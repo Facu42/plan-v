@@ -1,0 +1,233 @@
+/* Plan V — tokens del panel nutricionista
+   Ley visual: 3 columnas (menú / Mi trabajo / ficha)
+   Fuente: design/referencia-panel-nutri.png
+   Tipografías: Fraunces (títulos) + DM Sans (UI)
+   Estética: neumorfismo + glassmorphism. No inventar otra paleta.
+   Consumo: Forge importa estas --pv-* y pinta .crm-* / .pro-* con ellas.
+   Valores de radio/sombra del mock marcados [est.] si no hay medida exacta.
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap');
+
+:root {
+  /* —— Color: marca (canónicos, hex uppercase) —— */
+  --pv-mint: #DCEFE7;
+  --pv-surface: #F7FAF9;
+  --pv-green: #3BB273;
+  --pv-deep: #226C4B;
+  --pv-coral: #FF6F61;
+  --pv-yellow: #FBEFC5;
+  --pv-lilac: #EBE6F8;
+  --pv-lima: #EAFF78;          /* NUEVO: selección / activo. Hoy está hardcodeado */
+  --pv-ink: #1B1B1B;
+  --pv-muted: #71847C;
+  --pv-line: rgba(34, 108, 75, 0.10);
+
+  /* Washes (derivados, no paleta nueva) */
+  --pv-lima-wash: color-mix(in srgb, var(--pv-lima) 42%, var(--pv-surface));
+  --pv-mint-wash: color-mix(in srgb, var(--pv-mint) 70%, #fff);
+  --pv-coral-wash: #FFE4DF;
+  --pv-yellow-wash: color-mix(in srgb, var(--pv-yellow) 80%, #fff);
+  --pv-lilac-wash: color-mix(in srgb, var(--pv-lilac) 80%, #fff);
+  --pv-glass: rgba(247, 250, 249, 0.72);
+  --pv-glass-strong: rgba(251, 253, 252, 0.88);
+
+  /* —— Type —— */
+  --pv-font-display: 'Fraunces', Georgia, serif;
+  --pv-font-ui: 'DM Sans', Arial, sans-serif;
+  --pv-fs-display: 25px;     /* nombre en ficha — mock ~25px */
+  --pv-fs-col-title: 20px;   /* "Menú" / "Mi trabajo" */
+  --pv-fs-card-title: 14px;
+  --pv-fs-body: 12px;
+  --pv-fs-meta: 10px;
+  --pv-fs-micro: 8px;
+  --pv-fs-gauge: 31px;       /* número del radial */
+
+  /* —— Radii [est. del mock: cards ≥20px, cápsulas 99px] —— */
+  --pv-r-card: 20px;
+  --pv-r-card-lg: 24px;
+  --pv-r-capsule: 99px;
+  --pv-r-pill: 99px;
+  --pv-r-control: 12px;
+  --pv-r-badge: 50%;
+
+  /* —— Shadow: neumorfismo (ya en plan-v.css :root) —— */
+  --pv-shadow:
+    10px 10px 24px rgba(77, 112, 96, 0.11),
+    -8px -8px 20px rgba(255, 255, 255, 0.92);
+  --pv-shadow-lima: 0 4px 12px rgba(142, 157, 54, 0.16);
+  --pv-shadow-float: 0 8px 30px rgba(38, 77, 58, 0.12);
+
+  /* —— Layout 3 columnas (medido del CSS actual .crm-body) —— */
+  --pv-col-nav: 177px;
+  --pv-col-work: 284px;
+  --pv-col-ficha: minmax(0, 1fr);
+  --pv-gap-cols: 0px;          /* columnas pegadas, separadas por line */
+  --pv-gap-cards: 11px;
+  --pv-pad-ficha: 28px;
+  --pv-pad-card: 16px;
+  --pv-nav-item-gap: 3px;
+  --pv-tab-gap: 7px;
+
+  /* —— Scores circulares (Mi trabajo) —— */
+  --pv-score-high: #171A18;    /* 90 — negro del mock */
+  --pv-score-high-ink: #EAFF78;
+  --pv-score-good: var(--pv-mint);
+  --pv-score-mid: var(--pv-yellow);
+  --pv-score-low: var(--pv-coral-wash);
+  --pv-score-low-ink: #BD5A51;
+
+  /* —— Rail de proceso —— */
+  --pv-rail-active: var(--pv-deep);     /* cápsula teal/deep */
+  --pv-rail-active-ink: #fff;
+  --pv-rail-future: #E8EEEA;
+  --pv-rail-future-ink: var(--pv-muted);
+  --pv-rail-done: var(--pv-green);
+
+  /* —— Tabs píldora —— */
+  --pv-tab-active-bg: var(--pv-ink);
+  --pv-tab-active-ink: #fff;
+  --pv-tab-idle-bg: transparent;
+  --pv-tab-idle-ink: var(--pv-muted);
+
+  /* —— Up next —— */
+  --pv-upnext-bg: var(--pv-lima);
+  --pv-upnext-cta-bg: var(--pv-ink);
+  --pv-upnext-cta-ink: #fff;
+
+  /* —— Gauge radial —— */
+  --pv-gauge-tick: var(--pv-deep);
+  --pv-gauge-track: color-mix(in srgb, var(--pv-mint) 55%, #fff);
+  --pv-gauge-grade-bg: var(--pv-lima);
+}
+
+/* ============================================================
+   Recetas de componente (no son layout de app; Forge las aplica)
+   ============================================================ */
+
+/* 1. Nav item activo = cápsula lima, no recuadro mint */
+.pv-nav-item {
+  border-radius: var(--pv-r-capsule);
+  color: var(--pv-muted);
+  background: transparent;
+  font-family: var(--pv-font-ui);
+  font-size: var(--pv-fs-meta);
+  font-weight: 600;
+}
+.pv-nav-item.is-current {
+  color: var(--pv-ink);
+  background: var(--pv-lima);
+  box-shadow: var(--pv-shadow-lima);
+}
+
+/* 2. Card Mi trabajo: activa = wash lima */
+.pv-work-card {
+  border-radius: var(--pv-r-card);
+  background: transparent;
+}
+.pv-work-card.is-selected {
+  background: var(--pv-lima-wash);
+  box-shadow: var(--pv-shadow-lima);
+}
+
+/* 3. Score circular */
+.pv-score {
+  width: 29px;
+  height: 29px;
+  border-radius: var(--pv-r-badge);
+  font-family: var(--pv-font-ui);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+/* 4. Ficha header: gradiente lima → surface */
+.pv-ficha-header {
+  background: linear-gradient(90deg, var(--pv-lima-wash) 0%, var(--pv-surface) 70%);
+}
+.pv-ficha-header h1 {
+  font-family: var(--pv-font-display);
+  font-size: var(--pv-fs-display);
+  letter-spacing: -0.045em;
+  color: var(--pv-ink);
+}
+
+/* 5. Rail: cápsulas discretas, no barra continua */
+.pv-rail {
+  display: flex;
+  gap: 6px;
+}
+.pv-rail-stage {
+  border-radius: var(--pv-r-capsule);
+  padding: 8px 14px;
+  background: var(--pv-rail-future);
+  color: var(--pv-rail-future-ink);
+  font-family: var(--pv-font-ui);
+  font-size: var(--pv-fs-micro);
+  font-weight: 700;
+}
+.pv-rail-stage.is-active {
+  background: var(--pv-rail-active);
+  color: var(--pv-rail-active-ink);
+}
+
+/* 6. Tabs píldora */
+.pv-tab {
+  border-radius: var(--pv-r-pill);
+  padding: 8px 12px;
+  font-family: var(--pv-font-ui);
+  font-size: 9px;
+  color: var(--pv-tab-idle-ink);
+  background: var(--pv-tab-idle-bg);
+  border: 0;
+}
+.pv-tab.is-active {
+  color: var(--pv-tab-active-ink);
+  background: var(--pv-tab-active-bg);
+}
+
+/* 7. Up next: card lima + CTA negro píldora */
+.pv-upnext-task {
+  border-radius: 12px;
+  background: var(--pv-upnext-bg);
+  padding: 10px;
+}
+.pv-upnext-cta {
+  border-radius: var(--pv-r-capsule);
+  background: var(--pv-upnext-cta-bg);
+  color: var(--pv-upnext-cta-ink);
+}
+
+/* 8. Gauge: aro segmentado (ticks), no border dotted */
+.pv-gauge {
+  /* SVG: 36 ticks, stroke var(--pv-gauge-tick), gap 4°, radio ~56 */
+  font-family: var(--pv-font-display);
+  font-size: var(--pv-fs-gauge);
+}
+
+/* 9. Cards ficha: glass + neu */
+.pv-card {
+  border-radius: var(--pv-r-card);
+  background: var(--pv-glass);
+  box-shadow: var(--pv-shadow);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+/* 10. Lienzo 3 columnas — canvas interno, sin chrome Dynamics */
+.pv-panel {
+  display: grid;
+  grid-template-columns: var(--pv-col-nav) var(--pv-col-work) var(--pv-col-ficha);
+  min-height: 100vh;
+  background: var(--pv-surface);
+  font-family: var(--pv-font-ui);
+  color: var(--pv-ink);
+}
+.pv-panel-nav { background: var(--pv-mint-wash); }
+.pv-panel-work { background: var(--pv-surface); }
+.pv-panel-ficha {
+  background:
+    radial-gradient(circle at 68% 18%, color-mix(in srgb, var(--pv-lima) 38%, transparent), transparent 32%),
+    radial-gradient(circle at 92% 72%, color-mix(in srgb, var(--pv-lilac) 45%, transparent), transparent 28%),
+    radial-gradient(circle at 12% 88%, color-mix(in srgb, var(--pv-coral) 18%, transparent), transparent 26%),
+    var(--pv-surface);
+}

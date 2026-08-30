@@ -1,0 +1,23 @@
+{
+  "brand_name": "Plan V — Verónica Trenti",
+  "handle": "@planv.nutricion",
+  "palette": {
+    "primary": "#3BB273",
+    "deep": "#226C4B",
+    "accent": "#FF6F61",
+    "dark": "#1B1B1B",
+    "light": "#F7FAF9",
+    "muted": "#DCEFE7",
+    "yellow": "#FBEFC5",
+    "lilac": "#EBE6F8",
+    "lima": "#EAFF78"
+  },
+  "type": {
+    "display": "Fraunces",
+    "ui": "DM Sans"
+  },
+  "aesthetic": "neumorphism + glassmorphism",
+  "panel": "design/tokens-panel-nutri.css",
+  "ig_canvas": { "w": 1080, "h": 1350 },
+  "footer": "Plan V — Verónica Trenti | @planv.nutricion"
+}

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.gstack/
+archive/
+contenido/
+marketing/
+*.zip
+*.xlsx
+.env
+.env.local
