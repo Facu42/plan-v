@@ -24,8 +24,6 @@
 
   Guía: [`docs/supabase-setup.md`](docs/supabase-setup.md)
 
-  1. Ejecutá la migración en `supabase/migrations/` en el SQL Editor de Supabase
-  2. Configurá `VITE_SUPABASE_*` y `SUPABASE_SERVICE_ROLE_KEY` en `.env`
-  3. Registrate como nutricionista, o usá **modo demo** sin persistencia
-
+  **No aplicar** el draft SQL de este repo. Núcleo reescribe el schema contra el **016 lockeado**.
+  Sin service role la API sigue en modo memoria; login/demo ya están en la app.
   

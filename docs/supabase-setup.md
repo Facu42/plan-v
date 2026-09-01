@@ -1,20 +1,19 @@
 # Supabase setup — Plan V
 
-## 1. Crear proyecto
+## Schema: no aplicar el draft de este repo
 
-Usá el proyecto existente (`acevlqrkvdinelgxnaki`) o creá uno nuevo en [supabase.com](https://supabase.com).
+La migración `supabase/migrations/_DRAFT_DO_NOT_APPLY_plan_v_v0.sql` **no se corre**.
 
-## 2. Aplicar migración
+Fugas conocidas (por eso no es ley):
+- Paciente puede leer `note_for_nutri` vía `meal_logs` (policy select directa a la tabla).
+- Paciente ve `adherence_why` en `patients` (self select de fila completa).
+- Paciente ve `payments` y columnas `billing_*`.
 
-En **SQL Editor** de Supabase, pegá y ejecutá el contenido de:
+**Núcleo** reescribe el schema contra el **016 ya lockeado**. Auth/UI de este repo espera esa migración; no inventar tablas ni policies acá.
 
-```
-supabase/migrations/20260901000000_plan_v_v0.sql
-```
+## Variables de entorno (cuando Núcleo publique el 016+)
 
-## 3. Variables de entorno
-
-Copiá `.env.example` → `.env` y completá:
+Copiá `.env.example` → `.env`:
 
 | Variable | Dónde |
 |---|---|
@@ -22,29 +21,10 @@ Copiá `.env.example` → `.env` y completá:
 | `VITE_SUPABASE_ANON_KEY` | Settings → API → anon public |
 | `SUPABASE_SERVICE_ROLE_KEY` | Settings → API → service_role (solo servidor) |
 
-El anon key ya está en `src/utils/supabase/info.tsx` como fallback.
+Sin service role, la API sigue en **modo memoria** (demo).
 
-## 4. Auth
+## Auth en el cliente
 
-- **Registro nutricionista**: elegí rol "Nutricionista" → al iniciar sesión se crea fila en `nutritionists`
-- **Registro paciente**: rol "Paciente" → debe vincularse a un `patients.user_id` (invite v1)
-- **Modo demo**: sigue funcionando sin Supabase (datos en memoria)
-
-## 5. Seed de pacientes demo
-
-Después de que Verónica se registre, ejecutá en SQL Editor (reemplazá `NUTRI_ID`):
-
-```sql
-insert into patients (nutritionist_id, full_name, initials, tone, stage, status, goal, ...)
-values ('NUTRI_ID', 'Sofía R.', 'SR', 'peach', ...);
-```
-
-Ver plantilla en `supabase/seed.sql`.
-
-## 6. Correr local
-
-```bash
-npm run dev
-```
-
-Con service role configurado, la API persiste en Postgres. Sin él, usa memoria + auth en frontend.
+- Login/registro + modo demo ya están en la app.
+- Nutricionista / paciente se rutean por `profiles.role`.
+- Invite paciente (`patients.user_id`) queda para cuando el 016+ esté aplicado.
