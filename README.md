@@ -20,4 +20,12 @@
 
   Copiá `.env.example` a `.env` y agregá tu clave de OpenAI para IA en vivo.
 
+  ### Supabase (auth + base de datos)
+
+  Guía: [`docs/supabase-setup.md`](docs/supabase-setup.md)
+
+  1. Ejecutá la migración en `supabase/migrations/` en el SQL Editor de Supabase
+  2. Configurá `VITE_SUPABASE_*` y `SUPABASE_SERVICE_ROLE_KEY` en `.env`
+  3. Registrate como nutricionista, o usá **modo demo** sin persistencia
+
   
