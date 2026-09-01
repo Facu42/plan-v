@@ -1,0 +1,15 @@
+{
+  "name": "Plan V",
+  "install": "npm ci",
+  "terminals": [
+    {
+      "name": "dev",
+      "command": "npm run dev",
+      "description": "Runs the Vite frontend (http://localhost:5173) and the Hono API (http://localhost:3001) in parallel. Set OPENAI_API_KEY in .env for live AI; otherwise it runs in demo mode."
+    }
+  ],
+  "ports": [
+    { "name": "vite", "port": 5173 },
+    { "name": "api", "port": 3001 }
+  ]
+}
