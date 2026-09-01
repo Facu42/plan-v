@@ -1,9 +1,18 @@
 import type { Brief, MealLog, Message, Patient } from '../types';
+import { getSessionToken } from '../lib/supabase';
+
+async function authHeaders(): Promise<HeadersInit> {
+  const token = await getSessionToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers = await authHeaders();
   const res = await fetch(path, {
-    headers: { 'Content-Type': 'application/json', ...init?.headers },
     ...init,
+    headers: { ...headers, ...init?.headers },
   });
   if (!res.ok) {
     const err = await res.text();
@@ -13,12 +22,20 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  health: () => request<{ status: string; ai: boolean }>('/api/health'),
+  health: () => request<{ status: string; ai: boolean; supabase: boolean }>('/api/health'),
 
-  getPatients: () => request<{ patients: Patient[] }>('/api/patients'),
+  getPatients: () => request<{ patients: Patient[]; source?: string }>('/api/patients'),
+
+  getMyPatient: () => request<{ patient: Patient | null; shoppingList: string[] }>('/api/me/patient'),
 
   getPatient: (id: string) =>
     request<{ patient: Patient; shoppingList: string[] }>(`/api/patients/${id}`),
+
+  setupNutritionist: (displayName: string) =>
+    request<{ nutritionist_id: string }>('/api/nutritionist/setup', {
+      method: 'POST',
+      body: JSON.stringify({ display_name: displayName }),
+    }),
 
   analyzeMeal: (patientId: string, data: { description?: string; imageBase64?: string; slot: string; photoPreview?: string }) =>
     request<{ analysis: unknown; log: MealLog; patient: Patient }>(`/api/patients/${patientId}/meals/analyze`, {
@@ -36,7 +53,7 @@ export const api = {
     request<{ brief: Brief; patient: Patient }>(`/api/patients/${patientId}/copilot`, { method: 'POST' }),
 
   sendMessage: (patientId: string, text: string, from: 'vero' | 'patient', suggestedByAi = false) =>
-    request<{ message: Message; patient: Patient }>(`/api/patients/${patientId}/messages`, {
+    request<{ patient: Patient }>(`/api/patients/${patientId}/messages`, {
       method: 'POST',
       body: JSON.stringify({ text, from, suggested_by_ai: suggestedByAi }),
     }),

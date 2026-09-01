@@ -16,6 +16,6 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src/main.tsx", "src/App.tsx", "src/**/*.ts", "src/**/*.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["src/components/ui", "src/supabase", "src/components/BottomNavigation.tsx", "src/components/CaloriesView.tsx", "src/components/Header.tsx", "src/components/MacronutrientsView.tsx", "src/components/MealSection.tsx", "src/components/NutritionCarousel.tsx", "src/components/WeeklyCalendar.tsx", "src/components/CalorieCircle.tsx", "src/components/MacroCircle.tsx", "src/components/figma"]
 }

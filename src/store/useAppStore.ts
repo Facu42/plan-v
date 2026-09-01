@@ -2,14 +2,17 @@ import { create } from 'zustand';
 import { api } from '../api/client';
 import type { Patient } from '../types';
 
+type BootOptions = { isNutri?: boolean; isPatient?: boolean };
+
 type AppState = {
   patients: Patient[];
   activePatientId: string;
   shoppingList: string[];
   loading: boolean;
   aiEnabled: boolean;
+  supabaseEnabled: boolean;
   error: string | null;
-  boot: () => Promise<void>;
+  boot: (opts?: BootOptions) => Promise<void>;
   refreshPatient: (id: string) => Promise<void>;
   setActivePatient: (id: string) => void;
   selectCrmPatient: (id: string) => void;
@@ -21,15 +24,33 @@ export const useAppStore = create<AppState>((set, get) => ({
   shoppingList: [],
   loading: true,
   aiEnabled: false,
+  supabaseEnabled: false,
   error: null,
 
-  boot: async () => {
+  boot: async (opts = {}) => {
     try {
-      const [health, { patients }] = await Promise.all([api.health(), api.getPatients()]);
-      set({ patients, aiEnabled: health.ai, loading: false, error: null });
-      const active = get().activePatientId;
-      const { shoppingList } = await api.getPatient(active);
-      set({ shoppingList });
+      const health = await api.health();
+      set({ aiEnabled: health.ai, supabaseEnabled: health.supabase, error: null });
+
+      if (opts.isPatient) {
+        const { patient, shoppingList } = await api.getMyPatient();
+        if (patient) {
+          set({ patients: [patient], activePatientId: patient.id, shoppingList, loading: false });
+          return;
+        }
+      }
+
+      const { patients } = await api.getPatients();
+      set({
+        patients,
+        activePatientId: patients[0]?.id ?? '',
+        loading: false,
+      });
+      const active = patients[0]?.id;
+      if (active) {
+        const { shoppingList } = await api.getPatient(active);
+        set({ shoppingList });
+      }
     } catch (e) {
       set({ loading: false, error: e instanceof Error ? e.message : 'Error de conexión' });
     }
@@ -38,7 +59,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   refreshPatient: async (id: string) => {
     const { patient, shoppingList } = await api.getPatient(id);
     set((s) => ({
-      patients: s.patients.map((p) => (p.id === id ? patient : p)),
+      patients: s.patients.some((p) => p.id === id)
+        ? s.patients.map((p) => (p.id === id ? patient : p))
+        : [...s.patients, patient],
       shoppingList: id === s.activePatientId ? shoppingList : s.shoppingList,
     }));
   },
