@@ -37,11 +37,12 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
   };
 
   const analyze = async () => {
-    if (mode === 'photo' && !imageBase64) {
+    const text = mode === 'text' ? description.trim() : description.trim();
+    if (mode === 'photo' && !imageBase64 && !text) {
       setError('Subí una foto o contanos qué comiste en texto.');
       return;
     }
-    if (mode === 'text' && !description.trim()) {
+    if (mode === 'text' && !text) {
       setError('Describí qué comiste.');
       return;
     }
@@ -49,8 +50,8 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
     setStep('analyzing');
     try {
       const { log } = await api.analyzeMeal(patient.id, {
-        description: mode === 'text' ? description : description || undefined,
-        imageBase64: mode === 'photo' ? imageBase64 : undefined,
+        description: text || undefined,
+        imageBase64: mode === 'photo' && imageBase64 ? imageBase64 : undefined,
         slot,
         photoPreview: photoPreview ?? undefined,
       });
