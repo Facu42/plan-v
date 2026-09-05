@@ -12,7 +12,7 @@ type Props = {
 
 type Step = 'capture' | 'analyzing' | 'review' | 'success';
 
-const SLOTS = ['Desayuno', 'Almuerzo', 'Merienda', 'Cena', 'Extra'];
+const SLOTS = ['Desayuno', 'Colación', 'Almuerzo', 'Merienda', 'Cena', 'Extra'];
 
 export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props) {
   const refreshPatient = useAppStore((s) => s.refreshPatient);

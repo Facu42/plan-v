@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { api } from '../../api/client';
 import { useActivePatient, useAppStore } from '../../store/useAppStore';
 import { Icon, Mark } from '../shared/Icon';
@@ -6,11 +6,13 @@ import { MealLogModal } from './MealLogModal';
 import { PatientCamino } from './PatientCamino';
 import { PatientMessages } from './PatientMessages';
 import { PatientPlan } from './PatientPlan';
+import { flavorTip, PERMITTED_SEASONINGS, preparationSteps, withColacion } from './planContent';
 
 type Tab = 'hoy' | 'plan' | 'camino' | 'mensajes';
 
 const mealIcons: Record<string, 'sun' | 'leaf' | 'heart' | 'moon'> = {
   Desayuno: 'sun',
+  Colación: 'leaf',
   Almuerzo: 'leaf',
   Merienda: 'heart',
   Cena: 'moon',
@@ -18,15 +20,38 @@ const mealIcons: Record<string, 'sun' | 'leaf' | 'heart' | 'moon'> = {
 
 const mealTones: Record<string, string> = {
   Desayuno: 'yellow',
+  Colación: 'mint',
   Almuerzo: 'green',
   Merienda: 'coral',
   Cena: 'lilac',
 };
 
-function PatientHome({ openPhoto }: { openPhoto: (slot?: string) => void }) {
+function PatientHome({ openPhoto, onShowPlan, onShowMessages, darkMode, onToggleTheme }: { openPhoto: (slot?: string) => void; onShowPlan: () => void; onShowMessages: () => void; darkMode: boolean; onToggleTheme: () => void }) {
   const patient = useActivePatient()!;
   const refreshPatient = useAppStore((s) => s.refreshPatient);
-  const [selectedMeal, setSelectedMeal] = useState(patient.todayPlan[1]?.slot ?? 'Almuerzo');
+  const todayPlan = useMemo(() => withColacion(patient.todayPlan), [patient.todayPlan]);
+  const mealPreferenceKey = `plan-v:${patient.id}:selected-meal`;
+  const [selectedMeal, setSelectedMeal] = useState(() => {
+    try {
+      return window.localStorage.getItem(mealPreferenceKey) ?? todayPlan[1]?.slot ?? todayPlan[0]?.slot ?? 'Almuerzo';
+    } catch {
+      return todayPlan[1]?.slot ?? todayPlan[0]?.slot ?? 'Almuerzo';
+    }
+  });
+
+  useEffect(() => {
+    if (!todayPlan.some((meal) => meal.slot === selectedMeal)) {
+      setSelectedMeal(todayPlan[1]?.slot ?? todayPlan[0]?.slot ?? 'Almuerzo');
+    }
+  }, [selectedMeal, todayPlan]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(mealPreferenceKey, selectedMeal);
+    } catch {
+      // La app sigue funcionando aunque el navegador no permita guardar preferencias.
+    }
+  }, [mealPreferenceKey, selectedMeal]);
 
   const rhythmMessage = useMemo(() => {
     if (patient.hydration >= 7) return 'Tu ritmo está cuidado. Seguí escuchándote.';
@@ -49,12 +74,16 @@ function PatientHome({ openPhoto }: { openPhoto: (slot?: string) => void }) {
   };
 
   const lastVeroMsg = [...patient.messages].reverse().find((m) => m.from === 'vero');
+  const selectedMealPlan = todayPlan.find((meal) => meal.slot === selectedMeal);
 
   return (
     <main className="patient-shell">
       <header className="patient-topbar">
         <div className="brand-lockup"><Mark /><span>Plan V</span></div>
-        <button className="round-button" aria-label="Ver recordatorios"><Icon name="bell" size={18} /><b /></button>
+        <div className="topbar-actions">
+          <button className="round-button theme-toggle" type="button" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} aria-pressed={darkMode} onClick={onToggleTheme}><Icon name={darkMode ? 'sun' : 'moon'} size={18} /></button>
+          <button className="round-button" type="button" aria-label="Ver recordatorios"><Icon name="bell" size={18} /><b /></button>
+        </div>
       </header>
 
       <section className="patient-hello">
@@ -73,12 +102,12 @@ function PatientHome({ openPhoto }: { openPhoto: (slot?: string) => void }) {
           <div className="orbit orbit-1" /><div className="orbit orbit-2" /><div className="orbit orbit-3" />
           <div className="pulse-core"><Icon name="heart" size={23} /></div>
           <span className="orbit-tag tag-water"><Icon name="drop" size={13} /> {patient.hydration}/8</span>
-          <span className="orbit-tag tag-meals"><Icon name="check" size={13} /> {loggedSlots.size}/{patient.todayPlan.length}</span>
+          <span className="orbit-tag tag-meals"><Icon name="check" size={13} /> {loggedSlots.size}/{todayPlan.length}</span>
         </div>
         <div className="pulse-footer">
           <span>Comidas</span>
           <div className="pulse-track">
-            {patient.todayPlan.map((m) => (
+            {todayPlan.map((m) => (
               <i key={m.slot} className={loggedSlots.has(m.slot) ? '' : 'empty'} />
             ))}
           </div>
@@ -88,24 +117,24 @@ function PatientHome({ openPhoto }: { openPhoto: (slot?: string) => void }) {
 
       <section className="today-heading section-heading">
         <div><p className="eyebrow">Tu día, a tu manera</p><h2>¿Qué te toca ahora?</h2></div>
-        <button className="text-button" type="button">Ver menú <Icon name="arrow" size={15} /></button>
+        <button className="text-button" type="button" onClick={onShowPlan}>Ver menú <Icon name="arrow" size={15} /></button>
       </section>
 
       <section className="meal-list" aria-label="Comidas de hoy">
-        {patient.todayPlan.map((meal) => {
+        {todayPlan.map((meal) => {
           const logged = loggedSlots.has(meal.slot);
           return (
             <button
               key={meal.slot}
               type="button"
-              className={`meal-row ${selectedMeal === meal.slot ? 'active' : ''}`}
+              className={`meal-row${meal.slot === 'Colación' ? ' colacion' : ''} ${selectedMeal === meal.slot ? 'active' : ''}`}
               onClick={() => setSelectedMeal(meal.slot)}
             >
               <time>{meal.time}</time>
               <span className={`meal-icon ${mealTones[meal.slot] ?? 'green'}`}>
                 <Icon name={mealIcons[meal.slot] ?? 'leaf'} size={18} />
               </span>
-              <span className="meal-copy"><b>{meal.slot}</b><small>{meal.title}</small></span>
+              <span className="meal-copy"><b>{meal.slot}</b><small>{meal.title}{meal.slot === 'Colación' ? ' · entre desayuno y almuerzo' : ''}</small></span>
               <span className={`meal-state ${logged ? 'done' : ''}`}>
                 {logged && <Icon name="check" size={13} />}
                 {logged ? 'Registrado' : 'Pendiente'}
@@ -115,6 +144,21 @@ function PatientHome({ openPhoto }: { openPhoto: (slot?: string) => void }) {
           );
         })}
       </section>
+
+      {selectedMealPlan && (
+        <section className="meal-tip-card" aria-label="Tip para condimentar">
+          <p className="eyebrow">Para {selectedMealPlan.slot.toLocaleLowerCase('es-AR')}</p>
+          <h3>Cómo darle sabor</h3>
+          <p>{flavorTip(selectedMealPlan.title)}</p>
+          <div className="seasoning-chips">
+            {PERMITTED_SEASONINGS.slice(0, 5).map((seasoning) => <span key={seasoning}>{seasoning}</span>)}
+          </div>
+          <ol className="quick-preparation">
+            {preparationSteps(selectedMealPlan.title).map((step) => <li key={step}>{step}</li>)}
+          </ol>
+          <button type="button" className="text-button" onClick={onShowPlan}>Ver condimentos y próximas semanas <Icon name="arrow" size={15} /></button>
+        </section>
+      )}
 
       <section className="patient-actions">
         <button type="button" className="photo-action" onClick={() => openPhoto(selectedMeal)}>
@@ -155,7 +199,7 @@ function PatientHome({ openPhoto }: { openPhoto: (slot?: string) => void }) {
         <section className="message-card">
           <div className="avatar avatar-vero">VT</div>
           <div><p className="eyebrow">De Verónica · hoy</p><p>“{lastVeroMsg.text}”</p></div>
-          <button aria-label="Responder a Verónica" type="button"><Icon name="message" size={19} /></button>
+          <button aria-label="Responder a Verónica" type="button" onClick={onShowMessages}><Icon name="message" size={19} /></button>
         </section>
       )}
     </main>
@@ -167,6 +211,21 @@ export function PatientApp() {
   const [tab, setTab] = useState<Tab>('hoy');
   const [photoOpen, setPhotoOpen] = useState(false);
   const [defaultSlot, setDefaultSlot] = useState('Almuerzo');
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      return window.localStorage.getItem('plan-v:theme') === 'dark';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('plan-v:theme', darkMode ? 'dark' : 'light');
+    } catch {
+      // El tema se mantiene durante esta visita aunque no se pueda guardar.
+    }
+  }, [darkMode]);
 
   if (!patient) return <div className="loading-shell">Cargando…</div>;
 
@@ -176,9 +235,9 @@ export function PatientApp() {
   };
 
   return (
-    <>
-      {tab === 'hoy' && <PatientHome openPhoto={openPhoto} />}
-      {tab === 'plan' && <PatientPlan patient={patient} />}
+    <div className={`patient-app${darkMode ? ' dark' : ''}`}>
+      {tab === 'hoy' && <PatientHome openPhoto={openPhoto} onShowPlan={() => setTab('plan')} onShowMessages={() => setTab('mensajes')} darkMode={darkMode} onToggleTheme={() => setDarkMode((current) => !current)} />}
+      {tab === 'plan' && <PatientPlan patient={patient} darkMode={darkMode} onToggleTheme={() => setDarkMode((current) => !current)} />}
       {tab === 'camino' && <PatientCamino patient={patient} />}
       {tab === 'mensajes' && <PatientMessages patient={patient} />}
 
@@ -201,6 +260,6 @@ export function PatientApp() {
       </nav>
 
       {photoOpen && <MealLogModal patient={patient} defaultSlot={defaultSlot} close={() => setPhotoOpen(false)} />}
-    </>
+    </div>
   );
 }
