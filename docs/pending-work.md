@@ -26,8 +26,9 @@ Estado PV-01…05:
 
 - **PV-10** paridad 016 de ficha, menú semanal, hábitos (incluye sueño), turnos, brief y objetivo publicado. Lectura posterior a cada escritura; si falta schema, 501 explícito (no éxito falso). Siguen 501 a propósito: archivo operativo (no hay `archived_at` en 016), cobranza (service role / PV-32), actividad, recursos, avisos y recibos de mensajes (016b / tickets posteriores).
 - **PV-11** directorio paginado (`limit`/`offset` + `has_more`) sin extras N+1; el detalle y los mensajes (últimos 50) se piden al seleccionar. Cache de pacientes aislada por sesión: logout aborta requests y vacía el store. Respuestas `/api/*` van con `Cache-Control: no-store`.
+- **PV-12** intake `intake.v1` autodeclarado (alergias `unknown|none|reported`) separado de `clinical_notes`. Consentimientos versionados con hash; un hash viejo da 409. Persistencia en memoria con `expected_revision`; con Supabase, 501 hasta 016b. Un paciente con billing pendiente igual puede completar ingreso y consentir.
 
-Siguiente: intake y consentimientos versionados (PV-12). No aplicar 016 ni 016b a un proyecto con datos reales.
+Siguiente: onboarding de pantallas cortas y autoguardado (PV-13). No aplicar 016 ni 016b a un proyecto con datos reales.
 
 El registro de cortes que sigue se conserva como evidencia de **demo/memoria**. Sus casillas no acreditan producción ni aprobación visual integral.
 

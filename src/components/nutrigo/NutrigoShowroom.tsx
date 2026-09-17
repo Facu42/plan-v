@@ -114,6 +114,14 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
   }, [operation]);
   const selected = activePatients.find((p) => p.id === selectedId) ?? activePatients[0];
   const p = selected ? buildShowroomPatient(selected, now) : null;
+  useEffect(() => {
+    if (lockedRole !== 'patient' || !selected?.id) return;
+    let cancelled = false;
+    api.getIntake(selected.id).then((result) => {
+      if (!cancelled && result.intake.status === 'draft') setOnboardingOpen(true);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [lockedRole, selected?.id]);
   const markResourceRead = useCallback(async (resourceId: string) => {
     if (!selected?.id) return;
     const { patient } = await api.markResourceRead(selected.id, resourceId);

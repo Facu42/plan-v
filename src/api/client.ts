@@ -212,4 +212,30 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
+
+  getConsentCatalog: () => request<{ schema_version: string; consents: Array<{ purpose: string; text_version: string; text: string; text_hash: string; required: boolean }> }>('/api/consents/catalog'),
+
+  getIntake: (patientId: string) => request<{
+    intake: { revision: number; status: string; step?: string; payload: unknown };
+    consents: Array<{ purpose: string; decision: string }>;
+    source: string;
+  }>(`/api/patients/${patientId}/intake`),
+
+  patchIntake: (patientId: string, data: { expected_revision: number; step?: string; payload?: unknown }) =>
+    request<{ intake: { revision: number; status: string }; source: string }>(`/api/patients/${patientId}/intake`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  submitIntake: (patientId: string, expectedRevision: number) =>
+    request<{ intake: { revision: number; status: string }; source: string }>(`/api/patients/${patientId}/intake/submit`, {
+      method: 'POST',
+      body: JSON.stringify({ expected_revision: expectedRevision }),
+    }),
+
+  recordConsent: (patientId: string, data: { purpose: string; text_version: string; text_hash: string; decision: 'granted' | 'withdrawn' }) =>
+    request<{ consent: unknown; source: string }>(`/api/patients/${patientId}/consents`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };

@@ -49,7 +49,15 @@ export type PatientAction =
   | 'edit_goal'
   | 'edit_billing'
   | 'assign_resource'
-  | 'generate_copilot';
+  | 'generate_copilot'
+  | 'read_intake'
+  | 'edit_intake'
+  | 'submit_intake'
+  | 'review_intake'
+  | 'grant_consent'
+  | 'read_consent'
+  | 'read_clinical_note'
+  | 'write_clinical_note';
 
 export type PatientManagementAction = 'create_patient';
 
@@ -74,6 +82,11 @@ const PATIENT_ACTIONS = new Set<PatientAction>([
   'read_resource',
   'send_message',
   'reschedule_appointment',
+  'read_intake',
+  'edit_intake',
+  'submit_intake',
+  'grant_consent',
+  'read_consent',
 ]);
 
 const NUTRITIONIST_ACTIONS = new Set<PatientAction>([
@@ -89,12 +102,27 @@ const NUTRITIONIST_ACTIONS = new Set<PatientAction>([
   'edit_billing',
   'assign_resource',
   'generate_copilot',
+  'read_intake',
+  'review_intake',
+  'read_consent',
+  'read_clinical_note',
+  'write_clinical_note',
 ]);
 
 export function canAccessPatient(actor: Actor, patient: PatientResource, action: PatientAction): boolean {
   if (actor.role === 'paciente') {
     if (actor.patientId !== patient.id || !PATIENT_ACTIONS.has(action)) return false;
-    if (action === 'read_self' || action === 'read_patient' || action === 'read_resource' || action === 'send_message') return true;
+    if (
+      action === 'read_self'
+      || action === 'read_patient'
+      || action === 'read_resource'
+      || action === 'send_message'
+      || action === 'read_intake'
+      || action === 'edit_intake'
+      || action === 'submit_intake'
+      || action === 'grant_consent'
+      || action === 'read_consent'
+    ) return true;
     return hasFullPatientAccess(patient);
   }
   return actor.nutritionistId === patient.nutritionistId && NUTRITIONIST_ACTIONS.has(action);

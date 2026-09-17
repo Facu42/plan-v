@@ -19,6 +19,7 @@ import {
   type PatientInvite,
 } from './identity/invites.js';
 import { validateProvisionInput } from './identity/provision.js';
+import { resetIntakeMemory } from './intake/memory.js';
 
 export type { PatientInvite, InviteEvent } from './identity/invites.js';
 
@@ -676,6 +677,7 @@ export function provisionNutritionistMemory(input: { userId: string; displayName
 }
 
 export function resetStore(): void {
+  resetIntakeMemory();
   store = {
     patients: seedPatients(),
     patientInvites: [],

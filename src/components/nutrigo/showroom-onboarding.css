@@ -15,10 +15,16 @@
   gap: 10px;
 }
 .nvon-top > span { font-size: 16px; font-weight: 700; }
+.nvon-progress {
+  margin: 0 8px 0 auto;
+  color: var(--nv-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
 .nvon-top ol {
   display: flex;
   gap: 6px;
-  margin-left: auto;
+  margin-left: 0;
   padding: 0;
   list-style: none;
 }
@@ -30,6 +36,57 @@
 }
 .nvon-top li[aria-current=step] { width: 18px; background: var(--nv-forest); }
 .nv-app.nv-dark .nvon-top li[aria-current=step] { background: var(--nv-accent); }
+.nvon-status {
+  margin: -8px 0 12px;
+  color: var(--nv-muted);
+  font-size: 12px;
+}
+.nvon-error {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fde8e8;
+  color: #8a1f1f;
+  font-size: 13px;
+}
+.nvon-consent-text {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.nvon-intent label, .nvon-health label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.nvon-intent textarea, .nvon-health input {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--nv-border);
+  border-radius: 12px;
+  background: var(--nv-bg);
+  color: var(--nv-ink);
+  font: inherit;
+}
+.nvon-intent textarea { min-height: 96px; resize: vertical; }
+.nvon-health { display: grid; gap: 16px; }
+.nvon-health fieldset { border: 0; margin: 0; padding: 0; }
+.nvon-health legend { margin-bottom: 8px; font-size: 13px; font-weight: 600; }
+.nvon-health fieldset > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.nvon-health button {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--nv-border);
+  border-radius: 12px;
+  background: var(--nv-bg);
+  color: var(--nv-ink);
+  font: inherit;
+}
+.nvon-health button[aria-pressed=true] { border-color: var(--nv-forest); background: var(--nv-green); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) {
+  .nvon, .nvon-card, .nvon-actions .nv-button { transition: none; }
+}
 .nvon-card {
   flex: 0 1 auto;
   padding: 22px 20px;

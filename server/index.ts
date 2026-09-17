@@ -16,10 +16,14 @@ import {
   noticeCreateSchema,
   authRecoverInputSchema,
   billingUpdateInputSchema,
+  clinicalNoteInputSchema,
+  consentDecisionInputSchema,
   goalUpdateInputSchema,
   habitUpdateInputSchema,
   inviteAcceptInputSchema,
   inviteIdParamSchema,
+  intakePatchInputSchema,
+  intakeSubmitInputSchema,
   listPageQuerySchema,
   mealReviewInputSchema,
   menuSlotParamsSchema,
@@ -35,6 +39,21 @@ import {
   resourceGuideIdSchema,
 } from './schemas.js';
 import { paginateItems } from './pagination.js';
+import { CONSENT_CATALOG, matchConsentVersion } from './intake/consent.js';
+import {
+  addClinicalNote,
+  appendConsent,
+  getIntakeRecord,
+  IntakeConflictError,
+  IntakeNotReadyError,
+  listClinicalNotes,
+  listConsentEvents,
+  patchIntake,
+  reviewIntake,
+  submitIntake,
+} from './intake/memory.js';
+import { parseIntakePayload, type IntakeStep } from './intake/payload.js';
+import { toPatientIntakeView, toProfessionalIntakeView } from './intake/views.js';
 import { getAuthAccount, isSupabaseEnabled } from './db/supabase-client.js';
 import * as sb from './db/supabase-repo.js';
 import { recoveryAcknowledgement, provisionSecretMatches, validateProvisionInput } from './identity/provision.js';
@@ -986,6 +1005,200 @@ app.post('/api/ops/nutritionists', async (c) => {
   });
   if ('error' in created) return c.json({ error: created.error }, 400);
   return c.json({ ...created, source: 'memory' }, 201);
+});
+
+const INTAKE_UNAVAILABLE = 'Ingreso persistente pendiente del contrato 016b';
+
+app.get('/api/consents/catalog', (c) => c.json({
+  schema_version: 'consent.v1',
+  consents: CONSENT_CATALOG,
+}));
+
+app.get('/api/patients/:id/intake', async (c) => {
+  const auth = c.get('auth');
+  const patientId = c.req.param('id');
+
+  if ('userId' in auth && isSupabaseEnabled()) {
+    if (!await authorizePatient(auth.userId, patientId, 'read_intake')) {
+      return c.json({ error: 'Prohibido' }, 403);
+    }
+    return c.json({ error: INTAKE_UNAVAILABLE }, 501);
+  }
+
+  if (!getPatient(patientId)) return c.notFound();
+  const record = getIntakeRecord(patientId);
+  const events = listConsentEvents(patientId);
+  if ('userId' in auth) {
+    const actor = await authorizePatient(auth.userId, patientId, 'read_clinical_note');
+    if (actor) {
+      return c.json({ ...toProfessionalIntakeView(record, events, listClinicalNotes(patientId)), source: 'memory' });
+    }
+  }
+  return c.json({ ...toPatientIntakeView(record, events), source: 'memory' });
+});
+
+app.patch('/api/patients/:id/intake', async (c) => {
+  const auth = c.get('auth');
+  const patientId = c.req.param('id');
+  const parsedBody = await parseJsonBody(c, intakePatchInputSchema);
+  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
+
+  if ('userId' in auth && isSupabaseEnabled()) {
+    if (!await authorizePatient(auth.userId, patientId, 'edit_intake')) {
+      return c.json({ error: 'Prohibido' }, 403);
+    }
+    return c.json({ error: INTAKE_UNAVAILABLE }, 501);
+  }
+
+  if (!getPatient(patientId)) return c.notFound();
+  let payload = undefined;
+  if (parsedBody.data.payload !== undefined) {
+    const incoming = parsedBody.data.payload;
+    if (!incoming || typeof incoming !== 'object' || Array.isArray(incoming)) {
+      return c.json({ error: 'Datos inválidos' }, 400);
+    }
+    const parsedPayload = parseIntakePayload({ ...getIntakeRecord(patientId).payload, ...incoming });
+    if (!parsedPayload.success) return c.json({ error: 'Datos inválidos' }, 400);
+    payload = parsedPayload.data;
+  }
+  try {
+    const record = patchIntake(patientId, {
+      expected_revision: parsedBody.data.expected_revision,
+      step: parsedBody.data.step as IntakeStep | undefined,
+      payload,
+    });
+    return c.json({ ...toPatientIntakeView(record, listConsentEvents(patientId)), source: 'memory' });
+  } catch (error) {
+    if (error instanceof IntakeConflictError) return c.json({ error: error.message }, 409);
+    throw error;
+  }
+});
+
+app.post('/api/patients/:id/intake/submit', async (c) => {
+  const auth = c.get('auth');
+  const patientId = c.req.param('id');
+  const parsedBody = await parseJsonBody(c, intakeSubmitInputSchema);
+  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
+
+  if ('userId' in auth && isSupabaseEnabled()) {
+    if (!await authorizePatient(auth.userId, patientId, 'submit_intake')) {
+      return c.json({ error: 'Prohibido' }, 403);
+    }
+    return c.json({ error: INTAKE_UNAVAILABLE }, 501);
+  }
+
+  if (!getPatient(patientId)) return c.notFound();
+  try {
+    const record = submitIntake(patientId, parsedBody.data.expected_revision);
+    return c.json({ ...toPatientIntakeView(record, listConsentEvents(patientId)), source: 'memory' });
+  } catch (error) {
+    if (error instanceof IntakeConflictError) return c.json({ error: error.message }, 409);
+    if (error instanceof IntakeNotReadyError) return c.json({ error: error.message }, 409);
+    throw error;
+  }
+});
+
+app.post('/api/patients/:id/intake/review', async (c) => {
+  const auth = c.get('auth');
+  const patientId = c.req.param('id');
+
+  if ('userId' in auth && isSupabaseEnabled()) {
+    const actor = await authorizePatient(auth.userId, patientId, 'review_intake');
+    if (!actor) return c.json({ error: 'Prohibido' }, 403);
+    return c.json({ error: INTAKE_UNAVAILABLE }, 501);
+  }
+
+  if (!getPatient(patientId)) return c.notFound();
+  try {
+    const reviewer = 'userId' in auth ? auth.userId : 'demo-nutri';
+    const record = reviewIntake(patientId, reviewer);
+    return c.json({
+      ...toProfessionalIntakeView(record, listConsentEvents(patientId), listClinicalNotes(patientId)),
+      source: 'memory',
+    });
+  } catch (error) {
+    if (error instanceof IntakeNotReadyError) return c.json({ error: error.message }, 409);
+    throw error;
+  }
+});
+
+app.get('/api/patients/:id/consents', async (c) => {
+  const auth = c.get('auth');
+  const patientId = c.req.param('id');
+
+  if ('userId' in auth && isSupabaseEnabled()) {
+    if (!await authorizePatient(auth.userId, patientId, 'read_consent')) {
+      return c.json({ error: 'Prohibido' }, 403);
+    }
+    return c.json({ error: INTAKE_UNAVAILABLE }, 501);
+  }
+
+  if (!getPatient(patientId)) return c.notFound();
+  const view = toPatientIntakeView(getIntakeRecord(patientId), listConsentEvents(patientId));
+  return c.json({ consents: view.consents, source: 'memory' });
+});
+
+app.post('/api/patients/:id/consents', async (c) => {
+  const auth = c.get('auth');
+  const patientId = c.req.param('id');
+  const parsedBody = await parseJsonBody(c, consentDecisionInputSchema);
+  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
+  if (!matchConsentVersion(parsedBody.data)) {
+    return c.json({ error: 'La versión del consentimiento no coincide' }, 409);
+  }
+
+  if ('userId' in auth && isSupabaseEnabled()) {
+    if (!await authorizePatient(auth.userId, patientId, 'grant_consent')) {
+      return c.json({ error: 'Prohibido' }, 403);
+    }
+    return c.json({ error: INTAKE_UNAVAILABLE }, 501);
+  }
+
+  if (!getPatient(patientId)) return c.notFound();
+  const event = appendConsent(patientId, {
+    ...parsedBody.data,
+    actor_id: 'userId' in auth ? auth.userId : 'demo-patient',
+  });
+  return c.json({ consent: event, source: 'memory' }, 201);
+});
+
+app.get('/api/patients/:id/clinical-notes', async (c) => {
+  const auth = c.get('auth');
+  const patientId = c.req.param('id');
+
+  if ('userId' in auth && isSupabaseEnabled()) {
+    if (!await authorizePatient(auth.userId, patientId, 'read_clinical_note')) {
+      return c.json({ error: 'Prohibido' }, 403);
+    }
+    return c.json({ error: INTAKE_UNAVAILABLE }, 501);
+  }
+
+  if (!getPatient(patientId)) return c.notFound();
+  if ('userId' in auth && !await authorizePatient(auth.userId, patientId, 'read_clinical_note')) {
+    return c.json({ error: 'Prohibido' }, 403);
+  }
+  return c.json({ clinical_notes: listClinicalNotes(patientId), source: 'memory' });
+});
+
+app.post('/api/patients/:id/clinical-notes', async (c) => {
+  const auth = c.get('auth');
+  const patientId = c.req.param('id');
+  const parsedBody = await parseJsonBody(c, clinicalNoteInputSchema);
+  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
+
+  if ('userId' in auth && isSupabaseEnabled()) {
+    if (!await authorizePatient(auth.userId, patientId, 'write_clinical_note')) {
+      return c.json({ error: 'Prohibido' }, 403);
+    }
+    return c.json({ error: INTAKE_UNAVAILABLE }, 501);
+  }
+
+  if (!getPatient(patientId)) return c.notFound();
+  if ('userId' in auth && !await authorizePatient(auth.userId, patientId, 'write_clinical_note')) {
+    return c.json({ error: 'Prohibido' }, 403);
+  }
+  const note = addClinicalNote(patientId, 'userId' in auth ? auth.userId : 'demo-nutri', parsedBody.data.body);
+  return c.json({ clinical_note: note, source: 'memory' }, 201);
 });
 
 const isMainModule = Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;

@@ -209,5 +209,36 @@ export const listPageQuerySchema = z.object({
   ),
 });
 
+export const intakeStepSchema = z.enum(['start', 'privacy', 'profile', 'intent', 'allergies', 'habits', 'review']);
+
+export const intakePatchInputSchema = z.object({
+  expected_revision: z.number().int().min(1),
+  step: intakeStepSchema.optional(),
+  payload: z.unknown().optional(),
+});
+
+export const intakeSubmitInputSchema = z.object({
+  expected_revision: z.number().int().min(1),
+});
+
+export const consentDecisionInputSchema = z.object({
+  purpose: z.enum([
+    'care_relationship',
+    'meal_photo',
+    'clinical_document',
+    'body_progress',
+    'measurement',
+    'ai_meal_analysis',
+    'ai_menu_draft',
+  ]),
+  text_version: z.string().trim().min(3).max(80),
+  text_hash: z.string().trim().min(16).max(128),
+  decision: z.enum(['granted', 'withdrawn']),
+});
+
+export const clinicalNoteInputSchema = z.object({
+  body: z.string().trim().min(2).max(4000),
+});
+
 export type MealAnalysis = z.infer<typeof mealAnalysisSchema>;
 export type CopilotBrief = z.infer<typeof copilotBriefSchema>;
