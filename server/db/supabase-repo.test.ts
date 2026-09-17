@@ -61,6 +61,10 @@ const harness = vi.hoisted(() => {
     builder.gte = filter('gte');
     builder.order = filter('order');
     builder.limit = filter('limit');
+    builder.range = (from: number, to: number) => {
+      call.filters.push(['range', [from, to]]);
+      return builder;
+    };
     builder.single = () => Promise.resolve(next(table));
     builder.maybeSingle = () => Promise.resolve(next(table));
     builder.then = (resolve: (value: unknown) => unknown, reject: (reason: unknown) => unknown) =>
@@ -82,6 +86,8 @@ const harness = vi.hoisted(() => {
 
 vi.mock('./supabase-client.js', () => ({
   getSupabaseAdmin: () => harness.client,
+  getRequestDb: () => harness.client,
+  privilegedDb: () => harness.client,
   isSupabaseEnabled: () => true,
 }));
 
@@ -100,9 +106,13 @@ import {
   sbGetPatientById,
   sbGetPatientForUser,
   sbGetReminderConfig,
+  sbGetScheduledAppointment,
+  sbListPatientsForNutri,
   sbSetAppointment,
   sbSetBrief,
+  sbUpdateGoal,
   sbUpdateHabits,
+  sbUpdatePatientProfile,
   sbUpsertMenuSlot,
   sbUpsertReminder,
 } from './supabase-repo.js';
@@ -795,5 +805,130 @@ describe('sbSetBrief write failures', () => {
     harness.push('ai_briefs', { data: null, error });
     await expect(sbSetBrief('patient-1', 'nutri-1', brief)).rejects.toEqual(error);
     expect(harness.calls.filter((call) => call.table === 'patients')).toHaveLength(0);
+  });
+});
+
+describe('patient audience queries', () => {
+  it('selects an allowlist without professional-only columns and skips AI briefs', async () => {
+    harness.push('patients', {
+      data: {
+        id: 'patient-1',
+        full_name: 'Sofía',
+        status: 'En ritmo',
+        stage: 'plan',
+        goal: 'Ritmo',
+        adherence_score: 60,
+        billing_status: 'waived',
+        billing_until: null,
+      },
+      error: null,
+    });
+
+    const patient = await sbGetPatientForUser('user-1');
+    expect(patient).not.toBeNull();
+    expect(patient!.plan_b).toBe('');
+    expect(patient!.adherence_why).toBe('');
+
+    const patientsSelect = harness.calls.find((call) => call.table === 'patients' && call.op === 'select');
+    expect(String(patientsSelect?.payload)).not.toContain('plan_b');
+    expect(String(patientsSelect?.payload)).not.toContain('*');
+    const mealSelect = harness.calls.find((call) => call.table === 'meal_logs' && call.op === 'select');
+    expect(String(mealSelect?.payload)).not.toContain('note_for_nutri');
+    expect(harness.calls.some((call) => call.table === 'ai_briefs')).toBe(false);
+  });
+});
+
+describe('PV-11 directory summaries', () => {
+  const summaryRow = {
+    id: 'patient-1',
+    full_name: 'Sofía',
+    initials: 'SR',
+    tone: 'mint',
+    status: 'En ritmo',
+    stage: 'plan',
+    goal: 'Ritmo',
+    adherence_score: 60,
+    billing_status: 'waived',
+    billing_until: null,
+  };
+
+  it('pages directory rows without loading meal logs or messages', async () => {
+    harness.push('nutritionists', { data: { id: 'nutri-1' }, error: null });
+    harness.push('patients', {
+      data: [summaryRow, { ...summaryRow, id: 'patient-2', full_name: 'Ana' }, { ...summaryRow, id: 'patient-3', full_name: 'Beto' }],
+      error: null,
+    });
+    harness.push('appointments', {
+      data: [{
+        id: 'appt-1',
+        patient_id: 'patient-1',
+        starts_at: nextAppointmentStartsAt('Jueves', '14:30', new Date('2026-09-14T12:00:00-03:00')),
+        duration_min: 45,
+        channel: 'video',
+        status: 'scheduled',
+      }],
+      error: null,
+    });
+
+    const listed = await sbListPatientsForNutri('user-1', { offset: 0, limit: 2 });
+    expect(listed.page).toEqual({ offset: 0, limit: 2, has_more: true });
+    expect(listed.patients).toHaveLength(2);
+    expect(listed.patients[0].meal_logs).toEqual([]);
+    expect(listed.patients[0].messages).toEqual([]);
+    expect(listed.patients[0].weekPlan).toEqual([]);
+    expect(listed.patients.find((patient) => patient.id === 'patient-1')?.appointment?.when).toContain('Jueves');
+    expect(listed.patients.find((patient) => patient.id === 'patient-1')?.appointment).toMatchObject({
+      duration: 45,
+      channel: 'video',
+    });
+    expect(harness.calls.some((call) => call.table === 'meal_logs')).toBe(false);
+    expect(harness.calls.some((call) => call.table === 'messages')).toBe(false);
+    expect(harness.calls.some((call) => call.table === 'ai_briefs')).toBe(false);
+    expect(harness.calls.find((call) => call.table === 'patients')?.filters).toEqual(
+      expect.arrayContaining([['range', [0, 2]]]),
+    );
+  });
+});
+
+describe('PV-10 persistent writes', () => {
+  it('updates the professional profile columns without touching billing', async () => {
+    await sbUpdatePatientProfile('patient-1', { name: 'Sofía Ríos', status: 'Atención', next_focus: 'Cena' });
+    const update = harness.calls.find((call) => call.table === 'patients' && call.op === 'update');
+    expect(update?.payload).toEqual({
+      full_name: 'Sofía Ríos',
+      initials: 'SR',
+      status: 'Atención',
+      next_focus: 'Cena',
+    });
+    expect(JSON.stringify(update?.payload)).not.toContain('billing');
+  });
+
+  it('persists the published goal text', async () => {
+    await sbUpdateGoal('patient-1', 'Comer con regularidad');
+    const update = harness.calls.find((call) => call.table === 'patients' && call.op === 'update');
+    expect(update?.payload).toEqual({ goal: 'Comer con regularidad' });
+  });
+
+  it('reads the next scheduled appointment as local day and time', async () => {
+    harness.push('appointments', {
+      data: {
+        id: 'appt-1',
+        patient_id: 'patient-1',
+        starts_at: nextAppointmentStartsAt('Jueves', '14:30', new Date('2026-09-14T12:00:00-03:00')),
+        duration_min: 45,
+        channel: 'video',
+        meet_url: 'https://meet.example/sofia',
+        status: 'scheduled',
+      },
+      error: null,
+    });
+    const appointment = await sbGetScheduledAppointment('patient-1');
+    expect(appointment).toMatchObject({
+      day: 'Jueves',
+      time: '14:30',
+      duration: 45,
+      channel: 'video',
+      meet_url: 'https://meet.example/sofia',
+    });
   });
 });

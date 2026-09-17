@@ -78,7 +78,7 @@ export function CrmDashboard({ darkMode, onToggleTheme, initialEntry }: { darkMo
     setActiveModule('fichas');
     setActiveTab('resumen');
     setCreateOpen(false);
-    setInviteNotice(`${patient.name} fue incorporada. Invitación a ${invite.email} guardada, todavía no enviada.`);
+    setInviteNotice(`${patient.name} fue incorporada. Invitación de un uso a ${invite.email}${invite.expires_at ? ' con vencimiento' : ' guardada'}.`);
   };
 
   const generateBrief = async () => {

@@ -71,7 +71,7 @@ describe('directorio de pacientes del showroom', () => {
     expect(html).toContain('Nombre completo');
     expect(html).toContain('Email para la invitación');
     expect(html).toContain('Objetivo declarado');
-    expect(html).toContain('no se envía ningún email');
+    expect(html).toContain('no sale un email real');
     expect(html).toContain('Crear alta');
   });
 

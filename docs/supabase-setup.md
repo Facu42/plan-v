@@ -37,6 +37,6 @@ Estas defensas de aplicación **no reemplazan RLS**. Deben probarse nuevamente c
 
 ## Auth en el cliente
 
-- Login/registro + modo demo ya están en la app.
-- Nutricionista / paciente se rutean por `profiles.role`.
-- Invite paciente (`patients.user_id`) queda para cuando el 016+ esté aplicado.
+- Login/registro + recuperación de cuenta + modo demo ya están en la app.
+- Nutricionista / paciente se rutean por `profiles.role`. El rol profesional no se autoasigna: `POST /api/ops/nutritionists` con `PROVISION_SECRET`.
+- Invite paciente: crear/enviar/revocar/aceptar en API. La aceptación exige email Auth confirmado y coincidente (`accept_patient_invite` cuando 016 esté aplicado). El deep link es `?invite=<uuid>`.

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { api } from '../api/client';
+import { api, isAbortError } from '../api/client';
 import type { Patient } from '../types';
 
 type BootOptions = { isNutri?: boolean; isPatient?: boolean };
@@ -13,11 +13,39 @@ type AppState = {
   supabaseEnabled: boolean;
   error: string | null;
   boot: (opts?: BootOptions) => Promise<void>;
+  reset: () => void;
   addPatient: (patient: Patient) => void;
   refreshPatient: (id: string) => Promise<void>;
   setActivePatient: (id: string) => void;
   selectCrmPatient: (id: string) => void;
 };
+
+const DIRECTORY_PAGE = 50;
+const DIRECTORY_MAX = 500;
+
+let sessionGeneration = 0;
+let bootController: AbortController | null = null;
+const refreshControllers = new Map<string, AbortController>();
+
+function abortInflight() {
+  bootController?.abort();
+  bootController = null;
+  for (const controller of refreshControllers.values()) controller.abort();
+  refreshControllers.clear();
+}
+
+async function loadDirectory(signal: AbortSignal): Promise<Patient[]> {
+  const patients: Patient[] = [];
+  let offset = 0;
+  let hasMore = true;
+  while (hasMore && offset < DIRECTORY_MAX) {
+    const page = await api.getPatients({ limit: DIRECTORY_PAGE, offset }, { signal });
+    patients.push(...page.patients);
+    hasMore = page.page?.has_more ?? false;
+    offset += page.page?.limit ?? DIRECTORY_PAGE;
+  }
+  return patients;
+}
 
 export const useAppStore = create<AppState>((set, get) => ({
   patients: [],
@@ -28,32 +56,61 @@ export const useAppStore = create<AppState>((set, get) => ({
   supabaseEnabled: false,
   error: null,
 
+  reset: () => {
+    sessionGeneration += 1;
+    abortInflight();
+    set({
+      patients: [],
+      activePatientId: '',
+      shoppingList: [],
+      loading: false,
+      error: null,
+    });
+  },
+
   boot: async (opts = {}) => {
+    const generation = sessionGeneration;
+    bootController?.abort();
+    const controller = new AbortController();
+    bootController = controller;
+    set({ loading: true, error: null });
     try {
-      const health = await api.health();
+      const health = await api.health({ signal: controller.signal });
+      if (generation !== sessionGeneration) return;
       set({ aiEnabled: health.ai, supabaseEnabled: health.supabase, error: null });
 
       if (opts.isPatient) {
-        const { patient, shoppingList } = await api.getMyPatient();
+        const { patient, shoppingList } = await api.getMyPatient({ signal: controller.signal });
+        if (generation !== sessionGeneration) return;
         if (patient) {
           set({ patients: [patient], activePatientId: patient.id, shoppingList, loading: false });
           return;
         }
+        set({ patients: [], activePatientId: '', shoppingList: [], loading: false });
+        return;
       }
 
-      const { patients } = await api.getPatients();
+      const patients = await loadDirectory(controller.signal);
+      if (generation !== sessionGeneration) return;
+      const active = patients[0]?.id ?? '';
       set({
         patients,
-        activePatientId: patients[0]?.id ?? '',
+        activePatientId: active,
         loading: false,
       });
-      const active = patients[0]?.id;
       if (active) {
-        const { shoppingList } = await api.getPatient(active);
-        set({ shoppingList });
+        const { shoppingList, patient } = await api.getPatient(active, { signal: controller.signal });
+        if (generation !== sessionGeneration) return;
+        set((state) => ({
+          patients: state.patients.map((current) => (current.id === patient.id ? patient : current)),
+          shoppingList,
+        }));
       }
     } catch (e) {
+      if (isAbortError(e) || generation !== sessionGeneration) return;
       set({ loading: false, error: e instanceof Error ? e.message : 'Error de conexión' });
+    } finally {
+      if (bootController === controller) bootController = null;
     }
   },
 
@@ -67,23 +124,35 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   refreshPatient: async (id: string) => {
-    const { patient, shoppingList } = await api.getPatient(id);
-    set((s) => ({
-      patients: s.patients.some((p) => p.id === id)
-        ? s.patients.map((p) => (p.id === id ? patient : p))
-        : [...s.patients, patient],
-      shoppingList: id === s.activePatientId ? shoppingList : s.shoppingList,
-    }));
+    const generation = sessionGeneration;
+    refreshControllers.get(id)?.abort();
+    const controller = new AbortController();
+    refreshControllers.set(id, controller);
+    try {
+      const { patient, shoppingList } = await api.getPatient(id, { signal: controller.signal });
+      if (generation !== sessionGeneration) return;
+      set((state) => ({
+        patients: state.patients.some((current) => current.id === id)
+          ? state.patients.map((current) => (current.id === id ? patient : current))
+          : [...state.patients, patient],
+        shoppingList: id === state.activePatientId ? shoppingList : state.shoppingList,
+      }));
+    } catch (error) {
+      if (isAbortError(error) || generation !== sessionGeneration) return;
+      throw error;
+    } finally {
+      if (refreshControllers.get(id) === controller) refreshControllers.delete(id);
+    }
   },
 
   setActivePatient: (id: string) => {
     set({ activePatientId: id });
-    get().refreshPatient(id);
+    void get().refreshPatient(id);
   },
 
   selectCrmPatient: (id: string) => {
     set({ activePatientId: id });
-    get().refreshPatient(id);
+    void get().refreshPatient(id);
   },
 }));
 

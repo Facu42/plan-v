@@ -44,4 +44,4 @@
   Expansión Nutrigo/Plan V: [`tasks/plan.md`](tasks/plan.md) · tareas ejecutables desde el paso 1: [`tasks/todo.md`](tasks/todo.md) · pendientes y estado de producción: [`docs/pending-work.md`](docs/pending-work.md)
 
   **No aplicar** los borradores SQL de este repo. El contrato 016 local sigue en revisión y debe ampliarse y validarse antes de convertirse en migración.
-  Sin service role la API no cae a demo salvo `APP_MODE=demo` o `test`. Login público crea pacientes; el alta profesional se provisiona aparte (PV-09).
+  Sin service role la API no cae a demo salvo `APP_MODE=demo` o `test`. Login público crea pacientes; el alta profesional se provisiona con `PROVISION_SECRET` (`POST /api/ops/nutritionists`). La invitación de paciente es de un uso, con vencimiento y revocación. Recuperación de cuenta: “Olvidé mi contraseña”.

@@ -13,7 +13,7 @@ export function readRuntimeConfig(env: Record<string, string | undefined>): Runt
     throw new Error('Synthetic mode is forbidden in production');
   }
   const persistent = mode === 'staging' || mode === 'production';
-  if (persistent && (!(env.SUPABASE_URL ?? env.VITE_SUPABASE_URL) || !env.SUPABASE_SERVICE_ROLE_KEY)) {
+  if (persistent && (!(env.SUPABASE_URL ?? env.VITE_SUPABASE_URL) || !env.SUPABASE_SERVICE_ROLE_KEY || !(env.SUPABASE_ANON_KEY ?? env.VITE_SUPABASE_ANON_KEY))) {
     throw new Error('Supabase configuration is required');
   }
   const aiMode = env.AI_MODE ?? 'disabled';

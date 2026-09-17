@@ -14,9 +14,13 @@ import {
   appointmentUpdateSchema,
   appointmentRescheduleSchema,
   noticeCreateSchema,
+  authRecoverInputSchema,
   billingUpdateInputSchema,
   goalUpdateInputSchema,
   habitUpdateInputSchema,
+  inviteAcceptInputSchema,
+  inviteIdParamSchema,
+  listPageQuerySchema,
   mealReviewInputSchema,
   menuSlotParamsSchema,
   menuSlotUpdateSchema,
@@ -26,11 +30,14 @@ import {
   patientArchiveInputSchema,
   patientCreateInputSchema,
   patientProfileUpdateInputSchema,
+  provisionNutritionistInputSchema,
   resourceAssignmentInputSchema,
   resourceGuideIdSchema,
 } from './schemas.js';
-import { isSupabaseEnabled } from './db/supabase-client.js';
+import { paginateItems } from './pagination.js';
+import { getAuthAccount, isSupabaseEnabled } from './db/supabase-client.js';
 import * as sb from './db/supabase-repo.js';
+import { recoveryAcknowledgement, provisionSecretMatches, validateProvisionInput } from './identity/provision.js';
 import { authorizePatientAction } from './security/authorization.js';
 import {
   canManagePatients,
@@ -49,12 +56,17 @@ import {
   briefForDisplay,
   computeShoppingList,
   createPatient,
+  acceptPatientInvite,
   dismissBrief,
   enqueueNotice,
+  getInviteById,
   getPatient,
   getStore,
   listNotices,
   markResourceRead,
+  provisionNutritionistMemory,
+  revokePatientInvite,
+  sendPatientInvite,
   setBrief,
   setAppointment,
   setBillingStatus,
@@ -79,6 +91,14 @@ function authorizePatient(userId: string, patientId: string, action: PatientActi
   return authorizePatientAction(userId, patientId, action, patientAccessResolvers);
 }
 
+function queryAudience(role: 'nutri' | 'paciente') {
+  return role === 'paciente' ? 'patient' as const : 'professional' as const;
+}
+
+function serializePatient(patient: NonNullable<Awaited<ReturnType<typeof sb.sbGetPatientById>>>, role: 'nutri' | 'paciente') {
+  return role === 'paciente' ? toPatientSelfView(patient) : patient;
+}
+
 async function parseJsonBody<T>(c: Context, schema: ZodType<T>) {
   try {
     return schema.safeParse(await c.req.json());
@@ -87,7 +107,31 @@ async function parseJsonBody<T>(c: Context, schema: ZodType<T>) {
   }
 }
 
+async function persistPatientWrite(
+  c: Context,
+  patientId: string,
+  role: 'nutri' | 'paciente',
+  write: () => Promise<void>,
+  unavailable: string,
+) {
+  try {
+    await write();
+  } catch (error) {
+    if (error instanceof sb.SchemaUnavailableError) {
+      return c.json({ error: unavailable }, 501);
+    }
+    throw error;
+  }
+  const patient = await sb.sbGetPatientById(patientId, queryAudience(role));
+  if (!patient) return c.notFound();
+  return c.json({ patient: serializePatient(patient, role), source: 'supabase' });
+}
+
 app.use('/*', cors());
+app.use('/api/*', async (c, next) => {
+  await next();
+  c.header('Cache-Control', 'no-store');
+});
 app.use('/api/*', authMiddleware);
 
 app.onError((error, c) => {
@@ -106,21 +150,27 @@ app.get('/api/health', (c) =>
 );
 
 app.get('/api/patients', async (c) => {
+  const parsedPage = listPageQuerySchema.safeParse({
+    limit: c.req.query('limit'),
+    offset: c.req.query('offset'),
+  });
+  if (!parsedPage.success) return c.json({ error: 'Paginación inválida' }, 400);
+  const { limit, offset } = parsedPage.data;
+
   const auth = c.get('auth');
   if ('userId' in auth && isSupabaseEnabled()) {
     if (await sb.sbGetProfileRole(auth.userId) !== 'nutri') {
       return c.json({ error: 'Prohibido' }, 403);
     }
-    const patients = await sb.sbGetPatientsForNutri(auth.userId);
-    return c.json({ patients, source: 'supabase' });
+    const listed = await sb.sbListPatientsForNutri(auth.userId, { limit, offset });
+    return c.json({ patients: listed.patients, page: listed.page, source: 'supabase' });
   }
-  return c.json({
-    patients: getStore().patients.map((patient) => {
-      const brief = briefForDisplay(patient);
-      return { ...patient, brief: brief ?? (patient.brief ? { ...patient.brief, suggested_action: null, up_next_title: null, up_next_body: null, draft_message: null } : null) };
-    }),
-    source: 'memory',
-  });
+
+  const listed = paginateItems(getStore().patients.map((patient) => {
+    const brief = briefForDisplay(patient);
+    return { ...patient, brief: brief ?? (patient.brief ? { ...patient.brief, suggested_action: null, up_next_title: null, up_next_body: null, draft_message: null } : null) };
+  }), offset, limit);
+  return c.json({ patients: listed.items, page: listed.page, source: 'memory' });
 });
 
 app.post('/api/patients', async (c) => {
@@ -130,8 +180,24 @@ app.post('/api/patients', async (c) => {
 
   if ('userId' in auth && isSupabaseEnabled()) {
     const actor = await sb.sbGetActor(auth.userId);
-    if (!canManagePatients(actor, 'create_patient')) return c.json({ error: 'Prohibido' }, 403);
-    return c.json({ error: 'Alta de pacientes pendiente del contrato Supabase 016' }, 501);
+    if (!actor || actor.role !== 'nutri' || !canManagePatients(actor, 'create_patient')) {
+      return c.json({ error: 'Prohibido' }, 403);
+    }
+    try {
+      const created = await sb.sbCreatePatient({
+        nutritionistId: actor.nutritionistId,
+        name: parsedBody.data.name,
+        email: parsedBody.data.email,
+        goal: parsedBody.data.goal,
+      });
+      return c.json({ ...created, source: 'supabase' }, 201);
+    } catch (error) {
+      if (error instanceof sb.UniqueInviteError) return c.json({ error: error.message }, 409);
+      if (error instanceof sb.SchemaUnavailableError) {
+        return c.json({ error: 'Alta de pacientes pendiente del contrato Supabase 016' }, 501);
+      }
+      throw error;
+    }
   }
 
   const created = createPatient(parsedBody.data);
@@ -147,7 +213,7 @@ app.get('/api/patients/:id', async (c) => {
     const actor = await authorizePatient(auth.userId, id, 'read_patient');
     if (!actor) return c.json({ error: 'Prohibido' }, 403);
 
-    const patient = await sb.sbGetPatientById(id);
+    const patient = await sb.sbGetPatientById(id, actor.role === 'paciente' ? 'patient' : 'professional');
     if (!patient) return c.notFound();
     return c.json({
       patient: actor.role === 'paciente' ? toPatientSelfView(patient) : patient,
@@ -168,10 +234,9 @@ app.patch('/api/patients/:id/profile', async (c) => {
   if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
 
   if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'edit_patient')) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    return c.json({ error: 'Edición de pacientes pendiente del schema 016' }, 501);
+    const actor = await authorizePatient(auth.userId, patientId, 'edit_patient');
+    if (!actor) return c.json({ error: 'Prohibido' }, 403);
+    return persistPatientWrite(c, patientId, actor.role, () => sb.sbUpdatePatientProfile(patientId, parsedBody.data), 'No se pudo guardar la ficha');
   }
 
   const patient = setPatientProfile(patientId, parsedBody.data);
@@ -189,7 +254,7 @@ app.patch('/api/patients/:id/archive', async (c) => {
     if (!await authorizePatient(auth.userId, patientId, 'archive_patient')) {
       return c.json({ error: 'Prohibido' }, 403);
     }
-    return c.json({ error: 'Archivado de pacientes pendiente del schema 016' }, 501);
+    return c.json({ error: 'Archivado operativo pendiente de una columna 016 revisada' }, 501);
   }
 
   const patient = setPatientArchived(patientId, parsedBody.data.archived);
@@ -219,10 +284,11 @@ app.post('/api/patients/:id/meals/analyze', async (c) => {
 
   let patient = getPatient(patientId);
   if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'analyze_meal')) {
+    const actor = await authorizePatient(auth.userId, patientId, 'analyze_meal');
+    if (!actor) {
       return c.json({ error: 'Prohibido' }, 403);
     }
-    patient = (await sb.sbGetPatientById(patientId)) ?? undefined;
+    patient = (await sb.sbGetPatientById(patientId, queryAudience(actor.role))) ?? undefined;
   }
   if (!patient) return c.notFound();
 
@@ -253,7 +319,7 @@ app.post('/api/patients/:id/meals/analyze', async (c) => {
       title: `${body.slot} · foto en revisión`,
       body: `${new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} · estimación (${analysis.confidence.toFixed(2)}). Pendiente de Vero.`,
     });
-    const updated = await sb.sbGetPatientById(patient.id);
+    const updated = await sb.sbGetPatientById(patient.id, 'patient');
     return c.json({
       analysis: toPatientMealAnalysis(analysis),
       log: toPatientSelfMealLog(log),
@@ -306,10 +372,27 @@ app.post('/api/patients/:id/brief/dismiss', async (c) => {
   const patientId = c.req.param('id');
 
   if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'generate_copilot')) {
+    const actor = await authorizePatient(auth.userId, patientId, 'generate_copilot');
+    if (!actor) {
       return c.json({ error: 'Prohibido' }, 403);
     }
-    return c.json({ error: 'Descarte del brief pendiente del schema 016' }, 501);
+    try {
+      await sb.sbDismissBrief(patientId, auth.userId);
+    } catch (error) {
+      if (error instanceof sb.SchemaUnavailableError) {
+        return c.json({ error: 'No se pudo descartar el brief' }, 501);
+      }
+      throw error;
+    }
+    const patient = await sb.sbGetPatientById(patientId);
+    if (!patient) return c.notFound();
+    return c.json({
+      patient: {
+        ...patient,
+        brief: briefForDisplay(patient) ?? (patient.brief ? { ...patient.brief, suggested_action: null, up_next_title: null, up_next_body: null, draft_message: null } : null),
+      },
+      source: 'supabase',
+    });
   }
 
   const patient = dismissBrief(patientId);
@@ -363,7 +446,7 @@ app.post('/api/patients/:id/messages', async (c) => {
     const actor = await authorizePatient(auth.userId, patientId, 'send_message');
     if (!actor) return c.json({ error: 'Prohibido' }, 403);
 
-    const patient = await sb.sbGetPatientById(patientId);
+    const patient = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
     const resource = await sb.sbGetPatientResource(patientId);
     if (!patient || !resource) return c.notFound();
 
@@ -378,7 +461,7 @@ app.post('/api/patients/:id/messages', async (c) => {
     } catch {
       return c.json({ error: 'No se pudo enviar el mensaje' }, 503);
     }
-    const updated = await sb.sbGetPatientById(patientId);
+    const updated = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
     return c.json({
       patient: updated && actor.role === 'paciente' ? toPatientSelfView(updated) : updated,
       source: 'supabase',
@@ -424,14 +507,19 @@ app.patch('/api/patients/:id/habits', async (c) => {
   const body = parsedBody.data;
 
   if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'update_habits')) {
+    const actor = await authorizePatient(auth.userId, patientId, 'update_habits');
+    if (!actor) {
       return c.json({ error: 'Prohibido' }, 403);
     }
-    if (body.sleep_minutes !== undefined) {
-      return c.json({ error: 'Descanso persistente pendiente del schema 016' }, 501);
+    try {
+      await sb.sbUpdateHabits(patientId, body);
+    } catch (error) {
+      if (error instanceof sb.SchemaUnavailableError) {
+        return c.json({ error: 'No se pudieron guardar los hábitos' }, 501);
+      }
+      throw error;
     }
-    await sb.sbUpdateHabits(patientId, body);
-    const patient = await sb.sbGetPatientById(patientId);
+    const patient = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
     return c.json({ patient: patient ? toPatientSelfView(patient) : null, source: 'supabase' });
   }
 
@@ -523,10 +611,29 @@ app.put('/api/patients/:id/appointment', async (c) => {
   const body = parsedBody.data;
 
   if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'edit_appointment')) {
+    const actor = await authorizePatient(auth.userId, patientId, 'edit_appointment');
+    if (!actor || actor.role !== 'nutri') {
       return c.json({ error: 'Prohibido' }, 403);
     }
-    return c.json({ error: 'Turnos persistentes pendientes del schema 016' }, 501);
+    try {
+      await sb.sbSetAppointment(patientId, actor.nutritionistId, body.appointment);
+      if (body.appointment) {
+        await sb.sbAddTimelineEvent(patientId, {
+          kind: 'appointment',
+          title: 'Consulta · actualizada',
+          body: `${body.appointment.day} ${body.appointment.time}`,
+          visibility: 'patient',
+        });
+      }
+    } catch (error) {
+      if (error instanceof sb.SchemaUnavailableError) {
+        return c.json({ error: 'No se pudo guardar el turno' }, 501);
+      }
+      throw error;
+    }
+    const patient = await sb.sbGetPatientById(patientId);
+    if (!patient) return c.notFound();
+    return c.json({ patient, source: 'supabase' });
   }
 
   const patient = setAppointment(patientId, body.appointment);
@@ -541,10 +648,41 @@ app.post('/api/patients/:id/appointment/reschedule', async (c) => {
   if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
 
   if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'reschedule_appointment')) {
-      return c.json({ error: 'Prohibido' }, 403);
+    const actor = await authorizePatient(auth.userId, patientId, 'reschedule_appointment');
+    if (!actor) return c.json({ error: 'Prohibido' }, 403);
+    try {
+      const current = await sb.sbGetScheduledAppointment(patientId);
+      if (!current) return c.json({ error: 'No hay un turno para reprogramar' }, 409);
+      const sameSlot = current.day === parsedBody.data.day && current.time === parsedBody.data.time;
+      if (sameSlot) {
+        const patient = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
+        if (!patient) return c.notFound();
+        return c.json({ patient: serializePatient(patient, actor.role), source: 'supabase' });
+      }
+      const resource = await sb.sbGetPatientResource(patientId);
+      if (!resource) return c.notFound();
+      await sb.sbSetAppointment(patientId, resource.nutritionistId, {
+        day: parsedBody.data.day,
+        time: parsedBody.data.time,
+        duration: current.duration,
+        channel: current.channel,
+        ...(current.meet_url ? { meet_url: current.meet_url } : {}),
+      });
+      await sb.sbAddTimelineEvent(patientId, {
+        kind: 'appointment',
+        title: 'Consulta · reprogramada',
+        body: `${parsedBody.data.day} ${parsedBody.data.time}`,
+        visibility: 'patient',
+      });
+    } catch (error) {
+      if (error instanceof sb.SchemaUnavailableError) {
+        return c.json({ error: 'No se pudo reprogramar el turno' }, 501);
+      }
+      throw error;
     }
-    return c.json({ error: 'Turnos persistentes pendientes del schema 016' }, 501);
+    const patient = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
+    if (!patient) return c.notFound();
+    return c.json({ patient: serializePatient(patient, actor.role), source: 'supabase' });
   }
 
   const current = getPatient(patientId);
@@ -597,7 +735,7 @@ app.patch('/api/patients/:id/billing', async (c) => {
     if (!await authorizePatient(auth.userId, patientId, 'edit_billing')) {
       return c.json({ error: 'Prohibido' }, 403);
     }
-    return c.json({ error: 'Cobranza persistente pendiente del schema 016' }, 501);
+    return c.json({ error: 'Cobranza persistente: transiciones sólo por flujo autorizado (PV-32)' }, 501);
   }
 
   const patient = setBillingStatus(patientId, parsedBody.data);
@@ -612,10 +750,15 @@ app.patch('/api/patients/:id/goal', async (c) => {
   if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
 
   if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'edit_goal')) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    return c.json({ error: 'Objetivos persistentes pendientes del schema 016' }, 501);
+    const actor = await authorizePatient(auth.userId, patientId, 'edit_goal');
+    if (!actor) return c.json({ error: 'Prohibido' }, 403);
+    return persistPatientWrite(
+      c,
+      patientId,
+      actor.role,
+      () => sb.sbUpdateGoal(patientId, parsedBody.data.goal),
+      'No se pudo guardar el objetivo',
+    );
   }
 
   const patient = setGoal(patientId, parsedBody.data);
@@ -631,10 +774,17 @@ app.patch('/api/patients/:id/menu', async (c) => {
   const body = parsedBody.data;
 
   if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'edit_menu')) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    return c.json({ error: 'Menú persistente pendiente del schema 016' }, 501);
+    const actor = await authorizePatient(auth.userId, patientId, 'edit_menu');
+    if (!actor) return c.json({ error: 'Prohibido' }, 403);
+    return persistPatientWrite(c, patientId, actor.role, async () => {
+      await sb.sbUpsertMenuSlot(patientId, body.day, body.slot, body.title);
+      await sb.sbAddTimelineEvent(patientId, {
+        kind: 'menu',
+        title: `Menú · ${body.day} ${body.slot}`,
+        body: body.title,
+        visibility: 'patient',
+      });
+    }, 'No se pudo guardar el menú');
   }
 
   const patient = upsertMenuSlot(patientId, body.day, body.slot, body.title);
@@ -650,10 +800,17 @@ app.delete('/api/patients/:id/menu/:day/:slot', async (c) => {
   const { day, slot } = parsedParams.data;
 
   if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'edit_menu')) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    return c.json({ error: 'Menú persistente pendiente del schema 016' }, 501);
+    const actor = await authorizePatient(auth.userId, patientId, 'edit_menu');
+    if (!actor) return c.json({ error: 'Prohibido' }, 403);
+    return persistPatientWrite(c, patientId, actor.role, async () => {
+      await sb.sbDeleteMenuSlot(patientId, day, slot);
+      await sb.sbAddTimelineEvent(patientId, {
+        kind: 'menu',
+        title: `Menú · quitado ${day} ${slot}`,
+        body: '',
+        visibility: 'patient',
+      });
+    }, 'No se pudo guardar el menú');
   }
 
   const patient = removeMenuSlot(patientId, day, slot);
@@ -670,8 +827,165 @@ app.post('/api/nutritionist/setup', async (c) => {
   const parsedBody = await parseJsonBody(c, nutritionistSetupInputSchema);
   if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
   const body = parsedBody.data;
-  const id = await sb.sbEnsureNutritionist(auth.userId, body.display_name);
-  return c.json({ nutritionist_id: id });
+  try {
+    const id = await sb.sbEnsureNutritionist(auth.userId, body.display_name);
+    return c.json({ nutritionist_id: id });
+  } catch (error) {
+    if (error instanceof sb.SchemaUnavailableError) {
+      return c.json({ error: 'Alta profesional pendiente del contrato Supabase 016' }, 501);
+    }
+    throw error;
+  }
+});
+
+app.post('/api/invites/:id/send', async (c) => {
+  const auth = c.get('auth');
+  const inviteId = inviteIdParamSchema.safeParse(c.req.param('id'));
+  if (!inviteId.success) return c.json({ error: 'Datos inválidos' }, 400);
+
+  if ('userId' in auth && isSupabaseEnabled()) {
+    const actor = await sb.sbGetActor(auth.userId);
+    if (!actor || actor.role !== 'nutri' || !canManagePatients(actor, 'create_patient')) {
+      return c.json({ error: 'Prohibido' }, 403);
+    }
+    try {
+      const invite = await sb.sbGetInvite(inviteId.data);
+      if (!invite || invite.nutritionist_id !== actor.nutritionistId) return c.json({ error: 'Prohibido' }, 403);
+      return c.json({ invite: await sb.sbSendInvite(inviteId.data), source: 'supabase' });
+    } catch (error) {
+      if (error instanceof sb.SchemaUnavailableError) {
+        return c.json({ error: 'Invitaciones persistentes pendientes del contrato 016' }, 501);
+      }
+      return c.json({ error: 'Invitación no disponible' }, 409);
+    }
+  }
+
+  const invite = sendPatientInvite(inviteId.data);
+  if (!invite) return c.json({ error: 'Invitación no disponible' }, 409);
+  return c.json({ invite, source: 'memory' });
+});
+
+app.post('/api/invites/:id/revoke', async (c) => {
+  const auth = c.get('auth');
+  const inviteId = inviteIdParamSchema.safeParse(c.req.param('id'));
+  if (!inviteId.success) return c.json({ error: 'Datos inválidos' }, 400);
+
+  if ('userId' in auth && isSupabaseEnabled()) {
+    const actor = await sb.sbGetActor(auth.userId);
+    if (!actor || actor.role !== 'nutri' || !canManagePatients(actor, 'create_patient')) {
+      return c.json({ error: 'Prohibido' }, 403);
+    }
+    try {
+      const invite = await sb.sbGetInvite(inviteId.data);
+      if (!invite || invite.nutritionist_id !== actor.nutritionistId) return c.json({ error: 'Prohibido' }, 403);
+      return c.json({ invite: await sb.sbRevokeInvite(inviteId.data), source: 'supabase' });
+    } catch (error) {
+      if (error instanceof sb.SchemaUnavailableError) {
+        return c.json({ error: 'Invitaciones persistentes pendientes del contrato 016' }, 501);
+      }
+      return c.json({ error: 'Invitación no disponible' }, 409);
+    }
+  }
+
+  const invite = revokePatientInvite(inviteId.data);
+  if (!invite) return c.json({ error: 'Invitación no disponible' }, 409);
+  return c.json({ invite, source: 'memory' });
+});
+
+app.post('/api/invites/accept', async (c) => {
+  const auth = c.get('auth');
+  const parsedBody = await parseJsonBody(c, inviteAcceptInputSchema);
+  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
+  if (!('userId' in auth)) return c.json({ error: 'No autorizado' }, 401);
+
+  if (isSupabaseEnabled()) {
+    const role = await sb.sbGetProfileRole(auth.userId);
+    if (role !== 'paciente') return c.json({ error: 'Invitación no disponible' }, 409);
+    const account = await getAuthAccount(auth.userId);
+    if (!account) return c.json({ error: 'Servicio no disponible' }, 503);
+    if (!account.emailConfirmed) {
+      return c.json({ error: 'Confirmá tu email para aceptar la invitación' }, 403);
+    }
+    try {
+      const patientId = await sb.sbAcceptInvite(parsedBody.data.invite_id);
+      return c.json({ patient_id: patientId, source: 'supabase' });
+    } catch (error) {
+      if (error instanceof sb.SchemaUnavailableError) {
+        return c.json({ error: 'Invitaciones persistentes pendientes del contrato 016' }, 501);
+      }
+      const code = (error as { code?: string }).code;
+      if (code === 'unconfirmed_email') {
+        return c.json({ error: 'Confirmá tu email para aceptar la invitación' }, 403);
+      }
+      return c.json({ error: 'Invitación no disponible' }, 409);
+    }
+  }
+
+  const current = getInviteById(parsedBody.data.invite_id);
+  if (!current) return c.json({ error: 'Invitación no disponible' }, 409);
+  const result = acceptPatientInvite(parsedBody.data.invite_id, {
+    userId: auth.userId,
+    email: null,
+    emailConfirmed: false,
+    role: 'paciente',
+  });
+  if (result.ok) return c.json({ patient_id: result.patientId, invite: result.invite, source: 'memory' });
+  return c.json({ error: result.message }, result.code === 'unconfirmed_email' ? 403 : 409);
+});
+
+app.post('/api/auth/recover', async (c) => {
+  const parsedBody = await parseJsonBody(c, authRecoverInputSchema);
+  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
+  if (isSupabaseEnabled()) {
+    try {
+      await sb.sbRequestPasswordRecovery(parsedBody.data.email);
+    } catch {
+      // Same acknowledgement whether the provider accepted the address or not.
+    }
+  }
+  return c.json(recoveryAcknowledgement());
+});
+
+app.post('/api/ops/nutritionists', async (c) => {
+  const presented = c.req.header('X-PlanV-Provision') ?? c.req.header('Authorization');
+  if (!provisionSecretMatches(presented, process.env.PROVISION_SECRET)) {
+    return c.json({ error: 'No autorizado' }, 401);
+  }
+  const parsedBody = await parseJsonBody(c, provisionNutritionistInputSchema);
+  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
+  const parsed = validateProvisionInput({
+    userId: parsedBody.data.user_id,
+    displayName: parsedBody.data.display_name,
+    license: parsedBody.data.license,
+    monthlyFee: parsedBody.data.monthly_fee_ars,
+  });
+  if (!parsed.ok) return c.json({ error: parsed.message }, 400);
+
+  if (isSupabaseEnabled()) {
+    try {
+      const nutritionistId = await sb.sbProvisionNutritionist({
+        userId: parsed.userId,
+        displayName: parsed.displayName,
+        license: parsed.license,
+        monthlyFee: parsed.monthlyFee,
+      });
+      return c.json({ nutritionist_id: nutritionistId, source: 'supabase' }, 201);
+    } catch (error) {
+      if (error instanceof sb.SchemaUnavailableError) {
+        return c.json({ error: 'Alta profesional pendiente del contrato Supabase 016' }, 501);
+      }
+      throw error;
+    }
+  }
+
+  const created = provisionNutritionistMemory({
+    userId: parsed.userId,
+    displayName: parsed.displayName,
+    license: parsed.license,
+    monthlyFee: parsed.monthlyFee,
+  });
+  if ('error' in created) return c.json({ error: created.error }, 400);
+  return c.json({ ...created, source: 'memory' }, 201);
 });
 
 const isMainModule = Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;

@@ -4,6 +4,7 @@ const PatientApp = lazy(() => import('./patient/PatientApp').then(({ PatientApp 
 const CrmDashboard = lazy(() => import('./crm/CrmDashboard').then(({ CrmDashboard }) => ({ default: CrmDashboard })));
 import { LoginScreen } from './auth/LoginScreen';
 import { useAuth } from '../context/AuthContext';
+import { forgetPendingInvite, pendingInviteIdFromLocation, PENDING_INVITE_STORAGE_KEY } from '../context/invite-link';
 import { useAppStore } from '../store/useAppStore';
 import { api } from '../api/client';
 import { readThemePreference, writeThemePreference, type ThemePreference } from '../theme-preference';
@@ -15,11 +16,12 @@ const NutrigoShowroom = lazy(() => import('./nutrigo/NutrigoShowroom').then(({ N
 export function PlanVExperience() {
   const { session, demoMode, isNutri, isPatient, profile, signOut, loading: authLoading } = useAuth();
   const [view, setView] = useState<'patient' | 'pro'>('patient');
+  const [inviteStatus, setInviteStatus] = useState<'idle' | 'accepting' | 'unconfirmed' | 'unavailable' | 'linked'>('idle');
   const [theme, setTheme] = useState<ThemePreference>(() => readThemePreference(
     typeof window === 'undefined' ? null : window.localStorage,
     typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches,
   ));
-  const { boot, loading, error, aiEnabled, supabaseEnabled } = useAppStore();
+  const { boot, reset, loading, error, aiEnabled, supabaseEnabled, patients } = useAppStore();
   const darkMode = theme === 'dark';
   const toggleTheme = () => setTheme((current) => current === 'dark' ? 'light' : 'dark');
 
@@ -30,10 +32,36 @@ export function PlanVExperience() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!session && !demoMode) return;
+    if (!session && !demoMode) {
+      reset();
+      return;
+    }
     if (session && !isNutri && !isPatient) return;
-    boot({ isNutri, isPatient });
-  }, [authLoading, session, demoMode, isNutri, isPatient, boot]);
+    void boot({ isNutri, isPatient });
+  }, [authLoading, session, demoMode, isNutri, isPatient, boot, reset]);
+
+  useEffect(() => {
+    if (!session || !isPatient || inviteStatus !== 'idle') return;
+    const stored = typeof window === 'undefined' ? null : window.sessionStorage.getItem(PENDING_INVITE_STORAGE_KEY);
+    const inviteId = pendingInviteIdFromLocation(typeof window === 'undefined' ? '' : window.location.search, stored);
+    if (!inviteId) return;
+    let cancelled = false;
+    setInviteStatus('accepting');
+    api.acceptInvite(inviteId).then(() => {
+      if (cancelled) return;
+      forgetPendingInvite(window.sessionStorage);
+      const url = new URL(window.location.href);
+      url.searchParams.delete('invite');
+      window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+      setInviteStatus('linked');
+      boot({ isPatient: true });
+    }).catch((reason: unknown) => {
+      if (cancelled) return;
+      const message = reason instanceof Error ? reason.message : '';
+      setInviteStatus(message.includes('Confirmá tu email') ? 'unconfirmed' : 'unavailable');
+    });
+    return () => { cancelled = true; };
+  }, [session, isPatient, inviteStatus, boot]);
 
   useEffect(() => {
     if (isNutri) setView('pro');
@@ -65,7 +93,28 @@ export function PlanVExperience() {
           <Mark />
           <p className="eyebrow">Plan V</p>
           <h2>Tu cuenta todavía no está vinculada</h2>
-          <p>Cuando la nutricionista acepte tu invitación vas a ver tu plan. No se listan pacientes de otras cuentas.</p>
+          <p>Cuando aceptes la invitación de tu nutricionista vas a ver tu plan. No se listan pacientes de otras cuentas.</p>
+          <button type="button" className="primary-button" onClick={() => signOut()}>Cerrar sesión</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (session && isPatient && (inviteStatus === 'accepting' || inviteStatus === 'unconfirmed' || (inviteStatus !== 'linked' && !loading && patients.length === 0 && !demoMode))) {
+    const waiting = inviteStatus === 'unconfirmed'
+      ? 'Confirmá tu email para aceptar la invitación. Después volvé a entrar.'
+      : inviteStatus === 'unavailable'
+        ? 'Esta invitación no está disponible. Pedile a tu nutricionista una nueva.'
+        : inviteStatus === 'accepting'
+          ? 'Estamos vinculando tu cuenta con el consultorio…'
+          : 'Todavía no hay una ficha vinculada a esta cuenta. Abrí el enlace de invitación o esperá a que tu nutricionista te invite.';
+    return (
+      <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}>
+        <div className="loading-card">
+          <Mark />
+          <p className="eyebrow">Plan V</p>
+          <h2>Tu cuenta todavía no está vinculada</h2>
+          <p>{waiting}</p>
           <button type="button" className="primary-button" onClick={() => signOut()}>Cerrar sesión</button>
         </div>
       </div>

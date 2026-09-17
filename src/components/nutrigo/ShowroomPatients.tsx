@@ -37,6 +37,11 @@ export function ShowroomPatientCreate({ onClose, onCreated }: { onClose: () => v
     setError('');
     try {
       const result = await api.createPatient({ name, email, goal });
+      try {
+        result.invite = (await api.sendInvite(result.invite.id)).invite;
+      } catch {
+        // The patient exists even if the one-use window could not start.
+      }
       onCreated(result.patient, result.invite);
     } catch {
       setError('No pudimos crear el alta. Revisá los datos o si el email ya está registrado.');
@@ -54,7 +59,7 @@ export function ShowroomPatientCreate({ onClose, onCreated }: { onClose: () => v
         <label>Nombre completo<input ref={nameInput} value={name} onChange={(e) => setName(e.target.value)} required minLength={2} maxLength={80} autoComplete="name" /></label>
         <label>Email para la invitación<input value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={254} type="email" autoComplete="email" /></label>
         <label>Objetivo declarado<textarea value={goal} onChange={(e) => setGoal(e.target.value)} required minLength={2} maxLength={240} rows={3} /></label>
-        <p className="nv-dialog-hint"><Icon name="message" size={14} />En demo se guarda el destino, pero no se envía ningún email.</p>
+        <p className="nv-dialog-hint"><Icon name="message" size={14} />La invitación es de un uso y vence. En demo no sale un email real.</p>
         {error && <p className="nv-dialog-error" role="alert">{error}</p>}
         <footer className="nv-dialog-actions">
           <NvButton className="nv-ghost" onClick={onClose} disabled={busy}>Cancelar</NvButton>
@@ -153,7 +158,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', on
   const created = (patient: Patient, invite: PatientInvite) => {
     onChanged(patient);
     setCreating(false);
-    setInviteNotice(`${patient.name} fue incorporada. Invitación a ${invite.email} guardada, todavía no enviada.`);
+    setInviteNotice(`${patient.name} fue incorporada. Invitación de un uso a ${invite.email}${invite.expires_at ? ' con vencimiento' : ' guardada'}.`);
   };
 
   return <>

@@ -2,6 +2,8 @@ import type { Context, Next } from 'hono';
 import {
   verifyAuthToken as verifySupabaseAuthToken,
   isSupabaseEnabled as supabaseIsEnabled,
+  createActorClient,
+  bindActorClient,
 } from '../db/supabase-client.js';
 import { allowsSyntheticDemo } from '../config/runtime.js';
 import { resolveRequestAuth } from '../security/contracts.js';
@@ -45,6 +47,9 @@ export function createAuthMiddleware(dependencies: AuthDependencies) {
 
     if (decision.kind === 'user') {
       c.set('auth', { userId: decision.userId });
+      const actorDb = createActorClient(c.req.header('Authorization'));
+      if (actorDb) return bindActorClient(actorDb, () => next());
+      if (!allowsSyntheticDemo()) return c.json({ error: 'Servicio no disponible' }, 503);
       return next();
     }
 

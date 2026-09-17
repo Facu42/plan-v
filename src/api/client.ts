@@ -2,10 +2,18 @@ import type { Brief, DemoNotice, GoalStatus, MealLog, Message, Patient, Stage } 
 import { getSessionToken } from '../lib/supabase';
 
 export type PatientInvite = {
+  id: string;
   patient_id: string;
+  nutritionist_id: string;
   email: string;
-  status: 'not_sent';
+  status: 'not_sent' | 'pending' | 'accepted' | 'expired' | 'revoked';
+  invited_at: string | null;
+  expires_at: string | null;
+  accepted_at: string | null;
+  accepted_by: string | null;
+  revoked_at: string | null;
   created_at: string;
+  updated_at: string;
 };
 
 async function authHeaders(): Promise<HeadersInit> {
@@ -16,7 +24,13 @@ async function authHeaders(): Promise<HeadersInit> {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  if (init?.signal?.aborted) {
+    throw new DOMException('Aborted', 'AbortError');
+  }
   const headers = await authHeaders();
+  if (init?.signal?.aborted) {
+    throw new DOMException('Aborted', 'AbortError');
+  }
   const res = await fetch(path, {
     ...init,
     headers: { ...headers, ...init?.headers },
@@ -28,15 +42,49 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export const api = {
-  health: () => request<{ status: string; ai: boolean; supabase: boolean }>('/api/health'),
+export function isAbortError(error: unknown): boolean {
+  return (error instanceof DOMException || error instanceof Error) && error.name === 'AbortError';
+}
 
-  getPatients: () => request<{ patients: Patient[]; source?: string }>('/api/patients'),
+export type PatientListPage = {
+  patients: Patient[];
+  page: { offset: number; limit: number; has_more: boolean };
+  source?: string;
+};
+
+export const api = {
+  health: (init?: RequestInit) => request<{ status: string; ai: boolean; supabase: boolean }>('/api/health', init),
+
+  getPatients: (query?: { limit?: number; offset?: number }, init?: RequestInit) => {
+    const params = new URLSearchParams();
+    if (query?.limit != null) params.set('limit', String(query.limit));
+    if (query?.offset != null) params.set('offset', String(query.offset));
+    const suffix = params.toString() ? `?${params.toString()}` : '';
+    return request<PatientListPage>(`/api/patients${suffix}`, init);
+  },
 
   createPatient: (data: { name: string; email: string; goal: string }) =>
     request<{ patient: Patient; invite: PatientInvite; source: string }>('/api/patients', {
       method: 'POST',
       body: JSON.stringify(data),
+    }),
+
+  sendInvite: (inviteId: string) =>
+    request<{ invite: PatientInvite; source: string }>(`/api/invites/${inviteId}/send`, { method: 'POST' }),
+
+  revokeInvite: (inviteId: string) =>
+    request<{ invite: PatientInvite; source: string }>(`/api/invites/${inviteId}/revoke`, { method: 'POST' }),
+
+  acceptInvite: (inviteId: string) =>
+    request<{ patient_id: string; source: string }>('/api/invites/accept', {
+      method: 'POST',
+      body: JSON.stringify({ invite_id: inviteId }),
+    }),
+
+  recoverAccount: (email: string) =>
+    request<{ message: string }>('/api/auth/recover', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
     }),
 
   updatePatientProfile: (patientId: string, data: {
@@ -57,10 +105,10 @@ export const api = {
       body: JSON.stringify({ archived }),
     }),
 
-  getMyPatient: () => request<{ patient: Patient | null; shoppingList: string[] }>('/api/me/patient'),
+  getMyPatient: (init?: RequestInit) => request<{ patient: Patient | null; shoppingList: string[] }>('/api/me/patient', init),
 
-  getPatient: (id: string) =>
-    request<{ patient: Patient; shoppingList: string[] }>(`/api/patients/${id}`),
+  getPatient: (id: string, init?: RequestInit) =>
+    request<{ patient: Patient; shoppingList: string[] }>(`/api/patients/${id}`, init),
 
   setupNutritionist: (displayName: string) =>
     request<{ nutritionist_id: string }>('/api/nutritionist/setup', {

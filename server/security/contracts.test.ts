@@ -109,6 +109,13 @@ describe('resolveRequestAuth', () => {
       .toEqual({ kind: 'public' });
   });
 
+  it('keeps recovery and ops provisioning reachable without a user JWT', () => {
+    expect(resolveRequestAuth({ supabaseEnabled: true, path: '/api/auth/recover', verifiedUserId: null, allowDemo: false }))
+      .toEqual({ kind: 'public' });
+    expect(resolveRequestAuth({ supabaseEnabled: true, path: '/api/ops/nutritionists', verifiedUserId: null, allowDemo: false }))
+      .toEqual({ kind: 'public' });
+  });
+
   it('accepts a verified Supabase user', () => {
     expect(resolveRequestAuth({ supabaseEnabled: true, path: '/api/patients', verifiedUserId: 'user-1', allowDemo: false }))
       .toEqual({ kind: 'user', userId: 'user-1' });

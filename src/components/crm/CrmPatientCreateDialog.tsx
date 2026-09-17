@@ -32,6 +32,11 @@ export function CrmPatientCreateDialog({
     setError(null);
     try {
       const result = await api.createPatient({ name, email, goal });
+      try {
+        result.invite = (await api.sendInvite(result.invite.id)).invite;
+      } catch {
+        // Keep the created patient even if sending the one-use invite fails.
+      }
       onCreated(result.patient, result.invite);
     } catch {
       setError('No pudimos crear el alta. Revisá los datos o si el email ya está registrado.');
@@ -65,7 +70,7 @@ export function CrmPatientCreateDialog({
             Objetivo declarado
             <textarea value={goal} onChange={(event) => setGoal(event.target.value)} required minLength={2} maxLength={240} rows={3} />
           </label>
-          <p className="patient-create-hint"><Icon name="message" size={14} />En demo se guarda el destino, pero no se envía ningún email.</p>
+            <p className="patient-create-hint"><Icon name="message" size={14} />La invitación es de un uso y vence. En demo no sale un email real.</p>
           {error && <p className="patient-create-error" role="alert">{error}</p>}
           <div className="patient-create-actions">
             <button type="button" onClick={onClose} disabled={busy}>Cancelar</button>

@@ -177,5 +177,37 @@ export const nutritionistSetupInputSchema = z.object({
   display_name: z.string().trim().min(2).max(120),
 });
 
+export const inviteIdParamSchema = z.string().uuid();
+
+export const inviteAcceptInputSchema = z.object({
+  invite_id: z.string().uuid(),
+});
+
+export const authRecoverInputSchema = z.object({
+  email: z.string().trim().toLowerCase().email().max(254),
+});
+
+export const provisionNutritionistInputSchema = z.object({
+  user_id: z.string().trim().min(1).max(80),
+  display_name: z.string().trim().min(2).max(120),
+  license: z.string().trim().max(80).nullable().optional(),
+  monthly_fee_ars: z.number().int().positive().nullable().optional(),
+});
+
+export const PAGE_DEFAULT_LIMIT = 50;
+export const PAGE_MAX_LIMIT = 100;
+export const MESSAGE_PAGE_SIZE = 50;
+
+export const listPageQuerySchema = z.object({
+  limit: z.preprocess(
+    (value) => (value === undefined || value === '' ? PAGE_DEFAULT_LIMIT : value),
+    z.coerce.number().int().min(1).max(PAGE_MAX_LIMIT),
+  ),
+  offset: z.preprocess(
+    (value) => (value === undefined || value === '' ? 0 : value),
+    z.coerce.number().int().min(0).max(10_000),
+  ),
+});
+
 export type MealAnalysis = z.infer<typeof mealAnalysisSchema>;
 export type CopilotBrief = z.infer<typeof copilotBriefSchema>;

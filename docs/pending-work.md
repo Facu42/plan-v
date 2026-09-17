@@ -21,8 +21,13 @@ Estado PV-01…05:
 - **PV-05** guarda de migraciones + workflow CI. Node verificado: 24.16.0.
 - **PV-06** núcleo 016 intacto; ampliación piloto en `supabase/contracts/016b_piloto_ampliacion_draft.sql` (DRAFT/NO CORRER). Diccionario y política en `docs/contrato-diccionario-piloto.md`. Fuera del piloto: `exercise_library`, organizaciones, listas de compra persistidas.
 - **PV-07** Nutrigo entra al build de producción y a sesiones autenticadas. Rol tomado de la sesión (sin selector). Rutas `/app/:pagina` y `/crm/:pagina` con atrás/adelante y `#recurso=`. El selector de rol queda sólo en demo sin sesión; `?design=legacy` no aplica con sesión.
+- **PV-08** lecturas/escrituras ordinarias usan el JWT del actor (`createActorClient` + AsyncLocalStorage). Service role queda para auth/provisión (`privilegedDb`, `sbEnsureNutritionist`). Las consultas paciente ya no hacen `select *` ni piden `plan_b`/`note_for_nutri`/`ai_briefs`. Suite RLS A/B: `server/rls-ab.test.ts` (live skip sin `DISPOSABLE_SUPABASE_URL` + JWTs). Aplicación descartable: `node scripts/apply-disposable.mjs` con `DISPOSABLE_SUPABASE_APPLY=I_UNDERSTAND_DISPOSABLE_ONLY`. 016/016b no están en `supabase/migrations/`.
+- **PV-09** alta profesional por `POST /api/ops/nutritionists` con `PROVISION_SECRET` (nunca JWT de usuario). Invitación de un uso: crear → enviar (vence 7 días) → aceptar con email Auth confirmado y coincidente, o revocar. Recuperación de cuenta vía `/api/auth/recover` y el formulario de login, sin revelar si el email existe. 016 sigue sin aplicarse.
 
-Siguiente: DB/RLS (PV-08). No aplicar 016 ni 016b.
+- **PV-10** paridad 016 de ficha, menú semanal, hábitos (incluye sueño), turnos, brief y objetivo publicado. Lectura posterior a cada escritura; si falta schema, 501 explícito (no éxito falso). Siguen 501 a propósito: archivo operativo (no hay `archived_at` en 016), cobranza (service role / PV-32), actividad, recursos, avisos y recibos de mensajes (016b / tickets posteriores).
+- **PV-11** directorio paginado (`limit`/`offset` + `has_more`) sin extras N+1; el detalle y los mensajes (últimos 50) se piden al seleccionar. Cache de pacientes aislada por sesión: logout aborta requests y vacía el store. Respuestas `/api/*` van con `Cache-Control: no-store`.
+
+Siguiente: intake y consentimientos versionados (PV-12). No aplicar 016 ni 016b a un proyecto con datos reales.
 
 El registro de cortes que sigue se conserva como evidencia de **demo/memoria**. Sus casillas no acreditan producción ni aprobación visual integral.
 
@@ -100,21 +105,21 @@ La referencia aporta doce superficies. Plan V implementará funciones equivalent
 - [ ] Aprobar las siete puertas de `docs/016-approval-and-staging-checklist.md`.
 - [ ] Confirmar plazos de retención con privacidad/legal (los de PV-06 son de trabajo).
 - [ ] Revisar formalmente las RPC `accept_patient_invite` y `provision_nutritionist`.
-- [ ] Convertir el borrador revisado en una migración nueva e inmutable. No ejecutar 016 ni 016b.
-- [ ] Ejecutar los casos `RLS-01…RLS-23` con usuarios sintéticos en una instancia descartable.
+- [ ] Convertir el borrador revisado en una migración nueva e inmutable. No ejecutar 016 ni 016b sobre un proyecto con pacientes reales. PV-08 deja un runner descartable (`scripts/apply-disposable.mjs`) y no copia el draft a `supabase/migrations/`.
+- [ ] Ejecutar los casos `RLS-01…RLS-23` con usuarios sintéticos en una instancia descartable. PV-08 cablea JWT y deja RLS-02 live detrás de env; el resto de la matriz sigue pendiente de esa instancia.
 - [ ] Adjuntar evidencias redactadas, hash de la migración y decisión explícita de go/no-go.
 
 ### 2. Completar Supabase y aislamiento multiusuario
 
 La API falla de forma explícita con `501` en operaciones que aún no tienen contrato persistente aprobado. Falta:
 
-- [ ] Alta e invitación real de pacientes.
-- [ ] Edición y archivo/restauración de pacientes mediante `archived_at`.
-- [ ] Persistencia de objetivos e historial profesional.
-- [ ] Creación, reprogramación y cancelación de turnos.
-- [ ] Escritura del menú semanal.
-- [ ] Persistencia completa de sueño/hábitos.
-- [ ] Descarte persistente de briefs del copiloto.
+- [ ] Alta e invitación real de pacientes. PV-09 deja el ciclo crear/enviar/revocar/aceptar y recuperación; falta aplicar 016 en instancia descartable para persistirlos.
+- [ ] Edición y archivo/restauración de pacientes mediante `archived_at`. PV-10 persiste la ficha (nombre/estado/etapa/notas profesionales); el archivo operativo sigue 501 porque 016 no tiene esa columna.
+- [ ] Persistencia de objetivos e historial profesional. PV-10 escribe `patients.goal`; `goal_status`/`goal_history` quedan para 016b.
+- [ ] Creación, reprogramación y cancelación de turnos. PV-10 reemplaza el turno vigente (demo v0); historial append-only es PV-25.
+- [x] Escritura del menú semanal (PV-10, `meal_slots`).
+- [x] Persistencia completa de sueño/hábitos (PV-10, `habit_logs.sleep_minutes`).
+- [x] Descarte persistente de briefs del copiloto (PV-10, `ai_briefs.status=dismissed`).
 - [ ] Cobranza y transiciones de `billing_status`/`billing_until` sólo por flujos autorizados.
 - [ ] Verificar con RLS real que Nutri A nunca pueda leer o escribir datos de Nutri B.
 - [ ] Verificar que la vista paciente nunca exponga notas internas, briefs, razones de adherencia, borradores ni historial profesional.

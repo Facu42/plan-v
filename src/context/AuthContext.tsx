@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import type { Session, User } from '@supabase/supabase-js';
 import { getProfile, supabase, supabaseConfigured, type Profile } from '../lib/supabase';
 import { isLocalDemoAllowed, PUBLIC_SIGNUP_ROLE } from './auth-policy';
+import { pendingInviteIdFromLocation, rememberPendingInvite, PENDING_INVITE_STORAGE_KEY } from './invite-link';
+import { useAppStore } from '../store/useAppStore';
 
 type AuthState = {
   loading: boolean;
@@ -14,6 +16,7 @@ type AuthState = {
   demoAllowed: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error?: string }>;
+  requestPasswordReset: (email: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   enterDemoMode: () => void;
 };
@@ -33,6 +36,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [demoMode, setDemoMode] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const inviteId = pendingInviteIdFromLocation(
+      window.location.search,
+      window.sessionStorage.getItem(PENDING_INVITE_STORAGE_KEY),
+    );
+    if (inviteId) rememberPendingInvite(inviteId, window.sessionStorage);
+  }, []);
 
   useEffect(() => {
     if (!supabase) {
@@ -99,9 +111,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) return { error: error.message };
       return {};
     },
+    requestPasswordReset: async (email) => {
+      if (!supabase) return { error: 'Supabase no configurado' };
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: typeof window === 'undefined' ? undefined : window.location.origin,
+      });
+      if (error) return { error: error.message };
+      return {};
+    },
     signOut: async () => {
-      if (supabase) await supabase.auth.signOut();
+      useAppStore.getState().reset();
+      setSession(null);
+      setProfile(null);
       setDemoMode(false);
+      if (supabase) await supabase.auth.signOut();
     },
     enterDemoMode: () => {
       if (!demoAllowed) return;

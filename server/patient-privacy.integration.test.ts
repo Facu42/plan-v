@@ -17,6 +17,8 @@ vi.mock('./db/supabase-client.js', () => ({
   isSupabaseEnabled: () => true,
   verifyAuthToken: async (token?: string) => (token ? { userId: 'user-1' } : null),
   getSupabaseAdmin: () => ({}),
+  createActorClient: () => null,
+  bindActorClient: (_client: unknown, run: () => unknown) => run(),
 }));
 
 import { app } from './index.js';

@@ -7,6 +7,22 @@ import {
   type AppointmentHistoryActor,
   type AppointmentHistoryEntry,
 } from './appointment-ops.js';
+import {
+  activateInvite,
+  canOpenInvite,
+  createInviteRecord,
+  evaluateInviteAcceptance,
+  publicInviteView,
+  revokeInvite,
+  type AcceptActor,
+  type InviteEvent,
+  type PatientInvite,
+} from './identity/invites.js';
+import { validateProvisionInput } from './identity/provision.js';
+
+export type { PatientInvite, InviteEvent } from './identity/invites.js';
+
+export const DEMO_NUTRITIONIST_ID = 'nutri-demo';
 
 export type MealStatus = 'pending_review' | 'confirmed' | 'adjusted';
 export type SuggestedAction = 'mensaje' | 'ajuste_menu' | 'turno';
@@ -462,16 +478,12 @@ function seedPatients(): Patient[] {
   ];
 }
 
-export type PatientInvite = {
-  patient_id: string;
-  email: string;
-  status: 'not_sent';
-  created_at: string;
-};
-
 export type AppStore = {
   patients: Patient[];
   patientInvites: PatientInvite[];
+  inviteEvents: InviteEvent[];
+  provisionedNutritionists: { id: string; userId: string; displayName: string }[];
+  linkedPatientUsers: Record<string, string>;
   notices: DemoNotice[];
   activePatientId: string;
 };
@@ -479,6 +491,9 @@ export type AppStore = {
 let store: AppStore = {
   patients: seedPatients(),
   patientInvites: [],
+  inviteEvents: [],
+  provisionedNutritionists: [],
+  linkedPatientUsers: {},
   notices: [],
   activePatientId: 'pat-sofia',
 };
@@ -522,13 +537,39 @@ export function listNotices(patientId?: string): DemoNotice[] {
   return patientId ? store.notices.filter((notice) => notice.patientId === patientId) : store.notices;
 }
 
+function recordInviteEvent(inviteId: string, event: InviteEvent['event'], actorId: string | null = null): void {
+  store.inviteEvents.push({
+    id: randomUUID(),
+    invite_id: inviteId,
+    event,
+    actor_id: actorId,
+    detail: {},
+    created_at: now(),
+  });
+}
+
 export function getPatientInvite(patientId: string): PatientInvite | undefined {
   return store.patientInvites.find((invite) => invite.patient_id === patientId);
 }
 
+export function getInviteById(inviteId: string): PatientInvite | undefined {
+  return store.patientInvites.find((invite) => invite.id === inviteId);
+}
+
+export function listInviteEvents(inviteId: string): InviteEvent[] {
+  return store.inviteEvents.filter((event) => event.invite_id === inviteId);
+}
+
 export function createPatient(input: { name: string; email: string; goal: string }): { patient: Patient; invite: PatientInvite } | null {
   const email = input.email.trim().toLowerCase();
-  if (store.patientInvites.some((invite) => invite.email === email)) return null;
+  if (!canOpenInvite(store.patientInvites, {
+    patientId: `pending-${email}`,
+    nutritionistId: DEMO_NUTRITIONIST_ID,
+    email,
+  })) return null;
+  if (store.patientInvites.some((invite) => invite.email === email && (invite.status === 'not_sent' || invite.status === 'pending'))) {
+    return null;
+  }
 
   const id = `pat-${randomUUID()}`;
   const initials = patientInitials(input.name);
@@ -569,22 +610,78 @@ export function createPatient(input: { name: string; email: string; goal: string
     meal_logs: [],
     messages: [],
   };
-  const invite: PatientInvite = {
-    patient_id: id,
+  const invite = createInviteRecord({
+    id: randomUUID(),
+    patientId: id,
+    nutritionistId: DEMO_NUTRITIONIST_ID,
     email,
-    status: 'not_sent',
-    created_at: now(),
-  };
+    now: new Date(),
+  });
 
   store.patients.push(patient);
   store.patientInvites.push(invite);
-  return { patient, invite };
+  recordInviteEvent(invite.id, 'created');
+  return { patient, invite: publicInviteView(invite) };
+}
+
+export function sendPatientInvite(inviteId: string): PatientInvite | null {
+  const current = getInviteById(inviteId);
+  if (!current) return null;
+  const activated = activateInvite(current, new Date());
+  if (!activated) return null;
+  store.patientInvites = store.patientInvites.map((invite) => invite.id === inviteId ? activated.invite : invite);
+  recordInviteEvent(inviteId, activated.event);
+  return publicInviteView(activated.invite);
+}
+
+export function revokePatientInvite(inviteId: string): PatientInvite | null {
+  const current = getInviteById(inviteId);
+  if (!current) return null;
+  const revoked = revokeInvite(current, new Date());
+  if (!revoked) return null;
+  store.patientInvites = store.patientInvites.map((invite) => invite.id === inviteId ? revoked : invite);
+  recordInviteEvent(inviteId, 'revoked');
+  return publicInviteView(revoked);
+}
+
+export function acceptPatientInvite(inviteId: string, actor: AcceptActor): ReturnType<typeof evaluateInviteAcceptance> {
+  const current = getInviteById(inviteId);
+  if (!current) {
+    return { ok: false, code: 'invite_unavailable', message: 'Invitación no disponible' };
+  }
+  const result = evaluateInviteAcceptance({
+    invite: current,
+    actor,
+    now: new Date(),
+    patientUserId: store.linkedPatientUsers[current.patient_id] ?? null,
+  });
+  if (!result.ok) return result;
+  store.patientInvites = store.patientInvites.map((invite) => invite.id === inviteId ? result.invite : invite);
+  store.linkedPatientUsers[result.patientId] = actor.userId;
+  recordInviteEvent(inviteId, 'accepted', actor.userId);
+  return result;
+}
+
+export function provisionNutritionistMemory(input: { userId: string; displayName: string; license?: string | null; monthlyFee?: number | null }): { nutritionist_id: string } | { error: string } {
+  const parsed = validateProvisionInput(input);
+  if (!parsed.ok) return { error: parsed.message };
+  const existing = store.provisionedNutritionists.find((row) => row.userId === parsed.userId);
+  if (existing) {
+    existing.displayName = parsed.displayName;
+    return { nutritionist_id: existing.id };
+  }
+  const id = `nutri-${randomUUID()}`;
+  store.provisionedNutritionists.push({ id, userId: parsed.userId, displayName: parsed.displayName });
+  return { nutritionist_id: id };
 }
 
 export function resetStore(): void {
   store = {
     patients: seedPatients(),
     patientInvites: [],
+    inviteEvents: [],
+    provisionedNutritionists: [],
+    linkedPatientUsers: {},
     notices: [],
     activePatientId: 'pat-sofia',
   };
