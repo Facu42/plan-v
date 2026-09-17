@@ -11,8 +11,8 @@ export const patientTableColumns: Record<QueryAudience, string> = {
 };
 
 export const mealLogColumns: Record<QueryAudience, string> = {
-  professional: 'id,patient_id,slot,slot_label,photo_path,description,foods,macros,confidence,status,logged_at,note_for_nutri',
-  patient: 'id,patient_id,slot,slot_label,photo_path,description,foods,macros,confidence,status,logged_at',
+  professional: 'id,patient_id,slot_label,photo_path,description,foods,macros,confidence,status,logged_at,note_for_nutri',
+  patient: 'id,patient_id,slot_label,photo_path,description,foods,macros,confidence,status,logged_at',
 };
 
 export const messageColumns: Record<QueryAudience, string> = {

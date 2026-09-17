@@ -18,6 +18,9 @@ vi.mock('./db/supabase-client.js', () => ({
   createActorClient: () => null,
   bindActorClient: (_client: unknown, run: () => unknown) => run(),
   getAuthAccount: async () => ({ email: 'ana@example.com', emailConfirmed: true }),
+  getRequestDb: () => ({
+    rpc: async () => ({ data: null, error: { code: 'PGRST202', message: 'function not found' } }),
+  }),
 }));
 
 import { app } from './index.js';
@@ -35,12 +38,12 @@ describe('PV-12 supabase gap', () => {
     sbMocks.sbGetProfileRole.mockResolvedValue('paciente');
   });
 
-  it('keeps intake writes explicit until 016b is applied', async () => {
+  it('maps a missing intake schema to an explicit 501', async () => {
     const response = await app.request('/api/patients/pat-1/intake', {
       headers: { Authorization: 'Bearer test-token' },
     });
     expect(response.status).toBe(501);
-    expect(await response.json()).toEqual({ error: 'Ingreso persistente pendiente del contrato 016b' });
+    expect(await response.json()).toEqual({ error: 'El ingreso todavía no está habilitado en este entorno.' });
   });
 
   it('still serves the versioned consent catalog from code', async () => {

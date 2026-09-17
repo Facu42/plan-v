@@ -69,6 +69,11 @@ function heading(title, subtitle) {
 function navigation() {
   $('#navigation').innerHTML = views.map(([id, label, name]) => `<a class="nav-item" href="#${id}" ${id === currentView ? 'aria-current="page"' : ''}>${icon(name)}${label}${id === 'tasks' || id === 'findings' ? `<span class="nav-count">${id === 'tasks' ? board.tasks.length : board.findings.length}</span>` : ''}</a>`).join('');
 }
+function auditPanel() {
+  const audit = board.audit;
+  if (!audit) return '';
+  return `<section class="panel audit-panel" aria-label="Última revisión del desarrollo"><div class="audit-heading"><div><span class="tiny-label">ÚLTIMA REVISIÓN DEL DESARROLLO</span><h2>${escape(date(audit.reviewedAt))} <span class="mono muted">· ${escape(audit.commit)}</span></h2></div><a class="text-btn" href="/docs/progress" target="_blank" rel="noopener">Ver informe ${icon('arrow')}</a></div><p>${escape(audit.summary)}</p><div class="audit-checks">${audit.checks.map(check => `<span class="audit-check ${check.status}">${icon(check.status === 'passed' ? 'check' : 'circle')}<span><strong>${escape(check.label)}</strong> ${escape(check.result)}</span></span>`).join('')}</div><div class="audit-note">Evidencia registrada en esta revisión. No es CI en vivo ni aprobación para pacientes.</div></section>`;
+}
 function taskTable(tasks) {
   if (!tasks.length) return '<div class="empty"><h3>No hay entregas con estos filtros</h3><p>Probá con otra búsqueda o quitá los filtros para ver el plan completo.</p><button class="btn" data-clear>Limpiar filtros</button></div>';
   return `<div class="table-wrap"><table class="task-table"><thead><tr><th scope="col">ENTREGA</th><th scope="col">ESTADO</th><th scope="col" class="hide-mobile">PRIORIDAD</th><th scope="col" class="hide-mobile">DEPENDENCIAS</th></tr></thead><tbody>${tasks.map(t => `<tr><td><button class="task-name" data-task="${t.id}" aria-label="Abrir ${t.id}: ${escape(t.title)}"><span class="task-code">${t.id} <span aria-hidden="true">·</span> ${t.milestone}</span>${escape(t.title)}<span class="task-subtitle">${escape(t.owner || 'Sin asignar')} · ${escape(t.roles)}</span></button></td><td>${badge(t.status)}</td><td class="hide-mobile">${priority(t.priority)}</td><td class="hide-mobile">${t.waitingFor.length ? `<span class="waiting-text" title="${t.waitingFor.join(', ')}">Espera ${t.waitingFor.length} ${t.waitingFor.length === 1 ? 'entrega' : 'entregas'}</span>` : `<span class="ready-text">${t.status === 'done' ? 'Verificadas' : 'Resueltas'}</span>`}</td></tr>`).join('')}</tbody></table></div>`;
@@ -122,6 +127,7 @@ function render() {
   currentView = views.some(([id]) => id === requested) ? requested : 'overview';
   navigation();
   main.innerHTML = ({ overview, tasks: tasksView, roadmap: roadmapView, findings: findingsView, activity: activityView, documents: documentsView })[currentView]();
+  if (currentView === 'overview' || currentView === 'documents') main.querySelector('.page-heading')?.insertAdjacentHTML('afterend', auditPanel());
   document.title = `${views.find(([id]) => id === currentView)[1]} · Plan V`;
 }
 

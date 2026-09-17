@@ -51,6 +51,7 @@ export const emptyState = () => ({ schemaVersion: 1, tasks: {}, history: [] });
 
 export function validateState(state) {
   if (state?.schemaVersion !== 1 || !state.tasks || Array.isArray(state.tasks) || typeof state.tasks !== 'object' || !Array.isArray(state.history)) throw new Error('Archivo de seguimiento inválido. No se sobrescribió.');
+  if (state.audit && (typeof state.audit.reviewedAt !== 'string' || Number.isNaN(Date.parse(state.audit.reviewedAt)) || typeof state.audit.commit !== 'string' || typeof state.audit.summary !== 'string' || !Array.isArray(state.audit.checks) || state.audit.checks.some(check => !check || typeof check.label !== 'string' || typeof check.result !== 'string' || !['passed', 'failed', 'skipped'].includes(check.status)))) throw new Error('Datos de revisión inválidos.');
   for (const [id, entry] of Object.entries(state.tasks)) {
     if (!/^PV-\d{2}$/.test(id) || !entry || !Object.hasOwn(statuses, entry.status) || ['owner', 'notes', 'evidence'].some(k => typeof entry[k] !== 'string')) throw new Error(`Estado inválido en ${id}. No se sobrescribió.`);
     if (entry.status === 'done' && !entry.evidence.trim()) throw new Error(`Falta evidencia de cierre en ${id}`);
@@ -78,7 +79,7 @@ export function createStore({ planPath, statePath }) {
       if (task.status === 'done' && task.waitingFor.length) throw new Error(`${task.id} figura completa con dependencias pendientes. Revisá el archivo de seguimiento.`);
     }
     const revision = createHash('sha256').update(markdown).update(raw).digest('hex');
-    return { state, board: { revision, tasks, findings: plan.findings, milestones, coverage, documents, statuses, history: state.history, source: 'docs/plan-de-accion-2026-09-16.md', planDate: '2026-09-16', readAt: new Date().toISOString() } };
+    return { state, board: { revision, tasks, findings: plan.findings, milestones, coverage, documents, statuses, history: state.history, audit: state.audit ?? null, source: 'docs/plan-de-accion-2026-09-16.md', planDate: '2026-09-16', readAt: new Date().toISOString() } };
   }
   async function patch(id, input) {
     if (!input || typeof input !== 'object' || !Object.hasOwn(statuses, input.status)) throw new BoardError('Elegí un estado válido.');

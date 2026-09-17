@@ -1,5 +1,9 @@
 # Pendientes de Plan V
 
+## Revisión vigente de avance — 2026-09-17
+
+[Informe y prioridades actualizados](revision-avance-2026-09-17.md). Continuación: migraciones ejecutables núcleo/intake en `supabase/migrations/` (solo esquema vacío), RPC de ingreso, cola de autoguardado y revisión en la ficha. **No aplicar SQL a un proyecto con pacientes.** Siguiente verificación: suite local + PGlite. Los números anteriores de 5123acf son históricos.
+
 ## Secuencia vigente tras la revisión de arquitectura — 2026-09-16
 
 El [plan de acción revisado](plan-de-accion-2026-09-16.md) organiza el trabajo restante en **PV-01…PV-39**, con dependencias y criterios de aceptación. Ese orden prevalece sobre el orden histórico de pasos de este archivo: fundaciones/privacidad → contrato y persistencia → ingreso/archivos → recetas/planes → IA y acompañamiento → piloto → paridad completa Nutrigo.
@@ -21,18 +25,20 @@ Estado PV-01…05:
 - **PV-05** guarda de migraciones + workflow CI. Node verificado: 24.16.0.
 - **PV-06** núcleo 016 intacto; ampliación piloto en `supabase/contracts/016b_piloto_ampliacion_draft.sql` (DRAFT/NO CORRER). Diccionario y política en `docs/contrato-diccionario-piloto.md`. Fuera del piloto: `exercise_library`, organizaciones, listas de compra persistidas.
 - **PV-07** Nutrigo entra al build de producción y a sesiones autenticadas. Rol tomado de la sesión (sin selector). Rutas `/app/:pagina` y `/crm/:pagina` con atrás/adelante y `#recurso=`. El selector de rol queda sólo en demo sin sesión; `?design=legacy` no aplica con sesión.
-- **PV-08** lecturas/escrituras ordinarias usan el JWT del actor (`createActorClient` + AsyncLocalStorage). Service role queda para auth/provisión (`privilegedDb`, `sbEnsureNutritionist`). Las consultas paciente ya no hacen `select *` ni piden `plan_b`/`note_for_nutri`/`ai_briefs`. Suite RLS A/B: `server/rls-ab.test.ts` (live skip sin `DISPOSABLE_SUPABASE_URL` + JWTs). Aplicación descartable: `node scripts/apply-disposable.mjs` con `DISPOSABLE_SUPABASE_APPLY=I_UNDERSTAND_DISPOSABLE_ONLY`. 016/016b no están en `supabase/migrations/`.
+- **PV-08** lecturas/escrituras ordinarias usan el JWT del actor (`createActorClient` + AsyncLocalStorage). Service role queda para auth/provisión. Migraciones nuevas `20260917190000_core.sql` y `20260917190100_intake.sql` para esquema vacío; tests PGlite en `server/intake/postgres.integration.test.ts`. 016/016b draft siguen fuera de la cadena. No aplicar a un proyecto con pacientes.
 - **PV-09** alta profesional por `POST /api/ops/nutritionists` con `PROVISION_SECRET` (nunca JWT de usuario). Invitación de un uso: crear → enviar (vence 7 días) → aceptar con email Auth confirmado y coincidente, o revocar. Recuperación de cuenta vía `/api/auth/recover` y el formulario de login, sin revelar si el email existe. 016 sigue sin aplicarse.
 
 - **PV-10** paridad 016 de ficha, menú semanal, hábitos (incluye sueño), turnos, brief y objetivo publicado. Lectura posterior a cada escritura; si falta schema, 501 explícito (no éxito falso). Siguen 501 a propósito: archivo operativo (no hay `archived_at` en 016), cobranza (service role / PV-32), actividad, recursos, avisos y recibos de mensajes (016b / tickets posteriores).
 - **PV-11** directorio paginado (`limit`/`offset` + `has_more`) sin extras N+1; el detalle y los mensajes (últimos 50) se piden al seleccionar. Cache de pacientes aislada por sesión: logout aborta requests y vacía el store. Respuestas `/api/*` van con `Cache-Control: no-store`.
-- **PV-12** intake `intake.v1` autodeclarado (alergias `unknown|none|reported`) separado de `clinical_notes`. Consentimientos versionados con hash; un hash viejo da 409. Persistencia en memoria con `expected_revision`; con Supabase, 501 hasta 016b. Un paciente con billing pendiente igual puede completar ingreso y consentir.
+- **PV-12** intake `intake.v1` autodeclarado separado de `clinical_notes`. Consentimientos versionados. Memoria + RPC Supabase (`server/intake/repository.ts`); 501 si falta schema. Un paciente con billing pendiente igual puede completar ingreso y consentir.
+- **PV-13** onboarding de nueve pantallas, autoguardado serializado (800 ms + avanzar), reanudación y envío idempotente. Vacío ≠ “no tengo”.
+- **PV-14** ficha profesional muestra resumen de ingreso, faltantes, alergias y notas privadas; el paciente no ve `reviewed_by` ni observaciones clínicas.
 
-Siguiente: onboarding de pantallas cortas y autoguardado (PV-13). No aplicar 016 ni 016b a un proyecto con datos reales.
+Siguiente: Storage privado (PV-15). No aplicar las migraciones a un proyecto con datos reales.
 
 El registro de cortes que sigue se conserva como evidencia de **demo/memoria**. Sus casillas no acreditan producción ni aprobación visual integral.
 
-**Última actualización:** 2026-09-16  
+**Última actualización:** 2026-09-17  
 **Estado general:** demo funcional en memoria con las once entradas profesionales, las seis acciones principales y las superficies paciente Agenda, Compras, Progreso, Diario, Plan semanal, Menú saludable, Mensajes, Ejercicio y Recursos operativas en el consultorio Plan V. El showroom es la interfaz canónica de la demo (`/` en desarrollo); `?design=legacy` queda como escape. Recursos ya permite asignación individual/masiva y seguimiento de lectura en demo, pero todavía no está habilitada para pacientes reales ni producción.
 
 Este es el registro canónico de pendientes. Los cortes terminados y su evidencia técnica se conservan en `.scratch/`.

@@ -2,6 +2,8 @@
 
 Tablero local del plan del 16 de septiembre de 2026. Incluye las 39 entregas, siete hitos, doce hallazgos y una vista específica de las cinco brechas principales. Es una herramienta de seguimiento del desarrollo.
 
+Revisión de avance del 17 de septiembre incorporada en `tasks/implementation-status.json`: estados/evidencia por entrega y una captura de las verificaciones sobre `5123acf`. La vista general muestra los resultados y enlaza el informe. Esta captura no se actualiza al cambiar código: requiere una nueva revisión; no es CI en vivo.
+
 ## Abrir
 
 Desde `plan-v/`, con las dependencias del proyecto instaladas:

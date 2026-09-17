@@ -67,6 +67,28 @@ describe('PV-12 intake and consents in memory', () => {
     expect(JSON.stringify(await patientView.json())).not.toContain('Confirmar alergia');
   });
 
+  it('lets the professional review privately without rewriting the declaration', async () => {
+    await json('/api/patients/pat-sofia/intake', {
+      expected_revision: 1,
+      payload: { preferred_name: 'Sofi' },
+    }, { method: 'PATCH' });
+    const care = CONSENT_CATALOG.find((entry) => entry.purpose === 'care_relationship')!;
+    await json('/api/patients/pat-sofia/consents', {
+      purpose: care.purpose,
+      text_version: care.text_version,
+      text_hash: care.text_hash,
+      decision: 'granted',
+    });
+    const submitted = await json('/api/patients/pat-sofia/intake/submit', { expected_revision: 2 });
+    expect(submitted.status).toBe(200);
+    const reviewed = await json('/api/patients/pat-sofia/intake/review', { expected_revision: 3 });
+    expect(reviewed.status).toBe(200);
+    const body = await reviewed.json() as { intake: { status: string }; clinical_notes: unknown[] };
+    expect(body.intake.status).toBe('reviewed');
+    const patientView = await json('/api/patients/pat-sofia/intake');
+    expect(JSON.stringify(await patientView.json())).not.toContain('reviewed_by');
+  });
+
   it('rejects a consent hash that does not match the published text', async () => {
     const response = await json('/api/patients/pat-sofia/consents', {
       purpose: 'care_relationship',

@@ -1,5 +1,10 @@
 import type { Brief, DemoNotice, GoalStatus, MealLog, Message, Patient, Stage } from '../types';
 import { getSessionToken } from '../lib/supabase';
+import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } from '../types/intake';
+
+export class ApiError extends Error {
+  constructor(public status: number, message: string) { super(message); }
+}
 
 export type PatientInvite = {
   id: string;
@@ -37,7 +42,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(err || `HTTP ${res.status}`);
+    throw new ApiError(res.status, err || `HTTP ${res.status}`);
   }
   return res.json() as Promise<T>;
 }
@@ -213,13 +218,12 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
-  getConsentCatalog: () => request<{ schema_version: string; consents: Array<{ purpose: string; text_version: string; text: string; text_hash: string; required: boolean }> }>('/api/consents/catalog'),
+  getConsentCatalog: (init?: RequestInit) => request<{ schema_version: string; consents: Array<{ purpose: string; text_version: string; text: string; text_hash: string; required: boolean }> }>('/api/consents/catalog', init),
 
-  getIntake: (patientId: string) => request<{
-    intake: { revision: number; status: string; step?: string; payload: unknown };
-    consents: Array<{ purpose: string; decision: string }>;
-    source: string;
-  }>(`/api/patients/${patientId}/intake`),
+  getIntake: (patientId: string, init?: RequestInit) => request<PatientIntakeView & { source: string }>(`/api/patients/${patientId}/intake`, init),
+  getProfessionalIntake: (patientId: string, init?: RequestInit) => request<ProfessionalIntakeView>(`/api/patients/${patientId}/intake/professional`, init),
+  reviewIntake: (patientId: string, expectedRevision: number) => request<ProfessionalIntakeView>(`/api/patients/${patientId}/intake/review`, { method: 'POST', body: JSON.stringify({ expected_revision: expectedRevision }) }),
+  addClinicalNote: (patientId: string, body: string) => request<{ clinical_note: ClinicalNoteRecord }>(`/api/patients/${patientId}/clinical-notes`, { method: 'POST', body: JSON.stringify({ body }) }),
 
   patchIntake: (patientId: string, data: { expected_revision: number; step?: string; payload?: unknown }) =>
     request<{ intake: { revision: number; status: string }; source: string }>(`/api/patients/${patientId}/intake`, {

@@ -2,6 +2,8 @@
 
 Fecha: 16 de septiembre de 2026. Estado: **propuesta de desarrollo basada en revisión del repositorio**, no implementación ni aprobación de producción.
 
+**Avance revisado el 17 de septiembre:** [informe de ejecución y verificaciones](revision-avance-2026-09-17.md). Continuación el mismo día: migraciones ejecutables de núcleo e ingreso (esquema vacío), RPC, cola de autoguardado y revisión profesional en ficha. Las tablas de diagnóstico de este documento conservan el punto de partida; el estado por entrega está en el dashboard y en ese informe.
+
 ## Decisión recomendada
 
 Conservar la base React + TypeScript + Hono + Supabase y convertirla en un producto persistente por circuitos completos. Primero asegurar identidad, privacidad y datos; después conectar onboarding, archivos, planes, mensajes e IA. El diseño Nutrigo debe pasar del showroom de desarrollo a las rutas autenticadas y al build de producción.

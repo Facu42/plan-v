@@ -1,4 +1,4 @@
-import type { ConsentDecision, ConsentPurpose } from './consent.js';
+import { consentTextByPurpose, type ConsentDecision, type ConsentPurpose } from './consent.js';
 import type { IntakePayload, IntakeStatus, IntakeStep } from './payload.js';
 
 export type IntakeRecord = {
@@ -118,5 +118,5 @@ export function toProfessionalIntakeView(
 
 export function careRelationshipGranted(events: ConsentRecord[]): boolean {
   const latest = latestConsents(events).find((event) => event.purpose === 'care_relationship');
-  return latest?.decision === 'granted';
+  return latest?.decision === 'granted' && latest.text_version === consentTextByPurpose('care_relationship').text_version;
 }

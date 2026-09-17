@@ -41,6 +41,7 @@ export const coverage = [
 ];
 
 export const documents = [
+  { id: 'progress', title: 'Avance verificado · 17 sep 2026', path: 'docs/revision-avance-2026-09-17.md' },
   { id: 'plan', title: 'Plan de acción', path: 'docs/plan-de-accion-2026-09-16.md' },
   { id: 'architecture', title: 'Arquitectura y datos', path: 'docs/superpowers/specs/2026-09-16-plan-v-arquitectura-design.md' },
   { id: 'onboarding', title: 'Onboarding e IA', path: 'docs/superpowers/specs/2026-09-16-plan-v-onboarding-ia-design.md' },

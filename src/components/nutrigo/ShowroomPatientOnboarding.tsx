@@ -3,6 +3,7 @@ import { api, isAbortError } from '../../api/client';
 import { Icon, Mark } from '../shared/Icon';
 import { NvButton } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
+import { createIntakeSaveQueue, isIntakeConflict } from './intake-save-queue';
 import {
   buildOnboardingContext,
   canLeaveOnboardingStep,
@@ -71,6 +72,7 @@ export function ShowroomPatientOnboarding({
   const [submitting, setSubmitting] = useState(false);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const readyDraft = useRef(false);
+  const saveQueue = useRef(createIntakeSaveQueue());
   const copy = STEP_COPY[step];
   const canContinue = canLeaveOnboardingStep(step, draft);
   const next = nextOnboardingStep(step);
@@ -81,6 +83,8 @@ export function ShowroomPatientOnboarding({
 
   useEffect(() => {
     const controller = new AbortController();
+    const queue = saveQueue.current;
+    queue.reset();
     Promise.all([
       api.getConsentCatalog(),
       api.getIntake(patient.id),
@@ -98,6 +102,7 @@ export function ShowroomPatientOnboarding({
       }, context));
       setStep(resumeOnboardingStep(intake.intake.status, intake.intake.step));
       readyDraft.current = true;
+      queue.markReady();
     }).catch((error: unknown) => {
       if (controller.signal.aborted || isAbortError(error)) return;
       readyDraft.current = true;
@@ -109,7 +114,10 @@ export function ShowroomPatientOnboarding({
       setSaveState('error');
       setSaveError('No pudimos recuperar tu ingreso. Podés reintentar en un momento.');
     });
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      queue.reset();
+    };
   }, [patient.id, context]);
 
   useEffect(() => {
@@ -129,11 +137,12 @@ export function ShowroomPatientOnboarding({
     setSaveState('saving');
     setSaveError('');
     try {
-      const result = await api.patchIntake(patient.id, {
+      const result = await saveQueue.current.enqueue(() => api.patchIntake(patient.id, {
         expected_revision: revisionRef.current,
         step: intakeStepForUi(currentStep),
         payload: draftToIntakePayload(currentDraft),
-      });
+      }));
+      if (!result) return false;
       revisionRef.current = result.intake.revision;
       setSaveState('saved');
       return true;
@@ -144,23 +153,26 @@ export function ShowroomPatientOnboarding({
         return false;
       }
       setSaveState('error');
-      setSaveError('No pudimos guardar. Revisá la conexión e intentá de nuevo.');
+      setSaveError(isIntakeConflict(error)
+        ? 'El ingreso cambió en otra sesión. Recargá para continuar.'
+        : 'No pudimos guardar. Revisá la conexión e intentá de nuevo.');
       return false;
     }
   };
 
   const grantCare = async (granted: boolean) => {
     setDraft((current) => ({ ...current, consentSharing: granted }));
-    if (!granted || !care) return;
+    if (!care) return;
     try {
-      await api.recordConsent(patient.id, {
+      const result = await saveQueue.current.enqueue(() => api.recordConsent(patient.id, {
         purpose: care.purpose,
         text_version: care.text_version,
         text_hash: care.text_hash,
-        decision: 'granted',
-      });
+        decision: granted ? 'granted' : 'withdrawn',
+      }));
+      if (!result) setDraft((current) => ({ ...current, consentSharing: !granted }));
     } catch (error) {
-      setDraft((current) => ({ ...current, consentSharing: false }));
+      setDraft((current) => ({ ...current, consentSharing: !granted }));
       setSaveState('error');
       setSaveError(isPersistUnavailable(error)
         ? 'El consentimiento persistente todavía no está habilitado en este entorno.'
@@ -342,7 +354,7 @@ export function ShowroomPatientOnboarding({
 
     <footer className="nvon-actions">
       {previous && step !== 'ready' ? <NvButton className="nv-ghost" onClick={() => setStep(previous)}>Atrás</NvButton> : <NvButton className="nv-ghost" onClick={onExit}>{step === 'ready' ? 'Cerrar' : 'Salir'}</NvButton>}
-      {step === 'habits' && next && <NvButton className="nv-ghost" onClick={() => { setStep(next); }}>Saltear</NvButton>}
+      {step === 'habits' && next && <NvButton className="nv-ghost" onClick={() => { void persist(next, draft).then((saved) => { if (saved) setStep(next); }); }}>Saltear</NvButton>}
       {step === 'review' && <NvButton onClick={() => void submit()} disabled={!canContinue || submitting}>{submitting ? 'Enviando…' : 'Enviar a mi nutricionista'}</NvButton>}
       {step === 'ready' && finished ? <>
         <NvButton className="nv-ghost" onClick={() => onFinished('diario', finished)}>Registrar comida</NvButton>

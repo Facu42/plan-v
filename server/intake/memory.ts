@@ -17,6 +17,7 @@ import {
 let intakes = new Map<string, IntakeRecord>();
 let consents = new Map<string, ConsentRecord[]>();
 let notes = new Map<string, ClinicalNoteRecord[]>();
+let submittedRevisions = new Map<string, number>();
 
 export class IntakeConflictError extends Error {
   constructor(message = 'La revisión del ingreso cambió') {
@@ -36,6 +37,7 @@ export function resetIntakeMemory(): void {
   intakes = new Map();
   consents = new Map();
   notes = new Map();
+  submittedRevisions = new Map();
 }
 
 function nowIso() {
@@ -92,7 +94,8 @@ export function patchIntake(patientId: string, input: {
 export function submitIntake(patientId: string, expectedRevision: number): IntakeRecord {
   const current = getIntakeRecord(patientId);
   if (current.status === 'submitted' || current.status === 'reviewed') {
-    if (current.revision === expectedRevision) return current;
+    const submitted = submittedRevisions.get(patientId);
+    if (current.revision === expectedRevision || submitted === expectedRevision || (submitted != null && submitted + 1 === expectedRevision)) return current;
     throw new IntakeConflictError('El ingreso ya fue enviado');
   }
   if (current.revision !== expectedRevision) throw new IntakeConflictError();
@@ -111,12 +114,15 @@ export function submitIntake(patientId: string, expectedRevision: number): Intak
     updated_at: nowIso(),
   };
   intakes.set(patientId, submitted);
+  submittedRevisions.set(patientId, expectedRevision);
   return submitted;
 }
 
-export function reviewIntake(patientId: string, reviewerId: string): IntakeRecord {
+export function reviewIntake(patientId: string, reviewerId: string, expectedRevision?: number): IntakeRecord {
   const current = getIntakeRecord(patientId);
   if (current.status === 'draft') throw new IntakeNotReadyError('El paciente todavía no envió el ingreso');
+  if (current.status === 'reviewed' && (expectedRevision === undefined || expectedRevision === current.revision || expectedRevision === current.revision - 1)) return current;
+  if (expectedRevision !== undefined && current.revision !== expectedRevision) throw new IntakeConflictError();
   const reviewed: IntakeRecord = {
     ...current,
     status: 'reviewed',
@@ -136,6 +142,8 @@ export function appendConsent(patientId: string, input: {
   decision: ConsentDecision;
   actor_id: string;
 }): ConsentRecord {
+  const last = listConsentEvents(patientId).filter(event => event.purpose === input.purpose).slice(-1)[0];
+  if (last?.decision === input.decision && last.text_hash === input.text_hash && last.text_version === input.text_version) return last;
   const event: ConsentRecord = {
     id: randomUUID(),
     patient_id: patientId,

@@ -3,6 +3,7 @@ import type { CrmEntry } from '../crm/crm-entry';
 import { getGoalSnapshot, GOAL_STATUS_LABELS } from '../crm/crm-goals';
 import { Icon } from '../shared/Icon';
 import { NvBadge, NvButton, NvProgress, NvState } from './primitives';
+import { ShowroomIntakeReview } from './ShowroomIntakeReview';
 import './showroom-patient-record.css';
 
 const STAGE_LABELS: Record<Stage, string> = { ingreso: 'Ingreso', plan: 'Plan', seguimiento: 'Seguimiento', alta: 'Alta' };
@@ -72,6 +73,8 @@ export function ShowroomPatientRecord({ patient, patients = [patient], onSelect,
         <div><dt>Lectura de adherencia</dt><dd>{patient.adherence_why || 'Sin observación profesional'}</dd></div>
       </dl>
     </section>
+
+    <ShowroomIntakeReview patientId={patient.id} />
 
     <div className="nr-history-grid">
       <section className="nr-card nr-timeline">

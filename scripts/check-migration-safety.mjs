@@ -6,7 +6,7 @@ const files = (await readdir(dir)).filter((name) => name.endsWith('.sql'));
 const unsafe = [];
 for (const name of files) {
   const text = await readFile(new URL(name, dir), 'utf8');
-  if (/DRAFT|DO NOT APPLY|NO CORRER/i.test(text)) unsafe.push(name);
+  if (/^\s*--.*(?:\bDRAFT\b|DO NOT APPLY|NO CORRER)/im.test(text)) unsafe.push(name);
 }
 if (unsafe.length) {
   console.error('Review-only SQL is in the migration chain:', unsafe.join(', '));

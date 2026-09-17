@@ -1,3 +1,5 @@
+import { ApiError } from '../../api/client';
+
 export const ONBOARDING_STEPS = [
   'invite',
   'how',
@@ -226,6 +228,7 @@ export function careConsentFromCatalog(catalog: ConsentCatalogEntry[]): ConsentC
 }
 
 export function isPersistUnavailable(error: unknown): boolean {
+  if (error instanceof ApiError && (error.status === 501 || error.status === 503)) return true;
   const message = error instanceof Error ? error.message : String(error);
-  return message.includes('501') || message.includes('016b') || message.includes('Ingreso persistente');
+  return message.includes('501') || message.includes('016b') || message.includes('Ingreso persistente') || message.includes('todavía no está habilitado');
 }

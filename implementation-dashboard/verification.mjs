@@ -57,6 +57,12 @@ test('persistencia, historial y reapertura mantienen coherencia tras reiniciar',
   const rebooted = await createStore({ planPath, statePath }).read();
   assert.equal(rebooted.tasks[1].status, 'done'); assert.equal(rebooted.history.length, 2);
   assert.equal(rebooted.history[1].taskId, 'PV-02');
+  const state = JSON.parse(await readFile(statePath, 'utf8'));
+  state.audit = { reviewedAt: '2026-09-17T18:00:00Z', commit: 'fixture', summary: 'Revisión sintética', checks: [{ label: 'Test', result: '1 fallo', status: 'failed' }] };
+  await writeFile(statePath, JSON.stringify(state));
+  const reviewed = await store.read();
+  const updated = await store.update('PV-03', change(reviewed, 'review', { notes: 'Edición posterior a la auditoría' }));
+  assert.deepEqual(updated.audit, state.audit);
 });
 test('dos ediciones simultáneas no se pisan y cambios del plan invalidan la ficha', async t => {
   const { store, planPath } = await setup(t); const board = await store.read();

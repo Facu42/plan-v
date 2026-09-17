@@ -14,7 +14,7 @@ const staticFiles = new Map([
 ]);
 const escapeHtml = value => value.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 
-export function createDashboardServer({ statePath = resolve(root, 'tasks/implementation-status.json'), planPath = resolve(root, documents[0].path) } = {}) {
+export function createDashboardServer({ statePath = resolve(root, 'tasks/implementation-status.json'), planPath = resolve(root, documents.find(doc => doc.id === 'plan').path) } = {}) {
   const store = createStore({ planPath, statePath });
   return createServer(async (req, res) => {
     const port = req.socket.localPort;

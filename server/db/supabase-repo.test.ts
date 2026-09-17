@@ -590,7 +590,7 @@ describe('timeline_events (016 v2)', () => {
   });
 
   it('filters timeline to patient visibility when loading the patient actor view', async () => {
-    harness.push('patients', {
+    harness.push('patients_patient_view', {
       data: {
         id: 'patient-1',
         nutritionist_id: 'nutri-1',
@@ -610,11 +610,10 @@ describe('timeline_events (016 v2)', () => {
       error: null,
     });
     harness.push('meal_slots', { data: [], error: null });
-    harness.push('meal_logs', { data: [], error: null });
-    harness.push('messages', { data: [], error: null });
-    harness.push('ai_briefs', { data: null, error: null });
+    harness.push('meal_logs_patient_view', { data: [], error: null });
+    harness.push('messages_patient_view', { data: [], error: null });
     harness.push('habit_logs', { data: [], error: null });
-    harness.push('appointments', { data: [], error: null });
+    harness.push('appointments_patient_view', { data: [], error: null });
     harness.push('timeline_events', { data: [], error: null });
 
     await sbGetPatientForUser('user-patient');
@@ -810,7 +809,7 @@ describe('sbSetBrief write failures', () => {
 
 describe('patient audience queries', () => {
   it('selects an allowlist without professional-only columns and skips AI briefs', async () => {
-    harness.push('patients', {
+    harness.push('patients_patient_view', {
       data: {
         id: 'patient-1',
         full_name: 'Sofía',
@@ -823,16 +822,22 @@ describe('patient audience queries', () => {
       },
       error: null,
     });
+    harness.push('meal_slots', { data: [], error: null });
+    harness.push('meal_logs_patient_view', { data: [], error: null });
+    harness.push('messages_patient_view', { data: [], error: null });
+    harness.push('habit_logs', { data: [], error: null });
+    harness.push('appointments_patient_view', { data: [], error: null });
+    harness.push('timeline_events', { data: [], error: null });
 
     const patient = await sbGetPatientForUser('user-1');
     expect(patient).not.toBeNull();
     expect(patient!.plan_b).toBe('');
     expect(patient!.adherence_why).toBe('');
 
-    const patientsSelect = harness.calls.find((call) => call.table === 'patients' && call.op === 'select');
+    const patientsSelect = harness.calls.find((call) => call.table === 'patients_patient_view' && call.op === 'select');
     expect(String(patientsSelect?.payload)).not.toContain('plan_b');
     expect(String(patientsSelect?.payload)).not.toContain('*');
-    const mealSelect = harness.calls.find((call) => call.table === 'meal_logs' && call.op === 'select');
+    const mealSelect = harness.calls.find((call) => call.table === 'meal_logs_patient_view' && call.op === 'select');
     expect(String(mealSelect?.payload)).not.toContain('note_for_nutri');
     expect(harness.calls.some((call) => call.table === 'ai_briefs')).toBe(false);
   });

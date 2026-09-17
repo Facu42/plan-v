@@ -43,12 +43,25 @@
 .nr-notes small,.nr-meal-notes small { color:var(--nv-muted); font-size:12px; }
 .nr-history-grid .nv-state { padding:24px 12px; }
 .nr-history-grid .nv-state h2 { font-size:14px; }
+.nr-intake { padding:18px; border:1px solid var(--nv-border); border-left:4px solid var(--nv-forest); border-radius:12px; background:var(--nv-card); }
+.nr-intake>header { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:14px; }
+.nr-intake h3 { margin:2px 0 0; font-size:16px; }
+.nr-intake h4 { margin:16px 0 8px; font-size:13px; }
+.nr-intake dl { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:0; }
+.nr-intake dl>div { min-width:0; padding:12px; border-radius:9px; background:var(--nv-bg); }
+.nr-intake dt { color:var(--nv-muted); font-size:12px; }
+.nr-intake dd { margin:4px 0 0; font-size:13px; overflow-wrap:anywhere; }
+.nr-intake ul,.nr-intake ol { margin:0; padding-left:18px; }
+.nr-intake textarea { width:100%; min-height:88px; margin-top:8px; padding:10px 12px; border:1px solid var(--nv-border); border-radius:12px; background:var(--nv-bg); color:var(--nv-ink); font:inherit; font-size:16px; }
+.nr-intake-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.nr-intake-error { margin:0 0 12px; color:#8a1f1f; }
 .nv-app.nv-pro.nv-record .nv-content-layout { grid-template-columns:minmax(0,1fr); }
 .nv-pro.nv-record .nv-main { max-width:1120px; width:100%; }
 @media(max-width:900px) {
   .nr-summary-grid { grid-template-columns:1fr 1fr; }
   .nr-goal { grid-column:1/-1; }
   .nr-private dl { grid-template-columns:1fr 1fr; }
+  .nr-intake dl { grid-template-columns:1fr 1fr; }
   .nr-history-grid { grid-template-columns:1fr; }
   .nr-timeline { grid-row:auto; }
 }
@@ -56,7 +69,7 @@
   .nr-hero { align-items:flex-start; flex-wrap:wrap; }
   .nr-hero>.nv-button { width:100%; min-height:44px; }
   .nr-patient-select { width:100%; }.nr-patient-select select { min-height:44px; width:100%; }
-  .nr-summary-grid,.nr-private dl { grid-template-columns:1fr; }
+  .nr-summary-grid,.nr-private dl,.nr-intake dl { grid-template-columns:1fr; }
   .nr-goal { grid-column:auto; }
   .nr-actions { display:grid; grid-template-columns:1fr; }
   .nr-actions .nv-button { min-height:44px; }
