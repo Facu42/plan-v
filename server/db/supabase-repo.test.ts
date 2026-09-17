@@ -98,8 +98,10 @@ import {
   sbDeleteReminder,
   sbDismissBrief,
   sbGetPatientById,
+  sbGetPatientForUser,
   sbGetReminderConfig,
   sbSetAppointment,
+  sbSetBrief,
   sbUpdateHabits,
   sbUpsertMenuSlot,
   sbUpsertReminder,
@@ -145,6 +147,13 @@ describe('sbAddMessage (016 v2)', () => {
     });
     expect(typeof payload.sent_at).toBe('string');
     expect(Number.isNaN(Date.parse(payload.sent_at as string))).toBe(false);
+  });
+
+  it('propagates an unsuccessful message insert', async () => {
+    const error = { message: 'synthetic database failure' };
+    harness.push('messages', { data: null, error });
+    await expect(sbAddMessage('patient-1', 'nutri-1', 'author-1', 'hola', false))
+      .rejects.toEqual(error);
   });
 });
 
@@ -546,9 +555,9 @@ describe('timeline_events (016 v2)', () => {
 
     const patient = await sbGetPatientById('patient-1');
     expect(patient!.timeline).toEqual([
-      { id: 't1', kind: 'meal_logged', atLabel: 'HOY', title: 'Almuerzo · foto en revisión', body: '14:05' },
-      { id: 't2', kind: 'meal_missed', atLabel: 'AYER', title: 'Sin registro · cena', body: '21:47' },
-      { id: 't3', kind: 'menu', atLabel: '05/09', title: 'Menú · Sábado Cena', body: 'Plan B' },
+      { id: 't1', kind: 'meal_logged', atLabel: 'HOY', title: 'Almuerzo · foto en revisión', body: '14:05', visibility: 'professional' },
+      { id: 't2', kind: 'meal_missed', atLabel: 'AYER', title: 'Sin registro · cena', body: '21:47', visibility: 'professional' },
+      { id: 't3', kind: 'menu', atLabel: '05/09', title: 'Menú · Sábado Cena', body: 'Plan B', visibility: 'professional' },
     ]);
   });
 
@@ -568,6 +577,46 @@ describe('timeline_events (016 v2)', () => {
     const patient = await sbGetPatientById('patient-1');
     expect(patient!.timeline).toEqual([]);
     expect(patient!.meal_logs).toHaveLength(1);
+  });
+
+  it('filters timeline to patient visibility when loading the patient actor view', async () => {
+    harness.push('patients', {
+      data: {
+        id: 'patient-1',
+        nutritionist_id: 'nutri-1',
+        user_id: 'user-patient',
+        full_name: 'Sofía',
+        status: 'En ritmo',
+        stage: 'plan',
+        goal: '',
+        sensitive_hours: '',
+        plan_b: '',
+        next_focus: '',
+        adherence_score: 0,
+        adherence_why: '',
+        billing_status: 'waived',
+        billing_until: null,
+      },
+      error: null,
+    });
+    harness.push('meal_slots', { data: [], error: null });
+    harness.push('meal_logs', { data: [], error: null });
+    harness.push('messages', { data: [], error: null });
+    harness.push('ai_briefs', { data: null, error: null });
+    harness.push('habit_logs', { data: [], error: null });
+    harness.push('appointments', { data: [], error: null });
+    harness.push('timeline_events', { data: [], error: null });
+
+    await sbGetPatientForUser('user-patient');
+    const timelineCall = harness.calls.find((call) => call.table === 'timeline_events' && call.op === 'select');
+    expect(timelineCall?.filters).toContainEqual(['eq', ['visibility', 'patient']]);
+  });
+
+  it('does not publish unclassified timeline on professional reads via a patient filter', async () => {
+    pushPatientWithTimeline([]);
+    await sbGetPatientById('patient-1');
+    const timelineCall = harness.calls.find((call) => call.table === 'timeline_events' && call.op === 'select');
+    expect(timelineCall?.filters).not.toContainEqual(['eq', ['visibility', 'patient']]);
   });
 });
 
@@ -728,5 +777,23 @@ describe('habit_logs (016 v2)', () => {
       date: today,
       energy: 'Tranquila',
     });
+  });
+});
+
+describe('sbSetBrief write failures', () => {
+  const brief = {
+    suggested_action: 'mensaje' as const,
+    up_next_title: 'Mandarle un mensaje',
+    up_next_body: 'Un toque corto',
+    draft_message: 'Hola',
+    source_ids: [],
+    adherence_why: 'Pendiente',
+  };
+
+  it('aborts when deleting the previous brief fails', async () => {
+    const error = { message: 'synthetic database failure' };
+    harness.push('ai_briefs', { data: null, error });
+    await expect(sbSetBrief('patient-1', 'nutri-1', brief)).rejects.toEqual(error);
+    expect(harness.calls.filter((call) => call.table === 'patients')).toHaveLength(0);
   });
 });

@@ -5,15 +5,17 @@ export type RequestAuthDecision =
   | { kind: 'public' }
   | { kind: 'demo' }
   | { kind: 'user'; userId: string }
-  | { kind: 'unauthorized' };
+  | { kind: 'unauthorized' }
+  | { kind: 'unavailable' };
 
 export function resolveRequestAuth(input: {
   supabaseEnabled: boolean;
   path: string;
   verifiedUserId: string | null;
+  allowDemo: boolean;
 }): RequestAuthDecision {
   if (input.path === '/api/health') return { kind: 'public' };
-  if (!input.supabaseEnabled) return { kind: 'demo' };
+  if (!input.supabaseEnabled) return input.allowDemo ? { kind: 'demo' } : { kind: 'unavailable' };
   if (input.verifiedUserId) return { kind: 'user', userId: input.verifiedUserId };
   return { kind: 'unauthorized' };
 }
@@ -93,15 +95,41 @@ export function canAccessPatient(actor: Actor, patient: PatientResource, action:
 }
 
 export type PatientSelfMealLog = Omit<MealLog, 'note_for_nutri'>;
-export type PatientSelfMessage = Omit<Message, 'suggested_by_ai'>;
+export type PatientSelfMessage = Pick<Message, 'id' | 'patient_id' | 'from' | 'text' | 'sent_at' | 'delivered_at' | 'read_at'>;
 export type PatientSelfView = Omit<Patient, 'adherence_why' | 'brief' | 'goal_history' | 'meal_logs' | 'messages'> & {
   meal_logs: PatientSelfMealLog[];
   messages: PatientSelfMessage[];
 };
 
+function publicFoods(foods: MealLog['foods']): MealLog['foods'] {
+  return foods.map(({ name, portion_est, portion_unit, confidence }) => ({
+    name,
+    portion_est,
+    portion_unit,
+    confidence,
+  }));
+}
+
 export function toPatientSelfMealLog(log: MealLog): PatientSelfMealLog {
-  const { note_for_nutri: _noteForNutri, ...visibleLog } = log;
-  return visibleLog;
+  return {
+    id: log.id,
+    patient_id: log.patient_id,
+    slot: log.slot,
+    photo_url: log.photo_url,
+    description: log.description,
+    foods: publicFoods(log.foods),
+    macros: log.macros
+      ? {
+          kcal: log.macros.kcal,
+          protein_g: log.macros.protein_g,
+          carbs_g: log.macros.carbs_g,
+          fat_g: log.macros.fat_g,
+        }
+      : null,
+    confidence: log.confidence,
+    status: log.status,
+    logged_at: log.logged_at,
+  };
 }
 
 export function toPatientMealAnalysis<T extends { note_for_nutri: string }>(analysis: T): Omit<T, 'note_for_nutri'> {
@@ -109,26 +137,115 @@ export function toPatientMealAnalysis<T extends { note_for_nutri: string }>(anal
   return visibleAnalysis;
 }
 
-export function toPatientSelfView(patient: Patient): PatientSelfView {
-  const {
-    adherence_why: _adherenceWhy,
-    brief: _brief,
-    goal_history: _goalHistory,
-    meal_logs: mealLogs,
-    messages,
-    ...visiblePatient
-  } = patient;
-
-  const visibleMessages = messages
-    .filter((message) => Boolean(message.sent_at))
-    .map(({ suggested_by_ai: _suggestedByAi, ...visibleMessage }) => visibleMessage);
-  const billing_status = resolveBillingStatus(patient);
-  const visible = {
-    ...visiblePatient,
-    billing_status,
-    meal_logs: mealLogs.map(toPatientSelfMealLog),
-    messages: visibleMessages,
+function publicAppointment(appointment: Patient['appointment']): Patient['appointment'] {
+  if (!appointment) return null;
+  return {
+    when: appointment.when,
+    duration: appointment.duration,
+    channel: appointment.channel,
+    ...(appointment.meet_url ? { meet_url: appointment.meet_url } : {}),
+    ...(appointment.starts_at ? { starts_at: appointment.starts_at } : {}),
   };
+}
+
+function publicHabitLogs(logs: Patient['habit_logs']): Patient['habit_logs'] {
+  return logs.map(({ id, patient_id, date, hydration, energy, sleep_minutes }) => ({
+    id,
+    patient_id,
+    date,
+    hydration,
+    energy,
+    sleep_minutes,
+  }));
+}
+
+function publicActivityLogs(logs: NonNullable<Patient['activity_logs']>): NonNullable<Patient['activity_logs']> {
+  return logs.map(({ id, patient_id, activity, duration_minutes, intensity, note, logged_at }) => ({
+    id,
+    patient_id,
+    activity,
+    duration_minutes,
+    intensity,
+    note,
+    logged_at,
+  }));
+}
+
+function publicAssignments(assignments: NonNullable<Patient['resource_assignments']>): NonNullable<Patient['resource_assignments']> {
+  return assignments.map(({ id, patient_id, resource_id, assigned_at, read_at }) => ({
+    id,
+    patient_id,
+    resource_id,
+    assigned_at,
+    read_at,
+  }));
+}
+
+function publicAppointmentHistory(history: NonNullable<Patient['appointment_history']>): NonNullable<Patient['appointment_history']> {
+  return history.map(({ id, when, dateId, duration, channel, action, actor, at }) => ({
+    id,
+    when,
+    dateId,
+    duration,
+    channel,
+    action,
+    actor,
+    at,
+  }));
+}
+
+function publicTodayPlan(plan: Patient['todayPlan']): Patient['todayPlan'] {
+  return plan.map(({ slot, title, time }) => ({ slot, title, time }));
+}
+
+function publicWeekPlan(plan: Patient['weekPlan']): Patient['weekPlan'] {
+  return plan.map(({ day, meals }) => ({
+    day,
+    meals: meals.map(({ slot, title }) => ({ slot, title })),
+  }));
+}
+
+export function toPatientSelfView(patient: Patient): PatientSelfView {
+  const billing_status = resolveBillingStatus(patient);
+  const messages = patient.messages
+    .filter((message) => Boolean(message.sent_at))
+    .map(({ id, patient_id, from, text, sent_at, delivered_at, read_at }) =>
+      ({ id, patient_id, from, text, sent_at, delivered_at, read_at }));
+
+  const visible: PatientSelfView = {
+    id: patient.id,
+    name: patient.name,
+    initials: patient.initials,
+    tone: patient.tone,
+    billing_status,
+    billing_until: patient.billing_until,
+    status: patient.status,
+    stage: patient.stage,
+    goal: patient.goal,
+    goal_status: patient.goal_status,
+    goal_progress: patient.goal_progress,
+    goal_updated_at: patient.goal_updated_at,
+    sensitive_hours: '',
+    plan_b: '',
+    next_focus: '',
+    adherence_score: patient.adherence_score,
+    time: patient.time,
+    hydration: patient.hydration,
+    energy: patient.energy,
+    sleep_minutes: patient.sleep_minutes,
+    appointment: publicAppointment(patient.appointment),
+    appointment_history: publicAppointmentHistory(patient.appointment_history ?? []),
+    habit_logs: publicHabitLogs(patient.habit_logs),
+    activity_logs: publicActivityLogs(patient.activity_logs ?? []),
+    resource_assignments: publicAssignments(patient.resource_assignments ?? []),
+    todayPlan: publicTodayPlan(patient.todayPlan),
+    weekPlan: publicWeekPlan(patient.weekPlan),
+    timeline: [],
+    meal_logs: patient.meal_logs.map(toPatientSelfMealLog),
+    messages,
+  };
+
+  if (patient.archived_at !== undefined) visible.archived_at = patient.archived_at;
 
   if (hasFullPatientAccess({ ...patient, billing_status })) return visible;
 
@@ -149,6 +266,7 @@ export function toPatientSelfView(patient: Patient): PatientSelfView {
     appointment_history: [],
     habit_logs: [],
     activity_logs: [],
+    resource_assignments: [],
     todayPlan: [],
     weekPlan: [],
     timeline: [],

@@ -7,6 +7,11 @@ type DesignEntry = {
 };
 
 export function shouldShowNutrigo(entry: DesignEntry): boolean {
-  return entry.development && entry.demoMode && !entry.hasSession
-    && new URLSearchParams(entry.search).get('design') !== 'legacy';
+  if (entry.hasSession) return true;
+  if (!entry.demoMode) return false;
+  return new URLSearchParams(entry.search).get('design') !== 'legacy';
+}
+
+export function canUseDemoRoleSwitch(entry: Pick<DesignEntry, 'demoMode' | 'hasSession'>): boolean {
+  return entry.demoMode && !entry.hasSession;
 }

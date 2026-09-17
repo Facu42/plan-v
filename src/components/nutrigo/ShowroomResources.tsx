@@ -92,6 +92,8 @@ export const resourceGuideIdFromHash = (hash: string) => {
 
 export const buildResourceShareUrl = (id: string, href: string) => {
   const url = new URL(href);
+  url.pathname = '/app/recursos';
+  url.searchParams.delete('design');
   url.hash = `recurso=${encodeURIComponent(id)}`;
   return url.toString();
 };

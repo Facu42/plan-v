@@ -1,0 +1,25 @@
+import { describe, expect, it } from 'vitest';
+import { readRuntimeConfig } from './runtime.js';
+
+const db = { SUPABASE_URL: 'https://example.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'synthetic-key' };
+
+describe('runtime modes', () => {
+  it('requires an explicit application mode', () => {
+    expect(() => readRuntimeConfig({})).toThrow('APP_MODE');
+  });
+  it('does not allow demo in a production process', () => {
+    expect(() => readRuntimeConfig({ APP_MODE: 'demo', NODE_ENV: 'production' })).toThrow();
+  });
+  it('rejects incomplete production database settings', () => {
+    expect(() => readRuntimeConfig({ APP_MODE: 'production', AI_MODE: 'disabled' })).toThrow('Supabase');
+  });
+  it('supports local synthetic demo without provider keys', () => {
+    expect(readRuntimeConfig({ APP_MODE: 'demo', AI_MODE: 'demo' })).toEqual({ mode: 'demo', dataMode: 'memory', aiMode: 'demo' });
+  });
+  it('rejects simulated AI with persistent patient data', () => {
+    expect(() => readRuntimeConfig({ ...db, APP_MODE: 'staging', AI_MODE: 'demo' })).toThrow();
+  });
+  it('allows manual operation with AI disabled', () => {
+    expect(readRuntimeConfig({ ...db, APP_MODE: 'production', AI_MODE: 'disabled' }).aiMode).toBe('disabled');
+  });
+});

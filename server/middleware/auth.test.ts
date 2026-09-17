@@ -1,18 +1,24 @@
 import { Hono } from 'hono';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createAuthMiddleware } from './auth.js';
 
 function testApp(options: {
   supabaseEnabled: boolean;
   verifiedUserId?: string | null;
+  allowDemo?: boolean;
+  onProtected?: () => void;
 }) {
   const app = new Hono();
   app.use('/api/*', createAuthMiddleware({
     isSupabaseEnabled: () => options.supabaseEnabled,
     verifyAuthToken: async () => options.verifiedUserId ? { userId: options.verifiedUserId } : null,
+    allowDemo: () => options.allowDemo ?? false,
   }));
   app.get('/api/health', (c) => c.json({ status: 'ok' }));
-  app.get('/api/patients', (c) => c.json({ auth: c.get('auth') }));
+  app.get('/api/patients', (c) => {
+    options.onProtected?.();
+    return c.json({ auth: c.get('auth') });
+  });
   return app;
 }
 
@@ -38,10 +44,23 @@ describe('auth middleware', () => {
     expect(await response.json()).toEqual({ auth: { userId: 'user-1' } });
   });
 
-  it('keeps demo access when no Supabase service role is configured', async () => {
-    const response = await testApp({ supabaseEnabled: false }).request('/api/patients');
+  it('keeps demo access only when demo is explicitly allowed', async () => {
+    const response = await testApp({ supabaseEnabled: false, allowDemo: true }).request('/api/patients');
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ auth: { demo: true } });
+  });
+
+  it('returns 503 when the database is absent and demo is forbidden', async () => {
+    const onProtected = vi.fn();
+    const response = await testApp({
+      supabaseEnabled: false,
+      allowDemo: false,
+      onProtected,
+    }).request('/api/patients');
+
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ error: 'Servicio no disponible' });
+    expect(onProtected).not.toHaveBeenCalled();
   });
 });

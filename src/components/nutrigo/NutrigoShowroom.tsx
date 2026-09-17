@@ -26,10 +26,11 @@ import { ShowroomPatientAgenda } from './ShowroomPatientAgenda';
 import { ShowroomPatientPlan } from './ShowroomPatientPlan';
 import { ShowroomHealthyMenu } from './ShowroomHealthyMenu';
 import { ShowroomExercise } from './ShowroomExercise';
-import { ShowroomResources, resourceGuideIdFromHash } from './ShowroomResources';
+import { ShowroomResources } from './ShowroomResources';
 import { ShowroomPatientOnboarding } from './ShowroomPatientOnboarding';
 import { ShowroomWorkCenter, type WorkCenterModule } from './ShowroomWorkCenter';
 import { PATIENT_MORE, PATIENT_SURFACES, PATIENT_TABS, PRO_MORE, PRO_TABS, tabBarState } from './showroom-nav';
+import { buildAppHref, hasResourceHash, resolveAppLocation, type AppRole } from './app-location';
 import { unreadCount } from './message-receipts';
 import { buildConsultAlerts } from './consult-alerts';
 import { ConsultAlertStrip, ShowroomConsultAlerts } from './ShowroomConsultAlerts';
@@ -52,17 +53,29 @@ const OperationalCrm = lazy(() => import('../crm/CrmDashboard').then(({ CrmDashb
 const WORK_CENTER_PAGES: WorkCenterModule[] = ['reciente', 'guardado', 'seguimiento', 'paneles', 'videollamadas'];
 const isWorkCenterPage = (page: ShowroomPage): page is WorkCenterModule => WORK_CENTER_PAGES.includes(page as WorkCenterModule);
 
-export function NutrigoShowroom({ darkMode, onToggleTheme }: { darkMode: boolean; onToggleTheme: () => void }) {
+type NutrigoShowroomProps = {
+  darkMode: boolean;
+  onToggleTheme: () => void;
+  lockedRole?: AppRole | null;
+  allowRoleSwitch?: boolean;
+  onSignOut?: () => void;
+};
+
+export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, allowRoleSwitch = false, onSignOut }: NutrigoShowroomProps) {
   const patients = useAppStore((s) => s.patients);
   const addPatient = useAppStore((s) => s.addPatient);
   const activePatients = filterShowroomPatients(patients);
-  const [role, setRole] = useState<'patient' | 'pro'>('patient');
+  const demoSwitch = allowRoleSwitch && !lockedRole;
+  const initialLocation = typeof window === 'undefined'
+    ? { role: (lockedRole ?? 'patient') as AppRole, page: 'inicio' as ShowroomPage }
+    : resolveAppLocation({ pathname: window.location.pathname, hash: window.location.hash, lockedRole });
+  const [role, setRole] = useState<AppRole>(initialLocation.role);
   const [selectedId, setSelectedId] = useState(activePatients[0]?.id ?? '');
-  const [page, setPage] = useState<ShowroomPage>(() => typeof window !== 'undefined' && resourceGuideIdFromHash(window.location.hash) ? 'recursos' : 'inicio');
+  const [page, setPage] = useState<ShowroomPage>(initialLocation.page);
   const [pendingModule, setPendingModule] = useState('');
   const [query, setQuery] = useState('');
   const [moreOpen, setMoreOpen] = useState(false);
-  const [onboardingOpen, setOnboardingOpen] = useState(() => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('onboarding') === '1');
+  const [onboardingOpen, setOnboardingOpen] = useState(() => !lockedRole && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('onboarding') === '1');
   const [preferredName, setPreferredName] = useState('');
   const [dayIndex, setDayIndex] = useState(-1);
   const [now] = useState(() => new Date());
@@ -74,20 +87,27 @@ export function NutrigoShowroom({ darkMode, onToggleTheme }: { darkMode: boolean
   const returnFocus = useRef<HTMLButtonElement>(null);
   const didOpen = useRef(false);
   useEffect(() => {
-    const openSharedResource = () => {
-      if (!resourceGuideIdFromHash(window.location.hash)) return;
-      setPage('recursos');
-      setPendingModule('');
-      setQuery('');
-      setMoreOpen(false);
+    const syncLocation = () => {
+      const next = resolveAppLocation({ pathname: window.location.pathname, hash: window.location.hash, lockedRole });
+      setRole(next.role);
+      setPage(next.page);
+      if (hasResourceHash(window.location.hash)) {
+        setPendingModule('');
+        setQuery('');
+        setMoreOpen(false);
+      }
+      const href = buildAppHref(window.location.href, next.role, next.page, { keepHash: next.page === 'recursos' && hasResourceHash(window.location.hash) });
+      const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      if (next.replace && href !== current) window.history.replaceState(window.history.state, '', href);
     };
-    window.addEventListener('hashchange', openSharedResource);
-    window.addEventListener('popstate', openSharedResource);
+    syncLocation();
+    window.addEventListener('hashchange', syncLocation);
+    window.addEventListener('popstate', syncLocation);
     return () => {
-      window.removeEventListener('hashchange', openSharedResource);
-      window.removeEventListener('popstate', openSharedResource);
+      window.removeEventListener('hashchange', syncLocation);
+      window.removeEventListener('popstate', syncLocation);
     };
-  }, []);
+  }, [lockedRole]);
   useEffect(() => {
     if (operation) { didOpen.current = true; returnFocus.current?.focus(); }
     else if (didOpen.current) document.getElementById('nv-main')?.focus();
@@ -100,14 +120,21 @@ export function NutrigoShowroom({ darkMode, onToggleTheme }: { darkMode: boolean
     addPatient(patient);
   }, [addPatient, selected?.id]);
   const navigate = (target: ShowroomPage) => {
-    if (target !== 'recursos' && typeof window !== 'undefined' && resourceGuideIdFromHash(window.location.hash)) {
-      const url = new URL(window.location.href);
-      url.hash = '';
-      window.history.replaceState(window.history.state, '', url);
+    if (typeof window !== 'undefined') {
+      const href = buildAppHref(window.location.href, role, target);
+      window.history.pushState({ ...window.history.state, planVPage: target }, '', href);
     }
     setPage(target); setPendingModule(''); setQuery(''); setMoreOpen(false); setRecordEditing(false); setMealSlot(null);
   };
-  const switchRole = (target: 'patient' | 'pro') => { setRole(target); navigate('inicio'); setDayIndex(-1); };
+  const switchRole = (target: AppRole) => {
+    if (!demoSwitch) return;
+    setRole(target);
+    setDayIndex(-1);
+    if (typeof window !== 'undefined') {
+      window.history.pushState({ planVPage: 'inicio' }, '', buildAppHref(window.location.href, target, 'inicio'));
+    }
+    setPage('inicio'); setPendingModule(''); setQuery(''); setMoreOpen(false); setRecordEditing(false); setMealSlot(null);
+  };
   const pickPatient = (id: string) => { setSelectedId(id); setDayIndex(-1); navigate('inicio'); };
   const currentDay = buildCalendarWeek(now)[dayIndex];
   const meals = p ? resolveCalendarMeals(p, now, dayIndex) : [];
@@ -196,19 +223,24 @@ export function NutrigoShowroom({ darkMode, onToggleTheme }: { darkMode: boolean
   return <div className={`nv-app${role === 'patient' ? ' nv-patient' : ' nv-pro'}${darkMode ? ' nv-dark' : ''}${page === 'mensajes' ? ' nv-messaging' : ''}${page === 'ficha' ? ' nv-record' : ''}${page === 'diario' && role === 'pro' ? ' nv-food-diary' : ''}${page === 'plan' && role === 'pro' ? ' nv-meal-plan' : ''}${page === 'consultas' && role === 'pro' ? ' nv-consultation-page' : ''}${page === 'agenda' && role === 'pro' ? ' nv-agenda-page' : ''}${page === 'objetivos' && role === 'pro' ? ' nv-goals-page' : ''}${isWorkCenterPage(page) && role === 'pro' ? ' nv-work-center-page' : ''}${page === 'compras' && role === 'patient' ? ' nv-grocery-page' : ''}${page === 'progreso' && role === 'patient' ? ' nv-progress-page' : ''}${page === 'diario' && role === 'patient' ? ' nv-patient-diary' : ''}${page === 'plan' && role === 'patient' ? ' nv-patient-plan' : ''}${page === 'agenda' && role === 'patient' ? ' nv-patient-agenda' : ''}${page === 'recetas' && role === 'patient' ? ' nv-healthy-menu' : ''}${page === 'ejercicio' && role === 'patient' ? ' nv-exercise-page' : ''}${page === 'recursos' && role === 'patient' ? ' nv-resources-page' : ''}`}>
     <a className="nv-skip" href="#nv-main">Ir al contenido</a>
     {role === 'patient' && <aside className="nv-sidebar" aria-label="Tu espacio">
-      <a className="nv-brand" href="?design=nutrigo"><Mark /><span>Plan V<small>Mi espacio</small></span></a>
+      <a className="nv-brand" href={buildAppHref(typeof window === 'undefined' ? 'https://plan.v/app/inicio' : window.location.href, role, 'inicio')} onClick={(event) => { event.preventDefault(); navigate('inicio'); }}><Mark /><span>Plan V<small>Mi espacio</small></span></a>
       <span className="nv-nav-group">Mi app</span>
       <nav>{PATIENT_SURFACES.map((item) => <button type="button" key={item.id} aria-current={!pendingModule && page === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}><Icon name={item.icon} size={18} />{item.label}{item.id === 'mensajes' && messageUnread > 0 && <small>{messageUnread > 9 ? '9+' : messageUnread}</small>}</button>)}</nav>
-      <span className="nv-nav-group">Consultorio</span>
-      <nav><button type="button" onClick={() => setOnboardingOpen(true)}><Icon name="sparkle" size={18} />Ingreso</button></nav>
+      {!lockedRole && <><span className="nv-nav-group">Consultorio</span>
+      <nav><button type="button" onClick={() => setOnboardingOpen(true)}><Icon name="sparkle" size={18} />Ingreso</button></nav></>}
     </aside>}
     <div className="nv-workspace">
       <header className="nv-topbar">
-        <a className="nv-brand" href="?design=nutrigo"><Mark /><span>Plan V</span></a>
+        <a className="nv-brand" href={buildAppHref(typeof window === 'undefined' ? 'https://plan.v/app/inicio' : window.location.href, role, 'inicio')} onClick={(event) => { event.preventDefault(); navigate('inicio'); }}><Mark /><span>Plan V</span></a>
         <span className="nv-topbar-title">{PAGE_LABELS[page]}</span>
-        <div className="nv-role-switch" aria-label="Cambiar de rol"><button type="button" aria-pressed={role === 'patient'} onClick={() => switchRole('patient')}>Paciente</button><button type="button" aria-pressed={role === 'pro'} onClick={() => switchRole('pro')}>Nutricionista</button></div>
+        {demoSwitch ? (
+          <div className="nv-role-switch" aria-label="Cambiar de rol"><button type="button" aria-pressed={role === 'patient'} onClick={() => switchRole('patient')}>Paciente</button><button type="button" aria-pressed={role === 'pro'} onClick={() => switchRole('pro')}>Nutricionista</button></div>
+        ) : (
+          <span className="nv-role-badge">{role === 'pro' ? 'Consultorio' : 'Mi espacio'}</span>
+        )}
         <ShowroomConsultAlerts key={alertAudience} audience={alertAudience} alerts={consultAlerts} reminders={habitReminders} patientId={selected?.id} onOpen={(alert) => { if (role === 'pro') setSelectedId(alert.patientId); navigate('agenda'); }} onManage={role === 'pro' ? (alert) => { setSelectedId(alert.patientId); navigate('consultas'); } : undefined} onOpenReminder={openReminder} />
         <NvButton className="nv-ghost nv-theme" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} onClick={onToggleTheme}><Icon name={darkMode ? 'sun' : 'moon'} size={19} /></NvButton>
+        {onSignOut && <NvButton className="nv-ghost" onClick={() => onSignOut()}>Salir</NvButton>}
       </header>
       <div className="nv-content-layout">
         <main id="nv-main" tabIndex={-1} className="nv-main">
@@ -250,7 +282,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme }: { darkMode: boolean
     {moreOpen && <div className="nv-more" role="presentation" onClick={() => setMoreOpen(false)}>
       <div className="nv-more-sheet" id="nv-more-sheet" role="dialog" aria-modal="true" aria-labelledby="nv-more-title" onClick={(event) => event.stopPropagation()}>
         <h2 id="nv-more-title">{role === 'patient' ? 'Tu espacio' : 'Más secciones'}</h2>
-        <div className="nv-more-grid">{moreItems.map((item) => <button type="button" key={item.id} aria-current={page === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}><Icon name={item.icon} size={20} /><span>{item.label}</span></button>)}{role === 'patient' && <button type="button" onClick={() => { setMoreOpen(false); setOnboardingOpen(true); }}><Icon name="sparkle" size={20} /><span>Ingreso</span></button>}</div>
+        <div className="nv-more-grid">{moreItems.map((item) => <button type="button" key={item.id} aria-current={page === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}><Icon name={item.icon} size={20} /><span>{item.label}</span></button>)}{role === 'patient' && !lockedRole && <button type="button" onClick={() => { setMoreOpen(false); setOnboardingOpen(true); }}><Icon name="sparkle" size={20} /><span>Ingreso</span></button>}</div>
       </div>
     </div>}
     {recordEditing && selected && <ShowroomPatientEdit patient={selected} onClose={() => setRecordEditing(false)} onSaved={(updated) => { addPatient(updated); setRecordEditing(false); }} />}

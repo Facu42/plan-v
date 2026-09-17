@@ -89,23 +89,28 @@ const patient: Patient = {
 };
 
 describe('resolveRequestAuth', () => {
-  it('keeps local demo mode available when Supabase is disabled', () => {
-    expect(resolveRequestAuth({ supabaseEnabled: false, path: '/api/patients', verifiedUserId: null }))
+  it('keeps local demo mode available when Supabase is disabled and demo is allowed', () => {
+    expect(resolveRequestAuth({ supabaseEnabled: false, path: '/api/patients', verifiedUserId: null, allowDemo: true }))
       .toEqual({ kind: 'demo' });
   });
 
+  it('does not infer demo from a missing database', () => {
+    expect(resolveRequestAuth({ supabaseEnabled: false, path: '/api/patients', verifiedUserId: null, allowDemo: false }))
+      .toEqual({ kind: 'unavailable' });
+  });
+
   it('rejects unauthenticated protected requests when Supabase is enabled', () => {
-    expect(resolveRequestAuth({ supabaseEnabled: true, path: '/api/patients', verifiedUserId: null }))
+    expect(resolveRequestAuth({ supabaseEnabled: true, path: '/api/patients', verifiedUserId: null, allowDemo: false }))
       .toEqual({ kind: 'unauthorized' });
   });
 
   it('keeps health public when Supabase is enabled', () => {
-    expect(resolveRequestAuth({ supabaseEnabled: true, path: '/api/health', verifiedUserId: null }))
+    expect(resolveRequestAuth({ supabaseEnabled: true, path: '/api/health', verifiedUserId: null, allowDemo: false }))
       .toEqual({ kind: 'public' });
   });
 
   it('accepts a verified Supabase user', () => {
-    expect(resolveRequestAuth({ supabaseEnabled: true, path: '/api/patients', verifiedUserId: 'user-1' }))
+    expect(resolveRequestAuth({ supabaseEnabled: true, path: '/api/patients', verifiedUserId: 'user-1', allowDemo: false }))
       .toEqual({ kind: 'user', userId: 'user-1' });
   });
 });
@@ -223,5 +228,29 @@ describe('toPatientSelfView', () => {
     expect(view.appointment).toBeNull();
     expect(view.messages).toHaveLength(1);
     expect(view.billing_status).toBe('pending');
+  });
+
+  it('excludes unknown internal fields and unclassified timeline from patient JSON', () => {
+    const sentinel = 'PRIVATE_AUDIT_SENTINEL';
+    const input = {
+      ...patient,
+      billing_status: 'waived' as const,
+      plan_b: sentinel,
+      next_focus: sentinel,
+      sensitive_hours: sentinel,
+      internalFutureField: sentinel,
+      timeline: [{ id: 'private', kind: 'goal' as const, atLabel: 'HOY', title: sentinel, body: sentinel }],
+      appointment: {
+        when: 'Mañana 10:00',
+        duration: 45,
+        channel: 'Meet',
+        prep_note: sentinel,
+      },
+      weekPlan: [{ day: 'Lunes', meals: [{ slot: 'Almuerzo', title: 'Ensalada', internalNote: sentinel }] }],
+    };
+    const output = toPatientSelfView(input as typeof patient);
+    expect(JSON.stringify(output)).not.toContain(sentinel);
+    expect(output.id).toBe(patient.id);
+    expect(output.messages.every((message) => Boolean(message.sent_at))).toBe(true);
   });
 });

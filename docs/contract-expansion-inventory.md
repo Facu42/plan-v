@@ -1,29 +1,33 @@
-# Contrato ampliado — inventario de entidades y matriz de permisos (v0, 2026-09-15)
+# Contrato ampliado — inventario de entidades y matriz de permisos (v1, 2026-09-16)
 
-> Ampliación solicitada el 2026-09-16: incorporar intake/consentimientos versionados, estudios, fotos corporales opcionales, recetas y planes versionados, AI jobs y publicación supervisada. Ver el [modelo propuesto](superpowers/specs/2026-09-16-plan-v-arquitectura-design.md). La matriz de abajo es el inventario histórico de demo; no describe todavía todos los permisos del piloto nuevo ni habilita migraciones.
+> PV-06: el núcleo sigue en `supabase/contracts/016_plan_v_contract_draft.sql`. La ampliación piloto (H1–H4) vive en `supabase/contracts/016b_piloto_ampliacion_draft.sql`. Diccionario y política: [`contrato-diccionario-piloto.md`](contrato-diccionario-piloto.md). Ambos SQL son DRAFT / NO CORRER.
 
-Estado: **borrador documental para revisión, NO aprobado**. No contiene SQL ni
-modifica `supabase/contracts/016_plan_v_contract_draft.sql`. Alimenta los pasos
-2.1 y 2.2 del roadmap antes de tocar el borrador 016 o la matriz RLS.
+Estado: **borrador documental para revisión, NO aprobado**. No habilita migraciones.
 
 ## 1. Inventario de nuevas entidades y eventos (paso 2.1)
 
 Clasificación: **demo** = implementada sólo en memoria; **derivada** = se calcula
 de entidades existentes, no debe persistirse; **futura** = sin implementación.
 
-| Entidad / evento | Estado demo | Campos actuales (memoria) | Qué exige antes de persistir |
+| Entidad / evento | Estado demo | Contrato piloto | Qué queda para persistir (PV-08+) |
 | --- | --- | --- | --- |
-| `resource_assignments` (guía ↔ paciente) | demo (corte 60) | `id`, `patient_id`, `resource_id`, `assigned_at`, `read_at` | Tabla con `unique(patient_id, resource_id)`, RLS nutri-insert/paciente-read-own, audit de asignación y de primer `read_at` inmutable |
-| `resource_guides` (catálogo editorial) | estático en cliente (cortes 58–60) | seis IDs allowlist en Zod + catálogo TS | Tabla editorial con autoría profesional, estado de publicación y revisión clínica; el ID debe seguir siendo opaco, sin datos de paciente |
-| `activity_logs` (actividad autodeclarada) | demo (corte 57) | `id`, `patient_id`, `activity`, `duration`, `intensity`, `note`, `logged_at` | Tabla con RLS paciente-insert-own/nutri-select, retención y prohibición de campos clínicos inferidos (sin calorías, series ni rutinas) |
-| `plan_b` (alternativa personal) | campo existente en `patients` | texto libre por paciente | Ya cubierto por grants por columna de `patients`; confirmar que queda fuera de la vista paciente |
-| Lista de compras | derivada (corte 50) | — | No persistir hasta existir `recipe_ingredients`; el check local sigue siendo preferencia de dispositivo |
-| `recipes` / `recipe_ingredients` | futura | — | Modelo con porciones, unidades, instrucciones, fuente y revisión profesional; sin Health Score automático |
-| `weight_measurements` / medidas corporales | futura (alcance aprobado) | — | Consentimiento explícito, retención, visibilidad paciente/nutri y exclusión de fotografías hasta decisión separada |
-| Notificaciones | demo (corte 78) | campana in-app, preferencias de dispositivo, `Notification` del navegador, buzón `notices` en memoria | Proveedor, plantillas, RLS y prohibición de contenido clínico en push/mail reales; el buzón demo no sale a internet |
-| `appointment_history` | demo (corte 78) | cambios de turno y fechas vencidas (`scheduled`/`rescheduled`/`patient_rescheduled`/`cancelled`/`elapsed`) | Tabla append-only; no es asistencia ni historia clínica |
-| Eventos de lectura de guías | demo (`read_at`) | primera apertura | Append-only; la re-apertura no reescribe |
-| Recibos de mensajes (`delivered_at`, `read_at`) | demo (corte 74) | entrega inmediata al enviar; leído al abrir el hilo | Ampliar `messages` + RLS; hoy `501` en Supabase. No son prueba clínica de adherencia |
+| `resource_assignments` | demo (corte 60) | 016b: `resources` + `resource_assignments` (`first_read_at`) | RLS completa, seeds, 501 → escritura real |
+| `resource_guides` | estático en cliente | 016b: `resources` con `published`/`reviewed_at` | Autoría/revisión clínica y catálogo no clínico (PV-36) |
+| `activity_logs` | demo (corte 57) | 016b: actividad autodeclarada, sin calorías | RLS paciente-insert / nutri-select |
+| `plan_b` | campo en `patients` | núcleo 016; fuera del DTO paciente (PV-03) | Confirmar si alguna vez se publica |
+| Lista de compras | derivada | **fuera del piloto** | `shopping_lists` post-piloto (PV-21/39) |
+| `recipes` / `recipe_ingredients` | futura | 016b: recetas versionadas + ingredientes + asignaciones | Catálogo usable (PV-18) y publicación (PV-19) |
+| `meal_plans` / versiones | plantilla semanal 016 | 016b: plan fechado, una versión `published` | Publicación transaccional (PV-19) |
+| `intake_sessions` / `consent_events` | onboarding React | 016b: intake versionado + consentimientos append-only | Pantallas y persistencia (PV-12/13) |
+| `document_records` / `body_photo_entries` | — | 016b: estudios y fotos corporales; sin IA | Storage privado (PV-15/16) |
+| `measurements` | — | 016b: peso/medidas con unidad y origen | Historial usable (PV-17) |
+| `clinical_notes` | notas en ficha | 016b: sólo nutri; revoke paciente | Nunca en DTO paciente |
+| `ai_jobs` / `ai_artifacts` | mocks demo | 016b: jobs privados del profesional | Worker y revisión (PV-27) |
+| `outbox_events` | buzón demo | 016b: outbox + deliveries; sin policy authenticated | Proveedor real (PV-26) |
+| `appointment_events` | demo (corte 78) | 016b: historial append-only | Timezone/conflictos (PV-25) |
+| `message_receipts` | demo (corte 74) | 016b: recibo por (mensaje, usuario) | Semántica entre dispositivos (PV-23) |
+| `exercise_library` / rutinas | — | **fuera del piloto** (PV-35) | Habilitación profesional verificada |
+| `organizations` / equipos | — | **fuera del piloto** (PV-38) | Ownership y delegación |
 
 Reglas transversales ya vigentes: ninguna entidad nueva puede exponer
 `note_for_nutri`, `goal_history` profesional, `adherence_why`, `brief` ni

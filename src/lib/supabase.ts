@@ -1,12 +1,9 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { projectId, publicAnonKey } from '../utils/supabase/info';
 
-const url = import.meta.env.VITE_SUPABASE_URL ?? `https://${projectId}.supabase.co`;
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY ?? publicAnonKey;
+const url = import.meta.env.VITE_SUPABASE_URL;
+const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabaseConfigured = Boolean(url && anonKey);
-
-export const supabase = supabaseConfigured
+export const supabase: SupabaseClient | null = url && anonKey
   ? createClient(url, anonKey, {
       auth: {
         persistSession: true,
@@ -14,6 +11,8 @@ export const supabase = supabaseConfigured
       },
     })
   : null;
+
+export const supabaseConfigured = Boolean(supabase);
 
 export type Profile = {
   id: string;

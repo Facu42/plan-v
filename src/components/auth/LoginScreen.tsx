@@ -3,12 +3,11 @@ import { useAuth } from '../../context/AuthContext';
 import { Icon, Mark } from '../shared/Icon';
 
 export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; onToggleTheme: () => void }) {
-  const { signIn, signUp, enterDemoMode, loading } = useAuth();
+  const { signIn, signUp, enterDemoMode, loading, demoAllowed } = useAuth();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [role, setRole] = useState<'nutri' | 'paciente'>('nutri');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [signupOk, setSignupOk] = useState(false);
@@ -21,7 +20,7 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
         const res = await signIn(email, password);
         if (res.error) setError(res.error);
       } else {
-        const res = await signUp(email, password, fullName, role);
+        const res = await signUp(email, password, fullName);
         if (res.error) setError(res.error);
         else setSignupOk(true);
       }
@@ -57,7 +56,7 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
         ) : (
           <>
             <h1>{mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}</h1>
-            <p className="auth-sub">{mode === 'login' ? 'Accedé a tu panel o app de paciente.' : 'Registrate como nutricionista o paciente.'}</p>
+            <p className="auth-sub">{mode === 'login' ? 'Accedé a tu panel o app de paciente.' : 'El registro público crea una cuenta de paciente. La nutricionista se provisiona por invitación.'}</p>
 
             <div className="auth-tabs">
               <button type="button" className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')}>Entrar</button>
@@ -65,13 +64,7 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
             </div>
 
             {mode === 'signup' && (
-              <>
-                <input className="text-input" placeholder="Nombre completo" value={fullName} onChange={(e) => setFullName(e.target.value)} />
-                <div className="role-pills">
-                  <button type="button" className={role === 'nutri' ? 'active' : ''} onClick={() => setRole('nutri')}>Nutricionista</button>
-                  <button type="button" className={role === 'paciente' ? 'active' : ''} onClick={() => setRole('paciente')}>Paciente</button>
-                </div>
-              </>
+              <input className="text-input" placeholder="Nombre completo" value={fullName} onChange={(e) => setFullName(e.target.value)} />
             )}
 
             <input className="text-input" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
@@ -85,9 +78,16 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
           </>
         )}
 
-        <div className="auth-divider"><span>o</span></div>
-        <button type="button" className="soft-button wide" onClick={enterDemoMode}>Continuar en modo demo</button>
-        <p className="auth-foot">Modo demo usa datos locales sin persistencia. Para producción, conectá Supabase únicamente con la migración 016 revisada y aprobada.</p>
+        {demoAllowed && (
+          <>
+            <div className="auth-divider"><span>o</span></div>
+            <button type="button" className="soft-button wide" onClick={enterDemoMode}>Continuar en modo demo</button>
+            <p className="auth-foot">Modo demo usa datos locales sin persistencia. No está disponible en un build de producción.</p>
+          </>
+        )}
+        {!demoAllowed && (
+          <p className="auth-foot">El acceso demo no está habilitado en esta sesión.</p>
+        )}
       </div>
     </div>
   );

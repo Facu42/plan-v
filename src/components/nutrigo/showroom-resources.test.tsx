@@ -61,9 +61,9 @@ describe('ShowroomResources', () => {
     expect(html).toContain('Guardado sólo en este dispositivo');
   });
 
-  it('construye y valida enlaces profundos sin perder el selector de diseño', () => {
+  it('construye enlaces profundos canónicos a /app/recursos', () => {
     expect(buildResourceShareUrl('leer-plan-semanal', 'http://127.0.0.1:5180/?design=nutrigo')).toBe(
-      'http://127.0.0.1:5180/?design=nutrigo#recurso=leer-plan-semanal',
+      'http://127.0.0.1:5180/app/recursos#recurso=leer-plan-semanal',
     );
     expect(resourceGuideIdFromHash('#recurso=leer-plan-semanal')).toBe('leer-plan-semanal');
     expect(resourceGuideIdFromHash('#recurso=no-existe')).toBeNull();
@@ -75,11 +75,11 @@ describe('ShowroomResources', () => {
     const share = vi.fn().mockResolvedValue(undefined);
     const writeText = vi.fn().mockResolvedValue(undefined);
     await expect(shareResourceGuide(guide, { href: 'https://planv.test/', share, writeText })).resolves.toBe('shared');
-    expect(share).toHaveBeenCalledWith(expect.objectContaining({ title: guide.title, text: guide.summary, url: 'https://planv.test/#recurso=leer-plan-semanal' }));
+    expect(share).toHaveBeenCalledWith(expect.objectContaining({ title: guide.title, text: guide.summary, url: 'https://planv.test/app/recursos#recurso=leer-plan-semanal' }));
     expect(writeText).not.toHaveBeenCalled();
 
     await expect(shareResourceGuide(guide, { href: 'https://planv.test/', writeText })).resolves.toBe('copied');
-    expect(writeText).toHaveBeenCalledWith('https://planv.test/#recurso=leer-plan-semanal');
+    expect(writeText).toHaveBeenCalledWith('https://planv.test/app/recursos#recurso=leer-plan-semanal');
     await expect(shareResourceGuide(guide, { href: 'https://planv.test/' })).resolves.toBe('unavailable');
   });
 });

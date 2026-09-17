@@ -5,6 +5,8 @@ import { cors } from 'hono/cors';
 import type { ZodType } from 'zod';
 import { analyzeMeal } from './ai/meal-analyzer.js';
 import { generateCopilotBrief } from './ai/copilot.js';
+import { AIUnavailableError } from './ai/errors.js';
+import { readRuntimeConfig } from './config/runtime.js';
 import { authMiddleware } from './middleware/auth.js';
 import {
   analyzeMealInputSchema,
@@ -87,6 +89,17 @@ async function parseJsonBody<T>(c: Context, schema: ZodType<T>) {
 
 app.use('/*', cors());
 app.use('/api/*', authMiddleware);
+
+app.onError((error, c) => {
+  if (error instanceof AIUnavailableError) {
+    return c.json({
+      code: error.code,
+      message: error.message,
+      requestId: crypto.randomUUID(),
+    }, 503);
+  }
+  return c.json({ error: 'No se pudo completar la operación' }, 500);
+});
 
 app.get('/api/health', (c) =>
   c.json({ status: 'ok', ai: Boolean(process.env.OPENAI_API_KEY), supabase: isSupabaseEnabled() }),
@@ -213,6 +226,10 @@ app.post('/api/patients/:id/meals/analyze', async (c) => {
   }
   if (!patient) return c.notFound();
 
+  if ('userId' in auth && isSupabaseEnabled() && body.photoPreview) {
+    return c.json({ error: 'Fotos de comidas pendientes del contrato Storage 016' }, 501);
+  }
+
   const scheduled = patient.todayPlan.find((m) => m.slot === body.slot);
   const analysis = await analyzeMeal({
     description: body.description,
@@ -222,9 +239,6 @@ app.post('/api/patients/:id/meals/analyze', async (c) => {
   });
 
   if ('userId' in auth && isSupabaseEnabled()) {
-    if (body.photoPreview) {
-      return c.json({ error: 'Fotos de comidas pendientes del contrato Storage 016' }, 501);
-    }
     const log = await sb.sbAddMealLog(patient.id, {
       slot: body.slot,
       photo_url: null,
@@ -323,7 +337,13 @@ app.post('/api/patients/:id/copilot', async (c) => {
 
   if ('userId' in auth && isSupabaseEnabled()) {
     const nutriId = await sb.sbGetNutritionistId(auth.userId);
-    if (nutriId) await sb.sbSetBrief(patient.id, nutriId, brief);
+    if (nutriId) {
+      try {
+        await sb.sbSetBrief(patient.id, nutriId, brief);
+      } catch {
+        return c.json({ error: 'No se pudo guardar el brief' }, 503);
+      }
+    }
     const updated = await sb.sbGetPatientById(patient.id);
     return c.json({ brief, patient: updated, source: 'supabase' });
   }
@@ -347,13 +367,17 @@ app.post('/api/patients/:id/messages', async (c) => {
     const resource = await sb.sbGetPatientResource(patientId);
     if (!patient || !resource) return c.notFound();
 
-    await sb.sbAddMessage(
-      patientId,
-      resource.nutritionistId,
-      auth.userId,
-      body.text,
-      actor.role === 'nutri' && (body.suggested_by_ai ?? false),
-    );
+    try {
+      await sb.sbAddMessage(
+        patientId,
+        resource.nutritionistId,
+        auth.userId,
+        body.text,
+        actor.role === 'nutri' && (body.suggested_by_ai ?? false),
+      );
+    } catch {
+      return c.json({ error: 'No se pudo enviar el mensaje' }, 503);
+    }
     const updated = await sb.sbGetPatientById(patientId);
     return c.json({
       patient: updated && actor.role === 'paciente' ? toPatientSelfView(updated) : updated,
@@ -653,7 +677,8 @@ app.post('/api/nutritionist/setup', async (c) => {
 const isMainModule = Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isMainModule) {
+  const config = readRuntimeConfig(process.env);
   const port = Number(process.env.PORT ?? 3001);
-  console.log(`Plan V API → http://localhost:${port} (supabase: ${isSupabaseEnabled() ? 'on' : 'memory'})`);
+  console.log(`Plan V API → http://localhost:${port} (mode: ${config.mode}, data: ${config.dataMode}, ai: ${config.aiMode})`);
   serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
 }

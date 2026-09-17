@@ -194,8 +194,16 @@ export function mapMessage(row: Record<string, unknown>, authorRole: unknown): M
   };
 }
 
-async function loadPatientExtras(patientId: string): Promise<Pick<Patient, 'todayPlan' | 'weekPlan' | 'meal_logs' | 'messages' | 'brief' | 'briefDismissed' | 'timeline' | 'habit_logs' | 'hydration' | 'energy' | 'sleep_minutes' | 'appointment'>> {
+async function loadPatientExtras(
+  patientId: string,
+  audience: 'professional' | 'patient' = 'professional',
+): Promise<Pick<Patient, 'todayPlan' | 'weekPlan' | 'meal_logs' | 'messages' | 'brief' | 'briefDismissed' | 'timeline' | 'habit_logs' | 'hydration' | 'energy' | 'sleep_minutes' | 'appointment'>> {
   const sb = getSupabaseAdmin()!;
+
+  const timelineQuery = sb.from('timeline_events').select('*').eq('patient_id', patientId);
+  const scopedTimeline = audience === 'patient'
+    ? timelineQuery.eq('visibility', 'patient')
+    : timelineQuery;
 
   const [{ data: slots }, { data: logs }, { data: msgs }, { data: briefs }, { data: habits }, { data: appts }, { data: timelineRows }] = await Promise.all([
     sb.from('meal_slots').select('weekday, slot, title').eq('patient_id', patientId).order('weekday').order('slot'),
@@ -204,7 +212,7 @@ async function loadPatientExtras(patientId: string): Promise<Pick<Patient, 'toda
     sb.from('ai_briefs').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }).limit(1).maybeSingle(),
     sb.from('habit_logs').select('*').eq('patient_id', patientId).order('date', { ascending: false }).limit(14),
     sb.from('appointments').select('*').eq('patient_id', patientId).eq('status', 'scheduled').gte('starts_at', new Date().toISOString()).order('starts_at', { ascending: true }).limit(1),
-    sb.from('timeline_events').select('*').eq('patient_id', patientId).order('occurred_at', { ascending: false }).limit(20),
+    scopedTimeline.order('occurred_at', { ascending: false }).limit(20),
   ]);
 
   // Plantilla semanal recurrente (016 v2): agrupa por weekday 0=Lunes…6=Domingo.
@@ -262,6 +270,7 @@ async function loadPatientExtras(patientId: string): Promise<Pick<Patient, 'toda
     atLabel: timelineAtLabel(event.occurred_at as string),
     title: event.title as string,
     body: event.body as string,
+    visibility: event.visibility === 'patient' ? 'patient' : 'professional',
   }));
 
   // habit_logs es la fuente de verdad: el snapshot del día se deriva, no se duplica.
@@ -354,7 +363,7 @@ export async function sbGetPatientForUser(userId: string): Promise<Patient | nul
   const sb = getSupabaseAdmin()!;
   const { data: row } = await sb.from('patients').select('*').eq('user_id', userId).maybeSingle();
   if (!row) return null;
-  const extras = await loadPatientExtras(row.id);
+  const extras = await loadPatientExtras(row.id, 'patient');
   return mapPatient(row, extras);
 }
 
@@ -423,9 +432,11 @@ export async function sbUpdateMealLog(patientId: string, mealId: string, patch: 
 
 export async function sbSetBrief(patientId: string, nutritionistId: string, brief: Brief): Promise<void> {
   const sb = getSupabaseAdmin()!;
-  await sb.from('ai_briefs').delete().eq('patient_id', patientId).eq('status', 'pending_review');
+  // Not transactional yet: a later RPC in PV-08 must make delete/insert/update atomic.
+  const { error: deleteError } = await sb.from('ai_briefs').delete().eq('patient_id', patientId).eq('status', 'pending_review');
+  if (deleteError) throw deleteError;
   if (brief.suggested_action) {
-    await sb.from('ai_briefs').insert({
+    const { error: insertError } = await sb.from('ai_briefs').insert({
       patient_id: patientId,
       nutritionist_id: nutritionistId,
       suggested_action: brief.suggested_action,
@@ -436,8 +447,10 @@ export async function sbSetBrief(patientId: string, nutritionistId: string, brie
       adherence_why: brief.adherence_why,
       status: 'pending_review',
     });
+    if (insertError) throw insertError;
   }
-  await sb.from('patients').update({ adherence_why: brief.adherence_why }).eq('id', patientId);
+  const { error: updateError } = await sb.from('patients').update({ adherence_why: brief.adherence_why }).eq('id', patientId);
+  if (updateError) throw updateError;
 }
 
 export type ReminderConfig = { kind: string; time: string; enabled: boolean };
@@ -552,7 +565,7 @@ export async function sbUpdateHabits(patientId: string, data: { hydration?: numb
 
 export async function sbAddMessage(patientId: string, nutritionistId: string, authorId: string, text: string, suggestedByAi: boolean): Promise<void> {
   const sb = getSupabaseAdmin()!;
-  await sb.from('messages').insert({
+  const { error } = await sb.from('messages').insert({
     patient_id: patientId,
     nutritionist_id: nutritionistId,
     author_id: authorId,
@@ -560,6 +573,7 @@ export async function sbAddMessage(patientId: string, nutritionistId: string, au
     suggested_by_ai: suggestedByAi,
     sent_at: new Date().toISOString(),
   });
+  if (error) throw error;
 }
 
 export async function sbGetNutritionistId(userId: string): Promise<string | null> {

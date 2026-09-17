@@ -47,6 +47,7 @@ export type TimelineEvent = {
   atLabel: string;
   title: string;
   body: string;
+  visibility?: 'professional' | 'patient';
 };
 
 export type Brief = {

@@ -1,6 +1,8 @@
 import { generateText, Output } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { mealAnalysisSchema, type MealAnalysis } from '../schemas.js';
+import { AIUnavailableError } from './errors.js';
+import { logProviderFailure, resolveAiMode } from './mode.js';
 
 const MEAL_SYSTEM = `Sos el analizador de comidas de Plan V (Argentina, español rioplatense).
 Estimás alimentos y macros de una comida. No diagnosticás, no juzgás, no recetás.
@@ -59,10 +61,11 @@ export async function analyzeMeal(input: {
   slot: string;
   scheduledTitle?: string;
 }): Promise<MealAnalysis> {
-  const hasKey = Boolean(process.env.OPENAI_API_KEY);
   const { description, imageBase64, slot, scheduledTitle } = input;
+  const aiMode = resolveAiMode();
 
-  if (!hasKey) {
+  if (aiMode === 'disabled') throw new AIUnavailableError();
+  if (aiMode === 'demo') {
     if (description?.trim()) return mockFromText(description.trim(), slot);
     return mockFromImage(slot);
   }
@@ -88,10 +91,12 @@ export async function analyzeMeal(input: {
       system: MEAL_SYSTEM,
       messages: [{ role: 'user', content: userParts }],
       output: Output.object({ schema: mealAnalysisSchema }),
+      abortSignal: AbortSignal.timeout(20_000),
     });
-    return output ?? mockFromText(description ?? 'comida', slot);
-  } catch {
-    if (description?.trim()) return mockFromText(description.trim(), slot);
-    return mockFromImage(slot);
+    if (!output) throw new AIUnavailableError();
+    return output;
+  } catch (error) {
+    logProviderFailure('meal-analyzer', error);
+    throw error instanceof AIUnavailableError ? error : new AIUnavailableError();
   }
 }

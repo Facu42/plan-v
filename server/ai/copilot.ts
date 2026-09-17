@@ -2,6 +2,8 @@ import { generateText, Output } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { copilotBriefSchema, type CopilotBrief } from '../schemas.js';
 import type { AppStore } from '../store.js';
+import { AIUnavailableError } from './errors.js';
+import { logProviderFailure, resolveAiMode } from './mode.js';
 
 const COPILOT_SYSTEM = `Sos el copiloto de ficha de Plan V para Lic. Verónica Trenti (nutricionista, Argentina).
 Generás Up next y adherence_why. No diagnosticás, no recetás, no hablás al paciente directamente.
@@ -64,7 +66,9 @@ function mockBrief(patient: AppStore['patients'][0]): CopilotBrief {
 }
 
 export async function generateCopilotBrief(patient: AppStore['patients'][0]): Promise<CopilotBrief> {
-  if (!process.env.OPENAI_API_KEY) return mockBrief(patient);
+  const aiMode = resolveAiMode();
+  if (aiMode === 'disabled') throw new AIUnavailableError();
+  if (aiMode === 'demo') return mockBrief(patient);
 
   const pending = patient.meal_logs.filter((l) => l.status === 'pending_review');
   const confirmed = patient.meal_logs.filter((l) => l.status === 'confirmed' || l.status === 'adjusted');
@@ -91,9 +95,12 @@ ${pending.map((l) => `- ${l.slot}: confianza ${l.confidence}, nota: ${l.note_for
       system: COPILOT_SYSTEM,
       prompt: context,
       output: Output.object({ schema: copilotBriefSchema }),
+      abortSignal: AbortSignal.timeout(20_000),
     });
-    return output ?? mockBrief(patient);
-  } catch {
-    return mockBrief(patient);
+    if (!output) throw new AIUnavailableError();
+    return output;
+  } catch (error) {
+    logProviderFailure('copilot', error);
+    throw error instanceof AIUnavailableError ? error : new AIUnavailableError();
   }
 }

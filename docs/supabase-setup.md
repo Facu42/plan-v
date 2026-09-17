@@ -2,7 +2,7 @@
 
 ## Schema: no aplicar el draft de este repo
 
-La migración `supabase/migrations/20260901000000_plan_v_v0.sql` **no se corre**.
+La migración histórica `supabase/contracts/legacy/20260901000000_plan_v_v0.sql` **no se corre**. Se sacó de `supabase/migrations/` el 2026-09-16: no hay evidencia de que se haya aplicado en un ambiente; queda como legado no ejecutable. `npm run check:migrations` falla si un SQL con `DRAFT` / `DO NOT APPLY` / `NO CORRER` vuelve a la cadena de migraciones.
 
 Fugas conocidas (por eso no es ley):
 - Paciente puede leer `note_for_nutri` vía `meal_logs` (policy select directa a la tabla).

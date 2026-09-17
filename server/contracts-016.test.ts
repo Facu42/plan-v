@@ -4,11 +4,11 @@ import { describe, expect, it } from 'vitest';
 const contractPath = new URL('../supabase/contracts/016_plan_v_contract_draft.sql', import.meta.url);
 
 async function contractSql(): Promise<string> {
-  return readFile(contractPath, 'utf8');
+  return (await readFile(contractPath, 'utf8')).replace(/\r\n/g, '\n');
 }
 
 function viewBody(sql: string, viewName: string): string {
-  const match = sql.match(new RegExp(`create or replace view public\\.${viewName}[\\s\\S]*?;\\n`));
+  const match = sql.match(new RegExp(`create or replace view public\\.${viewName}[\\s\\S]*?;\\r?\\n`));
   if (!match) throw new Error(`Missing view ${viewName}`);
   return match[0];
 }
@@ -207,7 +207,8 @@ describe('016 draft contract v2', () => {
     for (const required of ['expires_at', 'accepted_by', 'revoked_at', 'updated_at']) expect(invites).toContain(required);
     expect(invites).not.toContain('patient_id uuid not null unique');
     expect(invites).toContain('check (email = lower(btrim(email)))');
-    expect(sql).toContain('on public.patient_invites (patient_id)\n  where status in');
+    expect(sql).toContain('on public.patient_invites (patient_id)');
+    expect(sql).toMatch(/on public\.patient_invites \(patient_id\)\s+where status in/);
     expect(sql).toContain('on public.patient_invites (nutritionist_id, email)');
   });
 
@@ -223,7 +224,14 @@ describe('016 draft contract v2', () => {
     const sql = await contractSql();
     expect(sql).toContain('on conflict (id) do update');
     expect(occurrences(sql, "(storage.foldername(name))[1] = 'patients'")).toBeGreaterThanOrEqual(5);
-    const storagePatientSelect = sql.match(/create policy meal_photos_patient_select[\s\S]*?;\n/)?.[0] ?? '';
+    const storagePatientSelect = sql.match(/create policy meal_photos_patient_select[\s\S]*?;\r?\n/)?.[0] ?? '';
     expect(storagePatientSelect).toContain('patient_has_full_access');
+  });
+
+  it('keeps the core 016 schema free of post-pilot extensions', async () => {
+    const sql = await contractSql();
+    expect(sql).not.toContain('exercise_library');
+    expect(sql).not.toContain('routine_assignments');
+    expect(sql).not.toContain('create table if not exists public.organizations');
   });
 });

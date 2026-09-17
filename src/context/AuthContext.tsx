@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { getProfile, supabase, supabaseConfigured, type Profile } from '../lib/supabase';
+import { isLocalDemoAllowed, PUBLIC_SIGNUP_ROLE } from './auth-policy';
 
 type AuthState = {
   loading: boolean;
@@ -10,38 +11,31 @@ type AuthState = {
   isNutri: boolean;
   isPatient: boolean;
   demoMode: boolean;
+  demoAllowed: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
-  signUp: (email: string, password: string, fullName: string, role: 'nutri' | 'paciente') => Promise<{ error?: string }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   enterDemoMode: () => void;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
 
-function wantsLocalDemo() {
-  if (!import.meta.env.DEV || typeof window === 'undefined') return !supabaseConfigured;
-  return new URLSearchParams(window.location.search).get('auth') !== '1';
+function frontAuthEnv() {
+  return {
+    DEV: import.meta.env.DEV,
+    VITE_ALLOW_DEMO: import.meta.env.VITE_ALLOW_DEMO,
+  };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const localDemo = wantsLocalDemo();
-  const [loading, setLoading] = useState(supabaseConfigured && !localDemo);
+  const demoAllowed = isLocalDemoAllowed(frontAuthEnv());
+  const [loading, setLoading] = useState(supabaseConfigured);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [demoMode, setDemoMode] = useState(localDemo || !supabaseConfigured);
+  const [demoMode, setDemoMode] = useState(false);
 
   useEffect(() => {
     if (!supabase) {
-      setLoading(false);
-      setDemoMode(true);
-      return;
-    }
-
-    if (localDemo) {
-      supabase.auth.signOut().catch(() => {});
-      setSession(null);
-      setProfile(null);
-      setDemoMode(true);
       setLoading(false);
       return;
     }
@@ -77,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.clearTimeout(timeout);
       sub.subscription.unsubscribe();
     };
-  }, [localDemo]);
+  }, []);
 
   const value = useMemo<AuthState>(() => ({
     loading,
@@ -87,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isNutri: profile?.role === 'nutri',
     isPatient: profile?.role === 'paciente',
     demoMode,
+    demoAllowed,
     signIn: async (email, password) => {
       if (!supabase) return { error: 'Supabase no configurado' };
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -94,12 +89,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setDemoMode(false);
       return {};
     },
-    signUp: async (email, password, fullName, role) => {
+    signUp: async (email, password, fullName) => {
       if (!supabase) return { error: 'Supabase no configurado' };
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName, role } },
+        options: { data: { full_name: fullName, role: PUBLIC_SIGNUP_ROLE } },
       });
       if (error) return { error: error.message };
       return {};
@@ -109,12 +104,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setDemoMode(false);
     },
     enterDemoMode: () => {
+      if (!demoAllowed) return;
       if (supabase) supabase.auth.signOut().catch(() => {});
       setSession(null);
       setProfile(null);
       setDemoMode(true);
     },
-  }), [loading, session, profile, demoMode]);
+  }), [loading, session, profile, demoMode, demoAllowed]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

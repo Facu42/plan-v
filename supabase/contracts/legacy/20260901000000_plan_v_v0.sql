@@ -1,3 +1,4 @@
+-- Relocado 2026-09-16 desde supabase/migrations/. Legado no ejecutable. Sin evidencia de aplicación previa.
 -- ⛔ DRAFT — DO NOT APPLY / NO CORRER
 -- Fugas: paciente puede leer note_for_nutri, adherence_why y payments/billing_*.
 -- Núcleo reescribe contra el 016 ya lockeado. Este archivo no es ley de schema.

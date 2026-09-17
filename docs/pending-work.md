@@ -10,7 +10,19 @@ Confirmaciones nuevas del usuario: **PWA paciente + CRM web**, y **fotos de comi
 - [Onboarding moderno e IA profesional](superpowers/specs/2026-09-16-plan-v-onboarding-ia-design.md).
 - [Primer bloque ejecutable: PV-01…05](superpowers/plans/2026-09-16-plan-v-fundaciones.md).
 
-Nueva verificación: 370 pruebas / 73 archivos, check y build aprobados. Brechas prioritarias nuevas: modo demo implícito ante falta de DB; timeline profesional sin filtro en respuesta paciente; mocks ante fallos IA; diseño Nutrigo excluido del build productivo; consentimiento/onboarding efímeros. El detalle y las limitaciones están en el plan. No se aplicó SQL ni se corrigió código de producto en esta revisión.
+Nueva verificación (fundaciones PV-01…05, 2026-09-16 noche): check y build aprobados; `check:migrations` en verde tras sacar el SQL de borrador de `supabase/migrations/`. Los 4 fallos de `server/contracts-016.test.ts` eran CRLF en Windows (`;\n` contra `;\r\n`); PV-06 normaliza el SQL en los tests. PV-07 monta Nutrigo en sesiones autenticadas y en el build de producción.
+
+Estado PV-01…05:
+
+- **PV-01** baseline en `docs/release-baseline.md`. Working tree del checkpoint local; no se publicó el remoto.
+- **PV-02** `APP_MODE` obligatorio; demo sólo explícita; registro público siempre paciente.
+- **PV-03** DTO paciente por allowlist; timeline paciente filtrada por `visibility=patient`.
+- **PV-04** fallos de IA/DB ya no se disfrazan de éxito; foto persistente se rechaza antes de llamar al proveedor.
+- **PV-05** guarda de migraciones + workflow CI. Node verificado: 24.16.0.
+- **PV-06** núcleo 016 intacto; ampliación piloto en `supabase/contracts/016b_piloto_ampliacion_draft.sql` (DRAFT/NO CORRER). Diccionario y política en `docs/contrato-diccionario-piloto.md`. Fuera del piloto: `exercise_library`, organizaciones, listas de compra persistidas.
+- **PV-07** Nutrigo entra al build de producción y a sesiones autenticadas. Rol tomado de la sesión (sin selector). Rutas `/app/:pagina` y `/crm/:pagina` con atrás/adelante y `#recurso=`. El selector de rol queda sólo en demo sin sesión; `?design=legacy` no aplica con sesión.
+
+Siguiente: DB/RLS (PV-08). No aplicar 016 ni 016b.
 
 El registro de cortes que sigue se conserva como evidencia de **demo/memoria**. Sus casillas no acreditan producción ni aprobación visual integral.
 
@@ -80,13 +92,15 @@ La referencia aporta doce superficies. Plan V implementará funciones equivalent
 
 ### 1. Aprobar el contrato de datos 016
 
-- [ ] Reabrir el contrato como versión ampliada antes de aprobarlo: recetas, ingredientes, favoritos, listas de compras, ejercicios, contenidos, notificaciones y progreso autorizado no existen en el alcance actual.
-- [ ] Actualizar la matriz RLS para cada nueva entidad y para asignaciones uno-a-uno o masivas de nutricionista a pacientes.
+- [x] Reabrir el contrato como versión ampliada documental (PV-06): 016 queda como núcleo; 016b cubre intake, consentimientos, recetas/planes, archivos por categoría, jobs de IA, recibos, historial de turnos y recursos. No se aplica SQL.
+- [x] Diccionario, permisos por acción y política de archivo/exportación/borrado en `docs/contrato-diccionario-piloto.md` (propuesta, no dictamen legal).
+- [x] Separar schema piloto de extensiones: `exercise_library`, organizaciones/equipos, shopping_lists persistidas y presupuesto quedan fuera de 016/016b (PV-35/38/39).
+- [ ] Actualizar la matriz RLS ejecutable y seeds para cada entidad nueva (PV-08). El RLS de 016b es mínimo fail-closed, no la suite A/B.
 - [ ] Asignar responsables para producto/nutrición, seguridad/DBA, privacidad/legal, proveedores, operación y QA.
 - [ ] Aprobar las siete puertas de `docs/016-approval-and-staging-checklist.md`.
-- [ ] Definir retención, borrado, exportación y atención de derechos por categoría de datos.
+- [ ] Confirmar plazos de retención con privacidad/legal (los de PV-06 son de trabajo).
 - [ ] Revisar formalmente las RPC `accept_patient_invite` y `provision_nutritionist`.
-- [ ] Convertir el borrador revisado en una migración nueva e inmutable. No ejecutar el draft actual.
+- [ ] Convertir el borrador revisado en una migración nueva e inmutable. No ejecutar 016 ni 016b.
 - [ ] Ejecutar los casos `RLS-01…RLS-23` con usuarios sintéticos en una instancia descartable.
 - [ ] Adjuntar evidencias redactadas, hash de la migración y decisión explícita de go/no-go.
 
@@ -146,10 +160,11 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 
 ### Paso 2 — Contrato de producto ampliado
 
-- [x] Inventario de entidades demo/derivadas/futuras y matriz de permisos por rol documentados en `docs/contract-expansion-inventory.md` (borrador sin SQL, corte 70).
-- [ ] Modelar en detalle recetas/ingredientes, favoritos/guardados unificados, grocery items, ejercicios/rutinas, notificaciones y progreso permitido dentro del borrador 016.
-- [ ] Actualizar borrador 016, privacidad y matriz RLS sin ejecutar migraciones.
+- [x] Inventario de entidades demo/derivadas/futuras y matriz de permisos por rol documentados en `docs/contract-expansion-inventory.md` (borrador sin SQL, corte 70; actualizado con 016b en PV-06).
+- [x] Modelar en 016b recetas/ingredientes, planes fechados, progreso permitido (mediciones/fotos corporales), notificaciones (outbox) y recursos. Favoritos unificados, grocery persistido y ejercicios/rutinas siguen post-piloto.
+- [x] Actualizar diccionario/privacidad documental sin ejecutar migraciones (`docs/contrato-diccionario-piloto.md`).
 - [ ] Preparar seeds demo y contratos API para desarrollar cada vertical slice en memoria.
+- [ ] Matriz RLS completa + migración inmutable: PV-08.
 
 ### Paso 3 — Dashboard dual
 

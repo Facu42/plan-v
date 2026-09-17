@@ -22,9 +22,9 @@
 
   - **App paciente**: navegación Hoy / Mi plan / Mi camino / Mensajes. Registro de comidas por **foto o descripción** con macros automáticos (IA).
   - **CRM nutricionista**: copiloto con sugerencias (Up next, borrador de mensaje), revisión de comidas pendientes, confirmación.
-  - **IA**: con `OPENAI_API_KEY` en `.env` usa GPT-4o-mini. Sin clave, modo demo con estimaciones simuladas.
+  **IA**: `AI_MODE=live` con `OPENAI_API_KEY` usa el proveedor. `AI_MODE=demo` sólo en `APP_MODE=demo` o `test`. En staging/producción la IA simulada está prohibida.
 
-  Copiá `.env.example` a `.env` y agregá tu clave de OpenAI para IA en vivo.
+  Copiá `.env.example` a `.env`. `npm run dev` fija `APP_MODE=demo`, `AI_MODE=demo` y `VITE_ALLOW_DEMO=true` mediante `scripts/with-env.mjs` (funciona en Windows). Sin `APP_MODE` el API no arranca. `APP_MODE=production` o `staging` sin URL y service role de Supabase aborta el proceso. Un build de producción no muestra el botón demo.
 
   ### Verificación local
 
@@ -32,9 +32,10 @@
   npm test
   npm run check
   npm run build
+  npm run check:migrations
   ```
 
-  `npm run check` valida tanto el cliente como el servidor. Las pruebas cubren autenticación fail-closed, autorización por relación, privacidad de la vista paciente y validación de entradas API.
+  `npm test` define `APP_MODE=test` y `AI_MODE=demo` en Vitest, sin depender del `.env` del desarrollador. `npm run check` valida tanto el cliente como el servidor. Las pruebas cubren autenticación fail-closed, autorización por relación, privacidad de la vista paciente y validación de entradas API.
 
   ### Supabase (auth + base de datos)
 
@@ -43,4 +44,4 @@
   Expansión Nutrigo/Plan V: [`tasks/plan.md`](tasks/plan.md) · tareas ejecutables desde el paso 1: [`tasks/todo.md`](tasks/todo.md) · pendientes y estado de producción: [`docs/pending-work.md`](docs/pending-work.md)
 
   **No aplicar** los borradores SQL de este repo. El contrato 016 local sigue en revisión y debe ampliarse y validarse antes de convertirse en migración.
-  Sin service role la API sigue en modo memoria; login/demo ya están en la app.
+  Sin service role la API no cae a demo salvo `APP_MODE=demo` o `test`. Login público crea pacientes; el alta profesional se provisiona aparte (PV-09).

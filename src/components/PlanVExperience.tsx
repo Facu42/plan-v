@@ -6,14 +6,11 @@ import { LoginScreen } from './auth/LoginScreen';
 import { useAuth } from '../context/AuthContext';
 import { useAppStore } from '../store/useAppStore';
 import { api } from '../api/client';
-import { supabaseConfigured } from '../lib/supabase';
 import { readThemePreference, writeThemePreference, type ThemePreference } from '../theme-preference';
 import { Mark } from './shared/Icon';
-import { shouldShowNutrigo } from './design-entry';
+import { canUseDemoRoleSwitch, shouldShowNutrigo } from './design-entry';
 
-const NutrigoShowroom = import.meta.env.DEV
-  ? lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })))
-  : null;
+const NutrigoShowroom = lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })));
 
 export function PlanVExperience() {
   const { session, demoMode, isNutri, isPatient, profile, signOut, loading: authLoading } = useAuth();
@@ -33,7 +30,8 @@ export function PlanVExperience() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!session && !demoMode && supabaseConfigured) return;
+    if (!session && !demoMode) return;
+    if (session && !isNutri && !isPatient) return;
     boot({ isNutri, isPatient });
   }, [authLoading, session, demoMode, isNutri, isPatient, boot]);
 
@@ -56,8 +54,22 @@ export function PlanVExperience() {
     );
   }
 
-  if (supabaseConfigured && !session && !demoMode) {
+  if (!session && !demoMode) {
     return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><LoginScreen darkMode={darkMode} onToggleTheme={toggleTheme} /></div>;
+  }
+
+  if (session && !isNutri && !isPatient) {
+    return (
+      <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}>
+        <div className="loading-card">
+          <Mark />
+          <p className="eyebrow">Plan V</p>
+          <h2>Tu cuenta todavía no está vinculada</h2>
+          <p>Cuando la nutricionista acepte tu invitación vas a ver tu plan. No se listan pacientes de otras cuentas.</p>
+          <button type="button" className="primary-button" onClick={() => signOut()}>Cerrar sesión</button>
+        </div>
+      </div>
+    );
   }
 
   if (loading) {
@@ -82,11 +94,22 @@ export function PlanVExperience() {
     );
   }
 
-  if (NutrigoShowroom && shouldShowNutrigo({ development: import.meta.env.DEV, demoMode, hasSession: Boolean(session), supabaseEnabled, search: window.location.search })) {
-    return <Suspense fallback={<div className="plan-v-app loading-screen" role="status">Cargando consultorio…</div>}><NutrigoShowroom darkMode={darkMode} onToggleTheme={toggleTheme} /></Suspense>;
+  if (shouldShowNutrigo({ development: import.meta.env.DEV, demoMode, hasSession: Boolean(session), supabaseEnabled, search: window.location.search })) {
+    const lockedRole = session ? (isNutri ? 'pro' as const : 'patient' as const) : null;
+    return (
+      <Suspense fallback={<div className="plan-v-app loading-screen" role="status">Cargando consultorio…</div>}>
+        <NutrigoShowroom
+          darkMode={darkMode}
+          onToggleTheme={toggleTheme}
+          lockedRole={lockedRole}
+          allowRoleSwitch={canUseDemoRoleSwitch({ demoMode, hasSession: Boolean(session) })}
+          onSignOut={session ? signOut : undefined}
+        />
+      </Suspense>
+    );
   }
 
-  const showToggle = demoMode || (!isNutri && !isPatient);
+  const showToggle = demoMode;
 
   return (
     <div className={`plan-v-app${darkMode ? ' dark' : ''}`}>
