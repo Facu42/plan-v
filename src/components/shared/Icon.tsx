@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react';
+import planVLogo from '../../assets/plan-v-logo-256.png';
 
 export type IconName =
   | 'arrow' | 'bell' | 'calendar' | 'camera' | 'check' | 'chevron' | 'clock'
-  | 'drop' | 'heart' | 'leaf' | 'message' | 'moon' | 'plus' | 'sparkle'
-  | 'sun' | 'trend' | 'users' | 'video' | 'edit' | 'loader';
+  | 'contact' | 'drop' | 'grid' | 'heart' | 'history' | 'home' | 'leaf' | 'list'
+  | 'message' | 'moon' | 'pin' | 'plus' | 'sparkle' | 'sun' | 'target' | 'trend'
+  | 'users' | 'video' | 'edit' | 'loader' | 'download';
 
 const paths: Record<IconName, ReactNode> = {
   arrow: <><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></>,
@@ -13,19 +15,27 @@ const paths: Record<IconName, ReactNode> = {
   check: <path d="m5 12 4.2 4.2L19 6.5" />,
   chevron: <path d="m9 18 6-6-6-6" />,
   clock: <><circle cx="12" cy="12" r="8.5" /><path d="M12 7v5l3.5 2" /></>,
+  contact: <><circle cx="12" cy="8" r="3.5" /><path d="M5 21v-1.5A5.5 5.5 0 0 1 10.5 14h3a5.5 5.5 0 0 1 5.5 5.5V21" /></>,
   drop: <path d="M12 3.5S6.5 10.1 6.5 14A5.5 5.5 0 0 0 12 19.5a5.5 5.5 0 0 0 5.5-5.5C17.5 10.1 12 3.5 12 3.5Z" />,
+  grid: <><rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" /><rect x="4" y="14" width="6" height="6" rx="1" /><rect x="14" y="14" width="6" height="6" rx="1" /></>,
   heart: <path d="M20.8 8.8c0 5.7-8.8 10.6-8.8 10.6S3.2 14.5 3.2 8.8A4.5 4.5 0 0 1 12 7.4a4.5 4.5 0 0 1 8.8 1.4Z" />,
+  history: <><path d="M4 5v5h5" /><path d="M5.5 16.5A8 8 0 1 0 6 6" /></>,
+  home: <><path d="m3 11 9-8 9 8" /><path d="M5 10v10h14V10M9 20v-6h6v6" /></>,
   leaf: <><path d="M20 4C10.5 4 5 8.5 5 15c0 2.2 1.8 4 4 4C15.5 19 20 13.5 20 4Z" /><path d="M4 20c3-4.5 6.5-7 11-9" /></>,
+  list: <><path d="M9 6h11M9 12h11M9 18h11" /><path d="M4 6h.01M4 12h.01M4 18h.01" /></>,
   message: <><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.4 8.4 0 0 1-3-.6L4 20l1.4-4A7.2 7.2 0 0 1 4 11.5 7.5 7.5 0 0 1 12 4a7.5 7.5 0 0 1 8 7.5Z" /><path d="M8.5 12h.01M12 12h.01M15.5 12h.01" /></>,
   moon: <path d="M20 15.4A8.3 8.3 0 0 1 8.6 4 8.3 8.3 0 1 0 20 15.4Z" />,
   plus: <path d="M12 5v14M5 12h14" />,
+  pin: <><path d="m15 4 5 5-4 2-3 5-5-5 5-3Z" /><path d="m9 15-5 5" /></>,
   sparkle: <><path d="m12 2 1.6 6.4L20 10l-6.4 1.6L12 18l-1.6-6.4L4 10l6.4-1.6L12 2Z" /><path d="m19 16 .6 2.4L22 19l-2.4.6L19 22l-.6-2.4L16 19l2.4-.6L19 16Z" /></>,
   sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></>,
+  target: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="4" /><path d="m15 9 5-5M16 4h4v4" /></>,
   trend: <><path d="M4 17 10 11l4 4 6-7" /><path d="M15 8h5v5" /></>,
   users: <><path d="M16 21v-1.5a4.5 4.5 0 0 0-4.5-4.5h-3A4.5 4.5 0 0 0 4 19.5V21" /><circle cx="10" cy="7" r="3.5" /><path d="M17 11.2a3.5 3.5 0 0 0 0-6.4M20 21v-1.5a4.5 4.5 0 0 0-2.6-4.1" /></>,
   video: <><rect x="3" y="6" width="13" height="12" rx="3" /><path d="m16 10 5-3v10l-5-3" /></>,
   edit: <><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></>,
   loader: <path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8" />,
+  download: <><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 20h14" /></>,
 };
 
 export function Icon({ name, size = 20, className }: { name: IconName; size?: number; className?: string }) {
@@ -49,9 +59,8 @@ export function Icon({ name, size = 20, className }: { name: IconName; size?: nu
 
 export function Mark() {
   return (
-    <div className="brand-mark" aria-label="Plan V">
-      <span>V</span>
-      <i />
+    <div className="brand-mark">
+      <img src={planVLogo} alt="Logo Plan V Nutrición" />
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Mark } from '../shared/Icon';
+import { Icon, Mark } from '../shared/Icon';
 
-export function LoginScreen() {
+export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; onToggleTheme: () => void }) {
   const { signIn, signUp, enterDemoMode, loading } = useAuth();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
@@ -41,7 +41,12 @@ export function LoginScreen() {
   return (
     <div className="auth-screen">
       <div className="auth-card">
-        <div className="auth-brand"><Mark /><div><strong>Plan V</strong><small>Centro profesional</small></div></div>
+        <div className="auth-head">
+          <div className="auth-brand"><Mark /><div><strong>Plan V</strong><small>Centro profesional</small></div></div>
+          <button className="round-button theme-toggle" type="button" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} aria-pressed={darkMode} onClick={onToggleTheme}>
+            <Icon name={darkMode ? 'sun' : 'moon'} size={18} />
+          </button>
+        </div>
 
         {signupOk ? (
           <>
@@ -82,7 +87,7 @@ export function LoginScreen() {
 
         <div className="auth-divider"><span>o</span></div>
         <button type="button" className="soft-button wide" onClick={enterDemoMode}>Continuar en modo demo</button>
-        <p className="auth-foot">Modo demo usa datos locales sin persistencia. Para producción, conectá Supabase y aplicá la migración en <code>supabase/migrations/</code>.</p>
+        <p className="auth-foot">Modo demo usa datos locales sin persistencia. Para producción, conectá Supabase únicamente con la migración 016 revisada y aprobada.</p>
       </div>
     </div>
   );

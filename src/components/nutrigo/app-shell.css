@@ -1,0 +1,186 @@
+/* App shell: bottom tab bar, compact type, no left menu. Loaded last. */
+.nv-app {
+  flex-direction: column;
+  width: 100%;
+  min-height: 100dvh;
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
+}
+.nv-app.nv-pro .nv-sidebar,
+.nv-menu-toggle,
+.nv-mobile-brand,
+.nv-preview-label,
+.nv-sidebar-note,
+.nv-back { display: none !important; }
+.nv-app.nv-patient .nv-sidebar { display: none; }
+
+.nv-workspace { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.nv-app.nv-patient .nv-topbar,
+.nv-app.nv-pro .nv-topbar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 16px;
+  gap: 10px;
+}
+.nv-app .nv-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  text-decoration: none;
+}
+.nv-app .nv-brand > span { font-size: 16px; }
+.nv-app .nv-brand small { display: none; }
+.nv-app .brand-mark { width: 32px; height: 32px; }
+.nv-app.nv-patient .nv-topbar-title,
+.nv-app.nv-pro .nv-topbar-title { font-size: 15px; }
+
+.nv-content-layout { grid-template-columns: minmax(0, 1fr) !important; }
+.nv-app.nv-patient .nv-content-layout,
+.nv-app.nv-pro:not(.nv-messaging) .nv-content-layout { grid-template-columns: minmax(0, 1fr) !important; }
+.nv-daily { display: none; }
+.nv-main { padding: 16px 16px 28px; }
+.nv-page-head { margin-bottom: 16px; align-items: flex-start; }
+.nv-page-head h1 { font-size: 22px; letter-spacing: -.5px; }
+.nv-page-head p { font-size: 13px; max-width: 42ch; }
+.nv-metric { min-height: 0; padding: 14px; }
+.nv-metric > strong { font-size: 22px; }
+.nv-card { padding: 16px; margin-bottom: 14px; }
+.nv-pro-summary dd { font-size: 20px; }
+.nv-card-head h2, .np-hero h2, .np-section h2, .nv-state h2 { font-size: 16px; }
+.nv-card p, .nv-state p, .np-copy p, .nw-plan-note { font-size: 13px; }
+.nv-metric h2 { font-size: 13px; }
+
+.nv-tabbar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 2px;
+  min-height: 64px;
+  padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--nv-border);
+  background: color-mix(in srgb, var(--nv-card) 94%, transparent);
+  backdrop-filter: blur(16px);
+}
+.nv-tabbar button {
+  display: flex;
+  min-width: 0;
+  min-height: 52px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 2px;
+  border: 0;
+  border-radius: 12px;
+  color: var(--nv-muted);
+  background: transparent;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.nv-tabbar button svg { width: 22px; height: 22px; }
+.nv-tab-icon { position: relative; display: grid; place-items: center; }
+.nv-tab-unread {
+  position: absolute;
+  top: -5px;
+  right: -9px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 99px;
+  background: #F86648;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+}
+.nv-tabbar button[aria-current=page] {
+  color: var(--nv-forest);
+  background: var(--nv-green);
+}
+.nv-app.nv-dark .nv-tabbar button[aria-current=page] {
+  color: #083a30;
+  background: var(--nv-accent);
+}
+
+.nv-more {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(8, 58, 48, .38);
+}
+.nv-more-sheet {
+  width: min(720px, 100%);
+  max-height: min(78vh, 640px);
+  margin: 0 auto;
+  padding: 12px 16px calc(20px + env(safe-area-inset-bottom));
+  overflow: auto;
+  border-radius: 20px 20px 0 0;
+  background: var(--nv-card);
+}
+.nv-more-sheet h2 { font-size: 16px; margin: 8px 4px 14px; }
+.nv-more-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.nv-more-grid button {
+  display: flex;
+  min-height: 56px;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--nv-border);
+  border-radius: 14px;
+  color: var(--nv-ink);
+  background: var(--nv-bg);
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+}
+.nv-more-grid button[aria-current=page] {
+  border-color: var(--nv-forest);
+  background: var(--nv-green);
+}
+
+@media (min-width: 1100px) {
+  .nv-app.nv-patient {
+    flex-direction: row;
+    padding-bottom: 0;
+  }
+  .nv-app.nv-patient .nv-sidebar {
+    display: flex !important;
+    width: 223px;
+    flex: 0 0 223px;
+  }
+  .nv-app.nv-patient .nv-tabbar { display: none; }
+  .nv-app.nv-patient .nv-brand small { display: block; }
+  .nv-app.nv-patient .nv-sidebar .nv-brand { margin-bottom: 20px; }
+  .nv-app.nv-patient .nv-sidebar nav button { font-size: 13px; min-height: 44px; }
+  .nv-app.nv-patient:not(.nv-messaging):not(.nv-grocery-page):not(.nv-progress-page):not(.nv-patient-diary):not(.nv-patient-plan):not(.nv-patient-agenda):not(.nv-healthy-menu):not(.nv-exercise-page):not(.nv-resources-page) .nv-content-layout,
+  .nv-app.nv-pro:not(.nv-messaging):not(.nv-record):not(.nv-food-diary):not(.nv-meal-plan):not(.nv-consultation-page):not(.nv-agenda-page):not(.nv-goals-page):not(.nv-work-center-page) .nv-content-layout {
+    grid-template-columns: minmax(0, 1fr) 300px !important;
+  }
+  .nv-app.nv-patient:not(.nv-messaging):not(.nv-grocery-page):not(.nv-progress-page):not(.nv-patient-diary):not(.nv-patient-plan):not(.nv-patient-agenda):not(.nv-healthy-menu):not(.nv-exercise-page):not(.nv-resources-page) .nv-daily,
+  .nv-app.nv-pro:not(.nv-messaging):not(.nv-record):not(.nv-food-diary):not(.nv-meal-plan):not(.nv-consultation-page):not(.nv-agenda-page):not(.nv-goals-page):not(.nv-work-center-page) .nv-daily {
+    display: block;
+  }
+  .nv-main { padding: 20px 24px 32px; }
+  .nv-page-head h1 { font-size: 26px; }
+  .nv-more-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .nv-page-head { flex-direction: column; }
+  .nv-search, .np-dashboard-search { width: 100%; max-width: none; }
+  .nv-metrics { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .nv-pro-summary { grid-template-columns: 1fr 1fr; }
+}

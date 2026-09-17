@@ -1,0 +1,22 @@
+[
+  [
+    "goals-action-stays-in-nutrigo",
+    "pat-sofia"
+  ],
+  [
+    "multipatient-filters",
+    true
+  ],
+  [
+    "patient-history-isolated",
+    "pat-marina"
+  ],
+  [
+    "update-readback-and-restore",
+    true
+  ],
+  [
+    "patient-progress-read-only",
+    true
+  ]
+]

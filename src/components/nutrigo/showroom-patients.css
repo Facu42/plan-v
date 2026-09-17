@@ -1,0 +1,44 @@
+/* Operational patients directory, scoped to the Nutrigo showroom (.nv-app). */
+.nv-directory-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:0 0 16px; }
+.nv-directory-summary>div { margin:0; padding:12px 14px; border-radius:10px; background:var(--nv-card); border:1px solid var(--nv-border); }
+.nv-directory-summary dt { font-size:13px; color:var(--nv-muted); }
+.nv-directory-summary dd { margin:4px 0 0; font-size:22px; font-weight:600; }
+.nv-directory-filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+.nv-directory-filters button { display:flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--nv-border); border-radius:999px; background:var(--nv-bg); color:var(--nv-ink); font-size:11px; }
+.nv-directory-filters button[aria-pressed=true] { background:var(--nv-green); border-color:transparent; font-weight:600; }
+.nv-directory-filters span { color:var(--nv-muted); font-size:13px; }
+.nv-directory-notice { display:flex; align-items:center; gap:8px; padding:10px 12px; margin:0 0 14px; border-radius:9px; background:var(--nv-green); font-size:11px; }
+.nv-directory-notice>span { flex:1; min-width:0; }
+.nv-directory-notice button { border:0; background:transparent; color:var(--nv-ink); font-size:14px; }
+.nv-directory-table [role=row] { grid-template-columns:1.1fr .8fr 1fr .7fr 1.2fr; }
+.nv-directory-table [role=cell]>span { display:flex; flex-direction:column; min-width:0; }
+.nv-directory-table [role=cell]:first-child>span>strong { font-size:12px; }
+.nv-directory-table [role=cell] small { color:var(--nv-muted); font-size:12px; overflow-wrap:anywhere; }
+.nv-directory-actions { display:flex; flex-wrap:wrap; gap:6px; }
+.nv-directory-actions .nv-button { padding:7px 10px; font-size:13px; }
+.nv-directory-actions .nv-confirm { background:var(--nv-coral); font-weight:600; }
+.nv-modal-backdrop { position:fixed; inset:0; z-index:120; display:grid; place-items:center; padding:20px; background:rgba(8,58,48,.45); }
+.nv-dialog { width:min(560px,100%); max-height:calc(100dvh - 40px); overflow-y:auto; padding:24px; border-radius:16px; background:var(--nv-card); color:var(--nv-ink); box-shadow:0 24px 60px rgba(8,58,48,.28); }
+.nv-dialog-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:18px; }
+.nv-dialog-head h2 { font-size:18px; margin:2px 0 6px; }
+.nv-dialog-head p { font-size:11px; color:var(--nv-muted); }
+.nv-dialog-head>button { border:0; background:var(--nv-bg); border-radius:8px; width:32px; height:32px; font-size:16px; color:var(--nv-ink); }
+.nv-eyebrow { margin:0; font-size:12px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--nv-muted); }
+.nv-dialog-form { display:flex; flex-direction:column; gap:14px; }
+.nv-dialog-form label { display:flex; flex-direction:column; gap:6px; font-size:11px; font-weight:500; }
+.nv-dialog-form input,.nv-dialog-form textarea,.nv-dialog-form select { padding:10px 12px; border:1px solid var(--nv-border); border-radius:9px; background:var(--nv-bg); color:var(--nv-ink); font:inherit; font-size:12px; }
+.nv-dialog-form input:focus-visible,.nv-dialog-form textarea:focus-visible,.nv-dialog-form select:focus-visible { outline:2px solid var(--nv-strong); outline-offset:1px; }
+.nv-dialog-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.nv-dialog-hint { display:flex; align-items:center; gap:8px; margin:0; font-size:13px; color:var(--nv-muted); }
+.nv-dialog-error { margin:0; padding:10px 12px; border-radius:9px; background:var(--nv-coral); font-size:11px; }
+.nv-dialog-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:4px; }
+.nv-dialog-actions .nv-button { display:inline-flex; align-items:center; gap:6px; }
+.nv-dialog .spin { animation:nv-spin 1s linear infinite; }
+@keyframes nv-spin { to { transform:rotate(360deg); } }
+@media(max-width:760px) {
+  .nv-directory-summary { grid-template-columns:1fr 1fr; }
+  .nv-directory-table [role=row] { grid-template-columns:1fr 1fr; }
+  .nv-dialog-grid { grid-template-columns:1fr; }
+  .nv-dialog { padding:18px; }
+}
+@media(max-width:360px) { .nv-directory-table [role=row] { grid-template-columns:1fr; } }

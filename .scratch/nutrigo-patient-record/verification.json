@@ -1,0 +1,98 @@
+[
+  {
+    "width": 1440,
+    "scroll": 1425,
+    "privateCards": 4,
+    "summaryCards": 3,
+    "historyCards": 3,
+    "rail": false,
+    "main": 1120,
+    "privateLabel": "Informaci\u00f3n profesional privada",
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-record\\record-light-1440.png"
+  },
+  {
+    "width": 800,
+    "scroll": 785,
+    "privateCards": 4,
+    "summaryCards": 3,
+    "historyCards": 3,
+    "rail": false,
+    "main": 585,
+    "privateLabel": "Informaci\u00f3n profesional privada",
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-record\\record-light-800.png"
+  },
+  {
+    "width": 390,
+    "scroll": 375,
+    "privateCards": 4,
+    "summaryCards": 3,
+    "historyCards": 3,
+    "rail": false,
+    "main": 375,
+    "privateLabel": "Informaci\u00f3n profesional privada",
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-record\\record-light-390.png"
+  },
+  {
+    "width": 320,
+    "scroll": 305,
+    "privateCards": 4,
+    "summaryCards": 3,
+    "historyCards": 3,
+    "rail": false,
+    "main": 305,
+    "privateLabel": "Informaci\u00f3n profesional privada",
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-record\\record-light-320.png"
+  },
+  {
+    "width": 1440,
+    "scroll": 1425,
+    "privateCards": 4,
+    "summaryCards": 3,
+    "historyCards": 3,
+    "rail": false,
+    "main": 1120,
+    "privateLabel": "Informaci\u00f3n profesional privada",
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-record\\record-dark-1440.png"
+  },
+  {
+    "width": 800,
+    "scroll": 785,
+    "privateCards": 4,
+    "summaryCards": 3,
+    "historyCards": 3,
+    "rail": false,
+    "main": 585,
+    "privateLabel": "Informaci\u00f3n profesional privada",
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-record\\record-dark-800.png"
+  },
+  {
+    "width": 390,
+    "scroll": 375,
+    "privateCards": 4,
+    "summaryCards": 3,
+    "historyCards": 3,
+    "rail": false,
+    "main": 375,
+    "privateLabel": "Informaci\u00f3n profesional privada",
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-record\\record-dark-390.png"
+  },
+  {
+    "width": 320,
+    "scroll": 305,
+    "privateCards": 4,
+    "summaryCards": 3,
+    "historyCards": 3,
+    "rail": false,
+    "main": 305,
+    "privateLabel": "Informaci\u00f3n profesional privada",
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-record\\record-dark-320.png"
+  }
+]

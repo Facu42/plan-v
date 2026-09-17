@@ -1,16 +1,35 @@
-import { useEffect, useState } from 'react';
-import { PatientApp } from './patient/PatientApp';
-import { CrmDashboard } from './crm/CrmDashboard';
+import { lazy, Suspense, useEffect, useState } from 'react';
+
+const PatientApp = lazy(() => import('./patient/PatientApp').then(({ PatientApp }) => ({ default: PatientApp })));
+const CrmDashboard = lazy(() => import('./crm/CrmDashboard').then(({ CrmDashboard }) => ({ default: CrmDashboard })));
 import { LoginScreen } from './auth/LoginScreen';
 import { useAuth } from '../context/AuthContext';
 import { useAppStore } from '../store/useAppStore';
 import { api } from '../api/client';
 import { supabaseConfigured } from '../lib/supabase';
+import { readThemePreference, writeThemePreference, type ThemePreference } from '../theme-preference';
+import { Mark } from './shared/Icon';
+import { shouldShowNutrigo } from './design-entry';
+
+const NutrigoShowroom = import.meta.env.DEV
+  ? lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })))
+  : null;
 
 export function PlanVExperience() {
   const { session, demoMode, isNutri, isPatient, profile, signOut, loading: authLoading } = useAuth();
   const [view, setView] = useState<'patient' | 'pro'>('patient');
+  const [theme, setTheme] = useState<ThemePreference>(() => readThemePreference(
+    typeof window === 'undefined' ? null : window.localStorage,
+    typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches,
+  ));
   const { boot, loading, error, aiEnabled, supabaseEnabled } = useAppStore();
+  const darkMode = theme === 'dark';
+  const toggleTheme = () => setTheme((current) => current === 'dark' ? 'light' : 'dark');
+
+  useEffect(() => {
+    writeThemePreference(typeof window === 'undefined' ? null : window.localStorage, theme);
+    document.documentElement.style.colorScheme = theme;
+  }, [theme]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -31,28 +50,29 @@ export function PlanVExperience() {
 
   if (authLoading) {
     return (
-      <div className="plan-v-app loading-screen">
-        <div className="loading-card"><p className="eyebrow">Plan V</p><h2>Cargando…</h2></div>
+      <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}>
+        <div className="loading-card"><Mark /><p className="eyebrow">Plan V</p><h2>Cargando…</h2></div>
       </div>
     );
   }
 
   if (supabaseConfigured && !session && !demoMode) {
-    return <LoginScreen />;
+    return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><LoginScreen darkMode={darkMode} onToggleTheme={toggleTheme} /></div>;
   }
 
   if (loading) {
     return (
-      <div className="plan-v-app loading-screen">
-        <div className="loading-card"><p className="eyebrow">Plan V</p><h2>Cargando datos…</h2></div>
+      <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}>
+        <div className="loading-card"><Mark /><p className="eyebrow">Plan V</p><h2>Cargando datos…</h2></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="plan-v-app loading-screen">
+      <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}>
         <div className="loading-card error">
+          <Mark />
           <p className="eyebrow">Plan V</p>
           <h2>No pudimos conectar</h2>
           <p>{error}</p>
@@ -62,10 +82,14 @@ export function PlanVExperience() {
     );
   }
 
+  if (NutrigoShowroom && shouldShowNutrigo({ development: import.meta.env.DEV, demoMode, hasSession: Boolean(session), supabaseEnabled, search: window.location.search })) {
+    return <Suspense fallback={<div className="plan-v-app loading-screen" role="status">Cargando consultorio…</div>}><NutrigoShowroom darkMode={darkMode} onToggleTheme={toggleTheme} /></Suspense>;
+  }
+
   const showToggle = demoMode || (!isNutri && !isPatient);
 
   return (
-    <div className="plan-v-app">
+    <div className={`plan-v-app${darkMode ? ' dark' : ''}`}>
       <div className="prototype-switch" role="group" aria-label="Cambiar vista">
         {showToggle ? (
           <>
@@ -77,12 +101,21 @@ export function PlanVExperience() {
           <span className="role-badge">{isNutri ? 'Verónica · CRM' : profile?.full_name ?? 'Paciente'}</span>
         )}
         <span className={`ai-pill ${aiEnabled ? 'live' : 'mock'}`}>IA {aiEnabled ? 'live' : 'demo'}</span>
+        {import.meta.env.DEV && demoMode && !session && !supabaseEnabled && <a href="?design=nutrigo" style={{ padding: '6px 10px', fontSize: 12, color: 'inherit' }}>Consultorio</a>}
         {supabaseEnabled && <span className="ai-pill live">DB</span>}
         {session && (
           <button type="button" className="signout-btn" onClick={() => signOut()} aria-label="Cerrar sesión">Salir</button>
         )}
       </div>
-      {view === 'patient' ? <PatientApp /> : <CrmDashboard />}
+      <Suspense fallback={(
+        <div className="loading-screen" role="status" aria-live="polite">
+          <div className="loading-card"><Mark /><p className="eyebrow">Plan V</p><h2>Cargando módulo…</h2></div>
+        </div>
+      )}>
+        {view === 'patient'
+          ? <PatientApp darkMode={darkMode} onToggleTheme={toggleTheme} />
+          : <CrmDashboard darkMode={darkMode} onToggleTheme={toggleTheme} />}
+      </Suspense>
     </div>
   );
 }

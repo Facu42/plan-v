@@ -1,0 +1,34 @@
+[
+  [
+    "sidebar-opens-new-directory",
+    true
+  ],
+  [
+    "search-filters-directory",
+    true
+  ],
+  [
+    "create-persists-and-notice",
+    "pat-2e594399-35d2-45cc-9255-e841d4ade2e8"
+  ],
+  [
+    "edit-persists-isolated",
+    true
+  ],
+  [
+    "archive-restore-reversible",
+    true
+  ],
+  [
+    "follow-selects-patient",
+    true
+  ],
+  [
+    "toolbar-uses-new-directory",
+    true
+  ],
+  [
+    "qa-patient-left-archived",
+    true
+  ]
+]

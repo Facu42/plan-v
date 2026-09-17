@@ -1,22 +1,26 @@
 {
   "brand_name": "Plan V — Verónica Trenti",
   "handle": "@planv.nutricion",
+  "logo": "Logo Plan V Nutrición - Isotipo Circular.png",
+  "palette_source": "Logo raster 1024x1024; colores representativos extraídos del primer plano",
   "palette": {
-    "primary": "#3BB273",
-    "deep": "#226C4B",
-    "accent": "#FF6F61",
-    "dark": "#1B1B1B",
-    "light": "#F7FAF9",
-    "muted": "#DCEFE7",
-    "yellow": "#FBEFC5",
-    "lilac": "#EBE6F8",
-    "lima": "#EAFF78"
+    "primary": "#23955D",
+    "deep": "#083A30",
+    "leaf": "#62AA66",
+    "gold": "#F9B343",
+    "coral": "#F87D6D",
+    "orange": "#F86648",
+    "apricot": "#F5A067",
+    "cream": "#F9F6EE",
+    "dark_surface": "#102A24",
+    "dark_card": "#173830",
+    "muted": "#E3EFE4"
   },
   "type": {
     "display": "Fraunces",
     "ui": "DM Sans"
   },
-  "aesthetic": "neumorphism + glassmorphism",
+  "aesthetic": "dashboard editorial de bienestar inspirado en Nutrigo, con implementación original de Plan V",
   "panel": "design/tokens-panel-nutri.css",
   "ig_canvas": { "w": 1080, "h": 1350 },
   "footer": "Plan V — Verónica Trenti | @planv.nutricion"

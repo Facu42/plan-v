@@ -1,0 +1,158 @@
+[
+  {
+    "width": 1440,
+    "scroll": 1425,
+    "stats": [
+      108,
+      108,
+      108
+    ],
+    "cells": 35,
+    "cellHeights": [
+      120,
+      120,
+      120,
+      120,
+      120,
+      120,
+      120
+    ],
+    "rail": false,
+    "legacy": false,
+    "layout": "833px 285px",
+    "primary": 833,
+    "detail": 285,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-consultations\\consultations-light-1440.png"
+  },
+  {
+    "width": 800,
+    "scroll": 785,
+    "stats": [
+      108,
+      108,
+      108
+    ],
+    "cells": 35,
+    "cellHeights": [
+      120,
+      120,
+      120,
+      120,
+      120,
+      120,
+      120
+    ],
+    "rail": false,
+    "legacy": false,
+    "layout": "549px",
+    "primary": 549,
+    "detail": 549,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-consultations\\consultations-light-800.png"
+  },
+  {
+    "width": 390,
+    "scroll": 375,
+    "stats": [
+      178,
+      178,
+      178
+    ],
+    "cells": 35,
+    "cellHeights": [
+      120,
+      120,
+      120,
+      120,
+      120,
+      120,
+      120
+    ],
+    "rail": false,
+    "legacy": false,
+    "layout": "343px",
+    "primary": 343,
+    "detail": 375,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-consultations\\consultations-light-390.png"
+  },
+  {
+    "width": 1440,
+    "scroll": 1425,
+    "stats": [
+      108,
+      108,
+      108
+    ],
+    "cells": 35,
+    "cellHeights": [
+      120,
+      120,
+      120,
+      120,
+      120,
+      120,
+      120
+    ],
+    "rail": false,
+    "legacy": false,
+    "layout": "833px 285px",
+    "primary": 833,
+    "detail": 285,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-consultations\\consultations-dark-1440.png"
+  },
+  {
+    "width": 800,
+    "scroll": 785,
+    "stats": [
+      108,
+      108,
+      108
+    ],
+    "cells": 35,
+    "cellHeights": [
+      120,
+      120,
+      120,
+      120,
+      120,
+      120,
+      120
+    ],
+    "rail": false,
+    "legacy": false,
+    "layout": "549px",
+    "primary": 549,
+    "detail": 549,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-consultations\\consultations-dark-800.png"
+  },
+  {
+    "width": 390,
+    "scroll": 375,
+    "stats": [
+      178,
+      178,
+      178
+    ],
+    "cells": 35,
+    "cellHeights": [
+      120,
+      120,
+      120,
+      120,
+      120,
+      120,
+      120
+    ],
+    "rail": false,
+    "legacy": false,
+    "layout": "343px",
+    "primary": 343,
+    "detail": 375,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-consultations\\consultations-dark-390.png"
+  }
+]

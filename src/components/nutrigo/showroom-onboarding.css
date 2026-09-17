@@ -1,0 +1,113 @@
+.nv-app.nv-onboarding { padding-bottom: 0; min-height: 100dvh; background: var(--nv-bg); }
+.nv-app.nv-onboarding .nv-tabbar { display: none; }
+.nvon {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 16px calc(20px + env(safe-area-inset-bottom));
+  max-width: 560px;
+  margin: 0 auto;
+}
+.nvon-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nvon-top > span { font-size: 16px; font-weight: 700; }
+.nvon-top ol {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+  padding: 0;
+  list-style: none;
+}
+.nvon-top li {
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--nv-border);
+}
+.nvon-top li[aria-current=step] { width: 18px; background: var(--nv-forest); }
+.nv-app.nv-dark .nvon-top li[aria-current=step] { background: var(--nv-accent); }
+.nvon-card {
+  flex: 0 1 auto;
+  padding: 22px 20px;
+  border: 1px solid var(--nv-border);
+  border-radius: 20px;
+  background: var(--nv-card);
+}
+.nvon-eyebrow {
+  margin: 0 0 8px;
+  color: var(--nv-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.nvon h1 {
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: -.6px;
+  line-height: 1.2;
+}
+.nvon-lead { margin: 10px 0 20px; color: var(--nv-muted); font-size: 14px; line-height: 1.5; }
+.nvon-invite, .nvon-points li, .nvon-profile article {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  border: 1px solid var(--nv-border);
+  border-radius: 14px;
+  background: var(--nv-bg);
+}
+.nvon-invite { flex-wrap: wrap; margin-top: 8px; }
+.nvon-invite > p { flex-basis: 100%; margin: 4px 0 0; font-size: 14px; }
+.nvon-invite strong, .nvon-points strong { font-size: 15px; }
+.nvon-invite small { display: block; color: var(--nv-muted); font-size: 12px; }
+.nvon-points { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.nvon-points span { display: block; margin-top: 4px; color: var(--nv-muted); font-size: 13px; line-height: 1.45; }
+.nvon-privacy ul { margin: 0 0 16px; padding-left: 18px; font-size: 14px; line-height: 1.5; }
+.nvon-privacy label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 14px;
+  border: 1px solid var(--nv-border);
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.nvon-privacy input { margin-top: 3px; width: 18px; height: 18px; }
+.nvon-profile { display: grid; gap: 12px; }
+.nvon-profile label { display: grid; gap: 6px; font-size: 13px; font-weight: 600; }
+.nvon-profile input, .nvon-habits button {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--nv-border);
+  border-radius: 12px;
+  background: var(--nv-bg);
+  color: var(--nv-ink);
+  font: inherit;
+}
+.nvon-profile article { display: grid; gap: 4px; }
+.nvon-profile small { color: var(--nv-muted); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.nvon-profile p { margin: 0; font-size: 15px; }
+.nvon-habits { display: grid; gap: 16px; }
+.nvon-habits fieldset { border: 0; margin: 0; padding: 0; }
+.nvon-habits legend { margin-bottom: 8px; font-size: 13px; font-weight: 600; }
+.nvon-habits fieldset > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.nvon-habits button[aria-pressed=true] { border-color: var(--nv-forest); background: var(--nv-green); font-weight: 600; }
+.nvon-habits > p { margin: 0; color: var(--nv-muted); font-size: 12px; }
+.nvon-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+.nvon-actions .nv-button { flex: 1; min-height: 46px; }
+@media (min-width: 760px) {
+  .nvon { padding-top: 28px; }
+  .nvon h1 { font-size: 30px; }
+  .nvon-card { padding: 28px 26px; }
+}

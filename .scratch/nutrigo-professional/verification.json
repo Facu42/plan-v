@@ -1,0 +1,132 @@
+[
+  {
+    "theme": "light",
+    "state": {
+      "width": 1440,
+      "scroll": 1425,
+      "modules": 11,
+      "selected": "pat-sofia"
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional\\light-1440.png"
+  },
+  {
+    "theme": "light",
+    "state": {
+      "width": 1024,
+      "scroll": 1009,
+      "modules": 11,
+      "selected": "pat-sofia"
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional\\light-1024.png"
+  },
+  {
+    "theme": "light",
+    "state": {
+      "width": 800,
+      "scroll": 785,
+      "modules": 11,
+      "selected": "pat-sofia"
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional\\light-800.png"
+  },
+  {
+    "theme": "light",
+    "state": {
+      "width": 390,
+      "scroll": 375,
+      "modules": 11,
+      "selected": "pat-sofia"
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional\\light-390.png"
+  },
+  {
+    "theme": "light",
+    "state": {
+      "width": 320,
+      "scroll": 305,
+      "modules": 11,
+      "selected": "pat-sofia"
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional\\light-320.png"
+  },
+  {
+    "theme": "dark",
+    "state": {
+      "width": 1440,
+      "scroll": 1425,
+      "modules": 11,
+      "selected": "pat-sofia"
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional\\dark-1440.png"
+  },
+  {
+    "theme": "dark",
+    "state": {
+      "width": 1024,
+      "scroll": 1009,
+      "modules": 11,
+      "selected": "pat-sofia"
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional\\dark-1024.png"
+  },
+  {
+    "theme": "dark",
+    "state": {
+      "width": 800,
+      "scroll": 785,
+      "modules": 11,
+      "selected": "pat-sofia"
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional\\dark-800.png"
+  },
+  {
+    "theme": "dark",
+    "state": {
+      "width": 390,
+      "scroll": 375,
+      "modules": 11,
+      "selected": "pat-sofia"
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional\\dark-390.png"
+  },
+  {
+    "theme": "dark",
+    "state": {
+      "width": 320,
+      "scroll": 305,
+      "modules": 11,
+      "selected": "pat-sofia"
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional\\dark-320.png"
+  },
+  {
+    "action": "Abrir ficha",
+    "patient": "Marina",
+    "returned": true
+  },
+  {
+    "action": "Editar plan",
+    "patient": "Marina",
+    "returned": true
+  },
+  {
+    "action": "Gestionar consultas",
+    "patient": "Marina",
+    "returned": true
+  },
+  {
+    "action": "Revisar comidas",
+    "patient": "Marina",
+    "returned": true
+  },
+  {
+    "action": "Editar pacientes",
+    "patient": "Marina",
+    "returned": true
+  },
+  {
+    "action": "Gestionar objetivos",
+    "patient": "Marina",
+    "returned": true
+  }
+]

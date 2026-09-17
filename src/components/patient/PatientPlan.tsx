@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Patient } from '../../types';
 import { Icon, Mark } from '../shared/Icon';
 import { buildMenuWeeks, flavorTip, PERMITTED_SEASONINGS, preparationSteps } from './planContent';
+import { buildShoppingExport, buildShoppingList, shoppingChecklistKey } from './shopping-list';
 
 function readPreference(key: string, fallback: string) {
   try {
@@ -19,17 +20,37 @@ function savePreference(key: string, value: string) {
   }
 }
 
+function readCheckedPreference(key: string): Set<string> {
+  try {
+    const value: unknown = JSON.parse(window.localStorage.getItem(key) ?? '[]');
+    return new Set(Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveCheckedPreference(key: string, value: ReadonlySet<string>) {
+  savePreference(key, JSON.stringify([...value]));
+}
+
 export function PatientPlan({ patient, darkMode, onToggleTheme }: { patient: Patient; darkMode: boolean; onToggleTheme: () => void }) {
-  const [checked, setChecked] = useState<Set<string>>(new Set());
   const [expandedMealKey, setExpandedMealKey] = useState<string | null>(null);
+  const [exportFeedback, setExportFeedback] = useState('');
   const weeks = useMemo(() => buildMenuWeeks(patient), [patient]);
   const weekKey = `plan-v:${patient.id}:selected-week`;
   const dayKey = `plan-v:${patient.id}:selected-day`;
   const [selectedWeekId, setSelectedWeekId] = useState(() => readPreference(weekKey, 'current'));
   const selectedWeek = weeks.find((week) => week.id === selectedWeekId) ?? weeks[0];
+  const checklistKey = shoppingChecklistKey(patient.id, selectedWeek.id);
+  const [checked, setChecked] = useState<Set<string>>(() => readCheckedPreference(checklistKey));
   const [selectedDayId, setSelectedDayId] = useState(() => readPreference(dayKey, selectedWeek.days.find((day) => day.isToday)?.id ?? selectedWeek.days[0]?.id ?? ''));
   const selectedDay = selectedWeek.days.find((day) => day.id === selectedDayId) ?? selectedWeek.days.find((day) => day.isToday) ?? selectedWeek.days[0];
-  const shopping = useMemo(() => [...new Set(selectedWeek.days.flatMap((day) => day.meals.map((meal) => meal.title)))], [selectedWeek]);
+  const shoppingGroups = useMemo(
+    () => buildShoppingList(selectedWeek.days.flatMap((day) => day.meals)),
+    [selectedWeek],
+  );
+  const shoppingItems = shoppingGroups.flatMap((group) => group.items);
+  const checkedCount = shoppingItems.filter((item) => checked.has(item.id)).length;
 
   useEffect(() => {
     if (!weeks.some((week) => week.id === selectedWeekId)) setSelectedWeekId('current');
@@ -46,6 +67,11 @@ export function PatientPlan({ patient, darkMode, onToggleTheme }: { patient: Pat
     if (selectedDay) savePreference(dayKey, selectedDay.id);
   }, [dayKey, selectedDay]);
 
+  useEffect(() => {
+    setChecked(readCheckedPreference(checklistKey));
+    setExportFeedback('');
+  }, [checklistKey]);
+
   const selectWeek = (weekId: string) => {
     const next = weeks.find((week) => week.id === weekId);
     if (!next) return;
@@ -53,13 +79,30 @@ export function PatientPlan({ patient, darkMode, onToggleTheme }: { patient: Pat
     setSelectedDayId(next.days.find((day) => day.isToday)?.id ?? next.days[0]?.id ?? '');
   };
 
-  const toggle = (item: string) => {
+  const toggle = (itemId: string) => {
     setChecked((previous) => {
       const next = new Set(previous);
-      if (next.has(item)) next.delete(item);
-      else next.add(item);
+      if (next.has(itemId)) next.delete(itemId);
+      else next.add(itemId);
+      saveCheckedPreference(checklistKey, next);
       return next;
     });
+  };
+
+  const exportShoppingList = () => {
+    const text = buildShoppingExport({
+      label: selectedWeek.label,
+      range: selectedWeek.range,
+      groups: shoppingGroups,
+      checkedIds: checked,
+    });
+    const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `lista-de-compras-${selectedWeek.id}.txt`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+    setExportFeedback('Lista descargada');
   };
 
   return (
@@ -126,17 +169,35 @@ export function PatientPlan({ patient, darkMode, onToggleTheme }: { patient: Pat
       <section className="shopping-section">
         <div className="section-heading">
           <div><p className="eyebrow">Lista de compras</p><h2>{selectedWeek.label}</h2></div>
+          {shoppingItems.length > 0 && (
+            <button className="shopping-export" type="button" onClick={exportShoppingList}>
+              <Icon name="download" size={15} /> Exportar .txt
+            </button>
+          )}
         </div>
-        <ul className="shopping-list">
-          {shopping.map((item) => (
-            <li key={item}>
-              <button type="button" className={checked.has(item) ? 'checked' : ''} onClick={() => toggle(item)}>
-                <span className="check-box">{checked.has(item) && <Icon name="check" size={12} />}</span>
-                {item}
-              </button>
-            </li>
-          ))}
-        </ul>
+        {shoppingItems.length > 0 ? (
+          <>
+            <p className="shopping-progress" aria-live="polite">{checkedCount} de {shoppingItems.length} listos</p>
+            {shoppingGroups.map((group) => (
+              <div className="shopping-group" key={group.category}>
+                <h3>{group.category}</h3>
+                <ul className="shopping-list">
+                  {group.items.map((item) => (
+                    <li key={item.id}>
+                      <button type="button" className={checked.has(item.id) ? 'checked' : ''} aria-pressed={checked.has(item.id)} onClick={() => toggle(item.id)}>
+                        <span className="check-box">{checked.has(item.id) && <Icon name="check" size={12} />}</span>
+                        <span><b>{item.label}</b>{item.occurrences > 1 && <small>Aparece en {item.occurrences} comidas</small>}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            {exportFeedback && <p className="shopping-feedback" role="status">{exportFeedback}</p>}
+          </>
+        ) : (
+          <p className="shopping-empty">Cuando Verónica cargue comidas para esta semana, vas a encontrar acá los ingredientes.</p>
+        )}
       </section>
 
       <div className="plan-b-banner">

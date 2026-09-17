@@ -1,0 +1,79 @@
+/* Professional counterpart of the Nutrigo pattern; does not alter patient or legacy editors. */
+.nv-pro .nv-sidebar { width:223px; flex-basis:223px; }
+.nv-pro .nv-sidebar { padding-bottom:96px; scrollbar-width:thin; }
+.nv-pro .nv-brand { margin:0 8px 40px; gap:8px; }
+.nv-pro .nv-brand .brand-mark { width:36px; height:36px; }
+.nv-pro .nv-brand>span { font-size:19px; letter-spacing:-.7px; }
+.nv-pro .nv-brand small { font-size:11px; letter-spacing:1.55px; margin-top:-2px; }
+.nv-pro .nv-topbar { position:fixed; bottom:0; left:0; z-index:10; width:223px; min-height:68px; padding:12px; gap:3px; border-top:1px solid var(--nv-border); border-bottom:0; }
+.nv-pro .nv-topbar-title,.nv-pro .nv-preview-label { display:none; }
+.nv-pro .nv-role-switch { margin:0; padding:3px; }
+.nv-pro .nv-role-switch button { padding:8px 7px; font-size:13px; }
+.nv-pro .nv-role-switch button[aria-pressed=true] { background:var(--nv-green); color:var(--nv-ink); }
+.nv-pro .nv-theme { padding:6px; }
+.nv-pro:not(.nv-messaging) .nv-content-layout { grid-template-columns:minmax(0,1fr) 325px; }
+.nv-pro .nv-main { padding:28px; }
+.nv-pro .nv-page-head { min-height:50px; margin-bottom:14px; }
+.nv-pro .nv-page-head h1 { font-size:25px; letter-spacing:-.8px; }
+.nv-pro .nv-page-head p { font-size:12px; }
+.nv-pro-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin:0 0 14px; padding:8px 0; border-block:1px solid var(--nv-border); }
+.nv-pro-summary>div { min-width:0; border-right:1px solid var(--nv-border); padding-right:12px; }
+.nv-pro-summary>div:last-child { border:0; }
+.nv-pro-summary dt { color:var(--nv-muted); font-size:12px; }
+.nv-pro-summary dd { margin:2px 0 0; color:var(--nv-ink); font-size:18px; font-weight:600; line-height:1.25; }
+.nv-work-toolbar { display:grid; grid-template-columns:minmax(170px,210px) minmax(0,1fr); align-items:center; column-gap:18px; row-gap:6px; padding:10px 12px; margin-bottom:14px; background:var(--nv-card); border:1px solid var(--nv-border); border-radius:12px; }
+.nv-work-toolbar header h2 { font-size:13px; font-weight:600; line-height:1.3; }
+.nv-work-toolbar header span { font-size:12px; color:var(--nv-muted); }
+.nv-work-toolbar .nv-patient-select { grid-column:1; display:grid; grid-template-columns:minmax(0,1fr); align-items:center; margin:0; gap:4px; }
+.nv-work-toolbar .nv-patient-select { font-size:13px; }
+.nv-work-toolbar .nv-patient-select select { min-height:36px; padding:6px 10px; }
+.nv-work-toolbar .nv-action-grid { grid-column:2; grid-row:1/3; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin-top:0; }
+.nv-work-toolbar .nv-action-grid .nv-button { min-height:32px; padding:6px 8px; font-size:13px; }
+.nv-work-toolbar>.nv-caption { grid-column:2; margin-top:0; font-size:12px; }
+.nv-pro .nv-context-banner { background:transparent; border-radius:0; padding:0 0 8px; margin-bottom:12px; border-bottom:1px solid var(--nv-border); font-size:11px; }
+.nv-pro .nv-metrics { gap:16px; margin-bottom:20px; }
+.nv-pro .nv-metric { min-height:142px; border-radius:12px; }
+.nv-pro .nv-sidebar nav button { min-height:42px; border-radius:8px; font-size:12px; }
+.nv-pro .nv-card-head h2 { font-size:14px; }
+.nv-pro .nv-daily { padding:28px; }
+.nv-pro .nv-meal-body .np-food-photo { width:58px; height:58px; flex:0 0 58px; border-radius:12px; }
+.nv-pro .np-contact-card .nv-card-head h2 { overflow-wrap:anywhere; }
+.nv-habit-details { padding:16px 18px; background:var(--nv-card); border:1px solid var(--nv-border); border-radius:12px; }
+.nv-habit-details summary { cursor:pointer; color:var(--nv-ink); font-size:12px; font-weight:500; }
+.nv-habit-details summary:focus-visible { outline:3px solid var(--nv-strong); outline-offset:5px; border-radius:4px; }
+.nv-habit-details[open] summary { margin-bottom:20px; }
+@media(max-width:1250px) {
+  .nv-pro .nv-sidebar { width:200px; flex-basis:200px; }
+  .nv-pro .nv-topbar { width:200px; padding-inline:6px; }
+  .nv-pro .nv-role-switch button { padding-inline:5px; }
+  .nv-pro:not(.nv-messaging) .nv-content-layout { grid-template-columns:minmax(0,1fr) 270px; }
+  .nv-pro .nv-main,.nv-pro .nv-daily { padding:24px 18px; }
+  .nv-work-toolbar { grid-template-columns:1fr; row-gap:10px; }
+  .nv-work-toolbar .nv-action-grid { grid-column:1/-1; grid-row:auto; }
+  .nv-work-toolbar>.nv-caption { grid-column:1/-1; }
+}
+@media(max-width:1050px) {
+  .nv-pro:not(.nv-messaging) .nv-content-layout { grid-template-columns:minmax(0,1fr); }
+
+}
+@media(max-width:760px) {
+  .nv-pro .nv-sidebar { width:100%; flex-basis:auto; padding-bottom:18px; }
+  .nv-pro .nv-topbar { position:static; width:auto; min-height:64px; padding:12px 16px; border-top:0; gap:6px; }
+  .nv-pro .nv-role-switch { margin-left:auto; }
+  .nv-pro .nv-role-switch button { padding:7px 10px; font-size:11px; }
+  .nv-pro .nv-main { padding:24px 16px; }
+  .nv-pro-summary { grid-template-columns:1fr 1fr; gap:14px; }
+  .nv-pro-summary>div:nth-child(2) { border:0; }
+  .nv-work-toolbar { padding:14px; }
+  .nv-work-toolbar .nv-patient-select { grid-template-columns:minmax(0,1fr); gap:6px; }
+  .nv-work-toolbar .nv-action-grid { display:grid; grid-template-columns:1fr 1fr; margin-top:0; }
+  .nv-work-toolbar .nv-action-grid .nv-button { min-height:44px; }
+
+}
+@media(max-width:360px) {
+  .nv-pro .nv-main { padding-inline:12px; }
+
+}
+.nv-pro-summary-item { display:block; width:100%; padding:0; border:0; color:inherit; background:transparent; text-align:left; font:inherit; cursor:pointer; }
+.nv-pro-summary-item:hover dt { color:var(--nv-ink); }
+.nv-pro-summary-item:disabled { cursor:not-allowed; opacity:.55; }

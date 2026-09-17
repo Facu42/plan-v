@@ -1,0 +1,82 @@
+[
+  {
+    "width": 1440,
+    "scroll": 1425,
+    "modules": 11,
+    "actions": 6,
+    "summary": 4,
+    "chartTop": 684.875,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional-compact\\light-1440.png"
+  },
+  {
+    "width": 800,
+    "scroll": 785,
+    "modules": 11,
+    "actions": 6,
+    "summary": 4,
+    "chartTop": 828.265625,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional-compact\\light-800.png"
+  },
+  {
+    "width": 390,
+    "scroll": 375,
+    "modules": 11,
+    "actions": 6,
+    "summary": 4,
+    "chartTop": 1204.75,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional-compact\\light-390.png"
+  },
+  {
+    "width": 320,
+    "scroll": 305,
+    "modules": 11,
+    "actions": 6,
+    "summary": 4,
+    "chartTop": 1237.03125,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional-compact\\light-320.png"
+  },
+  {
+    "width": 1440,
+    "scroll": 1425,
+    "modules": 11,
+    "actions": 6,
+    "summary": 4,
+    "chartTop": 684.875,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional-compact\\dark-1440.png"
+  },
+  {
+    "width": 800,
+    "scroll": 785,
+    "modules": 11,
+    "actions": 6,
+    "summary": 4,
+    "chartTop": 828.265625,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional-compact\\dark-800.png"
+  },
+  {
+    "width": 390,
+    "scroll": 375,
+    "modules": 11,
+    "actions": 6,
+    "summary": 4,
+    "chartTop": 1204.75,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional-compact\\dark-390.png"
+  },
+  {
+    "width": 320,
+    "scroll": 305,
+    "modules": 11,
+    "actions": 6,
+    "summary": 4,
+    "chartTop": 1237.03125,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-professional-compact\\dark-320.png"
+  }
+]

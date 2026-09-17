@@ -1,0 +1,20 @@
+/* Figma 28:962: 269×128, inset 12, header 30, gap 16, date row 58.
+   Seven days replace the kit's six visible cells; no dated menu is implied. */
+.nw-calendar { min-width:0; align-self:start; padding:12px; border-radius:12px; margin-bottom:20px; background:var(--nv-bg); }
+.nw-calendar header { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:30px; margin-bottom:16px; }
+.nw-calendar h2 { display:flex; align-items:baseline; flex-wrap:wrap; gap:6px; margin:0; font-size:14px; line-height:18px; font-weight:600; }
+.nw-calendar h2::first-letter { text-transform:uppercase; }
+.nw-calendar h2 small { color:var(--nv-muted); font-size:11px; font-weight:400; }
+.nw-calendar button { border:0; cursor:pointer; font:inherit; color:var(--nv-ink); }
+.nw-calendar .nw-today { min-height:30px; padding:4px 8px; background:var(--nv-card); border-radius:6px; font-size:13px; font-weight:500; }
+.nw-days { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); }
+.nw-day { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; height:58px; min-width:0; padding:4px 0; border-radius:8px; background:transparent; }
+.nw-day>span { font-size:12px; line-height:12px; color:var(--nv-muted); }
+.nw-day time { font-size:14px; line-height:18px; font-weight:500; }
+.nw-day[aria-current=date] time { text-decoration:underline; text-underline-offset:4px; }
+.nw-day[aria-pressed=true] { background:var(--nv-green); }
+.nw-day[aria-pressed=true]>span { color:var(--nv-ink); }
+.nw-calendar button:hover { box-shadow:inset 0 0 0 1px var(--nv-muted); }
+.nw-calendar button:focus-visible { outline:2px solid var(--nv-ink); outline-offset:2px; }
+.nw-plan-note { margin:6px 0 8px; color:var(--nv-muted); font-size:13px; line-height:1.6; }
+@media(max-width:1050px) { .nw-calendar { margin-bottom:0; }.nw-plan-note { grid-column:1/-1; } }

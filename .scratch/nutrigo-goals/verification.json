@@ -1,0 +1,110 @@
+[
+  {
+    "width": 1440,
+    "scroll": 1425,
+    "stats": [
+      108,
+      108,
+      108,
+      108
+    ],
+    "rail": false,
+    "legacy": false,
+    "main": 1202,
+    "layout": "752px 374px",
+    "directory": 752,
+    "focus": 374,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-goals\\goals-light-1440.png"
+  },
+  {
+    "width": 800,
+    "scroll": 785,
+    "stats": [
+      108,
+      108,
+      108,
+      108
+    ],
+    "rail": false,
+    "legacy": false,
+    "main": 585,
+    "layout": "549px",
+    "directory": 549,
+    "focus": 549,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-goals\\goals-light-800.png"
+  },
+  {
+    "width": 390,
+    "scroll": 375,
+    "stats": [
+      128,
+      128,
+      128,
+      128
+    ],
+    "rail": false,
+    "legacy": false,
+    "main": 375,
+    "layout": "343px",
+    "directory": 375,
+    "focus": 343,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-goals\\goals-light-390.png"
+  },
+  {
+    "width": 1440,
+    "scroll": 1425,
+    "stats": [
+      108,
+      108,
+      108,
+      108
+    ],
+    "rail": false,
+    "legacy": false,
+    "main": 1202,
+    "layout": "752px 374px",
+    "directory": 752,
+    "focus": 374,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-goals\\goals-dark-1440.png"
+  },
+  {
+    "width": 800,
+    "scroll": 785,
+    "stats": [
+      108,
+      108,
+      108,
+      108
+    ],
+    "rail": false,
+    "legacy": false,
+    "main": 585,
+    "layout": "549px",
+    "directory": 549,
+    "focus": 549,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-goals\\goals-dark-800.png"
+  },
+  {
+    "width": 390,
+    "scroll": 375,
+    "stats": [
+      128,
+      128,
+      128,
+      128
+    ],
+    "rail": false,
+    "legacy": false,
+    "main": 375,
+    "layout": "343px",
+    "directory": 375,
+    "focus": 343,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-goals\\goals-dark-390.png"
+  }
+]

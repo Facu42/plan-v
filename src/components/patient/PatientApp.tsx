@@ -1,11 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { api } from '../../api/client';
 import { useActivePatient, useAppStore } from '../../store/useAppStore';
 import { Icon, Mark } from '../shared/Icon';
+import { DailyRemindersPanel } from './DailyRemindersPanel';
 import { MealLogModal } from './MealLogModal';
 import { PatientCamino } from './PatientCamino';
 import { PatientMessages } from './PatientMessages';
 import { PatientPlan } from './PatientPlan';
+import { buildDailyReminders } from './daily-reminders';
+import { hasFullPatientAccess } from '../../billing';
+import { PatientPaywall } from './PatientPaywall';
 import { flavorTip, PERMITTED_SEASONINGS, preparationSteps, withColacion } from './planContent';
 
 type Tab = 'hoy' | 'plan' | 'camino' | 'mensajes';
@@ -30,6 +34,17 @@ function PatientHome({ openPhoto, onShowPlan, onShowMessages, darkMode, onToggle
   const patient = useActivePatient()!;
   const refreshPatient = useAppStore((s) => s.refreshPatient);
   const todayPlan = useMemo(() => withColacion(patient.todayPlan), [patient.todayPlan]);
+  const reminders = useMemo(() => buildDailyReminders({
+    todayPlan,
+    meal_logs: patient.meal_logs,
+    hydration: patient.hydration,
+    sleep_minutes: patient.sleep_minutes,
+    appointment: patient.appointment,
+  }), [patient.appointment, patient.hydration, patient.meal_logs, patient.sleep_minutes, todayPlan]);
+  const [remindersOpen, setRemindersOpen] = useState(false);
+  const [sleepHours, setSleepHours] = useState(patient.sleep_minutes === null ? '' : String(patient.sleep_minutes / 60));
+  const [sleepSaving, setSleepSaving] = useState(false);
+  const [sleepError, setSleepError] = useState('');
   const mealPreferenceKey = `plan-v:${patient.id}:selected-meal`;
   const [selectedMeal, setSelectedMeal] = useState(() => {
     try {
@@ -53,6 +68,10 @@ function PatientHome({ openPhoto, onShowPlan, onShowMessages, darkMode, onToggle
     }
   }, [mealPreferenceKey, selectedMeal]);
 
+  useEffect(() => {
+    setSleepHours(patient.sleep_minutes === null ? '' : String(patient.sleep_minutes / 60));
+  }, [patient.sleep_minutes]);
+
   const rhythmMessage = useMemo(() => {
     if (patient.hydration >= 7) return 'Tu ritmo está cuidado. Seguí escuchándote.';
     if (patient.hydration >= 5) return 'Vas bien. Un vaso más acompaña tu tarde.';
@@ -73,6 +92,26 @@ function PatientHome({ openPhoto, onShowPlan, onShowMessages, darkMode, onToggle
     await refreshPatient(patient.id);
   };
 
+  const saveSleep = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const hours = Number(sleepHours);
+    if (!Number.isFinite(hours) || hours < 0 || hours > 24) {
+      setSleepError('Ingresá un valor entre 0 y 24 horas.');
+      return;
+    }
+
+    setSleepSaving(true);
+    setSleepError('');
+    try {
+      await api.updateHabits(patient.id, { sleep_minutes: Math.round(hours * 60) });
+      await refreshPatient(patient.id);
+    } catch (reason) {
+      setSleepError(reason instanceof Error ? reason.message : 'No pudimos guardar el descanso.');
+    } finally {
+      setSleepSaving(false);
+    }
+  };
+
   const lastVeroMsg = [...patient.messages].reverse().find((m) => m.from === 'vero');
   const selectedMealPlan = todayPlan.find((meal) => meal.slot === selectedMeal);
 
@@ -82,7 +121,10 @@ function PatientHome({ openPhoto, onShowPlan, onShowMessages, darkMode, onToggle
         <div className="brand-lockup"><Mark /><span>Plan V</span></div>
         <div className="topbar-actions">
           <button className="round-button theme-toggle" type="button" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} aria-pressed={darkMode} onClick={onToggleTheme}><Icon name={darkMode ? 'sun' : 'moon'} size={18} /></button>
-          <button className="round-button" type="button" aria-label="Ver recordatorios"><Icon name="bell" size={18} /><b /></button>
+          <button className="round-button" type="button" aria-label="Ver recordatorios" aria-expanded={remindersOpen} aria-controls="daily-reminders-panel" onClick={() => setRemindersOpen(true)}>
+            <Icon name="bell" size={18} />
+            {reminders.some((reminder) => reminder.state === 'ahora' || reminder.state === 'perdido') && <b />}
+          </button>
         </div>
       </header>
 
@@ -193,6 +235,20 @@ function PatientHome({ openPhoto, onShowPlan, onShowMessages, darkMode, onToggle
           ))}
         </div>
         {patient.energy && <p className="checkin-feedback">Registrado. Verónica lo verá en tu próximo resumen.</p>}
+        <form className="sleep-checkin" id="sleep-checkin" onSubmit={saveSleep}>
+          <div className="sleep-checkin-heading">
+            <span className="mini-icon lilac"><Icon name="moon" size={16} /></span>
+            <div><p className="eyebrow">Descanso declarado</p><h3>¿Cuántas horas dormiste?</h3></div>
+          </div>
+          <div className="sleep-input-row">
+            <label htmlFor="sleep-hours">Horas de sueño</label>
+            <input id="sleep-hours" type="number" inputMode="decimal" min="0" max="24" step="0.5" value={sleepHours} onChange={(event) => setSleepHours(event.target.value)} placeholder="Ej. 7,5" required />
+            <span>horas</span>
+            <button type="submit" disabled={sleepSaving}>{sleepSaving ? 'Guardando…' : 'Guardar'}</button>
+          </div>
+          {patient.sleep_minutes !== null && <p className="checkin-feedback">Descanso registrado: {Math.floor(patient.sleep_minutes / 60)} h{patient.sleep_minutes % 60 > 0 ? ` ${patient.sleep_minutes % 60} min` : ''}. Es información para tu seguimiento, no una evaluación.</p>}
+          {sleepError && <p className="form-error" role="alert">{sleepError}</p>}
+        </form>
       </section>
 
       {lastVeroMsg && (
@@ -202,42 +258,76 @@ function PatientHome({ openPhoto, onShowPlan, onShowMessages, darkMode, onToggle
           <button aria-label="Responder a Verónica" type="button" onClick={onShowMessages}><Icon name="message" size={19} /></button>
         </section>
       )}
+
+      {patient.appointment && (
+        <section className="appointment-card-patient" aria-label="Tu próxima consulta">
+          <span className="mini-icon lilac"><Icon name="video" size={16} /></span>
+          <div>
+            <p className="eyebrow">Tu próxima consulta</p>
+            <h3>{patient.appointment.when}</h3>
+            <p>{patient.appointment.duration} min · {patient.appointment.channel === 'video' ? 'Videollamada con Verónica' : 'Consulta presencial'}</p>
+          </div>
+        </section>
+      )}
+
+      {remindersOpen && (
+        <DailyRemindersPanel
+          patient={patient}
+          onClose={() => setRemindersOpen(false)}
+          onLogMeal={(slot) => {
+            setRemindersOpen(false);
+            openPhoto(slot);
+          }}
+          onLogSleep={() => {
+            setRemindersOpen(false);
+            requestAnimationFrame(() => document.getElementById('sleep-checkin')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+          }}
+          onAddWater={addWater}
+        />
+      )}
     </main>
   );
 }
 
-export function PatientApp() {
+export function PatientApp({ darkMode, onToggleTheme }: { darkMode: boolean; onToggleTheme: () => void }) {
   const patient = useActivePatient();
   const [tab, setTab] = useState<Tab>('hoy');
   const [photoOpen, setPhotoOpen] = useState(false);
   const [defaultSlot, setDefaultSlot] = useState('Almuerzo');
-  const [darkMode, setDarkMode] = useState(() => {
-    try {
-      return window.localStorage.getItem('plan-v:theme') === 'dark';
-    } catch {
-      return false;
-    }
-  });
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem('plan-v:theme', darkMode ? 'dark' : 'light');
-    } catch {
-      // El tema se mantiene durante esta visita aunque no se pueda guardar.
-    }
-  }, [darkMode]);
 
   if (!patient) return <div className="loading-shell">Cargando…</div>;
+
+  const accessLocked = !hasFullPatientAccess(patient);
 
   const openPhoto = (slot?: string) => {
     if (slot) setDefaultSlot(slot);
     setPhotoOpen(true);
   };
 
+  if (accessLocked) {
+    return (
+      <div className={`patient-app${darkMode ? ' dark' : ''}`}>
+        {tab === 'mensajes' ? (
+          <PatientMessages patient={patient} />
+        ) : (
+          <PatientPaywall patient={patient} darkMode={darkMode} onToggleTheme={onToggleTheme} onShowMessages={() => setTab('mensajes')} />
+        )}
+        <nav className="patient-nav billing-nav" aria-label="Navegación del paciente">
+          <button type="button" className={tab !== 'mensajes' ? 'current' : ''} onClick={() => setTab('hoy')}>
+            <Icon name="heart" size={18} /><span>Acceso</span>
+          </button>
+          <button type="button" className={tab === 'mensajes' ? 'current' : ''} onClick={() => setTab('mensajes')}>
+            <Icon name="message" size={18} /><span>Mensajes</span>
+          </button>
+        </nav>
+      </div>
+    );
+  }
+
   return (
     <div className={`patient-app${darkMode ? ' dark' : ''}`}>
-      {tab === 'hoy' && <PatientHome openPhoto={openPhoto} onShowPlan={() => setTab('plan')} onShowMessages={() => setTab('mensajes')} darkMode={darkMode} onToggleTheme={() => setDarkMode((current) => !current)} />}
-      {tab === 'plan' && <PatientPlan patient={patient} darkMode={darkMode} onToggleTheme={() => setDarkMode((current) => !current)} />}
+      {tab === 'hoy' && <PatientHome openPhoto={openPhoto} onShowPlan={() => setTab('plan')} onShowMessages={() => setTab('mensajes')} darkMode={darkMode} onToggleTheme={onToggleTheme} />}
+      {tab === 'plan' && <PatientPlan patient={patient} darkMode={darkMode} onToggleTheme={onToggleTheme} />}
       {tab === 'camino' && <PatientCamino patient={patient} />}
       {tab === 'mensajes' && <PatientMessages patient={patient} />}
 

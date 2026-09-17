@@ -1,0 +1,6681 @@
+[
+  {
+    "id": "0:1",
+    "name": "🎨 Style & Component",
+    "frames": [
+      {
+        "id": "2:2711",
+        "name": "Frame 1",
+        "size": {
+          "x": 735,
+          "y": 1200
+        },
+        "fonts": {},
+        "children": [
+          {
+            "id": "2:2712",
+            "name": "Black",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 31,
+              "m10": 0,
+              "m11": 1,
+              "m12": 1042
+            }
+          },
+          {
+            "id": "2:2713",
+            "name": "Black",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 157,
+              "m10": 0,
+              "m11": 1,
+              "m12": 1042
+            }
+          },
+          {
+            "id": "2:2714",
+            "name": "Black",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 283,
+              "m10": 0,
+              "m11": 1,
+              "m12": 1042
+            }
+          },
+          {
+            "id": "2:2715",
+            "name": "Black",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 409,
+              "m10": 0,
+              "m11": 1,
+              "m12": 1042
+            }
+          },
+          {
+            "id": "2:2716",
+            "name": "Black",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 535,
+              "m10": 0,
+              "m11": 1,
+              "m12": 1042
+            }
+          },
+          {
+            "id": "2:2717",
+            "name": "Black",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 661,
+              "m10": 0,
+              "m11": 1,
+              "m12": 1042
+            }
+          },
+          {
+            "id": "2:2718",
+            "name": "Rectangle 39",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 608,
+              "m10": 0,
+              "m11": 1,
+              "m12": 265
+            }
+          },
+          {
+            "id": "2:2719",
+            "name": "Rectangle 43",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 608,
+              "m10": 0,
+              "m11": 1,
+              "m12": 151
+            }
+          },
+          {
+            "id": "2:2720",
+            "name": "Rectangle 44",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 608,
+              "m10": 0,
+              "m11": 1,
+              "m12": 37
+            }
+          },
+          {
+            "id": "2:2721",
+            "name": "Rectangle 40",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 608,
+              "m10": 0,
+              "m11": 1,
+              "m12": 379
+            }
+          },
+          {
+            "id": "2:2722",
+            "name": "Rectangle 41",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 608,
+              "m10": 0,
+              "m11": 1,
+              "m12": 493
+            }
+          },
+          {
+            "id": "2:2723",
+            "name": "Rectangle 45",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 608,
+              "m10": 0,
+              "m11": 1,
+              "m12": 607
+            }
+          },
+          {
+            "id": "2:2724",
+            "name": "Black",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 31,
+              "m10": 0,
+              "m11": 1,
+              "m12": 565
+            }
+          },
+          {
+            "id": "2:2725",
+            "name": "Gray-30",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 31,
+              "m10": 0,
+              "m11": 1,
+              "m12": 693
+            }
+          },
+          {
+            "id": "2:2726",
+            "name": "Gray-20",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 157,
+              "m10": 0,
+              "m11": 1,
+              "m12": 693
+            }
+          },
+          {
+            "id": "2:2727",
+            "name": "Gray-10",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 283,
+              "m10": 0,
+              "m11": 1,
+              "m12": 693
+            }
+          },
+          {
+            "id": "2:2728",
+            "name": "Gray-Line",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 409,
+              "m10": 0,
+              "m11": 1,
+              "m12": 693
+            }
+          },
+          {
+            "id": "2:2729",
+            "name": "Gray-BG",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 31,
+              "m10": 0,
+              "m11": 1,
+              "m12": 821
+            }
+          },
+          {
+            "id": "2:2730",
+            "name": "Gray-BG-Subtle",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 155,
+              "m10": 0,
+              "m11": 1,
+              "m12": 821
+            }
+          },
+          {
+            "id": "2:2731",
+            "name": "White",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 157,
+              "m10": 0,
+              "m11": 1,
+              "m12": 565
+            }
+          },
+          {
+            "id": "2:2732",
+            "name": "Red-30",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 459,
+              "m10": 0,
+              "m11": 1,
+              "m12": 165
+            }
+          },
+          {
+            "id": "2:2733",
+            "name": "Orange-20",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 157,
+              "m10": 0,
+              "m11": 1,
+              "m12": 365
+            }
+          },
+          {
+            "id": "2:2734",
+            "name": "Orange-10",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 283,
+              "m10": 0,
+              "m11": 1,
+              "m12": 365
+            }
+          },
+          {
+            "id": "2:2735",
+            "name": "Orange-Subtle",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 409,
+              "m10": 0,
+              "m11": 1,
+              "m12": 365
+            }
+          },
+          {
+            "id": "2:2736",
+            "name": "Green",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 31,
+              "m10": 0,
+              "m11": 1,
+              "m12": 37
+            }
+          },
+          {
+            "id": "2:2738",
+            "name": "Saffron",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 31,
+              "m10": 0,
+              "m11": 1,
+              "m12": 165
+            }
+          },
+          {
+            "id": "2:2740",
+            "name": "Orange",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 31,
+              "m10": 0,
+              "m11": 1,
+              "m12": 365
+            }
+          },
+          {
+            "id": "4:646",
+            "name": "Blue-Subtle",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 459,
+              "m10": 0,
+              "m11": 1,
+              "m12": 49
+            }
+          },
+          {
+            "id": "28:964",
+            "name": "Saffron-Light",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 157,
+              "m10": 0,
+              "m11": 1,
+              "m12": 165
+            }
+          },
+          {
+            "id": "52:1348",
+            "name": "Green-Light",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 157,
+              "m10": 0,
+              "m11": 1,
+              "m12": 37
+            }
+          },
+          {
+            "id": "156:6032",
+            "name": "White",
+            "type": "ROUNDED_RECTANGLE",
+            "size": {
+              "x": 100,
+              "y": 100
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 267,
+              "m10": 0,
+              "m11": 1,
+              "m12": 565
+            }
+          }
+        ],
+        "texts": []
+      },
+      {
+        "id": "2:2741",
+        "name": "Typography",
+        "size": {
+          "x": 1474,
+          "y": 1215
+        },
+        "fonts": {
+          "Poppins": 56
+        },
+        "children": [
+          {
+            "id": "2:2742",
+            "name": "Header-style",
+            "type": "SYMBOL",
+            "size": {
+              "x": 1474,
+              "y": 264
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "2:2747",
+            "name": "Body",
+            "type": "FRAME",
+            "size": {
+              "x": 1474,
+              "y": 951
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 264
+            }
+          }
+        ],
+        "texts": [
+          "Typography",
+          "Heading",
+          "H1/32px - SemiBold",
+          "H1/32px - Bold",
+          "H2/28px - Bold",
+          "H2/28px - Bold",
+          "H3/26px - Bold",
+          "H3/26px - Bold",
+          "H4/24px - Bold",
+          "H4/24px - ExtraBold",
+          "H5/22px - Bold",
+          "H5/22px - ExtraBold",
+          "H6/20px - Bold",
+          "H6/20px - ExtraBold",
+          "Title",
+          "Title/18px - SemiBold",
+          "Title/18px - Bold",
+          "Title/16px - SemiBold",
+          "Title/16px - Bold",
+          "Title/14px - Regular",
+          "Title/14px - SemiBold",
+          "Title/14px - Bold",
+          "Title/12px - Regular",
+          "Title/12px - SemiBold",
+          "Title/12px - Bold",
+          "Title/11px - Regular",
+          "Title/11px - SemiBold",
+          "Title/11px - Bold",
+          "Title/10px - Regular",
+          "Title/10px - SemiBold",
+          "Title/10px - Bold",
+          "Title/9px - Regular",
+          "Title/8px - Regular",
+          "Button",
+          "Btn/14px - Medium",
+          "Btn/14px - SemiBold",
+          "Btn/12px - Medium",
+          "Btn/12px - SemiBold",
+          "Btn/11px - Medium",
+          "Btn/11px - SemiBold",
+          "Paragraph",
+          "P/16px - Regular",
+          "P/16px - SemiBold",
+          "P/16px - Bold",
+          "P/14px - Regular",
+          "P/14px - SemiBold",
+          "P/14px - Bold",
+          "P/12px - Regular",
+          "P/12px - SemiBold",
+          "P/12px - Bold",
+          "P/11px - Regular",
+          "P/11px - SemiBold",
+          "P/11px - Bold",
+          "P/10px - Regular",
+          "P/10px - SemiBold",
+          "P/10px - Bold"
+        ]
+      },
+      {
+        "id": "2:2807",
+        "name": "Element",
+        "size": {
+          "x": 1444,
+          "y": 1844
+        },
+        "fonts": {
+          "Poppins": 10
+        },
+        "children": [
+          {
+            "id": "2:2808",
+            "name": "Header-style",
+            "type": "INSTANCE",
+            "size": {
+              "x": 1444,
+              "y": 264
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "2:2809",
+            "name": "Typography",
+            "type": "FRAME",
+            "size": {
+              "x": 1444,
+              "y": 1580
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 264
+            }
+          }
+        ],
+        "texts": [
+          "Nutrigo",
+          "AB",
+          "AB",
+          "AB",
+          "AB",
+          "AB",
+          "AB",
+          "AB",
+          "AB",
+          "AB"
+        ]
+      },
+      {
+        "id": "2:3207",
+        "name": "Component",
+        "size": {
+          "x": 9815,
+          "y": 2669
+        },
+        "fonts": {
+          "Figtree": 57,
+          "Plus Jakarta Sans": 102,
+          "Poppins": 326,
+          "Lato": 2,
+          "Inter": 1
+        },
+        "children": [
+          {
+            "id": "2:3208",
+            "name": "Header-style",
+            "type": "INSTANCE",
+            "size": {
+              "x": 9815,
+              "y": 264
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "2:3209",
+            "name": "Component",
+            "type": "FRAME",
+            "size": {
+              "x": 9815,
+              "y": 2405
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 264
+            }
+          }
+        ],
+        "texts": [
+          "Badges",
+          "5",
+          "5",
+          "Completed",
+          "Not Started",
+          "In Progress",
+          "Skipped",
+          "Grains",
+          "Veggies",
+          "Protein",
+          "Fruits",
+          "Dairy",
+          "Others",
+          "Purchased",
+          "Pending",
+          "Breakfast",
+          "Lunch",
+          "Snacks",
+          "Dinner",
+          "Breadcrumb",
+          "Link",
+          "/",
+          "Page",
+          "Link",
+          "/",
+          "Link",
+          "/",
+          "Page",
+          "Button",
+          "Dashboard",
+          "Dashboard",
+          "Dashboard",
+          "Dashboard",
+          "Dashboard",
+          "Dashboard",
+          "Dashboard",
+          "Dashboard",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Card",
+          "Baked Salmon with Steamed Broccoli and Sweet Potatoes",
+          "45g",
+          "C",
+          "35g",
+          "P",
+          "20g",
+          "F",
+          "Breakfast",
+          "450 kcal",
+          "Breakfast",
+          "450 kcal",
+          "Intermediate",
+          "Bodyweight Squats",
+          "450 kcal",
+          "30 min",
+          "C",
+          "45g",
+          "P",
+          "35g",
+          "F",
+          "20g",
+          "Grilled Chicken Wrap with Avocado and Spinach",
+          "A nutrient-dense option with a balance of carbs, protein, and healthy fats to support weight loss and overall health",
+          "200 kcal",
+          "Breakfast",
+          "+1.45%",
+          "Estimated Cost",
+          "21,615",
+          "kcal",
+          "Total Calories",
+          "12,615",
+          "kcal",
+          "+1.45%",
+          "vs last week",
+          "Breakfast",
+          "4.9",
+          "/5",
+          "Grilled Salmon with Lemon and Asparagus",
+          "C",
+          "18g",
+          "P",
+          "12g",
+          "F",
+          "10g",
+          "C",
+          "350 kcal",
+          "Grilled Chicken Wrap with Avocado and Spinach",
+          "Lunch",
+          "Sarah Murad",
+          "5/5",
+          "Very easy to make, and the portion was just right. I added a little garlic to the rice for extra flavor. This will be a regular meal in my meal prep rotation.",
+          "Fitness & Nutrition",
+          "Sept 20, 2028",
+          "How Nutrient Timing Affects Your Workout Performance",
+          "Nutrition & Wellness",
+          "The Role of Water in Post-Workout Recovery",
+          "Total Physical Activities Schedule",
+          "15",
+          "agendas",
+          "Total Physical Activities Schedule",
+          "15",
+          "agendas",
+          "Easy",
+          "30 minutes",
+          "Breakfast",
+          "Health Score:",
+          "9",
+          "/10",
+          "Baked Chicken Breast with Quinoa and Kale",
+          "450",
+          "kcal",
+          "30g",
+          "carbs",
+          "14g",
+          "protein",
+          "18g",
+          "fats",
+          "Breakfast",
+          "Easy",
+          "30 minutes",
+          "Health Score:",
+          "9",
+          "/10",
+          "Baked Chicken Breast with Quinoa and Kale",
+          "450",
+          "kcal",
+          "30g",
+          "C",
+          "14g",
+          "P",
+          "18g",
+          "F",
+          "Breakfast",
+          "Easy",
+          "30 minutes",
+          "Health Score:",
+          "9",
+          "/10",
+          "450",
+          "kcal",
+          "30g",
+          "C",
+          "14g",
+          "P",
+          "18g",
+          "F",
+          "Baked Chicken Breast with Quinoa and Kale",
+          "Health & Wellness",
+          "15/09/2028",
+          "Dr. Amelia Johnson",
+          "How Nutrient Timing Affects Your Workout Performance",
+          "Discover the science behind nutrient timing and how it can improve your workout results. Learn the best times to eat for energy, recovery, and muscle growth.",
+          "Health & Wellness",
+          "15/09/2028",
+          "How Nutrient Timing Affects Your Workout Performance",
+          "Discover the science behind nutrient timing and how it can improve your workout results. Learn the best times to eat for energy, recovery, and muscle growth.",
+          "Dr. Amelia Johnson",
+          "Grilled Shrimp Tacos with Mango Salsa",
+          "Lunch",
+          "Medium",
+          "30 minutes",
+          "Health Score:",
+          "8",
+          "/10",
+          "400",
+          "kcal",
+          "45g",
+          "C",
+          "28g",
+          "P",
+          "12g",
+          "F",
+          "Forms",
+          "Search placeholder",
+          "Search placeholder",
+          "Search placeholder",
+          "Placeholder",
+          "Placeholder",
+          "Label",
+          "Placeholder",
+          "Placeholder",
+          "Chart",
+          "8K",
+          "8K",
+          "8K",
+          "8K",
+          "8K",
+          "8K",
+          "Jan",
+          "Jan",
+          "Jan",
+          "110%",
+          "Jan",
+          "2.2 L",
+          "Jan",
+          "Jan",
+          "Jan",
+          "Calendar",
+          "Mon",
+          "4",
+          "Mon",
+          "4",
+          "31",
+          "31",
+          "31",
+          "Grocery Shopping: Fruits",
+          "9:00 AM",
+          "31",
+          "9:00 AM",
+          "Grocery Shopping: Fruits",
+          "9:00 AM",
+          "Grocery Shopping: Fruits",
+          "Sun",
+          "Sun",
+          "Item",
+          "Header Title",
+          "(1,242)",
+          "Sort by:",
+          "Sort by:",
+          "Sort by:",
+          "Sort by:",
+          "9.46 PM",
+          "Can I request a late check-out for Room 305?",
+          "9.46 PM",
+          "Can I request a late check-out for Room 305?",
+          "Can I request a late check-out for Room 305?",
+          "9.46 PM",
+          "Can I request a late check-out for Room 305?",
+          "9.46 PM",
+          "09:15 AM",
+          "Helen Martinez",
+          "-",
+          "Trainer",
+          "Just confirming my booking for the Mazda 3 next week.",
+          "09:15 AM",
+          "Helen Martinez",
+          "-",
+          "Trainer",
+          "Just confirming my booking for the Mazda 3 next week.",
+          "09:15 AM",
+          "Helen Martinez",
+          "-",
+          "Trainer",
+          "Just confirming my booking for the Mazda 3 next week.",
+          "Helen Martinez",
+          "-",
+          "Trainer",
+          "09:15 AM",
+          "Just confirming my booking for the Mazda 3 next week.",
+          "Helen Martinez",
+          "-",
+          "Trainer",
+          "09:15 AM",
+          "Just confirming my booking for the Mazda 3 next week.",
+          "Helen Martinez",
+          "-",
+          "Trainer",
+          "09:15 AM",
+          "Just confirming my booking for the Mazda 3 next week.",
+          "Level",
+          "Medium",
+          "Hello, Wingman!  👋",
+          "Welcome and Let’s do some workout today!",
+          "Adam Vasylenko",
+          "Member",
+          "Back to Page",
+          "Hello, Wingman!  👋",
+          "Adam Vasylenko",
+          "Member",
+          "Hello, Wingman!  👋",
+          "Welcome and Let’s do some workout today!",
+          "Hello, Wingman!  👋",
+          "Welcome and Let’s do some workout today!",
+          "Hello, Wingman!  👋",
+          "Welcome and Let’s do some workout today!",
+          "Hello, Wingman!  👋",
+          "Cardio progress updated – 7.5 km completed out of 10 km goal for endurance improvement",
+          "10:30 AM",
+          "10:30 AM",
+          "Cardio progress updated – 7.5 km completed out of 10 km goal for endurance improvement",
+          "Stretching to touch toes",
+          "Flexibility",
+          "(7/10)",
+          "75%",
+          "July 2028",
+          "82",
+          "Kg",
+          "Nutritional guide for muscle recovery.pdf",
+          "1.45 mb",
+          "http://www.alexfosterfitness.com/",
+          "1",
+          "Prep the Ingredients",
+          "Crack the eggs into a mixing bowl, add a pinch of salt and pepper, and whisk until fully blended.",
+          "1",
+          "200g turkey breast",
+          "#",
+          "Trending",
+          "Coach Daniel Green",
+          "85K Followers",
+          "1.",
+          "Regulates Body Temperature: Water is crucial for maintaining body temperature, especially during exercise or in hot environments.",
+          "Regulates Body Temperature: Water is crucial for maintaining body temperature, especially during exercise or in hot environments.",
+          "#",
+          "Hydration",
+          "1",
+          "Saucepan for cooking brown rice",
+          "Saucepan for cooking brown rice",
+          "1",
+          "Saucepan for cooking brown rice",
+          "Veggies",
+          "$39.25",
+          "30%",
+          "Veggies",
+          "$39.25",
+          "30%",
+          "Veggies",
+          "12 items",
+          "30%",
+          "Veggies",
+          "12 items",
+          "30%",
+          "#PostWorkoutNutrition",
+          "Mental Health & Wellness",
+          "15 posts",
+          "#PostWorkoutNutrition",
+          "Mental Health & Wellness",
+          "15 posts",
+          "Nav",
+          "Start your health journey with a FREE 1-month access to Nutrigo!",
+          "Title",
+          "Title",
+          "Pagination",
+          "Table",
+          "Wednesday",
+          "3 Sep",
+          "Grilled Turkey Breast with Steamed Asparagus and Brown Rice",
+          "Grilled Turkey Breast with Steamed Asparagus and Brown Rice",
+          "Grilled Turkey Breast with Steamed Asparagus and Brown Rice",
+          "Grilled Turkey Breast with Steamed Asparagus and Brown Rice",
+          "Breakfast",
+          "Lunch",
+          "Snack",
+          "Dinner",
+          "Wednesday",
+          "3 Sep",
+          "Grilled Turkey Breast with Steamed Asparagus and Brown Rice",
+          "Grilled Turkey Breast with Steamed Asparagus and Brown Rice",
+          "Grilled Turkey Breast with Steamed Asparagus and Brown Rice",
+          "Grilled Turkey Breast with Steamed Asparagus and Brown Rice",
+          "Breakfast",
+          "Lunch",
+          "Snack",
+          "Dinner",
+          "Exercise Name",
+          "Sets",
+          "Reps",
+          "Rest",
+          "Weight",
+          "Calories",
+          "Status",
+          "Mountain Climbers",
+          "4",
+          "30",
+          "Reps",
+          "30",
+          "sec",
+          "Bodyweight",
+          "kg",
+          "350",
+          "cal",
+          "Exercise Name",
+          "Sets",
+          "Reps",
+          "Rest",
+          "Weight",
+          "Calories",
+          "Status",
+          "Mountain Climbers",
+          "4",
+          "30",
+          "Reps",
+          "30",
+          "sec",
+          "Bodyweight",
+          "kg",
+          "350",
+          "cal",
+          "Item Name",
+          "Category",
+          "Qty",
+          "Calories",
+          "Cost",
+          "Status",
+          "Actual",
+          "Chicken Breast",
+          "bunch",
+          "500",
+          "1800",
+          "kcal",
+          "0.80",
+          "$",
+          "$",
+          "10",
+          "Menu",
+          "Category",
+          "Macronutrients",
+          "Carbs",
+          "Protein",
+          "Fats",
+          "Cals",
+          "Date & Time",
+          "Amount",
+          "Thoughts",
+          "Sugar",
+          "Scrambled Eggs with Spinach & Whole Grain Toast",
+          "50",
+          "gr",
+          "50",
+          "gr",
+          "50",
+          "gr",
+          "50",
+          "kcal",
+          "2028-09-01",
+          "12:30 PM",
+          "Serving",
+          "2",
+          "Uncomfortable",
+          "50",
+          "gr",
+          "Chest (cm)",
+          "Arm (cm)",
+          "Waist (cm)",
+          "Hips (cm)",
+          "Thigh (cm)",
+          "September 2028",
+          "Week 1",
+          "95.0",
+          "95.0",
+          "95.0",
+          "95.0",
+          "95.0"
+        ]
+      },
+      {
+        "id": "2:4578",
+        "name": "Color",
+        "size": {
+          "x": 1031,
+          "y": 1305
+        },
+        "fonts": {
+          "Inter": 2
+        },
+        "children": [
+          {
+            "id": "2:4579",
+            "name": "Header-style",
+            "type": "INSTANCE",
+            "size": {
+              "x": 1031,
+              "y": 264
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "2:4580",
+            "name": "Body",
+            "type": "FRAME",
+            "size": {
+              "x": 1031,
+              "y": 1041
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 264
+            }
+          }
+        ],
+        "texts": [
+          "Blue-00",
+          "#3384C6"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "0:2",
+    "name": "Internal Only Canvas",
+    "frames": [
+      {
+        "id": "28:469",
+        "name": "Content 12",
+        "size": {
+          "x": 100,
+          "y": 100
+        },
+        "fonts": {},
+        "children": [],
+        "texts": []
+      },
+      {
+        "id": "72:1677",
+        "name": "Chart-Card Statistic-Dashboard",
+        "size": {
+          "x": 470,
+          "y": 130
+        },
+        "fonts": {
+          "Figtree": 7
+        },
+        "children": [
+          {
+            "id": "72:1678",
+            "name": "Type=Heart Rate",
+            "type": "SYMBOL",
+            "size": {
+              "x": 130,
+              "y": 90
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 20,
+              "m10": 0,
+              "m11": 1,
+              "m12": 20
+            }
+          },
+          {
+            "id": "72:1683",
+            "name": "Type=Steps",
+            "type": "SYMBOL",
+            "size": {
+              "x": 130,
+              "y": 90
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 170,
+              "m10": 0,
+              "m11": 1,
+              "m12": 20
+            }
+          },
+          {
+            "id": "72:1708",
+            "name": "Type=Weight",
+            "type": "SYMBOL",
+            "size": {
+              "x": 130,
+              "y": 90
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 320,
+              "m10": 0,
+              "m11": 1,
+              "m12": 20
+            }
+          }
+        ],
+        "texts": [
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13"
+        ]
+      },
+      {
+        "id": "100:2470",
+        "name": "Canvas 12",
+        "size": {
+          "x": 100,
+          "y": 100
+        },
+        "fonts": {},
+        "children": [],
+        "texts": []
+      },
+      {
+        "id": "100:2471",
+        "name": "Content 9",
+        "size": {
+          "x": 100,
+          "y": 100
+        },
+        "fonts": {},
+        "children": [],
+        "texts": []
+      },
+      {
+        "id": "207:6446",
+        "name": "Button",
+        "size": {
+          "x": 569,
+          "y": 345
+        },
+        "fonts": {
+          "Lato": 18
+        },
+        "children": [
+          {
+            "id": "207:6447",
+            "name": "Size=small, With Icon=Left, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 75,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6452",
+            "name": "Size=small, With Icon=Left & Right, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 91,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6459",
+            "name": "Size=small, With Icon=Right, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 73,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6464",
+            "name": "Size=small, With Icon=No Icon, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 61,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6467",
+            "name": "Size=Medium, With Icon=No Icon, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 65,
+              "y": 34
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6470",
+            "name": "Size=Large, With Icon=No Icon, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 79,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6473",
+            "name": "Size=small, With Icon=Right, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 73,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6478",
+            "name": "Size=small, With Icon=No Icon, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 65,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6481",
+            "name": "Size=small, With Icon=Left, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 75,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6486",
+            "name": "Size=small, With Icon=Left & Right, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 91,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6493",
+            "name": "Size=small, With Icon=Right, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 73,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6498",
+            "name": "Size=small, With Icon=No Icon, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 57,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6501",
+            "name": "Size=small, With Icon=Left, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 75,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6506",
+            "name": "Size=small, With Icon=Left & Right, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 91,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6513",
+            "name": "Size=small, With Icon=Right, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 57,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6518",
+            "name": "Size=small, With Icon=Left, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 61,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6523",
+            "name": "Size=small, With Icon=Left & Right, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 75,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "207:6530",
+            "name": "Size=small, With Icon=No Icon, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 41,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button"
+        ]
+      },
+      {
+        "id": "217:5991",
+        "name": "Badge",
+        "size": {
+          "x": 132,
+          "y": 60
+        },
+        "fonts": {
+          "Plus Jakarta Sans": 2
+        },
+        "children": [
+          {
+            "id": "217:5992",
+            "name": "With Number=True, Size=Medium",
+            "type": "SYMBOL",
+            "size": {
+              "x": 20,
+              "y": 20
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 20,
+              "m10": 0,
+              "m11": 1,
+              "m12": 20
+            }
+          },
+          {
+            "id": "217:5995",
+            "name": "With Number=False, Size=Medium",
+            "type": "SYMBOL",
+            "size": {
+              "x": 20,
+              "y": 20
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 44,
+              "m10": 0,
+              "m11": 1,
+              "m12": 20
+            }
+          },
+          {
+            "id": "217:5997",
+            "name": "With Number=True, Size=Default",
+            "type": "SYMBOL",
+            "size": {
+              "x": 20,
+              "y": 20
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 68,
+              "m10": 0,
+              "m11": 1,
+              "m12": 20
+            }
+          },
+          {
+            "id": "217:6000",
+            "name": "With Number=False, Size=Default",
+            "type": "SYMBOL",
+            "size": {
+              "x": 20,
+              "y": 20
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 92,
+              "m10": 0,
+              "m11": 1,
+              "m12": 20
+            }
+          }
+        ],
+        "texts": [
+          "5",
+          "5"
+        ]
+      },
+      {
+        "id": "217:6002",
+        "name": "Button Icon",
+        "size": {
+          "x": 384,
+          "y": 218
+        },
+        "fonts": {},
+        "children": [
+          {
+            "id": "217:6003",
+            "name": "Size=Medium, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 36,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6006",
+            "name": "Size=Medium, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 36,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6009",
+            "name": "Size=Medium, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 36,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6012",
+            "name": "Size=Medium, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 36,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6015",
+            "name": "Size=Large, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 40,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6018",
+            "name": "Size=Large, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 40,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6021",
+            "name": "Size=Large, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 40,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6024",
+            "name": "Size=Small, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 30,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6026",
+            "name": "Size=Small, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 30,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6028",
+            "name": "Size=xSmall, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 26,
+              "y": 26
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6030",
+            "name": "Size=xSmall, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 26,
+              "y": 26
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6032",
+            "name": "Size=xSmall, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 26,
+              "y": 26
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6034",
+            "name": "Size=Small, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 30,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6036",
+            "name": "Size=Small, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 30,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6038",
+            "name": "Size=xSmall, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 26,
+              "y": 26
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": []
+      },
+      {
+        "id": "217:6050",
+        "name": "Input-search",
+        "size": {
+          "x": 777,
+          "y": 80
+        },
+        "fonts": {
+          "Plus Jakarta Sans": 3
+        },
+        "children": [
+          {
+            "id": "217:6051",
+            "name": "Size=Large",
+            "type": "SYMBOL",
+            "size": {
+              "x": 237,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 20,
+              "m10": 0,
+              "m11": 1,
+              "m12": 20
+            }
+          },
+          {
+            "id": "217:6056",
+            "name": "Size=Medium",
+            "type": "SYMBOL",
+            "size": {
+              "x": 237,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 277,
+              "m10": 0,
+              "m11": 1,
+              "m12": 20
+            }
+          },
+          {
+            "id": "217:6061",
+            "name": "Size=Small",
+            "type": "SYMBOL",
+            "size": {
+              "x": 223,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 534,
+              "m10": 0,
+              "m11": 1,
+              "m12": 20
+            }
+          }
+        ],
+        "texts": [
+          "Search placeholder",
+          "Search placeholder",
+          "Search placeholder"
+        ]
+      },
+      {
+        "id": "217:6072",
+        "name": "Button",
+        "size": {
+          "x": 569,
+          "y": 696
+        },
+        "fonts": {
+          "Plus Jakarta Sans": 48
+        },
+        "children": [
+          {
+            "id": "217:6073",
+            "name": "Size=small, With Icon=Left, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 79,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6078",
+            "name": "Size=small, With Icon=Left & Right, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 95,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6085",
+            "name": "Size=small, With Icon=Right, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 75,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6090",
+            "name": "Size=small, With Icon=No Icon, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 61,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6093",
+            "name": "Size=Medium, With Icon=No Icon, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 68,
+              "y": 35
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6096",
+            "name": "Size=Medium, With Icon=Right, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 84,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6101",
+            "name": "Size=Medium, With Icon=Right, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 84,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6106",
+            "name": "Size=Medium, With Icon=Right, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 84,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6111",
+            "name": "Size=Medium, With Icon=Right, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 60,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6116",
+            "name": "Size=Medium, With Icon=Left, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 90,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6121",
+            "name": "Size=Medium, With Icon=Left, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 90,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6126",
+            "name": "Size=Medium, With Icon=Left, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 90,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6131",
+            "name": "Size=Medium, With Icon=Left, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 62,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6136",
+            "name": "Size=Medium, With Icon=Left & Right, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 104,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6143",
+            "name": "Size=Medium, With Icon=Left & Right, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 104,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6150",
+            "name": "Size=Medium, With Icon=Left & Right, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 104,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6157",
+            "name": "Size=Medium, With Icon=Left & Right, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 78,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6164",
+            "name": "Size=Large, With Icon=No Icon, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 78,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6167",
+            "name": "Size=Large, With Icon=Left, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 102,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6172",
+            "name": "Size=Large, With Icon=Left, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 102,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6177",
+            "name": "Size=Large, With Icon=Left, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 102,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6182",
+            "name": "Size=Large, With Icon=Left, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 74,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6187",
+            "name": "Size=Large, With Icon=Right, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 98,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6192",
+            "name": "Size=Large, With Icon=Right, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 98,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6197",
+            "name": "Size=Large, With Icon=Right, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 98,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6202",
+            "name": "Size=Large, With Icon=Right, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 72,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6207",
+            "name": "Size=Large, With Icon=Left & Right, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 118,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6214",
+            "name": "Size=Large, With Icon=Left & Right, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 118,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6221",
+            "name": "Size=Large, With Icon=Left & Right, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 118,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6228",
+            "name": "Size=Large, With Icon=Left & Right, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 92,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6235",
+            "name": "Size=small, With Icon=Right, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 75,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6240",
+            "name": "Size=small, With Icon=No Icon, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 57,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6243",
+            "name": "Size=Medium, With Icon=No Icon, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 68,
+              "y": 35
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6246",
+            "name": "Size=Medium, With Icon=No Icon, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 68,
+              "y": 35
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6249",
+            "name": "Size=Medium, With Icon=No Icon, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 44,
+              "y": 35
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6252",
+            "name": "Size=Large, With Icon=No Icon, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 78,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6255",
+            "name": "Size=Large, With Icon=No Icon, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 78,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6258",
+            "name": "Size=Large, With Icon=No Icon, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 50,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6261",
+            "name": "Size=small, With Icon=Left, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 79,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6266",
+            "name": "Size=small, With Icon=Left & Right, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 95,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6273",
+            "name": "Size=small, With Icon=Right, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 75,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6278",
+            "name": "Size=small, With Icon=No Icon, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 57,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6281",
+            "name": "Size=small, With Icon=Left, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 79,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6286",
+            "name": "Size=small, With Icon=Left & Right, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 95,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6293",
+            "name": "Size=small, With Icon=Right, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 57,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6298",
+            "name": "Size=small, With Icon=Left, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 61,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6303",
+            "name": "Size=small, With Icon=Left & Right, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 75,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "217:6310",
+            "name": "Size=small, With Icon=No Icon, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 41,
+              "y": 29
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button"
+        ]
+      },
+      {
+        "id": "251:6574",
+        "name": "Button",
+        "size": {
+          "x": 569,
+          "y": 696
+        },
+        "fonts": {
+          "Figtree": 48
+        },
+        "children": [
+          {
+            "id": "251:6575",
+            "name": "Size=small, With Icon=Left, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 76,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6580",
+            "name": "Size=small, With Icon=Left & Right, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 92,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6587",
+            "name": "Size=small, With Icon=Right, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 72,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6592",
+            "name": "Size=small, With Icon=No Icon, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 58,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6595",
+            "name": "Size=Medium, With Icon=No Icon, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 65,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6598",
+            "name": "Size=Medium, With Icon=Right, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 81,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6603",
+            "name": "Size=Medium, With Icon=Right, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 81,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6608",
+            "name": "Size=Medium, With Icon=Right, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 81,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6613",
+            "name": "Size=Medium, With Icon=Right, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 57,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6618",
+            "name": "Size=Medium, With Icon=Left, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 87,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6623",
+            "name": "Size=Medium, With Icon=Left, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 87,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6628",
+            "name": "Size=Medium, With Icon=Left, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 87,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6633",
+            "name": "Size=Medium, With Icon=Left, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 59,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6638",
+            "name": "Size=Medium, With Icon=Left & Right, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 101,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6645",
+            "name": "Size=Medium, With Icon=Left & Right, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 101,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6652",
+            "name": "Size=Medium, With Icon=Left & Right, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 101,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6659",
+            "name": "Size=Medium, With Icon=Left & Right, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 75,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6666",
+            "name": "Size=Large, With Icon=No Icon, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 76,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6669",
+            "name": "Size=Large, With Icon=Left, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 100,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6674",
+            "name": "Size=Large, With Icon=Left, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 100,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6679",
+            "name": "Size=Large, With Icon=Left, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 100,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6684",
+            "name": "Size=Large, With Icon=Left, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 72,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6689",
+            "name": "Size=Large, With Icon=Right, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 96,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6694",
+            "name": "Size=Large, With Icon=Right, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 96,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6699",
+            "name": "Size=Large, With Icon=Right, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 96,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6704",
+            "name": "Size=Large, With Icon=Right, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 70,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6709",
+            "name": "Size=Large, With Icon=Left & Right, Type=Primary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 116,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6716",
+            "name": "Size=Large, With Icon=Left & Right, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 116,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6723",
+            "name": "Size=Large, With Icon=Left & Right, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 116,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6730",
+            "name": "Size=Large, With Icon=Left & Right, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 90,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6737",
+            "name": "Size=small, With Icon=Right, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 72,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6742",
+            "name": "Size=small, With Icon=No Icon, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 54,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6745",
+            "name": "Size=Medium, With Icon=No Icon, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 65,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6748",
+            "name": "Size=Medium, With Icon=No Icon, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 65,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6751",
+            "name": "Size=Medium, With Icon=No Icon, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 41,
+              "y": 36
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6754",
+            "name": "Size=Large, With Icon=No Icon, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 76,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6757",
+            "name": "Size=Large, With Icon=No Icon, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 76,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6760",
+            "name": "Size=Large, With Icon=No Icon, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 48,
+              "y": 40
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6763",
+            "name": "Size=small, With Icon=Left, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 76,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6768",
+            "name": "Size=small, With Icon=Left & Right, Type=Secondary",
+            "type": "SYMBOL",
+            "size": {
+              "x": 92,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6775",
+            "name": "Size=small, With Icon=Right, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 72,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6780",
+            "name": "Size=small, With Icon=No Icon, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 54,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6783",
+            "name": "Size=small, With Icon=Left, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 76,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6788",
+            "name": "Size=small, With Icon=Left & Right, Type=Ghost",
+            "type": "SYMBOL",
+            "size": {
+              "x": 92,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6795",
+            "name": "Size=small, With Icon=Right, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 54,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6800",
+            "name": "Size=small, With Icon=Left, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 58,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6805",
+            "name": "Size=small, With Icon=Left & Right, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 72,
+              "y": 30
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "251:6812",
+            "name": "Size=small, With Icon=No Icon, Type=Transparent",
+            "type": "SYMBOL",
+            "size": {
+              "x": 38,
+              "y": 29
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button",
+          "Button"
+        ]
+      },
+      {
+        "id": "427:15255",
+        "name": "Mobile",
+        "size": {
+          "x": 100,
+          "y": 100
+        },
+        "fonts": {},
+        "children": [],
+        "texts": []
+      },
+      {
+        "id": "427:15256",
+        "name": "Tablet",
+        "size": {
+          "x": 100,
+          "y": 100
+        },
+        "fonts": {},
+        "children": [],
+        "texts": []
+      }
+    ]
+  },
+  {
+    "id": "1:2",
+    "name": "💻 Interface",
+    "frames": [
+      {
+        "id": "12:792",
+        "name": "01. Dashboard (Desktop)",
+        "size": {
+          "x": 1440,
+          "y": 1232
+        },
+        "fonts": {
+          "Poppins": 43,
+          "Figtree": 4,
+          "Plus Jakarta Sans": 2
+        },
+        "children": [
+          {
+            "id": "12:793",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 223,
+              "y": 1232
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "28:417",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 892,
+              "y": 1232
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 223,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "33:1104",
+            "name": "Right Side",
+            "type": "FRAME",
+            "size": {
+              "x": 325,
+              "y": 1232
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 1115,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Progress is progress, no matter how slow. Keep going, you're getting closer to your goal every day! 🎉",
+          "85",
+          "65",
+          "Current Weight",
+          "78",
+          "kg",
+          "13 kg left",
+          "1240",
+          "kcal",
+          "Calories left",
+          "120",
+          "/325gr",
+          "Carbohydrates",
+          "37%",
+          "1750",
+          "kcal",
+          "Eaten calories",
+          "510",
+          "kcal",
+          "Burned calories",
+          "Steps",
+          "76%",
+          "1950 steps left",
+          "8050",
+          "steps",
+          "Water Intake",
+          "0.7",
+          "litre left",
+          "1.3/2",
+          "litre",
+          "Weight",
+          "85",
+          "80",
+          "75",
+          "70",
+          "65",
+          "78",
+          "kg",
+          "Sleep",
+          "6.5",
+          "hours",
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "September",
+          "2028",
+          "Adam Vasylenko",
+          "Member"
+        ]
+      },
+      {
+        "id": "84:1666",
+        "name": "04. Calendar (Desktop)",
+        "size": {
+          "x": 1440,
+          "y": 1048
+        },
+        "fonts": {
+          "Plus Jakarta Sans": 6,
+          "Poppins": 18
+        },
+        "children": [
+          {
+            "id": "84:1667",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 223,
+              "y": 1048
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "84:1668",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 892,
+              "y": 1048
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 223,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "215:5682",
+            "name": "Right Side",
+            "type": "FRAME",
+            "size": {
+              "x": 325,
+              "y": 1048
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 1115,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "September",
+          "2028",
+          "Sort by:",
+          "Meal Planning",
+          "Physical Activities",
+          "Appointments/Events",
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "Morning Yoga Session",
+          "Physical Activities",
+          "Tuesday, 5 September 2028",
+          "7:00 AM",
+          "Sunrise Yoga Studio, Main Street",
+          "Note",
+          "Focus on flexibility and breathing exercises, 1-hour session",
+          "General Health Check-up with Doctor",
+          "Tuesday, 5 September 2028",
+          "3:00 PM",
+          "Central Health Clinic, 5th Avenue",
+          "Appointments",
+          "Note",
+          "Annual check-up, bring previous health records, and fasting required for blood tests."
+        ]
+      },
+      {
+        "id": "84:2565",
+        "name": "07. Messages (Desktop)",
+        "size": {
+          "x": 1440,
+          "y": 1046
+        },
+        "fonts": {
+          "Poppins": 4,
+          "Figtree": 3,
+          "Lato": 7
+        },
+        "children": [
+          {
+            "id": "84:2566",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 223,
+              "y": 1046
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "84:2567",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 1217,
+              "y": 1046
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 223,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "Alex Foster",
+          "last seen recently",
+          "Today, Sept 8",
+          "Alex Foster",
+          "Personal Trainer",
+          "About",
+          "A certified personal trainer with 8 years of experience, specializing in strength training and personalized fitness plans for clients.",
+          "Media (2)",
+          "Documents (3)",
+          "Links"
+        ]
+      },
+      {
+        "id": "84:2716",
+        "name": "10. Healthy Menu (Desktop)",
+        "size": {
+          "x": 1440,
+          "y": 1118
+        },
+        "fonts": {
+          "Figtree": 3,
+          "Poppins": 15
+        },
+        "children": [
+          {
+            "id": "84:2717",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 223,
+              "y": 1118
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "226:5860",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 872,
+              "y": 1118
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 223,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "226:5962",
+            "name": "Right Side",
+            "type": "FRAME",
+            "size": {
+              "x": 345,
+              "y": 1118
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 1095,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Grilled Turkey Breast with Steamed Asparagus and Brown Rice",
+          "Lunch",
+          "4.8/5 (125 reviews)",
+          "Calories",
+          "450",
+          "kcal",
+          "Sort by:",
+          "All Menu",
+          "(1,242)",
+          "Sort by:",
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "Healthy Menu",
+          "Welcome and Let’s do some workout today!",
+          "Adam Vasylenko",
+          "Member"
+        ]
+      },
+      {
+        "id": "84:2994",
+        "name": "16. Meal Plan (Desktop)",
+        "size": {
+          "x": 1440,
+          "y": 1088
+        },
+        "fonts": {
+          "Poppins": 7
+        },
+        "children": [
+          {
+            "id": "84:2995",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 223,
+              "y": 1088
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "84:2996",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 1217,
+              "y": 1088
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 223,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Sort by:",
+          "September",
+          "2028",
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact"
+        ]
+      },
+      {
+        "id": "84:3145",
+        "name": "13. Recipe Details (Desktop)",
+        "size": {
+          "x": 1440,
+          "y": 1197
+        },
+        "fonts": {
+          "Poppins": 40,
+          "Figtree": 11
+        },
+        "children": [
+          {
+            "id": "84:3146",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 223,
+              "y": 1197
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "84:3147",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 1217,
+              "y": 1197
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 223,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Grilled Turkey Breast with Steamed Asparagus and Brown Rice",
+          "Lunch",
+          "A lean and balanced meal that’s perfect for a post-workout lunch or a healthy midday option. This meal provides a great balance of protein, fiber, and healthy fats while being low in calories. The grilled turkey breast offers a rich source of lean protein, while the steamed asparagus and brown rice provide essential vitamins and minerals.",
+          "Directions",
+          "Tools & Equipment",
+          "Notes",
+          "Calories",
+          "450",
+          "kcal",
+          "Calories",
+          "Per Serving",
+          "450 kcal",
+          "Carbohydrates",
+          "40 gr",
+          "Protein",
+          "35 gr",
+          "Total Fat",
+          "12 gr",
+          "Cholesterol",
+          "75 mg",
+          "Sodium",
+          "420 mg",
+          "Sugars",
+          "4 gr",
+          "Fiber",
+          "7 gr",
+          "Vitamin C",
+          "20% DV",
+          "2",
+          "Total Servings",
+          "Ingredients",
+          "Eat Time",
+          "12:30 PM",
+          "Prep Time",
+          "10 minutes",
+          "Cook Time",
+          "15 minutes",
+          "Difficulty",
+          "Medium",
+          "Total Steps",
+          "5 steps",
+          "Health Score",
+          "9/10",
+          "Reviews",
+          "by 125 People",
+          "4.8",
+          "/5",
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact"
+        ]
+      },
+      {
+        "id": "105:2472",
+        "name": "19. Grocery List (Desktop)",
+        "size": {
+          "x": 1440,
+          "y": 1412
+        },
+        "fonts": {
+          "Poppins": 15
+        },
+        "children": [
+          {
+            "id": "105:2473",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 223,
+              "y": 1412
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "105:2474",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 1217,
+              "y": 1412
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 223,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Showing",
+          "out of 40",
+          "Sort by:",
+          "Items",
+          "40",
+          "Total",
+          "157",
+          "$",
+          "Total Expense",
+          "$530",
+          "May 2028",
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact"
+        ]
+      },
+      {
+        "id": "105:2649",
+        "name": "22. Food Diary (Desktop)",
+        "size": {
+          "x": 1440,
+          "y": 1322
+        },
+        "fonts": {
+          "Poppins": 6
+        },
+        "children": [
+          {
+            "id": "105:2650",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 223,
+              "y": 1322
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "105:2651",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 1217,
+              "y": 1322
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 223,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Showing",
+          "out of 84",
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact"
+        ]
+      },
+      {
+        "id": "105:2790",
+        "name": "25. Progress (Desktop)",
+        "size": {
+          "x": 1440,
+          "y": 1157
+        },
+        "fonts": {
+          "Poppins": 66,
+          "Figtree": 2
+        },
+        "children": [
+          {
+            "id": "105:2791",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 223,
+              "y": 1157
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "105:2792",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 1217,
+              "y": 1157
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 223,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Chest",
+          "93.0",
+          "cm",
+          "Arm",
+          "28.5",
+          "cm",
+          "Waist",
+          "77.5",
+          "cm",
+          "Hips",
+          "98.0",
+          "cm",
+          "Thigh",
+          "58.5",
+          "cm",
+          "85 kg",
+          "80 kg",
+          "80 kg",
+          "83 kg",
+          "73 kg",
+          "78 kg",
+          "Start Weight",
+          "85",
+          "Kg",
+          "Current Weight",
+          "78",
+          "Kg",
+          "Weight Goal",
+          "65",
+          "Kg",
+          "Deep Sleep",
+          "REM Phase",
+          "Awake",
+          "Light Sleep",
+          "Sun",
+          "6h 45m",
+          "9:00 PM",
+          "11:00 PM",
+          "1:00 AM",
+          "3:00 AM",
+          "5:00 AM",
+          "8K",
+          "7h 55m",
+          "Tue",
+          "7h 25m",
+          "Mon",
+          "6h 0m",
+          "Wed",
+          "6h 50m",
+          "Thu",
+          "Burned",
+          "Consumed",
+          "Calorie Goal: 2,000 kcal",
+          "450",
+          "kcal left",
+          "Consumed",
+          "1,755",
+          "kcal",
+          "Normal",
+          "kcal left",
+          "Hydration Level",
+          "Intake",
+          "2.0 L",
+          "kcal left",
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact"
+        ]
+      },
+      {
+        "id": "105:2931",
+        "name": "28. Exercise (Desktop)",
+        "size": {
+          "x": 1440,
+          "y": 1136
+        },
+        "fonts": {
+          "Poppins": 4,
+          "Figtree": 2
+        },
+        "children": [
+          {
+            "id": "105:2932",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 223,
+              "y": 1136
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "105:2933",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 1217,
+              "y": 1136
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 223,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "Showing",
+          "out of 28"
+        ]
+      },
+      {
+        "id": "263:6588",
+        "name": "31. Insights (Desktop)",
+        "size": {
+          "x": 1440,
+          "y": 1136
+        },
+        "fonts": {
+          "Poppins": 12
+        },
+        "children": [
+          {
+            "id": "263:6589",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 223,
+              "y": 1136
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "263:7113",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 912,
+              "y": 1136
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 223,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "263:7204",
+            "name": "Right Side",
+            "type": "FRAME",
+            "size": {
+              "x": 305,
+              "y": 1136
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 1135,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "The Importance of Hydration for Optimal Health",
+          "Learn how proper hydration impacts your overall health, energy levels, and mental clarity, and get tips on how to stay hydrated throughout the day. Discover the signs of dehydration and how to prevent it with simple daily habits.",
+          "Health & Wellness",
+          "Sept 15, 2028",
+          "Dr. Amelia Johnson",
+          "Healthy Insights",
+          "Adam Vasylenko",
+          "Member"
+        ]
+      },
+      {
+        "id": "279:9301",
+        "name": "34. Insight Details (Desktop)",
+        "size": {
+          "x": 1440,
+          "y": 2020
+        },
+        "fonts": {
+          "Poppins": 24
+        },
+        "children": [
+          {
+            "id": "279:9302",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 223,
+              "y": 2020
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "279:9303",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 1217,
+              "y": 2020
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 223,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "The Science Behind Hydration: Why Water is Essential for Health",
+          "Water is the essence of life. It plays a crucial role in every system of the body, from maintaining cellular functions to regulating temperature and keeping us energized. While it’s often easy to overlook, staying hydrated is one of the simplest and most effective ways to support your overall well-being.",
+          "Health & Wellness",
+          "6 min read",
+          "Dr. Amelia Johnson",
+          "Sept 15, 2028",
+          "Why Hydration Matters",
+          "Your body is composed of about 60% water. Every cell, tissue, and organ relies on water to function properly. Hydration impacts everything from digestion to muscle performance and brain function. Even mild dehydration can affect your mood, concentration, and physical energy.",
+          "\"Hydration isn't just about drinking enough water—it's about ensuring your body has what it needs to perform at its best.\"",
+          "- Dr. Amelia Johnson -",
+          "How Much Water Do You Really Need?",
+          "The general guideline is to drink about 8 glasses of water a day, but your actual needs can vary depending on your activity level, environment, and health status. If you're exercising or in a hot climate, your water needs will increase. A good rule of thumb is to drink when you’re thirsty and aim for clear or light-colored urine, which indicates proper hydration.",
+          "Signs of Dehydration",
+          "Dehydration occurs when you’re losing more water than you’re taking in. Some common signs include:",
+          "Severe dehydration can lead to more serious health issues like kidney stones or heatstroke, so it’s important to monitor your hydration levels throughout the day.",
+          "Tips for Staying Hydrated",
+          "When you hydrate, water helps your body in the following ways:",
+          "Conclusion",
+          "Hydration is an essential part of maintaining your overall health and well-being. By understanding how water impacts your body and taking simple steps to stay hydrated, you can improve your mood, energy, and cognitive function. So, make sure you’re sipping water throughout the day and paying attention to your body's hydration needs.",
+          "This article dives into the importance of hydration for overall well-being, covering how water affects everything from brain function to physical performance. Learn how to keep your hydration levels optimal throughout the day."
+        ]
+      },
+      {
+        "id": "408:17594",
+        "name": "02. Dashboard (Tablet)",
+        "size": {
+          "x": 800,
+          "y": 2717
+        },
+        "fonts": {
+          "Poppins": 43
+        },
+        "children": [
+          {
+            "id": "408:17597",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 76,
+              "y": 2717
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "416:13316",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 724,
+              "y": 2717
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 76,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "78",
+          "kg",
+          "Current Weight",
+          "13 kg left",
+          "85",
+          "65",
+          "Progress is progress, no matter how slow. Keep going, you're getting closer to your goal every day! 🎉",
+          "1240",
+          "kcal",
+          "Calories left",
+          "1750",
+          "kcal",
+          "Eaten calories",
+          "510",
+          "kcal",
+          "Burned calories",
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "September",
+          "2028",
+          "Weight",
+          "78",
+          "kg",
+          "85",
+          "80",
+          "75",
+          "70",
+          "65",
+          "Steps",
+          "8050",
+          "steps",
+          "76%",
+          "1950 steps left",
+          "Sleep",
+          "6.5",
+          "hours",
+          "Water Intake",
+          "0.7",
+          "litre left",
+          "1.3/2",
+          "litre"
+        ]
+      },
+      {
+        "id": "427:14405",
+        "name": "03. Dashboard (Mobile)",
+        "size": {
+          "x": 390,
+          "y": 4514
+        },
+        "fonts": {
+          "Poppins": 43
+        },
+        "children": [
+          {
+            "id": "427:14406",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 390,
+              "y": 64
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "427:14407",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 390,
+              "y": 4450
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 64
+            }
+          }
+        ],
+        "texts": [
+          "Weight",
+          "78",
+          "kg",
+          "85",
+          "80",
+          "75",
+          "70",
+          "65",
+          "Steps",
+          "8050",
+          "steps",
+          "76%",
+          "1950 steps left",
+          "Sleep",
+          "6.5",
+          "hours",
+          "Water Intake",
+          "0.7",
+          "litre left",
+          "1.3/2",
+          "litre",
+          "78",
+          "kg",
+          "Current Weight",
+          "13 kg left",
+          "85",
+          "65",
+          "Progress is progress, no matter how slow. Keep going, you're getting closer to your goal every day! 🎉",
+          "1240",
+          "kcal",
+          "Calories left",
+          "1750",
+          "kcal",
+          "Eaten calories",
+          "510",
+          "kcal",
+          "Burned calories",
+          "September",
+          "2028",
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact"
+        ]
+      },
+      {
+        "id": "427:15467",
+        "name": "05. Calendar (Tablet)",
+        "size": {
+          "x": 800,
+          "y": 1516
+        },
+        "fonts": {
+          "Poppins": 23,
+          "Plus Jakarta Sans": 1
+        },
+        "children": [
+          {
+            "id": "427:15468",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 76,
+              "y": 1516
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "427:15469",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 724,
+              "y": 1516
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 76,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "September",
+          "2028",
+          "Sort by:",
+          "Meal Planning",
+          "Physical Activities",
+          "Appointments/Events",
+          "Physical Activities",
+          "Morning Yoga Session",
+          "Tuesday, 5 September 2028",
+          "7:00 AM",
+          "Sunrise Yoga Studio, Main Street",
+          "Note",
+          "Focus on flexibility and breathing exercises, 1-hour session",
+          "Appointments",
+          "General Health Check-up with Doctor",
+          "Tuesday, 5 September 2028",
+          "3:00 PM",
+          "Central Health Clinic, 5th Avenue",
+          "Note",
+          "Annual check-up, bring previous health records, and fasting required for blood tests."
+        ]
+      },
+      {
+        "id": "433:17250",
+        "name": "06. Calendar (Mobile)",
+        "size": {
+          "x": 390,
+          "y": 2004
+        },
+        "fonts": {
+          "Poppins": 23
+        },
+        "children": [
+          {
+            "id": "433:17251",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 390,
+              "y": 64
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "433:17252",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 390,
+              "y": 1940
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 64
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "September",
+          "2028",
+          "Meal Planning",
+          "Physical Activities",
+          "Appointments/Events",
+          "Physical Activities",
+          "Morning Yoga Session",
+          "Tuesday, 5 September 2028",
+          "7:00 AM",
+          "Sunrise Yoga Studio, Main Street",
+          "Note",
+          "Focus on flexibility and breathing exercises, 1-hour session",
+          "Appointments",
+          "General Health Check-up with Doctor",
+          "Tuesday, 5 September 2028",
+          "3:00 PM",
+          "Central Health Clinic, 5th Avenue",
+          "Note",
+          "Annual check-up, bring previous health records, and fasting required for blood tests."
+        ]
+      },
+      {
+        "id": "433:18545",
+        "name": "08. Messages (Tablet)",
+        "size": {
+          "x": 800,
+          "y": 2248
+        },
+        "fonts": {
+          "Poppins": 17
+        },
+        "children": [
+          {
+            "id": "433:18546",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 76,
+              "y": 2248
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "433:18547",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 724,
+              "y": 2248
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 76,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "Alex Foster",
+          "last seen recently",
+          "Today, Sept 8",
+          "Alex Foster",
+          "last seen recently",
+          "Today, Sept 8",
+          "Alex Foster",
+          "Personal Trainer",
+          "About",
+          "A certified personal trainer with 8 years of experience, specializing in strength training and personalized fitness plans for clients.",
+          "Media (2)",
+          "Documents (3)",
+          "Links"
+        ]
+      },
+      {
+        "id": "433:19982",
+        "name": "09. Messages (Mobile)",
+        "size": {
+          "x": 390,
+          "y": 2995
+        },
+        "fonts": {
+          "Poppins": 14
+        },
+        "children": [
+          {
+            "id": "433:19983",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 390,
+              "y": 64
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "433:19984",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 390,
+              "y": 2931
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 64
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "Alex Foster",
+          "last seen recently",
+          "Today, Sept 8",
+          "Alex Foster",
+          "Personal Trainer",
+          "About",
+          "A certified personal trainer with 8 years of experience, specializing in strength training and personalized fitness plans for clients.",
+          "Media (2)",
+          "Documents (3)",
+          "Links"
+        ]
+      },
+      {
+        "id": "445:8608",
+        "name": "11. Healthy Menu (Tablet)",
+        "size": {
+          "x": 800,
+          "y": 1978
+        },
+        "fonts": {
+          "Poppins": 11
+        },
+        "children": [
+          {
+            "id": "445:8609",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 76,
+              "y": 1978
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "445:8947",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 724,
+              "y": 1978
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 76,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "Grilled Turkey Breast with Steamed Asparagus and Brown Rice",
+          "Lunch",
+          "4.8/5 (125 reviews)",
+          "All Menu",
+          "(1,242)",
+          "Sort by:",
+          "Sort by:"
+        ]
+      },
+      {
+        "id": "445:10499",
+        "name": "12. Healthy Menu (Mobile)",
+        "size": {
+          "x": 390,
+          "y": 3195
+        },
+        "fonts": {
+          "Poppins": 11
+        },
+        "children": [
+          {
+            "id": "445:10500",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 390,
+              "y": 64
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "445:10501",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 390,
+              "y": 3131
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 64
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "Grilled Turkey Breast with Steamed Asparagus and Brown Rice",
+          "Lunch",
+          "4.8/5 (125 reviews)",
+          "All Menu",
+          "(1,242)",
+          "Sort by:",
+          "Sort by:"
+        ]
+      },
+      {
+        "id": "453:12042",
+        "name": "14. Recipe Details (Tablet)",
+        "size": {
+          "x": 800,
+          "y": 2021
+        },
+        "fonts": {
+          "Poppins": 60
+        },
+        "children": [
+          {
+            "id": "453:12043",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 76,
+              "y": 2021
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "453:12044",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 724,
+              "y": 2021
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 76,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Eat Time",
+          "12:30 PM",
+          "Prep Time",
+          "10 minutes",
+          "Cook Time",
+          "15 minutes",
+          "Difficulty",
+          "Medium",
+          "Total Steps",
+          "5 steps",
+          "Health Score",
+          "9/10",
+          "Reviews",
+          "by 125 People",
+          "4.8",
+          "/5",
+          "Grilled Turkey Breast with Steamed Asparagus and Brown Rice",
+          "Lunch",
+          "A lean and balanced meal that’s perfect for a post-workout lunch or a healthy midday option. This meal provides a great balance of protein, fiber, and healthy fats while being low in calories. The grilled turkey breast offers a rich source of lean protein, while the steamed asparagus and brown rice provide essential vitamins and minerals.",
+          "Tools & Equipment",
+          "Directions",
+          "Notes",
+          "Total Servings",
+          "2",
+          "Ingredients",
+          "Fats",
+          "12",
+          "gr",
+          "Carbs",
+          "40",
+          "gr",
+          "Protein",
+          "35",
+          "gr",
+          "Calories",
+          "450",
+          "kcal",
+          "Calories",
+          "Per Serving",
+          "450 kcal",
+          "Carbohydrates",
+          "40 gr",
+          "Protein",
+          "35 gr",
+          "Total Fat",
+          "12 gr",
+          "Fiber",
+          "7 gr",
+          "Sodium",
+          "420 mg",
+          "Cholesterol",
+          "75 mg",
+          "Sugars",
+          "4 gr",
+          "Vitamin C",
+          "20% DV",
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact"
+        ]
+      },
+      {
+        "id": "457:13264",
+        "name": "15. Recipe Details (Mobile)",
+        "size": {
+          "x": 390,
+          "y": 3146
+        },
+        "fonts": {
+          "Poppins": 48
+        },
+        "children": [
+          {
+            "id": "457:13265",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 390,
+              "y": 64
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "457:13266",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 390,
+              "y": 3082
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 64
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "Eat Time",
+          "12:30 PM",
+          "Prep Time",
+          "10 minutes",
+          "Cook Time",
+          "15 minutes",
+          "Difficulty",
+          "Medium",
+          "Total Steps",
+          "5 steps",
+          "Health Score",
+          "9/10",
+          "Grilled Turkey Breast with Steamed Asparagus and Brown Rice",
+          "Lunch",
+          "A lean and balanced meal that’s perfect for a post-workout lunch or a healthy midday option. This meal provides a great balance of protein, fiber, and healthy fats while being low in calories. The grilled turkey breast offers a rich source of lean protein, while the steamed asparagus and brown rice provide essential vitamins and minerals.",
+          "Tools & Equipment",
+          "Directions",
+          "Notes",
+          "Total Servings",
+          "2",
+          "Ingredients",
+          "Calories",
+          "Per Serving",
+          "450 kcal",
+          "Carbohydrates",
+          "40 gr",
+          "Protein",
+          "35 gr",
+          "Total Fat",
+          "12 gr",
+          "Fiber",
+          "7 gr",
+          "Sodium",
+          "420 mg",
+          "Cholesterol",
+          "75 mg",
+          "Sugars",
+          "4 gr",
+          "Vitamin C",
+          "20% DV",
+          "Reviews",
+          "by 125 People",
+          "4.8",
+          "/5"
+        ]
+      },
+      {
+        "id": "463:14306",
+        "name": "17. Meal Plan (Tablet)",
+        "size": {
+          "x": 800,
+          "y": 1658
+        },
+        "fonts": {
+          "Poppins": 7
+        },
+        "children": [
+          {
+            "id": "463:14307",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 76,
+              "y": 1658
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "463:14308",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 724,
+              "y": 1658
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 76,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "September",
+          "2028",
+          "Sort by:",
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact"
+        ]
+      },
+      {
+        "id": "470:15300",
+        "name": "18. Meal Plan (Mobile)",
+        "size": {
+          "x": 390,
+          "y": 1726
+        },
+        "fonts": {
+          "Poppins": 7
+        },
+        "children": [
+          {
+            "id": "470:15301",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 390,
+              "y": 64
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "470:15302",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 390,
+              "y": 1662
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 64
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "September",
+          "2028",
+          "Sort by:"
+        ]
+      },
+      {
+        "id": "473:10404",
+        "name": "20. Grocery List (Tablet)",
+        "size": {
+          "x": 800,
+          "y": 1854
+        },
+        "fonts": {
+          "Poppins": 29
+        },
+        "children": [
+          {
+            "id": "473:10405",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 76,
+              "y": 1854
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "473:10406",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 724,
+              "y": 1854
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 76,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "Estimated Cost",
+          "$157",
+          "",
+          "+2.08%",
+          "Total Items",
+          "40",
+          "",
+          "+10.2%",
+          "Total Calories",
+          "21,615",
+          "kcal",
+          "-3.56%",
+          "$",
+          "157",
+          "Total Expense",
+          "Total",
+          "40",
+          "Items",
+          "May 2028",
+          "$530",
+          "Showing",
+          "out of 40",
+          "Grocery List",
+          "(1,242)",
+          "Sort by:"
+        ]
+      },
+      {
+        "id": "492:11324",
+        "name": "21. Grocery List (Mobile)",
+        "size": {
+          "x": 390,
+          "y": 2364
+        },
+        "fonts": {
+          "Poppins": 14
+        },
+        "children": [
+          {
+            "id": "492:11325",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 390,
+              "y": 64
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "492:11326",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 390,
+              "y": 2300
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 64
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "May 2028",
+          "$530",
+          "$",
+          "157",
+          "Total Expense",
+          "Total",
+          "40",
+          "Items",
+          "Grocery List",
+          "(1,242)"
+        ]
+      },
+      {
+        "id": "492:13177",
+        "name": "23. Food Diary (Tablet)",
+        "size": {
+          "x": 800,
+          "y": 1402
+        },
+        "fonts": {
+          "Poppins": 6
+        },
+        "children": [
+          {
+            "id": "492:13178",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 76,
+              "y": 1402
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "492:13179",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 724,
+              "y": 1402
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 76,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "Showing",
+          "out of 84"
+        ]
+      },
+      {
+        "id": "492:14886",
+        "name": "24. Food Diary (Mobile)",
+        "size": {
+          "x": 390,
+          "y": 1624
+        },
+        "fonts": {
+          "Poppins": 4
+        },
+        "children": [
+          {
+            "id": "492:14887",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 390,
+              "y": 64
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "492:14888",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 390,
+              "y": 1560
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 64
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact"
+        ]
+      },
+      {
+        "id": "498:16416",
+        "name": "26. Progress (Tablet)",
+        "size": {
+          "x": 800,
+          "y": 2140
+        },
+        "fonts": {
+          "Poppins": 67,
+          "Figtree": 1
+        },
+        "children": [
+          {
+            "id": "498:16417",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 76,
+              "y": 2140
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "498:16418",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 724,
+              "y": 2140
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 76,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "Chest",
+          "93.0",
+          "cm",
+          "Waist",
+          "77.5",
+          "cm",
+          "Hips",
+          "98.0",
+          "cm",
+          "Arm",
+          "28.5",
+          "cm",
+          "Thigh",
+          "58.5",
+          "cm",
+          "Start Weight",
+          "85",
+          "Kg",
+          "Current Weight",
+          "78",
+          "Kg",
+          "Weight Goal",
+          "65",
+          "Kg",
+          "85 kg",
+          "83 kg",
+          "80 kg",
+          "73 kg",
+          "80 kg",
+          "78 kg",
+          "450",
+          "kcal left",
+          "Calorie Goal: 2,000 kcal",
+          "Consumed",
+          "Burned",
+          "Consumed",
+          "1,755",
+          "kcal",
+          "Deep Sleep",
+          "Light Sleep",
+          "REM Phase",
+          "Awake",
+          "9:00 PM",
+          "11:00 PM",
+          "1:00 AM",
+          "3:00 AM",
+          "5:00 AM",
+          "8K",
+          "6h 45m",
+          "Sun",
+          "7h 25m",
+          "Mon",
+          "7h 55m",
+          "Tue",
+          "6h 0m",
+          "Wed",
+          "6h 50m",
+          "Thu",
+          "Hydration Level",
+          "Normal",
+          "kcal left",
+          "Intake",
+          "2.0 L",
+          "kcal left"
+        ]
+      },
+      {
+        "id": "498:18237",
+        "name": "27. Progress (Mobile)",
+        "size": {
+          "x": 390,
+          "y": 2382
+        },
+        "fonts": {
+          "Poppins": 67,
+          "Figtree": 1
+        },
+        "children": [
+          {
+            "id": "498:18238",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 390,
+              "y": 64
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "498:18239",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 390,
+              "y": 2318
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 64
+            }
+          }
+        ],
+        "texts": [
+          "Chest",
+          "93.0",
+          "cm",
+          "Waist",
+          "77.5",
+          "cm",
+          "Hips",
+          "98.0",
+          "cm",
+          "Arm",
+          "28.5",
+          "cm",
+          "Thigh",
+          "58.5",
+          "cm",
+          "Start Weight",
+          "85",
+          "Kg",
+          "Current Weight",
+          "78",
+          "Kg",
+          "Weight Goal",
+          "65",
+          "Kg",
+          "85 kg",
+          "83 kg",
+          "80 kg",
+          "73 kg",
+          "80 kg",
+          "78 kg",
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "450",
+          "kcal left",
+          "Calorie Goal: 2,000 kcal",
+          "Consumed",
+          "Burned",
+          "Consumed",
+          "1,755",
+          "kcal",
+          "Deep Sleep",
+          "Light Sleep",
+          "REM Phase",
+          "Awake",
+          "9:00 PM",
+          "11:00 PM",
+          "1:00 AM",
+          "3:00 AM",
+          "5:00 AM",
+          "8K",
+          "6h 45m",
+          "Sun",
+          "7h 25m",
+          "Mon",
+          "7h 55m",
+          "Tue",
+          "6h 0m",
+          "Wed",
+          "6h 50m",
+          "Thu",
+          "Hydration Level",
+          "Normal",
+          "kcal left",
+          "Intake",
+          "2.0 L",
+          "kcal left"
+        ]
+      },
+      {
+        "id": "498:20328",
+        "name": "29. Exercise (Tablet)",
+        "size": {
+          "x": 800,
+          "y": 1066
+        },
+        "fonts": {
+          "Poppins": 6
+        },
+        "children": [
+          {
+            "id": "498:20329",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 76,
+              "y": 1066
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "498:20330",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 724,
+              "y": 1066
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 76,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "Showing",
+          "out of 28"
+        ]
+      },
+      {
+        "id": "501:22824",
+        "name": "30. Exercise (Mobile)",
+        "size": {
+          "x": 390,
+          "y": 1084
+        },
+        "fonts": {
+          "Poppins": 4
+        },
+        "children": [
+          {
+            "id": "501:22825",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 390,
+              "y": 64
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "501:22826",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 390,
+              "y": 1020
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 64
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact"
+        ]
+      },
+      {
+        "id": "501:24021",
+        "name": "32. Insights (Tablet)",
+        "size": {
+          "x": 800,
+          "y": 1930
+        },
+        "fonts": {
+          "Poppins": 10
+        },
+        "children": [
+          {
+            "id": "501:24022",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 76,
+              "y": 1930
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "501:24023",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 724,
+              "y": 1930
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 76,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Healthy Insights",
+          "Health & Wellness",
+          "Sept 15, 2028",
+          "The Importance of Hydration for Optimal Health",
+          "Learn how proper hydration impacts your overall health, energy levels, and mental clarity, and get tips on how to stay hydrated throughout the day. Discover the signs of dehydration and how to prevent it with simple daily habits.",
+          "Dr. Amelia Johnson",
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact"
+        ]
+      },
+      {
+        "id": "504:15334",
+        "name": "33. Insights (Mobile)",
+        "size": {
+          "x": 390,
+          "y": 2990
+        },
+        "fonts": {
+          "Poppins": 9
+        },
+        "children": [
+          {
+            "id": "504:15335",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 390,
+              "y": 64
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "504:15336",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 390,
+              "y": 2926
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 64
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "Health & Wellness",
+          "Sept 15, 2028",
+          "The Importance of Hydration for Optimal Health",
+          "Learn how proper hydration impacts your overall health, energy levels, and mental clarity, and get tips on how to stay hydrated throughout the day. Discover the signs of dehydration and how to prevent it with simple daily habits.",
+          "Dr. Amelia Johnson"
+        ]
+      },
+      {
+        "id": "507:16615",
+        "name": "35. Insight Details (Tablet)",
+        "size": {
+          "x": 800,
+          "y": 2814
+        },
+        "fonts": {
+          "Poppins": 28
+        },
+        "children": [
+          {
+            "id": "507:16616",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 76,
+              "y": 2814
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "507:16617",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 724,
+              "y": 2814
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 76,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          }
+        ],
+        "texts": [
+          "Health & Wellness",
+          "6 min read",
+          "The Science Behind Hydration: Why Water is Essential for Health",
+          "Dr. Amelia Johnson",
+          "Sept 15, 2028",
+          "This article dives into the importance of hydration for overall well-being, covering how water affects everything from brain function to physical performance. Learn how to keep your hydration levels optimal throughout the day.",
+          "Water is the essence of life. It plays a crucial role in every system of the body, from maintaining cellular functions to regulating temperature and keeping us energized. While it’s often easy to overlook, staying hydrated is one of the simplest and most effective ways to support your overall well-being.",
+          "Why Hydration Matters",
+          "Your body is composed of about 60% water. Every cell, tissue, and organ relies on water to function properly. Hydration impacts everything from digestion to muscle performance and brain function. Even mild dehydration can affect your mood, concentration, and physical energy.",
+          "\"Hydration isn't just about drinking enough water—it's about ensuring your body has what it needs to perform at its best.\"",
+          "- Dr. Amelia Johnson -",
+          "How Much Water Do You Really Need?",
+          "The general guideline is to drink about 8 glasses of water a day, but your actual needs can vary depending on your activity level, environment, and health status. If you're exercising or in a hot climate, your water needs will increase. A good rule of thumb is to drink when you’re thirsty and aim for clear or light-colored urine, which indicates proper hydration.",
+          "Signs of Dehydration",
+          "Dehydration occurs when you’re losing more water than you’re taking in. Some common signs include:",
+          "Severe dehydration can lead to more serious health issues like kidney stones or heatstroke, so it’s important to monitor your hydration levels throughout the day.",
+          "Tips for Staying Hydrated",
+          "When you hydrate, water helps your body in the following ways:",
+          "Conclusion",
+          "Hydration is an essential part of maintaining your overall health and well-being. By understanding how water impacts your body and taking simple steps to stay hydrated, you can improve your mood, energy, and cognitive function. So, make sure you’re sipping water throughout the day and paying attention to your body's hydration needs.",
+          "Share",
+          "Explore a Variety of Meal Options",
+          "Tags",
+          "Explore a Variety of Meal Options",
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact"
+        ]
+      },
+      {
+        "id": "507:17412",
+        "name": "36. Insight Details (Mobile)",
+        "size": {
+          "x": 390,
+          "y": 3328
+        },
+        "fonts": {
+          "Poppins": 28
+        },
+        "children": [
+          {
+            "id": "507:17413",
+            "name": "Navbar",
+            "type": "INSTANCE",
+            "size": {
+              "x": 390,
+              "y": 64
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 0
+            }
+          },
+          {
+            "id": "507:17414",
+            "name": "Content",
+            "type": "FRAME",
+            "size": {
+              "x": 390,
+              "y": 3264
+            },
+            "transform": {
+              "m00": 1,
+              "m01": 0,
+              "m02": 0,
+              "m10": 0,
+              "m11": 1,
+              "m12": 64
+            }
+          }
+        ],
+        "texts": [
+          "Copyright © 2024 Peterdraw",
+          "Privacy Policy",
+          "Term and conditions",
+          "Contact",
+          "Health & Wellness",
+          "6 min read",
+          "The Science Behind Hydration: Why Water is Essential for Health",
+          "Dr. Amelia Johnson",
+          "Sept 15, 2028",
+          "This article dives into the importance of hydration for overall well-being, covering how water affects everything from brain function to physical performance. Learn how to keep your hydration levels optimal throughout the day.",
+          "Water is the essence of life. It plays a crucial role in every system of the body, from maintaining cellular functions to regulating temperature and keeping us energized. While it’s often easy to overlook, staying hydrated is one of the simplest and most effective ways to support your overall well-being.",
+          "Why Hydration Matters",
+          "Your body is composed of about 60% water. Every cell, tissue, and organ relies on water to function properly. Hydration impacts everything from digestion to muscle performance and brain function. Even mild dehydration can affect your mood, concentration, and physical energy.",
+          "\"Hydration isn't just about drinking enough water—it's about ensuring your body has what it needs to perform at its best.\"",
+          "- Dr. Amelia Johnson -",
+          "How Much Water Do You Really Need?",
+          "The general guideline is to drink about 8 glasses of water a day, but your actual needs can vary depending on your activity level, environment, and health status. If you're exercising or in a hot climate, your water needs will increase. A good rule of thumb is to drink when you’re thirsty and aim for clear or light-colored urine, which indicates proper hydration.",
+          "Signs of Dehydration",
+          "Dehydration occurs when you’re losing more water than you’re taking in. Some common signs include:",
+          "Severe dehydration can lead to more serious health issues like kidney stones or heatstroke, so it’s important to monitor your hydration levels throughout the day.",
+          "Tips for Staying Hydrated",
+          "When you hydrate, water helps your body in the following ways:",
+          "Conclusion",
+          "Hydration is an essential part of maintaining your overall health and well-being. By understanding how water impacts your body and taking simple steps to stay hydrated, you can improve your mood, energy, and cognitive function. So, make sure you’re sipping water throughout the day and paying attention to your body's hydration needs.",
+          "Share",
+          "Explore a Variety of Meal Options",
+          "Tags",
+          "Explore a Variety of Meal Options"
+        ]
+      }
+    ]
+  }
+]

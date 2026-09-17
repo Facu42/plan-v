@@ -1,0 +1,73 @@
+{
+  "checks": [
+    {
+      "viewport": 1440,
+      "state": {
+        "width": 1440,
+        "scroll": 1425,
+        "logo": true
+      },
+      "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-showroom\\patient-light-1440.png"
+    },
+    {
+      "viewport": 800,
+      "state": {
+        "width": 800,
+        "scroll": 785,
+        "logo": true
+      },
+      "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-showroom\\patient-light-800.png"
+    },
+    {
+      "viewport": 390,
+      "state": {
+        "width": 390,
+        "scroll": 375,
+        "logo": true
+      },
+      "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-showroom\\patient-light-390.png"
+    },
+    {
+      "viewport": 320,
+      "state": {
+        "width": 320,
+        "scroll": 305,
+        "logo": true
+      },
+      "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-showroom\\patient-light-320.png"
+    },
+    {
+      "role": "pro",
+      "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-showroom\\crm-light.png"
+    },
+    {
+      "role": "pro-dark",
+      "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-showroom\\crm-dark.png"
+    },
+    {
+      "role": "patient-dark",
+      "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-showroom\\patient-dark.png"
+    },
+    {
+      "viewport": 800,
+      "theme": "dark",
+      "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-showroom\\patient-dark-800.png"
+    },
+    {
+      "viewport": 390,
+      "theme": "dark",
+      "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-showroom\\patient-dark-390.png"
+    },
+    {
+      "viewport": 320,
+      "theme": "dark",
+      "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-showroom\\patient-dark-320.png"
+    }
+  ],
+  "focus": {
+    "tag": "BUTTON",
+    "outline": "solid"
+  },
+  "originalCRM": true,
+  "errors": []
+}

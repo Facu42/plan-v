@@ -1,0 +1,38 @@
+[
+  {
+    "source": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\archive\\legacy-prototype-2026-09-04\\contenido\\fotos-publicaciones\\Carrusel Comida Real - Slide 1 Desayuno Saludable_1.jpg",
+    "derived": "src\\assets\\showroom\\breakfast.webp",
+    "crop": [
+      380,
+      830,
+      1660,
+      1780
+    ],
+    "bytes": 52410,
+    "usage": "Imagen ilustrativa del archivo de Plan V; no es foto del registro del paciente."
+  },
+  {
+    "source": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\archive\\legacy-prototype-2026-09-04\\contenido\\fotos-publicaciones\\Carrusel Comida Real - Slide 2 Almuerzo Balanceado_1.jpg",
+    "derived": "src\\assets\\showroom\\lunch.webp",
+    "crop": [
+      350,
+      830,
+      1660,
+      1770
+    ],
+    "bytes": 52936,
+    "usage": "Imagen ilustrativa del archivo de Plan V; no es foto del registro del paciente."
+  },
+  {
+    "source": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\archive\\legacy-prototype-2026-09-04\\contenido\\fotos-publicaciones\\Carrusel Comida Real - Slide 3 Merienda Saludable_1.jpg",
+    "derived": "src\\assets\\showroom\\snack.webp",
+    "crop": [
+      340,
+      840,
+      1660,
+      1770
+    ],
+    "bytes": 39724,
+    "usage": "Imagen ilustrativa del archivo de Plan V; no es foto del registro del paciente."
+  }
+]

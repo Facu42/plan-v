@@ -1,0 +1,154 @@
+[
+  {
+    "width": 1440,
+    "scroll": 1425,
+    "metrics": 4,
+    "metricHeights": [
+      72,
+      72,
+      72,
+      72
+    ],
+    "metricsHeight": 104,
+    "rows": 12,
+    "rail": false,
+    "main": 1202,
+    "tableScroll": 1114,
+    "tableClient": 1114,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-meals\\meals-light-1440.png"
+  },
+  {
+    "width": 800,
+    "scroll": 785,
+    "metrics": 4,
+    "metricHeights": [
+      72,
+      72,
+      72,
+      72
+    ],
+    "metricsHeight": 192,
+    "rows": 12,
+    "rail": false,
+    "main": 585,
+    "tableScroll": 760,
+    "tableClient": 517,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-meals\\meals-light-800.png"
+  },
+  {
+    "width": 390,
+    "scroll": 375,
+    "metrics": 4,
+    "metricHeights": [
+      72,
+      72,
+      72,
+      72
+    ],
+    "metricsHeight": 368,
+    "rows": 12,
+    "rail": false,
+    "main": 375,
+    "tableScroll": 702,
+    "tableClient": 319,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-meals\\meals-light-390.png"
+  },
+  {
+    "width": 320,
+    "scroll": 305,
+    "metrics": 4,
+    "metricHeights": [
+      72,
+      72,
+      72,
+      72
+    ],
+    "metricsHeight": 368,
+    "rows": 12,
+    "rail": false,
+    "main": 305,
+    "tableScroll": 702,
+    "tableClient": 257,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-meals\\meals-light-320.png"
+  },
+  {
+    "width": 1440,
+    "scroll": 1425,
+    "metrics": 4,
+    "metricHeights": [
+      72,
+      72,
+      72,
+      72
+    ],
+    "metricsHeight": 104,
+    "rows": 12,
+    "rail": false,
+    "main": 1202,
+    "tableScroll": 1114,
+    "tableClient": 1114,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-meals\\meals-dark-1440.png"
+  },
+  {
+    "width": 800,
+    "scroll": 785,
+    "metrics": 4,
+    "metricHeights": [
+      72,
+      72,
+      72,
+      72
+    ],
+    "metricsHeight": 192,
+    "rows": 12,
+    "rail": false,
+    "main": 585,
+    "tableScroll": 760,
+    "tableClient": 517,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-meals\\meals-dark-800.png"
+  },
+  {
+    "width": 390,
+    "scroll": 375,
+    "metrics": 4,
+    "metricHeights": [
+      72,
+      72,
+      72,
+      72
+    ],
+    "metricsHeight": 368,
+    "rows": 12,
+    "rail": false,
+    "main": 375,
+    "tableScroll": 702,
+    "tableClient": 319,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-meals\\meals-dark-390.png"
+  },
+  {
+    "width": 320,
+    "scroll": 305,
+    "metrics": 4,
+    "metricHeights": [
+      72,
+      72,
+      72,
+      72
+    ],
+    "metricsHeight": 368,
+    "rows": 12,
+    "rail": false,
+    "main": 305,
+    "tableScroll": 702,
+    "tableClient": 257,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-meals\\meals-dark-320.png"
+  }
+]

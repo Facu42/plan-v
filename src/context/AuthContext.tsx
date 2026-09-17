@@ -18,11 +18,17 @@ type AuthState = {
 
 const AuthContext = createContext<AuthState | null>(null);
 
+function wantsLocalDemo() {
+  if (!import.meta.env.DEV || typeof window === 'undefined') return !supabaseConfigured;
+  return new URLSearchParams(window.location.search).get('auth') !== '1';
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [loading, setLoading] = useState(supabaseConfigured);
+  const localDemo = wantsLocalDemo();
+  const [loading, setLoading] = useState(supabaseConfigured && !localDemo);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [demoMode, setDemoMode] = useState(!supabaseConfigured);
+  const [demoMode, setDemoMode] = useState(localDemo || !supabaseConfigured);
 
   useEffect(() => {
     if (!supabase) {
@@ -31,13 +37,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    if (localDemo) {
+      supabase.auth.signOut().catch(() => {});
+      setSession(null);
+      setProfile(null);
+      setDemoMode(true);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    const timeout = window.setTimeout(() => {
+      if (!cancelled) setLoading(false);
+    }, 2500);
+
     supabase.auth.getSession().then(async ({ data }) => {
+      if (cancelled) return;
       setSession(data.session);
       if (data.session?.user) {
         setProfile(await getProfile(data.session.user.id));
       }
       setLoading(false);
-    });
+    }).catch(() => {
+      if (!cancelled) setLoading(false);
+    }).finally(() => window.clearTimeout(timeout));
 
     const { data: sub } = supabase.auth.onAuthStateChange(async (_event, next) => {
       setSession(next);
@@ -49,8 +72,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    return () => sub.subscription.unsubscribe();
-  }, []);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeout);
+      sub.subscription.unsubscribe();
+    };
+  }, [localDemo]);
 
   const value = useMemo<AuthState>(() => ({
     loading,
@@ -81,7 +108,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (supabase) await supabase.auth.signOut();
       setDemoMode(false);
     },
-    enterDemoMode: () => setDemoMode(true),
+    enterDemoMode: () => {
+      if (supabase) supabase.auth.signOut().catch(() => {});
+      setSession(null);
+      setProfile(null);
+      setDemoMode(true);
+    },
   }), [loading, session, profile, demoMode]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

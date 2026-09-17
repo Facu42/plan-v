@@ -1,0 +1,884 @@
+{
+  "marina": {
+    "id": "pat-marina",
+    "name": "Marina C.",
+    "initials": "MC",
+    "tone": "lilac",
+    "status": "Plan B",
+    "billing_status": "pending",
+    "billing_until": null,
+    "stage": "plan",
+    "goal": "Sostener el Plan B sin improvisar de noche",
+    "goal_status": "paused",
+    "goal_progress": 40,
+    "goal_updated_at": "2026-09-04T14:41:54.620Z",
+    "goal_history": [
+      {
+        "id": "goal-m1",
+        "goal": "Sostener el Plan B sin improvisar de noche",
+        "status": "paused",
+        "progress": 40,
+        "note": "Pausa breve durante una semana de cambios laborales.",
+        "updated_at": "2026-09-04T14:41:54.620Z"
+      }
+    ],
+    "sensitive_hours": "Salida del trabajo · 18:00",
+    "plan_b": "Yogur + fruta + puñado de nueces",
+    "next_focus": "Merienda pre-armada",
+    "adherence_score": 72,
+    "adherence_why": "5 de 7 meriendas confirmadas. Usó Plan B 3 veces. Agua 5/7.",
+    "time": "ayer",
+    "hydration": 5,
+    "energy": "Tranquila",
+    "sleep_minutes": 480,
+    "appointment": {
+      "when": "Viernes · 11:00",
+      "duration": 30,
+      "channel": "video"
+    },
+    "habit_logs": [
+      {
+        "id": "hb-pat-marina-0",
+        "patient_id": "pat-marina",
+        "date": "2026-09-09",
+        "hydration": 5,
+        "energy": "Tranquila",
+        "sleep_minutes": 480
+      },
+      {
+        "id": "hb-pat-marina-1",
+        "patient_id": "pat-marina",
+        "date": "2026-09-08",
+        "hydration": 5,
+        "energy": null,
+        "sleep_minutes": 450
+      },
+      {
+        "id": "hb-pat-marina-2",
+        "patient_id": "pat-marina",
+        "date": "2026-09-07",
+        "hydration": 5,
+        "energy": null,
+        "sleep_minutes": 465
+      },
+      {
+        "id": "hb-pat-marina-3",
+        "patient_id": "pat-marina",
+        "date": "2026-09-06",
+        "hydration": 5,
+        "energy": null,
+        "sleep_minutes": 420
+      },
+      {
+        "id": "hb-pat-marina-4",
+        "patient_id": "pat-marina",
+        "date": "2026-09-05",
+        "hydration": 5,
+        "energy": null,
+        "sleep_minutes": 480
+      },
+      {
+        "id": "hb-pat-marina-5",
+        "patient_id": "pat-marina",
+        "date": "2026-09-04",
+        "hydration": 5,
+        "energy": null,
+        "sleep_minutes": 450
+      },
+      {
+        "id": "hb-pat-marina-6",
+        "patient_id": "pat-marina",
+        "date": "2026-09-03",
+        "hydration": 5,
+        "energy": null,
+        "sleep_minutes": 435
+      }
+    ],
+    "todayPlan": [
+      {
+        "slot": "Desayuno",
+        "title": "Avena con frutas",
+        "time": "08:00"
+      },
+      {
+        "slot": "Almuerzo",
+        "title": "Wrap de pollo y ensalada",
+        "time": "13:00"
+      },
+      {
+        "slot": "Merienda",
+        "title": "Yogur + fruta + nueces (Plan B)",
+        "time": "17:30"
+      },
+      {
+        "slot": "Cena",
+        "title": "Ensalada completa",
+        "time": "21:00"
+      }
+    ],
+    "weekPlan": [
+      {
+        "day": "Miércoles",
+        "meals": [
+          {
+            "slot": "Almuerzo",
+            "title": "Wrap de pollo"
+          },
+          {
+            "slot": "Merienda",
+            "title": "Plan B"
+          }
+        ]
+      },
+      {
+        "day": "Jueves",
+        "meals": [
+          {
+            "slot": "Almuerzo",
+            "title": "Bowl de quinoa"
+          },
+          {
+            "slot": "Cena",
+            "title": "Omelette + ensalada"
+          }
+        ]
+      }
+    ],
+    "brief": {
+      "suggested_action": "ajuste_menu",
+      "up_next_title": "Ajustar el menú",
+      "up_next_body": "Plan B tres veces esta semana. Conviene dejar la merienda pre-armada en el slot.",
+      "draft_message": null,
+      "source_ids": [],
+      "adherence_why": "5 de 7 meriendas confirmadas. Usó Plan B 3 veces. Agua 5/7."
+    },
+    "timeline": [
+      {
+        "id": "m1",
+        "kind": "meal_logged",
+        "atLabel": "HOY",
+        "title": "Merienda · foto en revisión",
+        "body": "17:40 · 0.58 · pendiente."
+      }
+    ],
+    "meal_logs": [
+      {
+        "id": "ml-m1",
+        "patient_id": "pat-marina",
+        "slot": "Merienda",
+        "photo_url": null,
+        "description": "Yogur con fruta",
+        "foods": [
+          {
+            "name": "yogur con fruta",
+            "portion_est": 180,
+            "portion_unit": "g",
+            "confidence": 0.58
+          }
+        ],
+        "macros": {
+          "kcal": 220,
+          "protein_g": 12,
+          "carbs_g": 28,
+          "fat_g": 6
+        },
+        "confidence": 0.58,
+        "note_for_nutri": "Parece Plan B. Confirmar si incluyó nueces.",
+        "status": "pending_review",
+        "logged_at": "2026-09-09T14:41:54.620Z"
+      },
+      {
+        "id": "ml-m2",
+        "patient_id": "pat-marina",
+        "slot": "Almuerzo",
+        "photo_url": null,
+        "description": "Wrap de pollo",
+        "foods": [
+          {
+            "name": "Wrap de pollo",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 420,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "confirmed",
+        "logged_at": "2026-09-08T14:41:54.620Z"
+      },
+      {
+        "id": "ml-m3",
+        "patient_id": "pat-marina",
+        "slot": "Merienda",
+        "photo_url": null,
+        "description": "Yogur + fruta + nueces (Plan B)",
+        "foods": [
+          {
+            "name": "Yogur + fruta + nueces (Plan B)",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 210,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "confirmed",
+        "logged_at": "2026-09-08T14:41:54.620Z"
+      },
+      {
+        "id": "ml-m4",
+        "patient_id": "pat-marina",
+        "slot": "Almuerzo",
+        "photo_url": null,
+        "description": "Wrap de pollo y ensalada",
+        "foods": [
+          {
+            "name": "Wrap de pollo y ensalada",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 430,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "adjusted",
+        "logged_at": "2026-09-07T14:41:54.620Z"
+      },
+      {
+        "id": "ml-m5",
+        "patient_id": "pat-marina",
+        "slot": "Cena",
+        "photo_url": null,
+        "description": "Ensalada completa",
+        "foods": [
+          {
+            "name": "Ensalada completa",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 340,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "confirmed",
+        "logged_at": "2026-09-06T14:41:54.620Z"
+      },
+      {
+        "id": "ml-m6",
+        "patient_id": "pat-marina",
+        "slot": "Almuerzo",
+        "photo_url": null,
+        "description": "Bowl de quinoa",
+        "foods": [
+          {
+            "name": "Bowl de quinoa",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 410,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "confirmed",
+        "logged_at": "2026-09-05T14:41:54.620Z"
+      },
+      {
+        "id": "ml-m7",
+        "patient_id": "pat-marina",
+        "slot": "Merienda",
+        "photo_url": null,
+        "description": "Yogur + fruta",
+        "foods": [
+          {
+            "name": "Yogur + fruta",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 190,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "confirmed",
+        "logged_at": "2026-09-04T14:41:54.620Z"
+      }
+    ],
+    "messages": []
+  },
+  "sofia": {
+    "id": "pat-sofia",
+    "name": "Sofía R.",
+    "initials": "SR",
+    "tone": "peach",
+    "status": "Atención",
+    "billing_status": "active",
+    "billing_until": "2026-10-09",
+    "stage": "seguimiento",
+    "goal": "Comer con más regularidad",
+    "goal_status": "active",
+    "goal_progress": 55,
+    "goal_updated_at": "2026-09-07T14:41:54.619Z",
+    "goal_history": [
+      {
+        "id": "goal-s1",
+        "goal": "Comer con más regularidad",
+        "status": "active",
+        "progress": 55,
+        "note": "Mejoró la organización del almuerzo; sostener el foco nocturno.",
+        "updated_at": "2026-09-07T14:41:54.619Z"
+      }
+    ],
+    "sensitive_hours": "Después de las 20:30",
+    "plan_b": "Tostada + huevo + palta",
+    "next_focus": "Organización nocturna",
+    "adherence_score": 62,
+    "adherence_why": "4 de 7 almuerzos confirmados. Agua 3/7 días. Cena de ayer en revisión (no suma).",
+    "time": "hace 38 min",
+    "hydration": 3,
+    "energy": "Baja",
+    "sleep_minutes": null,
+    "appointment": {
+      "when": "Jueves · 14:30",
+      "duration": 45,
+      "channel": "video"
+    },
+    "habit_logs": [
+      {
+        "id": "hb-pat-sofia-0",
+        "patient_id": "pat-sofia",
+        "date": "2026-09-09",
+        "hydration": 3,
+        "energy": "Baja",
+        "sleep_minutes": null
+      },
+      {
+        "id": "hb-pat-sofia-1",
+        "patient_id": "pat-sofia",
+        "date": "2026-09-08",
+        "hydration": 3,
+        "energy": null,
+        "sleep_minutes": 390
+      },
+      {
+        "id": "hb-pat-sofia-2",
+        "patient_id": "pat-sofia",
+        "date": "2026-09-07",
+        "hydration": 2,
+        "energy": null,
+        "sleep_minutes": 450
+      },
+      {
+        "id": "hb-pat-sofia-3",
+        "patient_id": "pat-sofia",
+        "date": "2026-09-06",
+        "hydration": 3,
+        "energy": null,
+        "sleep_minutes": 420
+      },
+      {
+        "id": "hb-pat-sofia-4",
+        "patient_id": "pat-sofia",
+        "date": "2026-09-05",
+        "hydration": 4,
+        "energy": null,
+        "sleep_minutes": 480
+      },
+      {
+        "id": "hb-pat-sofia-5",
+        "patient_id": "pat-sofia",
+        "date": "2026-09-04",
+        "hydration": 3,
+        "energy": null,
+        "sleep_minutes": 405
+      },
+      {
+        "id": "hb-pat-sofia-6",
+        "patient_id": "pat-sofia",
+        "date": "2026-09-03",
+        "hydration": 3,
+        "energy": null,
+        "sleep_minutes": 435
+      }
+    ],
+    "todayPlan": [
+      {
+        "slot": "Desayuno",
+        "title": "Yogur griego, granola y frutas",
+        "time": "08:00"
+      },
+      {
+        "slot": "Almuerzo",
+        "title": "Bowl tibio de pollo y vegetales",
+        "time": "13:30"
+      },
+      {
+        "slot": "Merienda",
+        "title": "Tostada + huevo + palta",
+        "time": "17:30"
+      },
+      {
+        "slot": "Cena",
+        "title": "Elegí tu versión favorita",
+        "time": "21:00"
+      }
+    ],
+    "weekPlan": [
+      {
+        "day": "Lunes",
+        "meals": [
+          {
+            "slot": "Almuerzo",
+            "title": "Wrap de pollo"
+          },
+          {
+            "slot": "Cena",
+            "title": "Ensalada tibia"
+          }
+        ]
+      },
+      {
+        "day": "Martes",
+        "meals": [
+          {
+            "slot": "Almuerzo",
+            "title": "Bowl de quinoa"
+          },
+          {
+            "slot": "Cena",
+            "title": "Omelette + ensalada"
+          }
+        ]
+      },
+      {
+        "day": "Miércoles",
+        "meals": [
+          {
+            "slot": "Almuerzo",
+            "title": "Bowl tibio de pollo y vegetales"
+          },
+          {
+            "slot": "Cena",
+            "title": "Plan B: tostada + huevo"
+          }
+        ]
+      },
+      {
+        "day": "Jueves",
+        "meals": [
+          {
+            "slot": "Almuerzo",
+            "title": "Milanesa de pollo y ensalada"
+          },
+          {
+            "slot": "Cena",
+            "title": "Sopa de verduras"
+          }
+        ]
+      },
+      {
+        "day": "Viernes",
+        "meals": [
+          {
+            "slot": "Almuerzo",
+            "title": "Pasta integral con verduras"
+          },
+          {
+            "slot": "Cena",
+            "title": "Pescado al horno"
+          }
+        ]
+      }
+    ],
+    "brief": {
+      "suggested_action": "mensaje",
+      "up_next_title": "Mandarle un mensaje",
+      "up_next_body": "Ayer no cargó el almuerzo y el agua quedó en 3/8. Un toque corto, no un sermón.",
+      "draft_message": "Hola, vi que ayer se te escapó el almuerzo. ¿Lo resolvemos con el Plan B o lo pasamos a hoy?",
+      "source_ids": [],
+      "adherence_why": "4 de 7 almuerzos confirmados. Agua 3/7 días. Cena de ayer en revisión (no suma)."
+    },
+    "timeline": [
+      {
+        "id": "s1",
+        "kind": "meal_logged",
+        "atLabel": "HOY",
+        "title": "Cena · foto en revisión",
+        "body": "21:47 · estimación floja (0.38). Macros no entran al gauge."
+      },
+      {
+        "id": "s2",
+        "kind": "habit",
+        "atLabel": "HOY",
+        "title": "Energía baja",
+        "body": "Check-in del paciente"
+      },
+      {
+        "id": "s3",
+        "kind": "meal_logged",
+        "atLabel": "HOY",
+        "title": "Almuerzo · foto en revisión",
+        "body": "14:02 · estimación (0.62). Pendiente de Vero."
+      },
+      {
+        "id": "s4",
+        "kind": "meal_missed",
+        "atLabel": "AYER",
+        "title": "Sin registro · almuerzo",
+        "body": "13:30 · slot planificado, sin meal_log"
+      }
+    ],
+    "meal_logs": [
+      {
+        "id": "ml-s1",
+        "patient_id": "pat-sofia",
+        "slot": "Cena",
+        "photo_url": null,
+        "description": "Pasta con salsa",
+        "foods": [
+          {
+            "name": "pasta con salsa",
+            "portion_est": 200,
+            "portion_unit": "g",
+            "confidence": 0.38
+          }
+        ],
+        "macros": {
+          "kcal": 380,
+          "protein_g": 12,
+          "carbs_g": 58,
+          "fat_g": 10
+        },
+        "confidence": 0.38,
+        "note_for_nutri": "Foto oscura, difícil estimar porción de pasta y grasa de la salsa.",
+        "status": "pending_review",
+        "logged_at": "2026-09-09T14:41:54.620Z"
+      },
+      {
+        "id": "ml-s2",
+        "patient_id": "pat-sofia",
+        "slot": "Almuerzo",
+        "photo_url": null,
+        "description": "Bowl de pollo",
+        "foods": [
+          {
+            "name": "pollo a la plancha",
+            "portion_est": 120,
+            "portion_unit": "g",
+            "confidence": 0.65
+          },
+          {
+            "name": "vegetales",
+            "portion_est": 80,
+            "portion_unit": "g",
+            "confidence": 0.6
+          }
+        ],
+        "macros": {
+          "kcal": 420,
+          "protein_g": 35,
+          "carbs_g": 28,
+          "fat_g": 14
+        },
+        "confidence": 0.62,
+        "note_for_nutri": "Coincide con el bowl planificado. Aceite no visible.",
+        "status": "pending_review",
+        "logged_at": "2026-09-09T14:41:54.620Z"
+      },
+      {
+        "id": "ml-s3",
+        "patient_id": "pat-sofia",
+        "slot": "Almuerzo",
+        "photo_url": null,
+        "description": "Wrap de pollo",
+        "foods": [
+          {
+            "name": "Wrap de pollo",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 430,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "confirmed",
+        "logged_at": "2026-09-08T14:41:54.620Z"
+      },
+      {
+        "id": "ml-s4",
+        "patient_id": "pat-sofia",
+        "slot": "Cena",
+        "photo_url": null,
+        "description": "Ensalada tibia",
+        "foods": [
+          {
+            "name": "Ensalada tibia",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 350,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "confirmed",
+        "logged_at": "2026-09-08T14:41:54.620Z"
+      },
+      {
+        "id": "ml-s5",
+        "patient_id": "pat-sofia",
+        "slot": "Almuerzo",
+        "photo_url": null,
+        "description": "Bowl de quinoa",
+        "foods": [
+          {
+            "name": "Bowl de quinoa",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 410,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "adjusted",
+        "logged_at": "2026-09-07T14:41:54.620Z"
+      },
+      {
+        "id": "ml-s6",
+        "patient_id": "pat-sofia",
+        "slot": "Cena",
+        "photo_url": null,
+        "description": "Omelette + ensalada",
+        "foods": [
+          {
+            "name": "Omelette + ensalada",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 330,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "confirmed",
+        "logged_at": "2026-09-07T14:41:54.620Z"
+      },
+      {
+        "id": "ml-s7",
+        "patient_id": "pat-sofia",
+        "slot": "Almuerzo",
+        "photo_url": null,
+        "description": "Bowl tibio de pollo y vegetales",
+        "foods": [
+          {
+            "name": "Bowl tibio de pollo y vegetales",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 420,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "confirmed",
+        "logged_at": "2026-09-06T14:41:54.620Z"
+      },
+      {
+        "id": "ml-s8",
+        "patient_id": "pat-sofia",
+        "slot": "Cena",
+        "photo_url": null,
+        "description": "Plan B: tostada + huevo",
+        "foods": [
+          {
+            "name": "Plan B: tostada + huevo",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 310,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "confirmed",
+        "logged_at": "2026-09-06T14:41:54.620Z"
+      },
+      {
+        "id": "ml-s9",
+        "patient_id": "pat-sofia",
+        "slot": "Almuerzo",
+        "photo_url": null,
+        "description": "Milanesa de pollo y ensalada",
+        "foods": [
+          {
+            "name": "Milanesa de pollo y ensalada",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 480,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "adjusted",
+        "logged_at": "2026-09-05T14:41:54.620Z"
+      },
+      {
+        "id": "ml-s10",
+        "patient_id": "pat-sofia",
+        "slot": "Cena",
+        "photo_url": null,
+        "description": "Sopa de verduras",
+        "foods": [
+          {
+            "name": "Sopa de verduras",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 280,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "confirmed",
+        "logged_at": "2026-09-05T14:41:54.620Z"
+      },
+      {
+        "id": "ml-s11",
+        "patient_id": "pat-sofia",
+        "slot": "Almuerzo",
+        "photo_url": null,
+        "description": "Pasta integral con verduras",
+        "foods": [
+          {
+            "name": "Pasta integral con verduras",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 450,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "confirmed",
+        "logged_at": "2026-09-04T14:41:54.620Z"
+      },
+      {
+        "id": "ml-s12",
+        "patient_id": "pat-sofia",
+        "slot": "Cena",
+        "photo_url": null,
+        "description": "Pescado al horno",
+        "foods": [
+          {
+            "name": "Pescado al horno",
+            "portion_est": 150,
+            "portion_unit": "g",
+            "confidence": 0.7
+          }
+        ],
+        "macros": {
+          "kcal": 390,
+          "protein_g": 28,
+          "carbs_g": 40,
+          "fat_g": 12
+        },
+        "confidence": 0.7,
+        "note_for_nutri": "Revisada en la semana.",
+        "status": "confirmed",
+        "logged_at": "2026-09-04T14:41:54.620Z"
+      }
+    ],
+    "messages": [
+      {
+        "id": "msg-1",
+        "patient_id": "pat-sofia",
+        "from": "vero",
+        "text": "Me encantó cómo venís encontrando opciones simples para tus almuerzos.",
+        "suggested_by_ai": false,
+        "sent_at": "2026-09-09T14:41:54.620Z"
+      }
+    ]
+  }
+}

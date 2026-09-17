@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { api } from '../../api/client';
+import { useRef, useState } from 'react';
+import { api, type PatientInvite } from '../../api/client';
 import {
   pendingReviewCount,
   scoreBand,
@@ -9,60 +9,43 @@ import {
   useAppStore,
 } from '../../store/useAppStore';
 import type { MealLog, Patient } from '../../types';
-import { Icon, Mark, ScoreRing, MacroBar } from '../shared/Icon';
+import { Icon, Mark, ScoreRing } from '../shared/Icon';
+import { CRM_MENU_SECTIONS, CrmModuleView, type CrmModule } from './CrmModuleView';
+import { MealReviewPanel } from './MealReviewPanel';
+import { CrmMenuEditor } from './CrmMenuEditor';
+import { CrmMealsHabitsTab } from './CrmMealsHabitsTab';
+import { CrmAppointmentsTab } from './CrmAppointmentsTab';
+import { CrmPatientContactCard } from './CrmPatientContactCard';
+import { CrmBillingControl } from './CrmBillingControl';
+import { CrmPatientCreateDialog } from './CrmPatientCreateDialog';
+import { resolveNextStepTarget } from './next-step-target';
+import { resolveCommandMessageAction, visibleBrief } from './crm-interactions';
+import { resolveCrmEntry, type CrmEntry } from './crm-entry';
 
-const RAIL_LABELS = ['Evaluación inicial', 'Ritmo de la semana', 'Plan B', 'Revisión'] as const;
+const RAIL_LABELS = ['Evaluación inicial', 'Ritmo semanal', 'Plan B', 'Revisión'] as const;
 
-function MealReviewPanel({ patient, log, onClose }: { patient: Patient; log: MealLog; onClose: () => void }) {
-  const refreshPatient = useAppStore((s) => s.refreshPatient);
-  const [busy, setBusy] = useState(false);
-
-  const act = async (status: 'confirmed' | 'adjusted') => {
-    setBusy(true);
-    try {
-      await api.updateMeal(patient.id, log.id, { status });
-      await refreshPatient(patient.id);
-      onClose();
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <div className="review-panel">
-      <div className="review-head">
-        <h3>Revisar comida · {log.slot}</h3>
-        <button type="button" onClick={onClose} aria-label="Cerrar">×</button>
-      </div>
-      {log.photo_url && <img src={log.photo_url} alt="Comida del paciente" className="review-photo" />}
-      {log.description && !log.photo_url && <p className="review-desc">“{log.description}”</p>}
-      <div className="food-tags">{log.foods.map((f) => <span key={f.name}>{f.name}</span>)}</div>
-      {log.macros && <MacroBar macros={log.macros} />}
-      <p className="review-note"><strong>Nota IA (solo vos):</strong> {log.note_for_nutri}</p>
-      <p className="review-confidence">Confianza: {(log.confidence * 100).toFixed(0)}% · {log.confidence < 0.45 ? 'No suma al gauge' : 'Estimación usable'}</p>
-      <div className="review-actions">
-        <button type="button" className="primary-button" disabled={busy} onClick={() => act('confirmed')}>
-          <Icon name="check" size={16} />Confirmar
-        </button>
-        <button type="button" className="soft-button" disabled={busy} onClick={() => act('adjusted')}>
-          <Icon name="edit" size={16} />Ajustar y confirmar
-        </button>
-      </div>
-    </div>
-  );
-}
-
-export function CrmDashboard() {
-  const { patients, selectCrmPatient, refreshPatient } = useAppStore();
-  const [selectedId, setSelectedId] = useState(patients[0]?.id ?? 'pat-sofia');
-  const selected = patients.find((p) => p.id === selectedId)!;
+export function CrmDashboard({ darkMode, onToggleTheme, initialEntry }: { darkMode: boolean; onToggleTheme: () => void; initialEntry?: CrmEntry }) {
+  const { patients, addPatient, selectCrmPatient, refreshPatient } = useAppStore();
+  const activePatients = patients.filter((patient) => !patient.archived_at);
+  const [entry] = useState(() => resolveCrmEntry(patients, initialEntry));
+  const [selectedId, setSelectedId] = useState(entry?.patientId ?? '');
+  const selected = patients.find((p) => p.id === selectedId);
   const [sent, setSent] = useState(false);
   const [draft, setDraft] = useState('');
   const [generating, setGenerating] = useState(false);
   const [reviewLog, setReviewLog] = useState<MealLog | null>(null);
+  const [activeModule, setActiveModule] = useState<CrmModule>(entry?.module ?? 'fichas');
+  const [activeTab, setActiveTab] = useState<'resumen' | 'comidas' | 'plan' | 'consultas'>(entry?.tab ?? 'resumen');
+  const [createOpen, setCreateOpen] = useState(false);
+  const [inviteNotice, setInviteNotice] = useState<string | null>(null);
+  const [menuFocus, setMenuFocus] = useState<{ day: string; slot: string | null } | null>(null);
+  const [appointmentEdit, setAppointmentEdit] = useState(false);
+  const messageDraftRef = useRef<HTMLTextAreaElement>(null);
+
+  if (!selected) return <div className="loading-card" role="status"><h2>Paciente no disponible</h2><p>Volvé al directorio para elegir un paciente activo.</p></div>;
 
   const stageIdx = STAGE_RAIL.indexOf(selected.stage);
-  const brief = selected.brief;
+  const brief = visibleBrief(selected.brief, selected.briefDismissed);
   const pending = selected.meal_logs.filter((l) => l.status === 'pending_review');
 
   const pickPatient = (id: string) => {
@@ -71,6 +54,31 @@ export function CrmDashboard() {
     setSent(false);
     setDraft('');
     setReviewLog(null);
+    setActiveModule('fichas');
+    setActiveTab('resumen');
+    setMenuFocus(null);
+    setAppointmentEdit(false);
+  };
+
+  const openAppointmentsForPatient = (id: string) => {
+    setSelectedId(id);
+    selectCrmPatient(id);
+    setSent(false);
+    setDraft('');
+    setReviewLog(null);
+    setActiveModule('fichas');
+    setActiveTab('consultas');
+    setMenuFocus(null);
+    setAppointmentEdit(true);
+  };
+
+  const patientCreated = (patient: Patient, invite: PatientInvite) => {
+    addPatient(patient);
+    setSelectedId(patient.id);
+    setActiveModule('fichas');
+    setActiveTab('resumen');
+    setCreateOpen(false);
+    setInviteNotice(`${patient.name} fue incorporada. Invitación a ${invite.email} guardada, todavía no enviada.`);
   };
 
   const generateBrief = async () => {
@@ -92,6 +100,44 @@ export function CrmDashboard() {
     await refreshPatient(selected.id);
   };
 
+  const dismissBrief = async () => {
+    await api.dismissBrief(selected.id);
+    setDraft('');
+    setSent(false);
+    await refreshPatient(selected.id);
+  };
+
+  const openNextStep = () => {
+    if (!brief?.suggested_action) return;
+    const target = resolveNextStepTarget(selected, brief.suggested_action);
+    if (target?.kind === 'menu') {
+      setMenuFocus({ day: target.day, slot: target.slot });
+      setAppointmentEdit(false);
+      setActiveTab('plan');
+    } else if (target?.kind === 'appointment') {
+      setAppointmentEdit(true);
+      setMenuFocus(null);
+      setActiveTab('consultas');
+    }
+  };
+
+  const focusMessageDraft = () => {
+    resolveCommandMessageAction();
+    setActiveTab('resumen');
+    setMenuFocus(null);
+    setAppointmentEdit(false);
+    window.setTimeout(() => {
+      messageDraftRef.current?.focus();
+      messageDraftRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }, 0);
+  };
+
+  const openTab = (tab: 'resumen' | 'comidas' | 'plan' | 'consultas') => {
+    setActiveTab(tab);
+    if (tab !== 'plan') setMenuFocus(null);
+    if (tab !== 'consultas') setAppointmentEdit(false);
+  };
+
   return (
     <main className="reference-stage">
       <section className="reference-frame">
@@ -100,6 +146,9 @@ export function CrmDashboard() {
             <span className="grid-dot">⠿</span><Mark /><b>Plan V</b><i /><span>Centro profesional</span>
           </div>
           <div className="crm-tools">
+            <button type="button" className="crm-theme-toggle" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} aria-pressed={darkMode} onClick={onToggleTheme}>
+              <Icon name={darkMode ? 'sun' : 'moon'} size={15} />
+            </button>
             <button type="button" className="ai-status-pill" title="Estado de IA">
               <Icon name="sparkle" size={14} /> Copiloto IA
             </button>
@@ -111,15 +160,27 @@ export function CrmDashboard() {
         <div className="crm-body">
           <aside className="crm-menu">
             <div className="crm-menu-heading"><h2>Menú</h2><button type="button"><Icon name="arrow" size={14} /></button></div>
-            <p>Mi trabajo</p>
-            <div className="menu-group">
-              <button type="button" className="menu-current"><Icon name="sparkle" size={15} />Centro de ritmo</button>
-              <button type="button"><Icon name="trend" size={15} />Seguimiento</button>
-              <button type="button"><Icon name="calendar" size={15} />Agenda</button>
-            </div>
-            <p>Pacientes</p>
-            <div className="menu-group">
-              <button type="button"><Icon name="users" size={15} />Todos <span className="menu-badge">{patients.length}</span></button>
+            <div className="crm-menu-sections">
+              {CRM_MENU_SECTIONS.map((section, sectionIndex) => (
+                <section className="menu-section" key={section.title ?? `main-${sectionIndex}`}>
+                  {section.title && <p className="menu-section-title">{section.title}</p>}
+                  <div className="menu-group">
+                    {section.items.map((item) => (
+                      <button
+                        type="button"
+                        className={activeModule === item.id ? 'menu-current' : ''}
+                        aria-current={activeModule === item.id ? 'page' : undefined}
+                        onClick={() => setActiveModule(item.id)}
+                        key={item.id}
+                      >
+                        <Icon name={item.icon} size={15} />
+                        <span className="menu-label">{item.label}</span>
+                        {item.id === 'pacientes' && <span className="menu-badge">{activePatients.length}</span>}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              ))}
             </div>
           </aside>
 
@@ -132,7 +193,7 @@ export function CrmDashboard() {
             </div>
             <p className="worklist-label">HOY</p>
             <div className="worklist-scroll">
-              {patients.map((patient) => (
+              {activePatients.map((patient) => (
                 <button
                   type="button"
                   className={`work-person ${selected.id === patient.id ? 'selected' : ''}`}
@@ -144,6 +205,9 @@ export function CrmDashboard() {
                     <b>{patient.name}</b>
                     <small>{patient.brief?.up_next_title ?? patient.adherence_why}</small>
                     <em>{patient.status} · {patient.time}</em>
+                    <span className={`billing-chip billing-${patient.billing_status}`}>
+                      {patient.billing_status === 'active' ? 'Activo' : patient.billing_status === 'pending' ? 'Pendiente' : patient.billing_status === 'waived' ? 'Exceptuado' : 'Vencido'}
+                    </span>
                   </span>
                   <span className={`person-score score-${scoreBand(patient.adherence_score)}`}>{patient.adherence_score}</span>
                   {pendingReviewCount(patient) > 0 && <span className="pending-dot">{pendingReviewCount(patient)}</span>}
@@ -153,14 +217,23 @@ export function CrmDashboard() {
           </section>
 
           <section className="crm-workspace">
+            {activeModule === 'fichas' ? <>
             <div className="crm-commandbar">
               <button type="button" className="command-primary" onClick={generateBrief} disabled={generating}>
                 <Icon name={generating ? 'loader' : 'sparkle'} size={14} className={generating ? 'spin' : ''} />
                 {generating ? 'Generando…' : 'Actualizar copiloto'}
               </button>
-              <button type="button"><Icon name="plus" size={14} />Nuevo paciente</button>
-              <button type="button"><Icon name="message" size={14} />Mensaje</button>
+              <button type="button" onClick={() => setCreateOpen(true)}><Icon name="plus" size={14} />Nuevo paciente</button>
+              <button type="button" onClick={focusMessageDraft}><Icon name="message" size={14} />Mensaje</button>
             </div>
+
+            {inviteNotice && (
+              <div className="patient-create-notice" role="status">
+                <Icon name="check" size={15} />
+                <span>{inviteNotice}</span>
+                <button type="button" onClick={() => setInviteNotice(null)} aria-label="Cerrar aviso">×</button>
+              </div>
+            )}
 
             <header className="patient-record">
               <span className={`record-avatar person-${selected.tone}`}>{selected.initials}</span>
@@ -176,21 +249,39 @@ export function CrmDashboard() {
               </div>
             </header>
 
-            <section className="rhythm-rail">
-              <div className="rail-progress">
-                {RAIL_LABELS.map((label, i) => (
-                  <i key={label} className={i < stageIdx ? 'rail-done' : i === stageIdx ? 'rail-active' : ''}>{label}</i>
-                ))}
+            <CrmBillingControl patient={selected} />
+
+            <section className="rhythm-rail" aria-label="Etapa del acompañamiento">
+              <div className="process-rail">
+                <div className="process-summary">
+                  <strong>Proceso de acompañamiento</strong>
+                  <small>Activo · {selected.time}</small>
+                </div>
+                <ol className="rail-progress">
+                  {RAIL_LABELS.map((label, i) => {
+                    const state = i < stageIdx ? 'rail-done' : i === stageIdx ? 'rail-active' : '';
+                    return (
+                      <li key={label} className={state} aria-current={i === stageIdx ? 'step' : undefined}>
+                        <span className="rail-step-index">{i < stageIdx ? <Icon name="check" size={10} /> : i + 1}</span>
+                        <span className="rail-step-label">{label}</span>
+                      </li>
+                    );
+                  })}
+                </ol>
               </div>
             </section>
 
             <nav className="record-tabs">
-              <button type="button" className="active">Resumen</button>
-              <button type="button">Comidas y hábitos</button>
-              <button type="button">Plan</button>
-              <button type="button">Consultas</button>
+              <button type="button" className={activeTab === 'resumen' ? 'active' : ''} onClick={() => openTab('resumen')}>Resumen</button>
+              <button type="button" className={activeTab === 'comidas' ? 'active' : ''} onClick={() => openTab('comidas')}>Comidas y hábitos</button>
+              <button type="button" className={activeTab === 'plan' ? 'active' : ''} onClick={() => openTab('plan')}>Plan</button>
+              <button type="button" className={activeTab === 'consultas' ? 'active' : ''} onClick={() => openTab('consultas')}>Consultas</button>
             </nav>
 
+            {activeTab === 'plan' && <CrmMenuEditor patient={selected} initialDay={menuFocus?.day} initialSlot={menuFocus?.slot} />}
+            {activeTab === 'comidas' && <CrmMealsHabitsTab patient={selected} onReviewMeal={setReviewLog} />}
+            {activeTab === 'consultas' && <CrmAppointmentsTab patient={selected} startEditing={appointmentEdit} />}
+            {activeTab === 'resumen' && (<>
             {pending.length > 0 && (
               <section className="pending-banner">
                 <Icon name="camera" size={16} />
@@ -200,15 +291,7 @@ export function CrmDashboard() {
             )}
 
             <section className="crm-card-grid">
-              <article className="crm-card contact-card">
-                <h3>Ficha breve</h3>
-                <dl>
-                  <div><dt>Objetivo actual</dt><dd>{selected.goal}</dd></div>
-                  <div><dt>Horario sensible</dt><dd>{selected.sensitive_hours}</dd></div>
-                  <div><dt>Plan B favorito</dt><dd>{selected.plan_b}</dd></div>
-                  <div><dt>Próximo foco</dt><dd>{selected.next_focus}</dd></div>
-                </dl>
-              </article>
+              <CrmPatientContactCard patient={selected} />
 
               <article className="crm-card next-card">
                 <div className="card-heading">
@@ -233,7 +316,7 @@ export function CrmDashboard() {
                     {brief.suggested_action === 'mensaje' && (
                       <div className="draft-box">
                         <label>Borrador sugerido (editá antes de enviar)</label>
-                        <textarea value={draft || brief.draft_message || ''} onChange={(e) => setDraft(e.target.value)} rows={3} />
+                        <textarea ref={messageDraftRef} value={draft || brief.draft_message || ''} onChange={(e) => setDraft(e.target.value)} rows={3} />
                       </div>
                     )}
                     <div className="task-actions">
@@ -242,9 +325,9 @@ export function CrmDashboard() {
                           {sent ? <><Icon name="check" size={14} />Enviado</> : UP_NEXT_CTA.mensaje}
                         </button>
                       ) : (
-                        <button type="button" className="dark-action">{UP_NEXT_CTA[brief.suggested_action]}</button>
+                        <button type="button" className="dark-action" onClick={openNextStep}>{UP_NEXT_CTA[brief.suggested_action]}</button>
                       )}
-                      <button type="button">Marcar luego</button>
+                      <button type="button" onClick={dismissBrief}>Marcar luego</button>
                     </div>
                   </>
                 ) : (
@@ -294,14 +377,36 @@ export function CrmDashboard() {
                 {selected.appointment ? (
                   <>
                     <p className="appointment-time">{selected.appointment.when} <span>{selected.appointment.duration} min</span></p>
-                    <button type="button" className="subtle-action">Abrir videollamada <Icon name="arrow" size={14} /></button>
+                    {selected.appointment.meet_url ? (
+                      <a className="subtle-action appointment-link" href={selected.appointment.meet_url} target="_blank" rel="noopener noreferrer">
+                        Abrir videollamada <Icon name="arrow" size={14} />
+                      </a>
+                    ) : (
+                      <button type="button" className="subtle-action" onClick={() => openTab('consultas')}>
+                        Preparar consulta <Icon name="arrow" size={14} />
+                      </button>
+                    )}
                   </>
                 ) : <p>Sin turno cargado.</p>}
               </article>
             </section>
+            </>)}
+            </> : (
+              <CrmModuleView
+                module={activeModule}
+                patients={activeModule === 'pacientes' ? patients : activePatients}
+                onOpenPatient={pickPatient}
+                onOpenAppointments={openAppointmentsForPatient}
+                onCreatePatient={() => setCreateOpen(true)}
+              />
+            )}
           </section>
         </div>
       </section>
+
+      {createOpen && (
+        <CrmPatientCreateDialog onClose={() => setCreateOpen(false)} onCreated={patientCreated} />
+      )}
 
       {reviewLog && (
         <div className="modal-backdrop review-backdrop">

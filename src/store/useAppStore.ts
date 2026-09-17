@@ -13,6 +13,7 @@ type AppState = {
   supabaseEnabled: boolean;
   error: string | null;
   boot: (opts?: BootOptions) => Promise<void>;
+  addPatient: (patient: Patient) => void;
   refreshPatient: (id: string) => Promise<void>;
   setActivePatient: (id: string) => void;
   selectCrmPatient: (id: string) => void;
@@ -54,6 +55,15 @@ export const useAppStore = create<AppState>((set, get) => ({
     } catch (e) {
       set({ loading: false, error: e instanceof Error ? e.message : 'Error de conexión' });
     }
+  },
+
+  addPatient: (patient) => {
+    set((state) => ({
+      patients: state.patients.some((current) => current.id === patient.id)
+        ? state.patients.map((current) => (current.id === patient.id ? patient : current))
+        : [...state.patients, patient],
+      activePatientId: patient.id,
+    }));
   },
 
   refreshPatient: async (id: string) => {

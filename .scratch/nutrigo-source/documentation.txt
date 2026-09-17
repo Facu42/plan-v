@@ -1,0 +1,61 @@
+Thank you for purchasing our template.
+If you have any questions that are beyond the scope of this help file, 
+please feel free to contact us.
+File Documentation
+DB-011 Nutrigo - Nutrition & Diet Dashboard
+Font Used
+Poppins
+https://fonts.google.com/specimen/Poppins
+Image Sources
+Envato Elements
+https://www.elements.envato.com/
+Pexels
+https://www.pexels.com/
+Unsplash
+https://www.unsplash.com/
+
+DB-011 Nutrigo - Nutrition & Diet Dashboard
+How to open the .fig file?
+:5 Download and install the Figma app to your computer
+https://www.figma.com/downloads/
+\5 Import the .fig file
+Go the home tab menu and click icon “+” from the Drafts menu
+Click the Import menu and locate the .fig file you just downloaded.
+Figma file configuration
+:5 Pages and Layers
+Once you have successfully imported the figma 
+file, you will find the structure of the pages like  
+the screenshot attached.
+
+DB-011 Nutrigo - Nutrition & Diet Dashboard
+ Text Styles
+You can find the Text styles for this template.
+We have created H1, H2, H3, H4 and P styles
+B Color Styles
+For the color styles, you can find the configuration for 
+the primary color, secondary color, and tertiary colors.
+
+DB-011 Nutrigo - Nutrition & Diet Dashboard
+How to edit the styles?
+.+ Edit the text styles
+To edit the text style,
+click the configuration icon.
+R+ Edit the text properties
+You can edit the font name, weight, size, etc.
+
+Once you edit this configuration, all text that 
+uses this configuration will be automatically 
+adjusted.
+
+DB-011 Nutrigo - Nutrition & Diet Dashboard
+How to edit the styles?
+0$ Edit the color styles
+To edit the color style,
+click the configuration icon.
+T$ Edit the color properties
+You can edit the color hex code, opacity, and 
+color name.
+
+Once you edit this configuration, all colors that 
+use this configuration will be automatically 
+adjusted.

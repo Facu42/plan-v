@@ -1,0 +1,22 @@
+[
+  [
+    "plan-action-stays-in-nutrigo",
+    "pat-sofia"
+  ],
+  [
+    "edit-and-restore",
+    "Lunes|Almuerzo"
+  ],
+  [
+    "add-and-remove",
+    "Lunes|Desayuno"
+  ],
+  [
+    "search-keeps-seven-days",
+    true
+  ],
+  [
+    "patient-plan-remains-read-only",
+    true
+  ]
+]
