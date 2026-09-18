@@ -16,6 +16,7 @@ export default defineConfig({
     env: {
       APP_MODE: 'test',
       AI_MODE: 'demo',
+      TZ: 'America/Argentina/Buenos_Aires',
     },
   },
 });
