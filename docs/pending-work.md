@@ -1,10 +1,20 @@
 # Pendientes de Plan V
 
-## Revisión vigente de avance — 2026-09-18
+## Revisión vigente de avance — 2026-09-18 (instancia Plan V)
 
-Continuación sobre el árbol sin consolidar del 17/09: módulo de seguimiento conectado (peso, cintura, actividad, fotos corporales, pagos manuales, reemplazos de menú con revisión profesional), navegación lateral en escritorio para ambos roles, lista de compras derivada del plan y de alternativas publicadas. **Pruebas locales: 509 aprobadas, 2 omitidas; TypeScript, build y guarda SQL aprobados.** `npm run apply:disposable` aplica `core`/`intake`/`care` a un Postgres vacío y aborta si ya hay pacientes; no hay `.env` local con `DISPOSABLE_DATABASE_URL`, así que no se tocó ningún proyecto remoto. Falta Auth/RLS live, estudios PDF y el circuito completo de Storage (PV-15).
+El proyecto Supabase **Plan V** (`acevlqrkvdinelgxnaki`, org Facu42) se reactivó y recibió las migraciones ejecutables `core` / `intake` / `care` sobre esquema vacío. **0 pacientes, 0 perfiles, 0 usuarios Auth.** No se ejecutó el draft 016/016b. No se aplicó SQL a **ruti-chat-crm**.
 
-Siguiente: cerrar verificación de navegador del seguimiento y, en el plan de acción, continuar Storage/estudios (PV-15/16) sin aplicar SQL a datos reales.
+Para liberar el cupo Free (2 proyectos activos) se pausó `supabase-indigo-zebra` (`molizymlsilnciiilqqo`): test Vercel de Rumbotex de julio, no es Plan V ni la base viva de ruti (último mensaje 2026-07-10). ruti-chat-crm sigue `ACTIVE_HEALTHY`.
+
+Verificado en esa instancia: 25 tablas con RLS, 6 vistas paciente, catálogo de 7 consentimientos, trigger `on_auth_user_created`, buckets privados `meal-photos` y `care-photos`. Historial MCP: `core_tables`, `core_functions`, `core_rls`, `intake`, `intake_rpcs`, `care_tables`, `care_rpcs`.
+
+La app local **todavía no apunta** a este proyecto: falta `.env` con `APP_MODE=staging`, anon y **service role** (esta conexión no expone el service role). PV-08 no está cerrado: falta la matriz RLS-01…23 con usuarios sintéticos y el circuito Auth/invitación end-to-end.
+
+Siguiente: cablear staging local, provisionar nutricionista (`PROVISION_SECRET`), correr RLS live, después Storage/estudios (PV-15/16).
+
+## Revisión de avance — 2026-09-18 (seguimiento en git)
+
+Continuación sobre el árbol sin consolidar del 17/09: módulo de seguimiento conectado (peso, cintura, actividad, fotos corporales, pagos manuales, reemplazos de menú con revisión profesional), navegación lateral en escritorio para ambos roles, lista de compras derivada del plan y de alternativas publicadas. **Pruebas locales: 509 aprobadas, 2 omitidas; TypeScript, build y guarda SQL aprobados.** En ese corte `npm run apply:disposable` existía pero no había `.env` local; el SQL remoto se aplicó más tarde el mismo día al proyecto Plan V vacío (sección de arriba).
 
 ## Revisión vigente de avance — 2026-09-17
 
@@ -31,7 +41,7 @@ Estado PV-01…05:
 - **PV-05** guarda de migraciones + workflow CI. Node verificado: 24.16.0.
 - **PV-06** núcleo 016 intacto; ampliación piloto en `supabase/contracts/016b_piloto_ampliacion_draft.sql` (DRAFT/NO CORRER). Diccionario y política en `docs/contrato-diccionario-piloto.md`. Fuera del piloto: `exercise_library`, organizaciones, listas de compra persistidas.
 - **PV-07** Nutrigo entra al build de producción y a sesiones autenticadas. Rol tomado de la sesión (sin selector). Rutas `/app/:pagina` y `/crm/:pagina` con atrás/adelante y `#recurso=`. El selector de rol queda sólo en demo sin sesión; `?design=legacy` no aplica con sesión.
-- **PV-08** lecturas/escrituras ordinarias usan el JWT del actor (`createActorClient` + AsyncLocalStorage). Service role queda para auth/provisión. Migraciones nuevas `20260917190000_core.sql` y `20260917190100_intake.sql` para esquema vacío; tests PGlite en `server/intake/postgres.integration.test.ts`. 016/016b draft siguen fuera de la cadena. No aplicar a un proyecto con pacientes.
+- **PV-08** lecturas/escrituras ordinarias usan el JWT del actor (`createActorClient` + AsyncLocalStorage). Service role queda para auth/provisión. Migraciones `core`/`intake`/`care` aplicadas el 2026-09-18 al proyecto vacío Plan V (`acevlqrkvdinelgxnaki`). Tests PGlite siguen en `server/intake/postgres.integration.test.ts`. 016/016b draft fuera de la cadena. Matriz RLS live y Auth E2E pendientes.
 - **PV-09** alta profesional por `POST /api/ops/nutritionists` con `PROVISION_SECRET` (nunca JWT de usuario). Invitación de un uso: crear → enviar (vence 7 días) → aceptar con email Auth confirmado y coincidente, o revocar. Recuperación de cuenta vía `/api/auth/recover` y el formulario de login, sin revelar si el email existe. 016 sigue sin aplicarse.
 
 - **PV-10** paridad 016 de ficha, menú semanal, hábitos (incluye sueño), turnos, brief y objetivo publicado. Lectura posterior a cada escritura; si falta schema, 501 explícito (no éxito falso). Siguen 501 a propósito: archivo operativo (no hay `archived_at` en 016), cobranza (service role / PV-32), actividad, recursos, avisos y recibos de mensajes (016b / tickets posteriores).
@@ -40,7 +50,7 @@ Estado PV-01…05:
 - **PV-13** onboarding de nueve pantallas, autoguardado serializado (800 ms + avanzar), reanudación y envío idempotente. Vacío ≠ “no tengo”.
 - **PV-14** ficha profesional muestra resumen de ingreso, faltantes, alergias y notas privadas; el paciente no ve `reviewed_by` ni observaciones clínicas.
 
-Siguiente: verificación de navegador del seguimiento, después Storage/estudios (PV-15/16). No aplicar las migraciones a un proyecto con datos reales.
+Siguiente: `.env` staging → Plan V, RLS live e invitación real, después Storage/estudios (PV-15/16). No aplicar 016/016b ni SQL a ruti-chat-crm ni a un proyecto con pacientes.
 
 El registro de cortes que sigue se conserva como evidencia de **demo/memoria**. Sus casillas no acreditan producción ni aprobación visual integral.
 
@@ -119,14 +129,14 @@ La referencia aporta doce superficies. Plan V implementará funciones equivalent
 - [ ] Confirmar plazos de retención con privacidad/legal (los de PV-06 son de trabajo).
 - [ ] Revisar formalmente las RPC `accept_patient_invite` y `provision_nutritionist`.
 - [x] Convertir el núcleo revisado en migraciones nuevas e inmutables. No ejecutar 016 ni 016b sobre un proyecto con pacientes reales. `npm run apply:disposable` aplica `core`/`intake`/`care` a un esquema vacío y aborta si ya hay pacientes.
-- [ ] Ejecutar los casos `RLS-01…RLS-23` con usuarios sintéticos en una instancia descartable. PV-08 cablea JWT y deja RLS-02 live detrás de env; el resto de la matriz sigue pendiente de esa instancia.
+- [ ] Ejecutar los casos `RLS-01…RLS-23` con usuarios sintéticos en Plan V (`acevlqrkvdinelgxnaki`, schema ya aplicado, 0 pacientes). PV-08 cablea JWT y deja RLS-02 live detrás de env; la matriz completa sigue pendiente.
 - [ ] Adjuntar evidencias redactadas, hash de la migración y decisión explícita de go/no-go.
 
 ### 2. Completar Supabase y aislamiento multiusuario
 
 La API falla de forma explícita con `501` en operaciones que aún no tienen contrato persistente aprobado. Falta:
 
-- [ ] Alta e invitación real de pacientes. PV-09 deja el ciclo crear/enviar/revocar/aceptar y recuperación; falta aplicar 016 en instancia descartable para persistirlos.
+- [ ] Alta e invitación real de pacientes. PV-09 deja el ciclo crear/enviar/revocar/aceptar y recuperación; el schema ya está en Plan V vacío. Falta `.env` (service role + `PROVISION_SECRET`) y el recorrido Auth/RPC persistente.
 - [ ] Edición y archivo/restauración de pacientes mediante `archived_at`. PV-10 persiste la ficha (nombre/estado/etapa/notas profesionales); el archivo operativo sigue 501 porque 016 no tiene esa columna.
 - [ ] Persistencia de objetivos e historial profesional. PV-10 escribe `patients.goal`; `goal_status`/`goal_history` quedan para 016b.
 - [ ] Creación, reprogramación y cancelación de turnos. PV-10 reemplaza el turno vigente (demo v0); historial append-only es PV-25.

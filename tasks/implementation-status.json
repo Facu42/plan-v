@@ -53,16 +53,16 @@
     "PV-08": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Migraciones ejecutables de núcleo e ingreso para esquema vacío, con pruebas PGlite de aislamiento. Falta instancia descartable real y matriz RLS live. No aplicar a proyectos con pacientes.",
-      "evidence": "supabase/migrations/20260917190000_core.sql y 20260917190100_intake.sql. server/intake/postgres.integration.test.ts en la suite 2026-09-17. server/rls-ab.test.ts sigue omitiendo 2 casos live.",
-      "updatedAt": "2026-09-17T19:50:00.000Z"
+      "notes": "Schema core/intake/care aplicado el 2026-09-18 al proyecto vacío Plan V (acevlqrkvdinelgxnaki): 0 pacientes. Falta matriz RLS-01…23 live, .env staging y no inflar a done. No aplicar 016 ni SQL a ruti.",
+      "evidence": "docs/pending-work.md (instancia Plan V). Migraciones MCP core_tables/functions/rls, intake, intake_rpcs, care_tables/rpcs. PGlite sigue en server/intake/postgres.integration.test.ts; rls-ab.test.ts omite 2 casos live.",
+      "updatedAt": "2026-09-18T17:55:00.000Z"
     },
     "PV-09": {
       "status": "review",
       "owner": "",
-      "notes": "Provisión, invitación de un uso y recuperación implementadas con mocks. Falta verificación end-to-end Auth/RPC persistente, dependiente de PV-08.",
-      "evidence": "Revisión local 2026-09-17 sobre 5123acf. Informe: docs/revision-avance-2026-09-17.md. server/identity/*.ts, identity.integration.test.ts, identity-supabase.integration.test.ts e invite-link.test.ts aprobados.",
-      "updatedAt": "2026-09-17T18:09:08.426Z"
+      "notes": "Provisión, invitación y recuperación en código. El schema ya está en Plan V vacío; falta .env (service role + PROVISION_SECRET) y el recorrido Auth/RPC persistente.",
+      "evidence": "Revisión local 2026-09-17 sobre 5123acf. Informe: docs/revision-avance-2026-09-17.md. Instancia: docs/pending-work.md 2026-09-18. identity.integration.test.ts e invite-link.test.ts aprobados.",
+      "updatedAt": "2026-09-18T17:55:00.000Z"
     },
     "PV-10": {
       "status": "in_progress",
@@ -81,9 +81,9 @@
     "PV-12": {
       "status": "review",
       "owner": "",
-      "notes": "Ingreso y consentimiento mediante RPC transaccionales, con errores explícitos. Verificados aislamiento y persistencia en PGlite; Auth/PostgREST reales pendientes en descartable.",
-      "evidence": "server/intake/postgres.integration.test.ts (6 casos) y server/intake-supabase.integration.test.ts (8 casos). Suite: 494 aprobadas / 2 omitidas. Informe vigente: docs/revision-avance-2026-09-17.md.",
-      "updatedAt": "2026-09-17T23:39:38.372Z"
+      "notes": "Ingreso y consentimiento mediante RPC transaccionales. Schema intake aplicado en Plan V vacío; Auth/PostgREST desde la app pendientes de .env staging.",
+      "evidence": "server/intake/postgres.integration.test.ts y server/intake-supabase.integration.test.ts. Proyecto acevlqrkvdinelgxnaki: consent_catalog 7 filas. docs/pending-work.md 2026-09-18.",
+      "updatedAt": "2026-09-18T17:55:00.000Z"
     },
     "PV-13": {
       "status": "review",
@@ -102,9 +102,9 @@
     "PV-15": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Fotos corporales y de comida: validación MIME/tamaño, bucket privado, URL firmada 60s, consentimiento y borrado. Falta reserva/cuarentena/EXIF y el circuito completo de Storage.",
-      "evidence": "supabase/migrations/20260918010000_care.sql; server/care/repository.ts, meal-photos.ts; pruebas de flujo y PGlite. No aplicar SQL a proyectos con pacientes.",
-      "updatedAt": "2026-09-18T14:10:00.000Z"
+      "notes": "Fotos corporales y de comida: validación MIME/tamaño, buckets privados meal-photos y care-photos ya creados en Plan V vacío, URL firmada 60s, consentimiento y borrado. Falta reserva/cuarentena/EXIF y el circuito completo de Storage.",
+      "evidence": "Buckets verificados en acevlqrkvdinelgxnaki. supabase/migrations/20260918010000_care.sql; server/care/repository.ts. docs/pending-work.md 2026-09-18.",
+      "updatedAt": "2026-09-18T17:55:00.000Z"
     },
     "PV-16": {
       "status": "in_progress",
@@ -143,6 +143,38 @@
     }
   },
   "history": [
+    {
+      "id": "c18a08e0-9f12-4a3b-8c01-planv-instance01",
+      "taskId": "PV-08",
+      "at": "2026-09-18T17:55:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c18a09e0-9f12-4a3b-8c01-planv-instance02",
+      "taskId": "PV-09",
+      "at": "2026-09-18T17:55:00.000Z",
+      "from": "review",
+      "to": "review",
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c18a12e0-9f12-4a3b-8c01-planv-instance03",
+      "taskId": "PV-12",
+      "at": "2026-09-18T17:55:00.000Z",
+      "from": "review",
+      "to": "review",
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c18a15e0-9f12-4a3b-8c01-planv-instance04",
+      "taskId": "PV-15",
+      "at": "2026-09-18T17:55:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
     {
       "id": "c18a15e0-9f12-4a3b-8c01-seguimiento0001",
       "taskId": "PV-15",
