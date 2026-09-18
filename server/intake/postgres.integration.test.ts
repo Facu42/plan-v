@@ -42,7 +42,7 @@ beforeAll(async () => {
     alter table storage.objects enable row level security;
     create function storage.foldername(text) returns text[] language sql immutable as $$ select string_to_array($1,'/') $$;
   `);
-  for (const file of ['20260917190000_core.sql', '20260917190100_intake.sql', '20260918010000_care.sql']) {
+  for (const file of ['20260917190000_core.sql', '20260917190100_intake.sql', '20260918010000_care.sql', '20260918180000_assets.sql']) {
     try { await db.exec(await readFile(new URL(`../../supabase/migrations/${file}`, import.meta.url), 'utf8')); }
     catch (error) { console.error(file, JSON.stringify(error)); throw error; }
   }
@@ -172,5 +172,23 @@ describe('migraciones de ingreso en PostgreSQL', () => {
     await rpc(a,'delete_care_photo',[patient,id]);
     expect((await db.query('select * from public.care_records where id=$1',[id])).rows).toEqual([]);
     expect((await db.query('select * from storage.objects where name=$1',[path])).rows).toEqual([]);
+  });
+  it('archivos: reserva aislada, consentimiento y cuarentena sin lectura', async () => {
+    const meal = CONSENT_CATALOG.find(entry => entry.purpose === 'meal_photo')!;
+    const intent = '30000000-0000-4000-a000-000000000001';
+    const path = `patients/${patient}/${intent}`;
+    await expect(rpc(a, 'reserve_asset_intent', [patient, 'meal_photo', intent, path])).rejects.toMatchObject({ code: '42501' });
+    await rpc(a, 'record_patient_consent', [patient, meal.purpose, meal.text_version, meal.text_hash, 'granted']);
+    await rpc(a, 'reserve_asset_intent', [patient, 'meal_photo', intent, path]);
+    expect(await asUser(a, 'select id from public.asset_upload_intents')).toEqual([{ id: intent }]);
+    expect(await asUser(b, 'select id from public.asset_upload_intents')).toEqual([]);
+    expect(await asUser(other, 'select id from public.asset_upload_intents')).toEqual([]);
+    expect(await asUser(pro, 'select id from public.asset_upload_intents')).toEqual([{ id: intent }]);
+    await db.exec('grant select,insert on storage.objects to authenticated');
+    await expect(asUser(b, "insert into storage.objects(bucket_id,name) values('asset-quarantine',$1)", [path])).rejects.toMatchObject({ code: '42501' });
+    await asUser(a, "insert into storage.objects(bucket_id,name) values('asset-quarantine',$1)", [path]);
+    expect(await asUser(a, 'select name from storage.objects where name=$1', [path])).toEqual([]);
+    expect(await asUser(b, 'select name from storage.objects where name=$1', [path])).toEqual([]);
+    await expect(rpc(a, 'purge_expired_asset_intents', [])).rejects.toMatchObject({ code: '42501' });
   });
 });

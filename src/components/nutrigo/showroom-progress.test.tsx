@@ -49,6 +49,7 @@ describe('Progreso paciente dentro de Nutrigo', () => {
     expect(html).toContain('Cargando registros');
     expect(html).not.toContain('adherence_why');
     expect(html).not.toContain('goal_history');
-    expect(html).toContain('No se completan períodos sin registros');
+    expect(html).toContain('Estudios opcionales');
+    expect(html).toContain('No se interpretan con IA');
   });
 });

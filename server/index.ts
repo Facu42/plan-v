@@ -1,5 +1,7 @@
 import { serve } from '@hono/node-server';
 import { registerCareRoutes, requireCareConsent } from './care/routes.js';
+import { registerAssetRoutes } from './assets/routes.js';
+import { AssetError } from './assets/inspect.js';
 import { CareError, validatePhoto } from './care/repository.js';
 import { uploadMealPhoto, signMealPhotos } from './care/meal-photos.js';
 import { pathToFileURL } from 'node:url';
@@ -160,6 +162,7 @@ app.use('/api/*', authMiddleware);
 
 app.onError((error, c) => {
   if (error instanceof CareError) return c.json({ error: error.message }, error.status);
+  if (error instanceof AssetError) return c.json({ error: error.message }, error.status);
   if (error instanceof intakeDb.IntakeRepositoryError) return c.json({ error: error.message }, error.status);
   if (error instanceof AIUnavailableError) {
     return c.json({
@@ -176,6 +179,7 @@ app.get('/api/health', (c) =>
 );
 
 registerCareRoutes(app);
+registerAssetRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({

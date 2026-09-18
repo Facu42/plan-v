@@ -1,3 +1,4 @@
+import { inspectAndSanitize, parseDataUrl, AssetError } from '../assets/inspect.js';
 import { getRequestDb, privilegedDb } from '../db/supabase-client.js';
 import { DEFAULT_CARE_PREFERENCES, type CareInput, type CareRecord, type CarePreferences, type CareReplacement, type ReplacementRecipe } from '../../src/types/care.js';
 
@@ -69,13 +70,16 @@ export async function publishReplacement(patientId: string, id: string, persiste
   const { error } = await getRequestDb().rpc('publish_care_replacement', { target: patientId, replacement_id: id, expected_recipe:expected, recipe_value:recipe }); careDbError(error);
 }
 export function validatePhoto(dataUrl: string) {
-  const match = /^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl);
-  if (!match) throw new CareError(400, 'Usá una imagen JPG, PNG o WebP.');
-  const bytes = Buffer.from(match[2], 'base64');
-  if (bytes.length > 5 * 1024 * 1024) throw new CareError(413, 'La foto debe pesar menos de 5 MB.');
-  const valid = match[1] === 'jpeg' ? bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff : match[1] === 'png' ? bytes.subarray(0,8).toString('hex') === '89504e470d0a1a0a' : bytes.subarray(0,4).toString() === 'RIFF' && bytes.subarray(8,12).toString() === 'WEBP';
-  if (!valid) throw new CareError(400, 'El contenido no corresponde a una imagen válida.');
-  return { bytes, mime: `image/${match[1]}` };
+  try {
+    const clean = inspectAndSanitize('body_progress', parseDataUrl(dataUrl));
+    return { bytes: clean.bytes, mime: clean.mime };
+  } catch (error) {
+    if (error instanceof AssetError) {
+      const status = error.status === 413 ? 413 : error.status === 409 ? 409 : error.status === 403 ? 403 : error.status === 404 ? 404 : 400;
+      throw new CareError(status, error.message);
+    }
+    throw error;
+  }
 }
 export async function storeCarePhoto(path: string, dataUrl: string, persistent: boolean) {
   const { bytes, mime } = validatePhoto(dataUrl);

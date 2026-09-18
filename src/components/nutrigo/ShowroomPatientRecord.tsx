@@ -5,6 +5,7 @@ import { Icon } from '../shared/Icon';
 import { NvBadge, NvButton, NvProgress, NvState } from './primitives';
 import { ShowroomIntakeReview } from './ShowroomIntakeReview';
 import { CarePanel } from './CarePanel';
+import { StudiesPanel } from './StudiesPanel';
 import './showroom-patient-record.css';
 
 const STAGE_LABELS: Record<Stage, string> = { ingreso: 'Ingreso', plan: 'Plan', seguimiento: 'Seguimiento', alta: 'Alta' };
@@ -66,6 +67,7 @@ export function ShowroomPatientRecord({ patient, patients = [patient], onSelect,
     </div>
 
     <CarePanel patientId={patient.id} mode="professional" />
+    <StudiesPanel patientId={patient.id} professional />
 
     <section className="nr-private" aria-label="Información profesional privada">
       <header><div><span className="nr-lock"><Icon name="pin" size={15} /></span><div><h3>Información profesional privada</h3><p>Solo visible para profesionales. No se comparte con el paciente.</p></div></div></header>

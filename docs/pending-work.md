@@ -1,16 +1,24 @@
 # Pendientes de Plan V
 
+## Revisión vigente de avance — 2026-09-18 (archivos y estudios)
+
+PV-15: migración `20260918180000_assets.sql` aplicada al Plan V vacío (`acevlqrkvdinelgxnaki`, **0 pacientes**). Buckets privados `asset-quarantine` y `clinical-documents`. API de reserva/complete/access/withdraw, inspección de magic bytes, recorte de EXIF JPEG y tEXt PNG, cuota y URL de 60 s. PGlite cubre aislamiento de intenciones. No se reencodifican WebP; no hay worker durable (sí `purge_expired_asset_intents` para service_role). El complete de demo sigue aceptando data URL; en persistente el API también emite URL de subida a cuarentena.
+
+PV-16: visor de estudios PDF/JPG/PNG en Progreso (paciente) y ficha CRM, con consentimiento `clinical_document` y retiro. Fotos corporales siguen en CarePanel. Sin OCR ni envío a IA.
+
+Siguiente P0 del plan: **PV-17** (peso/medidas ya tienen UI/API de care; falta Auth real) y/o cablear `.env` staging para RLS live (PV-08). No aplicar 016/016b ni SQL a ruti-chat-crm.
+
 ## Revisión vigente de avance — 2026-09-18 (instancia Plan V)
 
-El proyecto Supabase **Plan V** (`acevlqrkvdinelgxnaki`, org Facu42) se reactivó y recibió las migraciones ejecutables `core` / `intake` / `care` sobre esquema vacío. **0 pacientes, 0 perfiles, 0 usuarios Auth.** No se ejecutó el draft 016/016b. No se aplicó SQL a **ruti-chat-crm**.
+El proyecto Supabase **Plan V** (`acevlqrkvdinelgxnaki`, org Facu42) se reactivó y recibió las migraciones ejecutables `core` / `intake` / `care` / `assets` sobre esquema vacío. **0 pacientes, 0 perfiles, 0 usuarios Auth.** No se ejecutó el draft 016/016b. No se aplicó SQL a **ruti-chat-crm**.
 
 Para liberar el cupo Free (2 proyectos activos) se pausó `supabase-indigo-zebra` (`molizymlsilnciiilqqo`): test Vercel de Rumbotex de julio, no es Plan V ni la base viva de ruti (último mensaje 2026-07-10). ruti-chat-crm sigue `ACTIVE_HEALTHY`.
 
-Verificado en esa instancia: 25 tablas con RLS, 6 vistas paciente, catálogo de 7 consentimientos, trigger `on_auth_user_created`, buckets privados `meal-photos` y `care-photos`. Historial MCP: `core_tables`, `core_functions`, `core_rls`, `intake`, `intake_rpcs`, `care_tables`, `care_rpcs`.
+Verificado en esa instancia: tablas con RLS (incluye `asset_upload_intents`), 6 vistas paciente, catálogo de 7 consentimientos, trigger `on_auth_user_created`, buckets privados `meal-photos`, `care-photos`, `asset-quarantine` y `clinical-documents`. Historial MCP: `core_tables`, `core_functions`, `core_rls`, `intake`, `intake_rpcs`, `care_tables`, `care_rpcs`, `assets_types_tables`, `assets_rpcs`, `assets_policies_buckets`.
 
 La app local **todavía no apunta** a este proyecto: falta `.env` con `APP_MODE=staging`, anon y **service role** (esta conexión no expone el service role). PV-08 no está cerrado: falta la matriz RLS-01…23 con usuarios sintéticos y el circuito Auth/invitación end-to-end.
 
-Siguiente: cablear staging local, provisionar nutricionista (`PROVISION_SECRET`), correr RLS live, después Storage/estudios (PV-15/16).
+Siguiente: cablear staging local, provisionar nutricionista (`PROVISION_SECRET`), correr RLS live. Storage/estudios ya tienen schema y demo.
 
 ## Revisión de avance — 2026-09-18 (seguimiento en git)
 
@@ -49,8 +57,10 @@ Estado PV-01…05:
 - **PV-12** intake `intake.v1` autodeclarado separado de `clinical_notes`. Consentimientos versionados. Memoria + RPC Supabase (`server/intake/repository.ts`); 501 si falta schema. Un paciente con billing pendiente igual puede completar ingreso y consentir.
 - **PV-13** onboarding de nueve pantallas, autoguardado serializado (800 ms + avanzar), reanudación y envío idempotente. Vacío ≠ “no tengo”.
 - **PV-14** ficha profesional muestra resumen de ingreso, faltantes, alergias y notas privadas; el paciente no ve `reviewed_by` ni observaciones clínicas.
+- **PV-15** archivos privados: reserva, cuarentena, inspección de contenido, cuota, recorte JPEG/PNG, URL de 60 s y retiro. Schema aplicado en Plan V vacío. Falta worker durable y reencode WebP.
+- **PV-16** estudios PDF/JPG/PNG con visor temporal y retiro; fotos corporales ya tenían visor en seguimiento.
 
-Siguiente: `.env` staging → Plan V, RLS live e invitación real, después Storage/estudios (PV-15/16). No aplicar 016/016b ni SQL a ruti-chat-crm ni a un proyecto con pacientes.
+Siguiente: `.env` staging → Plan V, RLS live e invitación real (PV-08/09), luego recetas/planes (PV-18). No aplicar 016/016b ni SQL a ruti-chat-crm ni a un proyecto con pacientes.
 
 El registro de cortes que sigue se conserva como evidencia de **demo/memoria**. Sus casillas no acreditan producción ni aprobación visual integral.
 
@@ -150,7 +160,7 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 ### 3. Aprobar e integrar servicios externos
 
 - [ ] Email transaccional para invitaciones: proveedor, remitente, TTL, reintentos, revocación y rate limiting.
-- [ ] Storage privado de fotos: MIME, magic bytes, límite, EXIF, rutas por paciente, URLs firmadas, TTL, purga y objetos huérfanos.
+- [ ] Storage privado: PV-15 cubre magic bytes, cuota, recorte JPEG/PNG, URLs 60s y retiro en demo y Plan V vacío. Falta reencode WebP, worker de huérfanos y E2E con Auth.
 - [ ] Mercado Pago Checkout Pro en sandbox: preferencia, firma de webhook, replay window, idempotencia, conciliación, rechazo y reintegro.
 - [ ] Proveedor de IA: datos mínimos, consentimiento/base aplicable, DPA, retención y prohibición de entrenamiento con datos de pacientes.
 - [ ] Gestión de secretos sólo en servidor, rotación, mínimo privilegio y revocación.

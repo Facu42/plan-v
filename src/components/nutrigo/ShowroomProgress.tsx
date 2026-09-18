@@ -1,5 +1,6 @@
 import { Icon } from '../shared/Icon';
 import { CarePanel } from './CarePanel';
+import { StudiesPanel } from './StudiesPanel';
 import { NvBadge, NvRing, NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
 import './showroom-progress.css';
@@ -30,6 +31,7 @@ export function ShowroomProgress({ patient }: { patient: ShowroomPatient }) {
   const sleepAverage = patient.journey.sleepAverageMinutes;
   return <section className="nvp-progress" aria-label="Progreso del paciente">
     <CarePanel patientId={patient.id} />
+    <StudiesPanel patientId={patient.id} />
     <header className="nvp-hero"><div><span className="nv-icon-tile"><Icon name="trend" size={21} /></span><div><h2>Tu progreso, en contexto</h2><p>Datos declarados por vos y comidas revisadas por tu nutricionista.</p></div></div><NvBadge>Últimos 7 días</NvBadge></header>
 
     <section className="nvp-metrics" aria-label="Resumen semanal">

@@ -1,12 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import type { MealLog } from '../../src/types/index.js';
 import { getRequestDb } from '../db/supabase-client.js';
-import { CareError, validatePhoto } from './repository.js';
+import { CareError } from './repository.js';
+import { inspectAndSanitize, parseDataUrl } from '../assets/inspect.js';
 
 export async function uploadMealPhoto(patientId:string,dataUrl:string) {
-  const {bytes,mime}=validatePhoto(dataUrl);
+  const clean=inspectAndSanitize('meal_photo',parseDataUrl(dataUrl));
   const path=`patients/${patientId}/${randomUUID()}`;
-  const {error}=await getRequestDb().storage.from('meal-photos').upload(path,bytes,{contentType:mime,upsert:false});
+  const {error}=await getRequestDb().storage.from('meal-photos').upload(path,clean.bytes,{contentType:clean.mime,upsert:false});
   if(error)throw new CareError(503,'No se pudo guardar la foto de comida.');
   return path;
 }

@@ -100,18 +100,18 @@
       "updatedAt": "2026-09-17T23:39:38.384Z"
     },
     "PV-15": {
-      "status": "in_progress",
+      "status": "review",
       "owner": "",
-      "notes": "Fotos corporales y de comida: validación MIME/tamaño, buckets privados meal-photos y care-photos ya creados en Plan V vacío, URL firmada 60s, consentimiento y borrado. Falta reserva/cuarentena/EXIF y el circuito completo de Storage.",
-      "evidence": "Buckets verificados en acevlqrkvdinelgxnaki. supabase/migrations/20260918010000_care.sql; server/care/repository.ts. docs/pending-work.md 2026-09-18.",
-      "updatedAt": "2026-09-18T17:55:00.000Z"
+      "notes": "Circuito de archivos en API y Plan V vacío: reserva RPC, cuarentena, magic bytes, recorte JPEG/PNG, cuota, URL 60s y retiro. Demo completa con data URL. Falta reencode EXIF/WebP, worker de huérfanos y subida firmada desde el cliente (el API ya emite la URL).",
+      "evidence": "supabase/migrations/20260918180000_assets.sql aplicado en acevlqrkvdinelgxnaki (assets_types_tables, assets_rpcs, assets_policies_buckets). server/assets/* y PGlite de aislamiento. Suite 2026-09-18.",
+      "updatedAt": "2026-09-18T18:40:00.000Z"
     },
     "PV-16": {
-      "status": "in_progress",
+      "status": "review",
       "owner": "",
-      "notes": "Fotos corporales opcionales con permiso propio, visor temporal y retiro. Estudios PDF todavía no.",
-      "evidence": "CarePanel modo progreso, RPC delete_care_photo, tests de retiro de consentimiento. Suite local 2026-09-18.",
-      "updatedAt": "2026-09-18T14:10:00.000Z"
+      "notes": "Estudios PDF/JPG/PNG con permiso propio, visor de 60s y retiro. Fotos corporales siguen en CarePanel. Sin OCR ni envío a IA. Falta recorrido con JWT real y QA visual 390/1440.",
+      "evidence": "StudiesPanel en Progreso y ficha CRM. GET /api/patients/:id/assets no expone object_path. assets.integration.test.ts.",
+      "updatedAt": "2026-09-18T18:40:00.000Z"
     },
     "PV-17": {
       "status": "in_progress",
@@ -143,6 +143,22 @@
     }
   },
   "history": [
+    {
+      "id": "c18a15e0-9f12-4a3b-8c01-assets-pv15",
+      "taskId": "PV-15",
+      "at": "2026-09-18T18:40:00.000Z",
+      "from": "in_progress",
+      "to": "review",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a16e0-9f12-4a3b-8c01-studies-pv16",
+      "taskId": "PV-16",
+      "at": "2026-09-18T18:40:00.000Z",
+      "from": "in_progress",
+      "to": "review",
+      "fields": ["status", "notes", "evidence"]
+    },
     {
       "id": "c18a08e0-9f12-4a3b-8c01-planv-instance01",
       "taskId": "PV-08",
@@ -425,13 +441,13 @@
     }
   ],
   "audit": {
-    "reviewedAt": "2026-09-17T23:39:38.388Z",
-    "commit": "532ff27 + cambios locales",
-    "summary": "Continuación del trabajo de Cursor: ingreso recuperable, envío sin duplicación y revisión privada en CRM. Verificación local y navegador demo; Supabase Auth real pendiente.",
+    "reviewedAt": "2026-09-18T18:40:00.000Z",
+    "commit": "working tree PV-15/16",
+    "summary": "Archivos privados: inspección, cuarentena y endpoints; estudios con visor temporal en Progreso y ficha. Schema assets en Plan V vacío. Auth staging y RLS live siguen pendientes.",
     "checks": [
       {
         "label": "Pruebas",
-        "result": "494 OK · 2 omitidas · 97 archivos",
+        "result": "518 OK · 2 omitidas · 103 archivos",
         "status": "passed"
       },
       {
