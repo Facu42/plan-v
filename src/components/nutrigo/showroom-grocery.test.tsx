@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { ShowroomPatient } from './showroom-model';
-import { buildGroceryView, ShowroomGrocery } from './ShowroomGrocery';
+import { buildGroceryView, publishedRecipeMeals, ShowroomGrocery } from './ShowroomGrocery';
 
 const patient = {
   id: 'p1', name: 'Ana', initials: 'AR',
@@ -18,6 +18,17 @@ describe('Lista de compras Nutrigo', () => {
     expect(view.groups.flatMap((group) => group.items).find((item) => item.id === 'pollo')?.occurrences).toBe(2);
     expect(view.groups.flatMap((group) => group.items).some((item) => item.label === 'Ingredientes para: Preparación especial de Ana')).toBe(true);
     expect(view.fallbackItems).toBe(1);
+  });
+
+  it('incluye alternativas publicadas y descarta borradores', () => {
+    const extras = publishedRecipeMeals([
+      { published_at: '2026-09-18T12:00:00.000Z', recipe: { title: 'Tarta de zapallo', ingredients: ['zapallo', 'queso'], steps: ['Hornear'], explanation: 'Revisada' } },
+      { published_at: null, recipe: { title: 'Borrador secreto', ingredients: ['nuez'], steps: ['Mezclar'], explanation: 'Privado' } },
+    ]);
+    expect(extras).toEqual([{ title: 'Tarta de zapallo', detail: 'zapallo queso' }]);
+    const view = buildGroceryView(patient, extras);
+    expect(view.groups.flatMap((group) => group.items).some((item) => item.id === 'zapallo')).toBe(true);
+    expect(view.groups.flatMap((group) => group.items).some((item) => item.label.includes('Borrador secreto'))).toBe(false);
   });
 
   it('muestra categorías, checklist local, filtros y exportación', () => {

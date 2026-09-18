@@ -7,16 +7,26 @@
 
   Dashboard del plan: ejecutar `npm run dashboard` y abrir <http://127.0.0.1:4317>. Incluye 39 entregas, siete hitos, hallazgos y actualización persistente de estados con evidencia. [Uso y verificación](implementation-dashboard/README.md).
 
+  Avance revisado el 2026-09-17: [informe actualizado](docs/revision-avance-2026-09-17.md). El dashboard registra 6/39 entregas cerradas. TypeScript/build aprobados; suite con 471 pruebas aprobadas, 1 fallida y 2 RLS omitidas. Intake/consentimientos aún sin persistencia Supabase.
+
   This is a code bundle for Plan V. The original project is available at https://www.figma.com/design/7VTASs2smFVuTG8ZSNo78R/Plan-V.
 
   ## Running the code
 
   ```bash
   npm install
-  npm run dev
+  npm run local
   ```
 
-  Esto levanta el frontend (Vite) y el servidor API con IA en paralelo.
+  Esto levanta los tres servicios locales con datos demo:
+
+  - App paciente: <http://127.0.0.1:5173/app/inicio>
+  - CRM de la nutricionista: <http://127.0.0.1:5173/crm/inicio>
+  - Dashboard del plan de implementación: <http://127.0.0.1:4317/#overview>
+
+  En la pantalla de acceso elegí **Continuar en modo demo**. Los cambios de código se actualizan automáticamente. Para detener todo, usá `Ctrl+C` en la terminal donde ejecutaste `npm run local`.
+
+  Si sólo necesitás la app y la API, `npm run dev` conserva el comando anterior.
 
   ### Funcionalidades
 

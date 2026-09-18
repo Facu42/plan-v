@@ -11,20 +11,22 @@ export function createIntakeSaveQueue() {
   let stopped = false;
   let chain = Promise.resolve();
   let pending = 0;
+  let generation = 0;
 
   const enqueue = <T,>(task: () => Promise<T>): Promise<T | null> => {
     if (!ready || stopped) return Promise.resolve(null);
+    const epoch = generation;
     pending += 1;
     const run = chain.then(async () => {
-      if (stopped) return null;
+      if (stopped || epoch !== generation) return null;
       try {
         return await task();
       } catch (error) {
-        if (isIntakeConflict(error)) stopped = true;
+        if (epoch === generation && isIntakeConflict(error)) stopped = true;
         throw error;
       }
     }).finally(() => {
-      pending -= 1;
+      if (epoch === generation) pending -= 1;
     });
     chain = run.then(() => undefined, () => undefined);
     return run;
@@ -36,8 +38,11 @@ export function createIntakeSaveQueue() {
     },
     stop() {
       stopped = true;
+      generation += 1;
+      pending = 0;
     },
     reset() {
+      generation += 1;
       ready = false;
       stopped = false;
       chain = Promise.resolve();

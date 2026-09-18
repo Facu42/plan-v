@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { CONSENT_CATALOG } from './intake/consent.js';
+
+vi.mock('./intake/repository.js',async original=>({...await original<typeof import('./intake/repository.js')>(),readIntakeBundle:async()=>({intake:{},consents:CONSENT_CATALOG.map(c=>({...c,decision:'granted'}))})}));
 
 const sbMocks = vi.hoisted(() => ({
   sbGetActor: vi.fn(),

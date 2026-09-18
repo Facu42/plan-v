@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api, isAbortError } from '../../api/client';
 import type { ProfessionalIntakeView } from '../../types/intake';
-import { NvBadge, NvButton, NvState } from './primitives';
+import { NvBadge, NvButton } from './primitives';
 import { healthFactLabel, intakeMissingItems, intakeStatusLabel } from './intake-review';
 
 function readableDate(value: string | null | undefined) {
@@ -18,6 +18,7 @@ export function IntakeReviewPanel({
   onNoteChange,
   onReview,
   onSaveNote,
+  onReload,
 }: {
   view: ProfessionalIntakeView;
   note: string;
@@ -26,6 +27,7 @@ export function IntakeReviewPanel({
   onNoteChange: (value: string) => void;
   onReview: () => void;
   onSaveNote: () => void;
+  onReload?: () => void;
 }) {
   const payload = view.intake.payload ?? {};
   const missing = intakeMissingItems(view);
@@ -40,7 +42,7 @@ export function IntakeReviewPanel({
       </div>
       <NvBadge tone={view.intake.status === 'reviewed' ? 'green' : 'gold'}>{intakeStatusLabel(view.intake.status)}</NvBadge>
     </header>
-    {error && <p className="nr-intake-error" role="alert">{error}</p>}
+    {error && <div><p className="nr-intake-error" role="alert">{error}</p>{onReload && <NvButton className="nv-soft" onClick={onReload} disabled={busy}>Actualizar ingreso</NvButton>}</div>}
     <dl>
       <div><dt>Nombre preferido</dt><dd>{payload.preferred_name?.trim() || 'Sin nombre preferido'}</dd></div>
       <div><dt>Pedido</dt><dd>{payload.patient_intent?.trim() || 'Sin texto adicional'}</dd></div>
@@ -48,6 +50,7 @@ export function IntakeReviewPanel({
       <div><dt>Restricciones</dt><dd>{healthFactLabel(payload.restrictions, 'restricciones')}</dd></div>
       <div><dt>Consentimiento de atención</dt><dd>{care?.decision === 'granted' ? `Otorgado · ${care.text_version ?? ''}` : 'No vigente'}</dd></div>
       <div><dt>Enviado</dt><dd>{readableDate(view.intake.submitted_at)}</dd></div>
+      {view.review.reviewed_at && <div><dt>Revisión profesional</dt><dd>{readableDate(view.review.reviewed_at)}</dd></div>}
     </dl>
     <section aria-label="Faltantes del ingreso">
       <h4>Faltantes y banderas</h4>
@@ -58,7 +61,7 @@ export function IntakeReviewPanel({
       <p>Estas observaciones no se muestran al paciente ni reescriben su declaración.</p>
       {view.clinical_notes.length ? <ol>{view.clinical_notes.map((entry) => <li key={entry.id}><p>{entry.body}</p><small>v{entry.version} · {readableDate(entry.created_at)}</small></li>)}</ol> : <p>Todavía no hay observaciones de este ingreso.</p>}
       <label>Observación profesional
-        <textarea value={note} onChange={(event) => onNoteChange(event.target.value)} maxLength={4000} rows={3} />
+        <textarea value={note} disabled={busy} onChange={(event) => onNoteChange(event.target.value)} maxLength={4000} rows={3} />
       </label>
       <div className="nr-intake-actions">
         <NvButton className="nv-soft" onClick={onSaveNote} disabled={busy || note.trim().length < 2}>Guardar observación profesional</NvButton>
@@ -73,6 +76,8 @@ export function ShowroomIntakeReview({ patientId, initialView }: { patientId: st
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [reload, setReload] = useState(0);
+  const action = useRef(false);
 
   useEffect(() => {
     if (initialView) {
@@ -81,20 +86,23 @@ export function ShowroomIntakeReview({ patientId, initialView }: { patientId: st
     }
     const controller = new AbortController();
     setError('');
+    setView(null);
     api.getProfessionalIntake(patientId, { signal: controller.signal }).then((result) => {
       if (!controller.signal.aborted) setView(result);
     }).catch((reason: unknown) => {
       if (controller.signal.aborted || isAbortError(reason)) return;
-      setError('No pudimos cargar el ingreso. Reintentá desde la ficha.');
+      setError('No pudimos cargar el ingreso. Podés reintentar sin salir de la ficha.');
     });
     return () => controller.abort();
-  }, [patientId, initialView]);
+  }, [patientId, initialView, reload]);
 
   if (!view) {
-    return <section className="nr-intake" role="status">{error || 'Cargando ingreso…'}</section>;
+    return <section className="nr-intake"><p role={error ? 'alert' : 'status'}>{error || 'Cargando ingreso…'}</p>{error && <NvButton className="nv-soft" onClick={() => setReload(value => value + 1)}>Reintentar carga</NvButton>}</section>;
   }
 
   const saveNote = async () => {
+    if (action.current) return;
+    action.current = true;
     setBusy(true);
     setError('');
     try {
@@ -104,11 +112,14 @@ export function ShowroomIntakeReview({ patientId, initialView }: { patientId: st
     } catch {
       setError('No pudimos guardar la observación profesional.');
     } finally {
+      action.current = false;
       setBusy(false);
     }
   };
 
   const review = async () => {
+    if (action.current) return;
+    action.current = true;
     setBusy(true);
     setError('');
     try {
@@ -116,9 +127,10 @@ export function ShowroomIntakeReview({ patientId, initialView }: { patientId: st
     } catch {
       setError('No pudimos marcar el ingreso. Recargá la ficha si otra sesión lo revisó.');
     } finally {
+      action.current = false;
       setBusy(false);
     }
   };
 
-  return <IntakeReviewPanel view={view} note={note} error={error} busy={busy} onNoteChange={setNote} onReview={() => void review()} onSaveNote={() => void saveNote()} />;
+  return <IntakeReviewPanel view={view} note={note} error={error} busy={busy} onNoteChange={setNote} onReview={() => void review()} onSaveNote={() => void saveNote()} onReload={() => setReload(value => value + 1)} />;
 }

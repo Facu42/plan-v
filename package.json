@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "local": "node scripts/local.mjs",
     "dashboard": "node implementation-dashboard/server.mjs",
     "dashboard:test": "node --test implementation-dashboard/verification.mjs",
     "dev": "concurrently -n api,vite -c blue,green \"npm run dev:api\" \"npm run dev:vite\"",
@@ -12,7 +13,8 @@
     "build": "vite build",
     "check": "tsc --noEmit && tsc --noEmit -p tsconfig.server.json",
     "test": "vitest run",
-    "check:migrations": "node scripts/check-migration-safety.mjs"
+    "check:migrations": "node scripts/check-migration-safety.mjs",
+    "apply:disposable": "node scripts/apply-disposable.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.53",

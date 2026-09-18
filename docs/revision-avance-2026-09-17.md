@@ -1,5 +1,34 @@
 # Plan V: avance verificado el 17 de septiembre de 2026
 
+## Continuación sobre el trabajo de Cursor — corte vigente
+
+Se retomó `532ff27` (migraciones ejecutables, ingreso y revisión profesional), conservando los cambios previos. Este corte agrega correcciones locales de recuperación y guardado; no es un despliegue.
+
+- El autoguardado actualiza la revisión dentro de la cola. Avanzar, volver, saltear y enviar esperan las escrituras previas; una cola reiniciada descarta tareas de la ficha anterior.
+- Si se pierde la respuesta de un envío aceptado, se reintenta el mismo envío sin intentar editar el ingreso ya enviado. El paciente ve **Confirmar envío**.
+- Si falla la carga inicial, no se habilita la edición ni se guardan valores vacíos. **Recuperar ingreso guardado** vuelve a leer el servidor. Un conflicto requiere recuperar la versión guardada y avisa que reemplaza los cambios de la pantalla.
+- La decisión de consentimiento se refleja después de confirmarse; tanto otorgar como retirar pasan por la cola.
+- El CRM permite reintentar la carga y actualizar una revisión en conflicto, conserva las notas privadas y muestra la fecha de revisión. El cambio de ficha limpia el contenido anterior.
+- Se estilizaron los campos de intención y alimentos, foco visible, estados deshabilitados y transición breve compatible con movimiento reducido.
+
+| Verificación nueva | Resultado |
+| --- | --- |
+| `npm test` | **494 aprobadas, 2 omitidas; 97 archivos aprobados** |
+| `npm run check` | Aprobado, frontend y servidor |
+| `npm run build` | Aprobado, **198 módulos** |
+| `npm run check:migrations` | Aprobado |
+| `npm run dashboard:test` | **8/8 aprobadas** |
+| Navegador `/browse`, demo aislada | Respuesta de envío perdida → mismo envío confirmado; carga inicial fallida → recuperación sin escrituras; revisión y nota privada → respuesta paciente sin notas; fallo de carga en CRM → reintento y cambio de ficha |
+| Responsive | 390 px paciente/CRM y 1440 px CRM, sin desborde horizontal en los recorridos verificados |
+
+Evidencia visual: `.scratch/intake-recovery-2026-09-17/sent-mobile.png`, `crm-reviewed-desktop.png`, `crm-reviewed-mobile.png`. Scripts de los casos comprobados: `submission.js`, `load-recovery.js`, `crm.js` en esa misma carpeta. Pruebas de latencia y cancelación: `intake-session.test.ts`; contrato HTTP/RPC y privacidad: `server/intake-supabase.integration.test.ts`.
+
+**Límite de esta evidencia:** el navegador usa datos sintéticos en memoria. La suite SQL ejecuta PostgreSQL mediante PGlite con shims de Auth/Storage y verifica persistencia al reabrir la base. Esto no sustituye Supabase Auth, PostgREST, Storage ni una prueba de dos conexiones reales simultáneas. Los dos casos JWT contra Supabase descartable siguen omitidos por falta de configuración; no se aplicó SQL a una instancia externa ni se usaron datos reales.
+
+El dashboard mantiene **6 completadas, 6 en revisión, 2 en curso y 25 pendientes**. PV-12/13/14 quedan en revisión hasta verificar el circuito con Auth real; no se infla el porcentaje de cierre. Próxima salida de este bloque: completar PV-08/09 en instancia descartable y después Storage privado y archivos opcionales (PV-15/16). `scripts/apply-disposable.mjs` aplica las migraciones ejecutables de `supabase/migrations/` y se niega si ya hay pacientes.
+
+## Revisión histórica de la mañana — base 5123acf
+
 Revisión del código en `5123acf` y de los tres commits de implementación posteriores al checkpoint `37f3a22`. Se ejecutaron verificaciones locales. No se aplicaron migraciones ni se accedió a datos de pacientes, proveedores o despliegues.
 
 ## Resultado

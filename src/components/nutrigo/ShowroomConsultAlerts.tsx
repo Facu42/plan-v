@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useCareNotices, type CareNotice } from './useCareNotices';
 import { api } from '../../api/client';
 import type { DemoNotice } from '../../types';
 import { Icon } from '../shared/Icon';
@@ -36,6 +37,7 @@ export function ShowroomConsultAlerts({
   onOpen,
   onManage,
   onOpenReminder,
+  onOpenCare,
   defaultOpen = false,
   storage = typeof window === 'undefined' ? null : window.localStorage,
 }: {
@@ -46,6 +48,7 @@ export function ShowroomConsultAlerts({
   onOpen: (alert: ConsultAlert) => void;
   onManage?: (alert: ConsultAlert) => void;
   onOpenReminder?: (reminder: DailyReminder) => void;
+  onOpenCare?: (notice: CareNotice) => void;
   defaultOpen?: boolean;
   storage?: Pick<Storage, 'getItem' | 'setItem'> | null;
 }) {
@@ -53,12 +56,13 @@ export function ShowroomConsultAlerts({
   const [tick, setTick] = useState(0);
   const [prefs, setPrefs] = useState(() => readNoticePrefs(storage, audience));
   const [notices, setNotices] = useState<DemoNotice[]>([]);
+  const care = useCareNotices(patientId ?? '', audience === 'pro');
   const visible = useMemo(() => visibleConsultAlerts(alerts, audience, storage), [alerts, audience, storage, tick]);
   const openReminders = useMemo(
-    () => reminders.filter((reminder) => reminder.state !== 'done' && reminder.kind !== 'consulta'),
-    [reminders],
+    () => reminders.filter((reminder) => reminder.state !== 'done' && reminder.kind !== 'consulta' && !(care.hasPreferences && (reminder.kind === 'agua' || reminder.kind === 'sueno'))),
+    [reminders, care.hasPreferences],
   );
-  const badge = visible.length + openReminders.length;
+  const badge = visible.length + openReminders.length + care.notices.length;
   const title = audience === 'patient' ? 'Avisos' : 'Avisos del consultorio';
 
   useEffect(() => {
@@ -81,6 +85,10 @@ export function ShowroomConsultAlerts({
 
   useEffect(() => {
     if (!prefs.browser) return;
+    care.notices.forEach(notice => {
+      if (wasNoticeFired(storage, notice.id)) return;
+      if (fireBrowserNotice(audience === 'pro' ? 'Plan V · nuevo registro' : notice.title, audience === 'pro' ? 'Tenés registros pendientes en el consultorio.' : notice.detail)) markNoticeFired(storage, notice.id);
+    });
     visible.filter((alert) => alert.urgency === 'soon').forEach((alert) => {
       if (wasNoticeFired(storage, alert.id)) return;
       const titleText = audience === 'patient' ? 'Consulta con Verónica' : `Consulta con ${alert.patientName}`;
@@ -90,7 +98,7 @@ export function ShowroomConsultAlerts({
       if (wasNoticeFired(storage, reminder.id)) return;
       if (fireBrowserNotice(REMINDER_KIND_LABEL[reminder.kind], reminder.detail)) markNoticeFired(storage, reminder.id);
     });
-  }, [prefs.browser, visible, openReminders, audience, storage]);
+  }, [prefs.browser, visible, openReminders, audience, storage, care.notices]);
 
   useEffect(() => {
     if (!prefs.email || !patientId || !storage) return;
@@ -140,6 +148,8 @@ export function ShowroomConsultAlerts({
         <label><input type="checkbox" checked={prefs.browser} disabled={!browserNoticesSupported()} onChange={() => { void toggleBrowser(); }} /> Avisos en este dispositivo</label>
         <label><input type="checkbox" checked={prefs.email} onChange={toggleEmail} /> Buzón demo por mail</label>
       </div>
+      {care.error && <p role="alert">No se pudieron actualizar los avisos de seguimiento: {care.error}</p>}
+      {care.notices.length > 0 && <section className="nv-alerts-habits" aria-label="Avisos de seguimiento"><h3>{audience === 'pro' ? 'Registros de pacientes' : 'Tu seguimiento'}</h3><ul>{care.notices.map(notice => <li key={notice.id}><div><strong>{notice.patient_name ? `${notice.patient_name} · ` : ''}{notice.title}</strong><small>{notice.detail}</small></div>{onOpenCare && <div className="nv-alerts-actions"><NvButton onClick={() => { setOpen(false); onOpenCare(notice); }}>{audience === 'pro' ? 'Revisar registro' : 'Abrir'}</NvButton></div>}</li>)}</ul></section>}
       {visible.length ? <ul>{visible.map((alert) => <li key={alert.id}>
         <span className={`nv-alerts-urgency ${alert.urgency}`}>{alert.urgencyLabel}</span>
         <div>

@@ -1,8 +1,14 @@
 # Pendientes de Plan V
 
+## Revisión vigente de avance — 2026-09-18
+
+Continuación sobre el árbol sin consolidar del 17/09: módulo de seguimiento conectado (peso, cintura, actividad, fotos corporales, pagos manuales, reemplazos de menú con revisión profesional), navegación lateral en escritorio para ambos roles, lista de compras derivada del plan y de alternativas publicadas. **Pruebas locales: 509 aprobadas, 2 omitidas; TypeScript, build y guarda SQL aprobados.** `npm run apply:disposable` aplica `core`/`intake`/`care` a un Postgres vacío y aborta si ya hay pacientes; no hay `.env` local con `DISPOSABLE_DATABASE_URL`, así que no se tocó ningún proyecto remoto. Falta Auth/RLS live, estudios PDF y el circuito completo de Storage (PV-15).
+
+Siguiente: cerrar verificación de navegador del seguimiento y, en el plan de acción, continuar Storage/estudios (PV-15/16) sin aplicar SQL a datos reales.
+
 ## Revisión vigente de avance — 2026-09-17
 
-[Informe y prioridades actualizados](revision-avance-2026-09-17.md). Continuación: migraciones ejecutables núcleo/intake en `supabase/migrations/` (solo esquema vacío), RPC de ingreso, cola de autoguardado y revisión en la ficha. **No aplicar SQL a un proyecto con pacientes.** Siguiente verificación: suite local + PGlite. Los números anteriores de 5123acf son históricos.
+[Informe y prioridades actualizados](revision-avance-2026-09-17.md). Continuación sobre `532ff27`: guardados serializados con revisión confirmada, reintento de envío sin duplicación, recuperación de carga y revisión privada en CRM. **494 pruebas aprobadas, 2 omitidas; TypeScript, build y guarda SQL aprobados.** Navegador verificado en demo aislada. Falta Supabase descartable con Auth real; el runner histórico aún referencia el draft y debe actualizarse antes de usarlo. Los números de cortes anteriores que siguen abajo son históricos.
 
 ## Secuencia vigente tras la revisión de arquitectura — 2026-09-16
 
@@ -34,7 +40,7 @@ Estado PV-01…05:
 - **PV-13** onboarding de nueve pantallas, autoguardado serializado (800 ms + avanzar), reanudación y envío idempotente. Vacío ≠ “no tengo”.
 - **PV-14** ficha profesional muestra resumen de ingreso, faltantes, alergias y notas privadas; el paciente no ve `reviewed_by` ni observaciones clínicas.
 
-Siguiente: Storage privado (PV-15). No aplicar las migraciones a un proyecto con datos reales.
+Siguiente: verificación de navegador del seguimiento, después Storage/estudios (PV-15/16). No aplicar las migraciones a un proyecto con datos reales.
 
 El registro de cortes que sigue se conserva como evidencia de **demo/memoria**. Sus casillas no acreditan producción ni aprobación visual integral.
 
@@ -112,7 +118,7 @@ La referencia aporta doce superficies. Plan V implementará funciones equivalent
 - [ ] Aprobar las siete puertas de `docs/016-approval-and-staging-checklist.md`.
 - [ ] Confirmar plazos de retención con privacidad/legal (los de PV-06 son de trabajo).
 - [ ] Revisar formalmente las RPC `accept_patient_invite` y `provision_nutritionist`.
-- [ ] Convertir el borrador revisado en una migración nueva e inmutable. No ejecutar 016 ni 016b sobre un proyecto con pacientes reales. PV-08 deja un runner descartable (`scripts/apply-disposable.mjs`) y no copia el draft a `supabase/migrations/`.
+- [x] Convertir el núcleo revisado en migraciones nuevas e inmutables. No ejecutar 016 ni 016b sobre un proyecto con pacientes reales. `npm run apply:disposable` aplica `core`/`intake`/`care` a un esquema vacío y aborta si ya hay pacientes.
 - [ ] Ejecutar los casos `RLS-01…RLS-23` con usuarios sintéticos en una instancia descartable. PV-08 cablea JWT y deja RLS-02 live detrás de env; el resto de la matriz sigue pendiente de esa instancia.
 - [ ] Adjuntar evidencias redactadas, hash de la migración y decisión explícita de go/no-go.
 

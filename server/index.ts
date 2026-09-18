@@ -1,4 +1,7 @@
 import { serve } from '@hono/node-server';
+import { registerCareRoutes, requireCareConsent } from './care/routes.js';
+import { CareError, validatePhoto } from './care/repository.js';
+import { uploadMealPhoto, signMealPhotos } from './care/meal-photos.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -156,6 +159,7 @@ app.use('/api/*', async (c, next) => {
 app.use('/api/*', authMiddleware);
 
 app.onError((error, c) => {
+  if (error instanceof CareError) return c.json({ error: error.message }, error.status);
   if (error instanceof intakeDb.IntakeRepositoryError) return c.json({ error: error.message }, error.status);
   if (error instanceof AIUnavailableError) {
     return c.json({
@@ -170,6 +174,8 @@ app.onError((error, c) => {
 app.get('/api/health', (c) =>
   c.json({ status: 'ok', ai: Boolean(process.env.OPENAI_API_KEY), supabase: isSupabaseEnabled() }),
 );
+
+registerCareRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({
@@ -314,8 +320,12 @@ app.post('/api/patients/:id/meals/analyze', async (c) => {
   }
   if (!patient) return c.notFound();
 
-  if ('userId' in auth && isSupabaseEnabled() && body.photoPreview) {
-    return c.json({ error: 'Fotos de comidas pendientes del contrato Storage 016' }, 501);
+  let photoPath: string | null = null;
+  if ('userId' in auth && isSupabaseEnabled()) {
+    if(body.photoPreview) validatePhoto(body.photoPreview);
+    if(body.imageBase64) validatePhoto(`data:image/${body.imageBase64.startsWith('/9j/')?'jpeg':body.imageBase64.startsWith('UklGR')?'webp':'png'};base64,${body.imageBase64}`);
+    await requireCareConsent(patientId,true,'ai_meal_analysis');
+    if(body.photoPreview || body.imageBase64) await requireCareConsent(patientId,true,'meal_photo');
   }
 
   const scheduled = patient.todayPlan.find((m) => m.slot === body.slot);
@@ -327,9 +337,10 @@ app.post('/api/patients/:id/meals/analyze', async (c) => {
   });
 
   if ('userId' in auth && isSupabaseEnabled()) {
+    if(body.photoPreview || body.imageBase64) photoPath=await uploadMealPhoto(patientId,body.photoPreview ?? `data:image/${body.imageBase64!.startsWith('/9j/')?'jpeg':body.imageBase64!.startsWith('UklGR')?'webp':'png'};base64,${body.imageBase64}`);
     const log = await sb.sbAddMealLog(patient.id, {
       slot: body.slot,
-      photo_url: null,
+      photo_url: photoPath,
       description: body.description ?? null,
       foods: analysis.foods,
       macros: analysis.macros,
@@ -344,7 +355,7 @@ app.post('/api/patients/:id/meals/analyze', async (c) => {
     const updated = await sb.sbGetPatientById(patient.id, 'patient');
     return c.json({
       analysis: toPatientMealAnalysis(analysis),
-      log: toPatientSelfMealLog(log),
+      log: toPatientSelfMealLog((await signMealPhotos(patientId,[log]))[0]),
       patient: updated ? toPatientSelfView(updated) : null,
       source: 'supabase',
     });

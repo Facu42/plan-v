@@ -4,6 +4,7 @@ import { getGoalSnapshot, GOAL_STATUS_LABELS } from '../crm/crm-goals';
 import { Icon } from '../shared/Icon';
 import { NvBadge, NvButton, NvProgress, NvState } from './primitives';
 import { ShowroomIntakeReview } from './ShowroomIntakeReview';
+import { CarePanel } from './CarePanel';
 import './showroom-patient-record.css';
 
 const STAGE_LABELS: Record<Stage, string> = { ingreso: 'Ingreso', plan: 'Plan', seguimiento: 'Seguimiento', alta: 'Alta' };
@@ -63,6 +64,8 @@ export function ShowroomPatientRecord({ patient, patients = [patient], onSelect,
         <strong>{patient.adherence_score}%</strong><NvProgress value={patient.adherence_score} label={`Adherencia de ${patient.name}`} /><small>{patient.time || 'Sin actualización registrada'}</small>
       </article>
     </div>
+
+    <CarePanel patientId={patient.id} mode="professional" />
 
     <section className="nr-private" aria-label="Información profesional privada">
       <header><div><span className="nr-lock"><Icon name="pin" size={15} /></span><div><h3>Información profesional privada</h3><p>Solo visible para profesionales. No se comparte con el paciente.</p></div></div></header>

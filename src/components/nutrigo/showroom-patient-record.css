@@ -1,6 +1,9 @@
 /* Professional record. Private values are visually and semantically isolated from patient surfaces. */
 .nr-record { display:flex; flex-direction:column; gap:16px; }
-.nr-hero { display:flex; align-items:center; gap:14px; padding:18px; border:1px solid var(--nv-border); border-radius:12px; background:var(--nv-card); }
+.nr-hero { position:sticky;top:var(--nv-topbar-offset,60px);z-index:15;display:flex; align-items:center; gap:14px; padding:18px; border:1px solid var(--nv-border); border-radius:12px; background:var(--nv-card);box-shadow:0 8px 18px #00000006; }
+.nr-hero { order:-3; }
+.nr-summary-grid { order:-2; }
+.nr-actions { order:-1; }
 .nr-avatar { width:48px; height:48px; flex:0 0 48px; border-radius:12px; font-size:14px; }
 .nr-identity { flex:1; min-width:0; }
 .nr-identity>p,.nr-kicker { color:var(--nv-muted); font-size:12px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; }

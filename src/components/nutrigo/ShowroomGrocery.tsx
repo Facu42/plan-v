@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { buildShoppingExport, buildShoppingList, shoppingChecklistKey, type ShoppingGroup } from '../patient/shopping-list';
+import { buildShoppingExport, buildShoppingList, shoppingChecklistKey, type ShoppingGroup, type ShoppingMeal } from '../patient/shopping-list';
 import { Icon } from '../shared/Icon';
 import type { ShowroomPatient } from './showroom-model';
+import type { CareReplacement } from '../../types/care';
+import { useCare } from './useCare';
 import { NvBadge, NvButton, NvState } from './primitives';
 import './showroom-grocery.css';
 
@@ -20,15 +22,26 @@ function saveChecked(key: string, value: ReadonlySet<string>) {
   try { window.localStorage.setItem(key, JSON.stringify([...value])); } catch { /* El checklist sigue activo durante esta visita. */ }
 }
 
-export function buildGroceryView(patient: Pick<ShowroomPatient, 'weekPlan'>): { groups: ShoppingGroup[]; totalMeals: number; fallbackItems: number } {
-  const meals = patient.weekPlan.flatMap((day) => day.meals.map(({ title }) => ({ title })));
+export function publishedRecipeMeals(replacements: readonly Pick<CareReplacement, 'published_at' | 'recipe'>[]): ShoppingMeal[] {
+  return replacements
+    .filter((entry) => entry.published_at)
+    .map((entry) => ({ title: entry.recipe.title, detail: entry.recipe.ingredients.join(' ') }));
+}
+
+export function buildGroceryView(
+  patient: Pick<ShowroomPatient, 'weekPlan'>,
+  extras: readonly ShoppingMeal[] = [],
+): { groups: ShoppingGroup[]; totalMeals: number; fallbackItems: number } {
+  const meals = [...patient.weekPlan.flatMap((day) => day.meals.map(({ title }) => ({ title }))), ...extras];
   const groups = buildShoppingList(meals);
   return { groups, totalMeals: meals.length, fallbackItems: groups.find((group) => group.category === 'Otros')?.items.length ?? 0 };
 }
 
 export function ShowroomGrocery({ patient }: { patient: ShowroomPatient }) {
+  const care = useCare(patient.id);
+  const extras = useMemo(() => publishedRecipeMeals(care.data?.replacements ?? []), [care.data]);
   const storageKey = shoppingChecklistKey(patient.id, 'current');
-  const { groups, totalMeals, fallbackItems } = useMemo(() => buildGroceryView(patient), [patient]);
+  const { groups, totalMeals, fallbackItems } = useMemo(() => buildGroceryView(patient, extras), [patient, extras]);
   const items = groups.flatMap((group) => group.items);
   const [checked, setChecked] = useState<Set<string>>(() => readChecked(storageKey));
   const [filter, setFilter] = useState<GroceryFilter>('all');
@@ -62,7 +75,7 @@ export function ShowroomGrocery({ patient }: { patient: ShowroomPatient }) {
   const clearChecked = () => { const next = new Set<string>(); setChecked(next); saveChecked(storageKey, next); setFeedback('Checklist reiniciado.'); };
 
   return <section className="nvgrocery" aria-label="Lista de compras">
-    <header className="nvgrocery-header"><div><span className="nv-icon-tile"><Icon name="check" size={20} /></span><div><h2>Lista de compras</h2><p>Derivada de tu plan semanal publicado.</p></div></div>{items.length > 0 && <NvButton onClick={exportList}><Icon name="download" size={15} />Exportar .txt</NvButton>}</header>
+    <header className="nvgrocery-header"><div><span className="nv-icon-tile"><Icon name="check" size={20} /></span><div><h2>Lista de compras</h2><p>{extras.length ? 'Derivada de tu plan semanal y de las alternativas que tu nutricionista ya compartió.' : 'Derivada de tu plan semanal publicado.'}</p></div></div>{items.length > 0 && <NvButton onClick={exportList}><Icon name="download" size={15} />Exportar .txt</NvButton>}</header>
 
     {items.length > 0 ? <>
       <section className="nvgrocery-stats" aria-label="Resumen de la lista"><article><small>Elementos</small><strong>{items.length}</strong></article><article><small>Listos</small><strong>{checkedCount}</strong></article><article><small>Pendientes</small><strong>{items.length - checkedCount}</strong></article><article><small>Comidas fuente</small><strong>{totalMeals}</strong></article></section>

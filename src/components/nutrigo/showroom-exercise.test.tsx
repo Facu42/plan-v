@@ -21,19 +21,19 @@ describe('Ejercicio paciente Nutrigo', () => {
 
   it('muestra registros y sus datos reales sin prescribir rutinas', () => {
     const html = renderToStaticMarkup(<ShowroomExercise patient={patient} now={new Date('2026-09-14T18:00:00Z')} />);
-    expect(html).toContain('Movimiento registrado');
+    expect(html).toContain('Tu actividad física');
     expect(html).toContain('Caminata');
     expect(html).toContain('35 min');
     expect(html).toContain('Me sentí bien');
-    expect(html).toContain('Actividad autodeclarada');
-    expect(html).toContain('Registrar actividad');
+    expect(html).toContain('Registros anteriores');
+    expect(html).toContain('Cargando registros');
     expect(html).not.toMatch(/rutina recomendada|calorías quemadas|prescripción profesional/i);
   });
 
   it('presenta un vacío honesto y conserva el alta manual', () => {
     const html = renderToStaticMarkup(<ShowroomExercise patient={{ ...patient, activities: [] }} now={new Date('2026-09-14T18:00:00Z')} />);
-    expect(html).toContain('Todavía no registraste actividad');
-    expect(html).toContain('Registrar actividad');
+    expect(html).toContain('Cargando registros');
+    expect(html).not.toContain('Registros anteriores');
     expect(html).not.toContain('50 min');
   });
 });

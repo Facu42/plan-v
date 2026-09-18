@@ -70,14 +70,14 @@ describe('AI and persistence failures', () => {
     });
   });
 
-  it('rejects an unsupported persistent photo before calling the analyzer', async () => {
+  it('rejects an invalid persistent photo before calling the analyzer', async () => {
     const response = await app.request('/api/patients/pat-1/meals/analyze', authedJson({
       slot: 'Almuerzo',
       description: 'pollo',
       photoPreview: 'data:image/jpeg;base64,AAAA',
     }));
 
-    expect(response.status).toBe(501);
+    expect(response.status).toBe(400);
     expect(analyzeMocks.analyzeMeal).not.toHaveBeenCalled();
   });
 

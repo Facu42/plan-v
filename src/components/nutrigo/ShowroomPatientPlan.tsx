@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '../shared/Icon';
+import { CarePanel } from './CarePanel';
 import { NvBadge, NvState } from './primitives';
 import { buildCalendarWeek } from './WeeklyPlanCalendar';
 import type { ShowroomPatient } from './showroom-model';
@@ -27,10 +28,11 @@ export function buildPatientPlanView(patient: Pick<ShowroomPatient, 'todayPlan' 
   };
 }
 
-export function ShowroomPatientPlan({ patient, now, query }: {
+export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
   patient: ShowroomPatient;
   now: Date;
   query: string;
+  onShopping?: () => void;
 }) {
   const view = useMemo(() => buildPatientPlanView(patient, now), [patient, now]);
   const todayIndex = Math.max(0, view.days.findIndex((day) => day.isToday));
@@ -48,12 +50,13 @@ export function ShowroomPatientPlan({ patient, now, query }: {
 
   if (view.totalMeals === 0) return <section className="nvpp-plan" aria-label="Tu plan semanal">
     <NvState title="Tu plan está en preparación" description="Cuando tu nutricionista publique comidas, las vas a encontrar acá organizadas por día." />
+    <CarePanel patientId={patient.id} mode="menu" />
   </section>;
 
   return <section className="nvpp-plan" aria-label="Tu plan semanal">
     <header className="nvpp-hero">
       <div><span>MI ALIMENTACIÓN</span><h2>Tu plan semanal</h2><p>Plan publicado por tu nutricionista. Elegí un día para revisar sus indicaciones.</p></div>
-      <span className="nvpp-hero-icon"><Icon name="calendar" size={22} /></span>
+      <button type="button" className="nv-button primary" onClick={onShopping}><Icon name="check" size={18} /> Armar lista de compras</button>
     </header>
 
     <dl className="nvpp-summary" aria-label="Resumen del plan">
@@ -75,6 +78,7 @@ export function ShowroomPatientPlan({ patient, now, query }: {
       {selectedDay.meals.length ? <div className="nvpp-meals">{selectedDay.meals.map((meal, index) => <article key={`${selectedDay.isoDate}-${meal.slot}`}><span className="nvpp-number">{String(index + 1).padStart(2, '0')}</span><div className="nvpp-meal-copy"><div><NvBadge tone={meal.slot === 'Cena' ? 'gold' : 'green'}>{meal.slot}</NvBadge>{meal.time && <time>{meal.time}</time>}</div><strong>{meal.title}</strong><small>Indicación publicada · sin cantidades ni porciones registradas</small></div><Icon name="leaf" size={18} /></article>)}</div> : <NvState title="Sin comidas asignadas" description="Tu nutricionista todavía no publicó indicaciones para este día." />}
     </section>}
 
-    <p className="nvpp-note"><Icon name="list" size={16} /> Este plan muestra únicamente títulos publicados. No infiere recetas, macros, cantidades ni porciones.</p>
+    <p className="nvpp-note"><Icon name="list" size={16} /> La lista se arma automáticamente desde el menú publicado. Revisá las preparaciones que todavía no tienen ingredientes detallados.</p>
+    <CarePanel patientId={patient.id} mode="menu" />
   </section>;
 }

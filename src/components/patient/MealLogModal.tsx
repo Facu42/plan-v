@@ -3,6 +3,9 @@ import { api } from '../../api/client';
 import { useAppStore } from '../../store/useAppStore';
 import type { MealLog, Patient } from '../../types';
 import { Icon, MacroBar } from '../shared/Icon';
+import { careErrorMessage, notifyCareChanged } from '../../api/care';
+import { useCare } from '../nutrigo/useCare';
+import { CareConsent } from '../nutrigo/CarePanel';
 
 type Props = {
   patient: Patient;
@@ -15,6 +18,8 @@ type Step = 'capture' | 'analyzing' | 'review' | 'success';
 const SLOTS = ['Desayuno', 'Colación', 'Almuerzo', 'Merienda', 'Cena', 'Extra'];
 
 export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props) {
+  const care=useCare(patient.id);
+  const lock=useRef(false);
   const refreshPatient = useAppStore((s) => s.refreshPatient);
   const [step, setStep] = useState<Step>('capture');
   const [mode, setMode] = useState<'photo' | 'text'>('photo');
@@ -27,6 +32,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleFile = (file: File) => {
+    if(file.size>5*1024*1024 || !['image/jpeg','image/png','image/webp'].includes(file.type)){setError('Elegí una foto JPG, PNG o WebP de hasta 5 MB.');return;}
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result as string;
@@ -37,7 +43,16 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
   };
 
   const analyze = async () => {
-    const text = mode === 'text' ? description.trim() : description.trim();
+    if(lock.current)return;
+    const text = description.trim();
+    if (care.data && !care.data.consented.includes('ai_meal_analysis')) {
+      setError('Activá el permiso de análisis con IA para continuar.');
+      return;
+    }
+    if (mode === 'photo' && care.data && !care.data.consented.includes('meal_photo')) {
+      setError('Activá el permiso de fotos de comidas para subir una imagen.');
+      return;
+    }
     if (mode === 'photo' && !imageBase64 && !text) {
       setError('Subí una foto o contanos qué comiste en texto.');
       return;
@@ -47,21 +62,23 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
       return;
     }
     setError(null);
+    lock.current=true;
     setStep('analyzing');
     try {
       const { log } = await api.analyzeMeal(patient.id, {
         description: text || undefined,
         imageBase64: mode === 'photo' && imageBase64 ? imageBase64 : undefined,
         slot,
-        photoPreview: photoPreview ?? undefined,
+        photoPreview: mode === 'photo' ? photoPreview ?? undefined : undefined,
       });
       setResult(log);
-      await refreshPatient(patient.id);
+      try { await refreshPatient(patient.id); } catch { /* El registro ya fue confirmado; no reenviar por un fallo de lectura. */ }
+      notifyCareChanged();
       setStep('review');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'No pudimos analizar la comida');
+      setError(careErrorMessage(e));
       setStep('capture');
-    }
+    } finally { lock.current=false; }
   };
 
   const confirm = () => {
@@ -136,6 +153,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
         <button className="modal-close" onClick={close} aria-label="Cerrar">×</button>
         <p className="eyebrow">Registrar comida</p>
         <h2>¿Qué comiste?</h2>
+        {care.data && <CareConsent patientId={patient.id} snapshot={care.data} meals />}
 
         <div className="capture-tabs">
           <button className={mode === 'photo' ? 'active' : ''} onClick={() => setMode('photo')} type="button">
@@ -156,7 +174,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
         {mode === 'photo' ? (
           <>
             <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
-            <button type="button" className="upload-zone" onClick={() => fileRef.current?.click()}>
+            <button type="button" className="upload-zone" disabled={Boolean(care.data) && !care.data?.consented.includes('meal_photo')} onClick={() => fileRef.current?.click()}>
               {photoPreview ? <img src={photoPreview} alt="Vista previa" /> : (
                 <>
                   <Icon name="camera" size={28} />
@@ -183,7 +201,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
         )}
 
         {error && <p className="form-error">{error}</p>}
-        <button className="primary-button wide" type="button" onClick={analyze}>
+        <button className="primary-button wide" type="button" onClick={analyze} disabled={Boolean(care.data) && !care.data?.consented.includes('ai_meal_analysis')}>
           <Icon name="sparkle" size={17} />Analizar con IA
         </button>
       </div>

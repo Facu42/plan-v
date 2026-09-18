@@ -1,4 +1,5 @@
 import type { Brief, MealLog, Message, Patient } from '../../src/types/index.ts';
+import { signMealPhotos } from '../care/meal-photos.js';
 import { resolveBillingStatus } from '../../src/billing.ts';
 import type { Actor, PatientResource } from '../security/contracts.ts';
 import { MESSAGE_PAGE_SIZE, WEEK_DAYS } from '../schemas.ts';
@@ -279,7 +280,7 @@ async function loadPatientExtras(
     : null;
   const briefDismissed = briefStatus === 'dismissed';
 
-  const meal_logs = rows(logs).map(mapMealLog);
+  const meal_logs = await signMealPhotos(patientId, rows(logs).map(mapMealLog));
   const authorIds = [...new Set(rows(msgs).map((message) => String(message.author_id)))];
   const { data: authors } = authorIds.length > 0
     ? await sb.from('profiles').select('id, role').in('id', authorIds)

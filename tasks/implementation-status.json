@@ -32,9 +32,9 @@
     "PV-05": {
       "status": "done",
       "owner": "",
-      "notes": "CI y guarda implementados. La regresión de onboarding PV-13 mantiene roja la suite global y debe resolverse.",
-      "evidence": "Revisión local 2026-09-17 sobre 5123acf. Informe: docs/revision-avance-2026-09-17.md. .github/workflows/ci.yml (Node 24) y scripts/check-migration-safety.mjs. npm run check:migrations, check y build aprobados. Sin drafts bajo supabase/migrations.",
-      "updatedAt": "2026-09-17T18:09:08.412Z"
+      "notes": "CI y guarda implementados. Suite local verde: 494 aprobadas y 2 casos Supabase live omitidos.",
+      "evidence": "Verificación del 17/09 sobre 532ff27 más cambios locales: npm test, check, build y check:migrations aprobados. docs/revision-avance-2026-09-17.md.",
+      "updatedAt": "2026-09-17T23:39:38.364Z"
     },
     "PV-06": {
       "status": "done",
@@ -81,26 +81,116 @@
     "PV-12": {
       "status": "review",
       "owner": "",
-      "notes": "Intake y consentimientos versionados en memoria y vía RPC. 501 si falta schema. Falta aplicar migraciones en instancia descartable con Auth real.",
-      "evidence": "server/intake/repository.ts, memory.ts, postgres.integration.test.ts, intake.integration.test.ts. npm test 2026-09-17: 484 aprobadas, 2 omitidas.",
-      "updatedAt": "2026-09-17T19:50:00.000Z"
+      "notes": "Ingreso y consentimiento mediante RPC transaccionales, con errores explícitos. Verificados aislamiento y persistencia en PGlite; Auth/PostgREST reales pendientes en descartable.",
+      "evidence": "server/intake/postgres.integration.test.ts (6 casos) y server/intake-supabase.integration.test.ts (8 casos). Suite: 494 aprobadas / 2 omitidas. Informe vigente: docs/revision-avance-2026-09-17.md.",
+      "updatedAt": "2026-09-17T23:39:38.372Z"
     },
     "PV-13": {
       "status": "review",
       "owner": "",
-      "notes": "Nueve pantallas, cola de autoguardado serializada, reanudación y envío idempotente. Persistencia durable depende de aplicar el schema en descartable.",
-      "evidence": "ShowroomPatientOnboarding.tsx, intake-save-queue.test.ts, showroom-onboarding.test.ts. Suite 2026-09-17 en verde.",
-      "updatedAt": "2026-09-17T19:50:00.000Z"
+      "notes": "Onboarding de nueve pantallas con cola de revisión corregida, cancelación por ficha, recuperación de carga/conflicto y reintento de envío sin duplicación. Autenticación real pendiente.",
+      "evidence": "intake-session.test.ts e intake-save-queue.test.ts. Navegador 390 px: envío aceptado con respuesta perdida, mismo reintento sin PATCH; carga fallida recuperada sin escrituras. .scratch/intake-recovery-2026-09-17/sent-mobile.png.",
+      "updatedAt": "2026-09-17T23:39:38.377Z"
     },
     "PV-14": {
       "status": "review",
       "owner": "",
-      "notes": "Ficha profesional muestra resumen de ingreso, faltantes, alergias y notas privadas. El paciente no ve reviewed_by ni observaciones. Falta recorrido autenticado en staging.",
-      "evidence": "ShowroomIntakeReview.tsx montado en ShowroomPatientRecord.tsx; showroom-intake-review.test.tsx y intake.integration.test.ts de revisión.",
-      "updatedAt": "2026-09-17T19:50:00.000Z"
+      "notes": "Revisión profesional, nota privada, fecha de revisión y reintento de carga/conflicto. El cambio de ficha limpia el contenido anterior. Pendiente circuito con JWT real.",
+      "evidence": "Navegador demo 1440/390 px: nota privada y revisión persistidas en memoria, respuesta paciente sin notas; carga CRM 503 recuperada. API/RPC tests y .scratch/intake-recovery-2026-09-17/crm-reviewed-desktop.png.",
+      "updatedAt": "2026-09-17T23:39:38.384Z"
+    },
+    "PV-15": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Fotos corporales y de comida: validación MIME/tamaño, bucket privado, URL firmada 60s, consentimiento y borrado. Falta reserva/cuarentena/EXIF y el circuito completo de Storage.",
+      "evidence": "supabase/migrations/20260918010000_care.sql; server/care/repository.ts, meal-photos.ts; pruebas de flujo y PGlite. No aplicar SQL a proyectos con pacientes.",
+      "updatedAt": "2026-09-18T14:10:00.000Z"
+    },
+    "PV-16": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Fotos corporales opcionales con permiso propio, visor temporal y retiro. Estudios PDF todavía no.",
+      "evidence": "CarePanel modo progreso, RPC delete_care_photo, tests de retiro de consentimiento. Suite local 2026-09-18.",
+      "updatedAt": "2026-09-18T14:10:00.000Z"
+    },
+    "PV-17": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Peso semanal y cintura mensual autodeclarados, con fecha, consentimiento e historial. Sin inferir medidas desde fotos.",
+      "evidence": "careInputSchema, dueCareReminders, CarePanel y postgres.integration.test.ts. Demo en memoria; Auth real pendiente.",
+      "updatedAt": "2026-09-18T14:10:00.000Z"
+    },
+    "PV-21": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Lista derivada de títulos del plan y de alternativas ya publicadas. Explica que no hay cantidades. Checklist sólo en este navegador.",
+      "evidence": "ShowroomGrocery + publishedRecipeMeals. Sin unidades, agregados manuales ni sync entre dispositivos.",
+      "updatedAt": "2026-09-18T14:10:00.000Z"
+    },
+    "PV-26": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Avisos de peso/cintura/actividad/agua/descanso en la campana mientras la app está abierta. No es push ni email real.",
+      "evidence": "useCareNotices, ShowroomConsultAlerts, care-reminders.test.ts. Preferencias en care_preferences.",
+      "updatedAt": "2026-09-18T14:10:00.000Z"
+    },
+    "PV-27": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Borrador de alternativa (demo/IA) a pedido del paciente; la nutricionista edita y publica. El paciente no ve el borrador. Requiere alergias/restricciones declaradas.",
+      "evidence": "server/ai/replacements.ts, CareRecipeEditor, generate/publish RPC. Sin catálogo de recetas ni jobs versionados.",
+      "updatedAt": "2026-09-18T14:10:00.000Z"
     }
   },
   "history": [
+    {
+      "id": "c18a15e0-9f12-4a3b-8c01-seguimiento0001",
+      "taskId": "PV-15",
+      "at": "2026-09-18T14:10:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a16e0-9f12-4a3b-8c01-seguimiento0002",
+      "taskId": "PV-16",
+      "at": "2026-09-18T14:10:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a17e0-9f12-4a3b-8c01-seguimiento0003",
+      "taskId": "PV-17",
+      "at": "2026-09-18T14:10:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a21e0-9f12-4a3b-8c01-seguimiento0004",
+      "taskId": "PV-21",
+      "at": "2026-09-18T14:10:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a26e0-9f12-4a3b-8c01-seguimiento0005",
+      "taskId": "PV-26",
+      "at": "2026-09-18T14:10:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a27e0-9f12-4a3b-8c01-seguimiento0006",
+      "taskId": "PV-27",
+      "at": "2026-09-18T14:10:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
     {
       "id": "83a82128-0407-4c96-a75f-d19f999ab463",
       "taskId": "PV-01",
@@ -256,31 +346,75 @@
         "notes",
         "evidence"
       ]
+    },
+    {
+      "id": "015e5620-eb7e-47cb-aece-84d677755aa7",
+      "taskId": "PV-05",
+      "at": "2026-09-17T23:39:38.364Z",
+      "from": "done",
+      "to": "done",
+      "fields": [
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "19e178c6-334a-481f-b2e3-bd11ec401f4d",
+      "taskId": "PV-12",
+      "at": "2026-09-17T23:39:38.372Z",
+      "from": "review",
+      "to": "review",
+      "fields": [
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "ab0f628d-a821-4d66-8073-5bffd13bc274",
+      "taskId": "PV-13",
+      "at": "2026-09-17T23:39:38.377Z",
+      "from": "review",
+      "to": "review",
+      "fields": [
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "84d0942a-c910-4c1c-8e4a-ad18e688ffa3",
+      "taskId": "PV-14",
+      "at": "2026-09-17T23:39:38.384Z",
+      "from": "review",
+      "to": "review",
+      "fields": [
+        "notes",
+        "evidence"
+      ]
     }
   ],
   "audit": {
-    "reviewedAt": "2026-09-17T18:09:08.442Z",
-    "commit": "5123acf",
-    "summary": "Migraciones ejecutables de núcleo/ingreso, cola de autoguardado y revisión en ficha. Suite local verde. No se aplicó SQL a un proyecto con pacientes.",
+    "reviewedAt": "2026-09-17T23:39:38.388Z",
+    "commit": "532ff27 + cambios locales",
+    "summary": "Continuación del trabajo de Cursor: ingreso recuperable, envío sin duplicación y revisión privada en CRM. Verificación local y navegador demo; Supabase Auth real pendiente.",
     "checks": [
       {
         "label": "Pruebas",
-        "result": "484 OK · 2 omitidas",
+        "result": "494 OK · 2 omitidas · 97 archivos",
         "status": "passed"
       },
       {
         "label": "RLS real",
-        "result": "2 omitidas",
+        "result": "2 omitidas; PGlite 6/6",
         "status": "skipped"
       },
       {
         "label": "TypeScript",
-        "result": "aprobado",
+        "result": "frontend y servidor aprobados",
         "status": "passed"
       },
       {
         "label": "Build",
-        "result": "194 módulos",
+        "result": "198 módulos",
         "status": "passed"
       },
       {
@@ -291,6 +425,11 @@
       {
         "label": "Dashboard",
         "result": "8/8 pruebas",
+        "status": "passed"
+      },
+      {
+        "label": "Navegador",
+        "result": "recuperación, envío y CRM · 390/1440 px · demo",
         "status": "passed"
       }
     ]

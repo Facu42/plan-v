@@ -5,13 +5,12 @@
   min-height: 100dvh;
   padding-bottom: calc(64px + env(safe-area-inset-bottom));
 }
-.nv-app.nv-pro .nv-sidebar,
 .nv-menu-toggle,
 .nv-mobile-brand,
 .nv-preview-label,
 .nv-sidebar-note,
 .nv-back { display: none !important; }
-.nv-app.nv-patient .nv-sidebar { display: none; }
+.nv-app .nv-sidebar { display: none; }
 
 .nv-workspace { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .nv-app.nv-patient .nv-topbar,
@@ -151,17 +150,21 @@
   background: var(--nv-green);
 }
 
-@media (min-width: 1100px) {
-  .nv-app.nv-patient {
+@media (min-width: 1024px) {
+  .nv-app.nv-patient, .nv-app.nv-pro {
     flex-direction: row;
     padding-bottom: 0;
   }
-  .nv-app.nv-patient .nv-sidebar {
+  .nv-app .nv-sidebar {
     display: flex !important;
     width: 223px;
     flex: 0 0 223px;
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    overflow-y: auto;
   }
-  .nv-app.nv-patient .nv-tabbar { display: none; }
+  .nv-app .nv-tabbar { display: none; }
   .nv-app.nv-patient .nv-brand small { display: block; }
   .nv-app.nv-patient .nv-sidebar .nv-brand { margin-bottom: 20px; }
   .nv-app.nv-patient .nv-sidebar nav button { font-size: 13px; min-height: 44px; }
@@ -179,6 +182,8 @@
 }
 
 @media (max-width: 760px) {
+  .nv-app .nv-topbar .nv-topbar-title, .nv-app .nv-topbar .nv-brand > span { display: none; }
+  .nv-app .nv-topbar .nv-role-switch { margin-left: auto; }
   .nv-page-head { flex-direction: column; }
   .nv-search, .np-dashboard-search { width: 100%; max-width: none; }
   .nv-metrics { grid-template-columns: 1fr 1fr; gap: 10px; }

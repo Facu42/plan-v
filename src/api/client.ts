@@ -28,7 +28,7 @@ async function authHeaders(): Promise<HeadersInit> {
   return headers;
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (init?.signal?.aborted) {
     throw new DOMException('Aborted', 'AbortError');
   }
@@ -225,20 +225,23 @@ export const api = {
   reviewIntake: (patientId: string, expectedRevision: number) => request<ProfessionalIntakeView>(`/api/patients/${patientId}/intake/review`, { method: 'POST', body: JSON.stringify({ expected_revision: expectedRevision }) }),
   addClinicalNote: (patientId: string, body: string) => request<{ clinical_note: ClinicalNoteRecord }>(`/api/patients/${patientId}/clinical-notes`, { method: 'POST', body: JSON.stringify({ body }) }),
 
-  patchIntake: (patientId: string, data: { expected_revision: number; step?: string; payload?: unknown }) =>
+  patchIntake: (patientId: string, data: { expected_revision: number; step?: string; payload?: unknown }, init?: RequestInit) =>
     request<{ intake: { revision: number; status: string }; source: string }>(`/api/patients/${patientId}/intake`, {
+      ...init,
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
 
-  submitIntake: (patientId: string, expectedRevision: number) =>
+  submitIntake: (patientId: string, expectedRevision: number, init?: RequestInit) =>
     request<{ intake: { revision: number; status: string }; source: string }>(`/api/patients/${patientId}/intake/submit`, {
+      ...init,
       method: 'POST',
       body: JSON.stringify({ expected_revision: expectedRevision }),
     }),
 
-  recordConsent: (patientId: string, data: { purpose: string; text_version: string; text_hash: string; decision: 'granted' | 'withdrawn' }) =>
+  recordConsent: (patientId: string, data: { purpose: string; text_version: string; text_hash: string; decision: 'granted' | 'withdrawn' }, init?: RequestInit) =>
     request<{ consent: unknown; source: string }>(`/api/patients/${patientId}/consents`, {
+      ...init,
       method: 'POST',
       body: JSON.stringify(data),
     }),

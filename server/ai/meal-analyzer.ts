@@ -81,7 +81,7 @@ export async function analyzeMeal(input: {
   userParts.push({ type: 'text', text: prompt });
 
   if (imageBase64) {
-    const mime = imageBase64.startsWith('/9j/') ? 'image/jpeg' : 'image/png';
+    const mime = imageBase64.startsWith('/9j/') ? 'image/jpeg' : imageBase64.startsWith('UklGR') ? 'image/webp' : 'image/png';
     userParts.push({ type: 'image', image: `data:${mime};base64,${imageBase64}` });
   }
 

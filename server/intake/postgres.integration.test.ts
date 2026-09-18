@@ -42,7 +42,7 @@ beforeAll(async () => {
     alter table storage.objects enable row level security;
     create function storage.foldername(text) returns text[] language sql immutable as $$ select string_to_array($1,'/') $$;
   `);
-  for (const file of ['20260917190000_core.sql', '20260917190100_intake.sql']) {
+  for (const file of ['20260917190000_core.sql', '20260917190100_intake.sql', '20260918010000_care.sql']) {
     try { await db.exec(await readFile(new URL(`../../supabase/migrations/${file}`, import.meta.url), 'utf8')); }
     catch (error) { console.error(file, JSON.stringify(error)); throw error; }
   }
@@ -109,5 +109,68 @@ describe('migraciones de ingreso en PostgreSQL', () => {
     const saved = await rpc(a,'get_patient_intake',[patient]);
     expect(saved.intake).toMatchObject({status:'reviewed',revision:4,payload:{preferred_name:'Ana'}});
     expect(saved.consents[0].decision).toBe('granted');
+  });
+  it('seguimiento: aislamiento, consentimiento, reintentos y revisión profesional',async()=>{
+    const id='20000000-0000-4000-a000-000000000001';const data={kind:'weight',value:65,note:''};
+    await expect(rpc(a,'save_care_record',[patient,id,'2026-09-10',data])).rejects.toMatchObject({code:'42501'});
+    const c=CONSENT_CATALOG.find(c=>c.purpose==='measurement')!;
+    await rpc(a,'record_patient_consent',[patient,c.purpose,c.text_version,c.text_hash,'granted']);
+    const first=await rpc(a,'save_care_record',[patient,id,'2026-09-10',data]);
+    expect((await rpc(a,'save_care_record',[patient,id,'2026-09-10',data])).id).toBe(first.id);
+    await expect(rpc(a,'save_care_record',[patient,id,'2026-09-10',{...data,value:66}])).rejects.toMatchObject({code:'PT409'});
+    await expect(rpc(b,'save_care_record',[patient,id,'2026-09-10',data])).rejects.toMatchObject({code:'42501'});
+    expect(await asUser(b,'select * from public.care_records')).toEqual([]);
+    expect(await asUser(other,'select * from public.care_records')).toEqual([]);
+    await expect(asUser(a,"update public.care_records set reviewed_at=now() where id=$1",[id])).rejects.toMatchObject({code:'42501'});
+    await expect(rpc(a,'review_care_record',[patient,id])).rejects.toMatchObject({code:'42501'});
+    await rpc(pro,'review_care_record',[patient,id]);
+    expect((await asUser(pro,'select reviewed_at from public.care_records where id=$1',[id]))[0].reviewed_at).toBeTruthy();
+  });
+  it('seguimiento: pagos sólo profesionales y borradores invisibles hasta publicación',async()=>{
+    const payment='20000000-0000-4000-a000-000000000002';const request='20000000-0000-4000-a000-000000000003';const replacement='20000000-0000-4000-a000-000000000004';
+    const data={kind:'payment',amount:24000,currency:'ARS',method:'transferencia',reference:'T1',note:''};
+    await expect(rpc(a,'save_care_record',[patient,payment,'2026-09-10',data])).rejects.toMatchObject({code:'42501'});
+    await rpc(pro,'save_care_record',[patient,payment,'2026-09-10',data]);
+    expect(await asUser(a,'select id from public.care_records where id=$1',[payment])).toEqual([]);
+    await rpc(a,'save_care_record',[patient,request,'2026-09-10',{kind:'menu_request',target:'Almuerzo',reason:'Otro ingrediente',replacement:'ingredient'}]);
+    const c=CONSENT_CATALOG.find(c=>c.purpose==='ai_menu_draft')!;await rpc(a,'record_patient_consent',[patient,c.purpose,c.text_version,c.text_hash,'granted']);
+    await asUser(pro,"insert into public.care_replacements(id,patient_id,request_id,source,recipe) values($1,$2,$3,'demo',$4)",[replacement,patient,request,{title:'Propuesta privada',ingredients:['ejemplo'],steps:['ejemplo'],explanation:'ejemplo'}]);
+    expect(await asUser(a,'select * from public.care_replacements')).toEqual([]);
+    const recipe={title:'Propuesta privada',ingredients:['ejemplo'],steps:['ejemplo'],explanation:'ejemplo'};
+    await expect(rpc(a,'publish_care_replacement',[patient,replacement,recipe,recipe])).rejects.toMatchObject({code:'42501'});
+    await expect(rpc(pro,'publish_care_replacement',[patient,replacement,{...recipe,title:'Otro'},recipe])).rejects.toMatchObject({code:'PT409'});
+    await rpc(pro,'publish_care_replacement',[patient,replacement,recipe,{...recipe,title:'Revisado'}]);
+    await rpc(pro,'publish_care_replacement',[patient,replacement,recipe,{...recipe,title:'Revisado'}]);
+    expect(await asUser(a,'select id from public.care_replacements')).toEqual([{id:replacement}]);
+    expect(await asUser(b,'select * from public.care_replacements')).toEqual([]);
+  });
+  it('seguimiento: valida payload directo y preferencias propias',async()=>{
+    const id='20000000-0000-4000-a000-000000000005';
+    await expect(rpc(a,'save_care_record',[patient,id,'2026-09-10',{kind:'weight',value:-3,note:''}])).rejects.toMatchObject({code:'22023'});
+    await expect(rpc(a,'save_care_record',[patient,id,'2026-09-10',{kind:'weight',value:60,note:'',reviewed_at:'hoy'}])).rejects.toMatchObject({code:'22023'});
+    await expect(rpc(a,'save_care_preferences',[patient,{water:true}])).rejects.toMatchObject({code:'22023'});
+    const prefs={water:true,water_interval:120,weight:true,waist:false,activity:false,rest:true,rest_time:'22:30'};
+    await rpc(a,'save_care_preferences',[patient,prefs]);
+    expect((await asUser(a,'select settings from public.care_preferences'))[0].settings).toEqual(prefs);
+    await expect(rpc(pro,'save_care_preferences',[patient,prefs])).rejects.toMatchObject({code:'42501'});
+  });
+  it('Storage privado: otro paciente no puede leer, retirar consentimiento bloquea y permite eliminar',async()=>{
+    await db.exec('grant select,insert,delete on storage.objects to authenticated');
+    const id='20000000-0000-4000-a000-000000000006';const path=`${patient}/${id}`;const c=CONSENT_CATALOG.find(c=>c.purpose==='body_progress')!;
+    await expect(asUser(a,"insert into storage.objects(bucket_id,name) values('care-photos',$1)",[path])).rejects.toMatchObject({code:'42501'});
+    await rpc(a,'record_patient_consent',[patient,c.purpose,c.text_version,c.text_hash,'granted']);
+    await asUser(a,"insert into storage.objects(bucket_id,name) values('care-photos',$1)",[path]);
+    await rpc(a,'save_care_record',[patient,id,'2026-09-10',{kind:'body_photo',path,note:''}]);
+    expect(await asUser(pro,'select name from storage.objects where name=$1',[path])).toEqual([{name:path}]);
+    expect(await asUser(b,'select name from storage.objects where name=$1',[path])).toEqual([]);
+    await rpc(a,'record_patient_consent',[patient,c.purpose,c.text_version,c.text_hash,'withdrawn']);
+    expect(await asUser(pro,'select name from storage.objects where name=$1',[path])).toEqual([]);
+    await asUser(a,'delete from storage.objects where name=$1',[path]);
+    await expect(rpc(a,'delete_care_photo',[patient,id])).rejects.toMatchObject({code:'PT409'});
+    // Simula Storage.remove del backend autorizado: en Supabase elimina también el blob.
+    await db.query('delete from storage.objects where name=$1',[path]);
+    await rpc(a,'delete_care_photo',[patient,id]);
+    expect((await db.query('select * from public.care_records where id=$1',[id])).rows).toEqual([]);
+    expect((await db.query('select * from storage.objects where name=$1',[path])).rows).toEqual([]);
   });
 });
