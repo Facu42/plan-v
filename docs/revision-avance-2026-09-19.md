@@ -20,7 +20,7 @@ Resultado utilizable: dos profesionales y dos pacientes ficticios recorren el ci
 | Matriz de permisos RLS-01…23 | JWT de cada actor, no `service_role` | **PGlite RLS-01…23 + reopen PASS** (`server/rls-matrix.postgres.test.ts`). Live JWT omitido |
 | Persistencia tras reinicio y cambio de sesión | Reabrir API/base y otra sesión | PGlite reabre el directorio; Auth real pendiente |
 | Subida y retiro de un estudio PDF/JPG/PNG | Consentimiento, visor temporal, retiro, aislamiento A/B, sin IA | **Circuito demo + PGlite en este corte**; Storage live pendiente |
-| Invitación de un uso → ingreso → revisión profesional → plan publicado | Recorrido de dos roles en staging | Pendiente de instancia descartable. En demo: ingreso, revisión y menú publicado ya existen |
+| Invitación de un uso → ingreso → revisión profesional → plan publicado | Recorrido de dos roles en staging | **Demo PASS** (Sofía + Ana Corte + Marina). PGlite Nutri A/B. Accept live 401. Staging pendiente |
 
 Entregas que este corte puede pasar a **completadas** cuando haya evidencia live: PV-07, PV-08, PV-09, PV-11, PV-12, PV-13, PV-14. PV-10 (read-back real), PV-15 (Storage completo) y PV-16 (estudios en Auth/Storage reales) cierran con la misma instancia. El “plan publicado” de este corte es el plan semanal vigente que la profesional edita y el paciente lee, más alternativas ya revisadas. No exige todavía el catálogo versionado de recetas (PV-18/19).
 
@@ -55,5 +55,6 @@ PWA instalable, procesamiento durable, respaldos con restauración conjunta DB+S
 - Circuito de estudios opcionales: consentimiento `clinical_document`, PDF/JPG/PNG, visor de un minuto, retiro por el paciente, aislamiento y exclusión de IA.
 - Correcciones de seguimiento del 18/09 ya en la rama.
 - Matriz RLS-01…23 ejecutable en PGlite (JWT shim, no Auth/PostgREST live) con Nutri A/B y Paciente A/B sintéticos.
+- Circuito invitación → ingreso → revisión → plan publicado en PGlite, API demo y navegador (Sofía declara, nota privada, bowl publicado, Ana Corte invitada, Marina aislada).
 
-Próximo movimiento del corte 1: conectar la instancia descartable, repetir la matriz con JWT reales y el recorrido con dos profesionales y dos pacientes ficticios, incluyendo subida y retiro de un estudio.
+Próximo movimiento del corte 1: conectar la instancia descartable, repetir la matriz con JWT reales y el mismo recorrido con dos profesionales live.
