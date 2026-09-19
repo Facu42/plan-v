@@ -94,7 +94,7 @@ export function CareConsent({patientId,snapshot,onlyAI=false,meals=false}:{patie
     try{await api.recordConsent(patientId,{purpose,text_version:text.text_version,text_hash:text.text_hash,decision:granted?'withdrawn':'granted'});notifyCareChanged();}
     catch(e){setStatus(careErrorMessage(e));}finally{lock.current=false;setBusy(false);}
   }
-  return <details className="care-consent" open={meals || (!onlyAI && !snapshot.consented.includes('measurement'))}><summary>Permisos opcionales · vos elegís qué compartir</summary>{catalog.filter(c=>(meals?['meal_photo','ai_meal_analysis']:onlyAI?['ai_menu_draft']:['measurement','body_progress','clinical_document']).includes(c.purpose)).map(c=><label key={c.purpose}><input type="checkbox" disabled={busy} checked={snapshot.consented.includes(c.purpose)} onChange={()=>void toggle(c.purpose,snapshot.consented.includes(c.purpose))}/><span>{c.text}</span></label>)}{status&&<p role="alert">{status}</p>}</details>;
+  return <details className="care-consent" open={meals || (onlyAI ? !snapshot.consented.includes('ai_menu_draft') : !snapshot.consented.includes('measurement'))}><summary>Permisos opcionales · vos elegís qué compartir</summary>{catalog.filter(c=>(meals?['meal_photo','ai_meal_analysis']:onlyAI?['ai_menu_draft']:['measurement','body_progress','clinical_document']).includes(c.purpose)).map(c=><label key={c.purpose}><input type="checkbox" disabled={busy} checked={snapshot.consented.includes(c.purpose)} onChange={()=>void toggle(c.purpose,snapshot.consented.includes(c.purpose))}/><span>{c.text}</span></label>)}{status&&<p role="alert">{status}</p>}</details>;
 }
 
 function CareReminderSettings({patientId,settings}:{patientId:string;settings:CarePreferences}) {
