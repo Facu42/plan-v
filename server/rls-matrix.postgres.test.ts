@@ -235,7 +235,7 @@ describe('matriz RLS-01…23 en PostgreSQL descartable (PGlite)', () => {
       [invitePatient, nutriAId],
     )).rows[0].id;
     expect(await rpc(invitee, 'accept_patient_invite', [invite])).toBe(invitePatient);
-    expect((await db.query('select user_id from public.patients where id=$1', [invitePatient])).rows[0]).toEqual({ user_id: invitee });
+    expect((await db.query<{ user_id: string | null }>('select user_id from public.patients where id=$1', [invitePatient])).rows[0]).toEqual({ user_id: invitee });
     await expect(rpc(invitee, 'accept_patient_invite', [invite])).rejects.toMatchObject({});
   });
 
@@ -258,7 +258,7 @@ describe('matriz RLS-01…23 en PostgreSQL descartable (PGlite)', () => {
       [extra, nutriAId],
     )).rows[0].id;
     await expect(rpc(wrongMail, 'accept_patient_invite', [mismatch])).rejects.toMatchObject({});
-    expect((await db.query('select user_id from public.patients where id=$1', [extra])).rows[0].user_id).toBeNull();
+    expect((await db.query<{ user_id: string | null }>('select user_id from public.patients where id=$1', [extra])).rows[0].user_id).toBeNull();
   });
 
   it('RLS-20 fotos de comida: prefijo propio, B denegado', async () => {
