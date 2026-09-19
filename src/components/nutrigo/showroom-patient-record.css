@@ -1,54 +1,63 @@
-/* Professional record. Private values are visually and semantically isolated from patient surfaces. */
-.nr-record { display:flex; flex-direction:column; gap:16px; }
-.nr-hero { position:sticky;top:var(--nv-topbar-offset,60px);z-index:15;display:flex; align-items:center; gap:14px; padding:18px; border:1px solid var(--nv-border); border-radius:12px; background:var(--nv-card);box-shadow:0 8px 18px #00000006; }
-.nr-hero { order:-3; }
-.nr-summary-grid { order:-2; }
-.nr-actions { order:-1; }
-.nr-avatar { width:48px; height:48px; flex:0 0 48px; border-radius:12px; font-size:14px; }
-.nr-identity { flex:1; min-width:0; }
-.nr-identity>p,.nr-kicker { color:var(--nv-muted); font-size:12px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; }
-.nr-identity h2 { margin:1px 0 6px; font-size:20px; line-height:1.3; }
-.nr-identity>div { display:flex; flex-wrap:wrap; align-items:center; gap:9px; color:var(--nv-muted); font-size:13px; }
-.nr-hero>.nv-button,.nr-actions .nv-button { display:inline-flex; align-items:center; justify-content:center; gap:7px; }
+/* Professional record. Composition from Nutrigo Dashboard 12:792 + Food Diary 105:2649. */
+.nr-record { display:flex; flex-direction:column; gap:20px; }
+.nr-page-head { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; min-height:50px; }
+.nr-page-head>div:first-child { min-width:min(100%,280px); flex:1 1 280px; }
+.nr-page-head h1 { font-size:25px; font-weight:700; letter-spacing:-.8px; line-height:1.2; }
+.nr-page-head p { display:flex; flex-wrap:wrap; align-items:center; gap:9px; margin-top:6px; color:var(--nv-muted); font-size:12px; }
+.nr-kicker { color:var(--nv-muted); font-size:12px; font-weight:600; }
+.nr-page-tools { display:flex; flex-wrap:wrap; align-items:end; gap:10px; }
+.nr-page-tools .nv-button { display:inline-flex; align-items:center; gap:7px; }
 .nr-patient-select { display:flex; flex-direction:column; gap:4px; color:var(--nv-muted); font-size:12px; }
-.nr-patient-select select { min-width:150px; padding:8px 10px; border:1px solid var(--nv-border); border-radius:8px; background:var(--nv-bg); color:var(--nv-ink); font-size:11px; }
-.nr-actions { display:flex; flex-wrap:wrap; gap:8px; }
-.nr-actions .nv-button { min-height:38px; font-size:13px; }
-.nr-summary-grid { display:grid; grid-template-columns:1.35fr 1fr 1fr; gap:14px; }
-.nr-card { min-width:0; padding:18px; border:1px solid var(--nv-border); border-radius:12px; background:var(--nv-card); }
-.nr-card>header { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:14px; }
-.nr-card h3 { margin:2px 0 0; font-size:14px; line-height:1.35; }
-.nr-icon,.nr-lock { display:grid; place-items:center; width:34px; height:34px; flex:0 0 34px; border-radius:9px; background:var(--nv-green); }
-.nr-goal>strong,.nr-adherence>strong { display:block; margin-bottom:6px; font-size:25px; line-height:1; }
-.nr-card>.nv-progress { margin-bottom:8px; }
-.nr-card>small,.nr-card>p { color:var(--nv-muted); font-size:13px; }
-.nr-private { padding:18px; border:1px solid var(--nv-border); border-left:4px solid var(--nv-accent); border-radius:12px; background:var(--nv-card); }
-.nr-private>header>div { display:flex; align-items:center; gap:10px; }
-.nr-private h3 { margin:0; font-size:14px; }
-.nr-private header p { margin:2px 0 0; color:var(--nv-muted); font-size:13px; }
-.nr-lock { background:var(--nv-gold); }
-.nr-private dl { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:16px 0 0; }
-.nr-private dl>div { min-width:0; padding:12px; border-radius:9px; background:var(--nv-bg); }
+.nr-patient-select select { min-width:150px; min-height:36px; padding:7px 10px; border:1px solid var(--nv-border); border-radius:8px; background:var(--nv-bg); color:var(--nv-ink); font:inherit; font-size:11px; }
+.nr-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; padding:16px; border-radius:12px; background:var(--nv-card); }
+.nr-record .nr-metrics .nv-metric { min-height:72px; padding:0 16px; border:0; border-left:1px solid var(--nv-border); border-radius:0; background:transparent; }
+.nr-metrics .nv-metric:first-child { border-left:0; padding-left:0; }
+.nr-metrics .nv-metric:last-child { padding-right:0; }
+.nr-metrics .nv-metric-label { align-items:flex-start; }
+.nr-metrics .nv-icon-tile { width:28px; height:28px; }
+.nr-metrics .nv-metric>strong { margin:0; font-size:22px; font-weight:600; letter-spacing:-.4px; overflow-wrap:anywhere; }
+.nr-metrics .nv-metric>small { margin-top:4px; font-size:12px; line-height:1.35; }
+.nr-layout { display:grid; grid-template-columns:minmax(0,1fr) 325px; gap:20px; align-items:start; }
+.nr-column { display:flex; flex-direction:column; gap:20px; min-width:0; }
+.nr-actions { display:flex; flex-wrap:wrap; gap:4px 12px; }
+.nr-actions .nv-button { display:inline-flex; align-items:center; gap:7px; min-height:34px; padding:6px 8px; }
+.nr-rail { display:flex; flex-direction:column; gap:20px; min-width:0; padding:0 4px 0 8px; }
+.nr-person { display:flex; align-items:center; gap:10px; }
+.nr-person>div { min-width:0; flex:1; }
+.nr-person strong { display:block; font-size:14px; }
+.nr-person small { display:block; margin-top:2px; color:var(--nv-muted); font-size:13px; }
+.nr-avatar { width:38px; height:38px; flex:0 0 38px; border-radius:10px; font-size:12px; }
+.nr-visit { display:flex; flex-direction:column; align-items:flex-start; gap:6px; padding:18px; border-radius:12px; background:var(--nv-gold); }
+.nr-visit .nv-icon-tile { background:var(--nv-card); }
+.nr-visit>small { color:var(--nv-muted); font-size:12px; }
+.nr-visit>strong { font-size:15px; line-height:1.35; }
+.nr-visit>p { color:var(--nv-muted); font-size:12px; }
+.nr-visit .nv-button { padding-inline:0; }
+.nr-panel { min-width:0; padding:18px; border-radius:12px; background:var(--nv-card); }
+.nr-panel>header { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:12px; }
+.nr-panel h2 { margin:0; font-size:14px; font-weight:600; }
+.nr-panel header p { margin:3px 0 0; color:var(--nv-muted); font-size:12px; }
+.nr-private dl { display:grid; gap:0; margin:0; }
+.nr-private dl>div { min-width:0; padding:12px 0; border-top:1px solid var(--nv-border); }
 .nr-private dt { color:var(--nv-muted); font-size:12px; }
-.nr-private dd { margin:4px 0 0; font-size:11px; font-weight:500; overflow-wrap:anywhere; }
-.nr-history-grid { display:grid; grid-template-columns:1.2fr 1fr; gap:14px; }
-.nr-timeline { grid-row:span 2; }
-.nr-history-grid ol { list-style:none; margin:0; padding:0; }
+.nr-private dd { margin:4px 0 0; font-size:13px; font-weight:500; overflow-wrap:anywhere; }
+.nr-timeline ol,.nr-notes ol,.nr-meal-notes ol { list-style:none; margin:0; padding:0; }
 .nr-timeline li { display:grid; grid-template-columns:48px minmax(0,1fr); gap:10px; padding:11px 0; border-top:1px solid var(--nv-border); }
 .nr-timeline time { color:var(--nv-muted); font-size:12px; font-weight:600; }
 .nr-timeline strong,.nr-timeline small { display:block; }
-.nr-timeline strong { font-size:11px; }
+.nr-timeline strong { font-size:13px; }
 .nr-timeline small { color:var(--nv-muted); font-size:12px; margin-top:2px; }
+.nr-notes-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
 .nr-notes li,.nr-meal-notes li { padding:10px 0; border-top:1px solid var(--nv-border); }
 .nr-notes li>div,.nr-meal-notes li>div { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.nr-notes strong,.nr-meal-notes strong { font-size:11px; }
+.nr-notes strong,.nr-meal-notes strong { font-size:13px; }
 .nr-notes p,.nr-meal-notes p { margin:5px 0 3px; font-size:13px; overflow-wrap:anywhere; }
 .nr-notes small,.nr-meal-notes small { color:var(--nv-muted); font-size:12px; }
-.nr-history-grid .nv-state { padding:24px 12px; }
-.nr-history-grid .nv-state h2 { font-size:14px; }
-.nr-intake { padding:18px; border:1px solid var(--nv-border); border-left:4px solid var(--nv-forest); border-radius:12px; background:var(--nv-card); }
+.nr-record .nv-state { padding:24px 12px; background:var(--nv-bg); }
+.nr-record .nv-state h2 { font-size:14px; }
+.nr-intake { padding:18px; border-radius:12px; background:var(--nv-card); }
 .nr-intake>header { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:14px; }
-.nr-intake h3 { margin:2px 0 0; font-size:16px; }
+.nr-intake h3 { margin:2px 0 0; font-size:14px; font-weight:600; }
 .nr-intake h4 { margin:16px 0 8px; font-size:13px; }
 .nr-intake dl { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:0; }
 .nr-intake dl>div { min-width:0; padding:12px; border-radius:9px; background:var(--nv-bg); }
@@ -58,22 +67,34 @@
 .nr-intake textarea { width:100%; min-height:88px; margin-top:8px; padding:10px 12px; border:1px solid var(--nv-border); border-radius:12px; background:var(--nv-bg); color:var(--nv-ink); font:inherit; font-size:16px; }
 .nr-intake-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
 .nr-intake-error { margin:0 0 12px; color:#8a1f1f; }
+.nr-record .care-panel { margin:0; padding:18px; border:0; border-radius:12px; }
+.nr-record .care-heading h2 { font-size:14px; letter-spacing:0; }
+.nr-record .care-eyebrow { font-size:12px; font-weight:600; letter-spacing:0; text-transform:none; }
+.nr-record .care-summary article { border-radius:12px; padding:14px; }
+.nr-record .care-recipes>article { border-radius:12px; }
 .nv-app.nv-pro.nv-record .nv-content-layout { grid-template-columns:minmax(0,1fr); }
-.nv-pro.nv-record .nv-main { max-width:1120px; width:100%; }
+.nv-pro.nv-record .nv-main { max-width:none; width:100%; }
+@media(max-width:1250px) {
+  .nr-layout { grid-template-columns:minmax(0,1fr) 270px; }
+}
+@media(max-width:1050px) {
+  .nr-layout { grid-template-columns:1fr; }
+  .nr-rail { display:grid; grid-template-columns:1fr 1fr; gap:20px; padding:0; }
+  .nr-person,.nr-visit { grid-column:1/-1; }
+}
 @media(max-width:900px) {
-  .nr-summary-grid { grid-template-columns:1fr 1fr; }
-  .nr-goal { grid-column:1/-1; }
-  .nr-private dl { grid-template-columns:1fr 1fr; }
+  .nr-metrics { grid-template-columns:1fr 1fr; gap:16px; }
+  .nr-record .nr-metrics .nv-metric { border-left:0; padding:0; }
+  .nr-notes-grid { grid-template-columns:1fr; }
   .nr-intake dl { grid-template-columns:1fr 1fr; }
-  .nr-history-grid { grid-template-columns:1fr; }
-  .nr-timeline { grid-row:auto; }
 }
 @media(max-width:600px) {
-  .nr-hero { align-items:flex-start; flex-wrap:wrap; }
-  .nr-hero>.nv-button { width:100%; min-height:44px; }
-  .nr-patient-select { width:100%; }.nr-patient-select select { min-height:44px; width:100%; }
-  .nr-summary-grid,.nr-private dl,.nr-intake dl { grid-template-columns:1fr; }
-  .nr-goal { grid-column:auto; }
+  .nr-page-head { align-items:flex-start; flex-direction:column; }
+  .nr-page-tools,.nr-patient-select,.nr-patient-select select { width:100%; }
+  .nr-patient-select select { min-height:44px; }
+  .nr-page-tools .nv-button { width:100%; min-height:44px; }
+  .nr-metrics,.nr-intake dl { grid-template-columns:1fr; }
+  .nr-rail { grid-template-columns:1fr; }
   .nr-actions { display:grid; grid-template-columns:1fr; }
-  .nr-actions .nv-button { min-height:44px; }
+  .nr-actions .nv-button { min-height:44px; justify-content:flex-start; }
 }
