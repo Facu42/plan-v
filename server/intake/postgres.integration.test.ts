@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
-import { readFile, mkdtemp, rm } from 'node:fs/promises';
+import { readFile, readdir, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { CONSENT_CATALOG } from './consent.js';
@@ -42,8 +42,9 @@ beforeAll(async () => {
     alter table storage.objects enable row level security;
     create function storage.foldername(text) returns text[] language sql immutable as $$ select string_to_array($1,'/') $$;
   `);
-  for (const file of ['20260917190000_core.sql', '20260917190100_intake.sql', '20260918010000_care.sql']) {
-    try { await db.exec(await readFile(new URL(`../../supabase/migrations/${file}`, import.meta.url), 'utf8')); }
+  const migrations = new URL('../../supabase/migrations/', import.meta.url);
+  for (const file of (await readdir(migrations)).filter((name) => name.endsWith('.sql')).sort()) {
+    try { await db.exec(await readFile(new URL(file, migrations), 'utf8')); }
     catch (error) { console.error(file, JSON.stringify(error)); throw error; }
   }
   for (const id of [a,b,pro,other]) await db.query('insert into auth.users(id,email,email_confirmed_at) values($1,$2,now())', [id, `${id}@example.test`]);
@@ -172,5 +173,25 @@ describe('migraciones de ingreso en PostgreSQL', () => {
     await rpc(a,'delete_care_photo',[patient,id]);
     expect((await db.query('select * from public.care_records where id=$1',[id])).rows).toEqual([]);
     expect((await db.query('select * from storage.objects where name=$1',[path])).rows).toEqual([]);
+  });
+  it('estudios: consentimiento, aislamiento A/B y retiro del blob',async()=>{
+    await db.exec('grant select,insert,delete on storage.objects to authenticated');
+    const id='20000000-0000-4000-a000-000000000007';const path=`${patient}/${id}`;
+    const c=CONSENT_CATALOG.find(c=>c.purpose==='clinical_document')!;
+    const data={kind:'clinical_document',path,mime:'application/pdf',filename:'laboratorio.pdf',document_kind:'laboratorio',note:''};
+    await expect(asUser(a,"insert into storage.objects(bucket_id,name) values('care-documents',$1)",[path])).rejects.toMatchObject({code:'42501'});
+    await rpc(a,'record_patient_consent',[patient,c.purpose,c.text_version,c.text_hash,'granted']);
+    await asUser(a,"insert into storage.objects(bucket_id,name) values('care-documents',$1)",[path]);
+    await rpc(a,'save_care_record',[patient,id,'2026-09-10',data]);
+    expect(await asUser(pro,'select name from storage.objects where bucket_id=$1 and name=$2',['care-documents',path])).toEqual([{name:path}]);
+    expect(await asUser(b,'select name from storage.objects where bucket_id=$1 and name=$2',['care-documents',path])).toEqual([]);
+    await expect(rpc(b,'save_care_record',[patient,id,'2026-09-10',data])).rejects.toMatchObject({code:'42501'});
+    await rpc(a,'record_patient_consent',[patient,c.purpose,c.text_version,c.text_hash,'withdrawn']);
+    expect(await asUser(pro,'select name from storage.objects where bucket_id=$1 and name=$2',['care-documents',path])).toEqual([]);
+    await asUser(a,'delete from storage.objects where name=$1',[path]);
+    await expect(rpc(a,'delete_care_document',[patient,id])).rejects.toMatchObject({code:'PT409'});
+    await db.query('delete from storage.objects where name=$1',[path]);
+    await rpc(a,'delete_care_document',[patient,id]);
+    expect((await db.query('select * from public.care_records where id=$1',[id])).rows).toEqual([]);
   });
 });

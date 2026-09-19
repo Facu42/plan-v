@@ -46,6 +46,7 @@ describe('Progreso paciente dentro de Nutrigo', () => {
     const html = renderToStaticMarkup(<ShowroomProgress patient={patient} />);
     expect(html).not.toContain('IMC');
     expect(html).toContain('Peso semanal');
+    expect(html).toContain('estudios opcionales');
     expect(html).toContain('Cargando registros');
     expect(html).not.toContain('adherence_why');
     expect(html).not.toContain('goal_history');

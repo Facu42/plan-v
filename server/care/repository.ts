@@ -8,7 +8,8 @@ const records = new Map<string, CareRecord>();
 const preferences = new Map<string, CarePreferences>();
 const replacements = new Map<string, CareReplacement>();
 const photos = new Map<string, string>();
-export function resetCareMemory() { records.clear(); preferences.clear(); replacements.clear(); photos.clear(); }
+const documents = new Map<string, string>();
+export function resetCareMemory() { records.clear(); preferences.clear(); replacements.clear(); photos.clear(); documents.clear(); }
 export function careDbError(error: { code?: string } | null) {
   if (!error) return;
   if (['42P01','42883','PGRST202','PGRST205'].includes(error.code ?? '')) throw new CareError(501, 'El seguimiento requiere instalar la migración de este módulo.');
@@ -106,4 +107,59 @@ export async function carePhotoUrl(path: string, persistent: boolean) {
   if (!persistent) { const url = photos.get(path); if (!url) throw new CareError(404, 'La foto demo ya no está disponible.'); return url; }
   const { data, error } = await getRequestDb().storage.from('care-photos').createSignedUrl(path, 60);
   if (error || !data) throw new CareError(503, 'No se pudo abrir la foto.'); return data.signedUrl;
+}
+export function sanitizeDocumentFilename(name: string) {
+  const filename = name.replace(/[/\\]/g, '').trim().slice(0, 120);
+  if (!filename) throw new CareError(400, 'El archivo necesita un nombre.');
+  return filename;
+}
+export function validateDocument(dataUrl: string) {
+  const match = /^data:(application\/pdf|image\/jpeg|image\/png);base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl);
+  if (!match) throw new CareError(400, 'Usá un PDF, JPG o PNG.');
+  const bytes = Buffer.from(match[2], 'base64');
+  if (bytes.length > 20 * 1024 * 1024) throw new CareError(413, 'El estudio debe pesar menos de 20 MB.');
+  const mime = match[1] as 'application/pdf' | 'image/jpeg' | 'image/png';
+  const valid = mime === 'application/pdf'
+    ? bytes.subarray(0, 4).toString() === '%PDF'
+    : mime === 'image/jpeg'
+      ? bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff
+      : bytes.subarray(0, 8).toString('hex') === '89504e470d0a1a0a';
+  if (!valid) throw new CareError(400, 'El contenido no corresponde al tipo de archivo indicado.');
+  return { bytes, mime };
+}
+async function putPrivateBlob(bucket: 'care-photos' | 'care-documents', path: string, bytes: Buffer, mime: string, previous: string | undefined, persistent: boolean) {
+  if (!persistent) {
+    if (previous) {
+      const old = bucket === 'care-photos' ? validatePhoto(previous).bytes : validateDocument(previous).bytes;
+      if (!old.equals(bytes)) throw new CareError(409, bucket === 'care-photos' ? 'Ese registro ya tiene otra foto.' : 'Ese registro ya tiene otro estudio.');
+    }
+    return;
+  }
+  const { error } = await getRequestDb().storage.from(bucket).upload(path, bytes, { contentType: mime, upsert: false });
+  if (!error) return;
+  if (String(error.statusCode) === '409' || error.message.toLowerCase().includes('already exists')) {
+    const old = await getRequestDb().storage.from(bucket).download(path);
+    if (!old.error && old.data && Buffer.from(await old.data.arrayBuffer()).equals(bytes)) return;
+    throw new CareError(409, bucket === 'care-photos' ? 'Ese registro ya tiene otra foto.' : 'Ese registro ya tiene otro estudio.');
+  }
+  throw new CareError(503, bucket === 'care-photos' ? 'No se pudo guardar la foto privada.' : 'No se pudo guardar el estudio.');
+}
+export async function storeCareDocument(path: string, dataUrl: string, persistent: boolean) {
+  const { bytes, mime } = validateDocument(dataUrl);
+  await putPrivateBlob('care-documents', path, bytes, mime, documents.get(path), persistent);
+  if (!persistent) documents.set(path, dataUrl);
+}
+export async function deleteCareDocument(patientId: string, id: string, persistent: boolean) {
+  const record = (await listCareRecords(patientId, persistent)).find(r => r.id === id);
+  if (!record || record.data.kind !== 'clinical_document') throw new CareError(404, 'Estudio no encontrado.');
+  if (!persistent) { documents.delete(record.data.path); records.delete(id); return; }
+  if (record.data.path !== `${patientId}/${id}`) throw new CareError(403, 'Ruta de estudio inválida.');
+  const { error } = await privilegedDb().storage.from('care-documents').remove([record.data.path]);
+  if (error) throw new CareError(503, 'No se pudo eliminar el estudio. Reintentá.');
+  const result = await getRequestDb().rpc('delete_care_document', { target: patientId, record_id: id }); careDbError(result.error);
+}
+export async function careDocumentUrl(path: string, persistent: boolean) {
+  if (!persistent) { const url = documents.get(path); if (!url) throw new CareError(404, 'El estudio demo ya no está disponible.'); return url; }
+  const { data, error } = await getRequestDb().storage.from('care-documents').createSignedUrl(path, 60);
+  if (error || !data) throw new CareError(503, 'No se pudo abrir el estudio.'); return data.signedUrl;
 }

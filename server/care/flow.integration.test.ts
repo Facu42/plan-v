@@ -54,6 +54,27 @@ describe('seguimiento conectado',()=>{
     expect((await app.request(`${base}/photos/${id}`,{method:'DELETE'})).status).toBe(200);
     expect((await(await app.request(base)).json()).records).toEqual([]);
   });
+  it('estudios: permiso, visor, aislamiento y retiro',async()=>{
+    const id=randomUUID();
+    const file='data:application/pdf;base64,'+Buffer.from('%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF').toString('base64');
+    const input={id,recorded_on:'2026-09-10',file,note:'',filename:'laboratorio.pdf',document_kind:'laboratorio'};
+    expect((await post(`${base}/documents`,input)).status).toBe(403);
+    await consent('clinical_document');
+    expect((await post(`${base}/documents`,{...input,file:'data:application/pdf;base64,AAAA'})).status).toBe(400);
+    expect((await post(`${base}/documents`,input)).status).toBe(200);
+    expect((await post(`${base}/documents`,input)).status).toBe(200);
+    const alerts=await(await app.request('/api/care/alerts')).json();
+    expect(alerts.alerts.find((a:any)=>a.id===id).title).toBe('Nuevo estudio');
+    expect(JSON.stringify(alerts)).not.toContain(file);
+    const opened=await(await app.request(`${base}/documents/${id}`)).json();
+    expect(opened.mime).toBe('application/pdf');
+    expect(opened.filename).toBe('laboratorio.pdf');
+    expect((await app.request(`/api/patients/pat-marina/care/documents/${id}`)).status).toBe(403);
+    await consent('clinical_document','withdrawn');
+    expect((await app.request(`${base}/documents/${id}`)).status).toBe(403);
+    expect((await app.request(`${base}/documents/${id}`,{method:'DELETE'})).status).toBe(200);
+    expect((await(await app.request(base)).json()).records).toEqual([]);
+  });
   it('rechaza futuras fechas, datos ajenos, calorías negativas y preferencias inválidas',async()=>{
     for(const data of [{kind:'activity',activity:'Caminar',minutes:30,intensity:'suave',kcal:-2,note:''},{kind:'payment',amount:0,currency:'ARS',method:'otro',reference:'',note:''}])expect((await post(`${base}/records`,{id:randomUUID(),recorded_on:'2026-09-10',data})).status).toBe(400);
     expect((await post(`${base}/records`,{id:randomUUID(),recorded_on:'2999-01-01',data:{kind:'activity',activity:'Caminar',minutes:30,intensity:'suave',kcal:null,note:''}})).status).toBe(400);

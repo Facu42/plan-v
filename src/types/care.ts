@@ -12,6 +12,14 @@ export const careDataSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('waist'), value: z.number().min(10).max(300), note }).strict(),
   z.object({ kind: z.literal('activity'), activity: z.string().trim().min(2).max(80), minutes: z.number().int().min(1).max(600), intensity: z.enum(['suave','moderada','intensa']), kcal: z.number().int().min(0).max(10000).nullable(), note }).strict(),
   z.object({ kind: z.literal('body_photo'), path: z.string().min(1).max(250), note }).strict(),
+  z.object({
+    kind: z.literal('clinical_document'),
+    path: z.string().min(1).max(250),
+    mime: z.enum(['application/pdf','image/jpeg','image/png']),
+    filename: z.string().trim().min(1).max(120).refine((value) => !/[\\/]/.test(value), 'Nombre de archivo inválido.'),
+    document_kind: z.string().trim().max(80).default(''),
+    note,
+  }).strict(),
   z.object({ kind: z.literal('payment'), amount: z.number().positive().max(100000000), currency: z.enum(['ARS','USD']), method: z.enum(['transferencia','efectivo','tarjeta','otro']), reference: z.string().trim().max(120), note }).strict(),
   z.object({ kind: z.literal('menu_request'), target: z.string().trim().min(2).max(200), reason: z.string().trim().min(2).max(500), replacement: z.enum(['recipe','ingredient']) }).strict(),
 ]);
@@ -39,7 +47,15 @@ export type CareReplacement = { id: string; patient_id: string; request_id: stri
 export type CareSnapshot = { records: CareRecord[]; preferences: CarePreferences; replacements: CareReplacement[]; consented: string[]; source: 'memory' | 'supabase' };
 export type CareAlert = { id: string; patient_id: string; patient_name: string; title: string; detail: string; target: 'ficha' | 'diario'; created_at: string };
 
-export const CARE_LABELS: Record<CareData['kind'], string> = { weight: 'Peso semanal', waist: 'Cintura mensual', activity: 'Actividad física', body_photo: 'Archivo privado', payment: 'Pago registrado', menu_request: 'Revisar menú' };
+export const CARE_DOCUMENT_KINDS = ['laboratorio', 'imagen', 'informe', 'otro'] as const;
+export type CareDocumentKind = (typeof CARE_DOCUMENT_KINDS)[number];
+export const CARE_DOCUMENT_KIND_LABELS: Record<CareDocumentKind, string> = {
+  laboratorio: 'Laboratorio',
+  imagen: 'Imagen',
+  informe: 'Informe',
+  otro: 'Otro',
+};
+export const CARE_LABELS: Record<CareData['kind'], string> = { weight: 'Peso semanal', waist: 'Cintura mensual', activity: 'Actividad física', body_photo: 'Archivo privado', clinical_document: 'Estudio clínico', payment: 'Pago registrado', menu_request: 'Revisar menú' };
 export function describeCareRecord(record: CareRecord): string {
   const data = record.data;
   switch (data.kind) {
@@ -47,6 +63,12 @@ export function describeCareRecord(record: CareRecord): string {
     case 'waist': return `${data.value} cm`;
     case 'activity': return `${data.activity} · ${data.minutes} min${data.kcal === null ? '' : ` · ${data.kcal} kcal declaradas`}`;
     case 'body_photo': return 'Foto corporal privada';
+    case 'clinical_document': {
+      const kind = CARE_DOCUMENT_KINDS.includes(data.document_kind as CareDocumentKind)
+        ? CARE_DOCUMENT_KIND_LABELS[data.document_kind as CareDocumentKind]
+        : data.document_kind;
+      return kind ? `${data.filename} · ${kind}` : data.filename;
+    }
     case 'payment': return `${data.amount.toLocaleString('es-AR')} ${data.currency} · ${data.method}`;
     case 'menu_request': return `${data.target} · ${data.reason}`;
   }

@@ -1,5 +1,5 @@
 import { describe,expect,it } from 'vitest';
-import { DEFAULT_CARE_PREFERENCES, careDateConstraintMessage, dueCareReminders, type CareSnapshot, type CareRecord } from '../../types/care';
+import { DEFAULT_CARE_PREFERENCES, careDateConstraintMessage, describeCareRecord, dueCareReminders, type CareSnapshot, type CareRecord } from '../../types/care';
 import { patientCareNotices } from './useCareNotices';
 const prefs={...DEFAULT_CARE_PREFERENCES,weight:true,waist:true,activity:true};
 const record=(kind:'weight'|'waist',date:string)=>({id:kind,patient_id:'p',created_at:date,recorded_on:date,reviewed_at:null,data:{kind,value:60,note:''}} as CareRecord);
@@ -10,6 +10,9 @@ describe('frecuencia de registros y recordatorios',()=>{
     expect(dueCareReminders(records,prefs,'2026-09-18').map(r=>r.id)).toContain('weight:2026-09-18');
     expect(dueCareReminders(records,prefs,'2026-10-01').map(r=>r.id)).toContain('waist:2026-10');
     expect(dueCareReminders([],DEFAULT_CARE_PREFERENCES,'2026-09-18')).toEqual([]);
+  });
+  it('describe estudios por archivo y tipo, sin inventar un análisis',()=>{
+    expect(describeCareRecord({id:'d',patient_id:'p',created_at:'2026-09-19',recorded_on:'2026-09-19',reviewed_at:null,data:{kind:'clinical_document',path:'p/d',mime:'application/pdf',filename:'laboratorio.pdf',document_kind:'laboratorio',note:''}})).toBe('laboratorio.pdf · Laboratorio');
   });
   it('explica en español el tope de fecha del formulario, no con el mensaje nativo en inglés',()=>{
     expect(careDateConstraintMessage({rangeOverflow:true,valueMissing:false})).toBe('La fecha no puede ser futura.');

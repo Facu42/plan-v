@@ -109,9 +109,9 @@
     "PV-16": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Fotos corporales opcionales con permiso propio, visor temporal y retiro. Estudios PDF todavía no.",
-      "evidence": "CarePanel modo progreso, RPC delete_care_photo, tests de retiro de consentimiento. Suite local 2026-09-18.",
-      "updatedAt": "2026-09-18T14:10:00.000Z"
+      "notes": "Estudios PDF/JPG/PNG con consentimiento, visor de 60 s y retiro por el paciente en demo y PGlite. Falta Auth/Storage live en instancia descartable. Sin interpretación automática.",
+      "evidence": "docs/revision-avance-2026-09-19.md; server/care/flow.integration.test.ts; server/intake/postgres.integration.test.ts; supabase/migrations/20260919190000_clinical_documents.sql. No aplicar SQL a proyectos con pacientes.",
+      "updatedAt": "2026-09-19T17:30:00.000Z"
     },
     "PV-17": {
       "status": "in_progress",
@@ -143,6 +143,14 @@
     }
   },
   "history": [
+    {
+      "id": "c19a16e0-9f12-4a3b-8c01-estudios0001",
+      "taskId": "PV-16",
+      "at": "2026-09-19T17:30:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
     {
       "id": "c18a15e0-9f12-4a3b-8c01-seguimiento0001",
       "taskId": "PV-15",
