@@ -30,7 +30,7 @@ Probar que paciente A no accede a B, paciente no crea pagos ni revisa registros,
 
 
 - La migración `20260918010000_care.sql` es para esquema vacío/descartable. No aplicarla a un proyecto con pacientes.
-- Fotos de comida y corporales: Storage privado + URL firmada de 60 s. Falta el circuito completo de reserva/cuarentena/EXIF (PV-15) y estudios PDF (PV-16).
+- Fotos de comida y corporales: Storage privado + URL firmada de 60 s. Falta el circuito completo de reserva/cuarentena/EXIF (PV-15). Estudios PDF/JPG/PNG: consentimiento, subida, visor de 60 s y retiro en demo/PGlite (PV-16); Auth/Storage live pendiente.
 - Compras: títulos del plan + ingredientes de alternativas ya publicadas. Sin cantidades, unidades ni checklist sincronizado entre dispositivos (PV-21).
 - Avisos de agua/descanso/peso: campana mientras la app está abierta. No hay push ni email real (PV-26).
 - Alternativas de menú: borrador demo/IA con revisión profesional. No hay catálogo de recetas ni plan versionado (PV-18/19/27).

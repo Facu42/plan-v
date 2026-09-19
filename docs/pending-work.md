@@ -1,5 +1,15 @@
 # Pendientes de Plan V
 
+## Revisión vigente de avance — 2026-09-19
+
+Secuencia acordada en [informe del 19/09](revision-avance-2026-09-19.md):
+
+1. Cerrar **invitación → ingreso → revisión → plan publicado** en staging descartable, con dos profesionales, dos pacientes ficticios, matriz RLS, persistencia tras reinicio/cambio de sesión, y **subida/retiro de un estudio**.
+2. Validar acompañamiento e IA: diario, mensajes entre sesiones, agenda y propuesta → revisión de Verónica → publicación.
+3. Completar el piloto: PWA instalable, procesamiento durable, respaldos/restauración y recorrido final en móvil.
+
+En este árbol: Ver seguimiento y fecha futura ya corregidos; circuito de estudios PDF/JPG/PNG en demo y PGlite. **No hay `DISPOSABLE_DATABASE_URL`**: no se aplicó SQL remoto ni se acreditó Auth/Storage live. No aplicar migraciones a un proyecto con pacientes.
+
 ## Revisión vigente de avance — 2026-09-18
 
 Continuación sobre el árbol sin consolidar del 17/09: módulo de seguimiento conectado (peso, cintura, actividad, fotos corporales, pagos manuales, reemplazos de menú con revisión profesional), navegación lateral en escritorio para ambos roles, lista de compras derivada del plan y de alternativas publicadas. **Pruebas locales: 509 aprobadas, 2 omitidas; TypeScript, build y guarda SQL aprobados.** `npm run apply:disposable` aplica `core`/`intake`/`care` a un Postgres vacío y aborta si ya hay pacientes; no hay `.env` local con `DISPOSABLE_DATABASE_URL`, así que no se tocó ningún proyecto remoto. Falta Auth/RLS live, estudios PDF y el circuito completo de Storage (PV-15).
