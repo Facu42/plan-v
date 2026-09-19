@@ -8,7 +8,7 @@ Secuencia acordada en [informe del 19/09](revision-avance-2026-09-19.md):
 2. Validar acompañamiento e IA: diario, mensajes entre sesiones, agenda y propuesta → revisión de Verónica → publicación.
 3. Completar el piloto: PWA instalable, procesamiento durable, respaldos/restauración y recorrido final en móvil.
 
-En este árbol: Ver seguimiento y fecha futura ya corregidos; circuito de estudios PDF/JPG/PNG en demo y PGlite. **No hay `DISPOSABLE_DATABASE_URL`**: no se aplicó SQL remoto ni se acreditó Auth/Storage live. No aplicar migraciones a un proyecto con pacientes.
+En este árbol: Ver seguimiento y fecha futura ya corregidos; circuito de estudios PDF/JPG/PNG en demo y PGlite; matriz RLS-01…23 en PGlite (`server/rls-matrix.postgres.test.ts`). **No hay `DISPOSABLE_DATABASE_URL`**: no se aplicó SQL remoto ni se acreditó Auth/Storage live. No aplicar migraciones a un proyecto con pacientes.
 
 ## Revisión vigente de avance — 2026-09-18
 

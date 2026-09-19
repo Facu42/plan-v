@@ -17,7 +17,7 @@ Resultado utilizable: dos profesionales y dos pacientes ficticios recorren el ci
 | Ver seguimiento abre el centro, no Inicio | Navegador, Pacientes → Ver seguimiento | **Hecho** (`7b6d3c1`) |
 | Fecha futura en español | Formulario de peso/cintura / estudio | **Hecho** (`7b6d3c1`) |
 | Dos profesionales y dos pacientes sintéticos | Nutri A/B, Paciente A/B; nunca datos reales | Bloqueado: falta `DISPOSABLE_DATABASE_URL` |
-| Matriz de permisos RLS-01…23 | JWT de cada actor, no `service_role` | PGlite cubre aislamiento de ingreso/seguimiento; live omitido |
+| Matriz de permisos RLS-01…23 | JWT de cada actor, no `service_role` | **PGlite RLS-01…23 + reopen PASS** (`server/rls-matrix.postgres.test.ts`). Live JWT omitido |
 | Persistencia tras reinicio y cambio de sesión | Reabrir API/base y otra sesión | PGlite reabre el directorio; Auth real pendiente |
 | Subida y retiro de un estudio PDF/JPG/PNG | Consentimiento, visor temporal, retiro, aislamiento A/B, sin IA | **Circuito demo + PGlite en este corte**; Storage live pendiente |
 | Invitación de un uso → ingreso → revisión profesional → plan publicado | Recorrido de dos roles en staging | Pendiente de instancia descartable. En demo: ingreso, revisión y menú publicado ya existen |
@@ -54,5 +54,6 @@ PWA instalable, procesamiento durable, respaldos con restauración conjunta DB+S
 - Secuencia de tres cortes y criterios de salida, alineados al pedido del 19/09.
 - Circuito de estudios opcionales: consentimiento `clinical_document`, PDF/JPG/PNG, visor de un minuto, retiro por el paciente, aislamiento y exclusión de IA.
 - Correcciones de seguimiento del 18/09 ya en la rama.
+- Matriz RLS-01…23 ejecutable en PGlite (JWT shim, no Auth/PostgREST live) con Nutri A/B y Paciente A/B sintéticos.
 
-Próximo movimiento del corte 1: conectar la instancia descartable, correr la matriz RLS y repetir el recorrido con dos profesionales y dos pacientes ficticios, incluyendo subida y retiro de un estudio.
+Próximo movimiento del corte 1: conectar la instancia descartable, repetir la matriz con JWT reales y el recorrido con dos profesionales y dos pacientes ficticios, incluyendo subida y retiro de un estudio.

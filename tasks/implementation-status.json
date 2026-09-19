@@ -53,9 +53,9 @@
     "PV-08": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Migraciones ejecutables de núcleo e ingreso para esquema vacío, con pruebas PGlite de aislamiento. Falta instancia descartable real y matriz RLS live. No aplicar a proyectos con pacientes.",
-      "evidence": "supabase/migrations/20260917190000_core.sql y 20260917190100_intake.sql. server/intake/postgres.integration.test.ts en la suite 2026-09-17. server/rls-ab.test.ts sigue omitiendo 2 casos live.",
-      "updatedAt": "2026-09-17T19:50:00.000Z"
+      "notes": "Migraciones ejecutables de núcleo e ingreso para esquema vacío. Matriz RLS-01…23 cubiertas en PGlite con shims JWT (Nutri A/B, Paciente A/B). Falta instancia descartable real y JWT live. No aplicar a proyectos con pacientes.",
+      "evidence": "supabase/migrations/20260917190000_core.sql, 20260917190100_intake.sql, 20260918010000_care.sql, 20260919190000_clinical_documents.sql. server/rls-matrix.postgres.test.ts (24 casos). server/intake/postgres.integration.test.ts. server/rls-ab.test.ts sigue omitiendo 2 casos live.",
+      "updatedAt": "2026-09-19T18:16:00.000Z"
     },
     "PV-09": {
       "status": "review",
