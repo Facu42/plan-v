@@ -37,11 +37,11 @@ Criterio de salida: IA no publica ni envía mensajes sola; alergias declaradas s
 
 | Criterio de salida | Cómo se comprueba | Estado al 19/09 |
 | --- | --- | --- |
-| Diario foto/texto persistente y revisión profesional | Navegador demo + `server/acompanamiento.integration.test.ts` | **Demo API PASS**; navegador pendiente de este commit |
-| Fallo de IA no pierde el registro ni sustituye mocks | `AI_MODE=disabled` / proveedor caído → 200 `pending_review` vacío | **Hecho en demo y mock Supabase** (`meal-flow`, `meal-ai-unavailable`) |
-| Mensajes entre lecturas; IA no envía sola | Paciente no marca `suggested_by_ai`; profesional sí | **Demo API PASS** |
-| Agenda: confirmar y reprogramar | Confirmación en dispositivo; reprogramación persistida | **API reprograma**; confirmación es local al navegador |
-| Borrador de receta oculto hasta publicar | Paciente GET `replacements=[]` hasta `publish` | **Demo API PASS**; receta demo sin Maní |
+| Diario foto/texto persistente y revisión profesional | Navegador demo + `server/acompanamiento.integration.test.ts` | **Demo PASS** (tortilla → confirmada; nota IA solo CRM) |
+| Fallo de IA no pierde el registro ni sustituye mocks | `AI_MODE=disabled` / proveedor caído → 200 `pending_review` vacío | **Hecho en API demo y mock Supabase** |
+| Mensajes entre lecturas; IA no envía sola | Paciente no marca `suggested_by_ai`; profesional sí | **Demo PASS** (hilo Sofía ↔ Verónica) |
+| Agenda: confirmar y reprogramar | Confirmación en dispositivo; reprogramación persistida | **Demo PASS**; `type=time` en Chrome EN puede guardar 23:00 |
+| Borrador de receta oculto hasta publicar | Paciente GET `replacements=[]` hasta `publish` | **Demo PASS**; «Ensalada de lentejas revisada»; Marina aislada |
 | Staging live con las mismas cuentas | JWT/Auth reales | Bloqueado: falta `DISPOSABLE_DATABASE_URL` |
 
 ### 3. Completar el piloto operable (H5)
@@ -65,6 +65,6 @@ PWA instalable, procesamiento durable, respaldos con restauración conjunta DB+S
 - Correcciones de seguimiento del 18/09 ya en la rama.
 - Matriz RLS-01…23 ejecutable en PGlite (JWT shim, no Auth/PostgREST live) con Nutri A/B y Paciente A/B sintéticos.
 - Circuito invitación → ingreso → revisión → plan publicado en PGlite, API demo y navegador (Sofía declara, nota privada, bowl publicado, Ana Corte invitada, Marina aislada).
-- Corte 2 en demo: diario que conserva el registro si la IA falla, mensajes, reprogramación de agenda y reemplazo oculto hasta publicación. Navegador y staging live pendientes.
+- Corte 2 en demo: diario (revisión HITL), persistencia si falla la IA (API), mensajes, agenda y reemplazo oculto hasta publicación. Navegador verificado. Staging live pendiente.
 
-Próximo movimiento: verificar el corte 2 en el navegador demo; el corte 1 live sigue bloqueado sin instancia descartable.
+Próximo movimiento: corte 3 del piloto (PWA, jobs durables, respaldos) o instancia descartable para repetir cortes 1–2 con JWT reales.
