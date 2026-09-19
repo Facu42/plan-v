@@ -114,6 +114,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
   }
 
   if (step === 'review' && result) {
+    const estimationUnavailable = result.foods.length === 0 && !result.macros;
     return (
       <div className="modal-backdrop" role="dialog" aria-modal="true">
         <div className="photo-modal">
@@ -123,22 +124,28 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
           ) : (
             <div className="modal-camera text-preview"><Icon name="edit" size={28} /><p>{description}</p></div>
           )}
-          <p className="eyebrow">Lectura asistida · {slot}</p>
-          <h2>Esto es lo que vemos</h2>
-          <div className="food-tags">
-            {result.foods.map((f) => (
-              <span key={f.name}>{f.name}{f.portion_est ? ` · ~${f.portion_est}${f.portion_unit}` : ''}</span>
-            ))}
-          </div>
-          {result.macros ? (
-            <>
-              <MacroBar macros={result.macros} />
-              <p className={`confidence-badge ${result.confidence >= 0.75 ? 'high' : result.confidence >= 0.45 ? 'medium' : 'low'}`}>
-                Estimación · confianza {(result.confidence * 100).toFixed(0)}% · pendiente de Verónica
-              </p>
-            </>
+          <p className="eyebrow">{estimationUnavailable ? 'Registro guardado' : 'Lectura asistida'} · {slot}</p>
+          <h2>{estimationUnavailable ? 'Registramos tu comida' : 'Esto es lo que vemos'}</h2>
+          {estimationUnavailable ? (
+            <p className="modal-note">No pudimos estimar alimentos ni macros. Verónica lo revisará. Tu registro no se perdió.</p>
           ) : (
-            <p className="modal-note">No pudimos estimar macros con confianza. Verónica lo revisará.</p>
+            <>
+              <div className="food-tags">
+                {result.foods.map((f) => (
+                  <span key={f.name}>{f.name}{f.portion_est ? ` · ~${f.portion_est}${f.portion_unit}` : ''}</span>
+                ))}
+              </div>
+              {result.macros ? (
+                <>
+                  <MacroBar macros={result.macros} />
+                  <p className={`confidence-badge ${result.confidence >= 0.75 ? 'high' : result.confidence >= 0.45 ? 'medium' : 'low'}`}>
+                    Estimación · confianza {(result.confidence * 100).toFixed(0)}% · pendiente de Verónica
+                  </p>
+                </>
+              ) : (
+                <p className="modal-note">No pudimos estimar macros con confianza. Verónica lo revisará.</p>
+              )}
+            </>
           )}
           <p className="modal-note">No es una medida exacta. Verónica confirma antes de que cuente para tu seguimiento.</p>
           <button className="primary-button wide" onClick={confirm}><Icon name="check" size={17} />Guardar comida</button>

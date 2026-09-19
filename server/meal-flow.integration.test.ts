@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { calculateAdherence } from './adherence.js';
 import { app } from './index.js';
 import { getPatient, resetStore } from './store.js';
@@ -15,6 +15,10 @@ describe('meal review API flow in memory mode', () => {
   beforeEach(() => {
     vi.stubEnv('OPENAI_API_KEY', '');
     resetStore();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it('keeps a new meal pending until the professional adjusts it', async () => {
@@ -54,6 +58,28 @@ describe('meal review API flow in memory mode', () => {
       title: 'Almuerzo · ajustado',
       body: 'pollo al horno · 410 kcal',
     });
+  });
+
+  it('keeps the meal pending without demo foods when AI is unavailable', async () => {
+    vi.stubEnv('AI_MODE', 'disabled');
+    const description = 'Yogur con fruta sin estimación';
+    const response = await app.request(
+      '/api/patients/pat-sofia/meals/analyze',
+      jsonRequest('POST', { slot: 'Merienda', description }),
+    );
+    const body = await response.json();
+    const stored = getPatient('pat-sofia')!.meal_logs.find((log) => log.description === description);
+
+    expect(response.status).toBe(200);
+    expect(body.log).toMatchObject({ slot: 'Merienda', status: 'pending_review', foods: [], macros: null, confidence: 0, description });
+    expect(body.log).not.toHaveProperty('note_for_nutri');
+    expect(body.analysis).toMatchObject({ foods: [], macros: null, confidence: 0 });
+    expect(body.analysis).not.toHaveProperty('note_for_nutri');
+    expect(JSON.stringify({ analysis: body.analysis, log: body.log })).not.toMatch(/pollo a la plancha|proteína principal/);
+    expect(stored).toMatchObject({ status: 'pending_review', foods: [], macros: null, confidence: 0 });
+    expect(stored?.note_for_nutri).toMatch(/no está disponible/i);
+    expect(stored?.note_for_nutri).toMatch(/alimentos de demostración/i);
+    expect(getPatient('pat-sofia')!.timeline[0].body).toContain('estimación no disponible');
   });
 
   it('never accepts pending_review as a professional review result', async () => {

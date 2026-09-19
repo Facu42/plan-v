@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
 import type { ZodType } from 'zod';
-import { analyzeMeal } from './ai/meal-analyzer.js';
+import { analysisOrUnavailable, analyzeMeal } from './ai/meal-analyzer.js';
 import { generateCopilotBrief } from './ai/copilot.js';
 import { AIUnavailableError } from './ai/errors.js';
 import { readRuntimeConfig } from './config/runtime.js';
@@ -117,6 +117,14 @@ function authorizePatient(userId: string, patientId: string, action: PatientActi
 
 function queryAudience(role: 'nutri' | 'paciente') {
   return role === 'paciente' ? 'patient' as const : 'professional' as const;
+}
+
+function mealLoggedTimelineBody(confidence: number, foodCount: number, macros: { kcal: number } | null) {
+  const time = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  if (foodCount === 0 && confidence === 0 && macros == null) {
+    return `${time} · estimación no disponible. Pendiente de Vero.`;
+  }
+  return `${time} · estimación (${confidence.toFixed(2)}). Pendiente de Vero.`;
 }
 
 function serializePatient(patient: NonNullable<Awaited<ReturnType<typeof sb.sbGetPatientById>>>, role: 'nutri' | 'paciente') {
@@ -328,49 +336,62 @@ app.post('/api/patients/:id/meals/analyze', async (c) => {
     if(body.photoPreview || body.imageBase64) await requireCareConsent(patientId,true,'meal_photo');
   }
 
+  if ('userId' in auth && isSupabaseEnabled() && (body.photoPreview || body.imageBase64)) {
+    photoPath = await uploadMealPhoto(
+      patientId,
+      body.photoPreview ?? `data:image/${body.imageBase64!.startsWith('/9j/') ? 'jpeg' : body.imageBase64!.startsWith('UklGR') ? 'webp' : 'png'};base64,${body.imageBase64}`,
+    );
+  }
+
   const scheduled = patient.todayPlan.find((m) => m.slot === body.slot);
-  const analysis = await analyzeMeal({
-    description: body.description,
-    imageBase64: body.imageBase64,
+  let analysis;
+  try {
+    analysis = await analyzeMeal({
+      description: body.description,
+      imageBase64: body.imageBase64,
+      slot: body.slot,
+      scheduledTitle: scheduled?.title,
+    });
+  } catch (error) {
+    analysis = analysisOrUnavailable(error);
+  }
+
+  const logInput = {
     slot: body.slot,
-    scheduledTitle: scheduled?.title,
-  });
+    photo_url: photoPath,
+    description: body.description ?? null,
+    foods: analysis.foods,
+    macros: analysis.macros,
+    confidence: analysis.confidence,
+    note_for_nutri: analysis.note_for_nutri,
+  };
 
   if ('userId' in auth && isSupabaseEnabled()) {
-    if(body.photoPreview || body.imageBase64) photoPath=await uploadMealPhoto(patientId,body.photoPreview ?? `data:image/${body.imageBase64!.startsWith('/9j/')?'jpeg':body.imageBase64!.startsWith('UklGR')?'webp':'png'};base64,${body.imageBase64}`);
-    const log = await sb.sbAddMealLog(patient.id, {
-      slot: body.slot,
-      photo_url: photoPath,
-      description: body.description ?? null,
-      foods: analysis.foods,
-      macros: analysis.macros,
-      confidence: analysis.confidence,
-      note_for_nutri: analysis.note_for_nutri,
-    });
+    const log = await sb.sbAddMealLog(patient.id, logInput);
     await sb.sbAddTimelineEvent(patient.id, {
       kind: 'meal_logged',
       title: `${body.slot} · foto en revisión`,
-      body: `${new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} · estimación (${analysis.confidence.toFixed(2)}). Pendiente de Vero.`,
+      body: mealLoggedTimelineBody(analysis.confidence, analysis.foods.length, analysis.macros),
     });
     const updated = await sb.sbGetPatientById(patient.id, 'patient');
     return c.json({
       analysis: toPatientMealAnalysis(analysis),
-      log: toPatientSelfMealLog((await signMealPhotos(patientId,[log]))[0]),
+      log: toPatientSelfMealLog((await signMealPhotos(patientId, [log]))[0]),
       patient: updated ? toPatientSelfView(updated) : null,
       source: 'supabase',
     });
   }
 
   const log = addMealLog(patientId, {
-    slot: body.slot,
+    ...logInput,
     photo_url: body.photoPreview ?? null,
-    description: body.description ?? null,
-    foods: analysis.foods,
-    macros: analysis.macros,
-    confidence: analysis.confidence,
-    note_for_nutri: analysis.note_for_nutri,
   });
-  return c.json({ analysis, log, patient: getPatient(patientId), source: 'memory' });
+  return c.json({
+    analysis: toPatientMealAnalysis(analysis),
+    log: toPatientSelfMealLog(log),
+    patient: getPatient(patientId),
+    source: 'memory',
+  });
 });
 
 app.patch('/api/patients/:id/meals/:mealId', async (c) => {

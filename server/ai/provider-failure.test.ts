@@ -6,7 +6,8 @@ vi.mock('ai', () => ({
 }));
 
 import { generateText } from 'ai';
-import { analyzeMeal } from './meal-analyzer.js';
+import { analysisOrUnavailable, analyzeMeal, UNAVAILABLE_MEAL_ANALYSIS } from './meal-analyzer.js';
+import { AIUnavailableError } from './errors.js';
 import { generateCopilotBrief } from './copilot.js';
 import { getStore, resetStore } from '../store.js';
 
@@ -48,6 +49,16 @@ describe('meal provider failures', () => {
     const analysis = await analyzeMeal({ description: 'pollo con arroz', slot: 'Almuerzo' });
     expect(analysis.foods.length).toBeGreaterThan(0);
     expect(generateText).not.toHaveBeenCalled();
+  });
+});
+
+describe('analysisOrUnavailable', () => {
+  it('keeps an empty pending analysis and does not swallow other errors', () => {
+    expect(analysisOrUnavailable(new AIUnavailableError())).toEqual(UNAVAILABLE_MEAL_ANALYSIS);
+    expect(UNAVAILABLE_MEAL_ANALYSIS.foods).toEqual([]);
+    expect(UNAVAILABLE_MEAL_ANALYSIS.macros).toBeNull();
+    expect(UNAVAILABLE_MEAL_ANALYSIS.confidence).toBe(0);
+    expect(() => analysisOrUnavailable(new Error('db'))).toThrow('db');
   });
 });
 

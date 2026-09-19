@@ -37,6 +37,16 @@ describe('meal review draft', () => {
     });
   });
 
+  it('seeds an editable food when the automatic estimation is empty', () => {
+    const draft = createMealReviewDraft({ ...log, foods: [], macros: null, confidence: 0 });
+    expect(draft.foods).toEqual([{ name: '', portion_est: null, portion_unit: 'g', confidence: 0 }]);
+    expect(draft.macros).toEqual({ kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 });
+    expect(buildAdjustedMealPatch(draft)).toBeNull();
+    draft.foods[0].name = 'yogur';
+    draft.macros = { kcal: 180, protein_g: 10, carbs_g: 20, fat_g: 4 };
+    expect(buildAdjustedMealPatch(draft)?.foods[0].name).toBe('yogur');
+  });
+
   it('rejects blank foods and invalid macro values before the request', () => {
     const blankFood = createMealReviewDraft(log);
     blankFood.foods[0].name = '   ';

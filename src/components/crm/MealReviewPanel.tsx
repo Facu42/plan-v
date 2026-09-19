@@ -33,6 +33,15 @@ export function MealReviewPanel({ patient, log, onClose }: Props) {
     setError(null);
   };
 
+  const addFood = () => {
+    setDraft((current) => (
+      current.foods.length >= 8
+        ? current
+        : { ...current, foods: [...current.foods, { name: '', portion_est: null, portion_unit: 'g', confidence: 0 }] }
+    ));
+    setError(null);
+  };
+
   const updateMacro = (key: keyof Macros, value: number) => {
     setDraft((current) => ({ ...current, macros: { ...current.macros, [key]: value } }));
     setError(null);
@@ -71,6 +80,9 @@ export function MealReviewPanel({ patient, log, onClose }: Props) {
       </div>
       {log.photo_url && <img src={log.photo_url} alt="Comida de la paciente" className="review-photo" />}
       {log.description && !log.photo_url && <p className="review-desc">“{log.description}”</p>}
+      {!log.foods.length && (
+        <p className="review-note">Sin estimación automática. Confirmá el registro o completá los alimentos para ajustarlo.</p>
+      )}
 
       {editing ? (
         <div className="review-editor">
@@ -114,6 +126,9 @@ export function MealReviewPanel({ patient, log, onClose }: Props) {
                 </label>
               </div>
             ))}
+            {draft.foods.length < 8 && (
+              <button type="button" className="soft-button" onClick={addFood}>Agregar alimento</button>
+            )}
           </fieldset>
           <fieldset>
             <legend>Macros estimadas</legend>

@@ -1034,12 +1034,16 @@ export function addMealLog(patientId: string, log: Omit<MealLog, 'id' | 'patient
   const patient = getPatient(patientId);
   if (patient) {
     patient.meal_logs.unshift(entry);
+    const loggedAt = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    const estimationLabel = entry.foods.length === 0 && entry.confidence === 0 && entry.macros == null
+      ? 'estimación no disponible'
+      : `estimación (${entry.confidence.toFixed(2)})`;
     patient.timeline.unshift({
       id: randomUUID(),
       kind: 'meal_logged',
       atLabel: 'HOY',
       title: `${entry.slot} · foto en revisión`,
-      body: `${new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} · estimación (${entry.confidence.toFixed(2)}). Pendiente de Vero.`,
+      body: `${loggedAt} · ${estimationLabel}. Pendiente de Vero.`,
     });
     recalculateAdherence(patientId);
   }

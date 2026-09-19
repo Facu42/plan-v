@@ -14,8 +14,9 @@ export type AdjustedMealPatch = {
 const EMPTY_MACROS: Macros = { kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 };
 
 export function createMealReviewDraft(log: MealLog): MealReviewDraft {
+  const foods = log.foods.map((food) => ({ ...food }));
   return {
-    foods: log.foods.map((food) => ({ ...food })),
+    foods: foods.length > 0 ? foods : [{ name: '', portion_est: null, portion_unit: 'g', confidence: 0 }],
     macros: { ...(log.macros ?? EMPTY_MACROS) },
   };
 }

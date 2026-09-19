@@ -55,6 +55,21 @@ function mockFromImage(slot: string): MealAnalysis {
   };
 }
 
+export const UNAVAILABLE_MEAL_NOTE =
+  'La estimación automática no está disponible. El registro quedó pendiente de revisión profesional. No se usaron alimentos de demostración.';
+
+export const UNAVAILABLE_MEAL_ANALYSIS: MealAnalysis = {
+  foods: [],
+  macros: null,
+  confidence: 0,
+  note_for_nutri: UNAVAILABLE_MEAL_NOTE,
+};
+
+export function analysisOrUnavailable(error: unknown): MealAnalysis {
+  if (error instanceof AIUnavailableError) return UNAVAILABLE_MEAL_ANALYSIS;
+  throw error;
+}
+
 export async function analyzeMeal(input: {
   description?: string;
   imageBase64?: string;
