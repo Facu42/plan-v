@@ -34,6 +34,8 @@ describe('Ficha profesional en el showroom', () => {
     expect(html).toContain('Organizar comidas');
     expect(html).toContain('45%');
     expect(html).toContain('Jueves · 14:30');
+    expect(html).toContain('nr-layout');
+    expect(html).toContain('Contexto de la ficha');
   });
 
   it('rotula y muestra únicamente notas profesionales del paciente seleccionado', () => {
