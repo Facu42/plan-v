@@ -14,6 +14,7 @@ describe('entrada contextual al CRM', () => {
   });
   it('abre los módulos existentes sin heredar una pestaña de ficha', () => {
     expect(resolveCrmEntry(patients, { patientId: 'marina', module: 'agenda', tab: 'plan' })).toEqual({ patientId: 'marina', module: 'agenda', tab: 'resumen' });
+    expect(resolveCrmEntry(patients, { patientId: 'marina', module: 'seguimiento' })).toEqual({ patientId: 'marina', module: 'seguimiento', tab: 'resumen' });
   });
   it('rechaza un paciente eliminado o archivado en vez de abrir otro', () => {
     for (const patientId of ['missing', 'arch']) {

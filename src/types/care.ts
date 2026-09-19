@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
 export const careDate = z.iso.date().refine(value => value <= new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date()), 'La fecha no puede ser futura');
+export function careDateConstraintMessage(validity: { rangeOverflow: boolean; valueMissing: boolean }): string {
+  if (validity.rangeOverflow) return 'La fecha no puede ser futura.';
+  if (validity.valueMissing) return 'Elegí una fecha.';
+  return '';
+}
 const note = z.string().trim().max(500).default('');
 export const careDataSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('weight'), value: z.number().min(1).max(500), note }).strict(),

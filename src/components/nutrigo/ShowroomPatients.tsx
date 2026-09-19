@@ -7,6 +7,10 @@ import { NvBadge, NvButton, NvCard, NvProgress, NvState } from './primitives';
 import './showroom-patients.css';
 
 const STAGE_LABELS: Record<Stage, string> = { ingreso: 'Ingreso', plan: 'Plan', seguimiento: 'Seguimiento', alta: 'Alta' };
+
+export function followFromDirectory(patientId: string) {
+  return { patientId, module: 'seguimiento' as const };
+}
 const FILTERS: Array<{ id: PatientDirectoryFilter; label: string }> = [
   { id: 'active', label: 'Activos' },
   { id: 'attention', label: 'Necesitan atención' },

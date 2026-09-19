@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { Patient } from '../../types';
-import { ShowroomPatientCreate, ShowroomPatientEdit, ShowroomPatients } from './ShowroomPatients';
+import { ShowroomPatientCreate, ShowroomPatientEdit, ShowroomPatients, followFromDirectory } from './ShowroomPatients';
 
 const base: Patient = {
   id: 'sofia', name: 'Sofía', initials: 'S', tone: 'mint', status: 'En ritmo',
@@ -40,6 +40,10 @@ describe('directorio de pacientes del showroom', () => {
     expect(html).toContain('aria-label="Archivar Sofía"');
     expect(html).toContain('Jueves · 14:30');
     expect(html).toContain('Sumar proteína');
+  });
+
+  it('abre el centro de seguimiento del paciente, no el inicio del CRM', () => {
+    expect(followFromDirectory('sofia')).toEqual({ patientId: 'sofia', module: 'seguimiento' });
   });
 
   it('lista archivados con restaurar y sin acciones operativas', () => {
