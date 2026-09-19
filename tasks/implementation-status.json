@@ -127,6 +127,27 @@
       "evidence": "ShowroomGrocery + publishedRecipeMeals. Sin unidades, agregados manuales ni sync entre dispositivos.",
       "updatedAt": "2026-09-18T14:10:00.000Z"
     },
+    "PV-22": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "El diario conserva la comida si la IA falla: pending_review con foods vacío, macros null y nota profesional. No sustituye alimentos de demo. Falta job asíncrono y Auth/Storage live.",
+      "evidence": "POST /api/patients/:id/meals/analyze captura AIUnavailableError. server/meal-flow.integration.test.ts, server/meal-ai-unavailable.integration.test.ts, server/acompanamiento.integration.test.ts.",
+      "updatedAt": "2026-09-19T20:02:00.000Z"
+    },
+    "PV-23": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Hilo demo con entrega inmediata y leído al abrir. El paciente no puede marcar suggested_by_ai. Faltan recibos 016b entre dispositivos live.",
+      "evidence": "server/message-flow.integration.test.ts y server/acompanamiento.integration.test.ts. NutrigoMessages.",
+      "updatedAt": "2026-09-19T20:02:00.000Z"
+    },
+    "PV-25": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Reprogramación paciente conserva duración/canal. Confirmación de asistencia es local al dispositivo. Timezone y solapes transaccionales pendientes.",
+      "evidence": "server/appointment-flow.integration.test.ts, server/acompanamiento.integration.test.ts, ShowroomPatientAgenda.",
+      "updatedAt": "2026-09-19T20:02:00.000Z"
+    },
     "PV-26": {
       "status": "in_progress",
       "owner": "",
@@ -137,12 +158,59 @@
     "PV-27": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Borrador de alternativa (demo/IA) a pedido del paciente; la nutricionista edita y publica. El paciente no ve el borrador. Requiere alergias/restricciones declaradas.",
-      "evidence": "server/ai/replacements.ts, CareRecipeEditor, generate/publish RPC. Sin catálogo de recetas ni jobs versionados.",
-      "updatedAt": "2026-09-18T14:10:00.000Z"
+      "notes": "Borrador de alternativa (demo/IA) a pedido del paciente; la nutricionista edita y publica. El paciente no ve el borrador. Requiere alergias/restricciones declaradas en live. Sin jobs versionados.",
+      "evidence": "server/ai/replacements.ts, CareRecipeEditor, generate/publish RPC, server/acompanamiento.integration.test.ts. Circuito demo: borrador oculto hasta publicar.",
+      "updatedAt": "2026-09-19T20:02:00.000Z"
+    },
+    "PV-28": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Live envía alergias al proveedor y no cae a demo si falla. Demo no publica sola. Falta evaluación sintética completa de unidades y edición concurrente live.",
+      "evidence": "server/ai/replacements.test.ts incluye Maní en el prompt y rechaza alergias unknown. Acompañamiento demo publica receta sin Maní.",
+      "updatedAt": "2026-09-19T20:02:00.000Z"
     }
   },
   "history": [
+    {
+      "id": "c19a22e0-9f12-4a3b-8c01-acomp0001",
+      "taskId": "PV-22",
+      "at": "2026-09-19T20:02:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c19a23e0-9f12-4a3b-8c01-acomp0002",
+      "taskId": "PV-23",
+      "at": "2026-09-19T20:02:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c19a25e0-9f12-4a3b-8c01-acomp0003",
+      "taskId": "PV-25",
+      "at": "2026-09-19T20:02:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c19a27e0-9f12-4a3b-8c01-acomp0004",
+      "taskId": "PV-27",
+      "at": "2026-09-19T20:02:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c19a28e0-9f12-4a3b-8c01-acomp0005",
+      "taskId": "PV-28",
+      "at": "2026-09-19T20:02:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
     {
       "id": "c19a16e0-9f12-4a3b-8c01-estudios0001",
       "taskId": "PV-16",
