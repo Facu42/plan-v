@@ -38,11 +38,12 @@ export function ShowroomPatientRecord({ patient, patients = [patient], onSelect,
   const appointmentNote = patient.appointment
     ? `${patient.appointment.duration} min · ${patient.appointment.channel}`
     : 'Podés gestionarla desde Consultas.';
+  const recordTitle = patient.name.replace(/\s*\.$/, '');
 
   return <section className="nr-record" aria-labelledby="nr-record-title">
     <header className="nr-page-head">
       <div>
-        <h1 id="nr-record-title">Ficha de {patient.name}<span className="nv-title-dot">.</span></h1>
+        <h1 id="nr-record-title">Ficha de {recordTitle}<span className="nv-title-dot">.</span></h1>
         <p>
           <NvBadge>{patient.status}</NvBadge>
           <span>{STAGE_LABELS[patient.stage]}</span>

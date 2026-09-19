@@ -29,6 +29,10 @@ describe('Ficha profesional en el showroom', () => {
   it('presenta identidad, estado, etapa, objetivo y próxima consulta', () => {
     const html = render();
     expect(html).toContain('Ficha de Ana Ruiz');
+    expect(html).toContain('nv-title-dot');
+    expect(html).not.toContain('Ficha de Ana Ruiz.');
+    expect(render({ ...patient, name: 'Sofía R.' })).toContain('Ficha de Sofía R<span class="nv-title-dot">.</span>');
+    expect(render({ ...patient, name: 'Sofía R.' })).not.toContain('Ficha de Sofía R.');
     expect(html).toContain('En ritmo');
     expect(html).toContain('Seguimiento');
     expect(html).toContain('Organizar comidas');

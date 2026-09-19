@@ -1,6 +1,7 @@
 /* Professional record. Composition from Nutrigo Dashboard 12:792 + Food Diary 105:2649. */
 .nr-record { display:flex; flex-direction:column; gap:20px; }
-.nr-page-head { display:flex; justify-content:space-between; align-items:center; gap:16px; min-height:50px; }
+.nr-page-head { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; min-height:50px; }
+.nr-page-head>div:first-child { min-width:min(100%,280px); flex:1 1 280px; }
 .nr-page-head h1 { font-size:25px; font-weight:700; letter-spacing:-.8px; line-height:1.2; }
 .nr-page-head p { display:flex; flex-wrap:wrap; align-items:center; gap:9px; margin-top:6px; color:var(--nv-muted); font-size:12px; }
 .nr-kicker { color:var(--nv-muted); font-size:12px; font-weight:600; }
