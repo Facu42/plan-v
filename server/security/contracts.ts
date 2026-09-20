@@ -10,6 +10,7 @@ export type RequestAuthDecision =
 
 const PUBLIC_API_PATHS = new Set([
   '/api/health',
+  '/api/ready',
   '/api/auth/recover',
   '/api/ops/nutritionists',
 ]);

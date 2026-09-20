@@ -1,7 +1,8 @@
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import { registerPlanVWorker } from "./pwa/register";
+import "./index.css";
 
-  import { createRoot } from "react-dom/client";
-  import App from "./App";
-  import "./index.css";
-
-  createRoot(document.getElementById("root")!).render(<App />);
-  
+registerPlanVWorker();
+createRoot(document.getElementById("root")!).render(<App />);
+ 

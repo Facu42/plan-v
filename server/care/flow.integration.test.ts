@@ -34,6 +34,7 @@ describe('seguimiento conectado',()=>{
     await consent('ai_menu_draft');
     const response=await post(`${base}/replacements/${id}/generate`,{});expect(response.status).toBe(200);const generated=await response.json();
     expect(generated.replacement.source).toBe('demo');
+    expect(generated.job_id).toBeTruthy();
     expect((await(await app.request(base)).json()).replacements).toEqual([]);
     const publish={expected_recipe:generated.replacement.recipe,recipe:{...generated.replacement.recipe,title:'Alternativa revisada'}};
     expect((await post(`${base}/replacements/${generated.replacement.id}/publish`,publish)).status).toBe(200);

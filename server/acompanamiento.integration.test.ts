@@ -112,7 +112,8 @@ describe('acompañamiento conectado (demo memoria)', () => {
 
     const generated = await json(`/api/patients/${sofia}/care/replacements/${requestId}/generate`, {});
     expect(generated.status).toBe(200);
-    const proposal = await generated.json() as { replacement: { id: string; source: string; published_at: string | null; recipe: { title: string; ingredients: string[]; steps: string[] } } };
+    const proposal = await generated.json() as { replacement: { id: string; source: string; published_at: string | null; recipe: { title: string; ingredients: string[]; steps: string[] } }; job_id?: string };
+    expect(proposal.job_id).toBeTruthy();
     expect(proposal.replacement.source).toBe('demo');
     expect(proposal.replacement.published_at).toBeNull();
     expect(JSON.stringify(proposal.replacement.recipe)).not.toMatch(new RegExp(ALLERGEN, 'i'));

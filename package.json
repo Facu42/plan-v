@@ -14,7 +14,10 @@
     "check": "tsc --noEmit && tsc --noEmit -p tsconfig.server.json",
     "test": "vitest run",
     "check:migrations": "node scripts/check-migration-safety.mjs",
-    "apply:disposable": "node scripts/apply-disposable.mjs"
+    "apply:disposable": "node scripts/apply-disposable.mjs",
+    "backup": "node scripts/with-env.mjs tsx server/ops/backup.ts",
+    "restore": "node scripts/with-env.mjs tsx server/ops/restore.ts",
+    "worker": "node scripts/with-env.mjs tsx server/jobs/worker-main.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.53",
