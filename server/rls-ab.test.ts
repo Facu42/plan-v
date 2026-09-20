@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { createActorClient } from './db/supabase-client.js';
+import { applyDiscoveredLiveAuthEnv } from './test/planv-supabase.js';
+
+applyDiscoveredLiveAuthEnv();
 
 const live = Boolean(
   process.env.DISPOSABLE_SUPABASE_URL

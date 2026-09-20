@@ -17,6 +17,7 @@
     "apply:disposable": "node scripts/apply-disposable.mjs",
     "disposable:pg": "node scripts/disposable-pg.mjs",
     "test:disposable": "vitest run server/cut1.disposable.test.ts server/rls-ab.test.ts",
+    "test:live-auth": "PLANV_LIVE_AUTH=1 vitest run server/live-auth-storage.test.ts server/rls-ab.test.ts",
     "backup": "node scripts/with-env.mjs tsx server/ops/backup.ts",
     "restore": "node scripts/with-env.mjs tsx server/ops/restore.ts",
     "worker": "node scripts/with-env.mjs tsx server/jobs/worker-main.ts"
