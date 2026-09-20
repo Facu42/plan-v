@@ -8,3 +8,4 @@ marketing/
 *.xlsx
 .env
 .env.local
+backups/

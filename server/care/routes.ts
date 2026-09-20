@@ -1,32 +1,17 @@
 import type { Hono, Context } from 'hono';
 import { z } from 'zod';
-import { randomUUID } from 'node:crypto';
 import { authorizePatientAction } from '../security/authorization.js';
 import * as sb from '../db/supabase-repo.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { getPatient, getStore } from '../store.js';
-import { getIntakeRecord, listConsentEvents } from '../intake/memory.js';
-import { readIntakeBundle } from '../intake/repository.js';
-import { CONSENT_CATALOG, type ConsentPurpose } from '../intake/consent.js';
 import { careInputSchema, carePreferencesSchema, replacementRecipeSchema, CARE_LABELS, type CareAlert } from '../../src/types/care.js';
 import * as repo from './repository.js';
-import { generateReplacement } from '../ai/replacements.js';
+import { handleProcessingJob } from '../jobs/handlers.js';
+import { processQueue, runOne } from '../jobs/queue.js';
+import { AIUnavailableError } from '../ai/errors.js';
+import { currentCareConsents, requireCareConsent } from './consents.js';
 
-export async function currentCareConsents(patientId: string, persistent: boolean) {
-  const bundle = persistent ? await readIntakeBundle(patientId) : { intake: getIntakeRecord(patientId), consents: listConsentEvents(patientId) };
-  const latest = new Map<string, typeof bundle.consents[number]>();
-  for (const entry of bundle.consents) latest.set(entry.purpose, entry);
-  const consented = CONSENT_CATALOG.filter(text => {
-    const last = latest.get(text.purpose);
-    return last?.decision === 'granted' && last.text_version === text.text_version && last.text_hash === text.text_hash;
-  }).map(text => text.purpose);
-  return { ...bundle, consented };
-}
-export async function requireCareConsent(patientId: string, persistent: boolean, purpose: ConsentPurpose) {
-  const bundle = await currentCareConsents(patientId, persistent);
-  if (!bundle.consented.includes(purpose)) throw new repo.CareError(403, `Activá el permiso «${CONSENT_CATALOG.find(c => c.purpose === purpose)?.title}» antes de continuar.`);
-  return bundle;
-}
+export { currentCareConsents, requireCareConsent } from './consents.js';
 async function access(c: Context, patientId: string, mode: 'read' | 'patient' | 'professional') {
   const auth = c.get('auth'); const persistent = 'userId' in auth && isSupabaseEnabled();
   if (!persistent) { if (!getPatient(patientId)) throw new repo.CareError(404, 'Paciente no encontrado.'); return { persistent: false, professional: c.req.query('audience') === 'pro' || mode === 'professional' }; }
@@ -111,15 +96,20 @@ export function registerCareRoutes(app: Hono) {
   });
   app.post('/api/patients/:id/care/replacements/:recordId/generate', async c => {
     const id = c.req.param('id'); const { persistent } = await access(c, id, 'professional');
-    const bundle = await requireCareConsent(id, persistent, 'ai_menu_draft');
+    await requireCareConsent(id, persistent, 'ai_menu_draft');
     const record = (await repo.listCareRecords(id, persistent)).find(r => r.id === c.req.param('recordId'));
     if (!record || record.data.kind !== 'menu_request') throw new repo.CareError(404, 'Solicitud no encontrada.');
     const existing = (await repo.listReplacements(id, persistent)).find(r => r.request_id === record.id);
     if (existing) return c.json({ replacement: existing });
-    const patient = persistent ? await sb.sbGetPatientById(id, 'professional') : getPatient(id);
-    const result = await generateReplacement(record.data, bundle.intake.payload, patient?.weekPlan ?? []);
-    const replacement = { id: randomUUID(), patient_id: id, request_id: record.id, ...result, published_at: null, created_at: new Date().toISOString() };
-    await repo.saveReplacement(replacement, persistent); return c.json({ replacement });
+    const job = await processQueue.enqueue({
+      kind: 'menu_draft',
+      payload: { patient_id: id, record_id: record.id, persistent },
+    });
+    const processed = await runOne(processQueue, `api-${job.id}`, handleProcessingJob);
+    const saved = (await repo.listReplacements(id, persistent)).find(r => r.request_id === record.id);
+    if (processed?.status === 'succeeded' && saved) return c.json({ replacement: saved, job_id: job.id });
+    if (processed?.last_error === new AIUnavailableError().message) throw new AIUnavailableError();
+    throw new repo.CareError(503, processed?.last_error || 'No se pudo preparar la alternativa.');
   });
   app.post('/api/patients/:id/care/replacements/:replacementId/publish', async c => {
     const id = c.req.param('id'); const { persistent } = await access(c, id, 'professional');

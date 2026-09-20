@@ -10,6 +10,8 @@ import { api } from '../api/client';
 import { readThemePreference, writeThemePreference, type ThemePreference } from '../theme-preference';
 import { Mark } from './shared/Icon';
 import { canUseDemoRoleSwitch, shouldShowNutrigo } from './design-entry';
+import { InstallBanner } from '../pwa/InstallBanner';
+import { OfflineNotice } from '../pwa/OfflineNotice';
 
 const NutrigoShowroom = lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })));
 
@@ -147,6 +149,8 @@ export function PlanVExperience() {
     const lockedRole = session ? (isNutri ? 'pro' as const : 'patient' as const) : null;
     return (
       <Suspense fallback={<div className="plan-v-app loading-screen" role="status">Cargando consultorio…</div>}>
+        <OfflineNotice />
+        <InstallBanner />
         <NutrigoShowroom
           darkMode={darkMode}
           onToggleTheme={toggleTheme}

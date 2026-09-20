@@ -104,8 +104,10 @@ describe('resolveRequestAuth', () => {
       .toEqual({ kind: 'unauthorized' });
   });
 
-  it('keeps health public when Supabase is enabled', () => {
+  it('keeps health and readiness public when Supabase is enabled', () => {
     expect(resolveRequestAuth({ supabaseEnabled: true, path: '/api/health', verifiedUserId: null, allowDemo: false }))
+      .toEqual({ kind: 'public' });
+    expect(resolveRequestAuth({ supabaseEnabled: true, path: '/api/ready', verifiedUserId: null, allowDemo: false }))
       .toEqual({ kind: 'public' });
   });
 

@@ -58,7 +58,17 @@ export type PatientListPage = {
 };
 
 export const api = {
-  health: (init?: RequestInit) => request<{ status: string; ai: boolean; supabase: boolean }>('/api/health', init),
+  health: (init?: RequestInit) => request<{
+    status: string;
+    ai: boolean;
+    supabase: boolean;
+    jobs?: { queued: number; leased: number; dead: number; succeeded: number };
+  }>('/api/health', init),
+  ready: (init?: RequestInit) => request<{
+    status: string;
+    worker: string;
+    jobs: { queued: number; leased: number; dead: number; succeeded: number };
+  }>('/api/ready', init),
 
   getPatients: (query?: { limit?: number; offset?: number }, init?: RequestInit) => {
     const params = new URLSearchParams();

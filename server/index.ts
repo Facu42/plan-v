@@ -10,6 +10,8 @@ import { analysisOrUnavailable, analyzeMeal } from './ai/meal-analyzer.js';
 import { generateCopilotBrief } from './ai/copilot.js';
 import { AIUnavailableError } from './ai/errors.js';
 import { readRuntimeConfig } from './config/runtime.js';
+import { processQueue } from './jobs/queue.js';
+import { startJobWorker } from './jobs/worker.js';
 import { authMiddleware } from './middleware/auth.js';
 import {
   analyzeMealInputSchema,
@@ -179,9 +181,24 @@ app.onError((error, c) => {
   return c.json({ error: 'No se pudo completar la operación' }, 500);
 });
 
-app.get('/api/health', (c) =>
-  c.json({ status: 'ok', ai: Boolean(process.env.OPENAI_API_KEY), supabase: isSupabaseEnabled() }),
-);
+app.get('/api/health', async (c) => {
+  const jobs = await processQueue.counts();
+  return c.json({
+    status: 'ok',
+    ai: Boolean(process.env.OPENAI_API_KEY),
+    supabase: isSupabaseEnabled(),
+    jobs,
+  });
+});
+
+app.get('/api/ready', async (c) => {
+  const jobs = await processQueue.counts();
+  return c.json({
+    status: 'ready',
+    worker: process.env.VITEST === 'true' ? 'test' : 'inline',
+    jobs,
+  });
+});
 
 registerCareRoutes(app);
 
@@ -1308,6 +1325,7 @@ const isMainModule = Boolean(process.argv[1]) && import.meta.url === pathToFileU
 if (isMainModule) {
   const config = readRuntimeConfig(process.env);
   const port = Number(process.env.PORT ?? 3001);
+  startJobWorker();
   console.log(`Plan V API → http://localhost:${port} (mode: ${config.mode}, data: ${config.dataMode}, ai: ${config.aiMode})`);
   serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
 }
