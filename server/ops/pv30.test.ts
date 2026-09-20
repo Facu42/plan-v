@@ -87,7 +87,8 @@ describe('ops alerts', () => {
     expect(recentOpsAlerts()).toHaveLength(1);
     await deliverOpsAlert(alert, { ALERT_WEBHOOK_URL: 'https://alerts.example/hook' });
     expect(fetchMock).toHaveBeenCalledOnce();
-    const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
+    const posted = fetchMock.mock.calls[0] as unknown as [string, { body?: string }];
+    const body = JSON.parse(String(posted[1]?.body));
     expect(body).toMatchObject({ source: 'plan-v', kind: 'http_5xx', status: 500 });
     expect(JSON.stringify(body)).not.toContain('ana@');
     expect(await deliverOpsAlert(alert, { ALERT_WEBHOOK_URL: 'http://insecure.example' })).toEqual({ delivered: false });
