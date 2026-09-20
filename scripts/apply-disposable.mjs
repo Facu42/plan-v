@@ -38,10 +38,18 @@ for (const name of files) {
 }
 
 const guard = spawnSync('psql', [databaseUrl, '-v', 'ON_ERROR_STOP=1', '-tA', '-c', `
-  select case
-    when to_regclass('public.patients') is null then 0
-    else (select count(*)::int from public.patients)
-  end;
+do $guard$
+declare n int := 0;
+begin
+  if to_regclass('public.patients') is not null then
+    execute 'select count(*)::int from public.patients' into n;
+    if n > 0 then
+      raise exception 'Refusing to apply SQL: public.patients already has % row(s).', n;
+    end if;
+  end if;
+end
+$guard$;
+select 0;
 `], { encoding: 'utf8' });
 
 if (guard.status !== 0) {
@@ -49,7 +57,7 @@ if (guard.status !== 0) {
   process.exit(guard.status ?? 1);
 }
 
-const patientCount = Number((guard.stdout || '0').trim());
+const patientCount = Number((guard.stdout || '0').trim().split('\n').pop());
 if (!Number.isFinite(patientCount)) {
   console.error('Could not read patient count from the disposable database.');
   process.exit(1);
