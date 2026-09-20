@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
 import { readFile } from 'node:fs/promises';
 import { createPostgresJobStore } from './postgres.js';
-import { drain, runOne } from './queue.js';
+import { drain } from './queue.js';
 
 let db: PGlite;
 let dir: string;
@@ -47,7 +47,7 @@ describe('cola durable en PGlite', () => {
     const second = await store.lease('b', new Date('2026-09-20T15:00:01.000Z'), 30_000);
     expect(first?.id).toBe(created.id);
     expect(second).toBeNull();
-    const dead = await runOne(store, 'a', async () => { throw new Error('boom'); }, new Date('2026-09-20T15:00:02.000Z'));
-    expect(dead?.status).toBe('dead');
+    const dead = await store.complete(created.id, 'boom');
+    expect(dead.status).toBe('dead');
   });
 });
