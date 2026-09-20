@@ -6,11 +6,13 @@ if (!args.length) {
   process.exit(1);
 }
 
+const mode = process.env.APP_MODE || 'demo';
+const demoish = mode === 'demo' || mode === 'test';
 const env = {
   ...process.env,
-  APP_MODE: process.env.APP_MODE || 'demo',
-  AI_MODE: process.env.AI_MODE || 'demo',
-  VITE_ALLOW_DEMO: process.env.VITE_ALLOW_DEMO || 'true',
+  APP_MODE: mode,
+  AI_MODE: process.env.AI_MODE || (demoish ? 'demo' : 'disabled'),
+  ...(demoish ? { VITE_ALLOW_DEMO: process.env.VITE_ALLOW_DEMO || 'true' } : {}),
 };
 
 const child = spawn(args.join(' '), {

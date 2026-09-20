@@ -1,0 +1,10 @@
+node_modules
+dist
+.git
+.gstack
+.env
+.env.local
+backups
+*.zip
+.scratch
+implementation-dashboard

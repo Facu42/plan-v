@@ -13,6 +13,12 @@ import { readRuntimeConfig } from './config/runtime.js';
 import { processQueue } from './jobs/queue.js';
 import { startJobWorker } from './jobs/worker.js';
 import { authMiddleware } from './middleware/auth.js';
+import { emitOpsAlert } from './ops/alerts.js';
+import { resolveCorsOrigin } from './ops/cors.js';
+import { writeOpsLog } from './ops/log.js';
+import { createRateLimitMiddleware } from './ops/rate-limit.js';
+import { createBodyLimitMiddleware, evaluateReadiness, releaseSha } from './ops/readiness.js';
+import { assertSecretBoundary, inspectSecrets } from './ops/secrets.js';
 import {
   analyzeMealInputSchema,
   activityInputSchema,
@@ -161,11 +167,15 @@ async function persistPatientWrite(
   return c.json({ patient: serializePatient(patient, role), source: 'supabase' });
 }
 
-app.use('/*', cors());
+app.use('/*', cors({
+  origin: (origin) => resolveCorsOrigin(origin ?? '', process.env),
+}));
 app.use('/api/*', async (c, next) => {
   await next();
   c.header('Cache-Control', 'no-store');
 });
+app.use('/api/*', createBodyLimitMiddleware());
+app.use('/api/*', createRateLimitMiddleware());
 app.use('/api/*', authMiddleware);
 
 app.onError((error, c) => {
@@ -178,6 +188,12 @@ app.onError((error, c) => {
       requestId: crypto.randomUUID(),
     }, 503);
   }
+  writeOpsLog('error', 'http_unhandled', {
+    path: c.req.path,
+    name: error instanceof Error ? error.name : 'unknown',
+    message: error instanceof Error ? error.message : 'unknown',
+  });
+  emitOpsAlert({ kind: 'http_5xx', path: c.req.path, status: 500 });
   return c.json({ error: 'No se pudo completar la operación' }, 500);
 });
 
@@ -185,18 +201,27 @@ app.get('/api/health', async (c) => {
   const jobs = await processQueue.counts();
   return c.json({
     status: 'ok',
+    mode: process.env.APP_MODE ?? null,
     ai: Boolean(process.env.OPENAI_API_KEY),
     supabase: isSupabaseEnabled(),
     jobs,
+    sha: releaseSha(),
+    worker: evaluateReadiness(process.env, jobs).worker,
   });
 });
 
 app.get('/api/ready', async (c) => {
   const jobs = await processQueue.counts();
+  const ready = evaluateReadiness(process.env, jobs);
+  if (ready.status !== 'ready') {
+    emitOpsAlert({ kind: 'ready_fail', status: 503, detail: ready.reasons.join(',') });
+    return c.json({ status: 'not_ready', worker: ready.worker, reasons: ready.reasons, jobs }, 503);
+  }
   return c.json({
     status: 'ready',
-    worker: process.env.VITEST === 'true' ? 'test' : 'inline',
+    worker: ready.worker,
     jobs,
+    sha: releaseSha(),
   });
 });
 
@@ -1324,8 +1349,14 @@ const isMainModule = Boolean(process.argv[1]) && import.meta.url === pathToFileU
 
 if (isMainModule) {
   const config = readRuntimeConfig(process.env);
+  assertSecretBoundary(process.env);
+  const secrets = inspectSecrets(process.env);
+  if (!secrets.ok) {
+    writeOpsLog('error', 'startup_refused', { missing: secrets.missing.join(',') || 'secret_boundary' });
+    process.exit(1);
+  }
   const port = Number(process.env.PORT ?? 3001);
-  startJobWorker();
-  console.log(`Plan V API → http://localhost:${port} (mode: ${config.mode}, data: ${config.dataMode}, ai: ${config.aiMode})`);
+  if (process.env.WORKER_SEPARATE !== '1') startJobWorker();
+  writeOpsLog('info', 'api_listen', { mode: config.mode, data: config.dataMode, ai: config.aiMode, port: String(port) });
   serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
 }
