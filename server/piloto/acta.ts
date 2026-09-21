@@ -27,15 +27,17 @@ export type PilotoActa = {
   notes: string[];
 };
 
-const LIVE_REQUIRED: Array<keyof PilotoActaEvidence> = [
+const LIVE_REQUIRED = [
   'railwayThisBranch',
   'disposableLiveAuth',
   'physicalPwa',
   'evalReviewedByNutritionist',
   'legalRetentionConfirmed',
-];
+] as const;
 
-const LIVE_BLOCKER_LABEL: Record<(typeof LIVE_REQUIRED)[number], string> = {
+type LiveRequired = (typeof LIVE_REQUIRED)[number];
+
+const LIVE_BLOCKER_LABEL: Record<LiveRequired, string> = {
   railwayThisBranch: 'Railway public API is not this branch (still PR #1 unless Facu re-points)',
   disposableLiveAuth: 'Live two-role JWT on an empty disposable Supabase is missing',
   physicalPwa: 'Add-to-Home on a physical Android and iPhone is not accredited',
