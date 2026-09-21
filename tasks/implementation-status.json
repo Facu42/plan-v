@@ -144,9 +144,9 @@
     "PV-25": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Reprogramación paciente conserva duración/canal. Confirmación de asistencia es local al dispositivo. Timezone y solapes transaccionales pendientes.",
-      "evidence": "server/appointment-flow.integration.test.ts, server/acompanamiento.integration.test.ts, ShowroomPatientAgenda.",
-      "updatedAt": "2026-09-19T20:02:00.000Z"
+      "notes": "Timestamps UTC, timezone Buenos Aires, confirmación persistida (confirmed_at inmutable), reprogramación paciente día/hora, cancel+insert, lock de solapes 409. Fail closed 501 sin schema. GET hospedado cae a turnos 016. Falta schema live.",
+      "evidence": "supabase/migrations/20260921240000_appointments.sql; server/appointments/*; ShowroomPatientAgenda confirm API. Demo+PGlite; live schema bloqueado (patients existe).",
+      "updatedAt": "2026-09-21T04:46:00.000Z"
     },
     "PV-26": {
       "status": "in_progress",
@@ -183,6 +183,14 @@
       "id": "c21a23e0-9f12-4a3b-8c01-pv230001",
       "taskId": "PV-23",
       "at": "2026-09-21T04:20:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c21a25e0-9f12-4a3b-8c01-pv250001",
+      "taskId": "PV-25",
+      "at": "2026-09-21T04:46:00.000Z",
       "from": "in_progress",
       "to": "in_progress",
       "fields": ["notes", "evidence"]

@@ -466,6 +466,7 @@ describe('appointments (016 v2)', () => {
       duration: 45,
       channel: 'video',
       meet_url: 'https://meet.example.com/consulta-sofia',
+      starts_at: '2026-09-10T17:30:00.000Z',
     });
   });
 

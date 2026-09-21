@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { calculateAdherence } from './adherence.js';
+import { CareError } from './care/errors.js';
 import {
+  DEFAULT_APPOINTMENT_TIMEZONE,
   historyEntry,
   resolveAppointmentState,
   stampStartsAt,
@@ -168,7 +170,16 @@ export type Patient = {
   hydration: number;
   energy: string | null;
   sleep_minutes: number | null;
-  appointment: { when: string; duration: number; channel: string; meet_url?: string; starts_at?: string } | null;
+  appointment: {
+    when: string;
+    duration: number;
+    channel: string;
+    meet_url?: string;
+    starts_at?: string;
+    timezone?: string;
+    patient_reply?: 'attending' | 'needs_change';
+    confirmed_at?: string | null;
+  } | null;
   appointment_history?: AppointmentHistoryEntry[];
   habit_logs: HabitLog[];
   activity_logs?: ActivityLog[];
@@ -982,9 +993,22 @@ function appointmentTitle(previous: Patient['appointment'], next: Patient['appoi
   return actor === 'patient' ? 'Consulta · reprogramada por la paciente' : 'Consulta · reprogramada';
 }
 
+function appointmentRangesOverlap(
+  left: { starts_at?: string; duration: number },
+  right: { starts_at?: string; duration: number },
+) {
+  if (!left.starts_at || !right.starts_at) return false;
+  const aStart = Date.parse(left.starts_at);
+  const bStart = Date.parse(right.starts_at);
+  if (Number.isNaN(aStart) || Number.isNaN(bStart)) return false;
+  const aEnd = aStart + left.duration * 60_000;
+  const bEnd = bStart + right.duration * 60_000;
+  return aStart < bEnd && bStart < aEnd;
+}
+
 export function setAppointment(
   id: string,
-  appointment: { day: string; time: string; duration: number; channel: string; meet_url?: string } | null,
+  appointment: { day: string; time: string; duration: number; channel: string; meet_url?: string; timezone?: string } | null,
   options: { actor?: AppointmentHistoryActor } = {},
 ): Patient | undefined {
   const patient = getPatient(id);
@@ -998,9 +1022,18 @@ export function setAppointment(
         when: `${appointment.day} · ${appointment.time}`,
         duration: appointment.duration,
         channel: appointment.channel,
+        timezone: appointment.timezone ?? previous?.timezone ?? DEFAULT_APPOINTMENT_TIMEZONE,
         ...(appointment.meet_url ? { meet_url: appointment.meet_url } : {}),
       }, clock)
     : null;
+  if (scheduled) {
+    for (const other of store.patients) {
+      if (other.id === id || !other.appointment) continue;
+      if (appointmentRangesOverlap(scheduled, other.appointment)) {
+        throw new CareError(409, 'Ese horario se solapa con otra consulta del consultorio.');
+      }
+    }
+  }
   const history = [...(patient.appointment_history ?? [])];
   if (previous && previous.when !== scheduled?.when) {
     history.unshift(historyEntry({
@@ -1036,6 +1069,31 @@ export function setAppointment(
   }
 
   return updatePatient(id, { appointment: scheduled, appointment_history: history, timeline });
+}
+
+export function confirmAppointment(id: string, reply: 'attending' | 'needs_change'): Patient | undefined {
+  const patient = getPatient(id);
+  if (!patient) return undefined;
+  if (!patient.appointment) throw new CareError(409, 'No hay un turno para reprogramar');
+  if (patient.appointment.patient_reply === reply) return patient;
+  const recordedAt = now();
+  const appointment = {
+    ...patient.appointment,
+    timezone: patient.appointment.timezone ?? DEFAULT_APPOINTMENT_TIMEZONE,
+    patient_reply: reply,
+    ...(reply === 'attending' || patient.appointment.confirmed_at
+      ? { confirmed_at: patient.appointment.confirmed_at ?? recordedAt }
+      : {}),
+  };
+  const history = [historyEntry({
+    id: randomUUID(),
+    slot: appointment,
+    action: reply === 'attending' ? 'confirmed' : 'needs_change',
+    actor: 'patient',
+    at: recordedAt,
+    now: new Date(recordedAt),
+  }), ...(patient.appointment_history ?? [])];
+  return updatePatient(id, { appointment, appointment_history: history });
 }
 
 export function addMealLog(patientId: string, log: Omit<MealLog, 'id' | 'patient_id' | 'logged_at' | 'status'>): MealLog {

@@ -132,6 +132,13 @@ describe('API input schemas', () => {
     }).success).toBe(false);
   });
 
+  it('validates patient appointment confirmation replies', async () => {
+    const { appointmentConfirmSchema } = await import('./schemas.js');
+    expect(appointmentConfirmSchema.safeParse({ reply: 'attending' }).success).toBe(true);
+    expect(appointmentConfirmSchema.safeParse({ reply: 'needs_change' }).success).toBe(true);
+    expect(appointmentConfirmSchema.safeParse({ reply: 'pending' }).success).toBe(false);
+  });
+
   it('accepts only HTTPS meeting links when present', () => {
     expect(appointmentUpdateSchema.safeParse({
       appointment: { day: 'Jueves', time: '14:30', duration: 45, channel: 'video', meet_url: 'https://meet.example.com/abc' },

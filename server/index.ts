@@ -6,6 +6,7 @@ import { registerRecipeRoutes } from './recipes/routes.js';
 import { registerPlanRoutes } from './plans/routes.js';
 import { registerDiaryRoutes } from './diary/routes.js';
 import { registerMessageRoutes } from './messages/routes.js';
+import { registerAppointmentRoutes } from './appointments/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -24,8 +25,6 @@ import { createBodyLimitMiddleware, evaluateReadiness, releaseSha } from './ops/
 import { assertSecretBoundary, inspectSecrets } from './ops/secrets.js';
 import {
   activityInputSchema,
-  appointmentUpdateSchema,
-  appointmentRescheduleSchema,
   noticeCreateSchema,
   authRecoverInputSchema,
   billingUpdateInputSchema,
@@ -94,7 +93,6 @@ import {
   revokePatientInvite,
   sendPatientInvite,
   setBrief,
-  setAppointment,
   setBillingStatus,
   setGoal,
   setPatientArchived,
@@ -216,6 +214,7 @@ registerRecipeRoutes(app);
 registerPlanRoutes(app);
 registerDiaryRoutes(app);
 registerMessageRoutes(app);
+registerAppointmentRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({
@@ -513,107 +512,6 @@ app.post('/api/patients/:id/resources/:resourceId/read', async (c) => {
   const patient = markResourceRead(patientId, parsedResourceId.data);
   if (!patient) return c.notFound();
   return c.json({ patient: toPatientSelfView(patient), source: 'memory' });
-});
-
-app.put('/api/patients/:id/appointment', async (c) => {
-  const auth = c.get('auth');
-  const patientId = c.req.param('id');
-  const parsedBody = await parseJsonBody(c, appointmentUpdateSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-  const body = parsedBody.data;
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    const actor = await authorizePatient(auth.userId, patientId, 'edit_appointment');
-    if (!actor || actor.role !== 'nutri') {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    try {
-      await sb.sbSetAppointment(patientId, actor.nutritionistId, body.appointment);
-      if (body.appointment) {
-        await sb.sbAddTimelineEvent(patientId, {
-          kind: 'appointment',
-          title: 'Consulta · actualizada',
-          body: `${body.appointment.day} ${body.appointment.time}`,
-          visibility: 'patient',
-        });
-      }
-    } catch (error) {
-      if (error instanceof sb.SchemaUnavailableError) {
-        return c.json({ error: 'No se pudo guardar el turno' }, 501);
-      }
-      throw error;
-    }
-    const patient = await sb.sbGetPatientById(patientId);
-    if (!patient) return c.notFound();
-    return c.json({ patient, source: 'supabase' });
-  }
-
-  const patient = setAppointment(patientId, body.appointment);
-  if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
-});
-
-app.post('/api/patients/:id/appointment/reschedule', async (c) => {
-  const auth = c.get('auth');
-  const patientId = c.req.param('id');
-  const parsedBody = await parseJsonBody(c, appointmentRescheduleSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    const actor = await authorizePatient(auth.userId, patientId, 'reschedule_appointment');
-    if (!actor) return c.json({ error: 'Prohibido' }, 403);
-    try {
-      const current = await sb.sbGetScheduledAppointment(patientId);
-      if (!current) return c.json({ error: 'No hay un turno para reprogramar' }, 409);
-      const sameSlot = current.day === parsedBody.data.day && current.time === parsedBody.data.time;
-      if (sameSlot) {
-        const patient = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
-        if (!patient) return c.notFound();
-        return c.json({ patient: serializePatient(patient, actor.role), source: 'supabase' });
-      }
-      const resource = await sb.sbGetPatientResource(patientId);
-      if (!resource) return c.notFound();
-      await sb.sbSetAppointment(patientId, resource.nutritionistId, {
-        day: parsedBody.data.day,
-        time: parsedBody.data.time,
-        duration: current.duration,
-        channel: current.channel,
-        ...(current.meet_url ? { meet_url: current.meet_url } : {}),
-      });
-      await sb.sbAddTimelineEvent(patientId, {
-        kind: 'appointment',
-        title: 'Consulta · reprogramada',
-        body: `${parsedBody.data.day} ${parsedBody.data.time}`,
-        visibility: 'patient',
-      });
-    } catch (error) {
-      if (error instanceof sb.SchemaUnavailableError) {
-        return c.json({ error: 'No se pudo reprogramar el turno' }, 501);
-      }
-      throw error;
-    }
-    const patient = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
-    if (!patient) return c.notFound();
-    return c.json({ patient: serializePatient(patient, actor.role), source: 'supabase' });
-  }
-
-  const current = getPatient(patientId);
-  if (!current) return c.notFound();
-  if (!current.appointment) return c.json({ error: 'No hay un turno para reprogramar' }, 409);
-
-  const parsed = current.appointment.when.split(' · ');
-  const sameSlot = parsed[0] === parsedBody.data.day && parsed[1] === parsedBody.data.time;
-  if (sameSlot) return c.json({ patient: current, source: 'memory' });
-
-  const patient = setAppointment(patientId, {
-    day: parsedBody.data.day,
-    time: parsedBody.data.time,
-    duration: current.appointment.duration,
-    channel: current.appointment.channel,
-    ...(current.appointment.meet_url ? { meet_url: current.appointment.meet_url } : {}),
-  }, { actor: 'patient' });
-  if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
 });
 
 app.get('/api/notices', (c) => {

@@ -167,6 +167,12 @@ export const api = {
       body: JSON.stringify(appointment),
     }),
 
+  confirmAppointment: (patientId: string, reply: 'attending' | 'needs_change') =>
+    request<{ patient: Patient }>(`/api/patients/${patientId}/appointment/confirm`, {
+      method: 'POST',
+      body: JSON.stringify({ reply }),
+    }),
+
   listNotices: (patientId?: string) =>
     request<{ notices: DemoNotice[]; source: string }>(patientId ? `/api/notices?patientId=${encodeURIComponent(patientId)}` : '/api/notices'),
 

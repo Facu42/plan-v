@@ -25,7 +25,7 @@ de entidades existentes, no debe persistirse; **futura** = sin implementación.
 | `clinical_notes` | notas en ficha | 016b: sólo nutri; revoke paciente | Nunca en DTO paciente |
 | `ai_jobs` / `ai_artifacts` | mocks demo | 016b: jobs privados del profesional | Worker y revisión (PV-27) |
 | `outbox_events` | buzón demo | 016b: outbox + deliveries; sin policy authenticated | Proveedor real (PV-26) |
-| `appointment_events` | demo (corte 78) | 016b: historial append-only | Timezone/conflictos (PV-25) |
+| `appointment_events` | demo + PGlite (PV-25); cancel+insert, timezone, confirmación, solapes 409 | 016b: historial append-only | Live schema en proyecto **vacío**. GET hospedado cae a turnos 016 sin historial |
 | `message_receipts` | demo + PGlite (PV-23); entrega/lectura por persona, `client_id` | 016b: recibo por (mensaje, usuario) | Live schema en proyecto **vacío**. GET hospedado cae al hilo 016 sin recibos |
 | `exercise_library` / rutinas | — | **fuera del piloto** (PV-35) | Habilitación profesional verificada |
 | `organizations` / equipos | — | **fuera del piloto** (PV-38) | Ownership y delegación |

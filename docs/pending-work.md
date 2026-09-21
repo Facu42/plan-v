@@ -2,6 +2,8 @@
 
 ## Revisión vigente de avance — 2026-09-21
 
+PV-25 en esta rama: turnos con `starts_at` timestamptz, timezone `America/Argentina/Buenos_Aires`, confirmación persistida (`patient_reply` / `confirmed_at` inmutable en el primer attending), reprogramación paciente sólo día/hora, cancel+insert (no borra el anterior), lock transaccional de solapes por profesional → 409. Escrituras persistentes van por RPC (`schedule_appointment` / `reschedule_appointment` / `confirm_appointment`); sin schema → 501. GET hospedado cae al `appointments` 016 sin columnas nuevas (no 500). **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 646 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente P0: PV-27 jobs de IA (PV-21/24/26 son P1). No P1, no visual Nutrigo.
+
 PV-23 en esta rama: hilos 1:1 reales con no leídos, `client_id` idempotente y recibos de entrega/lectura por persona (no por dispositivo). La primera marca queda; un segundo leído no cambia el instante. El GET de ficha no marca leído. Escrituras persistentes van por RPC (`send_thread_message` / `mark_thread_read`); sin schema → 501. GET hospedado cae al `messages` 016 sin recibos (no 500). **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 635 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente P0: PV-25 timezone/historial de turnos (PV-21 es P1). No P1, no visual Nutrigo.
 
 PV-22 en esta rama: diario foto/texto persistente. El registro se guarda **antes** de la IA; un `client_id` duplicado no crea otra comida; si la IA falla quedan foto/texto con `analysis_status=failed` y `macros=null`. Revisión profesional append-only en `meal_reviews`. Fail closed 501 sin schema/buckets. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL ni buckets.
@@ -149,7 +151,7 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 - [ ] Alta e invitación real de pacientes. PV-09 deja el ciclo crear/enviar/revocar/aceptar y recuperación; falta aplicar 016 en instancia descartable para persistirlos.
 - [ ] Edición y archivo/restauración de pacientes mediante `archived_at`. PV-10 persiste la ficha (nombre/estado/etapa/notas profesionales); el archivo operativo sigue 501 porque 016 no tiene esa columna.
 - [ ] Persistencia de objetivos e historial profesional. PV-10 escribe `patients.goal`; `goal_status`/`goal_history` quedan para 016b.
-- [ ] Creación, reprogramación y cancelación de turnos. PV-10 reemplaza el turno vigente (demo v0); historial append-only es PV-25.
+- [x] Creación, reprogramación y cancelación de turnos (PV-10 + PV-25 en demo/PGlite). Reprogramar no borra: marca `cancelled` e inserta. Solapes 409. Confirmación persistida. Live schema bloqueado (`patients` existe).
 - [x] Escritura del menú semanal (PV-10, `meal_slots`).
 - [x] Persistencia completa de sueño/hábitos (PV-10, `habit_logs.sleep_minutes`).
 - [x] Descarte persistente de briefs del copiloto (PV-10, `ai_briefs.status=dismissed`).
@@ -219,8 +221,8 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 - [x] Historial de turnos (cambios publicados y fechas vencidas) y reprogramación de día/hora desde la paciente, conservando duración y modalidad (corte 78). No registra asistencia.
 - [x] Recordatorios de comidas y hábitos derivados del plan de hoy, agua y descanso (corte 78).
 - [x] Avisos al teléfono vía Notification del navegador en este dispositivo, y mail en buzón demo (corte 78). Sin proveedor de envío ni push remoto.
-- [ ] Zonas horarias y detección de conflictos: no existen en el modelo actual y no se rellenan.
-- [ ] Confirmación paciente: timezone y conflictos. La asistencia demo ya existe; no reemplaza gestión profesional.
+- [x] Zonas horarias y detección de conflictos (PV-25 demo/PGlite): timezone Buenos Aires, lock transaccional por profesional, 409 si se solapa. Live schema bloqueado.
+- [x] Confirmación paciente persistida (PV-25): `patient_reply` + `confirmed_at` inmutable; localStorage queda cache. No reemplaza la gestión profesional.
 
 ### Paso 5 — Mensajería ampliada
 

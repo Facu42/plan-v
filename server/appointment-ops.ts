@@ -1,14 +1,19 @@
 export const WEEK_DAY_NAMES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const;
 
+export const DEFAULT_APPOINTMENT_TIMEZONE = 'America/Argentina/Buenos_Aires';
+
 export type AppointmentSlot = {
   when: string;
   duration: number;
   channel: string;
   meet_url?: string;
   starts_at?: string;
+  timezone?: string;
+  patient_reply?: 'attending' | 'needs_change';
+  confirmed_at?: string | null;
 };
 
-export type AppointmentHistoryAction = 'scheduled' | 'rescheduled' | 'patient_rescheduled' | 'cancelled' | 'elapsed';
+export type AppointmentHistoryAction = 'scheduled' | 'rescheduled' | 'patient_rescheduled' | 'cancelled' | 'elapsed' | 'confirmed' | 'needs_change';
 export type AppointmentHistoryActor = 'pro' | 'patient' | 'system';
 
 export type AppointmentHistoryEntry = {

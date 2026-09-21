@@ -47,6 +47,7 @@ export type PatientAction =
   | 'edit_menu'
   | 'edit_appointment'
   | 'reschedule_appointment'
+  | 'confirm_appointment'
   | 'edit_goal'
   | 'edit_billing'
   | 'assign_resource'
@@ -83,6 +84,7 @@ const PATIENT_ACTIONS = new Set<PatientAction>([
   'read_resource',
   'send_message',
   'reschedule_appointment',
+  'confirm_appointment',
   'read_intake',
   'edit_intake',
   'submit_intake',
@@ -181,6 +183,9 @@ function publicAppointment(appointment: Patient['appointment']): Patient['appoin
     channel: appointment.channel,
     ...(appointment.meet_url ? { meet_url: appointment.meet_url } : {}),
     ...(appointment.starts_at ? { starts_at: appointment.starts_at } : {}),
+    ...(appointment.timezone ? { timezone: appointment.timezone } : {}),
+    ...(appointment.patient_reply ? { patient_reply: appointment.patient_reply } : {}),
+    ...(appointment.confirmed_at ? { confirmed_at: appointment.confirmed_at } : {}),
   };
 }
 

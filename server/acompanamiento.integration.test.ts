@@ -93,10 +93,10 @@ describe('acompañamiento conectado (demo memoria)', () => {
     const storedProMessage = getPatient(sofia)?.messages.find((message) => message.text === REPLY);
     expect(storedProMessage?.suggested_by_ai).toBe(true);
 
-    const rescheduled = await json(`/api/patients/${sofia}/appointment/reschedule`, { day: 'Viernes', time: '11:00' });
+    const rescheduled = await json(`/api/patients/${sofia}/appointment/reschedule`, { day: 'Viernes', time: '10:00' });
     expect(rescheduled.status).toBe(200);
     expect((await rescheduled.json() as { patient: { appointment: { when: string; duration: number; channel: string } } }).patient.appointment).toMatchObject({
-      when: 'Viernes · 11:00',
+      when: 'Viernes · 10:00',
       duration: 45,
       channel: 'video',
     });

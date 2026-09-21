@@ -6,6 +6,7 @@ import { MESSAGE_PAGE_SIZE, WEEK_DAYS } from '../schemas.ts';
 import type { ListPage } from '../pagination.ts';
 import { getRequestDb, privilegedDb } from './supabase-client.ts';
 import { listThreadMessagesPersist } from '../messages/repository.js';
+import { listPatientAppointmentPersist } from '../appointments/repository.js';
 import {
   appointmentColumns,
   mealLogColumns,
@@ -153,6 +154,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
   sleep_minutes?: number | null;
   briefDismissed?: boolean;
   appointment?: Patient['appointment'];
+  appointment_history?: Patient['appointment_history'];
 }, audience: QueryAudience = 'professional'): Patient {
   const billing = {
     billing_status: (row.billing_status as Patient['billing_status']) ?? 'pending',
@@ -180,6 +182,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
     energy: extras.energy ?? null,
     sleep_minutes: extras.sleep_minutes ?? null,
     appointment: extras.appointment ?? null,
+    appointment_history: extras.appointment_history ?? [],
     habit_logs: extras.habit_logs ?? [],
     todayPlan: extras.todayPlan ?? [],
     weekPlan: extras.weekPlan ?? [],
@@ -232,7 +235,7 @@ export function mapMessage(row: Record<string, unknown>, authorRole: unknown): M
 async function loadPatientExtras(
   patientId: string,
   audience: 'professional' | 'patient' = 'professional',
-): Promise<Pick<Patient, 'todayPlan' | 'weekPlan' | 'meal_logs' | 'messages' | 'brief' | 'briefDismissed' | 'timeline' | 'habit_logs' | 'hydration' | 'energy' | 'sleep_minutes' | 'appointment'>> {
+): Promise<Pick<Patient, 'todayPlan' | 'weekPlan' | 'meal_logs' | 'messages' | 'brief' | 'briefDismissed' | 'timeline' | 'habit_logs' | 'hydration' | 'energy' | 'sleep_minutes' | 'appointment' | 'appointment_history'>> {
   const sb = getRequestDb();
 
   const timelineQuery = sb.from('timeline_events').select('id,kind,title,body,visibility,occurred_at').eq('patient_id', patientId);
@@ -330,8 +333,10 @@ async function loadPatientExtras(
   }));
   const todayHabit = habit_logs.find((h) => h.date === localDateId(new Date()));
 
+  const listedAppt = await listPatientAppointmentPersist(patientId);
   const nextAppt = rows(appts)[0];
-  const appointment = mapScheduledAppointment(nextAppt);
+  const appointment = listedAppt ? listedAppt.appointment : mapScheduledAppointment(nextAppt);
+  const appointment_history = listedAppt?.history ?? [];
 
   return {
     todayPlan,
@@ -346,16 +351,22 @@ async function loadPatientExtras(
     energy: todayHabit?.energy ?? null,
     sleep_minutes: todayHabit?.sleep_minutes ?? null,
     appointment,
+    appointment_history,
   };
 }
 
 function mapScheduledAppointment(nextAppt: Record<string, unknown> | undefined | null): Patient['appointment'] {
   if (!nextAppt?.starts_at) return null;
+  const reply = nextAppt.patient_reply;
   return {
     when: formatAppointmentWhen(String(nextAppt.starts_at)),
     duration: Number(nextAppt.duration_min),
     channel: String(nextAppt.channel),
+    starts_at: String(nextAppt.starts_at),
     ...(nextAppt.meet_url ? { meet_url: String(nextAppt.meet_url) } : {}),
+    ...(typeof nextAppt.timezone === 'string' && nextAppt.timezone ? { timezone: String(nextAppt.timezone) } : {}),
+    ...(reply === 'attending' || reply === 'needs_change' ? { patient_reply: reply } : {}),
+    ...(nextAppt.confirmed_at ? { confirmed_at: String(nextAppt.confirmed_at) } : {}),
   };
 }
 

@@ -66,6 +66,10 @@ export const appointmentRescheduleSchema = z.object({
   time: appointmentTimeSchema,
 });
 
+export const appointmentConfirmSchema = z.object({
+  reply: z.enum(['attending', 'needs_change']),
+});
+
 export const noticeCreateSchema = z.object({
   patientId: z.string().trim().min(1).max(80),
   kind: z.literal('reminder'),

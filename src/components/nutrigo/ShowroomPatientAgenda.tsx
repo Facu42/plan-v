@@ -75,6 +75,7 @@ export function ShowroomPatientAgenda({
   onMessage,
   onNavigate,
   onReschedule,
+  onConfirm,
   audience = 'patient',
   storage = typeof window === 'undefined' ? null : window.localStorage,
 }: {
@@ -83,6 +84,7 @@ export function ShowroomPatientAgenda({
   onMessage: () => void;
   onNavigate?: (page: ShowroomPage) => void;
   onReschedule?: (day: string, time: string) => Promise<void> | void;
+  onConfirm?: (reply: Exclude<AppointmentReply, 'pending'>) => Promise<void> | void;
   audience?: 'patient' | 'professional';
   storage?: Pick<Storage, 'getItem' | 'setItem'> | null;
 }) {
@@ -94,21 +96,24 @@ export function ShowroomPatientAgenda({
   const [filter, setFilter] = useState<CalendarFilter>('all');
   const [selectedDateId, setSelectedDateId] = useState(() => localDateId(now));
   const [month, setMonth] = useState(() => monthAnchor(now));
-  const [reply, setReply] = useState<AppointmentReply>(() => current ? readAppointmentReply(storage, patient.id, current.when) : 'pending');
+  const [reply, setReply] = useState<AppointmentReply>(() => current?.patient_reply ?? (current ? readAppointmentReply(storage, patient.id, current.when) : 'pending'));
   const [rescheduling, setRescheduling] = useState(false);
   const [reschedule, setReschedule] = useState(() => parseAppointmentWhen(current?.when));
   const [rescheduleBusy, setRescheduleBusy] = useState(false);
   const [rescheduleError, setRescheduleError] = useState<string | null>(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
 
   useEffect(() => {
     setView('month');
     setFilter('all');
     setSelectedDateId(localDateId(now));
     setMonth(monthAnchor(now));
-    setReply(current ? readAppointmentReply(storage, patient.id, current.when) : 'pending');
+    setReply(current?.patient_reply ?? (current ? readAppointmentReply(storage, patient.id, current.when) : 'pending'));
     setRescheduling(false);
     setReschedule(parseAppointmentWhen(current?.when));
     setRescheduleError(null);
+    setConfirmError(null);
   }, [patient.id, now, current, storage]);
 
   const events = filterCalendarEvents(allEvents, filter);
@@ -120,11 +125,20 @@ export function ShowroomPatientAgenda({
   const safeUrl = current?.channel === 'video' ? secureMeetUrl(current.meet_url) : null;
   const isPatient = audience === 'patient';
 
-  const respond = (next: Exclude<AppointmentReply, 'pending'>) => {
-    if (!current) return;
-    writeAppointmentReply(storage, patient.id, current.when, next);
-    setReply(next);
-    if (next === 'needs_change') setRescheduling(true);
+  const respond = async (next: Exclude<AppointmentReply, 'pending'>) => {
+    if (!current || confirmBusy) return;
+    setConfirmBusy(true);
+    setConfirmError(null);
+    try {
+      if (onConfirm) await onConfirm(next);
+      writeAppointmentReply(storage, patient.id, current.when, next);
+      setReply(next);
+      if (next === 'needs_change') setRescheduling(true);
+    } catch {
+      setConfirmError('No pudimos guardar la confirmación. Probá de nuevo o escribile a Verónica.');
+    } finally {
+      setConfirmBusy(false);
+    }
   };
 
   const submitReschedule = async () => {
@@ -236,9 +250,11 @@ export function ShowroomPatientAgenda({
 
         {counts.consult > 0 && current && isPatient && <>
           <p className="nvpa-consult-when">{current.when} · {current.duration} min</p>
+          <p className="nvpa-reply-note">Zona horaria: {current.timezone ?? 'America/Argentina/Buenos_Aires'}</p>
           {safeUrl && <a href={safeUrl} target="_blank" rel="noopener noreferrer">Abrir videollamada <Icon name="arrow" size={15} /></a>}
-          {reply === 'pending' ? <div className="nvpa-reply"><NvButton onClick={() => respond('attending')}>Confirmar asistencia</NvButton><NvButton className="nv-ghost" onClick={() => respond('needs_change')}>Necesito cambiar el horario</NvButton></div>
+          {reply === 'pending' ? <div className="nvpa-reply"><NvButton disabled={confirmBusy} onClick={() => { void respond('attending'); }}>Confirmar asistencia</NvButton><NvButton className="nv-ghost" disabled={confirmBusy} onClick={() => { void respond('needs_change'); }}>Necesito cambiar el horario</NvButton></div>
             : <p className="nvpa-reply-note">{appointmentReplyLabel(reply)}. {reply === 'needs_change' ? 'Podés proponer un nuevo día y hora; duración y modalidad las conserva el consultorio.' : 'Si más adelante necesitás mover el turno, reprogramalo acá.'}</p>}
+          {confirmError && <p role="alert">{confirmError}</p>}
           {!rescheduling && <NvButton className="nv-ghost" onClick={() => setRescheduling(true)}>Reprogramar horario</NvButton>}
           {rescheduling && <form className="nvpa-reschedule" onSubmit={(event) => { event.preventDefault(); submitReschedule(); }}>
             <h4>Reprogramar horario</h4>
