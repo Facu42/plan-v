@@ -79,6 +79,14 @@ export const mealPlanDraftSchema = z.object({
 export const mealPlanPublishSchema = z.object({ expected_version: z.number().int().min(1) }).strict();
 
 export type MealPlanDraftInput = z.infer<typeof mealPlanDraftSchema>;
+export type PlanRecipeDetail = {
+  title: string;
+  version: number;
+  yield_portions: number;
+  steps: string[];
+  nutrient_source: string;
+  ingredients: Array<{ id: string; name: string; quantity: number; unit: string }>;
+};
 export type PlanItemView = {
   id: string;
   for_date: string;
@@ -86,6 +94,7 @@ export type PlanItemView = {
   recipe_id: string | null;
   recipe_version: number | null;
   recipe_title: string | null;
+  recipe: PlanRecipeDetail | null;
   free_text: string | null;
   portions: number | null;
   public_note: string;
@@ -116,3 +125,45 @@ export type PatientMealPlan = {
   published_at: string;
   items: PlanItemView[];
 };
+
+export function eachIsoDate(start: string, end: string): string[] {
+  const days: string[] = [];
+  for (let offset = 0; ; offset += 1) {
+    const time = Date.UTC(Number(start.slice(0, 4)), Number(start.slice(5, 7)) - 1, Number(start.slice(8, 10)) + offset);
+    const iso = new Date(time).toISOString().slice(0, 10);
+    if (iso > end) break;
+    days.push(iso);
+  }
+  return days;
+}
+
+export function planWeekdayLabel(iso: string): string {
+  const label = new Date(`${iso}T12:00:00-03:00`).toLocaleDateString('es-AR', {
+    weekday: 'long',
+    timeZone: 'America/Argentina/Buenos_Aires',
+  });
+  return label ? label.charAt(0).toLocaleUpperCase('es-AR') + label.slice(1) : iso;
+}
+
+export type PublishedPlanDay = { isoDate: string; weekday: string; items: PlanItemView[] };
+
+export function buildPublishedPlanDays(plan: Pick<PatientMealPlan, 'period_start' | 'period_end' | 'items'>): PublishedPlanDay[] {
+  return eachIsoDate(plan.period_start, plan.period_end).map((isoDate) => ({
+    isoDate,
+    weekday: planWeekdayLabel(isoDate),
+    items: plan.items.filter((item) => item.for_date === isoDate),
+  }));
+}
+
+export function toPublishedPatientPlan(plan: ProfessionalMealPlan): PatientMealPlan | null {
+  if (!plan.published?.published_at) return null;
+  return {
+    id: plan.id,
+    timezone: plan.timezone,
+    version: plan.published.version,
+    period_start: plan.published.period_start,
+    period_end: plan.published.period_end,
+    published_at: plan.published.published_at,
+    items: plan.published.items,
+  };
+}

@@ -1,13 +1,14 @@
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
 import { getPatient } from '../store.js';
-import { listProfessionalRecipes } from '../recipes/repository.js';
+import { getRecipeSnapshot, listProfessionalRecipes } from '../recipes/repository.js';
 import {
   planSlotKey,
   planSlotLabel,
   type MealPlanDraftInput,
   type PatientMealPlan,
   type PlanItemView,
+  type PlanRecipeDetail,
   type PlanSlot,
   type PlanVersionView,
   type ProfessionalMealPlan,
@@ -73,16 +74,43 @@ function asNumber(value: unknown): number {
   return n;
 }
 
-function asItem(row: Record<string, unknown>): PlanItemView {
+function asRecipeDetail(row: unknown, fallbackTitle: string | null, fallbackVersion: number | null): PlanRecipeDetail | null {
+  if (!row || typeof row !== 'object') return null;
+  const detail = row as Record<string, unknown>;
+  const ingredientsRaw = Array.isArray(detail.ingredients) ? detail.ingredients : [];
+  const title = String(detail.title ?? fallbackTitle ?? '');
+  if (!title) return null;
+  return {
+    title,
+    version: detail.version == null ? fallbackVersion ?? 1 : asNumber(detail.version),
+    yield_portions: asNumber(detail.yield_portions),
+    steps: Array.isArray(detail.steps) ? detail.steps.map((step) => String(step)) : [],
+    nutrient_source: String(detail.nutrient_source ?? ''),
+    ingredients: ingredientsRaw.map((item) => {
+      const line = item as Record<string, unknown>;
+      return {
+        id: String(line.id),
+        name: String(line.name),
+        quantity: asNumber(line.quantity),
+        unit: String(line.unit),
+      };
+    }),
+  };
+}
+
+function asItem(row: Record<string, unknown>, snapshot?: PlanRecipeDetail | null): PlanItemView {
   const slot = planSlotLabel(String(row.slot ?? ''));
   if (!slot) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
+  const recipeTitle = row.recipe_title ? String(row.recipe_title) : null;
+  const recipeVersion = row.recipe_version == null ? null : asNumber(row.recipe_version);
   return {
     id: String(row.id),
     for_date: String(row.for_date).slice(0, 10),
     slot,
     recipe_id: row.recipe_id ? String(row.recipe_id) : null,
-    recipe_version: row.recipe_version == null ? null : asNumber(row.recipe_version),
-    recipe_title: row.recipe_title ? String(row.recipe_title) : null,
+    recipe_version: recipeVersion,
+    recipe_title: recipeTitle,
+    recipe: snapshot === undefined ? asRecipeDetail(row.recipe, recipeTitle, recipeVersion) : snapshot,
     free_text: row.free_text ? String(row.free_text) : null,
     portions: row.portions == null ? null : asNumber(row.portions),
     public_note: String(row.public_note ?? ''),
@@ -145,6 +173,7 @@ function versionItems(versionId: string): PlanItemView[] {
       recipe_id: item.recipe_id,
       recipe_version: item.recipe_version,
       recipe_title: item.recipe_title,
+      recipe: getRecipeSnapshot(item.recipe_version_id),
       free_text: item.free_text,
       portions: item.portions,
       public_note: item.public_note,

@@ -146,6 +146,21 @@ function memVersionView(row: MemVersion): RecipeVersionView {
   };
 }
 
+export function getRecipeSnapshot(recipeVersionId: string | null) {
+  if (!recipeVersionId) return null;
+  const version = versions.get(recipeVersionId);
+  const recipe = version ? recipes.get(version.recipe_id) : undefined;
+  if (!version || !recipe || !version.published_at) return null;
+  return {
+    title: recipe.title,
+    version: version.version,
+    yield_portions: version.yield_portions,
+    steps: version.steps,
+    nutrient_source: version.nutrient_source,
+    ingredients: versionItems(version.id),
+  };
+}
+
 function memProfessional(row: MemRecipe): ProfessionalRecipe {
   const list = recipeVersions(row.id);
   const current = list[list.length - 1];

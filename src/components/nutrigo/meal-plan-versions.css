@@ -14,5 +14,12 @@
 .meal-plan-item-row{display:grid;grid-template-columns:140px 120px minmax(0,1fr) minmax(0,1fr) 88px;gap:8px;margin:8px 0}
 .meal-plan-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
 .meal-plan-add{border:0;background:transparent;color:var(--nv-strong);font:inherit;font-size:13px;font-weight:700}
-.published-dated-plan li{display:flex;flex-direction:column;gap:2px;margin:10px 0}
+.published-plan-day{margin:16px 0;padding-top:8px;border-top:1px solid var(--nv-border)}
+.published-plan-day h3{margin:0 0 8px;font-size:16px}
+.published-plan-empty-day{margin:0;font-size:13px;color:var(--nv-muted)}
+.published-plan-item{margin:12px 0;padding:12px;border:1px solid var(--nv-border);border-radius:12px;background:var(--nv-bg)}
+.published-plan-item header{display:flex;gap:8px;align-items:baseline}
+.published-plan-item h3{margin:8px 0 4px;font-size:16px}
+.published-plan-item h4{margin:10px 0 4px;font-size:12px;letter-spacing:.4px}
+.published-plan-item ul,.published-plan-item ol{margin:0;padding-left:18px;font-size:13px}
 @media(max-width:800px){.meal-plan-item-row,.meal-plan-form-row{grid-template-columns:1fr}}

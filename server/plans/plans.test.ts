@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mealPlanDraftSchema } from '../../src/types/plans.js';
+import { buildPublishedPlanDays, mealPlanDraftSchema, toPublishedPatientPlan } from '../../src/types/plans.js';
 import { CareError, mealPlanDbError } from './repository.js';
 
 const draft = {
@@ -49,5 +49,39 @@ describe('PV-19 planes fechados', () => {
     } catch (error) {
       expect(error).toMatchObject({ status: 409 });
     }
+  });
+
+  it('arma la semana con días vacíos reales y el mismo snapshot para el paciente', () => {
+    const items = [{
+      id: 'i1',
+      for_date: '2026-09-21',
+      slot: 'Almuerzo' as const,
+      recipe_id: null,
+      recipe_version: null,
+      recipe_title: null,
+      recipe: null,
+      free_text: 'Pollo con vegetales',
+      portions: 1,
+      public_note: '',
+    }];
+    const days = buildPublishedPlanDays({ period_start: '2026-09-21', period_end: '2026-09-27', items });
+    expect(days).toHaveLength(7);
+    expect(days[0]).toMatchObject({ isoDate: '2026-09-21', weekday: 'Lunes', items });
+    expect(days.slice(1).every((day) => day.items.length === 0)).toBe(true);
+    expect(days.map((day) => day.isoDate)).not.toContain('2026-09-28');
+    const patient = toPublishedPatientPlan({
+      id: 'p1',
+      patient_id: 'pat-sofia',
+      timezone: 'America/Argentina/Buenos_Aires',
+      created_at: '2026-09-21T12:00:00.000Z',
+      current: {
+        id: 'v2', version: 2, status: 'draft', period_start: '2026-09-21', period_end: '2026-09-27', published_at: null, items: [],
+      },
+      published: {
+        id: 'v1', version: 1, status: 'published', period_start: '2026-09-21', period_end: '2026-09-27', published_at: '2026-09-21T12:00:00.000Z', items,
+      },
+    });
+    expect(patient?.items).toEqual(items);
+    expect(patient?.version).toBe(1);
   });
 });

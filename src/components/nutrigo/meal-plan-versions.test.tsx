@@ -17,6 +17,14 @@ const published: PatientMealPlan = {
     recipe_id: 'r1',
     recipe_version: 1,
     recipe_title: 'Bowl de lentejas',
+    recipe: {
+      title: 'Bowl de lentejas',
+      version: 1,
+      yield_portions: 2,
+      steps: ['Lavar.', 'Cocinar.'],
+      nutrient_source: 'Tabla del consultorio',
+      ingredients: [{ id: 'i1', name: 'Lentejas', quantity: 80, unit: 'g' }],
+    },
     free_text: null,
     portions: 1,
     public_note: 'Sin fritura',
@@ -40,14 +48,35 @@ describe('Plan fechado profesional y publicado', () => {
     expect(html).not.toMatch(/porción|kcal|proteína|carbohidrato|grasa/i);
   });
 
-  it('muestra fecha, momento, receta o texto y rinde de la copia publicada', () => {
-    const html = renderToStaticMarkup(<PublishedDatedPlanView plan={published} />);
+  it('paciente y CRM ven el mismo detalle de receta, porciones y días vacíos reales', () => {
+    const patient = renderToStaticMarkup(<PublishedDatedPlanView plan={published} />);
+    const crm = renderToStaticMarkup(<PublishedDatedPlanView plan={published} audience="pro" />);
+    for (const html of [patient, crm]) {
+      expect(html).toContain('Bowl de lentejas');
+      expect(html).toContain('2026-09-21');
+      expect(html).toContain('Almuerzo');
+      expect(html).toContain('revisión 1');
+      expect(html).toContain('Porciones 1');
+      expect(html).toContain('Rinde 2');
+      expect(html).toContain('80 g Lentejas');
+      expect(html).toContain('Cocinar.');
+      expect(html).toContain('Tabla del consultorio');
+      expect(html).toContain('Sin fritura');
+      expect(html.match(/data-plan-date=/g)).toHaveLength(7);
+      expect(html.match(/Sin indicaciones este día/g)).toHaveLength(6);
+      expect(html).not.toMatch(/\bkcal\b|proteína|carbohidrato/i);
+    }
+    expect(patient).toContain('Plan publicado');
+    expect(crm).toContain('Lo que ve el paciente');
+  });
+
+  it('la búsqueda no rellena días vacíos con comidas de otro día', () => {
+    const html = renderToStaticMarkup(<PublishedDatedPlanView plan={published} query="lentejas" />);
     expect(html).toContain('Bowl de lentejas');
-    expect(html).toContain('2026-09-21');
-    expect(html).toContain('Almuerzo');
-    expect(html).toContain('revisión 1');
-    expect(html).toContain('Rinde 1');
-    expect(html).toContain('Sin fritura');
-    expect(html).not.toMatch(/\bkcal\b|proteína|carbohidrato/i);
+    expect(html.match(/data-plan-date=/g)).toHaveLength(1);
+    expect(html).not.toContain('Sin indicaciones este día');
+    const miss = renderToStaticMarkup(<PublishedDatedPlanView plan={published} query="milanesa" />);
+    expect(miss).not.toContain('Bowl de lentejas');
+    expect(miss).not.toContain('Sin indicaciones este día');
   });
 });

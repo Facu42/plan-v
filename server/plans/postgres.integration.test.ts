@@ -149,4 +149,34 @@ describe('PV-19 planes en PostgreSQL descartable', () => {
       await db.exec('alter table public.meal_plans_pv19_hidden rename to meal_plans');
     }
   });
+
+  it('el paciente ve el detalle inmutable de la receta, igual que el CRM', async () => {
+    await rpc(nutriA, 'publish_meal_plan', [planId, 2]);
+    const visible = await rpc(patientAUser, 'list_published_meal_plan', [patientA]) as {
+      version: number;
+      items: Array<{ slot: string; portions: number | string | null; recipe: { title: string; version: number; yield_portions: number | string; steps: string[]; ingredients: Array<{ name: string; quantity: number | string; unit: string }> } | null }>;
+    };
+    const professional = await rpc(nutriA, 'list_professional_meal_plan', [patientA]) as { published: { version: number; items: unknown } };
+    expect(visible.version).toBe(2);
+    expect(visible.items).toEqual(professional.published.items);
+    expect(visible.items[0]).toMatchObject({ slot: 'Colación', recipe: { title: 'Ensalada de quinoa', version: 1 } });
+    expect(Number(visible.items[0].recipe?.yield_portions)).toBe(2);
+    expect(visible.items[0].recipe?.steps).toEqual(['Cocinar la quinoa.', 'Mezclar con vegetales.']);
+    expect(visible.items[0].recipe?.ingredients).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: 'Quinoa', unit: 'g' }),
+    ]));
+
+    await rpc(nutriA, 'save_recipe_draft', [{
+      ...recipeDraft,
+      title: 'Ensalada de quinoa nueva',
+      yield_portions: 8,
+      items: [{ name: 'Quinoa', quantity: 200, unit: 'g' }],
+    }]);
+    const still = await rpc(patientAUser, 'list_published_meal_plan', [patientA]) as {
+      items: Array<{ recipe: { version: number; yield_portions: number | string; ingredients: Array<{ quantity: number | string }> } }>;
+    };
+    expect(still.items[0].recipe.version).toBe(1);
+    expect(Number(still.items[0].recipe.yield_portions)).toBe(2);
+    expect(Number(still.items[0].recipe.ingredients.find((line) => line.name === 'Quinoa')?.quantity)).toBe(60);
+  });
 });

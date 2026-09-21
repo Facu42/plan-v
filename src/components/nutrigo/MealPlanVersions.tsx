@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { careErrorMessage } from '../../api/care';
 import { plansApi } from '../../api/plans';
 import { recipesApi } from '../../api/recipes';
-import { PLAN_SLOTS, mealPlanDraftSchema, type PatientMealPlan, type PlanItemView, type PlanSlot, type ProfessionalMealPlan } from '../../types/plans';
+import { PLAN_SLOTS, buildPublishedPlanDays, mealPlanDraftSchema, toPublishedPatientPlan, type PatientMealPlan, type PlanItemView, type PlanSlot, type ProfessionalMealPlan } from '../../types/plans';
 import type { ProfessionalRecipe } from '../../types/recipes';
 import { NvButton, NvState } from './primitives';
 import './meal-plan-versions.css';
@@ -97,11 +97,7 @@ export function MealPlanEditor({ patientId }: { patientId: string }) {
     {source === 'memory' && <p className="meal-plan-demo">Vista demo · el plan fechado se conserva mientras la API siga encendida.</p>}
     {error && <p className="meal-plan-error" role="alert">{error}</p>}
     {status && <p className="meal-plan-status" role="status">{status}</p>}
-    {plan?.published && <aside className="meal-plan-published" aria-label="Copia publicada">
-      <span>PUBLICADA · v{plan.published.version}</span>
-      <p>{plan.published.period_start} a {plan.published.period_end} · no cambia al editar el borrador</p>
-      <ul>{plan.published.items.map((item) => <li key={item.id}>{item.for_date} · {item.slot} · {item.recipe_title || item.free_text}{item.portions ? ` · ${item.portions}` : ''}</li>)}</ul>
-    </aside>}
+    {plan?.published && <PublishedDatedPlanView plan={toPublishedPatientPlan(plan)} audience="pro" />}
     <form className="meal-plan-form" onSubmit={submit}>
       <div className="meal-plan-form-row">
         <label>Desde<input type="date" value={periodStart} onChange={(event) => setPeriodStart(event.target.value)} /></label>
@@ -128,28 +124,66 @@ export function MealPlanEditor({ patientId }: { patientId: string }) {
   </section>;
 }
 
-export function PublishedDatedPlanView({ plan, error = '' }: { plan: PatientMealPlan | null; error?: string }) {
-  return <section className="published-dated-plan" aria-label="Plan fechado publicado">
+function PlanPublishedItem({ item }: { item: PlanItemView }) {
+  const recipe = item.recipe;
+  return <article className="published-plan-item">
+    <header>
+      <strong>{item.slot}</strong>
+      {item.portions != null && <small>Porciones {item.portions}</small>}
+    </header>
+    {recipe ? <>
+      <h3>{recipe.title}</h3>
+      <p>Revisión {recipe.version} · Rinde {recipe.yield_portions} · {recipe.nutrient_source || 'Sin fuente nutricional declarada'}</p>
+      <h4>Ingredientes</h4>
+      <ul>{recipe.ingredients.map((line) => <li key={line.id}>{line.quantity} {line.unit} {line.name}</li>)}</ul>
+      <h4>Pasos</h4>
+      <ol>{recipe.steps.map((step) => <li key={step}>{step}</li>)}</ol>
+    </> : <p>{item.free_text}</p>}
+    {item.public_note && <small>{item.public_note}</small>}
+  </article>;
+}
+
+export function PublishedDatedPlanView({
+  plan,
+  error = '',
+  audience = 'patient',
+  query = '',
+}: {
+  plan: PatientMealPlan | null;
+  error?: string;
+  audience?: 'patient' | 'pro';
+  query?: string;
+}) {
+  const term = query.trim().toLocaleLowerCase('es-AR');
+  const days = plan ? buildPublishedPlanDays(plan).map((day) => ({
+    ...day,
+    items: term
+      ? day.items.filter((item) => `${item.slot} ${item.recipe?.title ?? ''} ${item.free_text ?? ''} ${item.public_note}`.toLocaleLowerCase('es-AR').includes(term))
+      : day.items,
+  })).filter((day) => !term || day.items.length > 0) : [];
+  return <section className="published-dated-plan" aria-label={audience === 'pro' ? 'Copia publicada que ve el paciente' : 'Plan fechado publicado'}>
     <header>
       <span>PLAN FECHADO</span>
-      <h2>Plan publicado</h2>
-      <p>Sólo la versión que tu nutricionista publicó. Un borrador posterior no cambia lo que ves.</p>
+      <h2>{audience === 'pro' ? 'Lo que ve el paciente' : 'Plan publicado'}</h2>
+      <p>{audience === 'pro'
+        ? 'Misma copia publicada que el paciente. Un borrador posterior no la cambia.'
+        : 'Sólo la versión que tu nutricionista publicó. Un borrador posterior no cambia lo que ves. Los días sin indicación quedan vacíos.'}</p>
     </header>
     {error && <p className="meal-plan-error" role="alert">{error}</p>}
     {!plan && <NvState title="Todavía no hay un plan fechado publicado" description="Cuando tu nutricionista publique un período con comidas, vas a verlo acá. Los días sin indicación quedan vacíos." />}
     {plan && <div>
       <p>Del {plan.period_start} al {plan.period_end} · revisión {plan.version}</p>
-      <ul>{plan.items.map((item: PlanItemView) => <li key={item.id}>
-        <strong>{item.for_date} · {item.slot}</strong>
-        <span>{item.recipe_title || item.free_text}</span>
-        {item.portions != null && <small>Rinde {item.portions}</small>}
-        {item.public_note && <small>{item.public_note}</small>}
-      </li>)}</ul>
+      {days.map((day) => <section className="published-plan-day" key={day.isoDate} data-plan-date={day.isoDate}>
+        <h3>{day.weekday} {day.isoDate}</h3>
+        {day.items.length
+          ? day.items.map((item) => <PlanPublishedItem key={item.id} item={item} />)
+          : <p className="published-plan-empty-day">Sin indicaciones este día</p>}
+      </section>)}
     </div>}
   </section>;
 }
 
-export function PublishedDatedPlan({ patientId }: { patientId: string }) {
+export function PublishedDatedPlan({ patientId, query = '' }: { patientId: string; query?: string }) {
   const [plan, setPlan] = useState<PatientMealPlan | null>(null);
   const [error, setError] = useState('');
   useEffect(() => {
@@ -163,5 +197,5 @@ export function PublishedDatedPlan({ patientId }: { patientId: string }) {
       });
     return () => controller.abort();
   }, [patientId]);
-  return <PublishedDatedPlanView plan={plan} error={error} />;
+  return <PublishedDatedPlanView plan={plan} error={error} query={query} />;
 }
