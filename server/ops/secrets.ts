@@ -43,6 +43,7 @@ export function inspectSecrets(env: Record<string, string | undefined> = process
   if (persistent) {
     if (!env.CORS_ORIGINS?.trim()) missing.push('CORS_ORIGINS');
     if (!env.PROVISION_SECRET?.trim()) missing.push('PROVISION_SECRET');
+    if (!env.AI_MODE?.trim() || env.AI_MODE === 'demo') missing.push('AI_MODE');
   }
 
   return { ok: missing.length === 0, leaked: false as const, missing };

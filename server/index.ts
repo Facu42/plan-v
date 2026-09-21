@@ -20,7 +20,7 @@ import { startJobWorker } from './jobs/worker.js';
 import { authMiddleware } from './middleware/auth.js';
 import { emitOpsAlert } from './ops/alerts.js';
 import { resolveCorsOrigin } from './ops/cors.js';
-import { writeOpsLog } from './ops/log.js';
+import { safePath, writeOpsLog } from './ops/log.js';
 import { createRateLimitMiddleware } from './ops/rate-limit.js';
 import { createBodyLimitMiddleware, evaluateReadiness, releaseSha } from './ops/readiness.js';
 import { assertSecretBoundary, inspectSecrets } from './ops/secrets.js';
@@ -153,6 +153,8 @@ async function persistPatientWrite(
 
 app.use('/*', cors({
   origin: (origin) => resolveCorsOrigin(origin ?? '', process.env),
+  allowHeaders: ['Authorization', 'Content-Type', 'X-Request-Id'],
+  exposeHeaders: ['X-Request-Id', 'Retry-After', 'X-RateLimit-Remaining'],
 }));
 app.use('/api/*', async (c, next) => {
   await next();
@@ -160,6 +162,23 @@ app.use('/api/*', async (c, next) => {
 });
 app.use('/api/*', createBodyLimitMiddleware());
 app.use('/api/*', createRateLimitMiddleware());
+app.use('/api/*', async (c, next) => {
+  const started = Date.now();
+  const incoming = c.req.header('x-request-id');
+  const requestId = incoming && /^[a-zA-Z0-9_-]{6,64}$/.test(incoming)
+    ? incoming
+    : `pv${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+  c.header('x-request-id', requestId);
+  await next();
+  if (c.req.path === '/api/health' || c.req.path === '/api/ready') return;
+  writeOpsLog('info', 'http', {
+    requestId,
+    method: c.req.method,
+    path: safePath(c.req.path),
+    status: c.res.status,
+    ms: Date.now() - started,
+  });
+});
 app.use('/api/*', authMiddleware);
 
 app.onError((error, c) => {
@@ -181,12 +200,20 @@ app.onError((error, c) => {
   return c.json({ error: 'No se pudo completar la operación' }, 500);
 });
 
+function publicAiEnabled() {
+  try {
+    return readRuntimeConfig(process.env).aiMode === 'live';
+  } catch {
+    return false;
+  }
+}
+
 app.get('/api/health', async (c) => {
   const jobs = await processQueue.counts();
   return c.json({
     status: 'ok',
     mode: process.env.APP_MODE ?? null,
-    ai: Boolean(process.env.OPENAI_API_KEY),
+    ai: publicAiEnabled(),
     supabase: isSupabaseEnabled(),
     jobs,
     sha: releaseSha(),

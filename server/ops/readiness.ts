@@ -2,7 +2,11 @@ import type { Context, Next } from 'hono';
 import { inspectSecrets } from './secrets.js';
 
 export function releaseSha(env: Record<string, string | undefined> = process.env) {
-  return env.GIT_SHA || env.VERCEL_GIT_COMMIT_SHA || env.GITHUB_SHA || null;
+  return env.GIT_SHA
+    || env.RAILWAY_GIT_COMMIT_SHA
+    || env.VERCEL_GIT_COMMIT_SHA
+    || env.GITHUB_SHA
+    || null;
 }
 
 export function workerLabel(env: Record<string, string | undefined> = process.env) {

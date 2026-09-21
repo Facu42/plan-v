@@ -8,6 +8,10 @@ import { resolveCorsOrigin } from './cors.js';
 import { evaluateReadiness, maxBodyBytes, releaseSha, workerLabel } from './readiness.js';
 import { Hono } from 'hono';
 import { readFileSync } from 'node:fs';
+import { app } from '../index.js';
+import { createMemoryJobStore } from '../jobs/memory.js';
+import { PermanentJobError } from '../jobs/errors.js';
+import { runOne } from '../jobs/queue.js';
 
 const staging = {
   APP_MODE: 'staging',
@@ -42,6 +46,7 @@ describe('secret boundary', () => {
     expect(incomplete.ok).toBe(false);
     expect(incomplete.missing.sort()).toEqual(['CORS_ORIGINS', 'PROVISION_SECRET']);
     expect(inspectSecrets(staging).ok).toBe(true);
+    expect(inspectSecrets({ ...staging, AI_MODE: '' }).missing).toContain('AI_MODE');
     expect(secretNamesPresent(staging)).toEqual(['SUPABASE_SERVICE_ROLE_KEY', 'PROVISION_SECRET']);
     expect(publicNamesPresent({ VITE_SUPABASE_URL: 'https://example.supabase.co' })).toEqual(['VITE_SUPABASE_URL']);
   });
@@ -134,6 +139,7 @@ describe('cors and readiness', () => {
     expect(evaluateReadiness(staging).status).toBe('ready');
     expect(workerLabel({ WORKER_SEPARATE: '1' })).toBe('external');
     expect(releaseSha({ GIT_SHA: 'abc1234' })).toBe('abc1234');
+    expect(releaseSha({ RAILWAY_GIT_COMMIT_SHA: 'railsha1' })).toBe('railsha1');
     expect(maxBodyBytes('/api/patients/x/meals')).toBeGreaterThan(maxBodyBytes('/api/patients'));
   });
 });
@@ -167,5 +173,56 @@ describe('deploy contract', () => {
     });
     expect(staging.status).not.toBe(0);
     expect(`${staging.stderr}${staging.stdout}`).toMatch(/Incomplete staging/);
+  });
+
+  it('Dockerfile splits API and worker and does not bake secrets', () => {
+    const docker = readFileSync(new URL('../../Dockerfile', import.meta.url), 'utf8');
+    expect(docker).toContain('server/index.ts');
+    expect(docker).toContain('server/jobs/worker-main.ts');
+    expect(docker).toContain('WORKER_SEPARATE');
+    expect(docker).not.toMatch(/service_role|sk-live|OPENAI_API_KEY=/i);
+    const worker = readFileSync(new URL('../jobs/worker-main.ts', import.meta.url), 'utf8');
+    expect(worker).toContain('assertSecretBoundary');
+    expect(worker).toContain('inspectSecrets');
+  });
+});
+
+describe('ops gaps on the live contract', () => {
+  it('alerts when a job reaches dead letter without the error text', async () => {
+    const store = createMemoryJobStore();
+    await store.enqueue({ kind: 'purge_asset', payload: { path: 'private/note' }, max_attempts: 1 });
+    const done = await runOne(store, 'w1', async () => { throw new PermanentJobError('ana@example.com'); });
+    expect(done?.status).toBe('dead');
+    const alert = recentOpsAlerts().find((item) => item.kind === 'dead_letter');
+    expect(alert).toMatchObject({ kind: 'dead_letter', status: 500, detail: 'purge_asset' });
+    expect(JSON.stringify(alert)).not.toContain('ana@');
+  });
+
+  it('health stays public, names the worker, and never echoes an AI key', async () => {
+    const previous = process.env.OPENAI_API_KEY;
+    process.env.OPENAI_API_KEY = 'sk-live-must-not-appear';
+    const health = await app.request('/api/health');
+    const raw = await health.text();
+    process.env.OPENAI_API_KEY = previous;
+    expect(health.status).toBe(200);
+    expect(health.headers.get('Cache-Control')).toBe('no-store');
+    expect(health.headers.get('x-request-id')).toBeTruthy();
+    expect(raw).not.toContain('sk-live-must-not-appear');
+    expect(raw).toContain('"jobs"');
+    expect(raw).toContain('"worker"');
+    const ready = await app.request('/api/ready');
+    expect(ready.status).toBe(200);
+    expect(await ready.json()).toMatchObject({ status: 'ready' });
+  });
+
+  it('logs HTTP access without UUID or email', async () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    const response = await app.request('/api/patients/33333333-3333-4333-a333-333333333333');
+    expect(response.status).toBeGreaterThanOrEqual(400);
+    const line = log.mock.calls.map((call) => String(call[0])).find((item) => item.includes('"event":"http"'));
+    log.mockRestore();
+    expect(line).toBeTruthy();
+    expect(line).toContain('[id-redacted]');
+    expect(line).not.toContain('33333333-3333-4333-a333-333333333333');
   });
 });
