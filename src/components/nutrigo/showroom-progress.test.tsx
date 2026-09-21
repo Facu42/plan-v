@@ -40,6 +40,9 @@ describe('Progreso paciente dentro de Nutrigo', () => {
     expect(html).toContain('Promedio 7 h');
     expect(html).toContain('Comidas revisadas');
     expect(html).toContain('Cena');
+    expect(html).toContain('7 días');
+    expect(html).toContain('30 días');
+    expect(html).toContain('90 días');
   });
 
   it('no presenta medidas, inferencias clínicas ni campos profesionales', () => {
@@ -51,5 +54,33 @@ describe('Progreso paciente dentro de Nutrigo', () => {
     expect(html).not.toContain('adherence_why');
     expect(html).not.toContain('goal_history');
     expect(html).toContain('No se completan períodos sin registros');
+    expect(html).not.toMatch(/mejoró|empeoró|leaderboard/i);
+    expect(html).toContain('Cada paciente se compara consigo misma');
+  });
+
+  it('muestra el cambio declarado del mismo paciente, con fuente y sin relleno', () => {
+    const html = renderToStaticMarkup(<ShowroomProgress patient={patient} professional progress={{
+      patient_id: 'ana',
+      timezone: 'America/Argentina/Buenos_Aires',
+      period_days: 7,
+      current: { start: '2026-09-15', end: '2026-09-21' },
+      previous: { start: '2026-09-08', end: '2026-09-14' },
+      measurements_included: true,
+      series: [{
+        kind: 'weight', unit: 'kg',
+        current: [{ id: 'now', value: 64.5, source: 'patient', captured_on: '2026-09-20', created_at: '2026-09-20T12:00:00.000Z' }],
+        previous: [{ id: 'prev', value: 65, source: 'professional', captured_on: '2026-09-10', created_at: '2026-09-10T12:00:00.000Z' }],
+        current_last: { id: 'now', value: 64.5, source: 'patient', captured_on: '2026-09-20', created_at: '2026-09-20T12:00:00.000Z' },
+        previous_last: { id: 'prev', value: 65, source: 'professional', captured_on: '2026-09-10', created_at: '2026-09-10T12:00:00.000Z' },
+        declared_delta: -0.5,
+      }],
+      meals: { current: { logged: 2, reviewed: 1, pending: 1 }, previous: { logged: 1, reviewed: 1, pending: 0 } },
+    }} />);
+    expect(html).toContain('Progreso de Ana, en contexto');
+    expect(html).toContain('Cambio declarado: -0,5 kg');
+    expect(html).toContain('Paciente');
+    expect(html).toContain('Se compara consigo misma');
+    expect(html).not.toContain('IMC');
+    expect(html).not.toMatch(/mejoró|empeoró|leaderboard/i);
   });
 });

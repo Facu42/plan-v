@@ -5,6 +5,7 @@ describe('rutas autenticadas de Nutrigo', () => {
   it('arma /app y /crm canónicos por rol', () => {
     expect(appPath('patient', 'plan')).toBe('/app/plan');
     expect(appPath('pro', 'pacientes')).toBe('/crm/pacientes');
+    expect(appPath('pro', 'progreso')).toBe('/crm/progreso');
     expect(appPath('patient', 'ficha')).toBe('/app/inicio');
     expect(appPath('pro', 'ejercicio')).toBe('/crm/inicio');
   });

@@ -11,6 +11,7 @@ import { registerAiJobRoutes } from './ai-jobs/routes.js';
 import { registerPrivacyRoutes } from './privacy/routes.js';
 import { registerShoppingRoutes } from './shopping/routes.js';
 import { registerOutboxRoutes } from './outbox/routes.js';
+import { registerProgressRoutes } from './progress/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -248,6 +249,7 @@ registerAiJobRoutes(app);
 registerPrivacyRoutes(app);
 registerShoppingRoutes(app);
 registerOutboxRoutes(app);
+registerProgressRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({

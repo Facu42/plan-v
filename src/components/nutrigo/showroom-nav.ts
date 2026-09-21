@@ -38,6 +38,7 @@ export const PRO_MORE: ShellTab[] = [
   { id: 'plan', icon: 'list', label: 'Plan' },
   { id: 'consultas', icon: 'video', label: 'Consultas' },
   { id: 'objetivos', icon: 'target', label: 'Objetivos' },
+  { id: 'progreso', icon: 'trend', label: 'Progreso' },
   { id: 'mensajes', icon: 'message', label: 'Mensajes' },
   { id: 'reciente', icon: 'history', label: 'Reciente' },
   { id: 'guardado', icon: 'pin', label: 'Guardado' },
