@@ -16,7 +16,7 @@ de entidades existentes, no debe persistirse; **futura** = sin implementación.
 | `activity_logs` | demo (corte 57) | 016b: actividad autodeclarada, sin calorías | RLS paciente-insert / nutri-select |
 | `plan_b` | campo en `patients` | núcleo 016; fuera del DTO paciente (PV-03) | Confirmar si alguna vez se publica |
 | Lista de compras | derivada | **fuera del piloto** | `shopping_lists` post-piloto (PV-21/39) |
-| `recipes` / `recipe_ingredients` | futura | 016b: recetas versionadas + ingredientes + asignaciones | Catálogo usable (PV-18) y publicación (PV-19) |
+| `recipes` / `recipe_ingredients` | demo + PGlite (PV-18) | 016b: recetas versionadas + ingredientes + asignaciones | Live schema en proyecto **vacío** (no el de `patients`). Plan fechado: PV-19 |
 | `meal_plans` / versiones | plantilla semanal 016 | 016b: plan fechado, una versión `published` | Publicación transaccional (PV-19) |
 | `intake_sessions` / `consent_events` | onboarding React | 016b: intake versionado + consentimientos append-only | Pantallas y persistencia (PV-12/13) |
 | `document_records` / `body_photo_entries` | — | 016b: estudios y fotos corporales; sin IA | Storage privado (PV-15/16) |

@@ -2,7 +2,7 @@
 
 ## Revisión vigente de avance — 2026-09-21
 
-PV-17 en esta rama: peso/cintura/cadera opcionales con fecha, unidad, origen e historial; dual-write `measurements` + `care_records`; fotos/estudios no infieren medidas; fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 594 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente P0: PV-18 recetas. No P1, no visual Nutrigo.
+PV-18 en esta rama: catálogo profesional de recetas/ingredientes con rinde, pasos y fuente nutricional declarada; versiones publicadas inmutables; paciente sólo ve revisiones publicadas y asignadas; fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 605 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente P0: PV-19 planes fechados. No P1, no visual Nutrigo.
 
 ## Revisión vigente de avance — 2026-09-19
 
