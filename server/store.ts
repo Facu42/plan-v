@@ -35,6 +35,7 @@ import { resetShoppingMemory } from './shopping/repository.js';
 import { enqueueMemoryOutbox, listMemoryMailbox, processMemoryDeliveries, resetOutboxMemory } from './outbox/memory.js';
 import { resetExerciseMemory } from './exercise/memory.js';
 import { resetResourceMemory } from './resources/memory.js';
+import { resetOrgMemory } from './orgs/memory.js';
 import type { OutboxEventType } from '../src/types/outbox.js';
 
 export type { PatientInvite, InviteEvent } from './identity/invites.js';
@@ -772,6 +773,7 @@ export function resetStore(): void {
   resetOutboxMemory();
   resetExerciseMemory();
   resetResourceMemory();
+  resetOrgMemory();
   store = {
     patients: seedPatients(),
     patientInvites: [],

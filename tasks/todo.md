@@ -13,6 +13,7 @@ Los pasos de abajo conservan el historial de migración funcional y visual a Nut
 - [x] Primer corte de shell paciente: 223/892/325 en canvas de 1440, padding 28 y cuerpo a y=106 comprobados en navegador. Ocho capturas en claro/oscuro a 1440/800/390/320; navegación móvil y once módulos CRM conservados. Evidencia: `.scratch/nutrigo-local-reference/shell-verification.json`. No equivale a fidelidad completa ni aprobación visual.
 - [x] Usuario confirma Poppins y compra de licencia de todo el pack Nutrigo. Fuente incorporada localmente al showroom; uso del pack autorizado por su declaración, sin afirmar una revisión legal independiente.
 - [x] PV-37: contratos de layout/estado de las doce superficies a 1440/800/390/320, claro/oscuro, vacío/error/carga y `:focus-visible`. Reorganización tablet/móvil; overflow de progreso/diario corregido. **No es aprobación visual.**
+- [x] PV-38: organizaciones/equipos, múltiples vínculos, delegación y suscripción B2B de estado; transferencia de ownership con hijos y auditoría. Fail closed 501. **No es SQL live ni aprobación visual.**
 - [ ] Resolver componentes/overrides y revisar visualmente cada pantalla antes de declarar auditados todos sus controles.
 - [x] Completar Dashboard y las once entradas del CRM desde esta fuente: todas abren superficies Nutrigo operativas; la comparación visual general sigue NO APROBADA.
 - [x] Verificar que `/` abra Nutrigo por defecto en demo local y que `?design=legacy` conserve la versión anterior. Guardas de sesión/producción intactas.

@@ -14,6 +14,7 @@ import { registerOutboxRoutes } from './outbox/routes.js';
 import { registerProgressRoutes } from './progress/routes.js';
 import { registerExerciseRoutes } from './exercise/routes.js';
 import { registerResourceRoutes } from './resources/routes.js';
+import { registerOrgRoutes } from './orgs/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -247,6 +248,7 @@ registerOutboxRoutes(app);
 registerProgressRoutes(app);
 registerExerciseRoutes(app);
 registerResourceRoutes(app);
+registerOrgRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({

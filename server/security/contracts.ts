@@ -64,7 +64,10 @@ export type PatientAction =
   | 'read_clinical_note'
   | 'write_clinical_note'
   | 'request_privacy'
-  | 'read_privacy';
+  | 'read_privacy'
+  | 'delegate_patient'
+  | 'revoke_delegation'
+  | 'transfer_ownership';
 
 export type PatientManagementAction = 'create_patient';
 
@@ -120,6 +123,9 @@ const NUTRITIONIST_ACTIONS = new Set<PatientAction>([
   'read_consent',
   'read_clinical_note',
   'write_clinical_note',
+  'delegate_patient',
+  'revoke_delegation',
+  'transfer_ownership',
 ]);
 
 export function canAccessPatient(actor: Actor, patient: PatientResource, action: PatientAction): boolean {

@@ -136,7 +136,7 @@ describe('canAccessPatient', () => {
     },
   );
 
-  it.each<PatientAction>(['read_clinical', 'review_meal', 'generate_copilot', 'generate_ai_job', 'edit_patient', 'archive_patient', 'edit_menu', 'edit_appointment', 'edit_goal', 'edit_billing', 'assign_resource', 'assign_routine', 'review_intake', 'write_clinical_note'])(
+  it.each<PatientAction>(['read_clinical', 'review_meal', 'generate_copilot', 'generate_ai_job', 'edit_patient', 'archive_patient', 'edit_menu', 'edit_appointment', 'edit_goal', 'edit_billing', 'assign_resource', 'assign_routine', 'review_intake', 'write_clinical_note', 'delegate_patient', 'revoke_delegation', 'transfer_ownership'])(
     'does not allow a patient to perform the professional action %s',
     (action) => {
       const actor: Actor = { role: 'paciente', userId: 'user-patient', patientId: 'patient-1' };
@@ -160,6 +160,9 @@ describe('canAccessPatient', () => {
     expect(canAccessPatient(actor, patientOwner, 'review_intake')).toBe(true);
     expect(canAccessPatient(actor, patientOwner, 'write_clinical_note')).toBe(true);
     expect(canAccessPatient(actor, patientOwner, 'generate_ai_job')).toBe(true);
+    expect(canAccessPatient(actor, patientOwner, 'delegate_patient')).toBe(true);
+    expect(canAccessPatient(actor, patientOwner, 'revoke_delegation')).toBe(true);
+    expect(canAccessPatient(actor, patientOwner, 'transfer_ownership')).toBe(true);
     expect(canAccessPatient(actor, { ...patientOwner, nutritionistId: 'nutri-2' }, 'read_clinical')).toBe(false);
     expect(canAccessPatient(actor, { ...patientOwner, nutritionistId: 'nutri-2' }, 'edit_patient')).toBe(false);
     expect(canAccessPatient(actor, { ...patientOwner, nutritionistId: 'nutri-2' }, 'archive_patient')).toBe(false);
@@ -169,6 +172,9 @@ describe('canAccessPatient', () => {
     expect(canAccessPatient(actor, { ...patientOwner, nutritionistId: 'nutri-2' }, 'edit_billing')).toBe(false);
     expect(canAccessPatient(actor, { ...patientOwner, nutritionistId: 'nutri-2' }, 'assign_resource')).toBe(false);
     expect(canAccessPatient(actor, { ...patientOwner, nutritionistId: 'nutri-2' }, 'assign_routine')).toBe(false);
+    expect(canAccessPatient(actor, { ...patientOwner, nutritionistId: 'nutri-2' }, 'delegate_patient')).toBe(false);
+    expect(canAccessPatient(actor, { ...patientOwner, nutritionistId: 'nutri-2' }, 'revoke_delegation')).toBe(false);
+    expect(canAccessPatient(actor, { ...patientOwner, nutritionistId: 'nutri-2' }, 'transfer_ownership')).toBe(false);
   });
 
   it('only lets nutritionists create patients', () => {

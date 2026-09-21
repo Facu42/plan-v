@@ -2,6 +2,8 @@
 
 ## Revisión vigente de avance — 2026-09-21
 
+PV-38 en esta rama: organizaciones y equipos, múltiples vínculos de cuidado, delegación y suscripción B2B **como estado** (waived/trialing/canceled/past_due; `active` exige proveedor y no se inventa). Transferencia de ownership reescribe `patients.nutritionist_id` y los hijos con FK compuesta, con auditoría. **No es aprobación visual de Nutrigo.** Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Siguiente incompleto del plan: PV-39 (PV-32 se salta, piloto gratuito). No Railway re-point, PWA física, `eval.v1` clínico, retención legal ni email/push `sent`.
+
 PV-37 en esta rama: paridad de **layout y estados** de las doce superficies Nutrigo a 1440/800/390/320, claro/oscuro, vacío/error/carga y `:focus-visible`. Reorganización tablet/móvil (no encoger el escritorio). Overflow de progreso/diario (`min-width:650px`) corregido. **No es aprobación visual de Facu.** Live no aplica: no hay SQL. Verificación: 776 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-38 (PV-32 se salta, piloto gratuito). No Railway re-point, PWA física, `eval.v1` clínico, retención legal ni email/push `sent`.
 
 PV-36 en esta rama: recursos editoriales con autoría, revisión y publicación explícita; asignación persistida; favoritos unificados (guía/artículo/receta) y búsqueda acotada por permisos. Plan B queda en Guardado/búsqueda profesional, no como favorito personal. `cover_url` nulo (sin imagen remota inventada). Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 771 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-37 (PV-32 se salta, piloto gratuito). No visual Nutrigo.
@@ -319,7 +321,7 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 
 - [ ] Flujo real de invitación/auth, Storage, mensajería, notificaciones y Mercado Pago.
 - [ ] Persistencia Supabase/RLS de todas las vertical slices aprobadas.
-- [ ] Multi-nutricionista, organizaciones, equipos y roles administrativos con aislamiento aprobado antes de expandir comercialmente.
+- [ ] Multi-nutricionista, organizaciones, equipos y roles administrativos con aislamiento aprobado antes de expandir comercialmente. **PV-38 aterrizó código+tests** (org/equipo, delegación, transferencia de ownership, suscripción de estado); eso no es go-live ni SQL en el proyecto con `patients`.
 - [ ] Configuración de marca, servicios y horarios por consultorio.
 - [ ] Importación/exportación y portabilidad de datos.
 - [ ] Facturación de Plan V a profesionales, límites de uso y soporte.

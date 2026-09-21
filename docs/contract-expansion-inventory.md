@@ -30,7 +30,7 @@ de entidades existentes, no debe persistirse; **futura** = sin implementación.
 | `message_receipts` | demo + PGlite (PV-23); entrega/lectura por persona, `client_id` | 016b: recibo por (mensaje, usuario) | Live schema en proyecto **vacío**. GET hospedado cae al hilo 016 sin recibos |
 | `exercise_library` / rutinas | demo + PGlite (PV-35) | **fuera del piloto** (PV-35) | Habilitación profesional verificada |
 | `favorites` | demo + PGlite (PV-36) | no en 016b | Live schema en proyecto **vacío**. Paciente `manage_favorites`; Plan B no |
-| `organizations` / equipos | — | **fuera del piloto** (PV-38) | Ownership y delegación |
+| `organizations` / equipos | demo + PGlite (PV-38) | **fuera del piloto** (PV-38) | Live schema en proyecto **vacío**. Ownership y delegación. Suscripción B2B es estado, sin claves de cobro. 501 sin RPC |
 
 Reglas transversales ya vigentes: ninguna entidad nueva puede exponer
 `note_for_nutri`, `goal_history` profesional, `adherence_why`, `brief` ni
