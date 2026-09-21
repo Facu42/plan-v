@@ -24,6 +24,7 @@ import { resetCareMemory } from './care/repository.js';
 import { resetPrivateAssets } from './assets/repository.js';
 import { resetProcessQueue } from './jobs/queue.js';
 import { resetRecipeMemory } from './recipes/repository.js';
+import { resetMealPlanMemory } from './plans/repository.js';
 
 export type { PatientInvite, InviteEvent } from './identity/invites.js';
 
@@ -686,6 +687,7 @@ export function resetStore(): void {
   resetPrivateAssets();
   resetProcessQueue();
   resetRecipeMemory();
+  resetMealPlanMemory();
   store = {
     patients: seedPatients(),
     patientInvites: [],

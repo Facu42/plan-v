@@ -4,6 +4,7 @@ import { CareError, validatePhoto } from './care/repository.js';
 import { uploadMealPhoto, signMealPhotos } from './care/meal-photos.js';
 import { registerAssetRoutes } from './assets/routes.js';
 import { registerRecipeRoutes } from './recipes/routes.js';
+import { registerPlanRoutes } from './plans/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -230,6 +231,7 @@ app.get('/api/ready', async (c) => {
 registerCareRoutes(app);
 registerAssetRoutes(app);
 registerRecipeRoutes(app);
+registerPlanRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({

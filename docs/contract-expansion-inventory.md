@@ -16,8 +16,8 @@ de entidades existentes, no debe persistirse; **futura** = sin implementación.
 | `activity_logs` | demo (corte 57) | 016b: actividad autodeclarada, sin calorías | RLS paciente-insert / nutri-select |
 | `plan_b` | campo en `patients` | núcleo 016; fuera del DTO paciente (PV-03) | Confirmar si alguna vez se publica |
 | Lista de compras | derivada | **fuera del piloto** | `shopping_lists` post-piloto (PV-21/39) |
-| `recipes` / `recipe_ingredients` | demo + PGlite (PV-18) | 016b: recetas versionadas + ingredientes + asignaciones | Live schema en proyecto **vacío** (no el de `patients`). Plan fechado: PV-19 |
-| `meal_plans` / versiones | plantilla semanal 016 | 016b: plan fechado, una versión `published` | Publicación transaccional (PV-19) |
+| `recipes` / `recipe_ingredients` | demo + PGlite (PV-18) | 016b: recetas versionadas + ingredientes + asignaciones | Live schema en proyecto **vacío** (no el de `patients`) |
+| `meal_plans` / versiones | demo + PGlite (PV-19); plantilla semanal 016 sigue aparte | 016b: plan fechado, una versión `published` | Live schema en proyecto **vacío**. Paciente ve publicado = CRM: PV-20 |
 | `intake_sessions` / `consent_events` | onboarding React | 016b: intake versionado + consentimientos append-only | Pantallas y persistencia (PV-12/13) |
 | `document_records` / `body_photo_entries` | — | 016b: estudios y fotos corporales; sin IA | Storage privado (PV-15/16) |
 | `measurements` | demo + PGlite (PV-17) | 016b: peso/medidas con unidad y origen | Live schema en proyecto **vacío** (no el de `patients`) |
@@ -47,6 +47,7 @@ a `PatientAction` actuales.
 | `activity_logs` | sí, sus pacientes | — (lectura solamente) | las propias | inserta propia [`log_activity`] | retención/purga |
 | `meal_logs` | sí, revisa [`review_meal`] | confirma/ajusta | las propias (sin nota interna) | crea [`analyze_meal`] | Storage/IA |
 | `meal_slots` (plan semanal) | sí | upsert/delete | plan publicado | — | — |
+| `meal_plans` / versiones / ítems (PV-19) | sí (profesional: borrador + publicada) | guarda borrador; publica con `expected_version` [`edit_menu`] | sólo snapshot `published` vía RPC (PV-20 detalle) | — | transacción de publicación; no SQL live |
 | `habit_logs` | sí | — | las propias | upsert propio [`update_habits`] | snapshot diario |
 | `appointments` | sí | crea/reprograma/cancela [`edit_appointment`] | próxima + historial de cambios (sin notas clínicas) | reprograma día/hora del turno vigente [`reschedule_appointment`]; no cancela | — |
 | Notificaciones (in-app, navegador, buzón demo) | sí, consultorio | — | propias | preferencias de dispositivo [`localStorage`]; buzón demo no envía mail real | proveedor/push/mail reales pendientes |
