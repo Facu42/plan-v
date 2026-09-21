@@ -123,9 +123,9 @@
     "PV-21": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Lista derivada de títulos del plan y de alternativas ya publicadas. Explica que no hay cantidades. Checklist sólo en este navegador.",
-      "evidence": "ShowroomGrocery + publishedRecipeMeals. Sin unidades, agregados manuales ni sync entre dispositivos.",
-      "updatedAt": "2026-09-18T14:10:00.000Z"
+      "notes": "Compras del plan publicado: cantidades/unidades, suma compatible, g vs taza aparte, texto libre sin qty inventada, manuales que sobreviven republicar, checks por source_key. Fail closed 501 sin RPC. Live schema bloqueado (patients existe).",
+      "evidence": "supabase/migrations/20260921280000_shopping_lists.sql; server/shopping/*; ShowroomGrocery API+fallback. 735 pruebas OK, 2 omitidas; check/check:migrations/build OK. No SQL en el proyecto con patients.",
+      "updatedAt": "2026-09-21T18:00:00.000Z"
     },
     "PV-22": {
       "status": "in_progress",
@@ -171,6 +171,14 @@
     }
   },
   "history": [
+    {
+      "id": "c21a21e0-9f12-4a3b-8c01-pv210002",
+      "taskId": "PV-21",
+      "at": "2026-09-21T18:00:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
     {
       "id": "c21a27e0-9f12-4a3b-8c01-pv270001",
       "taskId": "PV-27",

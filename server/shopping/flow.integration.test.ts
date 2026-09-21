@@ -92,7 +92,7 @@ describe('PV-21 lista de compras', () => {
       expect.objectContaining({ unit: 'g', quantity: 90, occurrences: 2, kind: 'derived', checked: false }),
       expect.objectContaining({ unit: 'taza', quantity: 1, occurrences: 1, kind: 'derived' }),
     ]);
-    expect(body.list.items.find((item) => item.name === 'Tomate')).toMatchObject({ quantity: 1, unit: 'u' });
+    expect(body.list.items.find((item) => item.name === 'Tomate')).toMatchObject({ quantity: 1.5, unit: 'u', occurrences: 2 });
     expect(body.list.items.find((item) => item.name === 'Pollo con vegetales')).toMatchObject({
       kind: 'text', quantity: null, unit: null, source_key: 'text:pollo con vegetales',
     });
