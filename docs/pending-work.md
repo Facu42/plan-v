@@ -1,5 +1,9 @@
 # Pendientes de Plan V
 
+## Revisión vigente de avance — 2026-09-21 (WIP local)
+
+El WIP que no había entrado al Project (`cursor/professional-app-ai-ca47-local-wip-20260921` @ `da11bab`) se inventarió contra esta rama. Cuarentena, visor de estudios, medidas, recetas, planes, diario, recibos, turnos y jobs/eval ya están en PV-15…PV-28. No se copió ese SQL (`20260918180000`…`20260918250000`) ni se fusionó a `main`. Se recupera la nota del 2026-09-18 sobre el proyecto Plan V vacío. Detalle: [integración del WIP local](integracion-wip-local-2026-09-21.md). **No se aplicó SQL** a proyectos hospedados.
+
 ## Revisión vigente de avance — 2026-09-21
 
 PV-39 en esta rama: decisión de alcance **ejecutable**. Presupuesto de compras, importación de actividad (wearables) y video nativo quedan **OUT** hasta evidencia de uso. Se conserva la lista operativa (PV-21), la actividad autodeclarada (PV-35) y `meet_url` HTTPS. Escrituras `shopping/budget`, `activity/import` y `video-room` → **501**. Sin tablas de presupuesto. **No es aprobación visual de Nutrigo.** Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. El plan numerado PV-01…PV-39 queda cubierto en código; no hay PV-40. Verificación: 792 pruebas OK, 2 omitidas; check, check:migrations y build OK. PV-32 se salta (piloto gratuito). No Railway re-point, PWA física, `eval.v1` clínico, retención legal ni email/push `sent`.
@@ -54,7 +58,7 @@ En este árbol: Ver seguimiento y fecha futura ya corregidos; circuito de estudi
 
 ## Revisión vigente de avance — 2026-09-18
 
-Continuación sobre el árbol sin consolidar del 17/09: módulo de seguimiento conectado (peso, cintura, actividad, fotos corporales, pagos manuales, reemplazos de menú con revisión profesional), navegación lateral en escritorio para ambos roles, lista de compras derivada del plan y de alternativas publicadas. **Pruebas locales: 509 aprobadas, 2 omitidas; TypeScript, build y guarda SQL aprobados.** `npm run apply:disposable` aplica `core`/`intake`/`care` a un Postgres vacío y aborta si ya hay pacientes; no hay `.env` local con `DISPOSABLE_DATABASE_URL`, así que no se tocó ningún proyecto remoto. Falta Auth/RLS live, estudios PDF y el circuito completo de Storage (PV-15).
+Continuación sobre el árbol sin consolidar del 17/09: módulo de seguimiento conectado (peso, cintura, actividad, fotos corporales, pagos manuales, reemplazos de menú con revisión profesional), navegación lateral en escritorio para ambos roles, lista de compras derivada del plan y de alternativas publicadas. **Pruebas locales: 509 aprobadas, 2 omitidas; TypeScript, build y guarda SQL aprobados.** `npm run apply:disposable` aplica `core`/`intake`/`care` a un Postgres vacío y aborta si ya hay pacientes. Esta frase describía el árbol de git de ese corte: ahí no había `.env` local. El WIP de la misma máquina, que este remoto no tenía, registró más tarde ese día la aplicación de `core` / `intake` / `care` al proyecto Plan V vacío. Esa nota está recuperada en [integración del WIP local](integracion-wip-local-2026-09-21.md). No reaplicar ese SQL.
 
 Siguiente: cerrar verificación de navegador del seguimiento y, en el plan de acción, continuar Storage/estudios (PV-15/16) sin aplicar SQL a datos reales.
 
