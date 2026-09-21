@@ -131,3 +131,97 @@ describe('PV-23 hilos en PostgreSQL descartable', () => {
     }
   });
 });
+
+describe('PV-24 adjuntos en PostgreSQL descartable', () => {
+  it('adjunta un asset listo, aísla a Nutri B y falla cerrado sin RPC', async () => {
+    const assetId = 'a0000000-0000-4000-a000-0000000000c1';
+    const mealId = 'a0000000-0000-4000-a000-0000000000c2';
+    const withdrawnId = 'a0000000-0000-4000-a000-0000000000c3';
+    const extraId = 'a0000000-0000-4000-a000-0000000000c4';
+    const nutriId = (await db.query<{ nutritionist_id: string }>('select nutritionist_id from public.patients where id=$1', [patientA])).rows[0].nutritionist_id;
+    await db.query(
+      `insert into public.patient_assets (id,patient_id,nutritionist_id,bucket,object_path,category,mime,byte_size,checksum_sha256,status)
+       values
+         ($1,$2,$3,'care-documents',$4,'chat_attachment','image/png',80,'aa','ready'),
+         ($5,$2,$3,'meal-photos',$6,'meal_photo','image/png',80,'aa','ready'),
+         ($7,$2,$3,'care-documents',$8,'chat_attachment','image/png',80,'aa','withdrawn'),
+         ($9,$2,$3,'care-documents',$10,'chat_attachment','image/png',80,'aa','ready')`,
+      [
+        assetId, patientA, nutriId, `patients/${patientA}/${assetId}`,
+        mealId, `patients/${patientA}/${mealId}`,
+        withdrawnId, `patients/${patientA}/${withdrawnId}`,
+        extraId, `patients/${patientA}/${extraId}`,
+      ],
+    );
+    await db.query('update public.patient_assets set withdrawn_at=now() where id=$1', [withdrawnId]);
+
+    const sent = await rpc(patientAUser, 'send_thread_attachment', [{
+      patient_id: patientA,
+      client_id: '88888888-8888-4888-8888-888888888888',
+      text: 'Merienda',
+      asset_id: assetId,
+      filename: 'merienda.png',
+    }]) as { message: { id: string; text: string; attachment?: { filename: string; kind: string; available: boolean } }; duplicate: boolean };
+    expect(sent.duplicate).toBe(false);
+    expect(sent.message.attachment).toMatchObject({ filename: 'merienda.png', kind: 'image', available: true });
+    expect(sent.message).not.toHaveProperty('url');
+
+    const replayed = await rpc(patientAUser, 'send_thread_attachment', [{
+      patient_id: patientA,
+      client_id: '88888888-8888-4888-8888-888888888888',
+      text: 'otro',
+      asset_id: assetId,
+      filename: 'merienda.png',
+    }]) as { message: { id: string }; duplicate: boolean };
+    expect(replayed.duplicate).toBe(true);
+    expect(replayed.message.id).toBe(sent.message.id);
+
+    const opened = await rpc(nutriA, 'open_message_attachment', [patientA, sent.message.id]) as { asset_id: string; filename: string };
+    expect(opened).toMatchObject({ asset_id: assetId, filename: 'merienda.png' });
+
+    await expect(rpc(nutriB, 'open_message_attachment', [patientA, sent.message.id])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(patientBUser, 'send_thread_attachment', [{
+      patient_id: patientA,
+      client_id: '99999999-9999-4999-8999-999999999999',
+      text: 'no',
+      asset_id: extraId,
+      filename: 'x.png',
+    }])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(patientAUser, 'send_thread_attachment', [{
+      patient_id: patientA,
+      client_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+      text: 'comida',
+      asset_id: mealId,
+      filename: 'almuerzo.png',
+    }])).rejects.toMatchObject({ code: '22023' });
+    await expect(rpc(patientAUser, 'send_thread_attachment', [{
+      patient_id: patientA,
+      client_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
+      text: 'retirado',
+      asset_id: withdrawnId,
+      filename: 'viejo.png',
+    }])).rejects.toMatchObject({ code: '22023' });
+
+    const pro = await rpc(nutriA, 'send_thread_attachment', [{
+      patient_id: patientA,
+      client_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1',
+      text: '',
+      asset_id: extraId,
+      filename: 'indicacion.png',
+    }]) as { message: { attachment?: { filename: string } } };
+    expect(pro.message.attachment?.filename).toBe('indicacion.png');
+
+    await db.exec('alter function public.send_thread_attachment(jsonb) rename to send_thread_attachment_pv24_hidden');
+    try {
+      await expect(rpc(patientAUser, 'send_thread_attachment', [{
+        patient_id: patientA,
+        client_id: 'cccccccc-cccc-4ccc-8ccc-ccccccccccc1',
+        text: 'x',
+        asset_id: extraId,
+        filename: 'x.png',
+      }])).rejects.toMatchObject({ code: '42883' });
+    } finally {
+      await db.exec('alter function public.send_thread_attachment_pv24_hidden(jsonb) rename to send_thread_attachment');
+    }
+  });
+});

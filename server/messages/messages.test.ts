@@ -25,5 +25,17 @@ describe('PV-23 hilos', () => {
     } catch (error) {
       expect(error).toMatchObject({ status: 501 });
     }
+    try {
+      messageDbError({ code: 'PT409' });
+      throw new Error('expected CareError');
+    } catch (error) {
+      expect(error).toMatchObject({ status: 409 });
+    }
+    try {
+      messageDbError({ code: 'PT404', message: 'thread_attachment_missing' });
+      throw new Error('expected CareError');
+    } catch (error) {
+      expect(error).toMatchObject({ status: 404, message: 'El adjunto ya no está disponible.' });
+    }
   });
 });

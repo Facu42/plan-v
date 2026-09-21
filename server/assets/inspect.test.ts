@@ -63,6 +63,8 @@ describe('PV-15 inspección de archivos privados', () => {
     expect(inspectPrivateFile('clinical_document', safe, 'application/pdf').pages).toBe(1);
     const active = Buffer.from('%PDF-1.4\n1 0 obj<</S/JavaScript/JS(app.alert(1))>>endobj\n%%EOF');
     expect(() => inspectPrivateFile('clinical_document', active, 'application/pdf')).toThrow(/contenido activo/);
+    expect(() => inspectPrivateFile('chat_attachment', active, 'application/pdf')).toThrow(/contenido activo/);
+    expect(inspectPrivateFile('chat_attachment', safe, 'application/pdf').mime).toBe('application/pdf');
   });
 
   it('falla cerrado si faltan buckets de producto', () => {

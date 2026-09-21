@@ -115,10 +115,16 @@ export const mealReviewInputSchema = z.object({
 });
 
 export const messageInputSchema = z.object({
-  text: z.string().trim().min(1).max(2000),
+  text: z.string().trim().max(2000).default(''),
   from: z.enum(['vero', 'patient']),
   suggested_by_ai: z.boolean().optional(),
   client_id: z.uuid().optional(),
+  asset_id: z.uuid().optional(),
+  filename: z.string().trim().max(80).optional(),
+}).strict().refine((input) => input.text.length >= 1 || Boolean(input.asset_id), {
+  message: 'Escribí un mensaje o adjuntá un archivo autorizado.',
+}).refine((input) => !input.asset_id || Boolean(input.filename), {
+  message: 'El adjunto necesita un nombre de archivo.',
 });
 
 export const messageReadSchema = z.object({

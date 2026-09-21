@@ -53,7 +53,7 @@ a `PatientAction` actuales.
 | `habit_logs` | sí | — | las propias | upsert propio [`update_habits`] | snapshot diario |
 | `appointments` | sí | crea/reprograma/cancela [`edit_appointment`] | próxima + historial de cambios (sin notas clínicas) | reprograma día/hora del turno vigente [`reschedule_appointment`]; no cancela | — |
 | Notificaciones (in-app, navegador, buzón demo) | sí, consultorio | — | propias | preferencias de dispositivo [`localStorage`]; buzón demo no envía mail real | proveedor/push/mail reales pendientes |
-| `messages` | sí, hilo asignado | envía como autor vía `send_thread_message`; JWT = autor | propias enviadas + recibo de la contraparte | envía; marca leído/entrega vía RPC | inmutable; `client_id` único; fail closed 501 sin schema |
+| `messages` / `message_attachments` (PV-23/24) | sí, hilo asignado | envía como autor vía `send_thread_message` / `send_thread_attachment`; JWT = autor | propias enviadas + recibo + metadatos de adjunto (sin URL firmada) | envía; marca leído/entrega; abre preview 60s auditado | inmutable; `client_id` único; adjunto = `chat_attachment` ready; fail closed 501 sin schema |
 | `goals` + `goal_history` | sí | actualiza [`set_goal`] | objetivo vigente | — | historial inmutable |
 | `patients` ficha | sí | perfil/archivo | vista segura propia | perfil limitado | lifecycle/billing |
 | `plan_b` | sí | edita en ficha | — (pendiente confirmar) | — | — |

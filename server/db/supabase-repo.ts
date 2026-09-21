@@ -229,6 +229,16 @@ export function mapMessage(row: Record<string, unknown>, authorRole: unknown): M
     sent_at: row.sent_at as string,
     ...('delivered_at' in row ? { delivered_at: row.delivered_at == null ? null : String(row.delivered_at) } : {}),
     ...('read_at' in row ? { read_at: row.read_at == null ? null : String(row.read_at) } : {}),
+    ...(row.attachment && typeof row.attachment === 'object' ? {
+      attachment: {
+        asset_id: String((row.attachment as { asset_id?: unknown }).asset_id ?? ''),
+        filename: String((row.attachment as { filename?: unknown }).filename ?? 'adjunto'),
+        mime: String((row.attachment as { mime?: unknown }).mime ?? ''),
+        byte_size: Number((row.attachment as { byte_size?: unknown }).byte_size ?? 0),
+        kind: String((row.attachment as { mime?: unknown }).mime ?? '').startsWith('image/') ? 'image' as const : 'pdf' as const,
+        available: (row.attachment as { available?: unknown }).available !== false,
+      },
+    } : {}),
   };
 }
 

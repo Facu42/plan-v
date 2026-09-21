@@ -10,17 +10,18 @@ import { writeOpsLog } from '../ops/log.js';
 import { ASSET_CATEGORIES, CONSENT_BY_CATEGORY } from './types.js';
 import * as repo from './repository.js';
 
-async function actorAccess(c: Context, patientId: string, mode: 'read' | 'patient') {
+async function actorAccess(c: Context, patientId: string, mode: 'read' | 'patient' | 'thread') {
   const auth = c.get('auth');
   const persistent = 'userId' in auth && isSupabaseEnabled();
   if (!persistent) {
     if (!getPatient(patientId)) throw new CareError(404, 'Paciente no encontrado.');
     return { persistent: false, professional: c.req.query('audience') === 'pro', nutritionistId: DEMO_NUTRITIONIST_ID };
   }
+  const action = mode === 'patient' ? 'log_activity' : mode === 'thread' ? 'send_message' : 'read_patient';
   const actor = await authorizePatientAction(
     auth.userId,
     patientId,
-    mode === 'patient' ? 'log_activity' : 'read_patient',
+    action,
     { getActor: sb.sbGetActor, getPatientResource: sb.sbGetPatientResource },
   );
   if (!actor || (mode === 'patient' && actor.role !== 'paciente')) throw new CareError(403, 'No tenés permiso para esta acción.');
@@ -45,9 +46,16 @@ const intentSchema = z.object({
 export function registerAssetRoutes(app: Hono) {
   app.post('/api/assets/upload-intents', async (c) => {
     const input = await jsonBody(c, intentSchema, 8_000);
-    const { persistent, professional, nutritionistId } = await actorAccess(c, input.patient_id, 'patient');
-    if (professional) throw new CareError(403, 'Sólo el paciente puede reservar una subida.');
-    await requireCareConsent(input.patient_id, persistent, CONSENT_BY_CATEGORY[input.category]);
+    const chat = input.category === 'chat_attachment';
+    const { persistent, professional, nutritionistId } = await actorAccess(
+      c,
+      input.patient_id,
+      chat ? 'thread' : 'patient',
+    );
+    if (!chat && professional) throw new CareError(403, 'Sólo el paciente puede reservar una subida.');
+    if (input.category !== 'chat_attachment') {
+      await requireCareConsent(input.patient_id, persistent, CONSENT_BY_CATEGORY[input.category]);
+    }
     const intent = await repo.reserveUploadIntent({
       patientId: input.patient_id,
       nutritionistId,
@@ -64,17 +72,15 @@ export function registerAssetRoutes(app: Hono) {
 
   app.put('/api/assets/:id/content', async (c) => {
     const input = await jsonBody(c, z.object({ patient_id: z.string().min(1), file: z.string().min(16) }).strict());
-    const { persistent, professional } = await actorAccess(c, input.patient_id, 'patient');
-    if (professional) throw new CareError(403, 'Sólo el paciente puede subir el archivo.');
-    const intent = await repo.uploadIntentBytes(c.req.param('id'), input.patient_id, input.file, persistent);
+    const { persistent, professional } = await actorAccess(c, input.patient_id, 'read');
+    const intent = await repo.uploadIntentBytes(c.req.param('id'), input.patient_id, input.file, persistent, professional);
     return c.json({ intent });
   });
 
   app.post('/api/assets/:id/complete', async (c) => {
     const input = await jsonBody(c, z.object({ patient_id: z.string().min(1) }).strict(), 4_000);
-    const { persistent, professional } = await actorAccess(c, input.patient_id, 'patient');
-    if (professional) throw new CareError(403, 'Sólo el paciente puede finalizar la subida.');
-    const asset = await repo.completeUploadIntent(c.req.param('id'), input.patient_id, persistent);
+    const { persistent, professional } = await actorAccess(c, input.patient_id, 'read');
+    const asset = await repo.completeUploadIntent(c.req.param('id'), input.patient_id, persistent, professional);
     writeOpsLog('info', 'asset_ready', { category: asset.category, persistent });
     return c.json({ asset });
   });

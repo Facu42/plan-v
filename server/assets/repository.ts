@@ -142,8 +142,17 @@ async function loadIntent(id: string, persistent: boolean) {
   return data as UploadIntent;
 }
 
-export async function uploadIntentBytes(id: string, patientId: string, dataUrl: string, persistent: boolean) {
+export async function uploadIntentBytes(
+  id: string,
+  patientId: string,
+  dataUrl: string,
+  persistent: boolean,
+  professional = false,
+) {
   const intent = await loadIntent(id, persistent);
+  if (intent.category !== 'chat_attachment' && professional) {
+    throw new CareError(403, 'Sólo el paciente puede subir el archivo.');
+  }
   if (intent.patient_id !== patientId) throw new CareError(403, 'No tenés permiso para esta reserva.');
   if (Date.parse(intent.expires_at) <= Date.now()) throw new CareError(409, 'La reserva venció. Pedí una nueva.');
   if (intent.status !== 'reserved' && intent.status !== 'quarantine') throw new CareError(409, 'Esa reserva ya no admite archivos.');
@@ -178,8 +187,16 @@ async function quarantineBytes(intent: UploadIntent, persistent: boolean) {
   return { bytes: Buffer.from(await data.arrayBuffer()), mime: intent.mime_declared, path: intent.object_path, bucket: QUARANTINE_BUCKET };
 }
 
-export async function completeUploadIntent(id: string, patientId: string, persistent: boolean) {
+export async function completeUploadIntent(
+  id: string,
+  patientId: string,
+  persistent: boolean,
+  professional = false,
+) {
   const intent = await loadIntent(id, persistent);
+  if (intent.category !== 'chat_attachment' && professional) {
+    throw new CareError(403, 'Sólo el paciente puede finalizar la subida.');
+  }
   if (intent.patient_id !== patientId) throw new CareError(403, 'No tenés permiso para esta reserva.');
   if (intent.status === 'ready' && intent.asset_id) {
     return persistent

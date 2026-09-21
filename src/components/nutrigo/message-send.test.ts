@@ -39,4 +39,18 @@ describe('mensajes operativos del diseño Nutrigo', () => {
     await sendShowroomMessage({ ...input, client_id: clientId }, deps);
     expect(deps.send).toHaveBeenCalledWith('p1', 'Hola', 'patient', false, clientId);
   });
+  it('permite enviar un adjunto autorizado sin texto', async () => {
+    const deps = dependencies();
+    await sendShowroomMessage({
+      patientId: 'p1',
+      text: '   ',
+      role: 'patient',
+      asset_id: '11111111-1111-4111-8111-111111111111',
+      filename: 'merienda.png',
+    }, deps);
+    expect(deps.send).toHaveBeenCalledWith('p1', '', 'patient', false, undefined, {
+      asset_id: '11111111-1111-4111-8111-111111111111',
+      filename: 'merienda.png',
+    });
+  });
 });

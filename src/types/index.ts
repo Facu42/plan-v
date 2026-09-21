@@ -62,6 +62,15 @@ export type Brief = {
   adherence_why: string;
 };
 
+export type MessageAttachment = {
+  asset_id: string;
+  filename: string;
+  mime: string;
+  byte_size: number;
+  kind: 'image' | 'pdf';
+  available?: boolean;
+};
+
 export type Message = {
   id: string;
   patient_id: string;
@@ -71,6 +80,7 @@ export type Message = {
   sent_at: string;
   delivered_at?: string | null;
   read_at?: string | null;
+  attachment?: MessageAttachment;
 };
 
 export type HabitLog = {

@@ -45,7 +45,10 @@ export function buildShowroomPatient(patient: Patient, now = new Date()) {
       foods: status === 'pending_review' ? [] : foods.map(({ name }) => ({ name })),
     })),
     messages: patient.messages.filter((m) => m.patient_id === patient.id && Boolean(m.sent_at))
-      .map(({ id, text, from, sent_at, delivered_at, read_at }) => ({ id, text, from, sent_at, delivered_at: delivered_at ?? null, read_at: read_at ?? null })),
+      .map(({ id, text, from, sent_at, delivered_at, read_at, attachment }) => ({
+        id, text, from, sent_at, delivered_at: delivered_at ?? null, read_at: read_at ?? null,
+        ...(attachment ? { attachment } : {}),
+      })),
   };
 }
 export type ShowroomPatient = ReturnType<typeof buildShowroomPatient>;

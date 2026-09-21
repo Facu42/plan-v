@@ -140,7 +140,7 @@ export function canAccessPatient(actor: Actor, patient: PatientResource, action:
 }
 
 export type PatientSelfMealLog = Omit<MealLog, 'note_for_nutri'>;
-export type PatientSelfMessage = Pick<Message, 'id' | 'patient_id' | 'from' | 'text' | 'sent_at' | 'delivered_at' | 'read_at'>;
+export type PatientSelfMessage = Pick<Message, 'id' | 'patient_id' | 'from' | 'text' | 'sent_at' | 'delivered_at' | 'read_at' | 'attachment'>;
 export type PatientSelfView = Omit<Patient, 'adherence_why' | 'brief' | 'goal_history' | 'meal_logs' | 'messages'> & {
   meal_logs: PatientSelfMealLog[];
   messages: PatientSelfMessage[];
@@ -258,8 +258,8 @@ export function toPatientSelfView(patient: Patient): PatientSelfView {
   const billing_status = resolveBillingStatus(patient);
   const messages = patient.messages
     .filter((message) => Boolean(message.sent_at))
-    .map(({ id, patient_id, from, text, sent_at, delivered_at, read_at }) =>
-      ({ id, patient_id, from, text, sent_at, delivered_at, read_at }));
+    .map(({ id, patient_id, from, text, sent_at, delivered_at, read_at, attachment }) =>
+      ({ id, patient_id, from, text, sent_at, delivered_at, read_at, ...(attachment ? { attachment } : {}) }));
 
   const visible: PatientSelfView = {
     id: patient.id,

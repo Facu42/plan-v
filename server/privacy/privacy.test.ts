@@ -63,6 +63,7 @@ describe('retención por categoría', () => {
     expect(purgeDelayMs('body_progress')).toBe(30 * 24 * 60 * 60 * 1000);
     expect(purgeDelayMs('meal_photo')).toBe(0);
     expect(purgeDelayMs('clinical_document')).toBe(0);
+    expect(purgeDelayMs('chat_attachment')).toBe(0);
     const now = new Date('2026-09-21T12:00:00.000Z');
     expect(purgeRunAfter('body_progress', now)).toBe('2026-10-21T12:00:00.000Z');
     expect(purgeRunAfter('meal_photo', now)).toBe(now.toISOString());

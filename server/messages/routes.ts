@@ -8,6 +8,7 @@ import { authorizePatientAction } from '../security/authorization.js';
 import { toPatientSelfView, type PatientAction } from '../security/contracts.js';
 import { getPatient } from '../store.js';
 import * as repo from './repository.js';
+import { writeOpsLog } from '../ops/log.js';
 
 const access = {
   getActor: sb.sbGetActor,
@@ -55,6 +56,8 @@ export function registerMessageRoutes(app: Hono) {
         from: partyFromRole(actor.role),
         suggestedByAi: actor.role === 'nutri' && (body.suggested_by_ai ?? false),
         client_id: clientId,
+        asset_id: body.asset_id,
+        filename: body.filename,
       }, true);
       const updated = await sb.sbGetPatientById(patientId, audience(actor.role));
       return c.json({
@@ -69,6 +72,8 @@ export function registerMessageRoutes(app: Hono) {
       from: body.from,
       suggestedByAi: body.from === 'vero' && (body.suggested_by_ai ?? false),
       client_id: clientId,
+      asset_id: body.asset_id,
+      filename: body.filename,
     }, false);
     const updated = getPatient(patientId)!;
     return c.json({
@@ -102,5 +107,21 @@ export function registerMessageRoutes(app: Hono) {
       patient,
       source: 'memory',
     });
+  });
+
+  app.post('/api/patients/:id/messages/:messageId/attachment', async (c) => {
+    const auth = c.get('auth');
+    const patientId = c.req.param('id');
+    const messageId = c.req.param('messageId');
+    const persistent = 'userId' in auth && isSupabaseEnabled();
+    if (persistent) {
+      const actor = await authorize(auth.userId, patientId, 'send_message');
+      if (!actor) return c.json({ error: 'Prohibido' }, 403);
+    } else if (!getPatient(patientId)) {
+      return c.notFound();
+    }
+    const grant = await repo.openThreadAttachment(patientId, messageId, persistent);
+    writeOpsLog('info', 'chat_attachment_access', { persistent, mime: grant.mime });
+    return c.json(grant);
   });
 }

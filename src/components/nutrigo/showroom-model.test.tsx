@@ -50,6 +50,20 @@ describe('modelo seguro del showroom', () => {
     expect(JSON.stringify(model.messages)).not.toContain('suggested_by_ai');
     expect(JSON.stringify(model.messages)).not.toContain('SECRETO');
   });
+  it('expone metadatos de adjunto sin URL viva', () => {
+    const m = {
+      id: 'msg',
+      patient_id: 'p1',
+      from: 'vero' as const,
+      text: '',
+      sent_at: now.toISOString(),
+      suggested_by_ai: false,
+      attachment: { asset_id: 'a1', filename: 'merienda.png', mime: 'image/png', byte_size: 80, kind: 'image' as const, available: true },
+    };
+    const model = buildShowroomPatient({ ...patient, messages: [m] }, now);
+    expect(model.messages[0].attachment).toMatchObject({ filename: 'merienda.png', kind: 'image' });
+    expect(JSON.stringify(model.messages)).not.toContain('https://');
+  });
   it('expone al paciente sólo los datos operativos seguros de su consulta', () => {
     const model = buildShowroomPatient({ ...patient, appointment: { when: 'Jueves · 14:30', duration: 45, channel: 'video', meet_url: 'https://meet.example.com/ana' } }, now);
     expect(model.appointment).toEqual({ when: 'Jueves · 14:30', duration: 45, channel: 'video', meet_url: 'https://meet.example.com/ana' });

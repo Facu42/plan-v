@@ -1,4 +1,4 @@
-export const ASSET_CATEGORIES = ['meal_photo', 'clinical_document', 'body_progress'] as const;
+export const ASSET_CATEGORIES = ['meal_photo', 'clinical_document', 'body_progress', 'chat_attachment'] as const;
 export type AssetCategory = (typeof ASSET_CATEGORIES)[number];
 
 export const ASSET_STATUSES = ['reserved', 'quarantine', 'ready', 'rejected', 'withdrawn'] as const;
@@ -8,6 +8,7 @@ export const READY_BUCKETS = {
   meal_photo: 'meal-photos',
   body_progress: 'care-photos',
   clinical_document: 'care-documents',
+  chat_attachment: 'care-documents',
 } as const;
 
 export const QUARANTINE_BUCKET = 'care-quarantine';
@@ -23,12 +24,14 @@ export const MIME_BY_CATEGORY = {
   meal_photo: ['image/jpeg', 'image/png', 'image/webp'],
   body_progress: ['image/jpeg', 'image/png', 'image/webp'],
   clinical_document: ['application/pdf', 'image/jpeg', 'image/png'],
+  chat_attachment: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
 } as const;
 
 export const BYTE_LIMIT_BY_CATEGORY = {
   meal_photo: 10 * 1024 * 1024,
   body_progress: 5 * 1024 * 1024,
   clinical_document: 20 * 1024 * 1024,
+  chat_attachment: 10 * 1024 * 1024,
 } as const;
 
 export const PATIENT_QUOTA = {

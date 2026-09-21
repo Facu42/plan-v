@@ -8,12 +8,14 @@ export const RETENTION_RULES: Record<AssetCategory, { delayMs: number; workingPe
   meal_photo: { delayMs: 0, workingPeriod: '3 años o hasta retiro' },
   clinical_document: { delayMs: 0, workingPeriod: '10 años o hasta retiro' },
   body_progress: { delayMs: 30 * DAY_MS, workingPeriod: 'hasta retiro + 30 días de cola' },
+  chat_attachment: { delayMs: 0, workingPeriod: 'hasta retiro' },
 };
 
 export function purgeDelayMs(category: string, now = Date.now()): number {
   if (category === 'body_progress') return RETENTION_RULES.body_progress.delayMs;
   if (category === 'meal_photo') return RETENTION_RULES.meal_photo.delayMs;
   if (category === 'clinical_document') return RETENTION_RULES.clinical_document.delayMs;
+  if (category === 'chat_attachment') return RETENTION_RULES.chat_attachment.delayMs;
   return 0;
 }
 

@@ -62,6 +62,17 @@ describe('API input schemas', () => {
     expect(messageInputSchema.safeParse({ text: '   ' }).success).toBe(false);
     expect(messageInputSchema.safeParse({ text: 'Hola', from: 'patient', client_id: '11111111-1111-4111-8111-111111111111' }).success).toBe(true);
     expect(messageInputSchema.safeParse({ text: 'Hola', from: 'patient', client_id: 'no-uuid' }).success).toBe(false);
+    expect(messageInputSchema.safeParse({
+      text: '',
+      from: 'patient',
+      asset_id: '11111111-1111-4111-8111-111111111111',
+      filename: 'merienda.png',
+    }).success).toBe(true);
+    expect(messageInputSchema.safeParse({ text: '', from: 'patient' }).success).toBe(false);
+    expect(messageInputSchema.safeParse({
+      from: 'patient',
+      asset_id: '11111111-1111-4111-8111-111111111111',
+    }).success).toBe(false);
   });
 
   it('normalizes patient onboarding fields and rejects invalid contact data', () => {

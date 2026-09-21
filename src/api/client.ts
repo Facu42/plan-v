@@ -201,10 +201,23 @@ export const api = {
   dismissBrief: (patientId: string) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/brief/dismiss`, { method: 'POST' }),
 
-  sendMessage: (patientId: string, text: string, from: 'vero' | 'patient', suggestedByAi = false, clientId?: string) =>
+  sendMessage: (
+    patientId: string,
+    text: string,
+    from: 'vero' | 'patient',
+    suggestedByAi = false,
+    clientId?: string,
+    attachment?: { asset_id: string; filename: string },
+  ) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/messages`, {
       method: 'POST',
-      body: JSON.stringify({ text, from, suggested_by_ai: suggestedByAi, ...(clientId ? { client_id: clientId } : {}) }),
+      body: JSON.stringify({
+        text,
+        from,
+        suggested_by_ai: suggestedByAi,
+        ...(clientId ? { client_id: clientId } : {}),
+        ...(attachment ? { asset_id: attachment.asset_id, filename: attachment.filename } : {}),
+      }),
     }),
 
   markMessagesRead: (patientId: string, reader: 'vero' | 'patient') =>
