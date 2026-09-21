@@ -158,9 +158,9 @@
     "PV-26": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Avisos de peso/cintura/actividad/agua/descanso en la campana mientras la app está abierta. No es push ni email real.",
-      "evidence": "useCareNotices, ShowroomConsultAlerts, care-reminders.test.ts. Preferencias en care_preferences.",
-      "updatedAt": "2026-09-18T14:10:00.000Z"
+      "notes": "Outbox persistente: enqueue idempotente, prefs in_app/email/push, reintentos, skip desactivado/desvinculado. in_app al buzón; email/push nunca sent sin adaptador/claves. Fail closed 501 sin schema. Live schema/claves no.",
+      "evidence": "supabase/migrations/20260921300000_notification_outbox.sql; server/outbox/*; ShowroomConsultAlerts prefs. 748 pruebas OK, 2 omitidas; check/check:migrations/build OK. No SQL en el proyecto con patients. No se inventaron claves de mail/push.",
+      "updatedAt": "2026-09-21T18:42:00.000Z"
     },
     "PV-27": {
       "status": "in_progress",
@@ -178,6 +178,14 @@
     }
   },
   "history": [
+    {
+      "id": "c21a26e0-9f12-4a3b-8c01-pv260001",
+      "taskId": "PV-26",
+      "at": "2026-09-21T18:42:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
     {
       "id": "c21a21e0-9f12-4a3b-8c01-pv210002",
       "taskId": "PV-21",

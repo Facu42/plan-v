@@ -24,7 +24,7 @@ de entidades existentes, no debe persistirse; **futura** = sin implementación.
 | `measurements` | demo + PGlite (PV-17) | 016b: peso/medidas con unidad y origen | Live schema en proyecto **vacío** (no el de `patients`) |
 | `clinical_notes` | notas en ficha | 016b: sólo nutri; revoke paciente | Nunca en DTO paciente |
 | `ai_jobs` / `ai_artifacts` | demo + PGlite (PV-27); prompt_version + context_hash; apply no publica | 016b: jobs privados del profesional | Live schema en proyecto **vacío**. Evaluación sintética: PV-28 en código (eval.v1), live no |
-| `outbox_events` | buzón demo | 016b: outbox + deliveries; sin policy authenticated | Proveedor real (PV-26) |
+| `outbox_events` | demo + PGlite (PV-26); in_app al buzón; email/push queued `provider_unconfigured`, nunca `sent` | 016b: outbox + deliveries; sin policy authenticated | Live schema en proyecto **vacío**. Claves reales de mail/push: humano. |
 | `appointment_events` | demo + PGlite (PV-25); cancel+insert, timezone, confirmación, solapes 409 | 016b: historial append-only | Live schema en proyecto **vacío**. GET hospedado cae a turnos 016 sin historial |
 | `message_receipts` | demo + PGlite (PV-23); entrega/lectura por persona, `client_id` | 016b: recibo por (mensaje, usuario) | Live schema en proyecto **vacío**. GET hospedado cae al hilo 016 sin recibos |
 | `exercise_library` / rutinas | — | **fuera del piloto** (PV-35) | Habilitación profesional verificada |
