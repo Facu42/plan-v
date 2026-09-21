@@ -8,6 +8,8 @@ Sumar al plan de acción el circuito de **recetas plantilla** como en el reel de
 2. **Asignar** a paciente / día.
 3. Paciente: en comidas del día, CTA **«Registrar esta comida»** (atajo al diario).
 
+**Barra visual (aclaración Facu 2026-09-21):** no alcanza el flujo. La card tiene que verse como el reel: foto de plato de calidad (generada o ilustrativa, coherente con la receta), macros KCAL/PROT/CARBS/GRASAS de un vistazo, layout premium. **No clonar** assets ni marca Cenra; sí la claridad. Review Lumen/Iris del formato antes de cerrar.
+
 Detalle y criterios: [ticket PV-40](ticket-pv40-recetas-ia-asignar-registrar.md).  
 **Estado:** backlog P1 (no bloquea smoke staging ni gates humanos P0). No SQL live. No merge a `main` por este doc.
 
