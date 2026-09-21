@@ -10,6 +10,7 @@ import { registerAppointmentRoutes } from './appointments/routes.js';
 import { registerAiJobRoutes } from './ai-jobs/routes.js';
 import { registerPrivacyRoutes } from './privacy/routes.js';
 import { registerShoppingRoutes } from './shopping/routes.js';
+import { registerOutboxRoutes } from './outbox/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -28,7 +29,6 @@ import { createBodyLimitMiddleware, evaluateReadiness, releaseSha } from './ops/
 import { assertSecretBoundary, inspectSecrets } from './ops/secrets.js';
 import {
   activityInputSchema,
-  noticeCreateSchema,
   authRecoverInputSchema,
   billingUpdateInputSchema,
   clinicalNoteInputSchema,
@@ -72,6 +72,7 @@ import { getAuthAccount, isSupabaseEnabled } from './db/supabase-client.js';
 import * as sb from './db/supabase-repo.js';
 import { recoveryAcknowledgement, provisionSecretMatches, validateProvisionInput } from './identity/provision.js';
 import { authorizePatientAction } from './security/authorization.js';
+import { enqueueOutboxBestEffort } from './outbox/repository.js';
 import {
   canManagePatients,
   toPatientSelfView,
@@ -86,11 +87,9 @@ import {
   createPatient,
   acceptPatientInvite,
   dismissBrief,
-  enqueueNotice,
   getInviteById,
   getPatient,
   getStore,
-  listNotices,
   markResourceRead,
   provisionNutritionistMemory,
   revokePatientInvite,
@@ -248,6 +247,7 @@ registerAppointmentRoutes(app);
 registerAiJobRoutes(app);
 registerPrivacyRoutes(app);
 registerShoppingRoutes(app);
+registerOutboxRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({
@@ -547,27 +547,6 @@ app.post('/api/patients/:id/resources/:resourceId/read', async (c) => {
   return c.json({ patient: toPatientSelfView(patient), source: 'memory' });
 });
 
-app.get('/api/notices', (c) => {
-  if (isSupabaseEnabled()) return c.json({ error: 'Avisos persistentes pendientes del schema 016' }, 501);
-  const patientId = c.req.query('patientId') || undefined;
-  return c.json({ notices: listNotices(patientId), source: 'memory' });
-});
-
-app.post('/api/notices', async (c) => {
-  const parsedBody = await parseJsonBody(c, noticeCreateSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-  if (isSupabaseEnabled()) return c.json({ error: 'Avisos persistentes pendientes del schema 016' }, 501);
-  const person = getPatient(parsedBody.data.patientId);
-  if (!person) return c.notFound();
-  const notice = enqueueNotice({
-    patientId: person.id,
-    kind: 'reminder',
-    subject: `Recordatorio · ${parsedBody.data.title} · ${person.name}`,
-    body: `${parsedBody.data.detail} Este aviso quedó en el buzón demo de Plan V; no se envió a internet.`,
-  });
-  return c.json({ notice, source: 'memory' }, 201);
-});
-
 app.patch('/api/patients/:id/billing', async (c) => {
   const auth = c.get('auth');
   const patientId = c.req.param('id');
@@ -694,7 +673,16 @@ app.post('/api/invites/:id/send', async (c) => {
     try {
       const invite = await sb.sbGetInvite(inviteId.data);
       if (!invite || invite.nutritionist_id !== actor.nutritionistId) return c.json({ error: 'Prohibido' }, 403);
-      return c.json({ invite: await sb.sbSendInvite(inviteId.data), source: 'supabase' });
+      const sent = await sb.sbSendInvite(inviteId.data);
+      await enqueueOutboxBestEffort({
+        patient_id: invite.patient_id,
+        event_type: 'invite_sent',
+        client_id: inviteId.data,
+        subject: `Invitación enviada · ${invite.email}`,
+        body: 'La invitación quedó en el buzón in-app de Plan V; no se envió un mail real.',
+        kind: 'invite',
+      }, true);
+      return c.json({ invite: sent, source: 'supabase' });
     } catch (error) {
       if (error instanceof sb.SchemaUnavailableError) {
         return c.json({ error: 'Invitaciones persistentes pendientes del contrato 016' }, 501);

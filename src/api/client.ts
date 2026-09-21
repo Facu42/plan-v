@@ -183,6 +183,31 @@ export const api = {
       body: JSON.stringify({ patientId: data.patientId, kind: 'reminder', title: data.title, detail: data.detail }),
     }),
 
+  getNotificationPrefs: (patientId?: string, audience?: 'patient' | 'pro') => {
+    const params = new URLSearchParams();
+    if (patientId) params.set('patientId', patientId);
+    if (audience) params.set('audience', audience);
+    const query = params.toString();
+    return request<{ prefs: { in_app: boolean; email: boolean; push: boolean }; source: string }>(
+      `/api/notification-preferences${query ? `?${query}` : ''}`,
+    );
+  },
+
+  saveNotificationPrefs: (
+    prefs: { in_app: boolean; email: boolean; push: boolean },
+    patientId?: string,
+    audience?: 'patient' | 'pro',
+  ) => {
+    const params = new URLSearchParams();
+    if (patientId) params.set('patientId', patientId);
+    if (audience) params.set('audience', audience);
+    const query = params.toString();
+    return request<{ prefs: { in_app: boolean; email: boolean; push: boolean }; source: string }>(
+      `/api/notification-preferences${query ? `?${query}` : ''}`,
+      { method: 'PUT', body: JSON.stringify(prefs) },
+    );
+  },
+
   updateBilling: (patientId: string, data: { status: 'pending' | 'waived' } | { status: 'active'; billing_until: string }) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/billing`, {
       method: 'PATCH',

@@ -1,8 +1,8 @@
 import type { ConsultAlertAudience } from './consult-alerts';
 
-export type NoticePrefs = { browser: boolean; email: boolean };
+export type NoticePrefs = { browser: boolean; email: boolean; push: boolean };
 
-const DEFAULT_PREFS: NoticePrefs = { browser: false, email: false };
+const DEFAULT_PREFS: NoticePrefs = { browser: false, email: false, push: false };
 
 export function noticePrefsKey(audience: ConsultAlertAudience) {
   return `plan-v:notice-prefs:${audience}`;
@@ -17,7 +17,7 @@ export function readNoticePrefs(storage: Pick<Storage, 'getItem'> | null, audien
   if (!raw) return DEFAULT_PREFS;
   try {
     const parsed = JSON.parse(raw) as Partial<NoticePrefs>;
-    return { browser: Boolean(parsed.browser), email: Boolean(parsed.email) };
+    return { browser: Boolean(parsed.browser), email: Boolean(parsed.email), push: Boolean(parsed.push) };
   } catch {
     return DEFAULT_PREFS;
   }

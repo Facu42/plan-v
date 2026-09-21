@@ -75,6 +75,7 @@ export const noticeCreateSchema = z.object({
   kind: z.literal('reminder'),
   title: z.string().trim().min(1).max(120),
   detail: z.string().trim().min(1).max(400),
+  client_id: z.uuid().optional(),
 });
 
 const billingDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => {

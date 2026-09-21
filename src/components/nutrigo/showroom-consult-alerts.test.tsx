@@ -15,6 +15,8 @@ describe('Campana de avisos de consulta', () => {
     expect(html).toContain('Mañana · 14:30');
     expect(html).toContain('buzón demo');
     expect(html).toContain('Avisos en este dispositivo');
+    expect(html).toContain('Push (sin proveedor, no se envía)');
+    expect(html).toContain('no salen a internet');
     expect(html).toContain('href="https://meet.example.com/ana"');
   });
 

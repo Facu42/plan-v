@@ -9,6 +9,7 @@ import { toPatientSelfView, type PatientAction } from '../security/contracts.js'
 import { getPatient } from '../store.js';
 import * as repo from './repository.js';
 import { writeOpsLog } from '../ops/log.js';
+import { enqueueOutboxBestEffort } from '../outbox/repository.js';
 
 const access = {
   getActor: sb.sbGetActor,
@@ -59,6 +60,14 @@ export function registerMessageRoutes(app: Hono) {
         asset_id: body.asset_id,
         filename: body.filename,
       }, true);
+      await enqueueOutboxBestEffort({
+        patient_id: patientId,
+        event_type: 'thread_message',
+        client_id: clientId,
+        subject: 'Mensaje nuevo en el hilo',
+        body: 'Hay un mensaje nuevo. Este aviso quedó en el buzón in-app de Plan V; no se envió a internet.',
+        kind: 'message',
+      }, true);
       const updated = await sb.sbGetPatientById(patientId, audience(actor.role));
       return c.json({
         patient: updated && actor.role === 'paciente' ? toPatientSelfView(updated) : updated,
@@ -74,6 +83,14 @@ export function registerMessageRoutes(app: Hono) {
       client_id: clientId,
       asset_id: body.asset_id,
       filename: body.filename,
+    }, false);
+    await enqueueOutboxBestEffort({
+      patient_id: patientId,
+      event_type: 'thread_message',
+      client_id: clientId,
+      subject: 'Mensaje nuevo en el hilo',
+      body: 'Hay un mensaje nuevo. Este aviso quedó en el buzón in-app de Plan V; no se envió a internet.',
+      kind: 'message',
     }, false);
     const updated = getPatient(patientId)!;
     return c.json({

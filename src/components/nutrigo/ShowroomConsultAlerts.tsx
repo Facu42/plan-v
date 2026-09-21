@@ -19,6 +19,7 @@ import {
   readNoticePrefs,
   wasNoticeFired,
   writeNoticePrefs,
+  type NoticePrefs,
 } from './showroom-notices';
 import './consult-alerts.css';
 
@@ -115,23 +116,42 @@ export function ShowroomConsultAlerts({
     setTick((value) => value + 1);
   };
 
+  const persistServerPrefs = (next: NoticePrefs) => {
+    if (!storage) return;
+    void api.saveNotificationPrefs(
+      { in_app: true, email: next.email, push: next.push },
+      patientId,
+      audience === 'pro' ? 'pro' : 'patient',
+    ).catch(() => undefined);
+  };
+
   const toggleBrowser = async () => {
     if (!prefs.browser) {
       const granted = await enableBrowserNotices();
       const next = { ...prefs, browser: granted };
       writeNoticePrefs(storage, audience, next);
       setPrefs(next);
+      persistServerPrefs(next);
       return;
     }
     const next = { ...prefs, browser: false };
     writeNoticePrefs(storage, audience, next);
     setPrefs(next);
+    persistServerPrefs(next);
   };
 
   const toggleEmail = () => {
     const next = { ...prefs, email: !prefs.email };
     writeNoticePrefs(storage, audience, next);
     setPrefs(next);
+    persistServerPrefs(next);
+  };
+
+  const togglePush = () => {
+    const next = { ...prefs, push: !prefs.push };
+    writeNoticePrefs(storage, audience, next);
+    setPrefs(next);
+    persistServerPrefs(next);
   };
 
   return <div className="nv-alerts">
@@ -141,12 +161,13 @@ export function ShowroomConsultAlerts({
     </button>
     {open && <div className="nv-alerts-pop" id="nv-alerts-panel" role="dialog" aria-label={title}>
       <header>
-        <div><strong>{title}</strong><small>Consultas, comidas y hábitos publicados. El teléfono usa avisos de este navegador. El mail queda en el buzón demo; no sale a internet.</small></div>
+        <div><strong>{title}</strong><small>Consultas, comidas y hábitos publicados. El teléfono usa avisos de este navegador. Mail y push quedan encolados en el buzón demo; no salen a internet sin claves del proveedor.</small></div>
         <button type="button" aria-label="Cerrar avisos" onClick={() => setOpen(false)}>×</button>
       </header>
       <div className="nv-alerts-prefs">
         <label><input type="checkbox" checked={prefs.browser} disabled={!browserNoticesSupported()} onChange={() => { void toggleBrowser(); }} /> Avisos en este dispositivo</label>
         <label><input type="checkbox" checked={prefs.email} onChange={toggleEmail} /> Buzón demo por mail</label>
+        <label><input type="checkbox" checked={prefs.push} onChange={togglePush} /> Push (sin proveedor, no se envía)</label>
       </div>
       {care.error && <p role="alert">No se pudieron actualizar los avisos de seguimiento: {care.error}</p>}
       {care.notices.length > 0 && <section className="nv-alerts-habits" aria-label="Avisos de seguimiento"><h3>{audience === 'pro' ? 'Registros de pacientes' : 'Tu seguimiento'}</h3><ul>{care.notices.map(notice => <li key={notice.id}><div><strong>{notice.patient_name ? `${notice.patient_name} · ` : ''}{notice.title}</strong><small>{notice.detail}</small></div>{onOpenCare && <div className="nv-alerts-actions"><NvButton onClick={() => { setOpen(false); onOpenCare(notice); }}>{audience === 'pro' ? 'Revisar registro' : 'Abrir'}</NvButton></div>}</li>)}</ul></section>}

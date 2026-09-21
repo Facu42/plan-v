@@ -32,6 +32,8 @@ import { markMemoryRead, resetMessageMemory, sendMemoryMessage } from './message
 import { resetAiJobMemory } from './ai-jobs/repository.js';
 import { resetPrivacyMemory } from './privacy/repository.js';
 import { resetShoppingMemory } from './shopping/repository.js';
+import { enqueueMemoryOutbox, listMemoryMailbox, processMemoryDeliveries, resetOutboxMemory } from './outbox/memory.js';
+import type { OutboxEventType } from '../src/types/outbox.js';
 
 export type { PatientInvite, InviteEvent } from './identity/invites.js';
 
@@ -553,8 +555,45 @@ export function getPatient(id: string): Patient | undefined {
 
 const DEMO_NOTICE_TO = 'aviso.demo@plan-v.local';
 
+function recordOutboxNotice(input: {
+  patientId: string;
+  eventType: OutboxEventType;
+  kind: DemoNotice['kind'];
+  subject: string;
+  body: string;
+  clientId?: string;
+}) {
+  const patient = getPatient(input.patientId);
+  if (!patient) return;
+  enqueueMemoryOutbox({
+    patient: {
+      id: patient.id,
+      nutritionist_id: DEMO_NUTRITIONIST_ID,
+      deactivated_at: patient.deactivated_at,
+      anonymized_at: patient.anonymized_at,
+    },
+    event_type: input.eventType,
+    client_id: input.clientId ?? randomUUID(),
+    subject: input.subject,
+    body: input.body,
+    kind: input.kind,
+    pref_user: patient.id,
+  });
+  processMemoryDeliveries();
+}
+
 export function enqueueNotice(input: Omit<DemoNotice, 'id' | 'at' | 'channel' | 'to'> & { to?: string }): DemoNotice {
-  const entry: DemoNotice = {
+  recordOutboxNotice({
+    patientId: input.patientId,
+    eventType: input.kind === 'appointment' ? 'appointment_scheduled' : 'reminder',
+    kind: input.kind,
+    subject: input.subject,
+    body: input.body,
+  });
+  const mailbox = listMemoryMailbox(input.patientId);
+  const entry = mailbox[0];
+  if (entry) return entry;
+  return {
     id: randomUUID(),
     at: now(),
     channel: 'email',
@@ -564,12 +603,10 @@ export function enqueueNotice(input: Omit<DemoNotice, 'id' | 'at' | 'channel' | 
     patientId: input.patientId,
     kind: input.kind,
   };
-  store.notices.unshift(entry);
-  return entry;
 }
 
 export function listNotices(patientId?: string): DemoNotice[] {
-  return patientId ? store.notices.filter((notice) => notice.patientId === patientId) : store.notices;
+  return listMemoryMailbox(patientId);
 }
 
 function recordInviteEvent(inviteId: string, event: InviteEvent['event'], actorId: string | null = null): void {
@@ -666,6 +703,14 @@ export function sendPatientInvite(inviteId: string): PatientInvite | null {
   if (!activated) return null;
   store.patientInvites = store.patientInvites.map((invite) => invite.id === inviteId ? activated.invite : invite);
   recordInviteEvent(inviteId, activated.event);
+  recordOutboxNotice({
+    patientId: current.patient_id,
+    eventType: 'invite_sent',
+    kind: 'reminder',
+    subject: `Invitación enviada · ${current.email}`,
+    body: 'La invitación quedó en el buzón in-app de Plan V; no se envió un mail real.',
+    clientId: inviteId,
+  });
   return publicInviteView(activated.invite);
 }
 
@@ -722,6 +767,7 @@ export function resetStore(): void {
   resetAiJobMemory();
   resetPrivacyMemory();
   resetShoppingMemory();
+  resetOutboxMemory();
   store = {
     patients: seedPatients(),
     patientInvites: [],
@@ -1074,8 +1120,14 @@ export function setAppointment(
 
   if (scheduled || previous) {
     const when = scheduled?.when ?? previous?.when ?? '';
-    enqueueNotice({
+    const eventType: OutboxEventType = !scheduled
+      ? 'appointment_cancelled'
+      : previous
+        ? 'appointment_rescheduled'
+        : 'appointment_scheduled';
+    recordOutboxNotice({
       patientId: id,
+      eventType,
       kind: 'appointment',
       subject: `${title} · ${patient.name}`,
       body: scheduled
@@ -1109,6 +1161,13 @@ export function confirmAppointment(id: string, reply: 'attending' | 'needs_chang
     at: recordedAt,
     now: new Date(recordedAt),
   }), ...(patient.appointment_history ?? [])];
+  recordOutboxNotice({
+    patientId: id,
+    eventType: 'appointment_confirmed',
+    kind: 'appointment',
+    subject: `Consulta · ${reply === 'attending' ? 'confirmada' : 'pide cambio'} · ${patient.name}`,
+    body: `La paciente respondió ${reply === 'attending' ? 'asiste' : 'pide cambio'} al turno ${appointment.when}. Este aviso quedó en el buzón in-app de Plan V; no se envió a internet.`,
+  });
   return updatePatient(id, { appointment, appointment_history: history });
 }
 
