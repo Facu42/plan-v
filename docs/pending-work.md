@@ -2,9 +2,9 @@
 
 ## Revisión vigente de avance — 2026-09-21
 
-PV-19 en esta rama: planes fechados/versionados (slots, receta XOR texto, timezone `America/Argentina/Buenos_Aires`); publicación transaccional con `expected_version`; copia publicada inmutable; el borrador siguiente no la cambia. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Siguiente P0: PV-20 paciente ve el plan publicado (mismo contenido que CRM). No P1, no visual Nutrigo.
+PV-19 en esta rama: planes fechados/versionados (slots, receta XOR texto, timezone `America/Argentina/Buenos_Aires`); publicación transaccional con `expected_version`; copia publicada inmutable; el borrador siguiente no la cambia. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 616 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente P0: PV-20 paciente ve el plan publicado (mismo contenido que CRM). No P1, no visual Nutrigo.
 
-PV-18 en esta rama: catálogo profesional de recetas/ingredientes con rinde, pasos y fuente nutricional declarada; versiones publicadas inmutables; paciente sólo ve revisiones publicadas y asignadas; fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 605 pruebas OK, 2 omitidas; check, check:migrations y build OK.
+PV-18 en esta rama: catálogo profesional de recetas/ingredientes con rinde, pasos y fuente nutricional declarada; versiones publicadas inmutables; paciente sólo ve revisiones publicadas y asignadas; fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL.
 
 ## Revisión vigente de avance — 2026-09-19
 
