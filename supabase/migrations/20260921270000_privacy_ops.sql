@@ -76,7 +76,7 @@ create or replace function public.request_privacy_action(payload jsonb)
 returns jsonb language plpgsql security definer set search_path='' as $$
 declare
   target uuid;
-  kind text;
+  req_kind text;
   pid uuid;
   rid uuid;
   existing public.privacy_requests;
@@ -90,23 +90,23 @@ begin
   exception when others then
     raise exception using errcode='22023', message='privacy_payload';
   end;
-  kind := payload->>'kind';
-  if kind not in ('export', 'delete', 'correction') then
+  req_kind := payload->>'kind';
+  if req_kind not in ('export', 'delete', 'correction') then
     raise exception using errcode='22023', message='privacy_kind';
   end if;
   pid := public.privacy_assert_patient(target);
 
-  if kind = 'delete' then
+  if req_kind = 'delete' then
     update public.patients
       set deactivated_at = coalesce(deactivated_at, stamp),
           deletion_requested_at = coalesce(deletion_requested_at, stamp)
     where id = pid;
   end if;
 
-  if kind = 'delete' then
+  if req_kind = 'delete' then
     select * into existing
     from public.privacy_requests
-    where patient_id = pid and kind = 'delete'
+    where patient_id = pid and privacy_requests.kind = 'delete'
     order by requested_at desc
     limit 1;
     if found and existing.status in ('requested', 'in_progress', 'completed') then
@@ -119,8 +119,8 @@ begin
   values (
     rid,
     pid,
-    kind,
-    case when kind = 'correction' then 'requested' else 'in_progress' end,
+    req_kind,
+    case when req_kind = 'correction' then 'requested' else 'in_progress' end,
     stamp,
     stamp + interval '30 days',
     coalesce(payload->>'notes', '')
