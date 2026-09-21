@@ -24,7 +24,10 @@ export function evaluateReadiness(
 }
 
 export function maxBodyBytes(path: string) {
-  if (path.includes('/meals') || path.includes('/care') || path.includes('/photos') || path.includes('/documents')) {
+  if (path.includes('/assets') || path.includes('/documents')) {
+    return 22 * 1024 * 1024;
+  }
+  if (path.includes('/meals') || path.includes('/care') || path.includes('/photos')) {
     return 12 * 1024 * 1024;
   }
   return 1 * 1024 * 1024;

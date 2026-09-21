@@ -194,4 +194,25 @@ describe('migraciones de ingreso en PostgreSQL', () => {
     await rpc(a,'delete_care_document',[patient,id]);
     expect((await db.query('select * from public.care_records where id=$1',[id])).rows).toEqual([]);
   });
+  it('PV-15: intenciones service-managed, cuarentena propia y Nutri B aislada', async () => {
+    await db.exec('grant select,insert,delete on storage.objects to authenticated');
+    const intent = '30000000-0000-4000-a000-000000000001';
+    const path = `patients/${patient}/q/${intent}`;
+    await expect(asUser(a, 'insert into public.asset_upload_intents(id,patient_id,nutritionist_id,category,object_path,mime_declared,byte_limit,expires_at) values($1,$2,$3,$4,$5,$6,$7,now()+interval \'15 minutes\')', [intent, patient, (await asUser<{nutritionist_id:string}>(pro, 'select nutritionist_id from public.patients where id=$1', [patient]))[0].nutritionist_id, 'clinical_document', path, 'application/pdf', 1024])).rejects.toMatchObject({ code: '42501' });
+    expect(await asUser(a, 'select id from public.asset_upload_intents')).toEqual([]);
+    const nutriId = (await db.query<{ nutritionist_id: string }>('select nutritionist_id from public.patients where id=$1', [patient])).rows[0].nutritionist_id;
+    await db.query(
+      `insert into public.asset_upload_intents(id,patient_id,nutritionist_id,category,object_path,mime_declared,byte_limit,expires_at)
+       values($1,$2,$3,'body_progress',$4,'image/png',1024,now()+interval '15 minutes')`,
+      [intent, patient, nutriId, path],
+    );
+    expect(await asUser(a, 'select id from public.asset_upload_intents')).toEqual([]);
+    expect(await asUser(pro, 'select object_path from public.asset_upload_intents')).toEqual([{ object_path: path }]);
+    expect(await asUser(other, 'select id from public.asset_upload_intents')).toEqual([]);
+    await expect(asUser(a, "insert into storage.objects(bucket_id,name) values('care-quarantine',$1)", ['mal.jpg'])).rejects.toMatchObject({ code: '42501' });
+    await asUser(a, "insert into storage.objects(bucket_id,name) values('care-quarantine',$1)", [path]);
+    expect(await asUser(a, 'select name from storage.objects where bucket_id=$1 and name=$2', ['care-quarantine', path])).toEqual([{ name: path }]);
+    expect(await asUser(b, 'select name from storage.objects where bucket_id=$1 and name=$2', ['care-quarantine', path])).toEqual([]);
+    expect(await asUser(pro, 'select name from storage.objects where bucket_id=$1 and name=$2', ['care-quarantine', path])).toEqual([]);
+  });
 });

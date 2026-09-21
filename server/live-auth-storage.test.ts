@@ -71,7 +71,7 @@ describe.skipIf(!live)('Plan V hosted Auth / Storage (sin migrar SQL)', () => {
     expect(buckets.status).toBe(200);
     expect(buckets.body).toEqual([]);
 
-    for (const name of ['meal-photos', 'care-documents', 'care-photos']) {
+    for (const name of ['meal-photos', 'care-documents', 'care-photos', 'care-quarantine']) {
       const one = await supabaseFetch(`/storage/v1/bucket/${name}`);
       expect(one.status).toBeGreaterThanOrEqual(400);
       expect(JSON.stringify(one.body)).toMatch(/Bucket not found|NoSuchBucket/i);

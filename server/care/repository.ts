@@ -1,9 +1,9 @@
 import { getRequestDb, privilegedDb } from '../db/supabase-client.js';
 import { DEFAULT_CARE_PREFERENCES, type CareInput, type CareRecord, type CarePreferences, type CareReplacement, type ReplacementRecipe } from '../../src/types/care.js';
-
-export class CareError extends Error {
-  constructor(public status: 400 | 403 | 404 | 409 | 413 | 501 | 503, message: string) { super(message); }
-}
+import { inspectPrivateFile } from '../assets/inspect.js';
+import { requireProductBuckets } from '../assets/storage.js';
+import { CareError } from './errors.js';
+export { CareError } from './errors.js';
 const records = new Map<string, CareRecord>();
 const preferences = new Map<string, CarePreferences>();
 const replacements = new Map<string, CareReplacement>();
@@ -76,11 +76,14 @@ export function validatePhoto(dataUrl: string) {
   if (bytes.length > 5 * 1024 * 1024) throw new CareError(413, 'La foto debe pesar menos de 5 MB.');
   const valid = match[1] === 'jpeg' ? bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff : match[1] === 'png' ? bytes.subarray(0,8).toString('hex') === '89504e470d0a1a0a' : bytes.subarray(0,4).toString() === 'RIFF' && bytes.subarray(8,12).toString() === 'WEBP';
   if (!valid) throw new CareError(400, 'El contenido no corresponde a una imagen válida.');
-  return { bytes, mime: `image/${match[1]}` };
+  const inspected = inspectPrivateFile('body_progress', bytes, `image/${match[1]}`);
+  return { bytes: inspected.bytes, mime: inspected.mime };
 }
 export async function storeCarePhoto(path: string, dataUrl: string, persistent: boolean) {
   const { bytes, mime } = validatePhoto(dataUrl);
-  if (!persistent) { const previous=photos.get(path); if(previous && !validatePhoto(previous).bytes.equals(bytes)) throw new CareError(409,'Ese registro ya tiene otra foto.'); photos.set(path, dataUrl); return; }
+  const cleaned = `data:${mime};base64,${bytes.toString('base64')}`;
+  if (!persistent) { const previous=photos.get(path); if(previous && !validatePhoto(previous).bytes.equals(bytes)) throw new CareError(409,'Ese registro ya tiene otra foto.'); photos.set(path, cleaned); return; }
+  await requireProductBuckets(['care-photos', 'care-quarantine']);
   const { error } = await getRequestDb().storage.from('care-photos').upload(path, bytes, { contentType: mime, upsert: false });
   if (error) {
     // Recuperar una carga aceptada cuyo acuse se perdió, sin sobrescribirla.
@@ -125,7 +128,8 @@ export function validateDocument(dataUrl: string) {
       ? bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff
       : bytes.subarray(0, 8).toString('hex') === '89504e470d0a1a0a';
   if (!valid) throw new CareError(400, 'El contenido no corresponde al tipo de archivo indicado.');
-  return { bytes, mime };
+  const inspected = inspectPrivateFile('clinical_document', bytes, mime);
+  return { bytes: inspected.bytes, mime };
 }
 async function putPrivateBlob(bucket: 'care-photos' | 'care-documents', path: string, bytes: Buffer, mime: string, previous: string | undefined, persistent: boolean) {
   if (!persistent) {
@@ -146,8 +150,9 @@ async function putPrivateBlob(bucket: 'care-photos' | 'care-documents', path: st
 }
 export async function storeCareDocument(path: string, dataUrl: string, persistent: boolean) {
   const { bytes, mime } = validateDocument(dataUrl);
+  if (persistent) await requireProductBuckets(['care-documents', 'care-quarantine']);
   await putPrivateBlob('care-documents', path, bytes, mime, documents.get(path), persistent);
-  if (!persistent) documents.set(path, dataUrl);
+  if (!persistent) documents.set(path, `data:${mime};base64,${bytes.toString('base64')}`);
 }
 export async function deleteCareDocument(patientId: string, id: string, persistent: boolean) {
   const record = (await listCareRecords(patientId, persistent)).find(r => r.id === id);

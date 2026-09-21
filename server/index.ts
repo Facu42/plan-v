@@ -2,6 +2,7 @@ import { serve } from '@hono/node-server';
 import { registerCareRoutes, requireCareConsent } from './care/routes.js';
 import { CareError, validatePhoto } from './care/repository.js';
 import { uploadMealPhoto, signMealPhotos } from './care/meal-photos.js';
+import { registerAssetRoutes } from './assets/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -226,6 +227,7 @@ app.get('/api/ready', async (c) => {
 });
 
 registerCareRoutes(app);
+registerAssetRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({
