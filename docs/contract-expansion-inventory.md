@@ -20,7 +20,7 @@ de entidades existentes, no debe persistirse; **futura** = sin implementación.
 | `meal_plans` / versiones | plantilla semanal 016 | 016b: plan fechado, una versión `published` | Publicación transaccional (PV-19) |
 | `intake_sessions` / `consent_events` | onboarding React | 016b: intake versionado + consentimientos append-only | Pantallas y persistencia (PV-12/13) |
 | `document_records` / `body_photo_entries` | — | 016b: estudios y fotos corporales; sin IA | Storage privado (PV-15/16) |
-| `measurements` | — | 016b: peso/medidas con unidad y origen | Historial usable (PV-17) |
+| `measurements` | demo + PGlite (PV-17) | 016b: peso/medidas con unidad y origen | Live schema en proyecto **vacío** (no el de `patients`) |
 | `clinical_notes` | notas en ficha | 016b: sólo nutri; revoke paciente | Nunca en DTO paciente |
 | `ai_jobs` / `ai_artifacts` | mocks demo | 016b: jobs privados del profesional | Worker y revisión (PV-27) |
 | `outbox_events` | buzón demo | 016b: outbox + deliveries; sin policy authenticated | Proveedor real (PV-26) |
