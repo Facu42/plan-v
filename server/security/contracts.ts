@@ -51,6 +51,7 @@ export type PatientAction =
   | 'edit_goal'
   | 'edit_billing'
   | 'assign_resource'
+  | 'assign_routine'
   | 'generate_copilot'
   | 'generate_ai_job'
   | 'read_intake'
@@ -109,6 +110,7 @@ const NUTRITIONIST_ACTIONS = new Set<PatientAction>([
   'edit_goal',
   'edit_billing',
   'assign_resource',
+  'assign_routine',
   'generate_copilot',
   'generate_ai_job',
   'read_intake',

@@ -33,6 +33,7 @@ import { resetAiJobMemory } from './ai-jobs/repository.js';
 import { resetPrivacyMemory } from './privacy/repository.js';
 import { resetShoppingMemory } from './shopping/repository.js';
 import { enqueueMemoryOutbox, listMemoryMailbox, processMemoryDeliveries, resetOutboxMemory } from './outbox/memory.js';
+import { resetExerciseMemory } from './exercise/memory.js';
 import type { OutboxEventType } from '../src/types/outbox.js';
 
 export type { PatientInvite, InviteEvent } from './identity/invites.js';
@@ -768,6 +769,7 @@ export function resetStore(): void {
   resetPrivacyMemory();
   resetShoppingMemory();
   resetOutboxMemory();
+  resetExerciseMemory();
   store = {
     patients: seedPatients(),
     patientInvites: [],

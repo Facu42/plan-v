@@ -7,7 +7,7 @@ describe('rutas autenticadas de Nutrigo', () => {
     expect(appPath('pro', 'pacientes')).toBe('/crm/pacientes');
     expect(appPath('pro', 'progreso')).toBe('/crm/progreso');
     expect(appPath('patient', 'ficha')).toBe('/app/inicio');
-    expect(appPath('pro', 'ejercicio')).toBe('/crm/inicio');
+    expect(appPath('pro', 'ejercicio')).toBe('/crm/ejercicio');
   });
 
   it('lee la superficie y la página desde el path', () => {

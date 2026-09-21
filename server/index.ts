@@ -12,6 +12,7 @@ import { registerPrivacyRoutes } from './privacy/routes.js';
 import { registerShoppingRoutes } from './shopping/routes.js';
 import { registerOutboxRoutes } from './outbox/routes.js';
 import { registerProgressRoutes } from './progress/routes.js';
+import { registerExerciseRoutes } from './exercise/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -29,7 +30,6 @@ import { createRateLimitMiddleware } from './ops/rate-limit.js';
 import { createBodyLimitMiddleware, evaluateReadiness, releaseSha } from './ops/readiness.js';
 import { assertSecretBoundary, inspectSecrets } from './ops/secrets.js';
 import {
-  activityInputSchema,
   authRecoverInputSchema,
   billingUpdateInputSchema,
   clinicalNoteInputSchema,
@@ -80,8 +80,6 @@ import {
   type PatientAction,
 } from './security/contracts.js';
 import {
-  addActivityLog,
-  deleteActivityLog,
   assignResourceToPatients,
   briefForDisplay,
   computeShoppingList,
@@ -250,6 +248,7 @@ registerPrivacyRoutes(app);
 registerShoppingRoutes(app);
 registerOutboxRoutes(app);
 registerProgressRoutes(app);
+registerExerciseRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({
@@ -472,41 +471,6 @@ app.patch('/api/patients/:id/habits', async (c) => {
   const patient = upsertHabitLog(patientId, body);
   if (!patient) return c.notFound();
   return c.json({ patient, source: 'memory' });
-});
-
-app.post('/api/patients/:id/activities', async (c) => {
-  const auth = c.get('auth');
-  const patientId = c.req.param('id');
-  const parsedBody = await parseJsonBody(c, activityInputSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'log_activity')) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    return c.json({ error: 'Actividad persistente pendiente del schema 016' }, 501);
-  }
-
-  const patient = addActivityLog(patientId, parsedBody.data);
-  if (!patient) return c.notFound();
-  return c.json({ patient: toPatientSelfView(patient), source: 'memory' });
-});
-
-app.delete('/api/patients/:id/activities/:activityId', async (c) => {
-  const auth = c.get('auth');
-  const patientId = c.req.param('id');
-  const activityId = c.req.param('activityId');
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'delete_activity')) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    return c.json({ error: 'Actividad persistente pendiente del schema 016' }, 501);
-  }
-
-  const patient = deleteActivityLog(patientId, activityId);
-  if (!patient) return c.notFound();
-  return c.json({ patient: toPatientSelfView(patient), source: 'memory' });
 });
 
 app.post('/api/resources/assign', async (c) => {
