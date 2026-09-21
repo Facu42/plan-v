@@ -17,6 +17,12 @@ import {
 describe('API input schemas', () => {
   it('requires a supported slot and either a description or an image', () => {
     expect(analyzeMealInputSchema.safeParse({ slot: 'Almuerzo', description: 'Bowl de pollo' }).success).toBe(true);
+    expect(analyzeMealInputSchema.safeParse({
+      slot: 'Almuerzo',
+      description: 'Bowl de pollo',
+      client_id: '11111111-1111-4111-8111-111111111111',
+    }).success).toBe(true);
+    expect(analyzeMealInputSchema.safeParse({ slot: 'Almuerzo', description: 'Bowl', client_id: 'no-uuid' }).success).toBe(false);
     expect(analyzeMealInputSchema.safeParse({ slot: 'Almuerzo', imageBase64: 'YWJjZA==' }).success).toBe(true);
     expect(analyzeMealInputSchema.safeParse({ slot: 'Media noche', description: 'Algo' }).success).toBe(false);
     expect(analyzeMealInputSchema.safeParse({ slot: 'Almuerzo' }).success).toBe(false);

@@ -130,9 +130,9 @@
     "PV-22": {
       "status": "in_progress",
       "owner": "",
-      "notes": "El diario conserva la comida si la IA falla: pending_review con foods vacío, macros null y nota profesional. No sustituye alimentos de demo. Falta job asíncrono y Auth/Storage live.",
-      "evidence": "POST /api/patients/:id/meals/analyze captura AIUnavailableError. server/meal-flow.integration.test.ts, server/meal-ai-unavailable.integration.test.ts, server/acompanamiento.integration.test.ts.",
-      "updatedAt": "2026-09-19T20:02:00.000Z"
+      "notes": "Save-first: el registro existe antes de la IA. Duplicados por client_id no crean otra comida; IA failed deja foto/texto, analysis_status=failed, macros=null. Revisión append-only. Fail closed 501 sin schema/buckets. Falta job asíncrono y Auth/Storage live.",
+      "evidence": "supabase/migrations/20260921220000_meal_diary.sql; server/diary/*; MealLogModal client_id. 628 pruebas OK, 2 omitidas; check/check:migrations/build OK.",
+      "updatedAt": "2026-09-21T04:06:00.000Z"
     },
     "PV-23": {
       "status": "in_progress",

@@ -203,6 +203,9 @@ function mapMealLog(row: Record<string, unknown>): MealLog {
     note_for_nutri: (row.note_for_nutri as string) ?? '',
     status: row.status as MealLog['status'],
     logged_at: row.logged_at as string,
+    ...(row.analysis_status === 'pending' || row.analysis_status === 'succeeded' || row.analysis_status === 'failed'
+      ? { analysis_status: row.analysis_status }
+      : {}),
   };
 }
 

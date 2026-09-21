@@ -132,7 +132,7 @@ export const api = {
       body: JSON.stringify({ display_name: displayName }),
     }),
 
-  analyzeMeal: (patientId: string, data: { description?: string; imageBase64?: string; slot: string; photoPreview?: string }) =>
+  analyzeMeal: (patientId: string, data: { description?: string; imageBase64?: string; slot: string; photoPreview?: string; client_id?: string }) =>
     request<{ analysis: unknown; log: MealLog; patient: Patient }>(`/api/patients/${patientId}/meals/analyze`, {
       method: 'POST',
       body: JSON.stringify(data),

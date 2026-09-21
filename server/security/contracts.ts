@@ -164,6 +164,7 @@ export function toPatientSelfMealLog(log: MealLog): PatientSelfMealLog {
     confidence: log.confidence,
     status: log.status,
     logged_at: log.logged_at,
+    ...(log.analysis_status ? { analysis_status: log.analysis_status } : {}),
   };
 }
 

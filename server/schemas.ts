@@ -97,6 +97,7 @@ export const analyzeMealInputSchema = z.object({
   imageBase64: z.string().min(4).max(8_000_000).optional(),
   slot: mealSlotSchema,
   photoPreview: z.string().max(10_700_000).optional(),
+  client_id: z.uuid().optional(),
 }).refine((input) => Boolean(input.description || input.imageBase64), {
   message: 'Se requiere una descripción o imagen',
 });

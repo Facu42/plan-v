@@ -27,6 +27,8 @@ export type Macros = {
   fat_g: number;
 };
 
+export type MealAnalysisStatus = 'pending' | 'succeeded' | 'failed';
+
 export type MealLog = {
   id: string;
   patient_id: string;
@@ -39,6 +41,7 @@ export type MealLog = {
   note_for_nutri: string;
   status: MealStatus;
   logged_at: string;
+  analysis_status?: MealAnalysisStatus;
 };
 
 export type TimelineEvent = {

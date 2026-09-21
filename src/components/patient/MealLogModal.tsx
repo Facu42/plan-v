@@ -17,9 +17,16 @@ type Step = 'capture' | 'analyzing' | 'review' | 'success';
 
 const SLOTS = ['Desayuno', 'Colación', 'Almuerzo', 'Merienda', 'Cena', 'Extra'];
 
+export function mealLogWasKept(log: Pick<MealLog, 'foods' | 'macros' | 'analysis_status'>) {
+  return log.analysis_status === 'failed' || (log.foods.length === 0 && !log.macros);
+}
+
+export const MEAL_KEPT_COPY = 'No pudimos estimar alimentos ni macros. Verónica lo revisará. Tu registro no se perdió.';
+
 export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props) {
   const care=useCare(patient.id);
   const lock=useRef(false);
+  const clientId = useRef(crypto.randomUUID());
   const refreshPatient = useAppStore((s) => s.refreshPatient);
   const [step, setStep] = useState<Step>('capture');
   const [mode, setMode] = useState<'photo' | 'text'>('photo');
@@ -70,6 +77,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
         imageBase64: mode === 'photo' && imageBase64 ? imageBase64 : undefined,
         slot,
         photoPreview: mode === 'photo' ? photoPreview ?? undefined : undefined,
+        client_id: clientId.current,
       });
       setResult(log);
       try { await refreshPatient(patient.id); } catch { /* El registro ya fue confirmado; no reenviar por un fallo de lectura. */ }
@@ -114,7 +122,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
   }
 
   if (step === 'review' && result) {
-    const estimationUnavailable = result.foods.length === 0 && !result.macros;
+    const estimationUnavailable = mealLogWasKept(result);
     return (
       <div className="modal-backdrop" role="dialog" aria-modal="true">
         <div className="photo-modal">
@@ -127,7 +135,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
           <p className="eyebrow">{estimationUnavailable ? 'Registro guardado' : 'Lectura asistida'} · {slot}</p>
           <h2>{estimationUnavailable ? 'Registramos tu comida' : 'Esto es lo que vemos'}</h2>
           {estimationUnavailable ? (
-            <p className="modal-note">No pudimos estimar alimentos ni macros. Verónica lo revisará. Tu registro no se perdió.</p>
+            <p className="modal-note">{MEAL_KEPT_COPY}</p>
           ) : (
             <>
               <div className="food-tags">

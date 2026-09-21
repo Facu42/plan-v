@@ -1,15 +1,14 @@
 import { serve } from '@hono/node-server';
-import { registerCareRoutes, requireCareConsent } from './care/routes.js';
-import { CareError, validatePhoto } from './care/repository.js';
-import { uploadMealPhoto, signMealPhotos } from './care/meal-photos.js';
+import { registerCareRoutes } from './care/routes.js';
+import { CareError } from './care/repository.js';
 import { registerAssetRoutes } from './assets/routes.js';
 import { registerRecipeRoutes } from './recipes/routes.js';
 import { registerPlanRoutes } from './plans/routes.js';
+import { registerDiaryRoutes } from './diary/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
 import type { ZodType } from 'zod';
-import { analysisOrUnavailable, analyzeMeal } from './ai/meal-analyzer.js';
 import { generateCopilotBrief } from './ai/copilot.js';
 import { AIUnavailableError } from './ai/errors.js';
 import { readRuntimeConfig } from './config/runtime.js';
@@ -23,7 +22,6 @@ import { createRateLimitMiddleware } from './ops/rate-limit.js';
 import { createBodyLimitMiddleware, evaluateReadiness, releaseSha } from './ops/readiness.js';
 import { assertSecretBoundary, inspectSecrets } from './ops/secrets.js';
 import {
-  analyzeMealInputSchema,
   activityInputSchema,
   appointmentUpdateSchema,
   appointmentRescheduleSchema,
@@ -39,7 +37,6 @@ import {
   intakePatchInputSchema,
   intakeSubmitInputSchema,
   listPageQuerySchema,
-  mealReviewInputSchema,
   menuSlotParamsSchema,
   menuSlotUpdateSchema,
   messageInputSchema,
@@ -76,13 +73,10 @@ import { recoveryAcknowledgement, provisionSecretMatches, validateProvisionInput
 import { authorizePatientAction } from './security/authorization.js';
 import {
   canManagePatients,
-  toPatientMealAnalysis,
-  toPatientSelfMealLog,
   toPatientSelfView,
   type PatientAction,
 } from './security/contracts.js';
 import {
-  addMealLog,
   addMessage,
   markMessagesRead,
   addActivityLog,
@@ -108,7 +102,6 @@ import {
   setGoal,
   setPatientArchived,
   setPatientProfile,
-  updateMealLog,
   updatePatient,
   removeMenuSlot,
   upsertHabitLog,
@@ -128,14 +121,6 @@ function authorizePatient(userId: string, patientId: string, action: PatientActi
 
 function queryAudience(role: 'nutri' | 'paciente') {
   return role === 'paciente' ? 'patient' as const : 'professional' as const;
-}
-
-function mealLoggedTimelineBody(confidence: number, foodCount: number, macros: { kcal: number } | null) {
-  const time = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-  if (foodCount === 0 && confidence === 0 && macros == null) {
-    return `${time} · estimación no disponible. Pendiente de Vero.`;
-  }
-  return `${time} · estimación (${confidence.toFixed(2)}). Pendiente de Vero.`;
 }
 
 function serializePatient(patient: NonNullable<Awaited<ReturnType<typeof sb.sbGetPatientById>>>, role: 'nutri' | 'paciente') {
@@ -232,6 +217,7 @@ registerCareRoutes(app);
 registerAssetRoutes(app);
 registerRecipeRoutes(app);
 registerPlanRoutes(app);
+registerDiaryRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({
@@ -357,116 +343,6 @@ app.get('/api/me/patient', async (c) => {
     patient: patient ? toPatientSelfView(patient) : null,
     shoppingList: patient ? sb.computeShoppingList(patient) : [],
   });
-});
-
-app.post('/api/patients/:id/meals/analyze', async (c) => {
-  const auth = c.get('auth');
-  const patientId = c.req.param('id');
-  const parsedBody = await parseJsonBody(c, analyzeMealInputSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-  const body = parsedBody.data;
-
-  let patient = getPatient(patientId);
-  if ('userId' in auth && isSupabaseEnabled()) {
-    const actor = await authorizePatient(auth.userId, patientId, 'analyze_meal');
-    if (!actor) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    patient = (await sb.sbGetPatientById(patientId, queryAudience(actor.role))) ?? undefined;
-  }
-  if (!patient) return c.notFound();
-
-  let photoPath: string | null = null;
-  if ('userId' in auth && isSupabaseEnabled()) {
-    if(body.photoPreview) validatePhoto(body.photoPreview);
-    if(body.imageBase64) validatePhoto(`data:image/${body.imageBase64.startsWith('/9j/')?'jpeg':body.imageBase64.startsWith('UklGR')?'webp':'png'};base64,${body.imageBase64}`);
-    await requireCareConsent(patientId,true,'ai_meal_analysis');
-    if(body.photoPreview || body.imageBase64) await requireCareConsent(patientId,true,'meal_photo');
-  }
-
-  if ('userId' in auth && isSupabaseEnabled() && (body.photoPreview || body.imageBase64)) {
-    photoPath = await uploadMealPhoto(
-      patientId,
-      body.photoPreview ?? `data:image/${body.imageBase64!.startsWith('/9j/') ? 'jpeg' : body.imageBase64!.startsWith('UklGR') ? 'webp' : 'png'};base64,${body.imageBase64}`,
-    );
-  }
-
-  const scheduled = patient.todayPlan.find((m) => m.slot === body.slot);
-  let analysis;
-  try {
-    analysis = await analyzeMeal({
-      description: body.description,
-      imageBase64: body.imageBase64,
-      slot: body.slot,
-      scheduledTitle: scheduled?.title,
-    });
-  } catch (error) {
-    analysis = analysisOrUnavailable(error);
-  }
-
-  const logInput = {
-    slot: body.slot,
-    photo_url: photoPath,
-    description: body.description ?? null,
-    foods: analysis.foods,
-    macros: analysis.macros,
-    confidence: analysis.confidence,
-    note_for_nutri: analysis.note_for_nutri,
-  };
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    const log = await sb.sbAddMealLog(patient.id, logInput);
-    await sb.sbAddTimelineEvent(patient.id, {
-      kind: 'meal_logged',
-      title: `${body.slot} · foto en revisión`,
-      body: mealLoggedTimelineBody(analysis.confidence, analysis.foods.length, analysis.macros),
-    });
-    const updated = await sb.sbGetPatientById(patient.id, 'patient');
-    return c.json({
-      analysis: toPatientMealAnalysis(analysis),
-      log: toPatientSelfMealLog((await signMealPhotos(patientId, [log]))[0]),
-      patient: updated ? toPatientSelfView(updated) : null,
-      source: 'supabase',
-    });
-  }
-
-  const log = addMealLog(patientId, {
-    ...logInput,
-    photo_url: body.photoPreview ?? null,
-  });
-  return c.json({
-    analysis: toPatientMealAnalysis(analysis),
-    log: toPatientSelfMealLog(log),
-    patient: getPatient(patientId),
-    source: 'memory',
-  });
-});
-
-app.patch('/api/patients/:id/meals/:mealId', async (c) => {
-  const auth = c.get('auth');
-  const { id: patientId, mealId } = c.req.param();
-  const parsedBody = await parseJsonBody(c, mealReviewInputSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-  const body = parsedBody.data;
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'review_meal')) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    const log = await sb.sbUpdateMealLog(patientId, mealId, body as Parameters<typeof sb.sbUpdateMealLog>[2]);
-    if (!log) return c.notFound();
-    await sb.sbAddTimelineEvent(patientId, {
-      kind: 'meal_logged',
-      title: `${log.slot} · ${body.status === 'confirmed' ? 'confirmado' : 'ajustado'}`,
-      body: log.macros ? `${log.foods.map((food) => food.name).join(', ')} · ${log.macros.kcal} kcal` : 'Sin macros',
-    });
-    const patient = await sb.sbGetPatientById(patientId);
-    return c.json({ log, patient, source: 'supabase' });
-  }
-
-  const log = updateMealLog(patientId, mealId, body as Parameters<typeof updateMealLog>[2]);
-  if (!log) return c.notFound();
-  return c.json({ log, patient: getPatient(patientId), source: 'memory' });
 });
 
 app.post('/api/patients/:id/brief/dismiss', async (c) => {

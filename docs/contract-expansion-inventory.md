@@ -18,6 +18,7 @@ de entidades existentes, no debe persistirse; **futura** = sin implementación.
 | Lista de compras | derivada | **fuera del piloto** | `shopping_lists` post-piloto (PV-21/39) |
 | `recipes` / `recipe_ingredients` | demo + PGlite (PV-18) | 016b: recetas versionadas + ingredientes + asignaciones | Live schema en proyecto **vacío** (no el de `patients`) |
 | `meal_plans` / versiones | demo + PGlite (PV-19/20); plantilla semanal 016 sigue aparte | 016b: plan fechado, una versión `published` | Live schema en proyecto **vacío**. Compras: PV-21 (P1) |
+| `meal_logs` + `meal_analysis_runs` / `meal_reviews` | demo + PGlite (PV-22); save-first + `client_id` | 016b: análisis y revisión separados del registro | Live schema/buckets en proyecto **vacío**. Job IA asíncrono: PV-27 |
 | `intake_sessions` / `consent_events` | onboarding React | 016b: intake versionado + consentimientos append-only | Pantallas y persistencia (PV-12/13) |
 | `document_records` / `body_photo_entries` | — | 016b: estudios y fotos corporales; sin IA | Storage privado (PV-15/16) |
 | `measurements` | demo + PGlite (PV-17) | 016b: peso/medidas con unidad y origen | Live schema en proyecto **vacío** (no el de `patients`) |
@@ -45,7 +46,8 @@ a `PatientAction` actuales.
 | `resource_guides` publicadas | sí | (futuro: crear/editar con revisión) | sí (catálogo) | — | migración/seed |
 | `resource_assignments` | sí, sus pacientes | asigna 1..N [`assign_resource`] | sólo las propias | marca `read_at` propio [`read_resource`] | auditoría |
 | `activity_logs` | sí, sus pacientes | — (lectura solamente) | las propias | inserta propia [`log_activity`] | retención/purga |
-| `meal_logs` | sí, revisa [`review_meal`] | confirma/ajusta | las propias (sin nota interna) | crea [`analyze_meal`] | Storage/IA |
+| `meal_logs` | sí, revisa [`review_meal`] | confirma/ajusta vía `review_meal_log` | las propias (sin nota interna ni `client_id`) | crea [`analyze_meal`] save-first | Storage/IA; RPC `save_meal_log` / `record_meal_analysis` |
+| `meal_analysis_runs` / `meal_reviews` (PV-22) | sí (nutri asignada) | append análisis/revisión | — (sin SELECT crudo) | no escribe tablas crudas | fail closed 501 sin schema |
 | `meal_slots` (plan semanal) | sí | upsert/delete | plan publicado | — | — |
 | `meal_plans` / versiones / ítems (PV-19/20) | sí (profesional: borrador + publicada) | guarda borrador; publica con `expected_version` [`edit_menu`] | snapshot `published` vía RPC: receta, porciones, días vacíos | — | transacción de publicación; no SQL live |
 | `habit_logs` | sí | — | las propias | upsert propio [`update_habits`] | snapshot diario |

@@ -25,6 +25,7 @@ import { resetPrivateAssets } from './assets/repository.js';
 import { resetProcessQueue } from './jobs/queue.js';
 import { resetRecipeMemory } from './recipes/repository.js';
 import { resetMealPlanMemory } from './plans/repository.js';
+import { resetDiaryMemory } from './diary/repository.js';
 
 export type { PatientInvite, InviteEvent } from './identity/invites.js';
 
@@ -59,6 +60,8 @@ export type Macros = {
   fat_g: number;
 };
 
+export type MealAnalysisStatus = 'pending' | 'succeeded' | 'failed';
+
 export type MealLog = {
   id: string;
   patient_id: string;
@@ -71,6 +74,7 @@ export type MealLog = {
   note_for_nutri: string;
   status: MealStatus;
   logged_at: string;
+  analysis_status?: MealAnalysisStatus;
 };
 
 export type DemoNotice = {
@@ -688,6 +692,7 @@ export function resetStore(): void {
   resetProcessQueue();
   resetRecipeMemory();
   resetMealPlanMemory();
+  resetDiaryMemory();
   store = {
     patients: seedPatients(),
     patientInvites: [],

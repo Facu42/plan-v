@@ -2,7 +2,9 @@
 
 ## Revisión vigente de avance — 2026-09-21
 
-PV-20 en esta rama: paciente ve el plan fechado publicado (detalle de receta, porciones, días vacíos reales, mismo contenido que CRM). Un borrador de receta posterior no cambia ese snapshot. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 620 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente P0: PV-22 diario foto/texto persistente (PV-21 es P1). No P1, no visual Nutrigo.
+PV-22 en esta rama: diario foto/texto persistente. El registro se guarda **antes** de la IA; un `client_id` duplicado no crea otra comida; si la IA falla quedan foto/texto con `analysis_status=failed` y `macros=null`. Revisión profesional append-only en `meal_reviews`. Fail closed 501 sin schema/buckets. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL ni buckets. Verificación: 628 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente P0: PV-23 hilos/no leídos reales (PV-21 es P1). No P1, no visual Nutrigo.
+
+PV-20 en esta rama: paciente ve el plan fechado publicado (detalle de receta, porciones, días vacíos reales, mismo contenido que CRM). Un borrador de receta posterior no cambia ese snapshot. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL.
 
 PV-19 en esta rama: planes fechados/versionados (slots, receta XOR texto, timezone `America/Argentina/Buenos_Aires`); publicación transaccional con `expected_version`; copia publicada inmutable; el borrador siguiente no la cambia. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL.
 
