@@ -210,6 +210,32 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
   const now = new Date().toISOString();
   const existing = [...plans.values()].find((row) => row.patient_id === patientId && row.nutritionist_id === nutritionistId);
   if (existing && existing.id !== input.id) throw new CareError(409, 'El plan publicado no se puede sobrescribir. Publicá una versión nueva.');
+  const prepared: Omit<MemItem, 'id' | 'version_id'>[] = [];
+  const seen = new Set<string>();
+  for (const item of input.items) {
+    const slot = planSlotLabel(item.slot);
+    if (!slot) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
+    const key = `${item.for_date}|${planSlotKey(slot)}`;
+    if (seen.has(key)) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
+    seen.add(key);
+    const hasRecipe = Boolean(item.recipe_id);
+    const freeText = item.free_text?.trim() || null;
+    if (hasRecipe === Boolean(freeText)) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
+    const linked = item.recipe_id
+      ? await resolveRecipe(nutritionistId, item.recipe_id, item.recipe_version, persistent)
+      : { recipe_id: null, recipe_version: null, recipe_title: null, recipe_version_id: null };
+    prepared.push({
+      for_date: item.for_date,
+      slot,
+      recipe_id: linked.recipe_id,
+      recipe_version: linked.recipe_version,
+      recipe_title: linked.recipe_title,
+      recipe_version_id: linked.recipe_version_id,
+      free_text: linked.recipe_id ? null : freeText,
+      portions: item.portions ?? null,
+      public_note: item.public_note ?? '',
+    });
+  }
   const plan = existing ?? {
     id: input.id,
     patient_id: patientId,
@@ -235,40 +261,13 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
     };
     versions.set(target.id, target);
   } else {
-    if (latest.status === 'published' || latest.status === 'archived') {
-      throw new CareError(409, 'El plan publicado no se puede sobrescribir. Publicá una versión nueva.');
-    }
     target = latest;
     target.period_start = input.period_start;
     target.period_end = input.period_end;
     for (const item of [...items.values()].filter((row) => row.version_id === target.id)) items.delete(item.id);
   }
-  const seen = new Set<string>();
-  for (const item of input.items) {
-    const slot = planSlotLabel(item.slot);
-    if (!slot) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
-    const key = `${item.for_date}|${planSlotKey(slot)}`;
-    if (seen.has(key)) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
-    seen.add(key);
-    const hasRecipe = Boolean(item.recipe_id);
-    const freeText = item.free_text?.trim() || null;
-    if (hasRecipe === Boolean(freeText)) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
-    const linked = item.recipe_id
-      ? await resolveRecipe(nutritionistId, item.recipe_id, item.recipe_version, persistent)
-      : { recipe_id: null, recipe_version: null, recipe_title: null, recipe_version_id: null };
-    const row: MemItem = {
-      id: crypto.randomUUID(),
-      version_id: target.id,
-      for_date: item.for_date,
-      slot,
-      recipe_id: linked.recipe_id,
-      recipe_version: linked.recipe_version,
-      recipe_title: linked.recipe_title,
-      recipe_version_id: linked.recipe_version_id,
-      free_text: linked.recipe_id ? null : freeText,
-      portions: item.portions ?? null,
-      public_note: item.public_note ?? '',
-    };
+  for (const item of prepared) {
+    const row: MemItem = { id: crypto.randomUUID(), version_id: target.id, ...item };
     items.set(row.id, row);
   }
   return memProfessional(plan);
