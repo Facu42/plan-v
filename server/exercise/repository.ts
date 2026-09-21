@@ -14,6 +14,7 @@ import {
 } from './memory.js';
 import type {
   ActivityLogView,
+  ExerciseCategory,
   PatientExerciseView,
   RoutineAssignmentView,
 } from '../../src/types/exercise.js';
@@ -93,19 +94,21 @@ function memorySnapshot(patientId: string, canAssign: boolean): PatientExerciseV
   };
 }
 
+function asCategory(value: unknown): ExerciseCategory {
+  return value === 'fuerza' || value === 'cardio' || value === 'equilibrio' || value === 'otro' ? value : 'movilidad';
+}
+
 function asLibrary(value: unknown): PatientExerciseView['library'] {
   if (!Array.isArray(value)) return catalogExercises();
   return value.flatMap((entry) => {
     const row = entry as Record<string, unknown>;
     if (typeof row.id !== 'string' || typeof row.name !== 'string') return [];
-    const category = row.category === 'fuerza' || row.category === 'cardio' || row.category === 'equilibrio' || row.category === 'otro'
-      ? row.category : 'movilidad';
     return [{
       id: String(row.id),
       slug: String(row.slug ?? ''),
       name: String(row.name),
       description: String(row.description ?? ''),
-      category,
+      category: asCategory(row.category),
       default_sets: Number(row.default_sets ?? 1),
       default_reps: Number(row.default_reps ?? 1),
       default_rest_seconds: Number(row.default_rest_seconds ?? 0),
@@ -120,13 +123,11 @@ function asAssignments(value: unknown): RoutineAssignmentView[] {
     if (typeof row.id !== 'string') return [];
     const items = Array.isArray(row.items) ? row.items.map((item) => {
       const line = item as Record<string, unknown>;
-      const category = line.category === 'fuerza' || line.category === 'cardio' || line.category === 'equilibrio' || line.category === 'otro'
-        ? line.category : 'movilidad';
       return {
         id: String(line.id),
         exercise_id: String(line.exercise_id),
         name: String(line.name ?? ''),
-        category,
+        category: asCategory(line.category),
         sets: Number(line.sets ?? 1),
         reps: Number(line.reps ?? 1),
         rest_seconds: Number(line.rest_seconds ?? 0),

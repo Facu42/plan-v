@@ -201,9 +201,9 @@ El usuario pidió definir un estándar de app nutricional moderna y aplicarlo, e
 ## Paso 11 — Ejercicio
 
 - [x] 11.0 Registro de actividad autodeclarada: paciente carga tipo, duración, intensidad y nota; resumen de siete días e historial; la profesional lo ve aislado en Actividades. Sin calorías, rutinas ni prescripción inferida.
-- [ ] 11.1 Persistencia `activity_logs`, RLS, retención y auditoría en contrato 016 aprobado.
-- [ ] 11.2 Biblioteca y detalle estructurado de ejercicios.
-- [ ] 11.3 Asignación de rutinas por profesional habilitado y feedback paciente. El rol nutricionista por sí solo no concede permiso de prescripción.
+- [x] 11.1 Persistencia `activity_logs`, RLS, retención declarada y auditoría de asignación en Postgres descartable (fuera de 016/016b). API 501 sin schema. Live no aplicado.
+- [x] 11.2 Biblioteca y detalle estructurado de ejercicios.
+- [x] 11.3 Asignación de rutinas por profesional habilitado y feedback paciente. El rol nutricionista por sí solo no concede permiso de prescripción.
 - [ ] 11.4 Progreso de rutinas asignadas y límites éticos adicionales, sólo después de resolver habilitación profesional y contrato.
 
 ## Paso 12 — Insights y Guardado

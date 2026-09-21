@@ -162,6 +162,13 @@
       "evidence": "supabase/migrations/20260921310000_patient_progress.sql; server/progress/*; ShowroomProgress chips. 757 pruebas OK, 2 omitidas; check/check:migrations/build OK. No SQL en el proyecto con patients.",
       "updatedAt": "2026-09-21T19:00:00.000Z"
     },
+    "PV-35": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Biblioteca de ejercicios y rutinas asignables sólo con habilitación verificada en servidor (el rol nutricionista no alcanza). activity_logs autodeclarados persistidos; series/reps/feedback; sin calorías inferidas. Fail closed 501 sin schema. Live schema bloqueado (patients existe).",
+      "evidence": "supabase/migrations/20260921320000_exercise_library.sql; server/exercise/*; ShowroomExercise biblioteca/rutina. 764 pruebas OK, 2 omitidas; check/check:migrations/build OK. No SQL en el proyecto con patients.",
+      "updatedAt": "2026-09-21T19:20:00.000Z"
+    },
     "PV-26": {
       "status": "in_progress",
       "owner": "",
@@ -185,6 +192,14 @@
     }
   },
   "history": [
+    {
+      "id": "c21a35e0-9f12-4a3b-8c01-pv350001",
+      "taskId": "PV-35",
+      "at": "2026-09-21T19:20:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
     {
       "id": "c21a34e0-9f12-4a3b-8c01-pv340001",
       "taskId": "PV-34",

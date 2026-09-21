@@ -2,6 +2,8 @@
 
 ## Revisión vigente de avance — 2026-09-21
 
+PV-35 en esta rama: biblioteca de ejercicios y rutinas asignables sólo con habilitación verificada en servidor (el rol nutricionista no alcanza; no hay casillero para auto-otorgársela). `activity_logs` autodeclarados persistidos con RLS en Postgres descartable; series/reps y feedback paciente; sin calorías inferidas ni rutina automática. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 764 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-36 (PV-32 se salta, piloto gratuito). No visual Nutrigo.
+
 PV-34 en esta rama: progreso longitudinal del mismo paciente. Períodos 7/30/90 en `America/Argentina/Buenos_Aires`; series de peso/cintura/cadera con fuente; comparativa este-vs-anterior sólo si hay valor en ambos y la misma unidad; kg y lb no se mezclan; períodos vacíos no se rellenan; sin ranking. Profesional ve la paciente seleccionada (`/crm/progreso`), no una tabla entre pacientes. Fail closed 501 sin RPC. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 757 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-35 (PV-32 se salta, piloto gratuito). No visual Nutrigo.
 
 PV-26 en esta rama: outbox de avisos con preferencias (`in_app`/`email`/`push`), `client_id`/dedupe, reintentos y skip si el paciente está desactivado o desvinculado. El canal in-app completa el buzón; email/push quedan `queued` con `provider_unconfigured` y **nunca** `sent` (no hay adaptador ni claves). Enganche de turno, mensaje e invitación. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL; no se inventaron claves de mail/push. Verificación: 748 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-32 se salta (piloto gratuito). No PV-34. No visual Nutrigo.
@@ -289,8 +291,8 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 ### Paso 11 — Ejercicio y actividad
 
 - [x] Registro paciente de actividad autodeclarada operativo en demo: tipo, duración, intensidad percibida, nota opcional, resumen real de siete días e historial; lectura profesional aislada por paciente en Actividades.
-- [ ] Persistir `activity_logs` en el contrato 016 con RLS, retención y auditoría. La API devuelve 501 cuando Supabase está activo hasta aprobar ese contrato.
-- [ ] Biblioteca/detalle estructurado de ejercicios y asignación de rutinas por profesional habilitado; definir series/repeticiones, feedback y permisos sin otorgar prescripción por el mero rol nutricionista.
+- [x] Persistir `activity_logs` en Postgres descartable con RLS, retención declarada (5 años) y auditoría de asignación (`assigned_by`/`assigned_at`). La API devuelve 501 cuando falta el schema. **No** se aplicó en el proyecto hospedado con `patients` ni se metió en 016/016b.
+- [x] Biblioteca/detalle estructurado de ejercicios y asignación de rutinas por profesional con habilitación verificada en servidor; series/repeticiones, feedback y permisos sin otorgar prescripción por el mero rol nutricionista.
 - [x] Límites éticos de la base actual: sin diagnóstico, prescripción automática, calorías quemadas ni datos inferidos.
 
 ### Paso 12 — Insights y Guardado
