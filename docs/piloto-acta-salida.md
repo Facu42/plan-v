@@ -26,7 +26,7 @@ Cobros: en demo la excepción comercial `waived` sigue en memoria. Persistente M
 | PWA Add-to-Home en Android e iPhone físicos | No acreditado. |
 | Revisión humana de `eval.v1` | Pendiente (no es gate automático). |
 | Retención confirmada por privacidad/legal | Los plazos de PV-31 son de trabajo. |
-| Aprobación visual Nutrigo | No (P1 PV-37). |
+| Aprobación visual Nutrigo | No. PV-37 aterrizó contratos de layout/estado 1440/800/390/320; **no es sign-off de Facu.** |
 | Mercado Pago sandbox | No (P1 PV-32). |
 
 Decisión explícita (checklist 016 §5): **no aprobar staging / no aprobar producción.**

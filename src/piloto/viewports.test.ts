@@ -1,12 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { appPath, resolveAppLocation } from '../components/nutrigo/app-location';
-import { PILOTO_VIEWPORTS, TWO_ROLE_SMOKE_PAGES } from './viewports';
+import { PILOTO_VIEWPORTS, TWO_ROLE_SMOKE_PAGES, NUTRIGO_VIEWPORTS } from './viewports';
 
 describe('PV-33 viewports y rutas de dos roles', () => {
   it('fija 390 y 1440 como contratos de layout, no como aprobación visual', () => {
     expect(PILOTO_VIEWPORTS.mobile).toBe(390);
     expect(PILOTO_VIEWPORTS.desktop).toBe(1440);
+    expect(NUTRIGO_VIEWPORTS).toMatchObject({ desktop: 1440, tablet: 800, mobile: 390, narrow: 320 });
     const patientCss = readFileSync(new URL('../components/nutrigo/patient-dashboard.css', import.meta.url), 'utf8');
     const goalsCss = readFileSync(new URL('../components/nutrigo/showroom-goals.css', import.meta.url), 'utf8');
     expect(patientCss).toMatch(/1440 px/);

@@ -3,7 +3,7 @@
 .meal-plan-versions h2,.published-dated-plan h2{margin:4px 0 8px;font-size:22px;letter-spacing:-.5px}
 .meal-plan-versions p,.published-dated-plan p{font-size:13px;line-height:1.65;color:var(--nv-muted)}
 .meal-plan-demo{font-size:11px}
-.meal-plan-error{color:#b32d25}
+.meal-plan-error{color:var(--nv-danger)}
 .meal-plan-status{padding:12px;border-radius:10px;background:var(--nv-green);color:var(--nv-ink)}
 .meal-plan-published{margin:14px 0;padding:16px;border:1px solid var(--nv-border);border-radius:14px;background:var(--nv-bg)}
 .meal-plan-published ul,.published-dated-plan ul{margin:8px 0 0;padding-left:18px;font-size:13px}
@@ -23,3 +23,5 @@
 .published-plan-item h4{margin:10px 0 4px;font-size:12px;letter-spacing:.4px}
 .published-plan-item ul,.published-plan-item ol{margin:0;padding-left:18px;font-size:13px}
 @media(max-width:800px){.meal-plan-item-row,.meal-plan-form-row{grid-template-columns:1fr}}
+@media(max-width:390px){.meal-plan-versions,.published-dated-plan{padding:16px 12px}.meal-plan-actions{flex-direction:column;align-items:stretch}.published-plan-item{padding:10px}}
+@media(max-width:320px){.meal-plan-versions,.published-dated-plan{padding:12px 10px}.meal-plan-versions h2,.published-dated-plan h2{font-size:18px}}

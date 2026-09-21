@@ -61,3 +61,19 @@
   .nm-conversation h2 { font-size:14px; }
   .nm-bubble { max-width:94%; }
 }
+@media(max-width:800px) {
+  .nm-layout { grid-template-columns:minmax(0,1fr); min-height:0; }
+  .nm-contacts { display:none; }
+  .nm-layout.nm-patient .nm-contacts { display:none; }
+  .nm-profile { display:none; }
+  .nm-mobile-picker { display:block; }
+}
+@media(max-width:390px) {
+  .nm-thread { height:42dvh; min-height:220px; padding:12px; }
+  .nm-conversation>header { padding:12px; }
+  .nm-compose { padding:12px; }
+}
+@media(max-width:320px) {
+  .nm-bubble { max-width:100%; padding:10px 12px; }
+  .nm-compose textarea { min-height:48px; }
+}

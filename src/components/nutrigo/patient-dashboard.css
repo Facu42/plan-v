@@ -178,10 +178,29 @@
   .np-food-photo { height:170px; }
   .np-contact-card .nv-card-head { flex-wrap:wrap; }
 }
+@media(max-width:800px) {
+  .np-dashboard .nv-metrics { grid-template-columns:1fr 1fr; }
+  .np-chart-grid { grid-template-columns:1fr; }
+  .np-chart-grid .nv-card { height:auto; min-height:0; }
+  .np-followup-grid { grid-template-columns:1fr; }
+  .np-plan-grid { grid-template-columns:1fr 1fr; }
+  .np-nutrition { grid-template-columns:1fr; }
+}
+@media(max-width:390px) {
+  .np-dashboard .nv-metrics { grid-template-columns:1fr; }
+  .np-plan-grid { grid-template-columns:1fr; }
+  .np-dashboard .nv-metric { min-height:0; }
+  .np-food-photo, .np-food-fallback { height:140px; }
+}
 @media(max-width:360px) {
   .nv-patient .nv-topbar { padding-inline:10px; }
   .nv-patient .nv-main { padding-inline:12px; }
   .np-dashboard .nv-metric { padding:10px; }
   .np-nutrition { grid-template-columns:1fr; }
   .np-calorie { width:150px; margin:12px auto; }
+}
+@media(max-width:320px) {
+  .nv-patient .nv-main { padding-inline:10px; }
+  .np-dashboard .nv-metric>strong { font-size:20px; }
+  .np-followup-grid>button { padding:12px; }
 }

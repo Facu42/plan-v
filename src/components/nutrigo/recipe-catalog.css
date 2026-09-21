@@ -20,4 +20,9 @@
 .recipe-list ul,.recipe-list ol{margin:8px 0 0;padding-left:18px;font-size:13px}
 .recipe-list h4{font-size:13px;margin:12px 0 4px}
 .recipe-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.recipe-error{color:var(--nv-danger)}
+.nv-app.nv-dark .recipe-error{color:var(--nv-danger)}
+@media(max-width:800px){.recipe-form-row,.recipe-item-row{grid-template-columns:1fr}.recipe-catalog,.assigned-recipes{padding:20px 16px}}
 @media(max-width:700px){.recipe-catalog,.assigned-recipes{padding:18px 14px}.recipe-form-row,.recipe-item-row{grid-template-columns:1fr}}
+@media(max-width:390px){.recipe-catalog,.assigned-recipes{padding:14px 12px}.recipe-catalog h2,.assigned-recipes h2{font-size:19px}.recipe-actions{flex-direction:column}.recipe-actions .nv-button{width:100%}}
+@media(max-width:320px){.recipe-catalog,.assigned-recipes{padding:12px 10px}.recipe-form{padding:14px}}

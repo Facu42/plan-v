@@ -10,8 +10,8 @@ export function NvCard({ title, action, children, className = '' }: { title: str
 export function NvBadge({ children, tone = 'green' }: { children: ReactNode; tone?: 'green' | 'gold' | 'coral' }) {
   return <span className={`nv-badge nv-${tone}`}>{children}</span>;
 }
-export function NvState({ title, description }: { title: string; description: string }) {
-  return <div className="nv-state" role="status"><Icon name="leaf" size={28} /><h2>{title}</h2><p>{description}</p></div>;
+export function NvState({ title, description, kind = 'empty' }: { title: string; description: string; kind?: 'empty' | 'error' | 'loading' }) {
+  return <div className={`nv-state nv-state-${kind}`} data-kind={kind} role={kind === 'error' ? 'alert' : 'status'}><Icon name="leaf" size={28} /><h2>{title}</h2><p>{description}</p></div>;
 }
 export function NvProgress({ value, label }: { value: number; label: string }) {
   const safeValue = Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 0;

@@ -108,8 +108,8 @@ export function ShowroomProgress({
     </header>
 
     <section className="nvp-compare" aria-label="Comparativa del mismo paciente">
-      {error && <p className="nvp-error" role="alert">{error}</p>}
-      {loading && !remote && <p role="status">Cargando períodos…</p>}
+      {error && <NvState kind="error" title="No se pudo cargar el progreso" description={error} />}
+      {loading && !remote && <NvState kind="loading" title="Cargando períodos…" description="Comparativa del mismo paciente, sin rankings." />}
       {remote && <>
         <p className="nvp-window">{shortDate(remote.current.start)} – {shortDate(remote.current.end)} comparado con {shortDate(remote.previous.start)} – {shortDate(remote.previous.end)}. Zona {remote.timezone}.</p>
         <div className="nvp-meal-compare">

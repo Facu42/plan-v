@@ -151,8 +151,8 @@ export function ShowroomExercise({
     <header className="nvexercise-heading"><div><small>{professional ? 'CONSULTORIO' : 'MI SEGUIMIENTO'}</small><h2>{heading}</h2><p>{intro}</p></div>
       {professional && <NvBadge tone={view.can_assign ? 'green' : 'gold'}>{view.can_assign ? 'Habilitación verificada' : 'Sin habilitación verificada'}</NvBadge>}
     </header>
-    {error && <p className="nvexercise-status" role="alert">{error}</p>}
-    {loading && !remote && <p role="status">Cargando biblioteca…</p>}
+    {error && <NvState kind="error" title="No se pudo cargar el ejercicio" description={error} />}
+    {loading && !remote && <NvState kind="loading" title="Cargando biblioteca…" description="Rutinas sólo con habilitación verificada en servidor." />}
 
     <section className="nvexercise-list" aria-label="Rutinas asignadas">
       <div className="nvexercise-heading"><div><small>RUTINA</small><h2>{professional ? 'Asignadas a esta paciente' : 'Rutina asignada'}</h2></div><span>{view.assignments.length} vigentes</span></div>

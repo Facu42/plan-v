@@ -18,6 +18,7 @@
   --nv-coral-soft: #f8d7ce;
   --nv-strong-ink: #083a30;
   --nv-cta: #f9b343;
+  --nv-danger: #8e3f38;
   font: 14px/1.5 Poppins, Arial, sans-serif;
   color: var(--nv-ink);
   background:
@@ -40,6 +41,7 @@
   --nv-mint: #234634;
   --nv-gold-soft: #4a3a1c;
   --nv-coral-soft: #4a3028;
+  --nv-danger: #f5b4a8;
   background:
     radial-gradient(1000px 420px at 100% 0%, rgba(249, 179, 67, .08), transparent 50%),
     var(--nv-bg);

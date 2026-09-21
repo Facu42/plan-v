@@ -77,7 +77,7 @@ export function environmentLiveFlags(env: NodeJS.ProcessEnv = process.env): Pick
 export function evaluatePilotoActa(evidence: PilotoActaEvidence): PilotoActa {
   const notes: string[] = [
     'Mercado Pago is P1 (PV-32); a free piloto may waive billing without live payments.',
-    'Nutrigo visual approval is P1 (PV-37); 390/1440 here are layout contracts, not visual sign-off.',
+    'Nutrigo visual approval remains a human sign-off (PLANV_NUTRIGO_VISUAL). PV-37 landed 1440/800/390/320 layout and state contracts; that is not visual sign-off.',
     'eval.v1 is a synthetic publish check, not a clinical gate.',
   ];
 
