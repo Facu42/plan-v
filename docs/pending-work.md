@@ -1,12 +1,23 @@
 # Pendientes de Plan V
 
+## Pedido Facu — 2026-09-21 (reel Cenra → PV-40)
+
+Sumar al plan de acción el circuito de **recetas plantilla** como en el reel de [Cenra](https://www.instagram.com/reel/DajVJcSxarK/):
+
+1. Nutri: biblioteca de recetas con macros; **Nueva receta** manual **o** asistente IA («describí el plato…»).
+2. **Asignar** a paciente / día.
+3. Paciente: en comidas del día, CTA **«Registrar esta comida»** (atajo al diario).
+
+Detalle y criterios: [ticket PV-40](ticket-pv40-recetas-ia-asignar-registrar.md).  
+**Estado:** backlog P1 (no bloquea smoke staging ni gates humanos P0). No SQL live. No merge a `main` por este doc.
+
 ## Revisión vigente de avance — 2026-09-21 (WIP local)
 
 El WIP que no había entrado al Project (`cursor/professional-app-ai-ca47-local-wip-20260921` @ `da11bab`) se inventarió contra esta rama. Cuarentena, visor de estudios, medidas, recetas, planes, diario, recibos, turnos y jobs/eval ya están en PV-15…PV-28. No se copió ese SQL (`20260918180000`…`20260918250000`) ni se fusionó a `main`. Se recupera la nota del 2026-09-18 sobre el proyecto Plan V vacío. Detalle: [integración del WIP local](integracion-wip-local-2026-09-21.md). **No se aplicó SQL** a proyectos hospedados.
 
 ## Revisión vigente de avance — 2026-09-21
 
-PV-39 en esta rama: decisión de alcance **ejecutable**. Presupuesto de compras, importación de actividad (wearables) y video nativo quedan **OUT** hasta evidencia de uso. Se conserva la lista operativa (PV-21), la actividad autodeclarada (PV-35) y `meet_url` HTTPS. Escrituras `shopping/budget`, `activity/import` y `video-room` → **501**. Sin tablas de presupuesto. **No es aprobación visual de Nutrigo.** Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. El plan numerado PV-01…PV-39 queda cubierto en código; no hay PV-40. Verificación: 792 pruebas OK, 2 omitidas; check, check:migrations y build OK. PV-32 se salta (piloto gratuito). No Railway re-point, PWA física, `eval.v1` clínico, retención legal ni email/push `sent`.
+PV-39 en esta rama: decisión de alcance **ejecutable**. Presupuesto de compras, importación de actividad (wearables) y video nativo quedan **OUT** hasta evidencia de uso. Se conserva la lista operativa (PV-21), la actividad autodeclarada (PV-35) y `meet_url` HTTPS. Escrituras `shopping/budget`, `activity/import` y `video-room` → **501**. Sin tablas de presupuesto. **No es aprobación visual de Nutrigo.** Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. El plan numerado PV-01…PV-39 queda cubierto en código; **PV-40** (pedido Facu 2026-09-21, reel Cenra) entra como backlog P1: ver sección arriba y [ticket PV-40](ticket-pv40-recetas-ia-asignar-registrar.md). Verificación: 792 pruebas OK, 2 omitidas; check, check:migrations y build OK. PV-32 se salta (piloto gratuito). No Railway re-point, PWA física, `eval.v1` clínico, retención legal ni email/push `sent`.
 
 PV-38 en esta rama: organizaciones y equipos, múltiples vínculos de cuidado, delegación y suscripción B2B **como estado** (waived/trialing/canceled/past_due; `active` exige proveedor y no se inventa). Transferencia de ownership reescribe `patients.nutritionist_id` y los hijos con FK compuesta, con auditoría. **No es aprobación visual de Nutrigo.** Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 785 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-39 (PV-32 se salta, piloto gratuito). No Railway re-point, PWA física, `eval.v1` clínico, retención legal ni email/push `sent`.
 
