@@ -132,6 +132,8 @@ export type Patient = {
   tone: 'peach' | 'lilac' | 'mint';
   status: string;
   archived_at?: string | null;
+  deactivated_at?: string | null;
+  anonymized_at?: string | null;
   billing_status: BillingStatus;
   billing_until: string | null;
   stage: Stage;

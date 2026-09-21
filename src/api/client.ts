@@ -1,6 +1,7 @@
 import type { Brief, DemoNotice, GoalStatus, MealLog, Message, Patient, Stage } from '../types';
 import { getSessionToken } from '../lib/supabase';
 import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } from '../types/intake';
+import type { PrivacyRequestKind, PrivacyRequestView } from '../types/privacy';
 import { resolveApiUrl } from './origin';
 
 export class ApiError extends Error {
@@ -262,4 +263,17 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+
+  requestPrivacy: (patientId: string, data: { kind: PrivacyRequestKind; notes?: string }) =>
+    request<{ request: PrivacyRequestView; source: string }>(`/api/patients/${patientId}/privacy/requests`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  listPrivacyRequests: (patientId: string, init?: RequestInit) =>
+    request<{ requests: PrivacyRequestView[]; source: string }>(`/api/patients/${patientId}/privacy/requests`, init),
+  downloadPrivacyPackage: (patientId: string, requestId: string, init?: RequestInit) =>
+    request<{ request: PrivacyRequestView; package: Record<string, unknown>; source: string }>(
+      `/api/patients/${patientId}/privacy/requests/${requestId}/package`,
+      init,
+    ),
 };

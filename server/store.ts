@@ -30,6 +30,7 @@ import { resetMealPlanMemory } from './plans/repository.js';
 import { resetDiaryMemory } from './diary/repository.js';
 import { markMemoryRead, resetMessageMemory, sendMemoryMessage } from './messages/repository.js';
 import { resetAiJobMemory } from './ai-jobs/repository.js';
+import { resetPrivacyMemory } from './privacy/repository.js';
 
 export type { PatientInvite, InviteEvent } from './identity/invites.js';
 
@@ -154,6 +155,8 @@ export type Patient = {
   tone: 'peach' | 'lilac' | 'mint';
   status: string;
   archived_at?: string | null;
+  deactivated_at?: string | null;
+  anonymized_at?: string | null;
   billing_status: BillingStatus;
   billing_until: string | null;
   stage: Stage;
@@ -708,6 +711,7 @@ export function resetStore(): void {
   resetDiaryMemory();
   resetMessageMemory();
   resetAiJobMemory();
+  resetPrivacyMemory();
   store = {
     patients: seedPatients(),
     patientInvites: [],

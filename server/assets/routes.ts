@@ -83,7 +83,7 @@ export function registerAssetRoutes(app: Hono) {
     const input = await jsonBody(c, z.object({ patient_id: z.string().min(1) }).strict(), 4_000);
     const { persistent } = await actorAccess(c, input.patient_id, 'read');
     const asset = await repo.accessPrivateAsset(c.req.param('id'), input.patient_id, persistent);
-    writeOpsLog('info', 'asset_access', { persistent });
+    writeOpsLog('info', 'asset_access', { persistent, category: asset.category });
     return c.json(asset);
   });
 
@@ -92,7 +92,7 @@ export function registerAssetRoutes(app: Hono) {
     const { persistent, professional } = await actorAccess(c, input.patient_id, 'patient');
     if (professional) throw new CareError(403, 'Sólo el paciente puede retirar el archivo.');
     const asset = await repo.withdrawPrivateAsset(c.req.param('id'), input.patient_id, persistent);
-    writeOpsLog('info', 'asset_withdrawn', { persistent });
+    writeOpsLog('info', 'asset_withdrawn', { persistent, category: asset.category });
     return c.json({ asset });
   });
 

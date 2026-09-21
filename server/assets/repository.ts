@@ -1,6 +1,7 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { CareError } from '../care/errors.js';
 import { processQueue } from '../jobs/queue.js';
+import { purgeRunAfter } from '../privacy/retention.js';
 import {
   BYTE_LIMIT_BY_CATEGORY,
   PATIENT_QUOTA,
@@ -254,12 +255,17 @@ export async function accessPrivateAsset(id: string, patientId: string, persiste
   if (asset.patient_id !== patientId) throw new CareError(403, 'No tenés permiso para este archivo.');
   if (asset.status === 'withdrawn' || asset.withdrawn_at) throw new CareError(404, 'El archivo ya no está disponible.');
   if (asset.status !== 'ready') throw new CareError(409, 'El archivo todavía no está listo.');
+  const grant = {
+    expires_in: PATIENT_QUOTA.signedUrlSeconds,
+    mime: asset.mime,
+    category: asset.category,
+  };
   if (persistent) {
-    return { url: await signStorageObject(asset.bucket, asset.object_path, PATIENT_QUOTA.signedUrlSeconds), expires_in: PATIENT_QUOTA.signedUrlSeconds, mime: asset.mime };
+    return { ...grant, url: await signStorageObject(asset.bucket, asset.object_path, PATIENT_QUOTA.signedUrlSeconds) };
   }
   const token = randomBytes(18).toString('hex');
   accessTokens.set(token, { assetId: asset.id, expiresAt: Date.now() + PATIENT_QUOTA.signedUrlSeconds * 1000 });
-  return { url: `/api/assets/blob/${token}`, expires_in: PATIENT_QUOTA.signedUrlSeconds, mime: asset.mime };
+  return { ...grant, url: `/api/assets/blob/${token}` };
 }
 
 export function readSignedBlob(token: string) {
@@ -286,7 +292,8 @@ export async function withdrawPrivateAsset(id: string, patientId: string, persis
   }
   await processQueue.enqueue({
     kind: 'purge_asset',
-    payload: { asset_id: asset.id, bucket: asset.bucket, path: asset.object_path, persistent },
+    payload: { asset_id: asset.id, bucket: asset.bucket, path: asset.object_path, persistent, category: asset.category },
+    run_after: purgeRunAfter(asset.category),
   });
   return { ...asset, status: 'withdrawn' as const, withdrawn_at: withdrawnAt };
 }

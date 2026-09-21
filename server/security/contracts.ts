@@ -60,7 +60,9 @@ export type PatientAction =
   | 'grant_consent'
   | 'read_consent'
   | 'read_clinical_note'
-  | 'write_clinical_note';
+  | 'write_clinical_note'
+  | 'request_privacy'
+  | 'read_privacy';
 
 export type PatientManagementAction = 'create_patient';
 
@@ -91,6 +93,8 @@ const PATIENT_ACTIONS = new Set<PatientAction>([
   'submit_intake',
   'grant_consent',
   'read_consent',
+  'request_privacy',
+  'read_privacy',
 ]);
 
 const NUTRITIONIST_ACTIONS = new Set<PatientAction>([
@@ -127,6 +131,8 @@ export function canAccessPatient(actor: Actor, patient: PatientResource, action:
       || action === 'submit_intake'
       || action === 'grant_consent'
       || action === 'read_consent'
+      || action === 'request_privacy'
+      || action === 'read_privacy'
     ) return true;
     return hasFullPatientAccess(patient);
   }
