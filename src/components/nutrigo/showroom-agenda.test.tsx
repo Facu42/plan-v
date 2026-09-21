@@ -65,7 +65,7 @@ describe('Agenda profesional multipaciente en Nutrigo', () => {
       weekPlan: [{ day: 'Lunes', meals: [{ slot: 'Almuerzo', title: 'Ensalada de quinoa' }] }],
       meal_logs: [{
         id: 'm1', patient_id: 'ana', slot: 'Cena', photo_url: null, description: 'Tortilla casera',
-        foods: [], macros: null, confidence: 0, note_for_nutri: '', status: 'pending_review', logged_at: '2026-09-16T19:00:00',
+        foods: [], macros: null, confidence: 0, note_for_nutri: '', status: 'pending_review', analysis_status: 'succeeded', logged_at: '2026-09-16T19:00:00',
       }],
       activity_logs: [{ id: 'a1', patient_id: 'ana', activity: 'Caminata', duration_minutes: 30, intensity: 'moderada', note: null, logged_at: '2026-09-14T18:00:00' }],
     });

@@ -33,6 +33,7 @@ function log(status: 'pending_review' | 'confirmed' | 'adjusted', loggedAt: stri
     confidence: 0.7,
     note_for_nutri: '',
     status,
+    analysis_status: 'succeeded' as const,
     logged_at: loggedAt,
   };
 }

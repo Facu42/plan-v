@@ -29,8 +29,10 @@ describe('Menú saludable paciente Nutrigo', () => {
     expect(html).toContain('Pollo con vegetales');
     expect(html).toContain('2 veces esta semana');
     expect(html).toContain('Imagen ilustrativa');
-    expect(html).toContain('No son recetas completas');
-    expect(html).not.toMatch(/ingredientes|preparación|porción|kcal|proteína|carbohidrato|grasa/i);
+    expect(html).toContain('Los títulos del plan no son recetas');
+    expect(html).not.toMatch(/kcal|proteína|carbohidrato|grasa/i);
+    expect(html).not.toContain('Generar propuesta');
+    expect(html).not.toContain('Proponer receta');
   });
 
   it('filtra con la búsqueda global sin mezclar otros datos', () => {

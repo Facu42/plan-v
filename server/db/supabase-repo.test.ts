@@ -73,6 +73,11 @@ const harness = vi.hoisted(() => {
     return builder;
   }
 
+  function rpc(name: string, payload?: unknown) {
+    calls.push({ table: name, op: 'rpc', payload, filters: [] });
+    return Promise.resolve(next(name));
+  }
+
   return {
     calls,
     push,
@@ -80,7 +85,7 @@ const harness = vi.hoisted(() => {
       calls.length = 0;
       queues.clear();
     },
-    client: { from },
+    client: { from, rpc },
   };
 });
 
@@ -132,7 +137,12 @@ beforeEach(() => {
 describe('mapMessage', () => {
   it('derives message direction from the author profile role', () => {
     expect(mapMessage(row, 'paciente')).toMatchObject({ from: 'patient', text: 'Hola' });
-    expect(mapMessage(row, 'nutri')).toMatchObject({ from: 'vero', text: 'Hola' });
+    expect(mapMessage(row, 'nutri', { delivered_at: row.sent_at, read_at: null })).toMatchObject({
+      from: 'vero',
+      text: 'Hola',
+      delivered_at: row.sent_at,
+      read_at: null,
+    });
   });
 
   it('fails closed when the author role is missing or invalid', () => {
@@ -141,28 +151,25 @@ describe('mapMessage', () => {
   });
 });
 
-describe('sbAddMessage (016 v2)', () => {
-  it('persists sent messages with sent_at so the patient thread can see them', async () => {
-    await sbAddMessage('patient-1', 'nutri-1', 'user-1', 'Hola', false);
+describe('sbAddMessage (thread RPC)', () => {
+  it('persists sent messages with a client id so retries do not duplicate', async () => {
+    harness.push('send_thread_message', { data: { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, error: null });
+    await sbAddMessage('patient-1', 'Hola', false, 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
 
-    const insert = harness.calls.find((call) => call.table === 'messages' && call.op === 'insert');
-    expect(insert).toBeDefined();
-    const payload = insert?.payload as Record<string, unknown>;
-    expect(payload).toMatchObject({
-      patient_id: 'patient-1',
-      nutritionist_id: 'nutri-1',
-      author_id: 'user-1',
-      body: 'Hola',
-      suggested_by_ai: false,
+    const call = harness.calls.find((entry) => entry.table === 'send_thread_message' && entry.op === 'rpc');
+    expect(call?.payload).toMatchObject({
+      thread_message_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      target: 'patient-1',
+      body_value: 'Hola',
+      suggested_flag: false,
     });
-    expect(typeof payload.sent_at).toBe('string');
-    expect(Number.isNaN(Date.parse(payload.sent_at as string))).toBe(false);
+    expect(call?.payload).not.toHaveProperty('message_id');
   });
 
   it('propagates an unsuccessful message insert', async () => {
     const error = { message: 'synthetic database failure' };
-    harness.push('messages', { data: null, error });
-    await expect(sbAddMessage('patient-1', 'nutri-1', 'author-1', 'hola', false))
+    harness.push('send_thread_message', { data: null, error });
+    await expect(sbAddMessage('patient-1', 'hola', false, 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'))
       .rejects.toEqual(error);
   });
 });
@@ -176,16 +183,17 @@ describe('sbAddMealLog (016 v2)', () => {
     macros: null,
     confidence: 0.9,
     note_for_nutri: '',
+    analysis_status: 'pending' as const,
   };
 
   it('writes photo_path (never photo_url) per the 016 v2 schema', async () => {
-    harness.push('meal_logs', { data: { id: 'log-1', patient_id: 'patient-1', slot_label: 'Almuerzo', confidence: 0.9, status: 'pending_review', logged_at: '2026-09-07T12:00:00.000Z' }, error: null });
+    harness.push('save_meal_capture', { data: { id: 'log-1', patient_id: 'patient-1', slot_label: 'Almuerzo', photo_path: 'patients/patient-1/lunch.jpg', foods: [], macros: null, confidence: 0, status: 'pending_review', analysis_status: 'pending', logged_at: '2026-09-07T12:00:00.000Z' }, error: null });
 
     await sbAddMealLog('patient-1', { ...baseLog, photo_url: 'patients/patient-1/lunch.jpg' });
 
-    const insert = harness.calls.find((call) => call.table === 'meal_logs' && call.op === 'insert');
-    const payload = insert?.payload as Record<string, unknown>;
-    expect(payload).toMatchObject({ photo_path: 'patients/patient-1/lunch.jpg', status: 'pending_review' });
+    const call = harness.calls.find((entry) => entry.op === 'rpc' && entry.table === 'save_meal_capture');
+    const payload = call?.payload as Record<string, unknown>;
+    expect(payload).toMatchObject({ photo_path_value: 'patients/patient-1/lunch.jpg', target: 'patient-1' });
     expect(payload).not.toHaveProperty('photo_url');
   });
 
@@ -193,7 +201,7 @@ describe('sbAddMealLog (016 v2)', () => {
     await expect(
       sbAddMealLog('patient-1', { ...baseLog, photo_url: 'data:image/jpeg;base64,AAAA' }),
     ).rejects.toThrow(/storage/i);
-    expect(harness.calls.filter((call) => call.table === 'meal_logs' && call.op === 'insert')).toHaveLength(0);
+    expect(harness.calls.filter((call) => call.op === 'rpc' && call.table === 'save_meal_capture')).toHaveLength(0);
   });
 });
 
@@ -388,6 +396,7 @@ describe('appointments (016 v2)', () => {
   });
 
   it('replaces the scheduled appointment and persists starts_at', async () => {
+    harness.push('save_appointment', { data: { id: 'appt-1' }, error: null });
     await sbSetAppointment('patient-1', 'nutri-1', {
       day: 'Jueves',
       time: '14:30',
@@ -396,33 +405,22 @@ describe('appointments (016 v2)', () => {
       meet_url: 'https://meet.example.com/consulta-sofia',
     });
 
-    const del = harness.calls.find((call) => call.table === 'appointments' && call.op === 'delete');
-    expect(del).toBeDefined();
-    const delEqs = del!.filters.filter(([name]) => name === 'eq').map(([, pair]) => pair);
-    expect(delEqs).toEqual(expect.arrayContaining([
-      ['patient_id', 'patient-1'],
-      ['status', 'scheduled'],
-    ]));
-
-    const insert = harness.calls.find((call) => call.table === 'appointments' && call.op === 'insert');
-    const payload = insert?.payload as Record<string, unknown>;
-    expect(payload).toMatchObject({
-      patient_id: 'patient-1',
-      nutritionist_id: 'nutri-1',
-      duration_min: 45,
-      channel: 'video',
-      status: 'scheduled',
-      meet_url: 'https://meet.example.com/consulta-sofia',
+    const save = harness.calls.find((call) => call.table === 'save_appointment' && call.op === 'rpc');
+    expect(save?.payload).toMatchObject({
+      target: 'patient-1',
+      duration_value: 45,
+      channel_value: 'video',
+      meet_url_value: 'https://meet.example.com/consulta-sofia',
+      timezone_value: 'America/Argentina/Buenos_Aires',
     });
-    const startsAt = Date.parse(payload.starts_at as string);
-    expect(Number.isNaN(startsAt)).toBe(false);
-    expect(startsAt).toBeGreaterThan(Date.now());
+    expect(Date.parse((save?.payload as { starts_at_value: string }).starts_at_value)).toBeGreaterThan(Date.now());
   });
 
   it('clears the scheduled appointment without inserting when null', async () => {
+    harness.push('cancel_appointment', { data: null, error: null });
     await sbSetAppointment('patient-1', 'nutri-1', null);
-    expect(harness.calls.some((call) => call.table === 'appointments' && call.op === 'delete')).toBe(true);
-    expect(harness.calls.some((call) => call.table === 'appointments' && call.op === 'insert')).toBe(false);
+    expect(harness.calls.some((call) => call.table === 'cancel_appointment' && call.op === 'rpc')).toBe(true);
+    expect(harness.calls.some((call) => call.table === 'save_appointment')).toBe(false);
   });
 
   it('maps the next scheduled appointment into the domain patient', async () => {
@@ -466,6 +464,10 @@ describe('appointments (016 v2)', () => {
       duration: 45,
       channel: 'video',
       meet_url: 'https://meet.example.com/consulta-sofia',
+      starts_at: '2026-09-10T17:30:00.000Z',
+      timezone: 'America/Argentina/Buenos_Aires',
+      confirmation: null,
+      confirmed_at: null,
     });
   });
 
@@ -935,5 +937,26 @@ describe('PV-10 persistent writes', () => {
       channel: 'video',
       meet_url: 'https://meet.example/sofia',
     });
+  });
+
+  it('saves and cancels appointments through transactional RPCs', async () => {
+    harness.push('save_appointment', { data: { id: 'appt-1' }, error: null });
+    await sbSetAppointment('patient-1', 'nutri-1', {
+      day: 'Jueves',
+      time: '14:30',
+      duration: 45,
+      channel: 'video',
+    });
+    const save = harness.calls.find((call) => call.table === 'save_appointment' && call.op === 'rpc');
+    expect(save?.payload).toMatchObject({
+      target: 'patient-1',
+      duration_value: 45,
+      channel_value: 'video',
+      timezone_value: 'America/Argentina/Buenos_Aires',
+    });
+
+    harness.push('cancel_appointment', { data: null, error: null });
+    await sbSetAppointment('patient-1', 'nutri-1', null);
+    expect(harness.calls.some((call) => call.table === 'cancel_appointment' && call.op === 'rpc')).toBe(true);
   });
 });

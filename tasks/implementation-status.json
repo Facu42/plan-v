@@ -67,7 +67,7 @@
     "PV-10": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Paridad parcial: ficha, hábitos, menú, turno y objetivo. Siguen 501 para archivo, actividad, recursos, avisos y recibos; brief aún no atómico. Falta read-back tras reinicio real.",
+      "notes": "Paridad parcial: ficha, hábitos, menú, turno, objetivo y ahora recibos de mensajes. Siguen 501 para archivo, actividad, recursos y avisos; brief aún no atómico. Falta read-back tras reinicio real.",
       "evidence": "Revisión local 2026-09-17 sobre 5123acf. Informe: docs/revision-avance-2026-09-17.md. server/db/supabase-repo.ts y persistence.integration.test.ts aprobados con mocks; server/index.ts conserva ramas 501 explícitas.",
       "updatedAt": "2026-09-17T18:09:08.429Z"
     },
@@ -114,11 +114,32 @@
       "updatedAt": "2026-09-18T18:40:00.000Z"
     },
     "PV-17": {
+      "status": "review",
+      "owner": "",
+      "notes": "Peso/cintura con unidad (kg/lb, cm/in), origen patient|professional, fecha, consentimiento e historial. El profesional puede cargar en consultorio. Sin estimar desde fotos. Auth real pendiente.",
+      "evidence": "20260918190000_care_measurements.sql, careDataSchema, CarePanel, flow.integration.test.ts y postgres.integration.test.ts.",
+      "updatedAt": "2026-09-18T22:40:00.000Z"
+    },
+    "PV-18": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Peso semanal y cintura mensual autodeclarados, con fecha, consentimiento e historial. Sin inferir medidas desde fotos.",
-      "evidence": "careInputSchema, dueCareReminders, CarePanel y postgres.integration.test.ts. Demo en memoria; Auth real pendiente.",
-      "updatedAt": "2026-09-18T14:10:00.000Z"
+      "notes": "Catálogo profesional con título, ingredientes, pasos, porciones y fuente. Paciente ve sólo publicadas de su nutricionista. Sin tabla de ingredientes, sin asignaciones por paciente ni versiones numeradas.",
+      "evidence": "20260918200000_recipes.sql, server/recipes/*, RecipeCatalog, ShowroomHealthyMenu. Falta PV-19 (plan versionado) y Auth real.",
+      "updatedAt": "2026-09-18T22:40:00.000Z"
+    },
+    "PV-19": {
+      "status": "review",
+      "owner": "",
+      "notes": "Planes semanales fechados (lunes), versionados, con slots y receta publicada opcional. Publicación transaccional con expected_version; la copia inédita no muta la vigente. Sin asignaciones por receta distintas del plan.",
+      "evidence": "20260918210000_meal_plans.sql, server/plans/*, ShowroomMealPlan, plans.integration.test.ts y postgres.integration.test.ts.",
+      "updatedAt": "2026-09-18T23:20:00.000Z"
+    },
+    "PV-20": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "El paciente lee la versión publicada (título, porciones si hay receta, detalle). Días vacíos quedan vacíos. Las superficies de menú/compras usan esa copia. Falta Auth real y paridad total de receta en todos los días.",
+      "evidence": "ShowroomPatientPlan, ShowroomHealthyMenu, ShowroomGrocery + usePublishedPlan.",
+      "updatedAt": "2026-09-18T23:20:00.000Z"
     },
     "PV-21": {
       "status": "in_progress",
@@ -126,6 +147,27 @@
       "notes": "Lista derivada de títulos del plan y de alternativas ya publicadas. Explica que no hay cantidades. Checklist sólo en este navegador.",
       "evidence": "ShowroomGrocery + publishedRecipeMeals. Sin unidades, agregados manuales ni sync entre dispositivos.",
       "updatedAt": "2026-09-18T14:10:00.000Z"
+    },
+    "PV-22": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Captura persistente con id de cliente: se guarda antes del análisis. Fallo de IA deja analysis_status=failed sin perder la comida. Reintento del mismo id no duplica. Falta Auth real y cola asíncrona.",
+      "evidence": "20260918220000_meal_log_analysis.sql, save_meal_capture/apply/fail RPCs, MealLogModal, meals.persist.integration.test.ts.",
+      "updatedAt": "2026-09-19T01:20:00.000Z"
+    },
+    "PV-23": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Envío con id de cliente; reintento no duplica. Recibos persistentes: entregado al guardar, leído al abrir. Mark-read ya no es 501. Sin Realtime ni adjuntos. Falta Auth real.",
+      "evidence": "20260918230000_message_receipts.sql, send_thread_message/mark_thread_read, NutrigoMessages, message-flow.integration.test.ts y postgres.integration.test.ts.",
+      "updatedAt": "2026-09-19T01:45:00.000Z"
+    },
+    "PV-25": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Timezone ART persistido, confirmación en el turno, historial de eventos, solape transaccional del consultorio y 12 h de aviso para reprogramar desde la paciente. Sin picker IANA ni push. Falta Auth real.",
+      "evidence": "20260918240000_appointment_events.sql, save/cancel/reschedule/confirm RPCs, ShowroomPatientAgenda, appointment-flow.integration.test.ts y postgres.integration.test.ts. Navegador demo: solape 409 y confirmación persistida.",
+      "updatedAt": "2026-09-19T03:20:00.000Z"
     },
     "PV-26": {
       "status": "in_progress",
@@ -137,12 +179,83 @@
     "PV-27": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Borrador de alternativa (demo/IA) a pedido del paciente; la nutricionista edita y publica. El paciente no ve el borrador. Requiere alergias/restricciones declaradas.",
-      "evidence": "server/ai/replacements.ts, CareRecipeEditor, generate/publish RPC. Sin catálogo de recetas ni jobs versionados.",
-      "updatedAt": "2026-09-18T14:10:00.000Z"
+      "notes": "Jobs versionados recipe/menu con contexto mínimo, timeout y tope de tokens. El artefacto queda inédito hasta aplicar; aplicar no publica. El paciente no lee jobs. Sin worker durable (PV-30).",
+      "evidence": "20260918250000_ai_jobs.sql, server/ai/jobs.ts, RecipeCatalog, ShowroomMealPlan, jobs.integration.test.ts y postgres.integration.test.ts. Navegador demo: consentimiento, propuesta inédita y plan paciente sin generate.",
+      "updatedAt": "2026-09-19T04:20:00.000Z"
+    },
+    "PV-28": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Evaluación sintética eval.v1: alergias/restricciones, faltantes/unidades, tiempo, contexto obsoleto y copia inédita concurrente. Aplicar revalida; bloqueos no publican. Set de 30 escenarios versionados. Falta revisión de Verónica y Auth real.",
+      "evidence": "server/ai/evaluate.ts, evaluate.scenarios.ts, evaluate.test.ts, evaluate.integration.test.ts. UI profesional muestra hallazgos y deshabilita guardar si hay bloqueo.",
+      "updatedAt": "2026-09-19T04:20:00.000Z"
     }
   },
   "history": [
+    {
+      "id": "c18a28e0-9f12-4a3b-8c01-ai-eval-pv28",
+      "taskId": "PV-28",
+      "at": "2026-09-19T04:20:00.000Z",
+      "from": "todo",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a23e0-9f12-4a3b-8c01-ai-jobs-pv27",
+      "taskId": "PV-27",
+      "at": "2026-09-19T03:40:00.000Z",
+      "from": "todo",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a23e0-9f12-4a3b-8c01-appointments-pv25",
+      "taskId": "PV-25",
+      "at": "2026-09-19T03:10:00.000Z",
+      "from": "todo",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a23e0-9f12-4a3b-8c01-messages-pv23",
+      "taskId": "PV-23",
+      "at": "2026-09-19T01:45:00.000Z",
+      "from": "todo",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a19e0-9f12-4a3b-8c01-plans-pv19",
+      "taskId": "PV-19",
+      "at": "2026-09-18T23:20:00.000Z",
+      "from": "todo",
+      "to": "review",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a20e0-9f12-4a3b-8c01-patient-plan-pv20",
+      "taskId": "PV-20",
+      "at": "2026-09-18T23:20:00.000Z",
+      "from": "todo",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a17e0-9f12-4a3b-8c01-measures-pv17",
+      "taskId": "PV-17",
+      "at": "2026-09-18T22:40:00.000Z",
+      "from": "in_progress",
+      "to": "review",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a18e0-9f12-4a3b-8c01-recipes-pv18",
+      "taskId": "PV-18",
+      "at": "2026-09-18T22:40:00.000Z",
+      "from": "todo",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
     {
       "id": "c18a15e0-9f12-4a3b-8c01-assets-pv15",
       "taskId": "PV-15",

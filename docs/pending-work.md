@@ -1,5 +1,49 @@
 # Pendientes de Plan V
 
+## Revisión vigente de avance — 2026-09-18 (evaluación de IA)
+
+PV-28 primera faja: validador determinista `eval.v1` sobre propuestas de receta/menú (alergias, restricciones, cantidades, unidades, huecos y contexto desactualizado). Aplicar revalida el hash; una alergia explícita o una copia inédita ajena bloquean el guardado. 30 escenarios sintéticos versionados. El paciente no ve hallazgos ni botones de generar. Sin revisión clínica de Verónica sobre el set ni worker durable (PV-30).
+
+Siguiente P0: PV-29 PWA, o cablear `.env` staging para RLS live (PV-08). No aplicar 016/016b ni SQL a ruti-chat-crm.
+
+## Revisión vigente de avance — 2026-09-18 (propuestas de IA)
+
+PV-27 primera faja: jobs versionados `recipe`/`menu` con `prompt_version`, hash de contexto mínimo (alergias, restricciones, tiempo de cocina, catálogo y plan, sin nombre ni notas privadas), timeout y tope de tokens. El artefacto queda inédito: aplicar lo guarda en el catálogo o en la copia del plan, nunca publica. El paciente no lee `ai_jobs` ni `ai_artifacts`. Un fallo del proveedor deja el job en `failed` sin propuesta simulada. Migración incremental `20260918250000_ai_jobs.sql` (no copia 016b). Sin worker durable (PV-30). Evaluación en PV-28.
+
+## Revisión vigente de avance — 2026-09-18 (consultas)
+
+PV-25 primera faja: timezone `America/Argentina/Buenos_Aires` en el turno, confirmación persistida (ya no localStorage), historial en `appointment_events` y RPC `save_appointment` / `cancel_appointment` / `reschedule_appointment` / `confirm_appointment`. El solape del mismo consultorio se bloquea con lock asesor y rango semiabierto. La paciente no puede reprogramar con menos de 12 h; el consultorio sí. Un turno scheduled por paciente. Cancelar deja `status=cancelled` (no borra). Sin picker IANA, sin exclusion gist, sin push/email (PV-26). Migración incremental `20260918240000_appointment_events.sql` (no reescribe `appointments` de core; no copia 016b).
+
+Siguiente P0: PV-27 jobs de IA, o cablear `.env` staging para RLS live (PV-08). No aplicar 016/016b ni SQL a ruti-chat-crm.
+
+## Revisión vigente de avance — 2026-09-18 (hilos y recibos)
+
+PV-23 primera faja: el envío lleva `id` de cliente; reintentar el mismo id no duplica. `message_receipts` guarda entrega (al persistir para la otra persona) y lectura (al abrir el hilo). `POST /messages/read` ya no responde 501: usa `mark_thread_read`. Los mensajes siguen inmutables. Sin Realtime ni adjuntos (PV-26 / PV-24). Migración incremental `20260918230000_message_receipts.sql` (no reescribe `messages` de core; no copia 016b).
+
+Siguiente P0: PV-25 consultas con timezone, o cablear `.env` staging para RLS live (PV-08). No aplicar 016/016b ni SQL a ruti-chat-crm.
+
+## Revisión vigente de avance — 2026-09-18 (diario persistente)
+
+PV-22 primera faja: el diario guarda la comida (foto o texto) **antes** de pedir el análisis. Un `id` de captura evita duplicados. Si la IA no está disponible, el registro queda con `analysis_status=failed` y la paciente no vuelve a captura vacía. Reintentar el mismo id no crea otra fila. Revisión profesional sigue por `PATCH` de comida. Migración incremental `20260918220000_meal_log_analysis.sql` (no reescribe `meal_logs` de core; no copia 016b).
+
+Siguiente P0: PV-23 hilos reales, o cablear `.env` staging para RLS live (PV-08). No aplicar 016/016b ni SQL a ruti-chat-crm.
+
+## Revisión vigente de avance — 2026-09-18 (planes versionados)
+
+PV-19: planes semanales fechados (lunes), versionados, con slots y receta publicada opcional. Guardar crea o actualiza una copia inédita; publicar exige `expected_version` y deja esa copia inmutable. Editar después abre otra versión. Migración `20260918210000_meal_plans.sql` aplicada en Plan V vacío (`meal_plan_tables`, `meal_plan_rpcs`). El editor CRM ya no publica al guardar cada título.
+
+PV-20 primera faja: el paciente, el menú y las compras leen la versión publicada. Si no hay publicada, sigue la plantilla demo. Días sin slots quedan vacíos. Detalle de receta y porciones sólo cuando el slot apunta a una receta publicada.
+
+Siguiente P0: PV-22 diario persistente, o cablear `.env` staging para RLS live (PV-08). No aplicar 016/016b ni SQL a ruti-chat-crm.
+
+## Revisión vigente de avance — 2026-09-18 (medidas y recetas)
+
+PV-17: peso y cintura guardan `unit` y `origin`. El paciente carga como autodeclarado; la nutricionista, como consultorio. No se estima desde fotos. Migración incremental `20260918190000_care_measurements.sql` aplicada en Plan V vacío (`care_measurements`).
+
+PV-18 primera faja: catálogo profesional (`recipes`) con ingredientes/pasos en JSON, porciones y fuente. El paciente sólo ve publicadas de su nutricionista. Una receta publicada no se edita: se crea otra. Schema aplicado (`recipes_tables`, `recipes_rpcs`). Sin tabla de ingredientes, sin asignaciones por paciente, sin planes versionados (PV-19).
+
+Siguiente P0: PV-19 planes fechados/versionados, o cablear `.env` staging para RLS live (PV-08). No aplicar 016/016b ni SQL a ruti-chat-crm.
+
 ## Revisión vigente de avance — 2026-09-18 (archivos y estudios)
 
 PV-15: migración `20260918180000_assets.sql` aplicada al Plan V vacío (`acevlqrkvdinelgxnaki`, **0 pacientes**). Buckets privados `asset-quarantine` y `clinical-documents`. API de reserva/complete/access/withdraw, inspección de magic bytes, recorte de EXIF JPEG y tEXt PNG, cuota y URL de 60 s. PGlite cubre aislamiento de intenciones. No se reencodifican WebP; no hay worker durable (sí `purge_expired_asset_intents` para service_role). El complete de demo sigue aceptando data URL; en persistente el API también emite URL de subida a cuarentena.
@@ -59,8 +103,10 @@ Estado PV-01…05:
 - **PV-14** ficha profesional muestra resumen de ingreso, faltantes, alergias y notas privadas; el paciente no ve `reviewed_by` ni observaciones clínicas.
 - **PV-15** archivos privados: reserva, cuarentena, inspección de contenido, cuota, recorte JPEG/PNG, URL de 60 s y retiro. Schema aplicado en Plan V vacío. Falta worker durable y reencode WebP.
 - **PV-16** estudios PDF/JPG/PNG con visor temporal y retiro; fotos corporales ya tenían visor en seguimiento.
+- **PV-17** peso/cintura con unidad y origen; historial y consentimiento. Sin estimación desde fotos. Falta Auth real.
+- **PV-18** catálogo profesional publicado; el paciente no ve inéditas. Faltan asignaciones por paciente, tabla de ingredientes y planes versionados (PV-19).
 
-Siguiente: `.env` staging → Plan V, RLS live e invitación real (PV-08/09), luego recetas/planes (PV-18). No aplicar 016/016b ni SQL a ruti-chat-crm ni a un proyecto con pacientes.
+Siguiente: `.env` staging → Plan V, RLS live e invitación real (PV-08/09), luego planes versionados (PV-19). No aplicar 016/016b ni SQL a ruti-chat-crm ni a un proyecto con pacientes.
 
 El registro de cortes que sigue se conserva como evidencia de **demo/memoria**. Sus casillas no acreditan producción ni aprobación visual integral.
 
@@ -149,7 +195,7 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 - [ ] Alta e invitación real de pacientes. PV-09 deja el ciclo crear/enviar/revocar/aceptar y recuperación; el schema ya está en Plan V vacío. Falta `.env` (service role + `PROVISION_SECRET`) y el recorrido Auth/RPC persistente.
 - [ ] Edición y archivo/restauración de pacientes mediante `archived_at`. PV-10 persiste la ficha (nombre/estado/etapa/notas profesionales); el archivo operativo sigue 501 porque 016 no tiene esa columna.
 - [ ] Persistencia de objetivos e historial profesional. PV-10 escribe `patients.goal`; `goal_status`/`goal_history` quedan para 016b.
-- [ ] Creación, reprogramación y cancelación de turnos. PV-10 reemplaza el turno vigente (demo v0); historial append-only es PV-25.
+- [x] Creación, reprogramación y cancelación de turnos. PV-25 persiste timezone, confirmación, historial append-only, política de 12 h para la paciente y bloqueo transaccional de solapes del consultorio. Falta Auth real.
 - [x] Escritura del menú semanal (PV-10, `meal_slots`).
 - [x] Persistencia completa de sueño/hábitos (PV-10, `habit_logs.sleep_minutes`).
 - [x] Descarte persistente de briefs del copiloto (PV-10, `ai_briefs.status=dismissed`).

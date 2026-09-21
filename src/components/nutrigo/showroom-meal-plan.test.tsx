@@ -36,6 +36,8 @@ describe('Plan semanal profesional en Nutrigo', () => {
     expect(html).toContain('Yogur con fruta');
     expect(html).toContain('Sopa de calabaza');
     expect(html).toContain('Guardar');
+    expect(html).toContain('Publicar para la paciente');
+    expect(html).toContain('Generar propuesta');
     expect(html).toContain('Agregar comida');
   });
 

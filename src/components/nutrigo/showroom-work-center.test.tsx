@@ -11,7 +11,7 @@ const patient = (overrides: Partial<Patient> = {}): Patient => ({
   appointment: { when: 'Jueves · 14:30', duration: 45, channel: 'presencial' }, habit_logs: [], todayPlan: [], weekPlan: [],
   brief: { suggested_action: 'mensaje', up_next_title: 'Revisar registro', up_next_body: 'Hay una comida pendiente.', draft_message: 'Hola Ana', source_ids: [], adherence_why: 'Dos comidas pendientes' },
   timeline: [{ id: 'event-ana', kind: 'meal_logged', atLabel: 'HOY', title: 'Cena registrada', body: 'Pendiente de revisión' }],
-  meal_logs: [{ id: 'meal-ana', patient_id: 'ana', slot: 'Cena', photo_url: null, description: 'Omelette', foods: [], macros: null, confidence: 0, note_for_nutri: '', status: 'pending_review', logged_at: '2026-09-13T22:00:00.000Z' }],
+  meal_logs: [{ id: 'meal-ana', patient_id: 'ana', slot: 'Cena', photo_url: null, description: 'Omelette', foods: [], macros: null, confidence: 0, note_for_nutri: '', status: 'pending_review', analysis_status: 'succeeded', logged_at: '2026-09-13T22:00:00.000Z' }],
   messages: [], ...overrides,
 });
 

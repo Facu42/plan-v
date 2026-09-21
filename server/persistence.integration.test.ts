@@ -48,6 +48,8 @@ const sbMocks = vi.hoisted(() => ({
   sbDeleteMenuSlot: vi.fn(),
   sbAddTimelineEvent: vi.fn(),
   sbSetAppointment: vi.fn(),
+  sbRescheduleAppointment: vi.fn(),
+  sbConfirmAppointment: vi.fn(),
   sbGetScheduledAppointment: vi.fn(),
   sbDismissBrief: vi.fn(),
   computeShoppingList: vi.fn(() => []),
@@ -144,12 +146,10 @@ describe('PV-10 persistence parity for 016 domains', () => {
       time: '11:00',
     }));
     expect(response.status).toBe(200);
-    expect(sbMocks.sbSetAppointment).toHaveBeenCalledWith('pat-1', 'nutri-1', expect.objectContaining({
+    expect(sbMocks.sbRescheduleAppointment).toHaveBeenCalledWith('pat-1', {
       day: 'Viernes',
       time: '11:00',
-      duration: 45,
-      channel: 'video',
-    }));
+    });
   });
 
   it('dismisses a brief and returns the patient afterwards', async () => {

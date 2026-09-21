@@ -15,6 +15,7 @@ function mealLog(slot: string) {
     confidence: 0.7,
     note_for_nutri: '',
     status: 'confirmed' as const,
+    analysis_status: 'succeeded' as const,
     logged_at: '2026-09-05T13:40:00.000Z',
   };
 }

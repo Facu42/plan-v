@@ -66,6 +66,7 @@ const patient: Patient = {
     confidence: 0.4,
     note_for_nutri: 'Foto oscura; revisar porción',
     status: 'pending_review',
+    analysis_status: 'succeeded',
     logged_at: '2026-09-05T00:00:00.000Z',
   }],
   messages: [
@@ -125,7 +126,7 @@ describe('resolveRequestAuth', () => {
 describe('canAccessPatient', () => {
   const patientOwner = { id: 'patient-1', nutritionistId: 'nutri-1', billing_status: 'active' as const, billing_until: '2099-10-06' };
 
-  it.each<PatientAction>(['read_self', 'read_patient', 'analyze_meal', 'update_habits', 'log_activity', 'read_resource', 'send_message', 'reschedule_appointment', 'read_intake', 'edit_intake', 'submit_intake', 'grant_consent', 'read_consent'])(
+  it.each<PatientAction>(['read_self', 'read_patient', 'analyze_meal', 'update_habits', 'log_activity', 'read_resource', 'send_message', 'reschedule_appointment', 'confirm_appointment', 'read_intake', 'edit_intake', 'submit_intake', 'grant_consent', 'read_consent'])(
     'allows a patient to perform %s only on their own record',
     (action) => {
       const actor: Actor = { role: 'paciente', userId: 'user-patient', patientId: 'patient-1' };
@@ -134,7 +135,7 @@ describe('canAccessPatient', () => {
     },
   );
 
-  it.each<PatientAction>(['read_clinical', 'review_meal', 'generate_copilot', 'edit_patient', 'archive_patient', 'edit_menu', 'edit_appointment', 'edit_goal', 'edit_billing', 'assign_resource', 'review_intake', 'write_clinical_note'])(
+  it.each<PatientAction>(['read_clinical', 'review_meal', 'generate_copilot', 'generate_ai_job', 'edit_patient', 'archive_patient', 'edit_menu', 'edit_appointment', 'edit_goal', 'edit_billing', 'assign_resource', 'review_intake', 'write_clinical_note'])(
     'does not allow a patient to perform the professional action %s',
     (action) => {
       const actor: Actor = { role: 'paciente', userId: 'user-patient', patientId: 'patient-1' };
@@ -150,12 +151,14 @@ describe('canAccessPatient', () => {
     expect(canAccessPatient(actor, patientOwner, 'archive_patient')).toBe(true);
     expect(canAccessPatient(actor, patientOwner, 'edit_menu')).toBe(true);
     expect(canAccessPatient(actor, patientOwner, 'edit_appointment')).toBe(true);
+    expect(canAccessPatient(actor, patientOwner, 'confirm_appointment')).toBe(true);
     expect(canAccessPatient(actor, patientOwner, 'edit_goal')).toBe(true);
     expect(canAccessPatient(actor, patientOwner, 'edit_billing')).toBe(true);
     expect(canAccessPatient(actor, patientOwner, 'assign_resource')).toBe(true);
     expect(canAccessPatient(actor, patientOwner, 'read_intake')).toBe(true);
     expect(canAccessPatient(actor, patientOwner, 'review_intake')).toBe(true);
     expect(canAccessPatient(actor, patientOwner, 'write_clinical_note')).toBe(true);
+    expect(canAccessPatient(actor, patientOwner, 'generate_ai_job')).toBe(true);
     expect(canAccessPatient(actor, { ...patientOwner, nutritionistId: 'nutri-2' }, 'read_clinical')).toBe(false);
     expect(canAccessPatient(actor, { ...patientOwner, nutritionistId: 'nutri-2' }, 'edit_patient')).toBe(false);
     expect(canAccessPatient(actor, { ...patientOwner, nutritionistId: 'nutri-2' }, 'archive_patient')).toBe(false);
@@ -186,6 +189,8 @@ describe('canAccessPatient', () => {
     expect(canAccessPatient(actor, locked, 'analyze_meal')).toBe(false);
     expect(canAccessPatient(actor, locked, 'update_habits')).toBe(false);
     expect(canAccessPatient(actor, locked, 'log_activity')).toBe(false);
+    expect(canAccessPatient(actor, locked, 'reschedule_appointment')).toBe(false);
+    expect(canAccessPatient(actor, locked, 'confirm_appointment')).toBe(false);
   });
 });
 

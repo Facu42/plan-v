@@ -13,6 +13,7 @@ const log: MealLog = {
   confidence: 0.7,
   note_for_nutri: 'Revisar porción',
   status: 'pending_review',
+  analysis_status: 'succeeded',
   logged_at: '2026-09-05T12:00:00.000Z',
 };
 

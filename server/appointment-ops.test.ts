@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { historyEntry, occurrenceFromWhen, resolveAppointmentState, stampStartsAt } from './appointment-ops.js';
+import { historyEntry, occurrenceFromWhen, resolveAppointmentState, stampStartsAt, appointmentsOverlap, patientRescheduleBlocked } from './appointment-ops.js';
 
 const now = new Date(2026, 8, 16, 10, 0, 0);
 
@@ -42,5 +42,15 @@ describe('appointment history ops', () => {
       appointment_history: [entry],
     }, new Date(2026, 8, 18, 10, 0, 0), () => 'ah-2');
     expect(resolved.appointment_history.filter((item) => item.action === 'elapsed')).toHaveLength(1);
+  });
+
+  it('detects overlapping intervals and the 12h patient notice window', () => {
+    const left = { starts_at: '2026-09-18T14:00:00.000Z', duration: 45 };
+    const right = { starts_at: '2026-09-18T14:30:00.000Z', duration: 30 };
+    const later = { starts_at: '2026-09-18T16:00:00.000Z', duration: 30 };
+    expect(appointmentsOverlap(left, right)).toBe(true);
+    expect(appointmentsOverlap(left, later)).toBe(false);
+    expect(patientRescheduleBlocked('2026-09-18T20:00:00.000Z', Date.parse('2026-09-18T07:00:00.000Z'))).toBe(false);
+    expect(patientRescheduleBlocked('2026-09-18T20:00:00.000Z', Date.parse('2026-09-18T10:00:00.000Z'))).toBe(true);
   });
 });

@@ -116,4 +116,16 @@ describe('Diario del paciente dentro de Nutrigo', () => {
     expect(patientVisibleReview(patient.logs[2])?.headline).toContain('ajustó');
     expect(JSON.stringify(patientVisibleReview(patient.logs[0]))).not.toContain('note_for_nutri');
   });
+
+  it('muestra una comida registrada aunque el análisis no esté disponible', () => {
+    const failed = {
+      ...patient,
+      logs: [{ ...patient.logs[1], analysis_status: 'failed' as const }],
+    } as unknown as ShowroomPatient;
+    const html = renderToStaticMarkup(<ShowroomPatientDiary patient={failed} query="" now={now} onLogMeal={() => {}} />);
+    expect(html).toContain('SECRETO VISUAL');
+    expect(html).toContain('Registrada sin análisis');
+    expect(html).toContain('Análisis no disponible');
+    expect(html).not.toContain('700 kcal');
+  });
 });

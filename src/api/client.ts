@@ -47,6 +47,17 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export function apiErrorMessage(error: unknown, fallback: string): string {
+  if (!(error instanceof ApiError)) return fallback;
+  try {
+    const parsed = JSON.parse(error.message) as { error?: unknown };
+    if (typeof parsed.error === 'string' && parsed.error.trim()) return parsed.error;
+  } catch {
+    if (error.message.trim()) return error.message;
+  }
+  return fallback;
+}
+
 export function isAbortError(error: unknown): boolean {
   return (error instanceof DOMException || error instanceof Error) && error.name === 'AbortError';
 }
@@ -121,8 +132,8 @@ export const api = {
       body: JSON.stringify({ display_name: displayName }),
     }),
 
-  analyzeMeal: (patientId: string, data: { description?: string; imageBase64?: string; slot: string; photoPreview?: string }) =>
-    request<{ analysis: unknown; log: MealLog; patient: Patient }>(`/api/patients/${patientId}/meals/analyze`, {
+  analyzeMeal: (patientId: string, data: { id: string; description?: string; imageBase64?: string; slot: string; photoPreview?: string }) =>
+    request<{ analysis: unknown; log: MealLog; patient: Patient | null; source?: string; code?: string }>(`/api/patients/${patientId}/meals/analyze`, {
       method: 'POST',
       body: JSON.stringify(data),
     }),
@@ -156,6 +167,12 @@ export const api = {
       body: JSON.stringify(appointment),
     }),
 
+  confirmAppointment: (patientId: string, confirmation: 'attending' | 'needs_change') =>
+    request<{ patient: Patient }>(`/api/patients/${patientId}/appointment/confirm`, {
+      method: 'POST',
+      body: JSON.stringify({ confirmation }),
+    }),
+
   listNotices: (patientId?: string) =>
     request<{ notices: DemoNotice[]; source: string }>(patientId ? `/api/notices?patientId=${encodeURIComponent(patientId)}` : '/api/notices'),
 
@@ -183,10 +200,10 @@ export const api = {
   dismissBrief: (patientId: string) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/brief/dismiss`, { method: 'POST' }),
 
-  sendMessage: (patientId: string, text: string, from: 'vero' | 'patient', suggestedByAi = false) =>
+  sendMessage: (patientId: string, text: string, from: 'vero' | 'patient', suggestedByAi = false, id: string = crypto.randomUUID()) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/messages`, {
       method: 'POST',
-      body: JSON.stringify({ text, from, suggested_by_ai: suggestedByAi }),
+      body: JSON.stringify({ id, text, from, suggested_by_ai: suggestedByAi }),
     }),
 
   markMessagesRead: (patientId: string, reader: 'vero' | 'patient') =>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api } from '../../api/client';
+import { api, apiErrorMessage } from '../../api/client';
 import { useAppStore } from '../../store/useAppStore';
 import type { Patient } from '../../types';
 import { Icon } from '../shared/Icon';
@@ -55,8 +55,8 @@ export function CrmAppointmentsTab({ patient, startEditing = false }: Props) {
       await api.updateAppointment(patient.id, meet_url ? { ...form, meet_url } : { day: form.day, time: form.time, duration: form.duration, channel: form.channel });
       await refreshPatient(patient.id);
       setEditing(false);
-    } catch {
-      setError('No pudimos guardar el turno. Revisá que el enlace sea HTTPS.');
+    } catch (error) {
+      setError(apiErrorMessage(error, 'No pudimos guardar el turno. Revisá que el enlace sea HTTPS.'));
     } finally {
       setBusy(false);
     }
@@ -84,6 +84,9 @@ export function CrmAppointmentsTab({ patient, startEditing = false }: Props) {
           <>
             <p className="appointment-time">{current.when} <span>{current.duration} min</span></p>
             <p className="appointment-channel">{CHANNELS.find((c) => c.id === current.channel)?.label ?? current.channel}</p>
+            <p className="appointment-channel">Buenos Aires (UTC−3)</p>
+            {current.confirmation === 'attending' && <p className="appointment-channel">Asistencia confirmada</p>}
+            {current.confirmation === 'needs_change' && <p className="appointment-channel">Pidió un cambio de horario</p>}
             {current.meet_url && (
               <a className="subtle-action appointment-link" href={current.meet_url} target="_blank" rel="noopener noreferrer">
                 Abrir videollamada <Icon name="arrow" size={14} />

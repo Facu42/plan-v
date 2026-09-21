@@ -3,8 +3,8 @@ import { z } from 'zod';
 export const careDate = z.iso.date().refine(value => value <= new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date()), 'La fecha no puede ser futura');
 const note = z.string().trim().max(500).default('');
 export const careDataSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('weight'), value: z.number().min(1).max(500), note }).strict(),
-  z.object({ kind: z.literal('waist'), value: z.number().min(10).max(300), note }).strict(),
+  z.object({ kind: z.literal('weight'), value: z.number().min(1).max(500), unit: z.enum(['kg', 'lb']), origin: z.enum(['patient', 'professional']), note }).strict(),
+  z.object({ kind: z.literal('waist'), value: z.number().min(10).max(300), unit: z.enum(['cm', 'in']), origin: z.enum(['patient', 'professional']), note }).strict(),
   z.object({ kind: z.literal('activity'), activity: z.string().trim().min(2).max(80), minutes: z.number().int().min(1).max(600), intensity: z.enum(['suave','moderada','intensa']), kcal: z.number().int().min(0).max(10000).nullable(), note }).strict(),
   z.object({ kind: z.literal('body_photo'), path: z.string().min(1).max(250), note }).strict(),
   z.object({ kind: z.literal('payment'), amount: z.number().positive().max(100000000), currency: z.enum(['ARS','USD']), method: z.enum(['transferencia','efectivo','tarjeta','otro']), reference: z.string().trim().max(120), note }).strict(),
@@ -38,8 +38,8 @@ export const CARE_LABELS: Record<CareData['kind'], string> = { weight: 'Peso sem
 export function describeCareRecord(record: CareRecord): string {
   const data = record.data;
   switch (data.kind) {
-    case 'weight': return `${data.value} kg`;
-    case 'waist': return `${data.value} cm`;
+    case 'weight': return `${data.value} ${data.unit} · ${data.origin === 'professional' ? 'consultorio' : 'autodeclarado'}`;
+    case 'waist': return `${data.value} ${data.unit} · ${data.origin === 'professional' ? 'consultorio' : 'autodeclarado'}`;
     case 'activity': return `${data.activity} · ${data.minutes} min${data.kcal === null ? '' : ` · ${data.kcal} kcal declaradas`}`;
     case 'body_photo': return 'Foto corporal privada';
     case 'payment': return `${data.amount.toLocaleString('es-AR')} ${data.currency} · ${data.method}`;

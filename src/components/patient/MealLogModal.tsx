@@ -20,6 +20,7 @@ const SLOTS = ['Desayuno', 'Colación', 'Almuerzo', 'Merienda', 'Cena', 'Extra']
 export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props) {
   const care=useCare(patient.id);
   const lock=useRef(false);
+  const mealId = useRef(crypto.randomUUID());
   const refreshPatient = useAppStore((s) => s.refreshPatient);
   const [step, setStep] = useState<Step>('capture');
   const [mode, setMode] = useState<'photo' | 'text'>('photo');
@@ -66,6 +67,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
     setStep('analyzing');
     try {
       const { log } = await api.analyzeMeal(patient.id, {
+        id: mealId.current,
         description: text || undefined,
         imageBase64: mode === 'photo' && imageBase64 ? imageBase64 : undefined,
         slot,
@@ -77,7 +79,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
       setStep('review');
     } catch (e) {
       setError(careErrorMessage(e));
-      setStep('capture');
+      setStep(result ? 'review' : 'capture');
     } finally { lock.current=false; }
   };
 
@@ -106,8 +108,8 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
       <div className="modal-backdrop" role="dialog" aria-modal="true">
         <div className="photo-modal analyzing-modal">
           <Icon name="loader" size={32} className="spin" />
-          <h2>Analizando tu comida…</h2>
-          <p>La IA estima alimentos y macros. Verónica confirma antes de que cuente.</p>
+          <h2>Registrando tu comida…</h2>
+          <p>Primero se guarda. Después, si está disponible, la IA estima alimentos. Verónica confirma antes de que cuente.</p>
         </div>
       </div>
     );
@@ -123,13 +125,17 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
           ) : (
             <div className="modal-camera text-preview"><Icon name="edit" size={28} /><p>{description}</p></div>
           )}
-          <p className="eyebrow">Lectura asistida · {slot}</p>
-          <h2>Esto es lo que vemos</h2>
-          <div className="food-tags">
-            {result.foods.map((f) => (
-              <span key={f.name}>{f.name}{f.portion_est ? ` · ~${f.portion_est}${f.portion_unit}` : ''}</span>
-            ))}
-          </div>
+          <p className="eyebrow">{result.analysis_status === 'failed' ? 'Comida registrada' : 'Lectura asistida'} · {slot}</p>
+          <h2>{result.analysis_status === 'failed' ? 'Quedó en tu diario' : 'Esto es lo que vemos'}</h2>
+          {result.analysis_status === 'failed' ? (
+            <p className="modal-note">El análisis automático no está disponible. La comida no se perdió; Verónica puede revisarla igual.</p>
+          ) : (
+            <div className="food-tags">
+              {result.foods.map((f) => (
+                <span key={f.name}>{f.name}{f.portion_est ? ` · ~${f.portion_est}${f.portion_unit}` : ''}</span>
+              ))}
+            </div>
+          )}
           {result.macros ? (
             <>
               <MacroBar macros={result.macros} />
@@ -137,11 +143,19 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
                 Estimación · confianza {(result.confidence * 100).toFixed(0)}% · pendiente de Verónica
               </p>
             </>
-          ) : (
+          ) : result.analysis_status !== 'failed' ? (
             <p className="modal-note">No pudimos estimar macros con confianza. Verónica lo revisará.</p>
-          )}
+          ) : null}
+          {error && <p className="form-error">{error}</p>}
           <p className="modal-note">No es una medida exacta. Verónica confirma antes de que cuente para tu seguimiento.</p>
-          <button className="primary-button wide" onClick={confirm}><Icon name="check" size={17} />Guardar comida</button>
+          {result.analysis_status === 'failed' ? (
+            <div className="review-actions">
+              <button className="primary-button wide" onClick={analyze}><Icon name="sparkle" size={17} />Reintentar análisis</button>
+              <button className="soft-button wide" onClick={confirm}>Entendido</button>
+            </div>
+          ) : (
+            <button className="primary-button wide" onClick={confirm}><Icon name="check" size={17} />Listo</button>
+          )}
         </div>
       </div>
     );
@@ -202,7 +216,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
 
         {error && <p className="form-error">{error}</p>}
         <button className="primary-button wide" type="button" onClick={analyze} disabled={Boolean(care.data) && !care.data?.consented.includes('ai_meal_analysis')}>
-          <Icon name="sparkle" size={17} />Analizar con IA
+          <Icon name="sparkle" size={17} />Registrar comida
         </button>
       </div>
     </div>

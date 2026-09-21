@@ -15,6 +15,7 @@ export function buildShowroomReminders(patient: ShowroomPatient, now: Date): Dai
       confidence: 1,
       note_for_nutri: '',
       status: log.status,
+      analysis_status: log.analysis_status ?? 'succeeded',
       logged_at: log.logged_at,
     })),
     hydration: patient.hydration,

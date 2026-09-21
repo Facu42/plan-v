@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   analyzeMealInputSchema,
   appointmentUpdateSchema,
+  appointmentConfirmSchema,
   billingUpdateInputSchema,
   goalUpdateInputSchema,
   habitUpdateInputSchema,
@@ -16,15 +17,16 @@ import {
 
 describe('API input schemas', () => {
   it('requires a supported slot and either a description or an image', () => {
-    expect(analyzeMealInputSchema.safeParse({ slot: 'Almuerzo', description: 'Bowl de pollo' }).success).toBe(true);
-    expect(analyzeMealInputSchema.safeParse({ slot: 'Almuerzo', imageBase64: 'YWJjZA==' }).success).toBe(true);
-    expect(analyzeMealInputSchema.safeParse({ slot: 'Media noche', description: 'Algo' }).success).toBe(false);
-    expect(analyzeMealInputSchema.safeParse({ slot: 'Almuerzo' }).success).toBe(false);
+    expect(analyzeMealInputSchema.safeParse({ id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', slot: 'Almuerzo', description: 'Bowl de pollo' }).success).toBe(true);
+    expect(analyzeMealInputSchema.safeParse({ id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', slot: 'Almuerzo', imageBase64: 'YWJjZA==' }).success).toBe(true);
+    expect(analyzeMealInputSchema.safeParse({ slot: 'Almuerzo', description: 'Bowl de pollo' }).success).toBe(false);
+    expect(analyzeMealInputSchema.safeParse({ id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', slot: 'Media noche', description: 'Algo' }).success).toBe(false);
+    expect(analyzeMealInputSchema.safeParse({ id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', slot: 'Almuerzo' }).success).toBe(false);
   });
 
   it('rejects oversized meal descriptions and image payloads', () => {
-    expect(analyzeMealInputSchema.safeParse({ slot: 'Cena', description: 'a'.repeat(1001) }).success).toBe(false);
-    expect(analyzeMealInputSchema.safeParse({ slot: 'Cena', imageBase64: 'a'.repeat(8_000_001) }).success).toBe(false);
+    expect(analyzeMealInputSchema.safeParse({ id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', slot: 'Cena', description: 'a'.repeat(1001) }).success).toBe(false);
+    expect(analyzeMealInputSchema.safeParse({ id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', slot: 'Cena', imageBase64: 'a'.repeat(8_000_001) }).success).toBe(false);
   });
 
   it('only accepts professional review states', () => {
@@ -51,10 +53,11 @@ describe('API input schemas', () => {
   });
 
   it('trims messages and rejects empty or oversized text', () => {
-    const parsed = messageInputSchema.safeParse({ text: '  Hola  ', from: 'vero' });
+    const parsed = messageInputSchema.safeParse({ id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', text: '  Hola  ', from: 'vero' });
     expect(parsed.success && parsed.data.text).toBe('Hola');
-    expect(messageInputSchema.safeParse({ text: '   ' }).success).toBe(false);
-    expect(messageInputSchema.safeParse({ text: 'a'.repeat(2001) }).success).toBe(false);
+    expect(messageInputSchema.safeParse({ text: 'Hola', from: 'vero' }).success).toBe(false);
+    expect(messageInputSchema.safeParse({ id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', text: '   ', from: 'vero' }).success).toBe(false);
+    expect(messageInputSchema.safeParse({ id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', text: 'a'.repeat(2001), from: 'vero' }).success).toBe(false);
   });
 
   it('normalizes patient onboarding fields and rejects invalid contact data', () => {
@@ -123,6 +126,9 @@ describe('API input schemas', () => {
     expect(appointmentUpdateSchema.safeParse({
       appointment: { day: 'Jueves', time: '14:30', duration: 45, channel: 'paloma-mensajera' },
     }).success).toBe(false);
+    expect(appointmentConfirmSchema.safeParse({ confirmation: 'attending' }).success).toBe(true);
+    expect(appointmentConfirmSchema.safeParse({ confirmation: 'needs_change' }).success).toBe(true);
+    expect(appointmentConfirmSchema.safeParse({ confirmation: 'pending' }).success).toBe(false);
   });
 
   it('accepts only HTTPS meeting links when present', () => {

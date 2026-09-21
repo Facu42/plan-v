@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { app } from './index.js';
 import { getPatient, resetStore } from './store.js';
 
+const messageId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
 function postMessage(body: unknown, patientId = 'pat-sofia') {
   return app.request(`/api/patients/${patientId}/messages`, {
     method: 'POST',
@@ -15,6 +17,7 @@ describe('message API flow in memory mode', () => {
 
   it('stores a patient message as human-authored and returns a patient-safe view', async () => {
     const response = await postMessage({
+      id: messageId,
       text: '¿Podemos revisar la merienda?',
       from: 'patient',
       suggested_by_ai: true,
@@ -25,6 +28,7 @@ describe('message API flow in memory mode', () => {
     expect(body.patient).not.toHaveProperty('brief');
     expect(body.patient).not.toHaveProperty('adherence_why');
     expect(body.patient.messages.at(-1)).toMatchObject({
+      id: messageId,
       from: 'patient',
       text: '¿Podemos revisar la merienda?',
     });
@@ -37,6 +41,7 @@ describe('message API flow in memory mode', () => {
 
   it('keeps the AI-origin flag only for a professional message', async () => {
     const response = await postMessage({
+      id: messageId,
       text: 'Probemos una alternativa más simple.',
       from: 'vero',
       suggested_by_ai: true,
@@ -51,16 +56,32 @@ describe('message API flow in memory mode', () => {
     });
   });
 
-  it('rejects blank messages and returns 404 for an unknown patient', async () => {
-    const blank = await postMessage({ text: '   ', from: 'patient' });
-    const missing = await postMessage({ text: 'Hola', from: 'patient' }, 'missing');
+  it('rejects blank messages, missing ids and unknown patients', async () => {
+    const blank = await postMessage({ id: messageId, text: '   ', from: 'patient' });
+    const missingId = await postMessage({ text: 'Hola', from: 'patient' });
+    const missing = await postMessage({ id: messageId, text: 'Hola', from: 'patient' }, 'missing');
 
     expect(blank.status).toBe(400);
+    expect(missingId.status).toBe(400);
     expect(missing.status).toBe(404);
   });
 
+  it('retries the same client id without duplicating and conflicts on a different payload', async () => {
+    const payload = { id: messageId, text: '¿Confirmamos el jueves?', from: 'patient' };
+    const first = await postMessage(payload);
+    const retry = await postMessage(payload);
+    const conflict = await postMessage({ ...payload, text: 'Otro texto' });
+    const stored = (getPatient('pat-sofia')?.messages ?? []).filter((message) => message.id === messageId);
+
+    expect(first.status).toBe(200);
+    expect(retry.status).toBe(200);
+    expect((await retry.json()).patient.messages.at(-1).id).toBe(messageId);
+    expect(conflict.status).toBe(409);
+    expect(stored).toHaveLength(1);
+  });
+
   it('marks incoming messages as read for the reader without changing authorship', async () => {
-    await postMessage({ text: '¿Confirmamos el jueves?', from: 'patient' });
+    await postMessage({ id: messageId, text: '¿Confirmamos el jueves?', from: 'patient' });
     const response = await app.request('/api/patients/pat-sofia/messages/read', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

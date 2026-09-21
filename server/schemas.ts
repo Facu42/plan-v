@@ -66,6 +66,10 @@ export const appointmentRescheduleSchema = z.object({
   time: appointmentTimeSchema,
 });
 
+export const appointmentConfirmSchema = z.object({
+  confirmation: z.enum(['attending', 'needs_change']),
+});
+
 export const noticeCreateSchema = z.object({
   patientId: z.string().trim().min(1).max(80),
   kind: z.literal('reminder'),
@@ -93,6 +97,7 @@ export const goalUpdateInputSchema = z.object({
 });
 
 export const analyzeMealInputSchema = z.object({
+  id: z.uuid(),
   description: z.string().trim().min(1).max(1000).optional(),
   imageBase64: z.string().min(4).max(8_000_000).optional(),
   slot: mealSlotSchema,
@@ -110,6 +115,7 @@ export const mealReviewInputSchema = z.object({
 });
 
 export const messageInputSchema = z.object({
+  id: z.uuid(),
   text: z.string().trim().min(1).max(2000),
   from: z.enum(['vero', 'patient']),
   suggested_by_ai: z.boolean().optional(),

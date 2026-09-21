@@ -1,6 +1,12 @@
 import { serve } from '@hono/node-server';
 import { registerCareRoutes, requireCareConsent } from './care/routes.js';
 import { registerAssetRoutes } from './assets/routes.js';
+import { registerRecipeRoutes } from './recipes/routes.js';
+import { RecipeError } from './recipes/repository.js';
+import { registerPlanRoutes } from './plans/routes.js';
+import { PlanError } from './plans/repository.js';
+import { registerAiJobRoutes } from './ai/routes.js';
+import { AiJobError } from './ai/repository.js';
 import { AssetError } from './assets/inspect.js';
 import { CareError, validatePhoto } from './care/repository.js';
 import { uploadMealPhoto, signMealPhotos } from './care/meal-photos.js';
@@ -18,6 +24,7 @@ import {
   activityInputSchema,
   appointmentUpdateSchema,
   appointmentRescheduleSchema,
+  appointmentConfirmSchema,
   noticeCreateSchema,
   authRecoverInputSchema,
   billingUpdateInputSchema,
@@ -73,10 +80,14 @@ import {
   type PatientAction,
 } from './security/contracts.js';
 import {
-  addMealLog,
-  addMessage,
-  markMessagesRead,
   addActivityLog,
+  addMessage,
+  applyMealAnalysis,
+  failMealAnalysis,
+  saveMealCapture,
+  MealPersistError,
+  MessagePersistError,
+  AppointmentError,
   deleteActivityLog,
   assignResourceToPatients,
   briefForDisplay,
@@ -89,12 +100,14 @@ import {
   getPatient,
   getStore,
   listNotices,
+  markMessagesRead,
   markResourceRead,
   provisionNutritionistMemory,
   revokePatientInvite,
   sendPatientInvite,
   setBrief,
   setAppointment,
+  confirmAppointment,
   setBillingStatus,
   setGoal,
   setPatientArchived,
@@ -123,6 +136,10 @@ function queryAudience(role: 'nutri' | 'paciente') {
 
 function serializePatient(patient: NonNullable<Awaited<ReturnType<typeof sb.sbGetPatientById>>>, role: 'nutri' | 'paciente') {
   return role === 'paciente' ? toPatientSelfView(patient) : patient;
+}
+
+function schemaUnavailable(error: unknown) {
+  return error instanceof Error && error.name === 'SchemaUnavailableError';
 }
 
 async function parseJsonBody<T>(c: Context, schema: ZodType<T>) {
@@ -163,6 +180,12 @@ app.use('/api/*', authMiddleware);
 app.onError((error, c) => {
   if (error instanceof CareError) return c.json({ error: error.message }, error.status);
   if (error instanceof AssetError) return c.json({ error: error.message }, error.status);
+  if (error instanceof RecipeError) return c.json({ error: error.message }, error.status);
+  if (error instanceof PlanError) return c.json({ error: error.message }, error.status);
+  if (error instanceof AiJobError) return c.json({ error: error.message }, error.status);
+  if (error instanceof MealPersistError) return c.json({ error: error.message }, error.status);
+  if (error instanceof MessagePersistError) return c.json({ error: error.message }, error.status);
+  if (error instanceof AppointmentError) return c.json({ error: error.message }, error.status);
   if (error instanceof intakeDb.IntakeRepositoryError) return c.json({ error: error.message }, error.status);
   if (error instanceof AIUnavailableError) {
     return c.json({
@@ -180,6 +203,9 @@ app.get('/api/health', (c) =>
 
 registerCareRoutes(app);
 registerAssetRoutes(app);
+registerRecipeRoutes(app);
+registerPlanRoutes(app);
+registerAiJobRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({
@@ -307,6 +333,13 @@ app.get('/api/me/patient', async (c) => {
   });
 });
 
+function mealPhotoDataUrl(body: { photoPreview?: string; imageBase64?: string }): string | null {
+  if (body.photoPreview) return body.photoPreview;
+  if (!body.imageBase64) return null;
+  const kind = body.imageBase64.startsWith('/9j/') ? 'jpeg' : body.imageBase64.startsWith('UklGR') ? 'webp' : 'png';
+  return `data:image/${kind};base64,${body.imageBase64}`;
+}
+
 app.post('/api/patients/:id/meals/analyze', async (c) => {
   const auth = c.get('auth');
   const patientId = c.req.param('id');
@@ -324,57 +357,81 @@ app.post('/api/patients/:id/meals/analyze', async (c) => {
   }
   if (!patient) return c.notFound();
 
-  let photoPath: string | null = null;
-  if ('userId' in auth && isSupabaseEnabled()) {
-    if(body.photoPreview) validatePhoto(body.photoPreview);
-    if(body.imageBase64) validatePhoto(`data:image/${body.imageBase64.startsWith('/9j/')?'jpeg':body.imageBase64.startsWith('UklGR')?'webp':'png'};base64,${body.imageBase64}`);
-    await requireCareConsent(patientId,true,'ai_meal_analysis');
-    if(body.photoPreview || body.imageBase64) await requireCareConsent(patientId,true,'meal_photo');
+  const persistent = 'userId' in auth && isSupabaseEnabled();
+  const photoData = mealPhotoDataUrl(body);
+  if (persistent) {
+    if (photoData) validatePhoto(photoData);
+    await requireCareConsent(patientId, true, 'ai_meal_analysis');
+    if (photoData) await requireCareConsent(patientId, true, 'meal_photo');
+  }
+
+  let photoPath: string | null = body.photoPreview ?? null;
+  if (persistent) {
+    photoPath = photoData ? await uploadMealPhoto(patientId, photoData) : null;
+  }
+
+  const capture = {
+    id: body.id,
+    slot: body.slot,
+    photo_url: photoPath,
+    description: body.description ?? null,
+  };
+  let log = persistent
+    ? await sb.sbSaveMealCapture(patient.id, capture)
+    : saveMealCapture(patientId, capture);
+
+  if (persistent && log.analysis_status === 'pending') {
+    await sb.sbAddTimelineEvent(patient.id, {
+      kind: 'meal_logged',
+      title: `${body.slot} · en revisión`,
+      body: `${new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} · comida registrada. Pendiente de análisis y de Vero.`,
+    });
   }
 
   const scheduled = patient.todayPlan.find((m) => m.slot === body.slot);
-  const analysis = await analyzeMeal({
-    description: body.description,
-    imageBase64: body.imageBase64,
-    slot: body.slot,
-    scheduledTitle: scheduled?.title,
-  });
+  const respond = async (saved: typeof log, analysis: Awaited<ReturnType<typeof analyzeMeal>> | null, extra: Record<string, unknown> = {}) => {
+    if (persistent) {
+      const updated = await sb.sbGetPatientById(patient.id, 'patient');
+      return c.json({
+        analysis: analysis ? toPatientMealAnalysis(analysis) : null,
+        log: toPatientSelfMealLog((await signMealPhotos(patientId, [saved]))[0]),
+        patient: updated ? toPatientSelfView(updated) : null,
+        source: 'supabase',
+        ...extra,
+      });
+    }
+    return c.json({ analysis, log: saved, patient: getPatient(patientId), source: 'memory', ...extra });
+  };
 
-  if ('userId' in auth && isSupabaseEnabled()) {
-    if(body.photoPreview || body.imageBase64) photoPath=await uploadMealPhoto(patientId,body.photoPreview ?? `data:image/${body.imageBase64!.startsWith('/9j/')?'jpeg':body.imageBase64!.startsWith('UklGR')?'webp':'png'};base64,${body.imageBase64}`);
-    const log = await sb.sbAddMealLog(patient.id, {
-      slot: body.slot,
-      photo_url: photoPath,
-      description: body.description ?? null,
-      foods: analysis.foods,
-      macros: analysis.macros,
-      confidence: analysis.confidence,
-      note_for_nutri: analysis.note_for_nutri,
-    });
-    await sb.sbAddTimelineEvent(patient.id, {
-      kind: 'meal_logged',
-      title: `${body.slot} · foto en revisión`,
-      body: `${new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} · estimación (${analysis.confidence.toFixed(2)}). Pendiente de Vero.`,
-    });
-    const updated = await sb.sbGetPatientById(patient.id, 'patient');
-    return c.json({
-      analysis: toPatientMealAnalysis(analysis),
-      log: toPatientSelfMealLog((await signMealPhotos(patientId,[log]))[0]),
-      patient: updated ? toPatientSelfView(updated) : null,
-      source: 'supabase',
+  if (log.analysis_status === 'succeeded') {
+    return respond(log, {
+      foods: log.foods,
+      macros: log.macros,
+      confidence: log.confidence,
+      note_for_nutri: log.note_for_nutri,
     });
   }
 
-  const log = addMealLog(patientId, {
-    slot: body.slot,
-    photo_url: body.photoPreview ?? null,
-    description: body.description ?? null,
-    foods: analysis.foods,
-    macros: analysis.macros,
-    confidence: analysis.confidence,
-    note_for_nutri: analysis.note_for_nutri,
-  });
-  return c.json({ analysis, log, patient: getPatient(patientId), source: 'memory' });
+  try {
+    const analysis = await analyzeMeal({
+      description: body.description,
+      imageBase64: body.imageBase64,
+      slot: body.slot,
+      scheduledTitle: scheduled?.title,
+    });
+    log = persistent
+      ? await sb.sbApplyMealAnalysis(patient.id, log.id, analysis)
+      : applyMealAnalysis(patientId, log.id, analysis);
+    return respond(log, analysis);
+  } catch (error) {
+    if (error instanceof AIUnavailableError) {
+      log = persistent
+        ? await sb.sbFailMealAnalysis(patient.id, log.id)
+        : failMealAnalysis(patientId, log.id);
+      return respond(log, null, { code: error.code });
+    }
+    throw error;
+  }
 });
 
 app.patch('/api/patients/:id/meals/:mealId', async (c) => {
@@ -490,12 +547,15 @@ app.post('/api/patients/:id/messages', async (c) => {
     try {
       await sb.sbAddMessage(
         patientId,
-        resource.nutritionistId,
-        auth.userId,
         body.text,
         actor.role === 'nutri' && (body.suggested_by_ai ?? false),
+        body.id,
       );
-    } catch {
+    } catch (error) {
+      if (error instanceof MessagePersistError) throw error;
+      if (schemaUnavailable(error)) {
+        return c.json({ error: 'Envío de mensajes pendiente del schema' }, 501);
+      }
       return c.json({ error: 'No se pudo enviar el mensaje' }, 503);
     }
     const updated = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
@@ -507,7 +567,7 @@ app.post('/api/patients/:id/messages', async (c) => {
 
   const patient = getPatient(patientId);
   if (!patient) return c.notFound();
-  addMessage(patientId, body.text, body.from, body.from === 'vero' && (body.suggested_by_ai ?? false));
+  addMessage(patientId, body.text, body.from, body.from === 'vero' && (body.suggested_by_ai ?? false), body.id);
   const updated = getPatient(patientId)!;
   return c.json({
     patient: body.from === 'patient' ? toPatientSelfView(updated) : updated,
@@ -522,10 +582,23 @@ app.post('/api/patients/:id/messages/read', async (c) => {
   if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
 
   if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'send_message')) {
-      return c.json({ error: 'Prohibido' }, 403);
+    const actor = await authorizePatient(auth.userId, patientId, 'send_message');
+    if (!actor) return c.json({ error: 'Prohibido' }, 403);
+    try {
+      await sb.sbMarkMessagesRead(patientId);
+    } catch (error) {
+      if (error instanceof MessagePersistError) throw error;
+      if (schemaUnavailable(error)) {
+        return c.json({ error: 'Lectura de mensajes pendiente del schema' }, 501);
+      }
+      return c.json({ error: 'No se pudo marcar la lectura' }, 503);
     }
-    return c.json({ error: 'Lectura de mensajes pendiente del schema 016' }, 501);
+    const updated = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
+    if (!updated) return c.notFound();
+    return c.json({
+      patient: serializePatient(updated, actor.role),
+      source: 'supabase',
+    });
   }
 
   const patient = markMessagesRead(patientId, parsedBody.data.reader);
@@ -663,7 +736,8 @@ app.put('/api/patients/:id/appointment', async (c) => {
         });
       }
     } catch (error) {
-      if (error instanceof sb.SchemaUnavailableError) {
+      if (error instanceof AppointmentError) throw error;
+      if (schemaUnavailable(error)) {
         return c.json({ error: 'No se pudo guardar el turno' }, 501);
       }
       throw error;
@@ -696,23 +770,16 @@ app.post('/api/patients/:id/appointment/reschedule', async (c) => {
         if (!patient) return c.notFound();
         return c.json({ patient: serializePatient(patient, actor.role), source: 'supabase' });
       }
-      const resource = await sb.sbGetPatientResource(patientId);
-      if (!resource) return c.notFound();
-      await sb.sbSetAppointment(patientId, resource.nutritionistId, {
-        day: parsedBody.data.day,
-        time: parsedBody.data.time,
-        duration: current.duration,
-        channel: current.channel,
-        ...(current.meet_url ? { meet_url: current.meet_url } : {}),
-      });
+      await sb.sbRescheduleAppointment(patientId, parsedBody.data);
       await sb.sbAddTimelineEvent(patientId, {
         kind: 'appointment',
-        title: 'Consulta · reprogramada',
+        title: actor.role === 'paciente' ? 'Consulta · reprogramada por la paciente' : 'Consulta · reprogramada',
         body: `${parsedBody.data.day} ${parsedBody.data.time}`,
         visibility: 'patient',
       });
     } catch (error) {
-      if (error instanceof sb.SchemaUnavailableError) {
+      if (error instanceof AppointmentError) throw error;
+      if (schemaUnavailable(error)) {
         return c.json({ error: 'No se pudo reprogramar el turno' }, 501);
       }
       throw error;
@@ -737,6 +804,34 @@ app.post('/api/patients/:id/appointment/reschedule', async (c) => {
     channel: current.appointment.channel,
     ...(current.appointment.meet_url ? { meet_url: current.appointment.meet_url } : {}),
   }, { actor: 'patient' });
+  if (!patient) return c.notFound();
+  return c.json({ patient, source: 'memory' });
+});
+
+app.post('/api/patients/:id/appointment/confirm', async (c) => {
+  const auth = c.get('auth');
+  const patientId = c.req.param('id');
+  const parsedBody = await parseJsonBody(c, appointmentConfirmSchema);
+  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
+
+  if ('userId' in auth && isSupabaseEnabled()) {
+    const actor = await authorizePatient(auth.userId, patientId, 'confirm_appointment');
+    if (!actor) return c.json({ error: 'Prohibido' }, 403);
+    try {
+      await sb.sbConfirmAppointment(patientId, parsedBody.data.confirmation);
+    } catch (error) {
+      if (error instanceof AppointmentError) throw error;
+      if (schemaUnavailable(error)) {
+        return c.json({ error: 'No se pudo confirmar el turno' }, 501);
+      }
+      throw error;
+    }
+    const patient = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
+    if (!patient) return c.notFound();
+    return c.json({ patient: serializePatient(patient, actor.role), source: 'supabase' });
+  }
+
+  const patient = confirmAppointment(patientId, parsedBody.data.confirmation);
   if (!patient) return c.notFound();
   return c.json({ patient, source: 'memory' });
 });

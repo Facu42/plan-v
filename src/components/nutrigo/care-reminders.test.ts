@@ -2,7 +2,7 @@ import { describe,expect,it } from 'vitest';
 import { DEFAULT_CARE_PREFERENCES, dueCareReminders, type CareSnapshot, type CareRecord } from '../../types/care';
 import { patientCareNotices } from './useCareNotices';
 const prefs={...DEFAULT_CARE_PREFERENCES,weight:true,waist:true,activity:true};
-const record=(kind:'weight'|'waist',date:string)=>({id:kind,patient_id:'p',created_at:date,recorded_on:date,reviewed_at:null,data:{kind,value:60,note:''}} as CareRecord);
+const record=(kind:'weight'|'waist',date:string)=>({id:kind,patient_id:'p',created_at:date,recorded_on:date,reviewed_at:null,data:{kind,value:60,unit:kind==='weight'?'kg':'cm',origin:'patient',note:''}} as CareRecord);
 describe('frecuencia de registros y recordatorios',()=>{
   it('peso cada siete días, cintura por mes y actividad diaria, todos optativos',()=>{
     const records=[record('weight','2026-09-11'),record('waist','2026-09-01')];

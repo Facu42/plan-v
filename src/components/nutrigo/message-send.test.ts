@@ -1,20 +1,20 @@
 import { describe, expect, it, vi } from 'vitest';
 import { sendShowroomMessage } from './message-send';
 
-const input = { patientId: 'p1', text: '  Hola  ', role: 'patient' as const };
+const input = { patientId: 'p1', text: '  Hola  ', role: 'patient' as const, id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
 const dependencies = () => ({ send: vi.fn().mockResolvedValue(undefined), refresh: vi.fn().mockResolvedValue(undefined) });
 
 describe('mensajes operativos del diseño Nutrigo', () => {
   it('envía texto limpio al paciente elegido y refresca sólo ese registro', async () => {
     const deps = dependencies();
     expect(await sendShowroomMessage(input, deps)).toBe('sent');
-    expect(deps.send).toHaveBeenCalledWith('p1', 'Hola', 'patient', false);
+    expect(deps.send).toHaveBeenCalledWith('p1', 'Hola', 'patient', false, input.id);
     expect(deps.refresh).toHaveBeenCalledWith('p1');
   });
   it('la profesional envía como humana, nunca como sugerencia IA', async () => {
     const deps = dependencies();
     await sendShowroomMessage({ ...input, role: 'pro', patientId: 'p2' }, deps);
-    expect(deps.send).toHaveBeenCalledWith('p2', 'Hola', 'vero', false);
+    expect(deps.send).toHaveBeenCalledWith('p2', 'Hola', 'vero', false, input.id);
   });
   it.each([' ', 'a'.repeat(2001)])('rechaza textos vacíos o demasiado largos', async (text) => {
     const deps = dependencies();

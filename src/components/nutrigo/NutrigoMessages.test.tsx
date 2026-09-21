@@ -36,6 +36,8 @@ describe('mensajería dentro del diseño Nutrigo', () => {
     expect(html).toContain('1 sin leer');
     expect(html).toContain('Entregado');
     expect(html).toContain('Hola Ana');
+    expect(html).toContain('Entregado: quedó guardado para la otra persona');
+    expect(html).not.toContain('Demo local');
   });
   it('no muestra otras personas en el modo paciente aunque se pasen a la lista', () => {
     const html = renderToStaticMarkup(<NutrigoMessages patient={patient} patients={[patient, { ...patient, id: 'p2', name: 'OTRA PERSONA' }]} role="patient" onSelect={() => {}} onNavigate={() => {}} />);

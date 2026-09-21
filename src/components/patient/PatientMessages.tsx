@@ -22,6 +22,7 @@ export function PatientMessages({ patient }: { patient: Patient }) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  const captureId = useRef(crypto.randomUUID());
   const messages = sortThreadMessages(patient.messages);
 
   useEffect(() => {
@@ -35,7 +36,8 @@ export function PatientMessages({ patient }: { patient: Patient }) {
     setSending(true);
     setError(null);
     try {
-      await api.sendMessage(patient.id, cleanText, 'patient');
+      await api.sendMessage(patient.id, cleanText, 'patient', false, captureId.current);
+      captureId.current = crypto.randomUUID();
       setText('');
       await refreshPatient(patient.id);
     } catch {

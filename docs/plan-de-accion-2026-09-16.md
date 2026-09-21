@@ -2,7 +2,7 @@
 
 Fecha: 16 de septiembre de 2026. Estado: **propuesta de desarrollo basada en revisión del repositorio**, no implementación ni aprobación de producción.
 
-**Avance revisado el 17 de septiembre:** [informe de ejecución y verificaciones](revision-avance-2026-09-17.md). Continuación el mismo día: migraciones ejecutables de núcleo e ingreso (esquema vacío), RPC, cola de autoguardado y revisión profesional en ficha. **18 de septiembre:** schema `core`/`intake`/`care`/`assets` en Plan V vacío (`acevlqrkvdinelgxnaki`); API de archivos y visor de estudios en demo. Las tablas de diagnóstico de este documento conservan el punto de partida; el estado por entrega está en el dashboard y en [pending-work](pending-work.md).
+**Avance revisado el 17 de septiembre:** [informe de ejecución y verificaciones](revision-avance-2026-09-17.md). Continuación el mismo día: migraciones ejecutables de núcleo e ingreso (esquema vacío), RPC, cola de autoguardado y revisión profesional en ficha. **18 de septiembre:** schema `core`/`intake`/`care`/`assets` en Plan V vacío (`acevlqrkvdinelgxnaki`); API de archivos y visor de estudios en demo. Más tarde el mismo día: unidad/origen en medidas (PV-17), primera faja del catálogo de recetas (PV-18), planes semanales versionados (PV-19/PV-20), diario persistente con captura antes del análisis (PV-22) e hilos con recibos e idempotencia (PV-23). Las tablas de diagnóstico de este documento conservan el punto de partida; el estado por entrega está en el dashboard y en [pending-work](pending-work.md).
 
 ## Decisión recomendada
 

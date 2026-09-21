@@ -4,6 +4,7 @@ import { Icon } from '../shared/Icon';
 import type { ShowroomPatient } from './showroom-model';
 import type { CareReplacement } from '../../types/care';
 import { useCare } from './useCare';
+import { usePublishedPlan, weekPlanForPatient } from './usePublishedPlan';
 import { NvBadge, NvButton, NvState } from './primitives';
 import './showroom-grocery.css';
 
@@ -39,9 +40,13 @@ export function buildGroceryView(
 
 export function ShowroomGrocery({ patient }: { patient: ShowroomPatient }) {
   const care = useCare(patient.id);
+  const { published } = usePublishedPlan(patient.id);
   const extras = useMemo(() => publishedRecipeMeals(care.data?.replacements ?? []), [care.data]);
   const storageKey = shoppingChecklistKey(patient.id, 'current');
-  const { groups, totalMeals, fallbackItems } = useMemo(() => buildGroceryView(patient, extras), [patient, extras]);
+  const { groups, totalMeals, fallbackItems } = useMemo(
+    () => buildGroceryView({ ...patient, weekPlan: weekPlanForPatient(patient, published) }, extras),
+    [patient, published, extras],
+  );
   const items = groups.flatMap((group) => group.items);
   const [checked, setChecked] = useState<Set<string>>(() => readChecked(storageKey));
   const [filter, setFilter] = useState<GroceryFilter>('all');

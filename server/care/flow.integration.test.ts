@@ -13,7 +13,7 @@ async function consent(purpose:ConsentPurpose,decision='granted') {
 describe('seguimiento conectado',()=>{
   beforeEach(()=>{resetStore();});
   it('exige permiso, conserva la fecha y evita duplicados al reintentar una medida',async()=>{
-    const input={id:randomUUID(),recorded_on:'2026-09-10',data:{kind:'weight',value:64.5,note:''}};
+    const input={id:randomUUID(),recorded_on:'2026-09-10',data:{kind:'weight',value:64.5,unit:'kg',origin:'patient',note:''}};
     expect((await post(`${base}/records`,input)).status).toBe(403);
     expect((await consent('measurement')).status).toBe(201);
     expect((await post(`${base}/records`,input)).status).toBe(200);
@@ -58,5 +58,18 @@ describe('seguimiento conectado',()=>{
     for(const data of [{kind:'activity',activity:'Caminar',minutes:30,intensity:'suave',kcal:-2,note:''},{kind:'payment',amount:0,currency:'ARS',method:'otro',reference:'',note:''}])expect((await post(`${base}/records`,{id:randomUUID(),recorded_on:'2026-09-10',data})).status).toBe(400);
     expect((await post(`${base}/records`,{id:randomUUID(),recorded_on:'2999-01-01',data:{kind:'activity',activity:'Caminar',minutes:30,intensity:'suave',kcal:null,note:''}})).status).toBe(400);
     expect((await post(`${base}/preferences`,{water:true},'PUT')).status).toBe(400);
+  });
+  it('conserva unidad y origen: paciente autodeclarado, profesional en consultorio',async()=>{
+    await consent('measurement');
+    const patientId=randomUUID();
+    expect((await post(`${base}/records`,{id:patientId,recorded_on:'2026-09-10',data:{kind:'weight',value:64.5,unit:'lb',origin:'professional',note:''}})).status).toBe(200);
+    expect((await post(`${base}/records`,{id:randomUUID(),recorded_on:'2026-09-10',data:{kind:'weight',value:70,note:''}})).status).toBe(400);
+    const clinicId=randomUUID();
+    expect((await post(`${base}/records?audience=pro`,{id:clinicId,recorded_on:'2026-09-10',data:{kind:'waist',value:78,unit:'cm',origin:'patient',note:''}})).status).toBe(200);
+    const body=await(await app.request(base)).json();
+    const patient=body.records.find((r:any)=>r.id===patientId); const clinic=body.records.find((r:any)=>r.id===clinicId);
+    expect(patient.data).toMatchObject({unit:'lb',origin:'patient'});
+    expect(clinic.data).toMatchObject({unit:'cm',origin:'professional'});
+    expect(JSON.stringify(body)).not.toContain('kg');
   });
 });

@@ -7,6 +7,9 @@ const sbMocks = vi.hoisted(() => ({
   sbGetActor: vi.fn(),
   sbGetPatientResource: vi.fn(),
   sbGetPatientById: vi.fn(),
+  sbSaveMealCapture: vi.fn(),
+  sbApplyMealAnalysis: vi.fn(),
+  sbFailMealAnalysis: vi.fn(),
   sbAddMealLog: vi.fn(),
   sbUpdateMealLog: vi.fn(),
   sbUpdateHabits: vi.fn(),
@@ -85,7 +88,7 @@ function asNutri() {
 
 describe('timeline emission in Supabase mode (parity with memory)', () => {
   it('emits meal_logged when a patient meal is analyzed and stored', async () => {
-    sbMocks.sbAddMealLog.mockResolvedValue({
+    sbMocks.sbSaveMealCapture.mockResolvedValue({
       id: 'log-1',
       patient_id: 'pat-1',
       slot: 'Almuerzo',
@@ -93,24 +96,40 @@ describe('timeline emission in Supabase mode (parity with memory)', () => {
       description: 'Bowl de quinoa',
       foods: [],
       macros: null,
+      confidence: 0,
+      note_for_nutri: '',
+      status: 'pending_review',
+      analysis_status: 'pending',
+      logged_at: new Date().toISOString(),
+    });
+    sbMocks.sbApplyMealAnalysis.mockResolvedValue({
+      id: 'log-1',
+      patient_id: 'pat-1',
+      slot: 'Almuerzo',
+      photo_url: null,
+      description: 'Bowl de quinoa',
+      foods: [{ name: 'quinoa', portion_est: 150, portion_unit: 'g', confidence: 0.62 }],
+      macros: { kcal: 420, protein_g: 18, carbs_g: 55, fat_g: 12 },
       confidence: 0.62,
       note_for_nutri: '',
       status: 'pending_review',
+      analysis_status: 'succeeded',
       logged_at: new Date().toISOString(),
     });
 
     const res = await app.request('/api/patients/pat-1/meals/analyze', authedJson('POST', {
+      id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       slot: 'Almuerzo',
       description: 'Bowl de quinoa',
     }));
 
     expect(res.status).toBe(200);
-    expect(sbMocks.sbAddMealLog).toHaveBeenCalledOnce();
+    expect(sbMocks.sbSaveMealCapture).toHaveBeenCalledOnce();
     expect(sbMocks.sbAddTimelineEvent).toHaveBeenCalledOnce();
     const [patientId, event] = sbMocks.sbAddTimelineEvent.mock.calls[0];
     expect(patientId).toBe('pat-1');
-    expect(event).toMatchObject({ kind: 'meal_logged', title: 'Almuerzo · foto en revisión' });
-    expect(event.body).toContain('estimación');
+    expect(event).toMatchObject({ kind: 'meal_logged', title: 'Almuerzo · en revisión' });
+    expect(event.body).toContain('comida registrada');
   });
 
   it('emits meal_logged confirmado with foods and kcal on review', async () => {

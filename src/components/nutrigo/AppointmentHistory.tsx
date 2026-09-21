@@ -12,7 +12,7 @@ export function AppointmentHistoryList({
   return <section className="nv-history" aria-label="Historial de turnos">
     <header>
       <h3>Historial de turnos</h3>
-      <small>Cambios publicados y fechas vencidas. No registra asistencia ni notas clínicas.</small>
+      <small>Cambios publicados, confirmación de asistencia y fechas vencidas.</small>
     </header>
     {entries.length ? <ol>
       {entries.map((entry) => <li key={entry.id}>

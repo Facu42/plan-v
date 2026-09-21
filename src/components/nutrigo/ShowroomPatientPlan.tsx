@@ -4,9 +4,13 @@ import { CarePanel } from './CarePanel';
 import { NvBadge, NvState } from './primitives';
 import { buildCalendarWeek } from './WeeklyPlanCalendar';
 import type { ShowroomPatient } from './showroom-model';
+import { recipesApi } from '../../api/recipes';
+import { careErrorMessage } from '../../api/care';
+import type { RecipeView } from '../../types/recipes';
+import { usePublishedPlan, weekPlanForPatient } from './usePublishedPlan';
 import './showroom-patient-plan.css';
 
-type PatientPlanMeal = { slot: string; title: string; time: string };
+type PatientPlanMeal = { slot: string; title: string; time: string; servings: number | null; recipe_id: string | null };
 type PatientPlanDay = ReturnType<typeof buildCalendarWeek>[number] & { meals: PatientPlanMeal[] };
 
 export function buildPatientPlanView(patient: Pick<ShowroomPatient, 'todayPlan' | 'weekPlan'>, now: Date) {
@@ -17,7 +21,7 @@ export function buildPatientPlanView(patient: Pick<ShowroomPatient, 'todayPlan' 
         ? patient.todayPlan.find((entry) => entry.slot === meal.slot && entry.title === meal.title)
           ?? patient.todayPlan.find((entry) => entry.slot === meal.slot)
         : undefined;
-      return { ...meal, time: current?.time ?? '' };
+      return { ...meal, time: current?.time ?? '', servings: null, recipe_id: null };
     });
     return { ...calendarDay, meals };
   });
@@ -34,12 +38,43 @@ export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
   query: string;
   onShopping?: () => void;
 }) {
-  const view = useMemo(() => buildPatientPlanView(patient, now), [patient, now]);
+  const { published } = usePublishedPlan(patient.id);
+  const [recipes, setRecipes] = useState<RecipeView[]>([]);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [recipeError, setRecipeError] = useState('');
+  const weekPlan = weekPlanForPatient(patient, published);
+  const view = useMemo(() => {
+    const slotMeta = published?.slots ?? [];
+    const days: PatientPlanDay[] = buildCalendarWeek(now).map((calendarDay) => {
+      const planned = weekPlan.find((entry) => entry.day === calendarDay.day)?.meals ?? [];
+      const meals = planned.map((meal) => {
+        const current = calendarDay.isToday
+          ? patient.todayPlan.find((entry) => entry.slot === meal.slot && entry.title === meal.title)
+            ?? patient.todayPlan.find((entry) => entry.slot === meal.slot)
+          : undefined;
+        const meta = slotMeta.find((item) => item.day === calendarDay.day && item.slot === meal.slot);
+        return { ...meal, time: current?.time ?? '', servings: meta?.servings ?? null, recipe_id: meta?.recipe_id ?? null };
+      });
+      return { ...calendarDay, meals };
+    });
+    return {
+      days,
+      totalMeals: days.reduce((total, day) => total + day.meals.length, 0),
+      plannedDays: days.filter((day) => day.meals.length > 0).length,
+    };
+  }, [weekPlan, patient.todayPlan, now, published]);
   const todayIndex = Math.max(0, view.days.findIndex((day) => day.isToday));
   const [selectedIndex, setSelectedIndex] = useState(todayIndex);
   const term = query.trim().toLocaleLowerCase('es-AR');
 
   useEffect(() => setSelectedIndex(todayIndex), [patient.id, todayIndex]);
+  useEffect(() => {
+    const controller = new AbortController();
+    recipesApi.published(patient.id, controller.signal)
+      .then((result) => { setRecipes(result.recipes); setRecipeError(''); })
+      .catch((err) => { if (err instanceof DOMException && err.name === 'AbortError') return; setRecipeError(careErrorMessage(err)); });
+    return () => controller.abort();
+  }, [patient.id]);
 
   const selectedDay = view.days[selectedIndex] ?? view.days[todayIndex];
   const results = term
@@ -62,7 +97,7 @@ export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
     <dl className="nvpp-summary" aria-label="Resumen del plan">
       <div><dt>Días con indicaciones</dt><dd>{view.plannedDays}<small> de 7 días</small></dd></div>
       <div><dt>Comidas asignadas</dt><dd>{view.totalMeals}<small> esta semana</small></dd></div>
-      <div><dt>Tipo de plan</dt><dd>Semanal<small> vigente</small></dd></div>
+      <div><dt>Tipo de plan</dt><dd>{published ? `Versión ${published.version}` : 'Semanal'}<small>{published ? `semana del ${published.period_start}` : 'vigente'}</small></dd></div>
     </dl>
 
     <section className="nvpp-week" aria-label="Elegir día del plan">
@@ -75,9 +110,16 @@ export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
       {results.length ? <div className="nvpp-result-list">{results.map(({ day, meal }) => <article key={`${day.isoDate}-${meal.slot}`}><NvBadge tone={meal.slot === 'Cena' ? 'gold' : 'green'}>{meal.slot}</NvBadge><div><strong>{meal.title}</strong><small>{day.day}{meal.time ? ` · ${meal.time}` : ''}</small></div></article>)}</div> : <NvState title="Sin coincidencias" description="Probá con otro plato o momento de comida." />}
     </section> : <section className="nvpp-detail" aria-live="polite">
       <header><div><span>{selectedDay.isToday ? 'HOY' : 'PLAN SEMANAL'}</span><h3>{selectedDay.day} {selectedDay.date.getDate()}</h3></div><small>{selectedDay.meals.length} {selectedDay.meals.length === 1 ? 'comida asignada' : 'comidas asignadas'}</small></header>
-      {selectedDay.meals.length ? <div className="nvpp-meals">{selectedDay.meals.map((meal, index) => <article key={`${selectedDay.isoDate}-${meal.slot}`}><span className="nvpp-number">{String(index + 1).padStart(2, '0')}</span><div className="nvpp-meal-copy"><div><NvBadge tone={meal.slot === 'Cena' ? 'gold' : 'green'}>{meal.slot}</NvBadge>{meal.time && <time>{meal.time}</time>}</div><strong>{meal.title}</strong><small>Indicación publicada · sin cantidades ni porciones registradas</small></div><Icon name="leaf" size={18} /></article>)}</div> : <NvState title="Sin comidas asignadas" description="Tu nutricionista todavía no publicó indicaciones para este día." />}
+      {selectedDay.meals.length ? <div className="nvpp-meals">{selectedDay.meals.map((meal, index) => {
+        const recipe = meal.recipe_id ? recipes.find((item) => item.id === meal.recipe_id) : undefined;
+        return <article key={`${selectedDay.isoDate}-${meal.slot}`}><span className="nvpp-number">{String(index + 1).padStart(2, '0')}</span><div className="nvpp-meal-copy"><div><NvBadge tone={meal.slot === 'Cena' ? 'gold' : 'green'}>{meal.slot}</NvBadge>{meal.time && <time>{meal.time}</time>}</div><strong>{meal.title}</strong><small>{meal.servings ? `${meal.servings} ${meal.servings === 1 ? 'porción registrada' : 'porciones registradas'}` : 'Indicación publicada · sin cantidades registradas'}</small>
+          {recipe && <button type="button" className="nv-button" onClick={() => setOpenId(openId === recipe.id ? null : recipe.id)}>{openId === recipe.id ? 'Ocultar receta' : 'Ver receta publicada'}</button>}
+          {recipe && openId === recipe.id && <div className="nvpp-recipe"><p>{recipe.explanation}</p><p>Ingredientes</p><ul>{recipe.ingredients.map((item, line) => <li key={line}>{item}</li>)}</ul><p>Preparación</p><ol>{recipe.steps.map((item, line) => <li key={line}>{item}</li>)}</ol></div>}
+        </div><Icon name="leaf" size={18} /></article>;
+      })}</div> : <NvState title="Sin comidas asignadas" description="Tu nutricionista todavía no publicó indicaciones para este día." />}
     </section>}
 
+    {recipeError && <p className="nvpp-note" role="alert">{recipeError}</p>}
     <p className="nvpp-note"><Icon name="list" size={16} /> La lista se arma automáticamente desde el menú publicado. Revisá las preparaciones que todavía no tienen ingredientes detallados.</p>
     <CarePanel patientId={patient.id} mode="menu" />
   </section>;

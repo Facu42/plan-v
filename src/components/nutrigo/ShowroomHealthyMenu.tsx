@@ -1,9 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '../shared/Icon';
 import { MealThumbnail } from './PatientOverview';
 import { NvBadge, NvButton, NvState } from './primitives';
 import type { ShowroomPage } from './ShowroomPanels';
 import type { ShowroomPatient } from './showroom-model';
+import { recipesApi } from '../../api/recipes';
+import { careErrorMessage } from '../../api/care';
+import type { RecipeView } from '../../types/recipes';
+import { usePublishedPlan, weekPlanForPatient } from './usePublishedPlan';
 import './showroom-healthy-menu.css';
 
 type HealthyMenuItem = {
@@ -47,16 +51,28 @@ export function ShowroomHealthyMenu({ patient, query, onNavigate }: {
   query: string;
   onNavigate: (page: ShowroomPage) => void;
 }) {
-  const menu = useMemo(() => buildHealthyMenu(patient), [patient]);
+  const { published } = usePublishedPlan(patient.id);
+  const menu = useMemo(() => buildHealthyMenu({ weekPlan: weekPlanForPatient(patient, published) }), [patient, published]);
   const [slot, setSlot] = useState('Todas');
+  const [recipes, setRecipes] = useState<RecipeView[]>([]);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [recipeError, setRecipeError] = useState('');
+  useEffect(() => {
+    const controller = new AbortController();
+    recipesApi.published(patient.id, controller.signal)
+      .then(result => { setRecipes(result.recipes); setRecipeError(''); })
+      .catch(err => { if (err instanceof DOMException && err.name === 'AbortError') return; setRecipeError(careErrorMessage(err)); });
+    return () => controller.abort();
+  }, [patient.id]);
   const term = normalize(query);
   const items = menu.items.filter((item) =>
     (slot === 'Todas' || item.slots.includes(slot))
     && (!term || normalize(`${item.title} ${item.slots.join(' ')} ${item.days.join(' ')}`).includes(term)));
   const featured = items[0];
+  const visibleRecipes = recipes.filter((recipe) => !term || normalize(`${recipe.title} ${recipe.ingredients.join(' ')} ${recipe.explanation}`).includes(term));
 
-  if (!menu.items.length) return <section className="nvm-menu" aria-label="Menú saludable">
-    <NvState title="Tu menú está en preparación" description="Cuando tu nutricionista publique el plan semanal, vas a encontrar acá sus títulos organizados." />
+  if (!menu.items.length && !recipes.length) return <section className="nvm-menu" aria-label="Menú saludable">
+    <NvState title="Tu menú está en preparación" description="Cuando tu nutricionista publique el plan semanal o una receta, vas a encontrarla acá." />
   </section>;
 
   return <section className="nvm-menu" aria-label="Menú saludable">
@@ -91,7 +107,27 @@ export function ShowroomHealthyMenu({ patient, query, onNavigate }: {
               <div className="nvm-card-slots">{item.slots.map((value) => <NvBadge key={value} tone={value === 'Cena' ? 'gold' : 'green'}>{value}</NvBadge>)}</div>
             </article>)}</div>
           </section>
-        </> : <NvState title="Sin coincidencias" description="Probá con otro título, día o momento de comida." />}
+        </> : menu.items.length ? <NvState title="Sin coincidencias" description="Probá con otro título, día o momento de comida." /> : null}
+
+        {recipeError && <p className="nvm-note" role="alert">{recipeError}</p>}
+        {visibleRecipes.length > 0 && <section className="nvm-all" aria-label="Recetas publicadas">
+          <header><div><span>CATÁLOGO</span><h3>Recetas publicadas</h3></div><small>{visibleRecipes.length} {visibleRecipes.length === 1 ? 'receta' : 'recetas'}</small></header>
+          <div className="nvm-list">{visibleRecipes.map((recipe) => <article key={recipe.id}>
+            <MealThumbnail slot="Almuerzo" />
+            <div>
+              <strong>{recipe.title}</strong>
+              <small>{recipe.servings} {recipe.servings === 1 ? 'porción' : 'porciones'} · {recipe.nutrient_source}</small>
+              <span>{recipe.explanation}</span>
+              <button type="button" className="nv-button" onClick={() => setOpenId(openId === recipe.id ? null : recipe.id)}>{openId === recipe.id ? 'Ocultar receta' : 'Ver ingredientes y pasos'}</button>
+              {openId === recipe.id && <>
+                <p>Ingredientes</p>
+                <ul>{recipe.ingredients.map((item, index) => <li key={index}>{item}</li>)}</ul>
+                <p>Preparación</p>
+                <ol>{recipe.steps.map((item, index) => <li key={index}>{item}</li>)}</ol>
+              </>}
+            </div>
+          </article>)}</div>
+        </section>}
       </div>
 
       <aside className="nvm-aside" aria-label="Resumen del menú">
@@ -106,6 +142,6 @@ export function ShowroomHealthyMenu({ patient, query, onNavigate }: {
         <NvButton className="nvm-shopping" onClick={() => onNavigate('compras')}><Icon name="check" size={16} /> Abrir lista de compras</NvButton>
       </aside>
     </div>
-    <p className="nvm-note"><Icon name="list" size={16} /> No son recetas completas; sólo reúne los títulos publicados por tu nutricionista.</p>
+    <p className="nvm-note"><Icon name="list" size={16} /> Los títulos del plan no son recetas. Las recetas publicadas muestran ingredientes, pasos, porciones y fuente.</p>
   </section>;
 }

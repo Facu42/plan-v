@@ -19,9 +19,9 @@ const patient: Patient = {
   ],
   todayPlan: [], weekPlan: [], brief: null, timeline: [], messages: [],
   meal_logs: [
-    { id: 'm1', patient_id: 'ana', slot: 'Cena', photo_url: null, description: 'Sopa de calabaza', foods: [], macros: null, confidence: 0.62, note_for_nutri: 'Privada Ana', status: 'pending_review', logged_at: '2026-09-12T22:00:00.000Z' },
-    { id: 'm2', patient_id: 'ana', slot: 'Almuerzo', photo_url: null, description: 'Ensalada', foods: [], macros: { kcal: 430, protein_g: 22, carbs_g: 45, fat_g: 18 }, confidence: 0.91, note_for_nutri: '', status: 'confirmed', logged_at: '2026-09-12T13:00:00.000Z' },
-    { id: 'm3', patient_id: 'otra', slot: 'Desayuno', photo_url: null, description: 'REGISTRO AJENO', foods: [], macros: null, confidence: 0.8, note_for_nutri: 'SECRETO AJENO', status: 'adjusted', logged_at: '2026-09-13T08:00:00.000Z' },
+    { id: 'm1', patient_id: 'ana', slot: 'Cena', photo_url: null, description: 'Sopa de calabaza', foods: [], macros: null, confidence: 0.62, note_for_nutri: 'Privada Ana', status: 'pending_review', analysis_status: 'succeeded', logged_at: '2026-09-12T22:00:00.000Z' },
+    { id: 'm2', patient_id: 'ana', slot: 'Almuerzo', photo_url: null, description: 'Ensalada', foods: [], macros: { kcal: 430, protein_g: 22, carbs_g: 45, fat_g: 18 }, confidence: 0.91, note_for_nutri: '', status: 'confirmed', analysis_status: 'succeeded', logged_at: '2026-09-12T13:00:00.000Z' },
+    { id: 'm3', patient_id: 'otra', slot: 'Desayuno', photo_url: null, description: 'REGISTRO AJENO', foods: [], macros: null, confidence: 0.8, note_for_nutri: 'SECRETO AJENO', status: 'adjusted', analysis_status: 'succeeded', logged_at: '2026-09-13T08:00:00.000Z' },
   ],
 };
 

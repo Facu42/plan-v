@@ -42,7 +42,7 @@ beforeAll(async () => {
     alter table storage.objects enable row level security;
     create function storage.foldername(text) returns text[] language sql immutable as $$ select string_to_array($1,'/') $$;
   `);
-  for (const file of ['20260917190000_core.sql', '20260917190100_intake.sql', '20260918010000_care.sql', '20260918180000_assets.sql']) {
+  for (const file of ['20260917190000_core.sql', '20260917190100_intake.sql', '20260918010000_care.sql', '20260918180000_assets.sql', '20260918190000_care_measurements.sql', '20260918200000_recipes.sql', '20260918210000_meal_plans.sql', '20260918220000_meal_log_analysis.sql', '20260918230000_message_receipts.sql', '20260918240000_appointment_events.sql', '20260918250000_ai_jobs.sql']) {
     try { await db.exec(await readFile(new URL(`../../supabase/migrations/${file}`, import.meta.url), 'utf8')); }
     catch (error) { console.error(file, JSON.stringify(error)); throw error; }
   }
@@ -111,7 +111,7 @@ describe('migraciones de ingreso en PostgreSQL', () => {
     expect(saved.consents[0].decision).toBe('granted');
   });
   it('seguimiento: aislamiento, consentimiento, reintentos y revisión profesional',async()=>{
-    const id='20000000-0000-4000-a000-000000000001';const data={kind:'weight',value:65,note:''};
+    const id='20000000-0000-4000-a000-000000000001';const data={kind:'weight',value:65,unit:'kg',origin:'patient',note:''};
     await expect(rpc(a,'save_care_record',[patient,id,'2026-09-10',data])).rejects.toMatchObject({code:'42501'});
     const c=CONSENT_CATALOG.find(c=>c.purpose==='measurement')!;
     await rpc(a,'record_patient_consent',[patient,c.purpose,c.text_version,c.text_hash,'granted']);
@@ -148,6 +148,10 @@ describe('migraciones de ingreso en PostgreSQL', () => {
     const id='20000000-0000-4000-a000-000000000005';
     await expect(rpc(a,'save_care_record',[patient,id,'2026-09-10',{kind:'weight',value:-3,note:''}])).rejects.toMatchObject({code:'22023'});
     await expect(rpc(a,'save_care_record',[patient,id,'2026-09-10',{kind:'weight',value:60,note:'',reviewed_at:'hoy'}])).rejects.toMatchObject({code:'22023'});
+    await expect(rpc(a,'save_care_record',[patient,id,'2026-09-10',{kind:'weight',value:60,unit:'kg',origin:'professional',note:''}])).rejects.toMatchObject({code:'42501'});
+    await expect(rpc(pro,'save_care_record',[patient,'20000000-0000-4000-a000-000000000015','2026-09-10',{kind:'weight',value:61,unit:'lb',origin:'patient',note:''}])).rejects.toMatchObject({code:'42501'});
+    const clinic=await rpc(pro,'save_care_record',[patient,'20000000-0000-4000-a000-000000000016','2026-09-10',{kind:'weight',value:61,unit:'lb',origin:'professional',note:''}]);
+    expect(clinic.data).toMatchObject({unit:'lb',origin:'professional'});
     await expect(rpc(a,'save_care_preferences',[patient,{water:true}])).rejects.toMatchObject({code:'22023'});
     const prefs={water:true,water_interval:120,weight:true,waist:false,activity:false,rest:true,rest_time:'22:30'};
     await rpc(a,'save_care_preferences',[patient,prefs]);
@@ -190,5 +194,128 @@ describe('migraciones de ingreso en PostgreSQL', () => {
     expect(await asUser(a, 'select name from storage.objects where name=$1', [path])).toEqual([]);
     expect(await asUser(b, 'select name from storage.objects where name=$1', [path])).toEqual([]);
     await expect(rpc(a, 'purge_expired_asset_intents', [])).rejects.toMatchObject({ code: '42501' });
+  });
+  it('recetas: inéditas invisibles al paciente, publicación idempotente y aislamiento entre consultorios', async () => {
+    const id = '40000000-0000-4000-a000-000000000001';
+    const args = [id, 'Bowl de quinoa', ['1 taza de quinoa'], ['Cocinar y servir'], 'Almuerzo de mediodía', 2, 'Revisión profesional'];
+    await expect(rpc(a, 'save_recipe', args)).rejects.toMatchObject({ code: '42501' });
+    const saved = await rpc(pro, 'save_recipe', args);
+    expect(saved.title).toBe('Bowl de quinoa');
+    expect(await asUser(a, 'select id from public.recipes')).toEqual([]);
+    expect((await rpc(pro, 'save_recipe', args)).id).toBe(saved.id);
+    await rpc(pro, 'publish_recipe', [id]);
+    await rpc(pro, 'publish_recipe', [id]);
+    expect(await asUser(a, 'select title from public.recipes')).toEqual([{ title: 'Bowl de quinoa' }]);
+    expect(await asUser(b, 'select id from public.recipes')).toEqual([]);
+    expect(await asUser(other, 'select id from public.recipes')).toEqual([]);
+    await expect(rpc(pro, 'save_recipe', [id, 'Otra receta', ['quinoa'], ['servir'], 'Cambio', 2, 'Revisión profesional'])).rejects.toMatchObject({ code: 'PT409' });
+    await expect(rpc(other, 'save_recipe', [id, 'Bowl de quinoa', ['1 taza de quinoa'], ['Cocinar y servir'], 'Almuerzo de mediodía', 2, 'Revisión profesional'])).rejects.toMatchObject({ code: '42501' });
+  });
+  it('planes: copia inédita invisible, publicación con versión esperada y aislamiento', async () => {
+    const recipeId = '40000000-0000-4000-a000-000000000002';
+    const planId = '50000000-0000-4000-a000-000000000001';
+    const nextId = '50000000-0000-4000-a000-000000000002';
+    const otherPlan = '50000000-0000-4000-a000-000000000003';
+    await rpc(pro, 'save_recipe', [recipeId, 'Bowl de quinoa', ['1 taza de quinoa'], ['Cocinar y servir'], 'Almuerzo de mediodía', 2, 'Revisión profesional']);
+    await rpc(pro, 'publish_recipe', [recipeId]);
+    const slots = [{ day: 'Lunes', slot: 'Almuerzo', title: 'Provisorio', recipe_id: recipeId, servings: null }];
+    await expect(rpc(a, 'save_plan_version', [planId, patient, '2026-09-14', slots, 0])).rejects.toMatchObject({ code: '42501' });
+    const saved = await rpc(pro, 'save_plan_version', [planId, patient, '2026-09-14', slots, 0]);
+    expect(saved.version).toBe(1);
+    expect(saved.slots[0].title).toBe('Bowl de quinoa');
+    expect(saved.slots[0].servings).toBe(2);
+    expect(await asUser(a, 'select id from public.meal_plan_versions')).toEqual([]);
+    await rpc(pro, 'publish_plan_version', [planId, 1]);
+    expect(await asUser(a, 'select version from public.meal_plan_versions')).toEqual([{ version: 1 }]);
+    const nextSlots = [{ day: 'Martes', slot: 'Cena', title: 'Tortilla de verdura', recipe_id: null, servings: null }];
+    await expect(rpc(pro, 'save_plan_version', [planId, patient, '2026-09-14', nextSlots, 1])).rejects.toMatchObject({ code: 'PT409' });
+    await expect(rpc(pro, 'save_plan_version', [nextId, patient, '2026-09-14', nextSlots, 0])).rejects.toMatchObject({ code: 'PT409' });
+    const open = await rpc(pro, 'save_plan_version', [nextId, patient, '2026-09-14', nextSlots, 1]);
+    expect(open.version).toBe(2);
+    expect(await asUser(a, 'select version from public.meal_plan_versions')).toEqual([{ version: 1 }]);
+    expect(await asUser(b, 'select id from public.meal_plan_versions')).toEqual([]);
+    expect(await asUser(other, 'select id from public.meal_plan_versions')).toEqual([]);
+    await expect(rpc(other, 'save_plan_version', [otherPlan, patientB, '2026-09-14', nextSlots, 0])).resolves.toMatchObject({ version: 1 });
+  });
+  it('diario: guarda captura, no duplica id y aísla pacientes', async () => {
+    const id = '60000000-0000-4000-a000-000000000001';
+    const otherId = '60000000-0000-4000-a000-000000000002';
+    await expect(rpc(pro, 'save_meal_capture', [id, patient, 'Almuerzo', null, 'pollo con arroz'])).rejects.toMatchObject({ code: '42501' });
+    const saved = await rpc(a, 'save_meal_capture', [id, patient, 'Almuerzo', null, 'pollo con arroz']);
+    expect(saved.analysis_status).toBe('pending');
+    expect((await rpc(a, 'save_meal_capture', [id, patient, 'Almuerzo', null, 'pollo con arroz'])).id).toBe(saved.id);
+    await expect(rpc(a, 'save_meal_capture', [id, patient, 'Almuerzo', null, 'otra comida'])).rejects.toMatchObject({ code: 'PT409' });
+    await expect(rpc(b, 'save_meal_capture', [otherId, patient, 'Cena', null, 'sopa'])).rejects.toMatchObject({ code: '42501' });
+    const failed = await rpc(a, 'fail_meal_analysis', [id, patient]);
+    expect(failed.analysis_status).toBe('failed');
+    expect(await asUser(a, 'select id, analysis_status from public.meal_logs_patient_view')).toEqual([{ id, analysis_status: 'failed' }]);
+    expect(await asUser(b, 'select id from public.meal_logs_patient_view')).toEqual([]);
+    const applied = await rpc(a, 'apply_meal_analysis', [id, patient, [{ name: 'pollo', portion_est: 120, portion_unit: 'g', confidence: 0.6 }], { kcal: 400, protein_g: 30, carbs_g: 40, fat_g: 12 }, 0.6, 'nota']);
+    expect(applied.analysis_status).toBe('succeeded');
+    expect((await rpc(a, 'fail_meal_analysis', [id, patient])).analysis_status).toBe('succeeded');
+    await expect(rpc(other, 'apply_meal_analysis', [id, patient, [], null, 0.5, ''])).rejects.toMatchObject({ code: '42501' });
+  });
+  it('hilos: envía con id de cliente, no duplica y marca leído', async () => {
+    const id = '70000000-0000-4000-a000-000000000001';
+    const otherId = '70000000-0000-4000-a000-000000000002';
+    await expect(rpc(b, 'send_thread_message', [id, patient, 'Hola Vero', false])).rejects.toMatchObject({ code: '42501' });
+    const sent = await rpc(a, 'send_thread_message', [id, patient, 'Hola Vero', false]);
+    expect(sent.body).toBe('Hola Vero');
+    expect((await rpc(a, 'send_thread_message', [id, patient, 'Hola Vero', false])).id).toBe(sent.id);
+    await expect(rpc(a, 'send_thread_message', [id, patient, 'Otro texto', false])).rejects.toMatchObject({ code: 'PT409' });
+    expect(await asUser(a, 'select body from public.messages_patient_view')).toEqual([{ body: 'Hola Vero' }]);
+    expect(await asUser(b, 'select id from public.messages_patient_view')).toEqual([]);
+    const receipts = await asUser<{ delivered_at: string | null; read_at: string | null }>(pro, 'select delivered_at, read_at from public.message_receipts where message_id = $1', [id]);
+    expect(receipts[0]?.delivered_at).toBeTruthy();
+    expect(receipts[0]?.read_at).toBeNull();
+    await rpc(pro, 'mark_thread_read', [patient]);
+    const read = await asUser<{ read_at: string | null }>(a, 'select read_at from public.message_receipts where message_id = $1', [id]);
+    expect(read[0]?.read_at).toBeTruthy();
+    await expect(rpc(other, 'send_thread_message', [otherId, patient, 'intruso', false])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(other, 'mark_thread_read', [patient])).rejects.toMatchObject({ code: '42501' });
+  });
+  it('consultas: timezone, confirmación, aviso de 12h y solape del consultorio', async () => {
+    const patientC = '10000000-0000-4000-a000-000000000003';
+    const cUser = '00000000-0000-4000-a000-000000000005';
+    await db.query('insert into auth.users(id,email,email_confirmed_at) values($1,$2,now())', [cUser, `${cUser}@example.test`]);
+    const n1 = (await db.query<{ id: string }>('select id from public.nutritionists where user_id = $1', [pro])).rows[0].id;
+    await db.query("insert into public.patients(id,nutritionist_id,user_id,full_name,billing_status) values($1,$2,$3,'Paciente C','waived')", [patientC, n1, cUser]);
+    const starts = '2026-10-05T17:30:00.000Z';
+    const overlap = '2026-10-05T17:45:00.000Z';
+    const later = '2026-10-05T19:00:00.000Z';
+    const saved = await rpc(pro, 'save_appointment', [patient, starts, 45, 'video', null, 'America/Argentina/Buenos_Aires']);
+    expect(saved.timezone).toBe('America/Argentina/Buenos_Aires');
+    expect(saved.status).toBe('scheduled');
+    await expect(rpc(pro, 'save_appointment', [patientC, overlap, 45, 'video', null, 'America/Argentina/Buenos_Aires'])).rejects.toMatchObject({ code: 'PT409' });
+    const otherSlot = await rpc(pro, 'save_appointment', [patientC, later, 45, 'video', null, 'America/Argentina/Buenos_Aires']);
+    expect(otherSlot.patient_id).toBe(patientC);
+    const confirmed = await rpc(a, 'confirm_appointment', [patient, 'attending']);
+    expect(confirmed.confirmation).toBe('attending');
+    expect(await asUser(b, 'select id from public.appointments_patient_view')).toEqual([]);
+    await expect(rpc(b, 'confirm_appointment', [patient, 'attending'])).rejects.toMatchObject({ code: '42501' });
+    await db.query("update public.appointments set starts_at = clock_timestamp() + interval '6 hours' where patient_id = $1 and status = 'scheduled'", [patient]);
+    await expect(rpc(a, 'reschedule_appointment', [patient, later])).rejects.toMatchObject({ code: 'PT409' });
+    expect(await asUser(pro, 'select action from public.appointment_events where patient_id = $1 order by at', [patient])).toEqual(
+      expect.arrayContaining([{ action: 'scheduled' }, { action: 'confirmed' }]),
+    );
+  });
+  it('propuestas IA: solo el consultorio lee, el paciente no ve artefactos y el id no duplica', async () => {
+    const id = '80000000-0000-4000-a000-000000000001';
+    const payload = { title: 'Ensalada tibia', ingredients: ['lentejas'], steps: ['cocinar'], explanation: 'Revisar', servings: 2, nutrient_source: 'Revisión profesional', warnings: [] };
+    await expect(rpc(a, 'enqueue_ai_job', [id, patient, 'recipe', 'recipe.v1', 'abc12345'])).rejects.toMatchObject({ code: '42501' });
+    const queued = await rpc(pro, 'enqueue_ai_job', [id, patient, 'recipe', 'recipe.v1', 'abc12345']);
+    expect(queued.status).toBe('queued');
+    expect((await rpc(pro, 'enqueue_ai_job', [id, patient, 'recipe', 'recipe.v1', 'abc12345'])).id).toBe(id);
+    const started = await rpc(pro, 'start_ai_job', [id]);
+    expect(started.attempt).toBe(1);
+    const done = await rpc(pro, 'complete_ai_job', [id, 120, 'recipe', payload]);
+    expect(done.status).toBe('succeeded');
+    expect(done.artifact.payload.title).toBe('Ensalada tibia');
+    expect(await asUser(a, 'select id from public.ai_jobs')).toEqual([]);
+    expect(await asUser(a, 'select id from public.ai_artifacts')).toEqual([]);
+    expect(await asUser(b, 'select id from public.ai_jobs')).toEqual([]);
+    expect(await asUser(other, 'select id from public.ai_jobs')).toEqual([]);
+    expect(await asUser(pro, 'select job_type from public.ai_jobs where id = $1', [id])).toEqual([{ job_type: 'recipe' }]);
+    await expect(rpc(other, 'complete_ai_job', [id, 10, 'recipe', payload])).rejects.toMatchObject({ code: 'PT404' });
   });
 });

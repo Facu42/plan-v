@@ -26,7 +26,7 @@ describe('modelo seguro del showroom', () => {
     expect(model).not.toHaveProperty('calorieTarget');
   });
   it('suma únicamente comidas revisadas del día y del paciente elegido', () => {
-    const base = { id: 'm', patient_id: 'p1', slot: 'Almuerzo', photo_url: null, description: '', foods: [], macros: { kcal: 400, protein_g: 20, carbs_g: 40, fat_g: 10 }, confidence: 1, note_for_nutri: 'SECRETO', status: 'confirmed' as const, logged_at: now.toISOString() };
+    const base = { id: 'm', patient_id: 'p1', slot: 'Almuerzo', photo_url: null, description: '', foods: [], macros: { kcal: 400, protein_g: 20, carbs_g: 40, fat_g: 10 }, confidence: 1, note_for_nutri: 'SECRETO', status: 'confirmed' as const, analysis_status: 'succeeded' as const, logged_at: now.toISOString() };
     const model = buildShowroomPatient({ ...patient, meal_logs: [base, { ...base, id: 'other', patient_id: 'p2' }, { ...base, id: 'pending', status: 'pending_review' }, { ...base, id: 'old', logged_at: new Date(2026, 8, 8, 12).toISOString() }] }, now);
     expect(model.kcal).toBe(400);
     expect(model.nutritionLogCount).toBe(1);
@@ -35,7 +35,7 @@ describe('modelo seguro del showroom', () => {
     expect(JSON.stringify(model)).not.toContain('SECRETO');
   });
   it('distingue macros ausentes de un valor cero efectivamente registrado', () => {
-    const base = { id: 'm', patient_id: 'p1', slot: 'Almuerzo', photo_url: null, description: '', foods: [], confidence: 1, note_for_nutri: '', status: 'confirmed' as const, logged_at: now.toISOString() };
+    const base = { id: 'm', patient_id: 'p1', slot: 'Almuerzo', photo_url: null, description: '', foods: [], confidence: 1, note_for_nutri: '', status: 'confirmed' as const, analysis_status: 'succeeded' as const, logged_at: now.toISOString() };
     const withoutMacros = buildShowroomPatient({ ...patient, meal_logs: [{ ...base, macros: null }] }, now);
     expect(withoutMacros.nutritionLogCount).toBe(0);
     const zero = buildShowroomPatient({ ...patient, meal_logs: [{ ...base, macros: { kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 } }] }, now);
@@ -52,7 +52,13 @@ describe('modelo seguro del showroom', () => {
   });
   it('expone al paciente sólo los datos operativos seguros de su consulta', () => {
     const model = buildShowroomPatient({ ...patient, appointment: { when: 'Jueves · 14:30', duration: 45, channel: 'video', meet_url: 'https://meet.example.com/ana' } }, now);
-    expect(model.appointment).toEqual({ when: 'Jueves · 14:30', duration: 45, channel: 'video', meet_url: 'https://meet.example.com/ana' });
+    expect(model.appointment).toEqual({
+      when: 'Jueves · 14:30',
+      duration: 45,
+      channel: 'video',
+      meet_url: 'https://meet.example.com/ana',
+      confirmation: null,
+    });
     expect(model.appointment).not.toHaveProperty('prep_note');
   });
   it('busca sin acentos y excluye archivados', () => {

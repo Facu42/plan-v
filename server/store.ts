@@ -1,7 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { calculateAdherence } from './adherence.js';
 import {
+  APPOINTMENT_TIMEZONE,
+  appointmentsOverlap,
   historyEntry,
+  patientRescheduleBlocked,
   resolveAppointmentState,
   stampStartsAt,
   type AppointmentHistoryActor,
@@ -22,6 +25,9 @@ import { validateProvisionInput } from './identity/provision.js';
 import { resetIntakeMemory } from './intake/memory.js';
 import { resetCareMemory } from './care/repository.js';
 import { resetAssetMemory } from './assets/repository.js';
+import { resetRecipeMemory } from './recipes/repository.js';
+import { resetPlanMemory } from './plans/repository.js';
+import { resetAiJobMemory } from './ai/repository.js';
 
 export type { PatientInvite, InviteEvent } from './identity/invites.js';
 
@@ -67,8 +73,30 @@ export type MealLog = {
   confidence: number;
   note_for_nutri: string;
   status: MealStatus;
+  analysis_status: 'pending' | 'succeeded' | 'failed';
   logged_at: string;
 };
+
+export class MealPersistError extends Error {
+  constructor(public status: 400 | 403 | 404 | 409, message: string) {
+    super(message);
+    this.name = 'MealPersistError';
+  }
+}
+
+export class MessagePersistError extends Error {
+  constructor(public status: 400 | 403 | 404 | 409, message: string) {
+    super(message);
+    this.name = 'MessagePersistError';
+  }
+}
+
+export class AppointmentError extends Error {
+  constructor(public status: 400 | 403 | 404 | 409, message: string) {
+    super(message);
+    this.name = 'AppointmentError';
+  }
+}
 
 export type DemoNotice = {
   id: string;
@@ -160,7 +188,16 @@ export type Patient = {
   hydration: number;
   energy: string | null;
   sleep_minutes: number | null;
-  appointment: { when: string; duration: number; channel: string; meet_url?: string; starts_at?: string } | null;
+  appointment: {
+    when: string;
+    duration: number;
+    channel: string;
+    meet_url?: string;
+    starts_at?: string;
+    timezone?: string;
+    confirmation?: 'attending' | 'needs_change' | null;
+    confirmed_at?: string | null;
+  } | null;
   appointment_history?: AppointmentHistoryEntry[];
   habit_logs: HabitLog[];
   activity_logs?: ActivityLog[];
@@ -217,6 +254,7 @@ function reviewedLog(id: string, patientId: string, slot: string, title: string,
     confidence: 0.7,
     note_for_nutri: 'Revisada en la semana.',
     status,
+    analysis_status: 'succeeded',
     logged_at: daysAgo(daysBack),
   };
 }
@@ -298,6 +336,7 @@ function seedPatients(): Patient[] {
           confidence: 0.38,
           note_for_nutri: 'Foto oscura, difícil estimar porción de pasta y grasa de la salsa.',
           status: 'pending_review',
+          analysis_status: 'succeeded',
           logged_at: now(),
         },
         {
@@ -314,6 +353,7 @@ function seedPatients(): Patient[] {
           confidence: 0.62,
           note_for_nutri: 'Coincide con el bowl planificado. Aceite no visible.',
           status: 'pending_review',
+          analysis_status: 'succeeded',
           logged_at: now(),
         },
         reviewedLog('ml-s3', 'pat-sofia', 'Almuerzo', 'Wrap de pollo', 430, 1),
@@ -389,6 +429,7 @@ function seedPatients(): Patient[] {
           confidence: 0.58,
           note_for_nutri: 'Parece Plan B. Confirmar si incluyó nueces.',
           status: 'pending_review',
+          analysis_status: 'succeeded',
           logged_at: now(),
         },
         reviewedLog('ml-m2', 'pat-marina', 'Almuerzo', 'Wrap de pollo', 420, 1),
@@ -459,6 +500,7 @@ function seedPatients(): Patient[] {
           confidence: 0.85,
           note_for_nutri: 'Coincide con el menú. Porción adecuada.',
           status: 'confirmed',
+          analysis_status: 'succeeded',
           logged_at: now(),
         },
         reviewedLog('ml-l2', 'pat-lucia', 'Almuerzo', 'Wok de verduras y arroz', 450, 1),
@@ -682,6 +724,9 @@ export function resetStore(): void {
   resetIntakeMemory();
   resetCareMemory();
   resetAssetMemory();
+  resetRecipeMemory();
+  resetPlanMemory();
+  resetAiJobMemory();
   store = {
     patients: seedPatients(),
     patientInvites: [],
@@ -980,14 +1025,28 @@ export function setAppointment(
   const recordedAt = now();
   const clock = new Date(recordedAt);
   const previous = patient.appointment;
+  if (actor === 'patient' && previous?.starts_at && patientRescheduleBlocked(previous.starts_at, clock.getTime())) {
+    throw new AppointmentError(409, 'Las reprogramaciones de la paciente necesitan 12 horas de anticipación.');
+  }
   const scheduled = appointment
     ? stampStartsAt({
         when: `${appointment.day} · ${appointment.time}`,
         duration: appointment.duration,
         channel: appointment.channel,
+        timezone: APPOINTMENT_TIMEZONE,
+        confirmation: previous && previous.when === `${appointment.day} · ${appointment.time}` ? previous.confirmation ?? null : null,
+        confirmed_at: previous && previous.when === `${appointment.day} · ${appointment.time}` ? previous.confirmed_at ?? null : null,
         ...(appointment.meet_url ? { meet_url: appointment.meet_url } : {}),
       }, clock)
     : null;
+  if (scheduled?.starts_at) {
+    for (const other of store.patients) {
+      if (other.id === id || !other.appointment) continue;
+      if (appointmentsOverlap(scheduled, other.appointment)) {
+        throw new AppointmentError(409, 'Ese horario se solapa con otra consulta del consultorio.');
+      }
+    }
+  }
   const history = [...(patient.appointment_history ?? [])];
   if (previous && previous.when !== scheduled?.when) {
     history.unshift(historyEntry({
@@ -1025,27 +1084,97 @@ export function setAppointment(
   return updatePatient(id, { appointment: scheduled, appointment_history: history, timeline });
 }
 
-export function addMealLog(patientId: string, log: Omit<MealLog, 'id' | 'patient_id' | 'logged_at' | 'status'>): MealLog {
-  const entry: MealLog = {
-    ...log,
+export function confirmAppointment(
+  id: string,
+  confirmation: 'attending' | 'needs_change',
+  options: { actor?: AppointmentHistoryActor } = {},
+): Patient | undefined {
+  const patient = getPatient(id);
+  if (!patient) return undefined;
+  if (!patient.appointment) throw new AppointmentError(409, 'No hay un turno para confirmar.');
+  if (patient.appointment.confirmation === confirmation) return patient;
+  const recordedAt = now();
+  const clock = new Date(recordedAt);
+  const history = [historyEntry({
     id: randomUUID(),
+    slot: patient.appointment,
+    action: 'confirmed',
+    actor: options.actor ?? 'patient',
+    at: recordedAt,
+    now: clock,
+  }), ...(patient.appointment_history ?? [])];
+  return updatePatient(id, {
+    appointment: { ...patient.appointment, confirmation, confirmed_at: recordedAt, timezone: patient.appointment.timezone ?? APPOINTMENT_TIMEZONE },
+    appointment_history: history,
+  });
+}
+
+function sameMealCapture(log: MealLog, slot: string, description: string | null) {
+  return log.slot === slot && (log.description ?? null) === (description ?? null);
+}
+
+export function saveMealCapture(patientId: string, input: {
+  id: string;
+  slot: string;
+  photo_url: string | null;
+  description: string | null;
+}): MealLog {
+  const patient = getPatient(patientId);
+  if (!patient) throw new Error('Paciente no encontrado');
+  const existing = patient.meal_logs.find((log) => log.id === input.id);
+  if (existing) {
+    if (!sameMealCapture(existing, input.slot, input.description)) {
+      throw new MealPersistError(409, 'Ese registro ya existe con otros datos.');
+    }
+    return existing;
+  }
+  const entry: MealLog = {
+    id: input.id,
     patient_id: patientId,
+    slot: input.slot,
+    photo_url: input.photo_url,
+    description: input.description,
+    foods: [],
+    macros: null,
+    confidence: 0,
+    note_for_nutri: '',
     status: 'pending_review',
+    analysis_status: 'pending',
     logged_at: now(),
   };
-  const patient = getPatient(patientId);
-  if (patient) {
-    patient.meal_logs.unshift(entry);
-    patient.timeline.unshift({
-      id: randomUUID(),
-      kind: 'meal_logged',
-      atLabel: 'HOY',
-      title: `${entry.slot} · foto en revisión`,
-      body: `${new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} · estimación (${entry.confidence.toFixed(2)}). Pendiente de Vero.`,
-    });
-    recalculateAdherence(patientId);
-  }
+  patient.meal_logs.unshift(entry);
+  patient.timeline.unshift({
+    id: randomUUID(),
+    kind: 'meal_logged',
+    atLabel: 'HOY',
+    title: `${entry.slot} · en revisión`,
+    body: `${new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} · comida registrada. Pendiente de análisis y de Vero.`,
+  });
+  recalculateAdherence(patientId);
   return entry;
+}
+
+export function applyMealAnalysis(patientId: string, logId: string, analysis: Pick<MealLog, 'foods' | 'macros' | 'confidence' | 'note_for_nutri'>): MealLog {
+  const current = getPatient(patientId)?.meal_logs.find((log) => log.id === logId);
+  if (!current) throw new Error('Registro no encontrado');
+  if (current.analysis_status === 'succeeded') return current;
+  return updateMealLog(patientId, logId, { ...analysis, analysis_status: 'succeeded' }) ?? current;
+}
+
+export function failMealAnalysis(patientId: string, logId: string): MealLog {
+  const current = getPatient(patientId)?.meal_logs.find((log) => log.id === logId);
+  if (!current) throw new Error('Registro no encontrado');
+  if (current.analysis_status === 'succeeded') return current;
+  return updateMealLog(patientId, logId, { analysis_status: 'failed' }) ?? current;
+}
+
+export function addMealLog(patientId: string, log: Omit<MealLog, 'id' | 'patient_id' | 'logged_at' | 'status'>): MealLog {
+  return saveMealCapture(patientId, {
+    id: randomUUID(),
+    slot: log.slot,
+    photo_url: log.photo_url,
+    description: log.description,
+  });
 }
 
 export function updateMealLog(patientId: string, logId: string, patch: Partial<MealLog>): MealLog | undefined {
@@ -1068,10 +1197,19 @@ export function updateMealLog(patientId: string, logId: string, patch: Partial<M
   return patient.meal_logs[idx];
 }
 
-export function addMessage(patientId: string, text: string, from: 'vero' | 'patient', suggestedByAi = false): Message {
+export function addMessage(patientId: string, text: string, from: 'vero' | 'patient', suggestedByAi = false, id: string = randomUUID()): Message {
+  const patient = getPatient(patientId);
+  if (!patient) throw new MessagePersistError(404, 'Paciente no encontrado.');
+  const existing = patient.messages.find((message) => message.id === id);
+  if (existing) {
+    if (existing.text !== text || existing.from !== from) {
+      throw new MessagePersistError(409, 'Ese mensaje ya existe con otros datos.');
+    }
+    return existing;
+  }
   const sentAt = now();
   const msg: Message = {
-    id: randomUUID(),
+    id,
     patient_id: patientId,
     from,
     text,
@@ -1079,8 +1217,7 @@ export function addMessage(patientId: string, text: string, from: 'vero' | 'pati
     sent_at: sentAt,
     delivered_at: sentAt,
   };
-  const patient = getPatient(patientId);
-  patient?.messages.push(msg);
+  patient.messages.push(msg);
   return msg;
 }
 

@@ -1,4 +1,6 @@
 export const WEEK_DAY_NAMES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const;
+export const APPOINTMENT_TIMEZONE = 'America/Argentina/Buenos_Aires';
+export const RESCHEDULE_NOTICE_MS = 12 * 60 * 60 * 1000;
 
 export type AppointmentSlot = {
   when: string;
@@ -6,9 +8,12 @@ export type AppointmentSlot = {
   channel: string;
   meet_url?: string;
   starts_at?: string;
+  timezone?: string;
+  confirmation?: 'attending' | 'needs_change' | null;
+  confirmed_at?: string | null;
 };
 
-export type AppointmentHistoryAction = 'scheduled' | 'rescheduled' | 'patient_rescheduled' | 'cancelled' | 'elapsed';
+export type AppointmentHistoryAction = 'scheduled' | 'rescheduled' | 'patient_rescheduled' | 'cancelled' | 'elapsed' | 'confirmed';
 export type AppointmentHistoryActor = 'pro' | 'patient' | 'system';
 
 export type AppointmentHistoryEntry = {
@@ -45,9 +50,32 @@ export function occurrenceFromWhen(when: string, now: Date): Date | null {
 }
 
 export function stampStartsAt(appointment: AppointmentSlot, now: Date): AppointmentSlot {
-  if (appointment.starts_at) return appointment;
-  const at = occurrenceFromWhen(appointment.when, now);
-  return at ? { ...appointment, starts_at: at.toISOString() } : appointment;
+  const withZone = appointment.timezone ? appointment : { ...appointment, timezone: APPOINTMENT_TIMEZONE };
+  if (withZone.starts_at) return withZone;
+  const at = occurrenceFromWhen(withZone.when, now);
+  return at ? { ...withZone, starts_at: at.toISOString() } : withZone;
+}
+
+export function appointmentRange(slot: Pick<AppointmentSlot, 'starts_at' | 'duration'>): { start: number; end: number } | null {
+  if (!slot.starts_at) return null;
+  const start = Date.parse(slot.starts_at);
+  if (Number.isNaN(start)) return null;
+  return { start, end: start + slot.duration * 60_000 };
+}
+
+export function appointmentsOverlap(
+  left: Pick<AppointmentSlot, 'starts_at' | 'duration'>,
+  right: Pick<AppointmentSlot, 'starts_at' | 'duration'>,
+): boolean {
+  const a = appointmentRange(left);
+  const b = appointmentRange(right);
+  if (!a || !b) return false;
+  return a.start < b.end && b.start < a.end;
+}
+
+export function patientRescheduleBlocked(startsAt: string, now = Date.now()): boolean {
+  const start = Date.parse(startsAt);
+  return Number.isFinite(start) && start - now < RESCHEDULE_NOTICE_MS;
 }
 
 export function historyEntry(input: {

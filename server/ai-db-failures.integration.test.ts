@@ -72,6 +72,7 @@ describe('AI and persistence failures', () => {
 
   it('rejects an invalid persistent photo before calling the analyzer', async () => {
     const response = await app.request('/api/patients/pat-1/meals/analyze', authedJson({
+      id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       slot: 'Almuerzo',
       description: 'pollo',
       photoPreview: 'data:image/jpeg;base64,AAAA',
@@ -84,6 +85,7 @@ describe('AI and persistence failures', () => {
   it('does not report a sent message when the insert fails', async () => {
     sbMocks.sbAddMessage.mockRejectedValue({ message: 'synthetic database failure' });
     const response = await app.request('/api/patients/pat-1/messages', authedJson({
+      id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       text: 'Hola',
       from: 'patient',
     }));

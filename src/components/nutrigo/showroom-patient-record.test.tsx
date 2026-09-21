@@ -18,8 +18,8 @@ const patient: Patient = {
   ],
   messages: [],
   meal_logs: [
-    { id: 'm1', patient_id: 'ana', slot: 'Cena', photo_url: null, description: 'Cena tardía', foods: [], macros: null, confidence: 0.6, note_for_nutri: 'Nota IA privada de Ana', status: 'pending_review', logged_at: '2026-09-11T22:00:00.000Z' },
-    { id: 'm2', patient_id: 'otra', slot: 'Almuerzo', photo_url: null, description: 'Ajena', foods: [], macros: null, confidence: 0.8, note_for_nutri: 'SECRETO DE OTRA PERSONA', status: 'confirmed', logged_at: '2026-09-11T13:00:00.000Z' },
+    { id: 'm1', patient_id: 'ana', slot: 'Cena', photo_url: null, description: 'Cena tardía', foods: [], macros: null, confidence: 0.6, note_for_nutri: 'Nota IA privada de Ana', status: 'pending_review', analysis_status: 'succeeded', logged_at: '2026-09-11T22:00:00.000Z' },
+    { id: 'm2', patient_id: 'otra', slot: 'Almuerzo', photo_url: null, description: 'Ajena', foods: [], macros: null, confidence: 0.8, note_for_nutri: 'SECRETO DE OTRA PERSONA', status: 'confirmed', analysis_status: 'succeeded', logged_at: '2026-09-11T13:00:00.000Z' },
   ],
 };
 

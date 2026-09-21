@@ -14,6 +14,7 @@ function log(id: string, status: MealLog['status'], loggedAt: string): MealLog {
     confidence: 0.5,
     note_for_nutri: '',
     status,
+    analysis_status: 'succeeded',
     logged_at: loggedAt,
   };
 }

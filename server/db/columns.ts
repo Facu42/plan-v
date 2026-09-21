@@ -11,8 +11,8 @@ export const patientTableColumns: Record<QueryAudience, string> = {
 };
 
 export const mealLogColumns: Record<QueryAudience, string> = {
-  professional: 'id,patient_id,slot_label,photo_path,description,foods,macros,confidence,status,logged_at,note_for_nutri',
-  patient: 'id,patient_id,slot_label,photo_path,description,foods,macros,confidence,status,logged_at',
+  professional: 'id,patient_id,slot_label,photo_path,description,foods,macros,confidence,status,analysis_status,logged_at,note_for_nutri',
+  patient: 'id,patient_id,slot_label,photo_path,description,foods,macros,confidence,status,analysis_status,logged_at',
 };
 
 export const messageColumns: Record<QueryAudience, string> = {
@@ -21,8 +21,8 @@ export const messageColumns: Record<QueryAudience, string> = {
 };
 
 export const appointmentColumns: Record<QueryAudience, string> = {
-  professional: 'id,patient_id,starts_at,duration_min,channel,meet_url,status,prep_note',
-  patient: 'id,patient_id,starts_at,duration_min,channel,meet_url,status',
+  professional: 'id,patient_id,starts_at,duration_min,channel,meet_url,status,timezone,confirmation,confirmed_at,prep_note',
+  patient: 'id,patient_id,starts_at,duration_min,channel,meet_url,status,timezone,confirmation,confirmed_at',
 };
 
 export function assertPublicSelectList(select: string, forbidden: readonly string[]): void {

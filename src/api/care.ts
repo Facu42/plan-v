@@ -4,7 +4,7 @@ const base = (id: string) => `/api/patients/${encodeURIComponent(id)}/care`;
 const json = (method: string, data: unknown) => ({ method, body: JSON.stringify(data) });
 export const careApi = {
   snapshot: (id: string, professional = false, signal?: AbortSignal) => request<CareSnapshot>(`${base(id)}?audience=${professional ? 'pro' : 'patient'}`, { signal }),
-  save: (id: string, input: CareInput) => request<{record: CareRecord}>(`${base(id)}/records`, json('POST', input)),
+  save: (id: string, input: CareInput, professional = false) => request<{record: CareRecord}>(`${base(id)}/records${professional ? '?audience=pro' : ''}`, json('POST', input)),
   preferences: (id: string, settings: CarePreferences) => request(`${base(id)}/preferences`, json('PUT', settings)),
   photo: (id: string, input: {id:string;recorded_on:string;image:string;note:string}) => request(`${base(id)}/photos`, json('POST', input)),
   openPhoto: (id: string, recordId: string) => request<{url:string;expires_in:number}>(`${base(id)}/photos/${recordId}`),

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import type { Patient } from '../../types';
 import { Icon } from '../shared/Icon';
 import { NvBadge, NvButton } from './primitives';
-import { appointmentReplyLabel, readAppointmentReply } from './appointment-reply';
+import { appointmentReplyLabel } from './appointment-reply';
 import { nextAppointmentDate, secureMeetUrl } from './ShowroomConsultations';
 import { ShowroomPatientAgenda } from './ShowroomPatientAgenda';
 import { buildShowroomPatient } from './showroom-model';
@@ -103,7 +103,9 @@ export function ShowroomAgenda({ patients, now, onManage, focusPatient = null, o
         <div className="nva-rows">
           {visibleEntries.map((entry) => {
             const safeUrl = secureMeetUrl(entry.appointment.meet_url);
-            const reply = readAppointmentReply(typeof window === 'undefined' ? null : window.localStorage, entry.patient.id, entry.appointment.when);
+            const reply = entry.appointment.confirmation === 'attending' || entry.appointment.confirmation === 'needs_change'
+              ? entry.appointment.confirmation
+              : 'pending';
             return <article className="nva-row" key={entry.patient.id}><span className={`nv-avatar person-${entry.patient.tone}`}>{entry.patient.initials}</span><div><strong>{entry.patient.name}</strong><small>{sentenceCase(entry.date.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'short' }))} · {entry.appointment.when.split(' · ')[1]} · {entry.appointment.duration} min</small><NvBadge tone={entry.appointment.channel === 'video' ? 'green' : 'gold'}>{entry.appointment.channel === 'video' ? 'Videollamada' : 'Presencial'}</NvBadge><small>{appointmentReplyLabel(reply)}</small></div><div className="nva-row-actions">{safeUrl && <a href={safeUrl} target="_blank" rel="noopener noreferrer">Abrir sala</a>}<NvButton onClick={() => onManage(entry.patient.id)}>Gestionar consulta</NvButton></div></article>;
           })}
           {visibleUnassigned.length > 0 && <section className="nva-unassigned" aria-label="Pacientes sin turno"><h3>Sin turno</h3>{visibleUnassigned.map((patient) => <article key={patient.id}><span className={`nv-avatar person-${patient.tone}`}>{patient.initials}</span><div><strong>{patient.name}</strong><small>Sin consulta programada</small></div><NvButton onClick={() => onManage(patient.id)}>Gestionar consulta</NvButton></article>)}</section>}

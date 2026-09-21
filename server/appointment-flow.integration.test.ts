@@ -138,4 +138,35 @@ describe('appointment API flow in memory mode', () => {
       expect(await response.json()).toEqual({ error: 'Datos inválidos' });
     }
   });
+
+  it('blocks overlapping appointments for the same nutritionist', async () => {
+    const response = await app.request(
+      '/api/patients/pat-sofia/appointment',
+      jsonRequest('PUT', { appointment: { day: 'Viernes', time: '11:00', duration: 45, channel: 'video' } }),
+    );
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({ error: 'Ese horario se solapa con otra consulta del consultorio.' });
+  });
+
+  it('persists patient confirmation and rejects a late patient reschedule', async () => {
+    const confirmed = await app.request(
+      '/api/patients/pat-sofia/appointment/confirm',
+      jsonRequest('POST', { confirmation: 'attending' }),
+    );
+    const confirmedBody = await confirmed.json();
+    expect(confirmed.status).toBe(200);
+    expect(confirmedBody.patient.appointment.confirmation).toBe('attending');
+
+    const current = getPatient('pat-sofia')!;
+    current.appointment = {
+      ...current.appointment!,
+      starts_at: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
+    };
+    const late = await app.request(
+      '/api/patients/pat-sofia/appointment/reschedule',
+      jsonRequest('POST', { day: 'Viernes', time: '10:00' }),
+    );
+    expect(late.status).toBe(409);
+    expect(await late.json()).toEqual({ error: 'Las reprogramaciones de la paciente necesitan 12 horas de anticipación.' });
+  });
 });

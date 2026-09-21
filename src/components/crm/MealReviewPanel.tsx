@@ -20,7 +20,16 @@ const MACRO_FIELDS: { key: keyof Macros; label: string; unit: string }[] = [
 
 export function MealReviewPanel({ patient, log, onClose }: Props) {
   const refreshPatient = useAppStore((state) => state.refreshPatient);
-  const [draft, setDraft] = useState<MealReviewDraft>(() => createMealReviewDraft(log));
+  const [draft, setDraft] = useState<MealReviewDraft>(() => {
+    const next = createMealReviewDraft(log);
+    if (log.analysis_status === 'failed' && next.foods.length === 0) {
+      return {
+        ...next,
+        foods: [{ name: log.description?.trim().slice(0, 120) || 'Comida registrada', portion_est: null, portion_unit: 'g', confidence: 0.5 }],
+      };
+    }
+    return next;
+  });
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +80,9 @@ export function MealReviewPanel({ patient, log, onClose }: Props) {
       </div>
       {log.photo_url && <img src={log.photo_url} alt="Comida de la paciente" className="review-photo" />}
       {log.description && !log.photo_url && <p className="review-desc">“{log.description}”</p>}
+      {log.analysis_status === 'failed' && (
+        <p className="review-note">El análisis automático no está disponible. La comida quedó registrada; confirmá o ajustá con lo que ves.</p>
+      )}
 
       {editing ? (
         <div className="review-editor">

@@ -5,6 +5,7 @@ import type { Actor, PatientResource } from '../security/contracts.ts';
 import { MESSAGE_PAGE_SIZE, WEEK_DAYS } from '../schemas.ts';
 import type { ListPage } from '../pagination.ts';
 import { getRequestDb, privilegedDb } from './supabase-client.ts';
+import { AppointmentError, MealPersistError, MessagePersistError } from '../store.ts';
 import {
   appointmentColumns,
   mealLogColumns,
@@ -152,6 +153,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
   sleep_minutes?: number | null;
   briefDismissed?: boolean;
   appointment?: Patient['appointment'];
+  appointment_history?: Patient['appointment_history'];
 }, audience: QueryAudience = 'professional'): Patient {
   const billing = {
     billing_status: (row.billing_status as Patient['billing_status']) ?? 'pending',
@@ -179,6 +181,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
     energy: extras.energy ?? null,
     sleep_minutes: extras.sleep_minutes ?? null,
     appointment: extras.appointment ?? null,
+    appointment_history: extras.appointment_history ?? [],
     habit_logs: extras.habit_logs ?? [],
     todayPlan: extras.todayPlan ?? [],
     weekPlan: extras.weekPlan ?? [],
@@ -202,11 +205,16 @@ function mapMealLog(row: Record<string, unknown>): MealLog {
     confidence: Number(row.confidence),
     note_for_nutri: (row.note_for_nutri as string) ?? '',
     status: row.status as MealLog['status'],
+    analysis_status: (row.analysis_status as MealLog['analysis_status']) ?? 'succeeded',
     logged_at: row.logged_at as string,
   };
 }
 
-export function mapMessage(row: Record<string, unknown>, authorRole: unknown): Message | null {
+export function mapMessage(
+  row: Record<string, unknown>,
+  authorRole: unknown,
+  receipt?: { delivered_at?: string | null; read_at?: string | null } | null,
+): Message | null {
   if (authorRole !== 'paciente' && authorRole !== 'nutri') return null;
   return {
     id: row.id as string,
@@ -215,13 +223,15 @@ export function mapMessage(row: Record<string, unknown>, authorRole: unknown): M
     text: row.body as string,
     suggested_by_ai: Boolean(row.suggested_by_ai),
     sent_at: row.sent_at as string,
+    delivered_at: receipt?.delivered_at ?? null,
+    read_at: receipt?.read_at ?? null,
   };
 }
 
 async function loadPatientExtras(
   patientId: string,
   audience: 'professional' | 'patient' = 'professional',
-): Promise<Pick<Patient, 'todayPlan' | 'weekPlan' | 'meal_logs' | 'messages' | 'brief' | 'briefDismissed' | 'timeline' | 'habit_logs' | 'hydration' | 'energy' | 'sleep_minutes' | 'appointment'>> {
+): Promise<Pick<Patient, 'todayPlan' | 'weekPlan' | 'meal_logs' | 'messages' | 'brief' | 'briefDismissed' | 'timeline' | 'habit_logs' | 'hydration' | 'energy' | 'sleep_minutes' | 'appointment' | 'appointment_history'>> {
   const sb = getRequestDb();
 
   const timelineQuery = sb.from('timeline_events').select('id,kind,title,body,visibility,occurred_at').eq('patient_id', patientId);
@@ -281,13 +291,38 @@ async function loadPatientExtras(
   const briefDismissed = briefStatus === 'dismissed';
 
   const meal_logs = await signMealPhotos(patientId, rows(logs).map(mapMealLog));
-  const authorIds = [...new Set(rows(msgs).map((message) => String(message.author_id)))];
+  const messageRows = rows(msgs);
+  const authorIds = [...new Set(messageRows.map((message) => String(message.author_id)))];
   const { data: authors } = authorIds.length > 0
     ? await sb.from('profiles').select('id, role').in('id', authorIds)
     : { data: [] };
   const roleByAuthor = new Map((authors ?? []).map((author) => [author.id, author.role]));
-  const messages: Message[] = rows(msgs).slice().reverse().flatMap((message) => {
-    const mapped = mapMessage(message, roleByAuthor.get(message.author_id as string));
+  const messageIds = messageRows.map((message) => String(message.id));
+  let receiptRows: Record<string, unknown>[] = [];
+  if (messageIds.length > 0) {
+    const { data: receipts, error: receiptError } = await sb
+      .from('message_receipts')
+      .select('message_id,user_id,delivered_at,read_at')
+      .in('message_id', messageIds);
+    if (receiptError && !isMissingRelation(receiptError)) throw receiptError;
+    receiptRows = rows(receipts);
+  }
+  const authorByMessage = new Map(messageRows.map((message) => [String(message.id), String(message.author_id)]));
+  const receiptByMessage = new Map<string, { delivered_at: string | null; read_at: string | null }>();
+  for (const receipt of receiptRows) {
+    const messageId = String(receipt.message_id);
+    if (String(receipt.user_id) === authorByMessage.get(messageId)) continue;
+    receiptByMessage.set(messageId, {
+      delivered_at: (receipt.delivered_at as string | null) ?? null,
+      read_at: (receipt.read_at as string | null) ?? null,
+    });
+  }
+  const messages: Message[] = messageRows.slice().reverse().flatMap((message) => {
+    const mapped = mapMessage(
+      message,
+      roleByAuthor.get(message.author_id as string),
+      receiptByMessage.get(String(message.id)),
+    );
     return mapped ? [mapped] : [];
   });
 
@@ -315,6 +350,15 @@ async function loadPatientExtras(
 
   const nextAppt = rows(appts)[0];
   const appointment = mapScheduledAppointment(nextAppt);
+  let eventRows: Record<string, unknown>[] = [];
+  const { data: events, error: eventError } = await sb
+    .from('appointment_events')
+    .select('id,action,actor_role,starts_at,duration_min,channel,timezone,at')
+    .eq('patient_id', patientId)
+    .order('at', { ascending: false })
+    .limit(50);
+  if (eventError && !isMissingRelation(eventError)) throw eventError;
+  if (!eventError) eventRows = rows(events);
 
   return {
     todayPlan,
@@ -329,15 +373,41 @@ async function loadPatientExtras(
     energy: todayHabit?.energy ?? null,
     sleep_minutes: todayHabit?.sleep_minutes ?? null,
     appointment,
+    appointment_history: eventRows.map(mapAppointmentEvent),
+  };
+}
+
+function mapAppointmentEvent(row: Record<string, unknown>): NonNullable<Patient['appointment_history']>[number] {
+  const startsAt = row.starts_at ? String(row.starts_at) : '';
+  const parts = startsAt ? tzParts(new Date(startsAt)) : null;
+  const dateId = parts
+    ? `${parts.year}-${String(parts.month + 1).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`
+    : null;
+  return {
+    id: String(row.id),
+    when: startsAt ? formatAppointmentWhen(startsAt) : '',
+    dateId,
+    duration: Number(row.duration_min ?? 0),
+    channel: String(row.channel ?? ''),
+    action: row.action as NonNullable<Patient['appointment_history']>[number]['action'],
+    actor: row.actor_role as NonNullable<Patient['appointment_history']>[number]['actor'],
+    at: String(row.at),
   };
 }
 
 function mapScheduledAppointment(nextAppt: Record<string, unknown> | undefined | null): Patient['appointment'] {
   if (!nextAppt?.starts_at) return null;
+  const confirmation = nextAppt.confirmation === 'attending' || nextAppt.confirmation === 'needs_change'
+    ? nextAppt.confirmation
+    : null;
   return {
     when: formatAppointmentWhen(String(nextAppt.starts_at)),
     duration: Number(nextAppt.duration_min),
     channel: String(nextAppt.channel),
+    starts_at: String(nextAppt.starts_at),
+    timezone: typeof nextAppt.timezone === 'string' ? nextAppt.timezone : PATIENT_TIMEZONE,
+    confirmation,
+    confirmed_at: nextAppt.confirmed_at ? String(nextAppt.confirmed_at) : null,
     ...(nextAppt.meet_url ? { meet_url: String(nextAppt.meet_url) } : {}),
   };
 }
@@ -445,23 +515,71 @@ export async function sbGetPatientById(id: string, audience: QueryAudience = 'pr
 }
 
 export async function sbAddMealLog(patientId: string, log: Omit<MealLog, 'id' | 'patient_id' | 'logged_at' | 'status'>): Promise<MealLog> {
+  return sbSaveMealCapture(patientId, {
+    id: crypto.randomUUID(),
+    slot: log.slot,
+    photo_url: log.photo_url,
+    description: log.description,
+  });
+}
+
+function mealDbError(error: { code?: string; message?: string } | null) {
+  if (!error) return;
+  if (['42P01', '42883', 'PGRST202', 'PGRST205'].includes(error.code ?? '')) {
+    throw new SchemaUnavailableError();
+  }
+  if (error.code === '42501') throw new MealPersistError(403, 'No tenés permiso para este registro.');
+  if (error.code === 'PT404') throw new MealPersistError(404, 'Registro no encontrado.');
+  if (error.code === 'PT409' || error.code === '23505') throw new MealPersistError(409, 'Ese registro ya existe con otros datos.');
+  if (['22023', '23514', '22P02'].includes(error.code ?? '')) throw new MealPersistError(400, 'Revisá la comida registrada.');
+  throw error;
+}
+
+export async function sbSaveMealCapture(patientId: string, log: {
+  id: string;
+  slot: string;
+  photo_url: string | null;
+  description: string | null;
+}): Promise<MealLog> {
   const sb = getRequestDb();
   if (log.photo_url?.startsWith('data:')) {
     throw new Error('Inline photos must be uploaded through the Storage contract first');
   }
-  const { data, error } = await sb.from('meal_logs').insert({
-    patient_id: patientId,
-    slot_label: log.slot,
-    photo_path: log.photo_url,
-    description: log.description,
-    foods: log.foods,
-    macros: log.macros,
-    confidence: log.confidence,
-    note_for_nutri: log.note_for_nutri,
-    status: 'pending_review',
-  }).select().single();
-  if (error) throw error;
-  return mapMealLog(data);
+  const { data, error } = await sb.rpc('save_meal_capture', {
+    log_id: log.id,
+    target: patientId,
+    slot_value: log.slot,
+    photo_path_value: log.photo_url,
+    description_value: log.description,
+  });
+  mealDbError(error);
+  return mapMealLog(data as Record<string, unknown>);
+}
+
+export async function sbApplyMealAnalysis(
+  patientId: string,
+  logId: string,
+  analysis: Pick<MealLog, 'foods' | 'macros' | 'confidence' | 'note_for_nutri'>,
+): Promise<MealLog> {
+  const { data, error } = await getRequestDb().rpc('apply_meal_analysis', {
+    log_id: logId,
+    target: patientId,
+    foods_value: analysis.foods,
+    macros_value: analysis.macros,
+    confidence_value: analysis.confidence,
+    note_value: analysis.note_for_nutri,
+  });
+  mealDbError(error);
+  return mapMealLog(data as Record<string, unknown>);
+}
+
+export async function sbFailMealAnalysis(patientId: string, logId: string): Promise<MealLog> {
+  const { data, error } = await getRequestDb().rpc('fail_meal_analysis', {
+    log_id: logId,
+    target: patientId,
+  });
+  mealDbError(error);
+  return mapMealLog(data as Record<string, unknown>);
 }
 
 export async function sbUpsertMenuSlot(patientId: string, day: string, slot: string, title: string): Promise<void> {
@@ -576,26 +694,66 @@ export async function sbAddTimelineEvent(
 
 export async function sbSetAppointment(
   patientId: string,
-  nutritionistId: string,
+  _nutritionistId: string,
   appointment: { day: string; time: string; duration: number; channel: string; meet_url?: string } | null,
 ): Promise<void> {
   const sb = getRequestDb();
-  // El dominio v0 tiene una sola consulta vigente por paciente: se reemplaza.
-  const { error: deleteError } = await sb.from('appointments').delete()
-    .eq('patient_id', patientId).eq('status', 'scheduled');
-  if (deleteError) throwWriteError(deleteError);
-  if (!appointment) return;
-
-  const { error } = await sb.from('appointments').insert({
-    patient_id: patientId,
-    nutritionist_id: nutritionistId,
-    starts_at: nextAppointmentStartsAt(appointment.day, appointment.time),
-    duration_min: appointment.duration,
-    channel: appointment.channel,
-    status: 'scheduled',
-    meet_url: appointment.meet_url ?? null,
+  if (!appointment) {
+    const { error } = await sb.rpc('cancel_appointment', { target: patientId });
+    appointmentDbError(error);
+    return;
+  }
+  const { error } = await sb.rpc('save_appointment', {
+    target: patientId,
+    starts_at_value: nextAppointmentStartsAt(appointment.day, appointment.time),
+    duration_value: appointment.duration,
+    channel_value: appointment.channel,
+    meet_url_value: appointment.meet_url ?? null,
+    timezone_value: PATIENT_TIMEZONE,
   });
-  if (error) throwWriteError(error);
+  appointmentDbError(error);
+}
+
+export async function sbRescheduleAppointment(
+  patientId: string,
+  appointment: { day: string; time: string },
+): Promise<void> {
+  const { error } = await getRequestDb().rpc('reschedule_appointment', {
+    target: patientId,
+    starts_at_value: nextAppointmentStartsAt(appointment.day, appointment.time),
+  });
+  appointmentDbError(error);
+}
+
+export async function sbConfirmAppointment(
+  patientId: string,
+  confirmation: 'attending' | 'needs_change',
+): Promise<void> {
+  const { error } = await getRequestDb().rpc('confirm_appointment', {
+    target: patientId,
+    confirmation_value: confirmation,
+  });
+  appointmentDbError(error);
+}
+
+function appointmentDbError(error: { code?: string; message?: string } | null) {
+  if (!error) return;
+  if (['42P01', '42883', 'PGRST202', 'PGRST205'].includes(error.code ?? '') || isMissingRelation(error)) {
+    throw new SchemaUnavailableError();
+  }
+  if (error.code === '42501') throw new AppointmentError(403, 'No tenés permiso para esta consulta.');
+  if (error.code === 'PT404') throw new AppointmentError(404, 'Paciente no encontrado.');
+  if (error.message === 'appointment_overlap' || /appointment_overlap/.test(error.message ?? '')) {
+    throw new AppointmentError(409, 'Ese horario se solapa con otra consulta del consultorio.');
+  }
+  if (error.message === 'appointment_notice' || /appointment_notice/.test(error.message ?? '')) {
+    throw new AppointmentError(409, 'Las reprogramaciones de la paciente necesitan 12 horas de anticipación.');
+  }
+  if (error.message === 'appointment_missing' || error.code === 'PT409' || /appointment_missing/.test(error.message ?? '')) {
+    throw new AppointmentError(409, 'No hay un turno para reprogramar.');
+  }
+  if (['22023', '23514', '22P02'].includes(error.code ?? '')) throw new AppointmentError(400, 'Revisá los datos de la consulta.');
+  throw error;
 }
 
 export async function sbDismissBrief(patientId: string, dismissedBy: string): Promise<void> {
@@ -691,17 +849,31 @@ export async function sbGetScheduledAppointment(patientId: string): Promise<Sche
   };
 }
 
-export async function sbAddMessage(patientId: string, nutritionistId: string, authorId: string, text: string, suggestedByAi: boolean): Promise<void> {
-  const sb = getRequestDb();
-  const { error } = await sb.from('messages').insert({
-    patient_id: patientId,
-    nutritionist_id: nutritionistId,
-    author_id: authorId,
-    body: text,
-    suggested_by_ai: suggestedByAi,
-    sent_at: new Date().toISOString(),
+function messageDbError(error: { code?: string; message?: string } | null) {
+  if (!error) return;
+  if (['42P01', '42883', 'PGRST202', 'PGRST205'].includes(error.code ?? '') || isMissingRelation(error)) {
+    throw new SchemaUnavailableError();
+  }
+  if (error.code === '42501') throw new MessagePersistError(403, 'No tenés permiso para este hilo.');
+  if (error.code === 'PT404') throw new MessagePersistError(404, 'Paciente no encontrado.');
+  if (error.code === 'PT409' || error.code === '23505') throw new MessagePersistError(409, 'Ese mensaje ya existe con otros datos.');
+  if (['22023', '23514', '22P02'].includes(error.code ?? '')) throw new MessagePersistError(400, 'Revisá el mensaje.');
+  throw error;
+}
+
+export async function sbAddMessage(patientId: string, text: string, suggestedByAi: boolean, id: string): Promise<void> {
+  const { error } = await getRequestDb().rpc('send_thread_message', {
+    thread_message_id: id,
+    target: patientId,
+    body_value: text,
+    suggested_flag: suggestedByAi,
   });
-  if (error) throw error;
+  messageDbError(error);
+}
+
+export async function sbMarkMessagesRead(patientId: string): Promise<void> {
+  const { error } = await getRequestDb().rpc('mark_thread_read', { target: patientId });
+  messageDbError(error);
 }
 
 export async function sbGetNutritionistId(userId: string): Promise<string | null> {

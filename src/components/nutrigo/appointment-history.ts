@@ -6,6 +6,7 @@ export const HISTORY_ACTION_LABEL: Record<AppointmentHistoryEntry['action'], str
   patient_rescheduled: 'Reprogramada por la paciente',
   cancelled: 'Cancelada',
   elapsed: 'Fecha vencida',
+  confirmed: 'Confirmación de asistencia',
 };
 
 export function historyActorLabel(actor: AppointmentHistoryEntry['actor']): string {

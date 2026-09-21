@@ -115,7 +115,7 @@ export function ShowroomMeals({ patient, patients = [], query, onSelect, onRevie
           <time role="cell" dateTime={log.logged_at}>{formatDate(log.logged_at)}</time>
           <strong role="cell">{log.slot}</strong>
           <span role="cell" className="nvm-detail">{mealDetail(log)}</span>
-          <span role="cell"><NvBadge tone={log.status === 'pending_review' ? 'gold' : 'green'}>{STATUS_LABEL[log.status]}</NvBadge></span>
+          <span role="cell"><NvBadge tone={log.status === 'pending_review' ? 'gold' : 'green'}>{log.analysis_status === 'failed' ? 'Sin análisis' : STATUS_LABEL[log.status]}</NvBadge></span>
           <span role="cell" className="nvm-action">{log.status === 'pending_review' ? <NvButton onClick={() => onReview(log)}>Revisar</NvButton> : <small>Revisada</small>}</span>
         </article>)}
       </div> : <NvState title="Sin registros para mostrar" description={term ? 'Probá otra búsqueda.' : 'Las comidas enviadas por la paciente aparecerán acá.'} />}

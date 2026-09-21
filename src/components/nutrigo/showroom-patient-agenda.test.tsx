@@ -33,7 +33,7 @@ describe('Agenda paciente Nutrigo', () => {
   });
 
   it('muestra mes/semana/día, eventos reales y confirmación de asistencia', () => {
-    const html = renderToStaticMarkup(<ShowroomPatientAgenda patient={patient} now={now} onMessage={vi.fn()} storage={null} />);
+    const html = renderToStaticMarkup(<ShowroomPatientAgenda patient={patient} now={now} onMessage={vi.fn()} />);
     expect(html).toContain('Tu calendario');
     expect(html).toContain('Mes');
     expect(html).toContain('Semana');
@@ -57,7 +57,7 @@ describe('Agenda paciente Nutrigo', () => {
   it('rechaza enlaces inseguros y no inventa una fecha desde un valor inválido', () => {
     const unsafe = { ...patient, appointment: { ...patient.appointment!, when: 'Feriado · 29:99', meet_url: 'javascript:alert(1)' }, weekPlan: [], logs: [], activities: [] };
     const view = buildPatientAgendaView(unsafe, now);
-    const html = renderToStaticMarkup(<ShowroomPatientAgenda patient={unsafe} now={now} onMessage={vi.fn()} storage={null} />);
+    const html = renderToStaticMarkup(<ShowroomPatientAgenda patient={unsafe} now={now} onMessage={vi.fn()} />);
     expect(view.date).toBeNull();
     expect(view.events.filter((event) => event.kind === 'consult')).toHaveLength(0);
     expect(html).toContain('Fecha pendiente de corregir');
@@ -66,10 +66,20 @@ describe('Agenda paciente Nutrigo', () => {
   });
 
   it('ofrece contactar a la nutricionista cuando no hay consulta y conserva el calendario', () => {
-    const html = renderToStaticMarkup(<ShowroomPatientAgenda patient={{ ...patient, appointment: null }} now={now} onMessage={vi.fn()} storage={null} />);
+    const html = renderToStaticMarkup(<ShowroomPatientAgenda patient={{ ...patient, appointment: null }} now={now} onMessage={vi.fn()} />);
     expect(html).toContain('Sin consulta programada');
     expect(html).toContain('Escribirle a Verónica');
     expect(html).toContain('Tu calendario');
     expect(html).toContain('data-patient-agenda-day="2026-09-16"');
+  });
+
+  it('muestra la confirmación persistida y no un estado local', () => {
+    const confirmed = {
+      ...patient,
+      appointment: { ...patient.appointment!, confirmation: 'attending' as const },
+    };
+    const html = renderToStaticMarkup(<ShowroomPatientAgenda patient={confirmed} now={now} onMessage={vi.fn()} />);
+    expect(html).toContain('Asistencia confirmada');
+    expect(html).not.toContain('Confirmar asistencia');
   });
 });

@@ -24,7 +24,7 @@ describe('meal review API flow in memory mode', () => {
 
     const createResponse = await app.request(
       '/api/patients/pat-sofia/meals/analyze',
-      jsonRequest('POST', { slot: 'Almuerzo', description: 'pollo con arroz y ensalada' }),
+      jsonRequest('POST', { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', slot: 'Almuerzo', description: 'pollo con arroz y ensalada' }),
     );
     const created = await createResponse.json();
 
@@ -33,7 +33,7 @@ describe('meal review API flow in memory mode', () => {
     // La adherencia se recalcula en cada mutación; pendientes no suman.
     expect(created.patient.adherence_score).toBe(calculateAdherence(created.patient).score);
     expect(created.patient.meal_logs.filter((log: { status: string }) => log.status === 'pending_review')).toHaveLength(initialPending + 1);
-    expect(created.patient.timeline[0].title).toContain('foto en revisión');
+    expect(created.patient.timeline[0].title).toContain('en revisión');
 
     const adjustedFoods = [{ name: 'pollo al horno', portion_est: 140, portion_unit: 'g', confidence: 0.9 }];
     const adjustedMacros = { kcal: 410, protein_g: 38, carbs_g: 35, fat_g: 12 };

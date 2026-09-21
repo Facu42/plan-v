@@ -38,6 +38,7 @@ export type MealLog = {
   confidence: number;
   note_for_nutri: string;
   status: MealStatus;
+  analysis_status: 'pending' | 'succeeded' | 'failed';
   logged_at: string;
 };
 
@@ -97,7 +98,8 @@ export type ResourceAssignment = {
   read_at: string | null;
 };
 
-export type AppointmentHistoryAction = 'scheduled' | 'rescheduled' | 'patient_rescheduled' | 'cancelled' | 'elapsed';
+export type AppointmentConfirmation = 'attending' | 'needs_change';
+export type AppointmentHistoryAction = 'scheduled' | 'rescheduled' | 'patient_rescheduled' | 'cancelled' | 'elapsed' | 'confirmed';
 export type AppointmentHistoryActor = 'pro' | 'patient' | 'system';
 
 export type AppointmentHistoryEntry = {
@@ -146,7 +148,16 @@ export type Patient = {
   hydration: number;
   energy: string | null;
   sleep_minutes: number | null;
-  appointment: { when: string; duration: number; channel: string; meet_url?: string; starts_at?: string } | null;
+  appointment: {
+    when: string;
+    duration: number;
+    channel: string;
+    meet_url?: string;
+    starts_at?: string;
+    timezone?: string;
+    confirmation?: AppointmentConfirmation | null;
+    confirmed_at?: string | null;
+  } | null;
   appointment_history?: AppointmentHistoryEntry[];
   habit_logs: HabitLog[];
   activity_logs?: ActivityLog[];

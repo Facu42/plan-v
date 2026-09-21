@@ -46,10 +46,12 @@ export type PatientAction =
   | 'edit_menu'
   | 'edit_appointment'
   | 'reschedule_appointment'
+  | 'confirm_appointment'
   | 'edit_goal'
   | 'edit_billing'
   | 'assign_resource'
   | 'generate_copilot'
+  | 'generate_ai_job'
   | 'read_intake'
   | 'edit_intake'
   | 'submit_intake'
@@ -82,6 +84,7 @@ const PATIENT_ACTIONS = new Set<PatientAction>([
   'read_resource',
   'send_message',
   'reschedule_appointment',
+  'confirm_appointment',
   'read_intake',
   'edit_intake',
   'submit_intake',
@@ -98,10 +101,13 @@ const NUTRITIONIST_ACTIONS = new Set<PatientAction>([
   'archive_patient',
   'edit_menu',
   'edit_appointment',
+  'reschedule_appointment',
+  'confirm_appointment',
   'edit_goal',
   'edit_billing',
   'assign_resource',
   'generate_copilot',
+  'generate_ai_job',
   'read_intake',
   'review_intake',
   'read_consent',
@@ -162,6 +168,7 @@ export function toPatientSelfMealLog(log: MealLog): PatientSelfMealLog {
       : null,
     confidence: log.confidence,
     status: log.status,
+    analysis_status: log.analysis_status ?? 'succeeded',
     logged_at: log.logged_at,
   };
 }
@@ -179,6 +186,9 @@ function publicAppointment(appointment: Patient['appointment']): Patient['appoin
     channel: appointment.channel,
     ...(appointment.meet_url ? { meet_url: appointment.meet_url } : {}),
     ...(appointment.starts_at ? { starts_at: appointment.starts_at } : {}),
+    ...(appointment.timezone ? { timezone: appointment.timezone } : {}),
+    confirmation: appointment.confirmation ?? null,
+    confirmed_at: appointment.confirmed_at ?? null,
   };
 }
 

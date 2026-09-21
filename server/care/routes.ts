@@ -47,10 +47,14 @@ export function registerCareRoutes(app: Hono) {
     return c.json({ records: records.filter(r => professional || r.data.kind !== 'payment'), preferences, replacements: replacements.filter(r => professional || r.published_at), consented: bundle.consented, source: persistent ? 'supabase' : 'memory' });
   });
   app.post('/api/patients/:id/care/records', async c => {
-    const id = c.req.param('id'); const input = await body(c, careInputSchema);
+    const id = c.req.param('id');     const input = await body(c, careInputSchema);
     if (input.data.kind === 'body_photo') throw new repo.CareError(400, 'Usá el formulario de foto privada.');
-    const { persistent } = await access(c, id, input.data.kind === 'payment' ? 'professional' : 'patient');
-    if (input.data.kind === 'weight' || input.data.kind === 'waist') await requireCareConsent(id, persistent, 'measurement');
+    const measure = input.data.kind === 'weight' || input.data.kind === 'waist';
+    const { persistent, professional } = await access(c, id, input.data.kind === 'payment' || (measure && c.req.query('audience') === 'pro') ? 'professional' : 'patient');
+    if (measure && (input.data.kind === 'weight' || input.data.kind === 'waist')) {
+      await requireCareConsent(id, persistent, 'measurement');
+      input.data = { ...input.data, origin: professional ? 'professional' : 'patient' };
+    }
     const record = await repo.saveCareRecord(id, input, persistent); return c.json({ record });
   });
   app.patch('/api/patients/:id/care/records/:recordId/review', async c => {
