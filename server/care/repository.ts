@@ -1,5 +1,5 @@
 import { getRequestDb, privilegedDb } from '../db/supabase-client.js';
-import { DEFAULT_CARE_PREFERENCES, type CareInput, type CareRecord, type CarePreferences, type CareReplacement, type ReplacementRecipe } from '../../src/types/care.js';
+import { DEFAULT_CARE_PREFERENCES, isMeasurementData, isMeasurementKind, type CareInput, type CareRecord, type CarePreferences, type CareReplacement, type Measurement, type ReplacementRecipe } from '../../src/types/care.js';
 import { inspectPrivateFile } from '../assets/inspect.js';
 import { requireProductBuckets } from '../assets/storage.js';
 import { CareError } from './errors.js';
@@ -9,7 +9,8 @@ const preferences = new Map<string, CarePreferences>();
 const replacements = new Map<string, CareReplacement>();
 const photos = new Map<string, string>();
 const documents = new Map<string, string>();
-export function resetCareMemory() { records.clear(); preferences.clear(); replacements.clear(); photos.clear(); documents.clear(); }
+const measurements = new Map<string, Measurement>();
+export function resetCareMemory() { records.clear(); preferences.clear(); replacements.clear(); photos.clear(); documents.clear(); measurements.clear(); }
 export function careDbError(error: { code?: string } | null) {
   if (!error) return;
   if (['42P01','42883','PGRST202','PGRST205'].includes(error.code ?? '')) throw new CareError(501, 'El seguimiento requiere instalar la migración de este módulo.');
@@ -35,7 +36,51 @@ export async function saveCareRecord(patientId: string, input: CareInput, persis
     return old;
   }
   const record = { ...input, patient_id: patientId, created_at: new Date().toISOString(), reviewed_at: input.data.kind === 'payment' ? new Date().toISOString() : null };
-  records.set(record.id, record); return record;
+  records.set(record.id, record);
+  rememberMeasurement(record);
+  return record;
+}
+function rememberMeasurement(record: CareRecord) {
+  if (!isMeasurementData(record.data)) return;
+  measurements.set(record.id, {
+    id: record.id,
+    patient_id: record.patient_id,
+    kind: record.data.kind,
+    value_numeric: record.data.value,
+    unit: record.data.unit,
+    source: record.data.source,
+    captured_on: record.recorded_on,
+    created_at: record.created_at,
+  });
+}
+function asMeasurement(row: { id: string; patient_id: string; kind: string; value_numeric: number | string; unit: string; source: string; captured_on: string; created_at: string }): Measurement {
+  if (!isMeasurementKind(row.kind)) throw new CareError(400, 'Revisá los datos del registro.');
+  if (row.source !== 'patient' && row.source !== 'professional') throw new CareError(400, 'Revisá los datos del registro.');
+  return {
+    id: row.id,
+    patient_id: row.patient_id,
+    kind: row.kind,
+    value_numeric: Number(row.value_numeric),
+    unit: row.unit,
+    source: row.source,
+    captured_on: row.captured_on,
+    created_at: row.created_at,
+  };
+}
+export async function listMeasurements(patientId: string, persistent: boolean): Promise<Measurement[]> {
+  if (!persistent) {
+    return [...measurements.values()]
+      .filter((entry) => entry.patient_id === patientId)
+      .sort((a, b) => b.captured_on.localeCompare(a.captured_on) || b.created_at.localeCompare(a.created_at));
+  }
+  const { data, error } = await getRequestDb()
+    .from('measurements')
+    .select('id,patient_id,kind,value_numeric,unit,source,captured_on,created_at')
+    .eq('patient_id', patientId)
+    .order('captured_on', { ascending: false })
+    .limit(500);
+  careDbError(error);
+  return (data ?? []).map(asMeasurement);
 }
 export async function reviewCareRecord(patientId: string, id: string, persistent: boolean) {
   if (persistent) { const { error } = await getRequestDb().rpc('review_care_record', { target: patientId, record_id: id }); careDbError(error); return; }

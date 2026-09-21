@@ -4,7 +4,7 @@ import { authorizePatientAction } from '../security/authorization.js';
 import * as sb from '../db/supabase-repo.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { getPatient, getStore, DEMO_NUTRITIONIST_ID } from '../store.js';
-import { careInputSchema, carePreferencesSchema, replacementRecipeSchema, CARE_LABELS, type CareAlert } from '../../src/types/care.js';
+import { careInputSchema, carePreferencesSchema, replacementRecipeSchema, CARE_LABELS, isMeasurementData, type CareAlert } from '../../src/types/care.js';
 import * as repo from './repository.js';
 import { ingestReadyAsset } from '../assets/repository.js';
 import { handleProcessingJob } from '../jobs/handlers.js';
@@ -30,15 +30,17 @@ async function body<T>(c: Context, schema: z.ZodType<T>, max = 7_100_000): Promi
 export function registerCareRoutes(app: Hono) {
   app.get('/api/patients/:id/care', async c => {
     const id = c.req.param('id'); const { persistent, professional } = await access(c, id, 'read');
-    const [records, preferences, replacements, bundle] = await Promise.all([repo.listCareRecords(id, persistent), repo.getCarePreferences(id, persistent), repo.listReplacements(id, persistent), currentCareConsents(id, persistent)]);
-    return c.json({ records: records.filter(r => professional || r.data.kind !== 'payment'), preferences, replacements: replacements.filter(r => professional || r.published_at), consented: bundle.consented, source: persistent ? 'supabase' : 'memory' });
+    const [records, preferences, replacements, bundle, measurements] = await Promise.all([repo.listCareRecords(id, persistent), repo.getCarePreferences(id, persistent), repo.listReplacements(id, persistent), currentCareConsents(id, persistent), repo.listMeasurements(id, persistent)]);
+    return c.json({ records: records.filter(r => professional || r.data.kind !== 'payment'), preferences, replacements: replacements.filter(r => professional || r.published_at), consented: bundle.consented, measurements, source: persistent ? 'supabase' : 'memory' });
   });
   app.post('/api/patients/:id/care/records', async c => {
     const id = c.req.param('id'); const input = await body(c, careInputSchema);
     if (input.data.kind === 'body_photo') throw new repo.CareError(400, 'Usá el formulario de foto privada.');
     if (input.data.kind === 'clinical_document') throw new repo.CareError(400, 'Usá el formulario de estudios.');
-    const { persistent } = await access(c, id, input.data.kind === 'payment' ? 'professional' : 'patient');
-    if (input.data.kind === 'weight' || input.data.kind === 'waist') await requireCareConsent(id, persistent, 'measurement');
+    const measurement = isMeasurementData(input.data);
+    const professionalMeasure = isMeasurementData(input.data) && input.data.source === 'professional';
+    const { persistent } = await access(c, id, input.data.kind === 'payment' || professionalMeasure ? 'professional' : 'patient');
+    if (measurement) await requireCareConsent(id, persistent, 'measurement');
     const record = await repo.saveCareRecord(id, input, persistent); return c.json({ record });
   });
   app.patch('/api/patients/:id/care/records/:recordId/review', async c => {

@@ -45,8 +45,8 @@ describe('Progreso paciente dentro de Nutrigo', () => {
   it('no presenta medidas, inferencias clínicas ni campos profesionales', () => {
     const html = renderToStaticMarkup(<ShowroomProgress patient={patient} />);
     expect(html).not.toContain('IMC');
-    expect(html).toContain('Peso semanal');
-    expect(html).toContain('estudios opcionales');
+    expect(html).toContain('Peso, cintura y cadera opcionales');
+    expect(html).toContain('Fotos y estudios no se usan para estimar medidas');
     expect(html).toContain('Cargando registros');
     expect(html).not.toContain('adherence_why');
     expect(html).not.toContain('goal_history');

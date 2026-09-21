@@ -20,6 +20,8 @@ describe('seguimiento conectado',()=>{
     expect((await post(`${base}/records`,input)).status).toBe(200);
     expect((await post(`${base}/records`,{...input,data:{...input.data,value:65}})).status).toBe(409);
     const body=await(await app.request(base)).json();expect(body.records).toHaveLength(1);expect(body.records[0].recorded_on).toBe('2026-09-10');
+    expect(body.measurements).toHaveLength(1);
+    expect(body.measurements[0]).toMatchObject({kind:'weight',value_numeric:64.5,unit:'kg',source:'patient',captured_on:'2026-09-10'});
     const alerts=await(await app.request('/api/care/alerts')).json();expect(alerts.alerts.find((a:any)=>a.id===input.id).title).toBe('Peso semanal');
     expect(JSON.stringify(alerts)).not.toContain('64.5');
     await post(`${base}/records/${input.id}/review`,{},'PATCH');
@@ -54,6 +56,7 @@ describe('seguimiento conectado',()=>{
     await consent('body_progress','withdrawn');expect((await app.request(`${base}/photos/${id}`)).status).toBe(403);
     expect((await app.request(`${base}/photos/${id}`,{method:'DELETE'})).status).toBe(200);
     expect((await(await app.request(base)).json()).records).toEqual([]);
+    expect((await(await app.request(base)).json()).measurements).toEqual([]);
   });
   it('estudios: permiso, visor, aislamiento y retiro',async()=>{
     const id=randomUUID();
@@ -75,6 +78,27 @@ describe('seguimiento conectado',()=>{
     expect((await app.request(`${base}/documents/${id}`)).status).toBe(403);
     expect((await app.request(`${base}/documents/${id}`,{method:'DELETE'})).status).toBe(200);
     expect((await(await app.request(base)).json()).records).toEqual([]);
+  });
+  it('peso/medidas: unidad, origen, historial; fotos no infieren medidas',async()=>{
+    await consent('measurement');
+    const weight={id:randomUUID(),recorded_on:'2026-09-10',data:{kind:'weight',value:140,unit:'lb',source:'patient',note:''}};
+    expect((await post(`${base}/records`,weight)).status).toBe(200);
+    const hip={id:randomUUID(),recorded_on:'2026-09-09',data:{kind:'hip',value:98,unit:'cm',source:'professional',note:'consultorio'}};
+    expect((await post(`${base}/records`,hip)).status).toBe(200);
+    const mismatch={id:randomUUID(),recorded_on:'2026-09-08',data:{kind:'waist',value:70,unit:'in',source:'professional',note:''}};
+    expect((await post(`${base}/records`,mismatch)).status).toBe(200);
+    const snapshot=await(await app.request(base)).json();
+    expect(snapshot.measurements.map((m:any)=>m.kind)).toEqual(['weight','hip','waist']);
+    expect(snapshot.measurements.find((m:any)=>m.kind==='weight')).toMatchObject({unit:'lb',source:'patient',value_numeric:140});
+    expect(snapshot.measurements.find((m:any)=>m.kind==='hip')).toMatchObject({unit:'cm',source:'professional',value_numeric:98});
+    await consent('body_progress');
+    const photoId=randomUUID();
+    const image='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a3uoAAAAASUVORK5CYII=';
+    expect((await post(`${base}/photos`,{id:photoId,recorded_on:'2026-09-10',image,note:''})).status).toBe(200);
+    const afterPhoto=await(await app.request(base)).json();
+    expect(afterPhoto.records.some((r:any)=>r.data.kind==='body_photo')).toBe(true);
+    expect(afterPhoto.measurements.some((m:any)=>m.id===photoId)).toBe(false);
+    expect(afterPhoto.measurements).toHaveLength(3);
   });
   it('rechaza futuras fechas, datos ajenos, calorías negativas y preferencias inválidas',async()=>{
     for(const data of [{kind:'activity',activity:'Caminar',minutes:30,intensity:'suave',kcal:-2,note:''},{kind:'payment',amount:0,currency:'ARS',method:'otro',reference:'',note:''}])expect((await post(`${base}/records`,{id:randomUUID(),recorded_on:'2026-09-10',data})).status).toBe(400);

@@ -2,7 +2,7 @@
 
 ## Revisión vigente de avance — 2026-09-21
 
-PV-15 en esta rama: reserva/cuarentena/EXIF/cuota/URL 60 s + fail closed sin buckets. PV-16 estudios demo ya PASS; ahora el PDF activo se rechaza y la subida pasa por el mismo inspect. **Live Storage no**: el proyecto hospedado tiene `patients` y buckets `[]`; no se crearon buckets ni se aplicó SQL. Siguiente P0: PV-17. No P1, no visual Nutrigo.
+PV-17 en esta rama: peso/cintura/cadera opcionales con fecha, unidad, origen e historial; dual-write `measurements` + `care_records`; fotos/estudios no infieren medidas; fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Siguiente P0: PV-18 recetas. No P1, no visual Nutrigo.
 
 ## Revisión vigente de avance — 2026-09-19
 
