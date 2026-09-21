@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { careErrorMessage } from '../../api/care';
 import { plansApi } from '../../api/plans';
 import { recipesApi } from '../../api/recipes';
+import { aiJobsApi } from '../../api/ai-jobs';
 import { PLAN_SLOTS, buildPublishedPlanDays, mealPlanDraftSchema, toPublishedPatientPlan, type PatientMealPlan, type PlanItemView, type PlanSlot, type ProfessionalMealPlan } from '../../types/plans';
 import type { ProfessionalRecipe } from '../../types/recipes';
 import { NvButton, NvState } from './primitives';
@@ -91,7 +92,7 @@ export function MealPlanEditor({ patientId }: { patientId: string }) {
       <div>
         <span>PLAN FECHADO</span>
         <h2>Versiones del plan</h2>
-        <p>El borrador se edita aparte. Publicar usa la versión esperada y deja una copia inmutable. El paciente sólo ve la publicada.</p>
+        <p>El borrador se edita aparte. Publicar usa la versión esperada y deja una copia inmutable. El paciente sólo ve la publicada. La IA propone un borrador; no publica sola.</p>
       </div>
     </header>
     {source === 'memory' && <p className="meal-plan-demo">Vista demo · el plan fechado se conserva mientras la API siga encendida.</p>}
@@ -117,6 +118,17 @@ export function MealPlanEditor({ patientId }: { patientId: string }) {
       </div>)}
       <div className="meal-plan-actions">
         <button type="button" className="meal-plan-add" onClick={() => setDraftItems([...draftItems, emptyItem(periodStart || draftItems[0]?.for_date || '')])}>Agregar indicación</button>
+        <NvButton type="button" className="nv-ghost" disabled={busy || !periodStart || !periodEnd} onClick={() => void run(async () => {
+          const created = await aiJobsApi.enqueue({
+            patient_id: patientId,
+            job_type: 'menu_draft',
+            period_start: periodStart,
+            period_end: periodEnd,
+            slots: ['Almuerzo', 'Cena'],
+          });
+          if (created.job.status !== 'succeeded' || !created.job.artifact) throw new Error(created.job.error_code === 'stale_context' ? 'El ingreso cambió. Regenerá la propuesta.' : 'No se pudo preparar el borrador de IA.');
+          await aiJobsApi.apply(created.job.id);
+        }, 'Propuesta de menú lista para tu revisión. No se publicó.')}>Generar propuesta de menú</NvButton>
         <NvButton type="submit" disabled={busy}>Guardar borrador</NvButton>
         {plan && !plan.current.published_at && <NvButton disabled={busy} onClick={() => void run(() => plansApi.publish(plan.id, plan.current.version), 'Plan publicado. El borrador nuevo ya no cambia esta copia.')}>Publicar v{plan.current.version}</NvButton>}
       </div>

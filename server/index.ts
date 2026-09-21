@@ -7,6 +7,7 @@ import { registerPlanRoutes } from './plans/routes.js';
 import { registerDiaryRoutes } from './diary/routes.js';
 import { registerMessageRoutes } from './messages/routes.js';
 import { registerAppointmentRoutes } from './appointments/routes.js';
+import { registerAiJobRoutes } from './ai-jobs/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -215,6 +216,7 @@ registerPlanRoutes(app);
 registerDiaryRoutes(app);
 registerMessageRoutes(app);
 registerAppointmentRoutes(app);
+registerAiJobRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({

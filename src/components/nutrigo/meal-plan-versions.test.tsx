@@ -37,6 +37,8 @@ describe('Plan fechado profesional y publicado', () => {
     expect(html).toContain('Versiones del plan');
     expect(html).toContain('versión esperada');
     expect(html).toContain('Guardar borrador');
+    expect(html).toContain('Generar propuesta de menú');
+    expect(html).toContain('no publica sola');
     expect(html).toContain('PLAN FECHADO');
     expect(html).toContain('Almuerzo');
     expect(html).not.toMatch(/\bkcal\b|proteína|carbohidrato/i);

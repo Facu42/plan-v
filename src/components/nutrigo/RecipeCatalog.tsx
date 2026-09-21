@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { recipesApi } from '../../api/recipes';
+import { aiJobsApi } from '../../api/ai-jobs';
 import { careErrorMessage } from '../../api/care';
 import { RECIPE_UNITS, recipeDraftSchema, type ProfessionalRecipe, type RecipeDraftInput, type RecipeUnit } from '../../types/recipes';
 import { NvButton, NvState } from './primitives';
@@ -83,9 +84,16 @@ export function RecipeCatalog({ patientId }: { patientId: string }) {
       <div>
         <span>CATÁLOGO DEL CONSULTORIO</span>
         <h2>Recetas e ingredientes</h2>
-        <p>Porciones, pasos y fuente nutricional declarada. Un borrador no cambia la revisión publicada. No se inventan calorías ni macros.</p>
+        <p>Porciones, pasos y fuente nutricional declarada. Un borrador no cambia la revisión publicada. No se inventan calorías ni macros. La IA deja un borrador privado; vos publicás.</p>
       </div>
-      <NvButton className="nv-ghost" disabled={busy} onClick={() => { setEditing(emptyDraft()); setStatus(''); setError(''); }}>Nueva receta</NvButton>
+      <div className="recipe-header-actions">
+        <NvButton className="nv-ghost" disabled={busy} onClick={() => { setEditing(emptyDraft()); setStatus(''); setError(''); }}>Nueva receta</NvButton>
+        <NvButton disabled={busy} onClick={() => void run(async () => {
+          const created = await aiJobsApi.enqueue({ patient_id: patientId, job_type: 'recipe_draft', title_hint: editing?.title || undefined });
+          if (created.job.status !== 'succeeded' || !created.job.artifact) throw new Error(created.job.error_code === 'stale_context' ? 'El ingreso cambió. Regenerá la propuesta.' : 'No se pudo preparar el borrador de IA.');
+          await aiJobsApi.apply(created.job.id);
+        }, 'Borrador de IA listo para tu revisión. No se publicó.')}>Generar borrador con IA</NvButton>
+      </div>
     </header>
     {source === 'memory' && <p className="recipe-demo">Vista demo · el catálogo se conserva mientras la API siga encendida.</p>}
     {error && <p className="recipe-error" role="alert">{error}</p>}

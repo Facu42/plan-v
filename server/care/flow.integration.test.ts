@@ -34,6 +34,9 @@ describe('seguimiento conectado',()=>{
     const id=randomUUID();await post(`${base}/records`,{id,recorded_on:'2026-09-10',data:{kind:'menu_request',target:'Almuerzo',reason:'No consigo el ingrediente',replacement:'ingredient'}});
     expect((await post(`${base}/replacements/${id}/generate`,{})).status).toBe(403);
     await consent('ai_menu_draft');
+    const started=await app.request(`/api/patients/${patient}/intake`);
+    const first=await started.json() as {intake:{revision:number}};
+    await post(`/api/patients/${patient}/intake`,{expected_revision:first.intake.revision,payload:{preferred_name:'Sofi',allergies:{state:'none',items:[]},restrictions:{state:'none',items:[]}}},'PATCH');
     const response=await post(`${base}/replacements/${id}/generate`,{});expect(response.status).toBe(200);const generated=await response.json();
     expect(generated.replacement.source).toBe('demo');
     expect(generated.job_id).toBeTruthy();

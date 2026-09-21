@@ -136,7 +136,7 @@ describe('canAccessPatient', () => {
     },
   );
 
-  it.each<PatientAction>(['read_clinical', 'review_meal', 'generate_copilot', 'edit_patient', 'archive_patient', 'edit_menu', 'edit_appointment', 'edit_goal', 'edit_billing', 'assign_resource', 'review_intake', 'write_clinical_note'])(
+  it.each<PatientAction>(['read_clinical', 'review_meal', 'generate_copilot', 'generate_ai_job', 'edit_patient', 'archive_patient', 'edit_menu', 'edit_appointment', 'edit_goal', 'edit_billing', 'assign_resource', 'review_intake', 'write_clinical_note'])(
     'does not allow a patient to perform the professional action %s',
     (action) => {
       const actor: Actor = { role: 'paciente', userId: 'user-patient', patientId: 'patient-1' };
@@ -158,6 +158,7 @@ describe('canAccessPatient', () => {
     expect(canAccessPatient(actor, patientOwner, 'read_intake')).toBe(true);
     expect(canAccessPatient(actor, patientOwner, 'review_intake')).toBe(true);
     expect(canAccessPatient(actor, patientOwner, 'write_clinical_note')).toBe(true);
+    expect(canAccessPatient(actor, patientOwner, 'generate_ai_job')).toBe(true);
     expect(canAccessPatient(actor, { ...patientOwner, nutritionistId: 'nutri-2' }, 'read_clinical')).toBe(false);
     expect(canAccessPatient(actor, { ...patientOwner, nutritionistId: 'nutri-2' }, 'edit_patient')).toBe(false);
     expect(canAccessPatient(actor, { ...patientOwner, nutritionistId: 'nutri-2' }, 'archive_patient')).toBe(false);

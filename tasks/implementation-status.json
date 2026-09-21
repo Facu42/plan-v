@@ -158,9 +158,9 @@
     "PV-27": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Borrador de alternativa (demo/IA) a pedido del paciente; la nutricionista edita y publica. El paciente no ve el borrador. Requiere alergias/restricciones declaradas en live. Sin jobs versionados.",
-      "evidence": "server/ai/replacements.ts, CareRecipeEditor, generate/publish RPC, server/acompanamiento.integration.test.ts. Circuito demo: borrador oculto hasta publicar.",
-      "updatedAt": "2026-09-19T20:02:00.000Z"
+      "notes": "Jobs versionados receta/menú con prompt_version, context_hash, límites de tokens/tiempo/cola y apply a borrador profesional. Nunca publica. Fail closed 501 sin schema. Live schema/claves IA no.",
+      "evidence": "supabase/migrations/20260921250000_ai_jobs.sql; server/ai-jobs/*; server/ai/context.ts. 653 pruebas OK, 2 omitidas; check/check:migrations/build OK.",
+      "updatedAt": "2026-09-21T05:05:00.000Z"
     },
     "PV-28": {
       "status": "in_progress",
@@ -171,6 +171,14 @@
     }
   },
   "history": [
+    {
+      "id": "c21a27e0-9f12-4a3b-8c01-pv270001",
+      "taskId": "PV-27",
+      "at": "2026-09-21T05:05:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
     {
       "id": "c19a22e0-9f12-4a3b-8c01-acomp0001",
       "taskId": "PV-22",

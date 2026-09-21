@@ -29,6 +29,7 @@ import { resetRecipeMemory } from './recipes/repository.js';
 import { resetMealPlanMemory } from './plans/repository.js';
 import { resetDiaryMemory } from './diary/repository.js';
 import { markMemoryRead, resetMessageMemory, sendMemoryMessage } from './messages/repository.js';
+import { resetAiJobMemory } from './ai-jobs/repository.js';
 
 export type { PatientInvite, InviteEvent } from './identity/invites.js';
 
@@ -706,6 +707,7 @@ export function resetStore(): void {
   resetMealPlanMemory();
   resetDiaryMemory();
   resetMessageMemory();
+  resetAiJobMemory();
   store = {
     patients: seedPatients(),
     patientInvites: [],
