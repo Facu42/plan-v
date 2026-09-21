@@ -101,6 +101,16 @@ export function buildShoppingList(meals: readonly ShoppingMeal[]): ShoppingGroup
   })).filter((group) => group.items.length > 0);
 }
 
+export function shoppingCategoryFor(name: string): ShoppingCategory {
+  const source = normalized(name);
+  return INGREDIENT_RULES.find((rule) => rule.pattern.test(source))?.category ?? 'Otros';
+}
+
+export function formatShoppingQty(quantity: number | null, unit: string | null): string {
+  if (quantity == null || !unit) return '';
+  return `${quantity} ${unit}`;
+}
+
 export function shoppingChecklistKey(patientId: string, weekId: string): string {
   return `plan-v:${patientId}:shopping:${weekId}`;
 }

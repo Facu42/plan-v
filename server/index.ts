@@ -9,6 +9,7 @@ import { registerMessageRoutes } from './messages/routes.js';
 import { registerAppointmentRoutes } from './appointments/routes.js';
 import { registerAiJobRoutes } from './ai-jobs/routes.js';
 import { registerPrivacyRoutes } from './privacy/routes.js';
+import { registerShoppingRoutes } from './shopping/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -246,6 +247,7 @@ registerMessageRoutes(app);
 registerAppointmentRoutes(app);
 registerAiJobRoutes(app);
 registerPrivacyRoutes(app);
+registerShoppingRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({

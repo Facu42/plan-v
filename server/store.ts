@@ -31,6 +31,7 @@ import { resetDiaryMemory } from './diary/repository.js';
 import { markMemoryRead, resetMessageMemory, sendMemoryMessage } from './messages/repository.js';
 import { resetAiJobMemory } from './ai-jobs/repository.js';
 import { resetPrivacyMemory } from './privacy/repository.js';
+import { resetShoppingMemory } from './shopping/repository.js';
 
 export type { PatientInvite, InviteEvent } from './identity/invites.js';
 
@@ -712,6 +713,7 @@ export function resetStore(): void {
   resetMessageMemory();
   resetAiJobMemory();
   resetPrivacyMemory();
+  resetShoppingMemory();
   store = {
     patients: seedPatients(),
     patientInvites: [],
