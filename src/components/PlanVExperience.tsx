@@ -10,8 +10,7 @@ import { api } from '../api/client';
 import { readThemePreference, writeThemePreference, type ThemePreference } from '../theme-preference';
 import { Mark } from './shared/Icon';
 import { canUseDemoRoleSwitch, shouldShowNutrigo } from './design-entry';
-import { InstallBanner } from '../pwa/InstallBanner';
-import { OfflineNotice } from '../pwa/OfflineNotice';
+import { PwaChrome } from '../pwa/PwaChrome';
 
 const NutrigoShowroom = lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })));
 
@@ -79,18 +78,20 @@ export function PlanVExperience() {
   if (authLoading) {
     return (
       <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}>
+        <PwaChrome />
         <div className="loading-card"><Mark /><p className="eyebrow">Plan V</p><h2>Cargando…</h2></div>
       </div>
     );
   }
 
   if (!session && !demoMode) {
-    return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><LoginScreen darkMode={darkMode} onToggleTheme={toggleTheme} /></div>;
+    return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PwaChrome /><LoginScreen darkMode={darkMode} onToggleTheme={toggleTheme} /></div>;
   }
 
   if (session && !isNutri && !isPatient) {
     return (
       <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}>
+        <PwaChrome />
         <div className="loading-card">
           <Mark />
           <p className="eyebrow">Plan V</p>
@@ -112,6 +113,7 @@ export function PlanVExperience() {
           : 'Todavía no hay una ficha vinculada a esta cuenta. Abrí el enlace de invitación o esperá a que tu nutricionista te invite.';
     return (
       <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}>
+        <PwaChrome />
         <div className="loading-card">
           <Mark />
           <p className="eyebrow">Plan V</p>
@@ -126,6 +128,7 @@ export function PlanVExperience() {
   if (loading) {
     return (
       <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}>
+        <PwaChrome />
         <div className="loading-card"><Mark /><p className="eyebrow">Plan V</p><h2>Cargando datos…</h2></div>
       </div>
     );
@@ -134,6 +137,7 @@ export function PlanVExperience() {
   if (error) {
     return (
       <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}>
+        <PwaChrome />
         <div className="loading-card error">
           <Mark />
           <p className="eyebrow">Plan V</p>
@@ -149,8 +153,7 @@ export function PlanVExperience() {
     const lockedRole = session ? (isNutri ? 'pro' as const : 'patient' as const) : null;
     return (
       <Suspense fallback={<div className="plan-v-app loading-screen" role="status">Cargando consultorio…</div>}>
-        <OfflineNotice />
-        <InstallBanner />
+        <PwaChrome />
         <NutrigoShowroom
           darkMode={darkMode}
           onToggleTheme={toggleTheme}
@@ -166,6 +169,7 @@ export function PlanVExperience() {
 
   return (
     <div className={`plan-v-app${darkMode ? ' dark' : ''}`}>
+      <PwaChrome />
       <div className="prototype-switch" role="group" aria-label="Cambiar vista">
         {showToggle ? (
           <>

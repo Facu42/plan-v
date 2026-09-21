@@ -4,8 +4,8 @@ export function isClinicalUrl(url: string, origin = 'http://127.0.0.1'): boolean
   try {
     const parsed = new URL(url, origin);
     if (parsed.pathname === '/api' || parsed.pathname.startsWith('/api/')) return true;
-    if (parsed.hostname.includes('supabase.co')) return true;
-    if (parsed.pathname.includes('/storage/v1')) return true;
+    if (parsed.hostname.includes('supabase.co') || parsed.hostname.includes('supabase.in')) return true;
+    if (parsed.pathname.includes('/storage/v1') || parsed.pathname.startsWith('/functions/v1')) return true;
     if (parsed.searchParams.has('token')) return true;
     if (SIGNED.test(parsed.search)) return true;
     return false;

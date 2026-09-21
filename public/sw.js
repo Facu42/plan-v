@@ -1,13 +1,13 @@
 /* Plan V shell worker. Never cache /api, Supabase, signed URLs or clinical payloads. */
-const SHELL = 'plan-v-shell-v1';
-const SHELL_URLS = ['/offline.html', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png'];
+const SHELL = 'plan-v-shell-v2';
+const SHELL_URLS = ['/offline.html', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png'];
 
 function clinicalRequest(url) {
   try {
     const parsed = new URL(url, self.location.origin);
     if (parsed.pathname === '/api' || parsed.pathname.startsWith('/api/')) return true;
-    if (parsed.hostname.includes('supabase.co')) return true;
-    if (parsed.pathname.includes('/storage/v1')) return true;
+    if (parsed.hostname.includes('supabase.co') || parsed.hostname.includes('supabase.in')) return true;
+    if (parsed.pathname.includes('/storage/v1') || parsed.pathname.startsWith('/functions/v1')) return true;
     if (parsed.searchParams.has('token')) return true;
     if (/X-Amz-Signature|sig=/i.test(parsed.search)) return true;
     return false;
@@ -36,9 +36,18 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter((key) => key !== SHELL).map((key) => caches.delete(key)));
+    const stale = keys.filter((key) => key.startsWith('plan-v-shell-') && key !== SHELL);
+    await Promise.all(stale.map((key) => caches.delete(key)));
     await self.clients.claim();
+    if (stale.length) {
+      const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      for (const client of clients) client.postMessage({ type: 'SHELL_UPDATED', cache: SHELL });
+    }
   })());
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('fetch', (event) => {
