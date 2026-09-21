@@ -68,7 +68,8 @@ export function declaredDelta(current: number | null | undefined, previous: numb
 
 function lastPoint(points: readonly ProgressPoint[]): ProgressPoint | null {
   if (!points.length) return null;
-  return [...points].sort(byCaptured).at(-1) ?? null;
+  const ordered = [...points].sort(byCaptured);
+  return ordered[ordered.length - 1] ?? null;
 }
 
 function asPoint(entry: Measurement): ProgressPoint {
