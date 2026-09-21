@@ -166,7 +166,7 @@
       "status": "in_progress",
       "owner": "",
       "notes": "Evaluación sintética eval.v1 (30 escenarios) al publicar/asignar: alergias, faltantes/unidades, coherencia, edición concurrente; apply/worker no publican. Fail closed 501 sin schema. Live schema/claves IA no.",
-      "evidence": "server/ai-eval/*; supabase/migrations/20260921260000_ai_eval.sql. Demo+PGlite; check/check:migrations/build pendientes de esta verificación.",
+      "evidence": "server/ai-eval/*; supabase/migrations/20260921260000_ai_eval.sql. 691 pruebas OK, 2 omitidas; check/check:migrations/build OK.",
       "updatedAt": "2026-09-19T20:02:00.000Z"
     }
   },
