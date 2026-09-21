@@ -27,6 +27,7 @@ describe('PV-33 acta de salida (piloto-acta.v1)', () => {
     expect(acta.liveBlockers.some((reason) => /not an automated clinical gate/.test(reason))).toBe(true);
     expect(acta.notes.some((note) => /Mercado Pago is P1/.test(note))).toBe(true);
     expect(acta.notes.some((note) => /not visual sign-off/.test(note))).toBe(true);
+    expect(acta.notes.some((note) => /Numbered plan PV-01…PV-39 is covered in code/.test(note))).toBe(true);
     expect(JSON.stringify(acta)).not.toMatch(/eval\.v1 is a clinical gate/i);
   });
 

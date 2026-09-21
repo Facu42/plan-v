@@ -7,7 +7,7 @@ Fecha: 16 de septiembre de 2026. Estado: **propuesta de revisión**. No autoriza
 | Artefacto | Qué cubre | Qué no cubre |
 | --- | --- | --- |
 | `supabase/contracts/016_plan_v_contract_draft.sql` | Núcleo 016 v2: identidad, invitación, menú semanal, comidas, hábitos, turnos, mensajes, briefs, pagos, auditoría, Storage de fotos de comida | Recetas versionadas, intake, consentimientos, planes fechados, jobs de IA, recibos |
-| `supabase/contracts/016b_piloto_ampliacion_draft.sql` | Ampliación del piloto (H1–H4): ingreso, archivos por categoría, recetas/planes, historial de turnos, recibos, recursos, outbox | `exercise_library`, organizaciones/equipos (PV-38 vive en `20260921340000_organizations.sql` descartable), listas de compra persistidas, presupuesto |
+| `supabase/contracts/016b_piloto_ampliacion_draft.sql` | Ampliación del piloto (H1–H4): ingreso, archivos por categoría, recetas/planes, historial de turnos, recibos, recursos, outbox | `exercise_library`, organizaciones/equipos (PV-38 vive en `20260921340000_organizations.sql` descartable), listas de compra persistidas (PV-21), presupuesto **OUT** (PV-39; sin tablas) |
 | `supabase/contracts/legacy/20260901000000_plan_v_v0.sql` | Legado inseguro | No se corre |
 
 `npm run check:migrations` vigila sólo `supabase/migrations/`. Estos borradores viven en `contracts/` a propósito.

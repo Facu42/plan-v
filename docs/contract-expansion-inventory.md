@@ -15,7 +15,7 @@ de entidades existentes, no debe persistirse; **futura** = sin implementación.
 | `resource_assignments` | demo + PGlite (PV-36) | 016b: `resources` + `resource_assignments` (`first_read_at`) | Live schema en proyecto **vacío**. 501 sin RPC |
 | `activity_logs` | demo (corte 57) | 016b: actividad autodeclarada, sin calorías | RLS paciente-insert / nutri-select |
 | `plan_b` | campo en `patients` | núcleo 016; fuera del DTO paciente (PV-03) | Confirmar si alguna vez se publica |
-| Lista de compras | derivada | **fuera del piloto** | `shopping_lists` post-piloto (PV-21/39) |
+| Lista de compras | demo + PGlite (PV-21) | **fuera del piloto**; presupuesto **OUT** (PV-39) | `shopping_lists` post-piloto (PV-21). Sin presupuesto/precios. Writes de budget → 501 |
 | `recipes` / `recipe_ingredients` | demo + PGlite (PV-18) | 016b: recetas versionadas + ingredientes + asignaciones | Live schema en proyecto **vacío** (no el de `patients`) |
 | `meal_plans` / versiones | demo + PGlite (PV-19/20); plantilla semanal 016 sigue aparte | 016b: plan fechado, una versión `published` | Live schema en proyecto **vacío**. Compras: PV-21 (P1) |
 | `meal_logs` + `meal_analysis_runs` / `meal_reviews` | demo + PGlite (PV-22); save-first + `client_id` | 016b: análisis y revisión separados del registro | Live schema/buckets en proyecto **vacío**. Job IA asíncrono: PV-27 |
@@ -31,6 +31,7 @@ de entidades existentes, no debe persistirse; **futura** = sin implementación.
 | `exercise_library` / rutinas | demo + PGlite (PV-35) | **fuera del piloto** (PV-35) | Habilitación profesional verificada |
 | `favorites` | demo + PGlite (PV-36) | no en 016b | Live schema en proyecto **vacío**. Paciente `manage_favorites`; Plan B no |
 | `organizations` / equipos | demo + PGlite (PV-38) | **fuera del piloto** (PV-38) | Live schema en proyecto **vacío**. Ownership y delegación. Suscripción B2B es estado, sin claves de cobro. 501 sin RPC |
+| Presupuesto / wearables / video nativo | — | **OUT** (PV-39) | Sin tablas. POST `shopping/budget`, `activity/import`, `video-room` → 501. Se conserva lista PV-21, actividad PV-35 y `meet_url` HTTPS |
 
 Reglas transversales ya vigentes: ninguna entidad nueva puede exponer
 `note_for_nutri`, `goal_history` profesional, `adherence_why`, `brief` ni

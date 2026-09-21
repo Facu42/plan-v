@@ -185,7 +185,7 @@ El usuario pidió definir un estándar de app nutricional moderna y aplicarlo, e
 - [x] 8.0 Base paciente en Nutrigo: lista conservadora derivada del plan semanal vigente, categorías, deduplicación, ocurrencias y aviso explícito de límites.
 - [ ] 8.1 Modelar ingredientes, cantidades, unidades y agregados manuales; hoy esos datos no existen y no se inventan.
 - [x] 8.2 Comprado/pendiente local por paciente, búsqueda, filtros y exportación de texto.
-- [ ] 8.3 Presupuesto/gastos sólo si se aprueba.
+- [x] 8.3 Presupuesto/gastos **OUT** (PV-39) hasta evidencia de uso. No implementar. POST `/shopping/budget` → 501.
 
 ## Paso 9 — Diario de comidas
 

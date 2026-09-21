@@ -13,6 +13,7 @@ const PUBLIC_API_PATHS = new Set([
   '/api/ready',
   '/api/auth/recover',
   '/api/ops/nutritionists',
+  '/api/alcance',
 ]);
 
 export function resolveRequestAuth(input: {

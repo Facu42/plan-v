@@ -2,6 +2,8 @@
 
 ## Revisión vigente de avance — 2026-09-21
 
+PV-39 en esta rama: decisión de alcance **ejecutable**. Presupuesto de compras, importación de actividad (wearables) y video nativo quedan **OUT** hasta evidencia de uso. Se conserva la lista operativa (PV-21), la actividad autodeclarada (PV-35) y `meet_url` HTTPS. Escrituras `shopping/budget`, `activity/import` y `video-room` → **501**. Sin tablas de presupuesto. **No es aprobación visual de Nutrigo.** Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. El plan numerado PV-01…PV-39 queda cubierto en código; no hay PV-40. PV-32 se salta (piloto gratuito). No Railway re-point, PWA física, `eval.v1` clínico, retención legal ni email/push `sent`.
+
 PV-38 en esta rama: organizaciones y equipos, múltiples vínculos de cuidado, delegación y suscripción B2B **como estado** (waived/trialing/canceled/past_due; `active` exige proveedor y no se inventa). Transferencia de ownership reescribe `patients.nutritionist_id` y los hijos con FK compuesta, con auditoría. **No es aprobación visual de Nutrigo.** Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 785 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-39 (PV-32 se salta, piloto gratuito). No Railway re-point, PWA física, `eval.v1` clínico, retención legal ni email/push `sent`.
 
 PV-37 en esta rama: paridad de **layout y estados** de las doce superficies Nutrigo a 1440/800/390/320, claro/oscuro, vacío/error/carga y `:focus-visible`. Reorganización tablet/móvil (no encoger el escritorio). Overflow de progreso/diario (`min-width:650px`) corregido. **No es aprobación visual de Facu.** Live no aplica: no hay SQL. Verificación: 776 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-38 (PV-32 se salta, piloto gratuito). No Railway re-point, PWA física, `eval.v1` clínico, retención legal ni email/push `sent`.
@@ -152,7 +154,7 @@ La referencia aporta doce superficies. Plan V implementará funciones equivalent
 - [x] Alcance de producto: usuario aprueba peso y medidas opcionales, registro de actividad y rutinas asignadas por profesional habilitado.
 - [ ] Peso/medidas: implementar historial, permisos, consentimiento y retención. Actualización 2026-09-16: fotografías corporales opcionales y estudios incluidos por confirmación del usuario; requieren modelo, consentimiento específico, Storage privado y QA antes de datos reales.
 - [ ] Ejercicio: el registro paciente autodeclarado ya funciona en memoria y es visible para su nutricionista; faltan persistencia/RLS y acreditación/permiso para asignar rutinas. El rol nutricionista por sí solo no habilita prescripción automática.
-- [ ] Presupuesto y gastos de supermercado: confirmar si aportan valor o si Grocery queda sólo como lista operativa.
+- [x] Presupuesto y gastos de supermercado: **OUT** (PV-39) hasta evidencia de uso. Grocery queda lista operativa (PV-21). POST `/shopping/budget` → 501. Sin tablas de presupuesto.
 - [x] Contenido editorial clínico de Insights: autoría, revisión y reglas de publicación en Postgres descartable (PV-36). Portada ilustrativa local (`cover_url` nulo); no hay imagen licenciada remota inventada. Live schema bloqueado si el proyecto tiene `patients`.
 - [x] Usuario confirma que compró la licencia de todo el pack Nutrigo y autoriza su uso en Plan V. Conservar procedencia de los assets; esto no afirma revisión independiente de términos legales.
 
@@ -277,7 +279,7 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 - [x] Superficie paciente en Nutrigo derivada del plan semanal vigente, con categorías, deduplicación, ocurrencias y límites explícitos.
 - [x] Comprado/pendiente local aislado por paciente, búsqueda, filtros y exportación de texto.
 - [ ] Modelar ingredientes estructurados, cantidades, unidades y agregados manuales; no inferirlos de los títulos actuales.
-- [ ] Implementar presupuesto/gastos sólo si se aprueba como necesidad real.
+- [x] Presupuesto/gastos **fuera de alcance** (PV-39) hasta evidencia de uso. Lista operativa (PV-21) se mantiene. POST 501. No hay tablas de presupuesto.
 
 ### Paso 9 — Diario de comidas
 
@@ -314,7 +316,7 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 - [x] Centro de seguimiento: priorización, acciones a Ficha/Diario y filtros configurables por banda de adherencia y revisiones pendientes ya operativos (corte 64); faltan agrupaciones guardadas y preferencias persistidas.
 - [ ] Paneles: agregados y navegación a atención prioritaria ya operativos; faltan períodos y desgloses históricos.
 - [x] Actividades/Reciente: base Nutrigo agregada con filtros por paciente/recencia y paginación incremental ya operativa (corte 65); faltan timestamp global persistido y paginación de servidor, que dependen del modelo longitudinal y del contrato 016.
-- [ ] Videollamadas: acceso seguro y gestión por paciente ya operativos; faltan estados de sala/proveedor y videollamada nativa.
+- [x] Videollamadas: CTA abre `meet_url` HTTPS o no-op (mvp-v0). Video nativo **OUT** (PV-39). POST `/video/rooms` y `/appointments/:id/video-room` → 501. Sin proveedor inventado.
 - [x] QA ampliado, primera matriz: estados vacíos explícitos de los cinco módulos del centro de trabajo, Objetivos y directorio cubiertos por `showroom-empty-states.test.tsx` (corte 69); faltan matrices de carga/error ligadas a flujos API.
 
 ## P2 — Producción y escala

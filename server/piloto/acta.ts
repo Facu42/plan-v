@@ -78,6 +78,7 @@ export function evaluatePilotoActa(evidence: PilotoActaEvidence): PilotoActa {
   const notes: string[] = [
     'Mercado Pago is P1 (PV-32); a free piloto may waive billing without live payments.',
     'Nutrigo visual approval remains a human sign-off (PLANV_NUTRIGO_VISUAL). PV-37 landed 1440/800/390/320 layout and state contracts; that is not visual sign-off.',
+    'PV-39 closed grocery budget, wearable activity import and native video as OUT. Numbered plan PV-01…PV-39 is covered in code; that is not visual sign-off and not a live GO.',
     'eval.v1 is a synthetic publish check, not a clinical gate.',
   ];
 
