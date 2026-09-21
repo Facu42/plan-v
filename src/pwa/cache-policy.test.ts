@@ -5,6 +5,7 @@ import { isClinicalUrl, isShellAsset } from './cache-policy';
 describe('política de cache PWA', () => {
   it('nunca marca /api, Supabase ni URLs firmadas como shell', () => {
     expect(isClinicalUrl('/api/patients')).toBe(true);
+    expect(isClinicalUrl('https://api-production-aad6.up.railway.app/api/health')).toBe(true);
     expect(isClinicalUrl('https://xyz.supabase.co/rest/v1/patients')).toBe(true);
     expect(isClinicalUrl('https://xyz.supabase.co/storage/v1/object/sign/meal-photos/a.jpg?token=abc')).toBe(true);
     expect(isClinicalUrl('/icons/icon-192.png?X-Amz-Signature=1')).toBe(true);

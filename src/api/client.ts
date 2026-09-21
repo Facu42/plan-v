@@ -1,6 +1,7 @@
 import type { Brief, DemoNotice, GoalStatus, MealLog, Message, Patient, Stage } from '../types';
 import { getSessionToken } from '../lib/supabase';
 import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } from '../types/intake';
+import { resolveApiUrl } from './origin';
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
@@ -36,7 +37,7 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (init?.signal?.aborted) {
     throw new DOMException('Aborted', 'AbortError');
   }
-  const res = await fetch(path, {
+  const res = await fetch(resolveApiUrl(path), {
     ...init,
     headers: { ...headers, ...init?.headers },
   });
