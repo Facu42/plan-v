@@ -44,16 +44,16 @@ Ya tenemos catálogo de recetas, planes fechados, vista paciente del plan, diari
 
 ## Criterios de aceptación
 
-- [ ] Nutri crea receta **manual** o con **IA por descripción** (borrador; no publica sola).
-- [ ] Card de receta muestra macros calculados a partir de ingredientes (o marca fallo explícito si la IA no pudo).
-- [ ] **Asignar** a paciente + fecha (+ slot); el paciente lo ve en comidas del día.
-- [ ] Paciente: **Registrar esta comida** crea entrada de diario ligada a esa receta/asignación (idempotente; sin duplicar al reintentar).
-- [ ] Fail closed sin schema / sin clave IA: 501 o estado `failed` visible; sin macros inventados en silencio.
-- [ ] No aplicar migraciones a proyectos hosted con `patients` sin puerta humana.
-- [ ] Tests + check/check:migrations/build.
-- [ ] Card profesional muestra foto de calidad + macros en formato limpio escaneable (no párrafo ni tabla cruda).
-- [ ] Flujo IA produce (o adjunta) imagen de plato alineada a la receta, revisable por el nutri antes de asignar.
-- [ ] Macros con labels KCAL/PROT/CARBS/GRASAS legibles; valores por porción.
+- [x] Nutri crea receta **manual** o con **IA por descripción** (borrador; no publica sola).
+- [x] Card de receta muestra macros calculados a partir de ingredientes (o marca fallo explícito si la IA no pudo).
+- [x] **Asignar** a paciente + fecha (+ slot); el paciente lo ve en comidas del día.
+- [x] Paciente: **Registrar esta comida** crea entrada de diario ligada a esa receta/asignación (idempotente; sin duplicar al reintentar).
+- [x] Fail closed sin schema / sin clave IA: 501 o estado `failed` visible; sin macros inventados en silencio.
+- [x] No aplicar migraciones a proyectos hosted con `patients` sin puerta humana.
+- [x] Tests + check/check:migrations/build.
+- [x] Card profesional muestra foto de calidad + macros en formato limpio escaneable (no párrafo ni tabla cruda). El pozo de foto es ilustración de revisión o «la foto no se generó»; no hay URL inventada.
+- [x] Flujo IA produce (o adjunta) imagen de plato alineada a la receta, revisable por el nutri antes de asignar. Sin clave, `cover_status=failed` visible.
+- [x] Macros con labels KCAL/PROT/CARBS/GRASAS legibles; valores por porción.
 - [ ] Lumen/Iris review del formato card antes de cerrar el ticket (no basta que «funcione»).
 
 ## Fuera de alcance de este ticket

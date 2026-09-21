@@ -26,6 +26,7 @@ import { resetCareMemory } from './care/repository.js';
 import { resetPrivateAssets } from './assets/repository.js';
 import { resetProcessQueue } from './jobs/queue.js';
 import { resetRecipeMemory } from './recipes/repository.js';
+import { resetRecipeDayMemory } from './recipes/day.js';
 import { resetMealPlanMemory } from './plans/repository.js';
 import { resetDiaryMemory } from './diary/repository.js';
 import { markMemoryRead, resetMessageMemory, sendMemoryMessage } from './messages/repository.js';
@@ -764,6 +765,7 @@ export function resetStore(): void {
   resetPrivateAssets();
   resetProcessQueue();
   resetRecipeMemory();
+  resetRecipeDayMemory();
   resetMealPlanMemory();
   resetDiaryMemory();
   resetMessageMemory();

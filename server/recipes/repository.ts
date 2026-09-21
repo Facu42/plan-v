@@ -8,11 +8,14 @@ import {
   normalizeIngredientName,
   type PatientRecipe,
   type ProfessionalRecipe,
+  type RecipeCard,
   type RecipeDraftInput,
   type RecipeItem,
   type RecipeUnit,
   type RecipeVersionView,
 } from '../../src/types/recipes.js';
+import { getRecipeCard, resetRecipeCards, setRecipeCard } from './presentation.js';
+import { unavailableCard } from '../../src/types/recipe-plate.js';
 
 export { CareError } from '../care/errors.js';
 
@@ -43,6 +46,7 @@ export function resetRecipeMemory() {
   versions.clear();
   lines.clear();
   assignments.clear();
+  resetRecipeCards();
 }
 
 export function recipeDbError(error: { code?: string; message?: string } | null) {
@@ -93,6 +97,7 @@ function asVersion(row: Record<string, unknown>): RecipeVersionView {
     nutrient_source: String(row.nutrient_source ?? ''),
     published_at: row.published_at ? String(row.published_at) : null,
     ingredients: ingredientsRaw.map((item) => asItem(item as { id?: string; name?: string; quantity?: unknown; unit?: string })),
+    ...(row.card ? { card: row.card as RecipeCard } : {}),
   };
 }
 
@@ -123,6 +128,7 @@ function asPatient(row: Record<string, unknown>): PatientRecipe {
     ingredients: ingredientsRaw.map((item) => asItem(item as { id?: string; name?: string; quantity?: unknown; unit?: string })),
     assigned_at: String(row.assigned_at),
     published_at: String(row.published_at),
+    ...(row.card ? { card: row.card as RecipeCard } : {}),
   };
 }
 
@@ -156,6 +162,7 @@ function memVersionView(row: MemVersion): RecipeVersionView {
     nutrient_source: row.nutrient_source,
     published_at: row.published_at,
     ingredients: versionItems(row.id),
+    card: getRecipeCard(row.id, recipes.get(row.recipe_id)?.title ?? 'Receta'),
   };
 }
 
@@ -208,7 +215,7 @@ function upsertIngredient(nutritionistId: string, name: string, unit: RecipeUnit
   return row;
 }
 
-function writeDraft(nutritionistId: string, input: RecipeDraftInput): ProfessionalRecipe {
+function writeDraft(nutritionistId: string, input: RecipeDraftInput, card?: RecipeCard): ProfessionalRecipe {
   const now = new Date().toISOString();
   let recipe = recipes.get(input.id);
   if (recipe && recipe.nutritionist_id !== nutritionistId) throw new CareError(403, 'No tenés permiso para esta acción.');
@@ -257,6 +264,7 @@ function writeDraft(nutritionistId: string, input: RecipeDraftInput): Profession
       lines.set(line.id, line);
     }
   }
+  setRecipeCard(target.id, card ?? getRecipeCard(target.id, recipe.title) ?? unavailableCard(recipe.title));
   return memProfessional(recipe);
 }
 
@@ -272,8 +280,13 @@ export async function listProfessionalRecipes(nutritionistId: string, persistent
   return parseList(data, asProfessional);
 }
 
-export async function saveRecipeDraft(nutritionistId: string, input: RecipeDraftInput, persistent: boolean): Promise<ProfessionalRecipe> {
-  if (!persistent) return writeDraft(nutritionistId, input);
+export async function saveRecipeDraft(
+  nutritionistId: string,
+  input: RecipeDraftInput,
+  persistent: boolean,
+  card?: RecipeCard,
+): Promise<ProfessionalRecipe> {
+  if (!persistent) return writeDraft(nutritionistId, input, card);
   const { data, error } = await getRequestDb().rpc('save_recipe_draft', { payload: input });
   recipeDbError(error);
   return asProfessional(data as Record<string, unknown>);
@@ -352,6 +365,7 @@ export async function assignRecipe(
       steps: version.steps,
       nutrient_source: version.nutrient_source,
       ingredients: versionItems(version.id),
+      card: getRecipeCard(version.id, recipe.title),
       assigned_at: row.assigned_at,
       published_at: version.published_at,
     };
@@ -378,28 +392,43 @@ export async function assignRecipe(
 
 export async function listAssignedRecipes(patientId: string, persistent: boolean): Promise<PatientRecipe[]> {
   if (!persistent) {
-    return [...assignments.values()]
-      .filter((row) => row.patient_id === patientId)
-      .map((row) => {
-        const recipe = recipes.get(row.recipe_id);
-        const version = versions.get(row.recipe_version_id);
-        if (!recipe || !version || !version.published_at) return null;
-        return {
-          id: recipe.id,
-          title: recipe.title,
-          version: version.version,
-          yield_portions: version.yield_portions,
-          steps: version.steps,
-          nutrient_source: version.nutrient_source,
-          ingredients: versionItems(version.id),
-          assigned_at: row.assigned_at,
-          published_at: version.published_at,
-        } satisfies PatientRecipe;
-      })
-      .filter((row): row is PatientRecipe => row !== null)
-      .sort((a, b) => b.assigned_at.localeCompare(a.assigned_at));
+    const listed: PatientRecipe[] = [];
+    for (const row of assignments.values()) {
+      if (row.patient_id !== patientId) continue;
+      const recipe = recipes.get(row.recipe_id);
+      const version = versions.get(row.recipe_version_id);
+      if (!recipe || !version || !version.published_at) continue;
+      listed.push({
+        id: recipe.id,
+        title: recipe.title,
+        version: version.version,
+        yield_portions: version.yield_portions,
+        steps: version.steps,
+        nutrient_source: version.nutrient_source,
+        ingredients: versionItems(version.id),
+        card: getRecipeCard(version.id, recipe.title),
+        assigned_at: row.assigned_at,
+        published_at: version.published_at,
+      });
+    }
+    return listed.sort((a, b) => b.assigned_at.localeCompare(a.assigned_at));
   }
   const { data, error } = await getRequestDb().rpc('list_assigned_recipes', { target: patientId });
   recipeDbError(error);
   return parseList(data, asPatient);
+}
+
+export function readPublishedMemory(nutritionistId: string, recipeId: string, expectedVersion: number) {
+  const recipe = recipes.get(recipeId);
+  if (!recipe || recipe.nutritionist_id !== nutritionistId) return null;
+  const version = recipeVersions(recipeId).find((row) => row.version === expectedVersion && row.published_at);
+  if (!version) return null;
+  return {
+    title: recipe.title,
+    version: version.version,
+    versionId: version.id,
+    yield_portions: version.yield_portions,
+    ingredients: versionItems(version.id),
+    card: getRecipeCard(version.id, recipe.title),
+  };
 }

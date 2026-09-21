@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '../shared/Icon';
 import { NvBadge, NvButton, NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
+import { DayAssignedMeals } from './DayMeals';
 import './showroom-patient-diary.css';
 
 export type PatientDiaryFilter = 'all' | 'pending' | 'reviewed';
@@ -104,7 +105,7 @@ export function buildPatientDiaryView(patient: ShowroomPatient, query = '', filt
   };
 }
 
-export function ShowroomPatientDiary({ patient, query, now = new Date(), onLogMeal }: { patient: ShowroomPatient; query: string; now?: Date; onLogMeal: (slot?: string) => void }) {
+export function ShowroomPatientDiary({ patient, query, now = new Date(), onLogMeal, patientId }: { patient: ShowroomPatient; query: string; now?: Date; onLogMeal: (slot?: string) => void; patientId?: string }) {
   const [filter, setFilter] = useState<PatientDiaryFilter>('all');
   const [weekOffset, setWeekOffset] = useState(0);
   useEffect(() => { setWeekOffset(0); }, [patient.id]);
@@ -112,7 +113,9 @@ export function ShowroomPatientDiary({ patient, query, now = new Date(), onLogMe
   const emptyCopy = view.emptyKind === 'week'
     ? (view.week.isCurrent ? 'Todavía no registraste comidas esta semana.' : 'No hay registros en esa semana. El diario no inventa historial.')
     : 'Usá otra búsqueda o cambiá el filtro.';
-  return <section className="nvpdiary" aria-label="Diario de comidas del paciente">
+  return <>
+    {patientId ? <DayAssignedMeals patientId={patientId} /> : null}
+    <section className="nvpdiary" aria-label="Diario de comidas del paciente">
     <header className="nvpdiary-hero"><div><span className="nv-icon-tile"><Icon name="leaf" size={21} /></span><div><h2>Tu diario de comidas</h2><p>Registrá lo que comiste y seguí el estado de revisión.</p></div></div><NvButton onClick={() => onLogMeal('Almuerzo')}><Icon name="camera" size={15} />Registrar comida</NvButton></header>
 
     <nav className="nvpdiary-week" aria-label="Semana del diario">
@@ -138,5 +141,6 @@ export function ShowroomPatientDiary({ patient, query, now = new Date(), onLogMe
       })}</div> : <NvState title={view.emptyKind === 'week' ? 'Sin registros esta semana' : 'Sin registros para mostrar'} description={emptyCopy} />}
       <footer><p><Icon name="sparkle" size={14} /> {patient.weekPlan.length > 0 && '«Del plan» compara el momento del registro con tu plan semanal publicado; no es una evaluación clínica. '}Las estimaciones automáticas no cuentan hasta que tu nutricionista las confirma o ajusta.</p><NvButton className="nv-ghost" onClick={() => onLogMeal('Almuerzo')}><Icon name="plus" size={14} />Agregar registro</NvButton></footer>
     </section>
-  </section>;
+  </section>
+  </>;
 }

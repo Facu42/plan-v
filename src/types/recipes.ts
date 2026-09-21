@@ -34,6 +34,22 @@ export const ingredientInputSchema = z.object({
 
 export type RecipeDraftInput = z.infer<typeof recipeDraftSchema>;
 export type RecipeItem = { id: string; name: string; quantity: number; unit: RecipeUnit };
+export type RecipeMacros = {
+  kcal: number | null;
+  protein_g: number | null;
+  carbs_g: number | null;
+  fat_g: number | null;
+};
+
+export type RecipeCard = {
+  category: string;
+  prep_minutes: number | null;
+  macro_status: 'declared' | 'unavailable' | 'failed';
+  macros: RecipeMacros | null;
+  cover_status: 'none' | 'failed' | 'ready';
+  cover_alt: string;
+};
+
 export type RecipeVersionView = {
   id: string;
   version: number;
@@ -42,6 +58,7 @@ export type RecipeVersionView = {
   nutrient_source: string;
   published_at: string | null;
   ingredients: RecipeItem[];
+  card?: RecipeCard;
 };
 export type ProfessionalRecipe = {
   id: string;
@@ -61,5 +78,6 @@ export type PatientRecipe = {
   ingredients: RecipeItem[];
   assigned_at: string;
   published_at: string;
+  card?: RecipeCard;
 };
 export type IngredientRecord = { id: string; name: string; base_unit: RecipeUnit; created_at: string };
