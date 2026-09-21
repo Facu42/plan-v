@@ -2,6 +2,8 @@
 
 ## Revisión vigente de avance — 2026-09-21
 
+PV-34 en esta rama: progreso longitudinal del mismo paciente. Períodos 7/30/90 en `America/Argentina/Buenos_Aires`; series de peso/cintura/cadera con fuente; comparativa este-vs-anterior sólo si hay valor en ambos y la misma unidad; kg y lb no se mezclan; períodos vacíos no se rellenan; sin ranking. Profesional ve la paciente seleccionada (`/crm/progreso`), no una tabla entre pacientes. Fail closed 501 sin RPC. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 757 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-35 (PV-32 se salta, piloto gratuito). No visual Nutrigo.
+
 PV-26 en esta rama: outbox de avisos con preferencias (`in_app`/`email`/`push`), `client_id`/dedupe, reintentos y skip si el paciente está desactivado o desvinculado. El canal in-app completa el buzón; email/push quedan `queued` con `provider_unconfigured` y **nunca** `sent` (no hay adaptador ni claves). Enganche de turno, mensaje e invitación. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL; no se inventaron claves de mail/push. Verificación: 748 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-32 se salta (piloto gratuito). No PV-34. No visual Nutrigo.
 
 PV-24 en esta rama: adjuntos de chat sólo mediante assets autorizados (`chat_attachment`, bucket `care-documents`). Paciente y profesional pueden adjuntar; meal_photo/estudios/corporales no se mezclan. Preview 60 s `no-store` auditado; retiro 404; Marina 403/404. El DTO no lleva URL viva. Escrituras persistentes por RPC nueva (`send_thread_attachment` / `open_message_attachment`); el texto sigue en `send_thread_message`. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL ni buckets. Verificación: 743 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-26 outbox. PV-32 se salta (piloto gratuito). No PV-34. No visual Nutrigo.
@@ -281,8 +283,8 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 ### Paso 10 — Progreso
 
 - [x] Superficie paciente accesible en Nutrigo con adherencia actual, objetivo publicado, agua, sueño, energía y comidas revisadas en la ventana real de siete días.
-- [ ] Comparación multipaciente por períodos para la profesional, sin ranking punitivo ni presentar agregados actuales como historia longitudinal.
-- [ ] Implementar peso y medidas sólo después de definir consentimiento, retención y privacidad. Fotografías corporales requieren una decisión aparte.
+- [x] Comparativa por períodos (7/30/90) del **mismo** paciente, también en CRM sobre la ficha seleccionada; métricas con fuente; sin ranking punitivo ni presentar la adherencia media del consultorio como historia. No hay tabla entre pacientes.
+- [x] Peso y medidas con consentimiento, unidad, origen e historial (PV-17); el progreso las agrega por período (PV-34). Fotografías corporales siguen siendo decisión aparte y no infieren medidas.
 
 ### Paso 11 — Ejercicio y actividad
 
