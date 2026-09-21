@@ -2,7 +2,9 @@
 
 ## Revisión vigente de avance — 2026-09-21
 
-PV-22 en esta rama: diario foto/texto persistente. El registro se guarda **antes** de la IA; un `client_id` duplicado no crea otra comida; si la IA falla quedan foto/texto con `analysis_status=failed` y `macros=null`. Revisión profesional append-only en `meal_reviews`. Fail closed 501 sin schema/buckets. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL ni buckets. Verificación: 628 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente P0: PV-23 hilos/no leídos reales (PV-21 es P1). No P1, no visual Nutrigo.
+PV-23 en esta rama: hilos 1:1 reales con no leídos, `client_id` idempotente y recibos de entrega/lectura por persona (no por dispositivo). La primera marca queda; un segundo leído no cambia el instante. El GET de ficha no marca leído. Escrituras persistentes van por RPC (`send_thread_message` / `mark_thread_read`); sin schema → 501. GET hospedado cae al `messages` 016 sin recibos (no 500). **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 635 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente P0: PV-25 timezone/historial de turnos (PV-21 es P1). No P1, no visual Nutrigo.
+
+PV-22 en esta rama: diario foto/texto persistente. El registro se guarda **antes** de la IA; un `client_id` duplicado no crea otra comida; si la IA falla quedan foto/texto con `analysis_status=failed` y `macros=null`. Revisión profesional append-only en `meal_reviews`. Fail closed 501 sin schema/buckets. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL ni buckets.
 
 PV-20 en esta rama: paciente ve el plan fechado publicado (detalle de receta, porciones, días vacíos reales, mismo contenido que CRM). Un borrador de receta posterior no cambia ese snapshot. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL.
 
@@ -223,7 +225,7 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 ### Paso 5 — Mensajería ampliada
 
 - [x] Base Nutrigo operativa: paciente y profesional envían mensajes; la profesional dispone de inbox multipaciente, búsqueda, selección y navegación contextual a Ficha/Consultas; el paciente navega a su Agenda.
-- [x] Recibos demo (corte 74): entrega inmediata al enviar, leído al abrir el hilo y recuento de no leídos. Persisten sólo en memoria; con Supabase activo la marca de lectura responde 501.
+- [x] Recibos demo (corte 74) y PV-23: entrega/lectura por persona, `client_id` idempotente, primera marca inmutable. Persistente vía RPC; sin schema 501. GET hospedado cae al hilo 016 sin recibos.
 - [ ] Adjuntos y archivos compartidos bajo Storage privado.
 
 ### Paso 6 — Menú saludable y recetas

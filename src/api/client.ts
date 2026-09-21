@@ -194,10 +194,10 @@ export const api = {
   dismissBrief: (patientId: string) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/brief/dismiss`, { method: 'POST' }),
 
-  sendMessage: (patientId: string, text: string, from: 'vero' | 'patient', suggestedByAi = false) =>
+  sendMessage: (patientId: string, text: string, from: 'vero' | 'patient', suggestedByAi = false, clientId?: string) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/messages`, {
       method: 'POST',
-      body: JSON.stringify({ text, from, suggested_by_ai: suggestedByAi }),
+      body: JSON.stringify({ text, from, suggested_by_ai: suggestedByAi, ...(clientId ? { client_id: clientId } : {}) }),
     }),
 
   markMessagesRead: (patientId: string, reader: 'vero' | 'patient') =>

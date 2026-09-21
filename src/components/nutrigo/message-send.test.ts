@@ -8,13 +8,13 @@ describe('mensajes operativos del diseño Nutrigo', () => {
   it('envía texto limpio al paciente elegido y refresca sólo ese registro', async () => {
     const deps = dependencies();
     expect(await sendShowroomMessage(input, deps)).toBe('sent');
-    expect(deps.send).toHaveBeenCalledWith('p1', 'Hola', 'patient', false);
+    expect(deps.send).toHaveBeenCalledWith('p1', 'Hola', 'patient', false, undefined);
     expect(deps.refresh).toHaveBeenCalledWith('p1');
   });
   it('la profesional envía como humana, nunca como sugerencia IA', async () => {
     const deps = dependencies();
     await sendShowroomMessage({ ...input, role: 'pro', patientId: 'p2' }, deps);
-    expect(deps.send).toHaveBeenCalledWith('p2', 'Hola', 'vero', false);
+    expect(deps.send).toHaveBeenCalledWith('p2', 'Hola', 'vero', false, undefined);
   });
   it.each([' ', 'a'.repeat(2001)])('rechaza textos vacíos o demasiado largos', async (text) => {
     const deps = dependencies();
@@ -32,5 +32,11 @@ describe('mensajes operativos del diseño Nutrigo', () => {
     deps.refresh.mockRejectedValue(new Error('Sin conexión'));
     expect(await sendShowroomMessage(input, deps)).toBe('sent-refresh-failed');
     expect(deps.send).toHaveBeenCalledTimes(1);
+  });
+  it('reenvía el mismo client_id para no duplicar el mensaje', async () => {
+    const deps = dependencies();
+    const clientId = '11111111-1111-4111-8111-111111111111';
+    await sendShowroomMessage({ ...input, client_id: clientId }, deps);
+    expect(deps.send).toHaveBeenCalledWith('p1', 'Hola', 'patient', false, clientId);
   });
 });

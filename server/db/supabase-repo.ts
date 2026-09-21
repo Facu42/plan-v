@@ -5,6 +5,7 @@ import type { Actor, PatientResource } from '../security/contracts.ts';
 import { MESSAGE_PAGE_SIZE, WEEK_DAYS } from '../schemas.ts';
 import type { ListPage } from '../pagination.ts';
 import { getRequestDb, privilegedDb } from './supabase-client.ts';
+import { listThreadMessagesPersist } from '../messages/repository.js';
 import {
   appointmentColumns,
   mealLogColumns,
@@ -210,14 +211,21 @@ function mapMealLog(row: Record<string, unknown>): MealLog {
 }
 
 export function mapMessage(row: Record<string, unknown>, authorRole: unknown): Message | null {
-  if (authorRole !== 'paciente' && authorRole !== 'nutri') return null;
+  const from = row.from === 'patient' || row.from === 'vero'
+    ? row.from
+    : authorRole === 'paciente' ? 'patient'
+      : authorRole === 'nutri' ? 'vero'
+        : null;
+  if (!from) return null;
   return {
     id: row.id as string,
     patient_id: row.patient_id as string,
-    from: authorRole === 'paciente' ? 'patient' : 'vero',
-    text: row.body as string,
+    from,
+    text: String(row.text ?? row.body ?? ''),
     suggested_by_ai: Boolean(row.suggested_by_ai),
     sent_at: row.sent_at as string,
+    ...('delivered_at' in row ? { delivered_at: row.delivered_at == null ? null : String(row.delivered_at) } : {}),
+    ...('read_at' in row ? { read_at: row.read_at == null ? null : String(row.read_at) } : {}),
   };
 }
 
@@ -284,15 +292,21 @@ async function loadPatientExtras(
   const briefDismissed = briefStatus === 'dismissed';
 
   const meal_logs = await signMealPhotos(patientId, rows(logs).map(mapMealLog));
-  const authorIds = [...new Set(rows(msgs).map((message) => String(message.author_id)))];
-  const { data: authors } = authorIds.length > 0
-    ? await sb.from('profiles').select('id, role').in('id', authorIds)
-    : { data: [] };
-  const roleByAuthor = new Map((authors ?? []).map((author) => [author.id, author.role]));
-  const messages: Message[] = rows(msgs).slice().reverse().flatMap((message) => {
-    const mapped = mapMessage(message, roleByAuthor.get(message.author_id as string));
-    return mapped ? [mapped] : [];
-  });
+  const listed = await listThreadMessagesPersist(patientId);
+  let messages: Message[];
+  if (listed) {
+    messages = listed.slice().reverse();
+  } else {
+    const authorIds = [...new Set(rows(msgs).map((message) => String(message.author_id)))];
+    const { data: authors } = authorIds.length > 0
+      ? await sb.from('profiles').select('id, role').in('id', authorIds)
+      : { data: [] };
+    const roleByAuthor = new Map((authors ?? []).map((author) => [author.id, author.role]));
+    messages = rows(msgs).slice().reverse().flatMap((message) => {
+      const mapped = mapMessage(message, roleByAuthor.get(message.author_id as string));
+      return mapped ? [mapped] : [];
+    });
+  }
 
   // Timeline persistida (016 v2): sin fabricación desde meal_logs; si no hay
   // eventos, queda vacía. Los eventos se crean al cablear las rutas (sbAddTimelineEvent).

@@ -26,7 +26,7 @@ de entidades existentes, no debe persistirse; **futura** = sin implementación.
 | `ai_jobs` / `ai_artifacts` | mocks demo | 016b: jobs privados del profesional | Worker y revisión (PV-27) |
 | `outbox_events` | buzón demo | 016b: outbox + deliveries; sin policy authenticated | Proveedor real (PV-26) |
 | `appointment_events` | demo (corte 78) | 016b: historial append-only | Timezone/conflictos (PV-25) |
-| `message_receipts` | demo (corte 74) | 016b: recibo por (mensaje, usuario) | Semántica entre dispositivos (PV-23) |
+| `message_receipts` | demo + PGlite (PV-23); entrega/lectura por persona, `client_id` | 016b: recibo por (mensaje, usuario) | Live schema en proyecto **vacío**. GET hospedado cae al hilo 016 sin recibos |
 | `exercise_library` / rutinas | — | **fuera del piloto** (PV-35) | Habilitación profesional verificada |
 | `organizations` / equipos | — | **fuera del piloto** (PV-38) | Ownership y delegación |
 
@@ -53,7 +53,7 @@ a `PatientAction` actuales.
 | `habit_logs` | sí | — | las propias | upsert propio [`update_habits`] | snapshot diario |
 | `appointments` | sí | crea/reprograma/cancela [`edit_appointment`] | próxima + historial de cambios (sin notas clínicas) | reprograma día/hora del turno vigente [`reschedule_appointment`]; no cancela | — |
 | Notificaciones (in-app, navegador, buzón demo) | sí, consultorio | — | propias | preferencias de dispositivo [`localStorage`]; buzón demo no envía mail real | proveedor/push/mail reales pendientes |
-| `messages` | sí, hilo asignado | envía como autor; lectura demo reutiliza [`send_message`] | propias enviadas y recibos | envía; marca leído en demo | inmutable; `delivered_at`/`read_at` aún no están en 016 |
+| `messages` | sí, hilo asignado | envía como autor vía `send_thread_message`; JWT = autor | propias enviadas + recibo de la contraparte | envía; marca leído/entrega vía RPC | inmutable; `client_id` único; fail closed 501 sin schema |
 | `goals` + `goal_history` | sí | actualiza [`set_goal`] | objetivo vigente | — | historial inmutable |
 | `patients` ficha | sí | perfil/archivo | vista segura propia | perfil limitado | lifecycle/billing |
 | `plan_b` | sí | edita en ficha | — (pendiente confirmar) | — | — |

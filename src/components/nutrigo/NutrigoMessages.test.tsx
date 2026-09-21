@@ -13,6 +13,8 @@ describe('mensajería dentro del diseño Nutrigo', () => {
     expect(html).toContain('Escribí un mensaje');
     expect(html).toContain('Enviar mensaje');
     expect(html).toContain('Ver mi agenda');
+    expect(html).toContain('por persona, no por dispositivo');
+    expect(html).not.toContain('entrega es inmediata');
     expect(html).not.toContain('Abrir ficha');
     expect(html).not.toContain('Solo lectura');
   });

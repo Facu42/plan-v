@@ -26,6 +26,7 @@ import { resetProcessQueue } from './jobs/queue.js';
 import { resetRecipeMemory } from './recipes/repository.js';
 import { resetMealPlanMemory } from './plans/repository.js';
 import { resetDiaryMemory } from './diary/repository.js';
+import { markMemoryRead, resetMessageMemory, sendMemoryMessage } from './messages/repository.js';
 
 export type { PatientInvite, InviteEvent } from './identity/invites.js';
 
@@ -693,6 +694,7 @@ export function resetStore(): void {
   resetRecipeMemory();
   resetMealPlanMemory();
   resetDiaryMemory();
+  resetMessageMemory();
   store = {
     patients: seedPatients(),
     patientInvites: [],
@@ -1084,31 +1086,17 @@ export function updateMealLog(patientId: string, logId: string, patch: Partial<M
 }
 
 export function addMessage(patientId: string, text: string, from: 'vero' | 'patient', suggestedByAi = false): Message {
-  const sentAt = now();
-  const msg: Message = {
-    id: randomUUID(),
-    patient_id: patientId,
-    from,
+  return sendMemoryMessage(patientId, {
     text,
-    suggested_by_ai: suggestedByAi,
-    sent_at: sentAt,
-    delivered_at: sentAt,
-  };
-  const patient = getPatient(patientId);
-  patient?.messages.push(msg);
-  return msg;
+    from,
+    suggestedByAi,
+    client_id: randomUUID(),
+  }).message;
 }
 
 export function markMessagesRead(patientId: string, reader: 'vero' | 'patient'): Patient | undefined {
-  const patient = getPatient(patientId);
-  if (!patient) return undefined;
-  const incomingFrom = reader === 'vero' ? 'patient' : 'vero';
-  const readAt = now();
-  patient.messages = patient.messages.map((message) => {
-    if (!message.sent_at || message.from !== incomingFrom || message.read_at) return message;
-    return { ...message, delivered_at: message.delivered_at ?? message.sent_at, read_at: readAt };
-  });
-  return patient;
+  if (!getPatient(patientId)) return undefined;
+  return markMemoryRead(patientId, reader);
 }
 
 export function setBrief(patientId: string, brief: Brief): void {

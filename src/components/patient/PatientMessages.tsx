@@ -4,6 +4,7 @@ import { useAppStore } from '../../store/useAppStore';
 import type { Patient } from '../../types';
 import { Icon, Mark } from '../shared/Icon';
 import { sortThreadMessages } from '../shared/message-thread';
+import { unreadCount } from '../nutrigo/message-receipts';
 
 function formatMessageTime(value: string): string {
   const date = new Date(value);
@@ -22,11 +23,18 @@ export function PatientMessages({ patient }: { patient: Patient }) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  const clientId = useRef(crypto.randomUUID());
   const messages = sortThreadMessages(patient.messages);
+  const unreadIncoming = unreadCount(messages, 'patient');
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: 'end' });
   }, [messages.length]);
+
+  useEffect(() => {
+    if (!unreadIncoming) return;
+    void api.markMessagesRead(patient.id, 'patient').then(() => refreshPatient(patient.id)).catch(() => undefined);
+  }, [patient.id, refreshPatient, unreadIncoming]);
 
   const send = async (event: FormEvent) => {
     event.preventDefault();
@@ -35,7 +43,8 @@ export function PatientMessages({ patient }: { patient: Patient }) {
     setSending(true);
     setError(null);
     try {
-      await api.sendMessage(patient.id, cleanText, 'patient');
+      await api.sendMessage(patient.id, cleanText, 'patient', false, clientId.current);
+      clientId.current = crypto.randomUUID();
       setText('');
       await refreshPatient(patient.id);
     } catch {

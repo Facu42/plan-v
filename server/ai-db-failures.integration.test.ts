@@ -18,6 +18,9 @@ vi.mock('./db/supabase-client.js', () => ({
   getSupabaseAdmin: () => ({}),
   createActorClient: () => null,
   bindActorClient: (_client: unknown, run: () => unknown) => run(),
+  getRequestDb: () => ({
+    rpc: () => Promise.resolve({ data: null, error: { message: 'synthetic database failure' } }),
+  }),
 }));
 
 import { app } from './index.js';

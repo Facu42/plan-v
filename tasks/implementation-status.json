@@ -137,9 +137,9 @@
     "PV-23": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Hilo demo con entrega inmediata y leído al abrir. El paciente no puede marcar suggested_by_ai. Faltan recibos 016b entre dispositivos live.",
-      "evidence": "server/message-flow.integration.test.ts y server/acompanamiento.integration.test.ts. NutrigoMessages.",
-      "updatedAt": "2026-09-19T20:02:00.000Z"
+      "notes": "Hilos 1:1 con client_id idempotente; entrega y lectura por persona (no por dispositivo); primera marca inmutable. Fail closed 501 sin schema. GET hospedado cae al hilo 016 sin recibos. Falta schema live.",
+      "evidence": "supabase/migrations/20260921230000_message_threads.sql; server/messages/*; NutrigoMessages/PatientMessages client_id. Demo+PGlite; live schema bloqueado (patients existe).",
+      "updatedAt": "2026-09-21T04:20:00.000Z"
     },
     "PV-25": {
       "status": "in_progress",
@@ -180,12 +180,12 @@
       "fields": ["status", "notes", "evidence"]
     },
     {
-      "id": "c19a23e0-9f12-4a3b-8c01-acomp0002",
+      "id": "c21a23e0-9f12-4a3b-8c01-pv230001",
       "taskId": "PV-23",
-      "at": "2026-09-19T20:02:00.000Z",
-      "from": "pending",
+      "at": "2026-09-21T04:20:00.000Z",
+      "from": "in_progress",
       "to": "in_progress",
-      "fields": ["status", "notes", "evidence"]
+      "fields": ["notes", "evidence"]
     },
     {
       "id": "c19a25e0-9f12-4a3b-8c01-acomp0003",

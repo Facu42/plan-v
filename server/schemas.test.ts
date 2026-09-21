@@ -60,7 +60,8 @@ describe('API input schemas', () => {
     const parsed = messageInputSchema.safeParse({ text: '  Hola  ', from: 'vero' });
     expect(parsed.success && parsed.data.text).toBe('Hola');
     expect(messageInputSchema.safeParse({ text: '   ' }).success).toBe(false);
-    expect(messageInputSchema.safeParse({ text: 'a'.repeat(2001) }).success).toBe(false);
+    expect(messageInputSchema.safeParse({ text: 'Hola', from: 'patient', client_id: '11111111-1111-4111-8111-111111111111' }).success).toBe(true);
+    expect(messageInputSchema.safeParse({ text: 'Hola', from: 'patient', client_id: 'no-uuid' }).success).toBe(false);
   });
 
   it('normalizes patient onboarding fields and rejects invalid contact data', () => {

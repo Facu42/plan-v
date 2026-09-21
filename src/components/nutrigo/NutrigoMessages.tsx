@@ -33,7 +33,7 @@ export function NutrigoMessages({ patient, patients, role, onSelect, onNavigate 
       {!contacts.length && <p className="nv-caption">No hay coincidencias.</p>}
     </aside>
     <MessageConversation key={`${role}:${patient.id}`} patient={patient} role={role} />
-    <aside className="nm-profile" aria-label="Contexto de la conversación"><span className="nv-avatar">{role === 'pro' ? patient.initials : 'VT'}</span><h2>{role === 'pro' ? patient.name : 'Verónica Trenti'}</h2><p>{role === 'pro' ? 'Paciente en seguimiento' : 'Tu nutricionista'}</p><hr /><h3>Objetivo compartido</h3><p>{patient.goal || 'Todavía no definido'}</p><h3>Próxima consulta</h3><p>{patient.appointment?.when ?? 'Por coordinar'}</p><div className="nm-profile-actions">{role === 'pro' ? <><NvButton className="nv-soft" onClick={() => onNavigate('ficha')}>Abrir ficha <Icon name="arrow" size={14} /></NvButton><NvButton className="nv-ghost" onClick={() => onNavigate('consultas')}>Ver consultas <Icon name="calendar" size={14} /></NvButton></> : <NvButton className="nv-soft" onClick={() => onNavigate('agenda')}>Ver mi agenda <Icon name="calendar" size={14} /></NvButton>}</div><hr /><p className="nv-caption">Conversación privada de acompañamiento. En demo, la entrega es inmediata y leído se marca al abrir el hilo. Los archivos adjuntos todavía no están disponibles.</p></aside>
+    <aside className="nm-profile" aria-label="Contexto de la conversación"><span className="nv-avatar">{role === 'pro' ? patient.initials : 'VT'}</span><h2>{role === 'pro' ? patient.name : 'Verónica Trenti'}</h2><p>{role === 'pro' ? 'Paciente en seguimiento' : 'Tu nutricionista'}</p><hr /><h3>Objetivo compartido</h3><p>{patient.goal || 'Todavía no definido'}</p><h3>Próxima consulta</h3><p>{patient.appointment?.when ?? 'Por coordinar'}</p><div className="nm-profile-actions">{role === 'pro' ? <><NvButton className="nv-soft" onClick={() => onNavigate('ficha')}>Abrir ficha <Icon name="arrow" size={14} /></NvButton><NvButton className="nv-ghost" onClick={() => onNavigate('consultas')}>Ver consultas <Icon name="calendar" size={14} /></NvButton></> : <NvButton className="nv-soft" onClick={() => onNavigate('agenda')}>Ver mi agenda <Icon name="calendar" size={14} /></NvButton>}</div><hr /><p className="nv-caption">Conversación privada de acompañamiento. Entrega y lectura se marcan por persona, no por dispositivo. Reintentar con el mismo identificador no duplica el mensaje. Los archivos adjuntos todavía no están disponibles.</p></aside>
   </section>;
 }
 
@@ -44,6 +44,7 @@ function MessageConversation({ patient, role }: Pick<Props, 'patient' | 'role'>)
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const inFlight = useRef(false);
+  const clientId = useRef(crypto.randomUUID());
   const list = useRef<HTMLDivElement>(null);
   const messages = sentMessages(patient);
   const unreadIncoming = unreadCount(messages, role);
@@ -59,7 +60,8 @@ function MessageConversation({ patient, role }: Pick<Props, 'patient' | 'role'>)
     if (inFlight.current || !text.trim()) return;
     inFlight.current = true; setBusy(true); setError(''); setStatus('');
     try {
-      const result = await sendShowroomMessage({ patientId: patient.id, text, role }, { send: api.sendMessage, refresh });
+      const result = await sendShowroomMessage({ patientId: patient.id, text, role, client_id: clientId.current }, { send: api.sendMessage, refresh });
+      clientId.current = crypto.randomUUID();
       setText('');
       setStatus(result === 'sent' ? 'Mensaje enviado.' : 'Mensaje enviado. No pudimos actualizar la conversación; usá Actualizar, no lo reenvíes.');
     } catch { setError('No pudimos enviar el mensaje. Tu texto se conserva para reintentar.'); }
@@ -75,7 +77,7 @@ function MessageConversation({ patient, role }: Pick<Props, 'patient' | 'role'>)
   return <section className="nm-conversation" aria-label={`Conversación con ${contact}`}>
     <header><span className="nv-avatar">{role === 'pro' ? patient.initials : 'VT'}</span><div><h2>{contact}</h2><small>Mensajes de acompañamiento</small></div><NvButton className="nv-ghost" onClick={reload} disabled={busy} aria-label="Actualizar conversación"><Icon name="history" size={18} /></NvButton></header>
     <div className="nm-thread" ref={list} role="log" aria-live="polite" aria-relevant="additions" aria-label="Mensajes enviados">
-      <p className="nm-demo-note">Demo local · entrega inmediata en memoria. Leído se marca al abrir la conversación.</p>
+      <p className="nm-demo-note">Entrega y leído se confirman al abrir el hilo (por persona, no por dispositivo). Un reintento con el mismo id no crea otro mensaje.</p>
       {!messages.length && <NvState title="Empezá la conversación" description="Escribí tu primer mensaje para iniciar el seguimiento." />}
       {messages.map((m) => {
         const own = m.from === (role === 'pro' ? 'vero' : 'patient');

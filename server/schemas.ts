@@ -114,6 +114,7 @@ export const messageInputSchema = z.object({
   text: z.string().trim().min(1).max(2000),
   from: z.enum(['vero', 'patient']),
   suggested_by_ai: z.boolean().optional(),
+  client_id: z.uuid().optional(),
 });
 
 export const messageReadSchema = z.object({

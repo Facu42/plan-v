@@ -5,6 +5,7 @@ import { registerAssetRoutes } from './assets/routes.js';
 import { registerRecipeRoutes } from './recipes/routes.js';
 import { registerPlanRoutes } from './plans/routes.js';
 import { registerDiaryRoutes } from './diary/routes.js';
+import { registerMessageRoutes } from './messages/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -39,8 +40,6 @@ import {
   listPageQuerySchema,
   menuSlotParamsSchema,
   menuSlotUpdateSchema,
-  messageInputSchema,
-  messageReadSchema,
   nutritionistSetupInputSchema,
   patientArchiveInputSchema,
   patientCreateInputSchema,
@@ -77,8 +76,6 @@ import {
   type PatientAction,
 } from './security/contracts.js';
 import {
-  addMessage,
-  markMessagesRead,
   addActivityLog,
   deleteActivityLog,
   assignResourceToPatients,
@@ -218,6 +215,7 @@ registerAssetRoutes(app);
 registerRecipeRoutes(app);
 registerPlanRoutes(app);
 registerDiaryRoutes(app);
+registerMessageRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({
@@ -411,70 +409,6 @@ app.post('/api/patients/:id/copilot', async (c) => {
 
   setBrief(patient.id, brief);
   return c.json({ brief, patient: getPatient(patient.id), source: 'memory' });
-});
-
-app.post('/api/patients/:id/messages', async (c) => {
-  const auth = c.get('auth');
-  const patientId = c.req.param('id');
-  const parsedBody = await parseJsonBody(c, messageInputSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-  const body = parsedBody.data;
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    const actor = await authorizePatient(auth.userId, patientId, 'send_message');
-    if (!actor) return c.json({ error: 'Prohibido' }, 403);
-
-    const patient = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
-    const resource = await sb.sbGetPatientResource(patientId);
-    if (!patient || !resource) return c.notFound();
-
-    try {
-      await sb.sbAddMessage(
-        patientId,
-        resource.nutritionistId,
-        auth.userId,
-        body.text,
-        actor.role === 'nutri' && (body.suggested_by_ai ?? false),
-      );
-    } catch {
-      return c.json({ error: 'No se pudo enviar el mensaje' }, 503);
-    }
-    const updated = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
-    return c.json({
-      patient: updated && actor.role === 'paciente' ? toPatientSelfView(updated) : updated,
-      source: 'supabase',
-    });
-  }
-
-  const patient = getPatient(patientId);
-  if (!patient) return c.notFound();
-  addMessage(patientId, body.text, body.from, body.from === 'vero' && (body.suggested_by_ai ?? false));
-  const updated = getPatient(patientId)!;
-  return c.json({
-    patient: body.from === 'patient' ? toPatientSelfView(updated) : updated,
-    source: 'memory',
-  });
-});
-
-app.post('/api/patients/:id/messages/read', async (c) => {
-  const auth = c.get('auth');
-  const patientId = c.req.param('id');
-  const parsedBody = await parseJsonBody(c, messageReadSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'send_message')) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    return c.json({ error: 'Lectura de mensajes pendiente del schema 016' }, 501);
-  }
-
-  const patient = markMessagesRead(patientId, parsedBody.data.reader);
-  if (!patient) return c.notFound();
-  return c.json({
-    patient,
-    source: 'memory',
-  });
 });
 
 app.patch('/api/patients/:id/habits', async (c) => {

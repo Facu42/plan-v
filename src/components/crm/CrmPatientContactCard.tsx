@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { api } from '../../api/client';
 import { useAppStore } from '../../store/useAppStore';
 import type { Patient } from '../../types';
@@ -19,11 +19,13 @@ export function CrmPatientContactCard({ patient }: { patient: Patient }) {
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+  const clientId = useRef(crypto.randomUUID());
   const recentMessages = sortThreadMessages(patient.messages).slice(-3);
 
   useEffect(() => {
     setText('');
     setStatus(null);
+    clientId.current = crypto.randomUUID();
   }, [patient.id]);
 
   const send = async (event: FormEvent) => {
@@ -33,7 +35,8 @@ export function CrmPatientContactCard({ patient }: { patient: Patient }) {
     setSending(true);
     setStatus(null);
     try {
-      await api.sendMessage(patient.id, cleanText, 'vero');
+      await api.sendMessage(patient.id, cleanText, 'vero', false, clientId.current);
+      clientId.current = crypto.randomUUID();
       setText('');
       await refreshPatient(patient.id);
       setStatus('Mensaje enviado.');

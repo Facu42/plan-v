@@ -31,7 +31,7 @@ describe('message API flow in memory mode', () => {
     expect(body.patient.messages.at(-1)).not.toHaveProperty('suggested_by_ai');
     const storedMessages = getPatient('pat-sofia')?.messages ?? [];
     expect(storedMessages[storedMessages.length - 1]?.suggested_by_ai).toBe(false);
-    expect(storedMessages[storedMessages.length - 1]?.delivered_at).toBeTruthy();
+    expect(storedMessages[storedMessages.length - 1]?.delivered_at).toBeFalsy();
     expect(storedMessages[storedMessages.length - 1]?.read_at).toBeFalsy();
   });
 
