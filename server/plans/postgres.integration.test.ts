@@ -173,7 +173,7 @@ describe('PV-19 planes en PostgreSQL descartable', () => {
       items: [{ name: 'Quinoa', quantity: 200, unit: 'g' }],
     }]);
     const still = await rpc(patientAUser, 'list_published_meal_plan', [patientA]) as {
-      items: Array<{ recipe: { version: number; yield_portions: number | string; ingredients: Array<{ quantity: number | string }> } }>;
+      items: Array<{ recipe: { version: number; yield_portions: number | string; ingredients: Array<{ name: string; quantity: number | string }> } }>;
     };
     expect(still.items[0].recipe.version).toBe(1);
     expect(Number(still.items[0].recipe.yield_portions)).toBe(2);
