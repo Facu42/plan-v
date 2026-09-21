@@ -120,6 +120,13 @@
       "evidence": "careInputSchema, dueCareReminders, CarePanel y postgres.integration.test.ts. Demo en memoria; Auth real pendiente.",
       "updatedAt": "2026-09-18T14:10:00.000Z"
     },
+    "PV-24": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Adjuntos de chat sólo via patient_assets chat_attachment listos; preview 60s auditado; profesional y paciente; fail closed 501 sin RPC nueva. Live schema/buckets bloqueado (patients existe).",
+      "evidence": "supabase/migrations/20260921290000_message_attachments.sql; server/messages/*; NutrigoMessages attach. 743 pruebas OK, 2 omitidas; check/check:migrations/build OK. No SQL en el proyecto con patients.",
+      "updatedAt": "2026-09-21T18:24:00.000Z"
+    },
     "PV-21": {
       "status": "in_progress",
       "owner": "",

@@ -120,6 +120,14 @@ export type Message = {
   sent_at: string;
   delivered_at?: string | null;
   read_at?: string | null;
+  attachment?: {
+    asset_id: string;
+    filename: string;
+    mime: string;
+    byte_size: number;
+    kind: 'image' | 'pdf';
+    available?: boolean;
+  };
 };
 
 export type HabitLog = {

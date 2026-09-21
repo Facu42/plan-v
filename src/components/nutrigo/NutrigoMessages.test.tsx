@@ -50,6 +50,8 @@ describe('mensajería dentro del diseño Nutrigo', () => {
         text: '',
         from: 'patient' as const,
         sent_at: '2026-09-10T17:00:00Z',
+        delivered_at: null,
+        read_at: null,
         attachment: { asset_id: 'a1', filename: 'merienda.png', mime: 'image/png', byte_size: 80, kind: 'image' as const, available: true },
       }],
     };

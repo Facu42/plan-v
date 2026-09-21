@@ -93,7 +93,8 @@ describe('PV-24 adjuntos de chat', () => {
       filename: 'indicacion.png',
     });
     expect(sent.status).toBe(200);
-    expect(getPatient(patient)!.messages.at(-1)?.attachment?.filename).toBe('indicacion.png');
+    const last = getPatient(patient)!.messages.slice(-1)[0];
+    expect(last?.attachment?.filename).toBe('indicacion.png');
 
     const mealPhoto = CONSENT_CATALOG.find((item) => item.purpose === 'meal_photo')!;
     await post(`/api/patients/${patient}/consents`, {
