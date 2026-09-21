@@ -42,7 +42,7 @@ describe('PV-39 alcance de producto', () => {
     expect(body.decisions.map((row) => [row.feature, row.status])).toEqual(
       ALCANCE_DECISIONS.map((row) => [row.feature, 'out']),
     );
-    expect(JSON.stringify(body)).not.toMatch(/mercadopago|OPENAI_API_KEY|Fitbit|WebRTC/i);
+    expect(JSON.stringify(body)).not.toMatch(/mercadopago|OPENAI_API_KEY|stripe_secret|provider_customer/i);
   });
 
   it('el snapshot nunca afirma aprobación visual aunque PLANV_NUTRIGO_VISUAL=1', () => {
