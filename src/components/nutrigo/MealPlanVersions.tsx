@@ -92,7 +92,7 @@ export function MealPlanEditor({ patientId }: { patientId: string }) {
       <div>
         <span>PLAN FECHADO</span>
         <h2>Versiones del plan</h2>
-        <p>El borrador se edita aparte. Publicar usa la versión esperada y deja una copia inmutable. El paciente sólo ve la publicada. La IA propone un borrador; no publica sola.</p>
+        <p>El borrador se edita aparte. Publicar revalida alergias, unidades y la versión esperada y deja una copia inmutable. El paciente sólo ve la publicada. La IA propone un borrador; no publica sola.</p>
       </div>
     </header>
     {source === 'memory' && <p className="meal-plan-demo">Vista demo · el plan fechado se conserva mientras la API siga encendida.</p>}

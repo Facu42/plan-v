@@ -36,6 +36,7 @@ describe('Plan fechado profesional y publicado', () => {
     const html = renderToStaticMarkup(<MealPlanEditor patientId="pat-sofia" />);
     expect(html).toContain('Versiones del plan');
     expect(html).toContain('versión esperada');
+    expect(html).toContain('alergias');
     expect(html).toContain('Guardar borrador');
     expect(html).toContain('Generar propuesta de menú');
     expect(html).toContain('no publica sola');

@@ -165,8 +165,8 @@
     "PV-28": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Live envía alergias al proveedor y no cae a demo si falla. Demo no publica sola. Falta evaluación sintética completa de unidades y edición concurrente live.",
-      "evidence": "server/ai/replacements.test.ts incluye Maní en el prompt y rechaza alergias unknown. Acompañamiento demo publica receta sin Maní.",
+      "notes": "Evaluación sintética eval.v1 (30 escenarios) al publicar/asignar: alergias, faltantes/unidades, coherencia, edición concurrente; apply/worker no publican. Fail closed 501 sin schema. Live schema/claves IA no.",
+      "evidence": "server/ai-eval/*; supabase/migrations/20260921260000_ai_eval.sql. Demo+PGlite; check/check:migrations/build pendientes de esta verificación.",
       "updatedAt": "2026-09-19T20:02:00.000Z"
     }
   },
@@ -220,12 +220,12 @@
       "fields": ["notes", "evidence"]
     },
     {
-      "id": "c19a28e0-9f12-4a3b-8c01-acomp0005",
+      "id": "c21a28e0-9f12-4a3b-8c01-pv280001",
       "taskId": "PV-28",
-      "at": "2026-09-19T20:02:00.000Z",
-      "from": "pending",
+      "at": "2026-09-21T05:30:00.000Z",
+      "from": "in_progress",
       "to": "in_progress",
-      "fields": ["status", "notes", "evidence"]
+      "fields": ["notes", "evidence"]
     },
     {
       "id": "c19a16e0-9f12-4a3b-8c01-estudios0001",

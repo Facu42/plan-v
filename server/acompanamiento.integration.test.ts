@@ -126,7 +126,12 @@ describe('acompañamiento conectado (demo memoria)', () => {
     const publishedTitle = 'Ensalada de lentejas revisada';
     const publish = {
       expected_recipe: proposal.replacement.recipe,
-      recipe: { ...proposal.replacement.recipe, title: publishedTitle },
+      recipe: {
+        ...proposal.replacement.recipe,
+        title: publishedTitle,
+        ingredients: ['Lentejas cocidas', 'Tomate'],
+        steps: ['Lavar las lentejas.', 'Mezclar con tomate.'],
+      },
     };
     expect((await json(`/api/patients/${sofia}/care/replacements/${proposal.replacement.id}/publish`, publish)).status).toBe(200);
     const afterPublish = await (await json(`/api/patients/${sofia}/care`)).json() as { replacements: Array<{ recipe: { title: string }; published_at: string | null }> };

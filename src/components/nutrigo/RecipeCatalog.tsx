@@ -84,7 +84,7 @@ export function RecipeCatalog({ patientId }: { patientId: string }) {
       <div>
         <span>CATÁLOGO DEL CONSULTORIO</span>
         <h2>Recetas e ingredientes</h2>
-        <p>Porciones, pasos y fuente nutricional declarada. Un borrador no cambia la revisión publicada. No se inventan calorías ni macros. La IA deja un borrador privado; vos publicás.</p>
+        <p>Porciones, pasos y fuente nutricional declarada. Un borrador no cambia la revisión publicada. No se inventan calorías ni macros. La IA deja un borrador privado; publicar revalida alergias y la versión. Vos publicás.</p>
       </div>
       <div className="recipe-header-actions">
         <NvButton className="nv-ghost" disabled={busy} onClick={() => { setEditing(emptyDraft()); setStatus(''); setError(''); }}>Nueva receta</NvButton>

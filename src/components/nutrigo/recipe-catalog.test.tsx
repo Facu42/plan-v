@@ -21,6 +21,7 @@ describe('Catálogo profesional y recetas asignadas', () => {
     expect(html).toContain('Recetas e ingredientes');
     expect(html).toContain('No se inventan calorías ni macros');
     expect(html).toContain('Generar borrador con IA');
+    expect(html).toContain('alergias');
     expect(html).toContain('borrador privado');
     expect(html).toContain('Cargando catálogo');
     expect(html).not.toMatch(/\bkcal\b|proteína|carbohidrato/i);

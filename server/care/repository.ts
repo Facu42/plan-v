@@ -3,6 +3,8 @@ import { DEFAULT_CARE_PREFERENCES, isMeasurementData, isMeasurementKind, type Ca
 import { inspectPrivateFile } from '../assets/inspect.js';
 import { requireProductBuckets } from '../assets/storage.js';
 import { CareError } from './errors.js';
+import { assertReadyToPublish, evaluateReplacementDraft } from '../ai-eval/evaluate.js';
+import { loadEvalHealth } from '../ai-eval/health.js';
 export { CareError } from './errors.js';
 const records = new Map<string, CareRecord>();
 const preferences = new Map<string, CarePreferences>();
@@ -106,6 +108,8 @@ export async function saveReplacement(entry: CareReplacement, persistent: boolea
   const { error } = await getRequestDb().from('care_replacements').insert(entry); careDbError(error);
 }
 export async function publishReplacement(patientId: string, id: string, persistent: boolean, expected:ReplacementRecipe, recipe:ReplacementRecipe) {
+  const health = await loadEvalHealth(patientId, persistent);
+  assertReadyToPublish(evaluateReplacementDraft(recipe, health));
   if (!persistent) {
     const entry = replacements.get(id); if (!entry || entry.patient_id !== patientId) throw new CareError(404, 'Propuesta no encontrada.');
     if(entry.published_at){if(JSON.stringify(entry.recipe)===JSON.stringify(recipe))return;throw new CareError(409,'Esta alternativa ya fue publicada.');}

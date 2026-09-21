@@ -41,7 +41,7 @@ describe('seguimiento conectado',()=>{
     expect(generated.replacement.source).toBe('demo');
     expect(generated.job_id).toBeTruthy();
     expect((await(await app.request(base)).json()).replacements).toEqual([]);
-    const publish={expected_recipe:generated.replacement.recipe,recipe:{...generated.replacement.recipe,title:'Alternativa revisada'}};
+    const publish={expected_recipe:generated.replacement.recipe,recipe:{...generated.replacement.recipe,title:'Alternativa revisada',ingredients:['Lentejas','Tomate'],steps:['Lavar.','Mezclar.']}};
     expect((await post(`${base}/replacements/${generated.replacement.id}/publish`,publish)).status).toBe(200);
     expect((await post(`${base}/replacements/${generated.replacement.id}/publish`,publish)).status).toBe(200);
     expect((await(await app.request(base)).json()).replacements).toHaveLength(1);

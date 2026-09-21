@@ -1,6 +1,8 @@
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
 import { getPatient } from '../store.js';
+import { assertReadyToPublish, evaluateMealPlanDraft } from '../ai-eval/evaluate.js';
+import { loadEvalHealth } from '../ai-eval/health.js';
 import { getRecipeSnapshot, listProfessionalRecipes } from '../recipes/repository.js';
 import {
   planSlotKey,
@@ -57,13 +59,24 @@ export function resetMealPlanMemory() {
   items.clear();
 }
 
-export function mealPlanDbError(error: { code?: string } | null) {
+export function mealPlanDbError(error: { code?: string; message?: string } | null) {
   if (!error) return;
   if (['42P01', '42883', 'PGRST202', 'PGRST205'].includes(error.code ?? '')) {
     throw new CareError(501, 'Los planes fechados requieren instalar la migración de este módulo.');
   }
   if (error.code === '42501') throw new CareError(403, 'No tenés permiso para esta acción.');
-  if (error.code === '23505' || error.code === 'PT409') throw new CareError(409, 'El plan publicado no se puede sobrescribir. Publicá una versión nueva.');
+  if (error.code === '23505' || error.code === 'PT409') {
+    if (error.message === 'meal_plan_allergies') {
+      throw new CareError(409, 'El plan incluye un alimento declarado como alergia o restricción. Revisalo antes de publicar.');
+    }
+    if (error.message === 'meal_plan_allergies_unknown') {
+      throw new CareError(409, 'Completá alergias y restricciones con el paciente antes de publicar.');
+    }
+    if (error.message === 'meal_plan_incomplete') {
+      throw new CareError(409, 'Este borrador todavía tiene texto de demostración o pendientes. Completalo antes de publicar.');
+    }
+    throw new CareError(409, 'El plan publicado no se puede sobrescribir. Publicá una versión nueva.');
+  }
   if (['22023', '23514', '22P02'].includes(error.code ?? '')) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
   throw new CareError(503, 'No se pudo confirmar el guardado. Reintentá sin cerrar el formulario.');
 }
@@ -348,6 +361,12 @@ export async function publishMealPlan(
     const version = planVersions(planId).find((row) => row.version === expectedVersion);
     if (!version) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
     if (versionItems(version.id).length < 1) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
+    const health = await loadEvalHealth(plan.patient_id, false);
+    assertReadyToPublish(evaluateMealPlanDraft({
+      period_start: version.period_start,
+      period_end: version.period_end,
+      items: versionItems(version.id),
+    }, health));
     if (version.status === 'published') return memProfessional(plan);
     if (version.status !== 'draft') throw new CareError(409, 'El plan publicado no se puede sobrescribir. Publicá una versión nueva.');
     for (const row of planVersions(planId)) {

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { app } from '../index.js';
 import { resetStore } from '../store.js';
+import { declareKnownHealth } from '../test/declare-health.js';
 
 const patient = 'pat-sofia';
 const other = 'pat-marina';
@@ -24,7 +25,10 @@ function draft(overrides: Record<string, unknown> = {}) {
 }
 
 describe('PV-18 catálogo de recetas', () => {
-  beforeEach(() => { resetStore(); });
+  beforeEach(async () => {
+    resetStore();
+    await declareKnownHealth(patient);
+  });
 
   it('el paciente no ve borradores ni publicadas sin asignar; sí ve la revisión asignada', async () => {
     const input = draft();

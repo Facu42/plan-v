@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { app } from '../index.js';
 import { resetStore } from '../store.js';
 import { toPublishedPatientPlan } from '../../src/types/plans.js';
+import { declareKnownHealth } from '../test/declare-health.js';
 
 const patient = 'pat-sofia';
 const other = 'pat-marina';
@@ -13,7 +14,10 @@ const post = (path: string, body: unknown) => app.request(path, {
 });
 
 describe('PV-20 paciente ve el plan publicado', () => {
-  beforeEach(() => { resetStore(); });
+  beforeEach(async () => {
+    resetStore();
+    await declareKnownHealth(patient);
+  });
 
   it('el paciente ve receta, porciones y el mismo contenido que el CRM; un borrador de receta no lo cambia', async () => {
     const recipeId = randomUUID();

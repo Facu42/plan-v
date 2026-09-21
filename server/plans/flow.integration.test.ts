@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { app } from '../index.js';
 import { resetStore } from '../store.js';
+import { declareKnownHealth } from '../test/declare-health.js';
 
 const patient = 'pat-sofia';
 const other = 'pat-marina';
@@ -23,7 +24,10 @@ function planDraft(overrides: Record<string, unknown> = {}) {
 }
 
 describe('PV-19 planes fechados versionados', () => {
-  beforeEach(() => { resetStore(); });
+  beforeEach(async () => {
+    resetStore();
+    await declareKnownHealth(patient);
+  });
 
   it('el paciente no ve el borrador; sí ve la copia publicada y un borrador posterior no la cambia', async () => {
     const input = planDraft();

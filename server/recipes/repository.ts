@@ -1,6 +1,8 @@
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
 import { getPatient } from '../store.js';
+import { assertReadyToPublish, evaluateRecipeDraft } from '../ai-eval/evaluate.js';
+import { loadEvalHealth } from '../ai-eval/health.js';
 import {
   RECIPE_UNITS,
   normalizeIngredientName,
@@ -49,7 +51,18 @@ export function recipeDbError(error: { code?: string; message?: string } | null)
     throw new CareError(501, 'El catálogo de recetas requiere instalar la migración de este módulo.');
   }
   if (error.code === '42501') throw new CareError(403, 'No tenés permiso para esta acción.');
-  if (error.code === '23505' || error.code === 'PT409') throw new CareError(409, 'Esa revisión ya fue publicada. Guardá una versión nueva.');
+  if (error.code === '23505' || error.code === 'PT409') {
+    if (error.message === 'meal_plan_allergies' || error.message === 'recipe_allergies') {
+      throw new CareError(409, 'El contenido incluye un alimento declarado como alergia o restricción. Revisalo antes de publicar.');
+    }
+    if (error.message === 'meal_plan_allergies_unknown') {
+      throw new CareError(409, 'Completá alergias y restricciones con el paciente antes de publicar.');
+    }
+    if (error.message === 'recipe_incomplete' || error.message === 'meal_plan_incomplete') {
+      throw new CareError(409, 'Este borrador todavía tiene texto de demostración o pendientes. Completalo antes de publicar.');
+    }
+    throw new CareError(409, 'Esa revisión ya fue publicada. Guardá una versión nueva.');
+  }
   if (['22023', '23514', '22P02'].includes(error.code ?? '')) throw new CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
   throw new CareError(503, 'No se pudo confirmar el guardado. Reintentá sin cerrar el formulario.');
 }
@@ -266,6 +279,15 @@ export async function saveRecipeDraft(nutritionistId: string, input: RecipeDraft
   return asProfessional(data as Record<string, unknown>);
 }
 
+function gateRecipePublish(title: string, version: { yield_portions: number; steps: string[]; ingredients: RecipeItem[] }) {
+  assertReadyToPublish(evaluateRecipeDraft({
+    title,
+    yield_portions: version.yield_portions,
+    steps: version.steps,
+    items: version.ingredients,
+  }));
+}
+
 export async function publishRecipe(nutritionistId: string, recipeId: string, expectedVersion: number, persistent: boolean): Promise<ProfessionalRecipe> {
   if (!persistent) {
     const recipe = recipes.get(recipeId);
@@ -275,12 +297,19 @@ export async function publishRecipe(nutritionistId: string, recipeId: string, ex
     if (versionItems(version.id).length < 1 || version.steps.length < 1) {
       throw new CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
     }
+    gateRecipePublish(recipe.title, { yield_portions: version.yield_portions, steps: version.steps, ingredients: versionItems(version.id) });
     if (!version.published_at) {
       version.published_at = new Date().toISOString();
       recipe.status = 'published';
     }
     return memProfessional(recipe);
   }
+  const catalog = await listProfessionalRecipes(nutritionistId, true);
+  const recipe = catalog.find((row) => row.id === recipeId);
+  if (!recipe) throw new CareError(403, 'No tenés permiso para esta acción.');
+  const version = recipe.current.version === expectedVersion ? recipe.current : recipe.published?.version === expectedVersion ? recipe.published : null;
+  if (!version) throw new CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
+  gateRecipePublish(recipe.title, version);
   const { data, error } = await getRequestDb().rpc('publish_recipe', { target_recipe: recipeId, expected_version: expectedVersion });
   recipeDbError(error);
   return asProfessional(data as Record<string, unknown>);
@@ -299,6 +328,13 @@ export async function assignRecipe(
     if (!recipe || recipe.nutritionist_id !== nutritionistId) throw new CareError(403, 'No tenés permiso para esta acción.');
     const version = recipeVersions(recipeId).find((row) => row.version === expectedVersion);
     if (!version || !version.published_at) throw new CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
+    const health = await loadEvalHealth(patientId, false);
+    assertReadyToPublish(evaluateRecipeDraft({
+      title: recipe.title,
+      yield_portions: version.yield_portions,
+      steps: version.steps,
+      items: versionItems(version.id),
+    }, health, { requireHealth: true }));
     const key = `${recipeId}:${patientId}`;
     const row: MemAssignment = {
       recipe_id: recipeId,
@@ -320,6 +356,17 @@ export async function assignRecipe(
       published_at: version.published_at,
     };
   }
+  const catalog = await listProfessionalRecipes(nutritionistId, true);
+  const owned = catalog.find((row) => row.id === recipeId);
+  const assignedVersion = owned?.published?.version === expectedVersion ? owned.published : owned?.current.version === expectedVersion ? owned.current : null;
+  if (!owned || !assignedVersion?.published_at) throw new CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
+  const health = await loadEvalHealth(patientId, true);
+  assertReadyToPublish(evaluateRecipeDraft({
+    title: owned.title,
+    yield_portions: assignedVersion.yield_portions,
+    steps: assignedVersion.steps,
+    items: assignedVersion.ingredients,
+  }, health, { requireHealth: true }));
   const { data, error } = await getRequestDb().rpc('assign_recipe', {
     target_recipe: recipeId,
     target_patient: patientId,

@@ -71,6 +71,11 @@ beforeAll(async () => {
      values ($1,$2,$3,'Paciente A','waived'),($4,$5,$6,'Paciente B','waived')`,
     [patientA, nutriAId, patientAUser, patientB, nutriBId, patientBUser],
   );
+  await rpc(patientAUser, 'save_patient_intake', [patientA, 1, 'allergies', {
+    preferred_name: 'Ana',
+    allergies: { state: 'none', items: [] },
+    restrictions: { state: 'none', items: [] },
+  }]);
 }, 60000);
 
 afterAll(async () => {
