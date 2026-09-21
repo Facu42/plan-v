@@ -41,6 +41,7 @@ export type PatientAction =
   | 'log_activity'
   | 'delete_activity'
   | 'read_resource'
+  | 'manage_favorites'
   | 'send_message'
   | 'edit_patient'
   | 'archive_patient'
@@ -86,6 +87,7 @@ const PATIENT_ACTIONS = new Set<PatientAction>([
   'log_activity',
   'delete_activity',
   'read_resource',
+  'manage_favorites',
   'send_message',
   'reschedule_appointment',
   'confirm_appointment',
@@ -127,6 +129,7 @@ export function canAccessPatient(actor: Actor, patient: PatientResource, action:
       action === 'read_self'
       || action === 'read_patient'
       || action === 'read_resource'
+      || action === 'manage_favorites'
       || action === 'send_message'
       || action === 'read_intake'
       || action === 'edit_intake'

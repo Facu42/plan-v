@@ -2,6 +2,8 @@
 
 ## Revisión vigente de avance — 2026-09-21
 
+PV-36 en esta rama: recursos editoriales con autoría, revisión y publicación explícita; asignación persistida; favoritos unificados (guía/artículo/receta) y búsqueda acotada por permisos. Plan B queda en Guardado/búsqueda profesional, no como favorito personal. `cover_url` nulo (sin imagen remota inventada). Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 771 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-37 (PV-32 se salta, piloto gratuito). No visual Nutrigo.
+
 PV-35 en esta rama: biblioteca de ejercicios y rutinas asignables sólo con habilitación verificada en servidor (el rol nutricionista no alcanza; no hay casillero para auto-otorgársela). `activity_logs` autodeclarados persistidos con RLS en Postgres descartable; series/reps y feedback paciente; sin calorías inferidas ni rutina automática. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 764 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-36 (PV-32 se salta, piloto gratuito). No visual Nutrigo.
 
 PV-34 en esta rama: progreso longitudinal del mismo paciente. Períodos 7/30/90 en `America/Argentina/Buenos_Aires`; series de peso/cintura/cadera con fuente; comparativa este-vs-anterior sólo si hay valor en ambos y la misma unidad; kg y lb no se mezclan; períodos vacíos no se rellenan; sin ranking. Profesional ve la paciente seleccionada (`/crm/progreso`), no una tabla entre pacientes. Fail closed 501 sin RPC. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 757 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-35 (PV-32 se salta, piloto gratuito). No visual Nutrigo.
@@ -147,7 +149,7 @@ La referencia aporta doce superficies. Plan V implementará funciones equivalent
 - [ ] Peso/medidas: implementar historial, permisos, consentimiento y retención. Actualización 2026-09-16: fotografías corporales opcionales y estudios incluidos por confirmación del usuario; requieren modelo, consentimiento específico, Storage privado y QA antes de datos reales.
 - [ ] Ejercicio: el registro paciente autodeclarado ya funciona en memoria y es visible para su nutricionista; faltan persistencia/RLS y acreditación/permiso para asignar rutinas. El rol nutricionista por sí solo no habilita prescripción automática.
 - [ ] Presupuesto y gastos de supermercado: confirmar si aportan valor o si Grocery queda sólo como lista operativa.
-- [ ] Contenido editorial clínico de Insights: autoría, revisión y derechos de imágenes. La biblioteca actual contiene sólo seis guías operativas originales sobre el uso de Plan V y prohíbe la publicación clínica automática por IA.
+- [x] Contenido editorial clínico de Insights: autoría, revisión y reglas de publicación en Postgres descartable (PV-36). Portada ilustrativa local (`cover_url` nulo); no hay imagen licenciada remota inventada. Live schema bloqueado si el proyecto tiene `patients`.
 - [x] Usuario confirma que compró la licencia de todo el pack Nutrigo y autoriza su uso en Plan V. Conservar procedencia de los assets; esto no afirma revisión independiente de términos legales.
 
 ## P0 — Bloqueos para usar datos reales
@@ -298,10 +300,10 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 ### Paso 12 — Insights y Guardado
 
 - [x] Base paciente de Recursos: seis guías operativas originales, categorías, destacado, búsqueda, detalle, tags, relacionados y navegación a la función explicada. No son recomendaciones clínicas ni copian contenidos del kit.
-- [ ] Contenido editorial clínico estructurado y revisado, con autoría, imágenes licenciadas y reglas de publicación.
-- [ ] Favoritos/Guardado unificado para recetas, artículos, Planes B y recursos. Guardado profesional ya reúne Planes B y asignación de guías, pero los favoritos personales de Recursos continúan sólo en `localStorage`, aislados por paciente y rotulados como conveniencia del dispositivo; todavía no existe una entidad real de receta/artículo.
+- [x] Contenido editorial clínico estructurado y revisado, con autoría y reglas de publicación (PV-36). Imágenes: `license_kind` placeholder/internal, `cover_url` nulo; no se inventó material de terceros remoto. Live schema bloqueado.
+- [x] Favoritos/Guardado unificado para recetas asignadas, artículos visibles, Planes B (búsqueda/Guardado profesional) y recursos. Favoritos personales persisten en servidor (demo/PGlite); sin schema → 501. Ya no viven en `localStorage`.
 - [x] Compartir las seis guías operativas mediante enlace profundo validado (`#recurso=<id>`), Web Share cuando existe y copia del enlace como fallback. Atrás/adelante del navegador y reapertura directa conservan el detalle; navegar a otra función limpia el hash.
-- [x] Asignación individual o masiva de las seis guías operativas, idempotente y aislada por paciente, con estado pendiente/leído visible en ambos roles. Funciona sólo en memoria demo; con Supabase activo falla cerrado con 501 hasta incorporar contrato, RLS y auditoría al schema 016.
+- [x] Asignación individual o masiva de guías operativas y artículos publicados, idempotente y aislada por paciente, con estado pendiente/leído visible en ambos roles. Persistida en Postgres descartable; con Supabase sin schema falla cerrado con 501. No se aplicó SQL en el proyecto hospedado con `patients`.
 
 ### Paso 13 — Completar módulos CRM
 

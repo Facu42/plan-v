@@ -7,6 +7,7 @@ import { NvBadge, NvButton, NvState } from './primitives';
 import { buildAgendaEntries } from './ShowroomAgenda';
 import { secureMeetUrl } from './ShowroomConsultations';
 import { RESOURCE_GUIDES, resourceAssignmentDateLabel } from './ShowroomResources';
+import { SEEDED_RESOURCES } from '../../types/resources';
 import './showroom-work-center.css';
 
 export type WorkCenterModule = 'reciente' | 'guardado' | 'seguimiento' | 'paneles' | 'videollamadas';
@@ -109,10 +110,11 @@ function Recent({ patients, onOpenPatient }: Pick<WorkCenterProps, 'patients' | 
 function Saved({ patients, onOpenPatient }: Pick<WorkCenterProps, 'patients' | 'onOpenPatient'>) {
   const addPatient = useAppStore((state) => state.addPatient);
   const [resourceId, setResourceId] = useState(RESOURCE_GUIDES[0].id);
+  const assignable = SEEDED_RESOURCES.filter((entry) => entry.published);
   const [selectedPatientIds, setSelectedPatientIds] = useState<string[]>([]);
   const [feedback, setFeedback] = useState('');
   const [saving, setSaving] = useState(false);
-  const resource = RESOURCE_GUIDES.find((guide) => guide.id === resourceId) ?? RESOURCE_GUIDES[0];
+  const resource = assignable.find((entry) => entry.slug === resourceId) ?? assignable[0];
   const saved = patients.filter((patient) => patient.plan_b.trim());
   const allSelected = patients.length > 0 && selectedPatientIds.length === patients.length;
   const togglePatient = (patientId: string) => {
@@ -142,10 +144,10 @@ function Saved({ patients, onOpenPatient }: Pick<WorkCenterProps, 'patients' | '
 
   return <div className="nvw-saved-layout">
     <section className="nvw-resource-assignment" aria-label="Asignar recursos">
-      <div className="nvw-panel-head"><div><h3>Asignar recursos</h3><p>Elegí una guía operativa y uno o varios pacientes.</p></div><NvBadge>{RESOURCE_GUIDES.length} guías</NvBadge></div>
-      <div className="nvw-resource-picker" aria-label="Guías disponibles">{RESOURCE_GUIDES.map((guide) => <button type="button" key={guide.id} aria-pressed={resourceId === guide.id} onClick={() => { setResourceId(guide.id); setFeedback(''); }}><span className="nv-icon-tile"><Icon name={guide.icon} size={17} /></span><span><strong>{guide.title}</strong><small>{guide.category} · {guide.minutes} min</small></span></button>)}</div>
+      <div className="nvw-panel-head"><div><h3>Asignar recursos</h3><p>Elegí una guía operativa o un artículo revisado y uno o varios pacientes.</p></div><NvBadge>{assignable.length} publicados</NvBadge></div>
+      <div className="nvw-resource-picker" aria-label="Recursos disponibles">{assignable.map((guide) => <button type="button" key={guide.slug} aria-pressed={resourceId === guide.slug} onClick={() => { setResourceId(guide.slug); setFeedback(''); }}><span className="nv-icon-tile"><Icon name={guide.icon as IconName} size={17} /></span><span><strong>{guide.title}</strong><small>{guide.kind === 'clinical' ? 'Artículo · ' : ''}{guide.category} · {guide.minutes} min</small></span></button>)}</div>
       <div className="nvw-assignment-body">
-        <article className="nvw-resource-preview"><span>{resource.eyebrow}</span><h4>{resource.title}</h4><p>{resource.summary}</p><small>Contenido editorial operativo · no es una indicación clínica.</small></article>
+        <article className="nvw-resource-preview"><span>{resource.eyebrow}</span><h4>{resource.title}</h4><p>{resource.summary}</p><small>{resource.kind === 'clinical' ? `Autoría: ${resource.author_name} · revisado · ${resource.license_note}` : 'Contenido editorial operativo · no es una indicación clínica.'}</small></article>
         <section className="nvw-patient-checklist" aria-label="Pacientes para asignar"><header><div><strong>Pacientes</strong><small>{selectedPatientIds.length} seleccionados</small></div><button type="button" onClick={() => setSelectedPatientIds(allSelected ? [] : patients.map((patient) => patient.id))}>{allSelected ? 'Quitar todos' : 'Seleccionar todos'}</button></header><div>{patients.map((patient) => {
           const assignment = patient.resource_assignments?.find((item) => item.resource_id === resourceId);
           return <label key={patient.id}><input type="checkbox" aria-label={`Seleccionar ${patient.name}`} checked={selectedPatientIds.includes(patient.id)} onChange={() => togglePatient(patient.id)} /><span className={`nv-avatar person-${patient.tone}`}>{patient.initials}</span><span><strong>{patient.name}</strong><small>{assignment?.read_at ? `Leído · ${resourceAssignmentDateLabel(assignment.read_at)}` : assignment ? `Asignado ${resourceAssignmentDateLabel(assignment.assigned_at)} · pendiente` : 'No asignado'}</small></span></label>;

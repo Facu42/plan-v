@@ -209,9 +209,9 @@ El usuario pidió definir un estándar de app nutricional moderna y aplicarlo, e
 ## Paso 12 — Insights y Guardado
 
 - [x] 12.1 Base paciente de Recursos: seis guías operativas originales, categorías, búsqueda y detalle; sin publicación clínica automática. Evidencia: `.scratch/nutrigo-resources/58-patient-resources.md`.
-- [x] 12.2 Tags, relacionados, favorito local y compartir para las seis guías operativas permitidas. Usa enlace profundo validado, Web Share o copy-link; historial del navegador y reapertura directa verificados. Evidencia: `.scratch/nutrigo-resource-share/59-resource-deep-links.md`.
-- [ ] 12.3 Guardado unificado de recetas, artículos, Planes B y recursos. Guardado profesional ya reúne Planes B con asignación de guías, pero los favoritos personales de Recursos siguen sólo en el dispositivo y aún no existen entidades reales de receta/artículo.
-- [x] 12.4 Asignación individual/masiva de las seis guías operativas con estado y fecha de envío/lectura por paciente; memoria demo únicamente y `501` en Supabase hasta contrato/RLS. Evidencia: `.scratch/nutrigo-resource-assignment/60-resource-assignment.md`.
+- [x] 12.2 Tags, relacionados, favorito persistido y compartir para las seis guías operativas permitidas. Usa enlace profundo validado, Web Share o copy-link; historial del navegador y reapertura directa verificados.
+- [x] 12.3 Guardado unificado de recetas asignadas, artículos visibles, Planes B (superficie profesional) y recursos. Favoritos personales persisten en servidor; sin schema 501.
+- [x] 12.4 Asignación individual/masiva de guías y artículos publicados con estado pendiente/leído; persistida en Postgres descartable y `501` sin schema.
 
 ## Paso 13 — CRM completo
 

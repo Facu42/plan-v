@@ -11,8 +11,8 @@ de entidades existentes, no debe persistirse; **futura** = sin implementación.
 
 | Entidad / evento | Estado demo | Contrato piloto | Qué queda para persistir (PV-08+) |
 | --- | --- | --- | --- |
-| `resource_assignments` | demo (corte 60) | 016b: `resources` + `resource_assignments` (`first_read_at`) | RLS completa, seeds, 501 → escritura real |
-| `resource_guides` | estático en cliente | 016b: `resources` con `published`/`reviewed_at` | Autoría/revisión clínica y catálogo no clínico (PV-36) |
+| `resource_guides` | demo + PGlite (PV-36) | 016b: `resources` con `published`/`reviewed_at` | Live schema en proyecto **vacío** (no el de `patients`). Autoría/revisión clínica aterrizada en migración descartable |
+| `resource_assignments` | demo + PGlite (PV-36) | 016b: `resources` + `resource_assignments` (`first_read_at`) | Live schema en proyecto **vacío**. 501 sin RPC |
 | `activity_logs` | demo (corte 57) | 016b: actividad autodeclarada, sin calorías | RLS paciente-insert / nutri-select |
 | `plan_b` | campo en `patients` | núcleo 016; fuera del DTO paciente (PV-03) | Confirmar si alguna vez se publica |
 | Lista de compras | derivada | **fuera del piloto** | `shopping_lists` post-piloto (PV-21/39) |
@@ -28,7 +28,8 @@ de entidades existentes, no debe persistirse; **futura** = sin implementación.
 | Progreso por períodos | derivado (PV-34); RPC `get_patient_progress`; no se persiste un agregado | 016b: medidas + meal_logs; comparativa same-patient | Live schema en proyecto **vacío**. Sin ranking |
 | `appointment_events` | demo + PGlite (PV-25); cancel+insert, timezone, confirmación, solapes 409 | 016b: historial append-only | Live schema en proyecto **vacío**. GET hospedado cae a turnos 016 sin historial |
 | `message_receipts` | demo + PGlite (PV-23); entrega/lectura por persona, `client_id` | 016b: recibo por (mensaje, usuario) | Live schema en proyecto **vacío**. GET hospedado cae al hilo 016 sin recibos |
-| `exercise_library` / rutinas | — | **fuera del piloto** (PV-35) | Habilitación profesional verificada |
+| `exercise_library` / rutinas | demo + PGlite (PV-35) | **fuera del piloto** (PV-35) | Habilitación profesional verificada |
+| `favorites` | demo + PGlite (PV-36) | no en 016b | Live schema en proyecto **vacío**. Paciente `manage_favorites`; Plan B no |
 | `organizations` / equipos | — | **fuera del piloto** (PV-38) | Ownership y delegación |
 
 Reglas transversales ya vigentes: ninguna entidad nueva puede exponer
@@ -58,8 +59,8 @@ a `PatientAction` actuales.
 | `goals` + `goal_history` | sí | actualiza [`set_goal`] | objetivo vigente | — | historial inmutable |
 | `patients` ficha | sí | perfil/archivo | vista segura propia | perfil limitado | lifecycle/billing |
 | `plan_b` | sí | edita en ficha | — (pendiente confirmar) | — | — |
-| `resource favorites` | — | — | propias, dispositivo | propias, dispositivo | nunca servidor (hoy) |
-| Favoritos/guardado unificado | — | — | — | — | entidad futura sin permisos definidos |
+| `resource favorites` | propias, servidor | propias, servidor [`manage_favorites`] | propias, servidor | propias, servidor | fail closed 501 sin schema |
+| Favoritos/guardado unificado | Plan B en ficha + búsqueda | asigna recursos publicados | receta/artículo/guía visibles | `toggle_favorite` | no `plan_b` como favorito paciente |
 
 Observaciones para la revisión:
 

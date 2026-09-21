@@ -13,6 +13,7 @@ import { registerShoppingRoutes } from './shopping/routes.js';
 import { registerOutboxRoutes } from './outbox/routes.js';
 import { registerProgressRoutes } from './progress/routes.js';
 import { registerExerciseRoutes } from './exercise/routes.js';
+import { registerResourceRoutes } from './resources/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -48,8 +49,6 @@ import {
   patientCreateInputSchema,
   patientProfileUpdateInputSchema,
   provisionNutritionistInputSchema,
-  resourceAssignmentInputSchema,
-  resourceGuideIdSchema,
 } from './schemas.js';
 import { paginateItems } from './pagination.js';
 import { CONSENT_CATALOG, matchConsentVersion } from './intake/consent.js';
@@ -80,7 +79,6 @@ import {
   type PatientAction,
 } from './security/contracts.js';
 import {
-  assignResourceToPatients,
   briefForDisplay,
   computeShoppingList,
   createPatient,
@@ -89,7 +87,6 @@ import {
   getInviteById,
   getPatient,
   getStore,
-  markResourceRead,
   provisionNutritionistMemory,
   revokePatientInvite,
   sendPatientInvite,
@@ -249,6 +246,7 @@ registerShoppingRoutes(app);
 registerOutboxRoutes(app);
 registerProgressRoutes(app);
 registerExerciseRoutes(app);
+registerResourceRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({
@@ -471,46 +469,6 @@ app.patch('/api/patients/:id/habits', async (c) => {
   const patient = upsertHabitLog(patientId, body);
   if (!patient) return c.notFound();
   return c.json({ patient, source: 'memory' });
-});
-
-app.post('/api/resources/assign', async (c) => {
-  const auth = c.get('auth');
-  const parsedBody = await parseJsonBody(c, resourceAssignmentInputSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-  const { resource_id: resourceId, patient_ids: patientIds } = parsedBody.data;
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    const decisions = await Promise.all(patientIds.map((patientId) => authorizePatient(auth.userId, patientId, 'assign_resource')));
-    if (decisions.some((actor) => !actor)) return c.json({ error: 'Prohibido' }, 403);
-    return c.json({ error: 'Asignación de recursos pendiente del schema 016' }, 501);
-  }
-
-  const result = assignResourceToPatients(resourceId, patientIds);
-  if (!result) return c.notFound();
-  return c.json({
-    patients: result.patients,
-    assigned_count: result.assignedCount,
-    existing_count: result.existingCount,
-    source: 'memory',
-  });
-});
-
-app.post('/api/patients/:id/resources/:resourceId/read', async (c) => {
-  const auth = c.get('auth');
-  const { id: patientId, resourceId } = c.req.param();
-  const parsedResourceId = resourceGuideIdSchema.safeParse(resourceId);
-  if (!parsedResourceId.success) return c.json({ error: 'Recurso inválido' }, 400);
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'read_resource')) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    return c.json({ error: 'Lectura de recursos pendiente del schema 016' }, 501);
-  }
-
-  const patient = markResourceRead(patientId, parsedResourceId.data);
-  if (!patient) return c.notFound();
-  return c.json({ patient: toPatientSelfView(patient), source: 'memory' });
 });
 
 app.patch('/api/patients/:id/billing', async (c) => {

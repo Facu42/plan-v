@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { recipesApi } from '../../api/recipes';
+import { resourcesApi } from '../../api/resources';
 import { aiJobsApi } from '../../api/ai-jobs';
 import { careErrorMessage } from '../../api/care';
 import { RECIPE_UNITS, recipeDraftSchema, type ProfessionalRecipe, type RecipeDraftInput, type RecipeUnit } from '../../types/recipes';
@@ -152,10 +153,13 @@ export function RecipeCatalog({ patientId }: { patientId: string }) {
   </section>;
 }
 
-export function AssignedRecipesView({ recipes, query = '', error = '' }: {
+export function AssignedRecipesView({ recipes, query = '', error = '', patientId, savedIds = [], onToggleFavorite }: {
   recipes: import('../../types/recipes').PatientRecipe[];
   query?: string;
   error?: string;
+  patientId?: string;
+  savedIds?: string[];
+  onToggleFavorite?: (recipeId: string) => void;
 }) {
   const term = query.trim().toLocaleLowerCase('es-AR');
   const visible = recipes.filter((recipe) => !term || `${recipe.title} ${recipe.ingredients.map((item) => item.name).join(' ')}`.toLocaleLowerCase('es-AR').includes(term));
@@ -172,6 +176,7 @@ export function AssignedRecipesView({ recipes, query = '', error = '' }: {
         <span className="recipe-eyebrow">Revisión {recipe.version}</span>
         <h3>{recipe.title}</h3>
         <p>Rinde {recipe.yield_portions} · {recipe.nutrient_source || 'Sin fuente nutricional declarada'}</p>
+        {patientId && onToggleFavorite && <button type="button" aria-pressed={savedIds.includes(recipe.id)} onClick={() => onToggleFavorite(recipe.id)}>{savedIds.includes(recipe.id) ? 'Guardada' : 'Guardar en favoritos'}</button>}
       </header>
       <h4>Ingredientes</h4>
       <ul>{recipe.ingredients.map((item) => <li key={item.id}>{item.quantity} {item.unit} {item.name}</li>)}</ul>
@@ -183,6 +188,7 @@ export function AssignedRecipesView({ recipes, query = '', error = '' }: {
 
 export function AssignedRecipes({ patientId, query = '' }: { patientId: string; query?: string }) {
   const [recipes, setRecipes] = useState<import('../../types/recipes').PatientRecipe[]>([]);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
   const [error, setError] = useState('');
   useEffect(() => {
     const controller = new AbortController();
@@ -193,7 +199,18 @@ export function AssignedRecipes({ patientId, query = '' }: { patientId: string; 
         setRecipes([]);
         setError(careErrorMessage(caught));
       });
+    resourcesApi.library(patientId, '', false, controller.signal)
+      .then((result) => setSavedIds(result.library.favorites.filter((row) => row.item_kind === 'recipe').map((row) => row.item_id)))
+      .catch((caught) => { if (caught instanceof DOMException && caught.name === 'AbortError') return; });
     return () => controller.abort();
   }, [patientId]);
-  return <AssignedRecipesView recipes={recipes} query={query} error={error} />;
+  async function toggleFavorite(recipeId: string) {
+    try {
+      const result = await resourcesApi.favorite(patientId, 'recipe', recipeId);
+      setSavedIds(result.library.favorites.filter((row) => row.item_kind === 'recipe').map((row) => row.item_id));
+    } catch (caught) {
+      setError(careErrorMessage(caught));
+    }
+  }
+  return <AssignedRecipesView recipes={recipes} query={query} error={error} patientId={patientId} savedIds={savedIds} onToggleFavorite={(id) => void toggleFavorite(id)} />;
 }
