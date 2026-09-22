@@ -115,6 +115,29 @@ Card de 551 × 306, radio 16, padding 16, separación 16. Cuerpo en dos columnas
 
 **La interfaz va en español.** El .fig manda en composición, color, tipo y densidad; no en idioma. Ningún rótulo, vacío ni mensaje queda en inglés por copiar el frame. Las cifras y nombres de ejemplo del pack no se copian: los datos son de Plan V.
 
+## Nodos del archivo
+
+La página de interfaz es `1:2`. Los frames de escritorio, por id:
+
+| # | Pantalla | Nodo | Alto |
+|---|---|---|---|
+| 01 | Dashboard | `12:792` | 1232 |
+| 04 | Calendar | `84:1666` | 1048 |
+| 07 | Messages | `84:2565` | 1046 |
+| 10 | Healthy Menu | `84:2716` | 1118 |
+| 13 | Recipe Details | `84:3145` | 1197 |
+| 16 | Meal Plan | `84:2994` | 1088 |
+| 19 | Grocery List | `105:2472` | 1412 |
+| 22 | Food Diary | `105:2649` | 1322 |
+| 25 | Progress | `105:2790` | 1157 |
+| 28 | Exercise | `105:2931` | 1136 |
+| 31 | Insights | `263:6588` | 1136 |
+| 34 | Insight Details | `279:9301` | 2020 |
+
+Todos miden 1440 de ancho. El archivo trae además una versión tablet (800) y una móvil (390) de cada pantalla; esta ley se ocupa por ahora del escritorio.
+
+Se listan con el Plugin API, no con la REST API: la REST solo devuelve la página de estilos.
+
 ## Pantallas
 
 Once superficies. Recipe Details e Insights entran. **Ejercicio no entra** en este pase visual; la página sigue en el producto.

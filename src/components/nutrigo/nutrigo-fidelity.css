@@ -625,3 +625,371 @@
    separación, y la columna de la derecha en 260. */
 .nv-app .np-plan-grid { gap: 20px; }
 .nv-app .np-plan-meal { border: 0; border-radius: 12px; background: var(--nv-track); }
+
+/* ── Calendario (nodo 84:1666) ───────────────────────────────────────────────
+   Cuerpo de 836: tres cards de estadística de 108, y debajo el calendario en
+   una sola card con la cabecera de 40 y filas de 120, celdas de 119,43. */
+.nv-app .nvpa-agenda { gap: var(--nv-section-gap); }
+/* El archivo no tiene banner oscuro en esta pantalla: la cabecera es texto. */
+.nv-app .nvpa-hero {
+  min-height: 50px;
+  padding: 0;
+  border-radius: 0;
+  color: var(--nv-ink);
+  background: transparent;
+}
+.nv-app .nvpa-hero-icon { display: none!important; }
+.nv-app .nvpa-hero > div > span,
+.nv-app .nvpa-echo-head > div > span {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t11);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.nv-app .nvpa-hero h2 {
+  margin: 6px 0;
+  font-size: var(--nv-fs-h5);
+  line-height: var(--nv-lh-h5);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.nv-app .nvpa-hero p {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+}
+.nv-app .nvpa-summary { gap: 16px; }
+.nv-app .nvpa-summary > div {
+  min-height: 108px;
+  padding: var(--nv-card-pad);
+  border: 0;
+  border-radius: var(--nv-r-card);
+  background: var(--nv-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app .nvpa-summary dt {
+  margin-bottom: 8px;
+  color: var(--nv-ink);
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+}
+.nv-app .nvpa-summary dd {
+  font-size: var(--nv-fs-t18);
+  line-height: var(--nv-lh-t18);
+  font-weight: 600;
+}
+/* Header-Section del calendario: botones de 30 y grupo segmentado. */
+.nv-app .nvpa-nav button {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--nv-fill);
+}
+.nv-app .nvpa-nav p {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+.nv-app :is(.nvpa-views, .nvpa-filters) {
+  gap: 0;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--nv-fill);
+}
+.nv-app :is(.nvpa-views, .nvpa-filters) button {
+  min-height: 26px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+  font-weight: 500;
+}
+.nv-app :is(.nvpa-views, .nvpa-filters) button[aria-pressed=true] {
+  border-color: transparent;
+  background: var(--nv-accent);
+  color: var(--nv-ink);
+}
+.nv-app .nvpa-layout { gap: var(--nv-section-gap); }
+.nv-app :is(.nvpa-calendar, .nvpa-detail) {
+  border: 0;
+  border-radius: var(--nv-r-card);
+  box-shadow: var(--nv-shadow);
+}
+/* Row-Calendar-Head (nodo 217:6491): 40 de alto, día 12 regular Gray-20. */
+.nv-app .nvpa-weekdays {
+  height: 40px;
+  border-block: 0;
+  border-bottom: 1px solid var(--nv-line);
+  background: var(--nv-card);
+}
+.nv-app .nvpa-weekdays span {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+  font-weight: 400;
+  text-transform: none;
+}
+/* Cell-Calendar-Body (nodo 217:6501): 120 de alto, padding 4, número 10. */
+.nv-app .nvpa-month-grid > button {
+  min-height: 120px;
+  padding: 4px;
+  gap: 4px;
+  border-right: 1px solid var(--nv-line);
+  border-bottom: 1px solid var(--nv-line);
+}
+.nv-app .nvpa-month-grid time {
+  width: 18px;
+  height: 18px;
+  border-radius: 0;
+  font-size: 10px;
+  line-height: 1.35;
+  font-weight: 400;
+}
+.nv-app .nvpa-month-grid .nvpa-outside { background: var(--nv-track); }
+.nv-app .nvpa-month-grid .nvpa-outside time { color: var(--nv-faint); }
+.nv-app .nvpa-month-grid .nvpa-occupied { background: var(--nv-accent-soft); }
+.nv-app .nvpa-chip { border-radius: 6px; }
+.nv-app .nvpa-filters { flex: 0 0 auto; margin-right: auto; }
+/* El archivo no marca el día con un recuadro negro: hoy es una pastilla verde
+   y el día elegido se resalta con el mismo verde, no con un borde fuerte. */
+.nv-app :is(.nvpa-month-grid, .nvpa-week-grid) .nvpa-today time {
+  outline: 0;
+  border-radius: 6px;
+  background: var(--nv-accent);
+  color: var(--nv-ink);
+  font-weight: 600;
+}
+.nv-app :is(.nvpa-month-grid, .nvpa-week-grid) .nvpa-selected {
+  outline: 2px solid var(--nv-accent);
+  outline-offset: -2px;
+}
+
+/* ── Mensajes (nodo 84:2565) ─────────────────────────────────────────────────
+   Sin rail: el cuerpo de 1161 se parte en 299 + 547 + 275 con 20. Los ítems
+   de la lista miden 96, la cabecera del chat 100 y el pie 88. */
+.nv-app :is(.nm-contacts, .nm-conversation, .nm-profile) {
+  border-radius: var(--nv-r-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app .nm-contacts { padding: var(--nv-card-pad) 12px; }
+.nv-app .nm-contacts > h2,
+.nv-app .nm-layout h2 {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+.nv-app :is(.nm-contacts > input, .nm-compose textarea, .nm-mobile-picker select) {
+  border: 0;
+  border-radius: 12px;
+  background: var(--nv-track);
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+}
+.nv-app .nm-contact-list > button {
+  min-height: 96px;
+  gap: 12px;
+  padding: 16px 12px;
+  border-radius: 12px;
+}
+.nv-app .nm-contact-list > button[aria-pressed=true] { background: var(--nv-accent-soft); }
+.nv-app .nm-contact-list strong {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+.nv-app .nm-contact-list small {
+  margin-top: 4px;
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+}
+.nv-app .nm-conversation > header {
+  min-height: 100px;
+  padding: var(--nv-card-pad);
+  border-bottom: 1px solid var(--nv-line);
+}
+.nv-app .nm-conversation > header small {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+}
+.nv-app .nm-thread { gap: 12px; padding: 16px 20px; }
+/* Bubble-chat: 507 de ancho, esquina viva del lado de quien habla. */
+.nv-app .nm-bubble {
+  padding: 12px 16px;
+  border-radius: 12px 12px 12px 2px;
+  background: var(--nv-track);
+}
+.nv-app .nm-bubble.nm-own {
+  border-radius: 12px 12px 2px 12px;
+  background: var(--nv-accent-soft);
+}
+.nv-app .nm-bubble > small {
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+  font-weight: 600;
+}
+.nv-app .nm-bubble p {
+  font-size: var(--nv-fs-p12);
+  line-height: var(--nv-lh-p12);
+}
+.nv-app .nm-bubble time {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t11);
+  line-height: var(--nv-lh-t11);
+}
+.nv-app .nm-compose { padding: var(--nv-card-pad); border-top: 1px solid var(--nv-line); }
+.nv-app .nm-profile { padding: var(--nv-card-pad); }
+.nv-app .nm-profile p {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-p11);
+  line-height: var(--nv-lh-p11);
+}
+.nv-app .nm-profile hr { margin: 20px 0; border-top: 1px solid var(--nv-line); }
+
+/* ── Menú saludable (nodo 84:2716) ───────────────────────────────────────────
+   Contenido 816 + rail 289. Arriba el destacado (imagen de 298 al lado del
+   texto de 312) y debajo la lista, con cards de 136. */
+.nv-app .nvm-menu { gap: var(--nv-section-gap); }
+.nv-app .nvm-main,
+.nv-app .nvm-aside { gap: var(--nv-section-gap); }
+.nv-app .nvm-hero {
+  min-height: 50px;
+  padding: 0;
+  border-radius: 0;
+  color: var(--nv-ink);
+  background: transparent;
+}
+.nv-app .nvm-hero-icon { display: none!important; }
+.nv-app .nvm-hero > div > span,
+.nv-app .nvm-all > header span,
+.nv-app .nvm-aside section > span {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t11);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.nv-app .nvm-hero h2 {
+  margin: 6px 0;
+  font-size: var(--nv-fs-h5);
+  line-height: var(--nv-lh-h5);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.nv-app .nvm-hero p {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+}
+@media (min-width: 1251px) {
+  .nv-app .nvm-layout { grid-template-columns: minmax(0, 1fr) 289px; }
+}
+.nv-app .nvm-layout { gap: var(--nv-section-gap); }
+/* Widget Featured Menu: imagen cuadrada de 298 con 20 de aire. */
+.nv-app .nvm-featured {
+  grid-template-columns: 298px minmax(0, 1fr);
+  gap: 20px;
+  min-height: 338px;
+  padding: 20px;
+  border: 0;
+  border-radius: var(--nv-r-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app .nvm-featured-image { min-height: 298px; border-radius: 12px; overflow: hidden; }
+.nv-app .nvm-featured-image > .np-food-photo,
+.nv-app .nvm-featured-image > .np-food-fallback { border-radius: 12px; }
+.nv-app .nvm-featured-copy { padding: 0; justify-content: flex-start; }
+.nv-app .nvm-featured-copy h3 {
+  margin: 0 0 16px;
+  font-size: var(--nv-fs-h5);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.nv-app .nvm-featured-copy > p {
+  font-size: var(--nv-fs-p12);
+  line-height: var(--nv-lh-p12);
+}
+/* Widget All Menu: no es una card, es una sección con cards de 136. */
+.nv-app .nvm-all { padding: 0; border: 0; background: transparent; box-shadow: none; }
+.nv-app .nvm-all > header { margin-bottom: 16px; }
+.nv-app .nvm-all h3 {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+.nv-app .nvm-list { gap: 16px; }
+.nv-app .nvm-list article {
+  min-height: 136px;
+  gap: 16px;
+  padding: var(--nv-card-pad);
+  border-radius: var(--nv-r-card);
+  background: var(--nv-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app .nvm-list article > .np-food-photo,
+.nv-app .nvm-list article > .np-food-fallback {
+  width: 104px;
+  height: 104px;
+  border-radius: 12px;
+}
+.nv-app .nvm-list strong {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+.nv-app .nvm-list small,
+.nv-app .nvm-list article > div:nth-child(2) > span {
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+}
+/* Segmented Button del archivo, en vez de píldoras sueltas. */
+.nv-app .nvm-filters {
+  gap: 0;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--nv-fill);
+}
+.nv-app .nvm-filters button {
+  min-height: 26px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font-size: var(--nv-fs-t12);
+  font-weight: 500;
+}
+.nv-app .nvm-filters button[aria-pressed="true"] {
+  border-color: transparent;
+  color: var(--nv-ink);
+  background: var(--nv-accent);
+}
+.nv-app .nvm-aside section {
+  padding: var(--nv-card-pad);
+  border: 0;
+  border-radius: var(--nv-r-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app .nvm-aside h3 {
+  margin: 6px 0 16px;
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+.nv-app .nvm-aside dl > div { border-radius: 10px; background: var(--nv-track); }
+.nv-app .nvm-aside dt { font-size: var(--nv-fs-t11); line-height: var(--nv-lh-t11); }
+.nv-app .nvm-aside dd { font-size: var(--nv-fs-t18); line-height: var(--nv-lh-t18); font-weight: 600; }
+.nv-app .nvm-moments { gap: 16px; }
+.nv-app .nvm-moments button {
+  min-height: 100px;
+  gap: 16px;
+  padding: var(--nv-card-pad);
+  border-radius: 12px;
+  background: var(--nv-track);
+}
+.nv-app .nvm-moment-icon { width: 56px; height: 56px; border-radius: 10px; background: var(--nv-fill); }
+.nv-app .nvm-moments strong { font-size: var(--nv-fs-t14); line-height: var(--nv-lh-t14); font-weight: 600; }
+.nv-app .nvm-moments small { margin-top: 4px; font-size: var(--nv-fs-t12); line-height: var(--nv-lh-t12); }
+.nv-app .nvm-featured-image { height: 298px; }
