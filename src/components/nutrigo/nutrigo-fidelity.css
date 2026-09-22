@@ -155,12 +155,17 @@
 .nv-app .recipe-macros dd { font-weight: 700; }
 
 .nv-app :is(h1, h2, h3) { font-weight: 600; letter-spacing: -0.03em; }
+/* Header del contenido (nodo 33:1574): 50 de alto, título 22 semibold y
+   bajada 12 regular apagada, con 6 entre las dos. El 26 bold del archivo es
+   la cifra de la dona de peso, no el título de página. */
+.nv-app .nv-page-head { min-height: 50px; margin-bottom: 28px; }
 .nv-app .nv-page-head h1 {
-  font-size: var(--nv-fs-h3);
-  line-height: var(--nv-lh-h3);
-  font-weight: 700;
+  font-size: var(--nv-fs-h5);
+  line-height: var(--nv-lh-h5);
+  font-weight: 600;
   letter-spacing: 0;
 }
+.nv-app .nv-page-head > div { max-width: 340px; }
 .nv-app .nv-card h2,
 .nv-app .nv-card h3 {
   font-size: var(--nv-fs-t16);
@@ -168,7 +173,28 @@
   font-weight: 600;
   letter-spacing: 0;
 }
-.nv-app .nv-page-head p { font-size: var(--nv-fs-p12); line-height: var(--nv-lh-p12); }
+.nv-app .nv-page-head p {
+  margin-top: 6px;
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+}
+/* Buscador del header: 330, blanco, radio 12, 13/9 de padding, icono 18. */
+.nv-app .np-dashboard-search {
+  width: 330px;
+  max-width: 45%;
+  gap: 6px;
+  padding: 9px 13px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--nv-card);
+}
+.nv-app .np-dashboard-search input {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+}
+.nv-app .np-dashboard-search input::placeholder { color: var(--nv-muted); }
+.nv-app .np-dashboard-search svg { width: 18px; height: 18px; color: var(--nv-muted); }
 .nv-app .nv-brand > span { font-weight: 700; }
 .nv-app .nv-sidebar-caption,
 .nv-app .nv-nav-group,
@@ -381,3 +407,221 @@
 .nv-app .nv-metric .nv-bars i { border-radius: var(--nv-r-chart); background: var(--nv-gold); }
 .nv-app .nv-metric .nv-progress { height: var(--nv-h-chart); border-radius: var(--nv-r-chart); }
 .nv-app .nv-metric .nv-progress > span { background: var(--nv-coral); }
+
+/* ── Dashboard: cuerpo, medido sobre el nodo 84:1489 ─────────────────────────
+   El body mide 836 y apila cuatro secciones con 20 de separación:
+   estadísticas 142, peso 265 + calorías 551, progreso 138 y recomendados
+   556 + 260. Las medidas fijas quedan atadas al ancho del frame (1440). */
+.nv-app :is(.np-chart-grid, .np-bottom-grid, .np-followup) { margin-bottom: var(--nv-section-gap); }
+.nv-app :is(.np-chart-grid, .np-bottom-grid, .np-followup-grid) { gap: var(--nv-section-gap); }
+@media (min-width: 1251px) {
+  .nv-app .np-chart-grid { grid-template-columns: 265px minmax(0, 1fr); }
+  .nv-app .np-bottom-grid { grid-template-columns: minmax(0, 1fr) 260px; }
+}
+.nv-app .np-dashboard .nv-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: var(--nv-card-pad);
+  border-radius: var(--nv-r-card);
+}
+.nv-app .np-dashboard .nv-card-head { margin: 0; min-height: 30px; }
+.nv-app .np-dashboard .nv-card-head h2 {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+/* El archivo fija 306; acá es un piso porque la nota de datos de Plan V no
+   existe en el pack y la fila crece con ella. */
+.nv-app .np-chart-grid > .nv-card { height: auto; min-height: 306px; }
+.nv-app .np-data-note { margin-top: auto!important; padding-top: 8px; font-size: var(--nv-fs-p11)!important; line-height: var(--nv-lh-p11); }
+
+/* Widget Weight Data (nodo 57:1509): media dona de 204 × 127, con el valor en
+   26 bold y la unidad en 24 regular, y una nota separada por una línea. */
+.nv-app .np-goal { padding: 16px 16px 0; }
+.nv-app .np-gauge { width: 204px; max-width: 204px; height: 127px; margin: 0 auto; }
+.nv-app .np-gauge path { stroke-width: 20px; }
+.nv-app .np-gauge-track { stroke: var(--nv-gold); }
+.nv-app .np-gauge > div { top: 41%; }
+.nv-app .np-gauge strong {
+  font-size: var(--nv-fs-h3);
+  line-height: var(--nv-lh-h3);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.nv-app .np-gauge strong small { font-size: 24px; font-weight: 400; }
+.nv-app .np-gauge > div > span {
+  margin-top: 8px;
+  font-size: var(--nv-fs-t11);
+  line-height: var(--nv-lh-t11);
+}
+.nv-app :is(.np-gauge-start, .np-gauge-end) {
+  bottom: 2px;
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+  color: var(--nv-muted);
+}
+.nv-app .np-gauge-start { left: 12px; }
+.nv-app .np-gauge-end { right: 12px; }
+.nv-app .np-goal-note {
+  margin: auto 0 0;
+  padding: 8px 0 16px;
+  border-top: 1px solid var(--nv-line);
+}
+.nv-app .np-goal-note strong {
+  font-size: var(--nv-fs-t11);
+  line-height: var(--nv-lh-t11);
+  font-weight: 600;
+}
+.nv-app .np-goal-note p {
+  margin-top: 8px;
+  color: var(--nv-ink-soft);
+  font-size: var(--nv-fs-p11);
+  line-height: var(--nv-lh-p11);
+}
+
+/* Widget Calories Intake (nodo 62:1513): dona de 228 a la izquierda, a la
+   derecha el detalle y la lista de macros con el ítem gris del archivo. */
+.nv-app .np-nutrition {
+  grid-template-columns: 228px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  min-height: 228px;
+}
+.nv-app .np-calorie {
+  width: 228px;
+  max-width: 228px;
+  height: 228px;
+  margin: 0;
+  border: 12px solid var(--nv-gold);
+  outline: 0;
+}
+.nv-app .np-calorie > svg { width: 32px; height: 32px; margin-bottom: 8px; color: var(--nv-ink); }
+.nv-app .np-calorie strong {
+  font-size: var(--nv-fs-h5);
+  line-height: var(--nv-lh-h5);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.nv-app .np-calorie strong small { font-size: var(--nv-fs-h5); font-weight: 400; }
+.nv-app .np-calorie > span {
+  margin-top: 8px;
+  font-size: var(--nv-fs-t11);
+  line-height: var(--nv-lh-t11);
+}
+/* "Detail Calories": chip redondo de 32 × 36 y cifra de 18 con rótulo de 11. */
+.nv-app .np-macro-heading { gap: 10px; margin: 0 0 20px; }
+.nv-app .np-macro-heading .nv-icon-tile {
+  width: 32px;
+  height: 36px;
+  border-radius: 20px;
+  background: var(--nv-accent-soft);
+}
+.nv-app .np-macro-heading .nv-icon-tile svg { width: 16px; height: 16px; }
+.nv-app .np-macro-heading strong {
+  font-size: var(--nv-fs-t18);
+  line-height: var(--nv-lh-t18);
+  font-weight: 600;
+}
+.nv-app .np-macro-heading small {
+  font-size: var(--nv-fs-t11);
+  line-height: var(--nv-lh-t11);
+  color: var(--nv-muted);
+}
+/* "Item List Macronutrients": pastilla gris a la izquierda, barra de 6 verde. */
+.nv-app .np-macro-row {
+  gap: 16px;
+  margin: 0 0 16px;
+  padding: 0 16px 0 0;
+  border-radius: 12px;
+  background: var(--nv-track);
+}
+.nv-app .np-macro-row:last-child { margin-bottom: 0; }
+.nv-app .np-macro-row > strong {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 89px;
+  min-width: 89px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--nv-fill);
+  font-size: var(--nv-fs-t18);
+  line-height: var(--nv-lh-t18);
+  font-weight: 700;
+}
+.nv-app .np-macro-row > strong small {
+  font-size: 9px;
+  line-height: 1.35;
+  color: var(--nv-ink-soft);
+}
+.nv-app .np-macro-row > div { display: flex; flex-direction: column; gap: 4px; }
+.nv-app .np-macro-row > div > span:first-child {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  font-size: var(--nv-fs-t11);
+  line-height: var(--nv-lh-t11);
+  color: var(--nv-muted);
+}
+.nv-app .np-macro-row > div > span:first-child b { color: var(--nv-ink); font-weight: 600; }
+.nv-app .np-macro-track { height: 6px; border-radius: 6px; background: var(--nv-card); }
+.nv-app .np-macro-track i { border-radius: 6px; background: var(--nv-accent); }
+
+/* Widget Workout Progress (nodo 71:1235): tres ítems de 92 con el mismo gris
+   del archivo, no bloques de color. */
+.nv-app .np-followup-grid > button {
+  height: 92px;
+  min-height: 92px;
+  gap: 16px;
+  padding: 0 16px 0 0;
+  border-radius: 12px;
+  background: var(--nv-track);
+}
+.nv-app .np-followup-grid > button:nth-child(2),
+.nv-app .np-followup-grid > button:nth-child(3) { background: var(--nv-track); }
+.nv-app .np-action-icon {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  margin-left: 12px;
+  border-radius: 10px;
+  background: var(--nv-fill);
+}
+.nv-app .np-action-icon svg { width: 20px; height: 20px; }
+.nv-app .np-followup-grid > button > span > span {
+  font-size: var(--nv-fs-t11);
+  line-height: var(--nv-lh-t11);
+  color: var(--nv-muted);
+}
+.nv-app .np-followup-grid strong {
+  margin-top: 4px;
+  font-size: var(--nv-fs-t18);
+  line-height: var(--nv-lh-t18);
+  font-weight: 600;
+}
+.nv-app .np-followup-grid small {
+  margin-top: 4px;
+  font-size: var(--nv-fs-t11);
+  line-height: var(--nv-lh-t11);
+  color: var(--nv-muted);
+}
+.nv-app .np-followup .nv-progress {
+  margin-top: 6px;
+  height: 6px;
+  border-radius: 6px;
+  background: var(--nv-card);
+}
+.nv-app .np-followup .nv-progress > span { background: var(--nv-accent); }
+.nv-app .np-followup > header { margin-bottom: 16px; }
+.nv-app .np-followup h2 {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+
+/* Section Recommendation (nodo 84:1488): dos platos de 252 × 330 con 20 de
+   separación, y la columna de la derecha en 260. */
+.nv-app .np-plan-grid { gap: 20px; }
+.nv-app .np-plan-meal { border: 0; border-radius: 12px; background: var(--nv-track); }

@@ -57,6 +57,11 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(css).toMatch(/--nv-r-chart:\s*6px/);
     expect(css).toMatch(/--nv-h-chart:\s*24px/);
     expect(rules).not.toMatch(/--nv-r-card:\s*20px/);
+    // Geometría del cuerpo del Dashboard (nodos 84:1489, 57:1509, 62:1513).
+    expect(css).toMatch(/grid-template-columns:\s*265px minmax\(0, 1fr\)/);
+    expect(css).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\) 260px/);
+    expect(css).toMatch(/grid-template-columns:\s*228px minmax\(0, 1fr\)/);
+    expect(css).toMatch(/width:\s*204px/);
     expect(css).toMatch(/Not Facu visual approval/);
     expect(css).not.toMatch(/PLANV_NUTRIGO_VISUAL\s*=\s*1/);
     expect(NV_VISUAL_LAW.type).toBe('Poppins');
@@ -123,6 +128,7 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(law).toMatch(/OAuth 403/);
     expect(law).toMatch(/74:2016/);
     expect(law).toMatch(/12:793/);
+    for (const node of ['33:1574', '84:1489', '57:1509', '62:1513']) expect(law).toContain(node);
     expect(law).toMatch(/design\/nutrigo-exports/);
     expect(law).not.toMatch(/PLANV_NUTRIGO_VISUAL\s*=\s*1/);
   });

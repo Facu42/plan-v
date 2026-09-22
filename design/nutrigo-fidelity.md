@@ -84,6 +84,33 @@ Los iconos son **Phosphor**: los nombres de las capas del archivo son literalmen
 - gráfico: alto 24, radio 6, separación 6; barra llena Orange `#FFA257`, barra vacía Saffron `#FFCB65`, punto vacío Gray-BG `#EEEEEF`
 - pie: porcentaje 12 semibold 1.3 Gray-30 `#52545B`; resto 11 regular 1.24 Gray-20
 
+### Header del contenido (nodo `33:1574`)
+
+50 de alto. A la izquierda un bloque de 340: título 22 semibold interlineado 1.08 y bajada 12 regular 1.3 en Gray-20, con 6 entre las dos. A la derecha el buscador: 330, blanco, radio 12, padding 9/13, icono 18 y texto 14 regular.
+
+**El 26 bold no es el título de página**, es la cifra de la dona de peso. La escala del archivo lo usa una sola vez.
+
+### Cuerpo (nodo `84:1489`)
+
+836 de ancho, cuatro secciones con 20 de separación:
+
+1. estadísticas: cuatro cards de 197, separación 16
+2. peso 265 + calorías 551
+3. progreso: tres ítems de 265 × 92
+4. recomendados: 556 + 260
+
+### Dona de peso (nodo `57:1509`)
+
+Card de 265 × 306, radio 16, padding 16/16/24, separación 16. Media dona de 204 × 127. Adentro: cifra 26 bold y unidad 24 regular alineadas por la base con 3 de separación, y debajo un rótulo 11 regular Gray-20. A los extremos, el inicio y la meta en 14 semibold Gray-20. Abajo, una nota separada por una línea Gray-Line de 1, texto 11 regular 1.6 en Gray-30.
+
+### Dona de calorías (nodo `62:1513`)
+
+Card de 551 × 306, radio 16, padding 16, separación 16. Cuerpo en dos columnas con 16: dona de 228 y, a la derecha, columna con 20 de separación.
+
+- centro de la dona: icono 32, cifra 22 semibold con unidad 22 regular, rótulo 11 regular Gray-20
+- detalle: chip Green-Light de 32 × 36 radio 20 con icono 16, cifra 18 semibold, unidad 16 regular, rótulo 11
+- lista de macros: ítem Gray-BG-Subtle radio 12 con 16 de separación; pastilla Gray-BG radio 10 de 89 con cifra 18 bold y unidad 9 en Gray-30; a la derecha, nombre 11 regular y porcentaje 11 semibold, y barra de 6 radio 6 en Green sobre blanco
+
 ## Copy
 
 **La interfaz va en español.** El .fig manda en composición, color, tipo y densidad; no en idioma. Ningún rótulo, vacío ni mensaje queda en inglés por copiar el frame. Las cifras y nombres de ejemplo del pack no se copian: los datos son de Plan V.
