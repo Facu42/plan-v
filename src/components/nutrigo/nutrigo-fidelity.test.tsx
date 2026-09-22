@@ -49,7 +49,14 @@ describe('NV-FIDELITY shell vs inventario', () => {
     const rules = css.replace(/\/\*[\s\S]*?\*\//g, '');
     expect(rules).not.toMatch(/#EAFF78/i);
     expect(rules).not.toMatch(/#f9b343/i);
-    expect(css).toMatch(/border-radius:\s*999px/);
+    // El nav del archivo es radio 14, no cápsula (nodo 12:793).
+    expect(css).toMatch(/border-radius:\s*14px/);
+    expect(css).toMatch(/padding:\s*28px 20px/);
+    // La card de estadística es radio 16, no 20, y su gráfico mide 24 (nodo 74:2016).
+    expect(css).toMatch(/--nv-r-card:\s*16px/);
+    expect(css).toMatch(/--nv-r-chart:\s*6px/);
+    expect(css).toMatch(/--nv-h-chart:\s*24px/);
+    expect(rules).not.toMatch(/--nv-r-card:\s*20px/);
     expect(css).toMatch(/Not Facu visual approval/);
     expect(css).not.toMatch(/PLANV_NUTRIGO_VISUAL\s*=\s*1/);
     expect(NV_VISUAL_LAW.type).toBe('Poppins');
@@ -114,6 +121,8 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(law).toMatch(/copy en espa\u00f1ol|La interfaz va en espa\u00f1ol/);
     expect(law).toMatch(/Ejercicio no entra/);
     expect(law).toMatch(/OAuth 403/);
+    expect(law).toMatch(/74:2016/);
+    expect(law).toMatch(/12:793/);
     expect(law).toMatch(/design\/nutrigo-exports/);
     expect(law).not.toMatch(/PLANV_NUTRIGO_VISUAL\s*=\s*1/);
   });

@@ -51,8 +51,11 @@
 
   /* Effect/Shadow, exactly as the file declares it. */
   --nv-shadow: 0 4px 12px rgba(176, 176, 176, 0.14);
-  --nv-r-card: 20px;
+  /* Radios del archivo: la card de estadística es 16, la grande 24. */
+  --nv-r-card: 16px;
   --nv-r-card-lg: 24px;
+  --nv-r-chart: 6px;
+  --nv-h-chart: 24px;
 
   /* Type. Poppins, with the file's own sizes and line heights. */
   --nv-fs-h3: 26px;   --nv-lh-h3: 1.08;
@@ -171,16 +174,47 @@
 .nv-app .nv-nav-group,
 .nv-app .nv-brand small { font-weight: 500; }
 
+/* Sidebar, medida sobre el nodo 12:793 "Navbar".
+   El item NO es una cápsula: el archivo usa radio 14. */
+.nv-app.nv-patient .nv-sidebar,
+.nv-app.nv-pro .nv-sidebar,
+.nv-app .nv-sidebar {
+  padding: 28px 20px;
+  gap: 28px;
+  background: var(--nv-card);
+  border-right: 0;
+}
+.nv-app .nv-sidebar nav { gap: 8px; }
 .nv-app.nv-patient .nv-sidebar nav button,
 .nv-app.nv-pro .nv-sidebar nav button,
 .nv-app .nv-sidebar nav button {
-  border-radius: 999px;
+  gap: 12px;
+  padding: 10px 8px 10px 16px;
+  border-radius: 14px;
+  min-height: 0;
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t14);
+  line-height: 1;
   font-weight: 500;
+  margin-bottom: 0;
 }
+.nv-app .nv-sidebar nav button svg { width: 20px; height: 20px; }
 .nv-app .nv-sidebar nav button[aria-current=page] {
   background: var(--nv-accent);
   color: var(--nv-ink);
-  font-weight: 700;
+  font-weight: 500;
+}
+/* Contador de mensajes: naranja, radio 9, 10px. */
+.nv-app .nv-sidebar nav button small {
+  min-width: 18px;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--nv-coral);
+  color: #FFFFFF;
+  font-size: 10px;
+  line-height: 1.35;
+  text-align: center;
+  opacity: 1;
 }
 .nv-app .nv-tabbar button,
 .nv-app .nv-role-switch,
@@ -243,3 +277,107 @@
 .nv-app .nvr-cover-heart { background: linear-gradient(145deg, var(--nv-coral-soft), var(--nv-coral)); }
 .nv-app .nvr-cover-check { background: linear-gradient(145deg, var(--nv-accent-soft), var(--nv-accent)); }
 .nv-app .nvr-card-check { color: var(--nv-ink); background: var(--nv-accent-soft); }
+
+/* Card de estadística, medida sobre el nodo 74:2016 "Card Statistic - Dashboard".
+   El archivo la arma como columna con el rótulo arriba y el bloque de datos
+   abajo: 197 × 142, padding 16, radio 16, separación interna 12.
+   El rótulo va en 14 regular (no en 11), y la cifra en 16 semibold (no en 24). */
+.nv-app .nv-metrics {
+  gap: 16px;
+}
+.nv-app .nv-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: 142px;
+  padding: var(--nv-card-pad);
+  border-radius: var(--nv-r-card);
+  background: var(--nv-card);
+}
+.nv-app .nv-metric .nv-metric-label {
+  gap: 8px;
+}
+/* El rótulo queda arriba y el bloque de datos abajo, con 12 entre sus piezas. */
+.nv-app .nv-metric > strong { margin-top: auto; }
+.nv-app .nv-metric > :is(small, .np-ruler, .np-review-track, .np-water, .nv-bars, .nv-progress) {
+  margin-top: 12px;
+}
+.nv-app .nv-metric .nv-metric-label h2 {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 400;
+  color: var(--nv-ink);
+}
+/* Chip del icono: padding 6 sobre un glifo de 14, radio 10. */
+.nv-app .nv-metric .nv-icon-tile {
+  width: 26px;
+  height: 26px;
+  border-radius: 10px;
+  flex: none;
+  background: var(--nv-accent);
+}
+.nv-app .nv-metric.nv-gold .nv-icon-tile { background: var(--nv-gold); }
+.nv-app .nv-metric.nv-coral .nv-icon-tile { background: var(--nv-coral); }
+.nv-app .nv-metric .nv-icon-tile svg {
+  width: 14px;
+  height: 14px;
+}
+/* Cifra y unidad: "Info Current Amount", alineadas por la base. */
+.nv-app .nv-metric > strong {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 0;
+  font-size: var(--nv-fs-t16);
+  line-height: var(--nv-lh-t16);
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--nv-ink);
+}
+.nv-app .nv-metric em {
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+  font-weight: 400;
+  color: var(--nv-muted);
+}
+/* Pie de la card: el texto restante en 11 regular, apagado. */
+.nv-app .nv-metric > small {
+  margin: 0;
+  font-size: var(--nv-fs-t11);
+  line-height: var(--nv-lh-t11);
+  color: var(--nv-muted);
+}
+/* Tira de gráfico: 24 de alto, radio 6, con los naranjas del archivo. */
+.nv-app .nv-metric :is(.np-ruler, .np-review-track, .np-water, .nv-bars, .nv-progress) {
+  height: var(--nv-h-chart);
+  flex: none;
+  border-radius: var(--nv-r-chart);
+}
+.nv-app .nv-metric .np-ruler {
+  padding-top: 8px;
+  font-size: var(--nv-fs-p11);
+  line-height: 1;
+}
+.nv-app .nv-metric .np-ruler::before { inset: 0 0 12px; }
+.nv-app .nv-metric .np-ruler i { top: 0; height: 18px; background: var(--nv-coral); }
+.nv-app .nv-metric .np-ruler i::before { background: var(--nv-coral); }
+.nv-app .nv-metric .np-review-track {
+  background: repeating-linear-gradient(90deg, var(--nv-gold) 0 5px, var(--nv-fill) 5px 6px);
+}
+.nv-app .nv-metric .np-review-track i {
+  background: var(--nv-coral);
+  border-right: 0;
+  border-radius: var(--nv-r-chart);
+}
+.nv-app .nv-metric .np-water {
+  border-top: 0;
+  background: var(--nv-gold-soft);
+  font-size: var(--nv-fs-p11);
+  color: var(--nv-ink);
+}
+.nv-app .nv-metric .np-water svg { width: 14px; height: 14px; }
+.nv-app .nv-metric .nv-bars { gap: 6px; padding: 0; }
+.nv-app .nv-metric .nv-bars > div > span { border-radius: var(--nv-r-chart); background: var(--nv-fill); }
+.nv-app .nv-metric .nv-bars i { border-radius: var(--nv-r-chart); background: var(--nv-gold); }
+.nv-app .nv-metric .nv-progress { height: var(--nv-h-chart); border-radius: var(--nv-r-chart); }
+.nv-app .nv-metric .nv-progress > span { background: var(--nv-coral); }

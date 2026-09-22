@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from 'react';
 import { Icon, type IconName } from '../shared/Icon';
+import { NvIcon, type NvIconName } from './NvIcon';
 
 export function NvButton({ children, className = '', type = 'button', ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
   return <button type={type} className={`nv-button ${className}`} {...props}>{children}</button>;
@@ -17,8 +18,10 @@ export function NvProgress({ value, label }: { value: number; label: string }) {
   const safeValue = Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 0;
   return <div className="nv-progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={safeValue}><span style={{ width: `${safeValue}%` }} /></div>;
 }
-export function NvMetric({ label, value, note, icon, tone = 'green', children, onOpen }: { label: string; value: ReactNode; note: string; icon: IconName; tone?: 'green' | 'gold' | 'coral'; children?: ReactNode; onOpen?: () => void }) {
-  const content = <><div className="nv-metric-label"><h2>{label}</h2><span className="nv-icon-tile"><Icon name={icon} size={18} /></span></div><strong>{value}</strong>{children}<small>{note}</small></>;
+/** `nvIcon` usa el glifo Phosphor del .fig; `icon` es el juego propio de Plan V. */
+export function NvMetric({ label, value, note, icon, nvIcon, tone = 'green', children, onOpen }: { label: string; value: ReactNode; note: string; icon: IconName; nvIcon?: NvIconName; tone?: 'green' | 'gold' | 'coral'; children?: ReactNode; onOpen?: () => void }) {
+  const glyph = nvIcon ? <NvIcon name={nvIcon} size={14} /> : <Icon name={icon} size={14} />;
+  const content = <><div className="nv-metric-label"><h2>{label}</h2><span className="nv-icon-tile">{glyph}</span></div><strong>{value}</strong>{children}<small>{note}</small></>;
   if (onOpen) return <button type="button" className={`nv-metric nv-openable nv-${tone}`} aria-label={`Ver detalle de ${label}`} onClick={onOpen}>{content}</button>;
   return <section className={`nv-metric nv-${tone}`}>{content}</section>;
 }

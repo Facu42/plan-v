@@ -51,6 +51,7 @@ import './clinic-professional.css';
 import './app-shell.css';
 import './nutrigo-parity.css';
 import './nutrigo-fidelity.css';
+import { NV_ICONS, NvIcon, type NvIconName } from './NvIcon';
 
 const OperationalCrm = lazy(() => import('../crm/CrmDashboard').then(({ CrmDashboard }) => ({ default: CrmDashboard })));
 
@@ -254,9 +255,9 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
     <aside className="nv-sidebar" aria-label={role === 'patient' ? 'Tu espacio' : 'Consultorio'}>
       <a className="nv-brand" href={buildAppHref(typeof window === 'undefined' ? 'https://plan.v/app/inicio' : window.location.href, role, 'inicio')} onClick={(event) => { event.preventDefault(); navigate('inicio'); }}><Mark /><span>Plan V<small>Mi espacio</small></span></a>
       <span className="nv-nav-group">{role === 'patient' ? 'Mi app' : 'Mi consultorio'}</span>
-      <nav>{(role === 'patient' ? PATIENT_SURFACES : [...PRO_TABS, ...PRO_MORE]).map((item) => <button type="button" key={item.id} aria-current={!pendingModule && page === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}><Icon name={item.icon} size={18} />{item.label}{item.id === 'mensajes' && messageUnread > 0 && <small>{messageUnread > 9 ? '9+' : messageUnread}</small>}</button>)}</nav>
+      <nav>{(role === 'patient' ? PATIENT_SURFACES : [...PRO_TABS, ...PRO_MORE]).map((item) => <button type="button" key={item.id} aria-current={!pendingModule && page === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}>{item.id in NV_ICONS ? <NvIcon name={item.id as NvIconName} size={20} /> : <Icon name={item.icon} size={20} />}{item.label}{item.id === 'mensajes' && messageUnread > 0 && <small>{messageUnread > 9 ? '9+' : messageUnread}</small>}</button>)}</nav>
       {!lockedRole && role === 'patient' && <><span className="nv-nav-group">Consultorio</span>
-      <nav><button type="button" onClick={() => setOnboardingOpen(true)}><Icon name="sparkle" size={18} />Ingreso</button></nav></>}
+      <nav><button type="button" onClick={() => setOnboardingOpen(true)}><NvIcon name="ingreso" size={20} />Ingreso</button></nav></>}
     </aside>
     <div className="nv-workspace">
       <header className="nv-topbar" ref={topbarRef}>

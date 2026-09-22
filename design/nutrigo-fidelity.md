@@ -10,7 +10,9 @@ https://www.figma.com/design/OTolnKfsxUFjaZOhhdb04i/Nutrigo---Nutrition---Diet-D
 
 File key: `OTolnKfsxUFjaZOhhdb04i`
 
-La composición (sidebar, rails, densidad de las once pantallas) sale de ese archivo y del inventario local. El MCP de Figma en Cursor respondió OAuth 403. Esta ley no espera ese MCP y no inventa medidas de frames que no estén ya en el inventario.
+La composición (sidebar, rails, densidad de las once pantallas) sale de ese archivo. El MCP de Figma quedó autorizado el 2026-09-22 y desde entonces las medidas se leen nodo por nodo; antes había respondido OAuth 403 y la ley no inventaba lo que no estuviera en el inventario.
+
+**Cuota:** la cuenta es Starter, con unas veinte llamadas de MCP por mes. Por eso cada nodo se lee una sola vez y lo leído se asienta acá.
 
 ## Piel
 
@@ -65,7 +67,22 @@ Del frame `12:792` "01. Dashboard (Desktop)", a 1440:
 - sidebar 223 + contenido 892 + rail 325 = 1440
 - padding de contenido 28, padding de card 16, separación entre secciones 20
 - cards de estadística 197 × 142, con 16 de separación
-- radios de card 16–24, navegación en píldora
+
+### Navegación (nodo `12:793`)
+
+Padding 28/20, separación 28, lista con separación 8. **El ítem no es una cápsula:** el archivo usa radio 14, padding 10/8/10/16, separación 12, icono de 20, texto 14 peso 500. El activo se pinta con Green `#C2E66E` sobre tinta. El contador de mensajes va en Orange, radio 9, 10px.
+
+Los iconos son **Phosphor**: los nombres de las capas del archivo son literalmente los de la librería. Se usa `@phosphor-icons/react`, la misma fuente, en vez de redibujarlos.
+
+### Card de estadística (nodo `74:2016`)
+
+197 × 142, fondo blanco, **radio 16**, padding 16, columna con el rótulo arriba y el bloque de datos abajo, separación interna 12.
+
+- rótulo: 14 regular, interlineado 1.25, tinta
+- chip del icono: 26 × 26 (padding 6 sobre un glifo de 14), radio 10, fondo Green
+- cifra: 16 semibold 1.24, tinta; unidad 12 regular 1.3, Gray-20, alineada por la base con 4 de separación
+- gráfico: alto 24, radio 6, separación 6; barra llena Orange `#FFA257`, barra vacía Saffron `#FFCB65`, punto vacío Gray-BG `#EEEEEF`
+- pie: porcentaje 12 semibold 1.3 Gray-30 `#52545B`; resto 11 regular 1.24 Gray-20
 
 ## Copy
 
