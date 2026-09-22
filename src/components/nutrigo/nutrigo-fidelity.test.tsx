@@ -79,6 +79,10 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(css).toMatch(/\.nv-app \.nv-button\.nv-menu-toggle/);
     expect(css).toMatch(/width:\s*var\(--nv-sidebar-width\)/);
     expect(css).toMatch(/\.nv-drawer-scrim/);
+    // La barra superior de escritorio no es del archivo: no puede quedar
+    // angosta al ancho del sidebar ni hacer que sus controles se salgan.
+    expect(rules).not.toMatch(/\.nv-topbar\s*\{[^}]*width:\s*var\(--nv-sidebar-width\)/);
+    expect(css).toMatch(/width:\s*30px;\s*height:\s*30px;\s*min-height:\s*0;\s*border:\s*0;\s*border-radius:\s*10px;/);
     // Detalle de receta (nodo 84:3145): las cuatro fichas de macro son Green,
     // asi que la piel pisa los azules y rojos que inventaba recipe-plate.css.
     expect(css).toMatch(/\.nv-app \.recipe-macros \[data-macro\] dd/);

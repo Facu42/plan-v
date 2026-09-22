@@ -115,14 +115,71 @@
     width: var(--nv-sidebar-width);
     flex-basis: var(--nv-sidebar-width);
   }
-  .nv-app.nv-patient .nv-topbar,
-  .nv-app.nv-pro .nv-topbar { width: var(--nv-sidebar-width); }
   .nv-app.nv-patient .nv-main,
   .nv-app.nv-pro .nv-main { padding: var(--nv-content-pad); }
 
   /* The .fig carries the brand only in the sidebar: no second lockup in the topbar. */
   .nv-app.nv-patient .nv-topbar .nv-brand,
   .nv-app.nv-pro .nv-topbar .nv-brand { display: none; }
+
+  /* Topbar: the .fig has none on desktop (the Navbar carries everything),
+     so this strip is Plan V's own — the role switch to flip between the
+     patient and nutritionist dashboards, plus avisos and tema. It used to
+     be squeezed to the sidebar's 223 and its controls spilled past the
+     edge; now it runs the content's own width and reads as a quiet utility
+     row in the file's own language (pill switch, icon-tiles), not a
+     borrowed header bar. Derived, not fidelity. */
+  .nv-app.nv-patient .nv-topbar,
+  .nv-app.nv-pro .nv-topbar {
+    min-height: 0;
+    padding: 20px var(--nv-content-pad) 0;
+    gap: 12px;
+    border-bottom: 0;
+    background: transparent;
+  }
+  .nv-app.nv-patient .nv-topbar-title,
+  .nv-app.nv-pro .nv-topbar-title {
+    margin-right: auto;
+    color: var(--nv-muted);
+    font-size: var(--nv-fs-t12);
+    line-height: var(--nv-lh-t12);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .nv-app.nv-patient .nv-role-switch,
+  .nv-app.nv-pro .nv-role-switch {
+    padding: 3px;
+    background: var(--nv-fill);
+  }
+  .nv-app.nv-patient .nv-role-switch button,
+  .nv-app.nv-pro .nv-role-switch button {
+    padding: 7px 14px;
+    color: var(--nv-muted);
+    font-size: var(--nv-fs-t12);
+    line-height: var(--nv-lh-t12);
+  }
+  .nv-app.nv-patient .nv-role-switch button[aria-pressed=true],
+  .nv-app.nv-pro .nv-role-switch button[aria-pressed=true] {
+    color: var(--nv-ink);
+    background: var(--nv-accent);
+  }
+  .nv-app.nv-patient .nv-alerts-bell,
+  .nv-app.nv-pro .nv-alerts-bell,
+  .nv-app.nv-patient .nv-topbar .nv-theme,
+  .nv-app.nv-pro .nv-topbar .nv-theme {
+    width: 30px;
+    height: 30px;
+    min-height: 0;
+    border: 0;
+    border-radius: 10px;
+    background: var(--nv-fill);
+    color: var(--nv-ink);
+  }
+  .nv-app.nv-patient .nv-alerts-bell[aria-expanded=true],
+  .nv-app.nv-pro .nv-alerts-bell[aria-expanded=true] {
+    background: var(--nv-accent);
+  }
 
   .nv-app.nv-patient:not(.nv-messaging):not(.nv-grocery-page):not(.nv-progress-page):not(.nv-patient-diary):not(.nv-patient-plan):not(.nv-patient-agenda):not(.nv-healthy-menu):not(.nv-exercise-page):not(.nv-resources-page) .nv-content-layout,
   .nv-app.nv-pro:not(.nv-messaging):not(.nv-record):not(.nv-food-diary):not(.nv-meal-plan):not(.nv-consultation-page):not(.nv-agenda-page):not(.nv-goals-page):not(.nv-work-center-page):not(.nv-progress-page) .nv-content-layout {
