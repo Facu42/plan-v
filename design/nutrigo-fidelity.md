@@ -113,7 +113,17 @@ Card de 551 × 306, radio 16, padding 16, separación 16. Cuerpo en dos columnas
 
 ### Calendario (nodo `84:1666`)
 
-Cuerpo de 836. Arriba, tres cards de resumen de 108. Debajo, el calendario en una sola card: cabecera de días de 40 con línea Gray-Line y texto 12 regular Gray-20 (`217:6491`), y celdas de 119,43 × 120 con padding 4 y número de 18 en 10 (`217:6501`). El día de hoy es una pastilla Green; el elegido lleva contorno Green de 2; los días de fuera van en Gray-BG con texto Gray-10. Los controles de mes son botones de 30 radio 8, y las vistas y filtros son grupos segmentados sobre Gray-BG.
+Reconstruido el 2026-09-22 con el código literal del archivo (`get_design_context` sobre `217:6452` y `215:5682`), no con medidas leídas a mano: la versión anterior se apartaba del .fig en varios puntos y Facundo lo marcó como "inventado".
+
+Cuerpo de 836. Arriba, tres cards de resumen de 108. Header-Section (`217:6453`): a la izquierda dos botones de 30 radio 8 (mes anterior/siguiente) + "Mes Año" 14 semibold (mes en Black, año en Gray-20) + caret; a la derecha un Segmented Button (Día/Semana/Mes, pastilla Gray-BG con la opción activa en Green) y un Button CTA verde ("New Schedule" → en Plan V, "Nueva consulta"/"Escribir", abre el mensaje a la nutricionista).
+
+Dentro de la card blanca del calendario: primero la Category List (`217:6472`), fila de checkboxes de 16 con el color de cada categoría (Meal Planning=Green, Physical Activities=Saffron, Appointments/Events=Orange) — en Plan V son los filtros existentes (Todos/Consultas/Plan/Diario/Actividad), un cuarto color propio (Green-Light) para Diario porque el archivo no distingue "plan" de "diario"; luego la cabecera de días de 40 con línea Gray-Line y texto 12 regular Gray-20 (`217:6491`), y celdas de 119,43 × 120 con padding 4 y número de 18 en 10 (`217:6501`).
+
+Celda con un solo evento: el bloque de evento ocupa el resto de la celda (radio 4, hora 8 Gray-30 + título 8 Black). Celda con 2+ eventos: el número del día lleva una pastilla Green-Light y los eventos se reparten el alto restante en partes iguales. Los días de fuera van en Gray-BG-Subtle con una trama diagonal y número Gray-10.
+
+El panel derecho ("Right Side", `215:5682`, 325 de ancho) es el detalle del día elegido, no una lista fija: una card por evento en Cream-BG radio 16 con badge de categoría (mismo color que en la celda), título 18 semibold, filas de detalle con ícono (fecha, hora) y una caja de nota en White (`#FEFCFB`) radio 12 con la línea divisoria del archivo. Las acciones (Edit/Remove en el archivo) son los botones reales que ya existían (ver en el plan, abrir diario, confirmar/reprogramar turno, historial).
+
+El día de hoy es una pastilla Green; el elegido lleva contorno Green de 2.
 
 ### Mensajes (nodo `84:2565`)
 
@@ -265,6 +275,12 @@ El cajón se cierra al navegar, al tocar el velo y con Escape; al cerrarse con E
 
 - El selector de rol Paciente/Nutricionista y la campana de avisos no están en el archivo. Se compactan a 32 de alto para que la barra caiga en los 64.
 - El archivo tiene tres cards de resumen en el calendario; Plan V tiene cuatro, así que van dos por fila. El alto de 178 del archivo es para una card con gráfico: la de Plan V lleva rótulo y cifra y se queda en 108.
+
+**Desviaciones deliberadas en el calendario (escritorio y móvil)**
+
+- El archivo dibuja tres categorías fijas (Meal Planning, Physical Activities, Appointments/Events), siempre tildadas. Plan V tiene cuatro tipos de evento reales (turno, plan, diario, actividad) y ya tenía un filtro de selección única; se mantiene como filtro (no como multi-selección) pero con el aspecto de checkbox del archivo, y Diario toma el Green-Light del pack porque el archivo no lo distingue de Plan.
+- El botón "New Schedule" del archivo no tiene una función de alta de turnos en Plan V (eso es un flujo nuevo, no un ajuste visual). Se implementó como "Nueva consulta"/"Escribir", que abre el mensaje a la nutricionista — el mismo canal por el que hoy se coordina un turno.
+- El panel derecho del archivo ("Schedule Details") es una tarjeta de detalle de turno con Editar/Quitar. En Plan V muestra el detalle del día elegido con las acciones que ya existían por tipo de evento (ver en el plan, abrir diario, confirmar/reprogramar consulta), no altas ni bajas de eventos.
 
 ## Tema oscuro
 

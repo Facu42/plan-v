@@ -175,4 +175,20 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(html).toContain('420');
     expect(html).not.toContain('http');
   });
+
+  it('el calendario quedó reconstruido con el código literal del archivo, no inventado', () => {
+    expect(law).toMatch(/get_design_context.*217:6452.*215:5682|217:6452.*215:5682/s);
+    expect(law).toMatch(/Reconstruido el 2026-09-22/);
+    // La CSS base del calendario (no la de fidelidad) lleva los colores literales
+    // de categoría, leídos del archivo: Appointments=Orange, Meal Planning=Green,
+    // Physical Activities=Saffron.
+    const agendaCss = readFileSync(new URL('./showroom-patient-agenda.css', import.meta.url), 'utf8');
+    expect(agendaCss).toMatch(/\.nvpa-chip\.consult\{background:#FFA257\}/);
+    expect(agendaCss).toMatch(/\.nvpa-chip\.plan\{background:#C2E66E\}/);
+    expect(agendaCss).toMatch(/\.nvpa-chip\.activity\{background:#FFCB65\}/);
+    // Las reglas viejas, aproximadas a mano, ya no deben pisar la CSS base.
+    expect(css).not.toMatch(/\.nvpa-nav p \{/);
+    expect(css).not.toMatch(/\.nvpa-filters \{/);
+    expect(css).not.toMatch(/nvpa-detail-icon/);
+  });
 });

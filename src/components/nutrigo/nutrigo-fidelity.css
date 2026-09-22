@@ -335,12 +335,6 @@
 .nv-app .np-ruler i::before,
 .nv-app .np-review-track i { background: var(--nv-coral); }
 .nv-app .np-water { border-top-color: var(--nv-accent-soft); background: var(--nv-accent-soft); }
-.nv-app .nvpa-chip.meal,
-.nv-app .nvpa-month-grid .nvpa-chip.meal { border-left-color: var(--nv-accent); background: var(--nv-accent-soft); }
-.nv-app .nvpa-chip.activity,
-.nv-app .nvpa-month-grid .nvpa-chip.activity { border-left-color: var(--nv-coral); background: var(--nv-coral-soft); }
-.nv-app .nvpa-event.meal .nvpa-detail-icon { background: var(--nv-accent-soft); color: var(--nv-ink); }
-.nv-app .nvpa-event.activity .nvpa-detail-icon { background: var(--nv-coral-soft); color: var(--nv-ink); }
 .nv-app .nv-operation-bar { background: var(--nv-bg); font-family: Poppins, "Public Sans", Arial, sans-serif; }
 .nv-app .nv-operation-bar button { background: var(--nv-accent); color: var(--nv-ink); border-radius: 999px; }
 .nv-app .nv-tab-unread { background: var(--nv-coral); }
@@ -691,9 +685,12 @@
 .nv-app .np-plan-grid { gap: 20px; }
 .nv-app .np-plan-meal { border: 0; border-radius: 12px; background: var(--nv-track); }
 
-/* ── Calendario (nodo 84:1666) ───────────────────────────────────────────────
-   Cuerpo de 836: tres cards de estadística de 108, y debajo el calendario en
-   una sola card con la cabecera de 40 y filas de 120, celdas de 119,43. */
+/* ── Calendario (nodo 84:1666, 217:6452, 215:5682) ──────────────────────────
+   Reconstruido con el código literal del archivo (get_design_context): cuerpo
+   de 836 con tres cards de estadística de 108, calendario de cabecera 40 y
+   filas de 120, celdas 119,43, y el panel derecho de 325 con las cards de
+   turno en Cream-BG. La base vive en showroom-patient-agenda.css; acá sólo
+   quedan los ajustes de escritorio (sombra de card, pastilla de "hoy"). */
 .nv-app .nvpa-agenda { gap: var(--nv-section-gap); }
 /* El archivo no tiene banner oscuro en esta pantalla: la cabecera es texto. */
 .nv-app .nvpa-hero {
@@ -743,86 +740,17 @@
   line-height: var(--nv-lh-t18);
   font-weight: 600;
 }
-/* Header-Section del calendario: botones de 30 y grupo segmentado. */
-.nv-app .nvpa-nav button {
-  width: 30px;
-  height: 30px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--nv-fill);
-}
-.nv-app .nvpa-nav p {
-  font-size: var(--nv-fs-t14);
-  line-height: var(--nv-lh-t14);
-  font-weight: 600;
-}
-.nv-app :is(.nvpa-views, .nvpa-filters) {
-  gap: 0;
-  padding: 2px;
-  border-radius: 8px;
-  background: var(--nv-fill);
-}
-.nv-app :is(.nvpa-views, .nvpa-filters) button {
-  min-height: 26px;
-  padding: 4px 12px;
-  border: 0;
-  border-radius: 6px;
-  color: var(--nv-muted);
-  font-size: var(--nv-fs-t12);
-  line-height: var(--nv-lh-t12);
-  font-weight: 500;
-}
-.nv-app :is(.nvpa-views, .nvpa-filters) button[aria-pressed=true] {
-  border-color: transparent;
-  background: var(--nv-accent);
-  color: var(--nv-ink);
-}
 .nv-app .nvpa-layout { gap: var(--nv-section-gap); }
 .nv-app :is(.nvpa-calendar, .nvpa-detail) {
   border: 0;
   border-radius: var(--nv-r-card);
   box-shadow: var(--nv-shadow);
 }
-/* Row-Calendar-Head (nodo 217:6491): 40 de alto, día 12 regular Gray-20. */
-.nv-app .nvpa-weekdays {
-  height: 40px;
-  border-block: 0;
-  border-bottom: 1px solid var(--nv-line);
-  background: var(--nv-card);
-}
-.nv-app .nvpa-weekdays span {
-  color: var(--nv-muted);
-  font-size: var(--nv-fs-t12);
-  line-height: var(--nv-lh-t12);
-  font-weight: 400;
-  text-transform: none;
-}
-/* Cell-Calendar-Body (nodo 217:6501): 120 de alto, padding 4, número 10. */
-.nv-app .nvpa-month-grid > button {
-  min-height: 120px;
-  padding: 4px;
-  gap: 4px;
-  border-right: 1px solid var(--nv-line);
-  border-bottom: 1px solid var(--nv-line);
-}
-.nv-app .nvpa-month-grid time {
-  width: 18px;
-  height: 18px;
-  border-radius: 0;
-  font-size: 10px;
-  line-height: 1.35;
-  font-weight: 400;
-}
-.nv-app .nvpa-month-grid .nvpa-outside { background: var(--nv-track); }
-.nv-app .nvpa-month-grid .nvpa-outside time { color: var(--nv-faint); }
-.nv-app .nvpa-month-grid .nvpa-occupied { background: var(--nv-accent-soft); }
-.nv-app .nvpa-chip { border-radius: 6px; }
-.nv-app .nvpa-filters { flex: 0 0 auto; margin-right: auto; }
-/* El archivo no marca el día con un recuadro negro: hoy es una pastilla verde
-   y el día elegido se resalta con el mismo verde, no con un borde fuerte. */
+/* El archivo no marca el día elegido con un recuadro negro: hoy y el día
+   elegido se resaltan con la pastilla verde del pack, no con un borde fuerte. */
 .nv-app :is(.nvpa-month-grid, .nvpa-week-grid) .nvpa-today time {
   outline: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   background: var(--nv-accent);
   color: var(--nv-ink);
   font-weight: 600;

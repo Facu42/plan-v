@@ -33,9 +33,9 @@ import './showroom-patient-agenda.css';
 const WEEK_DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const RESCHEDULE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const;
 const VIEWS: Array<{ id: CalendarView; label: string }> = [
-  { id: 'month', label: 'Mes' },
-  { id: 'week', label: 'Semana' },
   { id: 'day', label: 'Día' },
+  { id: 'week', label: 'Semana' },
+  { id: 'month', label: 'Mes' },
 ];
 const FILTERS: Array<{ id: CalendarFilter; label: string }> = [
   { id: 'all', label: 'Todos' },
@@ -44,6 +44,7 @@ const FILTERS: Array<{ id: CalendarFilter; label: string }> = [
   { id: 'meal', label: 'Diario' },
   { id: 'activity', label: 'Actividad' },
 ];
+const MONTH_YEAR = new Intl.DateTimeFormat('es-AR', { month: 'long', year: 'numeric' });
 
 export function buildPatientAgendaView(patient: ShowroomPatient, now: Date) {
   const events = buildPatientCalendarEvents(patient, now);
@@ -62,11 +63,8 @@ function channelLabel(channel: string): string {
   return 'Modalidad por confirmar';
 }
 
-function eventIcon(kind: CalendarEvent['kind']) {
-  if (kind === 'consult') return 'video';
-  if (kind === 'plan') return 'list';
-  if (kind === 'activity') return 'heart';
-  return 'leaf';
+function eventTime(event: CalendarEvent): string {
+  return event.at.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
 }
 
 export function ShowroomPatientAgenda({
@@ -199,12 +197,15 @@ export function ShowroomPatientAgenda({
     else if (view === 'week') goWeek(delta);
     else shiftSelectedDay(delta);
   };
+  const [monthWord, yearWord] = sentenceCase(MONTH_YEAR.format(month)).split(' de ');
 
   const renderChips = (dateId: string, compact = false) => {
     const dayEvents = eventsOnDate(events, dateId);
     const visible = compact ? dayEvents.slice(0, 2) : dayEvents;
     return <>
-      {visible.map((event) => <span key={event.id} className={`nvpa-chip ${event.kind}`}><b>{event.title}</b><small>{KIND_LABEL[event.kind]}</small></span>)}
+      <div className={`nvpa-day-events${visible.length === 1 ? ' nvpa-day-events-solo' : ''}`}>
+        {visible.map((event) => <span key={event.id} className={`nvpa-chip ${event.kind}`}><b>{eventTime(event)}</b><small>{event.title}</small></span>)}
+      </div>
       {compact && dayEvents.length > 2 && <small className="nvpa-more">+{dayEvents.length - 2}</small>}
     </>;
   };
@@ -220,32 +221,58 @@ export function ShowroomPatientAgenda({
       <div><dt>Actividad</dt><dd>{counts.activity}</dd></div>
     </dl>
 
-    <div className="nvpa-toolbar">
-      <div className="nvpa-views" aria-label="Vista del calendario">{VIEWS.map((option) => <button type="button" key={option.id} aria-pressed={view === option.id} onClick={() => setView(option.id)}>{option.label}</button>)}</div>
-      <div className="nvpa-nav">
-        <button type="button" aria-label="Anterior" disabled={!canPrev} onClick={() => onNav(-1)}><Icon name="chevron" size={16} /></button>
-        <p>{navLabel}</p>
-        <button type="button" aria-label="Siguiente" disabled={!canNext} onClick={() => onNav(1)}><Icon name="chevron" size={16} /></button>
+    <div className="nvpa-header">
+      <div className="nvpa-header-left">
+        <div className="nvpa-nav">
+          <button type="button" aria-label="Anterior" disabled={!canPrev} onClick={() => onNav(-1)}><Icon name="chevron" size={16} /></button>
+          <button type="button" aria-label="Siguiente" disabled={!canNext} onClick={() => onNav(1)}><Icon name="chevron" size={16} /></button>
+        </div>
+        <p className="nvpa-title"><span>{monthWord}</span><span className="nvpa-title-year">{yearWord}</span></p>
+        {view !== 'month' && <p className="nvpa-title-sub">{navLabel}</p>}
+      </div>
+      <div className="nvpa-header-right">
+        <div className="nvpa-views" aria-label="Vista del calendario">{VIEWS.map((option) => <button type="button" key={option.id} aria-pressed={view === option.id} onClick={() => setView(option.id)}>{option.label}</button>)}</div>
+        <NvButton className="nvpa-new" onClick={onMessage}>{isPatient ? 'Nueva consulta' : 'Escribir'}</NvButton>
       </div>
     </div>
-    <div className="nvpa-filters" aria-label="Filtrar eventos">{FILTERS.map((option) => <button type="button" key={option.id} aria-pressed={filter === option.id} onClick={() => setFilter(option.id)}>{option.label}</button>)}</div>
 
     <div className="nvpa-layout">
       <section className="nvpa-calendar" aria-label={view === 'month' ? 'Calendario mensual' : view === 'week' ? 'Calendario semanal' : 'Día seleccionado'}>
+        <div className="nvpa-categories" aria-label="Filtrar eventos">{FILTERS.map((option) => <button type="button" key={option.id} aria-pressed={filter === option.id} onClick={() => setFilter(option.id)}><i className={`nvpa-checkbox ${option.id}`} aria-hidden="true" />{option.label}</button>)}</div>
         {view === 'month' && <>
           <div className="nvpa-weekdays" aria-hidden="true">{WEEK_DAYS.map((day) => <span key={day}>{day}</span>)}</div>
           <div className="nvpa-month-grid">{monthGrid.cells.map((cell) => {
-            const occupied = eventsOnDate(events, cell.dateId).length > 0;
-            return <button type="button" key={cell.dateId} data-patient-agenda-day={cell.dateId} aria-pressed={cell.dateId === selectedDateId} aria-label={`${cell.dateId}${occupied ? ', con eventos' : ''}`} className={`${cell.inMonth ? '' : 'nvpa-outside'}${cell.isToday ? ' nvpa-today' : ''}${occupied ? ' nvpa-occupied' : ''}${cell.dateId === selectedDateId ? ' nvpa-selected' : ''}`} onClick={() => { setSelectedDateId(cell.dateId); setMonth(monthAnchor(cell.date)); }}><time dateTime={cell.dateId}>{cell.day}</time>{renderChips(cell.dateId, true)}</button>;
+            const dayEvents = eventsOnDate(events, cell.dateId);
+            const occupied = dayEvents.length > 0;
+            return <button type="button" key={cell.dateId} data-patient-agenda-day={cell.dateId} aria-pressed={cell.dateId === selectedDateId} aria-label={`${cell.dateId}${occupied ? ', con eventos' : ''}`} className={`${cell.inMonth ? '' : 'nvpa-outside'}${cell.isToday ? ' nvpa-today' : ''}${occupied ? ' nvpa-occupied' : ''}${cell.dateId === selectedDateId ? ' nvpa-selected' : ''}`} onClick={() => { setSelectedDateId(cell.dateId); setMonth(monthAnchor(cell.date)); }}><time dateTime={cell.dateId} className={dayEvents.length > 1 ? 'nvpa-day-badge' : undefined}>{cell.day}</time>{renderChips(cell.dateId, true)}</button>;
           })}</div>
         </>}
         {view === 'week' && <div className="nvpa-week-grid">{weekGrid.days.map((day) => <button type="button" key={day.dateId} data-patient-agenda-week-day={day.dateId} aria-pressed={day.dateId === selectedDateId} className={`${day.isToday ? 'nvpa-today' : ''}${day.dateId === selectedDateId ? ' nvpa-selected' : ''}`} onClick={() => setSelectedDateId(day.dateId)}><span>{day.weekday}</span><time dateTime={day.dateId}>{day.day}</time>{renderChips(day.dateId)}</button>)}</div>}
-        {view === 'day' && <div className="nvpa-day-list">{selectedEvents.length ? selectedEvents.map((event) => <article key={event.id} data-calendar-event={event.id} className={`nvpa-event ${event.kind}`}><span className="nvpa-detail-icon"><Icon name={eventIcon(event.kind)} size={18} /></span><div><NvBadge>{KIND_LABEL[event.kind]}</NvBadge><strong>{event.title}</strong><small>{event.subtitle}</small></div></article>) : <NvState title="Sin eventos este día" description="El calendario no inventa turnos, comidas ni actividad." />}</div>}
+        {view === 'day' && <div className="nvpa-day-list">{selectedEvents.length ? selectedEvents.map((event) => <article key={event.id} data-calendar-event={event.id} className={`nvpa-event ${event.kind}`}>
+          <span className={`nvpa-event-badge ${event.kind}`}>{KIND_LABEL[event.kind]}</span>
+          <strong>{event.title}</strong>
+          <div className="nvpa-event-details">
+            <p><Icon name="calendar" size={14} />{selectedLabel}</p>
+            <p><Icon name="clock" size={14} />{eventTime(event)}</p>
+          </div>
+        </article>) : <NvState title="Sin eventos este día" description="El calendario no inventa turnos, comidas ni actividad." />}</div>}
       </section>
 
       <aside className="nvpa-detail" aria-label="Detalle del día">
-        <header><h3>{selectedLabel}</h3><NvBadge>{selectedEvents.length} {selectedEvents.length === 1 ? 'evento' : 'eventos'}</NvBadge></header>
-        {selectedEvents.length ? selectedEvents.map((event) => <article key={event.id} className={`nvpa-event ${event.kind}`}><span className="nvpa-detail-icon"><Icon name={eventIcon(event.kind)} size={20} /></span><div><NvBadge>{KIND_LABEL[event.kind]}</NvBadge><strong>{event.title}</strong><small>{event.subtitle}</small>{onNavigate && event.kind !== 'consult' && <NvButton className="nv-ghost" onClick={() => openRelated(event)}>{event.kind === 'plan' ? 'Ver en el plan' : event.kind === 'meal' ? 'Abrir diario' : isPatient ? 'Abrir ejercicio' : 'Ver actividad'}</NvButton>}{event.kind === 'consult' && !isPatient && <NvButton className="nv-ghost" onClick={() => onNavigate?.('consultas')}>Gestionar consulta</NvButton>}</div></article>)
+        <header><h3>Detalle del día</h3><NvBadge>{selectedEvents.length} {selectedEvents.length === 1 ? 'evento' : 'eventos'}</NvBadge></header>
+        {selectedEvents.length ? selectedEvents.map((event) => <article key={event.id} className={`nvpa-event ${event.kind}`}>
+          <span className={`nvpa-event-badge ${event.kind}`}>{KIND_LABEL[event.kind]}</span>
+          <strong>{event.title}</strong>
+          <div className="nvpa-event-details">
+            <p><Icon name="calendar" size={14} />{selectedLabel}</p>
+            <p><Icon name="clock" size={14} />{eventTime(event)}</p>
+          </div>
+          <div className="nvpa-event-note"><span>Nota</span><p>{event.subtitle}</p></div>
+          {(onNavigate && event.kind !== 'consult') || (event.kind === 'consult' && !isPatient) ? <div className="nvpa-event-actions">
+            {onNavigate && event.kind !== 'consult' && <NvButton className="nv-ghost" onClick={() => openRelated(event)}>{event.kind === 'plan' ? 'Ver en el plan' : event.kind === 'meal' ? 'Abrir diario' : isPatient ? 'Abrir ejercicio' : 'Ver actividad'}</NvButton>}
+            {event.kind === 'consult' && !isPatient && <NvButton className="nv-ghost" onClick={() => onNavigate?.('consultas')}>Gestionar consulta</NvButton>}
+          </div> : null}
+        </article>)
           : <p className="nvpa-empty-day">No hay eventos publicados o registrados en este día.</p>}
 
         {counts.consult > 0 && current && isPatient && <>
