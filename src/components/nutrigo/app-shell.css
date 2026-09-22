@@ -169,11 +169,11 @@
   .nv-app.nv-patient .nv-sidebar .nv-brand { margin-bottom: 20px; }
   .nv-app.nv-patient .nv-sidebar nav button { font-size: 13px; min-height: 44px; }
   .nv-app.nv-patient:not(.nv-messaging):not(.nv-grocery-page):not(.nv-progress-page):not(.nv-patient-diary):not(.nv-patient-plan):not(.nv-patient-agenda):not(.nv-healthy-menu):not(.nv-exercise-page):not(.nv-resources-page) .nv-content-layout,
-  .nv-app.nv-pro:not(.nv-messaging):not(.nv-record):not(.nv-food-diary):not(.nv-meal-plan):not(.nv-consultation-page):not(.nv-agenda-page):not(.nv-goals-page):not(.nv-work-center-page) .nv-content-layout {
+  .nv-app.nv-pro:not(.nv-messaging):not(.nv-record):not(.nv-food-diary):not(.nv-meal-plan):not(.nv-consultation-page):not(.nv-agenda-page):not(.nv-goals-page):not(.nv-work-center-page):not(.nv-progress-page) .nv-content-layout {
     grid-template-columns: minmax(0, 1fr) 300px !important;
   }
   .nv-app.nv-patient:not(.nv-messaging):not(.nv-grocery-page):not(.nv-progress-page):not(.nv-patient-diary):not(.nv-patient-plan):not(.nv-patient-agenda):not(.nv-healthy-menu):not(.nv-exercise-page):not(.nv-resources-page) .nv-daily,
-  .nv-app.nv-pro:not(.nv-messaging):not(.nv-record):not(.nv-food-diary):not(.nv-meal-plan):not(.nv-consultation-page):not(.nv-agenda-page):not(.nv-goals-page):not(.nv-work-center-page) .nv-daily {
+  .nv-app.nv-pro:not(.nv-messaging):not(.nv-record):not(.nv-food-diary):not(.nv-meal-plan):not(.nv-consultation-page):not(.nv-agenda-page):not(.nv-goals-page):not(.nv-work-center-page):not(.nv-progress-page) .nv-daily {
     display: block;
   }
   .nv-main { padding: 20px 24px 32px; }

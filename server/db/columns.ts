@@ -1,7 +1,7 @@
 export type QueryAudience = 'professional' | 'patient';
 
 export const PRIVATE_PATIENT_COLUMNS = ['plan_b', 'next_focus', 'sensitive_hours', 'adherence_why'] as const;
-export const PRIVATE_MEAL_COLUMNS = ['note_for_nutri'] as const;
+export const PRIVATE_MEAL_COLUMNS = ['note_for_nutri', 'client_id'] as const;
 export const PRIVATE_MESSAGE_COLUMNS = ['suggested_by_ai'] as const;
 export const PRIVATE_APPOINTMENT_COLUMNS = ['prep_note'] as const;
 

@@ -37,7 +37,7 @@ export function ProfessionalActions({ patients, selectedId, onSelect, onOpen, sh
         <NvButton className="nv-ghost" disabled={!selected} onClick={() => onOpen({ patientId: selectedId, module: 'pacientes' })}>Editar pacientes</NvButton>
         <NvButton className="nv-ghost" disabled={!selected} onClick={() => onOpen({ patientId: selectedId, module: 'objetivos' })}>Gestionar objetivos</NvButton>
       </div>
-      <p className="nv-caption">Los cambios demo se guardan temporalmente en memoria. Las seis acciones abren el consultorio de esa paciente.</p>
+      <p className="nv-caption">Los cambios demo se guardan temporalmente en memoria. Las seis acciones abren el consultorio de esa paciente. La adherencia media es el valor actual, no un ranking ni un historial.</p>
     </section>
   </section>;
 }

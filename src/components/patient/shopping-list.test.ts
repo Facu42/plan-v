@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   buildShoppingExport,
   buildShoppingList,
+  formatShoppingQty,
+  shoppingCategoryFor,
   shoppingChecklistKey,
   type ShoppingMeal,
 } from './shopping-list';
@@ -35,6 +37,12 @@ describe('buildShoppingList', () => {
 
   it('returns an empty list for a week without meals', () => {
     expect(buildShoppingList([])).toEqual([]);
+  });
+
+  it('clasifica ingredientes conocidos y formatea cantidad+unidad', () => {
+    expect(shoppingCategoryFor('Quinoa')).toBe('Panadería y cereales');
+    expect(formatShoppingQty(90, 'g')).toBe('90 g');
+    expect(formatShoppingQty(null, null)).toBe('');
   });
 });
 

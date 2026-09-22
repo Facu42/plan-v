@@ -1,7 +1,19 @@
+import { useEffect, useState } from 'react';
 import { Icon } from '../shared/Icon';
 import { CarePanel } from './CarePanel';
 import { NvBadge, NvRing, NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
+import { CARE_LABELS, MEASUREMENT_SOURCE_LABELS } from '../../types/care';
+import { progressApi } from '../../api/progress';
+import { isAbortError } from '../../api/client';
+import { careErrorMessage } from '../../api/care';
+import {
+  PROGRESS_PERIODS,
+  PROGRESS_PERIOD_LABELS,
+  type PatientProgressView,
+  type ProgressPeriodDays,
+  type ProgressSeries,
+} from '../../types/progress';
 import './showroom-progress.css';
 
 function formatSleep(minutes: number | null): string {
@@ -15,6 +27,23 @@ function shortDate(value: string): string {
   return new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' }).format(new Date(`${value}T12:00:00`));
 }
 
+function formatQty(value: number): string {
+  return String(value).replace('.', ',');
+}
+
+function formatDelta(series: ProgressSeries): string {
+  if (series.declared_delta == null) return 'Sin comparativa: falta un valor declarado en alguno de los dos períodos.';
+  const formatted = formatQty(series.declared_delta);
+  const signed = series.declared_delta > 0 ? `+${formatted}` : formatted;
+  return `Cambio declarado: ${signed} ${series.unit}`;
+}
+
+function formatPoint(series: ProgressSeries, side: 'current' | 'previous'): string {
+  const point = side === 'current' ? series.current_last : series.previous_last;
+  if (!point) return 'Sin registro en este período';
+  return `${formatQty(point.value)} ${series.unit} · ${MEASUREMENT_SOURCE_LABELS[point.source]} · ${shortDate(point.captured_on)}`;
+}
+
 export function buildProgressView(patient: ShowroomPatient) {
   const activeDays = patient.journey.days.filter((day) => day.hydration > 0 || day.energy !== null || day.sleepMinutes !== null || day.reviewedMeals > 0 || day.pendingMeals > 0).length;
   const energyRecordedDays = patient.journey.days.filter((day) => day.energy !== null).length;
@@ -25,15 +54,86 @@ export function buildProgressView(patient: ShowroomPatient) {
   return { activeDays, energyRecordedDays, maxHydration, maxMeals, reviewedMeals: patient.journey.reviewedMeals, pendingMeals: patient.journey.pendingMeals, recentLogs };
 }
 
-export function ShowroomProgress({ patient }: { patient: ShowroomPatient }) {
+export function ShowroomProgress({
+  patient,
+  professional = false,
+  progress: injected,
+}: {
+  patient: ShowroomPatient;
+  professional?: boolean;
+  progress?: PatientProgressView | null;
+}) {
   const view = buildProgressView(patient);
   const sleepAverage = patient.journey.sleepAverageMinutes;
-  return <section className="nvp-progress" aria-label="Progreso del paciente">
-    <CarePanel patientId={patient.id} />
-    <header className="nvp-hero"><div><span className="nv-icon-tile"><Icon name="trend" size={21} /></span><div><h2>Tu progreso, en contexto</h2><p>Datos declarados por vos y comidas revisadas por tu nutricionista.</p></div></div><NvBadge>Últimos 7 días</NvBadge></header>
+  const [days, setDays] = useState<ProgressPeriodDays>(injected?.period_days ?? 7);
+  const [remote, setRemote] = useState<PatientProgressView | null>(injected ?? null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(!injected);
+
+  useEffect(() => {
+    if (injected) {
+      setRemote(injected);
+      setLoading(false);
+      setError('');
+      return;
+    }
+    const controller = new AbortController();
+    setLoading(true);
+    setError('');
+    progressApi.get(patient.id, days, controller.signal).then((result) => {
+      setRemote(result.progress);
+      setLoading(false);
+    }).catch((failure) => {
+      if (isAbortError(failure)) return;
+      setRemote(null);
+      setLoading(false);
+      setError(careErrorMessage(failure));
+    });
+    return () => controller.abort();
+  }, [patient.id, days, injected]);
+
+  const title = professional ? `Progreso de ${patient.name}, en contexto` : 'Tu progreso, en contexto';
+  const intro = professional
+    ? 'Datos declarados de esta paciente y comidas que revisaste. Se compara consigo misma, no con otras.'
+    : 'Datos declarados por vos y comidas revisadas por tu nutricionista.';
+
+  return <section className="nvp-progress" aria-label={professional ? `Progreso de ${patient.name}` : 'Progreso del paciente'}>
+    <CarePanel patientId={patient.id} mode={professional ? 'professional' : 'progress'} />
+    <header className="nvp-hero"><div><span className="nv-icon-tile"><Icon name="trend" size={21} /></span><div><h2>{title}</h2><p>{intro}</p></div></div>
+      <div className="nvp-periods" role="group" aria-label="Período a comparar">
+        {PROGRESS_PERIODS.map((period) => (
+          <button type="button" key={period} aria-pressed={days === period} onClick={() => setDays(period)}>{PROGRESS_PERIOD_LABELS[period]}</button>
+        ))}
+      </div>
+    </header>
+
+    <section className="nvp-compare" aria-label="Comparativa del mismo paciente">
+      {error && <NvState kind="error" title="No se pudo cargar el progreso" description={error} />}
+      {loading && !remote && <NvState kind="loading" title="Cargando períodos…" description="Comparativa del mismo paciente, sin rankings." />}
+      {remote && <>
+        <p className="nvp-window">{shortDate(remote.current.start)} – {shortDate(remote.current.end)} comparado con {shortDate(remote.previous.start)} – {shortDate(remote.previous.end)}. Zona {remote.timezone}.</p>
+        <div className="nvp-meal-compare">
+          <article><small>Comidas de este período</small><strong>{remote.meals.current.logged}</strong><p>{remote.meals.current.reviewed} revisadas · {remote.meals.current.pending} en revisión.</p></article>
+          <article><small>Comidas del período anterior</small><strong>{remote.meals.previous.logged}</strong><p>{remote.meals.previous.reviewed} revisadas · {remote.meals.previous.pending} en revisión.</p></article>
+        </div>
+        {!remote.measurements_included && <p className="nvp-source-note">Las medidas no se muestran: falta el permiso de peso y medidas. Las comidas sí se cuentan.</p>}
+        {remote.measurements_included && (remote.series.length ? <ol className="nvp-series">{remote.series.map((series) => (
+          <li key={`${series.kind}-${series.unit}`}>
+            <header><strong>{CARE_LABELS[series.kind]} · {series.unit}</strong><span>{formatDelta(series)}</span></header>
+            <p>Este período: {formatPoint(series, 'current')}</p>
+            <p>Período anterior: {formatPoint(series, 'previous')}</p>
+            {series.current.length + series.previous.length > 0 && <ul>
+              {[...series.previous, ...series.current].map((point) => (
+                <li key={point.id}>{shortDate(point.captured_on)} · {formatQty(point.value)} {series.unit} · {MEASUREMENT_SOURCE_LABELS[point.source]}</li>
+              ))}
+            </ul>}
+          </li>
+        ))}</ol> : <NvState title="Sin medidas en estos períodos" description="No se completa un período vacío ni se arrastra un valor más antiguo." />)}
+      </>}
+    </section>
 
     <section className="nvp-metrics" aria-label="Resumen semanal">
-      <article className="nvp-score"><NvRing value={patient.adherence} label="adherencia" /><div><small>Adherencia actual</small><strong>{patient.adherence}%</strong><p>Las comidas pendientes todavía no suman.</p></div></article>
+      <article className="nvp-score"><NvRing value={patient.adherence} label="adherencia" /><div><small>Adherencia actual</small><strong>{patient.adherence}%</strong><p>Las comidas pendientes todavía no suman. Cada paciente se compara consigo misma.</p></div></article>
       <article><span className="nvp-metric-icon mint"><Icon name="drop" size={18} /></span><small>Promedio de agua</small><strong>{patient.journey.hydrationAverage.toLocaleString('es-AR')} vasos/día</strong><p>Sobre siete días; los días sin carga quedan en cero.</p></article>
       <article><span className="nvp-metric-icon gold"><Icon name="moon" size={18} /></span><small>Descanso cargado</small><strong>{sleepAverage === null ? 'Sin promedio' : `Promedio ${formatSleep(sleepAverage)}`}</strong><p>{patient.journey.sleepRecordedDays} de 7 días con registro.</p></article>
       <article><span className="nvp-metric-icon coral"><Icon name="check" size={18} /></span><small>Comidas revisadas</small><strong>{view.reviewedMeals}</strong><p>{view.pendingMeals ? `${view.pendingMeals} todavía en revisión.` : 'Sin revisiones pendientes.'}</p></article>

@@ -37,13 +37,13 @@ describe('ShowroomResources', () => {
     expect(resourceAssignmentDateLabel('fecha-inválida')).toBe('fecha no disponible');
   });
 
-  it('renderiza biblioteca, filtros, guardado local explícito y acceso a detalle', () => {
+  it('renderiza biblioteca, filtros, guardado de cuenta y acceso a detalle', () => {
     const html = renderToStaticMarkup(<ShowroomResources patientId="pat-sofia" query="" onNavigate={onNavigate} />);
-    expect(html).toContain('Guías para usar Plan V');
+    expect(html).toContain('Guías y artículos revisados');
     expect(html).toContain('Cómo leer tu plan semanal');
-    expect(html).toContain('Guardado sólo en este dispositivo');
+    expect(html).toContain('No queda sólo en este dispositivo');
     expect(html).toContain('Abrir guía');
-    expect(html).not.toContain('Pronto');
+    expect(html).not.toContain('Registrar agua sin convertirla en una pauta');
   });
 
   it('distingue recursos asignados por la nutricionista del guardado local', () => {
@@ -58,7 +58,7 @@ describe('ShowroomResources', () => {
     />);
     expect(html).toContain('Asignado por tu nutricionista');
     expect(html).toContain('Pendiente de lectura');
-    expect(html).toContain('Guardado sólo en este dispositivo');
+    expect(html).toContain('No queda sólo en este dispositivo');
   });
 
   it('construye enlaces profundos canónicos a /app/recursos', () => {
@@ -66,6 +66,7 @@ describe('ShowroomResources', () => {
       'http://127.0.0.1:5180/app/recursos#recurso=leer-plan-semanal',
     );
     expect(resourceGuideIdFromHash('#recurso=leer-plan-semanal')).toBe('leer-plan-semanal');
+    expect(resourceGuideIdFromHash('#recurso=hidratacion-cotidiana')).toBe('hidratacion-cotidiana');
     expect(resourceGuideIdFromHash('#recurso=no-existe')).toBeNull();
     expect(resourceGuideIdFromHash('#otra-cosa')).toBeNull();
   });

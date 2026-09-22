@@ -1,6 +1,8 @@
 import type { Brief, DemoNotice, GoalStatus, MealLog, Message, Patient, Stage } from '../types';
 import { getSessionToken } from '../lib/supabase';
 import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } from '../types/intake';
+import type { PrivacyRequestKind, PrivacyRequestView } from '../types/privacy';
+import { resolveApiUrl } from './origin';
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
@@ -36,7 +38,7 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (init?.signal?.aborted) {
     throw new DOMException('Aborted', 'AbortError');
   }
-  const res = await fetch(path, {
+  const res = await fetch(resolveApiUrl(path), {
     ...init,
     headers: { ...headers, ...init?.headers },
   });
@@ -131,7 +133,7 @@ export const api = {
       body: JSON.stringify({ display_name: displayName }),
     }),
 
-  analyzeMeal: (patientId: string, data: { description?: string; imageBase64?: string; slot: string; photoPreview?: string }) =>
+  analyzeMeal: (patientId: string, data: { description?: string; imageBase64?: string; slot: string; photoPreview?: string; client_id?: string }) =>
     request<{ analysis: unknown; log: MealLog; patient: Patient }>(`/api/patients/${patientId}/meals/analyze`, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -166,6 +168,12 @@ export const api = {
       body: JSON.stringify(appointment),
     }),
 
+  confirmAppointment: (patientId: string, reply: 'attending' | 'needs_change') =>
+    request<{ patient: Patient }>(`/api/patients/${patientId}/appointment/confirm`, {
+      method: 'POST',
+      body: JSON.stringify({ reply }),
+    }),
+
   listNotices: (patientId?: string) =>
     request<{ notices: DemoNotice[]; source: string }>(patientId ? `/api/notices?patientId=${encodeURIComponent(patientId)}` : '/api/notices'),
 
@@ -174,6 +182,31 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ patientId: data.patientId, kind: 'reminder', title: data.title, detail: data.detail }),
     }),
+
+  getNotificationPrefs: (patientId?: string, audience?: 'patient' | 'pro') => {
+    const params = new URLSearchParams();
+    if (patientId) params.set('patientId', patientId);
+    if (audience) params.set('audience', audience);
+    const query = params.toString();
+    return request<{ prefs: { in_app: boolean; email: boolean; push: boolean }; source: string }>(
+      `/api/notification-preferences${query ? `?${query}` : ''}`,
+    );
+  },
+
+  saveNotificationPrefs: (
+    prefs: { in_app: boolean; email: boolean; push: boolean },
+    patientId?: string,
+    audience?: 'patient' | 'pro',
+  ) => {
+    const params = new URLSearchParams();
+    if (patientId) params.set('patientId', patientId);
+    if (audience) params.set('audience', audience);
+    const query = params.toString();
+    return request<{ prefs: { in_app: boolean; email: boolean; push: boolean }; source: string }>(
+      `/api/notification-preferences${query ? `?${query}` : ''}`,
+      { method: 'PUT', body: JSON.stringify(prefs) },
+    );
+  },
 
   updateBilling: (patientId: string, data: { status: 'pending' | 'waived' } | { status: 'active'; billing_until: string }) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/billing`, {
@@ -193,10 +226,23 @@ export const api = {
   dismissBrief: (patientId: string) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/brief/dismiss`, { method: 'POST' }),
 
-  sendMessage: (patientId: string, text: string, from: 'vero' | 'patient', suggestedByAi = false) =>
+  sendMessage: (
+    patientId: string,
+    text: string,
+    from: 'vero' | 'patient',
+    suggestedByAi = false,
+    clientId?: string,
+    attachment?: { asset_id: string; filename: string },
+  ) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/messages`, {
       method: 'POST',
-      body: JSON.stringify({ text, from, suggested_by_ai: suggestedByAi }),
+      body: JSON.stringify({
+        text,
+        from,
+        suggested_by_ai: suggestedByAi,
+        ...(clientId ? { client_id: clientId } : {}),
+        ...(attachment ? { asset_id: attachment.asset_id, filename: attachment.filename } : {}),
+      }),
     }),
 
   markMessagesRead: (patientId: string, reader: 'vero' | 'patient') =>
@@ -255,4 +301,17 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+
+  requestPrivacy: (patientId: string, data: { kind: PrivacyRequestKind; notes?: string }) =>
+    request<{ request: PrivacyRequestView; source: string }>(`/api/patients/${patientId}/privacy/requests`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  listPrivacyRequests: (patientId: string, init?: RequestInit) =>
+    request<{ requests: PrivacyRequestView[]; source: string }>(`/api/patients/${patientId}/privacy/requests`, init),
+  downloadPrivacyPackage: (patientId: string, requestId: string, init?: RequestInit) =>
+    request<{ request: PrivacyRequestView; package: Record<string, unknown>; source: string }>(
+      `/api/patients/${patientId}/privacy/requests/${requestId}/package`,
+      init,
+    ),
 };

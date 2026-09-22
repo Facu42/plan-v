@@ -93,10 +93,10 @@ describe('acompañamiento conectado (demo memoria)', () => {
     const storedProMessage = getPatient(sofia)?.messages.find((message) => message.text === REPLY);
     expect(storedProMessage?.suggested_by_ai).toBe(true);
 
-    const rescheduled = await json(`/api/patients/${sofia}/appointment/reschedule`, { day: 'Viernes', time: '11:00' });
+    const rescheduled = await json(`/api/patients/${sofia}/appointment/reschedule`, { day: 'Viernes', time: '10:00' });
     expect(rescheduled.status).toBe(200);
     expect((await rescheduled.json() as { patient: { appointment: { when: string; duration: number; channel: string } } }).patient.appointment).toMatchObject({
-      when: 'Viernes · 11:00',
+      when: 'Viernes · 10:00',
       duration: 45,
       channel: 'video',
     });
@@ -126,7 +126,12 @@ describe('acompañamiento conectado (demo memoria)', () => {
     const publishedTitle = 'Ensalada de lentejas revisada';
     const publish = {
       expected_recipe: proposal.replacement.recipe,
-      recipe: { ...proposal.replacement.recipe, title: publishedTitle },
+      recipe: {
+        ...proposal.replacement.recipe,
+        title: publishedTitle,
+        ingredients: ['Lentejas cocidas', 'Tomate'],
+        steps: ['Lavar las lentejas.', 'Mezclar con tomate.'],
+      },
     };
     expect((await json(`/api/patients/${sofia}/care/replacements/${proposal.replacement.id}/publish`, publish)).status).toBe(200);
     const afterPublish = await (await json(`/api/patients/${sofia}/care`)).json() as { replacements: Array<{ recipe: { title: string }; published_at: string | null }> };

@@ -12,6 +12,8 @@ Los pasos de abajo conservan el historial de migración funcional y visual a Nut
 - [x] Registrar estructura, medidas fuente y matriz Nutrigo ↔ Plan V en `docs/nutrigo-reference-map.md`; conservar once módulos y flujos propios.
 - [x] Primer corte de shell paciente: 223/892/325 en canvas de 1440, padding 28 y cuerpo a y=106 comprobados en navegador. Ocho capturas en claro/oscuro a 1440/800/390/320; navegación móvil y once módulos CRM conservados. Evidencia: `.scratch/nutrigo-local-reference/shell-verification.json`. No equivale a fidelidad completa ni aprobación visual.
 - [x] Usuario confirma Poppins y compra de licencia de todo el pack Nutrigo. Fuente incorporada localmente al showroom; uso del pack autorizado por su declaración, sin afirmar una revisión legal independiente.
+- [x] PV-37: contratos de layout/estado de las doce superficies a 1440/800/390/320, claro/oscuro, vacío/error/carga y `:focus-visible`. Reorganización tablet/móvil; overflow de progreso/diario corregido. **No es aprobación visual.**
+- [x] PV-38: organizaciones/equipos, múltiples vínculos, delegación y suscripción B2B de estado; transferencia de ownership con hijos y auditoría. Fail closed 501. **No es SQL live ni aprobación visual.**
 - [ ] Resolver componentes/overrides y revisar visualmente cada pantalla antes de declarar auditados todos sus controles.
 - [x] Completar Dashboard y las once entradas del CRM desde esta fuente: todas abren superficies Nutrigo operativas; la comparación visual general sigue NO APROBADA.
 - [x] Verificar que `/` abra Nutrigo por defecto en demo local y que `?design=legacy` conserve la versión anterior. Guardas de sesión/producción intactas.
@@ -183,7 +185,7 @@ El usuario pidió definir un estándar de app nutricional moderna y aplicarlo, e
 - [x] 8.0 Base paciente en Nutrigo: lista conservadora derivada del plan semanal vigente, categorías, deduplicación, ocurrencias y aviso explícito de límites.
 - [ ] 8.1 Modelar ingredientes, cantidades, unidades y agregados manuales; hoy esos datos no existen y no se inventan.
 - [x] 8.2 Comprado/pendiente local por paciente, búsqueda, filtros y exportación de texto.
-- [ ] 8.3 Presupuesto/gastos sólo si se aprueba.
+- [x] 8.3 Presupuesto/gastos **OUT** (PV-39) hasta evidencia de uso. No implementar. POST `/shopping/budget` → 501.
 
 ## Paso 9 — Diario de comidas
 
@@ -201,17 +203,17 @@ El usuario pidió definir un estándar de app nutricional moderna y aplicarlo, e
 ## Paso 11 — Ejercicio
 
 - [x] 11.0 Registro de actividad autodeclarada: paciente carga tipo, duración, intensidad y nota; resumen de siete días e historial; la profesional lo ve aislado en Actividades. Sin calorías, rutinas ni prescripción inferida.
-- [ ] 11.1 Persistencia `activity_logs`, RLS, retención y auditoría en contrato 016 aprobado.
-- [ ] 11.2 Biblioteca y detalle estructurado de ejercicios.
-- [ ] 11.3 Asignación de rutinas por profesional habilitado y feedback paciente. El rol nutricionista por sí solo no concede permiso de prescripción.
+- [x] 11.1 Persistencia `activity_logs`, RLS, retención declarada y auditoría de asignación en Postgres descartable (fuera de 016/016b). API 501 sin schema. Live no aplicado.
+- [x] 11.2 Biblioteca y detalle estructurado de ejercicios.
+- [x] 11.3 Asignación de rutinas por profesional habilitado y feedback paciente. El rol nutricionista por sí solo no concede permiso de prescripción.
 - [ ] 11.4 Progreso de rutinas asignadas y límites éticos adicionales, sólo después de resolver habilitación profesional y contrato.
 
 ## Paso 12 — Insights y Guardado
 
 - [x] 12.1 Base paciente de Recursos: seis guías operativas originales, categorías, búsqueda y detalle; sin publicación clínica automática. Evidencia: `.scratch/nutrigo-resources/58-patient-resources.md`.
-- [x] 12.2 Tags, relacionados, favorito local y compartir para las seis guías operativas permitidas. Usa enlace profundo validado, Web Share o copy-link; historial del navegador y reapertura directa verificados. Evidencia: `.scratch/nutrigo-resource-share/59-resource-deep-links.md`.
-- [ ] 12.3 Guardado unificado de recetas, artículos, Planes B y recursos. Guardado profesional ya reúne Planes B con asignación de guías, pero los favoritos personales de Recursos siguen sólo en el dispositivo y aún no existen entidades reales de receta/artículo.
-- [x] 12.4 Asignación individual/masiva de las seis guías operativas con estado y fecha de envío/lectura por paciente; memoria demo únicamente y `501` en Supabase hasta contrato/RLS. Evidencia: `.scratch/nutrigo-resource-assignment/60-resource-assignment.md`.
+- [x] 12.2 Tags, relacionados, favorito persistido y compartir para las seis guías operativas permitidas. Usa enlace profundo validado, Web Share o copy-link; historial del navegador y reapertura directa verificados.
+- [x] 12.3 Guardado unificado de recetas asignadas, artículos visibles, Planes B (superficie profesional) y recursos. Favoritos personales persisten en servidor; sin schema 501.
+- [x] 12.4 Asignación individual/masiva de guías y artículos publicados con estado pendiente/leído; persistida en Postgres descartable y `501` sin schema.
 
 ## Paso 13 — CRM completo
 

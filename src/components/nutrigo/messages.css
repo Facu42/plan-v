@@ -31,6 +31,14 @@
 .nm-compose textarea:focus-visible,.nm-mobile-picker select:focus-visible { outline:3px solid var(--nv-strong); outline-offset:2px; }
 .nm-compose>p { font-size:11px; margin-top:8px; overflow-wrap:anywhere; }
 .nm-compose [role=alert] { font-weight:600; }
+.nm-attach-row { display:flex; align-items:center; gap:10px; margin-top:10px; font-size:12px; }
+.nm-attach-row>input[type=file] { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+.nm-attach-row>label { cursor:pointer; color:var(--nv-ink); text-decoration:underline; }
+.nm-attach-row>span { display:flex; align-items:center; gap:8px; color:var(--nv-muted); }
+.nm-attach { margin:8px 0; }
+.nm-attach-name { font-size:12px; font-weight:600; margin:0 0 6px; }
+.nm-attach img { display:block; max-width:220px; max-height:180px; border-radius:8px; }
+.nm-attach-missing { color:var(--nv-muted); font-size:12px; margin:6px 0; }
 .nm-profile { padding:24px; }
 .nm-profile>h2 { margin-top:16px; }
 .nm-profile p { font-size:12px; color:var(--nv-muted); margin-top:8px; }
@@ -52,4 +60,20 @@
   .nm-conversation>header { padding:16px; }
   .nm-conversation h2 { font-size:14px; }
   .nm-bubble { max-width:94%; }
+}
+@media(max-width:800px) {
+  .nm-layout { grid-template-columns:minmax(0,1fr); min-height:0; }
+  .nm-contacts { display:none; }
+  .nm-layout.nm-patient .nm-contacts { display:none; }
+  .nm-profile { display:none; }
+  .nm-mobile-picker { display:block; }
+}
+@media(max-width:390px) {
+  .nm-thread { height:42dvh; min-height:220px; padding:12px; }
+  .nm-conversation>header { padding:12px; }
+  .nm-compose { padding:12px; }
+}
+@media(max-width:320px) {
+  .nm-bubble { max-width:100%; padding:10px 12px; }
+  .nm-compose textarea { min-height:48px; }
 }

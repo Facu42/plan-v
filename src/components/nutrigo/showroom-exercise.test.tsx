@@ -27,6 +27,7 @@ describe('Ejercicio paciente Nutrigo', () => {
     expect(html).toContain('Me sentí bien');
     expect(html).toContain('Registros anteriores');
     expect(html).toContain('Cargando registros');
+    expect(html).toContain('Todavía no hay una rutina asignada');
     expect(html).not.toMatch(/rutina recomendada|calorías quemadas|prescripción profesional/i);
   });
 
@@ -35,5 +36,38 @@ describe('Ejercicio paciente Nutrigo', () => {
     expect(html).toContain('Cargando registros');
     expect(html).not.toContain('Registros anteriores');
     expect(html).not.toContain('50 min');
+  });
+
+  it('muestra la rutina asignada y bloquea la asignación sin habilitación', () => {
+    const assigned = renderToStaticMarkup(<ShowroomExercise patient={patient} exercise={{
+      patient_id: 'p1',
+      can_assign: false,
+      habilitation_verified: true,
+      library: [{ id: '11111111-1111-4111-a111-000000000001', slug: 'movilidad-cadera', name: 'Movilidad de cadera', description: 'Círculos lentos', category: 'movilidad', default_sets: 2, default_reps: 8, default_rest_seconds: 30 }],
+      assignments: [{
+        id: 'as1', patient_id: 'p1', title: 'Movilidad suave', status: 'active', assigned_at: '2026-09-14T12:00:00.000Z',
+        items: [{ id: 'it1', exercise_id: '11111111-1111-4111-a111-000000000001', name: 'Movilidad de cadera', category: 'movilidad', sets: 2, reps: 8, rest_seconds: 30, note: null, sort: 0 }],
+        feedback: null,
+      }],
+      activities: [],
+    }} />);
+    expect(assigned).toContain('Movilidad suave');
+    expect(assigned).toContain('2 × 8');
+    expect(assigned).toContain('Ejercicios de tu rutina');
+    expect(assigned).not.toMatch(/rutina recomendada|calorías quemadas/i);
+
+    const blocked = renderToStaticMarkup(<ShowroomExercise patient={patient} professional exercise={{
+      patient_id: 'p1',
+      can_assign: false,
+      habilitation_verified: false,
+      library: [{ id: '11111111-1111-4111-a111-000000000002', slug: 'sentadilla-aire', name: 'Sentadilla al aire', description: 'Bajada controlada', category: 'fuerza', default_sets: 3, default_reps: 10, default_rest_seconds: 60 }],
+      assignments: [],
+      activities: [],
+    }} />);
+    expect(blocked).toContain('Ejercicio de Ana');
+    expect(blocked).toContain('Sin habilitación verificada');
+    expect(blocked).toContain('falta la verificación de habilitación');
+    expect(blocked).not.toContain('Asignar rutina');
+    expect(blocked).toContain('No hay un casillero para auto-otorgársela');
   });
 });

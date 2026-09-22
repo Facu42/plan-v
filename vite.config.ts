@@ -18,5 +18,11 @@ export default defineConfig({
       AI_MODE: 'demo',
       TZ: 'America/Argentina/Buenos_Aires',
     },
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      ...(process.env.DISPOSABLE_DATABASE_URL ? [] : ['server/cut1.disposable.test.ts']),
+      ...(process.env.PLANV_LIVE_AUTH === '1' ? [] : ['server/live-auth-storage.test.ts']),
+    ],
   },
 });

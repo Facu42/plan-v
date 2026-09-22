@@ -3,9 +3,10 @@ import { z } from 'zod';
 import { authorizePatientAction } from '../security/authorization.js';
 import * as sb from '../db/supabase-repo.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
-import { getPatient, getStore } from '../store.js';
-import { careInputSchema, carePreferencesSchema, replacementRecipeSchema, CARE_LABELS, type CareAlert } from '../../src/types/care.js';
+import { getPatient, getStore, DEMO_NUTRITIONIST_ID } from '../store.js';
+import { careInputSchema, carePreferencesSchema, replacementRecipeSchema, CARE_LABELS, isMeasurementData, type CareAlert } from '../../src/types/care.js';
 import * as repo from './repository.js';
+import { ingestReadyAsset } from '../assets/repository.js';
 import { handleProcessingJob } from '../jobs/handlers.js';
 import { processQueue, runOne } from '../jobs/queue.js';
 import { AIUnavailableError } from '../ai/errors.js';
@@ -14,10 +15,11 @@ import { currentCareConsents, requireCareConsent } from './consents.js';
 export { currentCareConsents, requireCareConsent } from './consents.js';
 async function access(c: Context, patientId: string, mode: 'read' | 'patient' | 'professional') {
   const auth = c.get('auth'); const persistent = 'userId' in auth && isSupabaseEnabled();
-  if (!persistent) { if (!getPatient(patientId)) throw new repo.CareError(404, 'Paciente no encontrado.'); return { persistent: false, professional: c.req.query('audience') === 'pro' || mode === 'professional' }; }
+  if (!persistent) { if (!getPatient(patientId)) throw new repo.CareError(404, 'Paciente no encontrado.'); return { persistent: false, professional: c.req.query('audience') === 'pro' || mode === 'professional', nutritionistId: DEMO_NUTRITIONIST_ID }; }
   const actor = await authorizePatientAction(auth.userId, patientId, mode === 'professional' ? 'review_intake' : mode === 'patient' ? 'log_activity' : 'read_patient', { getActor: sb.sbGetActor, getPatientResource: sb.sbGetPatientResource });
   if (!actor || (mode === 'patient' && actor.role !== 'paciente')) throw new repo.CareError(403, 'No tenés permiso para esta acción.');
-  return { persistent: true, professional: actor.role === 'nutri' };
+  const resource = await sb.sbGetPatientResource(patientId);
+  return { persistent: true, professional: actor.role === 'nutri', nutritionistId: resource?.nutritionistId ?? '' };
 }
 async function body<T>(c: Context, schema: z.ZodType<T>, max = 7_100_000): Promise<T> {
   if (Number(c.req.header('Content-Length')) > max) throw new repo.CareError(413, 'El archivo es demasiado grande.');
@@ -28,15 +30,17 @@ async function body<T>(c: Context, schema: z.ZodType<T>, max = 7_100_000): Promi
 export function registerCareRoutes(app: Hono) {
   app.get('/api/patients/:id/care', async c => {
     const id = c.req.param('id'); const { persistent, professional } = await access(c, id, 'read');
-    const [records, preferences, replacements, bundle] = await Promise.all([repo.listCareRecords(id, persistent), repo.getCarePreferences(id, persistent), repo.listReplacements(id, persistent), currentCareConsents(id, persistent)]);
-    return c.json({ records: records.filter(r => professional || r.data.kind !== 'payment'), preferences, replacements: replacements.filter(r => professional || r.published_at), consented: bundle.consented, source: persistent ? 'supabase' : 'memory' });
+    const [records, preferences, replacements, bundle, measurements] = await Promise.all([repo.listCareRecords(id, persistent), repo.getCarePreferences(id, persistent), repo.listReplacements(id, persistent), currentCareConsents(id, persistent), repo.listMeasurements(id, persistent)]);
+    return c.json({ records: records.filter(r => professional || r.data.kind !== 'payment'), preferences, replacements: replacements.filter(r => professional || r.published_at), consented: bundle.consented, measurements, source: persistent ? 'supabase' : 'memory' });
   });
   app.post('/api/patients/:id/care/records', async c => {
     const id = c.req.param('id'); const input = await body(c, careInputSchema);
     if (input.data.kind === 'body_photo') throw new repo.CareError(400, 'Usá el formulario de foto privada.');
     if (input.data.kind === 'clinical_document') throw new repo.CareError(400, 'Usá el formulario de estudios.');
-    const { persistent } = await access(c, id, input.data.kind === 'payment' ? 'professional' : 'patient');
-    if (input.data.kind === 'weight' || input.data.kind === 'waist') await requireCareConsent(id, persistent, 'measurement');
+    const measurement = isMeasurementData(input.data);
+    const professionalMeasure = isMeasurementData(input.data) && input.data.source === 'professional';
+    const { persistent } = await access(c, id, input.data.kind === 'payment' || professionalMeasure ? 'professional' : 'patient');
+    if (measurement) await requireCareConsent(id, persistent, 'measurement');
     const record = await repo.saveCareRecord(id, input, persistent); return c.json({ record });
   });
   app.patch('/api/patients/:id/care/records/:recordId/review', async c => {
@@ -48,11 +52,12 @@ export function registerCareRoutes(app: Hono) {
     const settings = await body(c, carePreferencesSchema); await repo.saveCarePreferences(id, settings, persistent); return c.json({ preferences: settings });
   });
   app.post('/api/patients/:id/care/photos', async c => {
-    const id = c.req.param('id'); const { persistent } = await access(c, id, 'patient');
+    const id = c.req.param('id'); const { persistent, nutritionistId } = await access(c, id, 'patient');
     await requireCareConsent(id, persistent, 'body_progress');
     const input = await body(c, z.object({ id: z.uuid(), recorded_on: careInputSchema.shape.recorded_on, image: z.string().max(7_000_000), note: z.string().trim().max(500) }).strict());
     const path = `${id}/${input.id}`;
     const recordInput = { id: input.id, recorded_on: input.recorded_on, data: { kind: 'body_photo' as const, path, note: input.note } };
+    await ingestReadyAsset({ patientId: id, nutritionistId, category: 'body_progress', dataUrl: input.image, persistent });
     await repo.storeCarePhoto(path, input.image, persistent);
     const record = await repo.saveCareRecord(id, recordInput, persistent); return c.json({ record });
   });
@@ -69,7 +74,7 @@ export function registerCareRoutes(app: Hono) {
     await repo.deleteCarePhoto(id,c.req.param('recordId'),persistent);return c.json({ok:true});
   });
   app.post('/api/patients/:id/care/documents', async c => {
-    const id = c.req.param('id'); const { persistent } = await access(c, id, 'patient');
+    const id = c.req.param('id'); const { persistent, nutritionistId } = await access(c, id, 'patient');
     await requireCareConsent(id, persistent, 'clinical_document');
     const input = await body(c, z.object({
       id: z.uuid(), recorded_on: careInputSchema.shape.recorded_on, file: z.string().max(28_000_000),
@@ -78,7 +83,8 @@ export function registerCareRoutes(app: Hono) {
     const filename = repo.sanitizeDocumentFilename(input.filename);
     const { mime } = repo.validateDocument(input.file);
     const path = `${id}/${input.id}`;
-    const recordInput = { id: input.id, recorded_on: input.recorded_on, data: { kind: 'clinical_document' as const, path, mime, filename, document_kind: input.document_kind, note: input.note } };
+    const recordInput = { id: input.id, recorded_on: input.recorded_on, data: { kind: 'clinical_document' as const, path, mime: mime as 'application/pdf' | 'image/jpeg' | 'image/png', filename, document_kind: input.document_kind, note: input.note } };
+    await ingestReadyAsset({ patientId: id, nutritionistId, category: 'clinical_document', dataUrl: input.file, persistent });
     await repo.storeCareDocument(path, input.file, persistent);
     const record = await repo.saveCareRecord(id, recordInput, persistent); return c.json({ record });
   });

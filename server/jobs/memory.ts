@@ -93,6 +93,13 @@ export function createMemoryJobStore(now: () => Date = () => new Date()): JobSto
 }
 
 export function assertJobKind(value: string): JobKind {
-  if (value === 'menu_draft' || value === 'purge_asset' || value === 'fail') return value;
+  if (
+    value === 'menu_draft'
+    || value === 'recipe_draft'
+    || value === 'purge_asset'
+    || value === 'privacy_export'
+    || value === 'privacy_delete'
+    || value === 'fail'
+  ) return value;
   throw new Error('job_kind');
 }

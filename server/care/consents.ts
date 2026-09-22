@@ -1,7 +1,7 @@
 import { CONSENT_CATALOG, type ConsentPurpose } from '../intake/consent.js';
 import { getIntakeRecord, listConsentEvents } from '../intake/memory.js';
 import { readIntakeBundle } from '../intake/repository.js';
-import { CareError } from './repository.js';
+import { CareError } from './errors.js';
 
 export async function currentCareConsents(patientId: string, persistent: boolean) {
   const bundle = persistent ? await readIntakeBundle(patientId) : { intake: getIntakeRecord(patientId), consents: listConsentEvents(patientId) };

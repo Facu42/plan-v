@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '../shared/Icon';
 import { NvBadge, NvButton, NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
+import { DayAssignedMeals } from './DayMeals';
+import { RecipeMacroGrid } from './RecipePlate';
 import './showroom-patient-diary.css';
 
 export type PatientDiaryFilter = 'all' | 'pending' | 'reviewed';
@@ -104,7 +106,7 @@ export function buildPatientDiaryView(patient: ShowroomPatient, query = '', filt
   };
 }
 
-export function ShowroomPatientDiary({ patient, query, now = new Date(), onLogMeal }: { patient: ShowroomPatient; query: string; now?: Date; onLogMeal: (slot?: string) => void }) {
+export function ShowroomPatientDiary({ patient, query, now = new Date(), onLogMeal, patientId }: { patient: ShowroomPatient; query: string; now?: Date; onLogMeal: (slot?: string) => void; patientId?: string }) {
   const [filter, setFilter] = useState<PatientDiaryFilter>('all');
   const [weekOffset, setWeekOffset] = useState(0);
   useEffect(() => { setWeekOffset(0); }, [patient.id]);
@@ -112,7 +114,9 @@ export function ShowroomPatientDiary({ patient, query, now = new Date(), onLogMe
   const emptyCopy = view.emptyKind === 'week'
     ? (view.week.isCurrent ? 'Todavía no registraste comidas esta semana.' : 'No hay registros en esa semana. El diario no inventa historial.')
     : 'Usá otra búsqueda o cambiá el filtro.';
-  return <section className="nvpdiary" aria-label="Diario de comidas del paciente">
+  return <>
+    {patientId ? <DayAssignedMeals patientId={patientId} /> : null}
+    <section className="nvpdiary" aria-label="Diario de comidas del paciente">
     <header className="nvpdiary-hero"><div><span className="nv-icon-tile"><Icon name="leaf" size={21} /></span><div><h2>Tu diario de comidas</h2><p>Registrá lo que comiste y seguí el estado de revisión.</p></div></div><NvButton onClick={() => onLogMeal('Almuerzo')}><Icon name="camera" size={15} />Registrar comida</NvButton></header>
 
     <nav className="nvpdiary-week" aria-label="Semana del diario">
@@ -131,12 +135,13 @@ export function ShowroomPatientDiary({ patient, query, now = new Date(), onLogMe
         return <article key={log.id}>
         <span className={`nvpdiary-icon ${log.status}`}><Icon name={log.status === 'pending_review' ? 'clock' : 'check'} size={17} /></span>
         <div className="nvpdiary-copy"><strong>{log.slot}</strong><p>{log.description || 'Sin descripción registrada'}</p><time dateTime={log.logged_at}>{new Intl.DateTimeFormat('es-AR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(log.logged_at))}</time></div>
-        <div className="nvpdiary-detail">{review ? <p><strong>{review.macros ? `${review.macros.kcal} kcal` : 'Valores publicados'}</strong><span>{review.macros ? `P ${review.macros.protein_g} g · C ${review.macros.carbs_g} g · G ${review.macros.fat_g} g` : 'Sin información nutricional publicada.'}</span></p> : <p><strong>Sin valores confirmados</strong><span>Tu nutricionista debe revisarlos.</span></p>}
+        <div className="nvpdiary-detail">{review ? <>{review.macros ? <RecipeMacroGrid macros={review.macros} /> : null}<p><strong>{review.macros ? `${review.macros.kcal} kcal` : 'Valores publicados'}</strong><span>{review.macros ? `P ${review.macros.protein_g} g · C ${review.macros.carbs_g} g · G ${review.macros.fat_g} g` : 'Sin información nutricional publicada.'}</span></p></> : <p><strong>Sin valores confirmados</strong><span>Tu nutricionista debe revisarlos.</span></p>}
           {review && <p className="nvpdiary-review"><strong>Revisión profesional</strong><span>{review.headline}. {review.foods.length ? `Alimentos: ${review.foods.join(', ')}` : 'Sin alimentos estructurados registrados.'} {review.caption}</span></p>}</div>
         <div className="nvpdiary-badges">{relation !== 'unknown' && <span className={`nvpdiary-plan-tag ${relation}`}>{relation === 'planned' ? 'Del plan' : 'Fuera del plan'}</span>}<NvBadge tone={log.status === 'pending_review' ? 'gold' : log.status === 'adjusted' ? 'coral' : 'green'}>{statusLabel(log.status)}</NvBadge></div>
       </article>;
       })}</div> : <NvState title={view.emptyKind === 'week' ? 'Sin registros esta semana' : 'Sin registros para mostrar'} description={emptyCopy} />}
       <footer><p><Icon name="sparkle" size={14} /> {patient.weekPlan.length > 0 && '«Del plan» compara el momento del registro con tu plan semanal publicado; no es una evaluación clínica. '}Las estimaciones automáticas no cuentan hasta que tu nutricionista las confirma o ajusta.</p><NvButton className="nv-ghost" onClick={() => onLogMeal('Almuerzo')}><Icon name="plus" size={14} />Agregar registro</NvButton></footer>
     </section>
-  </section>;
+  </section>
+  </>;
 }

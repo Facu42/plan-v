@@ -11,6 +11,10 @@ describe('frecuencia de registros y recordatorios',()=>{
     expect(dueCareReminders(records,prefs,'2026-10-01').map(r=>r.id)).toContain('waist:2026-10');
     expect(dueCareReminders([],DEFAULT_CARE_PREFERENCES,'2026-09-18')).toEqual([]);
   });
+  it('describe peso con unidad y origen, sin inventar un valor',()=>{
+    expect(describeCareRecord({id:'w',patient_id:'p',created_at:'2026-09-19',recorded_on:'2026-09-19',reviewed_at:null,data:{kind:'weight',value:64.5,unit:'kg',source:'patient',note:''}})).toBe('64.5 kg · Paciente');
+    expect(describeCareRecord({id:'h',patient_id:'p',created_at:'2026-09-19',recorded_on:'2026-09-19',reviewed_at:null,data:{kind:'hip',value:98,unit:'cm',source:'professional',note:''}})).toBe('98 cm · Profesional');
+  });
   it('describe estudios por archivo y tipo, sin inventar un análisis',()=>{
     expect(describeCareRecord({id:'d',patient_id:'p',created_at:'2026-09-19',recorded_on:'2026-09-19',reviewed_at:null,data:{kind:'clinical_document',path:'p/d',mime:'application/pdf',filename:'laboratorio.pdf',document_kind:'laboratorio',note:''}})).toBe('laboratorio.pdf · Laboratorio');
   });
@@ -20,7 +24,7 @@ describe('frecuencia de registros y recordatorios',()=>{
     expect(careDateConstraintMessage({rangeOverflow:false,valueMissing:false})).toBe('');
   });
   it('agua deduplicada por intervalo y descanso según hora argentina',()=>{
-    const snapshot:CareSnapshot={records:[],preferences:DEFAULT_CARE_PREFERENCES,replacements:[],consented:[],source:'memory'};
+    const snapshot:CareSnapshot={records:[],preferences:DEFAULT_CARE_PREFERENCES,replacements:[],consented:[],measurements:[],source:'memory'};
     const at=(date:string)=>patientCareNotices('p',snapshot,new Date(date));
     expect(at('2026-09-18T11:59:00Z')).toEqual([]);
     expect(at('2026-09-18T12:00:00Z')[0].id).toBe('p:water:2026-09-18:0');

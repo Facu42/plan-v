@@ -30,10 +30,22 @@ describe('authorizePatientAction', () => {
     await expect(authorizePatientAction('user-patient', 'patient-1', 'assign_resource', {
       ...resolvers, getActor: async () => patient,
     })).resolves.toBeNull();
+    await expect(authorizePatientAction('user-nutri', 'patient-1', 'assign_routine', {
+      ...resolvers, getActor: async () => nutri,
+    })).resolves.toEqual(nutri);
+    await expect(authorizePatientAction('user-patient', 'patient-1', 'assign_routine', {
+      ...resolvers, getActor: async () => patient,
+    })).resolves.toBeNull();
     await expect(authorizePatientAction('user-patient', 'patient-1', 'read_resource', {
       ...resolvers, getActor: async () => patient,
     })).resolves.toEqual(patient);
     await expect(authorizePatientAction('user-nutri', 'patient-1', 'read_resource', {
+      ...resolvers, getActor: async () => nutri,
+    })).resolves.toBeNull();
+    await expect(authorizePatientAction('user-patient', 'patient-1', 'manage_favorites', {
+      ...resolvers, getActor: async () => patient,
+    })).resolves.toEqual(patient);
+    await expect(authorizePatientAction('user-nutri', 'patient-1', 'manage_favorites', {
       ...resolvers, getActor: async () => nutri,
     })).resolves.toBeNull();
   });

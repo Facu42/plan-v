@@ -1,3 +1,4 @@
+import { emitOpsAlert } from '../ops/alerts.js';
 import { jobErrorMessage } from './errors.js';
 import type { JobStore, ProcessingJob } from './types.js';
 import { createMemoryJobStore } from './memory.js';
@@ -11,7 +12,9 @@ export async function runOne(store: JobStore, owner: string, handler: JobHandler
     await handler(job);
     return await store.complete(job.id);
   } catch (error) {
-    return await store.complete(job.id, jobErrorMessage(error));
+    const done = await store.complete(job.id, jobErrorMessage(error));
+    if (done.status === 'dead') emitOpsAlert({ kind: 'dead_letter', status: 500, detail: done.kind });
+    return done;
   }
 }
 

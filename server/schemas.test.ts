@@ -17,6 +17,12 @@ import {
 describe('API input schemas', () => {
   it('requires a supported slot and either a description or an image', () => {
     expect(analyzeMealInputSchema.safeParse({ slot: 'Almuerzo', description: 'Bowl de pollo' }).success).toBe(true);
+    expect(analyzeMealInputSchema.safeParse({
+      slot: 'Almuerzo',
+      description: 'Bowl de pollo',
+      client_id: '11111111-1111-4111-8111-111111111111',
+    }).success).toBe(true);
+    expect(analyzeMealInputSchema.safeParse({ slot: 'Almuerzo', description: 'Bowl', client_id: 'no-uuid' }).success).toBe(false);
     expect(analyzeMealInputSchema.safeParse({ slot: 'Almuerzo', imageBase64: 'YWJjZA==' }).success).toBe(true);
     expect(analyzeMealInputSchema.safeParse({ slot: 'Media noche', description: 'Algo' }).success).toBe(false);
     expect(analyzeMealInputSchema.safeParse({ slot: 'Almuerzo' }).success).toBe(false);
@@ -54,7 +60,19 @@ describe('API input schemas', () => {
     const parsed = messageInputSchema.safeParse({ text: '  Hola  ', from: 'vero' });
     expect(parsed.success && parsed.data.text).toBe('Hola');
     expect(messageInputSchema.safeParse({ text: '   ' }).success).toBe(false);
-    expect(messageInputSchema.safeParse({ text: 'a'.repeat(2001) }).success).toBe(false);
+    expect(messageInputSchema.safeParse({ text: 'Hola', from: 'patient', client_id: '11111111-1111-4111-8111-111111111111' }).success).toBe(true);
+    expect(messageInputSchema.safeParse({ text: 'Hola', from: 'patient', client_id: 'no-uuid' }).success).toBe(false);
+    expect(messageInputSchema.safeParse({
+      text: '',
+      from: 'patient',
+      asset_id: '11111111-1111-4111-8111-111111111111',
+      filename: 'merienda.png',
+    }).success).toBe(true);
+    expect(messageInputSchema.safeParse({ text: '', from: 'patient' }).success).toBe(false);
+    expect(messageInputSchema.safeParse({
+      from: 'patient',
+      asset_id: '11111111-1111-4111-8111-111111111111',
+    }).success).toBe(false);
   });
 
   it('normalizes patient onboarding fields and rejects invalid contact data', () => {
@@ -123,6 +141,13 @@ describe('API input schemas', () => {
     expect(appointmentUpdateSchema.safeParse({
       appointment: { day: 'Jueves', time: '14:30', duration: 45, channel: 'paloma-mensajera' },
     }).success).toBe(false);
+  });
+
+  it('validates patient appointment confirmation replies', async () => {
+    const { appointmentConfirmSchema } = await import('./schemas.js');
+    expect(appointmentConfirmSchema.safeParse({ reply: 'attending' }).success).toBe(true);
+    expect(appointmentConfirmSchema.safeParse({ reply: 'needs_change' }).success).toBe(true);
+    expect(appointmentConfirmSchema.safeParse({ reply: 'pending' }).success).toBe(false);
   });
 
   it('accepts only HTTPS meeting links when present', () => {

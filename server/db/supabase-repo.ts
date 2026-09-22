@@ -5,6 +5,8 @@ import type { Actor, PatientResource } from '../security/contracts.ts';
 import { MESSAGE_PAGE_SIZE, WEEK_DAYS } from '../schemas.ts';
 import type { ListPage } from '../pagination.ts';
 import { getRequestDb, privilegedDb } from './supabase-client.ts';
+import { listThreadMessagesPersist } from '../messages/repository.js';
+import { listPatientAppointmentPersist } from '../appointments/repository.js';
 import {
   appointmentColumns,
   mealLogColumns,
@@ -152,6 +154,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
   sleep_minutes?: number | null;
   briefDismissed?: boolean;
   appointment?: Patient['appointment'];
+  appointment_history?: Patient['appointment_history'];
 }, audience: QueryAudience = 'professional'): Patient {
   const billing = {
     billing_status: (row.billing_status as Patient['billing_status']) ?? 'pending',
@@ -179,6 +182,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
     energy: extras.energy ?? null,
     sleep_minutes: extras.sleep_minutes ?? null,
     appointment: extras.appointment ?? null,
+    appointment_history: extras.appointment_history ?? [],
     habit_logs: extras.habit_logs ?? [],
     todayPlan: extras.todayPlan ?? [],
     weekPlan: extras.weekPlan ?? [],
@@ -203,25 +207,45 @@ function mapMealLog(row: Record<string, unknown>): MealLog {
     note_for_nutri: (row.note_for_nutri as string) ?? '',
     status: row.status as MealLog['status'],
     logged_at: row.logged_at as string,
+    ...(row.analysis_status === 'pending' || row.analysis_status === 'succeeded' || row.analysis_status === 'failed'
+      ? { analysis_status: row.analysis_status }
+      : {}),
   };
 }
 
 export function mapMessage(row: Record<string, unknown>, authorRole: unknown): Message | null {
-  if (authorRole !== 'paciente' && authorRole !== 'nutri') return null;
+  const from = row.from === 'patient' || row.from === 'vero'
+    ? row.from
+    : authorRole === 'paciente' ? 'patient'
+      : authorRole === 'nutri' ? 'vero'
+        : null;
+  if (!from) return null;
   return {
     id: row.id as string,
     patient_id: row.patient_id as string,
-    from: authorRole === 'paciente' ? 'patient' : 'vero',
-    text: row.body as string,
+    from,
+    text: String(row.text ?? row.body ?? ''),
     suggested_by_ai: Boolean(row.suggested_by_ai),
     sent_at: row.sent_at as string,
+    ...('delivered_at' in row ? { delivered_at: row.delivered_at == null ? null : String(row.delivered_at) } : {}),
+    ...('read_at' in row ? { read_at: row.read_at == null ? null : String(row.read_at) } : {}),
+    ...(row.attachment && typeof row.attachment === 'object' ? {
+      attachment: {
+        asset_id: String((row.attachment as { asset_id?: unknown }).asset_id ?? ''),
+        filename: String((row.attachment as { filename?: unknown }).filename ?? 'adjunto'),
+        mime: String((row.attachment as { mime?: unknown }).mime ?? ''),
+        byte_size: Number((row.attachment as { byte_size?: unknown }).byte_size ?? 0),
+        kind: String((row.attachment as { mime?: unknown }).mime ?? '').startsWith('image/') ? 'image' as const : 'pdf' as const,
+        available: (row.attachment as { available?: unknown }).available !== false,
+      },
+    } : {}),
   };
 }
 
 async function loadPatientExtras(
   patientId: string,
   audience: 'professional' | 'patient' = 'professional',
-): Promise<Pick<Patient, 'todayPlan' | 'weekPlan' | 'meal_logs' | 'messages' | 'brief' | 'briefDismissed' | 'timeline' | 'habit_logs' | 'hydration' | 'energy' | 'sleep_minutes' | 'appointment'>> {
+): Promise<Pick<Patient, 'todayPlan' | 'weekPlan' | 'meal_logs' | 'messages' | 'brief' | 'briefDismissed' | 'timeline' | 'habit_logs' | 'hydration' | 'energy' | 'sleep_minutes' | 'appointment' | 'appointment_history'>> {
   const sb = getRequestDb();
 
   const timelineQuery = sb.from('timeline_events').select('id,kind,title,body,visibility,occurred_at').eq('patient_id', patientId);
@@ -281,15 +305,21 @@ async function loadPatientExtras(
   const briefDismissed = briefStatus === 'dismissed';
 
   const meal_logs = await signMealPhotos(patientId, rows(logs).map(mapMealLog));
-  const authorIds = [...new Set(rows(msgs).map((message) => String(message.author_id)))];
-  const { data: authors } = authorIds.length > 0
-    ? await sb.from('profiles').select('id, role').in('id', authorIds)
-    : { data: [] };
-  const roleByAuthor = new Map((authors ?? []).map((author) => [author.id, author.role]));
-  const messages: Message[] = rows(msgs).slice().reverse().flatMap((message) => {
-    const mapped = mapMessage(message, roleByAuthor.get(message.author_id as string));
-    return mapped ? [mapped] : [];
-  });
+  const listed = await listThreadMessagesPersist(patientId);
+  let messages: Message[];
+  if (listed) {
+    messages = listed.slice().reverse();
+  } else {
+    const authorIds = [...new Set(rows(msgs).map((message) => String(message.author_id)))];
+    const { data: authors } = authorIds.length > 0
+      ? await sb.from('profiles').select('id, role').in('id', authorIds)
+      : { data: [] };
+    const roleByAuthor = new Map((authors ?? []).map((author) => [author.id, author.role]));
+    messages = rows(msgs).slice().reverse().flatMap((message) => {
+      const mapped = mapMessage(message, roleByAuthor.get(message.author_id as string));
+      return mapped ? [mapped] : [];
+    });
+  }
 
   // Timeline persistida (016 v2): sin fabricación desde meal_logs; si no hay
   // eventos, queda vacía. Los eventos se crean al cablear las rutas (sbAddTimelineEvent).
@@ -313,8 +343,10 @@ async function loadPatientExtras(
   }));
   const todayHabit = habit_logs.find((h) => h.date === localDateId(new Date()));
 
+  const listedAppt = await listPatientAppointmentPersist(patientId);
   const nextAppt = rows(appts)[0];
-  const appointment = mapScheduledAppointment(nextAppt);
+  const appointment = listedAppt ? listedAppt.appointment : mapScheduledAppointment(nextAppt);
+  const appointment_history = listedAppt?.history ?? [];
 
   return {
     todayPlan,
@@ -329,16 +361,22 @@ async function loadPatientExtras(
     energy: todayHabit?.energy ?? null,
     sleep_minutes: todayHabit?.sleep_minutes ?? null,
     appointment,
+    appointment_history,
   };
 }
 
 function mapScheduledAppointment(nextAppt: Record<string, unknown> | undefined | null): Patient['appointment'] {
   if (!nextAppt?.starts_at) return null;
+  const reply = nextAppt.patient_reply;
   return {
     when: formatAppointmentWhen(String(nextAppt.starts_at)),
     duration: Number(nextAppt.duration_min),
     channel: String(nextAppt.channel),
+    starts_at: String(nextAppt.starts_at),
     ...(nextAppt.meet_url ? { meet_url: String(nextAppt.meet_url) } : {}),
+    ...(typeof nextAppt.timezone === 'string' && nextAppt.timezone ? { timezone: String(nextAppt.timezone) } : {}),
+    ...(reply === 'attending' || reply === 'needs_change' ? { patient_reply: reply } : {}),
+    ...(nextAppt.confirmed_at ? { confirmed_at: String(nextAppt.confirmed_at) } : {}),
   };
 }
 

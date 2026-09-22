@@ -7,9 +7,27 @@ export function careDateConstraintMessage(validity: { rangeOverflow: boolean; va
   return '';
 }
 const note = z.string().trim().max(500).default('');
+export const MEASUREMENT_KINDS = ['weight', 'waist', 'hip'] as const;
+export type MeasurementKind = (typeof MEASUREMENT_KINDS)[number];
+export const MEASUREMENT_SOURCES = ['patient', 'professional'] as const;
+export type MeasurementSource = (typeof MEASUREMENT_SOURCES)[number];
+export const MEASUREMENT_SOURCE_LABELS: Record<MeasurementSource, string> = { patient: 'Paciente', professional: 'Profesional' };
+const measurementSource = z.enum(MEASUREMENT_SOURCES).default('patient');
+const weightUnit = z.enum(['kg', 'lb']).default('kg');
+const lengthUnit = z.enum(['cm', 'in']).default('cm');
+export function isMeasurementKind(kind: string): kind is MeasurementKind {
+  return (MEASUREMENT_KINDS as readonly string[]).includes(kind);
+}
+export function isMeasurementData(data: CareData): data is Extract<CareData, { kind: MeasurementKind }> {
+  return isMeasurementKind(data.kind);
+}
+export function defaultMeasurementUnit(kind: MeasurementKind): 'kg' | 'cm' {
+  return kind === 'weight' ? 'kg' : 'cm';
+}
 export const careDataSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('weight'), value: z.number().min(1).max(500), note }).strict(),
-  z.object({ kind: z.literal('waist'), value: z.number().min(10).max(300), note }).strict(),
+  z.object({ kind: z.literal('weight'), value: z.number().min(1).max(500), unit: weightUnit, source: measurementSource, note }).strict(),
+  z.object({ kind: z.literal('waist'), value: z.number().min(10).max(300), unit: lengthUnit, source: measurementSource, note }).strict(),
+  z.object({ kind: z.literal('hip'), value: z.number().min(10).max(300), unit: lengthUnit, source: measurementSource, note }).strict(),
   z.object({ kind: z.literal('activity'), activity: z.string().trim().min(2).max(80), minutes: z.number().int().min(1).max(600), intensity: z.enum(['suave','moderada','intensa']), kcal: z.number().int().min(0).max(10000).nullable(), note }).strict(),
   z.object({ kind: z.literal('body_photo'), path: z.string().min(1).max(250), note }).strict(),
   z.object({
@@ -44,7 +62,17 @@ export const replacementRecipeSchema = z.object({
 }).strict();
 export type ReplacementRecipe = z.infer<typeof replacementRecipeSchema>;
 export type CareReplacement = { id: string; patient_id: string; request_id: string; recipe: ReplacementRecipe; source: 'ai' | 'demo'; published_at: string | null; created_at: string };
-export type CareSnapshot = { records: CareRecord[]; preferences: CarePreferences; replacements: CareReplacement[]; consented: string[]; source: 'memory' | 'supabase' };
+export type Measurement = {
+  id: string;
+  patient_id: string;
+  kind: MeasurementKind;
+  value_numeric: number;
+  unit: string;
+  source: MeasurementSource;
+  captured_on: string;
+  created_at: string;
+};
+export type CareSnapshot = { records: CareRecord[]; preferences: CarePreferences; replacements: CareReplacement[]; consented: string[]; measurements: Measurement[]; source: 'memory' | 'supabase' };
 export type CareAlert = { id: string; patient_id: string; patient_name: string; title: string; detail: string; target: 'ficha' | 'diario'; created_at: string };
 
 export const CARE_DOCUMENT_KINDS = ['laboratorio', 'imagen', 'informe', 'otro'] as const;
@@ -55,12 +83,16 @@ export const CARE_DOCUMENT_KIND_LABELS: Record<CareDocumentKind, string> = {
   informe: 'Informe',
   otro: 'Otro',
 };
-export const CARE_LABELS: Record<CareData['kind'], string> = { weight: 'Peso semanal', waist: 'Cintura mensual', activity: 'Actividad física', body_photo: 'Archivo privado', clinical_document: 'Estudio clínico', payment: 'Pago registrado', menu_request: 'Revisar menú' };
+export const CARE_LABELS: Record<CareData['kind'], string> = { weight: 'Peso semanal', waist: 'Cintura mensual', hip: 'Cadera', activity: 'Actividad física', body_photo: 'Archivo privado', clinical_document: 'Estudio clínico', payment: 'Pago registrado', menu_request: 'Revisar menú' };
+export function describeMeasurement(entry: Measurement): string {
+  return `${entry.value_numeric} ${entry.unit} · ${MEASUREMENT_SOURCE_LABELS[entry.source]}`;
+}
 export function describeCareRecord(record: CareRecord): string {
   const data = record.data;
   switch (data.kind) {
-    case 'weight': return `${data.value} kg`;
-    case 'waist': return `${data.value} cm`;
+    case 'weight': return `${data.value} ${data.unit} · ${MEASUREMENT_SOURCE_LABELS[data.source]}`;
+    case 'waist': return `${data.value} ${data.unit} · ${MEASUREMENT_SOURCE_LABELS[data.source]}`;
+    case 'hip': return `${data.value} ${data.unit} · ${MEASUREMENT_SOURCE_LABELS[data.source]}`;
     case 'activity': return `${data.activity} · ${data.minutes} min${data.kcal === null ? '' : ` · ${data.kcal} kcal declaradas`}`;
     case 'body_photo': return 'Foto corporal privada';
     case 'clinical_document': {

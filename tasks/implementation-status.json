@@ -120,57 +120,118 @@
       "evidence": "careInputSchema, dueCareReminders, CarePanel y postgres.integration.test.ts. Demo en memoria; Auth real pendiente.",
       "updatedAt": "2026-09-18T14:10:00.000Z"
     },
+    "PV-24": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Adjuntos de chat sólo via patient_assets chat_attachment listos; preview 60s auditado; profesional y paciente; fail closed 501 sin RPC nueva. Live schema/buckets bloqueado (patients existe).",
+      "evidence": "supabase/migrations/20260921290000_message_attachments.sql; server/messages/*; NutrigoMessages attach. 743 pruebas OK, 2 omitidas; check/check:migrations/build OK. No SQL en el proyecto con patients.",
+      "updatedAt": "2026-09-21T18:24:00.000Z"
+    },
     "PV-21": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Lista derivada de títulos del plan y de alternativas ya publicadas. Explica que no hay cantidades. Checklist sólo en este navegador.",
-      "evidence": "ShowroomGrocery + publishedRecipeMeals. Sin unidades, agregados manuales ni sync entre dispositivos.",
-      "updatedAt": "2026-09-18T14:10:00.000Z"
+      "notes": "Compras del plan publicado: cantidades/unidades, suma compatible, g vs taza aparte, texto libre sin qty inventada, manuales que sobreviven republicar, checks por source_key. Fail closed 501 sin RPC. Live schema bloqueado (patients existe).",
+      "evidence": "supabase/migrations/20260921280000_shopping_lists.sql; server/shopping/*; ShowroomGrocery API+fallback. 735 pruebas OK, 2 omitidas; check/check:migrations/build OK. No SQL en el proyecto con patients.",
+      "updatedAt": "2026-09-21T18:00:00.000Z"
     },
     "PV-22": {
       "status": "in_progress",
       "owner": "",
-      "notes": "El diario conserva la comida si la IA falla: pending_review con foods vacío, macros null y nota profesional. No sustituye alimentos de demo. Falta job asíncrono y Auth/Storage live.",
-      "evidence": "POST /api/patients/:id/meals/analyze captura AIUnavailableError. server/meal-flow.integration.test.ts, server/meal-ai-unavailable.integration.test.ts, server/acompanamiento.integration.test.ts.",
-      "updatedAt": "2026-09-19T20:02:00.000Z"
+      "notes": "Save-first: el registro existe antes de la IA. Duplicados por client_id no crean otra comida; IA failed deja foto/texto, analysis_status=failed, macros=null. Revisión append-only. Fail closed 501 sin schema/buckets. Falta job asíncrono y Auth/Storage live.",
+      "evidence": "supabase/migrations/20260921220000_meal_diary.sql; server/diary/*; MealLogModal client_id. 628 pruebas OK, 2 omitidas; check/check:migrations/build OK.",
+      "updatedAt": "2026-09-21T04:06:00.000Z"
     },
     "PV-23": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Hilo demo con entrega inmediata y leído al abrir. El paciente no puede marcar suggested_by_ai. Faltan recibos 016b entre dispositivos live.",
-      "evidence": "server/message-flow.integration.test.ts y server/acompanamiento.integration.test.ts. NutrigoMessages.",
-      "updatedAt": "2026-09-19T20:02:00.000Z"
+      "notes": "Hilos 1:1 con client_id idempotente; entrega y lectura por persona (no por dispositivo); primera marca inmutable. Fail closed 501 sin schema. GET hospedado cae al hilo 016 sin recibos. Falta schema live.",
+      "evidence": "supabase/migrations/20260921230000_message_threads.sql; server/messages/*; NutrigoMessages/PatientMessages client_id. Demo+PGlite; live schema bloqueado (patients existe).",
+      "updatedAt": "2026-09-21T04:20:00.000Z"
     },
     "PV-25": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Reprogramación paciente conserva duración/canal. Confirmación de asistencia es local al dispositivo. Timezone y solapes transaccionales pendientes.",
-      "evidence": "server/appointment-flow.integration.test.ts, server/acompanamiento.integration.test.ts, ShowroomPatientAgenda.",
-      "updatedAt": "2026-09-19T20:02:00.000Z"
+      "notes": "Timestamps UTC, timezone Buenos Aires, confirmación persistida (confirmed_at inmutable), reprogramación paciente día/hora, cancel+insert, lock de solapes 409. Fail closed 501 sin schema. GET hospedado cae a turnos 016. Falta schema live.",
+      "evidence": "supabase/migrations/20260921240000_appointments.sql; server/appointments/*; ShowroomPatientAgenda confirm API. Demo+PGlite; live schema bloqueado (patients existe).",
+      "updatedAt": "2026-09-21T04:46:00.000Z"
+    },
+    "PV-34": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Progreso longitudinal same-patient: períodos 7/30/90, series de medidas con fuente, delta este-vs-anterior sin mezclar unidades ni rellenar vacíos, sin ranking. Fail closed 501 sin RPC. Live schema bloqueado (patients existe).",
+      "evidence": "supabase/migrations/20260921310000_patient_progress.sql; server/progress/*; ShowroomProgress chips. 757 pruebas OK, 2 omitidas; check/check:migrations/build OK. No SQL en el proyecto con patients.",
+      "updatedAt": "2026-09-21T19:00:00.000Z"
+    },
+    "PV-35": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Biblioteca de ejercicios y rutinas asignables sólo con habilitación verificada en servidor (el rol nutricionista no alcanza). activity_logs autodeclarados persistidos; series/reps/feedback; sin calorías inferidas. Fail closed 501 sin schema. Live schema bloqueado (patients existe).",
+      "evidence": "supabase/migrations/20260921320000_exercise_library.sql; server/exercise/*; ShowroomExercise biblioteca/rutina. 764 pruebas OK, 2 omitidas; check/check:migrations/build OK. No SQL en el proyecto con patients.",
+      "updatedAt": "2026-09-21T19:20:00.000Z"
     },
     "PV-26": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Avisos de peso/cintura/actividad/agua/descanso en la campana mientras la app está abierta. No es push ni email real.",
-      "evidence": "useCareNotices, ShowroomConsultAlerts, care-reminders.test.ts. Preferencias en care_preferences.",
-      "updatedAt": "2026-09-18T14:10:00.000Z"
+      "notes": "Outbox persistente: enqueue idempotente, prefs in_app/email/push, reintentos, skip desactivado/desvinculado. in_app al buzón; email/push nunca sent sin adaptador/claves. Fail closed 501 sin schema. Live schema/claves no.",
+      "evidence": "supabase/migrations/20260921300000_notification_outbox.sql; server/outbox/*; ShowroomConsultAlerts prefs. 748 pruebas OK, 2 omitidas; check/check:migrations/build OK. No SQL en el proyecto con patients. No se inventaron claves de mail/push.",
+      "updatedAt": "2026-09-21T18:42:00.000Z"
     },
     "PV-27": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Borrador de alternativa (demo/IA) a pedido del paciente; la nutricionista edita y publica. El paciente no ve el borrador. Requiere alergias/restricciones declaradas en live. Sin jobs versionados.",
-      "evidence": "server/ai/replacements.ts, CareRecipeEditor, generate/publish RPC, server/acompanamiento.integration.test.ts. Circuito demo: borrador oculto hasta publicar.",
-      "updatedAt": "2026-09-19T20:02:00.000Z"
+      "notes": "Jobs versionados receta/menú con prompt_version, context_hash, límites de tokens/tiempo/cola y apply a borrador profesional. Nunca publica. Fail closed 501 sin schema. Live schema/claves IA no.",
+      "evidence": "supabase/migrations/20260921250000_ai_jobs.sql; server/ai-jobs/*; server/ai/context.ts. 653 pruebas OK, 2 omitidas; check/check:migrations/build OK.",
+      "updatedAt": "2026-09-21T05:05:00.000Z"
     },
     "PV-28": {
       "status": "in_progress",
       "owner": "",
-      "notes": "Live envía alergias al proveedor y no cae a demo si falla. Demo no publica sola. Falta evaluación sintética completa de unidades y edición concurrente live.",
-      "evidence": "server/ai/replacements.test.ts incluye Maní en el prompt y rechaza alergias unknown. Acompañamiento demo publica receta sin Maní.",
+      "notes": "Evaluación sintética eval.v1 (30 escenarios) al publicar/asignar: alergias, faltantes/unidades, coherencia, edición concurrente; apply/worker no publican. Fail closed 501 sin schema. Live schema/claves IA no.",
+      "evidence": "server/ai-eval/*; supabase/migrations/20260921260000_ai_eval.sql. 691 pruebas OK, 2 omitidas; check/check:migrations/build OK.",
       "updatedAt": "2026-09-19T20:02:00.000Z"
     }
   },
   "history": [
+    {
+      "id": "c21a35e0-9f12-4a3b-8c01-pv350001",
+      "taskId": "PV-35",
+      "at": "2026-09-21T19:20:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c21a34e0-9f12-4a3b-8c01-pv340001",
+      "taskId": "PV-34",
+      "at": "2026-09-21T19:00:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c21a26e0-9f12-4a3b-8c01-pv260001",
+      "taskId": "PV-26",
+      "at": "2026-09-21T18:42:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c21a21e0-9f12-4a3b-8c01-pv210002",
+      "taskId": "PV-21",
+      "at": "2026-09-21T18:00:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c21a27e0-9f12-4a3b-8c01-pv270001",
+      "taskId": "PV-27",
+      "at": "2026-09-21T05:05:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
     {
       "id": "c19a22e0-9f12-4a3b-8c01-acomp0001",
       "taskId": "PV-22",
@@ -180,12 +241,20 @@
       "fields": ["status", "notes", "evidence"]
     },
     {
-      "id": "c19a23e0-9f12-4a3b-8c01-acomp0002",
+      "id": "c21a23e0-9f12-4a3b-8c01-pv230001",
       "taskId": "PV-23",
-      "at": "2026-09-19T20:02:00.000Z",
-      "from": "pending",
+      "at": "2026-09-21T04:20:00.000Z",
+      "from": "in_progress",
       "to": "in_progress",
-      "fields": ["status", "notes", "evidence"]
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c21a25e0-9f12-4a3b-8c01-pv250001",
+      "taskId": "PV-25",
+      "at": "2026-09-21T04:46:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
     },
     {
       "id": "c19a25e0-9f12-4a3b-8c01-acomp0003",
@@ -204,12 +273,12 @@
       "fields": ["notes", "evidence"]
     },
     {
-      "id": "c19a28e0-9f12-4a3b-8c01-acomp0005",
+      "id": "c21a28e0-9f12-4a3b-8c01-pv280001",
       "taskId": "PV-28",
-      "at": "2026-09-19T20:02:00.000Z",
-      "from": "pending",
+      "at": "2026-09-21T05:30:00.000Z",
+      "from": "in_progress",
       "to": "in_progress",
-      "fields": ["status", "notes", "evidence"]
+      "fields": ["notes", "evidence"]
     },
     {
       "id": "c19a16e0-9f12-4a3b-8c01-estudios0001",

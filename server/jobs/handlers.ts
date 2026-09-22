@@ -3,6 +3,8 @@ import { generateReplacement } from '../ai/replacements.js';
 import { AIUnavailableError } from '../ai/errors.js';
 import { currentCareConsents, requireCareConsent } from '../care/consents.js';
 import * as repo from '../care/repository.js';
+import { purgePrivateAsset } from '../assets/repository.js';
+import { anonymizePatientLater } from '../privacy/repository.js';
 import * as sb from '../db/supabase-repo.js';
 import { getPatient } from '../store.js';
 import { PermanentJobError } from './errors.js';
@@ -13,6 +15,12 @@ export async function handleProcessingJob(job: ProcessingJob) {
   if (job.kind === 'purge_asset') {
     const path = String(job.payload.path ?? '');
     if (!path) throw new PermanentJobError('purge_path');
+    await purgePrivateAsset(job.payload);
+    return;
+  }
+  if (job.kind === 'privacy_export') return;
+  if (job.kind === 'privacy_delete') {
+    await anonymizePatientLater(job.payload);
     return;
   }
   if (job.kind !== 'menu_draft') throw new PermanentJobError('job_kind');

@@ -26,7 +26,15 @@ export function buildShowroomPatient(patient: Patient, now = new Date()) {
     sleep: patient.sleep_minutes === null ? 'Sin registro' : `${Math.round(patient.sleep_minutes / 6) / 10} h`,
     sleepMinutes: patient.sleep_minutes,
     adherence: patient.adherence_score, macros, kcal: macros.kcal, nutritionLogCount: nutritionLogs.length, journey,
-    appointment: patient.appointment ? { when: patient.appointment.when, duration: patient.appointment.duration, channel: patient.appointment.channel, meet_url: patient.appointment.meet_url } : null,
+    appointment: patient.appointment ? {
+      when: patient.appointment.when,
+      duration: patient.appointment.duration,
+      channel: patient.appointment.channel,
+      meet_url: patient.appointment.meet_url,
+      ...(patient.appointment.timezone ? { timezone: patient.appointment.timezone } : {}),
+      ...(patient.appointment.patient_reply ? { patient_reply: patient.appointment.patient_reply } : {}),
+      ...(patient.appointment.confirmed_at ? { confirmed_at: patient.appointment.confirmed_at } : {}),
+    } : null,
     appointmentHistory: (patient.appointment_history ?? []).map(({ id, when, dateId, duration, channel, action, actor, at }) => ({ id, when, dateId, duration, channel, action, actor, at })),
     activities: (patient.activity_logs ?? []).filter((entry) => entry.patient_id === patient.id)
       .map(({ id, patient_id, activity, duration_minutes, intensity, note, logged_at }) => ({ id, patient_id, activity, duration_minutes, intensity, note, logged_at })),
@@ -37,7 +45,10 @@ export function buildShowroomPatient(patient: Patient, now = new Date()) {
       foods: status === 'pending_review' ? [] : foods.map(({ name }) => ({ name })),
     })),
     messages: patient.messages.filter((m) => m.patient_id === patient.id && Boolean(m.sent_at))
-      .map(({ id, text, from, sent_at, delivered_at, read_at }) => ({ id, text, from, sent_at, delivered_at: delivered_at ?? null, read_at: read_at ?? null })),
+      .map(({ id, text, from, sent_at, delivered_at, read_at, attachment }) => ({
+        id, text, from, sent_at, delivered_at: delivered_at ?? null, read_at: read_at ?? null,
+        ...(attachment ? { attachment } : {}),
+      })),
   };
 }
 export type ShowroomPatient = ReturnType<typeof buildShowroomPatient>;

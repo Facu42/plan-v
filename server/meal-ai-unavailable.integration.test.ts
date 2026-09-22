@@ -17,12 +17,24 @@ vi.mock('./intake/repository.js', async (original) => ({
   }),
 }));
 
+const diaryMocks = vi.hoisted(() => ({
+  saveMealLog: vi.fn(),
+  recordMealAnalysis: vi.fn(),
+  reviewMealLog: vi.fn(),
+}));
+
 const sbMocks = vi.hoisted(() => ({
   sbGetActor: vi.fn(),
   sbGetPatientResource: vi.fn(),
   sbGetPatientById: vi.fn(),
-  sbAddMealLog: vi.fn(),
   sbAddTimelineEvent: vi.fn(),
+}));
+
+vi.mock('./diary/repository.js', async (original) => ({
+  ...await original<typeof import('./diary/repository.js')>(),
+  saveMealLog: diaryMocks.saveMealLog,
+  recordMealAnalysis: diaryMocks.recordMealAnalysis,
+  reviewMealLog: diaryMocks.reviewMealLog,
 }));
 
 vi.mock('./db/supabase-repo.js', () => sbMocks);
@@ -83,14 +95,38 @@ describe('meal analyze keeps the log when AI is unavailable (supabase)', () => {
       meal_logs: [],
       messages: [],
     });
-    sbMocks.sbAddMealLog.mockImplementation(async (_patientId: string, log: Record<string, unknown>) => ({
-      id: 'log-fail',
+    sbMocks.sbAddTimelineEvent.mockResolvedValue(undefined);
+    diaryMocks.saveMealLog.mockImplementation(async (_patientId: string, input: Record<string, unknown>) => ({
+      duplicate: false,
+      log: {
+        id: 'log-fail',
+        patient_id: 'pat-1',
+        slot: input.slot,
+        photo_url: input.photo_url ?? null,
+        description: input.description ?? null,
+        foods: [],
+        macros: null,
+        confidence: 0,
+        note_for_nutri: '',
+        status: 'pending_review',
+        logged_at: new Date().toISOString(),
+        analysis_status: 'pending',
+      },
+    }));
+    diaryMocks.recordMealAnalysis.mockImplementation(async (_patientId: string, mealId: string, input: Record<string, unknown>) => ({
+      id: mealId,
       patient_id: 'pat-1',
+      slot: 'Almuerzo',
+      photo_url: null,
+      description: 'Milanesa de pollo con ensalada',
+      foods: input.foods,
+      macros: input.macros,
+      confidence: input.confidence,
+      note_for_nutri: input.note_for_nutri,
       status: 'pending_review',
       logged_at: new Date().toISOString(),
-      ...log,
+      analysis_status: input.status,
     }));
-    sbMocks.sbAddTimelineEvent.mockResolvedValue(undefined);
   });
 
   it('persists description and photo metadata without substituting demo foods', async () => {
@@ -101,18 +137,26 @@ describe('meal analyze keeps the log when AI is unavailable (supabase)', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
+    expect(diaryMocks.saveMealLog).toHaveBeenCalledOnce();
     expect(analyzeMocks.analyzeMeal).toHaveBeenCalledOnce();
-    expect(sbMocks.sbAddMealLog).toHaveBeenCalledOnce();
-    const [, saved] = sbMocks.sbAddMealLog.mock.calls[0];
+    expect(diaryMocks.recordMealAnalysis).toHaveBeenCalledOnce();
+    expect(diaryMocks.saveMealLog.mock.invocationCallOrder[0]).toBeLessThan(analyzeMocks.analyzeMeal.mock.invocationCallOrder[0]);
+    const [, saved] = diaryMocks.saveMealLog.mock.calls[0];
     expect(saved).toMatchObject({
       slot: 'Almuerzo',
       description: 'Milanesa de pollo con ensalada',
+      photo_url: null,
+    });
+    const [, , analysis] = diaryMocks.recordMealAnalysis.mock.calls[0];
+    expect(analysis).toMatchObject({
+      status: 'failed',
       foods: [],
       macros: null,
       confidence: 0,
       note_for_nutri: UNAVAILABLE_MEAL_NOTE,
+      error_code: 'AI_UNAVAILABLE',
     });
-    expect(JSON.stringify(saved.foods)).not.toMatch(/pollo a la plancha|quinoa|proteína principal/);
+    expect(JSON.stringify(analysis.foods)).not.toMatch(/pollo a la plancha|quinoa|proteína principal/);
     expect(body.log).toMatchObject({ status: 'pending_review', foods: [], macros: null, confidence: 0 });
     expect(body.log).not.toHaveProperty('note_for_nutri');
     expect(body.analysis).not.toHaveProperty('note_for_nutri');

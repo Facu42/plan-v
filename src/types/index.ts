@@ -27,6 +27,8 @@ export type Macros = {
   fat_g: number;
 };
 
+export type MealAnalysisStatus = 'pending' | 'succeeded' | 'failed';
+
 export type MealLog = {
   id: string;
   patient_id: string;
@@ -39,6 +41,7 @@ export type MealLog = {
   note_for_nutri: string;
   status: MealStatus;
   logged_at: string;
+  analysis_status?: MealAnalysisStatus;
 };
 
 export type TimelineEvent = {
@@ -59,6 +62,15 @@ export type Brief = {
   adherence_why: string;
 };
 
+export type MessageAttachment = {
+  asset_id: string;
+  filename: string;
+  mime: string;
+  byte_size: number;
+  kind: 'image' | 'pdf';
+  available?: boolean;
+};
+
 export type Message = {
   id: string;
   patient_id: string;
@@ -68,6 +80,7 @@ export type Message = {
   sent_at: string;
   delivered_at?: string | null;
   read_at?: string | null;
+  attachment?: MessageAttachment;
 };
 
 export type HabitLog = {
@@ -97,7 +110,7 @@ export type ResourceAssignment = {
   read_at: string | null;
 };
 
-export type AppointmentHistoryAction = 'scheduled' | 'rescheduled' | 'patient_rescheduled' | 'cancelled' | 'elapsed';
+export type AppointmentHistoryAction = 'scheduled' | 'rescheduled' | 'patient_rescheduled' | 'cancelled' | 'elapsed' | 'confirmed' | 'needs_change';
 export type AppointmentHistoryActor = 'pro' | 'patient' | 'system';
 
 export type AppointmentHistoryEntry = {
@@ -129,6 +142,8 @@ export type Patient = {
   tone: 'peach' | 'lilac' | 'mint';
   status: string;
   archived_at?: string | null;
+  deactivated_at?: string | null;
+  anonymized_at?: string | null;
   billing_status: BillingStatus;
   billing_until: string | null;
   stage: Stage;
@@ -146,7 +161,16 @@ export type Patient = {
   hydration: number;
   energy: string | null;
   sleep_minutes: number | null;
-  appointment: { when: string; duration: number; channel: string; meet_url?: string; starts_at?: string } | null;
+  appointment: {
+    when: string;
+    duration: number;
+    channel: string;
+    meet_url?: string;
+    starts_at?: string;
+    timezone?: string;
+    patient_reply?: 'attending' | 'needs_change';
+    confirmed_at?: string | null;
+  } | null;
   appointment_history?: AppointmentHistoryEntry[];
   habit_logs: HabitLog[];
   activity_logs?: ActivityLog[];

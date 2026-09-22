@@ -1,24 +1,38 @@
 import { serve } from '@hono/node-server';
-import { registerCareRoutes, requireCareConsent } from './care/routes.js';
-import { CareError, validatePhoto } from './care/repository.js';
-import { uploadMealPhoto, signMealPhotos } from './care/meal-photos.js';
+import { registerCareRoutes } from './care/routes.js';
+import { CareError } from './care/repository.js';
+import { registerAssetRoutes } from './assets/routes.js';
+import { registerRecipeRoutes } from './recipes/routes.js';
+import { registerPlanRoutes } from './plans/routes.js';
+import { registerDiaryRoutes } from './diary/routes.js';
+import { registerMessageRoutes } from './messages/routes.js';
+import { registerAppointmentRoutes } from './appointments/routes.js';
+import { registerAiJobRoutes } from './ai-jobs/routes.js';
+import { registerPrivacyRoutes } from './privacy/routes.js';
+import { registerShoppingRoutes } from './shopping/routes.js';
+import { registerOutboxRoutes } from './outbox/routes.js';
+import { registerProgressRoutes } from './progress/routes.js';
+import { registerExerciseRoutes } from './exercise/routes.js';
+import { registerResourceRoutes } from './resources/routes.js';
+import { registerOrgRoutes } from './orgs/routes.js';
+import { registerAlcanceRoutes } from './alcance/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
 import type { ZodType } from 'zod';
-import { analysisOrUnavailable, analyzeMeal } from './ai/meal-analyzer.js';
 import { generateCopilotBrief } from './ai/copilot.js';
 import { AIUnavailableError } from './ai/errors.js';
 import { readRuntimeConfig } from './config/runtime.js';
 import { processQueue } from './jobs/queue.js';
 import { startJobWorker } from './jobs/worker.js';
 import { authMiddleware } from './middleware/auth.js';
+import { emitOpsAlert } from './ops/alerts.js';
+import { resolveCorsOrigin } from './ops/cors.js';
+import { safePath, writeOpsLog } from './ops/log.js';
+import { createRateLimitMiddleware } from './ops/rate-limit.js';
+import { createBodyLimitMiddleware, evaluateReadiness, releaseSha } from './ops/readiness.js';
+import { assertSecretBoundary, inspectSecrets } from './ops/secrets.js';
 import {
-  analyzeMealInputSchema,
-  activityInputSchema,
-  appointmentUpdateSchema,
-  appointmentRescheduleSchema,
-  noticeCreateSchema,
   authRecoverInputSchema,
   billingUpdateInputSchema,
   clinicalNoteInputSchema,
@@ -30,18 +44,13 @@ import {
   intakePatchInputSchema,
   intakeSubmitInputSchema,
   listPageQuerySchema,
-  mealReviewInputSchema,
   menuSlotParamsSchema,
   menuSlotUpdateSchema,
-  messageInputSchema,
-  messageReadSchema,
   nutritionistSetupInputSchema,
   patientArchiveInputSchema,
   patientCreateInputSchema,
   patientProfileUpdateInputSchema,
   provisionNutritionistInputSchema,
-  resourceAssignmentInputSchema,
-  resourceGuideIdSchema,
 } from './schemas.js';
 import { paginateItems } from './pagination.js';
 import { CONSENT_CATALOG, matchConsentVersion } from './intake/consent.js';
@@ -65,41 +74,29 @@ import { getAuthAccount, isSupabaseEnabled } from './db/supabase-client.js';
 import * as sb from './db/supabase-repo.js';
 import { recoveryAcknowledgement, provisionSecretMatches, validateProvisionInput } from './identity/provision.js';
 import { authorizePatientAction } from './security/authorization.js';
+import { enqueueOutboxBestEffort } from './outbox/repository.js';
 import {
   canManagePatients,
-  toPatientMealAnalysis,
-  toPatientSelfMealLog,
   toPatientSelfView,
   type PatientAction,
 } from './security/contracts.js';
 import {
-  addMealLog,
-  addMessage,
-  markMessagesRead,
-  addActivityLog,
-  deleteActivityLog,
-  assignResourceToPatients,
   briefForDisplay,
   computeShoppingList,
   createPatient,
   acceptPatientInvite,
   dismissBrief,
-  enqueueNotice,
   getInviteById,
   getPatient,
   getStore,
-  listNotices,
-  markResourceRead,
   provisionNutritionistMemory,
   revokePatientInvite,
   sendPatientInvite,
   setBrief,
-  setAppointment,
   setBillingStatus,
   setGoal,
   setPatientArchived,
   setPatientProfile,
-  updateMealLog,
   updatePatient,
   removeMenuSlot,
   upsertHabitLog,
@@ -119,14 +116,6 @@ function authorizePatient(userId: string, patientId: string, action: PatientActi
 
 function queryAudience(role: 'nutri' | 'paciente') {
   return role === 'paciente' ? 'patient' as const : 'professional' as const;
-}
-
-function mealLoggedTimelineBody(confidence: number, foodCount: number, macros: { kcal: number } | null) {
-  const time = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-  if (foodCount === 0 && confidence === 0 && macros == null) {
-    return `${time} · estimación no disponible. Pendiente de Vero.`;
-  }
-  return `${time} · estimación (${confidence.toFixed(2)}). Pendiente de Vero.`;
 }
 
 function serializePatient(patient: NonNullable<Awaited<ReturnType<typeof sb.sbGetPatientById>>>, role: 'nutri' | 'paciente') {
@@ -161,10 +150,33 @@ async function persistPatientWrite(
   return c.json({ patient: serializePatient(patient, role), source: 'supabase' });
 }
 
-app.use('/*', cors());
+app.use('/*', cors({
+  origin: (origin) => resolveCorsOrigin(origin ?? '', process.env),
+  allowHeaders: ['Authorization', 'Content-Type', 'X-Request-Id'],
+  exposeHeaders: ['X-Request-Id', 'Retry-After', 'X-RateLimit-Remaining'],
+}));
 app.use('/api/*', async (c, next) => {
   await next();
   c.header('Cache-Control', 'no-store');
+});
+app.use('/api/*', createBodyLimitMiddleware());
+app.use('/api/*', createRateLimitMiddleware());
+app.use('/api/*', async (c, next) => {
+  const started = Date.now();
+  const incoming = c.req.header('x-request-id');
+  const requestId = incoming && /^[a-zA-Z0-9_-]{6,64}$/.test(incoming)
+    ? incoming
+    : `pv${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+  c.header('x-request-id', requestId);
+  await next();
+  if (c.req.path === '/api/health' || c.req.path === '/api/ready') return;
+  writeOpsLog('info', 'http', {
+    requestId,
+    method: c.req.method,
+    path: safePath(c.req.path),
+    status: c.res.status,
+    ms: Date.now() - started,
+  });
 });
 app.use('/api/*', authMiddleware);
 
@@ -178,29 +190,67 @@ app.onError((error, c) => {
       requestId: crypto.randomUUID(),
     }, 503);
   }
+  writeOpsLog('error', 'http_unhandled', {
+    path: c.req.path,
+    name: error instanceof Error ? error.name : 'unknown',
+    message: error instanceof Error ? error.message : 'unknown',
+  });
+  emitOpsAlert({ kind: 'http_5xx', path: c.req.path, status: 500 });
   return c.json({ error: 'No se pudo completar la operación' }, 500);
 });
+
+function publicAiEnabled() {
+  try {
+    return readRuntimeConfig(process.env).aiMode === 'live';
+  } catch {
+    return false;
+  }
+}
 
 app.get('/api/health', async (c) => {
   const jobs = await processQueue.counts();
   return c.json({
     status: 'ok',
-    ai: Boolean(process.env.OPENAI_API_KEY),
+    mode: process.env.APP_MODE ?? null,
+    ai: publicAiEnabled(),
     supabase: isSupabaseEnabled(),
     jobs,
+    sha: releaseSha(),
+    worker: evaluateReadiness(process.env, jobs).worker,
   });
 });
 
 app.get('/api/ready', async (c) => {
   const jobs = await processQueue.counts();
+  const ready = evaluateReadiness(process.env, jobs);
+  if (ready.status !== 'ready') {
+    emitOpsAlert({ kind: 'ready_fail', status: 503, detail: ready.reasons.join(',') });
+    return c.json({ status: 'not_ready', worker: ready.worker, reasons: ready.reasons, jobs }, 503);
+  }
   return c.json({
     status: 'ready',
-    worker: process.env.VITEST === 'true' ? 'test' : 'inline',
+    worker: ready.worker,
     jobs,
+    sha: releaseSha(),
   });
 });
 
 registerCareRoutes(app);
+registerAssetRoutes(app);
+registerRecipeRoutes(app);
+registerPlanRoutes(app);
+registerDiaryRoutes(app);
+registerMessageRoutes(app);
+registerAppointmentRoutes(app);
+registerAiJobRoutes(app);
+registerPrivacyRoutes(app);
+registerShoppingRoutes(app);
+registerOutboxRoutes(app);
+registerProgressRoutes(app);
+registerExerciseRoutes(app);
+registerResourceRoutes(app);
+registerOrgRoutes(app);
+registerAlcanceRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({
@@ -328,116 +378,6 @@ app.get('/api/me/patient', async (c) => {
   });
 });
 
-app.post('/api/patients/:id/meals/analyze', async (c) => {
-  const auth = c.get('auth');
-  const patientId = c.req.param('id');
-  const parsedBody = await parseJsonBody(c, analyzeMealInputSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-  const body = parsedBody.data;
-
-  let patient = getPatient(patientId);
-  if ('userId' in auth && isSupabaseEnabled()) {
-    const actor = await authorizePatient(auth.userId, patientId, 'analyze_meal');
-    if (!actor) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    patient = (await sb.sbGetPatientById(patientId, queryAudience(actor.role))) ?? undefined;
-  }
-  if (!patient) return c.notFound();
-
-  let photoPath: string | null = null;
-  if ('userId' in auth && isSupabaseEnabled()) {
-    if(body.photoPreview) validatePhoto(body.photoPreview);
-    if(body.imageBase64) validatePhoto(`data:image/${body.imageBase64.startsWith('/9j/')?'jpeg':body.imageBase64.startsWith('UklGR')?'webp':'png'};base64,${body.imageBase64}`);
-    await requireCareConsent(patientId,true,'ai_meal_analysis');
-    if(body.photoPreview || body.imageBase64) await requireCareConsent(patientId,true,'meal_photo');
-  }
-
-  if ('userId' in auth && isSupabaseEnabled() && (body.photoPreview || body.imageBase64)) {
-    photoPath = await uploadMealPhoto(
-      patientId,
-      body.photoPreview ?? `data:image/${body.imageBase64!.startsWith('/9j/') ? 'jpeg' : body.imageBase64!.startsWith('UklGR') ? 'webp' : 'png'};base64,${body.imageBase64}`,
-    );
-  }
-
-  const scheduled = patient.todayPlan.find((m) => m.slot === body.slot);
-  let analysis;
-  try {
-    analysis = await analyzeMeal({
-      description: body.description,
-      imageBase64: body.imageBase64,
-      slot: body.slot,
-      scheduledTitle: scheduled?.title,
-    });
-  } catch (error) {
-    analysis = analysisOrUnavailable(error);
-  }
-
-  const logInput = {
-    slot: body.slot,
-    photo_url: photoPath,
-    description: body.description ?? null,
-    foods: analysis.foods,
-    macros: analysis.macros,
-    confidence: analysis.confidence,
-    note_for_nutri: analysis.note_for_nutri,
-  };
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    const log = await sb.sbAddMealLog(patient.id, logInput);
-    await sb.sbAddTimelineEvent(patient.id, {
-      kind: 'meal_logged',
-      title: `${body.slot} · foto en revisión`,
-      body: mealLoggedTimelineBody(analysis.confidence, analysis.foods.length, analysis.macros),
-    });
-    const updated = await sb.sbGetPatientById(patient.id, 'patient');
-    return c.json({
-      analysis: toPatientMealAnalysis(analysis),
-      log: toPatientSelfMealLog((await signMealPhotos(patientId, [log]))[0]),
-      patient: updated ? toPatientSelfView(updated) : null,
-      source: 'supabase',
-    });
-  }
-
-  const log = addMealLog(patientId, {
-    ...logInput,
-    photo_url: body.photoPreview ?? null,
-  });
-  return c.json({
-    analysis: toPatientMealAnalysis(analysis),
-    log: toPatientSelfMealLog(log),
-    patient: getPatient(patientId),
-    source: 'memory',
-  });
-});
-
-app.patch('/api/patients/:id/meals/:mealId', async (c) => {
-  const auth = c.get('auth');
-  const { id: patientId, mealId } = c.req.param();
-  const parsedBody = await parseJsonBody(c, mealReviewInputSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-  const body = parsedBody.data;
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'review_meal')) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    const log = await sb.sbUpdateMealLog(patientId, mealId, body as Parameters<typeof sb.sbUpdateMealLog>[2]);
-    if (!log) return c.notFound();
-    await sb.sbAddTimelineEvent(patientId, {
-      kind: 'meal_logged',
-      title: `${log.slot} · ${body.status === 'confirmed' ? 'confirmado' : 'ajustado'}`,
-      body: log.macros ? `${log.foods.map((food) => food.name).join(', ')} · ${log.macros.kcal} kcal` : 'Sin macros',
-    });
-    const patient = await sb.sbGetPatientById(patientId);
-    return c.json({ log, patient, source: 'supabase' });
-  }
-
-  const log = updateMealLog(patientId, mealId, body as Parameters<typeof updateMealLog>[2]);
-  if (!log) return c.notFound();
-  return c.json({ log, patient: getPatient(patientId), source: 'memory' });
-});
-
 app.post('/api/patients/:id/brief/dismiss', async (c) => {
   const auth = c.get('auth');
   const patientId = c.req.param('id');
@@ -506,70 +446,6 @@ app.post('/api/patients/:id/copilot', async (c) => {
   return c.json({ brief, patient: getPatient(patient.id), source: 'memory' });
 });
 
-app.post('/api/patients/:id/messages', async (c) => {
-  const auth = c.get('auth');
-  const patientId = c.req.param('id');
-  const parsedBody = await parseJsonBody(c, messageInputSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-  const body = parsedBody.data;
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    const actor = await authorizePatient(auth.userId, patientId, 'send_message');
-    if (!actor) return c.json({ error: 'Prohibido' }, 403);
-
-    const patient = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
-    const resource = await sb.sbGetPatientResource(patientId);
-    if (!patient || !resource) return c.notFound();
-
-    try {
-      await sb.sbAddMessage(
-        patientId,
-        resource.nutritionistId,
-        auth.userId,
-        body.text,
-        actor.role === 'nutri' && (body.suggested_by_ai ?? false),
-      );
-    } catch {
-      return c.json({ error: 'No se pudo enviar el mensaje' }, 503);
-    }
-    const updated = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
-    return c.json({
-      patient: updated && actor.role === 'paciente' ? toPatientSelfView(updated) : updated,
-      source: 'supabase',
-    });
-  }
-
-  const patient = getPatient(patientId);
-  if (!patient) return c.notFound();
-  addMessage(patientId, body.text, body.from, body.from === 'vero' && (body.suggested_by_ai ?? false));
-  const updated = getPatient(patientId)!;
-  return c.json({
-    patient: body.from === 'patient' ? toPatientSelfView(updated) : updated,
-    source: 'memory',
-  });
-});
-
-app.post('/api/patients/:id/messages/read', async (c) => {
-  const auth = c.get('auth');
-  const patientId = c.req.param('id');
-  const parsedBody = await parseJsonBody(c, messageReadSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'send_message')) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    return c.json({ error: 'Lectura de mensajes pendiente del schema 016' }, 501);
-  }
-
-  const patient = markMessagesRead(patientId, parsedBody.data.reader);
-  if (!patient) return c.notFound();
-  return c.json({
-    patient,
-    source: 'memory',
-  });
-});
-
 app.patch('/api/patients/:id/habits', async (c) => {
   const auth = c.get('auth');
   const patientId = c.req.param('id');
@@ -597,203 +473,6 @@ app.patch('/api/patients/:id/habits', async (c) => {
   const patient = upsertHabitLog(patientId, body);
   if (!patient) return c.notFound();
   return c.json({ patient, source: 'memory' });
-});
-
-app.post('/api/patients/:id/activities', async (c) => {
-  const auth = c.get('auth');
-  const patientId = c.req.param('id');
-  const parsedBody = await parseJsonBody(c, activityInputSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'log_activity')) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    return c.json({ error: 'Actividad persistente pendiente del schema 016' }, 501);
-  }
-
-  const patient = addActivityLog(patientId, parsedBody.data);
-  if (!patient) return c.notFound();
-  return c.json({ patient: toPatientSelfView(patient), source: 'memory' });
-});
-
-app.delete('/api/patients/:id/activities/:activityId', async (c) => {
-  const auth = c.get('auth');
-  const patientId = c.req.param('id');
-  const activityId = c.req.param('activityId');
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'delete_activity')) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    return c.json({ error: 'Actividad persistente pendiente del schema 016' }, 501);
-  }
-
-  const patient = deleteActivityLog(patientId, activityId);
-  if (!patient) return c.notFound();
-  return c.json({ patient: toPatientSelfView(patient), source: 'memory' });
-});
-
-app.post('/api/resources/assign', async (c) => {
-  const auth = c.get('auth');
-  const parsedBody = await parseJsonBody(c, resourceAssignmentInputSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-  const { resource_id: resourceId, patient_ids: patientIds } = parsedBody.data;
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    const decisions = await Promise.all(patientIds.map((patientId) => authorizePatient(auth.userId, patientId, 'assign_resource')));
-    if (decisions.some((actor) => !actor)) return c.json({ error: 'Prohibido' }, 403);
-    return c.json({ error: 'Asignación de recursos pendiente del schema 016' }, 501);
-  }
-
-  const result = assignResourceToPatients(resourceId, patientIds);
-  if (!result) return c.notFound();
-  return c.json({
-    patients: result.patients,
-    assigned_count: result.assignedCount,
-    existing_count: result.existingCount,
-    source: 'memory',
-  });
-});
-
-app.post('/api/patients/:id/resources/:resourceId/read', async (c) => {
-  const auth = c.get('auth');
-  const { id: patientId, resourceId } = c.req.param();
-  const parsedResourceId = resourceGuideIdSchema.safeParse(resourceId);
-  if (!parsedResourceId.success) return c.json({ error: 'Recurso inválido' }, 400);
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    if (!await authorizePatient(auth.userId, patientId, 'read_resource')) {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    return c.json({ error: 'Lectura de recursos pendiente del schema 016' }, 501);
-  }
-
-  const patient = markResourceRead(patientId, parsedResourceId.data);
-  if (!patient) return c.notFound();
-  return c.json({ patient: toPatientSelfView(patient), source: 'memory' });
-});
-
-app.put('/api/patients/:id/appointment', async (c) => {
-  const auth = c.get('auth');
-  const patientId = c.req.param('id');
-  const parsedBody = await parseJsonBody(c, appointmentUpdateSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-  const body = parsedBody.data;
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    const actor = await authorizePatient(auth.userId, patientId, 'edit_appointment');
-    if (!actor || actor.role !== 'nutri') {
-      return c.json({ error: 'Prohibido' }, 403);
-    }
-    try {
-      await sb.sbSetAppointment(patientId, actor.nutritionistId, body.appointment);
-      if (body.appointment) {
-        await sb.sbAddTimelineEvent(patientId, {
-          kind: 'appointment',
-          title: 'Consulta · actualizada',
-          body: `${body.appointment.day} ${body.appointment.time}`,
-          visibility: 'patient',
-        });
-      }
-    } catch (error) {
-      if (error instanceof sb.SchemaUnavailableError) {
-        return c.json({ error: 'No se pudo guardar el turno' }, 501);
-      }
-      throw error;
-    }
-    const patient = await sb.sbGetPatientById(patientId);
-    if (!patient) return c.notFound();
-    return c.json({ patient, source: 'supabase' });
-  }
-
-  const patient = setAppointment(patientId, body.appointment);
-  if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
-});
-
-app.post('/api/patients/:id/appointment/reschedule', async (c) => {
-  const auth = c.get('auth');
-  const patientId = c.req.param('id');
-  const parsedBody = await parseJsonBody(c, appointmentRescheduleSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-
-  if ('userId' in auth && isSupabaseEnabled()) {
-    const actor = await authorizePatient(auth.userId, patientId, 'reschedule_appointment');
-    if (!actor) return c.json({ error: 'Prohibido' }, 403);
-    try {
-      const current = await sb.sbGetScheduledAppointment(patientId);
-      if (!current) return c.json({ error: 'No hay un turno para reprogramar' }, 409);
-      const sameSlot = current.day === parsedBody.data.day && current.time === parsedBody.data.time;
-      if (sameSlot) {
-        const patient = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
-        if (!patient) return c.notFound();
-        return c.json({ patient: serializePatient(patient, actor.role), source: 'supabase' });
-      }
-      const resource = await sb.sbGetPatientResource(patientId);
-      if (!resource) return c.notFound();
-      await sb.sbSetAppointment(patientId, resource.nutritionistId, {
-        day: parsedBody.data.day,
-        time: parsedBody.data.time,
-        duration: current.duration,
-        channel: current.channel,
-        ...(current.meet_url ? { meet_url: current.meet_url } : {}),
-      });
-      await sb.sbAddTimelineEvent(patientId, {
-        kind: 'appointment',
-        title: 'Consulta · reprogramada',
-        body: `${parsedBody.data.day} ${parsedBody.data.time}`,
-        visibility: 'patient',
-      });
-    } catch (error) {
-      if (error instanceof sb.SchemaUnavailableError) {
-        return c.json({ error: 'No se pudo reprogramar el turno' }, 501);
-      }
-      throw error;
-    }
-    const patient = await sb.sbGetPatientById(patientId, queryAudience(actor.role));
-    if (!patient) return c.notFound();
-    return c.json({ patient: serializePatient(patient, actor.role), source: 'supabase' });
-  }
-
-  const current = getPatient(patientId);
-  if (!current) return c.notFound();
-  if (!current.appointment) return c.json({ error: 'No hay un turno para reprogramar' }, 409);
-
-  const parsed = current.appointment.when.split(' · ');
-  const sameSlot = parsed[0] === parsedBody.data.day && parsed[1] === parsedBody.data.time;
-  if (sameSlot) return c.json({ patient: current, source: 'memory' });
-
-  const patient = setAppointment(patientId, {
-    day: parsedBody.data.day,
-    time: parsedBody.data.time,
-    duration: current.appointment.duration,
-    channel: current.appointment.channel,
-    ...(current.appointment.meet_url ? { meet_url: current.appointment.meet_url } : {}),
-  }, { actor: 'patient' });
-  if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
-});
-
-app.get('/api/notices', (c) => {
-  if (isSupabaseEnabled()) return c.json({ error: 'Avisos persistentes pendientes del schema 016' }, 501);
-  const patientId = c.req.query('patientId') || undefined;
-  return c.json({ notices: listNotices(patientId), source: 'memory' });
-});
-
-app.post('/api/notices', async (c) => {
-  const parsedBody = await parseJsonBody(c, noticeCreateSchema);
-  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
-  if (isSupabaseEnabled()) return c.json({ error: 'Avisos persistentes pendientes del schema 016' }, 501);
-  const person = getPatient(parsedBody.data.patientId);
-  if (!person) return c.notFound();
-  const notice = enqueueNotice({
-    patientId: person.id,
-    kind: 'reminder',
-    subject: `Recordatorio · ${parsedBody.data.title} · ${person.name}`,
-    body: `${parsedBody.data.detail} Este aviso quedó en el buzón demo de Plan V; no se envió a internet.`,
-  });
-  return c.json({ notice, source: 'memory' }, 201);
 });
 
 app.patch('/api/patients/:id/billing', async (c) => {
@@ -922,7 +601,16 @@ app.post('/api/invites/:id/send', async (c) => {
     try {
       const invite = await sb.sbGetInvite(inviteId.data);
       if (!invite || invite.nutritionist_id !== actor.nutritionistId) return c.json({ error: 'Prohibido' }, 403);
-      return c.json({ invite: await sb.sbSendInvite(inviteId.data), source: 'supabase' });
+      const sent = await sb.sbSendInvite(inviteId.data);
+      await enqueueOutboxBestEffort({
+        patient_id: invite.patient_id,
+        event_type: 'invite_sent',
+        client_id: inviteId.data,
+        subject: `Invitación enviada · ${invite.email}`,
+        body: 'La invitación quedó en el buzón in-app de Plan V; no se envió un mail real.',
+        kind: 'invite',
+      }, true);
+      return c.json({ invite: sent, source: 'supabase' });
     } catch (error) {
       if (error instanceof sb.SchemaUnavailableError) {
         return c.json({ error: 'Invitaciones persistentes pendientes del contrato 016' }, 501);
@@ -1324,8 +1012,14 @@ const isMainModule = Boolean(process.argv[1]) && import.meta.url === pathToFileU
 
 if (isMainModule) {
   const config = readRuntimeConfig(process.env);
+  assertSecretBoundary(process.env);
+  const secrets = inspectSecrets(process.env);
+  if (!secrets.ok) {
+    writeOpsLog('error', 'startup_refused', { missing: secrets.missing.join(',') || 'secret_boundary' });
+    process.exit(1);
+  }
   const port = Number(process.env.PORT ?? 3001);
-  startJobWorker();
-  console.log(`Plan V API → http://localhost:${port} (mode: ${config.mode}, data: ${config.dataMode}, ai: ${config.aiMode})`);
+  if (process.env.WORKER_SEPARATE !== '1') startJobWorker();
+  writeOpsLog('info', 'api_listen', { mode: config.mode, data: config.dataMode, ai: config.aiMode, port: String(port) });
   serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
 }

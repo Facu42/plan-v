@@ -138,4 +138,52 @@ describe('appointment API flow in memory mode', () => {
       expect(await response.json()).toEqual({ error: 'Datos inválidos' });
     }
   });
+
+  it('rejects overlapping slots across patients of the same consultorio', async () => {
+    const response = await app.request(
+      '/api/patients/pat-sofia/appointment',
+      jsonRequest('PUT', { appointment: { day: 'Jueves', time: '16:00', duration: 45, channel: 'presencial' } }),
+    );
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ error: 'Ese horario se solapa con otra consulta del consultorio.' });
+    expect(getPatient('pat-sofia')!.appointment?.when).toBe('Jueves · 14:30');
+    expect(getPatient('pat-lucia')!.appointment?.when).toBe('Jueves · 16:00');
+  });
+
+  it('persists confirmation once and keeps confirmed_at on a second attending', async () => {
+    const first = await app.request(
+      '/api/patients/pat-sofia/appointment/confirm',
+      jsonRequest('POST', { reply: 'attending' }),
+    );
+    const firstBody = await first.json();
+    expect(first.status).toBe(200);
+    expect(firstBody.patient.appointment).toMatchObject({
+      patient_reply: 'attending',
+      timezone: 'America/Argentina/Buenos_Aires',
+    });
+    expect(typeof firstBody.patient.appointment.confirmed_at).toBe('string');
+    expect(firstBody.patient.appointment_history[0]).toMatchObject({ action: 'confirmed', actor: 'patient' });
+
+    const second = await app.request(
+      '/api/patients/pat-sofia/appointment/confirm',
+      jsonRequest('POST', { reply: 'attending' }),
+    );
+    const secondBody = await second.json();
+    expect(second.status).toBe(200);
+    expect(secondBody.patient.appointment.confirmed_at).toBe(firstBody.patient.appointment.confirmed_at);
+  });
+
+  it('lets the patient mark needs_change without cancelling', async () => {
+    const response = await app.request(
+      '/api/patients/pat-sofia/appointment/confirm',
+      jsonRequest('POST', { reply: 'needs_change' }),
+    );
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.patient.appointment).toMatchObject({
+      when: 'Jueves · 14:30',
+      patient_reply: 'needs_change',
+    });
+    expect(getPatient('pat-sofia')!.appointment?.when).toBe('Jueves · 14:30');
+  });
 });

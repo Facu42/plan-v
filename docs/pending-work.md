@@ -1,5 +1,89 @@
 # Pendientes de Plan V
 
+## Pedido Facu — 2026-09-21 (reel Cenra → PV-40)
+
+Sumar al plan de acción el circuito de **recetas plantilla** como en el reel de [Cenra](https://www.instagram.com/reel/DajVJcSxarK/):
+
+1. Nutri: biblioteca de recetas con macros; **Nueva receta** manual **o** asistente IA («describí el plato…»).
+2. **Asignar** a paciente / día.
+3. Paciente: en comidas del día, CTA **«Registrar esta comida»** (atajo al diario).
+
+**Barra visual (aclaración Facu 2026-09-21):** no alcanza el flujo. La card tiene que verse como el reel: foto de plato de calidad (generada o ilustrativa, coherente con la receta), macros KCAL/PROT/CARBS/GRASAS de un vistazo, layout premium. **No clonar** assets ni marca Cenra; sí la claridad. Review Lumen/Iris del formato antes de cerrar.
+
+Detalle y criterios: [ticket PV-40](ticket-pv40-recetas-ia-asignar-registrar.md).  
+**Estado:** aterrizado en esta rama (código + tests). Biblioteca con card (foto de revisión o fallo visible, macros KCAL/PROT/CARBS/GRASAS sólo si están declarados), wizard Manual | Asistente IA, asignar a paciente + día + slot con «Así lo ve tu asesorado», y CTA «Registrar esta comida» idempotente. Sin schema o sin clave de imagen: 501 / `failed`, sin macros ni URLs inventadas. **No es aprobación visual Nutrigo ni Cenra.** Review Lumen/Iris del formato sigue abierta. Verificación: 798 pruebas OK, 2 omitidas; check, check:migrations y build OK. No SQL en el proyecto con `patients`.
+
+## Ley visual Facu — 2026-09-22 (cierra pack amarillo y Poppins)
+
+Texto canónico: [design/nutrigo-fidelity.md](../design/nutrigo-fidelity.md). Composición en Figma Cloud, file key `OTolnKfsxUFjaZOhhdb04i` (https://www.figma.com/design/OTolnKfsxUFjaZOhhdb04i/Nutrigo---Nutrition---Diet-Dashboard). El MCP de Figma respondió OAuth 403; no se usó y no se esperó. Esta ley manda sobre el inventario Nutrigo y sobre la nota vieja que daba por aprobada Poppins.
+
+1. **Color:** paleta del logo en pasteles — menta, verde, coral, lila, lima. Más minimalista. **No** adoptar el amarillo/naranja energético del pack. El isotipo sigue teniendo píxeles dorados; no pintan la UI.
+2. **Tipo:** sans geométrica **Inter** (referencia de UI tipo Noteme). Jerarquía 400 cuerpo / 500 etiquetas / 600 títulos / 700 ítem activo. Poppins no es la ley de marca. Fraunces no es la cara principal de la UI.
+3. **Pantallas de fidelidad:** inventario del pack **sin Ejercicio** (11). Recipe Details e Insights siguen. Ejercicio permanece en el producto; no entra en este pase visual.
+4. **QA:** los once PNG de escritorio están en `design/nutrigo-exports/`. Los botones de acción usan lima, no el dorado del pack. La comparación no es aprobación visual. Facu todavía firma.
+
+Estructura y medidas del pack (sidebar, rails, reorganización tablet/móvil). Piel = Plan V + minimalismo Noteme: aire, radios ~16–24, sombra suave, navegación en píldora. `PLANV_NUTRIGO_VISUAL` sigue sin setearse.
+
+## NV-FIDELITY — en curso, parcial
+
+Cerrar la brecha visual P0 del shell nutri + paciente que va a staging: medidas del inventario y piel de la ley del 2026-09-22. Se apoya en los contratos de layout de PV-37 y en las cards de PV-40. No reescribe la lógica de dominio.
+
+**Estado: parcial.** En escritorio (≥1251 px) el shell usa sidebar **223 px**, padding **28 px** y rail de dashboard **325 px**. El detalle de Agenda queda en **325 px**, el menú saludable en **345 px** y el listado de Recursos en **305 px**. Mensajes, detalle de receta, plan, compras, diario, progreso y detalle de recurso no reservan ese rail global. La piel reemplaza el acento `#F9B343` por lima `#EAFF78`, menta `#DCEFE7`, coral `#FFE4DF` y lila `#EBE6F8`, con Inter y nav en píldora. El modal de foto del diario, el punto de macro y la urgencia de alertas dejan de pintar Poppins o el amarillo del pack. Macros confirmados del diario se leen como KCAL/PROT/CARBS/GRASAS. Las fotos de plato siguen siendo las ilustrativas de Plan V o el pozo SVG de PV-40. **No es aprobación visual.** El MCP de Figma no se consultó.
+
+Superficies de este pase, con PNG en `design/nutrigo-exports/`: Dashboard, Calendar, Messages, Healthy Menu, Recipe Details, Meal Plan, Grocery, Food Diary, Progress, Insight, Insight Details. Ejercicio queda fuera del pase. Los CTA del shell usan lima `#EAFF78`. **No es aprobación visual.**
+
+## NV-SEED — en curso, parcial
+
+Seed idempotente de demostración: Verónica Demo + Sofía, Marina, Luca y Elena Demo; planes publicados, diario, mensajes, turnos y recetas publicadas/asignadas (PV-40 de catálogo; asignar al día no tiene tabla SQL y sigue en 501). Sin PHI real. Sin fotos remotas.
+
+**Estado: parcial.** `npm run seed:demo` (`scripts/seed-demo.mjs` + `scripts/seed-demo.sql`) cuenta `public.patients` y **no corre el SQL** si hay filas. Rechaza `APP_MODE=production`, cualquier host que no sea `127.0.0.1`/`localhost`, `supabase.co` y el ref `wvosvlxpfytokwfbcero` (`plan-v-app`). La nota del 2026-09-21 registró 1 fila en ese proyecto; esta corrida no lo re-verificó y no se conectó. No se aplicó el seed en ningún Postgres.
+
+## Revisión vigente de avance — 2026-09-21 (WIP local)
+
+El WIP que no había entrado al Project (`cursor/professional-app-ai-ca47-local-wip-20260921` @ `da11bab`) se inventarió contra esta rama. Cuarentena, visor de estudios, medidas, recetas, planes, diario, recibos, turnos y jobs/eval ya están en PV-15…PV-28. No se copió ese SQL (`20260918180000`…`20260918250000`) ni se fusionó a `main`. Se recupera la nota del 2026-09-18 sobre el proyecto Plan V vacío. Detalle: [integración del WIP local](integracion-wip-local-2026-09-21.md). **No se aplicó SQL** a proyectos hospedados.
+
+## Revisión vigente de avance — 2026-09-21
+
+PV-39 en esta rama: decisión de alcance **ejecutable**. Presupuesto de compras, importación de actividad (wearables) y video nativo quedan **OUT** hasta evidencia de uso. Se conserva la lista operativa (PV-21), la actividad autodeclarada (PV-35) y `meet_url` HTTPS. Escrituras `shopping/budget`, `activity/import` y `video-room` → **501**. Sin tablas de presupuesto. **No es aprobación visual de Nutrigo.** Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. El plan numerado PV-01…PV-39 queda cubierto en código; **PV-40** (pedido Facu 2026-09-21) aterrizó el circuito receta → asignar al día → registrar, sin aprobación visual. Verificación previa de PV-39: 792 pruebas OK, 2 omitidas. PV-40: 798 pruebas OK, 2 omitidas; check, check:migrations y build OK. PV-32 se salta (piloto gratuito). No Railway re-point, PWA física, `eval.v1` clínico, retención legal ni email/push `sent`.
+
+PV-38 en esta rama: organizaciones y equipos, múltiples vínculos de cuidado, delegación y suscripción B2B **como estado** (waived/trialing/canceled/past_due; `active` exige proveedor y no se inventa). Transferencia de ownership reescribe `patients.nutritionist_id` y los hijos con FK compuesta, con auditoría. **No es aprobación visual de Nutrigo.** Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 785 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-39 (PV-32 se salta, piloto gratuito). No Railway re-point, PWA física, `eval.v1` clínico, retención legal ni email/push `sent`.
+
+PV-37 en esta rama: paridad de **layout y estados** de las doce superficies Nutrigo a 1440/800/390/320, claro/oscuro, vacío/error/carga y `:focus-visible`. Reorganización tablet/móvil (no encoger el escritorio). Overflow de progreso/diario (`min-width:650px`) corregido. **No es aprobación visual de Facu.** Live no aplica: no hay SQL. Verificación: 776 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-38 (PV-32 se salta, piloto gratuito). No Railway re-point, PWA física, `eval.v1` clínico, retención legal ni email/push `sent`.
+
+PV-36 en esta rama: recursos editoriales con autoría, revisión y publicación explícita; asignación persistida; favoritos unificados (guía/artículo/receta) y búsqueda acotada por permisos. Plan B queda en Guardado/búsqueda profesional, no como favorito personal. `cover_url` nulo (sin imagen remota inventada). Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 771 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-37 (PV-32 se salta, piloto gratuito). No visual Nutrigo.
+
+PV-35 en esta rama: biblioteca de ejercicios y rutinas asignables sólo con habilitación verificada en servidor (el rol nutricionista no alcanza; no hay casillero para auto-otorgársela). `activity_logs` autodeclarados persistidos con RLS en Postgres descartable; series/reps y feedback paciente; sin calorías inferidas ni rutina automática. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 764 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-36 (PV-32 se salta, piloto gratuito). No visual Nutrigo.
+
+PV-34 en esta rama: progreso longitudinal del mismo paciente. Períodos 7/30/90 en `America/Argentina/Buenos_Aires`; series de peso/cintura/cadera con fuente; comparativa este-vs-anterior sólo si hay valor en ambos y la misma unidad; kg y lb no se mezclan; períodos vacíos no se rellenan; sin ranking. Profesional ve la paciente seleccionada (`/crm/progreso`), no una tabla entre pacientes. Fail closed 501 sin RPC. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 757 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-35 (PV-32 se salta, piloto gratuito). No visual Nutrigo.
+
+PV-26 en esta rama: outbox de avisos con preferencias (`in_app`/`email`/`push`), `client_id`/dedupe, reintentos y skip si el paciente está desactivado o desvinculado. El canal in-app completa el buzón; email/push quedan `queued` con `provider_unconfigured` y **nunca** `sent` (no hay adaptador ni claves). Enganche de turno, mensaje e invitación. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL; no se inventaron claves de mail/push. Verificación: 748 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-32 se salta (piloto gratuito). No PV-34. No visual Nutrigo.
+
+PV-24 en esta rama: adjuntos de chat sólo mediante assets autorizados (`chat_attachment`, bucket `care-documents`). Paciente y profesional pueden adjuntar; meal_photo/estudios/corporales no se mezclan. Preview 60 s `no-store` auditado; retiro 404; Marina 403/404. El DTO no lleva URL viva. Escrituras persistentes por RPC nueva (`send_thread_attachment` / `open_message_attachment`); el texto sigue en `send_thread_message`. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL ni buckets. Verificación: 743 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-26 outbox. PV-32 se salta (piloto gratuito). No PV-34. No visual Nutrigo.
+
+PV-21 en esta rama: lista de compras del plan publicado. Ingredientes con cantidades y unidades (escala por porciones; misma unidad se suma; `g` y `taza` no se mezclan); texto libre sin cantidad inventada; agregados manuales que sobreviven a republicar; checks por `source_key` sincronizados. Escrituras sólo paciente (profesional 403). Fail closed 501 sin RPC. El fallback de títulos del menú semanal sigue si no hay plan fechado. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 735 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente incompleto del plan: PV-24 adjuntos de chat. PV-32 se salta (piloto gratuito). No PV-34. No visual Nutrigo.
+
+PV-33 en esta rama: E2E dos roles / go-no-go. Acta ejecutable `piloto-acta.v1` → **`go-synthetic-no-go-live`**. Demo Sofía/Marina (un `DEMO_NUTRITIONIST_ID`): receta asignada, plan fechado publicado, diario con IA caída (el registro queda), mensajes, turno, exportación ARCO, Marina no lee el paquete, webhook Mercado Pago 404. PGlite Nutri A/B + Paciente A/B: el mismo circuito + `42501` + `42883`. Viewports 390/1440 como contratos de layout (`/app` vs `/crm`, `lockedRole`); **no** es aprobación visual Nutrigo. `eval.v1` **no** es puerta clínica. **Live no**: hace falta Supabase vacío descartable + Railway en esta rama; el API público sigue PR #1. Verificación: 725 pruebas OK, 2 omitidas; check, check:migrations y build OK. P0 de código/demo/PGlite en H5 cubierto. Resto P0 humano (Railway, Auth live, PWA física, revisión de Verónica, retención legal).
+
+PV-31 en esta rama: exportación/retiro/purga y restore conjunto. Pedido ARCO del paciente (`export`/`delete`/`correction`); paquete allowlist (ficha visible, intake, consentimientos, plan publicado, comidas, mensajes, mediciones, metadatos de archivos) **sin** notas clínicas, `adherence_why`, artefactos de IA ni URLs firmadas vivas; retiro corta lecturas; purga de fotos corporales espera 30 días; borrado lógico (`deactivated_at`) sin cascade de pagos; restore conjunto sigue ensayo (`applied_remote_sql: false`). Escrituras persistentes por RPC nuevas; sin schema → 501. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL ni se re-apuntó Railway. Verificación: 714 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente P0: PV-33 E2E dos roles (PV-21/24/26/32 son P1). No P1, no visual Nutrigo.
+
+PV-30 en esta rama: frontend Vite, API Node y worker separados; perímetro de secretos (`VITE_*` no lleva service role); logs JSON sin PII; rate limits (auth/ops más estrictos; health/ready libres); alertas HTTPS sin clínica; `/api/health` y `/api/ready` públicos **en este binario**. **Live Railway sigue en el binario de PR #1** (`/api/ready` 401, CORS `*`); no se re-apuntó ni se inventaron claves. Verificación: 702 pruebas OK, 2 omitidas; check, check:migrations, build y check:secrets (test) OK. Siguiente P0: PV-31 export/purga/restore (PV-21/24/26 son P1). No P1, no visual Nutrigo.
+
+PV-29 en esta rama: PWA de PR #3 cerrada sin reescribir. Shell `plan-v-shell-v2` borra caches viejos y avisa Recargar; offline explícito (`offline.html` + aviso in-app); `/api`, Supabase, Storage, functions y URLs firmadas fuera del cache; copy iPhone ≠ Android; avisos en login, Nutrigo y legado. **No se afirma instalación en un teléfono físico.** Verificación: 698 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente P0: PV-30 deploy/secretos/rate limits/alertas (PV-21/24/26 son P1). No P1, no visual Nutrigo.
+
+PV-28 en esta rama: evaluación sintética `eval.v1` (30 escenarios) antes de publicar/asignar. Alergias y restricciones se revalidan al publicar, no sólo al generar; unknown bloquea; ningún alérgeno explícito del set pasa; faltantes/unidades/XOR/fechas/slots; `expected_version` desactualizada → 409; apply/worker no publican. Escrituras persistentes revalidan en RPC (`assert_health_publishable`); sin schema → 501. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL ni se inventaron claves de IA. Verificación: 691 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente P0: PV-29 PWA (PV-21/24/26 son P1). No P1, no visual Nutrigo.
+
+PV-27 en esta rama: jobs de IA versionados para receta/menú (`prompt_version` + `context_hash`), límites de costo/tiempo/cola (25 s, 8k tokens/job, 200k/mes, máx. 3 activos → 429), contexto mínimo (sin nombre ni notas) y borradores profesionales (`apply` no publica). Escrituras persistentes van por RPC (`enqueue_ai_job` / `finish_ai_job` / `apply_ai_job`); sin schema → 501. Stale si cambia el ingreso → 409. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL ni se inventaron claves de IA. Verificación: 653 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente P0: PV-28 evaluación sintética (PV-21/24/26 son P1). No P1, no visual Nutrigo.
+
+PV-25 en esta rama: turnos con `starts_at` timestamptz, timezone `America/Argentina/Buenos_Aires`, confirmación persistida (`patient_reply` / `confirmed_at` inmutable en el primer attending), reprogramación paciente sólo día/hora, cancel+insert (no borra el anterior), lock transaccional de solapes por profesional → 409. Escrituras persistentes van por RPC (`schedule_appointment` / `reschedule_appointment` / `confirm_appointment`); sin schema → 501. GET hospedado cae al `appointments` 016 sin columnas nuevas (no 500). **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 646 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente P0: PV-27 jobs de IA (PV-21/24/26 son P1). No P1, no visual Nutrigo.
+
+PV-23 en esta rama: hilos 1:1 reales con no leídos, `client_id` idempotente y recibos de entrega/lectura por persona (no por dispositivo). La primera marca queda; un segundo leído no cambia el instante. El GET de ficha no marca leído. Escrituras persistentes van por RPC (`send_thread_message` / `mark_thread_read`); sin schema → 501. GET hospedado cae al `messages` 016 sin recibos (no 500). **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL. Verificación: 635 pruebas OK, 2 omitidas; check, check:migrations y build OK. Siguiente P0: PV-25 timezone/historial de turnos (PV-21 es P1). No P1, no visual Nutrigo.
+
+PV-22 en esta rama: diario foto/texto persistente. El registro se guarda **antes** de la IA; un `client_id` duplicado no crea otra comida; si la IA falla quedan foto/texto con `analysis_status=failed` y `macros=null`. Revisión profesional append-only en `meal_reviews`. Fail closed 501 sin schema/buckets. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL ni buckets.
+
+PV-20 en esta rama: paciente ve el plan fechado publicado (detalle de receta, porciones, días vacíos reales, mismo contenido que CRM). Un borrador de receta posterior no cambia ese snapshot. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL.
+
+PV-19 en esta rama: planes fechados/versionados (slots, receta XOR texto, timezone `America/Argentina/Buenos_Aires`); publicación transaccional con `expected_version`; copia publicada inmutable; el borrador siguiente no la cambia. Fail closed 501 sin schema. **Live no**: el proyecto hospedado tiene `patients`; no se aplicó SQL.
+
 ## Revisión vigente de avance — 2026-09-19
 
 Secuencia acordada en [informe del 19/09](revision-avance-2026-09-19.md):
@@ -12,7 +96,7 @@ En este árbol: Ver seguimiento y fecha futura ya corregidos; circuito de estudi
 
 ## Revisión vigente de avance — 2026-09-18
 
-Continuación sobre el árbol sin consolidar del 17/09: módulo de seguimiento conectado (peso, cintura, actividad, fotos corporales, pagos manuales, reemplazos de menú con revisión profesional), navegación lateral en escritorio para ambos roles, lista de compras derivada del plan y de alternativas publicadas. **Pruebas locales: 509 aprobadas, 2 omitidas; TypeScript, build y guarda SQL aprobados.** `npm run apply:disposable` aplica `core`/`intake`/`care` a un Postgres vacío y aborta si ya hay pacientes; no hay `.env` local con `DISPOSABLE_DATABASE_URL`, así que no se tocó ningún proyecto remoto. Falta Auth/RLS live, estudios PDF y el circuito completo de Storage (PV-15).
+Continuación sobre el árbol sin consolidar del 17/09: módulo de seguimiento conectado (peso, cintura, actividad, fotos corporales, pagos manuales, reemplazos de menú con revisión profesional), navegación lateral en escritorio para ambos roles, lista de compras derivada del plan y de alternativas publicadas. **Pruebas locales: 509 aprobadas, 2 omitidas; TypeScript, build y guarda SQL aprobados.** `npm run apply:disposable` aplica `core`/`intake`/`care` a un Postgres vacío y aborta si ya hay pacientes. Esta frase describía el árbol de git de ese corte: ahí no había `.env` local. El WIP de la misma máquina, que este remoto no tenía, registró más tarde ese día la aplicación de `core` / `intake` / `care` al proyecto Plan V vacío. Esa nota está recuperada en [integración del WIP local](integracion-wip-local-2026-09-21.md). No reaplicar ese SQL.
 
 Siguiente: cerrar verificación de navegador del seguimiento y, en el plan de acción, continuar Storage/estudios (PV-15/16) sin aplicar SQL a datos reales.
 
@@ -112,8 +196,8 @@ La referencia aporta doce superficies. Plan V implementará funciones equivalent
 - [x] Alcance de producto: usuario aprueba peso y medidas opcionales, registro de actividad y rutinas asignadas por profesional habilitado.
 - [ ] Peso/medidas: implementar historial, permisos, consentimiento y retención. Actualización 2026-09-16: fotografías corporales opcionales y estudios incluidos por confirmación del usuario; requieren modelo, consentimiento específico, Storage privado y QA antes de datos reales.
 - [ ] Ejercicio: el registro paciente autodeclarado ya funciona en memoria y es visible para su nutricionista; faltan persistencia/RLS y acreditación/permiso para asignar rutinas. El rol nutricionista por sí solo no habilita prescripción automática.
-- [ ] Presupuesto y gastos de supermercado: confirmar si aportan valor o si Grocery queda sólo como lista operativa.
-- [ ] Contenido editorial clínico de Insights: autoría, revisión y derechos de imágenes. La biblioteca actual contiene sólo seis guías operativas originales sobre el uso de Plan V y prohíbe la publicación clínica automática por IA.
+- [x] Presupuesto y gastos de supermercado: **OUT** (PV-39) hasta evidencia de uso. Grocery queda lista operativa (PV-21). POST `/shopping/budget` → 501. Sin tablas de presupuesto.
+- [x] Contenido editorial clínico de Insights: autoría, revisión y reglas de publicación en Postgres descartable (PV-36). Portada ilustrativa local (`cover_url` nulo); no hay imagen licenciada remota inventada. Live schema bloqueado si el proyecto tiene `patients`.
 - [x] Usuario confirma que compró la licencia de todo el pack Nutrigo y autoriza su uso en Plan V. Conservar procedencia de los assets; esto no afirma revisión independiente de términos legales.
 
 ## P0 — Bloqueos para usar datos reales
@@ -139,7 +223,7 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 - [ ] Alta e invitación real de pacientes. PV-09 deja el ciclo crear/enviar/revocar/aceptar y recuperación; falta aplicar 016 en instancia descartable para persistirlos.
 - [ ] Edición y archivo/restauración de pacientes mediante `archived_at`. PV-10 persiste la ficha (nombre/estado/etapa/notas profesionales); el archivo operativo sigue 501 porque 016 no tiene esa columna.
 - [ ] Persistencia de objetivos e historial profesional. PV-10 escribe `patients.goal`; `goal_status`/`goal_history` quedan para 016b.
-- [ ] Creación, reprogramación y cancelación de turnos. PV-10 reemplaza el turno vigente (demo v0); historial append-only es PV-25.
+- [x] Creación, reprogramación y cancelación de turnos (PV-10 + PV-25 en demo/PGlite). Reprogramar no borra: marca `cancelled` e inserta. Solapes 409. Confirmación persistida. Live schema bloqueado (`patients` existe).
 - [x] Escritura del menú semanal (PV-10, `meal_slots`).
 - [x] Persistencia completa de sueño/hábitos (PV-10, `habit_logs.sleep_minutes`).
 - [x] Descarte persistente de briefs del copiloto (PV-10, `ai_briefs.status=dismissed`).
@@ -181,7 +265,7 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 - [x] Diario de comidas paciente específico en Nutrigo: resumen real, cronología, búsqueda, filtros por estado, macros sólo en comidas revisadas y registro operativo (foto/texto + IA) reutilizando el endpoint y el circuito existente; verificado con read-back API en servicios aislados.
 - [x] Agenda paciente Nutrigo: calendario mes/semana/día sobre la próxima consulta, el plan de la semana actual, diario y actividad; confirmación de asistencia demo; reprogramación de día/hora por la paciente; historial de cambios de turno; enlace HTTPS seguro y acceso a Mensajes (cortes 76–78).
 - [x] Menú saludable paciente Nutrigo derivado exclusivamente del plan vigente: títulos deduplicados, días, momentos, ocurrencias, búsqueda y filtros; imágenes ilustrativas rotuladas y navegación real a Plan/Compras, sin fingir una biblioteca de recetas.
-- [ ] Validación visual integral de tema claro/oscuro, densidad, tipografía e iconografía. Casilla reconciliada con `tasks/todo.md` y el mapa Nutrigo: no se encontró evidencia unívoca de aprobación general. Se conservan los controles visuales puntuales ya registrados.
+- [ ] Validación visual integral de tema claro/oscuro, densidad, tipografía e iconografía. **PV-37 aterrizó contratos de layout/estado (1440/800/390/320, claro/oscuro, vacío/error/carga/foco); eso no es aprobación visual.** Casilla reconciliada con `tasks/todo.md` y el mapa Nutrigo: no hay sign-off de Facu. Se conservan los controles visuales puntuales ya registrados.
 - [x] IA paciente Nutrigo (corte 75): diez superficies en menú lateral de escritorio; móvil 4 destinos + Más. El CRM profesional conserva barra inferior.
 
 **Dirección visual (corte 72):** consultorio nutricional moderno con navegación inferior. Paleta del logo, Poppins, tipo de lectura 12–16 px, títulos 22–26 px, menú fijo abajo, tarjetas con borde fino. El showroom reemplaza las pantallas viejas en demo; `?design=legacy` se conserva como interfaz anterior.
@@ -209,13 +293,13 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 - [x] Historial de turnos (cambios publicados y fechas vencidas) y reprogramación de día/hora desde la paciente, conservando duración y modalidad (corte 78). No registra asistencia.
 - [x] Recordatorios de comidas y hábitos derivados del plan de hoy, agua y descanso (corte 78).
 - [x] Avisos al teléfono vía Notification del navegador en este dispositivo, y mail en buzón demo (corte 78). Sin proveedor de envío ni push remoto.
-- [ ] Zonas horarias y detección de conflictos: no existen en el modelo actual y no se rellenan.
-- [ ] Confirmación paciente: timezone y conflictos. La asistencia demo ya existe; no reemplaza gestión profesional.
+- [x] Zonas horarias y detección de conflictos (PV-25 demo/PGlite): timezone Buenos Aires, lock transaccional por profesional, 409 si se solapa. Live schema bloqueado.
+- [x] Confirmación paciente persistida (PV-25): `patient_reply` + `confirmed_at` inmutable; localStorage queda cache. No reemplaza la gestión profesional.
 
 ### Paso 5 — Mensajería ampliada
 
 - [x] Base Nutrigo operativa: paciente y profesional envían mensajes; la profesional dispone de inbox multipaciente, búsqueda, selección y navegación contextual a Ficha/Consultas; el paciente navega a su Agenda.
-- [x] Recibos demo (corte 74): entrega inmediata al enviar, leído al abrir el hilo y recuento de no leídos. Persisten sólo en memoria; con Supabase activo la marca de lectura responde 501.
+- [x] Recibos demo (corte 74) y PV-23: entrega/lectura por persona, `client_id` idempotente, primera marca inmutable. Persistente vía RPC; sin schema 501. GET hospedado cae al hilo 016 sin recibos.
 - [ ] Adjuntos y archivos compartidos bajo Storage privado.
 
 ### Paso 6 — Menú saludable y recetas
@@ -237,7 +321,7 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 - [x] Superficie paciente en Nutrigo derivada del plan semanal vigente, con categorías, deduplicación, ocurrencias y límites explícitos.
 - [x] Comprado/pendiente local aislado por paciente, búsqueda, filtros y exportación de texto.
 - [ ] Modelar ingredientes estructurados, cantidades, unidades y agregados manuales; no inferirlos de los títulos actuales.
-- [ ] Implementar presupuesto/gastos sólo si se aprueba como necesidad real.
+- [x] Presupuesto/gastos **fuera de alcance** (PV-39) hasta evidencia de uso. Lista operativa (PV-21) se mantiene. POST 501. No hay tablas de presupuesto.
 
 ### Paso 9 — Diario de comidas
 
@@ -251,37 +335,37 @@ La API falla de forma explícita con `501` en operaciones que aún no tienen con
 ### Paso 10 — Progreso
 
 - [x] Superficie paciente accesible en Nutrigo con adherencia actual, objetivo publicado, agua, sueño, energía y comidas revisadas en la ventana real de siete días.
-- [ ] Comparación multipaciente por períodos para la profesional, sin ranking punitivo ni presentar agregados actuales como historia longitudinal.
-- [ ] Implementar peso y medidas sólo después de definir consentimiento, retención y privacidad. Fotografías corporales requieren una decisión aparte.
+- [x] Comparativa por períodos (7/30/90) del **mismo** paciente, también en CRM sobre la ficha seleccionada; métricas con fuente; sin ranking punitivo ni presentar la adherencia media del consultorio como historia. No hay tabla entre pacientes.
+- [x] Peso y medidas con consentimiento, unidad, origen e historial (PV-17); el progreso las agrega por período (PV-34). Fotografías corporales siguen siendo decisión aparte y no infieren medidas.
 
 ### Paso 11 — Ejercicio y actividad
 
 - [x] Registro paciente de actividad autodeclarada operativo en demo: tipo, duración, intensidad percibida, nota opcional, resumen real de siete días e historial; lectura profesional aislada por paciente en Actividades.
-- [ ] Persistir `activity_logs` en el contrato 016 con RLS, retención y auditoría. La API devuelve 501 cuando Supabase está activo hasta aprobar ese contrato.
-- [ ] Biblioteca/detalle estructurado de ejercicios y asignación de rutinas por profesional habilitado; definir series/repeticiones, feedback y permisos sin otorgar prescripción por el mero rol nutricionista.
+- [x] Persistir `activity_logs` en Postgres descartable con RLS, retención declarada (5 años) y auditoría de asignación (`assigned_by`/`assigned_at`). La API devuelve 501 cuando falta el schema. **No** se aplicó en el proyecto hospedado con `patients` ni se metió en 016/016b.
+- [x] Biblioteca/detalle estructurado de ejercicios y asignación de rutinas por profesional con habilitación verificada en servidor; series/repeticiones, feedback y permisos sin otorgar prescripción por el mero rol nutricionista.
 - [x] Límites éticos de la base actual: sin diagnóstico, prescripción automática, calorías quemadas ni datos inferidos.
 
 ### Paso 12 — Insights y Guardado
 
 - [x] Base paciente de Recursos: seis guías operativas originales, categorías, destacado, búsqueda, detalle, tags, relacionados y navegación a la función explicada. No son recomendaciones clínicas ni copian contenidos del kit.
-- [ ] Contenido editorial clínico estructurado y revisado, con autoría, imágenes licenciadas y reglas de publicación.
-- [ ] Favoritos/Guardado unificado para recetas, artículos, Planes B y recursos. Guardado profesional ya reúne Planes B y asignación de guías, pero los favoritos personales de Recursos continúan sólo en `localStorage`, aislados por paciente y rotulados como conveniencia del dispositivo; todavía no existe una entidad real de receta/artículo.
+- [x] Contenido editorial clínico estructurado y revisado, con autoría y reglas de publicación (PV-36). Imágenes: `license_kind` placeholder/internal, `cover_url` nulo; no se inventó material de terceros remoto. Live schema bloqueado.
+- [x] Favoritos/Guardado unificado para recetas asignadas, artículos visibles, Planes B (búsqueda/Guardado profesional) y recursos. Favoritos personales persisten en servidor (demo/PGlite); sin schema → 501. Ya no viven en `localStorage`.
 - [x] Compartir las seis guías operativas mediante enlace profundo validado (`#recurso=<id>`), Web Share cuando existe y copia del enlace como fallback. Atrás/adelante del navegador y reapertura directa conservan el detalle; navegar a otra función limpia el hash.
-- [x] Asignación individual o masiva de las seis guías operativas, idempotente y aislada por paciente, con estado pendiente/leído visible en ambos roles. Funciona sólo en memoria demo; con Supabase activo falla cerrado con 501 hasta incorporar contrato, RLS y auditoría al schema 016.
+- [x] Asignación individual o masiva de guías operativas y artículos publicados, idempotente y aislada por paciente, con estado pendiente/leído visible en ambos roles. Persistida en Postgres descartable; con Supabase sin schema falla cerrado con 501. No se aplicó SQL en el proyecto hospedado con `patients`.
 
 ### Paso 13 — Completar módulos CRM
 
 - [x] Centro de seguimiento: priorización, acciones a Ficha/Diario y filtros configurables por banda de adherencia y revisiones pendientes ya operativos (corte 64); faltan agrupaciones guardadas y preferencias persistidas.
 - [ ] Paneles: agregados y navegación a atención prioritaria ya operativos; faltan períodos y desgloses históricos.
 - [x] Actividades/Reciente: base Nutrigo agregada con filtros por paciente/recencia y paginación incremental ya operativa (corte 65); faltan timestamp global persistido y paginación de servidor, que dependen del modelo longitudinal y del contrato 016.
-- [ ] Videollamadas: acceso seguro y gestión por paciente ya operativos; faltan estados de sala/proveedor y videollamada nativa.
+- [x] Videollamadas: CTA abre `meet_url` HTTPS o no-op (mvp-v0). Video nativo **OUT** (PV-39). POST `/video/rooms` y `/appointments/:id/video-room` → 501. Sin proveedor inventado.
 - [x] QA ampliado, primera matriz: estados vacíos explícitos de los cinco módulos del centro de trabajo, Objetivos y directorio cubiertos por `showroom-empty-states.test.tsx` (corte 69); faltan matrices de carga/error ligadas a flujos API.
 
 ## P2 — Producción y escala
 
 - [ ] Flujo real de invitación/auth, Storage, mensajería, notificaciones y Mercado Pago.
 - [ ] Persistencia Supabase/RLS de todas las vertical slices aprobadas.
-- [ ] Multi-nutricionista, organizaciones, equipos y roles administrativos con aislamiento aprobado antes de expandir comercialmente.
+- [ ] Multi-nutricionista, organizaciones, equipos y roles administrativos con aislamiento aprobado antes de expandir comercialmente. **PV-38 aterrizó código+tests** (org/equipo, delegación, transferencia de ownership, suscripción de estado); eso no es go-live ni SQL en el proyecto con `patients`.
 - [ ] Configuración de marca, servicios y horarios por consultorio.
 - [ ] Importación/exportación y portabilidad de datos.
 - [ ] Facturación de Plan V a profesionales, límites de uso y soporte.

@@ -1,15 +1,18 @@
 import { getRequestDb, privilegedDb } from '../db/supabase-client.js';
-import { DEFAULT_CARE_PREFERENCES, type CareInput, type CareRecord, type CarePreferences, type CareReplacement, type ReplacementRecipe } from '../../src/types/care.js';
-
-export class CareError extends Error {
-  constructor(public status: 400 | 403 | 404 | 409 | 413 | 501 | 503, message: string) { super(message); }
-}
+import { DEFAULT_CARE_PREFERENCES, isMeasurementData, isMeasurementKind, type CareInput, type CareRecord, type CarePreferences, type CareReplacement, type Measurement, type ReplacementRecipe } from '../../src/types/care.js';
+import { inspectPrivateFile } from '../assets/inspect.js';
+import { requireProductBuckets } from '../assets/storage.js';
+import { CareError } from './errors.js';
+import { assertReadyToPublish, evaluateReplacementDraft } from '../ai-eval/evaluate.js';
+import { loadEvalHealth } from '../ai-eval/health.js';
+export { CareError } from './errors.js';
 const records = new Map<string, CareRecord>();
 const preferences = new Map<string, CarePreferences>();
 const replacements = new Map<string, CareReplacement>();
 const photos = new Map<string, string>();
 const documents = new Map<string, string>();
-export function resetCareMemory() { records.clear(); preferences.clear(); replacements.clear(); photos.clear(); documents.clear(); }
+const measurements = new Map<string, Measurement>();
+export function resetCareMemory() { records.clear(); preferences.clear(); replacements.clear(); photos.clear(); documents.clear(); measurements.clear(); }
 export function careDbError(error: { code?: string } | null) {
   if (!error) return;
   if (['42P01','42883','PGRST202','PGRST205'].includes(error.code ?? '')) throw new CareError(501, 'El seguimiento requiere instalar la migración de este módulo.');
@@ -35,7 +38,51 @@ export async function saveCareRecord(patientId: string, input: CareInput, persis
     return old;
   }
   const record = { ...input, patient_id: patientId, created_at: new Date().toISOString(), reviewed_at: input.data.kind === 'payment' ? new Date().toISOString() : null };
-  records.set(record.id, record); return record;
+  records.set(record.id, record);
+  rememberMeasurement(record);
+  return record;
+}
+function rememberMeasurement(record: CareRecord) {
+  if (!isMeasurementData(record.data)) return;
+  measurements.set(record.id, {
+    id: record.id,
+    patient_id: record.patient_id,
+    kind: record.data.kind,
+    value_numeric: record.data.value,
+    unit: record.data.unit,
+    source: record.data.source,
+    captured_on: record.recorded_on,
+    created_at: record.created_at,
+  });
+}
+function asMeasurement(row: { id: string; patient_id: string; kind: string; value_numeric: number | string; unit: string; source: string; captured_on: string; created_at: string }): Measurement {
+  if (!isMeasurementKind(row.kind)) throw new CareError(400, 'Revisá los datos del registro.');
+  if (row.source !== 'patient' && row.source !== 'professional') throw new CareError(400, 'Revisá los datos del registro.');
+  return {
+    id: row.id,
+    patient_id: row.patient_id,
+    kind: row.kind,
+    value_numeric: Number(row.value_numeric),
+    unit: row.unit,
+    source: row.source,
+    captured_on: row.captured_on,
+    created_at: row.created_at,
+  };
+}
+export async function listMeasurements(patientId: string, persistent: boolean): Promise<Measurement[]> {
+  if (!persistent) {
+    return [...measurements.values()]
+      .filter((entry) => entry.patient_id === patientId)
+      .sort((a, b) => b.captured_on.localeCompare(a.captured_on) || b.created_at.localeCompare(a.created_at));
+  }
+  const { data, error } = await getRequestDb()
+    .from('measurements')
+    .select('id,patient_id,kind,value_numeric,unit,source,captured_on,created_at')
+    .eq('patient_id', patientId)
+    .order('captured_on', { ascending: false })
+    .limit(500);
+  careDbError(error);
+  return (data ?? []).map(asMeasurement);
 }
 export async function reviewCareRecord(patientId: string, id: string, persistent: boolean) {
   if (persistent) { const { error } = await getRequestDb().rpc('review_care_record', { target: patientId, record_id: id }); careDbError(error); return; }
@@ -61,6 +108,8 @@ export async function saveReplacement(entry: CareReplacement, persistent: boolea
   const { error } = await getRequestDb().from('care_replacements').insert(entry); careDbError(error);
 }
 export async function publishReplacement(patientId: string, id: string, persistent: boolean, expected:ReplacementRecipe, recipe:ReplacementRecipe) {
+  const health = await loadEvalHealth(patientId, persistent);
+  assertReadyToPublish(evaluateReplacementDraft(recipe, health));
   if (!persistent) {
     const entry = replacements.get(id); if (!entry || entry.patient_id !== patientId) throw new CareError(404, 'Propuesta no encontrada.');
     if(entry.published_at){if(JSON.stringify(entry.recipe)===JSON.stringify(recipe))return;throw new CareError(409,'Esta alternativa ya fue publicada.');}
@@ -76,11 +125,14 @@ export function validatePhoto(dataUrl: string) {
   if (bytes.length > 5 * 1024 * 1024) throw new CareError(413, 'La foto debe pesar menos de 5 MB.');
   const valid = match[1] === 'jpeg' ? bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff : match[1] === 'png' ? bytes.subarray(0,8).toString('hex') === '89504e470d0a1a0a' : bytes.subarray(0,4).toString() === 'RIFF' && bytes.subarray(8,12).toString() === 'WEBP';
   if (!valid) throw new CareError(400, 'El contenido no corresponde a una imagen válida.');
-  return { bytes, mime: `image/${match[1]}` };
+  const inspected = inspectPrivateFile('body_progress', bytes, `image/${match[1]}`);
+  return { bytes: inspected.bytes, mime: inspected.mime };
 }
 export async function storeCarePhoto(path: string, dataUrl: string, persistent: boolean) {
   const { bytes, mime } = validatePhoto(dataUrl);
-  if (!persistent) { const previous=photos.get(path); if(previous && !validatePhoto(previous).bytes.equals(bytes)) throw new CareError(409,'Ese registro ya tiene otra foto.'); photos.set(path, dataUrl); return; }
+  const cleaned = `data:${mime};base64,${bytes.toString('base64')}`;
+  if (!persistent) { const previous=photos.get(path); if(previous && !validatePhoto(previous).bytes.equals(bytes)) throw new CareError(409,'Ese registro ya tiene otra foto.'); photos.set(path, cleaned); return; }
+  await requireProductBuckets(['care-photos', 'care-quarantine']);
   const { error } = await getRequestDb().storage.from('care-photos').upload(path, bytes, { contentType: mime, upsert: false });
   if (error) {
     // Recuperar una carga aceptada cuyo acuse se perdió, sin sobrescribirla.
@@ -125,7 +177,8 @@ export function validateDocument(dataUrl: string) {
       ? bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff
       : bytes.subarray(0, 8).toString('hex') === '89504e470d0a1a0a';
   if (!valid) throw new CareError(400, 'El contenido no corresponde al tipo de archivo indicado.');
-  return { bytes, mime };
+  const inspected = inspectPrivateFile('clinical_document', bytes, mime);
+  return { bytes: inspected.bytes, mime };
 }
 async function putPrivateBlob(bucket: 'care-photos' | 'care-documents', path: string, bytes: Buffer, mime: string, previous: string | undefined, persistent: boolean) {
   if (!persistent) {
@@ -146,8 +199,9 @@ async function putPrivateBlob(bucket: 'care-photos' | 'care-documents', path: st
 }
 export async function storeCareDocument(path: string, dataUrl: string, persistent: boolean) {
   const { bytes, mime } = validateDocument(dataUrl);
+  if (persistent) await requireProductBuckets(['care-documents', 'care-quarantine']);
   await putPrivateBlob('care-documents', path, bytes, mime, documents.get(path), persistent);
-  if (!persistent) documents.set(path, dataUrl);
+  if (!persistent) documents.set(path, `data:${mime};base64,${bytes.toString('base64')}`);
 }
 export async function deleteCareDocument(patientId: string, id: string, persistent: boolean) {
   const record = (await listCareRecords(patientId, persistent)).find(r => r.id === id);

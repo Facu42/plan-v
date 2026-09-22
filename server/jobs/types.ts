@@ -1,4 +1,4 @@
-export const JOB_KINDS = ['menu_draft', 'purge_asset', 'fail'] as const;
+export const JOB_KINDS = ['menu_draft', 'recipe_draft', 'purge_asset', 'privacy_export', 'privacy_delete', 'fail'] as const;
 export type JobKind = (typeof JOB_KINDS)[number];
 export const JOB_STATUSES = ['queued', 'leased', 'succeeded', 'failed', 'dead'] as const;
 export type JobStatus = (typeof JOB_STATUSES)[number];

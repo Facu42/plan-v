@@ -194,4 +194,53 @@ describe('migraciones de ingreso en PostgreSQL', () => {
     await rpc(a,'delete_care_document',[patient,id]);
     expect((await db.query('select * from public.care_records where id=$1',[id])).rows).toEqual([]);
   });
+  it('PV-15: intenciones service-managed, cuarentena propia y Nutri B aislada', async () => {
+    await db.exec('grant select,insert,delete on storage.objects to authenticated');
+    const intent = '30000000-0000-4000-a000-000000000001';
+    const path = `patients/${patient}/q/${intent}`;
+    await expect(asUser(a, 'insert into public.asset_upload_intents(id,patient_id,nutritionist_id,category,object_path,mime_declared,byte_limit,expires_at) values($1,$2,$3,$4,$5,$6,$7,now()+interval \'15 minutes\')', [intent, patient, (await asUser<{nutritionist_id:string}>(pro, 'select nutritionist_id from public.patients where id=$1', [patient]))[0].nutritionist_id, 'clinical_document', path, 'application/pdf', 1024])).rejects.toMatchObject({ code: '42501' });
+    expect(await asUser(a, 'select id from public.asset_upload_intents')).toEqual([]);
+    const nutriId = (await db.query<{ nutritionist_id: string }>('select nutritionist_id from public.patients where id=$1', [patient])).rows[0].nutritionist_id;
+    await db.query(
+      `insert into public.asset_upload_intents(id,patient_id,nutritionist_id,category,object_path,mime_declared,byte_limit,expires_at)
+       values($1,$2,$3,'body_progress',$4,'image/png',1024,now()+interval '15 minutes')`,
+      [intent, patient, nutriId, path],
+    );
+    expect(await asUser(a, 'select id from public.asset_upload_intents')).toEqual([]);
+    expect(await asUser(pro, 'select object_path from public.asset_upload_intents')).toEqual([{ object_path: path }]);
+    expect(await asUser(other, 'select id from public.asset_upload_intents')).toEqual([]);
+    await expect(asUser(a, "insert into storage.objects(bucket_id,name) values('care-quarantine',$1)", ['mal.jpg'])).rejects.toMatchObject({ code: '42501' });
+    await asUser(a, "insert into storage.objects(bucket_id,name) values('care-quarantine',$1)", [path]);
+    expect(await asUser(a, 'select name from storage.objects where bucket_id=$1 and name=$2', ['care-quarantine', path])).toEqual([{ name: path }]);
+    expect(await asUser(b, 'select name from storage.objects where bucket_id=$1 and name=$2', ['care-quarantine', path])).toEqual([]);
+    expect(await asUser(pro, 'select name from storage.objects where bucket_id=$1 and name=$2', ['care-quarantine', path])).toEqual([]);
+  });
+  it('PV-17: dual-write de medidas con unidad, origen, aislamiento y sin inferir desde fotos', async () => {
+    const weight = '20000000-0000-4000-a000-000000000001';
+    const photo = '20000000-0000-4000-a000-000000000006';
+    const hip = '20000000-0000-4000-a000-000000000021';
+    const waist = '20000000-0000-4000-a000-000000000022';
+    const stored = (await asUser<{ kind: string; value_numeric: string | number; unit: string; source: string; captured_on: string }>(a, 'select kind,value_numeric,unit,source,captured_on::text as captured_on from public.measurements where id=$1', [weight]))[0];
+    expect(stored).toMatchObject({ kind: 'weight', unit: 'kg', source: 'patient' });
+    expect(Number(stored.value_numeric)).toBe(65);
+    expect(stored.captured_on.startsWith('2026-09-10')).toBe(true);
+    expect(await asUser(a, 'select id from public.measurements where id=$1', [photo])).toEqual([]);
+    await rpc(pro, 'save_care_record', [patient, hip, '2026-09-09', { kind: 'hip', value: 98, note: '', unit: 'cm', source: 'professional' }]);
+    expect((await asUser<{ source: string; unit: string }>(a, 'select source,unit from public.measurements where id=$1', [hip]))[0]).toEqual({ source: 'professional', unit: 'cm' });
+    await expect(rpc(a, 'save_care_record', [patient, waist, '2026-09-08', { kind: 'waist', value: 70, note: '', source: 'professional' }])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(pro, 'save_care_record', [patient, waist, '2026-09-08', { kind: 'waist', value: 70, note: '', source: 'patient' }])).rejects.toMatchObject({ code: '42501' });
+    expect(await asUser(b, 'select * from public.measurements')).toEqual([]);
+    expect(await asUser(other, 'select * from public.measurements')).toEqual([]);
+    const nutriId = (await db.query<{ nutritionist_id: string }>('select nutritionist_id from public.patients where id=$1', [patient])).rows[0].nutritionist_id;
+    await expect(asUser(a, 'insert into public.measurements(id,patient_id,nutritionist_id,kind,value_numeric,unit,source,captured_on) values($1,$2,$3,$4,$5,$6,$7,$8)', ['20000000-0000-4000-a000-000000000023', patient, nutriId, 'weight', 80, 'kg', 'patient', '2026-09-07'])).rejects.toMatchObject({ code: '42501' });
+  });
+  it('PV-17: sin tabla measurements el guardado falla cerrado', async () => {
+    await db.exec('alter table public.measurements rename to measurements_pv17_hidden');
+    try {
+      await expect(rpc(a, 'save_care_record', [patient, '20000000-0000-4000-a000-000000000024', '2026-09-06', { kind: 'weight', value: 70, note: '' }])).rejects.toMatchObject({ code: '42P01' });
+      expect(await db.query('select id from public.care_records where id=$1', ['20000000-0000-4000-a000-000000000024'])).toMatchObject({ rows: [] });
+    } finally {
+      await db.exec('alter table public.measurements_pv17_hidden rename to measurements');
+    }
+  });
 });

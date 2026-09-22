@@ -67,7 +67,7 @@ export function PatientOverview({ patient: p, onNavigate, audience = 'patient' }
       </NvCard>
     </div>
     <section className="np-followup" aria-label={followupTitle}>
-      <header><h2>{followupTitle}</h2><NvButton className="nv-ghost" onClick={() => onNavigate('progreso')}>Últimos 7 días <Icon name="chevron" size={13} /></NvButton></header>
+      <header><h2>{followupTitle}</h2><NvButton className="nv-ghost" onClick={() => onNavigate('progreso')}>Ver períodos <Icon name="chevron" size={13} /></NvButton></header>
       <div className="np-followup-grid">
         <button type="button" onClick={() => onNavigate('diario')}><span className="np-action-icon"><Icon name="camera" size={25} /></span><span><span>Diario de comidas</span><strong>{p.journey.reviewedMeals} revisadas</strong><NvProgress value={reviewed} label="Registros revisados" /></span></button>
         <button type="button" onClick={() => onNavigate('progreso')}><span className="np-action-icon"><Icon name="drop" size={25} /></span><span><span>Hábitos de la semana</span><strong>Agua y descanso</strong><small>{professional ? 'Ver registros' : 'Ver mis registros'}</small></span></button>

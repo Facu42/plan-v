@@ -59,9 +59,20 @@ const sbMocks = vi.hoisted(() => ({
   },
 }));
 
+const appointmentMocks = vi.hoisted(() => ({
+  scheduleAppointment: vi.fn(),
+  rescheduleAppointment: vi.fn(),
+  confirmAppointmentReply: vi.fn(),
+}));
+
 vi.mock('./db/supabase-repo.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('./db/supabase-repo.js')>();
   return { ...actual, ...sbMocks };
+});
+
+vi.mock('./appointments/repository.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./appointments/repository.js')>();
+  return { ...actual, ...appointmentMocks };
 });
 
 vi.mock('./db/supabase-client.js', () => ({
@@ -128,28 +139,24 @@ describe('PV-10 persistence parity for 016 domains', () => {
       appointment: { day: 'Viernes', time: '10:00', duration: 45, channel: 'video' },
     }));
     expect(response.status).toBe(200);
-    expect(sbMocks.sbSetAppointment).toHaveBeenCalled();
+    expect(appointmentMocks.scheduleAppointment).toHaveBeenCalledWith(
+      'pat-1',
+      expect.objectContaining({ day: 'Viernes', time: '10:00', duration: 45, channel: 'video' }),
+      true,
+    );
   });
 
   it('reschedules from the persisted slot, not from memory', async () => {
     sbMocks.sbGetActor.mockResolvedValue({ role: 'paciente', userId: 'user-1', patientId: 'pat-1' });
-    sbMocks.sbGetScheduledAppointment.mockResolvedValue({
-      day: 'Jueves',
-      time: '14:30',
-      duration: 45,
-      channel: 'video',
-    });
     const response = await app.request('/api/patients/pat-1/appointment/reschedule', authed('POST', {
       day: 'Viernes',
       time: '11:00',
     }));
     expect(response.status).toBe(200);
-    expect(sbMocks.sbSetAppointment).toHaveBeenCalledWith('pat-1', 'nutri-1', expect.objectContaining({
+    expect(appointmentMocks.rescheduleAppointment).toHaveBeenCalledWith('pat-1', {
       day: 'Viernes',
       time: '11:00',
-      duration: 45,
-      channel: 'video',
-    }));
+    }, true);
   });
 
   it('dismisses a brief and returns the patient afterwards', async () => {

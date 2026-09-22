@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { ShowroomPatient } from './showroom-model';
-import { buildGroceryView, publishedRecipeMeals, ShowroomGrocery } from './ShowroomGrocery';
+import { buildGroceryView, groceryGroupsFromLines, publishedRecipeMeals, ShowroomGrocery } from './ShowroomGrocery';
 
 const patient = {
   id: 'p1', name: 'Ana', initials: 'AR',
@@ -43,10 +43,35 @@ describe('Lista de compras Nutrigo', () => {
     expect(html).toContain('0 de');
   });
 
-  it('no inventa cantidades, precios, presupuesto ni supermercado', () => {
+  it('no inventa cantidades, precios, presupuesto ni supermercado en la vista de títulos', () => {
     const html = renderToStaticMarkup(<ShowroomGrocery patient={patient} />);
     expect(html).toContain('No incluye cantidades ni porciones');
     expect(html).not.toMatch(/precio|presupuesto|supermercado|\$|\bkg\b|\bgramos\b/i);
+  });
+
+  it('muestra cantidades y unidades del plan publicado sin mezclar g con taza', () => {
+    const html = renderToStaticMarkup(<ShowroomGrocery patient={patient} list={{
+      plan_version: 1,
+      period_start: '2026-09-21',
+      period_end: '2026-09-27',
+      items: [
+        { id: 'derived:quinoa|g', kind: 'derived', source_key: 'derived:quinoa|g', name: 'Quinoa', quantity: 90, unit: 'g', occurrences: 2, checked: false },
+        { id: 'derived:quinoa|taza', kind: 'derived', source_key: 'derived:quinoa|taza', name: 'Quinoa', quantity: 1, unit: 'taza', occurrences: 1, checked: false },
+        { id: 'text:pollo', kind: 'text', source_key: 'text:pollo con vegetales', name: 'Pollo con vegetales', quantity: null, unit: null, occurrences: 1, checked: false },
+        { id: 'manual-1', kind: 'manual', source_key: 'manual:manual-1', name: 'Aceite de oliva', quantity: 1, unit: 'cda', occurrences: 1, checked: false },
+      ],
+    }} />);
+    expect(html).toContain('Quinoa · 90 g');
+    expect(html).toContain('Quinoa · 1 taza');
+    expect(html).toContain('Aceite de oliva · 1 cda');
+    expect(html).toContain('Pollo con vegetales');
+    expect(html).toContain('Agregar');
+    expect(html).toContain('El check se sincroniza en tu cuenta');
+    expect(html).not.toContain('No incluye cantidades ni porciones');
+    expect(groceryGroupsFromLines([
+      { id: 'derived:quinoa|g', kind: 'derived', source_key: 'derived:quinoa|g', name: 'Quinoa', quantity: 90, unit: 'g', occurrences: 2, checked: false },
+      { id: 'derived:quinoa|taza', kind: 'derived', source_key: 'derived:quinoa|taza', name: 'Quinoa', quantity: 1, unit: 'taza', occurrences: 1, checked: false },
+    ]).flatMap((group) => group.items).map((item) => item.label)).toEqual(['Quinoa · 1 taza', 'Quinoa · 90 g']);
   });
 
   it('muestra un vacío honesto cuando no existe plan semanal', () => {

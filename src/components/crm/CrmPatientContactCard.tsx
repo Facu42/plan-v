@@ -1,9 +1,11 @@
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { api } from '../../api/client';
+import { CHAT_ATTACHMENT_ACCEPT, assertChatFile, uploadChatAttachment } from '../../api/assets';
 import { useAppStore } from '../../store/useAppStore';
 import type { Patient } from '../../types';
 import { Icon } from '../shared/Icon';
 import { sortThreadMessages } from '../shared/message-thread';
+import { ChatAttachmentView } from '../nutrigo/ChatAttachment';
 
 function messageTime(value: string): string {
   return new Intl.DateTimeFormat('es-AR', {
@@ -17,24 +19,40 @@ function messageTime(value: string): string {
 export function CrmPatientContactCard({ patient }: { patient: Patient }) {
   const refreshPatient = useAppStore((state) => state.refreshPatient);
   const [text, setText] = useState('');
+  const [file, setFile] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+  const clientId = useRef(crypto.randomUUID());
+  const fileRef = useRef<HTMLInputElement>(null);
   const recentMessages = sortThreadMessages(patient.messages).slice(-3);
 
   useEffect(() => {
     setText('');
+    setFile(null);
     setStatus(null);
+    clientId.current = crypto.randomUUID();
   }, [patient.id]);
 
   const send = async (event: FormEvent) => {
     event.preventDefault();
     const cleanText = text.trim();
-    if (!cleanText || sending) return;
+    if ((!cleanText && !file) || sending) return;
     setSending(true);
     setStatus(null);
     try {
-      await api.sendMessage(patient.id, cleanText, 'vero');
+      const uploaded = file ? await uploadChatAttachment(patient.id, file, true) : null;
+      await api.sendMessage(
+        patient.id,
+        cleanText,
+        'vero',
+        false,
+        clientId.current,
+        uploaded ? { asset_id: uploaded.asset_id, filename: uploaded.filename } : undefined,
+      );
+      clientId.current = crypto.randomUUID();
       setText('');
+      setFile(null);
+      if (fileRef.current) fileRef.current.value = '';
       await refreshPatient(patient.id);
       setStatus('Mensaje enviado.');
     } catch {
@@ -61,7 +79,8 @@ export function CrmPatientContactCard({ patient }: { patient: Patient }) {
           {recentMessages.map((message) => (
             <div key={message.id} className={message.from === 'vero' ? 'from-vero' : 'from-patient'}>
               <span>{message.from === 'vero' ? 'Verónica' : patient.name}</span>
-              <p>{message.text}</p>
+              {message.text ? <p>{message.text}</p> : null}
+              {message.attachment && <ChatAttachmentView patientId={patient.id} messageId={message.id} attachment={message.attachment} />}
               <time dateTime={message.sent_at}>{messageTime(message.sent_at)}</time>
             </div>
           ))}
@@ -69,7 +88,14 @@ export function CrmPatientContactCard({ patient }: { patient: Patient }) {
         <form className="contact-compose" onSubmit={send}>
           <label htmlFor={`crm-message-${patient.id}`}>Escribir mensaje propio</label>
           <textarea id={`crm-message-${patient.id}`} rows={2} maxLength={2000} value={text} onChange={(event) => setText(event.target.value)} placeholder={`Mensaje para ${patient.name}`} />
-          <button type="submit" disabled={sending || !text.trim()}>{sending ? 'Enviando…' : 'Enviar mensaje'}</button>
+          <input ref={fileRef} id={`crm-attach-${patient.id}`} type="file" accept={CHAT_ATTACHMENT_ACCEPT} onChange={(event) => {
+            const next = event.target.files?.[0] ?? null;
+            if (!next) { setFile(null); return; }
+            try { assertChatFile(next); setFile(next); setStatus(null); }
+            catch (caught) { setFile(null); setStatus(caught instanceof Error ? caught.message : 'El archivo no se puede adjuntar.'); }
+          }} />
+          <label htmlFor={`crm-attach-${patient.id}`}>Adjuntar archivo</label>
+          <button type="submit" disabled={sending || (!text.trim() && !file)}>{sending ? 'Enviando…' : 'Enviar mensaje'}</button>
         </form>
         {status && <p className="contact-message-status" role="status">{status}</p>}
       </section>

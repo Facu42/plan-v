@@ -48,6 +48,7 @@ describe('Agenda paciente Nutrigo', () => {
     expect(html).toContain('rel="noopener noreferrer"');
     expect(html).toContain('Confirmar asistencia');
     expect(html).toContain('Necesito cambiar el horario');
+    expect(html).toContain('America/Argentina/Buenos_Aires');
     expect(html).toContain('Reprogramar horario');
     expect(html).toContain('Historial de turnos');
     expect(html).toContain('indicaciones del plan se muestran sólo sobre la semana calendario actual');

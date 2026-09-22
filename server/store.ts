@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { calculateAdherence } from './adherence.js';
+import { CareError } from './care/errors.js';
 import {
+  DEFAULT_APPOINTMENT_TIMEZONE,
   historyEntry,
   resolveAppointmentState,
   stampStartsAt,
@@ -21,7 +23,21 @@ import {
 import { validateProvisionInput } from './identity/provision.js';
 import { resetIntakeMemory } from './intake/memory.js';
 import { resetCareMemory } from './care/repository.js';
+import { resetPrivateAssets } from './assets/repository.js';
 import { resetProcessQueue } from './jobs/queue.js';
+import { resetRecipeMemory } from './recipes/repository.js';
+import { resetRecipeDayMemory } from './recipes/day.js';
+import { resetMealPlanMemory } from './plans/repository.js';
+import { resetDiaryMemory } from './diary/repository.js';
+import { markMemoryRead, resetMessageMemory, sendMemoryMessage } from './messages/repository.js';
+import { resetAiJobMemory } from './ai-jobs/repository.js';
+import { resetPrivacyMemory } from './privacy/repository.js';
+import { resetShoppingMemory } from './shopping/repository.js';
+import { enqueueMemoryOutbox, listMemoryMailbox, processMemoryDeliveries, resetOutboxMemory } from './outbox/memory.js';
+import { resetExerciseMemory } from './exercise/memory.js';
+import { resetResourceMemory } from './resources/memory.js';
+import { resetOrgMemory } from './orgs/memory.js';
+import type { OutboxEventType } from '../src/types/outbox.js';
 
 export type { PatientInvite, InviteEvent } from './identity/invites.js';
 
@@ -56,6 +72,8 @@ export type Macros = {
   fat_g: number;
 };
 
+export type MealAnalysisStatus = 'pending' | 'succeeded' | 'failed';
+
 export type MealLog = {
   id: string;
   patient_id: string;
@@ -68,6 +86,7 @@ export type MealLog = {
   note_for_nutri: string;
   status: MealStatus;
   logged_at: string;
+  analysis_status?: MealAnalysisStatus;
 };
 
 export type DemoNotice = {
@@ -107,6 +126,14 @@ export type Message = {
   sent_at: string;
   delivered_at?: string | null;
   read_at?: string | null;
+  attachment?: {
+    asset_id: string;
+    filename: string;
+    mime: string;
+    byte_size: number;
+    kind: 'image' | 'pdf';
+    available?: boolean;
+  };
 };
 
 export type HabitLog = {
@@ -143,6 +170,8 @@ export type Patient = {
   tone: 'peach' | 'lilac' | 'mint';
   status: string;
   archived_at?: string | null;
+  deactivated_at?: string | null;
+  anonymized_at?: string | null;
   billing_status: BillingStatus;
   billing_until: string | null;
   stage: Stage;
@@ -160,7 +189,16 @@ export type Patient = {
   hydration: number;
   energy: string | null;
   sleep_minutes: number | null;
-  appointment: { when: string; duration: number; channel: string; meet_url?: string; starts_at?: string } | null;
+  appointment: {
+    when: string;
+    duration: number;
+    channel: string;
+    meet_url?: string;
+    starts_at?: string;
+    timezone?: string;
+    patient_reply?: 'attending' | 'needs_change';
+    confirmed_at?: string | null;
+  } | null;
   appointment_history?: AppointmentHistoryEntry[];
   habit_logs: HabitLog[];
   activity_logs?: ActivityLog[];
@@ -521,8 +559,45 @@ export function getPatient(id: string): Patient | undefined {
 
 const DEMO_NOTICE_TO = 'aviso.demo@plan-v.local';
 
+function recordOutboxNotice(input: {
+  patientId: string;
+  eventType: OutboxEventType;
+  kind: DemoNotice['kind'];
+  subject: string;
+  body: string;
+  clientId?: string;
+}) {
+  const patient = getPatient(input.patientId);
+  if (!patient) return;
+  enqueueMemoryOutbox({
+    patient: {
+      id: patient.id,
+      nutritionist_id: DEMO_NUTRITIONIST_ID,
+      deactivated_at: patient.deactivated_at,
+      anonymized_at: patient.anonymized_at,
+    },
+    event_type: input.eventType,
+    client_id: input.clientId ?? randomUUID(),
+    subject: input.subject,
+    body: input.body,
+    kind: input.kind,
+    pref_user: patient.id,
+  });
+  processMemoryDeliveries();
+}
+
 export function enqueueNotice(input: Omit<DemoNotice, 'id' | 'at' | 'channel' | 'to'> & { to?: string }): DemoNotice {
-  const entry: DemoNotice = {
+  recordOutboxNotice({
+    patientId: input.patientId,
+    eventType: input.kind === 'appointment' ? 'appointment_scheduled' : 'reminder',
+    kind: input.kind,
+    subject: input.subject,
+    body: input.body,
+  });
+  const mailbox = listMemoryMailbox(input.patientId);
+  const entry = mailbox[0];
+  if (entry) return entry;
+  return {
     id: randomUUID(),
     at: now(),
     channel: 'email',
@@ -532,12 +607,10 @@ export function enqueueNotice(input: Omit<DemoNotice, 'id' | 'at' | 'channel' | 
     patientId: input.patientId,
     kind: input.kind,
   };
-  store.notices.unshift(entry);
-  return entry;
 }
 
 export function listNotices(patientId?: string): DemoNotice[] {
-  return patientId ? store.notices.filter((notice) => notice.patientId === patientId) : store.notices;
+  return listMemoryMailbox(patientId);
 }
 
 function recordInviteEvent(inviteId: string, event: InviteEvent['event'], actorId: string | null = null): void {
@@ -634,6 +707,14 @@ export function sendPatientInvite(inviteId: string): PatientInvite | null {
   if (!activated) return null;
   store.patientInvites = store.patientInvites.map((invite) => invite.id === inviteId ? activated.invite : invite);
   recordInviteEvent(inviteId, activated.event);
+  recordOutboxNotice({
+    patientId: current.patient_id,
+    eventType: 'invite_sent',
+    kind: 'reminder',
+    subject: `Invitación enviada · ${current.email}`,
+    body: 'La invitación quedó en el buzón in-app de Plan V; no se envió un mail real.',
+    clientId: inviteId,
+  });
   return publicInviteView(activated.invite);
 }
 
@@ -681,7 +762,20 @@ export function provisionNutritionistMemory(input: { userId: string; displayName
 export function resetStore(): void {
   resetIntakeMemory();
   resetCareMemory();
+  resetPrivateAssets();
   resetProcessQueue();
+  resetRecipeMemory();
+  resetRecipeDayMemory();
+  resetMealPlanMemory();
+  resetDiaryMemory();
+  resetMessageMemory();
+  resetAiJobMemory();
+  resetPrivacyMemory();
+  resetShoppingMemory();
+  resetOutboxMemory();
+  resetExerciseMemory();
+  resetResourceMemory();
+  resetOrgMemory();
   store = {
     patients: seedPatients(),
     patientInvites: [],
@@ -969,9 +1063,22 @@ function appointmentTitle(previous: Patient['appointment'], next: Patient['appoi
   return actor === 'patient' ? 'Consulta · reprogramada por la paciente' : 'Consulta · reprogramada';
 }
 
+function appointmentRangesOverlap(
+  left: { starts_at?: string; duration: number },
+  right: { starts_at?: string; duration: number },
+) {
+  if (!left.starts_at || !right.starts_at) return false;
+  const aStart = Date.parse(left.starts_at);
+  const bStart = Date.parse(right.starts_at);
+  if (Number.isNaN(aStart) || Number.isNaN(bStart)) return false;
+  const aEnd = aStart + left.duration * 60_000;
+  const bEnd = bStart + right.duration * 60_000;
+  return aStart < bEnd && bStart < aEnd;
+}
+
 export function setAppointment(
   id: string,
-  appointment: { day: string; time: string; duration: number; channel: string; meet_url?: string } | null,
+  appointment: { day: string; time: string; duration: number; channel: string; meet_url?: string; timezone?: string } | null,
   options: { actor?: AppointmentHistoryActor } = {},
 ): Patient | undefined {
   const patient = getPatient(id);
@@ -985,9 +1092,18 @@ export function setAppointment(
         when: `${appointment.day} · ${appointment.time}`,
         duration: appointment.duration,
         channel: appointment.channel,
+        timezone: appointment.timezone ?? previous?.timezone ?? DEFAULT_APPOINTMENT_TIMEZONE,
         ...(appointment.meet_url ? { meet_url: appointment.meet_url } : {}),
       }, clock)
     : null;
+  if (scheduled) {
+    for (const other of store.patients) {
+      if (other.id === id || !other.appointment) continue;
+      if (appointmentRangesOverlap(scheduled, other.appointment)) {
+        throw new CareError(409, 'Ese horario se solapa con otra consulta del consultorio.');
+      }
+    }
+  }
   const history = [...(patient.appointment_history ?? [])];
   if (previous && previous.when !== scheduled?.when) {
     history.unshift(historyEntry({
@@ -1012,8 +1128,14 @@ export function setAppointment(
 
   if (scheduled || previous) {
     const when = scheduled?.when ?? previous?.when ?? '';
-    enqueueNotice({
+    const eventType: OutboxEventType = !scheduled
+      ? 'appointment_cancelled'
+      : previous
+        ? 'appointment_rescheduled'
+        : 'appointment_scheduled';
+    recordOutboxNotice({
       patientId: id,
+      eventType,
       kind: 'appointment',
       subject: `${title} · ${patient.name}`,
       body: scheduled
@@ -1023,6 +1145,38 @@ export function setAppointment(
   }
 
   return updatePatient(id, { appointment: scheduled, appointment_history: history, timeline });
+}
+
+export function confirmAppointment(id: string, reply: 'attending' | 'needs_change'): Patient | undefined {
+  const patient = getPatient(id);
+  if (!patient) return undefined;
+  if (!patient.appointment) throw new CareError(409, 'No hay un turno para reprogramar');
+  if (patient.appointment.patient_reply === reply) return patient;
+  const recordedAt = now();
+  const appointment = {
+    ...patient.appointment,
+    timezone: patient.appointment.timezone ?? DEFAULT_APPOINTMENT_TIMEZONE,
+    patient_reply: reply,
+    ...(reply === 'attending' || patient.appointment.confirmed_at
+      ? { confirmed_at: patient.appointment.confirmed_at ?? recordedAt }
+      : {}),
+  };
+  const history = [historyEntry({
+    id: randomUUID(),
+    slot: appointment,
+    action: reply === 'attending' ? 'confirmed' : 'needs_change',
+    actor: 'patient',
+    at: recordedAt,
+    now: new Date(recordedAt),
+  }), ...(patient.appointment_history ?? [])];
+  recordOutboxNotice({
+    patientId: id,
+    eventType: 'appointment_confirmed',
+    kind: 'appointment',
+    subject: `Consulta · ${reply === 'attending' ? 'confirmada' : 'pide cambio'} · ${patient.name}`,
+    body: `La paciente respondió ${reply === 'attending' ? 'asiste' : 'pide cambio'} al turno ${appointment.when}. Este aviso quedó en el buzón in-app de Plan V; no se envió a internet.`,
+  });
+  return updatePatient(id, { appointment, appointment_history: history });
 }
 
 export function addMealLog(patientId: string, log: Omit<MealLog, 'id' | 'patient_id' | 'logged_at' | 'status'>): MealLog {
@@ -1073,31 +1227,17 @@ export function updateMealLog(patientId: string, logId: string, patch: Partial<M
 }
 
 export function addMessage(patientId: string, text: string, from: 'vero' | 'patient', suggestedByAi = false): Message {
-  const sentAt = now();
-  const msg: Message = {
-    id: randomUUID(),
-    patient_id: patientId,
-    from,
+  return sendMemoryMessage(patientId, {
     text,
-    suggested_by_ai: suggestedByAi,
-    sent_at: sentAt,
-    delivered_at: sentAt,
-  };
-  const patient = getPatient(patientId);
-  patient?.messages.push(msg);
-  return msg;
+    from,
+    suggestedByAi,
+    client_id: randomUUID(),
+  }).message;
 }
 
 export function markMessagesRead(patientId: string, reader: 'vero' | 'patient'): Patient | undefined {
-  const patient = getPatient(patientId);
-  if (!patient) return undefined;
-  const incomingFrom = reader === 'vero' ? 'patient' : 'vero';
-  const readAt = now();
-  patient.messages = patient.messages.map((message) => {
-    if (!message.sent_at || message.from !== incomingFrom || message.read_at) return message;
-    return { ...message, delivered_at: message.delivered_at ?? message.sent_at, read_at: readAt };
-  });
-  return patient;
+  if (!getPatient(patientId)) return undefined;
+  return markMemoryRead(patientId, reader);
 }
 
 export function setBrief(patientId: string, brief: Brief): void {

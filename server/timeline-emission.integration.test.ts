@@ -3,14 +3,25 @@ import { CONSENT_CATALOG } from './intake/consent.js';
 
 vi.mock('./intake/repository.js',async original=>({...await original<typeof import('./intake/repository.js')>(),readIntakeBundle:async()=>({intake:{},consents:CONSENT_CATALOG.map(c=>({...c,decision:'granted'}))})}));
 
+const diaryMocks = vi.hoisted(() => ({
+  saveMealLog: vi.fn(),
+  recordMealAnalysis: vi.fn(),
+  reviewMealLog: vi.fn(),
+}));
+
 const sbMocks = vi.hoisted(() => ({
   sbGetActor: vi.fn(),
   sbGetPatientResource: vi.fn(),
   sbGetPatientById: vi.fn(),
-  sbAddMealLog: vi.fn(),
-  sbUpdateMealLog: vi.fn(),
   sbUpdateHabits: vi.fn(),
   sbAddTimelineEvent: vi.fn(),
+}));
+
+vi.mock('./diary/repository.js', async (original) => ({
+  ...await original<typeof import('./diary/repository.js')>(),
+  saveMealLog: diaryMocks.saveMealLog,
+  recordMealAnalysis: diaryMocks.recordMealAnalysis,
+  reviewMealLog: diaryMocks.reviewMealLog,
 }));
 
 vi.mock('./db/supabase-repo.js', () => sbMocks);
@@ -77,6 +88,37 @@ beforeEach(() => {
   });
   sbMocks.sbGetPatientById.mockResolvedValue(fakePatient());
   sbMocks.sbAddTimelineEvent.mockResolvedValue(undefined);
+  diaryMocks.saveMealLog.mockResolvedValue({
+    duplicate: false,
+    log: {
+      id: 'log-1',
+      patient_id: 'pat-1',
+      slot: 'Almuerzo',
+      photo_url: null,
+      description: 'Bowl de quinoa',
+      foods: [],
+      macros: null,
+      confidence: 0,
+      note_for_nutri: '',
+      status: 'pending_review',
+      logged_at: new Date().toISOString(),
+      analysis_status: 'pending',
+    },
+  });
+  diaryMocks.recordMealAnalysis.mockImplementation(async (_patientId: string, mealId: string, input: { foods: unknown[]; macros: { kcal: number } | null; confidence: number; note_for_nutri: string; status: string }) => ({
+    id: mealId,
+    patient_id: 'pat-1',
+    slot: 'Almuerzo',
+    photo_url: null,
+    description: 'Bowl de quinoa',
+    foods: input.foods,
+    macros: input.macros,
+    confidence: input.confidence,
+    note_for_nutri: input.note_for_nutri,
+    status: 'pending_review',
+    logged_at: new Date().toISOString(),
+    analysis_status: input.status,
+  }));
 });
 
 function asNutri() {
@@ -85,27 +127,14 @@ function asNutri() {
 
 describe('timeline emission in Supabase mode (parity with memory)', () => {
   it('emits meal_logged when a patient meal is analyzed and stored', async () => {
-    sbMocks.sbAddMealLog.mockResolvedValue({
-      id: 'log-1',
-      patient_id: 'pat-1',
-      slot: 'Almuerzo',
-      photo_url: null,
-      description: 'Bowl de quinoa',
-      foods: [],
-      macros: null,
-      confidence: 0.62,
-      note_for_nutri: '',
-      status: 'pending_review',
-      logged_at: new Date().toISOString(),
-    });
-
     const res = await app.request('/api/patients/pat-1/meals/analyze', authedJson('POST', {
       slot: 'Almuerzo',
       description: 'Bowl de quinoa',
     }));
 
     expect(res.status).toBe(200);
-    expect(sbMocks.sbAddMealLog).toHaveBeenCalledOnce();
+    expect(diaryMocks.saveMealLog).toHaveBeenCalledOnce();
+    expect(diaryMocks.recordMealAnalysis).toHaveBeenCalledOnce();
     expect(sbMocks.sbAddTimelineEvent).toHaveBeenCalledOnce();
     const [patientId, event] = sbMocks.sbAddTimelineEvent.mock.calls[0];
     expect(patientId).toBe('pat-1');
@@ -115,7 +144,7 @@ describe('timeline emission in Supabase mode (parity with memory)', () => {
 
   it('emits meal_logged confirmado with foods and kcal on review', async () => {
     asNutri();
-    sbMocks.sbUpdateMealLog.mockResolvedValue({
+    diaryMocks.reviewMealLog.mockResolvedValue({
       id: 'meal-1',
       patient_id: 'pat-1',
       slot: 'Almuerzo',
@@ -140,7 +169,7 @@ describe('timeline emission in Supabase mode (parity with memory)', () => {
 
   it('emits meal_logged ajustado when the review adjusts', async () => {
     asNutri();
-    sbMocks.sbUpdateMealLog.mockResolvedValue({
+    diaryMocks.reviewMealLog.mockResolvedValue({
       id: 'meal-1',
       patient_id: 'pat-1',
       slot: 'Cena',

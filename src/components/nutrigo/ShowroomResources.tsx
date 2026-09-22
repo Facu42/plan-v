@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ResourceAssignment } from '../../types';
+import { resourcesApi } from '../../api/resources';
+import { isAbortError } from '../../api/client';
+import {
+  SEEDED_OPERATIONAL_RESOURCES,
+  SEEDED_RESOURCES,
+  favoriteKindForResource,
+  type EditorialResource,
+  type FavoriteView,
+  type PatientLibraryView,
+} from '../../types/resources';
 import { Icon, type IconName } from '../shared/Icon';
 import { NvBadge, NvButton, NvState } from './primitives';
 import type { ShowroomPage } from './ShowroomPanels';
@@ -17,77 +27,43 @@ export type ResourceGuide = {
   sections: Array<{ title: string; body: string }>;
   related: string[];
   action: { label: string; page: ShowroomPage };
+  kind: 'operational' | 'clinical';
+  author_name: string;
+  reviewed_at: string | null;
+  license_note: string;
 };
 
-export const RESOURCE_GUIDES: ResourceGuide[] = [
-  {
-    id: 'leer-plan-semanal', title: 'Cómo leer tu plan semanal', category: 'Mi plan', eyebrow: 'EMPEZÁ POR ACÁ', minutes: 3, icon: 'list',
-    summary: 'Ubicá cada indicación por día y momento, buscá títulos y consultá cualquier cambio con tu nutricionista.',
-    tags: ['plan semanal', 'días', 'comidas'], related: ['compras-desde-plan', 'registrar-comida'], action: { label: 'Abrir mi plan', page: 'plan' },
-    sections: [
-      { title: 'Una semana, siete días', body: 'En Mi plan podés recorrer los siete días publicados por tu nutricionista. Cada tarjeta conserva el título y el momento de comida que forman parte del plan vigente.' },
-      { title: 'Sólo mostramos lo que fue indicado', body: 'Plan V no completa por su cuenta porciones, cantidades ni información nutricional. Si una indicación necesita más detalle, usá Mensajes para consultarlo.' },
-      { title: 'Encontrá una preparación', body: 'El buscador recorre títulos, días y momentos. Menú saludable reúne los mismos títulos para ver rápidamente dónde aparecen durante la semana.' },
-    ],
-  },
-  {
-    id: 'registrar-comida', title: 'Registrar una comida sin perder contexto', category: 'Diario', eyebrow: 'TU REGISTRO', minutes: 2, icon: 'camera',
-    summary: 'Sumá una foto o una descripción al Diario para compartir el registro con tu nutricionista.',
-    tags: ['diario', 'foto', 'seguimiento'], related: ['leer-plan-semanal', 'progreso-semanal'], action: { label: 'Abrir mi diario', page: 'diario' },
-    sections: [
-      { title: 'Foto o descripción', body: 'Elegí el momento de comida y registrá una foto o un texto. La entrada queda asociada a tu ficha y visible para la profesional que te acompaña.' },
-      { title: 'Revisión profesional', body: 'Cuando exista una revisión, el Diario muestra únicamente la devolución habilitada para vos. Las notas privadas de trabajo profesional permanecen fuera de tu vista.' },
-      { title: 'Análisis disponible', body: 'Si el análisis asistido está habilitado, Plan V lo procesa dentro del circuito existente. Si no está disponible, tu registro igualmente conserva el contenido que enviaste.' },
-    ],
-  },
-  {
-    id: 'compras-desde-plan', title: 'Preparar la compra desde el plan', category: 'Organización', eyebrow: 'ORGANIZÁ TU SEMANA', minutes: 2, icon: 'check',
-    summary: 'Usá la lista derivada del plan vigente y marcá en este dispositivo lo que ya resolviste.',
-    tags: ['compras', 'organización', 'plan'], related: ['leer-plan-semanal', 'registrar-comida'], action: { label: 'Abrir lista de compras', page: 'compras' },
-    sections: [
-      { title: 'Una ayuda basada en tu plan', body: 'La lista reúne conservadoramente los títulos publicados para la semana y los organiza para facilitar el repaso antes de comprar.' },
-      { title: 'Sin cantidades inventadas', body: 'Si el plan no incluye ingredientes, cantidades o unidades, la lista tampoco los agrega. Ante una duda sobre qué comprar, consultá a tu nutricionista.' },
-      { title: 'Checklist de este dispositivo', body: 'Las marcas de completado son una comodidad local, separada de tu información clínica. Podés reiniciarlas cuando empiece una nueva compra.' },
-    ],
-  },
-  {
-    id: 'contacto-nutricionista', title: 'Coordinar con tu nutricionista', category: 'Acompañamiento', eyebrow: 'SEGUÍ EN CONTACTO', minutes: 2, icon: 'message',
-    summary: 'Encontrá tu próxima consulta y mantené la conversación en el mismo hilo privado de Plan V.',
-    tags: ['mensajes', 'agenda', 'consulta'], related: ['leer-plan-semanal', 'registrar-comida'], action: { label: 'Abrir mensajes', page: 'mensajes' },
-    sections: [
-      { title: 'Una conversación continua', body: 'Mensajes conserva el intercambio con tu nutricionista dentro de tu ficha. Es el lugar indicado para consultar una indicación o compartir contexto.' },
-      { title: 'Tu próxima consulta', body: 'Agenda muestra la próxima ocurrencia disponible, junto con modalidad y duración cuando esos datos fueron definidos por la profesional.' },
-      { title: 'Sin estados supuestos', body: 'Plan V no muestra confirmaciones de lectura o entrega que todavía no estén persistidas. El hilo presenta únicamente los mensajes disponibles.' },
-    ],
-  },
-  {
-    id: 'progreso-semanal', title: 'Entender tu progreso semanal', category: 'Seguimiento', eyebrow: 'TUS ÚLTIMOS DÍAS', minutes: 3, icon: 'trend',
-    summary: 'Revisá los registros disponibles de los últimos siete días sin confundirlos con una evaluación clínica.',
-    tags: ['progreso', 'hábitos', 'semana'], related: ['registrar-comida', 'actividad-autodeclarada'], action: { label: 'Ver mi progreso', page: 'progreso' },
-    sections: [
-      { title: 'Una ventana de siete días', body: 'Progreso organiza los datos que ya existen en tu ficha para mostrar una vista breve de comidas revisadas y hábitos registrados.' },
-      { title: 'Datos disponibles, no estimaciones', body: 'Cuando falta un registro, Plan V no lo completa ni lo reemplaza con valores aproximados. La vista se limita a la información disponible.' },
-      { title: 'Contexto para conversar', body: 'Usá esta pantalla como apoyo para reconocer patrones y preparar preguntas. La interpretación profesional corresponde a tu nutricionista.' },
-    ],
-  },
-  {
-    id: 'actividad-autodeclarada', title: 'Registrar actividad autodeclarada', category: 'Movimiento', eyebrow: 'TU ACTIVIDAD', minutes: 2, icon: 'heart',
-    summary: 'Anotá tipo, duración e intensidad percibida sin convertir el registro en una rutina indicada.',
-    tags: ['actividad', 'duración', 'intensidad'], related: ['progreso-semanal', 'contacto-nutricionista'], action: { label: 'Registrar actividad', page: 'ejercicio' },
-    sections: [
-      { title: 'Contá lo que hiciste', body: 'Podés registrar el nombre de la actividad, los minutos, la intensidad que percibiste y una nota opcional.' },
-      { title: 'Un registro personal', body: 'La pantalla conserva lo que declaraste y lo comparte con tu nutricionista. No agrega distancia, pasos, frecuencia cardíaca ni otros resultados que no ingresaste.' },
-      { title: 'Separado de una rutina', body: 'Anotar una actividad no crea una recomendación ni reemplaza la indicación de una persona habilitada para trabajar sobre ejercicio.' },
-    ],
-  },
-];
+const ICONS: IconName[] = ['list', 'camera', 'check', 'message', 'trend', 'heart', 'sparkle', 'leaf'];
+const asIcon = (value: string): IconName => ICONS.includes(value as IconName) ? value as IconName : 'sparkle';
+
+export function toResourceGuide(entry: EditorialResource): ResourceGuide {
+  return {
+    id: entry.slug,
+    title: entry.title,
+    category: entry.category,
+    eyebrow: entry.eyebrow,
+    summary: entry.summary,
+    minutes: entry.minutes,
+    icon: asIcon(entry.icon),
+    tags: entry.tags,
+    sections: entry.sections,
+    related: entry.related,
+    action: { label: entry.action_label, page: entry.action_page as ShowroomPage },
+    kind: entry.kind,
+    author_name: entry.author_name,
+    reviewed_at: entry.reviewed_at,
+    license_note: entry.license_note,
+  };
+}
+
+export const RESOURCE_GUIDES: ResourceGuide[] = SEEDED_OPERATIONAL_RESOURCES.map(toResourceGuide);
 
 export const resourceGuideIdFromHash = (hash: string) => {
   const match = /^#recurso=([^&]+)$/.exec(hash);
   if (!match) return null;
   let id = '';
   try { id = decodeURIComponent(match[1]); } catch { return null; }
-  return RESOURCE_GUIDES.some((guide) => guide.id === id) ? id : null;
+  return SEEDED_RESOURCES.some((entry) => entry.slug === id) ? id : null;
 };
 
 export const buildResourceShareUrl = (id: string, href: string) => {
@@ -133,37 +109,71 @@ export const resourceAssignmentDateLabel = (value: string) => {
   return month >= 1 && month <= 12 && day >= 1 && day <= 31 ? `${day} ${MONTHS[month - 1]}` : 'fecha no disponible';
 };
 
-const storageKey = (patientId: string) => `plan-v:resource-favorites:${patientId}`;
-const readSaved = (patientId: string) => {
-  if (typeof window === 'undefined') return [] as string[];
-  try {
-    const value = JSON.parse(window.localStorage.getItem(storageKey(patientId)) ?? '[]');
-    return Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : [];
-  } catch { return []; }
+const KIND_LABEL: Record<FavoriteView['item_kind'], string> = {
+  resource: 'Guía',
+  article: 'Artículo',
+  recipe: 'Receta',
+  plan_b: 'Plan B',
 };
 
-export function ShowroomResources({ patientId, query, assignments = [], onNavigate, onMarkRead }: {
+function emptyLibrary(patientId: string): PatientLibraryView {
+  return {
+    patient_id: patientId,
+    resources: SEEDED_OPERATIONAL_RESOURCES.map((entry) => ({ ...entry })),
+    articles: [],
+    recipes: [],
+    plan_b: null,
+    assignments: [],
+    favorites: [],
+    hits: [],
+  };
+}
+
+export function ShowroomResources({ patientId, query, assignments = [], onNavigate, onMarkRead, library: injected }: {
   patientId: string;
   query: string;
   assignments?: ResourceAssignment[];
   onNavigate: (page: ShowroomPage) => void;
   onMarkRead?: (resourceId: string) => Promise<void>;
+  library?: PatientLibraryView | null;
 }) {
   const [category, setCategory] = useState('Todas');
   const [selectedId, setSelectedId] = useState<string | null>(() => typeof window === 'undefined' ? null : resourceGuideIdFromHash(window.location.hash));
-  const [saved, setSaved] = useState<string[]>(() => readSaved(patientId));
+  const [remote, setRemote] = useState<PatientLibraryView | null>(injected ?? null);
   const [shareStatus, setShareStatus] = useState('');
   const [readStatus, setReadStatus] = useState('');
-  const categories = ['Todas', ...new Set(RESOURCE_GUIDES.map((guide) => guide.category))];
-  const guides = useMemo(() => filterResourceGuides(RESOURCE_GUIDES, query, category), [query, category]);
-  const selected = RESOURCE_GUIDES.find((guide) => guide.id === selectedId) ?? null;
-  const assignedGuides = assignments.map((assignment) => ({
+  const snapshot = remote ?? emptyLibrary(patientId);
+  const catalog = useMemo(() => {
+    const operational = snapshot.resources.map(toResourceGuide);
+    const articles = snapshot.articles.filter((entry) => entry.published).map(toResourceGuide);
+    return [...operational, ...articles];
+  }, [snapshot]);
+  const categories = ['Todas', ...new Set(catalog.map((guide) => guide.category))];
+  const guides = useMemo(() => filterResourceGuides(catalog, query, category), [catalog, query, category]);
+  const selected = catalog.find((guide) => guide.id === selectedId) ?? null;
+  const assignedGuides = (assignments.length ? assignments : snapshot.assignments.map((row) => ({
+    id: row.id, patient_id: row.patient_id, resource_id: row.resource_id, assigned_at: row.assigned_at, read_at: row.read_at,
+  }))).map((assignment) => ({
     assignment,
-    guide: RESOURCE_GUIDES.find((guide) => guide.id === assignment.resource_id),
+    guide: catalog.find((guide) => guide.id === assignment.resource_id),
   })).filter((item): item is { assignment: ResourceAssignment; guide: ResourceGuide } => Boolean(item.guide));
+  const saved = snapshot.favorites;
 
   useEffect(() => {
-    setSaved(readSaved(patientId));
+    if (injected) {
+      setRemote(injected);
+      return;
+    }
+    const controller = new AbortController();
+    resourcesApi.library(patientId, query, false, controller.signal).then((result) => {
+      setRemote(result.library);
+    }).catch((error) => {
+      if (isAbortError(error)) return;
+      setRemote(emptyLibrary(patientId));
+    });
+    return () => controller.abort();
+  }, [injected, patientId, query]);
+  useEffect(() => {
     setSelectedId(resourceGuideIdFromHash(window.location.hash));
   }, [patientId]);
   useEffect(() => {
@@ -197,10 +207,13 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
     setSelectedId(null);
     setShareStatus('');
   };
-  const toggleSaved = (id: string) => {
-    const next = saved.includes(id) ? saved.filter((value) => value !== id) : [...saved, id];
-    setSaved(next);
-    window.localStorage.setItem(storageKey(patientId), JSON.stringify(next));
+  const toggleSaved = async (guide: ResourceGuide) => {
+    try {
+      const result = await resourcesApi.favorite(patientId, favoriteKindForResource(guide.kind), guide.id);
+      setRemote(result.library);
+    } catch {
+      setShareStatus('No se pudo guardar en tu cuenta.');
+    }
   };
   const shareSelected = async (guide: ResourceGuide) => {
     try {
@@ -216,22 +229,23 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
   };
 
   if (selected) {
-    const related = selected.related.map((id) => RESOURCE_GUIDES.find((guide) => guide.id === id)).filter((guide): guide is ResourceGuide => Boolean(guide));
-    return <section className="nvr-resources nvr-detail" aria-label={`Guía: ${selected.title}`}>
-      <div className="nvr-detail-toolbar"><button type="button" onClick={closeGuide}>← Volver a Recursos</button><div><button type="button" onClick={() => void shareSelected(selected)}><Icon name="arrow" size={15} /> Compartir</button><button type="button" aria-pressed={saved.includes(selected.id)} onClick={() => toggleSaved(selected.id)}><Icon name="pin" size={15} /> {saved.includes(selected.id) ? 'Guardada' : 'Guardar'}</button></div></div>
+    const related = selected.related.map((id) => catalog.find((guide) => guide.id === id)).filter((guide): guide is ResourceGuide => Boolean(guide));
+    const isSaved = saved.some((row) => row.item_id === selected.id);
+    return <section className="nvr-resources nvr-detail" aria-label={`${selected.kind === 'clinical' ? 'Artículo' : 'Guía'}: ${selected.title}`}>
+      <div className="nvr-detail-toolbar"><button type="button" onClick={closeGuide}>← Volver a Recursos</button><div><button type="button" onClick={() => void shareSelected(selected)}><Icon name="arrow" size={15} /> Compartir</button><button type="button" aria-pressed={isSaved} onClick={() => void toggleSaved(selected)}><Icon name="pin" size={15} /> {isSaved ? 'Guardada' : 'Guardar'}</button></div></div>
       {shareStatus && <p className="nvr-share-status" role="status" aria-live="polite">{shareStatus}</p>}
       <div className="nvr-detail-layout">
         <article className="nvr-article">
-          <header><span>{selected.eyebrow}</span><h2>{selected.title}</h2><p>{selected.summary}</p><div><NvBadge>{selected.category}</NvBadge><small>{selected.minutes} min de lectura</small><small>Guía de uso de Plan V</small></div></header>
-          <div className={`nvr-cover nvr-cover-${selected.icon}`}><span className="nv-icon-tile"><Icon name={selected.icon} size={34} /></span><strong>{selected.category}</strong><small>Recurso operativo</small></div>
+          <header><span>{selected.eyebrow}</span><h2>{selected.title}</h2><p>{selected.summary}</p><div><NvBadge>{selected.category}</NvBadge><small>{selected.minutes} min de lectura</small><small>{selected.kind === 'clinical' ? `Autoría: ${selected.author_name}` : 'Guía de uso de Plan V'}</small>{selected.reviewed_at && <small>Revisado</small>}</div></header>
+          <div className={`nvr-cover nvr-cover-${selected.icon}`}><span className="nv-icon-tile"><Icon name={selected.icon} size={34} /></span><strong>{selected.category}</strong><small>{selected.kind === 'clinical' ? 'Artículo revisado' : 'Recurso operativo'}</small></div>
           <div className="nvr-sections">{selected.sections.map((section) => <section key={section.title}><h3>{section.title}</h3><p>{section.body}</p></section>)}</div>
-          <aside className="nvr-disclaimer"><Icon name="sparkle" size={18} /><p><strong>Sobre estas guías</strong><span>Explican cómo usar Plan V. No reemplazan las indicaciones de tu profesional.</span></p></aside>
+          <aside className="nvr-disclaimer"><Icon name="sparkle" size={18} /><p><strong>{selected.kind === 'clinical' ? 'Límite editorial' : 'Sobre estas guías'}</strong><span>{selected.license_note} {selected.kind === 'clinical' ? 'No diagnostica ni prescribe.' : 'Explican cómo usar Plan V. No reemplazan las indicaciones de tu profesional.'}</span></p></aside>
           <NvButton onClick={() => onNavigate(selected.action.page)}>{selected.action.label} <Icon name="arrow" size={15} /></NvButton>
         </article>
         <aside className="nvr-related">
           <section><span>ETIQUETAS</span><div className="nvr-tags">{selected.tags.map((tag) => <small key={tag}>#{tag.replace(/\s+/g, '')}</small>)}</div></section>
-          <section><span>GUÍAS RELACIONADAS</span><div>{related.map((guide) => <button type="button" key={guide.id} onClick={() => openGuide(guide.id, true)}><span className="nv-icon-tile"><Icon name={guide.icon} size={16} /></span><span><strong>{guide.title}</strong><small>{guide.category} · {guide.minutes} min</small></span><Icon name="chevron" size={14} /></button>)}</div></section>
-          <p><Icon name="pin" size={15} /> Guardado sólo en este dispositivo.</p>
+          <section><span>RELACIONADOS</span><div>{related.map((guide) => <button type="button" key={guide.id} onClick={() => openGuide(guide.id, true)}><span className="nv-icon-tile"><Icon name={guide.icon} size={16} /></span><span><strong>{guide.title}</strong><small>{guide.category} · {guide.minutes} min</small></span><Icon name="chevron" size={14} /></button>)}</div></section>
+          <p><Icon name="pin" size={15} /> Guardado en tu cuenta, no sólo en este dispositivo.</p>
         </aside>
       </div>
     </section>;
@@ -241,22 +255,22 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
   return <section className="nvr-resources" aria-label="Recursos">
     <div className="nvr-layout">
     <div className="nvr-main">
-      <header className="nvr-hero"><div><span>RECURSOS DE PLAN V</span><h2>Guías para usar Plan V</h2><p>Pasos breves para aprovechar tu plan, tus registros y el contacto con tu nutricionista.</p></div><span className="nvr-hero-mark"><Icon name="sparkle" size={25} /></span></header>
+      <header className="nvr-hero"><div><span>RECURSOS DE PLAN V</span><h2>Guías y artículos revisados</h2><p>Pasos para usar Plan V y lecturas con autoría, sólo las que te corresponden.</p></div><span className="nvr-hero-mark"><Icon name="sparkle" size={25} /></span></header>
       {assignedGuides.length > 0 && <section className="nvr-assigned" aria-label="Recursos asignados"><header><div><span>PARA VOS</span><h3>Asignado por tu nutricionista</h3></div><NvBadge>{assignedGuides.length}</NvBadge></header><div>{assignedGuides.map(({ assignment, guide }) => <button type="button" key={assignment.id} onClick={() => openGuide(guide.id)}><span className="nv-icon-tile"><Icon name={guide.icon} size={18} /></span><span><strong>{guide.title}</strong><small>{assignment.read_at ? `Leída · ${resourceAssignmentDateLabel(assignment.read_at)}` : `Pendiente de lectura · asignada ${resourceAssignmentDateLabel(assignment.assigned_at)}`} · {guide.minutes} min</small></span><Icon name="chevron" size={15} /></button>)}</div>{readStatus && <p role="status">{readStatus}</p>}</section>}
       <div className="nvr-filters" aria-label="Categorías de recursos">{categories.map((value) => <button type="button" key={value} aria-pressed={category === value} onClick={() => setCategory(value)}>{value}</button>)}</div>
         {featured ? <>
           <article className="nvr-featured">
-            <div className={`nvr-cover nvr-cover-${featured.icon}`}><span className="nv-icon-tile"><Icon name={featured.icon} size={30} /></span><strong>{featured.category}</strong><small>Guía de uso</small></div>
-            <div><NvBadge>{featured.eyebrow}</NvBadge><h3>{featured.title}</h3><p>{featured.summary}</p><small>{featured.minutes} min de lectura</small><NvButton onClick={() => openGuide(featured.id)}>Abrir guía <Icon name="arrow" size={15} /></NvButton></div>
+            <div className={`nvr-cover nvr-cover-${featured.icon}`}><span className="nv-icon-tile"><Icon name={featured.icon} size={30} /></span><strong>{featured.category}</strong><small>{featured.kind === 'clinical' ? 'Artículo revisado' : 'Guía de uso'}</small></div>
+            <div><NvBadge>{featured.eyebrow}</NvBadge><h3>{featured.title}</h3><p>{featured.summary}</p><small>{featured.minutes} min de lectura</small><NvButton onClick={() => openGuide(featured.id)}>Abrir {featured.kind === 'clinical' ? 'artículo' : 'guía'} <Icon name="arrow" size={15} /></NvButton></div>
           </article>
-          <section className="nvr-library" aria-label="Biblioteca de guías"><header><div><span>BIBLIOTECA</span><h3>Todas las guías</h3></div><small>{guides.length} {guides.length === 1 ? 'resultado' : 'resultados'}</small></header><div className="nvr-grid">{guides.map((guide) => <article key={guide.id}><div className={`nvr-card-icon nvr-card-${guide.icon}`}><Icon name={guide.icon} size={19} /></div><div><NvBadge tone={guide.category === 'Movimiento' ? 'coral' : guide.category === 'Organización' ? 'gold' : 'green'}>{guide.category}</NvBadge><h4>{guide.title}</h4><p>{guide.summary}</p><small>{guide.minutes} min</small></div><button type="button" onClick={() => openGuide(guide.id)}>Abrir guía <Icon name="arrow" size={14} /></button></article>)}</div></section>
+          <section className="nvr-library" aria-label="Biblioteca de recursos"><header><div><span>BIBLIOTECA</span><h3>Visible para vos</h3></div><small>{guides.length} {guides.length === 1 ? 'resultado' : 'resultados'}</small></header><div className="nvr-grid">{guides.map((guide) => <article key={guide.id}><div className={`nvr-card-icon nvr-card-${guide.icon}`}><Icon name={guide.icon} size={19} /></div><div><NvBadge tone={guide.kind === 'clinical' ? 'gold' : guide.category === 'Movimiento' ? 'coral' : guide.category === 'Organización' ? 'gold' : 'green'}>{guide.category}</NvBadge><h4>{guide.title}</h4><p>{guide.summary}</p><small>{guide.minutes} min{guide.kind === 'clinical' ? ` · ${guide.author_name}` : ''}</small></div><button type="button" onClick={() => openGuide(guide.id)}>Abrir {guide.kind === 'clinical' ? 'artículo' : 'guía'} <Icon name="arrow" size={14} /></button></article>)}</div></section>
         </> : <NvState title="Sin coincidencias" description="Probá con otra palabra o elegí una categoría diferente." />}
       </div>
       <aside className="nvr-aside" aria-label="Explorar recursos">
-        <section><span>EXPLORAR</span><h3>Categorías</h3><div>{categories.slice(1).map((value) => <button type="button" key={value} onClick={() => setCategory(value)}><span>{value}</span><small>{RESOURCE_GUIDES.filter((guide) => guide.category === value).length}</small></button>)}</div></section>
-        <section><span>GUARDADO LOCAL</span><h3>Para volver después</h3><strong>{saved.length}</strong><p>{saved.length === 1 ? 'guía guardada' : 'guías guardadas'}</p><small>Guardado sólo en este dispositivo.</small>{saved.length > 0 && <div className="nvr-saved">{saved.map((id) => RESOURCE_GUIDES.find((guide) => guide.id === id)).filter((guide): guide is ResourceGuide => Boolean(guide)).map((guide) => <button type="button" key={guide.id} onClick={() => openGuide(guide.id)}>{guide.title}<Icon name="chevron" size={13} /></button>)}</div>}</section>
+        <section><span>EXPLORAR</span><h3>Categorías</h3><div>{categories.slice(1).map((value) => <button type="button" key={value} onClick={() => setCategory(value)}><span>{value}</span><small>{catalog.filter((guide) => guide.category === value).length}</small></button>)}</div></section>
+        <section><span>GUARDADO UNIFICADO</span><h3>Para volver después</h3><strong>{saved.length}</strong><p>{saved.length === 1 ? 'ítem en tu cuenta' : 'ítems en tu cuenta'}</p><small>Recetas, artículos y guías. No queda sólo en este dispositivo.</small>{saved.length > 0 && <div className="nvr-saved">{saved.map((row) => <button type="button" key={row.id} onClick={() => row.item_kind === 'recipe' ? onNavigate('recetas') : openGuide(row.item_id)}>{KIND_LABEL[row.item_kind]} · {row.title}<Icon name="chevron" size={13} /></button>)}</div>}</section>
       </aside>
     </div>
-    <p className="nvr-note"><Icon name="sparkle" size={16} /> Estas guías explican funciones de Plan V; no publican recomendaciones clínicas automáticas.</p>
+    <p className="nvr-note"><Icon name="sparkle" size={16} /> Las guías operativas son de Plan V. Los artículos clínicos aparecen sólo si están publicados, revisados y asignados. Sin imágenes remotas de terceros.</p>
   </section>;
 }
