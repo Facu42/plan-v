@@ -1,15 +1,22 @@
 import { NUTRIGO_SURFACES, type NutrigoSurfaceId } from './nutrigo-surfaces';
 
-/** Facu, 2026-09-22. Layout from the pack. Skin is Plan V + Noteme minimalism.
+/** Facu, 2026-09-22: "exacto al .fig, copy en espanol".
+ *  Layout AND skin come from the pack. The earlier Plan V pastel deviation is withdrawn.
+ *  Hexes are sampled pixel-wise from design/nutrigo-exports/, not estimated.
  *  Canonical note: design/nutrigo-fidelity.md. Figma MCP was not used (OAuth 403). */
 export const NV_VISUAL_LAW = {
-  colors: ['mint', 'verde', 'coral', 'lilac', 'lima'] as const,
-  accent: '#EAFF78',
-  mint: '#DCEFE7',
-  coral: '#FFE4DF',
-  lilac: '#EBE6F8',
-  type: 'Inter',
-  notType: ['Poppins', 'Fraunces'] as const,
+  colors: ['verde', 'lima-claro', 'ambar', 'naranja', 'carbon'] as const,
+  accent: '#C2E66E',
+  accentSoft: '#DFF9A2',
+  gold: '#FFCB65',
+  coral: '#FFA257',
+  ink: '#272932',
+  muted: '#8F9195',
+  bg: '#F9F4F2',
+  border: '#EEEEEF',
+  type: 'Poppins',
+  notType: ['Inter', 'Fraunces'] as const,
+  copyLanguage: 'es' as const,
   cardRadius: [16, 24] as const,
   nav: 'pill',
   qaDir: 'design/nutrigo-exports',

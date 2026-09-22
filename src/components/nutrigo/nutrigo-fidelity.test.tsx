@@ -29,16 +29,23 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(css).toMatch(/--nv-rail-menu:\s*345px/);
     expect(css).toMatch(/--nv-rail-insights:\s*305px/);
     expect(css).toMatch(/--nv-content-pad:\s*28px/);
-    expect(css).toMatch(/font-family:\s*Inter/);
-    expect(css).toMatch(/--nv-accent:\s*#EAFF78/);
-    expect(css).toMatch(/--nv-mint:\s*#DCEFE7/);
-    expect(css).toMatch(/--nv-lilac:\s*#EBE6F8/);
-    expect(css).not.toMatch(/#f9b343|#ffe6ad|#F9B343/i);
+    expect(css).toMatch(/font-family:\s*Poppins/);
+    expect(css).toMatch(/--nv-accent:\s*#C2E66E/);
+    expect(css).toMatch(/--nv-gold:\s*#FFCB65/);
+    expect(css).toMatch(/--nv-coral:\s*#FFA257/);
+    expect(css).toMatch(/--nv-ink:\s*#272932/);
+    expect(css).toMatch(/--nv-bg:\s*#F9F4F2/);
+    // La lima Plan V y el dorado del isotipo no pintan esta superficie
+    // (los comentarios sí pueden nombrarlos para dejar asentada la desviación retirada).
+    const rules = css.replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(rules).not.toMatch(/#EAFF78/i);
+    expect(rules).not.toMatch(/#f9b343/i);
     expect(css).toMatch(/border-radius:\s*999px/);
     expect(css).toMatch(/Not Facu visual approval/);
     expect(css).not.toMatch(/PLANV_NUTRIGO_VISUAL\s*=\s*1/);
-    expect(NV_VISUAL_LAW.type).toBe('Inter');
-    expect(NV_VISUAL_LAW.notType).toEqual(['Poppins', 'Fraunces']);
+    expect(NV_VISUAL_LAW.type).toBe('Poppins');
+    expect(NV_VISUAL_LAW.notType).toEqual(['Inter', 'Fraunces']);
+    expect(NV_VISUAL_LAW.copyLanguage).toBe('es');
     expect(NV_VISUAL_LAW.qaDir).toBe('design/nutrigo-exports');
     expect(NV_VISUAL_LAW.law).toBe('design/nutrigo-fidelity.md');
     expect(NV_VISUAL_LAW.figmaFileKey).toBe('OTolnKfsxUFjaZOhhdb04i');
@@ -79,9 +86,9 @@ describe('NV-FIDELITY shell vs inventario', () => {
       expect(existsSync(new URL(`../../../${file}`, import.meta.url))).toBe(true);
     }
     expect(law).toContain('OTolnKfsxUFjaZOhhdb04i');
-    expect(law).toMatch(/Inter/);
-    expect(law).toMatch(/Public Sans/);
-    expect(law).toMatch(/Poppins no es la ley de marca/);
+    expect(law).toMatch(/Poppins/);
+    expect(law).toMatch(/exacta al archivo \.fig|exacta al \.fig|exacto al archivo \.fig/);
+    expect(law).toMatch(/copy en espa\u00f1ol|La interfaz va en espa\u00f1ol/);
     expect(law).toMatch(/Ejercicio no entra/);
     expect(law).toMatch(/OAuth 403/);
     expect(law).toMatch(/design\/nutrigo-exports/);
