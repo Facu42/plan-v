@@ -16,6 +16,7 @@
     "check:migrations": "node scripts/check-migration-safety.mjs",
     "apply:disposable": "node scripts/apply-disposable.mjs",
     "seed:demo": "node scripts/seed-demo.mjs",
+    "figma:pull": "node scripts/figma-pull.mjs",
     "disposable:pg": "node scripts/disposable-pg.mjs",
     "test:disposable": "vitest run server/cut1.disposable.test.ts server/rls-ab.test.ts",
     "test:live-auth": "PLANV_LIVE_AUTH=1 vitest run server/live-auth-storage.test.ts server/rls-ab.test.ts",

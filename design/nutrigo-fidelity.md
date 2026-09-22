@@ -63,7 +63,20 @@ El .fig no trae pantallas oscuras, así que no hay nada a lo que ser exacto. El 
 
 Las once capturas están en `design/nutrigo-exports/` (`01-dashboard.png` … `11-insight-details.png`).
 
-**Limitación conocida:** son capturas de pantalla completa de Figma abierto en el navegador, no exports limpios de frame. Cerca de la mitad del ancho es escritorio, barra de tareas y paneles de Figma, y el frame queda recortado a la derecha (en `01-dashboard.png` se corta la card Water Intake; en `08-food-diary.png` se cortan las columnas de macronutrientes). Sirven para color, tipo y composición general. No alcanzan para medir el borde derecho ni para un diff pixel a pixel. Para eso hacen falta exports de frame a 1440 o acceso al archivo.
+**Limitación conocida:** son capturas de pantalla completa de Figma abierto en el navegador, no exports limpios de frame. Cerca de la mitad del ancho es escritorio, barra de tareas y paneles de Figma, y el frame queda recortado a la derecha (en `01-dashboard.png` se corta la card Water Intake; en `08-food-diary.png` se cortan las columnas de macronutrientes). Sirven para color, tipo y composición general. No alcanzan para medir el borde derecho ni para un diff pixel a pixel.
+
+## Traer el archivo (reemplaza las capturas)
+
+`npm run figma:pull` baja el archivo de verdad por la REST API y deja:
+
+- `design/nutrigo-nodes/<frame>.json` — el árbol de nodos completo: posición, tamaño, relleno, borde, radio, tipografía y auto-layout de cada capa. Esto es el .fig en forma trabajable; el binario `.fig` no tiene parser abierto y no sirve para esto.
+- `design/nutrigo-exports/<frame>.png` — render limpio a 2x, sin cromo de navegador ni recorte.
+- `design/nutrigo-svg/<frame>.svg` — vector con geometría y texto exactos.
+- `design/nutrigo-tokens.json` — colores, escala tipográfica, radios y espaciados, por frecuencia de uso.
+
+Necesita `FIGMA_TOKEN`, un personal access token con scope `file_content:read`. Ese scope anda en plan gratuito. El token va por variable de entorno, nunca en un argumento ni en un archivo del repo.
+
+Cuando ese pull corra, los valores muestreados de las capturas se reemplazan por los del archivo y esta nota se actualiza con la diferencia.
 
 La comparación no es aprobación visual. `PLANV_NUTRIGO_VISUAL` sigue sin setearse.
 
