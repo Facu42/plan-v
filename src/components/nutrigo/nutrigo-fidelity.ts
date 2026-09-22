@@ -1,6 +1,7 @@
 import { NUTRIGO_SURFACES, type NutrigoSurfaceId } from './nutrigo-surfaces';
 
-/** Facu, 2026-09-22. Layout from the pack. Skin is Plan V + Noteme minimalism. */
+/** Facu, 2026-09-22. Layout from the pack. Skin is Plan V + Noteme minimalism.
+ *  Canonical note: design/nutrigo-fidelity.md. Figma MCP was not used (OAuth 403). */
 export const NV_VISUAL_LAW = {
   colors: ['mint', 'verde', 'coral', 'lilac', 'lima'] as const,
   accent: '#EAFF78',
@@ -12,6 +13,9 @@ export const NV_VISUAL_LAW = {
   cardRadius: [16, 24] as const,
   nav: 'pill',
   qaDir: 'design/nutrigo-exports',
+  law: 'design/nutrigo-fidelity.md',
+  figmaFileKey: 'OTolnKfsxUFjaZOhhdb04i',
+  figmaUrl: 'https://www.figma.com/design/OTolnKfsxUFjaZOhhdb04i/Nutrigo---Nutrition---Diet-Dashboard',
   excludedSurface: 'exercise' as const satisfies NutrigoSurfaceId,
 };
 
@@ -42,6 +46,6 @@ export const NUTRIGO_NO_GLOBAL_RAIL: readonly NutrigoSurfaceId[] = [
 export const NUTRIGO_FIDELITY_NOT_VISUAL_APPROVAL =
   'NV-FIDELITY shell contracts are not Facu visual approval. PLANV_NUTRIGO_VISUAL stays unset.';
 
-/** The .fig export is not in the clone yet. QA is side-by-side once PNGs land in design/nutrigo-exports/. */
+/** Cloud file is the composition reference. QA is side-by-side once PNGs land in design/nutrigo-exports/. */
 export const NUTRIGO_REFERENCE_PNG_MISSING: readonly NutrigoSurfaceId[] =
   NUTRIGO_FIDELITY_SURFACES.map((surface) => surface.id);

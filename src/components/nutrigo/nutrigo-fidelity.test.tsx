@@ -12,6 +12,7 @@ import {
 } from './nutrigo-fidelity';
 
 const css = readFileSync(new URL('./nutrigo-fidelity.css', import.meta.url), 'utf8');
+const law = readFileSync(new URL('../../../design/nutrigo-fidelity.md', import.meta.url), 'utf8');
 
 describe('NV-FIDELITY shell vs inventario', () => {
   it('fija sidebar 223 y rails 325/325/345/305 sin aprobación visual', () => {
@@ -38,6 +39,11 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(NV_VISUAL_LAW.type).toBe('Inter');
     expect(NV_VISUAL_LAW.notType).toEqual(['Poppins', 'Fraunces']);
     expect(NV_VISUAL_LAW.qaDir).toBe('design/nutrigo-exports');
+    expect(NV_VISUAL_LAW.law).toBe('design/nutrigo-fidelity.md');
+    expect(NV_VISUAL_LAW.figmaFileKey).toBe('OTolnKfsxUFjaZOhhdb04i');
+    expect(css).toMatch(/\.nv-app\.nv-patient-diary \.photo-modal/);
+    expect(css).toMatch(/\.nv-app \.nv-macro-dot\.nv-gold/);
+    expect(css).toMatch(/\.nv-app \.nv-alerts-urgency\.soon/);
     expect(NUTRIGO_FIDELITY_NOT_VISUAL_APPROVAL).toMatch(/not Facu visual approval/i);
   });
 
@@ -66,6 +72,14 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(NUTRIGO_FIDELITY_SURFACES.some((surface) => surface.id === 'exercise')).toBe(false);
     expect(NUTRIGO_REFERENCE_PNG_MISSING).toEqual(NUTRIGO_FIDELITY_SURFACES.map((surface) => surface.id));
     expect(NUTRIGO_REFERENCE_PNG_MISSING).toHaveLength(11);
+    expect(law).toContain('OTolnKfsxUFjaZOhhdb04i');
+    expect(law).toMatch(/Inter/);
+    expect(law).toMatch(/Public Sans/);
+    expect(law).toMatch(/Poppins no es la ley de marca/);
+    expect(law).toMatch(/Ejercicio no entra/);
+    expect(law).toMatch(/OAuth 403/);
+    expect(law).toMatch(/design\/nutrigo-exports/);
+    expect(law).not.toMatch(/PLANV_NUTRIGO_VISUAL\s*=\s*1/);
   });
 
   it('los macros declarados se leen como KCAL/PROT/CARBS/GRASAS', () => {

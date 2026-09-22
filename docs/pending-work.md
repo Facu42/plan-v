@@ -15,7 +15,7 @@ Detalle y criterios: [ticket PV-40](ticket-pv40-recetas-ia-asignar-registrar.md)
 
 ## Ley visual Facu — 2026-09-22 (cierra pack amarillo y Poppins)
 
-Esta ley manda sobre el inventario Nutrigo y sobre la nota vieja que daba por aprobada Poppins.
+Texto canónico: [design/nutrigo-fidelity.md](../design/nutrigo-fidelity.md). Composición en Figma Cloud, file key `OTolnKfsxUFjaZOhhdb04i` (https://www.figma.com/design/OTolnKfsxUFjaZOhhdb04i/Nutrigo---Nutrition---Diet-Dashboard). El MCP de Figma respondió OAuth 403; no se usó y no se esperó. Esta ley manda sobre el inventario Nutrigo y sobre la nota vieja que daba por aprobada Poppins.
 
 1. **Color:** paleta del logo en pasteles — menta, verde, coral, lila, lima. Más minimalista. **No** adoptar el amarillo/naranja energético del pack. El isotipo sigue teniendo píxeles dorados; no pintan la UI.
 2. **Tipo:** sans geométrica **Inter** (referencia de UI tipo Noteme). Jerarquía 400 cuerpo / 500 etiquetas / 600 títulos / 700 ítem activo. Poppins no es la ley de marca. Fraunces no es la cara principal de la UI.
@@ -28,7 +28,7 @@ Estructura y medidas del pack (sidebar, rails, reorganización tablet/móvil). P
 
 Cerrar la brecha visual P0 del shell nutri + paciente que va a staging: medidas del inventario y piel de la ley del 2026-09-22. Se apoya en los contratos de layout de PV-37 y en las cards de PV-40. No reescribe la lógica de dominio.
 
-**Estado: parcial.** En escritorio (≥1251 px) el shell usa sidebar **223 px**, padding **28 px** y rail de dashboard **325 px**. El detalle de Agenda queda en **325 px**, el menú saludable en **345 px** y el listado de Recursos en **305 px**. Mensajes, detalle de receta, plan, compras, diario, progreso y detalle de recurso no reservan ese rail global. La piel reemplaza el acento `#F9B343` por lima `#EAFF78`, menta `#DCEFE7`, coral `#FFE4DF` y lila `#EBE6F8`, con Inter y nav en píldora. Macros confirmados del diario se leen como KCAL/PROT/CARBS/GRASAS. Las fotos de plato siguen siendo las ilustrativas de Plan V o el pozo SVG de PV-40. **No es aprobación visual.**
+**Estado: parcial.** En escritorio (≥1251 px) el shell usa sidebar **223 px**, padding **28 px** y rail de dashboard **325 px**. El detalle de Agenda queda en **325 px**, el menú saludable en **345 px** y el listado de Recursos en **305 px**. Mensajes, detalle de receta, plan, compras, diario, progreso y detalle de recurso no reservan ese rail global. La piel reemplaza el acento `#F9B343` por lima `#EAFF78`, menta `#DCEFE7`, coral `#FFE4DF` y lila `#EBE6F8`, con Inter y nav en píldora. El modal de foto del diario, el punto de macro y la urgencia de alertas dejan de pintar Poppins o el amarillo del pack. Macros confirmados del diario se leen como KCAL/PROT/CARBS/GRASAS. Las fotos de plato siguen siendo las ilustrativas de Plan V o el pozo SVG de PV-40. **No es aprobación visual.** El MCP de Figma no se consultó.
 
 Superficies de este pase, todavía sin PNG en `design/nutrigo-exports/`: Dashboard, Calendar, Messages, Healthy Menu, Recipe Details, Meal Plan, Grocery, Food Diary, Progress, Insight, Insight Details. Ejercicio queda fuera del pase.
 

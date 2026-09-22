@@ -1,4 +1,6 @@
 /* NV-FIDELITY: layout from the Nutrigo inventory; skin is Plan V (2026-09-22).
+   Law: design/nutrigo-fidelity.md
+   Figma file key OTolnKfsxUFjaZOhhdb04i (composition only; Figma MCP unused, OAuth 403).
    Desktop frame 1440 = sidebar 223 + content + rail.
    Dashboard and Calendar rails 325. Healthy Menu rail 345. Insights list rail 305.
    Messages, Recipe Details, Meal Plan, Grocery, Food Diary, Progress
@@ -167,4 +169,10 @@
 .nv-app .nv-operation-bar button { background: var(--nv-lima); color: #083A30; border-radius: 999px; }
 .nv-app .nv-tab-unread { background: #FF6F61; }
 .nv-app .photo-modal,
-.nv-app .review-panel { font-family: Inter, "Public Sans", Arial, sans-serif; }
+.nv-app .review-panel,
+.nv-app.nv-patient-diary .photo-modal {
+  font-family: Inter, "Public Sans", Arial, sans-serif;
+}
+.nv-app .nv-macro-dot.nv-gold { background: #3BB273; }
+.nv-app .nv-alerts-urgency.soon,
+.nv-app .nv-alerts-urgency.today { background: var(--nv-lima); color: #083A30; }
