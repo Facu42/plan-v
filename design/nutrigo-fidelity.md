@@ -14,26 +14,58 @@ La composición (sidebar, rails, densidad de las once pantallas) sale de ese arc
 
 ## Piel
 
-Color: la paleta del pack, **no** pasteles Plan V. Los valores de abajo están muestreados pixel a pixel de las capturas en `design/nutrigo-exports/`, no estimados a ojo ni traídos del kit de marca.
+Color y tipografía salen de **las variables del propio archivo**, leídas por el MCP de Figma el 2026-09-22 sobre el nodo `12:792`. No están muestreadas de una captura ni estimadas a ojo. Los nombres de la izquierda son los del `.fig`.
 
-| Token | Hex | Uso en el .fig |
-|---|---|---|
-| `--nv-bg` | `#F9F4F2` | lienzo de página, blanco cálido |
-| `--nv-card` | `#FFFFFF` | cards |
-| `--nv-border` | `#EEEEEF` | bordes, tracks de barra |
-| `--nv-track` | `#F6F6F7` | relleno sutil, campos |
-| `--nv-ink` | `#272932` | texto principal, carbón (no verde bosque) |
-| `--nv-muted` | `#8F9195` | texto secundario, nav inactiva |
-| `--nv-accent` | `#C2E66E` | verde lima del pack: ítem activo, CTA primaria |
-| `--nv-accent-soft` | `#DFF9A2` | lima claro, fondos de estado positivo |
-| `--nv-gold` | `#FFCB65` | ámbar: carbohidratos, energía, progreso |
-| `--nv-coral` | `#FFA257` | naranja: proteínas, alertas, series intensas |
+| Variable del .fig | Hex | Token | Uso |
+|---|---|---|---|
+| Cream-BG | `#F9F4F2` | `--nv-bg` | lienzo de página |
+| Pure White | `#FFFFFF` | `--nv-card` | cards |
+| White | `#FEFCFB` | `--nv-card-warm` | blanco cálido |
+| Black | `#272932` | `--nv-ink` | texto principal |
+| Gray-30 | `#52545B` | `--nv-ink-soft` | texto secundario fuerte |
+| Gray-20 | `#8A8C90` | `--nv-muted` | texto apagado, nav inactiva |
+| Gray-10 | `#BEBFC2` | `--nv-faint` | texto deshabilitado |
+| Gray-Line | `#E1E1E2` | `--nv-line`, `--nv-border` | bordes y divisores |
+| Gray-BG | `#EEEEEF` | `--nv-fill` | rellenos y tracks |
+| Gray-BG-Subtle | `#F6F6F7` | `--nv-track` | relleno sutil, campos |
+| Green | `#C2E66E` | `--nv-accent` | ítem activo, CTA primaria |
+| Green-Light | `#DFF9A2` | `--nv-accent-soft` | estado positivo |
+| Saffron | `#FFCB65` | `--nv-gold` | carbohidratos, energía |
+| Saffron-Light | `#FFE6B5` | `--nv-gold-soft` | fondo ámbar |
+| Orange | `#FFA257` | `--nv-coral` | proteínas, alertas |
+| Orange-10 | `#FFE1C9` | `--nv-coral-soft` | fondo naranja |
+
+Sombra, tal como la declara el archivo: `0 4px 12px rgba(176, 176, 176, 0.14)`.
 
 El dorado `#F9B343` del isotipo Plan V no es token de interfaz. La lima `#EAFF78` de Plan V tampoco: el verde activo del pack es `#C2E66E`.
 
-Tipo: **Poppins**, la cara del pack, ya instalada vía `@fontsource/poppins` (OFL-1.1, subset latino, sin pedidos a Google Fonts). Jerarquía 400 cuerpo / 500 etiquetas / 600 títulos / 700 ítem activo. Inter y Fraunces quedan fuera de esta superficie.
+### Tipografía
 
-Radios de card ~16–24, sombra suave, navegación en píldora, aire.
+**Poppins**, vía `@fontsource/poppins` (OFL-1.1, subset latino, sin pedidos a Google Fonts). La escala es la del archivo, con su altura de línea:
+
+| Estilo | Tamaño | Peso | Line-height |
+|---|---|---|---|
+| H3 | 26px | 700 | 1.08 |
+| H5 | 22px | 400 / 600 | 1.08 |
+| Title | 18px | 600 / 700 | 1.2 |
+| Title | 16px | 400 / 600 | 1.24 |
+| Title | 14px | 400 / 600 | 1.25 |
+| Title | 12px | 400 / 600 | 1.3 |
+| Title | 11px | 400 / 600 | 1.24 |
+| P | 12px | 400 | 1.5 |
+| P | 11px | 400 | 1.6 |
+| Btn | 14px / 12px | 500 | 1 |
+
+Inter y Fraunces quedan fuera de esta superficie.
+
+### Medidas
+
+Del frame `12:792` "01. Dashboard (Desktop)", a 1440:
+
+- sidebar 223 + contenido 892 + rail 325 = 1440
+- padding de contenido 28, padding de card 16, separación entre secciones 20
+- cards de estadística 197 × 142, con 16 de separación
+- radios de card 16–24, navegación en píldora
 
 ## Copy
 

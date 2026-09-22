@@ -12,19 +12,18 @@ Logo canónico: `Logo Plan V Nutrición - Isotipo Circular.png`.
 
 ## Paleta de interfaz (del .fig)
 
-Muestreada pixel a pixel de `design/nutrigo-exports/`, no estimada a ojo.
+Leída de las variables del archivo por el MCP de Figma, no muestreada de capturas. Tabla completa con los nombres del `.fig` en [`design/nutrigo-fidelity.md`](../design/nutrigo-fidelity.md).
 
-- lienzo `#F9F4F2` — fondo de página, blanco cálido;
-- card `#FFFFFF` — superficies;
-- carbón `#272932` — texto principal;
-- gris `#8F9195` — texto secundario y navegación inactiva;
-- borde `#EEEEEF` — bordes y tracks;
-- verde `#C2E66E` — ítem activo y CTA primaria;
-- lima claro `#DFF9A2` — fondos de estado positivo;
-- ámbar `#FFCB65` — carbohidratos, energía, progreso;
-- naranja `#FFA257` — proteínas, alertas, series intensas.
+- lienzo `#F9F4F2` (Cream-BG), card `#FFFFFF` (Pure White), blanco cálido `#FEFCFB`;
+- texto `#272932` (Black), secundario `#52545B`, apagado `#8A8C90`, tenue `#BEBFC2`;
+- línea `#E1E1E2` (Gray-Line), relleno `#EEEEEF`, sutil `#F6F6F7`;
+- verde `#C2E66E` y lima claro `#DFF9A2` — activo y CTA;
+- ámbar `#FFCB65` / `#FFE6B5` — carbohidratos y energía;
+- naranja `#FFA257` / `#FFE1C9` — proteínas y alertas.
 
-La paleta del logo (verde `#23955D`, dorado `#F9B343`, coral `#F87D6D`) identifica la marca en el isotipo y en piezas de Instagram. **No pinta la interfaz.** La lima `#EAFF78` de pases anteriores queda retirada: el verde activo del pack es `#C2E66E`.
+Sombra: `0 4px 12px rgba(176, 176, 176, 0.14)`, tal como la declara el archivo.
+
+La paleta del logo (verde `#23955D`, dorado `#F9B343`, coral `#F87D6D`) identifica la marca en el isotipo y en piezas de Instagram. **No pinta la interfaz.** La lima `#EAFF78` de pases anteriores queda retirada.
 
 Los estados críticos deben incluir texto o icono además de color.
 
@@ -52,18 +51,18 @@ Los estados críticos deben incluir texto o icono además de color.
 
 ## Componentes
 
-- Tipografía operativa nunca por debajo de 12 px; cuerpo 13–14 px; títulos de página 24–28 px.
+- Títulos de página 26 px (H3 del archivo). El archivo baja hasta 9–11 px en microcopy; en producto el piso es 11 px.
 - Cifras con `tabular-nums`. Iconos SVG lineales de 18–20 px.
 - Topbar en el workspace (búsqueda/rol/tema). Sidebar solo para navegación y marca.
 - Primario: verde `#C2E66E` con texto carbón `#272932`. Activo de menú: la misma píldora verde.
-- Cards con borde `#EEEEEF`, radio 16–24 px y sombra suave.
+- Cards con borde `#E1E1E2`, radio 16–24 px, padding 16 y sombra del archivo.
 - Gráficos con máximo cuatro colores de la paleta por vista y leyenda textual.
 - Tablas compactas en escritorio; filas apiladas en móvil.
 - Fotografías e ilustraciones propias o con licencia compatible; no emojis ni assets de preview.
 
 ## Tipografía
 
-- Poppins, la cara del .fig, vía `@fontsource/poppins` (OFL-1.1), subset latino y `font-display: swap`, sin solicitudes a Google Fonts. Jerarquía 400 cuerpo / 500 etiquetas / 600 títulos / 700 ítem activo.
+- Poppins, la cara del .fig, vía `@fontsource/poppins` (OFL-1.1), subset latino y `font-display: swap`, sin solicitudes a Google Fonts. La escala sale del archivo: H3 26/1.08, H5 22/1.08, títulos 18/1.2, 16/1.24, 14/1.25, 12/1.3, 11/1.24, párrafos 12/1.5 y 11/1.6, botones 500 con line-height 1.
 - Inter y Fraunces quedan fuera de esta superficie. Las pantallas legacy (`?design=legacy`) conservan Fraunces y DM Sans hasta que se retiren.
 
 ## Licencia y originalidad

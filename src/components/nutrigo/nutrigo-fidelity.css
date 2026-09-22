@@ -8,43 +8,68 @@
    Messages, Recipe Details, Meal Plan, Grocery, Food Diary, Progress
    and Insight Details keep the remaining width: no global right rail.
    Exercise is out of this visual pass (product page stays; it is not a fidelity screen).
-   Colors are sampled pixel-wise from design/nutrigo-exports/, not estimated.
+   Colours and type come from the file's own variables, read over the Figma MCP
+   on 2026-09-22 (node 12:792). Names in comments are the .fig's variable names.
    Type: Poppins, the pack face. Not Inter. Not Fraunces.
    Copy stays Spanish: the .fig rules composition, not language.
    Not Facu visual approval. PLANV_NUTRIGO_VISUAL stays unset. */
 .nv-app {
+  /* Layout, measured on frame 12:792 "01. Dashboard (Desktop)" at 1440. */
   --nv-sidebar-width: 223px;
   --nv-rail-dashboard: 325px;
   --nv-rail-calendar: 325px;
   --nv-rail-menu: 345px;
   --nv-rail-insights: 305px;
   --nv-content-pad: 28px;
-  /* Pack palette, sampled from design/nutrigo-exports/. */
-  --nv-bg: #F9F4F2;
-  --nv-card: #FFFFFF;
-  --nv-ink: #272932;
-  --nv-muted: #8F9195;
-  --nv-border: #EEEEEF;
-  --nv-track: #F6F6F7;
-  --nv-accent: #C2E66E;
-  --nv-accent-soft: #DFF9A2;
+  --nv-card-pad: 16px;
+  --nv-section-gap: 20px;
+
+  /* Colour, from the file's variables. */
+  --nv-bg: #F9F4F2;            /* Cream-BG */
+  --nv-card: #FFFFFF;          /* Pure White */
+  --nv-card-warm: #FEFCFB;     /* White */
+  --nv-ink: #272932;           /* Black */
+  --nv-ink-soft: #52545B;      /* Gray-30 */
+  --nv-muted: #8A8C90;         /* Gray-20 */
+  --nv-faint: #BEBFC2;         /* Gray-10 */
+  --nv-line: #E1E1E2;          /* Gray-Line */
+  --nv-border: #E1E1E2;        /* Gray-Line */
+  --nv-fill: #EEEEEF;          /* Gray-BG */
+  --nv-track: #F6F6F7;         /* Gray-BG-Subtle */
+  --nv-accent: #C2E66E;        /* Green */
+  --nv-accent-soft: #DFF9A2;   /* Green-Light */
   --nv-cta: #C2E66E;
   --nv-green: #DFF9A2;
   --nv-mint: #DFF9A2;
-  --nv-gold: #FFCB65;
-  --nv-gold-soft: #FFE5B3;
-  --nv-coral: #FFA257;
-  --nv-coral-soft: #FFD9BC;
+  --nv-gold: #FFCB65;          /* Saffron */
+  --nv-gold-soft: #FFE6B5;     /* Saffron-Light */
+  --nv-coral: #FFA257;         /* Orange */
+  --nv-coral-soft: #FFE1C9;    /* Orange-10 */
   --nv-lilac: #F6F6F7;
   --nv-strong: #272932;
   --nv-forest: #272932;
-  --nv-shadow: 0 8px 24px rgba(39, 41, 50, 0.06);
+
+  /* Effect/Shadow, exactly as the file declares it. */
+  --nv-shadow: 0 4px 12px rgba(176, 176, 176, 0.14);
   --nv-r-card: 20px;
   --nv-r-card-lg: 24px;
+
+  /* Type. Poppins, with the file's own sizes and line heights. */
+  --nv-fs-h3: 26px;   --nv-lh-h3: 1.08;
+  --nv-fs-h5: 22px;   --nv-lh-h5: 1.08;
+  --nv-fs-t18: 18px;  --nv-lh-t18: 1.2;
+  --nv-fs-t16: 16px;  --nv-lh-t16: 1.24;
+  --nv-fs-t14: 14px;  --nv-lh-t14: 1.25;
+  --nv-fs-t12: 12px;  --nv-lh-t12: 1.3;
+  --nv-fs-t11: 11px;  --nv-lh-t11: 1.24;
+  --nv-fs-p12: 12px;  --nv-lh-p12: 1.5;
+  --nv-fs-p11: 11px;  --nv-lh-p11: 1.6;
+
   font-family: Poppins, "Public Sans", Arial, sans-serif;
   font-weight: 400;
   background: var(--nv-bg);
 }
+
 /* Derived, not fidelity: the .fig ships no dark frames. */
 .nv-app.nv-dark {
   --nv-bg: #1B1C22;
@@ -65,6 +90,11 @@
   --nv-lilac: #2C2E37;
   --nv-strong: #C2E66E;
   --nv-forest: #F6F6F7;
+  --nv-card-warm: #24262E;
+  --nv-ink-soft: #C9CBD1;
+  --nv-faint: #6C6F78;
+  --nv-line: #343640;
+  --nv-fill: #2C2E37;
   background: var(--nv-bg);
 }
 
@@ -122,7 +152,20 @@
 .nv-app .recipe-macros dd { font-weight: 700; }
 
 .nv-app :is(h1, h2, h3) { font-weight: 600; letter-spacing: -0.03em; }
-.nv-app .nv-page-head h1 { font-weight: 600; }
+.nv-app .nv-page-head h1 {
+  font-size: var(--nv-fs-h3);
+  line-height: var(--nv-lh-h3);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.nv-app .nv-card h2,
+.nv-app .nv-card h3 {
+  font-size: var(--nv-fs-t16);
+  line-height: var(--nv-lh-t16);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.nv-app .nv-page-head p { font-size: var(--nv-fs-p12); line-height: var(--nv-lh-p12); }
 .nv-app .nv-brand > span { font-weight: 700; }
 .nv-app .nv-sidebar-caption,
 .nv-app .nv-nav-group,

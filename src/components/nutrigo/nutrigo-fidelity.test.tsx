@@ -5,6 +5,7 @@ import { RecipeMacroGrid } from './RecipePlate';
 import {
   NUTRIGO_FIDELITY_NOT_VISUAL_APPROVAL,
   NUTRIGO_FIDELITY_RAILS,
+  NUTRIGO_FRAME,
   NUTRIGO_FIDELITY_SURFACES,
   NUTRIGO_NO_GLOBAL_RAIL,
   NUTRIGO_REFERENCE_PNG_MISSING,
@@ -30,11 +31,19 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(css).toMatch(/--nv-rail-insights:\s*305px/);
     expect(css).toMatch(/--nv-content-pad:\s*28px/);
     expect(css).toMatch(/font-family:\s*Poppins/);
+    // Valores leídos del archivo por el MCP de Figma, no muestreados.
     expect(css).toMatch(/--nv-accent:\s*#C2E66E/);
+    expect(css).toMatch(/--nv-accent-soft:\s*#DFF9A2/);
     expect(css).toMatch(/--nv-gold:\s*#FFCB65/);
+    expect(css).toMatch(/--nv-gold-soft:\s*#FFE6B5/);
     expect(css).toMatch(/--nv-coral:\s*#FFA257/);
+    expect(css).toMatch(/--nv-coral-soft:\s*#FFE1C9/);
     expect(css).toMatch(/--nv-ink:\s*#272932/);
+    expect(css).toMatch(/--nv-muted:\s*#8A8C90/);
+    expect(css).toMatch(/--nv-line:\s*#E1E1E2/);
     expect(css).toMatch(/--nv-bg:\s*#F9F4F2/);
+    expect(css).toMatch(/--nv-shadow:\s*0 4px 12px rgba\(176, 176, 176, 0\.14\)/);
+    expect(css).toMatch(/--nv-fs-h3:\s*26px/);
     // La lima Plan V y el dorado del isotipo no pintan esta superficie
     // (los comentarios sí pueden nombrarlos para dejar asentada la desviación retirada).
     const rules = css.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -46,6 +55,19 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(NV_VISUAL_LAW.type).toBe('Poppins');
     expect(NV_VISUAL_LAW.notType).toEqual(['Inter', 'Fraunces']);
     expect(NV_VISUAL_LAW.copyLanguage).toBe('es');
+    expect(NV_VISUAL_LAW.source).toBe('figma-mcp');
+    // Cada color del CSS tiene que ser una variable declarada en el archivo.
+    for (const value of Object.values(NV_VISUAL_LAW.colors)) {
+      expect(value).toMatch(/^#[0-9A-F]{6}$/);
+    }
+    expect(NV_VISUAL_LAW.colors.Green).toBe('#C2E66E');
+    expect(NV_VISUAL_LAW.colors['Gray-20']).toBe('#8A8C90');
+    expect(NUTRIGO_FRAME).toEqual({
+      width: 1440, sidebar: 223, content: 892, rail: 325,
+      contentPad: 28, cardPad: 16, sectionGap: 20,
+    });
+    // El ancho del frame cierra: 223 + 892 + 325 = 1440.
+    expect(NUTRIGO_FRAME.sidebar + NUTRIGO_FRAME.content + NUTRIGO_FRAME.rail).toBe(NUTRIGO_FRAME.width);
     expect(NV_VISUAL_LAW.qaDir).toBe('design/nutrigo-exports');
     expect(NV_VISUAL_LAW.law).toBe('design/nutrigo-fidelity.md');
     expect(NV_VISUAL_LAW.figmaFileKey).toBe('OTolnKfsxUFjaZOhhdb04i');
@@ -87,6 +109,7 @@ describe('NV-FIDELITY shell vs inventario', () => {
     }
     expect(law).toContain('OTolnKfsxUFjaZOhhdb04i');
     expect(law).toMatch(/Poppins/);
+    expect(law).toMatch(/Gray-20|Cream-BG/);
     expect(law).toMatch(/exacta al archivo \.fig|exacta al \.fig|exacto al archivo \.fig/);
     expect(law).toMatch(/copy en espa\u00f1ol|La interfaz va en espa\u00f1ol/);
     expect(law).toMatch(/Ejercicio no entra/);
