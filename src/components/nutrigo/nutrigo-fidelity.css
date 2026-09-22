@@ -1708,10 +1708,8 @@
    16 de guarda (ancho útil 358), cards de radio 16 con padding 16, y 24 o 32
    entre bloques según la pantalla.
 
-   Desviación deliberada: el archivo navega con un botón de menú arriba a la
-   derecha; Plan V usa la barra inferior de pestañas. La barra inferior se
-   queda, porque sacarla dejaría la app sin navegación hasta construir el
-   cajón lateral, que es trabajo de producto y no de piel. */
+   Navegación: igual que el archivo. El botón de la barra abre un cajón con la
+   Navbar de 223 (nodo 12:793) y la barra inferior de pestañas se va. */
 @media (max-width: 799px) {
   /* Navbar (390 × 64): blanca, padding 16, título 16 semibold. */
   .nv-app.nv-patient .nv-topbar,
@@ -1740,6 +1738,66 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  /* Navegación: el archivo abre el menú con el botón de la barra, así que la
+     barra inferior de pestañas se va y el cajón ocupa su lugar. El contenido
+     del cajón es la misma Navbar de 223 del nodo 12:793. */
+  .nv-app { padding-bottom: 0; }
+  .nv-app .nv-tabbar { display: none; }
+  .nv-app .nv-button.nv-menu-toggle {
+    display: inline-flex !important;
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    color: var(--nv-ink);
+    background: var(--nv-fill);
+  }
+  .nv-app.nv-menu-open .nv-button.nv-menu-toggle {
+    color: var(--nv-ink);
+    background: var(--nv-accent);
+  }
+  .nv-app.nv-patient .nv-sidebar,
+  .nv-app.nv-pro .nv-sidebar,
+  .nv-app .nv-sidebar {
+    position: fixed;
+    z-index: 60;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    width: var(--nv-sidebar-width);
+    max-width: calc(100vw - 56px);
+    height: 100dvh;
+    padding: 28px 20px;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+  }
+  .nv-app.nv-patient.nv-menu-open .nv-sidebar,
+  .nv-app.nv-pro.nv-menu-open .nv-sidebar,
+  .nv-app.nv-menu-open .nv-sidebar { transform: none; }
+  .nv-app .nv-sidebar:focus-visible { outline: 2px solid var(--nv-accent); outline-offset: -2px; }
+  /* El cajón mide 223: la navegación va en una columna, no en dos. */
+  .nv-app .nv-sidebar nav {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0;
+    gap: 8px;
+  }
+  .nv-app .nv-sidebar nav > div { display: contents; }
+  .nv-app .nv-sidebar .nv-brand > span { display: block; }
+  .nv-drawer-scrim {
+    position: fixed;
+    z-index: 55;
+    inset: 0;
+    background: rgba(39, 41, 50, 0.45);
+  }
+
   /* La barra del archivo es logo 32 + título + un botón de 32. Plan V suma
      el selector de rol y las alertas, que no están en el archivo: se
      compactan a 32 para que la barra caiga en los 64 y el título respire. */
@@ -1934,4 +1992,9 @@
   /* Detalle de receta (457:13264): título 20 semibold y ficha a una columna. */
   .nv-app .recipe-plate h3 { font-size: 20px; line-height: 1.1; }
   .nv-app .recipe-macros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* El cajón no se desliza para quien pidió menos movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  .nv-app .nv-sidebar { transition: none; }
 }

@@ -81,6 +81,10 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
   const [pendingModule, setPendingModule] = useState('');
   const [query, setQuery] = useState('');
   const [moreOpen, setMoreOpen] = useState(false);
+  // Cajón de navegación móvil: el archivo abre el menú desde la barra superior.
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
   const [onboardingOpen, setOnboardingOpen] = useState(() => !lockedRole && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('onboarding') === '1');
   useEffect(() => {
     const header = topbarRef.current;
@@ -148,7 +152,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
       const href = buildAppHref(window.location.href, role, target);
       window.history.pushState({ ...window.history.state, planVPage: target }, '', href);
     }
-    setPage(target); setPendingModule(''); setQuery(''); setMoreOpen(false); setRecordEditing(false); setMealSlot(null);
+    setPage(target); setPendingModule(''); setQuery(''); setMoreOpen(false); setMenuOpen(false); setRecordEditing(false); setMealSlot(null);
   };
   const switchRole = (target: AppRole) => {
     if (!demoSwitch) return;
@@ -157,7 +161,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
     if (typeof window !== 'undefined') {
       window.history.pushState({ planVPage: 'inicio' }, '', buildAppHref(window.location.href, target, 'inicio'));
     }
-    setPage('inicio'); setPendingModule(''); setQuery(''); setMoreOpen(false); setRecordEditing(false); setMealSlot(null);
+    setPage('inicio'); setPendingModule(''); setQuery(''); setMoreOpen(false); setMenuOpen(false); setRecordEditing(false); setMealSlot(null);
   };
   const pickPatient = (id: string) => { setSelectedId(id); setDayIndex(-1); navigate('inicio'); };
   const currentDay = buildCalendarWeek(now)[dayIndex];
@@ -197,6 +201,17 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [moreOpen]);
+  useEffect(() => {
+    if (!menuOpen) return;
+    drawerRef.current?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setMenuOpen(false);
+      menuButtonRef.current?.focus();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [menuOpen]);
 
   const openOperation = (target: CrmEntry) => {
     if (target.module === 'pacientes') { navigate('pacientes'); return; }
@@ -250,9 +265,9 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
     />
   </div>;
 
-  return <div className={`nv-app${role === 'patient' ? ' nv-patient' : ' nv-pro'}${darkMode ? ' nv-dark' : ''}${page === 'mensajes' ? ' nv-messaging' : ''}${page === 'ficha' ? ' nv-record' : ''}${page === 'diario' && role === 'pro' ? ' nv-food-diary' : ''}${page === 'plan' && role === 'pro' ? ' nv-meal-plan' : ''}${page === 'consultas' && role === 'pro' ? ' nv-consultation-page' : ''}${page === 'agenda' && role === 'pro' ? ' nv-agenda-page' : ''}${page === 'objetivos' && role === 'pro' ? ' nv-goals-page' : ''}${isWorkCenterPage(page) && role === 'pro' ? ' nv-work-center-page' : ''}${page === 'compras' && role === 'patient' ? ' nv-grocery-page' : ''}${page === 'progreso' ? ' nv-progress-page' : ''}${page === 'diario' && role === 'patient' ? ' nv-patient-diary' : ''}${page === 'plan' && role === 'patient' ? ' nv-patient-plan' : ''}${page === 'agenda' && role === 'patient' ? ' nv-patient-agenda' : ''}${page === 'recetas' && role === 'patient' ? ' nv-healthy-menu' : ''}${page === 'ejercicio' ? ' nv-exercise-page' : ''}${page === 'recursos' && role === 'patient' ? ' nv-resources-page' : ''}`}>
+  return <div className={`nv-app${role === 'patient' ? ' nv-patient' : ' nv-pro'}${darkMode ? ' nv-dark' : ''}${menuOpen ? ' nv-menu-open' : ''}${page === 'mensajes' ? ' nv-messaging' : ''}${page === 'ficha' ? ' nv-record' : ''}${page === 'diario' && role === 'pro' ? ' nv-food-diary' : ''}${page === 'plan' && role === 'pro' ? ' nv-meal-plan' : ''}${page === 'consultas' && role === 'pro' ? ' nv-consultation-page' : ''}${page === 'agenda' && role === 'pro' ? ' nv-agenda-page' : ''}${page === 'objetivos' && role === 'pro' ? ' nv-goals-page' : ''}${isWorkCenterPage(page) && role === 'pro' ? ' nv-work-center-page' : ''}${page === 'compras' && role === 'patient' ? ' nv-grocery-page' : ''}${page === 'progreso' ? ' nv-progress-page' : ''}${page === 'diario' && role === 'patient' ? ' nv-patient-diary' : ''}${page === 'plan' && role === 'patient' ? ' nv-patient-plan' : ''}${page === 'agenda' && role === 'patient' ? ' nv-patient-agenda' : ''}${page === 'recetas' && role === 'patient' ? ' nv-healthy-menu' : ''}${page === 'ejercicio' ? ' nv-exercise-page' : ''}${page === 'recursos' && role === 'patient' ? ' nv-resources-page' : ''}`}>
     <a className="nv-skip" href="#nv-main">Ir al contenido</a>
-    <aside className="nv-sidebar" aria-label={role === 'patient' ? 'Tu espacio' : 'Consultorio'}>
+    <aside className="nv-sidebar" id="nv-drawer" ref={drawerRef} tabIndex={-1} aria-label={role === 'patient' ? 'Tu espacio' : 'Consultorio'}>
       <a className="nv-brand" href={buildAppHref(typeof window === 'undefined' ? 'https://plan.v/app/inicio' : window.location.href, role, 'inicio')} onClick={(event) => { event.preventDefault(); navigate('inicio'); }}><Mark /><span>Plan V<small>Mi espacio</small></span></a>
       <span className="nv-nav-group">{role === 'patient' ? 'Mi app' : 'Mi consultorio'}</span>
       <nav>{(role === 'patient' ? PATIENT_SURFACES : [...PRO_TABS, ...PRO_MORE]).map((item) => <button type="button" key={item.id} aria-current={!pendingModule && page === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}>{item.id in NV_ICONS ? <NvIcon name={item.id as NvIconName} size={20} /> : <Icon name={item.icon} size={20} />}{item.label}{item.id === 'mensajes' && messageUnread > 0 && <small>{messageUnread > 9 ? '9+' : messageUnread}</small>}</button>)}</nav>
@@ -271,6 +286,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
 <ShowroomConsultAlerts key={alertAudience} audience={alertAudience} alerts={consultAlerts} reminders={habitReminders} patientId={selected?.id} onOpen={(alert) => { if (role === 'pro') setSelectedId(alert.patientId); navigate('agenda'); }} onManage={role === 'pro' ? (alert) => { setSelectedId(alert.patientId); navigate('consultas'); } : undefined} onOpenReminder={openReminder} onOpenCare={(notice) => { if (role === 'pro') setSelectedId(notice.patient_id); navigate(notice.target); }} />
         <NvButton className="nv-ghost nv-theme" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} onClick={onToggleTheme}><Icon name={darkMode ? 'sun' : 'moon'} size={19} /></NvButton>
         {onSignOut && <NvButton className="nv-ghost" onClick={() => onSignOut()}>Salir</NvButton>}
+        <button type="button" className="nv-button nv-ghost nv-menu-toggle" ref={menuButtonRef} aria-label={menuOpen ? 'Cerrar el menú' : 'Abrir el menú'} aria-expanded={menuOpen} aria-controls="nv-drawer" onClick={() => setMenuOpen((open) => !open)}><Icon name="list" size={20} /></button>
       </header>
       <div className="nv-content-layout">
         <main id="nv-main" tabIndex={-1} className="nv-main">
@@ -306,6 +322,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
         </aside>}
       </div>
     </div>
+    {menuOpen && <div className="nv-drawer-scrim" role="presentation" onClick={() => { setMenuOpen(false); menuButtonRef.current?.focus(); }} />}
     <nav className="nv-tabbar" aria-label="Secciones principales">
       {tabs.map((tab) => <button key={tab.id} type="button" aria-current={!pendingModule && page === tab.id ? 'page' : undefined} onClick={() => navigate(tab.id)}><span className="nv-tab-icon"><Icon name={tab.icon} size={22} />{tab.id === 'mensajes' && messageUnread > 0 && <b className="nv-tab-unread" aria-label={`${messageUnread} sin leer`}>{messageUnread > 9 ? '9+' : messageUnread}</b>}</span><span>{tab.label}</span></button>)}
       <button type="button" aria-current={moreCurrent ? 'page' : undefined} aria-expanded={moreOpen} aria-controls="nv-more-sheet" onClick={() => setMoreOpen(true)}><span className="nv-tab-icon"><Icon name="grid" size={22} />{role === 'pro' && messageUnread > 0 && <b className="nv-tab-unread" aria-label={`${messageUnread} sin leer`}>{messageUnread > 9 ? '9+' : messageUnread}</b>}</span><span>Más</span></button>

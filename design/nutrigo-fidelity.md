@@ -234,7 +234,7 @@ La piel móvil vive en un solo bloque `@media (max-width: 799px)` de `nutrigo-fi
 
 **Ley común**
 
-- barra superior blanca de 64 con padding 16, logo de 32, título de la pantalla en 14 semibold a 16, y un botón de 32 radio 12 a la derecha
+- barra superior blanca de 64 con padding 16, logo de 32, título de la pantalla en 16 semibold, y el botón de menú de 32 radio 12 a la derecha, en x 342 como en el archivo
 - contenido de 390 con 16 de guarda: ancho útil 358
 - cards de 358, radio 16, padding 16
 - 24 entre bloques en Dashboard, Calendario y Diario; 32 en Menú, Plan, Compras, Progreso e Insights
@@ -255,9 +255,14 @@ La piel móvil vive en un solo bloque `@media (max-width: 799px)` de `nutrigo-fi
 - **Detalle de recurso** (`507:17412`): una columna, card de texto con padding 24/16 e imagen cuadrada
 - **Detalle de receta** (`457:13264`): título 20 semibold y ficha a una columna
 
+**Navegación**
+
+Igual que el archivo: el botón de la barra abre un cajón de 223 con la Navbar del nodo `12:793`, y la barra inferior de pestañas no se muestra por debajo de 800. El archivo no dibuja el estado abierto del menú (el set `Navbar` tiene Desktop 223, Tablet 76, Mobile 390 × 68 y Mobile Back 390 × 64, y ninguna variante con el cajón desplegado), así que el contenido del cajón es la Navbar de escritorio, que es el único menú que el archivo dibuja.
+
+El cajón se cierra al navegar, al tocar el velo y con Escape; al cerrarse con Escape o con el velo el foco vuelve al botón.
+
 **Desviaciones deliberadas en móvil**
 
-- El archivo navega con un botón de menú arriba a la derecha. Plan V usa la barra inferior de pestañas y **se queda**: sacarla dejaría la app sin navegación hasta construir el cajón lateral, que es trabajo de producto y no de piel.
 - El selector de rol Paciente/Nutricionista y la campana de avisos no están en el archivo. Se compactan a 32 de alto para que la barra caiga en los 64.
 - El archivo tiene tres cards de resumen en el calendario; Plan V tiene cuatro, así que van dos por fila. El alto de 178 del archivo es para una card con gráfico: la de Plan V lleva rótulo y cifra y se queda en 108.
 

@@ -74,6 +74,11 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(css).toMatch(/@media \(max-width: 799px\)/);
     expect(css).toMatch(/min-height:\s*64px/);
     expect(css).toMatch(/padding:\s*24px var\(--nv-card-pad\)/);
+    // El cajon reemplaza a la barra inferior: menu de 32 y panel de 223.
+    expect(css).toMatch(/\.nv-app \.nv-tabbar \{ display: none; \}/);
+    expect(css).toMatch(/\.nv-app \.nv-button\.nv-menu-toggle/);
+    expect(css).toMatch(/width:\s*var\(--nv-sidebar-width\)/);
+    expect(css).toMatch(/\.nv-drawer-scrim/);
     // Detalle de receta (nodo 84:3145): las cuatro fichas de macro son Green,
     // asi que la piel pisa los azules y rojos que inventaba recipe-plate.css.
     expect(css).toMatch(/\.nv-app \.recipe-macros \[data-macro\] dd/);
