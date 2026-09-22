@@ -41,6 +41,11 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(css).toMatch(/--nv-ink:\s*#272932/);
     expect(css).toMatch(/--nv-muted:\s*#8A8C90/);
     expect(css).toMatch(/--nv-line:\s*#E1E1E2/);
+    // Leidos en los detalles de receta y de recurso (nodos 84:3145, 279:9301).
+    expect(css).toMatch(/--nv-leaf:\s*#73A107/);
+    expect(css).toMatch(/--nv-heading:\s*#212738/);
+    // El parrafo largo del archivo es 14 a 1.4, no el 14 a 1.25 de las etiquetas.
+    expect(css).toMatch(/--nv-fs-p14:\s*14px;\s*--nv-lh-p14:\s*1\.4/);
     expect(css).toMatch(/--nv-bg:\s*#F9F4F2/);
     expect(css).toMatch(/--nv-shadow:\s*0 4px 12px rgba\(176, 176, 176, 0\.14\)/);
     expect(css).toMatch(/--nv-fs-h3:\s*26px/);
@@ -62,6 +67,13 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(css).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\) 260px/);
     expect(css).toMatch(/grid-template-columns:\s*228px minmax\(0, 1fr\)/);
     expect(css).toMatch(/width:\s*204px/);
+    // Detalle de recurso (nodo 279:9301): 800 + 36 + 325, cada columna una card de padding 36.
+    expect(css).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\) 325px/);
+    expect(css).toMatch(/aspect-ratio:\s*728 \/ 408/);
+    // Detalle de receta (nodo 84:3145): las cuatro fichas de macro son Green,
+    // asi que la piel pisa los azules y rojos que inventaba recipe-plate.css.
+    expect(css).toMatch(/\.nv-app \.recipe-macros \[data-macro\] dd/);
+    expect(css).toMatch(/\.nv-app \.recipe-plate-badge/);
     expect(css).toMatch(/Not Facu visual approval/);
     expect(css).not.toMatch(/PLANV_NUTRIGO_VISUAL\s*=\s*1/);
     expect(NV_VISUAL_LAW.type).toBe('Poppins');
@@ -128,7 +140,11 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(law).toMatch(/OAuth 403/);
     expect(law).toMatch(/74:2016/);
     expect(law).toMatch(/12:793/);
-    for (const node of ['33:1574', '84:1489', '57:1509', '62:1513']) expect(law).toContain(node);
+    for (const node of [
+      '33:1574', '84:1489', '57:1509', '62:1513',
+      '84:1666', '84:2565', '84:2716', '84:2994', '105:2472', '105:2649', '105:2790',
+      '263:6588', '84:3145', '279:9301',
+    ]) expect(law).toContain(node);
     expect(law).toMatch(/design\/nutrigo-exports/);
     expect(law).not.toMatch(/PLANV_NUTRIGO_VISUAL\s*=\s*1/);
   });

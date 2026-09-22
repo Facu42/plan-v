@@ -111,6 +111,61 @@ Card de 551 × 306, radio 16, padding 16, separación 16. Cuerpo en dos columnas
 - detalle: chip Green-Light de 32 × 36 radio 20 con icono 16, cifra 18 semibold, unidad 16 regular, rótulo 11
 - lista de macros: ítem Gray-BG-Subtle radio 12 con 16 de separación; pastilla Gray-BG radio 10 de 89 con cifra 18 bold y unidad 9 en Gray-30; a la derecha, nombre 11 regular y porcentaje 11 semibold, y barra de 6 radio 6 en Green sobre blanco
 
+### Calendario (nodo `84:1666`)
+
+Cuerpo de 836. Arriba, tres cards de resumen de 108. Debajo, el calendario en una sola card: cabecera de días de 40 con línea Gray-Line y texto 12 regular Gray-20 (`217:6491`), y celdas de 119,43 × 120 con padding 4 y número de 18 en 10 (`217:6501`). El día de hoy es una pastilla Green; el elegido lleva contorno Green de 2; los días de fuera van en Gray-BG con texto Gray-10. Los controles de mes son botones de 30 radio 8, y las vistas y filtros son grupos segmentados sobre Gray-BG.
+
+### Mensajes (nodo `84:2565`)
+
+Sin rail: el cuerpo de 1161 se parte en 299 + 547 + 275 con 20. Los contactos son ítems de 96, la cabecera del chat mide 100 con padding 16 y el pie 88. Las burbujas van radio 12/12/12/2 en Gray-BG-Subtle; las propias, espejadas en Green-Light. Los campos no llevan borde: radio 12 sobre Gray-BG-Subtle.
+
+### Menú saludable (nodo `84:2716`)
+
+Contenido 816 + rail 289. El destacado es de 338 con imagen de 298 al lado del texto, radio 12 en la foto. La lista de abajo es una sección sin card, con artículos de 136 y fotos de 104. Los momentos del día son ítems de 100. Los filtros son un grupo segmentado.
+
+### Plan semanal (nodo `84:2994`, fila en `373:10644`)
+
+El archivo arma el plan como tabla de 1161: celda de día de 120 en Cream-BG con día 14 semibold y fecha 12 Gray-20, y una celda por comida con imagen de 88 y radio 14. Cada momento tiene su tinte: desayuno Green-Subtle, almuerzo Saffron-Subtle, merienda Orange-Subtle y cena Gray-BG-Subtle. Plan V muestra un día por vez, así que la fila se aplica a las comidas de ese día.
+
+### Lista de compras (nodo `105:2472`)
+
+Cuerpo 1161. Cards de resumen de 84. La lista es una tabla con solapas de 42 (activa en Green), filas de 66 y 16 de aire adentro de la card. El buscador no lleva borde: radio 12.
+
+### Diario (nodo `105:2649`)
+
+Tira de estadística de 104 con cuatro cards de 282 × 72 radio 16, chip de 26 radio 10. Debajo, la tabla en una card con filas de 68 separadas por línea Gray-Line y 16 de aire.
+
+### Progreso (nodo `105:2790`)
+
+Cuerpo 1161 = 767 + 374 con 20. Los widgets llevan padding 16 y cabecera de sección de 30. La tabla de medidas tiene filas de 44 y los períodos son un grupo segmentado.
+
+### Insights (nodo `263:6588`)
+
+Contenido 856 + rail 249. Cabecera con buscador y chips de 28 radio 8, solapas de 34, destacado de 369 al lado de la lista de 459, y abajo dos bloques de 414 con cards de 197 × 218. La lista del rail usa ítems de 56.
+
+### Detalle de receta (nodo `84:3145`)
+
+Cuerpo de 1161 = izquierda 275 + contenido 591 + derecha 295, **sin huecos**: la separación la hace el padding de cada columna.
+
+- izquierda: Cream-BG radio 16, imagen cuadrada de 275 radio 16 sobre Gray-BG, y una ficha de datos con filas de 24 a los extremos, rótulo 14 regular Gray-20 e importe 14 semibold
+- contenido: card blanca radio 16, padding 4/28, separación 24; título 22 semibold 1.08; bloque «sobre» en Gray-BG-Subtle radio 16 padding 16 con badge de 62 × 26 radio 8 en Saffron y texto 14 regular Gray-30; herramientas y pasos en dos columnas de 90 y 429 con 16
+- derecha: separación 20; bloque de porciones Cream-BG radio 16 padding 16, con ingredientes como filas de 32 (número de 28 radio 7, texto 12 regular Gray-30); cuatro fichas de 64,75 × 118 radio 16 en Green con padding 12, icono de 32 radio 8 en White y rótulo de 9; widget de nutrición Cream-BG radio 16, primera fila 16 semibold y el resto 12 medium contra 12 semibold
+
+Plan V no tiene pantalla de receta: la ficha vive como card dentro del diario y del plan, así que se aplican las piezas que sí existen (imagen, badge, título, fichas de macros, ingredientes). Las fichas de macro pierden los azules y rojos inventados: en el archivo las cuatro son Green.
+
+### Detalle de recurso (nodo `279:9301`)
+
+Cuerpo de 1161 = contenido 800 + 36 + rail 325. Cada columna es **una sola card blanca de radio 16 con padding 36**; las secciones de adentro no llevan card propia.
+
+- cabecera: categoría 12 regular en Green-Dark `#73A107`, título 28 semibold 1.08, autor 12 regular Gray-30 y fecha 12 regular Gray-20
+- entrada: caja con borde izquierdo de 2 Gray-Line y padding 16/24, texto 14 regular 1.4 Gray-20
+- imagen: 728 × 408 radio 16 sobre Gray-BG
+- cuerpo: títulos 14 semibold en Heading `#212738`, párrafos 14 regular 1.4 Gray-30
+- cita: Cream-BG con borde izquierdo de 2 en Orange y radio 0 12 12 0, padding 16/24
+- rail: separación 32 entre secciones, cabecera de 30, etiquetas como chips de 28 radio 8 en Cream-BG con el numeral en Gray-10, y artículos relacionados con título 14 semibold
+
+La card de relacionados del archivo lleva una foto de 253 × 160 que Plan V no tiene: la fila queda con el icono de la guía en su lugar.
+
 ## Copy
 
 **La interfaz va en español.** El .fig manda en composición, color, tipo y densidad; no en idioma. Ningún rótulo, vacío ni mensaje queda en inglés por copiar el frame. Las cifras y nombres de ejemplo del pack no se copian: los datos son de Plan V.

@@ -14,7 +14,12 @@ export const NV_VISUAL_LAW = {
     'Saffron-Light': '#FFE6B5',
     Orange: '#FFA257',
     'Orange-10': '#FFE1C9',
+    'Green-Subtle': '#EDFFC4',
+    'Saffron-Subtle': '#FFEDC9',
+    'Orange-Subtle': '#FFF2E8',
+    'Green-Dark': '#73A107',
     Black: '#272932',
+    Heading: '#212738',
     'Gray-30': '#52545B',
     'Gray-20': '#8A8C90',
     'Gray-10': '#BEBFC2',
@@ -32,6 +37,8 @@ export const NV_VISUAL_LAW = {
   copyLanguage: 'es' as const,
   /** Escala del archivo: tamano en px -> altura de linea. */
   typeScale: { 26: 1.08, 22: 1.08, 18: 1.2, 16: 1.24, 14: 1.25, 12: 1.3, 11: 1.24 } as const,
+  /** Parrafo largo del archivo: 14 a 1.4, distinto del 14 a 1.25 de las etiquetas. */
+  paragraphScale: { 14: 1.4, 12: 1.5, 11: 1.6 } as const,
   cardRadius: [16, 24] as const,
   nav: 'pill',
   qaDir: 'design/nutrigo-exports',

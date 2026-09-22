@@ -45,6 +45,13 @@
   --nv-gold-soft: #FFE6B5;     /* Saffron-Light */
   --nv-coral: #FFA257;         /* Orange */
   --nv-coral-soft: #FFE1C9;    /* Orange-10 */
+  /* Tintes suaves del archivo, leídos en la tabla del plan (nodo 373:10644). */
+  --nv-accent-subtle: #EDFFC4; /* Green-Subtle */
+  --nv-gold-subtle: #FFEDC9;   /* Saffron-Subtle */
+  --nv-coral-subtle: #FFF2E8;  /* Orange-Subtle */
+  /* Leídos en el detalle de receta y de recurso (nodos 84:3145, 279:9301). */
+  --nv-leaf: #73A107;          /* Green-Dark */
+  --nv-heading: #212738;       /* Heading */
   --nv-lilac: #F6F6F7;
   --nv-strong: #272932;
   --nv-forest: #272932;
@@ -66,6 +73,7 @@
   --nv-fs-t12: 12px;  --nv-lh-t12: 1.3;
   --nv-fs-t11: 11px;  --nv-lh-t11: 1.24;
   --nv-fs-p12: 12px;  --nv-lh-p12: 1.5;
+  --nv-fs-p14: 14px;  --nv-lh-p14: 1.4;
   --nv-fs-p11: 11px;  --nv-lh-p11: 1.6;
 
   font-family: Poppins, "Public Sans", Arial, sans-serif;
@@ -993,3 +1001,698 @@
 .nv-app .nvm-moments strong { font-size: var(--nv-fs-t14); line-height: var(--nv-lh-t14); font-weight: 600; }
 .nv-app .nvm-moments small { margin-top: 4px; font-size: var(--nv-fs-t12); line-height: var(--nv-lh-t12); }
 .nv-app .nvm-featured-image { height: 298px; }
+
+/* ── Plan semanal (nodo 84:2994) ─────────────────────────────────────────────
+   El archivo arma el plan como tabla de 1161: una celda de día de 120 en
+   Cream-BG y una celda por comida, con imagen de 88 y radio 14. Cada momento
+   tiene su tinte: desayuno Green-Subtle, almuerzo Saffron-Subtle, merienda
+   Orange-Subtle y cena Gray-BG-Subtle. Plan V muestra un día por vez, así que
+   la fila se aplica a las comidas de ese día. */
+.nv-app .nvpp-plan { gap: var(--nv-section-gap); }
+.nv-app .nvpp-hero {
+  min-height: 50px;
+  padding: 0;
+  border-radius: 0;
+  color: var(--nv-ink);
+  background: transparent;
+}
+.nv-app .nvpp-hero-icon { display: none!important; }
+.nv-app .nvpp-hero h2 {
+  margin: 6px 0;
+  font-size: var(--nv-fs-h5);
+  line-height: var(--nv-lh-h5);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.nv-app .nvpp-hero p {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+}
+.nv-app :is(.nvpp-hero, .nvpp-week, .nvpp-results, .nvpp-detail) > header span,
+.nv-app .nvpp-hero > div > span {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t11);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.nv-app .nvpp-summary { gap: 16px; }
+.nv-app .nvpp-summary > div {
+  min-height: 108px;
+  padding: var(--nv-card-pad);
+  border: 0;
+  border-radius: var(--nv-r-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app .nvpp-summary dt { color: var(--nv-ink); font-size: var(--nv-fs-t14); line-height: var(--nv-lh-t14); }
+.nv-app .nvpp-summary dd { font-size: var(--nv-fs-t18); line-height: var(--nv-lh-t18); font-weight: 600; }
+.nv-app :is(.nvpp-week, .nvpp-results, .nvpp-detail) {
+  padding: var(--nv-card-pad);
+  border: 0;
+  border-radius: var(--nv-r-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app :is(.nvpp-week, .nvpp-results, .nvpp-detail) h3 {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+/* Cell-Y - Meal Plan: 120, Cream-BG, radio 14, día 14 semibold y fecha 12. */
+.nv-app .nvpp-days { gap: 16px; }
+.nv-app .nvpp-day {
+  min-height: 96px;
+  padding: var(--nv-card-pad);
+  border: 0;
+  border-radius: 14px;
+  background: var(--nv-bg);
+}
+.nv-app .nvpp-day > span {
+  color: var(--nv-ink);
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+  text-transform: none;
+}
+.nv-app .nvpp-day time {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+  font-weight: 400;
+}
+.nv-app .nvpp-day small {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  background: var(--nv-fill);
+  font-size: 10px;
+  line-height: 1.35;
+  font-weight: 500;
+}
+.nv-app .nvpp-day[aria-pressed="true"] {
+  color: var(--nv-ink);
+  background: var(--nv-accent);
+}
+.nv-app .nvpp-day[aria-pressed="true"] :is(span, time) { color: var(--nv-ink); }
+.nv-app .nvpp-day[aria-pressed="true"] small { background: rgba(255, 255, 255, 0.6); color: var(--nv-ink); }
+/* Cell-Menu: tinte por momento, imagen de 88 y texto 12 con interlineado 1,5. */
+.nv-app :is(.nvpp-meals, .nvpp-result-list) { gap: 16px; }
+.nv-app :is(.nvpp-meals, .nvpp-result-list) article {
+  min-height: 96px;
+  gap: 16px;
+  padding: 0 16px 0 0;
+  border-radius: 14px;
+  background: var(--nv-track);
+}
+.nv-app :is(.nvpp-meals, .nvpp-result-list) article:nth-child(4n+1) { background: var(--nv-accent-subtle); }
+.nv-app :is(.nvpp-meals, .nvpp-result-list) article:nth-child(4n+2) { background: var(--nv-gold-subtle); }
+.nv-app :is(.nvpp-meals, .nvpp-result-list) article:nth-child(4n+3) { background: var(--nv-coral-subtle); }
+.nv-app .nvpp-number {
+  width: 88px;
+  height: 96px;
+  flex: 0 0 88px;
+  border-radius: 14px;
+  background: var(--nv-fill);
+  color: var(--nv-ink);
+  font-size: var(--nv-fs-t14);
+  font-weight: 600;
+}
+.nv-app .nvpp-meal-copy strong {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+.nv-app .nvpp-meal-copy small,
+.nv-app .nvpp-meal-copy p {
+  font-size: var(--nv-fs-p12);
+  line-height: var(--nv-lh-p12);
+}
+
+/* ── Lista de compras (nodo 105:2472) ────────────────────────────────────────
+   Cuerpo 1161. Cards de estadística de 84, y la lista como tabla con solapas
+   de 42, filas de 66 y 16 de aire adentro de la card. */
+.nv-app .nvgrocery { gap: var(--nv-section-gap); }
+.nv-app .nvgrocery-header {
+  min-height: 50px;
+  padding: var(--nv-card-pad);
+  border: 0;
+  border-radius: var(--nv-r-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app .nvgrocery-header h2 {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+.nv-app .nvgrocery-header p,
+.nv-app .nvgrocery-list-card header p {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+}
+.nv-app .nvgrocery-stats article {
+  min-height: 84px;
+  padding: var(--nv-card-pad);
+  border-radius: var(--nv-r-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app .nvgrocery-stats small {
+  color: var(--nv-ink);
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+}
+.nv-app .nvgrocery-stats strong {
+  margin-top: 6px;
+  font-size: var(--nv-fs-t18);
+  line-height: var(--nv-lh-t18);
+  font-weight: 600;
+}
+.nv-app .nvgrocery-progress {
+  gap: 16px;
+  padding: var(--nv-card-pad);
+  border-radius: var(--nv-r-card);
+  background: var(--nv-accent-subtle);
+}
+.nv-app .nvgrocery-progress > span { height: 6px; border-radius: 6px; }
+.nv-app .nvgrocery-progress i { background: var(--nv-accent); }
+.nv-app .nvgrocery-layout { gap: var(--nv-section-gap); }
+.nv-app :is(.nvgrocery-list-card, .nvgrocery-info) {
+  border-radius: var(--nv-r-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app .nvgrocery-list-card > header {
+  padding: var(--nv-card-pad);
+  border-bottom: 1px solid var(--nv-line);
+}
+.nv-app :is(.nvgrocery-list-card, .nvgrocery-info) h3 {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+.nv-app .nvgrocery-search {
+  gap: 6px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--nv-track);
+}
+.nv-app .nvgrocery-search input { min-height: 30px; font-size: var(--nv-fs-t14); }
+/* Solapas del archivo: 42 de alto, botón de 30, activo en verde. */
+.nv-app .nvgrocery-filters {
+  gap: 0;
+  padding: 6px 16px;
+  min-height: 42px;
+  border-bottom: 1px solid var(--nv-line);
+}
+.nv-app .nvgrocery-filters button {
+  min-height: 30px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+  font-weight: 500;
+}
+.nv-app .nvgrocery-filters button[aria-pressed=true] {
+  border-color: transparent;
+  color: var(--nv-ink);
+  background: var(--nv-accent);
+}
+/* Table-Row-Grocery List: filas de 66. */
+.nv-app .nvgrocery-groups li > button:first-of-type {
+  min-height: 66px;
+  gap: 12px;
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--nv-line);
+  font-size: var(--nv-fs-t14);
+}
+.nv-app .nvgrocery-groups h4 {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t11);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.nv-app .nvgrocery-groups section > header { border-bottom: 1px solid var(--nv-line); }
+
+/* ── Progreso (nodo 105:2790) ────────────────────────────────────────────────
+   Cuerpo 1161 = 767 + 374 con 20. Los widgets llevan padding 16, cabecera de
+   sección de 30 y la tabla de medidas filas de 44. */
+.nv-app .nvp-progress { gap: var(--nv-section-gap); }
+.nv-app .nvp-hero {
+  min-height: 50px;
+  padding: var(--nv-card-pad);
+  border: 0;
+  border-radius: var(--nv-r-card);
+  box-shadow: var(--nv-shadow);
+}
+@media (min-width: 1251px) {
+  .nv-app .nvp-layout { grid-template-columns: minmax(0, 1fr) 374px; }
+}
+.nv-app .nvp-layout { gap: var(--nv-section-gap); }
+.nv-app :is(.nvp-compare, .nvp-meals) {
+  padding: var(--nv-card-pad);
+  border-radius: var(--nv-r-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app .nvp-periods { gap: 0; padding: 2px; border-radius: 8px; background: var(--nv-fill); }
+.nv-app .nvp-periods button {
+  min-height: 26px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+  font-weight: 500;
+}
+.nv-app .nvp-periods button[aria-pressed=true] {
+  border-color: transparent;
+  color: var(--nv-ink);
+  background: var(--nv-accent);
+}
+.nv-app .nvp-metrics { gap: 16px; }
+.nv-app .nvp-metric-icon { width: 26px; height: 26px; border-radius: 10px; }
+.nv-app .nvp-metric-icon svg { width: 14px; height: 14px; }
+/* Table-Row-Progress: filas de 44. */
+.nv-app .nvp-series li {
+  min-height: 44px;
+  border-bottom: 1px solid var(--nv-line);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+}
+.nv-app .nvp-legend { gap: 16px; font-size: var(--nv-fs-t11); }
+
+/* ── Diario (nodo 105:2649) ──────────────────────────────────────────────────
+   Tira de estadística de 104 con cuatro cards de 282 × 72, y debajo la tabla
+   en una card, con filas de 68 y 16 de aire. */
+.nv-app .nvpdiary-hero {
+  min-height: 50px;
+  padding: var(--nv-card-pad);
+  border: 0;
+  border-radius: var(--nv-r-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app .nvpdiary-metrics { gap: 16px; }
+.nv-app .nvpdiary-metrics > * {
+  min-height: 72px;
+  border-radius: var(--nv-r-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app .nvpdiary-card { border-radius: var(--nv-r-card); box-shadow: var(--nv-shadow); }
+.nv-app .nvpdiary-filters {
+  gap: 0;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--nv-fill);
+}
+.nv-app .nvpdiary-filters button {
+  min-height: 26px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+  font-weight: 500;
+}
+.nv-app .nvpdiary-filters button[aria-pressed=true] {
+  border-color: transparent;
+  color: var(--nv-ink);
+  background: var(--nv-accent);
+}
+.nv-app .nvpdiary-list { padding: 0 16px; }
+/* Table-Row-Food Diary: 68 de alto, separador Gray-Line. */
+.nv-app .nvpdiary-list > article {
+  min-height: 68px;
+  gap: 16px;
+  border-bottom: 1px solid var(--nv-line);
+}
+.nv-app .nvpdiary-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 10px;
+  background: var(--nv-accent);
+  color: var(--nv-ink);
+}
+.nv-app .nvpdiary-icon svg { width: 14px; height: 14px; }
+.nv-app .nvpdiary-copy strong {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+.nv-app .nvpdiary-copy small {
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+}
+
+/* ── Insights / Recursos (nodo 263:6588) ─────────────────────────────────────
+   Contenido 856 + rail 249. Cabecera centrada con buscador y chips de 28,
+   solapas de 34, destacado de 369 al lado de la lista de 459, y abajo dos
+   bloques de 414 con cards de 197 × 218. La lista del rail usa ítems de 56. */
+.nv-app .nvr-resources { gap: var(--nv-section-gap); }
+.nv-app .nvr-main,
+.nv-app .nvr-aside { gap: var(--nv-section-gap); }
+@media (min-width: 1251px) {
+  .nv-app .nvr-layout { grid-template-columns: minmax(0, 1fr) 249px; }
+}
+.nv-app .nvr-layout { gap: var(--nv-section-gap); }
+/* El archivo no tiene degradado oscuro: la cabecera es texto sobre el lienzo. */
+.nv-app .nvr-hero {
+  min-height: 50px;
+  padding: 0;
+  border-radius: 0;
+  color: var(--nv-ink);
+  background: none;
+}
+.nv-app .nvr-hero-mark { display: none!important; }
+.nv-app .nvr-hero h2 {
+  margin: 6px 0;
+  font-size: var(--nv-fs-h5);
+  line-height: var(--nv-lh-h5);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.nv-app .nvr-hero p {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+}
+.nv-app .nvr-hero > div > span,
+.nv-app .nvr-library > header span,
+.nv-app .nvr-aside section > span,
+.nv-app .nvr-related section > span,
+.nv-app .nvr-article > header > span {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t11);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+/* Chips Category: 28 de alto, radio 8. */
+.nv-app .nvr-filters { gap: 8px; }
+.nv-app .nvr-filters button {
+  min-height: 28px;
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--nv-fill);
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+  font-weight: 500;
+}
+.nv-app .nvr-filters button[aria-pressed=true] {
+  border-color: transparent;
+  color: var(--nv-ink);
+  background: var(--nv-accent);
+}
+.nv-app :is(.nvr-featured, .nvr-library, .nvr-article, .nvr-aside section, .nvr-related section) {
+  border: 0;
+  border-radius: var(--nv-r-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app :is(.nvr-featured, .nvr-library, .nvr-article) { padding: var(--nv-card-pad); }
+.nv-app .nvr-cover { border-radius: 12px; }
+.nv-app .nvr-grid { gap: 20px; }
+.nv-app .nvr-grid article {
+  min-height: 218px;
+  border-radius: var(--nv-r-card);
+}
+.nv-app .nvr-aside li,
+.nv-app .nvr-saved li,
+.nv-app .nvr-assigned li {
+  min-height: 56px;
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+}
+.nv-app .nvr-card-icon { width: 26px; height: 26px; border-radius: 10px; }
+
+/* ─── Detalle de recurso, nodo 279:9301 "34. Insight Details (Desktop)" ───
+   El cuerpo 1161 es contenido 800 + 36 de separación + rail 325. Cada columna
+   es una sola card blanca de radio 16 con padding 36; las secciones de adentro
+   no llevan card propia. */
+@media (min-width: 1251px) {
+  .nv-app .nvr-detail-layout {
+    grid-template-columns: minmax(0, 1fr) 325px;
+    gap: 36px;
+  }
+}
+.nv-app .nvr-detail-layout > .nvr-article {
+  gap: var(--nv-section-gap);
+  padding: 36px;
+  border: 0;
+  border-radius: var(--nv-r-card);
+  /* El frame del archivo no lleva efecto: es card plana, sin sombra. */
+  box-shadow: none;
+}
+.nv-app .nvr-detail .nvr-article > header {
+  width: 100%;
+}
+/* Info Category: 12/400 en Green-Dark, sin espaciado de letra ni versalitas. */
+.nv-app .nvr-detail .nvr-article > header > span {
+  color: var(--nv-leaf);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.nv-app .nvr-detail .nvr-article > header h2 {
+  max-width: 728px;
+  margin: 20px 0 0;
+  font-size: 28px;
+  line-height: 1.08;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+/* Pharagraph de entrada: caja con borde izquierdo de 2, padding 16/24. */
+.nv-app .nvr-detail .nvr-article > header > p {
+  max-width: none;
+  margin-top: 20px;
+  padding: 16px 24px;
+  border-left: 2px solid var(--nv-line);
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-p14);
+  line-height: var(--nv-lh-p14);
+}
+.nv-app .nvr-detail .nvr-article > header > div {
+  margin-top: 16px;
+}
+.nv-app .nvr-detail .nvr-article > header > div small {
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+}
+/* Image: 728 × 408, radio 16 sobre Gray-BG. */
+.nv-app .nvr-detail .nvr-article > .nvr-cover {
+  aspect-ratio: 728 / 408;
+  min-height: 0;
+  margin: 0;
+  border-radius: var(--nv-r-card);
+  background: var(--nv-fill);
+}
+.nv-app .nvr-detail .nvr-sections { gap: 20px; }
+.nv-app .nvr-detail .nvr-sections h3 {
+  margin-bottom: 8px;
+  color: var(--nv-heading);
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+.nv-app .nvr-detail .nvr-sections p {
+  color: var(--nv-ink-soft);
+  font-size: var(--nv-fs-p14);
+  line-height: var(--nv-lh-p14);
+}
+/* Quotation: Cream-BG con borde izquierdo naranja de 2 y radio 0 12 12 0. */
+.nv-app .nvr-detail .nvr-disclaimer {
+  gap: 12px;
+  margin: 0;
+  padding: 16px 24px;
+  border-left: 2px solid var(--nv-coral);
+  border-radius: 0 12px 12px 0;
+  background: var(--nv-bg);
+}
+.nv-app .nvr-detail .nvr-disclaimer p { gap: 8px; }
+.nv-app .nvr-detail .nvr-disclaimer strong {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-p14);
+  font-weight: 600;
+}
+.nv-app .nvr-detail .nvr-disclaimer span {
+  color: var(--nv-ink-soft);
+  font-size: var(--nv-fs-p14);
+  line-height: var(--nv-lh-p14);
+}
+/* Right Side: una card de 325 con padding 36 y 32 entre secciones. */
+.nv-app .nvr-detail-layout > .nvr-related {
+  align-self: start;
+  gap: 32px;
+  padding: 36px;
+  border-radius: var(--nv-r-card);
+  background: var(--nv-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app .nvr-detail-layout > .nvr-related > section {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.nv-app .nvr-detail-layout > .nvr-related > section > span {
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  color: var(--nv-ink);
+  font-size: var(--nv-fs-t14);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.nv-app .nvr-detail-layout > .nvr-related > section > div { margin-top: 16px; gap: 16px; }
+/* Chips Tag: 28 de alto, radio 8, Cream-BG; el numeral va en Gray-10. */
+.nv-app .nvr-detail .nvr-tags { gap: 8px; }
+.nv-app .nvr-detail .nvr-tags small {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 7px 10px 7px 8px;
+  border-radius: 8px;
+  color: var(--nv-ink);
+  background: var(--nv-bg);
+  font-size: var(--nv-fs-t11);
+  line-height: var(--nv-lh-t11);
+  font-weight: 400;
+}
+/* Card Related Article: título 14/600, fondo de la card, sin relleno gris.
+   El archivo la arma con una foto de 253 × 160 que Plan V no tiene: acá
+   la fila queda con el icono de la guía en su lugar. */
+.nv-app .nvr-detail-layout > .nvr-related > section > div > button {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.nv-app .nvr-detail-layout > .nvr-related > section > div > button strong {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+.nv-app .nvr-detail-layout > .nvr-related > section > div > button small {
+  margin-top: 4px;
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+}
+
+/* ─── Detalle de receta, nodo 84:3145 "13. Recipe Details (Desktop)" ───
+   El cuerpo 1161 es izquierda 275 + contenido 591 + derecha 295, sin huecos:
+   la separación la hace el padding de cada columna. Plan V no tiene pantalla
+   de receta: la ficha vive como card (RecipePlateCard) dentro del diario y
+   del plan, así que acá se aplican las piezas que sí existen. */
+.nv-app .recipe-plate {
+  gap: 0;
+  border: 0;
+  border-radius: var(--nv-r-card);
+  background: var(--nv-card);
+  box-shadow: var(--nv-shadow);
+}
+/* Image: cuadrada, radio 16 sobre Gray-BG. */
+.nv-app .recipe-dish { background: var(--nv-fill); }
+.nv-app .recipe-dish svg { aspect-ratio: 1 / 1; }
+.nv-app .recipe-dish figcaption {
+  padding: 8px 16px 0;
+  color: var(--nv-muted);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+  letter-spacing: 0;
+}
+.nv-app .recipe-plate-body { gap: 16px; padding: var(--nv-card-pad); }
+/* Badge Meal Category: 26 de alto, radio 8, Saffron, texto 14/400 Gray-30. */
+.nv-app .recipe-plate-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  color: var(--nv-ink-soft);
+  background: var(--nv-gold);
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+/* Menu: 22/600, interlineado 1.08, sin tracking negativo. */
+.nv-app .recipe-plate h3 {
+  margin: 0;
+  font-size: var(--nv-fs-h5);
+  line-height: var(--nv-lh-h5);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.nv-app .recipe-plate-meta,
+.nv-app .recipe-macro-missing {
+  margin: 0;
+  color: var(--nv-ink-soft);
+  font-size: var(--nv-fs-p14);
+  line-height: var(--nv-lh-p14);
+}
+/* Details: cuatro fichas de 118 de alto, radio 16, Green, padding 12.
+   La del archivo apila icono y valor; el dt/dd de Plan V ocupa ese lugar. */
+.nv-app .recipe-macros { gap: 12px; margin: 0; }
+.nv-app .recipe-macros div {
+  gap: 2px;
+  justify-content: flex-end;
+  min-height: 84px;
+  padding: 12px;
+  border-radius: var(--nv-r-card);
+  background: var(--nv-accent);
+  text-align: left;
+}
+.nv-app .recipe-macros dt {
+  order: 1;
+  color: var(--nv-ink-soft);
+  font-size: 9px;
+  line-height: 1.35;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.nv-app .recipe-macros dd,
+.nv-app .recipe-macros [data-macro] dd {
+  order: 0;
+  color: var(--nv-ink);
+  font-size: var(--nv-fs-t16);
+  line-height: var(--nv-lh-t16);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+/* Item List Simple: fila de 32, número de 28 radio 7, texto 12/400 Gray-30. */
+.nv-app .recipe-plate-ingredients {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: nv-ingrediente;
+}
+.nv-app .recipe-plate-ingredients li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 32px;
+  color: var(--nv-ink-soft);
+  font-size: var(--nv-fs-t12);
+  line-height: var(--nv-lh-t12);
+}
+.nv-app .recipe-plate-ingredients li::before {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--nv-fill);
+  color: var(--nv-muted);
+  counter-increment: nv-ingrediente;
+  content: counter(nv-ingrediente);
+  font-size: var(--nv-fs-t12);
+  font-weight: 600;
+}
