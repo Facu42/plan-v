@@ -24,7 +24,7 @@
   - CRM de la nutricionista: <http://127.0.0.1:5173/crm/inicio>
   - Dashboard del plan de implementación: <http://127.0.0.1:4317/#overview>
 
-  En la pantalla de acceso elegí **Continuar en modo demo**. Los cambios de código se actualizan automáticamente. Para detener todo, usá `Ctrl+C` en la terminal donde ejecutaste `npm run local`.
+  En la pantalla de acceso elegí **Continuar en modo demo**. Al arrancar, la API carga contenido de ejemplo por sus propias rutas (`server/demo/content.ts`): recetas publicadas, el plan fechado de la semana, seis semanas de medidas, comidas revisadas de hoy, actividad, una rutina y respuestas a turnos. Todo vive en memoria y vuelve a cargarse al reiniciar; `DEMO_CONTENT=0` arranca sin él. Los cambios de código se actualizan automáticamente. Para detener todo, usá `Ctrl+C` en la terminal donde ejecutaste `npm run local`.
 
   Si sólo necesitás la app y la API, `npm run dev` conserva el comando anterior.
 

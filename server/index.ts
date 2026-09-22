@@ -1,4 +1,5 @@
 import { serve } from '@hono/node-server';
+import { seedDemoContent } from './demo/content.js';
 import { registerCareRoutes } from './care/routes.js';
 import { CareError } from './care/repository.js';
 import { registerAssetRoutes } from './assets/routes.js';
@@ -1022,4 +1023,10 @@ if (isMainModule) {
   if (process.env.WORKER_SEPARATE !== '1') startJobWorker();
   writeOpsLog('info', 'api_listen', { mode: config.mode, data: config.dataMode, ai: config.aiMode, port: String(port) });
   serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
+  if (config.mode === 'demo' && config.dataMode === 'memory' && process.env.DEMO_CONTENT !== '0') {
+    void seedDemoContent((path, init) => app.request(path, init)).then((steps) => {
+      const failed = steps.filter((step) => !step.ok);
+      writeOpsLog(failed.length ? 'error' : 'info', 'demo_content', { steps: String(steps.length), failed: failed.map((step) => step.step).join(', ') });
+    });
+  }
 }

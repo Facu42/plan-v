@@ -59,7 +59,7 @@ export function PatientOverview({ patient: p, onNavigate, audience = 'patient' }
             <div className="np-macro-heading"><span className="nv-icon-tile"><Icon name={hasNutrition ? 'check' : 'clock'} size={17} /></span><div><strong>{hasNutrition ? professional ? 'Datos revisados' : 'Lo que registraste' : 'Registro pendiente'}</strong><small>{hasNutrition ? 'Distribución energética estimada' : 'Sin valores para calcular'}</small></div></div>
             {(['Proteínas', 'Carbohidratos', 'Grasas'] as const).map((label, i) => <div className="np-macro-row" key={label}>
               <strong>{hasNutrition ? <>{[p.macros.protein_g, p.macros.carbs_g, p.macros.fat_g][i]}<small> g</small></> : '—'}</strong>
-              <div><span>{label}{hasNutrition && <b>{shares[i]}%</b>}</span><span className="np-macro-track" aria-hidden="true"><i style={{ width: `${shares[i]}%` }} /></span></div>
+              <div><span>{label}{hasNutrition && <b>{Math.round(shares[i])}%</b>}</span><span className="np-macro-track" aria-hidden="true"><i style={{ width: `${shares[i]}%` }} /></span></div>
             </div>)}
           </div>
         </div>

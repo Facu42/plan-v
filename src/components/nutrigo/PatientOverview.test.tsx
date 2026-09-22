@@ -26,6 +26,13 @@ describe('Dashboard paciente — composición Nutrigo', () => {
     expect(html).not.toContain('Ver mis registros');
   });
 
+  it('muestra la distribución energética en porcentajes enteros', () => {
+    const p = { ...buildShowroomPatient(patient), nutritionLogCount: 2, kcal: 860, macros: { kcal: 860, protein_g: 60, carbs_g: 90, fat_g: 26 } };
+    const html = renderToStaticMarkup(<PatientOverview patient={p} onNavigate={() => {}} />);
+    expect(html).toContain('<b>29%</b>');
+    expect(html).not.toMatch(/<b>\d+\.\d+%<\/b>/);
+  });
+
   it('no mezcla el menú ni el contacto al cambiar el paciente profesional', () => {
     const a = buildShowroomPatient({ ...patient, todayPlan: [{ slot: 'Almuerzo', title: 'Solo Ana', time: '13:00' }] });
     const b = buildShowroomPatient({ ...patient, id: 'b', name: 'Beatriz', initials: 'B', todayPlan: [{ slot: 'Almuerzo', title: 'Solo Beatriz', time: '13:00' }] });
