@@ -183,6 +183,12 @@ Cuerpo de 1161 = izquierda 275 + contenido 591 + derecha 295, **sin huecos**: la
 
 Plan V no tiene pantalla de receta: la ficha vive como card dentro del diario y del plan, así que se aplican las piezas que sí existen (imagen, badge, título, fichas de macros, ingredientes). Las fichas de macro pierden los azules y rojos inventados: en el archivo las cuatro son Green.
 
+Verificado el 2026-09-22 contra el `RecipeMacroGrid` real (`recipe-plate.css` + su bloque de `nutrigo-fidelity.css`, líneas ~1563-1660) y contra una captura del Diario del paciente: el archivo base todavía trae el código viejo con azul/naranja/rojo por macro, pero queda muerto porque `.nv-app .recipe-macros [data-macro] dd` (0,3,1) pesa más que el selector del archivo base (0,2,1) y gana la cascada — las cuatro fichas salen Green como pide la ley. No hizo falta tocar código; el comentario ya lo decía bien.
+
+### Auditoría 2026-09-22: Lista de compras, Progreso, Insights/Recursos y Detalle de recurso
+
+Estas cuatro pantallas se construyeron en el commit `cbb5e9a` con medidas ya leídas del archivo (estadística 84, solapas 42, filas 66/68/44/56, radios 16/12/10/8) y no mostraban el patrón de color inventado por momento de comida que apareció en Calendario, Dashboard, Mensajes, Menú saludable y Plan de comidas. Repasadas con captura de Playwright en las tres (Compras, Progreso, Recursos) más el detalle de un recurso: cards, chips, solapas y colores coinciden con lo documentado arriba. No se encontraron más ocurrencias del bug `slot === 'Cena' ? 'gold' : 'green'` en el resto del código. Sin cambios de código en esta pasada.
+
 ### Detalle de recurso (nodo `279:9301`)
 
 Cuerpo de 1161 = contenido 800 + 36 + rail 325. Cada columna es **una sola card blanca de radio 16 con padding 36**; las secciones de adentro no llevan card propia.
