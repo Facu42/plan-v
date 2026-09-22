@@ -145,7 +145,11 @@ El panel de conversación (`Center Section`) es Cream-BG de fondo, con la cabece
 
 ### Menú saludable (nodo `84:2716`)
 
-Contenido 816 + rail 289. El destacado es de 338 con imagen de 298 al lado del texto, radio 12 en la foto. La lista de abajo es una sección sin card, con artículos de 136 y fotos de 104. Los momentos del día son ítems de 100. Los filtros son un grupo segmentado.
+Corregido el 2026-09-22 contra `get_design_context` sobre `232:8108` (Widget Featured Menu) y `373:10388` (List Menu): la card destacada y las de la lista van en **Cream-BG**, no en card blanca — la versión anterior las pintaba blancas. Contenido 816 + rail 289. El destacado es de 338 con imagen de 298 (radio 14) al lado del texto. La lista de abajo es una sección sin card propia, con artículos de 136, foto de 152 × 104 (radio 16) y 20 de separación. Los momentos del día son ítems de 100. Los filtros son un grupo segmentado con el activo en Green.
+
+Las pastillas de momento usan el color literal por comida: Desayuno y Merienda en Green, Almuerzo en Saffron, Cena en Orange — antes sólo distinguía Cena del resto, y con el color equivocado (Saffron en vez de Orange).
+
+**Desviación deliberada:** el archivo dibuja por preparación una calificación (estrellas/reseñas), dificultad, "Health Score", duración de cocción, pasos totales y una columna de macros (Calorías/Carbohidratos/Proteínas/Grasas) a pleno color. Los títulos del plan semanal en Plan V (`weekPlan`/`todayPlan`) no tienen ninguno de esos datos — sólo título, momento y días de la semana —, así que no se fabrican: la card muestra lo que hay (imagen, título, momento, veces por semana, día) y nada más. Se resuelve el día que exista una base de recetas con esos datos reales por preparación.
 
 ### Plan semanal (nodo `84:2994`, fila en `373:10644`)
 

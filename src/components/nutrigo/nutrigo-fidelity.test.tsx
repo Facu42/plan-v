@@ -222,4 +222,14 @@ describe('NV-FIDELITY shell vs inventario', () => {
     // Las reglas viejas (verde propio, gris recibido) ya no deben quedar en la CSS de fidelidad.
     expect(css).not.toMatch(/\.nm-bubble\.nm-own \{[\s\S]{0,80}background: var\(--nv-accent-soft\);/);
   });
+
+  it('el menú saludable usa Cream-BG en las cards y el color literal por momento de comida', () => {
+    expect(law).toMatch(/get_design_context.*232:8108.*373:10388|232:8108.*373:10388/s);
+    expect(css).toMatch(/\.nvm-featured \{[^}]*background: var\(--nv-bg\);/);
+    expect(css).toMatch(/\.nvm-list article \{[^}]*background: var\(--nv-bg\);/);
+    const tsx = readFileSync(new URL('./ShowroomHealthyMenu.tsx', import.meta.url), 'utf8');
+    expect(tsx).toMatch(/const slotTone = \(value: string\) => value === 'Almuerzo' \? 'gold' : value === 'Cena' \? 'coral' : 'green';/);
+    // La falta de calificación/dificultad/health score/macros por preparación queda documentada, no fabricada.
+    expect(law).toMatch(/Desviación deliberada.*Health Score/s);
+  });
 });

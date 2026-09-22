@@ -820,7 +820,13 @@
 
 /* ── Menú saludable (nodo 84:2716) ───────────────────────────────────────────
    Contenido 816 + rail 289. Arriba el destacado (imagen de 298 al lado del
-   texto de 312) y debajo la lista, con cards de 136. */
+   texto de 312) y debajo la lista, con cards de 136. Colores leídos con
+   get_design_context sobre 232:8108 y 373:10388 el 2026-09-22: la card
+   destacada y las de la lista van en Cream-BG, no blancas — corregido, la
+   versión anterior las pintaba como card blanca genérica. Las categorías de
+   comida usan el color literal por momento (Desayuno/Merienda=Green,
+   Almuerzo=Saffron, Cena=Orange); antes sólo distinguía Cena, y encima con
+   el color equivocado (Saffron en vez de Orange). */
 .nv-app .nvm-menu { gap: var(--nv-section-gap); }
 .nv-app .nvm-main,
 .nv-app .nvm-aside { gap: var(--nv-section-gap); }
@@ -864,11 +870,12 @@
   padding: 20px;
   border: 0;
   border-radius: var(--nv-r-card);
-  box-shadow: var(--nv-shadow);
+  background: var(--nv-bg);
+  box-shadow: none;
 }
-.nv-app .nvm-featured-image { min-height: 298px; border-radius: 12px; overflow: hidden; }
+.nv-app .nvm-featured-image { min-height: 298px; border-radius: 14px; overflow: hidden; }
 .nv-app .nvm-featured-image > .np-food-photo,
-.nv-app .nvm-featured-image > .np-food-fallback { border-radius: 12px; }
+.nv-app .nvm-featured-image > .np-food-fallback { border-radius: 14px; }
 .nv-app .nvm-featured-copy { padding: 0; justify-content: flex-start; }
 .nv-app .nvm-featured-copy h3 {
   margin: 0 0 16px;
@@ -892,17 +899,18 @@
 .nv-app .nvm-list { gap: 16px; }
 .nv-app .nvm-list article {
   min-height: 136px;
-  gap: 16px;
-  padding: var(--nv-card-pad);
+  grid-template-columns: 152px minmax(0, 1fr) auto;
+  gap: 20px;
+  padding: 16px;
   border-radius: var(--nv-r-card);
-  background: var(--nv-card);
-  box-shadow: var(--nv-shadow);
+  background: var(--nv-bg);
+  box-shadow: none;
 }
 .nv-app .nvm-list article > .np-food-photo,
 .nv-app .nvm-list article > .np-food-fallback {
-  width: 104px;
+  width: 152px;
   height: 104px;
-  border-radius: 12px;
+  border-radius: 16px;
 }
 .nv-app .nvm-list strong {
   font-size: var(--nv-fs-t14);
