@@ -39,6 +39,7 @@ import { buildConsultAlerts } from './consult-alerts';
 import { ConsultAlertStrip, ShowroomConsultAlerts } from './ShowroomConsultAlerts';
 import { buildShowroomReminders, reminderPage } from './showroom-reminders';
 import { buildCalendarWeek, resolveCalendarMeals, WeeklyPlanCalendar } from './WeeklyPlanCalendar';
+import { activityWhen, buildRecentActivity } from './recent-activity';
 import '@fontsource/poppins/latin-400.css';
 import '@fontsource/poppins/latin-500.css';
 import '@fontsource/poppins/latin-600.css';
@@ -319,6 +320,12 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
           {meals.length > 0 && <p className="np-data-note">Imágenes ilustrativas de Plan V.</p>}
           {!meals.length && <p className="nv-caption">Todavía no hay comidas asignadas.</p>}
           <div className="nv-next-visit"><span className="nv-icon-tile"><Icon name="calendar" /></span><small>PRÓXIMA CONSULTA</small><strong>{p.appointment?.when ?? 'Por coordinar'}</strong><NvButton className="nv-ghost" onClick={() => navigate('agenda')}>Ver consulta <Icon name="arrow" size={15} /></NvButton></div>
+          {role === 'patient' && page === 'inicio' && <section className="nv-recent" aria-label="Actividad reciente">
+            <header><h2>Actividad reciente</h2></header>
+            {(() => { const items = buildRecentActivity(p, now); return items.length
+              ? <ol>{items.map((item) => <li key={item.id}><span className="nv-icon-tile"><Icon name={item.icon} size={15} /></span><div><small>{activityWhen(item.at, now)}</small><p>{item.text}</p></div></li>)}</ol>
+              : <p className="nv-caption">Todavía no registraste nada esta semana.</p>; })()}
+          </section>}
         </aside>}
       </div>
     </div>

@@ -628,25 +628,27 @@
 .nv-app .np-macro-track { height: 6px; border-radius: 6px; background: var(--nv-card); }
 .nv-app .np-macro-track i { border-radius: 6px; background: var(--nv-accent); }
 
-/* Widget Workout Progress (nodo 71:1235): tres ítems de 92 con el mismo gris
-   del archivo, no bloques de color. */
+/* Widget Workout Progress (nodo 71:1235): tres tarjetas de 92 a pleno color,
+   Green/Saffron/Orange, tal como el screenshot del nodo — no gris. La nota
+   vieja ("el mismo gris del archivo") leía mal el relleno del icono, no el
+   de la tarjeta; corregido el 2026-09-22 contra get_screenshot. */
 .nv-app .np-followup-grid > button {
   height: 92px;
   min-height: 92px;
   gap: 16px;
   padding: 0 16px 0 0;
   border-radius: 12px;
-  background: var(--nv-track);
+  background: var(--nv-accent);
 }
-.nv-app .np-followup-grid > button:nth-child(2),
-.nv-app .np-followup-grid > button:nth-child(3) { background: var(--nv-track); }
+.nv-app .np-followup-grid > button:nth-child(2) { background: var(--nv-gold); }
+.nv-app .np-followup-grid > button:nth-child(3) { background: var(--nv-coral); }
 .nv-app .np-action-icon {
   width: 56px;
   height: 56px;
   flex: 0 0 56px;
   margin-left: 12px;
   border-radius: 10px;
-  background: var(--nv-fill);
+  background: var(--nv-card);
 }
 .nv-app .np-action-icon svg { width: 20px; height: 20px; }
 .nv-app .np-followup-grid > button > span > span {
@@ -678,6 +680,51 @@
   font-size: var(--nv-fs-t14);
   line-height: var(--nv-lh-t14);
   font-weight: 600;
+}
+
+/* Section Recent Activity (nodo 33:1967, 33:1912): ícono circular de 32 por
+   ítem conectado por una línea vertical al siguiente, hora/fecha en 10px
+   Gray-20 y texto en 11px, tal como el código literal del nodo. Los colores
+   ciclan Green/Saffron/Orange como en el archivo. */
+.nv-app .nv-recent { padding: 20px; border-radius: 16px; background: var(--nv-card); }
+.nv-app .nv-recent header { margin-bottom: 16px; }
+.nv-app .nv-recent h2 {
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+  font-weight: 600;
+}
+.nv-app .nv-recent ol { display: flex; flex-direction: column; }
+.nv-app .nv-recent li { position: relative; display: flex; gap: 12px; padding-bottom: 20px; }
+.nv-app .nv-recent li:last-child { padding-bottom: 0; }
+.nv-app .nv-recent li:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 32px;
+  bottom: 0;
+  width: 1px;
+  background: var(--nv-border);
+}
+.nv-app .nv-recent .nv-icon-tile {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--nv-accent);
+}
+.nv-app .nv-recent li:nth-child(4n+2) .nv-icon-tile { background: var(--nv-gold); }
+.nv-app .nv-recent li:nth-child(4n+3) .nv-icon-tile { background: var(--nv-coral); }
+.nv-app .nv-recent .nv-icon-tile svg { width: 15px; height: 15px; }
+.nv-app .nv-recent li > div { display: flex; flex-direction: column; gap: 4px; padding-top: 2px; }
+.nv-app .nv-recent li small {
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--nv-muted);
+}
+.nv-app .nv-recent li p {
+  font-size: var(--nv-fs-t11);
+  line-height: 1.6;
+  color: var(--nv-ink);
 }
 
 /* Section Recommendation (nodo 84:1488): dos platos de 252 × 330 con 20 de

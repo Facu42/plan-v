@@ -191,4 +191,24 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(css).not.toMatch(/\.nvpa-filters \{/);
     expect(css).not.toMatch(/nvpa-detail-icon/);
   });
+
+  it('el dashboard usa las tarjetas de seguimiento a color y muestra actividad reciente real', () => {
+    // Las tres tarjetas de "Tu seguimiento" (71:1235) van a pleno color, no en gris.
+    expect(css).toMatch(/\.np-followup-grid > button \{[^}]*background: var\(--nv-accent\);/);
+    expect(css).toMatch(/nth-child\(2\) \{ background: var\(--nv-gold\); \}/);
+    expect(css).toMatch(/nth-child\(3\) \{ background: var\(--nv-coral\); \}/);
+    // Ya no debe quedar la regla gris vieja para estos botones.
+    expect(css).not.toMatch(/\.np-followup-grid > button \{[^}]*background: var\(--nv-track\);/);
+    // La sección Recent Activity (33:1967) existe con su estilo literal.
+    expect(css).toMatch(/\.nv-recent \{/);
+    expect(css).toMatch(/\.nv-recent \.nv-icon-tile \{[^}]*border-radius: 50%;/);
+    // La actividad reciente se arma con datos reales (logs/actividad/mensajes), no inventados.
+    const activity = readFileSync(new URL('./recent-activity.ts', import.meta.url), 'utf8');
+    expect(activity).toMatch(/no inventada/);
+    expect(activity).toMatch(/patient\.logs/);
+    expect(activity).toMatch(/patient\.activities/);
+    expect(activity).toMatch(/patient\.messages/);
+    // La desviación de las cards de "Tu Menú De Hoy" (sin macros por comida planificada) queda documentada.
+    expect(law).toMatch(/Desviación deliberada — tarjetas de "Tu Menú De Hoy"/);
+  });
 });

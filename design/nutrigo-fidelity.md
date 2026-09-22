@@ -111,6 +111,14 @@ Card de 551 × 306, radio 16, padding 16, separación 16. Cuerpo en dos columnas
 - detalle: chip Green-Light de 32 × 36 radio 20 con icono 16, cifra 18 semibold, unidad 16 regular, rótulo 11
 - lista de macros: ítem Gray-BG-Subtle radio 12 con 16 de separación; pastilla Gray-BG radio 10 de 89 con cifra 18 bold y unidad 9 en Gray-30; a la derecha, nombre 11 regular y porcentaje 11 semibold, y barra de 6 radio 6 en Green sobre blanco
 
+### Widget de seguimiento (nodo `71:1235`) y Actividad reciente (nodo `33:1967`)
+
+Corregido el 2026-09-22 contra `get_screenshot` del nodo `12:792`: las tres tarjetas de 265 × 92 ("Diario de comidas" / "Hábitos de la semana" / "Próxima consulta") van a pleno color — Green, Saffron y Orange — con un icono blanco de 56 encima, no en el mismo gris del archivo como decía un comentario anterior (leía mal el relleno del ícono, no el de la tarjeta).
+
+El rail derecho del Dashboard (`33:1104`, "Right Side") trae además una sección "Recent Activity" que Plan V no tenía: lista de hasta 4 ítems reales — comidas registradas, actividad física registrada y mensajes enviados/recibidos con la nutricionista —, cada uno con su ícono circular de 32 (Green/Saffron/Orange en ciclo, con línea conectora al siguiente) y su hora u fecha real. Se arma en `recent-activity.ts` a partir de los mismos logs/actividades/mensajes que ya usa el resto de la app; no se inventa ningún dato ni se muestra cuando no hay actividad registrada esa semana.
+
+**Desviación deliberada — tarjetas de "Tu Menú De Hoy":** el archivo dibuja cada `Card Meal Plan` del rail con una pastilla de check + kcal y una fila de macros (C/P/F) por comida. `todayPlan`/`weekPlan` en `showroom-model.ts` sólo tienen `{slot, title, time}` para comidas planificadas (a diferencia de las comidas ya registradas en el diario, que sí tienen macros reales) — no hay dato real de calorías/macros para una comida todavía no comida. Se mantiene la card simplificada actual en vez de fabricar esos números; se resuelve el día que el plan de comidas tenga macros propios por ítem.
+
 ### Calendario (nodo `84:1666`)
 
 Reconstruido el 2026-09-22 con el código literal del archivo (`get_design_context` sobre `217:6452` y `215:5682`), no con medidas leídas a mano: la versión anterior se apartaba del .fig en varios puntos y Facundo lo marcó como "inventado".
