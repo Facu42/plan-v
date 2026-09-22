@@ -176,3 +176,18 @@
 .nv-app .nv-macro-dot.nv-gold { background: #3BB273; }
 .nv-app .nv-alerts-urgency.soon,
 .nv-app .nv-alerts-urgency.today { background: var(--nv-lima); color: #083A30; }
+
+/* Action buttons stay lima. Pack gold must not paint a CTA. */
+.nv-app .nv-button:not(.nv-ghost):not(.nv-soft),
+.nv-app a.nv-button:not(.nv-ghost):not(.nv-soft),
+.nv-app .nvpa-detail > a {
+  background: var(--nv-lima);
+  color: #083A30;
+  border-color: transparent;
+}
+.nv-app .nv-button.nv-soft { background: var(--nv-mint); color: #083A30; }
+.nv-app .nv-button.nv-ghost { background: transparent; color: var(--nv-ink); }
+.nv-app .nvr-cover-camera,
+.nv-app .nvr-cover-heart { background: linear-gradient(145deg, #FFE4DF, #E7C2BC); }
+.nv-app .nvr-cover-check { background: linear-gradient(145deg, #EAFF78, #DCEFE7); }
+.nv-app .nvr-card-check { color: #226C4B; background: var(--nv-mint); }

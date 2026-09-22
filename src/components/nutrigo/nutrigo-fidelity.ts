@@ -46,6 +46,19 @@ export const NUTRIGO_NO_GLOBAL_RAIL: readonly NutrigoSurfaceId[] = [
 export const NUTRIGO_FIDELITY_NOT_VISUAL_APPROVAL =
   'NV-FIDELITY shell contracts are not Facu visual approval. PLANV_NUTRIGO_VISUAL stays unset.';
 
-/** Cloud file is the composition reference. QA is side-by-side once PNGs land in design/nutrigo-exports/. */
-export const NUTRIGO_REFERENCE_PNG_MISSING: readonly NutrigoSurfaceId[] =
-  NUTRIGO_FIDELITY_SURFACES.map((surface) => surface.id);
+/** Desktop PNGs from Figma Cloud OTolnKfsxUFjaZOhhdb04i. Not Facu visual approval. */
+export const NUTRIGO_REFERENCE_PNGS = {
+  dashboard: 'design/nutrigo-exports/01-dashboard.png',
+  calendar: 'design/nutrigo-exports/02-calendar.png',
+  messages: 'design/nutrigo-exports/03-messages.png',
+  'healthy-menu': 'design/nutrigo-exports/04-healthy-menu.png',
+  'recipe-details': 'design/nutrigo-exports/05-recipe-details.png',
+  'meal-plan': 'design/nutrigo-exports/06-meal-plan.png',
+  grocery: 'design/nutrigo-exports/07-grocery.png',
+  'food-diary': 'design/nutrigo-exports/08-food-diary.png',
+  progress: 'design/nutrigo-exports/09-progress.png',
+  insights: 'design/nutrigo-exports/10-insight.png',
+  'insight-details': 'design/nutrigo-exports/11-insight-details.png',
+} as const satisfies Record<Exclude<NutrigoSurfaceId, 'exercise'>, string>;
+
+export const NUTRIGO_REFERENCE_PNG_MISSING: readonly NutrigoSurfaceId[] = [];

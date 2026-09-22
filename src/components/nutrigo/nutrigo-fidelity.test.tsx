@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { RecipeMacroGrid } from './RecipePlate';
@@ -8,6 +8,7 @@ import {
   NUTRIGO_FIDELITY_SURFACES,
   NUTRIGO_NO_GLOBAL_RAIL,
   NUTRIGO_REFERENCE_PNG_MISSING,
+  NUTRIGO_REFERENCE_PNGS,
   NV_VISUAL_LAW,
 } from './nutrigo-fidelity';
 
@@ -44,6 +45,8 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(css).toMatch(/\.nv-app\.nv-patient-diary \.photo-modal/);
     expect(css).toMatch(/\.nv-app \.nv-macro-dot\.nv-gold/);
     expect(css).toMatch(/\.nv-app \.nv-alerts-urgency\.soon/);
+    expect(css).toMatch(/\.nv-app \.nv-button:not\(\.nv-ghost\):not\(\.nv-soft\)/);
+    expect(css).toMatch(/\.nv-app \.nvr-cover-check/);
     expect(NUTRIGO_FIDELITY_NOT_VISUAL_APPROVAL).toMatch(/not Facu visual approval/i);
   });
 
@@ -64,14 +67,17 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(css).toMatch(/grid-template-columns:\s*minmax\(0,\s*1fr\)\s*!important/);
   });
 
-  it('lista once superficies de fidelidad, sin Ejercicio y sin PNG todavía', () => {
+  it('lista once superficies de fidelidad, sin Ejercicio, con los PNG de escritorio', () => {
     expect(NUTRIGO_FIDELITY_SURFACES.map((surface) => surface.id)).toEqual([
       'dashboard', 'calendar', 'messages', 'healthy-menu', 'recipe-details',
       'meal-plan', 'grocery', 'food-diary', 'progress', 'insights', 'insight-details',
     ]);
     expect(NUTRIGO_FIDELITY_SURFACES.some((surface) => surface.id === 'exercise')).toBe(false);
-    expect(NUTRIGO_REFERENCE_PNG_MISSING).toEqual(NUTRIGO_FIDELITY_SURFACES.map((surface) => surface.id));
-    expect(NUTRIGO_REFERENCE_PNG_MISSING).toHaveLength(11);
+    expect(NUTRIGO_REFERENCE_PNG_MISSING).toEqual([]);
+    expect(Object.keys(NUTRIGO_REFERENCE_PNGS)).toEqual(NUTRIGO_FIDELITY_SURFACES.map((surface) => surface.id));
+    for (const file of Object.values(NUTRIGO_REFERENCE_PNGS)) {
+      expect(existsSync(new URL(`../../../${file}`, import.meta.url))).toBe(true);
+    }
     expect(law).toContain('OTolnKfsxUFjaZOhhdb04i');
     expect(law).toMatch(/Inter/);
     expect(law).toMatch(/Public Sans/);

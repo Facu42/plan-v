@@ -38,6 +38,6 @@ Once superficies. Recipe Details e Insights entran. **Ejercicio no entra** en es
 
 ## QA
 
-Comparación lado a lado cuando Facu deje PNG en `design/nutrigo-exports/`. Hasta que esos archivos existan, no hay QA visual y no se marca aprobación. `PLANV_NUTRIGO_VISUAL` sigue sin setearse.
+Los once PNG de escritorio están en `design/nutrigo-exports/` (`01-dashboard.png` … `11-insight-details.png`). Los botones de acción usan lima `#EAFF78`, no el dorado de pack `#F9B343`. La comparación no es aprobación visual. `PLANV_NUTRIGO_VISUAL` sigue sin setearse.
 
 Marca y copy siguen siendo Plan V. No se copian archivos propietarios del kit ni se inventan fotos de plato.

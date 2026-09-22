@@ -20,7 +20,7 @@ Texto canónico: [design/nutrigo-fidelity.md](../design/nutrigo-fidelity.md). Co
 1. **Color:** paleta del logo en pasteles — menta, verde, coral, lila, lima. Más minimalista. **No** adoptar el amarillo/naranja energético del pack. El isotipo sigue teniendo píxeles dorados; no pintan la UI.
 2. **Tipo:** sans geométrica **Inter** (referencia de UI tipo Noteme). Jerarquía 400 cuerpo / 500 etiquetas / 600 títulos / 700 ítem activo. Poppins no es la ley de marca. Fraunces no es la cara principal de la UI.
 3. **Pantallas de fidelidad:** inventario del pack **sin Ejercicio** (11). Recipe Details e Insights siguen. Ejercicio permanece en el producto; no entra en este pase visual.
-4. **QA:** lado a lado con los PNG cuando estén en `design/nutrigo-exports/`. Facu sigue exportando. Hasta entonces no hay comparación.
+4. **QA:** los once PNG de escritorio están en `design/nutrigo-exports/`. Los botones de acción usan lima, no el dorado del pack. La comparación no es aprobación visual. Facu todavía firma.
 
 Estructura y medidas del pack (sidebar, rails, reorganización tablet/móvil). Piel = Plan V + minimalismo Noteme: aire, radios ~16–24, sombra suave, navegación en píldora. `PLANV_NUTRIGO_VISUAL` sigue sin setearse.
 
@@ -30,7 +30,7 @@ Cerrar la brecha visual P0 del shell nutri + paciente que va a staging: medidas 
 
 **Estado: parcial.** En escritorio (≥1251 px) el shell usa sidebar **223 px**, padding **28 px** y rail de dashboard **325 px**. El detalle de Agenda queda en **325 px**, el menú saludable en **345 px** y el listado de Recursos en **305 px**. Mensajes, detalle de receta, plan, compras, diario, progreso y detalle de recurso no reservan ese rail global. La piel reemplaza el acento `#F9B343` por lima `#EAFF78`, menta `#DCEFE7`, coral `#FFE4DF` y lila `#EBE6F8`, con Inter y nav en píldora. El modal de foto del diario, el punto de macro y la urgencia de alertas dejan de pintar Poppins o el amarillo del pack. Macros confirmados del diario se leen como KCAL/PROT/CARBS/GRASAS. Las fotos de plato siguen siendo las ilustrativas de Plan V o el pozo SVG de PV-40. **No es aprobación visual.** El MCP de Figma no se consultó.
 
-Superficies de este pase, todavía sin PNG en `design/nutrigo-exports/`: Dashboard, Calendar, Messages, Healthy Menu, Recipe Details, Meal Plan, Grocery, Food Diary, Progress, Insight, Insight Details. Ejercicio queda fuera del pase.
+Superficies de este pase, con PNG en `design/nutrigo-exports/`: Dashboard, Calendar, Messages, Healthy Menu, Recipe Details, Meal Plan, Grocery, Food Diary, Progress, Insight, Insight Details. Ejercicio queda fuera del pase. Los CTA del shell usan lima `#EAFF78`. **No es aprobación visual.**
 
 ## NV-SEED — en curso, parcial
 
