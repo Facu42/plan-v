@@ -1,8 +1,8 @@
 import { generateText, Output } from 'ai';
-import { openai } from '@ai-sdk/openai';
 import { mealAnalysisSchema, type MealAnalysis } from '../schemas.js';
 import { AIUnavailableError } from './errors.js';
 import { logProviderFailure, resolveAiMode } from './mode.js';
+import { getAiModel } from './provider.js';
 
 const MEAL_SYSTEM = `Sos el analizador de comidas de Plan V (Argentina, español rioplatense).
 Estimás alimentos y macros de una comida. No diagnosticás, no juzgás, no recetás.
@@ -102,7 +102,7 @@ export async function analyzeMeal(input: {
 
   try {
     const { output } = await generateText({
-      model: openai('gpt-4o-mini'),
+      model: getAiModel(),
       system: MEAL_SYSTEM,
       messages: [{ role: 'user', content: userParts }],
       output: Output.object({ schema: mealAnalysisSchema }),
