@@ -2,6 +2,7 @@ import { readRuntimeConfig } from '../config/runtime.js';
 
 const SERVER_SECRET_NAMES = [
   'SUPABASE_SERVICE_ROLE_KEY',
+  'OPENROUTER_API_KEY',
   'OPENAI_API_KEY',
   'PROVISION_SECRET',
   'ALERT_WEBHOOK_URL',

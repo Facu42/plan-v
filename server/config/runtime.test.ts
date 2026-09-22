@@ -34,4 +34,19 @@ describe('runtime modes', () => {
   it('allows manual operation with AI disabled', () => {
     expect(readRuntimeConfig({ ...db, APP_MODE: 'production', AI_MODE: 'disabled' }).aiMode).toBe('disabled');
   });
+  it('allows live AI with an OpenRouter key', () => {
+    expect(readRuntimeConfig({
+      ...db,
+      APP_MODE: 'staging',
+      AI_MODE: 'live',
+      OPENROUTER_API_KEY: 'test-only',
+    }).aiMode).toBe('live');
+  });
+  it('rejects live AI without either provider key', () => {
+    expect(() => readRuntimeConfig({
+      ...db,
+      APP_MODE: 'staging',
+      AI_MODE: 'live',
+    })).toThrow('AI provider');
+  });
 });

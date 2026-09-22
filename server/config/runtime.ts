@@ -19,7 +19,9 @@ export function readRuntimeConfig(env: Record<string, string | undefined>): Runt
   const aiMode = env.AI_MODE ?? 'disabled';
   if (aiMode !== 'demo' && aiMode !== 'disabled' && aiMode !== 'live') throw new Error('Invalid AI_MODE');
   if (persistent && aiMode === 'demo') throw new Error('Simulated AI is forbidden with persistent data');
-  if (aiMode === 'live' && !env.OPENAI_API_KEY) throw new Error('AI provider configuration is required');
+  if (aiMode === 'live' && !env.OPENROUTER_API_KEY && !env.OPENAI_API_KEY) {
+    throw new Error('AI provider configuration is required');
+  }
   return { mode, dataMode: persistent ? 'supabase' : 'memory', aiMode };
 }
 

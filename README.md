@@ -32,7 +32,7 @@
 
   - **App paciente**: navegación Hoy / Mi plan / Mi camino / Mensajes. Registro de comidas por **foto o descripción** con macros automáticos (IA).
   - **CRM nutricionista**: copiloto con sugerencias (Up next, borrador de mensaje), revisión de comidas pendientes, confirmación.
-  **IA**: `AI_MODE=live` con `OPENAI_API_KEY` usa el proveedor. `AI_MODE=demo` sólo en `APP_MODE=demo` o `test`. En staging/producción la IA simulada está prohibida.
+  **IA**: `AI_MODE=live` prefiere `OPENROUTER_API_KEY` (modelo opcional en `OPENROUTER_MODEL`) y usa `OPENAI_API_KEY` como fallback. `AI_MODE=demo` sólo en `APP_MODE=demo` o `test`. En staging/producción la IA simulada está prohibida.
 
   Copiá `.env.example` a `.env`. `npm run dev` fija `APP_MODE=demo`, `AI_MODE=demo` y `VITE_ALLOW_DEMO=true` mediante `scripts/with-env.mjs` (funciona en Windows). Sin `APP_MODE` el API no arranca. `APP_MODE=production` o `staging` sin URL y service role de Supabase aborta el proceso. Un build de producción no muestra el botón demo.
 
