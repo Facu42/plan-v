@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '../shared/Icon';
 import { CarePanel } from './CarePanel';
-import { NvBadge, NvState } from './primitives';
+import { mealSlotTone, NvBadge, NvState } from './primitives';
 import { buildCalendarWeek } from './WeeklyPlanCalendar';
 import type { ShowroomPatient } from './showroom-model';
 import './showroom-patient-plan.css';
@@ -72,10 +72,10 @@ export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
 
     {term ? <section className="nvpp-results" aria-label="Resultados en el plan">
       <header><div><span>BÚSQUEDA</span><h3>{results.length} {results.length === 1 ? 'resultado' : 'resultados'} en tu semana</h3></div><small>Se buscan títulos y momentos de comida.</small></header>
-      {results.length ? <div className="nvpp-result-list">{results.map(({ day, meal }) => <article key={`${day.isoDate}-${meal.slot}`}><NvBadge tone={meal.slot === 'Cena' ? 'gold' : 'green'}>{meal.slot}</NvBadge><div><strong>{meal.title}</strong><small>{day.day}{meal.time ? ` · ${meal.time}` : ''}</small></div></article>)}</div> : <NvState title="Sin coincidencias" description="Probá con otro plato o momento de comida." />}
+      {results.length ? <div className="nvpp-result-list">{results.map(({ day, meal }) => <article key={`${day.isoDate}-${meal.slot}`}><NvBadge tone={mealSlotTone(meal.slot)}>{meal.slot}</NvBadge><div><strong>{meal.title}</strong><small>{day.day}{meal.time ? ` · ${meal.time}` : ''}</small></div></article>)}</div> : <NvState title="Sin coincidencias" description="Probá con otro plato o momento de comida." />}
     </section> : <section className="nvpp-detail" aria-live="polite">
       <header><div><span>{selectedDay.isToday ? 'HOY' : 'PLAN SEMANAL'}</span><h3>{selectedDay.day} {selectedDay.date.getDate()}</h3></div><small>{selectedDay.meals.length} {selectedDay.meals.length === 1 ? 'comida asignada' : 'comidas asignadas'}</small></header>
-      {selectedDay.meals.length ? <div className="nvpp-meals">{selectedDay.meals.map((meal, index) => <article key={`${selectedDay.isoDate}-${meal.slot}`}><span className="nvpp-number">{String(index + 1).padStart(2, '0')}</span><div className="nvpp-meal-copy"><div><NvBadge tone={meal.slot === 'Cena' ? 'gold' : 'green'}>{meal.slot}</NvBadge>{meal.time && <time>{meal.time}</time>}</div><strong>{meal.title}</strong><small>Indicación publicada · sin cantidades ni porciones registradas</small></div><Icon name="leaf" size={18} /></article>)}</div> : <NvState title="Sin comidas asignadas" description="Tu nutricionista todavía no publicó indicaciones para este día." />}
+      {selectedDay.meals.length ? <div className="nvpp-meals">{selectedDay.meals.map((meal, index) => <article key={`${selectedDay.isoDate}-${meal.slot}`}><span className="nvpp-number">{String(index + 1).padStart(2, '0')}</span><div className="nvpp-meal-copy"><div><NvBadge tone={mealSlotTone(meal.slot)}>{meal.slot}</NvBadge>{meal.time && <time>{meal.time}</time>}</div><strong>{meal.title}</strong><small>Indicación publicada · sin cantidades ni porciones registradas</small></div><Icon name="leaf" size={18} /></article>)}</div> : <NvState title="Sin comidas asignadas" description="Tu nutricionista todavía no publicó indicaciones para este día." />}
     </section>}
 
     <p className="nvpp-note"><Icon name="list" size={16} /> La lista se arma automáticamente desde el menú publicado. Revisá las preparaciones que todavía no tienen ingredientes detallados.</p>

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Icon } from '../shared/Icon';
 import { MealThumbnail } from './PatientOverview';
-import { NvBadge, NvButton, NvState } from './primitives';
+import { mealSlotTone, NvBadge, NvButton, NvState } from './primitives';
 import type { ShowroomPage } from './ShowroomPanels';
 import type { ShowroomPatient } from './showroom-model';
 import './showroom-healthy-menu.css';
@@ -15,7 +15,6 @@ type HealthyMenuItem = {
 };
 
 const normalize = (value: string) => value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('es-AR');
-const slotTone = (value: string) => value === 'Almuerzo' ? 'gold' : value === 'Cena' ? 'coral' : 'green';
 
 export function buildHealthyMenu(patient: Pick<ShowroomPatient, 'weekPlan'>) {
   const indexed = new Map<string, HealthyMenuItem>();
@@ -79,7 +78,7 @@ export function ShowroomHealthyMenu({ patient, query, onNavigate }: {
               <NvBadge tone="green">Más presente en tu semana</NvBadge>
               <h3>{featured.title}</h3>
               <p>{featured.occurrences} {featured.occurrences === 1 ? 'vez' : 'veces'} esta semana · {featured.days.join(', ')}</p>
-              <div className="nvm-slot-list">{featured.slots.map((value) => <NvBadge key={value} tone={slotTone(value)}>{value}</NvBadge>)}</div>
+              <div className="nvm-slot-list">{featured.slots.map((value) => <NvBadge key={value} tone={mealSlotTone(value)}>{value}</NvBadge>)}</div>
               <NvButton onClick={() => onNavigate('plan')}>Ver en plan semanal <Icon name="arrow" size={15} /></NvButton>
             </div>
           </article>
@@ -89,7 +88,7 @@ export function ShowroomHealthyMenu({ patient, query, onNavigate }: {
             <div className="nvm-list">{items.map((item) => <article key={normalize(item.title)}>
               <MealThumbnail slot={item.slots[0]} />
               <div><strong>{item.title}</strong><small>{item.days.join(' · ')}</small><span>{item.occurrences} {item.occurrences === 1 ? 'vez' : 'veces'} esta semana</span></div>
-              <div className="nvm-card-slots">{item.slots.map((value) => <NvBadge key={value} tone={slotTone(value)}>{value}</NvBadge>)}</div>
+              <div className="nvm-card-slots">{item.slots.map((value) => <NvBadge key={value} tone={mealSlotTone(value)}>{value}</NvBadge>)}</div>
             </article>)}</div>
           </section>
         </> : <NvState title="Sin coincidencias" description="Probá con otro título, día o momento de comida." />}

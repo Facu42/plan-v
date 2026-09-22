@@ -11,6 +11,10 @@ export function NvCard({ title, action, children, className = '' }: { title: str
 export function NvBadge({ children, tone = 'green' }: { children: ReactNode; tone?: 'green' | 'gold' | 'coral' }) {
   return <span className={`nv-badge nv-${tone}`}>{children}</span>;
 }
+/** Color literal del archivo por momento de comida: Desayuno/Merienda en Green, Almuerzo en Saffron, Cena en Orange. */
+export function mealSlotTone(slot: string): 'green' | 'gold' | 'coral' {
+  return slot === 'Almuerzo' ? 'gold' : slot === 'Cena' ? 'coral' : 'green';
+}
 export function NvState({ title, description, kind = 'empty' }: { title: string; description: string; kind?: 'empty' | 'error' | 'loading' }) {
   return <div className={`nv-state nv-state-${kind}`} data-kind={kind} role={kind === 'error' ? 'alert' : 'status'}><Icon name="leaf" size={28} /><h2>{title}</h2><p>{description}</p></div>;
 }

@@ -153,7 +153,9 @@ Las pastillas de momento usan el color literal por comida: Desayuno y Merienda e
 
 ### Plan semanal (nodo `84:2994`, fila en `373:10644`)
 
-El archivo arma el plan como tabla de 1161: celda de día de 120 en Cream-BG con día 14 semibold y fecha 12 Gray-20, y una celda por comida con imagen de 88 y radio 14. Cada momento tiene su tinte: desayuno Green-Subtle, almuerzo Saffron-Subtle, merienda Orange-Subtle y cena Gray-BG-Subtle. Plan V muestra un día por vez, así que la fila se aplica a las comidas de ese día.
+Verificado el 2026-09-22 contra `get_design_context` sobre `373:10644`: el archivo arma el plan como tabla de 1161: celda de día de 120 en Cream-BG con día 14 semibold y fecha 12 Gray-20, y una celda por comida con imagen de 88 y radio 14. Cada momento tiene su tinte literal: Desayuno Green-Subtle `#EDFFC4`, Almuerzo Saffron-Subtle `#FFEDC9`, Merienda Orange-Subtle `#FFF2E8` y Cena Gray-BG-Subtle `#F6F6F7`. Plan V muestra un día por vez, así que la fila se aplica a las comidas de ese día; el lado paciente (`nvpp-meals`) ya tenía ese tinte por posición, y se agregó el mismo ciclo al editor del nutricionista (`npm-meal-card`), que no tenía ninguno.
+
+Las pastillas de momento (badge, no el tinte de fondo) usan el color sólido literal visto en el Menú saludable — Desayuno/Merienda en Green, Almuerzo en Saffron, Cena en Orange —, corregido con el helper compartido `mealSlotTone` (antes sólo distinguía Cena, y con Saffron en vez de Orange).
 
 ### Lista de compras (nodo `105:2472`)
 

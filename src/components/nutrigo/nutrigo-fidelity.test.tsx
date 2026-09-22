@@ -227,9 +227,21 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(law).toMatch(/get_design_context.*232:8108.*373:10388|232:8108.*373:10388/s);
     expect(css).toMatch(/\.nvm-featured \{[^}]*background: var\(--nv-bg\);/);
     expect(css).toMatch(/\.nvm-list article \{[^}]*background: var\(--nv-bg\);/);
-    const tsx = readFileSync(new URL('./ShowroomHealthyMenu.tsx', import.meta.url), 'utf8');
-    expect(tsx).toMatch(/const slotTone = \(value: string\) => value === 'Almuerzo' \? 'gold' : value === 'Cena' \? 'coral' : 'green';/);
+    const primitives = readFileSync(new URL('./primitives.tsx', import.meta.url), 'utf8');
+    expect(primitives).toMatch(/export function mealSlotTone\(slot: string\)[^{]*\{\s*return slot === 'Almuerzo' \? 'gold' : slot === 'Cena' \? 'coral' : 'green';/);
     // La falta de calificación/dificultad/health score/macros por preparación queda documentada, no fabricada.
     expect(law).toMatch(/Desviación deliberada.*Health Score/s);
+  });
+
+  it('el plan de comidas usa el color literal por momento en las pastillas y el tinte de fondo del editor', () => {
+    expect(law).toMatch(/373:10644/);
+    // El helper compartido mealSlotTone se usa en las tres pantallas de plan (no cada una con su propia regla).
+    for (const file of ['ShowroomMealPlan.tsx', 'ShowroomPatientPlan.tsx', 'ShowroomHealthyMenu.tsx']) {
+      const tsx = readFileSync(new URL(`./${file}`, import.meta.url), 'utf8');
+      expect(tsx).toMatch(/mealSlotTone/);
+      expect(tsx).not.toMatch(/tone=\{[^}]*=== 'Cena' \? 'gold'/);
+    }
+    // El editor del nutricionista tiene el mismo ciclo de tinte por momento que el lado paciente.
+    expect(css).toMatch(/\.npm-meal-card:nth-child\(4n\+1\) \{ background: var\(--nv-accent-subtle\); \}/);
   });
 });

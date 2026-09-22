@@ -1095,6 +1095,12 @@
   font-size: var(--nv-fs-p12);
   line-height: var(--nv-lh-p12);
 }
+/* Editor del nutricionista (Table-row-meal plan): mismo tinte por momento
+   que el lado paciente — no tenía ninguno, las cuatro tarjetas quedaban
+   iguales en Gray-BG-Subtle. */
+.nv-app .npm-meal-card:nth-child(4n+1) { background: var(--nv-accent-subtle); }
+.nv-app .npm-meal-card:nth-child(4n+2) { background: var(--nv-gold-subtle); }
+.nv-app .npm-meal-card:nth-child(4n+3) { background: var(--nv-coral-subtle); }
 
 /* ── Lista de compras (nodo 105:2472) ────────────────────────────────────────
    Cuerpo 1161. Cards de estadística de 84, y la lista como tabla con solapas

@@ -3,7 +3,7 @@ import { api } from '../../api/client';
 import type { Patient } from '../../types';
 import { availableSlotsForDay, MENU_SLOTS } from '../crm/menu-editor-utils';
 import { Icon } from '../shared/Icon';
-import { NvBadge, NvButton } from './primitives';
+import { mealSlotTone, NvBadge, NvButton } from './primitives';
 import './showroom-meal-plan.css';
 
 export const PLAN_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const;
@@ -119,7 +119,7 @@ export function ShowroomMealPlan({ patient, patients = [], query, onSelect, onCh
                   const draft = drafts[key] ?? meal.title;
                   const dirty = draft.trim() !== meal.title;
                   return <div className="npm-meal-card" key={key}>
-                    <div><NvBadge tone={meal.slot === 'Cena' ? 'gold' : 'green'}>{meal.slot}</NvBadge><span className="npm-card-actions">{removingKey === key ? <span className="npm-confirm"><button type="button" disabled={busy} onClick={() => remove(day, meal.slot)}>Sí, quitar</button><button type="button" disabled={busy} onClick={() => setRemovingKey(null)}>No</button></span> : <><button type="button" className="npm-save" disabled={!dirty || savingKey === key} onClick={() => save(day, meal.slot)}>{savingKey === key ? 'Guardando…' : savedKey === key ? 'Listo' : 'Guardar'}</button><button type="button" className="npm-remove" aria-label={`Quitar ${meal.slot} del ${day}`} onClick={() => setRemovingKey(key)}>×</button></>}</span></div>
+                    <div><NvBadge tone={mealSlotTone(meal.slot)}>{meal.slot}</NvBadge><span className="npm-card-actions">{removingKey === key ? <span className="npm-confirm"><button type="button" disabled={busy} onClick={() => remove(day, meal.slot)}>Sí, quitar</button><button type="button" disabled={busy} onClick={() => setRemovingKey(null)}>No</button></span> : <><button type="button" className="npm-save" disabled={!dirty || savingKey === key} onClick={() => save(day, meal.slot)}>{savingKey === key ? 'Guardando…' : savedKey === key ? 'Listo' : 'Guardar'}</button><button type="button" className="npm-remove" aria-label={`Quitar ${meal.slot} del ${day}`} onClick={() => setRemovingKey(key)}>×</button></>}</span></div>
                     <input type="text" maxLength={200} data-plan-input={meal.slot} aria-label={`${day} · ${meal.slot}`} value={draft} onChange={(event) => setDrafts((current) => ({ ...current, [key]: event.target.value }))} />
                   </div>;
                 })}
