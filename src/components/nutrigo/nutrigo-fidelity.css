@@ -1696,3 +1696,242 @@
   font-size: var(--nv-fs-t12);
   font-weight: 600;
 }
+
+/* ═══ Versión móvil: los frames de 390 de la página 1:2 ══════════════════════
+   El archivo trae un frame móvil por pantalla: 03 Dashboard 427:14405,
+   06 Calendar 433:17250, 09 Messages 433:19982, 12 Healthy Menu 445:10499,
+   15 Recipe Details 457:13264, 18 Meal Plan 470:15300, 21 Grocery 492:11324,
+   24 Food Diary 492:14886, 27 Progress 498:18237, 33 Insights 504:15334 y
+   36 Insight Details 507:17412.
+
+   Ley común: barra superior blanca de 64 con padding 16, contenido de 390 con
+   16 de guarda (ancho útil 358), cards de radio 16 con padding 16, y 24 o 32
+   entre bloques según la pantalla.
+
+   Desviación deliberada: el archivo navega con un botón de menú arriba a la
+   derecha; Plan V usa la barra inferior de pestañas. La barra inferior se
+   queda, porque sacarla dejaría la app sin navegación hasta construir el
+   cajón lateral, que es trabajo de producto y no de piel. */
+@media (max-width: 799px) {
+  /* Navbar (390 × 64): blanca, padding 16, título 16 semibold. */
+  .nv-app.nv-patient .nv-topbar,
+  .nv-app.nv-pro .nv-topbar {
+    min-height: 64px;
+    align-items: center;
+    flex-wrap: nowrap;
+    padding: var(--nv-card-pad);
+    gap: 8px;
+    /* El archivo no le pone línea a la barra: es blanca a secas. */
+    border-bottom: 0;
+    background: var(--nv-card);
+  }
+  /* El archivo muestra el nombre de la pantalla en la barra; el móvil de
+     Plan V lo escondía. Vuelve, en 16 semibold. */
+  .nv-app .nv-topbar .nv-topbar-title,
+  .nv-app.nv-patient .nv-topbar-title,
+  .nv-app.nv-pro .nv-topbar-title {
+    display: block;
+    overflow: hidden;
+    min-width: 0;
+    flex: 1 1 auto;
+    font-size: var(--nv-fs-t16);
+    line-height: var(--nv-lh-t16);
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* La barra del archivo es logo 32 + título + un botón de 32. Plan V suma
+     el selector de rol y las alertas, que no están en el archivo: se
+     compactan a 32 para que la barra caiga en los 64 y el título respire. */
+  .nv-app .nv-topbar .nv-brand { height: 32px; flex: none; gap: 8px; }
+  .nv-app .nv-topbar .nv-brand > span { display: none; }
+  .nv-app .nv-topbar .nv-role-switch {
+    height: 32px;
+    flex: none;
+    align-items: center;
+    padding: 3px;
+    border-radius: 10px;
+  }
+  .nv-app .nv-topbar .nv-role-switch button {
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 10px;
+    line-height: 1.2;
+  }
+  .nv-app .nv-topbar .nv-alerts > button,
+  .nv-app .nv-topbar > button {
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    flex: none;
+    padding: 0;
+    border-radius: 12px;
+  }
+  .nv-app .brand-mark { width: 32px; height: 32px; border-radius: 12px; }
+
+  /* Content: padding 24/16 y 24 entre bloques. */
+  .nv-app .nv-main { padding: 24px var(--nv-card-pad); }
+  /* Header del contenido: 46 de alto, título 20 semibold y bajada 11 Gray-20. */
+  .nv-app .nv-page-head { margin-bottom: 24px; }
+  /* Los 46 son del bloque de título; el buscador de Plan V baja debajo. */
+  .nv-app .nv-page-head > div { min-height: 46px; max-width: none; }
+  .nv-app .nv-page-head h1 {
+    font-size: 20px;
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+  .nv-app .nv-page-head p {
+    max-width: none;
+    margin-top: 6px;
+    font-size: var(--nv-fs-t11);
+    line-height: var(--nv-lh-t11);
+  }
+  .nv-app .np-dashboard-search { width: 100%; }
+
+  /* Las cards mantienen radio 16 y padding 16 en todas las pantallas. */
+  .nv-app .nv-card {
+    margin-bottom: 0;
+    padding: var(--nv-card-pad);
+    border-radius: var(--nv-r-card);
+  }
+
+  /* Dashboard (427:14405): una card de estadística por fila, 142 y 16 entre
+     cada una; el resto del cuerpo en una sola columna con 24. */
+  .nv-app .np-dashboard { gap: 24px; }
+  .nv-app .nv-metrics,
+  .nv-app .np-metrics {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--nv-card-pad);
+  }
+  .nv-app .np-chart-grid,
+  .nv-app .np-bottom-grid,
+  .nv-app .np-followup-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--nv-card-pad);
+  }
+  .nv-app .np-chart-grid > .nv-card { min-height: 0; }
+  .nv-app .np-nutrition {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--nv-section-gap);
+  }
+  .nv-app .np-calorie {
+    width: 228px;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  /* Calendario (433:17250): tres cards de resumen de 178 en una fila, y el
+     calendario a sangre con celdas de 55,71 × 120 y cabecera de 36. */
+  .nv-app .nvpa-layout { grid-template-columns: minmax(0, 1fr); }
+  /* El archivo pone tres cards de resumen en una fila; Plan V tiene cuatro,
+     así que van dos por fila para que ninguna quede huérfana. El alto de 178
+     del archivo es para una card con gráfico: la de Plan V lleva rótulo y
+     cifra, y se queda en los 108 que ya usa en escritorio. */
+  .nv-app .nvpa-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--nv-card-pad);
+  }
+  .nv-app .nvpa-summary > div { gap: 12px; padding: var(--nv-card-pad); }
+  /* El calendario va a sangre: 390 de ancho, celdas de 55,71. */
+  .nv-app .nvpa-calendar {
+    margin-inline: calc(var(--nv-card-pad) * -1);
+    border-radius: var(--nv-r-card);
+  }
+  .nv-app .nvpa-weekdays { height: 36px; }
+  .nv-app .nvpa-month-grid > button { min-height: 120px; }
+
+  /* Mensajes (433:19982): la lista, el chat y el perfil quedan apilados a
+     ancho completo. Los ítems de la lista miden 90 con padding 22/20. */
+  .nv-app .nm-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--nv-card-pad);
+  }
+  .nv-app .nm-contact-list > button {
+    min-height: 90px;
+    gap: var(--nv-card-pad);
+    padding: 22px 20px;
+  }
+  .nv-app .nm-conversation > header { min-height: 98px; }
+  .nv-app .nm-compose { padding: var(--nv-card-pad); }
+  .nv-app .nm-profile { border-radius: 12px; padding: 24px var(--nv-card-pad); gap: 24px; }
+
+  /* Menú saludable (445:10499): 32 entre bloques, destacado en una columna. */
+  .nv-app .nvm-menu { gap: 32px; }
+  .nv-app .nvm-layout { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .nv-app .nvm-featured {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--nv-card-pad);
+    min-height: 0;
+  }
+  .nv-app .nvm-featured-image { height: 240px; }
+  .nv-app .nvm-list { gap: var(--nv-card-pad); }
+
+  /* Plan semanal (470:15300): la tira de días se desplaza al costado, como
+     en el archivo, y las comidas quedan una debajo de otra con 16. */
+  .nv-app .nvpp-plan { gap: 32px; }
+  .nv-app .nvpp-days { gap: var(--nv-card-pad); }
+  .nv-app .nvpp-meals { gap: var(--nv-card-pad); }
+
+  /* Lista de compras (492:11324): 32 entre el bloque de datos y la lista. */
+  .nv-app .nvgrocery { gap: 32px; }
+  .nv-app .nvgrocery-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--nv-section-gap);
+  }
+
+  /* Diario (492:14886): 24 entre bloques y las métricas una por fila. */
+  .nv-app .nvpdiary { gap: 24px; }
+  .nv-app .nvpdiary-metrics {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--nv-card-pad);
+  }
+
+  /* Progreso (498:18237): en móvil el lienzo es blanco y los widgets pasan a
+     Cream-BG, al revés que en escritorio. */
+  .nv-app .nvp-progress { gap: 32px; }
+  .nv-app .nvp-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--nv-section-gap);
+  }
+  .nv-app .nvp-chart,
+  .nv-app .nvp-energy,
+  .nv-app .nvp-meals,
+  .nv-app .nvp-compare {
+    border-radius: var(--nv-r-card);
+    background: var(--nv-bg);
+    box-shadow: none;
+  }
+
+  /* Insights (504:15334): la cabecera es un bloque Gray-BG de padding 32/16
+     con el buscador de 46 radio 14 en blanco; las solapas miden 30 radio 8. */
+  .nv-app .nvr-layout { grid-template-columns: minmax(0, 1fr); }
+  .nv-app .nvr-hero {
+    min-height: 0;
+    padding: 32px var(--nv-card-pad);
+    border-radius: var(--nv-r-card);
+    background: var(--nv-fill);
+  }
+  .nv-app .nvr-filters { gap: 8px; }
+  .nv-app .nvr-grid { grid-template-columns: minmax(0, 1fr); gap: var(--nv-card-pad); }
+  .nv-app .nvr-featured { grid-template-columns: minmax(0, 1fr); }
+
+  /* Detalle de recurso (507:17412): una sola columna; la card de texto pasa a
+     padding 24/16 y la imagen es cuadrada. */
+  .nv-app .nvr-detail-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+  .nv-app .nvr-detail-layout > .nvr-article { padding: 24px var(--nv-card-pad); }
+  .nv-app .nvr-detail .nvr-article > .nvr-cover { aspect-ratio: 1 / 1; }
+  .nv-app .nvr-detail-layout > .nvr-related {
+    gap: var(--nv-section-gap);
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  /* Detalle de receta (457:13264): título 20 semibold y ficha a una columna. */
+  .nv-app .recipe-plate h3 { font-size: 20px; line-height: 1.1; }
+  .nv-app .recipe-macros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

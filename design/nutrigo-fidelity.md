@@ -189,7 +189,26 @@ La página de interfaz es `1:2`. Los frames de escritorio, por id:
 | 31 | Insights | `263:6588` | 1136 |
 | 34 | Insight Details | `279:9301` | 2020 |
 
-Todos miden 1440 de ancho. El archivo trae además una versión tablet (800) y una móvil (390) de cada pantalla; esta ley se ocupa por ahora del escritorio.
+Todos miden 1440 de ancho. El archivo trae además una versión tablet (800) y una móvil (390) de cada pantalla.
+
+Los frames móviles, por id:
+
+| # | Pantalla | Nodo | Alto |
+|---|---|---|---|
+| 03 | Dashboard | `427:14405` | 4514 |
+| 06 | Calendar | `433:17250` | 2004 |
+| 09 | Messages | `433:19982` | 2995 |
+| 12 | Healthy Menu | `445:10499` | 3195 |
+| 15 | Recipe Details | `457:13264` | 3146 |
+| 18 | Meal Plan | `470:15300` | 1726 |
+| 21 | Grocery List | `492:11324` | 2364 |
+| 24 | Food Diary | `492:14886` | 1624 |
+| 27 | Progress | `498:18237` | 2382 |
+| 30 | Exercise | `501:22824` | 1084 |
+| 33 | Insights | `504:15334` | 2990 |
+| 36 | Insight Details | `507:17412` | 3328 |
+
+La versión tablet (800) todavía no está medida.
 
 Se listan con el Plugin API, no con la REST API: la REST solo devuelve la página de estilos.
 
@@ -208,6 +227,39 @@ Once superficies. Recipe Details e Insights entran. **Ejercicio no entra** en es
 9. Progress
 10. Insights
 11. Insight Details
+
+## Móvil (390)
+
+La piel móvil vive en un solo bloque `@media (max-width: 799px)` de `nutrigo-fidelity.css`.
+
+**Ley común**
+
+- barra superior blanca de 64 con padding 16, logo de 32, título de la pantalla en 14 semibold a 16, y un botón de 32 radio 12 a la derecha
+- contenido de 390 con 16 de guarda: ancho útil 358
+- cards de 358, radio 16, padding 16
+- 24 entre bloques en Dashboard, Calendario y Diario; 32 en Menú, Plan, Compras, Progreso e Insights
+- cabecera de contenido: bloque de título de 46, título 20 semibold, bajada 11 regular Gray-20
+- cabeceras de sección de 30, título 14 semibold
+
+**Por pantalla**
+
+- **Dashboard** (`427:14405`): una card de estadística por fila, 142 y 16 entre cada una; el resto del cuerpo en una columna
+- **Calendario** (`433:17250`): las cards de resumen en fila y el calendario **a sangre**, 390 de ancho, con cabecera de días de 36 y celdas de 55,71 × 120
+- **Mensajes** (`433:19982`): lista, chat y perfil apilados a ancho completo; ítems de lista de 90 con padding 22/20, cabecera del chat de 98, perfil radio 12 con padding 24/16
+- **Menú saludable** (`445:10499`): 32 entre bloques, destacado en una columna
+- **Plan semanal** (`470:15300`): el archivo deja la tabla en 700 y la desplaza al costado; Plan V muestra un día por vez y mantiene la tira de días con desplazamiento lateral
+- **Lista de compras** (`492:11324`): 32 entre el bloque de datos y la lista
+- **Diario** (`492:14886`): 24 entre bloques, métricas una por fila
+- **Progreso** (`498:18237`): en móvil el lienzo es blanco y los widgets pasan a Cream-BG, al revés que en escritorio
+- **Insights** (`504:15334`): la cabecera es un bloque Gray-BG con padding 32/16; solapas de 30 radio 8
+- **Detalle de recurso** (`507:17412`): una columna, card de texto con padding 24/16 e imagen cuadrada
+- **Detalle de receta** (`457:13264`): título 20 semibold y ficha a una columna
+
+**Desviaciones deliberadas en móvil**
+
+- El archivo navega con un botón de menú arriba a la derecha. Plan V usa la barra inferior de pestañas y **se queda**: sacarla dejaría la app sin navegación hasta construir el cajón lateral, que es trabajo de producto y no de piel.
+- El selector de rol Paciente/Nutricionista y la campana de avisos no están en el archivo. Se compactan a 32 de alto para que la barra caiga en los 64.
+- El archivo tiene tres cards de resumen en el calendario; Plan V tiene cuatro, así que van dos por fila. El alto de 178 del archivo es para una card con gráfico: la de Plan V lleva rótulo y cifra y se queda en 108.
 
 ## Tema oscuro
 

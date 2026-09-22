@@ -70,6 +70,10 @@ describe('NV-FIDELITY shell vs inventario', () => {
     // Detalle de recurso (nodo 279:9301): 800 + 36 + 325, cada columna una card de padding 36.
     expect(css).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\) 325px/);
     expect(css).toMatch(/aspect-ratio:\s*728 \/ 408/);
+    // Movil: un solo bloque de 799 con la barra de 64 y la guarda de 16.
+    expect(css).toMatch(/@media \(max-width: 799px\)/);
+    expect(css).toMatch(/min-height:\s*64px/);
+    expect(css).toMatch(/padding:\s*24px var\(--nv-card-pad\)/);
     // Detalle de receta (nodo 84:3145): las cuatro fichas de macro son Green,
     // asi que la piel pisa los azules y rojos que inventaba recipe-plate.css.
     expect(css).toMatch(/\.nv-app \.recipe-macros \[data-macro\] dd/);
@@ -144,7 +148,11 @@ describe('NV-FIDELITY shell vs inventario', () => {
       '33:1574', '84:1489', '57:1509', '62:1513',
       '84:1666', '84:2565', '84:2716', '84:2994', '105:2472', '105:2649', '105:2790',
       '263:6588', '84:3145', '279:9301',
+      // Frames moviles de 390.
+      '427:14405', '433:17250', '433:19982', '445:10499', '457:13264', '470:15300',
+      '492:11324', '492:14886', '498:18237', '504:15334', '507:17412',
     ]) expect(law).toContain(node);
+    expect(law).toMatch(/## Móvil \(390\)/);
     expect(law).toMatch(/design\/nutrigo-exports/);
     expect(law).not.toMatch(/PLANV_NUTRIGO_VISUAL\s*=\s*1/);
   });
