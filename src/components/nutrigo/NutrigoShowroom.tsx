@@ -51,6 +51,7 @@ import './weekly-plan-calendar.css';
 import './clinic-professional.css';
 import './app-shell.css';
 import './nutrigo-parity.css';
+import './nutrigo-fidelity.css';
 
 const OperationalCrm = lazy(() => import('../crm/CrmDashboard').then(({ CrmDashboard }) => ({ default: CrmDashboard })));
 

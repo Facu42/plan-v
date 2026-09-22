@@ -3,6 +3,7 @@ import { Icon } from '../shared/Icon';
 import { NvBadge, NvButton, NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
 import { DayAssignedMeals } from './DayMeals';
+import { RecipeMacroGrid } from './RecipePlate';
 import './showroom-patient-diary.css';
 
 export type PatientDiaryFilter = 'all' | 'pending' | 'reviewed';
@@ -134,7 +135,7 @@ export function ShowroomPatientDiary({ patient, query, now = new Date(), onLogMe
         return <article key={log.id}>
         <span className={`nvpdiary-icon ${log.status}`}><Icon name={log.status === 'pending_review' ? 'clock' : 'check'} size={17} /></span>
         <div className="nvpdiary-copy"><strong>{log.slot}</strong><p>{log.description || 'Sin descripción registrada'}</p><time dateTime={log.logged_at}>{new Intl.DateTimeFormat('es-AR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(log.logged_at))}</time></div>
-        <div className="nvpdiary-detail">{review ? <p><strong>{review.macros ? `${review.macros.kcal} kcal` : 'Valores publicados'}</strong><span>{review.macros ? `P ${review.macros.protein_g} g · C ${review.macros.carbs_g} g · G ${review.macros.fat_g} g` : 'Sin información nutricional publicada.'}</span></p> : <p><strong>Sin valores confirmados</strong><span>Tu nutricionista debe revisarlos.</span></p>}
+        <div className="nvpdiary-detail">{review ? <>{review.macros ? <RecipeMacroGrid macros={review.macros} /> : null}<p><strong>{review.macros ? `${review.macros.kcal} kcal` : 'Valores publicados'}</strong><span>{review.macros ? `P ${review.macros.protein_g} g · C ${review.macros.carbs_g} g · G ${review.macros.fat_g} g` : 'Sin información nutricional publicada.'}</span></p></> : <p><strong>Sin valores confirmados</strong><span>Tu nutricionista debe revisarlos.</span></p>}
           {review && <p className="nvpdiary-review"><strong>Revisión profesional</strong><span>{review.headline}. {review.foods.length ? `Alimentos: ${review.foods.join(', ')}` : 'Sin alimentos estructurados registrados.'} {review.caption}</span></p>}</div>
         <div className="nvpdiary-badges">{relation !== 'unknown' && <span className={`nvpdiary-plan-tag ${relation}`}>{relation === 'planned' ? 'Del plan' : 'Fuera del plan'}</span>}<NvBadge tone={log.status === 'pending_review' ? 'gold' : log.status === 'adjusted' ? 'coral' : 'green'}>{statusLabel(log.status)}</NvBadge></div>
       </article>;

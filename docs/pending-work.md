@@ -13,6 +13,20 @@ Sumar al plan de acción el circuito de **recetas plantilla** como en el reel de
 Detalle y criterios: [ticket PV-40](ticket-pv40-recetas-ia-asignar-registrar.md).  
 **Estado:** aterrizado en esta rama (código + tests). Biblioteca con card (foto de revisión o fallo visible, macros KCAL/PROT/CARBS/GRASAS sólo si están declarados), wizard Manual | Asistente IA, asignar a paciente + día + slot con «Así lo ve tu asesorado», y CTA «Registrar esta comida» idempotente. Sin schema o sin clave de imagen: 501 / `failed`, sin macros ni URLs inventadas. **No es aprobación visual Nutrigo ni Cenra.** Review Lumen/Iris del formato sigue abierta. Verificación: 798 pruebas OK, 2 omitidas; check, check:migrations y build OK. No SQL en el proyecto con `patients`.
 
+## NV-FIDELITY — en curso, parcial
+
+Cerrar la brecha visual P0 del shell nutri + paciente que va a staging, contra el inventario de `docs/nutrigo-reference-map.md` (12 superficies × escritorio/tablet/móvil). Se apoya en los contratos de layout de PV-37 y en las cards de PV-40. No reescribe la lógica de dominio.
+
+**Estado: parcial.** En escritorio (≥1251 px) el shell usa sidebar **223 px**, padding **28 px** y rail de dashboard **325 px** (el shell que se publica venía en 300 px). El detalle de Agenda queda en **325 px**, el menú saludable en **345 px** y el listado de Recursos en **305 px**. Mensajes, detalle de receta, plan, compras, diario, progreso, ejercicio y detalle de recurso no reservan ese rail global. Macros confirmados del diario se leen como KCAL/PROT/CARBS/GRASAS. Las fotos de plato siguen siendo las ilustrativas de Plan V o el pozo SVG de PV-40 (`none`/`failed`); no hay PNG del `.fig` en este clone y no se copiaron assets del kit. `PLANV_NUTRIGO_VISUAL` sigue sin setearse. **No es aprobación visual.**
+
+Superficies sin PNG de referencia en el repo: Dashboard, Calendar, Messages, Healthy Menu, Recipe Details, Meal Plan, Grocery, Food Diary, Progress, Exercise, Insight, Insight Details.
+
+## NV-SEED — en curso, parcial
+
+Seed idempotente de demostración: Verónica Demo + Sofía, Marina, Luca y Elena Demo; planes publicados, diario, mensajes, turnos y recetas publicadas/asignadas (PV-40 de catálogo; asignar al día no tiene tabla SQL y sigue en 501). Sin PHI real. Sin fotos remotas.
+
+**Estado: parcial.** `npm run seed:demo` (`scripts/seed-demo.mjs` + `scripts/seed-demo.sql`) cuenta `public.patients` y **no corre el SQL** si hay filas. Rechaza `APP_MODE=production`, cualquier host que no sea `127.0.0.1`/`localhost`, `supabase.co` y el ref `wvosvlxpfytokwfbcero` (`plan-v-app`). La nota del 2026-09-21 registró 1 fila en ese proyecto; esta corrida no lo re-verificó y no se conectó. No se aplicó el seed en ningún Postgres.
+
 ## Revisión vigente de avance — 2026-09-21 (WIP local)
 
 El WIP que no había entrado al Project (`cursor/professional-app-ai-ca47-local-wip-20260921` @ `da11bab`) se inventarió contra esta rama. Cuarentena, visor de estudios, medidas, recetas, planes, diario, recibos, turnos y jobs/eval ya están en PV-15…PV-28. No se copió ese SQL (`20260918180000`…`20260918250000`) ni se fusionó a `main`. Se recupera la nota del 2026-09-18 sobre el proyecto Plan V vacío. Detalle: [integración del WIP local](integracion-wip-local-2026-09-21.md). **No se aplicó SQL** a proyectos hospedados.
