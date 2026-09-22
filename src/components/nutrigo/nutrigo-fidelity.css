@@ -1,10 +1,13 @@
-/* NV-FIDELITY: shell measures from the local inventory (docs/nutrigo-reference-map.md).
+/* NV-FIDELITY: layout from the Nutrigo inventory; skin is Plan V (2026-09-22).
    Desktop frame 1440 = sidebar 223 + content + rail.
    Dashboard and Calendar rails 325. Healthy Menu rail 345. Insights list rail 305.
-   Messages, Recipe Details, Meal Plan, Grocery, Food Diary, Progress, Exercise
+   Messages, Recipe Details, Meal Plan, Grocery, Food Diary, Progress
    and Insight Details keep the remaining width: no global right rail.
+   Exercise is out of this visual pass (product page stays; it is not a fidelity screen).
+   Colors: mint / verde / coral / lilac / lima. Not pack yellow or orange energy.
+   Type: Inter. Not Poppins as brand law. Not Fraunces as the primary UI face.
    Not Facu visual approval. PLANV_NUTRIGO_VISUAL stays unset.
-   No kit PNG is in this clone; dish photos stay Plan V illustrative or the PV-40 well. */
+   Side-by-side QA waits for PNGs in design/nutrigo-exports/. */
 .nv-app {
   --nv-sidebar-width: 223px;
   --nv-rail-dashboard: 325px;
@@ -12,7 +15,51 @@
   --nv-rail-menu: 345px;
   --nv-rail-insights: 305px;
   --nv-content-pad: 28px;
-  font-family: Poppins, Arial, sans-serif;
+  --nv-bg: #F7FAF9;
+  --nv-card: #FFFFFF;
+  --nv-ink: #083A30;
+  --nv-muted: #3E5C52;
+  --nv-border: #E3EFE4;
+  --nv-green: #DCEFE7;
+  --nv-mint: #DCEFE7;
+  --nv-lilac: #EBE6F8;
+  --nv-lima: #EAFF78;
+  --nv-gold: #EBE6F8;
+  --nv-gold-soft: #EBE6F8;
+  --nv-coral: #FFE4DF;
+  --nv-coral-soft: #FFE4DF;
+  --nv-accent: #EAFF78;
+  --nv-cta: #EAFF78;
+  --nv-strong: #226C4B;
+  --nv-forest: #083A30;
+  --nv-track: #F3F8F6;
+  --nv-shadow: 0 8px 24px rgba(8, 58, 48, 0.06);
+  --nv-r-card: 20px;
+  --nv-r-card-lg: 24px;
+  font-family: Inter, "Public Sans", Arial, sans-serif;
+  font-weight: 400;
+  background: var(--nv-bg);
+}
+.nv-app.nv-dark {
+  --nv-bg: #102A24;
+  --nv-card: #173830;
+  --nv-ink: #F7FAF9;
+  --nv-muted: #C5D9D0;
+  --nv-border: #2C4A40;
+  --nv-green: #1E4A3A;
+  --nv-mint: #1E4A3A;
+  --nv-lilac: #2C3144;
+  --nv-lima: #EAFF78;
+  --nv-gold: #243830;
+  --nv-gold-soft: #243830;
+  --nv-coral: #4A3030;
+  --nv-coral-soft: #4A3030;
+  --nv-accent: #DCEFE7;
+  --nv-cta: #DCEFE7;
+  --nv-strong: #EAFF78;
+  --nv-forest: #DCEFE7;
+  --nv-track: #1C3830;
+  background: var(--nv-bg);
 }
 
 @media (min-width: 1251px) {
@@ -61,4 +108,63 @@
 
 .nvpdiary-detail .recipe-macros { margin: 0 0 8px; }
 .nvpdiary-detail .recipe-macros dd { font-size: 16px; }
-.nv-app .recipe-macros dt { text-transform: uppercase; }
+.nv-app .recipe-macros dt { text-transform: uppercase; font-weight: 600; letter-spacing: .06em; }
+.nv-app .recipe-macros dd { font-weight: 700; }
+
+.nv-app :is(h1, h2, h3) { font-weight: 600; letter-spacing: -0.03em; }
+.nv-app .nv-page-head h1 { font-weight: 600; }
+.nv-app .nv-brand > span { font-weight: 700; }
+.nv-app .nv-sidebar-caption,
+.nv-app .nv-nav-group,
+.nv-app .nv-brand small { font-weight: 500; }
+
+.nv-app.nv-patient .nv-sidebar nav button,
+.nv-app.nv-pro .nv-sidebar nav button,
+.nv-app .nv-sidebar nav button {
+  border-radius: 999px;
+  font-weight: 500;
+}
+.nv-app .nv-sidebar nav button[aria-current=page] {
+  background: var(--nv-lima);
+  color: var(--nv-forest);
+  font-weight: 700;
+}
+.nv-app .nv-tabbar button,
+.nv-app .nv-role-switch,
+.nv-app .nv-role-switch button,
+.nv-app .nv-button {
+  border-radius: 999px;
+}
+.nv-app .nv-tabbar button[aria-current=page] {
+  background: var(--nv-lima);
+  color: var(--nv-forest);
+  font-weight: 700;
+}
+.nv-app.nv-dark .nv-tabbar button[aria-current=page],
+.nv-app.nv-dark .nv-sidebar nav button[aria-current=page] {
+  background: var(--nv-lima);
+  color: #083A30;
+}
+
+.nv-app :is(.nv-card, .nv-metric, .nv-state, .recipe-plate) {
+  border-radius: var(--nv-r-card);
+  box-shadow: var(--nv-shadow);
+}
+.nv-app .recipe-plate { border-radius: var(--nv-r-card-lg); }
+
+.nv-app .np-gauge-value { stroke: #3BB273; }
+.nv-app .np-ruler i,
+.nv-app .np-ruler i::before,
+.nv-app .np-review-track i { background: #3BB273; }
+.nv-app .np-water { border-top-color: #DCEFE7; background: #DCEFE7; }
+.nv-app .nvpa-chip.meal,
+.nv-app .nvpa-month-grid .nvpa-chip.meal { border-left-color: #3BB273; background: #DCEFE7; }
+.nv-app .nvpa-chip.activity,
+.nv-app .nvpa-month-grid .nvpa-chip.activity { border-left-color: #FF6F61; background: #FFE4DF; }
+.nv-app .nvpa-event.meal .nvpa-detail-icon { background: #DCEFE7; color: #083A30; }
+.nv-app .nvpa-event.activity .nvpa-detail-icon { background: #FFE4DF; color: #083A30; }
+.nv-app .nv-operation-bar { background: #F7FAF9; font-family: Inter, "Public Sans", Arial, sans-serif; }
+.nv-app .nv-operation-bar button { background: var(--nv-lima); color: #083A30; border-radius: 999px; }
+.nv-app .nv-tab-unread { background: #FF6F61; }
+.nv-app .photo-modal,
+.nv-app .review-panel { font-family: Inter, "Public Sans", Arial, sans-serif; }

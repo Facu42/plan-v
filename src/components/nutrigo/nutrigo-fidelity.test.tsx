@@ -5,10 +5,11 @@ import { RecipeMacroGrid } from './RecipePlate';
 import {
   NUTRIGO_FIDELITY_NOT_VISUAL_APPROVAL,
   NUTRIGO_FIDELITY_RAILS,
+  NUTRIGO_FIDELITY_SURFACES,
   NUTRIGO_NO_GLOBAL_RAIL,
   NUTRIGO_REFERENCE_PNG_MISSING,
+  NV_VISUAL_LAW,
 } from './nutrigo-fidelity';
-import { NUTRIGO_SURFACES } from './nutrigo-surfaces';
 
 const css = readFileSync(new URL('./nutrigo-fidelity.css', import.meta.url), 'utf8');
 
@@ -26,9 +27,17 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(css).toMatch(/--nv-rail-menu:\s*345px/);
     expect(css).toMatch(/--nv-rail-insights:\s*305px/);
     expect(css).toMatch(/--nv-content-pad:\s*28px/);
-    expect(css).toMatch(/Poppins/);
+    expect(css).toMatch(/font-family:\s*Inter/);
+    expect(css).toMatch(/--nv-accent:\s*#EAFF78/);
+    expect(css).toMatch(/--nv-mint:\s*#DCEFE7/);
+    expect(css).toMatch(/--nv-lilac:\s*#EBE6F8/);
+    expect(css).not.toMatch(/#f9b343|#ffe6ad|#F9B343/i);
+    expect(css).toMatch(/border-radius:\s*999px/);
     expect(css).toMatch(/Not Facu visual approval/);
     expect(css).not.toMatch(/PLANV_NUTRIGO_VISUAL\s*=\s*1/);
+    expect(NV_VISUAL_LAW.type).toBe('Inter');
+    expect(NV_VISUAL_LAW.notType).toEqual(['Poppins', 'Fraunces']);
+    expect(NV_VISUAL_LAW.qaDir).toBe('design/nutrigo-exports');
     expect(NUTRIGO_FIDELITY_NOT_VISUAL_APPROVAL).toMatch(/not Facu visual approval/i);
   });
 
@@ -49,9 +58,14 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(css).toMatch(/grid-template-columns:\s*minmax\(0,\s*1fr\)\s*!important/);
   });
 
-  it('lista las doce superficies sin PNG de referencia en el clone', () => {
-    expect(NUTRIGO_REFERENCE_PNG_MISSING).toEqual(NUTRIGO_SURFACES.map((surface) => surface.id));
-    expect(NUTRIGO_REFERENCE_PNG_MISSING).toHaveLength(12);
+  it('lista once superficies de fidelidad, sin Ejercicio y sin PNG todavía', () => {
+    expect(NUTRIGO_FIDELITY_SURFACES.map((surface) => surface.id)).toEqual([
+      'dashboard', 'calendar', 'messages', 'healthy-menu', 'recipe-details',
+      'meal-plan', 'grocery', 'food-diary', 'progress', 'insights', 'insight-details',
+    ]);
+    expect(NUTRIGO_FIDELITY_SURFACES.some((surface) => surface.id === 'exercise')).toBe(false);
+    expect(NUTRIGO_REFERENCE_PNG_MISSING).toEqual(NUTRIGO_FIDELITY_SURFACES.map((surface) => surface.id));
+    expect(NUTRIGO_REFERENCE_PNG_MISSING).toHaveLength(11);
   });
 
   it('los macros declarados se leen como KCAL/PROT/CARBS/GRASAS', () => {

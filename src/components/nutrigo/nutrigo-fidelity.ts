@@ -1,5 +1,25 @@
 import { NUTRIGO_SURFACES, type NutrigoSurfaceId } from './nutrigo-surfaces';
 
+/** Facu, 2026-09-22. Layout from the pack. Skin is Plan V + Noteme minimalism. */
+export const NV_VISUAL_LAW = {
+  colors: ['mint', 'verde', 'coral', 'lilac', 'lima'] as const,
+  accent: '#EAFF78',
+  mint: '#DCEFE7',
+  coral: '#FFE4DF',
+  lilac: '#EBE6F8',
+  type: 'Inter',
+  notType: ['Poppins', 'Fraunces'] as const,
+  cardRadius: [16, 24] as const,
+  nav: 'pill',
+  qaDir: 'design/nutrigo-exports',
+  excludedSurface: 'exercise' as const satisfies NutrigoSurfaceId,
+};
+
+/** Eleven fidelity screens. Exercise stays in the product and out of this pass. */
+export const NUTRIGO_FIDELITY_SURFACES = NUTRIGO_SURFACES.filter(
+  (surface) => surface.id !== NV_VISUAL_LAW.excludedSurface,
+);
+
 /** Inventory rail widths at 1440. Not Facu visual approval. */
 export const NUTRIGO_FIDELITY_RAILS = {
   dashboard: 325,
@@ -22,6 +42,6 @@ export const NUTRIGO_NO_GLOBAL_RAIL: readonly NutrigoSurfaceId[] = [
 export const NUTRIGO_FIDELITY_NOT_VISUAL_APPROVAL =
   'NV-FIDELITY shell contracts are not Facu visual approval. PLANV_NUTRIGO_VISUAL stays unset.';
 
-/** The .fig lives on Facu’s PC. This clone has the inventory, not kit PNG exports. */
+/** The .fig export is not in the clone yet. QA is side-by-side once PNGs land in design/nutrigo-exports/. */
 export const NUTRIGO_REFERENCE_PNG_MISSING: readonly NutrigoSurfaceId[] =
-  NUTRIGO_SURFACES.map((surface) => surface.id);
+  NUTRIGO_FIDELITY_SURFACES.map((surface) => surface.id);
