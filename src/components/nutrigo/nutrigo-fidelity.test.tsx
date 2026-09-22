@@ -211,4 +211,15 @@ describe('NV-FIDELITY shell vs inventario', () => {
     // La desviación de las cards de "Tu Menú De Hoy" (sin macros por comida planificada) queda documentada.
     expect(law).toMatch(/Desviación deliberada — tarjetas de "Tu Menú De Hoy"/);
   });
+
+  it('mensajes usa los colores literales del archivo: burbuja propia Saffron, recibida White', () => {
+    expect(law).toMatch(/get_design_context.*198:5995.*198:5969|198:5995.*198:5969/s);
+    const messagesCss = readFileSync(new URL('./messages.css', import.meta.url), 'utf8');
+    expect(messagesCss).toMatch(/\.nm-bubble\.nm-own \{[^}]*background:var\(--nv-gold\);/);
+    expect(messagesCss).toMatch(/\.nm-bubble \{[^}]*background:var\(--nv-card-warm\);/);
+    // El ítem activo de la lista va en Cream-BG, no en el verde de acento.
+    expect(messagesCss).toMatch(/\.nm-contact-list>button\[aria-pressed=true\] \{ background:var\(--nv-bg\); \}/);
+    // Las reglas viejas (verde propio, gris recibido) ya no deben quedar en la CSS de fidelidad.
+    expect(css).not.toMatch(/\.nm-bubble\.nm-own \{[\s\S]{0,80}background: var\(--nv-accent-soft\);/);
+  });
 });

@@ -17,23 +17,25 @@ const sentMessages = (patient: ShowroomPatient) => patient.messages.filter((m) =
 
 export function NutrigoMessages({ patient, patients, role, onSelect, onNavigate }: Props) {
   const [query, setQuery] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
   const contacts = role === 'pro' ? patients.filter((p) => normalized(p.name).includes(normalized(query))) : [patient];
   return <section className={`nm-layout nm-${role}`} aria-label="Mensajería">
     <aside className="nm-contacts" aria-label="Conversaciones">
-      <h2>Conversaciones</h2>
-      {role === 'pro' && <input type="search" aria-label="Buscar conversaciones" placeholder="Buscar paciente…" value={query} onChange={(e) => setQuery(e.target.value)} />}
+      {role === 'pro' && <input ref={searchRef} type="search" aria-label="Buscar conversaciones" placeholder="Buscar paciente…" value={query} onChange={(e) => setQuery(e.target.value)} />}
       {role === 'pro' && <label className="nm-mobile-picker">Paciente<select aria-label="Seleccionar conversación" value={patient.id} onChange={(e) => onSelect(e.target.value)}>{patients.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>}
       <div className="nm-contact-list">{contacts.map((p) => {
         const thread = sentMessages(p);
         const latest = thread[thread.length - 1];
         const unread = unreadCount(thread, role);
         const preview = latest?.text || latest?.attachment?.filename || 'Iniciar conversación';
-        return <button type="button" key={p.id} aria-pressed={p.id === patient.id} onClick={() => onSelect(p.id)}>
-          <span className="nv-avatar">{role === 'pro' ? p.initials : 'VT'}</span><span><strong>{role === 'pro' ? p.name : 'Verónica Trenti'}</strong><small>{preview}</small></span>
-          {unread > 0 && <NvBadge>{unread} sin leer</NvBadge>}
+        const name = role === 'pro' ? p.name : 'Verónica Trenti';
+        return <button type="button" key={p.id} aria-pressed={p.id === patient.id} aria-label={unread > 0 ? `${name}, ${unread} sin leer` : undefined} onClick={() => onSelect(p.id)}>
+          <span className="nv-avatar">{role === 'pro' ? p.initials : 'VT'}</span><span><strong>{name}</strong><small>{preview}</small></span>
+          {unread > 0 && <NvBadge tone="coral">{unread}</NvBadge>}
         </button>;
       })}</div>
       {!contacts.length && <p className="nv-caption">No hay coincidencias.</p>}
+      {role === 'pro' && <div className="nm-contacts-footer"><NvButton className="nv-soft" onClick={() => searchRef.current?.focus()}>Nuevo mensaje</NvButton></div>}
     </aside>
     <MessageConversation key={`${role}:${patient.id}`} patient={patient} role={role} />
     <aside className="nm-profile" aria-label="Contexto de la conversación"><span className="nv-avatar">{role === 'pro' ? patient.initials : 'VT'}</span><h2>{role === 'pro' ? patient.name : 'Verónica Trenti'}</h2><p>{role === 'pro' ? 'Paciente en seguimiento' : 'Tu nutricionista'}</p><hr /><h3>Objetivo compartido</h3><p>{patient.goal || 'Todavía no definido'}</p><h3>Próxima consulta</h3><p>{patient.appointment?.when ?? 'Por coordinar'}</p><div className="nm-profile-actions">{role === 'pro' ? <><NvButton className="nv-soft" onClick={() => onNavigate('ficha')}>Abrir ficha <Icon name="arrow" size={14} /></NvButton><NvButton className="nv-ghost" onClick={() => onNavigate('consultas')}>Ver consultas <Icon name="calendar" size={14} /></NvButton></> : <NvButton className="nv-soft" onClick={() => onNavigate('agenda')}>Ver mi agenda <Icon name="calendar" size={14} /></NvButton>}</div><hr /><p className="nv-caption">Conversación privada de acompañamiento. Entrega y lectura se marcan por persona, no por dispositivo. Reintentar con el mismo identificador no duplica el mensaje. Los adjuntos son archivos autorizados (JPG, PNG, WebP o PDF de hasta 10 MB); la vista previa dura 60 segundos y queda registrada.</p></aside>
@@ -96,16 +98,17 @@ function MessageConversation({ patient, role }: Pick<Props, 'patient' | 'role'>)
     finally { inFlight.current = false; setBusy(false); }
   };
   return <section className="nm-conversation" aria-label={`Conversación con ${contact}`}>
-    <header><span className="nv-avatar">{role === 'pro' ? patient.initials : 'VT'}</span><div><h2>{contact}</h2><small>Mensajes de acompañamiento</small></div><NvButton className="nv-ghost" onClick={reload} disabled={busy} aria-label="Actualizar conversación"><Icon name="history" size={18} /></NvButton></header>
+    <header><span className="nv-avatar">{role === 'pro' ? patient.initials : 'VT'}</span><div><h2>{contact}</h2><small>Mensajes de acompañamiento</small></div><button type="button" className="nm-picker-btn" onClick={reload} disabled={busy} aria-label="Actualizar conversación"><Icon name="history" size={18} /></button></header>
     <div className="nm-thread" ref={list} role="log" aria-live="polite" aria-relevant="additions" aria-label="Mensajes enviados">
       <p className="nm-demo-note">Entrega y leído se confirman al abrir el hilo (por persona, no por dispositivo). Un reintento con el mismo id no crea otro mensaje.</p>
       {!messages.length && <NvState title="Empezá la conversación" description="Escribí tu primer mensaje para iniciar el seguimiento." />}
       {messages.map((m) => {
         const own = m.from === (role === 'pro' ? 'vero' : 'patient');
         const receipt = messageReceipt(m);
-        return <article key={m.id} className={`nm-bubble${own ? ' nm-own' : ''}`}><small>{m.from === 'vero' ? 'Verónica' : patient.name}</small>{m.text ? <p>{m.text}</p> : null}{m.attachment && <ChatAttachmentView patientId={patient.id} messageId={m.id} attachment={m.attachment} />}<time dateTime={m.sent_at}>{new Date(m.sent_at).toLocaleString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}{own ? ` · ${messageReceiptLabel(receipt)}` : ''}</time></article>;
+        const sender = m.from === 'vero' ? 'Verónica' : patient.name;
+        return <article key={m.id} className={`nm-bubble${own ? ' nm-own' : ''}`} aria-label={`Mensaje de ${sender}`}>{m.text ? <p>{m.text}</p> : null}{m.attachment && <ChatAttachmentView patientId={patient.id} messageId={m.id} attachment={m.attachment} />}<time dateTime={m.sent_at}>{new Date(m.sent_at).toLocaleString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}{own ? ` · ${messageReceiptLabel(receipt)}` : ''}</time></article>;
       })}
     </div>
-    <form className="nm-compose" onSubmit={send}><label htmlFor="nm-message">Mensaje para {contact}</label><div><textarea id="nm-message" rows={2} maxLength={2000} placeholder="Escribí un mensaje…" value={text} disabled={busy} onChange={(e) => setText(e.target.value)} aria-describedby={error ? 'nm-error' : 'nm-status'} /><NvButton type="submit" className="nv-soft" disabled={busy || !canSend}>{busy ? 'Enviando…' : 'Enviar mensaje'}</NvButton></div><div className="nm-attach-row"><input ref={fileRef} id="nm-attach" type="file" accept={CHAT_ATTACHMENT_ACCEPT} disabled={busy} onChange={(e) => pickFile(e.target.files?.[0] ?? null)} /><label htmlFor="nm-attach">Adjuntar archivo</label>{file && <span>{file.name}<button type="button" className="nv-button nv-ghost" onClick={() => pickFile(null)} disabled={busy}>Quitar</button></span>}</div><p id="nm-status" role="status">{status}</p>{error && <p id="nm-error" role="alert">{error}</p>}</form>
+    <form className="nm-compose" onSubmit={send}><label htmlFor="nm-message">Mensaje para {contact}</label><div className="nm-compose-row"><textarea id="nm-message" rows={2} maxLength={2000} placeholder="Escribí un mensaje…" value={text} disabled={busy} onChange={(e) => setText(e.target.value)} aria-describedby={error ? 'nm-error' : 'nm-status'} /><NvButton type="submit" className="nv-soft" disabled={busy || !canSend}>{busy ? 'Enviando…' : 'Enviar mensaje'}</NvButton></div><div className="nm-attach-row"><input ref={fileRef} id="nm-attach" type="file" accept={CHAT_ATTACHMENT_ACCEPT} disabled={busy} onChange={(e) => pickFile(e.target.files?.[0] ?? null)} /><label htmlFor="nm-attach">Adjuntar archivo</label>{file && <span>{file.name}<button type="button" className="nv-button nv-ghost" onClick={() => pickFile(null)} disabled={busy}>Quitar</button></span>}</div><p id="nm-status" role="status">{status}</p>{error && <p id="nm-error" role="alert">{error}</p>}</form>
   </section>;
 }

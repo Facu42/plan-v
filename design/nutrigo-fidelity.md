@@ -135,7 +135,13 @@ El día de hoy es una pastilla Green; el elegido lleva contorno Green de 2.
 
 ### Mensajes (nodo `84:2565`)
 
-Sin rail: el cuerpo de 1161 se parte en 299 + 547 + 275 con 20. Los contactos son ítems de 96, la cabecera del chat mide 100 con padding 16 y el pie 88. Las burbujas van radio 12/12/12/2 en Gray-BG-Subtle; las propias, espejadas en Green-Light. Los campos no llevan borde: radio 12 sobre Gray-BG-Subtle.
+Reconstruido el 2026-09-22 con el código literal del archivo (`get_design_context` sobre `198:5995` "Center Section" y `198:5969` "Section Messages"), no con medidas leídas a mano: la versión anterior pintaba la burbuja propia en Green-Light y la recibida en Gray-BG-Subtle, y el panel de conversación como card blanca — invertía los colores del archivo.
+
+Cuerpo de 1161 partido en 299 + 547 + 275 con 20. La lista de contactos son ítems de 96 con línea divisoria Gray-Line entre ellos (no cápsulas con hover), avatar circular de 40 con color cíclico Green/Saffron/Orange, y el ítem activo se pinta en Cream-BG (no en el verde de acento). El badge de no leídos es un contador circular Orange de 18, sólo el número — no una pastilla "N sin leer". El pie de la lista tiene el botón "Nuevo mensaje" en Green, que en Plan V enfoca el buscador de pacientes (rol nutricionista; el rol paciente no lo tiene porque sólo hay un contacto).
+
+El panel de conversación (`Center Section`) es Cream-BG de fondo, con la cabecera (100 de alto) y el pie (88) flotando como cards blancas con radio 16 y sombra. Las burbujas: la propia va en Saffron `#FFCB65`, la recibida en White `#FEFCFB` — el archivo no pinta ninguna en gris ni en verde. El archivo tampoco pone el nombre del remitente sobre cada burbuja (se distingue por posición); se sacó esa etiqueta visible y se dejó como `aria-label` del mensaje para no perder accesibilidad.
+
+**Desviación deliberada:** los tres botones de la cabecera del chat en el archivo son llamada, videollamada y un toggle de panel lateral. Plan V no tiene llamadas; se mantiene el único botón real que existía, "Actualizar conversación", con el mismo tratamiento visual (círculo Cream-BG de 36). El panel derecho del archivo trae una galería de medios y documentos compartidos que Plan V no tiene: se mantiene el panel de contexto real que ya existía (objetivo compartido, próxima consulta, accesos).
 
 ### Menú saludable (nodo `84:2716`)
 
