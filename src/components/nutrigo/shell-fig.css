@@ -1,0 +1,206 @@
+/* Shell del archivo: Header (84:2568), Navbar con Meal Plan desplegado (84:2995), Section Footer (84:2999).
+   Se carga último: gana sobre las capas anteriores del shell. */
+
+/* ---------- Header del contenido ---------- */
+.nv-app.nv-patient .nv-topbar,
+.nv-app.nv-pro .nv-topbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 50px;
+  padding: 28px 28px 0 32px;
+  border: 0;
+  background: transparent;
+}
+.nv-app.nv-patient .nv-topbar .nv-topbar-title,
+.nv-app.nv-pro .nv-topbar .nv-topbar-title {
+  display: block;
+  margin: 0 auto 0 0;
+  color: var(--nv-ink);
+  font-size: 22px;
+  line-height: 1.08;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.nv-app .nv-header-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+/* Button Icon: Cream-BG, padding 9, radio 12, icono 22; aviso = punto Orange de 8. */
+.nv-app.nv-patient .nv-header-menu .nv-alerts-bell,
+.nv-app.nv-pro .nv-header-menu .nv-alerts-bell {
+  width: 40px;
+  height: 40px;
+  padding: 9px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--nv-bg);
+  color: var(--nv-ink);
+}
+.nv-app .nv-header-menu .nv-alerts-bell svg { width: 22px; height: 22px; }
+.nv-app .nv-header-menu .nv-alerts-bell .nv-tab-unread {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  min-width: 0;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: var(--nv-orange, #FFA257);
+  font-size: 0;
+}
+/* User Profile: avatar 40 radio 12 Saffron, nombre 16 semibold, rol 11 Gray-20, caret en Button Icon 5/12. */
+.nv-app .nv-user {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.nv-app .nv-user-avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #FFCB65;
+  color: #272932;
+  font-size: 14px;
+  font-weight: 600;
+}
+.nv-app .nv-user-name {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.24;
+  white-space: nowrap;
+}
+.nv-app .nv-user-name strong { color: var(--nv-ink); font-size: 16px; font-weight: 600; }
+.nv-app .nv-user-name small { color: var(--nv-muted); font-size: 11px; font-weight: 400; }
+.nv-app .nv-user-caret {
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  padding: 5px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--nv-bg);
+  color: var(--nv-ink);
+  cursor: pointer;
+}
+.nv-app .nv-user-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 220px;
+  padding: 8px;
+  border-radius: 16px;
+  background: var(--nv-card);
+  box-shadow: 0 4px 12px rgba(176, 176, 176, .14);
+}
+.nv-app .nv-user-menu > button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--nv-ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.nv-app .nv-user-menu > button:hover { background: var(--nv-bg); }
+.nv-app .nv-user-menu .nv-role-switch { display: flex; margin: 0 0 4px; }
+.nv-app .nv-user-menu .nv-role-switch button { flex: 1; }
+
+/* ---------- Dashboard: sin header; perfil y campana arriba del rail (33:1104) ---------- */
+@media (min-width: 1251px) {
+  .nv-app.nv-home.nv-patient .nv-topbar .nv-topbar-title,
+  .nv-app.nv-home.nv-pro .nv-topbar .nv-topbar-title { display: none; }
+  .nv-app.nv-home.nv-patient .nv-topbar,
+  .nv-app.nv-home.nv-pro .nv-topbar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 5;
+    width: 325px;
+    min-height: 0;
+    padding: 28px 28px 0;
+    box-sizing: border-box;
+  }
+  .nv-app.nv-home .nv-header-menu { width: 100%; }
+  .nv-app.nv-home .nv-header-menu .nv-alerts { order: 2; margin-left: auto; }
+  .nv-app.nv-home .nv-user { order: 1; }
+  .nv-app.nv-home .nv-workspace { position: relative; }
+  .nv-app.nv-home .nv-daily { padding-top: 96px; }
+  .nv-app.nv-home .nv-daily > .nv-person { display: none; }
+}
+
+/* ---------- Navbar: Meal Plan desplegado ---------- */
+.nv-app .nv-sidebar .nv-nav-sub { display: flex; flex-direction: column; gap: 2px; border-radius: 14px; }
+.nv-app .nv-sidebar .nv-nav-sub.nv-open { padding: 2px; background: var(--nv-bg); }
+.nv-app .nv-sidebar nav .nv-nav-sub-head { width: 100%; }
+.nv-app .nv-sidebar nav .nv-nav-sub-head > span { flex: 1; text-align: left; }
+.nv-app .nv-sidebar nav .nv-nav-sub.nv-open .nv-nav-sub-head { padding: 8px 8px 10px 14px; color: #52545B; }
+.nv-app .nv-sidebar nav .nv-nav-sub-items { display: flex; flex-direction: column; gap: 2px; }
+.nv-app .nv-sidebar nav .nv-nav-sub-items button {
+  justify-content: flex-start;
+  padding: 13px 8px 13px 56px;
+  white-space: nowrap;
+  border-radius: 12px;
+  color: #52545B;
+}
+.nv-app .nv-sidebar nav .nv-nav-sub-items button[aria-current=page] { background: var(--nv-accent); color: var(--nv-ink); }
+
+/* ---------- Section Footer ---------- */
+.nv-app .nv-footer {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 28px;
+  min-height: 20px;
+  color: #52545B;
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+.nv-app .nv-footer p { margin: 0; }
+
+/* ---------- Móvil ---------- */
+@media (max-width: 799px) {
+  .nv-app.nv-patient .nv-topbar,
+  .nv-app.nv-pro .nv-topbar {
+    flex-wrap: wrap;
+    min-height: 64px;
+    padding: 12px 16px;
+    background: var(--nv-card);
+  }
+  .nv-app.nv-patient .nv-topbar .nv-topbar-title,
+  .nv-app.nv-pro .nv-topbar .nv-topbar-title { display: none; }
+  .nv-app .nv-header-menu { margin-left: auto; gap: 8px; }
+  .nv-app .nv-user-name { display: none; }
+  .nv-app .nv-footer { margin-top: 24px; }
+}
+
+/* ---------- Lienzo: fuera del Dashboard el frame es blanco y el Content lleva borde izquierdo Gray-Line ---------- */
+.nv-app:not(.nv-home) .nv-workspace,
+.nv-app:not(.nv-home) .nv-content-layout,
+.nv-app:not(.nv-home) .nv-main {
+  background: var(--nv-card);
+}
+@media (min-width: 800px) {
+  .nv-app:not(.nv-home) .nv-workspace { border-left: 1px solid var(--nv-border); }
+}

@@ -17,6 +17,12 @@ export const PATIENT_SURFACES: ShellTab[] = [
   { id: 'recursos', icon: 'pin', label: 'Recursos' },
 ];
 
+/** El grupo desplegable del Navbar (84:2994): Meal Plan abre Meal Plan y Grocery List. */
+export const PLAN_SUBPAGES: ShellTab[] = [
+  { id: 'plan', icon: 'list', label: 'Plan semanal' },
+  { id: 'compras', icon: 'check', label: 'Compras' },
+];
+
 export const PATIENT_TABS: ShellTab[] = [
   { id: 'inicio', icon: 'home', label: 'Inicio' },
   { id: 'plan', icon: 'list', label: 'Plan' },
@@ -38,10 +44,13 @@ export const PRO_SURFACES: ShellTab[] = [
   { id: 'inicio', icon: 'home', label: 'Inicio' },
   { id: 'agenda', icon: 'calendar', label: 'Agenda' },
   { id: 'mensajes', icon: 'message', label: 'Mensajes' },
+  { id: 'recetas', icon: 'leaf', label: 'Menú' },
   { id: 'plan', icon: 'list', label: 'Plan' },
+  { id: 'compras', icon: 'check', label: 'Compras' },
   { id: 'diario', icon: 'history', label: 'Diario' },
   { id: 'progreso', icon: 'trend', label: 'Progreso' },
   { id: 'ejercicio', icon: 'heart', label: 'Ejercicio' },
+  { id: 'recursos', icon: 'pin', label: 'Recursos' },
   { id: 'pacientes', icon: 'users', label: 'Pacientes' },
   { id: 'ficha', icon: 'contact', label: 'Ficha' },
   { id: 'consultas', icon: 'video', label: 'Consultas' },
