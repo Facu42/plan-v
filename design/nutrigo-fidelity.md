@@ -206,6 +206,12 @@ La card de relacionados del archivo lleva una foto de 253 × 160 que Plan V no t
 
 El archivo dibuja una sola persona; el nutricionista ve las mismas pantallas aplicadas al paciente que tiene en seguimiento. Inicio es el Dashboard (`12:792`) de ese paciente: el título es su nombre, el buscador del header (`33:1574`) pasa a ser el selector de paciente y el rail derecho (`33:1104`) muestra su tarjeta, su menú del día y su actividad reciente. El menú lateral sigue el orden de la Navbar (`12:793`) sin rótulo de grupo, con "Cerrar sesión" al pie como el Logout del archivo; debajo de los destinos del archivo van las pantallas propias de Plan V (Pacientes, Ficha, Consultas, Objetivos, Seguimiento). Ya no hay bloque "Mi consultorio", ni "Mi trabajo", ni lista "Mi seguimiento", y la app autenticada no abre el CRM viejo: queda sólo en `?design=legacy` en modo demo.
 
+## Pase 2026-09-23: shell y pantallas para los dos roles
+
+Shell (`shell-fig.css`): Header 84:2568 en todas las páginas salvo Inicio (título 22, campana, perfil con menú de cuenta: tema, rol en demo, cerrar sesión), lienzo blanco con borde izquierdo fuera del Dashboard, pie "Copyright © año Plan V" (sin enlaces ni redes: Plan V no tiene esas páginas), Plan desplegable con Plan semanal y Compras (84:2995). En Inicio el perfil y la campana van arriba del rail, como en 33:1104. No se dibuja el banner promocional del Navbar.
+
+Cada pantalla tiene su CSS propio: `messages-fig.css`, `menu-fig.css`, `plan-fig.css`, `agenda-diario-fig.css`, `progreso-recursos-fig.css`. El nutricionista usa los mismos frames con los datos del paciente elegido. Lo que el archivo dibuja sin dato real en Plan V (teléfono, precios, calorías de compras, puntajes, autores, fotos) se omite o se reemplaza por el registro real más cercano.
+
 ## Copy
 
 **La interfaz va en español.** El .fig manda en composición, color, tipo y densidad; no en idioma. Ningún rótulo, vacío ni mensaje queda en inglés por copiar el frame. Las cifras y nombres de ejemplo del pack no se copian: los datos son de Plan V.
