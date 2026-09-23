@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { ShowroomPatient } from './showroom-model';
-import { buildPatientAgendaView, ShowroomPatientAgenda } from './ShowroomPatientAgenda';
+import { buildPatientAgendaView, eventTime, ShowroomPatientAgenda } from './ShowroomPatientAgenda';
 
 const patient = {
   id: 'p1',
@@ -72,5 +72,16 @@ describe('Agenda paciente Nutrigo', () => {
     expect(html).toContain('Escribirle a Verónica');
     expect(html).toContain('Tu calendario');
     expect(html).toContain('data-patient-agenda-day="2026-09-16"');
+  });
+
+  it('no inventa una hora para las indicaciones del plan y usa el layout del frame', () => {
+    const at = new Date(2026, 8, 16, 12);
+    expect(eventTime({ kind: 'plan', at, subtitle: 'Almuerzo · indicación de esta semana' })).toBe('Almuerzo');
+    expect(eventTime({ kind: 'plan', at, subtitle: 'Almuerzo · 13:00' })).toBe('Almuerzo · 13:00');
+    const html = renderToStaticMarkup(<ShowroomPatientAgenda patient={patient} now={now} onMessage={vi.fn()} storage={null} />);
+    expect((html.match(/class="nvcal-stat"/g) ?? [])).toHaveLength(4);
+    expect(html).toContain('Detalle del día');
+    expect(html).toContain('Nueva consulta');
+    expect(html).toContain('aria-label="Elegir mes"');
   });
 });

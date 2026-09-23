@@ -10,6 +10,8 @@
   justify-content: space-between;
   gap: 12px;
   min-height: 50px;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   padding: 28px 28px 0 32px;
   border: 0;
   background: transparent;
@@ -135,6 +137,8 @@
     position: absolute;
     top: 0;
     right: 0;
+    bottom: auto;
+    height: auto;
     z-index: 5;
     width: 325px;
     min-height: 0;
@@ -204,3 +208,44 @@
 @media (min-width: 800px) {
   .nv-app:not(.nv-home) .nv-workspace { border-left: 1px solid var(--nv-border); }
 }
+
+/* ---------- Rail del Dashboard, literal de 33:1104 ---------- */
+@media (min-width: 1251px) {
+  .nv-app.nv-home .nv-daily { display: flex; flex-direction: column; gap: 28px; padding: 96px 28px 28px; }
+}
+.nv-app.nv-home .nw-calendar header h2 { display: flex; gap: 4px; align-items: baseline; font-size: 14px; line-height: 1.3; font-weight: 600; text-transform: capitalize; }
+.nv-app.nv-home .nw-calendar header small { font-size: 14px; line-height: 1.3; font-weight: 600; color: var(--nv-muted); }
+.nv-app.nv-home .nw-calendar .nw-today { padding: 6px 8px; border: 0; border-radius: 8px; background: var(--nv-card); }
+.nv-app.nv-home .nw-calendar .nw-day { flex: 1; padding: 8px 4px 6px; border-radius: 10px; }
+.nv-app.nv-home .nw-calendar .nw-day[aria-pressed=true] { background: #C2E66E; color: #272932; font-weight: 600; }
+.nv-app.nv-home .nv-agenda-meals { display: flex; flex-direction: column; gap: 20px; }
+.nv-app.nv-home .nv-agenda-meals > button { display: flex; flex-direction: column; align-items: stretch; gap: 16px; padding: 0 0 20px; border: 0; border-bottom: 1px solid var(--nv-border); border-radius: 0; background: transparent; text-align: left; }
+.nv-app.nv-home .nv-agenda-meals > button:last-child { border-bottom: 0; padding-bottom: 0; }
+.nv-app.nv-home .nv-meal-meta { display: flex; align-items: center; gap: 8px; }
+.nv-app.nv-home .nv-meal-chip { padding: 4px 8px; border-radius: 6px; color: #272932; font-size: 11px; line-height: 1.35; font-weight: 400; }
+.nv-app.nv-home .nv-meal-chip-0 { background: #EEEEEF; }
+.nv-app.nv-home .nv-meal-chip-1 { background: #C2E66E; }
+.nv-app.nv-home .nv-meal-chip-2 { background: #FFCB65; }
+.nv-app.nv-home .nv-meal-chip-3 { background: #FFA257; }
+.nv-app.nv-home .nv-meal-info { display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px; border-radius: 6px; color: #272932; font-size: 11px; line-height: 1.35; }
+.nv-app.nv-home .nv-meal-info-0 { background: #EEEEEF; }
+.nv-app.nv-home .nv-meal-info-1 { background: #DFF9A2; }
+.nv-app.nv-home .nv-meal-info-2 { background: #FFE6B5; }
+.nv-app.nv-home .nv-meal-info-3 { background: #FFE1C9; }
+.nv-app.nv-home .nv-meal-meta > svg { margin-left: auto; padding: 3px; box-sizing: content-box; border-radius: 6px; background: #EEEEEF; transform: rotate(-90deg); }
+.nv-app.nv-home .nv-meal-body { display: flex; align-items: center; gap: 16px; }
+.nv-app.nv-home .nv-meal-body .np-food-photo,
+.nv-app.nv-home .nv-meal-body .np-food-fallback { flex: none; width: 64px; height: 64px; border-radius: 12px; background: #EEEEEF; object-fit: cover; }
+.nv-app.nv-home .nv-meal-body strong { color: var(--nv-ink); font-size: 12px; line-height: 1.3; font-weight: 400; }
+.nv-app.nv-home .nv-recent { display: flex; flex-direction: column; gap: 16px; padding: 0 0 8px; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.nv-app.nv-home .nv-recent h2 { font-size: 14px; line-height: 1.3; font-weight: 600; }
+.nv-app.nv-home .nv-recent li { gap: 12px; padding-bottom: 12px; }
+.nv-app.nv-home .nv-recent li:last-child { padding-bottom: 0; }
+.nv-app.nv-home .nv-recent .nv-icon-tile { width: 32px; height: 32px; padding: 8px; border-radius: 20px; color: #272932; }
+.nv-app.nv-home .nv-recent li:nth-child(4n+1) .nv-icon-tile,
+.nv-app.nv-home .nv-recent li:nth-child(4n) .nv-icon-tile { background: #C2E66E; }
+.nv-app.nv-home .nv-recent li:nth-child(4n+2) .nv-icon-tile { background: #FFCB65; }
+.nv-app.nv-home .nv-recent li:nth-child(4n+3) .nv-icon-tile { background: #FFA257; }
+.nv-app.nv-home .nv-recent small { color: #52545B; font-size: 10px; line-height: 1.35; }
+.nv-app.nv-home .nv-recent p { font-size: 11px; line-height: 1.6; }
+.nv-app.nv-home .nv-daily > .nv-recent { margin-top: 28px; }

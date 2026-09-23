@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { RecipeDayAssignment } from '../../types/recipe-plate';
 import { DayAssignedMealsView } from './DayMeals';
 import { RecipeCatalog } from './RecipeCatalog';
-import { RecipePlateCard } from './RecipePlate';
+import { RecipeDetails, RecipePlateCard, scaleQuantity } from './RecipePlate';
 
 const card = {
   category: 'Almuerzo',
@@ -65,5 +65,31 @@ describe('PV-40 formato de card y CTA', () => {
     expect(catalog).toContain('Asistente IA');
     expect(catalog).toContain('Nueva receta');
     expect(catalog).toContain('No se inventan calorías ni macros');
+  });
+
+  it('el detalle de receta sigue el archivo con datos reales y sin reseñas ni health score', () => {
+    const detail = {
+      id: 'r1', title: 'Bowl de lentejas', version: 2, yieldPortions: 2, steps: ['Lavar.', 'Cocinar.'],
+      nutrientSource: 'Tabla del consultorio', ingredients: [{ id: 'i1', name: 'Lentejas', quantity: 80, unit: 'g' as const }],
+      card, statusLabel: 'Publicada',
+    };
+    const html = renderToStaticMarkup(<RecipeDetails recipe={detail} onBack={() => {}} />);
+    expect(html).toContain('Volver al menú');
+    expect(html).toContain('Fuente nutricional declarada: Tabla del consultorio.');
+    expect(html).toContain('80 g Lentejas');
+    expect(html).toContain('Información nutricional');
+    expect(html).toContain('185 kcal');
+    expect(html).toContain('Publicada');
+    expect(html).not.toMatch(/reseñas|reviews|health score|dificultad|fibra|sodio/i);
+    const bare = renderToStaticMarkup(<RecipeDetails recipe={{ ...detail, card: { ...card, macro_status: 'unavailable', macros: null } }} onBack={() => {}} />);
+    expect(bare).toContain('Sin macros declarados.');
+    expect(bare).not.toContain('Información nutricional');
+  });
+
+  it('las porciones escalan las cantidades de la receta sin inventar datos', () => {
+    expect(scaleQuantity(80, 2, 4)).toBe(160);
+    expect(scaleQuantity(80, 2, 1)).toBe(40);
+    expect(scaleQuantity(1, 3, 1)).toBe(0.3);
+    expect(scaleQuantity(5, 0, 2)).toBe(5);
   });
 });

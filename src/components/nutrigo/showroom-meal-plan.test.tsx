@@ -14,9 +14,10 @@ const patient: Patient = {
   ],
   brief: null, timeline: [], meal_logs: [], messages: [],
 };
+const now = new Date(2026, 8, 23, 12);
 
 const render = (query = '') => renderToStaticMarkup(
-  <ShowroomMealPlan patient={patient} patients={[patient]} query={query} onSelect={vi.fn()} />,
+  <ShowroomMealPlan patient={patient} patients={[patient]} query={query} onSelect={vi.fn()} now={now} />,
 );
 
 describe('Plan semanal profesional en Nutrigo', () => {
@@ -28,28 +29,29 @@ describe('Plan semanal profesional en Nutrigo', () => {
     expect(days[1].meals).toEqual([]);
   });
 
-  it('renderiza una tabla editable con siete días y selección multipaciente', () => {
+  it('la tabla es la página: barra con paciente, versiones y CTA; celdas editables', () => {
     const html = render();
     expect(html).toContain('Plan semanal de Ana Ruiz');
     expect(html).toContain('Paciente del plan');
-    expect((html.match(/data-plan-day=/g) ?? [])).toHaveLength(7);
-    expect(html).toContain('Yogur con fruta');
-    expect(html).toContain('Sopa de calabaza');
-    expect(html).toContain('Guardar');
+    expect(html).toContain('Versiones');
     expect(html).toContain('Agregar comida');
+    expect((html.match(/data-plan-day=/g) ?? [])).toHaveLength(7);
+    expect(html).toContain('Lunes · Desayuno: Yogur con fruta');
+    expect(html).toContain('Miércoles · Cena: Sopa de calabaza');
+    expect(html).toContain('Agregar Merienda el Lunes');
+    // Las herramientas del plan fechado no se apilan en la página: viven detrás de "Versiones".
+    expect(html).not.toContain('Guardar borrador');
   });
 
-  it('muestra días vacíos y no inventa cantidades, calorías ni macros', () => {
+  it('no inventa cantidades, calorías ni macros', () => {
     const html = render();
-    expect(html).toContain('Sin comidas asignadas');
     expect(html).not.toMatch(/\b(kcal|gramos|proteína|carbohidratos)\b/i);
   });
 
-  it('filtra comidas por slot o título sin eliminar las siete filas del plan', () => {
+  it('la búsqueda atenúa celdas sin quitar las siete filas', () => {
     const html = render('sopa');
     expect(html).toContain('Sopa de calabaza');
-    expect(html).not.toContain('Yogur con fruta');
     expect((html.match(/data-plan-day=/g) ?? [])).toHaveLength(7);
-    expect(html).toContain('Sin coincidencias');
+    expect(html.match(/data-dim="true"/g)).toHaveLength(2);
   });
 });

@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { ShowroomPatient } from './showroom-model';
-import { buildProgressView, ShowroomProgress } from './ShowroomProgress';
+import { buildMeasurementRows, buildProgressView, ShowroomProgress, sleepAxisLabel } from './ShowroomProgress';
 
 const patient = {
   id: 'ana', name: 'Ana', initials: 'AR', goal: 'Sostener cuatro cenas organizadas', goalProgress: 60,
@@ -31,14 +31,17 @@ describe('Progreso paciente dentro de Nutrigo', () => {
     expect(buildProgressView(patient)).toMatchObject({ activeDays: 3, energyRecordedDays: 3, maxHydration: 6, reviewedMeals: 2, pendingMeals: 1 });
   });
 
-  it('presenta adherencia, objetivo, agua, descanso y actividad semanal', () => {
+  it('presenta adherencia, objetivo, agua, descanso y actividad semanal en los widgets del archivo', () => {
     const html = renderToStaticMarkup(<ShowroomProgress patient={patient} />);
-    expect(html).toContain('Tu progreso, en contexto');
-    expect(html).toContain('74%');
+    expect(html).toContain('Tu objetivo');
+    expect(html).toContain('Adherencia actual');
+    expect(html).toContain('<strong>74</strong>');
     expect(html).toContain('Sostener cuatro cenas organizadas');
     expect(html).toContain('3,1 vasos/día');
-    expect(html).toContain('Promedio 7 h');
-    expect(html).toContain('Comidas revisadas');
+    expect(html).toContain('Descanso y energía');
+    expect(html).toContain('6h 30m');
+    expect(html).toContain('Energía media');
+    expect(html).toContain('Comidas de esta semana');
     expect(html).toContain('Cena');
     expect(html).toContain('7 días');
     expect(html).toContain('30 días');
@@ -53,13 +56,12 @@ describe('Progreso paciente dentro de Nutrigo', () => {
     expect(html).toContain('Cargando registros');
     expect(html).not.toContain('adherence_why');
     expect(html).not.toContain('goal_history');
-    expect(html).toContain('No se completan períodos sin registros');
     expect(html).not.toMatch(/mejoró|empeoró|leaderboard/i);
-    expect(html).toContain('Cada paciente se compara consigo misma');
+    expect(html).not.toContain('kcal');
   });
 
   it('muestra el cambio declarado del mismo paciente, con fuente y sin relleno', () => {
-    const html = renderToStaticMarkup(<ShowroomProgress patient={patient} professional progress={{
+    const progress = {
       patient_id: 'ana',
       timezone: 'America/Argentina/Buenos_Aires',
       period_days: 7,
@@ -75,12 +77,30 @@ describe('Progreso paciente dentro de Nutrigo', () => {
         declared_delta: -0.5,
       }],
       meals: { current: { logged: 2, reviewed: 1, pending: 1 }, previous: { logged: 1, reviewed: 1, pending: 0 } },
-    }} />);
-    expect(html).toContain('Progreso de Ana, en contexto');
+    } as const;
+    const html = renderToStaticMarkup(<ShowroomProgress patient={patient} professional progress={progress as never} />);
+    expect(html).toContain('Progreso de Ana');
+    expect(html).toContain('Objetivo de Ana');
     expect(html).toContain('Cambio declarado: -0,5 kg');
     expect(html).toContain('Paciente');
-    expect(html).toContain('Se compara consigo misma');
+    expect(html).toContain('Período anterior: 1');
+    expect(html).toContain('Peso (kg)');
+    expect(html).toContain('<strong>64,5</strong>');
     expect(html).not.toContain('IMC');
     expect(html).not.toMatch(/mejoró|empeoró|leaderboard/i);
+  });
+
+  it('arma la tabla de medidas por fecha, sin rellenar huecos, y rotula el descanso como el archivo', () => {
+    const point = (id: string, value: number, captured_on: string, source: 'patient' | 'professional' = 'patient') => ({ id, value, source, captured_on, created_at: `${captured_on}T12:00:00.000Z` });
+    const rows = buildMeasurementRows([
+      { kind: 'weight', unit: 'kg', current: [point('w2', 64.5, '2026-09-20')], previous: [point('w1', 65, '2026-09-10', 'professional')], current_last: null, previous_last: null, declared_delta: null },
+      { kind: 'waist', unit: 'cm', current: [point('c1', 80, '2026-09-20', 'professional')], previous: [], current_last: null, previous_last: null, declared_delta: null },
+    ]);
+    expect(rows).toEqual([
+      { date: '2026-09-10', sources: ['Profesional'], values: { weight: '65' } },
+      { date: '2026-09-20', sources: ['Paciente', 'Profesional'], values: { weight: '64,5', waist: '80' } },
+    ]);
+    expect(sleepAxisLabel(405)).toBe('6h 45m');
+    expect(sleepAxisLabel(null)).toBe('—');
   });
 });

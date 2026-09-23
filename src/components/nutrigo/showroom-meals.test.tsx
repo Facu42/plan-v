@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { Patient } from '../../types';
-import { buildMealDiary, ShowroomMeals } from './ShowroomMeals';
+import { buildMealDiary, mealDiaryRows, ShowroomMeals } from './ShowroomMeals';
 
 const patient: Patient = {
   id: 'ana', name: 'Ana Ruiz', initials: 'AR', tone: 'mint', status: 'En ritmo', archived_at: null,
@@ -39,16 +39,19 @@ describe('Comidas y hábitos en Nutrigo', () => {
     expect(diary.reviewed).toBe(1);
   });
 
-  it('presenta cuatro métricas y una tabla operativa compacta', () => {
+  it('presenta las cuatro cards de macros del frame y la tabla con revisión', () => {
     const html = render();
-    expect(html).toContain('Registros totales');
-    expect(html).toContain('Pendientes');
-    expect(html).toContain('Revisadas');
-    expect(html).toContain('Días con hábitos');
+    expect(html).toContain('Calorías totales');
+    expect(html).toContain('Carbohidratos totales');
+    expect(html).toContain('Proteínas totales');
+    expect(html).toContain('Grasas totales');
     expect(html).toContain('Historial de comidas');
     expect(html).toContain('Sopa de calabaza');
     expect(html).toContain('Ensalada');
     expect(html).toContain('Revisar');
+    expect(html).toContain('Todo el historial');
+    // Sólo suma lo revisado: la cena pendiente no aporta calorías.
+    expect(html).toMatch(/<strong>430<\/strong><small>kcal<\/small>/);
     expect(html).not.toContain('REGISTRO AJENO');
     expect(html).not.toContain('SECRETO AJENO');
   });
@@ -60,17 +63,11 @@ describe('Comidas y hábitos en Nutrigo', () => {
     expect(render('sin coincidencias')).toContain('Sin registros para mostrar');
   });
 
-  it('mantiene los hábitos como información declarada por la paciente', () => {
+  it('muestra la nota IA sólo en el consultorio y sin mezclar pacientes', () => {
     const html = render();
-    expect(html).toContain('Hábitos declarados por la paciente');
-    expect(html).toContain('5/8 vasos');
-    expect(html).toContain('7 h');
-    expect(html).toContain('Media');
-    expect(html).toContain('Actividad autodeclarada');
-    expect(html).toContain('Caminata');
-    expect(html).toContain('35 min');
-    expect(html).not.toContain('ACTIVIDAD AJENA');
-    expect(html).not.toContain('NOTA AJENA');
-    expect(html).not.toContain('Editar hábitos');
+    expect(html).toContain('Nota IA');
+    expect(html).toContain('Privada Ana');
+    expect(html).toContain('aria-label="Paciente del diario"');
+    expect(mealDiaryRows(patient).map((row) => row.id)).toEqual(['m1', 'm2']);
   });
 });

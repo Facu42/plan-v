@@ -6,6 +6,8 @@ import {
   buildResourceShareUrl,
   filterResourceGuides,
   resourceAssignmentDateLabel,
+  resourceDateLabel,
+  topResourceTags,
   resourceGuideIdFromHash,
   shareResourceGuide,
 } from './ShowroomResources';
@@ -82,5 +84,19 @@ describe('ShowroomResources', () => {
     await expect(shareResourceGuide(guide, { href: 'https://planv.test/', writeText })).resolves.toBe('copied');
     expect(writeText).toHaveBeenCalledWith('https://planv.test/app/recursos#recurso=leer-plan-semanal');
     await expect(shareResourceGuide(guide, { href: 'https://planv.test/' })).resolves.toBe('unavailable');
+  });
+  it('arma etiquetas reales por frecuencia y fechas cortas sin zona horaria', () => {
+    expect(resourceDateLabel('2026-09-16T23:30:00Z')).toBe('16 sep 2026');
+    expect(resourceDateLabel('2026-13-01')).toBeNull();
+    expect(resourceDateLabel(null)).toBeNull();
+    const guides = [
+      { ...RESOURCE_GUIDES[0], category: 'Plan', tags: ['agua', 'plan', 'agua'] },
+      { ...RESOURCE_GUIDES[1], category: 'Diario', tags: ['agua'] },
+      { ...RESOURCE_GUIDES[2], category: 'Plan', tags: ['plan', 'agua'] },
+    ];
+    expect(topResourceTags(guides)).toEqual([
+      { tag: 'agua', count: 3, category: 'Plan' },
+      { tag: 'plan', count: 2, category: 'Plan' },
+    ]);
   });
 });
