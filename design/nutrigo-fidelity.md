@@ -202,6 +202,10 @@ Cuerpo de 1161 = contenido 800 + 36 + rail 325. Cada columna es **una sola card 
 
 La card de relacionados del archivo lleva una foto de 253 × 160 que Plan V no tiene: la fila queda con el icono de la guía en su lugar.
 
+## Nutricionista (PV-41)
+
+El archivo dibuja una sola persona; el nutricionista ve las mismas pantallas aplicadas al paciente que tiene en seguimiento. Inicio es el Dashboard (`12:792`) de ese paciente: el título es su nombre, el buscador del header (`33:1574`) pasa a ser el selector de paciente y el rail derecho (`33:1104`) muestra su tarjeta, su menú del día y su actividad reciente. El menú lateral sigue el orden de la Navbar (`12:793`) sin rótulo de grupo, con "Cerrar sesión" al pie como el Logout del archivo; debajo de los destinos del archivo van las pantallas propias de Plan V (Pacientes, Ficha, Consultas, Objetivos, Seguimiento). Ya no hay bloque "Mi consultorio", ni "Mi trabajo", ni lista "Mi seguimiento", y la app autenticada no abre el CRM viejo: queda sólo en `?design=legacy` en modo demo.
+
 ## Copy
 
 **La interfaz va en español.** El .fig manda en composición, color, tipo y densidad; no en idioma. Ningún rótulo, vacío ni mensaje queda en inglés por copiar el frame. Las cifras y nombres de ejemplo del pack no se copian: los datos son de Plan V.

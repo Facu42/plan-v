@@ -33,20 +33,26 @@ export const PRO_TABS: ShellTab[] = [
   { id: 'agenda', icon: 'calendar', label: 'Agenda' },
 ];
 
-export const PRO_MORE: ShellTab[] = [
-  { id: 'ficha', icon: 'contact', label: 'Ficha' },
+/** Menú del nutricionista: primero los destinos que dibuja la Navbar del archivo (12:793), en su orden; después las pantallas propias de Plan V. */
+export const PRO_SURFACES: ShellTab[] = [
+  { id: 'inicio', icon: 'home', label: 'Inicio' },
+  { id: 'agenda', icon: 'calendar', label: 'Agenda' },
+  { id: 'mensajes', icon: 'message', label: 'Mensajes' },
   { id: 'plan', icon: 'list', label: 'Plan' },
-  { id: 'consultas', icon: 'video', label: 'Consultas' },
-  { id: 'objetivos', icon: 'target', label: 'Objetivos' },
+  { id: 'diario', icon: 'history', label: 'Diario' },
   { id: 'progreso', icon: 'trend', label: 'Progreso' },
   { id: 'ejercicio', icon: 'heart', label: 'Ejercicio' },
-  { id: 'mensajes', icon: 'message', label: 'Mensajes' },
-  { id: 'reciente', icon: 'history', label: 'Reciente' },
-  { id: 'guardado', icon: 'pin', label: 'Guardado' },
+  { id: 'pacientes', icon: 'users', label: 'Pacientes' },
+  { id: 'ficha', icon: 'contact', label: 'Ficha' },
+  { id: 'consultas', icon: 'video', label: 'Consultas' },
+  { id: 'objetivos', icon: 'target', label: 'Objetivos' },
   { id: 'seguimiento', icon: 'sparkle', label: 'Seguimiento' },
-  { id: 'paneles', icon: 'grid', label: 'Paneles' },
-  { id: 'videollamadas', icon: 'video', label: 'Videollamadas' },
 ];
+
+export const PRO_MORE: ShellTab[] = PRO_SURFACES.filter((surface) => !PRO_TABS.some((tab) => tab.id === surface.id));
+
+/** Siguen abriendo por enlace directo, fuera del menú. */
+export const PRO_HIDDEN_PAGES: ShowroomPage[] = ['reciente', 'guardado', 'paneles', 'videollamadas'];
 
 export const PATIENT_CRM_PAGES: ShowroomPage[] = ['ficha', 'pacientes', 'consultas', 'objetivos', 'reciente', 'guardado', 'seguimiento', 'paneles', 'videollamadas'];
 

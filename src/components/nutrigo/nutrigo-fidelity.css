@@ -265,6 +265,39 @@
 .nv-app .nv-nav-group,
 .nv-app .nv-brand small { font-weight: 500; }
 
+/* Logout del Navbar (12:793): al pie, Cream-BG, mismo botón que los ítems. */
+.nv-app .nv-sidebar .nv-logout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: auto;
+  padding: 10px 8px 10px 16px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--nv-bg);
+  color: var(--nv-muted);
+  font: inherit;
+  font-size: var(--nv-fs-t14);
+  line-height: 1;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.nv-app .nv-sidebar .nv-logout svg { width: 20px; height: 20px; }
+/* El nutricionista elige al paciente en el lugar del buscador del header (33:1574). */
+.nv-app .nv-patient-picker { align-self: center; }
+.nv-app .nv-patient-picker select {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--nv-ink);
+  font: inherit;
+  font-size: var(--nv-fs-t14);
+  line-height: var(--nv-lh-t14);
+}
+
 /* Sidebar, medida sobre el nodo 12:793 "Navbar".
    El item NO es una cápsula: el archivo usa radio 14. */
 .nv-app.nv-patient .nv-sidebar,
@@ -1821,6 +1854,7 @@
     line-height: var(--nv-lh-t11);
   }
   .nv-app .np-dashboard-search { width: 100%; }
+  .nv-app .nv-patient-picker { max-width: none; }
 
   /* Las cards mantienen radio 16 y padding 16 en todas las pantallas. */
   .nv-app .nv-card {
