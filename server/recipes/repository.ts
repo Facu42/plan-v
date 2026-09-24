@@ -16,6 +16,8 @@ import {
 } from '../../src/types/recipes.js';
 import { getRecipeCard, resetRecipeCards, setRecipeCard } from './presentation.js';
 import { unavailableCard } from '../../src/types/recipe-plate.js';
+import { generateRecipeCoverImage } from '../ai/recipe-cover.js';
+import { logProviderFailure } from '../ai/mode.js';
 
 export { CareError } from '../care/errors.js';
 
@@ -87,7 +89,14 @@ function asItem(row: { id?: string; name?: string; quantity?: unknown; unit?: st
   return { id: row.id, name: row.name, quantity: asNumber(row.quantity), unit: asUnit(row.unit) };
 }
 
-function asVersion(row: Record<string, unknown>): RecipeVersionView {
+function asCover(row: Record<string, unknown>, title: string): RecipeCard {
+  const status = row.cover_status === 'ready' || row.cover_status === 'failed' ? row.cover_status : 'none';
+  const url = status === 'ready' && typeof row.cover_url === 'string' ? row.cover_url : null;
+  const alt = typeof row.cover_alt === 'string' && row.cover_alt ? row.cover_alt : title;
+  return { ...unavailableCard(title), cover_status: status, cover_url: url, cover_alt: alt };
+}
+
+function asVersion(row: Record<string, unknown>, title: string): RecipeVersionView {
   const ingredientsRaw = Array.isArray(row.ingredients) ? row.ingredients : [];
   return {
     id: String(row.id),
@@ -97,7 +106,7 @@ function asVersion(row: Record<string, unknown>): RecipeVersionView {
     nutrient_source: String(row.nutrient_source ?? ''),
     published_at: row.published_at ? String(row.published_at) : null,
     ingredients: ingredientsRaw.map((item) => asItem(item as { id?: string; name?: string; quantity?: unknown; unit?: string })),
-    ...(row.card ? { card: row.card as RecipeCard } : {}),
+    card: row.card ? (row.card as RecipeCard) : asCover(row, title),
   };
 }
 
@@ -106,21 +115,23 @@ function asProfessional(row: Record<string, unknown>): ProfessionalRecipe {
   if (status !== 'draft' && status !== 'published' && status !== 'archived') {
     throw new CareError(503, 'No se pudo confirmar el guardado. Reintentá sin cerrar el formulario.');
   }
+  const title = String(row.title);
   return {
     id: String(row.id),
-    title: String(row.title),
+    title,
     status,
     created_at: String(row.created_at),
-    current: asVersion(row.current as Record<string, unknown>),
-    published: row.published ? asVersion(row.published as Record<string, unknown>) : null,
+    current: asVersion(row.current as Record<string, unknown>, title),
+    published: row.published ? asVersion(row.published as Record<string, unknown>, title) : null,
   };
 }
 
 function asPatient(row: Record<string, unknown>): PatientRecipe {
   const ingredientsRaw = Array.isArray(row.ingredients) ? row.ingredients : [];
+  const title = String(row.title);
   return {
     id: String(row.id),
-    title: String(row.title),
+    title,
     version: asNumber(row.version),
     yield_portions: asNumber(row.yield_portions),
     steps: Array.isArray(row.steps) ? row.steps.map((step) => String(step)) : [],
@@ -128,7 +139,7 @@ function asPatient(row: Record<string, unknown>): PatientRecipe {
     ingredients: ingredientsRaw.map((item) => asItem(item as { id?: string; name?: string; quantity?: unknown; unit?: string })),
     assigned_at: String(row.assigned_at),
     published_at: String(row.published_at),
-    ...(row.card ? { card: row.card as RecipeCard } : {}),
+    card: row.card ? (row.card as RecipeCard) : asCover(row, title),
   };
 }
 
@@ -325,7 +336,36 @@ export async function publishRecipe(nutritionistId: string, recipeId: string, ex
   gateRecipePublish(recipe.title, version);
   const { data, error } = await getRequestDb().rpc('publish_recipe', { target_recipe: recipeId, expected_version: expectedVersion });
   recipeDbError(error);
-  return asProfessional(data as Record<string, unknown>);
+  const published = asProfessional(data as Record<string, unknown>);
+  await attachCoverOnApproval(published);
+  return published;
+}
+
+/**
+ * Al aprobar (publicar) una receta se intenta UNA vez la foto del plato.
+ * Nunca bloquea la publicación: si la IA falla o no está en modo vivo,
+ * queda cover_status=failed, visible, sin URL inventada.
+ */
+async function attachCoverOnApproval(recipe: ProfessionalRecipe): Promise<void> {
+  const version = recipe.published;
+  if (!version || version.card?.cover_status !== 'none') return;
+  const cover = await generateRecipeCoverImage({
+    title: recipe.title,
+    items: version.ingredients.map((item) => ({ name: item.name })),
+  });
+  try {
+    const { data, error } = await getRequestDb().rpc('set_recipe_cover', {
+      target_version: version.id,
+      cover_status: cover.status,
+      cover_url: cover.status === 'ready' ? cover.url : null,
+      cover_alt: cover.status === 'ready' ? cover.alt : recipe.title,
+    });
+    if (error) throw error;
+    const row = data as { cover_status: RecipeCard['cover_status']; cover_url: string | null; cover_alt: string };
+    version.card = { ...(version.card ?? unavailableCard(recipe.title)), cover_status: row.cover_status, cover_url: row.cover_url, cover_alt: row.cover_alt };
+  } catch (error) {
+    logProviderFailure('recipe-cover-persist', error);
+  }
 }
 
 export async function assignRecipe(

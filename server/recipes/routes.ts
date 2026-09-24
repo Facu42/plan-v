@@ -77,7 +77,7 @@ async function saveWizard(c: Context) {
     }
     throw new repo.CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
   }
-  if (persistent && (card.macro_status === 'declared' || card.cover_status === 'failed')) {
+  if (persistent && card.macro_status === 'declared') {
     throw new repo.CareError(501, 'La ficha visual de la receta requiere instalar la migración de este módulo.');
   }
   const recipe = await repo.saveRecipeDraft(nutritionistId, coreDraft(input), persistent, card);

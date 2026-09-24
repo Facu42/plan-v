@@ -48,6 +48,8 @@ export type RecipeCard = {
   macros: RecipeMacros | null;
   cover_status: 'none' | 'failed' | 'ready';
   cover_alt: string;
+  /** Sólo presente cuando cover_status === 'ready'. Nunca inventada. */
+  cover_url: string | null;
 };
 
 export type RecipeVersionView = {

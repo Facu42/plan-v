@@ -55,6 +55,7 @@ export function unavailableCard(title: string, category = 'Almuerzo'): RecipeCar
     macros: null,
     cover_status: 'none',
     cover_alt: title,
+    cover_url: null,
   };
 }
 
@@ -81,6 +82,7 @@ export function buildRecipeCard(input: RecipeWizardInput): RecipeCard {
     macros,
     cover_status: input.cover_status ?? 'none',
     cover_alt: input.title.trim(),
+    cover_url: null,
   };
 }
 
@@ -92,5 +94,6 @@ export function failedAiCard(title: string, category = 'Almuerzo'): RecipeCard {
     macros: null,
     cover_status: 'failed',
     cover_alt: title,
+    cover_url: null,
   };
 }

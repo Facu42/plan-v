@@ -11,7 +11,12 @@ const LABELS = [
   ['fat_g', 'GRASAS', 'fat'],
 ] as const;
 
-export function RecipeDishWell({ title, status }: { title: string; status: RecipeCard['cover_status'] }) {
+export function RecipeDishWell({ title, status, url, alt }: { title: string; status: RecipeCard['cover_status']; url?: string | null; alt?: string }) {
+  if (status === 'ready' && url) {
+    return <figure className="recipe-dish" data-cover={status}>
+      <img src={url} alt={alt || title} loading="lazy" />
+    </figure>;
+  }
   const failed = status === 'failed';
   return <figure className="recipe-dish" data-cover={status}>
     <svg viewBox="0 0 320 200" role="img" aria-label={failed ? `Foto no generada de ${title}` : `Ilustración de revisión de ${title}`}>
@@ -22,7 +27,7 @@ export function RecipeDishWell({ title, status }: { title: string; status: Recip
       <circle cx="168" cy="98" r="18" fill="#6f9a62" />
       <circle cx="186" cy="116" r="12" fill="#c4a15a" />
     </svg>
-    <figcaption>{failed ? 'La foto del plato no se generó' : status === 'ready' ? title : 'Ilustración de revisión · sin foto generada'}</figcaption>
+    <figcaption>{failed ? 'La foto del plato no se generó' : 'Ilustración de revisión · sin foto generada'}</figcaption>
   </figure>;
 }
 
@@ -53,7 +58,7 @@ export function RecipePlateCard({
 }) {
   const meta = card.prep_minutes ? `${portions} porciones · ${card.prep_minutes} min` : `${portions} porciones`;
   return <article className="recipe-plate">
-    <RecipeDishWell title={title} status={card.cover_status} />
+    <RecipeDishWell title={title} status={card.cover_status} url={card.cover_url} alt={card.cover_alt} />
     <div className="recipe-plate-body">
       <span className="recipe-plate-badge">{card.category}</span>
       <h3>{title}</h3>
@@ -129,7 +134,7 @@ export function RecipeDetails({ recipe, onBack, actions }: {
     </div>
     <div className="mf-detail-grid">
       <aside className="mf-detail-left">
-        <div className="mf-detail-image"><RecipeDishWell title={recipe.title} status={recipe.card.cover_status} /></div>
+        <div className="mf-detail-image"><RecipeDishWell title={recipe.title} status={recipe.card.cover_status} url={recipe.card.cover_url} alt={recipe.card.cover_alt} /></div>
         <dl className="mf-detail-info">
           {info.map(([label, value, Glyph]) => <div key={label}>
             <dt><span><Glyph size={12} aria-hidden /></span>{label}</dt>
