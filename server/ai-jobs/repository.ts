@@ -4,7 +4,7 @@ import { CareError } from '../care/errors.js';
 import { getPatient } from '../store.js';
 import { requireCareConsent } from '../care/consents.js';
 import { saveRecipeDraft } from '../recipes/repository.js';
-import { saveMealPlanDraft } from '../plans/repository.js';
+import { getProfessionalMealPlan, saveMealPlanDraft } from '../plans/repository.js';
 import { listProfessionalRecipes } from '../recipes/repository.js';
 import { generateRecipeDraft } from '../ai/recipe-draft.js';
 import { generateMenuDraft } from '../ai/menu-draft.js';
@@ -321,7 +321,8 @@ export async function runAiJob(nutritionistId: string, jobId: string, persistent
         job.warnings = result.warnings;
         job.model = result.source === 'demo' ? 'demo' : job.model;
       } else {
-        const result = await generateMenuDraft(job.context as Parameters<typeof generateMenuDraft>[0]);
+        const currentPlan = await getProfessionalMealPlan(nutritionistId, job.patient_id, false);
+        const result = await generateMenuDraft(job.context as Parameters<typeof generateMenuDraft>[0], currentPlan?.id);
         job.artifact = {
           id: randomUUID(),
           kind: 'menu_draft',
@@ -365,7 +366,8 @@ export async function runAiJob(nutritionistId: string, jobId: string, persistent
       artifact = { kind: 'recipe_draft', payload: result.recipe as unknown as Record<string, unknown> };
       warnings = result.warnings;
     } else {
-      const result = await generateMenuDraft(live.context as Parameters<typeof generateMenuDraft>[0]);
+      const currentPlan = await getProfessionalMealPlan(nutritionistId, existing.patient_id, true);
+      const result = await generateMenuDraft(live.context as Parameters<typeof generateMenuDraft>[0], currentPlan?.id);
       artifact = { kind: 'menu_draft', payload: result.plan as unknown as Record<string, unknown> };
       warnings = result.warnings;
     }
@@ -412,6 +414,24 @@ export async function applyAiJob(nutritionistId: string, jobId: string, persiste
     return publicJob(job);
   }
   const data = await callRpc('apply_ai_job', { target_job: jobId });
+  return asAiJob(data as Record<string, unknown>);
+}
+
+export async function rejectAiJob(nutritionistId: string, jobId: string, persistent: boolean): Promise<AiJobView> {
+  if (!persistent) {
+    const job = jobs.get(jobId);
+    if (!job) throw new CareError(404, 'No encontramos ese job de IA.');
+    if (job.nutritionist_id !== nutritionistId) throw new CareError(403, 'No tenés permiso para esta acción.');
+    if (job.status === 'cancelled') return publicJob(job);
+    if (job.status !== 'succeeded' || job.applied_at) {
+      throw new CareError(409, 'Ese borrador ya no se puede rechazar.');
+    }
+    job.status = 'cancelled';
+    job.error_code = 'rejected_by_nutritionist';
+    job.artifact = null;
+    return publicJob(job);
+  }
+  const data = await callRpc('reject_ai_job', { target_job: jobId });
   return asAiJob(data as Record<string, unknown>);
 }
 

@@ -3,7 +3,8 @@ import { careErrorMessage } from '../../api/care';
 import { plansApi } from '../../api/plans';
 import { recipesApi } from '../../api/recipes';
 import { aiJobsApi } from '../../api/ai-jobs';
-import { PLAN_SLOTS, buildPublishedPlanDays, mealPlanDraftSchema, toPublishedPatientPlan, type PatientMealPlan, type PlanItemView, type PlanSlot, type ProfessionalMealPlan } from '../../types/plans';
+import type { AiJobView } from '../../types/ai-jobs';
+import { PLAN_SLOTS, buildPublishedPlanDays, mealPlanDraftSchema, toPublishedPatientPlan, type MealPlanDraftInput, type PatientMealPlan, type PlanItemView, type PlanSlot, type ProfessionalMealPlan } from '../../types/plans';
 import type { ProfessionalRecipe } from '../../types/recipes';
 import { NvButton, NvState } from './primitives';
 import './meal-plan-versions.css';
@@ -27,6 +28,45 @@ function itemsFrom(plan: ProfessionalMealPlan | null): DraftItem[] {
   }));
 }
 
+function proposalFrom(job: AiJobView | null): MealPlanDraftInput | null {
+  if (job?.status !== 'succeeded' || job.artifact?.kind !== 'menu_draft' || job.applied_at) return null;
+  const parsed = mealPlanDraftSchema.safeParse(job.artifact.payload);
+  return parsed.success ? parsed.data : null;
+}
+
+export function matchesMenuProposal(plan: ProfessionalMealPlan, proposal: MealPlanDraftInput): boolean {
+  if (plan.id !== proposal.id || plan.current.published_at) return false;
+  if (plan.current.period_start !== proposal.period_start || plan.current.period_end !== proposal.period_end) return false;
+  const key = (item: { for_date: string; slot: string; recipe_id?: string | null; free_text?: string | null; portions?: number | null; public_note?: string | null }) =>
+    JSON.stringify([item.for_date, item.slot, item.recipe_id ?? null, item.free_text ?? null, item.portions ?? null, item.public_note ?? '']);
+  return JSON.stringify(plan.current.items.map(key).sort()) === JSON.stringify(proposal.items.map(key).sort());
+}
+
+export function MenuProposalReview({ proposal, warnings, busy, onApprove, onReject }: {
+  proposal: MealPlanDraftInput;
+  warnings: string[];
+  busy: boolean;
+  onApprove: () => void;
+  onReject: () => void;
+}) {
+  return <section className="meal-plan-proposal" aria-label="Revisar menú propuesto por IA">
+    <span className="meal-plan-proposal-eyebrow">PROPUESTA IA · BORRADOR PRIVADO</span>
+    <h3>Revisá el menú antes de publicarlo</h3>
+    <p>Del {proposal.period_start} al {proposal.period_end}. El paciente todavía no ve esta propuesta. Aprobarla reemplaza el borrador actual y publica la versión revisada.</p>
+    {warnings.map((warning) => <p className="meal-plan-proposal-warning" key={warning}>{warning}</p>)}
+    <ul>{proposal.items.map((item, index) => <li key={`${item.for_date}-${item.slot}-${index}`}>
+      <strong>{item.for_date} · {item.slot}</strong>
+      <span>{item.free_text || 'Indicación sin texto'}</span>
+      {item.portions != null && <small>{item.portions} porciones</small>}
+      {item.public_note && <small>{item.public_note}</small>}
+    </li>)}</ul>
+    <div className="meal-plan-actions">
+      <NvButton type="button" disabled={busy} onClick={onApprove}>Aprobar y publicar menú</NvButton>
+      <NvButton type="button" className="nv-ghost" disabled={busy} onClick={onReject}>Rechazar propuesta</NvButton>
+    </div>
+  </section>;
+}
+
 export function MealPlanEditor({ patientId, onChanged }: { patientId: string; onChanged?: () => void }) {
   const [plan, setPlan] = useState<ProfessionalMealPlan | null>(null);
   const [recipes, setRecipes] = useState<ProfessionalRecipe[]>([]);
@@ -34,6 +74,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
+  const [proposal, setProposal] = useState<AiJobView | null>(null);
   const [periodStart, setPeriodStart] = useState('');
   const [periodEnd, setPeriodEnd] = useState('');
   const [draftItems, setDraftItems] = useState<DraftItem[]>([emptyItem(new Date().toISOString().slice(0, 10))]);
@@ -41,10 +82,11 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
 
   async function reload() {
     try {
-      const [plans, catalog] = await Promise.all([plansApi.professional(patientId), recipesApi.list()]);
+      const [plans, catalog, aiJobs] = await Promise.all([plansApi.professional(patientId), recipesApi.list(), aiJobsApi.list(patientId)]);
       setPlan(plans.plan);
       setSource(plans.source);
       setRecipes(catalog.recipes.filter((recipe) => recipe.published));
+      setProposal(aiJobs.jobs.find((job) => job.job_type === 'menu_draft' && proposalFrom(job)) ?? null);
       if (plans.plan) {
         setPeriodStart(plans.plan.current.period_start);
         setPeriodEnd(plans.plan.current.period_end);
@@ -55,7 +97,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
     }
   }
 
-  useEffect(() => { setError(''); setStatus(''); void reload(); }, [patientId]);
+  useEffect(() => { setError(''); setStatus(''); setProposal(null); void reload(); }, [patientId]);
 
   async function run(work: () => Promise<unknown>, success: string) {
     setBusy(true); setError(''); setStatus('');
@@ -87,6 +129,73 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
     void run(() => plansApi.save(patientId, parsed.data), 'Borrador guardado. El plan publicado no cambió.');
   }
 
+  async function generateProposal() {
+    setBusy(true); setError(''); setStatus(''); setProposal(null);
+    try {
+      const created = await aiJobsApi.enqueue({
+        patient_id: patientId,
+        job_type: 'menu_draft',
+        period_start: periodStart,
+        period_end: periodEnd,
+        slots: ['Almuerzo', 'Cena'],
+      });
+      if (!proposalFrom(created.job)) {
+        throw new Error(created.job.error_code === 'stale_context'
+          ? 'El ingreso cambió. Regenerá la propuesta.'
+          : 'La IA no pudo preparar un menú para revisar. No se publicó nada.');
+      }
+      setProposal(created.job);
+      setStatus('Propuesta lista para revisar. El paciente todavía no la ve.');
+    } catch (caught) {
+      setError(careErrorMessage(caught));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function rejectProposal() {
+    if (!proposal) return;
+    setBusy(true); setError(''); setStatus('');
+    try {
+      await aiJobsApi.reject(proposal.id);
+      setProposal(null);
+      setStatus('Propuesta rechazada. El plan publicado no cambió.');
+    } catch (caught) {
+      setError(careErrorMessage(caught));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function approveProposal() {
+    const candidate = proposalFrom(proposal);
+    if (!proposal || !candidate) return;
+    setBusy(true); setError(''); setStatus('');
+    let applied = false;
+    try {
+      await aiJobsApi.apply(proposal.id);
+      applied = true;
+      const current = (await plansApi.professional(patientId)).plan;
+      if (!current || !matchesMenuProposal(current, candidate)) {
+        throw new Error('El borrador cambió. Revisá la versión actual antes de publicar.');
+      }
+      await plansApi.publish(current.id, current.current.version);
+      setProposal(null);
+      setStatus('Menú aprobado y publicado. El paciente ya puede ver el plan fechado.');
+      await reload();
+      onChanged?.();
+    } catch (caught) {
+      setError(applied
+        ? `La propuesta quedó como borrador privado, pero no se publicó. ${careErrorMessage(caught)}`
+        : careErrorMessage(caught));
+      if (applied) await reload();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const proposedPlan = proposalFrom(proposal);
+
   return <section className="meal-plan-versions" aria-label="Plan fechado versionado">
     <header>
       <div>
@@ -99,6 +208,8 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
     {error && <p className="meal-plan-error" role="alert">{error}</p>}
     {status && <p className="meal-plan-status" role="status">{status}</p>}
     {plan?.published && <PublishedDatedPlanView plan={toPublishedPatientPlan(plan)} audience="pro" />}
+    {proposal && !proposedPlan && <p className="meal-plan-error" role="alert">La propuesta no tiene un menú válido. Regenerala antes de aprobar.</p>}
+    {proposedPlan && <MenuProposalReview proposal={proposedPlan} warnings={proposal?.warnings ?? []} busy={busy} onApprove={() => void approveProposal()} onReject={() => void rejectProposal()} />}
     <form className="meal-plan-form" onSubmit={submit}>
       <div className="meal-plan-form-row">
         <label>Desde<input type="date" value={periodStart} onChange={(event) => setPeriodStart(event.target.value)} /></label>
@@ -118,17 +229,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
       </div>)}
       <div className="meal-plan-actions">
         <button type="button" className="meal-plan-add" onClick={() => setDraftItems([...draftItems, emptyItem(periodStart || draftItems[0]?.for_date || '')])}>Agregar indicación</button>
-        <NvButton type="button" className="nv-ghost" disabled={busy || !periodStart || !periodEnd} onClick={() => void run(async () => {
-          const created = await aiJobsApi.enqueue({
-            patient_id: patientId,
-            job_type: 'menu_draft',
-            period_start: periodStart,
-            period_end: periodEnd,
-            slots: ['Almuerzo', 'Cena'],
-          });
-          if (created.job.status !== 'succeeded' || !created.job.artifact) throw new Error(created.job.error_code === 'stale_context' ? 'El ingreso cambió. Regenerá la propuesta.' : 'No se pudo preparar el borrador de IA.');
-          await aiJobsApi.apply(created.job.id);
-        }, 'Propuesta de menú lista para tu revisión. No se publicó.')}>Generar propuesta de menú</NvButton>
+        <NvButton type="button" className="nv-ghost" disabled={busy || !periodStart || !periodEnd || Boolean(proposal)} onClick={() => void generateProposal()}>Generar propuesta de menú</NvButton>
         <NvButton type="submit" disabled={busy}>Guardar borrador</NvButton>
         {plan && !plan.current.published_at && <NvButton disabled={busy} onClick={() => void run(() => plansApi.publish(plan.id, plan.current.version), 'Plan publicado. El borrador nuevo ya no cambia esta copia.')}>Publicar v{plan.current.version}</NvButton>}
       </div>

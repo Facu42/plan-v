@@ -133,6 +133,8 @@ describe('PV-18 recetas en PostgreSQL descartable', () => {
 });
 
 describe('PV-42 foto de portada al aprobar (recipe_covers)', () => {
+  const coverUrl = (versionId: string) => `https://wvosvlxpfytokwfbcero.supabase.co/storage/v1/object/public/recipe-covers/${nutriAId}/${versionId}/00000000-0000-4000-a000-0000000000c1.png`;
+  const coverPath = (versionId: string) => `${nutriAId}/${versionId}/00000000-0000-4000-a000-0000000000c1.png`;
   it('por default no hay portada; publish_recipe no la toca', async () => {
     const catalog = await rpc(nutriA, 'list_professional_recipes') as Array<{ published: { cover_status: string; cover_url: string | null } | null }>;
     const published = catalog[0].published!;
@@ -142,11 +144,12 @@ describe('PV-42 foto de portada al aprobar (recipe_covers)', () => {
 
   it('la nutri dueña puede registrar el resultado de la generación', async () => {
     const publishedId = (await asUser<{ id: string }>(nutriA, 'select id from public.recipe_versions where recipe_id=$1 and version=1', [recipeId]))[0].id;
-    const ready = await rpc(nutriA, 'set_recipe_cover', [publishedId, 'ready', 'https://cdn.example.test/covers/quinoa.png', 'Ensalada de quinoa']) as { cover_status: string; cover_url: string };
+    await asUser(nutriA, "insert into storage.objects(bucket_id,name) values('recipe-covers',$1)", [coverPath(publishedId)]);
+    const ready = await rpc(nutriA, 'set_recipe_cover', [publishedId, 'ready', coverUrl(publishedId), 'Ensalada de quinoa']) as { cover_status: string; cover_url: string };
     expect(ready.cover_status).toBe('ready');
-    expect(ready.cover_url).toBe('https://cdn.example.test/covers/quinoa.png');
+    expect(ready.cover_url).toBe(coverUrl(publishedId));
     const catalog = await rpc(nutriA, 'list_professional_recipes') as Array<{ published: { cover_status: string; cover_url: string | null; cover_alt: string } | null }>;
-    expect(catalog[0].published).toMatchObject({ cover_status: 'ready', cover_url: 'https://cdn.example.test/covers/quinoa.png', cover_alt: 'Ensalada de quinoa' });
+    expect(catalog[0].published).toMatchObject({ cover_status: 'ready', cover_url: coverUrl(publishedId), cover_alt: 'Ensalada de quinoa' });
 
     const failed = await rpc(nutriA, 'set_recipe_cover', [publishedId, 'failed', null, 'Ensalada de quinoa']) as { cover_status: string; cover_url: string | null };
     expect(failed.cover_status).toBe('failed');
@@ -156,7 +159,8 @@ describe('PV-42 foto de portada al aprobar (recipe_covers)', () => {
   it('no inventa URL: ready exige url, y los demás estados la prohíben', async () => {
     const publishedId = (await asUser<{ id: string }>(nutriA, 'select id from public.recipe_versions where recipe_id=$1 and version=1', [recipeId]))[0].id;
     await expect(rpc(nutriA, 'set_recipe_cover', [publishedId, 'ready', null, 'Ensalada de quinoa'])).rejects.toMatchObject({ code: '22023' });
-    await expect(rpc(nutriA, 'set_recipe_cover', [publishedId, 'failed', 'https://cdn.example.test/covers/quinoa.png', ''])).rejects.toMatchObject({ code: '22023' });
+    await expect(rpc(nutriA, 'set_recipe_cover', [publishedId, 'failed', coverUrl(publishedId), ''])).rejects.toMatchObject({ code: '22023' });
+    await expect(rpc(nutriA, 'set_recipe_cover', [publishedId, 'ready', 'data:image/png;base64,AAAA', ''])).rejects.toMatchObject({ code: '22023' });
     await expect(rpc(nutriA, 'set_recipe_cover', [publishedId, 'not_a_status', null, ''])).rejects.toMatchObject({ code: '22023' });
   });
 
@@ -171,8 +175,18 @@ describe('PV-42 foto de portada al aprobar (recipe_covers)', () => {
 
   it('la paciente ve la portada resuelta de lo que le asignaron', async () => {
     const publishedId = (await asUser<{ id: string }>(nutriA, 'select id from public.recipe_versions where recipe_id=$1 and version=1', [recipeId]))[0].id;
-    await rpc(nutriA, 'set_recipe_cover', [publishedId, 'ready', 'https://cdn.example.test/covers/quinoa.png', 'Ensalada de quinoa']);
+    await rpc(nutriA, 'set_recipe_cover', [publishedId, 'ready', coverUrl(publishedId), 'Ensalada de quinoa']);
     const assigned = await rpc(patientAUser, 'list_assigned_recipes', [patientA]) as Array<{ cover_status: string; cover_url: string | null; cover_alt: string }>;
-    expect(assigned[0]).toMatchObject({ cover_status: 'ready', cover_url: 'https://cdn.example.test/covers/quinoa.png', cover_alt: 'Ensalada de quinoa' });
+    expect(assigned[0]).toMatchObject({ cover_status: 'ready', cover_url: coverUrl(publishedId), cover_alt: 'Ensalada de quinoa' });
+  });
+
+  it('Storage sólo acepta la portada de una versión publicada de la nutri dueña', async () => {
+    const publishedId = (await asUser<{ id: string }>(nutriA, 'select id from public.recipe_versions where recipe_id=$1 and version=1', [recipeId]))[0].id;
+    const path = `${nutriAId}/${publishedId}/00000000-0000-4000-a000-0000000000c2.png`;
+    await expect(asUser(nutriB, "insert into storage.objects(bucket_id,name) values('recipe-covers',$1)", [path])).rejects.toMatchObject({ code: '42501' });
+    await expect(asUser(patientAUser, "insert into storage.objects(bucket_id,name) values('recipe-covers',$1)", [path])).rejects.toMatchObject({ code: '42501' });
+    await expect(asUser(nutriA, "insert into storage.objects(bucket_id,name) values('recipe-covers','bad.png')")).rejects.toMatchObject({ code: '42501' });
+    await asUser(nutriA, "insert into storage.objects(bucket_id,name) values('recipe-covers',$1)", [path]);
+    expect(await asUser(patientAUser, "select name from storage.objects where bucket_id='recipe-covers'")).toEqual([]);
   });
 });

@@ -5,6 +5,14 @@
 .meal-plan-demo{font-size:11px}
 .meal-plan-error{color:var(--nv-danger)}
 .meal-plan-status{padding:12px;border-radius:10px;background:var(--nv-green);color:var(--nv-ink)}
+.meal-plan-proposal{margin:18px 0;padding:18px;border:1px solid var(--nv-strong);border-radius:14px;background:var(--nv-bg)}
+.meal-plan-proposal-eyebrow{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--nv-strong)}
+.meal-plan-proposal h3{margin:8px 0;font-size:19px}
+.meal-plan-proposal p{margin:6px 0 12px}
+.meal-plan-proposal-warning{padding:8px 10px;border-radius:8px;background:var(--nv-card)}
+.meal-plan-proposal ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;max-height:360px;overflow:auto;margin:14px 0;padding:0;list-style:none}
+.meal-plan-proposal li{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid var(--nv-border);border-radius:10px;background:var(--nv-card);font-size:13px}
+.meal-plan-proposal li small{color:var(--nv-muted)}
 .meal-plan-published{margin:14px 0;padding:16px;border:1px solid var(--nv-border);border-radius:14px;background:var(--nv-bg)}
 .meal-plan-published ul,.published-dated-plan ul{margin:8px 0 0;padding-left:18px;font-size:13px}
 .meal-plan-form{margin-top:12px}

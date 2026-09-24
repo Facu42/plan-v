@@ -50,12 +50,12 @@ describe('PV-42 recipe-cover', () => {
     expect(result).toEqual({ status: 'failed' });
   });
 
-  it('devuelve la imagen real (data URI) cuando el proveedor la genera en modo vivo', async () => {
+  it('devuelve bytes para Storage cuando el proveedor genera la imagen en modo vivo', async () => {
     vi.stubEnv('APP_MODE', 'test');
     vi.stubEnv('AI_MODE', 'live');
     vi.stubEnv('OPENAI_API_KEY', 'synthetic-only');
     vi.mocked(generateImage).mockResolvedValueOnce({ image: { base64: 'AAAA', mediaType: 'image/png' } } as never);
     const result = await generateRecipeCoverImage(context);
-    expect(result).toEqual({ status: 'ready', url: 'data:image/png;base64,AAAA', alt: context.title });
+    expect(result).toEqual({ status: 'ready', bytes: Buffer.from('AAAA', 'base64'), mime: 'image/png', alt: context.title });
   });
 });

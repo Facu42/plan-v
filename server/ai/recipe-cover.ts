@@ -8,7 +8,7 @@ export type RecipeCoverContext = {
 };
 
 export type RecipeCoverResult =
-  | { status: 'ready'; url: string; alt: string }
+  | { status: 'ready'; bytes: Buffer; mime: 'image/png' | 'image/jpeg' | 'image/webp'; alt: string }
   | { status: 'failed' };
 
 function coverPrompt(context: RecipeCoverContext): string {
@@ -32,7 +32,10 @@ export async function generateRecipeCoverImage(context: RecipeCoverContext): Pro
     });
     if (!image?.base64) return { status: 'failed' };
     const mime = image.mediaType || 'image/png';
-    return { status: 'ready', url: `data:${mime};base64,${image.base64}`, alt: context.title };
+    if (mime !== 'image/png' && mime !== 'image/jpeg' && mime !== 'image/webp') return { status: 'failed' };
+    const bytes = Buffer.from(image.base64, 'base64');
+    if (!bytes.length || bytes.length > 5 * 1024 * 1024) return { status: 'failed' };
+    return { status: 'ready', bytes, mime, alt: context.title };
   } catch (error) {
     logProviderFailure('recipe-cover', error);
     return { status: 'failed' };

@@ -63,6 +63,16 @@ export function registerAiJobRoutes(app: Hono) {
     return c.json({ job, source: persistent ? 'supabase' : 'memory' });
   });
 
+  app.post('/api/ai/jobs/:id/reject', async (c) => {
+    const id = jobIdParam.safeParse(c.req.param('id'));
+    if (!id.success) throw new repo.CareError(400, 'Revisá el tipo de job, el paciente y el período.');
+    const { persistent, nutritionistId } = await professional(c);
+    const current = await repo.getAiJob(nutritionistId, id.data, persistent);
+    const { persistent: accessPersistent } = await professional(c, current.patient_id);
+    const job = await repo.rejectAiJob(nutritionistId, id.data, accessPersistent);
+    return c.json({ job, source: persistent ? 'supabase' : 'memory' });
+  });
+
   app.get('/api/patients/:id/ai/jobs', async (c) => {
     const patientId = c.req.param('id');
     const { persistent, nutritionistId } = await professional(c, patientId);

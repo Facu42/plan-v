@@ -103,6 +103,51 @@ describe('PV-27 jobs de IA versionados', () => {
     expect((await (await app.request(`/api/patients/${patient}/plans`)).json()).plan).toBeNull();
   });
 
+  it('rechaza una propuesta de menú y no permite aplicarla después', async () => {
+    await consentAi();
+    await declareAllergies();
+    const created = await post('/api/ai/jobs', {
+      patient_id: patient,
+      job_type: 'menu_draft',
+      period_start: '2026-09-21',
+      period_end: '2026-09-22',
+      slots: ['Almuerzo'],
+    });
+    const { job } = await created.json() as { job: { id: string; status: string } };
+    expect(job.status).toBe('succeeded');
+    const rejected = await post(`/api/ai/jobs/${job.id}/reject`, {});
+    expect(rejected.status).toBe(200);
+    expect((await rejected.json() as { job: { status: string; artifact: unknown } }).job)
+      .toMatchObject({ status: 'cancelled', artifact: null });
+    expect((await post(`/api/ai/jobs/${job.id}/apply`, {})).status).toBe(409);
+    expect((await (await app.request(`/api/patients/${patient}/plans`)).json()).plan).toBeNull();
+  });
+
+  it('genera la propuesta sobre el ID del plan existente', async () => {
+    await consentAi();
+    await declareAllergies();
+    const planId = randomUUID();
+    const saved = await post(`/api/patients/${patient}/plans`, {
+      id: planId,
+      period_start: '2026-09-21',
+      period_end: '2026-09-22',
+      timezone: 'America/Argentina/Buenos_Aires',
+      items: [{ for_date: '2026-09-21', slot: 'Almuerzo', free_text: 'Arroz con verduras' }],
+    });
+    expect(saved.status).toBe(200);
+    const created = await post('/api/ai/jobs', {
+      patient_id: patient,
+      job_type: 'menu_draft',
+      period_start: '2026-09-21',
+      period_end: '2026-09-22',
+      slots: ['Almuerzo'],
+    });
+    expect(created.status).toBe(202);
+    const { job } = await created.json() as { job: { id: string; artifact: { payload: { id: string } } } };
+    expect(job.artifact.payload.id).toBe(planId);
+    expect((await post(`/api/ai/jobs/${job.id}/apply`, {})).status).toBe(200);
+  });
+
   it('marca stale si cambia el ingreso, respeta la cola y no aplica el borrador', async () => {
     await consentAi();
     await declareAllergies();

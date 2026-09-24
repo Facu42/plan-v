@@ -337,7 +337,7 @@ export async function publishRecipe(nutritionistId: string, recipeId: string, ex
   const { data, error } = await getRequestDb().rpc('publish_recipe', { target_recipe: recipeId, expected_version: expectedVersion });
   recipeDbError(error);
   const published = asProfessional(data as Record<string, unknown>);
-  await attachCoverOnApproval(published);
+  await attachCoverOnApproval(nutritionistId, published);
   return published;
 }
 
@@ -346,19 +346,34 @@ export async function publishRecipe(nutritionistId: string, recipeId: string, ex
  * Nunca bloquea la publicación: si la IA falla o no está en modo vivo,
  * queda cover_status=failed, visible, sin URL inventada.
  */
-async function attachCoverOnApproval(recipe: ProfessionalRecipe): Promise<void> {
+async function attachCoverOnApproval(nutritionistId: string, recipe: ProfessionalRecipe): Promise<void> {
   const version = recipe.published;
   if (!version || version.card?.cover_status !== 'none') return;
-  const cover = await generateRecipeCoverImage({
+  const generated = await generateRecipeCoverImage({
     title: recipe.title,
     items: version.ingredients.map((item) => ({ name: item.name })),
   });
+  let cover: { status: 'ready' | 'failed'; url: string | null; alt: string } = {
+    status: 'failed', url: null, alt: recipe.title,
+  };
+  if (generated.status === 'ready') {
+    const extension = generated.mime === 'image/jpeg' ? 'jpg' : generated.mime === 'image/webp' ? 'webp' : 'png';
+    const path = `${nutritionistId}/${version.id}/${crypto.randomUUID()}.${extension}`;
+    try {
+      const bucket = getRequestDb().storage.from('recipe-covers');
+      const { error } = await bucket.upload(path, generated.bytes, { contentType: generated.mime, upsert: false });
+      if (error) throw error;
+      cover = { status: 'ready', url: bucket.getPublicUrl(path).data.publicUrl, alt: generated.alt };
+    } catch (error) {
+      logProviderFailure('recipe-cover-upload', error);
+    }
+  }
   try {
     const { data, error } = await getRequestDb().rpc('set_recipe_cover', {
       target_version: version.id,
       cover_status: cover.status,
-      cover_url: cover.status === 'ready' ? cover.url : null,
-      cover_alt: cover.status === 'ready' ? cover.alt : recipe.title,
+      cover_url: cover.url,
+      cover_alt: cover.alt,
     });
     if (error) throw error;
     const row = data as { cover_status: RecipeCard['cover_status']; cover_url: string | null; cover_alt: string };
