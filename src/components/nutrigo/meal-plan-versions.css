@@ -1,0 +1,35 @@
+.meal-plan-versions,.published-dated-plan{margin:18px 0;padding:24px;border:1px solid var(--nv-border);border-radius:18px;background:var(--nv-card);color:var(--nv-ink)}
+.meal-plan-versions>header span,.published-dated-plan>header span,.meal-plan-published>span{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--nv-muted)}
+.meal-plan-versions h2,.published-dated-plan h2{margin:4px 0 8px;font-size:22px;letter-spacing:-.5px}
+.meal-plan-versions p,.published-dated-plan p{font-size:13px;line-height:1.65;color:var(--nv-muted)}
+.meal-plan-demo{font-size:11px}
+.meal-plan-error{color:var(--nv-danger)}
+.meal-plan-status{padding:12px;border-radius:10px;background:var(--nv-green);color:var(--nv-ink)}
+.meal-plan-proposal{margin:18px 0;padding:18px;border:1px solid var(--nv-strong);border-radius:14px;background:var(--nv-bg)}
+.meal-plan-proposal-eyebrow{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--nv-strong)}
+.meal-plan-proposal h3{margin:8px 0;font-size:19px}
+.meal-plan-proposal p{margin:6px 0 12px}
+.meal-plan-proposal-warning{padding:8px 10px;border-radius:8px;background:var(--nv-card)}
+.meal-plan-proposal ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;max-height:360px;overflow:auto;margin:14px 0;padding:0;list-style:none}
+.meal-plan-proposal li{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid var(--nv-border);border-radius:10px;background:var(--nv-card);font-size:13px}
+.meal-plan-proposal li small{color:var(--nv-muted)}
+.meal-plan-published{margin:14px 0;padding:16px;border:1px solid var(--nv-border);border-radius:14px;background:var(--nv-bg)}
+.meal-plan-published ul,.published-dated-plan ul{margin:8px 0 0;padding-left:18px;font-size:13px}
+.meal-plan-form{margin-top:12px}
+.meal-plan-form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.meal-plan-form label{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.meal-plan-form input,.meal-plan-form select{padding:10px;border:1px solid var(--nv-border);border-radius:10px;background:var(--nv-bg);color:var(--nv-ink);font:inherit}
+.meal-plan-item-row{display:grid;grid-template-columns:140px 120px minmax(0,1fr) minmax(0,1fr) 88px;gap:8px;margin:8px 0}
+.meal-plan-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.meal-plan-add{border:0;background:transparent;color:var(--nv-strong);font:inherit;font-size:13px;font-weight:700}
+.published-plan-day{margin:16px 0;padding-top:8px;border-top:1px solid var(--nv-border)}
+.published-plan-day h3{margin:0 0 8px;font-size:16px}
+.published-plan-empty-day{margin:0;font-size:13px;color:var(--nv-muted)}
+.published-plan-item{margin:12px 0;padding:12px;border:1px solid var(--nv-border);border-radius:12px;background:var(--nv-bg)}
+.published-plan-item header{display:flex;gap:8px;align-items:baseline}
+.published-plan-item h3{margin:8px 0 4px;font-size:16px}
+.published-plan-item h4{margin:10px 0 4px;font-size:12px;letter-spacing:.4px}
+.published-plan-item ul,.published-plan-item ol{margin:0;padding-left:18px;font-size:13px}
+@media(max-width:800px){.meal-plan-item-row,.meal-plan-form-row{grid-template-columns:1fr}}
+@media(max-width:390px){.meal-plan-versions,.published-dated-plan{padding:16px 12px}.meal-plan-actions{flex-direction:column;align-items:stretch}.published-plan-item{padding:10px}}
+@media(max-width:320px){.meal-plan-versions,.published-dated-plan{padding:12px 10px}.meal-plan-versions h2,.published-dated-plan h2{font-size:18px}}

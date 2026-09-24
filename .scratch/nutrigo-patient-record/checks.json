@@ -1,0 +1,26 @@
+[
+  [
+    "fichas-opens-new-record",
+    true
+  ],
+  [
+    "professional-private-data-matches-api",
+    "pat-sofia"
+  ],
+  [
+    "patient-switch-isolated",
+    "pat-marina"
+  ],
+  [
+    "profile-edit-readback-and-restore",
+    true
+  ],
+  [
+    "meal-page-keeps-selection",
+    true
+  ],
+  [
+    "patient-role-excludes-private-record",
+    true
+  ]
+]

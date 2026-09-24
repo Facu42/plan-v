@@ -1,11 +1,57 @@
 
   # Plan V
 
+  Revisión de arquitectura y backlog (2026-09-16): [plan de acción y prioridades](docs/plan-de-accion-2026-09-16.md) · [arquitectura](docs/superpowers/specs/2026-09-16-plan-v-arquitectura-design.md) · [onboarding e IA](docs/superpowers/specs/2026-09-16-plan-v-onboarding-ia-design.md) · [primer bloque ejecutable](docs/superpowers/plans/2026-09-16-plan-v-fundaciones.md).
+
+  Estado actual: demo funcional; la persistencia completa, el diseño Nutrigo autenticado/productivo, los archivos privados y la IA generadora de menús/recetas siguen pendientes. Las instrucciones de esta revisión son propuestas; no se aplicaron cambios de producto ni SQL.
+
+  Dashboard del plan: ejecutar `npm run dashboard` y abrir <http://127.0.0.1:4317>. Incluye 39 entregas, siete hitos, hallazgos y actualización persistente de estados con evidencia. [Uso y verificación](implementation-dashboard/README.md).
+
+  Avance revisado el 2026-09-17: [informe actualizado](docs/revision-avance-2026-09-17.md). El dashboard registra 6/39 entregas cerradas. TypeScript/build aprobados; suite con 471 pruebas aprobadas, 1 fallida y 2 RLS omitidas. Intake/consentimientos aún sin persistencia Supabase.
+
   This is a code bundle for Plan V. The original project is available at https://www.figma.com/design/7VTASs2smFVuTG8ZSNo78R/Plan-V.
 
   ## Running the code
 
-  Run `npm i` to install the dependencies.
+  ```bash
+  npm install
+  npm run local
+  ```
 
-  Run `npm run dev` to start the development server.
-  
+  Esto levanta los tres servicios locales con datos demo:
+
+  - App paciente: <http://127.0.0.1:5173/app/inicio>
+  - CRM de la nutricionista: <http://127.0.0.1:5173/crm/inicio>
+  - Dashboard del plan de implementación: <http://127.0.0.1:4317/#overview>
+
+  En la pantalla de acceso elegí **Continuar en modo demo**. Los cambios de código se actualizan automáticamente. Para detener todo, usá `Ctrl+C` en la terminal donde ejecutaste `npm run local`.
+
+  Si sólo necesitás la app y la API, `npm run dev` conserva el comando anterior.
+
+  ### Funcionalidades
+
+  - **App paciente**: navegación Hoy / Mi plan / Mi camino / Mensajes. Registro de comidas por **foto o descripción** con macros automáticos (IA).
+  - **CRM nutricionista**: copiloto con sugerencias (Up next, borrador de mensaje), revisión de comidas pendientes, confirmación.
+  **IA**: `AI_MODE=live` prefiere `OPENROUTER_API_KEY` (modelo opcional en `OPENROUTER_MODEL`) para texto/análisis y usa `OPENAI_API_KEY` como fallback. La foto de portada de una receta aprobada usa `openai.image('dall-e-3')`: para verificar ese flujo en live también hace falta `OPENAI_API_KEY`; sin ella, la portada queda en `failed`. `AI_MODE=demo` sólo en `APP_MODE=demo` o `test`. En staging/producción la IA simulada está prohibida.
+
+  Copiá `.env.example` a `.env`. `npm run dev` fija `APP_MODE=demo`, `AI_MODE=demo` y `VITE_ALLOW_DEMO=true` mediante `scripts/with-env.mjs` (funciona en Windows). Sin `APP_MODE` el API no arranca. `APP_MODE=production` o `staging` sin URL y service role de Supabase aborta el proceso. Un build de producción no muestra el botón demo.
+
+  ### Verificación local
+
+  ```bash
+  npm test
+  npm run check
+  npm run build
+  npm run check:migrations
+  ```
+
+  `npm test` define `APP_MODE=test` y `AI_MODE=demo` en Vitest, sin depender del `.env` del desarrollador. `npm run check` valida tanto el cliente como el servidor. Las pruebas cubren autenticación fail-closed, autorización por relación, privacidad de la vista paciente y validación de entradas API.
+
+  ### Supabase (auth + base de datos)
+
+  Guía: [`docs/supabase-setup.md`](docs/supabase-setup.md) · checklist de aprobación y staging: [`docs/016-approval-and-staging-checklist.md`](docs/016-approval-and-staging-checklist.md)
+
+  Expansión Nutrigo/Plan V: [`tasks/plan.md`](tasks/plan.md) · tareas ejecutables desde el paso 1: [`tasks/todo.md`](tasks/todo.md) · pendientes y estado de producción: [`docs/pending-work.md`](docs/pending-work.md)
+
+  **No aplicar** los borradores SQL de este repo. El contrato 016 local sigue en revisión y debe ampliarse y validarse antes de convertirse en migración.
+  Sin service role la API no cae a demo salvo `APP_MODE=demo` o `test`. Login público crea pacientes; el alta profesional se provisiona con `PROVISION_SECRET` (`POST /api/ops/nutritionists`). La invitación de paciente es de un uso, con vencimiento y revocación. Recuperación de cuenta: “Olvidé mi contraseña”.

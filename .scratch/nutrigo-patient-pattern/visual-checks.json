@@ -1,0 +1,472 @@
+[
+  {
+    "theme": "light",
+    "state": {
+      "width": 1440,
+      "scroll": 1425,
+      "cards": 4,
+      "menuTop": 755.28125,
+      "charts": [
+        {
+          "height": 311.390625,
+          "width": 284.328125
+        },
+        {
+          "height": 311.390625,
+          "width": 568.671875
+        }
+      ],
+      "logo": 256,
+      "images": [
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": false
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": false
+        },
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": false
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": false
+        },
+        {
+          "url": "/src/assets/showroom/snack.webp",
+          "loaded": false
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": false
+        }
+      ]
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-pattern\\light-1440.png"
+  },
+  {
+    "theme": "light",
+    "state": {
+      "width": 1280,
+      "scroll": 1265,
+      "cards": 4,
+      "menuTop": 749.59375,
+      "charts": [
+        {
+          "height": 298.109375,
+          "width": 231
+        },
+        {
+          "height": 298.109375,
+          "width": 462
+        }
+      ],
+      "logo": 256,
+      "images": [
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/snack.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        }
+      ]
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-pattern\\light-1280.png"
+  },
+  {
+    "theme": "light",
+    "state": {
+      "width": 800,
+      "scroll": 785,
+      "cards": 4,
+      "menuTop": 817.578125,
+      "charts": [
+        {
+          "height": 297.390625,
+          "width": 181.65625
+        },
+        {
+          "height": 297.390625,
+          "width": 363.34375
+        }
+      ],
+      "logo": 256,
+      "images": [
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/snack.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        }
+      ]
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-pattern\\light-800.png"
+  },
+  {
+    "theme": "light",
+    "state": {
+      "width": 390,
+      "scroll": 375,
+      "cards": 4,
+      "menuTop": 1530.875,
+      "charts": [
+        {
+          "height": 297.109375,
+          "width": 343
+        },
+        {
+          "height": 297.390625,
+          "width": 343
+        }
+      ],
+      "logo": 256,
+      "images": [
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/snack.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        }
+      ]
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-pattern\\light-390.png"
+  },
+  {
+    "theme": "light",
+    "state": {
+      "width": 320,
+      "scroll": 305,
+      "cards": 4,
+      "menuTop": 1722.578125,
+      "charts": [
+        {
+          "height": 297.109375,
+          "width": 281
+        },
+        {
+          "height": 487.28125,
+          "width": 281
+        }
+      ],
+      "logo": 256,
+      "images": [
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/snack.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        }
+      ]
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-pattern\\light-320.png"
+  },
+  {
+    "theme": "dark",
+    "state": {
+      "width": 1440,
+      "scroll": 1425,
+      "cards": 4,
+      "menuTop": 755.28125,
+      "charts": [
+        {
+          "height": 311.390625,
+          "width": 284.328125
+        },
+        {
+          "height": 311.390625,
+          "width": 568.671875
+        }
+      ],
+      "logo": 256,
+      "images": [
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/snack.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        }
+      ]
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-pattern\\dark-1440.png"
+  },
+  {
+    "theme": "dark",
+    "state": {
+      "width": 1280,
+      "scroll": 1265,
+      "cards": 4,
+      "menuTop": 749.59375,
+      "charts": [
+        {
+          "height": 298.109375,
+          "width": 231
+        },
+        {
+          "height": 298.109375,
+          "width": 462
+        }
+      ],
+      "logo": 256,
+      "images": [
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/snack.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        }
+      ]
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-pattern\\dark-1280.png"
+  },
+  {
+    "theme": "dark",
+    "state": {
+      "width": 800,
+      "scroll": 785,
+      "cards": 4,
+      "menuTop": 817.578125,
+      "charts": [
+        {
+          "height": 297.390625,
+          "width": 181.65625
+        },
+        {
+          "height": 297.390625,
+          "width": 363.34375
+        }
+      ],
+      "logo": 256,
+      "images": [
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/snack.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        }
+      ]
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-pattern\\dark-800.png"
+  },
+  {
+    "theme": "dark",
+    "state": {
+      "width": 390,
+      "scroll": 375,
+      "cards": 4,
+      "menuTop": 1530.875,
+      "charts": [
+        {
+          "height": 297.109375,
+          "width": 343
+        },
+        {
+          "height": 297.390625,
+          "width": 343
+        }
+      ],
+      "logo": 256,
+      "images": [
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/snack.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        }
+      ]
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-pattern\\dark-390.png"
+  },
+  {
+    "theme": "dark",
+    "state": {
+      "width": 320,
+      "scroll": 305,
+      "cards": 4,
+      "menuTop": 1722.578125,
+      "charts": [
+        {
+          "height": 297.109375,
+          "width": 281
+        },
+        {
+          "height": 487.28125,
+          "width": 281
+        }
+      ],
+      "logo": 256,
+      "images": [
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/breakfast.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/snack.webp",
+          "loaded": true
+        },
+        {
+          "url": "/src/assets/showroom/lunch.webp",
+          "loaded": true
+        }
+      ]
+    },
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patient-pattern\\dark-320.png"
+  }
+]

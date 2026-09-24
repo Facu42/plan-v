@@ -1,0 +1,54 @@
+/* Professional food diary, based on Nutrigo frame 105:2649. */
+.nvm-diary { display:flex; flex-direction:column; gap:16px; }
+.nvm-context { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 16px; border:1px solid var(--nv-border); border-radius:12px; background:var(--nv-card); }
+.nvm-context>div { display:flex; align-items:center; gap:10px; min-width:0; }
+.nvm-context strong,.nvm-context small { display:block; }
+.nvm-context strong { font-size:12px; }.nvm-context small { color:var(--nv-muted); font-size:12px; }
+.nvm-context label { display:flex; flex-direction:column; gap:3px; color:var(--nv-muted); font-size:12px; }
+.nvm-context select { min-width:170px; min-height:36px; padding:7px 10px; border:1px solid var(--nv-border); border-radius:8px; color:var(--nv-ink); background:var(--nv-bg); font:inherit; font-size:11px; }
+.nvm-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; padding:16px; border-radius:12px; background:var(--nv-card); }
+.nv-pro .nvm-metrics .nv-metric { min-height:72px; padding:0 16px; border-left:1px solid var(--nv-border); border-radius:0; }
+.nvm-metrics .nv-metric:first-child { border-left:0; padding-left:0; }.nvm-metrics .nv-metric:last-child { padding-right:0; }
+.nvm-metrics .nv-metric-label { align-items:flex-start; }.nvm-metrics .nv-icon-tile { width:28px; height:28px; }
+.nvm-metrics .nv-metric>strong { margin:0; font-size:24px; }.nvm-metrics .nv-metric>small { margin-top:2px; }
+.nvm-habits,.nvm-activities,.nvm-table-card { border-radius:12px; background:var(--nv-card); }
+.nvm-habits,.nvm-activities { padding:16px; }
+.nvm-habits>header,.nvm-table-card>header { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.nvm-habits>header>div { display:flex; align-items:center; gap:10px; }.nvm-habits h2,.nvm-table-card h2 { font-size:13px; }
+.nvm-habits p,.nvm-table-card header p { color:var(--nv-muted); font-size:12px; }.nvm-habits time { color:var(--nv-muted); font-size:12px; text-transform:capitalize; }
+.nvm-habits dl { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:14px 0 0; }
+.nvm-habits dl>div { padding:11px 12px; border-radius:9px; background:var(--nv-bg); }
+.nvm-habits dt { display:flex; align-items:center; gap:6px; color:var(--nv-muted); font-size:12px; }.nvm-habits dd { margin:4px 0 0; font-size:14px; font-weight:600; }
+.nvm-activities>header,.nvm-activities>header>div{display:flex;align-items:center;justify-content:space-between;gap:10px}.nvm-activities h2{font-size:13px}.nvm-activities header p{color:var(--nv-muted);font-size:12px}.nvm-activity-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.nvm-activity-list article{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:start;padding:11px 12px;border-radius:9px;background:var(--nv-bg)}.nvm-activity-list article .nv-icon-tile{width:30px;height:30px}.nvm-activity-list strong,.nvm-activity-list small{display:block}.nvm-activity-list strong{font-size:11px}.nvm-activity-list small{margin-top:3px;color:var(--nv-muted);font-size:12px}.nvm-activity-list p{margin:7px 0 0;color:var(--nv-muted);font-size:12px}.nvm-activity-list article>b{color:var(--nv-green);font-size:13px;white-space:nowrap}.nvm-activity-empty{margin:14px 0 0;padding:14px;border-radius:9px;background:var(--nv-bg);color:var(--nv-muted);font-size:13px}
+.nvm-table-card { padding:16px; overflow:hidden; }.nvm-table-card>header { min-height:30px; margin-bottom:16px; }
+.nvm-table { width:100%; overflow-x:auto; }
+.nvm-table [role=row] { display:grid; grid-template-columns:128px minmax(90px,.65fr) minmax(220px,1.7fr) 100px 88px; align-items:center; min-width:760px; min-height:68px; padding:0 12px; border-bottom:1px solid var(--nv-border); column-gap:16px; }
+.nvm-table-head { min-height:42px!important; border-radius:8px 8px 0 0; color:var(--nv-muted); background:var(--nv-bg); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; }
+.nvm-table article { font-size:13px; }.nvm-table article time { color:var(--nv-muted); font-size:12px; }.nvm-table article strong { font-size:11px; }
+.nvm-table article.nvm-pending { background:color-mix(in srgb,var(--nv-gold) 22%,transparent); }
+.nvm-detail { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }.nvm-action { text-align:right; }.nvm-action .nv-button { min-height:32px; padding:6px 11px; font-size:13px!important; }.nvm-action small { color:var(--nv-muted); font-size:12px; }
+.nvm-table-card>.nv-state { border-radius:8px; background:var(--nv-bg); }
+/* Keep the operational review logic, but render it with the Nutrigo tokens. */
+.nv-app .review-panel { border:1px solid var(--nv-border); border-radius:14px; color:var(--nv-ink); background:var(--nv-card); font-family:'Poppins',Arial,sans-serif; box-shadow:0 24px 64px rgba(4,31,23,.28); }
+.nv-app .review-head h3 { color:var(--nv-ink); font-family:inherit; font-size:15px; font-weight:700; }
+.nv-app .review-head button { display:grid; width:32px; height:32px; place-items:center; border-radius:8px; color:var(--nv-muted); background:var(--nv-bg); }
+.nv-app .review-desc,.nv-app .review-confidence { color:var(--nv-muted); }
+.nv-app .food-tags span { color:var(--nv-ink); background:var(--nv-green); }
+.nv-app .macro-cell { background:var(--nv-green); }.nv-app .macro-cell.carbs { background:var(--nv-gold); }.nv-app .macro-cell.fat { background:var(--nv-coral); }
+.nv-app .macro-cell strong { color:var(--nv-ink); font-family:inherit; font-weight:700; }.nv-app .macro-cell span { color:var(--nv-muted); }
+.nv-app .review-note { padding:12px; border-left:3px solid var(--nv-accent); border-radius:8px; color:var(--nv-ink); background:var(--nv-bg); }
+.nv-app .review-actions .primary-button { border-radius:8px; color:#fff; background:var(--nv-strong); box-shadow:none; }
+.nv-app.nv-dark .review-actions .primary-button { color:#083a30; }
+.nv-app .review-actions .soft-button { border-radius:8px; color:var(--nv-ink); background:var(--nv-green); }
+.nv-app .review-editor fieldset { border-color:var(--nv-border); }.nv-app .review-editor legend,.nv-app .review-editor label>span { color:var(--nv-muted); }
+.nv-app .review-editor input,.nv-app .review-editor select { border-color:var(--nv-border); color:var(--nv-ink); background:var(--nv-bg); }
+.nv-app.nv-pro.nv-food-diary .nv-content-layout { grid-template-columns:minmax(0,1fr); }
+.nv-pro.nv-food-diary .nv-main { width:100%; }
+@media(max-width:900px) {
+  .nvm-metrics { grid-template-columns:1fr 1fr; gap:16px; }.nv-pro .nvm-metrics .nv-metric { border-left:0; padding:0; }.nvm-habits dl,.nvm-activity-list { grid-template-columns:1fr; }
+}
+@media(max-width:600px) {
+  .nvm-context { align-items:flex-start; flex-direction:column; }.nvm-context label,.nvm-context select { width:100%; }.nvm-context select { min-height:44px; }
+  .nvm-metrics { grid-template-columns:1fr; }.nv-pro .nvm-metrics .nv-metric { border-top:1px solid var(--nv-border); padding-top:0; }.nvm-metrics .nv-metric:first-child { border-top:0; padding-top:0; }
+  .nvm-table-card { padding:12px; }.nvm-table-card>header { align-items:flex-start; }.nvm-table [role=row] { min-width:700px; }
+}

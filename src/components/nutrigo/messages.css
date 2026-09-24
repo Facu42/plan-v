@@ -1,0 +1,93 @@
+/* Messages frame 84:2565: contact list (299), conversation (547), contextual
+   profile (275), reconstruido con el código literal del archivo
+   (get_design_context sobre 198:5995 y 198:5969) el 2026-09-22. */
+.nv-app.nv-messaging .nv-content-layout { grid-template-columns:minmax(0,1fr); }
+.nm-layout { display:grid; grid-template-columns:299px minmax(0,1fr) 275px; gap:20px; min-height:650px; }
+.nm-layout h2 { font-size:16px; font-weight:600; }
+.nm-layout h3 { font-size:12px; font-weight:600; margin:20px 0 8px; }
+.nm-contacts,.nm-profile { min-width:0; border-radius:16px; background:var(--nv-card); }
+.nm-contacts { display:flex; flex-direction:column; padding:0; }
+.nm-contacts>input,.nm-mobile-picker select { width:100%; border:0; border-radius:12px; padding:12px 13px; color:var(--nv-ink); background:var(--nv-track); font:inherit; font-size:14px; }
+.nm-contacts>input { margin:16px 16px 0; width:auto; }
+.nm-contact-list { display:flex; flex-direction:column; margin-top:8px; }
+.nm-contact-list>button { display:flex; align-items:center; gap:16px; width:100%; padding:24px 16px; border:0; border-bottom:1px solid var(--nv-line); background:transparent; color:var(--nv-ink); text-align:left; }
+.nm-contact-list>button:last-child { border-bottom:0; }
+.nm-contact-list>button[aria-pressed=true] { background:var(--nv-bg); }
+.nm-contact-list>button>span:nth-child(2) { min-width:0; flex:1; }
+.nm-contact-list strong { display:block; font-size:14px; font-weight:600; }
+.nm-contact-list small { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:5px; color:var(--nv-muted); font-size:12px; }
+.nm-contact-list .nv-badge { display:grid; place-items:center; min-width:18px; height:18px; padding:0 4px; border-radius:9px; color:#fff; font-size:10px; }
+/* Avatares circulares de 40, color cíclico Green/Saffron/Orange como en el archivo. */
+.nm-contact-list .nv-avatar { border-radius:50%; width:40px; height:40px; flex-basis:40px; background:var(--nv-green); }
+.nm-contact-list>button:nth-child(3n+2) .nv-avatar { background:var(--nv-gold); }
+.nm-contact-list>button:nth-child(3n) .nv-avatar { background:var(--nv-coral); }
+.nm-contacts-footer { padding:16px; margin-top:auto; }
+.nm-contacts-footer .nv-button { width:100%; justify-content:center; border-radius:12px; }
+.nm-conversation { display:flex; flex-direction:column; overflow:hidden; padding:16px; border-radius:16px; background:var(--nv-bg); }
+.nm-conversation>header { display:flex; align-items:center; gap:14px; padding:16px; border-radius:16px; background:var(--nv-card); }
+.nm-conversation>header>div { min-width:0; flex:1; }
+.nm-conversation>header h2 { font-size:14px; }
+.nm-conversation>header small { color:var(--nv-muted); font-size:12px; }
+.nm-conversation>header .nv-avatar { border-radius:50%; width:36px; height:36px; flex-basis:36px; }
+.nm-picker-btn { display:grid; place-items:center; width:36px; height:36px; flex:0 0 36px; border:0; border-radius:10px; background:var(--nv-bg); color:var(--nv-ink); }
+.nm-thread { flex:1; min-height:0; overflow-y:auto; padding:8px 20px; display:flex; flex-direction:column; align-items:flex-start; gap:4px; }
+.nm-demo-note { align-self:center; text-align:center; color:var(--nv-muted); font-size:13px; padding-bottom:8px; }
+/* Bubble-chat: propia en Saffron, recibida en White, tal como el código literal. */
+.nm-bubble { max-width:86%; border-radius:12px 12px 12px 2px; padding:13px 16px; background:var(--nv-card-warm); overflow-wrap:anywhere; }
+.nm-bubble.nm-own { align-self:flex-end; border-radius:12px 12px 2px 12px; background:var(--nv-gold); }
+.nm-bubble p { font-size:12px; line-height:1.5; white-space:pre-wrap; margin:0; }
+.nm-bubble time { display:block; margin-top:4px; color:var(--nv-muted); font-size:11px; text-align:left; }
+.nm-bubble.nm-own time { text-align:right; }
+.nm-compose { padding:16px; margin-top:auto; }
+.nm-compose>label { display:block; font-size:11px; margin-bottom:8px; }
+.nm-compose-row { display:flex; gap:6px; align-items:center; border-radius:16px; background:var(--nv-card); padding:8px 9px 8px 4px; }
+.nm-compose textarea { flex:1; min-width:0; resize:vertical; min-height:40px; max-height:160px; border:0; border-radius:12px; padding:9px 13px; font:inherit; font-size:14px; background:var(--nv-card); color:var(--nv-ink); }
+.nm-compose textarea:focus-visible,.nm-mobile-picker select:focus-visible { outline:3px solid var(--nv-strong); outline-offset:2px; }
+.nm-compose .nv-button { border-radius:12px; }
+.nm-compose>p { font-size:11px; margin-top:8px; overflow-wrap:anywhere; }
+.nm-compose [role=alert] { font-weight:600; }
+.nm-attach-row { display:flex; align-items:center; gap:10px; margin-top:10px; font-size:12px; }
+.nm-attach-row>input[type=file] { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+.nm-attach-row>label { cursor:pointer; color:var(--nv-ink); text-decoration:underline; }
+.nm-attach-row>span { display:flex; align-items:center; gap:8px; color:var(--nv-muted); }
+.nm-attach { margin:8px 0; }
+.nm-attach-name { font-size:12px; font-weight:600; margin:0 0 6px; }
+.nm-attach img { display:block; max-width:220px; max-height:180px; border-radius:8px; }
+.nm-attach-missing { color:var(--nv-muted); font-size:12px; margin:6px 0; }
+.nm-profile { padding:24px; }
+.nm-profile>h2 { margin-top:16px; }
+.nm-profile p { font-size:12px; color:var(--nv-muted); margin-top:8px; }
+.nm-profile hr { border:0; border-top:1px solid var(--nv-border); margin:24px 0; }
+.nm-profile-actions { display:flex; flex-direction:column; gap:8px; margin-top:18px; }
+.nm-profile-actions>.nv-button { width:100%; justify-content:space-between; }
+.nm-profile .nv-avatar { border-radius:50%; width:56px; height:56px; flex-basis:56px; margin:0 auto; font-size:16px; }
+.nm-mobile-picker { display:none; }
+@media(max-width:1250px) { .nm-layout { grid-template-columns:240px minmax(0,1fr); } .nm-profile { display:none; } }
+@media(max-width:960px) { .nm-layout { grid-template-columns:190px minmax(0,1fr); gap:12px; } .nm-compose-row { flex-direction:column; align-items:stretch; } }
+@media(max-width:760px) {
+  .nm-layout { grid-template-columns:minmax(0,1fr); min-height:0; }
+  .nm-contacts>input,.nm-contact-list { display:none; }
+  .nm-layout.nm-patient .nm-contacts { display:none; }
+  .nm-mobile-picker { display:block; font-size:11px; padding:12px; }
+  .nm-mobile-picker select { margin-top:8px; }
+  .nm-thread { height:48dvh; min-height:250px; padding:14px; }
+  .nm-conversation>header { padding:16px; }
+  .nm-conversation h2 { font-size:14px; }
+  .nm-bubble { max-width:94%; }
+}
+@media(max-width:800px) {
+  .nm-layout { grid-template-columns:minmax(0,1fr); min-height:0; }
+  .nm-contacts { display:none; }
+  .nm-layout.nm-patient .nm-contacts { display:none; }
+  .nm-profile { display:none; }
+  .nm-mobile-picker { display:block; }
+}
+@media(max-width:390px) {
+  .nm-thread { height:42dvh; min-height:220px; padding:12px; }
+  .nm-conversation>header { padding:12px; }
+  .nm-compose { padding:12px; }
+}
+@media(max-width:320px) {
+  .nm-bubble { max-width:100%; padding:10px 12px; }
+  .nm-compose textarea { min-height:40px; }
+}

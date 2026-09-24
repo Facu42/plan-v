@@ -1,0 +1,209 @@
+/* Mensajes — código literal de get_design_context sobre 198:5969 (lista),
+   198:5995 (chat), 207:6722 (perfil) y el frame mobile 433:19982.
+   messages.css queda como base; acá se pisa con .nv-app.nv-messaging. */
+
+.nv-app.nv-messaging { --nmf-on-color: #272932; }
+
+/* Body 198:5968: 299 · flex · 275, gap 20, alto mínimo 842. */
+.nv-app.nv-messaging .nm-layout { grid-template-columns: 299px minmax(0, 1fr) 275px; gap: 20px; min-height: 842px; align-items: stretch; }
+.nv-app.nv-messaging .nm-layout.nmf-profile-closed { grid-template-columns: 299px minmax(0, 1fr); }
+
+.nmf-sr { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ── Section Messages 198:5969 ─────────────────────────────────────────── */
+.nv-app.nv-messaging .nm-layout .nm-contacts { display: flex; flex-direction: column; gap: 8px; min-height: 0; padding: 0; border-radius: 0; background: transparent; box-shadow: none; overflow: hidden; }
+.nv-app.nv-messaging .nmf-list-head { display: flex; gap: 10px; align-items: flex-start; }
+.nv-app.nv-messaging .nmf-search { display: flex; flex: 1 1 0; min-width: 0; gap: 6px; align-items: center; padding: 9px 13px; border-radius: 12px; background: var(--nv-track); color: var(--nv-muted); cursor: text; }
+.nv-app.nv-messaging .nmf-search svg { flex: 0 0 18px; }
+.nv-app.nv-messaging .nmf-search input { flex: 1; min-width: 0; margin: 0; padding: 0 2px; border: 0; background: transparent; color: var(--nv-ink); font: inherit; font-size: 14px; line-height: 1.25; outline: 0; }
+.nv-app.nv-messaging .nmf-search input::placeholder { color: var(--nv-muted); opacity: 1; }
+.nv-app.nv-messaging .nmf-search:focus-within { outline: 2px solid var(--nv-accent); outline-offset: 1px; }
+.nv-app.nv-messaging .nmf-icon-btn { display: grid; place-items: center; flex: 0 0 auto; padding: 9px; border: 0; border-radius: 12px; background: var(--nv-fill); color: var(--nv-ink); cursor: pointer; }
+.nv-app.nv-messaging .nmf-filter[aria-pressed=true] { background: var(--nv-accent); color: var(--nmf-on-color); }
+.nv-app.nv-messaging .nmf-new-icon { display: none; background: var(--nv-accent); color: var(--nmf-on-color); }
+
+/* List Messages / Item List Message: 24/8, gap 16, línea inferior Gray-Line. */
+.nv-app.nv-messaging .nm-layout .nm-contact-list { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; margin: 0; overflow-y: auto; }
+.nv-app.nv-messaging .nm-layout .nm-contact-list > button { display: flex; align-items: center; gap: 16px; width: 100%; min-height: 0; padding: 24px 8px; border: 0; border-bottom: 1px solid var(--nv-line); border-radius: 0; background: transparent; color: var(--nv-ink); text-align: left; cursor: pointer; }
+.nv-app.nv-messaging .nm-layout .nm-contact-list > button[aria-pressed=true] { background: var(--nv-bg); }
+/* nutrigo-parity.css pone en negrita todo [aria-pressed=true]; el archivo no. */
+.nv-app.nv-messaging .nm-layout :is(.nm-contact-list > button, .nmf-picker, .nmf-icon-btn)[aria-pressed] { font-weight: 400; }
+.nv-app.nv-messaging .nm-layout .nm-contact-list .nv-avatar { display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 40px; border-radius: 20px; background: var(--nv-accent); color: var(--nmf-on-color); font-size: 13px; font-weight: 600; }
+.nv-app.nv-messaging .nm-layout .nm-contact-list > button:nth-child(3n+2) .nv-avatar { background: var(--nv-gold); }
+.nv-app.nv-messaging .nm-layout .nm-contact-list > button:nth-child(3n) .nv-avatar { background: var(--nv-coral); }
+.nv-app.nv-messaging .nmf-item-main { display: flex; flex: 1 1 0; flex-direction: column; gap: 10px; min-width: 0; }
+.nv-app.nv-messaging .nmf-item-head { display: flex; gap: 8px; align-items: baseline; width: 100%; white-space: nowrap; }
+.nv-app.nv-messaging .nmf-item-user { display: flex; flex: 1 1 0; gap: 4px; align-items: baseline; min-width: 0; }
+.nv-app.nv-messaging .nm-contact-list .nmf-item-user strong { display: inline; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--nv-ink); font-size: 14px; font-weight: 600; line-height: 1.25; }
+.nv-app.nv-messaging .nmf-item-user > span { flex: 0 0 auto; color: var(--nv-ink-soft); font-size: 11px; line-height: 1.24; }
+.nv-app.nv-messaging .nmf-item-user em { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--nv-ink-soft); font-size: 12px; font-style: normal; line-height: 1.3; }
+.nv-app.nv-messaging .nmf-item-head time { flex: 0 0 auto; color: var(--nv-ink); font-size: 11px; line-height: 1.24; }
+.nv-app.nv-messaging .nm-contact-list > button[aria-pressed=true] .nmf-item-head time { color: var(--nv-muted); }
+.nv-app.nv-messaging .nmf-item-body { display: flex; gap: 8px; align-items: flex-start; width: 100%; }
+.nv-app.nv-messaging .nm-contact-list .nmf-item-body small { display: block; flex: 1 1 0; min-width: 0; height: 20px; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--nv-muted); font-size: 12px; line-height: 1.5; }
+.nv-app.nv-messaging .nm-contact-list > button[aria-pressed=true] .nmf-item-body small { color: var(--nv-ink-soft); }
+/* Badge 2:3261: caja de 20 con p4, "Div Red" Orange de min 18, p2, radio 9. */
+.nv-app.nv-messaging .nmf-badge { flex: 0 0 auto; min-width: 18px; margin: 1px; padding: 2px; border-radius: 9px; background: var(--nv-coral); color: #fff; font-size: 10px; line-height: 1.35; text-align: center; }
+.nv-app.nv-messaging .nmf-empty { margin: 0; padding: 16px 8px; color: var(--nv-muted); font-size: 12px; line-height: 1.5; }
+.nv-app.nv-messaging .nm-layout .nm-contacts-footer { display: flex; margin: 0; padding: 0; }
+.nv-app.nv-messaging .nmf-new-btn { flex: 1; min-width: 0; padding: 10px 16px; border: 0; border-radius: 12px; background: var(--nv-accent); color: var(--nmf-on-color); font: inherit; font-size: 14px; font-weight: 500; line-height: 20px; cursor: pointer; }
+
+/* ── Center Section 198:5995: Cream-BG, radio 16 ───────────────────────── */
+.nv-app.nv-messaging .nm-layout .nm-conversation { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 0; overflow: hidden; border-radius: 16px; background: var(--nv-bg); box-shadow: none; }
+.nv-app.nv-messaging .nmf-chat-head { padding: 16px; }
+.nv-app.nv-messaging .nmf-chat-head > header { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px; border-radius: 16px; background: var(--nv-card); box-shadow: none; }
+.nv-app.nv-messaging .nmf-chat-head > header > div:not(.nmf-chat-actions) { display: flex; flex: 1 1 0; flex-direction: column; gap: 2px; min-width: 0; }
+.nv-app.nv-messaging .nmf-chat-head h2 { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--nv-heading); font-size: 14px; font-weight: 600; line-height: 1.25; }
+.nv-app.nv-dark.nv-messaging .nmf-chat-head h2 { color: var(--nv-ink); }
+.nv-app.nv-messaging .nmf-chat-head small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--nv-muted); font-size: 12px; line-height: 1.3; }
+.nv-app.nv-messaging .nmf-chat-head .nv-avatar { display: grid; place-items: center; width: 36px; height: 36px; flex: 0 0 36px; border-radius: 32px; background: var(--nv-gold); color: var(--nmf-on-color); font-size: 12px; font-weight: 600; }
+.nv-app.nv-messaging .nmf-chat-actions { display: flex; flex: 0 0 auto; gap: 10px; align-items: flex-start; }
+/* Button Picker: 36, p8, radio 10, Cream-BG; el de panel lateral en Green. */
+.nv-app.nv-messaging .nmf-picker { display: grid; place-items: center; width: 36px; height: 36px; flex: 0 0 36px; padding: 8px; border: 0; border-radius: 10px; background: var(--nv-bg); color: var(--nv-ink); cursor: pointer; }
+.nv-app.nv-messaging .nmf-picker.nmf-picker-on[aria-pressed=true] { background: var(--nv-accent); color: var(--nmf-on-color); }
+.nv-app.nv-messaging .nmf-picker:disabled { opacity: .55; cursor: progress; }
+
+/* Chat Area: px 20, mensajes pegados abajo. */
+.nv-app.nv-messaging .nm-layout .nm-thread { display: flex; flex: 1 1 0; flex-direction: column; align-items: stretch; gap: 0; min-height: 0; height: auto; padding: 0 20px; overflow-y: auto; }
+.nv-app.nv-messaging .nm-thread > :first-child { margin-top: auto; }
+.nv-app.nv-messaging .nm-thread > .nv-state { align-self: center; margin-block: auto; }
+.nv-app.nv-messaging .nmf-row-wrap { display: flex; flex-direction: column; }
+.nv-app.nv-messaging .nmf-day { display: flex; justify-content: center; margin: 0; padding: 8px 0; }
+.nv-app.nv-messaging .nmf-day span { padding: 4px 8px; border-radius: 6px; color: var(--nv-muted); font-size: 12px; line-height: 1.3; }
+.nv-app.nv-messaging .nmf-msg { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; padding: 4px 0; }
+.nv-app.nv-messaging .nmf-msg.nm-own { align-items: flex-end; }
+/* Bubble: 13/16/14, radio 12 salvo la esquina de la cola. */
+.nv-app.nv-messaging .nm-thread .nm-bubble { max-width: min(408px, 100%); margin: 0; padding: 13px 16px 14px; border-radius: 12px 12px 12px 0; background: var(--nv-card-warm); color: var(--nv-ink); }
+.nv-app.nv-messaging .nm-thread .nm-bubble.nm-own { border-radius: 12px 12px 0 12px; background: var(--nv-gold); color: var(--nmf-on-color); }
+.nv-app.nv-messaging .nm-thread .nm-bubble p { margin: 0; color: inherit; font-size: 12px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.nv-app.nv-messaging .nmf-meta { display: flex; gap: 4px; align-items: center; }
+.nv-app.nv-messaging .nmf-meta time { color: var(--nv-muted); font-size: 11px; line-height: 1.24; white-space: nowrap; }
+.nv-app.nv-messaging .nmf-receipt { display: inline-flex; color: var(--nv-muted); }
+.nv-app.nv-messaging .nmf-receipt-read { color: var(--nv-leaf); }
+
+/* Adjuntos en el hilo: "Image" 2:4293 (p8, cuadro de 148) y fila de documento. */
+.nv-app.nv-messaging .nm-thread .nm-attach { margin: 0; }
+.nv-app.nv-messaging .nmf-image-bubble { max-width: 100%; padding: 8px; border-radius: 12px 12px 12px 0; background: var(--nv-card-warm); }
+.nv-app.nv-messaging .nm-own > .nmf-image-bubble { border-radius: 12px 12px 0 12px; background: var(--nv-gold); color: var(--nmf-on-color); }
+.nv-app.nv-messaging .nmf-image-frame { display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; width: 148px; height: 148px; padding: 0; overflow: hidden; border: 0; border-radius: 0 6px 6px 6px; background: var(--nv-fill); color: var(--nv-muted); font: inherit; font-size: 11px; cursor: pointer; }
+.nv-app.nv-messaging .nmf-image-frame img { display: block; width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; border-radius: 0; }
+.nv-app.nv-messaging .nmf-image-bubble .nm-attach-name { max-width: 148px; margin: 6px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: inherit; font-size: 11px; font-weight: 400; line-height: 1.24; opacity: .8; }
+.nv-app.nv-messaging .nm-attach [role=alert] { margin: 6px 0 0; color: var(--nv-danger, #c0392b); font-size: 11px; }
+/* Item List Docs 209:5633: p12, gap 12, radio 16; icono Green p8 radio 8. */
+.nv-app.nv-messaging .nmf-doc > button { display: flex; gap: 12px; align-items: center; width: 100%; padding: 12px; border: 0; border-radius: 16px; background: var(--nv-bg); color: var(--nv-ink); font: inherit; text-align: left; cursor: pointer; }
+.nv-app.nv-messaging .nmf-doc-bubble { width: 264px; max-width: 100%; }
+.nv-app.nv-messaging .nmf-doc-bubble > button { border-radius: 12px 12px 12px 0; background: var(--nv-card-warm); }
+.nv-app.nv-messaging .nm-own > .nmf-doc-bubble > button { border-radius: 12px 12px 0 12px; background: var(--nv-gold); color: var(--nmf-on-color); }
+.nv-app.nv-messaging .nmf-doc-icon { display: flex; flex: 0 0 auto; padding: 8px; border-radius: 8px; background: var(--nv-accent); color: var(--nmf-on-color); }
+.nv-app.nv-messaging .nm-own > .nmf-doc-bubble .nmf-doc-icon { background: var(--nv-card-warm); }
+.nv-app.nv-messaging .nmf-doc-main { display: flex; flex: 1 1 0; flex-direction: column; gap: 4px; min-width: 0; }
+.nv-app.nv-messaging .nmf-doc-main strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--nv-ink-soft); font-size: 12px; font-weight: 500; line-height: 1.3; }
+.nv-app.nv-messaging .nm-own > .nmf-doc-bubble .nmf-doc-main strong { color: var(--nmf-on-color); }
+.nv-app.nv-messaging .nmf-doc-main small { color: var(--nv-muted); font-size: 11px; line-height: 1.24; }
+.nv-app.nv-messaging .nm-own > .nmf-doc-bubble .nmf-doc-main small { color: var(--nmf-on-color); opacity: .7; }
+.nv-app.nv-messaging .nm-attach-missing { margin: 0; color: var(--nv-muted); font-size: 12px; }
+
+/* Footer 198:6020 / Type Board 198:6021: p16; tablero blanco radio 16, 8/9/8/4. */
+.nv-app.nv-messaging .nm-layout .nm-compose { margin: 0; padding: 16px; }
+.nv-app.nv-messaging .nm-layout .nm-compose-row { display: flex; flex-direction: row; gap: 0; align-items: center; padding: 8px 9px 8px 4px; overflow: hidden; border-radius: 16px; background: var(--nv-card); box-shadow: none; }
+.nv-app.nv-messaging .nmf-attach-btn { display: grid; place-items: center; flex: 0 0 40px; width: 40px; height: 36px; padding: 0 0 0 4px; border: 0; border-radius: 10px; background: transparent; color: var(--nv-muted); cursor: pointer; }
+.nv-app.nv-messaging .nmf-attach-btn:hover { color: var(--nv-ink); }
+.nv-app.nv-messaging .nm-layout .nm-compose textarea { flex: 1 1 0; min-width: 0; min-height: 36px; max-height: 140px; margin: 0; padding: 9px 8px 9px 3px; border: 0; border-radius: 12px; background: transparent; color: var(--nv-ink); font: inherit; font-size: 14px; line-height: 1.25; resize: none; field-sizing: content; }
+.nv-app.nv-messaging .nm-compose textarea::placeholder { color: var(--nv-muted); opacity: 1; }
+.nv-app.nv-messaging .nm-compose textarea:focus-visible { outline: 0; }
+.nv-app.nv-messaging .nm-compose-row:focus-within { outline: 2px solid var(--nv-accent); outline-offset: 0; }
+/* Button 198:6023: Green, 9/14/9/16, radio 12, Medium 14 + PaperPlaneRight 16. */
+.nv-app.nv-messaging .nmf-send { display: inline-flex; flex: 0 0 auto; gap: 4px; align-items: center; justify-content: center; padding: 9px 14px 9px 16px; border: 0; border-radius: 12px; background: var(--nv-accent); color: var(--nmf-on-color); font: inherit; font-size: 14px; font-weight: 500; line-height: 20px; white-space: nowrap; cursor: pointer; }
+.nv-app.nv-messaging .nmf-send svg { margin-block: 2px; }
+.nv-app.nv-messaging .nmf-send:disabled { opacity: .55; cursor: not-allowed; }
+.nv-app.nv-messaging .nmf-file-chip { display: flex; gap: 6px; align-items: center; width: fit-content; max-width: 100%; margin: 0 0 8px; padding: 6px 8px 6px 10px; border-radius: 10px; background: var(--nv-card); color: var(--nv-ink-soft); font-size: 12px; }
+.nv-app.nv-messaging .nmf-file-chip > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nv-app.nv-messaging .nmf-file-chip > button { display: grid; place-items: center; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 6px; background: var(--nv-bg); color: var(--nv-ink); cursor: pointer; }
+.nv-app.nv-messaging .nm-compose > p.nmf-note { margin: 8px 4px 0; color: var(--nv-ink-soft); font-size: 11px; line-height: 1.35; }
+.nv-app.nv-messaging .nm-compose > p.nmf-note[role=alert] { color: var(--nv-danger, #c0392b); font-weight: 600; }
+
+/* ── Perfil 207:6722: 275, blanco, radio 12, secciones separadas 20 ───── */
+.nv-app.nv-messaging .nm-layout .nm-profile { display: flex; flex-direction: column; gap: 20px; min-width: 0; padding: 0; border-radius: 12px; background: var(--nv-card); box-shadow: none; }
+.nv-app.nv-messaging .nmf-profile-head { display: flex; align-items: center; justify-content: space-between; min-height: 26px; }
+.nv-app.nv-messaging .nmf-profile-head h2 { margin: 0; color: var(--nv-ink); font-size: 14px; font-weight: 600; line-height: 1.25; }
+.nv-app.nv-messaging .nmf-more { display: grid; place-items: center; padding: 3px; border: 0; border-radius: 5px; background: transparent; color: var(--nv-ink); cursor: pointer; }
+.nv-app.nv-messaging .nmf-profile-id { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.nv-app.nv-messaging .nm-layout .nm-profile .nv-avatar { display: grid; place-items: center; width: 56px; height: 56px; flex: 0 0 56px; margin: 0; border-radius: 28px; background: var(--nv-gold); color: var(--nmf-on-color); font-size: 16px; font-weight: 600; }
+.nv-app.nv-messaging .nmf-profile-id h3 { margin: 0; color: var(--nv-ink); font-size: 16px; font-weight: 600; line-height: 1.24; text-align: center; }
+.nv-app.nv-messaging .nmf-role { margin-top: -8px; padding: 4px 10px; border-radius: 6px; background: var(--nv-accent); color: var(--nmf-on-color); font-size: 11px; line-height: 1.24; }
+.nv-app.nv-messaging .nmf-feature { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.nv-app.nv-messaging .nmf-feature-title { display: flex; gap: 4px; align-items: center; color: var(--nv-muted); }
+.nv-app.nv-messaging .nmf-feature-title svg { flex: 0 0 14px; }
+.nv-app.nv-messaging .nmf-feature-title h4 { flex: 1 1 0; min-width: 0; margin: 0; color: var(--nv-muted); font-size: 12px; font-weight: 400; line-height: 1.3; }
+.nv-app.nv-messaging .nmf-show-all { padding: 2px 2px 3px; border: 0; border-radius: 12px; background: transparent; color: var(--nv-muted); font: inherit; font-size: 12px; font-weight: 500; line-height: 1; cursor: pointer; }
+.nv-app.nv-messaging .nmf-about { display: flex; flex-direction: column; gap: 4px; }
+.nv-app.nv-messaging .nm-profile .nmf-about p { margin: 0; color: var(--nv-ink-soft); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.nv-app.nv-messaging .nmf-about b { font-weight: 500; color: var(--nv-ink); }
+.nv-app.nv-messaging .nm-profile .nmf-empty { margin: 0; padding: 0; }
+/* Gallery 207:6743: miniaturas de 92, radio 12, gap 10, degradé a la derecha. */
+.nv-app.nv-messaging .nmf-gallery { position: relative; display: flex; gap: 10px; overflow: hidden; }
+.nv-app.nv-messaging .nmf-gallery:not(.nmf-gallery-all)::after { content: ''; position: absolute; top: 0; right: 0; width: 24px; height: 92px; background: linear-gradient(to left, rgba(255, 255, 255, .48), rgba(255, 255, 255, 0)); pointer-events: none; }
+.nv-app.nv-messaging .nmf-gallery-all { flex-wrap: wrap; }
+.nv-app.nv-messaging .nmf-image-tile { flex: 0 0 92px; }
+.nv-app.nv-messaging .nmf-image-tile .nmf-image-frame { width: 92px; height: 92px; border-radius: 12px; font-size: 10px; }
+.nv-app.nv-messaging .nmf-docs { display: flex; flex-direction: column; gap: 16px; }
+/* Item List Links 210:5737: Cream-BG, radio 8, 4/2; texto Green-Dark 12. */
+.nv-app.nv-messaging .nmf-links { display: flex; flex-direction: column; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.nv-app.nv-messaging .nmf-links li { display: flex; align-items: center; padding: 4px 2px; border-radius: 8px; background: var(--nv-bg); }
+.nv-app.nv-messaging .nmf-link-icon { display: grid; place-items: center; flex: 0 0 auto; padding: 6px; border: 0; border-radius: 6px; background: var(--nv-bg); color: var(--nv-ink-soft); }
+.nv-app.nv-messaging button.nmf-link-icon { cursor: pointer; }
+.nv-app.nv-messaging .nmf-links a { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--nv-leaf); font-size: 12px; line-height: 1.3; text-decoration: none; }
+.nv-app.nv-messaging .nmf-links a:hover { text-decoration: underline; }
+.nv-app.nv-dark.nv-messaging .nmf-gallery:not(.nmf-gallery-all)::after { background: linear-gradient(to left, rgba(36, 38, 46, .48), rgba(36, 38, 46, 0)); }
+
+.nv-app.nv-messaging :is(.nmf-icon-btn, .nmf-picker, .nmf-new-btn, .nmf-send, .nmf-attach-btn, .nmf-more, .nmf-show-all, .nmf-link-icon, .nmf-image-frame, .nmf-doc > button, .nm-contact-list > button):focus-visible { outline: 2px solid var(--nv-ink); outline-offset: 2px; }
+
+/* Tablet: el perfil pasa debajo, a lo ancho. */
+@media (max-width: 1250px) {
+  .nv-app.nv-messaging .nm-layout,
+  .nv-app.nv-messaging .nm-layout.nmf-profile-closed { grid-template-columns: 260px minmax(0, 1fr); grid-template-rows: minmax(680px, auto) auto; min-height: 0; }
+  .nv-app.nv-messaging .nm-layout .nm-profile { display: flex; grid-column: 1 / -1; padding: 16px 0 0; }
+}
+
+/* Mobile 433:19982: lista, chat y perfil apilados a ancho completo. */
+@media (max-width: 760px) {
+  .nv-app.nv-messaging .nm-layout,
+  .nv-app.nv-messaging .nm-layout.nmf-profile-closed { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; gap: 0; min-height: 0; margin-inline: calc(var(--nv-card-pad) * -1); }
+  .nv-app.nv-messaging .nm-layout .nm-contacts,
+  .nv-app.nv-messaging .nm-layout.nm-patient .nm-contacts { display: flex; gap: 0; overflow: visible; }
+  /* Header 433:20361: pb 20, px 20, línea inferior; búsqueda 12px, botones de 36 (p8, radio 10). */
+  .nv-app.nv-messaging .nmf-list-head { padding: 0 20px 20px; border-bottom: 1px solid var(--nv-line); }
+  .nv-app.nv-messaging .nmf-search { padding: 8px 12px; border-radius: 10px; }
+  .nv-app.nv-messaging .nmf-search svg { width: 16px; height: 16px; flex-basis: 16px; }
+  .nv-app.nv-messaging .nmf-search input { font-size: 12px; line-height: 1.3; }
+  .nv-app.nv-messaging .nmf-icon-btn { padding: 8px; border-radius: 10px; }
+  .nv-app.nv-messaging .nmf-icon-btn svg { width: 20px; height: 20px; }
+  .nv-app.nv-messaging .nmf-new-icon { display: grid; }
+  .nv-app.nv-messaging .nm-layout .nm-contacts-footer { display: none; }
+  .nv-app.nv-messaging .nm-layout .nm-contact-list { display: flex; flex: none; overflow: visible; }
+  /* Item 433:20365: 22/20, avatar 38, cuerpo 11/1.6. */
+  .nv-app.nv-messaging .nm-layout .nm-contact-list > button { min-height: 90px; gap: 16px; padding: 22px 20px; }
+  .nv-app.nv-messaging .nm-layout .nm-contact-list .nv-avatar { width: 38px; height: 38px; flex-basis: 38px; }
+  .nv-app.nv-messaging .nmf-item-main { gap: 8px; }
+  .nv-app.nv-messaging .nmf-item-user em { font-size: 11px; line-height: 1.24; }
+  .nv-app.nv-messaging .nm-contact-list .nmf-item-body small { font-size: 11px; line-height: 1.6; }
+  .nv-app.nv-messaging .nmf-empty { padding: 16px 20px; }
+  /* Center Section 536:17998: a sangre, header 98 (avatar 28, botones de 30). */
+  .nv-app.nv-messaging .nm-layout .nm-conversation { border-radius: 0; }
+  .nv-app.nv-messaging .nmf-chat-head > header { min-height: 0; }
+  .nv-app.nv-messaging .nmf-chat-head .nv-avatar { width: 28px; height: 28px; flex-basis: 28px; font-size: 10px; }
+  .nv-app.nv-messaging .nmf-chat-head small { font-size: 10px; line-height: 1.35; }
+  .nv-app.nv-messaging .nmf-picker { width: 30px; height: 30px; flex-basis: 30px; padding: 6px; border-radius: 8px; }
+  .nv-app.nv-messaging .nmf-picker svg { width: 18px; height: 18px; }
+  .nv-app.nv-messaging .nm-layout .nm-thread { flex: none; height: auto; min-height: 280px; max-height: 70dvh; padding: 0 20px; }
+  .nv-app.nv-messaging .nm-thread .nm-bubble { max-width: min(320px, 100%); }
+  .nv-app.nv-messaging .nm-thread .nm-bubble p { font-size: 11px; line-height: 1.6; }
+  .nv-app.nv-messaging .nmf-meta time { font-size: 10px; line-height: 1.35; }
+  /* Footer 536:18021: tablero 16, input 12px, Send 12px (8/12/8/14, radio 10). */
+  .nv-app.nv-messaging .nm-layout .nm-compose { padding: 16px; }
+  .nv-app.nv-messaging .nm-layout .nm-compose textarea { font-size: 12px; line-height: 1.3; padding: 8px 8px 8px 2px; }
+  .nv-app.nv-messaging .nmf-send { padding: 8px 12px 8px 14px; border-radius: 10px; font-size: 12px; line-height: 20px; }
+  .nv-app.nv-messaging .nmf-send svg { width: 14px; height: 14px; }
+  /* Perfil 536:18171: 24/16, secciones separadas 24. */
+  .nv-app.nv-messaging .nm-layout .nm-profile { grid-column: auto; gap: 24px; padding: 24px 16px; border-radius: 0; }
+}

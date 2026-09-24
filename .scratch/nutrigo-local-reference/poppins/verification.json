@@ -1,0 +1,67 @@
+{
+  "fonts": [
+    {
+      "family": "Poppins",
+      "weight": "400",
+      "status": "loaded"
+    },
+    {
+      "family": "Poppins",
+      "weight": "500",
+      "status": "loaded"
+    },
+    {
+      "family": "Poppins",
+      "weight": "600",
+      "status": "loaded"
+    },
+    {
+      "family": "Poppins",
+      "weight": "700",
+      "status": "loaded"
+    },
+    {
+      "family": "Poppins",
+      "weight": "800",
+      "status": "loaded"
+    }
+  ],
+  "views": [
+    {
+      "width": 1440,
+      "scroll": 1440,
+      "font": "Poppins, Arial, sans-serif",
+      "titleFont": "Poppins, Arial, sans-serif",
+      "role": "Paciente",
+      "theme": "light",
+      "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-local-reference\\poppins\\Paciente-1440.png"
+    },
+    {
+      "width": 390,
+      "scroll": 375,
+      "font": "Poppins, Arial, sans-serif",
+      "titleFont": "Poppins, Arial, sans-serif",
+      "role": "Paciente",
+      "theme": "dark",
+      "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-local-reference\\poppins\\Paciente-390.png"
+    },
+    {
+      "width": 1440,
+      "scroll": 1425,
+      "font": "Poppins, Arial, sans-serif",
+      "titleFont": "Poppins, Arial, sans-serif",
+      "role": "Nutricionista",
+      "theme": "light",
+      "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-local-reference\\poppins\\Nutricionista-1440.png"
+    },
+    {
+      "width": 390,
+      "scroll": 375,
+      "font": "Poppins, Arial, sans-serif",
+      "titleFont": "Poppins, Arial, sans-serif",
+      "role": "Nutricionista",
+      "theme": "dark",
+      "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-local-reference\\poppins\\Nutricionista-390.png"
+    }
+  ]
+}

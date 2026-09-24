@@ -1,0 +1,284 @@
+/* Shell del archivo: Header (84:2568), Navbar con Meal Plan desplegado (84:2995), Section Footer (84:2999).
+   Se carga último: gana sobre las capas anteriores del shell. */
+
+/* ---------- Header del contenido ---------- */
+.nv-app.nv-patient .nv-topbar,
+.nv-app.nv-pro .nv-topbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 50px;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  padding: 28px 28px 0 32px;
+  border: 0;
+  background: transparent;
+}
+.nv-app.nv-patient .nv-topbar .nv-topbar-title,
+.nv-app.nv-pro .nv-topbar .nv-topbar-title {
+  display: block;
+  margin: 0 auto 0 0;
+  color: var(--nv-ink);
+  font-size: 22px;
+  line-height: 1.08;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.nv-app .nv-topbar-label-mobile { display: none; }
+.nv-app .nv-header-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+/* Button Icon: Cream-BG, padding 9, radio 12, icono 22; aviso = punto Orange de 8. */
+.nv-app.nv-patient .nv-header-menu .nv-alerts-bell,
+.nv-app.nv-pro .nv-header-menu .nv-alerts-bell {
+  width: 40px;
+  height: 40px;
+  padding: 9px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--nv-bg);
+  color: var(--nv-ink);
+}
+.nv-app .nv-header-menu .nv-alerts-bell svg { width: 22px; height: 22px; }
+.nv-app .nv-header-menu .nv-alerts-bell .nv-tab-unread {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  min-width: 0;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: var(--nv-orange, #FFA257);
+  font-size: 0;
+}
+/* User Profile: avatar 40 radio 12 Saffron, nombre 16 semibold, rol 11 Gray-20, caret en Button Icon 5/12. */
+.nv-app .nv-user {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.nv-app .nv-user-avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #FFCB65;
+  color: #272932;
+  font-size: 14px;
+  font-weight: 600;
+}
+.nv-app .nv-user-name {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.24;
+  white-space: nowrap;
+}
+.nv-app .nv-user-name strong { color: var(--nv-ink); font-size: 16px; font-weight: 600; }
+.nv-app .nv-user-name small { color: var(--nv-muted); font-size: 11px; font-weight: 400; }
+.nv-app .nv-user-caret {
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  padding: 5px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--nv-bg);
+  color: var(--nv-ink);
+  cursor: pointer;
+}
+.nv-app .nv-user-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 220px;
+  padding: 8px;
+  border-radius: 16px;
+  background: var(--nv-card);
+  box-shadow: 0 4px 12px rgba(176, 176, 176, .14);
+}
+.nv-app .nv-user-menu > button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--nv-ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.nv-app .nv-user-menu > button:hover { background: var(--nv-bg); }
+.nv-app .nv-user-menu .nv-role-switch { display: flex; margin: 0 0 4px; }
+.nv-app .nv-user-menu .nv-role-switch button { flex: 1; }
+
+/* ---------- Dashboard: sin header; perfil y campana arriba del rail (33:1104) ---------- */
+@media (min-width: 1251px) {
+  .nv-app.nv-home.nv-patient .nv-topbar .nv-topbar-title,
+  .nv-app.nv-home.nv-pro .nv-topbar .nv-topbar-title { display: none; }
+  .nv-app.nv-home.nv-patient .nv-topbar,
+  .nv-app.nv-home.nv-pro .nv-topbar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: auto;
+    height: auto;
+    z-index: 5;
+    width: 325px;
+    min-height: 0;
+    padding: 28px 28px 0;
+    box-sizing: border-box;
+  }
+  .nv-app.nv-home .nv-header-menu { width: 100%; }
+  .nv-app.nv-home .nv-header-menu .nv-alerts { order: 2; margin-left: auto; }
+  .nv-app.nv-home .nv-user { order: 1; }
+  .nv-app.nv-home .nv-workspace { position: relative; }
+  .nv-app.nv-home .nv-daily { padding-top: 96px; }
+  .nv-app.nv-home .nv-daily > .nv-person { display: none; }
+}
+
+/* ---------- Navbar: Meal Plan desplegado ---------- */
+.nv-app .nv-sidebar .nv-nav-sub { display: flex; flex-direction: column; gap: 2px; border-radius: 14px; }
+.nv-app .nv-sidebar .nv-nav-sub.nv-open { padding: 2px; background: var(--nv-bg); }
+.nv-app .nv-sidebar nav .nv-nav-sub-head { width: 100%; }
+.nv-app .nv-sidebar nav .nv-nav-sub-head > span { flex: 1; text-align: left; }
+.nv-app .nv-sidebar nav .nv-nav-sub.nv-open .nv-nav-sub-head { padding: 8px 8px 10px 14px; color: #52545B; }
+.nv-app .nv-sidebar nav .nv-nav-sub-items { display: flex; flex-direction: column; gap: 2px; }
+.nv-app .nv-sidebar nav .nv-nav-sub-items button {
+  justify-content: flex-start;
+  padding: 13px 8px 13px 56px;
+  white-space: nowrap;
+  border-radius: 12px;
+  color: #52545B;
+}
+.nv-app .nv-sidebar nav .nv-nav-sub-items button[aria-current=page] { background: var(--nv-accent); color: var(--nv-ink); }
+
+/* ---------- Section Footer ---------- */
+.nv-app .nv-footer {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 28px;
+  min-height: 20px;
+  color: #52545B;
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+.nv-app .nv-footer p { margin: 0; }
+
+/* En el ancho intermedio, las tarjetas se apilan antes de que cambie la
+   orientación de su contenido. Dejar crecer la altura evita tapar el texto. */
+@media (min-width: 800px) and (max-width: 1250px) {
+  .nv-app .np-followup-grid > button { height: auto; }
+}
+@media (min-width: 800px) and (max-width: 1023px) {
+  .nv-app .np-followup-grid > button { flex-direction: row; align-items: center; }
+}
+
+/* ---------- Móvil ---------- */
+@media (max-width: 799px) {
+  .nv-app.nv-patient .nv-topbar,
+  .nv-app.nv-pro .nv-topbar {
+    flex-wrap: nowrap;
+    min-height: 64px;
+    padding: 16px;
+    background: var(--nv-card);
+  }
+  .nv-app.nv-patient .nv-topbar .nv-topbar-title,
+  .nv-app.nv-pro .nv-topbar .nv-topbar-title {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    color: var(--nv-ink);
+    font-size: 16px;
+    line-height: 1.24;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nv-app .nv-topbar-label-desktop { display: none; }
+  .nv-app .nv-topbar-label-mobile { display: inline; }
+  .nv-app .nv-header-menu { flex: none; margin-left: 0; gap: 8px; }
+  .nv-app.nv-patient .nv-header-menu .nv-alerts-bell,
+  .nv-app.nv-pro .nv-header-menu .nv-alerts-bell {
+    width: 32px;
+    height: 32px;
+    padding: 5px;
+  }
+  .nv-app .nv-user { height: 32px; gap: 4px; }
+  .nv-app .nv-user-avatar { width: 32px; height: 32px; }
+  .nv-app .nv-user-caret { width: 32px; height: 32px; align-self: center; }
+  .nv-app .nv-user-name { display: none; }
+  .nv-app .nv-footer { margin-top: 24px; }
+}
+
+/* ---------- Lienzo: fuera del Dashboard el frame es blanco y el Content lleva borde izquierdo Gray-Line ---------- */
+.nv-app:not(.nv-home) .nv-workspace,
+.nv-app:not(.nv-home) .nv-content-layout,
+.nv-app:not(.nv-home) .nv-main {
+  background: var(--nv-card);
+}
+@media (min-width: 800px) {
+  .nv-app:not(.nv-home) .nv-workspace { border-left: 1px solid var(--nv-border); }
+}
+
+/* ---------- Rail del Dashboard, literal de 33:1104 ---------- */
+@media (min-width: 1251px) {
+  .nv-app.nv-home .nv-daily { display: flex; flex-direction: column; gap: 28px; padding: 96px 28px 28px; }
+}
+.nv-app.nv-home .nw-calendar header h2 { display: flex; gap: 4px; align-items: baseline; font-size: 14px; line-height: 1.3; font-weight: 600; text-transform: capitalize; }
+.nv-app.nv-home .nw-calendar header small { font-size: 14px; line-height: 1.3; font-weight: 600; color: var(--nv-muted); }
+.nv-app.nv-home .nw-calendar .nw-today { padding: 6px 8px; border: 0; border-radius: 8px; background: var(--nv-card); }
+.nv-app.nv-home .nw-calendar .nw-day { flex: 1; padding: 8px 4px 6px; border-radius: 10px; }
+.nv-app.nv-home .nw-calendar .nw-day[aria-pressed=true] { background: #C2E66E; color: #272932; font-weight: 600; }
+.nv-app.nv-home .nv-agenda-meals { display: flex; flex-direction: column; gap: 20px; }
+.nv-app.nv-home .nv-agenda-meals > button { display: flex; flex-direction: column; align-items: stretch; gap: 16px; padding: 0 0 20px; border: 0; border-bottom: 1px solid var(--nv-border); border-radius: 0; background: transparent; text-align: left; }
+.nv-app.nv-home .nv-agenda-meals > button:last-child { border-bottom: 0; padding-bottom: 0; }
+.nv-app.nv-home .nv-meal-meta { display: flex; align-items: center; gap: 8px; }
+.nv-app.nv-home .nv-meal-chip { padding: 4px 8px; border-radius: 6px; color: #272932; font-size: 11px; line-height: 1.35; font-weight: 400; }
+.nv-app.nv-home .nv-meal-chip-0 { background: #EEEEEF; }
+.nv-app.nv-home .nv-meal-chip-1 { background: #C2E66E; }
+.nv-app.nv-home .nv-meal-chip-2 { background: #FFCB65; }
+.nv-app.nv-home .nv-meal-chip-3 { background: #FFA257; }
+.nv-app.nv-home .nv-meal-info { display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px; border-radius: 6px; color: #272932; font-size: 11px; line-height: 1.35; }
+.nv-app.nv-home .nv-meal-info-0 { background: #EEEEEF; }
+.nv-app.nv-home .nv-meal-info-1 { background: #DFF9A2; }
+.nv-app.nv-home .nv-meal-info-2 { background: #FFE6B5; }
+.nv-app.nv-home .nv-meal-info-3 { background: #FFE1C9; }
+.nv-app.nv-home .nv-meal-meta > svg { margin-left: auto; padding: 3px; box-sizing: content-box; border-radius: 6px; background: #EEEEEF; transform: rotate(-90deg); }
+.nv-app.nv-home .nv-meal-body { display: flex; align-items: center; gap: 16px; }
+.nv-app.nv-home .nv-meal-body .np-food-photo,
+.nv-app.nv-home .nv-meal-body .np-food-fallback { flex: none; width: 64px; height: 64px; border-radius: 12px; background: #EEEEEF; object-fit: cover; }
+.nv-app.nv-home .nv-meal-body strong { color: var(--nv-ink); font-size: 12px; line-height: 1.3; font-weight: 400; }
+.nv-app.nv-home .nv-recent { display: flex; flex-direction: column; gap: 16px; padding: 0 0 8px; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.nv-app.nv-home .nv-recent h2 { font-size: 14px; line-height: 1.3; font-weight: 600; }
+.nv-app.nv-home .nv-recent li { gap: 12px; padding-bottom: 12px; }
+.nv-app.nv-home .nv-recent li:last-child { padding-bottom: 0; }
+.nv-app.nv-home .nv-recent .nv-icon-tile { width: 32px; height: 32px; padding: 8px; border-radius: 20px; color: #272932; }
+.nv-app.nv-home .nv-recent li:nth-child(4n+1) .nv-icon-tile,
+.nv-app.nv-home .nv-recent li:nth-child(4n) .nv-icon-tile { background: #C2E66E; }
+.nv-app.nv-home .nv-recent li:nth-child(4n+2) .nv-icon-tile { background: #FFCB65; }
+.nv-app.nv-home .nv-recent li:nth-child(4n+3) .nv-icon-tile { background: #FFA257; }
+.nv-app.nv-home .nv-recent small { color: #52545B; font-size: 10px; line-height: 1.35; }
+.nv-app.nv-home .nv-recent p { font-size: 11px; line-height: 1.6; }
+.nv-app.nv-home .nv-daily > .nv-recent { margin-top: 28px; }

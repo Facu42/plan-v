@@ -1,0 +1,51 @@
+.pv-install, .pv-offline {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  margin: 0;
+  padding: 12px 16px;
+  font-family: Poppins, Arial, sans-serif;
+}
+.pv-install {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  background: #e1efd5;
+  color: #173d32;
+}
+.pv-install p { margin: 4px 0 0; font-size: 13px; color: #59685f; }
+.pv-install-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pv-install button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #083a30;
+  color: #f7f6f2;
+  font: inherit;
+  font-weight: 600;
+}
+.pv-install-dismiss { background: transparent !important; color: #173d32 !important; }
+.pv-offline { background: #ffe6ad; color: #173d32; font-size: 14px; }
+.pv-shell-update {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 16px;
+  background: #e1efd5;
+  color: #173d32;
+  font: 14px/1.4 Poppins, Arial, sans-serif;
+}
+.pv-shell-update button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #083a30;
+  color: #f7f6f2;
+  font: inherit;
+  font-weight: 600;
+}

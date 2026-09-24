@@ -1,0 +1,27 @@
+/* Professional weekly plan, based on Nutrigo frames 84:2994, 463:14306 and 470:15300. */
+.npm-plan { display:flex; flex-direction:column; gap:16px; }
+.npm-context { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:58px; padding:10px 16px; border:1px solid var(--nv-border); border-radius:12px; background:var(--nv-card); }
+.npm-context>div { display:flex; align-items:center; gap:10px; min-width:0; }.npm-context strong,.npm-context small { display:block; }.npm-context strong { font-size:12px; }.npm-context small { color:var(--nv-muted); font-size:12px; }
+.npm-context label { display:flex; flex-direction:column; gap:3px; color:var(--nv-muted); font-size:12px; }.npm-context select { min-width:170px; min-height:36px; padding:7px 10px; border:1px solid var(--nv-border); border-radius:8px; color:var(--nv-ink); background:var(--nv-bg); font:inherit; font-size:11px; }
+.npm-plan-note { display:flex; align-items:center; gap:10px; min-height:54px; padding:10px 16px; border-radius:10px; background:var(--nv-card); }.npm-plan-note p { flex:1; }.npm-plan-note strong,.npm-plan-note small { display:block; }.npm-plan-note strong { font-size:11px; }.npm-plan-note small { color:var(--nv-muted); font-size:12px; }
+.npm-error { padding:10px 12px; border-left:3px solid #f87d6d; border-radius:8px; color:var(--nv-ink); background:var(--nv-coral); font-size:13px; font-weight:600; }
+.npm-table-card { padding:16px; border-radius:12px; background:var(--nv-card); overflow:hidden; }.npm-table { width:100%; overflow-x:auto; }.npm-table-inner { display:flex; min-width:700px; flex-direction:column; gap:16px; }
+.npm-table-head,.npm-day-row { display:grid; grid-template-columns:108px minmax(0,1fr) 44px; column-gap:12px; align-items:center; }
+.npm-table-head { min-height:40px; padding:0 12px; border-radius:8px; color:var(--nv-muted); background:var(--nv-bg); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; }.npm-table-head span:last-child { text-align:center; }
+.npm-day-row { min-height:96px; padding:8px 12px; border:1px solid var(--nv-border); border-radius:10px; }.npm-day-row>strong { align-self:start; padding-top:11px; font-size:11px; }
+.npm-meals { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; min-width:0; }.npm-meal-card { position:relative; min-width:0; min-height:78px; padding:8px; border-radius:8px; background:var(--nv-bg); }.npm-meal-card>div { display:flex; align-items:center; justify-content:space-between; gap:5px; min-height:22px; }
+.npm-meal-card input { width:100%; min-height:30px; margin-top:5px; padding:5px 7px; border:1px solid var(--nv-border); border-radius:6px; color:var(--nv-ink); background:var(--nv-card); font:inherit; font-size:12px; }.npm-meal-card input:focus-visible,.npm-add-form :is(input,select):focus-visible { outline:2px solid var(--nv-strong); outline-offset:1px; }
+.npm-card-actions { display:flex; align-items:center; gap:3px; min-width:0; }.npm-save { padding:3px 4px; border:0; color:var(--nv-strong); background:transparent; font-size:12px; font-weight:700; }.npm-save:disabled { color:var(--nv-muted); }
+.npm-remove,.npm-cancel,.npm-day-action>button { display:grid; place-items:center; border:0; color:var(--nv-muted); background:transparent; }.npm-remove { width:20px; height:20px; border-radius:5px; font-size:15px; }.npm-remove:hover { color:#8e3f38; background:var(--nv-coral); }
+.npm-confirm { display:flex; gap:3px; }.npm-confirm button { padding:3px 5px; border:0; border-radius:5px; color:var(--nv-ink); background:var(--nv-coral); font-size:11px; font-weight:700; }.npm-confirm button+button { background:var(--nv-track); }
+.npm-day-action { display:grid; place-items:center; }.npm-day-action>button { width:34px; height:34px; border:1px solid var(--nv-border); border-radius:8px; background:var(--nv-bg); }.npm-day-action>button:hover { color:var(--nv-ink); background:var(--nv-green); }
+.npm-empty { align-self:center; color:var(--nv-muted); font-size:13px; }
+.npm-add-form { grid-column:1/-1; display:grid; grid-template-columns:120px minmax(180px,1fr) auto 28px; gap:7px; padding:8px; border:1px dashed var(--nv-border); border-radius:8px; background:var(--nv-bg); }.npm-add-form :is(input,select) { min-height:34px; padding:6px 8px; border:1px solid var(--nv-border); border-radius:7px; color:var(--nv-ink); background:var(--nv-card); font:inherit; font-size:12px; }.npm-add-form .nv-button { min-height:34px; padding:6px 10px; font-size:12px!important; }.npm-cancel { width:28px; height:34px; font-size:16px; }
+.nv-app.nv-pro.nv-meal-plan .nv-content-layout { grid-template-columns:minmax(0,1fr); }.nv-pro.nv-meal-plan .nv-main { width:100%; }
+@media(max-width:1050px) {
+  .npm-meals { grid-template-columns:repeat(2,minmax(0,1fr)); }.npm-day-row { min-height:184px; align-items:start; }.npm-day-row>strong,.npm-day-action { padding-top:11px; }
+}
+@media(max-width:600px) {
+  .npm-context { align-items:flex-start; flex-direction:column; }.npm-context label,.npm-context select { width:100%; }.npm-context select { min-height:44px; }
+  .npm-table-card { padding:0; background:transparent; }.npm-table { padding:12px; border-radius:12px; background:var(--nv-card); }.npm-add-form { grid-template-columns:110px minmax(180px,1fr) auto 28px; }
+}

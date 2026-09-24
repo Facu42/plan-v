@@ -1,0 +1,22 @@
+[
+  [
+    "consultations-action-stays-in-nutrigo",
+    "pat-sofia"
+  ],
+  [
+    "reschedule-isolated",
+    "pat-sofia"
+  ],
+  [
+    "patient-reset-and-restore",
+    true
+  ],
+  [
+    "cancel-confirmation-isolated",
+    true
+  ],
+  [
+    "patient-calendar-read-only",
+    true
+  ]
+]

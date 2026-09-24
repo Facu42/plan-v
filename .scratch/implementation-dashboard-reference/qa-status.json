@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "tasks": {
+    "PV-01": {
+      "status": "done",
+      "owner": "QA temporal",
+      "notes": "Verificación del tablero; datos aislados del avance real.",
+      "evidence": "QA del dashboard: guardado, recarga y validación de evidencia en instancia aislada.",
+      "updatedAt": "2026-09-17T00:11:21.038Z"
+    }
+  },
+  "history": [
+    {
+      "id": "a6780c4c-4d57-4896-b957-dbadb16511ad",
+      "taskId": "PV-01",
+      "at": "2026-09-17T00:11:20.259Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": [
+        "status",
+        "owner",
+        "notes"
+      ]
+    },
+    {
+      "id": "35f214a4-2f28-4b09-aebf-36ab015d79ec",
+      "taskId": "PV-01",
+      "at": "2026-09-17T00:11:21.038Z",
+      "from": "in_progress",
+      "to": "done",
+      "fields": [
+        "status",
+        "evidence"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,271 @@
+/* Clinic OS layer: Plan V as a modern nutrition practice, not a compressed kit replica.
+   Loaded last. Logo palette, readable type, topbar in the workspace, hairline surfaces. */
+.nv-app {
+  --nv-bg: #f6f3ea;
+  --nv-card: #fffdf8;
+  --nv-ink: #083a30;
+  --nv-muted: #5a6a63;
+  --nv-border: #e2e6dc;
+  --nv-green: #e3f0d8;
+  --nv-gold: #f7e3ae;
+  --nv-coral: #f8d7ce;
+  --nv-accent: #f9b343;
+  --nv-strong: #083a30;
+  --nv-forest: #083a30;
+  --nv-track: #eceee4;
+  --nv-mint: #e3f0d8;
+  --nv-gold-soft: #f7e3ae;
+  --nv-coral-soft: #f8d7ce;
+  --nv-strong-ink: #083a30;
+  --nv-cta: #f9b343;
+  --nv-danger: #8e3f38;
+  font: 14px/1.5 Poppins, Arial, sans-serif;
+  color: var(--nv-ink);
+  background:
+    radial-gradient(1200px 480px at 0% -10%, rgba(98, 170, 102, .08), transparent 55%),
+    var(--nv-bg);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.nv-app.nv-dark {
+  --nv-bg: #0c1f1a;
+  --nv-card: #163028;
+  --nv-ink: #f6f3ea;
+  --nv-muted: #b4c4bb;
+  --nv-border: #2b463c;
+  --nv-green: #234634;
+  --nv-gold: #4a3a1c;
+  --nv-coral: #4a3028;
+  --nv-track: #234033;
+  --nv-mint: #234634;
+  --nv-gold-soft: #4a3a1c;
+  --nv-coral-soft: #4a3028;
+  --nv-danger: #f5b4a8;
+  background:
+    radial-gradient(1000px 420px at 100% 0%, rgba(249, 179, 67, .08), transparent 50%),
+    var(--nv-bg);
+}
+.nv-app .brand-mark { width: 40px; height: 40px; }
+.nv-sidebar {
+  width: 232px;
+  flex-basis: 232px;
+  padding: 28px 16px 24px;
+  background: var(--nv-card);
+  border-right: 1px solid var(--nv-border);
+}
+.nv-brand { margin: 0 8px 32px; }
+.nv-brand > span { font-size: 20px; font-weight: 700; letter-spacing: -.6px; }
+.nv-brand small { font-size: 11px; letter-spacing: .16em; margin-top: 0; font-weight: 600; }
+.nv-sidebar-caption, .nv-nav-group {
+  font-size: 11px;
+  letter-spacing: .14em;
+  margin: 16px 0 8px;
+}
+.nv-sidebar nav { gap: 4px; }
+.nv-sidebar nav button {
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--nv-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+.nv-sidebar nav button:hover { background: var(--nv-track); color: var(--nv-ink); }
+.nv-sidebar nav button[aria-current=page] {
+  background: var(--nv-forest);
+  color: #f9f6ee;
+  font-weight: 600;
+}
+.nv-app.nv-dark .nv-sidebar nav button[aria-current=page] {
+  background: var(--nv-accent);
+  color: #083a30;
+}
+.nv-sidebar-note {
+  margin: 28px 6px 16px;
+  padding: 18px 16px;
+  border-radius: 14px;
+  background: var(--nv-green);
+}
+.nv-sidebar-note strong { font-size: 16px; letter-spacing: -.3px; }
+.nv-sidebar-note p { font-size: 12px; line-height: 1.5; }
+.nv-back {
+  margin-top: auto;
+  padding: 10px 8px;
+  font-size: 12px;
+  color: var(--nv-muted);
+}
+
+.nv-app.nv-patient .nv-topbar,
+.nv-app.nv-pro .nv-topbar {
+  position: sticky;
+  top: 0;
+  left: auto;
+  width: auto;
+  z-index: 30;
+  min-height: 64px;
+  padding: 10px 28px;
+  gap: 12px;
+  border-top: 0;
+  border-bottom: 1px solid var(--nv-border);
+  background: color-mix(in srgb, var(--nv-card) 88%, transparent);
+  backdrop-filter: blur(16px);
+}
+.nv-app.nv-patient .nv-topbar-title,
+.nv-app.nv-pro .nv-topbar-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+.nv-preview-label {
+  font-size: 12px;
+  color: var(--nv-muted);
+}
+.nv-role-switch {
+  margin-left: auto;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--nv-bg);
+  border: 1px solid var(--nv-border);
+}
+.nv-role-switch button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.nv-role-switch button[aria-pressed=true] {
+  background: var(--nv-forest);
+  color: #f9f6ee;
+  font-weight: 600;
+}
+.nv-app.nv-dark .nv-role-switch button[aria-pressed=true] {
+  background: var(--nv-accent);
+  color: #083a30;
+}
+
+.nv-button {
+  min-height: 40px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0;
+  box-shadow: 0 1px 0 rgba(8, 58, 48, .06);
+}
+.nv-button.nv-ghost {
+  min-height: 40px;
+  box-shadow: none;
+  font-weight: 500 !important;
+}
+.nv-button.nv-soft { background: var(--nv-green); color: var(--nv-ink); }
+.nv-search {
+  border-radius: 10px;
+  min-height: 42px;
+  padding: 6px 12px;
+}
+.nv-search input { font-size: 13px; min-height: 30px; width: 180px; }
+
+.nv-main { padding: 28px 32px 40px; }
+.nv-page-head { margin-bottom: 24px; }
+.nv-page-head h1 { font-size: 28px; font-weight: 700; letter-spacing: -.8px; }
+.nv-page-head p { font-size: 14px; margin-top: 6px; }
+.nv-title-dot { color: #23955d; }
+
+.nv-metric, .nv-card, .nv-state {
+  border: 1px solid var(--nv-border);
+  box-shadow: 0 1px 0 rgba(8, 58, 48, .04);
+}
+.nv-metric { min-height: 148px; padding: 16px; border-radius: 14px; }
+.nv-metric h2 { font-size: 13px; font-weight: 500; }
+.nv-metric > strong { font-size: 26px; font-weight: 650; letter-spacing: -.7px; }
+.nv-metric > small, .nv-caption { font-size: 12px; line-height: 1.45; }
+.nv-icon-tile { width: 34px; height: 34px; border-radius: 10px; }
+.nv-card { padding: 22px; border-radius: 16px; }
+.nv-card-head h2 { font-size: 16px; font-weight: 600; }
+.nv-badge { padding: 4px 9px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+.nv-avatar { width: 40px; height: 40px; flex-basis: 40px; border-radius: 12px; font-size: 12px; }
+
+.nv-daily {
+  padding: 28px 24px;
+  background: var(--nv-card);
+  border-left: 1px solid var(--nv-border);
+}
+.nv-person strong, .nv-worklist strong { font-size: 14px; }
+.nv-person small, .nv-worklist small { font-size: 12px; }
+.nv-calendar-strip { padding: 16px; border-radius: 14px; border: 1px solid var(--nv-border); }
+.nv-calendar-strip h2, .nv-daily-heading h2, .nv-worklist h2 { font-size: 14px; font-weight: 600; }
+.nv-calendar-strip button { min-height: 40px; font-size: 12px; }
+.nv-agenda-meals > button { padding: 14px 0; }
+.nv-meal-body strong { font-size: 13px; }
+.nv-meal-meta > small { font-size: 12px; }
+.nv-next-visit {
+  border: 1px solid var(--nv-border);
+  background: var(--nv-bg);
+  border-radius: 14px;
+}
+.nv-next-visit > small { font-size: 11px; letter-spacing: .12em; font-weight: 600; }
+.nv-next-visit > strong { font-size: 16px; }
+.nv-context-banner { font-size: 13px; }
+
+.nv-pro-summary { padding: 12px 0; }
+.nv-pro-summary dt { font-size: 12px; }
+.nv-pro-summary dd { font-size: 22px; }
+.nv-work-toolbar {
+  padding: 14px 16px;
+  border-radius: 14px;
+}
+.nv-work-toolbar header h2 { font-size: 15px; }
+.nv-work-toolbar header span, .nv-work-toolbar > .nv-caption { font-size: 12px; }
+.nv-work-toolbar .nv-action-grid .nv-button { min-height: 40px; font-size: 12px !important; }
+
+.nv-operation-bar {
+  font-family: Poppins, Arial, sans-serif;
+  min-height: 56px;
+  padding: 10px 20px;
+  background: var(--nv-forest);
+  color: #f9f6ee;
+  border-bottom: 0;
+}
+.nv-operation-bar button {
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--nv-accent);
+  color: #083a30;
+  font-weight: 700;
+}
+.dark .nv-operation-bar { background: #10251e; color: #f9f6ee; }
+
+.nv-patient-select select, .nv-app select {
+  min-height: 42px;
+  font-size: 13px;
+  border-radius: 10px;
+}
+
+@media (max-width: 1250px) {
+  .nv-app.nv-patient .nv-sidebar,
+  .nv-app.nv-pro .nv-sidebar { width: 200px; flex-basis: 200px; }
+  .nv-app.nv-patient .nv-topbar,
+  .nv-app.nv-pro .nv-topbar { padding-inline: 18px; }
+  .nv-main { padding: 24px 20px 36px; }
+}
+@media (max-width: 760px) {
+  .nv-app.nv-patient .nv-sidebar,
+  .nv-app.nv-pro .nv-sidebar { width: 100%; flex-basis: auto; padding: 16px; }
+  .nv-app.nv-patient .nv-topbar,
+  .nv-app.nv-pro .nv-topbar {
+    position: static;
+    width: auto;
+    min-height: 60px;
+    padding: 10px 16px;
+    backdrop-filter: none;
+  }
+  .nv-page-head h1 { font-size: 24px; }
+  .nv-main { padding: 20px 16px 32px; }
+  .nv-metrics { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 360px) {
+  .nv-main { padding-inline: 12px; }
+  .nv-page-head h1 { font-size: 22px; }
+}

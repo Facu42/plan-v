@@ -1,0 +1,110 @@
+[
+  {
+    "width": 1440,
+    "scroll": 1440,
+    "stats": [
+      102,
+      102,
+      102,
+      102
+    ],
+    "rail": false,
+    "legacy": false,
+    "main": 1217,
+    "layout": "760.656px 380.344px",
+    "calendar": 760.65625,
+    "queue": 380.34375,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-agenda\\agenda-light-1440.png"
+  },
+  {
+    "width": 800,
+    "scroll": 785,
+    "stats": [
+      102,
+      102,
+      102,
+      102
+    ],
+    "rail": false,
+    "legacy": false,
+    "main": 585,
+    "layout": "549px",
+    "calendar": 549,
+    "queue": 549,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-agenda\\agenda-light-800.png"
+  },
+  {
+    "width": 390,
+    "scroll": 375,
+    "stats": [
+      94,
+      94,
+      94,
+      94
+    ],
+    "rail": false,
+    "legacy": false,
+    "main": 375,
+    "layout": "343px",
+    "calendar": 375,
+    "queue": 375,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-agenda\\agenda-light-390.png"
+  },
+  {
+    "width": 1440,
+    "scroll": 1440,
+    "stats": [
+      102,
+      102,
+      102,
+      102
+    ],
+    "rail": false,
+    "legacy": false,
+    "main": 1217,
+    "layout": "760.656px 380.344px",
+    "calendar": 760.65625,
+    "queue": 380.34375,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-agenda\\agenda-dark-1440.png"
+  },
+  {
+    "width": 800,
+    "scroll": 785,
+    "stats": [
+      102,
+      102,
+      102,
+      102
+    ],
+    "rail": false,
+    "legacy": false,
+    "main": 585,
+    "layout": "549px",
+    "calendar": 549,
+    "queue": 549,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-agenda\\agenda-dark-800.png"
+  },
+  {
+    "width": 390,
+    "scroll": 375,
+    "stats": [
+      94,
+      94,
+      94,
+      94
+    ],
+    "rail": false,
+    "legacy": false,
+    "main": 375,
+    "layout": "343px",
+    "calendar": 375,
+    "queue": 375,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-agenda\\agenda-dark-390.png"
+  }
+]

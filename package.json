@@ -4,18 +4,54 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "local": "node scripts/local.mjs",
+    "dashboard": "node implementation-dashboard/server.mjs",
+    "dashboard:test": "node --test implementation-dashboard/verification.mjs",
+    "dev": "concurrently -n api,vite -c blue,green \"npm run dev:api\" \"npm run dev:vite\"",
+    "dev:api": "node scripts/with-env.mjs tsx watch server/index.ts",
+    "dev:vite": "node scripts/with-env.mjs vite --host",
     "build": "vite build",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit && tsc --noEmit -p tsconfig.server.json",
+    "test": "vitest run",
+    "check:migrations": "node scripts/check-migration-safety.mjs",
+    "apply:disposable": "node scripts/apply-disposable.mjs",
+    "seed:demo": "node scripts/seed-demo.mjs",
+    "figma:pull": "node scripts/figma-pull.mjs",
+    "disposable:pg": "node scripts/disposable-pg.mjs",
+    "test:disposable": "vitest run server/cut1.disposable.test.ts server/rls-ab.test.ts",
+    "test:live-auth": "PLANV_LIVE_AUTH=1 vitest run server/live-auth-storage.test.ts server/rls-ab.test.ts",
+    "backup": "node scripts/with-env.mjs tsx server/ops/backup.ts",
+    "restore": "node scripts/with-env.mjs tsx server/ops/restore.ts",
+    "worker": "node scripts/with-env.mjs tsx server/jobs/worker-main.ts",
+    "start:api": "node scripts/with-env.mjs tsx server/index.ts",
+    "start:worker": "node scripts/with-env.mjs tsx server/jobs/worker-main.ts",
+    "check:secrets": "node scripts/check-secrets.mjs"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.53",
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/poppins": "5.3.0",
+    "@hono/node-server": "^2.1.1",
+    "@phosphor-icons/react": "^2.1.10",
+    "@supabase/supabase-js": "^2.112.4",
+    "ai": "^7.0.87",
+    "hono": "^4.13.5",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "zod": "^4.5.4",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@types/node": "^26.4.0",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
+    "concurrently": "^10.0.5",
+    "pg": "^8.23.0",
+    "tsx": "^4.23.13",
     "typescript": "^5.7.3",
-    "vite": "^6.1.0"
+    "vite": "^6.1.0",
+    "vitest": "^5.0.0"
   }
 }

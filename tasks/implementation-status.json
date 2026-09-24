@@ -1,0 +1,582 @@
+{
+  "schemaVersion": 1,
+  "tasks": {
+    "PV-01": {
+      "status": "done",
+      "owner": "",
+      "notes": "Baseline e inventario entregados. No se publicó el remoto.",
+      "evidence": "Revisión local 2026-09-17 sobre 5123acf. Informe: docs/revision-avance-2026-09-17.md. docs/release-baseline.md y checkpoint 37f3a22; git status --short limpio al iniciar la revisión.",
+      "updatedAt": "2026-09-17T18:09:08.394Z"
+    },
+    "PV-02": {
+      "status": "done",
+      "owner": "",
+      "notes": "Modos explícitos y arranque cerrado ante configuración incompleta.",
+      "evidence": "Revisión local 2026-09-17 sobre 5123acf. Informe: docs/revision-avance-2026-09-17.md. server/config/runtime.ts, runtime.test.ts, middleware/auth.test.ts y context/auth-policy.test.ts. Pruebas aprobadas en la suite actual.",
+      "updatedAt": "2026-09-17T18:09:08.399Z"
+    },
+    "PV-03": {
+      "status": "done",
+      "owner": "",
+      "notes": "DTO paciente construido por allowlist; timeline y notas internas fuera de la respuesta. Falta RLS real en PV-08.",
+      "evidence": "Revisión local 2026-09-17 sobre 5123acf. Informe: docs/revision-avance-2026-09-17.md. server/security/contracts.ts; security/contracts.test.ts y patient-privacy.integration.test.ts aprobados.",
+      "updatedAt": "2026-09-17T18:09:08.404Z"
+    },
+    "PV-04": {
+      "status": "done",
+      "owner": "",
+      "notes": "Fallos live de IA ya no sustituyen resultados por mocks. Errores DB explícitos. Atomicidad de brief pendiente en PV-08/PV-10.",
+      "evidence": "Revisión local 2026-09-17 sobre 5123acf. Informe: docs/revision-avance-2026-09-17.md. server/ai/provider-failure.test.ts y server/ai-db-failures.integration.test.ts aprobados. Foto persistente rechazada antes del proveedor.",
+      "updatedAt": "2026-09-17T18:09:08.408Z"
+    },
+    "PV-05": {
+      "status": "done",
+      "owner": "",
+      "notes": "CI y guarda implementados. Suite local verde: 494 aprobadas y 2 casos Supabase live omitidos.",
+      "evidence": "Verificación del 17/09 sobre 532ff27 más cambios locales: npm test, check, build y check:migrations aprobados. docs/revision-avance-2026-09-17.md.",
+      "updatedAt": "2026-09-17T23:39:38.364Z"
+    },
+    "PV-06": {
+      "status": "done",
+      "owner": "",
+      "notes": "Contrato piloto y diccionario entregados como propuesta. Retención y aplicación del SQL aún requieren revisión de implementación.",
+      "evidence": "Revisión local 2026-09-17 sobre 5123acf. Informe: docs/revision-avance-2026-09-17.md. supabase/contracts/016b_piloto_ampliacion_draft.sql; docs/contrato-diccionario-piloto.md; contracts-016.test.ts y contracts-016b.test.ts aprobados.",
+      "updatedAt": "2026-09-17T18:09:08.416Z"
+    },
+    "PV-07": {
+      "status": "review",
+      "owner": "",
+      "notes": "Nutrigo ya entra al build y usa rol de sesión. Falta recorrido con sesiones reales sintéticas, atrás/adelante y enlaces directos en staging.",
+      "evidence": "Revisión local 2026-09-17 sobre 5123acf. Informe: docs/revision-avance-2026-09-17.md. npm run build aprobado (194 módulos, JS/CSS NutrigoShowroom). design-entry.test.ts y app-location.test.ts aprobados.",
+      "updatedAt": "2026-09-17T18:09:08.420Z"
+    },
+    "PV-08": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Migraciones ejecutables de núcleo e ingreso para esquema vacío. Matriz RLS-01…23 cubiertas en PGlite con shims JWT (Nutri A/B, Paciente A/B). Falta instancia descartable real y JWT live. No aplicar a proyectos con pacientes.",
+      "evidence": "supabase/migrations/20260917190000_core.sql, 20260917190100_intake.sql, 20260918010000_care.sql, 20260919190000_clinical_documents.sql. server/rls-matrix.postgres.test.ts (24 casos). server/intake/postgres.integration.test.ts. server/rls-ab.test.ts sigue omitiendo 2 casos live.",
+      "updatedAt": "2026-09-19T18:16:00.000Z"
+    },
+    "PV-09": {
+      "status": "review",
+      "owner": "",
+      "notes": "Provisión, invitación de un uso y recuperación implementadas con mocks. Falta verificación end-to-end Auth/RPC persistente, dependiente de PV-08.",
+      "evidence": "Revisión local 2026-09-17 sobre 5123acf. Informe: docs/revision-avance-2026-09-17.md. server/identity/*.ts, identity.integration.test.ts, identity-supabase.integration.test.ts e invite-link.test.ts aprobados.",
+      "updatedAt": "2026-09-17T18:09:08.426Z"
+    },
+    "PV-10": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Paridad parcial: ficha, hábitos, menú, turno y objetivo. Siguen 501 para archivo, actividad, recursos, avisos y recibos; brief aún no atómico. Falta read-back tras reinicio real.",
+      "evidence": "Revisión local 2026-09-17 sobre 5123acf. Informe: docs/revision-avance-2026-09-17.md. server/db/supabase-repo.ts y persistence.integration.test.ts aprobados con mocks; server/index.ts conserva ramas 501 explícitas.",
+      "updatedAt": "2026-09-17T18:09:08.429Z"
+    },
+    "PV-11": {
+      "status": "review",
+      "owner": "",
+      "notes": "Paginación, detalle bajo demanda, cache por sesión y cancelación implementados. Falta validar con usuarios/volumen reales y schema aplicado.",
+      "evidence": "Revisión local 2026-09-17 sobre 5123acf. Informe: docs/revision-avance-2026-09-17.md. server/pagination.integration.test.ts y src/store/useAppStore.test.ts aprobados; API con Cache-Control: no-store.",
+      "updatedAt": "2026-09-17T18:09:08.432Z"
+    },
+    "PV-12": {
+      "status": "review",
+      "owner": "",
+      "notes": "Ingreso y consentimiento mediante RPC transaccionales, con errores explícitos. Verificados aislamiento y persistencia en PGlite; Auth/PostgREST reales pendientes en descartable.",
+      "evidence": "server/intake/postgres.integration.test.ts (6 casos) y server/intake-supabase.integration.test.ts (8 casos). Suite: 494 aprobadas / 2 omitidas. Informe vigente: docs/revision-avance-2026-09-17.md.",
+      "updatedAt": "2026-09-17T23:39:38.372Z"
+    },
+    "PV-13": {
+      "status": "review",
+      "owner": "",
+      "notes": "Onboarding de nueve pantallas con cola de revisión corregida, cancelación por ficha, recuperación de carga/conflicto y reintento de envío sin duplicación. Autenticación real pendiente.",
+      "evidence": "intake-session.test.ts e intake-save-queue.test.ts. Navegador 390 px: envío aceptado con respuesta perdida, mismo reintento sin PATCH; carga fallida recuperada sin escrituras. .scratch/intake-recovery-2026-09-17/sent-mobile.png.",
+      "updatedAt": "2026-09-17T23:39:38.377Z"
+    },
+    "PV-14": {
+      "status": "review",
+      "owner": "",
+      "notes": "Revisión profesional, nota privada, fecha de revisión y reintento de carga/conflicto. El cambio de ficha limpia el contenido anterior. Pendiente circuito con JWT real.",
+      "evidence": "Navegador demo 1440/390 px: nota privada y revisión persistidas en memoria, respuesta paciente sin notas; carga CRM 503 recuperada. API/RPC tests y .scratch/intake-recovery-2026-09-17/crm-reviewed-desktop.png.",
+      "updatedAt": "2026-09-17T23:39:38.384Z"
+    },
+    "PV-15": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Fotos corporales y de comida: validación MIME/tamaño, bucket privado, URL firmada 60s, consentimiento y borrado. Falta reserva/cuarentena/EXIF y el circuito completo de Storage.",
+      "evidence": "supabase/migrations/20260918010000_care.sql; server/care/repository.ts, meal-photos.ts; pruebas de flujo y PGlite. No aplicar SQL a proyectos con pacientes.",
+      "updatedAt": "2026-09-18T14:10:00.000Z"
+    },
+    "PV-16": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Estudios PDF/JPG/PNG con consentimiento, visor de 60 s y retiro por el paciente en demo y PGlite. Falta Auth/Storage live en instancia descartable. Sin interpretación automática.",
+      "evidence": "docs/revision-avance-2026-09-19.md; server/care/flow.integration.test.ts; server/intake/postgres.integration.test.ts; supabase/migrations/20260919190000_clinical_documents.sql. No aplicar SQL a proyectos con pacientes.",
+      "updatedAt": "2026-09-19T17:30:00.000Z"
+    },
+    "PV-17": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Peso semanal y cintura mensual autodeclarados, con fecha, consentimiento e historial. Sin inferir medidas desde fotos.",
+      "evidence": "careInputSchema, dueCareReminders, CarePanel y postgres.integration.test.ts. Demo en memoria; Auth real pendiente.",
+      "updatedAt": "2026-09-18T14:10:00.000Z"
+    },
+    "PV-24": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Adjuntos de chat sólo via patient_assets chat_attachment listos; preview 60s auditado; profesional y paciente; fail closed 501 sin RPC nueva. Live schema/buckets bloqueado (patients existe).",
+      "evidence": "supabase/migrations/20260921290000_message_attachments.sql; server/messages/*; NutrigoMessages attach. 743 pruebas OK, 2 omitidas; check/check:migrations/build OK. No SQL en el proyecto con patients.",
+      "updatedAt": "2026-09-21T18:24:00.000Z"
+    },
+    "PV-21": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Compras del plan publicado: cantidades/unidades, suma compatible, g vs taza aparte, texto libre sin qty inventada, manuales que sobreviven republicar, checks por source_key. Fail closed 501 sin RPC. Live schema bloqueado (patients existe).",
+      "evidence": "supabase/migrations/20260921280000_shopping_lists.sql; server/shopping/*; ShowroomGrocery API+fallback. 735 pruebas OK, 2 omitidas; check/check:migrations/build OK. No SQL en el proyecto con patients.",
+      "updatedAt": "2026-09-21T18:00:00.000Z"
+    },
+    "PV-22": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Save-first: el registro existe antes de la IA. Duplicados por client_id no crean otra comida; IA failed deja foto/texto, analysis_status=failed, macros=null. Revisión append-only. Fail closed 501 sin schema/buckets. Falta job asíncrono y Auth/Storage live.",
+      "evidence": "supabase/migrations/20260921220000_meal_diary.sql; server/diary/*; MealLogModal client_id. 628 pruebas OK, 2 omitidas; check/check:migrations/build OK.",
+      "updatedAt": "2026-09-21T04:06:00.000Z"
+    },
+    "PV-23": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Hilos 1:1 con client_id idempotente; entrega y lectura por persona (no por dispositivo); primera marca inmutable. Fail closed 501 sin schema. GET hospedado cae al hilo 016 sin recibos. Falta schema live.",
+      "evidence": "supabase/migrations/20260921230000_message_threads.sql; server/messages/*; NutrigoMessages/PatientMessages client_id. Demo+PGlite; live schema bloqueado (patients existe).",
+      "updatedAt": "2026-09-21T04:20:00.000Z"
+    },
+    "PV-25": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Timestamps UTC, timezone Buenos Aires, confirmación persistida (confirmed_at inmutable), reprogramación paciente día/hora, cancel+insert, lock de solapes 409. Fail closed 501 sin schema. GET hospedado cae a turnos 016. Falta schema live.",
+      "evidence": "supabase/migrations/20260921240000_appointments.sql; server/appointments/*; ShowroomPatientAgenda confirm API. Demo+PGlite; live schema bloqueado (patients existe).",
+      "updatedAt": "2026-09-21T04:46:00.000Z"
+    },
+    "PV-34": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Progreso longitudinal same-patient: períodos 7/30/90, series de medidas con fuente, delta este-vs-anterior sin mezclar unidades ni rellenar vacíos, sin ranking. Fail closed 501 sin RPC. Live schema bloqueado (patients existe).",
+      "evidence": "supabase/migrations/20260921310000_patient_progress.sql; server/progress/*; ShowroomProgress chips. 757 pruebas OK, 2 omitidas; check/check:migrations/build OK. No SQL en el proyecto con patients.",
+      "updatedAt": "2026-09-21T19:00:00.000Z"
+    },
+    "PV-35": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Biblioteca de ejercicios y rutinas asignables sólo con habilitación verificada en servidor (el rol nutricionista no alcanza). activity_logs autodeclarados persistidos; series/reps/feedback; sin calorías inferidas. Fail closed 501 sin schema. Live schema bloqueado (patients existe).",
+      "evidence": "supabase/migrations/20260921320000_exercise_library.sql; server/exercise/*; ShowroomExercise biblioteca/rutina. 764 pruebas OK, 2 omitidas; check/check:migrations/build OK. No SQL en el proyecto con patients.",
+      "updatedAt": "2026-09-21T19:20:00.000Z"
+    },
+    "PV-26": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Outbox persistente: enqueue idempotente, prefs in_app/email/push, reintentos, skip desactivado/desvinculado. in_app al buzón; email/push nunca sent sin adaptador/claves. Fail closed 501 sin schema. Live schema/claves no.",
+      "evidence": "supabase/migrations/20260921300000_notification_outbox.sql; server/outbox/*; ShowroomConsultAlerts prefs. 748 pruebas OK, 2 omitidas; check/check:migrations/build OK. No SQL en el proyecto con patients. No se inventaron claves de mail/push.",
+      "updatedAt": "2026-09-21T18:42:00.000Z"
+    },
+    "PV-27": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Jobs versionados receta/menú con prompt_version, context_hash, límites de tokens/tiempo/cola y apply a borrador profesional. Nunca publica. Fail closed 501 sin schema. Live schema/claves IA no.",
+      "evidence": "supabase/migrations/20260921250000_ai_jobs.sql; server/ai-jobs/*; server/ai/context.ts. 653 pruebas OK, 2 omitidas; check/check:migrations/build OK.",
+      "updatedAt": "2026-09-21T05:05:00.000Z"
+    },
+    "PV-28": {
+      "status": "in_progress",
+      "owner": "",
+      "notes": "Evaluación sintética eval.v1 (30 escenarios) al publicar/asignar: alergias, faltantes/unidades, coherencia, edición concurrente; apply/worker no publican. Fail closed 501 sin schema. Live schema/claves IA no.",
+      "evidence": "server/ai-eval/*; supabase/migrations/20260921260000_ai_eval.sql. 691 pruebas OK, 2 omitidas; check/check:migrations/build OK.",
+      "updatedAt": "2026-09-19T20:02:00.000Z"
+    }
+  },
+  "history": [
+    {
+      "id": "c21a35e0-9f12-4a3b-8c01-pv350001",
+      "taskId": "PV-35",
+      "at": "2026-09-21T19:20:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c21a34e0-9f12-4a3b-8c01-pv340001",
+      "taskId": "PV-34",
+      "at": "2026-09-21T19:00:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c21a26e0-9f12-4a3b-8c01-pv260001",
+      "taskId": "PV-26",
+      "at": "2026-09-21T18:42:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c21a21e0-9f12-4a3b-8c01-pv210002",
+      "taskId": "PV-21",
+      "at": "2026-09-21T18:00:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c21a27e0-9f12-4a3b-8c01-pv270001",
+      "taskId": "PV-27",
+      "at": "2026-09-21T05:05:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c19a22e0-9f12-4a3b-8c01-acomp0001",
+      "taskId": "PV-22",
+      "at": "2026-09-19T20:02:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c21a23e0-9f12-4a3b-8c01-pv230001",
+      "taskId": "PV-23",
+      "at": "2026-09-21T04:20:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c21a25e0-9f12-4a3b-8c01-pv250001",
+      "taskId": "PV-25",
+      "at": "2026-09-21T04:46:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c19a25e0-9f12-4a3b-8c01-acomp0003",
+      "taskId": "PV-25",
+      "at": "2026-09-19T20:02:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c19a27e0-9f12-4a3b-8c01-acomp0004",
+      "taskId": "PV-27",
+      "at": "2026-09-19T20:02:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c21a28e0-9f12-4a3b-8c01-pv280001",
+      "taskId": "PV-28",
+      "at": "2026-09-21T05:30:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c19a16e0-9f12-4a3b-8c01-estudios0001",
+      "taskId": "PV-16",
+      "at": "2026-09-19T17:30:00.000Z",
+      "from": "in_progress",
+      "to": "in_progress",
+      "fields": ["notes", "evidence"]
+    },
+    {
+      "id": "c18a15e0-9f12-4a3b-8c01-seguimiento0001",
+      "taskId": "PV-15",
+      "at": "2026-09-18T14:10:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a16e0-9f12-4a3b-8c01-seguimiento0002",
+      "taskId": "PV-16",
+      "at": "2026-09-18T14:10:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a17e0-9f12-4a3b-8c01-seguimiento0003",
+      "taskId": "PV-17",
+      "at": "2026-09-18T14:10:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a21e0-9f12-4a3b-8c01-seguimiento0004",
+      "taskId": "PV-21",
+      "at": "2026-09-18T14:10:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a26e0-9f12-4a3b-8c01-seguimiento0005",
+      "taskId": "PV-26",
+      "at": "2026-09-18T14:10:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "c18a27e0-9f12-4a3b-8c01-seguimiento0006",
+      "taskId": "PV-27",
+      "at": "2026-09-18T14:10:00.000Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": ["status", "notes", "evidence"]
+    },
+    {
+      "id": "83a82128-0407-4c96-a75f-d19f999ab463",
+      "taskId": "PV-01",
+      "at": "2026-09-17T18:09:08.394Z",
+      "from": "pending",
+      "to": "done",
+      "fields": [
+        "status",
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "6debdba7-7c64-45cc-a194-dcc5c47e4bae",
+      "taskId": "PV-02",
+      "at": "2026-09-17T18:09:08.399Z",
+      "from": "pending",
+      "to": "done",
+      "fields": [
+        "status",
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "1bcf4417-9f62-4738-b980-2789ef04fc43",
+      "taskId": "PV-03",
+      "at": "2026-09-17T18:09:08.404Z",
+      "from": "pending",
+      "to": "done",
+      "fields": [
+        "status",
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "7048f5e1-61eb-49fd-b693-e566b19e32b8",
+      "taskId": "PV-04",
+      "at": "2026-09-17T18:09:08.408Z",
+      "from": "pending",
+      "to": "done",
+      "fields": [
+        "status",
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "dd5f0f9f-3c3c-48a3-b280-11710e96e95f",
+      "taskId": "PV-05",
+      "at": "2026-09-17T18:09:08.412Z",
+      "from": "pending",
+      "to": "done",
+      "fields": [
+        "status",
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "b3669a10-4579-4509-a53d-173e7bd112b7",
+      "taskId": "PV-06",
+      "at": "2026-09-17T18:09:08.416Z",
+      "from": "pending",
+      "to": "done",
+      "fields": [
+        "status",
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "351c2bf5-c35e-46a7-80c5-9341119a3c02",
+      "taskId": "PV-07",
+      "at": "2026-09-17T18:09:08.420Z",
+      "from": "pending",
+      "to": "review",
+      "fields": [
+        "status",
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "60c4eeab-0205-4e2b-a2f5-65232ee57c5d",
+      "taskId": "PV-08",
+      "at": "2026-09-17T18:09:08.423Z",
+      "from": "pending",
+      "to": "blocked",
+      "fields": [
+        "status",
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "cb9fea26-8141-4c8b-932b-342c00beb54c",
+      "taskId": "PV-09",
+      "at": "2026-09-17T18:09:08.426Z",
+      "from": "pending",
+      "to": "review",
+      "fields": [
+        "status",
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "132cd9e8-f566-429f-870b-d87f38380459",
+      "taskId": "PV-10",
+      "at": "2026-09-17T18:09:08.429Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": [
+        "status",
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "f3bc3fd7-5eab-4586-b5ff-799bbf78a158",
+      "taskId": "PV-11",
+      "at": "2026-09-17T18:09:08.432Z",
+      "from": "pending",
+      "to": "review",
+      "fields": [
+        "status",
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "5ae0d575-f223-474c-a611-d1a0e9ba4f78",
+      "taskId": "PV-12",
+      "at": "2026-09-17T18:09:08.435Z",
+      "from": "pending",
+      "to": "in_progress",
+      "fields": [
+        "status",
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "4c14e598-9bc7-4499-a473-84609086c07d",
+      "taskId": "PV-13",
+      "at": "2026-09-17T18:09:08.439Z",
+      "from": "pending",
+      "to": "blocked",
+      "fields": [
+        "status",
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "015e5620-eb7e-47cb-aece-84d677755aa7",
+      "taskId": "PV-05",
+      "at": "2026-09-17T23:39:38.364Z",
+      "from": "done",
+      "to": "done",
+      "fields": [
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "19e178c6-334a-481f-b2e3-bd11ec401f4d",
+      "taskId": "PV-12",
+      "at": "2026-09-17T23:39:38.372Z",
+      "from": "review",
+      "to": "review",
+      "fields": [
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "ab0f628d-a821-4d66-8073-5bffd13bc274",
+      "taskId": "PV-13",
+      "at": "2026-09-17T23:39:38.377Z",
+      "from": "review",
+      "to": "review",
+      "fields": [
+        "notes",
+        "evidence"
+      ]
+    },
+    {
+      "id": "84d0942a-c910-4c1c-8e4a-ad18e688ffa3",
+      "taskId": "PV-14",
+      "at": "2026-09-17T23:39:38.384Z",
+      "from": "review",
+      "to": "review",
+      "fields": [
+        "notes",
+        "evidence"
+      ]
+    }
+  ],
+  "audit": {
+    "reviewedAt": "2026-09-17T23:39:38.388Z",
+    "commit": "532ff27 + cambios locales",
+    "summary": "Continuación del trabajo de Cursor: ingreso recuperable, envío sin duplicación y revisión privada en CRM. Verificación local y navegador demo; Supabase Auth real pendiente.",
+    "checks": [
+      {
+        "label": "Pruebas",
+        "result": "494 OK · 2 omitidas · 97 archivos",
+        "status": "passed"
+      },
+      {
+        "label": "RLS real",
+        "result": "2 omitidas; PGlite 6/6",
+        "status": "skipped"
+      },
+      {
+        "label": "TypeScript",
+        "result": "frontend y servidor aprobados",
+        "status": "passed"
+      },
+      {
+        "label": "Build",
+        "result": "198 módulos",
+        "status": "passed"
+      },
+      {
+        "label": "Guarda SQL",
+        "result": "aprobada",
+        "status": "passed"
+      },
+      {
+        "label": "Dashboard",
+        "result": "8/8 pruebas",
+        "status": "passed"
+      },
+      {
+        "label": "Navegador",
+        "result": "recuperación, envío y CRM · 390/1440 px · demo",
+        "status": "passed"
+      }
+    ]
+  }
+}

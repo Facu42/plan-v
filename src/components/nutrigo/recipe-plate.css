@@ -1,0 +1,31 @@
+.recipe-plate{display:flex;flex-direction:column;overflow:hidden;margin:0;border:1px solid var(--nv-border);border-radius:22px;background:var(--nv-card);box-shadow:0 10px 30px rgba(8,58,48,.06)}
+.recipe-dish{margin:0;background:#f3efe6}
+.recipe-dish svg{display:block;width:100%;height:auto;aspect-ratio:16/10}
+.recipe-dish img{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover}
+.recipe-dish figcaption{padding:8px 16px 0;color:var(--nv-muted);font-size:11px;letter-spacing:.02em}
+.recipe-plate-body{display:flex;flex-direction:column;gap:8px;padding:16px 18px 18px}
+.recipe-plate-badge{align-self:flex-start;padding:4px 10px;border-radius:999px;background:var(--nv-green);color:var(--nv-strong);font-size:11px;font-weight:700;letter-spacing:.04em}
+.recipe-plate h3{margin:2px 0 0;font-size:22px;letter-spacing:-.03em;line-height:1.15}
+.recipe-plate-meta{margin:0;color:var(--nv-muted);font-size:13px}
+.recipe-macros{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:8px 0 0}
+.recipe-macros div{display:flex;flex-direction:column;gap:2px;min-width:0;padding:10px 8px;border-radius:14px;background:var(--nv-bg);text-align:center}
+.recipe-macros dd{margin:0;font-size:22px;font-weight:700;letter-spacing:-.04em;line-height:1}
+.recipe-macros dt{font-size:10px;font-weight:700;letter-spacing:.08em}
+.recipe-macros [data-macro=kcal] dd{color:var(--nv-ink)}
+.recipe-macros [data-macro=prot] dd{color:#2f6f9f}
+.recipe-macros [data-macro=carbs] dd{color:#c46a2b}
+.recipe-macros [data-macro=fat] dd{color:#a33b3b}
+.recipe-macro-missing{margin:4px 0 0;color:var(--nv-muted);font-size:13px}
+.recipe-plate-ingredients{margin:4px 0 0;padding-left:18px;color:var(--nv-ink);font-size:14px}
+.recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.recipe-choice{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.recipe-choice button{padding:18px;border:1px solid var(--nv-border);border-radius:16px;background:var(--nv-bg);color:var(--nv-ink);text-align:left;font:inherit}
+.recipe-choice button strong{display:block;margin-bottom:6px;font-size:16px}
+.recipe-choice button span{color:var(--nv-muted);font-size:13px;line-height:1.45}
+.recipe-overlay{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:24px;background:rgba(8,30,24,.45)}
+.recipe-overlay-card{width:min(440px,100%);max-height:90vh;overflow:auto;padding:18px;border-radius:22px;background:var(--nv-card)}
+.recipe-overlay-card h2{margin:0 0 8px;font-size:18px}
+.recipe-wizard-note{margin:0 0 8px;color:var(--nv-muted);font-size:13px}
+@media(max-width:800px){.recipe-choice,.recipe-macros{grid-template-columns:1fr 1fr}}
+@media(max-width:390px){.recipe-choice{grid-template-columns:1fr}.recipe-macros dd{font-size:18px}.recipe-plate h3{font-size:20px}}
+.recipe-choice button:focus-visible,.recipe-overlay button:focus-visible{outline:3px solid var(--nv-strong);outline-offset:2px}

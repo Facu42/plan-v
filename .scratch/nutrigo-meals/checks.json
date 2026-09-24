@@ -1,0 +1,26 @@
+[
+  [
+    "activities-opens-new-diary",
+    true
+  ],
+  [
+    "selected-patient-data-isolated",
+    "pat-sofia"
+  ],
+  [
+    "search-and-empty-state",
+    true
+  ],
+  [
+    "review-dialog-private-note",
+    "ml-s1"
+  ],
+  [
+    "review-action-stays-in-nutrigo",
+    true
+  ],
+  [
+    "patient-diary-excludes-private-notes",
+    true
+  ]
+]

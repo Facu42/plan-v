@@ -1,0 +1,66 @@
+[
+  {
+    "flow": "menu-save-and-restore",
+    "patientPreviewUpdated": true,
+    "apiReadback": true
+  },
+  {
+    "flow": "appointment-save-and-restore",
+    "apiReadback": true
+  },
+  {
+    "flow": "review-dialog",
+    "patient": "Marina",
+    "unchanged": true
+  },
+  {
+    "module": "Inicio",
+    "opened": true
+  },
+  {
+    "module": "Reciente",
+    "opened": true
+  },
+  {
+    "module": "Guardado",
+    "opened": true
+  },
+  {
+    "module": "Centro de seguimiento",
+    "opened": true
+  },
+  {
+    "module": "Paneles",
+    "opened": true
+  },
+  {
+    "module": "Actividades",
+    "opened": true
+  },
+  {
+    "module": "Pacientes",
+    "opened": true
+  },
+  {
+    "module": "Fichas",
+    "opened": true
+  },
+  {
+    "module": "Videollamadas",
+    "opened": true
+  },
+  {
+    "module": "Agenda",
+    "opened": true
+  },
+  {
+    "module": "Objetivos",
+    "opened": true
+  },
+  {
+    "flow": "patient-isolation",
+    "otherPatientUnchanged": true,
+    "editedFieldsRestored": true,
+    "errors": []
+  }
+]

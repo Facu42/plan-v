@@ -1,0 +1,19 @@
+# Postgres 16 vacío, sólo 127.0.0.1. Trust local. Sin volumen persistente de pacientes.
+# Preferido: npm run disposable:pg -- reset  (docker run; no requiere plugin compose)
+# Alternativa: docker compose -f supabase/disposable/docker-compose.yml up -d
+services:
+  plan-v-disposable:
+    image: postgres:16-alpine
+    container_name: plan-v-disposable
+    restart: "no"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_USER: planv
+      POSTGRES_DB: planv_disposable
+    ports:
+      - "127.0.0.1:55433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U planv -d planv_disposable"]
+      interval: 2s
+      timeout: 3s
+      retries: 20

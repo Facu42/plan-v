@@ -1,0 +1,26 @@
+[
+  [
+    "patient-send-readback-isolated",
+    true
+  ],
+  [
+    "patient-context-opens-agenda",
+    true
+  ],
+  [
+    "professional-search-select-send-isolated",
+    true
+  ],
+  [
+    "professional-context-opens-record-and-consultations",
+    true
+  ],
+  [
+    "private-fields-excluded",
+    14
+  ],
+  [
+    "responsive-themes",
+    6
+  ]
+]

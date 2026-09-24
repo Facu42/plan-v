@@ -1,0 +1,82 @@
+[
+  {
+    "width": 1440,
+    "scroll": 1425,
+    "summary": 4,
+    "filters": 3,
+    "rows": 5,
+    "table": 781,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patients\\directory-light-1440.png"
+  },
+  {
+    "width": 800,
+    "scroll": 785,
+    "summary": 4,
+    "filters": 3,
+    "rows": 5,
+    "table": 509,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patients\\directory-light-800.png"
+  },
+  {
+    "width": 390,
+    "scroll": 375,
+    "summary": 4,
+    "filters": 3,
+    "rows": 5,
+    "table": 307,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patients\\directory-light-390.png"
+  },
+  {
+    "width": 320,
+    "scroll": 305,
+    "summary": 4,
+    "filters": 3,
+    "rows": 5,
+    "table": 249,
+    "theme": "light",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patients\\directory-light-320.png"
+  },
+  {
+    "width": 1440,
+    "scroll": 1425,
+    "summary": 4,
+    "filters": 3,
+    "rows": 5,
+    "table": 781,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patients\\directory-dark-1440.png"
+  },
+  {
+    "width": 800,
+    "scroll": 785,
+    "summary": 4,
+    "filters": 3,
+    "rows": 5,
+    "table": 509,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patients\\directory-dark-800.png"
+  },
+  {
+    "width": 390,
+    "scroll": 375,
+    "summary": 4,
+    "filters": 3,
+    "rows": 5,
+    "table": 307,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patients\\directory-dark-390.png"
+  },
+  {
+    "width": 320,
+    "scroll": 305,
+    "summary": 4,
+    "filters": 3,
+    "rows": 5,
+    "table": 249,
+    "theme": "dark",
+    "shot": "C:\\Users\\facun\\OneDrive\\Desktop\\Personal\\Vero Insta\\Plan V\\plan-v\\.scratch\\nutrigo-patients\\directory-dark-320.png"
+  }
+]
