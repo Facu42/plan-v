@@ -27,6 +27,7 @@
   letter-spacing: 0;
   text-transform: none;
 }
+.nv-app .nv-topbar-label-mobile { display: none; }
 .nv-app .nv-header-menu {
   display: flex;
   align-items: center;
@@ -183,18 +184,50 @@
 }
 .nv-app .nv-footer p { margin: 0; }
 
+/* En el ancho intermedio, las tarjetas se apilan antes de que cambie la
+   orientación de su contenido. Dejar crecer la altura evita tapar el texto. */
+@media (min-width: 800px) and (max-width: 1250px) {
+  .nv-app .np-followup-grid > button { height: auto; }
+}
+@media (min-width: 800px) and (max-width: 1023px) {
+  .nv-app .np-followup-grid > button { flex-direction: row; align-items: center; }
+}
+
 /* ---------- Móvil ---------- */
 @media (max-width: 799px) {
   .nv-app.nv-patient .nv-topbar,
   .nv-app.nv-pro .nv-topbar {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     min-height: 64px;
-    padding: 12px 16px;
+    padding: 16px;
     background: var(--nv-card);
   }
   .nv-app.nv-patient .nv-topbar .nv-topbar-title,
-  .nv-app.nv-pro .nv-topbar .nv-topbar-title { display: none; }
-  .nv-app .nv-header-menu { margin-left: auto; gap: 8px; }
+  .nv-app.nv-pro .nv-topbar .nv-topbar-title {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    color: var(--nv-ink);
+    font-size: 16px;
+    line-height: 1.24;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nv-app .nv-topbar-label-desktop { display: none; }
+  .nv-app .nv-topbar-label-mobile { display: inline; }
+  .nv-app .nv-header-menu { flex: none; margin-left: 0; gap: 8px; }
+  .nv-app.nv-patient .nv-header-menu .nv-alerts-bell,
+  .nv-app.nv-pro .nv-header-menu .nv-alerts-bell {
+    width: 32px;
+    height: 32px;
+    padding: 5px;
+  }
+  .nv-app .nv-user { height: 32px; gap: 4px; }
+  .nv-app .nv-user-avatar { width: 32px; height: 32px; }
+  .nv-app .nv-user-caret { width: 32px; height: 32px; align-self: center; }
   .nv-app .nv-user-name { display: none; }
   .nv-app .nv-footer { margin-top: 24px; }
 }

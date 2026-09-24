@@ -56,6 +56,14 @@ import { CaretDown, CaretUp } from '@phosphor-icons/react';
 
 const WORK_CENTER_PAGES: WorkCenterModule[] = ['reciente', 'guardado', 'seguimiento', 'paneles', 'videollamadas'];
 const isWorkCenterPage = (page: ShowroomPage): page is WorkCenterModule => WORK_CENTER_PAGES.includes(page as WorkCenterModule);
+const MOBILE_PAGE_LABELS: Partial<Record<ShowroomPage, string>> = {
+  plan: 'Plan',
+  diario: 'Diario',
+  seguimiento: 'Seguimiento',
+  videollamadas: 'Video',
+  recetas: 'Menú',
+  compras: 'Compras',
+};
 
 type NutrigoShowroomProps = {
   darkMode: boolean;
@@ -268,7 +276,10 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
     <div className="nv-workspace">
       <header className="nv-topbar" ref={topbarRef}>
         <a className="nv-brand" href={buildAppHref(typeof window === 'undefined' ? 'https://plan.v/app/inicio' : window.location.href, role, 'inicio')} onClick={(event) => { event.preventDefault(); navigate('inicio'); }}><Mark /><span>Plan V</span></a>
-        <h1 className="nv-topbar-title">{PAGE_LABELS[page]}</h1>
+        <h1 className="nv-topbar-title" aria-label={PAGE_LABELS[page]}>
+          <span className="nv-topbar-label-desktop">{PAGE_LABELS[page]}</span>
+          <span className="nv-topbar-label-mobile" aria-hidden="true">{MOBILE_PAGE_LABELS[page] ?? PAGE_LABELS[page]}</span>
+        </h1>
         <div className="nv-header-menu">
           <ShowroomConsultAlerts key={alertAudience} audience={alertAudience} alerts={consultAlerts} reminders={habitReminders} patientId={selected?.id} onOpen={(alert) => { if (role === 'pro') setSelectedId(alert.patientId); navigate('agenda'); }} onManage={role === 'pro' ? (alert) => { setSelectedId(alert.patientId); navigate('consultas'); } : undefined} onOpenReminder={openReminder} onOpenCare={(notice) => { if (role === 'pro') setSelectedId(notice.patient_id); navigate(notice.target); }} />
           <div className="nv-user">
