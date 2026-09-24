@@ -34,9 +34,9 @@ Texto canónico: [design/nutrigo-fidelity.md](../design/nutrigo-fidelity.md). Co
 1. **Color:** paleta del logo en pasteles — menta, verde, coral, lila, lima. Más minimalista. **No** adoptar el amarillo/naranja energético del pack. El isotipo sigue teniendo píxeles dorados; no pintan la UI.
 2. **Tipo:** sans geométrica **Inter** (referencia de UI tipo Noteme). Jerarquía 400 cuerpo / 500 etiquetas / 600 títulos / 700 ítem activo. Poppins no es la ley de marca. Fraunces no es la cara principal de la UI.
 3. **Pantallas de fidelidad:** inventario del pack **sin Ejercicio** (11). Recipe Details e Insights siguen. Ejercicio permanece en el producto; no entra en este pase visual.
-4. **QA:** los once PNG de escritorio están en `design/nutrigo-exports/`. Los botones de acción usan lima, no el dorado del pack. La comparación no es aprobación visual. Facu todavía firma.
+4. **QA al 2026-09-22:** los once PNG de escritorio están en `design/nutrigo-exports/`. Los botones de acción usan lima, no el dorado del pack. La comparación técnica todavía no era aprobación visual; Facu firmó el gate el 2026-09-24.
 
-Estructura y medidas del pack (sidebar, rails, reorganización tablet/móvil). Piel = Plan V + minimalismo Noteme: aire, radios ~16–24, sombra suave, navegación en píldora. `PLANV_NUTRIGO_VISUAL` sigue sin setearse.
+Estructura y medidas del pack (sidebar, rails, reorganización tablet/móvil). Piel = Plan V + minimalismo Noteme: aire, radios ~16–24, sombra suave, navegación en píldora. Facu aprobó `PLANV_NUTRIGO_VISUAL` el 2026-09-24; queda pendiente el pase mobile.
 
 ## NV-FIDELITY — en curso, parcial
 
