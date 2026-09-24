@@ -1,9 +1,9 @@
 import { generateText, Output } from 'ai';
-import { openai } from '@ai-sdk/openai';
 import { copilotBriefSchema, type CopilotBrief } from '../schemas.js';
 import type { AppStore } from '../store.js';
 import { AIUnavailableError } from './errors.js';
 import { logProviderFailure, resolveAiMode } from './mode.js';
+import { getAiModel } from './provider.js';
 
 const COPILOT_SYSTEM = `Sos el copiloto de ficha de Plan V para Lic. Verónica Trenti (nutricionista, Argentina).
 Generás Up next y adherence_why. No diagnosticás, no recetás, no hablás al paciente directamente.
@@ -91,7 +91,7 @@ ${pending.map((l) => `- ${l.slot}: confianza ${l.confidence}, nota: ${l.note_for
 
   try {
     const { output } = await generateText({
-      model: openai('gpt-4o-mini'),
+      model: getAiModel(),
       system: COPILOT_SYSTEM,
       prompt: context,
       output: Output.object({ schema: copilotBriefSchema }),

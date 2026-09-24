@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /* Baja el archivo de Nutrigo desde Figma y lo deja en formato trabajable.
  *
  * El .fig binario no sirve para trabajar: no hay parser abierto. Lo que sí es

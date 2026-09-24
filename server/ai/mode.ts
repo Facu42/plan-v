@@ -6,6 +6,7 @@ export function resolveAiMode() {
     return readRuntimeConfig({
       APP_MODE: process.env.APP_MODE ?? 'test',
       AI_MODE: process.env.AI_MODE ?? 'disabled',
+      OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
       OPENAI_API_KEY: process.env.OPENAI_API_KEY,
       SUPABASE_URL: process.env.SUPABASE_URL,
       VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL,
