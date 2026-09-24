@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import type { PatientMealPlan } from '../../types/plans';
-import { MealPlanEditor, PublishedDatedPlan, PublishedDatedPlanView } from './MealPlanVersions';
+import type { MealPlanDraftInput, PatientMealPlan, ProfessionalMealPlan } from '../../types/plans';
+import { matchesMenuProposal, MealPlanEditor, MenuProposalReview, PublishedDatedPlan, PublishedDatedPlanView } from './MealPlanVersions';
 
 const published: PatientMealPlan = {
   id: 'plan-1',
@@ -32,6 +32,32 @@ const published: PatientMealPlan = {
 };
 
 describe('Plan fechado profesional y publicado', () => {
+  it('muestra aprobación y rechazo explícitos antes de publicar una propuesta IA', () => {
+    const proposal: MealPlanDraftInput = {
+      id: '00000000-0000-4000-a000-000000000001',
+      period_start: '2026-09-21',
+      period_end: '2026-09-27',
+      timezone: 'America/Argentina/Buenos_Aires',
+      items: [{ for_date: '2026-09-21', slot: 'Almuerzo', free_text: 'Bowl de lentejas', public_note: '' }],
+    };
+    const html = renderToStaticMarkup(<MenuProposalReview proposal={proposal} warnings={[]} busy={false} onApprove={() => undefined} onReject={() => undefined} />);
+    expect(html).toContain('BORRADOR PRIVADO');
+    expect(html).toContain('Bowl de lentejas');
+    expect(html).toContain('Aprobar y publicar menú');
+    expect(html).toContain('Rechazar propuesta');
+    const current = {
+      id: proposal.id,
+      current: {
+        period_start: proposal.period_start,
+        period_end: proposal.period_end,
+        published_at: null,
+        items: [{ for_date: '2026-09-21', slot: 'Almuerzo', recipe_id: null, free_text: 'Bowl de lentejas', portions: null, public_note: '' }],
+      },
+    } as ProfessionalMealPlan;
+    expect(matchesMenuProposal(current, proposal)).toBe(true);
+    expect(matchesMenuProposal({ ...current, current: { ...current.current, items: [{ ...current.current.items[0], free_text: 'Otro plato' }] } }, proposal)).toBe(false);
+  });
+
   it('el editor profesional explica borrador vs publicada sin inventar macros', () => {
     const html = renderToStaticMarkup(<MealPlanEditor patientId="pat-sofia" />);
     expect(html).toContain('Versiones del plan');

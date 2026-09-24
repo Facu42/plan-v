@@ -136,10 +136,24 @@ describe('PV-27 jobs de IA en PostgreSQL descartable', () => {
 
     const applied = await rpc(nutriA, 'apply_ai_job', [created.id]) as { applied_at: string };
     expect(applied.applied_at).toBeTruthy();
+    await expect(rpc(nutriA, 'reject_ai_job', [created.id])).rejects.toMatchObject({ code: 'PT409' });
     const recipe = await rpc(nutriA, 'list_professional_recipes') as Array<{ status: string; current: { published_at: string | null } }>;
     expect(recipe[0].status).toBe('draft');
     expect(recipe[0].current.published_at).toBeNull();
     expect(await rpc(nutriA, 'list_assigned_recipes', [patientA])).toEqual([]);
+
+    const disposable = await rpc(nutriA, 'enqueue_ai_job', [enqueuePayload()]) as { id: string };
+    await rpc(nutriA, 'finish_ai_job', [{
+      id: disposable.id,
+      status: 'succeeded',
+      current_context_hash: hash,
+      artifact: { kind: 'recipe_draft', payload: { title: 'Descartar' } },
+    }]);
+    await expect(rpc(nutriB, 'reject_ai_job', [disposable.id])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(patientAUser, 'reject_ai_job', [disposable.id])).rejects.toMatchObject({ code: '42501' });
+    const rejected = await rpc(nutriA, 'reject_ai_job', [disposable.id]) as { status: string; artifact: unknown };
+    expect(rejected).toMatchObject({ status: 'cancelled', artifact: null });
+    await expect(rpc(nutriA, 'apply_ai_job', [disposable.id])).rejects.toMatchObject({ code: 'PT409' });
 
     const stale = await rpc(nutriA, 'enqueue_ai_job', [enqueuePayload({ context_hash: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' })]) as { id: string };
     const marked = await rpc(nutriA, 'finish_ai_job', [{

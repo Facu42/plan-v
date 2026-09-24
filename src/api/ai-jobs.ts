@@ -8,6 +8,7 @@ export const aiJobsApi = {
   }),
   get: (id: string, signal?: AbortSignal) => request<{ job: AiJobView; source: string }>(`/api/ai/jobs/${id}`, { signal }),
   apply: (id: string) => request<{ job: AiJobView; source: string }>(`/api/ai/jobs/${id}/apply`, { method: 'POST' }),
+  reject: (id: string) => request<{ job: AiJobView; source: string }>(`/api/ai/jobs/${id}/reject`, { method: 'POST' }),
   list: (patientId: string, signal?: AbortSignal) => request<{ jobs: AiJobView[]; source: string }>(
     `/api/patients/${encodeURIComponent(patientId)}/ai/jobs`,
     { signal },

@@ -55,7 +55,7 @@ export async function generateMenuDraft(context: MenuJobContext, planId?: string
   if (mode === 'demo') {
     return {
       source: 'demo' as const,
-      plan: demoMenuPlan(context),
+      plan: demoMenuPlan(context, planId),
       warnings: ['Contenido de demostración. El paciente no ve este borrador.'],
     };
   }
