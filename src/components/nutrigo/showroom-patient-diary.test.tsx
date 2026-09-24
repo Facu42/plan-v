@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { ShowroomPatient } from './showroom-model';
-import { buildPatientDiaryView, mealLogPlanRelation, patientVisibleReview, ShowroomPatientDiary } from './ShowroomPatientDiary';
+import { buildDiaryTable, buildPatientDiaryView, mealLogPlanRelation, patientVisibleReview, ShowroomPatientDiary, slotTone, weekTrend, type DiaryRow } from './ShowroomPatientDiary';
 
 const patient = {
   id: 'ana', name: 'Ana', initials: 'AR', goal: 'Organizar comidas', goalProgress: 40,
@@ -56,7 +56,7 @@ describe('Diario del paciente dentro de Nutrigo', () => {
     const html = renderToStaticMarkup(<ShowroomPatientDiary patient={patient} query="" now={now} onLogMeal={() => {}} />);
     expect(html).toContain('Tu diario de comidas');
     expect(html).toContain('Yogur y fruta');
-    expect(html).toContain('250 kcal');
+    expect(html).toContain('<b>250</b> kcal');
     expect(html).toContain('SECRETO VISUAL');
     expect(html).not.toContain('700 kcal');
     expect(html).toContain('Pendiente de revisión');
@@ -90,24 +90,44 @@ describe('Diario del paciente dentro de Nutrigo', () => {
   it('muestra la relación con el plan publicado como información, nunca como diagnóstico', () => {
     const withOutside = { ...planned, logs: [...planned.logs.slice(0, 2), { ...planned.logs[2], slot: 'Merienda' }] } as unknown as ShowroomPatient;
     const html = renderToStaticMarkup(<ShowroomPatientDiary patient={withOutside} query="" now={now} onLogMeal={() => {}} />);
-    expect(html.match(/nvpdiary-plan-tag planned/g)?.length).toBe(2);
+    expect(html.match(/nvfd-plan-tag planned/g)?.length).toBe(2);
     expect(html).toContain('Fuera del plan');
     const without = renderToStaticMarkup(<ShowroomPatientDiary patient={patient} query="" now={now} onLogMeal={() => {}} />);
     expect(without).not.toContain('Del plan');
     expect(without).not.toContain('Fuera del plan');
   });
 
-  it('muestra el detalle de la revisión profesional sólo en registros revisados, sin notas internas', () => {
+  it('muestra el resultado de la revisión sólo en registros revisados, sin notas internas', () => {
     const html = renderToStaticMarkup(<ShowroomPatientDiary patient={patient} query="" now={now} onLogMeal={() => {}} />);
     expect(html).toContain('Esta semana');
-    expect(html).toContain('Semana anterior');
-    expect(html.match(/Revisión profesional/g)?.length).toBe(2);
     expect(html).toContain('Tu nutricionista confirmó este registro');
     expect(html).toContain('Tu nutricionista ajustó este registro');
-    expect(html).toContain('Yogur natural');
+    expect(html).toContain('Alimentos: Yogur natural, Fruta roja');
     expect(html).toContain('Vegetales al vapor');
-    expect(html).toContain('Solo ves el resultado publicado');
+    expect(html).toContain('En revisión');
     expect(html).not.toContain('ESTIMACIÓN OCULTA');
+    expect(html).not.toContain('Nota IA');
+  });
+
+  it('suma sólo lo revisado, compara con la semana pasada y pagina de a 12', () => {
+    const row = (id: string, at: string, status: DiaryRow['status'], kcal: number): DiaryRow => ({ id, slot: 'Almuerzo', description: id, foods: [], macros: { kcal, protein_g: 10, carbs_g: 20, fat_g: 5 }, status, logged_at: at });
+    const rows = [
+      row('a', '2026-09-14T13:00:00-03:00', 'confirmed', 600),
+      row('b', '2026-09-15T13:00:00-03:00', 'pending_review', 900),
+      row('c', '2026-09-08T13:00:00-03:00', 'adjusted', 400),
+      ...Array.from({ length: 13 }, (_, index) => row(`x${index}`, `2026-09-16T0${index % 9}:00:00-03:00`, 'confirmed', 0)),
+    ];
+    const table = buildDiaryTable(rows, { now, scope: 0, filter: 'all', query: '', page: 1, pageSize: 12 });
+    expect(table.totals.kcal).toBe(600);
+    expect(table.trend?.kcal).toBe(50);
+    expect(table.total).toBe(15);
+    expect(table.rows).toHaveLength(12);
+    expect(table.pages).toBe(2);
+    expect(buildDiaryTable(rows, { now, scope: 'all', filter: 'pending', query: '', page: 1, pageSize: 12 }).rows.map((entry) => entry.id)).toEqual(['b']);
+    expect(buildDiaryTable(rows, { now, scope: 'all', filter: 'all', query: '', page: 1, pageSize: 12 }).trend).toBeNull();
+    expect(weekTrend(10, 0)).toBeNull();
+    expect(slotTone('Desayuno')).toBe('green');
+    expect(slotTone('Cena')).toBe('gray');
   });
 
   it('expone el resultado publicado y oculta pendientes', () => {

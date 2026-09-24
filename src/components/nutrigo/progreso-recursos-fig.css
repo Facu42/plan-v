@@ -1,0 +1,354 @@
+/* Progreso (105:2790 / móvil 498:18237) e Insights (263:6588, 279:9301 / móvil 504:15334, 507:17412).
+   Lienzo blanco del shell: los widgets que en escritorio eran blancos sobre Cream-BG pasan a
+   Cream-BG sobre blanco, como en el frame móvil del mismo archivo. */
+
+/* ================= PROGRESO ================= */
+.nv-app .nvpf { display: block; }
+.nv-app .nvpf .nvpf-sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+.nv-app .nvpf-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+.nv-app .nvpf-main,
+.nv-app .nvpf-rail,
+.nv-app .nvpf-side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.nv-app .nvpf-info { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (min-width: 1000px) {
+  .nv-app .nvpf-info { grid-template-columns: minmax(0, 1fr) 275px; }
+}
+@media (min-width: 1251px) {
+  .nv-app .nvpf-body { grid-template-columns: minmax(0, 1fr) 374px; }
+}
+
+/* Widget: Cream-BG, radio 16, padding 16, gap 16 (Header-Section de 30). */
+.nv-app .nvpf-widget {
+  display: flex; flex-direction: column; gap: 16px; min-width: 0;
+  padding: 16px; border: 0; border-radius: 16px; background: var(--nv-bg); box-shadow: none;
+}
+.nv-app .nvpf-weight { gap: 20px; }
+.nv-app .nvpf-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 30px; }
+.nv-app .nvpf-head h3 { margin: 0; color: var(--nv-ink); font-size: 14px; line-height: 1.25; font-weight: 600; }
+
+/* Button Picker: Green, padding 6/8/6/10, radio 8, texto 11 medium, caret 14. */
+.nv-app .nvpf-picker,
+.nv-app .nvpf-chip {
+  position: relative; display: inline-flex; align-items: center; gap: 2px; flex: none;
+  padding: 6px 8px 6px 10px; border-radius: 8px; background: var(--nv-accent);
+  color: #272932; font-size: 11px; line-height: 1.05; font-weight: 500; white-space: nowrap;
+}
+.nv-app .nvpf-chip { padding: 6px 12px; }
+.nv-app .nvpf-picker select {
+  appearance: none; -webkit-appearance: none; width: auto; height: auto; min-height: 0; margin: 0; padding: 2px 16px 2px 2px;
+  border: 0; border-radius: 0; background: transparent; box-shadow: none; color: inherit;
+  font: inherit; font-size: 11px; line-height: 1.05; cursor: pointer;
+}
+.nv-app .nvpf-picker svg { position: absolute; right: 8px; pointer-events: none; }
+.nv-app .nvpf-picker:focus-within { outline: 2px solid var(--nv-ink); outline-offset: 2px; }
+
+.nv-app .nvpf-note { margin: 0; color: var(--nv-muted); font-size: 11px; line-height: 1.24; }
+
+/* Image Area (161:6761) → registros personales. */
+.nv-app .nvpf-image { min-width: 0; }
+.nv-app .nvpf-image .care-panel {
+  margin: 0; padding: 16px; border: 0; border-radius: 16px; background: var(--nv-bg);
+}
+.nv-app .nvpf-image .care-heading { margin-bottom: 16px; }
+.nv-app .nvpf-image .care-heading h2 { margin: 4px 0 6px; font-size: 14px; line-height: 1.25; font-weight: 600; letter-spacing: 0; }
+.nv-app .nvpf-image .care-heading p,
+.nv-app .nvpf-image .care-panel p { font-size: 11px; line-height: 1.5; color: var(--nv-muted); }
+.nv-app .nvpf-image .care-heading > svg,
+.nv-app .nvpf-image .care-heading .care-eyebrow { display: none; }
+.nv-app .nvpf-image .care-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 16px 0; }
+.nv-app .nvpf-image .care-summary article { padding: 12px; border-radius: 12px; background: var(--nv-card); }
+.nv-app .nvpf-image .care-summary small,
+.nv-app .nvpf-image .care-summary span { font-size: 11px; line-height: 1.24; color: var(--nv-muted); }
+.nv-app .nvpf-image .care-summary strong { margin: 6px 0 4px; font-size: 14px; line-height: 1.25; font-weight: 600; }
+.nv-app .nvpf-image :is(.care-consent, .care-preferences, .care-history) {
+  margin: 16px 0 0; padding: 12px; border: 0; border-radius: 12px; background: var(--nv-card);
+}
+.nv-app .nvpf-image .care-actions { gap: 8px; }
+.nv-app .nvpf-image .care-actions .nv-button { min-height: 30px; padding: 6px 12px; border-radius: 8px; font-size: 11px; }
+.nv-app .nvpf-image .care-history h3 { font-size: 12px; font-weight: 600; }
+.nv-app .nvpf-image .care-records article { padding: 12px 0; }
+
+/* Weight Tracking (159:6143): filas de 24 con 16 entre sí; rótulo 11 Gray-20, valor 22 semibold + unidad 14 Gray-20. */
+.nv-app .nvpf-weight-body { display: flex; flex-direction: column; gap: 20px; }
+.nv-app .nvpf-goal-text { margin: -8px 0 0; color: var(--nv-ink-soft); font-size: 12px; line-height: 1.3; }
+.nv-app .nvpf-rows { display: flex; flex-direction: column; gap: 16px; margin: 0; }
+.nv-app .nvpf-rows > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 24px; }
+.nv-app .nvpf-rows dt { color: var(--nv-muted); font-size: 11px; line-height: 1.24; }
+.nv-app .nvpf-rows dd { display: flex; align-items: baseline; gap: 4px; margin: 0; }
+.nv-app .nvpf-rows dd strong { color: var(--nv-ink); font-size: 22px; line-height: 1.08; font-weight: 600; }
+.nv-app .nvpf-rows dd span { color: var(--nv-muted); font-size: 14px; line-height: 1.25; }
+
+/* Chart de 181: cinco líneas Gray-Line, línea Orange sobre área Saffron, puntos de 8 y rótulos 10 Gray-30. */
+.nv-app .nvpf-weight-chart { position: relative; height: 181px; }
+.nv-app .nvpf-grid-lines,
+.nv-app .nvpf-weight-chart svg { position: absolute; left: 0; right: 0; top: 0; height: 160px; }
+.nv-app .nvpf-grid-lines { display: flex; flex-direction: column; justify-content: space-between; padding: 6px 0; box-sizing: border-box; }
+.nv-app .nvpf-grid-lines i { display: block; height: 1px; background: var(--nv-line); }
+.nv-app .nvpf-weight-chart svg { width: 100%; height: 181px; overflow: visible; }
+.nv-app .nvpf-area { fill: rgba(255, 203, 101, .18); }
+.nv-app .nvpf-line { fill: none; stroke: var(--nv-gold); stroke-width: 2; }
+.nv-app .nvpf-weight-chart ol { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; }
+.nv-app .nvpf-weight-chart li { position: absolute; width: 10px; height: 10px; transform: translate(-50%, -50%); }
+.nv-app .nvpf-weight-chart li i { position: absolute; inset: 1px; border: 2px solid var(--nv-card); border-radius: 50%; background: var(--nv-coral); box-sizing: border-box; width: 12px; height: 12px; left: -1px; top: -1px; }
+.nv-app .nvpf-weight-chart li small { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); color: var(--nv-ink-soft); font-size: 10px; line-height: 1.35; white-space: nowrap; }
+.nv-app .nvpf-weight-x { position: absolute; left: 0; right: 0; bottom: 4px; display: flex; }
+.nv-app .nvpf-weight-x span { flex: 1; color: var(--nv-muted); font-size: 11px; line-height: 1.24; text-align: center; }
+
+/* Progress Photos (161:6503) → comidas de la semana: sin fondo, carrusel de 156 con 16, slider de 8. */
+.nv-app .nvpf-meals { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.nv-app .nvpf-carousel {
+  display: flex; gap: 16px; overflow-x: auto; padding-bottom: 14px; scroll-snap-type: x mandatory;
+  scrollbar-width: thin; scrollbar-color: var(--nv-line) var(--nv-bg);
+}
+.nv-app .nvpf-carousel::-webkit-scrollbar { height: 8px; }
+.nv-app .nvpf-carousel::-webkit-scrollbar-track { border-radius: 6px; background: var(--nv-bg); }
+.nv-app .nvpf-carousel::-webkit-scrollbar-thumb { border-radius: 6px; background: var(--nv-line); }
+.nv-app .nvpf-carousel article { display: flex; flex-direction: column; flex: 0 0 156px; border-radius: 16px; background: var(--nv-bg); scroll-snap-align: start; }
+.nv-app .nvpf-carousel article > header { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; padding: 12px; }
+.nv-app .nvpf-carousel article > header small { color: var(--nv-muted); font-size: 11px; line-height: 1.24; white-space: nowrap; }
+.nv-app .nvpf-carousel article > header strong { overflow: hidden; color: var(--nv-ink); font-size: 14px; line-height: 1.25; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.nv-app .nvpf-carousel article > div {
+  display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; gap: 8px;
+  height: 156px; padding: 12px; border-radius: 16px; background: var(--nv-fill); box-sizing: border-box;
+}
+.nv-app .nvpf-carousel article > div p { display: -webkit-box; margin: 0; overflow: hidden; color: var(--nv-ink-soft); font-size: 12px; line-height: 1.3; -webkit-line-clamp: 6; -webkit-box-orient: vertical; }
+.nv-app .nvpf-meals .nv-state { min-height: 0; padding: 16px; border-radius: 16px; background: var(--nv-bg); }
+
+/* Section Table Body Measurement (182:8021): Cream-BG, padding 16/16/8, cabecera 11 Gray-20, celdas blancas radio 6 padding 10/12. */
+.nv-app .nvpf-table { padding: 16px 16px 8px; border-radius: 16px; background: var(--nv-bg); overflow-x: auto; }
+.nv-app .nvpf-table table { width: 100%; min-width: 560px; border-collapse: separate; border-spacing: 8px 0; margin: 0 -8px; }
+.nv-app .nvpf-table thead th { padding: 8px 10px 20px; color: var(--nv-muted); font-size: 11px; line-height: 1.24; font-weight: 400; text-align: left; white-space: nowrap; }
+.nv-app .nvpf-table thead th:first-child { width: 152px; padding-left: 0; color: var(--nv-ink); font-size: 12px; line-height: 1.3; }
+.nv-app .nvpf-table tbody th { width: 152px; padding: 0 0 8px; color: var(--nv-muted); font-size: 12px; line-height: 1.3; font-weight: 400; text-align: left; white-space: nowrap; }
+.nv-app .nvpf-table tbody td { padding: 0 0 8px; }
+.nv-app .nvpf-table tbody td span { display: block; padding: 10px 12px; border-radius: 6px; background: var(--nv-card); color: var(--nv-ink); font-size: 12px; line-height: 1.3; }
+.nv-app .nvpf-table .nvpf-empty-row { padding: 4px 0 12px; color: var(--nv-muted); font-size: 12px; }
+
+/* Calories Activities (173:7165) → comidas: top row 40, leyendas de 6, columnas con barras Saffron/Orange radio 5 arriba. */
+.nv-app .nvpf-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.nv-app .nvpf-total { display: flex; flex-direction: column; gap: 4px; }
+.nv-app .nvpf-total p { display: flex; align-items: baseline; gap: 4px; margin: 0; }
+.nv-app .nvpf-total strong { color: var(--nv-ink); font-size: 18px; line-height: 1.2; font-weight: 600; }
+.nv-app .nvpf-total span { color: var(--nv-muted); font-size: 14px; line-height: 1.25; }
+.nv-app .nvpf-total small { color: var(--nv-muted); font-size: 11px; line-height: 1.24; }
+.nv-app .nvpf-legend { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0 8px 0 0; list-style: none; }
+.nv-app .nvpf-legend li { display: flex; align-items: center; gap: 6px; color: var(--nv-muted); font-size: 11px; line-height: 1.24; white-space: nowrap; }
+.nv-app .nvpf-legend i { width: 6px; height: 6px; border-radius: 2px; }
+.nv-app .nvpf-legend-row { flex-direction: row; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; }
+.nv-app .nvpf-legend-row i { width: 10px; height: 4px; }
+.nv-app .nvpf-legend .reviewed,
+.nv-app .nvpf-pair .reviewed { background: var(--nv-gold); }
+.nv-app .nvpf-legend .pending,
+.nv-app .nvpf-pair .pending { background: var(--nv-coral); }
+.nv-app .nvpf .high { --nvpf-stage: var(--nv-accent); }
+.nv-app .nvpf .mid { --nvpf-stage: var(--nv-gold); }
+.nv-app .nvpf .low { --nvpf-stage: var(--nv-coral); }
+.nv-app .nvpf .none { --nvpf-stage: var(--nv-line); }
+.nv-app .nvpf-legend-row i,
+.nv-app .nvpf-stage { background: var(--nvpf-stage); }
+
+.nv-app .nvpf-columns { display: flex; align-items: stretch; height: 166px; min-width: 0; }
+.nv-app .nvpf-y { display: flex; flex-direction: column; justify-content: space-between; padding: 0 8px 4px 0; }
+.nv-app .nvpf-y span { height: 13px; color: var(--nv-muted); font-size: 11px; line-height: 1.24; white-space: nowrap; text-align: right; }
+.nv-app .nvpf-col { display: flex; flex: 1 1 0; flex-direction: column; gap: 8px; min-width: 0; padding-bottom: 4px; }
+.nv-app .nvpf-col > span { color: var(--nv-muted); font-size: 11px; line-height: 1.24; text-align: center; text-transform: capitalize; }
+.nv-app .nvpf-lines { position: relative; display: flex; flex: 1; flex-direction: column; justify-content: space-between; }
+.nv-app .nvpf-lines > i { display: block; height: 13px; background: linear-gradient(var(--nv-line), var(--nv-line)) center / 100% 1px no-repeat; }
+.nv-app .nvpf-pair { position: absolute; inset: 6.5px 15.56%; display: flex; align-items: flex-end; justify-content: center; }
+.nv-app .nvpf-pair b { flex: 1; min-height: 0; border-radius: 5px 5px 0 0; }
+
+/* Sleep Statistics (167:6762) → descanso y energía: columnas de 177, barra de 40 radio 4, eje 9 regular + 11 semibold. */
+.nv-app .nvpf-sleep-chart { height: 215px; }
+.nv-app .nvpf-sleep-chart .nvpf-y { padding-bottom: 34px; }
+.nv-app .nvpf-sleep-chart .nvpf-lines { flex: 0 0 177px; }
+.nv-app .nvpf-stage { position: absolute; bottom: 6.5px; left: 50%; width: min(40px, calc(100% - 8px)); transform: translateX(-50%); border-radius: 4px; }
+.nv-app .nvpf-sleep-chart .nvpf-col > span { display: flex; flex-direction: column; height: 26px; }
+.nv-app .nvpf-sleep-chart .nvpf-col > span small { font-size: 9px; line-height: 1.35; }
+.nv-app .nvpf-sleep-chart .nvpf-col > span strong { font-size: 11px; line-height: 1.24; font-weight: 600; }
+
+/* Hydration (173:7403): top row de 38 con gap 24, icono de 18 en tile; columnas con Div Bar Gray-BG 64 % radio 12 padding 6 y barra Saffron radio 8. */
+.nv-app .nvpf-hydration-top { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; }
+.nv-app .nvpf-hydration-top > div { display: flex; align-items: center; gap: 8px; }
+.nv-app .nvpf-tile { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 8px; color: #272932; }
+.nv-app .nvpf-tile.level { background: var(--nv-accent-soft); }
+.nv-app .nvpf-tile.intake { background: var(--nv-coral); }
+.nv-app .nvpf-hydration-top p { display: flex; flex-direction: column; margin: 0; }
+.nv-app .nvpf-hydration-top small { color: var(--nv-muted); font-size: 10px; line-height: 1.35; }
+.nv-app .nvpf-hydration-top strong { color: var(--nv-ink); font-size: 16px; line-height: 1.24; font-weight: 600; }
+.nv-app .nvpf-glasses { display: flex; height: 168px; }
+.nv-app .nvpf-glass { display: flex; flex: 1 1 0; flex-direction: column; min-width: 0; }
+.nv-app .nvpf-glass-bar {
+  display: flex; flex: 1; flex-direction: column; justify-content: flex-end; align-items: stretch; gap: 4px;
+  margin: 4px 6px; padding: 6px; border-radius: 12px; background: rgba(238, 238, 239, .64); overflow: hidden;
+}
+.nv-app .nvpf-glass-bar b { display: block; border-radius: 8px; background: var(--nv-gold); }
+.nv-app .nvpf-glass > span { display: flex; flex-direction: column; height: 22px; color: var(--nv-muted); font-size: 11px; line-height: 1.24; text-align: center; text-transform: capitalize; }
+.nv-app .nvpf-glass > span strong { font-size: 10px; line-height: 1.35; font-weight: 600; text-transform: none; }
+
+/* Móvil 498:18237: una columna, 32 entre bloques. */
+@media (max-width: 799px) {
+  .nv-app .nvpf-body,
+  .nv-app .nvpf-main,
+  .nv-app .nvpf-rail,
+  .nv-app .nvpf-side,
+  .nv-app .nvpf-info { gap: 32px; }
+}
+
+/* ================= INSIGHTS / RECURSOS (263:6588) ================= */
+.nv-app .nvrf { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.nv-app .nvrf .nvrf-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.nv-app .nvrf button { font-family: inherit; letter-spacing: 0; }
+/* La regla compartida del rail del Dashboard (≥1251) no excluye recursos para el rol pro: sin rail acá. */
+.nv-app.nv-resources-page:not(#nvrf-page) .nv-content-layout,
+.nv-app.nv-progress-page:not(#nvpf-page) .nv-content-layout { grid-template-columns: minmax(0, 1fr) !important; }
+.nv-app .nvrf-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-items: start; }
+@media (min-width: 1100px) {
+  .nv-app .nvrf-layout { grid-template-columns: minmax(0, 1fr) 305px; }
+}
+.nv-app .nvrf-main { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+.nv-app .nvrf-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 30px; }
+.nv-app .nvrf-head h3 { margin: 0; color: var(--nv-ink); font-size: 14px; line-height: 1.25; font-weight: 600; }
+.nv-app .nvrf-head small { color: var(--nv-ink-soft); font-size: 11px; line-height: 1.05; font-weight: 500; }
+
+/* Header: Gray-BG, radio 16, padding 32/64, gap 24; título 22 semibold centrado; buscador blanco radio 14 padding 8; chips White radio 8 padding 7/10. */
+.nv-app .nvrf-hero { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 32px 64px; border-radius: 16px; background: var(--nv-fill); }
+.nv-app .nvrf-hero h2 { margin: 0; padding: 2px 0; color: var(--nv-ink); font-size: 22px; line-height: 1.08; font-weight: 600; text-align: center; }
+.nv-app .nvrf-search { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px; border-radius: 14px; background: var(--nv-card); box-sizing: border-box; }
+.nv-app .nvrf-search input { flex: 1; min-width: 0; height: auto; min-height: 0; padding: 6px 10px; border: 0; border-radius: 8px; background: transparent; box-shadow: none; color: var(--nv-ink); font: inherit; font-size: 11px; line-height: 1.24; }
+.nv-app .nvrf-search input::placeholder { color: var(--nv-muted); }
+.nv-app .nvrf-search input:focus { outline: none; }
+.nv-app .nvrf-search:focus-within { outline: 2px solid var(--nv-accent); }
+.nv-app .nvrf-search-go { display: grid; place-items: center; padding: 6px; border-radius: 8px; background: var(--nv-accent); color: #272932; }
+.nv-app .nvrf-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.nv-app .nvrf-chips button { padding: 7px 10px; border: 0; border-radius: 8px; background: var(--nv-card-warm); color: var(--nv-ink); font-size: 11px; line-height: 1.24; cursor: pointer; }
+.nv-app .nvrf-chips button[aria-pressed=true] { background: var(--nv-accent); }
+
+/* Tab: botones de 34, padding 8/14, radio 10, 12 medium; activo Green, resto Cream-BG Gray-30. */
+.nv-app .nvrf-tabs { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.nv-app .nvrf-tabs button { min-height: 34px; padding: 11px 14px; border: 0; border-radius: 10px; background: var(--nv-bg); color: var(--nv-ink-soft); font-size: 12px; line-height: 1; font-weight: 500; white-space: nowrap; cursor: pointer; }
+.nv-app .nvrf-tabs button[aria-pressed=true] { background: var(--nv-accent); color: var(--nv-ink); }
+
+.nv-app .nvrf-card-link { display: flex; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.nv-app .nvrf-card-link:focus-visible,
+.nv-app .nvrf-rail button:focus-visible,
+.nv-app .nvrf-detail button:focus-visible { outline: 2px solid var(--nv-ink); outline-offset: 2px; border-radius: 16px; }
+.nv-app .nvrf-image { display: grid; place-items: center; overflow: hidden; border-radius: 16px; background: var(--nv-fill); color: var(--nv-muted); }
+.nv-app .nvrf-image img { width: 100%; height: 100%; object-fit: cover; }
+.nv-app .nvrf-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 0; font-size: 12px; line-height: 1.3; white-space: nowrap; }
+.nv-app .nvrf-meta span,
+.nv-app .nvrf-cat { color: var(--nv-leaf); font-size: 12px; line-height: 1.3; }
+.nv-app .nvrf-meta i,
+.nv-app .nvrf-list i,
+.nv-app .nvrf-byline b { width: 3px; height: 3px; flex: none; border-radius: 50%; background: var(--nv-faint); }
+.nv-app .nvrf-meta small { color: var(--nv-muted); font-size: 12px; }
+.nv-app .nvrf-desc { display: -webkit-box; overflow: hidden; color: var(--nv-muted); font-size: 12px; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.nv-app .nvrf-author { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--nv-ink-soft); font-size: 12px; line-height: 1.3; }
+.nv-app .nvrf-author i,
+.nv-app .nvrf-byline i { width: 20px; height: 20px; flex: none; border-radius: 32px; background: var(--nv-gold); }
+
+/* Widget Featured Menu: destacado 369 + 28 + lista 459. */
+.nv-app .nvrf-featured-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+@media (min-width: 1000px) {
+  .nv-app .nvrf-featured-row { grid-template-columns: minmax(0, 369fr) minmax(0, 459fr); }
+}
+.nv-app .nvrf-featured,
+.nv-app .nvrf-popular,
+.nv-app .nvrf-more { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.nv-app .nvrf-featured .nvrf-card-link { flex-direction: column; gap: 16px; }
+.nv-app .nvrf-featured .nvrf-image { height: 196px; }
+.nv-app .nvrf-featured-info { display: flex; flex-direction: column; gap: 12px; }
+.nv-app .nvrf-featured-info > strong { color: var(--nv-ink); font-size: 20px; line-height: 1.08; font-weight: 600; }
+.nv-app .nvrf-popular > div { display: flex; flex-direction: column; gap: 28px; }
+.nv-app .nvrf-popular-card { align-items: stretch; gap: 16px; min-height: 168px; border-radius: 16px; }
+.nv-app .nvrf-popular-card .nvrf-image { width: 165px; flex: none; }
+.nv-app .nvrf-popular-info { display: flex; flex: 1; flex-direction: column; gap: 10px; min-width: 0; padding: 4px 0; }
+.nv-app .nvrf-popular-info > strong { color: var(--nv-ink); font-size: 14px; line-height: 1.25; font-weight: 600; }
+.nv-app .nvrf-popular-info .nvrf-desc { -webkit-line-clamp: 3; }
+.nv-app .nvrf-popular-info .nvrf-author { margin-top: auto; }
+
+/* Section Recomendation: cards de 197 × 218 con 20; imagen 124; categoría, título 14 semibold y fecha 12 Gray-20 con 8. */
+.nv-app .nvrf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+.nv-app .nvrf-small-card { flex-direction: column; gap: 10px; }
+.nv-app .nvrf-small-card .nvrf-image { width: 100%; height: 124px; }
+.nv-app .nvrf-small-card > span { display: flex; flex-direction: column; gap: 8px; }
+.nv-app .nvrf-small-card strong { color: var(--nv-ink); font-size: 14px; line-height: 1.25; font-weight: 600; }
+.nv-app .nvrf-small-card small { color: var(--nv-muted); font-size: 12px; line-height: 1.3; }
+
+/* Right Side (263:7204): Cream-BG, padding 28; widgets de 249 con 32 entre sí; ítems con borde inferior Gray-Line, pb 16, gap 6. */
+.nv-app .nvrf-rail { display: flex; flex-direction: column; gap: 32px; min-width: 0; padding: 28px; border-radius: 16px; background: var(--nv-bg); }
+.nv-app .nvrf-rail > section { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+.nv-app .nvrf-rail .nvrf-head { width: 100%; }
+.nv-app .nvrf-list { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+.nv-app .nvrf-list > :is(button, div) { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 0 0 16px; border: 0; border-bottom: 1px solid var(--nv-line); background: transparent; color: inherit; text-align: left; }
+.nv-app .nvrf-list > button { cursor: pointer; }
+.nv-app .nvrf-list > :is(button, div):last-child { padding-bottom: 0; border-bottom: 0; }
+.nv-app .nvrf-list strong { color: var(--nv-ink); font-size: 14px; line-height: 1.25; font-weight: 600; }
+.nv-app .nvrf-list > * > span { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.nv-app .nvrf-list small { color: var(--nv-muted); font-size: 12px; line-height: 1.3; }
+.nv-app .nvrf-list i { width: 4px; height: 4px; }
+.nv-app .nvrf-more-btn { padding: 9px 10px; border: 1px solid var(--nv-line); border-radius: 8px; background: transparent; color: var(--nv-ink-soft); font-size: 11px; line-height: 1.05; font-weight: 500; cursor: pointer; }
+.nv-app .nvrf-people { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+.nv-app .nvrf-people > button { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 0 12px; border: 0; border-bottom: 1px solid var(--nv-line); background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.nv-app .nvrf-people > button > span:last-child { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.nv-app .nvrf-people strong { color: var(--nv-ink); font-size: 14px; line-height: 1.25; font-weight: 600; }
+.nv-app .nvrf-people small { color: var(--nv-muted); font-size: 11px; line-height: 1.24; }
+.nv-app .nvrf-avatar { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 12px; background: var(--nv-gold); color: #272932; }
+.nv-app .nvrf-avatar.recipe { background: var(--nv-accent); }
+.nv-app .nvrf-avatar.plan_b { background: var(--nv-coral); }
+.nv-app .nvrf-empty,
+.nv-app .nvrf-status { margin: 0; color: var(--nv-muted); font-size: 12px; line-height: 1.3; }
+
+/* ================= INSIGHT DETAILS (279:9301) ================= */
+.nv-app .nvrf-detail { gap: 16px; }
+.nv-app .nvrf-back { display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; padding: 0; border: 0; background: transparent; color: var(--nv-muted); font-size: 11px; line-height: 1.24; cursor: pointer; }
+.nv-app .nvrf-back svg { transform: rotate(180deg); }
+.nv-app .nvrf-detail-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 36px; align-items: start; }
+@media (min-width: 1100px) {
+  .nv-app .nvrf-detail-layout { grid-template-columns: minmax(0, 800fr) minmax(0, 325fr); }
+}
+/* Lienzo blanco: el texto va sin card propia, como en el móvil 507:17412. */
+.nv-app .nvrf-article { display: flex; flex-direction: column; gap: 24px; min-width: 0; padding: 0 36px 36px 0; }
+.nv-app .nvrf-article > header { display: flex; flex-direction: column; gap: 12px; }
+.nv-app .nvrf-article > header h2 { margin: 0; color: var(--nv-ink); font-size: 28px; line-height: 1.08; font-weight: 600; }
+.nv-app .nvrf-byline { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--nv-ink-soft); font-size: 12px; line-height: 1.3; }
+.nv-app .nvrf-byline small { color: var(--nv-muted); font-size: 12px; }
+.nv-app .nvrf-article > .nvrf-image { width: 100%; aspect-ratio: 728 / 408; }
+.nv-app .nvrf-intro { margin: 0; padding: 16px 24px; border-left: 2px solid var(--nv-line); color: var(--nv-muted); font-size: 14px; line-height: 1.4; }
+.nv-app .nvrf-sections { display: flex; flex-direction: column; gap: 24px; }
+.nv-app .nvrf-sections section { display: flex; flex-direction: column; gap: 12px; }
+.nv-app .nvrf-sections h3 { margin: 0; color: var(--nv-heading); font-size: 14px; line-height: 1.25; font-weight: 600; }
+.nv-app .nvrf-sections p { margin: 0; color: var(--nv-ink-soft); font-size: 14px; line-height: 1.4; }
+.nv-app .nvrf-quote { display: flex; flex-direction: column; gap: 8px; padding: 16px 24px; border-left: 2px solid var(--nv-coral); border-radius: 0 12px 12px 0; background: var(--nv-bg); }
+.nv-app .nvrf-quote p { margin: 0; color: var(--nv-ink-soft); font-size: 14px; line-height: 1.4; }
+.nv-app .nvrf-quote strong { color: var(--nv-ink); font-size: 14px; line-height: 1.25; font-weight: 600; }
+.nv-app .nvrf-article > .nv-button { align-self: flex-start; }
+.nv-app .nvrf-detail-rail { display: flex; flex-direction: column; gap: 32px; padding: 36px 28px; border-radius: 16px; background: var(--nv-bg); }
+.nv-app .nvrf-detail-rail > section { display: flex; flex-direction: column; gap: 16px; }
+.nv-app .nvrf-share { display: flex; flex-wrap: wrap; gap: 8px; }
+.nv-app .nvrf-share button { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 6px 10px; border: 1px solid var(--nv-line); border-radius: 8px; background: var(--nv-card); color: var(--nv-ink-soft); font-size: 11px; font-weight: 500; cursor: pointer; }
+.nv-app .nvrf-share button[aria-pressed=true] { border-color: var(--nv-accent); background: var(--nv-accent); color: var(--nv-ink); }
+.nv-app .nvrf-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.nv-app .nvrf-tags small { display: inline-flex; align-items: center; gap: 4px; min-height: 28px; padding: 0 10px; border-radius: 8px; background: var(--nv-card-warm); color: var(--nv-ink); font-size: 11px; line-height: 1.24; box-sizing: border-box; }
+.nv-app .nvrf-tags b { color: var(--nv-faint); font-weight: 400; }
+.nv-app .nvrf-related { display: flex; flex-direction: column; gap: 20px; }
+.nv-app .nvrf-related button { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.nv-app .nvrf-related .nvrf-image { width: 100%; height: 160px; }
+.nv-app .nvrf-related strong { color: var(--nv-ink); font-size: 14px; line-height: 1.25; font-weight: 600; }
+.nv-app .nvrf-related span:last-child { color: var(--nv-leaf); font-size: 12px; line-height: 1.3; }
+
+/* Móvil 504:15334 / 507:17412: cabecera Gray-BG padding 32/16, solapas de 30 radio 8, una columna. */
+@media (max-width: 799px) {
+  .nv-app .nvrf-hero { padding: 32px 16px; }
+  .nv-app .nvrf-tabs { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; }
+  .nv-app .nvrf-tabs button { min-height: 30px; padding: 9px 12px; border-radius: 8px; }
+  .nv-app .nvrf-main,
+  .nv-app .nvrf-layout { gap: 32px; }
+  .nv-app .nvrf-popular-card .nvrf-image { width: 120px; }
+  .nv-app .nvrf-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .nv-app .nvrf-rail { padding: 24px 16px; }
+  .nv-app .nvrf-article { padding: 0; }
+  .nv-app .nvrf-article > .nvrf-image { aspect-ratio: 1; }
+  .nv-app .nvrf-detail-rail { padding: 24px 16px; }
+}

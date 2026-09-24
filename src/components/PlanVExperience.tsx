@@ -160,6 +160,7 @@ export function PlanVExperience() {
           lockedRole={lockedRole}
           allowRoleSwitch={canUseDemoRoleSwitch({ demoMode, hasSession: Boolean(session) })}
           onSignOut={session ? signOut : undefined}
+          userName={profile?.full_name || undefined}
         />
       </Suspense>
     );

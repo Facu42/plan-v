@@ -1,16 +1,94 @@
-/* Patient calendar, adapted from Nutrigo Calendar frames 84:1666, 427:15467 and 433:17250. */
+/* Patient calendar, rebuilt from the literal Nutrigo Calendar frames 84:1666 (grid, 217:6452) and
+   215:5682 (day-detail cards), with Plan V's real appointment/plan/diary/activity data wired in. */
 .nvpa-agenda{display:flex;min-width:0;flex-direction:column;gap:18px}.nvpa-hero{display:flex;min-height:112px;align-items:center;justify-content:space-between;gap:18px;padding:22px 24px;border-radius:14px;color:#fff;background:var(--nv-forest)}.nvpa-hero>div>span,.nvpa-echo-head>div>span{font-size:12px;font-weight:700;letter-spacing:.12em}.nvpa-hero h2{margin:4px 0 5px;font-size:23px;line-height:1.1}.nvpa-hero p{max-width:620px;color:rgba(255,255,255,.72);font-size:13px}.nvpa-hero-icon{display:grid!important;width:48px;height:48px;flex:0 0 48px;place-items:center;border-radius:12px;background:rgba(255,255,255,.12)}
 .nvpa-echo-head{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:72px;padding:16px 18px;border:1px solid var(--nv-border);border-radius:14px;background:var(--nv-card)}.nvpa-echo-head h2{margin-top:4px;font-size:18px}.nvpa-echo-head p{margin-top:4px;color:var(--nv-muted);font-size:13px}
 .nvpa-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.nvpa-summary>div{min-width:0;padding:15px 17px;border:1px solid var(--nv-border);border-radius:12px;background:var(--nv-card)}.nvpa-summary dt{margin-bottom:7px;color:var(--nv-muted);font-size:12px}.nvpa-summary dd{overflow:hidden;font-size:16px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}
-.nvpa-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}.nvpa-views,.nvpa-filters{display:flex;flex-wrap:wrap;gap:6px}.nvpa-views button,.nvpa-filters button{min-height:32px;padding:6px 12px;border:1px solid var(--nv-border);border-radius:999px;color:var(--nv-muted);background:transparent;font:inherit;font-size:12px;font-weight:600;cursor:pointer}.nvpa-views button[aria-pressed=true],.nvpa-filters button[aria-pressed=true]{border-color:var(--nv-strong);color:var(--nv-strong);background:var(--nv-mint)}
-.nvpa-nav{display:flex;align-items:center;gap:8px}.nvpa-nav p{min-width:160px;margin:0;text-align:center;font-size:13px;font-weight:700;text-transform:capitalize}.nvpa-nav button{display:grid;width:34px;height:34px;place-items:center;border:1px solid var(--nv-border);border-radius:9px;background:var(--nv-card);color:var(--nv-ink);cursor:pointer}.nvpa-nav button:first-of-type{transform:rotate(180deg)}.nvpa-nav button:disabled{opacity:.4;cursor:not-allowed}
-.nvpa-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:18px;align-items:start}.nvpa-calendar,.nvpa-detail{overflow:hidden;border:1px solid var(--nv-border);border-radius:14px;background:var(--nv-card)}.nvpa-calendar>header,.nvpa-detail>header{display:flex;min-height:62px;align-items:center;justify-content:space-between;gap:12px;padding:13px 17px}.nvpa-calendar h3,.nvpa-detail h3{margin-top:2px;font-size:14px;text-transform:capitalize}
-.nvpa-weekdays,.nvpa-month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}.nvpa-weekdays{height:38px;border-block:1px solid var(--nv-border);background:var(--nv-bg)}.nvpa-weekdays span{display:grid;place-items:center;color:var(--nv-muted);font-size:12px;font-weight:600;text-transform:uppercase}
-.nvpa-month-grid>button{display:flex;min-width:0;min-height:92px;padding:8px;flex-direction:column;align-items:flex-start;gap:4px;border:0;border-right:1px solid var(--nv-border);border-bottom:1px solid var(--nv-border);background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}.nvpa-month-grid>button:nth-child(7n){border-right:0}.nvpa-month-grid time{display:grid;width:24px;height:24px;place-items:center;border-radius:50%;font-size:12px;font-weight:600}.nvpa-month-grid .nvpa-outside{color:var(--nv-muted);background:color-mix(in srgb,var(--nv-bg) 56%,transparent)}.nvpa-month-grid .nvpa-today time,.nvpa-week-grid .nvpa-today time{outline:1px solid var(--nv-strong)}.nvpa-month-grid .nvpa-occupied{background:var(--nv-green)}.nvpa-month-grid .nvpa-selected,.nvpa-week-grid .nvpa-selected{outline:2px solid var(--nv-strong);outline-offset:-2px}
-.nvpa-chip{display:block;min-width:0;width:100%;padding:4px 6px;border-left:3px solid var(--nv-forest);border-radius:5px;background:var(--nv-card);overflow:hidden}.nvpa-chip.plan{border-left-color:var(--nv-strong)}.nvpa-chip.meal{border-left-color:#F9B343}.nvpa-chip.activity{border-left-color:#F87D6D}.nvpa-chip.consult{border-left-color:var(--nv-forest)}.nvpa-chip b,.nvpa-chip small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nvpa-chip b{font-size:11px}.nvpa-chip small{color:var(--nv-muted);font-size:10px}.nvpa-more{color:var(--nv-muted);font-size:11px}
-.nvpa-week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));min-height:280px}.nvpa-week-grid>button{display:flex;min-width:0;min-height:260px;padding:10px 8px;flex-direction:column;align-items:flex-start;gap:6px;border:0;border-right:1px solid var(--nv-border);background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}.nvpa-week-grid>button:last-child{border-right:0}.nvpa-week-grid>button>span{color:var(--nv-muted);font-size:11px;font-weight:700;text-transform:uppercase}.nvpa-week-grid time{font-size:18px;font-weight:700}
-.nvpa-day-list{display:flex;flex-direction:column;gap:10px;padding:16px}.nvpa-event{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;margin:12px 16px;padding-bottom:12px;border-bottom:1px solid var(--nv-border)}.nvpa-day-list .nvpa-event{margin:0;padding:10px;border:1px solid var(--nv-border);border-radius:12px}.nvpa-event strong,.nvpa-event small{display:block}.nvpa-event strong{margin-top:4px;font-size:14px}.nvpa-event small{margin-top:3px;color:var(--nv-muted);font-size:12px}.nvpa-event .nv-button{margin-top:8px;min-height:32px;width:auto}
-.nvpa-detail{padding-bottom:16px}.nvpa-detail>header{border-bottom:1px solid var(--nv-border)}.nvpa-detail-icon{display:grid;width:40px;height:40px;place-items:center;border-radius:12px;color:var(--nv-forest);background:var(--nv-green)}.nvpa-event.consult .nvpa-detail-icon{color:#fff;background:var(--nv-forest)}.nvpa-event.meal .nvpa-detail-icon{color:#083a30;background:#F9B343}.nvpa-event.activity .nvpa-detail-icon{color:#fff;background:#F87D6D}
+
+/* Header-Section (217:6453): nav + month/year on the left, view switch + CTA on the right */
+.nvpa-header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}
+.nvpa-header-left{display:flex;align-items:center;gap:16px;min-width:0}
+.nvpa-nav{display:flex;align-items:center;gap:10px}
+.nvpa-nav button{display:grid;width:30px;height:30px;place-items:center;border:0;border-radius:8px;background:var(--nv-fill);color:var(--nv-ink);cursor:pointer}
+.nvpa-nav button:first-of-type svg{transform:rotate(180deg)}
+.nvpa-nav button:disabled{opacity:.4;cursor:not-allowed}
+.nvpa-title{display:flex;align-items:baseline;gap:4px;margin:0;font-size:14px;font-weight:600;color:var(--nv-ink);text-transform:capitalize;white-space:nowrap}
+.nvpa-title-year{color:var(--nv-muted)}
+.nvpa-title-sub{margin:0;color:var(--nv-muted);font-size:12px;text-transform:capitalize}
+.nvpa-header-right{display:flex;align-items:center;gap:10px}
+.nvpa-views{display:flex;gap:2px;padding:2px;border-radius:10px;background:var(--nv-fill)}
+.nvpa-views button{min-height:0;padding:6px 14px;border:0;border-radius:8px;color:var(--nv-muted);background:transparent;font:inherit;font-size:11px;font-weight:500;cursor:pointer}
+.nvpa-views button[aria-pressed=true]{color:var(--nv-ink);background:var(--nv-accent)}
+.nvpa-new{min-height:0;padding:6px 14px;border-radius:8px;background:var(--nv-accent);color:var(--nv-ink);font-size:11px;font-weight:500}
+
+.nvpa-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:18px;align-items:start}
+.nvpa-calendar{overflow:hidden;border-radius:14px;background:var(--nv-card)}
+.nvpa-detail{overflow:hidden;border:1px solid var(--nv-border);border-radius:14px;background:var(--nv-card)}
+.nvpa-detail>header{display:flex;min-height:62px;align-items:center;justify-content:space-between;gap:12px;padding:13px 17px;border-bottom:1px solid var(--nv-border)}
+.nvpa-detail h3{margin-top:2px;font-size:14px}
+
+/* Category List (217:6472): legend/filter row inside the calendar card */
+.nvpa-categories{display:flex;flex-wrap:wrap;align-items:center;gap:24px;padding:16px;border-bottom:1px solid var(--nv-border)}
+.nvpa-categories button{display:flex;align-items:center;gap:8px;padding:0;border:0;background:transparent;color:var(--nv-muted);font:inherit;font-size:12px;cursor:pointer}
+.nvpa-categories button[aria-pressed=true]{color:var(--nv-ink);font-weight:600}
+.nvpa-checkbox{display:inline-block;width:16px;height:16px;flex:0 0 auto;border:1.5px solid var(--nv-border);border-radius:4px;background:var(--nv-bg)}
+button[aria-pressed=true] .nvpa-checkbox{border-color:transparent;background:var(--nv-accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23272932' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.5l3 3 6-6.5'/%3E%3C/svg%3E") center/10px no-repeat}
+.nvpa-checkbox.consult{background-color:#FFA257}
+.nvpa-checkbox.plan{background-color:#C2E66E}
+.nvpa-checkbox.meal{background-color:#DFF9A2}
+.nvpa-checkbox.activity{background-color:#FFCB65}
+button[aria-pressed=true] .nvpa-checkbox.all{background-color:var(--nv-accent)}
+button[aria-pressed=true] .nvpa-checkbox.consult{background-color:#FFA257}
+button[aria-pressed=true] .nvpa-checkbox.plan{background-color:#C2E66E}
+button[aria-pressed=true] .nvpa-checkbox.meal{background-color:#DFF9A2}
+button[aria-pressed=true] .nvpa-checkbox.activity{background-color:#FFCB65}
+
+/* Row-Calendar-Head (217:6491) + Row/Cell-Calendar-Body (217:6499…) */
+.nvpa-weekdays,.nvpa-month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.nvpa-weekdays{border-bottom:1px solid var(--nv-border)}
+.nvpa-weekdays span{display:grid;place-items:center;padding:12px 10px;color:var(--nv-muted);font-size:12px;font-weight:400}
+.nvpa-month-grid>button{position:relative;display:flex;min-width:0;min-height:120px;padding:4px;flex-direction:column;align-items:flex-start;gap:2px;border:0;border-right:1px solid var(--nv-border);border-bottom:1px solid var(--nv-border);background:var(--nv-card);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.nvpa-month-grid>button:nth-child(7n){border-right:0}
+.nvpa-month-grid>button:nth-last-child(-n+7){border-bottom:0}
+.nvpa-month-grid time{display:flex;min-width:18px;align-items:center;justify-content:center;padding:2px;border-radius:4px;color:var(--nv-ink);font-size:10px}
+.nvpa-month-grid .nvpa-outside{background:var(--nv-fill);background-image:repeating-linear-gradient(-45deg,color-mix(in srgb,var(--nv-border) 60%,transparent) 0 1px,transparent 1px 7px)}
+.nvpa-month-grid .nvpa-outside time{color:var(--nv-line)}
+.nvpa-month-grid .nvpa-today time{outline:1px solid var(--nv-strong)}
+.nvpa-month-grid time.nvpa-day-badge{background:#DFF9A2}
+.nvpa-month-grid .nvpa-selected{outline:2px solid var(--nv-strong);outline-offset:-2px}
+.nvpa-day-events{display:flex;min-height:0;width:100%;flex:1;flex-direction:column;gap:2px;overflow:hidden}
+.nvpa-day-events-solo .nvpa-chip{flex:1}
+
+.nvpa-chip{display:block;min-width:0;min-height:0;width:100%;padding:6px;border-radius:4px;overflow:hidden;background:var(--nv-fill)}
+.nvpa-chip.consult{background:#FFA257}
+.nvpa-chip.plan{background:#C2E66E}
+.nvpa-chip.meal{background:#DFF9A2}
+.nvpa-chip.activity{background:#FFCB65}
+.nvpa-chip b,.nvpa-chip small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:400}
+.nvpa-chip b{color:var(--nv-ink-soft);font-size:8px}
+.nvpa-chip small{color:var(--nv-ink);font-size:8px}
+.nvpa-more{color:var(--nv-muted);font-size:11px}
+
+.nvpa-week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));min-height:280px;border-top:1px solid var(--nv-border)}.nvpa-week-grid>button{display:flex;min-width:0;min-height:260px;padding:10px 8px;flex-direction:column;align-items:flex-start;gap:6px;border:0;border-right:1px solid var(--nv-border);background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}.nvpa-week-grid>button:last-child{border-right:0}.nvpa-week-grid>button>span{color:var(--nv-muted);font-size:11px;font-weight:700;text-transform:uppercase}.nvpa-week-grid time{font-size:18px;font-weight:700}.nvpa-week-grid .nvpa-day-events{flex:none}.nvpa-week-grid .nvpa-chip{padding:4px 6px}.nvpa-week-grid .nvpa-chip b,.nvpa-week-grid .nvpa-chip small{font-size:10px}
+
+/* Schedule cards (217:8308/217:8335): used both in the day view list and the day-detail aside */
+.nvpa-day-list{display:flex;flex-direction:column;gap:12px;padding:16px}
+.nvpa-event{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:16px;border-radius:16px;background:var(--nv-bg)}
+.nvpa-detail .nvpa-event{margin:16px 16px 0}
+.nvpa-event-badge{padding:4px 8px;border-radius:6px;color:var(--nv-ink-soft);font-size:11px}
+.nvpa-event-badge.consult{background:#FFA257}
+.nvpa-event-badge.plan{background:#C2E66E}
+.nvpa-event-badge.meal{background:#DFF9A2}
+.nvpa-event-badge.activity{background:#FFCB65}
+.nvpa-event>strong{font-size:18px;font-weight:600;line-height:1.2}
+.nvpa-event-details{display:flex;flex-direction:column;gap:8px;width:100%}
+.nvpa-event-details p{display:flex;align-items:center;gap:8px;margin:0;color:var(--nv-ink-soft);font-size:12px}
+.nvpa-event-details svg{flex:0 0 auto;color:var(--nv-muted)}
+.nvpa-event-note{display:flex;flex-direction:column;gap:8px;width:100%;padding:12px;border-radius:12px;background:var(--nv-card-warm)}
+.nvpa-event-note>span{color:var(--nv-muted);font-size:11px}
+.nvpa-event-note>p{margin:0;padding-top:8px;border-top:1px solid var(--nv-border);color:var(--nv-ink-soft);font-size:12px;line-height:1.5}
+.nvpa-event-actions{display:flex;gap:8px;justify-content:flex-end;width:100%}
+.nvpa-event-actions .nv-button{min-height:0;width:auto;padding:6px 12px;font-size:11px}
+
 .nvpa-empty-day,.nvpa-reply-note,.nvpa-consult-when{margin:12px 18px;color:var(--nv-muted);font-size:13px;text-transform:none}.nvpa-consult-when{font-weight:700;color:var(--nv-ink)}.nvpa-detail>a,.nvpa-detail>.nv-button,.nvpa-reply,.nvpa-empty-consult{margin-inline:18px}.nvpa-reply{display:grid;gap:8px;margin-bottom:8px}.nvpa-reply .nv-button{width:100%}.nvpa-detail>a{display:flex;min-height:38px;align-items:center;justify-content:center;gap:7px;margin-bottom:8px;border-radius:8px;color:#083a30;background:var(--nv-accent);font-size:13px;font-weight:700;text-decoration:none}.nvpa-detail>.nv-button{width:calc(100% - 36px)}.nvpa-empty-consult{display:flex;flex-direction:column;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid var(--nv-border)}
 .nvpa-note{display:flex;align-items:center;gap:9px;padding:11px 13px;border-radius:9px;color:var(--nv-muted);background:var(--nv-track);font-size:12px}.nvpa-note svg{flex:0 0 auto;color:var(--nv-strong)}.nv-app.nv-patient-agenda .nv-content-layout{grid-template-columns:minmax(0,1fr)}.nv-app.nv-patient-agenda .nv-main{width:100%}
 .nvpa-reschedule{display:grid;gap:8px;margin:12px 18px;padding-top:12px;border-top:1px solid var(--nv-border)}
@@ -30,6 +108,6 @@
 @media(max-width:900px){.nvpa-layout{grid-template-columns:1fr}.nvpa-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.nvpa-week-grid{grid-template-columns:1fr}.nvpa-week-grid>button{min-height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;border-right:0;border-bottom:1px solid var(--nv-border)}}
 .nv-app.nv-dark .nvpa-reschedule [role=alert]{color:var(--nv-danger)}
 @media(max-width:800px){.nvpa-layout{grid-template-columns:1fr}.nvpa-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.nvpa-week-grid{grid-template-columns:1fr}.nvpa-week-grid>button{min-height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;border-right:0;border-bottom:1px solid var(--nv-border)}}
-@media(max-width:600px){.nvpa-agenda{gap:14px}.nvpa-hero{min-height:132px;padding:19px}.nvpa-hero h2{font-size:21px}.nvpa-hero-icon{display:none!important}.nvpa-summary>div{padding:13px}.nvpa-toolbar{flex-direction:column;align-items:stretch}.nvpa-nav p{min-width:0;flex:1}.nvpa-calendar{margin-inline:0}.nvpa-month-grid>button{min-height:58px;padding:4px;align-items:center}.nvpa-month-grid .nvpa-chip{width:7px;height:7px;margin:2px auto 0;padding:0;border:0;border-radius:50%;background:var(--nv-accent)}.nvpa-month-grid .nvpa-chip.plan{background:var(--nv-strong)}.nvpa-month-grid .nvpa-chip.meal{background:#F9B343}.nvpa-month-grid .nvpa-chip.activity{background:#F87D6D}.nvpa-month-grid .nvpa-chip>*{display:none!important}.nvpa-month-grid .nvpa-more{display:none}.nvpa-note{align-items:flex-start}.nvpa-detail>.nv-button{width:calc(100% - 28px);margin-inline:14px}}
+@media(max-width:600px){.nvpa-agenda{gap:14px}.nvpa-hero{min-height:132px;padding:19px}.nvpa-hero h2{font-size:21px}.nvpa-hero-icon{display:none!important}.nvpa-summary>div{padding:13px}.nvpa-header{flex-direction:column;align-items:stretch}.nvpa-header-right{justify-content:space-between}.nvpa-calendar{margin-inline:0}.nvpa-categories{gap:14px}.nvpa-month-grid>button{min-height:58px;padding:4px;align-items:center}.nvpa-month-grid .nvpa-day-events{align-items:center}.nvpa-month-grid .nvpa-chip{width:7px;height:7px;flex:none;margin:2px auto 0;padding:0;border-radius:50%}.nvpa-month-grid .nvpa-chip>*{display:none!important}.nvpa-more{display:none}.nvpa-note{align-items:flex-start}.nvpa-detail>.nv-button{width:calc(100% - 28px);margin-inline:14px}}
 @media(max-width:390px){.nvpa-summary{grid-template-columns:1fr}.nvpa-hero{padding:16px}.nvpa-month-grid>button{min-height:48px}}
-@media(max-width:320px){.nvpa-hero h2{font-size:18px}.nvpa-calendar>header,.nvpa-detail>header{padding:10px 12px}.nvpa-event{margin-inline:10px}}
+@media(max-width:320px){.nvpa-hero h2{font-size:18px}.nvpa-detail>header{padding:10px 12px}.nvpa-event{margin-inline:10px}}

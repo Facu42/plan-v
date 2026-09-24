@@ -1,18 +1,20 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { CalendarCheck, MapPinArea, VideoCamera } from '@phosphor-icons/react';
 import type { Patient } from '../../types';
-import { Icon } from '../shared/Icon';
-import { NvBadge, NvButton } from './primitives';
+import { NvState } from './primitives';
 import { appointmentReplyLabel, readAppointmentReply } from './appointment-reply';
 import { nextAppointmentDate, secureMeetUrl } from './ShowroomConsultations';
-import { ShowroomPatientAgenda } from './ShowroomPatientAgenda';
-import { buildShowroomPatient } from './showroom-model';
+import {
+  FigCalendarBoard, FigScheduleCard, FigStatCard, longDateLabel, toggleInSet, useCalendarNav,
+  type FigCalendarItem, type FigCategory,
+} from './ShowroomPatientAgenda';
+import { localDateId, sentenceCase } from './showroom-calendar';
 import type { ShowroomPage } from './ShowroomPanels';
-import { canShiftMonth, localDateId, monthAnchor, sentenceCase, shiftMonth } from './showroom-calendar';
 import './showroom-agenda.css';
+import './agenda-diario-fig.css';
 
-const WEEK_DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-type AgendaFilter = 'all' | 'video' | 'presencial' | 'unassigned';
 type Appointment = NonNullable<Patient['appointment']>;
+type ChannelKind = 'video' | 'presencial' | 'other';
 
 export type AgendaEntry = {
   patient: Patient;
@@ -47,70 +49,99 @@ export function buildAgendaCalendar(entries: AgendaEntry[], now: Date, month: Da
   };
 }
 
-const FILTERS: Array<{ id: AgendaFilter; label: string }> = [
-  { id: 'all', label: 'Todas' },
-  { id: 'video', label: 'Video' },
-  { id: 'presencial', label: 'Presenciales' },
-  { id: 'unassigned', label: 'Sin turno' },
-];
+export function agendaChannel(channel: string): ChannelKind {
+  return channel === 'video' ? 'video' : channel === 'presencial' ? 'presencial' : 'other';
+}
 
-export function ShowroomAgenda({ patients, now, onManage, focusPatient = null, onNavigatePatient }: {
+const CHANNEL_LABEL: Record<ChannelKind, string> = { video: 'Videollamada', presencial: 'Presencial', other: 'Modalidad por confirmar' };
+
+/** Category List del archivo: tres categorías con su color literal (Green, Saffron, Orange). */
+const CATEGORIES: FigCategory[] = [
+  { id: 'video', label: 'Videollamadas', tone: 'green' },
+  { id: 'presencial', label: 'Presenciales', tone: 'saffron' },
+  { id: 'other', label: 'Modalidad por confirmar', tone: 'orange' },
+];
+const TONE = { video: 'green', presencial: 'saffron', other: 'orange' } as const;
+
+/** Primera consulta desde hoy: el panel del día abre ahí en vez de en un día vacío. */
+export function firstAgendaDateId(entries: readonly AgendaEntry[], now: Date): string {
+  const todayId = localDateId(now);
+  return entries.find((entry) => entry.dateId >= todayId)?.dateId ?? todayId;
+}
+
+function timeOf(entry: AgendaEntry) {
+  return entry.appointment.when.split(' · ')[1] ?? entry.date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+}
+
+export function ShowroomAgenda({ patients, now, onManage, focusPatient = null }: {
   patients: Patient[];
   now: Date;
   onManage: (patientId: string) => void;
   focusPatient?: Patient | null;
+  /** Se conserva la firma del shell; la agenda ya no embebe el calendario de la paciente. */
   onNavigatePatient?: (patientId: string, page: ShowroomPage) => void;
 }) {
-  const [filter, setFilter] = useState<AgendaFilter>('all');
-  const [month, setMonth] = useState(() => monthAnchor(now));
   const entries = useMemo(() => buildAgendaEntries(patients, now), [patients, now]);
-  const calendar = useMemo(() => buildAgendaCalendar(entries, now, month), [entries, now, month]);
-  const clinicRange = useMemo(() => {
-    const ids = entries.map((entry) => entry.dateId);
-    ids.push(localDateId(now));
-    const sorted = [...ids].sort();
-    return { minId: sorted[0], maxId: sorted[sorted.length - 1] };
-  }, [entries, now]);
+  const items = useMemo<FigCalendarItem[]>(() => entries.map((entry) => ({
+    id: entry.patient.id, dateId: entry.dateId, at: entry.date, category: agendaChannel(entry.appointment.channel), time: timeOf(entry), title: entry.patient.name,
+  })), [entries]);
+  const dateIds = useMemo(() => entries.map((entry) => entry.dateId), [entries]);
+  const initial = firstAgendaDateId(entries, now);
+  const nav = useCalendarNav(dateIds, now, 'clinic', initial);
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
+  useEffect(() => { setHidden(new Set()); }, [now]);
+
   const unassigned = patients.filter((patient) => !patient.appointment);
-  const videoCount = entries.filter((entry) => entry.appointment.channel === 'video').length;
-  const presencialCount = entries.filter((entry) => entry.appointment.channel === 'presencial').length;
-  const visibleEntries = filter === 'all' ? entries : filter === 'unassigned' ? [] : entries.filter((entry) => entry.appointment.channel === filter);
-  const visibleUnassigned = filter === 'all' || filter === 'unassigned' ? unassigned : [];
+  const invalid = patients.filter((patient) => patient.appointment && !entries.some((entry) => entry.patient.id === patient.id));
+  const videoCount = entries.filter((entry) => agendaChannel(entry.appointment.channel) === 'video').length;
+  const presencialCount = entries.filter((entry) => agendaChannel(entry.appointment.channel) === 'presencial').length;
+  const dayEntries = entries.filter((entry) => entry.dateId === nav.selectedDateId && !hidden.has(agendaChannel(entry.appointment.channel)));
+  const storage = typeof window === 'undefined' ? null : window.localStorage;
+  const ctaPatient = focusPatient?.id ?? unassigned[0]?.id ?? patients[0]?.id ?? null;
 
-  return <section className="nva-agenda" aria-label="Agenda del consultorio">
-    <header className="nva-intro">
-      <div><span className="nv-icon-tile"><Icon name="calendar" size={20} /></span><div><strong>Agenda del consultorio</strong><small>Próximas consultas de todos los pacientes activos.</small></div></div>
-      <NvBadge tone="green">{entries.length} programadas</NvBadge>
-    </header>
+  const entryCard = (entry: AgendaEntry) => {
+    const channel = agendaChannel(entry.appointment.channel);
+    const safeUrl = secureMeetUrl(entry.appointment.meet_url);
+    const reply = entry.appointment.patient_reply ?? readAppointmentReply(storage, entry.patient.id, entry.appointment.when);
+    return <FigScheduleCard key={entry.patient.id} dataId={`consult:${entry.patient.id}`} tone={TONE[channel]} badge={CHANNEL_LABEL[channel]} title={entry.patient.name}
+      details={[
+        { icon: 'date', text: longDateLabel(entry.date) },
+        { icon: 'time', text: `${timeOf(entry)} · ${entry.appointment.duration} min` },
+        { icon: 'place', text: CHANNEL_LABEL[channel] },
+      ]}
+      note={{ label: 'Respuesta de la paciente', text: <p>{appointmentReplyLabel(reply)}</p> }}
+      actions={<>
+        {safeUrl && <a className="nvcal-btn" href={safeUrl} target="_blank" rel="noopener noreferrer">Abrir sala</a>}
+        <button type="button" className="nvcal-btn nvcal-btn-primary" onClick={() => onManage(entry.patient.id)}>Gestionar consulta</button>
+      </>} />;
+  };
 
-    <section className="nva-stats" aria-label="Resumen de agenda">
-      <article className="nva-stat"><span className="nv-icon-tile"><Icon name="calendar" size={18} /></span><small>Programadas</small><strong>{entries.length}</strong></article>
-      <article className="nva-stat"><span className="nv-icon-tile"><Icon name="video" size={18} /></span><small>Videollamadas</small><strong>{videoCount}</strong></article>
-      <article className="nva-stat"><span className="nv-icon-tile"><Icon name="contact" size={18} /></span><small>Presenciales</small><strong>{presencialCount}</strong></article>
-      <article className="nva-stat"><span className="nv-icon-tile"><Icon name="users" size={18} /></span><small>Sin turno</small><strong>{unassigned.length}</strong></article>
-    </section>
-
-    <div className="nva-layout">
-      <section className="nva-calendar" aria-label="Calendario multipaciente">
-        <header><div><h2>{calendar.label}</h2><small>Se muestra una próxima ocurrencia por paciente, derivada del día y horario guardados.</small></div><div className="nva-month-nav"><button type="button" aria-label="Mes anterior" disabled={!canShiftMonth(month, -1, clinicRange)} onClick={() => setMonth((current) => shiftMonth(current, -1))}><Icon name="chevron" size={16} /></button><NvBadge>{entries.length} consultas</NvBadge><button type="button" aria-label="Mes siguiente" disabled={!canShiftMonth(month, 1, clinicRange)} onClick={() => setMonth((current) => shiftMonth(current, 1))}><Icon name="chevron" size={16} /></button></div></header>
-        <div className="nva-weekdays" aria-hidden="true">{WEEK_DAYS.map((day) => <span key={day}>{day}</span>)}</div>
-        <div className="nva-month-grid">{calendar.cells.map((cell) => <article key={cell.dateId} data-agenda-day={cell.dateId} className={`${cell.inMonth ? '' : 'nva-outside'}${cell.isToday ? ' nva-today' : ''}${cell.entries.length ? ' nva-occupied' : ''}`}><time dateTime={cell.dateId}>{cell.day}</time><div>{cell.entries.map((entry) => <button type="button" key={entry.patient.id} onClick={() => onManage(entry.patient.id)}><b>{entry.appointment.when.split(' · ')[1]}</b><span>{entry.patient.name}</span></button>)}</div></article>)}</div>
+  return <section className="nvcal nvcal-clinic" aria-label="Agenda del consultorio">
+    <div className="nvcal-main">
+      <section className="nvcal-stats" aria-label="Resumen de agenda">
+        <FigStatCard label="Consultas programadas" value={entries.length} unit={entries.length === 1 ? 'consulta' : 'consultas'} tone="orange" icon={<CalendarCheck size={16} />} />
+        <FigStatCard label="Videollamadas" value={videoCount} unit={videoCount === 1 ? 'consulta' : 'consultas'} tone="green" icon={<VideoCamera size={16} />} />
+        <FigStatCard label="Presenciales" value={presencialCount} unit={presencialCount === 1 ? 'consulta' : 'consultas'} tone="saffron" icon={<MapPinArea size={16} />} />
       </section>
-
-      <aside className="nva-queue" aria-label="Consultas y pacientes sin turno">
-        <header><div><h2>Próximas consultas</h2><small>Ordenadas por la próxima fecha derivada.</small></div></header>
-        <div className="nva-filters" aria-label="Filtrar agenda">{FILTERS.map((option) => <button type="button" key={option.id} aria-pressed={filter === option.id} onClick={() => setFilter(option.id)}>{option.label}</button>)}</div>
-        <div className="nva-rows">
-          {visibleEntries.map((entry) => {
-            const safeUrl = secureMeetUrl(entry.appointment.meet_url);
-            const reply = entry.appointment.patient_reply ?? readAppointmentReply(typeof window === 'undefined' ? null : window.localStorage, entry.patient.id, entry.appointment.when);
-            return <article className="nva-row" key={entry.patient.id}><span className={`nv-avatar person-${entry.patient.tone}`}>{entry.patient.initials}</span><div><strong>{entry.patient.name}</strong><small>{sentenceCase(entry.date.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'short' }))} · {entry.appointment.when.split(' · ')[1]} · {entry.appointment.duration} min</small><NvBadge tone={entry.appointment.channel === 'video' ? 'green' : 'gold'}>{entry.appointment.channel === 'video' ? 'Videollamada' : 'Presencial'}</NvBadge><small>{appointmentReplyLabel(reply)}</small></div><div className="nva-row-actions">{safeUrl && <a href={safeUrl} target="_blank" rel="noopener noreferrer">Abrir sala</a>}<NvButton onClick={() => onManage(entry.patient.id)}>Gestionar consulta</NvButton></div></article>;
-          })}
-          {visibleUnassigned.length > 0 && <section className="nva-unassigned" aria-label="Pacientes sin turno"><h3>Sin turno</h3>{visibleUnassigned.map((patient) => <article key={patient.id}><span className={`nv-avatar person-${patient.tone}`}>{patient.initials}</span><div><strong>{patient.name}</strong><small>Sin consulta programada</small></div><NvButton onClick={() => onManage(patient.id)}>Gestionar consulta</NvButton></article>)}</section>}
-          {!visibleEntries.length && !visibleUnassigned.length && <p className="nva-empty">No hay consultas para este filtro.</p>}
-        </div>
-      </aside>
+      <FigCalendarBoard nav={nav} items={items} categories={CATEGORIES} hidden={hidden} onToggle={(id) => setHidden((set) => toggleInSet(set, id))}
+        cta={ctaPatient ? { label: 'Nueva consulta', onClick: () => onManage(ctaPatient) } : null} dayAttr="agenda"
+        caption="Se muestra una próxima ocurrencia por paciente, derivada del día y horario guardados."
+        renderDay={(list) => list.length ? list.map((item) => { const entry = entries.find((candidate) => candidate.patient.id === item.id); return entry ? entryCard(entry) : null; })
+          : <NvState title="Sin consultas este día" description="La agenda sólo muestra turnos guardados." />} />
     </div>
-    {focusPatient && <ShowroomPatientAgenda audience="professional" patient={buildShowroomPatient(focusPatient, now)} now={now} onMessage={() => onManage(focusPatient.id)} onNavigate={(page) => onNavigatePatient?.(focusPatient.id, page)} />}
+
+    <aside className="nvcal-aside" aria-label="Detalle del día">
+      <header><h3>Detalle del día</h3><small>{sentenceCase(nav.selectedDate.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }))}</small></header>
+      {dayEntries.map(entryCard)}
+      {!dayEntries.length && <p className="nvcal-empty-day">No hay consultas programadas en este día.</p>}
+      {(unassigned.length > 0 || invalid.length > 0) && <section className="nvcal-unassigned" aria-label="Pacientes sin turno">
+        <h4 className="nvcal-aside-sub">Sin turno <span>{unassigned.length + invalid.length}</span></h4>
+        {[...unassigned, ...invalid].map((patient) => <article key={patient.id}>
+          <span className={`nv-avatar person-${patient.tone}`}>{patient.initials}</span>
+          <div><strong>{patient.name}</strong><small>{patient.appointment ? 'Fecha pendiente de corregir' : 'Sin consulta programada'}</small></div>
+          <button type="button" className="nvcal-btn nvcal-btn-primary" onClick={() => onManage(patient.id)}>Gestionar consulta</button>
+        </article>)}
+      </section>}
+    </aside>
   </section>;
 }

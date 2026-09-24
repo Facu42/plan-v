@@ -27,7 +27,7 @@ function itemsFrom(plan: ProfessionalMealPlan | null): DraftItem[] {
   }));
 }
 
-export function MealPlanEditor({ patientId }: { patientId: string }) {
+export function MealPlanEditor({ patientId, onChanged }: { patientId: string; onChanged?: () => void }) {
   const [plan, setPlan] = useState<ProfessionalMealPlan | null>(null);
   const [recipes, setRecipes] = useState<ProfessionalRecipe[]>([]);
   const [source, setSource] = useState('');
@@ -59,7 +59,7 @@ export function MealPlanEditor({ patientId }: { patientId: string }) {
 
   async function run(work: () => Promise<unknown>, success: string) {
     setBusy(true); setError(''); setStatus('');
-    try { await work(); setStatus(success); await reload(); }
+    try { await work(); setStatus(success); await reload(); onChanged?.(); }
     catch (caught) { setError(careErrorMessage(caught)); }
     finally { setBusy(false); }
   }
@@ -92,7 +92,7 @@ export function MealPlanEditor({ patientId }: { patientId: string }) {
       <div>
         <span>PLAN FECHADO</span>
         <h2>Versiones del plan</h2>
-        <p>El borrador se edita aparte. Publicar revalida alergias, unidades y la versión esperada y deja una copia inmutable. El paciente sólo ve la publicada. La IA propone un borrador; no publica sola.</p>
+        <p>El paciente sólo ve la versión publicada. Publicar revalida alergias, unidades y la versión esperada. La IA propone un borrador; no publica sola.</p>
       </div>
     </header>
     {source === 'memory' && <p className="meal-plan-demo">Vista demo · el plan fechado se conserva mientras la API siga encendida.</p>}
@@ -136,7 +136,7 @@ export function MealPlanEditor({ patientId }: { patientId: string }) {
   </section>;
 }
 
-function PlanPublishedItem({ item }: { item: PlanItemView }) {
+export function PlanPublishedItem({ item }: { item: PlanItemView }) {
   const recipe = item.recipe;
   return <article className="published-plan-item">
     <header>

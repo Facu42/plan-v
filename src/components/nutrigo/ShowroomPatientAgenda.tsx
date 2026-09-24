@@ -1,49 +1,233 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Icon } from '../shared/Icon';
-import { NvBadge, NvButton, NvState } from './primitives';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  CalendarCheck, CalendarDots, CaretDown, CaretLeft, CaretRight, Clock, ForkKnife, MapPinArea, Notebook, PersonSimpleRun,
+} from '@phosphor-icons/react';
+import { NvState } from './primitives';
 import { appointmentReplyLabel, readAppointmentReply, writeAppointmentReply, type AppointmentReply } from './appointment-reply';
 import { parseAppointmentWhen, secureMeetUrl } from './ShowroomConsultations';
 import { AppointmentHistoryList } from './AppointmentHistory';
 import type { ShowroomPage } from './ShowroomPanels';
 import {
-  KIND_LABEL,
   addDays,
   buildMonthGrid,
   buildPatientCalendarEvents,
   buildWeekGrid,
-  calendarRange,
   canShiftDay,
   canShiftMonth,
   canShiftWeek,
   countByKind,
   dateFromId,
-  eventsOnDate,
-  filterCalendarEvents,
   localDateId,
   monthAnchor,
   sentenceCase,
   shiftMonth,
   type CalendarEvent,
-  type CalendarFilter,
+  type CalendarKind,
   type CalendarView,
 } from './showroom-calendar';
 import type { ShowroomPatient } from './showroom-model';
 import './showroom-patient-agenda.css';
+import './agenda-diario-fig.css';
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Piezas compartidas del frame "04. Calendar" (84:1666 / móvil 433:17250).
+   Las usan la agenda del paciente (acá) y la del consultorio (ShowroomAgenda).
+   ────────────────────────────────────────────────────────────────────────── */
+
+export type FigTone = 'green' | 'mint' | 'saffron' | 'orange' | 'gray';
+export type FigCategory = { id: string; label: string; tone: FigTone };
+export type FigCalendarItem = { id: string; dateId: string; at: Date; category: string; time: string; title: string; /** menor = primero en la celda */ priority?: number };
 
 const WEEK_DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const RESCHEDULE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const;
 const VIEWS: Array<{ id: CalendarView; label: string }> = [
-  { id: 'month', label: 'Mes' },
-  { id: 'week', label: 'Semana' },
   { id: 'day', label: 'Día' },
+  { id: 'week', label: 'Semana' },
+  { id: 'month', label: 'Mes' },
 ];
-const FILTERS: Array<{ id: CalendarFilter; label: string }> = [
-  { id: 'all', label: 'Todos' },
-  { id: 'consult', label: 'Consultas' },
-  { id: 'plan', label: 'Plan' },
-  { id: 'meal', label: 'Diario' },
-  { id: 'activity', label: 'Actividad' },
+const MONTH_YEAR = new Intl.DateTimeFormat('es-AR', { month: 'long', year: 'numeric' });
+const LONG_DATE = new Intl.DateTimeFormat('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+export function longDateLabel(date: Date): string {
+  return sentenceCase(LONG_DATE.format(date));
+}
+
+/** Card Statistic - Calendar (214:5650): rótulo, divisor, ícono de 36 y cifra 22 + unidad 14. */
+export function FigStatCard({ label, value, unit, tone, icon }: { label: string; value: number; unit: string; tone: FigTone; icon: ReactNode }) {
+  return <article className="nvcal-stat">
+    <p>{label}</p>
+    <hr />
+    <div><span className={`nvcal-stat-icon ${tone}`} aria-hidden="true">{icon}</span><p><strong>{value}</strong><small>{unit}</small></p></div>
+  </article>;
+}
+
+/** Schedule 1/2 (217:8308): badge de categoría, título 18, detalles con ícono, nota y acciones. */
+export function FigScheduleCard({ tone, badge, title, details, note, actions, children, dataId }: {
+  tone: FigTone;
+  badge: string;
+  title: string;
+  details: Array<{ icon: 'date' | 'time' | 'place'; text: string }>;
+  note?: { label: string; text: ReactNode } | null;
+  actions?: ReactNode;
+  children?: ReactNode;
+  dataId?: string;
+}) {
+  return <article className="nvcal-card" data-calendar-event={dataId}>
+    <span className={`nvcal-badge ${tone}`}>{badge}</span>
+    <strong>{title}</strong>
+    <div className="nvcal-card-details">{details.map((detail) => <p key={`${detail.icon}:${detail.text}`}>
+      {detail.icon === 'date' ? <CalendarDots size={16} aria-hidden="true" /> : detail.icon === 'time' ? <Clock size={16} aria-hidden="true" /> : <MapPinArea size={16} aria-hidden="true" />}{detail.text}
+    </p>)}</div>
+    {note && <div className="nvcal-card-note"><span>{note.label}</span><div>{note.text}</div></div>}
+    {children}
+    {actions && <div className="nvcal-card-actions">{actions}</div>}
+  </article>;
+}
+
+export function useCalendarNav(dateIds: readonly string[], now: Date, resetKey: string, initialDateId?: string) {
+  const range = useMemo(() => {
+    const sorted = [...dateIds, localDateId(now)].sort();
+    return { minId: sorted[0], maxId: sorted[sorted.length - 1] };
+  }, [dateIds, now]);
+  const startId = initialDateId ?? localDateId(now);
+  const [view, setView] = useState<CalendarView>('month');
+  const [selectedDateId, setSelectedDateId] = useState(startId);
+  const [month, setMonth] = useState(() => monthAnchor(dateFromId(startId)));
+
+  useEffect(() => {
+    setView('month');
+    setSelectedDateId(startId);
+    setMonth(monthAnchor(dateFromId(startId)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetKey, now]);
+
+  const selectedDate = dateFromId(selectedDateId);
+  const monthGrid = buildMonthGrid(month, now);
+  const weekGrid = buildWeekGrid(selectedDate, now);
+
+  const selectDate = (dateId: string) => {
+    setSelectedDateId(dateId);
+    setMonth(monthAnchor(dateFromId(dateId)));
+  };
+  const goMonth = (next: Date) => {
+    setMonth(next);
+    const todayId = localDateId(now);
+    const today = dateFromId(todayId);
+    setSelectedDateId(today.getMonth() === next.getMonth() && today.getFullYear() === next.getFullYear() ? todayId : localDateId(next));
+  };
+  const canPrev = view === 'month' ? canShiftMonth(month, -1, range) : view === 'week' ? canShiftWeek(weekGrid.start, -1, range) : canShiftDay(selectedDate, -1, range);
+  const canNext = view === 'month' ? canShiftMonth(month, 1, range) : view === 'week' ? canShiftWeek(weekGrid.start, 1, range) : canShiftDay(selectedDate, 1, range);
+  const onNav = (delta: number) => {
+    if (delta < 0 ? !canPrev : !canNext) return;
+    if (view === 'month') goMonth(shiftMonth(month, delta));
+    else if (view === 'week') {
+      const nextId = localDateId(addDays(selectedDate, delta * 7));
+      selectDate(nextId < range.minId ? range.minId : nextId > range.maxId ? range.maxId : nextId);
+    } else selectDate(localDateId(addDays(selectedDate, delta)));
+  };
+  const monthOptions = useMemo(() => {
+    const options: Date[] = [];
+    let cursor = monthAnchor(dateFromId(range.minId));
+    const last = monthAnchor(dateFromId(range.maxId));
+    while (cursor.getTime() <= last.getTime() && options.length < 36) {
+      options.push(cursor);
+      cursor = shiftMonth(cursor, 1);
+    }
+    return options;
+  }, [range]);
+
+  return { view, setView, month, goMonth, monthOptions, selectedDateId, selectedDate, selectDate, monthGrid, weekGrid, canPrev, canNext, onNav };
+}
+
+export type CalendarNav = ReturnType<typeof useCalendarNav>;
+
+function itemsOn(items: readonly FigCalendarItem[], dateId: string) {
+  return items.filter((item) => item.dateId === dateId);
+}
+
+/** Section Calendar (217:6452): Header-Section + card con Category List, cabecera de días y grilla. */
+export function FigCalendarBoard({ nav, items, categories, hidden, onToggle, cta, dayAttr, renderDay, caption }: {
+  nav: CalendarNav;
+  items: readonly FigCalendarItem[];
+  categories: readonly FigCategory[];
+  hidden: ReadonlySet<string>;
+  onToggle: (id: string) => void;
+  cta?: { label: string; onClick: () => void } | null;
+  dayAttr: string;
+  renderDay: (items: FigCalendarItem[]) => ReactNode;
+  caption?: string;
+}) {
+  const toneOf = (category: string) => categories.find((option) => option.id === category)?.tone ?? 'gray';
+  const visible = items.filter((item) => !hidden.has(item.category));
+  const [monthWord, yearWord] = sentenceCase(MONTH_YEAR.format(nav.month)).split(' de ');
+  const selectedLabel = sentenceCase(nav.selectedDate.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }));
+  const subLabel = nav.view === 'week' ? nav.weekGrid.label : nav.view === 'day' ? selectedLabel : null;
+  const monthValue = `${nav.month.getFullYear()}-${nav.month.getMonth()}`;
+
+  const renderChips = (dateId: string, max: number) => {
+    const dayItems = itemsOn(visible, dateId).sort((a, b) => (a.priority ?? 1) - (b.priority ?? 1));
+    const shown = dayItems.slice(0, max);
+    return <>
+      {shown.length > 0 && <span className="nvcal-schedules">{shown.map((item) => <span key={item.id} className={`nvcal-chip ${toneOf(item.category)}`}><b>{item.time}</b><small>{item.title}</small></span>)}</span>}
+      {dayItems.length > max && <small className="nvcal-more">+{dayItems.length - max}</small>}
+    </>;
+  };
+
+  return <section className="nvcal-section" aria-label="Calendario">
+    <header className="nvcal-head">
+      <div className="nvcal-head-left">
+        <div className="nvcal-arrows">
+          <button type="button" aria-label="Anterior" disabled={!nav.canPrev} onClick={() => nav.onNav(-1)}><CaretLeft size={18} aria-hidden="true" /></button>
+          <button type="button" aria-label="Siguiente" disabled={!nav.canNext} onClick={() => nav.onNav(1)}><CaretRight size={18} aria-hidden="true" /></button>
+        </div>
+        <label className="nvcal-title">
+          <span>{monthWord}</span><span className="nvcal-title-year">{yearWord}</span><CaretDown size={14} aria-hidden="true" />
+          <select aria-label="Elegir mes" value={monthValue} onChange={(event) => {
+            const option = nav.monthOptions.find((date) => `${date.getFullYear()}-${date.getMonth()}` === event.target.value);
+            if (option) nav.goMonth(option);
+          }}>{nav.monthOptions.map((date) => <option key={date.getTime()} value={`${date.getFullYear()}-${date.getMonth()}`}>{sentenceCase(MONTH_YEAR.format(date))}</option>)}</select>
+        </label>
+        {subLabel && <p className="nvcal-title-sub">{subLabel}</p>}
+      </div>
+      <div className="nvcal-head-right">
+        <div className="nvcal-views" aria-label="Vista del calendario">{VIEWS.map((option) => <button type="button" key={option.id} aria-pressed={nav.view === option.id} onClick={() => nav.setView(option.id)}>{option.label}</button>)}</div>
+        {cta && <button type="button" className="nvcal-cta" onClick={cta.onClick}>{cta.label}</button>}
+      </div>
+    </header>
+
+    <div className="nvcal-board">
+      <div className="nvcal-categories" aria-label="Filtrar eventos">{categories.map((option) => <button type="button" key={option.id} aria-pressed={!hidden.has(option.id)} onClick={() => onToggle(option.id)}><i className={`nvcal-check ${option.tone}`} aria-hidden="true" />{option.label}</button>)}</div>
+      {nav.view === 'month' && <>
+        <div className="nvcal-weekdays" aria-hidden="true">{WEEK_DAYS.map((day) => <span key={day}>{day}</span>)}</div>
+        <div className="nvcal-month" aria-label="Calendario mensual">{nav.monthGrid.cells.map((cell) => {
+          const count = itemsOn(visible, cell.dateId).length;
+          return <button type="button" key={cell.dateId} {...{ [`data-${dayAttr}-day`]: cell.dateId }} aria-pressed={cell.dateId === nav.selectedDateId} aria-label={`${cell.dateId}${count ? `, ${count} ${count === 1 ? 'evento' : 'eventos'}` : ''}`} className={`${cell.inMonth ? '' : 'nvcal-outside'}${cell.isToday ? ' nvcal-today' : ''}${cell.dateId === nav.selectedDateId ? ' nvcal-selected' : ''}${count === 1 ? ' nvcal-solo' : ''}`} onClick={() => nav.selectDate(cell.dateId)}>
+            <time dateTime={cell.dateId} className={count > 1 ? 'nvcal-multi' : undefined}>{cell.day}</time>
+            {renderChips(cell.dateId, 2)}
+          </button>;
+        })}</div>
+      </>}
+      {nav.view === 'week' && <div className="nvcal-week" aria-label="Calendario semanal">{nav.weekGrid.days.map((day) => <button type="button" key={day.dateId} {...{ [`data-${dayAttr}-week-day`]: day.dateId }} aria-pressed={day.dateId === nav.selectedDateId} className={`${day.isToday ? 'nvcal-today' : ''}${day.dateId === nav.selectedDateId ? ' nvcal-selected' : ''}`} onClick={() => nav.selectDate(day.dateId)}>
+        <span>{day.weekday}</span><time dateTime={day.dateId} className={itemsOn(visible, day.dateId).length > 1 ? 'nvcal-multi' : undefined}>{day.day}</time>{renderChips(day.dateId, 8)}
+      </button>)}</div>}
+      {nav.view === 'day' && <div className="nvcal-day" aria-label="Día seleccionado">{renderDay(itemsOn(visible, nav.selectedDateId))}</div>}
+    </div>
+    {caption && <p className="nvcal-caption">{caption}</p>}
+  </section>;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Agenda del paciente
+   ────────────────────────────────────────────────────────────────────────── */
+
+const PATIENT_CATEGORIES: FigCategory[] = [
+  { id: 'plan', label: 'Plan de comidas', tone: 'green' },
+  { id: 'meal', label: 'Diario', tone: 'mint' },
+  { id: 'activity', label: 'Actividad física', tone: 'saffron' },
+  { id: 'consult', label: 'Consultas', tone: 'orange' },
 ];
+const KIND_TONE: Record<CalendarKind, FigTone> = { plan: 'green', meal: 'mint', activity: 'saffron', consult: 'orange' };
+const KIND_BADGE: Record<CalendarKind, string> = { plan: 'Plan de comidas', meal: 'Diario', activity: 'Actividad física', consult: 'Consulta' };
 
 export function buildPatientAgendaView(patient: ShowroomPatient, now: Date) {
   const events = buildPatientCalendarEvents(patient, now);
@@ -62,11 +246,23 @@ function channelLabel(channel: string): string {
   return 'Modalidad por confirmar';
 }
 
-function eventIcon(kind: CalendarEvent['kind']) {
-  if (kind === 'consult') return 'video';
-  if (kind === 'plan') return 'list';
-  if (kind === 'activity') return 'heart';
-  return 'leaf';
+function clockTime(event: Pick<CalendarEvent, 'at'>): string {
+  return event.at.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+}
+
+/** Las indicaciones del plan no tienen hora propia (se anclan al mediodía): se muestra el momento y,
+    si el plan de hoy la trae, su hora. Nunca un "12:00" inventado. */
+export function eventTime(event: Pick<CalendarEvent, 'at' | 'kind' | 'subtitle'>): string {
+  if (event.kind !== 'plan') return clockTime(event);
+  const [slot, rest = ''] = event.subtitle.split(' · ');
+  return /^\d{1,2}:\d{2}$/.test(rest.trim()) ? `${slot} · ${rest.trim()}` : slot;
+}
+
+export function toggleInSet<T>(set: ReadonlySet<T>, value: T): Set<T> {
+  const next = new Set(set);
+  if (next.has(value)) next.delete(value);
+  else next.add(value);
+  return next;
 }
 
 export function ShowroomPatientAgenda({
@@ -76,7 +272,6 @@ export function ShowroomPatientAgenda({
   onNavigate,
   onReschedule,
   onConfirm,
-  audience = 'patient',
   storage = typeof window === 'undefined' ? null : window.localStorage,
 }: {
   patient: ShowroomPatient;
@@ -85,17 +280,16 @@ export function ShowroomPatientAgenda({
   onNavigate?: (page: ShowroomPage) => void;
   onReschedule?: (day: string, time: string) => Promise<void> | void;
   onConfirm?: (reply: Exclude<AppointmentReply, 'pending'>) => Promise<void> | void;
-  audience?: 'patient' | 'professional';
   storage?: Pick<Storage, 'getItem' | 'setItem'> | null;
 }) {
   const current = patient.appointment;
   const allEvents = useMemo(() => buildPatientCalendarEvents(patient, now), [patient, now]);
   const counts = countByKind(allEvents);
-  const range = useMemo(() => calendarRange(allEvents, now), [allEvents, now]);
-  const [view, setView] = useState<CalendarView>('month');
-  const [filter, setFilter] = useState<CalendarFilter>('all');
-  const [selectedDateId, setSelectedDateId] = useState(() => localDateId(now));
-  const [month, setMonth] = useState(() => monthAnchor(now));
+  const eventsById = useMemo(() => new Map(allEvents.map((event) => [event.id, event])), [allEvents]);
+  const items = useMemo<FigCalendarItem[]>(() => allEvents.map((event) => ({ id: event.id, dateId: event.dateId, at: event.at, category: event.kind, time: eventTime(event), title: event.title, priority: event.kind === 'consult' ? 0 : 1 })), [allEvents]);
+  const dateIds = useMemo(() => allEvents.map((event) => event.dateId), [allEvents]);
+  const nav = useCalendarNav(dateIds, now, patient.id);
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
   const [reply, setReply] = useState<AppointmentReply>(() => current?.patient_reply ?? (current ? readAppointmentReply(storage, patient.id, current.when) : 'pending'));
   const [rescheduling, setRescheduling] = useState(false);
   const [reschedule, setReschedule] = useState(() => parseAppointmentWhen(current?.when));
@@ -105,10 +299,7 @@ export function ShowroomPatientAgenda({
   const [confirmError, setConfirmError] = useState<string | null>(null);
 
   useEffect(() => {
-    setView('month');
-    setFilter('all');
-    setSelectedDateId(localDateId(now));
-    setMonth(monthAnchor(now));
+    setHidden(new Set());
     setReply(current?.patient_reply ?? (current ? readAppointmentReply(storage, patient.id, current.when) : 'pending'));
     setRescheduling(false);
     setReschedule(parseAppointmentWhen(current?.when));
@@ -116,14 +307,11 @@ export function ShowroomPatientAgenda({
     setConfirmError(null);
   }, [patient.id, now, current, storage]);
 
-  const events = filterCalendarEvents(allEvents, filter);
-  const monthGrid = buildMonthGrid(month, now);
-  const weekGrid = buildWeekGrid(dateFromId(selectedDateId), now);
-  const selectedEvents = eventsOnDate(events, selectedDateId);
-  const selectedDate = dateFromId(selectedDateId);
-  const selectedLabel = sentenceCase(selectedDate.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }));
+  const consultEvent = allEvents.find((event) => event.kind === 'consult') ?? null;
   const safeUrl = current?.channel === 'video' ? secureMeetUrl(current.meet_url) : null;
-  const isPatient = audience === 'patient';
+  const dayEvents = allEvents.filter((event) => event.dateId === nav.selectedDateId && !hidden.has(event.kind));
+  const consultOnDay = Boolean(consultEvent && dayEvents.some((event) => event.id === consultEvent.id));
+  const otherDayEvents = dayEvents.filter((event) => event.kind !== 'consult');
 
   const respond = async (next: Exclude<AppointmentReply, 'pending'>) => {
     if (!current || confirmBusy) return;
@@ -155,124 +343,73 @@ export function ShowroomPatientAgenda({
     }
   };
 
-  const openRelated = (event: CalendarEvent) => {
-    if (event.kind === 'consult') {
-      if (isPatient) onMessage();
-      else onNavigate?.('consultas');
-      return;
-    }
-    if (event.kind === 'plan') onNavigate?.('plan');
-    if (event.kind === 'meal') onNavigate?.('diario');
-    if (event.kind === 'activity') onNavigate?.(isPatient ? 'ejercicio' : 'reciente');
+  const related = (event: CalendarEvent): { label: string; page: ShowroomPage } | null => {
+    if (!onNavigate) return null;
+    if (event.kind === 'plan') return { label: 'Ver en el plan', page: 'plan' };
+    if (event.kind === 'meal') return { label: 'Abrir diario', page: 'diario' };
+    if (event.kind === 'activity') return { label: 'Abrir ejercicio', page: 'ejercicio' };
+    return null;
   };
 
-  const shiftSelectedDay = (delta: number) => {
-    if (!canShiftDay(selectedDate, delta, range)) return;
-    const next = addDays(selectedDate, delta);
-    setSelectedDateId(localDateId(next));
-    setMonth(monthAnchor(next));
+  const eventCard = (event: CalendarEvent) => {
+    const link = related(event);
+    return <FigScheduleCard key={event.id} dataId={event.id} tone={KIND_TONE[event.kind]} badge={KIND_BADGE[event.kind]} title={event.title}
+      details={[{ icon: 'date', text: longDateLabel(event.at) }, { icon: 'time', text: eventTime(event) }]}
+      note={{ label: 'Nota', text: <p>{event.subtitle}</p> }}
+      actions={link ? <button type="button" className="nvcal-btn" onClick={() => onNavigate?.(link.page)}>{link.label}</button> : null} />;
   };
 
-  const goMonth = (delta: number) => {
-    if (!canShiftMonth(month, delta, range)) return;
-    const next = shiftMonth(month, delta);
-    setMonth(next);
-    const todayId = localDateId(now);
-    const today = dateFromId(todayId);
-    setSelectedDateId(today.getMonth() === next.getMonth() && today.getFullYear() === next.getFullYear() ? todayId : localDateId(next));
-  };
+  const consultCard = consultEvent && current ? <FigScheduleCard key="consult" dataId={consultEvent.id} tone="orange" badge="Consulta" title={channelLabel(current.channel)}
+    details={[
+      { icon: 'date', text: longDateLabel(consultEvent.at) },
+      { icon: 'time', text: `${clockTime(consultEvent)} · ${current.duration} min` },
+      { icon: 'place', text: `${channelLabel(current.channel)} · ${current.timezone ?? 'America/Argentina/Buenos_Aires'}` },
+    ]}
+    note={{ label: 'Tu respuesta', text: <p>{reply === 'pending' ? 'Todavía no confirmaste la asistencia.' : `${appointmentReplyLabel(reply)}.`}{reply === 'needs_change' ? ' Podés proponer un nuevo día y hora; duración y modalidad las conserva el consultorio.' : ''}</p> }}
+    actions={<>
+      {safeUrl && <a className="nvcal-btn" href={safeUrl} target="_blank" rel="noopener noreferrer">Abrir videollamada</a>}
+      {reply === 'pending' && <>
+        <button type="button" className="nvcal-btn" disabled={confirmBusy} onClick={() => { void respond('needs_change'); }}>Necesito cambiar el horario</button>
+        <button type="button" className="nvcal-btn nvcal-btn-primary" disabled={confirmBusy} onClick={() => { void respond('attending'); }}>Confirmar asistencia</button>
+      </>}
+      {!rescheduling && <button type="button" className="nvcal-btn" onClick={() => setRescheduling(true)}>Reprogramar horario</button>}
+      <button type="button" className="nvcal-btn" onClick={onMessage}>Escribirle a Verónica</button>
+    </>}>
+    {confirmError && <p className="nvcal-alert" role="alert">{confirmError}</p>}
+    {rescheduling && <form className="nvcal-reschedule" onSubmit={(event) => { event.preventDefault(); void submitReschedule(); }}>
+      <h4>Reprogramar horario</h4>
+      <p>Se conservan la duración y la modalidad publicadas. Cancelar el turno sigue a cargo del consultorio.</p>
+      <label>Día<select aria-label="Nuevo día de la consulta" value={reschedule.day} onChange={(event) => setReschedule((value) => ({ ...value, day: event.target.value }))}>{RESCHEDULE_DAYS.map((day) => <option key={day}>{day}</option>)}</select></label>
+      <label>Hora<input aria-label="Nueva hora de la consulta" type="time" value={reschedule.time} onChange={(event) => setReschedule((value) => ({ ...value, time: event.target.value }))} /></label>
+      {rescheduleError && <p className="nvcal-alert" role="alert">{rescheduleError}</p>}
+      <div className="nvcal-card-actions"><button type="button" className="nvcal-btn" onClick={() => setRescheduling(false)}>Volver</button><button type="submit" className="nvcal-btn nvcal-btn-primary" disabled={rescheduleBusy || !onReschedule}>{rescheduleBusy ? 'Guardando…' : 'Confirmar horario'}</button></div>
+    </form>}
+  </FigScheduleCard> : null;
 
-  const goWeek = (delta: number) => {
-    if (!canShiftWeek(weekGrid.start, delta, range)) return;
-    const next = addDays(selectedDate, delta * 7);
-    const nextId = localDateId(next);
-    const clamped = nextId < range.minId ? range.minId : nextId > range.maxId ? range.maxId : nextId;
-    setSelectedDateId(clamped);
-    setMonth(monthAnchor(dateFromId(clamped)));
-  };
-
-  const navLabel = view === 'month' ? monthGrid.label : view === 'week' ? weekGrid.label : selectedLabel;
-  const canPrev = view === 'month' ? canShiftMonth(month, -1, range) : view === 'week' ? canShiftWeek(weekGrid.start, -1, range) : canShiftDay(selectedDate, -1, range);
-  const canNext = view === 'month' ? canShiftMonth(month, 1, range) : view === 'week' ? canShiftWeek(weekGrid.start, 1, range) : canShiftDay(selectedDate, 1, range);
-  const onNav = (delta: number) => {
-    if (view === 'month') goMonth(delta);
-    else if (view === 'week') goWeek(delta);
-    else shiftSelectedDay(delta);
-  };
-
-  const renderChips = (dateId: string, compact = false) => {
-    const dayEvents = eventsOnDate(events, dateId);
-    const visible = compact ? dayEvents.slice(0, 2) : dayEvents;
-    return <>
-      {visible.map((event) => <span key={event.id} className={`nvpa-chip ${event.kind}`}><b>{event.title}</b><small>{KIND_LABEL[event.kind]}</small></span>)}
-      {compact && dayEvents.length > 2 && <small className="nvpa-more">+{dayEvents.length - 2}</small>}
-    </>;
-  };
-
-  return <section className={`nvpa-agenda${isPatient ? '' : ' nvpa-embed'}`} aria-label={isPatient ? 'Tu calendario' : `Calendario de ${patient.name}`}>
-    {isPatient ? <header className="nvpa-hero"><div><span>TU SEMANA</span><h2>Tu calendario</h2><p>Consultas publicadas, indicaciones de esta semana y lo que ya registraste. Nada más.</p></div><span className="nvpa-hero-icon"><Icon name="calendar" size={22} /></span></header>
-      : <header className="nvpa-echo-head"><div><span>ECO DE LA PACIENTE</span><h2>Calendario de {patient.name}</h2><p>Las mismas fechas que ella ve: próxima consulta, plan de esta semana, diario y actividad.</p></div><NvBadge>{allEvents.length} eventos</NvBadge></header>}
-
-    <dl className="nvpa-summary" aria-label="Resumen del calendario">
-      <div><dt>Consultas</dt><dd>{counts.consult}</dd></div>
-      <div><dt>Plan de la semana</dt><dd>{counts.plan}</dd></div>
-      <div><dt>Diario</dt><dd>{counts.meal}</dd></div>
-      <div><dt>Actividad</dt><dd>{counts.activity}</dd></div>
-    </dl>
-
-    <div className="nvpa-toolbar">
-      <div className="nvpa-views" aria-label="Vista del calendario">{VIEWS.map((option) => <button type="button" key={option.id} aria-pressed={view === option.id} onClick={() => setView(option.id)}>{option.label}</button>)}</div>
-      <div className="nvpa-nav">
-        <button type="button" aria-label="Anterior" disabled={!canPrev} onClick={() => onNav(-1)}><Icon name="chevron" size={16} /></button>
-        <p>{navLabel}</p>
-        <button type="button" aria-label="Siguiente" disabled={!canNext} onClick={() => onNav(1)}><Icon name="chevron" size={16} /></button>
-      </div>
-    </div>
-    <div className="nvpa-filters" aria-label="Filtrar eventos">{FILTERS.map((option) => <button type="button" key={option.id} aria-pressed={filter === option.id} onClick={() => setFilter(option.id)}>{option.label}</button>)}</div>
-
-    <div className="nvpa-layout">
-      <section className="nvpa-calendar" aria-label={view === 'month' ? 'Calendario mensual' : view === 'week' ? 'Calendario semanal' : 'Día seleccionado'}>
-        {view === 'month' && <>
-          <div className="nvpa-weekdays" aria-hidden="true">{WEEK_DAYS.map((day) => <span key={day}>{day}</span>)}</div>
-          <div className="nvpa-month-grid">{monthGrid.cells.map((cell) => {
-            const occupied = eventsOnDate(events, cell.dateId).length > 0;
-            return <button type="button" key={cell.dateId} data-patient-agenda-day={cell.dateId} aria-pressed={cell.dateId === selectedDateId} aria-label={`${cell.dateId}${occupied ? ', con eventos' : ''}`} className={`${cell.inMonth ? '' : 'nvpa-outside'}${cell.isToday ? ' nvpa-today' : ''}${occupied ? ' nvpa-occupied' : ''}${cell.dateId === selectedDateId ? ' nvpa-selected' : ''}`} onClick={() => { setSelectedDateId(cell.dateId); setMonth(monthAnchor(cell.date)); }}><time dateTime={cell.dateId}>{cell.day}</time>{renderChips(cell.dateId, true)}</button>;
-          })}</div>
-        </>}
-        {view === 'week' && <div className="nvpa-week-grid">{weekGrid.days.map((day) => <button type="button" key={day.dateId} data-patient-agenda-week-day={day.dateId} aria-pressed={day.dateId === selectedDateId} className={`${day.isToday ? 'nvpa-today' : ''}${day.dateId === selectedDateId ? ' nvpa-selected' : ''}`} onClick={() => setSelectedDateId(day.dateId)}><span>{day.weekday}</span><time dateTime={day.dateId}>{day.day}</time>{renderChips(day.dateId)}</button>)}</div>}
-        {view === 'day' && <div className="nvpa-day-list">{selectedEvents.length ? selectedEvents.map((event) => <article key={event.id} data-calendar-event={event.id} className={`nvpa-event ${event.kind}`}><span className="nvpa-detail-icon"><Icon name={eventIcon(event.kind)} size={18} /></span><div><NvBadge>{KIND_LABEL[event.kind]}</NvBadge><strong>{event.title}</strong><small>{event.subtitle}</small></div></article>) : <NvState title="Sin eventos este día" description="El calendario no inventa turnos, comidas ni actividad." />}</div>}
+  return <section className="nvcal" aria-label="Tu calendario">
+    <div className="nvcal-main">
+      <section className="nvcal-stats" aria-label="Resumen del calendario">
+        <FigStatCard label="Comidas del plan" value={counts.plan} unit={counts.plan === 1 ? 'comida' : 'comidas'} tone="green" icon={<ForkKnife size={16} />} />
+        <FigStatCard label="Registros del diario" value={counts.meal} unit={counts.meal === 1 ? 'registro' : 'registros'} tone="mint" icon={<Notebook size={16} />} />
+        <FigStatCard label="Actividad física" value={counts.activity} unit={counts.activity === 1 ? 'registro' : 'registros'} tone="saffron" icon={<PersonSimpleRun size={16} />} />
+        <FigStatCard label="Consultas" value={counts.consult} unit={counts.consult === 1 ? 'consulta' : 'consultas'} tone="orange" icon={<CalendarCheck size={16} />} />
       </section>
-
-      <aside className="nvpa-detail" aria-label="Detalle del día">
-        <header><h3>{selectedLabel}</h3><NvBadge>{selectedEvents.length} {selectedEvents.length === 1 ? 'evento' : 'eventos'}</NvBadge></header>
-        {selectedEvents.length ? selectedEvents.map((event) => <article key={event.id} className={`nvpa-event ${event.kind}`}><span className="nvpa-detail-icon"><Icon name={eventIcon(event.kind)} size={20} /></span><div><NvBadge>{KIND_LABEL[event.kind]}</NvBadge><strong>{event.title}</strong><small>{event.subtitle}</small>{onNavigate && event.kind !== 'consult' && <NvButton className="nv-ghost" onClick={() => openRelated(event)}>{event.kind === 'plan' ? 'Ver en el plan' : event.kind === 'meal' ? 'Abrir diario' : isPatient ? 'Abrir ejercicio' : 'Ver actividad'}</NvButton>}{event.kind === 'consult' && !isPatient && <NvButton className="nv-ghost" onClick={() => onNavigate?.('consultas')}>Gestionar consulta</NvButton>}</div></article>)
-          : <p className="nvpa-empty-day">No hay eventos publicados o registrados en este día.</p>}
-
-        {counts.consult > 0 && current && isPatient && <>
-          <p className="nvpa-consult-when">{current.when} · {current.duration} min</p>
-          <p className="nvpa-reply-note">Zona horaria: {current.timezone ?? 'America/Argentina/Buenos_Aires'}</p>
-          {safeUrl && <a href={safeUrl} target="_blank" rel="noopener noreferrer">Abrir videollamada <Icon name="arrow" size={15} /></a>}
-          {reply === 'pending' ? <div className="nvpa-reply"><NvButton disabled={confirmBusy} onClick={() => { void respond('attending'); }}>Confirmar asistencia</NvButton><NvButton className="nv-ghost" disabled={confirmBusy} onClick={() => { void respond('needs_change'); }}>Necesito cambiar el horario</NvButton></div>
-            : <p className="nvpa-reply-note">{appointmentReplyLabel(reply)}. {reply === 'needs_change' ? 'Podés proponer un nuevo día y hora; duración y modalidad las conserva el consultorio.' : 'Si más adelante necesitás mover el turno, reprogramalo acá.'}</p>}
-          {confirmError && <p role="alert">{confirmError}</p>}
-          {!rescheduling && <NvButton className="nv-ghost" onClick={() => setRescheduling(true)}>Reprogramar horario</NvButton>}
-          {rescheduling && <form className="nvpa-reschedule" onSubmit={(event) => { event.preventDefault(); submitReschedule(); }}>
-            <h4>Reprogramar horario</h4>
-            <p>Se conserva la duración y la modalidad publicadas. Cancelar el turno sigue a cargo del consultorio.</p>
-            <label>Día<select aria-label="Nuevo día de la consulta" value={reschedule.day} onChange={(event) => setReschedule((value) => ({ ...value, day: event.target.value }))}>{RESCHEDULE_DAYS.map((day) => <option key={day}>{day}</option>)}</select></label>
-            <label>Hora<input aria-label="Nueva hora de la consulta" type="time" value={reschedule.time} onChange={(event) => setReschedule((value) => ({ ...value, time: event.target.value }))} /></label>
-            {rescheduleError && <p role="alert">{rescheduleError}</p>}
-            <div className="nvpa-reply"><NvButton type="submit" disabled={rescheduleBusy || !onReschedule}>{rescheduleBusy ? 'Guardando…' : 'Confirmar horario'}</NvButton><NvButton className="nv-ghost" type="button" onClick={() => setRescheduling(false)}>Volver</NvButton></div>
-          </form>}
-          <NvButton className="nv-soft" onClick={onMessage}>Escribirle a Verónica <Icon name="message" size={15} /></NvButton>
-        </>}
-
-        {current && !counts.consult && isPatient && <p className="nvpa-reply-note">Fecha pendiente de corregir. La gestión del turno corresponde al consultorio.</p>}
-        {!current && isPatient && <div className="nvpa-empty-consult"><NvState title="Sin consulta programada" description="Podés escribirle a Verónica para coordinar el próximo encuentro." /><NvButton onClick={onMessage}>Escribirle a Verónica <Icon name="message" size={16} /></NvButton></div>}
-        <AppointmentHistoryList entries={patient.appointmentHistory ?? []} audience={isPatient ? 'patient' : 'professional'} />
-      </aside>
+      <FigCalendarBoard nav={nav} items={items} categories={PATIENT_CATEGORIES} hidden={hidden} onToggle={(id) => setHidden((set) => toggleInSet(set, id))}
+        cta={{ label: 'Nueva consulta', onClick: onMessage }} dayAttr="patient-agenda"
+        caption="Las indicaciones del plan se muestran sólo sobre la semana calendario actual."
+        renderDay={(list) => list.length ? list.map((item) => { const event = eventsById.get(item.id); return event ? (event.kind === 'consult' ? consultCard : eventCard(event)) : null; })
+          : <NvState title="Sin eventos este día" description="El calendario no inventa turnos, comidas ni actividad." />} />
     </div>
 
-    <p className="nvpa-note"><Icon name="calendar" size={16} /> Las indicaciones del plan se muestran sólo sobre la semana calendario actual. Diario y actividad usan su fecha real. La consulta es la próxima ocurrencia publicada. Los avisos de comidas, hábitos y consulta están en la campana; el teléfono usa el navegador de este dispositivo y el mail queda en el buzón demo.</p>
+    <aside className="nvcal-aside" aria-label="Detalle del día">
+      <header><h3>Detalle del día</h3><small>{sentenceCase(nav.selectedDate.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }))}</small></header>
+      {consultOnDay && consultCard}
+      {otherDayEvents.map(eventCard)}
+      {!dayEvents.length && <p className="nvcal-empty-day">No hay eventos publicados o registrados en este día.</p>}
+      {consultCard && !consultOnDay && <><h4 className="nvcal-aside-sub">Próxima consulta</h4>{consultCard}</>}
+      {current && !consultEvent && <p className="nvcal-empty-day">Fecha pendiente de corregir. La gestión del turno corresponde al consultorio.</p>}
+      {!current && <div className="nvcal-empty-consult"><NvState title="Sin consulta programada" description="Podés escribirle a Verónica para coordinar el próximo encuentro." /><button type="button" className="nvcal-btn nvcal-btn-primary" onClick={onMessage}>Escribirle a Verónica</button></div>}
+      <AppointmentHistoryList entries={patient.appointmentHistory ?? []} audience="patient" />
+    </aside>
   </section>;
 }

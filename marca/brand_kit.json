@@ -17,11 +17,35 @@
     "muted": "#E3EFE4"
   },
   "type": {
-    "display": "Fraunces",
-    "ui": "DM Sans"
+    "display": "Poppins",
+    "ui": "Poppins"
   },
-  "aesthetic": "dashboard editorial de bienestar inspirado en Nutrigo, con implementación original de Plan V",
-  "panel": "design/tokens-panel-nutri.css",
-  "ig_canvas": { "w": 1080, "h": 1350 },
-  "footer": "Plan V — Verónica Trenti | @planv.nutricion"
+  "aesthetic": "fidelidad exacta al pack Nutrigo (.fig OTolnKfsxUFjaZOhhdb04i), copy en espanol",
+  "panel": "src/components/nutrigo/nutrigo-fidelity.css",
+  "ig_canvas": {
+    "w": 1080,
+    "h": 1350
+  },
+  "footer": "Plan V — Verónica Trenti | @planv.nutricion",
+  "ui_palette_source": "Variables del archivo .fig OTolnKfsxUFjaZOhhdb04i, leídas por el MCP de Figma (2026-09-22)",
+  "ui_palette": {
+    "bg": "#F9F4F2",
+    "card": "#FFFFFF",
+    "card_warm": "#FEFCFB",
+    "ink": "#272932",
+    "ink_soft": "#52545B",
+    "muted": "#8A8C90",
+    "faint": "#BEBFC2",
+    "line": "#E1E1E2",
+    "fill": "#EEEEEF",
+    "track": "#F6F6F7",
+    "accent": "#C2E66E",
+    "accent_soft": "#DFF9A2",
+    "gold": "#FFCB65",
+    "gold_soft": "#FFE6B5",
+    "coral": "#FFA257",
+    "coral_soft": "#FFE1C9"
+  },
+  "note": "La paleta del logo identifica la marca (isotipo, piezas de IG). No pinta la interfaz.",
+  "ui_shadow": "0 4px 12px rgba(176, 176, 176, 0.14)"
 }

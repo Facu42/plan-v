@@ -30,16 +30,16 @@ export function PatientOverview({ patient: p, onNavigate, audience = 'patient' }
   const latest = p.messages[p.messages.length - 1];
   return <div className="np-dashboard">
     <div className="nv-metrics np-metrics">
-      <NvMetric label="Adherencia" value={<>{p.adherence}<em> %</em></>} note="Últimos 7 días" icon="target" onOpen={() => onNavigate('progreso')}>
+      <NvMetric label="Adherencia" value={<>{p.adherence}<em>%</em></>} note="Últimos 7 días" icon="target" nvIcon="adherencia" onOpen={() => onNavigate('progreso')}>
         <div className="np-ruler" aria-hidden="true"><i style={{ left: `${Math.min(100, Math.max(0, p.adherence))}%` }} /><span>0</span><span>50</span><span>100</span></div>
       </NvMetric>
-      <NvMetric label="Comidas revisadas" value={p.journey.reviewedMeals} note={`${p.journey.pendingMeals} pendientes de revisión`} icon="check" tone="coral" onOpen={() => onNavigate('diario')}>
+      <NvMetric label="Comidas revisadas" value={p.journey.reviewedMeals} note={`${p.journey.pendingMeals} pendientes de revisión`} icon="check" nvIcon="diario" tone="coral" onOpen={() => onNavigate('diario')}>
         <div className="np-review-track" role="img" aria-label={`${p.journey.reviewedMeals} de ${totalMeals} registros revisados`}><i style={{ width: `${reviewed}%` }} /></div>
       </NvMetric>
-      <NvMetric label="Descanso" value={p.sleep} note="Registro de hoy" icon="moon" tone="gold" onOpen={() => onNavigate('progreso')}>
+      <NvMetric label="Descanso" value={p.sleep} note="Registro de hoy" icon="moon" nvIcon="descanso" tone="gold" onOpen={() => onNavigate('progreso')}>
         <NvBars label="Horas de sueño" values={p.journey.days.map((d) => ({ label: d.label, value: (d.sleepMinutes ?? 0) / 60 }))} />
       </NvMetric>
-      <NvMetric label="Hidratación" value={<>{p.hydration}<em> vasos</em></>} note="Registro de hoy · sin meta prescrita" icon="drop" onOpen={() => onNavigate('progreso')}>
+      <NvMetric label="Hidratación" value={<>{p.hydration}<em>vasos</em></>} note="Registro de hoy · sin meta prescrita" icon="drop" nvIcon="hidratacion" onOpen={() => onNavigate('progreso')}>
         <div className="np-water" aria-hidden="true"><Icon name="drop" size={19} /><span>{professional ? 'Agua registrada' : 'Tu registro de agua'}</span></div>
       </NvMetric>
     </div>
@@ -59,7 +59,7 @@ export function PatientOverview({ patient: p, onNavigate, audience = 'patient' }
             <div className="np-macro-heading"><span className="nv-icon-tile"><Icon name={hasNutrition ? 'check' : 'clock'} size={17} /></span><div><strong>{hasNutrition ? professional ? 'Datos revisados' : 'Lo que registraste' : 'Registro pendiente'}</strong><small>{hasNutrition ? 'Distribución energética estimada' : 'Sin valores para calcular'}</small></div></div>
             {(['Proteínas', 'Carbohidratos', 'Grasas'] as const).map((label, i) => <div className="np-macro-row" key={label}>
               <strong>{hasNutrition ? <>{[p.macros.protein_g, p.macros.carbs_g, p.macros.fat_g][i]}<small> g</small></> : '—'}</strong>
-              <div><span>{label}</span><span className="np-macro-track" aria-hidden="true"><i style={{ width: `${shares[i]}%` }} /></span></div>
+              <div><span>{label}{hasNutrition && <b>{shares[i]}%</b>}</span><span className="np-macro-track" aria-hidden="true"><i style={{ width: `${shares[i]}%` }} /></span></div>
             </div>)}
           </div>
         </div>

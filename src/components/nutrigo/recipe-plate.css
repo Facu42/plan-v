@@ -1,6 +1,7 @@
 .recipe-plate{display:flex;flex-direction:column;overflow:hidden;margin:0;border:1px solid var(--nv-border);border-radius:22px;background:var(--nv-card);box-shadow:0 10px 30px rgba(8,58,48,.06)}
 .recipe-dish{margin:0;background:#f3efe6}
 .recipe-dish svg{display:block;width:100%;height:auto;aspect-ratio:16/10}
+.recipe-dish img{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover}
 .recipe-dish figcaption{padding:8px 16px 0;color:var(--nv-muted);font-size:11px;letter-spacing:.02em}
 .recipe-plate-body{display:flex;flex-direction:column;gap:8px;padding:16px 18px 18px}
 .recipe-plate-badge{align-self:flex-start;padding:4px 10px;border-radius:999px;background:var(--nv-green);color:var(--nv-strong);font-size:11px;font-weight:700;letter-spacing:.04em}
