@@ -84,7 +84,7 @@ export const NUTRIGO_NO_GLOBAL_RAIL: readonly NutrigoSurfaceId[] = [
 ];
 
 export const NUTRIGO_FIDELITY_NOT_VISUAL_APPROVAL =
-  'NV-FIDELITY shell contracts are not Facu visual approval. PLANV_NUTRIGO_VISUAL stays unset.';
+  'NV-FIDELITY shell contracts are not Facu visual approval. Facu approved the gate separately on 2026-09-24.';
 
 /** Desktop PNGs from Figma Cloud OTolnKfsxUFjaZOhhdb04i. Not Facu visual approval. */
 export const NUTRIGO_REFERENCE_PNGS = {

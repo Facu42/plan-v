@@ -341,6 +341,6 @@ Necesita `FIGMA_TOKEN`, un personal access token con scope `file_content:read`. 
 
 Cuando ese pull corra, los valores muestreados de las capturas se reemplazan por los del archivo y esta nota se actualiza con la diferencia.
 
-La comparación no es aprobación visual. `PLANV_NUTRIGO_VISUAL` sigue sin setearse.
+Esta comparación técnica no constituyó la aprobación visual. Facu aprobó el gate el 2026-09-24; `PLANV_NUTRIGO_VISUAL` quedó activo en Railway API y worker. El pase mobile sigue pendiente.
 
 Marca y copy siguen siendo Plan V. No se copian archivos propietarios del kit ni se inventan fotos de plato.
