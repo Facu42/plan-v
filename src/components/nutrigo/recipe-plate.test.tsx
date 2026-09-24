@@ -12,6 +12,7 @@ const card = {
   macros: { kcal: 185, protein_g: 18, carbs_g: 40, fat_g: 9 },
   cover_status: 'none' as const,
   cover_alt: 'Bowl de lentejas',
+  cover_url: null,
 };
 
 const assignment: RecipeDayAssignment = {
@@ -53,6 +54,14 @@ describe('PV-40 formato de card y CTA', () => {
     expect(html).toContain('La foto del plato no se generó');
     expect(html).toContain('La IA no devolvió macros');
     expect(html).not.toMatch(/https?:\/\//);
+  });
+
+  it('con cover_status ready se muestra la foto real generada (PV-42), no la ilustración', () => {
+    const ready = { ...card, cover_status: 'ready' as const, cover_url: 'https://cdn.example.test/covers/bowl.png' };
+    const html = renderToStaticMarkup(<RecipePlateCard title="Bowl de lentejas" portions={2} card={ready} />);
+    expect(html).toContain('<img');
+    expect(html).toContain('https://cdn.example.test/covers/bowl.png');
+    expect(html).not.toContain('Ilustración de revisión');
   });
 
   it('el paciente ve Registrar esta comida y el catálogo ofrece manual o IA', () => {

@@ -117,11 +117,12 @@ export function useRecipeCatalog(patientId: string) {
         yield_portions: payload.yield_portions || 1,
         steps: payload.steps?.length ? payload.steps : [''],
         nutrient_source: '',
-        cover_status: 'failed',
+        // La foto recién se intenta al aprobar (publicar), no en el borrador (PV-42).
+        cover_status: 'none',
         items: payload.items?.length ? payload.items.map((item) => ({ name: item.name, quantity: item.quantity, unit: item.unit })) : [{ name: '', quantity: 1, unit: 'g' }],
       });
       setPath('manual');
-    }, 'Propuesta lista para revisar. Sin macros ni foto si la IA no los devolvió.');
+    }, 'Propuesta lista para revisar. Sin macros. La foto se genera al aprobar.');
   }
 
   return {

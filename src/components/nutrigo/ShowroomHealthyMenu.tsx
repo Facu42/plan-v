@@ -263,7 +263,7 @@ function RecommendedWidget({ title, recipes, emptyText, savedIds, onToggleFavori
       const saved = savedIds?.includes(recipe.id) ?? false;
       return <article key={`${recipe.id}:${recipe.version}`} className="mf-recommended-card">
         <div className="mf-recommended-main">
-          <span className="mf-thumb mf-thumb-64"><RecipeDishWell title={recipe.title} status={card.cover_status} /></span>
+          <span className="mf-thumb mf-thumb-64"><RecipeDishWell title={recipe.title} status={card.cover_status} url={card.cover_url} alt={card.cover_alt} /></span>
           <div>
             <button type="button" className="mf-link-title" onClick={() => onOpen(recipe)}>{recipe.title}</button>
             <div className="mf-recommended-foot">
@@ -472,7 +472,7 @@ function ProHealthyMenu({ patient, query }: { patient: ShowroomPatient; query: s
         </SectionHead>
         <div className={`mf-featured-body${featuredMacros ? '' : ' mf-no-macros'}`}>
           <div className="mf-featured-main">
-            <span className="mf-thumb mf-featured-image"><RecipeDishWell title={featured.title} status={featuredCard.cover_status} /></span>
+            <span className="mf-thumb mf-featured-image"><RecipeDishWell title={featured.title} status={featuredCard.cover_status} url={featuredCard.cover_url} alt={featuredCard.cover_alt} /></span>
             <div className="mf-featured-content">
               <h3>{featured.title}</h3>
               <div className="mf-featured-row">
@@ -501,7 +501,7 @@ function ProHealthyMenu({ patient, query }: { patient: ShowroomPatient; query: s
         {items.length ? <div className="mf-list" data-view={view}>{items.map((recipe) => {
           const card = recipe.current.card ?? unavailableCard(recipe.title);
           return <article key={recipe.id} className="mf-card" data-featured={recipe === featured || undefined}>
-            <span className="mf-thumb mf-card-image"><RecipeDishWell title={recipe.title} status={card.cover_status} /></span>
+            <span className="mf-thumb mf-card-image"><RecipeDishWell title={recipe.title} status={card.cover_status} url={card.cover_url} alt={card.cover_alt} /></span>
             <div className="mf-card-head">
               <span className="mf-card-badges"><SlotBadge slot={card.category} /><span className="mf-level">{recipe.current.published_at ? <Check size={12} aria-hidden /> : <PencilSimple size={12} aria-hidden />}{recipe.current.published_at ? 'Publicada' : 'Borrador'}</span></span>
               <span className="mf-score"><span>Rinde:</span><strong>{recipe.current.yield_portions}</strong><small>{recipe.current.yield_portions === 1 ? '\u00a0porción' : '\u00a0porciones'}</small></span>

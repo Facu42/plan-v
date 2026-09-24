@@ -69,7 +69,7 @@ describe('Menú saludable nutricionista: el catálogo es el menú', () => {
     current: {
       id: `${id}-v1`, version: 1, yield_portions: 2, steps: ['Cocinar.'], nutrient_source: 'Tabla', published_at: published ? created : null,
       ingredients: [{ id: 'i1', name: 'Lentejas', quantity: 80, unit: 'g' }],
-      card: { category, prep_minutes: null, macro_status: kcal == null ? 'unavailable' : 'declared', macros: kcal == null ? null : { kcal, protein_g: 10, carbs_g: 20, fat_g: 5 }, cover_status: 'none', cover_alt: title },
+      card: { category, prep_minutes: null, macro_status: kcal == null ? 'unavailable' : 'declared', macros: kcal == null ? null : { kcal, protein_g: 10, carbs_g: 20, fat_g: 5 }, cover_status: 'none', cover_alt: title, cover_url: null },
     },
     published: null,
   });
