@@ -12,7 +12,8 @@
    on 2026-09-22 (node 12:792). Names in comments are the .fig's variable names.
    Type: Poppins, the pack face. Not Inter. Not Fraunces.
    Copy stays Spanish: the .fig rules composition, not language.
-   Facu approved the visual gate on 2026-09-24. Mobile remains a follow-up. */
+   Not Facu visual approval at implementation time (2026-09-22).
+   Facu approved the gate on 2026-09-24. Mobile remains a follow-up. */
 .nv-app {
   /* Layout, measured on frame 12:792 "01. Dashboard (Desktop)" at 1440. */
   --nv-sidebar-width: 223px;
