@@ -23,6 +23,15 @@ describe('PV-42 recipe-cover', () => {
     expect(generateImage).not.toHaveBeenCalled();
   });
 
+  it('no intenta generar una portada con sólo OpenRouter configurado', async () => {
+    vi.stubEnv('APP_MODE', 'test');
+    vi.stubEnv('AI_MODE', 'live');
+    vi.stubEnv('OPENROUTER_API_KEY', 'synthetic-only');
+    vi.stubEnv('OPENAI_API_KEY', '');
+    expect(await generateRecipeCoverImage(context)).toEqual({ status: 'failed' });
+    expect(generateImage).not.toHaveBeenCalled();
+  });
+
   it('no inventa una URL si el proveedor falla en modo vivo', async () => {
     vi.stubEnv('APP_MODE', 'test');
     vi.stubEnv('AI_MODE', 'live');

@@ -20,7 +20,10 @@ export function assertSecretBoundary(env: Record<string, string | undefined> = p
   for (const [key, value] of Object.entries(env)) {
     if (!value) continue;
     if (!key.startsWith('VITE_')) continue;
-    if (/SERVICE_ROLE|SECRET|PASSWORD|PRIVATE_KEY/i.test(key)) {
+    if (
+      /SERVICE_ROLE|SECRET|PASSWORD|PRIVATE_KEY/i.test(key)
+      || SERVER_SECRET_NAMES.some((secretName) => key.includes(secretName))
+    ) {
       throw new Error(`Refusing to expose a server secret via ${key}`);
     }
   }

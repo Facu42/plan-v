@@ -143,9 +143,14 @@ function asTransfer(value: unknown): OwnershipTransferView {
   };
 }
 
-function assertNoProviderKeys(value: unknown) {
+export function assertNoProviderKeys(value: unknown) {
   const text = JSON.stringify(value ?? {});
-  if (/(mercadopago|mp_access|stripe_secret|provider_customer|OPENAI_API_KEY)/i.test(text)) {
+  const providerKeyValues = [process.env.OPENAI_API_KEY, process.env.OPENROUTER_API_KEY]
+    .filter((key): key is string => Boolean(key));
+  if (
+    /(mercadopago|mp_access|stripe_secret|provider_customer|OPENAI_API_KEY|OPENROUTER_API_KEY|sk-or-)/i.test(text)
+    || providerKeyValues.some((key) => text.includes(key))
+  ) {
     throw new CareError(503, 'No se pudo guardar la organización. Reintentá en un momento.');
   }
 }

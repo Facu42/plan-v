@@ -23,7 +23,7 @@ function coverPrompt(context: RecipeCoverContext): string {
  * (evita costo en demo/test/disabled) y devuelve 'failed' sin URL.
  */
 export async function generateRecipeCoverImage(context: RecipeCoverContext): Promise<RecipeCoverResult> {
-  if (resolveAiMode() !== 'live') return { status: 'failed' };
+  if (resolveAiMode() !== 'live' || !process.env.OPENAI_API_KEY) return { status: 'failed' };
   try {
     const { image } = await generateImage({
       model: openai.image('dall-e-3'),
