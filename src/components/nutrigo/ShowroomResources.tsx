@@ -16,6 +16,7 @@ import { NvBadge, NvButton, NvState } from './primitives';
 import type { ShowroomPage } from './ShowroomPanels';
 import './showroom-resources.css';
 import './progreso-recursos-fig.css';
+import './figma-mobile-resources.css';
 
 export type ResourceGuide = {
   id: string;
@@ -285,10 +286,10 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
     const related = selected.related.map((id) => catalog.find((guide) => guide.id === id)).filter((guide): guide is ResourceGuide => Boolean(guide));
     const isSaved = saved.some((row) => row.item_id === selected.id);
     const date = resourceDateLabel(selected.reviewed_at);
-    return <section className="nvrf nvrf-detail" aria-label={`${selected.kind === 'clinical' ? 'Artículo' : 'Guía'}: ${selected.title}`}>
+    return <section className="nvrf nvrf-detail" data-figma-frame="507:17412" aria-label={`${selected.kind === 'clinical' ? 'Artículo' : 'Guía'}: ${selected.title}`}>
       <button type="button" className="nvrf-back" onClick={closeGuide}><Icon name="arrow" size={14} /> Volver a Recursos</button>
       <div className="nvrf-detail-layout">
-        <article className="nvrf-article">
+        <article className="nvrf-article" data-figma-node="507:17793">
           <header>
             <p className="nvrf-meta"><span>{selected.category}</span><i aria-hidden="true" /><small>{selected.minutes} min de lectura</small></p>
             <h2>{selected.title}</h2>
@@ -300,7 +301,7 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
           <aside className="nvrf-quote"><p>{selected.license_note} {selected.kind === 'clinical' ? 'No diagnostica ni prescribe.' : 'No reemplaza las indicaciones de tu profesional.'}</p><strong>– {selected.kind === 'clinical' ? 'Límite editorial' : 'Sobre estas guías'} –</strong></aside>
           <NvButton onClick={() => onNavigate(selected.action.page)}>{selected.action.label} <Icon name="arrow" size={15} /></NvButton>
         </article>
-        <aside className="nvrf-detail-rail">
+        <aside className="nvrf-detail-rail" data-figma-node="507:18004">
           <section><header className="nvrf-head"><h3>Compartir</h3></header>
             <div className="nvrf-share">
               <button type="button" onClick={() => void shareSelected(selected)}><Icon name="arrow" size={16} /> Compartir</button>
@@ -312,6 +313,7 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
           {related.length > 0 && <section><header className="nvrf-head"><h3>Relacionados</h3></header><div className="nvrf-related">{related.map((guide) => <button type="button" key={guide.id} onClick={() => openGuide(guide.id, true)}><Cover guide={guide} size={28} /><strong>{guide.title}</strong><span>{guide.category}</span></button>)}</div></section>}
         </aside>
       </div>
+      <footer className="nvrf-figma-footer"><strong>Copyright © {new Date().getFullYear()} Plan V</strong><span>Privacidad　 Condiciones　 Contacto</span></footer>
     </section>;
   }
 
@@ -320,25 +322,25 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
   const popular = others.slice(0, 2);
   const more = others.slice(2);
   const visibleTags = allTags ? tags : tags.slice(0, 6);
-  return <section className="nvrf" aria-label="Recursos">
+  return <section className="nvrf" data-figma-frame="504:15334" aria-label="Recursos">
     <div className="nvrf-layout">
       <div className="nvrf-main">
-        <header className="nvrf-hero">
+        <header className="nvrf-hero" data-figma-node="504:15702">
           <h2>Guías y artículos revisados</h2>
           {onQueryChange && <label className="nvrf-search"><span className="nvrf-sr">Buscar recursos y guardados</span><input type="search" placeholder="Buscar guías y artículos" value={query} onChange={(event) => onQueryChange(event.target.value)} /><span className="nvrf-search-go" aria-hidden="true"><MagnifyingGlass size={18} /></span></label>}
           {onQueryChange && tags.length > 0 && <div className="nvrf-chips" aria-label="Etiquetas frecuentes">{tags.slice(0, 5).map(({ tag }) => <button type="button" key={tag} aria-pressed={normalize(query) === normalize(tag)} onClick={() => onQueryChange(normalize(query) === normalize(tag) ? '' : tag)}>{tag}</button>)}</div>}
         </header>
-        <div className="nvrf-tabs" role="group" aria-label="Categorías de recursos">{categories.map((value) => <button type="button" key={value} aria-pressed={category === value} onClick={() => setCategory(value)}>{value}</button>)}</div>
+        <div className="nvrf-tabs" data-figma-node="507:15755" role="group" aria-label="Categorías de recursos">{categories.map((value) => <button type="button" key={value} aria-pressed={category === value} onClick={() => setCategory(value)}>{value}</button>)}</div>
         {featured ? <>
           <div className="nvrf-featured-row">
-            <section className="nvrf-featured" aria-label="Destacado">
+            <section className="nvrf-featured" data-figma-node="507:15787" aria-label="Destacado">
               <header className="nvrf-head"><h3>Destacado</h3></header>
               <button type="button" className="nvrf-card-link" aria-label={`Abrir ${readLabel(featured)}: ${featured.title}`} onClick={() => openGuide(featured.id)}>
                 <Cover guide={featured} size={40} />
                 <span className="nvrf-featured-info"><Meta guide={featured} /><strong>{featured.title}</strong><span className="nvrf-desc">{featured.summary}</span><Author guide={featured} /></span>
               </button>
             </section>
-            {popular.length > 0 && <section className="nvrf-popular" aria-label="Biblioteca de recursos">
+            {popular.length > 0 && <section className="nvrf-popular" data-figma-node="507:15852" aria-label="Biblioteca de recursos">
               <header className="nvrf-head"><h3>Visible para vos</h3><small>{guides.length} {guides.length === 1 ? 'resultado' : 'resultados'}</small></header>
               <div>{popular.map((guide) => <button type="button" className="nvrf-card-link nvrf-popular-card" key={guide.id} aria-label={`Abrir ${readLabel(guide)}: ${guide.title}`} onClick={() => openGuide(guide.id)}>
                 <Cover guide={guide} size={32} />
@@ -346,7 +348,7 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
               </button>)}</div>
             </section>}
           </div>
-          {more.length > 0 && <section className="nvrf-more" aria-label="Más para leer">
+          {more.length > 0 && <section className="nvrf-more" data-figma-node="507:16304" aria-label="Más para leer">
             <header className="nvrf-head"><h3>Más para leer</h3></header>
             <div className="nvrf-grid">{more.map((guide) => <button type="button" className="nvrf-card-link nvrf-small-card" key={guide.id} aria-label={`Abrir ${readLabel(guide)}: ${guide.title}`} onClick={() => openGuide(guide.id)}>
               <Cover guide={guide} size={28} />
@@ -356,7 +358,7 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
         </> : <NvState title="Sin coincidencias" description="Probá con otra palabra o elegí una categoría diferente." />}
       </div>
 
-      <aside className="nvrf-rail" aria-label="Explorar recursos">
+      <aside className="nvrf-rail" data-figma-node="507:16417" aria-label="Explorar recursos">
         {assignedGuides.length > 0 && <section className="nvrf-assigned" aria-label="Recursos asignados">
           <header className="nvrf-head"><h3>Asignado por tu nutricionista</h3><NvBadge>{assignedGuides.length}</NvBadge></header>
           <div className="nvrf-list">{assignedGuides.map(({ assignment, guide }) => <button type="button" key={assignment.id} onClick={() => openGuide(guide.id)}>
@@ -386,5 +388,6 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
         </section>
       </aside>
     </div>
+    <footer className="nvrf-figma-footer" data-figma-node="504:15358"><strong>Copyright © {new Date().getFullYear()} Plan V</strong><span>Privacidad　 Condiciones　 Contacto</span></footer>
   </section>;
 }

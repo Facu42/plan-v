@@ -1,0 +1,69 @@
+/* Figma MCP get_design_context: 504:15334 (Insights) and 507:17412
+   (Insight Details). Content comes from Plan V's published resource library. */
+.nvrf-figma-footer { display: none; }
+
+@media (max-width: 767px) {
+  .nv-app.nv-resources-page.nv-patient .nv-main { padding: 0 0 40px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf { width: 100%; max-width: 390px; margin: 0 auto; gap: 24px; color: #272932; font-family: Poppins, sans-serif; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-layout { display: flex; flex-direction: column; gap: 24px; width: 100%; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-main { gap: 24px; width: 100%; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-hero { width: 100%; height: 198px; min-height: 198px; gap: 24px; padding: 32px 16px; border-radius: 0; background: #eeeeef; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-hero h2 { display: none; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-search { width: 100%; height: 46px; min-height: 46px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-search-go { width: 30px; height: 30px; padding: 6px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-chips { align-content: start; width: 100%; min-height: 64px; gap: 8px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-chips button { height: 28px; padding: 7px 10px; background: #fefcfb; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-tabs { width: 100%; height: 30px; min-height: 30px; padding: 0 16px; gap: 8px; overflow-x: auto; flex-wrap: nowrap; justify-content: flex-start; scrollbar-width: none; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-tabs button { min-height: 30px; height: 30px; padding: 9px 12px; border-radius: 8px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-featured-row { display: flex; flex-direction: column; gap: 24px; width: 100%; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-featured { width: 100%; min-height: 454px; gap: 16px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-featured > .nvrf-head { padding: 0 16px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-featured .nvrf-card-link { width: 100%; gap: 16px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-featured .nvrf-image { width: 100%; height: 196px; min-height: 196px; border-radius: 0; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-featured-info { min-height: 196px; gap: 12px; padding: 0 16px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-featured-info > strong { font-size: 20px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-popular { width: 100%; min-height: 478px; gap: 16px; padding: 0 16px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-popular > div { gap: 28px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-popular-card { width: 100%; height: 202px; min-height: 202px; gap: 12px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-popular-card .nvrf-image { width: 44%; height: 100%; flex: 0 0 44%; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-popular-info { gap: 8px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-more { min-height: 588px; gap: 16px; padding: 0 16px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 20px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-small-card { min-width: 0; height: 236px; gap: 10px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-small-card .nvrf-image { height: 124px; min-height: 124px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-small-card strong { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-rail { width: 100%; min-height: 932px; gap: 32px; padding: 28px; border-radius: 0; background: #f9f4f2; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-rail > section { gap: 16px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-rail .nvrf-list { max-height: 268px; overflow-y: auto; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-rail .nvrf-list > :is(button, div) { min-height: 46px; padding: 8px 0; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-figma-footer { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; height: 78px; min-height: 78px; color: #8a8c90; font-size: 12px; line-height: 1.3; text-align: center; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-figma-footer strong { color: #52545b; font-weight: 600; }
+
+  /* Insight Details 507:17412: content 390 × 2334, rail 390 × 764. */
+  .nv-app.nv-resources-page.nv-patient:has(.nvrf-detail) .nv-topbar-label-mobile { font-size: 0; }
+  .nv-app.nv-resources-page.nv-patient:has(.nvrf-detail) .nv-topbar-label-mobile::after { content: 'Detalle del recurso'; font-size: 16px; }
+  .nv-app.nv-resources-page.nv-patient:has(.nvrf-detail) .nv-topbar .nv-brand { visibility: hidden; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-back { position: fixed; z-index: 61; top: 16px; left: 16px; width: 32px; height: 32px; overflow: hidden; justify-content: flex-start; font-size: 0; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-back svg { width: 24px; height: 24px; flex: 0 0 24px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-detail-layout { display: flex; flex-direction: column; gap: 24px; width: 100%; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-article { min-height: 2334px; gap: 20px; padding: 24px 16px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-article > header { gap: 20px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-article > header h2 { min-height: 90px; font-size: 28px; line-height: 1.08; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-article > .nvrf-image { width: 100%; height: 358px; aspect-ratio: auto; border-radius: 16px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-intro { width: 100%; min-height: 152px; padding: 16px 24px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-sections { gap: 20px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-sections section { gap: 8px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-sections p { font-size: 14px; line-height: 1.4; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-detail-rail { width: 100%; min-height: 764px; gap: 32px; padding: 24px 16px; border-radius: 0; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-related { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-related button { min-width: 0; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-related .nvrf-image { width: 100%; height: 124px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-detail .nvrf-figma-footer { height: 94px; min-height: 94px; padding-top: 16px; }
+}
+
+@media (max-width: 359px) {
+  .nv-app.nv-resources-page.nv-patient .nvrf-hero { padding-inline: 12px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-popular,
+  .nv-app.nv-resources-page.nv-patient .nvrf-more { padding-inline: 12px; }
+  .nv-app.nv-resources-page.nv-patient .nvrf-rail { padding-inline: 16px; }
+}

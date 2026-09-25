@@ -3,6 +3,7 @@ import { ArrowLeft, Bread, ChartBar, Clock, CookingPot, Drop, Fire, Fish, Heartb
 import type { RecipeCard, RecipeItem, RecipeMacros } from '../../types/recipes';
 import './recipe-plate.css';
 import './menu-fig.css';
+import './figma-mobile-recipe.css';
 
 const LABELS = [
   ['kcal', 'KCAL', 'kcal'],
@@ -127,29 +128,29 @@ export function RecipeDetails({ recipe, onBack, actions }: {
     ...(recipe.statusLabel ? [['Estado', recipe.statusLabel, Heartbeat] as [string, string, typeof Clock]] : []),
   ];
   const step = recipe.yieldPortions % 1 ? 0.5 : 1;
-  return <section className="mf-detail" aria-label={`Detalle de receta: ${recipe.title}`}>
+  return <section className="mf-detail" data-figma-frame="457:13264" aria-label={`Detalle de receta: ${recipe.title}`}>
     <div className="mf-detail-top">
       <button type="button" className="mf-back" onClick={onBack}><ArrowLeft size={16} aria-hidden /> Volver al menú</button>
       {actions && <div className="mf-detail-actions">{actions}</div>}
     </div>
     <div className="mf-detail-grid">
-      <aside className="mf-detail-left">
-        <div className="mf-detail-image"><RecipeDishWell title={recipe.title} status={recipe.card.cover_status} url={recipe.card.cover_url} alt={recipe.card.cover_alt} /></div>
-        <dl className="mf-detail-info">
+      <aside className="mf-detail-left" data-figma-node="463:13917">
+        <div className="mf-detail-image" data-figma-node="463:13918"><RecipeDishWell title={recipe.title} status={recipe.card.cover_status} url={recipe.card.cover_url} alt={recipe.card.cover_alt} /></div>
+        <dl className="mf-detail-info" data-figma-node="545:18905">
           {info.map(([label, value, Glyph]) => <div key={label}>
-            <dt><span><Glyph size={12} aria-hidden /></span>{label}</dt>
+            <dt><span className="mf-info-icon"><Glyph size={12} aria-hidden /></span><span className="mf-info-label">{label}</span></dt>
             <dd>{value}</dd>
           </div>)}
         </dl>
       </aside>
 
-      <article className="mf-detail-content">
+      <article className="mf-detail-content" data-figma-node="463:14016">
         <h2>{recipe.title}</h2>
-        <div className="mf-detail-about">
+        <div className="mf-detail-about" data-figma-node="463:14018">
           <span className="mf-badge" data-slot={recipe.card.category}>{recipe.card.category}</span>
           <p>{recipe.nutrientSource ? `Fuente nutricional declarada: ${recipe.nutrientSource}.` : 'Sin fuente nutricional declarada.'}</p>
         </div>
-        <section className="mf-detail-steps" aria-label="Pasos">
+        <section className="mf-detail-steps" data-figma-node="463:14022" aria-label="Pasos">
           <h3>Pasos</h3>
           {recipe.steps.length ? <ol>{recipe.steps.map((text, index) => <li key={`${index}-${text}`}>
             <span className="mf-step-number">{index + 1}</span>
@@ -159,7 +160,7 @@ export function RecipeDetails({ recipe, onBack, actions }: {
       </article>
 
       <aside className="mf-detail-right">
-        <section className="mf-servings" aria-label="Porciones e ingredientes">
+        <section className="mf-servings" data-figma-node="536:20969" aria-label="Porciones e ingredientes">
           <div className="mf-servings-head">
             <h3>Porciones</h3>
             <div className="mf-stepper">
@@ -175,7 +176,7 @@ export function RecipeDetails({ recipe, onBack, actions }: {
         </section>
         {macros ? <>
           <RecipeMacroTiles macros={macros} variant="row" />
-          <section className="mf-facts" aria-label="Información nutricional">
+          <section className="mf-facts" data-figma-node="536:21047" aria-label="Información nutricional">
             <h3>Información nutricional</h3>
             <dl>
               <div className="mf-facts-main"><dt>Calorías</dt><dd><small>Por porción</small>{macros.kcal == null ? '—' : `${macros.kcal} kcal`}</dd></div>
@@ -187,5 +188,7 @@ export function RecipeDetails({ recipe, onBack, actions }: {
         </> : <p className="mf-facts-missing" role="status">{recipe.card.macro_status === 'failed' ? 'La IA no devolvió macros.' : 'Sin macros declarados.'}</p>}
       </aside>
     </div>
+    <section className="mf-detail-reviews" data-figma-node="536:21087" aria-label="Reseñas"><h3>Reseñas</h3><p>Aún no hay reseñas de esta receta.</p></section>
+    <footer className="mf-detail-footer" data-figma-node="457:13349"><strong>Copyright © {new Date().getFullYear()} Plan V</strong><span>Privacidad　 Condiciones　 Contacto</span></footer>
   </section>;
 }

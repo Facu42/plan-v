@@ -1,9 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Icon } from '../shared/Icon';
 import { CarePanel } from './CarePanel';
+import { FigmaMobileExercise } from './FigmaMobileExercise';
 import { NvBadge, NvButton, NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
 import { exerciseApi } from '../../api/exercise';
+import { api } from '../../api/client';
+import { useAppStore } from '../../store/useAppStore';
 import { isAbortError } from '../../api/client';
 import { careErrorMessage } from '../../api/care';
 import {
@@ -72,6 +75,7 @@ export function ShowroomExercise({
   const [selected, setSelected] = useState<string[]>([SEEDED_EXERCISES[0].id]);
   const [busy, setBusy] = useState(false);
   const [feedbackNote, setFeedbackNote] = useState('');
+  const refreshPatient = useAppStore((state) => state.refreshPatient);
 
   useEffect(() => {
     if (injected) {
@@ -127,26 +131,47 @@ export function ShowroomExercise({
     }
   }
 
-  async function sendFeedback(assignmentId: string, sets: number, reps: number) {
-    if (busy) return;
+  async function sendFeedback(assignmentId: string, sets: number, reps: number, note = feedbackNote) {
+    if (busy) return false;
     setBusy(true);
     setError('');
     try {
       const result = await exerciseApi.feedback(patient.id, assignmentId, {
         sets_completed: sets,
         reps_completed: reps,
-        note: feedbackNote,
+        note,
       });
       setRemote(result.exercise);
       setFeedbackNote('');
+      return true;
     } catch (failure) {
       setError(careErrorMessage(failure));
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function addActivity(activity: string, durationMinutes: number, intensity: 'suave' | 'moderada' | 'intensa') {
+    if (busy) return false;
+    setBusy(true);
+    setError('');
+    try {
+      await api.logActivity(patient.id, { activity, duration_minutes: durationMinutes, intensity });
+      const [result] = await Promise.all([exerciseApi.get(patient.id, professional), refreshPatient(patient.id)]);
+      setRemote(result.exercise);
+      return true;
+    } catch (failure) {
+      setError(careErrorMessage(failure));
+      return false;
     } finally {
       setBusy(false);
     }
   }
 
   return <section className="nvexercise" aria-label={professional ? `Ejercicio de ${patient.name}` : 'Actividad física'}>
+    {!professional && <FigmaMobileExercise patient={patient} view={view} loading={loading} error={error} busy={busy} onFeedback={sendFeedback} onAddActivity={addActivity} />}
+    <div className="nvexercise-legacy">
     {!professional && <CarePanel patientId={patient.id} mode="activity" />}
     <header className="nvexercise-heading"><div><small>{professional ? 'CONSULTORIO' : 'MI SEGUIMIENTO'}</small><h2>{heading}</h2><p>{intro}</p></div>
       {professional && <NvBadge tone={view.can_assign ? 'green' : 'gold'}>{view.can_assign ? 'Habilitación verificada' : 'Sin habilitación verificada'}</NvBadge>}
@@ -204,5 +229,6 @@ export function ShowroomExercise({
     </section>}
 
     {patient.activities.length > 0 && <section className="nvexercise-list"><h2>Registros anteriores</h2>{patient.activities.map((entry) => <article className="nvexercise-entry" key={entry.id}><Icon name="heart" size={18}/><div><h3>{entry.activity} · {entry.duration_minutes} min</h3><p>{formatActivityDate(entry.logged_at)} · Intensidad {intensityLabel[entry.intensity]}</p>{entry.note && <p>{entry.note}</p>}</div></article>)}</section>}
+    </div>
   </section>;
 }

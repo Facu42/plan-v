@@ -6,6 +6,7 @@ import type { ShowroomPage } from './ShowroomPanels';
 import breakfast from '../../assets/showroom/breakfast.webp';
 import lunch from '../../assets/showroom/lunch.webp';
 import snack from '../../assets/showroom/snack.webp';
+import { FigmaMobileDashboard } from './FigmaMobileDashboard';
 
 // Relative energy from recorded macros (4/4/9), never a prescribed daily target.
 export function macroShares(macros: Macros) {
@@ -28,7 +29,7 @@ export function PatientOverview({ patient: p, onNavigate, audience = 'patient' }
   const totalMeals = p.journey.reviewedMeals + p.journey.pendingMeals;
   const reviewed = totalMeals ? p.journey.reviewedMeals / totalMeals * 100 : 0;
   const latest = p.messages[p.messages.length - 1];
-  return <div className="np-dashboard">
+  return <>{!professional && <FigmaMobileDashboard patient={p} onNavigate={onNavigate} />}<div className="np-dashboard np-dashboard-legacy">
     <div className="nv-metrics np-metrics">
       <NvMetric label="Adherencia" value={<>{p.adherence}<em>%</em></>} note="Últimos 7 días" icon="target" nvIcon="adherencia" onOpen={() => onNavigate('progreso')}>
         <div className="np-ruler" aria-hidden="true"><i style={{ left: `${Math.min(100, Math.max(0, p.adherence))}%` }} /><span>0</span><span>50</span><span>100</span></div>
@@ -86,5 +87,5 @@ export function PatientOverview({ patient: p, onNavigate, audience = 'patient' }
       <NvButton className="nv-soft" onClick={() => onNavigate('mensajes')}>Ver conversación <Icon name="arrow" size={15} /></NvButton>
     </NvCard>
     </div>
-  </div>;
+  </div></>;
 }

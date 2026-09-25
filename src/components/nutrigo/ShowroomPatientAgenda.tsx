@@ -28,6 +28,13 @@ import {
 import type { ShowroomPatient } from './showroom-model';
 import './showroom-patient-agenda.css';
 import './agenda-diario-fig.css';
+import dotsFigma from '../../assets/figma-mobile/427-14552-imgIconDotsThree.svg';
+import facebookFigma from '../../assets/figma-mobile/427-14667-imgFacebookLogo.svg';
+import twitterFigma from '../../assets/figma-mobile/427-14667-imgTwitterLogo.svg';
+import instagramFigma from '../../assets/figma-mobile/427-14667-imgInstagramLogo.svg';
+import youtubeFigma from '../../assets/figma-mobile/427-14667-imgYoutubeLogo.svg';
+import linkedinFigma from '../../assets/figma-mobile/427-14667-imgLinkedinLogo.svg';
+import './figma-mobile-agenda.css';
 
 /* ──────────────────────────────────────────────────────────────────────────
    Piezas compartidas del frame "04. Calendar" (84:1666 / móvil 433:17250).
@@ -173,7 +180,7 @@ export function FigCalendarBoard({ nav, items, categories, hidden, onToggle, cta
     </>;
   };
 
-  return <section className="nvcal-section" aria-label="Calendario">
+  return <section className="nvcal-section" aria-label="Calendario" data-figma-node="433:18153">
     <header className="nvcal-head">
       <div className="nvcal-head-left">
         <div className="nvcal-arrows">
@@ -191,7 +198,8 @@ export function FigCalendarBoard({ nav, items, categories, hidden, onToggle, cta
       </div>
       <div className="nvcal-head-right">
         <div className="nvcal-views" aria-label="Vista del calendario">{VIEWS.map((option) => <button type="button" key={option.id} aria-pressed={nav.view === option.id} onClick={() => nav.setView(option.id)}>{option.label}</button>)}</div>
-        {cta && <button type="button" className="nvcal-cta" onClick={cta.onClick}>{cta.label}</button>}
+        {cta && <button type="button" className="nvcal-cta" onClick={cta.onClick}><span className="nvcal-cta-long">{cta.label}</span><span className="nvcal-cta-short">Escribir</span></button>}
+        <details className="nvcal-mobile-more"><summary aria-label="Opciones del calendario"><img src={dotsFigma} alt="" width="24" height="24" /></summary><div><div className="nvcal-mobile-month"><button type="button" disabled={!nav.canPrev} onClick={() => nav.onNav(-1)}>Anterior</button><button type="button" disabled={!nav.canNext} onClick={() => nav.onNav(1)}>Siguiente</button></div><div className="nvcal-mobile-views">{VIEWS.map((option) => <button type="button" key={option.id} aria-pressed={nav.view === option.id} onClick={() => nav.setView(option.id)}>{option.label}</button>)}</div></div></details>
       </div>
     </header>
 
@@ -386,9 +394,9 @@ export function ShowroomPatientAgenda({
     </form>}
   </FigScheduleCard> : null;
 
-  return <section className="nvcal" aria-label="Tu calendario">
+  return <><section className="nvcal" aria-label="Tu calendario" data-figma-frame="433:17250">
     <div className="nvcal-main">
-      <section className="nvcal-stats" aria-label="Resumen del calendario">
+      <section className="nvcal-stats" aria-label="Resumen del calendario" data-figma-node="433:18045">
         <FigStatCard label="Comidas del plan" value={counts.plan} unit={counts.plan === 1 ? 'comida' : 'comidas'} tone="green" icon={<ForkKnife size={16} />} />
         <FigStatCard label="Registros del diario" value={counts.meal} unit={counts.meal === 1 ? 'registro' : 'registros'} tone="mint" icon={<Notebook size={16} />} />
         <FigStatCard label="Actividad física" value={counts.activity} unit={counts.activity === 1 ? 'registro' : 'registros'} tone="saffron" icon={<PersonSimpleRun size={16} />} />
@@ -401,7 +409,7 @@ export function ShowroomPatientAgenda({
           : <NvState title="Sin eventos este día" description="El calendario no inventa turnos, comidas ni actividad." />} />
     </div>
 
-    <aside className="nvcal-aside" aria-label="Detalle del día">
+    <aside className="nvcal-aside" aria-label="Detalle del día" data-figma-node="433:18471">
       <header><h3>Detalle del día</h3><small>{sentenceCase(nav.selectedDate.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }))}</small></header>
       {consultOnDay && consultCard}
       {otherDayEvents.map(eventCard)}
@@ -411,5 +419,5 @@ export function ShowroomPatientAgenda({
       {!current && <div className="nvcal-empty-consult"><NvState title="Sin consulta programada" description="Podés escribirle a Verónica para coordinar el próximo encuentro." /><button type="button" className="nvcal-btn nvcal-btn-primary" onClick={onMessage}>Escribirle a Verónica</button></div>}
       <AppointmentHistoryList entries={patient.appointmentHistory ?? []} audience="patient" />
     </aside>
-  </section>;
+  </section><footer className="fmca-footer" data-figma-node="433:17504"><strong>Copyright © {now.getFullYear()} Plan V</strong><span>Privacidad　 Condiciones　 Contacto</span><span aria-hidden="true">{[facebookFigma, twitterFigma, instagramFigma, youtubeFigma, linkedinFigma].map((src) => <img key={src} src={src} alt="" width="20" height="20" />)}</span></footer></>;
 }

@@ -8,6 +8,13 @@ import type { ShowroomPatient } from './showroom-model';
 import { DayAssignedMeals } from './DayMeals';
 import './showroom-patient-diary.css';
 import './agenda-diario-fig.css';
+import funnelFigma from '../../assets/figma-mobile/445-11016-imgIconFunnel.svg';
+import facebookFigma from '../../assets/figma-mobile/427-14667-imgFacebookLogo.svg';
+import twitterFigma from '../../assets/figma-mobile/427-14667-imgTwitterLogo.svg';
+import instagramFigma from '../../assets/figma-mobile/427-14667-imgInstagramLogo.svg';
+import youtubeFigma from '../../assets/figma-mobile/427-14667-imgYoutubeLogo.svg';
+import linkedinFigma from '../../assets/figma-mobile/427-14667-imgLinkedinLogo.svg';
+import './figma-mobile-diary.css';
 
 export type PatientDiaryFilter = 'all' | 'pending' | 'reviewed';
 
@@ -246,6 +253,7 @@ export function FoodDiaryBoard({ rows, now, audience, query, defaultScope, onAdd
   const [scope, setScope] = useState<DiaryScope>(defaultScope);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   useEffect(() => { setTerm(query); }, [query]);
   useEffect(() => { setPage(1); }, [term, filter, scope, pageSize, rows]);
   const bounds = useMemo(() => diaryWeekBounds(rows.map((row) => row.logged_at), now), [rows, now]);
@@ -262,25 +270,26 @@ export function FoodDiaryBoard({ rows, now, audience, query, defaultScope, onAdd
   const statScope = scope === 'all' ? 'En todo el historial' : scope === 0 ? 'En esta semana' : 'En la semana elegida';
   const emptyScoped = table.total === 0;
 
-  return <div className="nvfd">
-    <section className="nvfd-stats" aria-label="Resumen del diario">
+  return <div className="nvfd" data-figma-frame={pro ? undefined : '492:14886'}>
+    <section className="nvfd-stats" aria-label="Resumen del diario" data-figma-node={pro ? undefined : '492:14889'}>
       <DiaryStat label="Calorías totales" value={table.totals.kcal} unit="kcal" tone="green" icon={<Fire size={24} />} trend={table.trend?.kcal} scopeLabel={statScope} />
       <DiaryStat label="Carbohidratos totales" value={table.totals.carbs_g} unit="g" tone="saffron" icon={<Bread size={24} />} trend={table.trend?.carbs_g} scopeLabel={statScope} />
       <DiaryStat label="Proteínas totales" value={table.totals.protein_g} unit="g" tone="orange" icon={<Fish size={24} />} trend={table.trend?.protein_g} scopeLabel={statScope} />
       <DiaryStat label="Grasas totales" value={table.totals.fat_g} unit="g" tone="gray" icon={<Drop size={24} />} trend={table.trend?.fat_g} scopeLabel={statScope} />
     </section>
 
-    <section className="nvfd-widget" aria-label={pro ? 'Historial de comidas' : 'Registros del diario'}>
+    <section className="nvfd-widget" aria-label={pro ? 'Historial de comidas' : 'Registros del diario'} data-figma-node={pro ? undefined : '492:15789'}>
       <header className="nvfd-head">
         <div className="nvfd-head-left">
           <label className="nvfd-search"><MagnifyingGlass size={14} aria-hidden="true" /><input type="search" aria-label="Buscar comidas" placeholder="Buscar comidas" value={term} onChange={(event) => setTerm(event.target.value)} /></label>
           <Picker className="nvfd-filter" icon={<Funnel size={14} aria-hidden="true" />} label={filter === 'all' ? 'Filtrar' : FILTER_LABEL[filter]} ariaLabel="Filtrar registros" value={filter} onChange={(value) => setFilter(value as PatientDiaryFilter)}
             options={(['all', 'pending', 'reviewed'] as const).map((id) => ({ value: id, label: `${FILTER_LABEL[id]} (${table.counts[id]})` }))} />
         </div>
+        {!pro && <div className="nvfd-mobile-filter"><button type="button" aria-label="Filtrar diario" aria-expanded={mobileFilterOpen} onClick={() => setMobileFilterOpen((open) => !open)}><img src={funnelFigma} alt="" width="18" height="18" /></button>{mobileFilterOpen && <div className="nvfd-mobile-filter-panel"><label>Estado<select value={filter} onChange={(event) => setFilter(event.target.value as PatientDiaryFilter)}>{(['all', 'pending', 'reviewed'] as const).map((id) => <option value={id} key={id}>{FILTER_LABEL[id]} ({table.counts[id]})</option>)}</select></label><label>Período<select value={String(scope)} onChange={(event) => setScope(event.target.value === 'all' ? 'all' : Number(event.target.value))}>{weekOptions.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></label></div>}</div>}
         <div className="nvfd-head-right">
           {patientPicker}
           <Picker icon={<CalendarBlank size={14} aria-hidden="true" />} label={scopeLabel} ariaLabel="Semana del diario" value={String(scope)} onChange={(value) => setScope(value === 'all' ? 'all' : Number(value))} options={weekOptions} />
-          {onAdd && <button type="button" className="nvfd-cta" onClick={onAdd}><Plus size={14} aria-hidden="true" />Registrar comida</button>}
+          {onAdd && <button type="button" className="nvfd-cta" onClick={onAdd}><Plus size={14} aria-hidden="true" /><span className="nvfd-cta-long">Registrar comida</span><span className="nvfd-cta-short">Añadir</span></button>}
         </div>
       </header>
 
@@ -351,6 +360,7 @@ export function ShowroomPatientDiary({ patient, query, now = new Date(), onLogMe
   }), [patient]);
   return <section className="nvfd-page" aria-label="Tu diario de comidas">
     <FoodDiaryBoard key={patient.id} rows={rows} now={now} audience="patient" query={query} defaultScope={0} onAdd={() => onLogMeal('Almuerzo')} emptyWeekTitle="Sin registros esta semana" />
+    <footer className="fmd-footer" data-figma-node="492:14999"><strong>Copyright © {now.getFullYear()} Plan V</strong><span>Privacidad　 Condiciones　 Contacto</span><span aria-hidden="true">{[facebookFigma, twitterFigma, instagramFigma, youtubeFigma, linkedinFigma].map((src) => <img key={src} src={src} alt="" width="20" height="20" />)}</span></footer>
     {patientId ? <DayAssignedMeals patientId={patientId} /> : null}
   </section>;
 }

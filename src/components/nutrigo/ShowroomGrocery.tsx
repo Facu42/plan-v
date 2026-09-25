@@ -14,6 +14,7 @@ import { RECIPE_UNITS, type RecipeUnit } from '../../types/recipes';
 import type { ShoppingKind, ShoppingLine, ShoppingListView } from '../../types/shopping';
 import { parseAppPath } from './app-location';
 import './plan-fig.css';
+import './figma-mobile-grocery.css';
 
 /* Grocery List del .fig (105:2472 escritorio, 492:11324 móvil). Sin precios, calorías ni gasto:
  * Plan V no los tiene. Las tarjetas y gráficos cuentan elementos reales de la lista. */
@@ -334,17 +335,23 @@ export function ShowroomGrocery({ patient, list, readOnly = isProfessionalSurfac
     { key: 'pending', label: 'Pendientes', value: rows.length - checkedCount, badge: `${percent(rows.length - checkedCount, rows.length)}%`, tone: 'orange', icon: <Clock size={20} /> },
   ];
 
-  return <section className={`gf${readOnly ? ' gf-readonly' : ''}`} aria-label="Lista de compras">
+  return <section className={`gf${readOnly ? ' gf-readonly' : ''}`} data-figma-frame="492:11324" aria-label="Lista de compras">
     <div className="gf-data">
       <div className="gf-left">
-        <div className="gf-stats" aria-label="Resumen de la lista">
+        <div className="gf-stats" data-figma-node="492:11637" aria-label="Resumen de la lista">
           {stats.map((stat) => <article className="gf-stat" key={stat.key}>
             <span className="gf-stat-icon" data-tone={stat.tone}>{stat.icon}</span>
             <div className="gf-stat-info"><small>{stat.label}</small><strong>{stat.value}</strong></div>
             {stat.badge && <span className="gf-stat-badge" data-tone={stat.key === 'pending' ? 'orange' : undefined}>{stat.badge}</span>}
           </article>)}
         </div>
-        <section className="gf-widget gf-status" aria-label="Estado de compras">
+        <section className="gf-widget gf-overview" data-figma-node="492:11672" aria-label="Elementos por categoría">
+          <header className="gf-widget-head"><h3>Elementos por categoría</h3></header>
+          <div className="gf-overview-bars" role="img" aria-label={categoryCounts.map((entry) => `${entry.category}: ${entry.total}`).join(', ')}>
+            {categoryCounts.map((entry) => <span key={entry.category} className="gf-overview-column"><i data-tone={GROCERY_TONES[entry.category]} style={{ height: `${Math.max(8, entry.total / Math.max(...categoryCounts.map((item) => item.total)) * 100)}%` }} /><small>{entry.category}</small></span>)}
+          </div>
+        </section>
+        <section className="gf-widget gf-status" data-figma-node="492:12080" aria-label="Estado de compras">
           <header className="gf-widget-head"><h3>Estado de compras</h3></header>
           <div className="gf-status-body">
             <StatusDonut done={checkedCount} total={rows.length} />
@@ -356,7 +363,7 @@ export function ShowroomGrocery({ patient, list, readOnly = isProfessionalSurfac
           </div>
         </section>
       </div>
-      <section className="gf-widget gf-category" aria-label="Categorías de la lista">
+      <section className="gf-widget gf-category" data-figma-node="492:12253" aria-label="Categorías de la lista">
         <header className="gf-widget-head"><h3>Categorías</h3>
           <div className="gf-more" ref={moreRoot}>
             <button type="button" className="gf-more-button" aria-label="Más acciones de la lista" aria-expanded={moreOpen} onClick={() => setMoreOpen(!moreOpen)}><DotsThree size={24} /></button>
@@ -380,7 +387,7 @@ export function ShowroomGrocery({ patient, list, readOnly = isProfessionalSurfac
       </section>
     </div>
 
-    <section className="gf-list" aria-label="Elementos de la lista">
+    <section className="gf-list" data-figma-node="492:12688" aria-label="Elementos de la lista">
       <header className="gf-list-head">
         <div className="gf-list-title"><h2>Lista de compras{readOnly ? ` de ${patient.name}` : ''}</h2><p>{source}</p></div>
         <div className="gf-list-actions">
@@ -458,5 +465,6 @@ export function ShowroomGrocery({ patient, list, readOnly = isProfessionalSurfac
         </nav>
       </footer>
     </section>
+    <footer className="gf-figma-footer" data-figma-node="492:11353"><strong>Copyright © {new Date().getFullYear()} Plan V</strong><span>Privacidad　 Condiciones　 Contacto</span></footer>
   </section>;
 }
