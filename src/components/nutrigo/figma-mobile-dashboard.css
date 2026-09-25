@@ -53,18 +53,25 @@
 
   /* Section Statistics: four 358 × 142 cards, 16 px gap. */
   .fm-statistics { display: flex; flex-direction: column; gap: 16px; }
-  .fm-stat { display: flex; flex-direction: column; justify-content: space-between; width: 100%; height: 142px; padding: 16px; border: 0; border-radius: 16px; background: #fff; text-align: left; }
+  .fm-stat { position: relative; display: flex; flex-direction: column; justify-content: space-between; width: 100%; height: 142px; padding: 16px; border: 0; border-radius: 16px; background: #fff; text-align: left; }
   .fm-stat-head { display: flex; align-items: flex-start; justify-content: space-between; width: 100%; font-size: 14px; line-height: 1.25; }
   .fm-stat-icon { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 10px; background: #c2e66e; }
   .fm-stat-icon img { display: block; width: 14px; height: 14px; }
   .fm-stat-value, .fm-weight-stat { display: flex; align-items: baseline; gap: 4px; line-height: 1.24; }
   .fm-stat-value strong, .fm-weight-stat strong { font-size: 16px; font-weight: 600; }
   .fm-stat-value small, .fm-weight-stat small { font-size: 12px; color: #8a8c90; }
-  .fm-weight-stat { align-self: flex-start; margin-top: 4px; }
-  .fm-ruler { display: flex; align-items: flex-end; justify-content: space-between; width: 100%; height: 24px; border-top: 6px solid #f6f6f7; border-radius: 6px; }
-  .fm-ruler i { width: 1px; height: 14px; background: #e1e1e2; }
-  .fm-ruler i:nth-child(5n+1) { height: 20px; }
-  .fm-ruler-labels, .fm-stat-foot { display: flex; justify-content: space-between; width: 100%; color: #8a8c90; font-size: 10px; line-height: 1.35; }
+  .fm-mini-weight-chart { position: absolute; top: 76px; right: 16px; left: 16px; height: 50px; }
+  .fm-mini-weight-track { position: relative; display: block; width: 100%; height: 6px; border-radius: 8px; background: #f6f6f7; }
+  .fm-mini-weight-marker { position: absolute; top: -4px; display: flex; align-items: baseline; gap: 4px; width: 14px; height: 14px; border-radius: 16px; background: #ffa257; transform: translateX(-50%); }
+  .fm-mini-weight-marker strong, .fm-mini-weight-marker small { position: absolute; bottom: 20px; color: #272932; white-space: nowrap; }
+  .fm-mini-weight-marker strong { left: -11px; font-size: 16px; line-height: 1.24; font-weight: 600; }
+  .fm-mini-weight-marker small { left: 13px; font-size: 11px; line-height: 1.24; }
+  .fm-mini-weight-ruler { display: flex; width: 100%; height: 36px; margin-top: 8px; }
+  .fm-mini-weight-ruler > span { display: flex; flex: 1 1 0; flex-direction: column; align-items: center; height: 36px; }
+  .fm-mini-weight-ruler i { display: block; width: 1px; height: 14px; background: #e1e1e2; }
+  .fm-mini-weight-ruler > span:nth-child(5n+1) i { height: 20px; }
+  .fm-mini-weight-ruler small { margin-top: 2px; color: #8a8c90; font-size: 10px; line-height: 1.35; }
+  .fm-stat-foot { display: flex; justify-content: space-between; width: 100%; color: #8a8c90; font-size: 10px; line-height: 1.35; }
   .fm-steps-track { display: block; width: 100%; height: 24px; border-radius: 6px; background: #f6f6f7; }
   .fm-sleep-chart { display: flex; justify-content: space-around; align-items: end; width: 100%; height: 54px; }
   .fm-sleep-chart i { position: relative; width: 4px; height: var(--fm-bar); min-height: 6px; max-height: 42px; border-radius: 4px; background: #ffcb65; }
@@ -81,20 +88,29 @@
   /* Widget Weight Data: node 427:14552, 358 × 316. */
   .fm-weight-widget { display: flex; flex-direction: column; align-items: center; min-height: 316px; padding: 16px 16px 0; }
   .fm-weight-chart { position: relative; width: 248px; height: 154px; margin-top: 16px; overflow: hidden; }
-  .fm-weight-chart::before { position: absolute; top: 4px; left: 0; width: 248px; height: 248px; border: 24px solid #ffcb65; border-bottom-color: transparent; border-left-color: #ffa257; border-radius: 50%; content: ''; }
-  .fm-weight-chart > img { display: none; }
+  .fm-weight-chart > img { position: absolute; display: block; max-width: none; }
+  .fm-weight-base { top: 0; left: 116.96px; }
+  .fm-weight-mask { top: 0; left: 0; }
+  .fm-weight-progress { top: 2.55px; left: 0.45px; }
   .fm-weight-chart > div { position: absolute; top: 73px; left: 50%; display: flex; flex-direction: column; align-items: center; gap: 8px; transform: translateX(-50%); white-space: nowrap; }
   .fm-weight-chart strong { font-size: 26px; line-height: 1.08; font-weight: 700; }
   .fm-weight-chart small { color: #8a8c90; font-size: 11px; line-height: 1.24; }
-  .fm-weight-note { width: calc(100% + 32px); margin-top: 24px !important; padding: 16px 24px; border-top: 1px solid #c2e66e; color: #52545b; font-size: 11px; line-height: 1.6; text-align: center; }
+  .fm-weight-note { display: flex; flex-direction: column; align-items: center; gap: 16px; width: calc(100% + 32px); margin-top: 24px !important; padding: 8px 16px 16px; color: #52545b; font-size: 11px; line-height: 1.6; text-align: center; }
+  .fm-weight-note img { display: block; flex: none; max-width: none; }
+  .fm-weight-note p { max-width: 326px; }
 
   /* Widget Calories Intake: node 427:14572, 358 × 536. */
   .fm-calories-widget { display: flex; flex-direction: column; gap: 16px; min-height: 536px; }
-  .fm-calorie-ring { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 228px; height: 228px; margin: 0 auto; border: 11px solid #ffa257; outline: 3px solid #eeeeef; outline-offset: -22px; border-radius: 50%; }
-  .fm-calorie-ring img { width: 32px; height: 32px; }
-  .fm-calorie-ring strong { margin-top: 8px; font-size: 22px; line-height: 1.08; font-weight: 600; }
+  .fm-calorie-ring { position: relative; width: 228px; height: 228px; margin: 0 auto; }
+  .fm-calorie-ring > img { position: absolute; display: block; max-width: none; }
+  .fm-calorie-ellipse { top: 0; left: 0; }
+  .fm-calorie-base { top: 15px; left: 16px; }
+  .fm-calorie-progress { top: 10.5px; right: 9.5px; }
+  .fm-calorie-info { position: absolute; top: calc(50% - 8px); left: 50%; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 106px; transform: translate(-50%, -50%); text-align: center; }
+  .fm-calorie-info img { width: 32px; height: 32px; }
+  .fm-calorie-ring strong { font-size: 22px; line-height: 1.08; font-weight: 600; }
   .fm-calorie-ring strong small { font-size: 22px; }
-  .fm-calorie-ring span { margin-top: 8px; color: #8a8c90; font-size: 11px; line-height: 1.24; }
+  .fm-calorie-ring span { color: #8a8c90; font-size: 11px; line-height: 1.24; }
   .fm-calorie-facts { display: flex; justify-content: center; gap: 32px; width: 100%; }
   .fm-calorie-facts > span { display: grid; grid-template-columns: 32px auto; column-gap: 10px; align-items: center; }
   .fm-calorie-facts img { grid-row: span 2; width: 32px; height: 32px; padding: 8px; border-radius: 50%; background: #dff9a2; }

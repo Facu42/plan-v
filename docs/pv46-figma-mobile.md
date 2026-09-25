@@ -13,9 +13,12 @@ Fuente: archivo Nutrigo `OTolnKfsxUFjaZOhhdb04i`. Los tamaños, el orden de secc
 | Lista de compras | `492:11324` | `ShowroomGrocery.tsx`, `figma-mobile-grocery.css` |
 | Diario de comidas | `492:14886` | `ShowroomPatientDiary.tsx`, `figma-mobile-diary.css` |
 | Progreso | `498:18237` | `ShowroomProgress.tsx`, `figma-mobile-progress.css` |
+| Ejercicio | `501:22824` | `FigmaMobileExercise.tsx`, `figma-mobile-exercise.css` |
 | Recursos | `504:15334` | `ShowroomResources.tsx`, `figma-mobile-resources.css` |
 | Detalle de recurso | `507:17412` | `ShowroomResources.tsx`, `figma-mobile-resources.css` |
 
-La interfaz usa los datos reales de Plan V. El `.fig` incluye gasto histórico, valores antropométricos, macros, reseñas, contactos y recursos de ejemplo. Cuando faltan en la app se muestran valores vacíos o estados explícitos. La gráfica de compras conserva el bloque y usa el conteo actual de categorías; no representa gastos que Plan V no registra. El área de la ilustración corporal sigue el placeholder gris que entrega `get_design_context` para ese nodo.
+La interfaz usa los datos reales de Plan V. El `.fig` incluye gasto histórico, valores antropométricos, macros, reseñas, contactos y recursos de ejemplo. Cuando faltan en la app se muestran valores vacíos o estados explícitos. La gráfica de compras conserva el bloque y usa el conteo actual de categorías; no representa gastos que Plan V no registra. El área de la ilustración corporal sigue el placeholder gris que entrega `get_design_context` para ese nodo. La tabla de Ejercicio usa asignaciones y actividades reales; deja peso y calorías vacíos porque esos campos no existen en el modelo actual.
 
-Esta es una implementación estructural de las pantallas mobile. La siguiente revisión debe comparar **cada nodo y cada estado interactivo** contra el código generado por el MCP, completar las diferencias de componentes, iconos y contenido disponible, y mantener `excludeScreenshot: true`. No declarar paridad visual final hasta cerrar esa revisión.
+La extracción del código generado por el MCP cubrió los doce frames mobile de la página `💻 Interface` (`1:2`). En el dashboard se sustituyeron los arcos dibujados con CSS por los SVG exportados por Figma y se reconstruyó el deslizador de peso según `427:14416`. En Ejercicio se tomaron las dimensiones, columnas, iconos y barra horizontal de `501:22824` y se conectaron búsqueda, orden, alta de actividad y registro de series a las funciones existentes. El scroll horizontal y las secciones mayores se comprobaron a 390 px; Ejercicio también a 320 px, sin usar capturas.
+
+El MCP devuelve React y clases Tailwind generados a partir del diseño, con contenido de ejemplo. No entrega el código original de una app funcional ni los datos de Plan V. Esta implementación adapta ese código al proyecto sin copiar los pacientes, registros ni valores ficticios del `.fig`. El gate visual mobile sigue separado del gate Nutrigo desktop ya aprobado.
