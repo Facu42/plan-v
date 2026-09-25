@@ -1,0 +1,49 @@
+/* Figma Progress mobile, nodes 498:18240 and 498:20327. */
+.nvpf-figma-image, .fmpg-footer { display: none; }
+
+@media (max-width: 767px) {
+  .nv-app.nv-progress-page.nv-patient .nv-page-head,
+  .nv-app.nv-progress-page.nv-patient .nv-footer { display: none; }
+  .nv-app.nv-progress-page.nv-patient .nv-main { padding: 24px 16px; }
+  .nv-app.nv-progress-page.nv-patient .nvpf-body { display: flex; flex-direction: column; gap: 32px; }
+  .nv-app.nv-progress-page.nv-patient .nvpf-main,
+  .nv-app.nv-progress-page.nv-patient .nvpf-info { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 100%; min-width: 0; }
+  .nv-app.nv-progress-page.nv-patient .nvpf-image,
+  .nv-app.nv-progress-page.nv-patient .nvpf-side { max-width: 100%; min-width: 0; }
+  .nv-app.nv-progress-page.nv-patient .nvpf-side { display: flex; flex-direction: column; gap: 20px; }
+  .nv-app.nv-progress-page.nv-patient .nvpf-image { width: 100%; height: 556px; flex: 0 0 556px; overflow: hidden; }
+  .nv-app.nv-progress-page.nv-patient .nvpf-image > .care-panel { display: none; }
+  .nv-app.nv-progress-page.nv-patient .nvpf-table { display: none; }
+  .nv-app.nv-progress-page.nv-patient .nvpf-figma-image { display: block; position: relative; width: 100%; height: 556px; overflow: hidden; background: #eeeeef; }
+  .nvpf-figma-image > button { position: absolute; z-index: 2; top: 0; left: 0; display: flex; align-items: center; gap: 2px; min-height: 30px; padding: 6px 8px 6px 10px; border: 0; border-radius: 8px; background: #c2e66e; color: #272932; font-family: Poppins, sans-serif; font-size: 11px; font-weight: 500; }
+  .nvpf-figma-image > button img { width: 14px; height: 14px; }
+  .nvpf-figma-image > img { position: absolute; display: block; max-width: none; }
+  .nvpf-line-arm { top: 137px; left: 13px; width: 105px; height: 33px; }
+  .nvpf-line-chest { top: 80px; left: 50%; width: 172px; height: 59px; }
+  .nvpf-line-waist { top: 172px; left: 50%; width: 173px; height: 27px; }
+  .nvpf-line-hip { top: 258px; left: 13px; width: 166px; height: 52px; }
+  .nvpf-measure { position: absolute; display: flex; flex-direction: column; gap: 8px; min-width: 58px; padding: 0 8px; color: #272932; font-family: Poppins, sans-serif; white-space: nowrap; }
+  .nvpf-measure small { color: #8a8c90; font-size: 11px; line-height: 1.24; }
+  .nvpf-measure strong { font-size: 14px; font-weight: 600; line-height: 1.25; }
+  .nvpf-arm { top: 121px; left: 13px; }.nvpf-hip { top: 294px; left: 13px; }
+  .nvpf-chest { top: 65px; right: 0; }.nvpf-waist { top: 157px; right: 0; }.nvpf-thigh { top: 369px; right: 0; }
+  .nv-app.nv-progress-page.nv-patient .nvpf-weight { width: 100%; height: 263px; min-height: 263px; overflow-y: auto; }
+  .nv-app.nv-progress-page.nv-patient .nvpf-meals { width: 100%; height: 270px; min-height: 270px; overflow: hidden; }
+  .nv-app.nv-progress-page.nv-patient .nvpf-rail { gap: 32px; }
+  .nv-app.nv-progress-page.nv-patient .nvpf-activity { height: 304px; min-height: 304px; overflow: hidden; }
+  .nv-app.nv-progress-page.nv-patient .nvpf-sleep { height: 327px; min-height: 327px; overflow: hidden; }
+  .nv-app.nv-progress-page.nv-patient .nvpf-hydration { height: 304px; min-height: 304px; overflow: hidden; }
+  .nv-app.nv-progress-page.nv-patient .fmpg-footer { display: flex; flex-direction: column; align-items: center; gap: 12px; width: calc(100% + 32px); height: 78px; min-height: 78px; margin: 32px -16px 0; color: #8a8c90; font-family: Poppins, sans-serif; font-size: 11px; line-height: 1.3; text-align: center; }
+  .fmpg-footer strong { color: #52545b; font-size: 12px; font-weight: 600; }
+  .fmpg-footer > span:last-child { display: flex; gap: 12px; }
+  .fmpg-footer img { display: block; width: 20px; height: 20px; }
+  .nvpf-care-layer { position: fixed; z-index: 70; inset: 0; display: flex; align-items: flex-end; background: #27293299; }
+  .nvpf-care-dialog { width: 100%; max-height: 90vh; overflow-y: auto; padding: 16px; border-radius: 16px 16px 0 0; background: #fff; }
+  .nvpf-care-close { display: block; margin: 0 0 12px auto; padding: 6px 10px; border: 0; border-radius: 8px; background: #eeeeef; font: inherit; font-size: 12px; }
+}
+
+@media (max-width: 359px) {
+  .nvpf-figma-image > img { opacity: .7; }
+  .nvpf-measure { padding-inline: 4px; }
+  .nvpf-chest, .nvpf-waist, .nvpf-thigh { right: 0; }
+}

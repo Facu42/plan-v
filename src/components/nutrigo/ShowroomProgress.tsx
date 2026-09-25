@@ -17,6 +17,17 @@ import {
 } from '../../types/progress';
 import './showroom-progress.css';
 import './progreso-recursos-fig.css';
+import lineArmFigma from '../../assets/figma-mobile/498-18240-imgLine.svg';
+import lineChestFigma from '../../assets/figma-mobile/498-18240-imgLine1.svg';
+import lineWaistFigma from '../../assets/figma-mobile/498-18240-imgLine3.svg';
+import lineHipFigma from '../../assets/figma-mobile/498-18240-imgLine4.svg';
+import caretFigma from '../../assets/figma-mobile/498-18240-imgIconCaretDown.svg';
+import facebookFigma from '../../assets/figma-mobile/427-14667-imgFacebookLogo.svg';
+import twitterFigma from '../../assets/figma-mobile/427-14667-imgTwitterLogo.svg';
+import instagramFigma from '../../assets/figma-mobile/427-14667-imgInstagramLogo.svg';
+import youtubeFigma from '../../assets/figma-mobile/427-14667-imgYoutubeLogo.svg';
+import linkedinFigma from '../../assets/figma-mobile/427-14667-imgLinkedinLogo.svg';
+import './figma-mobile-progress.css';
 
 /* Progreso = frame 25 "Progress" (105:2790; móvil 498:18237).
    Cuerpo 767 + 20 + 374. Izquierda: Main Info (440 + 20 + 275) y la tabla de medidas;
@@ -145,6 +156,14 @@ export function ShowroomProgress({
   const [remote, setRemote] = useState<PatientProgressView | null>(injected ?? null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(!injected);
+  const [careOpen, setCareOpen] = useState(false);
+
+  useEffect(() => {
+    if (!careOpen) return;
+    const close = (event: KeyboardEvent) => { if (event.key === 'Escape') setCareOpen(false); };
+    window.addEventListener('keydown', close);
+    return () => window.removeEventListener('keydown', close);
+  }, [careOpen]);
 
   useEffect(() => {
     if (injected) {
@@ -177,6 +196,11 @@ export function ShowroomProgress({
   const mealScale = Math.max(4, Math.ceil(view.maxMeals / 4) * 4);
   const mealTicks = [1, 0.75, 0.5, 0.25, 0].map((share) => mealScale * share);
   const today = patient.journey.days.find((day) => day.isToday);
+  const latestMeasure = (kind: 'waist' | 'hip') => {
+    const series = remote?.measurements_included ? remote.series.find((entry) => entry.kind === kind) : null;
+    const latest = series ? [...series.previous, ...series.current].sort((a, b) => b.captured_on.localeCompare(a.captured_on))[0] : null;
+    return latest && series ? `${formatQty(latest.value)} ${series.unit}` : '—';
+  };
 
   return <section className="nvp-progress nvpf" aria-label={professional ? `Progreso de ${patient.name}` : 'Progreso del paciente'}>
     <div className="nvpf-body">
@@ -184,9 +208,12 @@ export function ShowroomProgress({
         <div className="nvpf-info">
           {/* Image Area (161:6761): Plan V no tiene la ilustración del cuerpo; en su lugar van
               los registros personales de medidas, que es de donde salen esos valores. */}
-          <div className="nvpf-image"><CarePanel patientId={patient.id} mode={professional ? 'professional' : 'progress'} /></div>
+          <div className="nvpf-image" data-figma-node="498:18849">
+            <CarePanel patientId={patient.id} mode={professional ? 'professional' : 'progress'} />
+            {!professional && <div className="nvpf-figma-image"><button type="button" onClick={() => setCareOpen(true)}>Mis medidas <img src={caretFigma} alt="" width="14" height="14" /></button><img className="nvpf-line-arm" src={lineArmFigma} alt="" /><img className="nvpf-line-chest" src={lineChestFigma} alt="" /><img className="nvpf-line-waist" src={lineWaistFigma} alt="" /><img className="nvpf-line-hip" src={lineHipFigma} alt="" /><span className="nvpf-measure nvpf-arm"><small>Brazo</small><strong>—</strong></span><span className="nvpf-measure nvpf-chest"><small>Pecho</small><strong>—</strong></span><span className="nvpf-measure nvpf-waist"><small>Cintura</small><strong>{latestMeasure('waist')}</strong></span><span className="nvpf-measure nvpf-hip"><small>Cadera</small><strong>{latestMeasure('hip')}</strong></span><span className="nvpf-measure nvpf-thigh"><small>Muslo</small><strong>—</strong></span></div>}
+          </div>
           <div className="nvpf-side">
-            <section className="nvpf-widget nvpf-weight" aria-label={professional ? `Objetivo de ${patient.name}` : 'Tu objetivo'}>
+            <section className="nvpf-widget nvpf-weight" aria-label={professional ? `Objetivo de ${patient.name}` : 'Tu objetivo'} data-figma-node={professional ? undefined : '498:18956'}>
               <header className="nvpf-head"><h3>{professional ? `Objetivo de ${patient.name}` : 'Tu objetivo'}</h3></header>
               <div className="nvpf-weight-body">
                 <p className="nvpf-goal-text">{patient.goal || 'Sin objetivo publicado'}</p>
@@ -200,7 +227,7 @@ export function ShowroomProgress({
                 {remote && !remote.measurements_included && <p className="nvpf-note">Las medidas no se muestran: falta el permiso de peso y medidas.</p>}
               </div>
             </section>
-            <section className="nvpf-meals" aria-label="Comidas de esta semana">
+            <section className="nvpf-meals" aria-label="Comidas de esta semana" data-figma-node={professional ? undefined : '498:19010'}>
               <header className="nvpf-head"><h3>Comidas de esta semana</h3><NvBadge>{view.recentLogs.length}</NvBadge></header>
               {view.recentLogs.length ? <div className="nvpf-carousel">{view.recentLogs.map((log) => <article key={log.id}>
                 <header><small>{new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' }).format(new Date(log.logged_at))}</small><strong>{log.slot}</strong></header>
@@ -218,7 +245,7 @@ export function ShowroomProgress({
       </div>
 
       <div className="nvpf-rail">
-        <section className="nvpf-widget nvpf-activity" aria-label="Comparativa del mismo paciente">
+        <section className="nvpf-widget nvpf-activity" aria-label="Comparativa del mismo paciente" data-figma-node={professional ? undefined : '498:19888'}>
           <header className="nvpf-head"><h3>Comidas</h3><PeriodPicker days={days} onChange={setDays} /></header>
           {error && <NvState kind="error" title="No se pudo cargar el progreso" description={error} />}
           {loading && !remote && <NvState kind="loading" title="Cargando períodos…" description="Comparativa del mismo paciente, sin rankings." />}
@@ -240,7 +267,7 @@ export function ShowroomProgress({
           </div>
         </section>
 
-        <section className="nvpf-widget nvpf-sleep" aria-label="Descanso y energía">
+        <section className="nvpf-widget nvpf-sleep" aria-label="Descanso y energía" data-figma-node={professional ? undefined : '498:19917'}>
           <header className="nvpf-head"><h3>Descanso y energía</h3><span className="nvpf-chip">Últimos 7 días</span></header>
           <ul className="nvpf-legend nvpf-legend-row">{ENERGY_TONES.map((entry) => <li key={entry.tone}><i className={entry.tone} />{entry.label}</li>)}<li><i className="none" />Sin registro</li></ul>
           <div className="nvpf-columns nvpf-sleep-chart" role="img" aria-label={`Descanso por día: ${patient.journey.days.map((day) => `${day.isToday ? 'hoy' : day.label} ${formatSleep(day.sleepMinutes)}, energía ${day.energy ?? 'sin registro'}`).join('; ')}`}>
@@ -254,7 +281,7 @@ export function ShowroomProgress({
           </div>
         </section>
 
-        <section className="nvpf-widget nvpf-hydration" aria-label="Hidratación">
+        <section className="nvpf-widget nvpf-hydration" aria-label="Hidratación" data-figma-node={professional ? undefined : '498:20077'}>
           <header className="nvpf-head"><h3>Hidratación</h3><span className="nvpf-chip">Últimos 7 días</span></header>
           <div className="nvpf-hydration-top">
             <div><span className="nvpf-tile level"><DropHalfBottom size={18} aria-hidden /></span><p><small>Promedio de agua</small><strong>{patient.journey.hydrationAverage.toLocaleString('es-AR')} vasos/día</strong></p></div>
@@ -269,5 +296,7 @@ export function ShowroomProgress({
         </section>
       </div>
     </div>
+    {!professional && <footer className="fmpg-footer" data-figma-node="498:18273"><strong>Copyright © {new Date().getFullYear()} Plan V</strong><span>Privacidad　 Condiciones　 Contacto</span><span aria-hidden="true">{[facebookFigma, twitterFigma, instagramFigma, youtubeFigma, linkedinFigma].map((src) => <img key={src} src={src} alt="" width="20" height="20" />)}</span></footer>}
+    {careOpen && !professional && <div className="nvpf-care-layer" onMouseDown={(event) => { if (event.target === event.currentTarget) setCareOpen(false); }}><div role="dialog" aria-modal="true" aria-label="Mis medidas" className="nvpf-care-dialog"><button type="button" className="nvpf-care-close" onClick={() => setCareOpen(false)}>Cerrar</button><CarePanel patientId={patient.id} mode="progress" /></div></div>}
   </section>;
 }

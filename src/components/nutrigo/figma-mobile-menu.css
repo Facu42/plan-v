@@ -1,0 +1,108 @@
+/* Figma mobile Healthy Menu, file OTolnKfsxUFjaZOhhdb04i, frame 445:10499.
+   Dimensions and hierarchy come from get_design_context, not a raster reference. */
+.fmm-page { display: none; }
+
+@media (max-width: 767px) {
+  .nv-app.nv-healthy-menu.nv-patient .nv-main { padding: 0 0 40px; }
+  .nv-app.nv-healthy-menu.nv-patient .nv-page-head { display: none; }
+  .nv-app.nv-healthy-menu.nv-patient .fmm-legacy { display: none; }
+  .fmm-page { display: flex; flex-direction: column; width: 100%; max-width: 390px; margin: 0 auto; color: #272932; font-family: Poppins, sans-serif; }
+  .fmm-page *, .fmm-page *::before, .fmm-page *::after { box-sizing: border-box; }
+  .fmm-page h2, .fmm-page h3, .fmm-page p { margin: 0; }
+  .fmm-page button, .fmm-page select { font: inherit; color: inherit; }
+  .fmm-section-head { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 30px; }
+  .fmm-section-head h2, .fmm-all-head h2 { font-size: 14px; font-weight: 600; line-height: 1.25; }
+  .fmm-section-head button { display: grid; place-items: center; width: 30px; height: 30px; padding: 3px; border: 0; border-radius: 5px; background: transparent; }
+  .fmm-section-head button img { display: block; width: 24px; height: 24px; }
+  .fmm-image { display: block; overflow: hidden; flex: 0 0 auto; background: #eeeeef; }
+  .fmm-image > * { width: 100%; height: 100%; }
+  .fmm-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .fmm-badge { display: inline-flex; align-items: center; width: max-content; padding: 4px 10px; border-radius: 8px; background: #ffcb65; color: #52545b; font-size: 12px; line-height: 1.3; white-space: nowrap; }
+  .fmm-cta, .fmm-add { display: grid; place-items: center; border: 0; background: #c2e66e; color: #272932; font-weight: 500; cursor: pointer; }
+
+  /* Featured Menu: node 445:10878, 390 × 844. */
+  .fmm-featured { display: flex; flex-direction: column; gap: 12px; width: 100%; min-height: 844px; padding-bottom: 0; background: #fff; }
+  .fmm-featured-main { display: flex; flex-direction: column; gap: 20px; width: 100%; min-height: 704px; padding: 20px 16px; background: #f9f4f2; }
+  .fmm-featured-main > .fmm-image { width: 100%; height: 298px; border-radius: 14px; }
+  .fmm-featured-content { display: flex; flex-direction: column; gap: 24px; width: 100%; min-height: 296px; padding-top: 4px; }
+  .fmm-featured-content h3 { min-height: 72px; font-size: 22px; font-weight: 600; line-height: 1.08; }
+  .fmm-featured-badges { display: flex; align-items: center; gap: 16px; min-height: 24px; color: #52545b; font-size: 12px; }
+  .fmm-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 16px; row-gap: 16px; min-height: 84px; padding-right: 16px; }
+  .fmm-details > span { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .fmm-details i { display: grid; place-items: center; width: 32px; height: 32px; flex: 0 0 32px; border-radius: 8px; background: #fff; }
+  .fmm-details i img { width: 16px; height: 16px; }
+  .fmm-details > span > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .fmm-details small { color: #8a8c90; font-size: 11px; line-height: 1.24; }
+  .fmm-details strong { overflow: hidden; color: #52545b; font-size: 12px; font-weight: 600; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+  .fmm-cta { width: 100%; height: 40px; border-radius: 12px; font-size: 14px; }
+  .fmm-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; padding: 0 16px; }
+  .fmm-tile { display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 58px; padding: 12px; border-radius: 8px; background: #c2e66e; }
+  .fmm-tile:nth-child(2) { background: #ffcb65; }.fmm-tile:nth-child(3) { background: #ffa257; }.fmm-tile:nth-child(4) { background: #e1e1e2; }
+  .fmm-tile i { display: grid; place-items: center; width: 32px; height: 32px; flex: 0 0 32px; border-radius: 8px; background: #fefcfb; }
+  .fmm-tile i img { width: 16px; height: 16px; }
+  .fmm-tile > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .fmm-tile small { overflow: hidden; color: #52545b; font-size: 11px; line-height: 1.24; text-overflow: ellipsis; white-space: nowrap; }
+  .fmm-tile strong { font-size: 14px; font-weight: 600; line-height: 1.25; }.fmm-tile em { font-size: 12px; font-style: normal; font-weight: 400; }
+
+  /* All Menu: node 445:11016, starts 32 px below featured. */
+  .fmm-all { display: flex; flex-direction: column; gap: 16px; width: 100%; margin-top: 32px; padding: 0 16px; }
+  .fmm-all-head { display: flex; align-items: center; justify-content: space-between; min-height: 30px; }
+  .fmm-filter, .fmm-sort > span { display: flex; align-items: center; gap: 2px; height: 30px; padding: 0 8px; border-radius: 8px; background: #f6f6f7; }
+  .fmm-filter img, .fmm-sort img { width: 14px; height: 14px; flex: 0 0 14px; }
+  .fmm-filter select, .fmm-sort select { max-width: 108px; padding: 0 2px; border: 0; outline: 0; appearance: none; background: transparent; color: #52545b; font-size: 11px; font-weight: 500; }
+  .fmm-tabs { display: flex; width: 100%; height: 30px; min-height: 30px; overflow-x: auto; border-radius: 10px; background: #f6f6f7; scrollbar-width: none; }
+  .fmm-tabs::-webkit-scrollbar { display: none; }
+  .fmm-tabs button { flex: 1 0 auto; height: 30px; min-height: 30px; padding: 6px 8px; border: 0; border-radius: 8px; background: transparent; color: #52545b; font-size: 11px; font-weight: 500; line-height: 1.05; white-space: nowrap; }
+  .fmm-tabs button[aria-pressed=true] { background: #c2e66e; color: #272932; }
+  .fmm-sort { display: flex; align-items: center; gap: 10px; min-height: 30px; color: #8a8c90; font-size: 11px; line-height: 1.24; }
+  .fmm-all-list { display: flex; flex-direction: column; gap: 16px; width: 100%; max-height: 731px; overflow-y: auto; scrollbar-width: none; }
+  .fmm-all-list::-webkit-scrollbar { display: none; }
+  .fmm-list-card { display: flex; flex-direction: column; gap: 20px; width: 100%; min-height: 233px; padding: 16px; border-radius: 16px; background: #f9f4f2; }
+  .fmm-list-card-top { display: flex; align-items: stretch; gap: 20px; width: 100%; height: 104px; }
+  .fmm-list-card-top > .fmm-image { width: 152px; height: 104px; border-radius: 16px; }
+  .fmm-list-card-top > div { display: flex; flex: 1; flex-direction: column; justify-content: space-between; min-width: 0; }
+  .fmm-list-card h3 { display: -webkit-box; overflow: hidden; font-size: 16px; font-weight: 600; line-height: 1.24; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+  .fmm-add { width: 100%; min-height: 30px; padding: 6px 12px; border-radius: 8px; font-size: 11px; }
+  .fmm-list-card-info { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 22px; }
+  .fmm-list-card-info .fmm-badge { padding: 4px 10px; border-radius: 6px; background: #c2e66e; font-size: 10px; }
+  .fmm-frequency { overflow: hidden; color: #52545b; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+  .fmm-nutrients { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; width: 100%; min-height: 34px; padding: 8px 10px; border-radius: 6px; background: #fff; }
+  .fmm-nutrients > span { display: flex; align-items: center; justify-content: center; gap: 2px; min-width: 0; }
+  .fmm-nutrients img { width: 12px; height: 12px; flex: 0 0 12px; }.fmm-nutrients small { color: #52545b; font-size: 9px; }.fmm-nutrients strong { overflow: hidden; font-size: 10px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Menus: node 445:11785; popular and recommended widgets. */
+  .fmm-side { display: flex; flex-direction: column; width: 100%; margin-top: 32px; }
+  .fmm-popular, .fmm-recommended { display: flex; flex-direction: column; gap: 16px; width: 100%; padding: 16px; background: #f9f4f2; }
+  .fmm-recommended { min-height: 694px; }
+  .fmm-popular-list, .fmm-recommended-list { display: flex; flex-direction: column; gap: 16px; }
+  .fmm-popular-card { display: flex; align-items: flex-start; gap: 12px; width: 100%; min-height: 100px; padding: 16px; border-radius: 16px; background: #fff; }
+  .fmm-popular-card > .fmm-image { width: 68px; height: 68px; border-radius: 12px; }
+  .fmm-popular-card > div { display: flex; flex: 1; flex-direction: column; justify-content: space-between; min-width: 0; min-height: 68px; }
+  .fmm-popular-top, .fmm-popular-foot { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; width: 100%; }
+  .fmm-title-button { padding: 0; border: 0; background: transparent; font-size: 12px; font-weight: 600; line-height: 1.3; text-align: left; }
+  .fmm-plus { display: grid; place-items: center; width: 24px; height: 24px; flex: 0 0 24px; padding: 4px; border: 0; border-radius: 8px; background: #c2e66e; }
+  .fmm-plus img { width: 16px; height: 16px; }
+  .fmm-popular-foot { align-items: center; }.fmm-popular-foot > span:first-child { padding: 4px 6px; border-radius: 6px; background: #f6f6f7; color: #52545b; font-size: 10px; }
+  .fmm-popular-foot .fmm-badge { padding: 4px 6px; border-radius: 6px; background: #dff9a2; font-size: 10px; }
+  .fmm-recommended-card { display: flex; flex-direction: column; gap: 16px; width: 100%; min-height: 142px; padding: 16px; border-radius: 16px; background: #fff; }
+  .fmm-recommended-main { display: flex; gap: 16px; width: 100%; height: 64px; }
+  .fmm-recommended-main > .fmm-image { width: 64px; height: 64px; border-radius: 12px; }
+  .fmm-recommended-main > div { display: flex; flex: 1; flex-direction: column; justify-content: space-between; min-width: 0; }
+  .fmm-recommended-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .fmm-recommended-foot .fmm-badge { padding: 4px 6px; border-radius: 6px; background: #dff9a2; font-size: 10px; }
+  .fmm-recommended-card .fmm-nutrients { min-height: 30px; padding: 0; }
+  .fmm-empty { padding: 16px 0; color: #8a8c90; font-size: 11px; line-height: 1.5; }
+  .fmm-footer { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; min-height: 78px; margin-top: 32px; color: #8a8c90; font-size: 11px; line-height: 1.3; text-align: center; }
+  .fmm-footer strong { color: #52545b; font-size: 12px; font-weight: 600; }
+  .fmm-social { display: flex; gap: 12px; }.fmm-social img { display: block; width: 20px; height: 20px; }
+}
+
+@media (max-width: 359px) {
+  .fmm-featured-main { padding-inline: 12px; }
+  .fmm-list-card-top > .fmm-image { width: 42%; }
+  .fmm-list-card-top { gap: 12px; }
+  .fmm-all, .fmm-popular, .fmm-recommended { padding-inline: 12px; }
+  .fmm-tiles { padding-inline: 12px; }
+  .fmm-list-card { gap: 12px; }
+  .fmm-nutrients { padding-inline: 4px; }
+}

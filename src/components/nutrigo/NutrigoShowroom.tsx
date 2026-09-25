@@ -50,8 +50,10 @@ import './app-shell.css';
 import './nutrigo-parity.css';
 import './nutrigo-fidelity.css';
 import './shell-fig.css';
+import './figma-mobile-dashboard.css';
 import { NV_ICONS, NvIcon, type NvIconName } from './NvIcon';
 import { CaretDown, CaretUp } from '@phosphor-icons/react';
+import figmaListIcon from '../../assets/figma-mobile/navbar-imgIconList.svg';
 
 
 const WORK_CENTER_PAGES: WorkCenterModule[] = ['reciente', 'guardado', 'seguimiento', 'paneles', 'videollamadas'];
@@ -272,10 +274,16 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
       {!lockedRole && role === 'patient' && <><span className="nv-nav-group">Consultorio</span>
       <nav><button type="button" onClick={() => setOnboardingOpen(true)}><NvIcon name="ingreso" size={20} />Ingreso</button></nav></>}
       {onSignOut && <button type="button" className="nv-logout" onClick={() => onSignOut()}><NvIcon name="salir" size={20} />Cerrar sesión</button>}
+      <div className="nv-mobile-tools" aria-label="Cuenta y avisos">
+        <ShowroomConsultAlerts key={`drawer:${alertAudience}`} audience={alertAudience} alerts={consultAlerts} reminders={habitReminders} patientId={selected?.id} onOpen={(alert) => { if (role === 'pro') setSelectedId(alert.patientId); navigate('agenda'); }} onManage={role === 'pro' ? (alert) => { setSelectedId(alert.patientId); navigate('consultas'); } : undefined} onOpenReminder={openReminder} onOpenCare={(notice) => { if (role === 'pro') setSelectedId(notice.patient_id); navigate(notice.target); }} />
+        <span className="nv-mobile-account-name">{displayName}</span>
+        {demoSwitch && <div className="nv-role-switch" aria-label="Cambiar de rol"><button type="button" aria-pressed={role === 'patient'} onClick={() => switchRole('patient')}>Paciente</button><button type="button" aria-pressed={role === 'pro'} onClick={() => switchRole('pro')}>Nutricionista</button></div>}
+        <button type="button" className="nv-mobile-theme" onClick={onToggleTheme}><Icon name={darkMode ? 'sun' : 'moon'} size={18} />{darkMode ? 'Tema claro' : 'Tema oscuro'}</button>
+      </div>
     </aside>
     <div className="nv-workspace">
       <header className="nv-topbar" ref={topbarRef}>
-        <a className="nv-brand" href={buildAppHref(typeof window === 'undefined' ? 'https://plan.v/app/inicio' : window.location.href, role, 'inicio')} onClick={(event) => { event.preventDefault(); navigate('inicio'); }}><Mark /><span>Plan V</span></a>
+        <a className="nv-brand" href={buildAppHref(typeof window === 'undefined' ? 'https://plan.v/app/inicio' : window.location.href, role, 'inicio')} onClick={(event) => { event.preventDefault(); navigate('inicio'); }}><Mark /><span className="nv-figma-bowl" aria-hidden="true"><i /><i /></span><span>Plan V</span></a>
         <h1 className="nv-topbar-title" aria-label={PAGE_LABELS[page]}>
           <span className="nv-topbar-label-desktop">{PAGE_LABELS[page]}</span>
           <span className="nv-topbar-label-mobile" aria-hidden="true">{MOBILE_PAGE_LABELS[page] ?? PAGE_LABELS[page]}</span>
@@ -293,7 +301,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
             </div>}
           </div>
         </div>
-        <button type="button" className="nv-button nv-ghost nv-menu-toggle" ref={menuButtonRef} aria-label={menuOpen ? 'Cerrar el menú' : 'Abrir el menú'} aria-expanded={menuOpen} aria-controls="nv-drawer" onClick={() => setMenuOpen((open) => !open)}><Icon name="list" size={20} /></button>
+        <button type="button" className="nv-button nv-ghost nv-menu-toggle" ref={menuButtonRef} aria-label={menuOpen ? 'Cerrar el menú' : 'Abrir el menú'} aria-expanded={menuOpen} aria-controls="nv-drawer" onClick={() => setMenuOpen((open) => !open)}><Icon name="list" size={20} /><img className="nv-figma-list" src={figmaListIcon} alt="" width="24" height="24" /></button>
       </header>
       <div className="nv-content-layout">
         <main id="nv-main" tabIndex={-1} className="nv-main">

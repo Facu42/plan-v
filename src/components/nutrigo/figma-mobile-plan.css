@@ -1,0 +1,30 @@
+/* Direct layout dimensions from Figma get_design_context, frame 470:15300. */
+.fmp-footer { display: none; }
+
+@media (max-width: 767px) {
+  .nv-app.nv-patient-plan.nv-patient .nv-main { padding: 0 0 24px; }
+  .nv-app.nv-patient-plan.nv-patient .nv-page-head,
+  .nv-app.nv-patient-plan.nv-patient .nv-footer { display: none; }
+  .nv-app.nv-patient-plan.nv-patient .pf-plan { gap: 32px; width: 100%; min-height: 0; }
+  .nv-app.nv-patient-plan.nv-patient .pf-toolbar { width: 100%; height: 54px; min-height: 54px; margin: 0; padding: 12px 16px; border-radius: 0; }
+  .nv-app.nv-patient-plan.nv-patient .pf-table-scroll { width: 100%; height: 1442px; margin: 0; padding: 0 16px 30px; overflow-x: auto; overflow-y: hidden; }
+  .nv-app.nv-patient-plan.nv-patient .pf-table { width: max-content; height: 1412px; gap: 16px; }
+  .nv-app.nv-patient-plan.nv-patient .pf-row.pf-head { height: 30px; min-height: 30px; }
+  .nv-app.nv-patient-plan.nv-patient .pf-row:nth-child(2) { height: 184px; min-height: 184px; }
+  .nv-app.nv-patient-plan.nv-patient .pf-row:nth-child(3) { height: 202px; min-height: 202px; }
+  .nv-app.nv-patient-plan.nv-patient .pf-row:nth-child(4) { height: 184px; min-height: 184px; }
+  .nv-app.nv-patient-plan.nv-patient .pf-row:nth-child(5) { height: 166px; min-height: 166px; }
+  .nv-app.nv-patient-plan.nv-patient .pf-row:nth-child(6) { height: 184px; min-height: 184px; }
+  .nv-app.nv-patient-plan.nv-patient .pf-row:nth-child(7) { height: 166px; min-height: 166px; }
+  .nv-app.nv-patient-plan.nv-patient .pf-row:nth-child(8) { height: 184px; min-height: 184px; }
+  .nv-app.nv-patient-plan.nv-patient .pf-cell { height: 100%; }
+  .nv-app.nv-patient-plan.nv-patient .fmp-footer { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; height: 78px; color: #8a8c90; font-family: Poppins, sans-serif; font-size: 11px; line-height: 1.3; text-align: center; }
+  .fmp-footer strong { color: #52545b; font-size: 12px; font-weight: 600; }
+  .fmp-footer > span:last-child { display: flex; gap: 12px; }
+  .fmp-footer img { display: block; width: 20px; height: 20px; }
+}
+
+@media (max-width: 359px) {
+  .nv-app.nv-patient-plan.nv-patient .pf-toolbar { margin: 0; padding-inline: 12px; }
+  .nv-app.nv-patient-plan.nv-patient .pf-table-scroll { margin: 0; padding-inline: 12px; }
+}

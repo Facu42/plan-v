@@ -1,0 +1,21 @@
+/* Figma Messages mobile, frame 433:19982. Content length follows real conversations. */
+.fmmg-footer { display: none; }
+
+@media (max-width: 760px) {
+  .nv-app.nv-messaging.nv-patient .nv-page-head,
+  .nv-app.nv-messaging.nv-patient .nv-footer { display: none; }
+  .nv-app.nv-messaging.nv-patient .nv-main { padding: 0 0 24px; }
+  .nv-app.nv-messaging.nv-patient .nm-layout,
+  .nv-app.nv-messaging.nv-patient .nm-layout.nmf-profile-closed { display: flex; flex-direction: column; width: 100%; margin: 0; gap: 0; }
+  .nv-app.nv-messaging.nv-patient .nmf-list-head { height: 56px; min-height: 56px; padding: 0 20px 20px; }
+  .nv-app.nv-messaging.nv-patient .nm-contact-list > button { height: 90px; min-height: 90px; padding: 22px 20px; }
+  .nv-app.nv-messaging.nv-patient .nm-conversation { height: 900px; min-height: 900px; }
+  .nv-app.nv-messaging.nv-patient .nmf-chat-head { height: 98px; min-height: 98px; }
+  .nv-app.nv-messaging.nv-patient .nm-thread { height: 718px; min-height: 718px; max-height: 718px; flex: 0 0 718px; }
+  .nv-app.nv-messaging.nv-patient .nm-compose { height: 84px; min-height: 84px; flex: 0 0 84px; }
+  .nv-app.nv-messaging.nv-patient .nm-profile { padding: 24px 16px; }
+  .nv-app.nv-messaging.nv-patient .fmmg-footer { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; height: 126px; min-height: 126px; padding: 24px 0; color: #8a8c90; font-family: Poppins, sans-serif; font-size: 11px; line-height: 1.3; text-align: center; }
+  .fmmg-footer strong { color: #52545b; font-size: 12px; font-weight: 600; }
+  .fmmg-footer > span:last-child { display: flex; gap: 12px; }
+  .fmmg-footer img { display: block; width: 20px; height: 20px; }
+}

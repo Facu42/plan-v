@@ -9,6 +9,12 @@ import { PlanPublishedItem } from './MealPlanVersions';
 import { mealSlotTone, NvBadge, NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
 import './plan-fig.css';
+import facebookFigma from '../../assets/figma-mobile/427-14667-imgFacebookLogo.svg';
+import twitterFigma from '../../assets/figma-mobile/427-14667-imgTwitterLogo.svg';
+import instagramFigma from '../../assets/figma-mobile/427-14667-imgInstagramLogo.svg';
+import youtubeFigma from '../../assets/figma-mobile/427-14667-imgYoutubeLogo.svg';
+import linkedinFigma from '../../assets/figma-mobile/427-14667-imgLinkedinLogo.svg';
+import './figma-mobile-plan.css';
 
 /* Meal Plan del .fig (84:2994 escritorio, 470:15300 móvil): barra Cream-BG con mes, búsqueda,
  * filtro y CTA verde; debajo, la tabla semanal: una fila por día y una columna por momento. */
@@ -311,7 +317,7 @@ export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
     cta={<button type="button" className="pf-cta pf-collapse" aria-label="Lista de compras" onClick={onShopping}><span className="pf-cta-icon"><ShoppingCart size={18} /></span><span className="pf-cta-text">Lista de compras</span></button>}
   />;
 
-  return <section className="pf-plan" aria-label="Tu plan semanal">
+  return <section className="pf-plan" aria-label="Tu plan semanal" data-figma-frame="470:15300">
     {toolbar}
     {error && <p className="pf-error" role="alert">{error}</p>}
     {hasAnyPlan ? <PlanWeekTable rows={table.rows} columns={columns} nav={nav} label="Plan semanal" renderCell={(row, column) => {
@@ -319,6 +325,7 @@ export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
       if (!cell) return <div className="pf-cell pf-cell-empty" data-tone={column.tone}><span className="pf-cell-image" aria-hidden="true" /><span className="pf-cell-text"><span>Sin indicación</span></span></div>;
       return <PlanMealCell row={row} column={column} cell={cell} dim={!matchesPlanSearch(cell, search)} onOpen={() => setOpen({ row, cell })} />;
     }} /> : <NvState title="Tu plan está en preparación" description="Cuando tu nutricionista publique comidas, las vas a encontrar acá organizadas por día." />}
+    <footer className="fmp-footer" data-figma-node="470:15469"><strong>Copyright © {now.getFullYear()} Plan V</strong><span>Privacidad　 Condiciones　 Contacto</span><span aria-hidden="true">{[facebookFigma, twitterFigma, instagramFigma, youtubeFigma, linkedinFigma].map((src) => <img key={src} src={src} alt="" width="20" height="20" />)}</span></footer>
     {open && <PlanSheet title={`${open.cell.slot} · ${open.row.day}`} onClose={() => setOpen(null)}><PlanCellDetail row={open.row} cell={open.cell} plan={open.cell.source === 'dated' ? plan : null} /></PlanSheet>}
     {alternatives && <PlanSheet title="Alternativas" wide onClose={() => setAlternatives(false)}><CarePanel patientId={patient.id} mode="menu" /></PlanSheet>}
   </section>;

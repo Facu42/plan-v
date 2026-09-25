@@ -25,6 +25,24 @@ import { RecipeDetails, RecipeDishWell, RecipeMacroTiles, type RecipeDetailData 
 import type { ShowroomPage } from './ShowroomPanels';
 import type { ShowroomPatient } from './showroom-model';
 import './menu-fig.css';
+import dotsFigma from '../../assets/figma-mobile/445-10878-imgIconDotsThree.svg';
+import chartFigma from '../../assets/figma-mobile/445-10878-imgIconNavChartBar.svg';
+import heartFigma from '../../assets/figma-mobile/445-10878-imgIconSpecialHeartbeat.svg';
+import cookingFigma from '../../assets/figma-mobile/445-10878-imgIconSpecialCookingPot.svg';
+import stepsFigma from '../../assets/figma-mobile/445-10878-imgIconSpecialListNumbers.svg';
+import fireFigma from '../../assets/figma-mobile/445-10878-imgIconSpecialFire.svg';
+import breadFigma from '../../assets/figma-mobile/445-10878-imgIconSpecialBread.svg';
+import fishFigma from '../../assets/figma-mobile/445-10878-imgIconSpecialFish.svg';
+import dropFigma from '../../assets/figma-mobile/445-10878-imgIconSpecialDrop.svg';
+import funnelFigma from '../../assets/figma-mobile/445-11016-imgIconFunnel.svg';
+import caretFigma from '../../assets/figma-mobile/445-11016-imgIconCaretDown.svg';
+import plusFigma from '../../assets/figma-mobile/445-11785-imgIconPlus.svg';
+import facebookFigma from '../../assets/figma-mobile/427-14667-imgFacebookLogo.svg';
+import twitterFigma from '../../assets/figma-mobile/427-14667-imgTwitterLogo.svg';
+import instagramFigma from '../../assets/figma-mobile/427-14667-imgInstagramLogo.svg';
+import youtubeFigma from '../../assets/figma-mobile/427-14667-imgYoutubeLogo.svg';
+import linkedinFigma from '../../assets/figma-mobile/427-14667-imgLinkedinLogo.svg';
+import './figma-mobile-menu.css';
 
 type HealthyMenuItem = {
   title: string;
@@ -286,6 +304,98 @@ function RecommendedWidget({ title, recipes, emptyText, savedIds, onToggleFavori
 
 /* ── Rol paciente ───────────────────────────────────────────────────────── */
 
+function FigmaMenuSectionHead({ title, onOpen }: { title: string; onOpen: () => void }) {
+  return <header className="fmm-section-head"><h2>{title}</h2><button type="button" aria-label={`Abrir ${title}`} onClick={onOpen}><img src={dotsFigma} alt="" width="24" height="24" /></button></header>;
+}
+
+function FigmaMenuImage({ recipe, title }: { recipe?: PatientRecipe; title: string }) {
+  return <span className="fmm-image">{recipe?.card?.cover_url && <RecipeDishWell title={title} status={recipe.card.cover_status} url={recipe.card.cover_url} alt={recipe.card.cover_alt} />}</span>;
+}
+
+function FigmaMenuNutrients({ macros }: { macros: RecipeMacros | null }) {
+  return <span className="fmm-nutrients">{[
+    [fireFigma, 'C', macros?.kcal, 'kcal'], [breadFigma, 'HC', macros?.carbs_g, 'g'],
+    [fishFigma, 'P', macros?.protein_g, 'g'], [dropFigma, 'G', macros?.fat_g, 'g'],
+  ].map(([src, label, value, unit]) => <span key={label}><img src={src as string} alt="" width="14" height="14" /><small>{label}</small><strong>{value ?? '—'}{value == null ? '' : unit}</strong></span>)}</span>;
+}
+
+function FigmaPatientMenu({
+  menu, items, featured, recipes, savedIds, slot, setSlot, day, setDay, sort, setSort,
+  onNavigate, onOpen, onFeature, onFavorite,
+}: {
+  menu: ReturnType<typeof buildHealthyMenu>; items: HealthyMenuItem[]; featured?: HealthyMenuItem;
+  recipes: PatientRecipe[]; savedIds: string[]; slot: string; setSlot: (value: string) => void;
+  day: string; setDay: (value: string) => void; sort: MenuSort; setSort: (value: MenuSort) => void;
+  onNavigate: (page: ShowroomPage) => void; onOpen: (id: string) => void;
+  onFeature: (title: string) => void; onFavorite: (id: string) => void;
+}) {
+  const byTitle = new Map(recipes.map((recipe) => [normalize(recipe.title), recipe]));
+  const featuredRecipe = featured ? byTitle.get(normalize(featured.title)) : undefined;
+  const featuredMacros = declaredMacros(featuredRecipe?.card);
+  const popular = menu.items.slice(0, 4);
+  const recommended = recipes.slice(0, 4);
+  const openMenuItem = (item: HealthyMenuItem) => {
+    const recipe = byTitle.get(normalize(item.title));
+    if (recipe) onOpen(recipe.id); else onNavigate('plan');
+  };
+  const dayOptions = WEEK.filter((value) => menu.items.some((item) => item.days.includes(value)));
+  const details = featured ? [
+    [chartFigma, 'Momento', featured.slots.join(' · ')],
+    [heartFigma, 'Esta semana', times(featured.occurrences)],
+    [cookingFigma, 'Días', featured.days.join(', ')],
+    [stepsFigma, 'Pasos', featuredRecipe ? `${featuredRecipe.steps.length}` : 'Sin receta'],
+  ] : [];
+  const macroTiles = [
+    [fireFigma, 'Calorías', featuredMacros?.kcal, 'kcal'],
+    [breadFigma, 'Carbohidratos', featuredMacros?.carbs_g, 'g'],
+    [fishFigma, 'Proteínas', featuredMacros?.protein_g, 'g'],
+    [dropFigma, 'Grasas', featuredMacros?.fat_g, 'g'],
+  ];
+
+  return <div className="fmm-page" data-figma-frame="445:10499">
+    {featured && <section className="fmm-featured" data-figma-node="445:10878">
+      <div className="fmm-featured-main">
+        <FigmaMenuSectionHead title="Menú destacado" onOpen={() => onNavigate('plan')} />
+        <FigmaMenuImage recipe={featuredRecipe} title={featured.title} />
+        <div className="fmm-featured-content">
+          <h3>{featured.title}</h3>
+          <div className="fmm-featured-badges"><span className="fmm-badge">{featured.slots[0]}</span><span>{times(featured.occurrences)} esta semana</span></div>
+          <div className="fmm-details">{details.map(([src, label, value]) => <span key={label}><i><img src={src} alt="" width="16" height="16" /></i><span><small>{label}</small><strong>{value}</strong></span></span>)}</div>
+          <button type="button" className="fmm-cta" onClick={() => openMenuItem(featured)}>{featuredRecipe ? 'Ver receta' : 'Ver en plan semanal'}</button>
+        </div>
+      </div>
+      <div className="fmm-tiles">{macroTiles.map(([src, label, value, unit]) => <span key={label} className="fmm-tile"><i><img src={src as string} alt="" width="16" height="16" /></i><span><small>{label}</small><strong>{value ?? '—'} <em>{value == null ? '' : unit}</em></strong></span></span>)}</div>
+    </section>}
+
+    <section className="fmm-all" data-figma-node="445:11016">
+      <div className="fmm-all-head"><h2>Todo el menú</h2><label className="fmm-filter"><img src={funnelFigma} alt="" width="14" height="14" /><select aria-label="Filtrar por día" value={day} onChange={(event) => setDay(event.target.value)}><option value="Todos">Filtrar</option>{dayOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select><img src={caretFigma} alt="" width="14" height="14" /></label></div>
+      <div className="fmm-tabs" role="group" aria-label="Momento de comida">{['Todas', ...menuSlots(menu.slots)].map((value) => <button key={value} type="button" aria-pressed={slot === value} onClick={() => setSlot(value)}>{value}</button>)}</div>
+      <label className="fmm-sort">Ordenar por: <span><select aria-label="Ordenar menú" value={sort} onChange={(event) => setSort(event.target.value as MenuSort)}><option value="frecuencia">Frecuencia</option><option value="dia">Día</option><option value="nombre">Nombre</option></select><img src={caretFigma} alt="" width="14" height="14" /></span></label>
+      <div className="fmm-all-list">{items.length ? items.map((item) => {
+        const recipe = byTitle.get(normalize(item.title));
+        return <article className="fmm-list-card" key={normalize(item.title)}>
+          <div className="fmm-list-card-top"><FigmaMenuImage recipe={recipe} title={item.title} /><div><h3>{item.title}</h3><button type="button" className="fmm-add" onClick={() => openMenuItem(item)}>{recipe ? 'Ver receta' : 'Ver plan'}</button></div></div>
+          <div className="fmm-list-card-info"><span className="fmm-badge">{item.slots[0]}</span><span className="fmm-frequency">{times(item.occurrences)} · {item.days.join(', ')}</span></div>
+          <FigmaMenuNutrients macros={declaredMacros(recipe?.card)} />
+        </article>;
+      }) : <p className="fmm-empty">No hay comidas para este filtro.</p>}</div>
+    </section>
+
+    <div className="fmm-side" data-figma-node="445:11785">
+      <section className="fmm-popular" data-figma-node="445:11520"><FigmaMenuSectionHead title="Más presentes en tu semana" onOpen={() => onNavigate('plan')} /><div className="fmm-popular-list">{popular.length ? popular.map((item) => {
+        const recipe = byTitle.get(normalize(item.title));
+        return <article className="fmm-popular-card" key={normalize(item.title)}><FigmaMenuImage recipe={recipe} title={item.title} /><div><div className="fmm-popular-top"><button type="button" className="fmm-title-button" onClick={() => { onFeature(item.title); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>{item.title}</button><button type="button" className="fmm-plus" aria-label={`Abrir ${item.title}`} onClick={() => openMenuItem(item)}><img src={plusFigma} alt="" width="16" height="16" /></button></div><div className="fmm-popular-foot"><span>{times(item.occurrences)}</span><span className="fmm-badge">{item.slots[0]}</span></div></div></article>;
+      }) : <p className="fmm-empty">El plan semanal aún no tiene comidas.</p>}</div></section>
+      <section className="fmm-recommended" data-figma-node="445:11529"><FigmaMenuSectionHead title="Recetas de tu nutricionista" onOpen={() => onNavigate('plan')} /><div className="fmm-recommended-list">{recommended.length ? recommended.map((recipe) => {
+        const macros = declaredMacros(recipe.card);
+        const saved = savedIds.includes(recipe.id);
+        return <article className="fmm-recommended-card" key={`${recipe.id}:${recipe.version}`}><div className="fmm-recommended-main"><FigmaMenuImage recipe={recipe} title={recipe.title} /><div><button type="button" className="fmm-title-button" onClick={() => onOpen(recipe.id)}>{recipe.title}</button><div className="fmm-recommended-foot"><span className="fmm-badge">{recipe.card?.category ?? 'Receta'}</span><button type="button" className="fmm-plus" aria-pressed={saved} aria-label={saved ? `Quitar ${recipe.title} de favoritos` : `Guardar ${recipe.title} en favoritos`} onClick={() => onFavorite(recipe.id)}>{saved ? <Check size={16} aria-hidden /> : <img src={plusFigma} alt="" width="16" height="16" />}</button></div></div></div><FigmaMenuNutrients macros={macros} /></article>;
+      }) : <p className="fmm-empty">Todavía no hay recetas publicadas para vos.</p>}</div></section>
+    </div>
+    <footer className="fmm-footer" data-figma-node="445:10624"><strong>Copyright © {new Date().getFullYear()} Plan V</strong><span>Privacidad　 Condiciones　 Contacto</span><span className="fmm-social" aria-hidden="true">{[facebookFigma, twitterFigma, instagramFigma, youtubeFigma, linkedinFigma].map((src) => <img key={src} src={src} alt="" width="20" height="20" />)}</span></footer>
+  </div>;
+}
+
 function PatientHealthyMenu({ patient, query, onNavigate }: { patient: ShowroomPatient; query: string; onNavigate: (page: ShowroomPage) => void }) {
   const menu = useMemo(() => buildHealthyMenu(patient), [patient]);
   const assigned = useAssignedRecipes(patient.id);
@@ -312,13 +422,18 @@ function PatientHealthyMenu({ patient, query, onNavigate }: { patient: ShowroomP
     <button type="button" className="mf-btn mf-btn-cta" onClick={() => onNavigate('compras')}><ShoppingCart size={18} aria-hidden /> Lista de compras</button>
   </HeaderActions>;
 
+  const mobile = <FigmaPatientMenu menu={menu} items={items} featured={featured} recipes={assigned.recipes} savedIds={assigned.savedIds}
+    slot={slot} setSlot={setSlot} day={day} setDay={setDay} sort={sort} setSort={setSort}
+    onNavigate={onNavigate} onOpen={setOpenId} onFeature={(title) => { setSlot('Todas'); setDay('Todos'); setFeaturedKey(normalize(title)); }}
+    onFavorite={(id) => void assigned.toggleFavorite(id)} />;
+
   const aside = <>
     <PopularWidget title="Más presentes en tu semana" items={menu.items.slice(0, 3)} onPick={(item) => { setSlot('Todas'); setDay('Todos'); setFeaturedKey(normalize(item.title)); }} />
     <RecommendedWidget title="Recetas de tu nutricionista" recipes={assigned.recipes} emptyText="Todavía no hay recetas publicadas para vos." savedIds={assigned.savedIds} onToggleFavorite={(id) => void assigned.toggleFavorite(id)} onOpen={(recipe) => setOpenId(recipe.id)} />
     {assigned.error && <p className="recipe-error" role="alert">{assigned.error}</p>}
   </>;
 
-  if (!menu.items.length) return <>{header}<MenuLayout main={<NvState title="Tu menú está en preparación" description="Cuando tu nutricionista publique el plan semanal, vas a encontrar acá sus títulos organizados." />} aside={aside} /></>;
+  if (!menu.items.length) return <>{header}{mobile}<div className="fmm-legacy"><MenuLayout main={<NvState title="Tu menú está en preparación" description="Cuando tu nutricionista publique el plan semanal, vas a encontrar acá sus títulos organizados." />} aside={aside} /></div></>;
 
   const featuredRecipe = featured ? recipeByTitle.get(normalize(featured.title)) : undefined;
   const featuredMacros = declaredMacros(featuredRecipe?.card);
@@ -375,7 +490,7 @@ function PatientHealthyMenu({ patient, query, onNavigate }: { patient: ShowroomP
     </section>
   </>;
 
-  return <>{header}<MenuLayout main={main} aside={aside} /></>;
+  return <>{header}{mobile}<div className="fmm-legacy"><MenuLayout main={main} aside={aside} /></div></>;
 }
 
 /* ── Rol nutricionista ──────────────────────────────────────────────────── */

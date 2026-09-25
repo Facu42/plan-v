@@ -23,6 +23,12 @@ import {
 } from './message-panel';
 import './messages.css';
 import './messages-fig.css';
+import facebookFigma from '../../assets/figma-mobile/427-14667-imgFacebookLogo.svg';
+import twitterFigma from '../../assets/figma-mobile/427-14667-imgTwitterLogo.svg';
+import instagramFigma from '../../assets/figma-mobile/427-14667-imgInstagramLogo.svg';
+import youtubeFigma from '../../assets/figma-mobile/427-14667-imgYoutubeLogo.svg';
+import linkedinFigma from '../../assets/figma-mobile/427-14667-imgLinkedinLogo.svg';
+import './figma-mobile-messages.css';
 
 type Role = 'patient' | 'pro';
 type Props = { patient: ShowroomPatient; patients: ShowroomPatient[]; role: Role; onSelect: (id: string) => void; onNavigate: (page: ShowroomPage) => void };
@@ -61,8 +67,8 @@ export function NutrigoMessages({ patient, patients, role, onSelect, onNavigate 
     if (role === 'pro') { setQuery(''); setUnreadOnly(false); searchRef.current?.focus(); return; }
     composeRef.current?.focus();
   };
-  return <section className={`nm-layout nm-${role}${profileOpen ? '' : ' nmf-profile-closed'}`} aria-label="Mensajería">
-    <aside className="nm-contacts" aria-label="Conversaciones">
+  return <><section className={`nm-layout nm-${role}${profileOpen ? '' : ' nmf-profile-closed'}`} aria-label="Mensajería" data-figma-frame={role === 'patient' ? '433:19982' : undefined}>
+    <aside className="nm-contacts" aria-label="Conversaciones" data-figma-node={role === 'patient' ? '433:20364' : undefined}>
       <div className="nmf-list-head">
         <label className="nmf-search">
           <MagnifyingGlass size={18} aria-hidden />
@@ -93,7 +99,7 @@ export function NutrigoMessages({ patient, patients, role, onSelect, onNavigate 
     </aside>
     <MessageConversation key={`${role}:${patient.id}`} patient={patient} role={role} composeRef={composeRef} profileOpen={profileOpen} onToggleProfile={() => setProfileOpen((open) => !open)} onNavigate={onNavigate} />
     {profileOpen && <ConversationProfile patient={patient} role={role} onNavigate={onNavigate} />}
-  </section>;
+  </section>{role === 'patient' && <footer className="fmmg-footer" data-figma-node="433:20107"><strong>Copyright © {new Date().getFullYear()} Plan V</strong><span>Privacidad　 Condiciones　 Contacto</span><span aria-hidden="true">{[facebookFigma, twitterFigma, instagramFigma, youtubeFigma, linkedinFigma].map((src) => <img key={src} src={src} alt="" width="20" height="20" />)}</span></footer>}</>;
 }
 
 function MessageConversation({ patient, role, composeRef, profileOpen, onToggleProfile, onNavigate }: Pick<Props, 'patient' | 'role' | 'onNavigate'> & {
