@@ -67,16 +67,40 @@ Hallazgos, por impacto:
    Pacientes, mostraban "Sin pacientes activos" y no había cómo crear la primera. **Arreglado**:
    Pacientes siempre abre y el aviso trae "Ir a Pacientes".
 
-## Pendientes conocidos (siguiente)
+## Publicación (2026-09-28, con el OK de Facundo)
 
-- Aplicar a producción las migraciones pendientes + las tres nuevas (con el OK de Facundo),
-  y publicar el código (merge a `main`).
-- Cobro a la nutricionista (prueba gratis, plan mensual): decisión de producto abierta.
-- Mails reales (invitación, avisos): sin proveedor. Hoy se comparte el enlace a mano.
-- Cobro dentro de la app (Mercado Pago): fuera de alcance del piloto gratuito.
-- Integrar `codex/pv46-figma-mobile`, `claude/project-thread-7h8rax` y el trabajo local de
-  Consejos/recetas cuando llegue a GitHub.
-- Backlog visual de la auditoría del 27/09 (iconos, textos, imágenes, estados).
+- Base `plan-v-app`: aplicadas `shopping_lists`, `message_attachments`, `notification_outbox`,
+  `exercise_library`, `editorial_resources`, `organizations`, `recipe_cards_days`,
+  `patient_access` y `patient_archive` (la de progreso ya estaba). Antes se verificó que los
+  datos existentes cumplen las restricciones nuevas (mensajes ≤ 2000, categorías de archivos).
+- PR #18 mergeado a `main` (3bcddb8). Vercel producción publicó ese commit.
+- Railway: con el OK de Facundo ("sí, cambialo a main"), los servicios `api` y `worker` pasaron
+  de la rama `claude/project-thread-nziakk` a `main`. Ambos publicaron 3bcddb8 sin errores
+  (api escuchando, conectada a Supabase). Desde ahora cada merge a `main` actualiza web y servidor.
+
+## Plan de acción (actualizado 2026-09-28)
+
+Orden propuesto. Cada paso dice qué hace falta de Facundo, si hace falta algo.
+
+1. **Prueba real de punta a punta en la app publicada.** Crear una cuenta "Soy nutricionista",
+   dar de alta una paciente, compartirle el enlace, habilitar su acceso y que registre una comida.
+   Lo ideal es que lo haga Verónica con una paciente de confianza. Necesita: dos emails reales.
+2. **Juntar el trabajo local del 27/09** (Consejos, detalle de consejo, ficha de receta, Menú
+   saludable móvil y la auditoría `docs/auditoria-figma-mcp-2026-09-27.md`). Necesita: que el
+   agente de su PC lo suba a la rama `codex/pv47-recetas-consejos`. Después se integra con `main`
+   sin perder lo del 28.
+3. **Mails reales** (invitación, aviso de mensaje nuevo, recuperar contraseña con remitente propio).
+   Necesita: elegir proveedor y dominio remitente. Hoy el enlace se comparte a mano (Copiar / WhatsApp).
+4. **Cobro a la nutricionista**: prueba gratis y plan mensual, con Mercado Pago. Necesita:
+   decisión de precio y duración de la prueba, y una cuenta de Mercado Pago.
+5. **Ramas viejas sin mergear**: `codex/pv46-figma-mobile` y `claude/project-thread-7h8rax`
+   (modo demo con contenido). Revisar qué sigue sirviendo y cerrar el resto.
+6. **Backlog visual** de la auditoría del 27/09 (iconos, textos, imágenes, estados), cuando esté
+   en GitHub (paso 2).
+7. **Arrastrados de `pending-work.md`**: pantalla para aprobar el menú semanal que propone la IA,
+   y guardar las fotos de recetas en Storage en vez de dentro de la base.
+
+Fuera por ahora: tablet (decidido el 2026-09-22).
 
 ## Verificación
 
