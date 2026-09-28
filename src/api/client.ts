@@ -89,6 +89,9 @@ export const api = {
   sendInvite: (inviteId: string) =>
     request<{ invite: PatientInvite; source: string }>(`/api/invites/${inviteId}/send`, { method: 'POST' }),
 
+  patientInvite: (patientId: string) =>
+    request<{ invite: PatientInvite; source: string }>(`/api/patients/${patientId}/invite`, { method: 'POST' }),
+
   revokeInvite: (inviteId: string) =>
     request<{ invite: PatientInvite; source: string }>(`/api/invites/${inviteId}/revoke`, { method: 'POST' }),
 
@@ -126,6 +129,12 @@ export const api = {
 
   getPatient: (id: string, init?: RequestInit) =>
     request<{ patient: Patient; shoppingList: string[] }>(`/api/patients/${id}`, init),
+
+  claimProfessional: (displayName: string) =>
+    request<{ nutritionist_id: string }>('/api/me/professional', {
+      method: 'POST',
+      body: JSON.stringify({ display_name: displayName }),
+    }),
 
   setupNutritionist: (displayName: string) =>
     request<{ nutritionist_id: string }>('/api/nutritionist/setup', {

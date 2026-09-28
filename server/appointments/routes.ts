@@ -58,7 +58,7 @@ export function registerAppointmentRoutes(app: Hono) {
         kind: 'appointment',
       }, true);
       if (parsedBody.data.appointment) {
-        await sb.sbAddTimelineEvent(patientId, {
+        await sb.sbAddTimelineEventBestEffort(patientId, {
           kind: 'appointment',
           title: 'Consulta · actualizada',
           body: `${parsedBody.data.appointment.day} ${parsedBody.data.appointment.time}`,
@@ -94,7 +94,7 @@ export function registerAppointmentRoutes(app: Hono) {
         body: `Turno reprogramado: ${parsedBody.data.day} ${parsedBody.data.time}. Este aviso quedó en el buzón in-app; no se envió a internet.`,
         kind: 'appointment',
       }, true);
-      await sb.sbAddTimelineEvent(patientId, {
+      await sb.sbAddTimelineEventBestEffort(patientId, {
         kind: 'appointment',
         title: 'Consulta · reprogramada',
         body: `${parsedBody.data.day} ${parsedBody.data.time}`,

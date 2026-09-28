@@ -4,6 +4,7 @@ import type { Patient, Stage } from '../../types';
 import { filterDirectoryPatients, getPatientDirectoryMetrics, type PatientDirectoryFilter } from '../crm/crm-patients';
 import { Icon } from '../shared/Icon';
 import { NvBadge, NvButton, NvCard, NvProgress, NvState } from './primitives';
+import { hasFullPatientAccess } from '../../billing';
 import './showroom-patients.css';
 
 const STAGE_LABELS: Record<Stage, string> = { ingreso: 'Ingreso', plan: 'Plan', seguimiento: 'Seguimiento', alta: 'Alta' };
@@ -23,6 +24,43 @@ function useDialogKeys(onClose: () => void, busy: boolean) {
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [onClose, busy]);
+}
+
+export function inviteLink(inviteId: string, origin = typeof window === 'undefined' ? '' : window.location.origin) {
+  return `${origin}/app/inicio?invite=${encodeURIComponent(inviteId)}`;
+}
+
+export function inviteMessage(patientName: string, link: string) {
+  const first = patientName.trim().split(/\s+/)[0] || '';
+  return `Hola ${first}, te invito a Plan V para seguir tu plan conmigo. Creá tu cuenta con este enlace: ${link}`;
+}
+
+export function accessLabel(patient: Pick<Patient, 'billing_status' | 'billing_until'>) {
+  if (patient.billing_status === 'waived') return 'Acceso sin cargo';
+  if (patient.billing_status === 'active') return `Acceso hasta ${patient.billing_until?.split('-').reverse().join('/') ?? ''}`;
+  if (patient.billing_status === 'past_due') return 'Acceso vencido';
+  return 'Acceso pendiente';
+}
+
+function InviteShare({ name, invite, onClose }: { name: string; invite: PatientInvite; onClose: () => void }) {
+  const link = inviteLink(invite.id);
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(link); setCopied(true); } catch { setCopied(false); }
+  };
+  return <div className="nv-directory-notice nv-invite-share" role="status">
+    <Icon name="check" size={15} />
+    <span>
+      <strong>Invitación lista para {name}</strong>
+      <small>Mandale este enlace: crea su cuenta con {invite.email} y queda vinculada a tu consultorio. Vence en 7 días.</small>
+      <input readOnly value={link} aria-label="Enlace de invitación" onFocus={(event) => event.currentTarget.select()} />
+    </span>
+    <span className="nv-invite-actions">
+      <NvButton className="nv-soft" onClick={copy}>{copied ? 'Copiado' : 'Copiar enlace'}</NvButton>
+      <a className="nv-button nv-ghost" href={`https://wa.me/?text=${encodeURIComponent(inviteMessage(name, link))}`} target="_blank" rel="noreferrer">WhatsApp</a>
+    </span>
+    <button type="button" onClick={onClose} aria-label="Cerrar aviso">×</button>
+  </div>;
 }
 
 export function ShowroomPatientCreate({ onClose, onCreated }: { onClose: () => void; onCreated: (patient: Patient, invite: PatientInvite) => void }) {
@@ -81,6 +119,8 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
   const [sensitiveHours, setSensitiveHours] = useState(patient.sensitive_hours);
   const [planB, setPlanB] = useState(patient.plan_b);
   const [nextFocus, setNextFocus] = useState(patient.next_focus);
+  const [access, setAccess] = useState(patient.billing_status);
+  const [accessUntil, setAccessUntil] = useState(patient.billing_until ?? '');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const nameInput = useRef<HTMLInputElement>(null);
@@ -92,9 +132,15 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
     setBusy(true);
     setError('');
     try {
-      const { patient: updated } = await api.updatePatientProfile(patient.id, {
+      let { patient: updated } = await api.updatePatientProfile(patient.id, {
         name, status, stage, sensitive_hours: sensitiveHours, plan_b: planB, next_focus: nextFocus,
       });
+      // Sólo si la profesional cambió el acceso; un vencido sin tocar queda como está.
+      const accessChanged = access !== patient.billing_status || (access === 'active' && accessUntil !== (patient.billing_until ?? ''));
+      if (accessChanged && access !== 'past_due') {
+        if (access === 'active' && !accessUntil) throw new Error('Elegí hasta qué fecha tiene acceso.');
+        ({ patient: updated } = await api.updateBilling(patient.id, access === 'active' ? { status: 'active', billing_until: accessUntil } : { status: access }));
+      }
       onSaved(updated);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'No pudimos actualizar la ficha.');
@@ -114,6 +160,15 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
           <label>Estado visible<input value={status} onChange={(e) => setStatus(e.target.value)} minLength={2} maxLength={40} required /></label>
           <label>Etapa<select value={stage} onChange={(e) => setStage(e.target.value as Stage)}>{(['ingreso', 'plan', 'seguimiento', 'alta'] as const).map((value) => <option key={value} value={value}>{STAGE_LABELS[value]}</option>)}</select></label>
           <label>Horario sensible<input value={sensitiveHours} onChange={(e) => setSensitiveHours(e.target.value)} maxLength={120} placeholder="Ej.: después de las 20:30" /></label>
+        </div>
+        <div className="nv-dialog-grid">
+          <label>Acceso a la app<select value={access} onChange={(e) => setAccess(e.target.value as typeof access)}>
+            {patient.billing_status === 'past_due' && <option value="past_due" disabled>Vencido</option>}
+            <option value="pending">Pendiente</option>
+            <option value="waived">Sin cargo</option>
+            <option value="active">Pagado hasta una fecha</option>
+          </select></label>
+          {access === 'active' && <label>Pagado hasta<input type="date" value={accessUntil} onChange={(e) => setAccessUntil(e.target.value)} required /></label>}
         </div>
         <label>Plan B<textarea value={planB} onChange={(e) => setPlanB(e.target.value)} maxLength={240} rows={2} /></label>
         <label>Próximo foco<textarea value={nextFocus} onChange={(e) => setNextFocus(e.target.value)} maxLength={240} rows={2} /></label>
@@ -140,7 +195,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', on
   const [archiveConfirmation, setArchiveConfirmation] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState('');
-  const [inviteNotice, setInviteNotice] = useState('');
+  const [share, setShare] = useState<{ name: string; invite: PatientInvite } | null>(null);
   const metrics = getPatientDirectoryMetrics(patients);
   const visible = filterDirectoryPatients(patients, query, filter);
 
@@ -162,7 +217,20 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', on
   const created = (patient: Patient, invite: PatientInvite) => {
     onChanged(patient);
     setCreating(false);
-    setInviteNotice(`${patient.name} fue incorporada. Invitación de un uso a ${invite.email}${invite.expires_at ? ' con vencimiento' : ' guardada'}.`);
+    setShare({ name: patient.name, invite });
+  };
+
+  const invite = async (patient: Patient) => {
+    setBusyId(patient.id);
+    setError('');
+    try {
+      const { invite: ready } = await api.patientInvite(patient.id);
+      setShare({ name: patient.name, invite: ready });
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'No pudimos preparar la invitación.');
+    } finally {
+      setBusyId(null);
+    }
   };
 
   return <>
@@ -179,17 +247,18 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', on
           return <button type="button" key={item.id} aria-pressed={filter === item.id} onClick={() => { setFilter(item.id); setArchiveConfirmation(null); }}>{item.label}<span>{count}</span></button>;
         })}
       </nav>
-      {inviteNotice && <p className="nv-directory-notice" role="status"><Icon name="check" size={15} /><span>{inviteNotice}</span><button type="button" onClick={() => setInviteNotice('')} aria-label="Cerrar aviso">×</button></p>}
+      {share && <InviteShare name={share.name} invite={share.invite} onClose={() => setShare(null)} />}
       {error && <p className="nv-dialog-error" role="alert">{error}</p>}
       <div className="nv-patient-table nv-directory-table" role="table" aria-label="Pacientes del directorio">
         <div role="row" className="nv-table-head"><span role="columnheader">Paciente</span><span role="columnheader">Estado</span><span role="columnheader">Próximo foco</span><span role="columnheader">Adherencia</span><span role="columnheader">Acciones</span></div>
         {visible.map((patient) => <div role="row" key={patient.id}>
           <span role="cell"><span className="nv-avatar">{patient.initials}</span><span><strong>{patient.name}</strong><small>{patient.goal}</small></span></span>
-          <span role="cell"><strong>{patient.status}</strong><small>{STAGE_LABELS[patient.stage]}</small></span>
+          <span role="cell"><strong>{patient.status}</strong><small>{STAGE_LABELS[patient.stage]}</small>{!hasFullPatientAccess(patient) && <NvBadge tone="coral">{accessLabel(patient)}</NvBadge>}{patient.has_account === false && <NvBadge tone="gold">Sin cuenta</NvBadge>}</span>
           <span role="cell"><strong>{patient.next_focus || 'Sin foco cargado'}</strong><small>{patient.appointment?.when ?? 'Sin consulta'}</small></span>
           <span role="cell"><NvProgress value={patient.adherence_score} label={`Adherencia de ${patient.name}`} /><strong>{patient.adherence_score}%</strong></span>
           <span role="cell" className="nv-directory-actions">
             {!patient.archived_at && <NvButton className="nv-soft" aria-label={`Ver seguimiento de ${patient.name}`} onClick={() => onFollow(patient.id)}>Ver seguimiento</NvButton>}
+            {!patient.archived_at && patient.has_account === false && <NvButton className="nv-ghost" aria-label={`Invitar a ${patient.name}`} disabled={busyId === patient.id} onClick={() => invite(patient)}><Icon name="message" size={13} />Invitar</NvButton>}
             {!patient.archived_at && <NvButton className="nv-ghost" aria-label={`Editar ficha de ${patient.name}`} onClick={() => setEditing(patient)}><Icon name="edit" size={13} />Editar</NvButton>}
             <NvButton className={`nv-ghost${archiveConfirmation === patient.id ? ' nv-confirm' : ''}`} aria-label={patient.archived_at ? `Restaurar ${patient.name}` : archiveConfirmation === patient.id ? `Confirmar archivo de ${patient.name}` : `Archivar ${patient.name}`} disabled={busyId === patient.id} onClick={() => setArchived(patient, !patient.archived_at)}>
               {busyId === patient.id ? 'Guardando…' : patient.archived_at ? 'Restaurar' : archiveConfirmation === patient.id ? 'Confirmar archivo' : 'Archivar'}

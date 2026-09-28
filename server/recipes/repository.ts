@@ -57,6 +57,7 @@ export function recipeDbError(error: { code?: string; message?: string } | null)
     throw new CareError(501, 'El catálogo de recetas requiere instalar la migración de este módulo.');
   }
   if (error.code === '42501') throw new CareError(403, 'No tenés permiso para esta acción.');
+  if (error.code === 'PT404') throw new CareError(404, 'No encontramos esa comida asignada.');
   if (error.code === '23505' || error.code === 'PT409') {
     if (error.message === 'meal_plan_allergies' || error.message === 'recipe_allergies') {
       throw new CareError(409, 'El contenido incluye un alimento declarado como alergia o restricción. Revisalo antes de publicar.');
@@ -300,7 +301,17 @@ export async function saveRecipeDraft(
   if (!persistent) return writeDraft(nutritionistId, input, card);
   const { data, error } = await getRequestDb().rpc('save_recipe_draft', { payload: input });
   recipeDbError(error);
-  return asProfessional(data as Record<string, unknown>);
+  const saved = asProfessional(data as Record<string, unknown>);
+  if (!card || saved.current.published_at) return saved;
+  const { data: stored, error: cardError } = await getRequestDb().rpc('set_recipe_card', {
+    target_version: saved.current.id,
+    card,
+  });
+  recipeDbError(cardError);
+  if (!stored) throw new CareError(501, 'La ficha visual de la receta requiere instalar la migración de este módulo.');
+  const { cover_status, cover_url, cover_alt } = saved.current.card ?? unavailableCard(saved.title);
+  saved.current.card = { ...(stored as RecipeCard), cover_status, cover_url, cover_alt };
+  return saved;
 }
 
 function gateRecipePublish(title: string, version: { yield_portions: number; steps: string[]; ingredients: RecipeItem[] }) {

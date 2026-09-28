@@ -146,6 +146,8 @@ export type Patient = {
   anonymized_at?: string | null;
   billing_status: BillingStatus;
   billing_until: string | null;
+  /** Sólo en la vista profesional: si la paciente ya vinculó su cuenta. */
+  has_account?: boolean;
   stage: Stage;
   goal: string;
   goal_status?: GoalStatus;

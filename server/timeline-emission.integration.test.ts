@@ -24,7 +24,10 @@ vi.mock('./diary/repository.js', async (original) => ({
   reviewMealLog: diaryMocks.reviewMealLog,
 }));
 
-vi.mock('./db/supabase-repo.js', () => sbMocks);
+vi.mock('./db/supabase-repo.js', () => ({
+  ...sbMocks,
+  sbAddTimelineEventBestEffort: (...args: Parameters<typeof sbMocks.sbAddTimelineEvent>) => sbMocks.sbAddTimelineEvent(...args),
+}));
 
 vi.mock('./db/supabase-client.js', () => ({
   isSupabaseEnabled: () => true,

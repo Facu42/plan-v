@@ -90,4 +90,21 @@ describe('directorio de pacientes del showroom', () => {
     expect(html).toContain('<option value="seguimiento" selected="">Seguimiento</option>');
     expect(html).toContain('Guardar cambios');
   });
+
+  it('un acceso vencido se muestra como vencido y no se reactiva solo al guardar', () => {
+    const html = renderToStaticMarkup(<ShowroomPatientEdit patient={{ ...base, billing_status: 'past_due', billing_until: '2020-01-01' }} onClose={vi.fn()} onSaved={vi.fn()} />);
+    expect(html).toContain('<option value="past_due" disabled="" selected="">Vencido</option>');
+    expect(html).not.toContain('Pagado hasta<input');
+  });
+});
+
+describe('PV-47 enlace de invitación', () => {
+  it('arma el enlace que acepta la app y un mensaje listo para WhatsApp', async () => {
+    const { inviteLink, inviteMessage, accessLabel } = await import('./ShowroomPatients');
+    const link = inviteLink('7d0f3c1e-1b2a-4c3d-8e9f-0a1b2c3d4e5f', 'https://plan-v.app');
+    expect(link).toBe('https://plan-v.app/app/inicio?invite=7d0f3c1e-1b2a-4c3d-8e9f-0a1b2c3d4e5f');
+    expect(inviteMessage('Lía Pérez', link)).toBe(`Hola Lía, te invito a Plan V para seguir tu plan conmigo. Creá tu cuenta con este enlace: ${link}`);
+    expect(accessLabel({ billing_status: 'active', billing_until: '2026-10-31' })).toBe('Acceso hasta 31/10/2026');
+    expect(accessLabel({ billing_status: 'pending', billing_until: null })).toBe('Acceso pendiente');
+  });
 });

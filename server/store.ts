@@ -174,6 +174,7 @@ export type Patient = {
   anonymized_at?: string | null;
   billing_status: BillingStatus;
   billing_until: string | null;
+  has_account?: boolean;
   stage: Stage;
   goal: string;
   goal_status?: GoalStatus;
@@ -659,6 +660,7 @@ export function createPatient(input: { name: string; email: string; goal: string
     archived_at: null,
     billing_status: 'pending',
     billing_until: null,
+    has_account: false,
     stage: 'ingreso',
     goal: input.goal.trim(),
     goal_status: 'active',
@@ -742,8 +744,29 @@ export function acceptPatientInvite(inviteId: string, actor: AcceptActor): Retur
   if (!result.ok) return result;
   store.patientInvites = store.patientInvites.map((invite) => invite.id === inviteId ? result.invite : invite);
   store.linkedPatientUsers[result.patientId] = actor.userId;
+  updatePatient(result.patientId, { has_account: true });
   recordInviteEvent(inviteId, 'accepted', actor.userId);
   return result;
+}
+
+/** Igual que sbRenewPatientInvite, en memoria. */
+export function renewPatientInvite(patientId: string): PatientInvite | null {
+  const invites = store.patientInvites
+    .filter((invite) => invite.patient_id === patientId)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  if (!invites.length || invites.some((invite) => invite.status === 'accepted') || store.linkedPatientUsers[patientId]) return null;
+  const open = invites.find((invite) => invite.status === 'not_sent' || invite.status === 'pending');
+  if (open) return sendPatientInvite(open.id);
+  const invite = createInviteRecord({
+    id: randomUUID(),
+    patientId,
+    nutritionistId: invites[0].nutritionist_id,
+    email: invites[0].email,
+    now: new Date(),
+  });
+  store.patientInvites.push(invite);
+  recordInviteEvent(invite.id, 'created');
+  return sendPatientInvite(invite.id);
 }
 
 export function provisionNutritionistMemory(input: { userId: string; displayName: string; license?: string | null; monthlyFee?: number | null }): { nutritionist_id: string } | { error: string } {

@@ -13,3 +13,15 @@ describe('frontend auth policy', () => {
     expect(PUBLIC_SIGNUP_ROLE).toBe('paciente');
   });
 });
+
+describe('PV-47 registro "Soy nutricionista"', () => {
+  it('sólo la marca explícita pide abrir consultorio y usa el nombre del registro', async () => {
+    const { wantsProfessionalSignup, professionalDisplayName } = await import('./auth-policy');
+    expect(wantsProfessionalSignup({ professional_signup: true })).toBe(true);
+    expect(wantsProfessionalSignup({ professional_signup: 'true' })).toBe(false);
+    expect(wantsProfessionalSignup({ role: 'nutri' })).toBe(false);
+    expect(wantsProfessionalSignup(undefined)).toBe(false);
+    expect(professionalDisplayName({ full_name: ' Lic. Ana ' }, 'ana')).toBe('Lic. Ana');
+    expect(professionalDisplayName({}, ' ana ')).toBe('ana');
+  });
+});

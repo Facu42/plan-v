@@ -7,6 +7,7 @@ import type { ListPage } from '../pagination.ts';
 import { getRequestDb, privilegedDb } from './supabase-client.ts';
 import { listThreadMessagesPersist } from '../messages/repository.js';
 import { listPatientAppointmentPersist } from '../appointments/repository.js';
+import { writeOpsLog } from '../ops/log.js';
 import {
   appointmentColumns,
   mealLogColumns,
@@ -170,6 +171,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
     archived_at: (row.archived_at as string | null | undefined) ?? null,
     billing_status: resolveBillingStatus(billing),
     billing_until: billing.billing_until,
+    ...(audience === 'professional' && 'user_id' in row ? { has_account: row.user_id != null } : {}),
     stage: row.stage as Patient['stage'],
     goal: row.goal as string,
     sensitive_hours: audience === 'patient' ? '' : row.sensitive_hours as string,
@@ -451,12 +453,26 @@ export async function sbListPatientsForNutri(userId: string, query: { offset: nu
     }
   }
 
+  const archivedAt = await loadArchivedAt(ids);
   return {
-    patients: pageRows.map((patientRow) => mapPatient(patientRow, {
+    patients: pageRows.map((patientRow) => mapPatient({ ...patientRow, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, {
       appointment: mapScheduledAppointment(nextByPatient.get(String(patientRow.id))),
     }, 'professional')),
     page: { offset: query.offset, limit: query.limit, has_more: hasMore },
   };
+}
+
+// archived_at llega con la migración 20260928140000; si la base todavía no la
+// tiene, la lista sigue funcionando y nadie figura archivado.
+async function loadArchivedAt(ids: string[]): Promise<Map<string, string | null>> {
+  const archived = new Map<string, string | null>();
+  if (ids.length === 0) return archived;
+  const { data, error } = await getRequestDb().from('patients').select('id,archived_at').in('id', ids);
+  if (error) return archived;
+  for (const patientRow of rows(data)) {
+    archived.set(String(patientRow.id), (patientRow.archived_at as string | null) ?? null);
+  }
+  return archived;
 }
 
 export async function sbGetPatientsForNutri(userId: string): Promise<Patient[]> {
@@ -479,6 +495,10 @@ export async function sbGetPatientById(id: string, audience: QueryAudience = 'pr
   const patientRow = row(data);
   if (!patientRow) return null;
   const extras = await loadPatientExtras(patientRow.id as string, audience);
+  if (audience === 'professional') {
+    const archivedAt = await loadArchivedAt([String(patientRow.id)]);
+    return mapPatient({ ...patientRow, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, extras, audience);
+  }
   return mapPatient(patientRow, extras, audience);
 }
 
@@ -610,6 +630,25 @@ export async function sbAddTimelineEvent(
     occurred_at: new Date().toISOString(),
   });
   if (error) throwWriteError(error);
+}
+
+/**
+ * Para acciones de la paciente: RLS sólo deja escribir la línea de tiempo a la
+ * profesional (RLS-11). La acción principal ya quedó guardada, así que si el
+ * evento no entra se registra en el log y no se devuelve error.
+ */
+export async function sbAddTimelineEventBestEffort(
+  patientId: string,
+  event: { kind: string; title: string; body: string; visibility?: 'professional' | 'patient' },
+): Promise<void> {
+  try {
+    await sbAddTimelineEvent(patientId, event);
+  } catch (error) {
+    writeOpsLog('warn', 'timeline_write_skipped', {
+      kind: event.kind,
+      message: error instanceof Error ? error.message : String((error as { message?: string })?.message ?? 'unknown'),
+    });
+  }
 }
 
 export async function sbSetAppointment(
@@ -746,6 +785,14 @@ export async function sbGetNutritionistId(userId: string): Promise<string | null
   const sb = getRequestDb();
   const { data } = await sb.from('nutritionists').select('id').eq('user_id', userId).maybeSingle();
   return data?.id ?? null;
+}
+
+// Una cuenta ya vinculada como paciente no se convierte en profesional: su
+// ficha y su historial dependen de otra nutricionista.
+export async function sbUserHasPatientLink(userId: string): Promise<boolean> {
+  const { data, error } = await privilegedDb().from('patients').select('id').eq('user_id', userId).limit(1);
+  if (error) throw error;
+  return rows(data).length > 0;
 }
 
 export async function sbEnsureNutritionist(userId: string, displayName: string): Promise<string> {
@@ -885,6 +932,32 @@ export async function sbRevokeInvite(inviteId: string): Promise<PatientInvite> {
   if (error || !data) throwWriteError(error);
   await sb.from('patient_invite_events').insert({ invite_id: inviteId, event: 'revoked' });
   return mapInvite(row(data) ?? {});
+}
+
+/**
+ * Deja lista una invitación para compartir por enlace: reusa la vigente
+ * (renovando el vencimiento) o abre una nueva con el mismo email si la anterior
+ * venció o se revocó. null si la paciente ya vinculó su cuenta.
+ */
+export async function sbRenewPatientInvite(patientId: string, nutritionistId: string): Promise<PatientInvite | null> {
+  const sb = getRequestDb();
+  const { data, error } = await sb.from('patient_invites').select('*')
+    .eq('patient_id', patientId).order('created_at', { ascending: false }).limit(10);
+  if (error) throwWriteError(error);
+  const invites = rows(data).map(mapInvite);
+  if (!invites.length || invites.some((invite) => invite.status === 'accepted')) return null;
+  const open = invites.find((invite) => invite.status === 'not_sent' || invite.status === 'pending');
+  if (open) return sbSendInvite(open.id);
+  const { data: created, error: createError } = await sb.from('patient_invites').insert({
+    patient_id: patientId,
+    nutritionist_id: nutritionistId,
+    email: invites[0].email,
+    status: 'not_sent',
+  }).select('*').single();
+  if (createError || !created) throwWriteError(createError);
+  const invite = mapInvite(row(created) ?? {});
+  await sb.from('patient_invite_events').insert({ invite_id: invite.id, event: 'created' });
+  return sbSendInvite(invite.id);
 }
 
 export async function sbAcceptInvite(inviteId: string): Promise<string> {

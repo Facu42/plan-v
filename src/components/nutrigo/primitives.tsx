@@ -15,8 +15,8 @@ export function NvBadge({ children, tone = 'green' }: { children: ReactNode; ton
 export function mealSlotTone(slot: string): 'green' | 'gold' | 'coral' {
   return slot === 'Almuerzo' ? 'gold' : slot === 'Cena' ? 'coral' : 'green';
 }
-export function NvState({ title, description, kind = 'empty' }: { title: string; description: string; kind?: 'empty' | 'error' | 'loading' }) {
-  return <div className={`nv-state nv-state-${kind}`} data-kind={kind} role={kind === 'error' ? 'alert' : 'status'}><Icon name="leaf" size={28} /><h2>{title}</h2><p>{description}</p></div>;
+export function NvState({ title, description, kind = 'empty', action }: { title: string; description: string; kind?: 'empty' | 'error' | 'loading'; action?: ReactNode }) {
+  return <div className={`nv-state nv-state-${kind}`} data-kind={kind} role={kind === 'error' ? 'alert' : 'status'}><Icon name="leaf" size={28} /><h2>{title}</h2><p>{description}</p>{action}</div>;
 }
 export function NvProgress({ value, label }: { value: number; label: string }) {
   const safeValue = Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 0;

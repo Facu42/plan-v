@@ -10,6 +10,7 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [professional, setProfessional] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [signupOk, setSignupOk] = useState(false);
@@ -29,7 +30,7 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
         const res = await signIn(email, password);
         if (res.error) setError(res.error);
       } else if (mode === 'signup') {
-        const res = await signUp(email, password, fullName);
+        const res = await signUp(email, password, fullName, professional);
         if (res.error) setError(res.error);
         else setSignupOk(true);
       } else {
@@ -66,7 +67,7 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
         {signupOk ? (
           <>
             <h1>Revisá tu email</h1>
-            <p>Te enviamos un link de confirmación. Después de confirmarlo podés iniciar sesión{invitePending ? ' y aceptar la invitación' : ''}.</p>
+            <p>Te enviamos un link de confirmación. Después de confirmarlo podés iniciar sesión{professional ? ' y tu consultorio queda listo para invitar pacientes' : invitePending ? ' y aceptar la invitación' : ''}.</p>
             <button type="button" className="primary-button wide" onClick={() => { setSignupOk(false); setMode('login'); }}>Ir a iniciar sesión</button>
           </>
         ) : recoverOk ? (
@@ -82,7 +83,9 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
               {mode === 'login' && (invitePending
                 ? 'Entrá con el email invitado. La cuenta tiene que estar verificada para vincularte.'
                 : 'Accedé a tu panel o app de paciente.')}
-              {mode === 'signup' && 'El registro público crea una cuenta de paciente. La nutricionista se provisiona por invitación.'}
+              {mode === 'signup' && (professional
+                ? 'Creás tu consultorio y después invitás a tus pacientes con un enlace.'
+                : 'Si tu nutricionista te mandó un enlace, abrilo primero para quedar vinculada.')}
               {mode === 'recover' && 'Ingresá el email de la cuenta. No vamos a decir si el correo existe o no.'}
             </p>
 
@@ -94,7 +97,13 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
             )}
 
             {mode === 'signup' && (
-              <input className="text-input" placeholder="Nombre completo" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+              <>
+                <div className="auth-tabs" role="group" aria-label="Tipo de cuenta">
+                  <button type="button" className={professional ? '' : 'active'} aria-pressed={!professional} onClick={() => setProfessional(false)}>Soy paciente</button>
+                  <button type="button" className={professional ? 'active' : ''} aria-pressed={professional} onClick={() => setProfessional(true)}>Soy nutricionista</button>
+                </div>
+                <input className="text-input" placeholder={professional ? 'Nombre profesional' : 'Nombre completo'} value={fullName} onChange={(e) => setFullName(e.target.value)} />
+              </>
             )}
 
             <input className="text-input" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
@@ -104,7 +113,7 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
 
             {error && <p className="form-error">{error}</p>}
 
-            <button type="button" className="primary-button wide" disabled={busy || !email || (mode !== 'recover' && !password)} onClick={submit}>
+            <button type="button" className="primary-button wide" disabled={busy || !email || (mode !== 'recover' && !password) || (mode === 'signup' && professional && fullName.trim().length < 2)} onClick={submit}>
               {busy ? 'Un momento…' : mode === 'login' ? 'Entrar' : mode === 'signup' ? 'Crear cuenta' : 'Enviar recuperación'}
             </button>
 
