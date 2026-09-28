@@ -1,5 +1,7 @@
 # Pendientes de Plan V
 
+> **Plan vigente (2026-09-28):** ver [registro-producto-listo.md](registro-producto-listo.md#plan-de-acción-actualizado-2026-09-28). Este documento queda como historia.
+
 ## PV-42 — Dashboard nutri Nutrigo + foto de receta al aprobar (issue #8)
 
 **Alcance A (Dashboard nutri Nutrigo):** ya aterrizado en ramas previas, verificado en esta rama. Post-login nutri entra a `inicio` → `PatientOverview` con `audience="professional"` (no al CRM «Mi consultorio»), selector de paciente en el header, KPIs reales (adherencia, comidas revisadas/pendientes, descanso, hidratación), objetivo, seguimiento (diario/hábitos/próxima consulta) y plan del día — todo de datos reales del paciente seleccionado, no mock. Navegación a Pacientes/Diario/Plan/Mensajes/Agenda/Progreso intacta. No se tocó nada de esto: ya cumplía el alcance pedido.
