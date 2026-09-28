@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { getProfile, supabase, supabaseConfigured, type Profile } from '../lib/supabase';
-import { isLocalDemoAllowed, PUBLIC_SIGNUP_ROLE } from './auth-policy';
+import { api } from '../api/client';
+import { isLocalDemoAllowed, professionalDisplayName, PROFESSIONAL_SIGNUP_FLAG, PUBLIC_SIGNUP_ROLE, wantsProfessionalSignup } from './auth-policy';
 import { pendingInviteIdFromLocation, rememberPendingInvite, PENDING_INVITE_STORAGE_KEY } from './invite-link';
 import { useAppStore } from '../store/useAppStore';
 
@@ -15,7 +16,7 @@ type AuthState = {
   demoMode: boolean;
   demoAllowed: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error?: string }>;
+  signUp: (email: string, password: string, fullName: string, professional?: boolean) => Promise<{ error?: string }>;
   requestPasswordReset: (email: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   enterDemoMode: () => void;
@@ -28,6 +29,19 @@ function frontAuthEnv() {
     DEV: import.meta.env.DEV,
     VITE_ALLOW_DEMO: import.meta.env.VITE_ALLOW_DEMO,
   };
+}
+
+async function loadProfile(user: User): Promise<Profile | null> {
+  const profile = await getProfile(user.id);
+  if (!supabase || profile?.role !== 'paciente' || !wantsProfessionalSignup(user.user_metadata)) return profile;
+  try {
+    await api.claimProfessional(professionalDisplayName(user.user_metadata, profile.full_name || user.email?.split('@')[0] || ''));
+    void supabase.auth.updateUser({ data: { [PROFESSIONAL_SIGNUP_FLAG]: false } }).catch(() => {});
+    return await getProfile(user.id);
+  } catch {
+    // Si el servidor no lo permite (cuenta ya vinculada como paciente), sigue como paciente.
+    return profile;
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -61,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (cancelled) return;
       setSession(data.session);
       if (data.session?.user) {
-        setProfile(await getProfile(data.session.user.id));
+        setProfile(await loadProfile(data.session.user));
       }
       setLoading(false);
     }).catch(() => {
@@ -71,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange(async (_event, next) => {
       setSession(next);
       if (next?.user) {
-        setProfile(await getProfile(next.user.id));
+        setProfile(await loadProfile(next.user));
         setDemoMode(false);
       } else {
         setProfile(null);
@@ -101,12 +115,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setDemoMode(false);
       return {};
     },
-    signUp: async (email, password, fullName) => {
+    signUp: async (email, password, fullName, professional = false) => {
       if (!supabase) return { error: 'Supabase no configurado' };
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName, role: PUBLIC_SIGNUP_ROLE } },
+        options: { data: { full_name: fullName, role: PUBLIC_SIGNUP_ROLE, ...(professional ? { [PROFESSIONAL_SIGNUP_FLAG]: true } : {}) } },
       });
       if (error) return { error: error.message };
       return {};

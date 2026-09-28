@@ -144,3 +144,18 @@ describe('PV-47 la nutricionista habilita el acceso (set_patient_billing)', () =
     await rpc(nutriA, 'set_patient_billing', [invitePatient, 'waived', null]);
   });
 });
+
+describe('PV-47 la nutricionista archiva y restaura (set_patient_archived)', () => {
+  it('sólo la nutri dueña archiva; restaurar limpia la marca; no toca el acceso', async () => {
+    await expect(rpc(nutriB, 'set_patient_archived', [invitePatient, true])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(invitee, 'set_patient_archived', [invitePatient, true])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(nutriA, 'set_patient_archived', [invitePatient, null])).rejects.toMatchObject({ code: '22023' });
+    const before = (await db.query<{ billing_status: string }>('select billing_status::text from public.patients where id=$1', [invitePatient])).rows[0];
+    await rpc(nutriA, 'set_patient_archived', [invitePatient, true]);
+    const archived = (await db.query<{ archived: boolean; billing_status: string }>('select archived_at is not null as archived, billing_status::text from public.patients where id=$1', [invitePatient])).rows[0];
+    expect(archived).toEqual({ archived: true, billing_status: before.billing_status });
+    await rpc(nutriA, 'set_patient_archived', [invitePatient, false]);
+    const restored = (await db.query<{ archived: boolean }>('select archived_at is not null as archived from public.patients where id=$1', [invitePatient])).rows[0];
+    expect(restored.archived).toBe(false);
+  });
+});

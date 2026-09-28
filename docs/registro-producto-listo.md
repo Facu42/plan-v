@@ -52,14 +52,26 @@ Hallazgos, por impacto:
    (`20260921280000`…`20260921340000`) pero no se aplicaron a `plan-v-app`, así que esas
    pantallas responden 501. **Pendiente de la decisión de Facundo** (tarjeta en el hilo).
 
+## Segunda tanda (2026-09-28, tarde)
+
+7. **Archivar paciente** en producción respondía 501. **Arreglado**: columna `archived_at` y
+   `set_patient_archived` (`20260928140000_patient_archive.sql`, sólo la nutricionista dueña).
+   Archivar la saca de la lista activa; no cierra su cuenta ni cambia su acceso. Si la base
+   todavía no tiene la columna, la lista sigue andando (nadie figura archivado).
+8. **Una nutricionista nueva no podía darse de alta sola** (sólo por operador con secreto).
+   **Arreglado**: en "Registro" se elige "Soy paciente" o "Soy nutricionista". La cuenta nace
+   como paciente igual (el rol nunca viene del navegador) y, en el primer ingreso ya verificado,
+   la app pide `POST /api/me/professional`, que abre el consultorio salvo que esa cuenta ya
+   esté vinculada a una ficha de paciente (409). Sin cobro a la profesional por ahora.
+9. **Consultorio vacío sin salida**: con cero pacientes activos todas las pantallas, incluida
+   Pacientes, mostraban "Sin pacientes activos" y no había cómo crear la primera. **Arreglado**:
+   Pacientes siempre abre y el aviso trae "Ir a Pacientes".
+
 ## Pendientes conocidos (siguiente)
 
-- Aplicar a producción las migraciones pendientes + las dos nuevas (con el OK de Facundo),
+- Aplicar a producción las migraciones pendientes + las tres nuevas (con el OK de Facundo),
   y publicar el código (merge a `main`).
-- Alta de nutricionistas: hoy sólo por operador (`/api/ops/nutritionists` con secreto); el
-  registro público crea cuentas de paciente. Para salir al mercado hace falta alta propia
-  con período de prueba. Decisión de producto abierta.
-- Archivar paciente en producción sigue en 501 (falta columna revisada).
+- Cobro a la nutricionista (prueba gratis, plan mensual): decisión de producto abierta.
 - Mails reales (invitación, avisos): sin proveedor. Hoy se comparte el enlace a mano.
 - Cobro dentro de la app (Mercado Pago): fuera de alcance del piloto gratuito.
 - Integrar `codex/pv46-figma-mobile`, `claude/project-thread-7h8rax` y el trabajo local de
@@ -75,3 +87,5 @@ Hallazgos, por impacto:
 | 2026-09-28 | `npm run check`, `check:migrations` | OK |
 | 2026-09-28 | Recorrido demo 1440 paciente (10 pantallas) y nutricionista (15) | Sin errores de API ni de página |
 | 2026-09-28 | Alta de paciente → enlace → habilitar acceso (demo, navegador) | OK |
+| 2026-09-28 | `npm test` segunda tanda | 884 OK, 2 omitidas |
+| 2026-09-28 | Consultorio sin pacientes → "Ir a Pacientes" (demo, navegador) | OK |

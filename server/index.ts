@@ -358,7 +358,21 @@ app.patch('/api/patients/:id/archive', async (c) => {
     if (!await authorizePatient(auth.userId, patientId, 'archive_patient')) {
       return c.json({ error: 'Prohibido' }, 403);
     }
-    return c.json({ error: 'Archivado operativo pendiente de una columna 016 revisada' }, 501);
+    const { error } = await getRequestDb().rpc('set_patient_archived', {
+      target: patientId,
+      archived: parsedBody.data.archived,
+    });
+    if (error) {
+      if (['42883', 'PGRST202'].includes(error.code ?? '')) {
+        return c.json({ error: 'Archivar pacientes requiere instalar la migración de este módulo.' }, 501);
+      }
+      if (error.code === '42501') return c.json({ error: 'Prohibido' }, 403);
+      if (error.code === '22023') return c.json({ error: 'Datos inválidos' }, 400);
+      throw error;
+    }
+    const updated = await sb.sbGetPatientById(patientId, 'professional');
+    if (!updated) return c.notFound();
+    return c.json({ patient: updated, source: 'supabase' });
   }
 
   const patient = setPatientArchived(patientId, parsedBody.data.archived);
@@ -597,6 +611,36 @@ app.post('/api/nutritionist/setup', async (c) => {
   try {
     const id = await sb.sbEnsureNutritionist(auth.userId, body.display_name);
     return c.json({ nutritionist_id: id });
+  } catch (error) {
+    if (error instanceof sb.SchemaUnavailableError) {
+      return c.json({ error: 'Alta profesional pendiente del contrato Supabase 016' }, 501);
+    }
+    throw error;
+  }
+});
+
+// PV-47: alta propia de nutricionistas. El registro público sigue naciendo como
+// paciente (el rol nunca viene del cliente); con la cuenta ya verificada, quien
+// eligió "Soy nutricionista" abre su consultorio vacío. RLS la aísla: sólo ve
+// las pacientes que ella misma cree.
+app.post('/api/me/professional', async (c) => {
+  const auth = c.get('auth');
+  if (!('userId' in auth) || !isSupabaseEnabled()) return c.json({ error: 'Requiere una cuenta real' }, 400);
+  const parsedBody = await parseJsonBody(c, nutritionistSetupInputSchema);
+  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
+  const displayName = parsedBody.data.display_name.trim();
+  if (displayName.length < 2) return c.json({ error: 'Datos inválidos' }, 400);
+  const role = await sb.sbGetProfileRole(auth.userId);
+  if (role === 'nutri') {
+    return c.json({ nutritionist_id: await sb.sbEnsureNutritionist(auth.userId, displayName) });
+  }
+  if (role !== 'paciente') return c.json({ error: 'Prohibido' }, 403);
+  if (await sb.sbUserHasPatientLink(auth.userId)) {
+    return c.json({ error: 'Esta cuenta ya está vinculada como paciente. Registrate con otro email para tu consultorio.' }, 409);
+  }
+  try {
+    const id = await sb.sbProvisionNutritionist({ userId: auth.userId, displayName });
+    return c.json({ nutritionist_id: id }, 201);
   } catch (error) {
     if (error instanceof sb.SchemaUnavailableError) {
       return c.json({ error: 'Alta profesional pendiente del contrato Supabase 016' }, 501);

@@ -453,12 +453,26 @@ export async function sbListPatientsForNutri(userId: string, query: { offset: nu
     }
   }
 
+  const archivedAt = await loadArchivedAt(ids);
   return {
-    patients: pageRows.map((patientRow) => mapPatient(patientRow, {
+    patients: pageRows.map((patientRow) => mapPatient({ ...patientRow, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, {
       appointment: mapScheduledAppointment(nextByPatient.get(String(patientRow.id))),
     }, 'professional')),
     page: { offset: query.offset, limit: query.limit, has_more: hasMore },
   };
+}
+
+// archived_at llega con la migración 20260928140000; si la base todavía no la
+// tiene, la lista sigue funcionando y nadie figura archivado.
+async function loadArchivedAt(ids: string[]): Promise<Map<string, string | null>> {
+  const archived = new Map<string, string | null>();
+  if (ids.length === 0) return archived;
+  const { data, error } = await getRequestDb().from('patients').select('id,archived_at').in('id', ids);
+  if (error) return archived;
+  for (const patientRow of rows(data)) {
+    archived.set(String(patientRow.id), (patientRow.archived_at as string | null) ?? null);
+  }
+  return archived;
 }
 
 export async function sbGetPatientsForNutri(userId: string): Promise<Patient[]> {
@@ -481,6 +495,10 @@ export async function sbGetPatientById(id: string, audience: QueryAudience = 'pr
   const patientRow = row(data);
   if (!patientRow) return null;
   const extras = await loadPatientExtras(patientRow.id as string, audience);
+  if (audience === 'professional') {
+    const archivedAt = await loadArchivedAt([String(patientRow.id)]);
+    return mapPatient({ ...patientRow, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, extras, audience);
+  }
   return mapPatient(patientRow, extras, audience);
 }
 
@@ -767,6 +785,14 @@ export async function sbGetNutritionistId(userId: string): Promise<string | null
   const sb = getRequestDb();
   const { data } = await sb.from('nutritionists').select('id').eq('user_id', userId).maybeSingle();
   return data?.id ?? null;
+}
+
+// Una cuenta ya vinculada como paciente no se convierte en profesional: su
+// ficha y su historial dependen de otra nutricionista.
+export async function sbUserHasPatientLink(userId: string): Promise<boolean> {
+  const { data, error } = await privilegedDb().from('patients').select('id').eq('user_id', userId).limit(1);
+  if (error) throw error;
+  return rows(data).length > 0;
 }
 
 export async function sbEnsureNutritionist(userId: string, displayName: string): Promise<string> {
