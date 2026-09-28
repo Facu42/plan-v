@@ -74,13 +74,12 @@ Hallazgos, por impacto:
   `patient_access` y `patient_archive` (la de progreso ya estaba). Antes se verificó que los
   datos existentes cumplen las restricciones nuevas (mensajes ≤ 2000, categorías de archivos).
 - PR #18 mergeado a `main` (3bcddb8). Vercel producción publicó ese commit.
-- **Railway no toma `main`**: los servicios `api` y `worker` siguen la rama
-  `claude/project-thread-nziakk` (contenida en `main`). Hasta cambiarlos a `main`, el servidor
-  publicado sigue con el código anterior. Pendiente del OK de Facundo para cambiar esa rama.
+- Railway: con el OK de Facundo ("sí, cambialo a main"), los servicios `api` y `worker` pasaron
+  de la rama `claude/project-thread-nziakk` a `main`. Ambos publicaron 3bcddb8 sin errores
+  (api escuchando, conectada a Supabase). Desde ahora cada merge a `main` actualiza web y servidor.
 
 ## Pendientes conocidos (siguiente)
 
-- Que Railway (`api` y `worker`) despliegue desde `main`.
 - Cobro a la nutricionista (prueba gratis, plan mensual): decisión de producto abierta.
 - Mails reales (invitación, avisos): sin proveedor. Hoy se comparte el enlace a mano.
 - Cobro dentro de la app (Mercado Pago): fuera de alcance del piloto gratuito.
