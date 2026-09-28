@@ -119,7 +119,7 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
   const [sensitiveHours, setSensitiveHours] = useState(patient.sensitive_hours);
   const [planB, setPlanB] = useState(patient.plan_b);
   const [nextFocus, setNextFocus] = useState(patient.next_focus);
-  const [access, setAccess] = useState<'pending' | 'waived' | 'active'>(patient.billing_status === 'past_due' ? 'active' : patient.billing_status);
+  const [access, setAccess] = useState(patient.billing_status);
   const [accessUntil, setAccessUntil] = useState(patient.billing_until ?? '');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -135,8 +135,9 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
       let { patient: updated } = await api.updatePatientProfile(patient.id, {
         name, status, stage, sensitive_hours: sensitiveHours, plan_b: planB, next_focus: nextFocus,
       });
+      // Sólo si la profesional cambió el acceso; un vencido sin tocar queda como está.
       const accessChanged = access !== patient.billing_status || (access === 'active' && accessUntil !== (patient.billing_until ?? ''));
-      if (accessChanged) {
+      if (accessChanged && access !== 'past_due') {
         if (access === 'active' && !accessUntil) throw new Error('Elegí hasta qué fecha tiene acceso.');
         ({ patient: updated } = await api.updateBilling(patient.id, access === 'active' ? { status: 'active', billing_until: accessUntil } : { status: access }));
       }
@@ -162,6 +163,7 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
         </div>
         <div className="nv-dialog-grid">
           <label>Acceso a la app<select value={access} onChange={(e) => setAccess(e.target.value as typeof access)}>
+            {patient.billing_status === 'past_due' && <option value="past_due" disabled>Vencido</option>}
             <option value="pending">Pendiente</option>
             <option value="waived">Sin cargo</option>
             <option value="active">Pagado hasta una fecha</option>

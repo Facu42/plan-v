@@ -90,6 +90,12 @@ describe('directorio de pacientes del showroom', () => {
     expect(html).toContain('<option value="seguimiento" selected="">Seguimiento</option>');
     expect(html).toContain('Guardar cambios');
   });
+
+  it('un acceso vencido se muestra como vencido y no se reactiva solo al guardar', () => {
+    const html = renderToStaticMarkup(<ShowroomPatientEdit patient={{ ...base, billing_status: 'past_due', billing_until: '2020-01-01' }} onClose={vi.fn()} onSaved={vi.fn()} />);
+    expect(html).toContain('<option value="past_due" disabled="" selected="">Vencido</option>');
+    expect(html).not.toContain('Pagado hasta<input');
+  });
 });
 
 describe('PV-47 enlace de invitación', () => {

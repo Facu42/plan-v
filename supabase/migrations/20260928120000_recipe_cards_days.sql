@@ -223,6 +223,7 @@ declare
   rid uuid;
   pid uuid;
   day date;
+  expected int;
   slot_label text;
   ver public.recipe_versions;
   rec public.recipes;
@@ -236,11 +237,12 @@ begin
     rid := (payload->>'recipe_id')::uuid;
     pid := (payload->>'patient_id')::uuid;
     day := (payload->>'for_date')::date;
+    expected := (payload->>'expected_version')::int;
   exception when others then
     raise exception using errcode = '22023', message = 'recipe_day';
   end;
   slot_label := payload->>'slot';
-  if rid is null or pid is null or day is null
+  if rid is null or pid is null or day is null or expected is null or expected < 1
     or slot_label not in ('Desayuno','Colación','Almuerzo','Merienda','Cena','Extra') then
     raise exception using errcode = '22023', message = 'recipe_day';
   end if;
@@ -250,7 +252,7 @@ begin
     raise exception using errcode = '42501', message = 'recipe_forbidden';
   end if;
   select * into ver from public.recipe_versions v
-    where v.recipe_id = rid and v.version = (payload->>'expected_version')::int;
+    where v.recipe_id = rid and v.version = expected;
   if not found or ver.published_at is null then
     raise exception using errcode = '22023', message = 'recipe_not_published';
   end if;

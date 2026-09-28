@@ -219,6 +219,8 @@ describe('PV-47 ficha de receta y receta del día en PostgreSQL', () => {
     const assigned = await rpc(nutriA, 'assign_recipe_day', [{ recipe_id: dayRecipe, patient_id: patientA, expected_version: 1, for_date: '2026-09-28', slot: 'Almuerzo' }]) as { id: string; title: string; card: { macro_status: string } };
     expect(assigned).toMatchObject({ title: 'Bowl de lentejas', card: { macro_status: 'declared' } });
     await expect(rpc(nutriB, 'assign_recipe_day', [{ recipe_id: dayRecipe, patient_id: patientB, expected_version: 1, for_date: '2026-09-28', slot: 'Almuerzo' }])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(nutriA, 'assign_recipe_day', [{ recipe_id: dayRecipe, patient_id: patientA, for_date: '2026-09-28', slot: 'Almuerzo' }])).rejects.toMatchObject({ code: '22023' });
+    await expect(rpc(nutriA, 'assign_recipe_day', [{ recipe_id: dayRecipe, patient_id: patientA, expected_version: 'uno', for_date: '2026-09-28', slot: 'Almuerzo' }])).rejects.toMatchObject({ code: '22023' });
     const list = await rpc(patientAUser, 'list_recipe_days', [patientA, '2026-09-28']) as Array<{ id: string; for_date: string }>;
     expect(list).toHaveLength(1);
     expect(list[0].for_date).toBe('2026-09-28');
