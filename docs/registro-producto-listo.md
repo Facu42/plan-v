@@ -67,10 +67,20 @@ Hallazgos, por impacto:
    Pacientes, mostraban "Sin pacientes activos" y no había cómo crear la primera. **Arreglado**:
    Pacientes siempre abre y el aviso trae "Ir a Pacientes".
 
+## Publicación (2026-09-28, con el OK de Facundo)
+
+- Base `plan-v-app`: aplicadas `shopping_lists`, `message_attachments`, `notification_outbox`,
+  `exercise_library`, `editorial_resources`, `organizations`, `recipe_cards_days`,
+  `patient_access` y `patient_archive` (la de progreso ya estaba). Antes se verificó que los
+  datos existentes cumplen las restricciones nuevas (mensajes ≤ 2000, categorías de archivos).
+- PR #18 mergeado a `main` (3bcddb8). Vercel producción publicó ese commit.
+- **Railway no toma `main`**: los servicios `api` y `worker` siguen la rama
+  `claude/project-thread-nziakk` (contenida en `main`). Hasta cambiarlos a `main`, el servidor
+  publicado sigue con el código anterior. Pendiente del OK de Facundo para cambiar esa rama.
+
 ## Pendientes conocidos (siguiente)
 
-- Aplicar a producción las migraciones pendientes + las tres nuevas (con el OK de Facundo),
-  y publicar el código (merge a `main`).
+- Que Railway (`api` y `worker`) despliegue desde `main`.
 - Cobro a la nutricionista (prueba gratis, plan mensual): decisión de producto abierta.
 - Mails reales (invitación, avisos): sin proveedor. Hoy se comparte el enlace a mano.
 - Cobro dentro de la app (Mercado Pago): fuera de alcance del piloto gratuito.
