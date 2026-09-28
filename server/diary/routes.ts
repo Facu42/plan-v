@@ -140,7 +140,7 @@ export function registerDiaryRoutes(app: Hono) {
       const title = `${body.slot} · foto en revisión`;
       const timelineBody = mealLoggedTimelineBody(analysis.confidence, analysis.foods.length, analysis.macros);
       if (persistent) {
-        await sb.sbAddTimelineEvent(patientId, { kind: 'meal_logged', title, body: timelineBody });
+        await sb.sbAddTimelineEventBestEffort(patientId, { kind: 'meal_logged', title, body: timelineBody });
       } else {
         emitMemoryTimeline(patientId, title, timelineBody);
       }

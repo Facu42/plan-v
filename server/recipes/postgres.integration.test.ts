@@ -190,3 +190,51 @@ describe('PV-42 foto de portada al aprobar (recipe_covers)', () => {
     expect(await asUser(patientAUser, "select name from storage.objects where bucket_id='recipe-covers'")).toEqual([]);
   });
 });
+
+describe('PV-47 ficha de receta y receta del día en PostgreSQL', () => {
+  const dayRecipe = '30000000-0000-4000-a000-0000000000a2';
+  const card = {
+    category: 'Almuerzo',
+    prep_minutes: 20,
+    macro_status: 'declared',
+    macros: { kcal: 420, protein_g: 18, carbs_g: 50, fat_g: 12 },
+    cover_status: 'none',
+    cover_alt: 'Bowl',
+    cover_url: null,
+  };
+
+  it('guarda la ficha declarada del borrador y la muestra al publicar', async () => {
+    const saved = await rpc(nutriA, 'save_recipe_draft', [{ ...draft, id: dayRecipe, title: 'Bowl de lentejas' }]) as { current: { id: string } };
+    const stored = await rpc(nutriA, 'set_recipe_card', [saved.current.id, card]) as Record<string, unknown>;
+    expect(stored).toMatchObject({ macro_status: 'declared', macros: { kcal: 420 } });
+    expect(stored.cover_status).toBeUndefined();
+    await expect(rpc(nutriB, 'set_recipe_card', [saved.current.id, card])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(nutriA, 'set_recipe_card', [saved.current.id, { ...card, macro_status: 'inventado' }])).rejects.toMatchObject({ code: '22023' });
+    const published = await rpc(nutriA, 'publish_recipe', [dayRecipe, 1]) as { published: { card: Record<string, unknown> } };
+    expect(published.published.card).toMatchObject({ macro_status: 'declared', category: 'Almuerzo', cover_status: 'none', cover_alt: 'Bowl de lentejas' });
+    await expect(rpc(nutriA, 'set_recipe_card', [saved.current.id, card])).rejects.toMatchObject({ code: '22023' });
+  });
+
+  it('asigna al día, la paciente la ve y registrarla crea una sola comida con los macros declarados', async () => {
+    const assigned = await rpc(nutriA, 'assign_recipe_day', [{ recipe_id: dayRecipe, patient_id: patientA, expected_version: 1, for_date: '2026-09-28', slot: 'Almuerzo' }]) as { id: string; title: string; card: { macro_status: string } };
+    expect(assigned).toMatchObject({ title: 'Bowl de lentejas', card: { macro_status: 'declared' } });
+    await expect(rpc(nutriB, 'assign_recipe_day', [{ recipe_id: dayRecipe, patient_id: patientB, expected_version: 1, for_date: '2026-09-28', slot: 'Almuerzo' }])).rejects.toMatchObject({ code: '42501' });
+    const list = await rpc(patientAUser, 'list_recipe_days', [patientA, '2026-09-28']) as Array<{ id: string; for_date: string }>;
+    expect(list).toHaveLength(1);
+    expect(list[0].for_date).toBe('2026-09-28');
+    expect(await rpc(patientAUser, 'list_recipe_days', [patientA, '2026-09-29'])).toEqual([]);
+    await expect(rpc(patientBUser, 'list_recipe_days', [patientA, null])).rejects.toMatchObject({ code: '42501' });
+    const mine = await rpc(patientAUser, 'list_assigned_recipes', [patientA]) as Array<{ title: string; card: unknown }>;
+    expect(mine.find((row) => row.title === 'Bowl de lentejas')?.card).toMatchObject({ macro_status: 'declared' });
+
+    const clientId = '40000000-0000-4000-a000-0000000000a1';
+    const first = await rpc(patientAUser, 'register_recipe_day', [{ patient_id: patientA, assignment_id: assigned.id, client_id: clientId }]) as { duplicate: boolean; assignment: { registered_meal_id: string } };
+    expect(first.duplicate).toBe(false);
+    expect(first.assignment.registered_meal_id).toBeTruthy();
+    const again = await rpc(patientAUser, 'register_recipe_day', [{ patient_id: patientA, assignment_id: assigned.id, client_id: clientId }]) as { duplicate: boolean };
+    expect(again.duplicate).toBe(true);
+    const meals = await db.query<{ macros: { kcal: number }; analysis_status: string }>('select macros, analysis_status from public.meal_logs where id=$1', [first.assignment.registered_meal_id]);
+    expect(meals.rows[0]).toMatchObject({ analysis_status: 'succeeded', macros: { kcal: 420 } });
+    await expect(rpc(patientBUser, 'register_recipe_day', [{ patient_id: patientA, assignment_id: assigned.id, client_id: clientId }])).rejects.toMatchObject({ code: '42501' });
+  });
+});

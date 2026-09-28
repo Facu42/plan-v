@@ -7,6 +7,7 @@ import type { ListPage } from '../pagination.ts';
 import { getRequestDb, privilegedDb } from './supabase-client.ts';
 import { listThreadMessagesPersist } from '../messages/repository.js';
 import { listPatientAppointmentPersist } from '../appointments/repository.js';
+import { writeOpsLog } from '../ops/log.js';
 import {
   appointmentColumns,
   mealLogColumns,
@@ -610,6 +611,25 @@ export async function sbAddTimelineEvent(
     occurred_at: new Date().toISOString(),
   });
   if (error) throwWriteError(error);
+}
+
+/**
+ * Para acciones de la paciente: RLS sólo deja escribir la línea de tiempo a la
+ * profesional (RLS-11). La acción principal ya quedó guardada, así que si el
+ * evento no entra se registra en el log y no se devuelve error.
+ */
+export async function sbAddTimelineEventBestEffort(
+  patientId: string,
+  event: { kind: string; title: string; body: string; visibility?: 'professional' | 'patient' },
+): Promise<void> {
+  try {
+    await sbAddTimelineEvent(patientId, event);
+  } catch (error) {
+    writeOpsLog('warn', 'timeline_write_skipped', {
+      kind: event.kind,
+      message: error instanceof Error ? error.message : String((error as { message?: string })?.message ?? 'unknown'),
+    });
+  }
 }
 
 export async function sbSetAppointment(
