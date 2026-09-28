@@ -70,7 +70,7 @@ import { parseIntakePayload, type IntakeStep } from './intake/payload.js';
 import { toPatientIntakeView, toProfessionalIntakeView } from './intake/views.js';
 import * as intakeDb from './intake/repository.js';
 import { IntakeRepositoryError } from './intake/repository.js';
-import { getAuthAccount, isSupabaseEnabled } from './db/supabase-client.js';
+import { getAuthAccount, getRequestDb, isSupabaseEnabled } from './db/supabase-client.js';
 import * as sb from './db/supabase-repo.js';
 import { recoveryAcknowledgement, provisionSecretMatches, validateProvisionInput } from './identity/provision.js';
 import { authorizePatientAction } from './security/authorization.js';
@@ -91,6 +91,7 @@ import {
   getStore,
   provisionNutritionistMemory,
   revokePatientInvite,
+  renewPatientInvite,
   sendPatientInvite,
   setBrief,
   setBillingStatus,
@@ -485,7 +486,23 @@ app.patch('/api/patients/:id/billing', async (c) => {
     if (!await authorizePatient(auth.userId, patientId, 'edit_billing')) {
       return c.json({ error: 'Prohibido' }, 403);
     }
-    return c.json({ error: 'Cobranza persistente: transiciones sólo por flujo autorizado (PV-32)' }, 501);
+    const input = parsedBody.data;
+    const { error } = await getRequestDb().rpc('set_patient_billing', {
+      target: patientId,
+      next_status: input.status,
+      until: input.status === 'active' ? input.billing_until : null,
+    });
+    if (error) {
+      if (['42883', 'PGRST202'].includes(error.code ?? '')) {
+        return c.json({ error: 'Habilitar el acceso requiere instalar la migración de este módulo.' }, 501);
+      }
+      if (error.code === '42501') return c.json({ error: 'Prohibido' }, 403);
+      if (error.code === '22023') return c.json({ error: 'Datos inválidos' }, 400);
+      throw error;
+    }
+    const updated = await sb.sbGetPatientById(patientId, 'professional');
+    if (!updated) return c.notFound();
+    return c.json({ patient: updated, source: 'supabase' });
   }
 
   const patient = setBillingStatus(patientId, parsedBody.data);
@@ -648,6 +665,31 @@ app.post('/api/invites/:id/revoke', async (c) => {
 
   const invite = revokePatientInvite(inviteId.data);
   if (!invite) return c.json({ error: 'Invitación no disponible' }, 409);
+  return c.json({ invite, source: 'memory' });
+});
+
+app.post('/api/patients/:id/invite', async (c) => {
+  const auth = c.get('auth');
+  const patientId = c.req.param('id');
+
+  if ('userId' in auth && isSupabaseEnabled()) {
+    const actor = await authorizePatient(auth.userId, patientId, 'edit_patient');
+    if (!actor || actor.role !== 'nutri') return c.json({ error: 'Prohibido' }, 403);
+    try {
+      const invite = await sb.sbRenewPatientInvite(patientId, actor.nutritionistId);
+      if (!invite) return c.json({ error: 'Esta paciente ya tiene su cuenta vinculada.' }, 409);
+      return c.json({ invite, source: 'supabase' });
+    } catch (error) {
+      if (error instanceof sb.SchemaUnavailableError) {
+        return c.json({ error: 'Invitaciones persistentes pendientes del contrato 016' }, 501);
+      }
+      return c.json({ error: 'Invitación no disponible' }, 409);
+    }
+  }
+
+  if (!getPatient(patientId)) return c.notFound();
+  const invite = renewPatientInvite(patientId);
+  if (!invite) return c.json({ error: 'Esta paciente ya tiene su cuenta vinculada.' }, 409);
   return c.json({ invite, source: 'memory' });
 });
 

@@ -82,6 +82,8 @@ vi.mock('./db/supabase-client.js', () => ({
   createActorClient: () => null,
   bindActorClient: (_client: unknown, run: () => unknown) => run(),
   getAuthAccount: async () => ({ email: 'vero@example.com', emailConfirmed: true }),
+  // Base sin la migración de acceso (PV-47): el RPC no existe.
+  getRequestDb: () => ({ rpc: async () => ({ data: null, error: { code: '42883', message: 'function does not exist' } }) }),
 }));
 
 import { app } from './index.js';

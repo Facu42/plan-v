@@ -171,6 +171,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
     archived_at: (row.archived_at as string | null | undefined) ?? null,
     billing_status: resolveBillingStatus(billing),
     billing_until: billing.billing_until,
+    ...(audience === 'professional' && 'user_id' in row ? { has_account: row.user_id != null } : {}),
     stage: row.stage as Patient['stage'],
     goal: row.goal as string,
     sensitive_hours: audience === 'patient' ? '' : row.sensitive_hours as string,
@@ -905,6 +906,32 @@ export async function sbRevokeInvite(inviteId: string): Promise<PatientInvite> {
   if (error || !data) throwWriteError(error);
   await sb.from('patient_invite_events').insert({ invite_id: inviteId, event: 'revoked' });
   return mapInvite(row(data) ?? {});
+}
+
+/**
+ * Deja lista una invitación para compartir por enlace: reusa la vigente
+ * (renovando el vencimiento) o abre una nueva con el mismo email si la anterior
+ * venció o se revocó. null si la paciente ya vinculó su cuenta.
+ */
+export async function sbRenewPatientInvite(patientId: string, nutritionistId: string): Promise<PatientInvite | null> {
+  const sb = getRequestDb();
+  const { data, error } = await sb.from('patient_invites').select('*')
+    .eq('patient_id', patientId).order('created_at', { ascending: false }).limit(10);
+  if (error) throwWriteError(error);
+  const invites = rows(data).map(mapInvite);
+  if (!invites.length || invites.some((invite) => invite.status === 'accepted')) return null;
+  const open = invites.find((invite) => invite.status === 'not_sent' || invite.status === 'pending');
+  if (open) return sbSendInvite(open.id);
+  const { data: created, error: createError } = await sb.from('patient_invites').insert({
+    patient_id: patientId,
+    nutritionist_id: nutritionistId,
+    email: invites[0].email,
+    status: 'not_sent',
+  }).select('*').single();
+  if (createError || !created) throwWriteError(createError);
+  const invite = mapInvite(row(created) ?? {});
+  await sb.from('patient_invite_events').insert({ invite_id: invite.id, event: 'created' });
+  return sbSendInvite(invite.id);
 }
 
 export async function sbAcceptInvite(inviteId: string): Promise<string> {

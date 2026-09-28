@@ -10,7 +10,7 @@
 .nv-directory-notice { display:flex; align-items:center; gap:8px; padding:10px 12px; margin:0 0 14px; border-radius:9px; background:var(--nv-green); font-size:11px; }
 .nv-directory-notice>span { flex:1; min-width:0; }
 .nv-directory-notice button { border:0; background:transparent; color:var(--nv-ink); font-size:14px; }
-.nv-directory-table [role=row] { grid-template-columns:1.1fr .8fr 1fr .7fr 1.2fr; }
+.nv-patient-table.nv-directory-table [role=row] { grid-template-columns:1.1fr .8fr 1fr .7fr 1.2fr; }
 .nv-directory-table [role=cell]>span { display:flex; flex-direction:column; min-width:0; }
 .nv-directory-table [role=cell]:first-child>span>strong { font-size:12px; }
 .nv-directory-table [role=cell] small { color:var(--nv-muted); font-size:12px; overflow-wrap:anywhere; }
@@ -37,8 +37,15 @@
 @keyframes nv-spin { to { transform:rotate(360deg); } }
 @media(max-width:760px) {
   .nv-directory-summary { grid-template-columns:1fr 1fr; }
-  .nv-directory-table [role=row] { grid-template-columns:1fr 1fr; }
+  .nv-patient-table.nv-directory-table [role=row] { grid-template-columns:1fr 1fr; }
   .nv-dialog-grid { grid-template-columns:1fr; }
   .nv-dialog { padding:18px; }
 }
-@media(max-width:360px) { .nv-directory-table [role=row] { grid-template-columns:1fr; } }
+@media(max-width:360px) { .nv-patient-table.nv-directory-table [role=row] { grid-template-columns:1fr; } }
+.nv-invite-share { align-items:flex-start; flex-wrap:wrap; }
+.nv-invite-share>span:first-of-type { display:flex; flex-direction:column; gap:4px; }
+.nv-invite-share small { color:var(--nv-ink); font-size:12px; }
+.nv-invite-share input { width:100%; padding:7px 10px; border:1px solid var(--nv-line, #E1E1E2); border-radius:8px; background:#fff; font:inherit; font-size:12px; color:var(--nv-ink); }
+.nv-invite-actions { display:flex; gap:6px; align-items:center; }
+.nv-invite-actions .nv-button { padding:7px 10px; font-size:13px; text-decoration:none; }
+.nv-directory-table [role=cell] .nv-badge { display:inline-flex; width:max-content; margin:4px 4px 0 0; }

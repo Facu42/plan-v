@@ -89,6 +89,9 @@ export const api = {
   sendInvite: (inviteId: string) =>
     request<{ invite: PatientInvite; source: string }>(`/api/invites/${inviteId}/send`, { method: 'POST' }),
 
+  patientInvite: (patientId: string) =>
+    request<{ invite: PatientInvite; source: string }>(`/api/patients/${patientId}/invite`, { method: 'POST' }),
+
   revokeInvite: (inviteId: string) =>
     request<{ invite: PatientInvite; source: string }>(`/api/invites/${inviteId}/revoke`, { method: 'POST' }),
 

@@ -93,3 +93,30 @@ describe('circuito invitación → ingreso → revisión → plan publicado (dem
     }
   });
 });
+
+describe('PV-47 enlace de invitación para compartir', () => {
+  beforeEach(() => {
+    resetStore();
+    resetIntakeMemory();
+  });
+
+  it('reusa la invitación vigente, abre una nueva si se revocó y no invita a quien ya tiene cuenta', async () => {
+    const created = await json('/api/patients', { name: 'Lía Test', email: 'lia@example.test', goal: 'Ordenar comidas' });
+    const payload = await created.json() as { patient: { id: string; has_account?: boolean }; invite: { id: string } };
+    expect(payload.patient.has_account).toBe(false);
+    const first = await json(`/api/patients/${payload.patient.id}/invite`, {});
+    expect(first.status).toBe(200);
+    const ready = (await first.json() as { invite: { id: string; status: string; expires_at: string | null } }).invite;
+    expect(ready).toMatchObject({ id: payload.invite.id, status: 'pending' });
+    expect(ready.expires_at).toBeTruthy();
+
+    expect((await json(`/api/invites/${ready.id}/revoke`, {})).status).toBe(200);
+    const renewed = await json(`/api/patients/${payload.patient.id}/invite`, {});
+    const next = (await renewed.json() as { invite: { id: string; email: string; status: string } }).invite;
+    expect(next.id).not.toBe(ready.id);
+    expect(next).toMatchObject({ email: 'lia@example.test', status: 'pending' });
+
+    expect((await json('/api/patients/pat-inexistente/invite', {})).status).toBe(404);
+    expect((await json('/api/patients/pat-sofia/invite', {})).status).toBe(409);
+  });
+});
