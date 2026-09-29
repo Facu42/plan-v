@@ -29,6 +29,10 @@ describe('movimiento', () => {
     expect(imports[imports.length - 1]).toBe('motion.css');
   });
 
+  it('cada pantalla vuelve a entrar aunque comparta bloques con la anterior', () => {
+    expect(showroom).toMatch(/<main key=\{`\$\{role\}:\$\{page\}`\} id="nv-main"/);
+  });
+
   it('nada se mueve para quien pidió reducir movimiento', () => {
     const always = outsideNoPreference(css.replace(/\/\*[\s\S]*?\*\//g, ''));
     expect(always).not.toMatch(/\banimation(-name)?\s*:/);

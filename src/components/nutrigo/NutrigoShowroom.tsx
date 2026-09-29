@@ -297,7 +297,8 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
         <button type="button" className="nv-button nv-ghost nv-menu-toggle" ref={menuButtonRef} aria-label={menuOpen ? 'Cerrar el menú' : 'Abrir el menú'} aria-expanded={menuOpen} aria-controls="nv-drawer" onClick={() => setMenuOpen((open) => !open)}><Icon name="list" size={20} /></button>
       </header>
       <div className="nv-content-layout">
-        <main id="nv-main" tabIndex={-1} className="nv-main">
+        {/* La clave por pantalla vuelve a correr la entrada de motion.css en cada cambio de pantalla. */}
+        <main key={`${role}:${page}`} id="nv-main" tabIndex={-1} className="nv-main">
           {role === 'pro' && selected && ['consultas','objetivos','progreso'].includes(page) && <SelectedPatientContext patient={selected} onRecord={() => navigate('ficha')} />}
           {page === 'inicio' && <ConsultAlertStrip audience={alertAudience} alerts={consultAlerts} reminder={nextHabitReminder} onOpen={(alert) => { if (role === 'pro') setSelectedId(alert.patientId); navigate('agenda'); }} onOpenReminder={openReminder} />}
           {(showHeading || (['pacientes', 'recetas'].includes(page) && !pendingModule)) ? (
