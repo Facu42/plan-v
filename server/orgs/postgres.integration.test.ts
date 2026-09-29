@@ -26,6 +26,15 @@ async function asUser<T = Record<string, unknown>>(user: string, sql: string, pa
   });
 }
 
+// can_care_for_patient es interna (sólo la usan otras funciones de la base): se
+// evalúa con la identidad de la usuaria pero sin el rol authenticated.
+async function canCare(user: string, patient: string) {
+  return db.transaction(async (tx) => {
+    await tx.query("select set_config('request.jwt.claim.sub', $1, true)", [user]);
+    return (await tx.query<{ result: boolean }>('select public.can_care_for_patient($1) as result', [patient])).rows[0].result;
+  });
+}
+
 async function rpc(user: string, name: string, args: unknown[] = []) {
   const placeholders = args.map((_, i) => `$${i + 1}`).join(',');
   const sql = placeholders
@@ -97,8 +106,8 @@ describe('PV-38 organizaciones en PostgreSQL descartable', () => {
 
     const delegated = await rpc(nutriA, 'delegate_patient_care', [patientA, nutriBId, 'delegate', org.id]) as CareLinkView[];
     expect(delegated.some((row) => row.nutritionist_id === nutriBId && row.link_role === 'delegate')).toBe(true);
-    expect(await rpc(nutriB, 'can_care_for_patient', [patientA])).toBe(true);
-    expect(await rpc(nutriC, 'can_care_for_patient', [patientA])).toBe(false);
+    expect(await canCare(nutriB, patientA)).toBe(true);
+    expect(await canCare(nutriC, patientA)).toBe(false);
     await expect(rpc(nutriC, 'list_patient_care_links', [patientA])).rejects.toMatchObject({ code: '42501' });
 
     const observer = await rpc(nutriA, 'invite_org_member', [org.id, nutriCId, 'member']) as OrganizationView;
@@ -106,11 +115,11 @@ describe('PV-38 organizaciones en PostgreSQL descartable', () => {
     await rpc(nutriC, 'accept_org_invite', [org.id]);
     const observed = await rpc(nutriA, 'delegate_patient_care', [patientA, nutriCId, 'observer', org.id]) as CareLinkView[];
     expect(observed.some((row) => row.link_role === 'observer' && row.nutritionist_id === nutriCId)).toBe(true);
-    expect(await rpc(nutriC, 'can_care_for_patient', [patientA])).toBe(false);
+    expect(await canCare(nutriC, patientA)).toBe(false);
 
     const linkId = delegated.find((row) => row.link_role === 'delegate')?.id as string;
     await rpc(nutriA, 'revoke_patient_care', [linkId]);
-    expect(await rpc(nutriB, 'can_care_for_patient', [patientA])).toBe(false);
+    expect(await canCare(nutriB, patientA)).toBe(false);
 
     await db.query(
       `insert into public.shopping_manual_items(patient_id,nutritionist_id,name,quantity,unit,client_id)

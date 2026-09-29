@@ -19,6 +19,7 @@ import { registerAlcanceRoutes } from './alcance/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
+import { secureHeaders } from 'hono/secure-headers';
 import type { ZodType } from 'zod';
 import { generateCopilotBrief } from './ai/copilot.js';
 import { AIUnavailableError } from './ai/errors.js';
@@ -151,6 +152,15 @@ async function persistPatientWrite(
   return c.json({ patient: serializePatient(patient, role), source: 'supabase' });
 }
 
+// Cabeceras de seguridad. La API sólo devuelve JSON: no se deja embeber en otra
+// página ni que el navegador adivine el tipo. El recurso se lee desde la web (otro
+// dominio) con CORS, por eso la política de recursos cruzados queda abierta.
+app.use('/*', secureHeaders({
+  xFrameOptions: 'DENY',
+  crossOriginResourcePolicy: 'cross-origin',
+  crossOriginOpenerPolicy: false,
+  contentSecurityPolicy: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] },
+}));
 app.use('/*', cors({
   origin: (origin) => resolveCorsOrigin(origin ?? '', process.env),
   allowHeaders: ['Authorization', 'Content-Type', 'X-Request-Id'],
