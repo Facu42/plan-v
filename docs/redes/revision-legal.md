@@ -82,4 +82,4 @@ Nada de lo revisado promete resultados de peso, muestra cuerpos, habla de dietas
 
 Fuentes consultadas: boletinoficial.gob.ar (DNU 274/2019: https://www.boletinoficial.gob.ar/detalleAviso/primera/205888/20190422), argentina.gob.ar (Ley 26.396: https://www.argentina.gob.ar/normativa/nacional/ley-26396-144033/texto; Ley 24.240: https://www.argentina.gob.ar/normativa/nacional/ley-24240-638/actualizacion), y `docs/limites-eticos.md`.
 
-Nota aparte (no legal): el calendario y los guiones numeran distinto los reels (por ejemplo, R2 es "Tu primera paciente" en uno y "El PDF perdido" en el otro). Conviene unificarlos antes de producir.
+Nota aparte (no legal): la numeración de los reels del calendario y de los guiones ya quedó unificada (manda la de `guiones-videos.md`).
