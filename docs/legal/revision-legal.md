@@ -32,11 +32,11 @@ abogado o abogada con experiencia en datos personales y salud.
 | `[RESPONSABLE: nombre o razón social]` | Completado el 2026-09-29 (dato de Facundo): Lic. Verónica Trenti, licenciada en nutrición, MN 7808, MP 3294. | Privacidad 1; Términos 1 y 11 |
 | `[CUIT]` | Completado el 2026-09-29: 27-32468524-9 (dígito verificador correcto). | Privacidad 1; Términos 1 |
 | `[DOMICILIO]` | Completado el 2026-09-29: 24 de Octubre 625, Ituzaingó. Se asumió provincia de Buenos Aires. | Privacidad 1 y 15; Términos 1 |
-| `[MAIL DE CONTACTO]` | Mail que alguien lea y conteste (plazos de 10 días y 5 días hábiles) | Varias veces en las dos |
-| `[FECHA DE VIGENCIA]` | Fecha desde la que valen los textos | Arriba de las dos |
+| `[MAIL DE CONTACTO]` | Completado el 2026-09-29: planv.nutricion@gmail.com (alguien tiene que leerlo: plazos de 10 días y 5 días hábiles) | Varias veces en las dos |
+| `[FECHA DE VIGENCIA]` | Completado: 29 de septiembre de 2026 (se ajusta si se publican otro día) | Arriba de las dos |
 | `[REGIÓN DE LA BASE]` | Completado el 2026-09-29: Brasil (San Pablo), región `sa-east-1` del proyecto `plan-v-app`, leída en Supabase. El servidor (Railway) está en Estados Unidos (Virginia). | privacidad §7 |
 
-Para buscar lo que falta: `grep -n "\[" public/legal/*.html`.
+Todos completos. Las notas para el abogado se sacaron de las páginas publicadas el 2026-09-29 (opción recomendada "publicar ya"); siguen abajo en este archivo.
 
 ## Puntos para el abogado (`[CONFIRMAR CON ABOGADO]`)
 

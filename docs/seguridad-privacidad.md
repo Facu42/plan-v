@@ -13,7 +13,7 @@ privacidad". Agentes: `appsec-engineer` (lidera), `secrets-credential-engineer`,
 | 3. 12 tablas con acceso por fila y sin reglas | Revisadas: son sólo del servidor y así deben quedar. Se encontró y arregló un uso roto (ver abajo). |
 | 4. Cabeceras de seguridad de web y API | Hecho en el código, probado en navegador. Se publica con el merge. |
 | 5. Prueba con dos cuentas | Hecha dentro de la base (pruebas automáticas). Falta repetirla sobre la app publicada. |
-| 6. Términos, privacidad, consentimiento, descargar y borrar la cuenta | Hecho en el código. Los textos son borrador: faltan los datos del responsable y la revisión de un abogado antes de publicar. |
+| 6. Términos, privacidad, consentimiento, descargar y borrar la cuenta | Hecho. Textos completos con los datos de la responsable (2026-09-29), listos para publicar con el merge. La revisión del abogado queda pendiente (13 puntos en `docs/legal/revision-legal.md`). |
 
 ## 2026-09-29: funciones de la base
 
@@ -96,3 +96,11 @@ tocó. Cuando se arme el cobro, ese estado debería poder ponerlo sólo el servi
 - Probado en navegador (1440 y 390, con la política de contenido activa): la casilla bloquea
   "Crear cuenta" hasta marcarla, la copia se descarga, el borrado pide confirmación y las
   páginas legales se ven bien en el teléfono. 893 pruebas pasan.
+
+## 2026-09-29: textos legales completos
+
+Facundo dio los datos: responsable Lic. Verónica Trenti (MN 7808, MP 3294), CUIT
+27-32468524-9, domicilio 24 de Octubre 625, Ituzaingó (se asumió provincia de Buenos Aires),
+mail planv.nutricion@gmail.com. Vigencia: 29 de septiembre de 2026. Se sacaron de las
+páginas las notas para el abogado y el aviso de borrador (siguen en
+`docs/legal/revision-legal.md`), y se aclaró en los términos que hoy Plan V no cobra.
