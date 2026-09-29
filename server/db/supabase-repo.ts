@@ -882,10 +882,7 @@ export async function sbCreatePatient(input: {
   if (inviteError || !inviteRow) throwWriteError(inviteError);
 
   const invite = mapInvite(row(inviteRow) ?? {});
-  await sb.from('patient_invite_events').insert({
-    invite_id: invite.id,
-    event: 'created',
-  });
+  await logInviteEvent(invite.id, 'created');
 
   return { patient: mapPatient(inserted, {}, 'professional'), invite };
 }
@@ -896,6 +893,18 @@ export async function sbGetInvite(inviteId: string): Promise<PatientInvite | nul
   if (error) throwWriteError(error);
   const mapped = row(data);
   return mapped ? mapInvite(mapped) : null;
+}
+
+// El historial de invitaciones es sólo del servidor (la tabla no tiene reglas
+// para usuarias). Antes se escribía con la sesión de la nutricionista y la base
+// lo rechazaba sin avisar: se perdía. La invitación ya se validó con su sesión.
+async function logInviteEvent(inviteId: string, event: 'created' | 'sent' | 'resent' | 'revoked'): Promise<void> {
+  try {
+    const { error } = await privilegedDb().from('patient_invite_events').insert({ invite_id: inviteId, event });
+    if (error) writeOpsLog('warn', 'invite_event_failed', { event, code: error.code ?? 'unknown' });
+  } catch {
+    writeOpsLog('warn', 'invite_event_failed', { event, code: 'no_admin' });
+  }
 }
 
 export async function sbSendInvite(inviteId: string, ttlMs = 7 * 24 * 60 * 60 * 1000): Promise<PatientInvite> {
@@ -913,7 +922,7 @@ export async function sbSendInvite(inviteId: string, ttlMs = 7 * 24 * 60 * 60 * 
     updated_at: now.toISOString(),
   }).eq('id', inviteId).select('*').single();
   if (error || !data) throwWriteError(error);
-  await sb.from('patient_invite_events').insert({ invite_id: inviteId, event });
+  await logInviteEvent(inviteId, event);
   return mapInvite(row(data) ?? {});
 }
 
@@ -930,7 +939,7 @@ export async function sbRevokeInvite(inviteId: string): Promise<PatientInvite> {
     updated_at: now,
   }).eq('id', inviteId).select('*').single();
   if (error || !data) throwWriteError(error);
-  await sb.from('patient_invite_events').insert({ invite_id: inviteId, event: 'revoked' });
+  await logInviteEvent(inviteId, 'revoked');
   return mapInvite(row(data) ?? {});
 }
 
@@ -956,7 +965,7 @@ export async function sbRenewPatientInvite(patientId: string, nutritionistId: st
   }).select('*').single();
   if (createError || !created) throwWriteError(createError);
   const invite = mapInvite(row(created) ?? {});
-  await sb.from('patient_invite_events').insert({ invite_id: invite.id, event: 'created' });
+  await logInviteEvent(invite.id, 'created');
   return sbSendInvite(invite.id);
 }
 

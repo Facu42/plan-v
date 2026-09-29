@@ -203,3 +203,4 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 | Fecha | Apartado | Qué se hizo |
 | --- | --- | --- |
 | 2026-09-28 | Organización | Se trajeron 43 agentes a `.claude/agents/`, se escribieron las reglas y este plan. Revisión de seguridad de Supabase leída (129 + 1 advertencias, 12 avisos). |
+| 2026-09-29 | A. Seguridad | Cerradas 34 funciones internas de la base que quedaban abiertas (fuga comprobada), cabeceras de seguridad en web y API, historial de invitaciones arreglado. Detalle en `docs/seguridad-privacidad.md`. |
