@@ -34,7 +34,7 @@ abogado o abogada con experiencia en datos personales y salud.
 | `[DOMICILIO]` | Domicilio legal | Privacidad 1 y 15; Términos 1 |
 | `[MAIL DE CONTACTO]` | Mail que alguien lea y conteste (plazos de 10 días y 5 días hábiles) | Varias veces en las dos |
 | `[FECHA DE VIGENCIA]` | Fecha desde la que valen los textos | Arriba de las dos |
-| `[REGIÓN DE LA BASE]` | Región de Supabase del proyecto `plan-v-app` (se ve en Supabase → Project Settings → General; por ejemplo "Estados Unidos (us-east-1)" o "Brasil (sa-east-1)") | Privacidad 7 |
+| `[REGIÓN DE LA BASE]` | Completado el 2026-09-29: Brasil (San Pablo), región `sa-east-1` del proyecto `plan-v-app`, leída en Supabase. El servidor (Railway) está en Estados Unidos (Virginia). | privacidad §7 |
 
 Para buscar lo que falta: `grep -n "\[" public/legal/*.html`.
 
@@ -48,11 +48,13 @@ En la política de privacidad:
 2. **Consentimiento "por escrito"** (punto 4): ¿alcanza una casilla al registrarse para datos
    sensibles (art. 5 Ley 25.326)? ¿Conviene casillas separadas para salud y para
    transferencia internacional?
-3. **OpenAI** (punto 5): condiciones vigentes (no entrenar con los datos, cuánto guarda) y si
+3. **OpenRouter y OpenAI** (punto 5): la app manda los pedidos de inteligencia artificial a
+   OpenRouter, que los pasa a un modelo de OpenAI. Condiciones vigentes de ambos (no entrenar
+   con los datos, cuánto guardan; en OpenRouter depende de la configuración de la cuenta) y si
    hace falta un acuerdo de tratamiento de datos firmado.
 4. **Transferencia internacional** (punto 7): Estados Unidos no es país "adecuado". Además del
    consentimiento, ¿hay que firmar las cláusulas modelo de la Disposición 60-E/2016 con
-   Supabase, Railway, Vercel y OpenAI, o alcanzan sus condiciones estándar?
+   Supabase, Railway, Vercel, OpenRouter y OpenAI, o alcanzan sus condiciones estándar?
 5. **Historia clínica** (punto 8): ¿lo que registra una licenciada en nutrición es "historia
    clínica" según la Ley 26.529? ¿La obligación de guardarla 10 años es de la nutricionista
    (lo más probable) y no de Plan V? ¿Cuánto guardar registros de seguridad y el registro de
