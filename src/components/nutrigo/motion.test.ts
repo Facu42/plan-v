@@ -26,7 +26,7 @@ function outsideNoPreference(source: string) {
 describe('movimiento', () => {
   it('se carga después del resto de los estilos de la app', () => {
     const imports = [...showroom.matchAll(/^import '\.\/([\w-]+\.css)';$/gm)].map((m) => m[1]);
-    expect(imports.at(-1)).toBe('motion.css');
+    expect(imports[imports.length - 1]).toBe('motion.css');
   });
 
   it('nada se mueve para quien pidió reducir movimiento', () => {
