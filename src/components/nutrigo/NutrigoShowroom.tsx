@@ -50,6 +50,7 @@ import './app-shell.css';
 import './nutrigo-parity.css';
 import './nutrigo-fidelity.css';
 import './shell-fig.css';
+import './motion.css';
 import { NV_ICONS, NvIcon, type NvIconName } from './NvIcon';
 import { CaretDown, CaretUp } from '@phosphor-icons/react';
 
