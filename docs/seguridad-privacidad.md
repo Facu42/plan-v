@@ -13,7 +13,7 @@ privacidad". Agentes: `appsec-engineer` (lidera), `secrets-credential-engineer`,
 | 3. 12 tablas con acceso por fila y sin reglas | Revisadas: son sólo del servidor y así deben quedar. Se encontró y arregló un uso roto (ver abajo). |
 | 4. Cabeceras de seguridad de web y API | Hecho en el código, probado en navegador. Se publica con el merge. |
 | 5. Prueba con dos cuentas | Hecha dentro de la base (pruebas automáticas). Falta repetirla sobre la app publicada. |
-| 6. Términos, privacidad, consentimiento, descargar y borrar la cuenta | En curso. Necesita los datos del responsable. |
+| 6. Términos, privacidad, consentimiento, descargar y borrar la cuenta | Hecho en el código. Los textos son borrador: faltan los datos del responsable y la revisión de un abogado antes de publicar. |
 
 ## 2026-09-29: funciones de la base
 
@@ -78,3 +78,21 @@ La dueña de una organización puede ponerle a su propia suscripción el estado 
 (`set_organization_subscription_status` acepta `waived`), y eso habilita la delegación de
 pacientes entre profesionales. Hoy ninguna pantalla lo usa y no hay cobro, así que no se
 tocó. Cuando se arme el cobro, ese estado debería poder ponerlo sólo el servidor.
+
+## 2026-09-29: lo legal y "Tus datos"
+
+- **Textos** (redactados con el agente `legal-compliance-checker`, ley 25.326, 26.529 y
+  24.240): `public/legal/privacidad.html` y `public/legal/terminos.html`, versión
+  2026-09-29. Son borrador: tienen marcados los datos a completar (responsable, CUIT,
+  domicilio, mail, fecha de vigencia, región de la base) y 13 puntos para confirmar con un
+  abogado. Lista completa, qué prometen los textos y el registro ante la AAIP en
+  `docs/legal/revision-legal.md`. **No se publican hasta completar esos datos.**
+- **Registro**: casilla obligatoria (sin marcar de entrada) que acepta términos, privacidad y
+  el tratamiento de datos de salud. La cuenta guarda la versión aceptada y la fecha
+  (`src/legal.ts`). Enlaces a Privacidad y Términos al pie del ingreso y de la app.
+- **Tus datos** (paciente, en el menú de su cuenta): descarga un archivo con sus datos y puede
+  pedir el borrado de su cuenta con confirmación. Usa lo que el servidor ya tenía (pedido,
+  copia al momento, registro de cada pedido); antes no había pantalla.
+- Probado en navegador (1440 y 390, con la política de contenido activa): la casilla bloquea
+  "Crear cuenta" hasta marcarla, la copia se descarga, el borrado pide confirmación y las
+  páginas legales se ven bien en el teléfono. 893 pruebas pasan.

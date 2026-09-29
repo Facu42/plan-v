@@ -49,3 +49,13 @@
 .nv-invite-actions { display:flex; gap:6px; align-items:center; }
 .nv-invite-actions .nv-button { padding:7px 10px; font-size:13px; text-decoration:none; }
 .nv-directory-table [role=cell] .nv-badge { display:inline-flex; width:max-content; margin:4px 4px 0 0; }
+/* Tus datos (paciente): descargar copia y borrar cuenta */
+.nv-privacy p { font-size:13px; line-height:1.5; color:var(--nv-ink); }
+.nv-privacy-row { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:16px 0; border-top:1px solid var(--nv-border); }
+.nv-privacy-row h3 { margin:0 0 4px; font-size:14px; font-weight:600; }
+.nv-privacy-row p { margin:0; font-size:12px; color:var(--nv-muted); }
+.nv-privacy-row .nv-button { flex:none; }
+.nv-privacy-legal { margin-top:16px; font-size:12px; color:var(--nv-muted); }
+.nv-privacy-legal a, .nv-app .nv-footer a { color:inherit; text-decoration:underline; }
+.nv-button.nv-danger { border-color:#C0392B; color:#fff; background:#C0392B; }
+@media (max-width: 560px) { .nv-privacy-row { flex-direction:column; align-items:stretch; } }

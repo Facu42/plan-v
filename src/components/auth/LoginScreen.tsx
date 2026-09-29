@@ -3,6 +3,7 @@ import { api } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { pendingInviteIdFromLocation } from '../../context/invite-link';
 import { Icon, Mark } from '../shared/Icon';
+import { PRIVACY_URL, TERMS_URL } from '../../legal';
 
 export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; onToggleTheme: () => void }) {
   const { signIn, signUp, enterDemoMode, loading, demoAllowed } = useAuth();
@@ -11,6 +12,7 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [professional, setProfessional] = useState(false);
+  const [acceptedLegal, setAcceptedLegal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [signupOk, setSignupOk] = useState(false);
@@ -111,9 +113,16 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
               <input className="text-input" type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
             )}
 
+            {mode === 'signup' && (
+              <label className="auth-consent">
+                <input type="checkbox" checked={acceptedLegal} onChange={(e) => setAcceptedLegal(e.target.checked)} />
+                <span>Leí y acepto los <a href={TERMS_URL} target="_blank" rel="noreferrer">términos y condiciones</a> y la <a href={PRIVACY_URL} target="_blank" rel="noreferrer">política de privacidad</a>, y doy mi consentimiento expreso para que se traten mis datos de salud, incluso en servidores fuera de Argentina, para los fines que ahí se explican.</span>
+              </label>
+            )}
+
             {error && <p className="form-error">{error}</p>}
 
-            <button type="button" className="primary-button wide" disabled={busy || !email || (mode !== 'recover' && !password) || (mode === 'signup' && professional && fullName.trim().length < 2)} onClick={submit}>
+            <button type="button" className="primary-button wide" disabled={busy || !email || (mode !== 'recover' && !password) || (mode === 'signup' && professional && fullName.trim().length < 2) || (mode === 'signup' && !acceptedLegal)} onClick={submit}>
               {busy ? 'Un momento…' : mode === 'login' ? 'Entrar' : mode === 'signup' ? 'Crear cuenta' : 'Enviar recuperación'}
             </button>
 
@@ -136,6 +145,7 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
         {!demoAllowed && (
           <p className="auth-foot">El acceso demo no está habilitado en esta sesión.</p>
         )}
+        <p className="auth-foot auth-legal"><a href={PRIVACY_URL} target="_blank" rel="noreferrer">Privacidad</a> · <a href={TERMS_URL} target="_blank" rel="noreferrer">Términos</a></p>
       </div>
     </div>
   );

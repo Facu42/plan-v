@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { legalAcceptance } from '../legal';
 import type { Session, User } from '@supabase/supabase-js';
 import { getProfile, supabase, supabaseConfigured, type Profile } from '../lib/supabase';
 import { api } from '../api/client';
@@ -120,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName, role: PUBLIC_SIGNUP_ROLE, ...(professional ? { [PROFESSIONAL_SIGNUP_FLAG]: true } : {}) } },
+        options: { data: { full_name: fullName, role: PUBLIC_SIGNUP_ROLE, ...legalAcceptance(), ...(professional ? { [PROFESSIONAL_SIGNUP_FLAG]: true } : {}) } },
       });
       if (error) return { error: error.message };
       return {};
