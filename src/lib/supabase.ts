@@ -32,3 +32,19 @@ export async function getSessionToken(): Promise<string | null> {
   const { data } = await supabase.auth.getSession();
   return data.session?.access_token ?? null;
 }
+
+/**
+ * Si el ingreso con Google está prendido en Supabase. El botón aparece solo cuando
+ * alguien lo activa ahí, sin tocar la app.
+ */
+export async function googleSignInEnabled(fetcher: typeof fetch = fetch): Promise<boolean> {
+  if (!url || !anonKey) return false;
+  try {
+    const res = await fetcher(`${url.replace(/\/$/, '')}/auth/v1/settings`, { headers: { apikey: anonKey } });
+    if (!res.ok) return false;
+    const body = await res.json() as { external?: Record<string, unknown> };
+    return body.external?.google === true;
+  } catch {
+    return false;
+  }
+}
