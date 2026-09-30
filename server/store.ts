@@ -34,6 +34,7 @@ import { resetAiJobMemory } from './ai-jobs/repository.js';
 import { resetPrivacyMemory } from './privacy/repository.js';
 import { resetShoppingMemory } from './shopping/repository.js';
 import { resetFeesMemory } from './fees/repository.js';
+import { resetServiceMemory } from './admin/repository.js';
 import { enqueueMemoryOutbox, listMemoryMailbox, processMemoryDeliveries, resetOutboxMemory } from './outbox/memory.js';
 import { resetExerciseMemory } from './exercise/memory.js';
 import { resetResourceMemory } from './resources/memory.js';
@@ -797,6 +798,7 @@ export function resetStore(): void {
   resetPrivacyMemory();
   resetShoppingMemory();
   resetFeesMemory();
+  resetServiceMemory();
   resetOutboxMemory();
   resetExerciseMemory();
   resetResourceMemory();

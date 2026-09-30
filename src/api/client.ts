@@ -3,6 +3,7 @@ import { getSessionToken } from '../lib/supabase';
 import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } from '../types/intake';
 import type { PrivacyRequestKind, PrivacyRequestView } from '../types/privacy';
 import { resolveApiUrl } from './origin';
+import type { ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings } from '../types/service';
 import type { BillingBoard, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
 
 export class ApiError extends Error {
@@ -223,6 +224,20 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
+
+  // Panel del servicio (administrador de la plataforma). En demo el acceso se pide con audience 'admin'.
+  getAdminMe: (audience?: 'admin') => request<{ admin: boolean }>(`/api/admin/me${audience ? '?audience=admin' : ''}`),
+  getServiceBoard: () => request<{ board: ServiceBoard }>('/api/admin/service'),
+  saveServiceSettings: (settings: ServiceSettings) =>
+    request<{ settings: ServiceSettings }>('/api/admin/service/settings', { method: 'PUT', body: JSON.stringify(settings) }),
+  addServicePayment: (nutritionistId: string, payment: ServicePaymentInput) =>
+    request<{ nutritionist: ServiceNutritionist }>(`/api/admin/nutritionists/${nutritionistId}/payments`, { method: 'POST', body: JSON.stringify(payment) }),
+  voidServicePayment: (paymentId: string) =>
+    request<{ nutritionist: ServiceNutritionist }>(`/api/admin/service-payments/${paymentId}`, { method: 'DELETE' }),
+  extendServiceTrial: (nutritionistId: string, days: number) =>
+    request<{ nutritionist: ServiceNutritionist }>(`/api/admin/nutritionists/${nutritionistId}/trial`, { method: 'POST', body: JSON.stringify({ days }) }),
+  setServiceOverride: (nutritionistId: string, override: ServiceOverride, note = '') =>
+    request<{ nutritionist: ServiceNutritionist }>(`/api/admin/nutritionists/${nutritionistId}/override`, { method: 'PUT', body: JSON.stringify({ override, note }) }),
 
   // Cobranzas. En modo demo la vista de paciente manda ?audience=patient.
   getBillingBoard: () => request<{ board: BillingBoard }>('/api/billing'),
