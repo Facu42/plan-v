@@ -103,3 +103,7 @@ El panel **no** muestra datos de salud de las pacientes (solo cantidades), por p
 - 30/09/2026 (~19:05Z): la dirección /admin daba 404 en la app publicada porque Vercel no tenía
   reglas para las rutas internas; se agregaron para /admin, /app y /crm (también arregla recargar
   la página estando dentro de la app).
+
+## 2026-09-30 — /admin como pantalla propia
+
+Facundo entra con su cuenta de Google (rol paciente + administrador de plataforma) y no quiere ser nutricionista. `/admin` ahora abre una pantalla propia (`AdminConsole`): barra con "Panel del servicio" y "Cerrar sesión", y el mismo panel de antes. La base confirma si la cuenta es administradora (`/api/admin/me`); si no lo es, muestra "No tenés permiso". No hay cambios en la base.
