@@ -1,0 +1,38 @@
+import { getRequestDb } from '../db/supabase-client.js';
+import { CareError as TargetError } from '../care/errors.js';
+import type { TargetInput, TargetResult } from '../../src/lib/nutrition-target.js';
+
+
+export type StoredTarget = { patient_id: string; inputs: TargetInput; result: TargetResult; published_at: string | null; updated_at: string };
+
+const memory = new Map<string, StoredTarget>();
+export function resetTargetMemory() { memory.clear(); }
+
+function dbError(error: { code?: string } | null) {
+  if (!error) return;
+  if (['42P01', '42883', 'PGRST202', 'PGRST205'].includes(error.code ?? '')) throw new TargetError(501, 'Esta función requiere instalar la migración de metas nutricionales.');
+  if (error.code === '42501') throw new TargetError(403, 'No tenés permiso para esta acción.');
+  if (['22023', '23514', '22P02'].includes(error.code ?? '')) throw new TargetError(400, 'Revisá los datos de la meta.');
+  throw new TargetError(503, 'No se pudo confirmar el guardado. Reintentá.');
+}
+
+export async function getTarget(patientId: string, persistent: boolean): Promise<StoredTarget | null> {
+  if (!persistent) return memory.get(patientId) ?? null;
+  const { data, error } = await getRequestDb().from('nutrition_targets').select('patient_id,inputs,result,published_at,updated_at').eq('patient_id', patientId).maybeSingle();
+  dbError(error);
+  return (data as StoredTarget | null) ?? null;
+}
+
+export async function saveTarget(patientId: string, inputs: TargetInput, result: TargetResult, publish: boolean, persistent: boolean): Promise<StoredTarget> {
+  if (persistent) {
+    const { data, error } = await getRequestDb().rpc('save_nutrition_target', { target: patientId, target_inputs: inputs, target_result: result, publish });
+    dbError(error);
+    return data as StoredTarget;
+  }
+  const now = new Date().toISOString();
+  const row: StoredTarget = { patient_id: patientId, inputs, result, published_at: publish ? now : null, updated_at: now };
+  memory.set(patientId, row);
+  return row;
+}
+
+export { TargetError };

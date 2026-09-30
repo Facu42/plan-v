@@ -90,6 +90,7 @@ const ALLOWED = [
   'save_meal_log',
   'save_meal_plan_draft',
   'save_notification_preferences',
+  'save_nutrition_target',
   'save_patient_intake',
   'save_recipe_draft',
   'save_routine_feedback',
