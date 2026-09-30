@@ -152,11 +152,14 @@ describe('deploy contract', () => {
     };
     expect(vercel.outputDirectory).toBe('dist');
     expect(JSON.stringify(vercel)).not.toMatch(/server\/index/);
-    // Sólo se permiten rutas de la pantalla (recargar /admin, /app/*, /crm/*) hacia index.html; nunca a la API.
-    for (const rewrite of vercel.rewrites ?? []) {
-      expect(rewrite.destination).toBe('/index.html');
-      expect(rewrite.source).toMatch(/^\/(admin|app|crm)(\/:path\*)?$/);
-    }
+    // Sólo rutas de la pantalla (abrir o recargar /admin, /app/*, /crm/*) hacia index.html; nunca a la API.
+    expect(vercel.rewrites).toEqual([
+      { source: '/admin', destination: '/index.html' },
+      { source: '/app', destination: '/index.html' },
+      { source: '/app/:path*', destination: '/index.html' },
+      { source: '/crm', destination: '/index.html' },
+      { source: '/crm/:path*', destination: '/index.html' },
+    ]);
   });
 
   it('check:secrets refuses a leaked VITE_ service role and passes in test mode', () => {
