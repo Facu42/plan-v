@@ -15,6 +15,7 @@ export const PATIENT_SURFACES: ShellTab[] = [
   { id: 'progreso', icon: 'trend', label: 'Progreso' },
   { id: 'ejercicio', icon: 'heart', label: 'Ejercicio' },
   { id: 'recursos', icon: 'pin', label: 'Recursos' },
+  { id: 'pagos', icon: 'wallet', label: 'Pagos' },
 ];
 
 /** El grupo desplegable del Navbar (84:2994): Meal Plan abre Meal Plan y Grocery List. */
@@ -52,6 +53,7 @@ export const PRO_SURFACES: ShellTab[] = [
   { id: 'ejercicio', icon: 'heart', label: 'Ejercicio' },
   { id: 'recursos', icon: 'pin', label: 'Recursos' },
   { id: 'pacientes', icon: 'users', label: 'Pacientes' },
+  { id: 'cobranzas', icon: 'wallet', label: 'Cobranzas' },
   { id: 'ficha', icon: 'contact', label: 'Ficha' },
   { id: 'consultas', icon: 'video', label: 'Consultas' },
   { id: 'objetivos', icon: 'target', label: 'Objetivos' },
