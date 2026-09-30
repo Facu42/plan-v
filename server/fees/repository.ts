@@ -298,3 +298,6 @@ export async function setChargeWaived(chargeId: string, waived: boolean, persist
   charge.status = waived ? 'waived' : 'open';
   return memoryLedger(patientId);
 }
+
+// El modo demo arranca con los ejemplos (resetStore los vuelve a cargar en las pruebas).
+seedDemo();

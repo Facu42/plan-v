@@ -72,3 +72,10 @@ El panel **no** muestra datos de salud de las pacientes (solo cantidades), por p
 
 - 30/09/2026: relevado lo que existe y enviada la propuesta.
 - 30/09/2026: Facundo eligió cobro manual a nutricionistas al principio (transferencia o link de Mercado Pago que él marca en su panel). Falta precio y días de prueba.
+- 30/09/2026: con el "ok" de Facundo se construyó la parte 1 (cobranzas de pacientes) en la rama
+  claude/project-thread-t30f1i: migración `20260930120000_patient_fees.sql` (tablas de cuota,
+  cuotas, pagos y datos de cobro; escrituras sólo por funciones de la base), rutas del servidor en
+  `server/fees/`, pantalla **Cobranzas** de la nutricionista y **Pagos** de la paciente, más un aviso
+  en Inicio de la paciente. La deuda no bloquea la app. Probado en una base de prueba; **la migración
+  no está aplicada en producción** (necesita el OK escrito de Facundo). Hasta aplicarla, las
+  pantallas nuevas en la app publicada muestran que falta instalar el módulo.
