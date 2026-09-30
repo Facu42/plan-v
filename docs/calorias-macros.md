@@ -6,6 +6,14 @@
 - **Nutricionista** (pantalla Objetivos, debajo del seguimiento): carga sexo, edad, peso, talla, nivel de actividad y objetivo. Ve al instante metabolismo basal, gasto total y la meta con reparto de proteínas, hidratos y grasas. Puede ajustar el % calórico, la proteína por kilo y el % de grasa. "Guardar borrador" o "Confirmar y compartir".
 - **Paciente** (pantalla Plan): ve "Tu meta diaria" solo cuando la nutricionista la confirmó. Si la nutricionista cambia datos, la paciente sigue viendo la meta anterior hasta que se confirme de nuevo.
 
+## Datos de la paciente (ajuste pedido por Facundo, 2026-09-30)
+Los datos corporales (sexo, fecha de nacimiento, talla, peso) los carga la **paciente**, no la nutricionista:
+- al terminar el onboarding (pantalla "Ya estás en tu espacio"),
+- desde Inicio, con la tarjeta "Tus datos para el plan" y el botón Actualizar, cuando ella quiera,
+- cuando la nutricionista toca "Pedir que los cargue o actualice" en la calculadora: a la paciente le aparece el formulario abierto en Inicio hasta que guarda.
+La calculadora se completa sola con esos datos (edad calculada de la fecha de nacimiento) y la nutricionista puede corregirlos.
+Migración: tablas `patient_body_data` y `patient_body_data_requests`, funciones `save_my_body_data` y `request_body_data`.
+
 ## Cómo se calcula (fórmula fija, sin modelo de lenguaje)
 - GEB = 10 × peso + 6,25 × talla − 5 × edad + 5 (varón) o −161 (mujer).
 - Gasto total = GEB × factor (1,2 / 1,375 / 1,55 / 1,725 / 1,9).
@@ -24,5 +32,6 @@ La automatización es el cálculo en sí. No se usó un modelo de lenguaje para 
 
 ## Pendiente
 - Aplicar la migración en producción (necesita OK escrito).
-- La ficha aún no guarda edad, sexo ni talla de la paciente: hoy se cargan en la calculadora. Guardarlas en la ficha evitaría cargarlas cada vez.
-- Estado real de pruebas: 909 pasan, 2 omitidas (suite completa).
+- Aviso push o mail cuando la nutricionista pide actualizar: hoy el pedido aparece dentro de la app (Inicio); falta enviarlo por el sistema de notificaciones.
+- Decisión abierta: estos datos no exigen el consentimiento "measurement" del módulo de seguimiento. Conviene revisarlo con el abogado (docs/legal/revision-legal.md).
+- Estado de pruebas: 913 pasan, 2 omitidas (suite completa).

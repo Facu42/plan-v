@@ -33,3 +33,19 @@ describe('Mifflin-St Jeor', () => {
     expect(targetInputSchema.safeParse({ ...base, extra: 1 }).success).toBe(false);
   });
 });
+
+import { ageFromBirthDate, bodyDataSchema } from './nutrition-target';
+describe('datos corporales de la paciente', () => {
+  it('calcula la edad exacta y rechaza fechas imposibles', () => {
+    const today = new Date(Date.UTC(2026, 8, 30));
+    expect(ageFromBirthDate('1996-09-30', today)).toBe(30);
+    expect(ageFromBirthDate('1996-10-01', today)).toBe(29);
+    expect(ageFromBirthDate('1996-02-31', today)).toBeNull();
+  });
+  it('valida el formulario', () => {
+    const ok = { sex: 'femenino', birth_date: '1990-05-10', height_cm: 165, weight_kg: 64 };
+    expect(bodyDataSchema.safeParse(ok).success).toBe(true);
+    expect(bodyDataSchema.safeParse({ ...ok, birth_date: '2020-01-01' }).success).toBe(false);
+    expect(bodyDataSchema.safeParse({ ...ok, height_cm: 20 }).success).toBe(false);
+  });
+});

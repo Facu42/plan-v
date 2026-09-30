@@ -72,3 +72,21 @@ export function calculateTarget(input: TargetInput): TargetResult {
     protein_pct: pct(protein_g, 4), carbs_pct: pct(carbs_g, 4), fat_pct: pct(fat_g, 9), warnings,
   };
 }
+
+// Datos corporales que carga la paciente; la nutricionista los usa para calcular la meta.
+export const bodyDataSchema = z.object({
+  sex: z.enum(SEX_OPTIONS),
+  birth_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  height_cm: targetInputSchema.shape.height_cm,
+  weight_kg: targetInputSchema.shape.weight_kg,
+}).strict().refine((d) => { const a = ageFromBirthDate(d.birth_date); return a !== null && a >= 15 && a <= 100; }, { message: 'birth_date' });
+export type BodyData = z.infer<typeof bodyDataSchema>;
+
+export function ageFromBirthDate(birthDate: string, today: Date = new Date()): number | null {
+  const [y, m, d] = birthDate.split('-').map(Number);
+  const born = new Date(Date.UTC(y, m - 1, d));
+  if (Number.isNaN(born.getTime()) || born.getUTCMonth() !== m - 1 || born.getUTCDate() !== d) return null;
+  let age = today.getUTCFullYear() - y;
+  if (today.getUTCMonth() + 1 < m || (today.getUTCMonth() + 1 === m && today.getUTCDate() < d)) age -= 1;
+  return age;
+}

@@ -4,7 +4,7 @@ import { authorizePatientAction } from '../security/authorization.js';
 import * as sb from '../db/supabase-repo.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { getPatient } from '../store.js';
-import { calculateTarget, targetInputSchema } from '../../src/lib/nutrition-target.js';
+import { bodyDataSchema, calculateTarget, targetInputSchema } from '../../src/lib/nutrition-target.js';
 import * as repo from './repository.js';
 
 const saveSchema = z.object({ inputs: targetInputSchema, publish: z.boolean() }).strict();
@@ -40,5 +40,30 @@ export function registerTargetRoutes(app: Hono) {
     const result = calculateTarget(parsed.inputs);
     const target = await repo.saveTarget(id, parsed.inputs, result, parsed.publish, persistent);
     return c.json({ target });
+  });
+
+  // Datos corporales: los carga la paciente; la nutricionista los lee y puede pedir una actualización.
+  app.get('/api/patients/:id/body-data', async (c) => {
+    const id = c.req.param('id');
+    const { persistent } = await access(c, id);
+    return c.json(await repo.getBodyData(id, persistent));
+  });
+
+  app.put('/api/patients/:id/body-data', async (c) => {
+    const id = c.req.param('id');
+    const { persistent, professional } = await access(c, id);
+    if (professional) throw new repo.TargetError(403, 'Estos datos los carga la paciente.');
+    let body: z.infer<typeof bodyDataSchema>;
+    try { body = bodyDataSchema.parse(JSON.parse(await c.req.text())); } catch { throw new repo.TargetError(400, 'Revisá sexo, fecha de nacimiento, talla y peso.'); }
+    await repo.saveBodyData(id, body, persistent);
+    return c.json(await repo.getBodyData(id, persistent));
+  });
+
+  app.post('/api/patients/:id/body-data/request', async (c) => {
+    const id = c.req.param('id');
+    const { persistent, professional } = await access(c, id);
+    if (!professional) throw new repo.TargetError(403, 'Sólo la nutricionista puede pedir la actualización.');
+    await repo.requestBodyData(id, persistent);
+    return c.json(await repo.getBodyData(id, persistent));
   });
 }

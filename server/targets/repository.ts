@@ -1,6 +1,6 @@
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError as TargetError } from '../care/errors.js';
-import type { TargetInput, TargetResult } from '../../src/lib/nutrition-target.js';
+import type { BodyData, TargetInput, TargetResult } from '../../src/lib/nutrition-target.js';
 
 
 export type StoredTarget = { patient_id: string; inputs: TargetInput; result: TargetResult; published_at: string | null; updated_at: string };
@@ -36,3 +36,39 @@ export async function saveTarget(patientId: string, inputs: TargetInput, result:
 }
 
 export { TargetError };
+
+export type StoredBodyData = { data: (BodyData & { updated_at: string }) | null; requested_at: string | null };
+const bodyMemory = new Map<string, BodyData & { updated_at: string }>();
+const requestMemory = new Map<string, string>();
+export function resetBodyMemory() { bodyMemory.clear(); requestMemory.clear(); }
+
+export async function getBodyData(patientId: string, persistent: boolean): Promise<StoredBodyData> {
+  if (!persistent) return { data: bodyMemory.get(patientId) ?? null, requested_at: requestMemory.get(patientId) ?? null };
+  const db = getRequestDb();
+  const [body, request] = await Promise.all([
+    db.from('patient_body_data').select('sex,birth_date,height_cm,weight_kg,updated_at').eq('patient_id', patientId).maybeSingle(),
+    db.from('patient_body_data_requests').select('requested_at').eq('patient_id', patientId).maybeSingle(),
+  ]);
+  dbError(body.error); dbError(request.error);
+  const row = body.data as (BodyData & { updated_at: string }) | null;
+  return { data: row ? { ...row, height_cm: Number(row.height_cm), weight_kg: Number(row.weight_kg) } : null, requested_at: (request.data as { requested_at: string } | null)?.requested_at ?? null };
+}
+
+export async function saveBodyData(patientId: string, body: BodyData, persistent: boolean) {
+  if (persistent) {
+    const { error } = await getRequestDb().rpc('save_my_body_data', { body });
+    dbError(error);
+    return;
+  }
+  bodyMemory.set(patientId, { ...body, updated_at: new Date().toISOString() });
+  requestMemory.delete(patientId);
+}
+
+export async function requestBodyData(patientId: string, persistent: boolean) {
+  if (persistent) {
+    const { error } = await getRequestDb().rpc('request_body_data', { target: patientId });
+    dbError(error);
+    return;
+  }
+  requestMemory.set(patientId, new Date().toISOString());
+}
