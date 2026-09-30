@@ -25,4 +25,4 @@ La automatización es el cálculo en sí. No se usó un modelo de lenguaje para 
 ## Pendiente
 - Aplicar la migración en producción (necesita OK escrito).
 - La ficha aún no guarda edad, sexo ni talla de la paciente: hoy se cargan en la calculadora. Guardarlas en la ficha evitaría cargarlas cada vez.
-- Estado real de pruebas: 910 pasan, 2 omitidas.
+- Estado real de pruebas: 909 pasan, 2 omitidas (suite completa).
