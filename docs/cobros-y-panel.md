@@ -95,3 +95,11 @@ El panel **no** muestra datos de salud de las pacientes (solo cantidades), por p
     cancelar. Los consultorios nuevos arrancan en prueba (antes: "sin cargo").
   - El panel no muestra datos de salud: nombre, mail, fechas, cantidad de pacientes y pagos.
   - Todavía no cambia nada para las nutricionistas: el "solo lectura" al vencer es la parte 3.
+- 30/09/2026 (~18:50Z): con el "aplicá panel de administrador en la base" de Facundo se aplicó la
+  migración `service_admin` en producción (las 7 funciones del panel llamables sólo con sesión, las
+  5 internas cerradas), su cuenta quedó como administradora y el PR #31 se publicó en main.
+  Las nutricionistas que ya existían arrancaron con 30 días de prueba (informativo hasta la parte 3);
+  el precio mensual sigue vacío y lo carga él desde el panel.
+- 30/09/2026 (~19:05Z): la dirección /admin daba 404 en la app publicada porque Vercel no tenía
+  reglas para las rutas internas; se agregaron para /admin, /app y /crm (también arregla recargar
+  la página estando dentro de la app).
