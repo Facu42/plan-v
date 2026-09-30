@@ -100,7 +100,7 @@ en el celular. Herramienta de revisión fuera del repositorio.
 y la norma pide 4,5 a 1 para texto chico. Son 1.324 textos en 36 pantallas (subtítulos, notas,
 etiquetas). Como ese gris es un valor del archivo de Nutrigo y la regla del proyecto es que gana
 el archivo, queda así. Si más adelante se quiere cumplir la norma, basta oscurecer ese único
-valor en la paleta (por ejemplo a #6B6D72, que da 5,0 a 1) y cambia todas las pantallas juntas.
+valor en la paleta (por ejemplo a #6B6D72, que da 5,2 a 1) y cambia todas las pantallas juntas.
 
 **Sin resolver todavía.** La medición de botones chicos en el celular marcó unos 20 casos de
 menos de 24 px de alto, casi todos campos dentro de una etiqueta más grande (el toque cae en la
