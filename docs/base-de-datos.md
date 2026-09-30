@@ -46,3 +46,15 @@ nota. Se revisa cuando haya muchas más pacientes.
 
 **No aplicada en producción.** Necesita el OK escrito de Facundo. Antes de aplicarla,
 confirmar con el hilo de Autenticación (apartado D) que no cambió las mismas reglas.
+
+## 2026-09-30: plan Pro activo
+
+- Facundo pasó la organización a Pro (comprobado: la organización figura en plan Pro).
+  Las copias diarias arrancan solas en Pro; la prueba de restaurar se hace cuando exista
+  la primera.
+- La protección contra contraseñas filtradas sigue apagada (el asesor de seguridad lo marca).
+  Se enciende desde el panel: Authentication, Attack Protection.
+- Quién gastó el tráfico que frenó la organización (9,56 GB contra 5 GB gratis): el proyecto
+  **ruti-chat-crm**, no Plan V. Sus consultas más repetidas se ejecutaron unos 6 millones de
+  veces cada una (mensajes, conversaciones, clientes); las de Plan V, unas pocas miles.
+  Dato de las estadísticas de consultas de cada base.
