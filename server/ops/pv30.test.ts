@@ -148,11 +148,15 @@ describe('deploy contract', () => {
   it('keeps the Vercel artifact as the Vite frontend, not the Node API', () => {
     const vercel = JSON.parse(readFileSync(new URL('../../vercel.json', import.meta.url), 'utf8')) as {
       outputDirectory: string;
-      rewrites?: unknown[];
+      rewrites?: { source: string; destination: string }[];
     };
     expect(vercel.outputDirectory).toBe('dist');
     expect(JSON.stringify(vercel)).not.toMatch(/server\/index/);
-    expect(vercel.rewrites ?? []).toEqual([]);
+    // Sólo se permiten rutas de la pantalla (recargar /admin, /app/*, /crm/*) hacia index.html; nunca a la API.
+    for (const rewrite of vercel.rewrites ?? []) {
+      expect(rewrite.destination).toBe('/index.html');
+      expect(rewrite.source).toMatch(/^\/(admin|app|crm)(\/:path\*)?$/);
+    }
   });
 
   it('check:secrets refuses a leaked VITE_ service role and passes in test mode', () => {
