@@ -81,3 +81,17 @@ El panel **no** muestra datos de salud de las pacientes (solo cantidades), por p
   `patient_fees` quedó aplicada en la base de producción. Verificado: las 4 funciones internas no
   son llamables por usuarias; las 8 que usa la app sí (validan quién llama). El asesor de seguridad
   sólo suma esas 8 al aviso general de funciones llamables, como las demás de la app.
+- 30/09/2026 (tarde): con el pedido de Facundo se construyó la parte 2 (su panel de administrador)
+  en la rama claude/project-thread-t30f1i, en borrador:
+  - Migración `20260930180000_service_admin.sql`: lista de administradores (se carga a mano al
+    aplicar, no va en el repo), precio mensual (vacío) y días de prueba (30), suscripción de cada
+    nutricionista (las nuevas y las que ya existen arrancan con 30 días de prueba), pagos manuales
+    que corren el "pagado hasta", anular pagos, extender prueba, "sin cargo" y "suspendida". Cada
+    acción queda anotada en el registro de auditoría. Sólo el administrador llama a estas funciones.
+  - Regla de pagos: un pago dentro de los 7 días de gracia sigue desde el vencimiento anterior; si
+    el corte fue más largo, cuenta desde el día que pagó. Un pago durante la prueba empieza al
+    terminar la prueba.
+  - Cierre: la dueña de un consultorio ya no puede ponerse "sin cargo" ni "en prueba" sola; sólo
+    cancelar. Los consultorios nuevos arrancan en prueba (antes: "sin cargo").
+  - El panel no muestra datos de salud: nombre, mail, fechas, cantidad de pacientes y pagos.
+  - Todavía no cambia nada para las nutricionistas: el "solo lectura" al vencer es la parte 3.
