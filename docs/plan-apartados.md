@@ -6,7 +6,7 @@ todo lo que le falta a Plan V. Sus sugerencias: app móvil, seguridad, diseño y
 (movimiento de los elementos), autenticación, base de datos y marketing. Se sumaron dos
 apartados que también hacen falta para salir al mercado: lo legal y la calidad en producción.
 
-- Los agentes están en `.claude/agents/` (43 de unos 200; el resto no aplica a esta app).
+- Los agentes están en `.claude/agents/` (41 de unos 200; el resto no aplica a esta app).
 - Reglas que valen para todos: `docs/agentes/reglas-plan-v.md`.
 - Este plan **no repite** el plan de 7 pasos de `docs/registro-producto-listo.md` (prueba real,
   trabajo de la PC, mails reales, cobro, ramas viejas, backlog visual del 27/09, pendientes
@@ -93,7 +93,7 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 - **Lidera:** `social-media-strategist`. **Apoyo:** `brand-guardian`, `content-creator`,
   `instagram-curator`, `tiktok-strategist`, `short-video-editing-coach`,
-  `healthcare-marketing-compliance`, `growth-hacker`.
+  `legal-compliance-checker`, `growth-hacker`.
 - **Qué hay hoy:** marca "Plan V — Verónica Trenti", cuenta `@planv.nutricion`, paleta y
   tipografía en `marca/brand_kit.json`. No hay plan de contenidos ni piezas.
 - **Qué falta:**
@@ -102,7 +102,7 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
   2. Calendario de un mes de publicaciones (posts, carruseles, historias) con los textos.
   3. Guiones de videos cortos (reels y TikTok) y los primeros videos. El proyecto tiene el
      conector de Higgsfield para generar imágenes y video.
-  4. Revisión de salud: sin promesas de resultados ni afirmaciones médicas.
+  4. Revisión de salud con la ley argentina: sin promesas de resultados ni afirmaciones médicas.
 - **Necesita de Facundo:** confirmar que la marca que se vende es "Plan V" con Verónica como
   cara; acceso o permiso para publicar en la cuenta (nada se publica sin su OK).
 - **Terminado cuando:** hay estrategia escrita, calendario del primer mes y un lote de piezas
@@ -182,7 +182,7 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 - **Lidera:** `growth-hacker`. **Apoyo:** `seo-specialist`, `paid-media-paid-social-strategist`,
   `paid-media-creative-strategist`, `paid-media-tracking-specialist`, `email-strategist`,
-  `healthcare-marketing-compliance`.
+  `legal-compliance-checker`.
 - **Qué hay hoy:** no hay página pública que explique Plan V ni precios; se entra directo al
   ingreso.
 - **Qué falta:**
@@ -203,3 +203,5 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 | Fecha | Apartado | Qué se hizo |
 | --- | --- | --- |
 | 2026-09-28 | Organización | Se trajeron 43 agentes a `.claude/agents/`, se escribieron las reglas y este plan. Revisión de seguridad de Supabase leída (129 + 1 advertencias, 12 avisos). |
+| 2026-09-28 | Organización | Se sacaron dos agentes que no aplican: `healthcare-marketing-compliance` (trata la ley de publicidad de China) y `senior-developer` (es para Laravel, otra tecnología). La revisión de salud en marketing la hace `legal-compliance-checker` con la ley argentina. Quedan 41. |
+| 2026-09-29 | A. Seguridad | Cerradas 34 funciones internas de la base que quedaban abiertas (fuga comprobada), cabeceras de seguridad en web y API, historial de invitaciones arreglado. Términos, privacidad y consentimiento completos con los datos de la responsable; "Tus datos" para la paciente. Detalle en `docs/seguridad-privacidad.md`. |

@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Política de privacidad · Plan V</title>
+<meta name="description" content="Qué datos guarda Plan V, para qué, quién los ve y cómo pedirlos o borrarlos.">
+<style>
+  :root {
+    --texto: #212738;
+    --fondo: #F9F4F2;
+    --enlace: #73A107;
+    --tarjeta: #FFFFFF;
+    --borde: #E1E1E2;
+    --suave: #5B6070;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: Poppins, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .contenedor { max-width: 760px; margin: 0 auto; padding: 0 16px 48px; }
+  header.sitio {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 20px 0; border-bottom: 1px solid var(--borde); margin-bottom: 24px;
+  }
+  .marca { font-weight: 700; font-size: 20px; color: var(--texto); text-decoration: none; }
+  a { color: var(--enlace); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:hover { text-decoration-thickness: 2px; }
+  a:focus-visible { outline: 2px solid var(--enlace); outline-offset: 2px; border-radius: 4px; }
+  h1 { font-size: 28px; line-height: 1.25; margin: 0 0 8px; }
+  h2 { font-size: 20px; line-height: 1.3; margin: 0 0 12px; }
+  h3 { font-size: 16px; margin: 20px 0 8px; }
+  p { margin: 0 0 12px; }
+  ul, ol { margin: 0 0 12px; padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  .version { color: var(--suave); font-size: 14px; margin-bottom: 20px; }
+  .tarjeta {
+    background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 16px;
+    padding: 20px; margin-bottom: 16px; overflow-wrap: anywhere;
+  }
+  .tarjeta > :last-child { margin-bottom: 0; }
+  .aviso { border-left: 4px solid var(--enlace); }
+  .tabla { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .tabla th, .tabla td { text-align: left; vertical-align: top; padding: 8px 6px; border-top: 1px solid var(--borde); }
+  .tabla th { font-weight: 600; }
+  nav.indice ol { columns: 2; column-gap: 24px; }
+  @media (max-width: 560px) {
+    h1 { font-size: 24px; }
+    nav.indice ol { columns: 1; }
+    .tabla, .tabla tbody, .tabla tr, .tabla td, .tabla th { display: block; width: 100%; }
+    .tabla thead { display: none; }
+    .tabla tr { border-top: 1px solid var(--borde); padding: 8px 0; }
+    .tabla td { border: 0; padding: 2px 0; }
+  }
+  footer { color: var(--suave); font-size: 14px; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="contenedor">
+
+<header class="sitio">
+  <a class="marca" href="/">Plan V</a>
+  <a href="/">Volver a Plan V</a>
+</header>
+
+<main>
+<h1>Política de privacidad</h1>
+<p class="version">Versión 2026-09-29 · Vigente desde el 29 de septiembre de 2026</p>
+
+<div class="tarjeta aviso">
+  <p><strong>En pocas palabras.</strong> Plan V es una app para que una nutricionista acompañe a sus pacientes. Lo que cargás como paciente (comidas, fotos, medidas, respuestas del cuestionario, mensajes, turnos) es información de salud y la ley la protege de forma especial. Lo ve tu nutricionista, no lo vendemos, no hay publicidad y no usamos herramientas de seguimiento. Podés descargar una copia de tus datos o pedir que borremos tu cuenta desde la app.</p>
+  <p>También podés leer los <a href="/legal/terminos.html">Términos y condiciones</a>.</p>
+</div>
+
+<nav class="indice tarjeta" aria-label="Contenido">
+  <h2>Contenido</h2>
+  <ol>
+    <li><a href="#quien">Quién es responsable de tus datos</a></li>
+    <li><a href="#que-datos">Qué datos guardamos</a></li>
+    <li><a href="#para-que">Para qué los usamos</a></li>
+    <li><a href="#consentimiento">Tu consentimiento</a></li>
+    <li><a href="#ia">Inteligencia artificial</a></li>
+    <li><a href="#quien-ve">Quién ve tus datos</a></li>
+    <li><a href="#donde">Dónde se guardan</a></li>
+    <li><a href="#cuanto">Cuánto tiempo los guardamos</a></li>
+    <li><a href="#seguridad">Cómo los cuidamos</a></li>
+    <li><a href="#derechos">Tus derechos</a></li>
+    <li><a href="#pedir-borrar">Cómo pedir tus datos o borrar tu cuenta</a></li>
+    <li><a href="#dispositivo">Lo que queda en tu teléfono o navegador</a></li>
+    <li><a href="#menores">Menores de edad</a></li>
+    <li><a href="#cambios">Cambios a esta política</a></li>
+    <li><a href="#contacto">Contacto y autoridad de control</a></li>
+  </ol>
+</nav>
+
+<section class="tarjeta" id="quien">
+  <h2>1. Quién es responsable de tus datos</h2>
+  <p>En Plan V hay dos papeles distintos, y conviene tenerlos claros porque de eso depende a quién le pedís qué.</p>
+  <h3>Si sos paciente: tu nutricionista es la responsable de tus datos de salud</h3>
+  <p>Tu nutricionista es quien te invita, te atiende y decide qué información necesita para tu tratamiento. Por eso, para la ley, ella es la <strong>responsable</strong> de tus datos de salud (lo que la Ley 25.326 llama "responsable de archivo, registro, base o banco de datos"). Tus datos quedan cubiertos por su secreto profesional.</p>
+  <p>Plan V le presta el sistema donde se guarda esa información. Para esos datos, Plan V es un <strong>prestador de servicios</strong> (en la ley, "encargado del tratamiento", artículo 25 de la Ley 25.326): los guarda y los procesa sólo para que la app funcione y sólo siguiendo lo que corresponde al servicio que le da a tu nutricionista. No los usa para nada propio, no los vende y no se los da a nadie más, salvo lo que se explica en esta política.</p>
+  <h3>Plan V es responsable de las cuentas y de la app</h3>
+  <p>Plan V es responsable de:</p>
+  <ul>
+    <li>los datos de cuenta de las nutricionistas (nombre, mail, datos profesionales, datos para cobrarle la suscripción);</li>
+    <li>los datos técnicos que necesita cualquier cuenta para funcionar y estar segura: mail de acceso, contraseña (guardada de forma que nadie puede leerla), registros de ingreso, registros de seguridad y el historial de pedidos de copia o de borrado.</li>
+  </ul>
+  <h3>Datos de Plan V</h3>
+  <p>Responsable: Lic. Verónica Trenti<br>
+  Licenciada en Nutrición, matrícula nacional 7808 y matrícula provincial 3294<br>
+  CUIT: 27-32468524-9<br>
+  Domicilio: 24 de Octubre 625, Ituzaingó, provincia de Buenos Aires<br>
+  Mail de contacto: <a href="mailto:planv.nutricion@gmail.com">planv.nutricion@gmail.com</a></p>
+</section>
+
+<section class="tarjeta" id="que-datos">
+  <h2>2. Qué datos guardamos</h2>
+  <table class="tabla">
+    <thead><tr><th>Quién</th><th>Qué datos</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Pacientes</strong><br>(datos de salud, datos sensibles)</td>
+        <td>Nombre y mail; diario de comidas y fotos de comidas; medidas del cuerpo (peso, perímetros y similares); cuestionario de ingreso (antecedentes de salud, medicación que informes, hábitos); registro de actividad física; mensajes con tu nutricionista; turnos.</td></tr>
+      <tr><td><strong>Nutricionistas</strong></td>
+        <td>Nombre, mail, datos profesionales que cargue (por ejemplo, matrícula), datos de su suscripción; y lo que escribe sobre sus pacientes: notas clínicas y planes de alimentación.</td></tr>
+      <tr><td><strong>Todas las cuentas</strong></td>
+        <td>Datos de acceso y de seguridad: fecha y hora de ingreso, dirección IP y tipo de navegador o dispositivo cuando entrás, y registros de acciones importantes (por ejemplo, un pedido de borrado).</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:12px">Nadie está obligado a darnos datos de salud (artículo 7 de la Ley 25.326). Si no querés contestar alguna pregunta del cuestionario, podés dejarla vacía; lo único es que tu nutricionista va a tener menos información para acompañarte.</p>
+</section>
+
+<section class="tarjeta" id="para-que">
+  <h2>3. Para qué los usamos</h2>
+  <ul>
+    <li><strong>Para que tu nutricionista te acompañe:</strong> ver lo que cargás, armarte el plan, escribirte, darte turnos.</li>
+    <li><strong>Para que la app funcione:</strong> crear tu cuenta, dejarte entrar, mandarte avisos de la app (por ejemplo, un turno o un mensaje nuevo), guardar tus fotos.</li>
+    <li><strong>Para cuidar la seguridad:</strong> detectar ingresos raros, evitar abusos y poder revisar qué pasó si hay un problema.</li>
+    <li><strong>Para cobrarle la suscripción a la nutricionista</strong> (sólo datos de la nutricionista; las pacientes no pagan).</li>
+    <li><strong>Para cumplir la ley</strong> cuando una autoridad con facultades legales nos lo pida.</li>
+  </ul>
+  <p>No usamos tus datos para publicidad, no los vendemos, no armamos perfiles para terceros y no usamos herramientas de medición o seguimiento de terceros. Si algún día quisiéramos usar datos para mejorar la app, lo haríamos sólo con datos que no permitan identificar a nadie, y te lo avisaríamos antes cambiando esta política.</p>
+</section>
+
+<section class="tarjeta" id="consentimiento">
+  <h2>4. Tu consentimiento</h2>
+  <p>Como los datos de salud son sensibles, sólo los tratamos con tu consentimiento libre, expreso e informado (artículos 5 y 7 de la Ley 25.326). Lo das al crear tu cuenta, marcando la casilla donde aceptás esta política y los términos. Guardamos cuándo lo diste y qué versión aceptaste.</p>
+  <p>Podés retirar tu consentimiento cuando quieras pidiendo el borrado de tu cuenta (ver <a href="#pedir-borrar">punto 11</a>). Retirarlo no vuelve ilegal lo que se hizo antes, y puede haber datos que tu nutricionista deba conservar por ley (ver <a href="#cuanto">punto 8</a>).</p>
+</section>
+
+<section class="tarjeta" id="ia">
+  <h2>5. Inteligencia artificial (opcional)</h2>
+  <p>Plan V tiene una función opcional: tu nutricionista puede pedirle a una inteligencia artificial que analice la foto de una comida (por ejemplo, una estimación de qué y cuánto hay en el plato) o que le prepare un borrador de sugerencias.</p>
+  <ul>
+    <li><strong>Sólo con tu permiso, y para cada uso por separado.</strong> Si no lo das, esta función no se usa con tus datos. Podés dar o sacar cada permiso cuando quieras desde la app.</li>
+    <li><strong>Quién lo procesa:</strong> nuestro servidor manda el pedido a OpenRouter, una empresa de Estados Unidos que lo entrega a un modelo de OpenAI, también de Estados Unidos. Les mandamos sólo lo necesario para ese pedido (por ejemplo, la foto).</li>
+    <li><strong>No decide nada.</strong> Lo que devuelve es una estimación o un borrador. Tu nutricionista lo revisa y decide; nada se te manda ni se confirma solo.</li>
+    <li><strong>No entrenan con tus datos.</strong> No autorizamos que se usen tus fotos ni tus datos para entrenar modelos de inteligencia artificial.</li>
+  </ul>
+</section>
+
+<section class="tarjeta" id="quien-ve">
+  <h2>6. Quién ve tus datos</h2>
+  <ul>
+    <li><strong>Tu nutricionista</strong> ve todo lo que cargás en Plan V. Si ella trabaja con otras profesionales dentro de Plan V y te deriva a alguna, esa profesional también puede verlo.</li>
+    <li><strong>Vos</strong> ves lo tuyo. Hay notas internas de tu nutricionista que son de trabajo y no aparecen en tu pantalla; igual podés pedir acceso a todos tus datos (ver <a href="#derechos">punto 10</a>).</li>
+    <li><strong>Otras pacientes y otras nutricionistas no ven nada tuyo.</strong></li>
+    <li><strong>El equipo de Plan V</strong> no mira tus datos de salud. Sólo puede acceder cuando es indispensable para resolver un problema técnico o de seguridad, con acceso limitado y obligación de confidencialidad (artículo 10 de la Ley 25.326).</li>
+    <li><strong>Proveedores que hacen funcionar la app</strong> (ver <a href="#donde">punto 7</a>). Guardan o procesan datos por cuenta nuestra, no para ellos.</li>
+    <li><strong>Autoridades</strong>, sólo si lo exige una orden judicial o una norma que nos obligue.</li>
+  </ul>
+</section>
+
+<section class="tarjeta" id="donde">
+  <h2>7. Dónde se guardan (transferencia internacional)</h2>
+  <p>Para funcionar, Plan V usa estos proveedores, que tienen sus servidores fuera de Argentina:</p>
+  <table class="tabla">
+    <thead><tr><th>Proveedor</th><th>Para qué</th><th>Dónde</th></tr></thead>
+    <tbody>
+      <tr><td>Supabase (sobre Amazon Web Services)</td><td>Base de datos y archivos (incluidas las fotos)</td><td>Brasil (San Pablo)</td></tr>
+      <tr><td>Railway</td><td>Servidor de la app (procesa los pedidos)</td><td>Estados Unidos</td></tr>
+      <tr><td>Vercel</td><td>Publica la página web de la app</td><td>Estados Unidos</td></tr>
+      <tr><td>OpenRouter y OpenAI</td><td>Sólo la función opcional de inteligencia artificial, con tu permiso</td><td>Estados Unidos</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:12px">Ni Brasil ni Estados Unidos figuran entre los países que la autoridad argentina considera con protección "adecuada". Por eso, la ley pide que des tu consentimiento expreso para esta transferencia (artículo 12 de la Ley 25.326 y su decreto reglamentario 1558/2001). Al aceptar esta política, das ese consentimiento. Además, les exigimos a estos proveedores que cuiden los datos y los usen sólo para prestarnos el servicio.</p>
+  <p>Si sumamos o cambiamos un proveedor que reciba datos personales (por ejemplo, para mandar mails o para cobrar la suscripción), actualizamos esta lista antes de empezar a usarlo.</p>
+</section>
+
+<section class="tarjeta" id="cuanto">
+  <h2>8. Cuánto tiempo los guardamos</h2>
+  <ul>
+    <li><strong>Mientras tu cuenta esté activa</strong>, guardamos tus datos para que la app funcione.</li>
+    <li><strong>Si pedís borrar tu cuenta</strong>, borramos tu cuenta y tus datos, salvo lo que haya que conservar por ley.</li>
+    <li><strong>Historia clínica.</strong> En Argentina, la historia clínica de una paciente debe conservarse al menos 10 años (artículo 18 de la Ley 26.529 de Derechos del Paciente). Si lo que tu nutricionista registró sobre vos forma parte de tu historia clínica, esa parte puede tener que conservarse aunque borres tu cuenta. En ese caso deja de estar a la vista en la app, se guarda aparte, con acceso restringido, y sólo se usa para cumplir esa obligación o para dártela si la pedís.</li>
+    <li><strong>Registro de pedidos.</strong> Guardamos un registro de cada pedido de copia o de borrado (qué se pidió, cuándo y qué se hizo), para poder demostrar que cumplimos.</li>
+    <li><strong>Registros de seguridad</strong> se guardan por un tiempo limitado y después se borran.</li>
+    <li><strong>Copias de seguridad.</strong> Los datos borrados pueden seguir por un tiempo corto en copias de seguridad técnicas hasta que esas copias se reemplacen solas. No se usan para nada más.</li>
+  </ul>
+</section>
+
+<section class="tarjeta" id="seguridad">
+  <h2>9. Cómo los cuidamos</h2>
+  <ul>
+    <li>Toda la comunicación entre tu teléfono o computadora y Plan V va cifrada (HTTPS).</li>
+    <li>Cada cuenta ve sólo lo que le corresponde: la base de datos tiene reglas que impiden que una persona lea datos de otra.</li>
+    <li>Las contraseñas se guardan de forma que nadie, ni siquiera nosotros, puede leerlas.</li>
+    <li>Las fotos se muestran con enlaces privados que vencen al rato.</li>
+    <li>Revisamos la seguridad de la app de forma periódica, siguiendo las medidas que recomienda la autoridad argentina (Resolución AAIP 47/2018).</li>
+  </ul>
+  <p>Ningún sistema es infalible. Si pasara algo que afecte tus datos, te vamos a avisar a vos y a tu nutricionista lo antes posible, con lo que sepamos y lo que estemos haciendo.</p>
+</section>
+
+<section class="tarjeta" id="derechos">
+  <h2>10. Tus derechos</h2>
+  <p>Según la Ley 25.326 tenés derecho a:</p>
+  <ul>
+    <li><strong>Acceso:</strong> saber qué datos tuyos hay y recibir una copia. Es gratis cada seis meses (o antes, si tenés un interés legítimo). Te respondemos dentro de los 10 días corridos (artículo 14).</li>
+    <li><strong>Rectificación:</strong> corregir lo que esté mal o incompleto. Muchos datos los podés corregir vos desde la app; si no, lo hacemos dentro de los 5 días hábiles (artículo 16).</li>
+    <li><strong>Supresión:</strong> que borremos tus datos, dentro de los 5 días hábiles, salvo los que haya que conservar por ley o cuyo borrado perjudique derechos de otras personas (artículo 16).</li>
+    <li><strong>Retirar tu consentimiento</strong>, incluidos los permisos para la inteligencia artificial.</li>
+  </ul>
+  <p>Además, como paciente, la Ley 26.529 te da derecho a pedir una copia de tu historia clínica, que se entrega dentro de las 48 horas (artículo 14 de esa ley).</p>
+  <p>Como tu nutricionista es la responsable de tus datos de salud, también podés pedírselo a ella. Plan V la ayuda a responder y, si nos escribís a nosotros, le avisamos y le damos lo necesario para cumplir en plazo.</p>
+</section>
+
+<section class="tarjeta" id="pedir-borrar">
+  <h2>11. Cómo pedir tus datos o borrar tu cuenta</h2>
+  <p>Desde la app, en el menú de tu cuenta (tu nombre, arriba a la derecha) → <strong>Tus datos</strong>, podés:</p>
+  <ul>
+    <li><strong>Descargar una copia</strong> de tus datos.</li>
+    <li><strong>Pedir que borremos tu cuenta.</strong></li>
+  </ul>
+  <p>Si no podés entrar a la app o preferís hacerlo por mail, escribinos a <a href="mailto:planv.nutricion@gmail.com">planv.nutricion@gmail.com</a> desde el mail de tu cuenta. Puede que te pidamos algo para confirmar que sos vos, para que nadie más pueda pedir tus datos.</p>
+  <p>Guardamos un registro de cada pedido. Si parte de tus datos debe conservarse por ley (ver <a href="#cuanto">punto 8</a>), te lo decimos en la respuesta.</p>
+</section>
+
+<section class="tarjeta" id="dispositivo">
+  <h2>12. Lo que queda en tu teléfono o navegador</h2>
+  <p>Plan V guarda en tu dispositivo sólo lo necesario para funcionar: tu sesión (para que no tengas que entrar cada vez) y los archivos de la app para que abra más rápido o muestre un aviso si no hay conexión. Tus datos de salud no se guardan en esa copia. No usamos cookies de publicidad ni de medición de terceros.</p>
+  <p>Si usás Plan V en un dispositivo compartido, cerrá sesión al terminar.</p>
+</section>
+
+<section class="tarjeta" id="menores">
+  <h2>13. Menores de edad</h2>
+  <p>Plan V está pensado para personas mayores de 18 años. Si una paciente es menor de edad, la cuenta la tiene que crear o autorizar su madre, padre o representante legal, y tu nutricionista es quien debe verificarlo.</p>
+</section>
+
+<section class="tarjeta" id="cambios">
+  <h2>14. Cambios a esta política</h2>
+  <p>Si cambiamos esta política, publicamos la nueva versión con su fecha. Si el cambio es importante (por ejemplo, un nuevo uso de tus datos o un proveedor nuevo), te avisamos en la app antes de que empiece a valer y, si hace falta, te pedimos de nuevo tu consentimiento.</p>
+</section>
+
+<section class="tarjeta" id="contacto">
+  <h2>15. Contacto y autoridad de control</h2>
+  <p>Por cualquier consulta sobre tus datos: <a href="mailto:planv.nutricion@gmail.com">planv.nutricion@gmail.com</a>. Domicilio: 24 de Octubre 625, Ituzaingó, provincia de Buenos Aires.</p>
+  <p>Si creés que no respetamos tus derechos, podés reclamar ante la Agencia de Acceso a la Información Pública (<a href="https://www.argentina.gob.ar/aaip">www.argentina.gob.ar/aaip</a>).</p>
+  <p><strong>Aviso legal obligatorio:</strong> El titular de los datos personales tiene la facultad de ejercer el derecho de acceso a los mismos en forma gratuita a intervalos no inferiores a seis meses, salvo que se acredite un interés legítimo al efecto conforme lo establecido en el artículo 14, inciso 3 de la Ley N° 25.326. La AGENCIA DE ACCESO A LA INFORMACIÓN PÚBLICA, en su carácter de Órgano de Control de la Ley N° 25.326, tiene la atribución de atender las denuncias y reclamos que interpongan quienes resulten afectados en sus derechos por incumplimiento de las normas vigentes en materia de protección de datos personales.</p>
+</section>
+</main>
+
+<footer>
+  <p>Plan V · Política de privacidad · Versión 2026-09-29 · <a href="/legal/terminos.html">Términos y condiciones</a> · <a href="/">Volver a Plan V</a></p>
+</footer>
+
+</div>
+</body>
+</html>

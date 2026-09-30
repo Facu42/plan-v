@@ -28,6 +28,7 @@ import { ShowroomHealthyMenu } from './ShowroomHealthyMenu';
 import { ShowroomExercise } from './ShowroomExercise';
 import { ShowroomResources } from './ShowroomResources';
 import { ShowroomPatientOnboarding } from './ShowroomPatientOnboarding';
+import { ShowroomPrivacy } from './ShowroomPrivacy';
 import { ShowroomWorkCenter, type WorkCenterModule } from './ShowroomWorkCenter';
 import { PATIENT_MORE, PATIENT_SURFACES, PATIENT_TABS, PLAN_SUBPAGES, PRO_MORE, PRO_SURFACES, PRO_TABS, tabBarState } from './showroom-nav';
 import { buildAppHref, hasResourceHash, resolveAppLocation, type AppRole } from './app-location';
@@ -52,7 +53,7 @@ import './nutrigo-fidelity.css';
 import './shell-fig.css';
 import './motion.css';
 import { NV_ICONS, NvIcon, type NvIconName } from './NvIcon';
-import { CaretDown, CaretUp } from '@phosphor-icons/react';
+import { CaretDown, CaretUp, LockSimple } from '@phosphor-icons/react';
 
 
 const WORK_CENTER_PAGES: WorkCenterModule[] = ['reciente', 'guardado', 'seguimiento', 'paneles', 'videollamadas'];
@@ -92,6 +93,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
   const [moreOpen, setMoreOpen] = useState(false);
   const [planOpen, setPlanOpen] = useState<boolean | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
   // Cajón de navegación móvil: el archivo abre el menú desde la barra superior.
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -290,6 +292,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
             {profileOpen && <div className="nv-user-menu" id="nv-user-menu">
               {demoSwitch && <div className="nv-role-switch" aria-label="Cambiar de rol"><button type="button" aria-pressed={role === 'patient'} onClick={() => { setProfileOpen(false); switchRole('patient'); }}>Paciente</button><button type="button" aria-pressed={role === 'pro'} onClick={() => { setProfileOpen(false); switchRole('pro'); }}>Nutricionista</button></div>}
               <button type="button" className="nv-theme" onClick={() => { setProfileOpen(false); onToggleTheme(); }}><Icon name={darkMode ? 'sun' : 'moon'} size={18} />{darkMode ? 'Tema claro' : 'Tema oscuro'}</button>
+              {role === 'patient' && selected && <button type="button" onClick={() => { setProfileOpen(false); setPrivacyOpen(true); }}><LockSimple size={18} aria-hidden="true" />Tus datos</button>}
               {onSignOut && <button type="button" onClick={() => onSignOut()}><NvIcon name="salir" size={18} />Cerrar sesión</button>}
             </div>}
           </div>
@@ -316,7 +319,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
           {page === 'mensajes' && p ? <NutrigoMessages patient={p} patients={role === 'pro' ? activePatients.map((person) => buildShowroomPatient(person, now)) : [p]} role={role} onSelect={(id) => { setSelectedId(id); setDayIndex(-1); }} onNavigate={navigate} /> : <>
 {page === 'pacientes' && role === 'pro' ? <ShowroomPatients patients={patients} query={query} onChanged={addPatient} onFollow={(id) => openOperation(followFromDirectory(id))} /> : !p ? <NvState title="Sin pacientes activos" description={role === 'pro' ? 'Creá tu primera paciente y compartile el enlace para que entre a la app.' : 'Todavía no hay datos para mostrar.'} action={role === 'pro' ? <NvButton className="nv-soft" onClick={() => navigate('pacientes')}>Ir a Pacientes</NvButton> : undefined} /> : pendingModule ? <NvState title={`${pendingModule} · diseño pendiente`} description="El módulo actual sigue disponible en la aplicación. Esta vista todavía no lo reemplaza." /> : page === 'ficha' && role === 'pro' ? <ShowroomPatientRecord patient={selected!} patients={activePatients} onSelect={(id) => { setSelectedId(id); setDayIndex(-1); }} onEdit={() => setRecordEditing(true)} onOpen={openOperation} /> : page === 'diario' && role === 'pro' ? <ShowroomMeals patient={selected!} patients={activePatients} query={query} onSelect={(id) => { setSelectedId(id); setDayIndex(-1); }} onReview={setReviewLog} /> : page === 'diario' && role === 'patient' ? <ShowroomPatientDiary patient={p} patientId={p.id} query={query} now={now} onLogMeal={(slot = 'Almuerzo') => setMealSlot(slot)} /> : page === 'recetas' ? <ShowroomHealthyMenu patient={p} query={query} onNavigate={navigate} role={role} /> : page === 'recursos' ? <ShowroomResources patientId={p.id} query={query} onQueryChange={setQuery} assignments={selected?.resource_assignments} onNavigate={navigate} onMarkRead={role === 'patient' ? markResourceRead : undefined} /> : page === 'plan' && role === 'pro' ? <ShowroomMealPlan patient={selected!} patients={activePatients} query={query} now={now} onSelect={(id) => { setSelectedId(id); setDayIndex(-1); }} onChanged={addPatient} /> : page === 'plan' && role === 'patient' ? <ShowroomPatientPlan patient={p} now={now} query={query} onShopping={() => navigate('compras')} /> : page === 'consultas' && role === 'pro' ? <ShowroomConsultations patient={selected!} patients={activePatients} now={now} onSelect={(id) => { setSelectedId(id); setDayIndex(-1); }} onChanged={addPatient} /> : page === 'agenda' && role === 'pro' ? <ShowroomAgenda patients={activePatients} now={now} focusPatient={selected} onManage={(id) => { setSelectedId(id); navigate('consultas'); }} onNavigatePatient={(id, target) => { setSelectedId(id); navigate(target === 'consultas' ? 'consultas' : target); }} /> : isWorkCenterPage(page) && role === 'pro' ? <ShowroomWorkCenter module={page} patients={activePatients} now={now} onOpenPatient={(id) => { setSelectedId(id); navigate('ficha'); }} onOpenMeals={(id) => { setSelectedId(id); navigate('diario'); }} onOpenConsultations={(id) => { setSelectedId(id); navigate('consultas'); }} /> : page === 'objetivos' && role === 'pro' ? <ShowroomGoals patient={selected!} patients={activePatients} onSelect={(id) => { setSelectedId(id); setDayIndex(-1); }} onChanged={addPatient} onOpenPatient={(id) => { setSelectedId(id); navigate('ficha'); }} /> : page === 'pacientes' ? <ShowroomPatients patients={patients} query={query} onChanged={addPatient} onFollow={(id) => openOperation(followFromDirectory(id))} /> : page === 'inicio' ? <PatientOverview patient={p} onNavigate={navigate} audience={role === 'pro' ? 'professional' : 'patient'} /> : page === 'progreso' ? <ShowroomProgress patient={p} professional={role === 'pro'} /> : page === 'ejercicio' ? <ShowroomExercise patient={p} now={now} professional={role === 'pro'} /> : page === 'compras' ? <ShowroomGrocery patient={p} readOnly={role === 'pro'} /> : page === 'agenda' && role === 'patient' ? <ShowroomPatientAgenda patient={p} now={now} onMessage={() => navigate('mensajes')} onNavigate={navigate} onReschedule={rescheduleAppointment} onConfirm={confirmAppointment} /> : <ShowroomDetail page={page} patient={p} query={query} />}
           </>}
-          <footer className="nv-footer"><p>Copyright © {now.getFullYear()} Plan V</p></footer>
+          <footer className="nv-footer"><p>Copyright © {now.getFullYear()} Plan V · <a href="/legal/privacidad.html" target="_blank" rel="noreferrer">Privacidad</a> · <a href="/legal/terminos.html" target="_blank" rel="noreferrer">Términos</a></p></footer>
         </main>
         {p && page !== 'mensajes' && page !== 'ficha' && page !== 'compras' && page !== 'progreso' && page !== 'diario' && page !== 'plan' && page !== 'agenda' && page !== 'recetas' && page !== 'ejercicio' && page !== 'recursos' && page !== 'pacientes' && !(role === 'pro' && (page === 'consultas' || page === 'objetivos' || isWorkCenterPage(page))) && <aside className="nv-daily" aria-label={role === 'pro' ? 'Paciente en seguimiento' : 'Mi día'}>
           <div className="nv-person"><span className="nv-avatar">{p.initials}</span><div><strong>{p.name}</strong><small>{role === 'pro' ? 'Paciente en seguimiento' : 'Mi plan de acompañamiento'}</small></div><Icon name="leaf" size={18} /></div>
@@ -343,6 +346,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
         <div className="nv-more-grid">{moreItems.map((item) => <button type="button" key={item.id} aria-current={page === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}><Icon name={item.icon} size={20} /><span>{item.label}</span></button>)}{role === 'patient' && !lockedRole && <button type="button" onClick={() => { setMoreOpen(false); setOnboardingOpen(true); }}><Icon name="sparkle" size={20} /><span>Ingreso</span></button>}</div>
       </div>
     </div>}
+    {privacyOpen && selected && role === 'patient' && <ShowroomPrivacy patientId={selected.id} onClose={() => setPrivacyOpen(false)} onDeleted={() => { setPrivacyOpen(false); onSignOut?.(); }} />}
     {recordEditing && selected && <ShowroomPatientEdit patient={selected} onClose={() => setRecordEditing(false)} onSaved={(updated) => { addPatient(updated); setRecordEditing(false); }} />}
     {reviewLog && selected && <div className="modal-backdrop review-backdrop"><MealReviewPanel patient={selected} log={reviewLog} onClose={() => setReviewLog(null)} /></div>}
     {mealSlot && selected && role === 'patient' && <MealLogModal key={`${selected.id}:${mealSlot}`} patient={selected} defaultSlot={mealSlot} close={() => setMealSlot(null)} />}
