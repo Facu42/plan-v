@@ -71,7 +71,18 @@ Progreso, y el aviso amarillo de "sin conexión". Faltaban dos cosas que se ven 
 aparece el error y el botón; con la descarga demorada aparece la carga y después el consultorio.
 Pruebas nuevas en `AppStatus.test.tsx`.
 
+## 2026-09-30 — Primer uso (punto 3)
+
+**Nutricionista.** Quien se registra con "Soy nutricionista" entra a un consultorio vacío. Antes veía
+"Sin pacientes activos" y un botón. Ahora ve "Empecemos", con tres pasos numerados en el orden
+real de la app: crear su primer paciente ("Nuevo paciente" en Pacientes), compartirle el enlace
+(copiar o WhatsApp) y armar su plan (Plan semanal), y un botón "Ir a Pacientes".
+Archivo `src/components/nutrigo/FirstSteps.tsx`. Comprobado en 1440 y 390; pruebas en
+`FirstSteps.test.tsx`.
+
+**Paciente.** Ya tiene su recorrido: el ingreso guiado la primera vez y, hasta que su
+nutricionista publica el plan, la pantalla "Tu plan está en camino". No se tocó.
+
 ## Lo que sigue en este apartado
 
-3. Recorrido de primer uso de la nutricionista y de la paciente.
 4. Accesibilidad: contraste, uso con teclado, tamaños táctiles en móvil.
