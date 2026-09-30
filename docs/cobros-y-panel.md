@@ -71,3 +71,4 @@ El panel **no** muestra datos de salud de las pacientes (solo cantidades), por p
 ## Avance
 
 - 30/09/2026: relevado lo que existe y enviada la propuesta.
+- 30/09/2026: Facundo eligió cobro manual a nutricionistas al principio (transferencia o link de Mercado Pago que él marca en su panel). Falta precio y días de prueba.
