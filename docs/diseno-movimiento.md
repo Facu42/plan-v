@@ -83,6 +83,31 @@ Archivo `src/components/nutrigo/FirstSteps.tsx`. Comprobado en 1440 y 390; prueb
 **Paciente.** Ya tiene su recorrido: el ingreso guiado la primera vez y, hasta que su
 nutricionista publica el plan, la pantalla "Tu plan está en camino". No se tocó.
 
+## 2026-09-30 — Accesibilidad (punto 4)
+
+**Cómo se midió.** Revisión automática con axe (reglas WCAG 2.1 AA) sobre 17 pantallas de
+paciente y de nutricionista en 1440 y 390, en modo demo, más una medición de tamaños de botones
+en el celular. Herramienta de revisión fuera del repositorio.
+
+**Corregido** (pruebas en `accesibilidad.test.ts`; las cuatro fallas dejaron de aparecer):
+- El campo oculto para adjuntar archivos en Mensajes no tenía nombre (falla crítica, 4 pantallas).
+- El carrusel de comidas de Progreso no se podía recorrer con teclado.
+- El resumen de objetivos ponía íconos dentro de una lista de definiciones (estructura inválida). Se
+  reordenó sin cambiar nada de lo que se ve (captura idéntica píxel por píxel).
+- Los enlaces "Privacidad" y "Términos" del pie y del ingreso medían 17 px de alto; ahora al menos 24 px.
+
+**No se cambió, a propósito.** Contraste del gris del archivo (#8A8C90) sobre blanco: da 3,36 a 1
+y la norma pide 4,5 a 1 para texto chico. Son 1.324 textos en 36 pantallas (subtítulos, notas,
+etiquetas). Como ese gris es un valor del archivo de Nutrigo y la regla del proyecto es que gana
+el archivo, queda así. Si más adelante se quiere cumplir la norma, basta oscurecer ese único
+valor en la paleta (por ejemplo a #6B6D72, que da 5,0 a 1) y cambia todas las pantallas juntas.
+
+**Sin resolver todavía.** La medición de botones chicos en el celular marcó unos 20 casos de
+menos de 24 px de alto, casi todos campos dentro de una etiqueta más grande (el toque cae en la
+etiqueta) y algunos botones de texto. Hay que revisarlos uno por uno a mano antes de tocar
+nada; queda como siguiente paso.
+
 ## Lo que sigue en este apartado
 
-4. Accesibilidad: contraste, uso con teclado, tamaños táctiles en móvil.
+- Revisar a mano los botones chicos del celular y decidir el gris (ver arriba).
+- Repetir la revisión automática cuando entren las pantallas de Consejos y recetas del otro hilo.

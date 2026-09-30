@@ -198,7 +198,7 @@ function MessageConversation({ patient, role, composeRef, profileOpen, onToggleP
       <label htmlFor="nm-message" className="nmf-sr">Mensaje para {contact.name}</label>
       {file && <div className="nmf-file-chip"><Paperclip size={14} aria-hidden /><span>{file.name}</span><button type="button" onClick={() => pickFile(null)} disabled={busy} aria-label={`Quitar ${file.name}`}><X size={14} aria-hidden /></button></div>}
       <div className="nm-compose-row">
-        <input ref={fileRef} id="nm-attach" className="nmf-sr" tabIndex={-1} type="file" accept={CHAT_ATTACHMENT_ACCEPT} disabled={busy} onChange={(e) => pickFile(e.target.files?.[0] ?? null)} aria-describedby="nm-attach-hint" />
+        <input ref={fileRef} id="nm-attach" className="nmf-sr" tabIndex={-1} aria-label="Adjuntar archivo" type="file" accept={CHAT_ATTACHMENT_ACCEPT} disabled={busy} onChange={(e) => pickFile(e.target.files?.[0] ?? null)} aria-describedby="nm-attach-hint" />
         <button type="button" className="nmf-attach-btn" onClick={() => fileRef.current?.click()} disabled={busy} aria-label="Adjuntar archivo" aria-describedby="nm-attach-hint" title="Adjuntar archivo"><Paperclip size={18} aria-hidden /></button>
         <span id="nm-attach-hint" className="nmf-sr">JPG, PNG, WebP o PDF de hasta 10 MB.</span>
         <textarea ref={composeRef} id="nm-message" rows={1} maxLength={2000} placeholder="Escribí un mensaje…" value={text} disabled={busy} onChange={(e) => setText(e.target.value)} onKeyDown={onKeyDown} aria-describedby={error ? 'nm-error' : 'nm-status'} />
