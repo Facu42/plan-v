@@ -13,6 +13,7 @@ import { readThemePreference, writeThemePreference, type ThemePreference } from 
 import { Mark } from './shared/Icon';
 import { canUseDemoRoleSwitch, shouldShowNutrigo } from './design-entry';
 import { PwaChrome } from '../pwa/PwaChrome';
+import { LoadingScreen } from './shared/AppStatus';
 
 const NutrigoShowroom = lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })));
 
@@ -161,7 +162,7 @@ export function PlanVExperience() {
   if (shouldShowNutrigo({ development: import.meta.env.DEV, demoMode, hasSession: Boolean(session), supabaseEnabled, search: window.location.search })) {
     const lockedRole = session ? (isNutri ? 'pro' as const : 'patient' as const) : null;
     return (
-      <Suspense fallback={<div className="plan-v-app loading-screen" role="status">Cargando consultorio…</div>}>
+      <Suspense fallback={<LoadingScreen />}>
         <PwaChrome />
         <NutrigoShowroom
           darkMode={darkMode}

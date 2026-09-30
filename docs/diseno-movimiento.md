@@ -47,8 +47,31 @@ activado "reducir movimiento" en su teléfono o computadora.
   "reducir movimiento", que las duraciones estén entre 150 y 250 ms y que las entradas no
   dejen nada corrido. Suite completa: 888 pruebas pasan, 2 omitidas.
 
+## 2026-09-30 — Estados que el archivo no dibuja (punto 2)
+
+El movimiento del punto 1 quedó publicado el 2026-09-30 (PR #22).
+
+**Qué había.** Mensajes de "sin datos" en casi todas las pantallas, carga y error sólo en
+Progreso, y el aviso amarillo de "sin conexión". Faltaban dos cosas que se ven en producción:
+- Mientras bajaba el consultorio, la pantalla mostraba una línea de texto suelta.
+- Si algo fallaba al dibujar (por ejemplo, después de una actualización de la app con la
+  pestaña vieja abierta), la persona veía una página en blanco sin salida.
+
+**Qué se hizo** (`src/components/shared/AppStatus.tsx` y `app-status.css`):
+- **Cargando:** pantalla con el fondo del archivo (#F9F4F2), un giro verde oscuro (#73A107) y
+  "Cargando tu espacio…". Se anuncia a lectores de pantalla y el giro se apaga con "reducir movimiento".
+- **Error:** "Algo salió mal. No pudimos mostrar esta pantalla. Lo que ya tenías guardado sigue
+  ahí. Volvé a cargar la app para seguir." con el botón verde "Volver a cargar".
+  Envuelve toda la app, así que atrapa cualquier falla de dibujo.
+- **Vacío y sin conexión:** ya existían con el estilo del archivo; no se tocaron.
+- Los valores de color y tamaño están escritos a mano en esa hoja porque corre antes de que baje
+  el consultorio (que trae las variables del archivo). Son los mismos valores del archivo.
+
+**Cómo se comprobó.** Navegador real en 1440 y 390: con la descarga del consultorio cortada
+aparece el error y el botón; con la descarga demorada aparece la carga y después el consultorio.
+Pruebas nuevas en `AppStatus.test.tsx`.
+
 ## Lo que sigue en este apartado
 
-2. Estados que el archivo no dibuja: cargando, vacío, error, sin conexión.
 3. Recorrido de primer uso de la nutricionista y de la paciente.
 4. Accesibilidad: contraste, uso con teclado, tamaños táctiles en móvil.
