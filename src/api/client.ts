@@ -3,6 +3,7 @@ import { getSessionToken } from '../lib/supabase';
 import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } from '../types/intake';
 import type { PrivacyRequestKind, PrivacyRequestView } from '../types/privacy';
 import { resolveApiUrl } from './origin';
+import type { BillingBoard, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
@@ -222,6 +223,28 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
+
+  // Cobranzas. En modo demo la vista de paciente manda ?audience=patient.
+  getBillingBoard: () => request<{ board: BillingBoard }>('/api/billing'),
+
+  savePaymentSettings: (settings: PaymentSettings) =>
+    request<{ settings: PaymentSettings }>('/api/billing/settings', { method: 'PUT', body: JSON.stringify(settings) }),
+
+  getPatientLedger: (patientId: string, audience?: 'patient') =>
+    request<{ ledger: PatientLedgerView }>(`/api/patients/${patientId}/ledger${audience ? '?audience=patient' : ''}`),
+
+  setPatientFee: (patientId: string, fee: PatientFee | null) =>
+    request<{ ledger: PatientLedger }>(`/api/patients/${patientId}/fee`, { method: 'PUT', body: JSON.stringify({ fee }) }),
+
+  /** La nutricionista registra un pago; con audience 'patient' es el aviso "Ya pagué". */
+  addPatientPayment: (patientId: string, payment: PaymentInput, audience?: 'patient') =>
+    request<{ ledger: PatientLedgerView }>(`/api/patients/${patientId}/payments${audience ? '?audience=patient' : ''}`, { method: 'POST', body: JSON.stringify(payment) }),
+
+  reviewPatientPayment: (paymentId: string, decision: PaymentDecision) =>
+    request<{ ledger: PatientLedger }>(`/api/payments/${paymentId}`, { method: 'PATCH', body: JSON.stringify({ decision }) }),
+
+  setChargeWaived: (chargeId: string, waived: boolean) =>
+    request<{ ledger: PatientLedger }>(`/api/charges/${chargeId}`, { method: 'PATCH', body: JSON.stringify({ waived }) }),
 
   updateGoal: (patientId: string, data: { goal: string; status: GoalStatus; progress: number; note?: string }) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/goal`, {
