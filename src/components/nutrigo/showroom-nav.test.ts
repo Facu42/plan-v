@@ -5,10 +5,10 @@ import { isAllowedPage } from './app-location';
 describe('navegación del espacio paciente', () => {
   it('expone las diez superficies de Nutrigo y ninguna entrada de CRM', () => {
     expect(PATIENT_SURFACES.map((tab) => tab.id)).toEqual([
-      'inicio', 'agenda', 'mensajes', 'recetas', 'plan', 'compras', 'diario', 'progreso', 'ejercicio', 'recursos',
+      'inicio', 'agenda', 'mensajes', 'recetas', 'plan', 'compras', 'diario', 'progreso', 'ejercicio', 'recursos', 'pagos',
     ]);
     expect(PATIENT_SURFACES.some((tab) => PATIENT_CRM_PAGES.includes(tab.id))).toBe(false);
-    expect(PATIENT_MORE.map((tab) => tab.id)).toEqual(['agenda', 'recetas', 'compras', 'progreso', 'ejercicio', 'recursos']);
+    expect(PATIENT_MORE.map((tab) => tab.id)).toEqual(['agenda', 'recetas', 'compras', 'progreso', 'ejercicio', 'recursos', 'pagos']);
   });
 
   it('conserva cuatro destinos en la barra móvil y marca Más fuera de ella', () => {
@@ -23,7 +23,7 @@ describe('navegación del espacio paciente', () => {
 describe('navegación del nutricionista', () => {
   it('sigue el orden de la Navbar del archivo y deja las pantallas propias al final', () => {
     expect(PRO_SURFACES.map((tab) => tab.id)).toEqual([
-      'inicio', 'agenda', 'mensajes', 'recetas', 'plan', 'compras', 'diario', 'progreso', 'ejercicio', 'recursos', 'pacientes', 'ficha', 'consultas', 'objetivos', 'seguimiento',
+      'inicio', 'agenda', 'mensajes', 'recetas', 'plan', 'compras', 'diario', 'progreso', 'ejercicio', 'recursos', 'pacientes', 'cobranzas', 'ficha', 'consultas', 'objetivos', 'seguimiento',
     ]);
     expect(PLAN_SUBPAGES.map((tab) => tab.id)).toEqual(['plan', 'compras']);
   });
