@@ -34,6 +34,10 @@ export function parseAppPath(pathname: string): { surface: 'app' | 'crm'; page: 
   return { surface: match[1] as 'app' | 'crm', page: match[2] ?? 'inicio' };
 }
 
+export function isAdminPath(pathname: string): boolean {
+  return /^\/admin\/?$/.test(pathname);
+}
+
 export function hasResourceHash(hash: string): boolean {
   return /^#recurso=/.test(hash);
 }
@@ -58,7 +62,8 @@ function pageFor(role: AppRole, token: string, recurso: boolean): ShowroomPage {
 
 export function resolveAppLocation(input: LocationInput): ResolvedLocation {
   const locked = input.lockedRole ?? null;
-  const parsed = parseAppPath(input.pathname);
+  // /admin abre el Panel del servicio (la pantalla misma verifica que sea administrador).
+  const parsed = isAdminPath(input.pathname) ? { surface: 'crm' as const, page: 'servicio' } : parseAppPath(input.pathname);
   const recurso = hasResourceHash(input.hash ?? '');
   const role = locked ?? (parsed ? roleFromSurface(parsed.surface) : 'patient');
   const surfaceOk = !locked || !parsed || parsed.surface === surfaceFor(role);
