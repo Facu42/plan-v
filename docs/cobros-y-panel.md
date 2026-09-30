@@ -76,6 +76,8 @@ El panel **no** muestra datos de salud de las pacientes (solo cantidades), por p
   claude/project-thread-t30f1i: migración `20260930120000_patient_fees.sql` (tablas de cuota,
   cuotas, pagos y datos de cobro; escrituras sólo por funciones de la base), rutas del servidor en
   `server/fees/`, pantalla **Cobranzas** de la nutricionista y **Pagos** de la paciente, más un aviso
-  en Inicio de la paciente. La deuda no bloquea la app. Probado en una base de prueba; **la migración
-  no está aplicada en producción** (necesita el OK escrito de Facundo). Hasta aplicarla, las
-  pantallas nuevas en la app publicada muestran que falta instalar el módulo.
+  en Inicio de la paciente. La deuda no bloquea la app. Probado en una base de prueba.
+- 30/09/2026 (~15:29Z): con el "aplicá cobranzas en la base" de Facundo, la migración
+  `patient_fees` quedó aplicada en la base de producción. Verificado: las 4 funciones internas no
+  son llamables por usuarias; las 8 que usa la app sí (validan quién llama). El asesor de seguridad
+  sólo suma esas 8 al aviso general de funciones llamables, como las demás de la app.
