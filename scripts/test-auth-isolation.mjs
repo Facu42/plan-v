@@ -78,7 +78,7 @@ try {
     VITE_SUPABASE_URL: apiUrl, VITE_SUPABASE_ANON_KEY: status.ANON_KEY,
   };
   // Ninguna configuración heredada puede activar proveedores o el runner hospedado.
-  for (const key of ['PLANV_LIVE_AUTH', 'RLS_JWT_NUTRI_A', 'RLS_JWT_NUTRI_B', 'RLS_PATIENT_B_ID', 'OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'RESEND_API_KEY']) delete env[key];
+  for (const key of ['PLANV_LIVE_AUTH', 'RLS_JWT_NUTRI_A', 'RLS_JWT_NUTRI_B', 'RLS_PATIENT_B_ID', 'OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'RESEND_API_KEY', 'ALERT_WEBHOOK_URL']) delete env[key];
   const vitest = fileURLToPath(new URL('../node_modules/vitest/vitest.mjs', import.meta.url));
   const code = await new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [vitest, 'run', '--config', 'vitest.auth-isolation.config.ts', '--maxWorkers=1'], { env, stdio: 'inherit' });

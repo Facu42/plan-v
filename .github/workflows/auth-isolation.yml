@@ -4,15 +4,29 @@ on:
     paths:
       - '.github/workflows/auth-isolation.yml'
       - 'scripts/test-auth-isolation.mjs'
-      - 'vitest.auth-isolation.config.ts'
-      - 'supabase/auth-isolation/**'
-      - 'supabase/migrations/**'
-      - 'server/security/signed-auth.local.test.ts'
+      - 'supabase/**'
+      - 'server/**'
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite*.ts'
+      - 'vitest*.ts'
+  pull_request:
+    paths:
+      - '.github/workflows/auth-isolation.yml'
+      - 'scripts/test-auth-isolation.mjs'
+      - 'supabase/**'
+      - 'server/**'
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite*.ts'
+      - 'vitest*.ts'
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: signed-auth-${{ github.ref }}
+  group: signed-auth-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 jobs:
   signed-auth:

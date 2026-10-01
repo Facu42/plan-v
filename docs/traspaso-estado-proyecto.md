@@ -45,8 +45,12 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
 
 ## Lo pendiente
 
-- Seguridad, siguiente paso (punto 4): comprobar aislamiento con sesiones firmadas
-  y cuentas ficticias, sin contratar recursos ni usar datos reales. El punto 3 está
+- Seguridad, punto 4: prueba con cuatro sesiones reales en Supabase temporal de
+  GitHub realizada. Se encontró lectura de notas profesionales por una política
+  legacy de paciente. Migración `20261001193156_close_legacy_patient_row_access.sql`
+  preparada y probada, **sin aplicar en producción**: requiere autorización escrita
+  para el cierre y comprobación posterior. Ver `docs/sesiones-aislamiento-2026-10-01.md`.
+  La prueba con navegador y app publicada sigue pendiente. El punto 3 está
   clasificado: las 16 tablas están cerradas al acceso directo; 38 pruebas locales
   nuevas lo protegen. Ver `docs/clasificacion-tablas-internas-2026-10-01.md`.
   Las 34 funciones internas siguen cerradas y las 116 públicas coinciden con la

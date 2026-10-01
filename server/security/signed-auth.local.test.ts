@@ -134,6 +134,20 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     }
   });
 
+  it('la ficha de paciente funciona por la API sin devolver notas profesionales', async () => {
+    for (const path of ['/api/me/patient','/api/patients/' + pidA]) {
+      const response = await api(patientA,path);
+      expect(response.status).toBe(200);
+      const json = await response.json();
+      expect(json.patient.id).toBe(pidA);
+      expect(JSON.stringify(json)).not.toContain(canary);
+    }
+    const professional = await api(ownerA,'/api/patients/' + pidA);
+    expect(professional.status).toBe(200);
+    expect((await professional.json()).patient.adherence_why).toBe(canary);
+    expect((await api(patientB,'/api/patients/' + pidA)).status).toBe(403);
+  });
+
   it('la API bloquea a la profesional y paciente ajenas', async () => {
     for (const actor of [ownerB,patientB]) {
       expect((await api(actor,'/api/patients/' + pidA + '/nutrition-target')).status).toBe(403);
