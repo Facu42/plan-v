@@ -129,10 +129,10 @@ export function memoryCreateOrganization(name: string, slug: string, actorId: st
   teams.set(teamId, { id: teamId, organization_id: id, name: 'consultorio', member_ids: [actorId] });
   subscriptions.set(id, {
     organization_id: id,
-    status: 'waived',
+    status: 'trialing',
     plan_code: 'b2b_team',
-    valid_until: null,
-    note: 'piloto gratuito manual',
+    valid_until: addDays(created.slice(0, 10), 30),
+    note: 'prueba',
     updated_at: created,
   });
   return snapshot(id, actorId);
@@ -180,8 +180,9 @@ export function memoryGetSubscription(orgId: string, actorId: string): OrgSubscr
 
 export function memorySetSubscription(orgId: string, status: OrgSubscriptionStatus, note: string, actorId: string): OrgSubscriptionView {
   if (!manager(orgId, actorId)) raise('42501', 'org_forbidden');
-  if (status === 'active') raise('22023', 'org_subscription_provider');
-  if (!['trialing', 'waived', 'canceled', 'past_due'].includes(status)) raise('22023', 'org_subscription_invalid');
+  if (!['trialing', 'active', 'waived', 'canceled', 'past_due'].includes(status)) raise('22023', 'org_subscription_invalid');
+  // Sólo el administrador del servicio pone otros estados; la dueña sólo puede cancelar.
+  if (status !== 'canceled') raise('42501', 'org_subscription_admin');
   const current = subscriptions.get(orgId);
   if (!current) raise('P0002', 'org_missing');
   const next: OrgSubscriptionView = {
@@ -294,3 +295,9 @@ export function memoryCanCare(patientId: string, actorId: string) {
 }
 
 export type { OrgMemberRole, OrgMemberStatus };
+
+function addDays(date: string, days: number): string {
+  const value = new Date(`${date}T12:00:00Z`);
+  value.setUTCDate(value.getUTCDate() + days);
+  return value.toISOString().slice(0, 10);
+}

@@ -3,6 +3,8 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 const PatientApp = lazy(() => import('./patient/PatientApp').then(({ PatientApp }) => ({ default: PatientApp })));
 const CrmDashboard = lazy(() => import('./crm/CrmDashboard').then(({ CrmDashboard }) => ({ default: CrmDashboard })));
 import { LoginScreen } from './auth/LoginScreen';
+import { ConsentScreen } from './auth/ConsentScreen';
+import { hasCurrentLegalAcceptance } from '../legal';
 import { useAuth } from '../context/AuthContext';
 import { forgetPendingInvite, pendingInviteIdFromLocation, PENDING_INVITE_STORAGE_KEY } from '../context/invite-link';
 import { useAppStore } from '../store/useAppStore';
@@ -11,7 +13,10 @@ import { readThemePreference, writeThemePreference, type ThemePreference } from 
 import { Mark } from './shared/Icon';
 import { canUseDemoRoleSwitch, shouldShowNutrigo } from './design-entry';
 import { PwaChrome } from '../pwa/PwaChrome';
+import { LoadingScreen } from './shared/AppStatus';
+import { isAdminPath } from './nutrigo/app-location';
 
+const AdminConsole = lazy(() => import('./nutrigo/AdminConsole').then(({ AdminConsole }) => ({ default: AdminConsole })));
 const NutrigoShowroom = lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })));
 
 export function PlanVExperience() {
@@ -24,6 +29,8 @@ export function PlanVExperience() {
   ));
   const { boot, reset, loading, error, aiEnabled, supabaseEnabled, patients } = useAppStore();
   const darkMode = theme === 'dark';
+  // Sin la aceptación vigente no se carga nada ni se acepta la invitación.
+  const legalOk = !session || hasCurrentLegalAcceptance(session.user.user_metadata);
   const toggleTheme = () => setTheme((current) => current === 'dark' ? 'light' : 'dark');
 
   useEffect(() => {
@@ -38,11 +45,12 @@ export function PlanVExperience() {
       return;
     }
     if (session && !isNutri && !isPatient) return;
+    if (!legalOk) return;
     void boot({ isNutri, isPatient });
-  }, [authLoading, session, demoMode, isNutri, isPatient, boot, reset]);
+  }, [authLoading, session, demoMode, isNutri, isPatient, legalOk, boot, reset]);
 
   useEffect(() => {
-    if (!session || !isPatient || inviteStatus !== 'idle') return;
+    if (!session || !isPatient || !legalOk || inviteStatus !== 'idle') return;
     const stored = typeof window === 'undefined' ? null : window.sessionStorage.getItem(PENDING_INVITE_STORAGE_KEY);
     const inviteId = pendingInviteIdFromLocation(typeof window === 'undefined' ? '' : window.location.search, stored);
     if (!inviteId) return;
@@ -62,7 +70,7 @@ export function PlanVExperience() {
       setInviteStatus(message.includes('Confirmá tu email') ? 'unconfirmed' : 'unavailable');
     });
     return () => { cancelled = true; };
-  }, [session, isPatient, inviteStatus, boot]);
+  }, [session, isPatient, legalOk, inviteStatus, boot]);
 
   useEffect(() => {
     if (isNutri) setView('pro');
@@ -70,10 +78,10 @@ export function PlanVExperience() {
   }, [isNutri, isPatient]);
 
   useEffect(() => {
-    if (session && isNutri && profile) {
+    if (session && isNutri && profile && legalOk) {
       api.setupNutritionist(profile.full_name || 'Verónica Trenti').catch(() => {});
     }
-  }, [session, isNutri, profile]);
+  }, [session, isNutri, profile, legalOk]);
 
   if (authLoading) {
     return (
@@ -86,6 +94,21 @@ export function PlanVExperience() {
 
   if (!session && !demoMode) {
     return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PwaChrome /><LoginScreen darkMode={darkMode} onToggleTheme={toggleTheme} /></div>;
+  }
+
+  if (session && !legalOk) {
+    return <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}><PwaChrome /><ConsentScreen /></div>;
+  }
+
+  // /admin: pantalla propia del administrador del servicio. La base confirma si la cuenta lo es;
+  // no hace falta ser nutricionista ni paciente.
+  if (session && isAdminPath(window.location.pathname)) {
+    return (
+      <Suspense fallback={<div className="plan-v-app loading-screen" role="status">Cargando…</div>}>
+        <PwaChrome />
+        <AdminConsole darkMode={darkMode} onToggleTheme={toggleTheme} onSignOut={() => signOut()} userName={profile?.full_name || undefined} />
+      </Suspense>
+    );
   }
 
   if (session && !isNutri && !isPatient) {
@@ -152,7 +175,7 @@ export function PlanVExperience() {
   if (shouldShowNutrigo({ development: import.meta.env.DEV, demoMode, hasSession: Boolean(session), supabaseEnabled, search: window.location.search })) {
     const lockedRole = session ? (isNutri ? 'pro' as const : 'patient' as const) : null;
     return (
-      <Suspense fallback={<div className="plan-v-app loading-screen" role="status">Cargando consultorio…</div>}>
+      <Suspense fallback={<LoadingScreen />}>
         <PwaChrome />
         <NutrigoShowroom
           darkMode={darkMode}

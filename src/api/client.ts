@@ -3,6 +3,8 @@ import { getSessionToken } from '../lib/supabase';
 import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } from '../types/intake';
 import type { PrivacyRequestKind, PrivacyRequestView } from '../types/privacy';
 import { resolveApiUrl } from './origin';
+import type { NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
+import type { BillingBoard, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
@@ -222,6 +224,51 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
+
+  // Panel del servicio (administrador de la plataforma). En demo el acceso se pide con audience 'admin'.
+  getAdminMe: (audience?: 'admin') => request<{ admin: boolean }>(`/api/admin/me${audience ? '?audience=admin' : ''}`),
+  getServiceBoard: () => request<{ board: ServiceBoard }>('/api/admin/service'),
+  saveServiceSettings: (settings: ServiceSettings) =>
+    request<{ settings: ServiceSettings }>('/api/admin/service/settings', { method: 'PUT', body: JSON.stringify(settings) }),
+  addServicePayment: (nutritionistId: string, payment: ServicePaymentInput) =>
+    request<{ nutritionist: ServiceNutritionist }>(`/api/admin/nutritionists/${nutritionistId}/payments`, { method: 'POST', body: JSON.stringify(payment) }),
+  voidServicePayment: (paymentId: string) =>
+    request<{ nutritionist: ServiceNutritionist }>(`/api/admin/service-payments/${paymentId}`, { method: 'DELETE' }),
+  extendServiceTrial: (nutritionistId: string, days: number) =>
+    request<{ nutritionist: ServiceNutritionist }>(`/api/admin/nutritionists/${nutritionistId}/trial`, { method: 'POST', body: JSON.stringify({ days }) }),
+  setServiceOverride: (nutritionistId: string, override: ServiceOverride, note = '') =>
+    request<{ nutritionist: ServiceNutritionist }>(`/api/admin/nutritionists/${nutritionistId}/override`, { method: 'PUT', body: JSON.stringify({ override, note }) }),
+  createNutritionist: (input: NutritionistCreateInput) =>
+    request<{ nutritionist: ServiceNutritionist }>('/api/admin/nutritionists', { method: 'POST', body: JSON.stringify(input) }),
+  sendNutritionistAccess: (nutritionistId: string) =>
+    request<{ sent: boolean }>(`/api/admin/nutritionists/${nutritionistId}/send-access`, { method: 'POST' }),
+  saveNutritionistNote: (nutritionistId: string, note: string) =>
+    request<{ nutritionist: ServiceNutritionist }>(`/api/admin/nutritionists/${nutritionistId}/note`, { method: 'PUT', body: JSON.stringify({ note }) }),
+  createTestAccounts: (input: TestAccountsInput) =>
+    request<TestAccountsResult>('/api/admin/test-accounts', { method: 'POST', body: JSON.stringify(input) }),
+  listTestAccounts: () => request<{ accounts: TestAccount[] }>('/api/admin/test-accounts'),
+
+  // Cobranzas. En modo demo la vista de paciente manda ?audience=patient.
+  getBillingBoard: () => request<{ board: BillingBoard }>('/api/billing'),
+
+  savePaymentSettings: (settings: PaymentSettings) =>
+    request<{ settings: PaymentSettings }>('/api/billing/settings', { method: 'PUT', body: JSON.stringify(settings) }),
+
+  getPatientLedger: (patientId: string, audience?: 'patient') =>
+    request<{ ledger: PatientLedgerView }>(`/api/patients/${patientId}/ledger${audience ? '?audience=patient' : ''}`),
+
+  setPatientFee: (patientId: string, fee: PatientFee | null) =>
+    request<{ ledger: PatientLedger }>(`/api/patients/${patientId}/fee`, { method: 'PUT', body: JSON.stringify({ fee }) }),
+
+  /** La nutricionista registra un pago; con audience 'patient' es el aviso "Ya pagué". */
+  addPatientPayment: (patientId: string, payment: PaymentInput, audience?: 'patient') =>
+    request<{ ledger: PatientLedgerView }>(`/api/patients/${patientId}/payments${audience ? '?audience=patient' : ''}`, { method: 'POST', body: JSON.stringify(payment) }),
+
+  reviewPatientPayment: (paymentId: string, decision: PaymentDecision) =>
+    request<{ ledger: PatientLedger }>(`/api/payments/${paymentId}`, { method: 'PATCH', body: JSON.stringify({ decision }) }),
+
+  setChargeWaived: (chargeId: string, waived: boolean) =>
+    request<{ ledger: PatientLedger }>(`/api/charges/${chargeId}`, { method: 'PATCH', body: JSON.stringify({ waived }) }),
 
   updateGoal: (patientId: string, data: { goal: string; status: GoalStatus; progress: number; note?: string }) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/goal`, {

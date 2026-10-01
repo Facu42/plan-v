@@ -282,3 +282,6 @@
 .nv-app.nv-home .nv-recent small { color: #52545B; font-size: 10px; line-height: 1.35; }
 .nv-app.nv-home .nv-recent p { font-size: 11px; line-height: 1.6; }
 .nv-app.nv-home .nv-daily > .nv-recent { margin-top: 28px; }
+
+/* Los enlaces legales del pie son fáciles de tocar en el celular: al menos 24 px de alto. */
+.nv-app .nv-footer a { display: inline-block; padding: 4px 0; }

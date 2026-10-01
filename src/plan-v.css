@@ -544,7 +544,15 @@
 .auth-foot code { font-size:9px; }
 .auth-consent { display:flex; gap:10px; align-items:flex-start; margin:4px 0 12px; font-size:12px; line-height:1.45; color:var(--pv-muted); text-align:left; cursor:pointer; }
 .auth-consent input { flex:none; width:18px; height:18px; margin-top:1px; accent-color:var(--pv-deep); }
-.auth-consent a, .auth-legal a { color:inherit; text-decoration:underline; }
+.auth-consent a, .auth-legal a { color:inherit; text-decoration:underline; } .auth-legal a { display:inline-block; padding:4px 0; }
+.google-button { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:10px; padding:11px 16px; border:1px solid #dadce0; border-radius:13px; color:#1f1f1f; background:#fff; font-size:13px; font-weight:600; cursor:pointer; transition:box-shadow .2s ease; }
+.google-button:hover:not(:disabled) { box-shadow:0 2px 8px rgba(60,64,67,.15); }
+.google-button:disabled { opacity:.5; cursor:not-allowed; }
+.consent-card { max-width:460px; text-align:left; }
+.consent-card h2 { margin-bottom:8px; }
+.consent-card .primary-button { width:100%; margin-top:4px; }
+.consent-card .soft-button { width:100%; margin-top:10px; }
+@media (prefers-reduced-motion:reduce) { .google-button { transition:none; } }
 .role-badge { padding:6px 12px; font-size:11px; font-weight:700; color:var(--pv-deep); }
 .signout-btn { padding:6px 10px; border:0; border-radius:99px; background:transparent; color:var(--pv-muted); font-size:10px; font-weight:700; cursor:pointer; }
 .signout-btn:hover { background:var(--pv-coral-wash); color:#bd5a51; }
