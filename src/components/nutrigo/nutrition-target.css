@@ -6,3 +6,4 @@
 @media(max-width:800px){.nvt-layout{grid-template-columns:1fr}.nvt-form input,.nvt-form select{min-height:44px}.nvt-actions .nv-button{flex:1;justify-content:center;min-height:44px}}
 @media(max-width:390px){.nvt-card{margin-inline:-16px;border-radius:0}}
 .nvt-source{margin:0;color:var(--nv-muted);font-size:12px}.nvt-link{padding:0;border:0;color:var(--nv-strong);background:none;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}.nvt-body{margin-bottom:16px}.nvt-body-form{gap:10px}
+.nvt-link{position:relative}.nvt-link::after{content:"";position:absolute;inset:-4px 0}

@@ -102,12 +102,15 @@ etiquetas). Como ese gris es un valor del archivo de Nutrigo y la regla del proy
 el archivo, queda así. Si más adelante se quiere cumplir la norma, basta oscurecer ese único
 valor en la paleta (por ejemplo a #6B6D72, que da 5,2 a 1) y cambia todas las pantallas juntas.
 
-**Sin resolver todavía.** La medición de botones chicos en el celular marcó unos 20 casos de
-menos de 24 px de alto, casi todos campos dentro de una etiqueta más grande (el toque cae en la
-etiqueta) y algunos botones de texto. Hay que revisarlos uno por uno a mano antes de tocar
-nada; queda como siguiente paso.
+**Botones chicos del celular (revisados a mano el 2026-10-01).** Se midieron las 16 pantallas
+principales en 390. Los campos de texto y selectores dentro de una etiqueta grande no son un
+problema (el toque cae en la etiqueta). Se corrigieron, sin mover nada de lo que se ve, con una zona
+de toque invisible de 24 px: los filtros del calendario (Plan de comidas, Diario, Consultas,
+Videollamadas, etc.), el selector de mes del plan y las casillas de "Mis recordatorios"
+(etiqueta de 28 px), el enlace "Pedir que los cargue" de la calculadora de calorías y los títulos
+de recetas de Menú saludable (misma zona invisible, sin tocar el diseño del archivo).
 
 ## Lo que sigue en este apartado
 
-- Revisar a mano los botones chicos del celular y decidir el gris (ver arriba).
+- Decidir el gris (ver arriba).
 - Repetir la revisión automática cuando entren las pantallas de Consejos y recetas del otro hilo.

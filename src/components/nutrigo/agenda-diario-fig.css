@@ -318,3 +318,6 @@
   .nvfd-stat-icon { padding: 18px; }
   .nvfd-pages > span { display: none; }
 }
+/* Zona de toque de al menos 24 px de alto para los filtros del calendario, sin mover nada de lo que se ve. */
+.nvcal-categories button { position: relative; }
+.nvcal-categories button::after { content: ""; position: absolute; inset: -4px; }
