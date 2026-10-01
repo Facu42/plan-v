@@ -31,7 +31,7 @@ La automatización es el cálculo en sí. No se usó un modelo de lenguaje para 
 - `src/components/nutrigo/ShowroomNutritionTarget.tsx`
 
 ## Pendiente
-- Aplicar la migración en producción (necesita OK escrito).
+- ~~Aplicar la migración en producción~~ Hecho el 2026-10-01 con la frase escrita de Facundo ("aplicá la migración de calorías y datos corporales en la base de producción"). Comprobado en la base: 3 tablas con seguridad por filas y 2 reglas cada una; 3 funciones (`save_nutrition_target`, `save_my_body_data`, `request_body_data`) con permiso solo para usuarios con sesión (no anónimos). Falta mergear el PR #28 para que la app publicada use las rutas nuevas.
 - Aviso push o mail cuando la nutricionista pide actualizar: hoy el pedido aparece dentro de la app (Inicio); falta enviarlo por el sistema de notificaciones.
 - Decisión abierta: estos datos no exigen el consentimiento "measurement" del módulo de seguimiento. Conviene revisarlo con el abogado (docs/legal/revision-legal.md).
 - Estado de pruebas: 913 pasan, 2 omitidas (suite completa).
