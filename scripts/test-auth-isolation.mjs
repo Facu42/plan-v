@@ -14,6 +14,7 @@ const workdir = await mkdtemp(prefix);
 const projectId = 'plan-v-signed-auth-' + randomUUID().slice(0, 8);
 let pool;
 let startAttempted = false;
+let phase = 'comprobar Docker';
 
 async function cli(args, timeout = 60000) {
   const executable = process.env.PLANV_SUPABASE_CLI;
@@ -38,9 +39,11 @@ try {
   const config = await readFile(new URL('../supabase/auth-isolation/config.toml', import.meta.url), 'utf8');
   await writeFile(join(workdir, 'supabase', 'config.toml'), config.replace('PLAN_V_ISOLATION_PROJECT', projectId));
   console.log('Iniciando Supabase temporal con Auth, base y API de datos.');
+  phase = 'iniciar servicios locales';
   startAttempted = true;
   await cli(['start', '--exclude', 'studio,meta,realtime,edge-runtime,functions,imgproxy,inbucket,analytics,vector'], 600000);
   const { stdout } = await cli(['status', '--output', 'json']);
+  phase = 'preparar esquema local';
   const status = JSON.parse(stdout);
   const apiUrl = loopback(status.API_URL, ['http:']);
   const dbUrl = loopback(status.DB_URL, ['postgres:', 'postgresql:']);
@@ -52,6 +55,7 @@ try {
   const snapshot = await readFile(new URL('../supabase/auth-isolation/live-policy-snapshot.sql', import.meta.url), 'utf8');
   let snapshotApplied = false;
   for (const file of (await readdir(migrations)).filter(name => name.endsWith('.sql')).sort()) {
+    phase = 'migración local ' + file;
     // La instantánea reproduce el estado vulnerable antes de su corrección.
     if (file.endsWith('_close_legacy_patient_row_access.sql')) {
       await pool.query(snapshot);
@@ -83,7 +87,10 @@ try {
   if (code !== 0) process.exitCode = 1;
 } catch (error) {
   // No volcar stdout/stderr de las herramientas: pueden contener claves temporales.
-  console.error('No se completó la prueba de sesiones: ' + (error?.code || error?.name || 'error') + '.');
+  console.error('No se completó la prueba de sesiones (' + phase + '): ' + (error?.code || error?.name || 'error') + '.');
+  const diagnostic = error?.stderr || (error instanceof Error ? error.message : '');
+  console.error(String(diagnostic).split('\n').slice(-15).map(line => /(?:key|secret|password|token)/i.test(line)
+    ? '[Credenciales omitidas]' : line.replace(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, '[JWT omitido]')).join('\n'));
   process.exitCode = 1;
 } finally {
   await pool?.end();

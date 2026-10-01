@@ -180,7 +180,7 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
   });
 
   it('el mensaje autorizado se lee y la función interna queda cerrada', async () => {
-    const own = await ownerA.client.rpc('list_thread_messages',{target_patient:pidA,include_ai:false});
+    const own = await ownerA.client.rpc('list_thread_messages',{target_patient:pidA,ack_delivery:false});
     // La firma real debe coincidir: un error de catálogo no cuenta como denegación.
     expect(own.error).toBeNull(); expect(JSON.stringify(own.data)).toContain('MENSAJE FICTICIO A');
     for (const actor of [ownerA,ownerB,patientA,patientB]) {
