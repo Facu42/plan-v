@@ -46,7 +46,7 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 ## A. Seguridad y privacidad
 
 - **Sesiones firmadas 2026-10-01, punto 4:** cuatro cuentas ficticias en Supabase
-  temporal dentro de GitHub. Se confirmó una política legacy que expone notas
+  temporal dentro de GitHub. Se confirmó una política legacy que exponía notas
   profesionales a la propia paciente por la API de datos. Cierre aplicado como
   `20261001195127`, con permiso profesional y vistas conservados en el catálogo.
   Antes: 14 casos aprobados y 1 fallido;

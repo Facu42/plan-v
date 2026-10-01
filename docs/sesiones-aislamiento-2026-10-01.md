@@ -8,13 +8,13 @@ La corrección fue probada y **aplicada en producción**, sin modificar datos ni
 
 ## Qué se encontró
 
-El catálogo publicado de `plan-v-app` tiene la política `patients_self_select`,
+El catálogo publicado de `plan-v-app` tenía la política `patients_self_select`,
 para `authenticated`, con condición `user_id = auth.uid()`. No aparece en la
 cadena de migraciones del repositorio. Ese rol tiene SELECT sobre toda la tabla
 `patients`, incluidos `adherence_why`, `sensitive_hours`, `plan_b` y
 `next_focus`, que el contrato de la app reserva a la profesional.
 
-Una paciente puede llamar directamente a PostgREST para leer esos campos de su
+Una paciente podía llamar directamente a PostgREST para leer esos campos de su
 propia fila. La interfaz de Plan V los oculta, pero eso no protege la API de datos.
 No se observó acceso a filas de otra paciente en esta matriz.
 
