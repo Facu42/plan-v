@@ -8,7 +8,7 @@ privacidad". Agentes: `appsec-engineer` (lidera), `secrets-credential-engineer`,
 
 | Punto del plan | Estado |
 | --- | --- |
-| 1. Funciones de la base abiertas (129 avisos) | Arreglado en el código (PR de este apartado). Falta aplicarlo en la base de producción con el OK de Facundo. |
+| 1. Funciones de la base abiertas (129 avisos) | Hecho. Aplicado en la base de producción el 2026-09-29 con el OK de Facundo. |
 | 2. Protección contra contraseñas filtradas | Bloqueado: Supabase la da sólo en el plan Pro; la cuenta está en el plan gratuito. Se decide junto con el plan pago (apartado E). |
 | 3. 12 tablas con acceso por fila y sin reglas | Revisadas: son sólo del servidor y así deben quedar. Se encontró y arregló un uso roto (ver abajo). |
 | 4. Cabeceras de seguridad de web y API | Hecho en el código, probado en navegador. Se publica con el merge. |
@@ -104,3 +104,14 @@ Facundo dio los datos: responsable Lic. Verónica Trenti (MN 7808, MP 3294), CUI
 mail planv.nutricion@gmail.com. Vigencia: 29 de septiembre de 2026. Se sacaron de las
 páginas las notas para el abogado y el aviso de borrador (siguen en
 `docs/legal/revision-legal.md`), y se aclaró en los términos que hoy Plan V no cobra.
+
+## 2026-09-29: cierre aplicado en producción
+
+Con el OK escrito de Facundo ("aplicá el cierre en la base") se aplicó la migración
+`close_internal_functions` en `plan-v-app`. Antes: 129 funciones ejecutables por cuentas con
+sesión. Después: 95, las mismas que fija la prueba; ninguna para "anon". Comprobado en la base
+publicada: la función de la fuga (`thread_message_json`) ahora da "permiso denegado", y una
+función de la app que usa las internas (lista de recetas de una nutricionista real) sigue
+respondiendo igual. Sin errores en el servidor después del cambio. El asesor de Supabase ahora
+marca 95 (esperado), las 12 tablas sólo del servidor y la protección de contraseñas filtradas
+(plan pago).
