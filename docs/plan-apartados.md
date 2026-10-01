@@ -49,7 +49,7 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
   temporal dentro de GitHub. Se confirmó una política legacy que expone notas
   profesionales a la propia paciente por la API de datos. Cierre preparado;
   todavía sin aplicar en producción. Antes: 14 casos aprobados y 1 fallido;
-  después: 15 aprobados sin omisiones. Suite general: 1111 aprobadas y 2 omitidas.
+  después: 16 aprobados sin omisiones. Suite general: 1111 aprobadas y 2 omitidas.
   No se contrataron recursos de Supabase. Ver [prueba y límites](sesiones-aislamiento-2026-10-01.md).
 
 - **Clasificación 2026-10-01, punto 3:** las 16 tablas sin políticas están cerradas

@@ -76,7 +76,14 @@
     },
     "types": "passed",
     "migration_check": "passed",
-    "expanded_matrix": "16 cases; final run linked from PR."
+    "expanded_matrix": {
+      "run_id": 36916424527,
+      "source_commit": "0a5aea0aabc4686a44400648bd0e3b7ea422901c",
+      "passed": 16,
+      "failed": 0,
+      "skipped": 0,
+      "cleanup": "Temporary local stack and synthetic data removed."
+    }
   },
   "boundaries": {
     "cloud_supabase_resources_created": 0,

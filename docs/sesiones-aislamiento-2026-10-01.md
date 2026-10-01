@@ -41,8 +41,10 @@ prueba es un texto ficticio escrito en la base temporal.
   aplicación sin cambios en datos.
 - La revisión agregó un caso de compatibilidad para `/api/me/patient` y
   `/api/patients/:id`: ficha propia sin nota privada, ficha profesional con la
-  nota y denegación a otra paciente. El resultado final de los 16 casos se
-  registra en la evidencia del PR.
+  nota y denegación a otra paciente. Ejecución final
+  [36916424527](https://github.com/Facu42/plan-v/actions/runs/36916424527), commit
+  `0a5aea0`: **16 casos aprobados, sin omisiones**, con eliminación confirmada
+  del entorno temporal y los datos ficticios.
 
 La [evidencia de catálogo y ejecuciones](security/sesiones-aislamiento-2026-10-01.json)
 distingue el estado publicado de la corrección local.
@@ -51,8 +53,11 @@ distingue el estado publicado de la corrección local.
 
 Dos nutricionistas y sus dos pacientes. Cada cuenta se crea con la API local de
 Auth y entra con contraseña; se valida su identidad con Auth y una operación
-positiva de PostgREST. Las llamadas de usuarias llevan su JWT, nunca la clave de
-servicio. La clave privilegiada se usa solo para crear las cuentas del entorno.
+positiva de PostgREST. Las llamadas directas a la API de datos de las cuatro
+usuarias usan su JWT y la clave pública. La preparación usa la clave privilegiada
+y SQL locales para crear/verificar cuentas y cargar los datos ficticios. La API
+de Plan V conserva sus consultas privilegiadas internas habituales, sujetas a sus
+controles de acceso. Ninguno de esos clientes apunta al proyecto publicado.
 
 Se comprueban lecturas y escritura de terceros, ficha propia, notas
 profesionales, metas y datos corporales, borrador/publicación, función interna
@@ -91,8 +96,10 @@ las migraciones y la política legacy confirmada; no se afirma que sea una copia
 contrato pendiente de finalización de exportación/borrado ni todos los módulos
 de la app.
 
-Para cerrar la exposición publicada falta aplicar la migración con autorización
-escrita según la regla de producción del proyecto y comprobar el catálogo
-posterior. El PR y las pruebas pueden revisarse antes de esa acción.
+Para cerrar la exposición publicada falta aplicar la migración y comprobar el
+catálogo posterior. La autorización escrita ya consta en este hilo: «hacelo,
+aplica la migracion y configura el despliegue» y las instrucciones posteriores
+de continuar las correcciones de seguridad, manteniendo el límite de no contratar
+recursos de Supabase. No se solicita otra autorización para ese mismo trabajo.
 Referencia de la plataforma: [flujo de desarrollo local de Supabase](https://supabase.com/docs/guides/local-development/cli-workflows).
 
