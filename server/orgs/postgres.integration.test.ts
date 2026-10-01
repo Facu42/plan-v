@@ -89,6 +89,25 @@ afterAll(async () => {
 });
 
 describe('PV-38 organizaciones en PostgreSQL descartable', () => {
+  it('un tercero no acepta otra invitación ni delega, revoca o transfiere una paciente ajena', async () => {
+    const org = await rpc(nutriA, 'create_organization', ['Auditoría ficticia', 'auditoria-ficticia']) as OrganizationView;
+    await rpc(nutriA, 'invite_org_member', [org.id, nutriBId, 'member']);
+    await expect(rpc(nutriC, 'accept_org_invite', [org.id])).rejects.toMatchObject({ code: '42501' });
+    await rpc(nutriB, 'accept_org_invite', [org.id]);
+    const links = await rpc(nutriA, 'delegate_patient_care', [patientA, nutriBId, 'delegate', org.id]) as CareLinkView[];
+    const link = links.find((row) => row.link_role === 'delegate' && row.nutritionist_id === nutriBId)!;
+    for (const user of [nutriC, patientBUser, '']) {
+      await expect(rpc(user, 'invite_org_member', [org.id, nutriCId, 'admin'])).rejects.toMatchObject({ code: '42501' });
+      await expect(rpc(user, 'delegate_patient_care', [patientA, nutriCId, 'delegate', org.id])).rejects.toMatchObject({ code: '42501' });
+      await expect(rpc(user, 'revoke_patient_care', [link.id])).rejects.toMatchObject({ code: '42501' });
+      await expect(rpc(user, 'transfer_patient_ownership', [patientA, nutriBId, 'intento ficticio'])).rejects.toMatchObject({ code: '42501' });
+    }
+    expect((await db.query('select nutritionist_id from public.patients where id=$1', [patientA])).rows[0]).toEqual({ nutritionist_id: nutriAId });
+    expect((await db.query('select revoked_at from public.patient_care_links where id=$1', [link.id])).rows[0]).toEqual({ revoked_at: null });
+    await rpc(nutriA, 'revoke_patient_care', [link.id]);
+    await db.query('delete from public.organizations where id=$1', [org.id]);
+  });
+
   it('aísla el consultorio, delega, observa y transfiere ownership con hijos', async () => {
     const org = await rpc(nutriA, 'create_organization', ['Consultorio Sur', 'consultorio-sur']) as OrganizationView;
     expect(org.subscription.status).toBe('trialing');

@@ -1,0 +1,3403 @@
+{
+  "project": "plan-v-app",
+  "project_ref": "wvosvlxpfytokwfbcero",
+  "base_commit": "44f95c1abeb01e08085c092f77b414101088c717",
+  "audited_at": "2026-10-01",
+  "scope_names": [
+    "accept_org_invite",
+    "accept_patient_invite",
+    "admin_extend_trial",
+    "admin_get_service_board",
+    "admin_log_service_event",
+    "admin_mark_test_account",
+    "admin_record_service_payment",
+    "admin_set_service_note",
+    "admin_set_service_override",
+    "admin_set_service_settings",
+    "admin_void_service_payment",
+    "complete_privacy_delete",
+    "complete_privacy_export",
+    "delegate_patient_care",
+    "get_billing_board",
+    "get_patient_ledger",
+    "get_privacy_package",
+    "invite_org_member",
+    "is_platform_admin",
+    "list_privacy_requests",
+    "privacy_assert_patient",
+    "privacy_request_json",
+    "provision_nutritionist",
+    "record_patient_consent",
+    "record_patient_payment",
+    "record_privacy_access",
+    "report_patient_payment",
+    "request_body_data",
+    "request_privacy_action",
+    "review_patient_payment",
+    "revoke_patient_care",
+    "save_my_body_data",
+    "save_nutrition_target",
+    "service_assert_admin",
+    "service_audit",
+    "service_nutritionist_json",
+    "service_recompute",
+    "service_start_trial",
+    "set_organization_subscription_status",
+    "set_patient_billing",
+    "set_patient_charge_waived",
+    "set_patient_fee",
+    "set_payment_settings",
+    "transfer_patient_ownership"
+  ],
+  "table_security": [
+    {
+      "table_name": "consent_catalog",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": true,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": [
+        {
+          "name": "consent_catalog_read",
+          "check": null,
+          "roles": [
+            "authenticated"
+          ],
+          "using": "true",
+          "command": "SELECT"
+        }
+      ]
+    },
+    {
+      "table_name": "consent_events",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": true,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": [
+        {
+          "name": "consents_scoped_read",
+          "check": null,
+          "roles": [
+            "authenticated"
+          ],
+          "using": "((patient_id = my_patient_id()) OR is_assigned_patient(patient_id))",
+          "command": "SELECT"
+        }
+      ]
+    },
+    {
+      "table_name": "nutritionist_subscriptions",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": false,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": []
+    },
+    {
+      "table_name": "nutritionists",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": true,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": [
+        {
+          "name": "nutritionists_select_own",
+          "check": null,
+          "roles": [
+            "public"
+          ],
+          "using": "(user_id = auth.uid())",
+          "command": "SELECT"
+        }
+      ]
+    },
+    {
+      "table_name": "organization_members",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": true,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": [
+        {
+          "name": "organization_members_select",
+          "check": null,
+          "roles": [
+            "authenticated"
+          ],
+          "using": "is_org_member(organization_id)",
+          "command": "SELECT"
+        }
+      ]
+    },
+    {
+      "table_name": "organization_subscriptions",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": true,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": [
+        {
+          "name": "organization_subscriptions_select",
+          "check": null,
+          "roles": [
+            "authenticated"
+          ],
+          "using": "is_org_member(organization_id)",
+          "command": "SELECT"
+        }
+      ]
+    },
+    {
+      "table_name": "patient_care_links",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": true,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": [
+        {
+          "name": "patient_care_links_select",
+          "check": null,
+          "roles": [
+            "authenticated"
+          ],
+          "using": "(is_assigned_patient(patient_id) OR (NOT (nutritionist_id IS DISTINCT FROM my_nutritionist_id())))",
+          "command": "SELECT"
+        }
+      ]
+    },
+    {
+      "table_name": "patient_charges",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": true,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": [
+        {
+          "name": "patient_charges_select",
+          "check": null,
+          "roles": [
+            "public"
+          ],
+          "using": "((nutritionist_id = ( SELECT my_nutritionist_id() AS my_nutritionist_id)) OR (patient_id = ( SELECT my_patient_id() AS my_patient_id)))",
+          "command": "SELECT"
+        }
+      ]
+    },
+    {
+      "table_name": "patient_invites",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": true,
+      "authenticated_insert": true,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": [
+        {
+          "name": "patient_invites_nutri_insert",
+          "check": "(nutritionist_id = my_nutritionist_id())",
+          "roles": [
+            "public"
+          ],
+          "using": null,
+          "command": "INSERT"
+        },
+        {
+          "name": "patient_invites_nutri_select",
+          "check": null,
+          "roles": [
+            "public"
+          ],
+          "using": "(nutritionist_id = my_nutritionist_id())",
+          "command": "SELECT"
+        }
+      ]
+    },
+    {
+      "table_name": "patient_payments",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": true,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": [
+        {
+          "name": "patient_payments_select",
+          "check": null,
+          "roles": [
+            "public"
+          ],
+          "using": "((nutritionist_id = ( SELECT my_nutritionist_id() AS my_nutritionist_id)) OR (patient_id = ( SELECT my_patient_id() AS my_patient_id)))",
+          "command": "SELECT"
+        }
+      ]
+    },
+    {
+      "table_name": "patients",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": true,
+      "authenticated_insert": true,
+      "authenticated_update": false,
+      "authenticated_delete": true,
+      "policies": [
+        {
+          "name": "patients_nutri_all",
+          "check": "(nutritionist_id = my_nutritionist_id())",
+          "roles": [
+            "public"
+          ],
+          "using": "(nutritionist_id = my_nutritionist_id())",
+          "command": "ALL"
+        },
+        {
+          "name": "patients_self_select",
+          "check": null,
+          "roles": [
+            "authenticated"
+          ],
+          "using": "(user_id = auth.uid())",
+          "command": "SELECT"
+        }
+      ]
+    },
+    {
+      "table_name": "platform_admins",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": false,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": []
+    },
+    {
+      "table_name": "platform_settings",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": false,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": []
+    },
+    {
+      "table_name": "privacy_access_events",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": false,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": []
+    },
+    {
+      "table_name": "privacy_export_packages",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": false,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": []
+    },
+    {
+      "table_name": "privacy_requests",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": false,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": []
+    },
+    {
+      "table_name": "profiles",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": false,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": [
+        {
+          "name": "profiles_select_own",
+          "check": null,
+          "roles": [
+            "public"
+          ],
+          "using": "(id = auth.uid())",
+          "command": "SELECT"
+        },
+        {
+          "name": "profiles_update_own",
+          "check": "(id = auth.uid())",
+          "roles": [
+            "public"
+          ],
+          "using": "(id = auth.uid())",
+          "command": "UPDATE"
+        }
+      ]
+    },
+    {
+      "table_name": "service_payments",
+      "rls": true,
+      "anon_select": false,
+      "anon_write": false,
+      "authenticated_select": false,
+      "authenticated_insert": false,
+      "authenticated_update": false,
+      "authenticated_delete": false,
+      "policies": []
+    },
+    {
+      "table_name": "nutrition_targets",
+      "rls": true,
+      "authenticated_select": true,
+      "authenticated_write": true,
+      "policies": [
+        {
+          "name": "nutrition_targets_read_patient",
+          "check": null,
+          "using": "((published_at IS NOT NULL) AND (patient_id = my_patient_id()))",
+          "command": "SELECT"
+        },
+        {
+          "name": "nutrition_targets_read_pro",
+          "check": null,
+          "using": "is_assigned_patient(patient_id)",
+          "command": "SELECT"
+        }
+      ]
+    },
+    {
+      "table_name": "patient_body_data",
+      "rls": true,
+      "authenticated_select": true,
+      "authenticated_write": true,
+      "policies": [
+        {
+          "name": "body_data_read_pro",
+          "check": null,
+          "using": "is_assigned_patient(patient_id)",
+          "command": "SELECT"
+        },
+        {
+          "name": "body_data_read_self",
+          "check": null,
+          "using": "(patient_id = my_patient_id())",
+          "command": "SELECT"
+        }
+      ]
+    },
+    {
+      "table_name": "patient_body_data_requests",
+      "rls": true,
+      "authenticated_select": true,
+      "authenticated_write": true,
+      "policies": [
+        {
+          "name": "body_requests_read_pro",
+          "check": null,
+          "using": "is_assigned_patient(patient_id)",
+          "command": "SELECT"
+        },
+        {
+          "name": "body_requests_read_self",
+          "check": null,
+          "using": "(patient_id = my_patient_id())",
+          "command": "SELECT"
+        }
+      ]
+    }
+  ],
+  "migration_history": [
+    {
+      "version": "20260921133925",
+      "name": "ping_empty_check"
+    },
+    {
+      "version": "20260921134441",
+      "name": "core"
+    },
+    {
+      "version": "20260921134639",
+      "name": "intake"
+    },
+    {
+      "version": "20260921134737",
+      "name": "care"
+    },
+    {
+      "version": "20260921134747",
+      "name": "jobs"
+    },
+    {
+      "version": "20260921134749",
+      "name": "clinical_documents"
+    },
+    {
+      "version": "20260921134811",
+      "name": "private_assets"
+    },
+    {
+      "version": "20260921134849",
+      "name": "measurements"
+    },
+    {
+      "version": "20260921135046",
+      "name": "recipes"
+    },
+    {
+      "version": "20260921135157",
+      "name": "meal_plans"
+    },
+    {
+      "version": "20260921135205",
+      "name": "meal_plan_patient_detail"
+    },
+    {
+      "version": "20260921135301",
+      "name": "meal_diary"
+    },
+    {
+      "version": "20260921135336",
+      "name": "message_threads"
+    },
+    {
+      "version": "20260921135454",
+      "name": "appointments"
+    },
+    {
+      "version": "20260921135535",
+      "name": "ai_jobs"
+    },
+    {
+      "version": "20260921135624",
+      "name": "ai_eval"
+    },
+    {
+      "version": "20260921135702",
+      "name": "privacy_ops"
+    },
+    {
+      "version": "20260921161022",
+      "name": "fix_security_invoker_patient_views"
+    },
+    {
+      "version": "20260921163821",
+      "name": "patients_self_select_rls"
+    },
+    {
+      "version": "20260924001657",
+      "name": "patient_progress"
+    },
+    {
+      "version": "20260924021342",
+      "name": "recipe_cover"
+    },
+    {
+      "version": "20260924021448",
+      "name": "recipe_cover_funcs_align"
+    },
+    {
+      "version": "20260924141030",
+      "name": "ai_job_reject"
+    },
+    {
+      "version": "20260924141033",
+      "name": "recipe_cover_storage"
+    },
+    {
+      "version": "20260928112510",
+      "name": "shopping_lists"
+    },
+    {
+      "version": "20260928112603",
+      "name": "message_attachments"
+    },
+    {
+      "version": "20260928112711",
+      "name": "notification_outbox"
+    },
+    {
+      "version": "20260928112820",
+      "name": "exercise_library"
+    },
+    {
+      "version": "20260928112952",
+      "name": "editorial_resources"
+    },
+    {
+      "version": "20260928113118",
+      "name": "organizations"
+    },
+    {
+      "version": "20260928113231",
+      "name": "recipe_cards_days"
+    },
+    {
+      "version": "20260928113304",
+      "name": "patient_access"
+    },
+    {
+      "version": "20260928113329",
+      "name": "patient_archive"
+    },
+    {
+      "version": "20260929183450",
+      "name": "close_internal_functions"
+    },
+    {
+      "version": "20260930152855",
+      "name": "patient_fees"
+    },
+    {
+      "version": "20260930184822",
+      "name": "service_admin"
+    },
+    {
+      "version": "20261001002458",
+      "name": "nutrition_targets"
+    },
+    {
+      "version": "20261001011015",
+      "name": "service_admin_accounts"
+    },
+    {
+      "version": "20261001143810",
+      "name": "ai_followup_consent"
+    }
+  ],
+  "default_function_privileges": [
+    {
+      "creator_role": "postgres",
+      "schema_name": "*",
+      "acl": "{postgres=X/postgres}"
+    },
+    {
+      "creator_role": "postgres",
+      "schema_name": "public",
+      "acl": "{postgres=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "creator_role": "supabase_admin",
+      "schema_name": "public",
+      "acl": "{postgres=X/supabase_admin,anon=X/supabase_admin,authenticated=X/supabase_admin,service_role=X/supabase_admin}"
+    }
+  ],
+  "functions": [
+    {
+      "name": "accept_org_invite",
+      "arguments": "org_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "b513dd9f85f8f27e19c0f89c32e72308a0cb0d1e5603a25d0ab58c0ef387fc89",
+      "local_definition_sha256": "b513dd9f85f8f27e19c0f89c32e72308a0cb0d1e5603a25d0ab58c0ef387fc89",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "accept_patient_invite",
+      "arguments": "invite_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "5d87356fdd519d63688817f3e8316de9144da9a5a2847ad332216764e2d879c0",
+      "local_definition_sha256": "5d87356fdd519d63688817f3e8316de9144da9a5a2847ad332216764e2d879c0",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "ack_thread_delivery",
+      "arguments": "target_patient uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "f3134be7e1630979a137d4f96976c20070ed48d18247272444b4d720a379db09",
+      "local_definition_sha256": "f3134be7e1630979a137d4f96976c20070ed48d18247272444b4d720a379db09",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "add_patient_clinical_note",
+      "arguments": "target uuid, note_body text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "a5d3adc8076449e065c384201488ea01e6575f7f4f72b69e33dedd1e5f510057",
+      "local_definition_sha256": "a5d3adc8076449e065c384201488ea01e6575f7f4f72b69e33dedd1e5f510057",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "add_shopping_manual",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "e54324d193e33855bfe6d134ff4f872eae408f30c5aeb62bbc8024ef56a87d42",
+      "local_definition_sha256": "e54324d193e33855bfe6d134ff4f872eae408f30c5aeb62bbc8024ef56a87d42",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "admin_extend_trial",
+      "arguments": "target uuid, days integer",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "5347748615869336e05a3f89c8093bb88981f8526f34aaa9959cf68abc8e2ba8",
+      "local_definition_sha256": "5347748615869336e05a3f89c8093bb88981f8526f34aaa9959cf68abc8e2ba8",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "admin_get_service_board",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "94991ab277493204a0120edb727445b941126bfe831918289d4325db318a0543",
+      "local_definition_sha256": "94991ab277493204a0120edb727445b941126bfe831918289d4325db318a0543",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "admin_log_service_event",
+      "arguments": "target uuid, input_action text, input_mode text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "5df284a8eb5c5d52a32377151f0b029562117d50605f3dd64e735f38132223f3",
+      "local_definition_sha256": "5df284a8eb5c5d52a32377151f0b029562117d50605f3dd64e735f38132223f3",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "admin_mark_test_account",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "c86c09d7233ec18518dcda41efa0f559fbf8fc533c37866154244202c060368a",
+      "local_definition_sha256": "c86c09d7233ec18518dcda41efa0f559fbf8fc533c37866154244202c060368a",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "admin_record_service_payment",
+      "arguments": "target uuid, amount integer, months integer, paid_on date, method text, note text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "66853db0085260723d85cee1912489ee611a42908c95b765e19443f28d93fb52",
+      "local_definition_sha256": "66853db0085260723d85cee1912489ee611a42908c95b765e19443f28d93fb52",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "admin_set_service_note",
+      "arguments": "target uuid, note text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "5edb3fda41d910f15c075991620c55a2effafbf001e50d2e8543fee9654c460a",
+      "local_definition_sha256": "5edb3fda41d910f15c075991620c55a2effafbf001e50d2e8543fee9654c460a",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "admin_set_service_override",
+      "arguments": "target uuid, input_override text, note text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "ecb0deb9fd1cfcaf9c174a928c4a872edea31278192dc597a8e26210f9cddfe5",
+      "local_definition_sha256": "ecb0deb9fd1cfcaf9c174a928c4a872edea31278192dc597a8e26210f9cddfe5",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "admin_set_service_settings",
+      "arguments": "monthly_price integer, trial_days integer",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "0a5a6d9e105b5cc125b79faa4d4c584aa62d8718ccb346e87885080f4cf33f35",
+      "local_definition_sha256": "0a5a6d9e105b5cc125b79faa4d4c584aa62d8718ccb346e87885080f4cf33f35",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "admin_void_service_payment",
+      "arguments": "payment_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "622ba6f27dbc49896afbab078b5b3206df91ff3b362eb44381e20730ab33abf0",
+      "local_definition_sha256": "622ba6f27dbc49896afbab078b5b3206df91ff3b362eb44381e20730ab33abf0",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "ai_job_json",
+      "arguments": "jid uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "bd4656a6312f274461c1e2159d5c8a07a2781443b2d2c829ac5b807d26022802",
+      "local_definition_sha256": "bd4656a6312f274461c1e2159d5c8a07a2781443b2d2c829ac5b807d26022802",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "apply_ai_job",
+      "arguments": "target_job uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "db7d1cfe25c98a32b7ab4488b090fd425e97f23d84d4c9d8ff506c6a1dde609d",
+      "local_definition_sha256": "db7d1cfe25c98a32b7ab4488b090fd425e97f23d84d4c9d8ff506c6a1dde609d",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "appointment_assert_patient",
+      "arguments": "pid uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "dfe3ed621b19633c0b3b44f9c2fe8b73dc47243c0aaec1a16530c6ca03b292c3",
+      "local_definition_sha256": "dfe3ed621b19633c0b3b44f9c2fe8b73dc47243c0aaec1a16530c6ca03b292c3",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "appointment_assert_pro",
+      "arguments": "pid uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "c11591b7ae102356cbc9fc8715fe7f206ce224d322fe706cb2f067a719eb95f3",
+      "local_definition_sha256": "c11591b7ae102356cbc9fc8715fe7f206ce224d322fe706cb2f067a719eb95f3",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "assert_health_publishable",
+      "arguments": "target_patient uuid, haystack text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "d74e79a28f5ac786992e1b5987dacaeff2d75b00d20cdc2306d8001aab07bfce",
+      "local_definition_sha256": "d74e79a28f5ac786992e1b5987dacaeff2d75b00d20cdc2306d8001aab07bfce",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "assign_editorial_resource",
+      "arguments": "resource_slug text, patient_ids uuid[]",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "4208ad78210f80b968cb71029b44021f5acd268a962650a2ebc11c8918dcc182",
+      "local_definition_sha256": "4208ad78210f80b968cb71029b44021f5acd268a962650a2ebc11c8918dcc182",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "assign_exercise_routine",
+      "arguments": "target_patient uuid, input_title text, input_items jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "89c82b820dca2f3884fe332793af05f65255b3605b8db60bfae4e73f2e41a3ff",
+      "local_definition_sha256": "89c82b820dca2f3884fe332793af05f65255b3605b8db60bfae4e73f2e41a3ff",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "assign_recipe",
+      "arguments": "target_recipe uuid, target_patient uuid, expected_version integer",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "ca842d1236544fdf8b068cf959db3f21a58a636b7be88f5b2c973e965348315e",
+      "local_definition_sha256": "ca842d1236544fdf8b068cf959db3f21a58a636b7be88f5b2c973e965348315e",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "assign_recipe_day",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "6369cda110ae71f0e016cc251ad8a756a8af6e0d655030a3f10c9edc8b828e9d",
+      "local_definition_sha256": "6369cda110ae71f0e016cc251ad8a756a8af6e0d655030a3f10c9edc8b828e9d",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "billing_assert_owner",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "2a2e5720550de7f835ee36631c6e1731ab1971cd2411baff729fc519d3fae792",
+      "local_definition_sha256": "2a2e5720550de7f835ee36631c6e1731ab1971cd2411baff729fc519d3fae792",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "billing_ledger_json",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "ac95216c7797715df428cba1cd2b0765c96b4ddea3a96836c46643cf5786751a",
+      "local_definition_sha256": "ac95216c7797715df428cba1cd2b0765c96b4ddea3a96836c46643cf5786751a",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "billing_sync_charges",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "7f4d25d0a5d424c92b4143fcb0e3f9bc46b408a9dabea1df9fafdff28bb486e3",
+      "local_definition_sha256": "7f4d25d0a5d424c92b4143fcb0e3f9bc46b408a9dabea1df9fafdff28bb486e3",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "can_care_for_patient",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "ce4fcb265f39aaffb4e70a17929606ec8ce7e90640eb85d01de5182877adac1c",
+      "local_definition_sha256": "ce4fcb265f39aaffb4e70a17929606ec8ce7e90640eb85d01de5182877adac1c",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "care_can_read",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "6f928d34bfa9664b11bd13e82e9d5b2ca5177beb45664b211225c6e675b866d7",
+      "local_definition_sha256": "6f928d34bfa9664b11bd13e82e9d5b2ca5177beb45664b211225c6e675b866d7",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "care_consent",
+      "arguments": "target uuid, purpose_value text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "6ba64b7a176e837686cf7d5fad9177aeb6afeb7de801ce1cc6d2bd0515f3ae74",
+      "local_definition_sha256": "6ba64b7a176e837686cf7d5fad9177aeb6afeb7de801ce1cc6d2bd0515f3ae74",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "care_meal_photo_allowed",
+      "arguments": "path text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "e639857dc85ca713d835a05af00baaac20b1194f86b7bc163047fe92f12b51b2",
+      "local_definition_sha256": "e639857dc85ca713d835a05af00baaac20b1194f86b7bc163047fe92f12b51b2",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "complete_privacy_delete",
+      "arguments": "target_request uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "25b304b8fa53917db1e2e2061b47f757fe96c9473c8f3675b3ad25f19a1802e2",
+      "local_definition_sha256": "25b304b8fa53917db1e2e2061b47f757fe96c9473c8f3675b3ad25f19a1802e2",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "complete_privacy_export",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "c35e3868bdc7107165b17feecfbbe212a7c168cf698c1703d7d145f950b4a063",
+      "local_definition_sha256": "c35e3868bdc7107165b17feecfbbe212a7c168cf698c1703d7d145f950b4a063",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "confirm_appointment",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "3c4e4ba66d15f5737c5bdbb03b51579216c5fd8290dda15cb92a41c0857ceeb8",
+      "local_definition_sha256": "3c4e4ba66d15f5737c5bdbb03b51579216c5fd8290dda15cb92a41c0857ceeb8",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "create_organization",
+      "arguments": "input_name text, input_slug text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "1e1108f0d993769c6309d2a64b1dc54ecc2fb5669d815ca1203ce385a7f75ad6",
+      "local_definition_sha256": "1e1108f0d993769c6309d2a64b1dc54ecc2fb5669d815ca1203ce385a7f75ad6",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "delegate_patient_care",
+      "arguments": "target_patient uuid, delegate_nutritionist uuid, input_role text, org_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "89fee12b3aae5b9444cab577e573b861be657c08ffa6c68ac0c24dce4ab1bb14",
+      "local_definition_sha256": "89fee12b3aae5b9444cab577e573b861be657c08ffa6c68ac0c24dce4ab1bb14",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "delete_care_document",
+      "arguments": "target uuid, record_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "d4e30195c89f7610a7009d05262533a83d355f59255cbc0a46083fc0ddf16495",
+      "local_definition_sha256": "d4e30195c89f7610a7009d05262533a83d355f59255cbc0a46083fc0ddf16495",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "delete_care_photo",
+      "arguments": "target uuid, record_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "622be95ef9a1629b6cdacfa9bf00329b864a23de663009a7848a64c4b33b9956",
+      "local_definition_sha256": "622be95ef9a1629b6cdacfa9bf00329b864a23de663009a7848a64c4b33b9956",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "delete_patient_activity",
+      "arguments": "target_patient uuid, activity_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "aa25e48d4bf4923f51a3f04b6b607155cd15a8a58947bb04e75d1a5ac5e2e224",
+      "local_definition_sha256": "aa25e48d4bf4923f51a3f04b6b607155cd15a8a58947bb04e75d1a5ac5e2e224",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "delete_shopping_manual",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "f64a1440339f7d5cb5e59abc63a40f421aa88718e5dcd6d582c779dad450287f",
+      "local_definition_sha256": "f64a1440339f7d5cb5e59abc63a40f421aa88718e5dcd6d582c779dad450287f",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "diary_assert_access",
+      "arguments": "target uuid, professional boolean",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "2c7e45b8022918c42974850a1c508cfa11e257e52c2da68bf12528af378bc356",
+      "local_definition_sha256": "2c7e45b8022918c42974850a1c508cfa11e257e52c2da68bf12528af378bc356",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "enqueue_ai_job",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "70860d1046d3eac8cfbc2a47c55ac9a356177c4a866fec7daef5108dde37bbd0",
+      "local_definition_sha256": "70860d1046d3eac8cfbc2a47c55ac9a356177c4a866fec7daef5108dde37bbd0",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "enqueue_outbox_event",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "80444a25b42567c8cf68c0350d09328da94633b8f5709394c817c05373ecb781",
+      "local_definition_sha256": "80444a25b42567c8cf68c0350d09328da94633b8f5709394c817c05373ecb781",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "exercise_assert_prescribe",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "a34f6b34971c6e08ccb311e14f44016400f417d1f99d7b0c22845658c958da2a",
+      "local_definition_sha256": "a34f6b34971c6e08ccb311e14f44016400f417d1f99d7b0c22845658c958da2a",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "exercise_can_prescribe",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "bb3594c47fbd3f4a05a8540c9caf00954ad5da2e0549366dea9f3f3d11d006f9",
+      "local_definition_sha256": "bb3594c47fbd3f4a05a8540c9caf00954ad5da2e0549366dea9f3f3d11d006f9",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "exercise_library_json",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "be289572cf11dff5591ee598623703a4965a1b5483177284ce9146b3bcf265c8",
+      "local_definition_sha256": "be289572cf11dff5591ee598623703a4965a1b5483177284ce9146b3bcf265c8",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "finish_ai_job",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "7db8274cb891369960ada1a0b9146646bb9506d30eae0b5e9fac5ab68b21c675",
+      "local_definition_sha256": "7db8274cb891369960ada1a0b9146646bb9506d30eae0b5e9fac5ab68b21c675",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "get_ai_job",
+      "arguments": "target_job uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "693fcddfe7d26dbf8288e8988fd8ab87b926f7753bae659f84674f59209eaed3",
+      "local_definition_sha256": "693fcddfe7d26dbf8288e8988fd8ab87b926f7753bae659f84674f59209eaed3",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "get_billing_board",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "b0f6601bcc6f531cd98941ec6dc1dc3fd02be88bf2029df8a2fa618201bc7a83",
+      "local_definition_sha256": "b0f6601bcc6f531cd98941ec6dc1dc3fd02be88bf2029df8a2fa618201bc7a83",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "get_notification_preferences",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "d65a0bca21c8d7bdb3dafbdfc14046f12adde085fbe73b4d2140e7e740a86487",
+      "local_definition_sha256": "d65a0bca21c8d7bdb3dafbdfc14046f12adde085fbe73b4d2140e7e740a86487",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "get_organization_subscription",
+      "arguments": "org_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "a3f294ae50e26b35bbf4f1b142a5887c9cc0b5af6da233a4fba857e8e7aab06a",
+      "local_definition_sha256": "a3f294ae50e26b35bbf4f1b142a5887c9cc0b5af6da233a4fba857e8e7aab06a",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "get_patient_appointment",
+      "arguments": "target_patient uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "f0ee115294f035c2e0d405d6fd0df9442d2807996d37384609065ca0dce1feb2",
+      "local_definition_sha256": "f0ee115294f035c2e0d405d6fd0df9442d2807996d37384609065ca0dce1feb2",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "get_patient_exercise",
+      "arguments": "target_patient uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "e7e9583c01126b005e1bf966d0298748c59ea5e396919d57038196c4fa3ddb47",
+      "local_definition_sha256": "e7e9583c01126b005e1bf966d0298748c59ea5e396919d57038196c4fa3ddb47",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "get_patient_intake",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "4453be6bc0895593f9f5dc69f2bfb714566f34020cf05e3aa227db69ab7a6152",
+      "local_definition_sha256": "4453be6bc0895593f9f5dc69f2bfb714566f34020cf05e3aa227db69ab7a6152",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "get_patient_ledger",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "bb19a64e75afa9f18f5a72637a2a96133cabad693ef18e19641390def4daa701",
+      "local_definition_sha256": "bb19a64e75afa9f18f5a72637a2a96133cabad693ef18e19641390def4daa701",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "get_patient_library",
+      "arguments": "target_patient uuid, query text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "5ed71195aa379956457a8c9ad4ee1774d60f222df9db3f669f0225e5e69bbb28",
+      "local_definition_sha256": "5ed71195aa379956457a8c9ad4ee1774d60f222df9db3f669f0225e5e69bbb28",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "get_patient_progress",
+      "arguments": "target_patient uuid, period_days integer",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "d3dbf6fd7a6fb60c57cd164797d36f3fa6cc7507ecb9ee5041f128a72c7af640",
+      "local_definition_sha256": "d3dbf6fd7a6fb60c57cd164797d36f3fa6cc7507ecb9ee5041f128a72c7af640",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "get_privacy_package",
+      "arguments": "target_request uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "fdb1d79cd7368a1056c874b63ed76e9d3e6bcab736a39e1fa1693607fcfb222a",
+      "local_definition_sha256": "fdb1d79cd7368a1056c874b63ed76e9d3e6bcab736a39e1fa1693607fcfb222a",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "get_shopping_list",
+      "arguments": "target_patient uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "2663163ba4fbc63333d8ad9f26afc72ebd9fa04acba22da7c72e1cc24eb4ba92",
+      "local_definition_sha256": "2663163ba4fbc63333d8ad9f26afc72ebd9fa04acba22da7c72e1cc24eb4ba92",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "handle_new_user",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "dcb36ade2ba3b64ebc02f83a6c560124a7b5b4dfa5e52b61b24526178b8a2e90",
+      "local_definition_sha256": "dcb36ade2ba3b64ebc02f83a6c560124a7b5b4dfa5e52b61b24526178b8a2e90",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "intake_assert_access",
+      "arguments": "target uuid, professional boolean",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "6f4fe6158fcab125aebc76a378834e3385f484db6228d9c482043626663b2a53",
+      "local_definition_sha256": "6f4fe6158fcab125aebc76a378834e3385f484db6228d9c482043626663b2a53",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "intake_bundle",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "cce9daab690199b25f21def2add9132855a020392a5928dd8577d43dac13cfc0",
+      "local_definition_sha256": "cce9daab690199b25f21def2add9132855a020392a5928dd8577d43dac13cfc0",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "invite_org_member",
+      "arguments": "org_id uuid, target_nutritionist uuid, input_role text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "c1c5be83597b694e2d63dac8116de7fe3418c358e9615c51db5660b667954b45",
+      "local_definition_sha256": "c1c5be83597b694e2d63dac8116de7fe3418c358e9615c51db5660b667954b45",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "is_assigned_patient",
+      "arguments": "target_patient_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "b57a8f84a72dcd790ddcae93a5a03ba7bb087584720db934c7b5fe11a294e910",
+      "local_definition_sha256": "b57a8f84a72dcd790ddcae93a5a03ba7bb087584720db934c7b5fe11a294e910",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "is_assigned_patient_path",
+      "arguments": "target_patient_id text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "a4661a97ec3c6c84dc9400f58723084c52ba3b810991e3a1d75fb41d8ce4b2a0",
+      "local_definition_sha256": "a4661a97ec3c6c84dc9400f58723084c52ba3b810991e3a1d75fb41d8ce4b2a0",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "is_org_manager",
+      "arguments": "org_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "013e09ffb44de82775f529aa616301cb448ea8d6b90aa1a8727e661341938de2",
+      "local_definition_sha256": "013e09ffb44de82775f529aa616301cb448ea8d6b90aa1a8727e661341938de2",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "is_org_member",
+      "arguments": "org_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "e83d8dfd2ef57fbc32898bb876226059e42c5248afcb9590b689e7be844f8199",
+      "local_definition_sha256": "e83d8dfd2ef57fbc32898bb876226059e42c5248afcb9590b689e7be844f8199",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "is_own_patient",
+      "arguments": "patient_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "7944771967deec60bdaa4a61e8a1c3991dc1cd3fdf04c92e082a7022b96ef32f",
+      "local_definition_sha256": "7944771967deec60bdaa4a61e8a1c3991dc1cd3fdf04c92e082a7022b96ef32f",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "is_platform_admin",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "085f905417f0e42e03613ce909e7b1ca3fc29038304cf2de102120a628b89a7a",
+      "local_definition_sha256": "085f905417f0e42e03613ce909e7b1ca3fc29038304cf2de102120a628b89a7a",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "list_ai_jobs",
+      "arguments": "target_patient uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "c18f845a40d4914fb3b24b6660734fcbd824390764e11fae8b414b3dbbda39e1",
+      "local_definition_sha256": "c18f845a40d4914fb3b24b6660734fcbd824390764e11fae8b414b3dbbda39e1",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "list_assigned_recipes",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "0878479d25c5b890a2abe44861c4cd43522b1295c87a140077f33cee77546b81",
+      "local_definition_sha256": "0878479d25c5b890a2abe44861c4cd43522b1295c87a140077f33cee77546b81",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "list_my_organizations",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "4282598e438c34fcd6be357f1da5008d8258af684d05e79449bb6b207a7ec22d",
+      "local_definition_sha256": "4282598e438c34fcd6be357f1da5008d8258af684d05e79449bb6b207a7ec22d",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "list_outbox_mailbox",
+      "arguments": "target_patient uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "9d534e243c3c48dba6091eed6c13ee8d52e8af2a05b8338ecbe0c70e2a68d687",
+      "local_definition_sha256": "9d534e243c3c48dba6091eed6c13ee8d52e8af2a05b8338ecbe0c70e2a68d687",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "list_outbox_snapshot",
+      "arguments": "target_patient uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "1c854a08216529cf414338734b8f25d3f61085f9e5161047ea65ad5cc1b9fb40",
+      "local_definition_sha256": "1c854a08216529cf414338734b8f25d3f61085f9e5161047ea65ad5cc1b9fb40",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "list_patient_care_links",
+      "arguments": "target_patient uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "fae780f40a09f6916be439b1fcb8e79405b97abbc7e5e11a31d442de181ee16d",
+      "local_definition_sha256": "fae780f40a09f6916be439b1fcb8e79405b97abbc7e5e11a31d442de181ee16d",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "list_privacy_requests",
+      "arguments": "target_patient uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "f39d64c03e80c7dd597aba26d72c6ca5f85f69f2477e9b6a4ea16665cadb8e9a",
+      "local_definition_sha256": "f39d64c03e80c7dd597aba26d72c6ca5f85f69f2477e9b6a4ea16665cadb8e9a",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "list_professional_meal_plan",
+      "arguments": "target_patient uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "2c2f9a52a77224bde6af3c849d03b650a0fc32535d2f612a7c8942469924a827",
+      "local_definition_sha256": "2c2f9a52a77224bde6af3c849d03b650a0fc32535d2f612a7c8942469924a827",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "list_professional_recipes",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "2f0222835cbea6d8bde3ea07beb960d0d6359915e5d599f946100381ce38acd6",
+      "local_definition_sha256": "2f0222835cbea6d8bde3ea07beb960d0d6359915e5d599f946100381ce38acd6",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "list_published_meal_plan",
+      "arguments": "target_patient uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "288203e5c292711dfc20fc2861c45b09eab408310dc8b7a82998e069408803ef",
+      "local_definition_sha256": "288203e5c292711dfc20fc2861c45b09eab408310dc8b7a82998e069408803ef",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "list_recipe_days",
+      "arguments": "target uuid, for_date date",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "376bfd66352359369009a5cf9a0cc52ff01b65cb4b03ce5a763bc714368eb044",
+      "local_definition_sha256": "376bfd66352359369009a5cf9a0cc52ff01b65cb4b03ce5a763bc714368eb044",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "list_thread_messages",
+      "arguments": "target_patient uuid, ack_delivery boolean",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "154c3db519e75dcd896d44519db04bcc9f22bf43a4018a3bc1e14fd2c34793bf",
+      "local_definition_sha256": "154c3db519e75dcd896d44519db04bcc9f22bf43a4018a3bc1e14fd2c34793bf",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "log_patient_activity",
+      "arguments": "target_patient uuid, input_activity text, input_duration integer, input_intensity text, input_note text, input_assignment uuid, input_sets integer, input_reps integer",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "7dcc60a9c9f2f873970a477c1c5a111ca8fb0e978f0bfa1b2326af4318e7b388",
+      "local_definition_sha256": "7dcc60a9c9f2f873970a477c1c5a111ca8fb0e978f0bfa1b2326af4318e7b388",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "mark_editorial_resource_read",
+      "arguments": "target_patient uuid, resource_slug text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "b777e8a9944c1a92b481e92a59e4259ffb8f091b31ec973a97dea0f87a7e4dbf",
+      "local_definition_sha256": "b777e8a9944c1a92b481e92a59e4259ffb8f091b31ec973a97dea0f87a7e4dbf",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "mark_thread_read",
+      "arguments": "target_patient uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "43f22f2cc18eb23347c89c4dd3143e51fe27600833130b9c6db77d0a7a65c643",
+      "local_definition_sha256": "43f22f2cc18eb23347c89c4dd3143e51fe27600833130b9c6db77d0a7a65c643",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "meal_log_json",
+      "arguments": "lid uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "faba6d81390cf894ea6b4e2b9130b7fbc79ffa90dbd560eee5c3ead774d37e89",
+      "local_definition_sha256": "faba6d81390cf894ea6b4e2b9130b7fbc79ffa90dbd560eee5c3ead774d37e89",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "meal_plan_item_json",
+      "arguments": "iid uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "e80b0140204b87b33a2d7b3cce9234276512713a34e381fc8504ebff28d595ee",
+      "local_definition_sha256": "e80b0140204b87b33a2d7b3cce9234276512713a34e381fc8504ebff28d595ee",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "meal_plan_professional_json",
+      "arguments": "pid uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "babd7ae92d657d3d69d006380670da6f6003b249d1680873c427ee1f48a46431",
+      "local_definition_sha256": "babd7ae92d657d3d69d006380670da6f6003b249d1680873c427ee1f48a46431",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "meal_plan_version_json",
+      "arguments": "vid uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "eeb9cee7ffc2081e690fd22b9b89644d92cffb812c67f3fe373d6202b7450582",
+      "local_definition_sha256": "eeb9cee7ffc2081e690fd22b9b89644d92cffb812c67f3fe373d6202b7450582",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "my_nutritionist_id",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "ddb76160e48ae83605849e83658d204cef7876a17e5d7678130848a39cada417",
+      "local_definition_sha256": "ddb76160e48ae83605849e83658d204cef7876a17e5d7678130848a39cada417",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "my_patient_id",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "7d9d78ceeb73f1c3dc48a332d34dde41e5e1f9cdcfc1b0d78d23a20d6f017ab1",
+      "local_definition_sha256": "7d9d78ceeb73f1c3dc48a332d34dde41e5e1f9cdcfc1b0d78d23a20d6f017ab1",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "open_message_attachment",
+      "arguments": "target_patient uuid, target_message uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "7a0af3126c56e027f0eead2a10d84162e1dfb74dd023fe8b842dbfde043c0f0c",
+      "local_definition_sha256": "7a0af3126c56e027f0eead2a10d84162e1dfb74dd023fe8b842dbfde043c0f0c",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "org_snapshot",
+      "arguments": "org_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "15c86ab6e0a9f5ed8d3dfa18afa996b3d77181bd2754b6848359ea0f922bde6e",
+      "local_definition_sha256": "15c86ab6e0a9f5ed8d3dfa18afa996b3d77181bd2754b6848359ea0f922bde6e",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "org_subscription_allows_care",
+      "arguments": "org_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "efead0582dd1d46dcb401dd47064e8fd046be4b87d2ce7b3e0d8d62c8e215ce4",
+      "local_definition_sha256": "efead0582dd1d46dcb401dd47064e8fd046be4b87d2ce7b3e0d8d62c8e215ce4",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "outbox_assert_access",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "0bffd631098b3b37349158b858c26cbc5cea779ea173c29a59f8468d39219d56",
+      "local_definition_sha256": "0bffd631098b3b37349158b858c26cbc5cea779ea173c29a59f8468d39219d56",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "outbox_event_json",
+      "arguments": "e outbox_events",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "83cfd2794a8a12fd65eeac598670b5287976ee2c632681a8a42a49ece187e178",
+      "local_definition_sha256": "83cfd2794a8a12fd65eeac598670b5287976ee2c632681a8a42a49ece187e178",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "outbox_mailbox_json",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "3e6de803f0675c237892b1fe6fcf484bd88f1202f822be8d475404baae0ea26c",
+      "local_definition_sha256": "3e6de803f0675c237892b1fe6fcf484bd88f1202f822be8d475404baae0ea26c",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "outbox_patient_skip",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "d5a290e7ab58e7bea5da62c8354f2cf58b22d7bdb77438bb5555956adcd15493",
+      "local_definition_sha256": "d5a290e7ab58e7bea5da62c8354f2cf58b22d7bdb77438bb5555956adcd15493",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "outbox_pref_on",
+      "arguments": "uid uuid, channel text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "431bd7400155fab85c2b7e7fdd228128207575aff75bafe1909e62d27863131a",
+      "local_definition_sha256": "431bd7400155fab85c2b7e7fdd228128207575aff75bafe1909e62d27863131a",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "patient_can_see_resource",
+      "arguments": "r resources, target_patient uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "4a7f50cffc87b2958d18b172ef8ed6a19401ce7d6bf23ee26a20e93c45a7e9a6",
+      "local_definition_sha256": "4a7f50cffc87b2958d18b172ef8ed6a19401ce7d6bf23ee26a20e93c45a7e9a6",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "patient_has_full_access",
+      "arguments": "patient_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "62b9776053fc8de7c9f6a5f4ce0352643a655852cdd1eea24e2870c61c51c4c0",
+      "local_definition_sha256": "62b9776053fc8de7c9f6a5f4ce0352643a655852cdd1eea24e2870c61c51c4c0",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "privacy_assert_patient",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "fc35f0b30fd2b1db223f2591ef5a02a6de8d1efa55c73d7caa37a3d30b3b01db",
+      "local_definition_sha256": "fc35f0b30fd2b1db223f2591ef5a02a6de8d1efa55c73d7caa37a3d30b3b01db",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "privacy_request_json",
+      "arguments": "rid uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "caf4f25517569d6766b21b4066bcd88978531da74345422b4a471481d13f6f3d",
+      "local_definition_sha256": "caf4f25517569d6766b21b4066bcd88978531da74345422b4a471481d13f6f3d",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "process_outbox_deliveries",
+      "arguments": "input jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "cfe75f8f8e0c174bb363d79b1b251845cf44f70565247c04b88e6f5482a03d29",
+      "local_definition_sha256": "cfe75f8f8e0c174bb363d79b1b251845cf44f70565247c04b88e6f5482a03d29",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "provision_nutritionist",
+      "arguments": "target_user_id uuid, display_name text, license_value text, monthly_fee_value integer",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "6410473bf9cd66f1477d3cd26955a76a2adac744ed3ee31f4c6b42118cfaa581",
+      "local_definition_sha256": "6410473bf9cd66f1477d3cd26955a76a2adac744ed3ee31f4c6b42118cfaa581",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "publish_care_replacement",
+      "arguments": "target uuid, replacement_id uuid, expected_recipe jsonb, recipe_value jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "80fb94f9c7bbca2fba95293e43bc942070c26cd0ce3dc2e9e73e8318d2d08bbd",
+      "local_definition_sha256": "80fb94f9c7bbca2fba95293e43bc942070c26cd0ce3dc2e9e73e8318d2d08bbd",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "publish_editorial_resource",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "ff419815e11f9597f34f02cfcf1331dfb3127d0feaa6f02b7167966f24808180",
+      "local_definition_sha256": "ff419815e11f9597f34f02cfcf1331dfb3127d0feaa6f02b7167966f24808180",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "publish_meal_plan",
+      "arguments": "target_plan uuid, expected_version integer",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "c14b86e1108da22e391d342fb88fc1e0803ce58dfd2bbe5b601ef059d2f760ed",
+      "local_definition_sha256": "c14b86e1108da22e391d342fb88fc1e0803ce58dfd2bbe5b601ef059d2f760ed",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "publish_recipe",
+      "arguments": "target_recipe uuid, expected_version integer",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "b3bb5b4a327ea9cf0f085189eaefa9ff3cce137a728144a7aa3a8b018b464f33",
+      "local_definition_sha256": "b3bb5b4a327ea9cf0f085189eaefa9ff3cce137a728144a7aa3a8b018b464f33",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "recipe_assert_nutri",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "78722c4c07039cc7be75ea9baa6ca593fb3d2f9adf28c60bf66749e5c12bb73c",
+      "local_definition_sha256": "78722c4c07039cc7be75ea9baa6ca593fb3d2f9adf28c60bf66749e5c12bb73c",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "recipe_card_json",
+      "arguments": "vid uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "9fbdff8ecdb9a97f60ced62d692975734c48fa6114051de69e0d06842ffe84e0",
+      "local_definition_sha256": "9fbdff8ecdb9a97f60ced62d692975734c48fa6114051de69e0d06842ffe84e0",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "recipe_day_json",
+      "arguments": "aid uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "e07ebb26543c802f8db89f5b60c7f8b535b674936ae382ec35ca3a7a1cf06e3e",
+      "local_definition_sha256": "e07ebb26543c802f8db89f5b60c7f8b535b674936ae382ec35ca3a7a1cf06e3e",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "recipe_professional_json",
+      "arguments": "rid uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "a4f4704338897e8b67e506a591163dd201802878b19a7bd25f1bda6cb09e8474",
+      "local_definition_sha256": "a4f4704338897e8b67e506a591163dd201802878b19a7bd25f1bda6cb09e8474",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "recipe_version_json",
+      "arguments": "vid uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "8918643c055a90124492684a0ae767c02e1af47a43223d68ecb474efdb315d50",
+      "local_definition_sha256": "8918643c055a90124492684a0ae767c02e1af47a43223d68ecb474efdb315d50",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "record_meal_analysis",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "95a647049fbb786d68ec5eb44a1ddc57262ca4ddba3bd4fe49c065f3ded6e91d",
+      "local_definition_sha256": "95a647049fbb786d68ec5eb44a1ddc57262ca4ddba3bd4fe49c065f3ded6e91d",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "record_patient_consent",
+      "arguments": "target uuid, purpose_value text, version_value text, hash_value text, decision_value text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "eff1cfc41815c35531f712f8455d5c917f84901c39365be8065d2edce56ead1d",
+      "local_definition_sha256": "eff1cfc41815c35531f712f8455d5c917f84901c39365be8065d2edce56ead1d",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "record_patient_payment",
+      "arguments": "target uuid, amount integer, paid_on date, method text, note text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "0ff4995830f1bd77581f52977bdb73fa9369900324c6a03c2ce8956109f96069",
+      "local_definition_sha256": "0ff4995830f1bd77581f52977bdb73fa9369900324c6a03c2ce8956109f96069",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "record_privacy_access",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "1dee4af547fc3a4a3cf94aa10672b94ffa517b0e4cf78a9f6abed5545602ed7c",
+      "local_definition_sha256": "1dee4af547fc3a4a3cf94aa10672b94ffa517b0e4cf78a9f6abed5545602ed7c",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "register_recipe_day",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "fce7c2ee72ece8ee170831f866e351fa44ddf090d3da93a3dacf3b153b9308d2",
+      "local_definition_sha256": "fce7c2ee72ece8ee170831f866e351fa44ddf090d3da93a3dacf3b153b9308d2",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "reject_ai_job",
+      "arguments": "target_job uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "04f6a7119621b48b81519c5d6427dbecc9dd29be240899bdd050df7b9ab5256c",
+      "local_definition_sha256": "04f6a7119621b48b81519c5d6427dbecc9dd29be240899bdd050df7b9ab5256c",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "report_patient_payment",
+      "arguments": "target uuid, amount integer, paid_on date, method text, note text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "85387df2bc734923c2d9f5da12ff7bfea50771362a883b1624e82c2bfef876c0",
+      "local_definition_sha256": "85387df2bc734923c2d9f5da12ff7bfea50771362a883b1624e82c2bfef876c0",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "request_body_data",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "f5e9cbeacfd95b78d6e5e822e10fabd201556ba9a6af61ca5021970ead77143b",
+      "local_definition_sha256": "f5e9cbeacfd95b78d6e5e822e10fabd201556ba9a6af61ca5021970ead77143b",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "request_privacy_action",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "f9bf34777ab7550ee7532de2b6f07e34d36303d8d90d947147c06633335187d7",
+      "local_definition_sha256": "f9bf34777ab7550ee7532de2b6f07e34d36303d8d90d947147c06633335187d7",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "reschedule_appointment",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "91e8be1e1d5552bb3092812c3fe3baaea48f78f815fbb63063a4a3787fcc8160",
+      "local_definition_sha256": "91e8be1e1d5552bb3092812c3fe3baaea48f78f815fbb63063a4a3787fcc8160",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "resource_row_json",
+      "arguments": "r resources",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "721cf6a31c850a015b7fb1e2b980dd269e6931280b8d8c06ac7d6875054936ed",
+      "local_definition_sha256": "721cf6a31c850a015b7fb1e2b980dd269e6931280b8d8c06ac7d6875054936ed",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "review_care_record",
+      "arguments": "target uuid, record_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "f362a5db15a46ba2b047e82da32a06185f85dedb95dd5daeb1bc267962f985f5",
+      "local_definition_sha256": "f362a5db15a46ba2b047e82da32a06185f85dedb95dd5daeb1bc267962f985f5",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "review_meal_log",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "dfd51b34ec68dc2facb20b1d09253003ddcf702b8d8bc3f4b3ec231322e1d33f",
+      "local_definition_sha256": "dfd51b34ec68dc2facb20b1d09253003ddcf702b8d8bc3f4b3ec231322e1d33f",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "review_patient_intake",
+      "arguments": "target uuid, expected_revision integer",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "ee9e807247c6c19990f1223e19a9ddc7970b1083483db10d78ff362cb9144b3b",
+      "local_definition_sha256": "ee9e807247c6c19990f1223e19a9ddc7970b1083483db10d78ff362cb9144b3b",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "review_patient_payment",
+      "arguments": "payment_id uuid, decision text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "772ab5f985e5a4725b0b33f6db6c7bac618b9075dc510da1dfb8cc23bdb13be1",
+      "local_definition_sha256": "772ab5f985e5a4725b0b33f6db6c7bac618b9075dc510da1dfb8cc23bdb13be1",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "revoke_patient_care",
+      "arguments": "link_id uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "84bff5056139899dd34ad1c88a261e12b3365d14896645a59911bfaaeb441063",
+      "local_definition_sha256": "84bff5056139899dd34ad1c88a261e12b3365d14896645a59911bfaaeb441063",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "save_care_preferences",
+      "arguments": "target uuid, settings_value jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "f111717616ca5d124267d0e10fbc710df6f3bd34e2d1511520bd33793d34f9a9",
+      "local_definition_sha256": "f111717616ca5d124267d0e10fbc710df6f3bd34e2d1511520bd33793d34f9a9",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "save_care_record",
+      "arguments": "target uuid, record_id uuid, record_date date, record_data jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "242be275800ffdd77fbd21620f94584346c2f4753a8b3ec17887213280d7b3a0",
+      "local_definition_sha256": "242be275800ffdd77fbd21620f94584346c2f4753a8b3ec17887213280d7b3a0",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "save_editorial_resource",
+      "arguments": "input_slug text, input_title text, input_summary text, input_category text, input_sections jsonb, input_kind text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "e2b27444a4a296636fdbec93e6cd1580437bada12fe5fca432c7f69dca5c4bce",
+      "local_definition_sha256": "e2b27444a4a296636fdbec93e6cd1580437bada12fe5fca432c7f69dca5c4bce",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "save_meal_log",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "c7e501b22a81f29d5abc7e332e29001976c6bdb3e6a548309422119cf6dd4fb1",
+      "local_definition_sha256": "c7e501b22a81f29d5abc7e332e29001976c6bdb3e6a548309422119cf6dd4fb1",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "save_meal_plan_draft",
+      "arguments": "target_patient uuid, payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "7816bed25b5d67d0096e144dc21f24a83bc5ae5fdf7fc6ad731d798741130273",
+      "local_definition_sha256": "7816bed25b5d67d0096e144dc21f24a83bc5ae5fdf7fc6ad731d798741130273",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "save_my_body_data",
+      "arguments": "body jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "3066262ecdb78e260a892cdc800af25ce5282f0b17b52408af8a3f3f186ab1c3",
+      "local_definition_sha256": "3066262ecdb78e260a892cdc800af25ce5282f0b17b52408af8a3f3f186ab1c3",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "save_notification_preferences",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "22e23b9ef49e9d0375a289172cb8da03da8f602d14624382d4b3af677add968a",
+      "local_definition_sha256": "22e23b9ef49e9d0375a289172cb8da03da8f602d14624382d4b3af677add968a",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "save_nutrition_target",
+      "arguments": "target uuid, target_inputs jsonb, target_result jsonb, publish boolean",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "3882a7b6fc069a6bbace8cba5b769afd99af842fd0dc0582b653fbc3c12a4d7b",
+      "local_definition_sha256": "3882a7b6fc069a6bbace8cba5b769afd99af842fd0dc0582b653fbc3c12a4d7b",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "save_patient_intake",
+      "arguments": "target uuid, expected_revision integer, next_step text, patch jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "8d2a047ee744038e6d04facf864f7d31661e0a0fad4525d6d7feeaca0badefbb",
+      "local_definition_sha256": "8d2a047ee744038e6d04facf864f7d31661e0a0fad4525d6d7feeaca0badefbb",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "save_recipe_draft",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "877684c6ac8d7552415c3608b8a14e8ae1e6d2ea21aa8678813cc834a9a87832",
+      "local_definition_sha256": "877684c6ac8d7552415c3608b8a14e8ae1e6d2ea21aa8678813cc834a9a87832",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "save_routine_feedback",
+      "arguments": "target_patient uuid, assignment_id uuid, input_sets integer, input_reps integer, input_note text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "e3cc5357306199ab53e9c85c3297222a77d5397ff79551a742c50a8f142d3cc0",
+      "local_definition_sha256": "e3cc5357306199ab53e9c85c3297222a77d5397ff79551a742c50a8f142d3cc0",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "schedule_appointment",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "fdc9eceb61887305d1775a5e7e30a4c19e66039d1d3c620d518b1f58c8f8a354",
+      "local_definition_sha256": "fdc9eceb61887305d1775a5e7e30a4c19e66039d1d3c620d518b1f58c8f8a354",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "send_thread_attachment",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "16ce2b3893d4d67b2ad8e097f7d3ae949e2f2a25575162a8c022fcf9b792383b",
+      "local_definition_sha256": "16ce2b3893d4d67b2ad8e097f7d3ae949e2f2a25575162a8c022fcf9b792383b",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "send_thread_message",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "510196bce0f52568a74ddd89b7aba5ba84839b40bf395bc1654f8eea1df99155",
+      "local_definition_sha256": "510196bce0f52568a74ddd89b7aba5ba84839b40bf395bc1654f8eea1df99155",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "service_assert_admin",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "753dd197eb8288ac44e152bfad8525eadaddfad209ec2114e172f24896626c7b",
+      "local_definition_sha256": "753dd197eb8288ac44e152bfad8525eadaddfad209ec2114e172f24896626c7b",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "service_audit",
+      "arguments": "target uuid, input_action text, details jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "79f10498720ce6ee2707d966c1aacc226c346a2e99d3c45b4c496f390987084e",
+      "local_definition_sha256": "79f10498720ce6ee2707d966c1aacc226c346a2e99d3c45b4c496f390987084e",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "service_nutritionist_json",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "3b8225a21157b7156b72c272a27a059a5d67c18410d0f3fc722350a61e9bfd12",
+      "local_definition_sha256": "3b8225a21157b7156b72c272a27a059a5d67c18410d0f3fc722350a61e9bfd12",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "service_recompute",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "7d42bcfc9a7b239578848ca37aa20f68f085631ecaf25febcf9d25222d27d97e",
+      "local_definition_sha256": "3abcf32285fdbc00320262be365e957e66a1e2c60e0f9315db067bd00af6fdf0",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "service_start_trial",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "4e43cb559bf5b1263005c3f21dfd3114972f2483a362b7672b915135ade4fe45",
+      "local_definition_sha256": "4e43cb559bf5b1263005c3f21dfd3114972f2483a362b7672b915135ade4fe45",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "set_organization_subscription_status",
+      "arguments": "org_id uuid, input_status text, input_note text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "e2fa577a06e10698f690e2685920d3b27c6f356b2efbf0cec26a9a056794052c",
+      "local_definition_sha256": "fa76de401dbfe737adced8d5ed39ba5c59a549160469cba57130980bc263ea4f",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "set_patient_archived",
+      "arguments": "target uuid, archived boolean",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "33cc7fb11bfce7b96b1812b19ce08df938bf1d23948318903c3768805001f12d",
+      "local_definition_sha256": "33cc7fb11bfce7b96b1812b19ce08df938bf1d23948318903c3768805001f12d",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "set_patient_billing",
+      "arguments": "target uuid, next_status text, until date",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "4a079b2f4dd5714e9446cc1064683a0e3f843252188be63c9204485730c7e3d2",
+      "local_definition_sha256": "4a079b2f4dd5714e9446cc1064683a0e3f843252188be63c9204485730c7e3d2",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "set_patient_charge_waived",
+      "arguments": "charge_id uuid, waived boolean",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "ef8498c3732387cc68ca69efefb3b5a22487f378eb28d00385aeba271b178ac4",
+      "local_definition_sha256": "ef8498c3732387cc68ca69efefb3b5a22487f378eb28d00385aeba271b178ac4",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "set_patient_fee",
+      "arguments": "target uuid, amount integer, first_due_on date",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "9908eb317d202e01b8861e97c2562d6776eea897657dfa7781d505e0a9d9a9b6",
+      "local_definition_sha256": "9908eb317d202e01b8861e97c2562d6776eea897657dfa7781d505e0a9d9a9b6",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "set_payment_settings",
+      "arguments": "default_fee integer, alias text, payment_link text, instructions text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "live_definition_sha256": "83b1a9034662f2235d10ba9086fa0bbc782f57674872b108e96550470d52437d",
+      "local_definition_sha256": "83b1a9034662f2235d10ba9086fa0bbc782f57674872b108e96550470d52437d",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "set_recipe_card",
+      "arguments": "target_version uuid, card jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "addb5bc3da0a09aab17fda3500b9f1d6fc6c8bde402f4bb1b87be67b4e347ec3",
+      "local_definition_sha256": "addb5bc3da0a09aab17fda3500b9f1d6fc6c8bde402f4bb1b87be67b4e347ec3",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "set_recipe_cover",
+      "arguments": "target_version uuid, cover_status text, cover_url text, cover_alt text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "8b11c3b8d680d19a974b9b42713ce37cdb8e5c156865285b14a2f75f3ab1c88d",
+      "local_definition_sha256": "8b11c3b8d680d19a974b9b42713ce37cdb8e5c156865285b14a2f75f3ab1c88d",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "set_shopping_checked",
+      "arguments": "payload jsonb",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "fc0d522deff7b463575975eb3db45c7516e1948ca5096119e9e6b4701dc023e9",
+      "local_definition_sha256": "fc0d522deff7b463575975eb3db45c7516e1948ca5096119e9e6b4701dc023e9",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "shopping_assert_patient",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "b3e13a91ae1ec9ac80f3767127232f36fa48ae98543d97a3646ae15939b4404e",
+      "local_definition_sha256": "b3e13a91ae1ec9ac80f3767127232f36fa48ae98543d97a3646ae15939b4404e",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "shopping_list_json",
+      "arguments": "target_patient uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "0128b61ba34518d1eeb1ec286c80027334594cb8071c1c8e851c51ade3718c55",
+      "local_definition_sha256": "0128b61ba34518d1eeb1ec286c80027334594cb8071c1c8e851c51ade3718c55",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "submit_patient_intake",
+      "arguments": "target uuid, expected_revision integer",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "450e5f3d6dcbff0eb8a539c1e7b4d3aef0538346d62b13c06bda405b930024e9",
+      "local_definition_sha256": "450e5f3d6dcbff0eb8a539c1e7b4d3aef0538346d62b13c06bda405b930024e9",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "thread_assert_access",
+      "arguments": "target uuid",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "2b0833cb78961f74bc9b0f9d74a964c6a425fe330e4729f9b45c86f3d0c15995",
+      "local_definition_sha256": "2b0833cb78961f74bc9b0f9d74a964c6a425fe330e4729f9b45c86f3d0c15995",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "thread_message_json",
+      "arguments": "mid uuid, include_ai boolean",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "27f29161ab5eb15ff33c0aff243b038e2e63b8d14be3d2ee4a5cf999ddb65ccb",
+      "local_definition_sha256": "27f29161ab5eb15ff33c0aff243b038e2e63b8d14be3d2ee4a5cf999ddb65ccb",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "toggle_favorite",
+      "arguments": "target_patient uuid, input_kind text, input_item text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "16861c09feb364fdee4bebb84fb0de97cdc35871fa9ebbf8ecc83d690991bf2b",
+      "local_definition_sha256": "16861c09feb364fdee4bebb84fb0de97cdc35871fa9ebbf8ecc83d690991bf2b",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "transfer_patient_ownership",
+      "arguments": "target_patient uuid, to_nutritionist uuid, reason text",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": true,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "78921ac87cadd2f876feddc62035008c6eefe034ed1e0749e1c5e37abeb7e9ba",
+      "local_definition_sha256": "78921ac87cadd2f876feddc62035008c6eefe034ed1e0749e1c5e37abeb7e9ba",
+      "in_sensitive_scope": true
+    },
+    {
+      "name": "validate_meal_log_slot",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "ed783b2967dbae12b02bbcd0042844c278bc4a3cac9d4a28b5b5a11f41baafd8",
+      "local_definition_sha256": "ed783b2967dbae12b02bbcd0042844c278bc4a3cac9d4a28b5b5a11f41baafd8",
+      "in_sensitive_scope": false
+    },
+    {
+      "name": "validate_message_author",
+      "arguments": "",
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true,
+      "settings": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "live_definition_sha256": "0979c142412df74f82f3e77372b1ed138fd92dfcf843e8996d45b1f027751e43",
+      "local_definition_sha256": "0979c142412df74f82f3e77372b1ed138fd92dfcf843e8996d45b1f027751e43",
+      "in_sensitive_scope": false
+    }
+  ],
+  "historical_comparison": {
+    "historicalAllowed": [
+      "accept_org_invite",
+      "accept_patient_invite",
+      "ack_thread_delivery",
+      "add_patient_clinical_note",
+      "add_shopping_manual",
+      "apply_ai_job",
+      "assign_editorial_resource",
+      "assign_exercise_routine",
+      "assign_recipe",
+      "assign_recipe_day",
+      "care_can_read",
+      "care_consent",
+      "care_meal_photo_allowed",
+      "complete_privacy_delete",
+      "complete_privacy_export",
+      "confirm_appointment",
+      "create_organization",
+      "delegate_patient_care",
+      "delete_care_document",
+      "delete_care_photo",
+      "delete_patient_activity",
+      "delete_shopping_manual",
+      "enqueue_ai_job",
+      "enqueue_outbox_event",
+      "finish_ai_job",
+      "get_ai_job",
+      "get_notification_preferences",
+      "get_organization_subscription",
+      "get_patient_appointment",
+      "get_patient_exercise",
+      "get_patient_intake",
+      "get_patient_library",
+      "get_patient_progress",
+      "get_privacy_package",
+      "get_shopping_list",
+      "invite_org_member",
+      "is_assigned_patient",
+      "is_assigned_patient_path",
+      "is_org_member",
+      "list_ai_jobs",
+      "list_assigned_recipes",
+      "list_my_organizations",
+      "list_outbox_mailbox",
+      "list_outbox_snapshot",
+      "list_patient_care_links",
+      "list_privacy_requests",
+      "list_professional_meal_plan",
+      "list_professional_recipes",
+      "list_published_meal_plan",
+      "list_recipe_days",
+      "list_thread_messages",
+      "log_patient_activity",
+      "mark_editorial_resource_read",
+      "mark_thread_read",
+      "my_nutritionist_id",
+      "my_patient_id",
+      "open_message_attachment",
+      "patient_has_full_access",
+      "process_outbox_deliveries",
+      "publish_care_replacement",
+      "publish_editorial_resource",
+      "publish_meal_plan",
+      "publish_recipe",
+      "record_meal_analysis",
+      "record_patient_consent",
+      "record_privacy_access",
+      "register_recipe_day",
+      "reject_ai_job",
+      "request_privacy_action",
+      "reschedule_appointment",
+      "review_care_record",
+      "review_meal_log",
+      "review_patient_intake",
+      "revoke_patient_care",
+      "save_care_preferences",
+      "save_care_record",
+      "save_editorial_resource",
+      "save_meal_log",
+      "save_meal_plan_draft",
+      "save_notification_preferences",
+      "save_patient_intake",
+      "save_recipe_draft",
+      "save_routine_feedback",
+      "schedule_appointment",
+      "send_thread_attachment",
+      "send_thread_message",
+      "set_organization_subscription_status",
+      "set_patient_archived",
+      "set_patient_billing",
+      "set_recipe_card",
+      "set_recipe_cover",
+      "set_shopping_checked",
+      "submit_patient_intake",
+      "toggle_favorite",
+      "transfer_patient_ownership"
+    ],
+    "currentAllowed": [
+      "accept_org_invite",
+      "accept_patient_invite",
+      "ack_thread_delivery",
+      "add_patient_clinical_note",
+      "add_shopping_manual",
+      "admin_extend_trial",
+      "admin_get_service_board",
+      "admin_log_service_event",
+      "admin_mark_test_account",
+      "admin_record_service_payment",
+      "admin_set_service_note",
+      "admin_set_service_override",
+      "admin_set_service_settings",
+      "admin_void_service_payment",
+      "apply_ai_job",
+      "assign_editorial_resource",
+      "assign_exercise_routine",
+      "assign_recipe",
+      "assign_recipe_day",
+      "care_can_read",
+      "care_consent",
+      "care_meal_photo_allowed",
+      "complete_privacy_delete",
+      "complete_privacy_export",
+      "confirm_appointment",
+      "create_organization",
+      "delegate_patient_care",
+      "delete_care_document",
+      "delete_care_photo",
+      "delete_patient_activity",
+      "delete_shopping_manual",
+      "enqueue_ai_job",
+      "enqueue_outbox_event",
+      "finish_ai_job",
+      "get_ai_job",
+      "get_billing_board",
+      "get_notification_preferences",
+      "get_organization_subscription",
+      "get_patient_appointment",
+      "get_patient_exercise",
+      "get_patient_intake",
+      "get_patient_ledger",
+      "get_patient_library",
+      "get_patient_progress",
+      "get_privacy_package",
+      "get_shopping_list",
+      "invite_org_member",
+      "is_assigned_patient",
+      "is_assigned_patient_path",
+      "is_org_member",
+      "is_platform_admin",
+      "list_ai_jobs",
+      "list_assigned_recipes",
+      "list_my_organizations",
+      "list_outbox_mailbox",
+      "list_outbox_snapshot",
+      "list_patient_care_links",
+      "list_privacy_requests",
+      "list_professional_meal_plan",
+      "list_professional_recipes",
+      "list_published_meal_plan",
+      "list_recipe_days",
+      "list_thread_messages",
+      "log_patient_activity",
+      "mark_editorial_resource_read",
+      "mark_thread_read",
+      "my_nutritionist_id",
+      "my_patient_id",
+      "open_message_attachment",
+      "patient_has_full_access",
+      "process_outbox_deliveries",
+      "publish_care_replacement",
+      "publish_editorial_resource",
+      "publish_meal_plan",
+      "publish_recipe",
+      "record_meal_analysis",
+      "record_patient_consent",
+      "record_patient_payment",
+      "record_privacy_access",
+      "register_recipe_day",
+      "reject_ai_job",
+      "report_patient_payment",
+      "request_body_data",
+      "request_privacy_action",
+      "reschedule_appointment",
+      "review_care_record",
+      "review_meal_log",
+      "review_patient_intake",
+      "review_patient_payment",
+      "revoke_patient_care",
+      "save_care_preferences",
+      "save_care_record",
+      "save_editorial_resource",
+      "save_meal_log",
+      "save_meal_plan_draft",
+      "save_my_body_data",
+      "save_notification_preferences",
+      "save_nutrition_target",
+      "save_patient_intake",
+      "save_recipe_draft",
+      "save_routine_feedback",
+      "schedule_appointment",
+      "send_thread_attachment",
+      "send_thread_message",
+      "set_organization_subscription_status",
+      "set_patient_archived",
+      "set_patient_billing",
+      "set_patient_charge_waived",
+      "set_patient_fee",
+      "set_payment_settings",
+      "set_recipe_card",
+      "set_recipe_cover",
+      "set_shopping_checked",
+      "submit_patient_intake",
+      "toggle_favorite",
+      "transfer_patient_ownership"
+    ],
+    "added": [
+      "admin_extend_trial",
+      "admin_get_service_board",
+      "admin_log_service_event",
+      "admin_mark_test_account",
+      "admin_record_service_payment",
+      "admin_set_service_note",
+      "admin_set_service_override",
+      "admin_set_service_settings",
+      "admin_void_service_payment",
+      "get_billing_board",
+      "get_patient_ledger",
+      "is_platform_admin",
+      "record_patient_payment",
+      "report_patient_payment",
+      "request_body_data",
+      "review_patient_payment",
+      "save_my_body_data",
+      "save_nutrition_target",
+      "set_patient_charge_waived",
+      "set_patient_fee",
+      "set_payment_settings"
+    ],
+    "differences": [
+      {
+        "name": "service_recompute",
+        "reason": "definition differs"
+      },
+      {
+        "name": "set_organization_subscription_status",
+        "reason": "definition differs"
+      }
+    ],
+    "closedNames": [
+      "ai_job_json",
+      "appointment_assert_patient",
+      "appointment_assert_pro",
+      "can_care_for_patient",
+      "diary_assert_access",
+      "exercise_assert_prescribe",
+      "exercise_can_prescribe",
+      "exercise_library_json",
+      "is_org_manager",
+      "is_own_patient",
+      "meal_log_json",
+      "meal_plan_item_json",
+      "meal_plan_professional_json",
+      "meal_plan_version_json",
+      "org_snapshot",
+      "org_subscription_allows_care",
+      "outbox_assert_access",
+      "outbox_event_json",
+      "outbox_mailbox_json",
+      "outbox_patient_skip",
+      "outbox_pref_on",
+      "patient_can_see_resource",
+      "privacy_assert_patient",
+      "privacy_request_json",
+      "recipe_assert_nutri",
+      "recipe_card_json",
+      "recipe_day_json",
+      "recipe_professional_json",
+      "recipe_version_json",
+      "resource_row_json",
+      "shopping_assert_patient",
+      "shopping_list_json",
+      "thread_assert_access",
+      "thread_message_json"
+    ]
+  },
+  "local_reproduction": {
+    "definitions": "snapshot real ejecutado solo en PGlite local",
+    "empty_target_published": true,
+    "null_kcal_target_published": true,
+    "after_deletion": {
+      "body_saved": true,
+      "body_request_accepted": true,
+      "target_published": true,
+      "owner_read_rows": {
+        "body": 1,
+        "target": 1
+      }
+    },
+    "service_paid_until": "2027-01-30",
+    "expected_paid_until": "2027-01-31"
+  }
+}

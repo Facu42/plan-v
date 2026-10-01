@@ -89,12 +89,13 @@ describe('panel del servicio (PGlite)', () => {
   });
 
   it('nadie más puede llamar al panel ni a sus acciones', async () => {
-    for (const user of [nutriA, patientUser]) {
+    for (const user of [nutriA, patientUser, '']) {
       expect(await rpc(user, 'is_platform_admin')).toBe(false);
       await expect(rpc(user, 'admin_get_service_board')).rejects.toMatchObject({ code: '42501' });
       await expect(rpc(user, 'admin_extend_trial', [nutriAId, 30])).rejects.toMatchObject({ code: '42501' });
       await expect(rpc(user, 'admin_set_service_override', [nutriAId, 'waived', ''])).rejects.toMatchObject({ code: '42501' });
       await expect(rpc(user, 'admin_record_service_payment', [nutriAId, 1, 1, await shift(0), 'otro', ''])).rejects.toMatchObject({ code: '42501' });
+      await expect(rpc(user, 'admin_void_service_payment', ['20000000-0000-4000-a000-000000000000'])).rejects.toMatchObject({ code: '42501' });
       await expect(rpc(user, 'admin_set_service_settings', [1, 30])).rejects.toMatchObject({ code: '42501' });
       await expect(rpc(user, 'admin_set_service_note', [nutriAId, 'nota'])).rejects.toMatchObject({ code: '42501' });
       await expect(rpc(user, 'admin_log_service_event', [nutriAId, 'service.access_sent', null])).rejects.toMatchObject({ code: '42501' });
@@ -105,6 +106,13 @@ describe('panel del servicio (PGlite)', () => {
     }
     await expect(asUser(nutriA, 'insert into public.platform_admins(user_id) values ($1)', [nutriA])).rejects.toMatchObject({ code: '42501' });
     expect(await rpc(admin, 'is_platform_admin')).toBe(true);
+  });
+
+  it('declararse administrador en los datos editables de la cuenta no da acceso al panel', async () => {
+    await db.query('update auth.users set raw_user_meta_data=$1 where id=$2', [{ role: 'admin', is_admin: true }, patientUser]);
+    expect(await rpc(patientUser, 'is_platform_admin')).toBe(false);
+    await expect(rpc(patientUser, 'admin_get_service_board')).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(patientUser, 'admin_set_service_override', [nutriAId, 'waived', ''])).rejects.toMatchObject({ code: '42501' });
   });
 
   it('carga el precio mensual y los días de prueba', async () => {

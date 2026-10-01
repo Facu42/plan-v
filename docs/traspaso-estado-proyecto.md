@@ -41,6 +41,12 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
 
 ## Lo pendiente
 
+- Revisión posterior al PR #40: cerrar datos corporales y metas después de desactivar
+  la cuenta, rechazar metas vacías por acceso directo y aplicar la migración pendiente
+  del vencimiento por meses. Las 34 funciones internas siguen cerradas; las 116
+  públicas coinciden con la lista actual. Evidencia y pruebas en
+  `docs/revision-funciones-sensibles-2026-10-01.md` (auditoría, sin cambios en producción).
+
 - Abiertos sin juntar: #27 base de datos (63 índices; en verde, necesita su frase "aplicá índices en la
   base"), #24 marketing (borrador, no toca la app), #25 documentación.
 - Trabajo local del 27/9 en la PC de Facundo (Consejos, detalle de consejo, ficha de receta, Menú

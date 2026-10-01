@@ -65,6 +65,21 @@ afterAll(async () => {
 });
 
 describe('PV-31 privacidad en PostgreSQL descartable', () => {
+  it('la otra paciente, la nutricionista y una sesión sin identidad no completan pedidos ajenos', async () => {
+    const exported = await rpc(patientBUser, 'request_privacy_action', [{ patient_id: patientB, kind: 'export' }]) as { id: string };
+    const deleted = await rpc(patientBUser, 'request_privacy_action', [{ patient_id: patientB, kind: 'delete' }]) as { id: string };
+    for (const user of [patientAUser, nutriA, '']) {
+      await expect(rpc(user, 'complete_privacy_export', [{ request_id: exported.id, package: { version: 'ficticia' } }])).rejects.toMatchObject({ code: '42501' });
+      await expect(rpc(user, 'complete_privacy_delete', [deleted.id])).rejects.toMatchObject({ code: '42501' });
+      await expect(rpc(user, 'get_privacy_package', [exported.id])).rejects.toMatchObject({ code: '42501' });
+      await expect(rpc(user, 'list_privacy_requests', [patientB])).rejects.toMatchObject({ code: '42501' });
+      await expect(rpc(user, 'record_privacy_access', [{ patient_id: patientB }])).rejects.toMatchObject({ code: '42501' });
+    }
+    expect((await db.query('select status from public.privacy_requests where id=$1', [exported.id])).rows[0]).toEqual({ status: 'in_progress' });
+    expect((await db.query('select status from public.privacy_requests where id=$1', [deleted.id])).rows[0]).toEqual({ status: 'in_progress' });
+    expect((await db.query('select count(*)::int as n from public.privacy_export_packages')).rows[0]).toEqual({ n: 0 });
+  });
+
   it('el paciente exporta y descarga, el otro no, y el delete no toca payments', async () => {
     const created = await rpc(patientAUser, 'request_privacy_action', [{ patient_id: patientA, kind: 'export' }]) as { id: string; kind: string; status: string };
     expect(created.kind).toBe('export');
