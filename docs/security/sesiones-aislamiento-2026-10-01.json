@@ -1,0 +1,152 @@
+{
+  "observed_at": "2026-10-01T19:43:43.786Z",
+  "project_id": "wvosvlxpfytokwfbcero",
+  "production_queries": "Catalog metadata only; no patient rows or credentials read.",
+  "production_policies": [
+    {
+      "policyname": "patients_nutri_all",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "(nutritionist_id = my_nutritionist_id())",
+      "with_check": "(nutritionist_id = my_nutritionist_id())"
+    },
+    {
+      "policyname": "patients_self_select",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(user_id = auth.uid())",
+      "with_check": null
+    }
+  ],
+  "production_column_privileges": [
+    {
+      "attname": "adherence_why",
+      "authenticated_select": true
+    },
+    {
+      "attname": "id",
+      "authenticated_select": true
+    },
+    {
+      "attname": "next_focus",
+      "authenticated_select": true
+    },
+    {
+      "attname": "plan_b",
+      "authenticated_select": true
+    },
+    {
+      "attname": "sensitive_hours",
+      "authenticated_select": true
+    }
+  ],
+  "finding": {
+    "type": "patient_self_raw_row_access",
+    "scope": "A patient can read professional-only fields of their own raw patients row through PostgREST; this is not cross-patient access.",
+    "reproduced_with": "Synthetic canary, four local Auth users, signed sessions, local PostgREST."
+  },
+  "correction": {
+    "migration": "20261001195127_close_legacy_patient_row_access.sql",
+    "sql": "drop policy if exists patients_self_select on public.patients;",
+    "production_applied": true,
+    "rows_modified": 0,
+    "authorization": "User explicitly authorized security migrations/deployment in this conversation and subsequently requested continuing the corrections; no new Supabase expenses.",
+    "catalog_verified_at": "2026-10-01T19:53:05.929Z"
+  },
+  "verification": {
+    "baseline": {
+      "run_id": 36915168369,
+      "source_commit": "72c6923326c3cf1d8b6e76262be32b3b27737ad9",
+      "passed": 14,
+      "failed": 1,
+      "skipped": 0
+    },
+    "after_correction": {
+      "run_id": 36915652255,
+      "source_commit": "06adf4d9cdd1d6f590580ce7af28d20eba890ddc",
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "cleanup": "Temporary local stack and synthetic data removed."
+    },
+    "general": {
+      "files": 213,
+      "passed": 1111,
+      "skipped": 2
+    },
+    "types": "passed",
+    "migration_check": "passed",
+    "expanded_matrix": {
+      "run_id": 36916424527,
+      "source_commit": "0a5aea0aabc4686a44400648bd0e3b7ea422901c",
+      "passed": 16,
+      "failed": 0,
+      "skipped": 0,
+      "cleanup": "Temporary local stack and synthetic data removed."
+    },
+    "production_after": {
+      "views": [
+        {
+          "owner": "postgres",
+          "relname": "patient_access_view",
+          "definition": " SELECT id,\n    nutritionist_id,\n    billing_status,\n    billing_until\n   FROM patients\n  WHERE deactivated_at IS NULL AND anonymized_at IS NULL AND (id = my_patient_id() OR is_assigned_patient(id));",
+          "authenticated_select": true
+        },
+        {
+          "owner": "postgres",
+          "relname": "patients_patient_view",
+          "definition": " SELECT id,\n    user_id,\n    full_name,\n    initials,\n    tone,\n    billing_status,\n    billing_until,\n    status,\n    stage,\n    goal,\n    adherence_score,\n    created_at\n   FROM patients\n  WHERE user_id = auth.uid();",
+          "authenticated_select": true
+        }
+      ],
+      "policies": [
+        {
+          "cmd": "ALL",
+          "qual": "(nutritionist_id = my_nutritionist_id())",
+          "roles": [
+            "public"
+          ],
+          "permissive": "PERMISSIVE",
+          "policyname": "patients_nutri_all",
+          "with_check": "(nutritionist_id = my_nutritionist_id())"
+        }
+      ],
+      "migration": [
+        {
+          "name": "close_legacy_patient_row_access",
+          "version": "20261001195127"
+        }
+      ]
+    },
+    "security_advisors_after": [
+      {
+        "name": "rls_enabled_no_policy",
+        "level": "INFO",
+        "count": 16,
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+      },
+      {
+        "name": "authenticated_security_definer_function_executable",
+        "level": "WARN",
+        "count": 116,
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable"
+      }
+    ]
+  },
+  "boundaries": {
+    "cloud_supabase_resources_created": 0,
+    "production_writes": "One DDL migration applied; zero patient/account rows modified.",
+    "real_patient_data_used": false,
+    "auth_accounts": 4,
+    "auth_source": "Local Supabase Auth in GitHub Linux runner",
+    "api_mode": "staging, AI disabled, Hono app.request + real Auth/PostgREST",
+    "not_verified": [
+      "Browser / deployed application with production users",
+      "Full hosted schema equivalence",
+      "All 116 public functions",
+      "Privacy finalization/deletion contract"
+    ]
+  }
+}

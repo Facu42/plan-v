@@ -45,6 +45,14 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 ## A. Seguridad y privacidad
 
+- **Sesiones firmadas 2026-10-01, punto 4:** cuatro cuentas ficticias en Supabase
+  temporal dentro de GitHub. Se confirmó una política legacy que exponía notas
+  profesionales a la propia paciente por la API de datos. Cierre aplicado como
+  `20261001195127`, con permiso profesional y vistas conservados en el catálogo.
+  Antes: 14 casos aprobados y 1 fallido;
+  después: 16 aprobados sin omisiones. Suite general: 1111 aprobadas y 2 omitidas.
+  No se contrataron recursos de Supabase. Ver [prueba y límites](sesiones-aislamiento-2026-10-01.md).
+
 - **Clasificación 2026-10-01, punto 3:** las 16 tablas sin políticas están cerradas
   al acceso directo de visitantes y usuarias, también por columnas; no hay vistas
   que las expongan. Se mantienen internas, con las funciones autorizadas como

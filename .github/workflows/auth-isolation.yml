@@ -1,0 +1,43 @@
+name: Aislamiento con sesiones firmadas
+on:
+  push:
+    paths:
+      - '.github/workflows/auth-isolation.yml'
+      - 'scripts/test-auth-isolation.mjs'
+      - 'supabase/**'
+      - 'server/**'
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite*.ts'
+      - 'vitest*.ts'
+  pull_request:
+    paths:
+      - '.github/workflows/auth-isolation.yml'
+      - 'scripts/test-auth-isolation.mjs'
+      - 'supabase/**'
+      - 'server/**'
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite*.ts'
+      - 'vitest*.ts'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: signed-auth-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+jobs:
+  signed-auth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run test:auth-isolation
+

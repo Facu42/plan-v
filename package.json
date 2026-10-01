@@ -13,6 +13,7 @@
     "build": "vite build",
     "check": "tsc --noEmit && tsc --noEmit -p tsconfig.server.json",
     "test": "vitest run",
+    "test:auth-isolation": "node scripts/test-auth-isolation.mjs",
     "check:migrations": "node scripts/check-migration-safety.mjs",
     "apply:disposable": "node scripts/apply-disposable.mjs",
     "seed:demo": "node scripts/seed-demo.mjs",
