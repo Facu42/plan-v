@@ -6,6 +6,14 @@ temporal con cuatro cuentas ficticias. **Se encontró una exposición adicional
 de notas profesionales a la propia paciente por acceso directo a la tabla.**
 La corrección fue probada y **aplicada en producción**, sin modificar datos ni cuentas.
 
+**Actualización posterior:** el navegador encontró que ambas vistas publicadas
+tenían `security_invoker=true`, opción omitida en esta verificación. La paciente
+vinculada perdió su ficha al cerrar la política cruda. Corregido con `20261001222659`,
+ya aplicado, con filtros explícitos y vistas solo de lectura. El par ficticio pasó
+tras corregir; este informe anterior no prueba compatibilidad funcional publicada.
+Ver [regresión, corrección y QA](prueba-navegador-produccion-2026-10-01.md).
+Los resultados de abajo corresponden al PR #43 antes de esa comprobación posterior.
+
 ## Qué se encontró
 
 El catálogo publicado de `plan-v-app` tenía la política `patients_self_select`,

@@ -45,6 +45,14 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 ## A. Seguridad y privacidad
 
+- **Navegador publicado 2026-10-01:** par ficticio autenticado probado. Regresión
+  del PR #43 por opciones de vistas distintas en producción corregida con
+  `20261001222659`, ya aplicada. Ficha recuperada, notas privadas cerradas, vistas
+  solo de lectura, recarga y cambio de roles comprobados; nota QA retirada.
+  1113 pruebas generales y 16 de sesiones aprobadas. Dos avisos de vistas con
+  permisos del propietario documentados; sin recursos de Supabase nuevos.
+  Ver [resultado, corrección y límites](prueba-navegador-produccion-2026-10-01.md).
+
 - **Sesiones firmadas 2026-10-01, punto 4:** cuatro cuentas ficticias en Supabase
   temporal dentro de GitHub. Se confirmó una política legacy que exponía notas
   profesionales a la propia paciente por la API de datos. Cierre aplicado como

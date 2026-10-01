@@ -49,9 +49,16 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
   GitHub realizada. Se encontró lectura de notas profesionales por una política
   legacy de paciente. Migración `20261001195127_close_legacy_patient_row_access.sql`
   **aplicada en producción** bajo la autorización escrita previa de este hilo.
-  Se conservan permiso profesional y vistas; 16 casos de sesiones aprobados. Ver
+  Se conserva permiso profesional; 16 casos temporales de sesiones aprobados. Ver
   `docs/sesiones-aislamiento-2026-10-01.md`.
-  La prueba con navegador y app publicada sigue pendiente. El punto 3 está
+  El navegador detectó una regresión por opciones de vistas omitidas en el catálogo.
+  Corregida y aplicada como `20261001222659`: ficha recuperada, notas privadas
+  cerradas y vistas solo de lectura. Par ficticio probado con recarga y cambio
+  de sesión; nota QA retirada, invitación e ingreso preparados para usar.
+  1113 pruebas generales y 16 de sesiones aprobadas. Dos avisos de vistas con
+  permisos del propietario documentados; sin recursos de Supabase nuevos.
+  Registro: `docs/prueba-navegador-produccion-2026-10-01.md`.
+  El punto 3 está
   clasificado: las 16 tablas están cerradas al acceso directo; 38 pruebas locales
   nuevas lo protegen. Ver `docs/clasificacion-tablas-internas-2026-10-01.md`.
   Las 34 funciones internas siguen cerradas y las 116 públicas coinciden con la
