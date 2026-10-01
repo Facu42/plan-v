@@ -58,3 +58,9 @@ confirmar con el hilo de Autenticación (apartado D) que no cambió las mismas r
   **ruti-chat-crm**, no Plan V. Sus consultas más repetidas se ejecutaron unos 6 millones de
   veces cada una (mensajes, conversaciones, clientes); las de Plan V, unas pocas miles.
   Dato de las estadísticas de consultas de cada base.
+
+## 2026-10-01: contraseñas filtradas encendidas
+
+Facundo encendió la protección contra contraseñas filtradas. Comprobado con el asesor de
+seguridad de Supabase: el aviso ya no aparece. Sigue la prueba de restaurar una copia diaria
+en un proyecto aparte (se crea desde el panel de copias y tiene costo por hora mientras exista).
