@@ -133,3 +133,6 @@ nada en la base):
 - Migración nueva, sin aplicar: `20261001120000_service_admin_accounts.sql` (marca de prueba, nota de
   hasta 500, tres funciones del panel que validan que quien llama es administrador). Hasta aplicarla,
   la nota y las cuentas de prueba responden 501; el alta y el reenvío funcionan igual.
+
+### 2026-10-01 — migración service_admin_accounts aplicada en producción
+Con su frase "aplicá panel ampliado en la base" se aplicó `20261001120000_service_admin_accounts.sql` (columna `is_test`, nota de hasta 500 caracteres y tres funciones solo para administradores). Comprobado: las tres funciones nuevas las puede ejecutar `authenticated` y no `anon`; `service_nutritionist_json` queda cerrada. Falta publicar el PR #35 (su "publicalo").
