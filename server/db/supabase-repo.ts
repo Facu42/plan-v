@@ -257,7 +257,8 @@ async function loadPatientExtras(
 
   const briefQuery = audience === 'patient'
     ? Promise.resolve({ data: null as Record<string, unknown> | null })
-    : sb.from('ai_briefs').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }).limit(1).maybeSingle();
+    // Sin permiso de tabla para la nutricionista: lo lee el servidor; quien llama ya la autorizó sobre esta paciente.
+    : privilegedDb().from('ai_briefs').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }).limit(1).maybeSingle();
 
   const [{ data: slots }, { data: logs }, { data: msgs }, briefsResult, { data: habits }, { data: appts }, { data: timelineRows }] = await Promise.all([
     sb.from('meal_slots').select('weekday, slot, title').eq('patient_id', patientId).order('weekday').order('slot'),
@@ -441,7 +442,9 @@ export async function sbListPatientsForNutri(userId: string, query: { offset: nu
 
   const nextByPatient = new Map<string, Record<string, unknown>>();
   if (ids.length > 0) {
-    const { data: appts } = await sb.from('appointments')
+    // Sin permiso de tabla para la nutricionista: lo lee el servidor, sólo de las pacientes de esta página
+    // (salieron de su consulta con permisos de fila).
+    const { data: appts } = await privilegedDb().from('appointments')
       .select(appointmentColumns.professional)
       .in('patient_id', ids)
       .eq('status', 'scheduled')
@@ -559,11 +562,14 @@ export async function sbUpdateMealLog(patientId: string, mealId: string, patch: 
 
 export async function sbSetBrief(patientId: string, nutritionistId: string, brief: Brief): Promise<void> {
   const sb = getRequestDb();
+  // La nutricionista no tiene permiso de tabla sobre los briefs: los escribe el servidor, que ya
+  // comprobó en la ruta que la paciente es de su consultorio.
+  const admin = privilegedDb();
   // Not transactional yet: a later RPC in PV-08 must make delete/insert/update atomic.
-  const { error: deleteError } = await sb.from('ai_briefs').delete().eq('patient_id', patientId).eq('status', 'pending_review');
+  const { error: deleteError } = await admin.from('ai_briefs').delete().eq('patient_id', patientId).eq('status', 'pending_review');
   if (deleteError) throw deleteError;
   if (brief.suggested_action) {
-    const { error: insertError } = await sb.from('ai_briefs').insert({
+    const { error: insertError } = await admin.from('ai_briefs').insert({
       patient_id: patientId,
       nutritionist_id: nutritionistId,
       suggested_action: brief.suggested_action,
@@ -676,7 +682,8 @@ export async function sbSetAppointment(
 }
 
 export async function sbDismissBrief(patientId: string, dismissedBy: string): Promise<void> {
-  const sb = getRequestDb();
+  // Sin permiso de tabla para la nutricionista: lo escribe el servidor tras autorizar la ruta.
+  const sb = privilegedDb();
   // Sólo el brief pendiente: si ya estaba dismissed/done, es un no-op idempotente.
   const { error } = await sb.from('ai_briefs').update({
     status: 'dismissed',
@@ -914,7 +921,9 @@ export async function sbSendInvite(inviteId: string, ttlMs = 7 * 24 * 60 * 60 * 
   }
   const now = new Date();
   const event = current.status === 'pending' ? 'resent' : 'sent';
-  const sb = getRequestDb();
+  // La nutricionista sólo puede leer y crear invitaciones (permiso de tabla); el cambio de estado lo hace
+  // el servidor. `current` ya salió con su sesión, así que la invitación es de su consultorio.
+  const sb = privilegedDb();
   const { data, error } = await sb.from('patient_invites').update({
     status: 'pending',
     invited_at: now.toISOString(),
@@ -932,7 +941,8 @@ export async function sbRevokeInvite(inviteId: string): Promise<PatientInvite> {
     throw new Error('Invite unavailable');
   }
   const now = new Date().toISOString();
-  const sb = getRequestDb();
+  // Igual que al enviar: `current` salió con la sesión de la nutricionista; el cambio lo hace el servidor.
+  const sb = privilegedDb();
   const { data, error } = await sb.from('patient_invites').update({
     status: 'revoked',
     revoked_at: now,

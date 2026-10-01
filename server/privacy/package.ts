@@ -6,7 +6,7 @@ import { getPatient } from '../store.js';
 import { listMeasurements } from '../care/repository.js';
 import { getPublishedMealPlan } from '../plans/repository.js';
 import { privateAssetSnapshot } from '../assets/repository.js';
-import { getRequestDb } from '../db/supabase-client.js';
+import { getRequestDb, privilegedDb } from '../db/supabase-client.js';
 import * as sb from '../db/supabase-repo.js';
 import { PRIVACY_EXPORT_VERSION, type PrivacyAssetMeta } from '../../src/types/privacy.js';
 import { retentionRulesForExport } from './retention.js';
@@ -69,7 +69,9 @@ async function assetMeta(patientId: string, persistent: boolean): Promise<Privac
       .filter((asset) => asset.patient_id === patientId)
       .map(mapAssetMeta);
   }
-  const { data, error } = await getRequestDb()
+  // Sin permiso de tabla para quien exporta: lo lee el servidor, sólo de esta paciente y después de
+  // que la base autorizó el pedido (request_privacy_action).
+  const { data, error } = await privilegedDb()
     .from('patient_assets')
     .select('id,category,mime,byte_size,status,created_at,withdrawn_at')
     .eq('patient_id', patientId)
