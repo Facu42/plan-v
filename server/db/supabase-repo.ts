@@ -559,11 +559,14 @@ export async function sbUpdateMealLog(patientId: string, mealId: string, patch: 
 
 export async function sbSetBrief(patientId: string, nutritionistId: string, brief: Brief): Promise<void> {
   const sb = getRequestDb();
+  // La nutricionista no tiene permiso de tabla sobre los briefs: los escribe el servidor, que ya
+  // comprobó en la ruta que la paciente es de su consultorio.
+  const admin = privilegedDb();
   // Not transactional yet: a later RPC in PV-08 must make delete/insert/update atomic.
-  const { error: deleteError } = await sb.from('ai_briefs').delete().eq('patient_id', patientId).eq('status', 'pending_review');
+  const { error: deleteError } = await admin.from('ai_briefs').delete().eq('patient_id', patientId).eq('status', 'pending_review');
   if (deleteError) throw deleteError;
   if (brief.suggested_action) {
-    const { error: insertError } = await sb.from('ai_briefs').insert({
+    const { error: insertError } = await admin.from('ai_briefs').insert({
       patient_id: patientId,
       nutritionist_id: nutritionistId,
       suggested_action: brief.suggested_action,
@@ -676,7 +679,8 @@ export async function sbSetAppointment(
 }
 
 export async function sbDismissBrief(patientId: string, dismissedBy: string): Promise<void> {
-  const sb = getRequestDb();
+  // Sin permiso de tabla para la nutricionista: lo escribe el servidor tras autorizar la ruta.
+  const sb = privilegedDb();
   // Sólo el brief pendiente: si ya estaba dismissed/done, es un no-op idempotente.
   const { error } = await sb.from('ai_briefs').update({
     status: 'dismissed',
