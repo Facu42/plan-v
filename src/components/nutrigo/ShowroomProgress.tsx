@@ -202,7 +202,7 @@ export function ShowroomProgress({
             </section>
             <section className="nvpf-meals" aria-label="Comidas de esta semana">
               <header className="nvpf-head"><h3>Comidas de esta semana</h3><NvBadge>{view.recentLogs.length}</NvBadge></header>
-              {view.recentLogs.length ? <div className="nvpf-carousel">{view.recentLogs.map((log) => <article key={log.id}>
+              {view.recentLogs.length ? <div className="nvpf-carousel" role="region" aria-label="Comidas registradas" tabIndex={0}>{view.recentLogs.map((log) => <article key={log.id}>
                 <header><small>{new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' }).format(new Date(log.logged_at))}</small><strong>{log.slot}</strong></header>
                 <div><p>{log.description || 'Sin descripción registrada'}</p><NvBadge tone={log.status === 'pending_review' ? 'gold' : 'green'}>{log.status === 'pending_review' ? 'En revisión' : log.status === 'adjusted' ? 'Ajustada' : 'Confirmada'}</NvBadge></div>
               </article>)}</div> : <NvState title="Sin comidas registradas esta semana" description={professional ? 'Cuando registre comidas, sus estados aparecerán acá.' : 'Cuando registres comidas, sus estados aparecerán acá.'} />}

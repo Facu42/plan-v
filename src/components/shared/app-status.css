@@ -1,0 +1,50 @@
+/*
+ * Pantallas de carga y de error de toda la app. Viven en la hoja que se baja
+ * primero (no dentro del consultorio), así que usan los valores del archivo de
+ * Nutrigo escritos a mano: lienzo #F9F4F2, carbón #272932, verde #C2E66E, gris #8A8C90.
+ */
+.app-status {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 16px;
+  color: #272932;
+  background: #f9f4f2;
+  font-family: 'Poppins', 'DM Sans', Arial, sans-serif;
+  text-align: center;
+}
+.app-status h1 { margin: 0; color: #212738; font-size: 22px; font-weight: 600; }
+.app-status p { max-width: 340px; margin: 0; color: #8a8c90; font-size: 14px; line-height: 1.5; }
+.app-status button {
+  min-height: 44px;
+  margin-top: 8px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 12px;
+  color: #272932;
+  background: #c2e66e;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.app-status button:focus-visible { outline: 2px solid #73a107; outline-offset: 2px; }
+.app-status-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e1e1e2;
+  border-top-color: #73a107;
+  border-radius: 50%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .app-status-spinner { animation: app-status-spin 0.9s linear infinite; }
+  .app-status { animation: app-status-fade 0.2s ease-out 0.15s backwards; }
+  .app-status button { transition: background-color 0.15s ease, transform 0.15s ease; }
+  .app-status button:active { transform: scale(0.97); }
+}
+@keyframes app-status-spin { to { transform: rotate(360deg); } }
+@keyframes app-status-fade { from { opacity: 0; } to { opacity: 1; } }
