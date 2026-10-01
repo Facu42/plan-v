@@ -257,7 +257,8 @@ async function loadPatientExtras(
 
   const briefQuery = audience === 'patient'
     ? Promise.resolve({ data: null as Record<string, unknown> | null })
-    : sb.from('ai_briefs').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }).limit(1).maybeSingle();
+    // Sin permiso de tabla para la nutricionista: lo lee el servidor; quien llama ya la autorizó sobre esta paciente.
+    : privilegedDb().from('ai_briefs').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }).limit(1).maybeSingle();
 
   const [{ data: slots }, { data: logs }, { data: msgs }, briefsResult, { data: habits }, { data: appts }, { data: timelineRows }] = await Promise.all([
     sb.from('meal_slots').select('weekday, slot, title').eq('patient_id', patientId).order('weekday').order('slot'),
@@ -441,7 +442,9 @@ export async function sbListPatientsForNutri(userId: string, query: { offset: nu
 
   const nextByPatient = new Map<string, Record<string, unknown>>();
   if (ids.length > 0) {
-    const { data: appts } = await sb.from('appointments')
+    // Sin permiso de tabla para la nutricionista: lo lee el servidor, sólo de las pacientes de esta página
+    // (salieron de su consulta con permisos de fila).
+    const { data: appts } = await privilegedDb().from('appointments')
       .select(appointmentColumns.professional)
       .in('patient_id', ids)
       .eq('status', 'scheduled')
