@@ -13,6 +13,15 @@ describe('AdminConsole', () => {
     expect(html).not.toContain('Pacientes');
   });
 
+  it('ofrece el botón del tema y refleja el estado', () => {
+    const claro = renderToStaticMarkup(<AdminConsole darkMode={false} onToggleTheme={() => undefined} />);
+    expect(claro).toContain('Usar tema oscuro');
+    expect(claro).not.toContain('nv-dark');
+    const oscuro = renderToStaticMarkup(<AdminConsole darkMode onToggleTheme={() => undefined} />);
+    expect(oscuro).toContain('Usar tema claro');
+    expect(oscuro).toContain('nv-dark');
+  });
+
   it('reconoce la ruta /admin', () => {
     expect(isAdminPath('/admin')).toBe(true);
     expect(isAdminPath('/app')).toBe(false);

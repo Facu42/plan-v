@@ -8,3 +8,41 @@
   .svc .cbz-patients button { flex-wrap: wrap; }
   .svc .cbz-side { flex-direction: row; flex-wrap: wrap; align-items: center; }
 }
+
+/* Pestañas del panel */
+.svc-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; border-bottom: 1px solid var(--nv-border); scrollbar-width: thin; }
+.svc-tabs button { flex: 0 0 auto; min-height: 44px; padding: 8px 16px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--nv-muted); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.svc-tabs button:hover { color: var(--nv-ink); }
+.svc-tabs button[aria-selected=true] { color: var(--nv-ink); font-weight: 600; border-bottom-color: var(--nv-strong); }
+.svc-tabs button:focus-visible { outline: 2px solid var(--nv-strong); outline-offset: -2px; border-radius: 6px; }
+.svc-tabpanel { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.svc-two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+
+/* Lista: buscador, filtros y acciones */
+.svc-count { margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: var(--nv-green); color: var(--nv-ink); font-size: 11px; font-weight: 600; }
+.svc-tools { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--nv-border); }
+.svc-filters { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 10px; }
+.svc-filters-2 { grid-template-columns: 1fr 1.4fr; margin-bottom: 10px; }
+.svc-tools .nv-button, .svc-mail { min-height: 40px; }
+a.nv-button.svc-mail { display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
+.svc-quick { gap: 8px; }
+.svc-count-line { margin-bottom: 8px; }
+.svc-events-all { max-height: none; }
+.svc-modes { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0; padding: 0; border: 0; font-size: 12px; font-weight: 500; }
+.svc-modes legend { padding: 0; margin-bottom: 6px; }
+.cbz-form .svc-radio { flex-direction: row; align-items: center; gap: 8px; font-size: 13px; font-weight: 400; min-height: 40px; }
+.cbz-form .svc-radio input { width: 18px; min-height: 18px; height: 18px; padding: 0; accent-color: var(--nv-strong); }
+.cbz-form textarea { resize: vertical; }
+.svc-preview strong { color: var(--nv-ink); overflow-wrap: anywhere; }
+.svc-result { margin-top: 14px; padding: 14px; border-radius: 12px; background: var(--nv-green); color: var(--nv-ink); font-size: 13px; }
+.svc-result p { margin: 0 0 8px; }
+.svc-result dl { margin: 0 0 8px; display: grid; gap: 6px; }
+.svc-result dt { font-size: 11px; color: var(--nv-muted); }
+.svc-result dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.svc-tabpanel .nv-card h2 { color: var(--nv-ink); }
+.nv-dark .cbz-form input::placeholder { color: var(--nv-muted); }
+@media (max-width: 1050px) { .svc-two { grid-template-columns: 1fr; } }
+@media (max-width: 700px) {
+  .svc-filters, .svc-filters-2 { grid-template-columns: 1fr; }
+  .svc-tools .cbz-actions .nv-button, .svc-tools .cbz-actions .svc-mail { flex: 1 1 140px; }
+}

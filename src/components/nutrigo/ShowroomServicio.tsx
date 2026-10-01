@@ -2,17 +2,18 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 import { api } from '../../api/client';
 import { formatFeeDate, formatPesos } from '../../fees';
 import { localBillingDate } from '../../billing';
-import { serviceTotals, SERVICE_METHOD_LABELS, SERVICE_STATE_LABELS, summarizeService } from '../../service';
+import { serviceTotals, SERVICE_METHOD_LABELS, SERVICE_STATE_LABELS, summarizeService, type ServiceState } from '../../service';
 import type { ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServicePaymentMethod, ServiceSettings } from '../../types/service';
 import { Icon } from '../shared/Icon';
 import { NvBadge, NvButton, NvCard, NvState } from './primitives';
 import { ConfirmDialog, FeeError } from './cobranzas-shared';
 import { feeErrorMessage, parsePesos } from './cobranzas-utils';
-import { buildServiceRows, daysLeftText, replaceNutritionist, SERVICE_STATE_TONE, serviceEventLabel, shortDateTime } from './servicio-utils';
+import { adminErrorMessage, buildMailto, buildServiceRows, daysLeftText, emailsOf, filterServiceRows, mailKindFor, mailTemplate, replaceNutritionist, SERVICE_ORDERS, SERVICE_STATE_FILTERS, SERVICE_STATE_TONE, serviceEventLabel, shortDateTime, type ServiceOrder, type ServiceRow } from './servicio-utils';
+import { ActividadTab, AltasTab, PruebasTab } from './ServicioTabs';
 import './cobranzas-fig.css';
 import './servicio-fig.css';
 
-function SettingsCard({ settings, onSaved }: { settings: ServiceSettings; onSaved: (settings: ServiceSettings) => void }) {
+export function SettingsCard({ settings, onSaved }: { settings: ServiceSettings; onSaved: (settings: ServiceSettings) => void }) {
   const [price, setPrice] = useState(settings.monthly_price ? String(settings.monthly_price) : '');
   const [trial, setTrial] = useState(String(settings.trial_days));
   const [busy, setBusy] = useState(false);
@@ -95,13 +96,25 @@ export function NutritionistPanel({ nutritionist, monthlyPrice, onChange, onBack
   const [voiding, setVoiding] = useState<string | null>(null);
   const [trialDays, setTrialDays] = useState('15');
   const [overrideNote, setOverrideNote] = useState('');
+  const [internalNote, setInternalNote] = useState(nutritionist.subscription.note);
+  const [notice, setNotice] = useState('');
 
   const act = async (id: string, run: () => Promise<{ nutritionist: ServiceNutritionist }>): Promise<boolean> => {
-    setBusyId(id); setError('');
+    setBusyId(id); setError(''); setNotice('');
     try { onChange((await run()).nutritionist); return true; }
-    catch (reason) { setError(feeErrorMessage(reason)); return false; } finally { setBusyId(''); }
+    catch (reason) { setError(adminErrorMessage(reason)); return false; } finally { setBusyId(''); }
   };
-  const record = async (input: ServicePaymentInput) => { onChange((await api.addServicePayment(nutritionist.id, input)).nutritionist); };
+  const resendAccess = async () => {
+    setBusyId('access'); setError(''); setNotice('');
+    try { await api.sendNutritionistAccess(nutritionist.id); setNotice(`Le reenviamos el acceso a ${nutritionist.email}.`); }
+    catch (reason) { setError(adminErrorMessage(reason, 'No pudimos reenviar el acceso.')); } finally { setBusyId(''); }
+  };
+  const saveNote = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void act('note', () => api.saveNutritionistNote(nutritionist.id, internalNote.trim())).then((ok) => { if (ok) setNotice('Nota guardada.'); });
+  };
+  const mail = mailTemplate(mailKindFor(summary.state), nutritionist.display_name);
+  const record = async (input: ServicePaymentInput) => { onChange((await api.addServicePayment(nutritionist.id, input)).nutritionist); setNotice('Pago registrado.'); };
   const extend = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const days = Number(trialDays);
@@ -125,8 +138,20 @@ export function NutritionistPanel({ nutritionist, monthlyPrice, onChange, onBack
       <div><dt>Pacientes activos</dt><dd>{nutritionist.patients_active}</dd></div>
       <div><dt>Último ingreso</dt><dd>{nutritionist.last_sign_in_at ? shortDateTime(nutritionist.last_sign_in_at) : 'Nunca'}</dd></div>
     </dl>
-    {nutritionist.subscription.note && <p className="cbz-muted">Nota: {nutritionist.subscription.note}</p>}
+    <div className="cbz-actions svc-quick">
+      <NvButton className="nv-soft" disabled={busy} onClick={() => void resendAccess()}>{busyId === 'access' ? 'Enviando…' : 'Reenviar acceso'}</NvButton>
+      <a className="nv-button nv-soft svc-mail" href={buildMailto([nutritionist.email], mail.subject, mail.body)}><Icon name="message" size={14} />Escribir mail</a>
+    </div>
     <FeeError message={error} />
+    {notice && !error && <p className="cbz-ok" role="status">{notice}</p>}
+
+    <section className="cbz-block"><h3>Nota interna</h3>
+      <form className="cbz-form" onSubmit={saveNote} noValidate>
+        <p className="cbz-hint">Sólo la ves vos. No va con datos de salud.</p>
+        <label htmlFor="svc-internal-note">Nota<textarea id="svc-internal-note" rows={3} value={internalNote} onChange={(event) => setInternalNote(event.target.value)} maxLength={500} disabled={busy} /></label>
+        <NvButton type="submit" className="nv-soft" disabled={busy}>{busyId === 'note' ? 'Guardando…' : 'Guardar nota'}</NvButton>
+      </form>
+    </section>
 
     <section className="cbz-block"><h3>Registrar pago</h3>
       <PaymentForm key={`${nutritionist.id}-${nutritionist.payments.length}-${monthlyPrice ?? 0}`} defaultAmount={monthlyPrice} onSubmit={record} />
@@ -163,9 +188,60 @@ export function NutritionistPanel({ nutritionist, monthlyPrice, onChange, onBack
   </aside>;
 }
 
-export function ServicioScreen({ board, onBoard, today = localBillingDate(), initialSelectedId = null }: {
-  board: ServiceBoard; onBoard: (board: ServiceBoard) => void; today?: string; initialSelectedId?: string | null;
+export type ServicioTab = 'resumen' | 'altas' | 'pruebas' | 'actividad' | 'precio';
+export const SERVICIO_TABS: Array<{ id: ServicioTab; label: string }> = [
+  { id: 'resumen', label: 'Resumen' }, { id: 'altas', label: 'Altas' }, { id: 'pruebas', label: 'Cuentas de prueba' }, { id: 'actividad', label: 'Actividad' }, { id: 'precio', label: 'Precio y prueba' },
+];
+
+function ServiceList({ rows, selectedId, onSelect }: { rows: ServiceRow[]; selectedId: string | null; onSelect: (id: string) => void }) {
+  const [query, setQuery] = useState('');
+  const [state, setState] = useState<ServiceState | 'todas'>('todas');
+  const [order, setOrder] = useState<ServiceOrder>('vencimiento');
+  const [copied, setCopied] = useState('');
+  const visible = useMemo(() => filterServiceRows(rows, { query, state, order }), [rows, query, state, order]);
+  const emails = emailsOf(visible);
+  const template = mailTemplate(state === 'todas' ? 'bienvenida' : mailKindFor(state));
+  const mailto = buildMailto(emails, template.subject, template.body);
+
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(emails.join(', ')); setCopied(emails.length === 1 ? 'Copiamos 1 mail.' : `Copiamos ${emails.length} mails.`); }
+    catch { setCopied('No pudimos copiar. Probá de nuevo.'); }
+  };
+
+  return <section className="cbz-directory" aria-label="Nutricionistas">
+    <header><h2>Nutricionistas <span className="svc-count">{visible.length === rows.length ? rows.length : `${visible.length} de ${rows.length}`}</span></h2></header>
+    {rows.length > 0 && <div className="svc-tools">
+      <div className="cbz-form svc-filters">
+        <label htmlFor="svc-search">Buscar<input id="svc-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nombre o mail" /></label>
+        <label htmlFor="svc-state">Estado<select id="svc-state" value={state} onChange={(event) => setState(event.target.value as ServiceState | 'todas')}>{SERVICE_STATE_FILTERS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
+        <label htmlFor="svc-order">Ordenar por<select id="svc-order" value={order} onChange={(event) => setOrder(event.target.value as ServiceOrder)}>{SERVICE_ORDERS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
+      </div>
+      <div className="cbz-actions">
+        <NvButton className="nv-soft" disabled={!emails.length} onClick={() => void copy()}>Copiar mails</NvButton>
+        {mailto ? <a className="nv-button nv-soft svc-mail" href={mailto}>Escribir mail</a> : <NvButton className="nv-soft" disabled>Escribir mail</NvButton>}
+        {copied && <span className="cbz-muted" role="status">{copied}</span>}
+      </div>
+    </div>}
+    {!rows.length ? <NvState title="Todavía no hay nutricionistas" description="Cuando se sumen las vas a ver acá con su prueba y sus pagos." />
+      : !visible.length ? <p className="cbz-muted cbz-pad">Ninguna nutricionista coincide con la búsqueda.</p>
+        : <ul className="cbz-patients">{visible.map(({ nutritionist, summary }) => <li key={nutritionist.id}>
+          <button type="button" className={nutritionist.id === selectedId ? 'cbz-selected' : ''} aria-pressed={nutritionist.id === selectedId} aria-label={`Ver servicio de ${nutritionist.display_name}`} onClick={() => onSelect(nutritionist.id)}>
+            <span className="cbz-who"><strong>{nutritionist.display_name}</strong><small>{nutritionist.email}</small>
+              <small>{nutritionist.patients_active === 1 ? '1 paciente activa' : `${nutritionist.patients_active} pacientes activas`} · Último ingreso: {nutritionist.last_sign_in_at ? shortDateTime(nutritionist.last_sign_in_at) : 'nunca'}</small></span>
+            <span className="cbz-side">
+              <ServiceStateBadge state={summary.state} />
+              {summary.until && <small className="svc-until">Hasta {formatFeeDate(summary.until)}</small>}
+              {summary.days_left !== null && <small className="svc-until">{daysLeftText(summary)}</small>}
+            </span>
+          </button>
+        </li>)}</ul>}
+  </section>;
+}
+
+export function ServicioScreen({ board, onBoard, today = localBillingDate(), initialSelectedId = null, initialTab = 'resumen' }: {
+  board: ServiceBoard; onBoard: (board: ServiceBoard) => void; today?: string; initialSelectedId?: string | null; initialTab?: ServicioTab;
 }) {
+  const [tab, setTab] = useState<ServicioTab>(initialTab);
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId);
   const rows = useMemo(() => buildServiceRows(board, today), [board, today]);
   const totals = serviceTotals(board.nutritionists, today);
@@ -174,38 +250,35 @@ export function ServicioScreen({ board, onBoard, today = localBillingDate(), ini
 
   return <div className="cbz svc">
     <header className="svc-head"><h2>Panel del servicio</h2><p>Acá no hay datos de salud de las pacientes: solo cantidades.</p></header>
-    <dl className="cbz-summary">
-      <div className="cbz-stat"><dt>Activas</dt><dd>{totals.activas}</dd></div>
-      <div className="cbz-stat"><dt>En prueba</dt><dd>{totals.prueba}</dd></div>
-      <div className="cbz-stat"><dt>Vencidas</dt><dd>{totals.vencidas}</dd></div>
-      <div className="cbz-stat"><dt>Cobrado este mes</dt><dd>{formatPesos(totals.cobrado_mes)}</dd></div>
-    </dl>
-    <div className={`cbz-layout${selected ? ' cbz-has-selection' : ''}`}>
-      <div className="cbz-list-col">
-        <section className="cbz-directory" aria-label="Nutricionistas">
-          <header><h2>Nutricionistas</h2></header>
-          {!rows.length ? <NvState title="Todavía no hay nutricionistas" description="Cuando se sumen las vas a ver acá con su prueba y sus pagos." />
-            : <ul className="cbz-patients">{rows.map(({ nutritionist, summary }) => <li key={nutritionist.id}>
-              <button type="button" className={nutritionist.id === selectedId ? 'cbz-selected' : ''} aria-pressed={nutritionist.id === selectedId} aria-label={`Ver servicio de ${nutritionist.display_name}`} onClick={() => setSelectedId(nutritionist.id)}>
-                <span className="cbz-who"><strong>{nutritionist.display_name}</strong><small>{nutritionist.email}</small>
-                  <small>{nutritionist.patients_active === 1 ? '1 paciente activa' : `${nutritionist.patients_active} pacientes activas`} · Último ingreso: {nutritionist.last_sign_in_at ? shortDateTime(nutritionist.last_sign_in_at) : 'nunca'}</small></span>
-                <span className="cbz-side">
-                  <ServiceStateBadge state={summary.state} />
-                  {summary.until && <small className="svc-until">Hasta {formatFeeDate(summary.until)}</small>}
-                  {summary.days_left !== null && <small className="svc-until">{daysLeftText(summary)}</small>}
-                </span>
-              </button>
-            </li>)}</ul>}
-        </section>
-        <SettingsCard settings={board.settings} onSaved={(settings) => onBoard({ ...board, settings })} />
-        <NvCard title="Actividad reciente">
-          {board.events.length ? <ul className="cbz-list svc-events">{board.events.slice(0, 15).map((event) => <li key={event.id} className="cbz-row">
-            <div><strong>{serviceEventLabel(event.action)}</strong><small>{event.nutritionist_id ? names.get(event.nutritionist_id) ?? 'Nutricionista' : 'General'} · {shortDateTime(event.occurred_at)}</small></div>
-          </li>)}</ul> : <p className="cbz-muted">Todavía no hay movimientos.</p>}
-        </NvCard>
-      </div>
-      {selected ? <NutritionistPanel nutritionist={selected} monthlyPrice={board.settings.monthly_price} today={today} onBack={() => setSelectedId(null)} onChange={(next) => onBoard(replaceNutritionist(board, next))} />
-        : <aside className="cbz-panel cbz-panel-empty" aria-label="Detalle del servicio"><p>Elegí una nutricionista para registrar pagos, extender su prueba o cambiar su estado.</p></aside>}
+    <div className="svc-tabs" role="tablist" aria-label="Secciones del panel">
+      {SERVICIO_TABS.map((item) => <button key={item.id} type="button" role="tab" id={`svc-tab-${item.id}`} aria-selected={tab === item.id} aria-controls="svc-tabpanel" tabIndex={tab === item.id ? 0 : -1} onClick={() => setTab(item.id)}>{item.label}</button>)}
+    </div>
+    <div id="svc-tabpanel" role="tabpanel" aria-labelledby={`svc-tab-${tab}`} className="svc-tabpanel">
+      {tab === 'resumen' && <>
+        <dl className="cbz-summary">
+          <div className="cbz-stat"><dt>Activas</dt><dd>{totals.activas}</dd></div>
+          <div className="cbz-stat"><dt>En prueba</dt><dd>{totals.prueba}</dd></div>
+          <div className="cbz-stat"><dt>Vencidas</dt><dd>{totals.vencidas}</dd></div>
+          <div className="cbz-stat"><dt>Cobrado este mes</dt><dd>{formatPesos(totals.cobrado_mes)}</dd></div>
+        </dl>
+        <div className={`cbz-layout${selected ? ' cbz-has-selection' : ''}`}>
+          <div className="cbz-list-col">
+            <ServiceList rows={rows} selectedId={selectedId} onSelect={setSelectedId} />
+            <NvCard title="Actividad reciente">
+              {board.events.length ? <ul className="cbz-list svc-events">{board.events.slice(0, 8).map((event) => <li key={event.id} className="cbz-row">
+                <div><strong>{serviceEventLabel(event.action)}</strong><small>{event.nutritionist_id ? names.get(event.nutritionist_id) ?? 'Nutricionista' : 'General'} · {shortDateTime(event.occurred_at)}</small></div>
+              </li>)}</ul> : <p className="cbz-muted">Todavía no hay movimientos.</p>}
+              {board.events.length > 8 && <NvButton className="nv-ghost" onClick={() => setTab('actividad')}>Ver toda la actividad</NvButton>}
+            </NvCard>
+          </div>
+          {selected ? <NutritionistPanel key={selected.id} nutritionist={selected} monthlyPrice={board.settings.monthly_price} today={today} onBack={() => setSelectedId(null)} onChange={(next) => onBoard(replaceNutritionist(board, next))} />
+            : <aside className="cbz-panel cbz-panel-empty" aria-label="Detalle del servicio"><p>Elegí una nutricionista para registrar pagos, extender su prueba o cambiar su estado.</p></aside>}
+        </div>
+      </>}
+      {tab === 'altas' && <AltasTab nutritionists={board.nutritionists} onCreated={(nutritionist) => onBoard({ ...board, nutritionists: [...board.nutritionists.filter((item) => item.id !== nutritionist.id), nutritionist] })} onOpen={(id) => { setSelectedId(id); setTab('resumen'); }} />}
+      {tab === 'pruebas' && <PruebasTab />}
+      {tab === 'actividad' && <ActividadTab events={board.events} names={names} />}
+      {tab === 'precio' && <SettingsCard settings={board.settings} onSaved={(settings) => onBoard({ ...board, settings })} />}
     </div>
   </div>;
 }

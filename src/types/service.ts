@@ -52,6 +52,33 @@ export interface ServiceBoard {
   events: ServiceEvent[];
 }
 
+export type NutritionistCreateMode = 'invite' | 'password';
+
+export interface NutritionistCreateInput {
+  name: string;
+  email: string;
+  mode: NutritionistCreateMode;
+  /** Sólo con mode 'password' (mínimo 10 caracteres). */
+  password?: string;
+}
+
+export interface TestAccountsInput {
+  email_base: string;
+  password: string;
+}
+
+export interface TestAccountsResult {
+  nutritionist: { email: string };
+  patient: { email: string };
+  created: boolean;
+}
+
+export interface TestAccount {
+  email: string;
+  name: string;
+  role: 'nutritionist' | 'patient';
+}
+
 export interface ServicePaymentInput {
   amount: number;
   months: number;

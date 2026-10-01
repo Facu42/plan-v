@@ -3,7 +3,7 @@ import { getSessionToken } from '../lib/supabase';
 import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } from '../types/intake';
 import type { PrivacyRequestKind, PrivacyRequestView } from '../types/privacy';
 import { resolveApiUrl } from './origin';
-import type { ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings } from '../types/service';
+import type { NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
 import type { BillingBoard, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
 
 export class ApiError extends Error {
@@ -238,6 +238,15 @@ export const api = {
     request<{ nutritionist: ServiceNutritionist }>(`/api/admin/nutritionists/${nutritionistId}/trial`, { method: 'POST', body: JSON.stringify({ days }) }),
   setServiceOverride: (nutritionistId: string, override: ServiceOverride, note = '') =>
     request<{ nutritionist: ServiceNutritionist }>(`/api/admin/nutritionists/${nutritionistId}/override`, { method: 'PUT', body: JSON.stringify({ override, note }) }),
+  createNutritionist: (input: NutritionistCreateInput) =>
+    request<{ nutritionist: ServiceNutritionist }>('/api/admin/nutritionists', { method: 'POST', body: JSON.stringify(input) }),
+  sendNutritionistAccess: (nutritionistId: string) =>
+    request<{ sent: boolean }>(`/api/admin/nutritionists/${nutritionistId}/send-access`, { method: 'POST' }),
+  saveNutritionistNote: (nutritionistId: string, note: string) =>
+    request<{ nutritionist: ServiceNutritionist }>(`/api/admin/nutritionists/${nutritionistId}/note`, { method: 'PUT', body: JSON.stringify({ note }) }),
+  createTestAccounts: (input: TestAccountsInput) =>
+    request<TestAccountsResult>('/api/admin/test-accounts', { method: 'POST', body: JSON.stringify(input) }),
+  listTestAccounts: () => request<{ accounts: TestAccount[] }>('/api/admin/test-accounts'),
 
   // Cobranzas. En modo demo la vista de paciente manda ?audience=patient.
   getBillingBoard: () => request<{ board: BillingBoard }>('/api/billing'),
