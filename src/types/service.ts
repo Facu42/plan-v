@@ -78,7 +78,7 @@ export interface TestAccountsResult {
 export interface TestAccount {
   email: string;
   name: string;
-  role: 'nutritionist' | 'patient';
+  role: 'nutricionista' | 'paciente';
 }
 
 export interface ServicePaymentInput {

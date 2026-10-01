@@ -114,7 +114,7 @@ export function PruebasTab({ initialAccounts = null }: { initialAccounts?: TestA
       {accounts === null ? <p className="cbz-muted">Cargando…</p>
         : accounts.length ? <ul className="cbz-list">{accounts.map((account) => <li key={`${account.role}-${account.email}`} className="cbz-row">
           <div><strong>{account.name || account.email}</strong><small>{account.email}</small></div>
-          <NvBadge tone={account.role === 'nutritionist' ? 'green' : 'gold'}>{account.role === 'nutritionist' ? 'Nutricionista' : 'Paciente'}</NvBadge>
+          <NvBadge tone={account.role === 'nutricionista' ? 'green' : 'gold'}>{account.role === 'nutricionista' ? 'Nutricionista' : 'Paciente'}</NvBadge>
         </li>)}</ul> : <p className="cbz-muted">{listError || 'Todavía no hay cuentas de prueba.'}</p>}
       {accounts !== null && accounts.length === 0 && listError ? <NvButton className="nv-ghost" onClick={load}>Reintentar</NvButton> : null}
     </NvCard>

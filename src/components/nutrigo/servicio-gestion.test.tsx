@@ -69,7 +69,7 @@ describe('Pestañas del panel', () => {
     expect(renderToStaticMarkup(<AltasTab nutritionists={[]} onCreated={vi.fn()} onOpen={vi.fn()} />)).toContain('Todavía no hay altas');
   });
   it('Cuentas de prueba: formulario y lista de las existentes', () => {
-    const html = renderToStaticMarkup(<PruebasTab initialAccounts={[{ email: 'f+plan-v-nutri@gmail.com', name: 'Nutri de prueba', role: 'nutritionist' }, { email: 'f+plan-v-paciente@gmail.com', name: 'Paciente de prueba', role: 'patient' }]} />);
+    const html = renderToStaticMarkup(<PruebasTab initialAccounts={[{ email: 'f+plan-v-nutri@gmail.com', name: 'Nutri de prueba', role: 'nutricionista' }, { email: 'f+plan-v-paciente@gmail.com', name: 'Paciente de prueba', role: 'paciente' }]} />);
     for (const text of ['Tu mail', 'Clave', 'Crear nutricionista y paciente de prueba', 'facundorodriguez42@gmail.com', 'f+plan-v-nutri@gmail.com', 'Paciente de prueba', 'Cuentas de prueba existentes']) expect(html).toContain(text);
     expect(renderToStaticMarkup(<PruebasTab initialAccounts={[]} />)).toContain('Todavía no hay cuentas de prueba');
   });

@@ -13,7 +13,7 @@ export const SERVICE_EVENT_LABELS: Record<string, string> = {
   'service.nutritionist_created': 'Alta de nutricionista',
   'service.access_sent': 'Acceso reenviado',
   'service.note': 'Nota interna editada',
-  'service.test_accounts': 'Cuentas de prueba',
+  'service.test_accounts_created': 'Cuentas de prueba creadas',
 };
 
 export function serviceEventLabel(action: string): string {
@@ -57,9 +57,10 @@ export function shortDateTime(iso: string | null): string {
   return date.split('-').reverse().join('/');
 }
 
-export const SERVICE_STATE_FILTERS: Array<{ id: ServiceState | 'todas'; label: string }> = [
+export const SERVICE_STATE_FILTERS: Array<{ id: ServiceState | 'todas' | 'cuentas_prueba'; label: string }> = [
   { id: 'todas', label: 'Todos los estados' },
   ...(['prueba', 'activa', 'por_vencer', 'vencida', 'cortada', 'sin_cargo', 'suspendida'] as ServiceState[]).map((id) => ({ id, label: SERVICE_STATE_LABELS[id] })),
+  { id: 'cuentas_prueba', label: 'Cuentas de prueba' },
 ];
 
 export type ServiceOrder = 'vencimiento' | 'ingreso' | 'nombre';
@@ -69,7 +70,7 @@ export const SERVICE_ORDERS: Array<{ id: ServiceOrder; label: string }> = [
   { id: 'nombre', label: 'Nombre' },
 ];
 
-export interface ServiceRowFilter { query?: string; state?: ServiceState | 'todas'; order?: ServiceOrder }
+export interface ServiceRowFilter { query?: string; state?: ServiceState | 'todas' | 'cuentas_prueba'; order?: ServiceOrder }
 
 function normalize(text: string): string {
   return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
@@ -80,7 +81,7 @@ export function filterServiceRows(rows: ServiceRow[], { query = '', state = 'tod
   const needle = normalize(query);
   const byName = (a: ServiceRow, b: ServiceRow) => a.nutritionist.display_name.localeCompare(b.nutritionist.display_name, 'es');
   return rows
-    .filter((row) => (state === 'todas' || row.summary.state === state)
+    .filter((row) => (state === 'cuentas_prueba' ? row.nutritionist.is_test === true : row.nutritionist.is_test !== true && (state === 'todas' || row.summary.state === state))
       && (!needle || normalize(row.nutritionist.display_name).includes(needle) || normalize(row.nutritionist.email).includes(needle)))
     .sort((a, b) => {
       if (order === 'nombre') return byName(a, b);
