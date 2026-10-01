@@ -82,13 +82,24 @@ export function serviceTotals(nutritionists: ServiceNutritionist[], today: strin
 /** Misma regla que la base: un pago dentro de la gracia sigue desde el vencimiento; si no, desde el día que pagó. */
 export function servicePaidUntil(trialEndsOn: string, payments: Pick<ServiceNutritionist['payments'][number], 'paid_on' | 'months' | 'status' | 'created_at'>[]): string | null {
   let covered: string | null = null;
+  // Los pagos seguidos suman meses desde el mismo comienzo (31/10 + 1 + 2 meses = 31/01, no 30/01).
+  let runStart: string | null = null;
+  let runMonths = 0;
   const ordered = payments
     .filter((payment) => payment.status === 'confirmed')
     .sort((a, b) => a.paid_on.localeCompare(b.paid_on) || a.created_at.localeCompare(b.created_at));
   for (const payment of ordered) {
-    let start: string = covered ?? trialEndsOn;
-    if (days(start, payment.paid_on) > SERVICE_GRACE_DAYS) start = payment.paid_on;
-    covered = addMonths(start, payment.months);
+    const start: string = covered ?? trialEndsOn;
+    if (days(start, payment.paid_on) > SERVICE_GRACE_DAYS) {
+      runStart = payment.paid_on;
+      runMonths = payment.months;
+    } else if (runStart === null) {
+      runStart = start;
+      runMonths = payment.months;
+    } else {
+      runMonths += payment.months;
+    }
+    covered = addMonths(runStart, runMonths);
   }
   return covered;
 }
