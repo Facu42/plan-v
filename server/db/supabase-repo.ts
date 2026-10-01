@@ -914,7 +914,9 @@ export async function sbSendInvite(inviteId: string, ttlMs = 7 * 24 * 60 * 60 * 
   }
   const now = new Date();
   const event = current.status === 'pending' ? 'resent' : 'sent';
-  const sb = getRequestDb();
+  // La nutricionista sólo puede leer y crear invitaciones (permiso de tabla); el cambio de estado lo hace
+  // el servidor. `current` ya salió con su sesión, así que la invitación es de su consultorio.
+  const sb = privilegedDb();
   const { data, error } = await sb.from('patient_invites').update({
     status: 'pending',
     invited_at: now.toISOString(),
@@ -932,7 +934,8 @@ export async function sbRevokeInvite(inviteId: string): Promise<PatientInvite> {
     throw new Error('Invite unavailable');
   }
   const now = new Date().toISOString();
-  const sb = getRequestDb();
+  // Igual que al enviar: `current` salió con la sesión de la nutricionista; el cambio lo hace el servidor.
+  const sb = privilegedDb();
   const { data, error } = await sb.from('patient_invites').update({
     status: 'revoked',
     revoked_at: now,
