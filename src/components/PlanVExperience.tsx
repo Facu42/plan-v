@@ -106,7 +106,7 @@ export function PlanVExperience() {
     return (
       <Suspense fallback={<div className="plan-v-app loading-screen" role="status">Cargando…</div>}>
         <PwaChrome />
-        <AdminConsole darkMode={darkMode} onSignOut={() => signOut()} userName={profile?.full_name || undefined} />
+        <AdminConsole darkMode={darkMode} onToggleTheme={toggleTheme} onSignOut={() => signOut()} userName={profile?.full_name || undefined} />
       </Suspense>
     );
   }

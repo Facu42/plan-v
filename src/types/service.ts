@@ -32,6 +32,8 @@ export interface ServiceNutritionist {
   email: string;
   created_at: string;
   last_sign_in_at: string | null;
+  /** Cuenta de prueba del administrador: no cuenta en los números del panel. El servidor siempre lo manda. */
+  is_test?: boolean;
   patients_active: number;
   patients_total: number;
   subscription: ServiceSubscription;
@@ -52,10 +54,67 @@ export interface ServiceBoard {
   events: ServiceEvent[];
 }
 
+export type NutritionistCreateMode = 'invite' | 'password';
+
+export interface NutritionistCreateInput {
+  name: string;
+  email: string;
+  mode: NutritionistCreateMode;
+  /** Sólo con mode 'password' (mínimo 10 caracteres). */
+  password?: string;
+}
+
+export interface TestAccountsInput {
+  email_base: string;
+  password: string;
+}
+
+export interface TestAccountsResult {
+  nutritionist: { email: string };
+  patient: { email: string };
+  created: boolean;
+}
+
+export interface TestAccount {
+  email: string;
+  name: string;
+  role: 'nutricionista' | 'paciente';
+}
+
 export interface ServicePaymentInput {
   amount: number;
   months: number;
   paid_on: string;
   method: ServicePaymentMethod;
   note?: string;
+}
+
+export type ServiceSignupMode = 'invite' | 'password';
+
+/** POST /api/admin/nutritionists. La clave nunca vuelve en la respuesta. */
+export interface ServiceNutritionistCreateInput {
+  name: string;
+  email: string;
+  mode: ServiceSignupMode;
+  password?: string;
+}
+
+export type ServiceTestRole = 'nutricionista' | 'paciente';
+
+export interface ServiceTestAccount {
+  email: string;
+  name: string;
+  role: ServiceTestRole;
+}
+
+/** POST /api/admin/test-accounts */
+export interface ServiceTestAccountsInput {
+  email_base: string;
+  password: string;
+}
+
+export interface ServiceTestAccountsResult {
+  nutritionist: { email: string };
+  patient: { email: string };
+  created: boolean;
 }

@@ -55,12 +55,18 @@ export interface ServiceTotals {
   vencidas: number;
   sin_cargo: number;
   cobrado_mes: number;
+  /** Cuentas de prueba: no suman en ningún otro número. */
+  cuentas_prueba: number;
 }
 
 export function serviceTotals(nutritionists: ServiceNutritionist[], today: string): ServiceTotals {
   const month = today.slice(0, 7);
-  const totals: ServiceTotals = { activas: 0, prueba: 0, vencidas: 0, sin_cargo: 0, cobrado_mes: 0 };
+  const totals: ServiceTotals = { activas: 0, prueba: 0, vencidas: 0, sin_cargo: 0, cobrado_mes: 0, cuentas_prueba: 0 };
   for (const nutritionist of nutritionists) {
+    if (nutritionist.is_test) {
+      totals.cuentas_prueba += 1;
+      continue;
+    }
     const { state } = summarizeService(nutritionist.subscription, today);
     if (state === 'activa' || state === 'por_vencer') totals.activas += 1;
     else if (state === 'prueba') totals.prueba += 1;

@@ -42,18 +42,23 @@ describe('Panel del servicio: helpers', () => {
 describe('Pantalla Panel del servicio', () => {
   it('muestra totales, lista, precio y actividad', () => {
     const html = renderToStaticMarkup(<ServicioScreen board={board} onBoard={vi.fn()} today={TODAY} />);
-    for (const text of ['Panel del servicio', 'no hay datos de salud', 'Activas', 'En prueba', 'Vencidas', 'Cobrado este mes', 'Ana Gómez', 'ana@x.com', 'Sin pagar', 'En prueba', 'Hasta 12/10/2026', 'Faltan 12 días', '4 pacientes activas', 'Último ingreso: nunca', 'Precio mensual', 'Días de prueba', 'Actividad reciente', 'Pago registrado', 'Elegí una nutricionista']) expect(html).toContain(text);
-    expect(html).toContain('value="20000"');
+    for (const text of ['Panel del servicio', 'no hay datos de salud', 'Activas', 'En prueba', 'Vencidas', 'Cobrado este mes', 'Ana Gómez', 'ana@x.com', 'Sin pagar', 'En prueba', 'Hasta 12/10/2026', 'Faltan 12 días', '4 pacientes activas', 'Último ingreso: nunca', 'Actividad reciente', 'Buscar', 'role="tablist"', 'Pago registrado', 'Elegí una nutricionista']) expect(html).toContain(text);
     expect(html.indexOf('Clara Paz')).toBeLessThan(html.indexOf('Ana Gómez'));
   });
   it('muestra "Sin definir" cuando no hay precio', () => {
-    const html = renderToStaticMarkup(<ServicioScreen board={{ ...board, settings: { monthly_price: null, trial_days: 30 } }} onBoard={vi.fn()} today={TODAY} />);
+    const html = renderToStaticMarkup(<ServicioScreen initialTab="precio" board={{ ...board, settings: { monthly_price: null, trial_days: 30 } }} onBoard={vi.fn()} today={TODAY} />);
     expect(html).toContain('placeholder="Sin definir"');
+  });
+  it('la pestaña Precio y prueba tiene el precio y los días', () => {
+    const html = renderToStaticMarkup(<ServicioScreen initialTab="precio" board={board} onBoard={vi.fn()} today={TODAY} />);
+    for (const text of ['Precio mensual', 'Días de prueba', 'Guardar']) expect(html).toContain(text);
+    expect(html).toContain('value="20000"');
+    expect(html).not.toContain('Cobrado este mes');
   });
   it('el detalle ofrece pago con el precio cargado, prueba, excepciones e historial', () => {
     const html = renderToStaticMarkup(<ServicioScreen board={board} onBoard={vi.fn()} today={TODAY} initialSelectedId="ana" />);
     expect(html).toContain('Servicio de Ana Gómez');
-    for (const text of ['Registrar pago', 'Meses que cubre', 'Extender prueba', 'Sin cargo', 'Suspender', 'Historial de pagos', 'Septiembre', 'Anular', 'Anulado']) expect(html).toContain(text);
+    for (const text of ['Reenviar acceso', 'Escribir mail', 'Nota interna', 'Guardar nota', 'mailto:ana@x.com', 'Registrar pago', 'Meses que cubre', 'Extender prueba', 'Sin cargo', 'Suspender', 'Historial de pagos', 'Septiembre', 'Anular', 'Anulado']) expect(html).toContain(text);
     expect(html).not.toContain('Quitar excepción');
     expect(html).toMatch(/id="svc-pay-amount"[^>]*value="20000"/);
     expect(html).toMatch(/id="svc-trial-days"[^>]*value="15"/);

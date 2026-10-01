@@ -11,3 +11,14 @@
   .nv-admin .nv-admin-user span { display: none; }
   .nv-admin .nv-admin-main { padding: 16px 16px 28px; }
 }
+
+.nv-admin .nv-admin-theme { display: inline-grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--nv-border); border-radius: 999px; background: var(--nv-green); color: var(--nv-ink); cursor: pointer; }
+.nv-admin .nv-admin-theme:hover { background: var(--nv-track); }
+.nv-admin .nv-admin-theme:focus-visible { outline: 2px solid var(--nv-strong); outline-offset: 2px; }
+.nv-app.nv-admin .nv-admin-bar { border-bottom-color: var(--nv-border); }
+.nv-app.nv-admin.nv-dark .nv-admin-bar { background: var(--nv-card); }
+.nv-app.nv-admin .nv-admin-main { background: transparent; box-shadow: none; }
+/* Botón principal: en oscuro el verde lima lleva texto carbón (si no, queda claro sobre claro). */
+.nv-app.nv-admin.nv-dark .nv-button:not(.nv-soft):not(.nv-ghost) { background: #C2E66E; color: #272932; }
+.nv-app.nv-admin.nv-dark .nv-button:not(.nv-soft):not(.nv-ghost) svg { color: #272932; }
+.nv-app.nv-admin.nv-dark .nv-button:disabled { opacity: .55; }

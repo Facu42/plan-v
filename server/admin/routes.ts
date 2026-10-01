@@ -2,6 +2,7 @@ import type { Context, Hono } from 'hono';
 import { z } from 'zod';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import * as repo from './repository.js';
+import * as accounts from './accounts.js';
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => !Number.isNaN(Date.parse(`${value}T12:00:00Z`)));
 const settingsSchema = z.object({
@@ -17,6 +18,28 @@ const paymentSchema = z.object({
 });
 const trialSchema = z.object({ days: z.number().int().min(1).max(365) });
 const overrideSchema = z.object({ override: z.enum(['none', 'waived', 'suspended']), note: z.string().trim().max(280).default('') });
+
+const emailSchema = z.string().trim().toLowerCase().max(254).pipe(z.email());
+const passwordSchema = z.string().min(10).max(72);
+const nutritionistCreateSchema = z.object({
+  name: z.string().trim().min(2).max(80),
+  email: emailSchema,
+  mode: z.enum(['invite', 'password']),
+  password: passwordSchema.optional(),
+}).strict().refine((input) => input.mode === 'invite' ? input.password === undefined : input.password !== undefined);
+const testAccountsSchema = z.object({ email_base: emailSchema, password: passwordSchema }).strict();
+const noteSchema = z.object({ note: z.string().max(500) }).strict();
+
+/** Para las altas: JSON roto es 400; datos que no cumplen, 422. */
+async function strictBody<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
+  const raw = await c.req.text();
+  if (raw.length > 4_000) throw new repo.CareError(413, 'Los datos son demasiado largos.');
+  let parsed: unknown;
+  try { parsed = JSON.parse(raw); } catch { throw new repo.CareError(400, 'Revisá los datos cargados.'); }
+  const result = schema.safeParse(parsed);
+  if (!result.success) throw new repo.CareError(422, 'Revisá los datos cargados.');
+  return result.data;
+}
 
 async function body<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
   const raw = await c.req.text();
@@ -84,5 +107,35 @@ export function registerAdminRoutes(app: Hono) {
     const persistent = await requireAdmin(c);
     const input = await body(c, overrideSchema);
     return c.json({ nutritionist: await repo.setOverride(c.req.param('id'), input.override, input.note, persistent), source: source(persistent) });
+  });
+
+  // Altas. Nunca devuelven claves ni enlaces de acceso.
+  app.post('/api/admin/nutritionists', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, nutritionistCreateSchema);
+    return c.json({ nutritionist: await accounts.createNutritionist(input, persistent), source: source(persistent) }, 201);
+  });
+
+  app.post('/api/admin/nutritionists/:id/send-access', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ ...await accounts.sendAccess(c.req.param('id'), persistent), source: source(persistent) });
+  });
+
+  app.put('/api/admin/nutritionists/:id/note', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, noteSchema);
+    return c.json({ nutritionist: await repo.setNote(c.req.param('id'), input.note, persistent), source: source(persistent) });
+  });
+
+  app.get('/api/admin/test-accounts', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ accounts: await accounts.listTestAccounts(persistent), source: source(persistent) });
+  });
+
+  app.post('/api/admin/test-accounts', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, testAccountsSchema);
+    const result = await accounts.createTestAccounts(input, persistent, (path, init) => app.request(path, init));
+    return c.json({ ...result, source: source(persistent) }, result.created ? 201 : 200);
   });
 }
