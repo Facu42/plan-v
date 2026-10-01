@@ -1,0 +1,33 @@
+# Entorno efímero de prueba. Nunca vincularlo a un proyecto hospedado.
+project_id = "PLAN_V_ISOLATION_PROJECT"
+[api]
+enabled = true
+port = 55441
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+auto_expose_new_tables = true
+[db]
+port = 55442
+shadow_port = 55440
+major_version = 17
+[db.seed]
+enabled = false
+[studio]
+enabled = false
+[inbucket]
+enabled = false
+[realtime]
+enabled = false
+[analytics]
+enabled = false
+[storage]
+enabled = true
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:3000"
+enable_signup = true
+enable_anonymous_sign_ins = false
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+
