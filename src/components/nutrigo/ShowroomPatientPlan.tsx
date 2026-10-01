@@ -5,6 +5,7 @@ import { isAbortError } from '../../api/client';
 import { plansApi } from '../../api/plans';
 import type { PatientMealPlan, PlanItemView } from '../../types/plans';
 import { CarePanel } from './CarePanel';
+import { PatientNutritionTarget } from './ShowroomNutritionTarget';
 import { PlanPublishedItem } from './MealPlanVersions';
 import { mealSlotTone, NvBadge, NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
@@ -311,7 +312,7 @@ export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
     cta={<button type="button" className="pf-cta pf-collapse" aria-label="Lista de compras" onClick={onShopping}><span className="pf-cta-icon"><ShoppingCart size={18} /></span><span className="pf-cta-text">Lista de compras</span></button>}
   />;
 
-  return <section className="pf-plan" aria-label="Tu plan semanal">
+  return <><PatientNutritionTarget patientId={patient.id} /><section className="pf-plan" aria-label="Tu plan semanal">
     {toolbar}
     {error && <p className="pf-error" role="alert">{error}</p>}
     {hasAnyPlan ? <PlanWeekTable rows={table.rows} columns={columns} nav={nav} label="Plan semanal" renderCell={(row, column) => {
@@ -321,5 +322,5 @@ export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
     }} /> : <NvState title="Tu plan está en preparación" description="Cuando tu nutricionista publique comidas, las vas a encontrar acá organizadas por día." />}
     {open && <PlanSheet title={`${open.cell.slot} · ${open.row.day}`} onClose={() => setOpen(null)}><PlanCellDetail row={open.row} cell={open.cell} plan={open.cell.source === 'dated' ? plan : null} /></PlanSheet>}
     {alternatives && <PlanSheet title="Alternativas" wide onClose={() => setAlternatives(false)}><CarePanel patientId={patient.id} mode="menu" /></PlanSheet>}
-  </section>;
+  </section></>;
 }

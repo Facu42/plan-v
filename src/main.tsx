@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
+import { AppErrorBoundary } from "./components/shared/AppStatus";
 import { registerPlanVWorker } from "./pwa/register";
 import "./index.css";
 import { takeAdminReturn } from "./context/admin-return";
@@ -11,5 +12,5 @@ try {
 } catch { /* sin almacenamiento: se entra a /admin a mano */ }
 
 registerPlanVWorker();
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(<AppErrorBoundary><App /></AppErrorBoundary>);
  
