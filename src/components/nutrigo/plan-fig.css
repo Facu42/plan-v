@@ -470,3 +470,5 @@
   font: 500 11px/1.05 Poppins, sans-serif; color: var(--pf-ink-soft);
 }
 .nv-app .pf-sheet .meal-plan-actions .nv-button:not(.nv-ghost) { min-height: 0; padding: 9px 14px; border-radius: 8px; font: 500 11px/1.05 Poppins, sans-serif; }
+/* Zona de toque de al menos 24 px de alto para el selector de mes, sin mover nada de lo que se ve. */
+.nv-app .pf-month::before { content: ""; position: absolute; inset: -4px 0; }
