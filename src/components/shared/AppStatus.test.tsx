@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { AppErrorBoundary, ErrorScreen, LoadingScreen } from './AppStatus';
 
-const css = readFileSync(new URL('./app-status.css', import.meta.url), 'utf8');
+const css = readFileSync(new URL('./app-status.css', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 
 describe('pantallas de carga y de error', () => {
   it('la carga avisa a quien usa lector de pantalla', () => {

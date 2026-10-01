@@ -1,4 +1,5 @@
 import type { Context, Next } from 'hono';
+import { clientAddress } from '../security/client-address.js';
 import { emitOpsAlert } from './alerts.js';
 import { safePath } from './log.js';
 
@@ -23,11 +24,6 @@ export function classifyRateLimitPath(path: string) {
   return 'api' as const;
 }
 
-export function clientIp(headers: { get(name: string): string | undefined }) {
-  const forwarded = headers.get('x-forwarded-for')?.split(',')[0]?.trim();
-  return forwarded || headers.get('x-real-ip')?.trim() || 'local';
-}
-
 function limitFor(kind: ReturnType<typeof classifyRateLimitPath>, env: Record<string, string | undefined>) {
   if (kind === 'auth') return Number(env.RATE_LIMIT_AUTH_MAX) || 5;
   if (kind === 'ops') return Number(env.RATE_LIMIT_OPS_MAX) || 10;
@@ -37,6 +33,10 @@ function limitFor(kind: ReturnType<typeof classifyRateLimitPath>, env: Record<st
 export function consumeRateLimit(key: string, limit: number, windowMs = 60_000, now = Date.now()) {
   const current = buckets.get(key);
   if (!current || current.resetAt <= now) {
+    if (buckets.size >= 10_000) {
+      for (const [id, bucket] of buckets) if (bucket.resetAt <= now) buckets.delete(id);
+      if (!buckets.has(key) && buckets.size >= 10_000) return { ok: false, remaining: 0, resetAt: now + windowMs };
+    }
     buckets.set(key, { count: 1, resetAt: now + windowMs });
     return { ok: true, remaining: Math.max(0, limit - 1), resetAt: now + windowMs };
   }
@@ -50,7 +50,7 @@ export function createRateLimitMiddleware(env: Record<string, string | undefined
     if (!rateLimitsEnabled(env)) return next();
     const kind = classifyRateLimitPath(c.req.path);
     if (kind === 'public') return next();
-    const ip = clientIp({ get: (name) => c.req.header(name) });
+    const ip = clientAddress(c, env);
     const limit = limitFor(kind, env);
     const result = consumeRateLimit(`${ip}:${kind}`, limit);
     c.header('X-RateLimit-Remaining', String(result.remaining));

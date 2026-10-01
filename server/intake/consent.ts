@@ -8,6 +8,7 @@ export const CONSENT_PURPOSES = [
   'measurement',
   'ai_meal_analysis',
   'ai_menu_draft',
+  'ai_followup',
 ] as const;
 
 export type ConsentPurpose = (typeof CONSENT_PURPOSES)[number];
@@ -70,6 +71,13 @@ const TEXTS: Array<Omit<ConsentText, 'text_hash'>> = [
     text_version: 'ai_menu_draft.v1',
     title: 'Borradores de menú con IA',
     text: 'Mi nutricionista puede usar IA para proponer menús o recetas. Nada se publica ni se me envía sin su revisión.',
+    required: false,
+  },
+  {
+    purpose: 'ai_followup',
+    text_version: 'ai_followup.v1',
+    title: 'Copiloto de seguimiento con IA',
+    text: 'Autorizo a Plan V a enviar a un proveedor externo de IA mis indicadores de adherencia, hidratación y cantidad de comidas registradas para preparar sugerencias y borradores de mensajes para mi nutricionista. No se envían mi nombre, notas clínicas ni mensajes. Nada se me envía sin revisión profesional. Este permiso es opcional y puedo retirarlo.',
     required: false,
   },
 ];

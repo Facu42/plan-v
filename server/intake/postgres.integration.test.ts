@@ -243,4 +243,17 @@ describe('migraciones de ingreso en PostgreSQL', () => {
       await db.exec('alter table public.measurements_pv17_hidden rename to measurements');
     }
   });
+  it('el permiso de seguimiento es opcional, separado del menú y revocable por el paciente', async () => {
+    const followup = CONSENT_CATALOG.find(c => c.purpose === 'ai_followup')!;
+    const menu = CONSENT_CATALOG.find(c => c.purpose === 'ai_menu_draft')!;
+    expect(followup.required).toBe(false);
+    expect((await asUser<{ allowed: boolean }>(b, "select public.care_consent($1,'ai_followup') as allowed", [patientB]))[0].allowed).toBe(false);
+    await rpc(b, 'record_patient_consent', [patientB, menu.purpose, menu.text_version, menu.text_hash, 'granted']);
+    expect((await asUser<{ allowed: boolean }>(b, "select public.care_consent($1,'ai_followup') as allowed", [patientB]))[0].allowed).toBe(false);
+    await expect(rpc(other, 'record_patient_consent', [patientB, followup.purpose, followup.text_version, followup.text_hash, 'granted'])).rejects.toMatchObject({ code: '42501' });
+    await rpc(b, 'record_patient_consent', [patientB, followup.purpose, followup.text_version, followup.text_hash, 'granted']);
+    expect((await asUser<{ allowed: boolean }>(b, "select public.care_consent($1,'ai_followup') as allowed", [patientB]))[0].allowed).toBe(true);
+    await rpc(b, 'record_patient_consent', [patientB, followup.purpose, followup.text_version, followup.text_hash, 'withdrawn']);
+    expect((await asUser<{ allowed: boolean }>(b, "select public.care_consent($1,'ai_followup') as allowed", [patientB]))[0].allowed).toBe(false);
+  });
 });

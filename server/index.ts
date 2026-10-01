@@ -1,5 +1,6 @@
 import { serve } from '@hono/node-server';
-import { registerCareRoutes } from './care/routes.js';
+import { registerCareRoutes, requireCareConsent } from './care/routes.js';
+import { createBodyGuard, createOriginGuard, createRateLimits, readCorsOrigins } from './security/http.js';
 import { CareError } from './care/repository.js';
 import { registerAssetRoutes } from './assets/routes.js';
 import { registerRecipeRoutes } from './recipes/routes.js';
@@ -34,7 +35,7 @@ import { emitOpsAlert } from './ops/alerts.js';
 import { resolveCorsOrigin } from './ops/cors.js';
 import { safePath, writeOpsLog } from './ops/log.js';
 import { createRateLimitMiddleware } from './ops/rate-limit.js';
-import { createBodyLimitMiddleware, evaluateReadiness, releaseSha } from './ops/readiness.js';
+import { maxBodyBytes, evaluateReadiness, releaseSha } from './ops/readiness.js';
 import { assertSecretBoundary, inspectSecrets } from './ops/secrets.js';
 import {
   authRecoverInputSchema,
@@ -164,16 +165,20 @@ app.use('/*', secureHeaders({
   crossOriginOpenerPolicy: false,
   contentSecurityPolicy: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] },
 }));
+app.use('/api/*', async (c, next) => {
+  c.header('Cache-Control', 'no-store');
+  await next();
+  c.header('Cache-Control', 'no-store');
+});
+app.use('/api/*', createOriginGuard(() => ({ ...process.env, CORS_ALLOWED_ORIGINS: process.env.CORS_ORIGINS })));
+const securityLimits = createRateLimits();
+app.use('/api/*', securityLimits.public);
 app.use('/*', cors({
   origin: (origin) => resolveCorsOrigin(origin ?? '', process.env),
   allowHeaders: ['Authorization', 'Content-Type', 'X-Request-Id'],
   exposeHeaders: ['X-Request-Id', 'Retry-After', 'X-RateLimit-Remaining'],
 }));
-app.use('/api/*', async (c, next) => {
-  await next();
-  c.header('Cache-Control', 'no-store');
-});
-app.use('/api/*', createBodyLimitMiddleware());
+app.use('/api/*', createBodyGuard(c => maxBodyBytes(c.req.path)));
 app.use('/api/*', createRateLimitMiddleware());
 app.use('/api/*', async (c, next) => {
   const started = Date.now();
@@ -193,6 +198,7 @@ app.use('/api/*', async (c, next) => {
   });
 });
 app.use('/api/*', authMiddleware);
+app.use('/api/*', securityLimits.protected);
 
 app.onError((error, c) => {
   if (error instanceof CareError) return c.json({ error: error.message }, error.status);
@@ -458,6 +464,7 @@ app.post('/api/patients/:id/copilot', async (c) => {
   }
   if (!patient) return c.notFound();
 
+  if ('userId' in auth && isSupabaseEnabled()) await requireCareConsent(patientId, true, 'ai_followup');
   const brief = await generateCopilotBrief(patient as Parameters<typeof generateCopilotBrief>[0]);
 
   if ('userId' in auth && isSupabaseEnabled()) {
@@ -1114,6 +1121,7 @@ const isMainModule = Boolean(process.argv[1]) && import.meta.url === pathToFileU
 
 if (isMainModule) {
   const config = readRuntimeConfig(process.env);
+  readCorsOrigins({ ...process.env, CORS_ALLOWED_ORIGINS: process.env.CORS_ORIGINS }, true);
   assertSecretBoundary(process.env);
   const secrets = inspectSecrets(process.env);
   if (!secrets.ok) {

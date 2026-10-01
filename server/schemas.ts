@@ -243,6 +243,7 @@ export const consentDecisionInputSchema = z.object({
     'measurement',
     'ai_meal_analysis',
     'ai_menu_draft',
+    'ai_followup',
   ]),
   text_version: z.string().trim().min(3).max(80),
   text_hash: z.string().trim().min(16).max(128),

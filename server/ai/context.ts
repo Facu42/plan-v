@@ -83,9 +83,9 @@ export function buildMenuJobContext(input: {
     slots: input.slots ?? [],
     catalog_titles: (input.catalogTitles ?? []).slice(0, 20),
     request: input.request ?? null,
-    week_slots: (input.weekPlan ?? []).map((entry) => ({
+    week_slots: (input.weekPlan ?? []).slice(0, 7).map((entry) => ({
       day: entry.day,
-      meals: entry.meals.map((meal) => ({ slot: meal.slot, title: meal.title })),
+      meals: entry.meals.slice(0, 6).map((meal) => ({ slot: meal.slot, title: meal.title })),
     })),
   };
 }
