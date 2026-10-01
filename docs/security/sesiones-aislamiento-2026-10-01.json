@@ -1,5 +1,11 @@
 {
   "observed_at": "2026-10-01T19:43:43.786Z",
+  "later_browser_correction": {
+    "report": "navegador-produccion-2026-10-01.json",
+    "prior_gap": "Production view reloptions were omitted; invoker=true broke the linked patient's own read after PR43.",
+    "applied_migration": "20261001222659_explicit_patient_view_boundary.sql",
+    "prior_results_scope": "The remainder of this file records PR43 evidence before the later browser check."
+  },
   "project_id": "wvosvlxpfytokwfbcero",
   "production_queries": "Catalog metadata only; no patient rows or credentials read.",
   "production_policies": [

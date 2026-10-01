@@ -1,0 +1,70 @@
+{
+  "observed_date": "2026-10-01",
+  "project_id": "wvosvlxpfytokwfbcero",
+  "scope": "Un par ficticio marcado como prueba, navegador publicado con sesiones Auth reales; sin datos de salud reales.",
+  "deployed_api_at_qa": "0f1745f7bf8c81ebde02dfab5d8ff0d2ac44f439",
+  "regression": {
+    "before": "patients_patient_view y patient_access_view: security_invoker=true; ficha propia API200 patient:null, detalle403, pantalla sin vínculo.",
+    "prior_check_gap": "El PR43 omitió reloptions en su comprobación de catálogo y no probó el par publicado.",
+    "migration_applied": "20261001222659_explicit_patient_view_boundary.sql",
+    "after_options": ["security_barrier=true", "security_invoker=false"],
+    "after_permissions": "authenticated SELECT únicamente; anon/PUBLIC cerrados; cero ACL por columna.",
+    "private_columns_exposed": false,
+    "raw_self_policy_restored": false,
+    "migration_rows_changed": 0
+  },
+  "patient_observed_at": "2026-10-01T22:33:40.419Z",
+  "patient": {
+    "own_api": {"status": 200, "own_id": true, "private_canary_hidden": true},
+    "own_detail": {"status": 200, "own_id": true, "private_canary_hidden": true},
+    "raw_private_query": {"status": 200, "rows": 0},
+    "allowed_view": {"status": 200, "own_id": true},
+    "view_writes": {"views": ["patients_patient_view", "patient_access_view"], "status": 403, "code": "42501", "payload": "Cobro ficticio actual, sin cambio de valor."},
+    "protected_admin": 403,
+    "directory": 403,
+    "professional_profile_write": 403,
+    "nonexistent_patient": {"status": 403, "cross_patient_evidence": false},
+    "ui": ["Ingreso completado", "Inicio", "Plan semanal vacío", "Progreso vacío cargado", "Mensajes vacíos"],
+    "refresh_preserved_own_access": true,
+    "return_from_professional_observed_at": "2026-10-01T22:36:27.859Z",
+    "return_from_professional_preserved_role": true
+  },
+  "professional_observed_at": "2026-10-01T22:35:29.998Z",
+  "professional": {
+    "own_api": {"status": 200, "private_canary_visible": true},
+    "directory": {"status": 200, "only_own_test_patient": true},
+    "protected_admin": 403,
+    "view_writes": {"status": 403, "code": "42501", "both_views": true},
+    "patient_denied_write_left_canary_unchanged": true,
+    "refresh_preserved_own_access": true
+  },
+  "cleanup": {
+    "observed_at": "2026-10-01T22:35:36.053Z",
+    "professional_api": 200,
+    "private_canary_removed": true,
+    "next_focus": "",
+    "exact_original_restored": false,
+    "reason": "La preparación interrumpida perdió el valor previo; se eliminó la nota QA y se dejó el valor predeterminado vacío.",
+    "fixture_changes_retained": ["Vínculo e invitación aceptada", "Textos legales y consentimiento de atención", "Cobranza waived", "Ingreso ficticio enviado"],
+    "real_patient_rows_modified": false,
+    "external_messages_sent": false,
+    "browser_qa_storage_removed": true,
+    "final_signed_out": true
+  },
+  "unsigned_final_at": "2026-10-01T22:37:08.288Z",
+  "unsigned_final": {"own_api": 401, "directory": 401, "protected_admin": 401, "session_absent": true, "login_visible": true, "ready": 200},
+  "automated": {
+    "general": {"files": 213, "passed": 1113, "skipped": 2},
+    "sql_regressions": {"passed": 4, "dml_denied": ["INSERT", "UPDATE cobro", "UPDATE vínculo", "DELETE"], "roles": ["paciente", "profesional"], "both_views": true, "rows_unchanged": true},
+    "types": "passed",
+    "migration_check": "passed",
+    "signed_auth": {"run_id": 36935338163, "sha": "bdd2d8536e594f561aa85406b99eb7413c946a40", "passed": 16, "skipped": 0, "temporary_stack_removed": true, "production_view_options_reproduced": true}
+  },
+  "advisors": [
+    {"name": "rls_enabled_no_policy", "level": "INFO", "count": 16},
+    {"name": "authenticated_security_definer_function_executable", "level": "WARN", "count": 116},
+    {"name": "security_definer_view", "level": "ERROR", "count": 2, "exception": "Proyecciones de lectura con identidad explícita, columnas enumeradas y barrera; tabla cruda cerrada a paciente.", "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view"}
+  ],
+  "limits": ["No dos consultorios ficticios publicados: esa matriz solo se probó temporalmente", "No auditoría exhaustiva de todos los módulos y funciones", "No cierre del contrato de borrado/exportación"],
+  "new_cloud_supabase_resources": 0
+}
