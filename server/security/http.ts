@@ -60,29 +60,43 @@ export function createOriginGuard(environment: () => Environment = () => process
 }
 
 // Limit the bytes actually received, including requests without an honest length header.
-export function createBodyGuard(maxBytes = 7_100_000): MiddlewareHandler {
+export function createBodyGuard(maxBytes: number | ((c: Context) => number) = 7_100_000, options: { maxReservedBytes?: number } = {}): MiddlewareHandler {
+  // Reserve the route maximum until its handler finishes: at most 64 MiB of
+  // original body chunks can be live across requests, even with concurrent uploads.
+  // Buffering rejects overflow before a handler can cause side effects.
+  const capacity = options.maxReservedBytes ?? 64 * 1024 * 1024;
+  let reserved = 0;
   return async (c, next) => {
     const request = c.req.raw;
     if (!request.body) return next();
-    if (Number(request.headers.get('Content-Length')) > maxBytes) return c.json({ error: 'El archivo es demasiado grande.' }, 413);
-    const reader = request.body.getReader();
-    const chunks: Uint8Array[] = [];
-    let bytes = 0;
+    const limit = typeof maxBytes === 'function' ? maxBytes(c) : maxBytes;
+    if (Number(request.headers.get('Content-Length')) > limit) return c.json({ error: 'El archivo es demasiado grande.' }, 413);
+    if (reserved + limit > capacity) {
+      c.header('Retry-After', '5');
+      return c.json({ error: 'Hay varias cargas en curso. Volvé a intentar en unos segundos.' }, 503);
+    }
+    reserved += limit;
     try {
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        bytes += value.byteLength;
-        if (bytes > maxBytes) {
-          await reader.cancel();
-          return c.json({ error: 'El archivo es demasiado grande.' }, 413);
+      const reader = request.body.getReader();
+      const chunks: Uint8Array[] = [];
+      let bytes = 0;
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          bytes += value.byteLength;
+          if (bytes > limit) {
+            await reader.cancel();
+            return c.json({ error: 'El archivo es demasiado grande.' }, 413);
+          }
+          chunks.push(value);
         }
-        chunks.push(value);
-      }
-    } catch { return c.json({ error: 'Datos inválidos' }, 400); }
-    const body = new ReadableStream<Uint8Array>({ start(controller) { chunks.forEach(chunk => controller.enqueue(chunk)); controller.close(); } });
-    c.req.raw = new Request(request, { body, duplex: 'half' } as RequestInit);
-    return next();
+      } catch { return c.json({ error: 'Datos inválidos' }, 400); }
+      // Reuse the same chunks; do not concatenate another full-body buffer here.
+      const body = new ReadableStream<Uint8Array>({ start(controller) { chunks.forEach(chunk => controller.enqueue(chunk)); controller.close(); } });
+      c.req.raw = new Request(request, { body, duplex: 'half' } as RequestInit);
+      return await next();
+    } finally { reserved -= limit; }
   };
 }
 

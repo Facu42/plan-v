@@ -56,13 +56,16 @@ si se agregan réplicas se necesita un contador compartido antes de ampliar el s
   y `no-store` también en rechazos tempranos; se preserva el identificador de pedidos.
 - Cuerpos limitados por bytes realmente recibidos, cancelando el flujo al exceder el
   máximo. Se preservan los máximos existentes: 1 MB general, 12 MB comidas y fotos,
-  22 MB documentos y archivos.
+  22 MB documentos y archivos. Las cargas concurrentes reservan como máximo 64 MB
+  de cuerpos originales en total hasta terminar cada respuesta; si no queda espacio
+  reciben 503 y pueden volver a intentar. Así se verifica el tamaño antes de ejecutar
+  la operación y se limita también la memoria conjunta, no solo cada archivo.
 - El copiloto externo recibe solo cuatro indicadores numéricos y conteos. No recibe
   nombre, identificadores, etiquetas de comidas, notas, mensajes ni historial libre.
 - Gitleaks en todo el historial, con hallazgos ocultos y excepciones exactas para un
   identificador público de Figma y una clave pública anónima de Supabase. CI también
   audita las dependencias y revisa los límites de secretos.
-- Pruebas locales finales: **209 archivos, 1054 pruebas aprobadas y 2 omitidas**.
+- Pruebas locales finales: **209 archivos, 1055 pruebas aprobadas y 2 omitidas**.
   Comprobación de tipos, compilación, revisión de migraciones y límites de secretos:
   aprobadas. Se probó el flujo de consentimiento en una base local desechable,
   además de autorización y rechazo antes del proveedor, cuerpos fragmentados,
@@ -87,5 +90,6 @@ Las dos pruebas de acceso remoto se omiten sin sus credenciales específicas.
 
 ## Estado de publicación
 
-Migración y variables aplicadas; código verificado y preparado para PR. La comprobación
-de los servicios publicados se registrará después de integrar el cambio.
+Migración y variables aplicadas; código verificado en el
+[PR 40](https://github.com/Facu42/plan-v/pull/40). Este registro se prepara antes
+de integrar el cambio; la evidencia de publicación posterior se anota en ese PR.

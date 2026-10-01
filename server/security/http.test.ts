@@ -3,6 +3,33 @@ import { describe, expect, it, vi } from 'vitest';
 import { apiHeaders, createBodyGuard, createOriginGuard, createRateLimits, readCorsOrigins } from './http.js';
 
 describe('HTTP security', () => {
+  it('bounds concurrent buffered uploads and releases capacity after completion or overflow', async () => {
+    const app = new Hono();
+    app.use('/api/*', createBodyGuard(8, { maxReservedBytes: 8 }));
+    let entered!: () => void;
+    let release!: () => void;
+    const started = new Promise<void>(resolve => { entered = resolve; });
+    const held = new Promise<void>(resolve => { release = resolve; });
+    let calls = 0;
+    app.post('/api/write', async c => {
+      calls++;
+      const text = await c.req.text();
+      if (calls === 1) { entered(); await held; }
+      return c.text(text);
+    });
+    const first = app.request('/api/write', { method: 'POST', body: 'first' });
+    await started;
+    const busy = await app.request('/api/write', { method: 'POST', body: 'second' });
+    expect(busy.status).toBe(503);
+    expect(busy.headers.get('Retry-After')).toBe('5');
+    expect(calls).toBe(1);
+    release();
+    expect(await (await first).text()).toBe('first');
+    expect((await app.request('/api/write', { method: 'POST', body: 'overflow!' })).status).toBe(413);
+    expect(await (await app.request('/api/write', { method: 'POST', body: 'retry' })).text()).toBe('retry');
+    expect(calls).toBe(2);
+  });
+
   it('requires explicit HTTPS origins for a persistent deployment', () => {
     expect(() => readCorsOrigins({ APP_MODE: 'production' }, true)).toThrow('CORS_ALLOWED_ORIGINS');
     for (const origin of ['*', 'null', 'https://app.example/path', 'https://user:pass@app.example', 'http://app.example']) {

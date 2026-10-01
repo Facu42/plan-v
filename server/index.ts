@@ -178,7 +178,7 @@ app.use('/*', cors({
   allowHeaders: ['Authorization', 'Content-Type', 'X-Request-Id'],
   exposeHeaders: ['X-Request-Id', 'Retry-After', 'X-RateLimit-Remaining'],
 }));
-app.use('/api/*', (c, next) => createBodyGuard(maxBodyBytes(c.req.path))(c, next));
+app.use('/api/*', createBodyGuard(c => maxBodyBytes(c.req.path)));
 app.use('/api/*', createRateLimitMiddleware());
 app.use('/api/*', async (c, next) => {
   const started = Date.now();

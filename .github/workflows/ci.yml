@@ -47,4 +47,4 @@ jobs:
         shell: bash
         run: |
           "$RUNNER_TEMP/gitleaks" git . --log-opts="--all" --redact --no-banner \
-            --max-decode-depth 1 --max-target-megabytes 5 --timeout 600 --exit-code 1
+            --max-decode-depth 1 --timeout 600 --exit-code 1
