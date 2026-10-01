@@ -91,7 +91,7 @@ afterAll(async () => {
 describe('PV-38 organizaciones en PostgreSQL descartable', () => {
   it('aísla el consultorio, delega, observa y transfiere ownership con hijos', async () => {
     const org = await rpc(nutriA, 'create_organization', ['Consultorio Sur', 'consultorio-sur']) as OrganizationView;
-    expect(org.subscription.status).toBe('waived');
+    expect(org.subscription.status).toBe('trialing');
     expect(org.teams[0].name).toBe('consultorio');
     expect(JSON.stringify(org)).not.toMatch(/mercadopago|stripe_secret|provider_customer/i);
 
@@ -159,7 +159,9 @@ describe('PV-38 organizaciones en PostgreSQL descartable', () => {
     const org = await rpc(nutriB, 'create_organization', ['Consultorio Pausa', 'consultorio-pausa']) as OrganizationView;
     await rpc(nutriB, 'invite_org_member', [org.id, nutriCId, 'member']);
     await rpc(nutriC, 'accept_org_invite', [org.id]);
-    await expect(rpc(nutriB, 'set_organization_subscription_status', [org.id, 'active', ''])).rejects.toMatchObject({ code: '22023' });
+    await expect(rpc(nutriB, 'set_organization_subscription_status', [org.id, 'active', ''])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(nutriB, 'set_organization_subscription_status', [org.id, 'waived', ''])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(nutriB, 'set_organization_subscription_status', [org.id, 'nada', ''])).rejects.toMatchObject({ code: '22023' });
     await rpc(nutriB, 'set_organization_subscription_status', [org.id, 'canceled', 'cierra el piloto']);
     await expect(rpc(nutriB, 'delegate_patient_care', [patientB, nutriCId, 'delegate', org.id])).rejects.toMatchObject({ code: '22023' });
 

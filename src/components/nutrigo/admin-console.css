@@ -1,0 +1,13 @@
+/* Pantalla del administrador (/admin): barra superior simple y contenido a todo el ancho. */
+.nv-app.nv-admin { display: block; padding-bottom: 0; }
+.nv-admin .nv-admin-bar { display: flex; align-items: center; gap: 16px; padding: 14px 28px; border-bottom: 1px solid var(--nv-line, rgba(39, 41, 50, 0.1)); background: var(--nv-card, #fff); }
+.nv-admin .nv-admin-brand { display: inline-flex; align-items: center; gap: 10px; color: inherit; font-weight: 600; text-decoration: none; }
+.nv-admin .nv-admin-bar h1 { margin: 0; font-size: 22px; font-weight: 600; flex: 1; min-width: 0; }
+.nv-admin .nv-admin-user { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--nv-muted); }
+.nv-admin .nv-admin-main { max-width: 1240px; margin: 0 auto; padding: 24px 28px 40px; }
+@media (max-width: 700px) {
+  .nv-admin .nv-admin-bar { flex-wrap: wrap; padding: 12px 16px; gap: 8px; }
+  .nv-admin .nv-admin-bar h1 { order: 3; flex-basis: 100%; font-size: 18px; }
+  .nv-admin .nv-admin-user span { display: none; }
+  .nv-admin .nv-admin-main { padding: 16px 16px 28px; }
+}

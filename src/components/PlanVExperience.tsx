@@ -14,7 +14,9 @@ import { Mark } from './shared/Icon';
 import { canUseDemoRoleSwitch, shouldShowNutrigo } from './design-entry';
 import { PwaChrome } from '../pwa/PwaChrome';
 import { LoadingScreen } from './shared/AppStatus';
+import { isAdminPath } from './nutrigo/app-location';
 
+const AdminConsole = lazy(() => import('./nutrigo/AdminConsole').then(({ AdminConsole }) => ({ default: AdminConsole })));
 const NutrigoShowroom = lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })));
 
 export function PlanVExperience() {
@@ -96,6 +98,17 @@ export function PlanVExperience() {
 
   if (session && !legalOk) {
     return <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}><PwaChrome /><ConsentScreen /></div>;
+  }
+
+  // /admin: pantalla propia del administrador del servicio. La base confirma si la cuenta lo es;
+  // no hace falta ser nutricionista ni paciente.
+  if (session && isAdminPath(window.location.pathname)) {
+    return (
+      <Suspense fallback={<div className="plan-v-app loading-screen" role="status">Cargando…</div>}>
+        <PwaChrome />
+        <AdminConsole darkMode={darkMode} onSignOut={() => signOut()} userName={profile?.full_name || undefined} />
+      </Suspense>
+    );
   }
 
   if (session && !isNutri && !isPatient) {
