@@ -2,7 +2,7 @@
   "observed_date": "2026-10-01",
   "project_id": "wvosvlxpfytokwfbcero",
   "scope": "Un par ficticio marcado como prueba, navegador publicado con sesiones Auth reales; sin datos de salud reales.",
-  "deployed_api_at_qa": "0f1745f7bf8c81ebde02dfab5d8ff0d2ac44f439",
+  "deployed_code_sha_at_qa": "0f1745f7bf8c81ebde02dfab5d8ff0d2ac44f439",
   "regression": {
     "before": "patients_patient_view y patient_access_view: security_invoker=true; ficha propia API200 patient:null, detalle403, pantalla sin vínculo.",
     "prior_check_gap": "El PR43 omitió reloptions en su comprobación de catálogo y no probó el par publicado.",

@@ -1,0 +1,3 @@
+# Identificador público de commit del PR43, detectado por el nombre anterior del campo JSON.
+# Excepción limitada a ese commit, archivo, regla y línea; ninguna clave permitida.
+febe01aea4b50c7e1e32924b9fc27e1ebd0dacfc:docs/security/navegador-produccion-2026-10-01.json:generic-api-key:5
