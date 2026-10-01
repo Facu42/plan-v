@@ -45,6 +45,22 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 ## A. Seguridad y privacidad
 
+- **Correcciones aplicadas 2026-10-01, punto 2:** cierre de lecturas/escrituras
+  corporales y metas tras el retiro; validación y recálculo de metas en la base;
+  corrección de meses pagados y vencimientos existentes. Dos migraciones aplicadas
+  en `plan-v-app`, con autorización escrita y sin contratar recursos. 1071 pruebas
+  generales aprobadas y 47 con las definiciones reales reproducidas localmente.
+  Siguen cerradas las 34 internas; permanecen 116 advertencias esperadas de función
+  ejecutable y 16 avisos de tablas por clasificar en el punto 3. Ver
+  [correcciones aplicadas](correcciones-funciones-sensibles-2026-10-01.md).
+
+- **Revisión de funciones 2026-10-01, posterior al PR #40:** las 116 permitidas
+  coinciden con la base y las 34 internas siguen cerradas. Se confirmaron tres
+  pendientes: datos corporales/metas tras desactivar, metas vacías por llamada
+  directa y migración del vencimiento por meses sin aplicar. Auditoría y pruebas
+  sin escribir producción ni contratar recursos. Detalle e inventario en
+  [revisión de funciones sensibles](revision-funciones-sensibles-2026-10-01.md).
+
 - **Avance 2026-10-01:** migración de permiso separado de IA aplicada, cabeceras,
   límites, dependencias y revisión de secretos preparados y verificados. Configuración
   sobre los servicios existentes, sin contratar recursos de Supabase. Evidencia y

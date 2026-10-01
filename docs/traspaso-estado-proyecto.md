@@ -32,6 +32,10 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
 - Producto listo para usar de punta a punta, diseño Nutrigo en 13 pantallas: `docs/registro-producto-listo.md`.
 - Seguridad y privacidad: términos y privacidad, 34 funciones internas cerradas en la base:
   `docs/seguridad-privacidad.md`, `docs/legal/`.
+- Correcciones posteriores al PR #40 ya aplicadas en la base: datos corporales y
+  metas cerrados tras el retiro, validación y cálculo dentro de la base y meses
+  pagados corregidos. Dos migraciones verificadas, sin contratar recursos:
+  `docs/correcciones-funciones-sensibles-2026-10-01.md`.
 - Diseño y movimiento, carga y errores, primer uso de la nutricionista, accesibilidad, botones del
   celular: `docs/diseno-movimiento.md`.
 - Ingreso con Google y pantalla "Antes de seguir": `docs/autenticacion.md`.
@@ -40,6 +44,11 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
 - Calorías y macros (Mifflin-St Jeor) con migración aplicada: `docs/calorias-macros.md`.
 
 ## Lo pendiente
+
+- Seguridad, siguiente paso (punto 3): clasificar las 16 tablas sin políticas.
+  Las 34 funciones internas siguen cerradas y las 116 públicas coinciden con la
+  lista actual. Las tres correcciones confirmadas de los puntos 1 y 2 están
+  aplicadas; evidencia anterior y posterior en los informes de funciones sensibles.
 
 - Abiertos sin juntar: #27 base de datos (63 índices; en verde, necesita su frase "aplicá índices en la
   base"), #24 marketing (borrador, no toca la app), #25 documentación.

@@ -89,12 +89,13 @@ describe('panel del servicio (PGlite)', () => {
   });
 
   it('nadie más puede llamar al panel ni a sus acciones', async () => {
-    for (const user of [nutriA, patientUser]) {
+    for (const user of [nutriA, patientUser, '']) {
       expect(await rpc(user, 'is_platform_admin')).toBe(false);
       await expect(rpc(user, 'admin_get_service_board')).rejects.toMatchObject({ code: '42501' });
       await expect(rpc(user, 'admin_extend_trial', [nutriAId, 30])).rejects.toMatchObject({ code: '42501' });
       await expect(rpc(user, 'admin_set_service_override', [nutriAId, 'waived', ''])).rejects.toMatchObject({ code: '42501' });
       await expect(rpc(user, 'admin_record_service_payment', [nutriAId, 1, 1, await shift(0), 'otro', ''])).rejects.toMatchObject({ code: '42501' });
+      await expect(rpc(user, 'admin_void_service_payment', ['20000000-0000-4000-a000-000000000000'])).rejects.toMatchObject({ code: '42501' });
       await expect(rpc(user, 'admin_set_service_settings', [1, 30])).rejects.toMatchObject({ code: '42501' });
       await expect(rpc(user, 'admin_set_service_note', [nutriAId, 'nota'])).rejects.toMatchObject({ code: '42501' });
       await expect(rpc(user, 'admin_log_service_event', [nutriAId, 'service.access_sent', null])).rejects.toMatchObject({ code: '42501' });
@@ -105,6 +106,13 @@ describe('panel del servicio (PGlite)', () => {
     }
     await expect(asUser(nutriA, 'insert into public.platform_admins(user_id) values ($1)', [nutriA])).rejects.toMatchObject({ code: '42501' });
     expect(await rpc(admin, 'is_platform_admin')).toBe(true);
+  });
+
+  it('declararse administrador en los datos editables de la cuenta no da acceso al panel', async () => {
+    await db.query('update auth.users set raw_user_meta_data=$1 where id=$2', [{ role: 'admin', is_admin: true }, patientUser]);
+    expect(await rpc(patientUser, 'is_platform_admin')).toBe(false);
+    await expect(rpc(patientUser, 'admin_get_service_board')).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(patientUser, 'admin_set_service_override', [nutriAId, 'waived', ''])).rejects.toMatchObject({ code: '42501' });
   });
 
   it('carga el precio mensual y los días de prueba', async () => {
@@ -146,6 +154,21 @@ describe('panel del servicio (PGlite)', () => {
     expect(await pay(2, '2026-11-25')).toBe('2027-01-31');
     // Un corte largo (más de 7 días) vuelve a contar desde el día que pagó.
     expect(await pay(1, '2027-03-15')).toBe('2027-04-15');
+    await db.query('delete from public.nutritionists where id=$1', [id]);
+  });
+
+  it('la migración corrige también un vencimiento ya guardado sin modificar sus pagos', async () => {
+    const id = (await db.query<{ id: string }>("insert into public.nutritionists(user_id,display_name) values ($1,'Vencimiento ficticio anterior') returning id", [admin])).rows[0].id;
+    await db.query("update public.nutritionist_subscriptions set trial_ends_on=date '2026-10-31',paid_until=date '2027-01-30' where nutritionist_id=$1", [id]);
+    for (const [months, paidOn] of [[1, '2026-10-20'], [2, '2026-11-25']] as const) {
+      await db.query("insert into public.service_payments(nutritionist_id,amount,months,paid_on,method,created_by) values($1,$2,$3,$4,'transferencia',$5)", [id, months * 1000, months, paidOn, admin]);
+    }
+    const before = (await db.query('select * from public.service_payments where nutritionist_id=$1 order by months', [id])).rows;
+    const migrations = new URL('../supabase/migrations/', import.meta.url);
+    const migration = (await readdir(migrations)).find((name) => name.endsWith('_harden_nutrition_target_access.sql'))!;
+    await db.exec(await readFile(new URL(migration, migrations), 'utf8'));
+    expect((await db.query("select to_char(paid_until,'YYYY-MM-DD') as d from public.nutritionist_subscriptions where nutritionist_id=$1", [id])).rows[0]).toEqual({ d: '2027-01-31' });
+    expect((await db.query('select * from public.service_payments where nutritionist_id=$1 order by months', [id])).rows).toEqual(before);
     await db.query('delete from public.nutritionists where id=$1', [id]);
   });
 
