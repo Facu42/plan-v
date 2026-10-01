@@ -5,7 +5,7 @@ export type IconName =
   | 'arrow' | 'bell' | 'calendar' | 'camera' | 'check' | 'chevron' | 'clock'
   | 'contact' | 'drop' | 'grid' | 'heart' | 'history' | 'home' | 'leaf' | 'list'
   | 'message' | 'moon' | 'pin' | 'plus' | 'sparkle' | 'sun' | 'target' | 'trend'
-  | 'users' | 'video' | 'edit' | 'loader' | 'download';
+  | 'users' | 'video' | 'edit' | 'loader' | 'download' | 'wallet';
 
 const paths: Record<IconName, ReactNode> = {
   arrow: <><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></>,
@@ -35,6 +35,7 @@ const paths: Record<IconName, ReactNode> = {
   video: <><rect x="3" y="6" width="13" height="12" rx="3" /><path d="m16 10 5-3v10l-5-3" /></>,
   edit: <><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></>,
   loader: <path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8" />,
+  wallet: <><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3" /><rect x="4" y="7" width="16" height="12" rx="3" /><path d="M16 13h.01" /></>,
   download: <><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 20h14" /></>,
 };
 

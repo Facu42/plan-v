@@ -1,0 +1,108 @@
+/*
+ * Movimiento de Plan V.
+ *
+ * El archivo de Nutrigo no trae animaciones (get_motion_context devuelve vacío
+ * en todas las pantallas, revisado el 2026-09-28), así que esto es el default
+ * que eligió el plan: transiciones cortas (150 a 250 ms), sin rebotes, sólo
+ * opacidad, color, sombra y desplazamientos de pocos píxeles. Todo vive dentro
+ * de `prefers-reduced-motion: no-preference`: quien pidió menos movimiento en
+ * su teléfono o computadora ve la app quieta (además, nutrigo.css apaga
+ * cualquier transición de `.nv-app` en ese caso).
+ *
+ * Las entradas usan `backwards`: al terminar no queda ningún transform puesto,
+ * así no cambian el posicionamiento de los paneles fijos que viven adentro.
+ */
+.nv-app {
+  --nv-motion-fast: 150ms;
+  --nv-motion-base: 200ms;
+  --nv-motion-slow: 250ms;
+  --nv-motion-ease: cubic-bezier(0.2, 0, 0, 1);
+  --nv-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
+}
+
+@keyframes nv-motion-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes nv-motion-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes nv-motion-pop {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes nv-motion-sheet {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+@keyframes nv-motion-dialog {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* 1. Al pasar el mouse o tocar: color, fondo, borde y sombra cambian suave. */
+  .nv-app button,
+  .nv-app a,
+  .nv-app [role="button"],
+  .nv-app input,
+  .nv-app select,
+  .nv-app textarea {
+    transition-property: background-color, border-color, color, box-shadow, opacity, transform;
+    transition-duration: var(--nv-motion-fast);
+    transition-timing-function: var(--nv-motion-ease);
+  }
+  /* Los botones se hunden apenas al apretarlos. */
+  .nv-app .nv-button:active:not(:disabled),
+  .nv-app .nv-tabbar button:active,
+  .nv-app .nv-more-grid button:active { transform: scale(0.97); }
+
+  /* Tarjetas que se abren: suben 2 px y ganan la sombra del archivo. */
+  .nv-app .nv-openable { transition-duration: var(--nv-motion-base); }
+  /* Con teclado, el foco da la misma señal que el mouse. */
+  .nv-app .nv-openable:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(176, 176, 176, 0.24);
+  }
+  @media (hover: hover) {
+    .nv-app .nv-openable:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(176, 176, 176, 0.24);
+    }
+  }
+
+  /* 2. Al cambiar de pantalla: cada bloque del contenido aparece subiendo 8 px,
+     escalonado de a 40 ms para que se lea de arriba hacia abajo. */
+  .nv-app .nv-main > *:not(.nv-footer) {
+    animation: nv-motion-rise var(--nv-motion-slow) var(--nv-motion-ease) backwards;
+  }
+  .nv-app .nv-main > *:nth-child(2) { animation-delay: 40ms; }
+  .nv-app .nv-main > *:nth-child(3) { animation-delay: 80ms; }
+  .nv-app .nv-main > *:nth-child(n + 4) { animation-delay: 120ms; }
+  .nv-app .nv-daily { animation: nv-motion-fade var(--nv-motion-slow) var(--nv-motion-ease) 80ms backwards; }
+
+  /* 3. Tarjetas que aparecen dentro de una pantalla. */
+  .nv-app .nv-state { animation: nv-motion-rise var(--nv-motion-slow) var(--nv-motion-ease) backwards; }
+
+  /* 4. Paneles que se abren. */
+  /* Cajón móvil: ya se desliza (nutrigo-fidelity.css); el fondo oscuro aparece. */
+  .nv-app .nv-drawer-scrim { animation: nv-motion-fade var(--nv-motion-base) var(--nv-motion-ease) backwards; }
+  /* "Más" en el celular: la hoja sube desde abajo. */
+  .nv-app .nv-more { animation: nv-motion-fade var(--nv-motion-base) var(--nv-motion-ease) backwards; }
+  .nv-app .nv-more-sheet { animation: nv-motion-sheet var(--nv-motion-slow) var(--nv-motion-ease) backwards; }
+  /* Menú de la cuenta, avisos y el submenú de Plan: caen desde su botón. */
+  .nv-app .nv-user-menu,
+  .nv-app .nv-alerts-pop { transform-origin: top right; animation: nv-motion-pop var(--nv-motion-fast) var(--nv-motion-ease) backwards; }
+  .nv-app .nv-nav-sub-items { animation: nv-motion-pop var(--nv-motion-fast) var(--nv-motion-ease) backwards; }
+  /* Ventanas (nueva paciente, editar, registrar comida, revisar comida). */
+  .nv-app .nv-modal-backdrop,
+  .nv-app .modal-backdrop { animation: nv-motion-fade var(--nv-motion-base) var(--nv-motion-ease) backwards; }
+  .nv-app .nv-dialog,
+  .nv-app .modal-backdrop > :not(.photo-modal) { animation: nv-motion-dialog var(--nv-motion-slow) var(--nv-motion-ease) backwards; }
+}
+
+/* En el celular los avisos se abren como hoja fija abajo: suben en vez de caer. */
+@media (prefers-reduced-motion: no-preference) and (max-width: 700px) {
+  .nv-app .nv-alerts-pop { transform-origin: bottom center; animation-name: nv-motion-rise; }
+}
