@@ -35,6 +35,9 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
       - name: Install checksum-verified Gitleaks 8.30.1
         shell: bash
         run: |
@@ -43,8 +46,11 @@ jobs:
             --output "$RUNNER_TEMP/gitleaks.tar.gz"
           printf '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  %s\n' "$RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check --strict
           tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
-      - name: Scan all Git history with redacted findings
+      - name: Scan Git history with redacted findings
         shell: bash
         run: |
           "$RUNNER_TEMP/gitleaks" git . --log-opts="--all" --redact --no-banner \
-            --max-decode-depth 1 --timeout 600 --exit-code 1
+            --max-decode-depth 1 --max-target-megabytes 5 --timeout 600 --exit-code 1
+      - name: Scan every oversized historical object in overlapping fragments
+        shell: bash
+        run: node scripts/scan-large-git-blobs.mjs "$RUNNER_TEMP/gitleaks"

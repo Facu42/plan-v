@@ -62,10 +62,17 @@ si se agregan réplicas se necesita un contador compartido antes de ampliar el s
   la operación y se limita también la memoria conjunta, no solo cada archivo.
 - El copiloto externo recibe solo cuatro indicadores numéricos y conteos. No recibe
   nombre, identificadores, etiquetas de comidas, notas, mensajes ni historial libre.
-- Gitleaks en todo el historial, con hallazgos ocultos y excepciones exactas para un
-  identificador público de Figma y una clave pública anónima de Supabase. CI también
-  audita las dependencias y revisa los límites de secretos.
-- Pruebas locales finales: **209 archivos, 1055 pruebas aprobadas y 2 omitidas**.
+- Gitleaks en el historial y cada objeto histórico mayor de 5 MB, con hallazgos
+  ocultos. Los objetos grandes se leen en fragmentos de 1 MB solapados 64 KB:
+  se conservan todos los bytes y se cubren credenciales que cruzan sus bordes dentro
+  de ese solapamiento, con una capa de decodificación y un tiempo máximo por escaneo.
+  La prueba comprueba reconstrucción íntegra y un secreto sintético entre bordes.
+  Las excepciones base son un identificador público de Figma y una clave pública
+  anónima de Supabase. El exportado histórico de Figma añade 446 identificadores
+  públicos exactos de estilos/componentes/bibliotecas, y sus prefijos de fragmentos,
+  solo cuando coincide también la huella inmutable del objeto original. No se
+  excluye ningún directorio ni todo el archivo. CI audita además las dependencias.
+- Pruebas locales finales: **210 archivos, 1057 pruebas aprobadas y 2 omitidas**.
   Comprobación de tipos, compilación, revisión de migraciones y límites de secretos:
   aprobadas. Se probó el flujo de consentimiento en una base local desechable,
   además de autorización y rechazo antes del proveedor, cuerpos fragmentados,
