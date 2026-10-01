@@ -96,6 +96,10 @@ describe('panel del servicio (PGlite)', () => {
       await expect(rpc(user, 'admin_set_service_override', [nutriAId, 'waived', ''])).rejects.toMatchObject({ code: '42501' });
       await expect(rpc(user, 'admin_record_service_payment', [nutriAId, 1, 1, await shift(0), 'otro', ''])).rejects.toMatchObject({ code: '42501' });
       await expect(rpc(user, 'admin_set_service_settings', [1, 30])).rejects.toMatchObject({ code: '42501' });
+      await expect(rpc(user, 'admin_set_service_note', [nutriAId, 'nota'])).rejects.toMatchObject({ code: '42501' });
+      await expect(rpc(user, 'admin_log_service_event', [nutriAId, 'service.access_sent', null])).rejects.toMatchObject({ code: '42501' });
+      await expect(rpc(user, 'admin_mark_test_account', [nutriAId])).rejects.toMatchObject({ code: '42501' });
+      await expect(asUser(user, 'select public.service_nutritionist_json($1)', [nutriAId])).rejects.toMatchObject({ code: '42501' });
       await expect(asUser(user, 'select * from public.nutritionist_subscriptions')).rejects.toMatchObject({ code: '42501' });
       await expect(asUser(user, 'select * from public.platform_admins')).rejects.toMatchObject({ code: '42501' });
     }
@@ -163,5 +167,36 @@ describe('panel del servicio (PGlite)', () => {
     await expect(rpc(nutriB, 'set_organization_subscription_status', [org.id, 'canceled', ''])).rejects.toMatchObject({ code: '42501' });
     expect(await rpc(admin, 'set_organization_subscription_status', [org.id, 'waived', 'piloto'])).toMatchObject({ status: 'waived' });
     expect(await rpc(nutriA, 'set_organization_subscription_status', [org.id, 'canceled', ''])).toMatchObject({ status: 'canceled' });
+  });
+
+  it('altas: nota interna de hasta 500, registro de altas y reenvíos sin datos personales', async () => {
+    const long = 'n'.repeat(500);
+    const noted = await rpc<ServiceNutritionist>(admin, 'admin_set_service_note', [nutriBId, `  ${long}  `]);
+    expect(noted.subscription.note).toBe(long);
+    expect(noted.is_test).toBe(false);
+    await expect(rpc(admin, 'admin_set_service_note', [nutriBId, 'n'.repeat(501)])).rejects.toMatchObject({ code: '22023' });
+    await expect(rpc(admin, 'admin_set_service_note', ['20000000-0000-4000-a000-000000000000', 'x'])).rejects.toMatchObject({ code: '22023' });
+
+    await rpc(admin, 'admin_log_service_event', [nutriBId, 'service.nutritionist_created', 'invite']);
+    await rpc(admin, 'admin_log_service_event', [nutriBId, 'service.access_sent', null]);
+    await expect(rpc(admin, 'admin_log_service_event', [nutriBId, 'service.payment', null])).rejects.toMatchObject({ code: '22023' });
+    await expect(rpc(admin, 'admin_log_service_event', [nutriBId, 'service.access_sent', 'nutri-b@example.test'])).rejects.toMatchObject({ code: '22023' });
+    await expect(rpc(admin, 'admin_log_service_event', ['20000000-0000-4000-a000-000000000000', 'service.access_sent', null])).rejects.toMatchObject({ code: '22023' });
+
+    const board = await rpc<ServiceBoard>(admin, 'admin_get_service_board');
+    const mine = board.events.filter((event) => event.nutritionist_id === nutriBId).map((event) => event.action);
+    expect(mine).toEqual(expect.arrayContaining(['service.note', 'service.nutritionist_created', 'service.access_sent']));
+    expect(JSON.stringify(board.events)).not.toContain('@example.test');
+    expect(JSON.stringify(board.events)).not.toContain(long);
+  });
+
+  it('cuenta de prueba: queda marcada en el tablero y anotada', async () => {
+    const marked = await rpc<ServiceNutritionist>(admin, 'admin_mark_test_account', [nutriBId]);
+    expect(marked.is_test).toBe(true);
+    const board = await rpc<ServiceBoard>(admin, 'admin_get_service_board');
+    expect(board.nutritionists.find((row) => row.id === nutriBId)?.is_test).toBe(true);
+    expect(board.nutritionists.find((row) => row.id === nutriAId)?.is_test).toBe(false);
+    expect(board.events[0]).toMatchObject({ action: 'service.test_accounts_created', nutritionist_id: nutriBId });
+    await expect(rpc(admin, 'admin_mark_test_account', ['20000000-0000-4000-a000-000000000000'])).rejects.toMatchObject({ code: '22023' });
   });
 });

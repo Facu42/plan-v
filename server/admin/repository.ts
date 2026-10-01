@@ -11,6 +11,7 @@ import type {
   ServicePayment,
   ServicePaymentInput,
   ServiceSettings,
+  ServiceTestAccount,
 } from '../../src/types/service.js';
 
 export { CareError } from '../care/errors.js';
@@ -25,7 +26,7 @@ export function serviceDbError(error: { code?: string; message?: string } | null
   throw new CareError(503, 'No se pudo guardar. Reintentá en un momento.');
 }
 
-async function call(name: string, args?: Record<string, unknown>): Promise<unknown> {
+export async function call(name: string, args?: Record<string, unknown>): Promise<unknown> {
   const { data, error } = await getRequestDb().rpc(name, args);
   serviceDbError(error);
   return data;
@@ -36,6 +37,8 @@ async function call(name: string, args?: Record<string, unknown>): Promise<unkno
 const settings: ServiceSettings = { monthly_price: null, trial_days: 30 };
 let nutritionists: ServiceNutritionist[] = [];
 let events: ServiceEvent[] = [];
+/** Cuentas de prueba del modo demo (sin claves: en memoria no hay inicio de sesión). */
+export const memoryTestAccounts: ServiceTestAccount[] = [];
 
 function demoPayment(amount: number, months: number, paid_on: string): ServicePayment {
   return { id: randomUUID(), amount, months, paid_on, method: 'transferencia', note: '', status: 'confirmed', created_at: `${paid_on}T15:00:00.000Z` };
@@ -46,7 +49,7 @@ function demoNutritionist(id: string, name: string, email: string, createdDaysAg
   const created = addDays(today, -createdDaysAgo);
   const trial = addDays(created, 30);
   return {
-    id, display_name: name, email, created_at: `${created}T12:00:00.000Z`, last_sign_in_at: `${today}T11:00:00.000Z`,
+    id, display_name: name, email, created_at: `${created}T12:00:00.000Z`, last_sign_in_at: `${today}T11:00:00.000Z`, is_test: false,
     patients_active: patients, patients_total: patients,
     subscription: { trial_ends_on: trial, paid_until: servicePaidUntil(trial, payments), override: 'none', note: '' },
     payments,
@@ -67,6 +70,7 @@ function seedDemo(): void {
     demoNutritionist('nutri-julieta', 'Julieta Paz', 'julieta@example.test', 50, 4, []),
   ];
   events = [];
+  memoryTestAccounts.length = 0;
 }
 
 export function resetServiceMemory(): void {
@@ -75,15 +79,32 @@ export function resetServiceMemory(): void {
 }
 seedDemo();
 
-function memoryFind(id: string): ServiceNutritionist {
+export function memoryFind(id: string): ServiceNutritionist {
   const found = nutritionists.find((row) => row.id === id);
   if (!found) throw new CareError(400, 'Revisá los datos cargados.');
   return found;
 }
 
-function memoryAudit(action: string, nutritionistId: string | null, metadata: Record<string, unknown>): void {
+export function memoryAudit(action: string, nutritionistId: string | null, metadata: Record<string, unknown>): void {
   events.unshift({ id: randomUUID(), occurred_at: new Date().toISOString(), action, nutritionist_id: nutritionistId, metadata });
   events = events.slice(0, 30);
+}
+
+/** Altas en memoria: suma una nutricionista nueva con la prueba vigente. */
+export function memoryAddNutritionist(input: { id: string; name: string; email: string; isTest?: boolean; patients?: number }): ServiceNutritionist {
+  const today = localBillingDate();
+  const row: ServiceNutritionist = {
+    id: input.id, display_name: input.name, email: input.email, created_at: new Date().toISOString(), last_sign_in_at: null,
+    is_test: input.isTest === true, patients_active: input.patients ?? 0, patients_total: input.patients ?? 0,
+    subscription: { trial_ends_on: addDays(today, settings.trial_days), paid_until: null, override: 'none', note: '' },
+    payments: [],
+  };
+  nutritionists.push(row);
+  return structuredClone(row);
+}
+
+export function memoryEmailTaken(email: string): boolean {
+  return nutritionists.some((row) => row.email.toLowerCase() === email.toLowerCase());
 }
 
 function recompute(row: ServiceNutritionist): ServiceNutritionist {
@@ -102,6 +123,7 @@ function asNutritionist(raw: unknown): ServiceNutritionist {
     email: String(row.email ?? ''),
     created_at: String(row.created_at ?? ''),
     last_sign_in_at: row.last_sign_in_at ? String(row.last_sign_in_at) : null,
+    is_test: row.is_test === true,
     patients_active: Number(row.patients_active ?? 0),
     patients_total: Number(row.patients_total ?? 0),
     subscription: {
@@ -220,3 +242,13 @@ export async function setOverride(id: string, override: ServiceOverride, note: s
   memoryAudit('service.override', id, { override });
   return structuredClone(row);
 }
+
+export async function setNote(id: string, note: string, persistent: boolean): Promise<ServiceNutritionist> {
+  if (persistent) return asNutritionist(await call('admin_set_service_note', { target: id, note }));
+  const row = memoryFind(id);
+  row.subscription.note = note.trim();
+  memoryAudit('service.note', id, { length: row.subscription.note.length });
+  return structuredClone(row);
+}
+
+export { asNutritionist };
