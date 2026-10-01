@@ -9,3 +9,9 @@ marketing/
 .env
 .env.local
 backups/
+.vercel
+.env*
+!.env.example
+*.pem
+*.key
+credentials.json

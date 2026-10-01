@@ -45,6 +45,11 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 ## A. Seguridad y privacidad
 
+- **Avance 2026-10-01:** migración de permiso separado de IA aplicada, cabeceras,
+  límites, dependencias y revisión de secretos preparados y verificados. Configuración
+  sobre los servicios existentes, sin contratar recursos de Supabase. Evidencia y
+  avisos restantes en [despliegue de seguridad](despliegue-seguridad-2026-10-01.md).
+
 - **Lidera:** `appsec-engineer`. **Apoyo:** `secrets-credential-engineer`, `privacy-engineer`,
   `penetration-tester`, `legal-compliance-checker`.
 - **Qué hay hoy:** permisos por rol en la API, reglas de acceso por fila en la base (RLS),

@@ -1,0 +1,18 @@
+title = "Plan V secret scanning"
+[extend]
+useDefault = true
+
+# Exact historical Supabase anon JWT, verified public; no path-wide exception.
+[[rules]]
+id = "jwt"
+[[rules.allowlists]]
+description = "Historical public Supabase anon key; never a service-role credential"
+regexTarget = "secret"
+regexes = ['''^eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjZXZscXJrdmRpbmVsZ3huYWtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0ODg4ODUsImV4cCI6MjA3MjA2NDg4NX0\.6I41M1ME_81YpesGquMvwL0s7FQ5L9V5r1SmgjRaDCA$''']
+
+[[rules]]
+id = "generic-api-key"
+[[rules.allowlists]]
+description = "Exact historical Figma file identifier, not an API credential"
+regexTarget = "secret"
+regexes = ['''^OTolnKfsxUFjaZOhhdb04i$''']

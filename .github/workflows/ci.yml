@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -17,8 +20,31 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - run: npm audit --audit-level=moderate
       - run: npm test
       - run: npm run check
       - run: npm run build
       - run: npm run check:migrations
       - run: npm run check:secrets
+
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install checksum-verified Gitleaks 8.30.1
+        shell: bash
+        run: |
+          curl --fail --silent --show-error --location \
+            https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz \
+            --output "$RUNNER_TEMP/gitleaks.tar.gz"
+          printf '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  %s\n' "$RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+      - name: Scan all Git history with redacted findings
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/gitleaks" git . --log-opts="--all" --redact --no-banner \
+            --max-decode-depth 1 --max-target-megabytes 5 --timeout 600 --exit-code 1
