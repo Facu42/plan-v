@@ -27,7 +27,7 @@ La automatización es el cálculo en sí. No se usó un modelo de lenguaje para 
 ## Archivos
 - `src/lib/nutrition-target.ts` (fórmula y validación, compartida por servidor y pantalla)
 - `server/targets/` (rutas `GET/PUT /api/patients/:id/nutrition-target`, memoria en demo, RPC en producción)
-- `supabase/migrations/20260930120000_nutrition_targets.sql` (**no aplicada en producción**: espera el OK escrito de Facundo)
+- `supabase/migrations/20260930190000_nutrition_targets.sql` (**no aplicada en producción**: espera el OK escrito de Facundo)
 - `src/components/nutrigo/ShowroomNutritionTarget.tsx`
 
 ## Pendiente
