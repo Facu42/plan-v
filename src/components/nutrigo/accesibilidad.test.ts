@@ -23,5 +23,7 @@ describe('accesibilidad: fallas corregidas', () => {
     expect(read('./agenda-diario-fig.css')).toMatch(/\.nvcal-categories button::after \{ content: ""; position: absolute; inset: -4px; \}/);
     expect(read('./plan-fig.css')).toMatch(/\.pf-month::before \{ content: ""; position: absolute; inset: -4px 0; \}/);
     expect(read('./care-panel.css')).toMatch(/\.care-preference-grid label\{min-height:28px\}/);
+    expect(read('./nutrition-target.css')).toMatch(/\.nvt-link::after\{content:"";position:absolute;inset:-4px 0\}/);
+    expect(read('./menu-fig.css')).toMatch(/\.mf-card h3 button::after, \.nv-app \.mf-link-title::after \{ content: ""; position: absolute; inset: -3px 0; \}/);
   });
 });

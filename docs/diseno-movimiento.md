@@ -107,10 +107,10 @@ principales en 390. Los campos de texto y selectores dentro de una etiqueta gran
 problema (el toque cae en la etiqueta). Se corrigieron, sin mover nada de lo que se ve, con una zona
 de toque invisible de 24 px: los filtros del calendario (Plan de comidas, Diario, Consultas,
 Videollamadas, etc.), el selector de mes del plan y las casillas de "Mis recordatorios"
-(etiqueta de 28 px). Quedan dos que pertenecen a otros hilos y no se tocaron: el enlace "Pedir que los
-cargue" de la calculadora de calorías (18 px) y los títulos de recetas en Menú saludable (20 px).
+(etiqueta de 28 px), el enlace "Pedir que los cargue" de la calculadora de calorías y los títulos
+de recetas de Menú saludable (misma zona invisible, sin tocar el diseño del archivo).
 
 ## Lo que sigue en este apartado
 
-- Decidir el gris (ver arriba). Avisar al hilo de calorías y al de Menú saludable de sus dos botones chicos.
+- Decidir el gris (ver arriba).
 - Repetir la revisión automática cuando entren las pantallas de Consejos y recetas del otro hilo.

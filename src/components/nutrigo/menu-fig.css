@@ -358,3 +358,6 @@
 }
 /* El lápiz de «Editar» queda cuadrado; el CTA ocupa el resto. */
 .nv-app .mf-card-action .mf-btn-soft.mf-btn-small { flex: none; width: 30px; padding: 6px; }
+/* Zona de toque de al menos 24 px de alto para los títulos de receta, sin mover nada de lo que se ve. */
+.nv-app .mf-card h3 button, .nv-app .mf-link-title { position: relative; }
+.nv-app .mf-card h3 button::after, .nv-app .mf-link-title::after { content: ""; position: absolute; inset: -3px 0; }
