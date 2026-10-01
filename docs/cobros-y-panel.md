@@ -107,3 +107,29 @@ El panel **no** muestra datos de salud de las pacientes (solo cantidades), por p
 ## 2026-09-30 — /admin como pantalla propia
 
 Facundo entra con su cuenta de Google (rol paciente + administrador de plataforma) y no quiere ser nutricionista. `/admin` ahora abre una pantalla propia (`AdminConsole`): barra con "Panel del servicio" y "Cerrar sesión", y el mismo panel de antes. La base confirma si la cuenta es administradora (`/api/admin/me`); si no lo es, muestra "No tenés permiso". No hay cambios en la base.
+
+## 2026-10-01 — Altas y cuentas de prueba (servidor)
+
+Pedido de Facundo: dar de alta nutricionistas desde su panel y tener un par de cuentas de prueba,
+sin que el panel muestre datos de salud. En la rama `claude/admin-altas` (sólo servidor, sin aplicar
+nada en la base):
+
+- `POST /api/admin/nutritionists` `{name, email, mode: 'invite'|'password', password?}`: crea la
+  cuenta con Auth (invitación por mail al sitio, o clave elegida y cuenta ya confirmada) con los mismos
+  datos que el registro "Soy nutricionista" y abre su consultorio con 30 días de prueba. No marca la
+  aceptación legal: la persona la acepta en "Antes de seguir". 409 si el mail ya existe, 422 si los
+  datos no cumplen.
+- `POST /api/admin/nutritionists/:id/send-access`: manda el mail de recuperar clave.
+- `PUT /api/admin/nutritionists/:id/note` `{note}`: nota interna, hasta 500 caracteres.
+- `POST /api/admin/test-accounts` `{email_base, password}` y `GET /api/admin/test-accounts`: dos
+  cuentas con alias de Gmail (`+plan-v-nutri`, `+plan-v-paciente`), confirmadas, "[Prueba] ..." en el
+  nombre y marcadas como de prueba. La paciente queda vinculada (alta con invitación, envío y
+  aceptación, hechos por cada cuenta) y habilitada sin cargo, y se le carga contenido de ejemplo
+  (recetas, plan de la semana, medidas, comidas, hábitos, actividad y rutina) por las rutas reales.
+  La nutricionista de prueba no cuenta en los números del panel (`is_test`, `cuentas_prueba`).
+- Nunca se devuelven ni se anotan claves ni enlaces; el registro de operaciones sólo guarda el dominio
+  del mail. Cada acción queda en la auditoría (`service.nutritionist_created`, `service.access_sent`,
+  `service.note`, `service.test_accounts_created`).
+- Migración nueva, sin aplicar: `20261001120000_service_admin_accounts.sql` (marca de prueba, nota de
+  hasta 500, tres funciones del panel que validan que quien llama es administrador). Hasta aplicarla,
+  la nota y las cuentas de prueba responden 501; el alta y el reenvío funcionan igual.

@@ -36,7 +36,9 @@ describe('estado del servicio de una nutricionista', () => {
       { subscription: sub({ paid_until: '2026-12-30' }), payments: [{ id: '1', amount: 15000, months: 1, paid_on: '2026-11-02', method: 'transferencia', note: '', status: 'confirmed', created_at: '' }] },
       { subscription: sub(), payments: [] },
       { subscription: sub({ override: 'waived' }), payments: [] },
+      // Cuenta de prueba: no suma en nada más, ni sus pagos.
+      { is_test: true, subscription: sub({ paid_until: '2026-12-30' }), payments: [{ id: '2', amount: 9999, months: 1, paid_on: '2026-11-02', method: 'otro', note: '', status: 'confirmed', created_at: '' }] },
     ] as unknown as ServiceNutritionist[];
-    expect(serviceTotals(rows, '2026-11-10')).toEqual({ activas: 1, prueba: 0, vencidas: 1, sin_cargo: 1, cobrado_mes: 15000 });
+    expect(serviceTotals(rows, '2026-11-10')).toEqual({ activas: 1, prueba: 0, vencidas: 1, sin_cargo: 1, cobrado_mes: 15000, cuentas_prueba: 1 });
   });
 });
