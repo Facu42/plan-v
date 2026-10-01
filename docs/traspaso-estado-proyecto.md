@@ -47,9 +47,9 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
 
 - Seguridad, punto 4: prueba con cuatro sesiones reales en Supabase temporal de
   GitHub realizada. Se encontró lectura de notas profesionales por una política
-  legacy de paciente. Migración `20261001193156_close_legacy_patient_row_access.sql`
-  preparada y probada, **sin aplicar en producción**: aplicación y comprobación
-  posterior en curso bajo la autorización escrita previa de este hilo. Ver
+  legacy de paciente. Migración `20261001195127_close_legacy_patient_row_access.sql`
+  **aplicada en producción** bajo la autorización escrita previa de este hilo.
+  Se conservan permiso profesional y vistas; 16 casos de sesiones aprobados. Ver
   `docs/sesiones-aislamiento-2026-10-01.md`.
   La prueba con navegador y app publicada sigue pendiente. El punto 3 está
   clasificado: las 16 tablas están cerradas al acceso directo; 38 pruebas locales

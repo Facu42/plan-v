@@ -8,7 +8,7 @@ const patientUser = '00000000-0000-4000-a000-000000000042';
 const outsider = '00000000-0000-4000-a000-000000000043';
 const patient = '10000000-0000-4000-a000-000000000041';
 const note = 'NOTA PROFESIONAL FICTICIA';
-const corrective = new URL('../../supabase/migrations/20261001193156_close_legacy_patient_row_access.sql', import.meta.url);
+const corrective = new URL('../../supabase/migrations/20261001195127_close_legacy_patient_row_access.sql', import.meta.url);
 
 async function asUser(user: string, sql: string) {
   return db.transaction(async tx => {

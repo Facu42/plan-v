@@ -4,7 +4,7 @@ Punto 4 de la revisión posterior al PR #40. Se comprobó el aislamiento con
 sesiones emitidas por Supabase Auth y aceptadas por PostgREST, en un entorno
 temporal con cuatro cuentas ficticias. **Se encontró una exposición adicional
 de notas profesionales a la propia paciente por acceso directo a la tabla.**
-La corrección está preparada y probada; **todavía no está aplicada en producción**.
+La corrección fue probada y **aplicada en producción**, sin modificar datos ni cuentas.
 
 ## Qué se encontró
 
@@ -27,7 +27,7 @@ prueba es un texto ficticio escrito en la base temporal.
 - Antes: ejecución [36915168369](https://github.com/Facu42/plan-v/actions/runs/36915168369),
   commit `72c6923`: **14 casos aprobados y 1 fallido**. El caso fallido recibió
   la nota profesional ficticia con la sesión real de la paciente.
-- Corrección: `20261001193156_close_legacy_patient_row_access.sql` elimina
+- Corrección: `20261001195127_close_legacy_patient_row_access.sql` elimina
   exclusivamente esa política antigua. No modifica filas, cuentas, vínculos,
   precios o cobros; tampoco elimina permisos de la profesional asignada.
 - Después: ejecución [36915652255](https://github.com/Facu42/plan-v/actions/runs/36915652255),
@@ -96,8 +96,19 @@ las migraciones y la política legacy confirmada; no se afirma que sea una copia
 contrato pendiente de finalización de exportación/borrado ni todos los módulos
 de la app.
 
-Para cerrar la exposición publicada falta aplicar la migración y comprobar el
-catálogo posterior. La autorización escrita ya consta en este hilo: «hacelo,
+La migración se aplicó en `plan-v-app` como `20261001195127`, nombre
+`close_legacy_patient_row_access`. El catálogo posterior confirma que solo queda
+`patients_nutri_all` y que ambas vistas conservan su definición y acceso. Solo
+se consultaron metadatos; la compatibilidad funcional se probó en el entorno
+temporal, no con filas de producción. El archivo se renombró al identificador
+registrado por Supabase, sin cambiar su SQL.
+
+El asesor mantiene los 16 avisos informativos y las 116 advertencias de funciones
+ya inventariadas, sin categorías nuevas. Referencias:
+[tablas sin políticas](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy)
+y [funciones públicas con permisos elevados](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable).
+
+La autorización escrita ya consta en este hilo: «hacelo,
 aplica la migracion y configura el despliegue» y las instrucciones posteriores
 de continuar las correcciones de seguridad, manteniendo el límite de no contratar
 recursos de Supabase. No se solicita otra autorización para ese mismo trabajo.

@@ -48,10 +48,12 @@
     "reproduced_with": "Synthetic canary, four local Auth users, signed sessions, local PostgREST."
   },
   "correction": {
-    "migration": "20261001193156_close_legacy_patient_row_access.sql",
+    "migration": "20261001195127_close_legacy_patient_row_access.sql",
     "sql": "drop policy if exists patients_self_select on public.patients;",
-    "production_applied": false,
-    "rows_modified": 0
+    "production_applied": true,
+    "rows_modified": 0,
+    "authorization": "User explicitly authorized security migrations/deployment in this conversation and subsequently requested continuing the corrections; no new Supabase expenses.",
+    "catalog_verified_at": "2026-10-01T19:53:05.929Z"
   },
   "verification": {
     "baseline": {
@@ -83,11 +85,59 @@
       "failed": 0,
       "skipped": 0,
       "cleanup": "Temporary local stack and synthetic data removed."
-    }
+    },
+    "production_after": {
+      "views": [
+        {
+          "owner": "postgres",
+          "relname": "patient_access_view",
+          "definition": " SELECT id,\n    nutritionist_id,\n    billing_status,\n    billing_until\n   FROM patients\n  WHERE deactivated_at IS NULL AND anonymized_at IS NULL AND (id = my_patient_id() OR is_assigned_patient(id));",
+          "authenticated_select": true
+        },
+        {
+          "owner": "postgres",
+          "relname": "patients_patient_view",
+          "definition": " SELECT id,\n    user_id,\n    full_name,\n    initials,\n    tone,\n    billing_status,\n    billing_until,\n    status,\n    stage,\n    goal,\n    adherence_score,\n    created_at\n   FROM patients\n  WHERE user_id = auth.uid();",
+          "authenticated_select": true
+        }
+      ],
+      "policies": [
+        {
+          "cmd": "ALL",
+          "qual": "(nutritionist_id = my_nutritionist_id())",
+          "roles": [
+            "public"
+          ],
+          "permissive": "PERMISSIVE",
+          "policyname": "patients_nutri_all",
+          "with_check": "(nutritionist_id = my_nutritionist_id())"
+        }
+      ],
+      "migration": [
+        {
+          "name": "close_legacy_patient_row_access",
+          "version": "20261001195127"
+        }
+      ]
+    },
+    "security_advisors_after": [
+      {
+        "name": "rls_enabled_no_policy",
+        "level": "INFO",
+        "count": 16,
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+      },
+      {
+        "name": "authenticated_security_definer_function_executable",
+        "level": "WARN",
+        "count": 116,
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable"
+      }
+    ]
   },
   "boundaries": {
     "cloud_supabase_resources_created": 0,
-    "production_writes": 0,
+    "production_writes": "One DDL migration applied; zero patient/account rows modified.",
     "real_patient_data_used": false,
     "auth_accounts": 4,
     "auth_source": "Local Supabase Auth in GitHub Linux runner",
