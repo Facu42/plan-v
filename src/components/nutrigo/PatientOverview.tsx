@@ -1,3 +1,4 @@
+import { PatientBodyDataCard } from './ShowroomNutritionTarget';
 import type { Macros } from '../../types';
 import { Icon } from '../shared/Icon';
 import { NvBadge, NvBars, NvButton, NvCard, NvMetric, NvProgress, NvState } from './primitives';
@@ -29,6 +30,7 @@ export function PatientOverview({ patient: p, onNavigate, audience = 'patient' }
   const reviewed = totalMeals ? p.journey.reviewedMeals / totalMeals * 100 : 0;
   const latest = p.messages[p.messages.length - 1];
   return <div className="np-dashboard">
+    {!professional && <PatientBodyDataCard patientId={p.id} />}
     <div className="nv-metrics np-metrics">
       <NvMetric label="Adherencia" value={<>{p.adherence}<em>%</em></>} note="Últimos 7 días" icon="target" nvIcon="adherencia" onOpen={() => onNavigate('progreso')}>
         <div className="np-ruler" aria-hidden="true"><i style={{ left: `${Math.min(100, Math.max(0, p.adherence))}%` }} /><span>0</span><span>50</span><span>100</span></div>

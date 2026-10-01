@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { api, isAbortError } from '../../api/client';
 import { Icon, Mark } from '../shared/Icon';
 import { NvButton } from './primitives';
+import { PatientBodyDataCard } from './ShowroomNutritionTarget';
 import type { ShowroomPatient } from './showroom-model';
 import { isIntakeConflict } from './intake-save-queue';
 import { createIntakeSession, type IntakeSession } from './intake-session';
@@ -386,6 +387,7 @@ export function ShowroomPatientOnboarding({
         <li><Icon name="check" size={18} /><div><strong>Hola, {normalizePreferredName(draft.preferredName)}</strong><span>{context.hasPublishedPlan ? 'Ya tenés un plan de la semana para consultar.' : 'Cuando Verónica publique el plan, aparece en tu inicio.'}</span></div></li>
         <li><Icon name="calendar" size={18} /><div><strong>{context.appointmentWhen ?? 'Consulta por coordinar'}</strong><span>Recibimos tu información. Verónica la va a revisar; no hay un plan inventado.</span></div></li>
       </ul>}
+      {step === 'ready' && <PatientBodyDataCard patientId={patient.id} forceOpen />}
       </fieldset>
     </div>
 
