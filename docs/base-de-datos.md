@@ -64,3 +64,11 @@ confirmar con el hilo de Autenticación (apartado D) que no cambió las mismas r
 Facundo encendió la protección contra contraseñas filtradas. Comprobado con el asesor de
 seguridad de Supabase: el aviso ya no aparece. Sigue la prueba de restaurar una copia diaria
 en un proyecto aparte (se crea desde el panel de copias y tiene costo por hora mientras exista).
+
+## 2026-10-01: prueba de restaurar
+
+El conector de Supabase de los hilos no puede restaurar copias (sólo reactiva proyectos
+pausados), y Facundo pidió no pasarle pasos manuales. Queda así: Supabase guarda una copia
+diaria de los últimos 7 días (plan Pro) y la prueba de restaurar no se hizo. Si algún día
+hace falta recuperar datos, se restaura desde el panel, en Database, Backups, pestaña
+"Restore to a New Project" (no la otra, que pisa la base publicada).
