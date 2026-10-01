@@ -72,3 +72,8 @@ pausados), y Facundo pidió no pasarle pasos manuales. Queda así: Supabase guar
 diaria de los últimos 7 días (plan Pro) y la prueba de restaurar no se hizo. Si algún día
 hace falta recuperar datos, se restaura desde el panel, en Database, Backups, pestaña
 "Restore to a New Project" (no la otra, que pisa la base publicada).
+
+Actualización 2026-10-01 ~02:10Z: se intentó desde la PC de Facundo; la copia más reciente es
+la del 30/9 06:38 UTC (completada) y Supabase mostraba US$9,68/mes por el proyecto nuevo.
+Facundo la canceló: no quiere gastos fuera del plan Pro. Comprobado con el conector: no se
+creó ningún proyecto (siguen plan-v-app, ruti-chat-crm y "Plan V" pausado). Prueba descartada.
