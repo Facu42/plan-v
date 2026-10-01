@@ -59,6 +59,7 @@ try {
     // La instantánea reproduce el estado vulnerable antes de su corrección.
     if (file.endsWith('_close_legacy_patient_row_access.sql')) {
       await pool.query(snapshot);
+      await pool.query(await readFile(new URL('../supabase/auth-isolation/live-view-options.sql', import.meta.url), 'utf8'));
       snapshotApplied = true;
     }
     await pool.query(await readFile(new URL(file, migrations), 'utf8'));

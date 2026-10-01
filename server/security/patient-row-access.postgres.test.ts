@@ -9,6 +9,7 @@ const outsider = '00000000-0000-4000-a000-000000000043';
 const patient = '10000000-0000-4000-a000-000000000041';
 const note = 'NOTA PROFESIONAL FICTICIA';
 const corrective = new URL('../../supabase/migrations/20261001195127_close_legacy_patient_row_access.sql', import.meta.url);
+const viewBoundary = new URL('../../supabase/migrations/20261001222659_explicit_patient_view_boundary.sql', import.meta.url);
 
 async function asUser(user: string, sql: string) {
   return db.transaction(async tx => {
@@ -64,6 +65,55 @@ describe('cierre de lectura cruda de paciente en esquema legacy', () => {
     await db.exec(await readFile(corrective,'utf8'));
     expect((await db.query("select adherence_why from public.patients where id=$1",[patient])).rows).toEqual([{ adherence_why: note }]);
     expect((await db.query("select policyname from pg_policies where schemaname='public' and tablename='patients' order by policyname")).rows).toEqual([{ policyname:'patients_nutri_all' }]);
+  });
+
+  it('reproduce las vistas invoker publicadas y recupera la ficha sin exponer filas ni columnas privadas',async () => {
+    const nid = (await db.query<{ id: string }>("select public.provision_nutritionist($1,'Otra ficticia') as id",[outsider])).rows[0].id;
+    const otherPatient = '10000000-0000-4000-a000-000000000043';
+    await db.query("insert into public.patients(id,nutritionist_id,user_id,full_name,billing_status,adherence_why) values($1,$2,$3,'Otra ficticia','waived',$4)",[otherPatient,nid,outsider,note]);
+    await db.exec(await readFile(new URL('../../supabase/auth-isolation/live-view-options.sql',import.meta.url),'utf8'));
+    expect(await asUser(patientUser,'select id from public.patients_patient_view')).toEqual([]);
+    expect(await asUser(patientUser,'select id from public.patient_access_view')).toEqual([]);
+    // Simula ACL heredadas de tabla y columna, no eliminadas por CREATE OR REPLACE.
+    await db.exec(`
+      grant all on public.patients_patient_view,public.patient_access_view to authenticated;
+      grant update(billing_status),select(id) on public.patients_patient_view,public.patient_access_view to authenticated,anon;
+      grant update(user_id) on public.patients_patient_view to public;
+    `);
+    await db.exec(await readFile(viewBoundary,'utf8'));
+    expect(await asUser(patientUser,'select id from public.patients_patient_view')).toEqual([{id:patient}]);
+    expect(await asUser(patientUser,'select id from public.patient_access_view')).toEqual([{id:patient}]);
+    expect(await asUser(owner,'select id from public.patient_access_view')).toEqual([{id:patient}]);
+    expect(await asUser(patientUser,'select id from public.patients')).toEqual([]);
+    expect(await asUser(patientUser,"select id from public.patients_patient_view where id='"+otherPatient+"'")).toEqual([]);
+    expect(await asUser(patientUser,"select id from public.patient_access_view where id='"+otherPatient+"'")).toEqual([]);
+    const columns = (await db.query<{column_name:string}>("select column_name from information_schema.columns where table_schema='public' and table_name in ('patients_patient_view','patient_access_view')")).rows.map(row=>row.column_name);
+    for (const field of ['adherence_why','next_focus','plan_b','sensitive_hours']) expect(columns).not.toContain(field);
+    expect((await db.query("select has_table_privilege('anon','public.patients_patient_view','SELECT') as patient,has_table_privilege('anon','public.patient_access_view','SELECT') as access")).rows).toEqual([{patient:false,access:false}]);
+    await db.exec(await readFile(viewBoundary,'utf8'));
+    expect((await db.query('select adherence_why from public.patients where id=$1',[patient])).rows).toEqual([{adherence_why:note}]);
+  });
+
+  it('niega escrituras de paciente y profesional en ambas vistas sin alterar filas ni vínculos',async () => {
+    const before = (await db.query('select id,user_id,nutritionist_id,billing_status,adherence_why from public.patients order by id')).rows;
+    for (const view of ['patients_patient_view','patient_access_view']) {
+      const privileges = (await db.query(`select privilege,
+        has_table_privilege('authenticated','public.${view}',privilege) as allowed
+        from unnest(array['SELECT','INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER']) privilege`)).rows;
+      expect(privileges).toEqual(['SELECT','INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER'].map(privilege=>({privilege,allowed:privilege==='SELECT'})));
+      const acls = (await db.query(`select attname from pg_attribute where attrelid='public.${view}'::regclass and attacl is not null`)).rows;
+      expect(acls).toEqual([]);
+      expect((await db.query(`select has_column_privilege('anon','public.${view}','id','SELECT') as allowed`)).rows).toEqual([{allowed:false}]);
+      for (const user of [patientUser,owner]) {
+        for (const sql of [
+          `update public.${view} set billing_status='pending' where id='${patient}'`,
+          `update public.${view} set ${view==='patients_patient_view'?'user_id':'nutritionist_id'}='${outsider}' where id='${patient}'`,
+          `insert into public.${view}(id,billing_status) values(gen_random_uuid(),'waived')`,
+          `delete from public.${view} where id='${patient}'`,
+        ]) await expect(asUser(user,sql)).rejects.toMatchObject({code:'42501'});
+      }
+    }
+    expect((await db.query('select id,user_id,nutritionist_id,billing_status,adherence_why from public.patients order by id')).rows).toEqual(before);
   });
 });
 
