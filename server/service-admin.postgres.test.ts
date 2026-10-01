@@ -157,6 +157,21 @@ describe('panel del servicio (PGlite)', () => {
     await db.query('delete from public.nutritionists where id=$1', [id]);
   });
 
+  it('la migración corrige también un vencimiento ya guardado sin modificar sus pagos', async () => {
+    const id = (await db.query<{ id: string }>("insert into public.nutritionists(user_id,display_name) values ($1,'Vencimiento ficticio anterior') returning id", [admin])).rows[0].id;
+    await db.query("update public.nutritionist_subscriptions set trial_ends_on=date '2026-10-31',paid_until=date '2027-01-30' where nutritionist_id=$1", [id]);
+    for (const [months, paidOn] of [[1, '2026-10-20'], [2, '2026-11-25']] as const) {
+      await db.query("insert into public.service_payments(nutritionist_id,amount,months,paid_on,method,created_by) values($1,$2,$3,$4,'transferencia',$5)", [id, months * 1000, months, paidOn, admin]);
+    }
+    const before = (await db.query('select * from public.service_payments where nutritionist_id=$1 order by months', [id])).rows;
+    const migrations = new URL('../supabase/migrations/', import.meta.url);
+    const migration = (await readdir(migrations)).find((name) => name.endsWith('_harden_nutrition_target_access.sql'))!;
+    await db.exec(await readFile(new URL(migration, migrations), 'utf8'));
+    expect((await db.query("select to_char(paid_until,'YYYY-MM-DD') as d from public.nutritionist_subscriptions where nutritionist_id=$1", [id])).rows[0]).toEqual({ d: '2027-01-31' });
+    expect((await db.query('select * from public.service_payments where nutritionist_id=$1 order by months', [id])).rows).toEqual(before);
+    await db.query('delete from public.nutritionists where id=$1', [id]);
+  });
+
   it('rechaza pagos inválidos', async () => {
     await expect(rpc(admin, 'admin_record_service_payment', [nutriBId, 0, 1, await shift(0), 'otro', ''])).rejects.toMatchObject({ code: '22023' });
     await expect(rpc(admin, 'admin_record_service_payment', [nutriBId, 100, 0, await shift(0), 'otro', ''])).rejects.toMatchObject({ code: '22023' });

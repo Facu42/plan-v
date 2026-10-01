@@ -1,5 +1,10 @@
 # Revisión de funciones sensibles — 01/10/2026
 
+**Estado posterior:** Facundo autorizó aplicar las tres correcciones y continuar
+con el punto 2. Las dos migraciones se aplicaron y verificaron en producción:
+[correcciones y evidencia posterior](correcciones-funciones-sensibles-2026-10-01.md).
+El contenido de abajo conserva lo observado antes de aplicar, como registro de auditoría.
+
 Punto 1 pedido por Facundo después del PR [#40](https://github.com/Facu42/plan-v/pull/40).
 Revisión de la base existente `plan-v-app`, comparada con `main` en
 `44f95c1abeb01e08085c092f77b414101088c717`. Solo se consultaron definiciones,
