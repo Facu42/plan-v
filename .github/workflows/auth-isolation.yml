@@ -4,6 +4,7 @@ on:
     paths:
       - '.github/workflows/auth-isolation.yml'
       - 'scripts/test-auth-isolation.mjs'
+      - 'vitest.auth-isolation.config.ts'
       - 'supabase/auth-isolation/**'
       - 'supabase/migrations/**'
       - 'server/security/signed-auth.local.test.ts'

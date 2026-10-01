@@ -81,7 +81,7 @@ try {
   for (const key of ['PLANV_LIVE_AUTH', 'RLS_JWT_NUTRI_A', 'RLS_JWT_NUTRI_B', 'RLS_PATIENT_B_ID', 'OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'RESEND_API_KEY']) delete env[key];
   const vitest = fileURLToPath(new URL('../node_modules/vitest/vitest.mjs', import.meta.url));
   const code = await new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, [vitest, 'run', 'server/security/signed-auth.local.test.ts', '--maxWorkers=1'], { env, stdio: 'inherit' });
+    const child = spawn(process.execPath, [vitest, 'run', '--config', 'vitest.auth-isolation.config.ts', '--maxWorkers=1'], { env, stdio: 'inherit' });
     child.on('error', reject); child.on('exit', code => resolve(code ?? 1));
   });
   if (code !== 0) process.exitCode = 1;
