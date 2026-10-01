@@ -25,6 +25,12 @@ describe('estado del servicio de una nutricionista', () => {
     expect(servicePaidUntil('2026-10-30', [pay('2026-10-01'), pay('2026-10-02', 1, 'voided')])).toBe('2026-11-30');
   });
 
+  it('los meses de pagos seguidos se suman desde el mismo comienzo, también a fin de mes', () => {
+    expect(servicePaidUntil('2026-10-31', [pay('2026-10-20')])).toBe('2026-11-30');
+    expect(servicePaidUntil('2026-10-31', [pay('2026-10-20'), pay('2026-11-25', 2)])).toBe('2027-01-31');
+    expect(servicePaidUntil('2026-10-31', [pay('2026-10-20'), pay('2026-11-25', 2), pay('2027-03-15')])).toBe('2027-04-15');
+  });
+
   it('después de un corte largo, cuenta desde el día que pagó', () => {
     expect(servicePaidUntil('2026-10-30', [pay('2026-11-05')])).toBe('2026-11-30');
     expect(servicePaidUntil('2026-10-30', [pay('2026-12-15')])).toBe('2027-01-15');

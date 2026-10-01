@@ -134,6 +134,21 @@ describe('panel del servicio (PGlite)', () => {
     await expect(rpc(admin, 'admin_void_service_payment', [two.payments.find((row) => row.months === 2)!.id])).rejects.toMatchObject({ code: '22023' });
   });
 
+  it('los meses de pagos seguidos se suman desde el mismo comienzo, también a fin de mes', async () => {
+    const id = (await db.query<{ id: string }>("insert into public.nutritionists(user_id,display_name) values ($1,'Nutri Fin de Mes') returning id", [admin])).rows[0].id;
+    await db.query("update public.nutritionist_subscriptions set trial_ends_on = date '2026-10-31' where nutritionist_id=$1", [id]);
+    const pay = async (months: number, paidOn: string) => {
+      await db.query("insert into public.service_payments (nutritionist_id, amount, months, paid_on, method, created_by) values ($1,$2,$3,$4,'transferencia',$5)", [id, 1000 * months, months, paidOn, admin]);
+      await db.query('select public.service_recompute($1)', [id]);
+      return (await db.query<{ d: string }>("select to_char(paid_until,'YYYY-MM-DD') as d from public.nutritionist_subscriptions where nutritionist_id=$1", [id])).rows[0].d;
+    };
+    expect(await pay(1, '2026-10-20')).toBe('2026-11-30');
+    expect(await pay(2, '2026-11-25')).toBe('2027-01-31');
+    // Un corte largo (más de 7 días) vuelve a contar desde el día que pagó.
+    expect(await pay(1, '2027-03-15')).toBe('2027-04-15');
+    await db.query('delete from public.nutritionists where id=$1', [id]);
+  });
+
   it('rechaza pagos inválidos', async () => {
     await expect(rpc(admin, 'admin_record_service_payment', [nutriBId, 0, 1, await shift(0), 'otro', ''])).rejects.toMatchObject({ code: '22023' });
     await expect(rpc(admin, 'admin_record_service_payment', [nutriBId, 100, 0, await shift(0), 'otro', ''])).rejects.toMatchObject({ code: '22023' });
