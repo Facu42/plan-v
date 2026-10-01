@@ -45,7 +45,10 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
 
 ## Lo pendiente
 
-- Seguridad, siguiente paso (punto 3): clasificar las 16 tablas sin políticas.
+- Seguridad, siguiente paso (punto 4): comprobar aislamiento con sesiones firmadas
+  y cuentas ficticias, sin contratar recursos ni usar datos reales. El punto 3 está
+  clasificado: las 16 tablas están cerradas al acceso directo; 38 pruebas locales
+  nuevas lo protegen. Ver `docs/clasificacion-tablas-internas-2026-10-01.md`.
   Las 34 funciones internas siguen cerradas y las 116 públicas coinciden con la
   lista actual. Las tres correcciones confirmadas de los puntos 1 y 2 están
   aplicadas; evidencia anterior y posterior en los informes de funciones sensibles.

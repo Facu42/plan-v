@@ -45,13 +45,20 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 ## A. Seguridad y privacidad
 
+- **Clasificación 2026-10-01, punto 3:** las 16 tablas sin políticas están cerradas
+  al acceso directo de visitantes y usuarias, también por columnas; no hay vistas
+  que las expongan. Se mantienen internas, con las funciones autorizadas como
+  entrada. Dos tablas son reservas sin integración activa (eventos externos de pago
+  y tareas persistentes). 38 pruebas locales nuevas aprobadas. Sin cambios en
+  producción ni recursos contratados. Ver [clasificación y límites](clasificacion-tablas-internas-2026-10-01.md).
+
 - **Correcciones aplicadas 2026-10-01, punto 2:** cierre de lecturas/escrituras
   corporales y metas tras el retiro; validación y recálculo de metas en la base;
   corrección de meses pagados y vencimientos existentes. Dos migraciones aplicadas
   en `plan-v-app`, con autorización escrita y sin contratar recursos. 1071 pruebas
   generales aprobadas y 47 con las definiciones reales reproducidas localmente.
   Siguen cerradas las 34 internas; permanecen 116 advertencias esperadas de función
-  ejecutable y 16 avisos de tablas por clasificar en el punto 3. Ver
+  ejecutable y 16 avisos de tablas, clasificados después en el punto 3. Ver
   [correcciones aplicadas](correcciones-funciones-sensibles-2026-10-01.md).
 
 - **Revisión de funciones 2026-10-01, posterior al PR #40:** las 116 permitidas

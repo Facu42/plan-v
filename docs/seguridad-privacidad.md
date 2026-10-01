@@ -6,6 +6,14 @@ privacidad". Agentes: `appsec-engineer` (lidera), `secrets-credential-engineer`,
 
 ## Estado
 
+**Actualización 2026-10-01:** las tablas de estado y conclusiones del 29/9 de abajo
+son históricas. Supabase ya está en Pro desde el 30/9; ese bloqueo de plan gratuito
+no es vigente. Las funciones internas y correcciones posteriores están aplicadas
+(PR #40 y #41). Ahora hay 116 advertencias de funciones y 16 avisos informativos
+de tablas: las 16 quedaron [clasificadas y verificadas](clasificacion-tablas-internas-2026-10-01.md)
+sin abrir permisos ni escribir producción. La prueba con sesiones reales y la
+revisión legal siguen pendientes.
+
 | Punto del plan | Estado |
 | --- | --- |
 | 1. Funciones de la base abiertas (129 avisos) | Arreglado en el código (PR de este apartado). Falta aplicarlo en la base de producción con el OK de Facundo. |
