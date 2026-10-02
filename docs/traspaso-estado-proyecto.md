@@ -96,12 +96,13 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
    con Gmail llegan a la misma casilla). La primera vez pide aceptar términos ("Antes de seguir").
    Para ver el primer uso de una nutricionista vacía, crear otra desde la pestaña de altas ("Crear con clave").
 
-## Landing para nutricionistas (borrador, PR 45)
+## Páginas públicas y sistema de diseño (borrador, PR 45)
 
-- Dirección: `/nutricionistas` (archivo `landing.html`, estilos y script en `src/landing/`, fotos en `public/landing/`). Es una página aparte: no toca la entrada ni la app. La ruta está en `vercel.json`.
-- Movimiento (portada, cinta, números, parallax) como el pin y el video de referencia; con "reducir movimiento" queda quieta.
-- Las 7 fotos son ilustrativas, generadas con IA en Gemini (Nano Banana) desde el Chrome de Facundo, porque la cuenta de Higgsfield no tenía créditos. La página lo aclara en el pie.
-- Por decidir: destino del botón principal (hoy lleva a `/`), precio (no se muestra), testimonios (no hay) y si se cambian los números de la fila.
+- Direcciones: `/nutricionistas` (`landing.html`) y `/pacientes` (`pacientes.html`, para que la nutricionista la comparta). Páginas aparte: no tocan la entrada ni la app. Rutas en `vercel.json`, `vite.config.ts` y la prueba `server/ops/pv30.test.ts`.
+- Sistema de diseño de las páginas públicas: `docs/sistema-de-diseno-publico.md` (y `.html` para verlo), con las variables en `src/landing/tokens.css`. Los colores son los del logo. Reemplaza la paleta de la guía de redes (`docs/redes`). La app no lo usa.
+- Movimiento como el pin y el video de referencia; con "reducir movimiento" queda quieta.
+- Fotos ilustrativas generadas con IA (API de Higgsfield, script fuera del repo). La única persona real es Verónica Trenti, cuya autorización escrita falta. El pie de cada página lo aclara.
+- Por decidir: destino del botón principal (hoy `/`), precio (no se muestra), testimonios (no hay).
 - No se junta a `main` sin la frase "publicalo".
 
 ## Cómo se registra
