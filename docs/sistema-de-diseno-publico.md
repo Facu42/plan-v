@@ -44,6 +44,16 @@ Radio 32 px en bloques y fotos, 24 px en tarjetas, píldora en botones y etiquet
 - **Foto** (`.lp-photo`): radio 32, entra recortándose y con un parallax suave. En la portada se deja aire arriba (la barra flotante no debe tapar la cara) y el encuadre apunta a la parte alta de la foto.
 - **Función en fila** (`.lp-feature`): foto a un lado y texto con etiqueta, título, bajada y dos puntos (`.lp-checks`); se alternan los lados y en celular se apilan. Cada fila debe describir algo que la app hace hoy; si no existe, va como "próximamente".
 
+## Landing de pacientes (rediseño, `src/landing/pacientes.css`)
+
+Usa **todos** los colores del logo como fondos de tarjetas, con pares ya probados (clases `.pv-c-gold`, `.pv-c-coral`, `.pv-c-leaf`, `.pv-c-apricot`, `.pv-c-orange`, `.pv-c-mist`, `.pv-c-green`, `.pv-c-deep`). Sobre naranja y hoja el texto va en verde profundo y con peso 500 o más; el texto blanco chico sólo sobre `--pv-green-strong` o verde profundo.
+
+- **Portada con zoom** (`.pv-zoom`): la sección mide 260 % del alto de pantalla; la foto queda fija y se acerca mientras se baja, el marco pasa de tarjeta a pantalla completa y el título se reemplaza por una segunda frase.
+- **Beneficios en horizontal** (`.pv-hs`): la sección queda fija y la fila de tarjetas se corre de costado con el scroll; una barra muestra el avance.
+- **El logo** aparece en la barra, la portada, la cinta, el bloque de la diferencia, la foto de la nutricionista, el cierre (girando) y el pie.
+- Sin el script, o con "reducir movimiento", la portada es una foto quieta y los beneficios se deslizan con el dedo: nada queda escondido.
+- Las personas de las fotos son variadas (edades, cuerpos, géneros) y el texto no asume género.
+
 ## Fotos
 
 Ilustrativas, generadas con IA, siempre aclarado en el pie. Comida colorida y natural, luz natural cálida, tonos crema y verde. Personas adultas, sin texto ni logos dentro de la imagen (se revisa que la IA no escriba letras raras). La única foto de una persona real es la de Verónica Trenti, con su autorización escrita.
