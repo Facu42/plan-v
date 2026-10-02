@@ -118,7 +118,8 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
   sus móviles/detalles conectado a datos reales; 81 SVG originales locales. Accesos
   a Pacientes, Ficha y Plan con selección conservada; recorridos 1440/390, porciones,
   ordenamiento y guardado protegido comprobados; 1.114 pruebas aprobadas.
-  [PR #46](https://github.com/Facu42/plan-v/pull/46), aún sin publicar.
+  [PR #46](https://github.com/Facu42/plan-v/pull/46) integrado y publicado el 2026-10-02;
+  web, API y worker confirmados para el commit `6a2d292`, CI y sesiones aprobados.
   Registro: [Figma y consultorio funcional](figma-crm-funcional-2026-10-01.md).
 
 - **Lidera:** `ux-architect`. **Apoyo:** `ui-designer`, `whimsy-injector` (movimiento),

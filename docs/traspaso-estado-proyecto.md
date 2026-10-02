@@ -43,15 +43,17 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
   `docs/cobros-y-panel.md`.
 - Calorías y macros (Mifflin-St Jeor) con migración aplicada: `docs/calorias-macros.md`.
 
-## Lo pendiente
-
-- Corrección de Figma y accesos del consultorio preparada en
-  `codex/figma-crm-funcional`: MCP de las 24 vistas; ampliado el 2026-10-02 a los bloques
+- Corrección de Figma y accesos del consultorio integrada por
+  [PR #46](https://github.com/Facu42/plan-v/pull/46) el 2026-10-02, commit `6a2d292`:
+  MCP de las 24 vistas; ampliado a los bloques
   originales de las doce pantallas del paciente y sus móviles/detalles, 81 SVG locales,
   accesos Pacientes/Ficha/Plan y selección conservada. Pruebas 1440/390, porciones,
-  ordenamiento y guardado protegido; 1.114 pruebas aprobadas. Sin tocar producción ni
-  contratar recursos. Pendiente integrar [PR #46](https://github.com/Facu42/plan-v/pull/46) para que se publique.
+  ordenamiento y guardado protegido; 1.114 pruebas aprobadas. Web, API y worker publicados
+  para ese commit; CI y sesiones de main aprobados. Ingreso público comprobado sin errores.
+  Sin migraciones, cambios de ajustes de producción ni recursos nuevos.
   Ver `docs/figma-crm-funcional-2026-10-01.md`.
+
+## Lo pendiente
 
 - Seguridad, punto 4: prueba con cuatro sesiones reales en Supabase temporal de
   GitHub realizada. Se encontró lectura de notas profesionales por una política
