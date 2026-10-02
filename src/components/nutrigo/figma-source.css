@@ -45,6 +45,8 @@
 .nv-clinic-shortcuts > label { margin-left: auto; display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 11px; color: var(--nv-muted); }
 .nv-clinic-shortcuts select { min-width: 0; max-width: 240px; min-height: 40px; border: 1px solid var(--nv-line); border-radius: 8px; background: var(--nv-card); color: var(--nv-ink); padding: 8px; font: 400 12px/1.3 Poppins, sans-serif; }
 .nv-app .nv-directory-actions { gap: 6px; }
+.nv-app .nv-directory-table [role=cell]:nth-child(2),
+.nv-app .nv-directory-table [role=cell]:nth-child(3) { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .nv-app .nvfd-scroll { position: relative; }
 .nv-app .nvexercise { padding: 0; }
 .nv-app .nvexercise-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }

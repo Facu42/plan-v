@@ -1,7 +1,7 @@
 # Figma y accesos del consultorio
 
 Fecha: 2026-10-01. Rama: `codex/figma-crm-funcional`.
-Trabajo preparado para integrar mediante PR; producción sigue en su versión anterior.
+Trabajo preparado en [PR #46](https://github.com/Facu42/plan-v/pull/46); producción sigue en su versión anterior.
 No se aplicaron migraciones, cambios de configuración ni servicios nuevos.
 
 ## Fuente y alcance
@@ -62,6 +62,8 @@ documentadas; no se afirma una equivalencia de todas las capturas píxel por pí
 ## Verificación
 
 - `npm test`: 213 archivos, 1.114 pruebas aprobadas y dos omitidas por configuración.
+  La repetición final usó `npm test -- --maxWorkers=4` tras agotar memoria con
+  verificaciones simultáneas; ejecutó la misma suite completa, sin omitir archivos.
 - `npm run check` y `npm run build`: aprobados.
 - Navegador gstack en modo demo local, escritorio 1440 y móvil 390: diez pantallas
   de paciente y doce del consultorio en ambos tamaños. Sin desbordamiento horizontal
@@ -74,6 +76,10 @@ documentadas; no se afirma una equivalencia de todas las capturas píxel por pí
 - Inicio paciente → buscar «Wrap» → Plan conserva «Wrap»; el rol paciente no presenta
   accesos del consultorio. Detalle de recurso conserva el prefijo de cada rol.
 - Revisión independiente de código y comprobación de realidad: hallazgos corregidos.
+- GitHub: suite, tipos, compilación, migraciones y secretos aprobados; 16 casos
+  adicionales de sesiones firmadas aprobados. Se corrigió el disparador de esta
+  última prueba: `push` sólo en `main`, más cada PR; antes dos ejecuciones de la
+  misma rama se cancelaban entre sí y dejaban un aviso engañoso en el PR.
 
 Las capturas y registros locales están en `.gstack/figma-*.png` y
 `.gstack/figma-ui-*.json`. El informe de medidas sin contenido de pacientes se conserva
