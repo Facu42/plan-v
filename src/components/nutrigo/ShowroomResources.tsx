@@ -74,6 +74,13 @@ export const buildResourceShareUrl = (id: string, href: string) => {
   const url = new URL(href);
   url.pathname = '/app/recursos';
   url.searchParams.delete('design');
+  url.searchParams.delete('paciente');
+  url.hash = `recurso=${encodeURIComponent(id)}`;
+  return url.toString();
+};
+
+export const buildResourceNavigationUrl = (id: string, href: string) => {
+  const url = new URL(href);
   url.hash = `recurso=${encodeURIComponent(id)}`;
   return url.toString();
 };
@@ -247,7 +254,7 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
   const openGuide = (id: string, replace = false) => {
     const method = replace ? 'replaceState' : 'pushState';
     const state = replace ? window.history.state : { ...window.history.state, planVResourceOpen: true };
-    window.history[method](state, '', buildResourceShareUrl(id, window.location.href));
+    window.history[method](state, '', buildResourceNavigationUrl(id, window.location.href));
     setSelectedId(id);
     setShareStatus('');
   };

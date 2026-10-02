@@ -9,7 +9,8 @@ const patient = { id: 'p1', name: 'Ana', initials: 'A', goal: 'Organizar comidas
 describe('mensajería dentro del diseño Nutrigo', () => {
   it('el paciente ve a su nutricionista y un compositor, no un aviso de solo lectura', () => {
     const html = renderToStaticMarkup(<NutrigoMessages patient={patient} patients={[patient]} role="patient" onSelect={() => {}} onNavigate={() => {}} />);
-    expect(html).toContain('Conversación con Verónica Trenti');
+    expect(html).toContain('Conversación con Tu nutricionista');
+    expect(html).not.toContain('Verónica Trenti');
     expect(html).toContain('Escribí un mensaje');
     expect(html).toContain('>Enviar<');
     expect(html).toContain('Ver mi agenda');
@@ -69,7 +70,7 @@ describe('mensajería dentro del diseño Nutrigo', () => {
   it('no muestra otras personas en el modo paciente aunque se pasen a la lista', () => {
     const html = renderToStaticMarkup(<NutrigoMessages patient={patient} patients={[patient, { ...patient, id: 'p2', name: 'OTRA PERSONA' }]} role="patient" onSelect={() => {}} onNavigate={() => {}} />);
     expect(html).not.toContain('OTRA PERSONA');
-    expect(html).toContain('Verónica Trenti');
+    expect(html).toContain('Tu nutricionista');
   });
   it('el panel derecho lista imágenes, documentos y enlaces que de verdad se enviaron', () => {
     const shared = {

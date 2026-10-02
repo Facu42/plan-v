@@ -329,7 +329,7 @@ function PatientHealthyMenu({ patient, query, onNavigate }: { patient: ShowroomP
       <SectionHead title="Menú destacado" />
       <div className={`mf-featured-body${featuredMacros ? '' : ' mf-no-macros'}`}>
         <div className="mf-featured-main">
-          <span className="mf-thumb mf-featured-image"><MealThumbnail slot={featured.slots[0]} /><small>Imagen ilustrativa</small></span>
+          <span className="mf-thumb mf-featured-image"><MealThumbnail slot={featured.slots[0]} /></span>
           <div className="mf-featured-content">
             <h3>{featured.title}</h3>
             <div className="mf-featured-row">

@@ -21,9 +21,9 @@ describe('navegación del espacio paciente', () => {
 });
 
 describe('navegación del nutricionista', () => {
-  it('sigue el orden de la Navbar del archivo y deja las pantallas propias al final', () => {
+  it('prioriza pacientes, fichas y planes sin perder los destinos existentes', () => {
     expect(PRO_SURFACES.map((tab) => tab.id)).toEqual([
-      'inicio', 'agenda', 'mensajes', 'recetas', 'plan', 'compras', 'diario', 'progreso', 'ejercicio', 'recursos', 'pacientes', 'cobranzas', 'ficha', 'consultas', 'objetivos', 'seguimiento',
+      'inicio', 'pacientes', 'ficha', 'plan', 'agenda', 'mensajes', 'recetas', 'compras', 'diario', 'progreso', 'ejercicio', 'recursos', 'cobranzas', 'consultas', 'objetivos', 'seguimiento',
     ]);
     expect(PLAN_SUBPAGES.map((tab) => tab.id)).toEqual(['plan', 'compras']);
   });

@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Icon } from '../shared/Icon';
+import { MagnifyingGlass } from '@phosphor-icons/react';
 import { CarePanel } from './CarePanel';
+import { useCare } from './useCare';
 import { NvBadge, NvButton, NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
 import { exerciseApi } from '../../api/exercise';
@@ -71,6 +73,11 @@ export function ShowroomExercise({
   const [title, setTitle] = useState('Rutina de movilidad');
   const [selected, setSelected] = useState<string[]>([SEEDED_EXERCISES[0].id]);
   const [busy, setBusy] = useState(false);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [tablePage, setTablePage] = useState(0);
+  const [activityOpen, setActivityOpen] = useState(false);
+  const { data: care, error: careError } = useCare(patient.id, professional);
   const [feedbackNote, setFeedbackNote] = useState('');
 
   useEffect(() => {
@@ -103,6 +110,19 @@ export function ShowroomExercise({
     ? 'Biblioteca y rutinas de esta paciente. Asignar requiere habilitación verificada en el servidor; ser nutricionista no alcanza.'
     : 'Actividad que vos declarás y, si hay, la rutina que te asignó una profesional habilitada. No se estiman calorías ni se arma una rutina automática.';
 
+  const exerciseRows = [
+    ...view.assignments.flatMap((assignment) => assignment.items.map((item) => ({
+      id: item.id, name: item.name, sets: String(item.sets), amount: `${item.reps} repeticiones`, rest: `${item.rest_seconds} s`,
+      kcal: '—', state: assignment.status === 'completed' ? 'Completada' : assignment.status === 'paused' ? 'Pausada' : 'Asignada',
+    }))),
+    ...(remote ? view.activities : patient.activities.map((activity) => ({ ...activity, sets: null, reps: null }))).map((activity) => ({ id: activity.id, name: activity.activity, sets: activity.sets === null ? '—' : String(activity.sets),
+      amount: activity.reps === null ? `${activity.duration_minutes} min` : `${activity.reps} repeticiones`, rest: '—', kcal: '—', state: 'Registrada' })),
+    ...(care?.records ?? []).flatMap((record) => record.data.kind === 'activity' ? [{ id: record.id, name: record.data.activity, sets: '—', amount: `${record.data.minutes} min`, rest: '—', kcal: record.data.kcal === null ? '—' : `${record.data.kcal} declaradas`, state: 'Registrada' }] : []),
+  ];
+  const visibleRows = exerciseRows.filter((row) => row.name.toLocaleLowerCase('es').includes(search.trim().toLocaleLowerCase('es')) && (filter === 'all' || row.state === filter));
+  const lastPage = Math.max(0, Math.ceil(visibleRows.length / 12) - 1);
+  const currentPage = Math.min(tablePage, lastPage);
+  const tableRows = visibleRows.slice(currentPage * 12, (currentPage + 1) * 12);
   async function assign(event: FormEvent) {
     event.preventDefault();
     if (busy) return;
@@ -147,12 +167,24 @@ export function ShowroomExercise({
   }
 
   return <section className="nvexercise" aria-label={professional ? `Ejercicio de ${patient.name}` : 'Actividad física'}>
-    {!professional && <CarePanel patientId={patient.id} mode="activity" />}
-    <header className="nvexercise-heading"><div><small>{professional ? 'CONSULTORIO' : 'MI SEGUIMIENTO'}</small><h2>{heading}</h2><p>{intro}</p></div>
-      {professional && <NvBadge tone={view.can_assign ? 'green' : 'gold'}>{view.can_assign ? 'Habilitación verificada' : 'Sin habilitación verificada'}</NvBadge>}
-    </header>
+    <div className="nvexercise-toolbar">
+      <label><MagnifyingGlass size={14} aria-hidden="true" /><input type="search" aria-label="Buscar ejercicios" placeholder="Buscar ejercicios…" value={search} onChange={(event) => { setSearch(event.target.value); setTablePage(0); }} /></label>
+      <select aria-label="Estado del ejercicio" value={filter} onChange={(event) => { setFilter(event.target.value); setTablePage(0); }}><option value="all">Todos los estados</option>{['Asignada', 'Completada', 'Pausada', 'Registrada'].map((state) => <option key={state}>{state}</option>)}</select>
+      {!professional && <NvButton onClick={() => setActivityOpen((open) => !open)} aria-expanded={activityOpen} aria-controls="exercise-registration"><Icon name="plus" size={14} />Registrar actividad</NvButton>}
+    </div>
+    {careError && <NvState kind="error" title="No pudimos actualizar la actividad registrada" description={careError} />}
     {error && <NvState kind="error" title="No se pudo cargar el ejercicio" description={error} />}
-    {loading && !remote && <NvState kind="loading" title="Cargando biblioteca…" description="Rutinas sólo con habilitación verificada en servidor." />}
+    {loading && !remote && <NvState kind="loading" title="Cargando ejercicios…" description="Consultando las rutinas y actividades registradas." />}
+    <div className="nvexercise-table-scroll" role="region" aria-label="Ejercicios y actividades" tabIndex={0}>
+      <table className="nvexercise-table"><thead><tr><th>Ejercicio</th><th>Series</th><th>Repeticiones / tiempo</th><th>Pausa</th><th>Peso</th><th>Calorías</th><th>Estado</th></tr></thead>
+        <tbody>{tableRows.map((row, index) => <tr key={row.id}><th scope="row"><span className={`nvexercise-table-icon tone-${index % 3}`}><Icon name="heart" size={16} /></span>{row.name}</th><td>{row.sets}</td><td>{row.amount}</td><td>{row.rest}</td><td>—</td><td>{row.kcal}</td><td><NvBadge tone={row.state === 'Pausada' ? 'gold' : 'green'}>{row.state}</NvBadge></td></tr>)}</tbody>
+      </table>
+      {!tableRows.length && !loading && !error && !careError && <NvState title="Sin ejercicios para mostrar" description="Las rutinas asignadas y la actividad registrada aparecerán acá." />}
+    </div>
+    <div className="nvexercise-pagination"><small>{visibleRows.length} ejercicios y actividades · Peso y calorías sin datos registrados.</small><div><NvButton className="nv-ghost" disabled={currentPage === 0} onClick={() => setTablePage(currentPage - 1)}>Anterior</NvButton><span>{currentPage + 1}</span><NvButton className="nv-ghost" disabled={currentPage === lastPage} onClick={() => setTablePage(currentPage + 1)}>Siguiente</NvButton></div></div>
+    {!professional && activityOpen && <div id="exercise-registration"><CarePanel patientId={patient.id} mode="activity" /></div>}
+    <details className="nvexercise-management"><summary>{professional ? 'Administrar biblioteca y rutinas' : 'Ver mi rutina y sus detalles'}</summary>
+    <header className="nvexercise-heading"><div><h2>{heading}</h2><p>{intro}</p></div>{professional && <NvBadge tone={view.can_assign ? 'green' : 'gold'}>{view.can_assign ? 'Habilitación verificada' : 'Sin habilitación verificada'}</NvBadge>}</header>
 
     <section className="nvexercise-list" aria-label="Rutinas asignadas">
       <div className="nvexercise-heading"><div><small>RUTINA</small><h2>{professional ? 'Asignadas a esta paciente' : 'Rutina asignada'}</h2></div><span>{view.assignments.length} vigentes</span></div>
@@ -204,5 +236,6 @@ export function ShowroomExercise({
     </section>}
 
     {patient.activities.length > 0 && <section className="nvexercise-list"><h2>Registros anteriores</h2>{patient.activities.map((entry) => <article className="nvexercise-entry" key={entry.id}><Icon name="heart" size={18}/><div><h3>{entry.activity} · {entry.duration_minutes} min</h3><p>{formatActivityDate(entry.logged_at)} · Intensidad {intensityLabel[entry.intensity]}</p>{entry.note && <p>{entry.note}</p>}</div></article>)}</section>}
+    </details>
   </section>;
 }

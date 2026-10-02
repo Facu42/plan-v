@@ -128,7 +128,8 @@ describe('PV-37 paridad de layout/estado Nutrigo', () => {
     }
     expect(html.progress).toContain('Cargando períodos…');
     expect(html.progress).toContain('data-kind="loading"');
-    expect(html.exercise).toContain('Cargando biblioteca…');
+    expect(html.exercise).toContain('Cargando ejercicios…');
+    expect(html.exercise).not.toContain('Sin ejercicios para mostrar');
     expect(html['recipe-details']).toContain('Todavía no hay recetas publicadas para vos');
   });
 });

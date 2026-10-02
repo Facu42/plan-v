@@ -1,12 +1,15 @@
 import { PatientBodyDataCard } from './ShowroomNutritionTarget';
+import { useEffect, useState } from 'react';
+import { bodyDataApi } from '../../api/nutrition-target';
+import { exerciseApi } from '../../api/exercise';
+import type { RoutineItemView } from '../../types/exercise';
+import calorieRing from '../../assets/nutrigo/calorie-ring.svg?no-inline';
+import weightGauge from '../../assets/nutrigo/weight-gauge.svg?no-inline';
 import type { Macros } from '../../types';
 import { Icon } from '../shared/Icon';
 import { NvBadge, NvBars, NvButton, NvCard, NvMetric, NvProgress, NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
 import type { ShowroomPage } from './ShowroomPanels';
-import breakfast from '../../assets/showroom/breakfast.webp';
-import lunch from '../../assets/showroom/lunch.webp';
-import snack from '../../assets/showroom/snack.webp';
 
 // Relative energy from recorded macros (4/4/9), never a prescribed daily target.
 export function macroShares(macros: Macros) {
@@ -16,27 +19,41 @@ export function macroShares(macros: Macros) {
 }
 
 export function MealThumbnail({ slot }: { slot: string }) {
-  const image = slot === 'Desayuno' ? breakfast : slot === 'Merienda' ? snack : ['Almuerzo', 'Cena'].includes(slot) ? lunch : null;
-  return image ? <img className="np-food-photo" src={image} alt="Imagen ilustrativa del archivo de Plan V" width={480} height={360} loading="lazy" /> : <span className="np-food-fallback"><Icon name="leaf" /></span>;
+  return <span className="np-food-photo np-food-placeholder" aria-hidden="true" data-slot={slot} />;
 }
 
 export function PatientOverview({ patient: p, onNavigate, audience = 'patient' }: { patient: ShowroomPatient; onNavigate: (page: ShowroomPage) => void; audience?: 'patient' | 'professional' }) {
   const professional = audience === 'professional';
+  const actorKey = `${p.id}:${professional}`;
+  const [revision, setRevision] = useState(0);
+  const [bodyResult, setBodyResult] = useState<{ key: string; weight: number | null; failed: boolean } | null>(null);
+  const [routineResult, setRoutineResult] = useState<{ key: string; items: RoutineItemView[]; failed: boolean } | null>(null);
+  const weight = bodyResult?.key === actorKey ? bodyResult.weight : null;
+  const routine = routineResult?.key === actorKey ? routineResult.items : [];
+  const bodyFailed = bodyResult?.key === actorKey && bodyResult.failed;
+  const routineFailed = routineResult?.key === actorKey && routineResult.failed;
+  useEffect(() => {
+    const controller = new AbortController();
+    bodyDataApi.get(p.id, professional, controller.signal).then((view) => {
+      if (!controller.signal.aborted) setBodyResult({ key: actorKey, weight: view.data?.weight_kg ?? null, failed: false });
+    }).catch(() => { if (!controller.signal.aborted) setBodyResult({ key: actorKey, weight: null, failed: true }); });
+    exerciseApi.get(p.id, professional, controller.signal).then(({ exercise }) => {
+      if (!controller.signal.aborted) setRoutineResult({ key: actorKey, items: exercise.assignments.filter((assignment) => assignment.status === 'active').flatMap((assignment) => assignment.items), failed: false });
+    }).catch(() => { if (!controller.signal.aborted) setRoutineResult({ key: actorKey, items: [], failed: true }); });
+    return () => controller.abort();
+  }, [p.id, professional, actorKey, revision]);
   const followupTitle = professional ? 'Seguimiento del paciente' : 'Tu seguimiento';
   const shares = macroShares(p.macros);
   const hasNutrition = p.nutritionLogCount > 0;
-  const progress = Math.min(100, Math.max(0, p.goalProgress));
   const totalMeals = p.journey.reviewedMeals + p.journey.pendingMeals;
   const reviewed = totalMeals ? p.journey.reviewedMeals / totalMeals * 100 : 0;
-  const latest = p.messages[p.messages.length - 1];
   return <div className="np-dashboard">
-    {!professional && <PatientBodyDataCard patientId={p.id} />}
     <div className="nv-metrics np-metrics">
-      <NvMetric label="Adherencia" value={<>{p.adherence}<em>%</em></>} note="Últimos 7 días" icon="target" nvIcon="adherencia" onOpen={() => onNavigate('progreso')}>
-        <div className="np-ruler" aria-hidden="true"><i style={{ left: `${Math.min(100, Math.max(0, p.adherence))}%` }} /><span>0</span><span>50</span><span>100</span></div>
+      <NvMetric label="Peso" value={<>{weight ?? '—'}<em>kg</em></>} note={bodyFailed ? 'No pudimos cargar el peso' : weight === null ? 'Sin peso declarado' : 'Último dato declarado'} icon="target" nvIcon="adherencia" onOpen={() => onNavigate('progreso')}>
+        <div className="np-ruler np-ruler-empty" aria-hidden="true" />
       </NvMetric>
-      <NvMetric label="Comidas revisadas" value={p.journey.reviewedMeals} note={`${p.journey.pendingMeals} pendientes de revisión`} icon="check" nvIcon="diario" tone="coral" onOpen={() => onNavigate('diario')}>
-        <div className="np-review-track" role="img" aria-label={`${p.journey.reviewedMeals} de ${totalMeals} registros revisados`}><i style={{ width: `${reviewed}%` }} /></div>
+      <NvMetric label="Pasos" value="—" note="Sin pasos registrados" icon="check" nvIcon="pasos" tone="coral" onOpen={() => onNavigate('ejercicio')}>
+        <div className="np-review-track np-steps-empty" aria-hidden="true" />
       </NvMetric>
       <NvMetric label="Descanso" value={p.sleep} note="Registro de hoy" icon="moon" nvIcon="descanso" tone="gold" onOpen={() => onNavigate('progreso')}>
         <NvBars label="Horas de sueño" values={p.journey.days.map((d) => ({ label: d.label, value: (d.sleepMinutes ?? 0) / 60 }))} />
@@ -46,17 +63,18 @@ export function PatientOverview({ patient: p, onNavigate, audience = 'patient' }
       </NvMetric>
     </div>
     <div className="np-chart-grid">
-      <NvCard title={professional ? 'Objetivo del paciente' : 'Tu objetivo'} className="np-goal" action={<Icon name="target" size={16} />}>
-        <div className="np-gauge" role="img" aria-label={`Avance del objetivo: ${progress}%`}>
-          <svg viewBox="0 0 244 150" aria-hidden="true"><path className="np-gauge-track" d="M22 122 A100 100 0 0 1 222 122" /><path className="np-gauge-value" d="M22 122 A100 100 0 0 1 222 122" pathLength="100" strokeDasharray={`${progress} 100`} /></svg>
-          <div><strong>{progress}<small>%</small></strong><span>Avance registrado</span></div>
-          <span className="np-gauge-start">0</span><span className="np-gauge-end">100</span>
+      <NvCard title="Datos de peso" className="np-goal" action={<Icon name="target" size={16} />}>
+        <div className="np-gauge" role="img" aria-label={weight === null ? 'Sin peso declarado' : `Peso declarado: ${weight} kg. Sin meta de peso registrada.`}>
+          <span className="np-gauge-source" aria-hidden="true" style={{ maskImage: `url("${weightGauge}")` }} />
+          <span className="np-gauge-source np-gauge-source-left" aria-hidden="true" style={{ maskImage: `url("${weightGauge}")` }} />
+          <div><strong>{weight ?? '—'}<small> kg</small></strong><span>Peso declarado</span></div>
+          <span className="np-gauge-start">—</span><span className="np-gauge-end">—</span>
         </div>
         <div className="np-goal-note"><strong>{p.goal || 'Objetivo por definir'}</strong><p>{professional ? 'Avance del objetivo registrado en la ficha.' : <>Cada pequeño paso cuenta.<br />A tu ritmo, con acompañamiento.</>}</p></div>
       </NvCard>
       <NvCard title="Registro nutricional" className="np-nutrition-card" action={<NvBadge>Hoy</NvBadge>}>
         <div className="np-nutrition">
-          <div className="np-calorie"><Icon name="leaf" size={27} /><strong>{hasNutrition ? <>{p.kcal}<small> kcal</small></> : '—'}</strong><span>{hasNutrition ? 'Comidas revisadas' : 'Sin datos nutricionales'}</span></div>
+          <div className="np-calorie"><img className="np-calorie-source" src={calorieRing} alt="" /><Icon name="leaf" size={27} /><strong>{hasNutrition ? <>{p.kcal}<small> kcal</small></> : '—'}</strong><span>{hasNutrition ? 'Comidas revisadas' : 'Sin datos nutricionales'}</span></div>
           <div className="np-macros">
             <div className="np-macro-heading"><span className="nv-icon-tile"><Icon name={hasNutrition ? 'check' : 'clock'} size={17} /></span><div><strong>{hasNutrition ? professional ? 'Datos revisados' : 'Lo que registraste' : 'Registro pendiente'}</strong><small>{hasNutrition ? 'Distribución energética estimada' : 'Sin valores para calcular'}</small></div></div>
             {(['Proteínas', 'Carbohidratos', 'Grasas'] as const).map((label, i) => <div className="np-macro-row" key={label}>
@@ -65,7 +83,7 @@ export function PatientOverview({ patient: p, onNavigate, audience = 'patient' }
             </div>)}
           </div>
         </div>
-        <p className="np-data-note">{hasNutrition ? 'Solo comidas con datos nutricionales revisados. Sin meta calórica prescrita.' : p.journey.days[p.journey.days.length - 1]?.reviewedMeals ? 'Sin datos nutricionales en las comidas revisadas hoy.' : 'Sin comidas revisadas hoy. No se calcula consumo ni una meta.'}</p>
+
       </NvCard>
     </div>
     <section className="np-followup" aria-label={followupTitle}>
@@ -79,14 +97,13 @@ export function PatientOverview({ patient: p, onNavigate, audience = 'patient' }
     <div className="np-bottom-grid">
     <NvCard title={professional ? 'Plan asignado para hoy' : 'En tu plan de hoy'} className="np-menu-card" action={<NvButton className="nv-ghost" onClick={() => onNavigate('plan')}>Ver plan <Icon name="arrow" size={14} /></NvButton>}>
       <div className="np-plan-grid">{p.todayPlan.slice(0, 2).map((meal) => <button type="button" className="np-plan-meal" key={meal.slot} onClick={() => onNavigate('plan')}><MealThumbnail slot={meal.slot} /><span><NvBadge tone="gold">{meal.slot}</NvBadge><small><Icon name="clock" size={12} />{meal.time}</small></span><strong>{meal.title}</strong></button>)}</div>
-      {!p.todayPlan.length ? <NvState title={professional ? 'Sin plan para hoy' : 'Tu plan está en camino'} description="Todavía no hay comidas publicadas para hoy." /> : <p className="np-data-note">{professional ? 'Imágenes ilustrativas de Plan V, no fotografías de registros del paciente.' : 'Imágenes ilustrativas de Plan V. Seguí las indicaciones de tu plan.'}</p>}
+      {!p.todayPlan.length ? <NvState title={professional ? 'Sin plan para hoy' : 'Tu plan está en camino'} description="Todavía no hay comidas publicadas para hoy." /> : null}
     </NvCard>
-    <NvCard title={professional ? `Conversación con ${p.name}` : 'Tu nutricionista'} className="np-contact-card" action={<Icon name="message" size={16} />}>
-      <div className="nv-professional"><span className="nv-avatar">{professional ? p.initials : 'VT'}</span><div><strong>{professional ? p.name : 'Verónica Trenti'}</strong><small>{professional ? 'Paciente · Plan V' : 'Nutricionista · Plan V'}</small></div></div>
-      {latest && <small className="nv-caption">{latest.from === 'patient' ? p.name : 'Verónica'} · Último mensaje enviado</small>}
-      <p className="nv-message-preview">{latest?.text ?? (professional ? 'Todavía no hay mensajes enviados en este seguimiento.' : 'Los mensajes de tu nutricionista aparecerán acá.')}</p>
-      <NvButton className="nv-soft" onClick={() => onNavigate('mensajes')}>Ver conversación <Icon name="arrow" size={15} /></NvButton>
+    <NvCard title="Ejercicios asignados" className="np-exercise-card" action={<NvButton className="nv-ghost" onClick={() => onNavigate('ejercicio')} aria-label="Ver ejercicio"><Icon name="arrow" size={14} /></NvButton>}>
+      {routine.length ? routine.slice(0, 3).map((item) => <button className="np-routine-item" type="button" key={item.id} onClick={() => onNavigate('ejercicio')}><span className="np-food-photo np-food-placeholder" aria-hidden="true" /><span><strong>{item.name}</strong><small>{item.sets} series · {item.reps} repeticiones</small><NvBadge>{item.category}</NvBadge></span></button>) : <NvState kind={routineFailed ? 'error' : 'empty'} title={routineFailed ? 'No pudimos cargar la rutina' : 'Sin ejercicios asignados'} description={routineFailed ? 'Abrí Ejercicio para volver a cargarla.' : 'Acá aparecerá la rutina cuando una profesional habilitada la publique.'} />}
     </NvCard>
     </div>
+    <details className="np-data-explanation"><summary>Cómo se calculan estos datos</summary><p className="np-data-note">{hasNutrition ? 'Solo comidas con datos nutricionales revisados. Sin meta calórica prescrita.' : p.journey.days[p.journey.days.length - 1]?.reviewedMeals ? 'Sin datos nutricionales en las comidas revisadas hoy.' : 'Sin comidas revisadas hoy. No se calcula consumo ni una meta.'}</p></details>
+    {!professional && <PatientBodyDataCard patientId={p.id} onSaved={() => setRevision((value) => value + 1)} />}
   </div>;
 }

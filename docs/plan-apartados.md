@@ -113,6 +113,12 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 ## B. Diseño, experiencia y movimiento
 
+- **Corrección de Figma y accesos del CRM (2026-10-01):** código/capturas de 24 nodos
+  obtenidos por MCP; Inicio y Ejercicio recompuestos, assets originales y accesos
+  directos a Pacientes, Ficha y Plan. Selección conservada y recorridos locales probados
+  en 1440/390. Rama `codex/figma-crm-funcional`, preparada para PR, aún sin publicar.
+  Registro: [Figma y consultorio funcional](figma-crm-funcional-2026-10-01.md).
+
 - **Lidera:** `ux-architect`. **Apoyo:** `ui-designer`, `whimsy-injector` (movimiento),
   `accessibility-auditor`, `ui-finish-gate-reviewer`.
 - **Qué hay hoy:** las trece pantallas del archivo en escritorio y móvil, más las pantallas

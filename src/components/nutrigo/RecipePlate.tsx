@@ -19,15 +19,8 @@ export function RecipeDishWell({ title, status, url, alt }: { title: string; sta
   }
   const failed = status === 'failed';
   return <figure className="recipe-dish" data-cover={status}>
-    <svg viewBox="0 0 320 200" role="img" aria-label={failed ? `Foto no generada de ${title}` : `Ilustración de revisión de ${title}`}>
-      <rect width="320" height="200" fill="#f3efe6" />
-      <ellipse cx="160" cy="118" rx="108" ry="36" fill="#e7e1d6" />
-      <ellipse cx="160" cy="112" rx="78" ry="28" fill="#f7f4ee" stroke="#d9d1c3" />
-      <circle cx="132" cy="104" r="16" fill="#d98a4a" />
-      <circle cx="168" cy="98" r="18" fill="#6f9a62" />
-      <circle cx="186" cy="116" r="12" fill="#c4a15a" />
-    </svg>
-    <figcaption>{failed ? 'La foto del plato no se generó' : 'Ilustración de revisión · sin foto generada'}</figcaption>
+    <span className="recipe-placeholder" role="img" aria-label={failed ? `Foto no generada de ${title}` : `Sin foto de ${title}`} />
+    <figcaption>{failed ? 'La foto del plato no se generó' : 'Sin foto generada'}</figcaption>
   </figure>;
 }
 
