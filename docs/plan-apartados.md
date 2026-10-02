@@ -119,7 +119,8 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
   con la API de Higgsfield indicada por Facundo; aprobada («Sí, aplicalo») e implementada
   para paciente y nutricionista: cinco etapas, revisión completa, recuperación legacy,
   foto optimizada y accesos reales. 1.116 pruebas aprobadas, TypeScript/build y recorridos
-  1440/390 claros/oscuros comprobados; captura/informe `design-qa.md`. Pendiente PR/publicación.
+  1440/390 claros/oscuros comprobados; captura/informe `design-qa.md`.
+  Integración/publicación registrada en [PR #49](https://github.com/Facu42/plan-v/pull/49).
   Registro: [comprobación y propuesta](verificacion-ia-calorias-onboarding-2026-10-02.md).
 
 - **Corrección de Figma y accesos del CRM (2026-10-01):** código/capturas de 24 nodos

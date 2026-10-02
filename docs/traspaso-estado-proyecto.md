@@ -63,7 +63,8 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
   indicada por Facundo; diseño aprobado («Sí, aplicalo») e implementado en ambos roles.
   Cinco etapas conservan ingresos anteriores; revisión completa y datos corporales separados.
   Accesos profesionales reales; 1.116 pruebas, TypeScript/build y navegador 1440/390 aprobados.
-  Capturas y reporte `design-qa.md`; pendiente PR/publicación. Sin cambios de base/configuración.
+  Capturas y reporte `design-qa.md`; integración/publicación y comprobación final en
+  [PR #49](https://github.com/Facu42/plan-v/pull/49). Sin cambios de base/configuración.
   Rama `codex/onboarding-ia-verificacion`; ver `docs/verificacion-ia-calorias-onboarding-2026-10-02.md`.
 
 - Seguridad, punto 4: prueba con cuatro sesiones reales en Supabase temporal de

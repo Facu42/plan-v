@@ -11,7 +11,7 @@ Base revisada: `980f1e3bf984886220c0fe0939d84f684e320ebd`.
 | Fotos de platos | Implementadas después de aprobar la receta. Usan OpenAI directamente. | Bloqueadas por el resolutor de configuración; OpenAI no figura entre las variables de producción. La clave de Higgsfield local todavía no es un proveedor de la app. |
 | Planes con IA | Borradores, alergias/restricciones y aprobación profesional implementados con OpenRouter/OpenAI. | Bloqueados en producción por el mismo resolutor. No se hizo una generación real paga para esta comprobación. |
 | Calorías y macros | Fórmula fija, datos corporales del paciente y ajustes profesionales; servidor y SQL recalculan. | Cálculo ordinario comprobado; guardar otro borrador oculta la meta confirmada anterior. |
-| Onboarding | Rediseño Higgsfield aprobado e implementado: cinco etapas, reanudación y consentimiento versionado. | Paciente y nutricionista comprobados localmente en escritorio/móvil; detalle y capturas en `design-qa.md`. Publicación pendiente del PR. |
+| Onboarding | Rediseño Higgsfield aprobado e implementado: cinco etapas, reanudación y consentimiento versionado. | Paciente y nutricionista comprobados localmente en escritorio/móvil; detalle y capturas en `design-qa.md`. Estado de integración y publicación en [PR #49](https://github.com/Facu42/plan-v/pull/49). |
 
 El control público de la API devuelve producción, `ai: true` y el SHA revisado. Ese indicador
 lee la configuración completa: no demuestra que el generador funcione. El conector Railway
@@ -104,3 +104,5 @@ Escritorio 1440 × 900 y móvil 390 × 844, temas claro/oscuro, sin desborde hor
 Revisiones `code-reviewer` y `reality-checker` con hallazgos corregidos.
 Capturas y resultados conservados en `design/onboarding/`; informe visual `design-qa.md`.
 Esto no certifica una generación IA en producción ni corrige los fallos de IA/metas anteriores.
+El estado final del despliegue y su comprobación se registra en el
+[PR #49](https://github.com/Facu42/plan-v/pull/49), asociado a esta rama.
