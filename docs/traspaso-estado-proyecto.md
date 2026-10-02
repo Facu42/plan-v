@@ -55,14 +55,18 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
 
 ## Lo pendiente
 
-- Correcciones de IA del 2026-10-02 preparadas en `codex/correcciones-ia`,
-  [PR #50](https://github.com/Facu42/plan-v/pull/50):
+- Correcciones de IA del 2026-10-02 integradas y publicadas por
+  [PR #50](https://github.com/Facu42/plan-v/pull/50), commit `d313a62`:
   configuración, tareas reservadas y vigentes, identidad de recetas, publicación
-  de la copia revisada y recuperación de fotos. Dos migraciones nuevas sin aplicar;
-  necesitan autorización y publicación coordinada. Fotos aún requieren proveedor
-  configurado; no se realizaron llamadas pagas ni cambios de producción.
+  de la copia revisada y recuperación de fotos. Dos migraciones aplicadas mediante
+  MCP en `plan-v-app`, con el «ok» escrito de Facundo; web/API/worker desplegados.
+  Fotos aún requieren proveedor configurado; no se realizaron llamadas pagas ni
+  se contrataron recursos de Supabase. Permisos y ambos roles ficticios comprobados.
   1.144 pruebas generales y 18 de sesiones firmadas/concurrencia aprobadas en
   GitHub, TypeScript/build y controles en verde; navegador ficticio 1440/390.
+  API health/ready 200 y nueva versión confirmada. Asesor: 17 avisos de tablas
+  internas y 120 avisos de funciones ejecutables por cuentas con sesión (incluyen
+  las nuevas); dos avisos anteriores de vistas conservados y documentados.
   Ver `docs/correcciones-ia-2026-10-02.md` para pruebas, despliegue y límites.
 
 - Solicitud del 2026-10-02: comprobar IA de platos/planes, cálculo y rediseñar onboarding.
@@ -93,8 +97,9 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
   El punto 3 está
   clasificado: las 16 tablas están cerradas al acceso directo; 38 pruebas locales
   nuevas lo protegen. Ver `docs/clasificacion-tablas-internas-2026-10-01.md`.
-  Las 34 funciones internas siguen cerradas y las 116 públicas coinciden con la
-  lista actual. Las tres correcciones confirmadas de los puntos 1 y 2 están
+  El 1/10 se verificaron las 34 funciones internas cerradas y las 116 públicas
+  entonces existentes; la ampliación de IA del 2/10 se registra arriba.
+  Las tres correcciones confirmadas de los puntos 1 y 2 están
   aplicadas; evidencia anterior y posterior en los informes de funciones sensibles.
 
 - Abiertos sin juntar: #27 base de datos (63 índices; en verde, necesita su frase "aplicá índices en la
