@@ -1,0 +1,10 @@
+[
+  {
+    "label": "cancel-invite-on-patient-change",
+    "passed": true
+  },
+  {
+    "label": "cancel-invite-on-history",
+    "passed": true
+  }
+]

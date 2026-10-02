@@ -113,6 +113,16 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 ## B. Diseño, experiencia y movimiento
 
+- **Comprobación de IA, calorías y onboarding (2026-10-02):** 86 pruebas focalizadas
+  aprobadas, con bloqueo de configuración IA y pérdida de meta al guardar borrador
+  reproducidos sin proveedores. Propuesta de onboarding paciente/profesional generada
+  con la API de Higgsfield indicada por Facundo; aprobada («Sí, aplicalo») e implementada
+  para paciente y nutricionista: cinco etapas, revisión completa, recuperación legacy,
+  foto optimizada y accesos reales. 1.116 pruebas aprobadas, TypeScript/build y recorridos
+  1440/390 claros/oscuros comprobados; captura/informe `design-qa.md`.
+  Integración/publicación registrada en [PR #49](https://github.com/Facu42/plan-v/pull/49).
+  Registro: [comprobación y propuesta](verificacion-ia-calorias-onboarding-2026-10-02.md).
+
 - **Corrección de Figma y accesos del CRM (2026-10-01):** código/capturas de 24 nodos
   obtenidos por MCP. Ampliado el 2026-10-02: frontend de las doce pantallas del paciente,
   sus móviles/detalles conectado a datos reales; 81 SVG originales locales. Accesos

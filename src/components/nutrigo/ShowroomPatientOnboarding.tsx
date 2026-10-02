@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { api, isAbortError } from '../../api/client';
 import { Icon, Mark } from '../shared/Icon';
 import { NvButton } from './primitives';
-import { PatientBodyDataCard } from './ShowroomNutritionTarget';
+import welcomeDish from '../../assets/onboarding/welcome-dish.webp';
 import type { ShowroomPatient } from './showroom-model';
 import { isIntakeConflict } from './intake-save-queue';
 import { createIntakeSession, type IntakeSession } from './intake-session';
@@ -19,6 +19,7 @@ import {
   nextOnboardingStep,
   normalizePreferredName,
   ONBOARDING_STEPS,
+  onboardingReview,
   prevOnboardingStep,
   resumeOnboardingStep,
   stepFieldError,
@@ -37,15 +38,12 @@ const HEALTH: Array<{ id: HealthChoice; label: string }> = [
   { id: 'reported', label: 'Sí' },
 ];
 const STEP_COPY: Record<OnboardingStep, { eyebrow: string; title: string; lead: string }> = {
-  invite: { eyebrow: 'Invitación del consultorio', title: 'Tu nutricionista te espera en Plan V', lead: 'Este espacio es el acompañamiento con tu profesional, no una app genérica de dietas.' },
-  how: { eyebrow: 'Cómo funciona', title: 'Tres cosas, con claridad', lead: 'Vas a ver sólo lo que tu nutricionista publica. Nada se inventa para rellenar la pantalla.' },
-  privacy: { eyebrow: 'Privacidad', title: 'Qué ve tu nutricionista', lead: 'Vos elegís qué compartir. Las fotos corporales y los estudios son opcionales.' },
-  profile: { eyebrow: 'Sobre vos', title: 'Confirmá cómo te llamamos', lead: 'El objetivo lo publica tu nutricionista. Acá no se edita ni se diagnostica.' },
-  intent: { eyebrow: 'Tu pedido', title: '¿En qué te gustaría que te acompañemos?', lead: 'Es tu intención, no una indicación profesional. Podés dejarlo breve.' },
-  allergies: { eyebrow: 'Alimentos', title: '¿Hay algo que necesites evitar?', lead: 'Vacío no significa “no tengo”. Elegí No lo sé, No tengo o Sí.' },
-  habits: { eyebrow: 'Opcional', title: 'Un primer registro, si querés', lead: 'Agua, sueño y energía son autodeclarados. Podés saltearlos y cargarlos después.' },
-  review: { eyebrow: 'Revisar', title: 'Revisá lo que vas a compartir', lead: 'Al enviar, Verónica recibe tu declaración. Sus notas no aparecen acá.' },
-  ready: { eyebrow: 'Recibido', title: 'Ya estás en tu espacio', lead: 'Empezá por el plan de hoy o registrá una comida. Verónica va a revisar lo que enviaste.' },
+  invite: { eyebrow: 'Tu espacio en Plan V', title: 'Bienvenida a tu espacio', lead: 'Tu plan, tus registros y tu nutricionista en un solo lugar.' },
+  privacy: { eyebrow: 'Privacidad', title: 'Vos elegís qué compartir', lead: 'Tu nutricionista ve lo que registrás para acompañarte. Las fotos corporales y los estudios son opcionales.' },
+  profile: { eyebrow: 'Sobre vos', title: 'Contanos sobre vos', lead: 'Empecemos por cómo preferís que te llamemos y qué te gustaría trabajar.' },
+  allergies: { eyebrow: 'Alimentos y hábitos', title: 'Tu día a día también cuenta', lead: 'Contanos si hay alimentos que evitás. Los hábitos son opcionales: podés completarlos después.' },
+  review: { eyebrow: 'Revisar y enviar', title: 'Revisá lo que vas a compartir', lead: 'Tu nutricionista recibe esta información para revisarla con vos.' },
+  ready: { eyebrow: 'Información recibida', title: 'Ya estás en tu espacio', lead: 'Tu nutricionista va a revisar lo que enviaste. Podés consultar tu plan o registrar una comida.' },
 };
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error' | 'unavailable';
@@ -95,7 +93,7 @@ export function ShowroomPatientOnboarding({
   const previous = prevOnboardingStep(step);
   const finished = finishOnboarding(draft);
   const care = careConsentFromCatalog(catalog);
-  const stepNumber = ONBOARDING_STEPS.indexOf(step) + 1;
+  const stepNumber = ONBOARDING_STEPS.findIndex(id => id === step) + 1;
   const busy = navigating || submitting || consentBusy;
   const disabled = !loaded || recoverNeeded || busy || awaitingReceipt;
 
@@ -251,15 +249,22 @@ export function ShowroomPatientOnboarding({
             : saveState === 'error' ? 'Guardado sin confirmar'
               : 'Cambios pendientes de guardar';
 
-  return <section className="nvon" aria-label="Ingreso del paciente">
+  return <section className={`nvon${step === 'invite' ? ' nvon-welcome' : ''}`} aria-label="Ingreso del paciente">
     <header className="nvon-top">
       <Mark />
       <span>Plan V</span>
-      <p className="nvon-progress" aria-live="polite">Paso {stepNumber} de {ONBOARDING_STEPS.length}</p>
-      <ol aria-label="Pasos del ingreso">{ONBOARDING_STEPS.map((id) => <li key={id} aria-current={id === step ? 'step' : undefined} />)}</ol>
+      <p className="nvon-progress" aria-live="polite">{step === 'ready' ? 'Ingreso completo' : `${stepNumber} de ${ONBOARDING_STEPS.length}`}</p>
+      <ol aria-label="Pasos del ingreso">{ONBOARDING_STEPS.map((id, index) => <li key={id} aria-current={id === step ? 'step' : undefined}><span className="nvon-sr">{index + 1}. {STEP_COPY[id].eyebrow}</span></li>)}</ol>
       <NvButton className="nv-ghost nv-theme" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} onClick={onToggleTheme}><Icon name={darkMode ? 'sun' : 'moon'} size={18} /></NvButton>
     </header>
 
+    <div className="nvon-body">
+    {step === 'invite' && <aside className="nvon-photo">
+      <img src={welcomeDish} alt="Plato con garbanzos, brócoli, zanahorias y hojas verdes" width={960} height={960} fetchPriority="high" />
+      <h2>Tu bienestar, acompañado</h2>
+      <p>Un espacio para avanzar a tu ritmo.</p>
+    </aside>}
+    <div className="nvon-panel">
     <div className="nvon-card">
       <p className="nvon-eyebrow">{copy.eyebrow}</p>
       <h1 ref={titleRef} tabIndex={-1}>{copy.title}</h1>
@@ -275,16 +280,10 @@ export function ShowroomPatientOnboarding({
       </div>}
       <fieldset className="nvon-fields" disabled={disabled}>
 
-      {step === 'invite' && <div className="nvon-invite">
-        <span className="nv-avatar">VT</span>
-        <div><strong>{context.nutritionist}</strong><small>Nutricionista · Plan V</small></div>
-        <p>Invitó a <strong>{context.fullName}</strong> a seguir el plan desde acá.</p>
-      </div>}
-
-      {step === 'how' && <ul className="nvon-points">
-        <li><Icon name="list" size={18} /><div><strong>Plan publicado</strong><span>Indicaciones de la semana, cuando tu nutricionista las deje listas.</span></div></li>
-        <li><Icon name="history" size={18} /><div><strong>Diario con revisión</strong><span>Registrás comidas. Los valores cuentan cuando ella los confirma o ajusta.</span></div></li>
-        <li><Icon name="message" size={18} /><div><strong>Mensajes del consultorio</strong><span>Un hilo con Verónica. No hay chatbot clínico ni otros pacientes.</span></div></li>
+      {step === 'invite' && <ul className="nvon-points nvon-benefits">
+        <li><Icon name="list" size={20} /><div><strong>Plan</strong><span>Tus comidas e indicaciones de la semana.</span></div></li>
+        <li><Icon name="history" size={20} /><div><strong>Diario</strong><span>Tus registros, con revisión profesional.</span></div></li>
+        <li><Icon name="message" size={20} /><div><strong>Mensajes</strong><span>Contacto directo con tu nutricionista.</span></div></li>
       </ul>}
 
       {step === 'privacy' && <div className="nvon-privacy">
@@ -293,7 +292,6 @@ export function ShowroomPatientOnboarding({
           <li>No ves notas internas, briefs ni el resto de la agenda del consultorio.</li>
           <li>Peso, medidas y fotos corporales no se piden en este ingreso.</li>
         </ul>
-        <p className="nvon-consent-text">{care?.text ?? 'Autorizo a mi nutricionista a ver lo que registre para el acompañamiento.'}</p>
         <label>
           <input
             type="checkbox"
@@ -301,8 +299,10 @@ export function ShowroomPatientOnboarding({
             disabled={!care || disabled}
             onChange={(event) => void grantCare(event.target.checked)}
           />
-          Acepto la relación de atención con {context.nutritionist}. No está preseleccionado.
+          Acepto compartir mis registros con mi nutricionista para el acompañamiento.
         </label>
+        <details className="nvon-consent-details"><summary>Leer el consentimiento de atención</summary><p>{care?.text ?? 'Estamos recuperando el texto del consentimiento.'}</p></details>
+        <p className="nvon-help">Podés revisar o retirar el consentimiento en Tus datos, desde el menú de tu cuenta.</p>
       </div>}
 
       {step === 'profile' && <div className="nvon-profile">
@@ -315,6 +315,9 @@ export function ShowroomPatientOnboarding({
             aria-invalid={Boolean(fieldError)}
           />
         </label>
+        <div className="nvon-intent"><label>¿Qué te gustaría trabajar? <small>Opcional</small>
+          <textarea value={draft.patientIntent} onChange={event => setDraft(current => ({ ...current, patientIntent: event.target.value }))} maxLength={500} rows={3} placeholder="Contanos con tus palabras…" />
+        </label><p className="nvon-help">Es tu pedido. El objetivo del plan lo define tu nutricionista.</p></div>
         <article>
           <small>Objetivo publicado</small>
           <p>{context.goal}</p>
@@ -325,18 +328,7 @@ export function ShowroomPatientOnboarding({
         </article>}
       </div>}
 
-      {step === 'intent' && <div className="nvon-intent">
-        <label>Contame con tus palabras
-          <textarea
-            value={draft.patientIntent}
-            onChange={(event) => setDraft((current) => ({ ...current, patientIntent: event.target.value }))}
-            maxLength={500}
-            rows={4}
-          />
-        </label>
-      </div>}
-
-      {step === 'allergies' && <div className="nvon-health">
+      {step === 'allergies' && <><div className="nvon-health">
         <fieldset>
           <legend>Alimentos a evitar</legend>
           <div>{HEALTH.map((option) => (
@@ -359,46 +351,41 @@ export function ShowroomPatientOnboarding({
             </label>
           )}
         </fieldset>
-      </div>}
-
-      {step === 'habits' && <div className="nvon-habits">
+      </div><div className="nvon-habits">
+        <h2>Un primer registro <small>Opcional</small></h2>
         <fieldset>
           <legend>Agua de hoy</legend>
-          <div>{[0, 2, 4, 6, 8].map((value) => <button type="button" key={value} aria-pressed={draft.hydration === value} onClick={() => setDraft((current) => ({ ...current, hydration: value }))}>{value} vasos</button>)}</div>
+          <div>{[0, 2, 4, 6, 8].map((value) => <button type="button" key={value} aria-pressed={draft.hydration === value} onClick={() => setDraft((current) => ({ ...current, hydration: current.hydration === value ? null : value }))}>{value} vasos</button>)}</div>
         </fieldset>
         <fieldset>
           <legend>Sueño de anoche</legend>
-          <div>{[5, 6, 7, 8, 9].map((value) => <button type="button" key={value} aria-pressed={draft.sleepHours === value} onClick={() => setDraft((current) => ({ ...current, sleepHours: value }))}>{value} h</button>)}</div>
+          <div>{[5, 6, 7, 8, 9].map((value) => <button type="button" key={value} aria-pressed={draft.sleepHours === value} onClick={() => setDraft((current) => ({ ...current, sleepHours: current.sleepHours === value ? null : value }))}>{value} h</button>)}</div>
         </fieldset>
         <fieldset>
           <legend>Energía percibida</legend>
-          <div>{ENERGY.map((value) => <button type="button" key={value} aria-pressed={draft.energy === value} onClick={() => setDraft((current) => ({ ...current, energy: value }))}>{value}</button>)}</div>
+          <div>{ENERGY.map((value) => <button type="button" key={value} aria-pressed={draft.energy === value} onClick={() => setDraft((current) => ({ ...current, energy: current.energy === value ? null : value }))}>{value}</button>)}</div>
         </fieldset>
         <p>Si lo salteás, no se inventa un valor. Cero vasos es distinto de no responder.</p>
-      </div>}
+      </div></>}
 
-      {step === 'review' && <ul className="nvon-points">
-        <li><Icon name="check" size={18} /><div><strong>{normalizePreferredName(draft.preferredName) || 'Nombre pendiente'}</strong><span>{draft.consentSharing ? 'Consentimiento de atención otorgado.' : 'Falta el consentimiento de atención.'}</span></div></li>
-        <li><Icon name="list" size={18} /><div><strong>Alimentos</strong><span>{draft.allergiesState === 'reported' ? draft.allergyItems : draft.allergiesState === 'none' ? 'Declaraste que no tenés alimentos a evitar.' : 'Todavía no lo sabés o preferís hablarlo.'}</span></div></li>
-        <li><Icon name="message" size={18} /><div><strong>Tu pedido</strong><span>{draft.patientIntent.trim() || 'Sin texto adicional para este ingreso.'}</span></div></li>
-      </ul>}
+      {step === 'review' && <dl className="nvon-review">{onboardingReview(draft).map(row => <div key={row.title}><dt>{row.title}</dt><dd>{row.value}</dd></div>)}</dl>}
 
       {step === 'ready' && <ul className="nvon-points">
-        <li><Icon name="check" size={18} /><div><strong>Hola, {normalizePreferredName(draft.preferredName)}</strong><span>{context.hasPublishedPlan ? 'Ya tenés un plan de la semana para consultar.' : 'Cuando Verónica publique el plan, aparece en tu inicio.'}</span></div></li>
-        <li><Icon name="calendar" size={18} /><div><strong>{context.appointmentWhen ?? 'Consulta por coordinar'}</strong><span>Recibimos tu información. Verónica la va a revisar; no hay un plan inventado.</span></div></li>
+        <li><Icon name="check" size={18} /><div><strong>Hola, {normalizePreferredName(draft.preferredName)}</strong><span>{context.hasPublishedPlan ? 'Ya tenés un plan de la semana para consultar.' : 'Cuando tu nutricionista publique el plan, aparece en tu inicio.'}</span></div></li>
+        <li><Icon name="calendar" size={18} /><div><strong>{context.appointmentWhen ?? 'Consulta por coordinar'}</strong><span>Tu información ya está en el consultorio para su revisión.</span></div></li>
       </ul>}
-      {step === 'ready' && <PatientBodyDataCard patientId={patient.id} forceOpen />}
+      {step === 'ready' && <p className="nvon-help">Si querés cargar peso y medidas para el cálculo del plan, podés hacerlo después en Inicio. Es un formulario separado y opcional.</p>}
       </fieldset>
     </div>
 
     <footer className="nvon-actions">
-      {previous && step !== 'ready' ? <NvButton className="nv-ghost" disabled={disabled} onClick={() => void moveTo(previous)}>Atrás</NvButton> : <NvButton className="nv-ghost" disabled={busy || (loaded && recoverNeeded)} onClick={() => void exit()}>{step === 'ready' ? 'Cerrar' : 'Salir'}</NvButton>}
-      {step === 'habits' && next && <NvButton className="nv-ghost" disabled={disabled} onClick={() => void moveTo(next)}>Saltear</NvButton>}
+      {previous && step !== 'ready' ? <NvButton className="nv-ghost" disabled={disabled} onClick={() => void moveTo(previous)}>Atrás</NvButton> : <NvButton className="nv-ghost" disabled={busy || (loaded && recoverNeeded)} onClick={() => void exit()}>{step === 'ready' ? 'Cerrar' : 'Continuar después'}</NvButton>}
       {step === 'review' && <NvButton onClick={() => void submit()} disabled={!loaded || recoverNeeded || !canContinue || busy}>{submitting ? 'Enviando…' : awaitingReceipt ? 'Confirmar envío' : 'Enviar a mi nutricionista'}</NvButton>}
       {step === 'ready' && finished ? <>
-        <NvButton className="nv-ghost" onClick={() => onFinished('diario', finished)}>Registrar comida</NvButton>
         <NvButton onClick={() => onFinished(context.hasPublishedPlan ? 'plan' : 'inicio', finished)}>{context.hasPublishedPlan ? 'Ver mi plan' : 'Ir al inicio'}</NvButton>
-      </> : step !== 'review' && step !== 'ready' ? <NvButton onClick={() => void goNext()} disabled={disabled || !canContinue}>{step === 'invite' ? 'Continuar' : 'Siguiente'}</NvButton> : null}
+      </> : step !== 'review' && step !== 'ready' ? <NvButton onClick={() => void goNext()} disabled={disabled || !canContinue}>{step === 'invite' ? 'Comenzar' : 'Continuar'}</NvButton> : null}
     </footer>
+    </div>
+    </div>
   </section>;
 }

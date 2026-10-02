@@ -182,10 +182,14 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
   </div>;
 }
 
-export function ShowroomPatients({ patients, query, initialFilter = 'active', onChanged, onFollow, onRecord, onPlan }: {
+export type DirectoryAction = 'create' | { share: { name: string; invite: PatientInvite } };
+
+export function ShowroomPatients({ patients, query, initialFilter = 'active', initialAction, onActionConsumed, onChanged, onFollow, onRecord, onPlan }: {
   patients: Patient[];
   query: string;
   initialFilter?: PatientDirectoryFilter;
+  initialAction?: DirectoryAction | null;
+  onActionConsumed?: () => void;
   onChanged: (patient: Patient) => void;
   onFollow: (id: string) => void;
   onRecord?: (id: string) => void;
@@ -234,6 +238,17 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', on
       setBusyId(null);
     }
   };
+
+  useEffect(() => {
+    if (!initialAction) return;
+    if (initialAction === 'create') {
+      setCreating(true);
+      onActionConsumed?.();
+      return;
+    }
+    setShare(initialAction.share);
+    onActionConsumed?.();
+  }, [initialAction]);
 
   return <>
     <dl className="nv-directory-summary" aria-label="Resumen del directorio">

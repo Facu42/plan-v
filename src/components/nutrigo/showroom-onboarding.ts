@@ -2,16 +2,12 @@ import { ApiError } from '../../api/client';
 
 export const ONBOARDING_STEPS = [
   'invite',
-  'how',
   'privacy',
   'profile',
-  'intent',
   'allergies',
-  'habits',
   'review',
-  'ready',
 ] as const;
-export type OnboardingStep = typeof ONBOARDING_STEPS[number];
+export type OnboardingStep = typeof ONBOARDING_STEPS[number] | 'ready';
 export type IntakeServerStep = 'start' | 'privacy' | 'profile' | 'intent' | 'allergies' | 'habits' | 'review';
 export type HealthChoice = 'unknown' | 'none' | 'reported';
 
@@ -81,7 +77,7 @@ export function buildOnboardingContext(patient: {
   goal: string;
   appointment: { when: string } | null;
   weekPlan: unknown[];
-}, nutritionist = 'Verónica Trenti'): OnboardingContext {
+}, nutritionist = 'Tu nutricionista'): OnboardingContext {
   return {
     patientId: patient.id,
     fullName: patient.name,
@@ -98,7 +94,7 @@ export function createOnboardingDraft(context: OnboardingContext): OnboardingDra
 }
 
 export function onboardingStepIndex(step: OnboardingStep) {
-  return ONBOARDING_STEPS.indexOf(step);
+  return ONBOARDING_STEPS.findIndex(id => id === step);
 }
 
 export function nextOnboardingStep(step: OnboardingStep): OnboardingStep | null {
@@ -141,7 +137,7 @@ export function draftToIntakePayload(draft: OnboardingDraft) {
 }
 
 export function intakeStepForUi(step: OnboardingStep): IntakeServerStep {
-  if (step === 'invite' || step === 'how') return 'start';
+  if (step === 'invite') return 'start';
   if (step === 'ready') return 'review';
   return step;
 }
@@ -151,9 +147,9 @@ export function resumeOnboardingStep(status: string, serverStep?: string): Onboa
   switch (serverStep) {
     case 'privacy': return 'privacy';
     case 'profile': return 'profile';
-    case 'intent': return 'intent';
+    case 'intent': return 'profile';
     case 'allergies': return 'allergies';
-    case 'habits': return 'habits';
+    case 'habits': return 'allergies';
     case 'review': return 'review';
     default: return 'invite';
   }
@@ -225,6 +221,23 @@ export function finishOnboarding(draft: OnboardingDraft): OnboardingFinish | nul
 
 export function careConsentFromCatalog(catalog: ConsentCatalogEntry[]): ConsentCatalogEntry | undefined {
   return catalog.find((entry) => entry.purpose === 'care_relationship');
+}
+
+/** La revisión muestra también los campos opcionales y distingue cero de no responder. */
+export function onboardingReview(draft: OnboardingDraft) {
+  const fact = (state: HealthChoice, items: string) => state === 'reported'
+    ? parseDeclaredItems(items).join(', ')
+    : state === 'none' ? 'Declaraste que no tenés.' : 'No lo sé / por conversar.';
+  return [
+    { title: 'Nombre preferido', value: normalizePreferredName(draft.preferredName) },
+    { title: 'Consentimiento de atención', value: draft.consentSharing ? 'Otorgado.' : 'Pendiente.' },
+    { title: 'Tu pedido', value: draft.patientIntent.trim() || 'Sin pedido adicional.' },
+    { title: 'Alimentos a evitar', value: fact(draft.allergiesState, draft.allergyItems) },
+    { title: 'Otras restricciones', value: fact(draft.restrictionsState, draft.restrictionItems) },
+    { title: 'Agua de hoy', value: draft.hydration === null ? 'Sin responder.' : `${draft.hydration} vasos` },
+    { title: 'Sueño de anoche', value: draft.sleepHours === null ? 'Sin responder.' : `${draft.sleepHours} h` },
+    { title: 'Energía percibida', value: draft.energy ?? 'Sin responder.' },
+  ];
 }
 
 export function isPersistUnavailable(error: unknown): boolean {
