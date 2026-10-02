@@ -55,11 +55,14 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
 
 ## Lo pendiente
 
-- Correcciones de IA del 2026-10-02 preparadas en `codex/correcciones-ia`:
+- Correcciones de IA del 2026-10-02 preparadas en `codex/correcciones-ia`,
+  [PR #50](https://github.com/Facu42/plan-v/pull/50):
   configuración, tareas reservadas y vigentes, identidad de recetas, publicación
   de la copia revisada y recuperación de fotos. Dos migraciones nuevas sin aplicar;
   necesitan autorización y publicación coordinada. Fotos aún requieren proveedor
   configurado; no se realizaron llamadas pagas ni cambios de producción.
+  1.144 pruebas generales y 18 de sesiones firmadas/concurrencia aprobadas en
+  GitHub, TypeScript/build y controles en verde; navegador ficticio 1440/390.
   Ver `docs/correcciones-ia-2026-10-02.md` para pruebas, despliegue y límites.
 
 - Solicitud del 2026-10-02: comprobar IA de platos/planes, cálculo y rediseñar onboarding.

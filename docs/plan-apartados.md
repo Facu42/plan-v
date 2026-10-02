@@ -117,7 +117,9 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
   vigente, edición de recetas sin duplicados, publicación de la copia revisada y
   reintento de foto sin republicar. Preparadas dos migraciones; producción y
   configuración del proveedor pendientes de autorización. Pruebas y alcance en
-  [correcciones de IA](correcciones-ia-2026-10-02.md).
+  [correcciones de IA](correcciones-ia-2026-10-02.md), [PR #50](https://github.com/Facu42/plan-v/pull/50).
+  1.144 pruebas generales y 18 de sesiones/concurrencia aprobadas en GitHub;
+  navegador local ficticio 1440/390 y controles aprobados.
 
 - **Comprobación de IA, calorías y onboarding (2026-10-02):** 86 pruebas focalizadas
   aprobadas, con bloqueo de configuración IA y pérdida de meta al guardar borrador
