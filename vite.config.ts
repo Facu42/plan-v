@@ -1,6 +1,26 @@
+import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 
+// Páginas públicas aparte: /nutricionistas (landing.html) y /pacientes (pacientes.html).
+const PUBLIC_ROUTES: Record<string, string> = { '/nutricionistas': '/landing.html', '/pacientes': '/pacientes.html' };
+const landingDevRoute = {
+  name: 'plan-v-landing-route',
+  configureServer(server: { middlewares: { use: (fn: (req: { url?: string }, res: unknown, next: () => void) => void) => void } }) {
+    server.middlewares.use((req, _res, next) => {
+      const path = req.url?.split('?')[0] ?? '';
+      if (PUBLIC_ROUTES[path]) req.url = PUBLIC_ROUTES[path];
+      next();
+    });
+  },
+};
+
 export default defineConfig({
+  plugins: [landingDevRoute],
+  build: {
+    rollupOptions: {
+      input: { main: resolve(__dirname, 'index.html'), landing: resolve(__dirname, 'landing.html'), pacientes: resolve(__dirname, 'pacientes.html') },
+    },
+  },
   server: {
     host: true,
     port: 5173,

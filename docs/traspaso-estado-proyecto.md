@@ -96,6 +96,15 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
    con Gmail llegan a la misma casilla). La primera vez pide aceptar términos ("Antes de seguir").
    Para ver el primer uso de una nutricionista vacía, crear otra desde la pestaña de altas ("Crear con clave").
 
+## Páginas públicas y sistema de diseño (borrador, PR 45)
+
+- Direcciones: `/nutricionistas` (`landing.html`) y `/pacientes` (`pacientes.html`, para que la nutricionista la comparta). Páginas aparte: no tocan la entrada ni la app. Rutas en `vercel.json`, `vite.config.ts` y la prueba `server/ops/pv30.test.ts`.
+- Sistema de diseño de las páginas públicas: `docs/sistema-de-diseno-publico.md` (y `.html` para verlo), con las variables en `src/landing/tokens.css`. Los colores son los del logo. Reemplaza la paleta de la guía de redes (`docs/redes`). La app no lo usa.
+- Movimiento como el pin y el video de referencia; con "reducir movimiento" queda quieta.
+- Fotos ilustrativas generadas con IA (API de Higgsfield, script fuera del repo). La única persona real es Verónica Trenti, cuya autorización escrita falta. El pie de cada página lo aclara.
+- Por decidir: destino del botón principal (hoy `/`), precio (no se muestra), testimonios (no hay).
+- No se junta a `main` sin la frase "publicalo".
+
 ## Cómo se registra
 
 - Cada tema anota lo avanzado en su archivo de `docs/` (arriba) o en `docs/plan-apartados.md`.
