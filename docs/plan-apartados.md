@@ -115,8 +115,10 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 - **Correcciones de IA (2026-10-02):** configuración, tareas con reserva y contexto
   vigente, edición de recetas sin duplicados, publicación de la copia revisada y
-  reintento de foto sin republicar. Preparadas dos migraciones; producción y
-  configuración del proveedor pendientes de autorización. Pruebas y alcance en
+  reintento de foto sin republicar. Dos migraciones aplicadas y PR #50 publicado
+  con autorización escrita de Facundo; configuración del proveedor de imágenes
+  aún pendiente. Permisos, health/ready y ambos roles ficticios comprobados en
+  producción, sin llamadas pagas ni recursos de Supabase nuevos. Pruebas y alcance en
   [correcciones de IA](correcciones-ia-2026-10-02.md), [PR #50](https://github.com/Facu42/plan-v/pull/50).
   1.144 pruebas generales y 18 de sesiones/concurrencia aprobadas en GitHub;
   navegador local ficticio 1440/390 y controles aprobados.

@@ -1,7 +1,7 @@
 # Correcciones de IA (2026-10-02)
 
 Continuación de [la auditoría de IA, calorías y onboarding](verificacion-ia-calorias-onboarding-2026-10-02.md), a pedido de Facundo: «seguí con los pendientes de correcciones de IA».
-Rama `codex/correcciones-ia`, [PR #50](https://github.com/Facu42/plan-v/pull/50). Cambios preparados; todavía no aplicados a producción.
+Rama `codex/correcciones-ia`, [PR #50](https://github.com/Facu42/plan-v/pull/50). Integrado y publicado el 2026-10-02, con las dos migraciones aplicadas tras el OK escrito de Facundo.
 
 ## Qué cambia
 
@@ -32,16 +32,28 @@ GitHub verificó el código `ba599b1`: [CI general aprobado](https://github.com/
 
 El límite mensual de tokens existente sigue siendo una estimación para admisión; no equivale a un tope de facturación del proveedor. No se afirma que la IA clínica ni las imágenes funcionen de punta a punta en producción a partir de estas simulaciones.
 
-## Base y publicación pendientes
+## Base y publicación aplicadas
 
-Dos migraciones nuevas, creadas con la CLI de Supabase y todavía sin aplicar:
+Dos migraciones creadas con la CLI de Supabase y aplicadas mediante el MCP al proyecto existente `plan-v-app`:
 
 1. `20261002165327_ai_cover_reservations.sql`: tabla interna de reservas de portada, funciones autorizadas para reservar/finalizar y publicación del plan revisado. La tabla tiene RLS y no permite lectura ni escritura directa a visitantes o usuarias; conserva los permisos necesarios del servidor.
 2. `20261002165527_harden_ai_job_execution.sql`: reserva de ejecución, vencimiento, comprobantes de ficha/consentimiento y cola atómica. Cambia el protocolo de finalización para exigir la reserva. Marca como fallidas las tareas activas previas; las propuestas antiguas sin comprobantes deben generarse nuevamente antes de aplicarse.
 
 La segunda migración y la nueva API deben publicarse coordinadas: entre la migración y el despliegue la API anterior no puede finalizar tareas con el protocolo nuevo. Preparar el PR aprobado y el despliegue antes de aplicar; evitar generar propuestas en esa ventana. Aplicar primero la migración de portadas, luego la de tareas e integrar inmediatamente el PR para desplegar web/API/worker. Comprobar versión desplegada, estado de migraciones, permisos y los recorridos con cuentas ficticias. Si hay un problema, mantener cerrada la generación y corregir hacia adelante; volver a la API anterior sola no revierte el protocolo de la base.
 
-Hace falta el OK escrito de Facundo para esas dos migraciones y la publicación coordinada, según [regla 4 del proyecto](agentes/reglas-plan-v.md). No se tocó producción, no se contrataron recursos de Supabase y no se consumieron créditos de generación durante estas correcciones.
+Facundo respondió «ok» a la autorización concreta para aplicar estas dos migraciones y publicar el PR #50. Se aplicaron primero las reservas de fotos y después las tareas; el PR se integró inmediatamente. No se cambiaron credenciales ni servicios, no se contrataron recursos de Supabase y no se consumieron créditos de generación.
+
+### Comprobación en producción
+
+- Supabase registró `ai_cover_reservations` como `20261002200412` y `harden_ai_job_execution` como `20261002200418`. El MCP asigna la hora de aplicación; corresponden a los archivos locales `20261002165327` y `20261002165527` respectivamente. Antes de aplicar había cero tareas de IA activas. Las cuatro columnas de reserva/contexto están presentes.
+- El PR #50 se integró a las 20:04:22 UTC, commit `d313a62e50175c5c5202ced24713ff8ceb6cd4e8`. Vercel `dpl_4DvQHLo7WyTe5xRardLDSALnYafX` quedó READY en producción con el alias público y ese commit. Railway API `f4409a48-170a-4c64-b004-16c44ea61898` y worker `1e6432a3-2bbd-4ea3-a2d1-f11b495667fb` quedaron SUCCESS con el mismo commit.
+- [CI de main](https://github.com/Facu42/plan-v/actions/runs/37058215575) y [sesiones/concurrencia de main](https://github.com/Facu42/plan-v/actions/runs/37058215561) aprobados. La API devuelve health/ready 200, Supabase activo, worker externo y el commit integrado.
+- La tabla de reservas tiene RLS y niega acceso directo tanto a visitantes como a usuarias. Las cuatro funciones nuevas niegan ejecución a visitantes y permiten a sesiones autenticadas pasar por su autorización interna.
+- El asesor conserva las dos advertencias de vistas ya documentadas. Sus avisos de tablas internas pasan de 16 a 17 por `recipe_cover_requests`, y los de funciones autenticadas de 116 a 120 por las cuatro entradas nuevas verificadas. Son aumentos esperados, no una apertura directa: permisos comprobados y pruebas de aislamiento/concurrencia aprobadas. Referencias del asesor: [tabla interna sin políticas](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy), [función con autorización interna](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable) y [vistas anteriores](https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view).
+- Navegador gstack con las dos cuentas ficticias entregadas por Facundo: ingreso profesional y de paciente, lectura de planes 200 en ambos roles, catálogo profesional 200, catálogo/foto profesional rechazados con 403 para la paciente y catálogo sin sesión rechazado con 401. Un período de IA excesivo devuelve 400 antes de generar. No se crearon tareas, recetas, fotos, planes ni consentimientos en esta comprobación; no se enviaron datos de salud a proveedores.
+- La API publicada informa `image_generation: false`. Confirma que las fotos reales siguen deshabilitadas y que el despliegue no habilitó un proveedor de imágenes. No se hizo una generación real de texto ni de imagen.
+
+Resultados sin credenciales ni datos de salud: [API profesional](evidencias/ia-2026-10-02/ia-deploy-api-results.json), [permisos de paciente](evidencias/ia-2026-10-02/ia-deploy-patient-results.json) y [clasificación del asesor](evidencias/ia-2026-10-02/ia-deploy-security-results.json).
 
 ## Lo que sigue abierto
 
