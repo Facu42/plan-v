@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es-AR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sistema de diseño de Plan V (páginas públicas)</title>
+<style>
+:root{--deep:#083a30;--green:#23955d;--leaf:#62aa66;--gold:#f9b343;--goldsoft:#fcd58e;--coral:#f87d6d;--apricot:#f5a067;--cream:#f9f6ee;--mist:#e3efe4;--soft:#3f5f56}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--deep);font-family:Poppins,system-ui,sans-serif;line-height:1.5;padding:clamp(20px,5vw,64px)}
+h1{font-size:clamp(32px,5vw,56px);margin:0 0 8px;font-weight:600;letter-spacing:-.02em}h1 em{color:var(--green);font-weight:500}
+h2{font-size:24px;margin:56px 0 16px;font-weight:600}p{color:var(--soft);max-width:70ch}
+.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}.c{border-radius:24px;padding:18px;min-height:120px;display:flex;flex-direction:column;justify-content:flex-end;font-size:14px;font-weight:500}.c b{font-size:16px}.c small{opacity:.9;font-weight:400}
+.btn{display:inline-block;padding:16px 32px;border-radius:999px;background:var(--gold);color:var(--deep);font-weight:500}.tag{display:inline-block;padding:8px 16px;border-radius:999px;background:var(--gold);color:var(--deep);font-weight:500;font-size:14px}.tag.i{background:var(--deep);color:var(--gold)}
+.card{background:#fff;border-radius:24px;padding:24px;max-width:320px}.card .n{background:var(--gold);padding:4px 12px;border-radius:999px;font-size:13px;font-weight:500}.card h3{margin:16px 0 8px}.row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.dark{background:var(--deep);color:var(--cream);border-radius:32px;padding:32px;max-width:520px}.dark em{color:var(--gold);font-weight:500}.dark h3{font-size:30px;margin:12px 0}
+.band{background:var(--gold);padding:14px 20px;border-radius:12px;transform:rotate(-1.2deg);font-weight:500;max-width:520px}
+.ok{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}.ok div{border-radius:16px;padding:14px;font-size:14px;font-weight:500}
+</style></head><body>
+<h1>Sistema de diseño <em>de Plan V</em></h1>
+<p>Para las páginas públicas (/nutricionistas y /pacientes). Los colores salen del logo. No afecta la app.</p>
+<h2>Color</h2>
+<div class="sw">
+<div class="c" style="background:var(--deep);color:var(--cream)"><b>Verde profundo</b>#083A30<small>texto y fondos oscuros</small></div>
+<div class="c" style="background:var(--green);color:#fff"><b>Verde del logo</b>#23955D<small>acentos, títulos grandes</small></div>
+<div class="c" style="background:var(--leaf);color:var(--deep)"><b>Hoja</b>#62AA66<small>detalles</small></div>
+<div class="c" style="background:var(--gold);color:var(--deep)"><b>Dorado</b>#F9B343<small>botones y etiquetas</small></div>
+<div class="c" style="background:var(--goldsoft);color:var(--deep)"><b>Dorado suave</b>#FCD58E<small>hover</small></div>
+<div class="c" style="background:var(--coral);color:var(--deep)"><b>Coral</b>#F87D6D<small>decorativo</small></div>
+<div class="c" style="background:var(--apricot);color:var(--deep)"><b>Damasco</b>#F5A067<small>decorativo</small></div>
+<div class="c" style="background:var(--cream);color:var(--deep);border:1px solid #ddd"><b>Crema</b>#F9F6EE<small>lienzo</small></div>
+<div class="c" style="background:var(--mist);color:var(--deep)"><b>Verde claro</b>#E3EFE4<small>tarjetas</small></div>
+</div>
+<h2>Pares de texto aprobados</h2>
+<div class="ok">
+<div style="background:var(--cream);border:1px solid #ddd">Verde profundo sobre crema · 11,7</div>
+<div style="background:var(--deep);color:var(--cream)">Crema sobre verde profundo · 11,7</div>
+<div style="background:var(--gold)">Verde profundo sobre dorado · 7,0</div>
+<div style="background:var(--deep);color:var(--gold)">Dorado sobre verde profundo · 7,0</div>
+<div style="background:var(--mist)">Verde profundo sobre verde claro · 10,7</div>
+<div style="background:var(--cream);color:var(--green);font-size:26px;border:1px solid #ddd">Título grande · 3,5</div>
+</div>
+<p>Prohibido: blanco sobre dorado, texto chico verde del logo sobre crema, texto chico en coral u hoja.</p>
+<h2>Tipografía (Poppins)</h2>
+<div style="font-size:48px;font-weight:600;line-height:1.1;letter-spacing:-.02em">Título 600 con <em style="color:var(--green);font-weight:500">resalte</em></div>
+<p style="font-size:20px;font-weight:500;color:var(--deep)">Subtítulo y botones 500</p><p>Texto 400. Tono en voseo, cálido, simple. Sin promesas de resultados.</p>
+<h2>Componentes</h2>
+<div class="row"><span class="btn">Quiero probarla</span><span class="tag">Etiqueta</span><span class="tag i">Etiqueta invertida</span></div><br>
+<div class="row"><div class="card"><span class="n">01</span><h3>La ficha, en orden</h3><p style="margin:0">Todo de cada paciente en una pantalla.</p></div>
+<div class="dark"><span class="tag">Bloque oscuro</span><h3>Texto crema con <em>resalte dorado</em></h3><span class="btn">Botón dorado</span></div></div><br>
+<div class="band">Cinta dorada · Plan semanal · Lista de compras · Turnos</div>
+<h2>Forma y movimiento</h2>
+<p>Radio 32 px (bloques y fotos), 24 px (tarjetas), píldora (botones y etiquetas). Entrada de títulos por línea, aparición al bajar, parallax suave, cinta continua y números que suben. Con "reducir movimiento" todo queda quieto.</p>
+</body></html>
