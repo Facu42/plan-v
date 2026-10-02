@@ -77,13 +77,13 @@ em { font-style: italic; font-weight: 500; }
 .lp-lead { font-size: clamp(16px, 1.6vw, 20px); color: var(--ink-soft); max-width: 56ch; margin: 24px 0 0; }
 
 /* Portada */
-.lp-hero { padding: 12px var(--pad) 0; max-width: calc(var(--max) + var(--pad) * 2); margin-inline: auto; }
+.lp-hero { padding: 84px var(--pad) 0; max-width: calc(var(--max) + var(--pad) * 2); margin-inline: auto; }
 .lp-hero__frame {
   position: relative; overflow: hidden; border-radius: var(--radius);
   min-height: min(86vh, 760px); display: flex; align-items: flex-end;
   background: var(--ink);
 }
-.lp-hero__img { position: absolute; inset: -6% 0; width: 100%; height: 112%; object-fit: cover; }
+.lp-hero__img { position: absolute; inset: -3% 0; width: 100%; height: 106%; object-fit: cover; object-position: 56% 14%; }
 .lp-hero__shade { position: absolute; inset: 0; background: linear-gradient(0deg, rgb(8 58 48 / 0.78), rgb(8 58 48 / 0.15) 70%); }
 .lp-hero__copy { position: relative; padding: clamp(24px, 5vw, 64px); max-width: 860px; color: var(--white); }
 .lp-hero__title { margin: 0; font-size: clamp(34px, 6vw, 76px); font-weight: 600; line-height: 1.06; letter-spacing: -0.025em; }
@@ -206,3 +206,20 @@ em { font-style: italic; font-weight: 500; }
   .lp-steps__list { grid-template-columns: 1fr; }
 }
 .lp-card-photo img { transform: none; object-position: top; }
+
+/* Funciones en filas (página de pacientes) */
+.lp-feature { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 5vw, 72px); align-items: center; padding-block: clamp(28px, 4vw, 56px); }
+.lp-feature:nth-of-type(even) .lp-photo { order: 2; }
+.lp-feature .lp-photo { aspect-ratio: 4 / 3; }
+.lp-feature .lp-photo img { object-position: center; }
+.lp-feature h3 { margin: 4px 0 0; font-size: clamp(24px, 3vw, 38px); line-height: 1.15; font-weight: 600; letter-spacing: -0.015em; text-wrap: balance; }
+.lp-feature .lp-tag { margin-bottom: 16px; }
+.lp-checks { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 10px; }
+.lp-checks li { position: relative; padding-left: 28px; font-weight: 500; }
+.lp-checks li::before { content: ''; position: absolute; left: 0; top: 0.5em; width: 14px; height: 14px; border-radius: 50%; background: var(--pv-gold); box-shadow: 0 0 0 3px var(--pv-mist); }
+@media (max-width: 860px) {
+  .lp-hero { padding-top: 80px; }
+  .lp-hero__img { object-position: 60% 10%; }
+  .lp-feature { grid-template-columns: 1fr; }
+  .lp-feature:nth-of-type(even) .lp-photo { order: 0; }
+}

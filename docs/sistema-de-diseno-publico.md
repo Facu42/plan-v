@@ -41,7 +41,8 @@ Radio 32 px en bloques y fotos, 24 px en tarjetas, píldora en botones y etiquet
 - **Bloque oscuro** (`.lp-green`, `.lp-cta`): verde profundo con texto crema y resalte dorado.
 - **Cinta** (`.lp-marquee`): franja dorada inclinada que se desplaza, sólo decorativa (`aria-hidden`).
 - **Números** (`.lp-stats`): cifra grande con línea arriba; suben al entrar en pantalla. Sólo cifras de producto, nunca de ventas ni resultados.
-- **Foto** (`.lp-photo`): radio 32, entra recortándose y con un parallax suave.
+- **Foto** (`.lp-photo`): radio 32, entra recortándose y con un parallax suave. En la portada se deja aire arriba (la barra flotante no debe tapar la cara) y el encuadre apunta a la parte alta de la foto.
+- **Función en fila** (`.lp-feature`): foto a un lado y texto con etiqueta, título, bajada y dos puntos (`.lp-checks`); se alternan los lados y en celular se apilan. Cada fila debe describir algo que la app hace hoy; si no existe, va como "próximamente".
 
 ## Fotos
 
