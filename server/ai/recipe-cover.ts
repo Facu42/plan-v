@@ -1,6 +1,7 @@
 import { generateImage } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { logProviderFailure, resolveAiMode } from './mode.js';
+import { freeAiOnly } from './cost-policy.js';
 
 export type RecipeCoverContext = {
   title: string;
@@ -16,7 +17,7 @@ export const DEFAULT_RECIPE_IMAGE_MODEL = 'gpt-image-2.5-flare';
 
 export function recipeCoverEnabled(): boolean {
   try {
-    return resolveAiMode() === 'live' && !!process.env.OPENAI_API_KEY;
+    return !freeAiOnly() && resolveAiMode() === 'live' && !!process.env.OPENAI_API_KEY;
   } catch {
     return false;
   }

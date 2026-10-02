@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('ai', () => ({
   generateImage: vi.fn(),
@@ -15,6 +15,15 @@ afterEach(() => {
 const context = { title: 'Bowl de pollo y vegetales', items: [{ name: 'Pechuga de pollo' }, { name: 'Vegetales' }] };
 
 describe('PV-42 recipe-cover', () => {
+  // Legacy paid path is mocked; this does not enable paid generation in production.
+  beforeEach(() => vi.stubEnv('AI_COST_MODE', 'paid'));
+  it.each(['free', '', 'unknown'])('blocks paid images even with a key in cost mode %s', async (mode) => {
+    vi.stubEnv('AI_COST_MODE', mode);
+    vi.stubEnv('APP_MODE', 'test'); vi.stubEnv('AI_MODE', 'live'); vi.stubEnv('OPENAI_API_KEY', 'synthetic-only');
+    expect(recipeCoverEnabled()).toBe(false);
+    expect(await generateRecipeCoverImage(context)).toEqual({ status: 'failed' });
+    expect(generateImage).not.toHaveBeenCalled();
+  });
   it('configuración inválida no escapa como excepción después de publicar', async () => {
     vi.stubEnv('APP_MODE', 'production'); vi.stubEnv('AI_MODE', 'live');
     vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', '');

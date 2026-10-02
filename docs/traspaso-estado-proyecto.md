@@ -55,6 +55,14 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
 
 ## Lo pendiente
 
+- IA gratuita, pedido del 2/10: el predeterminado seguía siendo `gpt-4o-mini` y no cumplía
+  lo acordado. Rama `codex/ia-solo-modelos-gratuitos`: `openrouter/free`, rechazo de pagos
+  salvo habilitación explícita, límite de precio cero y fotos pagas deshabilitadas.
+  Sin migraciones ni cambios de variables de producción. Ver
+  `docs/ia-gratuita-2026-10-02.md` y [PR #53](https://github.com/Facu42/plan-v/pull/53)
+  para comprobaciones y estado de publicación. Paciente ficticio aún necesita completar
+  alergias/restricciones y habilitar su permiso de IA antes de probar una generación real.
+
 - Correcciones de IA del 2026-10-02 integradas y publicadas por
   [PR #50](https://github.com/Facu42/plan-v/pull/50), commit `d313a62`:
   configuración, tareas reservadas y vigentes, identidad de recetas, publicación
