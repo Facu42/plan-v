@@ -3,6 +3,7 @@ import { PGlite } from '@electric-sql/pglite';
 import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { planReviewSnapshot, type PlanVersionView } from '../../src/types/plans.js';
 
 let db: PGlite;
 let dir: string;
@@ -183,5 +184,20 @@ describe('PV-19 planes en PostgreSQL descartable', () => {
     expect(still.items[0].recipe.version).toBe(1);
     expect(Number(still.items[0].recipe.yield_portions)).toBe(2);
     expect(Number(still.items[0].recipe.ingredients.find((line) => line.name === 'Quinoa')?.quantity)).toBe(60);
+  });
+});
+
+describe('Publicación de una propuesta revisada', () => {
+  it('bloquea cambios de otra pestaña aunque el número de revisión sea el mismo', async () => {
+    const id = planId;
+    const first = await rpc(nutriA, 'save_meal_plan_draft', [patientA, planDraft({ id })]) as { current: PlanVersionView };
+    const reviewed = planReviewSnapshot(first.current);
+    const changed = await rpc(nutriA, 'save_meal_plan_draft', [patientA, planDraft({ id, items: [{ for_date: '2026-09-21', slot: 'Almuerzo', free_text: 'Arroz con verduras', portions: 1 }] })]) as { current: PlanVersionView };
+    expect(changed.current.version).toBe(first.current.version);
+    await expect(rpc(nutriA, 'publish_reviewed_meal_plan', [id, changed.current.version, reviewed])).rejects.toMatchObject({ code: 'PT409' });
+    await expect(rpc(nutriB, 'publish_reviewed_meal_plan', [id, changed.current.version, planReviewSnapshot(changed.current)])).rejects.toMatchObject({ code: '42501' });
+    const published = await rpc(nutriA, 'publish_reviewed_meal_plan', [id, changed.current.version, planReviewSnapshot(changed.current)]) as { current: PlanVersionView };
+    expect(published.current.published_at).not.toBeNull();
+    expect(published.current.items[0].free_text).toBe('Arroz con verduras');
   });
 });

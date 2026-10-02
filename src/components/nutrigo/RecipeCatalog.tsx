@@ -38,10 +38,15 @@ function fromRecipe(recipe: ProfessionalRecipe): RecipeWizardInput {
 
 export type RecipeCatalogState = ReturnType<typeof useRecipeCatalog>;
 
+export function recipeEditorFromAi(payload: Record<string, unknown>): RecipeWizardInput {
+  return recipeWizardSchema.parse({ ...payload, category: 'Almuerzo', cover_status: 'none' });
+}
+
 /** Estado y acciones reales del catálogo profesional (crear, IA, editar, publicar, asignar al día). */
 export function useRecipeCatalog(patientId: string) {
   const [recipes, setRecipes] = useState<ProfessionalRecipe[] | null>(null);
   const [source, setSource] = useState('');
+  const [imageGeneration, setImageGeneration] = useState(false);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
@@ -58,6 +63,7 @@ export function useRecipeCatalog(patientId: string) {
       const result = await recipesApi.list();
       setRecipes(result.recipes);
       setSource(result.source);
+      setImageGeneration(result.image_generation === true);
     } catch (caught) {
       setRecipes([]);
       setError(careErrorMessage(caught));
@@ -107,26 +113,17 @@ export function useRecipeCatalog(patientId: string) {
     void run(async () => {
       const created = await aiJobsApi.enqueue({ patient_id: patientId, job_type: 'recipe_draft', title_hint: description.trim() });
       if (created.job.status === 'failed' || created.job.status !== 'succeeded' || !created.job.artifact) {
-        throw new Error('La IA no pudo armar la receta. Quedó en failed, sin macros ni foto inventados.');
+        throw new Error('La IA no pudo armar la receta. Reintentá; no se publicó ninguna propuesta.');
       }
+      const draft = recipeEditorFromAi(created.job.artifact.payload);
       await aiJobsApi.apply(created.job.id);
-      const payload = created.job.artifact.payload as { title?: string; yield_portions?: number; steps?: string[]; items?: RecipeWizardInput['items'] };
-      setEditing({
-        ...emptyDraft(),
-        title: payload.title || description.trim(),
-        yield_portions: payload.yield_portions || 1,
-        steps: payload.steps?.length ? payload.steps : [''],
-        nutrient_source: '',
-        // La foto recién se intenta al aprobar (publicar), no en el borrador (PV-42).
-        cover_status: 'none',
-        items: payload.items?.length ? payload.items.map((item) => ({ name: item.name, quantity: item.quantity, unit: item.unit })) : [{ name: '', quantity: 1, unit: 'g' }],
-      });
+      setEditing(draft);
       setPath('manual');
     }, 'Propuesta lista para revisar. Sin macros. La foto se genera al aprobar.');
   }
 
   return {
-    patientId, recipes, source, error, status, busy, editing, path, description, assigning, day, slot,
+    patientId, recipes, source, imageGeneration, error, status, busy, editing, path, description, assigning, day, slot,
     setEditing, setPath, setDescription, setDay, setSlot, run, submit, submitAi, quickAiDraft,
     startNew: () => { setPath('choose'); setEditing(null); setStatus(''); setError(''); },
     chooseManual: () => { setPath('manual'); setEditing(emptyDraft()); },
@@ -134,6 +131,13 @@ export function useRecipeCatalog(patientId: string) {
     closeEditor: () => { setEditing(null); setPath(null); },
     startEdit: (recipe: ProfessionalRecipe) => { setEditing(fromRecipe(recipe)); setPath('manual'); setStatus(''); setError(''); },
     publish: (recipe: ProfessionalRecipe) => void run(() => recipesApi.publish(recipe.id, recipe.current.version), 'Revisión publicada. El paciente la ve cuando la asignás.'),
+    retryCover: (recipe: ProfessionalRecipe) => void run(async () => {
+      if (!recipe.published) return;
+      const saved = await recipesApi.cover(recipe.id, recipe.published.version);
+      if (saved.recipe.published?.card?.cover_status !== 'ready') {
+        throw new Error('La receta sigue publicada. No se pudo preparar la foto; podés reintentar más tarde.');
+      }
+    }, 'Foto lista. La receta publicada conserva su contenido.'),
     startAssign: (recipe: ProfessionalRecipe) => { setAssigning(recipe); setStatus(''); setError(''); },
     closeAssign: () => setAssigning(null),
     confirmAssign: () => {
@@ -145,6 +149,15 @@ export function useRecipeCatalog(patientId: string) {
       }, 'Asignada al día. El paciente puede registrarla.');
     },
   };
+}
+
+export function RecipeCoverAction({ catalog, recipe, className = '' }: { catalog: RecipeCatalogState; recipe: ProfessionalRecipe; className?: string }) {
+  if (!recipe.published || recipe.published.card?.cover_status === 'ready') return null;
+  return <button type="button" className={className} disabled={catalog.busy || !catalog.imageGeneration}
+    title={catalog.imageGeneration ? 'Preparar la foto de la revisión publicada' : 'La generación de fotos todavía no está habilitada.'}
+    onClick={() => catalog.retryCover(recipe)}>
+    {recipe.published.card?.cover_status === 'failed' ? 'Reintentar foto' : 'Generar foto'}
+  </button>;
 }
 
 /** Paso 1: carga manual o asistente IA. */
@@ -275,6 +288,7 @@ export function RecipeCatalog({ patientId }: { patientId: string }) {
         <NvButton className="nv-ghost" disabled={busy} onClick={() => catalog.startEdit(recipe)}>Editar</NvButton>
         {!recipe.current.published_at && <NvButton disabled={busy} onClick={() => catalog.publish(recipe)}>Publicar</NvButton>}
         {recipe.published && <NvButton disabled={busy} onClick={() => catalog.startAssign(recipe)}>Asignar</NvButton>}
+        <RecipeCoverAction catalog={catalog} recipe={recipe} className="nv-button nv-ghost" />
       </>} />;
     })}</div>
     <RecipeAssignDialog catalog={catalog} />

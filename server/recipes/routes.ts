@@ -8,6 +8,7 @@ import { recipeAssignSchema, recipePublishSchema } from '../../src/types/recipes
 import { buildRecipeCard, recipeDayAssignSchema, recipeRegisterSchema, recipeWizardSchema } from '../../src/types/recipe-plate.js';
 import * as days from './day.js';
 import * as repo from './repository.js';
+import { recipeCoverEnabled } from '../ai/recipe-cover.js';
 
 async function body<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
   const raw = await c.req.text();
@@ -87,7 +88,7 @@ export function registerRecipeRoutes(app: Hono) {
   app.get('/api/recipes', async (c) => {
     const { persistent, nutritionistId } = await professional(c);
     const recipes = await repo.listProfessionalRecipes(nutritionistId, persistent);
-    return c.json({ recipes, source: persistent ? 'supabase' : 'memory' });
+    return c.json({ recipes, source: persistent ? 'supabase' : 'memory', image_generation: persistent && recipeCoverEnabled() });
   });
 
   app.post('/api/recipes', async (c) => c.json(await saveWizard(c)));
@@ -115,6 +116,15 @@ export function registerRecipeRoutes(app: Hono) {
     if (!id.success) throw new repo.CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
     const input = await body(c, recipeAssignSchema);
     const recipe = await repo.assignRecipe(nutritionistId, id.data, input.patient_id, input.expected_version, persistent);
+    return c.json({ recipe, source: persistent ? 'supabase' : 'memory' });
+  });
+
+  app.post('/api/recipes/:id/cover', async (c) => {
+    const { persistent, nutritionistId } = await professional(c);
+    const id = recipeIdParam.safeParse(c.req.param('id'));
+    if (!id.success) throw new repo.CareError(400, 'Volvé a abrir la receta antes de generar la foto.');
+    const input = await body(c, recipePublishSchema);
+    const recipe = await repo.retryRecipeCover(nutritionistId, id.data, input.expected_version, persistent);
     return c.json({ recipe, source: persistent ? 'supabase' : 'memory' });
   });
 

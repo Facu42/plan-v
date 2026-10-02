@@ -14,8 +14,9 @@ export const AI_JOB_TIMEOUT_MS = 25_000;
 export const AI_JOB_MAX_TOKENS = 8_000;
 export const AI_JOB_MONTHLY_TOKEN_BUDGET = 200_000;
 export const AI_JOB_MAX_ACTIVE = 3;
+export const AI_JOB_LEASE_MS = 120_000;
 
-const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const isoDate = z.iso.date();
 
 export const aiJobEnqueueSchema = z.object({
   patient_id: z.string().trim().min(1).max(80),
@@ -28,7 +29,8 @@ export const aiJobEnqueueSchema = z.object({
   if (value.job_type === 'menu_draft') {
     if (!value.period_start || !value.period_end) {
       ctx.addIssue({ code: 'custom', message: 'period', path: ['period_start'] });
-    } else if (value.period_end < value.period_start) {
+    } else if (value.period_end < value.period_start ||
+      (Date.parse(value.period_end) - Date.parse(value.period_start)) / 86_400_000 > 21) {
       ctx.addIssue({ code: 'custom', message: 'period', path: ['period_end'] });
     }
   }

@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { PatientRecipe } from '../../types/recipes';
-import { AssignedRecipes, AssignedRecipesView, RecipeCatalog } from './RecipeCatalog';
+import { AssignedRecipes, AssignedRecipesView, RecipeCatalog, recipeEditorFromAi } from './RecipeCatalog';
 
 const assigned: PatientRecipe = {
   id: 'r1',
@@ -16,6 +16,14 @@ const assigned: PatientRecipe = {
 };
 
 describe('Catálogo profesional y recetas asignadas', () => {
+  it('la edición asistida conserva la receta aplicada y su procedencia', () => {
+    const payload = { id: '11111111-1111-4111-8111-111111111111', title: 'Bowl', yield_portions: 1,
+      steps: ['Cocinar.'], nutrient_source: 'propuesta_ia.v1', items: [{ name: 'Arroz', quantity: 80, unit: 'g' }] };
+    const draft = recipeEditorFromAi(payload);
+    expect(draft.id).toBe(payload.id); expect(draft.nutrient_source).toBe('propuesta_ia.v1');
+    expect(draft.protein_g).toBeUndefined(); expect(draft.cover_status).toBe('none');
+    expect(() => recipeEditorFromAi({ ...payload, id: 'invalid' })).toThrow();
+  });
   it('el catálogo profesional explica borrador vs publicada sin inventar macros', () => {
     const html = renderToStaticMarkup(<RecipeCatalog patientId="pat-sofia" />);
     expect(html).toContain('Recetas e ingredientes');

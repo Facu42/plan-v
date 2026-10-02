@@ -179,7 +179,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
       if (!current || !matchesMenuProposal(current, candidate)) {
         throw new Error('El borrador cambió. Revisá la versión actual antes de publicar.');
       }
-      await plansApi.publish(current.id, current.current.version);
+      await plansApi.publish(current.id, current.current.version, current.current);
       setProposal(null);
       setStatus('Menú aprobado y publicado. El paciente ya puede ver el plan fechado.');
       await reload();
@@ -231,7 +231,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
         <button type="button" className="meal-plan-add" onClick={() => setDraftItems([...draftItems, emptyItem(periodStart || draftItems[0]?.for_date || '')])}>Agregar indicación</button>
         <NvButton type="button" className="nv-ghost" disabled={busy || !periodStart || !periodEnd || Boolean(proposal)} onClick={() => void generateProposal()}>Generar propuesta de menú</NvButton>
         <NvButton type="submit" disabled={busy}>Guardar borrador</NvButton>
-        {plan && !plan.current.published_at && <NvButton disabled={busy} onClick={() => void run(() => plansApi.publish(plan.id, plan.current.version), 'Plan publicado. El borrador nuevo ya no cambia esta copia.')}>Publicar v{plan.current.version}</NvButton>}
+        {plan && !plan.current.published_at && <NvButton disabled={busy} onClick={() => void run(() => plansApi.publish(plan.id, plan.current.version, plan.current), 'Plan publicado. El borrador nuevo ya no cambia esta copia.')}>Publicar v{plan.current.version}</NvButton>}
       </div>
     </form>
   </section>;

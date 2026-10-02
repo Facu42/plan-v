@@ -76,7 +76,7 @@ export function registerPlanRoutes(app: Hono) {
     if (!id.success) throw new repo.CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
     const { persistent, nutritionistId } = await professional(c);
     const input = await body(c, mealPlanPublishSchema);
-    const plan = await repo.publishMealPlan(nutritionistId, id.data, input.expected_version, persistent);
+    const plan = await repo.publishMealPlan(nutritionistId, id.data, input.expected_version, persistent, input.expected_snapshot);
     return c.json({ plan, source: persistent ? 'supabase' : 'memory' });
   });
 }

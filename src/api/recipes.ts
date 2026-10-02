@@ -3,7 +3,7 @@ import type { PatientRecipe, ProfessionalRecipe } from '../types/recipes';
 import type { RecipeDayAssignment, RecipeWizardInput } from '../types/recipe-plate';
 
 export const recipesApi = {
-  list: (signal?: AbortSignal) => request<{ recipes: ProfessionalRecipe[]; source: string }>('/api/recipes', { signal }),
+  list: (signal?: AbortSignal) => request<{ recipes: ProfessionalRecipe[]; source: string; image_generation?: boolean }>('/api/recipes', { signal }),
   save: (input: RecipeWizardInput) => request<{ recipe: ProfessionalRecipe; source: string }>('/api/recipes', {
     method: 'POST',
     body: JSON.stringify(input),
@@ -15,6 +15,9 @@ export const recipesApi = {
   publish: (id: string, expected_version: number) => request<{ recipe: ProfessionalRecipe; source: string }>(`/api/recipes/${id}/publish`, {
     method: 'POST',
     body: JSON.stringify({ expected_version }),
+  }),
+  cover: (id: string, expected_version: number) => request<{ recipe: ProfessionalRecipe; source: string }>(`/api/recipes/${id}/cover`, {
+    method: 'POST', body: JSON.stringify({ expected_version }),
   }),
   assign: (id: string, patient_id: string, expected_version: number) => request<{ recipe: PatientRecipe; source: string }>(`/api/recipes/${id}/assign`, {
     method: 'POST',

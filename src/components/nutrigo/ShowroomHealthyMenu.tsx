@@ -20,7 +20,7 @@ import { PLAN_SLOTS } from '../../types/plans';
 import { unavailableCard } from '../../types/recipe-plate';
 import { MealThumbnail } from './PatientOverview';
 import { mealSlotTone, NvState } from './primitives';
-import { RecipeAiForm, RecipeAssignDialog, RecipeChoice, RecipeEditorForm, useAssignedRecipes, useRecipeCatalog, type RecipeCatalogState } from './RecipeCatalog';
+import { RecipeAiForm, RecipeAssignDialog, RecipeChoice, RecipeCoverAction, RecipeEditorForm, useAssignedRecipes, useRecipeCatalog, type RecipeCatalogState } from './RecipeCatalog';
 import { RecipeDetails, RecipeDishWell, RecipeMacroTiles, type RecipeDetailData } from './RecipePlate';
 import type { ShowroomPage } from './ShowroomPanels';
 import type { ShowroomPatient } from './showroom-model';
@@ -387,6 +387,7 @@ function RecipeActions({ catalog, recipe, small = false }: { catalog: RecipeCata
       : <button type="button" className="mf-btn mf-btn-soft" disabled={catalog.busy} onClick={() => catalog.startEdit(recipe)}><PencilSimple size={14} aria-hidden /> Editar</button>}
     {!recipe.current.published_at && <button type="button" className={`mf-btn${size}`} disabled={catalog.busy} onClick={() => catalog.publish(recipe)}>Publicar</button>}
     {recipe.published && <button type="button" className={`mf-btn${size}`} disabled={catalog.busy} onClick={() => catalog.startAssign(recipe)}>Agregar al plan</button>}
+    <RecipeCoverAction catalog={catalog} recipe={recipe} className={`mf-btn mf-btn-soft${size}`} />
   </>;
 }
 

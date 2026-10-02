@@ -10,6 +10,7 @@ import { generateRecipeDraft } from '../ai/recipe-draft.js';
 import { generateMenuDraft } from '../ai/menu-draft.js';
 import { AIUnavailableError } from '../ai/errors.js';
 import { resolveAiMode } from '../ai/mode.js';
+import { resolveAiProvider } from '../ai/provider.js';
 import {
   assertJobTokenBudget,
   buildMenuJobContext,
@@ -22,6 +23,8 @@ import {
   AI_JOB_MAX_ACTIVE,
   AI_JOB_MONTHLY_TOKEN_BUDGET,
   AI_JOB_TIMEOUT_MS,
+  AI_JOB_LEASE_MS,
+  aiJobEnqueueSchema,
   type AiJobEnqueueInput,
   type AiJobStatus,
   type AiJobType,
@@ -38,6 +41,7 @@ type MemJob = AiJobView & {
   nutritionist_id: string;
   requested_by: string;
   context: unknown;
+  expires_at: number;
 };
 
 const jobs = new Map<string, MemJob>();
@@ -130,7 +134,7 @@ export function asAiJob(row: Record<string, unknown>): AiJobView {
 }
 
 function publicJob(job: MemJob): AiJobView {
-  const { nutritionist_id: _n, requested_by: _r, context: _c, ...view } = job;
+  const { nutritionist_id: _n, requested_by: _r, context: _c, expires_at: _e, ...view } = job;
   return view;
 }
 
@@ -163,6 +167,11 @@ async function buildContext(nutritionistId: string, input: AiJobEnqueueInput, pe
 function assertMemoryBudget(nutritionistId: string, tokens: number) {
   const start = monthStart();
   const mine = [...jobs.values()].filter((job) => job.nutritionist_id === nutritionistId);
+  for (const job of mine) {
+    if ((job.status === 'queued' || job.status === 'running') && job.expires_at <= Date.now()) {
+      job.status = 'failed'; job.error_code = 'job_expired'; job.finished_at = new Date().toISOString(); job.artifact = null;
+    }
+  }
   const used = mine
     .filter((job) => job.created_at.slice(0, 10) >= start)
     .reduce((sum, job) => sum + (job.cost_tokens ?? 0), 0);
@@ -198,12 +207,13 @@ export async function enqueueAiJob(
   input: AiJobEnqueueInput,
   persistent: boolean,
 ): Promise<AiJobView> {
+  if (!aiJobEnqueueSchema.safeParse(input).success) throw new CareError(400, 'Revisá el tipo de job, el paciente y el período.');
   if (!persistent && !getPatient(input.patient_id)) throw new CareError(404, 'Paciente no encontrado.');
   const context = await buildContext(nutritionistId, input, persistent);
   const tokens = estimateTokens(context);
   const hash = hashAiContext(context);
   const promptVersion = promptVersionFor(input.job_type);
-  const model = resolveAiMode() === 'live' ? 'gpt-4o-mini' : 'demo';
+  const model = resolveAiMode() === 'live' ? resolveAiProvider()?.model ?? 'unavailable' : 'demo';
   const request = {
     title_hint: input.title_hint ?? null,
     period_start: input.period_start ?? null,
@@ -225,6 +235,7 @@ export async function enqueueAiJob(
       context_hash: hash,
       request,
       context,
+      expires_at: Date.now() + AI_JOB_LEASE_MS,
       attempt: 0,
       cost_tokens: null,
       error_code: null,
@@ -292,106 +303,67 @@ async function currentHash(job: Pick<MemJob, 'job_type' | 'patient_id' | 'reques
 }
 
 export async function runAiJob(nutritionistId: string, jobId: string, persistent: boolean): Promise<AiJobView> {
-  if (!persistent) {
-    const job = jobs.get(jobId);
-    if (!job || job.nutritionist_id !== nutritionistId) throw new CareError(404, 'No encontramos ese job de IA.');
-    if (job.status === 'succeeded' || job.status === 'stale' || job.status === 'cancelled') return publicJob(job);
-    job.status = 'running';
-    job.started_at = new Date().toISOString();
-    job.attempt += 1;
-    try {
-      const live = await currentHash(job, false);
-      const tokens = Math.max(live.tokens, estimateTokens(job.context));
-      assertJobTokenBudget(tokens);
-      if (live.hash !== job.context_hash) {
-        job.status = 'stale';
-        job.finished_at = new Date().toISOString();
-        job.cost_tokens = tokens;
-        job.error_code = 'stale_context';
-        return publicJob(job);
-      }
-      if (job.job_type === 'recipe_draft') {
-        const result = await generateRecipeDraft(job.context as Parameters<typeof generateRecipeDraft>[0]);
-        job.artifact = {
-          id: randomUUID(),
-          kind: 'recipe_draft',
-          payload: result.recipe as unknown as Record<string, unknown>,
-          created_at: new Date().toISOString(),
-        };
-        job.warnings = result.warnings;
-        job.model = result.source === 'demo' ? 'demo' : job.model;
-      } else {
-        const currentPlan = await getProfessionalMealPlan(nutritionistId, job.patient_id, false);
-        const result = await generateMenuDraft(job.context as Parameters<typeof generateMenuDraft>[0], currentPlan?.id);
-        job.artifact = {
-          id: randomUUID(),
-          kind: 'menu_draft',
-          payload: result.plan as unknown as Record<string, unknown>,
-          created_at: new Date().toISOString(),
-        };
-        job.warnings = result.warnings;
-        job.model = result.source === 'demo' ? 'demo' : job.model;
-      }
-      job.status = 'succeeded';
-      job.cost_tokens = tokens;
-      job.finished_at = new Date().toISOString();
-      return publicJob(job);
-    } catch (error) {
-      job.status = 'failed';
-      job.finished_at = new Date().toISOString();
-      job.error_code = error instanceof AIUnavailableError ? 'AI_UNAVAILABLE' : 'job_failed';
-      if (error instanceof CareError || error instanceof AIUnavailableError) throw error;
-      throw new AIUnavailableError();
+  const memory = persistent ? null : jobs.get(jobId);
+  if (!persistent && (!memory || memory.nutritionist_id !== nutritionistId)) throw new CareError(404, 'No encontramos ese job de IA.');
+  const existing = persistent ? await getAiJob(nutritionistId, jobId, true) : publicJob(memory!);
+  if (existing.status !== 'queued') return existing;
+  let runToken: string | undefined;
+  if (persistent) {
+    const claimed = await callRpc('claim_ai_job', { target_job: jobId }) as Record<string, unknown>;
+    if (claimed.status !== 'running') return asAiJob(claimed);
+    if (typeof claimed.run_token !== 'string') throw new CareError(503, 'No se pudo reservar el intento de IA.');
+    runToken = String(claimed.run_token);
+  } else {
+    if (memory!.expires_at <= Date.now()) {
+      memory!.status = 'failed'; memory!.error_code = 'job_expired'; memory!.finished_at = new Date().toISOString();
+      return publicJob(memory!);
     }
+    memory!.status = 'running'; memory!.started_at = new Date().toISOString(); memory!.attempt += 1;
+    memory!.expires_at = Date.now() + AI_JOB_LEASE_MS;
   }
-
-  const existing = await getAiJob(nutritionistId, jobId, true);
-  if (existing.status === 'succeeded' || existing.status === 'stale' || existing.status === 'cancelled') return existing;
-  const live = await currentHash({
-    job_type: existing.job_type,
-    patient_id: existing.patient_id,
-    nutritionist_id: nutritionistId,
-    request: existing.request,
-  }, true);
-  let artifact: { kind: 'recipe_draft' | 'menu_draft'; payload: Record<string, unknown> } | null = null;
-  let warnings: string[] = [];
-  let status: AiJobStatus = 'succeeded';
-  let errorCode: string | undefined;
+  let tokens = 0;
+  let hash = existing.context_hash;
+  const finish = async (status: AiJobStatus, artifact: AiJobView['artifact'] = null, warnings: string[] = [], errorCode?: string) => {
+    if (persistent) return asAiJob(await callRpc('finish_ai_job', { payload: {
+      id: jobId, run_token: runToken, status, cost_tokens: tokens,
+      current_context_hash: hash, error_code: errorCode, warnings, artifact,
+    } }) as Record<string, unknown>);
+    // A recovered/expired attempt can never become successful after its provider returns.
+    if (memory!.status !== 'running' || memory!.expires_at <= Date.now()) {
+      if (memory!.status === 'running') {
+        memory!.status = 'failed'; memory!.error_code = 'job_expired'; memory!.finished_at = new Date().toISOString(); memory!.artifact = null;
+      }
+      return publicJob(memory!);
+    }
+    memory!.status = status; memory!.cost_tokens = tokens; memory!.finished_at = new Date().toISOString();
+    memory!.error_code = errorCode ?? null; memory!.warnings = warnings; memory!.artifact = status === 'succeeded' ? artifact : null;
+    return publicJob(memory!);
+  };
   try {
-    if (live.hash !== existing.context_hash) {
-      status = 'stale';
-      errorCode = 'stale_context';
-    } else if (existing.job_type === 'recipe_draft') {
+    const live = await currentHash({ ...existing, nutritionist_id: nutritionistId }, persistent);
+    hash = live.hash; tokens = live.tokens; assertJobTokenBudget(tokens);
+    if (hash !== existing.context_hash) return await finish('stale', null, [], 'stale_context');
+    let artifact: NonNullable<AiJobView['artifact']>;
+    let warnings: string[];
+    if (existing.job_type === 'recipe_draft') {
       const result = await generateRecipeDraft(live.context as Parameters<typeof generateRecipeDraft>[0]);
-      artifact = { kind: 'recipe_draft', payload: result.recipe as unknown as Record<string, unknown> };
+      artifact = { id: randomUUID(), kind: 'recipe_draft', payload: result.recipe as unknown as Record<string, unknown>, created_at: new Date().toISOString() };
       warnings = result.warnings;
     } else {
-      const currentPlan = await getProfessionalMealPlan(nutritionistId, existing.patient_id, true);
-      const result = await generateMenuDraft(live.context as Parameters<typeof generateMenuDraft>[0], currentPlan?.id);
-      artifact = { kind: 'menu_draft', payload: result.plan as unknown as Record<string, unknown> };
+      const plan = await getProfessionalMealPlan(nutritionistId, existing.patient_id, persistent);
+      const result = await generateMenuDraft(live.context as Parameters<typeof generateMenuDraft>[0], plan?.id);
+      artifact = { id: randomUUID(), kind: 'menu_draft', payload: result.plan as unknown as Record<string, unknown>, created_at: new Date().toISOString() };
       warnings = result.warnings;
     }
+    const latest = await currentHash({ ...existing, nutritionist_id: nutritionistId }, persistent);
+    hash = latest.hash;
+    if (hash !== existing.context_hash) return await finish('stale', null, [], 'stale_context');
+    return await finish('succeeded', artifact, warnings);
   } catch (error) {
-    status = 'failed';
-    errorCode = error instanceof AIUnavailableError ? 'AI_UNAVAILABLE' : 'job_failed';
-    await callRpc('finish_ai_job', {
-      payload: { id: jobId, status, error_code: errorCode, cost_tokens: live.tokens, current_context_hash: live.hash },
-    });
+    await finish('failed', null, [], error instanceof AIUnavailableError ? 'AI_UNAVAILABLE' : 'job_failed');
     if (error instanceof CareError || error instanceof AIUnavailableError) throw error;
     throw new AIUnavailableError();
   }
-  const data = await callRpc('finish_ai_job', {
-    payload: {
-      id: jobId,
-      status,
-      cost_tokens: live.tokens,
-      current_context_hash: live.hash,
-      error_code: errorCode,
-      warnings,
-      artifact,
-    },
-  });
-  return asAiJob(data as Record<string, unknown>);
 }
 
 export async function applyAiJob(nutritionistId: string, jobId: string, persistent: boolean): Promise<AiJobView> {
@@ -402,6 +374,8 @@ export async function applyAiJob(nutritionistId: string, jobId: string, persiste
       throw new CareError(409, 'Ese borrador ya no se puede aplicar. Regenerá la propuesta.');
     }
     if (job.applied_at) return publicJob(job);
+    const latest = await currentHash(job, false);
+    if (latest.hash !== job.context_hash) throw new CareError(409, 'El ingreso cambió. Regenerá la propuesta.');
     if (job.artifact.kind === 'recipe_draft') {
       const recipe = await saveRecipeDraft(nutritionistId, job.artifact.payload as unknown as RecipeDraftInput, false);
       if (recipe.current.published_at) throw new CareError(409, 'Ese borrador ya no se puede aplicar. Regenerá la propuesta.');
@@ -412,6 +386,11 @@ export async function applyAiJob(nutritionistId: string, jobId: string, persiste
     }
     job.applied_at = new Date().toISOString();
     return publicJob(job);
+  }
+  const existing = await getAiJob(nutritionistId, jobId, true);
+  if (!existing.applied_at) {
+    const latest = await currentHash({ ...existing, nutritionist_id: nutritionistId }, true);
+    if (latest.hash !== existing.context_hash) throw new CareError(409, 'El ingreso cambió. Regenerá la propuesta.');
   }
   const data = await callRpc('apply_ai_job', { target_job: jobId });
   return asAiJob(data as Record<string, unknown>);

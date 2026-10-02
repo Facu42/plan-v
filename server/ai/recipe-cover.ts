@@ -11,6 +11,17 @@ export type RecipeCoverResult =
   | { status: 'ready'; bytes: Buffer; mime: 'image/png' | 'image/jpeg' | 'image/webp'; alt: string }
   | { status: 'failed' };
 
+export const RECIPE_COVER_TIMEOUT_MS = 60_000;
+export const DEFAULT_RECIPE_IMAGE_MODEL = 'gpt-image-2.5-flare';
+
+export function recipeCoverEnabled(): boolean {
+  try {
+    return resolveAiMode() === 'live' && !!process.env.OPENAI_API_KEY;
+  } catch {
+    return false;
+  }
+}
+
 function coverPrompt(context: RecipeCoverContext): string {
   const ingredients = context.items.map((item) => item.name).slice(0, 8).join(', ');
   return `Foto de comida real, estilo flat-lay editorial, fondo neutro claro, luz natural, plato limpio y apetitoso, sin texto, sin marca de agua, sin personas. Plato: "${context.title}"${ingredients ? `. Ingredientes visibles: ${ingredients}.` : '.'}`;
@@ -23,12 +34,15 @@ function coverPrompt(context: RecipeCoverContext): string {
  * (evita costo en demo/test/disabled) y devuelve 'failed' sin URL.
  */
 export async function generateRecipeCoverImage(context: RecipeCoverContext): Promise<RecipeCoverResult> {
-  if (resolveAiMode() !== 'live' || !process.env.OPENAI_API_KEY) return { status: 'failed' };
   try {
+    if (!recipeCoverEnabled()) return { status: 'failed' };
     const { image } = await generateImage({
-      model: openai.image('dall-e-3'),
+      model: openai.image(process.env.OPENAI_IMAGE_MODEL || DEFAULT_RECIPE_IMAGE_MODEL),
       prompt: coverPrompt(context),
       size: '1024x1024',
+      abortSignal: AbortSignal.timeout(RECIPE_COVER_TIMEOUT_MS),
+      maxRetries: 0,
+      providerOptions: { openai: { quality: 'low', outputFormat: 'webp', outputCompression: 80 } },
     });
     if (!image?.base64) return { status: 'failed' };
     const mime = image.mediaType || 'image/png';

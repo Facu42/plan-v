@@ -9,7 +9,7 @@ const INTERNAL = [
   'nutritionist_subscriptions', 'outbox_events', 'patient_invite_events',
   'payment_webhook_events', 'platform_admins', 'platform_settings',
   'privacy_access_events', 'privacy_export_packages', 'privacy_requests',
-  'processing_jobs', 'recipe_day_assignments', 'recipe_version_cards', 'service_payments',
+  'processing_jobs', 'recipe_cover_requests', 'recipe_day_assignments', 'recipe_version_cards', 'service_payments',
 ] as const;
 const PUBLIC_ROLES = ['anon', 'authenticated'] as const;
 const TABLE_PRIVILEGES = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER', 'MAINTAIN'];
@@ -40,7 +40,7 @@ beforeAll(async () => {
 afterAll(async () => { await db?.close(); });
 
 describe('tablas internas: cierre directo y funciones autorizadas', () => {
-  it('las únicas tablas public sin políticas son las 16 clasificadas y tienen RLS', async () => {
+  it('las únicas tablas public sin políticas son las clasificadas y tienen RLS', async () => {
     const { rows } = await db.query<{ name: string; rls: boolean }>(`
       select c.relname as name,c.relrowsecurity as rls
       from pg_class c join pg_namespace n on n.oid=c.relnamespace
