@@ -4,6 +4,7 @@ import {
   RESOURCE_GUIDES,
   ShowroomResources,
   buildResourceShareUrl,
+  buildResourceNavigationUrl,
   filterResourceGuides,
   resourceAssignmentDateLabel,
   resourceDateLabel,
@@ -15,6 +16,11 @@ import {
 const onNavigate = vi.fn();
 
 describe('ShowroomResources', () => {
+  it('abrir una guía conserva el consultorio y compartir omite la selección privada', () => {
+    const href = 'https://planv.test/crm/recursos?paciente=pat-marina';
+    expect(buildResourceNavigationUrl('leer-plan-semanal', href)).toBe('https://planv.test/crm/recursos?paciente=pat-marina#recurso=leer-plan-semanal');
+    expect(buildResourceShareUrl('leer-plan-semanal', href)).toBe('https://planv.test/app/recursos#recurso=leer-plan-semanal');
+  });
   it('publica sólo guías operativas internas con rutas válidas y relaciones resolubles', () => {
     const ids = new Set(RESOURCE_GUIDES.map((guide) => guide.id));
     expect(ids.size).toBe(RESOURCE_GUIDES.length);

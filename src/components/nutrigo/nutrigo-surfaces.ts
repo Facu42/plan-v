@@ -40,7 +40,7 @@ export const NUTRIGO_SURFACES: readonly NutrigoSurface[] = [
   { id: 'meal-plan', frame: 'Meal Plan', page: 'plan', css: ['showroom-patient-plan.css', 'meal-plan-versions.css'], emptyTitle: 'Tu plan está en preparación' },
   { id: 'grocery', frame: 'Grocery List', page: 'compras', css: ['showroom-grocery.css'], emptyTitle: 'Sin lista para generar' },
   { id: 'food-diary', frame: 'Food Diary', page: 'diario', css: ['showroom-patient-diary.css'], emptyTitle: 'Sin registros esta semana' },
-  { id: 'progress', frame: 'Progress', page: 'progreso', css: ['showroom-progress.css'], emptyTitle: 'Sin comidas registradas esta semana' },
+  { id: 'progress', frame: 'Progress', page: 'progreso', css: ['showroom-progress.css'], emptyTitle: 'Sin medidas en estos períodos' },
   { id: 'exercise', frame: 'Exercise', page: 'ejercicio', css: ['showroom-exercise.css'], emptyTitle: 'Todavía no hay una rutina asignada' },
   { id: 'insights', frame: 'Insights', page: 'recursos', css: ['showroom-resources.css'], emptyTitle: 'Sin coincidencias' },
   { id: 'insight-details', frame: 'Insight Details', page: 'recursos', css: ['showroom-resources.css'], emptyTitle: 'Sin coincidencias' },

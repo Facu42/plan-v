@@ -1,6 +1,7 @@
 name: Aislamiento con sesiones firmadas
 on:
   push:
+    branches: [main]
     paths:
       - '.github/workflows/auth-isolation.yml'
       - 'scripts/test-auth-isolation.mjs'

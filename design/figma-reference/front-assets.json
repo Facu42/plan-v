@@ -1,0 +1,808 @@
+[
+  {
+    "name": "search",
+    "variable": "imgIconMagnifyingGlass",
+    "sourceNode": "84:2716",
+    "sourceFile": "f08ac.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 986,
+    "sha256": "4d49828abf2e652d21579346715b108a2f33a1e71cde587291688c9fde83cb8b"
+  },
+  {
+    "name": "filter",
+    "variable": "imgIconFadersHorizontal",
+    "sourceNode": "84:2716",
+    "sourceFile": "0639e.svg",
+    "dimensions": [
+      "width=\"22\"",
+      "height=\"22\"",
+      "viewBox=\"0 0 22 22\""
+    ],
+    "bytes": 1876,
+    "sha256": "f2cababa3931f691b986b259f81dabdd6c050e7901e72425b600791af866423d"
+  },
+  {
+    "name": "more",
+    "variable": "imgIconDotsThree",
+    "sourceNode": "84:2716",
+    "sourceFile": "74332.svg",
+    "dimensions": [
+      "width=\"24\"",
+      "height=\"24\"",
+      "viewBox=\"0 0 24 24\""
+    ],
+    "bytes": 811,
+    "sha256": "52cdb72ced54614812223d83683ad8e243714a07fe735f4d571af9ed235a2c6d"
+  },
+  {
+    "name": "star",
+    "variable": "imgStar",
+    "sourceNode": "84:2716",
+    "sourceFile": "c88d0.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1377,
+    "sha256": "2cbd4bc67126c9ce74b1688fb6df4a0e7a6f4af5b6cbadf60e3a51e4b81523fd"
+  },
+  {
+    "name": "difficulty",
+    "variable": "imgIconNavChartBar",
+    "sourceNode": "84:2716",
+    "sourceFile": "de48f.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 978,
+    "sha256": "16af894147d68320a868b7ea3cb1fa3e3d48ea3db76cec548c5863685ed0f84a"
+  },
+  {
+    "name": "health",
+    "variable": "imgIconSpecialHeartbeat",
+    "sourceNode": "84:2716",
+    "sourceFile": "a0ae2.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 2767,
+    "sha256": "43ac1452deea41c128741b4c42fae1e69cde3da67ef1a5704b645eab843f699c"
+  },
+  {
+    "name": "cooking",
+    "variable": "imgIconSpecialCookingPot",
+    "sourceNode": "84:2716",
+    "sourceFile": "b3caf.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 2306,
+    "sha256": "39c109b596c6793d16b02eb7a7551ef4b94734e22e41138f269acc032f5651f5"
+  },
+  {
+    "name": "steps",
+    "variable": "imgIconSpecialListNumbers",
+    "sourceNode": "84:2716",
+    "sourceFile": "b5ce2.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 3379,
+    "sha256": "fa4a28c19e92b799e9a4c2a4f9f770fa255163406e919fd6bc3b28eca46f4dd5"
+  },
+  {
+    "name": "bread",
+    "variable": "imgIconSpecialBread",
+    "sourceNode": "84:2716",
+    "sourceFile": "bb986.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 1955,
+    "sha256": "2886bf16d7401fd8eaf7c87d41ba54e5e3af30ef9702eb8ff478fbf2d87faf51"
+  },
+  {
+    "name": "fish",
+    "variable": "imgIconSpecialFish",
+    "sourceNode": "84:2716",
+    "sourceFile": "a4b28.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 3039,
+    "sha256": "882162b30ff7c1ebc337c457e1650490391008522268aae2ede618e62939eb90"
+  },
+  {
+    "name": "drop",
+    "variable": "imgIconSpecialDrop",
+    "sourceNode": "84:2716",
+    "sourceFile": "871ca.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 1522,
+    "sha256": "87d2f9d944b029d8cc9a6ae1e692d89a1dbbfeadc3eea1578229fe719ab29aa6"
+  },
+  {
+    "name": "funnel",
+    "variable": "imgIconFunnel",
+    "sourceNode": "84:2716",
+    "sourceFile": "e3085.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1451,
+    "sha256": "1a72d131743d099bd21510a6329954e12488280af9aec075a979805c7efe1a58"
+  },
+  {
+    "name": "grid",
+    "variable": "imgIconGridFour",
+    "sourceNode": "84:2716",
+    "sourceFile": "2a9e0.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 822,
+    "sha256": "94eeb539cac61483fc0df10bfd004014613d37e4905930ca985113c1ee0be229"
+  },
+  {
+    "name": "list",
+    "variable": "imgIconList",
+    "sourceNode": "84:2716",
+    "sourceFile": "07fed.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1389,
+    "sha256": "e8b2ecc1f53311e818aec1a7a381b1fe30058f9131b3b1a3cc6a9acc755a2def"
+  },
+  {
+    "name": "fire",
+    "variable": "imgIconSpecialFire",
+    "sourceNode": "84:2716",
+    "sourceFile": "36850.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 1942,
+    "sha256": "fae2b51601ee8513d2b2484393f1d340d83471652ea43247987c18516285b5d4"
+  },
+  {
+    "name": "bell",
+    "variable": "imgIconBell",
+    "sourceNode": "84:2716",
+    "sourceFile": "dfce3.svg",
+    "dimensions": [
+      "width=\"22\"",
+      "height=\"22\"",
+      "viewBox=\"0 0 22 22\""
+    ],
+    "bytes": 1865,
+    "sha256": "3f1a39ce3ace822f6dd0be165f5ed8e77647b9e19744ef681a6ec55e55ea314c"
+  },
+  {
+    "name": "plus",
+    "variable": "imgIconPlus",
+    "sourceNode": "84:2716",
+    "sourceFile": "84d5e.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 734,
+    "sha256": "59f5b50ab692222e2698a2dd810d079fdc5bdb2772356fe39cf6c36deb0d96bd"
+  },
+  {
+    "name": "facebook",
+    "variable": "imgFacebookLogo",
+    "sourceNode": "84:2716",
+    "sourceFile": "55106.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 1320,
+    "sha256": "c5a62d9e5687b4fb3bd1c8522b7327a7cc46e9575c5aadc925b3bbf5d2bca63e"
+  },
+  {
+    "name": "twitter",
+    "variable": "imgTwitterLogo",
+    "sourceNode": "84:2716",
+    "sourceFile": "2e99e.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 1398,
+    "sha256": "bc2e08ae68f0ad3d796e1dbd75adb3ac61342db2219f9cf8d418e3dfaa59d797"
+  },
+  {
+    "name": "instagram",
+    "variable": "imgInstagramLogo",
+    "sourceNode": "84:2716",
+    "sourceFile": "3de81.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 1315,
+    "sha256": "eca5c2eaa887baf1d893b93e3dbdf0ac9e6aef41bcc1c9eda6eb888ea14a526b"
+  },
+  {
+    "name": "youtube",
+    "variable": "imgYoutubeLogo",
+    "sourceNode": "84:2716",
+    "sourceFile": "1c262.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 3857,
+    "sha256": "a535dfb939a93d7244b1172d34487a9536000fdbcec1ed13bea3622701c8177a"
+  },
+  {
+    "name": "linkedin",
+    "variable": "imgLinkedinLogo",
+    "sourceNode": "84:2716",
+    "sourceFile": "228c2.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 1617,
+    "sha256": "a5489c3c7f1b9c8fd4b27eafa1f8054f0dc773673904899399354ea4002df949"
+  },
+  {
+    "name": "body-point",
+    "variable": "imgPoint",
+    "sourceNode": "105:2790",
+    "sourceFile": "870cf.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 261,
+    "sha256": "70c6d02c6235113c89ca67c5f3f9bdb367e6d5b5847005a7dfabf38b45dcff0b"
+  },
+  {
+    "name": "body-line",
+    "variable": "imgLine",
+    "sourceNode": "105:2790",
+    "sourceFile": "f495a.svg",
+    "dimensions": [
+      "width=\"126.34\"",
+      "height=\"39.3666\"",
+      "viewBox=\"0 0 126.34 39.3666\""
+    ],
+    "bytes": 249,
+    "sha256": "b125c8167ed1ea62701284b53a1fd456758094973e47cd14b681886510e92322"
+  },
+  {
+    "name": "body-line1",
+    "variable": "imgLine1",
+    "sourceNode": "105:2790",
+    "sourceFile": "0c8c0.svg",
+    "dimensions": [
+      "width=\"206.266\"",
+      "height=\"70.4232\"",
+      "viewBox=\"0 0 206.266 70.4232\""
+    ],
+    "bytes": 265,
+    "sha256": "192d1da82822bcc7292b65fad3a95decb9b426f3d88d3da4b0d0aab139f45b16"
+  },
+  {
+    "name": "body-line2",
+    "variable": "imgLine2",
+    "sourceNode": "105:2790",
+    "sourceFile": "42aba.svg",
+    "dimensions": [
+      "width=\"176.292\"",
+      "height=\"58.9057\"",
+      "viewBox=\"0 0 176.292 58.9057\""
+    ],
+    "bytes": 275,
+    "sha256": "6d3d553c1e1a705c39e0d77ca0eefeeb8c8894c2cc08e93427e638ffd5e78d39"
+  },
+  {
+    "name": "body-line3",
+    "variable": "imgLine3",
+    "sourceNode": "105:2790",
+    "sourceFile": "cb687.svg",
+    "dimensions": [
+      "width=\"206.637\"",
+      "height=\"32.9808\"",
+      "viewBox=\"0 0 206.637 32.9808\""
+    ],
+    "bytes": 267,
+    "sha256": "cffc38deaf7c9cc48c0d608008439def873d1b5e4890a95c57a056cd2ded28d3"
+  },
+  {
+    "name": "body-line4",
+    "variable": "imgLine4",
+    "sourceNode": "105:2790",
+    "sourceFile": "759b1.svg",
+    "dimensions": [
+      "width=\"199.777\"",
+      "height=\"62.4164\"",
+      "viewBox=\"0 0 199.777 62.4164\""
+    ],
+    "bytes": 262,
+    "sha256": "5d6656a848306b2fb7adc8ada4ac42d4b740295b2c00ac8f32e4079fc71600f5"
+  },
+  {
+    "name": "body-mobile-point",
+    "variable": "imgPoint",
+    "sourceNode": "498:18237",
+    "sourceFile": "845df.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"15\"",
+      "viewBox=\"0 0 14 15\""
+    ],
+    "bytes": 353,
+    "sha256": "b2360d7c77563b4d37dfae04bc06045dc5f5c7678dcfa71d55d7f67c08875c2f"
+  },
+  {
+    "name": "body-mobile-point1",
+    "variable": "imgPoint1",
+    "sourceNode": "498:18237",
+    "sourceFile": "8730a.svg",
+    "dimensions": [
+      "width=\"15\"",
+      "height=\"13\"",
+      "viewBox=\"0 0 15 13\""
+    ],
+    "bytes": 361,
+    "sha256": "1f0c5566e28d969ca1798cb29ec8e53dff0ef1c891ba3d70ff18912d0a46358d"
+  },
+  {
+    "name": "body-mobile-point2",
+    "variable": "imgPoint2",
+    "sourceNode": "498:18237",
+    "sourceFile": "e27f6.svg",
+    "dimensions": [
+      "width=\"15\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 15 14\""
+    ],
+    "bytes": 355,
+    "sha256": "8bdf4088e14d251e22a6cf28b5e8cbae31c0a32db7306b29a82f0ebcc26d4b0b"
+  },
+  {
+    "name": "body-mobile-line",
+    "variable": "imgLine",
+    "sourceNode": "498:18237",
+    "sourceFile": "3f805.svg",
+    "dimensions": [
+      "width=\"105.34\"",
+      "height=\"32.867\"",
+      "viewBox=\"0 0 105.34 32.867\""
+    ],
+    "bytes": 252,
+    "sha256": "e95e4292f302fecaa3ed2ddaeece810604f3099193b96cb323892ef5c9d22d81"
+  },
+  {
+    "name": "body-mobile-line1",
+    "variable": "imgLine1",
+    "sourceNode": "498:18237",
+    "sourceFile": "272cd.svg",
+    "dimensions": [
+      "width=\"172.269\"",
+      "height=\"59.9212\"",
+      "viewBox=\"0 0 172.269 59.9212\""
+    ],
+    "bytes": 267,
+    "sha256": "66c6806b503ea8a1f7a89246e0deeaf447f797f86f8d58ea768d27f411ec0949"
+  },
+  {
+    "name": "body-mobile-line2",
+    "variable": "imgLine2",
+    "sourceNode": "498:18237",
+    "sourceFile": "b3c5e.svg",
+    "dimensions": [
+      "width=\"146.292\"",
+      "height=\"48.906\"",
+      "viewBox=\"0 0 146.292 48.906\""
+    ],
+    "bytes": 271,
+    "sha256": "9417dc858af273593381b07795c39fe88c88c1b595c420933c5ec7b8004fb2c7"
+  },
+  {
+    "name": "body-mobile-line3",
+    "variable": "imgLine3",
+    "sourceNode": "498:18237",
+    "sourceFile": "b72a7.svg",
+    "dimensions": [
+      "width=\"173.138\"",
+      "height=\"27.9805\"",
+      "viewBox=\"0 0 173.138 27.9805\""
+    ],
+    "bytes": 267,
+    "sha256": "a63887cc2423b3bfdf029866ba36cde4186aaf195674a061e3a459611bc4b959"
+  },
+  {
+    "name": "body-mobile-line4",
+    "variable": "imgLine4",
+    "sourceNode": "498:18237",
+    "sourceFile": "96be4.svg",
+    "dimensions": [
+      "width=\"166.28\"",
+      "height=\"52.9143\"",
+      "viewBox=\"0 0 166.28 52.9143\""
+    ],
+    "bytes": 262,
+    "sha256": "9e531d938df1a68003d224326738d96277d392dd85befe598c09d1df93224627"
+  },
+  {
+    "name": "home-fire",
+    "variable": "imgIconSpecialFire1",
+    "sourceNode": "12:792",
+    "sourceFile": "3003c.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 2059,
+    "sha256": "683498079d907c7aa07f744fff9f37c92e33ad35a29b8ddf0c90199d20a44e7d"
+  },
+  {
+    "name": "home-bread",
+    "variable": "imgIconSpecialBread",
+    "sourceNode": "12:792",
+    "sourceFile": "7470b.svg",
+    "dimensions": [
+      "width=\"12\"",
+      "height=\"12\"",
+      "viewBox=\"0 0 12 12\""
+    ],
+    "bytes": 2106,
+    "sha256": "4a36f990ab940698b15eb3cb128577e9e04f85ca091bca02c488a014aa57fb3d"
+  },
+  {
+    "name": "home-fish",
+    "variable": "imgIconSpecialFish",
+    "sourceNode": "12:792",
+    "sourceFile": "76a07.svg",
+    "dimensions": [
+      "width=\"12\"",
+      "height=\"12\"",
+      "viewBox=\"0 0 12 12\""
+    ],
+    "bytes": 3073,
+    "sha256": "be1cd2a76a0e152f930d318dbbe49a3f73e1c99945906b431fd612a49d135414"
+  },
+  {
+    "name": "home-drop",
+    "variable": "imgIconSpecialDrop",
+    "sourceNode": "12:792",
+    "sourceFile": "bc928.svg",
+    "dimensions": [
+      "width=\"12\"",
+      "height=\"12\"",
+      "viewBox=\"0 0 12 12\""
+    ],
+    "bytes": 1576,
+    "sha256": "9289142094fb00f6181ed073a3237e033cf766fbb01e4d06afa57a53cbf1b04d"
+  },
+  {
+    "name": "workout-run",
+    "variable": "imgIconSpecialPersonSimpleRun",
+    "sourceNode": "12:792",
+    "sourceFile": "6e985.svg",
+    "dimensions": [
+      "width=\"32\"",
+      "height=\"32\"",
+      "viewBox=\"0 0 32 32\""
+    ],
+    "bytes": 2837,
+    "sha256": "3ec71d31628930d1d105509c14a2457cedcafe26119ae1a9ba3720c0aa5afff7"
+  },
+  {
+    "name": "workout-strength",
+    "variable": "imgIconSpecialPersonSimpleDeadlifts",
+    "sourceNode": "12:792",
+    "sourceFile": "2218d.svg",
+    "dimensions": [
+      "width=\"32\"",
+      "height=\"32\"",
+      "viewBox=\"0 0 32 32\""
+    ],
+    "bytes": 3316,
+    "sha256": "14dc4185e7ae4bfa24888de4ae4b5a303e986af8915ad0041635d4ca11fc0986"
+  },
+  {
+    "name": "workout-stretch",
+    "variable": "imgIconSpecialPersonSimpleTaiChi",
+    "sourceNode": "12:792",
+    "sourceFile": "6b479.svg",
+    "dimensions": [
+      "width=\"32\"",
+      "height=\"32\"",
+      "viewBox=\"0 0 32 32\""
+    ],
+    "bytes": 1952,
+    "sha256": "c74e30565c93cfbc44462841f9d430355349420b6c934a393d7b07b1a44cc195"
+  },
+  {
+    "name": "share-link",
+    "variable": "imgIconLink",
+    "sourceNode": "279:9301",
+    "sourceFile": "e1e1f.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 2709,
+    "sha256": "2826668ab8165afa4b70f067e940c7cfdc8ad3f3b9439792e4cfa4dc515e8cf8"
+  },
+  {
+    "name": "share-facebook",
+    "variable": "imgIconFacebookLogo",
+    "sourceNode": "279:9301",
+    "sourceFile": "74650.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1364,
+    "sha256": "a8dc9d2baf8c7c9e4b85e40acce71ea4f9f9234154b22222c9aae9b526dcaf25"
+  },
+  {
+    "name": "share-instagram",
+    "variable": "imgIconInstagramLogo",
+    "sourceNode": "279:9301",
+    "sourceFile": "b8fc5.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 2456,
+    "sha256": "873982fe84778a224b25925f2574969b2be9e6c90317978c436fbba9321d5e75"
+  },
+  {
+    "name": "share-twitter",
+    "variable": "imgIconTwitterLogo",
+    "sourceNode": "279:9301",
+    "sourceFile": "51979.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1401,
+    "sha256": "e71725b54de7f0215a81a7bb97c2baa539c2c706d555e035f04f7316e87e1cb1"
+  },
+  {
+    "name": "video-play",
+    "variable": "imgPlay",
+    "sourceNode": "279:9301",
+    "sourceFile": "e6a2a.svg",
+    "dimensions": [
+      "width=\"58\"",
+      "height=\"58\"",
+      "viewBox=\"0 0 58 58\""
+    ],
+    "bytes": 854,
+    "sha256": "d0747fa0bc7e7868ebf9e85ed484671d70dd07c41dd6ba559a0f64ae6e61ca7f"
+  },
+  {
+    "name": "exercise-sort",
+    "variable": "imgIconSort",
+    "sourceNode": "105:2931",
+    "sourceFile": "5ef2f.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 973,
+    "sha256": "0e50b4f16d88320db2698a18f894686fa827f08b510b939be3eaafc85c6a8d2c"
+  },
+  {
+    "name": "exercise-search",
+    "variable": "imgIconMagnifyingGlass",
+    "sourceNode": "105:2931",
+    "sourceFile": "843cb.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 986,
+    "sha256": "bbfce0114fd40d176150f84b333c159ca8d0f81af627be2a9836bfe8d9ec5448"
+  },
+  {
+    "name": "exercise-plus",
+    "variable": "imgIconPlus",
+    "sourceNode": "105:2931",
+    "sourceFile": "6e435.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 734,
+    "sha256": "a3280fdb8890d157d036042205a5aa5e40a3f33aa16c39eb0a176a8656631de6"
+  },
+  {
+    "name": "exercise-squat",
+    "variable": "imgIconSpecialPersonSimpleSquat",
+    "sourceNode": "105:2931",
+    "sourceFile": "a4ab3.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1448,
+    "sha256": "34b1e4ce8a2c2a00d5ba5bebf73fad74f0cf97e3ef9b2799561751c8e9e3e797"
+  },
+  {
+    "name": "exercise-run",
+    "variable": "imgIconNavPersonSimpleRun",
+    "sourceNode": "105:2931",
+    "sourceFile": "deeef.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 3032,
+    "sha256": "230271c4a3b6d69fd6ad9bd513a68bd4960236a939fdf988c15b47a054bbcf06"
+  },
+  {
+    "name": "exercise-yoga",
+    "variable": "imgIconSpecialPersonYoga",
+    "sourceNode": "105:2931",
+    "sourceFile": "39546.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 2333,
+    "sha256": "c2202edba9e9b389a36238b40d8c2de510a61784c0d862f9fe313701a5672fa3"
+  },
+  {
+    "name": "recipe-clock",
+    "variable": "imgIconClock",
+    "sourceNode": "84:3145",
+    "sourceFile": "1f647.svg",
+    "dimensions": [
+      "width=\"12\"",
+      "height=\"12\"",
+      "viewBox=\"0 0 12 12\""
+    ],
+    "bytes": 1604,
+    "sha256": "3b7cb56b2834bdcac31e2dcd1a2b1bad715739a27735a416fa10c260262f0649"
+  },
+  {
+    "name": "recipe-cooking",
+    "variable": "imgIconSpecialCookingPot",
+    "sourceNode": "84:3145",
+    "sourceFile": "33cab.svg",
+    "dimensions": [
+      "width=\"12\"",
+      "height=\"12\"",
+      "viewBox=\"0 0 12 12\""
+    ],
+    "bytes": 2500,
+    "sha256": "49df668a8b5673dbb9479a43bda9d2d62d68c125b588ea736723adc11aa575df"
+  },
+  {
+    "name": "recipe-difficulty",
+    "variable": "imgIconChartBar",
+    "sourceNode": "84:3145",
+    "sourceFile": "a1d03.svg",
+    "dimensions": [
+      "width=\"12\"",
+      "height=\"12\"",
+      "viewBox=\"0 0 12 12\""
+    ],
+    "bytes": 1420,
+    "sha256": "2e9eb12896e6dfa2418e9451991770e7876967a3a27f69b82cf6007be488c00f"
+  },
+  {
+    "name": "recipe-steps",
+    "variable": "imgIconSpecialListNumbers",
+    "sourceNode": "84:3145",
+    "sourceFile": "7a7e7.svg",
+    "dimensions": [
+      "width=\"12\"",
+      "height=\"12\"",
+      "viewBox=\"0 0 12 12\""
+    ],
+    "bytes": 3540,
+    "sha256": "8ae916f79dc8e9b196fbf2b7362551e4f1ad6cb8f5abc3bfd4ab9279b1687be8"
+  },
+  {
+    "name": "recipe-health",
+    "variable": "imgIconNavHeartbeat1",
+    "sourceNode": "84:3145",
+    "sourceFile": "5a044.svg",
+    "dimensions": [
+      "width=\"12\"",
+      "height=\"12\"",
+      "viewBox=\"0 0 12 12\""
+    ],
+    "bytes": 2907,
+    "sha256": "101b2e51749237d6d34d0208fdf0bbe0272ff300710346c66a6ea2f3a54ed3ea"
+  },
+  {
+    "name": "recipe-back",
+    "variable": "imgIconArrowLeft",
+    "sourceNode": "84:3145",
+    "sourceFile": "980a2.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 813,
+    "sha256": "996d5837b790f5f131cf45c3d7c263a13462a6c86337861f5fdac7b1d2018be3"
+  },
+  {
+    "name": "recipe-minus",
+    "variable": "imgIconMinus",
+    "sourceNode": "84:3145",
+    "sourceFile": "4425e.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 561,
+    "sha256": "89981541f08fe138cd4e566935e621bf25e8bf402ddce320fbc5ab70b473802c"
+  },
+  {
+    "name": "recipe-plus",
+    "variable": "imgIconPlus",
+    "sourceNode": "84:3145",
+    "sourceFile": "2ac73.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 642,
+    "sha256": "dfdc4093249c74ecded3cf24780a017bdf9474ff3dbc1feb295a69d28f302bfd"
+  }
+]

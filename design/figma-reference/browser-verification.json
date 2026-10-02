@@ -1,0 +1,817 @@
+{
+  "verifiedOn": "2026-10-02",
+  "environment": "demo local; datos ficticios; gstack /browse",
+  "scope": "Frontend original adaptado a API; geometría y recorridos; sin comparación completa píxel por píxel ni prueba de producción",
+  "sourceNodes": 24,
+  "originalAssets": 81,
+  "additionalAssetsVerified": 62,
+  "visits": [
+    {
+      "screen": "Inicio",
+      "role": "patient",
+      "width": 1440,
+      "mainWidth": 892,
+      "headerHeight": 68,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Agenda",
+      "role": "patient",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 78,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Mensajes",
+      "role": "patient",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 78,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Menú",
+      "role": "patient",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 78,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Plan",
+      "role": "patient",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 78,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Compras",
+      "role": "patient",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 78,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Diario",
+      "role": "patient",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 78,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Progreso",
+      "role": "patient",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 78,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Ejercicio",
+      "role": "patient",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 78,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Recursos",
+      "role": "patient",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 78,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Inicio",
+      "role": "patient",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Agenda",
+      "role": "patient",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Mensajes",
+      "role": "patient",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Menú",
+      "role": "patient",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Plan",
+      "role": "patient",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Compras",
+      "role": "patient",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Diario",
+      "role": "patient",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Progreso",
+      "role": "patient",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Ejercicio",
+      "role": "patient",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Recursos",
+      "role": "patient",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 0,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Inicio",
+      "role": "pro",
+      "width": 1440,
+      "mainWidth": 892,
+      "headerHeight": 68,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Pacientes",
+      "role": "pro",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 68,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Fichas",
+      "role": "pro",
+      "width": 1440,
+      "mainWidth": 1120,
+      "headerHeight": 68,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Planes",
+      "role": "pro",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 68,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Agenda",
+      "role": "pro",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 68,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Mensajes",
+      "role": "pro",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 68,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Menú",
+      "role": "pro",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 68,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Compras",
+      "role": "pro",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 68,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Diario",
+      "role": "pro",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 68,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Progreso",
+      "role": "pro",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 68,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Ejercicio",
+      "role": "pro",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 68,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Recursos",
+      "role": "pro",
+      "width": 1440,
+      "mainWidth": 1216,
+      "headerHeight": 68,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Inicio",
+      "role": "pro",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Pacientes",
+      "role": "pro",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Fichas",
+      "role": "pro",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Planes",
+      "role": "pro",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Agenda",
+      "role": "pro",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Mensajes",
+      "role": "pro",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Menú",
+      "role": "pro",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Compras",
+      "role": "pro",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Diario",
+      "role": "pro",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Progreso",
+      "role": "pro",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Ejercicio",
+      "role": "pro",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    },
+    {
+      "screen": "Recursos",
+      "role": "pro",
+      "width": 390,
+      "mainWidth": 390,
+      "headerHeight": 64,
+      "sidebarWidth": 223,
+      "shortcuts": 1,
+      "iconsValid": true,
+      "overflow": false,
+      "emptyRail": false
+    }
+  ],
+  "details": [
+    {
+      "screen": "Detalle receta",
+      "width": 1440,
+      "node": "84:3145",
+      "overflow": false,
+      "image": {
+        "width": 275,
+        "height": 275
+      },
+      "facts": {
+        "width": 295,
+        "height": 460.078125
+      },
+      "factsRows": 9,
+      "assetInstances": 22,
+      "assetsLoaded": true,
+      "assetsOriginalDimensions": true
+    },
+    {
+      "screen": "Detalle recurso",
+      "width": 1440,
+      "node": "279:9301",
+      "overflow": false,
+      "share": [
+        {
+          "width": 30,
+          "height": 30
+        },
+        {
+          "width": 30,
+          "height": 30
+        },
+        {
+          "width": 30,
+          "height": 30
+        },
+        {
+          "width": 30,
+          "height": 30
+        }
+      ],
+      "videoSlots": 2,
+      "videoImages": [
+        {
+          "width": 252.71875,
+          "height": 160
+        },
+        {
+          "width": 252.71875,
+          "height": 160
+        }
+      ],
+      "assetInstances": 11,
+      "assetsLoaded": true,
+      "assetsOriginalDimensions": true
+    },
+    {
+      "screen": "Detalle receta",
+      "width": 390,
+      "node": "457:13264",
+      "overflow": false,
+      "image": {
+        "width": 358,
+        "height": 275
+      },
+      "facts": {
+        "width": 358,
+        "height": 441
+      },
+      "factsRows": 9,
+      "assetInstances": 22,
+      "assetsLoaded": true,
+      "assetsOriginalDimensions": true
+    },
+    {
+      "screen": "Detalle recurso",
+      "width": 390,
+      "node": "507:17412",
+      "overflow": false,
+      "share": [
+        {
+          "width": 30,
+          "height": 30
+        },
+        {
+          "width": 30,
+          "height": 30
+        },
+        {
+          "width": 30,
+          "height": 30
+        },
+        {
+          "width": 30,
+          "height": 30
+        }
+      ],
+      "videoSlots": 2,
+      "videoImages": [
+        {
+          "width": 155,
+          "height": 160
+        },
+        {
+          "width": 155,
+          "height": 160
+        }
+      ],
+      "assetInstances": 11,
+      "assetsLoaded": true,
+      "assetsOriginalDimensions": true
+    }
+  ],
+  "geometry": [
+    {
+      "screen": "Menú",
+      "width": 1440,
+      "image": {
+        "width": 298,
+        "height": 298
+      },
+      "mainWidth": 670,
+      "macroRows": 4,
+      "macroColumns": 1
+    },
+    {
+      "screen": "Inicio",
+      "width": 1440,
+      "exercisesBackground": "rgba(0, 0, 0, 0)",
+      "rows": [
+        {
+          "background": "rgb(255, 255, 255)",
+          "imageWidth": 78,
+          "imageHeight": 78,
+          "radius": "10px"
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "imageWidth": 78,
+          "imageHeight": 78,
+          "radius": "10px"
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "imageWidth": 78,
+          "imageHeight": 78,
+          "radius": "10px"
+        }
+      ]
+    },
+    {
+      "screen": "Agenda",
+      "width": 1440,
+      "cards": [
+        {
+          "background": "rgb(255, 255, 255)",
+          "padding": "16px",
+          "font": "22px"
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "padding": "16px",
+          "font": "22px"
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "padding": "16px",
+          "font": "22px"
+        }
+      ]
+    },
+    {
+      "screen": "Diario",
+      "width": 1440,
+      "tableWidth": 1126,
+      "lastColumnVisible": true,
+      "lastColumnWidth": 136
+    },
+    {
+      "screen": "Progreso",
+      "width": 1440,
+      "bodyAssetsValid": 10
+    },
+    {
+      "screen": "Ejercicio",
+      "width": 1440,
+      "assignedRows": 2,
+      "sortingWorks": true,
+      "searchWorks": true
+    },
+    {
+      "screen": "Menú",
+      "width": 390,
+      "image": {
+        "width": 358,
+        "height": 298
+      },
+      "mainWidth": 390,
+      "macroRows": 2,
+      "macroColumns": 2
+    },
+    {
+      "screen": "Inicio",
+      "width": 390,
+      "exercisesBackground": "rgba(0, 0, 0, 0)",
+      "rows": [
+        {
+          "background": "rgb(255, 255, 255)",
+          "imageWidth": 78,
+          "imageHeight": 78,
+          "radius": "10px"
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "imageWidth": 78,
+          "imageHeight": 78,
+          "radius": "10px"
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "imageWidth": 78,
+          "imageHeight": 78,
+          "radius": "10px"
+        }
+      ]
+    },
+    {
+      "screen": "Agenda",
+      "width": 390,
+      "cards": [
+        {
+          "background": "rgb(255, 255, 255)",
+          "padding": "16px",
+          "font": "22px"
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "padding": "16px",
+          "font": "22px"
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "padding": "16px",
+          "font": "22px"
+        }
+      ]
+    },
+    {
+      "screen": "Diario",
+      "width": 390,
+      "tableWidth": 1024,
+      "lastColumnVisible": true,
+      "lastColumnWidth": 136
+    },
+    {
+      "screen": "Progreso",
+      "width": 390,
+      "bodyAssetsValid": 10
+    },
+    {
+      "screen": "Ejercicio",
+      "width": 390,
+      "assignedRows": 2,
+      "sortingWorks": true,
+      "searchWorks": true
+    }
+  ],
+  "forms": {
+    "environment": "demo local ficticio",
+    "dialogModal": true,
+    "escapeCloses": true,
+    "focusReturned": true,
+    "escapeGuardDuringSave": true,
+    "closeGuardDuringSave": true,
+    "recordPosts": 1,
+    "weightUpdated": true
+  },
+  "clipboard": "Navegador automatizado rechazó copiar; estado de error comprobado. No se afirma copia ni publicación. Enlaces compartidos sin selección privada protegidos por pruebas."
+}

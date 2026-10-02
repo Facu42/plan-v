@@ -312,14 +312,16 @@ export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
     cta={<button type="button" className="pf-cta pf-collapse" aria-label="Lista de compras" onClick={onShopping}><span className="pf-cta-icon"><ShoppingCart size={18} /></span><span className="pf-cta-text">Lista de compras</span></button>}
   />;
 
-  return <><PatientNutritionTarget patientId={patient.id} /><section className="pf-plan" aria-label="Tu plan semanal">
+  return <><section className="pf-plan" aria-label="Tu plan semanal">
     {toolbar}
     {error && <p className="pf-error" role="alert">{error}</p>}
-    {hasAnyPlan ? <PlanWeekTable rows={table.rows} columns={columns} nav={nav} label="Plan semanal" renderCell={(row, column) => {
+    <PlanWeekTable rows={table.rows} columns={columns} nav={nav} label="Plan semanal" renderCell={(row, column) => {
       const cell = row.cells[column.slot];
       if (!cell) return <div className="pf-cell pf-cell-empty" data-tone={column.tone}><span className="pf-cell-image" aria-hidden="true" /><span className="pf-cell-text"><span>Sin indicación</span></span></div>;
       return <PlanMealCell row={row} column={column} cell={cell} dim={!matchesPlanSearch(cell, search)} onOpen={() => setOpen({ row, cell })} />;
-    }} /> : <NvState title="Tu plan está en preparación" description="Cuando tu nutricionista publique comidas, las vas a encontrar acá organizadas por día." />}
+    }} />
+    {!hasAnyPlan && <p className="pf-note" role="status">Tu plan está en preparación. Cuando tu nutricionista publique comidas, las vas a encontrar acá organizadas por día.</p>}
+    <details className="fp-plan-target"><summary>Mi información nutricional</summary><PatientNutritionTarget patientId={patient.id} /></details>
     {open && <PlanSheet title={`${open.cell.slot} · ${open.row.day}`} onClose={() => setOpen(null)}><PlanCellDetail row={open.row} cell={open.cell} plan={open.cell.source === 'dated' ? plan : null} /></PlanSheet>}
     {alternatives && <PlanSheet title="Alternativas" wide onClose={() => setAlternatives(false)}><CarePanel patientId={patient.id} mode="menu" /></PlanSheet>}
   </section></>;

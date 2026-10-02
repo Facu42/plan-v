@@ -25,6 +25,7 @@ import { RecipeDetails, RecipeDishWell, RecipeMacroTiles, type RecipeDetailData 
 import type { ShowroomPage } from './ShowroomPanels';
 import type { ShowroomPatient } from './showroom-model';
 import './menu-fig.css';
+import { FigmaAsset } from './FigmaPatientFront';
 
 type HealthyMenuItem = {
   title: string;
@@ -297,7 +298,7 @@ function PatientHealthyMenu({ patient, query, onNavigate }: { patient: ShowroomP
   const [openId, setOpenId] = useState<string | null>(null);
 
   const items = filterHealthyMenu(menu.items, { slot, day, query, sort });
-  const featured = items.find((item) => normalize(item.title) === featuredKey) ?? items[0];
+  const featured = menu.items.find((item) => normalize(item.title) === featuredKey) ?? menu.items[0] ?? { title: 'Tu menú está en preparación', slots: [], days: [], occurrences: 0, order: 0 };
   const recipeByTitle = new Map(assigned.recipes.map((recipe) => [normalize(recipe.title), recipe]));
   const opened = assigned.recipes.find((recipe) => recipe.id === openId);
 
@@ -318,8 +319,6 @@ function PatientHealthyMenu({ patient, query, onNavigate }: { patient: ShowroomP
     {assigned.error && <p className="recipe-error" role="alert">{assigned.error}</p>}
   </>;
 
-  if (!menu.items.length) return <>{header}<MenuLayout main={<NvState title="Tu menú está en preparación" description="Cuando tu nutricionista publique el plan semanal, vas a encontrar acá sus títulos organizados." />} aside={aside} /></>;
-
   const featuredRecipe = featured ? recipeByTitle.get(normalize(featured.title)) : undefined;
   const featuredMacros = declaredMacros(featuredRecipe?.card);
   const dayOptions: Array<[string, string]> = [['Todos', 'Todos los días'], ...WEEK.filter((value) => menu.items.some((item) => item.days.includes(value))).map((value) => [value, value] as [string, string])];
@@ -327,27 +326,27 @@ function PatientHealthyMenu({ patient, query, onNavigate }: { patient: ShowroomP
   const main = <>
     {featured && <section className="mf-featured" aria-label="Menú destacado">
       <SectionHead title="Menú destacado" />
-      <div className={`mf-featured-body${featuredMacros ? '' : ' mf-no-macros'}`}>
+      <div className="mf-featured-body">
         <div className="mf-featured-main">
-          <span className="mf-thumb mf-featured-image"><MealThumbnail slot={featured.slots[0]} /><small>Imagen ilustrativa</small></span>
+          <span className="mf-thumb mf-featured-image"><MealThumbnail slot={featured.slots[0]} /></span>
           <div className="mf-featured-content">
             <h3>{featured.title}</h3>
             <div className="mf-featured-row">
               {featured.slots.map((value) => <SlotBadge key={value} slot={value} />)}
-              <span className="mf-featured-meta"><Repeat size={14} aria-hidden />{times(featured.occurrences)} esta semana</span>
+              <span className="mf-featured-meta"><Repeat size={14} aria-hidden />{featured.occurrences ? `${times(featured.occurrences)} esta semana` : 'Sin comidas publicadas'}</span>
             </div>
             <div className="mf-details">
-              <DetailInfo icon={<ForkKnife size={16} aria-hidden />} label="Momento" value={featured.slots.join(' · ')} />
-              <DetailInfo icon={<Repeat size={16} aria-hidden />} label="Esta semana" value={times(featured.occurrences)} />
-              <DetailInfo icon={<CalendarBlank size={16} aria-hidden />} label="Días" value={featured.days.join(', ')} />
-              {featuredRecipe && <DetailInfo icon={<ListNumbers size={16} aria-hidden />} label="Pasos" value={`${featuredRecipe.steps.length}`} />}
+              <DetailInfo icon={<FigmaAsset name="difficulty" size={16} />} label="Dificultad" value="—" />
+              <DetailInfo icon={<FigmaAsset name="health" size={16} />} label="Puntuación de salud" value="—" />
+              <DetailInfo icon={<FigmaAsset name="cooking" size={16} />} label="Preparación" value={featuredRecipe?.card?.prep_minutes ? `${featuredRecipe.card.prep_minutes} min` : '—'} />
+              <DetailInfo icon={<FigmaAsset name="steps" size={16} />} label="Pasos" value={featuredRecipe ? `${featuredRecipe.steps.length}` : '—'} />
             </div>
             {featuredRecipe
               ? <button type="button" className="mf-btn mf-btn-cta mf-btn-block" onClick={() => setOpenId(featuredRecipe.id)}>Ver receta</button>
               : <button type="button" className="mf-btn mf-btn-cta mf-btn-block" onClick={() => onNavigate('plan')}>Ver en plan semanal</button>}
           </div>
         </div>
-        {featuredMacros && <RecipeMacroTiles macros={featuredMacros} variant="column" />}
+        <RecipeMacroTiles macros={featuredMacros} variant="column" />
       </div>
     </section>}
 

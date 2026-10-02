@@ -31,18 +31,18 @@ describe('Progreso paciente dentro de Nutrigo', () => {
     expect(buildProgressView(patient)).toMatchObject({ activeDays: 3, energyRecordedDays: 3, maxHydration: 6, reviewedMeals: 2, pendingMeals: 1 });
   });
 
-  it('presenta adherencia, objetivo, agua, descanso y actividad semanal en los widgets del archivo', () => {
+  it('presenta los widgets del archivo sin confundir adherencia con peso', () => {
     const html = renderToStaticMarkup(<ShowroomProgress patient={patient} />);
     expect(html).toContain('Tu objetivo');
-    expect(html).toContain('Adherencia actual');
-    expect(html).toContain('<strong>74</strong>');
-    expect(html).toContain('Sostener cuatro cenas organizadas');
+    expect(html).toContain('Seguimiento de peso');
+    expect(html).not.toContain('Adherencia actual');
+    expect(html).not.toContain('<strong>74</strong>');
     expect(html).toContain('3,1 vasos/día');
     expect(html).toContain('Descanso y energía');
     expect(html).toContain('6h 30m');
     expect(html).toContain('Energía media');
-    expect(html).toContain('Comidas de esta semana');
-    expect(html).toContain('Cena');
+    expect(html).toContain('Fotos de progreso');
+    expect(html).toContain('Actividad calórica');
     expect(html).toContain('7 días');
     expect(html).toContain('30 días');
     expect(html).toContain('90 días');
@@ -51,13 +51,13 @@ describe('Progreso paciente dentro de Nutrigo', () => {
   it('no presenta medidas, inferencias clínicas ni campos profesionales', () => {
     const html = renderToStaticMarkup(<ShowroomProgress patient={patient} />);
     expect(html).not.toContain('IMC');
-    expect(html).toContain('Peso, cintura y cadera opcionales');
-    expect(html).toContain('Fotos y estudios no se usan para estimar medidas');
-    expect(html).toContain('Cargando registros');
+    expect(html).toContain('Últimas medidas declaradas');
+    expect(html).toContain('Sin medidas en estos períodos');
+    expect(html).toContain('Las fotos se abren desde tus registros con tu permiso');
     expect(html).not.toContain('adherence_why');
     expect(html).not.toContain('goal_history');
     expect(html).not.toMatch(/mejoró|empeoró|leaderboard/i);
-    expect(html).not.toContain('kcal');
+    expect(html).toContain('Sin calorías quemadas declaradas');
   });
 
   it('muestra el cambio declarado del mismo paciente, con fuente y sin relleno', () => {

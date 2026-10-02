@@ -182,12 +182,14 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
   </div>;
 }
 
-export function ShowroomPatients({ patients, query, initialFilter = 'active', onChanged, onFollow }: {
+export function ShowroomPatients({ patients, query, initialFilter = 'active', onChanged, onFollow, onRecord, onPlan }: {
   patients: Patient[];
   query: string;
   initialFilter?: PatientDirectoryFilter;
   onChanged: (patient: Patient) => void;
   onFollow: (id: string) => void;
+  onRecord?: (id: string) => void;
+  onPlan?: (id: string) => void;
 }) {
   const [filter, setFilter] = useState<PatientDirectoryFilter>(initialFilter);
   const [creating, setCreating] = useState(false);
@@ -257,6 +259,8 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', on
           <span role="cell"><strong>{patient.next_focus || 'Sin foco cargado'}</strong><small>{patient.appointment?.when ?? 'Sin consulta'}</small></span>
           <span role="cell"><NvProgress value={patient.adherence_score} label={`Adherencia de ${patient.name}`} /><strong>{patient.adherence_score}%</strong></span>
           <span role="cell" className="nv-directory-actions">
+            {!patient.archived_at && onRecord && <NvButton className="nv-soft" aria-label={`Abrir ficha de ${patient.name}`} onClick={() => onRecord(patient.id)}><Icon name="contact" size={14} />Ficha</NvButton>}
+            {!patient.archived_at && onPlan && <NvButton className="nv-soft" aria-label={`Abrir plan de ${patient.name}`} onClick={() => onPlan(patient.id)}><Icon name="list" size={14} />Plan</NvButton>}
             {!patient.archived_at && <NvButton className="nv-soft" aria-label={`Ver seguimiento de ${patient.name}`} onClick={() => onFollow(patient.id)}>Ver seguimiento</NvButton>}
             {!patient.archived_at && patient.has_account === false && <NvButton className="nv-ghost" aria-label={`Invitar a ${patient.name}`} disabled={busyId === patient.id} onClick={() => invite(patient)}><Icon name="message" size={13} />Invitar</NvButton>}
             {!patient.archived_at && <NvButton className="nv-ghost" aria-label={`Editar ficha de ${patient.name}`} onClick={() => setEditing(patient)}><Icon name="edit" size={13} />Editar</NvButton>}

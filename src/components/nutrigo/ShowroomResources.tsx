@@ -16,6 +16,7 @@ import { NvBadge, NvButton, NvState } from './primitives';
 import type { ShowroomPage } from './ShowroomPanels';
 import './showroom-resources.css';
 import './progreso-recursos-fig.css';
+import { FigmaAsset, useFigmaDetail } from './FigmaPatientFront';
 
 export type ResourceGuide = {
   id: string;
@@ -74,6 +75,13 @@ export const buildResourceShareUrl = (id: string, href: string) => {
   const url = new URL(href);
   url.pathname = '/app/recursos';
   url.searchParams.delete('design');
+  url.searchParams.delete('paciente');
+  url.hash = `recurso=${encodeURIComponent(id)}`;
+  return url.toString();
+};
+
+export const buildResourceNavigationUrl = (id: string, href: string) => {
+  const url = new URL(href);
   url.hash = `recurso=${encodeURIComponent(id)}`;
   return url.toString();
 };
@@ -203,6 +211,7 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
   const guides = useMemo(() => filterResourceGuides(catalog, query, category), [catalog, query, category]);
   const tags = useMemo(() => topResourceTags(catalog), [catalog]);
   const selected = catalog.find((guide) => guide.id === selectedId) ?? null;
+  useFigmaDetail(selected ? 'Detalle de recurso' : null, ['279:9301','507:17412']);
   const assignedGuides = (assignments.length ? assignments : snapshot.assignments.map((row) => ({
     id: row.id, patient_id: row.patient_id, resource_id: row.resource_id, assigned_at: row.assigned_at, read_at: row.read_at,
   }))).map((assignment) => ({
@@ -247,7 +256,7 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
   const openGuide = (id: string, replace = false) => {
     const method = replace ? 'replaceState' : 'pushState';
     const state = replace ? window.history.state : { ...window.history.state, planVResourceOpen: true };
-    window.history[method](state, '', buildResourceShareUrl(id, window.location.href));
+    window.history[method](state, '', buildResourceNavigationUrl(id, window.location.href));
     setSelectedId(id);
     setShareStatus('');
   };
@@ -279,6 +288,13 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
       setShareStatus('No se pudo compartir la guía.');
     }
   };
+  const copySelected = async (guide: ResourceGuide, destination = '') => {
+    try {
+      if (!navigator.clipboard?.writeText) { setShareStatus('Copiar no está disponible en este navegador.'); return; }
+      await navigator.clipboard.writeText(buildResourceShareUrl(guide.id, window.location.href));
+      setShareStatus(destination ? `Enlace copiado para compartir en ${destination}.` : 'Enlace copiado.');
+    } catch { setShareStatus('No se pudo copiar el enlace.'); }
+  };
 
   /* ---------- Insight Details (279:9301): contenido 800 + 36 + rail 325 ---------- */
   if (selected) {
@@ -302,14 +318,16 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
         </article>
         <aside className="nvrf-detail-rail">
           <section><header className="nvrf-head"><h3>Compartir</h3></header>
-            <div className="nvrf-share">
-              <button type="button" onClick={() => void shareSelected(selected)}><Icon name="arrow" size={16} /> Compartir</button>
-              <button type="button" aria-pressed={isSaved} onClick={() => void toggleSaved(selected)}><Icon name="pin" size={16} /> {isSaved ? 'Guardada' : 'Guardar'}</button>
+            <div className="nvrf-share fp-resource-share">
+              <button type="button" aria-label="Copiar enlace" onClick={() => void copySelected(selected)}><FigmaAsset name="share-link" size={18} /></button>
+              {['Facebook','Instagram','Twitter'].map((destination) => <button type="button" key={destination} aria-label={`Copiar enlace para compartir en ${destination}`} onClick={() => void copySelected(selected, destination)}><FigmaAsset name={`share-${destination.toLowerCase()}`} size={18} /></button>)}
             </div>
+            <div className="fp-resource-save"><NvButton onClick={() => void shareSelected(selected)}>Compartir con otras apps</NvButton><NvButton aria-pressed={isSaved} onClick={() => void toggleSaved(selected)}>{isSaved ? 'Guardada' : 'Guardar'}</NvButton></div>
             {shareStatus && <p className="nvrf-status" role="status" aria-live="polite">{shareStatus}</p>}
           </section>
           <section><header className="nvrf-head"><h3>Etiquetas</h3></header><div className="nvrf-tags">{selected.tags.map((tag) => <small key={tag}><b>#</b>{tag}</small>)}</div></section>
           {related.length > 0 && <section><header className="nvrf-head"><h3>Relacionados</h3></header><div className="nvrf-related">{related.map((guide) => <button type="button" key={guide.id} onClick={() => openGuide(guide.id, true)}><Cover guide={guide} size={28} /><strong>{guide.title}</strong><span>{guide.category}</span></button>)}</div></section>}
+          <section><header className="nvrf-head"><h3>Videos relacionados</h3></header><div className="nvrf-related fp-related-videos">{[0,1].map((slot) => <article key={slot}><div className="nvrf-image fp-video-placeholder" aria-hidden="true"><FigmaAsset name="video-play" size={58} /></div><p>Sin video publicado.</p></article>)}</div></section>
         </aside>
       </div>
     </section>;
@@ -347,12 +365,13 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
             </section>}
           </div>
           {more.length > 0 && <section className="nvrf-more" aria-label="Más para leer">
-            <header className="nvrf-head"><h3>Más para leer</h3></header>
+            <header className="nvrf-head"><h3>Artículos y guías</h3></header>
             <div className="nvrf-grid">{more.map((guide) => <button type="button" className="nvrf-card-link nvrf-small-card" key={guide.id} aria-label={`Abrir ${readLabel(guide)}: ${guide.title}`} onClick={() => openGuide(guide.id)}>
               <Cover guide={guide} size={28} />
               <span><span className="nvrf-cat">{guide.category}</span><strong>{guide.title}</strong><small>{guide.minutes} min{guide.kind === 'clinical' ? ` · ${guide.author_name}` : ''}</small></span>
             </button>)}</div>
           </section>}
+          <section className="nvrf-more fp-resource-videos" aria-label="Videos"><header className="nvrf-head"><h3>Videos</h3></header><div className="nvrf-grid">{[0,1].map((slot) => <article className="fp-video-empty" key={slot}><div className="nvrf-image" aria-hidden="true" /><p>No hay videos publicados.</p></article>)}</div></section>
         </> : <NvState title="Sin coincidencias" description="Probá con otra palabra o elegí una categoría diferente." />}
       </div>
 
@@ -373,7 +392,8 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
           })}</div>
           {tags.length > 6 && <button type="button" className="nvrf-more-btn" aria-expanded={allTags} onClick={() => setAllTags((value) => !value)}>{allTags ? 'Mostrar menos' : 'Mostrar más'}</button>}
         </section>}
-        <section aria-label="Guardado en tu cuenta">
+        <section aria-label="Autores"><header className="nvrf-head"><h3>Autores</h3></header><div className="nvrf-people">{[...new Set(guides.map((guide) => guide.author_name))].filter(Boolean).map((name) => <div className="fp-resource-author" key={name}><span className="nvrf-avatar" aria-hidden="true" /><span><strong>{name}</strong><small>{guides.filter((guide) => guide.author_name === name).length} publicaciones disponibles</small></span></div>)}</div></section>
+        <details className="fp-resource-saved"><summary>Guardados ({saved.length})</summary><section aria-label="Guardado en tu cuenta">
           <header className="nvrf-head"><h3>Guardados</h3><NvBadge>{saved.length}</NvBadge></header>
           {saved.length > 0 ? <div className="nvrf-people">{saved.map((row) => {
             const guide = catalog.find((entry) => entry.id === row.item_id);
@@ -383,7 +403,7 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
             </button>;
           })}</div> : <p className="nvrf-empty">Todavía no guardaste recetas, artículos ni guías.</p>}
           <p className="nvrf-empty">No queda sólo en este dispositivo: se guarda en tu cuenta.</p>
-        </section>
+        </section></details>
       </aside>
     </div>
   </section>;

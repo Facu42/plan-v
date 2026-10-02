@@ -77,6 +77,7 @@ export function buildAppHref(originHref: string, role: AppRole, page: ShowroomPa
   const url = new URL(originHref);
   url.pathname = appPath(role, page);
   url.searchParams.delete('design');
+  if (role === 'patient') url.searchParams.delete('paciente');
   if (!options?.keepHash) url.hash = '';
   return `${url.pathname}${url.search}${url.hash}`;
 }

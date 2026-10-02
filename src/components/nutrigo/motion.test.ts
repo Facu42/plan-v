@@ -30,7 +30,7 @@ describe('movimiento', () => {
   });
 
   it('cada pantalla vuelve a entrar aunque comparta bloques con la anterior', () => {
-    expect(showroom).toMatch(/<main key=\{`\$\{role\}:\$\{page\}`\} id="nv-main"/);
+    expect(showroom).toMatch(/<main key=\{`\$\{role\}:\$\{page\}:\$\{selected\?\.id \?\? ''\}`\} id="nv-main"/);
   });
 
   it('nada se mueve para quien pidió reducir movimiento', () => {

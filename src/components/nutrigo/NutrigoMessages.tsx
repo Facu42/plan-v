@@ -27,7 +27,7 @@ import './messages-fig.css';
 type Role = 'patient' | 'pro';
 type Props = { patient: ShowroomPatient; patients: ShowroomPatient[]; role: Role; onSelect: (id: string) => void; onNavigate: (page: ShowroomPage) => void };
 
-const NUTRITIONIST = { name: 'Verónica Trenti', initials: 'VT', role: 'Nutricionista' };
+const NUTRITIONIST = { name: 'Tu nutricionista', initials: 'N', role: 'Nutricionista' };
 const normalized = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const sentMessages = (patient: ShowroomPatient) => patient.messages.filter((m) => Boolean(m.sent_at)).slice().sort((a, b) => Date.parse(a.sent_at) - Date.parse(b.sent_at));
 const latestAt = (patient: ShowroomPatient) => {
@@ -179,7 +179,7 @@ function MessageConversation({ patient, role, composeRef, profileOpen, onToggleP
       {messages.map((m, index) => {
         const own = m.from === ownFrom;
         const receipt = messageReceipt(m);
-        const sender = m.from === 'vero' ? 'Verónica' : patient.name;
+        const sender = m.from === 'vero' ? 'Tu nutricionista' : patient.name;
         const divider = index === 0 || !sameDay(messages[index - 1].sent_at, m.sent_at);
         return <div key={m.id} className="nmf-row-wrap">
           {divider && <p className="nmf-day"><span>{dayDividerLabel(m.sent_at)}</span></p>}

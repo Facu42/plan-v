@@ -16,9 +16,9 @@ describe('Dashboard paciente — composición Nutrigo', () => {
   it('comparte la composición con el CRM sin tratar a la profesional como paciente', () => {
     const p = buildShowroomPatient({ ...patient, todayPlan: [{ slot: 'Almuerzo', title: 'Plan de Ana', time: '13:00' }] });
     const html = renderToStaticMarkup(<PatientOverview patient={p} audience="professional" onNavigate={() => {}} />);
-    expect(html).toContain('Objetivo del paciente');
+    expect(html).toContain('Datos de peso');
     expect(html).toContain('Seguimiento del paciente');
-    expect(html).toContain('Conversación con Ana');
+    expect(html).toContain('Ejercicios asignados');
     expect(html).toContain('Plan de Ana');
     expect(html).toContain('np-gauge');
     expect(html).toContain('np-macro-row');
@@ -32,7 +32,7 @@ describe('Dashboard paciente — composición Nutrigo', () => {
     const render = (p: typeof a) => renderToStaticMarkup(<PatientOverview patient={p} audience="professional" onNavigate={() => {}} />);
     expect(render(a)).toContain('Solo Ana');
     const html = render(b);
-    expect(html).toContain('Conversación con Beatriz');
+    expect(html).toContain('Ejercicios asignados');
     expect(html).toContain('Solo Beatriz');
     expect(html).not.toContain('Solo Ana');
     expect(html).not.toContain('Conversación con Ana');
@@ -47,25 +47,26 @@ describe('Dashboard paciente — composición Nutrigo', () => {
     expect(html).toContain('Sin registro');
     expect(html).toContain('Sin comidas revisadas hoy');
     expect(html).toContain('Tu plan está en camino');
-    expect(html).not.toContain('kg');
+    expect(html).toContain('Sin peso declarado');
+    expect(html).not.toContain('78<');
     expect(html).not.toContain('Calorías restantes');
     expect(html).not.toMatch(/NaN|Infinity/);
     expect(html).toContain('Sin datos nutricionales');
     expect(html).not.toContain('0<small> kcal');
     expect(html).not.toContain('0<small> g');
   });
-  it('presenta el menú existente y distingue las imágenes ilustrativas de registros reales', () => {
+  it('presenta el menú existente con los espacios neutros del archivo', () => {
     const p = buildShowroomPatient({ ...patient, todayPlan: [{ slot: 'Almuerzo', title: 'Mi plato asignado', time: '13:00' }] });
     const html = renderToStaticMarkup(<PatientOverview patient={p} onNavigate={() => {}} />);
     expect(html).toContain('Mi plato asignado');
-    expect(html).toContain('Imágenes ilustrativas');
-    expect(html).toContain('lunch.webp');
+    expect(html).toContain('np-food-placeholder');
+    expect(html).not.toContain('lunch.webp');
   });
 
   it('convierte cada KPI en un acceso real a su flujo', () => {
     const html = renderToStaticMarkup(<PatientOverview patient={buildShowroomPatient(patient)} onNavigate={() => {}} />);
-    expect(html).toContain('aria-label="Ver detalle de Adherencia"');
-    expect(html).toContain('aria-label="Ver detalle de Comidas revisadas"');
+    expect(html).toContain('aria-label="Ver detalle de Peso"');
+    expect(html).toContain('aria-label="Ver detalle de Pasos"');
     expect(html).toContain('aria-label="Ver detalle de Descanso"');
     expect(html).toContain('aria-label="Ver detalle de Hidratación"');
     expect(html.match(/<button[^>]*class="nv-metric nv-openable/g)?.length).toBe(4);
