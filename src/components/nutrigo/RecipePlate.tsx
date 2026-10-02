@@ -3,6 +3,7 @@ import { ArrowLeft, Bread, ChartBar, Clock, CookingPot, Drop, Fire, Fish, Heartb
 import type { RecipeCard, RecipeItem, RecipeMacros } from '../../types/recipes';
 import './recipe-plate.css';
 import './menu-fig.css';
+import { FigmaAsset, useFigmaDetail } from './FigmaPatientFront';
 
 const LABELS = [
   ['kcal', 'KCAL', 'kcal'],
@@ -93,13 +94,13 @@ const MACRO_TILES = [
   ['fat_g', 'Grasas', 'g', Drop],
 ] as const;
 
-/** Las cuatro fichas del archivo (Green, Saffron, Orange, Gray-Line). Vacías → no se dibujan. */
-export function RecipeMacroTiles({ macros, variant }: { macros: RecipeMacros; variant: 'column' | 'row' }) {
+/** Las cuatro fichas del archivo, con — cuando no se declararon sus valores. */
+export function RecipeMacroTiles({ macros, variant }: { macros: RecipeMacros | null; variant: 'column' | 'row' }) {
   return <dl className={`mf-macros mf-macros-${variant}`}>
-    {MACRO_TILES.map(([key, label, unit, Glyph]) => <div key={key} data-macro={key}>
-      <span className="mf-macro-icon"><Glyph size={16} aria-hidden /></span>
+    {MACRO_TILES.map(([key, label, unit], index) => <div key={key} data-macro={key}>
+      <span className="mf-macro-icon"><FigmaAsset name={['fire','bread','fish','drop'][index]} size={16} /></span>
       <dt>{label}</dt>
-      <dd>{macros[key] == null ? '—' : <><strong>{macros[key]}</strong> <small>{unit}</small></>}</dd>
+      <dd>{macros?.[key] == null ? <strong>—</strong> : <><strong>{macros[key]}</strong> <small>{unit}</small></>}</dd>
     </div>)}
   </dl>;
 }
@@ -110,30 +111,32 @@ export function RecipeDetails({ recipe, onBack, actions }: {
   actions?: ReactNode;
 }) {
   const [servings, setServings] = useState(recipe.yieldPortions);
+  useFigmaDetail('Detalle de receta', ['84:3145','457:13264']);
   const macros = recipe.card.macro_status === 'declared' ? recipe.card.macros : null;
-  const info: Array<[string, string, typeof Clock]> = [
-    ...(recipe.card.prep_minutes ? [['Preparación', `${recipe.card.prep_minutes} min`, Clock] as [string, string, typeof Clock]] : []),
-    ['Rinde', `${recipe.yieldPortions} ${recipe.yieldPortions === 1 ? 'porción' : 'porciones'}`, Knife],
-    ['Ingredientes', String(recipe.ingredients.length), CookingPot],
-    ['Total de pasos', `${recipe.steps.length} ${recipe.steps.length === 1 ? 'paso' : 'pasos'}`, ListNumbers],
-    ['Revisión', String(recipe.version), ChartBar],
-    ...(recipe.statusLabel ? [['Estado', recipe.statusLabel, Heartbeat] as [string, string, typeof Clock]] : []),
+  const info: Array<[string, string, string]> = [
+    ['Preparación', recipe.card.prep_minutes ? `${recipe.card.prep_minutes} min` : '—', 'recipe-clock'],
+    ['Cocción', '—', 'recipe-cooking'],
+    ['Dificultad', '—', 'recipe-difficulty'],
+    ['Total de pasos', `${recipe.steps.length} ${recipe.steps.length === 1 ? 'paso' : 'pasos'}`, 'recipe-steps'],
+    ['Puntuación de salud', '—', 'recipe-health'],
+    ...(recipe.statusLabel ? [['Estado', recipe.statusLabel, 'recipe-health'] as [string, string, string]] : []),
   ];
   const step = recipe.yieldPortions % 1 ? 0.5 : 1;
-  return <section className="mf-detail" aria-label={`Detalle de receta: ${recipe.title}`}>
+  return <section className="mf-detail" data-figma-node="84:3145" data-figma-mobile="457:13264" aria-label={`Detalle de receta: ${recipe.title}`}>
     <div className="mf-detail-top">
-      <button type="button" className="mf-back" onClick={onBack}><ArrowLeft size={16} aria-hidden /> Volver al menú</button>
+      <button type="button" className="mf-back" onClick={onBack}><FigmaAsset name="recipe-back" size={16} /> Volver al menú</button>
       {actions && <div className="mf-detail-actions">{actions}</div>}
     </div>
     <div className="mf-detail-grid">
       <aside className="mf-detail-left">
         <div className="mf-detail-image"><RecipeDishWell title={recipe.title} status={recipe.card.cover_status} url={recipe.card.cover_url} alt={recipe.card.cover_alt} /></div>
         <dl className="mf-detail-info">
-          {info.map(([label, value, Glyph]) => <div key={label}>
-            <dt><span><Glyph size={12} aria-hidden /></span>{label}</dt>
+          {info.map(([label, value, asset]) => <div key={label}>
+            <dt><span><FigmaAsset name={asset} size={12} /></span>{label}</dt>
             <dd>{value}</dd>
           </div>)}
         </dl>
+        <section className="fp-recipe-reviews" aria-label="Reseñas"><header><h3>Reseñas</h3><span className="fp-rating-empty"><span aria-hidden="true">{[0,1,2,3,4].map((index) => <FigmaAsset key={index} name="star" size={14} />)}</span>— / 5</span></header><div className="fp-review-empty"><p>No hay reseñas disponibles para esta receta.</p><span className="fp-review-avatar" aria-hidden="true" /></div></section>
       </aside>
 
       <article className="mf-detail-content">
@@ -142,6 +145,7 @@ export function RecipeDetails({ recipe, onBack, actions }: {
           <span className="mf-badge" data-slot={recipe.card.category}>{recipe.card.category}</span>
           <p>{recipe.nutrientSource ? `Fuente nutricional declarada: ${recipe.nutrientSource}.` : 'Sin fuente nutricional declarada.'}</p>
         </div>
+        <section className="fp-recipe-tools" aria-label="Utensilios"><h3>Utensilios y equipo</h3><div><p className="mf-muted">Sin utensilios declarados.</p></div></section>
         <section className="mf-detail-steps" aria-label="Pasos">
           <h3>Pasos</h3>
           {recipe.steps.length ? <ol>{recipe.steps.map((text, index) => <li key={`${index}-${text}`}>
@@ -149,6 +153,7 @@ export function RecipeDetails({ recipe, onBack, actions }: {
             <p>{text}</p>
           </li>)}</ol> : <p className="mf-muted">Sin pasos cargados.</p>}
         </section>
+        <section className="fp-recipe-notes" aria-label="Notas de preparación"><h3>Notas</h3><p className="mf-muted">Sin notas de preparación declaradas.</p></section>
       </article>
 
       <aside className="mf-detail-right">
@@ -156,9 +161,9 @@ export function RecipeDetails({ recipe, onBack, actions }: {
           <div className="mf-servings-head">
             <h3>Porciones</h3>
             <div className="mf-stepper">
-              <button type="button" aria-label="Menos porciones" disabled={servings <= step} onClick={() => setServings((value) => Math.max(step, value - step))}><Minus size={16} aria-hidden /></button>
+              <button type="button" aria-label="Menos porciones" disabled={servings <= step} onClick={() => setServings((value) => Math.max(step, value - step))}><FigmaAsset name="recipe-minus" size={16} /></button>
               <output aria-live="polite" aria-label="Porciones">{servings}</output>
-              <button type="button" aria-label="Más porciones" disabled={servings >= 50} onClick={() => setServings((value) => Math.min(50, value + step))}><Plus size={16} aria-hidden /></button>
+              <button type="button" aria-label="Más porciones" disabled={servings >= 50} onClick={() => setServings((value) => Math.min(50, value + step))}><FigmaAsset name="recipe-plus" size={16} /></button>
             </div>
           </div>
           <h3>Ingredientes</h3>
@@ -166,18 +171,21 @@ export function RecipeDetails({ recipe, onBack, actions }: {
             <span>{index + 1}</span>{scaleQuantity(item.quantity, recipe.yieldPortions, servings)} {item.unit} {item.name}
           </li>)}</ol> : <p className="mf-muted">Sin ingredientes cargados.</p>}
         </section>
-        {macros ? <>
+        <>
           <RecipeMacroTiles macros={macros} variant="row" />
           <section className="mf-facts" aria-label="Información nutricional">
             <h3>Información nutricional</h3>
             <dl>
-              <div className="mf-facts-main"><dt>Calorías</dt><dd><small>Por porción</small>{macros.kcal == null ? '—' : `${macros.kcal} kcal`}</dd></div>
-              <div><dt>Carbohidratos</dt><dd>{macros.carbs_g == null ? '—' : `${macros.carbs_g} g`}</dd></div>
-              <div><dt>Proteínas</dt><dd>{macros.protein_g == null ? '—' : `${macros.protein_g} g`}</dd></div>
-              <div><dt>Grasas</dt><dd>{macros.fat_g == null ? '—' : `${macros.fat_g} g`}</dd></div>
+              <div className="mf-facts-main"><dt>Calorías</dt><dd><small>Por porción</small>{macros?.kcal == null ? '—' : `${macros.kcal} kcal`}</dd></div>
+              <div><dt>Carbohidratos</dt><dd>{macros?.carbs_g == null ? '—' : `${macros.carbs_g} g`}</dd></div>
+              <div><dt>Proteínas</dt><dd>{macros?.protein_g == null ? '—' : `${macros.protein_g} g`}</dd></div>
+              <div><dt>Grasas</dt><dd>{macros?.fat_g == null ? '—' : `${macros.fat_g} g`}</dd></div>
+              <div><dt>Fibra</dt><dd>—</dd></div><div><dt>Sodio</dt><dd>—</dd></div>
+              <div><dt>Colesterol</dt><dd>—</dd></div><div><dt>Azúcares</dt><dd>—</dd></div><div><dt>Vitamina C</dt><dd>—</dd></div>
             </dl>
           </section>
-        </> : <p className="mf-facts-missing" role="status">{recipe.card.macro_status === 'failed' ? 'La IA no devolvió macros.' : 'Sin macros declarados.'}</p>}
+        </>
+        {!macros && <p className="mf-facts-missing" role="status">{recipe.card.macro_status === 'failed' ? 'La IA no devolvió macros.' : 'Sin macros declarados.'}</p>}
       </aside>
     </div>
   </section>;

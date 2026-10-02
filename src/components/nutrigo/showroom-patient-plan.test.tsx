@@ -96,6 +96,7 @@ describe('Plan semanal paciente Nutrigo (tabla del .fig)', () => {
   it('muestra un vacío honesto cuando no hay plan', () => {
     const html = renderToStaticMarkup(<ShowroomPatientPlan patient={{ ...patient, todayPlan: [], weekPlan: [] }} now={monday} query="" />);
     expect(html).toContain('Tu plan está en preparación');
-    expect(html).not.toContain('data-plan-day');
+    expect(html.match(/data-plan-day=/g)).toHaveLength(7);
+    expect(html).toContain('Sin indicación');
   });
 });

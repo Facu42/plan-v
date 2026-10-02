@@ -76,7 +76,7 @@ describe('PV-40 formato de card y CTA', () => {
     expect(catalog).toContain('No se inventan calorías ni macros');
   });
 
-  it('el detalle de receta sigue el archivo con datos reales y sin reseñas ni health score', () => {
+  it('el detalle conserva los campos del archivo sin inventar reseñas ni valores nutricionales', () => {
     const detail = {
       id: 'r1', title: 'Bowl de lentejas', version: 2, yieldPortions: 2, steps: ['Lavar.', 'Cocinar.'],
       nutrientSource: 'Tabla del consultorio', ingredients: [{ id: 'i1', name: 'Lentejas', quantity: 80, unit: 'g' as const }],
@@ -89,10 +89,13 @@ describe('PV-40 formato de card y CTA', () => {
     expect(html).toContain('Información nutricional');
     expect(html).toContain('185 kcal');
     expect(html).toContain('Publicada');
-    expect(html).not.toMatch(/reseñas|reviews|health score|dificultad|fibra|sodio/i);
+    expect(html).toContain('No hay reseñas disponibles');
+    expect(html).toContain('Sin utensilios declarados');
+    expect(html.replace(/<[^>]*>/g, '')).not.toMatch(/125 personas|4\.8|9\/10|Sarah Murad/i);
     const bare = renderToStaticMarkup(<RecipeDetails recipe={{ ...detail, card: { ...card, macro_status: 'unavailable', macros: null } }} onBack={() => {}} />);
     expect(bare).toContain('Sin macros declarados.');
-    expect(bare).not.toContain('Información nutricional');
+    expect(bare).toContain('Información nutricional');
+    expect(bare).not.toContain('185 kcal');
   });
 
   it('las porciones escalan las cantidades de la receta sin inventar datos', () => {

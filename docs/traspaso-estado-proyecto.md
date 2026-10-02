@@ -46,9 +46,11 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
 ## Lo pendiente
 
 - Corrección de Figma y accesos del consultorio preparada en
-  `codex/figma-crm-funcional`: MCP de las 24 vistas, assets originales, Inicio/Ejercicio,
-  accesos Pacientes/Ficha/Plan y selección conservada. Pruebas locales a 1440/390;
-  1.114 pruebas aprobadas. Pendiente integrar [PR #46](https://github.com/Facu42/plan-v/pull/46) para que se publique.
+  `codex/figma-crm-funcional`: MCP de las 24 vistas; ampliado el 2026-10-02 a los bloques
+  originales de las doce pantallas del paciente y sus móviles/detalles, 81 SVG locales,
+  accesos Pacientes/Ficha/Plan y selección conservada. Pruebas 1440/390, porciones,
+  ordenamiento y guardado protegido; 1.114 pruebas aprobadas. Sin tocar producción ni
+  contratar recursos. Pendiente integrar [PR #46](https://github.com/Facu42/plan-v/pull/46) para que se publique.
   Ver `docs/figma-crm-funcional-2026-10-01.md`.
 
 - Seguridad, punto 4: prueba con cuatro sesiones reales en Supabase temporal de

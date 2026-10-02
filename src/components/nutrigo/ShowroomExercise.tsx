@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Icon } from '../shared/Icon';
-import { MagnifyingGlass } from '@phosphor-icons/react';
+import { FigmaAsset } from './FigmaPatientFront';
 import { CarePanel } from './CarePanel';
 import { useCare } from './useCare';
 import { NvBadge, NvButton, NvState } from './primitives';
@@ -76,6 +76,7 @@ export function ShowroomExercise({
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [tablePage, setTablePage] = useState(0);
+  const [sort, setSort] = useState<{ key: 'name' | 'sets' | 'amount' | 'rest' | 'kcal' | 'state'; descending: boolean } | null>(null);
   const [activityOpen, setActivityOpen] = useState(false);
   const { data: care, error: careError } = useCare(patient.id, professional);
   const [feedbackNote, setFeedbackNote] = useState('');
@@ -120,6 +121,10 @@ export function ShowroomExercise({
     ...(care?.records ?? []).flatMap((record) => record.data.kind === 'activity' ? [{ id: record.id, name: record.data.activity, sets: '—', amount: `${record.data.minutes} min`, rest: '—', kcal: record.data.kcal === null ? '—' : `${record.data.kcal} declaradas`, state: 'Registrada' }] : []),
   ];
   const visibleRows = exerciseRows.filter((row) => row.name.toLocaleLowerCase('es').includes(search.trim().toLocaleLowerCase('es')) && (filter === 'all' || row.state === filter));
+  if (sort) visibleRows.sort((a, b) => {
+    const compare = a[sort.key].localeCompare(b[sort.key], 'es', { numeric: true });
+    return sort.descending ? -compare : compare;
+  });
   const lastPage = Math.max(0, Math.ceil(visibleRows.length / 12) - 1);
   const currentPage = Math.min(tablePage, lastPage);
   const tableRows = visibleRows.slice(currentPage * 12, (currentPage + 1) * 12);
@@ -168,16 +173,16 @@ export function ShowroomExercise({
 
   return <section className="nvexercise" aria-label={professional ? `Ejercicio de ${patient.name}` : 'Actividad física'}>
     <div className="nvexercise-toolbar">
-      <label><MagnifyingGlass size={14} aria-hidden="true" /><input type="search" aria-label="Buscar ejercicios" placeholder="Buscar ejercicios…" value={search} onChange={(event) => { setSearch(event.target.value); setTablePage(0); }} /></label>
+      <label><FigmaAsset name="exercise-search" size={14} /><input type="search" aria-label="Buscar ejercicios" placeholder="Buscar ejercicios…" value={search} onChange={(event) => { setSearch(event.target.value); setTablePage(0); }} /></label>
       <select aria-label="Estado del ejercicio" value={filter} onChange={(event) => { setFilter(event.target.value); setTablePage(0); }}><option value="all">Todos los estados</option>{['Asignada', 'Completada', 'Pausada', 'Registrada'].map((state) => <option key={state}>{state}</option>)}</select>
-      {!professional && <NvButton onClick={() => setActivityOpen((open) => !open)} aria-expanded={activityOpen} aria-controls="exercise-registration"><Icon name="plus" size={14} />Registrar actividad</NvButton>}
+      {!professional && <NvButton onClick={() => setActivityOpen((open) => !open)} aria-expanded={activityOpen} aria-controls="exercise-registration"><FigmaAsset name="exercise-plus" size={14} />Registrar actividad</NvButton>}
     </div>
     {careError && <NvState kind="error" title="No pudimos actualizar la actividad registrada" description={careError} />}
     {error && <NvState kind="error" title="No se pudo cargar el ejercicio" description={error} />}
     {loading && !remote && <NvState kind="loading" title="Cargando ejercicios…" description="Consultando las rutinas y actividades registradas." />}
     <div className="nvexercise-table-scroll" role="region" aria-label="Ejercicios y actividades" tabIndex={0}>
-      <table className="nvexercise-table"><thead><tr><th>Ejercicio</th><th>Series</th><th>Repeticiones / tiempo</th><th>Pausa</th><th>Peso</th><th>Calorías</th><th>Estado</th></tr></thead>
-        <tbody>{tableRows.map((row, index) => <tr key={row.id}><th scope="row"><span className={`nvexercise-table-icon tone-${index % 3}`}><Icon name="heart" size={16} /></span>{row.name}</th><td>{row.sets}</td><td>{row.amount}</td><td>{row.rest}</td><td>—</td><td>{row.kcal}</td><td><NvBadge tone={row.state === 'Pausada' ? 'gold' : 'green'}>{row.state}</NvBadge></td></tr>)}</tbody>
+      <table className="nvexercise-table"><thead><tr>{([['name','Ejercicio'],['sets','Series'],['amount','Repeticiones / tiempo'],['rest','Pausa'],[null,'Peso'],['kcal','Calorías'],['state','Estado']] as const).map(([key,label]) => <th key={label} scope="col" aria-sort={key && sort?.key === key ? sort.descending ? 'descending' : 'ascending' : 'none'}>{key ? <button type="button" onClick={() => { setSort({key, descending: sort?.key === key && !sort.descending}); setTablePage(0); }}>{label}<FigmaAsset name="exercise-sort" size={14} /></button> : label}</th>)}</tr></thead>
+        <tbody>{tableRows.map((row, index) => <tr key={row.id}><th scope="row"><span className={`nvexercise-table-icon tone-${index % 3}`}><FigmaAsset name={/sentadilla/i.test(row.name) ? "exercise-squat" : /movilidad|equilibrio|estiramiento/i.test(row.name) ? "exercise-yoga" : "exercise-run"} size={18} /></span>{row.name}</th><td>{row.sets}</td><td>{row.amount}</td><td>{row.rest}</td><td>—</td><td>{row.kcal}</td><td><NvBadge tone={row.state === 'Pausada' ? 'gold' : 'green'}>{row.state}</NvBadge></td></tr>)}</tbody>
       </table>
       {!tableRows.length && !loading && !error && !careError && <NvState title="Sin ejercicios para mostrar" description="Las rutinas asignadas y la actividad registrada aparecerán acá." />}
     </div>

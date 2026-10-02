@@ -17,6 +17,7 @@ import {
 } from '../../types/progress';
 import './showroom-progress.css';
 import './progreso-recursos-fig.css';
+import { FigmaBodyMap, FigmaRecordDialog } from './FigmaPatientFront';
 
 /* Progreso = frame 25 "Progress" (105:2790; móvil 498:18237).
    Cuerpo 767 + 20 + 374. Izquierda: Main Info (440 + 20 + 275) y la tabla de medidas;
@@ -145,6 +146,13 @@ export function ShowroomProgress({
   const [remote, setRemote] = useState<PatientProgressView | null>(injected ?? null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(!injected);
+  const [recordsOpen, setRecordsOpen] = useState(false);
+  const [revision, setRevision] = useState(0);
+  useEffect(() => {
+    const reload = () => setRevision((value) => value + 1);
+    window.addEventListener('plan-v:care-changed', reload);
+    return () => window.removeEventListener('plan-v:care-changed', reload);
+  }, []);
 
   useEffect(() => {
     if (injected) {
@@ -166,7 +174,7 @@ export function ShowroomProgress({
       setError(careErrorMessage(failure));
     });
     return () => controller.abort();
-  }, [patient.id, days, injected]);
+  }, [patient.id, days, injected, revision]);
 
   const weight = remote?.measurements_included ? remote.series.find((series) => series.kind === 'weight') ?? null : null;
   const weightPoints = weight ? [...weight.previous, ...weight.current] : [];
@@ -177,62 +185,73 @@ export function ShowroomProgress({
   const mealScale = Math.max(4, Math.ceil(view.maxMeals / 4) * 4);
   const mealTicks = [1, 0.75, 0.5, 0.25, 0].map((share) => mealScale * share);
   const today = patient.journey.days.find((day) => day.isToday);
+  const calories = patient.journey.days.map((day) => {
+    const reviewed = patient.logs.filter((log) => day.mealLogIds.includes(log.id) && log.status !== 'pending_review' && log.macros !== null);
+    return { ...day, consumed: reviewed.length ? reviewed.reduce((sum,log) => sum + (log.macros?.kcal ?? 0), 0) : null };
+  });
+  const calorieScale = Math.max(2000, Math.ceil(Math.max(...calories.map((day) => day.consumed ?? 0)) / 500) * 500);
+  const calorieTotal = calories.some((day) => day.consumed !== null) ? calories.reduce((sum,day) => sum + (day.consumed ?? 0), 0) : null;
 
   return <section className="nvp-progress nvpf" aria-label={professional ? `Progreso de ${patient.name}` : 'Progreso del paciente'}>
     <div className="nvpf-body">
       <div className="nvpf-main">
         <div className="nvpf-info">
-          {/* Image Area (161:6761): Plan V no tiene la ilustración del cuerpo; en su lugar van
-              los registros personales de medidas, que es de donde salen esos valores. */}
-          <div className="nvpf-image"><CarePanel patientId={patient.id} mode={professional ? 'professional' : 'progress'} /></div>
+          {/* El frame original usa un área gris con conectores; las medidas respetan el permiso. */}
+          <div className="nvpf-image">{professional ? <CarePanel patientId={patient.id} mode="professional" /> : <FigmaBodyMap series={remote?.measurements_included ? remote.series : []} onRecord={() => setRecordsOpen(true)} />}</div>
           <div className="nvpf-side">
             <section className="nvpf-widget nvpf-weight" aria-label={professional ? `Objetivo de ${patient.name}` : 'Tu objetivo'}>
-              <header className="nvpf-head"><h3>{professional ? `Objetivo de ${patient.name}` : 'Tu objetivo'}</h3></header>
+              <header className="nvpf-head"><h3>{professional ? `Objetivo de ${patient.name}` : 'Seguimiento de peso'}</h3>{!professional && <button type="button" className="fp-more" aria-label="Registrar peso y medidas" onClick={() => setRecordsOpen(true)}>···</button>}</header>
               <div className="nvpf-weight-body">
-                <p className="nvpf-goal-text">{patient.goal || 'Sin objetivo publicado'}</p>
-                <dl className="nvpf-rows">
+                {!professional && <PeriodPicker days={days} onChange={setDays} />}
+                {professional && <p className="nvpf-goal-text">{patient.goal || 'Sin objetivo publicado'}</p>}
+                {professional ? <dl className="nvpf-rows">
                   <div><dt>Avance del objetivo</dt><dd><strong>{goalProgress}</strong><span>%</span></dd></div>
                   <div><dt>Adherencia actual</dt><dd><strong>{patient.adherence}</strong><span>%</span></dd></div>
                   <div><dt>Peso declarado</dt><dd>{weightPoints.length ? <><strong>{formatQty(weightPoints[weightPoints.length - 1].value)}</strong><span>{weight!.unit}</span></> : <strong>—</strong>}</dd></div>
-                </dl>
+                </dl> : <dl className="nvpf-rows">
+                  <div><dt>Peso inicial</dt><dd><strong>—</strong><span>{weight?.unit ?? 'kg'}</span></dd></div>
+                  <div><dt>Peso del período</dt><dd><strong>{weight?.current_last ? formatQty(weight.current_last.value) : '—'}</strong><span>{weight?.unit ?? 'kg'}</span></dd></div>
+                  <div><dt>Meta de peso</dt><dd><strong>—</strong><span>kg</span></dd></div>
+                </dl>}
                 {weight && <WeightChart series={weight} />}
                 {weight && <p className="nvpf-note">{formatDelta(weight)}</p>}
                 {remote && !remote.measurements_included && <p className="nvpf-note">Las medidas no se muestran: falta el permiso de peso y medidas.</p>}
               </div>
             </section>
-            <section className="nvpf-meals" aria-label="Comidas de esta semana">
+            {professional ? <section className="nvpf-meals" aria-label="Comidas de esta semana">
               <header className="nvpf-head"><h3>Comidas de esta semana</h3><NvBadge>{view.recentLogs.length}</NvBadge></header>
               {view.recentLogs.length ? <div className="nvpf-carousel" role="region" aria-label="Comidas registradas" tabIndex={0}>{view.recentLogs.map((log) => <article key={log.id}>
                 <header><small>{new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' }).format(new Date(log.logged_at))}</small><strong>{log.slot}</strong></header>
                 <div><p>{log.description || 'Sin descripción registrada'}</p><NvBadge tone={log.status === 'pending_review' ? 'gold' : 'green'}>{log.status === 'pending_review' ? 'En revisión' : log.status === 'adjusted' ? 'Ajustada' : 'Confirmada'}</NvBadge></div>
               </article>)}</div> : <NvState title="Sin comidas registradas esta semana" description={professional ? 'Cuando registre comidas, sus estados aparecerán acá.' : 'Cuando registres comidas, sus estados aparecerán acá.'} />}
-            </section>
+            </section> : <section className="nvpf-meals fp-progress-photos" aria-label="Fotos de progreso"><header className="nvpf-head"><h3>Fotos de progreso</h3><button type="button" className="nvpf-chip" onClick={() => setRecordsOpen(true)}>Ver todas</button></header><div className="fp-photo-slots">{[0,1].map((slot) => <button type="button" key={slot} onClick={() => setRecordsOpen(true)} aria-label="Abrir mis fotos privadas"><span><small>Foto privada</small><strong>—</strong></span><span className="fp-photo-placeholder" aria-hidden="true" /></button>)}</div><p className="fp-sr">Las fotos se abren desde tus registros con tu permiso.</p></section>}
           </div>
         </div>
-        {remote?.measurements_included && <section className="nvpf-table" aria-label="Medidas declaradas">
+        {(remote?.measurements_included || !professional) && <section className="nvpf-table" aria-label="Medidas declaradas">
           <table>
-            <thead><tr><th scope="col">{shortDate(remote.previous.start)} – {shortDate(remote.current.end)}</th>{TABLE_KINDS.map(({ kind, label }) => <th scope="col" key={kind}>{label} ({remote.series.find((series) => series.kind === kind)?.unit ?? (kind === 'weight' ? 'kg' : 'cm')})</th>)}</tr></thead>
-            <tbody>{rows.length ? rows.map((row) => <tr key={row.date}><th scope="row">{shortDate(row.date)} · {row.sources.join(' y ')}</th>{TABLE_KINDS.map(({ kind }) => <td key={kind}><span>{row.values[kind] ?? '—'}</span></td>)}</tr>) : <tr><td colSpan={4} className="nvpf-empty-row">Sin medidas en estos períodos. No se completa un período vacío ni se arrastra un valor más antiguo.</td></tr>}</tbody>
+            <thead><tr><th scope="col">{remote ? `${shortDate(remote.previous.start)} – ${shortDate(remote.current.end)}` : 'Medidas'}</th>{(professional ? TABLE_KINDS : [{kind: null,label:'Pecho'},{kind: null,label:'Brazo'},{kind:'waist' as const,label:'Cintura'},{kind:'hip' as const,label:'Cadera'},{kind:null,label:'Muslo'}]).map(({ kind, label }) => <th scope="col" key={label}>{label} ({remote?.series.find((series) => series.kind === kind)?.unit ?? (kind === 'weight' ? 'kg' : 'cm')})</th>)}</tr></thead>
+            <tbody>{rows.length ? rows.map((row) => <tr key={row.date}><th scope="row">{shortDate(row.date)} · {row.sources.join(' y ')}</th>{(professional ? TABLE_KINDS : [{kind:null,label:'Pecho'},{kind:null,label:'Brazo'},{kind:'waist' as const,label:'Cintura'},{kind:'hip' as const,label:'Cadera'},{kind:null,label:'Muslo'}]).map(({ kind, label }) => <td key={label}><span>{kind ? row.values[kind] ?? '—' : '—'}</span></td>)}</tr>) : <tr><td colSpan={professional ? 4 : 6} className="nvpf-empty-row">Sin medidas en estos períodos. No se completa un período vacío ni se arrastra un valor más antiguo.</td></tr>}</tbody>
           </table>
         </section>}
       </div>
 
       <div className="nvpf-rail">
         <section className="nvpf-widget nvpf-activity" aria-label="Comparativa del mismo paciente">
-          <header className="nvpf-head"><h3>Comidas</h3><PeriodPicker days={days} onChange={setDays} /></header>
+          <header className="nvpf-head"><h3>{professional ? 'Comidas' : 'Actividad calórica'}</h3>{professional ? <PeriodPicker days={days} onChange={setDays} /> : <span className="nvpf-chip">Últimos 7 días</span>}</header>
           {error && <NvState kind="error" title="No se pudo cargar el progreso" description={error} />}
           {loading && !remote && <NvState kind="loading" title="Cargando períodos…" description="Comparativa del mismo paciente, sin rankings." />}
-          {remote && <div className="nvpf-top">
+          {!professional && <div className="nvpf-top"><div className="nvpf-total"><p><strong>{calorieTotal ?? '—'}</strong><span>kcal declaradas</span></p><small>Consumo registrado en los últimos 7 días. Sin calorías quemadas declaradas.</small></div><ul className="nvpf-legend"><li><i className="reviewed" />Consumidas</li><li><i className="pending" />Quemadas · —</li></ul></div>}
+          {professional && remote && <div className="nvpf-top">
             <div className="nvpf-total"><p><strong>{remote.meals.current.logged}</strong><span>comidas registradas</span></p><small>Período anterior: {remote.meals.previous.logged} · {remote.meals.current.reviewed} revisadas</small></div>
             <ul className="nvpf-legend"><li><i className="reviewed" />Revisadas</li><li><i className="pending" />En revisión</li></ul>
           </div>}
-          <div className="nvpf-columns" role="img" aria-label={`Comidas por día: ${patient.journey.days.map((day) => `${day.isToday ? 'hoy' : day.label} ${day.reviewedMeals} revisadas y ${day.pendingMeals} en revisión`).join(', ')}`}>
-            <div className="nvpf-y" aria-hidden="true">{mealTicks.map((tick, index) => <span key={index}>{formatQty(tick)}</span>)}<span /></div>
+          <div className="nvpf-columns" role="img" aria-label={professional ? `Comidas por día: ${patient.journey.days.map((day) => `${day.isToday ? 'hoy' : day.label} ${day.reviewedMeals} revisadas y ${day.pendingMeals} en revisión`).join(', ')}` : `Calorías declaradas por día: ${calories.map((day) => `${day.label}: ${day.consumed ?? 'sin datos'}`).join(', ')}`}>
+            <div className="nvpf-y" aria-hidden="true">{(professional ? mealTicks : [1,.75,.5,.25,0].map((share) => share * calorieScale)).map((tick, index) => <span key={index}>{formatQty(tick)}</span>)}<span /></div>
             {patient.journey.days.map((day) => <div className="nvpf-col" key={day.date}>
               <div className="nvpf-lines" aria-hidden="true">{[0, 1, 2, 3, 4].map((line) => <i key={line} />)}
                 <div className="nvpf-pair">
-                  <b className="reviewed" style={{ height: `${view.maxMeals ? day.reviewedMeals / mealScale * 100 : 0}%` }} />
-                  <b className="pending" style={{ height: `${view.maxMeals ? day.pendingMeals / mealScale * 100 : 0}%` }} />
+                  <b className="reviewed" style={{ height: `${professional ? view.maxMeals ? day.reviewedMeals / mealScale * 100 : 0 : (calories.find((entry) => entry.date === day.date)?.consumed ?? 0) / calorieScale * 100}%` }} />
+                  <b className="pending" style={{ height: `${professional && view.maxMeals ? day.pendingMeals / mealScale * 100 : 0}%` }} />
                 </div>
               </div>
               <span>{day.isToday ? 'Hoy' : day.label}</span>
@@ -269,5 +288,6 @@ export function ShowroomProgress({
         </section>
       </div>
     </div>
+    {!professional && recordsOpen && <FigmaRecordDialog title="Mis registros de progreso" onClose={() => setRecordsOpen(false)}><CarePanel patientId={patient.id} mode="progress" /></FigmaRecordDialog>}
   </section>;
 }

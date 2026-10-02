@@ -1,88 +1,49 @@
-# Figma y accesos del consultorio
+# Frontend de Figma y consultorio funcional
 
-Fecha: 2026-10-01. Rama: `codex/figma-crm-funcional`.
-Trabajo preparado en [PR #46](https://github.com/Facu42/plan-v/pull/46); producción sigue en su versión anterior.
-No se aplicaron migraciones, cambios de configuración ni servicios nuevos.
+Iniciado 2026-10-01; actualizado 2026-10-02. Rama `codex/figma-crm-funcional`.
+[PR #46](https://github.com/Facu42/plan-v/pull/46). Pendiente integrar para publicar.
+Sin cambios de base, configuración de producción, generación de IA ni recursos pagos.
 
-## Fuente y alcance
+## Fuente y trabajo realizado
 
-Se usó el MCP de Figma para obtener código y captura de doce pantallas de Nutrigo
-y sus doce versiones móviles. El [inventario de los 24 nodos](../design/figma-reference/manifest.json)
-registra las huellas del código recibido y de los 19 SVG originales usados en la app.
-La [nota de adaptación](../design/figma-reference/README.md) explica las medidas y los
-estados que Figma no dibuja. La referencia completa queda localmente en
-`.gstack/figma-reference`; no se incorporan URLs temporales a la aplicación.
+Se tomó código y captura de las doce pantallas originales de Nutrigo y sus doce versiones móviles mediante el MCP de Figma. Se tradujo ese frontend a React y CSS nativo, conectado a datos y operaciones existentes de Plan V. Esta segunda pasada amplía la adaptación anterior de estilos comunes: recupera los bloques, orden, espacios y componentes del frente de paciente.
 
-Se conservaron los componentes existentes de Agenda, Menú, Plan, Compras, Diario,
-Progreso y Recursos, ajustando su piel común. Se recompusieron Inicio y Ejercicio;
-se corrigieron fondos, placeholders y tarjetas del detalle de recurso y receta.
-Los textos siguen en español y la identidad es Plan V.
+El [inventario de 24 nodos](../design/figma-reference/manifest.json) y el [inventario de 62 SVG adicionales](../design/figma-reference/front-assets.json) conservan fuente, dimensiones y huellas. Junto a los 19 SVG iniciales hay 81 assets originales locales, sin modificar sus archivos. [Referencia y defaults](../design/figma-reference/README.md).
 
-## Cambios funcionales
+## Pantallas del paciente
 
-- El menú profesional empieza por Inicio, Pacientes, Fichas y Planes.
-- En todas las pantallas profesionales hay accesos visibles a Pacientes, Ficha y Plan,
-  junto con un selector de paciente. Cada fila del directorio permite abrir directamente
-  la ficha o el plan de esa persona; seguimiento, edición y archivo siguen disponibles.
-- La selección se conserva al navegar y recargar mediante la URL. Un paciente que
-  no existe o está archivado muestra «Paciente no disponible», con acciones deshabilitadas;
-  no se abre por defecto la ficha de otra persona.
-- Cambiar de paciente desmonta los datos y formularios anteriores. Las respuestas
-  pendientes se abortan. Guardar los datos corporales actualiza el peso de Inicio.
-- Buscar desde Inicio paciente conserva el término al abrir el Plan.
-- El detalle de recurso conserva la ruta del consultorio y la selección. El enlace
-  para compartir no incluye el identificador del paciente.
-- El menú móvil cerrado queda fuera de la navegación por teclado. Escape lo cierra
-  y devuelve el foco al botón. Avisos y opciones de cuenta siguen en el cajón móvil.
+- Inicio: indicadores, media dona, consumo/macros, tres tarjetas de actividad, dos espacios de comidas, tres ejercicios y columna diaria 325. Formularios corporales desde diálogo, sin sustituir los bloques del diseño.
+- Agenda: tres indicadores, calendario y panel lateral; en celular, tarjetas blancas sobre crema, padding 16 y números 22. Confirmación y reprogramación conservadas.
+- Mensajes: conversación móvil de 900 y controles existentes.
+- Menú: destacado 670, imagen 298, cuatro macros y grilla 2 × 2 móvil; conserva estructura sin plan. Búsqueda, filtros, favoritos y recetas asignadas conectados.
+- Receta: foto 275, cinco datos, descripción, macros, porciones e ingredientes escalables, utensilios, pasos, notas, nueve filas nutricionales y reseñas. Orden móvil original y Facts 441. Cabecera identifica el detalle.
+- Plan: siete filas y espacios de comidas incluso sin un plan en el período; metas adicionales en apartado desplegable.
+- Compras: resumen y estado en dos gráficos, categorías y lista. Marcar, añadir y exportar conservados. Sin precios, muestra cantidades reales rotuladas como tales.
+- Diario: nueve columnas; cantidad/azúcar no disponibles quedan «—», sin exponer notas profesionales. Desplazamiento interno hasta Estado en celular.
+- Progreso: área gris y conectores, cinco etiquetas, peso, dos espacios de fotos privadas, tabla y gráficos. Registrar conserva permisos y actualiza medidas. Selector 7/30/90 para medidas; calorías rotuladas siete días.
+- Ejercicio: tabla con búsqueda, filtro, ordenamiento y paginación. Rutinas/feedback en detalles; sin inventar calorías ni habilitaciones.
+- Recursos: portada, artículos, dos espacios de videos, autores reales, etiquetas y guardados. Detalle con cuatro botones de copiar enlace, artículos en dos columnas móviles y dos videos relacionados vacíos de 160.
+- Navegación/pie: medidas originales, Plan/Compras agrupados, acceso al plan, pie después del contenido diario en celular; legales y contacto funcionales.
 
-## Cambios visuales y estados
+Los datos no soportados, reseñas y videos quedan vacíos dentro de los espacios originales. Español, marca Plan V y fotos dinámicas conservados. Descanso muestra horas/energía declaradas, sin inventar fases. Pasos, metas y calorías quemadas ausentes no se estiman. No se afirma equivalencia completa píxel por píxel: existen estas adaptaciones de datos y acciones operativas adicionales.
 
-Inicio recupera Peso, Pasos, Descanso e Hidratación; media dona de peso, registro
-nutricional, seguimiento, plan del día y ejercicios asignados. Se usan datos de la API;
-pasos y metas de peso no disponibles permanecen vacíos. La silueta de peso es el SVG
-del MCP de Figma en gris, sin simular progreso hacia una meta.
+## Consultorio y protección de datos
 
-Ejercicio usa una tabla de siete columnas, búsqueda, filtro de estado y paginación.
-La biblioteca, asignación y feedback siguen disponibles en un apartado desplegable.
-Los errores de carga se muestran junto a la tabla, sin confundirse con falta de datos.
-Se conservan los permisos de habilitación profesional del servidor.
+Pacientes, Fichas y Planes al comienzo del menú profesional. Accesos visibles a Pacientes/Ficha/Plan y selector en todas sus pantallas. Cada fila abre ficha o plan correctos; selección conservada al navegar/recargar. Una selección inexistente o archivada presenta «Paciente no disponible», no otra ficha por defecto.
 
-Se quitaron fotos de comidas elegidas arbitrariamente y el dibujo de plato que Figma
-no contiene. La ausencia de foto usa un bloque gris; las fotos reales siguen visibles.
-Se corrigió la columna vacía de 325 píxeles en pantallas profesionales sin contenido
-lateral, el icono estirado del submenú de Plan y el desbordamiento del diario móvil
-causado por un texto accesible con posición absoluta. El pie de Inicio móvil queda
-después del calendario y la actividad reciente.
+Cambiar paciente desmonta formularios/datos y aborta respuestas pendientes. Buscar desde Inicio paciente conserva el término en Plan. El detalle de recurso conserva `/crm` y selección; compartir elimina el identificador privado. El rol paciente no tiene accesos del consultorio. Menú móvil cerrado queda fuera del teclado, Escape lo cierra y devuelve el foco.
 
-Figma contiene datos de ejemplo, reseñas, autores y promociones que Plan V no tiene.
-No se copiaron como si fueran datos reales. Tampoco dibuja el consultorio: sus accesos
-y ficha son adaptaciones operativas con la misma piel. Estas diferencias están
-documentadas; no se afirma una equivalencia de todas las capturas píxel por píxel.
+Mis registros usa diálogo nativo: foco contenido, Escape y retorno al botón. Durante un guardado, Escape/cierre no desmontan el formulario ni pierden el UUID. La prueba con petición pendiente verificó un solo envío y actualización del peso.
 
-## Verificación
+## Verificación y límites
 
-- `npm test`: 213 archivos, 1.114 pruebas aprobadas y dos omitidas por configuración.
-  La repetición final usó `npm test -- --maxWorkers=4` tras agotar memoria con
-  verificaciones simultáneas; ejecutó la misma suite completa, sin omitir archivos.
-- `npm run check` y `npm run build`: aprobados.
-- Navegador gstack en modo demo local, escritorio 1440 y móvil 390: diez pantallas
-  de paciente y doce del consultorio en ambos tamaños. Sin desbordamiento horizontal
-  de documento ni iconos de fuente vacíos. El desplazamiento de las tablas es interno.
-- Detalles de receta y recurso abiertos y capturados en 1440/390. La receta de prueba
-  se creó por la interfaz en la memoria del modo demo; no se llamó a generación de IA.
-- Directorio → ficha de Marina → plan conserva selección; abrir el plan desde su fila
-  y recargar conserva el mismo paciente. Selección inexistente no muestra ficha ajena.
-- Selector y accesos probados en celular; menú probado con Escape y retorno de foco.
-- Inicio paciente → buscar «Wrap» → Plan conserva «Wrap»; el rol paciente no presenta
-  accesos del consultorio. Detalle de recurso conserva el prefijo de cada rol.
-- Revisión independiente de código y comprobación de realidad: hallazgos corregidos.
-- GitHub: suite, tipos, compilación, migraciones y secretos aprobados; 16 casos
-  adicionales de sesiones firmadas aprobados. Se corrigió el disparador de esta
-  última prueba: `push` sólo en `main`, más cada PR; antes dos ejecuciones de la
-  misma rama se cancelaban entre sí y dejaban un aviso engañoso en el PR.
+- Suite completa: 213 archivos, 1.114 pruebas aprobadas y dos omitidas por configuración. Tipos y compilación aprobados; secretos y `git diff --check` limpios.
+- gstack, datos ficticios locales, 1440/390: 44 recorridos base (diez paciente y doce consultorio, ambos tamaños), sin desbordamiento de documento ni iconos vacíos. Cuatro detalles adicionales de receta/recurso en ambos tamaños.
+- Medidas: imagen Menú 298, grilla móvil 2 × 2, miniaturas 78, tarjetas Agenda, Diario hasta Estado, conectores Progreso, Facts con nueve filas y 441 móvil, compartir 30/iconos 18. Assets de detalle cargados sin alterar dimensiones; inventario validado por SHA-256.
+- Porciones cambian/vuelven; búsqueda/orden de ejercicio probados con rutina ficticia de dos ejercicios. Formulario: modal, Escape, foco de vuelta, guardado protegido y un solo envío. Sin datos/cuentas de salud de producción.
+- Primera pasada CRM: directorio → ficha → plan y recarga conservan paciente; selección inválida no abre ficha ajena; selector también en celular.
+- Revisiones independientes de código y realidad: hallazgos del alcance corregidos.
+- El navegador automatizado rechazó copiar al portapapeles. Se verificó el error y el enlace sin selección privada; no se afirma que se copió/publicó en redes. Los botones de redes sólo copian, no publican automáticamente.
+- Los 16 casos de sesiones firmadas y CI del commit anterior estaban aprobados. La nueva ejecución de GitHub corresponde al commit ampliado del PR.
 
-Las capturas y registros locales están en `.gstack/figma-*.png` y
-`.gstack/figma-ui-*.json`. El informe de medidas sin contenido de pacientes se conserva
-en [browser-verification.json](../design/figma-reference/browser-verification.json).
-Los recorridos locales prueban esta implementación; no sustituyen una comprobación
-del despliegue después de integrar el PR.
+Capturas/evidencia locales en `.gstack/figma-*`; [informe sin contenido de pacientes](../design/figma-reference/browser-verification.json). Pendiente integrar PR y comprobar despliegue; preparar estos cambios aquí no modifica la web de producción.

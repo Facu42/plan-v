@@ -166,7 +166,7 @@ export function PatientBodyDataCard({ patientId, forceOpen = false, onSaved }: {
   }
   return <section className="nvt-card nvt-body" aria-label="Tus datos para el plan">
     <header><div><p className="nv-eyebrow">{view.requested_at ? 'Tu nutricionista te pidió actualizarlos' : 'Tus datos para el plan'}</p><h2>Contale a tu nutricionista cómo estás hoy</h2><p>Los usa para calcular tus calorías y macros. Sólo los ve ella y podés cambiarlos cuando quieras.</p></div></header>
-    <form className="nvt-form nvt-body-form" onSubmit={save}>
+    <form className="nvt-form nvt-body-form" onSubmit={save} aria-busy={busy}>
       <fieldset>
         <label>Sexo<select value={form.sex} onChange={(e) => setForm({ ...form, sex: e.target.value })}>{SEX_OPTIONS.map((s) => <option key={s} value={s}>{SEX_LABELS[s]}</option>)}</select></label>
         <label>Fecha de nacimiento<input type="date" value={form.birth_date} onChange={(e) => setForm({ ...form, birth_date: e.target.value })} /></label>

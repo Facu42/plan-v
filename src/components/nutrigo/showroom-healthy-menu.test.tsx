@@ -38,7 +38,8 @@ describe('Menú saludable paciente Nutrigo', () => {
     expect(html).toContain('2 veces esta semana');
     expect(html).toContain('np-food-placeholder');
     expect(html).toContain('Ver en plan semanal');
-    expect(html).not.toMatch(/health score|reseñas|reviews|dificultad|\/10|kcal|proteína|carbohidrato/i);
+    const text = html.replace(/<[^>]*>/g, '');
+    expect(text).not.toMatch(/9\/10|4\.8|350 kcal|45g|125 personas/i);
   });
 
   it('filtra con la búsqueda global sin mezclar otros datos', () => {
@@ -59,7 +60,8 @@ describe('Menú saludable paciente Nutrigo', () => {
   it('presenta un vacío honesto si no hay plan publicado', () => {
     const html = renderToStaticMarkup(<ShowroomHealthyMenu patient={{ ...patient, weekPlan: [] }} query="" onNavigate={() => undefined} />);
     expect(html).toContain('Tu menú está en preparación');
-    expect(html).not.toContain('Todo el menú');
+    expect(html).toContain('Todo el menú');
+    expect(html).toContain('Sin comidas publicadas');
   });
 });
 
