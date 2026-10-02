@@ -48,7 +48,8 @@ Radio 32 px en bloques y fotos, 24 px en tarjetas, píldora en botones y etiquet
 
 Usa **todos** los colores del logo como fondos de tarjetas, con pares ya probados (clases `.pv-c-gold`, `.pv-c-coral`, `.pv-c-leaf`, `.pv-c-apricot`, `.pv-c-orange`, `.pv-c-mist`, `.pv-c-green`, `.pv-c-deep`). Sobre naranja y hoja el texto va en verde profundo y con peso 500 o más; el texto blanco chico sólo sobre `--pv-green-strong` o verde profundo.
 
-- **Portada con zoom** (`.pv-zoom`): la sección mide 260 % del alto de pantalla; la foto queda fija y se acerca mientras se baja, el marco pasa de tarjeta a pantalla completa y el título se reemplaza por una segunda frase.
+- **Portada** (`.pv-hx`): la sección mide 270 % del alto de pantalla; el título gigante queda arriba, la modelo recortada (sin fondo) crece mientras se baja, los objetos 3D salen volando en capas y aparece una segunda frase abajo. El avance se suaviza como un resorte.
+- **Objetos 3D** (`.pv-obj`): frutas, verduras y un mate recortados en WebP con transparencia; flotan solos y se desplazan y giran con el scroll según su profundidad (`data-depth`).
 - **Beneficios en horizontal** (`.pv-hs`): la sección queda fija y la fila de tarjetas se corre de costado con el scroll; una barra muestra el avance.
 - **El logo** aparece en la barra, la portada, la cinta, el bloque de la diferencia, la foto de la nutricionista, el cierre (girando) y el pie.
 - Sin el script, o con "reducir movimiento", la portada es una foto quieta y los beneficios se deslizan con el dedo: nada queda escondido.

@@ -27,10 +27,12 @@ if (!reduce) {
   }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
   items.forEach((el) => io.observe(el));
 
-  const zoom = document.getElementById('zoom');
+  const hero = document.getElementById('zoom');
   const hs = document.getElementById('beneficios');
   const track = hs?.querySelector<HTMLElement>('.pv-hs__track');
   const viewport = hs?.querySelector<HTMLElement>('.pv-hs__viewport');
+  const heroObjs = [...document.querySelectorAll<HTMLElement>('.pv-obj[data-hero]')];
+  const sideObjs = [...document.querySelectorAll<HTMLElement>('.pv-obj:not([data-hero])')];
   let hsMax = 0;
 
   // La sección horizontal mide tanto como lo que tiene que recorrer la fila de tarjetas
@@ -40,14 +42,25 @@ if (!reduce) {
     hs.style.height = `${window.innerHeight + hsMax}px`;
   };
 
-  let ticking = false;
-  const update = () => {
-    ticking = false;
+  // Progreso de la portada suavizado (se acerca al valor real de a poco, como un resorte)
+  let heroTarget = 0;
+  let heroNow = 0;
+  let pending = false;
+  // Cuadro siguiente: requestAnimationFrame, con un respaldo por si el navegador lo frena
+  const schedule = () => {
+    if (pending) return;
+    pending = true;
+    const run = () => { if (!pending) return; pending = false; frame(); };
+    requestAnimationFrame(run);
+    window.setTimeout(run, 40);
+  };
+
+  const read = () => {
     const vh = window.innerHeight;
-    if (zoom) {
-      const r = zoom.getBoundingClientRect();
+    if (hero) {
+      const r = hero.getBoundingClientRect();
       const total = r.height - vh;
-      zoom.style.setProperty('--p', total > 0 ? clamp01(-r.top / total).toFixed(4) : '0');
+      heroTarget = total > 0 ? clamp01(-r.top / total) : 0;
     }
     if (hs && hsMax > 0) {
       const r = hs.getBoundingClientRect();
@@ -55,12 +68,38 @@ if (!reduce) {
       hs.style.setProperty('--x', `${(-p * hsMax).toFixed(1)}px`);
       hs.style.setProperty('--hp', p.toFixed(4));
     }
+    sideObjs.forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.bottom < -200 || r.top > vh + 200) return;
+      const k = Number(el.dataset.depth || 0.6);
+      const off = (r.top + r.height / 2 - vh / 2) * k;
+      el.style.transform = `translate3d(0, ${(-off * 0.35).toFixed(1)}px, 0) rotate(${(off * 0.04).toFixed(2)}deg)`;
+    });
   };
-  const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+
+  function frame() {
+    heroNow += (heroTarget - heroNow) * 0.12;
+    if (Math.abs(heroTarget - heroNow) < 0.0005) heroNow = heroTarget;
+    if (hero) {
+      hero.style.setProperty('--p', heroNow.toFixed(4));
+      const vh = window.innerHeight;
+      heroObjs.forEach((el, i) => {
+        const k = Number(el.dataset.depth || 1);
+        const dir = i % 2 ? 1 : -1;
+        el.style.transform = `translate3d(${(dir * heroNow * k * 6).toFixed(2)}vw, ${(-heroNow * k * vh * 0.55).toFixed(1)}px, 0) rotate(${(dir * heroNow * k * 70).toFixed(1)}deg) scale(${(1 + heroNow * k * 0.35).toFixed(3)})`;
+      });
+    }
+    if (heroNow !== heroTarget) schedule();
+  }
+
+  const onScroll = () => {
+    read();
+    schedule();
+  };
   const onResize = () => { measure(); onScroll(); };
 
   measure();
-  update();
+  onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onResize);
   window.addEventListener('load', onResize);

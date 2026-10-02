@@ -8,7 +8,7 @@
     <meta name="description" content="Plan V no es solo una app para contar calorías: es el contacto con tu nutricionista, con mensajes, consultas programadas, tu plan y la lista de compras en un mismo lugar." />
     <meta property="og:title" content="Plan V: tu nutricionista, en el bolsillo" />
     <meta property="og:description" content="Mensajes, consultas, tu plan y la lista de compras, con una nutricionista profesional del otro lado." />
-    <meta property="og:image" content="/landing/v2-hero-wide.jpg" />
+    <meta property="og:image" content="/landing/v3-og.jpg" />
     <link rel="icon" href="/icons/icon-192.png" />
   </head>
   <body class="pv">
@@ -29,30 +29,29 @@
     </header>
 
     <main id="contenido">
-      <!-- 1. Portada: la foto se acerca a medida que se baja -->
-      <section class="pv-zoom" id="zoom" aria-labelledby="hero-titulo">
-        <div class="pv-zoom__stage">
-          <div class="pv-zoom__frame">
-            <picture>
-              <source media="(min-aspect-ratio: 1/1)" srcset="/landing/v2-hero-wide.jpg" />
-              <img class="pv-zoom__img" src="/landing/v2-hero-tall.jpg" alt="Un hombre sonríe mirando su celular frente a un plato de comida casera en su cocina." fetchpriority="high" />
-            </picture>
-            <div class="pv-zoom__shade" aria-hidden="true"></div>
-          </div>
-          <img class="pv-zoom__badge" src="/landing/logo.png" alt="" width="120" height="120" aria-hidden="true" />
-          <div class="pv-zoom__copy pv-zoom__copy--a">
+      <!-- 1. Portada: la modelo crece al bajar, el título queda arriba y los objetos 3D se mueven -->
+      <section class="pv-hx" id="zoom" aria-labelledby="hero-titulo">
+        <div class="pv-hx__stage">
+          <div class="pv-hx__bg" aria-hidden="true"><i class="pv-hx__grid"></i><i class="pv-hx__glow"></i></div>
+          <h1 id="hero-titulo" class="pv-hx__title"><span>Tu nutri,</span><em>en el bolsillo.</em></h1>
+          <img class="pv-hx__model" src="/landing/v3-hero-modelo.webp" alt="Una mujer sonriente en ropa deportiva sostiene su celular." fetchpriority="high" />
+          <span class="pv-obj" data-hero data-depth="1.1" style="--x: 6%; --y: 30%; --w: clamp(70px, 11vw, 150px);" aria-hidden="true"><img src="/landing/obj-palta.webp" alt="" /></span>
+          <span class="pv-obj" data-hero data-depth="0.7" style="--x: 80%; --y: 26%; --w: clamp(56px, 8vw, 116px);" aria-hidden="true"><img src="/landing/obj-frutilla.webp" alt="" /></span>
+          <span class="pv-obj" data-hero data-depth="1.4" style="--x: 86%; --y: 58%; --w: clamp(64px, 9vw, 130px);" aria-hidden="true"><img src="/landing/obj-limon.webp" alt="" /></span>
+          <span class="pv-obj" data-hero data-depth="0.9" style="--x: 3%; --y: 64%; --w: clamp(58px, 8vw, 118px);" aria-hidden="true"><img src="/landing/obj-kiwi.webp" alt="" /></span>
+          <span class="pv-obj" data-hero data-depth="1.6" style="--x: 22%; --y: 46%; --w: clamp(40px, 5vw, 76px);" aria-hidden="true"><img src="/landing/obj-tomate.webp" alt="" /></span>
+          <span class="pv-obj" data-hero data-depth="1.2" style="--x: 68%; --y: 40%; --w: clamp(44px, 6vw, 90px);" aria-hidden="true"><img src="/landing/obj-hoja.webp" alt="" /></span>
+          <img class="pv-hx__badge" src="/landing/logo.png" alt="" width="120" height="120" aria-hidden="true" />
+          <div class="pv-hx__card">
             <p class="pv-tag">Para quien quiere comer mejor, con alguien al lado</p>
-            <h1 id="hero-titulo" class="pv-h1">Tu nutricionista,<br /><em>en el bolsillo.</em></h1>
-            <p class="pv-zoom__lead">Tu plan, tus dudas y tus consultas con una profesional de verdad, en la misma app.</p>
-            <div class="pv-zoom__cta">
+            <p class="pv-hx__lead">Tu plan, tus dudas y tus consultas con una nutricionista de verdad, en la misma app.</p>
+            <div class="pv-hx__cta">
               <a class="pv-btn" href="#empezar">Quiero empezar</a>
               <a class="pv-link" href="#diferencia">Mirá cómo es</a>
             </div>
           </div>
-          <div class="pv-zoom__copy pv-zoom__copy--b" aria-hidden="true">
-            <p class="pv-h1 pv-h1--xl">Empezar es fácil.<br /><em>Sostenerlo sin ayuda, no.</em></p>
-          </div>
-          <div class="pv-zoom__hint" aria-hidden="true"><span></span>Bajá</div>
+          <p class="pv-hx__line2" aria-hidden="true">Empezar es fácil.<br /><em>Sostenerlo sin ayuda, no.</em></p>
+          <div class="pv-hx__hint" aria-hidden="true"><span></span>Bajá</div>
         </div>
       </section>
 
@@ -65,7 +64,8 @@
       </div>
 
       <!-- 3. El dolor -->
-      <section class="pv-section pv-pain" aria-labelledby="pain-titulo">
+      <section class="pv-section pv-pain pv-has-obj" aria-labelledby="pain-titulo">
+        <span class="pv-obj pv-obj--side" data-depth="0.5" style="--x: 82%; --y: 2%; --w: clamp(80px, 12vw, 170px);" aria-hidden="true"><img src="/landing/obj-palta.webp" alt="" loading="lazy" /></span>
         <p class="pv-eyebrow" data-reveal>¿Te suena?</p>
         <h2 id="pain-titulo" class="pv-h2" data-reveal>El problema nunca fue <em>la fuerza de voluntad</em>.</h2>
         <p class="pv-lead" data-reveal>Fue quedarte sin nadie a quien preguntarle entre una consulta y la otra.</p>
@@ -80,7 +80,9 @@
 
       <!-- 4. La diferencia -->
       <section class="pv-diff" id="diferencia" aria-labelledby="diff-titulo">
-        <div class="pv-diff__inner">
+        <div class="pv-diff__inner pv-has-obj">
+          <span class="pv-obj pv-obj--side" data-depth="0.6" style="--x: 80%; --y: 6%; --w: clamp(80px, 12vw, 170px);" aria-hidden="true"><img src="/landing/obj-brocoli.webp" alt="" loading="lazy" /></span>
+          <span class="pv-obj pv-obj--side" data-depth="0.9" style="--x: 88%; --y: 70%; --w: clamp(56px, 8vw, 110px);" aria-hidden="true"><img src="/landing/obj-kiwi.webp" alt="" loading="lazy" /></span>
           <img class="pv-diff__logo" src="/landing/logo.png" alt="" width="96" height="96" data-reveal />
           <h2 id="diff-titulo" class="pv-h2 pv-h2--xl" data-reveal>No es otra app para contar calorías.<br /><em>Es tu nutricionista, cerca.</em></h2>
           <div class="pv-diff__cols">
@@ -156,7 +158,8 @@
 
       <!-- 6. Cómo funciona -->
       <section class="pv-section pv-flow" id="como-funciona" aria-labelledby="flow-titulo">
-        <div class="pv-flow__head">
+        <div class="pv-flow__head pv-has-obj">
+          <span class="pv-obj pv-obj--side" data-depth="0.6" style="--x: 84%; --y: -10%; --w: clamp(70px, 10vw, 150px);" aria-hidden="true"><img src="/landing/obj-mate.webp" alt="" loading="lazy" /></span>
           <p class="pv-eyebrow" data-reveal>Cómo funciona</p>
           <h2 id="flow-titulo" class="pv-h2" data-reveal>Primero definen el plan. <em>Después, la app te lo hace fácil</em>.</h2>
         </div>
@@ -186,7 +189,7 @@
               <div class="pv-c-gold"><h3>Si entrenás</h3><p>Comer acorde a lo que entrenás, con un plan pensado para tu rutina.</p></div>
             </li>
             <li class="pv-who__card" data-reveal>
-              <img src="/landing/v2-cuerpo-grande.jpg" alt="Un hombre cocina un plato colorido en su casa, sonriendo." loading="lazy" />
+              <img src="/landing/v3-desayuno-mate.jpg" alt="Una persona prepara un desayuno con yogur, frutas y mate en su cocina." loading="lazy" />
               <div class="pv-c-coral"><h3>Si querés bajar de peso</h3><p>Sin dietas de moda ni juicios: acompañamiento profesional, a tu ritmo.</p></div>
             </li>
             <li class="pv-who__card" data-reveal>
@@ -254,7 +257,9 @@
       </section>
 
       <!-- 11. Cierre -->
-      <section class="pv-cta" id="empezar" aria-labelledby="cta-titulo">
+      <section class="pv-cta pv-has-obj" id="empezar" aria-labelledby="cta-titulo">
+        <span class="pv-obj pv-obj--side" data-depth="0.7" style="--x: 6%; --y: 14%; --w: clamp(70px, 10vw, 140px);" aria-hidden="true"><img src="/landing/obj-mate.webp" alt="" loading="lazy" /></span>
+        <span class="pv-obj pv-obj--side" data-depth="1" style="--x: 84%; --y: 60%; --w: clamp(60px, 9vw, 120px);" aria-hidden="true"><img src="/landing/obj-frutilla.webp" alt="" loading="lazy" /></span>
         <img class="pv-cta__logo" src="/landing/logo.png" alt="" width="140" height="140" />
         <h2 id="cta-titulo" class="pv-h2 pv-h2--xl" data-reveal>Llevá a tu nutricionista <em>con vos</em>.</h2>
         <p class="pv-lead" data-reveal>Pedile tu enlace de Plan V. Si ya lo tenés, entrá desde acá.</p>
