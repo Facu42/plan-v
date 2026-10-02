@@ -27,6 +27,11 @@ async function rpc(user: string, name: string, args: unknown[] = []) {
   return rows[0].result;
 }
 
+async function finish(user: string, payload: Record<string, unknown>) {
+  const claimed = await rpc(user, 'claim_ai_job', [payload.id]) as { run_token: string };
+  return rpc(user, 'finish_ai_job', [{ ...payload, run_token: claimed.run_token }]);
+}
+
 function enqueuePayload(overrides: Record<string, unknown> = {}) {
   return {
     patient_id: patientA,
@@ -107,7 +112,7 @@ describe('PV-27 jobs de IA en PostgreSQL descartable', () => {
     };
     expect(created).toMatchObject({ status: 'queued', prompt_version: 'recipe_draft.v1', context_hash: hash });
 
-    const finished = await rpc(nutriA, 'finish_ai_job', [{
+    const finished = await finish(nutriA, {
       id: created.id,
       status: 'succeeded',
       cost_tokens: 42,
@@ -124,7 +129,7 @@ describe('PV-27 jobs de IA en PostgreSQL descartable', () => {
           items: [{ name: 'Huevo', quantity: 2, unit: 'u' }],
         },
       },
-    }]) as { status: string; cost_tokens: number; artifact: { kind: string } };
+    }) as { status: string; cost_tokens: number; artifact: { kind: string } };
     expect(finished.status).toBe('succeeded');
     expect(finished.cost_tokens).toBe(42);
     expect(finished.artifact.kind).toBe('recipe_draft');
@@ -143,12 +148,12 @@ describe('PV-27 jobs de IA en PostgreSQL descartable', () => {
     expect(await rpc(nutriA, 'list_assigned_recipes', [patientA])).toEqual([]);
 
     const disposable = await rpc(nutriA, 'enqueue_ai_job', [enqueuePayload()]) as { id: string };
-    await rpc(nutriA, 'finish_ai_job', [{
+    await finish(nutriA, {
       id: disposable.id,
       status: 'succeeded',
       current_context_hash: hash,
       artifact: { kind: 'recipe_draft', payload: { title: 'Descartar' } },
-    }]);
+    });
     await expect(rpc(nutriB, 'reject_ai_job', [disposable.id])).rejects.toMatchObject({ code: '42501' });
     await expect(rpc(patientAUser, 'reject_ai_job', [disposable.id])).rejects.toMatchObject({ code: '42501' });
     const rejected = await rpc(nutriA, 'reject_ai_job', [disposable.id]) as { status: string; artifact: unknown };
@@ -156,12 +161,45 @@ describe('PV-27 jobs de IA en PostgreSQL descartable', () => {
     await expect(rpc(nutriA, 'apply_ai_job', [disposable.id])).rejects.toMatchObject({ code: 'PT409' });
 
     const stale = await rpc(nutriA, 'enqueue_ai_job', [enqueuePayload({ context_hash: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' })]) as { id: string };
-    const marked = await rpc(nutriA, 'finish_ai_job', [{
+    const marked = await finish(nutriA, {
       id: stale.id,
       status: 'succeeded',
       current_context_hash: hash,
-    }]) as { status: string };
+    }) as { status: string };
     expect(marked.status).toBe('stale');
     await expect(rpc(nutriA, 'apply_ai_job', [stale.id])).rejects.toMatchObject({ code: 'PT409' });
+  });
+
+  it('recupera la cola vencida, reserva una vez y descarta respuestas tardías', async () => {
+    const queued = await Promise.all(Array.from({ length: 3 }, () => rpc(nutriA, 'enqueue_ai_job', [enqueuePayload()]))) as Array<{ id: string }>;
+    await expect(rpc(nutriA, 'enqueue_ai_job', [enqueuePayload()])).rejects.toMatchObject({ code: 'PT429' });
+    const claimed = await rpc(nutriA, 'claim_ai_job', [queued[0].id]) as { run_token: string };
+    await expect(rpc(nutriA, 'claim_ai_job', [queued[0].id])).rejects.toMatchObject({ code: 'PT409' });
+    await expect(rpc(nutriB, 'claim_ai_job', [queued[0].id])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(nutriA, 'finish_ai_job', [{ id: queued[0].id, status: 'succeeded', run_token: 'wrong' }])).rejects.toMatchObject({ code: 'PT409' });
+    await db.exec("update public.ai_jobs set run_expires_at=clock_timestamp()-interval '1 second' where status in ('queued','running')");
+    const replacement = await rpc(nutriA, 'enqueue_ai_job', [enqueuePayload()]) as { id: string };
+    const late = await rpc(nutriA, 'finish_ai_job', [{ id: queued[0].id, status: 'succeeded', run_token: claimed.run_token, artifact: { kind: 'recipe_draft', payload: { title: 'Late' } } }]) as { status: string; artifact: unknown };
+    expect(late).toMatchObject({ status: 'failed', artifact: null });
+    const expired = (await rpc(nutriA, 'list_ai_jobs', [patientA]) as Array<{ id: string; status: string }>).filter(job => queued.some(old => old.id === job.id));
+    expect(expired.every(job => job.status === 'failed')).toBe(true);
+    await finish(nutriA, { id: replacement.id, status: 'failed', error_code: 'synthetic_failure' });
+  });
+
+  it('revalida el consentimiento al terminar y el contexto al aplicar', async () => {
+    const catalog = CONSENT_CATALOG.find(entry => entry.purpose === 'ai_menu_draft')!;
+    const queued = await rpc(nutriA, 'enqueue_ai_job', [enqueuePayload()]) as { id: string };
+    const claimed = await rpc(nutriA, 'claim_ai_job', [queued.id]) as { run_token: string };
+    await rpc(patientAUser, 'record_patient_consent', [patientA, catalog.purpose, catalog.text_version, catalog.text_hash, 'withdrawn']);
+    const stale = await rpc(nutriA, 'finish_ai_job', [{ id: queued.id, status: 'succeeded', run_token: claimed.run_token, current_context_hash: hash, artifact: { kind: 'recipe_draft', payload: { title: 'Private' } } }]) as { status: string; artifact: unknown };
+    expect(stale).toMatchObject({ status: 'stale', artifact: null });
+    await rpc(patientAUser, 'record_patient_consent', [patientA, catalog.purpose, catalog.text_version, catalog.text_hash, 'granted']);
+    const ready = await rpc(nutriA, 'enqueue_ai_job', [enqueuePayload()]) as { id: string };
+    await finish(nutriA, { id: ready.id, status: 'succeeded', current_context_hash: hash, artifact: { kind: 'recipe_draft', payload: { title: 'Private' } } });
+    const revision = (await db.query<{ revision: number }>('select revision from public.intake_sessions where patient_id=$1', [patientA])).rows[0].revision;
+    await rpc(patientAUser, 'save_patient_intake', [patientA, revision, 'allergies', { allergies: { state: 'reported', items: ['Maní'] } }]);
+    await expect(rpc(nutriA, 'apply_ai_job', [ready.id])).rejects.toMatchObject({ code: 'PT409' });
+    const rows = await db.query('select applied_at from public.ai_jobs where id=$1', [ready.id]);
+    expect(rows.rows[0]).toMatchObject({ applied_at: null });
   });
 });

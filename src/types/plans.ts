@@ -76,7 +76,10 @@ export const mealPlanDraftSchema = z.object({
   }
 });
 
-export const mealPlanPublishSchema = z.object({ expected_version: z.number().int().min(1) }).strict();
+export const mealPlanPublishSchema = z.object({
+  expected_version: z.number().int().min(1),
+  expected_snapshot: z.record(z.string(), z.unknown()).optional(),
+}).strict();
 
 export type MealPlanDraftInput = z.infer<typeof mealPlanDraftSchema>;
 export type PlanRecipeDetail = {
@@ -116,6 +119,11 @@ export type ProfessionalMealPlan = {
   current: PlanVersionView;
   published: PlanVersionView | null;
 };
+
+export function planReviewSnapshot(version: PlanVersionView) {
+  const { status: _status, published_at: _published, items, ...head } = version;
+  return { ...head, items: items.map(({ recipe: _recipe, recipe_title: _title, ...item }) => item) };
+}
 export type PatientMealPlan = {
   id: string;
   timezone: string;

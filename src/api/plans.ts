@@ -1,5 +1,5 @@
 import { request } from './client';
-import type { MealPlanDraftInput, PatientMealPlan, ProfessionalMealPlan } from '../types/plans';
+import { planReviewSnapshot, type MealPlanDraftInput, type PatientMealPlan, type ProfessionalMealPlan, type PlanVersionView } from '../types/plans';
 
 export const plansApi = {
   professional: (patientId: string, signal?: AbortSignal) => request<{ plan: ProfessionalMealPlan | null; source: string }>(
@@ -14,8 +14,8 @@ export const plansApi = {
     `/api/patients/${encodeURIComponent(patientId)}/plans`,
     { method: 'POST', body: JSON.stringify(input) },
   ),
-  publish: (planId: string, expected_version: number) => request<{ plan: ProfessionalMealPlan; source: string }>(
+  publish: (planId: string, expected_version: number, reviewed?: PlanVersionView) => request<{ plan: ProfessionalMealPlan; source: string }>(
     `/api/plans/${planId}/publish`,
-    { method: 'POST', body: JSON.stringify({ expected_version }) },
+    { method: 'POST', body: JSON.stringify({ expected_version, expected_snapshot: reviewed ? planReviewSnapshot(reviewed) : undefined }) },
   ),
 };

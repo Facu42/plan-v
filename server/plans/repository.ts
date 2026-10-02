@@ -3,10 +3,12 @@ import { CareError } from '../care/errors.js';
 import { getPatient } from '../store.js';
 import { assertReadyToPublish, evaluateMealPlanDraft } from '../ai-eval/evaluate.js';
 import { loadEvalHealth } from '../ai-eval/health.js';
+import { canonicalJson } from '../ai/context.js';
 import { getRecipeSnapshot, listProfessionalRecipes } from '../recipes/repository.js';
 import {
   planSlotKey,
   planSlotLabel,
+  planReviewSnapshot,
   type MealPlanDraftInput,
   type PatientMealPlan,
   type PlanItemView,
@@ -66,6 +68,9 @@ export function mealPlanDbError(error: { code?: string; message?: string } | nul
   }
   if (error.code === '42501') throw new CareError(403, 'No tenés permiso para esta acción.');
   if (error.code === '23505' || error.code === 'PT409') {
+    if (error.message === 'meal_plan_review_changed') {
+      throw new CareError(409, 'El borrador cambió. Revisá la versión actual antes de publicar.');
+    }
     if (error.message === 'meal_plan_allergies') {
       throw new CareError(409, 'El plan incluye un alimento declarado como alergia o restricción. Revisalo antes de publicar.');
     }
@@ -354,6 +359,7 @@ export async function publishMealPlan(
   planId: string,
   expectedVersion: number,
   persistent: boolean,
+  expectedSnapshot?: Record<string, unknown>,
 ): Promise<ProfessionalMealPlan> {
   if (!persistent) {
     const plan = plans.get(planId);
@@ -362,6 +368,9 @@ export async function publishMealPlan(
     if (!version) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
     if (versionItems(version.id).length < 1) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
     const health = await loadEvalHealth(plan.patient_id, false);
+    if (expectedSnapshot && canonicalJson(planReviewSnapshot(memVersionView(version))) !== canonicalJson(expectedSnapshot)) {
+      throw new CareError(409, 'El borrador cambió. Revisá la versión actual antes de publicar.');
+    }
     assertReadyToPublish(evaluateMealPlanDraft({
       period_start: version.period_start,
       period_end: version.period_end,
@@ -376,7 +385,10 @@ export async function publishMealPlan(
     version.published_at = new Date().toISOString();
     return memProfessional(plan);
   }
-  const { data, error } = await getRequestDb().rpc('publish_meal_plan', { target_plan: planId, expected_version: expectedVersion });
+  const { data, error } = await getRequestDb().rpc(expectedSnapshot ? 'publish_reviewed_meal_plan' : 'publish_meal_plan', {
+    target_plan: planId, expected_version: expectedVersion,
+    ...(expectedSnapshot ? { expected_snapshot: expectedSnapshot } : {}),
+  });
   mealPlanDbError(error);
   return asProfessional(data as Record<string, unknown>);
 }

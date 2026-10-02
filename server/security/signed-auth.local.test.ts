@@ -4,9 +4,11 @@ import { randomUUID, randomBytes } from 'node:crypto';
 import pg from 'pg';
 import { app } from '../index.js';
 import { calculateTarget, defaultsForGoal, type TargetInput } from '../../src/lib/nutrition-target.js';
+import { planReviewSnapshot, type PlanVersionView } from '../../src/types/plans.js';
+import { CONSENT_CATALOG } from '../intake/consent.js';
 
 const enabled = process.env.PLANV_LOCAL_SIGNED_AUTH === '1';
-const INTERNAL = ['audit_events','notification_deliveries','notification_preferences','nutritionist_subscriptions','outbox_events','patient_invite_events','payment_webhook_events','platform_admins','platform_settings','privacy_access_events','privacy_export_packages','privacy_requests','processing_jobs','recipe_day_assignments','recipe_version_cards','service_payments'];
+const INTERNAL = ['audit_events','notification_deliveries','notification_preferences','nutritionist_subscriptions','outbox_events','patient_invite_events','payment_webhook_events','platform_admins','platform_settings','privacy_access_events','privacy_export_packages','privacy_requests','processing_jobs','recipe_cover_requests','recipe_day_assignments','recipe_version_cards','service_payments'];
 const canary = 'NOTA PROFESIONAL FICTICIA: prueba de acceso';
 const inputs: TargetInput = { sex: 'femenino', age: 30, weight_kg: 65, height_cm: 165, activity: 'ligera', ...defaultsForGoal('bajar') };
 const body = { sex: 'femenino', birth_date: '1990-05-10', height_cm: 165, weight_kg: 65 };
@@ -202,7 +204,7 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     }
   });
 
-  it('las 16 tablas internas siguen cerradas con todas las sesiones y sin sesión', async () => {
+  it('las tablas internas siguen cerradas con todas las sesiones y sin sesión', async () => {
     for (const client of [anonymous,ownerA.client,ownerB.client,patientA.client,patientB.client]) {
       for (const table of INTERNAL) {
         const result = await client.from(table).select('*').limit(1);
@@ -234,6 +236,71 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     expect((await ownerA.client.rpc('request_body_data',{target:pidA})).error?.code).toBe('42501');
     const other = await api(patientB,'/api/patients/' + pidB + '/nutrition-target');
     expect(other.status).toBe(200); expect((await other.json()).target.patient_id).toBe(pidB);
+  });
+
+  it('las reservas de portada y el límite IA son atómicos con sesiones independientes', async () => {
+    const intake = await (await api(patientB, `/api/patients/${pidB}/intake`)).json();
+    expect((await api(patientB, `/api/patients/${pidB}/intake`, 'PATCH', {
+      expected_revision: intake.intake.revision, step: 'allergies',
+      payload: { allergies: { state: 'none', items: [] }, restrictions: { state: 'none', items: [] } },
+    })).status).toBe(200);
+    const consent = CONSENT_CATALOG.find(entry => entry.purpose === 'ai_menu_draft')!;
+    expect((await api(patientB, `/api/patients/${pidB}/consents`, 'POST', {
+      purpose: consent.purpose, text_version: consent.text_version, text_hash: consent.text_hash, decision: 'granted',
+    })).status).toBe(201);
+    const queued = await Promise.all(Array.from({ length: 4 }, () => ownerB.client.rpc('enqueue_ai_job', { payload: {
+      patient_id: pidB, job_type: 'recipe_draft', prompt_version: 'recipe_draft.v1', context_hash: 'a'.repeat(64),
+      estimated_tokens: 20, model: 'synthetic-only', request: {},
+    } })));
+    expect(queued.filter(result => !result.error)).toHaveLength(3);
+    expect(queued.filter(result => result.error).map(result => result.error!.code)).toEqual(['PT429']);
+    const jid = queued.find(result => !result.error)!.data.id;
+    const runs = await Promise.all([ownerB.client.rpc('claim_ai_job', { target_job: jid }), ownerB.client.rpc('claim_ai_job', { target_job: jid })]);
+    expect(runs.filter(result => !result.error)).toHaveLength(1);
+    expect(runs.find(result => result.error)?.error?.code).toBe('PT409');
+
+    const rid = randomUUID();
+    const saved = await ownerB.client.rpc('save_recipe_draft', { payload: {
+      id: rid, title: 'Arroz de prueba', yield_portions: 1, steps: ['Cocinar.'], nutrient_source: '',
+      items: [{ name: 'Arroz', quantity: 80, unit: 'g' }],
+    } });
+    expect(saved.error).toBeNull();
+    expect((await ownerB.client.rpc('publish_recipe', { target_recipe: rid, expected_version: 1 })).error).toBeNull();
+    const vid = saved.data.current.id;
+    const covers = await Promise.all(Array.from({ length: 4 }, () => ownerB.client.rpc('claim_recipe_cover', { target_version: vid, retry: false })));
+    expect(covers.every(result => !result.error)).toBe(true);
+    expect(covers.filter(result => result.data)).toHaveLength(1);
+    expect((await patientB.client.rpc('claim_recipe_cover', { target_version: vid, retry: true })).error?.code).toBe('42501');
+  });
+
+  it('la publicación revisada retiene el mismo lock que una edición en otra conexión', async () => {
+    const id = randomUUID();
+    const draft = { id, period_start: '2026-10-02', period_end: '2026-10-03',
+      items: [{ for_date: '2026-10-02', slot: 'Almuerzo', free_text: 'Arroz con verduras', portions: 1 }] };
+    const saved = await ownerB.client.rpc('save_meal_plan_draft', { target_patient: pidB, payload: draft });
+    expect(saved.error).toBeNull();
+    const first = await pool.connect(); const second = await pool.connect();
+    let editing: Promise<pg.QueryResult> | undefined;
+    try {
+      for (const client of [first, second]) {
+        await client.query('begin'); await client.query('set local role authenticated');
+        await client.query("set local statement_timeout='10s'");
+        await client.query("select set_config('request.jwt.claim.sub',$1,true)", [ownerB.id]);
+      }
+      await first.query('select public.publish_reviewed_meal_plan($1,1,$2)', [id, planReviewSnapshot(saved.data.current as PlanVersionView)]);
+      const available = await second.query('select pg_try_advisory_xact_lock(hashtextextended($1,1)) as acquired', [pidB]);
+      expect(available.rows[0].acquired).toBe(false);
+      editing = second.query('select public.save_meal_plan_draft($1,$2)', [pidB, { ...draft, items: [{ ...draft.items[0], free_text: 'Otra indicación' }] }]);
+      await first.query('commit');
+      const changed = (await editing).rows[0].save_meal_plan_draft;
+      expect(changed.current.version).toBe(2);
+      expect(changed.published.items[0].free_text).toBe('Arroz con verduras');
+      await second.query('commit');
+    } finally {
+      await first.query('rollback');
+      if (editing) await editing.catch(() => undefined);
+      await second.query('rollback'); first.release(); second.release();
+    }
   });
 });
 
