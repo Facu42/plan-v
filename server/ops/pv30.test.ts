@@ -153,7 +153,9 @@ describe('deploy contract', () => {
     expect(vercel.outputDirectory).toBe('dist');
     expect(JSON.stringify(vercel)).not.toMatch(/server\/index/);
     // Sólo rutas de la pantalla (abrir o recargar /admin, /app/*, /crm/*) hacia index.html; nunca a la API.
+    // /nutricionistas es la landing de presentación (landing.html), una página aparte sin sesión.
     expect(vercel.rewrites).toEqual([
+      { source: '/nutricionistas', destination: '/landing.html' },
       { source: '/admin', destination: '/index.html' },
       { source: '/app', destination: '/index.html' },
       { source: '/app/:path*', destination: '/index.html' },

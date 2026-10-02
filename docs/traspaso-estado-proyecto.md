@@ -96,6 +96,14 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
    con Gmail llegan a la misma casilla). La primera vez pide aceptar términos ("Antes de seguir").
    Para ver el primer uso de una nutricionista vacía, crear otra desde la pestaña de altas ("Crear con clave").
 
+## Landing para nutricionistas (borrador, PR 45)
+
+- Dirección: `/nutricionistas` (archivo `landing.html`, estilos y script en `src/landing/`, fotos en `public/landing/`). Es una página aparte: no toca la entrada ni la app. La ruta está en `vercel.json`.
+- Movimiento (portada, cinta, números, parallax) como el pin y el video de referencia; con "reducir movimiento" queda quieta.
+- Las 7 fotos son ilustrativas, generadas con IA en Gemini (Nano Banana) desde el Chrome de Facundo, porque la cuenta de Higgsfield no tenía créditos. La página lo aclara en el pie.
+- Por decidir: destino del botón principal (hoy lleva a `/`), precio (no se muestra), testimonios (no hay) y si se cambian los números de la fila.
+- No se junta a `main` sin la frase "publicalo".
+
 ## Cómo se registra
 
 - Cada tema anota lo avanzado en su archivo de `docs/` (arriba) o en `docs/plan-apartados.md`.
