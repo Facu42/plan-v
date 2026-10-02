@@ -1,6 +1,24 @@
+import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 
+// La landing para nutricionistas es una página aparte (landing.html) que se sirve en /nutricionistas.
+const landingDevRoute = {
+  name: 'plan-v-landing-route',
+  configureServer(server: { middlewares: { use: (fn: (req: { url?: string }, res: unknown, next: () => void) => void) => void } }) {
+    server.middlewares.use((req, _res, next) => {
+      if (req.url === '/nutricionistas' || req.url?.startsWith('/nutricionistas?')) req.url = '/landing.html';
+      next();
+    });
+  },
+};
+
 export default defineConfig({
+  plugins: [landingDevRoute],
+  build: {
+    rollupOptions: {
+      input: { main: resolve(__dirname, 'index.html'), landing: resolve(__dirname, 'landing.html') },
+    },
+  },
   server: {
     host: true,
     port: 5173,

@@ -5,6 +5,10 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/nutricionistas",
+      "destination": "/landing.html"
+    },
+    {
       "source": "/admin",
       "destination": "/index.html"
     },
