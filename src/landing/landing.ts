@@ -2,6 +2,7 @@ import '@fontsource/poppins/400.css';
 import '@fontsource/poppins/500.css';
 import '@fontsource/poppins/500-italic.css';
 import '@fontsource/poppins/600.css';
+import './tokens.css';
 import './landing.css';
 
 const root = document.documentElement;
