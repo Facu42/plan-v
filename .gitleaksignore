@@ -1,3 +1,6 @@
 # Identificador público de commit del PR43, detectado por el nombre anterior del campo JSON.
 # Excepción limitada a ese commit, archivo, regla y línea; ninguna clave permitida.
 febe01aea4b50c7e1e32924b9fc27e1ebd0dacfc:docs/security/navegador-produccion-2026-10-01.json:generic-api-key:5
+# UUID de despliegue Railway confirmado por el conector; no es una credencial.
+# El rótulo API disparó el detector. Sólo esta línea histórica queda exceptuada.
+0f46a43ac1cd4c045ac320e74d1666a70a181009:docs/figma-crm-funcional-2026-10-01.md:generic-api-key:61

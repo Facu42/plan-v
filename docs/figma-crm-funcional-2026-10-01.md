@@ -58,13 +58,17 @@ Los controles del PR y los dos procesos de la rama principal terminaron aprobado
 
 - Vercel: `dpl_97oWe74JtYEZfoHLwhT3cjYravLR`, estado `READY`, destino producción,
   alias `plan-v-eight.vercel.app` y commit del merge confirmados por el conector.
-- Railway API: `91c20409-0802-4ffe-97d0-dd9c8f135a3e`, estado `SUCCESS`.
+- Railway, despliegue del servicio web: `91c20409-0802-4ffe-97d0-dd9c8f135a3e`, estado `SUCCESS`.
 - Railway worker: `f0b907d5-deb7-4182-9136-44eeda7bcc03`, estado `SUCCESS`.
   Ambos despliegues corresponden al mismo commit del merge.
 - API pública: `/api/health` y `/api/ready` responden 200 con el SHA del merge;
-  el control de disponibilidad confirma el worker externo.
+  la respuesta declara modo de worker externo. Su despliegue `SUCCESS` se confirmó
+  por Railway; no se probó aquí la ejecución de trabajos.
 - Navegador gstack: ingreso público con respuesta 200, contenido visible, sin errores de
   consola y carga de 1,29 segundos. Este control de publicación no reemplaza los recorridos
   locales de paciente/consultorio ni afirma una nueva prueba completa con cuentas reales.
 
 No se aplicaron migraciones, no se cambiaron ajustes de producción ni se contrataron recursos.
+El detector de secretos confundió el UUID de un despliegue de Railway con una clave por el
+rótulo «API». Se corrigió el rótulo y se exceptuó únicamente la huella histórica de esa
+línea, commit y regla en `.gitleaksignore`; ningún secreto ni archivo completo queda permitido.
