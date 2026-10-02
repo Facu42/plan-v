@@ -64,9 +64,9 @@ describe('ejecución de jobs sin proveedores externos', () => {
   });
 
   it('registra el modelo seleccionado y rechaza períodos inválidos sin contexto ni proveedor', async () => {
-    vi.stubEnv('AI_MODE', 'live'); vi.stubEnv('OPENROUTER_API_KEY', 'synthetic-only'); vi.stubEnv('OPENROUTER_MODEL', 'synthetic/model');
+    vi.stubEnv('AI_MODE', 'live'); vi.stubEnv('OPENROUTER_API_KEY', 'synthetic-only'); vi.stubEnv('OPENROUTER_MODEL', 'synthetic/model:free');
     const job = await enqueueAiJob(DEMO_NUTRITIONIST_ID, 'demo-nutri', { patient_id: patientId, job_type: 'recipe_draft' }, false);
-    expect(job.model).toBe('synthetic/model');
+    expect(job.model).toBe('synthetic/model:free');
     mocks.consent.mockClear();
     await expect(enqueueAiJob(DEMO_NUTRITIONIST_ID, 'demo-nutri', { patient_id: patientId, job_type: 'menu_draft', period_start: '2026-10-01', period_end: '2026-11-01' }, false)).rejects.toMatchObject({ status: 400 });
     expect(mocks.consent).not.toHaveBeenCalled(); expect(mocks.generate).not.toHaveBeenCalled();

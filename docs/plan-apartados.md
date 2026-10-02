@@ -113,6 +113,12 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 ## B. Diseño, experiencia y movimiento
 
+- **Modelos gratuitos (2026-10-02):** Facundo recordó el acuerdo de no usar modelos pagos.
+  Corregido el predeterminado de texto a `openrouter/free`, bloqueo de alternativas pagas
+  y precios máximos cero en cada petición. Fotos pagas bloqueadas también con clave.
+  Sin cambios de base/configuración ni contrataciones. Pruebas/revisiones y límites en
+  [IA gratuita](ia-gratuita-2026-10-02.md); calorías e imágenes siguen pendientes.
+
 - **Correcciones de IA (2026-10-02):** configuración, tareas con reserva y contexto
   vigente, edición de recetas sin duplicados, publicación de la copia revisada y
   reintento de foto sin republicar. Dos migraciones aplicadas y PR #50 publicado

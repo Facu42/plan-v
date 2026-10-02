@@ -20,7 +20,7 @@ describe('meal provider failures', () => {
   it('never substitutes demo food when live generation fails', async () => {
     vi.stubEnv('APP_MODE', 'test');
     vi.stubEnv('AI_MODE', 'live');
-    vi.stubEnv('OPENAI_API_KEY', 'synthetic-only');
+    vi.stubEnv('OPENROUTER_API_KEY', 'synthetic-only');
     await expect(analyzeMeal({ description: 'comida de prueba', slot: 'Almuerzo' }))
       .rejects.toMatchObject({ code: 'AI_UNAVAILABLE' });
     expect(generateText).toHaveBeenCalled();
@@ -29,7 +29,7 @@ describe('meal provider failures', () => {
   it('rejects empty provider output in live mode', async () => {
     vi.stubEnv('APP_MODE', 'test');
     vi.stubEnv('AI_MODE', 'live');
-    vi.stubEnv('OPENAI_API_KEY', 'synthetic-only');
+    vi.stubEnv('OPENROUTER_API_KEY', 'synthetic-only');
     vi.mocked(generateText).mockResolvedValueOnce({ output: null } as never);
     await expect(analyzeMeal({ description: 'comida de prueba', slot: 'Cena' }))
       .rejects.toMatchObject({ code: 'AI_UNAVAILABLE' });
@@ -70,7 +70,7 @@ describe('copilot provider failures', () => {
   it('never substitutes a demo brief when live generation fails', async () => {
     vi.stubEnv('APP_MODE', 'test');
     vi.stubEnv('AI_MODE', 'live');
-    vi.stubEnv('OPENAI_API_KEY', 'synthetic-only');
+    vi.stubEnv('OPENROUTER_API_KEY', 'synthetic-only');
     const patient = getStore().patients[0];
     await expect(generateCopilotBrief(patient)).rejects.toMatchObject({ code: 'AI_UNAVAILABLE' });
   });

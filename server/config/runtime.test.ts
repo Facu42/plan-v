@@ -49,4 +49,8 @@ describe('runtime modes', () => {
       AI_MODE: 'live',
     })).toThrow('AI provider');
   });
+  it('rejects paid-only configuration in default free mode', () => {
+    expect(() => readRuntimeConfig({ ...db, APP_MODE: 'production', AI_MODE: 'live', OPENAI_API_KEY: 'synthetic-only' })).toThrow('AI provider');
+    expect(() => readRuntimeConfig({ ...db, APP_MODE: 'production', AI_MODE: 'live', OPENROUTER_API_KEY: 'synthetic-only', OPENROUTER_MODEL: 'openai/gpt-4o-mini' })).toThrow('AI provider');
+  });
 });
