@@ -55,6 +55,14 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
 
 ## Lo pendiente
 
+- Solicitud del 2026-10-02: comprobar IA de platos/planes, cálculo y rediseñar onboarding.
+  Auditoría local con 86 pruebas aprobadas y dos fallos reproducidos: resolutor IA omite
+  clave pública de Supabase y guardar borrador oculta meta confirmada. Foto de platos
+  requiere OpenAI, ausente entre nombres de variables Railway; Higgsfield todavía no
+  está conectado a ese generador. Propuesta visual Higgsfield hecha con la clave local
+  indicada por Facundo; pendiente aprobación del diseño, sin cambios de app/base.
+  Rama `codex/onboarding-ia-verificacion`; ver `docs/verificacion-ia-calorias-onboarding-2026-10-02.md`.
+
 - Seguridad, punto 4: prueba con cuatro sesiones reales en Supabase temporal de
   GitHub realizada. Se encontró lectura de notas profesionales por una política
   legacy de paciente. Migración `20261001195127_close_legacy_patient_row_access.sql`
