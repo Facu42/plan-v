@@ -1,0 +1,79 @@
+[
+  {
+    "label": "patient-profile",
+    "width": 390,
+    "overflow": false,
+    "title": "Contanos sobre vos",
+    "step": "3 de 5",
+    "bodyForm": false,
+    "status": "Cambios pendientes de guardar"
+  },
+  {
+    "label": "patient-habits",
+    "width": 390,
+    "overflow": false,
+    "title": "Tu día a día también cuenta",
+    "step": "4 de 5",
+    "bodyForm": false,
+    "status": "Cambios pendientes de guardar"
+  },
+  {
+    "label": "patient-review",
+    "width": 390,
+    "overflow": false,
+    "title": "Revisá lo que vas a compartir",
+    "step": "5 de 5",
+    "bodyForm": false,
+    "status": "Guardado en el consultorio"
+  },
+  {
+    "label": "legacy-intent",
+    "width": 390,
+    "overflow": false,
+    "title": "Contanos sobre vos",
+    "step": "3 de 5",
+    "bodyForm": false,
+    "status": "Guardado en el consultorio"
+  },
+  {
+    "label": "legacy-habits",
+    "width": 390,
+    "overflow": false,
+    "title": "Tu día a día también cuenta",
+    "step": "4 de 5",
+    "bodyForm": false,
+    "status": "Guardado en el consultorio"
+  },
+  {
+    "label": "patient-review",
+    "width": 1440,
+    "overflow": false,
+    "title": "Revisá lo que vas a compartir",
+    "step": "5 de 5",
+    "bodyForm": false,
+    "status": "Guardado en el consultorio"
+  },
+  {
+    "label": "patient-ready",
+    "width": 390,
+    "overflow": false,
+    "title": "Ya estás en tu espacio",
+    "step": "Ingreso completo",
+    "bodyForm": false,
+    "status": "Guardado en el consultorio"
+  },
+  {
+    "label": "submitted-reopened",
+    "width": 390,
+    "overflow": false,
+    "title": "Ya estás en tu espacio",
+    "step": "Ingreso completo",
+    "bodyForm": false,
+    "status": "Guardado en el consultorio"
+  },
+  {
+    "label": "finished-to-plan",
+    "path": "/app/plan",
+    "onboarding": false
+  }
+]

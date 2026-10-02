@@ -60,7 +60,10 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
   clave pública de Supabase y guardar borrador oculta meta confirmada. Foto de platos
   requiere OpenAI, ausente entre nombres de variables Railway; Higgsfield todavía no
   está conectado a ese generador. Propuesta visual Higgsfield hecha con la clave local
-  indicada por Facundo; pendiente aprobación del diseño, sin cambios de app/base.
+  indicada por Facundo; diseño aprobado («Sí, aplicalo») e implementado en ambos roles.
+  Cinco etapas conservan ingresos anteriores; revisión completa y datos corporales separados.
+  Accesos profesionales reales; 1.116 pruebas, TypeScript/build y navegador 1440/390 aprobados.
+  Capturas y reporte `design-qa.md`; pendiente PR/publicación. Sin cambios de base/configuración.
   Rama `codex/onboarding-ia-verificacion`; ver `docs/verificacion-ia-calorias-onboarding-2026-10-02.md`.
 
 - Seguridad, punto 4: prueba con cuatro sesiones reales en Supabase temporal de

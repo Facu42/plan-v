@@ -11,7 +11,7 @@ Base revisada: `980f1e3bf984886220c0fe0939d84f684e320ebd`.
 | Fotos de platos | Implementadas después de aprobar la receta. Usan OpenAI directamente. | Bloqueadas por el resolutor de configuración; OpenAI no figura entre las variables de producción. La clave de Higgsfield local todavía no es un proveedor de la app. |
 | Planes con IA | Borradores, alergias/restricciones y aprobación profesional implementados con OpenRouter/OpenAI. | Bloqueados en producción por el mismo resolutor. No se hizo una generación real paga para esta comprobación. |
 | Calorías y macros | Fórmula fija, datos corporales del paciente y ajustes profesionales; servidor y SQL recalculan. | Cálculo ordinario comprobado; guardar otro borrador oculta la meta confirmada anterior. |
-| Onboarding | Nueve pasos, reanudación, guardado serializado, consentimiento versionado y conflictos. | Estética propia, no parte de los 24 nodos Figma. Textos largos y profesional fijo; propuesta Higgsfield preparada para revisar. |
+| Onboarding | Rediseño Higgsfield aprobado e implementado: cinco etapas, reanudación y consentimiento versionado. | Paciente y nutricionista comprobados localmente en escritorio/móvil; detalle y capturas en `design-qa.md`. Publicación pendiente del PR. |
 
 El control público de la API devuelve producción, `ai: true` y el SHA revisado. Ese indicador
 lee la configuración completa: no demuestra que el generador funcione. El conector Railway
@@ -41,7 +41,7 @@ Repros privados en `.gstack/ia-calorias-repro.ts` y `.json`, sin credenciales re
   ajustes pueden generar macros incompatibles con la meta y permitir confirmar con aviso.
 - El canal de datos corporales no comprueba los consentimientos que sí exige el registro de
   medidas. Revisar ambos canales y revocación antes de cambiar la base. No se hizo ese cambio.
-- Onboarding: nombre/iniciales y textos fijos de Verónica; revisión omite restricciones y
+- Onboarding antes del rediseño: nombre/iniciales y textos fijos de Verónica; revisión omite restricciones y
   hábitos que sí se envían; privacidad contradice el formulario corporal abierto al finalizar.
   Los botones finales no esperan su guardado. Errores de datos/metas se presentan como ausencia.
 
@@ -61,17 +61,46 @@ una sola imagen. La credencial se leyó del archivo externo indicado por Facundo
 variables del proceso. No se copió a la app, el navegador, documentos ni Git.
 
 La propuesta está en la PC: `C:/Users/facun/higgsfield-fotos/salida/onboarding-plan-v-2026-10-02.png`.
-Es una referencia visual; aún no se implementó ni publicó. La imagen puede dibujar más puntos
-de progreso que el flujo propuesto: la implementación debe mostrar exactamente cinco etapas.
+La referencia aprobada se conserva también en `design/onboarding/reference-higgsfield.png`.
+El frontend ya está implementado. La imagen dibuja más puntos que el flujo: la app muestra
+exactamente cinco etapas y una confirmación final separada.
 
 - Paciente: Bienvenida → Privacidad → Sobre vos → Alimentos/hábitos → Revisar/enviar;
   confirmación final y datos corporales opcionales separados, con explicación coherente.
 - Profesional: Crear paciente → Compartir invitación → Armar plan; acciones visibles y
   acceso a explorar el consultorio. La asistencia propone y la profesional confirma.
 - Paleta y tipografía de la app: crema `#F9F4F2`, blanco, tinta `#272932`, lima `#C2E66E`, Poppins.
-  Consentimientos sin preselección, nombre profesional real, guardado y revisión completos.
+  Consentimientos sin preselección, sin nombre profesional inventado, guardado y revisión completos.
 - Escritorio 1440 y móvil 390, sin tablet. Enlaces y texto con contraste suficiente;
   no trasladar el enlace lima sobre crema de la imagen literalmente.
 
-La aprobación del diseño se solicitó antes de modificar el frontend, según brainstorming.
-No hubo cambios de producción, migraciones ni nuevos recursos de Supabase.
+Facundo aprobó aplicar el diseño a ambos roles: «Sí, aplicalo» (2026-10-02).
+No hubo migraciones, cambios de configuración ni nuevos recursos de Supabase.
+
+## Implementación aprobada y comprobada
+
+- Bienvenida con foto original generada por Higgsfield (`ideogram/v4.0`), optimizada a
+  WebP 960 × 960, 155.644 bytes. El PNG de 6,49 MB se conserva fuera del repositorio.
+  La app sirve la foto localmente; no usa la credencial Higgsfield ni genera al abrir.
+- Privacidad con casilla sin marcar, texto de consentimiento obtenido de la API y registro
+  de la versión/hash vigente. El texto profesional fijo se reemplazó por «tu nutricionista».
+- Perfil y pedido reunidos; alimentos/restricciones y hábitos reunidos. La reanudación de
+  `intent` anterior abre Perfil y la de `habits` abre Alimentos/hábitos, sin perder datos.
+- Revisión incluye nombre, consentimiento, pedido, alimentos, restricciones, agua, sueño
+  y energía. Cero vasos sigue siendo distinto de no responder. Los hábitos se pueden desmarcar.
+- Peso/medidas quedó fuera del ingreso; continúa en Inicio como formulario opcional separado.
+  Esto elimina el cierre del ingreso mientras ese segundo formulario estaba guardando.
+  El problema de autorización del canal corporal y el cálculo siguen pendientes.
+- Primeros pasos profesional abre el alta real, el directorio, la invitación del paciente
+  seleccionado y su plan. Sin pacientes, explica por qué invitación/plan todavía no están
+  disponibles. Se puede reabrir desde el menú de cuenta, también desde Mensajes.
+- Cambio de paciente, navegación o historial descartan la respuesta tardía de una invitación.
+
+Validación final: 213 archivos de pruebas, 1.116 aprobadas y 2 omitidas; TypeScript aprobado;
+build aprobado (persiste aviso de tamaño de bundle). Navegador gstack con API local en memoria,
+IA desactivada y datos ficticios: consentimiento otorgado/retirado, guardado, recuperación
+legacy, revisión, envío/reapertura, destinos reales y cancelación de invitaciones tardías.
+Escritorio 1440 × 900 y móvil 390 × 844, temas claro/oscuro, sin desborde horizontal.
+Revisiones `code-reviewer` y `reality-checker` con hallazgos corregidos.
+Capturas y resultados conservados en `design/onboarding/`; informe visual `design-qa.md`.
+Esto no certifica una generación IA en producción ni corrige los fallos de IA/metas anteriores.
