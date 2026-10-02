@@ -1,7 +1,8 @@
 # Frontend de Figma y consultorio funcional
 
 Iniciado 2026-10-01; actualizado 2026-10-02. Rama `codex/figma-crm-funcional`.
-[PR #46](https://github.com/Facu42/plan-v/pull/46). Pendiente integrar para publicar.
+[PR #46](https://github.com/Facu42/plan-v/pull/46) integrado el 2026-10-02 a las 11:15 de Argentina,
+commit `6a2d2922411a7586105e22c86000a7181be65c4e`. Publicado en [Plan V](https://plan-v-eight.vercel.app/).
 Sin cambios de base, configuración de producción, generación de IA ni recursos pagos.
 
 ## Fuente y trabajo realizado
@@ -44,6 +45,30 @@ Mis registros usa diálogo nativo: foco contenido, Escape y retorno al botón. D
 - Primera pasada CRM: directorio → ficha → plan y recarga conservan paciente; selección inválida no abre ficha ajena; selector también en celular.
 - Revisiones independientes de código y realidad: hallazgos del alcance corregidos.
 - El navegador automatizado rechazó copiar al portapapeles. Se verificó el error y el enlace sin selección privada; no se afirma que se copió/publicó en redes. Los botones de redes sólo copian, no publican automáticamente.
-- Los 16 casos de sesiones firmadas y CI del commit anterior estaban aprobados. La nueva ejecución de GitHub corresponde al commit ampliado del PR.
+- Antes del merge, los 16 casos de sesiones firmadas y CI quedaron aprobados para el commit ampliado del PR.
 
-Capturas/evidencia locales en `.gstack/figma-*`; [informe sin contenido de pacientes](../design/figma-reference/browser-verification.json). Pendiente integrar PR y comprobar despliegue; preparar estos cambios aquí no modifica la web de producción.
+Capturas/evidencia locales en `.gstack/figma-*`; [informe sin contenido de pacientes](../design/figma-reference/browser-verification.json).
+
+## Integración y publicación (2026-10-02)
+
+Facundo autorizó la integración con «integralo». Se integró por PR, sin cambios directos a `main`.
+Los controles del PR y los dos procesos de la rama principal terminaron aprobados:
+[CI](https://github.com/Facu42/plan-v/actions/runs/37018599190) y
+[sesiones firmadas](https://github.com/Facu42/plan-v/actions/runs/37018598944).
+
+- Vercel: `dpl_97oWe74JtYEZfoHLwhT3cjYravLR`, estado `READY`, destino producción,
+  alias `plan-v-eight.vercel.app` y commit del merge confirmados por el conector.
+- Railway, despliegue del servicio web: `91c20409-0802-4ffe-97d0-dd9c8f135a3e`, estado `SUCCESS`.
+- Railway worker: `f0b907d5-deb7-4182-9136-44eeda7bcc03`, estado `SUCCESS`.
+  Ambos despliegues corresponden al mismo commit del merge.
+- API pública: `/api/health` y `/api/ready` responden 200 con el SHA del merge;
+  la respuesta declara modo de worker externo. Su despliegue `SUCCESS` se confirmó
+  por Railway; no se probó aquí la ejecución de trabajos.
+- Navegador gstack: ingreso público con respuesta 200, contenido visible, sin errores de
+  consola y carga de 1,29 segundos. Este control de publicación no reemplaza los recorridos
+  locales de paciente/consultorio ni afirma una nueva prueba completa con cuentas reales.
+
+No se aplicaron migraciones, no se cambiaron ajustes de producción ni se contrataron recursos.
+El detector de secretos confundió el UUID de un despliegue de Railway con una clave por el
+rótulo «API». Se corrigió el rótulo y se exceptuó únicamente la huella histórica de esa
+línea, commit y regla en `.gitleaksignore`; ningún secreto ni archivo completo queda permitido.
