@@ -127,7 +127,7 @@ em { font-style: italic; font-weight: 500; }
 .lp-green .lp-tag, .lp-cta .lp-tag { background: var(--pv-gold); color: var(--pv-deep); }
 .lp-green .lp-btn--ink, .lp-cta .lp-btn--ink { background: var(--pv-gold); color: var(--pv-deep); }
 .lp-card-photo { background: #fff; position: relative; margin: 0; overflow: hidden; border-radius: var(--radius); aspect-ratio: 4 / 5; box-shadow: 0 30px 60px rgb(8 58 48 / 0.18); }
-.lp-chip { position: absolute; left: 16px; bottom: 16px; display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 999px; background: var(--white); font-weight: 500; font-size: 14px; box-shadow: 0 8px 24px rgb(8 58 48 / 0.15); animation: lp-float 5s ease-in-out infinite; }
+.lp-chip { color: var(--pv-deep); position: absolute; left: 16px; bottom: 16px; display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 999px; background: var(--white); font-weight: 500; font-size: 14px; box-shadow: 0 8px 24px rgb(8 58 48 / 0.15); animation: lp-float 5s ease-in-out infinite; }
 .lp-chip i { width: 10px; height: 10px; border-radius: 50%; background: var(--lima-dark); }
 @keyframes lp-float { 50% { transform: translateY(-8px); } }
 
