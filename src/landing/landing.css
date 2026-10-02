@@ -83,7 +83,7 @@ em { font-style: italic; font-weight: 500; }
   min-height: min(86vh, 760px); display: flex; align-items: flex-end;
   background: var(--ink);
 }
-.lp-hero__img { position: absolute; inset: -6% 0; width: 100%; height: 112%; object-fit: cover; }
+.lp-hero__img { object-position: 55% 30%; position: absolute; inset: -6% 0; width: 100%; height: 112%; object-fit: cover; }
 .lp-hero__shade { position: absolute; inset: 0; background: linear-gradient(0deg, rgb(39 41 50 / 0.78), rgb(39 41 50 / 0.15) 70%); }
 .lp-hero__copy { position: relative; padding: clamp(24px, 5vw, 64px); max-width: 860px; color: var(--white); }
 .lp-hero__title { margin: 0; font-size: clamp(34px, 6vw, 76px); font-weight: 600; line-height: 1.06; letter-spacing: -0.025em; }
