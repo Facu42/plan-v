@@ -46,7 +46,13 @@ simulada, salida JSON estructurada, precios cero y cupo agotado sin alternativa 
 TypeScript, comprobación de secretos y build aprobados. Persiste el aviso de tamaño del bundle.
 La primera suite general agotó recursos de Windows con 22 procesos de pruebas caídos;
 se repitió con un máximo de dos procesos: 216 archivos aprobados, 1.165 pruebas aprobadas
-y 2 omitidas. Publicación: por registrar.
+y 2 omitidas. Estado actualizado de integración/publicación y controles en el
+[PR #53](https://github.com/Facu42/plan-v/pull/53).
+
+Cuenta ficticia profesional autenticada en producción: catálogo/paciente, ficha y permisos
+responden 200. El paciente de prueba no tiene permiso `ai_menu_draft` ni alergias/restricciones
+completadas; no se modificaron sus decisiones ni se generó una propuesta. Para una prueba real,
+primero completar esos pasos desde la cuenta ficticia del paciente.
 
 Revisiones independientes `code-reviewer` y `reality-checker`: sin brechas concretas en
 las rutas actuales; se incorporó el rechazo explícito de presets sugerido por revisión.
