@@ -3,224 +3,277 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#F9F6EE" />
-    <title>Plan V para pacientes</title>
-    <meta name="description" content="Tu plan de comidas, tu lista de compras y tus turnos en tu celular, con el acompañamiento de tu nutricionista. Se instala desde el navegador." />
-    <meta property="og:title" content="Plan V para pacientes" />
-    <meta property="og:description" content="Tu plan, tus compras y tu nutri, en tu celular." />
-    <meta property="og:image" content="/landing/paciente-celular.jpg" />
+    <meta name="theme-color" content="#083A30" />
+    <title>Plan V: tu nutricionista, en el bolsillo</title>
+    <meta name="description" content="Plan V no es solo una app para contar calorías: es el contacto con tu nutricionista, con mensajes, consultas programadas, tu plan y la lista de compras en un mismo lugar." />
+    <meta property="og:title" content="Plan V: tu nutricionista, en el bolsillo" />
+    <meta property="og:description" content="Mensajes, consultas, tu plan y la lista de compras, con una nutricionista profesional del otro lado." />
+    <meta property="og:image" content="/landing/v3-og.jpg" />
     <link rel="icon" href="/icons/icon-192.png" />
   </head>
-  <body class="lp">
-    <a class="lp-skip" href="#contenido">Ir al contenido</a>
+  <body class="pv">
+    <a class="pv-skip" href="#contenido">Ir al contenido</a>
 
-    <header class="lp-nav" id="nav">
-      <a class="lp-brand" href="/pacientes" aria-label="Plan V">
-        <img src="/landing/logo.png" alt="" width="36" height="36" />
+    <header class="pv-nav" id="nav">
+      <a class="pv-brand" href="/pacientes" aria-label="Plan V">
+        <img src="/landing/logo.png" alt="" width="44" height="44" />
         <span>Plan V</span>
       </a>
-      <nav class="lp-nav__links" aria-label="Secciones">
-        <a href="#que-es">Qué es</a>
-        <a href="#herramientas">Qué vas a tener</a>
-        <a href="#como-empezar">Cómo empezar</a>
+      <nav class="pv-nav__links" aria-label="Secciones">
+        <a href="#diferencia">Qué es</a>
+        <a href="#beneficios">Beneficios</a>
+        <a href="#para-quien">Para quién</a>
+        <a href="#como-funciona">Cómo funciona</a>
       </nav>
-      <a class="lp-btn lp-btn--sm" href="#como-empezar">Quiero empezar</a>
+      <a class="pv-btn pv-btn--sm" href="#empezar">Quiero empezar</a>
     </header>
 
     <main id="contenido">
-      <!-- 1. Portada -->
-      <section class="lp-hero" aria-labelledby="hero-titulo">
-        <div class="lp-hero__frame" data-parallax-wrap>
-          <img class="lp-hero__img" data-parallax="0.03" src="/landing/paciente-celular.jpg" alt="Una mujer sonríe mirando su celular en su cocina, con un plato de comida fresca en la mesada." width="1696" height="960" fetchpriority="high" />
-          <div class="lp-hero__shade" aria-hidden="true"></div>
-          <div class="lp-hero__copy">
-            <p class="lp-tag" data-split>Para pacientes de nutricionistas que usan Plan V</p>
-            <h1 id="hero-titulo" class="lp-hero__title">
-              <span class="lp-line"><span>Tu plan, tus compras</span></span>
-              <span class="lp-line"><span>y tu nutri, <em>en tu celular</em>.</span></span>
-            </h1>
-            <p class="lp-hero__lead">Todo lo que armaron juntas, siempre a mano. Sin buscar PDFs en el chat.</p>
-            <div class="lp-hero__cta">
-              <a class="lp-btn" href="#como-empezar">Quiero empezar</a>
-              <a class="lp-link" href="#que-es">Mirá qué es</a>
+      <!-- 1. Portada: la modelo crece al bajar, el título queda arriba y los objetos 3D se mueven -->
+      <section class="pv-hx" id="zoom" aria-labelledby="hero-titulo">
+        <div class="pv-hx__stage">
+          <div class="pv-hx__bg" aria-hidden="true"><i class="pv-hx__grid"></i><i class="pv-hx__glow"></i></div>
+          <h1 id="hero-titulo" class="pv-hx__title"><span>Tu nutri,</span><em>en el bolsillo.</em></h1>
+          <img class="pv-hx__model" src="/landing/v3-hero-modelo.webp" alt="Una mujer sonriente en ropa deportiva sostiene su celular." fetchpriority="high" />
+          <span class="pv-obj" data-hero data-depth="1.1" style="--x: 6%; --y: 30%; --w: clamp(70px, 11vw, 150px);" aria-hidden="true"><img src="/landing/obj-palta.webp" alt="" /></span>
+          <span class="pv-obj" data-hero data-depth="0.7" style="--x: 80%; --y: 26%; --w: clamp(56px, 8vw, 116px);" aria-hidden="true"><img src="/landing/obj-frutilla.webp" alt="" /></span>
+          <span class="pv-obj" data-hero data-depth="1.4" style="--x: 86%; --y: 58%; --w: clamp(64px, 9vw, 130px);" aria-hidden="true"><img src="/landing/obj-limon.webp" alt="" /></span>
+          <span class="pv-obj" data-hero data-depth="0.9" style="--x: 3%; --y: 64%; --w: clamp(58px, 8vw, 118px);" aria-hidden="true"><img src="/landing/obj-kiwi.webp" alt="" /></span>
+          <span class="pv-obj" data-hero data-depth="1.6" style="--x: 22%; --y: 46%; --w: clamp(40px, 5vw, 76px);" aria-hidden="true"><img src="/landing/obj-tomate.webp" alt="" /></span>
+          <span class="pv-obj" data-hero data-depth="1.2" style="--x: 68%; --y: 40%; --w: clamp(44px, 6vw, 90px);" aria-hidden="true"><img src="/landing/obj-hoja.webp" alt="" /></span>
+          <img class="pv-hx__badge" src="/landing/logo.png" alt="" width="120" height="120" aria-hidden="true" />
+          <div class="pv-hx__card">
+            <p class="pv-tag">Para quien quiere comer mejor, con alguien al lado</p>
+            <p class="pv-hx__lead">Tu plan, tus dudas y tus consultas con una nutricionista de verdad, en la misma app.</p>
+            <div class="pv-hx__cta">
+              <a class="pv-btn" href="#empezar">Quiero empezar</a>
+              <a class="pv-link" href="#diferencia">Mirá cómo es</a>
             </div>
           </div>
+          <p class="pv-hx__line2" aria-hidden="true">Empezar es fácil.<br /><em>Sostenerlo sin ayuda, no.</em></p>
+          <div class="pv-hx__hint" aria-hidden="true"><span></span>Bajá</div>
         </div>
       </section>
 
-      <!-- 2. Cintas con movimiento -->
-      <div class="lp-marquee" aria-hidden="true">
-        <div class="lp-marquee__track">
-          <span>Tu plan de la semana</span><i></i><span>Lista de compras</span><i></i><span>Tus comidas con foto</span><i></i><span>Recetas</span><i></i><span>Tus turnos</span><i></i><span>Mensajes con tu nutri</span><i></i>
-          <span>Tu plan de la semana</span><i></i><span>Lista de compras</span><i></i><span>Tus comidas con foto</span><i></i><span>Recetas</span><i></i><span>Tus turnos</span><i></i><span>Mensajes con tu nutri</span><i></i>
+      <!-- 2. Cinta con el logo -->
+      <div class="pv-marquee" aria-hidden="true">
+        <div class="pv-marquee__track">
+          <span>Mensajes con tu nutri</span><img src="/landing/logo.png" alt="" /><span>Consultas programadas</span><img src="/landing/logo.png" alt="" /><span>Tu plan de la semana</span><img src="/landing/logo.png" alt="" /><span>Lista de compras</span><img src="/landing/logo.png" alt="" /><span>Alternativas</span><img src="/landing/logo.png" alt="" /><span>Seguimiento</span><img src="/landing/logo.png" alt="" />
+          <span>Mensajes con tu nutri</span><img src="/landing/logo.png" alt="" /><span>Consultas programadas</span><img src="/landing/logo.png" alt="" /><span>Tu plan de la semana</span><img src="/landing/logo.png" alt="" /><span>Lista de compras</span><img src="/landing/logo.png" alt="" /><span>Alternativas</span><img src="/landing/logo.png" alt="" /><span>Seguimiento</span><img src="/landing/logo.png" alt="" />
         </div>
       </div>
 
-      <!-- 3. Qué es + números -->
-      <section class="lp-intro lp-section" id="que-es" aria-labelledby="intro-titulo">
-        <div class="lp-intro__head">
-          <h2 id="intro-titulo" class="lp-h2" data-reveal>
-            Comer mejor es más fácil cuando <em>sabés qué hacer hoy</em>.
-          </h2>
-          <p class="lp-lead" data-reveal>Plan V es la app que tu nutricionista usa para acompañarte. Ahí está tu plan, la lista para el súper, tus turnos y un lugar para contarle cómo te va.</p>
-        </div>
-        <ul class="lp-stats">
-          <li data-reveal><b data-count="1">1</b><span>enlace de tu nutri para empezar</span></li>
-          <li data-reveal><b data-count="0">0</b><span>PDFs perdidos en el chat</span></li>
-          <li data-reveal><b data-count="7">7</b><span>días de plan siempre a mano</span></li>
+      <!-- 3. El dolor -->
+      <section class="pv-section pv-pain pv-has-obj" aria-labelledby="pain-titulo">
+        <span class="pv-obj pv-obj--side" data-depth="0.5" style="--x: 82%; --y: 2%; --w: clamp(80px, 12vw, 170px);" aria-hidden="true"><img src="/landing/obj-palta.webp" alt="" loading="lazy" /></span>
+        <p class="pv-eyebrow" data-reveal>¿Te suena?</p>
+        <h2 id="pain-titulo" class="pv-h2" data-reveal>El problema nunca fue <em>la fuerza de voluntad</em>.</h2>
+        <p class="pv-lead" data-reveal>Fue quedarte sin nadie a quien preguntarle entre una consulta y la otra.</p>
+        <ul class="pv-pain__list">
+          <li class="pv-pain__card pv-c-coral" data-reveal>Arrancás el lunes con todo. El jueves ya no sabés qué comer.</li>
+          <li class="pv-pain__card pv-c-gold" data-reveal>El plan quedó en un PDF perdido entre los chats.</li>
+          <li class="pv-pain__card pv-c-leaf" data-reveal>Tenés una duda hoy y la próxima consulta es en un mes.</li>
+          <li class="pv-pain__card pv-c-apricot" data-reveal>Contás calorías en una app, pero nadie te dice si vas bien.</li>
+          <li class="pv-pain__card pv-c-mist" data-reveal>Llegás al súper sin lista y volvés con cualquier cosa.</li>
         </ul>
       </section>
 
-      <!-- 4. Collage de fotos -->
-      <section class="lp-collage lp-section" aria-label="Comida de todos los días">
-        <figure class="lp-photo lp-photo--tall" data-reveal-img>
-          <img data-parallax="0.06" src="/landing/tostadas.jpg" alt="Tostadas con palta y huevo sobre una tabla de madera." loading="lazy" width="1696" height="960" />
-        </figure>
-        <figure class="lp-photo" data-reveal-img>
-          <img data-parallax="-0.05" src="/landing/plato-pescado.jpg" alt="Plato con pescado, chauchas, arroz y verduras de colores." loading="lazy" width="1696" height="960" />
-        </figure>
-        <figure class="lp-photo lp-photo--wide" data-reveal-img>
-          <img data-parallax="0.05" src="/landing/mealprep-color.jpg" alt="Táperes de vidrio con almuerzos coloridos." loading="lazy" width="1696" height="960" />
-        </figure>
-        <p class="lp-collage__text" data-reveal>Comida real, de la que cocinás en tu casa. Tu plan se adapta a tu día, no al revés.</p>
+      <!-- 4. La diferencia -->
+      <section class="pv-diff" id="diferencia" aria-labelledby="diff-titulo">
+        <div class="pv-diff__inner pv-has-obj">
+          <span class="pv-obj pv-obj--side" data-depth="0.6" style="--x: 80%; --y: 6%; --w: clamp(80px, 12vw, 170px);" aria-hidden="true"><img src="/landing/obj-brocoli.webp" alt="" loading="lazy" /></span>
+          <span class="pv-obj pv-obj--side" data-depth="0.9" style="--x: 88%; --y: 70%; --w: clamp(56px, 8vw, 110px);" aria-hidden="true"><img src="/landing/obj-kiwi.webp" alt="" loading="lazy" /></span>
+          <img class="pv-diff__logo" src="/landing/logo.png" alt="" width="96" height="96" data-reveal />
+          <h2 id="diff-titulo" class="pv-h2 pv-h2--xl" data-reveal>No es otra app para contar calorías.<br /><em>Es tu nutricionista, cerca.</em></h2>
+          <div class="pv-diff__cols">
+            <div class="pv-diff__col pv-diff__col--no" data-reveal>
+              <h3>Una app de calorías</h3>
+              <ul>
+                <li>Números sueltos, sin nadie que los mire</li>
+                <li>Un plan genérico, igual para todos</li>
+                <li>Las dudas te las respondés vos</li>
+                <li>La consulta va por otro lado</li>
+              </ul>
+            </div>
+            <div class="pv-diff__col pv-diff__col--si" data-reveal>
+              <h3>Plan V</h3>
+              <ul>
+                <li>Una nutricionista profesional que te conoce</li>
+                <li>Tu plan lo arma y lo ajusta ella, para vos</li>
+                <li>Le escribís por mensajes, desde la app</li>
+                <li>Las consultas se programan en la misma app</li>
+              </ul>
+            </div>
+          </div>
+          <p class="pv-diff__note" data-reveal>Las calorías y los macros también están, pero como una estimación que tu nutricionista revisa.</p>
+        </div>
       </section>
 
-      <!-- 5. Sección oscura -->
-      <section class="lp-green lp-section" aria-labelledby="acomp-titulo">
-        <div class="lp-green__inner">
-          <div class="lp-green__copy">
-            <p class="lp-tag" data-reveal>Tu nutricionista, más cerca</p>
-            <h2 id="acomp-titulo" class="lp-h2" data-reveal>Ella ve cómo te va y te acompaña, <em>sin que le escribas a toda hora</em>.</h2>
-            <p class="lp-lead" data-reveal>Registrás tus comidas con una foto, tildás lo que compraste y le dejás tus mensajes. En el próximo turno, las dos ya saben cómo viniste.</p>
-            <a class="lp-btn" href="#como-empezar" data-reveal>Quiero empezar</a>
+      <!-- 5. Beneficios: se desplaza de costado al bajar -->
+      <section class="pv-hs" id="beneficios" aria-labelledby="hs-titulo">
+        <div class="pv-hs__stage">
+          <div class="pv-hs__head">
+            <p class="pv-eyebrow">Lo que te llevás</p>
+            <h2 id="hs-titulo" class="pv-h2">Todo lo que necesitás, <em>sin perderte</em>.</h2>
           </div>
-          <figure class="lp-card-photo" data-reveal-img>
-            <img src="/landing/veronica.jpg" alt="La Lic. Verónica Trenti, nutricionista." loading="lazy" width="615" height="760" />
-            <figcaption class="lp-chip"><i></i>Lic. Verónica Trenti</figcaption>
+          <div class="pv-hs__viewport">
+            <ul class="pv-hs__track">
+              <li class="pv-hs__card pv-c-coral">
+                <img src="/landing/paciente-mensajes.jpg" alt="Una persona escribe un mensaje en su celular, en un sillón con plantas." loading="lazy" />
+                <div><span>01</span><h3>Mensajes con tu nutricionista</h3><p>Le escribís desde la app, con fotos si hace falta. Sin mezclarlo con el resto de tus chats.</p></div>
+              </li>
+              <li class="pv-hs__card pv-c-gold">
+                <img src="/landing/paciente-agenda.jpg" alt="Una persona anota en su agenda junto a su celular." loading="lazy" />
+                <div><span>02</span><h3>Consultas programadas</h3><p>Ves tu próxima consulta, confirmás que vas o proponés otro horario, todo desde la app.</p></div>
+              </li>
+              <li class="pv-hs__card pv-c-leaf">
+                <img src="/landing/mealprep-color.jpg" alt="Táperes de vidrio con almuerzos coloridos." loading="lazy" />
+                <div><span>03</span><h3>Tu plan y tu menú</h3><p>Las comidas de cada día con sus recetas, siempre en tu celular.</p></div>
+              </li>
+              <li class="pv-hs__card pv-c-apricot">
+                <img src="/landing/v2-super.jpg" alt="Manos con un celular y una canasta con verduras y frutas en la verdulería." loading="lazy" />
+                <div><span>04</span><h3>Lista de compras lista</h3><p>Cuando tu plan está definido, la app te arma la lista para el súper. Vos tildás lo que comprás.</p></div>
+              </li>
+              <li class="pv-hs__card pv-c-green">
+                <img src="/landing/v2-wok.jpg" alt="Plato de verduras salteadas con pollo y arroz integral." loading="lazy" />
+                <div><span>05</span><h3>Alternativas</h3><p>¿No conseguís un ingrediente o una receta no te cierra? Pedís un reemplazo y tu nutricionista lo revisa.</p></div>
+              </li>
+              <li class="pv-hs__card pv-c-orange">
+                <img src="/landing/v2-ensalada.jpg" alt="Bowl de ensalada con garbanzos, calabaza, hojas verdes y palta." loading="lazy" />
+                <div><span>06</span><h3>Seguimiento de verdad</h3><p>Registrás tus comidas con una foto y ella ve cómo venís antes de la próxima consulta.</p></div>
+              </li>
+              <li class="pv-hs__card pv-c-deep">
+                <img src="/landing/plato-pescado.jpg" alt="Plato con pescado, chauchas, arroz y verduras de colores." loading="lazy" />
+                <div><span>07</span><h3>Calorías y macros, con criterio</h3><p>La app estima los valores de tu foto y tu nutricionista los confirma o los ajusta. Es una estimación.</p></div>
+              </li>
+              <li class="pv-hs__card pv-c-mist">
+                <img src="/landing/v2-frutas.jpg" alt="Bowl de yogur con granola, frutillas, kiwi y naranja." loading="lazy" />
+                <div><span>08</span><h3>Tu actividad y tus registros</h3><p>Si querés, sumás tu actividad física y tus medidas. Se comparten solo con tu nutricionista.</p></div>
+              </li>
+            </ul>
+          </div>
+          <div class="pv-hs__bar" aria-hidden="true"><i></i></div>
+        </div>
+      </section>
+
+      <!-- 6. Cómo funciona -->
+      <section class="pv-section pv-flow" id="como-funciona" aria-labelledby="flow-titulo">
+        <div class="pv-flow__head pv-has-obj">
+          <span class="pv-obj pv-obj--side" data-depth="0.6" style="--x: 84%; --y: -10%; --w: clamp(70px, 10vw, 150px);" aria-hidden="true"><img src="/landing/obj-mate.webp" alt="" loading="lazy" /></span>
+          <p class="pv-eyebrow" data-reveal>Cómo funciona</p>
+          <h2 id="flow-titulo" class="pv-h2" data-reveal>Primero definen el plan. <em>Después, la app te lo hace fácil</em>.</h2>
+        </div>
+        <div class="pv-flow__grid">
+          <ol class="pv-flow__list">
+            <li data-reveal><b class="pv-c-gold">1</b><div><h3>Tu nutricionista te invita</h3><p>Te llega un enlace por WhatsApp. No te registrás por tu cuenta ni bajás nada de una tienda.</p></div></li>
+            <li data-reveal><b class="pv-c-coral">2</b><div><h3>Definen tu plan</h3><p>En la consulta arman un plan a tu medida. Lo decide una profesional, no un algoritmo.</p></div></li>
+            <li data-reveal><b class="pv-c-leaf">3</b><div><h3>La app te manda la lista de compras</h3><p>Sale de tu plan de la semana, para que el súper sea un trámite.</p></div></li>
+            <li data-reveal><b class="pv-c-apricot">4</b><div><h3>Vivís tu semana</h3><p>Mirás tu menú, registrás tus comidas con una foto y pedís alternativas si algo no te sirve.</p></div></li>
+            <li data-reveal><b class="pv-c-orange">5</b><div><h3>Le escribís cuando lo necesitás</h3><p>Tus mensajes y tu historial quedan juntos. Ella ve cómo venís.</p></div></li>
+            <li data-reveal><b class="pv-c-green">6</b><div><h3>Próxima consulta, ya agendada</h3><p>La confirmás desde la app y llegan las dos partes sabiendo de dónde seguir.</p></div></li>
+          </ol>
+          <figure class="pv-flow__photo" data-reveal>
+            <img src="/landing/paciente-mercado.jpg" alt="Una persona elige verduras frescas en una feria, con una bolsa de tela al hombro." loading="lazy" />
           </figure>
         </div>
       </section>
 
-      <!-- 6. Qué vas a tener -->
-      <section class="lp-tools lp-section" id="herramientas" aria-labelledby="tools-titulo">
-        <div class="lp-tools__head">
-          <h2 id="tools-titulo" class="lp-h2" data-reveal>Todo lo que necesitás, <em>en un solo lugar</em>.</h2>
-        </div>
-
-        <article class="lp-feature">
-          <figure class="lp-photo" data-reveal-img>
-            <img data-parallax="0.04" src="/landing/plato-pescado.jpg" alt="Plato con pescado, chauchas, arroz y verduras de colores." loading="lazy" width="1696" height="960" />
-          </figure>
-          <div class="lp-feature__copy">
-            <p class="lp-tag" data-reveal>Calorías y macros</p>
-            <h3 data-reveal>Sacás una foto y Plan V estima las calorías y los macros.</h3>
-            <p class="lp-lead" data-reveal>La estimación con IA queda en revisión hasta que tu nutricionista la confirma o la ajusta. Es una estimación, no una medición exacta.</p>
-            <ul class="lp-checks" data-reveal>
-              <li>Tu meta diaria, calculada con una fórmula y confirmada por tu nutri</li>
-              <li>Solo suman los registros que tu nutri ya revisó</li>
-            </ul>
-          </div>
-        </article>
-
-        <article class="lp-feature">
-          <figure class="lp-photo" data-reveal-img>
-            <img data-parallax="0.04" src="/landing/paciente-mercado.jpg" alt="Una mujer elige verduras frescas en una feria, con una bolsa de tela al hombro." loading="lazy" width="1696" height="960" />
-          </figure>
-          <div class="lp-feature__copy">
-            <p class="lp-tag" data-reveal>Lista de compras</p>
-            <h3 data-reveal>La lista del súper sale sola de tu plan.</h3>
-            <p class="lp-lead" data-reveal>Tildás lo que ya compraste y llegás a la verdulería sin anotar nada.</p>
-            <ul class="lp-checks" data-reveal>
-              <li>Armada a partir de tu plan de la semana</li>
-              <li>La podés descargar y llevar con vos</li>
-            </ul>
-          </div>
-        </article>
-
-        <article class="lp-feature">
-          <figure class="lp-photo" data-reveal-img>
-            <img data-parallax="0.04" src="/landing/mealprep-color.jpg" alt="Táperes de vidrio con almuerzos coloridos." loading="lazy" width="1696" height="960" />
-          </figure>
-          <div class="lp-feature__copy">
-            <p class="lp-tag" data-reveal>Menú</p>
-            <h3 data-reveal>Tu menú de la semana, siempre a mano.</h3>
-            <p class="lp-lead" data-reveal>Las comidas de cada día con sus recetas, en tu celular. Si tu nutri actualiza el plan, lo ves actualizado.</p>
-            <ul class="lp-checks" data-reveal>
-              <li>Menú saludable con recetas</li>
-              <li>Sin buscar PDFs en el chat</li>
-            </ul>
-          </div>
-        </article>
-
-        <article class="lp-feature">
-          <figure class="lp-photo" data-reveal-img>
-            <img data-parallax="0.04" src="/landing/paciente-mensajes.jpg" alt="Una mujer sonríe mientras escribe un mensaje en su celular, en un sillón con plantas." loading="lazy" width="1696" height="1272" />
-          </figure>
-          <div class="lp-feature__copy">
-            <p class="lp-tag" data-reveal>Seguimiento y mensajes</p>
-            <h3 data-reveal>Tu nutri te acompaña y vos no andás perdida.</h3>
-            <p class="lp-lead" data-reveal>Registrás tus comidas y le escribís a tu nutricionista desde la misma app, con fotos si hace falta. Todo queda junto, en un solo lugar.</p>
-            <ul class="lp-checks" data-reveal>
-              <li>Diario de comidas con foto</li>
-              <li>Mensajes con tu nutri, sin mezclarlos con el resto del chat</li>
-            </ul>
-          </div>
-        </article>
-
-        <article class="lp-feature">
-          <figure class="lp-photo" data-reveal-img>
-            <img data-parallax="0.04" src="/landing/paciente-agenda.jpg" alt="Una mujer anota en su agenda de papel junto a su celular y una taza de té." loading="lazy" width="1696" height="1272" />
-          </figure>
-          <div class="lp-feature__copy">
-            <p class="lp-tag" data-reveal>Próximas consultas</p>
-            <h3 data-reveal>Tus próximas consultas, bien organizadas.</h3>
-            <p class="lp-lead" data-reveal>Ves el día, la hora y la modalidad de tu próxima consulta. Confirmás que vas o pedís cambiar el horario.</p>
-            <ul class="lp-checks" data-reveal>
-              <li>Confirmás tu asistencia con un toque</li>
-              <li>Si no podés, proponés otro día y hora</li>
-            </ul>
-          </div>
-        </article>
-      </section>
-
-      <!-- 7. Banner grande -->
-      <section class="lp-banner" aria-labelledby="banner-titulo">
-        <img data-parallax="0.12" src="/landing/cocina-banner.jpg" alt="" aria-hidden="true" loading="lazy" width="1696" height="960" />
-        <div class="lp-banner__shade" aria-hidden="true"></div>
-        <div class="lp-banner__copy">
-          <h2 id="banner-titulo" class="lp-h2 lp-h2--light" data-reveal>Un paso a la vez, <em>a tu ritmo</em>.</h2>
-          <a class="lp-btn" href="#como-empezar" data-reveal>Quiero empezar</a>
+      <!-- 7. Para quién -->
+      <section class="pv-who" id="para-quien" aria-labelledby="who-titulo">
+        <div class="pv-section">
+          <p class="pv-eyebrow" data-reveal>Para vos, seas quien seas</p>
+          <h2 id="who-titulo" class="pv-h2" data-reveal>Cada persona es distinta. <em>Tu plan también</em>.</h2>
+          <ul class="pv-who__grid">
+            <li class="pv-who__card" data-reveal>
+              <img src="/landing/v2-deportista.jpg" alt="Un hombre en ropa deportiva come un bowl de avena con frutas después de entrenar." loading="lazy" />
+              <div class="pv-c-gold"><h3>Si entrenás</h3><p>Comer acorde a lo que entrenás, con un plan pensado para tu rutina.</p></div>
+            </li>
+            <li class="pv-who__card" data-reveal>
+              <img src="/landing/v3-desayuno-mate.jpg" alt="Una persona prepara un desayuno con yogur, frutas y mate en su cocina." loading="lazy" />
+              <div class="pv-c-coral"><h3>Si querés bajar de peso</h3><p>Sin dietas de moda ni juicios: acompañamiento profesional, a tu ritmo.</p></div>
+            </li>
+            <li class="pv-who__card" data-reveal>
+              <img src="/landing/v2-mayores.jpg" alt="Una pareja mayor cocina verduras frescas en su cocina, riendo." loading="lazy" />
+              <div class="pv-c-leaf"><h3>Si pasaste los 60</h3><p>Comer rico y adecuado a esta etapa, con alguien que te guía.</p></div>
+            </li>
+            <li class="pv-who__card" data-reveal>
+              <img src="/landing/v2-digestivo.jpg" alt="Una mujer toma una sopa de verduras junto a una ventana, tranquila." loading="lazy" />
+              <div class="pv-c-apricot"><h3>Si tenés una afección digestiva</h3><p>Tu nutricionista arma el plan para tu caso, con la indicación de tu médico.</p></div>
+            </li>
+            <li class="pv-who__card" data-reveal>
+              <img src="/landing/v2-oficina.jpg" alt="Una persona almuerza de un táper en su escritorio, junto a la notebook." loading="lazy" />
+              <div class="pv-c-mist"><h3>Si no tenés tiempo</h3><p>Menú resuelto y lista hecha para toda la semana.</p></div>
+            </li>
+            <li class="pv-who__card" data-reveal>
+              <img src="/landing/paciente-celular.jpg" alt="Una mujer sonríe mirando su celular en su cocina." loading="lazy" />
+              <div class="pv-c-green"><h3>Si solo querés comer mejor</h3><p>Ordenar tus comidas sin marearte con los números.</p></div>
+            </li>
+          </ul>
+          <p class="pv-fine" data-reveal>Plan V no diagnostica ni reemplaza a tu médico. El plan lo define siempre tu nutricionista.</p>
         </div>
       </section>
 
-      <!-- 8. Cómo empezar -->
-      <section class="lp-steps lp-section" id="como-empezar" aria-labelledby="steps-titulo">
-        <h2 id="steps-titulo" class="lp-h2" data-reveal>Empezar es <em>muy simple</em>.</h2>
-        <ol class="lp-steps__list">
-          <li class="lp-step" data-reveal><b>1</b><h3>Tu nutri te manda un enlace</h3><p>Te llega por WhatsApp. No tenés que registrarte por tu cuenta.</p></li>
-          <li class="lp-step" data-reveal><b>2</b><h3>Lo abrís en el celular</h3><p>Se instala desde el navegador, sin pasar por ninguna tienda de aplicaciones.</p></li>
-          <li class="lp-step" data-reveal><b>3</b><h3>Vivís tu día</h3><p>Mirás tu plan, tildás tus compras y registrás tus comidas.</p></li>
-        </ol>
+      <!-- 8. Más razones -->
+      <section class="pv-section pv-more" aria-labelledby="more-titulo">
+        <p class="pv-eyebrow" data-reveal>Más razones</p>
+        <h2 id="more-titulo" class="pv-h2" data-reveal>Pensada para que <em>sigas</em>, no para que abandones.</h2>
+        <ul class="pv-more__grid">
+          <li class="pv-c-gold" data-reveal><b>01</b><h3>Todo en un solo lugar</h3><p>Plan, lista, mensajes y consultas. Sin buscar en cinco aplicaciones.</p></li>
+          <li class="pv-c-mist" data-reveal><b>02</b><h3>Sin tiendas de apps</h3><p>Se instala desde el navegador de tu celular.</p></li>
+          <li class="pv-c-coral" data-reveal><b>03</b><h3>Recetas de tu menú</h3><p>Cada comida de tu plan con su receta, para no improvisar.</p></li>
+          <li class="pv-c-leaf" data-reveal><b>04</b><h3>Material de tu nutri</h3><p>Los recursos que ella te comparte, guardados para cuando los necesites.</p></li>
+          <li class="pv-c-apricot" data-reveal><b>05</b><h3>Lo tuyo, entre vos y ella</h3><p>Lo que cargás lo ve tu nutricionista.</p></li>
+          <li class="pv-c-deep" data-reveal><b>06</b><h3>Hecha en Argentina</h3><p>En nuestro español y con comida de acá.</p></li>
+        </ul>
       </section>
 
-      <!-- 9. Cierre -->
-      <section class="lp-cta lp-section" id="pedila" aria-labelledby="cta-titulo">
-        <div class="lp-cta__inner">
-          <p class="lp-tag" data-reveal>Plan V para pacientes</p>
-          <h2 id="cta-titulo" class="lp-h2" data-reveal>¿Todavía no tenés tu enlace? <em>Pedíselo a tu nutricionista</em>.</h2>
-          <p class="lp-lead" data-reveal>Plan V se usa con una nutricionista que ya la tenga. Si ya te mandó el enlace, entrá desde acá.</p>
-          <a class="lp-btn" href="/" data-reveal>Ya tengo mi enlace</a>
+      <!-- 9. Una nutricionista real -->
+      <section class="pv-pro" aria-labelledby="pro-titulo">
+        <div class="pv-pro__inner">
+          <div class="pv-pro__copy">
+            <p class="pv-tag" data-reveal>Hecha con una nutricionista de verdad</p>
+            <h2 id="pro-titulo" class="pv-h2" data-reveal>Del otro lado <em>hay una persona</em>.</h2>
+            <p class="pv-lead" data-reveal>Plan V se creó junto a la Lic. Verónica Trenti, que la usa con sus pacientes. Tu plan lo arma y lo confirma tu nutricionista: la app está para que el contacto no se corte.</p>
+            <a class="pv-btn" href="#empezar" data-reveal>Quiero empezar</a>
+          </div>
+          <figure class="pv-pro__photo" data-reveal>
+            <img src="/landing/veronica.jpg" alt="La Lic. Verónica Trenti, nutricionista." loading="lazy" width="612" height="760" />
+            <figcaption><img src="/landing/logo.png" alt="" width="28" height="28" />Lic. Verónica Trenti</figcaption>
+          </figure>
         </div>
+      </section>
+
+      <!-- 10. Preguntas -->
+      <section class="pv-section pv-faq" aria-labelledby="faq-titulo">
+        <p class="pv-eyebrow" data-reveal>Preguntas frecuentes</p>
+        <h2 id="faq-titulo" class="pv-h2" data-reveal>Lo que <em>todos preguntan</em>.</h2>
+        <div class="pv-faq__list">
+          <details data-reveal><summary>¿Es una app para contar calorías?</summary><p>No solamente. Las calorías y los macros están, como una estimación que tu nutricionista revisa. Lo central es el contacto con ella: mensajes, consultas, tu plan y el seguimiento.</p></details>
+          <details data-reveal><summary>¿Puedo usarla sin nutricionista?</summary><p>No. Plan V se usa con una nutricionista que ya la tenga. Ella te manda el enlace para entrar.</p></details>
+          <details data-reveal><summary>¿La inteligencia artificial decide mi plan?</summary><p>No. El plan lo arma y lo confirma tu nutricionista. La IA solo ayuda con estimaciones y borradores que ella revisa antes de que te lleguen.</p></details>
+          <details data-reveal><summary>¿Hay que bajarla de una tienda?</summary><p>No. Se instala desde el navegador de tu celular, con el enlace que te manda tu nutricionista.</p></details>
+          <details data-reveal><summary>¿Quién ve lo que cargo?</summary><p>Tu nutricionista. Podés leer el detalle en la página de privacidad.</p></details>
+        </div>
+      </section>
+
+      <!-- 11. Cierre -->
+      <section class="pv-cta pv-has-obj" id="empezar" aria-labelledby="cta-titulo">
+        <span class="pv-obj pv-obj--side" data-depth="0.7" style="--x: 6%; --y: 14%; --w: clamp(70px, 10vw, 140px);" aria-hidden="true"><img src="/landing/obj-mate.webp" alt="" loading="lazy" /></span>
+        <span class="pv-obj pv-obj--side" data-depth="1" style="--x: 84%; --y: 60%; --w: clamp(60px, 9vw, 120px);" aria-hidden="true"><img src="/landing/obj-frutilla.webp" alt="" loading="lazy" /></span>
+        <img class="pv-cta__logo" src="/landing/logo.png" alt="" width="140" height="140" />
+        <h2 id="cta-titulo" class="pv-h2 pv-h2--xl" data-reveal>Llevá a tu nutricionista <em>con vos</em>.</h2>
+        <p class="pv-lead" data-reveal>Pedile tu enlace de Plan V. Si ya lo tenés, entrá desde acá.</p>
+        <a class="pv-btn pv-btn--deep" href="/" data-reveal>Ya tengo mi enlace</a>
       </section>
     </main>
 
-    <footer class="lp-footer">
-      <div class="lp-footer__brand"><img src="/landing/logo.png" alt="" width="32" height="32" /><span>Plan V</span></div>
+    <footer class="pv-footer">
+      <div class="pv-footer__brand"><img src="/landing/logo.png" alt="" width="56" height="56" /><span>Plan V</span></div>
       <p>Hecha en Argentina, junto a la Lic. Verónica Trenti.</p>
-      <p class="lp-footer__note">Las fotos de comida, cocina y consultorio son ilustrativas, generadas con inteligencia artificial; la foto de la Lic. Verónica Trenti es real. Las estimaciones de comidas que muestra la app son orientativas y no reemplazan la indicación de tu nutricionista.</p>
+      <p class="pv-footer__note">Las fotos de personas, comida y lugares son ilustrativas, generadas con inteligencia artificial; la foto de la Lic. Verónica Trenti es real. Las estimaciones de comidas que muestra la app son orientativas y no reemplazan la indicación de tu nutricionista ni de tu médico.</p>
       <nav aria-label="Legales"><a href="/legal/privacidad.html">Privacidad</a><a href="/legal/terminos.html">Términos</a></nav>
     </footer>
 
-    <script type="module" src="/src/landing/landing.ts"></script>
+    <script type="module" src="/src/landing/pacientes.ts"></script>
   </body>
 </html>
