@@ -205,19 +205,30 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
   });
 
   it('dos sesiones con la misma revisión no sobrescriben la meta',async()=>{
-    const workspace=await ownerA.client.rpc('get_nutrition_target_workspace',{target:pidA});
-    expect(workspace.error).toBeNull();
-    const results=await Promise.all([67,68].map(weight_kg=>{
-      const proposed={...inputs,weight_kg};
-      return ownerA.client.rpc('save_nutrition_target_versioned',{target:pidA,target_inputs:proposed,target_result:calculateTarget(proposed),publish:false,expected_revision:workspace.data.revision});
+    const started=performance.now();
+    const url=assertLocal(process.env.SUPABASE_URL,['http:']);
+    const clients=[0,1].map(()=>createClient(url,process.env.SUPABASE_ANON_KEY!,{
+      accessToken:async()=>ownerA.token,auth:{persistSession:false,autoRefreshToken:false},db:{retry:false},
     }));
+    const workspace=await clients[0].rpc('get_nutrition_target_workspace',{target:pidA}).abortSignal(AbortSignal.timeout(12000));
+    const workspaceMs=Math.round(performance.now()-started);
+    expect(workspace.error).toBeNull();
+    const writesStarted=performance.now();
+    const probe=setTimeout(()=>{void pool.query("select state,wait_event_type,wait_event,cardinality(pg_blocking_pids(pid)) as blockers from pg_stat_activity where datname=current_database() and application_name ilike '%postgrest%' and state<>'idle'").then(result=>console.info('Diagnóstico local de contención:',JSON.stringify(result.rows))).catch(()=>console.info('Diagnóstico local no disponible.'));},4000);
+    const results=await Promise.all([67,68].map((weight_kg,index)=>{
+      const proposed={...inputs,weight_kg};
+      return clients[index].rpc('save_nutrition_target_versioned',{target:pidA,target_inputs:proposed,target_result:calculateTarget(proposed),publish:false,expected_revision:workspace.data.revision}).abortSignal(AbortSignal.timeout(12000));
+    })).finally(()=>clearTimeout(probe));
+    console.info('Concurrencia local de metas:',JSON.stringify({workspace_ms:workspaceMs,writes_ms:Math.round(performance.now()-writesStarted),statuses:results.map(result=>result.status),codes:results.map(result=>result.error?.code??null)}));
     expect(results.filter(result=>!result.error)).toHaveLength(1);
     expect(results.find(result=>result.error)?.error?.code).toBe('40001');
-    const after=await ownerA.client.rpc('get_nutrition_target_workspace',{target:pidA});
+    const afterStarted=performance.now();
+    const after=await clients[0].rpc('get_nutrition_target_workspace',{target:pidA}).abortSignal(AbortSignal.timeout(12000));
+    console.info('Lectura local posterior:',JSON.stringify({elapsed_ms:Math.round(performance.now()-afterStarted),status:after.status,code:after.error?.code??null}));
     expect(after.error).toBeNull();expect(after.data.revision).toBe(workspace.data.revision+1);
     expect([67,68]).toContain(after.data.draft.inputs.weight_kg);
     expect(after.data.published.result).toEqual(calculateTarget(inputs));
-  });
+  },15000);
 
   it('el mensaje autorizado se lee y la función interna queda cerrada', async () => {
     const own = await ownerA.client.rpc('list_thread_messages',{target_patient:pidA,ack_delivery:false});
