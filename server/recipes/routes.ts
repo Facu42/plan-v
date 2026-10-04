@@ -9,6 +9,7 @@ import { buildRecipeCard, recipeDayAssignSchema, recipeRegisterSchema, recipeWiz
 import * as days from './day.js';
 import * as repo from './repository.js';
 import { recipeCoverEnabled } from '../ai/recipe-cover.js';
+import { saveManualRecipeCover } from './manual-cover.js';
 
 async function body<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
   const raw = await c.req.text();
@@ -63,6 +64,7 @@ function coreDraft(input: ReturnType<typeof recipeWizardSchema.parse>) {
     yield_portions: input.yield_portions,
     steps: input.steps,
     nutrient_source: input.nutrient_source,
+    ...(input.nutrition ? { nutrition: input.nutrition } : {}),
     items: input.items.map(({ name, quantity, unit }) => ({ name, quantity, unit })),
   };
 }
@@ -83,6 +85,7 @@ async function saveWizard(c: Context) {
 }
 
 const recipeIdParam = z.uuid();
+const manualCoverSchema = z.object({ expected_version: z.number().int().positive(), expected_cover_url: z.string().max(7_000_000).nullable(), data_url: z.string().max(7_000_000) }).strict();
 
 export function registerRecipeRoutes(app: Hono) {
   app.get('/api/recipes', async (c) => {
@@ -125,6 +128,20 @@ export function registerRecipeRoutes(app: Hono) {
     if (!id.success) throw new repo.CareError(400, 'Volvé a abrir la receta antes de generar la foto.');
     const input = await body(c, recipePublishSchema);
     const recipe = await repo.retryRecipeCover(nutritionistId, id.data, input.expected_version, persistent);
+    return c.json({ recipe, source: persistent ? 'supabase' : 'memory' });
+  });
+
+  app.post('/api/recipes/:id/cover/manual', async (c) => {
+    const { persistent, nutritionistId } = await professional(c);
+    if (c.req.query('audience') === 'patient') throw new repo.CareError(403, 'Sólo la nutricionista puede subir la foto.');
+    const id = recipeIdParam.safeParse(c.req.param('id'));
+    if (!id.success) throw new repo.CareError(400, 'Volvé a abrir la receta antes de subir la foto.');
+    if (Number(c.req.header('Content-Length')) > 7_100_000) throw new repo.CareError(413, 'La foto debe pesar como máximo 5 MB.');
+    const raw = await c.req.text();
+    if (Buffer.byteLength(raw) > 7_100_000) throw new repo.CareError(413, 'La foto debe pesar como máximo 5 MB.');
+    let input: z.infer<typeof manualCoverSchema>;
+    try { input = manualCoverSchema.parse(JSON.parse(raw)); } catch { throw new repo.CareError(400, 'Seleccioná una foto JPG, PNG o WebP y volvé a abrir la receta.'); }
+    const recipe = await saveManualRecipeCover(nutritionistId, id.data, input.expected_version, input.expected_cover_url, input.data_url, persistent);
     return c.json({ recipe, source: persistent ? 'supabase' : 'memory' });
   });
 

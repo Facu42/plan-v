@@ -84,6 +84,7 @@ export function ShowroomPatientOnboarding({
   const draftRef = useRef(draft);
   const stepRef = useRef(step);
   const contextRef = useRef(context);
+  const loadedRevision = useRef<number | null>(null);
   draftRef.current = draft;
   stepRef.current = step;
   contextRef.current = context;
@@ -105,6 +106,7 @@ export function ShowroomPatientOnboarding({
   useEffect(() => {
     const controller = new AbortController();
     controllerRef.current = controller;
+    loadedRevision.current = null;
     setLoaded(false);
     setSaveError('');
     setRecoverNeeded(false);
@@ -126,6 +128,7 @@ export function ShowroomPatientOnboarding({
           submit: revision => api.submitIntake(patient.id, revision, init),
         });
         setDraft(recovered);
+        loadedRevision.current = snapshot.intake.revision;
         setStep(resumeOnboardingStep(snapshot.intake.status, snapshot.intake.step));
         setLoaded(true);
         setSaveState('saved');
@@ -231,7 +234,7 @@ export function ShowroomPatientOnboarding({
     cancelTimer(); actionRef.current = true; setSubmitting(true); setSaveError('');
     try {
       const result = await session.submit({step:'review',payload:draftToIntakePayload(draft)});
-      if (result && sessionRef.current === session) { setStep('ready'); setSaveState('saved'); }
+      if (result && sessionRef.current === session) { loadedRevision.current = result.intake.revision; setStep('ready'); setSaveState('saved'); }
     } catch (reason) {
       showFailure(reason, session);
       if (session.awaitingReceipt && !session.blocked) setSaveError('No recibimos la confirmación del envío. Reintentá confirmar; se conserva el mismo ingreso sin duplicarlo.');
@@ -239,6 +242,25 @@ export function ShowroomPatientOnboarding({
       if (sessionRef.current === session) setAwaitingReceipt(session.awaitingReceipt);
       actionRef.current = false; setSubmitting(false);
     }
+  };
+
+  const correctSubmitted = async () => {
+    const revision = loadedRevision.current;
+    if (revision === null || actionRef.current || disabled) return;
+    actionRef.current = true; setNavigating(true); cancelTimer(); setSaveError('');
+    try {
+      const snapshot = await api.reopenIntake(patient.id, revision, { signal: controllerRef.current?.signal });
+      if (controllerRef.current?.signal.aborted) return;
+      const currentCare = careConsentFromCatalog(catalog);
+      const recovered = intakeToDraft({ intake: { ...snapshot.intake, payload: snapshot.intake.payload as Record<string, unknown> }, consents: snapshot.consents.filter(event => event.purpose !== 'care_relationship' || event.text_version === currentCare?.text_version) }, contextRef.current);
+      sessionRef.current?.dispose();
+      sessionRef.current = createIntakeSession(snapshot.intake.revision, { save: data => api.patchIntake(patient.id, data, { signal: controllerRef.current?.signal }), submit: expected => api.submitIntake(patient.id, expected, { signal: controllerRef.current?.signal }) });
+      loadedRevision.current = snapshot.intake.revision;
+      skipInitialSave.current = true; setDraft(recovered); setStep(recovered.consentSharing ? 'profile' : 'privacy'); setSaveState('saved');
+    } catch (error) {
+      if (isAbortError(error)) return;
+      setRecoverNeeded(true); setSaveState('error'); setSaveError('No pudimos confirmar la apertura para corregir. Recuperá la ficha guardada antes de reintentar. Los datos anteriores se conservan.');
+    } finally { actionRef.current = false; setNavigating(false); }
   };
 
   const saveLabel = !loaded && !saveError ? 'Recuperando tu ingreso…'
@@ -381,6 +403,7 @@ export function ShowroomPatientOnboarding({
     <footer className="nvon-actions">
       {previous && step !== 'ready' ? <NvButton className="nv-ghost" disabled={disabled} onClick={() => void moveTo(previous)}>Atrás</NvButton> : <NvButton className="nv-ghost" disabled={busy || (loaded && recoverNeeded)} onClick={() => void exit()}>{step === 'ready' ? 'Cerrar' : 'Continuar después'}</NvButton>}
       {step === 'review' && <NvButton onClick={() => void submit()} disabled={!loaded || recoverNeeded || !canContinue || busy}>{submitting ? 'Enviando…' : awaitingReceipt ? 'Confirmar envío' : 'Enviar a mi nutricionista'}</NvButton>}
+      {step === 'ready' && <NvButton className="nv-soft" disabled={disabled} onClick={() => void correctSubmitted()}>Corregir mi ficha enviada</NvButton>}
       {step === 'ready' && finished ? <>
         <NvButton onClick={() => onFinished(context.hasPublishedPlan ? 'plan' : 'inicio', finished)}>{context.hasPublishedPlan ? 'Ver mi plan' : 'Ir al inicio'}</NvButton>
       </> : step !== 'review' && step !== 'ready' ? <NvButton onClick={() => void goNext()} disabled={disabled || !canContinue}>{step === 'invite' ? 'Comenzar' : 'Continuar'}</NvButton> : null}

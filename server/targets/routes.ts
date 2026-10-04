@@ -7,7 +7,7 @@ import { getPatient } from '../store.js';
 import { bodyDataSchema, calculateTarget, targetInputSchema } from '../../src/lib/nutrition-target.js';
 import * as repo from './repository.js';
 
-const saveSchema = z.object({ inputs: targetInputSchema, publish: z.boolean() }).strict();
+const saveSchema = z.object({ inputs: targetInputSchema, publish: z.boolean(), expected_revision: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER) }).strict();
 
 async function access(c: Context, patientId: string) {
   const auth = c.get('auth');
@@ -25,9 +25,9 @@ export function registerTargetRoutes(app: Hono) {
   app.get('/api/patients/:id/nutrition-target', async (c) => {
     const id = c.req.param('id');
     const { persistent, professional } = await access(c, id);
-    const target = await repo.getTarget(id, persistent);
-    // La paciente sólo ve la meta una vez que la nutricionista la confirmó.
-    return c.json({ target: professional ? target : target?.published_at ? target : null });
+    if (professional) return c.json(await repo.getTargetWorkspace(id, persistent));
+    // El borrador y su revisión nunca forman parte de la respuesta de la paciente.
+    return c.json({ target: await repo.getTarget(id, persistent) });
   });
 
   app.put('/api/patients/:id/nutrition-target', async (c) => {
@@ -35,11 +35,10 @@ export function registerTargetRoutes(app: Hono) {
     const { persistent, professional } = await access(c, id);
     if (!professional) throw new repo.TargetError(403, 'Sólo la nutricionista puede definir la meta.');
     let parsed: z.infer<typeof saveSchema>;
-    try { parsed = saveSchema.parse(JSON.parse(await c.req.text())); } catch { throw new repo.TargetError(400, 'Revisá sexo, edad, peso, talla y porcentajes.'); }
+    try { parsed = saveSchema.parse(JSON.parse(await c.req.text())); } catch { throw new repo.TargetError(400, 'Revisá los datos y recargá la meta antes de guardarla.'); }
     // El servidor recalcula: nunca se confía en cifras enviadas por el navegador.
     const result = calculateTarget(parsed.inputs);
-    const target = await repo.saveTarget(id, parsed.inputs, result, parsed.publish, persistent);
-    return c.json({ target });
+    return c.json(await repo.saveTarget(id, parsed.inputs, result, parsed.publish, persistent, parsed.expected_revision));
   });
 
   // Datos corporales: los carga la paciente; la nutricionista los lee y puede pedir una actualización.

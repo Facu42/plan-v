@@ -10,6 +10,8 @@ import { RecipePlateCard } from './RecipePlate';
 import './recipe-plate.css';
 import { NvButton, NvState } from './primitives';
 import './recipe-catalog.css';
+import { recipeNutritionLabel } from '../../types/ai-nutrition';
+import { RecipeManualCoverAction } from './RecipeManualCoverAction';
 
 function emptyDraft(id = crypto.randomUUID()): RecipeWizardInput {
   return {
@@ -25,6 +27,7 @@ function fromRecipe(recipe: ProfessionalRecipe): RecipeWizardInput {
     yield_portions: recipe.current.yield_portions,
     steps: recipe.current.steps.length ? recipe.current.steps : [''],
     nutrient_source: recipe.current.nutrient_source,
+    ...(recipe.current.nutrition ? { nutrition: recipe.current.nutrition } : {}),
     category: (PLAN_SLOTS as readonly string[]).includes(recipe.current.card?.category ?? '') ? recipe.current.card!.category as PlanSlot : 'Almuerzo',
     prep_minutes: recipe.current.card?.prep_minutes ?? null,
     protein_g: recipe.current.card?.macros?.protein_g ?? null,
@@ -119,12 +122,12 @@ export function useRecipeCatalog(patientId: string) {
       await aiJobsApi.apply(created.job.id);
       setEditing(draft);
       setPath('manual');
-    }, 'Propuesta lista para revisar. Sin macros. La foto se genera al aprobar.');
+    }, 'Propuesta lista para revisar. Los nutrientes son estimaciones de IA; la foto puede subirse manualmente.');
   }
 
   return {
     patientId, recipes, source, imageGeneration, error, status, busy, editing, path, description, assigning, day, slot,
-    setEditing, setPath, setDescription, setDay, setSlot, run, submit, submitAi, quickAiDraft,
+    setEditing, setPath, setDescription, setDay, setSlot, reload, run, submit, submitAi, quickAiDraft,
     startNew: () => { setPath('choose'); setEditing(null); setStatus(''); setError(''); },
     chooseManual: () => { setPath('manual'); setEditing(emptyDraft()); },
     chooseAi: () => { setPath('ai'); setEditing(null); },
@@ -191,7 +194,13 @@ export function RecipeEditorForm({ catalog }: { catalog: RecipeCatalogState }) {
   if (!editing) return null;
   return <form className="recipe-form" onSubmit={submit}>
     <p className="recipe-wizard-note">Paso 2 de 2 · revisá ingredientes, macros y foto antes de asignar.</p>
+    {editing.nutrition && <p>{recipeNutritionLabel(editing.nutrition)} · revisar no convierte la estimación en un valor medido.</p>}
     <label>Título<input value={editing.title} maxLength={150} onChange={(event) => setEditing({ ...editing, title: event.target.value })} /></label>
+    {editing.nutrition && <fieldset><legend>Nutrientes por porción · estimación para revisar</legend>
+      {(['kcal', 'protein_g', 'carbs_g', 'fat_g'] as const).map((key) => <label key={key}>{({ kcal: 'Calorías (kcal)', protein_g: 'Proteínas (g)', carbs_g: 'Hidratos (g)', fat_g: 'Grasas (g)' })[key]}
+        <input type="number" min={key === 'kcal' ? 0.1 : 0} step="0.1" value={editing.nutrition!.per_portion[key]} onChange={(event) => setEditing({ ...editing, nutrition: { ...editing.nutrition!, per_portion: { ...editing.nutrition!.per_portion, [key]: Number(event.target.value) } } })} />
+      </label>)}
+    </fieldset>}
     <div className="recipe-form-row">
       <label>Rinde (porciones)<input type="number" min={1} max={50} step="0.5" value={editing.yield_portions} onChange={(event) => setEditing({ ...editing, yield_portions: Number(event.target.value) })} /></label>
       <label>Fuente nutricional<input value={editing.nutrient_source} maxLength={200} placeholder="Declarada; vacía si no hay base" onChange={(event) => setEditing({ ...editing, nutrient_source: event.target.value })} /></label>
@@ -207,10 +216,10 @@ export function RecipeEditorForm({ catalog }: { catalog: RecipeCatalogState }) {
           ...editing,
           items: editing.items.map((current, currentIndex) => currentIndex === index ? { ...current, quantity: Number(event.target.value) } : current),
         })} />
-        <input aria-label={`Kcal de línea ${index + 1}`} type="number" min={0} step="1" placeholder="kcal" value={item.line_kcal ?? ''} onChange={(event) => setEditing({
+        {!editing.nutrition && <input aria-label={`Kcal de línea ${index + 1}`} type="number" min={0} step="1" placeholder="kcal" value={item.line_kcal ?? ''} onChange={(event) => setEditing({
           ...editing,
           items: editing.items.map((current, currentIndex) => currentIndex === index ? { ...current, line_kcal: event.target.value === '' ? undefined : Number(event.target.value) } : current),
-        })} />
+        })} />}
         <select aria-label={`Unidad ${index + 1}`} value={item.unit} onChange={(event) => setEditing({
           ...editing,
           items: editing.items.map((current, currentIndex) => currentIndex === index ? { ...current, unit: event.target.value as RecipeUnit } : current),
@@ -220,11 +229,11 @@ export function RecipeEditorForm({ catalog }: { catalog: RecipeCatalogState }) {
       </div>)}
       <button type="button" className="recipe-add" onClick={() => setEditing({ ...editing, items: [...editing.items, { name: '', quantity: 1, unit: 'g' }] })}>Agregar ingrediente</button>
     </fieldset>
-    <div className="recipe-form-row">
+    {!editing.nutrition && <div className="recipe-form-row">
       <label>PROT g<input type="number" min={0} step="0.1" value={editing.protein_g ?? ''} onChange={(event) => setEditing({ ...editing, protein_g: event.target.value === '' ? null : Number(event.target.value) })} /></label>
       <label>CARBS g<input type="number" min={0} step="0.1" value={editing.carbs_g ?? ''} onChange={(event) => setEditing({ ...editing, carbs_g: event.target.value === '' ? null : Number(event.target.value) })} /></label>
       <label>GRASAS g<input type="number" min={0} step="0.1" value={editing.fat_g ?? ''} onChange={(event) => setEditing({ ...editing, fat_g: event.target.value === '' ? null : Number(event.target.value) })} /></label>
-    </div>
+    </div>}
     <fieldset>
       <legend>Pasos</legend>
       <textarea aria-label="Pasos de la receta" value={editing.steps.join('\n')} onChange={(event) => setEditing({ ...editing, steps: event.target.value.split('\n') })} />
@@ -267,7 +276,7 @@ export function RecipeCatalog({ patientId }: { patientId: string }) {
       <div>
         <span>CATÁLOGO DEL CONSULTORIO</span>
         <h2>Recetas e ingredientes</h2>
-        <p>Porciones, pasos y fuente nutricional declarada. Un borrador no cambia la revisión publicada. No se inventan calorías ni macros. La IA deja un borrador privado; publicar revalida alergias y la versión. Vos publicás.</p>
+        <p>Porciones, pasos y fuente nutricional declarada. Un borrador privado no cambia la revisión publicada. La IA propone nutrientes estimados que requieren revisión; la etiqueta de estimación se conserva al publicar. Publicar revalida alergias y la versión. Vos publicás.</p>
       </div>
       <div className="recipe-header-actions">
         <NvButton className="nv-ghost" disabled={busy} onClick={catalog.startNew}>Nueva receta</NvButton>
@@ -289,6 +298,7 @@ export function RecipeCatalog({ patientId }: { patientId: string }) {
         {!recipe.current.published_at && <NvButton disabled={busy} onClick={() => catalog.publish(recipe)}>Publicar</NvButton>}
         {recipe.published && <NvButton disabled={busy} onClick={() => catalog.startAssign(recipe)}>Asignar</NvButton>}
         <RecipeCoverAction catalog={catalog} recipe={recipe} className="nv-button nv-ghost" />
+        <RecipeManualCoverAction recipe={recipe} disabled={busy} onSaved={catalog.reload} />
       </>} />;
     })}</div>
     <RecipeAssignDialog catalog={catalog} />

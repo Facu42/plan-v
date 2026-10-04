@@ -18,6 +18,7 @@ import { getRecipeCard, resetRecipeCards, setRecipeCard } from './presentation.j
 import { unavailableCard } from '../../src/types/recipe-plate.js';
 import { generateRecipeCoverImage, recipeCoverEnabled } from '../ai/recipe-cover.js';
 import { logProviderFailure } from '../ai/mode.js';
+import { recipeNutritionSchema, resolveRecipeNutrition, type RecipeNutrition } from '../../src/types/ai-nutrition.js';
 
 export { CareError } from '../care/errors.js';
 
@@ -32,6 +33,7 @@ type MemVersion = {
   nutrient_source: string;
   published_at: string | null;
   created_at: string;
+  nutrition?: RecipeNutrition;
 };
 type MemLine = { id: string; recipe_version_id: string; ingredient_id: string; quantity: number; unit: RecipeUnit };
 type MemAssignment = { recipe_id: string; patient_id: string; nutritionist_id: string; recipe_version_id: string; assigned_at: string };
@@ -105,6 +107,7 @@ function asVersion(row: Record<string, unknown>, title: string): RecipeVersionVi
     yield_portions: asNumber(row.yield_portions),
     steps: Array.isArray(row.steps) ? row.steps.map((step) => String(step)) : [],
     nutrient_source: String(row.nutrient_source ?? ''),
+    ...(row.nutrition ? { nutrition: recipeNutritionSchema.parse(row.nutrition) } : {}),
     published_at: row.published_at ? String(row.published_at) : null,
     ingredients: ingredientsRaw.map((item) => asItem(item as { id?: string; name?: string; quantity?: unknown; unit?: string })),
     card: row.card ? (row.card as RecipeCard) : asCover(row, title),
@@ -137,6 +140,7 @@ function asPatient(row: Record<string, unknown>): PatientRecipe {
     yield_portions: asNumber(row.yield_portions),
     steps: Array.isArray(row.steps) ? row.steps.map((step) => String(step)) : [],
     nutrient_source: String(row.nutrient_source ?? ''),
+    ...(row.nutrition ? { nutrition: recipeNutritionSchema.parse(row.nutrition) } : {}),
     ingredients: ingredientsRaw.map((item) => asItem(item as { id?: string; name?: string; quantity?: unknown; unit?: string })),
     assigned_at: String(row.assigned_at),
     published_at: String(row.published_at),
@@ -172,6 +176,7 @@ function memVersionView(row: MemVersion): RecipeVersionView {
     yield_portions: row.yield_portions,
     steps: row.steps,
     nutrient_source: row.nutrient_source,
+    ...(row.nutrition ? { nutrition: row.nutrition } : {}),
     published_at: row.published_at,
     ingredients: versionItems(row.id),
     card: getRecipeCard(row.id, recipes.get(row.recipe_id)?.title ?? 'Receta'),
@@ -183,12 +188,14 @@ export function getRecipeSnapshot(recipeVersionId: string | null) {
   const version = versions.get(recipeVersionId);
   const recipe = version ? recipes.get(version.recipe_id) : undefined;
   if (!version || !recipe || !version.published_at) return null;
+  const nutrition = resolveRecipeNutrition(version.nutrition, getRecipeCard(version.id, recipe.title).macros, version.nutrient_source);
   return {
     title: recipe.title,
     version: version.version,
     yield_portions: version.yield_portions,
     steps: version.steps,
     nutrient_source: version.nutrient_source,
+    ...(nutrition ? { nutrition } : {}),
     ingredients: versionItems(version.id),
   };
 }
@@ -248,6 +255,7 @@ function writeDraft(nutritionistId: string, input: RecipeDraftInput, card?: Reci
       yield_portions: input.yield_portions,
       steps: input.steps.map((step) => step.trim()),
       nutrient_source: input.nutrient_source ?? '',
+      ...(input.nutrition ? { nutrition: input.nutrition } : latest?.nutrition ? { nutrition: latest.nutrition } : {}),
       published_at: null,
       created_at: now,
     };
@@ -257,6 +265,7 @@ function writeDraft(nutritionistId: string, input: RecipeDraftInput, card?: Reci
     target.yield_portions = input.yield_portions;
     target.steps = input.steps.map((step) => step.trim());
     target.nutrient_source = input.nutrient_source ?? '';
+    target.nutrition = input.nutrition ?? latest.nutrition;
     for (const line of [...lines.values()].filter((row) => row.recipe_version_id === target.id)) lines.delete(line.id);
   }
   for (const item of input.items) {
@@ -276,7 +285,12 @@ function writeDraft(nutritionistId: string, input: RecipeDraftInput, card?: Reci
       lines.set(line.id, line);
     }
   }
-  setRecipeCard(target.id, card ?? getRecipeCard(target.id, recipe.title) ?? unavailableCard(recipe.title));
+  if (latest?.nutrition?.origin === 'ai_estimate' && target.nutrition) {
+    target.nutrition = { ...target.nutrition, origin: 'ai_estimate', source: latest.nutrition.source };
+    target.nutrient_source = latest.nutrition.source;
+  }
+  const nutritionalCard = target.nutrition ? { ...unavailableCard(recipe.title), macro_status: 'declared' as const, macros: target.nutrition.per_portion } : undefined;
+  setRecipeCard(target.id, card ?? nutritionalCard ?? getRecipeCard(target.id, recipe.title) ?? unavailableCard(recipe.title));
   return memProfessional(recipe);
 }
 
@@ -461,6 +475,7 @@ export async function assignRecipe(
       yield_portions: version.yield_portions,
       steps: version.steps,
       nutrient_source: version.nutrient_source,
+      ...(version.nutrition ? { nutrition: version.nutrition } : {}),
       ingredients: versionItems(version.id),
       card: getRecipeCard(version.id, recipe.title),
       assigned_at: row.assigned_at,
@@ -502,6 +517,7 @@ export async function listAssignedRecipes(patientId: string, persistent: boolean
         yield_portions: version.yield_portions,
         steps: version.steps,
         nutrient_source: version.nutrient_source,
+        ...(version.nutrition ? { nutrition: version.nutrition } : {}),
         ingredients: versionItems(version.id),
         card: getRecipeCard(version.id, recipe.title),
         assigned_at: row.assigned_at,

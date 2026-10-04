@@ -29,6 +29,8 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
 
 ## Lo hecho (publicado en `main`)
 
+Trabajo nuevo aún **sin publicar**: [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.md), rama `codex/nutrigo-producto-mcp` desde `d976213`. Conserva el enfoque anterior por separado. Migraciones y cierre real pendientes de aprobación concreta; no confundir las verificaciones locales con producción ni editar el registro del otro hilo.
+
 - Producto listo para usar de punta a punta, diseño Nutrigo en 13 pantallas: `docs/registro-producto-listo.md`.
 - Seguridad y privacidad: términos y privacidad, 34 funciones internas cerradas en la base:
   `docs/seguridad-privacidad.md`, `docs/legal/`.

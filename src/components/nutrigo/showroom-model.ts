@@ -31,6 +31,7 @@ export function buildShowroomPatient(patient: Patient, now = new Date()) {
       duration: patient.appointment.duration,
       channel: patient.appointment.channel,
       meet_url: patient.appointment.meet_url,
+      ...(patient.appointment.starts_at ? { starts_at: patient.appointment.starts_at } : {}),
       ...(patient.appointment.timezone ? { timezone: patient.appointment.timezone } : {}),
       ...(patient.appointment.patient_reply ? { patient_reply: patient.appointment.patient_reply } : {}),
       ...(patient.appointment.confirmed_at ? { confirmed_at: patient.appointment.confirmed_at } : {}),

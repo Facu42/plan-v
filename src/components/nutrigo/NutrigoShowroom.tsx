@@ -62,6 +62,7 @@ import './motion.css';
 import { NV_ICONS, NvIcon, type NvIconName } from './NvIcon';
 import { CaretDown, CaretUp, LockSimple } from '@phosphor-icons/react';
 import { FigmaDetailContext, FigmaPatientFooter, FigmaPlanCard, PATIENT_FIGMA_NODES, type FigmaDetail } from './FigmaPatientFront';
+import { NutrigoPatientApp } from '../../features/nutrigo/PatientApp';
 
 
 const WORK_CENTER_PAGES: WorkCenterModule[] = ['reciente', 'guardado', 'seguimiento', 'paneles', 'videollamadas'];
@@ -335,6 +336,8 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
       }}
     />
   </div>;
+
+  if (role === 'patient' && p) return <NutrigoPatientApp key={`${p.id}:${page}`} patient={p} page={page} query={query} now={now} onNavigate={navigate} onSignOut={onSignOut} onEditIntake={()=>setOnboardingOpen(true)} onConfirm={confirmAppointment} onReschedule={rescheduleAppointment} demoRoleSwitch={demoSwitch?()=>switchRole('pro'):undefined}/>;
 
   const firstSteps = <FirstSteps
     patientName={selected?.name}

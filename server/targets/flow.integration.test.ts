@@ -6,10 +6,14 @@ import { defaultsForGoal } from '../../src/lib/nutrition-target.js';
 
 const patient = 'pat-sofia';
 const inputs = { sex: 'femenino', age: 30, weight_kg: 65, height_cm: 165, activity: 'ligera', ...defaultsForGoal('bajar') };
-const put = (body: unknown, audience = 'pro') => app.request(`/api/patients/${patient}/nutrition-target?audience=${audience}`, {
-  method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
-});
-const get = async (audience?: string) => (await (await app.request(`/api/patients/${patient}/nutrition-target${audience ? `?audience=${audience}` : ''}`)).json()) as { target: { result: { kcal: number }; published_at: string | null } | null };
+const put = async (body: Record<string, unknown>, audience = 'pro') => {
+  const workspace = await get('pro');
+  return app.request(`/api/patients/${patient}/nutrition-target?audience=${audience}`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ expected_revision: workspace.revision, ...body }),
+  });
+};
+type Target = { inputs: typeof inputs; result: { kcal: number }; published_at: string | null; updated_at: string };
+const get = async (audience?: string) => (await (await app.request(`/api/patients/${patient}/nutrition-target${audience ? `?audience=${audience}` : ''}`)).json()) as { target: Target | null; draft?: Target | null; published?: Target | null; revision?: number };
 
 describe('meta de calorías y macros (Mifflin-St Jeor)', () => {
   beforeEach(() => { resetStore(); resetTargetMemory(); resetBodyMemory(); });
@@ -32,6 +36,40 @@ describe('meta de calorías y macros (Mifflin-St Jeor)', () => {
   it('la paciente no puede definir la meta y los datos absurdos se rechazan', async () => {
     expect((await put({ inputs, publish: true }, 'patient')).status).toBe(403);
     expect((await put({ inputs: { ...inputs, weight_kg: 5 }, publish: false })).status).toBe(400);
+  });
+
+  it('guardar un nuevo borrador conserva intacta la meta confirmada de la paciente', async () => {
+    await put({ inputs, publish: true });
+    const confirmed = (await get()).target;
+    const changed = { ...inputs, weight_kg: 80 };
+    const saved = await (await put({ inputs: changed, publish: false })).json() as Awaited<ReturnType<typeof get>>;
+    expect(saved.draft?.inputs.weight_kg).toBe(80);
+    expect(saved.published).toEqual(confirmed);
+    expect(await get()).toEqual({ target: confirmed });
+    const reloaded = await get('pro');
+    expect(reloaded.draft).toEqual(saved.draft);
+    expect(reloaded.revision).toBe(2);
+    await put({ inputs: changed, publish: true });
+    expect((await get('pro')).draft).toBeNull();
+    expect((await get()).target?.inputs.weight_kg).toBe(80);
+  });
+
+  it('rechaza revisión ausente o antigua y no cambia la meta ni el borrador', async () => {
+    const path = `/api/patients/${patient}/nutrition-target?audience=pro`;
+    expect((await app.request(path, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ inputs, publish: true }) })).status).toBe(400);
+    await put({ inputs, publish: true });
+    const before = await get('pro');
+    expect((await put({ inputs: { ...inputs, weight_kg: 85 }, publish: false, expected_revision: 0 })).status).toBe(409);
+    expect(await get('pro')).toEqual(before);
+  });
+
+  it('dos guardados simultáneos de la misma revisión sólo confirman uno', async () => {
+    const statuses = await Promise.all([
+      put({ inputs, publish: true, expected_revision: 0 }),
+      put({ inputs: { ...inputs, weight_kg: 85 }, publish: false, expected_revision: 0 }),
+    ]);
+    expect(statuses.map((r) => r.status).sort()).toEqual([200, 409]);
+    expect((await get('pro')).revision).toBe(1);
   });
 
   describe('datos corporales que carga la paciente', () => {

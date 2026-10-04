@@ -39,7 +39,7 @@ export function deriveShoppingFromPlan(plan: PatientMealPlan | null, checks: Rea
 }
 
 function addPlanItem(item: PlanItemView, add: (partial: Omit<Acc, 'checked' | 'id'>) => void) {
-  const recipe = item.recipe;
+  const recipe = item.recipe ?? item.recipe_proposal;
   if (recipe?.ingredients.length) {
     const yieldPortions = recipe.yield_portions > 0 ? recipe.yield_portions : 1;
     const scale = (item.portions && item.portions > 0 ? item.portions : 1) / yieldPortions;

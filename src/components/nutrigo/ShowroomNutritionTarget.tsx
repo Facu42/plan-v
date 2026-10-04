@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { careErrorMessage } from '../../api/care';
 import { isAbortError } from '../../api/client';
 import { bodyDataApi, nutritionTargetApi, type BodyDataView, type NutritionTarget } from '../../api/nutrition-target';
@@ -37,18 +37,27 @@ export function TargetSummary({ target, heading }: { target: NutritionTarget; he
 /** Vista de la paciente: sólo aparece cuando la nutricionista confirmó la meta. */
 export function PatientNutritionTarget({ patientId }: { patientId: string }) {
   const [target, setTarget] = useState<NutritionTarget | null>(null);
+  const [error, setError] = useState('');
   useEffect(() => {
     const controller = new AbortController();
-    nutritionTargetApi.get(patientId, false, controller.signal).then((r) => setTarget(r.target)).catch((e) => { if (!isAbortError(e)) setTarget(null); });
+    setTarget(null); setError('');
+    nutritionTargetApi.get(patientId, false, controller.signal).then((r) => { if (!controller.signal.aborted) setTarget(r.target); }).catch((e) => { if (!controller.signal.aborted && !isAbortError(e)) setError(careErrorMessage(e)); });
     return () => controller.abort();
   }, [patientId]);
+  if (error) return <section className="nvt-card nvt-patient" aria-label="Tu meta diaria"><p role="alert">{error}</p></section>;
   if (!target?.published_at) return null;
   return <section className="nvt-card nvt-patient" aria-label="Tu meta diaria"><header><div><p className="nv-eyebrow">Definida por tu nutricionista</p><h2>Tu meta diaria</h2></div><NvBadge>{GOAL_LABELS[target.inputs.goal]}</NvBadge></header><TargetSummary target={target} /><small className="nvt-note">Es una referencia para organizar tu plan. Tu nutricionista puede ajustarla en cada consulta.</small></section>;
 }
 
 /** Calculadora de la nutricionista: calcula con Mifflin-St Jeor, ella revisa y confirma. */
 export function NutritionTargetPanel({ patientId, patientName }: { patientId: string; patientName: string }) {
+  const activePatient = useRef(patientId);
+  activePatient.current = patientId;
+  const saving = useRef(false);
   const [stored, setStored] = useState<NutritionTarget | null>(null);
+  const [published, setPublished] = useState<NutritionTarget | null>(null);
+  const [revision, setRevision] = useState<number | null>(null);
+  const [refresh, setRefresh] = useState(0);
   const [body, setBody] = useState<BodyDataView | null>(null);
   const [draft, setDraft] = useState<Draft>(() => toDraft(null));
   const [busy, setBusy] = useState(false);
@@ -58,17 +67,19 @@ export function NutritionTargetPanel({ patientId, patientName }: { patientId: st
   useEffect(() => {
     const controller = new AbortController();
     setMessage(''); setError('');
-    setBody(null);
+    setBody(null); setStored(null); setPublished(null); setRevision(null); setDraft(toDraft(null));
     Promise.all([nutritionTargetApi.get(patientId, true, controller.signal), bodyDataApi.get(patientId, true, controller.signal).catch(() => null)]).then(([r, b]) => {
-      setStored(r.target); setBody(b);
+      if (controller.signal.aborted) return;
+      setStored(r.target); setBody(b); setPublished(r.published ?? null); setRevision(r.revision ?? null);
+      if (r.revision === undefined) setError('Recargá la aplicación para usar las metas actualizadas.');
       const base = toDraft(r.target?.inputs ?? null);
       // Si la paciente cargó datos más nuevos que la meta guardada, se usan esos.
       const fresh = b?.data && (!r.target || b.data.updated_at > r.target.updated_at);
       const age = b?.data ? ageFromBirthDate(b.data.birth_date) : null;
       setDraft(fresh && b?.data && age !== null ? { ...base, sex: b.data.sex, age: String(age), height_cm: String(b.data.height_cm), weight_kg: String(b.data.weight_kg) } : base);
-    }).catch((e) => { if (!isAbortError(e)) { setStored(null); setDraft(toDraft(null)); } });
+    }).catch((e) => { if (!controller.signal.aborted && !isAbortError(e)) setError(careErrorMessage(e)); });
     return () => controller.abort();
-  }, [patientId]);
+  }, [patientId, refresh]);
 
   const parsed = useMemo(() => parseDraft(draft), [draft]);
   const live = parsed.success ? calculateTarget(parsed.data) : null;
@@ -76,22 +87,27 @@ export function NutritionTargetPanel({ patientId, patientName }: { patientId: st
   const pickGoal = (goal: TargetGoal) => { const g = defaultsForGoal(goal); setDraft((d) => ({ ...d, goal, adjust_pct: String(g.adjust_pct), protein_g_per_kg: String(g.protein_g_per_kg), fat_pct: String(g.fat_pct) })); setMessage(''); };
 
   const save = async (publish: boolean) => {
+    if (saving.current) return;
     if (!parsed.success) { setError('Completá sexo, edad, peso y talla con valores reales.'); return; }
-    setBusy(true); setError(''); setMessage('');
+    if (revision === null) { setError('Recargá la meta antes de guardar.'); return; }
+    saving.current = true; setBusy(true); setError(''); setMessage('');
     try {
-      const { target } = await nutritionTargetApi.save(patientId, parsed.data, publish);
-      setStored(target);
-      setMessage(publish ? `Meta confirmada: ${patientName} ya la ve en su plan.` : 'Borrador guardado. Todavía no lo ve la paciente.');
-    } catch (reason) { setError(careErrorMessage(reason)); } finally { setBusy(false); }
+      const workspace = await nutritionTargetApi.save(patientId, parsed.data, publish, revision);
+      if (activePatient.current !== patientId) return;
+      setStored(workspace.target); setPublished(workspace.published); setRevision(workspace.revision);
+      setMessage(publish ? `Meta confirmada: ${patientName} ya la ve en su plan.` : 'Borrador guardado. La paciente conserva su última meta confirmada.');
+    } catch (reason) { if (activePatient.current === patientId) setError(careErrorMessage(reason)); } finally { saving.current = false; setBusy(false); }
   };
   const askPatient = async () => {
+    if (saving.current) return;
+    saving.current = true;
     setBusy(true); setError(''); setMessage('');
-    try { setBody(await bodyDataApi.request(patientId)); setMessage(`Le pedimos a ${patientName} que actualice sus datos.`); }
-    catch (reason) { setError(careErrorMessage(reason)); } finally { setBusy(false); }
+    try { const updated = await bodyDataApi.request(patientId); if (activePatient.current === patientId) { setBody(updated); setMessage(`Le pedimos a ${patientName} que actualice sus datos.`); } }
+    catch (reason) { if (activePatient.current === patientId) setError(careErrorMessage(reason)); } finally { saving.current = false; setBusy(false); }
   };
   const bodyNote = body?.data ? `Datos cargados por ${patientName} el ${new Date(body.data.updated_at).toLocaleDateString('es-AR')}.` : `${patientName} todavía no cargó sus datos.`;
   const onSubmit = (event: FormEvent) => { event.preventDefault(); void save(false); };
-  const changedSincePublish = stored?.published_at && parsed.success && JSON.stringify(parsed.data) !== JSON.stringify(stored.inputs);
+  const changedSincePublish = published && parsed.success && JSON.stringify(parsed.data) !== JSON.stringify(published.inputs);
 
   return <section className="nvt-card" aria-label={`Calorías y macros de ${patientName}`}>
     <header><div><p className="nv-eyebrow">Ecuación de Mifflin-St Jeor</p><h2>Calorías y macronutrientes de {patientName}</h2><p>Calculadas con una fórmula fija a partir de sus datos. Vos revisás y confirmás antes de que las vea.</p></div>{stored && <NvBadge tone={stored.published_at ? 'green' : 'gold'}>{stored.published_at ? 'Confirmada' : 'Borrador'}</NvBadge>}</header>
@@ -115,15 +131,17 @@ export function NutritionTargetPanel({ patientId, patientName }: { patientId: st
         </fieldset>
       </div>
       <aside className="nvt-result" aria-live="polite">
+        {revision === null && !error && <p role="status">Cargando meta guardada…</p>}
         {live && parsed.success ? <>
           <dl className="nvt-steps"><div><dt>Metabolismo basal</dt><dd>{live.bmr} kcal</dd></div><div><dt>Gasto total diario</dt><dd>{live.tdee} kcal</dd></div></dl>
           <TargetSummary target={{ patient_id: patientId, inputs: parsed.data, result: live, published_at: null, updated_at: '' }} heading="Meta propuesta" />
           {live.warnings.map((w) => <p key={w} className="nvt-warning" role="status">{w}</p>)}
         </> : <p className="nvt-empty">Completá edad, peso y talla para ver el cálculo.</p>}
-        {error && <p className="nv-dialog-error" role="alert">{error}</p>}
+        {published && <TargetSummary target={published} heading="Meta que ve la paciente" />}
+        {error && <p className="nv-dialog-error" role="alert">{error} <button type="button" className="nvt-link" disabled={busy} onClick={() => setRefresh((r) => r + 1)}>Recargar meta</button></p>}
         {message && <p className="nvt-ok" role="status">{message}</p>}
         {changedSincePublish && <p className="nvt-warning" role="status">Cambiaste datos: la paciente sigue viendo la meta anterior hasta que confirmes de nuevo.</p>}
-        <div className="nvt-actions"><NvButton type="submit" className="nv-ghost" disabled={busy || !live}>Guardar borrador</NvButton><NvButton disabled={busy || !live} onClick={() => void save(true)}>{busy ? 'Guardando…' : 'Confirmar y compartir'}</NvButton></div>
+        <div className="nvt-actions"><NvButton type="submit" className="nv-ghost" disabled={busy || !live || revision === null}>Guardar borrador</NvButton><NvButton disabled={busy || !live || revision === null} onClick={() => void save(true)}>{busy ? 'Guardando…' : 'Confirmar y compartir'}</NvButton></div>
       </aside>
     </form>
   </section>;

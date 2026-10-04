@@ -80,7 +80,7 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     for (const [actor, id, owner] of [[patientA,pidA,ownerA],[patientB,pidB,ownerB]] as const) {
       const saved = await actor.client.rpc('save_my_body_data', { body });
       expect(saved.error).toBeNull();
-      const target = await owner.client.rpc('save_nutrition_target', { target: id, target_inputs: inputs, target_result: calculateTarget(inputs), publish: true });
+      const target = await owner.client.rpc('save_nutrition_target_versioned', { target: id, target_inputs: inputs, target_result: calculateTarget(inputs), publish: true, expected_revision: 0 });
       expect(target.error).toBeNull();
     }
   }, 60000);
@@ -187,12 +187,36 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
   });
 
   it('el borrador no se filtra a la paciente y la publicación sí llega', async () => {
-    expect((await ownerA.client.rpc('save_nutrition_target',{target:pidA,target_inputs:inputs,target_result:calculateTarget(inputs),publish:false})).error).toBeNull();
-    const hidden = await patientA.client.from('nutrition_targets').select('patient_id').eq('patient_id',pidA);
-    expect(hidden.error).toBeNull(); expect(hidden.data).toEqual([]);
-    expect((await ownerA.client.rpc('save_nutrition_target',{target:pidA,target_inputs:inputs,target_result:calculateTarget(inputs),publish:true})).error).toBeNull();
+    const draftInputs={...inputs,weight_kg:66};
+    const workspace=await ownerA.client.rpc('get_nutrition_target_workspace',{target:pidA});
+    expect(workspace.error).toBeNull();
+    const saved=await ownerA.client.rpc('save_nutrition_target_versioned',{target:pidA,target_inputs:draftInputs,target_result:calculateTarget(draftInputs),publish:false,expected_revision:workspace.data.revision});
+    expect(saved.error).toBeNull();
+    for(const actor of [patientA,patientB,ownerB]){
+      const hidden=await actor.client.from('nutrition_target_drafts').select('patient_id').eq('patient_id',pidA);
+      expect(hidden.error).toBeNull();expect(hidden.data).toEqual([]);
+    }
+    const published=await api(patientA,'/api/patients/'+pidA+'/nutrition-target');
+    expect(published.status).toBe(200);const json=await published.json();
+    expect(json.target.result).toEqual(calculateTarget(inputs));expect(json).not.toHaveProperty('draft');expect(json).not.toHaveProperty('revision');
+    expect((await ownerA.client.rpc('save_nutrition_target_versioned',{target:pidA,target_inputs:inputs,target_result:calculateTarget(inputs),publish:true,expected_revision:saved.data.revision})).error).toBeNull();
     const visible = await patientA.client.from('nutrition_targets').select('patient_id').eq('patient_id',pidA);
     expect(visible.error).toBeNull(); expect(visible.data).toEqual([{ patient_id: pidA }]);
+  });
+
+  it('dos sesiones con la misma revisión no sobrescriben la meta',async()=>{
+    const workspace=await ownerA.client.rpc('get_nutrition_target_workspace',{target:pidA});
+    expect(workspace.error).toBeNull();
+    const results=await Promise.all([67,68].map(weight_kg=>{
+      const proposed={...inputs,weight_kg};
+      return ownerA.client.rpc('save_nutrition_target_versioned',{target:pidA,target_inputs:proposed,target_result:calculateTarget(proposed),publish:false,expected_revision:workspace.data.revision});
+    }));
+    expect(results.filter(result=>!result.error)).toHaveLength(1);
+    expect(results.find(result=>result.error)?.error?.code).toBe('40001');
+    const after=await ownerA.client.rpc('get_nutrition_target_workspace',{target:pidA});
+    expect(after.error).toBeNull();expect(after.data.revision).toBe(workspace.data.revision+1);
+    expect([67,68]).toContain(after.data.draft.inputs.weight_kg);
+    expect(after.data.published.result).toEqual(calculateTarget(inputs));
   });
 
   it('el mensaje autorizado se lee y la función interna queda cerrada', async () => {
@@ -236,6 +260,26 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     expect((await ownerA.client.rpc('request_body_data',{target:pidA})).error?.code).toBe('42501');
     const other = await api(patientB,'/api/patients/' + pidB + '/nutrition-target');
     expect(other.status).toBe(200); expect((await other.json()).target.patient_id).toBe(pidB);
+  });
+
+  it('reabrir ficha revisada usa CAS, conserva payload/consentimiento e impide leer historial privado', async () => {
+    const endpoint = `/api/patients/${pidB}/intake`;
+    const initial = await (await api(patientB,endpoint)).json();
+    const saved = await api(patientB,endpoint,'PATCH',{expected_revision:initial.intake.revision,step:'review',payload:{preferred_name:'Paciente ficticia',patient_intent:'Corregir información'}});
+    expect(saved.status).toBe(200); const draft = await saved.json();
+    const care = CONSENT_CATALOG.find(entry => entry.purpose === 'care_relationship')!;
+    expect((await api(patientB,`/api/patients/${pidB}/consents`,'POST',{purpose:care.purpose,text_version:care.text_version,text_hash:care.text_hash,decision:'granted'})).status).toBe(201);
+    const sent = await api(patientB,endpoint+'/submit','POST',{expected_revision:draft.intake.revision}); expect(sent.status).toBe(200);
+    const reviewed = await api(ownerB,endpoint+'/review','POST',{expected_revision:(await sent.json()).intake.revision}); expect(reviewed.status).toBe(200); const closed = await reviewed.json();
+    for (const actor of [ownerB,ownerA,patientA]) expect((await api(actor,endpoint+'/reopen','POST',{expected_revision:closed.intake.revision})).status).toBe(403);
+    const race = await Promise.all([api(patientB,endpoint+'/reopen','POST',{expected_revision:closed.intake.revision}),api(patientB,endpoint+'/reopen','POST',{expected_revision:closed.intake.revision})]);
+    expect(race.map(result=>result.status).sort()).toEqual([200,409]);
+    const opened = await (await api(patientB,endpoint)).json(); expect(opened.intake).toMatchObject({status:'draft',revision:closed.intake.revision+1,payload:closed.intake.payload});
+    expect(opened.consents.find((c:{purpose:string})=>c.purpose===care.purpose)?.decision).toBe('granted'); expect(opened).not.toHaveProperty('history');
+    const history = await pool.query('select snapshot from private.intake_revision_history where patient_id=$1',[pidB]); expect(history.rows).toHaveLength(1); expect(history.rows[0].snapshot.reviewed_by).toBe(ownerB.id);
+    for(const actor of [patientB,patientA,ownerB]) expect((await actor.client.schema('private').from('intake_revision_history').select('*')).error).not.toBeNull();
+    const edited = await api(patientB,endpoint,'PATCH',{expected_revision:opened.intake.revision,payload:{...opened.intake.payload,preferred_name:'Ficticia corregida'}}); expect(edited.status).toBe(200);
+    expect((await (await api(patientB,endpoint)).json()).intake.payload.preferred_name).toBe('Ficticia corregida');
   });
 
   it('las reservas de portada y el límite IA son atómicos con sesiones independientes', async () => {

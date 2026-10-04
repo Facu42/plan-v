@@ -141,6 +141,8 @@ describe('cors and readiness', () => {
     expect(releaseSha({ GIT_SHA: 'abc1234' })).toBe('abc1234');
     expect(releaseSha({ RAILWAY_GIT_COMMIT_SHA: 'railsha1' })).toBe('railsha1');
     expect(maxBodyBytes('/api/patients/x/meals')).toBeGreaterThan(maxBodyBytes('/api/patients'));
+    expect(maxBodyBytes('/api/recipes/x/cover/manual')).toBe(7_100_000);
+    expect(maxBodyBytes('/api/recipes/x/versions')).toBe(1024 * 1024);
   });
 });
 

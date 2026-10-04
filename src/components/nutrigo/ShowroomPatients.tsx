@@ -5,6 +5,7 @@ import { filterDirectoryPatients, getPatientDirectoryMetrics, type PatientDirect
 import { Icon } from '../shared/Icon';
 import { NvBadge, NvButton, NvCard, NvProgress, NvState } from './primitives';
 import { hasFullPatientAccess } from '../../billing';
+import { createPatientWithInvitation, invitationReady } from './patient-invite-actions';
 import './showroom-patients.css';
 
 const STAGE_LABELS: Record<Stage, string> = { ingreso: 'Ingreso', plan: 'Plan', seguimiento: 'Seguimiento', alta: 'Alta' };
@@ -42,24 +43,36 @@ export function accessLabel(patient: Pick<Patient, 'billing_status' | 'billing_u
   return 'Acceso pendiente';
 }
 
-function InviteShare({ name, invite, onClose }: { name: string; invite: PatientInvite; onClose: () => void }) {
-  const link = inviteLink(invite.id);
+export function InviteShare({ name, invite, onClose }: { name: string; invite: PatientInvite; onClose: () => void }) {
+  const [current, setCurrent] = useState(invite);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const lock = useRef(false);
+  const ready = invitationReady(current);
+  const link = inviteLink(current.id);
   const [copied, setCopied] = useState(false);
+  useEffect(() => { setCurrent(invite); setError(''); setCopied(false); }, [invite.id, invite.updated_at]);
+  const prepare = async () => {
+    if (lock.current) return; lock.current = true; setBusy(true); setError('');
+    try { const saved = (await api.patientInvite(current.patient_id)).invite; setCurrent(saved); if (!invitationReady(saved)) setError('El enlace todavía no está habilitado. Reintentá preparar la invitación.'); }
+    catch { setError('La ficha está guardada, pero no pudimos preparar el enlace. Reintentá sin crear otra ficha.'); }
+    finally { lock.current = false; setBusy(false); }
+  };
   const copy = async () => {
+    if (!invitationReady(current)) { setError('La invitación venció. Prepará un enlace vigente antes de compartirlo.'); return; }
     try { await navigator.clipboard.writeText(link); setCopied(true); } catch { setCopied(false); }
   };
   return <div className="nv-directory-notice nv-invite-share" role="status">
-    <Icon name="check" size={15} />
+    <Icon name={ready ? 'check' : 'clock'} size={15} />
     <span>
-      <strong>Invitación lista para {name}</strong>
-      <small>Mandale este enlace: crea su cuenta con {invite.email} y queda vinculada a tu consultorio. Vence en 7 días.</small>
-      <input readOnly value={link} aria-label="Enlace de invitación" onFocus={(event) => event.currentTarget.select()} />
+      <strong>{ready ? `Invitación lista para ${name}` : `Ficha creada para ${name}; falta preparar su acceso`}</strong>
+      {ready ? <><small>Mandale este enlace: crea su cuenta con {current.email} y queda vinculada a tu consultorio. Vence el {new Date(current.expires_at!).toLocaleString('es-AR')}.</small><input readOnly value={link} aria-label="Enlace de invitación" onFocus={(event) => event.currentTarget.select()} /></> : <small>El enlace todavía no está habilitado. Podés reintentar sin repetir el alta.</small>}
+      {error && <small role="alert">{error}</small>}
     </span>
     <span className="nv-invite-actions">
-      <NvButton className="nv-soft" onClick={copy}>{copied ? 'Copiado' : 'Copiar enlace'}</NvButton>
-      <a className="nv-button nv-ghost" href={`https://wa.me/?text=${encodeURIComponent(inviteMessage(name, link))}`} target="_blank" rel="noreferrer">WhatsApp</a>
+      {ready ? <><NvButton className="nv-soft" onClick={copy}>{copied ? 'Copiado' : 'Copiar enlace'}</NvButton><a className="nv-button nv-ghost" href={`https://wa.me/?text=${encodeURIComponent(inviteMessage(name, link))}`} target="_blank" rel="noreferrer">WhatsApp</a></> : <NvButton className="nv-soft" disabled={busy} onClick={() => void prepare()}>{busy ? 'Preparando…' : 'Reintentar preparar invitación'}</NvButton>}
     </span>
-    <button type="button" onClick={onClose} aria-label="Cerrar aviso">×</button>
+    <button type="button" disabled={busy} onClick={onClose} aria-label="Cerrar aviso">×</button>
   </div>;
 }
 
@@ -70,22 +83,21 @@ export function ShowroomPatientCreate({ onClose, onCreated }: { onClose: () => v
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const nameInput = useRef<HTMLInputElement>(null);
+  const creationLock = useRef(false);
   useDialogKeys(onClose, busy);
   useEffect(() => { nameInput.current?.focus(); }, []);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (creationLock.current) return;
+    creationLock.current = true;
     setBusy(true);
     setError('');
     try {
-      const result = await api.createPatient({ name, email, goal });
-      try {
-        result.invite = (await api.sendInvite(result.invite.id)).invite;
-      } catch {
-        // The patient exists even if the one-use window could not start.
-      }
+      const result = await createPatientWithInvitation({ name, email, goal }, { create: api.createPatient, activate: api.sendInvite });
       onCreated(result.patient, result.invite);
     } catch {
+      creationLock.current = false;
       setError('No pudimos crear el alta. Revisá los datos o si el email ya está registrado.');
       setBusy(false);
     }

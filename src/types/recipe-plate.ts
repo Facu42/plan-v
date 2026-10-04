@@ -72,13 +72,13 @@ export function buildRecipeCard(input: RecipeWizardInput): RecipeCard {
   const fat = input.fat_g ?? null;
   const anyMacro = kcal != null || protein != null || carbs != null || fat != null;
   if (anyMacro && !input.nutrient_source.trim()) throw new Error('recipe_macro_source');
-  const macros: RecipeMacros | null = anyMacro
+  const macros: RecipeMacros | null = input.nutrition?.per_portion ?? (anyMacro
     ? { kcal, protein_g: protein, carbs_g: carbs, fat_g: fat }
-    : null;
+    : null);
   return {
     category: input.category,
     prep_minutes: input.prep_minutes ?? null,
-    macro_status: anyMacro ? 'declared' : 'unavailable',
+    macro_status: macros ? 'declared' : 'unavailable',
     macros,
     cover_status: input.cover_status ?? 'none',
     cover_alt: input.title.trim(),

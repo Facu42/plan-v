@@ -17,6 +17,9 @@ import {
   type PlanVersionView,
   type ProfessionalMealPlan,
 } from '../../src/types/plans.js';
+import { menuTargetSchema, proposedRecipeSchema, recipeNutritionSchema, resolveRecipeNutrition, retainProposalEstimate, type MenuNutritionTarget, type ProposedRecipe } from '../../src/types/ai-nutrition.js';
+import { summarizeMenuNutrition } from '../ai/menu-nutrition.js';
+import { getTarget } from '../targets/repository.js';
 
 export { CareError } from '../care/errors.js';
 
@@ -32,6 +35,7 @@ type MemItem = {
   free_text: string | null;
   portions: number | null;
   public_note: string;
+  recipe_proposal?: ProposedRecipe;
 };
 type MemVersion = {
   id: string;
@@ -42,6 +46,7 @@ type MemVersion = {
   period_end: string;
   published_at: string | null;
   created_at: string;
+  nutrition_target?: MenuNutritionTarget;
 };
 type MemPlan = {
   id: string;
@@ -98,12 +103,15 @@ function asRecipeDetail(row: unknown, fallbackTitle: string | null, fallbackVers
   const ingredientsRaw = Array.isArray(detail.ingredients) ? detail.ingredients : [];
   const title = String(detail.title ?? fallbackTitle ?? '');
   if (!title) return null;
+  const card = detail.card as { macros?: unknown } | undefined;
+  const nutrition = resolveRecipeNutrition(detail.nutrition ? recipeNutritionSchema.parse(detail.nutrition) : undefined, card?.macros, String(detail.nutrient_source ?? ''));
   return {
     title,
     version: detail.version == null ? fallbackVersion ?? 1 : asNumber(detail.version),
     yield_portions: asNumber(detail.yield_portions),
     steps: Array.isArray(detail.steps) ? detail.steps.map((step) => String(step)) : [],
     nutrient_source: String(detail.nutrient_source ?? ''),
+    ...(nutrition ? { nutrition } : {}),
     ingredients: ingredientsRaw.map((item) => {
       const line = item as Record<string, unknown>;
       return {
@@ -132,6 +140,7 @@ function asItem(row: Record<string, unknown>, snapshot?: PlanRecipeDetail | null
     free_text: row.free_text ? String(row.free_text) : null,
     portions: row.portions == null ? null : asNumber(row.portions),
     public_note: String(row.public_note ?? ''),
+    ...(row.recipe_proposal ? { recipe_proposal: proposedRecipeSchema.parse(row.recipe_proposal) } : {}),
   };
 }
 
@@ -141,6 +150,8 @@ function asVersion(row: Record<string, unknown>): PlanVersionView {
     throw new CareError(503, 'No se pudo confirmar el guardado. Reintentá sin cerrar el formulario.');
   }
   const rawItems = Array.isArray(row.items) ? row.items : [];
+  const preparedItems = rawItems.map((item) => asItem(item as Record<string, unknown>));
+  const target = row.nutrition_target ? menuTargetSchema.parse(row.nutrition_target) : undefined;
   return {
     id: String(row.id),
     version: asNumber(row.version),
@@ -148,7 +159,9 @@ function asVersion(row: Record<string, unknown>): PlanVersionView {
     period_start: String(row.period_start).slice(0, 10),
     period_end: String(row.period_end).slice(0, 10),
     published_at: row.published_at ? String(row.published_at) : null,
-    items: rawItems.map((item) => asItem(item as Record<string, unknown>)),
+    items: preparedItems,
+    ...(target ? { nutrition_target: target } : {}),
+    ...(target || preparedItems.some((item) => item.recipe_proposal) ? { nutrition: summarizeView(preparedItems, target, row) } : {}),
   };
 }
 
@@ -165,6 +178,8 @@ function asProfessional(row: Record<string, unknown>): ProfessionalMealPlan {
 
 function asPatient(row: Record<string, unknown>): PatientMealPlan {
   const rawItems = Array.isArray(row.items) ? row.items : [];
+  const preparedItems = rawItems.map((item) => asItem(item as Record<string, unknown>));
+  const target = row.nutrition_target ? menuTargetSchema.parse(row.nutrition_target) : undefined;
   return {
     id: String(row.id),
     timezone: String(row.timezone),
@@ -172,7 +187,9 @@ function asPatient(row: Record<string, unknown>): PatientMealPlan {
     period_start: String(row.period_start).slice(0, 10),
     period_end: String(row.period_end).slice(0, 10),
     published_at: String(row.published_at),
-    items: rawItems.map((item) => asItem(item as Record<string, unknown>)),
+    items: preparedItems,
+    ...(target ? { nutrition_target: target } : {}),
+    ...(target || preparedItems.some((item) => item.recipe_proposal) ? { nutrition: summarizeView(preparedItems, target, row) } : {}),
   };
 }
 
@@ -195,10 +212,18 @@ function versionItems(versionId: string): PlanItemView[] {
       free_text: item.free_text,
       portions: item.portions,
       public_note: item.public_note,
+      ...(item.recipe_proposal ? { recipe_proposal: item.recipe_proposal } : {}),
     }));
 }
 
+function summarizeView(view: PlanItemView[], target?: MenuNutritionTarget, period?: { period_start?: unknown; period_end?: unknown }) {
+  return summarizeMenuNutrition(view, target ?? null, view.flatMap((item) => item.recipe_id && item.recipe_version ? [{
+    id: item.recipe_id, version: item.recipe_version, nutrition: item.recipe?.nutrition ?? null,
+  }] : []), period?.period_start && period.period_end ? { period_start: String(period.period_start).slice(0, 10), period_end: String(period.period_end).slice(0, 10) } : undefined);
+}
+
 function memVersionView(row: MemVersion): PlanVersionView {
+  const preparedItems = versionItems(row.id);
   return {
     id: row.id,
     version: row.version,
@@ -206,7 +231,9 @@ function memVersionView(row: MemVersion): PlanVersionView {
     period_start: row.period_start,
     period_end: row.period_end,
     published_at: row.published_at,
-    items: versionItems(row.id),
+    items: preparedItems,
+    ...(row.nutrition_target ? { nutrition_target: row.nutrition_target } : {}),
+    ...(row.nutrition_target || preparedItems.some((item) => item.recipe_proposal) ? { nutrition: summarizeView(preparedItems, row.nutrition_target, row) } : {}),
   };
 }
 
@@ -236,6 +263,8 @@ function memPatient(row: MemPlan): PatientMealPlan | null {
     period_end: published.period_end,
     published_at: published.published_at,
     items: versionItems(published.id),
+    ...(published.nutrition_target ? { nutrition_target: published.nutrition_target } : {}),
+    ...(published.nutrition_target || versionItems(published.id).some((item) => item.recipe_proposal) ? { nutrition: summarizeView(versionItems(published.id), published.nutrition_target, published) } : {}),
   };
 }
 
@@ -257,6 +286,8 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
   const now = new Date().toISOString();
   const existing = [...plans.values()].find((row) => row.patient_id === patientId && row.nutritionist_id === nutritionistId);
   if (existing && existing.id !== input.id) throw new CareError(409, 'El plan publicado no se puede sobrescribir. Publicá una versión nueva.');
+  const previousVersions = existing ? planVersions(existing.id) : [];
+  const previous = previousVersions.length ? versionItems(previousVersions[previousVersions.length - 1].id) : [];
   const prepared: Omit<MemItem, 'id' | 'version_id'>[] = [];
   const seen = new Set<string>();
   for (const item of input.items) {
@@ -268,6 +299,11 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
     const hasRecipe = Boolean(item.recipe_id);
     const freeText = item.free_text?.trim() || null;
     if (hasRecipe === Boolean(freeText)) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
+    if (item.recipe_proposal && !(item.portions && item.portions > 0 && item.portions <= 50)) {
+      throw new CareError(400, 'Las recetas del plan necesitan porciones positivas.');
+    }
+    const prior = previous.find((row) => row.recipe_proposal && row.for_date === item.for_date && planSlotKey(row.slot) === planSlotKey(slot))
+      ?? previous.find((row) => row.recipe_proposal?.title === item.recipe_proposal?.title);
     const linked = item.recipe_id
       ? await resolveRecipe(nutritionistId, item.recipe_id, item.recipe_version, persistent)
       : { recipe_id: null, recipe_version: null, recipe_title: null, recipe_version_id: null };
@@ -281,6 +317,7 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
       free_text: linked.recipe_id ? null : freeText,
       portions: item.portions ?? null,
       public_note: item.public_note ?? '',
+      ...(item.recipe_proposal ? { recipe_proposal: retainProposalEstimate(item.recipe_proposal, prior?.recipe_proposal) } : {}),
     });
   }
   const plan = existing ?? {
@@ -305,12 +342,14 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
       period_end: input.period_end,
       published_at: null,
       created_at: now,
+      ...(input.nutrition_target ? { nutrition_target: input.nutrition_target } : {}),
     };
     versions.set(target.id, target);
   } else {
     target = latest;
     target.period_start = input.period_start;
     target.period_end = input.period_end;
+    target.nutrition_target = input.nutrition_target;
     for (const item of [...items.values()].filter((row) => row.version_id === target.id)) items.delete(item.id);
   }
   for (const item of prepared) {
@@ -348,10 +387,20 @@ export async function saveMealPlanDraft(
   input: MealPlanDraftInput,
   persistent: boolean,
 ): Promise<ProfessionalMealPlan> {
+  await assertCurrentNutritionTarget(patientId, input.nutrition_target, persistent);
   if (!persistent) return writeDraft(nutritionistId, patientId, input, false);
   const { data, error } = await getRequestDb().rpc('save_meal_plan_draft', { target_patient: patientId, payload: input });
   mealPlanDbError(error);
   return asProfessional(data as Record<string, unknown>);
+}
+
+async function assertCurrentNutritionTarget(patientId: string, target: MenuNutritionTarget | undefined, persistent: boolean) {
+  if (!target) return;
+  const confirmed = await getTarget(patientId, persistent);
+  if (!confirmed?.published_at || target.revision !== confirmed.updated_at || target.published_at !== confirmed.published_at ||
+      (['kcal', 'protein_g', 'carbs_g', 'fat_g'] as const).some((key) => target[key] !== confirmed.result[key])) {
+    throw new CareError(409, 'La meta confirmada cambió. Regenerá la propuesta o recargá el plan antes de guardar o publicar.');
+  }
 }
 
 export async function publishMealPlan(
@@ -367,6 +416,7 @@ export async function publishMealPlan(
     const version = planVersions(planId).find((row) => row.version === expectedVersion);
     if (!version) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
     if (versionItems(version.id).length < 1) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
+    if (version.status === 'draft') await assertCurrentNutritionTarget(plan.patient_id, version.nutrition_target, false);
     const health = await loadEvalHealth(plan.patient_id, false);
     if (expectedSnapshot && canonicalJson(planReviewSnapshot(memVersionView(version))) !== canonicalJson(expectedSnapshot)) {
       throw new CareError(409, 'El borrador cambió. Revisá la versión actual antes de publicar.');

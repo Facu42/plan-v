@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { menuTargetSchema, menuNutritionSummarySchema, proposedRecipeSchema, type ProposedRecipe, type MenuNutritionTarget, type MenuNutritionSummary, type RecipeNutrition } from './ai-nutrition.js';
 
 export const PLAN_SLOTS = ['Desayuno', 'Colación', 'Almuerzo', 'Merienda', 'Cena', 'Extra'] as const;
 export type PlanSlot = (typeof PLAN_SLOTS)[number];
@@ -42,11 +43,18 @@ export const planItemInputSchema = z.object({
   free_text: z.string().trim().max(150).optional(),
   portions: z.number().positive().max(50).optional(),
   public_note: z.string().trim().max(200).default(''),
+  recipe_proposal: proposedRecipeSchema.optional(),
 }).strict().superRefine((value, ctx) => {
   if (!planSlotKey(value.slot)) ctx.addIssue({ code: 'custom', message: 'slot', path: ['slot'] });
   const hasRecipe = Boolean(value.recipe_id);
   const hasText = Boolean(value.free_text && value.free_text.length > 0);
   if (hasRecipe === hasText) ctx.addIssue({ code: 'custom', message: 'item', path: hasRecipe ? ['free_text'] : ['recipe_id'] });
+  if (value.recipe_proposal && (hasRecipe || value.recipe_proposal.title !== value.free_text)) {
+    ctx.addIssue({ code: 'custom', message: 'proposal', path: ['recipe_proposal'] });
+  }
+  if (value.recipe_proposal && value.portions == null) {
+    ctx.addIssue({ code: 'custom', message: 'portions', path: ['portions'] });
+  }
 });
 
 function utcDays(start: string, end: string) {
@@ -61,6 +69,8 @@ export const mealPlanDraftSchema = z.object({
   period_end: isoDate,
   timezone: z.literal('America/Argentina/Buenos_Aires').default('America/Argentina/Buenos_Aires'),
   items: z.array(planItemInputSchema).min(1).max(42),
+  nutrition_target: menuTargetSchema.optional(),
+  nutrition: menuNutritionSummarySchema.optional(),
 }).strict().superRefine((value, ctx) => {
   if (value.period_end < value.period_start || utcDays(value.period_start, value.period_end) > 21) {
     ctx.addIssue({ code: 'custom', message: 'period', path: ['period_end'] });
@@ -89,6 +99,7 @@ export type PlanRecipeDetail = {
   steps: string[];
   nutrient_source: string;
   ingredients: Array<{ id: string; name: string; quantity: number; unit: string }>;
+  nutrition?: RecipeNutrition;
 };
 export type PlanItemView = {
   id: string;
@@ -101,6 +112,7 @@ export type PlanItemView = {
   free_text: string | null;
   portions: number | null;
   public_note: string;
+  recipe_proposal?: ProposedRecipe;
 };
 export type PlanVersionView = {
   id: string;
@@ -110,6 +122,8 @@ export type PlanVersionView = {
   period_end: string;
   published_at: string | null;
   items: PlanItemView[];
+  nutrition_target?: MenuNutritionTarget;
+  nutrition?: MenuNutritionSummary;
 };
 export type ProfessionalMealPlan = {
   id: string;
@@ -121,7 +135,7 @@ export type ProfessionalMealPlan = {
 };
 
 export function planReviewSnapshot(version: PlanVersionView) {
-  const { status: _status, published_at: _published, items, ...head } = version;
+  const { status: _status, published_at: _published, nutrition: _summary, items, ...head } = version;
   return { ...head, items: items.map(({ recipe: _recipe, recipe_title: _title, ...item }) => item) };
 }
 export type PatientMealPlan = {
@@ -132,6 +146,8 @@ export type PatientMealPlan = {
   period_end: string;
   published_at: string;
   items: PlanItemView[];
+  nutrition_target?: MenuNutritionTarget;
+  nutrition?: MenuNutritionSummary;
 };
 
 export function eachIsoDate(start: string, end: string): string[] {
@@ -173,5 +189,7 @@ export function toPublishedPatientPlan(plan: ProfessionalMealPlan): PatientMealP
     period_end: plan.published.period_end,
     published_at: plan.published.published_at,
     items: plan.published.items,
+    ...(plan.published.nutrition_target ? { nutrition_target: plan.published.nutrition_target } : {}),
+    ...(plan.published.nutrition ? { nutrition: plan.published.nutrition } : {}),
   };
 }

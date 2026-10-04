@@ -111,7 +111,6 @@ const ALLOWED = [
   'save_meal_plan_draft',
   'save_my_body_data',
   'save_notification_preferences',
-  'save_nutrition_target',
   'save_patient_intake',
   'save_recipe_draft',
   'save_routine_feedback',
@@ -201,6 +200,21 @@ describe('funciones con permisos de dueño (permisos como en Supabase)', () => {
 
   it('authenticated sólo ejecuta las de la lista permitida', async () => {
     expect(await executable('authenticated')).toEqual(ALLOWED);
+  });
+
+  it('la reapertura expone un wrapper invoker y un helper privado autorizado con ruta de búsqueda vacía',async()=>{
+    const routines = await db.query<{schema:string;prosecdef:boolean;allowed:boolean;anonymous:boolean;proconfig:string[]}>(
+      "select n.nspname as schema,p.prosecdef,has_function_privilege('authenticated',p.oid,'execute') as allowed,has_function_privilege('anon',p.oid,'execute') as anonymous,p.proconfig from pg_proc p join pg_namespace n on n.oid=p.pronamespace where p.proname='reopen_patient_intake' order by n.nspname",
+    );
+    expect(routines.rows).toEqual([{schema:'private',prosecdef:true,allowed:true,anonymous:false,proconfig:['search_path=""']},{schema:'public',prosecdef:false,allowed:true,anonymous:false,proconfig:['search_path=""']}]);
+  });
+
+  it('el guardado antiguo no permite saltar la revisión de la meta', async () => {
+    const result = await db.query<{ allowed: boolean }>(
+      "select has_function_privilege('authenticated', p.oid, 'execute') as allowed from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='save_nutrition_target'",
+    );
+    expect(result.rows.length).toBeGreaterThan(0);
+    expect(result.rows.every(row => !row.allowed)).toBe(true);
   });
 
   it('una nutricionista ajena no lee un mensaje por su id', async () => {

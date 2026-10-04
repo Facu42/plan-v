@@ -4,35 +4,49 @@ import type { BodyData, TargetInput, TargetResult } from '../../src/lib/nutritio
 
 
 export type StoredTarget = { patient_id: string; inputs: TargetInput; result: TargetResult; published_at: string | null; updated_at: string };
+export type TargetWorkspace = { target: StoredTarget | null; draft: StoredTarget | null; published: StoredTarget | null; revision: number };
 
-const memory = new Map<string, StoredTarget>();
+const memory = new Map<string, TargetWorkspace>();
 export function resetTargetMemory() { memory.clear(); }
 
 function dbError(error: { code?: string } | null) {
   if (!error) return;
   if (['42P01', '42883', 'PGRST202', 'PGRST205'].includes(error.code ?? '')) throw new TargetError(501, 'Esta función requiere instalar la migración de metas nutricionales.');
   if (error.code === '42501') throw new TargetError(403, 'No tenés permiso para esta acción.');
+  if (error.code === '40001') throw new TargetError(409, 'La meta cambió en otra sesión. Recargala antes de guardar.');
   if (['22023', '23514', '22P02'].includes(error.code ?? '')) throw new TargetError(400, 'Revisá los datos de la meta.');
   throw new TargetError(503, 'No se pudo confirmar el guardado. Reintentá.');
 }
 
 export async function getTarget(patientId: string, persistent: boolean): Promise<StoredTarget | null> {
-  if (!persistent) return memory.get(patientId) ?? null;
-  const { data, error } = await getRequestDb().from('nutrition_targets').select('patient_id,inputs,result,published_at,updated_at').eq('patient_id', patientId).maybeSingle();
+  if (!persistent) return memory.get(patientId)?.published ?? null;
+  const { data, error } = await getRequestDb().from('nutrition_targets').select('patient_id,inputs,result,published_at,updated_at').eq('patient_id', patientId).not('published_at', 'is', null).maybeSingle();
   dbError(error);
   return (data as StoredTarget | null) ?? null;
 }
 
-export async function saveTarget(patientId: string, inputs: TargetInput, result: TargetResult, publish: boolean, persistent: boolean): Promise<StoredTarget> {
+export async function getTargetWorkspace(patientId: string, persistent: boolean): Promise<TargetWorkspace> {
+  if (!persistent) return memory.get(patientId) ?? { target: null, draft: null, published: null, revision: 0 };
+  const { data, error } = await getRequestDb().rpc('get_nutrition_target_workspace', { target: patientId });
+  dbError(error);
+  return data as TargetWorkspace;
+}
+
+export async function saveTarget(patientId: string, inputs: TargetInput, result: TargetResult, publish: boolean, persistent: boolean, expectedRevision: number): Promise<TargetWorkspace> {
   if (persistent) {
-    const { data, error } = await getRequestDb().rpc('save_nutrition_target', { target: patientId, target_inputs: inputs, target_result: result, publish });
+    const { data, error } = await getRequestDb().rpc('save_nutrition_target_versioned', { target: patientId, target_inputs: inputs, target_result: result, publish, expected_revision: expectedRevision });
     dbError(error);
-    return data as StoredTarget;
+    return data as TargetWorkspace;
   }
+  const previous = memory.get(patientId) ?? { target: null, draft: null, published: null, revision: 0 };
+  if (previous.revision !== expectedRevision) throw new TargetError(409, 'La meta cambió en otra sesión. Recargala antes de guardar.');
   const now = new Date().toISOString();
   const row: StoredTarget = { patient_id: patientId, inputs, result, published_at: publish ? now : null, updated_at: now };
-  memory.set(patientId, row);
-  return row;
+  const published = publish ? row : previous.published;
+  const draft = publish ? null : row;
+  const workspace = { target: draft ?? published, draft, published, revision: previous.revision + 1 };
+  memory.set(patientId, workspace);
+  return workspace;
 }
 
 export { TargetError };

@@ -1,3 +1,5 @@
 # Assets originales de Figma: conservar los bytes y sus SHA-256 también en Windows.
 /src/assets/nutrigo/*.svg -text
 /src/assets/nutrigo/front/*.svg -text
+/design/figma-reference/original/*.tsx -text
+/src/features/nutrigo/assets/*.svg -text

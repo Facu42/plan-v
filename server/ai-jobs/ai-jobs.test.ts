@@ -4,10 +4,11 @@ import { aiJobEnqueueSchema } from '../../src/types/ai-jobs.js';
 
 describe('errores de jobs de IA', () => {
   it('rechaza fechas imposibles y períodos excesivos antes de generar', () => {
-    const input = { patient_id: 'patient', job_type: 'menu_draft', period_start: '2026-10-01', period_end: '2026-10-22' };
+    const input = { patient_id: 'patient', job_type: 'menu_draft', period_start: '2026-10-01', period_end: '2026-10-21', slots: ['Almuerzo', 'Cena'] };
     expect(aiJobEnqueueSchema.safeParse(input).success).toBe(true);
     for (const dates of [
       { period_end: '2026-10-23' },
+      { period_end: '2026-10-22' },
       { period_start: '2026-02-30', period_end: '2026-03-03' },
       { period_start: '2026-13-01', period_end: '2026-13-02' },
     ]) expect(aiJobEnqueueSchema.safeParse({ ...input, ...dates }).success).toBe(false);

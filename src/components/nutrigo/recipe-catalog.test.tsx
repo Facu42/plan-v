@@ -27,7 +27,7 @@ describe('Catálogo profesional y recetas asignadas', () => {
   it('el catálogo profesional explica borrador vs publicada sin inventar macros', () => {
     const html = renderToStaticMarkup(<RecipeCatalog patientId="pat-sofia" />);
     expect(html).toContain('Recetas e ingredientes');
-    expect(html).toContain('No se inventan calorías ni macros');
+    expect(html).toContain('nutrientes estimados que requieren revisión');
     expect(html).toContain('Generar borrador con IA');
     expect(html).toContain('alergias');
     expect(html).toContain('borrador privado');

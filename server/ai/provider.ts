@@ -1,12 +1,11 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { AIUnavailableError } from './errors.js';
-import { freeAiOnly, isFreeOpenRouterModel } from './cost-policy.js';
+import { isFreeOpenRouterModel } from './cost-policy.js';
 
 export const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 export const DEFAULT_OPENROUTER_MODEL = 'openrouter/free';
-export const DEFAULT_OPENAI_MODEL = 'gpt-4o-mini';
 
-export type AiProvider = 'openrouter' | 'openai';
+export type AiProvider = 'openrouter';
 
 export type AiProviderConfig = {
   provider: AiProvider;
@@ -19,19 +18,11 @@ export function resolveAiProvider(
 ): AiProviderConfig | null {
   if (env.OPENROUTER_API_KEY) {
     const model = env.OPENROUTER_MODEL || DEFAULT_OPENROUTER_MODEL;
-    if (freeAiOnly(env) && !isFreeOpenRouterModel(model)) return null;
+    if (!isFreeOpenRouterModel(model)) return null;
     return {
       provider: 'openrouter',
       apiKey: env.OPENROUTER_API_KEY,
       model,
-    };
-  }
-
-  if (!freeAiOnly(env) && env.OPENAI_API_KEY) {
-    return {
-      provider: 'openai',
-      apiKey: env.OPENAI_API_KEY,
-      model: env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL,
     };
   }
 
@@ -64,27 +55,19 @@ export function createFreeOpenRouterFetch(fetchImpl: typeof globalThis.fetch = g
 
 /**
  * Returns a language model for live AI calls.
- * Free OpenRouter by default. Direct OpenAI needs explicit paid opt-in.
- * OpenRouter uses the Chat Completions path (OpenAI-compatible); direct OpenAI
- * keeps the default Responses model factory used previously.
+ * Only free OpenRouter models. Its Chat Completions path is OpenAI-compatible.
  */
 export function getAiModel() {
   const config = resolveAiProvider();
   if (!config) throw new AIUnavailableError();
 
-  if (config.provider === 'openrouter') {
-    const provider = createOpenAI({
-      apiKey: config.apiKey,
-      baseURL: OPENROUTER_BASE_URL,
-      name: 'openrouter',
-      fetch: freeAiOnly() ? createFreeOpenRouterFetch() : undefined,
-    });
-    // OpenRouter exposes Chat Completions, not the OpenAI Responses API.
-    return provider.chat(config.model);
-  }
-
-  const provider = createOpenAI({ apiKey: config.apiKey });
-  return provider(config.model);
+  const provider = createOpenAI({
+    apiKey: config.apiKey,
+    baseURL: OPENROUTER_BASE_URL,
+    name: 'openrouter',
+    fetch: createFreeOpenRouterFetch(),
+  });
+  return provider.chat(config.model);
 }
 
 /** @deprecated Prefer getAiModel — kept as an alias for call sites already migrated. */
