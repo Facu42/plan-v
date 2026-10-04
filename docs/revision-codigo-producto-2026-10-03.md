@@ -6,6 +6,14 @@ Revisión independiente de sólo lectura del código en la rama `codex/nutrigo-p
 
 ## Revalidación adicional — 4 de octubre de 2026
 
+### Cierre acotado de marca Plan V e idioma
+
+Se revisaron `branding.tsx`, su integración en `FramePair.tsx`, `translation.ts` y los pies de `FigmaPatientFront.tsx` y `NutrigoShowroom.tsx`. El enlace de marca usa el PNG oficial ya existente, conserva los contenedores originales `Logo` y `symbol` y sustituye el contenido del símbolo; el nombre se traduce a Plan V. El inventario de las 24 vistas contiene 22 espacios `Logo`, todos con un único `symbol`, compatibles con ese enlace. Los pies muestran `©` y Plan V, sin el texto inglés `Copyright`. El CSS generado añade únicamente la utilidad de ajuste de imagen dentro del ámbito de Nutrigo.
+
+Pasaron **70 pruebas independientes en cuatro archivos**: contrato de fuentes, pantallas principales, pantallas secundarias y fidelidad de componentes. El contrato conserva los 278 recursos y sus hashes; el diff no modifica los archivos MCP originales ni los árboles JSON. No se encontraron defectos reproducibles en este ajuste. La comprobación visual y de navegación de las 24 vistas corresponde al hilo principal.
+
+También se inspeccionó el comparador local ignorado por Git: su modo inicial muestra Plan V traducido con el logo, y la referencia original queda oculta hasta activar su control. Ese comparador no forma parte del producto. No se hicieron capturas ni cambios de producción.
+
 ### Cierre acotado del conflicto de revisión de metas
 
 Se revisaron los cuatro archivos finales de metas: la migración `20261003172112_separate_nutrition_target_drafts.sql`, `server/targets/repository.ts`, `server/targets/postgres.integration.test.ts` y `server/security/signed-auth.local.test.ts`. La migración preparada usa `PT409` para la revisión vencida; el cambio conserva bloqueos, comparación de revisión, permisos y escrituras. El repositorio traduce `PT409` y el código anterior `40001` a HTTP 409. Pasaron **23 pruebas independientes en dos archivos** de metas PostgreSQL y flujo. No se encontraron nuevos defectos reproducibles en este cambio acotado.

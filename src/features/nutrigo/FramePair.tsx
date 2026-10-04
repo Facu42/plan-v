@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { SourceView, nodeName, sourceText, renderSource, type SourceNode, type SourceResolver } from './SourceView';
 import { translateSource } from './translation';
+import { planVBrandBinding } from './branding';
 import type { ShowroomPage } from '../../components/nutrigo/ShowroomPanels';
 import { FigmaRecordDialog } from '../../components/nutrigo/FigmaPatientFront';
 import './nutrigo.generated.css';
@@ -19,6 +20,7 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
   const id = nodes[mobile ? 1 : 0];
   useEffect(() => { let active=true; setSource(null);setLoadError(false); const load=frames[`./source/${id.replace(':','-')}.json`]; if (!load) {setLoadError(true);return;} load().then(module=>{if(active)setSource(module.default);}).catch(()=>{if(active)setLoadError(true);});return()=>{active=false;}; },[id,attempt]);
   const common:SourceResolver = node => {
+    const brand=planVBrandBinding(node);if(brand)return brand;
     const specific=resolve(node);if(specific)return specific;
     const name=nodeName(node), text=sourceText(node);
     if(name==='Button Nav') {

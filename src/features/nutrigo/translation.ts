@@ -30,7 +30,7 @@ export function translateSource(text: string): string {
   const value = text.trim();
   if (!value) return text;
   if (value in labels) return labels[value];
-  if (/Copyright/.test(value)) return `Copyright © ${new Date().getFullYear()} Plan V`;
+  if (/Copyright/.test(value)) return `© ${new Date().getFullYear()} Plan V`;
   if (/^Hello,/.test(value)) return 'Hola';
   if (/^Start your health journey/.test(value)) return 'Tu plan y tus registros, siempre a mano.';
   if (/Progress is progress/.test(value)) return 'Cada registro te ayuda a seguir tu progreso.';
