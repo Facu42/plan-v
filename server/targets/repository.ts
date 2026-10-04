@@ -13,7 +13,7 @@ function dbError(error: { code?: string } | null) {
   if (!error) return;
   if (['42P01', '42883', 'PGRST202', 'PGRST205'].includes(error.code ?? '')) throw new TargetError(501, 'Esta función requiere instalar la migración de metas nutricionales.');
   if (error.code === '42501') throw new TargetError(403, 'No tenés permiso para esta acción.');
-  if (error.code === '40001') throw new TargetError(409, 'La meta cambió en otra sesión. Recargala antes de guardar.');
+  if (['PT409', '40001'].includes(error.code ?? '')) throw new TargetError(409, 'La meta cambió en otra sesión. Recargala antes de guardar.');
   if (['22023', '23514', '22P02'].includes(error.code ?? '')) throw new TargetError(400, 'Revisá los datos de la meta.');
   throw new TargetError(503, 'No se pudo confirmar el guardado. Reintentá.');
 }

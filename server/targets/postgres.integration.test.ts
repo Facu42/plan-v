@@ -132,7 +132,7 @@ describe('metas y datos corporales por acceso directo a PostgreSQL', () => {
     await rpc(owner, 'save_nutrition_target_versioned', [patient, inputs, calculateTarget(inputs), true, 0]);
     const before = await rpc(owner, 'get_nutrition_target_workspace', [patient]);
     for (const revision of [0, null, -1]) {
-      await expect(rpc(owner, 'save_nutrition_target_versioned', [patient, { ...inputs, weight_kg: 80 }, calculateTarget(inputs), false, revision])).rejects.toMatchObject({ code: revision === 0 ? '40001' : '22023' });
+      await expect(rpc(owner, 'save_nutrition_target_versioned', [patient, { ...inputs, weight_kg: 80 }, calculateTarget(inputs), false, revision])).rejects.toMatchObject({ code: revision === 0 ? 'PT409' : '22023' });
     }
     expect(await rpc(owner, 'get_nutrition_target_workspace', [patient])).toEqual(before);
     await expect(asUser(owner, 'select public.save_nutrition_target($1,$2,$3,$4)', [patient, inputs, calculateTarget(inputs), false])).rejects.toMatchObject({ code: '42501' });
@@ -152,7 +152,7 @@ describe('metas y datos corporales por acceso directo a PostgreSQL', () => {
       rpc(owner, 'save_nutrition_target_versioned', [patient, { ...inputs, weight_kg: 80 }, calculateTarget(inputs), false, 0]),
     ]);
     expect(responses.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
-    expect(responses.filter((r) => r.status === 'rejected')).toEqual([expect.objectContaining({ reason: expect.objectContaining({ code: '40001' }) })]);
+    expect(responses.filter((r) => r.status === 'rejected')).toEqual([expect.objectContaining({ reason: expect.objectContaining({ code: 'PT409' }) })]);
     const state = await rpc<{ revision: number }>(owner, 'get_nutrition_target_workspace', [patient]);
     expect(state.revision).toBe(1);
   });

@@ -93,7 +93,8 @@ begin
     raise exception using errcode='22023', message='nutrition_target_revision_required';
   end if;
   if current_revision <> expected_revision then
-    raise exception using errcode='40001', message='nutrition_target_conflict';
+    -- Una revisión vencida es un conflicto del producto, no un fallo de serialización.
+    raise exception using errcode='PT409', message='nutrition_target_conflict';
   end if;
   if publish is null or jsonb_typeof(target_result) is distinct from 'object'
     or jsonb_typeof(target_result->'warnings') is distinct from 'array' then

@@ -221,13 +221,21 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     })).finally(()=>clearTimeout(probe));
     console.info('Concurrencia local de metas:',JSON.stringify({workspace_ms:workspaceMs,writes_ms:Math.round(performance.now()-writesStarted),statuses:results.map(result=>result.status),codes:results.map(result=>result.error?.code??null)}));
     expect(results.filter(result=>!result.error)).toHaveLength(1);
-    expect(results.find(result=>result.error)?.error?.code).toBe('40001');
+    const conflict=results.find(result=>result.error);
+    expect(conflict?.error?.code).toBe('PT409');expect(conflict?.status).toBe(409);
     const afterStarted=performance.now();
     const after=await clients[0].rpc('get_nutrition_target_workspace',{target:pidA}).abortSignal(AbortSignal.timeout(12000));
     console.info('Lectura local posterior:',JSON.stringify({elapsed_ms:Math.round(performance.now()-afterStarted),status:after.status,code:after.error?.code??null}));
     expect(after.error).toBeNull();expect(after.data.revision).toBe(workspace.data.revision+1);
     expect([67,68]).toContain(after.data.draft.inputs.weight_kg);
     expect(after.data.published.result).toEqual(calculateTarget(inputs));
+    // El mismo conflicto debe responder sin otra escritura simultánea y sin alterar datos.
+    const stale=await clients[0].rpc('save_nutrition_target_versioned',{target:pidA,target_inputs:inputs,target_result:calculateTarget(inputs),publish:false,expected_revision:workspace.data.revision}).abortSignal(AbortSignal.timeout(3000));
+    expect(stale.status).toBe(409);expect(stale.error?.code).toBe('PT409');
+    const staleApi=await api(ownerA,'/api/patients/'+pidA+'/nutrition-target','PUT',{inputs,publish:false,expected_revision:workspace.data.revision});
+    expect(staleApi.status).toBe(409);expect(await staleApi.json()).toMatchObject({error:'La meta cambió en otra sesión. Recargala antes de guardar.'});
+    const unchanged=await clients[0].rpc('get_nutrition_target_workspace',{target:pidA}).abortSignal(AbortSignal.timeout(3000));
+    expect(unchanged.error).toBeNull();expect(unchanged.data).toEqual(after.data);
   },15000);
 
   it('el mensaje autorizado se lee y la función interna queda cerrada', async () => {
