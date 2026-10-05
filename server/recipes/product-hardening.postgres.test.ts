@@ -116,10 +116,10 @@ describe('cierre funcional: revisiones, privacidad y reintentos persistentes', (
     const first=await rpc(nutriA,'create_patient_with_invite',[input]) as any;
     const user=randomUUID();
     await db.query('insert into auth.users(id,email,email_confirmed_at) values($1,$2,now())',[user,input.email]);
-    await db.query("update public.patient_invites set status='pending',expires_at=now()+interval '1 day' where id=$1",[first.invite.id]);
+    await db.query("update public.patient_invites set status='pending',invited_at=now(),expires_at=now()+interval '1 day' where id=$1",[first.invite.id]);
     expect(await rpc(user,'accept_patient_invite',[first.invite.id])).toBe(first.patient_id);
     for(const status of ['accepted','revoked','expired']){
-      await db.query('update public.patient_invites set status=$1 where id=$2',[status,first.invite.id]);
+      await db.query('update public.patient_invites set status=$1,revoked_at=now() where id=$2',[status,first.invite.id]);
       const retry=await rpc(nutriA,'create_patient_with_invite',[input]) as any;
       expect(retry.patient_id).toBe(first.patient_id);expect(retry.invite.id).toBe(first.invite.id);expect(retry.invite.status).toBe(status);expect(retry.duplicate).toBe(true);
     }

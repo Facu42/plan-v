@@ -56,7 +56,15 @@ async function logout() {
   await B('js',"Array.from(document.querySelectorAll('button')).find(e=>/^(Cerrar sesión|Salir)$/.test(e.textContent.trim())&&e.getClientRects().length).click()");await B('wait','input[placeholder="Email"]');
 }
 async function read(actor,path) {
-  const response=await fetch(apiOrigin+path,{headers:{Authorization:'Bearer '+actor.token}});
+  let response=await fetch(apiOrigin+path,{headers:{Authorization:'Bearer '+actor.token}});
+  // Salir de la app revoca las sesiones del usuario, incluida la del lector de prueba.
+  // Comprobar tras un nuevo ingreso exige una sesión nueva, sin eludir la revocación.
+  if(response.status===401){
+    const signed=await actor.client.auth.signInWithPassword({email:actor.email,password});
+    if(signed.error||!signed.data.session)throw Error('No se pudo renovar la sesión ficticia de lectura');
+    actor.token=signed.data.session.access_token;
+    response=await fetch(apiOrigin+path,{headers:{Authorization:'Bearer '+actor.token}});
+  }
   lastReadStatus=response.status;
   if(!response.ok) throw Error('Nueva lectura del servidor falló: '+response.status);
   return response.json();
