@@ -33,13 +33,14 @@ async function identity(label) {
   if(signed.error) throw Error('Sesión ficticia no iniciada');
   const actor={id:created.data.user.id,email,client,token:signed.data.session.access_token};identities.push(actor);return actor;
 }
-async function B(...args) { lastAction=args[0]+(['wait','fill','click','select','upload'].includes(args[0])?' '+args[1]:'');return (await run(browse,args,{env,timeout:45000,maxBuffer:2*1024*1024})).stdout.trim(); }
+async function B(...args) { if(args[0]!=='js')lastAction=args[0]+(['wait','fill','click','select','upload'].includes(args[0])?' '+args[1]:'');return (await run(browse,args,{env,timeout:45000,maxBuffer:2*1024*1024})).stdout.trim(); }
 async function until(expression) {
   const deadline=Date.now()+20000;
   while(Date.now()<deadline) { if((await B('js',expression)).includes('true')) return; await new Promise(r=>setTimeout(r,250)); }
   throw Error('No se confirmó el estado de la interfaz');
 }
 async function button(text) {
+  lastAction='botón '+text;
   await until(`Array.from(document.querySelectorAll('button')).some(e=>e.textContent.trim()===${JSON.stringify(text)}&&!e.disabled&&e.getClientRects().length)`);
   await B('js',`Array.from(document.querySelectorAll('button')).find(e=>e.textContent.trim()===${JSON.stringify(text)}&&!e.disabled&&e.getClientRects().length).click()`);
 }
@@ -150,13 +151,21 @@ try {
   pieces.forEach((content,index)=>{offsets.push(Buffer.byteLength(pdf));pdf+=`${index+1} 0 obj\n${content}\nendobj\n`;});const xref=Buffer.byteLength(pdf);pdf+='xref\n0 4\n0000000000 65535 f \n'+offsets.slice(1).map(offset=>String(offset).padStart(10,'0')+' 00000 n \n').join('')+`trailer\n<< /Size 4 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;await writeFile(pdfPath,pdf);
   phase='adjunto privado';await B('upload','[aria-label="Archivo adjunto"]',pdfPath);await until("document.body.innerText.includes('Adjunto: plan-v-prueba.pdf')");await B('fill','[aria-label="Escribir mensaje"]','Adjunto ficticio del recorrido');await B('click','[aria-label="Enviar mensaje"]');await until("document.body.innerText.includes('Mensaje enviado.')");await reloadContains('plan-v-prueba.pdf');
   const attached=(await read(professional,`/api/patients/${pid}`)).patient.messages.find(m=>m.text==='Adjunto ficticio del recorrido');check(attached?.attachment?.filename==='plan-v-prueba.pdf','adjunto guardado y visible desde ambos roles');
+  await button('Ver adjunto: plan-v-prueba.pdf');await until("Array.from(document.querySelectorAll('a')).some(a=>a.textContent.trim()==='Abrir plan-v-prueba.pdf')");
+  const documentUrl=await B('js',"Array.from(document.querySelectorAll('a')).find(a=>a.textContent.trim()==='Abrir plan-v-prueba.pdf').href");
+  const documentResponse=await fetch(documentUrl);check(documentResponse.ok&&Buffer.from(await documentResponse.arrayBuffer()).equals(Buffer.from(pdf)),'paciente abre y descarga el PDF real del almacenamiento temporal');
+  const proDocument=await read(professional,`/api/patients/${pid}/messages/${attached.id}/attachment`);const proResponse=await fetch(proDocument.url);check(proResponse.ok&&Buffer.from(await proResponse.arrayBuffer()).equals(Buffer.from(pdf)),'profesional descarga el mismo adjunto privado');
+  const stranger=await identity('Paciente ajena ficticia');const denied=await fetch(apiOrigin+`/api/patients/${pid}/messages/${attached.id}/attachment`,{headers:{Authorization:'Bearer '+stranger.token}});check(denied.status===403,'otra paciente no obtiene el enlace del adjunto');
   phase='actividad';await B('goto',origin+'/app/ejercicio');await button('Registrar actividad');await field('Actividad','Caminata');await button('Guardar');await until("document.body.innerText.includes('Actividad guardada.')");
   await reloadContains('Caminata');check((await read(professional,`/api/patients/${pid}/exercise?audience=pro`)).exercise.activities.length===1,'actividad visible desde ambos roles tras recarga');
   phase='medidas';await B('goto',origin+'/app/progreso');await button('Registrar medidas y archivos');await B('click','.care-consent label:has-text("Puedo cargar peso o medidas") input');await readUntil(patient,`/api/patients/${pid}/care?audience=patient`,r=>r.consented.includes('measurement'));await button('Registrar peso');await field('Peso','63','.care-form ');await button('Guardar registro');await until("document.body.innerText.includes('Registro guardado y disponible')");await B('click','[aria-label="Cerrar registros"]');await B('reload');
   check((await read(professional,`/api/patients/${pid}/care?audience=pro`)).measurements.some(m=>m.kind==='weight'&&m.value===63&&m.unit==='kg'),'medida opcional persistente con consentimiento y origen paciente');
   phase='recurso leído y guardado';await B('goto',origin+'/app/recursos');await B('click',`[aria-label="Leer ${resource.title}"]`);await button('Guardar recurso');await until("document.body.innerText.includes('Recurso guardado.')");await B('reload');
   const rereadLibrary=await readUntil(professional,`/api/patients/${pid}/library?audience=pro`,r=>r.library.assignments.some(a=>a.id===resourceAssignment.id&&a.read_at));check(rereadLibrary.library.favorites.some(f=>f.item_id===resource.id),'recurso leído y favorito persisten y se revisan desde consultorio');
-  phase='confirmación y aviso de pago';await B('goto',origin+'/app/agenda');await button('Confirmar');await readUntil(professional,`/api/patients/${pid}`,r=>r.patient.appointment?.patient_reply==='attending');await B('reload');check(true,'confirmación de turno persistente');
+  phase='confirmación y aviso de pago';
+  const appointment=(await read(patient,`/api/patients/${pid}`)).patient.appointment;
+  const appointmentDay=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(appointment.starts_at));
+  await B('goto',origin+'/app/agenda');await B('fill','[aria-label="Elegir mes"]',appointmentDay.slice(0,7));await B('click',`[data-calendar-date="${appointmentDay}"]`);await button('Confirmar');await readUntil(professional,`/api/patients/${pid}`,r=>r.patient.appointment?.patient_reply==='attending');await B('reload');check(true,'confirmación de turno persistente');
   await B('goto',origin+'/app/pagos');await B('fill','#cbz-report-amount','1000');await B('fill','#cbz-report-note','Aviso ficticio del recorrido');await button('Avisar que pagué');await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.payments.some(p=>p.status==='reported'));
   await logout();await B('viewport','1440x1000');await login(professional,'/crm/cobranzas');await B('click','[aria-label="Ver cobranzas de Paciente ficticia"]');await button('Confirmar');await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.payments.some(p=>p.status==='confirmed'&&p.amount===1000));await B('reload');check(true,'aviso de pago confirmado por profesional persiste sin cobro automático');
   await logout();await login(patient,'/app/pagos');await reloadContains('Confirmado');

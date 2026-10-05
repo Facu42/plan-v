@@ -32,7 +32,7 @@ import { ShowroomPatientOnboarding } from './ShowroomPatientOnboarding';
 import { ShowroomPrivacy } from './ShowroomPrivacy';
 import { ShowroomWorkCenter, type WorkCenterModule } from './ShowroomWorkCenter';
 import { PATIENT_MORE, PATIENT_SURFACES, PATIENT_TABS, PLAN_SUBPAGES, PRO_TABS, proMore, proSurfaces, tabBarState } from './showroom-nav';
-import { buildAppHref, hasResourceHash, isAdminPath, resolveAppLocation, type AppRole } from './app-location';
+import { buildAppHref, contentIdentity, hasResourceHash, isAdminPath, resolveAppLocation, type AppRole } from './app-location';
 import { unreadCount } from './message-receipts';
 import { buildConsultAlerts } from './consult-alerts';
 import { ShowroomCobranzas } from './ShowroomCobranzas';
@@ -385,7 +385,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
       </header>
       <div className="nv-content-layout">
         {/* Cambiar de pantalla o paciente desmonta los datos y formularios anteriores. */}
-        <main key={`${role}:${page}:${page === 'pacientes' ? 'directorio' : selected?.id ?? ''}`} id="nv-main" tabIndex={-1} className="nv-main" data-figma-node={role === 'patient' ? (figmaDetail?.nodes ?? PATIENT_FIGMA_NODES[page])?.[compactHeader ? 1 : 0] : undefined}>
+        <main key={contentIdentity(role,page,selected?.id)} id="nv-main" tabIndex={-1} className="nv-main" data-figma-node={role === 'patient' ? (figmaDetail?.nodes ?? PATIENT_FIGMA_NODES[page])?.[compactHeader ? 1 : 0] : undefined}>
           {role === 'pro' && <nav className="nv-clinic-shortcuts" aria-label="Accesos del consultorio">
             <button type="button" aria-current={page === 'pacientes' ? 'page' : undefined} onClick={() => navigate('pacientes')}><Icon name="users" size={18} />Pacientes</button>
             <button type="button" aria-current={page === 'ficha' ? 'page' : undefined} disabled={!selected} onClick={() => navigate('ficha')}><Icon name="contact" size={18} />Ficha</button>
