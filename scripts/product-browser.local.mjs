@@ -23,7 +23,7 @@ const env = { ...process.env, PORT:'5597', VITE_API_PROXY:apiOrigin, CORS_ORIGIN
 const pool = new pg.Pool({ connectionString:env.PLANV_LOCAL_AUTH_DB_URL });
 const admin = createClient(env.SUPABASE_URL,env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
 let password = 'Local-' + randomBytes(24).toString('base64url') + '-A1!';
-const identities=[]; const evidence=[]; let apiProcess; let webProcess; let phase='preparar identidades';let lastAction='preparación';
+const identities=[]; const evidence=[]; let apiProcess; let webProcess; let phase='preparar identidades';let lastAction='preparación';let failedCheck='ninguna';let lastReadStatus=null;
 async function identity(label) {
   const email=label.toLowerCase().replaceAll(' ','-')+'-'+randomUUID()+'@example.test';
   const created=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:label,legal_version:'2026-09-29',legal_accepted_at:new Date().toISOString()}});
@@ -57,6 +57,7 @@ async function logout() {
 }
 async function read(actor,path) {
   const response=await fetch(apiOrigin+path,{headers:{Authorization:'Bearer '+actor.token}});
+  lastReadStatus=response.status;
   if(!response.ok) throw Error('Nueva lectura del servidor falló: '+response.status);
   return response.json();
 }
@@ -65,7 +66,7 @@ async function readUntil(actor,path,predicate) {
   while(Date.now()<deadline){const result=await read(actor,path);if(predicate(result))return result;await new Promise(r=>setTimeout(r,250));}
   throw Error('El servidor no confirmó el guardado');
 }
-function check(condition,label) { if(!condition) throw Error(label);evidence.push(label);console.log('Verificado: '+label); }
+function check(condition,label) { if(!condition) {failedCheck=label;throw Error(label);}evidence.push(label);console.log('Verificado: '+label); }
 async function reloadContains(text) {await B('reload');await until(`document.body.innerText.includes(${JSON.stringify(text)})`);}
 async function field(label,value,scope='') {await B('fill',`${scope}label:has-text("${label}") input`,value);}
 try {
@@ -98,7 +99,7 @@ try {
   await B('js',"Array.from(document.querySelectorAll('.nvon-health fieldset')).forEach(section=>{ const choices=Array.from(section.querySelectorAll('button'));const none=choices.find(e=>/no tengo|ninguna|ninguno/i.test(e.textContent));if(none)none.click(); })");
   phase='onboarding: alimentos';await button('Continuar');await B('wait','.nvon-review');
   phase='onboarding: envío';await button('Enviar a mi nutricionista');await button('Ir al inicio');
-  const intake=await read(professional,`/api/patients/${pid}/intake?audience=pro`);
+  phase='onboarding: lectura profesional';const intake=await read(professional,`/api/patients/${pid}/intake/professional`);
   check(intake.intake.status==='submitted','consentimiento y ficha enviados desde el navegador');
   await B('goto',origin+'/app/ficha');await B('wait','.nvt-body-form');
   await field('Fecha de nacimiento','1990-05-10','.nvt-body-form ');await field('Talla (cm)','165','.nvt-body-form ');await field('Peso (kg)','65','.nvt-body-form ');await button('Guardar mis datos');
@@ -156,8 +157,8 @@ try {
   await button('Ver adjunto: plan-v-prueba.pdf');await until("Array.from(document.querySelectorAll('a')).some(a=>a.textContent.trim()==='Abrir plan-v-prueba.pdf')");
   const documentUrl=await B('js',"Array.from(document.querySelectorAll('a')).find(a=>a.textContent.trim()==='Abrir plan-v-prueba.pdf').href");
   const documentResponse=await fetch(documentUrl);check(documentResponse.ok&&Buffer.from(await documentResponse.arrayBuffer()).equals(Buffer.from(pdf)),'paciente abre y descarga el PDF real del almacenamiento temporal');
-  const proDocument=await read(professional,`/api/patients/${pid}/messages/${attached.id}/attachment`);const proResponse=await fetch(proDocument.url);check(proResponse.ok&&Buffer.from(await proResponse.arrayBuffer()).equals(Buffer.from(pdf)),'profesional descarga el mismo adjunto privado');
-  const stranger=await identity('Paciente ajena ficticia');const denied=await fetch(apiOrigin+`/api/patients/${pid}/messages/${attached.id}/attachment`,{headers:{Authorization:'Bearer '+stranger.token}});check(denied.status===403,'otra paciente no obtiene el enlace del adjunto');
+  const proDocumentResponse=await fetch(apiOrigin+`/api/patients/${pid}/messages/${attached.id}/attachment`,{method:'POST',headers:{Authorization:'Bearer '+professional.token}});if(!proDocumentResponse.ok)throw Error('No se pudo abrir el adjunto profesional');const proDocument=await proDocumentResponse.json();const proResponse=await fetch(proDocument.url);check(proResponse.ok&&Buffer.from(await proResponse.arrayBuffer()).equals(Buffer.from(pdf)),'profesional descarga el mismo adjunto privado');
+  const stranger=await identity('Paciente ajena ficticia');const denied=await fetch(apiOrigin+`/api/patients/${pid}/messages/${attached.id}/attachment`,{method:'POST',headers:{Authorization:'Bearer '+stranger.token}});check(denied.status===403,'otra paciente no obtiene el enlace del adjunto');
   phase='actividad';await B('goto',origin+'/app/ejercicio');await button('Registrar actividad');await field('Actividad','Caminata');await button('Guardar');await until("document.body.innerText.includes('Actividad guardada.')");
   await reloadContains('Caminata');check((await read(professional,`/api/patients/${pid}/exercise?audience=pro`)).exercise.activities.length===1,'actividad visible desde ambos roles tras recarga');
   phase='medidas';await B('goto',origin+'/app/progreso');await button('Registrar medidas y archivos');await B('click','.care-consent label:has-text("Puedo cargar peso o medidas") input');await readUntil(patient,`/api/patients/${pid}/care?audience=patient`,r=>r.consented.includes('measurement'));await button('Registrar peso');await field('Peso','63','.care-form ');await button('Guardar registro');await until("document.body.innerText.includes('Registro guardado y disponible')");await B('click','[aria-label="Cerrar registros"]');await B('reload');
@@ -184,6 +185,7 @@ try {
 } catch (error) {
   console.error('Falló la comprobación del navegador en: '+phase+'; control: '+lastAction+'. No se imprimen cuentas, tokens ni contenido de sesión.');
   console.error('Tipo de fallo: '+(error instanceof Error?error.name:'desconocido')+'; código: '+(Number.isInteger(error?.code)?error.code:'sin código'));
+  console.error('Última lectura HTTP: '+(lastReadStatus??'sin lectura')+'; comprobación fallida: '+failedCheck);
   // Diagnóstico limitado a controles, sin valores, texto libre ni enlaces de sesión.
   try{console.error('Controles al detenerse: '+await B('js',"JSON.stringify({privacy:!!document.querySelector('.nvon-privacy'),profile:!!document.querySelector('.nvon-profile'),health:!!document.querySelector('.nvon-health'),review:!!document.querySelector('.nvon-review'),alerts:document.querySelectorAll('.nvon-error').length,continue:Array.from(document.querySelectorAll('button')).filter(e=>e.textContent.trim()==='Continuar').map(e=>({disabled:e.matches(':disabled'),visible:!!e.getClientRects().length}))})"));}catch{}
   if(phase==='arranque de servicios temporales')console.error('Salida local API: '+(apiProcess?.exitCode??'en ejecución')+'; web: '+(webProcess?.exitCode??'en ejecución'));

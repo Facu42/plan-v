@@ -19,6 +19,14 @@ describe('alta e invitación sin falso éxito', () => {
     await expect(createPatientWithInvitation({ name: '', email: '', goal: '' }, { create: vi.fn().mockRejectedValue(error), activate })).rejects.toBe(error);
     expect(activate).not.toHaveBeenCalled();
   });
+  it('recuperar una cuenta vinculada no reactiva el enlace ni propone otra invitación', async () => {
+    const accepted = { ...created, invite: { ...invite, status: 'accepted' as const } };
+    const activate = vi.fn();
+    expect(await createPatientWithInvitation({name:'Ana',email:invite.email,goal:'Comidas'}, {create:vi.fn().mockResolvedValue(accepted),activate})).toBe(accepted);
+    expect(activate).not.toHaveBeenCalled();
+    const html=renderToStaticMarkup(<InviteShare name="Ana" invite={accepted.invite} onClose={()=>undefined}/>);
+    expect(html).toContain('Cuenta vinculada');expect(html).not.toContain('Reintentar preparar invitación');expect(html).not.toContain('Enlace de invitación');
+  });
   it('muestra enlace sólo si el servidor confirma pending con vencimiento vigente', async () => {
     const pending = { ...invite, status: 'pending' as const, expires_at: '2099-10-10T15:00:00Z' };
     const result = await createPatientWithInvitation({ name: 'Ana', email: invite.email, goal: 'Comidas' }, { create: vi.fn().mockResolvedValue(created), activate: vi.fn().mockResolvedValue({ invite: pending, source: 'supabase' }) });

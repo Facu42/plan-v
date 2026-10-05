@@ -111,6 +111,20 @@ describe('cierre funcional: revisiones, privacidad y reintentos persistentes', (
     finally {await db.exec('drop trigger fail_trial_invite on public.patient_invites;drop function public.fail_trial_invite();');}
     expect((await rpc(nutriA,'create_patient_with_invite',[input]) as any).duplicate).toBe(false);
   });
+  it('recupera el alta después de aceptar, revocar o vencer su enlace, sin crear otra ficha',async()=>{
+    const input={name:'Alta recuperada',email:'recuperada@example.test',goal:'Organizar comidas'};
+    const first=await rpc(nutriA,'create_patient_with_invite',[input]) as any;
+    const user=randomUUID();
+    await db.query('insert into auth.users(id,email,email_confirmed_at) values($1,$2,now())',[user,input.email]);
+    await db.query("update public.patient_invites set status='pending',expires_at=now()+interval '1 day' where id=$1",[first.invite.id]);
+    expect(await rpc(user,'accept_patient_invite',[first.invite.id])).toBe(first.patient_id);
+    for(const status of ['accepted','revoked','expired']){
+      await db.query('update public.patient_invites set status=$1 where id=$2',[status,first.invite.id]);
+      const retry=await rpc(nutriA,'create_patient_with_invite',[input]) as any;
+      expect(retry.patient_id).toBe(first.patient_id);expect(retry.invite.id).toBe(first.invite.id);expect(retry.invite.status).toBe(status);expect(retry.duplicate).toBe(true);
+    }
+    expect((await db.query<{n:number}>("select count(*)::int as n from public.patients where full_name='Alta recuperada'")).rows[0].n).toBe(1);
+  });
   it('rechaza la segunda escritura de un editor desactualizado, incluso en la primera versión', async () => {
     recipe = await rpc(nutriA,'save_recipe_draft',[recipeDraft]);
     const first = recipe.current.revision;

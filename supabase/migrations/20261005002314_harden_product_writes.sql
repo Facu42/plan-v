@@ -581,7 +581,8 @@ begin
     raise exception using errcode='22023',message='patient_create_invalid';
   end if;
   perform pg_advisory_xact_lock(hashtextextended(nid::text||':patient-create:'||mail,9));
-  select * into invitation from public.patient_invites where nutritionist_id=nid and email=mail and status in ('not_sent','pending');
+  -- El recibo del alta sigue siendo recuperable después de usar, revocar o vencer el enlace.
+  select * into invitation from public.patient_invites where nutritionist_id=nid and email=mail order by created_at desc,id desc limit 1;
   if found then
     select * into existing from public.patients where id=invitation.patient_id and nutritionist_id=nid;
     if existing.full_name is distinct from pname or existing.goal is distinct from goal or existing.deactivated_at is not null or existing.anonymized_at is not null then

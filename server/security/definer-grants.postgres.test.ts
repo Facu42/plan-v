@@ -38,6 +38,7 @@ const ALLOWED = [
   'complete_privacy_export',
   'confirm_appointment',
   'create_organization',
+  'create_patient_with_invite',
   'delegate_patient_care',
   'delete_care_document',
   'delete_care_photo',

@@ -49,6 +49,7 @@ export function InviteShare({ name, invite, onClose }: { name: string; invite: P
   const [error, setError] = useState('');
   const lock = useRef(false);
   const ready = invitationReady(current);
+  const linked = current.status === 'accepted';
   const link = inviteLink(current.id);
   const [copied, setCopied] = useState(false);
   useEffect(() => { setCurrent(invite); setError(''); setCopied(false); }, [invite.id, invite.updated_at]);
@@ -63,15 +64,15 @@ export function InviteShare({ name, invite, onClose }: { name: string; invite: P
     try { await navigator.clipboard.writeText(link); setCopied(true); } catch { setCopied(false); }
   };
   return <div className="nv-directory-notice nv-invite-share" role="status">
-    <Icon name={ready ? 'check' : 'clock'} size={15} />
+    <Icon name={ready || linked ? 'check' : 'clock'} size={15} />
     <span>
-      <strong>{ready ? `Invitación lista para ${name}` : `Ficha creada para ${name}; falta preparar su acceso`}</strong>
-      {ready ? <><small>Mandale este enlace: crea su cuenta con {current.email} y queda vinculada a tu consultorio. Vence el {new Date(current.expires_at!).toLocaleString('es-AR')}.</small><input readOnly value={link} aria-label="Enlace de invitación" onFocus={(event) => event.currentTarget.select()} /></> : <small>El enlace todavía no está habilitado. Podés reintentar sin repetir el alta.</small>}
+      <strong>{linked ? `Cuenta vinculada de ${name}` : ready ? `Invitación lista para ${name}` : `Ficha creada para ${name}; falta preparar su acceso`}</strong>
+      {linked ? <small>Esta paciente ya aceptó la invitación. Se recuperó su ficha existente.</small> : ready ? <><small>Mandale este enlace: crea su cuenta con {current.email} y queda vinculada a tu consultorio. Vence el {new Date(current.expires_at!).toLocaleString('es-AR')}.</small><input readOnly value={link} aria-label="Enlace de invitación" onFocus={(event) => event.currentTarget.select()} /></> : <small>El enlace todavía no está habilitado. Podés reintentar sin repetir el alta.</small>}
       {error && <small role="alert">{error}</small>}
     </span>
-    <span className="nv-invite-actions">
+    {!linked && <span className="nv-invite-actions">
       {ready ? <><NvButton className="nv-soft" onClick={copy}>{copied ? 'Copiado' : 'Copiar enlace'}</NvButton><a className="nv-button nv-ghost" href={`https://wa.me/?text=${encodeURIComponent(inviteMessage(name, link))}`} target="_blank" rel="noreferrer">WhatsApp</a></> : <NvButton className="nv-soft" disabled={busy} onClick={() => void prepare()}>{busy ? 'Preparando…' : 'Reintentar preparar invitación'}</NvButton>}
-    </span>
+    </span>}
     <button type="button" disabled={busy} onClick={onClose} aria-label="Cerrar aviso">×</button>
   </div>;
 }
