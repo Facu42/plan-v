@@ -2,7 +2,7 @@
 
 Continuación del PR #54 (rama codex/nutrigo-producto-mcp). Conserva las 24 fuentes originales del MCP, los recursos, el español y el logo oficial. El comparador estático no demuestra persistencia del producto.
 
-**Estado posterior a la aprobación:** PR #54 y #56 integrados; cinco migraciones aplicadas y web/API/worker comprobados en `6edd6fc`. Portada manual, permiso y una propuesta gratuita reales verificados. Se ajustan espera/formato de IA para cerrar receta nueva estimada y edición/publicación. El registro actualizado está en [publicación y comprobaciones](publicacion-producto-plan-v-2026-10-05.md). La evidencia de abajo corresponde al ensayo anterior a publicar.
+**Estado posterior a la aprobación:** PR #54, #56 y #57 integrados; cinco migraciones aplicadas y web/API/worker comprobados en `df8e5d0`. Portada manual y generación gratuita real de cuatro recetas nuevas verificadas. Se editó y publicó v2, y la paciente recibe exactamente lo revisado conservando las estimaciones. [Evidencia y guía del producto publicado](cierre-producto-publicado-2026-10-05.md), [historial de publicación](publicacion-producto-plan-v-2026-10-05.md). La evidencia de abajo corresponde al ensayo anterior a publicar.
 
 ## Correcciones comprobadas localmente
 
@@ -31,7 +31,7 @@ El CI existente ejecuta un recorrido en gstack, sin capturas y con Auth/PostgRES
 
 Las revisiones independientes code-reviewer y reality-checker reprodujeron defectos de producto y del ensayo. El revisor de contratos revalidó por separado permisos, persistencia, invitaciones y publicación mediante el adaptador real de la API. En [CI de sesiones y recorrido completo de `66c4fbf`](https://github.com/Facu42/plan-v/actions/runs/37318109128) pasaron **24 pruebas con sesiones firmadas y 36 comprobaciones de navegador**: alta/invitación, consentimiento, ficha y meta; receta/plan publicados y borradores privados; comidas/hábitos, compras/favoritos, recursos y lectura; mensajes de ambos roles y descargas reales de adjuntos, fotos y estudios con denegación ajena; medidas/actividad, revisión profesional, turnos y pagos manuales; edición y archivo/restauración; nuevo ingreso, recuperación real de contraseña y corrección de ficha recibida por la profesional con regreso al plan publicado. Se usó el almacenamiento temporal real, no el adaptador de memoria. Los contenedores y datos ficticios se eliminaron al terminar.
 
-**Límites del ensayo temporal:** la IA estuvo deshabilitada: sus 36 comprobaciones no prueban generación. La portada manual tenía pruebas SQL/HTTP y no se debilitó la condición HTTPS para hacer pasar ese ensayo. La aprobación, publicación y apertura HTTPS se acreditaron después en el registro de producción enlazado arriba. Sigue pendiente completar la generación gratuita real y su recorrido. Las fotos IA continúan pendientes; no se copian secretos ni se activa un proveedor pago.
+**Límites del ensayo temporal:** la IA estuvo deshabilitada: sus 36 comprobaciones no prueban generación. La portada manual tenía pruebas SQL/HTTP y no se debilitó la condición HTTPS para hacer pasar ese ensayo. La aprobación, publicación, apertura HTTPS y recorrido real de IA gratuita se acreditaron después en el registro de producción enlazado arriba. Las fotos IA continúan pendientes; no se copian secretos ni se activa un proveedor pago.
 
 Los endpoints, permisos y lecturas de comprobación de cada acción están en [recorridos y contratos](recorridos-y-contratos-plan-v-2026-10-05.md), junto con una guía breve para ambas cuentas ficticias.
 
