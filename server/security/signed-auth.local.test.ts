@@ -23,7 +23,7 @@ let messageA: string;
 function assertLocal(raw: string | undefined, protocols: string[]) {
   if (!raw) throw new Error('Falta el entorno local de sesiones.');
   const url = new URL(raw);
-  if (!protocols.includes(url.protocol) || !['127.0.0.1','localhost','[::1]'].includes(url.hostname)) {
+  if (url.search||url.hash||!protocols.includes(url.protocol) || !['127.0.0.1','localhost','[::1]'].includes(url.hostname)) {
     throw new Error('No se permiten proyectos hospedados ni pacientes reales.');
   }
   return raw;

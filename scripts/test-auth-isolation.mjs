@@ -27,7 +27,7 @@ async function cli(args, timeout = 60000) {
 
 function loopback(raw, protocols) {
   const url = new URL(raw);
-  if (!protocols.includes(url.protocol) || !['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname)) {
+  if (url.search||url.hash||!protocols.includes(url.protocol) || !['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname)) {
     throw new Error('La prueba solo permite servicios locales.');
   }
   return raw;

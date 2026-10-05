@@ -10,7 +10,8 @@ function localSignedAuthOrigin(env: Environment, url: URL): boolean {
   if(env.APP_MODE!=='staging'||env.PLANV_LOCAL_SIGNED_AUTH!=='1'||!['127.0.0.1','localhost','[::1]'].includes(url.hostname))return false;
   try {
     const supabase=new URL(env.SUPABASE_URL??''),database=new URL(env.PLANV_LOCAL_AUTH_DB_URL??'');
-    return supabase.protocol==='http:'&&['postgres:','postgresql:'].includes(database.protocol)
+    return !supabase.search&&!supabase.hash&&!database.search&&!database.hash
+      &&supabase.protocol==='http:'&&['postgres:','postgresql:'].includes(database.protocol)
       &&[supabase,database].every(value=>['127.0.0.1','localhost','[::1]'].includes(value.hostname));
   } catch {return false;}
 }

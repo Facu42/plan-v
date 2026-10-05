@@ -41,7 +41,7 @@ describe('HTTP security', () => {
   it('permite HTTP sólo en la pila firmada descartable y mantiene HTTPS obligatorio en producción',async()=>{
     const temporary={APP_MODE:'staging',PLANV_LOCAL_SIGNED_AUTH:'1',SUPABASE_URL:'http://127.0.0.1:55441',PLANV_LOCAL_AUTH_DB_URL:'postgres://postgres@127.0.0.1:55442/postgres',CORS_ALLOWED_ORIGINS:'http://127.0.0.1:5596'};
     expect(readCorsOrigins(temporary,true)).toEqual(['http://127.0.0.1:5596']);
-    for(const invalid of [{APP_MODE:'production'},{PLANV_LOCAL_SIGNED_AUTH:'0'},{SUPABASE_URL:'https://project.supabase.co'},{PLANV_LOCAL_AUTH_DB_URL:'postgres://postgres@remote.example/db'},{CORS_ALLOWED_ORIGINS:'http://app.example'}]) {
+    for(const invalid of [{APP_MODE:'production'},{PLANV_LOCAL_SIGNED_AUTH:'0'},{SUPABASE_URL:'https://project.supabase.co'},{PLANV_LOCAL_AUTH_DB_URL:'postgres://postgres@remote.example/db'},{PLANV_LOCAL_AUTH_DB_URL:'postgres://postgres@127.0.0.1:55442/postgres?host=remote.example'},{CORS_ALLOWED_ORIGINS:'http://app.example'}]) {
       expect(()=>readCorsOrigins({...temporary,...invalid},true)).toThrow();
     }
     const app=new Hono();app.use('/api/*',createOriginGuard(()=>temporary));app.get('/api/check',c=>c.json({ok:true}));

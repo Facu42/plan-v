@@ -11,7 +11,8 @@ const run = promisify(execFile);
 const browse = process.env.PLANV_GSTACK_CLI;
 for (const key of ['SUPABASE_URL', 'PLANV_LOCAL_AUTH_DB_URL']) {
   const value = new URL(process.env[key]);
-  if (!['127.0.0.1','localhost','[::1]'].includes(value.hostname)) throw Error('Entorno de navegador no local');
+  const protocols=key==='SUPABASE_URL'?['http:']:['postgres:','postgresql:'];
+  if(value.search||value.hash||!protocols.includes(value.protocol)||!['127.0.0.1','localhost','[::1]'].includes(value.hostname))throw Error('Entorno de navegador no local');
 }
 if (process.env.PLANV_LOCAL_SIGNED_AUTH !== '1' || !browse) throw Error('Falta el entorno descartable de navegador');
 const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
