@@ -129,7 +129,7 @@ try {
   check(true,'retiro del permiso de IA desde celular persiste y se muestra desactivado');
   const deniedAi=await fetch(apiOrigin+'/api/ai/jobs',{method:'POST',headers:{Authorization:'Bearer '+professional.token,'Content-Type':'application/json'},body:JSON.stringify({patient_id:pid,job_type:'menu_draft',period_start:today,period_end:today,slots:['Almuerzo']})});
   check(deniedAi.status===403,'retirar el permiso bloquea la generación profesional antes de llamar al proveedor');
-  phase='recuperar catálogo de permisos tras un error';await B('goto',origin+'/app/plan');await B('wait','[aria-label="Mi ficha"]');
+  phase='recuperar catálogo de permisos tras un error';await B('viewport','1440x1000');await B('goto',origin+'/app/plan');await B('wait','[aria-label="Mi ficha"]');
   await B('js',`(()=>{const original=window.fetch;window.fetch=(input,options)=>{const url=typeof input==='string'?input:input.url;if(String(url).includes('/api/consents/catalog')){window.fetch=original;return Promise.resolve(new Response(JSON.stringify({error:'Fallo temporal de prueba'}),{status:503,headers:{'Content-Type':'application/json'}}));}return original(input,options);};})()`);
   await B('click','[aria-label="Mi ficha"]');await button('Reintentar permisos');await B('wait',aiPermission);
   check((await read(patient,`/api/patients/${pid}/care`)).consented.includes('ai_menu_draft')===false,'catálogo de permisos recuperado en la misma pantalla tras un error sin alterar la decisión guardada');
