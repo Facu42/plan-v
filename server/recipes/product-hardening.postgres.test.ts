@@ -103,6 +103,17 @@ describe('cierre funcional: revisiones, privacidad y reintentos persistentes', (
     expect((await rpc(patientAUser,'toggle_favorite',[patientA,'resource',rid]) as any).favorites).toEqual([]);
     await expect(rpc(patientBUser,'toggle_favorite',[patientA,'resource',rid])).rejects.toMatchObject({code:'42501'});
   });
+  it('un slug igual al UUID de otra guía no duplica ni desvía el favorito guardado por ID', async () => {
+    const guide = (await db.query<{id:string}>('select id from public.resources where slug=$1', ['leer-plan-semanal'])).rows[0];
+    const collision = await rpc(nutriA, 'save_editorial_resource', [guide.id, 'Artículo privado con alias UUID', 'Resumen privado.', 'Hábitos', [{title:'Uno',body:'Privado'}], 'clinical']) as {id:string};
+    const saved = await rpc(patientAUser, 'toggle_favorite', [patientA, 'resource', guide.id]) as {favorites:Array<{id:string,item_id:string}>};
+    expect(saved.favorites).toHaveLength(1);
+    expect(saved.favorites[0].item_id).toBe(guide.id);
+    const reread = await rpc(patientAUser, 'get_patient_library', [patientA]) as typeof saved;
+    expect(reread.favorites).toEqual(saved.favorites);
+    expect(reread.favorites.some(f => f.item_id === collision.id)).toBe(false);
+    expect((await rpc(patientAUser, 'toggle_favorite', [patientA, 'resource', guide.id]) as typeof saved).favorites).toEqual([]);
+  });
   it('reintentar un alta devuelve la misma ficha/invitación; otro contenido no sobrescribe y otro rol no crea',async()=>{
     const input={name:'Paciente de alta',email:'alta@example.test',goal:'Organizar comidas'};
     const first=await rpc(nutriA,'create_patient_with_invite',[input]) as any;

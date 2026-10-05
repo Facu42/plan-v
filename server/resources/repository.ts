@@ -274,7 +274,8 @@ export async function toggleFavorite(
   if (!persistent) {
     const resource=kind==='resource'||kind==='article'?findResource(itemId):null;
     const canonicalItem=resource?.id??itemId;
-    const existing = getFavorite(patientId, kind, canonicalItem) ?? (resource ? getFavorite(patientId, kind, resource.slug) : undefined);
+    const existing = getFavorite(patientId, kind, canonicalItem)
+      ?? (resource && findResource(resource.slug)?.id === resource.id ? getFavorite(patientId, kind, resource.slug) : undefined);
     if (existing) {
       dropFavorite(existing.id);
       return memorySnapshot(patientId, false);

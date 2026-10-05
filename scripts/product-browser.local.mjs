@@ -55,9 +55,9 @@ async function login(actor,path='/') {
 }
 async function logout() {
   // El control de cuenta puede estar dentro de su menú original.
-  const ready=await B('js',"Array.from(document.querySelectorAll('button')).some(e=>/^(Cerrar sesión|Salir)$/.test(e.textContent.trim())&&e.getClientRects().length)");
-  if(!ready.includes('true')) await B('click','[aria-label="Abrir menú"], [aria-label="Abrir el menú"]');
-  await B('js',"Array.from(document.querySelectorAll('button')).find(e=>/^(Cerrar sesión|Salir)$/.test(e.textContent.trim())&&e.getClientRects().length).click()");await B('wait','input[placeholder="Email"]');
+  lastAction='cerrar sesión';
+  await until(`(()=>{const b=Array.from(document.querySelectorAll('button')).find(e=>/^(Cerrar sesión|Salir)$/.test(e.textContent.trim())&&!e.matches(':disabled')&&e.getClientRects().length);if(b){b.click();return true;}const menu=Array.from(document.querySelectorAll('[aria-label="Abrir menú"], [aria-label="Abrir el menú"]')).find(e=>!e.matches(':disabled')&&e.getClientRects().length&&e.getAttribute('aria-expanded')!=='true');if(menu)menu.click();return false;})()`);
+  await B('wait','input[placeholder="Email"]');
 }
 async function read(actor,path) {
   let response=await fetch(apiOrigin+path,{headers:{Authorization:'Bearer '+actor.token}});

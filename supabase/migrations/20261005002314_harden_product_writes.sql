@@ -283,7 +283,12 @@ begin
         'created_at', f.created_at
       ) order by f.created_at desc)
       from public.favorites f
-      left join public.resources fr on f.item_kind in ('resource','article') and (fr.slug=f.item_id or fr.id::text=f.item_id)
+      left join lateral (
+        select r.id from public.resources r
+        where f.item_kind in ('resource','article') and (r.id::text=f.item_id or r.slug=f.item_id)
+        order by (r.id::text=f.item_id) desc
+        limit 1
+      ) fr on true
       where f.patient_id = target_patient
         and (f.patient_id is not distinct from public.my_patient_id() or professional)
     ), '[]'::jsonb)
@@ -346,16 +351,24 @@ begin
     raise exception using errcode = '22023', message = 'favorite_kind';
   end if;
   if input_kind in ('resource','article') then
-    select * into rec from public.resources r where r.slug=canonical_item or r.id::text=canonical_item;
+    select * into rec from public.resources r
+    where r.id::text=canonical_item or r.slug=canonical_item
+    order by (r.id::text=canonical_item) desc limit 1;
     if not found then raise exception using errcode='42501',message='favorite_hidden'; end if;
     canonical_item := rec.id::text;
   end if;
   if exists (
     select 1 from public.favorites f
-    where f.patient_id = target_patient and f.item_kind = input_kind and f.item_id in (canonical_item,rec.slug)
+    where f.patient_id = target_patient and f.item_kind = input_kind
+      and (f.item_id=canonical_item or (f.item_id=rec.slug and not exists (
+        select 1 from public.resources r where r.id::text=rec.slug and r.id<>rec.id
+      )))
   ) then
     delete from public.favorites
-    where patient_id = target_patient and item_kind = input_kind and item_id in (canonical_item,rec.slug);
+    where patient_id = target_patient and item_kind = input_kind
+      and (item_id=canonical_item or (item_id=rec.slug and not exists (
+        select 1 from public.resources r where r.id::text=rec.slug and r.id<>rec.id
+      )));
     return public.get_patient_library(target_patient, '');
   end if;
 
