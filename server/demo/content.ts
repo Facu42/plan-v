@@ -1,5 +1,6 @@
 import { planReviewSnapshot } from '../../src/types/plans.js';
 import { randomUUID } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
 import { CONSENT_CATALOG, type ConsentPurpose } from '../intake/consent.js';
 import { SEEDED_EXERCISES } from '../../src/types/exercise.js';
 
@@ -36,11 +37,12 @@ function mondayOf(iso: string): string {
   return addDays(iso, -((weekday + 6) % 7));
 }
 
-type Recipe = { title: string; portions: number; steps: string[]; items: Array<{ name: string; quantity: number; unit: 'g' | 'ml' | 'u' | 'cdita' | 'cda' | 'taza' }> };
+type Recipe = { title: string; photo: string; portions: number; steps: string[]; items: Array<{ name: string; quantity: number; unit: 'g' | 'ml' | 'u' | 'cdita' | 'cda' | 'taza' }> };
 
 const RECIPES: Recipe[] = [
   {
     title: 'Bowl tibio de pollo y vegetales',
+    photo: 'receta-bowl-pollo.jpg',
     portions: 2,
     steps: ['Cortar el pollo en tiras y dorarlo a la plancha.', 'Saltear zapallo, zanahoria y brócoli 8 minutos.', 'Servir sobre arroz integral con semillas.'],
     items: [
@@ -53,6 +55,7 @@ const RECIPES: Recipe[] = [
   },
   {
     title: 'Yogur griego, granola y frutas',
+    photo: 'receta-yogur-granola.jpg',
     portions: 1,
     steps: ['Servir el yogur en un bowl.', 'Sumar la fruta cortada y la granola por encima.'],
     items: [
@@ -64,6 +67,7 @@ const RECIPES: Recipe[] = [
   },
   {
     title: 'Tortilla de espinaca al horno',
+    photo: 'receta-tortilla-espinaca.jpg',
     portions: 3,
     steps: ['Batir los huevos con la ricota.', 'Sumar la espinaca salteada y la cebolla.', 'Hornear 25 minutos a 180 °C.'],
     items: [
@@ -75,6 +79,7 @@ const RECIPES: Recipe[] = [
   },
   {
     title: 'Ensalada de lentejas y vegetales',
+    photo: 'receta-ensalada-lentejas.jpg',
     portions: 2,
     steps: ['Cocinar las lentejas 20 minutos y enfriar.', 'Mezclar con tomate, pepino y cebolla morada.', 'Condimentar con limón y aceite de oliva.'],
     items: [
@@ -86,6 +91,7 @@ const RECIPES: Recipe[] = [
   },
   {
     title: 'Merluza al horno con papas',
+    photo: 'receta-merluza-papas.jpg',
     portions: 2,
     steps: ['Cortar las papas en rodajas finas y hornear 15 minutos.', 'Sumar la merluza con limón y perejil.', 'Hornear 15 minutos más.'],
     items: [
@@ -108,6 +114,16 @@ const WEEK: Array<[string | number, string | number, string | number, string | n
   [1, 'Pastas con salsa de tomate y pollo', 'Fruta de estación', 2],
 ];
 const SLOTS = ['Desayuno', 'Almuerzo', 'Merienda', 'Cena'] as const;
+
+/** Foto ilustrativa del plato (hecha con IA), guardada junto a este archivo. Sin la foto, la receta queda sin portada. */
+async function demoPhoto(file: string): Promise<string | null> {
+  try {
+    const bytes = await readFile(new URL(`./fotos/${file}`, import.meta.url));
+    return `data:image/jpeg;base64,${bytes.toString('base64')}`;
+  } catch {
+    return null;
+  }
+}
 
 export type DemoTarget = {
   /** Paciente que recibe recetas, plan, medidas, comidas, hábitos y rutina. */
@@ -167,6 +183,8 @@ export async function seedDemoContent(fetcher: Fetcher, now = new Date(), target
     });
     if (!saved) continue;
     await call(`publicar ${recipe.title}`, `/api/recipes/${id}/publish`, 'POST', { expected_version: 1, expected_revision: saved.recipe.current.revision });
+    const photo = await demoPhoto(recipe.photo);
+    if (photo) await call(`foto ${recipe.title}`, `/api/recipes/${id}/cover/manual`, 'POST', { expected_version: 1, expected_cover_url: null, data_url: photo });
     await call(`asignar ${recipe.title}`, `/api/recipes/${id}/assign`, 'POST', { patient_id: MAIN, expected_version: 1 });
     recipeIds.push(id);
   }

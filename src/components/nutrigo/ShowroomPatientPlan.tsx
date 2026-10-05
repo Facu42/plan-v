@@ -6,6 +6,7 @@ import { plansApi } from '../../api/plans';
 import type { PatientMealPlan, PlanItemView } from '../../types/plans';
 import { CarePanel } from './CarePanel';
 import { PatientNutritionTarget } from './ShowroomNutritionTarget';
+import { useAssignedRecipes } from './RecipeCatalog';
 import { PlanPublishedItem } from './MealPlanVersions';
 import { mealSlotTone, NvBadge, NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
@@ -247,9 +248,9 @@ export function PlanWeekTable({ rows, columns, nav, label, renderCell }: {
   </div>;
 }
 
-export function PlanMealCell({ row, column, cell, dim, onOpen }: { row: PlanRow; column: PlanColumn; cell: PlanCell; dim?: boolean; onOpen: () => void }) {
+export function PlanMealCell({ row, column, cell, dim, cover, onOpen }: { row: PlanRow; column: PlanColumn; cell: PlanCell; dim?: boolean; cover?: string; onOpen: () => void }) {
   return <button type="button" className="pf-cell" data-tone={column.tone} data-dim={dim || undefined} data-source={cell.source} aria-label={`${row.day} · ${cell.slot}: ${cell.title}`} onClick={onOpen}>
-    <span className="pf-cell-image" aria-hidden="true" />
+    <span className="pf-cell-image" aria-hidden="true">{cover && <img src={cover} alt="" loading="lazy" />}</span>
     <span className="pf-cell-text"><span>{cell.title}</span></span>
   </button>;
 }
@@ -281,6 +282,12 @@ export function usePublishedPlan(patientId: string, loader: (patientId: string, 
   return { plan, error };
 }
 
+/** Foto de cada receta asignada, por id. Sólo la que la receta ya tiene: el plan nunca inventa una. */
+export function useRecipeCovers(patientId: string): Map<string, string> {
+  const { recipes } = useAssignedRecipes(patientId, false);
+  return useMemo(() => new Map(recipes.flatMap((recipe) => recipe.card?.cover_status === 'ready' && recipe.card.cover_url ? [[recipe.id, recipe.card.cover_url] as const] : [])), [recipes]);
+}
+
 const loadPatientPlan = async (patientId: string, signal: AbortSignal) => (await plansApi.published(patientId, signal)).plan;
 
 export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
@@ -291,6 +298,7 @@ export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
 }) {
   const nav = useWeekNav(now);
   const { plan, error } = usePublishedPlan(patient.id, loadPatientPlan);
+  const covers = useRecipeCovers(patient.id);
   const [search, setSearch] = useState(query);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [open, setOpen] = useState<{ row: PlanRow; cell: PlanCell } | null>(null);
@@ -318,7 +326,7 @@ export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
     <PlanWeekTable rows={table.rows} columns={columns} nav={nav} label="Plan semanal" renderCell={(row, column) => {
       const cell = row.cells[column.slot];
       if (!cell) return <div className="pf-cell pf-cell-empty" data-tone={column.tone}><span className="pf-cell-image" aria-hidden="true" /><span className="pf-cell-text"><span>Sin indicación</span></span></div>;
-      return <PlanMealCell row={row} column={column} cell={cell} dim={!matchesPlanSearch(cell, search)} onOpen={() => setOpen({ row, cell })} />;
+      return <PlanMealCell row={row} column={column} cell={cell} dim={!matchesPlanSearch(cell, search)} cover={cell.item?.recipe_id ? covers.get(cell.item.recipe_id) : undefined} onOpen={() => setOpen({ row, cell })} />;
     }} />
     {!hasAnyPlan && <p className="pf-note" role="status">Tu plan está en preparación. Cuando tu nutricionista publique comidas, las vas a encontrar acá organizadas por día.</p>}
     <details className="fp-plan-target"><summary>Mi información nutricional</summary><PatientNutritionTarget patientId={patient.id} /></details>
