@@ -2,7 +2,7 @@
 
 Continuación del PR #54 (rama codex/nutrigo-producto-mcp). Conserva las 24 fuentes originales del MCP, los recursos, el español y el logo oficial. El comparador estático no demuestra persistencia del producto.
 
-**Estado posterior a la aprobación:** PR #54 integrado; cinco migraciones aplicadas y web/API/worker comprobados en `83a93a8`. Portada manual HTTPS verificada. El registro actualizado de producción y el cierre del permiso de IA están en [publicación y comprobaciones](publicacion-producto-plan-v-2026-10-05.md). La evidencia de abajo corresponde al ensayo anterior a publicar.
+**Estado posterior a la aprobación:** PR #54 y #56 integrados; cinco migraciones aplicadas y web/API/worker comprobados en `6edd6fc`. Portada manual, permiso y una propuesta gratuita reales verificados. Se ajustan espera/formato de IA para cerrar receta nueva estimada y edición/publicación. El registro actualizado está en [publicación y comprobaciones](publicacion-producto-plan-v-2026-10-05.md). La evidencia de abajo corresponde al ensayo anterior a publicar.
 
 ## Correcciones comprobadas localmente
 

@@ -6,6 +6,7 @@ import { app } from '../index.js';
 import { calculateTarget, defaultsForGoal, type TargetInput } from '../../src/lib/nutrition-target.js';
 import { planReviewSnapshot, type PlanVersionView } from '../../src/types/plans.js';
 import { CONSENT_CATALOG } from '../intake/consent.js';
+import { createPostgresJobStore } from '../jobs/postgres.js';
 
 const enabled = process.env.PLANV_LOCAL_SIGNED_AUTH === '1';
 const INTERNAL = ['audit_events','notification_deliveries','notification_preferences','nutritionist_subscriptions','outbox_events','patient_invite_events','payment_webhook_events','platform_admins','platform_settings','privacy_access_events','privacy_export_packages','privacy_requests','processing_jobs','recipe_cover_requests','recipe_day_assignments','recipe_version_cards','service_payments'];
@@ -88,6 +89,30 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
   afterAll(async () => {
     // La eliminación de todos los datos/usuarios la hace el runner al quitar SU entorno.
     await pool?.end();
+  });
+
+  it('dos conexiones reales no reservan el mismo trabajo mientras la primera transacción sigue abierta', async () => {
+    const first = await pool.connect(); const second = await pool.connect();
+    const store = (client: pg.PoolClient) => createPostgresJobStore({
+      async query<T>(sql: string, params?: unknown[]) { return { rows: (await client.query(sql, params)).rows as T[] }; },
+    });
+    let id: string | undefined;
+    try {
+      id = (await store(first).enqueue({ kind: 'menu_draft', payload: {} })).id;
+      await first.query('begin'); await second.query('begin');
+      await second.query("set local statement_timeout='1s'");
+      const claimed = await store(first).lease('primero', new Date(), 120_000);
+      expect(claimed?.id).toBe(id);
+      // Sin SKIP LOCKED la segunda conexión espera y luego puede sobrescribir la reserva.
+      expect(await store(second).lease('segundo', new Date(), 120_000)).toBeNull();
+      await first.query('commit'); await second.query('commit');
+      const saved = await store(first).get(id);
+      expect(saved).toMatchObject({ status: 'leased', attempts: 1, lease_owner: 'primero' });
+    } finally {
+      await first.query('rollback'); await second.query('rollback');
+      if (id) await first.query('delete from public.processing_jobs where id=$1', [id]);
+      first.release(); second.release();
+    }
   });
 
   it('las cuatro sesiones son identidades distintas aceptadas por Auth y PostgreSQL', async () => {

@@ -42,4 +42,27 @@ describe('cola durable en memoria', () => {
     expect(done?.status).toBe('dead');
     expect(done?.last_error).toBe('purge_path');
   });
+
+  it('otro worker no ejecuta una alternativa mientras sigue activa a los 89 segundos', async () => {
+    let stamp = Date.parse('2026-10-05T12:00:00Z');
+    const store = createMemoryJobStore(() => new Date(stamp));
+    const job = await store.enqueue({ kind: 'menu_draft' });
+    let entered!: () => void;
+    let release!: () => void;
+    const running = new Promise<void>((resolve) => { entered = resolve; });
+    const finish = new Promise<void>((resolve) => { release = resolve; });
+    let calls = 0;
+    const handler = async () => { calls += 1; entered(); await finish; };
+    const first = runOne(store, 'primero', handler, new Date(stamp));
+    await running;
+    try {
+      stamp += 26_000;
+      expect(await runOne(store, 'segundo', handler, new Date(stamp))).toBeNull();
+      stamp += 63_000;
+      expect(await runOne(store, 'tercero', handler, new Date(stamp))).toBeNull();
+      expect(calls).toBe(1);
+      expect((await store.get(job.id))?.attempts).toBe(1);
+    } finally { release(); }
+    expect((await first)?.status).toBe('succeeded');
+  });
 });
