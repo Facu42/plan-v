@@ -1,6 +1,33 @@
 -- Cierre funcional: revisiones de contenido, títulos publicados y reintentos seguros.
 -- No recupera títulos históricos perdidos: inicializa las versiones con el título disponible.
 begin;
+-- El RPC anterior guardaba slugs. Convertirlos con esa semántica antes de aceptar IDs.
+-- La fase temporal evita choques de la clave única cuando un slug coincide con otro UUID.
+lock table public.favorites in share row exclusive mode;
+create temporary table product_favorite_ids on commit drop as
+select f.id, r.id::text as canonical_item,
+  row_number() over (partition by f.patient_id,f.item_kind,r.id order by f.created_at,f.id) as duplicate_rank
+from public.favorites f
+join lateral (
+  select res.id from public.resources res
+  where ((f.item_kind='resource' and res.kind='operational') or (f.item_kind='article' and res.kind='clinical'))
+    and (res.slug=f.item_id or res.id::text=f.item_id)
+  order by (res.slug=f.item_id) desc limit 1
+) r on true;
+delete from public.favorites f using product_favorite_ids m where f.id=m.id and m.duplicate_rank>1;
+do $$
+declare migration_prefix text;
+begin
+  loop
+    migration_prefix := 'm-'||replace(gen_random_uuid()::text,'-','')||'-';
+    exit when not exists(select 1 from public.favorites where item_id like migration_prefix||'%');
+  end loop;
+  update public.favorites f set item_id=migration_prefix||f.id::text
+    from product_favorite_ids m where f.id=m.id;
+  update public.favorites f set item_id=m.canonical_item
+    from product_favorite_ids m where f.id=m.id;
+end;
+$$;
 alter table public.recipe_versions add column revision uuid not null default gen_random_uuid();
 alter table public.meal_plan_versions add column revision uuid not null default gen_random_uuid();
 alter table public.recipe_versions add column title text;

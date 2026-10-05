@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { api, isAbortError } from '../../api/client';
+import { plansApi } from '../../api/plans';
 import { Icon, Mark } from '../shared/Icon';
 import { NvButton } from './primitives';
 import welcomeDish from '../../assets/onboarding/welcome-dish.webp';
@@ -75,6 +76,9 @@ export function ShowroomPatientOnboarding({
   const [recoverNeeded, setRecoverNeeded] = useState(false);
   const [awaitingReceipt, setAwaitingReceipt] = useState(false);
   const [reload, setReload] = useState(0);
+  const [hasPublishedPlan, setHasPublishedPlan] = useState<boolean | null>(null);
+  const [planError, setPlanError] = useState(false);
+  const [planReload, setPlanReload] = useState(0);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const sessionRef = useRef<IntakeSession | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
@@ -147,6 +151,21 @@ export function ShowroomPatientOnboarding({
   }, [patient.id, reload]);
 
   useEffect(() => { titleRef.current?.focus(); }, [step]);
+
+  // La consulta requiere el consentimiento del ingreso y sólo se hace al terminar.
+  // El menú antiguo de la ficha no indica si existe un plan fechado publicado.
+  useEffect(() => {
+    setHasPublishedPlan(null);
+    setPlanError(false);
+    if (step !== 'ready') return;
+    const controller = new AbortController();
+    plansApi.published(patient.id, controller.signal).then(result => {
+      if (!controller.signal.aborted) setHasPublishedPlan(result.plan !== null);
+    }).catch(error => {
+      if (!controller.signal.aborted && !isAbortError(error)) setPlanError(true);
+    });
+    return () => controller.abort();
+  }, [patient.id, step, planReload]);
 
   const showFailure = (error: unknown, session: IntakeSession) => {
     if (sessionRef.current !== session || isAbortError(error)) return;
@@ -393,10 +412,11 @@ export function ShowroomPatientOnboarding({
       {step === 'review' && <dl className="nvon-review">{onboardingReview(draft).map(row => <div key={row.title}><dt>{row.title}</dt><dd>{row.value}</dd></div>)}</dl>}
 
       {step === 'ready' && <ul className="nvon-points">
-        <li><Icon name="check" size={18} /><div><strong>Hola, {normalizePreferredName(draft.preferredName)}</strong><span>{context.hasPublishedPlan ? 'Ya tenés un plan de la semana para consultar.' : 'Cuando tu nutricionista publique el plan, aparece en tu inicio.'}</span></div></li>
+        <li><Icon name="check" size={18} /><div><strong>Hola, {normalizePreferredName(draft.preferredName)}</strong><span>{planError ? 'No pudimos consultar tu plan. Tu ficha enviada está guardada.' : hasPublishedPlan === null ? 'Consultando tu plan publicado…' : hasPublishedPlan ? 'Ya tenés un plan publicado para consultar.' : 'Cuando tu nutricionista publique el plan, aparece en tu inicio.'}</span></div></li>
         <li><Icon name="calendar" size={18} /><div><strong>{context.appointmentWhen ?? 'Consulta por coordinar'}</strong><span>Tu información ya está en el consultorio para su revisión.</span></div></li>
       </ul>}
       {step === 'ready' && <p className="nvon-help">Si querés cargar peso y medidas para el cálculo del plan, podés hacerlo después en Inicio. Es un formulario separado y opcional.</p>}
+      {step === 'ready' && planError && <div role="alert"><NvButton className="nv-soft" onClick={() => setPlanReload(value => value + 1)}>Reintentar consultar plan</NvButton></div>}
       </fieldset>
     </div>
 
@@ -405,7 +425,7 @@ export function ShowroomPatientOnboarding({
       {step === 'review' && <NvButton onClick={() => void submit()} disabled={!loaded || recoverNeeded || !canContinue || busy}>{submitting ? 'Enviando…' : awaitingReceipt ? 'Confirmar envío' : 'Enviar a mi nutricionista'}</NvButton>}
       {step === 'ready' && <NvButton className="nv-soft" disabled={disabled} onClick={() => void correctSubmitted()}>Corregir mi ficha enviada</NvButton>}
       {step === 'ready' && finished ? <>
-        <NvButton onClick={() => onFinished(context.hasPublishedPlan ? 'plan' : 'inicio', finished)}>{context.hasPublishedPlan ? 'Ver mi plan' : 'Ir al inicio'}</NvButton>
+        <NvButton disabled={hasPublishedPlan === null} onClick={() => onFinished(hasPublishedPlan ? 'plan' : 'inicio', finished)}>{hasPublishedPlan === null ? 'Consultando tu plan…' : hasPublishedPlan ? 'Ver mi plan' : 'Ir al inicio'}</NvButton>
       </> : step !== 'review' && step !== 'ready' ? <NvButton onClick={() => void goNext()} disabled={disabled || !canContinue}>{step === 'invite' ? 'Comenzar' : 'Continuar'}</NvButton> : null}
     </footer>
     </div>

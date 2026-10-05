@@ -31,7 +31,7 @@ async function identity(label) {
   const client=createClient(env.SUPABASE_URL,env.SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
   const signed=await client.auth.signInWithPassword({email,password});
   if(signed.error) throw Error('Sesión ficticia no iniciada');
-  const actor={id:created.data.user.id,email,client,token:signed.data.session.access_token};identities.push(actor);return actor;
+  const actor={id:created.data.user.id,email,password,client,token:signed.data.session.access_token};identities.push(actor);return actor;
 }
 async function B(...args) { if(args[0]!=='js')lastAction=args[0]+(['wait','fill','click','select','upload'].includes(args[0])?' '+args[1]:'');return (await run(browse,args,{env,timeout:45000,maxBuffer:2*1024*1024})).stdout.trim(); }
 async function until(expression) {
@@ -49,7 +49,7 @@ async function control(selector) {
 }
 async function login(actor,path='/') {
   await B('goto',origin+path);await B('wait','input[placeholder="Email"]');
-  await B('fill','input[placeholder="Email"]',actor.email);await B('fill','input[placeholder="Contraseña"]',password);
+  await B('fill','input[placeholder="Email"]',actor.email);await B('fill','input[placeholder="Contraseña"]',actor.password);
   await B('click','button.primary-button');
   await until('!document.querySelector("input[placeholder=Email]")');
 }
@@ -64,7 +64,7 @@ async function read(actor,path) {
   // Salir de la app revoca las sesiones del usuario, incluida la del lector de prueba.
   // Comprobar tras un nuevo ingreso exige una sesión nueva, sin eludir la revocación.
   if(response.status===401){
-    const signed=await actor.client.auth.signInWithPassword({email:actor.email,password});
+    const signed=await actor.client.auth.signInWithPassword({email:actor.email,password:actor.password});
     if(signed.error||!signed.data.session)throw Error('No se pudo renovar la sesión ficticia de lectura');
     actor.token=signed.data.session.access_token;
     response=await fetch(apiOrigin+path,{headers:{Authorization:'Bearer '+actor.token}});
@@ -211,9 +211,9 @@ try {
   await B('goto',recovery.data.properties.action_link);await until("document.body.innerText.includes('Elegí tu nueva contraseña')");
   password='Local-new-'+randomBytes(24).toString('base64url')+'-A1!';
   await field('Nueva contraseña',password);await field('Repetir contraseña',password);await button('Guardar y volver al ingreso');
-  await B('wait','input[placeholder="Email"]');await login(patient,'/app/plan');await reloadContains('Indicación publicada');
+  await B('wait','input[placeholder="Email"]');patient.password=password;await login(patient,'/app/plan');await reloadContains('Indicación publicada');
   check(true,'recuperación real de contraseña y nuevo ingreso conservan datos');
-  phase='corregir ficha enviada';await B('goto',origin+'/app/ficha');await button('Editar mi ficha inicial');await button('Corregir mi ficha enviada');await B('wait','.nvon-profile input');await field('¿Cómo preferís que te nombremos?','Prueba corregida');await button('Continuar');await B('wait','.nvon-health');await button('Continuar');await B('wait','.nvon-review');await button('Enviar a mi nutricionista');await readUntil(patient,`/api/patients/${pid}/intake`,r=>r.intake.status==='submitted'&&r.intake.payload.preferred_name==='Prueba corregida');await button('Ver mi plan');await reloadContains('Indicación publicada');check(true,'corrección de ficha enviada conserva consentimiento y plan publicado');
+  phase='corregir ficha enviada';await B('goto',origin+'/app/ficha');await button('Editar mi ficha inicial');await button('Corregir mi ficha enviada');await B('wait','.nvon-profile input');await field('¿Cómo preferís que te nombremos?','Prueba corregida');await button('Continuar');await B('wait','.nvon-health');await button('Continuar');await B('wait','.nvon-review');await button('Enviar a mi nutricionista');await readUntil(patient,`/api/patients/${pid}/intake`,r=>r.intake.status==='submitted'&&r.intake.payload.preferred_name==='Prueba corregida');await readUntil(professional,`/api/patients/${pid}/intake/professional`,r=>r.intake.status==='submitted'&&r.intake.payload.preferred_name==='Prueba corregida');await button('Ver mi plan');await reloadContains('Indicación publicada');check(true,'corrección de ficha enviada recibida por profesional conserva consentimiento y plan publicado');
   await writeFile('.gstack/product-browser-evidence.json',JSON.stringify({result:'passed',screenshots:false,provider:'disabled',checks:evidence},null,2));
 } catch (error) {
   console.error('Falló la comprobación del navegador en: '+phase+'; control: '+lastAction+'. No se imprimen cuentas, tokens ni contenido de sesión.');
