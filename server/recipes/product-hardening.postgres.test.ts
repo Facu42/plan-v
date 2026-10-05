@@ -94,6 +94,15 @@ describe('cierre funcional: revisiones, privacidad y reintentos persistentes', (
   const recipeDraft = { ...draft, title, expected_revision: null };
   const planId = randomUUID();
   const menu = { id: planId, expected_revision: null, period_start: '2026-10-04', period_end: '2026-10-04', timezone: 'America/Argentina/Buenos_Aires', items: [{ for_date: '2026-10-04', slot: 'Almuerzo', recipe_id: recipeId, recipe_version: 1, portions: 1, public_note: 'Indicación publicada' }] };
+  it('los favoritos editoriales aceptan ID y nombre interno, recuperan registros anteriores y no se duplican',async()=>{
+    const slug='leer-plan-semanal';const rid=(await db.query<{id:string}>('select id from public.resources where slug=$1',[slug])).rows[0].id;
+    const saved=await rpc(patientAUser,'toggle_favorite',[patientA,'resource',rid]) as any;expect(saved.favorites[0].item_id).toBe(rid);
+    expect((await rpc(patientAUser,'toggle_favorite',[patientA,'resource',slug]) as any).favorites).toEqual([]);
+    await db.query("insert into public.favorites(patient_id,nutritionist_id,item_kind,item_id,title) values($1,$2,'resource',$3,'Guía anterior')",[patientA,nutriAId,slug]);
+    expect((await rpc(patientAUser,'get_patient_library',[patientA]) as any).favorites[0].item_id).toBe(rid);
+    expect((await rpc(patientAUser,'toggle_favorite',[patientA,'resource',rid]) as any).favorites).toEqual([]);
+    await expect(rpc(patientBUser,'toggle_favorite',[patientA,'resource',rid])).rejects.toMatchObject({code:'42501'});
+  });
   it('reintentar un alta devuelve la misma ficha/invitación; otro contenido no sobrescribe y otro rol no crea',async()=>{
     const input={name:'Paciente de alta',email:'alta@example.test',goal:'Organizar comidas'};
     const first=await rpc(nutriA,'create_patient_with_invite',[input]) as any;

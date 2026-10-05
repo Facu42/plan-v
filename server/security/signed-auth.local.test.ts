@@ -420,6 +420,8 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     const assigned=await api(ownerB,'/api/resources/assign','POST',{resource_id:resource.slug,patient_ids:[pidB]});expect(assigned.status).toBe(200);const result=await assigned.json();
     expect(result.assigned_count).toBe(1);expect(result.patients).toHaveLength(1);expect(result.patients[0].resource_assignments.some((r:{resource_id:string})=>r.resource_id===resource.slug)).toBe(true);
     const reread=await api(patientB,`/api/patients/${pidB}/library`);expect(reread.status).toBe(200);expect((await reread.json()).library.assignments.some((r:{slug:string})=>r.slug===resource.slug)).toBe(true);
+    const saved=await api(patientB,`/api/patients/${pidB}/favorites`,'POST',{item_kind:'resource',item_id:resource.id});expect(saved.status).toBe(200);expect((await saved.json()).library.favorites.some((r:{item_id:string})=>r.item_id===resource.id)).toBe(true);
+    const removed=await api(patientB,`/api/patients/${pidB}/favorites`,'POST',{item_kind:'resource',item_id:resource.slug});expect(removed.status).toBe(200);expect((await removed.json()).library.favorites.some((r:{item_id:string})=>r.item_id===resource.id)).toBe(false);
   });
 });
 

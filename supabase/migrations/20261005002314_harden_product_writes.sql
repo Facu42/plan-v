@@ -278,11 +278,12 @@ begin
         'id', f.id,
         'patient_id', f.patient_id,
         'item_kind', f.item_kind,
-        'item_id', f.item_id,
+        'item_id', coalesce(fr.id::text, f.item_id),
         'title', f.title,
         'created_at', f.created_at
       ) order by f.created_at desc)
       from public.favorites f
+      left join public.resources fr on f.item_kind in ('resource','article') and (fr.slug=f.item_id or fr.id::text=f.item_id)
       where f.patient_id = target_patient
         and (f.patient_id is not distinct from public.my_patient_id() or professional)
     ), '[]'::jsonb)
@@ -332,6 +333,7 @@ declare
   nid uuid;
   title text;
   rec public.resources%rowtype;
+  canonical_item text := btrim(input_item);
 begin
   if target_patient is distinct from public.my_patient_id() then
     raise exception using errcode = '42501', message = 'favorite_patient_only';
@@ -343,18 +345,22 @@ begin
   if input_kind not in ('resource', 'article', 'recipe') then
     raise exception using errcode = '22023', message = 'favorite_kind';
   end if;
+  if input_kind in ('resource','article') then
+    select * into rec from public.resources r where r.slug=canonical_item or r.id::text=canonical_item;
+    if not found then raise exception using errcode='42501',message='favorite_hidden'; end if;
+    canonical_item := rec.id::text;
+  end if;
   if exists (
     select 1 from public.favorites f
-    where f.patient_id = target_patient and f.item_kind = input_kind and f.item_id = btrim(input_item)
+    where f.patient_id = target_patient and f.item_kind = input_kind and f.item_id in (canonical_item,rec.slug)
   ) then
     delete from public.favorites
-    where patient_id = target_patient and item_kind = input_kind and item_id = btrim(input_item);
+    where patient_id = target_patient and item_kind = input_kind and item_id in (canonical_item,rec.slug);
     return public.get_patient_library(target_patient, '');
   end if;
 
   if input_kind in ('resource', 'article') then
-    select * into rec from public.resources r where r.slug = btrim(input_item);
-    if not found or not public.patient_can_see_resource(rec, target_patient) then
+    if not public.patient_can_see_resource(rec, target_patient) then
       raise exception using errcode = '42501', message = 'favorite_hidden';
     end if;
     if (input_kind = 'article' and rec.kind is distinct from 'clinical')
@@ -374,7 +380,7 @@ begin
   end if;
 
   insert into public.favorites (patient_id, nutritionist_id, item_kind, item_id, title)
-  values (target_patient, nid, input_kind, btrim(input_item), title);
+  values (target_patient, nid, input_kind, canonical_item, title);
   return public.get_patient_library(target_patient, '');
 end;
 $$;

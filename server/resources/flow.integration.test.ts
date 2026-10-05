@@ -59,7 +59,7 @@ describe('PV-36 recursos editoriales y favoritos unificados', () => {
     const savedGuide = await post(`/api/patients/${patient}/favorites`, { item_kind: 'resource', item_id: 'leer-plan-semanal' });
     expect(savedGuide.status).toBe(200);
     const guideBody = await savedGuide.json() as { library: PatientLibraryView };
-    expect(guideBody.library.favorites[0]).toMatchObject({ item_kind: 'resource', item_id: 'leer-plan-semanal' });
+    expect(guideBody.library.favorites[0]).toMatchObject({ item_kind: 'resource', item_id: guideBody.library.resources.find((r:{slug:string})=>r.slug==='leer-plan-semanal').id });
 
     const savedArticle = await post(`/api/patients/${patient}/favorites`, { item_kind: 'article', item_id: 'hidratacion-cotidiana' });
     expect(savedArticle.status).toBe(200);
@@ -92,7 +92,7 @@ describe('PV-36 recursos editoriales y favoritos unificados', () => {
     expect((await post(`/api/patients/${patient}/favorites`, { item_kind: 'plan_b', item_id: patient })).status).toBe(400);
     expect((await post(`/api/patients/${other}/favorites`, { item_kind: 'resource', item_id: 'leer-plan-semanal' })).status).toBe(200);
     expect((await library(other)).body.library.favorites).toHaveLength(1);
-    expect((await library()).body.library.favorites.some((row) => row.item_id === 'leer-plan-semanal')).toBe(true);
+    expect((await library()).body.library.favorites.some((row) => row.item_id === guideBody.library.favorites[0].item_id)).toBe(true);
   });
 
   it('no publica un borrador clínico hasta la revisión explícita', async () => {

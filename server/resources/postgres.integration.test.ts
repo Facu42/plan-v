@@ -97,7 +97,7 @@ describe('PV-36 recursos en PostgreSQL descartable', () => {
     await expect(asUser(nutriB, 'select public.assign_editorial_resource($1,$2::uuid[])', ['hidratacion-cotidiana', [patientA]])).rejects.toMatchObject({ code: '42501' });
 
     const favored = await rpc(patientAUser, 'toggle_favorite', [patientA, 'article', 'hidratacion-cotidiana']) as PatientLibraryView;
-    expect(favored.favorites[0].item_id).toBe('hidratacion-cotidiana');
+    expect(favored.favorites[0].item_id).toBe(after.articles[0].id);
     await expect(rpc(patientAUser, 'toggle_favorite', [patientA, 'article', 'comidas-fuera-de-casa'])).rejects.toMatchObject({ code: '42501' });
     await expect(rpc(patientAUser, 'toggle_favorite', [patientA, 'plan_b', patientA])).rejects.toMatchObject({ code: '22023' });
 
