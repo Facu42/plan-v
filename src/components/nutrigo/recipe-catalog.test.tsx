@@ -1,7 +1,8 @@
+import { buildRecipeCard } from '../../types/recipe-plate';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import type { PatientRecipe } from '../../types/recipes';
-import { AssignedRecipes, AssignedRecipesView, RecipeCatalog, recipeEditorFromAi } from './RecipeCatalog';
+import type { PatientRecipe, ProfessionalRecipe } from '../../types/recipes';
+import { AssignedRecipes, AssignedRecipesView, RecipeCatalog, recipeEditorFromAi, recipeEditorFromStored } from './RecipeCatalog';
 
 const assigned: PatientRecipe = {
   id: 'r1',
@@ -16,6 +17,13 @@ const assigned: PatientRecipe = {
 };
 
 describe('Catálogo profesional y recetas asignadas', () => {
+  it('reabrir y editar título/pasos conserva las calorías declaradas por porción',()=>{
+    const recipe = {id:'11111111-1111-4111-8111-111111111111',title:'Bowl',current:{revision:'22222222-2222-4222-8222-222222222222',yield_portions:2,steps:['Cocinar.'],nutrient_source:'Tabla declarada',ingredients:[{id:'i1',name:'Arroz',quantity:100,unit:'g'}],card:{category:'Almuerzo',prep_minutes:20,macros:{kcal:200,protein_g:10,carbs_g:35,fat_g:3}}}} as ProfessionalRecipe;
+    const editor=recipeEditorFromStored(recipe);
+    expect(editor.expected_revision).toBe(recipe.current.revision);
+    expect(buildRecipeCard({...editor,title:'Nuevo título',steps:['Cocinar y servir.']}).macros).toEqual(recipe.current.card!.macros);
+    expect(editor.nutrient_source).toBe('Tabla declarada');
+  });
   it('la edición asistida conserva la receta aplicada y su procedencia', () => {
     const payload = { id: '11111111-1111-4111-8111-111111111111', title: 'Bowl', yield_portions: 1,
       steps: ['Cocinar.'], nutrient_source: 'propuesta_ia.v1', items: [{ name: 'Arroz', quantity: 80, unit: 'g' }] };

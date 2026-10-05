@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { CONSENT_CATALOG } from '../intake/consent.js';
 import { planReviewSnapshot } from '../../src/types/plans.js';
+import { mealLogColumns } from '../db/columns.js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
 import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
@@ -182,6 +183,43 @@ describe('cierre funcional: revisiones, privacidad y reintentos persistentes', (
     const current=await rpc(nutriA,'list_professional_meal_plan',[patientA]) as any;
     await rpc(nutriA,'save_meal_plan_draft',[patientA,{...menu,expected_revision:current.current.revision}]);
     await expect(rpc(nutriA,'apply_ai_job',[queued.id])).rejects.toMatchObject({code:'PT409'});
+  });
+  it('registrar una receta estimada conserva procedencia al revisar y releer',async()=>{
+    const rid=randomUUID();const per_portion={kcal:300,protein_g:20,carbs_g:35,fat_g:8};
+    const created=await rpc(nutriA,'save_recipe_draft',[{...recipeDraft,id:rid,title:'Receta estimada',nutrition:{origin:'ai_estimate',source:'estimacion_ia.v2',per_portion},card:{category:'Almuerzo',prep_minutes:null,macro_status:'declared',macros:per_portion,cover_status:'none',cover_alt:'Receta estimada',cover_url:null}}]) as any;
+    await rpc(nutriA,'publish_recipe',[rid,1,created.current.revision]);
+    const day=await rpc(nutriA,'assign_recipe_day',[{recipe_id:rid,patient_id:patientA,expected_version:1,for_date:'2026-10-05',slot:'Almuerzo'}]) as any;
+    expect(day.nutrition.origin).toBe('ai_estimate');
+    const registered=await rpc(patientAUser,'register_recipe_day',[{patient_id:patientA,assignment_id:day.id,client_id:randomUUID()}]) as any;
+    await rpc(nutriA,'review_meal_log',[{meal_id:registered.assignment.registered_meal_id,status:'confirmed'}]);
+    const stored=(await db.query<{nutrition_origin:string;note_for_nutri:string}>('select nutrition_origin,note_for_nutri from public.meal_logs where id=$1',[registered.assignment.registered_meal_id])).rows[0];
+    expect(stored.nutrition_origin).toBe('ai_estimate');expect(stored.note_for_nutri).toContain('estimados por IA');expect(stored.note_for_nutri).not.toContain('no estimados');
+    const mid=registered.assignment.registered_meal_id;
+    expect((await asUser(patientAUser,`select ${mealLogColumns.patient} from public.meal_logs_patient_view where id=$1`,[mid]))[0]).toMatchObject({nutrition_origin:'ai_estimate'});
+    expect((await asUser(nutriA,`select ${mealLogColumns.professional} from public.meal_logs where id=$1`,[mid]))[0]).toMatchObject({nutrition_origin:'ai_estimate'});
+    await expect(asUser(nutriA,"update public.meal_logs set nutrition_origin='declared' where id=$1",[mid])).rejects.toMatchObject({code:'42501'});
+    await expect(asUser(patientAUser,"insert into public.meal_logs(patient_id,slot_label,description,nutrition_origin) values($1,'Almuerzo','Inventada','declared')",[patientA])).rejects.toMatchObject({code:'42501'});
+    expect((await rpc(patientAUser,'list_recipe_days',[patientA,'2026-10-05']) as any[])[0].nutrition.origin).toBe('ai_estimate');
+  });
+  it.each(['confirmed','pending_review'] as const)('un análisis tardío no inventa procedencia sobre un registro %s ya analizado',async(status)=>{
+    const mid=randomUUID();const macros={kcal:200,protein_g:10,carbs_g:35,fat_g:3};
+    await db.query("insert into public.meal_logs(id,patient_id,slot_label,description,status,analysis_status,macros,note_for_nutri) values($1,$2,'Almuerzo','Histórica',$3,'succeeded',$4,'Nota privada histórica')",[mid,patientA,status,macros]);
+    for(const resultStatus of ['failed','succeeded']) {
+      const result=await rpc(patientAUser,'record_meal_analysis',[{meal_id:mid,status:resultStatus,foods:[],macros:resultStatus==='succeeded'?macros:null,confidence:0}]) as any;
+      expect(result.nutrition_origin).toBeNull();expect(result).not.toHaveProperty('note_for_nutri');
+      expect((await db.query<{nutrition_origin:null}>('select nutrition_origin from public.meal_logs where id=$1',[mid])).rows[0].nutrition_origin).toBeNull();
+    }
+  });
+  it('los RPC repetidos de diario no revelan una nota profesional y un nuevo análisis aceptado conserva su procedencia',async()=>{
+    const payload={patient_id:patientA,client_id:randomUUID(),slot:'Almuerzo',description:'Comida de prueba'};
+    const saved=await rpc(patientAUser,'save_meal_log',[payload]) as any;
+    const analyzed=await rpc(patientAUser,'record_meal_analysis',[{meal_id:saved.log.id,status:'succeeded',foods:[],macros:{kcal:200,protein_g:10,carbs_g:35,fat_g:3},confidence:0.5,note_for_nutri:'Estimación privada'}]) as any;
+    expect(analyzed.nutrition_origin).toBe('ai_estimate');expect(analyzed).not.toHaveProperty('note_for_nutri');
+    await rpc(nutriA,'review_meal_log',[{meal_id:saved.log.id,status:'confirmed'}]);
+    const duplicate=await rpc(patientAUser,'save_meal_log',[payload]) as any;
+    expect(duplicate.duplicate).toBe(true);expect(duplicate.log).not.toHaveProperty('note_for_nutri');expect(duplicate.log.nutrition_origin).toBe('ai_estimate');
+    const reread=await rpc(nutriA,'record_meal_analysis',[{meal_id:saved.log.id,status:'failed',foods:[],macros:null,confidence:0}]) as any;
+    expect(reread.note_for_nutri).toBe('Estimación privada');expect(reread.nutrition_origin).toBe('ai_estimate');
   });
   it('lo publicado y los registros sobreviven al cierre y reapertura de la base',async()=>{
     await db.close();db=new PGlite(dir);

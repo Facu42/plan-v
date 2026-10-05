@@ -840,6 +840,7 @@ describe('patient audience queries', () => {
     expect(String(patientsSelect?.payload)).not.toContain('*');
     const mealSelect = harness.calls.find((call) => call.table === 'meal_logs_patient_view' && call.op === 'select');
     expect(String(mealSelect?.payload)).not.toContain('note_for_nutri');
+    expect(String(mealSelect?.payload)).toContain('nutrition_origin');
     expect(harness.calls.some((call) => call.table === 'ai_briefs')).toBe(false);
   });
 });

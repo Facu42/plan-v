@@ -11,14 +11,17 @@ Continuación del PR #54 (rama codex/nutrigo-producto-mcp). Conserva las 24 fuen
 - Se cerraron escrituras directas que permitían eludir las comprobaciones de recetas/planes. La ficha visual y los ingredientes se guardan dentro de la misma transacción del borrador; la publicación antigua sin copia revisada ya no se ofrece a clientes.
 - El botón principal del CRM abre el editor fechado que consume la paciente. Mantiene la paciente elegida. Mi ficha funciona como destino propio; el peso respeta su unidad y progreso se actualiza al registrar medidas. Hidratación usa el mismo máximo que el servidor.
 - Recuperación de contraseña cuenta con pantalla para el enlace real de Auth, validación, guardado, salida y nuevo ingreso. Se corrigió una carrera al cargar la sesión inicial.
+- Editar el título o los pasos de una receta manual conserva sus calorías declaradas. La ficha profesional incorpora el cálculo y la confirmación de la meta; el diario permite registrar las recetas asignadas por fecha.
+- La procedencia de nutrientes estimados se conserva en las nuevas lecturas de ambos roles y al revisar una comida. No se inventa el origen de registros históricos ni se permite cambiarlo mediante escritura directa. Los RPC del diario y los reintentos tampoco devuelven notas profesionales a la paciente.
+- Compras y mensajes liberan las correcciones después de un rechazo definitivo; ante una respuesta incierta reutilizan la misma operación y el adjunto ya subido.
 
 ## Evidencia y límites actuales
 
-Suite general: **1329 aprobadas, dos omitidas por configuración**, 235 archivos. TypeScript, build, controles de migraciones y secretos aprobados. Hay regresiones SQL sobre toda la cadena de migraciones y reapertura de una base temporal; esto no equivale a concurrencia en PostgreSQL con conexiones independientes.
+Suite general: **1345 aprobadas, dos omitidas por configuración**, 236 archivos. TypeScript, build, controles de migraciones y secretos aprobados. Hay regresiones SQL sobre toda la cadena de migraciones y reapertura de una base temporal; esto no equivale a concurrencia en PostgreSQL con conexiones independientes.
 
 El CI existente se amplía con un recorrido en gstack, sin capturas y con Auth/PostgREST/Supabase temporales, escritorio 1440 y celular 390. El guion todavía debe ejecutarse con éxito antes de atribuirle evidencia. Docker de esta PC no dispone de un daemon operativo; se usa el runner temporal existente, sin crear proyectos hospedados ni ampliar Supabase.
 
-Las revisiones independientes code-reviewer y reality-checker reprodujeron los defectos anteriores. Sus verificaciones finales están en curso. No se declara terminado el producto sólo porque compila.
+Las revisiones independientes code-reviewer y reality-checker reprodujeron los defectos anteriores. El revisor de contratos revalidó por separado la persistencia de calorías y los cuatro cierres de procedencia/permisos/privacidad. El primer CI pasó las **20 pruebas con sesiones firmadas**, pero su navegador no inició la API por una configuración temporal faltante; el guion corregido debe volver a pasar. No se declara terminado el producto sólo porque compila.
 
 **Todavía pendientes de cierre:** resultado del recorrido de navegador en la base temporal, prueba real gratuita de texto, aprobación concreta de producción y recorrido final con las cuentas ficticias publicadas. La clave del proveedor existente sólo se devuelve como nombre por el conector; no se copian secretos ni se activa un proveedor pago. Las fotos IA continúan pendientes; las fotos manuales permanecen disponibles.
 

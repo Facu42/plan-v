@@ -539,6 +539,7 @@ export function readPublishedMemory(nutritionistId: string, recipeId: string, ex
     title: version.title,
     version: version.version,
     versionId: version.id,
+    nutrition: resolveRecipeNutrition(version.nutrition, getRecipeCard(version.id,version.title).macros, version.nutrient_source) ?? undefined,
     yield_portions: version.yield_portions,
     ingredients: versionItems(version.id),
     card: getRecipeCard(version.id, version.title),

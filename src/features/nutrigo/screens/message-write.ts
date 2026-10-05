@@ -1,3 +1,4 @@
+import { writeWasRejected } from '../../../api/write-outcome';
 import { sendShowroomMessage } from '../../../components/nutrigo/message-send';
 import { createPendingWrite } from './pending-write';
 import { assertChatFilename } from '../../../api/chat-file';
@@ -12,5 +13,5 @@ export function createMessageWrite(patientId: string, services: Services) {
     if (input.uploaded) assertChatFilename(input.uploaded.filename);
     input.messageStarted = true;
     return sendShowroomMessage({ patientId, role: 'patient', text: input.text, client_id: input.client_id, asset_id: input.uploaded?.asset_id, filename: input.uploaded?.filename }, services);
-  }, (_error, input) => input.messageStarted === true);
+  }, (error, input) => input.messageStarted === true && !writeWasRejected(error));
 }

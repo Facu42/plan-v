@@ -77,6 +77,7 @@ export type Macros = {
 export type MealAnalysisStatus = 'pending' | 'succeeded' | 'failed';
 
 export type MealLog = {
+  nutrition_origin?: 'declared' | 'ai_estimate';
   id: string;
   patient_id: string;
   slot: string;

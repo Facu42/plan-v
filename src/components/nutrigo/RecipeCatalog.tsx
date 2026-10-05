@@ -21,7 +21,7 @@ function emptyDraft(id = crypto.randomUUID()): RecipeWizardInput {
   };
 }
 
-function fromRecipe(recipe: ProfessionalRecipe): RecipeWizardInput {
+export function recipeEditorFromStored(recipe: ProfessionalRecipe): RecipeWizardInput {
   return {
     id: recipe.id,
     expected_revision: recipe.current.revision ?? null,
@@ -32,6 +32,7 @@ function fromRecipe(recipe: ProfessionalRecipe): RecipeWizardInput {
     ...(recipe.current.nutrition ? { nutrition: recipe.current.nutrition } : {}),
     category: (PLAN_SLOTS as readonly string[]).includes(recipe.current.card?.category ?? '') ? recipe.current.card!.category as PlanSlot : 'Almuerzo',
     prep_minutes: recipe.current.card?.prep_minutes ?? null,
+    kcal: recipe.current.card?.macros?.kcal ?? null,
     protein_g: recipe.current.card?.macros?.protein_g ?? null,
     carbs_g: recipe.current.card?.macros?.carbs_g ?? null,
     fat_g: recipe.current.card?.macros?.fat_g ?? null,
@@ -104,7 +105,7 @@ export function useRecipeCatalog(patientId: string) {
       setError('Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
       return;
     }
-    void run(async () => { const saved = await recipesApi.save(parsed.data); setEditing(fromRecipe(saved.recipe)); }, 'Borrador guardado en el catálogo.');
+    void run(async () => { const saved = await recipesApi.save(parsed.data); setEditing(recipeEditorFromStored(saved.recipe)); }, 'Borrador guardado en el catálogo.');
   }
 
   function quickAiDraft() {
@@ -125,7 +126,7 @@ export function useRecipeCatalog(patientId: string) {
       await aiJobsApi.apply(created.job.id);
       const saved = (await recipesApi.list()).recipes.find(recipe => recipe.id === created.job.artifact!.payload.id);
       if (!saved) throw new Error('La receta quedó guardada, pero falta confirmar su lectura. Recargá el catálogo.');
-      setEditing(fromRecipe(saved));
+      setEditing(recipeEditorFromStored(saved));
       setPath('manual');
     }, 'Propuesta lista para revisar. Los nutrientes son estimaciones de IA; la foto puede subirse manualmente.');
   }
@@ -133,12 +134,12 @@ export function useRecipeCatalog(patientId: string) {
   return {
     patientId, recipes, source, imageGeneration, error, status, busy, editing, path, description, assigning, day, slot,
     setEditing, setPath, setDescription, setDay, setSlot, reload, run, submit, submitAi, quickAiDraft,
-    recoverEditing: () => void run(async () => { const saved = (await recipesApi.list()).recipes.find(recipe => recipe.id === editing?.id); if (saved) setEditing(fromRecipe(saved)); }, 'Versión guardada recuperada. Revisala antes de continuar.'),
+    recoverEditing: () => void run(async () => { const saved = (await recipesApi.list()).recipes.find(recipe => recipe.id === editing?.id); if (saved) setEditing(recipeEditorFromStored(saved)); }, 'Versión guardada recuperada. Revisala antes de continuar.'),
     startNew: () => { setPath('choose'); setEditing(null); setStatus(''); setError(''); },
     chooseManual: () => { setPath('manual'); setEditing(emptyDraft()); },
     chooseAi: () => { setPath('ai'); setEditing(null); },
     closeEditor: () => { setEditing(null); setPath(null); },
-    startEdit: (recipe: ProfessionalRecipe) => { setEditing(fromRecipe(recipe)); setPath('manual'); setStatus(''); setError(''); },
+    startEdit: (recipe: ProfessionalRecipe) => { setEditing(recipeEditorFromStored(recipe)); setPath('manual'); setStatus(''); setError(''); },
     publish: (recipe: ProfessionalRecipe) => void run(() => recipesApi.publish(recipe.id, recipe.current.version, recipe.current.revision), 'Revisión publicada. El paciente la ve cuando la asignás.'),
     retryCover: (recipe: ProfessionalRecipe) => void run(async () => {
       if (!recipe.published) return;
@@ -236,6 +237,8 @@ export function RecipeEditorForm({ catalog }: { catalog: RecipeCatalogState }) {
       <button type="button" className="recipe-add" onClick={() => setEditing({ ...editing, items: [...editing.items, { name: '', quantity: 1, unit: 'g' }] })}>Agregar ingrediente</button>
     </fieldset>
     {!editing.nutrition && <div className="recipe-form-row">
+      <p>Valores por porción. Si cambiás ingredientes, cantidades o rinde, revisá y corregí estos nutrientes antes de guardar.</p>
+      <label>KCAL<input type="number" min={0} max={20000} step="0.1" value={editing.kcal ?? ''} onChange={(event) => setEditing({ ...editing, kcal: event.target.value === '' ? null : Number(event.target.value) })} /></label>
       <label>PROT g<input type="number" min={0} step="0.1" value={editing.protein_g ?? ''} onChange={(event) => setEditing({ ...editing, protein_g: event.target.value === '' ? null : Number(event.target.value) })} /></label>
       <label>CARBS g<input type="number" min={0} step="0.1" value={editing.carbs_g ?? ''} onChange={(event) => setEditing({ ...editing, carbs_g: event.target.value === '' ? null : Number(event.target.value) })} /></label>
       <label>GRASAS g<input type="number" min={0} step="0.1" value={editing.fat_g ?? ''} onChange={(event) => setEditing({ ...editing, fat_g: event.target.value === '' ? null : Number(event.target.value) })} /></label>

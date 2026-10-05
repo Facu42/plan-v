@@ -206,6 +206,7 @@ function mapMealLog(row: Record<string, unknown>): MealLog {
     foods: row.foods as MealLog['foods'],
     macros: row.macros as MealLog['macros'],
     confidence: Number(row.confidence),
+    ...(row.nutrition_origin === 'declared' || row.nutrition_origin === 'ai_estimate' ? {nutrition_origin:row.nutrition_origin} : {}),
     note_for_nutri: (row.note_for_nutri as string) ?? '',
     status: row.status as MealLog['status'],
     logged_at: row.logged_at as string,

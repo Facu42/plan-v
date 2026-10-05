@@ -127,6 +127,7 @@ returns jsonb language sql stable security definer set search_path = '' as $$
     'recipe_version', v.version,
     'title', v.title,
     'yield_portions', v.yield_portions,
+    'nutrition',coalesce(v.nutrition,case when v.nutrient_source<>'' and jsonb_typeof(public.recipe_card_json(v.id)->'macros'->'kcal')='number' and jsonb_typeof(public.recipe_card_json(v.id)->'macros'->'protein_g')='number' and jsonb_typeof(public.recipe_card_json(v.id)->'macros'->'carbs_g')='number' and jsonb_typeof(public.recipe_card_json(v.id)->'macros'->'fat_g')='number' then jsonb_build_object('origin','declared','source',v.nutrient_source,'per_portion',public.recipe_card_json(v.id)->'macros') end),
     'ingredients', public.recipe_version_json(v.id)->'ingredients',
     'card', coalesce(public.recipe_card_json(v.id), jsonb_build_object(
       'category', d.slot,
@@ -397,6 +398,46 @@ returns text language sql stable set search_path='' as $$
     from public.meal_plan_items where meal_plan_version_id=target_version),'');
 $$;
 
+-- Procedencia pública de nutrientes; no se inventa para registros históricos.
+alter table public.meal_logs add column nutrition_origin text check(nutrition_origin in ('declared','ai_estimate'));
+create or replace view public.meal_logs_patient_view as
+  select id,patient_id,meal_slot_id,slot_label,photo_path,description,foods,macros,confidence,status,logged_at,analysis_status,nutrition_origin
+  from public.meal_logs where patient_id=public.my_patient_id() and public.patient_has_full_access(public.my_patient_id());
+-- Conserva las escrituras heredadas sujetas a RLS, sin permitir declarar o borrar la procedencia.
+revoke insert,update on public.meal_logs from authenticated;
+grant insert(id,patient_id,meal_slot_id,slot_label,photo_path,description,foods,macros,confidence,note_for_nutri,status,logged_at,client_id,analysis_status),
+  update(id,patient_id,meal_slot_id,slot_label,photo_path,description,foods,macros,confidence,note_for_nutri,status,logged_at,client_id,analysis_status)
+  on public.meal_logs to authenticated;
+alter function public.meal_log_json(uuid) rename to meal_log_json_pre_product;
+create function public.meal_log_json(lid uuid) returns jsonb language sql stable security definer set search_path='' as $$
+  select (case when public.is_assigned_patient(l.patient_id) then public.meal_log_json_pre_product(lid)
+    else public.meal_log_json_pre_product(lid)-'note_for_nutri' end)||jsonb_build_object('nutrition_origin',l.nutrition_origin)
+  from public.meal_logs l where l.id=lid;
+$$;
+revoke all on function public.meal_log_json_pre_product(uuid),public.meal_log_json(uuid) from public,anon,authenticated;
+alter function public.record_meal_analysis(jsonb) rename to record_meal_analysis_pre_product;
+create function public.record_meal_analysis(payload jsonb) returns jsonb language plpgsql security definer set search_path='' as $$
+declare result jsonb; lid uuid; existing public.meal_logs; accepted boolean;
+begin
+  begin lid:=(payload->>'meal_id')::uuid;
+  exception when invalid_text_representation then raise exception using errcode='22023',message='diary_invalid'; end;
+  if lid is null then raise exception using errcode='22023',message='diary_invalid'; end if;
+  select * into existing from public.meal_logs where id=lid;
+  if not found then raise exception using errcode='PT404',message='meal_missing'; end if;
+  perform public.diary_assert_access(existing.patient_id,false);
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(lid::text,0));
+  select * into existing from public.meal_logs where id=lid;
+  accepted:=existing.status='pending_review' and existing.analysis_status is distinct from 'succeeded' and payload->>'status'='succeeded';
+  result:=public.record_meal_analysis_pre_product(payload);
+  if accepted then
+    update public.meal_logs set nutrition_origin='ai_estimate' where id=lid and nutrition_origin is null and analysis_status='succeeded' and macros is not null;
+  end if;
+  return public.meal_log_json(lid);
+end; $$;
+revoke all on function public.record_meal_analysis_pre_product(jsonb) from public,anon,authenticated;
+revoke all on function public.record_meal_analysis(jsonb) from public,anon;
+grant execute on function public.record_meal_analysis(jsonb) to authenticated;
+
 create or replace function public.register_recipe_day(payload jsonb)
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare
@@ -467,12 +508,14 @@ begin
     'status', case when macros is null then 'failed' else 'succeeded' end,
     'foods', foods,
     'macros', macros,
-    'confidence', case when macros is null then 0 else 1 end,
+    'confidence', case when macros is null then 0 when (select nutrition->>'origin' from public.recipe_versions where id=asg.recipe_version_id)='ai_estimate' then 0.5 else 1 end,
     'note_for_nutri', case when macros is null
       then 'Registrada desde la receta asignada. Sin macros declarados.'
+      when (select nutrition->>'origin' from public.recipe_versions where id=asg.recipe_version_id)='ai_estimate' then 'Registrada desde la receta asignada. Nutrientes estimados por IA y revisados por la nutricionista.'
       else 'Registrada desde la receta asignada. Macros declarados por la nutricionista, no estimados por IA.' end,
     'error_code', case when macros is null then 'macros_unavailable' else null end
   ));
+  update public.meal_logs m set nutrition_origin=case when (select nutrition->>'origin' from public.recipe_versions where id=asg.recipe_version_id)='ai_estimate' then 'ai_estimate' else 'declared' end where m.id=meal and m.macros is not null;
   update public.recipe_day_assignments set registered_meal_id = meal, client_id = cid where id = aid;
   return jsonb_build_object('assignment', public.recipe_day_json(aid), 'duplicate', coalesce((saved->>'duplicate')::boolean, false));
 end; $$;

@@ -1,3 +1,4 @@
+import { ApiError } from './error';
 import type { Brief, DemoNotice, GoalStatus, MealLog, Message, Patient, Stage } from '../types';
 import { getSessionToken } from '../lib/supabase';
 import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } from '../types/intake';
@@ -6,9 +7,7 @@ import { resolveApiUrl } from './origin';
 import type { NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
 import type { BillingBoard, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
 
-export class ApiError extends Error {
-  constructor(public status: number, message: string) { super(message); }
-}
+export { ApiError } from './error';
 
 export type PatientInvite = {
   id: string;

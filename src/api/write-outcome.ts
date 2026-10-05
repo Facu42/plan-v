@@ -1,4 +1,4 @@
-import { ApiError } from './client';
+import { ApiError } from './error';
 
 /** A rejected transaction is safe to correct; an absent acknowledgement keeps its UUID. */
 export function writeWasRejected(error: unknown): boolean {
