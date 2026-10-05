@@ -55,7 +55,7 @@ export function InviteShare({ name, invite, onClose }: { name: string; invite: P
   useEffect(() => { setCurrent(invite); setError(''); setCopied(false); }, [invite.id, invite.updated_at]);
   const prepare = async () => {
     if (lock.current) return; lock.current = true; setBusy(true); setError('');
-    try { const saved = (await api.patientInvite(current.patient_id)).invite; setCurrent(saved); if (!invitationReady(saved)) setError('El enlace todavía no está habilitado. Reintentá preparar la invitación.'); }
+    try { const saved = (await api.patientInvite(current.patient_id)).invite; setCurrent(saved); if (saved.status !== 'accepted' && !invitationReady(saved)) setError('El enlace todavía no está habilitado. Reintentá preparar la invitación.'); }
     catch { setError('La ficha está guardada, pero no pudimos preparar el enlace. Reintentá sin crear otra ficha.'); }
     finally { lock.current = false; setBusy(false); }
   };

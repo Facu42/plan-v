@@ -336,20 +336,6 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     expect((await patientB.client.rpc('claim_recipe_cover', { target_version: vid, retry: true })).error?.code).toBe('42501');
   });
 
-  it('publica un plan manual con el snapshot que recibe el navegador y conserva su versión frente a otro borrador',async()=>{
-    const id=randomUUID();const path=`/api/patients/${pidB}/plans`;
-    const draft={id,expected_revision:null,period_start:'2026-10-05',period_end:'2026-10-05',items:[{for_date:'2026-10-05',slot:'Almuerzo',free_text:'Arroz con vegetales',portions:1,public_note:'Indicación revisada'}]};
-    const saved=await api(ownerB,path,'POST',draft);expect(saved.status).toBe(200);
-    const current=(await saved.json()).plan.current as PlanVersionView;
-    expect(current.items[0]).not.toHaveProperty('recipe_proposal');
-    const published=await api(ownerB,`/api/plans/${id}/publish`,'POST',{expected_version:current.version,expected_snapshot:planReviewSnapshot(current)});
-    expect(published.status).toBe(200);
-    const next=await api(ownerB,path,'POST',{...draft,expected_revision:current.revision,items:[{...draft.items[0],public_note:'Nuevo borrador privado'}]});expect(next.status).toBe(200);
-    const reread=await api(patientB,path);expect(reread.status).toBe(200);const visible=(await reread.json()).plan;
-    expect(visible.version).toBe(1);expect(visible.items[0].public_note).toBe('Indicación revisada');expect(JSON.stringify(visible)).not.toContain('Nuevo borrador privado');
-    const stale=await api(ownerB,`/api/plans/${id}/publish`,'POST',{expected_version:current.version,expected_snapshot:planReviewSnapshot(current)});expect(stale.status).toBe(409);
-  });
-
   it('un análisis bloqueado por una revisión no inventa origen y las lecturas conservan privacidad',async()=>{
     const mid=randomUUID();const cid=randomUUID();const macros={kcal:200,protein_g:10,carbs_g:35,fat_g:3};
     await pool.query("insert into public.meal_logs(id,patient_id,client_id,slot_label,description,note_for_nutri) values($1,$2,$3,'Almuerzo','Registro histórico ficticio',$4)",[mid,pidB,cid,canary]);
@@ -412,6 +398,21 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
       if (editing) await editing.catch(() => undefined);
       await second.query('rollback'); first.release(); second.release();
     }
+  });
+  it('publica un plan manual con el snapshot que recibe el navegador y conserva su versión frente a otro borrador',async()=>{
+    const path=`/api/patients/${pidB}/plans`;
+    const initial=await api(ownerB,path);expect(initial.status).toBe(200);const previous=(await initial.json()).plan;
+    const id=previous.id;
+    const draft={id,expected_revision:previous.current.revision,period_start:'2026-10-05',period_end:'2026-10-05',items:[{for_date:'2026-10-05',slot:'Almuerzo',free_text:'Arroz con vegetales',portions:1,public_note:'Indicación revisada'}]};
+    const saved=await api(ownerB,path,'POST',draft);expect(saved.status).toBe(200);
+    const current=(await saved.json()).plan.current as PlanVersionView;
+    expect(current.items[0]).not.toHaveProperty('recipe_proposal');
+    const published=await api(ownerB,`/api/plans/${id}/publish`,'POST',{expected_version:current.version,expected_snapshot:planReviewSnapshot(current)});expect(published.status).toBe(200);
+    const next=await api(ownerB,path,'POST',{...draft,expected_revision:current.revision,items:[{...draft.items[0],public_note:'Nuevo borrador privado'}]});expect(next.status).toBe(200);const nextVersion=(await next.json()).plan.current.version;
+    const reread=await api(patientB,path);expect(reread.status).toBe(200);const visible=(await reread.json()).plan;
+    expect(visible.version).toBe(current.version);expect(visible.items[0].public_note).toBe('Indicación revisada');expect(JSON.stringify(visible)).not.toContain('Nuevo borrador privado');
+    // Repetir la publicación idéntica ya aceptada es válido; la copia antigua no aprueba el nuevo borrador.
+    const stale=await api(ownerB,`/api/plans/${id}/publish`,'POST',{expected_version:nextVersion,expected_snapshot:planReviewSnapshot(current)});expect(stale.status).toBe(409);
   });
 });
 
