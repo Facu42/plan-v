@@ -26,6 +26,7 @@ import type { ShowroomPage } from './ShowroomPanels';
 import type { ShowroomPatient } from './showroom-model';
 import './menu-fig.css';
 import { FigmaAsset } from './FigmaPatientFront';
+import { RecipeManualCoverAction } from './RecipeManualCoverAction';
 
 type HealthyMenuItem = {
   title: string;
@@ -387,6 +388,7 @@ function RecipeActions({ catalog, recipe, small = false }: { catalog: RecipeCata
       : <button type="button" className="mf-btn mf-btn-soft" disabled={catalog.busy} onClick={() => catalog.startEdit(recipe)}><PencilSimple size={14} aria-hidden /> Editar</button>}
     {!recipe.current.published_at && <button type="button" className={`mf-btn${size}`} disabled={catalog.busy} onClick={() => catalog.publish(recipe)}>Publicar</button>}
     {recipe.published && <button type="button" className={`mf-btn${size}`} disabled={catalog.busy} onClick={() => catalog.startAssign(recipe)}>Agregar al plan</button>}
+    {recipe.published && <RecipeManualCoverAction recipe={recipe} disabled={catalog.busy} className={`mf-btn mf-btn-soft${size}`} onSaved={catalog.reload} />}
     <RecipeCoverAction catalog={catalog} recipe={recipe} className={`mf-btn mf-btn-soft${size}`} />
   </>;
 }

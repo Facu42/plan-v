@@ -43,6 +43,10 @@ async function button(text) {
   lastAction='botón '+text;
   await until(`(()=>{const e=Array.from(document.querySelectorAll('button')).find(e=>e.textContent.trim()===${JSON.stringify(text)}&&!e.matches(':disabled')&&e.getClientRects().length);if(!e)return false;e.click();return true;})()`);
 }
+async function control(selector) {
+  lastAction='control '+selector;
+  await until(`(()=>{const e=Array.from(document.querySelectorAll(${JSON.stringify(selector)})).find(e=>!e.matches(':disabled')&&e.getClientRects().length);if(!e)return false;e.click();return true;})()`);
+}
 async function login(actor,path='/') {
   await B('goto',origin+path);await B('wait','input[placeholder="Email"]');
   await B('fill','input[placeholder="Email"]',actor.email);await B('fill','input[placeholder="Contraseña"]',password);
@@ -151,9 +155,9 @@ try {
   await button('Registrar descanso');await field('Minutos dormidos','480');await button('Guardar registro');await readUntil(patient,`/api/patients/${pid}`,r=>r.patient.sleep_minutes===480);
   await reloadContains('Agua: 3 vasos');check((await read(professional,`/api/patients/${pid}`)).patient.sleep_minutes===480,'hidratación y descanso conservados al recargar y releer');
   phase='compras';await B('goto',origin+'/app/compras');await B('click','[aria-label="Agregar producto"]');await field('Producto','Manzana de prueba');await field('Cantidad','2');await button('Guardar');await until("document.body.innerText.includes('Producto agregado.')");
-  await B('click','[aria-label="Marcar como comprado: Manzana de prueba"]');await until("document.body.innerText.includes('Lista guardada.')");await reloadContains('Manzana de prueba');
+  await control('[aria-label="Marcar como comprado: Manzana de prueba"]');await until("document.body.innerText.includes('Lista guardada.')");await reloadContains('Manzana de prueba');
   check((await read(patient,`/api/patients/${pid}/shopping`)).list.items.some(i=>i.name==='Manzana de prueba'&&i.checked),'compras y marcas sobreviven a recarga');
-  phase='receta y favoritos';await B('goto',origin+'/app/recetas');await B('click','[aria-label="Ver Arroz con vegetales"]');await button('Guardar en favoritos');await until("document.body.innerText.includes('Guardada')");
+  phase='receta y favoritos';await B('goto',origin+'/app/recetas');await control('[aria-label="Ver Arroz con vegetales"]');await button('Guardar en favoritos');await until("document.body.innerText.includes('Guardada')");
   check((await read(patient,`/api/patients/${pid}/library`)).library.favorites.some(f=>f.item_id===recipe.id),'favorito guardado con la receta publicada');
   phase='mensajes';await B('goto',origin+'/app/mensajes');await B('fill','[aria-label="Escribir mensaje"]','Consulta ficticia del recorrido');await B('click','[aria-label="Enviar mensaje"]');await until("document.body.innerText.includes('Mensaje enviado.')");await reloadContains('Consulta ficticia del recorrido');
   check((await read(professional,`/api/patients/${pid}`)).patient.messages.some(m=>m.text==='Consulta ficticia del recorrido'),'mensaje persistente visible desde ambos roles');
@@ -170,8 +174,8 @@ try {
   phase='actividad';await B('goto',origin+'/app/ejercicio');await button('Registrar actividad');await field('Actividad','Caminata');await button('Guardar');await until("document.body.innerText.includes('Actividad guardada.')");
   await reloadContains('Caminata');check((await read(professional,`/api/patients/${pid}/exercise?audience=pro`)).exercise.activities.length===1,'actividad visible desde ambos roles tras recarga');
   phase='medidas';await B('goto',origin+'/app/progreso');await button('Registrar medidas y archivos');await B('click','.care-consent label:has-text("Puedo cargar peso o medidas") input');await readUntil(patient,`/api/patients/${pid}/care?audience=patient`,r=>r.consented.includes('measurement'));await button('Registrar peso');await field('Peso','63','.care-form ');await button('Guardar registro');await until("document.body.innerText.includes('Registro guardado y disponible')");await B('click','[aria-label="Cerrar registros"]');await B('reload');
-  check((await read(professional,`/api/patients/${pid}/care?audience=pro`)).measurements.some(m=>m.kind==='weight'&&m.value===63&&m.unit==='kg'),'medida opcional persistente con consentimiento y origen paciente');
-  phase='recurso leído y guardado';await B('goto',origin+'/app/recursos');await B('click',`[aria-label="Leer ${resource.title}"]`);await button('Guardar recurso');await until("document.body.innerText.includes('Recurso guardado.')");await B('reload');
+  check((await read(professional,`/api/patients/${pid}/care?audience=pro`)).measurements.some(m=>m.kind==='weight'&&m.value_numeric===63&&m.unit==='kg'&&m.source==='patient'),'medida opcional persistente con consentimiento y origen paciente');
+  phase='recurso leído y guardado';await B('goto',origin+'/app/recursos');await control(`[aria-label="Leer ${resource.title}"]`);await button('Guardar recurso');await until("document.body.innerText.includes('Recurso guardado.')");await B('reload');
   const rereadLibrary=await readUntil(professional,`/api/patients/${pid}/library?audience=pro`,r=>r.library.assignments.some(a=>a.id===resourceAssignment.id&&a.read_at));check(rereadLibrary.library.favorites.some(f=>f.item_id===resource.id),'recurso leído y favorito persisten y se revisan desde consultorio');
   phase='confirmación y aviso de pago';
   const appointment=(await read(patient,`/api/patients/${pid}`)).patient.appointment;
@@ -195,7 +199,7 @@ try {
   console.error('Tipo de fallo: '+(error instanceof Error?error.name:'desconocido')+'; código: '+(Number.isInteger(error?.code)?error.code:'sin código'));
   console.error('Última lectura HTTP: '+(lastReadStatus??'sin lectura')+'; comprobación fallida: '+failedCheck);
   // Diagnóstico limitado a controles, sin valores, texto libre ni enlaces de sesión.
-  try{console.error('Controles al detenerse: '+await B('js',"JSON.stringify({privacy:!!document.querySelector('.nvon-privacy'),profile:!!document.querySelector('.nvon-profile'),health:!!document.querySelector('.nvon-health'),review:!!document.querySelector('.nvon-review'),alerts:document.querySelectorAll('.nvon-error').length,continue:Array.from(document.querySelectorAll('button')).filter(e=>e.textContent.trim()==='Continuar').map(e=>({disabled:e.matches(':disabled'),visible:!!e.getClientRects().length}))})"));}catch{}
+  try{console.error('Controles al detenerse: '+await B('js',"JSON.stringify({privacy:!!document.querySelector('.nvon-privacy'),profile:!!document.querySelector('.nvon-profile'),health:!!document.querySelector('.nvon-health'),review:!!document.querySelector('.nvon-review'),alerts:document.querySelectorAll('.nvon-error').length,planForms:document.querySelectorAll('.meal-plan-form').length,planErrors:document.querySelectorAll('.meal-plan-error').length,planDirty:document.body.innerText.includes('Tenés cambios sin guardar'),publish:Array.from(document.querySelectorAll('button')).filter(e=>/^Publicar v/.test(e.textContent.trim())).map(e=>({disabled:e.matches(':disabled'),visible:!!e.getClientRects().length})),continue:Array.from(document.querySelectorAll('button')).filter(e=>e.textContent.trim()==='Continuar').map(e=>({disabled:e.matches(':disabled'),visible:!!e.getClientRects().length}))})"));}catch{}
   if(phase==='arranque de servicios temporales')console.error('Salida local API: '+(apiProcess?.exitCode??'en ejecución')+'; web: '+(webProcess?.exitCode??'en ejecución'));
   process.exitCode=1;
 } finally {

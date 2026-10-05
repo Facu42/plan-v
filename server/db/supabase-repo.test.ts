@@ -110,6 +110,8 @@ import {
   sbListPatientsForNutri,
   sbSetAppointment,
   sbSetBrief,
+  sbSendInvite,
+  sbRevokeInvite,
   sbUpdateGoal,
   sbUpdateHabits,
   sbUpdatePatientProfile,
@@ -127,6 +129,30 @@ const row = {
 
 beforeEach(() => {
   harness.reset();
+});
+
+describe('invitaciones aceptadas durante una escritura', () => {
+  const pending = { id:'invite-1', patient_id:'patient-1', nutritionist_id:'nutri-1', email:'patient@example.test', status:'pending' };
+  it('enviar no reabre una aceptación posterior ni registra un reenvío falso', async () => {
+    harness.push('patient_invites', { data:pending, error:null });
+    harness.push('patient_invites', { data:null, error:null });
+    harness.push('patient_invites', { data:{...pending,status:'accepted'}, error:null });
+    expect((await sbSendInvite(pending.id)).status).toBe('accepted');
+    expect(harness.calls.find(c=>c.table==='patient_invites'&&c.op==='update')?.filters).toContainEqual(['in',['status',['not_sent','pending']]]);
+    expect(harness.calls.some(c=>c.table==='patient_invite_events')).toBe(false);
+  });
+  it('revocar no cambia una invitación que dejó de estar abierta', async () => {
+    harness.push('patient_invites', { data:pending, error:null });
+    harness.push('patient_invites', { data:null, error:null });
+    await expect(sbRevokeInvite(pending.id)).rejects.toThrow('Invite unavailable');
+    expect(harness.calls.find(c=>c.table==='patient_invites'&&c.op==='update')?.filters).toContainEqual(['in',['status',['not_sent','pending']]]);
+    expect(harness.calls.some(c=>c.table==='patient_invite_events')).toBe(false);
+  });
+  it('recupera la invitación aceptada sin efectuar ninguna mutación', async () => {
+    harness.push('patient_invites', { data:{...pending,status:'accepted'}, error:null });
+    expect((await sbSendInvite(pending.id)).status).toBe('accepted');
+    expect(harness.calls).toHaveLength(1);
+  });
 });
 
 describe('mapMessage', () => {

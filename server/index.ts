@@ -687,7 +687,7 @@ app.post('/api/invites/:id/send', async (c) => {
       const invite = await sb.sbGetInvite(inviteId.data);
       if (!invite || invite.nutritionist_id !== actor.nutritionistId) return c.json({ error: 'Prohibido' }, 403);
       const sent = await sb.sbSendInvite(inviteId.data);
-      await enqueueOutboxBestEffort({
+      if (sent.status === 'pending') await enqueueOutboxBestEffort({
         patient_id: invite.patient_id,
         event_type: 'invite_sent',
         client_id: inviteId.data,

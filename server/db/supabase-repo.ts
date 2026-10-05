@@ -893,6 +893,7 @@ async function logInviteEvent(inviteId: string, event: 'created' | 'sent' | 'res
 
 export async function sbSendInvite(inviteId: string, ttlMs = 7 * 24 * 60 * 60 * 1000): Promise<PatientInvite> {
   const current = await sbGetInvite(inviteId);
+  if (current?.status === 'accepted') return current;
   if (!current || (current.status !== 'not_sent' && current.status !== 'pending')) {
     throw new Error('Invite unavailable');
   }
@@ -906,8 +907,14 @@ export async function sbSendInvite(inviteId: string, ttlMs = 7 * 24 * 60 * 60 * 
     invited_at: now.toISOString(),
     expires_at: new Date(now.getTime() + ttlMs).toISOString(),
     updated_at: now.toISOString(),
-  }).eq('id', inviteId).select('*').single();
-  if (error || !data) throwWriteError(error);
+  }).eq('id', inviteId).in('status', ['not_sent', 'pending']).select('*').maybeSingle();
+  if (error) throwWriteError(error);
+  if (!data) {
+    // La aceptación puede ocurrir después de la lectura. No reabrir su enlace.
+    const latest = await sbGetInvite(inviteId);
+    if (latest?.status === 'accepted') return latest;
+    throw new Error('Invite unavailable');
+  }
   await logInviteEvent(inviteId, event);
   return mapInvite(row(data) ?? {});
 }
@@ -924,8 +931,9 @@ export async function sbRevokeInvite(inviteId: string): Promise<PatientInvite> {
     status: 'revoked',
     revoked_at: now,
     updated_at: now,
-  }).eq('id', inviteId).select('*').single();
-  if (error || !data) throwWriteError(error);
+  }).eq('id', inviteId).in('status', ['not_sent', 'pending']).select('*').maybeSingle();
+  if (error) throwWriteError(error);
+  if (!data) throw new Error('Invite unavailable');
   await logInviteEvent(inviteId, 'revoked');
   return mapInvite(row(data) ?? {});
 }

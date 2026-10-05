@@ -137,6 +137,8 @@ describe('cierre funcional: revisiones, privacidad y reintentos persistentes', (
   });
   it('un título privado no cambia receta asignada, día, búsqueda, favorito ni detalle del plan', async () => {
     plan = await rpc(nutriA,'save_meal_plan_draft',[patientA,menu]);
+    // Coincide con el contrato HTTP: las propuestas opcionales ausentes no son null.
+    expect(plan.current.items[0]).not.toHaveProperty('recipe_proposal');
     const old = plan.current.revision;
     plan = await rpc(nutriA,'save_meal_plan_draft',[patientA,{ ...menu, expected_revision: old, items:[{...menu.items[0], public_note:'Nota revisada'}] }]);
     await expect(rpc(nutriA,'save_meal_plan_draft',[patientA,{ ...menu, expected_revision: old }])).rejects.toMatchObject({code:'PT409'});

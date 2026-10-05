@@ -190,8 +190,9 @@ returns jsonb language sql stable security definer set search_path='' as $$
     end,
     'free_text', i.free_text,
     'portions', i.portions,
-    'public_note', i.public_note, 'recipe_proposal',i.recipe_proposal
-  )
+    'public_note', i.public_note
+  ) || case when i.recipe_proposal is null then '{}'::jsonb
+    else jsonb_build_object('recipe_proposal', i.recipe_proposal) end
   from public.meal_plan_items i
   left join public.recipe_versions v on v.id = i.recipe_version_id
   left join public.recipes rec on rec.id = v.recipe_id
