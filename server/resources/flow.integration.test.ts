@@ -59,7 +59,8 @@ describe('PV-36 recursos editoriales y favoritos unificados', () => {
     const savedGuide = await post(`/api/patients/${patient}/favorites`, { item_kind: 'resource', item_id: 'leer-plan-semanal' });
     expect(savedGuide.status).toBe(200);
     const guideBody = await savedGuide.json() as { library: PatientLibraryView };
-    expect(guideBody.library.favorites[0]).toMatchObject({ item_kind: 'resource', item_id: guideBody.library.resources.find((r:{slug:string})=>r.slug==='leer-plan-semanal').id });
+    const guide=guideBody.library.resources.find((r:{slug:string})=>r.slug==='leer-plan-semanal');expect(guide).toBeTruthy();
+    expect(guideBody.library.favorites[0]).toMatchObject({ item_kind: 'resource', item_id: guide?.id });
 
     const savedArticle = await post(`/api/patients/${patient}/favorites`, { item_kind: 'article', item_id: 'hidratacion-cotidiana' });
     expect(savedArticle.status).toBe(200);
