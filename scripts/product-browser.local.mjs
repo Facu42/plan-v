@@ -145,7 +145,7 @@ try {
   await B('goto',origin+'/crm/cobranzas');await B('click','[aria-label="Ver cobranzas de Paciente ficticia"]');await B('fill','#cbz-fee-amount','1000');await B('fill','#cbz-fee-due',today);await button('Guardar cuota');
   await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.fee?.amount===1000);
   await B('goto',origin+'/crm/guardado');await B('click','.nvw-resource-picker button:first-child');await B('click','[aria-label="Seleccionar Paciente ficticia"]');await button('Asignar a 1');await until("document.body.innerText.includes('1 asignación creada.')");
-  const assignedLibrary=(await read(patient,`/api/patients/${pid}/library`)).library;const resourceAssignment=assignedLibrary.assignments[0];const resource=assignedLibrary.resources.find(r=>r.id===resourceAssignment.resource_id);
+  const assignedLibrary=(await read(patient,`/api/patients/${pid}/library`)).library;const resourceAssignment=assignedLibrary.assignments[0];const resource=[...assignedLibrary.resources,...assignedLibrary.articles].find(r=>r.id===resourceAssignment.resource_id||r.slug===resourceAssignment.slug);
   check(Boolean(resource),'turno, cuota y recurso guardados por la profesional');
   await logout();phase='paciente y recarga';await login(patient,'/app/plan');await reloadContains('Arroz con vegetales');
   for(const size of ['1440x1000','390x844']){await B('viewport',size);await until("document.body.innerText.includes('Arroz con vegetales')");check(!(await B('js',"document.body.innerText.includes('Borrador privado nuevo')")).includes('true'),'borrador oculto para paciente '+size);}

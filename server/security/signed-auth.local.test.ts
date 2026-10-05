@@ -414,5 +414,12 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     // Repetir la publicación idéntica ya aceptada es válido; la copia antigua no aprueba el nuevo borrador.
     const stale=await api(ownerB,`/api/plans/${id}/publish`,'POST',{expected_version:nextVersion,expected_snapshot:planReviewSnapshot(current)});expect(stale.status).toBe(409);
   });
+  it('asignar un recurso devuelve fichas releídas para actualizar el consultorio',async()=>{
+    const response=await api(ownerB,`/api/patients/${pidB}/library`);expect(response.status).toBe(200);const library=(await response.json()).library;
+    const resource=library.resources[0];expect(resource).toBeTruthy();
+    const assigned=await api(ownerB,'/api/resources/assign','POST',{resource_id:resource.slug,patient_ids:[pidB]});expect(assigned.status).toBe(200);const result=await assigned.json();
+    expect(result.assigned_count).toBe(1);expect(result.patients).toHaveLength(1);expect(result.patients[0].resource_assignments.some((r:{resource_id:string})=>r.resource_id===resource.slug)).toBe(true);
+    const reread=await api(patientB,`/api/patients/${pidB}/library`);expect(reread.status).toBe(200);expect((await reread.json()).library.assignments.some((r:{slug:string})=>r.slug===resource.slug)).toBe(true);
+  });
 });
 
