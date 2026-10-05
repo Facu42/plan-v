@@ -438,6 +438,24 @@ revoke all on function public.record_meal_analysis_pre_product(jsonb) from publi
 revoke all on function public.record_meal_analysis(jsonb) from public,anon;
 grant execute on function public.record_meal_analysis(jsonb) to authenticated;
 
+-- La revisión y el análisis usan el mismo lock; un resultado tardío no sustituye lo confirmado.
+alter function public.review_meal_log(jsonb) rename to review_meal_log_pre_product;
+create function public.review_meal_log(payload jsonb) returns jsonb language plpgsql security definer set search_path='' as $$
+declare lid uuid; pid uuid;
+begin
+  begin lid:=(payload->>'meal_id')::uuid;
+  exception when invalid_text_representation then raise exception using errcode='22023',message='diary_invalid'; end;
+  if lid is null then raise exception using errcode='22023',message='diary_invalid'; end if;
+  select patient_id into pid from public.meal_logs where id=lid;
+  if not found then raise exception using errcode='PT404',message='meal_missing'; end if;
+  perform public.diary_assert_access(pid,true);
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(lid::text,0));
+  return public.review_meal_log_pre_product(payload);
+end; $$;
+revoke all on function public.review_meal_log_pre_product(jsonb) from public,anon,authenticated;
+revoke all on function public.review_meal_log(jsonb) from public,anon;
+grant execute on function public.review_meal_log(jsonb) to authenticated;
+
 create or replace function public.register_recipe_day(payload jsonb)
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare

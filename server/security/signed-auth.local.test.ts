@@ -338,12 +338,11 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
 
   it('un análisis bloqueado por una revisión no inventa origen y las lecturas conservan privacidad',async()=>{
     const mid=randomUUID();const cid=randomUUID();const macros={kcal:200,protein_g:10,carbs_g:35,fat_g:3};
-    await pool.query("insert into public.meal_logs(id,patient_id,client_id,slot_label,description) values($1,$2,$3,'Almuerzo','Registro histórico ficticio')",[mid,pidB,cid]);
+    await pool.query("insert into public.meal_logs(id,patient_id,client_id,slot_label,description,note_for_nutri) values($1,$2,$3,'Almuerzo','Registro histórico ficticio',$4)",[mid,pidB,cid,canary]);
     const first=await pool.connect();let analysis:Promise<Awaited<ReturnType<typeof patientB.client.rpc>>>|undefined;
     try {
       await first.query('begin');await first.query('set local role authenticated');await first.query("select set_config('request.jwt.claim.sub',$1,true)",[ownerB.id]);
-      await first.query('select pg_advisory_xact_lock(hashtextextended($1,0))',[mid]);
-      await first.query("update public.meal_logs set status='confirmed',analysis_status='succeeded',macros=$2,note_for_nutri=$3 where id=$1",[mid,macros,canary]);
+      await first.query('select public.review_meal_log($1)',[{meal_id:mid,status:'confirmed',macros}]);
       analysis=Promise.resolve(patientB.client.rpc('record_meal_analysis',{payload:{meal_id:mid,status:'succeeded',foods:[],macros,confidence:0.5}}));
       // Inicia una conexión real de PostgREST mientras la revisión conserva el lock.
       let blocked=false;

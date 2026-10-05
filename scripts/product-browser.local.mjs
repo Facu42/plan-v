@@ -84,7 +84,7 @@ try {
   await B('wait','input[aria-label="Enlace de invitación"]');
   const link=await B('js','document.querySelector(\'input[aria-label="Enlace de invitación"]\').value');
   const visibleInvite=new URL(link.replace(/^"|"$/g,'')).searchParams.get('invite');
-  const rows=await pool.query('select p.id,i.id as invite,i.status,i.expires_at>now() as vigente from public.patients p join public.patient_invites i on i.patient_id=p.id where p.email=$1',[patient.email]);
+  const rows=await pool.query('select p.id,i.id as invite,i.status,i.expires_at>now() as vigente from public.patients p join public.patient_invites i on i.patient_id=p.id where i.email=$1',[patient.email]);
   check(rows.rows.length===1&&rows.rows[0].invite===visibleInvite&&rows.rows[0].status==='pending'&&rows.rows[0].vigente,'alta única y enlace visible de invitación vigente y persistente');const pid=rows.rows[0].id;const invite=rows.rows[0].invite;
   // Exención ficticia de cuota para ensayar salud; nunca crea pagos ni suscripciones.
   await pool.query("update public.patients set billing_status='waived' where id=$1",[pid]);
@@ -111,7 +111,7 @@ try {
   await B('fill','[aria-label="Ingrediente 1"]','Arroz');await B('fill','[aria-label="Cantidad 1"]','100');await B('fill','[aria-label="Pasos de la receta"]','Cocinar el arroz y servir.');
   await button('Guardar borrador');await until("document.body.innerText.includes('Borrador guardado en el catálogo')");
   const catalog=await read(professional,'/api/recipes');const recipe=catalog.recipes.find(r=>r.title==='Arroz con vegetales');check(recipe?.current.card.macros.kcal===200,'receta manual conserva calorías declaradas');
-  await button('Cerrar');await button('Publicar');await until("document.body.innerText.includes('Revisión publicada')");
+  await until('!document.querySelector(".recipe-form")');await button('Publicar');await until("document.body.innerText.includes('Revisión publicada')");
   await button('Agregar al plan');await field('Día',today,'.recipe-overlay ');await button('Confirmar asignación');await until("document.body.innerText.includes('Asignada al día')");
   check((await read(patient,`/api/patients/${pid}/recipe-days?date=${today}`)).assignments.length===1,'receta publicada asignada por fecha');
   phase='plan manual';await B('goto',origin+`/crm/plan?paciente=${pid}`);await B('click','[aria-label="Crear o editar plan"]');
@@ -122,6 +122,15 @@ try {
   let published=await read(patient,`/api/patients/${pid}/plans`);check(published.plan?.items[0].public_note==='Indicación publicada','publicación del contenido revisado');
   await B('fill','[aria-label="Nota 1"]','Borrador privado nuevo');await B('click','.meal-plan-form button[type="submit"]');await until("document.body.innerText.includes('Borrador guardado')");
   published=await read(patient,`/api/patients/${pid}/plans`);check(published.plan?.items[0].public_note==='Indicación publicada','nuevo borrador conserva la versión publicada');
+  phase='turno, cuota y recurso profesionales';await B('goto',origin+`/crm/consultas?paciente=${pid}`);
+  const weekday=new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',weekday:'long'}).format(new Date());
+  await B('select','[aria-label="Día de la consulta"]',weekday[0].toUpperCase()+weekday.slice(1));await B('fill','[aria-label="Hora de la consulta"]','16:00');await B('select','[aria-label="Modalidad de la consulta"]','video');await B('fill','[aria-label="Enlace de videollamada"]','https://example.test/consulta');await button('Guardar turno');
+  await readUntil(patient,`/api/patients/${pid}`,r=>r.patient.appointment?.meet_url==='https://example.test/consulta');await reloadContains('Abrir videollamada');
+  await B('goto',origin+'/crm/cobranzas');await B('click','[aria-label="Ver cobranzas de Paciente ficticia"]');await B('fill','#cbz-fee-amount','1000');await B('fill','#cbz-fee-due',today);await button('Guardar cuota');
+  await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.fee?.amount===1000);
+  await B('goto',origin+'/crm/guardado');await B('click','.nvw-resource-picker button:first-child');await B('click','[aria-label="Seleccionar Paciente ficticia"]');await button('Asignar a 1');await until("document.body.innerText.includes('1 asignación creada.')");
+  const assignedLibrary=(await read(patient,`/api/patients/${pid}/library`)).library;const resourceAssignment=assignedLibrary.assignments[0];const resource=assignedLibrary.resources.find(r=>r.id===resourceAssignment.resource_id);
+  check(Boolean(resource),'turno, cuota y recurso guardados por la profesional');
   await logout();phase='paciente y recarga';await login(patient,'/app/plan');await reloadContains('Arroz con vegetales');
   for(const size of ['1440x1000','390x844']){await B('viewport',size);await until("document.body.innerText.includes('Arroz con vegetales')");check(!(await B('js',"document.body.innerText.includes('Borrador privado nuevo')")).includes('true'),'borrador oculto para paciente '+size);}
   phase='comidas y hábitos';await B('goto',origin+'/app/diario');await button('Registrar esta comida');await until("document.body.innerText.includes('Ya registraste esta comida')");
@@ -136,8 +145,21 @@ try {
   check((await read(patient,`/api/patients/${pid}/library`)).library.favorites.some(f=>f.item_id===recipe.id),'favorito guardado con la receta publicada');
   phase='mensajes';await B('goto',origin+'/app/mensajes');await B('fill','[aria-label="Escribir mensaje"]','Consulta ficticia del recorrido');await B('click','[aria-label="Enviar mensaje"]');await until("document.body.innerText.includes('Mensaje enviado.')");await reloadContains('Consulta ficticia del recorrido');
   check((await read(professional,`/api/patients/${pid}`)).patient.messages.some(m=>m.text==='Consulta ficticia del recorrido'),'mensaje persistente visible desde ambos roles');
+  const pdfPath=resolve('.gstack/plan-v-prueba.pdf');
+  let pdf='%PDF-1.4\n';const offsets=[0];const pieces=['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>','<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] >>'];
+  pieces.forEach((content,index)=>{offsets.push(Buffer.byteLength(pdf));pdf+=`${index+1} 0 obj\n${content}\nendobj\n`;});const xref=Buffer.byteLength(pdf);pdf+='xref\n0 4\n0000000000 65535 f \n'+offsets.slice(1).map(offset=>String(offset).padStart(10,'0')+' 00000 n \n').join('')+`trailer\n<< /Size 4 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;await writeFile(pdfPath,pdf);
+  phase='adjunto privado';await B('upload','[aria-label="Archivo adjunto"]',pdfPath);await until("document.body.innerText.includes('Adjunto: plan-v-prueba.pdf')");await B('fill','[aria-label="Escribir mensaje"]','Adjunto ficticio del recorrido');await B('click','[aria-label="Enviar mensaje"]');await until("document.body.innerText.includes('Mensaje enviado.')");await reloadContains('plan-v-prueba.pdf');
+  const attached=(await read(professional,`/api/patients/${pid}`)).patient.messages.find(m=>m.text==='Adjunto ficticio del recorrido');check(attached?.attachment?.filename==='plan-v-prueba.pdf','adjunto guardado y visible desde ambos roles');
   phase='actividad';await B('goto',origin+'/app/ejercicio');await button('Registrar actividad');await field('Actividad','Caminata');await button('Guardar');await until("document.body.innerText.includes('Actividad guardada.')");
   await reloadContains('Caminata');check((await read(professional,`/api/patients/${pid}/exercise?audience=pro`)).exercise.activities.length===1,'actividad visible desde ambos roles tras recarga');
+  phase='medidas';await B('goto',origin+'/app/progreso');await button('Registrar medidas y archivos');await B('click','.care-consent label:has-text("Puedo cargar peso o medidas") input');await readUntil(patient,`/api/patients/${pid}/care?audience=patient`,r=>r.consented.includes('measurement'));await button('Registrar peso');await field('Peso','63','.care-form ');await button('Guardar registro');await until("document.body.innerText.includes('Registro guardado y disponible')");await B('click','[aria-label="Cerrar registros"]');await B('reload');
+  check((await read(professional,`/api/patients/${pid}/care?audience=pro`)).measurements.some(m=>m.kind==='weight'&&m.value===63&&m.unit==='kg'),'medida opcional persistente con consentimiento y origen paciente');
+  phase='recurso leído y guardado';await B('goto',origin+'/app/recursos');await B('click',`[aria-label="Leer ${resource.title}"]`);await button('Guardar recurso');await until("document.body.innerText.includes('Recurso guardado.')");await B('reload');
+  const rereadLibrary=await readUntil(professional,`/api/patients/${pid}/library?audience=pro`,r=>r.library.assignments.some(a=>a.id===resourceAssignment.id&&a.read_at));check(rereadLibrary.library.favorites.some(f=>f.item_id===resource.id),'recurso leído y favorito persisten y se revisan desde consultorio');
+  phase='confirmación y aviso de pago';await B('goto',origin+'/app/agenda');await button('Confirmar');await readUntil(professional,`/api/patients/${pid}`,r=>r.patient.appointment?.patient_reply==='attending');await B('reload');check(true,'confirmación de turno persistente');
+  await B('goto',origin+'/app/pagos');await B('fill','#cbz-report-amount','1000');await B('fill','#cbz-report-note','Aviso ficticio del recorrido');await button('Avisar que pagué');await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.payments.some(p=>p.status==='reported'));
+  await logout();await B('viewport','1440x1000');await login(professional,'/crm/cobranzas');await B('click','[aria-label="Ver cobranzas de Paciente ficticia"]');await button('Confirmar');await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.payments.some(p=>p.status==='confirmed'&&p.amount===1000));await B('reload');check(true,'aviso de pago confirmado por profesional persiste sin cobro automático');
+  await logout();await login(patient,'/app/pagos');await reloadContains('Confirmado');
   await logout();await login(patient,'/app/plan');await reloadContains('Indicación publicada');check(true,'sesión cerrada y nuevo ingreso conservan el plan');
   phase='recuperación de contraseña';
   const recovery=await admin.auth.admin.generateLink({type:'recovery',email:patient.email,options:{redirectTo:origin}});

@@ -185,7 +185,7 @@ function Author({ guide }: { guide: ResourceGuide }) {
   return <p className="nvrf-author"><i aria-hidden="true" />{guide.author_name}</p>;
 }
 
-export function ShowroomResources({ patientId, query, assignments = [], onNavigate, onMarkRead, onQueryChange, library: injected }: {
+export function ShowroomResources({ patientId, query, assignments = [], onNavigate, onMarkRead, onQueryChange, library: injected, professional=false }: {
   patientId: string;
   query: string;
   assignments?: ResourceAssignment[];
@@ -194,10 +194,12 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
   /** Con esto el buscador vive dentro de la cabecera del archivo (Header 371:10069). */
   onQueryChange?: (value: string) => void;
   library?: PatientLibraryView | null;
+  professional?: boolean;
 }) {
   const [category, setCategory] = useState('Todas');
   const [selectedId, setSelectedId] = useState<string | null>(() => typeof window === 'undefined' ? null : resourceGuideIdFromHash(window.location.hash));
   const [remote, setRemote] = useState<PatientLibraryView | null>(injected ?? null);
+  const [loadError,setLoadError]=useState('');const [loading,setLoading]=useState(!injected);const [retry,setRetry]=useState(0);
   const [shareStatus, setShareStatus] = useState('');
   const [readStatus, setReadStatus] = useState('');
   const [allTags, setAllTags] = useState(false);
@@ -223,17 +225,20 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
   useEffect(() => {
     if (injected) {
       setRemote(injected);
+      setLoading(false);setLoadError('');
       return;
     }
     const controller = new AbortController();
-    resourcesApi.library(patientId, query, false, controller.signal).then((result) => {
+    setLoading(true);setLoadError('');
+    resourcesApi.library(patientId, query, professional, controller.signal).then((result) => {
       setRemote(result.library);
+      setLoading(false);
     }).catch((error) => {
       if (isAbortError(error)) return;
-      setRemote(emptyLibrary(patientId));
+      setLoading(false);setLoadError('No pudimos cargar los recursos. Revisá la conexión y tu acceso, y reintentá.');
     });
     return () => controller.abort();
-  }, [injected, patientId, query]);
+  }, [injected, patientId, query,professional,retry]);
   useEffect(() => {
     setSelectedId(resourceGuideIdFromHash(window.location.hash));
   }, [patientId]);
@@ -297,6 +302,8 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
   };
 
   /* ---------- Insight Details (279:9301): contenido 800 + 36 + rail 325 ---------- */
+  if(loadError)return <NvState kind="error" title="No pudimos cargar los recursos" description={loadError} action={<NvButton onClick={()=>setRetry(value=>value+1)}>Reintentar</NvButton>}/>;
+  if(loading)return <NvState kind="loading" title="Cargando recursos…" description="Un momento."/>;
   if (selected) {
     const related = selected.related.map((id) => catalog.find((guide) => guide.id === id)).filter((guide): guide is ResourceGuide => Boolean(guide));
     const isSaved = saved.some((row) => row.item_id === selected.id);
@@ -343,6 +350,7 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
       <div className="nvrf-main">
         <header className="nvrf-hero">
           <h2>Guías y artículos revisados</h2>
+          {professional&&<NvButton className="nv-soft" onClick={()=>onNavigate('guardado')}>Asignar recursos a pacientes</NvButton>}
           {onQueryChange && <label className="nvrf-search"><span className="nvrf-sr">Buscar recursos y guardados</span><input type="search" placeholder="Buscar guías y artículos" value={query} onChange={(event) => onQueryChange(event.target.value)} /><span className="nvrf-search-go" aria-hidden="true"><MagnifyingGlass size={18} /></span></label>}
           {onQueryChange && tags.length > 0 && <div className="nvrf-chips" aria-label="Etiquetas frecuentes">{tags.slice(0, 5).map(({ tag }) => <button type="button" key={tag} aria-pressed={normalize(query) === normalize(tag)} onClick={() => onQueryChange(normalize(query) === normalize(tag) ? '' : tag)}>{tag}</button>)}</div>}
         </header>
