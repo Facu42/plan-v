@@ -10,7 +10,8 @@ export type AiJobStatus = (typeof AI_JOB_STATUSES)[number];
 export const RECIPE_PROMPT_VERSION = 'recipe_draft.v2';
 export const MENU_PROMPT_VERSION = 'menu_draft.v2';
 
-export const AI_JOB_TIMEOUT_MS = 25_000;
+// Deja 30 s de margen para releer permisos/contexto y cerrar la reserva de 120 s.
+export const AI_JOB_TIMEOUT_MS = 90_000;
 export const AI_JOB_MAX_TOKENS = 8_000;
 export const AI_JOB_MONTHLY_TOKEN_BUDGET = 200_000;
 export const AI_JOB_MAX_ACTIVE = 3;

@@ -11,5 +11,6 @@ export function resolveAiMode() {
 
 export function logProviderFailure(scope: string, error: unknown) {
   const name = error instanceof Error ? error.name : 'unknown';
-  console.error(`[ai:${scope}] provider failed`, { name, code: 'AI_UNAVAILABLE' });
+  console.error(`[ai:${scope}] provider failed`, { name, code: 'AI_UNAVAILABLE',
+    ...(error instanceof AIUnavailableError && error.reason ? { reason: error.reason } : {}) });
 }

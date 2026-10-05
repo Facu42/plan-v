@@ -2,11 +2,13 @@ import { emitOpsAlert } from '../ops/alerts.js';
 import { jobErrorMessage } from './errors.js';
 import type { JobStore, ProcessingJob } from './types.js';
 import { createMemoryJobStore } from './memory.js';
+import { AI_JOB_TIMEOUT_MS } from '../../src/types/ai-jobs.js';
 
 export type JobHandler = (job: ProcessingJob) => Promise<void>;
 
 export async function runOne(store: JobStore, owner: string, handler: JobHandler, now?: Date) {
-  const job = await store.lease(owner, now);
+  // También las alternativas usan esta cola: no recuperar un intento durante su llamada.
+  const job = await store.lease(owner, now, AI_JOB_TIMEOUT_MS + 30_000);
   if (!job) return null;
   try {
     await handler(job);
