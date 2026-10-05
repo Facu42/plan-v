@@ -29,7 +29,7 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
 
 ## Lo hecho (publicado en `main`)
 
-Trabajo nuevo aún **sin publicar**: [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.md), PR #54, rama `codex/nutrigo-producto-mcp` desde `d976213`, con la landing publicada en PR #55 incorporada. Conserva el enfoque anterior por separado. [Cierre funcional y evidencia](cierre-funcional-plan-v-2026-10-05.md), [acciones y guía](recorridos-y-contratos-plan-v-2026-10-05.md) y [paquete de cinco migraciones](paquete-produccion-pr54-2026-10-05.md). Producción pendiente de aprobación concreta; los ensayos temporales no certifican su despliegue ni la generación gratuita real. No editar el registro del otro hilo.
+El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.md), PR #54, ya se integró y publicó en `83a93a8`, con las cinco migraciones aprobadas aplicadas y la landing #55 conservada. [Publicación y comprobaciones actuales](publicacion-producto-plan-v-2026-10-05.md), [cierre funcional previo](cierre-funcional-plan-v-2026-10-05.md), [acciones y guía](recorridos-y-contratos-plan-v-2026-10-05.md) y [paquete SQL](paquete-produccion-pr54-2026-10-05.md). La prueba real de IA gratuita requiere cerrar el control de permisos de la nueva app; la portada manual HTTPS ya está comprobada. No editar el registro del otro hilo.
 
 - Producto listo para usar de punta a punta, diseño Nutrigo en 13 pantallas: `docs/registro-producto-listo.md`.
 - Seguridad y privacidad: términos y privacidad, 34 funciones internas cerradas en la base:
