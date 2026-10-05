@@ -6,6 +6,14 @@ import { clientAddress } from './client-address.js';
 
 type Environment = Record<string, string | undefined>;
 const LOCAL_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+function localSignedAuthOrigin(env: Environment, url: URL): boolean {
+  if(env.APP_MODE!=='staging'||env.PLANV_LOCAL_SIGNED_AUTH!=='1'||!['127.0.0.1','localhost','[::1]'].includes(url.hostname))return false;
+  try {
+    const supabase=new URL(env.SUPABASE_URL??''),database=new URL(env.PLANV_LOCAL_AUTH_DB_URL??'');
+    return supabase.protocol==='http:'&&['postgres:','postgresql:'].includes(database.protocol)
+      &&[supabase,database].every(value=>['127.0.0.1','localhost','[::1]'].includes(value.hostname));
+  } catch {return false;}
+}
 
 export function readCorsOrigins(env: Environment, requireConfigured = false): string[] {
   const persistent = env.APP_MODE === 'production' || env.APP_MODE === 'staging';
@@ -18,7 +26,7 @@ export function readCorsOrigins(env: Environment, requireConfigured = false): st
     const origin = value.trim();
     const url = new URL(origin);
     if (url.origin !== origin || url.username || url.password || !['http:', 'https:'].includes(url.protocol)
-      || (persistent && url.protocol !== 'https:')) {
+      || (persistent && url.protocol !== 'https:' && !localSignedAuthOrigin(env,url))) {
       throw new Error('CORS_ALLOWED_ORIGINS must contain exact approved origins');
     }
     return origin;

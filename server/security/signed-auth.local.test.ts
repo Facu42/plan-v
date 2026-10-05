@@ -336,6 +336,31 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     expect((await patientB.client.rpc('claim_recipe_cover', { target_version: vid, retry: true })).error?.code).toBe('42501');
   });
 
+  it('un análisis bloqueado por una revisión no inventa origen y las lecturas conservan privacidad',async()=>{
+    const mid=randomUUID();const cid=randomUUID();const macros={kcal:200,protein_g:10,carbs_g:35,fat_g:3};
+    await pool.query("insert into public.meal_logs(id,patient_id,client_id,slot_label,description) values($1,$2,$3,'Almuerzo','Registro histórico ficticio')",[mid,pidB,cid]);
+    const first=await pool.connect();let analysis:Promise<Awaited<ReturnType<typeof patientB.client.rpc>>>|undefined;
+    try {
+      await first.query('begin');await first.query('set local role authenticated');await first.query("select set_config('request.jwt.claim.sub',$1,true)",[ownerB.id]);
+      await first.query('select pg_advisory_xact_lock(hashtextextended($1,0))',[mid]);
+      await first.query("update public.meal_logs set status='confirmed',analysis_status='succeeded',macros=$2,note_for_nutri=$3 where id=$1",[mid,macros,canary]);
+      analysis=Promise.resolve(patientB.client.rpc('record_meal_analysis',{payload:{meal_id:mid,status:'succeeded',foods:[],macros,confidence:0.5}}));
+      // Inicia una conexión real de PostgREST mientras la revisión conserva el lock.
+      let blocked=false;
+      for(let attempt=0;attempt<60;attempt++) {
+        blocked=(await pool.query("select exists(select 1 from pg_locks where locktype='advisory' and not granted) as waiting")).rows[0].waiting;
+        if(blocked)break;await new Promise(resolve=>setTimeout(resolve,50));
+      }
+      expect(blocked).toBe(true);
+      await first.query('commit');const result=await analysis;
+      expect(result.error).toBeNull();expect(result.data.nutrition_origin).toBeNull();expect(result.data).not.toHaveProperty('note_for_nutri');
+      expect((await patientB.client.rpc('save_meal_log',{payload:{patient_id:pidB,client_id:cid,slot:'Almuerzo',description:'Reintento ficticio'}})).data.log).not.toHaveProperty('note_for_nutri');
+      expect((await ownerB.client.from('meal_logs').update({nutrition_origin:'declared'}).eq('id',mid)).error?.code).toBe('42501');
+      const reread=await api(patientB,`/api/patients/${pidB}`);expect(reread.status).toBe(200);const body=await reread.json();expect(JSON.stringify(body)).not.toContain(canary);
+      expect((await pool.query('select nutrition_origin from public.meal_logs where id=$1',[mid])).rows[0].nutrition_origin).toBeNull();
+    } finally {await first.query('rollback');first.release();if(analysis)await analysis.catch(()=>undefined);}
+  });
+
   it('la publicación revisada retiene el mismo lock que una edición en otra conexión', async () => {
     const id = randomUUID();
     const draft = { id, period_start: '2026-10-02', period_end: '2026-10-03',

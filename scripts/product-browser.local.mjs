@@ -22,7 +22,7 @@ const env = { ...process.env, PORT:'5597', VITE_API_PROXY:apiOrigin, CORS_ORIGIN
 const pool = new pg.Pool({ connectionString:env.PLANV_LOCAL_AUTH_DB_URL });
 const admin = createClient(env.SUPABASE_URL,env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
 let password = 'Local-' + randomBytes(24).toString('base64url') + '-A1!';
-const identities=[]; const evidence=[]; let apiProcess; let webProcess; let phase='preparar identidades';
+const identities=[]; const evidence=[]; let apiProcess; let webProcess; let phase='preparar identidades';let lastAction='preparación';
 async function identity(label) {
   const email=label.toLowerCase().replaceAll(' ','-')+'-'+randomUUID()+'@example.test';
   const created=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:label,legal_version:'2026-09-29',legal_accepted_at:new Date().toISOString()}});
@@ -32,7 +32,7 @@ async function identity(label) {
   if(signed.error) throw Error('Sesión ficticia no iniciada');
   const actor={id:created.data.user.id,email,client,token:signed.data.session.access_token};identities.push(actor);return actor;
 }
-async function B(...args) { return (await run(browse,args,{env,timeout:45000,maxBuffer:2*1024*1024})).stdout.trim(); }
+async function B(...args) { lastAction=args[0]+(['wait','fill','click','select','upload'].includes(args[0])?' '+args[1]:'');return (await run(browse,args,{env,timeout:45000,maxBuffer:2*1024*1024})).stdout.trim(); }
 async function until(expression) {
   const deadline=Date.now()+20000;
   while(Date.now()<deadline) { if((await B('js',expression)).includes('true')) return; await new Promise(r=>setTimeout(r,250)); }
@@ -148,7 +148,9 @@ try {
   check(true,'recuperación real de contraseña y nuevo ingreso conservan datos');
   await writeFile('.gstack/product-browser-evidence.json',JSON.stringify({result:'passed',screenshots:false,provider:'disabled',checks:evidence},null,2));
 } catch {
-  console.error('Falló la comprobación del navegador en: '+phase+'. No se imprimen cuentas, tokens ni contenido de sesión.');process.exitCode=1;
+  console.error('Falló la comprobación del navegador en: '+phase+'; control: '+lastAction+'. No se imprimen cuentas, tokens ni contenido de sesión.');
+  if(phase==='arranque de servicios temporales')console.error('Salida local API: '+(apiProcess?.exitCode??'en ejecución')+'; web: '+(webProcess?.exitCode??'en ejecución'));
+  process.exitCode=1;
 } finally {
   try {await B('stop');}catch{}
   for(const child of [webProcess,apiProcess]) if(child&&!child.killed)child.kill();
