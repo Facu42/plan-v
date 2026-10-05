@@ -156,6 +156,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
   briefDismissed?: boolean;
   appointment?: Patient['appointment'];
   appointment_history?: Patient['appointment_history'];
+  resource_assignments?: Patient['resource_assignments'];
 }, audience: QueryAudience = 'professional'): Patient {
   const billing = {
     billing_status: (row.billing_status as Patient['billing_status']) ?? 'pending',
@@ -193,6 +194,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
     timeline: extras.timeline ?? [],
     meal_logs: extras.meal_logs ?? [],
     messages: extras.messages ?? [],
+    resource_assignments: extras.resource_assignments ?? [],
   };
 }
 
@@ -248,7 +250,7 @@ export function mapMessage(row: Record<string, unknown>, authorRole: unknown): M
 async function loadPatientExtras(
   patientId: string,
   audience: 'professional' | 'patient' = 'professional',
-): Promise<Pick<Patient, 'todayPlan' | 'weekPlan' | 'meal_logs' | 'messages' | 'brief' | 'briefDismissed' | 'timeline' | 'habit_logs' | 'hydration' | 'energy' | 'sleep_minutes' | 'appointment' | 'appointment_history'>> {
+): Promise<Pick<Patient, 'todayPlan' | 'weekPlan' | 'meal_logs' | 'messages' | 'brief' | 'briefDismissed' | 'timeline' | 'habit_logs' | 'hydration' | 'energy' | 'sleep_minutes' | 'appointment' | 'appointment_history' | 'resource_assignments'>> {
   const sb = getRequestDb();
 
   const timelineQuery = sb.from('timeline_events').select('id,kind,title,body,visibility,occurred_at').eq('patient_id', patientId);
@@ -261,7 +263,7 @@ async function loadPatientExtras(
     // Sin permiso de tabla para la nutricionista: lo lee el servidor; quien llama ya la autorizó sobre esta paciente.
     : privilegedDb().from('ai_briefs').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }).limit(1).maybeSingle();
 
-  const [{ data: slots }, { data: logs }, { data: msgs }, briefsResult, { data: habits }, { data: appts }, { data: timelineRows }] = await Promise.all([
+  const [{ data: slots }, { data: logs }, { data: msgs }, briefsResult, { data: habits }, { data: appts }, { data: timelineRows }, resourceAssignments] = await Promise.all([
     sb.from('meal_slots').select('weekday, slot, title').eq('patient_id', patientId).order('weekday').order('slot'),
     sb.from(audience === 'patient' ? 'meal_logs_patient_view' : 'meal_logs').select(mealLogColumns[audience]).eq('patient_id', patientId).order('logged_at', { ascending: false }).limit(20),
     sb.from(audience === 'patient' ? 'messages_patient_view' : 'messages').select(messageColumns[audience]).eq('patient_id', patientId).order('sent_at', { ascending: false }).limit(MESSAGE_PAGE_SIZE),
@@ -269,6 +271,7 @@ async function loadPatientExtras(
     sb.from('habit_logs').select('*').eq('patient_id', patientId).order('date', { ascending: false }).limit(14),
     sb.from(audience === 'patient' ? 'appointments_patient_view' : 'appointments').select(appointmentColumns[audience]).eq('patient_id', patientId).eq('status', 'scheduled').gte('starts_at', new Date().toISOString()).order('starts_at', { ascending: true }).limit(1),
     scopedTimeline.order('occurred_at', { ascending: false }).limit(20),
+    loadResourceAssignments([patientId]),
   ]);
   const briefs = briefsResult.data;
 
@@ -366,6 +369,7 @@ async function loadPatientExtras(
     sleep_minutes: todayHabit?.sleep_minutes ?? null,
     appointment,
     appointment_history,
+    resource_assignments: resourceAssignments.get(patientId) ?? [],
   };
 }
 
@@ -457,13 +461,32 @@ export async function sbListPatientsForNutri(userId: string, query: { offset: nu
     }
   }
 
-  const archivedAt = await loadArchivedAt(ids);
+  const [archivedAt, resourceAssignments] = await Promise.all([loadArchivedAt(ids), loadResourceAssignments(ids)]);
   return {
     patients: pageRows.map((patientRow) => mapPatient({ ...patientRow, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, {
       appointment: mapScheduledAppointment(nextByPatient.get(String(patientRow.id))),
+      resource_assignments: resourceAssignments.get(String(patientRow.id)) ?? [],
     }, 'professional')),
     page: { offset: query.offset, limit: query.limit, has_more: hasMore },
   };
+}
+
+async function loadResourceAssignments(ids: string[]) {
+  const grouped = new Map<string, NonNullable<Patient['resource_assignments']>>();
+  if (!ids.length) return grouped;
+  // La sesión y las reglas de ambas tablas delimitan las asignaciones visibles.
+  const { data, error } = await getRequestDb().from('resource_assignments')
+    .select('id,patient_id,assigned_at,first_read_at,resources!inner(slug)').in('patient_id', ids);
+  if (error) throwWriteError(error);
+  for (const assignment of rows(data)) {
+    const resource = row(assignment.resources);
+    if (typeof resource?.slug !== 'string') throw new Error('Resource assignment returned no slug');
+    const patientId = String(assignment.patient_id);
+    const list = grouped.get(patientId) ?? [];
+    list.push({id:String(assignment.id),patient_id:patientId,resource_id:resource.slug,assigned_at:String(assignment.assigned_at),read_at:assignment.first_read_at == null ? null : String(assignment.first_read_at)});
+    grouped.set(patientId, list);
+  }
+  return grouped;
 }
 
 // archived_at llega con la migración 20260928140000; si la base todavía no la
