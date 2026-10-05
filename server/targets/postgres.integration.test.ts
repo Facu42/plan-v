@@ -13,7 +13,11 @@ const patient = '10000000-0000-4000-a000-000000000091';
 const otherPatient = '10000000-0000-4000-a000-000000000092';
 const inputs: TargetInput = { sex: 'femenino', age: 30, weight_kg: 65, height_cm: 165, activity: 'ligera', ...defaultsForGoal('bajar') };
 const body = { sex: 'femenino', birth_date: '1990-05-10', height_cm: 165, weight_kg: 65 };
-const tables = ['nutrition_targets', 'patient_body_data', 'patient_body_data_requests'] as const;
+const tables = ['nutrition_targets', 'nutrition_target_drafts', 'patient_body_data', 'patient_body_data_requests'] as const;
+let migratedDraft: unknown[];
+let migratedPublished: unknown[];
+let legacyDraft: unknown[];
+let legacyPublished: unknown[];
 
 async function asUser<T = Record<string, unknown>>(user: string, sql: string, params: unknown[] = []) {
   return db.transaction(async (tx) => {
@@ -22,7 +26,14 @@ async function asUser<T = Record<string, unknown>>(user: string, sql: string, pa
     return (await tx.query<T>(sql, params)).rows;
   });
 }
-async function rpc<T = Record<string, unknown>>(user: string, name: string, args: unknown[] = []) {
+async function rpc<T = Record<string, unknown>>(user: string, name: string, args: unknown[] = []): Promise<T> {
+  // La API ya usa CAS. Los casos de fórmula conservan el helper anterior y
+  // leen explícitamente la revisión antes de enviar la nueva función.
+  if (name === 'save_nutrition_target') {
+    const current = (await db.query<{ revision: number }>('select revision from public.nutrition_target_drafts where patient_id=$1', [args[0]])).rows[0]?.revision ?? 0;
+    const workspace = await rpc<{ target: T }>(user, 'save_nutrition_target_versioned', [...args, current]);
+    return workspace.target;
+  }
   return (await asUser<{ result: T }>(user, `select public.${name}(${args.map((_, i) => `$${i + 1}`).join(',')}) as result`, args))[0].result;
 }
 async function seedHealth() {
@@ -57,20 +68,34 @@ beforeAll(async () => {
     create function storage.foldername(text) returns text[] language sql immutable as $$ select string_to_array($1,'/') $$;
   `);
   const migrations = new URL('../../supabase/migrations/', import.meta.url);
-  for (const file of (await readdir(migrations)).filter((name) => name.endsWith('.sql')).sort()) await db.exec(await readFile(new URL(file, migrations), 'utf8'));
+  const files = (await readdir(migrations)).filter((name) => name.endsWith('.sql')).sort();
+  const targetMigration = '20261003172112_separate_nutrition_target_drafts.sql';
+  for (const file of files.filter((name) => name < targetMigration)) await db.exec(await readFile(new URL(file, migrations), 'utf8'));
   for (const [id, email] of [[owner, 'owner@example.test'], [outsider, 'outsider@example.test'], [patientUser, 'patient@example.test'], [otherPatientUser, 'other-patient@example.test']]) {
     await db.query('insert into auth.users(id,email,email_confirmed_at) values($1,$2,now())', [id, email]);
   }
   ownerId = (await db.query<{ id: string }>("select public.provision_nutritionist($1,'Nutricionista ficticia') as id", [owner])).rows[0].id;
   const otherOwnerId = (await db.query<{ id: string }>("select public.provision_nutritionist($1,'Otra ficticia') as id", [outsider])).rows[0].id;
   await db.query("insert into public.patients(id,nutritionist_id,user_id,full_name,billing_status) values($1,$2,$3,'Paciente ficticia','waived'),($4,$5,$6,'Otra ficticia','waived')", [patient, ownerId, patientUser, otherPatient, otherOwnerId, otherPatientUser]);
+  await asUser(owner, 'select public.save_nutrition_target($1,$2,$3,false)', [patient, inputs, calculateTarget(inputs)]);
+  await asUser(outsider, 'select public.save_nutrition_target($1,$2,$3,true)', [otherPatient, inputs, calculateTarget(inputs)]);
+  legacyDraft = (await db.query('select patient_id,inputs,result,updated_at from public.nutrition_targets where patient_id=$1', [patient])).rows;
+  legacyPublished = (await db.query('select * from public.nutrition_targets where patient_id=$1', [otherPatient])).rows;
+  for (const file of files.filter((name) => name >= targetMigration)) await db.exec(await readFile(new URL(file, migrations), 'utf8'));
+  migratedDraft = (await db.query('select patient_id,inputs,result,updated_at from public.nutrition_target_drafts where patient_id=$1', [patient])).rows;
+  migratedPublished = (await db.query('select * from public.nutrition_targets where patient_id=$1', [otherPatient])).rows;
+  expect((await db.query('select count(*)::int as n from public.nutrition_targets where patient_id=$1', [patient])).rows).toEqual([{ n: 0 }]);
 }, 60000);
 beforeEach(async () => {
-  await db.exec('delete from public.privacy_export_packages; delete from public.privacy_requests; delete from public.patient_body_data_requests; delete from public.patient_body_data; delete from public.nutrition_targets; update public.patients set deactivated_at=null,anonymized_at=null,deletion_requested_at=null;');
+  await db.exec('delete from public.privacy_export_packages; delete from public.privacy_requests; delete from public.patient_body_data_requests; delete from public.patient_body_data; delete from public.nutrition_targets; delete from public.nutrition_target_drafts; update public.patients set deactivated_at=null,anonymized_at=null,deletion_requested_at=null;');
 });
 afterAll(async () => { await db?.close(); });
 
 describe('metas y datos corporales por acceso directo a PostgreSQL', () => {
+  it('la migración conserva exactamente borrador previo y meta publicada, sin inventar historial', () => {
+    expect(migratedDraft).toEqual(legacyDraft);
+    expect(migratedPublished).toEqual(legacyPublished);
+  });
   it('guarda datos propios y mantiene el borrador oculto a la paciente', async () => {
     await rpc(patientUser, 'save_my_body_data', [body]);
     const draft = await rpc(owner, 'save_nutrition_target', [patient, inputs, calculateTarget(inputs), false]);
@@ -80,6 +105,56 @@ describe('metas y datos corporales por acceso directo a PostgreSQL', () => {
     expect(await asUser(patientUser, 'select result from public.nutrition_targets')).toEqual([{ result: calculateTarget(inputs) }]);
     expect(await asUser(otherPatientUser, 'select result from public.nutrition_targets')).toEqual([]);
     expect(await asUser(outsider, 'select weight_kg from public.patient_body_data')).toEqual([]);
+  });
+
+  it('un borrador posterior no cambia la publicada ni permite leer el borrador desde la paciente', async () => {
+    await rpc(owner, 'save_nutrition_target', [patient, inputs, calculateTarget(inputs), true]);
+    const confirmed = await asUser(patientUser, 'select * from public.nutrition_targets');
+    const updated = { ...inputs, weight_kg: 80 };
+    const saved = await rpc<{ revision: number; draft: { inputs: TargetInput }; published: unknown }>(owner, 'save_nutrition_target_versioned', [patient, updated, calculateTarget(updated), false, 1]);
+    expect(saved.revision).toBe(2);
+    expect(saved.draft.inputs).toEqual(updated);
+    expect(await asUser(patientUser, 'select * from public.nutrition_targets')).toEqual(confirmed);
+    for (const user of [patientUser, otherPatientUser, outsider]) {
+      expect(await asUser(user, 'select * from public.nutrition_target_drafts')).toEqual([]);
+      await expect(rpc(user, 'get_nutrition_target_workspace', [patient])).rejects.toMatchObject({ code: '42501' });
+    }
+    const state = await rpc<{ revision: number; draft: unknown; published: unknown }>(owner, 'get_nutrition_target_workspace', [patient]);
+    expect(state.revision).toBe(2);
+    expect(state.draft).not.toBeNull();
+    const published = await rpc<{ revision: number; draft: unknown; published: { inputs: TargetInput } }>(owner, 'save_nutrition_target_versioned', [patient, updated, calculateTarget(updated), true, 2]);
+    expect(published.draft).toBeNull();
+    expect(published.published.inputs).toEqual(updated);
+    expect(published.revision).toBe(3);
+  });
+
+  it('CAS rechaza conflicto y revisión ausente sin escribir y el RPC antiguo queda cerrado', async () => {
+    await rpc(owner, 'save_nutrition_target_versioned', [patient, inputs, calculateTarget(inputs), true, 0]);
+    const before = await rpc(owner, 'get_nutrition_target_workspace', [patient]);
+    for (const revision of [0, null, -1]) {
+      await expect(rpc(owner, 'save_nutrition_target_versioned', [patient, { ...inputs, weight_kg: 80 }, calculateTarget(inputs), false, revision])).rejects.toMatchObject({ code: revision === 0 ? 'PT409' : '22023' });
+    }
+    expect(await rpc(owner, 'get_nutrition_target_workspace', [patient])).toEqual(before);
+    await expect(asUser(owner, 'select public.save_nutrition_target($1,$2,$3,$4)', [patient, inputs, calculateTarget(inputs), false])).rejects.toMatchObject({ code: '42501' });
+  });
+
+  it('los nuevos RPC cierran visitantes y la base impide volver a mezclar un borrador con la confirmada', async () => {
+    for (const signature of ['public.get_nutrition_target_workspace(uuid)', 'public.save_nutrition_target_versioned(uuid,jsonb,jsonb,boolean,bigint)', 'private.save_nutrition_target_versioned(uuid,jsonb,jsonb,boolean,bigint)']) {
+      expect((await db.query<{ allowed: boolean }>('select has_function_privilege($1,$2,\'execute\') as allowed', ['anon', signature])).rows[0].allowed).toBe(false);
+    }
+    await expect(db.query('insert into public.nutrition_targets(patient_id,inputs,result,published_at) values($1,$2,$3,null)', [patient, inputs, calculateTarget(inputs)])).rejects.toMatchObject({ code: '23514' });
+    await expect(db.query('insert into public.nutrition_target_drafts(patient_id,inputs,result,revision) values($1,null,$2,1)', [patient, calculateTarget(inputs)])).rejects.toMatchObject({ code: '23514' });
+  });
+
+  it('dos escrituras de una misma revisión conservan sólo una y rechazan la segunda', async () => {
+    const responses = await Promise.allSettled([
+      rpc(owner, 'save_nutrition_target_versioned', [patient, inputs, calculateTarget(inputs), true, 0]),
+      rpc(owner, 'save_nutrition_target_versioned', [patient, { ...inputs, weight_kg: 80 }, calculateTarget(inputs), false, 0]),
+    ]);
+    expect(responses.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+    expect(responses.filter((r) => r.status === 'rejected')).toEqual([expect.objectContaining({ reason: expect.objectContaining({ code: 'PT409' }) })]);
+    const state = await rpc<{ revision: number }>(owner, 'get_nutrition_target_workspace', [patient]);
+    expect(state.revision).toBe(1);
   });
 
   it('bloquea escrituras y lecturas después de pedir y completar el borrado', async () => {

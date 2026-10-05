@@ -1,3 +1,4 @@
+import { productFixtureArgs } from '../testing/product-rpc-fixture';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
 import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
@@ -24,6 +25,8 @@ async function asUser<T = Record<string, unknown>>(user: string, sql: string, pa
   });
 }
 async function rpc(user: string, name: string, args: unknown[] = []) {
+  args = await productFixtureArgs(db, name, args);
+  if (name === 'publish_meal_plan') name = 'publish_reviewed_meal_plan';
   const rows = await asUser<{ result: unknown }>(user, `select public.${name}(${args.map((_, i) => `$${i + 1}`).join(',')}) as result`, args);
   return rows[0].result;
 }
@@ -128,9 +131,9 @@ describe('PV-19 planes en PostgreSQL descartable', () => {
     expect(still.items[0].free_text).toBe('Pollo con vegetales');
 
     const publishedId = (await asUser<{ id: string }>(nutriA, 'select id from public.meal_plan_versions where meal_plan_id=$1 and version=1', [planId]))[0].id;
-    await expect(asUser(nutriA, 'update public.meal_plan_versions set period_end=period_end + 1 where id=$1', [publishedId])).rejects.toMatchObject({ code: 'PT409' });
-    await expect(asUser(nutriA, "insert into public.meal_plan_items(meal_plan_version_id, for_date, slot, free_text) values ($1,'2026-09-24','extra','no')", [publishedId])).rejects.toMatchObject({ code: 'PT409' });
-    await expect(asUser(nutriA, 'delete from public.meal_plan_items where meal_plan_version_id=$1', [publishedId])).rejects.toMatchObject({ code: 'PT409' });
+    await expect(asUser(nutriA, 'update public.meal_plan_versions set period_end=period_end + 1 where id=$1', [publishedId])).rejects.toMatchObject({ code: '42501' });
+    await expect(asUser(nutriA, "insert into public.meal_plan_items(meal_plan_version_id, for_date, slot, free_text) values ($1,'2026-09-24','extra','no')", [publishedId])).rejects.toMatchObject({ code: '42501' });
+    await expect(asUser(nutriA, 'delete from public.meal_plan_items where meal_plan_version_id=$1', [publishedId])).rejects.toMatchObject({ code: '42501' });
   });
 
   it('resuelve receta publicada XOR texto, rechaza receta borrador y falla cerrado sin tablas', async () => {

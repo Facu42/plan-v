@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { recipeNutritionSchema, type RecipeNutrition } from './ai-nutrition.js';
 
 export const RECIPE_UNITS = ['g', 'ml', 'u', 'cdita', 'cda', 'taza'] as const;
 export type RecipeUnit = (typeof RECIPE_UNITS)[number];
@@ -16,13 +17,15 @@ export const recipeItemInputSchema = z.object({
 }).strict();
 export const recipeDraftSchema = z.object({
   id: z.uuid(),
+  expected_revision: z.uuid().nullable().optional(),
   title: z.string().trim().min(2).max(150),
   yield_portions: z.number().positive().max(50),
   steps: z.array(step).min(1).max(12),
   nutrient_source: z.string().trim().max(200).default(''),
   items: z.array(recipeItemInputSchema).min(1).max(20),
+  nutrition: recipeNutritionSchema.optional(),
 }).strict();
-export const recipePublishSchema = z.object({ expected_version: z.number().int().min(1) }).strict();
+export const recipePublishSchema = z.object({ expected_version: z.number().int().min(1), expected_revision: z.uuid().optional() }).strict();
 export const recipeAssignSchema = z.object({
   patient_id: z.string().trim().min(1).max(80),
   expected_version: z.number().int().min(1),
@@ -54,6 +57,8 @@ export type RecipeCard = {
 
 export type RecipeVersionView = {
   id: string;
+  title?: string;
+  revision?: string;
   version: number;
   yield_portions: number;
   steps: string[];
@@ -61,6 +66,7 @@ export type RecipeVersionView = {
   published_at: string | null;
   ingredients: RecipeItem[];
   card?: RecipeCard;
+  nutrition?: RecipeNutrition;
 };
 export type ProfessionalRecipe = {
   id: string;
@@ -81,5 +87,6 @@ export type PatientRecipe = {
   assigned_at: string;
   published_at: string;
   card?: RecipeCard;
+  nutrition?: RecipeNutrition;
 };
 export type IngredientRecord = { id: string; name: string; base_unit: RecipeUnit; created_at: string };

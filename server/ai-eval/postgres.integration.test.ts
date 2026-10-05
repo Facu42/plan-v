@@ -1,3 +1,4 @@
+import { productFixtureArgs } from '../testing/product-rpc-fixture';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
 import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
@@ -23,6 +24,8 @@ async function asUser<T = Record<string, unknown>>(user: string, sql: string, pa
   });
 }
 async function rpc(user: string, name: string, args: unknown[] = []) {
+  args = await productFixtureArgs(db, name, args);
+  if (name === 'publish_meal_plan') name = 'publish_reviewed_meal_plan';
   const rows = await asUser<{ result: unknown }>(user, `select public.${name}(${args.map((_, i) => `$${i + 1}`).join(',')}) as result`, args);
   return rows[0].result;
 }
@@ -96,7 +99,7 @@ describe('PV-28 evaluación en PostgreSQL descartable', () => {
       items: [{ for_date: '2026-09-21', slot: 'Almuerzo', free_text: 'Tostada con maní', portions: 1 }],
     }]);
     await expect(rpc(nutriA, 'publish_meal_plan', [planId, 1])).rejects.toMatchObject({ code: 'PT409' });
-    await expect(rpc(nutriA, 'publish_meal_plan', [planId, 9])).rejects.toMatchObject({ code: '22023' });
+    await expect(rpc(nutriA, 'publish_meal_plan', [planId, 9])).rejects.toMatchObject({ code: '42501' });
     await expect(rpc(nutriB, 'publish_meal_plan', [planId, 1])).rejects.toMatchObject({ code: '42501' });
     await expect(rpc(patientAUser, 'publish_meal_plan', [planId, 1])).rejects.toMatchObject({ code: '42501' });
     await expect(rpc(patientBUser, 'publish_meal_plan', [planId, 1])).rejects.toMatchObject({ code: '42501' });

@@ -36,7 +36,7 @@ export function FigmaPlanCard({ onOpen }: { onOpen: () => void }) {
 /** Section Footer: fila 20 px, copyright, enlaces y cinco assets originales. */
 export function FigmaPatientFooter({ year, onContact }: { year: number; onContact: () => void }) {
   return <footer className="nv-footer fp-footer">
-    <p>Copyright © {year} Plan V</p>
+    <p>© {year} Plan V</p>
     <nav className="fp-footer-links" aria-label="Información y contacto"><a href="/legal/privacidad.html" target="_blank" rel="noreferrer">Privacidad</a>
     <a href="/legal/terminos.html" target="_blank" rel="noreferrer">Términos y condiciones</a>
     <button type="button" onClick={onContact}>Contacto</button></nav>

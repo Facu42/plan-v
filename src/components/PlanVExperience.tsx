@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 const PatientApp = lazy(() => import('./patient/PatientApp').then(({ PatientApp }) => ({ default: PatientApp })));
 const CrmDashboard = lazy(() => import('./crm/CrmDashboard').then(({ CrmDashboard }) => ({ default: CrmDashboard })));
 import { LoginScreen } from './auth/LoginScreen';
+import { PasswordResetScreen } from './auth/PasswordResetScreen';
 import { ConsentScreen } from './auth/ConsentScreen';
 import { hasCurrentLegalAcceptance } from '../legal';
 import { useAuth } from '../context/AuthContext';
@@ -20,7 +21,7 @@ const AdminConsole = lazy(() => import('./nutrigo/AdminConsole').then(({ AdminCo
 const NutrigoShowroom = lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })));
 
 export function PlanVExperience() {
-  const { session, demoMode, isNutri, isPatient, profile, signOut, loading: authLoading } = useAuth();
+  const { session, demoMode, passwordRecovery, isNutri, isPatient, profile, signOut, loading: authLoading } = useAuth();
   const [view, setView] = useState<'patient' | 'pro'>('patient');
   const [inviteStatus, setInviteStatus] = useState<'idle' | 'accepting' | 'unconfirmed' | 'unavailable' | 'linked'>('idle');
   const [theme, setTheme] = useState<ThemePreference>(() => readThemePreference(
@@ -31,6 +32,7 @@ export function PlanVExperience() {
   const darkMode = theme === 'dark';
   // Sin la aceptación vigente no se carga nada ni se acepta la invitación.
   const legalOk = !session || hasCurrentLegalAcceptance(session.user.user_metadata);
+  const sessionUserId=session?.user.id??null;
   const toggleTheme = () => setTheme((current) => current === 'dark' ? 'light' : 'dark');
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export function PlanVExperience() {
   }, [theme]);
 
   useEffect(() => {
-    if (authLoading) return;
+    if (authLoading || passwordRecovery) return;
     if (!session && !demoMode) {
       reset();
       return;
@@ -47,10 +49,11 @@ export function PlanVExperience() {
     if (session && !isNutri && !isPatient) return;
     if (!legalOk) return;
     void boot({ isNutri, isPatient });
-  }, [authLoading, session, demoMode, isNutri, isPatient, legalOk, boot, reset]);
+  }, [authLoading, session, demoMode, isNutri, isPatient, legalOk, boot, reset, passwordRecovery]);
 
   useEffect(() => {
-    if (!session || !isPatient || !legalOk || inviteStatus !== 'idle') return;
+    setInviteStatus('idle');
+    if (!sessionUserId || !isPatient || !legalOk) return;
     const stored = typeof window === 'undefined' ? null : window.sessionStorage.getItem(PENDING_INVITE_STORAGE_KEY);
     const inviteId = pendingInviteIdFromLocation(typeof window === 'undefined' ? '' : window.location.search, stored);
     if (!inviteId) return;
@@ -70,7 +73,7 @@ export function PlanVExperience() {
       setInviteStatus(message.includes('Confirmá tu email') ? 'unconfirmed' : 'unavailable');
     });
     return () => { cancelled = true; };
-  }, [session, isPatient, legalOk, inviteStatus, boot]);
+  }, [sessionUserId, isPatient, legalOk, boot]);
 
   useEffect(() => {
     if (isNutri) setView('pro');
@@ -91,6 +94,8 @@ export function PlanVExperience() {
       </div>
     );
   }
+
+  if (passwordRecovery) return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PasswordResetScreen /></div>;
 
   if (!session && !demoMode) {
     return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PwaChrome /><LoginScreen darkMode={darkMode} onToggleTheme={toggleTheme} /></div>;

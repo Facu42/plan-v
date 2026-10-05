@@ -2,7 +2,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import {
-  DEFAULT_OPENAI_MODEL,
   DEFAULT_OPENROUTER_MODEL,
   getAiModel,
   resolveAiProvider,
@@ -38,22 +37,16 @@ describe('AI provider selection', () => {
     });
   });
 
-  it('permits direct OpenAI only with explicit paid opt-in', () => {
-    expect(resolveAiProvider({ AI_COST_MODE: 'paid', OPENAI_API_KEY: 'openai-test-only' })).toMatchObject({
-      provider: 'openai',
-      model: DEFAULT_OPENAI_MODEL,
-    });
+  it('blocks direct OpenAI even with legacy paid configuration', () => {
+    expect(resolveAiProvider({ AI_COST_MODE: 'paid', OPENAI_API_KEY: 'openai-test-only' })).toBeNull();
   });
 
-  it('honors OPENAI_MODEL when using the OpenAI provider', () => {
+  it('cannot enable a direct paid model through environment configuration', () => {
     expect(resolveAiProvider({
       OPENAI_API_KEY: 'openai-test-only',
       OPENAI_MODEL: 'gpt-4o',
       AI_COST_MODE: 'paid',
-    })).toMatchObject({
-      provider: 'openai',
-      model: 'gpt-4o',
-    });
+    })).toBeNull();
   });
 
   it('fails provider resolution closed when no key is configured', () => {
@@ -77,13 +70,13 @@ describe('AI provider selection', () => {
     expect(model.modelId).toBe('openrouter/free');
   });
 
-  it.each([undefined, 'free', 'PAID', 'unknown'])('blocks paid overrides and direct OpenAI with cost mode %s', (costMode) => {
+  it.each([undefined, 'free', 'paid', 'PAID', 'unknown'])('blocks paid overrides and direct OpenAI with cost mode %s', (costMode) => {
     expect(resolveAiProvider({ AI_COST_MODE: costMode, OPENAI_API_KEY: 'synthetic-only' })).toBeNull();
     expect(resolveAiProvider({ AI_COST_MODE: costMode, OPENROUTER_API_KEY: 'synthetic-only', OPENROUTER_MODEL: 'openai/gpt-4o-mini', OPENAI_API_KEY: 'synthetic-only' })).toBeNull();
   });
 
-  it('allows a paid OpenRouter override only with explicit opt-in', () => {
-    expect(resolveAiProvider({ AI_COST_MODE: 'paid', OPENROUTER_API_KEY: 'synthetic-only', OPENROUTER_MODEL: 'openai/gpt-4o-mini' })?.model).toBe('openai/gpt-4o-mini');
+  it('blocks a paid OpenRouter override even with legacy paid opt-in', () => {
+    expect(resolveAiProvider({ AI_COST_MODE: 'paid', OPENROUTER_API_KEY: 'synthetic-only', OPENROUTER_MODEL: 'openai/gpt-4o-mini' })).toBeNull();
   });
 });
 

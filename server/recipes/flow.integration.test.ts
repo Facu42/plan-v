@@ -30,6 +30,16 @@ describe('PV-18 catálogo de recetas', () => {
     await declareKnownHealth(patient);
   });
 
+  it('rechaza un identificador distinto antes de crear o modificar otra receta', async () => {
+    const initial = draft();
+    expect((await post('/api/recipes', initial)).status).toBe(200);
+    const wrong = draft({ title: 'No debe guardarse' });
+    expect((await post('/api/recipes/'+initial.id+'/versions', wrong)).status).toBe(400);
+    const catalog = await (await app.request('/api/recipes')).json();
+    expect(catalog.recipes).toHaveLength(1);
+    expect(catalog.recipes[0]).toMatchObject({id: initial.id, title: initial.title});
+  });
+
   it('el paciente no ve borradores ni publicadas sin asignar; sí ve la revisión asignada', async () => {
     const input = draft();
     const saved = await post('/api/recipes', input);

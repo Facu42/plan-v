@@ -23,7 +23,9 @@ export function catalogResources() {
 }
 
 export function findResource(idOrSlug: string) {
-  return catalogResources().find((entry) => entry.slug === idOrSlug || entry.id === idOrSlug) ?? null;
+  const resources = catalogResources();
+  return resources.find((entry) => entry.id === idOrSlug)
+    ?? resources.find((entry) => entry.slug === idOrSlug) ?? null;
 }
 
 export function putResource(entry: EditorialResource) {

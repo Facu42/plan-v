@@ -1,6 +1,6 @@
-/** Paid providers require an explicit server-side opt-in; missing/unknown values stay free. */
-export function freeAiOnly(env: Record<string, string | undefined> = process.env): boolean {
-  return env.AI_COST_MODE !== 'paid';
+/** The product only admits free providers, including legacy paid configuration. */
+export function freeAiOnly(_env: Record<string, string | undefined> = process.env): boolean {
+  return true;
 }
 
 export function isFreeOpenRouterModel(model: unknown): model is string {

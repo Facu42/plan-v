@@ -141,6 +141,8 @@ describe('cors and readiness', () => {
     expect(releaseSha({ GIT_SHA: 'abc1234' })).toBe('abc1234');
     expect(releaseSha({ RAILWAY_GIT_COMMIT_SHA: 'railsha1' })).toBe('railsha1');
     expect(maxBodyBytes('/api/patients/x/meals')).toBeGreaterThan(maxBodyBytes('/api/patients'));
+    expect(maxBodyBytes('/api/recipes/x/cover/manual')).toBe(7_100_000);
+    expect(maxBodyBytes('/api/recipes/x/versions')).toBe(1024 * 1024);
   });
 });
 
@@ -153,9 +155,9 @@ describe('deploy contract', () => {
     expect(vercel.outputDirectory).toBe('dist');
     expect(JSON.stringify(vercel)).not.toMatch(/server\/index/);
     // Sólo rutas de la pantalla (abrir o recargar /admin, /app/*, /crm/*) hacia index.html; nunca a la API.
-    // /pacientes es la página pública de presentación (pacientes.html), sin sesión.
+    // /pacientes sirve la landing estática exportada, sin sesión.
     expect(vercel.rewrites).toEqual([
-      { source: '/pacientes', destination: '/pacientes.html' },
+      { source: '/pacientes', destination: '/pacientes/index.html' },
       { source: '/admin', destination: '/index.html' },
       { source: '/app', destination: '/index.html' },
       { source: '/app/:path*', destination: '/index.html' },

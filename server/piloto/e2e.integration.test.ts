@@ -1,3 +1,4 @@
+import { planReviewSnapshot } from '../../src/types/plans.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { app } from '../index.js';
@@ -12,7 +13,11 @@ const MEAL = 'Tortilla PV-33';
 const FAILED = 'Yogur PV-33 sin IA';
 const MESSAGE = '¿Revisamos la merienda del circuito PV-33?';
 
-function json(path: string, body?: unknown, init?: RequestInit) {
+async function json(path: string, body?: unknown, init?: RequestInit) {
+  if (path.startsWith('/api/plans/') && path.endsWith('/publish')) {
+    const saved = await (await app.request(`/api/patients/${sofia}/plans?audience=pro`)).json();
+    body = { ...(body as object), expected_snapshot: planReviewSnapshot(saved.plan.current) };
+  }
   return app.request(path, {
     method: body === undefined && !init?.method ? 'GET' : init?.method ?? 'POST',
     headers: { 'Content-Type': 'application/json', ...init?.headers },

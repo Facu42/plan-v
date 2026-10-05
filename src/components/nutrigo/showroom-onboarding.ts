@@ -31,7 +31,6 @@ export type OnboardingContext = {
   goal: string;
   nutritionist: string;
   appointmentWhen: string | null;
-  hasPublishedPlan: boolean;
 };
 
 export type ConsentCatalogEntry = {
@@ -76,7 +75,6 @@ export function buildOnboardingContext(patient: {
   name: string;
   goal: string;
   appointment: { when: string } | null;
-  weekPlan: unknown[];
 }, nutritionist = 'Tu nutricionista'): OnboardingContext {
   return {
     patientId: patient.id,
@@ -85,7 +83,6 @@ export function buildOnboardingContext(patient: {
     goal: patient.goal.trim() || 'Todavía no hay un objetivo publicado.',
     nutritionist,
     appointmentWhen: patient.appointment?.when ?? null,
-    hasPublishedPlan: patient.weekPlan.length > 0,
   };
 }
 

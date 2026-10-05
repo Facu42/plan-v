@@ -42,6 +42,7 @@ export type MealLog = {
   status: MealStatus;
   logged_at: string;
   analysis_status?: MealAnalysisStatus;
+  nutrition_origin?: 'declared' | 'ai_estimate';
 };
 
 export type TimelineEvent = {

@@ -1,3 +1,4 @@
+import { planReviewSnapshot } from '../../src/types/plans.js';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { app } from '../index.js';
@@ -6,11 +7,16 @@ import { declareKnownHealth } from '../test/declare-health.js';
 
 const patient = 'pat-sofia';
 const other = 'pat-marina';
-const post = (path: string, body: unknown) => app.request(path, {
+const post = async (path: string, body: unknown) => {
+  if (path.startsWith('/api/plans/') && path.endsWith('/publish')) {
+    const saved = await (await app.request(`/api/patients/${patient}/plans?audience=pro`)).json();
+    body = { ...(body as object), expected_snapshot: planReviewSnapshot(saved.plan.current) };
+  }
+  return app.request(path, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(body),
-});
+}); };
 
 function planDraft(overrides: Record<string, unknown> = {}) {
   return {
@@ -27,6 +33,37 @@ describe('PV-19 planes fechados versionados', () => {
   beforeEach(async () => {
     resetStore();
     await declareKnownHealth(patient);
+  });
+
+  it('no publica si falta la copia revisada en el pedido', async () => {
+    const input = planDraft();
+    expect((await post('/api/patients/'+patient+'/plans',input)).status).toBe(200);
+    const response = await app.request('/api/plans/'+input.id+'/publish',{ method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({expected_version:1}) });
+    expect(response.status).toBe(400);
+    expect((await (await app.request('/api/patients/'+patient+'/plans')).json()).plan).toBeNull();
+  });
+
+  it('exige porciones para recetas nuevas y conserva la estimación al revisar y publicar por API', async () => {
+    const nutrition = { origin: 'ai_estimate', source: 'estimacion_ia.v2', per_portion: { kcal: 500, protein_g: 20, carbs_g: 60, fat_g: 20 } };
+    const recipe = { title: 'Arroz con verduras', yield_portions: 2, steps: ['Cocinar y servir.'], ingredients: [{ name: 'Arroz', quantity: 100, unit: 'g' }], nutrition };
+    const inline = { for_date: '2026-09-21', slot: 'Almuerzo', free_text: recipe.title, recipe_proposal: recipe };
+    const input = planDraft({ items: [inline] });
+    expect((await post(`/api/patients/${patient}/plans`, input)).status).toBe(400);
+    const items = [{ ...inline, portions: 2 }];
+    expect((await post(`/api/patients/${patient}/plans`, { ...input, items })).status).toBe(200);
+    const edited = [{ ...items[0], recipe_proposal: { ...recipe, nutrition: { ...nutrition, origin: 'declared', source: 'Revisado', per_portion: { ...nutrition.per_portion, kcal: 450 } } } }];
+    const saved = await (await post(`/api/patients/${patient}/plans`, { ...input, items: edited })).json();
+    expect(saved.plan.current.items[0].recipe_proposal.nutrition).toEqual({ ...nutrition, per_portion: edited[0].recipe_proposal.nutrition.per_portion });
+    expect((await post(`/api/plans/${input.id}/publish`, { expected_version: 1 })).status).toBe(200);
+    expect((await post(`/api/patients/${patient}/plans`, { ...input, items: edited })).status).toBe(200);
+    const pro = await (await app.request(`/api/patients/${patient}/plans?audience=pro`)).json();
+    expect(pro.plan.current.version).toBe(2);
+    expect(pro.plan.current.items[0].recipe_proposal.nutrition.origin).toBe('ai_estimate');
+    const visible = await (await app.request(`/api/patients/${patient}/plans`)).json();
+    expect(visible.plan.items[0].portions).toBe(2);
+    expect(visible.plan.items[0].recipe_proposal.nutrition.origin).toBe('ai_estimate');
+    const shopping = await (await app.request(`/api/patients/${patient}/shopping`)).json();
+    expect(shopping.list.items).toContainEqual(expect.objectContaining({ name: 'Arroz', quantity: 100, unit: 'g' }));
   });
 
   it('el paciente no ve el borrador; sí ve la copia publicada y un borrador posterior no la cambia', async () => {

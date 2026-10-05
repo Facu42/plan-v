@@ -1,3 +1,4 @@
+import { planReviewSnapshot } from '../../src/types/plans.js';
 import { randomUUID } from 'node:crypto';
 import { CONSENT_CATALOG, type ConsentPurpose } from '../intake/consent.js';
 import { SEEDED_EXERCISES } from '../../src/types/exercise.js';
@@ -165,7 +166,7 @@ export async function seedDemoContent(fetcher: Fetcher, now = new Date(), target
       items: recipe.items,
     });
     if (!saved) continue;
-    await call(`publicar ${recipe.title}`, `/api/recipes/${id}/publish`, 'POST', { expected_version: 1 });
+    await call(`publicar ${recipe.title}`, `/api/recipes/${id}/publish`, 'POST', { expected_version: 1, expected_revision: saved.recipe.current.revision });
     await call(`asignar ${recipe.title}`, `/api/recipes/${id}/assign`, 'POST', { patient_id: MAIN, expected_version: 1 });
     recipeIds.push(id);
   }
@@ -182,7 +183,7 @@ export async function seedDemoContent(fetcher: Fetcher, now = new Date(), target
     const plan = await call('plan de la semana', `/api/patients/${MAIN}/plans`, 'POST', {
       id: planId, period_start: monday, period_end: addDays(monday, 6), timezone: TZ, items,
     });
-    if (plan) await call('publicar plan', `/api/plans/${planId}/publish`, 'POST', { expected_version: 1 });
+    if (plan) await call('publicar plan', `/api/plans/${planId}/publish`, 'POST', { expected_version: 1, expected_snapshot: planReviewSnapshot(plan.plan.current) });
   }
 
   // Medidas: permiso y seis semanas de peso, cintura y cadera.

@@ -22,7 +22,7 @@ beforeEach(() => {
   intake = { ...emptyIntakePayload(), allergies: { state: 'none', items: [] }, restrictions: { state: 'none', items: [] } };
   mocks.consent.mockImplementation(async () => ({ intake: { payload: intake }, consents: [] }));
   mocks.generate.mockResolvedValue(result);
-  row = { id: '20000000-0000-4000-a000-000000000001', patient_id: patientId, job_type: 'recipe_draft', status: 'queued', model: 'demo', prompt_version: 'recipe_draft.v1', context_hash: hashAiContext(buildRecipeJobContext({ intake })), request: {}, created_at: new Date().toISOString(), artifact: null };
+  row = { id: '20000000-0000-4000-a000-000000000001', patient_id: patientId, job_type: 'recipe_draft', status: 'queued', model: 'demo', prompt_version: 'recipe_draft.v1', context_hash: hashAiContext(buildRecipeJobContext({ intake })), request: { _write_base: { recipe_id: result.recipe.id, revision: null } }, created_at: new Date().toISOString(), artifact: null };
   mocks.rpc.mockImplementation(async (name: string, args: { payload?: Record<string, unknown> }) => {
     if (name === 'get_ai_job') return { data: row, error: null };
     if (name === 'claim_ai_job') return { data: { ...row, status: 'running', run_token: '40000000-0000-4000-a000-000000000001' }, error: null };

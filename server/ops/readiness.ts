@@ -28,6 +28,7 @@ export function evaluateReadiness(
 }
 
 export function maxBodyBytes(path: string) {
+  if (/^\/api\/recipes\/[^/]+\/cover\/manual$/.test(path)) return 7_100_000;
   if (path.includes('/assets') || path.includes('/documents')) {
     return 22 * 1024 * 1024;
   }

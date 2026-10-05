@@ -1,3 +1,4 @@
+import { NutritionTargetPanel } from './ShowroomNutritionTarget';
 import type { MealLog, Patient, Stage } from '../../types';
 import type { CrmEntry } from '../crm/crm-entry';
 import { getGoalSnapshot, GOAL_STATUS_LABELS } from '../crm/crm-goals';
@@ -77,7 +78,8 @@ export function ShowroomPatientRecord({ patient, patients = [patient], onSelect,
       </dl>
     </section>
 
-    <ShowroomIntakeReview patientId={patient.id} />
+    <ShowroomIntakeReview key={patient.id} patientId={patient.id} />
+    <NutritionTargetPanel key={patient.id} patientId={patient.id} patientName={patient.name} />
 
     <div className="nr-history-grid">
       <section className="nr-card nr-timeline">

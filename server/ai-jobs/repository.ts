@@ -32,6 +32,8 @@ import {
 } from '../../src/types/ai-jobs.js';
 import type { RecipeDraftInput } from '../../src/types/recipes.js';
 import type { MealPlanDraftInput } from '../../src/types/plans.js';
+import { getTarget } from '../targets/repository.js';
+import { nutrientAmountsSchema } from '../../src/types/ai-nutrition.js';
 
 export { CareError } from '../care/errors.js';
 
@@ -124,10 +126,12 @@ export function asAiJob(row: Record<string, unknown>): AiJobView {
     finished_at: row.finished_at == null ? null : String(row.finished_at),
     applied_at: row.applied_at == null ? null : String(row.applied_at),
     request: {
+      ...(request._write_base && typeof request._write_base === 'object' ? { _write_base: request._write_base as AiJobView['request']['_write_base'] } : {}),
       title_hint: typeof request.title_hint === 'string' ? request.title_hint : null,
       period_start: typeof request.period_start === 'string' ? request.period_start : null,
       period_end: typeof request.period_end === 'string' ? request.period_end : null,
       slots: Array.isArray(request.slots) ? request.slots.map((slot) => String(slot)) : [],
+      ...(Array.isArray(request.dietary_preferences) ? { dietary_preferences: request.dietary_preferences.map(String) } : {}),
     },
     artifact,
   };
@@ -150,18 +154,39 @@ function monthStart(now = new Date()) {
 async function buildContext(nutritionistId: string, input: AiJobEnqueueInput, persistent: boolean) {
   const bundle = await requireCareConsent(input.patient_id, persistent, 'ai_menu_draft');
   const intake = bundle.intake.payload;
+  const validity = bundle.intake.revision ? { intake_revision: bundle.intake.revision,
+    consent_event_id: bundle.consents.filter((entry) => entry.purpose === 'ai_menu_draft').slice(-1)[0]?.id ?? null } : undefined;
   if (input.job_type === 'recipe_draft') {
-    return buildRecipeJobContext({ intake, titleHint: input.title_hint });
+    return { ...buildRecipeJobContext({ intake, titleHint: input.title_hint }), ...(validity ? { validity } : {}) };
   }
   const catalog = await listProfessionalRecipes(nutritionistId, persistent);
-  return buildMenuJobContext({
+  const target = await getTarget(input.patient_id, persistent);
+  return { ...buildMenuJobContext({
     intake,
     periodStart: input.period_start,
     periodEnd: input.period_end,
     slots: input.slots,
-    catalogTitles: catalog.filter((recipe) => recipe.published).map((recipe) => recipe.title),
+    dietaryPreferences: input.dietary_preferences,
+    catalogTitles: catalog.filter((recipe) => recipe.published).map((recipe) => recipe.published!.title ?? recipe.title),
+    catalog: catalog.filter((recipe) => recipe.published).map((recipe) => {
+      const version = recipe.published!;
+      const declared = nutrientAmountsSchema.safeParse(version.card?.macros);
+      return {
+        id: recipe.id, version: version.version, title: version.title ?? recipe.title,
+        yield_portions: version.yield_portions, steps: version.steps,
+        ingredients: version.ingredients.map(({ name, quantity, unit }) => ({ name, quantity, unit })),
+        nutrition: version.nutrition ?? (declared.success && version.nutrient_source ? {
+          origin: version.nutrient_source.startsWith('estimacion_ia.') || version.nutrient_source.startsWith('propuesta_ia.') ? 'ai_estimate' as const : 'declared' as const,
+          source: version.nutrient_source, per_portion: declared.data,
+        } : null),
+      };
+    }),
+    confirmedTarget: target?.published_at ? {
+      kcal: target.result.kcal, protein_g: target.result.protein_g, carbs_g: target.result.carbs_g, fat_g: target.result.fat_g,
+      revision: target.updated_at, published_at: target.published_at,
+    } : null,
     weekPlan: persistent ? [] : (getPatient(input.patient_id)?.weekPlan ?? []),
-  });
+  }), ...(validity ? { validity } : {}) };
 }
 
 function assertMemoryBudget(nutritionistId: string, tokens: number) {
@@ -219,9 +244,12 @@ export async function enqueueAiJob(
     period_start: input.period_start ?? null,
     period_end: input.period_end ?? null,
     slots: input.slots ?? [],
+    ...(input.dietary_preferences ? { dietary_preferences: input.dietary_preferences } : {}),
   };
   if (!persistent) {
     assertMemoryBudget(nutritionistId, tokens);
+    const current = input.job_type === 'menu_draft' ? await getProfessionalMealPlan(nutritionistId, input.patient_id, false) : null;
+    const base = input.job_type === 'menu_draft' ? { plan_id: current?.id ?? randomUUID(), revision: current?.current.revision ?? null } : { recipe_id: randomUUID(), revision: null };
     const stamp = new Date().toISOString();
     const job: MemJob = {
       id: randomUUID(),
@@ -233,7 +261,7 @@ export async function enqueueAiJob(
       model,
       prompt_version: promptVersion,
       context_hash: hash,
-      request,
+      request: { ...request, _write_base: base },
       context,
       expires_at: Date.now() + AI_JOB_LEASE_MS,
       attempt: 0,
@@ -297,6 +325,7 @@ async function currentHash(job: Pick<MemJob, 'job_type' | 'patient_id' | 'reques
     period_start: job.request.period_start ?? undefined,
     period_end: job.request.period_end ?? undefined,
     slots: job.request.slots.length ? job.request.slots as AiJobEnqueueInput['slots'] : undefined,
+    dietary_preferences: job.request.dietary_preferences,
   };
   const context = await buildContext(job.nutritionist_id, input, persistent);
   return { context, hash: hashAiContext(context), tokens: estimateTokens(context) };
@@ -343,16 +372,17 @@ export async function runAiJob(nutritionistId: string, jobId: string, persistent
     const live = await currentHash({ ...existing, nutritionist_id: nutritionistId }, persistent);
     hash = live.hash; tokens = live.tokens; assertJobTokenBudget(tokens);
     if (hash !== existing.context_hash) return await finish('stale', null, [], 'stale_context');
+    const base = existing.request._write_base;
+    if (!base || (existing.job_type === 'menu_draft' ? !base.plan_id : !base.recipe_id)) return await finish('stale', null, [], 'stale_context');
     let artifact: NonNullable<AiJobView['artifact']>;
     let warnings: string[];
     if (existing.job_type === 'recipe_draft') {
       const result = await generateRecipeDraft(live.context as Parameters<typeof generateRecipeDraft>[0]);
-      artifact = { id: randomUUID(), kind: 'recipe_draft', payload: result.recipe as unknown as Record<string, unknown>, created_at: new Date().toISOString() };
+      artifact = { id: randomUUID(), kind: 'recipe_draft', payload: { ...result.recipe, id: base.recipe_id!, expected_revision: base.revision } as unknown as Record<string, unknown>, created_at: new Date().toISOString() };
       warnings = result.warnings;
     } else {
-      const plan = await getProfessionalMealPlan(nutritionistId, existing.patient_id, persistent);
-      const result = await generateMenuDraft(live.context as Parameters<typeof generateMenuDraft>[0], plan?.id);
-      artifact = { id: randomUUID(), kind: 'menu_draft', payload: result.plan as unknown as Record<string, unknown>, created_at: new Date().toISOString() };
+      const result = await generateMenuDraft(live.context as Parameters<typeof generateMenuDraft>[0], base.plan_id);
+      artifact = { id: randomUUID(), kind: 'menu_draft', payload: { ...result.plan, id: base.plan_id!, expected_revision: base.revision } as unknown as Record<string, unknown>, created_at: new Date().toISOString() };
       warnings = result.warnings;
     }
     const latest = await currentHash({ ...existing, nutritionist_id: nutritionistId }, persistent);

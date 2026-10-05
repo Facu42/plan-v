@@ -25,12 +25,13 @@ export function buildShowroomPatient(patient: Patient, now = new Date()) {
     hydration: patient.hydration, energy: patient.energy ?? 'Sin registro',
     sleep: patient.sleep_minutes === null ? 'Sin registro' : `${Math.round(patient.sleep_minutes / 6) / 10} h`,
     sleepMinutes: patient.sleep_minutes,
-    adherence: patient.adherence_score, macros, kcal: macros.kcal, nutritionLogCount: nutritionLogs.length, journey,
+    adherence: patient.adherence_score, macros, kcal: macros.kcal, nutritionLogCount: nutritionLogs.length, nutritionEstimated: nutritionLogs.some(log=>log.nutrition_origin==='ai_estimate'), journey,
     appointment: patient.appointment ? {
       when: patient.appointment.when,
       duration: patient.appointment.duration,
       channel: patient.appointment.channel,
       meet_url: patient.appointment.meet_url,
+      ...(patient.appointment.starts_at ? { starts_at: patient.appointment.starts_at } : {}),
       ...(patient.appointment.timezone ? { timezone: patient.appointment.timezone } : {}),
       ...(patient.appointment.patient_reply ? { patient_reply: patient.appointment.patient_reply } : {}),
       ...(patient.appointment.confirmed_at ? { confirmed_at: patient.appointment.confirmed_at } : {}),
@@ -40,8 +41,8 @@ export function buildShowroomPatient(patient: Patient, now = new Date()) {
       .map(({ id, patient_id, activity, duration_minutes, intensity, note, logged_at }) => ({ id, patient_id, activity, duration_minutes, intensity, note, logged_at })),
     todayPlan: patient.todayPlan.map(({ slot, title, time }) => ({ slot, title, time })),
     weekPlan: patient.weekPlan.map(({ day, meals: plan }) => ({ day, meals: plan.map(({ slot, title }) => ({ slot, title })) })),
-    logs: meals.map(({ id, slot, description, status, macros: nutrients, foods, logged_at }) => ({
-      id, slot, description, status, macros: nutrients, logged_at,
+    logs: meals.map(({ id, slot, description, status, macros: nutrients, foods, logged_at, nutrition_origin }) => ({
+      id, slot, description, status, macros: nutrients, logged_at, ...(nutrition_origin ? {nutrition_origin} : {}),
       foods: status === 'pending_review' ? [] : foods.map(({ name }) => ({ name })),
     })),
     messages: patient.messages.filter((m) => m.patient_id === patient.id && Boolean(m.sent_at))

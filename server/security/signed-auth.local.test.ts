@@ -23,7 +23,7 @@ let messageA: string;
 function assertLocal(raw: string | undefined, protocols: string[]) {
   if (!raw) throw new Error('Falta el entorno local de sesiones.');
   const url = new URL(raw);
-  if (!protocols.includes(url.protocol) || !['127.0.0.1','localhost','[::1]'].includes(url.hostname)) {
+  if (url.search||url.hash||!protocols.includes(url.protocol) || !['127.0.0.1','localhost','[::1]'].includes(url.hostname)) {
     throw new Error('No se permiten proyectos hospedados ni pacientes reales.');
   }
   return raw;
@@ -80,7 +80,7 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     for (const [actor, id, owner] of [[patientA,pidA,ownerA],[patientB,pidB,ownerB]] as const) {
       const saved = await actor.client.rpc('save_my_body_data', { body });
       expect(saved.error).toBeNull();
-      const target = await owner.client.rpc('save_nutrition_target', { target: id, target_inputs: inputs, target_result: calculateTarget(inputs), publish: true });
+      const target = await owner.client.rpc('save_nutrition_target_versioned', { target: id, target_inputs: inputs, target_result: calculateTarget(inputs), publish: true, expected_revision: 0 });
       expect(target.error).toBeNull();
     }
   }, 60000);
@@ -187,13 +187,56 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
   });
 
   it('el borrador no se filtra a la paciente y la publicación sí llega', async () => {
-    expect((await ownerA.client.rpc('save_nutrition_target',{target:pidA,target_inputs:inputs,target_result:calculateTarget(inputs),publish:false})).error).toBeNull();
-    const hidden = await patientA.client.from('nutrition_targets').select('patient_id').eq('patient_id',pidA);
-    expect(hidden.error).toBeNull(); expect(hidden.data).toEqual([]);
-    expect((await ownerA.client.rpc('save_nutrition_target',{target:pidA,target_inputs:inputs,target_result:calculateTarget(inputs),publish:true})).error).toBeNull();
+    const draftInputs={...inputs,weight_kg:66};
+    const workspace=await ownerA.client.rpc('get_nutrition_target_workspace',{target:pidA});
+    expect(workspace.error).toBeNull();
+    const saved=await ownerA.client.rpc('save_nutrition_target_versioned',{target:pidA,target_inputs:draftInputs,target_result:calculateTarget(draftInputs),publish:false,expected_revision:workspace.data.revision});
+    expect(saved.error).toBeNull();
+    for(const actor of [patientA,patientB,ownerB]){
+      const hidden=await actor.client.from('nutrition_target_drafts').select('patient_id').eq('patient_id',pidA);
+      expect(hidden.error).toBeNull();expect(hidden.data).toEqual([]);
+    }
+    const published=await api(patientA,'/api/patients/'+pidA+'/nutrition-target');
+    expect(published.status).toBe(200);const json=await published.json();
+    expect(json.target.result).toEqual(calculateTarget(inputs));expect(json).not.toHaveProperty('draft');expect(json).not.toHaveProperty('revision');
+    expect((await ownerA.client.rpc('save_nutrition_target_versioned',{target:pidA,target_inputs:inputs,target_result:calculateTarget(inputs),publish:true,expected_revision:saved.data.revision})).error).toBeNull();
     const visible = await patientA.client.from('nutrition_targets').select('patient_id').eq('patient_id',pidA);
     expect(visible.error).toBeNull(); expect(visible.data).toEqual([{ patient_id: pidA }]);
   });
+
+  it('dos sesiones con la misma revisión no sobrescriben la meta',async()=>{
+    const started=performance.now();
+    const url=assertLocal(process.env.SUPABASE_URL,['http:']);
+    const clients=[0,1].map(()=>createClient(url,process.env.SUPABASE_ANON_KEY!,{
+      accessToken:async()=>ownerA.token,auth:{persistSession:false,autoRefreshToken:false},db:{retry:false},
+    }));
+    const workspace=await clients[0].rpc('get_nutrition_target_workspace',{target:pidA}).abortSignal(AbortSignal.timeout(12000));
+    const workspaceMs=Math.round(performance.now()-started);
+    expect(workspace.error).toBeNull();
+    const writesStarted=performance.now();
+    const probe=setTimeout(()=>{void pool.query("select state,wait_event_type,wait_event,cardinality(pg_blocking_pids(pid)) as blockers from pg_stat_activity where datname=current_database() and application_name ilike '%postgrest%' and state<>'idle'").then(result=>console.info('Diagnóstico local de contención:',JSON.stringify(result.rows))).catch(()=>console.info('Diagnóstico local no disponible.'));},4000);
+    const results=await Promise.all([67,68].map((weight_kg,index)=>{
+      const proposed={...inputs,weight_kg};
+      return clients[index].rpc('save_nutrition_target_versioned',{target:pidA,target_inputs:proposed,target_result:calculateTarget(proposed),publish:false,expected_revision:workspace.data.revision}).abortSignal(AbortSignal.timeout(12000));
+    })).finally(()=>clearTimeout(probe));
+    console.info('Concurrencia local de metas:',JSON.stringify({workspace_ms:workspaceMs,writes_ms:Math.round(performance.now()-writesStarted),statuses:results.map(result=>result.status),codes:results.map(result=>result.error?.code??null)}));
+    expect(results.filter(result=>!result.error)).toHaveLength(1);
+    const conflict=results.find(result=>result.error);
+    expect(conflict?.error?.code).toBe('PT409');expect(conflict?.status).toBe(409);
+    const afterStarted=performance.now();
+    const after=await clients[0].rpc('get_nutrition_target_workspace',{target:pidA}).abortSignal(AbortSignal.timeout(12000));
+    console.info('Lectura local posterior:',JSON.stringify({elapsed_ms:Math.round(performance.now()-afterStarted),status:after.status,code:after.error?.code??null}));
+    expect(after.error).toBeNull();expect(after.data.revision).toBe(workspace.data.revision+1);
+    expect([67,68]).toContain(after.data.draft.inputs.weight_kg);
+    expect(after.data.published.result).toEqual(calculateTarget(inputs));
+    // El mismo conflicto debe responder sin otra escritura simultánea y sin alterar datos.
+    const stale=await clients[0].rpc('save_nutrition_target_versioned',{target:pidA,target_inputs:inputs,target_result:calculateTarget(inputs),publish:false,expected_revision:workspace.data.revision}).abortSignal(AbortSignal.timeout(3000));
+    expect(stale.status).toBe(409);expect(stale.error?.code).toBe('PT409');
+    const staleApi=await api(ownerA,'/api/patients/'+pidA+'/nutrition-target','PUT',{inputs,publish:false,expected_revision:workspace.data.revision});
+    expect(staleApi.status).toBe(409);expect(await staleApi.json()).toMatchObject({error:'La meta cambió en otra sesión. Recargala antes de guardar.'});
+    const unchanged=await clients[0].rpc('get_nutrition_target_workspace',{target:pidA}).abortSignal(AbortSignal.timeout(3000));
+    expect(unchanged.error).toBeNull();expect(unchanged.data).toEqual(after.data);
+  },15000);
 
   it('el mensaje autorizado se lee y la función interna queda cerrada', async () => {
     const own = await ownerA.client.rpc('list_thread_messages',{target_patient:pidA,ack_delivery:false});
@@ -238,6 +281,26 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     expect(other.status).toBe(200); expect((await other.json()).target.patient_id).toBe(pidB);
   });
 
+  it('reabrir ficha revisada usa CAS, conserva payload/consentimiento e impide leer historial privado', async () => {
+    const endpoint = `/api/patients/${pidB}/intake`;
+    const initial = await (await api(patientB,endpoint)).json();
+    const saved = await api(patientB,endpoint,'PATCH',{expected_revision:initial.intake.revision,step:'review',payload:{preferred_name:'Paciente ficticia',patient_intent:'Corregir información'}});
+    expect(saved.status).toBe(200); const draft = await saved.json();
+    const care = CONSENT_CATALOG.find(entry => entry.purpose === 'care_relationship')!;
+    expect((await api(patientB,`/api/patients/${pidB}/consents`,'POST',{purpose:care.purpose,text_version:care.text_version,text_hash:care.text_hash,decision:'granted'})).status).toBe(201);
+    const sent = await api(patientB,endpoint+'/submit','POST',{expected_revision:draft.intake.revision}); expect(sent.status).toBe(200);
+    const reviewed = await api(ownerB,endpoint+'/review','POST',{expected_revision:(await sent.json()).intake.revision}); expect(reviewed.status).toBe(200); const closed = await reviewed.json();
+    for (const actor of [ownerB,ownerA,patientA]) expect((await api(actor,endpoint+'/reopen','POST',{expected_revision:closed.intake.revision})).status).toBe(403);
+    const race = await Promise.all([api(patientB,endpoint+'/reopen','POST',{expected_revision:closed.intake.revision}),api(patientB,endpoint+'/reopen','POST',{expected_revision:closed.intake.revision})]);
+    expect(race.map(result=>result.status).sort()).toEqual([200,409]);
+    const opened = await (await api(patientB,endpoint)).json(); expect(opened.intake).toMatchObject({status:'draft',revision:closed.intake.revision+1,payload:closed.intake.payload});
+    expect(opened.consents.find((c:{purpose:string})=>c.purpose===care.purpose)?.decision).toBe('granted'); expect(opened).not.toHaveProperty('history');
+    const history = await pool.query('select snapshot from private.intake_revision_history where patient_id=$1',[pidB]); expect(history.rows).toHaveLength(1); expect(history.rows[0].snapshot.reviewed_by).toBe(ownerB.id);
+    for(const actor of [patientB,patientA,ownerB]) expect((await actor.client.schema('private').from('intake_revision_history').select('*')).error).not.toBeNull();
+    const edited = await api(patientB,endpoint,'PATCH',{expected_revision:opened.intake.revision,payload:{...opened.intake.payload,preferred_name:'Ficticia corregida'}}); expect(edited.status).toBe(200);
+    expect((await (await api(patientB,endpoint)).json()).intake.payload.preferred_name).toBe('Ficticia corregida');
+  });
+
   it('las reservas de portada y el límite IA son atómicos con sesiones independientes', async () => {
     const intake = await (await api(patientB, `/api/patients/${pidB}/intake`)).json();
     expect((await api(patientB, `/api/patients/${pidB}/intake`, 'PATCH', {
@@ -265,12 +328,46 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
       items: [{ name: 'Arroz', quantity: 80, unit: 'g' }],
     } });
     expect(saved.error).toBeNull();
-    expect((await ownerB.client.rpc('publish_recipe', { target_recipe: rid, expected_version: 1 })).error).toBeNull();
+    expect((await ownerB.client.rpc('publish_recipe', { target_recipe: rid, expected_version: 1, expected_revision: saved.data.current.revision })).error).toBeNull();
     const vid = saved.data.current.id;
     const covers = await Promise.all(Array.from({ length: 4 }, () => ownerB.client.rpc('claim_recipe_cover', { target_version: vid, retry: false })));
     expect(covers.every(result => !result.error)).toBe(true);
     expect(covers.filter(result => result.data)).toHaveLength(1);
     expect((await patientB.client.rpc('claim_recipe_cover', { target_version: vid, retry: true })).error?.code).toBe('42501');
+  });
+
+  it('un análisis bloqueado por una revisión no inventa origen y las lecturas conservan privacidad',async()=>{
+    const mid=randomUUID();const cid=randomUUID();const macros={kcal:200,protein_g:10,carbs_g:35,fat_g:3};
+    await pool.query("insert into public.meal_logs(id,patient_id,client_id,slot_label,description,note_for_nutri) values($1,$2,$3,'Almuerzo','Registro histórico ficticio',$4)",[mid,pidB,cid,canary]);
+    const first=await pool.connect();let analysis:Promise<Awaited<ReturnType<typeof patientB.client.rpc>>>|undefined;
+    try {
+      await first.query('begin');await first.query('set local role authenticated');await first.query("select set_config('request.jwt.claim.sub',$1,true)",[ownerB.id]);
+      await first.query('select public.review_meal_log($1)',[{meal_id:mid,status:'confirmed',macros}]);
+      analysis=Promise.resolve(patientB.client.rpc('record_meal_analysis',{payload:{meal_id:mid,status:'succeeded',foods:[],macros,confidence:0.5}}));
+      // Inicia una conexión real de PostgREST mientras la revisión conserva el lock.
+      let blocked=false;
+      for(let attempt=0;attempt<60;attempt++) {
+        blocked=(await pool.query("select exists(select 1 from pg_locks where locktype='advisory' and not granted) as waiting")).rows[0].waiting;
+        if(blocked)break;await new Promise(resolve=>setTimeout(resolve,50));
+      }
+      expect(blocked).toBe(true);
+      await first.query('commit');const result=await analysis;
+      expect(result.error).toBeNull();expect(result.data.nutrition_origin).toBeNull();expect(result.data).not.toHaveProperty('note_for_nutri');
+      expect((await patientB.client.rpc('save_meal_log',{payload:{patient_id:pidB,client_id:cid,slot:'Almuerzo',description:'Reintento ficticio'}})).data.log).not.toHaveProperty('note_for_nutri');
+      expect((await ownerB.client.from('meal_logs').update({nutrition_origin:'declared'}).eq('id',mid)).error?.code).toBe('42501');
+      const reread=await api(patientB,`/api/patients/${pidB}`);expect(reread.status).toBe(200);const body=await reread.json();expect(JSON.stringify(body)).not.toContain(canary);
+      expect((await pool.query('select nutrition_origin from public.meal_logs where id=$1',[mid])).rows[0].nutrition_origin).toBeNull();
+    } finally {await first.query('rollback');first.release();if(analysis)await analysis.catch(()=>undefined);}
+  });
+
+  it('dos altas concurrentes con sesiones reales crean una ficha y una invitación recuperables',async()=>{
+    const input={name:'Alta concurrente ficticia',email:randomUUID()+'@example.test',goal:'Organizar comidas'};
+    const responses=await Promise.all([api(ownerB,'/api/patients','POST',input),api(ownerB,'/api/patients','POST',input)]);
+    expect(responses.map(r=>r.status)).toEqual([201,201]);const bodies=await Promise.all(responses.map(r=>r.json()));
+    expect(bodies[0].patient.id).toBe(bodies[1].patient.id);expect(bodies[0].invite.id).toBe(bodies[1].invite.id);
+    expect((await pool.query('select count(*)::int as n from public.patient_invites where nutritionist_id=$1 and email=$2',[bodies[0].invite.nutritionist_id,input.email])).rows[0].n).toBe(1);
+    expect((await api(ownerB,'/api/patients','POST',{...input,goal:'Otro objetivo'})).status).toBe(409);
+    expect((await api(patientB,'/api/patients','POST',input)).status).toBe(403);
   });
 
   it('la publicación revisada retiene el mismo lock que una edición en otra conexión', async () => {
@@ -290,7 +387,7 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
       await first.query('select public.publish_reviewed_meal_plan($1,1,$2)', [id, planReviewSnapshot(saved.data.current as PlanVersionView)]);
       const available = await second.query('select pg_try_advisory_xact_lock(hashtextextended($1,1)) as acquired', [pidB]);
       expect(available.rows[0].acquired).toBe(false);
-      editing = second.query('select public.save_meal_plan_draft($1,$2)', [pidB, { ...draft, items: [{ ...draft.items[0], free_text: 'Otra indicación' }] }]);
+      editing = second.query('select public.save_meal_plan_draft($1,$2)', [pidB, { ...draft, expected_revision: saved.data.current.revision, items: [{ ...draft.items[0], free_text: 'Otra indicación' }] }]);
       await first.query('commit');
       const changed = (await editing).rows[0].save_meal_plan_draft;
       expect(changed.current.version).toBe(2);
@@ -301,6 +398,30 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
       if (editing) await editing.catch(() => undefined);
       await second.query('rollback'); first.release(); second.release();
     }
+  });
+  it('publica un plan manual con el snapshot que recibe el navegador y conserva su versión frente a otro borrador',async()=>{
+    const path=`/api/patients/${pidB}/plans`;
+    const initial=await api(ownerB,path);expect(initial.status).toBe(200);const previous=(await initial.json()).plan;
+    const id=previous.id;
+    const draft={id,expected_revision:previous.current.revision,period_start:'2026-10-05',period_end:'2026-10-05',items:[{for_date:'2026-10-05',slot:'Almuerzo',free_text:'Arroz con vegetales',portions:1,public_note:'Indicación revisada'}]};
+    const saved=await api(ownerB,path,'POST',draft);expect(saved.status).toBe(200);
+    const current=(await saved.json()).plan.current as PlanVersionView;
+    expect(current.items[0]).not.toHaveProperty('recipe_proposal');
+    const published=await api(ownerB,`/api/plans/${id}/publish`,'POST',{expected_version:current.version,expected_snapshot:planReviewSnapshot(current)});expect(published.status).toBe(200);
+    const next=await api(ownerB,path,'POST',{...draft,expected_revision:current.revision,items:[{...draft.items[0],public_note:'Nuevo borrador privado'}]});expect(next.status).toBe(200);const nextVersion=(await next.json()).plan.current.version;
+    const reread=await api(patientB,path);expect(reread.status).toBe(200);const visible=(await reread.json()).plan;
+    expect(visible.version).toBe(current.version);expect(visible.items[0].public_note).toBe('Indicación revisada');expect(JSON.stringify(visible)).not.toContain('Nuevo borrador privado');
+    // Repetir la publicación idéntica ya aceptada es válido; la copia antigua no aprueba el nuevo borrador.
+    const stale=await api(ownerB,`/api/plans/${id}/publish`,'POST',{expected_version:nextVersion,expected_snapshot:planReviewSnapshot(current)});expect(stale.status).toBe(409);
+  });
+  it('asignar un recurso devuelve fichas releídas para actualizar el consultorio',async()=>{
+    const response=await api(ownerB,`/api/patients/${pidB}/library`);expect(response.status).toBe(200);const library=(await response.json()).library;
+    const resource=library.resources[0];expect(resource).toBeTruthy();
+    const assigned=await api(ownerB,'/api/resources/assign','POST',{resource_id:resource.slug,patient_ids:[pidB]});expect(assigned.status).toBe(200);const result=await assigned.json();
+    expect(result.assigned_count).toBe(1);expect(result.patients).toHaveLength(1);expect(result.patients[0].resource_assignments.some((r:{resource_id:string})=>r.resource_id===resource.slug)).toBe(true);
+    const reread=await api(patientB,`/api/patients/${pidB}/library`);expect(reread.status).toBe(200);expect((await reread.json()).library.assignments.some((r:{slug:string})=>r.slug===resource.slug)).toBe(true);
+    const saved=await api(patientB,`/api/patients/${pidB}/favorites`,'POST',{item_kind:'resource',item_id:resource.id});expect(saved.status).toBe(200);expect((await saved.json()).library.favorites.some((r:{item_id:string})=>r.item_id===resource.id)).toBe(true);
+    const removed=await api(patientB,`/api/patients/${pidB}/favorites`,'POST',{item_kind:'resource',item_id:resource.slug});expect(removed.status).toBe(200);expect((await removed.json()).library.favorites.some((r:{item_id:string})=>r.item_id===resource.id)).toBe(false);
   });
 });
 

@@ -34,6 +34,8 @@ export const saveIntake = (patientId: string, input: { expected_revision: number
   rpc<IntakeBundle>('save_patient_intake', { target: patientId, expected_revision: input.expected_revision, next_step: input.step ?? null, patch: input.payload ?? {} });
 export const sendIntake = (patientId: string, expectedRevision: number) =>
   rpc<IntakeBundle>('submit_patient_intake', { target: patientId, expected_revision: expectedRevision });
+export const reopenIntake = (patientId: string, expectedRevision: number) =>
+  rpc<IntakeBundle>('reopen_patient_intake', { target: patientId, expected_revision: expectedRevision });
 export const markIntakeReviewed = (patientId: string, expectedRevision: number) =>
   rpc<IntakeBundle>('review_patient_intake', { target: patientId, expected_revision: expectedRevision });
 export const recordConsent = (patientId: string, input: { purpose: ConsentPurpose; text_version: string; text_hash: string; decision: ConsentDecision }) =>

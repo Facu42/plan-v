@@ -65,6 +65,29 @@ describe('PV-12 API y adaptador RPC', () => {
     expect(sbMocks.rpc).not.toHaveBeenCalled();
   });
 
+  it('reabre sólo ficha propia con revisión explícita y devuelve vista acotada', async () => {
+    sbMocks.rpc.mockResolvedValue({ error: null, data: {
+      intake: { id:'i1', patient_id:'pat-1', schema_version:'intake.v1', revision:5, status:'draft', step:'profile', payload:{preferred_name:'Ana'}, submitted_at:null, updated_at:'2026-10-03T20:00:00Z', reviewed_by:'private-author', reviewed_at:null },
+      consents: [], clinical_notes:[{body:'Privado'}], history:[{body:'Privado'}],
+    } });
+    const headers = {Authorization:'Bearer test-token','Content-Type':'application/json'};
+    const response = await app.request('/api/patients/pat-1/intake/reopen', {method:'POST',headers,body:JSON.stringify({expected_revision:4})});
+    expect(response.status).toBe(200); expect(sbMocks.rpc).toHaveBeenCalledExactlyOnceWith('reopen_patient_intake',{target:'pat-1',expected_revision:4});
+    const body = await response.json(); expect(body.intake).toMatchObject({revision:5,status:'draft'}); expect(JSON.stringify(body)).not.toContain('Privado'); expect(JSON.stringify(body)).not.toContain('private-author');
+    sbMocks.rpc.mockClear();
+    for (const role of ['nutri','admin']) {
+      sbMocks.sbGetActor.mockResolvedValue({role,userId:'user-1',nutritionistId:'nutri-1'});
+      expect((await app.request('/api/patients/pat-1/intake/reopen',{method:'POST',headers,body:JSON.stringify({expected_revision:4})})).status).toBe(403);
+    }
+    expect(sbMocks.rpc).not.toHaveBeenCalled();
+  });
+
+  it.each([['PT409',409],['42501',403],['08006',503]])('reapertura fallida %s no simula éxito ni inventa un borrador', async (code,status) => {
+    sbMocks.rpc.mockResolvedValue({data:null,error:{code,message:'dato privado'}});
+    const response = await app.request('/api/patients/pat-1/intake/reopen',{method:'POST',headers:{Authorization:'Bearer test-token','Content-Type':'application/json'},body:JSON.stringify({expected_revision:4})});
+    expect(response.status).toBe(status); expect(JSON.stringify(await response.json())).not.toContain('dato privado');
+  });
+
   it.each([['PT409',409],['42501',403],['22023',400],['08006',503]])('conserva el error %s sin devolver éxito simulado', async (code, status) => {
     sbMocks.rpc.mockResolvedValue({data:null,error:{code,message:'detalle interno sensible'}});
     const response = await app.request('/api/patients/pat-1/intake/submit',{method:'POST',headers:{Authorization:'Bearer test-token','Content-Type':'application/json'},body:JSON.stringify({expected_revision:2})});

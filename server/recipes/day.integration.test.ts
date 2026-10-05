@@ -1,3 +1,4 @@
+import { toPatientSelfMealLog } from '../security/contracts.js';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { app } from '../index.js';
@@ -37,6 +38,21 @@ describe('PV-40 asignar al día y registrar', () => {
     await declareKnownHealth(patient);
   });
 
+  it('una receta estimada conserva el origen al registrar y revisar una comida',async()=>{
+    const input=draft({nutrition:{origin:'ai_estimate',source:'estimacion_ia.v2',per_portion:{kcal:300,protein_g:20,carbs_g:35,fat_g:8}}});
+    expect((await post('/api/recipes',input)).status).toBe(200);
+    expect((await post('/api/recipes/'+input.id+'/publish',{expected_version:1})).status).toBe(200);
+    const assigned=await (await post('/api/recipes/'+input.id+'/day',{patient_id:patient,expected_version:1,for_date:'2026-10-05',slot:'Almuerzo'})).json();
+    expect(assigned.assignment.nutrition.origin).toBe('ai_estimate');
+    const registered=await (await post('/api/patients/'+patient+'/recipe-days/'+assigned.assignment.id+'/register',{client_id:randomUUID()})).json();
+    const mealId=registered.assignment.registered_meal_id;
+    const meal=getPatient(patient)!.meal_logs.find(m=>m.id===mealId)!;
+    expect(meal.nutrition_origin).toBe('ai_estimate');expect(meal.note_for_nutri).toContain('estimados por IA');expect(meal.note_for_nutri).not.toContain('no estimados');
+    const reviewed=await app.request('/api/patients/'+patient+'/meals/'+mealId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'confirmed'})});
+    expect(reviewed.status).toBe(200);
+    const publicMeal=toPatientSelfMealLog(getPatient(patient)!.meal_logs.find(m=>m.id===mealId)!);
+    expect(publicMeal.nutrition_origin).toBe('ai_estimate');expect(publicMeal).not.toHaveProperty('note_for_nutri');
+  });
   it('guarda macros declarados, asigna el día y no duplica el registro', async () => {
     const input = draft();
     const saved = await post('/api/recipes', input);

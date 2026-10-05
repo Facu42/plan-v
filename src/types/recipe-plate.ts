@@ -1,3 +1,4 @@
+import type { RecipeNutrition } from './ai-nutrition';
 import { z } from 'zod';
 import { PLAN_SLOTS } from './plans';
 import { recipeDraftSchema, recipeItemInputSchema, type RecipeCard, type RecipeMacros } from './recipes';
@@ -10,6 +11,7 @@ export const recipeWizardSchema = recipeDraftSchema.extend({
   }).strict()).min(1).max(20),
   category: z.enum(PLAN_SLOTS).default('Almuerzo'),
   prep_minutes: z.number().int().positive().max(240).nullable().optional(),
+  kcal: macroNumber.nullable().optional(),
   protein_g: macroNumber.max(2000).nullable().optional(),
   carbs_g: macroNumber.max(2000).nullable().optional(),
   fat_g: macroNumber.max(2000).nullable().optional(),
@@ -40,6 +42,7 @@ export type RecipeDayAssignment = {
   yield_portions: number;
   ingredients: Array<{ id: string; name: string; quantity: number; unit: string }>;
   card: RecipeCard;
+  nutrition?: RecipeNutrition;
   registered_meal_id: string | null;
 };
 
@@ -66,19 +69,19 @@ export function buildRecipeCard(input: RecipeWizardInput): RecipeCard {
   if (declaredLines.length > 0 && declaredLines.length !== input.items.length) {
     throw new Error('recipe_line_kcal');
   }
-  const kcal = declaredLines.length ? round1(declaredLines.reduce((sum, value) => sum + value, 0) / portions) : null;
+  const kcal = input.kcal ?? (declaredLines.length ? round1(declaredLines.reduce((sum, value) => sum + value, 0) / portions) : null);
   const protein = input.protein_g ?? null;
   const carbs = input.carbs_g ?? null;
   const fat = input.fat_g ?? null;
   const anyMacro = kcal != null || protein != null || carbs != null || fat != null;
   if (anyMacro && !input.nutrient_source.trim()) throw new Error('recipe_macro_source');
-  const macros: RecipeMacros | null = anyMacro
+  const macros: RecipeMacros | null = input.nutrition?.per_portion ?? (anyMacro
     ? { kcal, protein_g: protein, carbs_g: carbs, fat_g: fat }
-    : null;
+    : null);
   return {
     category: input.category,
     prep_minutes: input.prep_minutes ?? null,
-    macro_status: anyMacro ? 'declared' : 'unavailable',
+    macro_status: macros ? 'declared' : 'unavailable',
     macros,
     cover_status: input.cover_status ?? 'none',
     cover_alt: input.title.trim(),

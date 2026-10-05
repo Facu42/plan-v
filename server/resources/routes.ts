@@ -87,8 +87,10 @@ export function registerResourceRoutes(app: Hono) {
       }
     }
     const result = await repo.assignEditorialResource(input.resource_id, input.patient_ids, persistent, professional);
+    const patients = persistent ? await Promise.all(input.patient_ids.map(id => sb.sbGetPatientById(id, 'professional'))) : result.patients;
+    if (patients.some(patient => !patient)) throw new repo.CareError(503, 'Las asignaciones se guardaron, pero no se pudo recuperar la ficha. Recargá para comprobarlas.');
     return c.json({
-      patients: persistent ? result.patients : result.patients,
+      patients,
       assigned_count: result.assigned_count,
       existing_count: result.existing_count,
       source: persistent ? 'supabase' : 'memory',

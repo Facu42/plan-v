@@ -195,7 +195,7 @@ async function memorySnapshot(patientId: string, professional: boolean, query = 
     recipes,
     plan_b: planB,
     assignments,
-    favorites: listFavorites(patientId),
+    favorites: listFavorites(patientId).map(item => ({...item,item_id:item.item_kind==='resource'||item.item_kind==='article'?findResource(item.item_id)?.id??item.item_id:item.item_id})),
     hits: buildHits(professional, assignedSlugs, recipes, planB, query),
   };
 }
@@ -272,7 +272,10 @@ export async function toggleFavorite(
 ): Promise<PatientLibraryView> {
   if (professional) throw new CareError(403, 'Sólo la paciente puede guardar favoritos personales.');
   if (!persistent) {
-    const existing = getFavorite(patientId, kind, itemId);
+    const resource=kind==='resource'||kind==='article'?findResource(itemId):null;
+    const canonicalItem=resource?.id??itemId;
+    const existing = getFavorite(patientId, kind, canonicalItem)
+      ?? (resource && findResource(resource.slug)?.id === resource.id ? getFavorite(patientId, kind, resource.slug) : undefined);
     if (existing) {
       dropFavorite(existing.id);
       return memorySnapshot(patientId, false);
@@ -288,7 +291,7 @@ export async function toggleFavorite(
       id: newResourceId(),
       patient_id: patientId,
       item_kind: kind,
-      item_id: itemId,
+      item_id: canonicalItem,
       title: title ?? itemId,
       created_at: new Date().toISOString(),
     });

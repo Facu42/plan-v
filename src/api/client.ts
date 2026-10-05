@@ -1,3 +1,4 @@
+import { ApiError } from './error';
 import type { Brief, DemoNotice, GoalStatus, MealLog, Message, Patient, Stage } from '../types';
 import { getSessionToken } from '../lib/supabase';
 import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } from '../types/intake';
@@ -6,9 +7,7 @@ import { resolveApiUrl } from './origin';
 import type { NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
 import type { BillingBoard, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
 
-export class ApiError extends Error {
-  constructor(public status: number, message: string) { super(message); }
-}
+export { ApiError } from './error';
 
 export type PatientInvite = {
   id: string;
@@ -307,7 +306,7 @@ export const api = {
       body: JSON.stringify({ reader }),
     }),
 
-  logActivity: (patientId: string, data: { activity: string; duration_minutes: number; intensity: 'suave' | 'moderada' | 'intensa'; note?: string }) =>
+  logActivity: (patientId: string, data: { client_id?: string; activity: string; duration_minutes: number; intensity: 'suave' | 'moderada' | 'intensa'; note?: string }) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/activities`, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -335,6 +334,7 @@ export const api = {
   getIntake: (patientId: string, init?: RequestInit) => request<PatientIntakeView & { source: string }>(`/api/patients/${patientId}/intake`, init),
   getProfessionalIntake: (patientId: string, init?: RequestInit) => request<ProfessionalIntakeView>(`/api/patients/${patientId}/intake/professional`, init),
   reviewIntake: (patientId: string, expectedRevision: number) => request<ProfessionalIntakeView>(`/api/patients/${patientId}/intake/review`, { method: 'POST', body: JSON.stringify({ expected_revision: expectedRevision }) }),
+  reopenIntake: (patientId: string, expectedRevision: number, init?: RequestInit) => request<PatientIntakeView>(`/api/patients/${patientId}/intake/reopen`, { ...init, method: 'POST', body: JSON.stringify({ expected_revision: expectedRevision }) }),
   addClinicalNote: (patientId: string, body: string) => request<{ clinical_note: ClinicalNoteRecord }>(`/api/patients/${patientId}/clinical-notes`, { method: 'POST', body: JSON.stringify({ body }) }),
 
   patchIntake: (patientId: string, data: { expected_revision: number; step?: string; payload?: unknown }, init?: RequestInit) =>

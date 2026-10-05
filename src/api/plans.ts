@@ -14,7 +14,7 @@ export const plansApi = {
     `/api/patients/${encodeURIComponent(patientId)}/plans`,
     { method: 'POST', body: JSON.stringify(input) },
   ),
-  publish: (planId: string, expected_version: number, reviewed?: PlanVersionView) => request<{ plan: ProfessionalMealPlan; source: string }>(
+  publish: (planId: string, expected_version: number, reviewed: PlanVersionView) => request<{ plan: ProfessionalMealPlan; source: string }>(
     `/api/plans/${planId}/publish`,
     { method: 'POST', body: JSON.stringify({ expected_version, expected_snapshot: reviewed ? planReviewSnapshot(reviewed) : undefined }) },
   ),

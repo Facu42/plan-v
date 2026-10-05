@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
+import { SEEDED_OPERATIONAL_RESOURCES, type PatientLibraryView } from '../../types/resources';
 import {
   RESOURCE_GUIDES,
   ShowroomResources,
@@ -14,6 +15,7 @@ import {
 } from './ShowroomResources';
 
 const onNavigate = vi.fn();
+const loadedLibrary:PatientLibraryView={patient_id:'pat-sofia',resources:SEEDED_OPERATIONAL_RESOURCES,articles:[],recipes:[],plan_b:null,assignments:[],favorites:[],hits:[]};
 
 describe('ShowroomResources', () => {
   it('abrir una guía conserva el consultorio y compartir omite la selección privada', () => {
@@ -46,7 +48,7 @@ describe('ShowroomResources', () => {
   });
 
   it('renderiza biblioteca, filtros, guardado de cuenta y acceso a detalle', () => {
-    const html = renderToStaticMarkup(<ShowroomResources patientId="pat-sofia" query="" onNavigate={onNavigate} />);
+    const html = renderToStaticMarkup(<ShowroomResources patientId="pat-sofia" query="" onNavigate={onNavigate} library={loadedLibrary} />);
     expect(html).toContain('Guías y artículos revisados');
     expect(html).toContain('Cómo leer tu plan semanal');
     expect(html).toContain('No queda sólo en este dispositivo');
@@ -58,6 +60,7 @@ describe('ShowroomResources', () => {
     const html = renderToStaticMarkup(<ShowroomResources
       patientId="pat-sofia"
       query=""
+      library={loadedLibrary}
       assignments={[{
         id: 'assignment-1', patient_id: 'pat-sofia', resource_id: 'leer-plan-semanal',
         assigned_at: '2026-09-15T12:00:00.000Z', read_at: null,

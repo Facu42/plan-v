@@ -187,6 +187,7 @@ export function toPatientSelfMealLog(log: MealLog): PatientSelfMealLog {
     status: log.status,
     logged_at: log.logged_at,
     ...(log.analysis_status ? { analysis_status: log.analysis_status } : {}),
+    ...(log.nutrition_origin ? {nutrition_origin:log.nutrition_origin} : {}),
   };
 }
 

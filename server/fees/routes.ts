@@ -19,6 +19,7 @@ const feeSchema = z.object({
   fee: z.object({ amount: amountSchema, first_due_on: dateSchema }).nullable(),
 });
 const paymentSchema = z.object({
+  client_id: z.uuid().optional(),
   amount: amountSchema,
   paid_on: dateSchema,
   method: z.enum(['efectivo', 'transferencia', 'mercado_pago', 'otro']),

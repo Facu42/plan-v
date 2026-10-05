@@ -73,7 +73,8 @@ describe('PV-40 formato de card y CTA', () => {
     expect(catalog).toContain('Carga manual');
     expect(catalog).toContain('Asistente IA');
     expect(catalog).toContain('Nueva receta');
-    expect(catalog).toContain('No se inventan calorías ni macros');
+    expect(catalog).toContain('nutrientes estimados que requieren revisión');
+    expect(catalog).toContain('la etiqueta de estimación se conserva al publicar');
   });
 
   it('el detalle conserva los campos del archivo sin inventar reseñas ni valores nutricionales', () => {

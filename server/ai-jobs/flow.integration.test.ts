@@ -58,7 +58,7 @@ describe('PV-27 jobs de IA versionados', () => {
       };
     };
     expect(body.job.status).toBe('succeeded');
-    expect(body.job.prompt_version).toBe('recipe_draft.v1');
+    expect(body.job.prompt_version).toBe('recipe_draft.v2');
     expect(body.job.context_hash).toHaveLength(64);
     expect(body.job.cost_tokens).toBeGreaterThan(0);
     expect(body.job.artifact.kind).toBe('recipe_draft');
@@ -92,7 +92,7 @@ describe('PV-27 jobs de IA versionados', () => {
     });
     expect(created.status).toBe(202);
     const body = await created.json() as { job: { id: string; prompt_version: string; status: string } };
-    expect(body.job.prompt_version).toBe('menu_draft.v1');
+    expect(body.job.prompt_version).toBe('menu_draft.v2');
     expect((await post(`/api/ai/jobs/${body.job.id}/apply`, {})).status).toBe(200);
     const pro = await (await app.request(`/api/patients/${patient}/plans?audience=pro`)).json() as {
       plan: { current: { published_at: string | null; items: Array<{ slot: string }> }; published: null };
@@ -172,5 +172,32 @@ describe('PV-27 jobs de IA versionados', () => {
     await expect(enqueueAiJob(DEMO_NUTRITIONIST_ID, 'demo-nutri', { patient_id: patient, job_type: 'recipe_draft' }, false))
       .rejects.toMatchObject({ status: 429 });
     expect((await post(`/api/ai/jobs/${randomUUID()}/apply`, {})).status).toBe(404);
+  });
+  it('un borrador privado de meta no vence la propuesta, pero una meta publicada nueva sí', async () => {
+    await consentAi(); await declareAllergies();
+    const input = { sex: 'femenino', age: 34, weight_kg: 65, height_cm: 165, activity: 'moderada', goal: 'mantener', adjust_pct: 0, protein_g_per_kg: 1.4, fat_pct: 30 };
+    const initial = await (await app.request(`/api/patients/${patient}/nutrition-target?audience=pro`)).json();
+    const saved = await post(`/api/patients/${patient}/nutrition-target?audience=pro`, { inputs: input, publish: true, expected_revision: initial.revision }, 'PUT');
+    expect(saved.status).toBe(200);
+    const target = await saved.json();
+    const { enqueueAiJob, runAiJob, applyAiJob } = await import('./repository.js');
+    const { DEMO_NUTRITIONIST_ID } = await import('../store.js');
+    const queued = await enqueueAiJob(DEMO_NUTRITIONIST_ID, 'demo-nutri', { patient_id: patient, job_type: 'menu_draft', period_start: '2026-10-03', period_end: '2026-10-03', slots: ['Almuerzo'] }, false);
+    const draft = await post(`/api/patients/${patient}/nutrition-target?audience=pro`, { inputs: { ...input, adjust_pct: -10 }, publish: false, expected_revision: target.revision }, 'PUT');
+    expect(draft.status).toBe(200);
+    expect((await runAiJob(DEMO_NUTRITIONIST_ID, queued.id, false)).status).toBe('succeeded');
+    const workspace = await draft.json();
+    expect((await post(`/api/patients/${patient}/nutrition-target?audience=pro`, { inputs: { ...input, adjust_pct: 10 }, publish: true, expected_revision: workspace.revision }, 'PUT')).status).toBe(200);
+    await expect(applyAiJob(DEMO_NUTRITIONIST_ID, queued.id, false)).rejects.toMatchObject({ status: 409 });
+  });
+  it('retirar y volver a otorgar IA no revalida una propuesta del permiso anterior', async () => {
+    await consentAi(); await declareAllergies();
+    const { enqueueAiJob, runAiJob } = await import('./repository.js');
+    const { DEMO_NUTRITIONIST_ID } = await import('../store.js');
+    const queued = await enqueueAiJob(DEMO_NUTRITIONIST_ID, 'demo-nutri', { patient_id: patient, job_type: 'recipe_draft' }, false);
+    const text = CONSENT_CATALOG.find((entry) => entry.purpose === 'ai_menu_draft')!;
+    expect((await post(`/api/patients/${patient}/consents`, { purpose: text.purpose, text_version: text.text_version, text_hash: text.text_hash, decision: 'withdrawn' })).status).toBe(201);
+    await consentAi();
+    expect(await runAiJob(DEMO_NUTRITIONIST_ID, queued.id, false)).toMatchObject({ status: 'stale', artifact: null });
   });
 });

@@ -24,7 +24,7 @@ describe('contexto mínimo de jobs de IA', () => {
     const recipe = buildRecipeJobContext({ intake, titleHint: 'Bowl' });
     const encoded = canonicalJson(recipe);
     expect(encoded).toContain('Maní');
-    expect(encoded).toContain('recipe_draft.v1');
+    expect(encoded).toContain('recipe_draft.v2');
     expect(encoded).not.toContain('Sofía');
     expect(encoded).not.toContain('Nota clínica');
     const menu = buildMenuJobContext({
@@ -37,7 +37,7 @@ describe('contexto mínimo de jobs de IA', () => {
     });
     const menuJson = canonicalJson(menu);
     expect(menuJson).toContain('Pollo');
-    expect(menuJson).toContain('menu_draft.v1');
+    expect(menuJson).toContain('menu_draft.v2');
     expect(menuJson).not.toContain('Sofía Privada');
     expect(hashAiContext(recipe)).toHaveLength(64);
     expect(estimateTokens(recipe)).toBeGreaterThan(0);

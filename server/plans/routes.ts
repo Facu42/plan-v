@@ -9,7 +9,7 @@ import * as repo from './repository.js';
 
 async function body<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
   const raw = await c.req.text();
-  if (raw.length > 24_000) throw new repo.CareError(413, 'El archivo es demasiado grande.');
+  if (raw.length > 262_144) throw new repo.CareError(413, 'El archivo es demasiado grande.');
   try { return schema.parse(JSON.parse(raw)); } catch { throw new repo.CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.'); }
 }
 

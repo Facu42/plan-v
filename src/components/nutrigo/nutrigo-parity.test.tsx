@@ -119,8 +119,8 @@ describe('PV-37 paridad de layout/estado Nutrigo', () => {
       'food-diary': renderToStaticMarkup(<ShowroomPatientDiary patient={empty} query="" now={now} onLogMeal={() => {}} />),
       progress: renderToStaticMarkup(<ShowroomProgress patient={empty} />),
       exercise: renderToStaticMarkup(<ShowroomExercise patient={empty} now={now} />),
-      insights: renderToStaticMarkup(<ShowroomResources patientId="p1" query="dato inexistente" onNavigate={() => {}} />),
-      'insight-details': renderToStaticMarkup(<ShowroomResources patientId="p1" query="dato inexistente" onNavigate={() => {}} />),
+      insights: renderToStaticMarkup(<ShowroomResources patientId="p1" query="dato inexistente" onNavigate={() => {}} library={{patient_id:'p1',resources:[],articles:[],recipes:[],plan_b:null,assignments:[],favorites:[],hits:[]}} />),
+      'insight-details': renderToStaticMarkup(<ShowroomResources patientId="p1" query="dato inexistente" onNavigate={() => {}} library={{patient_id:'p1',resources:[],articles:[],recipes:[],plan_b:null,assignments:[],favorites:[],hits:[]}} />),
     } as const;
     for (const surface of NUTRIGO_SURFACES) {
       expect(html[surface.id], surface.id).toContain(surface.emptyTitle);

@@ -110,6 +110,8 @@ import {
   sbListPatientsForNutri,
   sbSetAppointment,
   sbSetBrief,
+  sbSendInvite,
+  sbRevokeInvite,
   sbUpdateGoal,
   sbUpdateHabits,
   sbUpdatePatientProfile,
@@ -127,6 +129,30 @@ const row = {
 
 beforeEach(() => {
   harness.reset();
+});
+
+describe('invitaciones aceptadas durante una escritura', () => {
+  const pending = { id:'invite-1', patient_id:'patient-1', nutritionist_id:'nutri-1', email:'patient@example.test', status:'pending' };
+  it('enviar no reabre una aceptación posterior ni registra un reenvío falso', async () => {
+    harness.push('patient_invites', { data:pending, error:null });
+    harness.push('patient_invites', { data:null, error:null });
+    harness.push('patient_invites', { data:{...pending,status:'accepted'}, error:null });
+    expect((await sbSendInvite(pending.id)).status).toBe('accepted');
+    expect(harness.calls.find(c=>c.table==='patient_invites'&&c.op==='update')?.filters).toContainEqual(['in',['status',['not_sent','pending']]]);
+    expect(harness.calls.some(c=>c.table==='patient_invite_events')).toBe(false);
+  });
+  it('revocar no cambia una invitación que dejó de estar abierta', async () => {
+    harness.push('patient_invites', { data:pending, error:null });
+    harness.push('patient_invites', { data:null, error:null });
+    await expect(sbRevokeInvite(pending.id)).rejects.toThrow('Invite unavailable');
+    expect(harness.calls.find(c=>c.table==='patient_invites'&&c.op==='update')?.filters).toContainEqual(['in',['status',['not_sent','pending']]]);
+    expect(harness.calls.some(c=>c.table==='patient_invite_events')).toBe(false);
+  });
+  it('recupera la invitación aceptada sin efectuar ninguna mutación', async () => {
+    harness.push('patient_invites', { data:{...pending,status:'accepted'}, error:null });
+    expect((await sbSendInvite(pending.id)).status).toBe('accepted');
+    expect(harness.calls).toHaveLength(1);
+  });
 });
 
 describe('mapMessage', () => {
@@ -840,6 +866,7 @@ describe('patient audience queries', () => {
     expect(String(patientsSelect?.payload)).not.toContain('*');
     const mealSelect = harness.calls.find((call) => call.table === 'meal_logs_patient_view' && call.op === 'select');
     expect(String(mealSelect?.payload)).not.toContain('note_for_nutri');
+    expect(String(mealSelect?.payload)).toContain('nutrition_origin');
     expect(harness.calls.some((call) => call.table === 'ai_briefs')).toBe(false);
   });
 });
@@ -893,6 +920,14 @@ describe('PV-11 directory summaries', () => {
     expect(harness.calls.find((call) => call.table === 'patients')?.filters).toEqual(
       expect.arrayContaining([['range', [0, 2]]]),
     );
+  });
+  it('carga las asignaciones autorizadas con el identificador de recurso usado por el consultorio',async()=>{
+    harness.push('nutritionists',{data:{id:'nutri-1'},error:null});
+    harness.push('patients',{data:[summaryRow],error:null});
+    harness.push('resource_assignments',{data:[{id:'a1',patient_id:'patient-1',assigned_at:'2026-10-05T10:00:00Z',first_read_at:'2026-10-05T11:00:00Z',resources:{slug:'leer-plan-semanal'}}],error:null});
+    const result=await sbListPatientsForNutri('user-1',{offset:0,limit:2});
+    expect(result.patients[0].resource_assignments).toEqual([{id:'a1',patient_id:'patient-1',resource_id:'leer-plan-semanal',assigned_at:'2026-10-05T10:00:00Z',read_at:'2026-10-05T11:00:00Z'}]);
+    expect(harness.calls.find(c=>c.table==='resource_assignments')?.filters).toContainEqual(['in',['patient_id',['patient-1']]]);
   });
 });
 

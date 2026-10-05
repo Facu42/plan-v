@@ -68,6 +68,7 @@ import {
   listClinicalNotes,
   listConsentEvents,
   patchIntake,
+  reopenIntake,
   reviewIntake,
   submitIntake,
 } from './intake/memory.js';
@@ -686,7 +687,7 @@ app.post('/api/invites/:id/send', async (c) => {
       const invite = await sb.sbGetInvite(inviteId.data);
       if (!invite || invite.nutritionist_id !== actor.nutritionistId) return c.json({ error: 'Prohibido' }, 403);
       const sent = await sb.sbSendInvite(inviteId.data);
-      await enqueueOutboxBestEffort({
+      if (sent.status === 'pending') await enqueueOutboxBestEffort({
         patient_id: invite.patient_id,
         event_type: 'invite_sent',
         client_id: inviteId.data,
@@ -958,6 +959,25 @@ app.patch('/api/patients/:id/intake', async (c) => {
     if (error instanceof IntakeConflictError) return c.json({ error: error.message }, 409);
     throw error;
   }
+});
+
+app.post('/api/patients/:id/intake/reopen', async (c) => {
+  const auth = c.get('auth');
+  const patientId = c.req.param('id');
+  const parsedBody = await parseJsonBody(c, intakeSubmitInputSchema);
+  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
+  if ('userId' in auth) {
+    if (!await authorizePatient(auth.userId, patientId, 'edit_intake')) return c.json({ error: 'Prohibido' }, 403);
+    if (isSupabaseEnabled()) {
+      try {
+        const bundle = await intakeDb.reopenIntake(patientId, parsedBody.data.expected_revision);
+        return c.json({ ...toPatientIntakeView(bundle.intake, bundle.consents), source: 'supabase' });
+      } catch (error) { return intakeFailure(c, error); }
+    }
+  }
+  if (!getPatient(patientId)) return c.notFound();
+  try { return c.json({ ...toPatientIntakeView(reopenIntake(patientId, parsedBody.data.expected_revision), listConsentEvents(patientId)), source: 'memory' }); }
+  catch (error) { if (error instanceof IntakeConflictError) return c.json({ error: error.message }, 409); throw error; }
 });
 
 app.post('/api/patients/:id/intake/submit', async (c) => {

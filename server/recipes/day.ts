@@ -55,6 +55,7 @@ export async function assignRecipeDay(
       yield_portions: published.yield_portions,
       ingredients: published.ingredients,
       card: published.card,
+      ...(published.nutrition ? {nutrition:published.nutrition} : {}),
       registered_meal_id: existing?.registered_meal_id ?? null,
       client_id: existing?.client_id ?? null,
     };
@@ -113,9 +114,10 @@ export async function registerRecipeDay(
       status: macros ? 'succeeded' : 'failed',
       foods,
       macros,
-      confidence: macros ? 1 : 0,
+      nutrition_origin: row.nutrition?.origin === 'ai_estimate' ? 'ai_estimate' : 'declared',
+      confidence: macros ? (row.nutrition?.origin === 'ai_estimate' ? 0.5 : 1) : 0,
       note_for_nutri: macros
-        ? 'Registrada desde la receta asignada. Macros declarados por la nutricionista, no estimados por IA.'
+        ? (row.nutrition?.origin === 'ai_estimate' ? 'Registrada desde la receta asignada. Nutrientes estimados por IA y revisados por la nutricionista.' : 'Registrada desde la receta asignada. Macros declarados por la nutricionista, no estimados por IA.')
         : 'Registrada desde la receta asignada. Sin macros declarados.',
       error_code: macros ? null : 'macros_unavailable',
     }, false);

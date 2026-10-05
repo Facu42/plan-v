@@ -27,7 +27,6 @@ describe('ingreso del paciente', () => {
     expect(context.preferredName).toBe('Sofía');
     expect(context.goal).toBe('Comer con más regularidad');
     expect(context.appointmentWhen).toBe('Jueves · 14:30');
-    expect(context.hasPublishedPlan).toBe(true);
     expect(ONBOARDING_STEPS).toEqual(['invite', 'privacy', 'profile', 'allergies', 'review']);
     expect(context.nutritionist).toBe('Tu nutricionista');
   });

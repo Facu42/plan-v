@@ -6,7 +6,7 @@ describe('rutas autenticadas de Nutrigo', () => {
     expect(appPath('patient', 'plan')).toBe('/app/plan');
     expect(appPath('pro', 'pacientes')).toBe('/crm/pacientes');
     expect(appPath('pro', 'progreso')).toBe('/crm/progreso');
-    expect(appPath('patient', 'ficha')).toBe('/app/inicio');
+    expect(appPath('patient', 'ficha')).toBe('/app/ficha');
     expect(appPath('pro', 'ejercicio')).toBe('/crm/ejercicio');
   });
 
@@ -20,8 +20,11 @@ describe('rutas autenticadas de Nutrigo', () => {
     expect(resolveAppLocation({ pathname: '/app/plan' })).toEqual({
       role: 'patient', page: 'plan', path: '/app/plan', replace: false,
     });
-    expect(resolveAppLocation({ pathname: '/app/ficha' }).path).toBe('/app/inicio');
-    expect(resolveAppLocation({ pathname: '/app/ficha' }).replace).toBe(true);
+    expect(resolveAppLocation({ pathname: '/app/ficha', lockedRole: 'patient' })).toEqual({
+      role: 'patient', page: 'ficha', path: '/app/ficha', replace: false,
+    });
+    expect(buildAppHref('https://plan.test/app/inicio', 'patient', 'ficha')).toBe('/app/ficha');
+    expect(resolveAppLocation({ pathname: '/app/pacientes', lockedRole: 'patient' }).path).toBe('/app/inicio');
   });
 
   it('no deja que una sesión paciente abra el CRM por URL', () => {

@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { contentIdentity } from './app-location';
 
 const css = readFileSync(new URL('./motion.css', import.meta.url), 'utf8');
 const showroom = readFileSync(new URL('./NutrigoShowroom.tsx', import.meta.url), 'utf8');
@@ -30,7 +31,9 @@ describe('movimiento', () => {
   });
 
   it('cada pantalla vuelve a entrar aunque comparta bloques con la anterior', () => {
-    expect(showroom).toMatch(/<main key=\{`\$\{role\}:\$\{page\}:\$\{selected\?\.id \?\? ''\}`\} id="nv-main"/);
+    expect(contentIdentity('pro','ficha','p1')).not.toBe(contentIdentity('pro','plan','p1'));
+    expect(contentIdentity('pro','ficha','p1')).not.toBe(contentIdentity('pro','ficha','p2'));
+    expect(contentIdentity('pro','pacientes')).toBe(contentIdentity('pro','pacientes','primera-paciente'));
   });
 
   it('nada se mueve para quien pidió reducir movimiento', () => {

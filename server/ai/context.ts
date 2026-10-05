@@ -8,6 +8,7 @@ import {
   type AiJobType,
 } from '../../src/types/ai-jobs.js';
 import { CareError } from '../care/errors.js';
+import type { MenuNutritionTarget, RecipeNutrition, ProposedRecipe } from '../../src/types/ai-nutrition.js';
 
 export { RECIPE_PROMPT_VERSION, MENU_PROMPT_VERSION };
 
@@ -22,9 +23,11 @@ export type RecipeJobContext = {
   restrictions: HealthSlice;
   cooking_time_minutes: number | null;
   title_hint: string | null;
+  validity?: { intake_revision: number; consent_event_id: string | null };
 };
 
 export type MenuSlotContext = { day: string; meals: Array<{ slot: string; title: string }> };
+export type MenuCatalogRecipe = Omit<ProposedRecipe, 'nutrition'> & { id: string; version: number; nutrition: RecipeNutrition | null };
 
 export type MenuJobContext = {
   schema: typeof MENU_PROMPT_VERSION;
@@ -35,8 +38,12 @@ export type MenuJobContext = {
   period_end: string | null;
   slots: string[];
   catalog_titles: string[];
+  catalog: MenuCatalogRecipe[];
+  confirmed_target: MenuNutritionTarget | null;
+  preferences: { cooking_time_minutes: number | null; dietary: string[] };
   request: { target: string; reason: string; replacement: 'recipe' | 'ingredient' } | null;
   week_slots: MenuSlotContext[];
+  validity?: { intake_revision: number; consent_event_id: string | null };
 };
 
 export function assertKnownAllergies(intake: Pick<IntakePayload, 'allergies' | 'restrictions'>) {
@@ -69,6 +76,9 @@ export function buildMenuJobContext(input: {
   periodEnd?: string | null;
   slots?: string[];
   catalogTitles?: string[];
+  catalog?: MenuCatalogRecipe[];
+  confirmedTarget?: MenuNutritionTarget | null;
+  dietaryPreferences?: string[];
   request?: { target: string; reason: string; replacement: 'recipe' | 'ingredient' } | null;
   weekPlan?: Patient['weekPlan'];
 }): MenuJobContext {
@@ -82,6 +92,9 @@ export function buildMenuJobContext(input: {
     period_end: input.periodEnd ?? null,
     slots: input.slots ?? [],
     catalog_titles: (input.catalogTitles ?? []).slice(0, 20),
+    catalog: [...(input.catalog ?? [])].sort((a, b) => a.id.localeCompare(b.id)).slice(0, 12),
+    confirmed_target: input.confirmedTarget ?? null,
+    preferences: { cooking_time_minutes: input.intake.cooking_time_minutes ?? null, dietary: input.dietaryPreferences ?? [] },
     request: input.request ?? null,
     week_slots: (input.weekPlan ?? []).slice(0, 7).map((entry) => ({
       day: entry.day,
@@ -95,6 +108,12 @@ export function canonicalJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map((item) => canonicalJson(item)).join(',')}]`;
   const record = value as Record<string, unknown>;
   return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(record[key])}`).join(',')}}`;
+}
+
+/** Validity markers stay on our server; providers receive no consent IDs. */
+export function providerJobContext(context: RecipeJobContext | MenuJobContext) {
+  const { validity: _validity, ...external } = context;
+  return external;
 }
 
 export function hashAiContext(context: unknown): string {
