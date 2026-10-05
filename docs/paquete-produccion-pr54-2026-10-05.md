@@ -1,6 +1,6 @@
 # Paquete de producción del PR #54
 
-Preparado el 5 de octubre de 2026. **Pendiente de aprobación escrita; no aplicado.**
+Preparado el 5 de octubre de 2026. **Aprobado por Facundo y aplicado sin modificar los cinco archivos.** Las versiones reales de Supabase, el commit publicado y las comprobaciones están en [publicación y cierre](publicacion-producto-plan-v-2026-10-05.md).
 
 Código y SQL del paquete: `66c4fbfd4c803b16f3883e53089fa8974e077be5`. Las cinco migraciones se aplican en el orden de la tabla. Los SHA-256 identifican los bytes del archivo en Git (saltos LF), no una conversión de saltos de línea de Windows.
 

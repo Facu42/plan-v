@@ -24,6 +24,7 @@ import { NutrigoResources } from './screens/Resources';
 import { errorText } from './screens/shared';
 import { notifyCareChanged } from '../../api/care';
 import { HABIT_LIMITS, parseHabitInput } from '../../lib/habit-input';
+import { PatientAiPermissions } from './PatientAiPermissions';
 
 function HabitForm({patient,kind,onClose}:{patient:ShowroomPatient;kind:'water'|'rest';onClose:()=>void}) {
   const [value,setValue]=useState(kind==='water'?String(patient.hydration):patient.sleepMinutes==null?'':String(patient.sleepMinutes));
@@ -48,7 +49,7 @@ export function NutrigoPatientApp({patient,page,onNavigate,onSignOut,onEditIntak
   else if(page==='mensajes')screen=<NutrigoMessages {...common}/>;
   else if(page==='recursos')screen=<NutrigoResources {...common}/>;
   else screen=<FramePair nodes={['84:2994','470:15300']} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut} resolve={node=>nodeName(node)==='Body'||nodeName(node)==='Table'?{children:page==='pagos'?<ShowroomPagos patientId={patient.id}/>:<section className="p-[24px] flex flex-col gap-[16px]" aria-label="Mi ficha y permisos"><h1 className="text-[22px]">Mi ficha</h1><button className="mcp-action" onClick={onEditIntake}>Editar mi ficha inicial</button><button className="mcp-action" onClick={()=>setPrivacy(true)}>Mis datos y permisos</button><PatientNutritionTarget patientId={patient.id}/><PatientBodyDataCard patientId={patient.id} forceOpen onSaved={notifyCareChanged}/><button className="mcp-action" onClick={onRecord}>Peso, medidas y archivos privados</button><button className="mcp-action" onClick={()=>onNavigate('pagos')}>Mis pagos</button></section>}:undefined}/>;
-  return <>{screen}{demoRoleSwitch&&<div className="mcp-nutrigo mcp-screen-state"><button className="mcp-action" onClick={demoRoleSwitch}>Ver consultorio de demostración</button></div>}
+  return <>{screen}{page==='ficha'&&<div className="mcp-nutrigo mcp-screen-state"><PatientAiPermissions key={patient.id} patientId={patient.id}/></div>}{demoRoleSwitch&&<div className="mcp-nutrigo mcp-screen-state"><button className="mcp-action" onClick={demoRoleSwitch}>Ver consultorio de demostración</button></div>}
     {dialog==='records'&&<FigmaRecordDialog title="Mis registros" onClose={()=>setDialog(null)}><PatientBodyDataCard patientId={patient.id} forceOpen onSaved={notifyCareChanged}/><CarePanel patientId={patient.id}/></FigmaRecordDialog>}
     {(dialog==='water'||dialog==='rest')&&<HabitForm patient={patient} kind={dialog} onClose={()=>setDialog(null)}/>}
     {slot&&fullPatient&&<MealLogModal patient={fullPatient} defaultSlot={slot} close={()=>setSlot(null)}/>}

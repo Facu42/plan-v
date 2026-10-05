@@ -2,6 +2,8 @@
 
 Continuación del PR #54 (rama codex/nutrigo-producto-mcp). Conserva las 24 fuentes originales del MCP, los recursos, el español y el logo oficial. El comparador estático no demuestra persistencia del producto.
 
+**Estado posterior a la aprobación:** PR #54 integrado; cinco migraciones aplicadas y web/API/worker comprobados en `83a93a8`. Portada manual HTTPS verificada. El registro actualizado de producción y el cierre del permiso de IA están en [publicación y comprobaciones](publicacion-producto-plan-v-2026-10-05.md). La evidencia de abajo corresponde al ensayo anterior a publicar.
+
 ## Correcciones comprobadas localmente
 
 - Recetas y planes usan una revisión de contenido distinta del número de versión. Dos editores sobre el mismo borrador no pueden sobrescribirse silenciosamente. La publicación exige el contenido revisado; el editor conserva datos ante un conflicto y ofrece recuperar lo guardado.
@@ -29,7 +31,7 @@ El CI existente ejecuta un recorrido en gstack, sin capturas y con Auth/PostgRES
 
 Las revisiones independientes code-reviewer y reality-checker reprodujeron defectos de producto y del ensayo. El revisor de contratos revalidó por separado permisos, persistencia, invitaciones y publicación mediante el adaptador real de la API. En [CI de sesiones y recorrido completo de `66c4fbf`](https://github.com/Facu42/plan-v/actions/runs/37318109128) pasaron **24 pruebas con sesiones firmadas y 36 comprobaciones de navegador**: alta/invitación, consentimiento, ficha y meta; receta/plan publicados y borradores privados; comidas/hábitos, compras/favoritos, recursos y lectura; mensajes de ambos roles y descargas reales de adjuntos, fotos y estudios con denegación ajena; medidas/actividad, revisión profesional, turnos y pagos manuales; edición y archivo/restauración; nuevo ingreso, recuperación real de contraseña y corrección de ficha recibida por la profesional con regreso al plan publicado. Se usó el almacenamiento temporal real, no el adaptador de memoria. Los contenedores y datos ficticios se eliminaron al terminar.
 
-**Todavía pendientes de cierre:** aprobación concreta de producción, publicación y recorrido final con las cuentas ficticias existentes, prueba real gratuita de texto y apertura pública real HTTPS de una portada manual. La IA estuvo deshabilitada en el ensayo temporal: sus 36 comprobaciones no prueban generación. La clave del proveedor existente sólo se devuelve como nombre por el conector; no se copian secretos ni se activa un proveedor pago. Las fotos IA continúan pendientes. La portada manual tiene validaciones y pruebas de almacenamiento SQL/HTTP; la pila temporal usa HTTP y no se debilita la condición de producción para hacer pasar el ensayo.
+**Límites del ensayo temporal:** la IA estuvo deshabilitada: sus 36 comprobaciones no prueban generación. La portada manual tenía pruebas SQL/HTTP y no se debilitó la condición HTTPS para hacer pasar ese ensayo. La aprobación, publicación y apertura HTTPS se acreditaron después en el registro de producción enlazado arriba. Sigue pendiente completar la generación gratuita real y su recorrido. Las fotos IA continúan pendientes; no se copian secretos ni se activa un proveedor pago.
 
 Los endpoints, permisos y lecturas de comprobación de cada acción están en [recorridos y contratos](recorridos-y-contratos-plan-v-2026-10-05.md), junto con una guía breve para ambas cuentas ficticias.
 
@@ -43,4 +45,4 @@ Los endpoints, permisos y lecturas de comprobación de cada acción están en [r
 
 La quinta responde a defectos reproducidos durante el cierre. El título anterior de cada versión se inicializa con el disponible: no se inventa historia perdida. Las cinco se ensayaron juntas. El [paquete de producción](paquete-produccion-pr54-2026-10-05.md) identifica sus SHA-256, configuración gratuita y comprobaciones posteriores. La lectura de migraciones mediante MCP del 5 de octubre confirmó que ninguna de estas cinco estaba aplicada; la última instalada era `20261002200418_harden_ai_job_execution`.
 
-La regla 4 de [las reglas del proyecto](agentes/reglas-plan-v.md) exige: «Cualquier cambio en la base de producción, en la configuración de producción o en servicios pagos necesita antes el OK escrito de Facundo». Este registro no concede ese permiso. No se aplicó este paquete ni se fusionó el PR a main.
+La regla 4 de [las reglas del proyecto](agentes/reglas-plan-v.md) exige: «Cualquier cambio en la base de producción, en la configuración de producción o en servicios pagos necesita antes el OK escrito de Facundo». Facundo aprobó el paquete concreto y se aplicó sin modificarlo; la aprobación y la publicación están registradas en el archivo de producción.

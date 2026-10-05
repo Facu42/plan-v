@@ -93,14 +93,25 @@ function CarePanelContent({patientId,mode}:{patientId:string;mode:Mode}) {
 export function CareConsent({patientId,snapshot,onlyAI=false,meals=false}:{patientId:string;snapshot:CareSnapshot;onlyAI?:boolean;meals?:boolean}) {
   const [catalog,setCatalog]=useState<Awaited<ReturnType<typeof api.getConsentCatalog>>['consents']>([]);
   const [status,setStatus]=useState('');const [busy,setBusy]=useState(false);const lock=useRef(false);
-  useEffect(()=>{const c=new AbortController();api.getConsentCatalog({signal:c.signal}).then(r=>setCatalog(r.consents)).catch(e=>{if(!c.signal.aborted)setStatus(careErrorMessage(e));});return()=>c.abort();},[]);
+  const [catalogError,setCatalogError]=useState('');const [catalogLoading,setCatalogLoading]=useState(true);const [catalogRevision,setCatalogRevision]=useState(0);
+  useEffect(()=>{
+    const c=new AbortController();setCatalog([]);setCatalogError('');setCatalogLoading(true);
+    api.getConsentCatalog({signal:c.signal}).then(r=>{if(!c.signal.aborted)setCatalog(r.consents);})
+      .catch(e=>{if(!c.signal.aborted)setCatalogError(careErrorMessage(e));})
+      .finally(()=>{if(!c.signal.aborted)setCatalogLoading(false);});
+    return()=>c.abort();
+  },[patientId,catalogRevision]);
   async function toggle(purpose:string, granted:boolean) {
     if(lock.current)return; const text=catalog.find(c=>c.purpose===purpose);if(!text)return;
     lock.current=true;setBusy(true);setStatus('');
     try{await api.recordConsent(patientId,{purpose,text_version:text.text_version,text_hash:text.text_hash,decision:granted?'withdrawn':'granted'});notifyCareChanged();}
     catch(e){setStatus(careErrorMessage(e));}finally{lock.current=false;setBusy(false);}
   }
-  return <details className="care-consent" open={meals || (onlyAI ? (!snapshot.consented.includes('ai_menu_draft') || !snapshot.consented.includes('ai_followup')) : !snapshot.consented.includes('measurement'))}><summary>Permisos opcionales · vos elegís qué compartir</summary>{catalog.filter(c=>(meals?['meal_photo','ai_meal_analysis']:onlyAI?['ai_menu_draft','ai_followup']:['measurement','body_progress','clinical_document']).includes(c.purpose)).map(c=><label key={c.purpose}><input type="checkbox" disabled={busy} checked={snapshot.consented.includes(c.purpose)} onChange={()=>void toggle(c.purpose,snapshot.consented.includes(c.purpose))}/><span>{c.text}</span></label>)}{status&&<p role="alert">{status}</p>}</details>;
+  return <details className="care-consent" open={meals || catalogLoading || Boolean(catalogError) || (onlyAI ? (!snapshot.consented.includes('ai_menu_draft') || !snapshot.consented.includes('ai_followup')) : !snapshot.consented.includes('measurement'))}><summary>Permisos opcionales · vos elegís qué compartir</summary>
+    {catalogLoading&&<p role="status">Cargando permisos…</p>}
+    {catalogError&&<p role="alert">{catalogError} <button type="button" disabled={busy} onClick={()=>setCatalogRevision(r=>r+1)}>Reintentar permisos</button></p>}
+    {catalog.filter(c=>(meals?['meal_photo','ai_meal_analysis']:onlyAI?['ai_menu_draft','ai_followup']:['measurement','body_progress','clinical_document']).includes(c.purpose)).map(c=><label key={c.purpose}><input type="checkbox" disabled={busy} checked={snapshot.consented.includes(c.purpose)} onChange={()=>void toggle(c.purpose,snapshot.consented.includes(c.purpose))}/><span>{c.text}</span></label>)}{status&&<p role="alert">{status}</p>}
+  </details>;
 }
 
 function CareReminderSettings({patientId,settings}:{patientId:string;settings:CarePreferences}) {
