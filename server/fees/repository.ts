@@ -23,6 +23,7 @@ export function feesDbError(error: { code?: string; message?: string } | null): 
     throw new CareError(501, 'Las cobranzas requieren instalar la migración de este módulo.');
   }
   if (error.code === '42501') throw new CareError(403, 'No tenés permiso para esta acción.');
+  if (error.code === 'PT409') throw new CareError(409,'Ese reintento contiene datos distintos. Recuperá el pago guardado.');
   if (error.message === 'billing_too_many_reports') throw new CareError(429, 'Ya avisaste varios pagos. Esperá a que tu nutricionista los confirme.');
   if (['22023', '23514', '22P02'].includes(error.code ?? '')) throw new CareError(400, 'Revisá el monto, la fecha y el medio de pago.');
   throw new CareError(503, 'No se pudo guardar. Reintentá en un momento.');
@@ -61,6 +62,7 @@ export function resetFeesMemory(): void {
   fees.clear();
   charges.clear();
   payments.clear();
+  paymentReceipts.clear();
   seedDemo();
 }
 
@@ -262,23 +264,23 @@ export async function setFee(patientId: string, input: PatientFee | null, persis
 export async function recordPayment(patientId: string, input: PaymentInput, persistent: boolean): Promise<PatientLedger> {
   if (persistent) {
     return asLedger(await call('record_patient_payment', {
-      target: patientId, amount: input.amount, paid_on: input.paid_on, method: input.method, note: input.note ?? '',
+      target: patientId, amount: input.amount, paid_on: input.paid_on, method: input.method, note: input.note ?? '', client_id: input.client_id,
     }));
   }
   memoryPatient(patientId);
-  addPayment(patientId, input, false);
+  if (!paymentDuplicate(patientId, input, 'record')) addPayment(patientId, input, false);
   return memoryLedger(patientId);
 }
 
 export async function reportPayment(patientId: string, input: PaymentInput, persistent: boolean): Promise<PatientLedgerView> {
   if (persistent) {
     await call('report_patient_payment', {
-      target: patientId, amount: input.amount, paid_on: input.paid_on, method: input.method, note: input.note ?? '',
+      target: patientId, amount: input.amount, paid_on: input.paid_on, method: input.method, note: input.note ?? '', client_id: input.client_id,
     });
     return getLedger(patientId, true);
   }
   memoryPatient(patientId);
-  addPayment(patientId, input, true);
+  if (!paymentDuplicate(patientId, input, 'report')) addPayment(patientId, input, true);
   return getLedger(patientId, false);
 }
 
@@ -301,3 +303,13 @@ export async function setChargeWaived(chargeId: string, waived: boolean, persist
 
 // El modo demo arranca con los ejemplos (resetStore los vuelve a cargar en las pruebas).
 seedDemo();
+
+const paymentReceipts = new Map<string,string>();
+function paymentDuplicate(patientId: string, input: PaymentInput, operation: string) {
+  if (!input.client_id) return false;
+  const body = JSON.stringify([patientId,operation,input.amount,input.paid_on,input.method,input.note?.trim() ?? '']);
+  const prior = paymentReceipts.get(input.client_id);
+  if (prior && prior !== body) throw new CareError(409,'Ese reintento contiene datos distintos. Recuperá el pago guardado.');
+  if (prior) return true;
+  paymentReceipts.set(input.client_id,body); return false;
+}

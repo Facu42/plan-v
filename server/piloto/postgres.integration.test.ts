@@ -1,3 +1,4 @@
+import { productFixtureArgs } from '../testing/product-rpc-fixture';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { PGlite } from '@electric-sql/pglite';
@@ -27,6 +28,8 @@ async function asUser<T = Record<string, unknown>>(user: string, sql: string, pa
   });
 }
 async function rpc(user: string, name: string, args: unknown[] = []) {
+  args = await productFixtureArgs(db, name, args);
+  if (name === 'publish_meal_plan') name = 'publish_reviewed_meal_plan';
   const rows = await asUser<{ result: unknown }>(user, `select public.${name}(${args.map((_, i) => `$${i + 1}`).join(',')}) as result`, args);
   return rows[0].result;
 }

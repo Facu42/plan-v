@@ -70,6 +70,7 @@ export type AiJobView = {
     period_end: string | null;
     slots: string[];
     dietary_preferences?: string[];
+    _write_base?: { plan_id?: string; recipe_id?: string; revision: string | null };
   };
   artifact: AiJobArtifact | null;
 };

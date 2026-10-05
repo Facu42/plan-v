@@ -39,6 +39,7 @@ type MemItem = {
 };
 type MemVersion = {
   id: string;
+  revision: string;
   meal_plan_id: string;
   version: number;
   status: 'draft' | 'published' | 'archived';
@@ -155,6 +156,7 @@ function asVersion(row: Record<string, unknown>): PlanVersionView {
   return {
     id: String(row.id),
     version: asNumber(row.version),
+    ...(row.revision ? { revision: String(row.revision) } : {}),
     status,
     period_start: String(row.period_start).slice(0, 10),
     period_end: String(row.period_end).slice(0, 10),
@@ -227,6 +229,7 @@ function memVersionView(row: MemVersion): PlanVersionView {
   return {
     id: row.id,
     version: row.version,
+    revision: row.revision,
     status: row.status,
     period_start: row.period_start,
     period_end: row.period_end,
@@ -276,9 +279,9 @@ async function resolveRecipe(nutritionistId: string, recipeId: string, recipeVer
   if (recipeVersion != null && published.version !== recipeVersion) {
     const match = recipe.current.published_at && recipe.current.version === recipeVersion ? recipe.current : null;
     if (!match) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
-    return { recipe_id: recipe.id, recipe_version: match.version, recipe_title: recipe.title, recipe_version_id: match.id };
+    return { recipe_id: recipe.id, recipe_version: match.version, recipe_title: match.title ?? recipe.title, recipe_version_id: match.id };
   }
-  return { recipe_id: recipe.id, recipe_version: published.version, recipe_title: recipe.title, recipe_version_id: published.id };
+  return { recipe_id: recipe.id, recipe_version: published.version, recipe_title: published.title ?? recipe.title, recipe_version_id: published.id };
 }
 
 async function writeDraft(nutritionistId: string, patientId: string, input: MealPlanDraftInput, persistent: boolean): Promise<ProfessionalMealPlan> {
@@ -287,6 +290,7 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
   const existing = [...plans.values()].find((row) => row.patient_id === patientId && row.nutritionist_id === nutritionistId);
   if (existing && existing.id !== input.id) throw new CareError(409, 'El plan publicado no se puede sobrescribir. Publicá una versión nueva.');
   const previousVersions = existing ? planVersions(existing.id) : [];
+  if (input.expected_revision !== undefined && input.expected_revision !== (previousVersions[previousVersions.length - 1]?.revision ?? null)) throw new CareError(409, 'El borrador cambió. Recuperá la versión guardada antes de editar.');
   const previous = previousVersions.length ? versionItems(previousVersions[previousVersions.length - 1].id) : [];
   const prepared: Omit<MemItem, 'id' | 'version_id'>[] = [];
   const seen = new Set<string>();
@@ -336,6 +340,7 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
     target = {
       id: crypto.randomUUID(),
       meal_plan_id: plan.id,
+      revision: crypto.randomUUID(),
       version: (latest?.version ?? 0) + 1,
       status: 'draft',
       period_start: input.period_start,
@@ -352,6 +357,7 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
     target.nutrition_target = input.nutrition_target;
     for (const item of [...items.values()].filter((row) => row.version_id === target.id)) items.delete(item.id);
   }
+  target.revision = crypto.randomUUID();
   for (const item of prepared) {
     const row: MemItem = { id: crypto.randomUUID(), version_id: target.id, ...item };
     items.set(row.id, row);
@@ -435,7 +441,8 @@ export async function publishMealPlan(
     version.published_at = new Date().toISOString();
     return memProfessional(plan);
   }
-  const { data, error } = await getRequestDb().rpc(expectedSnapshot ? 'publish_reviewed_meal_plan' : 'publish_meal_plan', {
+  if (!expectedSnapshot) throw new CareError(409, 'Revisá la copia guardada antes de publicar.');
+  const { data, error } = await getRequestDb().rpc('publish_reviewed_meal_plan', {
     target_plan: planId, expected_version: expectedVersion,
     ...(expectedSnapshot ? { expected_snapshot: expectedSnapshot } : {}),
   });

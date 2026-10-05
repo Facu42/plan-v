@@ -3,7 +3,7 @@ import { PATIENT_SURFACES, PRO_HIDDEN_PAGES, PRO_SURFACES } from './showroom-nav
 
 export type AppRole = 'patient' | 'pro';
 
-export const PATIENT_PAGES: ShowroomPage[] = PATIENT_SURFACES.map((item) => item.id);
+export const PATIENT_PAGES: ShowroomPage[] = [...PATIENT_SURFACES.map((item) => item.id), 'ficha'];
 export const PRO_PAGES: ShowroomPage[] = [...PRO_SURFACES.map((item) => item.id), ...PRO_HIDDEN_PAGES];
 
 const PAGES: Record<AppRole, Set<ShowroomPage>> = {

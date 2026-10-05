@@ -1,8 +1,9 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { FramePair } from '../FramePair';
 import { nodeName, sourceText, type SourceNode, type SourceResolver } from '../SourceView';
 import { progressApi } from '../../../api/progress';
 import { careApi } from '../../../api/care';
+import { latestMeasurementSeries } from '../../../lib/measurement-display';
 import type { CareRecord } from '../../../types/care';
 import type { ProgressPeriodDays } from '../../../types/progress';
 import { dateId, dateLabel, descendants, errorText, fields, formatNumber, idEnds, leaf, objects, source, Stateful, useRemote, type ScreenProps } from './shared';
@@ -11,8 +12,9 @@ type Props = ScreenProps & { onRecord?: () => void; onHydration?: () => void; on
 export function NutrigoProgress({ patient, onNavigate, onSignOut, onRecord, onHydration, onRest }: Props) {
   const [days, setDays] = useState<ProgressPeriodDays>(30);
   const remote = useRemote(`${patient.id}:${days}`, async signal => { const [progress, care] = await Promise.all([progressApi.get(patient.id, days, signal), careApi.snapshot(patient.id, false, signal)]); return { progress: progress.progress, care }; });
+  useEffect(() => { const update=() => remote.reload(); window.addEventListener('plan-v:care-changed',update); return () => window.removeEventListener('plan-v:care-changed',update); },[remote.reload]);
   const [error, setError] = useState(''); const [opening, setOpening] = useState<string | null>(null);
-  const series = (kind: 'weight' | 'waist' | 'hip') => remote.data?.progress.series.find(item => item.kind === kind);
+  const series = (kind: 'weight' | 'waist' | 'hip') => latestMeasurementSeries(remote.data?.progress.series ?? [], kind);
   const weight = series('weight'); const photos = remote.data?.care.records.filter(item => item.data.kind === 'body_photo') ?? [];
   const openPhoto = async (item: CareRecord) => { if (opening) return; setOpening(item.id); setError(''); try { const grant = await careApi.openPhoto(patient.id, item.id); window.open(grant.url, '_blank', 'noopener,noreferrer'); } catch (caught) { setError(errorText(caught)); } finally { setOpening(null); } };
   const wrapWidget = (node: SourceNode, body: ReactNode) => { const header = objects(node).find(child => nodeName(child) === 'Header-Section'); const originalBody = objects(node).find(child => nodeName(child) === 'Body'); return { children: <>{header && source(header, child => /Button/.test(nodeName(child)) ? { hidden: true } : undefined)}{originalBody ? source(originalBody, child => child === originalBody ? { children: body } : undefined) : body}</> }; };

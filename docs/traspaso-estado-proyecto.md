@@ -156,3 +156,6 @@ Trabajo nuevo aún **sin publicar**: [producto desde el código original del MCP
 - Cada tema anota lo avanzado en su archivo de `docs/` (arriba) o en `docs/plan-apartados.md`.
 - El estado resumido del proyecto vive además en la memoria compartida del proyecto en Claude; este
   archivo es la copia para quien no la tiene.
+
+
+Continuación del cierre de paciente y nutricionista: [correcciones, evidencia y paquete de cinco migraciones](cierre-funcional-plan-v-2026-10-05.md).

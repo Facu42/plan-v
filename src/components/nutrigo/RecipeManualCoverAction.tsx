@@ -27,7 +27,7 @@ export function RecipeManualCoverAction({ recipe, disabled = false, className = 
     finally { inFlight.current = false; setBusy(false); }
   }
   return <div className="recipe-manual-cover">
-    <input ref={input} type="file" accept="image/jpeg,image/png,image/webp" aria-label={`Foto del plato ${recipe.title}`} hidden onChange={(event) => void selectFile(event)} />
+    <input ref={input} type="file" accept="image/jpeg,image/png,image/webp" aria-label={`Foto del plato ${recipe.published?.title ?? recipe.title}`} hidden onChange={(event) => void selectFile(event)} />
     <button type="button" className={className} disabled={disabled || busy} onClick={() => input.current?.click()}>{busy ? 'Guardando foto…' : recipe.published.card?.cover_status === 'ready' ? 'Cambiar foto' : 'Subir foto'}</button>
     <small>JPG, PNG o WebP · hasta 5 MB. Subí sólo el plato: la foto será pública.</small>
     {error && <p role="alert">{error}</p>}

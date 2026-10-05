@@ -5,6 +5,7 @@ const DEMO_NUTRI = 'nutri-demo';
 
 type ExtraActivity = { assignment_id: string | null; sets: number | null; reps: number | null };
 
+export const activityReceipts = new Map<string,string>();
 const assignments = new Map<string, RoutineAssignmentView>();
 const extraActivities = new Map<string, ExtraActivity>();
 let habilitated = new Set<string>([DEMO_NUTRI]);
@@ -12,6 +13,7 @@ let habilitated = new Set<string>([DEMO_NUTRI]);
 export function resetExerciseMemory() {
   assignments.clear();
   extraActivities.clear();
+  activityReceipts.clear();
   habilitated = new Set<string>([DEMO_NUTRI]);
 }
 

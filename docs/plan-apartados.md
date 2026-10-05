@@ -282,6 +282,7 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 | Fecha | Apartado | Qué se hizo |
 | --- | --- | --- |
+| 2026-10-05 | Producto funcional | Correcciones de versiones, privacidad de borradores, recuperación y reintentos; 1329 pruebas aprobadas. Recorrido temporal y cierre de producción en curso. [Registro propio](cierre-funcional-plan-v-2026-10-05.md). |
 | 2026-10-03 | Producto Nutrigo | Frontend nuevo desde las 24 respuestas originales del MCP, aislado del enfoque anterior; metas privadas, propuestas IA gratuitas y fotos manuales. Implementación y revisiones locales en curso, con producción pendiente de aprobación y comprobación. [Registro propio](producto-nutrigo-mcp-2026-10-03.md). |
 | 2026-09-28 | Organización | Se trajeron 43 agentes a `.claude/agents/`, se escribieron las reglas y este plan. Revisión de seguridad de Supabase leída (129 + 1 advertencias, 12 avisos). |
 | 2026-09-28 | Organización | Se sacaron dos agentes que no aplican: `healthcare-marketing-compliance` (trata la ley de publicidad de China) y `senior-developer` (es para Laravel, otra tecnología). La revisión de salud en marketing la hace `legal-compliance-checker` con la ley argentina. Quedan 41. |

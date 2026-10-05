@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { careErrorMessage } from '../../api/care';
 import { plansApi } from '../../api/plans';
 import { recipesApi } from '../../api/recipes';
@@ -66,7 +66,7 @@ export function MenuProposalReview({ proposal, warnings, busy, onApprove, onReje
     {warnings.map((warning) => <p className="meal-plan-proposal-warning" key={warning}>{warning}</p>)}
     <ul>{proposal.items.map((item, index) => <li key={`${item.for_date}-${item.slot}-${index}`}>
       <strong>{item.for_date} · {item.slot}</strong>
-      <span>{item.free_text || recipes.find((recipe) => recipe.id === item.recipe_id)?.title || 'Receta del catálogo'}</span>
+      <span>{item.free_text || recipes.find((recipe) => recipe.id === item.recipe_id)?.published?.title || 'Receta del catálogo'}</span>
       {item.portions != null && <small>{item.portions} porciones</small>}
       {item.public_note && <small>{item.public_note}</small>}
       {item.recipe_proposal && <details><summary>Ingredientes, pasos y nutrientes</summary>
@@ -98,7 +98,9 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
   const [draftItems, setDraftItems] = useState<DraftItem[]>([emptyItem(new Date().toISOString().slice(0, 10))]);
   const [selectedSlots, setSelectedSlots] = useState<PlanSlot[]>(['Desayuno', 'Almuerzo', 'Merienda', 'Cena']);
   const [dietaryPreferences, setDietaryPreferences] = useState('');
-  const planId = plan?.id ?? crypto.randomUUID();
+  const [newPlanId] = useState(() => crypto.randomUUID());
+  const planId = plan?.id ?? newPlanId;
+  const lock = useRef(false);
 
   async function reload() {
     try {
@@ -120,16 +122,29 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
   useEffect(() => { setError(''); setStatus(''); setProposal(null); void reload(); }, [patientId]);
 
   async function run(work: () => Promise<unknown>, success: string) {
-    setBusy(true); setError(''); setStatus('');
+    if (lock.current) return;
+    lock.current = true; setBusy(true); setError(''); setStatus('');
     try { await work(); setStatus(success); await reload(); onChanged?.(); }
     catch (caught) { setError(careErrorMessage(caught)); }
-    finally { setBusy(false); }
+    finally { lock.current = false; setBusy(false); }
+  }
+
+  function formInput() {
+    return { id: planId, expected_revision: plan?.current.revision ?? null, period_start: periodStart, period_end: periodEnd,
+      timezone: 'America/Argentina/Buenos_Aires' as const,
+      ...(plan?.current.nutrition_target ? { nutrition_target: plan.current.nutrition_target } : {}),
+      items: draftItems.map(item => ({ for_date: item.for_date, slot: item.slot, recipe_id: item.recipe_id || undefined,
+        recipe_version: item.recipe_id ? item.recipe_version : undefined, free_text: item.free_text.trim() || undefined,
+        portions: item.portions ? Number(item.portions) : undefined, public_note: item.public_note,
+        ...(item.recipe_proposal ? { recipe_proposal: item.recipe_proposal } : {}) })),
+    };
   }
 
   function submit(event: FormEvent) {
     event.preventDefault();
     const parsed = mealPlanDraftSchema.safeParse({
-      id: plan?.id ?? planId,
+      id: planId,
+      expected_revision: plan?.current.revision ?? null,
       period_start: periodStart,
       period_end: periodEnd,
       timezone: 'America/Argentina/Buenos_Aires',
@@ -153,6 +168,8 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
   }
 
   async function generateProposal() {
+    if (lock.current) return;
+    lock.current = true;
     setBusy(true); setError(''); setStatus(''); setProposal(null);
     try {
       const created = await aiJobsApi.enqueue({
@@ -173,12 +190,13 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
     } catch (caught) {
       setError(careErrorMessage(caught));
     } finally {
-      setBusy(false);
+      lock.current = false; setBusy(false);
     }
   }
 
   async function rejectProposal() {
-    if (!proposal) return;
+    if (!proposal || lock.current) return;
+    lock.current = true;
     setBusy(true); setError(''); setStatus('');
     try {
       await aiJobsApi.reject(proposal.id);
@@ -187,13 +205,14 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
     } catch (caught) {
       setError(careErrorMessage(caught));
     } finally {
-      setBusy(false);
+      lock.current = false; setBusy(false);
     }
   }
 
   async function approveProposal() {
     const candidate = proposalFrom(proposal);
-    if (!proposal || !candidate) return;
+    if (!proposal || !candidate || lock.current) return;
+    lock.current = true;
     setBusy(true); setError(''); setStatus('');
     let applied = false;
     try {
@@ -214,7 +233,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
         : careErrorMessage(caught));
       if (applied) await reload();
     } finally {
-      setBusy(false);
+      lock.current = false; setBusy(false);
     }
   }
 
@@ -224,6 +243,11 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
   }
 
   const proposedPlan = proposalFrom(proposal);
+  const dirty = !plan || !matchesMenuProposal(plan, formInput());
+  function publishVisible() {
+    if (!plan || dirty) { setError('Guardá y revisá los cambios antes de publicar.'); return; }
+    void run(() => plansApi.publish(plan.id, plan.current.version, plan.current), 'Plan publicado. La paciente ve la versión revisada.');
+  }
 
   return <section className="meal-plan-versions" aria-label="Plan fechado versionado">
     <header>
@@ -240,7 +264,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
     {proposal && !proposedPlan && <p className="meal-plan-error" role="alert">La propuesta no tiene un menú válido. Regenerala antes de aprobar.</p>}
     {proposedPlan && <MenuProposalReview key={proposal!.id} proposal={proposedPlan} warnings={proposal?.warnings ?? []} busy={busy} recipes={recipes} onEdit={() => void editProposal()} onApprove={() => void approveProposal()} onReject={() => void rejectProposal()} />}
     <AiPlanNutritionSummary nutrition={plan?.current.nutrition} />
-    <form className="meal-plan-form" onSubmit={submit}>
+    <form className="meal-plan-form" onSubmit={submit}><fieldset disabled={busy} className="meal-plan-edit-fields">
       <div className="meal-plan-form-row">
         <label>Desde<input type="date" value={periodStart} onChange={(event) => setPeriodStart(event.target.value)} /></label>
         <label>Hasta<input type="date" value={periodEnd} onChange={(event) => setPeriodEnd(event.target.value)} /></label>
@@ -254,17 +278,21 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
         </select>
         <select aria-label={`Receta ${index + 1}`} value={item.recipe_id} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, recipe_id: event.target.value, recipe_version: recipes.find((recipe) => recipe.id === event.target.value)?.published?.version, recipe_proposal: undefined, free_text: event.target.value ? '' : current.free_text } : current))}>
           <option value="">Texto libre</option>
-          {recipes.map((recipe) => <option key={recipe.id} value={recipe.id}>{recipe.title} · v{recipe.published?.version}</option>)}
+          {recipes.map((recipe) => <option key={recipe.id} value={recipe.id}>{recipe.published?.title ?? recipe.title} · v{recipe.published?.version}</option>)}
         </select>
         <input aria-label={`Texto ${index + 1}`} placeholder="Indicación" value={item.free_text} disabled={Boolean(item.recipe_id)} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, free_text: event.target.value, ...(current.recipe_proposal ? { recipe_proposal: { ...current.recipe_proposal, title: event.target.value } } : {}) } : current))} />
         <input aria-label={`Porciones ${index + 1}`} type="number" min={0.0001} max={50} step="0.0001" placeholder="Rinde" value={item.portions} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, portions: event.target.value } : current))} />
         {item.recipe_proposal && <PlanRecipeProposalEditor proposal={item.recipe_proposal} index={index} onChange={(recipe_proposal) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, recipe_proposal } : current))} />}
+        <label>Nota para la paciente<input maxLength={200} aria-label={`Nota ${index + 1}`} value={item.public_note} onChange={event => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, public_note: event.target.value } : current))} /></label>
+        <button type="button" disabled={busy} onClick={() => setDraftItems(draftItems.filter((_, currentIndex) => currentIndex !== index))}>Quitar indicación {index + 1}</button>
       </div>)}
+      </fieldset>{plan && !plan.current.published_at && dirty && <p role="status">Tenés cambios sin guardar. Guardalos y revisalos antes de publicar.</p>}
+      {error && <button type="button" disabled={busy} onClick={() => void reload()}>Recuperar la versión guardada y reemplazar este formulario</button>}
       <div className="meal-plan-actions">
-        <button type="button" className="meal-plan-add" onClick={() => setDraftItems([...draftItems, emptyItem(periodStart || draftItems[0]?.for_date || '')])}>Agregar indicación</button>
+        <button type="button" className="meal-plan-add" onClick={() => setDraftItems([...draftItems, emptyItem(periodStart || draftItems[0]?.for_date || '')])} disabled={busy}>Agregar indicación</button>
         <NvButton type="button" className="nv-ghost" disabled={busy || !periodStart || !periodEnd || !selectedSlots.length || Boolean(proposal)} onClick={() => void generateProposal()}>Generar propuesta de menú</NvButton>
         <NvButton type="submit" disabled={busy}>Guardar borrador</NvButton>
-        {plan && !plan.current.published_at && <NvButton disabled={busy} onClick={() => void run(() => plansApi.publish(plan.id, plan.current.version, plan.current), 'Plan publicado. El borrador nuevo ya no cambia esta copia.')}>Publicar v{plan.current.version}</NvButton>}
+        {plan && !plan.current.published_at && <NvButton type="button" disabled={busy || dirty} onClick={publishVisible}>Publicar v{plan.current.version}</NvButton>}
       </div>
     </form>
   </section>;

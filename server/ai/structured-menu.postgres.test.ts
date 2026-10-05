@@ -1,3 +1,4 @@
+import { productFixtureArgs } from '../testing/product-rpc-fixture';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
 import { readFile, readdir } from 'node:fs/promises';
@@ -17,6 +18,7 @@ const proposal = { title: 'Arroz con verduras', yield_portions: 2, steps: ['Coci
 const draft = { id: planId, period_start: '2026-10-03', period_end: '2026-10-03', items: [{ for_date: '2026-10-03', slot: 'Almuerzo', free_text: proposal.title, portions: 2, recipe_proposal: proposal }] };
 
 async function rpc(actor: string, name: string, args: unknown[] = []) {
+  args = await productFixtureArgs(db, name, args);
   return db.transaction(async (tx) => {
     await tx.exec('set local role authenticated');
     await tx.query("select set_config('request.jwt.claim.sub',$1,true)", [actor]);
@@ -55,7 +57,7 @@ describe('persistencia de recetas y planes estimados, sin proveedores externos',
       await tx.exec('set local role authenticated');
       await tx.query("select set_config('request.jwt.claim.sub',$1,true)", [user]);
       await tx.query('update public.meal_plan_items set portions=null where id=$1', [saved.current.items[0].id]);
-    })).rejects.toMatchObject({ code: '22023' });
+    })).rejects.toMatchObject({ code: '42501' });
   });
   it('conserva ingredientes y etiqueta estimada después de editar, publicar y recargar como paciente', async () => {
     let saved = await rpc(user, 'save_recipe_draft', [{ id: recipeId, title: proposal.title, yield_portions: 2, steps: proposal.steps, items: proposal.ingredients, nutrient_source: estimate.source, nutrition: estimate }]);
@@ -98,11 +100,11 @@ describe('persistencia de recetas y planes estimados, sin proveedores externos',
     saved = await rpc(user, 'save_meal_plan_draft', [patient, { ...draft, items: [{ ...draft.items[0], recipe_proposal: edited }] }]);
     expect(saved.current.items[0].recipe_proposal.nutrition.origin).toBe('ai_estimate');
     expect(saved.current.items[0].recipe_proposal.nutrition.source).toBe(estimate.source);
-    await db.transaction(async (tx) => {
+    await expect(db.transaction(async (tx) => {
       await tx.exec('set local role authenticated');
       await tx.query("select set_config('request.jwt.claim.sub',$1,true)", [user]);
       await tx.query('update public.meal_plan_items set recipe_proposal=$1 where id=$2', [edited, saved.current.items[0].id]);
-    });
+    })).rejects.toMatchObject({ code: '42501' });
     expect((await rpc(user, 'list_professional_meal_plan', [patient])).current.items[0].recipe_proposal.nutrition.origin).toBe('ai_estimate');
     const moved = { ...edited, title: 'Arroz revisado' };
     saved = await rpc(user, 'save_meal_plan_draft', [patient, { ...draft, items: [{ ...draft.items[0], slot: 'Cena', free_text: moved.title, recipe_proposal: moved }] }]);

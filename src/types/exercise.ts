@@ -97,6 +97,7 @@ export const routineFeedbackSchema = z.object({
 }).strict();
 
 export const activityLogInputSchema = z.object({
+  client_id: z.uuid().optional(),
   activity: z.string().trim().min(2).max(80),
   duration_minutes: z.number().int().min(1).max(600),
   intensity: z.enum(EXERCISE_INTENSITIES),

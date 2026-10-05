@@ -56,5 +56,5 @@ export function suggestedPaymentAmount(summary: FeeSummary, fee: PatientLedger['
 
 export function parsePesos(value: string): number | null {
   const amount = Number(value.replace(/\./g, '').replace(',', '.'));
-  return Number.isInteger(amount) && amount > 0 ? amount : null;
+  return Number.isInteger(amount) && amount > 0 && amount <= 100_000_000 ? amount : null;
 }

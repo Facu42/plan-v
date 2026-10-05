@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from 'react';
+import { writeWasRejected } from '../../api/write-outcome';
+import { useRef, useState, type FormEvent } from 'react';
 import { formatPesos, PAYMENT_METHOD_LABELS, type FeeState, type FeeSummary } from '../../fees';
 import { localBillingDate } from '../../billing';
 import type { PaymentInput, PaymentMethod, PaymentStatus } from '../../types/fees';
@@ -46,30 +47,36 @@ export function PaymentForm({ idPrefix, defaultAmount, submitLabel, hint, onSubm
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const pending = useRef<PaymentInput | null>(null);
+  const lock = useRef(false);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (lock.current) return;
     const pesos = parsePesos(amount);
     if (!pesos) { setError('Escribí un monto en pesos, sin decimales.'); return; }
     if (!paidOn) { setError('Elegí la fecha del pago.'); return; }
-    setBusy(true); setError('');
+    lock.current = true; setBusy(true); setError('');
     try {
-      await onSubmit({ amount: pesos, paid_on: paidOn, method, ...(note.trim() ? { note: note.trim() } : {}) });
+      pending.current ??= { client_id: crypto.randomUUID(), amount: pesos, paid_on: paidOn, method, ...(note.trim() ? { note: note.trim() } : {}) };
+      await onSubmit(pending.current);
+      pending.current = null;
       setNote('');
     } catch (reason) {
+      if (writeWasRejected(reason)) pending.current = null;
       setError(feeErrorMessage(reason));
-    } finally { setBusy(false); }
+    } finally { lock.current = false; setBusy(false); }
   };
 
   return <form className="cbz-form" onSubmit={submit} noValidate>
     <div className="cbz-grid">
-      <label htmlFor={`${idPrefix}-amount`}>Monto ($)<input id={`${idPrefix}-amount`} inputMode="numeric" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="Ej. 25000" disabled={busy} /></label>
-      <label htmlFor={`${idPrefix}-date`}>Fecha<input id={`${idPrefix}-date`} type="date" value={paidOn} onChange={(event) => setPaidOn(event.target.value)} disabled={busy} /></label>
-      <label htmlFor={`${idPrefix}-method`}>Medio<select id={`${idPrefix}-method`} value={method} onChange={(event) => setMethod(event.target.value as PaymentMethod)} disabled={busy}>{(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((key) => <option key={key} value={key}>{PAYMENT_METHOD_LABELS[key]}</option>)}</select></label>
+      <label htmlFor={`${idPrefix}-amount`}>Monto ($)<input id={`${idPrefix}-amount`} inputMode="numeric" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="Ej. 25000" disabled={busy || Boolean(pending.current)} /></label>
+      <label htmlFor={`${idPrefix}-date`}>Fecha<input id={`${idPrefix}-date`} type="date" value={paidOn} onChange={(event) => setPaidOn(event.target.value)} disabled={busy || Boolean(pending.current)} /></label>
+      <label htmlFor={`${idPrefix}-method`}>Medio<select id={`${idPrefix}-method`} value={method} onChange={(event) => setMethod(event.target.value as PaymentMethod)} disabled={busy || Boolean(pending.current)}>{(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((key) => <option key={key} value={key}>{PAYMENT_METHOD_LABELS[key]}</option>)}</select></label>
     </div>
-    <label htmlFor={`${idPrefix}-note`}>Nota (opcional)<input id={`${idPrefix}-note`} value={note} onChange={(event) => setNote(event.target.value)} maxLength={200} disabled={busy} /></label>
+    <label htmlFor={`${idPrefix}-note`}>Nota (opcional)<input id={`${idPrefix}-note`} value={note} onChange={(event) => setNote(event.target.value)} maxLength={200} disabled={busy || Boolean(pending.current)} /></label>
     {hint && <p className="cbz-hint">{hint}</p>}
-    <FeeError message={error} />
+    <FeeError message={error} />{pending.current && !busy && <p>El resultado quedó sin confirmar. Reintentá el mismo pago; no se registrará dos veces.</p>}
     <NvButton type="submit" disabled={busy}>{busy ? <Icon name="loader" size={14} /> : <Icon name="check" size={14} />}{busy ? 'Guardando…' : submitLabel}</NvButton>
   </form>;
 }

@@ -86,6 +86,15 @@ try {
     child.on('error', reject); child.on('exit', code => resolve(code ?? 1));
   });
   if (code !== 0) process.exitCode = 1;
+  else if (process.env.PLANV_PRODUCT_BROWSER === '1') {
+    phase = 'recorrido en navegador con sesiones locales';
+    const script = fileURLToPath(new URL('./product-browser.local.mjs', import.meta.url));
+    const browserCode = await new Promise((resolve,reject) => {
+      const child = spawn(process.execPath,[script],{env,stdio:'inherit'});
+      child.on('error',reject);child.on('exit',code=>resolve(code ?? 1));
+    });
+    if (browserCode !== 0) process.exitCode = 1;
+  }
 } catch (error) {
   // No volcar stdout/stderr de las herramientas: pueden contener claves temporales.
   console.error('No se completó la prueba de sesiones (' + phase + '): ' + (error?.code || error?.name || 'error') + '.');

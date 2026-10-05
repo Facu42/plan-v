@@ -6,6 +6,7 @@ import { recipesApi } from '../../../api/recipes';
 import { plansApi } from '../../../api/plans';
 import { exerciseApi } from '../../../api/exercise';
 import { careApi } from '../../../api/care';
+import { latestWeight } from '../../../lib/measurement-display';
 import { recipeNutritionLabel, type NutrientAmounts } from '../../../types/ai-nutrition';
 import { descendants, fields, formatNumber, leaf, Stateful, useRemote, dateId, type ScreenProps } from './shared';
 
@@ -36,8 +37,8 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
   const data=useRemote(`${patient.id}:home:${refresh}`, signal=>homeData(patient.id,signal));
   useEffect(()=>{const reload=()=>setRefresh(v=>v+1);window.addEventListener('plan-v:care-changed',reload);return()=>window.removeEventListener('plan-v:care-changed',reload);},[]);
   const current=data.data;
-  const weights=current?.care?.measurements.filter(row=>row.kind==='weight').sort((a,b)=>b.captured_on.localeCompare(a.captured_on));
-  const weight=weights?.[0]?.value_numeric ?? current?.body?.weight_kg ?? null;
+  const weightDisplay=latestWeight(current?.care?.measurements??[],current?.body?.weight_kg??null);
+  const weight=weightDisplay.value;
   const target=current?.target?.result;
   const known=patient.nutritionLogCount>0;
   const kcal=known?patient.kcal:null;
@@ -48,12 +49,12 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
   const resolve:SourceResolver=node=>{
     const name=nodeName(node),text=sourceText(node);
     if(name==='Card Statistic - Dashboard') {
-      if(text.startsWith('Weight'))return {onClick:onRecord,label:'Registrar peso y medidas',children:fields(node,{'84:1483':formatNumber(weight),'427:14421':formatNumber(weight)},child=>neutralGraph(child,{'78':formatNumber(weight)})??(leaf(child)&&sourceText(child)==='78'?{text:formatNumber(weight)}:leaf(child)&&/^\d+$/.test(sourceText(child))?{text:''}:undefined))};
+      if(text.startsWith('Weight'))return {onClick:onRecord,label:'Registrar peso y medidas',children:fields(node,{'84:1483':formatNumber(weight),'427:14421':formatNumber(weight)},child=>neutralGraph(child,{'78':formatNumber(weight),'Kg':weightDisplay.unit,'kg':weightDisplay.unit})??(leaf(child)&&['Kg','kg'].includes(sourceText(child))?{text:weightDisplay.unit}:leaf(child)&&sourceText(child)==='78'?{text:formatNumber(weight)}:leaf(child)&&/^\d+$/.test(sourceText(child))?{text:''}:undefined))};
       if(text.startsWith('Steps'))return {onClick:()=>onNavigate('ejercicio'),label:'Ver actividad',children:fields(node,{},child=>neutralGraph(child)??(leaf(child)&&/^8050|76%|1950/.test(sourceText(child))?{text:'—'}:undefined))};
       if(text.startsWith('Sleep'))return {onClick:onRest,label:'Registrar descanso',children:fields(node,{},child=>nodeName(child)==='Column Ruler'?{props:{style:{visibility:'hidden'},'aria-hidden':true}}:leaf(child)&&sourceText(child)==='6.5'?{text:patient.sleepMinutes==null?'—':formatNumber(patient.sleepMinutes/60)}:undefined)};
       return {onClick:onHydration,label:'Registrar hidratación',children:fields(node,{},child=>neutralGraph(child,{'1.3/2':formatNumber(patient.hydration),'litre':'vasos'})??(leaf(child)&&sourceText(child)==='1.3/2'?{text:formatNumber(patient.hydration)}:leaf(child)&&['0.7','litre left','litre'].includes(sourceText(child))?{text:sourceText(child)==='litre'?'vasos':''}:undefined))};
     }
-    if(name==='Widget Weight Data')return {children:fields(node,{},child=>neutralGraph(child)??(leaf(child)&&sourceText(child)==='78'?{text:formatNumber(weight)}:/Button/.test(nodeName(child))?{onClick:onRecord,label:'Registrar peso'}:undefined))};
+    if(name==='Widget Weight Data')return {children:fields(node,{},child=>neutralGraph(child)??(leaf(child)&&['Kg','kg'].includes(sourceText(child))?{text:weightDisplay.unit}:leaf(child)&&sourceText(child)==='78'?{text:formatNumber(weight)}:/Button/.test(nodeName(child))?{onClick:onRecord,label:'Registrar peso'}:undefined))};
     if(name==='Widget Calories Intake')return {children:fields(node,{},child=>{
       if(nodeName(child)==='Button More')return {onClick:()=>onLogMeal(),label:'Registrar comida'};
       const graph=neutralGraph(child);if(graph)return graph;

@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/auth-isolation.yml'
       - 'scripts/test-auth-isolation.mjs'
+      - 'scripts/product-browser.local.mjs'
       - 'supabase/**'
       - 'server/**'
       - 'src/**'
@@ -16,6 +17,7 @@ on:
     paths:
       - '.github/workflows/auth-isolation.yml'
       - 'scripts/test-auth-isolation.mjs'
+      - 'scripts/product-browser.local.mjs'
       - 'supabase/**'
       - 'server/**'
       - 'src/**'
@@ -40,5 +42,20 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.9'
+      - name: Preparar navegador gstack sin capturas
+        run: |
+          git clone https://github.com/garrytan/gstack.git "$RUNNER_TEMP/plan-v-gstack"
+          git -C "$RUNNER_TEMP/plan-v-gstack" checkout dedfe42ef00908171055b120734380650757b9b1
+          cd "$RUNNER_TEMP/plan-v-gstack"
+          bun install --frozen-lockfile
+          mkdir -p browse/dist
+          bun build browse/src/cli.ts --compile --outfile browse/dist/browse
+          bunx playwright install --with-deps chromium
+          echo "PLANV_GSTACK_CLI=$RUNNER_TEMP/plan-v-gstack/browse/dist/browse" >> "$GITHUB_ENV"
       - run: npm run test:auth-isolation
+        env:
+          PLANV_PRODUCT_BROWSER: '1'
 

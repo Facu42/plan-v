@@ -27,6 +27,8 @@ type MemRecipe = { id: string; nutritionist_id: string; title: string; status: '
 type MemVersion = {
   id: string;
   recipe_id: string;
+  title: string;
+  revision: string;
   version: number;
   yield_portions: number;
   steps: string[];
@@ -104,6 +106,8 @@ function asVersion(row: Record<string, unknown>, title: string): RecipeVersionVi
   return {
     id: String(row.id),
     version: asNumber(row.version),
+    title: String(row.title ?? title),
+    ...(row.revision ? { revision: String(row.revision) } : {}),
     yield_portions: asNumber(row.yield_portions),
     steps: Array.isArray(row.steps) ? row.steps.map((step) => String(step)) : [],
     nutrient_source: String(row.nutrient_source ?? ''),
@@ -171,6 +175,7 @@ function versionItems(versionId: string): RecipeItem[] {
 
 function memVersionView(row: MemVersion): RecipeVersionView {
   return {
+    title: row.title, revision: row.revision,
     id: row.id,
     version: row.version,
     yield_portions: row.yield_portions,
@@ -179,7 +184,7 @@ function memVersionView(row: MemVersion): RecipeVersionView {
     ...(row.nutrition ? { nutrition: row.nutrition } : {}),
     published_at: row.published_at,
     ingredients: versionItems(row.id),
-    card: getRecipeCard(row.id, recipes.get(row.recipe_id)?.title ?? 'Receta'),
+    card: getRecipeCard(row.id, row.title),
   };
 }
 
@@ -188,9 +193,9 @@ export function getRecipeSnapshot(recipeVersionId: string | null) {
   const version = versions.get(recipeVersionId);
   const recipe = version ? recipes.get(version.recipe_id) : undefined;
   if (!version || !recipe || !version.published_at) return null;
-  const nutrition = resolveRecipeNutrition(version.nutrition, getRecipeCard(version.id, recipe.title).macros, version.nutrient_source);
+  const nutrition = resolveRecipeNutrition(version.nutrition, getRecipeCard(version.id, version.title).macros, version.nutrient_source);
   return {
-    title: recipe.title,
+    title: version.title,
     version: version.version,
     yield_portions: version.yield_portions,
     steps: version.steps,
@@ -219,7 +224,6 @@ function upsertIngredient(nutritionistId: string, name: string, unit: RecipeUnit
   const name_normalized = normalizeIngredientName(name);
   const existing = [...ingredients.values()].find((row) => row.nutritionist_id === nutritionistId && row.name_normalized === name_normalized);
   if (existing) {
-    existing.name = name.trim();
     return existing;
   }
   const row: MemIngredient = {
@@ -238,19 +242,22 @@ function writeDraft(nutritionistId: string, input: RecipeDraftInput, card?: Reci
   const now = new Date().toISOString();
   let recipe = recipes.get(input.id);
   if (recipe && recipe.nutritionist_id !== nutritionistId) throw new CareError(403, 'No tenés permiso para esta acción.');
+  const list = recipeVersions(input.id);
+  const latest = list[list.length - 1];
+  if (input.expected_revision !== undefined && input.expected_revision !== (latest?.revision ?? null)) throw new CareError(409, 'La receta cambió. Recuperá la versión guardada antes de editar.');
   if (!recipe) {
     recipe = { id: input.id, nutritionist_id: nutritionistId, title: input.title.trim(), status: 'draft', created_at: now };
     recipes.set(recipe.id, recipe);
   } else {
     recipe.title = input.title.trim();
   }
-  const list = recipeVersions(recipe.id);
-  const latest = list[list.length - 1];
   let target: MemVersion;
   if (!latest || latest.published_at) {
     target = {
       id: crypto.randomUUID(),
       recipe_id: recipe.id,
+      title: input.title.trim(),
+      revision: crypto.randomUUID(),
       version: (latest?.version ?? 0) + 1,
       yield_portions: input.yield_portions,
       steps: input.steps.map((step) => step.trim()),
@@ -268,6 +275,7 @@ function writeDraft(nutritionistId: string, input: RecipeDraftInput, card?: Reci
     target.nutrition = input.nutrition ?? latest.nutrition;
     for (const line of [...lines.values()].filter((row) => row.recipe_version_id === target.id)) lines.delete(line.id);
   }
+  target.title = input.title.trim(); target.revision = crypto.randomUUID();
   for (const item of input.items) {
     const ingredient = upsertIngredient(nutritionistId, item.name, item.unit);
     const line: MemLine = {
@@ -313,19 +321,9 @@ export async function saveRecipeDraft(
   card?: RecipeCard,
 ): Promise<ProfessionalRecipe> {
   if (!persistent) return writeDraft(nutritionistId, input, card);
-  const { data, error } = await getRequestDb().rpc('save_recipe_draft', { payload: input });
+  const { data, error } = await getRequestDb().rpc('save_recipe_draft', { payload: { ...input, ...(card ? { card } : {}) } });
   recipeDbError(error);
-  const saved = asProfessional(data as Record<string, unknown>);
-  if (!card || saved.current.published_at) return saved;
-  const { data: stored, error: cardError } = await getRequestDb().rpc('set_recipe_card', {
-    target_version: saved.current.id,
-    card,
-  });
-  recipeDbError(cardError);
-  if (!stored) throw new CareError(501, 'La ficha visual de la receta requiere instalar la migración de este módulo.');
-  const { cover_status, cover_url, cover_alt } = saved.current.card ?? unavailableCard(saved.title);
-  saved.current.card = { ...(stored as RecipeCard), cover_status, cover_url, cover_alt };
-  return saved;
+  return asProfessional(data as Record<string, unknown>);
 }
 
 function gateRecipePublish(title: string, version: { yield_portions: number; steps: string[]; ingredients: RecipeItem[] }) {
@@ -337,16 +335,17 @@ function gateRecipePublish(title: string, version: { yield_portions: number; ste
   }));
 }
 
-export async function publishRecipe(nutritionistId: string, recipeId: string, expectedVersion: number, persistent: boolean): Promise<ProfessionalRecipe> {
+export async function publishRecipe(nutritionistId: string, recipeId: string, expectedVersion: number, persistent: boolean, expectedRevision?: string): Promise<ProfessionalRecipe> {
   if (!persistent) {
     const recipe = recipes.get(recipeId);
     if (!recipe || recipe.nutritionist_id !== nutritionistId) throw new CareError(403, 'No tenés permiso para esta acción.');
     const version = recipeVersions(recipeId).find((row) => row.version === expectedVersion);
     if (!version) throw new CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
+    if (expectedRevision !== undefined && expectedRevision !== version.revision) throw new CareError(409, 'La receta cambió. Recuperá la versión guardada antes de publicar.');
     if (versionItems(version.id).length < 1 || version.steps.length < 1) {
       throw new CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
     }
-    gateRecipePublish(recipe.title, { yield_portions: version.yield_portions, steps: version.steps, ingredients: versionItems(version.id) });
+    gateRecipePublish(version.title ?? recipe.title, { yield_portions: version.yield_portions, steps: version.steps, ingredients: versionItems(version.id) });
     if (!version.published_at) {
       version.published_at = new Date().toISOString();
       recipe.status = 'published';
@@ -359,7 +358,7 @@ export async function publishRecipe(nutritionistId: string, recipeId: string, ex
   const version = recipe.current.version === expectedVersion ? recipe.current : recipe.published?.version === expectedVersion ? recipe.published : null;
   if (!version) throw new CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
   gateRecipePublish(recipe.title, version);
-  const { data, error } = await getRequestDb().rpc('publish_recipe', { target_recipe: recipeId, expected_version: expectedVersion });
+  const { data, error } = await getRequestDb().rpc('publish_recipe', { target_recipe: recipeId, expected_version: expectedVersion, expected_revision: expectedRevision });
   recipeDbError(error);
   const published = asProfessional(data as Record<string, unknown>);
   try {
@@ -385,7 +384,7 @@ async function attachCoverOnApproval(nutritionistId: string, recipe: Professiona
   recipeDbError(claimError);
   if (typeof token !== 'string' || !token) return false;
   const generated = await generateRecipeCoverImage({
-    title: recipe.title,
+    title: version.title ?? recipe.title,
     items: version.ingredients.map((item) => ({ name: item.name })),
   });
   let cover: { status: 'ready' | 'failed'; url: string | null; alt: string } = {
@@ -454,7 +453,7 @@ export async function assignRecipe(
     if (!version || !version.published_at) throw new CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
     const health = await loadEvalHealth(patientId, false);
     assertReadyToPublish(evaluateRecipeDraft({
-      title: recipe.title,
+      title: version.title,
       yield_portions: version.yield_portions,
       steps: version.steps,
       items: versionItems(version.id),
@@ -470,14 +469,14 @@ export async function assignRecipe(
     assignments.set(key, row);
     return {
       id: recipe.id,
-      title: recipe.title,
+      title: version.title,
       version: version.version,
       yield_portions: version.yield_portions,
       steps: version.steps,
       nutrient_source: version.nutrient_source,
       ...(version.nutrition ? { nutrition: version.nutrition } : {}),
       ingredients: versionItems(version.id),
-      card: getRecipeCard(version.id, recipe.title),
+      card: getRecipeCard(version.id, version.title),
       assigned_at: row.assigned_at,
       published_at: version.published_at,
     };
@@ -488,7 +487,7 @@ export async function assignRecipe(
   if (!owned || !assignedVersion?.published_at) throw new CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
   const health = await loadEvalHealth(patientId, true);
   assertReadyToPublish(evaluateRecipeDraft({
-    title: owned.title,
+    title: assignedVersion.title ?? owned.title,
     yield_portions: assignedVersion.yield_portions,
     steps: assignedVersion.steps,
     items: assignedVersion.ingredients,
@@ -512,14 +511,14 @@ export async function listAssignedRecipes(patientId: string, persistent: boolean
       if (!recipe || !version || !version.published_at) continue;
       listed.push({
         id: recipe.id,
-        title: recipe.title,
+        title: version.title,
         version: version.version,
         yield_portions: version.yield_portions,
         steps: version.steps,
         nutrient_source: version.nutrient_source,
         ...(version.nutrition ? { nutrition: version.nutrition } : {}),
         ingredients: versionItems(version.id),
-        card: getRecipeCard(version.id, recipe.title),
+        card: getRecipeCard(version.id, version.title),
         assigned_at: row.assigned_at,
         published_at: version.published_at,
       });
@@ -537,11 +536,11 @@ export function readPublishedMemory(nutritionistId: string, recipeId: string, ex
   const version = recipeVersions(recipeId).find((row) => row.version === expectedVersion && row.published_at);
   if (!version) return null;
   return {
-    title: recipe.title,
+    title: version.title,
     version: version.version,
     versionId: version.id,
     yield_portions: version.yield_portions,
     ingredients: versionItems(version.id),
-    card: getRecipeCard(version.id, recipe.title),
+    card: getRecipeCard(version.id, version.title),
   };
 }

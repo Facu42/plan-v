@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { recipesApi } from '../../api/recipes';
 import { resourcesApi } from '../../api/resources';
 import { aiJobsApi } from '../../api/ai-jobs';
@@ -12,10 +12,11 @@ import { NvButton, NvState } from './primitives';
 import './recipe-catalog.css';
 import { recipeNutritionLabel } from '../../types/ai-nutrition';
 import { RecipeManualCoverAction } from './RecipeManualCoverAction';
+import { dateId } from '../../features/nutrigo/screens/shared';
 
 function emptyDraft(id = crypto.randomUUID()): RecipeWizardInput {
   return {
-    id, title: '', yield_portions: 1, steps: [''], nutrient_source: '', category: 'Almuerzo', prep_minutes: null,
+    id, expected_revision: null, title: '', yield_portions: 1, steps: [''], nutrient_source: '', category: 'Almuerzo', prep_minutes: null,
     items: [{ name: '', quantity: 1, unit: 'g' }],
   };
 }
@@ -23,6 +24,7 @@ function emptyDraft(id = crypto.randomUUID()): RecipeWizardInput {
 function fromRecipe(recipe: ProfessionalRecipe): RecipeWizardInput {
   return {
     id: recipe.id,
+    expected_revision: recipe.current.revision ?? null,
     title: recipe.title,
     yield_portions: recipe.current.yield_portions,
     steps: recipe.current.steps.length ? recipe.current.steps : [''],
@@ -57,7 +59,8 @@ export function useRecipeCatalog(patientId: string) {
   const [path, setPath] = useState<'choose' | 'manual' | 'ai' | null>(null);
   const [description, setDescription] = useState('');
   const [assigning, setAssigning] = useState<ProfessionalRecipe | null>(null);
-  const [day, setDay] = useState('2026-09-22');
+  const [day, setDay] = useState(() => dateId(new Date()));
+  const lock = useRef(false);
   const [slot, setSlot] = useState<PlanSlot>('Almuerzo');
 
   async function reload() {
@@ -76,6 +79,7 @@ export function useRecipeCatalog(patientId: string) {
   useEffect(() => { void reload(); }, []);
 
   async function run(work: () => Promise<unknown>, success: string) {
+    if (lock.current) return; lock.current = true;
     setBusy(true); setStatus(''); setError('');
     try {
       await work();
@@ -84,7 +88,7 @@ export function useRecipeCatalog(patientId: string) {
     } catch (caught) {
       setError(careErrorMessage(caught));
     } finally {
-      setBusy(false);
+      lock.current = false; setBusy(false);
     }
   }
 
@@ -100,7 +104,7 @@ export function useRecipeCatalog(patientId: string) {
       setError('Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
       return;
     }
-    void run(() => recipesApi.save(parsed.data), 'Borrador guardado en el catálogo.');
+    void run(async () => { const saved = await recipesApi.save(parsed.data); setEditing(fromRecipe(saved.recipe)); }, 'Borrador guardado en el catálogo.');
   }
 
   function quickAiDraft() {
@@ -118,9 +122,10 @@ export function useRecipeCatalog(patientId: string) {
       if (created.job.status === 'failed' || created.job.status !== 'succeeded' || !created.job.artifact) {
         throw new Error('La IA no pudo armar la receta. Reintentá; no se publicó ninguna propuesta.');
       }
-      const draft = recipeEditorFromAi(created.job.artifact.payload);
       await aiJobsApi.apply(created.job.id);
-      setEditing(draft);
+      const saved = (await recipesApi.list()).recipes.find(recipe => recipe.id === created.job.artifact!.payload.id);
+      if (!saved) throw new Error('La receta quedó guardada, pero falta confirmar su lectura. Recargá el catálogo.');
+      setEditing(fromRecipe(saved));
       setPath('manual');
     }, 'Propuesta lista para revisar. Los nutrientes son estimaciones de IA; la foto puede subirse manualmente.');
   }
@@ -128,12 +133,13 @@ export function useRecipeCatalog(patientId: string) {
   return {
     patientId, recipes, source, imageGeneration, error, status, busy, editing, path, description, assigning, day, slot,
     setEditing, setPath, setDescription, setDay, setSlot, reload, run, submit, submitAi, quickAiDraft,
+    recoverEditing: () => void run(async () => { const saved = (await recipesApi.list()).recipes.find(recipe => recipe.id === editing?.id); if (saved) setEditing(fromRecipe(saved)); }, 'Versión guardada recuperada. Revisala antes de continuar.'),
     startNew: () => { setPath('choose'); setEditing(null); setStatus(''); setError(''); },
     chooseManual: () => { setPath('manual'); setEditing(emptyDraft()); },
     chooseAi: () => { setPath('ai'); setEditing(null); },
     closeEditor: () => { setEditing(null); setPath(null); },
     startEdit: (recipe: ProfessionalRecipe) => { setEditing(fromRecipe(recipe)); setPath('manual'); setStatus(''); setError(''); },
-    publish: (recipe: ProfessionalRecipe) => void run(() => recipesApi.publish(recipe.id, recipe.current.version), 'Revisión publicada. El paciente la ve cuando la asignás.'),
+    publish: (recipe: ProfessionalRecipe) => void run(() => recipesApi.publish(recipe.id, recipe.current.version, recipe.current.revision), 'Revisión publicada. El paciente la ve cuando la asignás.'),
     retryCover: (recipe: ProfessionalRecipe) => void run(async () => {
       if (!recipe.published) return;
       const saved = await recipesApi.cover(recipe.id, recipe.published.version);
@@ -192,7 +198,7 @@ export function RecipeAiForm({ catalog }: { catalog: RecipeCatalogState }) {
 export function RecipeEditorForm({ catalog }: { catalog: RecipeCatalogState }) {
   const { editing, setEditing, busy, submit, closeEditor } = catalog;
   if (!editing) return null;
-  return <form className="recipe-form" onSubmit={submit}>
+  return <form className="recipe-form" onSubmit={submit}><fieldset disabled={busy} className="recipe-edit-fields">
     <p className="recipe-wizard-note">Paso 2 de 2 · revisá ingredientes, macros y foto antes de asignar.</p>
     {editing.nutrition && <p>{recipeNutritionLabel(editing.nutrition)} · revisar no convierte la estimación en un valor medido.</p>}
     <label>Título<input value={editing.title} maxLength={150} onChange={(event) => setEditing({ ...editing, title: event.target.value })} /></label>
@@ -238,7 +244,7 @@ export function RecipeEditorForm({ catalog }: { catalog: RecipeCatalogState }) {
       <legend>Pasos</legend>
       <textarea aria-label="Pasos de la receta" value={editing.steps.join('\n')} onChange={(event) => setEditing({ ...editing, steps: event.target.value.split('\n') })} />
     </fieldset>
-    <footer>
+    </fieldset>{catalog.error && <button type="button" disabled={busy} onClick={catalog.recoverEditing}>Recuperar la versión guardada y reemplazar el formulario</button>}<footer>
       <NvButton type="submit" disabled={busy}>Guardar borrador</NvButton>
       <button type="button" className="recipe-cancel" disabled={busy} onClick={closeEditor}>Cerrar</button>
     </footer>
@@ -255,7 +261,7 @@ export function RecipeAssignDialog({ catalog }: { catalog: RecipeCatalogState })
       <label>Día<input type="date" value={day} onChange={(event) => setDay(event.target.value)} /></label>
       <label>Momento<select value={slot} onChange={(event) => setSlot(event.target.value as PlanSlot)}>{PLAN_SLOTS.map((item) => <option key={item}>{item}</option>)}</select></label>
       <RecipePlateCard
-        title={assigning.title}
+        title={assigning.published.title ?? assigning.title}
         portions={assigning.published.yield_portions}
         card={assigning.published.card ?? unavailableCard(assigning.title)}
         ingredients={assigning.published.ingredients}

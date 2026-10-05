@@ -12,9 +12,9 @@ export const recipesApi = {
     method: 'POST',
     body: JSON.stringify(input),
   }),
-  publish: (id: string, expected_version: number) => request<{ recipe: ProfessionalRecipe; source: string }>(`/api/recipes/${id}/publish`, {
+  publish: (id: string, expected_version: number, expected_revision?: string) => request<{ recipe: ProfessionalRecipe; source: string }>(`/api/recipes/${id}/publish`, {
     method: 'POST',
-    body: JSON.stringify({ expected_version }),
+    body: JSON.stringify({ expected_version, expected_revision }),
   }),
   cover: (id: string, expected_version: number) => request<{ recipe: ProfessionalRecipe; source: string }>(`/api/recipes/${id}/cover`, {
     method: 'POST', body: JSON.stringify({ expected_version }),

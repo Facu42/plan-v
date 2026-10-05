@@ -17,6 +17,7 @@ export const recipeItemInputSchema = z.object({
 }).strict();
 export const recipeDraftSchema = z.object({
   id: z.uuid(),
+  expected_revision: z.uuid().nullable().optional(),
   title: z.string().trim().min(2).max(150),
   yield_portions: z.number().positive().max(50),
   steps: z.array(step).min(1).max(12),
@@ -24,7 +25,7 @@ export const recipeDraftSchema = z.object({
   items: z.array(recipeItemInputSchema).min(1).max(20),
   nutrition: recipeNutritionSchema.optional(),
 }).strict();
-export const recipePublishSchema = z.object({ expected_version: z.number().int().min(1) }).strict();
+export const recipePublishSchema = z.object({ expected_version: z.number().int().min(1), expected_revision: z.uuid().optional() }).strict();
 export const recipeAssignSchema = z.object({
   patient_id: z.string().trim().min(1).max(80),
   expected_version: z.number().int().min(1),
@@ -56,6 +57,8 @@ export type RecipeCard = {
 
 export type RecipeVersionView = {
   id: string;
+  title?: string;
+  revision?: string;
   version: number;
   yield_portions: number;
   steps: string[];

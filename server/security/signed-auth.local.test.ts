@@ -328,7 +328,7 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
       items: [{ name: 'Arroz', quantity: 80, unit: 'g' }],
     } });
     expect(saved.error).toBeNull();
-    expect((await ownerB.client.rpc('publish_recipe', { target_recipe: rid, expected_version: 1 })).error).toBeNull();
+    expect((await ownerB.client.rpc('publish_recipe', { target_recipe: rid, expected_version: 1, expected_revision: saved.data.current.revision })).error).toBeNull();
     const vid = saved.data.current.id;
     const covers = await Promise.all(Array.from({ length: 4 }, () => ownerB.client.rpc('claim_recipe_cover', { target_version: vid, retry: false })));
     expect(covers.every(result => !result.error)).toBe(true);
@@ -353,7 +353,7 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
       await first.query('select public.publish_reviewed_meal_plan($1,1,$2)', [id, planReviewSnapshot(saved.data.current as PlanVersionView)]);
       const available = await second.query('select pg_try_advisory_xact_lock(hashtextextended($1,1)) as acquired', [pidB]);
       expect(available.rows[0].acquired).toBe(false);
-      editing = second.query('select public.save_meal_plan_draft($1,$2)', [pidB, { ...draft, items: [{ ...draft.items[0], free_text: 'Otra indicación' }] }]);
+      editing = second.query('select public.save_meal_plan_draft($1,$2)', [pidB, { ...draft, expected_revision: saved.data.current.revision, items: [{ ...draft.items[0], free_text: 'Otra indicación' }] }]);
       await first.query('commit');
       const changed = (await editing).rows[0].save_meal_plan_draft;
       expect(changed.current.version).toBe(2);

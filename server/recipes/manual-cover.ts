@@ -50,7 +50,7 @@ export async function saveManualRecipeCover(
     const latest = await publishedVersion(nutritionistId, recipeId, expectedVersion, false);
     const card = getRecipeCard(latest.version.id, latest.recipe.title);
     if ((card.cover_url ?? null) !== expectedCoverUrl) throw new CareError(409, 'La foto cambió. Recargá la receta.');
-    setRecipeCard(latest.version.id, { ...card, cover_status: 'ready', cover_url: `data:${inspected.mime};base64,${inspected.bytes.toString('base64')}`, cover_alt: recipe.title });
+    setRecipeCard(latest.version.id, { ...card, cover_status: 'ready', cover_url: `data:${inspected.mime};base64,${inspected.bytes.toString('base64')}`, cover_alt: version.title ?? recipe.title });
     return (await publishedVersion(nutritionistId, recipeId, expectedVersion, false)).recipe;
   }
   const extension = inspected.mime === 'image/jpeg' ? 'jpg' : inspected.mime === 'image/webp' ? 'webp' : 'png';

@@ -1,3 +1,4 @@
+import { productFixtureArgs } from '../testing/product-rpc-fixture';
 import { randomUUID } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
@@ -22,6 +23,7 @@ async function asUser<T = Record<string, unknown>>(user: string, sql: string, pa
   });
 }
 async function rpc<T = Record<string, unknown>>(user: string, name: string, args: unknown[] = []): Promise<T> {
+  args = await productFixtureArgs(db, name, args);
   return (await asUser<{ result: T }>(user, `select public.${name}(${args.map((_, i) => `$${i + 1}`).join(',')}) as result`, args))[0].result;
 }
 async function objectUrl() {
@@ -55,8 +57,7 @@ beforeAll(async () => {
 }, 60000);
 beforeEach(async () => {
   rid = randomUUID();
-  const saved = await rpc<{ current: { id: string } }>(owner, 'save_recipe_draft', [content()]);
-  await rpc(owner, 'set_recipe_card', [saved.current.id, unavailableCard('Ensalada de tomate')]);
+  const saved = await rpc<{ current: { id: string } }>(owner, 'save_recipe_draft', [{ ...content(), card: unavailableCard('Ensalada de tomate') }]);
   const recipe = await rpc<{ published: { id: string } }>(owner, 'publish_recipe', [rid, 1]);
   vid = recipe.published.id;
 });
@@ -71,6 +72,12 @@ describe('foto manual con SQL real y Storage existente reproducido', () => {
     const reloaded = await rpc<Array<{ id: string; card: { cover_url: string } }>>(patientUser, 'list_assigned_recipes', [patient]);
     expect(reloaded.find((row) => row.id === rid)!.card.cover_url).toBe(url);
     expect(await asUser(patientUser, 'select * from public.recipe_covers')).toEqual([]);
+  });
+  it('la portada publicada conserva el título aprobado después de editar el borrador',async()=>{
+    await rpc(owner,'save_recipe_draft',[{...content(),title:'Título privado nuevo'}]);
+    const url=await objectUrl();
+    const cover=await rpc(owner,'save_manual_recipe_cover',[rid,1,null,url]);
+    expect(cover).toMatchObject({cover_alt:'Ensalada de tomate'});
   });
   it('rechaza paciente, otra profesional y una cuenta sin rol profesional', async () => {
     const url = await objectUrl();

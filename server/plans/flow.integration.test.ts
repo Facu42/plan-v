@@ -1,3 +1,4 @@
+import { planReviewSnapshot } from '../../src/types/plans.js';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { app } from '../index.js';
@@ -6,11 +7,16 @@ import { declareKnownHealth } from '../test/declare-health.js';
 
 const patient = 'pat-sofia';
 const other = 'pat-marina';
-const post = (path: string, body: unknown) => app.request(path, {
+const post = async (path: string, body: unknown) => {
+  if (path.startsWith('/api/plans/') && path.endsWith('/publish')) {
+    const saved = await (await app.request(`/api/patients/${patient}/plans?audience=pro`)).json();
+    body = { ...(body as object), expected_snapshot: planReviewSnapshot(saved.plan.current) };
+  }
+  return app.request(path, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(body),
-});
+}); };
 
 function planDraft(overrides: Record<string, unknown> = {}) {
   return {
@@ -27,6 +33,14 @@ describe('PV-19 planes fechados versionados', () => {
   beforeEach(async () => {
     resetStore();
     await declareKnownHealth(patient);
+  });
+
+  it('no publica si falta la copia revisada en el pedido', async () => {
+    const input = planDraft();
+    expect((await post('/api/patients/'+patient+'/plans',input)).status).toBe(200);
+    const response = await app.request('/api/plans/'+input.id+'/publish',{ method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({expected_version:1}) });
+    expect(response.status).toBe(400);
+    expect((await (await app.request('/api/patients/'+patient+'/plans')).json()).plan).toBeNull();
   });
 
   it('exige porciones para recetas nuevas y conserva la estimación al revisar y publicar por API', async () => {

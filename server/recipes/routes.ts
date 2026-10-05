@@ -60,6 +60,7 @@ async function patientWrite(c: Context, patientId: string) {
 function coreDraft(input: ReturnType<typeof recipeWizardSchema.parse>) {
   return {
     id: input.id,
+    expected_revision: input.expected_revision,
     title: input.title,
     yield_portions: input.yield_portions,
     steps: input.steps,
@@ -69,9 +70,10 @@ function coreDraft(input: ReturnType<typeof recipeWizardSchema.parse>) {
   };
 }
 
-async function saveWizard(c: Context) {
+async function saveWizard(c: Context, expectedId?: string) {
   const { persistent, nutritionistId } = await professional(c);
   const input = await body(c, recipeWizardSchema);
+  if (expectedId && input.id !== expectedId) throw new repo.CareError(400, 'El identificador de la receta no coincide. No se guardó nada.');
   let card;
   try { card = buildRecipeCard(input); }
   catch (error) {
@@ -99,8 +101,7 @@ export function registerRecipeRoutes(app: Hono) {
   app.post('/api/recipes/:id/versions', async (c) => {
     const id = recipeIdParam.safeParse(c.req.param('id'));
     if (!id.success) throw new repo.CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
-    const saved = await saveWizard(c);
-    if (saved.recipe.id !== id.data) throw new repo.CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
+    const saved = await saveWizard(c, id.data);
     return c.json(saved);
   });
 
@@ -109,7 +110,7 @@ export function registerRecipeRoutes(app: Hono) {
     const id = recipeIdParam.safeParse(c.req.param('id'));
     if (!id.success) throw new repo.CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
     const input = await body(c, recipePublishSchema);
-    const recipe = await repo.publishRecipe(nutritionistId, id.data, input.expected_version, persistent);
+    const recipe = await repo.publishRecipe(nutritionistId, id.data, input.expected_version, persistent, input.expected_revision);
     return c.json({ recipe, source: persistent ? 'supabase' : 'memory' });
   });
 

@@ -65,6 +65,7 @@ function utcDays(start: string, end: string) {
 
 export const mealPlanDraftSchema = z.object({
   id: z.uuid(),
+  expected_revision: z.uuid().nullable().optional(),
   period_start: isoDate,
   period_end: isoDate,
   timezone: z.literal('America/Argentina/Buenos_Aires').default('America/Argentina/Buenos_Aires'),
@@ -88,7 +89,7 @@ export const mealPlanDraftSchema = z.object({
 
 export const mealPlanPublishSchema = z.object({
   expected_version: z.number().int().min(1),
-  expected_snapshot: z.record(z.string(), z.unknown()).optional(),
+  expected_snapshot: z.record(z.string(), z.unknown()),
 }).strict();
 
 export type MealPlanDraftInput = z.infer<typeof mealPlanDraftSchema>;
@@ -116,6 +117,7 @@ export type PlanItemView = {
 };
 export type PlanVersionView = {
   id: string;
+  revision?: string;
   version: number;
   status: 'draft' | 'published' | 'archived';
   period_start: string;

@@ -41,5 +41,5 @@ export type PatientLedgerView = PatientLedger & { payment_info: PaymentInfo | nu
 export type BillingBoardPatient = PatientLedger & { full_name: string };
 export type BillingBoard = { settings: PaymentSettings; patients: BillingBoardPatient[] };
 
-export type PaymentInput = { amount: number; paid_on: string; method: PaymentMethod; note?: string };
+export type PaymentInput = { client_id?: string; amount: number; paid_on: string; method: PaymentMethod; note?: string };
 export type PaymentDecision = 'confirm' | 'reject' | 'void';
