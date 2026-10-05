@@ -41,7 +41,7 @@ Los favoritos editoriales devuelven el UUID del recurso. Los registros anteriore
 
 ## Guía para probar las dos experiencias
 
-La dirección publicada es [Plan V](https://plan-v-eight.vercel.app/). Hasta aprobar las migraciones y publicar el PR, esa dirección contiene la versión anterior. El comparador local sólo permite revisar la presentación.
+La dirección publicada es [Plan V](https://plan-v-eight.vercel.app/). Las cinco migraciones aprobadas y los PR #54, #56 y #57 están publicados. El comparador local sólo permite revisar la presentación. [Evidencia real y guía breve](cierre-producto-publicado-2026-10-05.md).
 
 1. Entrar con la cuenta ficticia de nutricionista entregada en el chat. Abrir **Pacientes**, elegir la paciente y pasar por **Ficha** y **Plan**: debe conservarse la selección. Crear una paciente ficticia diferente únicamente si se quiere probar una nueva invitación.
 2. En **Ficha**, revisar el ingreso y los datos corporales. Confirmar la meta. Guardar después otro borrador: la meta visible de la paciente debe seguir siendo la confirmada.
@@ -49,6 +49,6 @@ La dirección publicada es [Plan V](https://plan-v-eight.vercel.app/). Hasta apr
 4. Cerrar sesión y entrar con la cuenta ficticia de paciente. Para una invitación nueva, usar su enlace y el mismo email indicado. Completar consentimiento e ingreso, salir/reingresar y comprobar lo guardado. En **Mi ficha**, corregir y reenviar la ficha si hace falta.
 5. Abrir **Plan** y **Diario**. Debe aparecer la indicación publicada, sin el borrador nuevo. Registrar la receta, agua y descanso; recargar. Agregar un producto a **Compras**, marcarlo, guardar un favorito, enviar mensaje y adjuntar un archivo ficticio.
 6. En **Progreso**, habilitar únicamente los permisos opcionales que se quieran probar y registrar una medida. Confirmar un turno en **Agenda**, leer un recurso asignado y avisar un pago manual. Volver a la cuenta profesional: comprobar registros, mensaje/descarga del adjunto y confirmar el pago.
-7. Para IA, otorgar el permiso correspondiente con la paciente ficticia y generar desde el editor profesional. Editar la propuesta, revisar nutrientes y totales y publicar; consultar la misma copia desde paciente. Este paso sólo se considerará aprobado después de una generación gratuita real. Si el proveedor está agotado, se puede reintentar o trabajar manualmente.
+7. Para IA, otorgar el permiso correspondiente con la paciente ficticia y generar desde el editor profesional. Editar la propuesta, revisar nutrientes y totales y publicar; consultar la misma copia desde paciente. Este recorrido ya se comprobó con una generación real de cuatro recetas mediante `openrouter/free`; todas mantienen su etiqueta de nutrientes estimados. Si el proveedor está agotado, se puede reintentar o trabajar manualmente.
 
 Estado de la evidencia: [registro de cierre](cierre-funcional-plan-v-2026-10-05.md). El ensayo usa cuentas y datos ficticios y almacenamiento temporal; no contrata servicios. Las fotos generadas por IA continúan pendientes y la subida manual se mantiene.
