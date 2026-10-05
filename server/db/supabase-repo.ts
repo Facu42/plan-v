@@ -861,38 +861,14 @@ export async function sbCreatePatient(input: {
   email: string;
   goal: string;
 }): Promise<{ patient: Patient; invite: PatientInvite }> {
-  const sb = getRequestDb();
-  const fullName = input.name.trim();
-  const { data: patientRow, error: patientError } = await sb.from('patients').insert({
-    nutritionist_id: input.nutritionistId,
-    full_name: fullName,
-    initials: patientInitials(fullName),
-    tone: 'mint',
-    status: 'Ingreso',
-    billing_status: 'pending',
-    billing_until: null,
-    stage: 'ingreso',
-    goal: input.goal.trim(),
-    adherence_score: 0,
-    next_focus: 'Completar evaluación inicial',
-  }).select(patientTableColumns.professional).single();
-  if (patientError || !patientRow) throwWriteError(patientError);
-
-  const inserted = row(patientRow);
-  if (!inserted) throw new Error('Patient insert returned no row');
-
-  const { data: inviteRow, error: inviteError } = await sb.from('patient_invites').insert({
-    patient_id: inserted.id,
-    nutritionist_id: input.nutritionistId,
-    email: input.email.trim().toLowerCase(),
-    status: 'not_sent',
-  }).select('*').single();
-  if (inviteError || !inviteRow) throwWriteError(inviteError);
-
-  const invite = mapInvite(row(inviteRow) ?? {});
-  await logInviteEvent(invite.id, 'created');
-
-  return { patient: mapPatient(inserted, {}, 'professional'), invite };
+  const sb=getRequestDb();
+  const {data,error}=await sb.rpc('create_patient_with_invite',{payload:{name:input.name,email:input.email,goal:input.goal}});
+  if(error){if(error.code==='PT409')throw new UniqueInviteError();throwWriteError(error);}
+  const saved=row(data);const inviteRow=row(saved?.invite);
+  if(!saved||!inviteRow)throw new Error('Patient creation returned no invitation');
+  const patient=await sbGetPatientById(String(saved.patient_id),'professional');
+  if(!patient)throw new Error('Created patient is not accessible');
+  return {patient,invite:mapInvite(inviteRow)};
 }
 
 export async function sbGetInvite(inviteId: string): Promise<PatientInvite | null> {

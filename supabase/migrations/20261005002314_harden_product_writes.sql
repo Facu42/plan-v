@@ -564,6 +564,40 @@ returns text language sql stable set search_path='' as $$
 $$;
 
 -- Recibos privados de operación: el mismo actor/UUID nunca puede escribir dos contenidos.
+-- Alta e invitación en una sola transacción. Un reintento de la misma alta no deja fichas huérfanas.
+create function public.create_patient_with_invite(payload jsonb) returns jsonb language plpgsql security definer set search_path='' as $$
+declare nid uuid; pname text; mail text; goal text; pid uuid; invitation public.patient_invites; existing public.patients;
+begin
+  nid:=public.my_nutritionist_id();
+  if nid is null then raise exception using errcode='42501',message='patient_create_forbidden'; end if;
+  if jsonb_typeof(payload) is distinct from 'object' or octet_length(payload::text)>4000
+    or jsonb_typeof(payload->'name') is distinct from 'string' or jsonb_typeof(payload->'email') is distinct from 'string' or jsonb_typeof(payload->'goal') is distinct from 'string'
+    or exists(select 1 from jsonb_object_keys(payload) k where k not in ('name','email','goal')) then
+    raise exception using errcode='22023',message='patient_create_invalid';
+  end if;
+  pname:=btrim(coalesce(payload->>'name',''));mail:=lower(btrim(coalesce(payload->>'email','')));goal:=btrim(coalesce(payload->>'goal',''));
+  if char_length(pname) not between 2 and 80 or char_length(goal) not between 2 and 240 or char_length(mail)>254
+    or mail!~'^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$' then
+    raise exception using errcode='22023',message='patient_create_invalid';
+  end if;
+  perform pg_advisory_xact_lock(hashtextextended(nid::text||':patient-create:'||mail,9));
+  select * into invitation from public.patient_invites where nutritionist_id=nid and email=mail and status in ('not_sent','pending');
+  if found then
+    select * into existing from public.patients where id=invitation.patient_id and nutritionist_id=nid;
+    if existing.full_name is distinct from pname or existing.goal is distinct from goal or existing.deactivated_at is not null or existing.anonymized_at is not null then
+      raise exception using errcode='PT409',message='patient_create_conflict';
+    end if;
+    return jsonb_build_object('patient_id',existing.id,'invite',to_jsonb(invitation),'duplicate',true);
+  end if;
+  insert into public.patients(nutritionist_id,full_name,initials,tone,status,billing_status,stage,goal,adherence_score,next_focus)
+    values(nid,pname,upper(left(split_part(pname,' ',1),1)||case when position(' ' in pname)>0 then left(split_part(pname,' ',2),1) else '' end),'mint','Ingreso','pending','ingreso',goal,0,'Completar evaluación inicial') returning id into pid;
+  insert into public.patient_invites(patient_id,nutritionist_id,email,status) values(pid,nid,mail,'not_sent') returning * into invitation;
+  insert into public.patient_invite_events(invite_id,event) values(invitation.id,'created');
+  return jsonb_build_object('patient_id',pid,'invite',to_jsonb(invitation),'duplicate',false);
+end; $$;
+revoke all on function public.create_patient_with_invite(jsonb) from public,anon;
+grant execute on function public.create_patient_with_invite(jsonb) to authenticated;
+
 create table private.product_write_receipts(
   actor_id uuid not null references public.profiles(id) on delete cascade,
   client_id uuid not null, patient_id uuid not null references public.patients(id) on delete cascade,

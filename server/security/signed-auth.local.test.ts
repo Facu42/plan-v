@@ -360,6 +360,16 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     } finally {await first.query('rollback');first.release();if(analysis)await analysis.catch(()=>undefined);}
   });
 
+  it('dos altas concurrentes con sesiones reales crean una ficha y una invitación recuperables',async()=>{
+    const input={name:'Alta concurrente ficticia',email:randomUUID()+'@example.test',goal:'Organizar comidas'};
+    const responses=await Promise.all([api(ownerB,'/api/patients','POST',input),api(ownerB,'/api/patients','POST',input)]);
+    expect(responses.map(r=>r.status)).toEqual([201,201]);const bodies=await Promise.all(responses.map(r=>r.json()));
+    expect(bodies[0].patient.id).toBe(bodies[1].patient.id);expect(bodies[0].invite.id).toBe(bodies[1].invite.id);
+    expect((await pool.query('select count(*)::int as n from public.patient_invites where nutritionist_id=$1 and email=$2',[bodies[0].invite.nutritionist_id,input.email])).rows[0].n).toBe(1);
+    expect((await api(ownerB,'/api/patients','POST',{...input,goal:'Otro objetivo'})).status).toBe(409);
+    expect((await api(patientB,'/api/patients','POST',input)).status).toBe(403);
+  });
+
   it('la publicación revisada retiene el mismo lock que una edición en otra conexión', async () => {
     const id = randomUUID();
     const draft = { id, period_start: '2026-10-02', period_end: '2026-10-03',

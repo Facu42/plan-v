@@ -41,8 +41,7 @@ async function until(expression) {
 }
 async function button(text) {
   lastAction='botón '+text;
-  await until(`Array.from(document.querySelectorAll('button')).some(e=>e.textContent.trim()===${JSON.stringify(text)}&&!e.disabled&&e.getClientRects().length)`);
-  await B('js',`Array.from(document.querySelectorAll('button')).find(e=>e.textContent.trim()===${JSON.stringify(text)}&&!e.disabled&&e.getClientRects().length).click()`);
+  await until(`(()=>{const e=Array.from(document.querySelectorAll('button')).find(e=>e.textContent.trim()===${JSON.stringify(text)}&&!e.matches(':disabled')&&e.getClientRects().length);if(!e)return false;e.click();return true;})()`);
 }
 async function login(actor,path='/') {
   await B('goto',origin+path);await B('wait','input[placeholder="Email"]');
@@ -90,12 +89,15 @@ try {
   // Exención ficticia de cuota para ensayar salud; nunca crea pagos ni suscripciones.
   await pool.query("update public.patients set billing_status='waived' where id=$1",[pid]);
   await logout();phase='aceptar invitación y onboarding';await login(patient,'/?invite='+invite);
-  await button('Comenzar');await B('click','.nvon-privacy input[type="checkbox"]');await button('Continuar');
-  await field('¿Cómo preferís que te nombremos?','Prueba');await button('Continuar');
+  await button('Comenzar');await B('wait','.nvon-privacy input[type="checkbox"]');
+  phase='onboarding: consentimiento';await B('click','.nvon-privacy input[type="checkbox"]');await button('Continuar');
+  await B('wait','.nvon-profile input');phase='onboarding: nombre';
+  await field('¿Cómo preferís que te nombremos?','Prueba');await button('Continuar');await B('wait','.nvon-health');
   const none=await B('js',"JSON.stringify(Array.from(document.querySelectorAll('.nvon-health button')).map(e=>e.textContent))");
   if(!none.includes('No')) throw Error('No se encontraron controles de alergias');
   await B('js',"Array.from(document.querySelectorAll('.nvon-health fieldset')).forEach(section=>{ const choices=Array.from(section.querySelectorAll('button'));const none=choices.find(e=>/no tengo|ninguna|ninguno/i.test(e.textContent));if(none)none.click(); })");
-  await button('Continuar');await button('Enviar a mi nutricionista');await button('Ir al inicio');
+  phase='onboarding: alimentos';await button('Continuar');await B('wait','.nvon-review');
+  phase='onboarding: envío';await button('Enviar a mi nutricionista');await button('Ir al inicio');
   const intake=await read(professional,`/api/patients/${pid}/intake?audience=pro`);
   check(intake.intake.status==='submitted','consentimiento y ficha enviados desde el navegador');
   await B('goto',origin+'/app/ficha');await B('wait','.nvt-body-form');
@@ -179,8 +181,11 @@ try {
   await B('wait','input[placeholder="Email"]');await login(patient,'/app/plan');await reloadContains('Indicación publicada');
   check(true,'recuperación real de contraseña y nuevo ingreso conservan datos');
   await writeFile('.gstack/product-browser-evidence.json',JSON.stringify({result:'passed',screenshots:false,provider:'disabled',checks:evidence},null,2));
-} catch {
+} catch (error) {
   console.error('Falló la comprobación del navegador en: '+phase+'; control: '+lastAction+'. No se imprimen cuentas, tokens ni contenido de sesión.');
+  console.error('Tipo de fallo: '+(error instanceof Error?error.name:'desconocido')+'; código: '+(Number.isInteger(error?.code)?error.code:'sin código'));
+  // Diagnóstico limitado a controles, sin valores, texto libre ni enlaces de sesión.
+  try{console.error('Controles al detenerse: '+await B('js',"JSON.stringify({privacy:!!document.querySelector('.nvon-privacy'),profile:!!document.querySelector('.nvon-profile'),health:!!document.querySelector('.nvon-health'),review:!!document.querySelector('.nvon-review'),alerts:document.querySelectorAll('.nvon-error').length,continue:Array.from(document.querySelectorAll('button')).filter(e=>e.textContent.trim()==='Continuar').map(e=>({disabled:e.matches(':disabled'),visible:!!e.getClientRects().length}))})"));}catch{}
   if(phase==='arranque de servicios temporales')console.error('Salida local API: '+(apiProcess?.exitCode??'en ejecución')+'; web: '+(webProcess?.exitCode??'en ejecución'));
   process.exitCode=1;
 } finally {

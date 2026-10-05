@@ -94,6 +94,23 @@ describe('cierre funcional: revisiones, privacidad y reintentos persistentes', (
   const recipeDraft = { ...draft, title, expected_revision: null };
   const planId = randomUUID();
   const menu = { id: planId, expected_revision: null, period_start: '2026-10-04', period_end: '2026-10-04', timezone: 'America/Argentina/Buenos_Aires', items: [{ for_date: '2026-10-04', slot: 'Almuerzo', recipe_id: recipeId, recipe_version: 1, portions: 1, public_note: 'Indicación publicada' }] };
+  it('reintentar un alta devuelve la misma ficha/invitación; otro contenido no sobrescribe y otro rol no crea',async()=>{
+    const input={name:'Paciente de alta',email:'alta@example.test',goal:'Organizar comidas'};
+    const first=await rpc(nutriA,'create_patient_with_invite',[input]) as any;
+    const retry=await rpc(nutriA,'create_patient_with_invite',[input]) as any;
+    expect(retry.patient_id).toBe(first.patient_id);expect(retry.invite.id).toBe(first.invite.id);expect(retry.duplicate).toBe(true);
+    expect((await db.query<{n:number}>('select count(*)::int as n from public.patient_invite_events where invite_id=$1',[first.invite.id])).rows[0].n).toBe(1);
+    await expect(rpc(nutriA,'create_patient_with_invite',[{...input,goal:'Otro contenido'}])).rejects.toMatchObject({code:'PT409'});
+    await expect(rpc(patientAUser,'create_patient_with_invite',[input])).rejects.toMatchObject({code:'42501'});
+    const other=await rpc(nutriB,'create_patient_with_invite',[input]) as any;expect(other.patient_id).not.toBe(first.patient_id);
+  });
+  it('si falla crear la invitación, se revierte también la ficha y se permite recuperar el alta',async()=>{
+    await db.exec("create function public.fail_trial_invite() returns trigger language plpgsql as $$ begin if new.email='fallo@example.test' then raise exception 'fallo de prueba'; end if; return new; end $$; create trigger fail_trial_invite before insert on public.patient_invites for each row execute function public.fail_trial_invite();");
+    const input={name:'Alta con falla',email:'fallo@example.test',goal:'Organizar comidas'};
+    try {await expect(rpc(nutriA,'create_patient_with_invite',[input])).rejects.toThrow();expect((await db.query<{n:number}>("select count(*)::int as n from public.patients where full_name='Alta con falla'")).rows[0].n).toBe(0);}
+    finally {await db.exec('drop trigger fail_trial_invite on public.patient_invites;drop function public.fail_trial_invite();');}
+    expect((await rpc(nutriA,'create_patient_with_invite',[input]) as any).duplicate).toBe(false);
+  });
   it('rechaza la segunda escritura de un editor desactualizado, incluso en la primera versión', async () => {
     recipe = await rpc(nutriA,'save_recipe_draft',[recipeDraft]);
     const first = recipe.current.revision;
