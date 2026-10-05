@@ -1,3 +1,5 @@
 # Assets originales de Figma: conservar los bytes y sus SHA-256 también en Windows.
 /src/assets/nutrigo/*.svg -text
 /src/assets/nutrigo/front/*.svg -text
+# La landing estática incluye scripts inline; el hash de CSP exige los mismos bytes.
+/public/pacientes/** -text

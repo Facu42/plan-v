@@ -6,7 +6,7 @@
   "rewrites": [
     {
       "source": "/pacientes",
-      "destination": "/pacientes.html"
+      "destination": "/pacientes/index.html"
     },
     {
       "source": "/admin",
@@ -35,7 +35,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https://wvosvlxpfytokwfbcero.supabase.co wss://wvosvlxpfytokwfbcero.supabase.co https://api-production-aad6.up.railway.app; worker-src 'self'; manifest-src 'self'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+          "value": "default-src 'self'; script-src 'self' 'sha256-OBTN3RiyCV4Bq7dFqZ5a2pAXjnCcCYeTJMO2I/LYKeo=' 'sha256-raXRfKMmoh1oYPN38gTwS6zYe2kX4PapC6B76mS0/Rs=' 'sha256-evv1+XwfDqRaVqLUFaCsYDW6h5DUAKghKr4XNxBhzFE='; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https://wvosvlxpfytokwfbcero.supabase.co wss://wvosvlxpfytokwfbcero.supabase.co https://api-production-aad6.up.railway.app; worker-src 'self'; manifest-src 'self'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
         },
         {
           "key": "X-Content-Type-Options",
