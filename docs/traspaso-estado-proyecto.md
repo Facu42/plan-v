@@ -29,7 +29,7 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
 
 ## Lo hecho (publicado en `main`)
 
-Trabajo nuevo aún **sin publicar**: [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.md), rama `codex/nutrigo-producto-mcp` desde `d976213`. Conserva el enfoque anterior por separado. Migraciones y cierre real pendientes de aprobación concreta; no confundir las verificaciones locales con producción ni editar el registro del otro hilo.
+Trabajo nuevo aún **sin publicar**: [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.md), PR #54, rama `codex/nutrigo-producto-mcp` desde `d976213`, con la landing publicada en PR #55 incorporada. Conserva el enfoque anterior por separado. [Cierre funcional y evidencia](cierre-funcional-plan-v-2026-10-05.md), [acciones y guía](recorridos-y-contratos-plan-v-2026-10-05.md) y [paquete de cinco migraciones](paquete-produccion-pr54-2026-10-05.md). Producción pendiente de aprobación concreta; los ensayos temporales no certifican su despliegue ni la generación gratuita real. No editar el registro del otro hilo.
 
 - Producto listo para usar de punta a punta, diseño Nutrigo en 13 pantallas: `docs/registro-producto-listo.md`.
 - Seguridad y privacidad: términos y privacidad, 34 funciones internas cerradas en la base:
@@ -159,3 +159,5 @@ Trabajo nuevo aún **sin publicar**: [producto desde el código original del MCP
 
 
 Continuación del cierre de paciente y nutricionista: [correcciones, evidencia y paquete de cinco migraciones](cierre-funcional-plan-v-2026-10-05.md).
+
+Contrato de cada acción, permisos y lecturas al recargar: [recorridos y guía para ambas experiencias](recorridos-y-contratos-plan-v-2026-10-05.md).

@@ -46,12 +46,13 @@ La consulta del catálogo de OpenRouter no encontró una opción compatible grat
 
 ## Migraciones y publicación
 
-Las cuatro migraciones preparadas son:
+El paquete actual tiene cinco migraciones preparadas:
 
 1. `20261003172112_separate_nutrition_target_drafts.sql`: separar borrador privado de meta publicada, conservar datos existentes sin inventar un historial y exigir revisión al guardar.
 2. `20261003172907_structured_menu_nutrition.sql`: nutrientes, propuestas estructuradas, cálculo/lecturas/compras y guardas de procedencia, porciones y meta vigente.
 3. `20261003174117_manual_recipe_cover.sql`: reemplazo manual de portada con controles de propiedad y concurrencia; usa el almacenamiento existente.
 4. `20261003231922_reopen_patient_intake.sql`: reapertura explícita de la ficha propia con revisión esperada y copia exacta anterior en un historial privado. No reconstruye un historial perdido ni modifica consentimientos.
+5. `20261005002314_harden_product_writes.sql`: revisiones de contenido, escrituras atómicas y reintentos, títulos publicados, privacidad del diario y aceptación concurrente de invitaciones. Los defectos reproducidos durante el cierre justifican esta ampliación del paquete.
 
 Supabase se consultó sólo para comprobar su estado: el paquete todavía no está instalado; en el momento de la consulta no había metas guardadas, y el bucket existente `recipe-covers` admite 5 MB. No se creó ni amplió almacenamiento.
 

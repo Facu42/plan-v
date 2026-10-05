@@ -37,6 +37,8 @@ Este documento corresponde al PR #54. Las rutas son de la API existente; los ide
 
 Las vistas de paciente y profesional usan los mismos contratos, con sus permisos. Un texto de confirmación visual no reemplaza la lectura nueva del servidor. Los errores de escritura muestran fallo o confirmación pendiente; nunca éxito inventado. La IA usa sólo modelos cuyo precio gratuito se verificó; no existe cambio automático a un modelo pago.
 
+Los favoritos editoriales devuelven el UUID del recurso. Los registros anteriores guardados por nombre interno se convierten respetando el recurso y la fecha existentes. Al finalizar o corregir el onboarding se consulta el plan publicado, con carga, error y reintento; un menú antiguo no sustituye esa comprobación.
+
 ## Guía para probar las dos experiencias
 
 La dirección publicada es [Plan V](https://plan-v-eight.vercel.app/). Hasta aprobar las migraciones y publicar el PR, esa dirección contiene la versión anterior. El comparador local sólo permite revisar la presentación.

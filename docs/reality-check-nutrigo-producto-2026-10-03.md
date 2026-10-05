@@ -1,6 +1,16 @@
 # Revisión funcional independiente de Nutrigo — 2026-10-03
 
-Estado: **requiere correcciones y validación real antes de publicar**. El frontend original del MCP está integrado, pero los recorridos acordados todavía no permiten afirmar que el producto esté terminado. Un PR en borrador representa trabajo para revisar; no certifica funcionamiento en producción.
+## Cierre del ensayo temporal — 5 de octubre
+
+El revisor funcional confirmó independientemente [CI 37318109128](https://github.com/Facu42/plan-v/actions/runs/37318109128), commit `66c4fbf`: **24/24 pruebas de sesiones aprobadas y recorrido de navegador completo**. La evidencia acredita persistencia entre ambos roles con Auth, PostgREST y Storage reales temporales, incluida descarga de los bytes guardados y denegación de acceso ajeno. También aprobó sus 12 pruebas focales de onboarding, ficha y contraseña.
+
+Durante el recorrido detectó un P2: el final del onboarding infería la existencia del plan fechado desde el menú antiguo de la ficha. El código final consulta exclusivamente el plan publicado al llegar a la etapa lista, mantiene carga/error/reintento y cancela respuestas anteriores. El navegador comprobó nuevo ingreso y recuperación real de contraseña, ficha corregida recibida por la profesional y regreso al plan publicado. El revisor no encontró otro bloqueo concreto en ese arreglo. La revisión de código separada aprobó 16 pruebas focales y el control de efectos/permisos.
+
+**Ensayo temporal completo; producción y generación gratuita real pendientes.** La IA estuvo deshabilitada durante esta ejecución. No se aplicó SQL de producción, no se publicaron servicios ni se tomaron capturas. La foto manual pública HTTPS también se comprueba después de la aprobación. El [registro de cierre](cierre-funcional-plan-v-2026-10-05.md) contiene las 36 comprobaciones de navegador y las 1358 pruebas generales; el [paquete concreto](paquete-produccion-pr54-2026-10-05.md) presenta las cinco migraciones y configuración para aprobación.
+
+## Estado inicial y hallazgos históricos
+
+Estado al 3 de octubre: **requiere correcciones y validación real antes de publicar**. El frontend original del MCP estaba integrado, pero los recorridos acordados todavía no permitían afirmar que el producto estaba terminado. Un PR en borrador representa trabajo para revisar; no certifica funcionamiento en producción.
 
 Revisión del rol `reality-checker` en la rama `codex/nutrigo-producto-mcp`. Se leyeron las reglas del proyecto y el código de las superficies de paciente, CRM, ingreso, invitaciones, planes, IA, mensajes, compras, seguimiento y cobranzas. Se revisaron fuente y resultados de pruebas. La instrucción del usuario de no tomar capturas prevalece sobre la plantilla genérica del agente: se usaron el código original, comprobaciones del DOM y pruebas. No se abrió otro navegador ni se modificó código del producto. Las metas y fotos manuales, implementadas por este mismo agente, quedan fuera de su revisión independiente; su evidencia y límites están en `docs/metas-y-fotos-manuales-2026-10-03.md`.
 

@@ -1,5 +1,15 @@
 # Revisión de código del producto Nutrigo — 3 de octubre de 2026
 
+## Continuación de la revisión — 5 de octubre
+
+El revisor independiente de contratos revalidó las escrituras atómicas, aceptación concurrente de invitaciones, forma de la copia revisada del plan, asignaciones de recursos y favoritos. Detectó dos defectos en favoritos: un enlace ambiguo podía duplicar la fila; después de resolverlo, el cambio podía reinterpretar un nombre interno histórico como el UUID de otro recurso. Ambos se reprodujeron antes del arreglo y tienen regresiones de la cadena anterior → quinta migración.
+
+La conversión final respeta el contrato anterior antes de activar la resolución por ID, evita choques de la clave única y conserva el registro más antiguo si encuentra duplicados existentes. El revisor aprobó **33 pruebas locales** y comprobó aparte colisiones cruzadas, título/fecha conservados, recetas intactas, eliminación de la tabla temporal y permisos sin ampliación. No ensayó solicitudes activas durante la aplicación de producción.
+
+El cambio de onboarding en `66c4fbf` consulta el plan fechado publicado al terminar el ingreso y conserva carga, error y reintento. Su revisión funcional y de código es independiente de la implementación. El revisor de código comprobó permisos, efectos/cancelación y 16 pruebas locales; el revisor funcional confirmó después el recorrido real completo del CI. Los resultados finales y el paquete SQL están en [cierre funcional](cierre-funcional-plan-v-2026-10-05.md) y [paquete de producción](paquete-produccion-pr54-2026-10-05.md). La evidencia temporal no acredita generación real gratuita ni publicación; ambas siguen sujetas al cierre posterior a la aprobación.
+
+## Revisión inicial y hallazgos históricos
+
 Revisión independiente de sólo lectura del código en la rama `codex/nutrigo-producto-mcp`, comparado con `d976213` y con los archivos nuevos aún sin commit. Se leyeron `.claude/agents/code-reviewer.md`, las reglas del proyecto y sus registros. Se revisaron las cuatro migraciones nuevas, el manejo de metas, propuestas, nutrientes, fotos manuales, compras, reapertura de ficha y la integración de las pantallas construidas desde el archivo original.
 
 **Revisión de código cerrada también al 4 de octubre, sin defectos reproducibles pendientes.** Los dos defectos iniciales, sus dos regresiones, el caso de nutrientes manuales en Inicio y el desplazamiento de fechas civiles en Progreso quedaron corregidos y verificados. Los reintentos de respuesta perdida de Mensajes/Compras y la regresión del nombre largo del adjunto también quedaron corregidos y verificados. No hubo cambios en producción, capturas, navegación ni llamadas a proveedores externos. Este informe es el único archivo escrito por esta revisión.
