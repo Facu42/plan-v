@@ -20,7 +20,7 @@ Implementación del plan aprobado por Facundo, desde la versión principal vigen
 - [Bandeja y biblioteca: alcance, comprobaciones y migración preparada](consultorio-backend-2026-10-05.md).
 - [Consultorio: ficha, seguimiento, biblioteca y cobranzas](consultorio-interfaz-2026-10-05.md).
 - [Planes y aprobación de IA](consultorio-planes-2026-10-05.md).
-- Las evidencias de interfaz y sesiones se agregan al finalizar sus comprobaciones; producción requiere autorización escrita específica.
+- [Paciente Nutrigo: doce superficies, fuentes y evidencia](paciente-nutrigo-2026-10-05.md). Producción requiere autorización escrita específica.
 
 ## Orden
 

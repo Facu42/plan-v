@@ -2,12 +2,12 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { SourceView, nodeName, sourceText, renderSource, type SourceNode, type SourceResolver } from './SourceView';
 import { translateSource } from './translation';
 import { planVBrandBinding } from './branding';
+import { patientNavigation as nav, patientNavBinding } from './patient-navigation';
 import type { ShowroomPage } from '../../components/nutrigo/ShowroomPanels';
 import { FigmaRecordDialog } from '../../components/nutrigo/FigmaPatientFront';
 import './nutrigo.generated.css';
 
 const frames = import.meta.glob<{default:SourceNode}>('./source/*.json');
-const nav: Record<string,ShowroomPage> = { Dashboard:'inicio',Calendar:'agenda',Messages:'mensajes','Healthy Menu':'recetas','Meal Plan':'plan','Food Diary':'diario',Progress:'progreso',Exercises:'ejercicio','Health Insights':'recursos' };
 export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, children, onSearch, query = '', unread = 0 }: {
   nodes: [string,string]; resolve:SourceResolver; patientName:string; onNavigate:(page:ShowroomPage)=>void; onSignOut?:()=>void; children?:ReactNode; onSearch?:(query:string)=>void; query?:string; unread?:number;
 }) {
@@ -22,12 +22,11 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
   const common:SourceResolver = node => {
     const brand=planVBrandBinding(node);if(brand)return brand;
     const specific=resolve(node);if(specific)return specific;
+    const navigation=patientNavBinding(node,onNavigate,unread);if(navigation)return navigation;
     const name=nodeName(node), text=sourceText(node);
     if(name==='Button Nav') {
       if(!text)return {onClick:()=>setMenu(true),label:'Abrir menú'};
       if(text==='Logout')return onSignOut ? {onClick:onSignOut,label:'Salir'} : {hidden:true};
-      const entry=Object.entries(nav).find(([label])=>text===label||text.startsWith(`${label} `));
-      if(entry)return {onClick:()=>onNavigate(entry[1]),label:translateSource(entry[0]),children:node.children.map((child,i)=>renderSource(child,n=>sourceText(n)==='6'?{text:unread || ''}:undefined,translateSource,i))};
     }
     if(name==='User Profile')return {onClick:()=>onNavigate('ficha'),label:'Mi ficha',children:node.children.map((child,i)=>renderSource(child,n=>{
       if(n.tag==='p'&&/Adam|Wingman/.test(sourceText(n)))return {text:patientName};return undefined;

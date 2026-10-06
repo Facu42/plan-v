@@ -5,6 +5,7 @@ import { shoppingApi } from '../../../api/shopping';
 import { RECIPE_UNITS, type RecipeUnit } from '../../../types/recipes';
 import type { ShoppingLine } from '../../../types/shopping';
 import { createPendingWrite } from './pending-write';
+import { canLeaveWorkspace,useUnsavedChanges } from '../../../components/nutrigo/unsaved-changes';
 import { errorText, formatNumber, leaf, objects, searchBinding, source, RecordDialog, Stateful, useRemote, type ScreenProps } from './shared';
 
 export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut }: ScreenProps) {
@@ -14,6 +15,9 @@ export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut }: 
   const [name, setName] = useState(''); const [quantity, setQuantity] = useState('1'); const [unit, setUnit] = useState<RecipeUnit>('u');
   const [busy, setBusy] = useState(false); const lock = useRef(false); const [pending, setPending] = useState(false);
   const [addition] = useState(() => createPendingWrite((input: Parameters<typeof shoppingApi.add>[1]) => shoppingApi.add(patient.id, input)));
+  const closeAddition=()=>{if(canLeaveWorkspace())setAdding(false);};
+  const additionDirty=Boolean(name.trim()||quantity!=='1'||unit!=='u'||pending);
+  useUnsavedChanges(pending||adding&&additionDirty,busy);
   const all = list.data?.items ?? [];
   const rows = all.filter(item => (filter === 'all' || !item.checked) && item.name.toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'))).sort((a, b) => sort ? a.name.localeCompare(b.name, 'es') : 0);
   const mutate = async (action: () => ReturnType<typeof shoppingApi.get>) => { if (lock.current) return; lock.current = true; setBusy(true); setError(''); setStatus(''); try { const saved = await action(); list.setData(saved.list); setStatus('Lista guardada.'); } catch (caught) { setError(errorText(caught)); } finally { lock.current = false; setBusy(false); } };
@@ -30,6 +34,8 @@ export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut }: 
   }, item.source_key);
   const resolver: SourceResolver = node => {
     const name = nodeName(node); const text = sourceText(node);
+    if (name === 'Pagination') return { hidden: true };
+    if (name === 'Footer' && objects(node).some(child => nodeName(child) === 'Pagination')) return { text: `${rows.length} de ${all.length} productos` };
     const input = searchBinding(node, search, setSearch, 'Buscar producto'); if (input) return input;
     if (name === 'Table') { const parts = objects(node); const prototype = parts.find(child => nodeName(child) === 'Table-Row-Grocery List'); const header = parts[0]; return { children: <>{header && source(header, () => undefined)}{list.error ? <Stateful error={list.error} onRetry={list.reload} /> : !list.data ? <Stateful loading /> : !rows.length ? <Stateful empty="No hay productos. Agregá uno o consultá tu plan." /> : prototype && rows.map(item => row(prototype, item))}</> }; }
     if (/Button/.test(name) && text === 'Add Item') return { onClick: () => setAdding(true), label: 'Agregar producto' };
@@ -44,6 +50,6 @@ export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut }: 
   };
   return <FramePair nodes={['105:2472', '492:11324']} resolve={resolver} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut}>
     {error && <Stateful error={error} />}{status && <p role="status" className="mx-[24px] p-[16px] text-[#272932]">{status}</p>}
-    {adding && <RecordDialog title="Agregar producto" onClose={() => setAdding(false)} busy={busy}><form onSubmit={event => void add(event)} className="flex w-full max-w-[420px] flex-col gap-[16px] rounded-[16px] bg-white p-[24px]"><h2 className="text-[22px] font-medium">Agregar producto</h2><label>Producto<input disabled={busy || pending} required maxLength={80} value={name} onChange={event => setName(event.target.value)} className="mt-[4px] w-full rounded-[8px] border border-[#e1e1e2] p-[10px]" /></label><label>Cantidad<input disabled={busy || pending} required type="number" min="0.01" max="100000" step="0.01" value={quantity} onChange={event => setQuantity(event.target.value)} className="mt-[4px] w-full rounded-[8px] border border-[#e1e1e2] p-[10px]" /></label><label>Unidad<select disabled={busy || pending} value={unit} onChange={event => setUnit(event.target.value as RecipeUnit)} className="mt-[4px] w-full rounded-[8px] border border-[#e1e1e2] p-[10px]">{RECIPE_UNITS.map(value => <option key={value} value={value}>{value}</option>)}</select></label>{error && <Stateful error={error} />}<div className="flex gap-[8px]"><button type="submit" disabled={busy} className="rounded-[8px] bg-[#c2e66e] px-[16px] py-[10px] text-[#272932]">{busy ? 'Guardando…' : pending ? 'Reintentar guardado' : 'Guardar'}</button><button type="button" disabled={busy} onClick={() => setAdding(false)} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">{pending ? 'Cerrar' : 'Cancelar'}</button></div></form></RecordDialog>}
+    {adding && <RecordDialog title="Agregar producto" onClose={closeAddition} busy={busy} dirty={additionDirty}><form onSubmit={event => void add(event)} className="flex w-full max-w-[420px] flex-col gap-[16px] rounded-[16px] bg-white p-[24px]"><h2 className="text-[22px] font-medium">Agregar producto</h2><label>Producto<input disabled={busy || pending} required maxLength={80} value={name} onChange={event => setName(event.target.value)} className="mt-[4px] w-full rounded-[8px] border border-[#e1e1e2] p-[10px]" /></label><label>Cantidad<input disabled={busy || pending} required type="number" min="0.01" max="100000" step="0.01" value={quantity} onChange={event => setQuantity(event.target.value)} className="mt-[4px] w-full rounded-[8px] border border-[#e1e1e2] p-[10px]" /></label><label>Unidad<select disabled={busy || pending} value={unit} onChange={event => setUnit(event.target.value as RecipeUnit)} className="mt-[4px] w-full rounded-[8px] border border-[#e1e1e2] p-[10px]">{RECIPE_UNITS.map(value => <option key={value} value={value}>{value}</option>)}</select></label>{error && <Stateful error={error} />}<div className="flex gap-[8px]"><button type="submit" disabled={busy} className="rounded-[8px] bg-[#c2e66e] px-[16px] py-[10px] text-[#272932]">{busy ? 'Guardando…' : pending ? 'Reintentar guardado' : 'Guardar'}</button><button type="button" disabled={busy} onClick={closeAddition} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">{pending ? 'Cerrar' : 'Cancelar'}</button></div></form></RecordDialog>}
   </FramePair>;
 }
