@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { MealPlanDraftInput, PatientMealPlan, ProfessionalMealPlan } from '../../types/plans';
-import { matchesMenuProposal, MealPlanEditor, MenuProposalReview, PublishedDatedPlan, PublishedDatedPlanView } from './MealPlanVersions';
+import { matchesMenuForm, matchesMenuProposal, MealPlanEditor, MenuProposalReview, PublishedDatedPlan, PublishedDatedPlanView } from './MealPlanVersions';
 
 const published: PatientMealPlan = {
   id: 'plan-1',
@@ -55,6 +55,9 @@ describe('Plan fechado profesional y publicado', () => {
       },
     } as ProfessionalMealPlan;
     expect(matchesMenuProposal(current, proposal)).toBe(true);
+    const alreadyPublished = { ...current, current: { ...current.current, published_at: '2026-09-21T12:00:00Z' } };
+    expect(matchesMenuForm(alreadyPublished, proposal)).toBe(true);
+    expect(matchesMenuProposal(alreadyPublished, proposal)).toBe(false);
     expect(matchesMenuProposal({ ...current, current: { ...current.current, items: [{ ...current.current.items[0], free_text: 'Otro plato' }] } }, proposal)).toBe(false);
   });
 
