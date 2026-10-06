@@ -234,6 +234,16 @@ try {
   await B('wait','input[placeholder="Email"]');patient.password=password;await login(patient,'/app/plan');await reloadContains('Indicación publicada');
   check(true,'recuperación real de contraseña y nuevo ingreso conservan datos');
   phase='corregir ficha enviada';await B('goto',origin+'/app/ficha');await button('Editar mi ficha inicial');await button('Corregir mi ficha enviada');await B('wait','.nvon-profile input');await field('¿Cómo preferís que te nombremos?','Prueba corregida');await button('Continuar');await B('wait','.nvon-health');await button('Continuar');await B('wait','.nvon-review');await button('Enviar a mi nutricionista');await readUntil(patient,`/api/patients/${pid}/intake`,r=>r.intake.status==='submitted'&&r.intake.payload.preferred_name==='Prueba corregida');await readUntil(professional,`/api/patients/${pid}/intake/professional`,r=>r.intake.status==='submitted'&&r.intake.payload.preferred_name==='Prueba corregida');await button('Ver mi plan');await reloadContains('Indicación publicada');check(true,'corrección de ficha enviada recibida por profesional conserva consentimiento y plan publicado');
+  phase='persistencia tras reiniciar la API';
+  const beforeRestart=(await read(patient,`/api/patients/${pid}/plans`)).plan;
+  const oldApi=apiProcess;
+  await new Promise((resolve,reject)=>{const timeout=setTimeout(()=>reject(Error('La API temporal no cerró')),10000);oldApi.once('exit',()=>{clearTimeout(timeout);resolve();});oldApi.kill();});
+  apiProcess=spawn(process.execPath,['--import','tsx','server/index.ts'],{env,stdio:'ignore'});
+  let restarted=false;for(let i=0;i<80;i++){try{if((await fetch(apiOrigin+'/api/health')).ok){restarted=true;break;}}catch{}await new Promise(r=>setTimeout(r,250));}if(!restarted)throw Error('La API temporal no reinició');
+  const afterRestart=(await read(patient,`/api/patients/${pid}/plans`)).plan;
+  const ledgerAfterRestart=(await read(patient,`/api/patients/${pid}/ledger?audience=patient`)).ledger;
+  check(afterRestart.id===beforeRestart.id&&afterRestart.version===beforeRestart.version&&afterRestart.items[0].public_note==='Indicación publicada'&&ledgerAfterRestart.payments.some(p=>p.status==='confirmed'&&p.amount===1000),'reinicio del servidor conserva el plan publicado y el pago confirmado');
+  await B('goto',origin+'/app/plan');await reloadContains('Indicación publicada');check(true,'paciente recupera el plan desde el navegador después del reinicio');
   await writeFile('.gstack/product-browser-evidence.json',JSON.stringify({result:'passed',screenshots:false,provider:'disabled',checks:evidence},null,2));
 } catch (error) {
   console.error('Falló la comprobación del navegador en: '+phase+'; control: '+lastAction+'. No se imprimen cuentas, tokens ni contenido de sesión.');
