@@ -1,3 +1,4 @@
+import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { careErrorMessage } from '../../api/care';
 import { isAbortError } from '../../api/client';
@@ -60,14 +61,16 @@ export function NutritionTargetPanel({ patientId, patientName }: { patientId: st
   const [refresh, setRefresh] = useState(0);
   const [body, setBody] = useState<BodyDataView | null>(null);
   const [draft, setDraft] = useState<Draft>(() => toDraft(null));
+  const [baseline, setBaseline] = useState(() => JSON.stringify(toDraft(null)));
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  useUnsavedChanges(JSON.stringify(draft) !== baseline, busy);
 
   useEffect(() => {
     const controller = new AbortController();
     setMessage(''); setError('');
-    setBody(null); setStored(null); setPublished(null); setRevision(null); setDraft(toDraft(null));
+    setBody(null); setStored(null); setPublished(null); setRevision(null); setDraft(toDraft(null)); setBaseline(JSON.stringify(toDraft(null)));
     Promise.all([nutritionTargetApi.get(patientId, true, controller.signal), bodyDataApi.get(patientId, true, controller.signal).catch(() => null)]).then(([r, b]) => {
       if (controller.signal.aborted) return;
       setStored(r.target); setBody(b); setPublished(r.published ?? null); setRevision(r.revision ?? null);
@@ -76,7 +79,8 @@ export function NutritionTargetPanel({ patientId, patientName }: { patientId: st
       // Si la paciente cargó datos más nuevos que la meta guardada, se usan esos.
       const fresh = b?.data && (!r.target || b.data.updated_at > r.target.updated_at);
       const age = b?.data ? ageFromBirthDate(b.data.birth_date) : null;
-      setDraft(fresh && b?.data && age !== null ? { ...base, sex: b.data.sex, age: String(age), height_cm: String(b.data.height_cm), weight_kg: String(b.data.weight_kg) } : base);
+      const loaded = fresh && b?.data && age !== null ? { ...base, sex: b.data.sex, age: String(age), height_cm: String(b.data.height_cm), weight_kg: String(b.data.weight_kg) } : base;
+      setDraft(loaded); setBaseline(JSON.stringify(loaded));
     }).catch((e) => { if (!controller.signal.aborted && !isAbortError(e)) setError(careErrorMessage(e)); });
     return () => controller.abort();
   }, [patientId, refresh]);
@@ -94,7 +98,7 @@ export function NutritionTargetPanel({ patientId, patientName }: { patientId: st
     try {
       const workspace = await nutritionTargetApi.save(patientId, parsed.data, publish, revision);
       if (activePatient.current !== patientId) return;
-      setStored(workspace.target); setPublished(workspace.published); setRevision(workspace.revision);
+      setStored(workspace.target); setPublished(workspace.published); setRevision(workspace.revision); setBaseline(JSON.stringify(draft));
       setMessage(publish ? `Meta confirmada: ${patientName} ya la ve en su plan.` : 'Borrador guardado. La paciente conserva su última meta confirmada.');
     } catch (reason) { if (activePatient.current === patientId) setError(careErrorMessage(reason)); } finally { saving.current = false; setBusy(false); }
   };
@@ -153,14 +157,17 @@ export function PatientBodyDataCard({ patientId, forceOpen = false, onSaved }: {
   const [view, setView] = useState<BodyDataView | null>(null);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ sex: 'femenino', birth_date: '', height_cm: '', weight_kg: '' });
+  const [baseline, setBaseline] = useState(() => JSON.stringify({ sex: 'femenino', birth_date: '', height_cm: '', weight_kg: '' }));
+  const lock = useRef(false);
   const [busy, setBusy] = useState(false);
+  useUnsavedChanges(JSON.stringify(form) !== baseline, busy);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const controller = new AbortController();
     bodyDataApi.get(patientId, false, controller.signal).then((r) => {
       setView(r);
-      if (r.data) setForm({ sex: r.data.sex, birth_date: r.data.birth_date, height_cm: String(r.data.height_cm), weight_kg: String(r.data.weight_kg) });
+      if (r.data) { const values = { sex: r.data.sex, birth_date: r.data.birth_date, height_cm: String(r.data.height_cm), weight_kg: String(r.data.weight_kg) }; setForm(values); setBaseline(JSON.stringify(values)); }
     }).catch((e) => { if (!isAbortError(e)) setView(null); });
     return () => controller.abort();
   }, [patientId]);
@@ -171,11 +178,12 @@ export function PatientBodyDataCard({ patientId, forceOpen = false, onSaved }: {
 
   const save = async (event: FormEvent) => {
     event.preventDefault();
+    if (lock.current) return;
     const parsed = bodyDataSchema.safeParse({ sex: form.sex, birth_date: form.birth_date, height_cm: num(form.height_cm), weight_kg: num(form.weight_kg) });
     if (!parsed.success) { setError('Revisá la fecha de nacimiento, la talla (cm) y el peso (kg).'); return; }
-    setBusy(true); setError('');
-    try { setView(await bodyDataApi.save(patientId, parsed.data)); setEditing(false); onSaved?.(); }
-    catch (reason) { setError(careErrorMessage(reason)); } finally { setBusy(false); }
+    lock.current = true; setBusy(true); setError('');
+    try { setView(await bodyDataApi.save(patientId, parsed.data)); setBaseline(JSON.stringify(form)); setEditing(false); onSaved?.(); }
+    catch (reason) { setError(careErrorMessage(reason)); } finally { lock.current = false; setBusy(false); }
   };
 
   if (!open) {
@@ -185,14 +193,14 @@ export function PatientBodyDataCard({ patientId, forceOpen = false, onSaved }: {
   return <section className="nvt-card nvt-body" aria-label="Tus datos para el plan">
     <header><div><p className="nv-eyebrow">{view.requested_at ? 'Tu nutricionista te pidió actualizarlos' : 'Tus datos para el plan'}</p><h2>Contale a tu nutricionista cómo estás hoy</h2><p>Los usa para calcular tus calorías y macros. Sólo los ve ella y podés cambiarlos cuando quieras.</p></div></header>
     <form className="nvt-form nvt-body-form" onSubmit={save} aria-busy={busy}>
-      <fieldset>
+      <fieldset disabled={busy}>
         <label>Sexo<select value={form.sex} onChange={(e) => setForm({ ...form, sex: e.target.value })}>{SEX_OPTIONS.map((s) => <option key={s} value={s}>{SEX_LABELS[s]}</option>)}</select></label>
         <label>Fecha de nacimiento<input type="date" value={form.birth_date} onChange={(e) => setForm({ ...form, birth_date: e.target.value })} /></label>
         <label>Talla (cm)<input inputMode="decimal" value={form.height_cm} onChange={(e) => setForm({ ...form, height_cm: e.target.value })} /></label>
         <label>Peso (kg)<input inputMode="decimal" value={form.weight_kg} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} /></label>
       </fieldset>
       {error && <p className="nv-dialog-error" role="alert">{error}</p>}
-      <div className="nvt-actions">{!missing && !view.requested_at && <NvButton className="nv-ghost" onClick={() => setEditing(false)} disabled={busy}>Cancelar</NvButton>}<NvButton type="submit" disabled={busy}>{busy ? 'Guardando…' : 'Guardar mis datos'}</NvButton></div>
+      <div className="nvt-actions">{!missing && !view.requested_at && <NvButton className="nv-ghost" onClick={() => { if (canLeaveWorkspace()) { setForm(JSON.parse(baseline)); setEditing(false); } }} disabled={busy}>Cancelar</NvButton>}<NvButton type="submit" disabled={busy}>{busy ? 'Guardando…' : 'Guardar mis datos'}</NvButton></div>
     </form>
   </section>;
 }

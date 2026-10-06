@@ -1,3 +1,4 @@
+import { useUnsavedChanges } from './unsaved-changes';
 // Mensajes — frame 84:2565 (desktop) y 433:19982 (mobile) del archivo Nutrigo.
 // Tres columnas: "Section Messages" 198:5969 (búsqueda, filtro, lista y "New
 // Message"), "Center Section" 198:5995 (chat en Cream-BG) y el perfil 207:6722
@@ -115,6 +116,7 @@ function MessageConversation({ patient, role, composeRef, profileOpen, onToggleP
   const ownFrom = role === 'pro' ? 'vero' : 'patient';
   const reader = ownFrom;
   const canSend = Boolean(text.trim() || file);
+  useUnsavedChanges(canSend, busy);
   const seen = lastSeenAt(messages, ownFrom);
   const meetUrl = patient.appointment?.channel === 'video' ? secureMeetUrl(patient.appointment.meet_url) : null;
   useEffect(() => { if (list.current) list.current.scrollTop = list.current.scrollHeight; }, [messages.length]);

@@ -1,3 +1,4 @@
+import { useUnsavedChanges } from './unsaved-changes';
 import { writeWasRejected } from '../../api/write-outcome';
 import { useRef, useState, type FormEvent } from 'react';
 import { formatPesos, PAYMENT_METHOD_LABELS, type FeeState, type FeeSummary } from '../../fees';
@@ -49,6 +50,8 @@ export function PaymentForm({ idPrefix, defaultAmount, submitLabel, hint, onSubm
   const [error, setError] = useState('');
   const pending = useRef<PaymentInput | null>(null);
   const lock = useRef(false);
+  const [baseline, setBaseline] = useState(() => JSON.stringify([amount, paidOn, method, note]));
+  useUnsavedChanges(JSON.stringify([amount, paidOn, method, note]) !== baseline || Boolean(pending.current), busy);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -61,7 +64,7 @@ export function PaymentForm({ idPrefix, defaultAmount, submitLabel, hint, onSubm
       pending.current ??= { client_id: crypto.randomUUID(), amount: pesos, paid_on: paidOn, method, ...(note.trim() ? { note: note.trim() } : {}) };
       await onSubmit(pending.current);
       pending.current = null;
-      setNote('');
+      setNote(''); setBaseline(JSON.stringify([amount, paidOn, method, '']));
     } catch (reason) {
       if (writeWasRejected(reason)) pending.current = null;
       setError(feeErrorMessage(reason));

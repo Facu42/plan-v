@@ -1,3 +1,5 @@
+import { useUnsavedChanges } from './unsaved-changes';
+import type { EditorialResource } from '../../types/resources';
 import { useState } from 'react';
 import type { Patient, TimelineEvent } from '../../types';
 import { api } from '../../api/client';
@@ -107,14 +109,15 @@ function Recent({ patients, onOpenPatient }: Pick<WorkCenterProps, 'patients' | 
       : <NvState title="Sin actividad en este filtro" description="Ajustá la paciente o la recencia para volver a ver movimientos." />}</section>;
 }
 
-function Saved({ patients, onOpenPatient }: Pick<WorkCenterProps, 'patients' | 'onOpenPatient'>) {
+export function ResourceAssignmentManager({ patients, onOpenPatient, catalog = SEEDED_RESOURCES }: Pick<WorkCenterProps, 'patients' | 'onOpenPatient'> & { catalog?: EditorialResource[] }) {
   const addPatient = useAppStore((state) => state.addPatient);
   const [resourceId, setResourceId] = useState(RESOURCE_GUIDES[0].id);
-  const assignable = SEEDED_RESOURCES.filter((entry) => entry.published);
+  const assignable = catalog.filter((entry) => entry.published);
   const [selectedPatientIds, setSelectedPatientIds] = useState<string[]>([]);
   const [feedback, setFeedback] = useState('');
   const [saving, setSaving] = useState(false);
   const resource = assignable.find((entry) => entry.slug === resourceId) ?? assignable[0];
+  useUnsavedChanges(selectedPatientIds.length > 0, saving);
   const saved = patients.filter((patient) => patient.plan_b.trim());
   const allSelected = patients.length > 0 && selectedPatientIds.length === patients.length;
   const togglePatient = (patientId: string) => {
@@ -124,17 +127,17 @@ function Saved({ patients, onOpenPatient }: Pick<WorkCenterProps, 'patients' | '
     setFeedback('');
   };
   const assign = async () => {
-    if (!selectedPatientIds.length || saving) return;
+    if (!selectedPatientIds.length || saving || !resource) return;
     setSaving(true);
     setFeedback('');
     try {
-      const result = await api.assignResource(resourceId, selectedPatientIds);
+      const result = await api.assignResource(resource.slug, selectedPatientIds);
       result.patients.forEach(addPatient);
       const assigned = result.assigned_count;
       const existing = result.existing_count;
       const assignedText = assigned === 1 ? '1 asignación creada.' : assigned > 1 ? `${assigned} asignaciones creadas.` : 'No se crearon asignaciones nuevas.';
       const existingText = existing ? ` ${existing} ya existía${existing === 1 ? '' : 'n'}.` : '';
-      setFeedback(`${assignedText}${existingText}`);
+      setSelectedPatientIds([]); setFeedback(`${assignedText}${existingText}`);
     } catch {
       setFeedback('No se pudieron asignar los recursos.');
     } finally {
@@ -142,6 +145,7 @@ function Saved({ patients, onOpenPatient }: Pick<WorkCenterProps, 'patients' | '
     }
   };
 
+  if (!resource) return <NvState title="Sin recursos publicados" description="Creá y publicá un recurso para poder asignarlo." />;
   return <div className="nvw-saved-layout">
     <section className="nvw-resource-assignment" aria-label="Asignar recursos">
       <div className="nvw-panel-head"><div><h3>Asignar recursos</h3><p>Elegí una guía operativa o un artículo revisado y uno o varios pacientes.</p></div><NvBadge>{assignable.length} publicados</NvBadge></div>
@@ -221,7 +225,7 @@ export function ShowroomWorkCenter(props: WorkCenterProps) {
   return <section className={`nvw-work-center nvw-${props.module}`} aria-label={MODULES[props.module].title}>
     <Header module={props.module} count={props.patients.length} />
     {props.module === 'reciente' ? <Recent patients={props.patients} onOpenPatient={props.onOpenPatient} />
-      : props.module === 'guardado' ? <Saved patients={props.patients} onOpenPatient={props.onOpenPatient} />
+      : props.module === 'guardado' ? <ResourceAssignmentManager patients={props.patients} onOpenPatient={props.onOpenPatient} />
         : props.module === 'seguimiento' ? <FollowUp patients={props.patients} onOpenPatient={props.onOpenPatient} onOpenMeals={props.onOpenMeals} />
           : props.module === 'paneles' ? <Panels patients={props.patients} onOpenPatient={props.onOpenPatient} />
             : <VideoCalls patients={props.patients} now={props.now} onOpenConsultations={props.onOpenConsultations} />}

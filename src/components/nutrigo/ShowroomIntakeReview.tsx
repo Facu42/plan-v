@@ -3,6 +3,7 @@ import { api, isAbortError } from '../../api/client';
 import type { ProfessionalIntakeView } from '../../types/intake';
 import { NvBadge, NvButton } from './primitives';
 import { healthFactLabel, intakeMissingItems, intakeStatusLabel } from './intake-review';
+import { useUnsavedChanges } from './unsaved-changes';
 
 function readableDate(value: string | null | undefined) {
   if (!value) return 'Sin fecha';
@@ -78,6 +79,7 @@ export function ShowroomIntakeReview({ patientId, initialView }: { patientId: st
   const [busy, setBusy] = useState(false);
   const [reload, setReload] = useState(0);
   const action = useRef(false);
+  useUnsavedChanges(Boolean(note.trim()), busy);
 
   useEffect(() => {
     if (initialView) {

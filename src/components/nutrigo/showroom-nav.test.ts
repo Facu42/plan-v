@@ -15,7 +15,7 @@ describe('navegación del espacio paciente', () => {
     expect(PATIENT_TABS.map((tab) => tab.id)).toEqual(['inicio', 'plan', 'diario', 'mensajes']);
     expect(tabBarState('inicio', PATIENT_TABS, PATIENT_MORE)).toEqual({ onPrimary: true, onMore: false, moreCurrent: false });
     expect(tabBarState('ejercicio', PATIENT_TABS, PATIENT_MORE).moreCurrent).toBe(true);
-    expect(tabBarState('objetivos', PRO_TABS, PRO_MORE).moreCurrent).toBe(true);
+    expect(tabBarState('biblioteca', PRO_TABS, PRO_MORE).moreCurrent).toBe(true);
     expect(tabBarState('pacientes', PRO_TABS, PRO_MORE).onPrimary).toBe(true);
   });
 });
@@ -23,7 +23,7 @@ describe('navegación del espacio paciente', () => {
 describe('navegación del nutricionista', () => {
   it('prioriza pacientes, fichas y planes sin perder los destinos existentes', () => {
     expect(PRO_SURFACES.map((tab) => tab.id)).toEqual([
-      'inicio', 'pacientes', 'ficha', 'plan', 'agenda', 'mensajes', 'recetas', 'compras', 'diario', 'progreso', 'ejercicio', 'recursos', 'cobranzas', 'consultas', 'objetivos', 'seguimiento',
+      'inicio', 'pacientes', 'plan', 'seguimiento', 'agenda', 'mensajes', 'biblioteca', 'cobranzas',
     ]);
     expect(PLAN_SUBPAGES.map((tab) => tab.id)).toEqual(['plan', 'compras']);
   });

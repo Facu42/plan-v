@@ -60,6 +60,11 @@ export type ResolvedLocation = {
 };
 
 function pageFor(role: AppRole, token: string, recurso: boolean): ShowroomPage {
+  if (role === 'pro') {
+    if (recurso || token === 'recetas' || token === 'recursos' || token === 'guardado') return 'biblioteca';
+    if (token === 'reciente' || token === 'paneles') return 'inicio';
+    if (token === 'videollamadas') return 'agenda';
+  }
   if (recurso && isAllowedPage(role, 'recursos')) return 'recursos';
   return isAllowedPage(role, token) ? token : 'inicio';
 }
@@ -83,5 +88,10 @@ export function buildAppHref(originHref: string, role: AppRole, page: ShowroomPa
   url.searchParams.delete('design');
   if (role === 'patient') url.searchParams.delete('paciente');
   if (!options?.keepHash) url.hash = '';
+  if (role === 'pro') {
+    if (page !== 'ficha') url.searchParams.delete('seccion');
+    if (page !== 'plan') url.searchParams.delete('propuesta');
+    if (page !== 'biblioteca') url.searchParams.delete('biblioteca');
+  }
   return `${url.pathname}${url.search}${url.hash}`;
 }

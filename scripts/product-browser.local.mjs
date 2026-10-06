@@ -134,7 +134,7 @@ try {
   await B('click','[aria-label="Mi ficha"]');await button('Reintentar permisos');await B('wait',aiPermission);
   check((await read(patient,`/api/patients/${pid}/care`)).consented.includes('ai_menu_draft')===false,'catálogo de permisos recuperado en la misma pantalla tras un error sin alterar la decisión guardada');
   await B('viewport','1440x1000');
-  await logout();phase='ficha y meta profesional';await login(professional,`/crm/ficha?paciente=${pid}`);
+  await logout();phase='ficha y meta profesional';await login(professional,`/crm/ficha?paciente=${pid}&seccion=ingreso`);
   await button('Marcar ingreso como revisado');await button('Confirmar y compartir');await until("document.body.innerText.includes('Meta confirmada:')");
   const target=await read(patient,`/api/patients/${pid}/nutrition-target`);check(Boolean(target.target?.published_at),'meta confirmada visible sólo al publicarse');
   phase='receta manual y asignación';
@@ -144,10 +144,10 @@ try {
   await B('fill','[aria-label="Ingrediente 1"]','Arroz');await B('fill','[aria-label="Cantidad 1"]','100');await B('fill','[aria-label="Pasos de la receta"]','Cocinar el arroz y servir.');
   await button('Guardar borrador');await until("document.body.innerText.includes('Borrador guardado en el catálogo')");
   const catalog=await read(professional,'/api/recipes');const recipe=catalog.recipes.find(r=>r.title==='Arroz con vegetales');check(recipe?.current.card.macros.kcal===200,'receta manual conserva calorías declaradas');
-  await until('!document.querySelector(".recipe-form")');await button('Publicar');await until("document.body.innerText.includes('Revisión publicada')");
+  await button('Cerrar');await until('!document.querySelector(".recipe-form")');await button('Publicar');await until("document.body.innerText.includes('Revisión publicada')");
   await button('Agregar al plan');await field('Día',today,'.recipe-overlay ');await button('Confirmar asignación');await until("document.body.innerText.includes('Asignada al día')");
   check((await read(patient,`/api/patients/${pid}/recipe-days?date=${today}`)).assignments.length===1,'receta publicada asignada por fecha');
-  phase='plan manual';await B('goto',origin+`/crm/plan?paciente=${pid}`);await B('click','[aria-label="Crear o editar plan"]');
+  phase='plan manual';await B('goto',origin+`/crm/plan?paciente=${pid}`);await B('wait','.meal-plan-form');
   await field('Desde',today,'.meal-plan-form ');await field('Hasta',today,'.meal-plan-form ');
   await B('fill','[aria-label="Fecha 1"]',today);await B('select','[aria-label="Receta 1"]',recipe.id);await B('fill','[aria-label="Nota 1"]','Indicación publicada');
   await B('click','.meal-plan-form button[type="submit"]');await until("document.body.innerText.includes('Borrador guardado')");
@@ -161,7 +161,7 @@ try {
   await readUntil(patient,`/api/patients/${pid}`,r=>r.patient.appointment?.meet_url==='https://example.test/consulta');await reloadContains('Abrir videollamada');
   await B('goto',origin+'/crm/cobranzas');await B('click','[aria-label="Ver cobranzas de Paciente ficticia"]');await B('fill','#cbz-fee-amount','1000');await B('fill','#cbz-fee-due',today);await button('Guardar cuota');
   await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.fee?.amount===1000);
-  await B('goto',origin+'/crm/guardado');await B('click','.nvw-resource-picker button:first-child');await B('click','[aria-label="Seleccionar Paciente ficticia"]');await button('Asignar a 1');await until("document.body.innerText.includes('1 asignación creada.')");
+  await B('goto',origin+'/crm/biblioteca?biblioteca=recursos');await B('click','.nvw-resource-picker button:first-child');await B('click','[aria-label="Seleccionar Paciente ficticia"]');await button('Asignar a 1');await until("document.body.innerText.includes('1 asignación creada.')");
   const assignedLibrary=(await read(patient,`/api/patients/${pid}/library`)).library;const resourceAssignment=assignedLibrary.assignments[0];const resource=[...assignedLibrary.resources,...assignedLibrary.articles].find(r=>r.id===resourceAssignment.resource_id||r.slug===resourceAssignment.slug);
   check(Boolean(resource),'turno, cuota y recurso guardados por la profesional');
   await logout();phase='paciente y recarga';await login(patient,'/app/plan');await reloadContains('Arroz con vegetales');
