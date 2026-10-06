@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FramePair } from '../FramePair';
 import { nodeId, nodeName, sourceText, type SourceNode, type SourceResolver } from '../SourceView';
 import { plansApi } from '../../../api/plans';
+import { recipesApi } from '../../../api/recipes';
 import { PLAN_SLOTS, buildPublishedPlanDays, type PlanItemView } from '../../../types/plans';
 import { unavailableCard } from '../../../types/recipe-plate';
 import { NutrigoRecipeDetail, type DisplayRecipe } from './Menu';
@@ -15,6 +16,9 @@ export function planRecipe(item:PlanItemView):DisplayRecipe|null {
 }
 export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps) {
   const remote=useRemote(`${patient.id}:plan`,signal=>plansApi.published(patient.id,signal));
+  // Foto de cada receta asignada: sólo la que la receta ya tiene; sin foto, la celda queda como en el diseño.
+  const assigned=useRemote(`${patient.id}:plan-covers`,signal=>recipesApi.assigned(patient.id,signal));
+  const covers=new Map((assigned.data?.recipes??[]).flatMap(recipe=>recipe.card?.cover_status==='ready'&&recipe.card.cover_url?[[recipe.id,recipe.card.cover_url] as const]:[]));
   const [search,setSearch]=useState(query),[page,setPage]=useState(0),[chosen,setChosen]=useState<PlanItemView|null>(null),[hideEmpty,setHideEmpty]=useState(false);
   const plan=remote.data?.plan;
   const days=plan?buildPublishedPlanDays(plan):[];
@@ -37,7 +41,7 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
         return fields(prototype,{},child=>{
           if(child===first)return {children:fields(first,{},p=>leaf(p)?{text:/Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday/.test(sourceText(p))?day.weekday:dateLabel(day.isoDate)}:undefined)};
           const index=cells.indexOf(child)-1;
-          if(index>=0){const slot=['Desayuno','Almuerzo','Merienda','Cena'][index];const item=day.items.find(entry=>entry.slot===slot);const title=item?.recipe_title??item?.free_text??'';const show=title.toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'));return {children:fields(child,{},p=>leaf(p)?{text:show?(title||'Sin indicación'):'—'}:undefined),...(item&&planRecipe(item)?{onClick:()=>setChosen(item),label:`Ver ${slot}: ${title}`}:{})};}
+          if(index>=0){const slot=['Desayuno','Almuerzo','Merienda','Cena'][index];const item=day.items.find(entry=>entry.slot===slot);const title=item?.recipe_title??item?.free_text??'';const show=title.toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'));const cover=item?.recipe_id&&show?covers.get(item.recipe_id):undefined;return {children:fields(child,{},p=>leaf(p)?{text:show?(title||'Sin indicación'):'—'}:cover&&nodeName(p)==='Image'?{children:<img src={cover} alt="" loading="lazy" className="absolute inset-0 block size-full object-cover"/>}:undefined),...(item&&planRecipe(item)?{onClick:()=>setChosen(item),label:`Ver ${slot}: ${title}`}:{})};}
           return undefined;
         },day.isoDate);
       })}{slots.some(s=>s==='Colación'||s==='Extra')&&<section className="p-[16px]"><h3>Otras indicaciones</h3>{shown.flatMap(day=>day.items.filter(item=>item.slot==='Colación'||item.slot==='Extra').map(item=><p key={item.id}>{dateLabel(item.for_date)} · {item.slot} · {item.recipe_title??item.free_text} {planRecipe(item)&&<button className="mcp-action" onClick={()=>setChosen(item)}>Ver receta</button>}</p>))}</section>}</>};

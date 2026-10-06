@@ -14,7 +14,7 @@ describe('contenido demo', () => {
   it('deja a Sofía con recetas, plan publicado, medidas y rutina', async () => {
     await seedDemoContent((path, init) => app.request(path, init), new Date('2026-09-22T15:00:00Z'));
     const recipes = await (await app.request('/api/patients/pat-sofia/recipes')).json();
-    expect(recipes.recipes).toHaveLength(5);
+    expect(recipes.recipes).toHaveLength(12);
     const plan = await (await app.request('/api/patients/pat-sofia/plans')).json();
     expect(plan.plan.period_start).toBe('2026-09-21');
     expect(plan.plan.items).toHaveLength(28);

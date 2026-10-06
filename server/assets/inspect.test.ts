@@ -27,6 +27,10 @@ function jpegWithExif() {
   ]);
 }
 
+function jpegWithoutExifLength(raw: Buffer) {
+  return stripJpegMetadata(raw).length;
+}
+
 describe('PV-15 inspección de archivos privados', () => {
   it('acepta PNG 1×1 y rechaza magic bytes falsos', () => {
     expect(detectMagic(PNG)).toBe('image/png');
@@ -34,6 +38,15 @@ describe('PV-15 inspección de archivos privados', () => {
     expect(inspected.width).toBe(1);
     expect(inspected.height).toBe(1);
     expect(() => inspectPrivateFile('body_progress', Buffer.from('AAAA'), 'image/png')).toThrow(CareError);
+  });
+
+  it('limpia un JPEG del tamaño de una foto real sin desbordar la pila', () => {
+    const raw = jpegWithExif();
+    const scan = raw.indexOf(Buffer.from([0xff, 0xda]));
+    const big = Buffer.concat([raw.subarray(0, scan + 10), Buffer.alloc(2_000_000, 0x3f), Buffer.from([0xff, 0xd9])]);
+    const clean = stripJpegMetadata(big);
+    expect(clean.length).toBe(big.length - (raw.length - jpegWithoutExifLength(raw)));
+    expect(clean.subarray(-2)).toEqual(Buffer.from([0xff, 0xd9]));
   });
 
   it('saca EXIF del JPEG y conserva el tamaño', () => {

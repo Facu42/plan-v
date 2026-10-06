@@ -42,7 +42,7 @@ type Recipe = { title: string; photo: string; portions: number; steps: string[];
 const RECIPES: Recipe[] = [
   {
     title: 'Bowl tibio de pollo y vegetales',
-    photo: 'receta-bowl-pollo.jpg',
+    photo: 'bowl-pollo-vegetales.jpg',
     portions: 2,
     steps: ['Cortar el pollo en tiras y dorarlo a la plancha.', 'Saltear zapallo, zanahoria y brócoli 8 minutos.', 'Servir sobre arroz integral con semillas.'],
     items: [
@@ -55,9 +55,9 @@ const RECIPES: Recipe[] = [
   },
   {
     title: 'Yogur griego, granola y frutas',
-    photo: 'receta-yogur-granola.jpg',
+    photo: 'yogur-granola.jpg',
     portions: 1,
-    steps: ['Servir el yogur en un bowl.', 'Sumar la fruta cortada y la granola por encima.'],
+    steps: ['Servir el yogur en un vaso.', 'Sumar la fruta cortada y la granola por encima.'],
     items: [
       { name: 'Yogur griego natural', quantity: 170, unit: 'g' },
       { name: 'Granola sin azúcar', quantity: 2, unit: 'cda' },
@@ -66,32 +66,33 @@ const RECIPES: Recipe[] = [
     ],
   },
   {
-    title: 'Tortilla de espinaca al horno',
-    photo: 'receta-tortilla-espinaca.jpg',
-    portions: 3,
-    steps: ['Batir los huevos con la ricota.', 'Sumar la espinaca salteada y la cebolla.', 'Hornear 25 minutos a 180 °C.'],
+    title: 'Omelette de queso con ensalada',
+    photo: 'omelette-ensalada.jpg',
+    portions: 1,
+    steps: ['Batir los huevos con sal y pimienta.', 'Cocinar en sartén, sumar el queso y doblar.', 'Servir con hojas verdes, tomate y pepino.'],
     items: [
-      { name: 'Huevos', quantity: 4, unit: 'u' },
-      { name: 'Espinaca', quantity: 300, unit: 'g' },
-      { name: 'Ricota', quantity: 100, unit: 'g' },
-      { name: 'Cebolla', quantity: 1, unit: 'u' },
+      { name: 'Huevos', quantity: 2, unit: 'u' },
+      { name: 'Queso por salut', quantity: 40, unit: 'g' },
+      { name: 'Hojas verdes', quantity: 60, unit: 'g' },
+      { name: 'Tomate cherry', quantity: 6, unit: 'u' },
     ],
   },
   {
-    title: 'Ensalada de lentejas y vegetales',
-    photo: 'receta-ensalada-lentejas.jpg',
+    title: 'Ensalada tibia de garbanzos y calabaza',
+    photo: 'ensalada-tibia.jpg',
     portions: 2,
-    steps: ['Cocinar las lentejas 20 minutos y enfriar.', 'Mezclar con tomate, pepino y cebolla morada.', 'Condimentar con limón y aceite de oliva.'],
+    steps: ['Hornear la calabaza en cubos 25 minutos.', 'Mezclar con garbanzos cocidos y espinaca.', 'Terminar con queso feta y perejil.'],
     items: [
-      { name: 'Lentejas secas', quantity: 120, unit: 'g' },
-      { name: 'Tomate', quantity: 1, unit: 'u' },
-      { name: 'Pepino', quantity: 0.5, unit: 'u' },
+      { name: 'Calabaza', quantity: 300, unit: 'g' },
+      { name: 'Garbanzos cocidos', quantity: 200, unit: 'g' },
+      { name: 'Espinaca', quantity: 80, unit: 'g' },
+      { name: 'Queso feta', quantity: 50, unit: 'g' },
       { name: 'Aceite de oliva', quantity: 1, unit: 'cda' },
     ],
   },
   {
     title: 'Merluza al horno con papas',
-    photo: 'receta-merluza-papas.jpg',
+    photo: 'pescado-horno.jpg',
     portions: 2,
     steps: ['Cortar las papas en rodajas finas y hornear 15 minutos.', 'Sumar la merluza con limón y perejil.', 'Hornear 15 minutos más.'],
     items: [
@@ -101,17 +102,99 @@ const RECIPES: Recipe[] = [
       { name: 'Aceite de oliva', quantity: 1, unit: 'cda' },
     ],
   },
+  {
+    title: 'Wrap integral de pollo',
+    photo: 'wrap-pollo.jpg',
+    portions: 1,
+    steps: ['Calentar la tortilla integral.', 'Rellenar con pollo, lechuga, tomate y palta.', 'Enrollar y cortar al medio.'],
+    items: [
+      { name: 'Tortilla integral', quantity: 1, unit: 'u' },
+      { name: 'Pechuga de pollo cocida', quantity: 100, unit: 'g' },
+      { name: 'Lechuga', quantity: 30, unit: 'g' },
+      { name: 'Palta', quantity: 0.25, unit: 'u' },
+    ],
+  },
+  {
+    title: 'Tostada con huevo y tomate',
+    photo: 'tostada-huevo.jpg',
+    portions: 1,
+    steps: ['Tostar el pan integral.', 'Cocinar el huevo a la plancha.', 'Servir con rodajas de tomate y orégano.'],
+    items: [
+      { name: 'Pan integral', quantity: 1, unit: 'u' },
+      { name: 'Huevos', quantity: 1, unit: 'u' },
+      { name: 'Tomate', quantity: 0.5, unit: 'u' },
+    ],
+  },
+  {
+    title: 'Bowl de quinoa, huevo y vegetales',
+    photo: 'bowl-quinoa.jpg',
+    portions: 1,
+    steps: ['Cocinar la quinoa 15 minutos.', 'Hervir el huevo 7 minutos.', 'Servir con morrón, tomate, palta y brócoli.'],
+    items: [
+      { name: 'Quinoa cocida', quantity: 1, unit: 'taza' },
+      { name: 'Huevos', quantity: 1, unit: 'u' },
+      { name: 'Morrón', quantity: 0.5, unit: 'u' },
+      { name: 'Palta', quantity: 0.25, unit: 'u' },
+    ],
+  },
+  {
+    title: 'Milanesa de pollo al horno con ensalada',
+    photo: 'milanesa-ensalada.jpg',
+    portions: 2,
+    steps: ['Pasar el pollo por huevo y pan rallado.', 'Hornear 20 minutos a 200 °C, dando vuelta a mitad.', 'Servir con ensalada de lechuga, tomate y zanahoria.'],
+    items: [
+      { name: 'Pechuga de pollo', quantity: 300, unit: 'g' },
+      { name: 'Pan rallado', quantity: 4, unit: 'cda' },
+      { name: 'Huevos', quantity: 1, unit: 'u' },
+      { name: 'Lechuga', quantity: 80, unit: 'g' },
+    ],
+  },
+  {
+    title: 'Fideos integrales salteados con vegetales',
+    photo: 'pasta-integral.jpg',
+    portions: 2,
+    steps: ['Hervir los fideos integrales.', 'Saltear zucchini, tomate y choclo.', 'Mezclar todo en la sartén con queso rallado.'],
+    items: [
+      { name: 'Fideos integrales', quantity: 160, unit: 'g' },
+      { name: 'Zucchini', quantity: 1, unit: 'u' },
+      { name: 'Tomate cherry', quantity: 8, unit: 'u' },
+      { name: 'Queso rallado', quantity: 1, unit: 'cda' },
+    ],
+  },
+  {
+    title: 'Sopa de verduras y garbanzos',
+    photo: 'sopa-verduras.jpg',
+    portions: 3,
+    steps: ['Rehogar cebolla, zanahoria y apio.', 'Sumar papa, garbanzos y caldo; cocinar 25 minutos.', 'Agregar espinaca al final.'],
+    items: [
+      { name: 'Zanahoria', quantity: 2, unit: 'u' },
+      { name: 'Papa', quantity: 1, unit: 'u' },
+      { name: 'Garbanzos cocidos', quantity: 150, unit: 'g' },
+      { name: 'Espinaca', quantity: 80, unit: 'g' },
+    ],
+  },
+  {
+    title: 'Pavo a la plancha con espárragos',
+    photo: 'pavo-esparragos.jpg',
+    portions: 1,
+    steps: ['Dorar la pechuga de pavo a la plancha.', 'Saltear los espárragos 5 minutos.', 'Servir con arroz integral.'],
+    items: [
+      { name: 'Pechuga de pavo', quantity: 150, unit: 'g' },
+      { name: 'Espárragos', quantity: 120, unit: 'g' },
+      { name: 'Arroz integral cocido', quantity: 0.5, unit: 'taza' },
+    ],
+  },
 ];
 
 /** Qué comer cada día de la semana: [desayuno, almuerzo, merienda, cena]; un número es una receta del catálogo. */
 const WEEK: Array<[string | number, string | number, string | number, string | number]> = [
-  [1, 3, 'Tostada integral con queso untable', 4],
-  ['Avena con manzana y canela', 0, 1, 2],
-  [1, 'Wrap de pollo y vegetales', 'Fruta y un puñado de nueces', 3],
-  ['Tostada + huevo + palta', 0, 1, 4],
-  [1, 2, 'Licuado de banana con leche', 'Pizza casera de vegetales'],
-  ['Panqueques de avena y banana', 'Asado con ensalada mixta', 'Tostada + huevo + palta', 3],
-  [1, 'Pastas con salsa de tomate y pollo', 'Fruta de estación', 2],
+  [1, 3, 6, 4],
+  [6, 0, 1, 2],
+  [1, 5, 'Fruta y un puñado de nueces', 10],
+  [1, 7, 'Licuado de banana con leche', 11],
+  [1, 8, 6, 4],
+  ['Panqueques de avena y banana', 'Asado con ensalada mixta', 'Fruta de estación', 9],
+  [1, 9, 6, 10],
 ];
 const SLOTS = ['Desayuno', 'Almuerzo', 'Merienda', 'Cena'] as const;
 

@@ -16,6 +16,8 @@ export const dateId = (value: Date) => new Intl.DateTimeFormat('en-CA', { timeZo
 export { dateLabel } from './date-label';
 export const timeLabel = (value: string) => Number.isNaN(Date.parse(value)) ? '' : new Date(value).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
 export const safeUrl = (value: string | null | undefined) => { try { const url = new URL(value ?? ''); return url.protocol === 'https:' ? url.href : null; } catch { return null; } };
+/** Imagen https o archivo propio de la app ("/recursos/…"); nunca otra URL. */
+export const safeImageSrc = (value: string | null | undefined) => value && /^\/(?!\/)[\w./-]+$/.test(value) && !value.includes('..') ? value : safeUrl(value);
 
 export const translate = (text: string) => secondaryLabels[text] ?? translateSource(text);
 export function source(node: SourceNode, resolve: SourceResolver, key?: string | number) { return renderSource(node, resolve, translate, key); }

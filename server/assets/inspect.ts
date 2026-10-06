@@ -53,11 +53,12 @@ export function jpegDimensions(bytes: Buffer) {
 
 export function stripJpegMetadata(bytes: Buffer) {
   if (bytes[0] !== 0xff || bytes[1] !== 0xd8) throw new CareError(400, 'El contenido no es un JPEG válido.');
-  const out: number[] = [0xff, 0xd8];
+  // Trozos y no un arreglo de números: esparcir la imagen entera desborda la pila con fotos reales.
+  const out: Buffer[] = [Buffer.from([0xff, 0xd8])];
   let i = 2;
   while (i < bytes.length) {
     if (bytes[i] !== 0xff) {
-      out.push(...bytes.subarray(i));
+      out.push(bytes.subarray(i));
       break;
     }
     while (i < bytes.length && bytes[i] === 0xff) i += 1;
@@ -65,24 +66,24 @@ export function stripJpegMetadata(bytes: Buffer) {
     const marker = bytes[i];
     i += 1;
     if (marker === 0xd9) {
-      out.push(0xff, 0xd9);
+      out.push(Buffer.from([0xff, 0xd9]));
       break;
     }
     if (marker >= 0xd0 && marker <= 0xd7) {
-      out.push(0xff, marker);
+      out.push(Buffer.from([0xff, marker]));
       continue;
     }
     if (marker === 0xda) {
-      out.push(0xff, 0xda, ...bytes.subarray(i));
+      out.push(Buffer.from([0xff, 0xda]), bytes.subarray(i));
       break;
     }
     const length = readU16(bytes, i);
     if (i + length > bytes.length) throw new CareError(400, 'El JPEG está incompleto.');
     const skip = marker === 0xe1 || marker === 0xe2 || marker === 0xed || marker === 0xfe;
-    if (!skip) out.push(0xff, marker, ...bytes.subarray(i, i + length));
+    if (!skip) out.push(Buffer.from([0xff, marker]), bytes.subarray(i, i + length));
     i += length;
   }
-  return Buffer.from(out);
+  return Buffer.concat(out);
 }
 
 export function pngDimensions(bytes: Buffer) {
