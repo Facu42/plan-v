@@ -115,6 +115,10 @@ describe('PV-36 recursos en PostgreSQL descartable', () => {
     const published = await rpc(nutriA, 'publish_editorial_resource', [draft[0].result.id]) as { published: boolean; reviewed_at: string };
     expect(published.published).toBe(true);
     expect(published.reviewed_at).toBeTruthy();
+    expect(await asUser(nutriB, 'select id from public.resources where id=$1', [draft[0].result.id])).toEqual([]);
+    await expect(rpc(nutriB, 'assign_editorial_resource', ['nota-local', [patientB]])).rejects.toMatchObject({code:'42501'});
+    const ownResource = await asUser(nutriA, 'select id from public.resources where id=$1', [draft[0].result.id]);
+    expect(ownResource).toHaveLength(1);
     await expect(rpc(patientAUser, 'publish_editorial_resource', [draft[0].result.id])).rejects.toMatchObject({ code: '42501' });
   });
 

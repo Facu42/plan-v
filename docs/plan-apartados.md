@@ -13,6 +13,13 @@ apartados que también hacen falta para salir al mercado: lo legal y la calidad 
   chicos). Eso sigue en el hilo "Plan V listo para el mercado". Acá solo se anota qué agentes le
   sirven a ese hilo (ver "Lo que ya tiene dueño").
 
+## Consultorio y paciente — 5/10/2026
+
+Implementación del plan aprobado por Facundo, desde la versión principal vigente y en copia aislada. Entregas encadenadas por apartado: backend, consultorio, planes e IA, y paciente Nutrigo.
+
+- [Bandeja y biblioteca: alcance, comprobaciones y migración preparada](consultorio-backend-2026-10-05.md).
+- Las evidencias de interfaz y sesiones se agregan al finalizar sus comprobaciones; producción requiere autorización escrita específica.
+
 ## Orden
 
 | Ola | Apartado | Puede arrancar | Depende de |
