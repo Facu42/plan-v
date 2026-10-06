@@ -26,3 +26,21 @@ Gstack: 14 confirmaciones de escritura/lectura y 60 medidas (12 superficies por 
 Suite general del conjunto: 243 archivos, 1388 aprobadas/2 omitidas. Tipos, compilación, migraciones y secretos aprobados; después de los últimos detalles visuales se repitieron las pruebas del paciente y tipos. Sesiones firmadas, adjuntos, aislamiento y persistencia tras reinicio se ejecutan en CI con Supabase descartable. Resultados pendientes se anotan al terminar CI.
 
 Registros de backend, consultorio y planes enlazados en docs/plan-apartados.md. Revisión independiente de código y evidencia cerrada. No se desplegó ni aplicó una migración en producción.
+
+## Contrato de acciones y aceptación
+
+La [matriz vigente de acciones, escritura, permiso y lectura posterior](recorridos-y-contratos-plan-v-2026-10-05.md) se conserva. Esta entrega añade:
+
+| Acción | Operación | Permiso | Comprobación posterior |
+| --- | --- | --- | --- |
+| Abrir pendientes, filtrar y paginar | GET /api/crm/work-queue | Nutricionista; consultorio desde sesión | Misma lista autorizada, contadores y cursor; sin notas ni borradores |
+| Crear material del consultorio | POST /api/resources | Nutricionista propietaria | GET /api/resources?audience=pro; id y contenido guardados |
+| Publicar material revisado | POST /api/resources/:id/publish | Propietaria; otra profesional y paciente rechazadas | Catálogo profesional published=true |
+| Crear nueva versión editorial | Nuevo slug mediante POST /api/resources | Propietaria | Nueva copia; asignación anterior conserva su recurso |
+| Asignar material creado | POST /api/resources/assign | Propietaria del material y de los pacientes | Biblioteca del paciente devuelve el mismo contenido; consultorio ajeno bloqueado por API y función de base |
+| Abrir recurso asignado | POST /api/patients/:id/resources/:resourceId/read | Paciente titular | Biblioteca profesional devuelve read_at persistente |
+| Navegar, volver y cambiar paciente con edición pendiente | Sin escritura; controlador central | Sesión del rol actual | Cancelar conserva formulario y URL; guardar habilita la salida |
+
+La suite general cubre errores de conexión, proveedor caído, consentimiento retirado, concurrencia y reintentos. El recorrido autenticado cubre alta, invitación, ingreso, meta, receta, plan, registros, permisos, agenda, mensajes, adjuntos, cuota/aviso/confirmación, archivo/restauración, cierre de sesión y recuperación tras reinicio. El resultado concreto del entorno temporal queda visible en las comprobaciones de cada PR.
+
+Entregas encadenadas: [backend #59](https://github.com/Facu42/plan-v/pull/59), [consultorio #60](https://github.com/Facu42/plan-v/pull/60), [planes #61](https://github.com/Facu42/plan-v/pull/61), [paciente #62](https://github.com/Facu42/plan-v/pull/62).
