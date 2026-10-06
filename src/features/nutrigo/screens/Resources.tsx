@@ -54,7 +54,7 @@ export function NutrigoResources({ patient, query = '', onNavigate, onSignOut, r
     const name = nodeName(node); const text = sourceText(node);
     if (name === 'Back Button') return { onClick: () => open(null), label: 'Volver a Recursos', text: 'Volver a Recursos' };
     if (name === 'Button Nav' && descendants(node).some(child => nodeName(child) === 'Icon/ArrowLeft')) return { onClick: () => open(null), label: 'Volver a Recursos' };
-    if (leaf(node) && text === 'Insights Details') return { text: 'Detalle del recurso' };
+    if (leaf(node) && ['Insight Details','Insights Details'].includes(text)) return { text: 'Detalle del recurso' };
     if (idEnds(node, '281:9834') || idEnds(node, '507:17793')) {
       if (!current) return { children: state() };
       const parts = objects(node); const heading = parts.find(child => idEnds(child, '281:9835') || idEnds(child, '507:17800')); const metadata = parts.find(child => nodeName(child) === 'Header'); const byline = parts.find(child => nodeName(child) === 'Footer'); const image = parts.find(child => nodeName(child) === 'Image'); const paragraph = parts.find(child => nodeName(child) === 'Pharagraph' && descendants(child).some(n => nodeName(n) === 'Div Title'));

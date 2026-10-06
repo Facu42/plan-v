@@ -26,6 +26,7 @@ import { notifyCareChanged } from '../../api/care';
 import { HABIT_LIMITS, parseHabitInput } from '../../lib/habit-input';
 import { PatientAiPermissions } from './PatientAiPermissions';
 import { canLeaveWorkspace,useUnsavedChanges } from '../../components/nutrigo/unsaved-changes';
+import { patientExtraBinding } from './patient-extra-binding';
 
 function HabitForm({patient,kind,onClose}:{patient:ShowroomPatient;kind:'water'|'rest';onClose:()=>void}) {
   const [value,setValue]=useState(kind==='water'?String(patient.hydration):patient.sleepMinutes==null?'':String(patient.sleepMinutes));
@@ -50,11 +51,32 @@ export function NutrigoPatientApp({patient,page,onNavigate,onSignOut,onEditIntak
   else if(page==='compras')screen=<NutrigoShopping {...common}/>;
   else if(page==='mensajes')screen=<NutrigoMessages {...common}/>;
   else if(page==='recursos')screen=<NutrigoResources {...common}/>;
-  else screen=<FramePair nodes={['84:2994','470:15300']} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut} resolve={node=>nodeName(node)==='Body'||nodeName(node)==='Table'?{children:page==='pagos'?<ShowroomPagos patientId={patient.id}/>:<section className="p-[24px] flex flex-col gap-[16px]" aria-label="Mi ficha y permisos"><h1 className="text-[22px]">Mi ficha</h1><button className="mcp-action" onClick={onEditIntake}>Editar mi ficha inicial</button><button className="mcp-action" onClick={()=>setPrivacy(true)}>Mis datos y permisos</button><PatientNutritionTarget patientId={patient.id}/><PatientBodyDataCard patientId={patient.id} forceOpen onSaved={notifyCareChanged}/><button className="mcp-action" onClick={onRecord}>Peso, medidas y archivos privados</button><button className="mcp-action" onClick={()=>onNavigate('pagos')}>Mis pagos</button></section>}:undefined}/>;
-  return <>{screen}{page==='ficha'&&<div className="mcp-nutrigo mcp-screen-state"><PatientAiPermissions key={patient.id} patientId={patient.id}/></div>}{demoRoleSwitch&&<div className="mcp-nutrigo mcp-screen-state"><button className="mcp-action" onClick={demoRoleSwitch}>Ver consultorio de demostración</button></div>}
+  else screen=<FramePair nodes={['84:2994','470:15300']} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut} resolve={node=>{
+    const shell=patientExtraBinding(node,page==='pagos'?'pagos':'ficha',onNavigate);
+    if(shell)return shell;
+    if(!['Body','Table'].includes(nodeName(node)))return undefined;
+    return {children:<section className="mcp-extra-content" aria-label={page==='pagos'?'Mis pagos':'Mi ficha y permisos'}>
+      {page==='pagos'?<ShowroomPagos patientId={patient.id}/>:<>
+        <div className="mcp-extra-actions">
+          <button className="mcp-action" onClick={onEditIntake}>Editar mi ficha inicial</button>
+          <button className="mcp-action" onClick={()=>setPrivacy(true)}>Mis datos y permisos</button>
+        </div>
+        <PatientNutritionTarget patientId={patient.id}/>
+        <PatientBodyDataCard patientId={patient.id} forceOpen onSaved={notifyCareChanged}/>
+        <div className="mcp-extra-actions">
+          <button className="mcp-action" onClick={onRecord}>Peso, medidas y archivos privados</button>
+          <button className="mcp-action" onClick={()=>onNavigate('pagos')}>Mis pagos</button>
+        </div>
+        <PatientAiPermissions key={patient.id} patientId={patient.id}/>
+      </>}
+    </section>};
+  }}/>;
+  return <>{screen}{demoRoleSwitch&&<div className="mcp-nutrigo mcp-screen-state"><button className="mcp-action" onClick={demoRoleSwitch}>Ver consultorio de demostración</button></div>}
+    <div className="mcp-patient-overlays">
     {dialog==='records'&&<FigmaRecordDialog title="Mis registros" onClose={()=>{if(canLeaveWorkspace())setDialog(null);}}><PatientBodyDataCard patientId={patient.id} forceOpen onSaved={notifyCareChanged}/><CarePanel patientId={patient.id}/></FigmaRecordDialog>}
     {(dialog==='water'||dialog==='rest')&&<HabitForm patient={patient} kind={dialog} onClose={()=>setDialog(null)}/>}
     {slot&&fullPatient&&<MealLogModal patient={fullPatient} defaultSlot={slot} close={()=>setSlot(null)}/>}
     {privacy&&<ShowroomPrivacy patientId={patient.id} onClose={()=>setPrivacy(false)} onDeleted={()=>{setPrivacy(false);onSignOut?.();}}/>}
+    </div>
   </>;
 }
