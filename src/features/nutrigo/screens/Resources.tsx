@@ -5,7 +5,7 @@ import { resourcesApi } from '../../../api/resources';
 import { api } from '../../../api/client';
 import { favoriteKindForResource, type EditorialResource } from '../../../types/resources';
 import { isAllowedPage } from '../../../components/nutrigo/app-location';
-import { dateLabel, descendants, errorText, idEnds, leaf, objects, safeUrl, searchBinding, source, Stateful, useRemote, type ScreenProps } from './shared';
+import { dateLabel, descendants, errorText, idEnds, leaf, objects, safeImageSrc, searchBinding, source, Stateful, useRemote, type ScreenProps } from './shared';
 
 type Props = ScreenProps & { resourceId?: string | null; onOpenResource?: (slug: string | null) => void };
 const hashResource = () => { if (typeof window === 'undefined') return null; try { return window.location.hash.startsWith('#recurso=') ? decodeURIComponent(window.location.hash.slice(9)) : null; } catch { return null; } };
@@ -33,7 +33,7 @@ export function NutrigoResources({ patient, query = '', onNavigate, onSignOut, r
     if (idEnds(child, '276:9115') || idEnds(child, '507:16187') || idEnds(child, '290:7830')) return { text: item.category };
     if (idEnds(child, '276:9118') || idEnds(child, '507:16190')) return { text: item.reviewed_at ? dateLabel(item.reviewed_at) : 'Guía de uso' };
     if (leaf(child) && /^Dr\. Amelia Johnson$/.test(text)) return { text: item.author_name };
-    if (name === 'Image') return { children: safeUrl(item.cover_url) ? <img src={safeUrl(item.cover_url)!} alt="" className="h-full w-full rounded-[12px] object-cover" /> : <span aria-hidden="true" className="flex h-full w-full items-center justify-center rounded-[12px] bg-[#f3f2eb] text-[40px] text-[#272932]">◇</span> };
+    if (name === 'Image') return { children: safeImageSrc(item.cover_url) ? <img src={safeImageSrc(item.cover_url)!} alt="" className="h-full w-full rounded-[12px] object-cover" /> : <span aria-hidden="true" className="flex h-full w-full items-center justify-center rounded-[12px] bg-[#f3f2eb] text-[40px] text-[#272932]">◇</span> };
     if (name === 'Avatar' || name === 'Play') return { hidden: true };
     return undefined;
   }, key);

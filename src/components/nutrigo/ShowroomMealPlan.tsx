@@ -8,7 +8,7 @@ import { availableSlotsForDay, MENU_SLOTS } from '../crm/menu-editor-utils';
 import { MealPlanEditor } from './MealPlanVersions';
 import {
   buildWeekTable, ColumnFilter, matchesPlanSearch, PlanCellDetail, PlanMealCell, PlanSheet, PlanToolbar, PlanWeekTable,
-  usePublishedPlan, useWeekNav, WEEK_DAYS, weekdayPlural, type PlanCell, type PlanRow,
+  usePublishedPlan, useRecipeCovers, useWeekNav, WEEK_DAYS, weekdayPlural, type PlanCell, type PlanRow,
 } from './ShowroomPatientPlan';
 import { mealSlotTone, NvBadge, NvButton } from './primitives';
 import './plan-fig.css';
@@ -49,6 +49,7 @@ export function ShowroomMealPlan({ patient, patients = [], query, onSelect, onCh
   const nav = useWeekNav(today);
   const [refresh, setRefresh] = useState(0);
   const { plan: published, error: planError } = usePublishedPlan(patient.id, loadProfessionalPlan, refresh);
+  const covers = useRecipeCovers(patient.id);
   const [search, setSearch] = useState(query);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState<Editing | null>(null);
@@ -125,7 +126,7 @@ export function ShowroomMealPlan({ patient, patients = [], query, onSelect, onCh
     {planError && <p className="pf-error" role="alert">{planError}</p>}
     <PlanWeekTable rows={table.rows} columns={columns} nav={nav} label="Plan semanal editable" renderCell={(row, column) => {
       const cell = row.cells[column.slot];
-      if (cell) return <PlanMealCell row={row} column={column} cell={cell} dim={!matchesPlanSearch(cell, search)} onOpen={() => open(cell.source === 'dated' ? { kind: 'dated', row, cell } : { kind: 'edit', row, cell })} />;
+      if (cell) return <PlanMealCell row={row} column={column} cell={cell} dim={!matchesPlanSearch(cell, search)} cover={cell.item?.recipe_id ? covers.get(cell.item.recipe_id) : undefined} onOpen={() => open(cell.source === 'dated' ? { kind: 'dated', row, cell } : { kind: 'edit', row, cell })} />;
       if (row.dated) return <div className="pf-cell pf-cell-empty" data-tone={column.tone}><span className="pf-cell-image" aria-hidden="true" /><span className="pf-cell-text"><span>Sin indicación</span></span></div>;
       return <button type="button" className="pf-cell pf-cell-empty pf-cell-add" data-tone={column.tone} aria-label={`Agregar ${column.slot} el ${row.day}`} onClick={() => setVersionsOpen(true)}>
         <span className="pf-cell-image" aria-hidden="true"><Plus size={18} /></span><span className="pf-cell-text"><span>Agregar</span></span>

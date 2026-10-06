@@ -1152,4 +1152,11 @@ if (isMainModule) {
   if (process.env.WORKER_SEPARATE !== '1') startJobWorker();
   writeOpsLog('info', 'api_listen', { mode: config.mode, data: config.dataMode, ai: config.aiMode, port: String(port) });
   serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
+  // Modo demo con datos en memoria: arranca con el contenido de ejemplo (DEMO_CONTENT=0 lo apaga).
+  if (config.mode === 'demo' && config.dataMode === 'memory' && process.env.DEMO_CONTENT !== '0') {
+    void import('./demo/content.js')
+      .then(({ seedDemoContent }) => seedDemoContent((path, init) => app.request(path, init)))
+      .then((steps) => writeOpsLog('info', 'demo_content', { steps: String(steps.length), failed: String(steps.filter((step) => !step.ok).length) }))
+      .catch(() => writeOpsLog('warn', 'demo_content_failed', {}));
+  }
 }

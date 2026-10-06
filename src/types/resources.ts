@@ -102,6 +102,7 @@ export const SEEDED_OPERATIONAL_RESOURCES: EditorialResource[] = [
       { title: 'Encontrá una preparación', body: 'El buscador recorre títulos, días y momentos. Menú saludable reúne los mismos títulos para ver rápidamente dónde aparecen durante la semana.' },
     ],
     ...LICENSE_OPERATIONAL,
+    cover_url: '/recursos/guia-plan-semanal.jpg',
   },
   {
     id: '22222222-2222-4222-a222-000000000002',
@@ -123,6 +124,7 @@ export const SEEDED_OPERATIONAL_RESOURCES: EditorialResource[] = [
       { title: 'Análisis disponible', body: 'Si el análisis asistido está habilitado, Plan V lo procesa dentro del circuito existente. Si no está disponible, tu registro igualmente conserva el contenido que enviaste.' },
     ],
     ...LICENSE_OPERATIONAL,
+    cover_url: '/recursos/guia-registrar-comida.jpg',
   },
   {
     id: '22222222-2222-4222-a222-000000000003',
@@ -144,6 +146,7 @@ export const SEEDED_OPERATIONAL_RESOURCES: EditorialResource[] = [
       { title: 'Checklist de este dispositivo', body: 'Las marcas de completado son una comodidad local, separada de tu información clínica. Podés reiniciarlas cuando empiece una nueva compra.' },
     ],
     ...LICENSE_OPERATIONAL,
+    cover_url: '/recursos/guia-compra.jpg',
   },
   {
     id: '22222222-2222-4222-a222-000000000004',
@@ -165,6 +168,7 @@ export const SEEDED_OPERATIONAL_RESOURCES: EditorialResource[] = [
       { title: 'Sin estados supuestos', body: 'Plan V no muestra confirmaciones de lectura o entrega que todavía no estén persistidas. El hilo presenta únicamente los mensajes disponibles.' },
     ],
     ...LICENSE_OPERATIONAL,
+    cover_url: '/recursos/guia-coordinar.jpg',
   },
   {
     id: '22222222-2222-4222-a222-000000000005',
@@ -186,6 +190,7 @@ export const SEEDED_OPERATIONAL_RESOURCES: EditorialResource[] = [
       { title: 'Contexto para conversar', body: 'Usá esta pantalla como apoyo para reconocer patrones y preparar preguntas. La interpretación profesional corresponde a tu nutricionista.' },
     ],
     ...LICENSE_OPERATIONAL,
+    cover_url: '/recursos/guia-progreso.jpg',
   },
   {
     id: '22222222-2222-4222-a222-000000000006',
@@ -207,6 +212,7 @@ export const SEEDED_OPERATIONAL_RESOURCES: EditorialResource[] = [
       { title: 'Separado de una rutina', body: 'Anotar una actividad no crea una recomendación ni reemplaza la indicación de una persona habilitada para trabajar sobre ejercicio.' },
     ],
     ...LICENSE_OPERATIONAL,
+    cover_url: '/recursos/guia-actividad.jpg',
   },
 ];
 
