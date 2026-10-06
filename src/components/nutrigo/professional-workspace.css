@@ -1,4 +1,6 @@
 .nv-pro .nv-content-layout {grid-template-columns:minmax(0,1fr)}
+/* El consultorio no monta el rail del dashboard del paciente. */
+.nv-app.nv-pro.nv-home:has(.pw-work) .nv-content-layout {grid-template-columns:minmax(0,1fr)!important}
 .nv-pro .nv-main {min-width:0}
 .pw-record,.pw-library,.pw-work {display:grid;gap:20px;min-width:0}
 .pw-record-head,.pw-work-head {display:flex;align-items:center;justify-content:space-between;gap:16px}
