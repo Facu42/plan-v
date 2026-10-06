@@ -53,6 +53,7 @@ export type RecipeCard = {
   cover_alt: string;
   /** Sólo presente cuando cover_status === 'ready'. Nunca inventada. */
   cover_url: string | null;
+  cover_generation?: 'queued' | 'leased' | 'ready' | 'failed';
 };
 
 export type RecipeVersionView = {

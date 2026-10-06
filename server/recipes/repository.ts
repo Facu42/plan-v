@@ -201,6 +201,7 @@ export function getRecipeSnapshot(recipeVersionId: string | null) {
     yield_portions: version.yield_portions,
     steps: version.steps,
     nutrient_source: version.nutrient_source,
+    card: getRecipeCard(version.id, version.title),
     ...(nutrition ? { nutrition } : {}),
     ingredients: versionItems(version.id),
   };
@@ -362,17 +363,13 @@ export async function publishRecipe(nutritionistId: string, recipeId: string, ex
   const { data, error } = await getRequestDb().rpc('publish_recipe', { target_recipe: recipeId, expected_version: expectedVersion, expected_revision: expectedRevision });
   recipeDbError(error);
   const published = asProfessional(data as Record<string, unknown>);
-  try {
-    await attachCoverOnApproval(nutritionistId, published);
-  } catch (error) {
-    // The publication is committed. A separate photo failure must not report it as failed.
-    logProviderFailure('recipe-cover-approval', error);
-  }
+  // Automatic photos start only when this version is included in an approved
+  // menu. Publishing the library recipe alone never contacts the image model.
   return published;
 }
 
 /**
- * Al aprobar (publicar) una receta se intenta UNA vez la foto del plato.
+ * El botón explícito de fotos permite reintentar una receta ya publicada.
  * La publicación ya está confirmada: un fallo de foto no revierte ese éxito.
  * Sin proveedor se conserva la portada existente; un intento fallido queda sin URL.
  */
@@ -386,7 +383,8 @@ async function attachCoverOnApproval(nutritionistId: string, recipe: Professiona
   if (typeof token !== 'string' || !token) return false;
   const generated = await generateRecipeCoverImage({
     title: version.title ?? recipe.title,
-    items: version.ingredients.map((item) => ({ name: item.name })),
+    items: version.ingredients.map((item) => ({ name: item.name, quantity: item.quantity, unit: item.unit })),
+    steps: version.steps,
   });
   let cover: { status: 'ready' | 'failed'; url: string | null; alt: string } = {
     status: 'failed', url: null, alt: recipe.title,
@@ -430,8 +428,13 @@ export async function retryRecipeCover(nutritionistId: string, recipeId: string,
     throw new CareError(409, 'La receta cambió. Volvé a abrir la revisión publicada antes de generar la foto.');
   }
   if (recipe.published.card?.cover_status === 'ready') return recipe;
-  if (!persistent || !recipeCoverEnabled()) {
+  if (!recipeCoverEnabled()) {
     throw new CareError(503, 'La generación de fotos todavía no está habilitada. La receta sigue publicada.');
+  }
+  if (!persistent) {
+    const { enqueueMemoryDish, proposalCoverContext } = await import('./menu-covers.js');
+    await enqueueMemoryDish(nutritionistId, proposalCoverContext({ ...recipe.published, title: recipe.published.title ?? recipe.title }), recipe.published.id, true);
+    return (await listProfessionalRecipes(nutritionistId, false)).find(row => row.id === recipeId)!;
   }
   if (!await attachCoverOnApproval(nutritionistId, recipe, true)) {
     throw new CareError(409, 'La foto ya se está preparando o se intentó hace poco. Esperá unos minutos y volvé a abrir la receta.');

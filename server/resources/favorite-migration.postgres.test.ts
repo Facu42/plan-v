@@ -35,7 +35,8 @@ beforeAll(async () => {
   `);
   const migrations = new URL('../../supabase/migrations/', import.meta.url);
   const productMigration = '20261005002314_harden_product_writes.sql';
-  for (const file of (await readdir(migrations)).filter(name => name.endsWith('.sql') && name !== productMigration).sort()) {
+  const ordered = (await readdir(migrations)).filter(name => name.endsWith('.sql')).sort();
+  for (const file of ordered.filter(name => name < productMigration)) {
     await db.exec(await readFile(new URL(file, migrations), 'utf8'));
   }
   await db.query('insert into auth.users(id,email,email_confirmed_at) values($1,$2,now()),($3,$4,now())', [pro,'pro@example.test',user,'patient@example.test']);
@@ -51,6 +52,9 @@ beforeAll(async () => {
   favoriteId = legacy.favorites.find(f => f.item_kind === 'article')!.id;
   expect(legacy.favorites.find(f => f.id === favoriteId)?.item_id).toBe(guideId);
   await db.exec(await readFile(new URL(productMigration, migrations), 'utf8'));
+  for (const file of ordered.filter(name => name > productMigration)) {
+    await db.exec(await readFile(new URL(file, migrations), 'utf8'));
+  }
 }, 60000);
 
 afterAll(async () => { await db?.close(); });

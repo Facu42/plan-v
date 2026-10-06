@@ -3,26 +3,23 @@ import { FramePair } from '../FramePair';
 import { nodeId, nodeName, sourceText, type SourceNode, type SourceResolver } from '../SourceView';
 import { plansApi } from '../../../api/plans';
 import { PLAN_SLOTS, buildPublishedPlanDays, type PlanItemView } from '../../../types/plans';
-import { unavailableCard } from '../../../types/recipe-plate';
+import { planRecipe } from '../plan-recipe';
+export { planRecipe } from '../plan-recipe';
 import { NutrigoRecipeDetail, type DisplayRecipe } from './Menu';
 import { AiPlanNutritionSummary } from '../../../components/nutrigo/AiPlanNutritionSummary';
 import { dateLabel, fields, leaf, objects, searchBinding, Stateful, useRemote, type ScreenProps } from './shared';
 
-export function planRecipe(item:PlanItemView):DisplayRecipe|null {
-  const recipe=item.recipe??item.recipe_proposal;
-  if(!recipe)return null;
-  return {id:item.id,title:recipe.title,version:item.recipe_version??1,yield_portions:recipe.yield_portions,ingredients:recipe.ingredients.map((ingredient,index)=>({...ingredient,id:'id'in ingredient?ingredient.id:`${item.id}:${index}`})),steps:recipe.steps,nutrient_source:'nutrient_source'in recipe?recipe.nutrient_source:recipe.nutrition?.source??'',nutrition:recipe.nutrition??undefined,card:unavailableCard(recipe.title,item.slot)};
-}
 export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps) {
   const remote=useRemote(`${patient.id}:plan`,signal=>plansApi.published(patient.id,signal));
   const [search,setSearch]=useState(query),[page,setPage]=useState(0),[chosen,setChosen]=useState<PlanItemView|null>(null),[hideEmpty,setHideEmpty]=useState(false);
   const plan=remote.data?.plan;
+  useEffect(()=>{if(!plan?.items.some(item=>['queued','leased'].includes(item.dish_card?.cover_generation??'')))return;const timer=setInterval(remote.reload,4000);return()=>clearInterval(timer);},[plan,remote.reload]);
   useEffect(()=>{setPage(0);setChosen(null);},[plan?.id,plan?.version]);
   const days=plan?buildPublishedPlanDays(plan):[];
   const shown=days.slice(page*7,page*7+7);
   const slots=PLAN_SLOTS.filter(slot=>['Desayuno','Almuerzo','Merienda','Cena'].includes(slot)||plan?.items.some(item=>item.slot===slot));
   const matchesItem=(item:PlanItemView)=>(item.recipe_title??item.free_text??'').toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'));
-  const detail=chosen?planRecipe(chosen):null;
+  const detail=chosen?planRecipe(plan?.items.find(item=>item.id===chosen.id)??chosen):null;
   if(detail)return <NutrigoRecipeDetail key={detail.id} recipe={detail} initialPortions={chosen?.portions??undefined} onBack={()=>setChosen(null)} backLabel="Volver al plan" patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut}/>;
   const resolve:SourceResolver=node=>{
     const name=nodeName(node),text=sourceText(node);
@@ -39,7 +36,10 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
         return fields(prototype,{},child=>{
           if(child===first)return {children:fields(first,{},p=>leaf(p)?{text:/Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday/.test(sourceText(p))?day.weekday:dateLabel(day.isoDate)}:undefined)};
           const index=cells.indexOf(child)-1;
-          if(index>=0){const slot=['Desayuno','Almuerzo','Merienda','Cena'][index];const item=day.items.find(entry=>entry.slot===slot);const title=item?.recipe_title??item?.free_text??'';const show=item?matchesItem(item):!search;return {children:fields(child,{},p=>leaf(p)?{text:show?(title||'Sin indicación'):'—'}:undefined),...(show&&item&&planRecipe(item)?{onClick:()=>setChosen(item),label:`Ver ${slot}: ${title}`}:{})};}
+          if(index>=0){const slot=['Desayuno','Almuerzo','Merienda','Cena'][index];const item=day.items.find(entry=>entry.slot===slot);const title=item?.recipe_title??item?.free_text??'';const show=item?matchesItem(item):!search;const recipe=item?planRecipe(item):null;return {children:fields(child,{},p=>{
+            if(show&&recipe?.card.cover_status==='ready'&&recipe.card.cover_url&&['Image','Image-Meal Plan','Place Image Here'].includes(nodeName(p)))return {children:<img src={recipe.card.cover_url} alt={recipe.card.cover_alt||title} className="absolute inset-0 block size-full object-cover"/>};
+            return leaf(p)?{text:show?(title||'Sin indicación'):'—'}:undefined;
+          }),...(show&&item&&recipe?{onClick:()=>setChosen(item),label:`Ver ${slot}: ${title}`}:{})};}
           return undefined;
         },day.isoDate);
       })}{slots.some(s=>s==='Colación'||s==='Extra')&&<section className="p-[16px]"><h3>Otras indicaciones</h3>{shown.flatMap(day=>day.items.filter(item=>(item.slot==='Colación'||item.slot==='Extra')&&matchesItem(item)).map(item=><p key={item.id}>{dateLabel(item.for_date)} · {item.slot} · {item.recipe_title??item.free_text} {planRecipe(item)&&<button className="mcp-action" onClick={()=>setChosen(item)}>Ver receta</button>}</p>))}</section>}</>};

@@ -11,6 +11,6 @@ if (isMainModule) {
     writeOpsLog('error', 'startup_refused', { missing: secrets.missing.join(',') || 'secret_boundary' });
     process.exit(1);
   }
-  startJobWorker();
+  startJobWorker('plan-v-worker', true);
   writeOpsLog('info', 'worker_listen', { worker: 'external' });
 }

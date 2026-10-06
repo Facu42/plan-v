@@ -96,6 +96,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
   const [plan, setPlan] = useState<ProfessionalMealPlan | null>(null);
   const [recipes, setRecipes] = useState<ProfessionalRecipe[]>([]);
   const [source, setSource] = useState('');
+  const [imageGeneration, setImageGeneration] = useState(false);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
@@ -114,6 +115,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
       const [plans, catalog, aiJobs] = await Promise.all([plansApi.professional(patientId), recipesApi.list(), aiJobsApi.list(patientId)]);
       setPlan(plans.plan);
       setSource(plans.source);
+      setImageGeneration(plans.image_generation === true);
       setRecipes(catalog.recipes.filter((recipe) => recipe.published));
       const requested = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('propuesta');
       const nextProposal = aiJobs.jobs.find((job) => job.job_type === 'menu_draft' && (requested ? job.id === requested : Boolean(proposalFrom(job)))) ?? null;
@@ -280,6 +282,12 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
     {proposal && !proposedPlan && <p className="meal-plan-error" role="alert">La propuesta no tiene un menú válido. Regenerala antes de aprobar.</p>}
     {proposedPlan && <MenuProposalReview key={proposal!.id} proposal={proposedPlan} warnings={proposal?.warnings ?? []} busy={busy} recipes={recipes} onEdit={() => void editProposal()} onApprove={() => void approveProposal()} onReject={() => void rejectProposal()} />}
     <AiPlanNutritionSummary nutrition={plan?.current.nutrition} />
+    {plan?.published&&<section aria-label="Fotos del menú publicado" className="meal-plan-actions">
+      <p>Las fotos se preparan después de aprobar el menú. Se reutilizan para los platos repetidos.</p>
+      <NvButton type="button" className="nv-ghost" disabled={busy||dirty||!imageGeneration} onClick={()=>void run(()=>plansApi.covers(plan.id,plan.published!.version),'Fotos pendientes enviadas a preparar. El menú conserva su contenido.')}>Preparar fotos pendientes</NvButton>
+      <NvButton type="button" className="nv-ghost" disabled={busy||dirty} onClick={()=>void reload()}>Actualizar fotos</NvButton>
+      {!imageGeneration&&<small>La generación de fotos todavía no está habilitada.</small>}
+    </section>}
     <form className="meal-plan-form" onSubmit={submit}><fieldset disabled={busy} className="meal-plan-edit-fields">
       <div className="meal-plan-form-row">
         <label>Desde<input type="date" value={periodStart} onChange={(event) => setPeriodStart(event.target.value)} /></label>

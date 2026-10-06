@@ -3,6 +3,8 @@ import { FramePair } from '../FramePair';
 import { nodeName, sourceText, type SourceResolver, type SourceNode } from '../SourceView';
 import { recipesApi } from '../../../api/recipes';
 import { resourcesApi } from '../../../api/resources';
+import { plansApi } from '../../../api/plans';
+import { patientMenuRecipes, recipePresentationKey } from '../plan-recipe';
 import type { PatientRecipe } from '../../../types/recipes';
 import { recipeNutritionLabel } from '../../../types/ai-nutrition';
 import { descendants, fields, formatNumber, leaf, objects, idEnds, errorText, searchBinding, Stateful, useRemote, type ScreenProps } from './shared';
@@ -57,30 +59,31 @@ export function NutrigoRecipeDetail({recipe,onBack,patientName,onNavigate,onSign
     return undefined;
   };
   return <FramePair nodes={['84:3145','457:13264']} resolve={resolver} patientName={patientName} onNavigate={onNavigate} onSignOut={onSignOut}>
-    <div className="mcp-screen-state"><button className="mcp-action" onClick={onBack}>{backLabel}</button>{onFavorite&&<button className="mcp-action" disabled={busy} aria-pressed={saved} onClick={onFavorite}>{saved?'Guardada':'Guardar en favoritos'}</button>}<p>{origin}</p>{error&&<p role="alert">{error}</p>}</div>
+    <div className="mcp-screen-state"><button className="mcp-action" onClick={onBack}>{backLabel}</button>{onFavorite&&<button className="mcp-action" disabled={busy} aria-pressed={saved} onClick={onFavorite}>{saved?'Guardada':'Guardar en favoritos'}</button>}<p>{origin}</p>{recipe.card?.cover_alt?.includes('imagen ilustrativa generada con IA')&&<small>Imagen ilustrativa generada con IA. Las cantidades indicadas en la receta son la referencia.</small>}{['queued','leased'].includes(recipe.card?.cover_generation??'')&&<small>La foto del plato está pendiente.</small>}{recipe.card?.cover_generation==='failed'&&<small>No se pudo preparar la foto. La receta sigue disponible.</small>}{error&&<p role="alert">{error}</p>}</div>
   </FramePair>;
 }
 export function NutrigoMenu({patient,onNavigate,onSignOut,query=''}:ScreenProps) {
   const remote=useRemote(`${patient.id}:menu`,async signal=>{
-    const [recipes,library]=await Promise.all([recipesApi.assigned(patient.id,signal),resourcesApi.library(patient.id,'',false,signal)]);
-    return {recipes:recipes.recipes,favorites:library.library.favorites.filter(f=>f.item_kind==='recipe').map(f=>f.item_id)};
+    const [recipes,library,plan]=await Promise.all([recipesApi.assigned(patient.id,signal),resourcesApi.library(patient.id,'',false,signal),plansApi.published(patient.id,signal)]);
+    return {recipes:patientMenuRecipes(plan.plan,recipes.recipes),favoriteRecipeIds:recipes.recipes.map(recipe=>recipe.id),favorites:library.library.favorites.filter(f=>f.item_kind==='recipe').map(f=>f.item_id)};
   });
   const [opened,setOpened]=useState<string|null>(null),[search,setSearch]=useState(query),[onlySaved,setOnlySaved]=useState(false),[alphabetic,setAlphabetic]=useState(false),[byCalories,setByCalories]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
   const recipes=(remote.data?.recipes??[]).filter(r=>r.title.toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'))&&(!onlySaved||remote.data?.favorites.includes(r.id))).slice().sort((a,b)=>byCalories?((nutrients(a)?.kcal??Infinity)-(nutrients(b)?.kcal??Infinity)||a.title.localeCompare(b.title,'es')):alphabetic?a.title.localeCompare(b.title,'es'):0);
   const toggle=async(id:string)=>{if(busy)return;setBusy(true);setError('');try{const response=await resourcesApi.favorite(patient.id,'recipe',id);if(remote.data)remote.setData({...remote.data,favorites:response.library.favorites.filter(f=>f.item_kind==='recipe').map(f=>f.item_id)});}catch(e){setError(errorText(e));}finally{setBusy(false);}};
-  const chosen=remote.data?.recipes.find(r=>r.id===opened);
-  if(chosen)return <NutrigoRecipeDetail key={`${chosen.id}:${chosen.version}`} recipe={chosen} onBack={()=>setOpened(null)} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut} saved={remote.data?.favorites.includes(chosen.id)} onFavorite={()=>void toggle(chosen.id)} busy={busy} error={error}/>;
-  const card=(prototype:SourceNode,recipe:PatientRecipe)=>{
+  const chosen=remote.data?.recipes.find(r=>recipePresentationKey(r)===opened);
+  useEffect(()=>{if(!remote.data?.recipes.some(recipe=>['queued','leased'].includes(recipe.card?.cover_generation??'')))return;const timer=setInterval(remote.reload,4000);return()=>clearInterval(timer);},[remote.data,remote.reload]);
+  if(chosen)return <NutrigoRecipeDetail key={recipePresentationKey(chosen)} recipe={chosen} onBack={()=>setOpened(null)} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut} saved={remote.data?.favorites.includes(chosen.id)} onFavorite={remote.data?.favoriteRecipeIds?.includes(chosen.id)?()=>void toggle(chosen.id):undefined} busy={busy} error={error}/>;
+  const card=(prototype:SourceNode,recipe:DisplayRecipe)=>{
     const macro=nutrients(recipe);
     return fields(prototype,{'236:9386':recipe.title,'453:11817':recipe.title,'228:6622':recipe.title,'228:7500':recipe.title,'236:9444':recipe.card?.category??'Receta','453:11793':recipe.card?.category??'Receta','228:6649':recipe.card?.category??'Receta','228:7503':recipe.card?.category??'Receta','236:9421':`${formatNumber(macro?.kcal)} kcal`,'453:11823':`${formatNumber(macro?.kcal)} kcal`,'228:7541':`${formatNumber(macro?.kcal)} kcal`,'243:6430':`${formatNumber(macro?.carbs_g)} g`,'453:11829':`${formatNumber(macro?.carbs_g)} g`,'228:7519':`${formatNumber(macro?.carbs_g)} g`,'243:6449':`${formatNumber(macro?.protein_g)} g`,'453:11835':`${formatNumber(macro?.protein_g)} g`,'228:7524':`${formatNumber(macro?.protein_g)} g`,'243:6453':`${formatNumber(macro?.fat_g)} g`,'453:11841':`${formatNumber(macro?.fat_g)} g`,'228:7529':`${formatNumber(macro?.fat_g)} g`},child=>{
       const image=imageBinding(child,recipe);if(image)return image;
       if(nodeName(child)==='Info Rating')return {text:'Sin valoraciones'};
       if(nodeName(child)==='Info Level')return {text:recipe.card?.prep_minutes!=null?`${recipe.card.prep_minutes} min`:'Sin tiempo declarado'};
       if(nodeName(child)==='Chart Health Score')return {text:recipeNutritionLabel(recipe.nutrition,recipe.nutrient_source,macro)};
-      if(/^Button/.test(nodeName(child)))return {onClick:()=>setOpened(recipe.id),label:`Ver ${recipe.title}`,children:<span>Ver receta</span>};
+      if(/^Button/.test(nodeName(child)))return {onClick:()=>setOpened(recipePresentationKey(recipe)),label:`Ver ${recipe.title}`,children:<span>Ver receta</span>};
         if(leaf(child)&&sourceText(child)==='Health Score:')return {text:recipeNutritionLabel(recipe.nutrition,recipe.nutrient_source,macro)};
       return undefined;
-    },recipe.id);
+    },recipePresentationKey(recipe));
   };
   const resolver:SourceResolver=node=>{
     const name=nodeName(node),text=sourceText(node);
@@ -96,7 +99,7 @@ export function NutrigoMenu({patient,onNavigate,onSignOut,query=''}:ScreenProps)
         const image=imageBinding(child,recipe);if(image)return image;
         const info=recipeInfoBinding(child,recipe);if(info)return info;
         if(nodeName(child)==='Badge Meal Category')return {text:sourceText(child)==='Lunch'?recipe.card?.category??'Receta':'Sin valoraciones'};
-        if(/^Button/.test(nodeName(child)))return {onClick:()=>setOpened(recipe.id),text:'Ver receta'};
+        if(/^Button/.test(nodeName(child)))return {onClick:()=>setOpened(recipePresentationKey(recipe)),text:'Ver receta'};
         if(/Item Detail Meal Value/.test(nodeName(child))) {const m=nutrients(recipe),t=sourceText(child),k=t.startsWith('Calories')?'kcal':t.startsWith('Carbs')?'carbs_g':t.startsWith('Protein')?'protein_g':'fat_g';return {children:fields(child,{},n=>leaf(n)&&/^\d/.test(sourceText(n))?{text:formatNumber(m?.[k])}:undefined)};}
         return undefined;
       })};

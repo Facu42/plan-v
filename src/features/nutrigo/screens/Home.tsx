@@ -6,6 +6,7 @@ import { recipesApi } from '../../../api/recipes';
 import { plansApi } from '../../../api/plans';
 import { exerciseApi } from '../../../api/exercise';
 import { careApi } from '../../../api/care';
+import { patientMenuRecipes, planRecipe } from '../plan-recipe';
 import { latestWeight } from '../../../lib/measurement-display';
 import { recipeNutritionLabel, type NutrientAmounts } from '../../../types/ai-nutrition';
 import { planSlotKey, PLAN_SLOT_KEYS } from '../../../types/plans';
@@ -38,6 +39,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
   const data=useRemote(`${patient.id}:home:${refresh}`, signal=>homeData(patient.id,signal));
   useEffect(()=>{const reload=()=>setRefresh(v=>v+1);window.addEventListener('plan-v:care-changed',reload);return()=>window.removeEventListener('plan-v:care-changed',reload);},[]);
   const current=data.data;
+  useEffect(()=>{if(!current?.plan?.items.some(item=>['queued','leased'].includes(item.dish_card?.cover_generation??'')))return;const timer=setInterval(()=>setRefresh(v=>v+1),4000);return()=>clearInterval(timer);},[current]);
   const weightDisplay=latestWeight(current?.care?.measurements??[],current?.body?.weight_kg??null);
   const weight=weightDisplay.value;
   const target=current?.target?.result;
@@ -45,7 +47,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
   const kcal=known?patient.kcal:null;
   const today=dateId(now);
   const meals=(current?.plan?.items.filter(item=>item.for_date===today)??[]).slice().sort((a,b)=>PLAN_SLOT_KEYS.indexOf(planSlotKey(a.slot)!)-PLAN_SLOT_KEYS.indexOf(planSlotKey(b.slot)!));
-  const recipes=current?.recipes??[];
+  const recipes=patientMenuRecipes(current?.plan??null,current?.recipes??[]);
   const routines=current?.exercise?.assignments.filter(a=>a.status==='active').flatMap(a=>a.items)??[];
   const resolve:SourceResolver=node=>{
     const name=nodeName(node),text=sourceText(node);
@@ -85,6 +87,8 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
       let titleSet=false;
       return fields(prototype,{},child=>{
         const recipe=meal.recipe??meal.recipe_proposal;
+        const photo=planRecipe(meal)?.card;
+        if(['Image','Image Area','Place Image Here'].includes(nodeName(child))&&photo?.cover_status==='ready'&&photo.cover_url)return {children:<img src={photo.cover_url} alt={photo.cover_alt} className="absolute inset-0 block size-full object-cover"/>};
         const nutrients=nutrientBinding(child,recipe?.nutrition?.per_portion,meal.portions);if(nutrients)return nutrients;
         if(leaf(child)&&['Breakfast','Lunch','Snack','Dinner'].includes(sourceText(child)))return {text:meal.slot};
         if(leaf(child)&&sourceText(child).length>30&&!titleSet){titleSet=true;return {children:<>{meal.recipe_title??meal.free_text??'Comida del plan'}<span className="block text-[11px]">{meal.portions!=null?`${meal.portions.toLocaleString('es-AR',{maximumFractionDigits:4})} porciones · `:''}{recipeNutritionLabel(recipe?.nutrition)}{meal.public_note?` · ${meal.public_note}`:''}</span></>};}

@@ -6,6 +6,7 @@ import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { DEMO_NUTRITIONIST_ID, getPatient } from '../store.js';
 import { mealPlanDraftSchema, mealPlanPublishSchema } from '../../src/types/plans.js';
 import * as repo from './repository.js';
+import { recipeCoverEnabled } from '../ai/recipe-cover.js';
 
 async function body<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
   const raw = await c.req.text();
@@ -52,12 +53,20 @@ async function readAccess(c: Context, patientId: string) {
 const planIdParam = z.uuid();
 
 export function registerPlanRoutes(app: Hono) {
+  app.post('/api/plans/:id/covers', async (c) => {
+    const id = planIdParam.safeParse(c.req.param('id'));
+    if (!id.success) throw new repo.CareError(400, 'Volvé a abrir el plan publicado.');
+    const { persistent, nutritionistId } = await professional(c);
+    const input = await body(c, z.object({ expected_version: z.number().int().positive() }).strict());
+    const plan = await repo.retryMealPlanCovers(nutritionistId, id.data, input.expected_version, persistent);
+    return c.json({ plan, source: persistent ? 'supabase' : 'memory' });
+  });
   app.get('/api/patients/:id/plans', async (c) => {
     const id = c.req.param('id');
     const { persistent, professional, nutritionistId } = await readAccess(c, id);
     if (professional) {
       const plan = await repo.getProfessionalMealPlan(nutritionistId, id, persistent);
-      return c.json({ plan, source: persistent ? 'supabase' : 'memory' });
+      return c.json({ plan, source: persistent ? 'supabase' : 'memory', image_generation: recipeCoverEnabled() });
     }
     const plan = await repo.getPublishedMealPlan(id, persistent);
     return c.json({ plan, source: persistent ? 'supabase' : 'memory' });

@@ -55,7 +55,10 @@ beforeEach(() => {
 describe('Publicación y reintento de fotos sin llamadas externas', () => {
   it('una foto fallida no transforma la publicación confirmada en un error', async () => {
     const response = await post('publish'); expect(response.status).toBe(200);
-    expect((await response.json()).recipe).toMatchObject({ status: 'published', published: { card: { cover_status: 'failed', cover_url: null } } });
+    expect((await response.json()).recipe).toMatchObject({ status: 'published', published: { card: { cover_status: 'none', cover_url: null } } });
+    expect(mocks.generate).not.toHaveBeenCalled();
+    expect((await post('cover')).status).toBe(200);
+    expect(stored.published).toMatchObject({card:{cover_status:'failed'}});
     expect(mocks.generate).toHaveBeenCalledTimes(1);
   });
   it('falla sin bloquear la publicación incluso ante una excepción de portada', async () => {
@@ -63,9 +66,11 @@ describe('Publicación y reintento de fotos sin llamadas externas', () => {
     expect((await post('publish')).status).toBe(200);
     expect(stored.status).toBe('published');
   });
-  it('dos publicaciones simultáneas intentan una sola generación', async () => {
+  it('publicar biblioteca no genera; dos solicitudes explícitas reservan una sola foto', async () => {
     const responses = await Promise.all([post('publish'), post('publish')]);
     expect(responses.map(r => r.status)).toEqual([200, 200]);
+    expect(mocks.generate).not.toHaveBeenCalled();
+    await Promise.all([post('cover'),post('cover')]);
     expect(mocks.generate).toHaveBeenCalledTimes(1);
   });
   it('un reintento guarda la imagen y conserva la revisión publicada', async () => {
@@ -80,6 +85,7 @@ describe('Publicación y reintento de fotos sin llamadas externas', () => {
     mocks.actor.mockResolvedValueOnce({ role: 'paciente' }); expect((await post('cover')).status).toBe(403);
     await post('publish'); mocks.generate.mockClear();
     expect((await post('cover', 2)).status).toBe(409);
+    claimed = true;
     expect((await post('cover')).status).toBe(409);
     mocks.rpc.mockResolvedValueOnce({ data: [], error: null }); expect((await post('cover')).status).toBe(403);
     expect(mocks.generate).not.toHaveBeenCalled();

@@ -3,7 +3,7 @@ const mode = process.env.APP_MODE;
 
 for (const [key, value] of Object.entries(process.env)) {
   if (!value) continue;
-  if (key.startsWith('VITE_') && /SERVICE_ROLE|SECRET|PASSWORD|PRIVATE_KEY/i.test(key)) {
+  if (key.startsWith('VITE_') && /SERVICE_ROLE|SECRET|PASSWORD|PRIVATE_KEY|CLOUDFLARE_API_TOKEN/i.test(key)) {
     console.error(`Refusing to expose a server secret via ${key}`);
     process.exit(1);
   }

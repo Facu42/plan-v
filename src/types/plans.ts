@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { RecipeCard } from './recipes.js';
 import { menuTargetSchema, menuNutritionSummarySchema, proposedRecipeSchema, type ProposedRecipe, type MenuNutritionTarget, type MenuNutritionSummary, type RecipeNutrition } from './ai-nutrition.js';
 
 export const PLAN_SLOTS = ['Desayuno', 'Colación', 'Almuerzo', 'Merienda', 'Cena', 'Extra'] as const;
@@ -101,6 +102,7 @@ export type PlanRecipeDetail = {
   nutrient_source: string;
   ingredients: Array<{ id: string; name: string; quantity: number; unit: string }>;
   nutrition?: RecipeNutrition;
+  card?: RecipeCard;
 };
 export type PlanItemView = {
   id: string;
@@ -113,6 +115,7 @@ export type PlanItemView = {
   free_text: string | null;
   portions: number | null;
   public_note: string;
+  dish_card?: RecipeCard;
   recipe_proposal?: ProposedRecipe;
 };
 export type PlanVersionView = {
@@ -138,7 +141,7 @@ export type ProfessionalMealPlan = {
 
 export function planReviewSnapshot(version: PlanVersionView) {
   const { status: _status, published_at: _published, nutrition: _summary, items, ...head } = version;
-  return { ...head, items: items.map(({ recipe: _recipe, recipe_title: _title, ...item }) => item) };
+  return { ...head, items: items.map(({ recipe: _recipe, recipe_title: _title, dish_card: _card, ...item }) => item) };
 }
 export type PatientMealPlan = {
   id: string;

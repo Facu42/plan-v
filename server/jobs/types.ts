@@ -1,4 +1,4 @@
-export const JOB_KINDS = ['menu_draft', 'recipe_draft', 'purge_asset', 'privacy_export', 'privacy_delete', 'fail'] as const;
+export const JOB_KINDS = ['menu_draft', 'menu_cover', 'recipe_draft', 'purge_asset', 'privacy_export', 'privacy_delete', 'fail'] as const;
 export type JobKind = (typeof JOB_KINDS)[number];
 export const JOB_STATUSES = ['queued', 'leased', 'succeeded', 'failed', 'dead'] as const;
 export type JobStatus = (typeof JOB_STATUSES)[number];
@@ -21,7 +21,7 @@ export type ProcessingJob = {
 export type JobStore = {
   enqueue(input: { kind: JobKind; payload?: Record<string, unknown>; max_attempts?: number; run_after?: string }): Promise<ProcessingJob>;
   lease(owner: string, now?: Date, leaseMs?: number): Promise<ProcessingJob | null>;
-  complete(id: string, error?: string): Promise<ProcessingJob>;
+  complete(id: string, error?: string, retryAfterMs?: number): Promise<ProcessingJob>;
   get(id: string): Promise<ProcessingJob | null>;
   counts(): Promise<{ queued: number; leased: number; dead: number; succeeded: number }>;
   snapshot(): Promise<ProcessingJob[]>;

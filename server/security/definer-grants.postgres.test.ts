@@ -99,6 +99,8 @@ const ALLOWED = [
   'request_body_data',
   'request_privacy_action',
   'reschedule_appointment',
+  // Exige profesional, titularidad del plan y versión publicada vigente.
+  'retry_menu_dish_covers',
   'review_care_record',
   'review_meal_log',
   'review_patient_intake',

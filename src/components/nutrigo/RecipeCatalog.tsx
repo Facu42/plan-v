@@ -152,10 +152,10 @@ export function useRecipeCatalog(patientId: string) {
     retryCover: (recipe: ProfessionalRecipe) => void run(async () => {
       if (!recipe.published) return;
       const saved = await recipesApi.cover(recipe.id, recipe.published.version);
-      if (saved.recipe.published?.card?.cover_status !== 'ready') {
+      if (saved.recipe.published?.card?.cover_status !== 'ready' && !['queued','leased'].includes(saved.recipe.published?.card?.cover_generation??'')) {
         throw new Error('La receta sigue publicada. No se pudo preparar la foto; podés reintentar más tarde.');
       }
-    }, 'Foto lista. La receta publicada conserva su contenido.'),
+    }, 'Solicitud de foto confirmada. Actualizá para ver el resultado; la receta conserva su contenido.'),
     startAssign: (recipe: ProfessionalRecipe) => { setAssigning(recipe); setStatus(''); setError(''); },
     closeAssign: () => setAssigning(null),
     confirmAssign: () => {
@@ -171,6 +171,7 @@ export function useRecipeCatalog(patientId: string) {
 
 export function RecipeCoverAction({ catalog, recipe, className = '' }: { catalog: RecipeCatalogState; recipe: ProfessionalRecipe; className?: string }) {
   if (!recipe.published || recipe.published.card?.cover_status === 'ready') return null;
+  if (['queued','leased'].includes(recipe.published.card?.cover_generation??'')) return <small>Foto pendiente</small>;
   return <button type="button" className={className} disabled={catalog.busy || !catalog.imageGeneration}
     title={catalog.imageGeneration ? 'Preparar la foto de la revisión publicada' : 'La generación de fotos todavía no está habilitada.'}
     onClick={() => catalog.retryCover(recipe)}>

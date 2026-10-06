@@ -5,7 +5,8 @@ import { readFile, readdir } from 'node:fs/promises';
 // Lista revisada en producción el 1/10. Una tabla nueva sin políticas exige
 // justificar su uso y cerrar también permisos de tabla y de columnas.
 const INTERNAL = [
-  'audit_events', 'notification_deliveries', 'notification_preferences',
+  // Cola de fotos: sólo servicio; lectura mediante el plan autorizado.
+  'audit_events', 'menu_dish_covers', 'notification_deliveries', 'notification_preferences',
   'nutritionist_subscriptions', 'outbox_events', 'patient_invite_events',
   'payment_webhook_events', 'platform_admins', 'platform_settings',
   'privacy_access_events', 'privacy_export_packages', 'privacy_requests',
