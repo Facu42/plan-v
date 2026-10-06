@@ -15,3 +15,9 @@ Validación: suite general 1388 aprobadas/2 omitidas; tipos y compilación aprob
 Revisiones independientes code-reviewer y reality-checker cerradas sin bloqueo concreto para PR. La evidencia visual del paciente se entrega en el apartado siguiente.
 
 Comprobación adicional de teclado con gstack: asignación de receta enfoca la fecha, Shift+Tab/Tab mantienen el foco dentro, Escape devuelve el foco al botón inicial; el registro de comida conserva el texto si se cancela el descarte con Escape. Seis verificaciones aprobadas, junto con tipos y 13 pruebas focalizadas. Nueve destinos del consultorio medidos a 1440 y 390, sin desbordamiento del documento.
+
+## Cierre del ensayo autenticado
+
+El 6/10/2026 (UTC; 5/10 en Argentina) terminaron correctamente las comprobaciones de las cuatro entregas. Implementación completa e95d3df: 27 pruebas de sesiones firmadas y 42 confirmaciones de navegador sobre Supabase temporal. Se comprobó que reiniciar la API conserva el identificador, versión e indicación del plan y el pago confirmado; la paciente recuperó el mismo plan al recargar. Los datos ficticios y contenedores se eliminaron.
+
+[Ejecución del conjunto completo](https://github.com/Facu42/plan-v/actions/runs/37397726321). La entrega backend separada también aprobó sus 27 pruebas y 40 confirmaciones con su interfaz base. Revisión de código y de evidencia cerradas sin bloqueos. La documentación final no cambia el código probado. La migración de aislamiento editorial continúa preparada, sin aplicar a producción.

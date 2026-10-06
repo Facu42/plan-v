@@ -4,6 +4,7 @@ import type { ShowroomPage } from '../../../components/nutrigo/ShowroomPanels';
 import { nodeId, nodeName, renderSource, sourceText, type SourceNode, type SourceResolver } from '../SourceView';
 import { translateSource } from '../translation';
 import { secondaryLabels } from '../secondaryTranslation';
+import { canLeaveWorkspace, useUnsavedChanges } from '../../../components/nutrigo/unsaved-changes';
 
 export type ScreenProps = { patient: ShowroomPatient; query?: string; now?: Date; onNavigate: (page: ShowroomPage) => void; onSignOut?: () => void };
 export const descendants = (node: SourceNode): SourceNode[] => [node, ...node.children.flatMap(child => typeof child === 'object' ? descendants(child) : [])];
@@ -26,10 +27,13 @@ export function Stateful({ loading, error, empty, onRetry }: { loading?: boolean
   if (error) return <div role="alert" className="p-[16px] text-[#a32929]">{error}{onRetry && <button type="button" className="ml-[8px] underline" onClick={onRetry}>Reintentar</button>}</div>;
   return <p role={loading ? 'status' : undefined} className="p-[16px] text-[14px] text-[#8a8c90]">{loading ? 'Cargando…' : empty}</p>;
 }
-export function RecordDialog({ title, onClose, busy = false, children }: { title: string; onClose: () => void; busy?: boolean; children: ReactNode }) {
+export function RecordDialog({ title, onClose, busy = false, dirty = false, children }: { title: string; onClose: () => void; busy?: boolean; dirty?: boolean; children: ReactNode }) {
+  useUnsavedChanges(dirty,busy);
+  const requestClose=()=>{if(!busy&&canLeaveWorkspace())onClose();};
   const container = useRef<HTMLDivElement | null>(null); const busyRef = useRef(busy); busyRef.current = busy; const closeRef = useRef(onClose); closeRef.current = onClose;
   useEffect(() => { const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null; const focusable = () => [...(container.current?.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),a[href],[tabindex="0"]') ?? [])]; focusable()[0]?.focus(); const onKey = (event: globalThis.KeyboardEvent) => { if (event.key === 'Escape' && !busyRef.current) { event.preventDefault(); closeRef.current(); } if (event.key === 'Tab') { const options = focusable(); if (!options.length) { event.preventDefault(); container.current?.focus(); } else if (event.shiftKey && document.activeElement === options[0]) { event.preventDefault(); options[options.length - 1]?.focus(); } else if (!event.shiftKey && document.activeElement === options[options.length - 1]) { event.preventDefault(); options[0]?.focus(); } } }; document.addEventListener('keydown', onKey); return () => { document.removeEventListener('keydown', onKey); previous?.focus(); }; }, []);
-  return <div role="dialog" aria-modal="true" aria-label={title} ref={container} tabIndex={-1} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 p-[16px]" onClick={event => { if (event.target === event.currentTarget && !busy) onClose(); }}>{children}</div>;
+  closeRef.current=requestClose;
+  return <div role="dialog" aria-modal="true" aria-label={title} ref={container} tabIndex={-1} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 p-[16px]" onClick={event => { if (event.target === event.currentTarget) requestClose(); }}>{children}</div>;
 }
 export function useRemote<T>(key: string, load: (signal: AbortSignal) => Promise<T>) {
   const [state, setState] = useState<{ key: string; value: T } | null>(null);

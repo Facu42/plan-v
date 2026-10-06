@@ -22,3 +22,12 @@
 .mcp-dialog button {cursor:pointer}
 .mcp-screen-state {display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:#fff}
 .mcp-screen-state p {margin:0}
+
+/* Conservar los tamaños fuente en 1440/390 y permitir acceder al contenido en los anchos intermedios. */
+@media(max-width:389px) {
+  .mcp-nutrigo [data-name="Navbar"] {width:100%;max-width:100%}
+}
+@media(max-width:1439px) {
+  .mcp-nutrigo [data-name="Content"] {overflow-x:auto}
+  .mcp-nutrigo [data-name="Tab"] {max-width:100%;overflow-x:auto}
+}

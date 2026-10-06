@@ -51,12 +51,16 @@ describe.each([false, true])('pantallas desde MCP (celular: %s)', mobile => {
     expect(html).toContain('data-calendar-date="2026-10-03"'); expect(html).toContain('data-calendar-date="2026-10-05"');
     expect(html).not.toContain('Morning Yoga'); expect(html).not.toContain('General Health Check-up'); expect(html).not.toContain('September 2028');
     expect(html.match(/aria-label="Mostrar plan"/g)?.length).toBe(1);
+    expect(html.match(/aria-label="Mostrar diario"/g)?.length).toBe(1);
+    expect(html).toContain('box-shadow:inset 0 0 0 2px #c2e66e');
+    expect(html).toContain('background:#ffffff');
   });
   it('compras muestra cantidades del servidor y permite completar cada producto', () => {
     context.mobile = mobile; context.data = { items: [{ id: 'i1', source_key: 'manual:i1', name: 'Tomate real', kind: 'manual', quantity: 500, unit: 'g', checked: false }] };
     const html = renderToStaticMarkup(<NutrigoShopping patient={patient} onNavigate={navigate} />);
     expect(html).toContain('Tomate real'); expect(html).toContain('500 g'); expect(html).toContain('Marcar como comprado: Tomate real'); expect(html).toContain('Eliminar Tomate real');
     expect(html).not.toContain('Almond Butter'); expect(html).not.toContain('$157');
+    expect(html).not.toContain('data-name="Pagination"');expect(html).toContain('1 de 1 productos');
   });
   it('ejercicio conserva la tabla sin rutinas o calorías inventadas', () => {
     context.mobile = mobile; context.data = { assignments: [], activities: [{ id: 'a1', activity: 'Caminata real', duration_minutes: 25, intensity: 'suave', note: null, logged_at: '2026-10-03T14:00:00Z', sets: null, reps: null }] };

@@ -7,6 +7,7 @@ import { useAppStore } from '../../../store/useAppStore';
 import { messageReceipt, messageReceiptLabel, unreadCount } from '../../../components/nutrigo/message-receipts';
 import type { MessageAttachment } from '../../../types';
 import { createMessageWrite } from './message-write';
+import { useUnsavedChanges } from '../../../components/nutrigo/unsaved-changes';
 import { dateLabel, descendants, errorText, fields, idEnds, leaf, objects, safeUrl, searchBinding, source, Stateful, timeLabel, type ScreenProps } from './shared';
 
 function Attachment({ patientId, messageId, attachment }: { patientId: string; messageId: string; attachment: MessageAttachment }) {
@@ -20,6 +21,7 @@ export function NutrigoMessages({ patient, onNavigate, onSignOut }: ScreenProps)
   const compose = useRef<HTMLTextAreaElement | null>(null); const picker = useRef<HTMLInputElement | null>(null); const chat = useRef<HTMLDivElement | null>(null); const lock = useRef(false); const [unreadOnly, setUnreadOnly] = useState(false);
   const [pending, setPending] = useState(false);
   const [delivery] = useState(() => createMessageWrite(patient.id, { upload: selected => uploadChatAttachment(patient.id, selected, false), send: api.sendMessage, refresh }));
+  useUnsavedChanges(Boolean(text.trim()||file||pending),busy);
   const all = patient.messages.filter(item => item.sent_at).slice().sort((a, b) => a.sent_at.localeCompare(b.sent_at)); const messages = all.filter(item => `${item.text} ${item.attachment?.filename ?? ''}`.toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'))); const unread = unreadCount(all, 'patient'); const files = all.filter(item => item.attachment); const latest = all[all.length - 1];
   const links = [...new Set(all.flatMap(message => message.text.match(/https:\/\/[^\s<>]+/g) ?? []))].map(value => safeUrl(value)).filter((value): value is string => !!value);
   useEffect(() => { if (chat.current) chat.current.scrollTop = chat.current.scrollHeight; }, [all.length]);

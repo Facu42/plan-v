@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect,useState } from 'react';
 import { FramePair } from '../FramePair';
 import { nodeId, nodeName, sourceText, type SourceNode, type SourceResolver } from '../SourceView';
 import { plansApi } from '../../../api/plans';
@@ -17,9 +17,11 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
   const remote=useRemote(`${patient.id}:plan`,signal=>plansApi.published(patient.id,signal));
   const [search,setSearch]=useState(query),[page,setPage]=useState(0),[chosen,setChosen]=useState<PlanItemView|null>(null),[hideEmpty,setHideEmpty]=useState(false);
   const plan=remote.data?.plan;
+  useEffect(()=>{setPage(0);setChosen(null);},[plan?.id,plan?.version]);
   const days=plan?buildPublishedPlanDays(plan):[];
   const shown=days.slice(page*7,page*7+7);
   const slots=PLAN_SLOTS.filter(slot=>['Desayuno','Almuerzo','Merienda','Cena'].includes(slot)||plan?.items.some(item=>item.slot===slot));
+  const matchesItem=(item:PlanItemView)=>(item.recipe_title??item.free_text??'').toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'));
   const detail=chosen?planRecipe(chosen):null;
   if(detail)return <NutrigoRecipeDetail key={detail.id} recipe={detail} initialPortions={chosen?.portions??undefined} onBack={()=>setChosen(null)} backLabel="Volver al plan" patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut}/>;
   const resolve:SourceResolver=node=>{
@@ -37,10 +39,10 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
         return fields(prototype,{},child=>{
           if(child===first)return {children:fields(first,{},p=>leaf(p)?{text:/Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday/.test(sourceText(p))?day.weekday:dateLabel(day.isoDate)}:undefined)};
           const index=cells.indexOf(child)-1;
-          if(index>=0){const slot=['Desayuno','Almuerzo','Merienda','Cena'][index];const item=day.items.find(entry=>entry.slot===slot);const title=item?.recipe_title??item?.free_text??'';const show=title.toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'));return {children:fields(child,{},p=>leaf(p)?{text:show?(title||'Sin indicación'):'—'}:undefined),...(item&&planRecipe(item)?{onClick:()=>setChosen(item),label:`Ver ${slot}: ${title}`}:{})};}
+          if(index>=0){const slot=['Desayuno','Almuerzo','Merienda','Cena'][index];const item=day.items.find(entry=>entry.slot===slot);const title=item?.recipe_title??item?.free_text??'';const show=item?matchesItem(item):!search;return {children:fields(child,{},p=>leaf(p)?{text:show?(title||'Sin indicación'):'—'}:undefined),...(show&&item&&planRecipe(item)?{onClick:()=>setChosen(item),label:`Ver ${slot}: ${title}`}:{})};}
           return undefined;
         },day.isoDate);
-      })}{slots.some(s=>s==='Colación'||s==='Extra')&&<section className="p-[16px]"><h3>Otras indicaciones</h3>{shown.flatMap(day=>day.items.filter(item=>item.slot==='Colación'||item.slot==='Extra').map(item=><p key={item.id}>{dateLabel(item.for_date)} · {item.slot} · {item.recipe_title??item.free_text} {planRecipe(item)&&<button className="mcp-action" onClick={()=>setChosen(item)}>Ver receta</button>}</p>))}</section>}</>};
+      })}{slots.some(s=>s==='Colación'||s==='Extra')&&<section className="p-[16px]"><h3>Otras indicaciones</h3>{shown.flatMap(day=>day.items.filter(item=>(item.slot==='Colación'||item.slot==='Extra')&&matchesItem(item)).map(item=><p key={item.id}>{dateLabel(item.for_date)} · {item.slot} · {item.recipe_title??item.free_text} {planRecipe(item)&&<button className="mcp-action" onClick={()=>setChosen(item)}>Ver receta</button>}</p>))}</section>}</>};
     }
     if(leaf(node)&&['September 2028','September'].includes(text))return {text:plan?`${dateLabel(plan.period_start)} – ${dateLabel(plan.period_end)}`:'Sin plan publicado'};
     if(/^Button/.test(name)&&text==='Add Menu')return {onClick:()=>onNavigate('mensajes'),text:'Pedir un cambio'};
@@ -50,7 +52,7 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
   };
   return <FramePair nodes={['84:2994','470:15300']} resolve={resolve} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut} query={search} onSearch={setSearch}>
     <div className="mcp-screen-state"><button className="mcp-action" onClick={()=>onNavigate('compras')}>Lista de compras</button></div>
-    {shown.some(day=>day.items.some(item=>item.public_note))&&<section className="mcp-screen-state" aria-label="Indicaciones de tu nutricionista"><h3>Indicaciones de tu nutricionista</h3>{shown.flatMap(day=>day.items.filter(item=>item.public_note).map(item=><p key={item.id}>{dateLabel(day.isoDate)} · {item.slot}: {item.public_note}</p>))}</section>}
+    {shown.some(day=>day.items.some(item=>item.public_note&&matchesItem(item)))&&<section className="mcp-screen-state" aria-label="Indicaciones de tu nutricionista"><h3>Indicaciones de tu nutricionista</h3>{shown.flatMap(day=>day.items.filter(item=>item.public_note&&matchesItem(item)).map(item=><p key={item.id}>{dateLabel(day.isoDate)} · {item.slot}: {item.public_note}</p>))}</section>}
     {plan?.nutrition&&<AiPlanNutritionSummary nutrition={plan.nutrition}/>} {chosen&&!detail&&<p>La indicación no contiene una receta.</p>}
   </FramePair>;
 }
