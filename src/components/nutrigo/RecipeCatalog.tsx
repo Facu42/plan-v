@@ -1,3 +1,4 @@
+import { useModalFocus } from './use-modal-focus';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { recipesApi } from '../../api/recipes';
 import { resourcesApi } from '../../api/resources';
@@ -264,8 +265,9 @@ export function RecipeEditorForm({ catalog }: { catalog: RecipeCatalogState }) {
 /** Vista previa de lo que ve el paciente + día y momento; confirma la asignación al día. */
 export function RecipeAssignDialog({ catalog }: { catalog: RecipeCatalogState }) {
   const { assigning, day, setDay, slot, setSlot, busy, confirmAssign, closeAssign } = catalog;
+  const dialog = useModalFocus(Boolean(assigning?.published), () => { if (!busy) closeAssign(); });
   if (!assigning?.published) return null;
-  return <div className="recipe-overlay" role="dialog" aria-label="Así lo ve tu asesorado">
+  return <div className="recipe-overlay" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Así lo ve tu asesorado">
     <div className="recipe-overlay-card">
       <h2>Así lo ve tu asesorado</h2>
       <label>Día<input type="date" value={day} onChange={(event) => setDay(event.target.value)} /></label>

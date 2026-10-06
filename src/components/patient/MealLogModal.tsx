@@ -1,3 +1,4 @@
+import { useModalFocus } from '../nutrigo/use-modal-focus';
 import { useUnsavedChanges, canLeaveWorkspace } from '../nutrigo/unsaved-changes';
 import { useRef, useState } from 'react';
 import { api } from '../../api/client';
@@ -40,6 +41,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
   const fileRef = useRef<HTMLInputElement>(null);
   useUnsavedChanges(step === 'capture' && Boolean(description.trim() || imageBase64), step === 'analyzing');
   const closeSafely = () => { if (canLeaveWorkspace()) close(); };
+  const dialog = useModalFocus(true, closeSafely);
 
   const handleFile = (file: File) => {
     if(file.size>5*1024*1024 || !['image/jpeg','image/png','image/webp'].includes(file.type)){setError('Elegí una foto JPG, PNG o WebP de hasta 5 MB.');return;}
@@ -98,7 +100,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
 
   if (step === 'success' && result) {
     return (
-      <div className="modal-backdrop" role="dialog" aria-modal="true">
+      <div className="modal-backdrop" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Registrar comida">
         <div className="photo-modal photo-success">
           <button className="modal-close" onClick={closeSafely} aria-label="Cerrar">×</button>
           <span><Icon name="check" size={30} /></span>
@@ -114,7 +116,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
 
   if (step === 'analyzing') {
     return (
-      <div className="modal-backdrop" role="dialog" aria-modal="true">
+      <div className="modal-backdrop" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Registrar comida">
         <div className="photo-modal analyzing-modal">
           <Icon name="loader" size={32} className="spin" />
           <h2>Analizando tu comida…</h2>
@@ -127,7 +129,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
   if (step === 'review' && result) {
     const estimationUnavailable = mealLogWasKept(result);
     return (
-      <div className="modal-backdrop" role="dialog" aria-modal="true">
+      <div className="modal-backdrop" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Registrar comida">
         <div className="photo-modal">
           <button className="modal-close" onClick={closeSafely} aria-label="Cerrar">×</button>
           {photoPreview ? (
@@ -166,7 +168,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
   }
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Registrar comida">
+    <div className="modal-backdrop" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Registrar comida">
       <div className="photo-modal meal-capture-modal">
         <button className="modal-close" onClick={closeSafely} aria-label="Cerrar">×</button>
         <p className="eyebrow">Registrar comida</p>
