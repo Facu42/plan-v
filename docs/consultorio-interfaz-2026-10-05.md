@@ -13,3 +13,5 @@ Las superficies nuevas usan Poppins, crema #F9F4F2, verde #C2E66E y tarjetas de 
 Validación: suite general 1388 aprobadas/2 omitidas; tipos y compilación aprobados. Gstack comprobó cancelar Atrás y cambio de paciente conservando una observación, guardarla, crear/publicar/asignar un recurso y releer su contenido desde paciente, y cambiar una cuota confirmando el mismo importe. Datos únicamente ficticios. La prueba nativa completa de sesiones, persistencia, adjuntos y reinicio se ejecuta en CI; no se ha probado producción.
 
 Revisiones independientes code-reviewer y reality-checker cerradas sin bloqueo concreto para PR. La evidencia visual del paciente se entrega en el apartado siguiente.
+
+Comprobación adicional de teclado con gstack: asignación de receta enfoca la fecha, Shift+Tab/Tab mantienen el foco dentro, Escape devuelve el foco al botón inicial; el registro de comida conserva el texto si se cancela el descarte con Escape. Seis verificaciones aprobadas, junto con tipos y 13 pruebas focalizadas. Nueve destinos del consultorio medidos a 1440 y 390, sin desbordamiento del documento.
