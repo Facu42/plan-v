@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import { SEEDED_EXERCISES, type RoutineAssignmentView } from '../../src/types/exercise.js';
 
@@ -59,3 +60,5 @@ export function getAssignment(id: string) {
 export function newId() {
   return randomUUID();
 }
+
+registerDemoState('exercise/memory', () => ({ activityReceipts, assignments, extraActivities, habilitated }));

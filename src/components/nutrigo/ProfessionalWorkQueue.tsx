@@ -44,7 +44,8 @@ export function ProfessionalWorkQueue({ patients, mode = 'inicio', initialKind =
   useEffect(() => {
     const refreshOnFocus = () => { setCursor(undefined); setRefresh((value) => value + 1); };
     window.addEventListener('focus', refreshOnFocus);
-    return () => window.removeEventListener('focus', refreshOnFocus);
+    window.addEventListener('plan-v:care-changed', refreshOnFocus);
+    return () => { window.removeEventListener('focus', refreshOnFocus); window.removeEventListener('plan-v:care-changed', refreshOnFocus); };
   }, []);
   const chooseKind = (next: CrmWorkKind | '') => { setKind(next); setCursor(undefined); };
   return <section className="pw-work" aria-label={mode === 'planes' ? 'Propuestas de IA del consultorio' : 'Bandeja del consultorio'}>
@@ -55,7 +56,7 @@ export function ProfessionalWorkQueue({ patients, mode = 'inicio', initialKind =
         <label>Tipo de pendiente<select value={kind} onChange={(event) => chooseKind(event.target.value as CrmWorkKind | '')}><option value="">Todos los pendientes</option>{CRM_WORK_KINDS.map((id) => <option key={id} value={id}>{WORK_LABELS[id]}</option>)}</select></label><p>{data.total} {data.total === 1 ? 'tarea' : 'tareas'}</p></div>
       {data.items.length ? <WorkQueueList items={data.items} onOpen={onOpen} /> : <NvState title="Sin pendientes en este filtro" description="Podés cambiar el filtro o continuar desde Pacientes y Planes." />}
       <div className="pw-work-pagination">{cursor && <NvButton className="nv-soft" onClick={() => setCursor(undefined)}>Volver al principio</NvButton>}{data.next_cursor && <NvButton onClick={() => setCursor(data.next_cursor!)}>Siguientes pendientes</NvButton>}</div>
-      {data.source === 'memory' && <p className="nv-caption">Modo demo · los cambios duran mientras la API local siga encendida.</p>}
+      {data.source === 'memory' && <p className="nv-caption">Modo demo · datos ficticios para recorrer el consultorio.</p>}
     </>}
   </section>;
 }

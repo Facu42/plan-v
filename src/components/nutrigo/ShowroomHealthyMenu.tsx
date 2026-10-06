@@ -449,7 +449,7 @@ function ProHealthyMenu({ patient, query }: { patient: ShowroomPatient; query: s
   </HeaderActions>;
 
   const notices = <>
-    {catalog.source === 'memory' && <p className="mf-notice">Vista demo · el catálogo se conserva mientras la API siga encendida.</p>}
+    {catalog.source === 'memory' && <p className="mf-notice">Vista demo · recetas ficticias para probar el menú.</p>}
     {catalog.error && !editorOpen && <p className="recipe-error" role="alert">{catalog.error}</p>}
     {catalog.status && <p className="recipe-status" role="status">{catalog.status}</p>}
   </>;

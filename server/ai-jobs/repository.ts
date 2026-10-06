@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
@@ -449,3 +450,5 @@ export function memoryJobContext(jobId: string) {
 }
 
 export const AI_JOB_LIMITS = { timeoutMs: AI_JOB_TIMEOUT_MS, maxTokens: 8000, monthly: AI_JOB_MONTHLY_TOKEN_BUDGET, maxActive: AI_JOB_MAX_ACTIVE };
+
+registerDemoState('ai-jobs/repository', () => ({ jobs }));

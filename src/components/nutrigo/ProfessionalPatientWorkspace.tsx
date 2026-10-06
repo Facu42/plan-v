@@ -10,7 +10,6 @@ import { NutritionTargetPanel } from './ShowroomNutritionTarget';
 import { ShowroomMeals } from './ShowroomMeals';
 import { ShowroomProgress } from './ShowroomProgress';
 import { ShowroomGoals } from './ShowroomGoals';
-import { CarePanel } from './CarePanel';
 import { MealPlanEditor } from './MealPlanVersions';
 import { ShowroomConsultations } from './ShowroomConsultations';
 import { NutrigoMessages } from './NutrigoMessages';
@@ -75,7 +74,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
     <div key={`${patient.id}:${tab}`} className="pw-record-content">
       {tab === 'resumen' && <><ShowroomPatientRecord patient={patient} patients={patients} onSelect={onSelect} onEdit={onEdit} onOpen={onOpen} summaryOnly /><ProfessionalLedgerSummary patientId={patient.id} onOpen={() => change('cobros')} /></>}
       {tab === 'ingreso' && <><ShowroomIntakeReview patientId={patient.id} /><NutritionTargetPanel patientId={patient.id} patientName={patient.name} /></>}
-      {tab === 'registros' && <><ShowroomMeals patient={patient} query="" onSelect={onSelect} onReview={onReview} now={now} /><CarePanel patientId={patient.id} mode="professional" /><ShowroomProgress patient={p} professional /><ShowroomGoals patient={patient} patients={patients} onSelect={onSelect} onChanged={addPatient} onOpenPatient={onSelect} /></>}
+      {tab === 'registros' && <><ShowroomMeals patient={patient} query="" onSelect={onSelect} onReview={onReview} now={now} /><ShowroomProgress patient={p} professional /><ShowroomGoals patient={patient} patients={patients} onSelect={onSelect} onChanged={addPatient} onOpenPatient={onSelect} /></>}
       {tab === 'plan' && <><PlanSafetySummary patientId={patient.id} /><MealPlanEditor patientId={patient.id} onChanged={() => void api.getPatient(patient.id).then(({ patient: updated }) => addPatient(updated)).catch(() => undefined)} /></>}
       {tab === 'consultas' && <ShowroomConsultations patient={patient} now={now} onSelect={onSelect} onChanged={addPatient} />}
       {tab === 'mensajes' && <NutrigoMessages patient={p} patients={patients.map((person) => buildShowroomPatient(person, now))} role="pro" onSelect={onSelect} onNavigate={onNavigate} />}

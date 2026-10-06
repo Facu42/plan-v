@@ -301,7 +301,7 @@ export function RecipeCatalog({ patientId }: { patientId: string }) {
         <NvButton disabled={busy || !patientId} onClick={catalog.quickAiDraft}>Generar borrador con IA</NvButton>
       </div>
     </header>
-    {source === 'memory' && <p className="recipe-demo">Vista demo · el catálogo se conserva mientras la API siga encendida.</p>}
+    {source === 'memory' && <p className="recipe-demo">Vista demo · recetas ficticias para probar el catálogo.</p>}
     {error && <p className="recipe-error" role="alert">{error}</p>}
     {status && <p className="recipe-status" role="status">{status}</p>}
     {!recipes && !error && <p role="status">Cargando catálogo…</p>}

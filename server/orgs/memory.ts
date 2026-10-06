@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import type {
   CareLinkRole,
@@ -301,3 +302,5 @@ function addDays(date: string, days: number): string {
   value.setUTCDate(value.getUTCDate() + days);
   return value.toISOString().slice(0, 10);
 }
+
+registerDemoState('orgs/memory', () => ({ orgs, members, subscriptions, teams, links, transfers, patientOwners }));

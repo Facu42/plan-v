@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { getRequestDb, privilegedDb } from '../db/supabase-client.js';
 import { DEFAULT_CARE_PREFERENCES, isMeasurementData, isMeasurementKind, type CareInput, type CareRecord, type CarePreferences, type CareReplacement, type Measurement, type ReplacementRecipe } from '../../src/types/care.js';
 import { inspectPrivateFile } from '../assets/inspect.js';
@@ -217,3 +218,5 @@ export async function careDocumentUrl(path: string, persistent: boolean) {
   const { data, error } = await getRequestDb().storage.from('care-documents').createSignedUrl(path, 60);
   if (error || !data) throw new CareError(503, 'No se pudo abrir el estudio.'); return data.signedUrl;
 }
+
+registerDemoState('care/repository', () => ({ records, preferences, replacements, photos, documents, measurements }));

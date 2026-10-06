@@ -25,14 +25,14 @@ const livePlanSchema = z.object({
 export function demoMenuPlan(context: MenuJobContext, planId: string = randomUUID()) {
   const start = context.period_start ?? new Date().toISOString().slice(0, 10);
   const end = context.period_end ?? start;
-  const slots = context.slots.length ? context.slots : ['Almuerzo'];
-  const items = slots.map((slot) => ({
-    for_date: start,
+  const slots = [...new Set(context.slots.length ? context.slots : ['Desayuno', 'Almuerzo', 'Merienda', 'Cena'])];
+  const items = eachIsoDate(start, end).flatMap((date) => slots.map((slot) => ({
+    for_date: date,
     slot,
     free_text: 'Indicación demo: completar antes de publicar',
     portions: 1,
     public_note: '',
-  }));
+  })));
   return mealPlanDraftSchema.parse({
     id: z.uuid().parse(planId),
     period_start: start,

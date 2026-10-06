@@ -1,10 +1,12 @@
 import { randomUUID } from 'node:crypto';
+import { registerDemoState } from '../demo/state.js';
 import type { JobKind, JobStore, ProcessingJob } from './types.js';
 
 const backoffMs = (attempts: number) => Math.min(60_000, 500 * 2 ** Math.max(0, attempts - 1));
 
-export function createMemoryJobStore(now: () => Date = () => new Date()): JobStore {
+export function createMemoryJobStore(now: () => Date = () => new Date(), demoDomain?: string): JobStore {
   const jobs = new Map<string, ProcessingJob>();
+  if (demoDomain) registerDemoState(demoDomain, () => ({ jobs }));
 
   return {
     async enqueue(input) {

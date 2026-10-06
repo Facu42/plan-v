@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import {
   SEEDED_RESOURCES,
@@ -97,3 +98,5 @@ export function buildHits(
 }
 
 export type { PatientLibraryView };
+
+registerDemoState('resources/memory', () => ({ extras, favorites }));

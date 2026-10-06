@@ -18,6 +18,18 @@ const navigate=()=>undefined;
 const recipe:DisplayRecipe={id:'real-r',title:'Preparación real aprobada',version:2,yield_portions:2,ingredients:[{id:'real-i',name:'Lentejas reales',quantity:200,unit:'g'}],steps:['Lavar la preparación real.','Cocinar hasta el punto indicado.'],nutrient_source:'Estimación de IA revisada',nutrition:{origin:'ai_estimate',source:'Estimación de IA revisada',per_portion:{kcal:620,carbs_g:80,protein_g:20,fat_g:15}},card:unavailableCard('Preparación real aprobada','Almuerzo')};
 beforeEach(()=>{context.mobile=false;context.data=null;});
 describe.each([false,true])('pantallas principales MCP (celular %s)',mobile=>{
+  it('inicio respeta las dos tarjetas del diseño y el orden diario con porciones exactas',()=>{
+    context.mobile=mobile;
+    context.data={body:null,target:null,recipes:[recipe,{...recipe,id:'r2',title:'Otra receta aprobada'},{...recipe,id:'r3',title:'Tercera receta aprobada'}],plan:{items:[
+      {id:'cena',for_date:'2026-10-03',slot:'Cena',free_text:'Comida nocturna publicada',portions:1,recipe_proposal:recipe},
+      {id:'desayuno',for_date:'2026-10-03',slot:'Desayuno',free_text:'Comida de mañana publicada',portions:1.25,recipe_proposal:recipe},
+    ]},exercise:{assignments:[]},care:null,failed:false};
+    const html=renderToStaticMarkup(<NutrigoHome patient={patient} now={new Date('2026-10-03T12:00:00-03:00')} onNavigate={navigate} onRecord={navigate} onHydration={navigate} onRest={navigate} onLogMeal={navigate}/>);
+    expect(html.match(/data-name="Card Recommended Menu"/g)).toHaveLength(2);
+    expect(html).not.toContain('Tercera receta aprobada');
+    expect(html.indexOf('aria-label="Registrar Desayuno"')).toBeLessThan(html.indexOf('aria-label="Registrar Cena"'));
+    expect(html).toContain('1,25 porciones');
+  });
   it('inicio muestra registros reales sin duplicar tarjetas ni usar métricas de ejemplo',()=>{
     context.mobile=mobile;context.data={body:{weight_kg:72},target:null,recipes:[],plan:null,exercise:null,care:{measurements:[]},failed:false};
     const html=renderToStaticMarkup(<NutrigoHome patient={{...patient,hydration:5,sleepMinutes:450,nutritionLogCount:0}} onNavigate={navigate} onRecord={navigate} onHydration={navigate} onRest={navigate} onLogMeal={navigate}/>);

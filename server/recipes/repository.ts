@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
 import { getPatient } from '../store.js';
@@ -545,3 +546,5 @@ export function readPublishedMemory(nutritionistId: string, recipeId: string, ex
     card: getRecipeCard(version.id, version.title),
   };
 }
+
+registerDemoState('recipes/repository', () => ({ ingredients, recipes, versions, lines, assignments }));

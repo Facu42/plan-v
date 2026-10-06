@@ -1,3 +1,4 @@
+import { registerDemoState } from './demo/state.js';
 import { randomUUID } from 'node:crypto';
 import { calculateAdherence } from './adherence.js';
 import { CareError } from './care/errors.js';
@@ -1292,3 +1293,5 @@ export function computeShoppingList(patient: Patient): string[] {
   for (const meal of patient.todayPlan) items.add(meal.title);
   return [...items];
 }
+
+registerDemoState('store', () => ({ store }));

@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
@@ -252,3 +253,5 @@ export async function setNote(id: string, note: string, persistent: boolean): Pr
 }
 
 export { asNutritionist };
+
+registerDemoState('admin/repository', () => ({ settings, nutritionists, events, memoryTestAccounts }));

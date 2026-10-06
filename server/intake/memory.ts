@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import type { ConsentDecision, ConsentPurpose } from './consent.js';
 import {
@@ -188,3 +189,5 @@ export function addClinicalNote(patientId: string, authorId: string, body: strin
   notes.set(patientId, [...existing, note]);
   return note;
 }
+
+registerDemoState('intake/memory', () => ({ intakes, consents, notes, submittedRevisions, history }));

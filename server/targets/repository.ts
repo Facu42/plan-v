@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError as TargetError } from '../care/errors.js';
 import type { BodyData, TargetInput, TargetResult } from '../../src/lib/nutrition-target.js';
@@ -86,3 +87,5 @@ export async function requestBodyData(patientId: string, persistent: boolean) {
   }
   requestMemory.set(patientId, new Date().toISOString());
 }
+
+registerDemoState('targets/repository', () => ({ memory, bodyMemory, requestMemory }));
