@@ -44,3 +44,9 @@ La [matriz vigente de acciones, escritura, permiso y lectura posterior](recorrid
 La suite general cubre errores de conexión, proveedor caído, consentimiento retirado, concurrencia y reintentos. El recorrido autenticado cubre alta, invitación, ingreso, meta, receta, plan, registros, permisos, agenda, mensajes, adjuntos, cuota/aviso/confirmación, archivo/restauración, cierre de sesión y recuperación tras reinicio. El resultado concreto del entorno temporal queda visible en las comprobaciones de cada PR.
 
 Entregas encadenadas: [backend #59](https://github.com/Facu42/plan-v/pull/59), [consultorio #60](https://github.com/Facu42/plan-v/pull/60), [planes #61](https://github.com/Facu42/plan-v/pull/61), [paciente #62](https://github.com/Facu42/plan-v/pull/62).
+
+## Cierre del ensayo autenticado
+
+El 6/10/2026 (UTC; 5/10 en Argentina) terminaron correctamente las comprobaciones de las cuatro entregas. Implementación completa e95d3df: 27 pruebas de sesiones firmadas y 42 confirmaciones de navegador sobre Supabase temporal. Se comprobó que reiniciar la API conserva el identificador, versión e indicación del plan y el pago confirmado; la paciente recuperó el mismo plan al recargar. Los datos ficticios y contenedores se eliminaron.
+
+[Ejecución del conjunto completo](https://github.com/Facu42/plan-v/actions/runs/37397726321). La entrega backend separada también aprobó sus 27 pruebas y 40 confirmaciones con su interfaz base. Revisión de código y de evidencia cerradas sin bloqueos. La documentación final no cambia el código probado. La migración de aislamiento editorial continúa preparada, sin aplicar a producción.

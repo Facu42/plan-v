@@ -17,12 +17,14 @@
 - [x] Ficha: siete pestañas y contexto persistente, reutilizando ingreso, evolución, plan, consultas, mensajes y cobranzas. Cobros inicializan la selección indicada por la URL. Formularios advierten cambios pendientes.
 - [x] Planes: editor fechado único con revisión y publicación; información de alergias/permisos, borrador vs publicado y procedencia estimada conservados. Pruebas existentes de IA/versionado más regresiones de cambios sin guardar y paciente.
 - [x] Paciente: inspeccionar `src/features/nutrigo` frente a `design/figma-reference/original`, reparar desviaciones y acciones. Documentar las doce superficies y limitaciones verificadas.
-- [ ] Cierre: tests, check, build, migraciones/secretos, sesiones nativas y navegador gstack. Revisiones independientes de código y funcionamiento antes del PR; sin afirmar producción ni paridad total sin evidencia.
+- [x] Cierre: tests, check, build, migraciones/secretos, sesiones nativas y navegador gstack. Revisiones independientes de código y funcionamiento antes del PR; sin afirmar producción ni paridad total sin evidencia.
 
 
 ## Evidencia de ejecución
 
 - Suite general: 243 archivos, 1388 aprobadas y 2 omitidas. Tipos, build, migraciones y secretos aprobados.
 - Gstack: 14 confirmaciones y 60 medidas de doce superficies en cinco tamaños; sin desbordamiento del documento.
-- Revisiones independientes cerradas sin bloqueo concreto para PR. Sesiones firmadas y recorrido persistente pendientes de CI.
+- Revisiones independientes cerradas sin bloqueo concreto para PR. Sesiones firmadas: 27 aprobadas. Recorrido persistente: 42 confirmaciones aprobadas, incluido reinicio de la API temporal.
 - Registros por apartado: docs/consultorio-backend-2026-10-05.md, consultorio-interfaz-2026-10-05.md, consultorio-planes-2026-10-05.md y paciente-nutrigo-2026-10-05.md.
+
+Cierre del código e95d3df: las cuatro entregas aprobaron CI, secretos y sesiones. Evidencia nativa: https://github.com/Facu42/plan-v/actions/runs/37397726321. Producción no modificada; migración preparada pendiente de autorización escrita.
