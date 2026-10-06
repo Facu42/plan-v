@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "overrides": {
+    "concurrently": { "shell-quote": "1.12.0" }
+  },
   "scripts": {
     "local": "node scripts/local.mjs",
     "demo:consultorio": "node scripts/demo-consultorio.mjs",

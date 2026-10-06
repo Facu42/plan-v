@@ -1,6 +1,6 @@
 # Simulación de paciente y nutricionista — 6 de octubre de 2026
 
-Se cargó una demostración ficticia de ambos roles mediante los formularios de la aplicación y se comprobó la lectura posterior desde la API. Los datos permanecen disponibles en esta computadora para revisar las pantallas funcionando.
+Se cargó una demostración ficticia de ambos roles mediante formularios y contratos de API, y se comprobó su lectura posterior. Los datos permanecen disponibles en esta computadora para revisar las pantallas funcionando.
 
 ## Cómo abrirla
 
@@ -54,19 +54,21 @@ El plan contiene valores de ejemplo y diferencias visibles frente a la meta; no 
 - Inicio agregaba tres tarjetas en la fila que Nutrigo define para dos, superponiendo nutrientes: se deriva la cantidad de los nodos originales, con sus mismas clases. Comidas ordenadas de desayuno a cena; 1,25 porciones se muestra sin redondearlo a 1,3.
 - El modo de demostración perdía datos al reiniciar: se agregó guardado local opcional de los 21 dominios de memoria, con copia atómica, bloqueo contra dos servidores y restauración validada. La prueba detectó además configuración de cobros/servicio omitida; ambas quedaron incluidas y la segunda comparación completa pasó.
 - El lanzador podía heredar conexiones remotas: fuerza API local y credenciales Supabase vacías incluso para impedir que Vite las cargue desde archivos de entorno.
+- CI detectó avisos de seguridad preexistentes en dependencias de desarrollo: `shell-quote` pasó a 1.12.0 mediante override limitado a `concurrently`, y `source-map-js` a 1.2.2. Auditoría final sin vulnerabilidades y ejecución simultánea de dos comandos comprobada.
 
 ## Evidencia y alcance
 
 - Navegador oficial de gstack: 116 comprobaciones registradas, incluidas repeticiones de archivos y 46 vistas de paciente/consultorio a 1440 y 390 px. Sin desbordamiento horizontal de página. Tras corregir Inicio se repitieron ambas variantes, contando dos tarjetas, orden de comidas, porciones exactas y nutrientes dentro de las tarjetas.
 - Reinicio: las 14 respuestas completas consultadas coincidieron antes/después; cuatro archivos mantuvieron sus hashes. Los dos adjuntos coinciden byte por byte con la imagen subida y el estudio con el PDF ficticio.
+- La precarga histórica registró 48 acciones correctas y un error 500 al guardar el turno de Marina, durante la retención del archivo de copia en OneDrive. La copia pasó a la carpeta local con reintentos de escritura. La lectura posterior al reinicio confirmó el turno conservado de Marina (viernes 9, 10:00); no se contabiliza la precarga inicial como 49 acciones exitosas.
 - Permiso de estudio: al retirarlo, botón bloqueado y API 403; al restaurarlo vuelve a abrir el archivo conservado. No se expusieron notas profesionales en la respuesta de ingreso del paciente.
 - Las fuentes JSON, colores, medidas y clases exportadas de Nutrigo se conservan. Este ensayo agrega datos y corrige su enlace con el diseño. La revisión general del archivo está en [revisión visual anterior](revision-visual-nutrigo-2026-10-06.md); ausencia de desbordamiento no acredita por sí sola fidelidad completa a Figma.
-- Suite final: **247 archivos, 1.402 pruebas aprobadas, 2 omitidas**; tipos y compilación completos. La compilación avisa sobre tamaño de algunos paquetes, sin fallar.
+- Suite final: **247 archivos, 1.402 pruebas aprobadas, 2 omitidas**; tipos y compilación completos. Tras actualizar dependencias se repitió la suite con `npm test -- --maxWorkers=1` por agotamiento de memoria de Windows en la ejecución simultánea. La compilación avisa sobre tamaño de algunos paquetes, sin fallar.
 - Revisión independiente de código: sin hallazgos pendientes. Revisión funcional independiente de datos, reinicio, pruebas y límites realizada; comprobación final de Inicio repetida por el agente principal.
 - Evidencia local ignorada por Git: `.gstack/simulacion/actions.json`, `loaded-layouts.json`, `restart-before.json`, `restart-after.json`, capturas y registros de pruebas. No contiene datos de personas reales.
 
 ### Pendientes que esta simulación no acredita
 
-`test:auth-isolation` se intentó dos veces, pero Docker no ofreció su motor local, incluso después de iniciarlo. **No se completó la repetición de sesiones firmadas, aislamiento entre consultorios ni RLS en este entorno.** Las pruebas de memoria no sustituyen esa comprobación.
+`test:auth-isolation` se intentó dos veces en esta computadora, pero Docker no ofreció su motor local. La misma comprobación sí terminó en GitHub con **27 pruebas aprobadas de Auth/PostgREST y sesiones firmadas**, sobre el commit `63260d5`: [ejecución de aislamiento](https://github.com/Facu42/plan-v/actions/runs/37502855316). Verifica sesiones y permisos mediante servicios temporales; la demostración de navegador por sí sola no acredita ese aislamiento. El cambio posterior sólo actualiza dependencias de desarrollo y documentación.
 
 La IA ejecutada aquí es de demostración: no se comprobó un proveedor real en esta sesión. Camila conserva invitación pendiente; no se completó una aceptación mediante cuenta real ni envío externo. La confirmación del turno se comprobó mediante su contrato de API y lectura posterior; el recorrido visual comprobó creación/reprogramación e historial. No se cambió producción ni se aplicaron migraciones.
