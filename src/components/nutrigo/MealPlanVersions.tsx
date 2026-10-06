@@ -8,6 +8,7 @@ import { PLAN_SLOTS, buildPublishedPlanDays, mealPlanDraftSchema, toPublishedPat
 import type { ProfessionalRecipe } from '../../types/recipes';
 import { NvButton, NvState } from './primitives';
 import './meal-plan-versions.css';
+import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
 import { recipeNutritionLabel, type ProposedRecipe } from '../../types/ai-nutrition';
 import { RECIPE_UNITS } from '../../types/recipes';
 import { AiPlanNutritionSummary } from './AiPlanNutritionSummary';
@@ -40,7 +41,12 @@ function proposalFrom(job: AiJobView | null): MealPlanDraftInput | null {
 }
 
 export function matchesMenuProposal(plan: ProfessionalMealPlan, proposal: MealPlanDraftInput): boolean {
-  if (plan.id !== proposal.id || plan.current.published_at) return false;
+  if (plan.current.published_at) return false;
+  return matchesMenuForm(plan, proposal);
+}
+
+export function matchesMenuForm(plan: ProfessionalMealPlan, proposal: MealPlanDraftInput): boolean {
+  if (plan.id !== proposal.id) return false;
   if (plan.current.period_start !== proposal.period_start || plan.current.period_end !== proposal.period_end) return false;
   if (JSON.stringify(plan.current.nutrition_target ?? null) !== JSON.stringify(proposal.nutrition_target ?? null)) return false;
   const key = (item: { for_date: string; slot: string; recipe_id?: string | null; recipe_version?: number | null; free_text?: string | null; portions?: number | null; public_note?: string | null; recipe_proposal?: ProposedRecipe }) =>
@@ -108,7 +114,10 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
       setPlan(plans.plan);
       setSource(plans.source);
       setRecipes(catalog.recipes.filter((recipe) => recipe.published));
-      setProposal(aiJobs.jobs.find((job) => job.job_type === 'menu_draft' && proposalFrom(job)) ?? null);
+      const requested = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('propuesta');
+      const nextProposal = aiJobs.jobs.find((job) => job.job_type === 'menu_draft' && (requested ? job.id === requested : Boolean(proposalFrom(job)))) ?? null;
+      setProposal(nextProposal && proposalFrom(nextProposal) ? nextProposal : null);
+      if (requested && !proposalFrom(nextProposal)) setError('Esta propuesta ya no está lista para aprobar. Revisá el plan guardado o generá una propuesta nueva.');
       if (plans.plan) {
         setPeriodStart(plans.plan.current.period_start);
         setPeriodEnd(plans.plan.current.period_end);
@@ -211,7 +220,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
 
   async function approveProposal() {
     const candidate = proposalFrom(proposal);
-    if (!proposal || !candidate || lock.current) return;
+    if (!proposal || !candidate || lock.current || !canLeaveWorkspace()) return;
     lock.current = true;
     setBusy(true); setError(''); setStatus('');
     let applied = false;
@@ -238,12 +247,13 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
   }
 
   async function editProposal() {
-    if (!proposal) return;
+    if (!proposal || !canLeaveWorkspace()) return;
     await run(async () => { await aiJobsApi.apply(proposal.id); setProposal(null); }, 'Propuesta guardada como borrador privado. Editala y revisala antes de publicar.');
   }
 
   const proposedPlan = proposalFrom(proposal);
-  const dirty = !plan || !matchesMenuProposal(plan, formInput());
+  const dirty = !plan || !matchesMenuForm(plan, formInput());
+  useUnsavedChanges(plan ? dirty : Boolean(periodStart || periodEnd || dietaryPreferences || draftItems.some((item) => item.free_text.trim() || item.recipe_id || item.public_note || item.recipe_proposal)), busy);
   function publishVisible() {
     if (!plan || dirty) { setError('Guardá y revisá los cambios antes de publicar.'); return; }
     void run(() => plansApi.publish(plan.id, plan.current.version, plan.current), 'Plan publicado. La paciente ve la versión revisada.');
