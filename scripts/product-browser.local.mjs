@@ -134,7 +134,7 @@ try {
   await B('click','[aria-label="Mi ficha"]');await button('Reintentar permisos');await B('wait',aiPermission);
   check((await read(patient,`/api/patients/${pid}/care`)).consented.includes('ai_menu_draft')===false,'catálogo de permisos recuperado en la misma pantalla tras un error sin alterar la decisión guardada');
   await B('viewport','1440x1000');
-  await logout();phase='ficha y meta profesional';await login(professional,`/crm/ficha?paciente=${pid}`);
+  await logout();phase='ficha y meta profesional';await login(professional,`/crm/ficha?paciente=${pid}&seccion=ingreso`);
   await button('Marcar ingreso como revisado');await button('Confirmar y compartir');await until("document.body.innerText.includes('Meta confirmada:')");
   const target=await read(patient,`/api/patients/${pid}/nutrition-target`);check(Boolean(target.target?.published_at),'meta confirmada visible sólo al publicarse');
   phase='receta manual y asignación';
@@ -144,10 +144,10 @@ try {
   await B('fill','[aria-label="Ingrediente 1"]','Arroz');await B('fill','[aria-label="Cantidad 1"]','100');await B('fill','[aria-label="Pasos de la receta"]','Cocinar el arroz y servir.');
   await button('Guardar borrador');await until("document.body.innerText.includes('Borrador guardado en el catálogo')");
   const catalog=await read(professional,'/api/recipes');const recipe=catalog.recipes.find(r=>r.title==='Arroz con vegetales');check(recipe?.current.card.macros.kcal===200,'receta manual conserva calorías declaradas');
-  await until('!document.querySelector(".recipe-form")');await button('Publicar');await until("document.body.innerText.includes('Revisión publicada')");
-  await button('Agregar al plan');await field('Día',today,'.recipe-overlay ');await button('Confirmar asignación');await until("document.body.innerText.includes('Asignada al día')");
+  await button('Cerrar');await until('!document.querySelector(".recipe-form")');await button('Publicar');await until("document.body.innerText.includes('Revisión publicada')");
+  await button('Asignar');await field('Día',today,'.recipe-overlay ');await button('Confirmar asignación');await until("document.body.innerText.includes('Asignada al día')");
   check((await read(patient,`/api/patients/${pid}/recipe-days?date=${today}`)).assignments.length===1,'receta publicada asignada por fecha');
-  phase='plan manual';await B('goto',origin+`/crm/plan?paciente=${pid}`);await B('click','[aria-label="Crear o editar plan"]');
+  phase='plan manual';await B('goto',origin+`/crm/plan?paciente=${pid}`);await B('wait','.meal-plan-form');
   await field('Desde',today,'.meal-plan-form ');await field('Hasta',today,'.meal-plan-form ');
   await B('fill','[aria-label="Fecha 1"]',today);await B('select','[aria-label="Receta 1"]',recipe.id);await B('fill','[aria-label="Nota 1"]','Indicación publicada');
   await B('click','.meal-plan-form button[type="submit"]');await until("document.body.innerText.includes('Borrador guardado')");
@@ -161,7 +161,7 @@ try {
   await readUntil(patient,`/api/patients/${pid}`,r=>r.patient.appointment?.meet_url==='https://example.test/consulta');await reloadContains('Abrir videollamada');
   await B('goto',origin+'/crm/cobranzas');await B('click','[aria-label="Ver cobranzas de Paciente ficticia"]');await B('fill','#cbz-fee-amount','1000');await B('fill','#cbz-fee-due',today);await button('Guardar cuota');
   await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.fee?.amount===1000);
-  await B('goto',origin+'/crm/guardado');await B('click','.nvw-resource-picker button:first-child');await B('click','[aria-label="Seleccionar Paciente ficticia"]');await button('Asignar a 1');await until("document.body.innerText.includes('1 asignación creada.')");
+  await B('goto',origin+'/crm/biblioteca?biblioteca=recursos');await B('click','.nvw-resource-picker button:first-child');await B('click','[aria-label="Seleccionar Paciente ficticia"]');await button('Asignar a 1');await until("document.body.innerText.includes('1 asignación creada.')");
   const assignedLibrary=(await read(patient,`/api/patients/${pid}/library`)).library;const resourceAssignment=assignedLibrary.assignments[0];const resource=[...assignedLibrary.resources,...assignedLibrary.articles].find(r=>r.id===resourceAssignment.resource_id||r.slug===resourceAssignment.slug);
   check(Boolean(resource),'turno, cuota y recurso guardados por la profesional');
   await logout();phase='paciente y recarga';await login(patient,'/app/plan');await reloadContains('Arroz con vegetales');
@@ -215,7 +215,7 @@ try {
   await B('goto',origin+'/app/agenda');await B('fill','[aria-label="Elegir mes"]',appointmentDay.slice(0,7));await B('click',`[data-calendar-date="${appointmentDay}"]`);await button('Confirmar');await readUntil(professional,`/api/patients/${pid}`,r=>r.patient.appointment?.patient_reply==='attending');await B('reload');check(true,'confirmación de turno persistente');
   await B('goto',origin+'/app/pagos');await B('fill','#cbz-report-amount','1000');await B('fill','#cbz-report-note','Aviso ficticio del recorrido');await button('Avisar que pagué');await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.payments.some(p=>p.status==='reported'));
   await logout();await B('viewport','1440x1000');await login(professional,'/crm/cobranzas');await B('click','[aria-label="Ver cobranzas de Paciente ficticia"]');await button('Confirmar');await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.payments.some(p=>p.status==='confirmed'&&p.amount===1000));await B('reload');check(true,'aviso de pago confirmado por profesional persiste sin cobro automático');
-  phase='seguimiento profesional';await B('goto',origin+`/crm/ficha?paciente=${pid}`);await button('Marcar revisado');await readUntil(patient,`/api/patients/${pid}/care`,r=>r.records.some(x=>x.reviewed_at));await B('reload');check(true,'revisión profesional de un registro conserva su estado');
+  phase='seguimiento profesional';await B('goto',origin+`/crm/ficha?paciente=${pid}&seccion=registros`);await button('Marcar revisado');await readUntil(patient,`/api/patients/${pid}/care`,r=>r.records.some(x=>x.reviewed_at));await B('reload');check(true,'revisión profesional de un registro conserva su estado');
   phase='respuesta profesional';await B('goto',origin+`/crm/mensajes?paciente=${pid}`);await B('wait','#nm-message');await B('fill','#nm-message','Respuesta ficticia profesional');await button('Enviar');await readUntil(patient,`/api/patients/${pid}`,r=>r.patient.messages.some(m=>m.text==='Respuesta ficticia profesional'&&m.from==='vero'));await reloadContains('Respuesta ficticia profesional');check(true,'respuesta profesional persistente visible para la paciente');
   phase='editar receta publicada';await B('goto',origin+`/crm/recetas?paciente=${pid}`);await control('[aria-label="Editar Arroz con vegetales"]');await field('Título','Borrador privado de receta','.recipe-form ');await button('Guardar borrador');await readUntil(professional,'/api/recipes',r=>r.recipes.some(x=>x.id===recipe.id&&x.title==='Borrador privado de receta'&&x.current.version===2&&x.published.version===1));
   const frozenPlan=(await read(patient,`/api/patients/${pid}/plans`)).plan;check(frozenPlan.items[0].recipe.title==='Arroz con vegetales'&&frozenPlan.items[0].recipe.nutrition.per_portion.kcal===200,'editar receta conserva título y calorías de la versión publicada en el plan');
@@ -234,6 +234,16 @@ try {
   await B('wait','input[placeholder="Email"]');patient.password=password;await login(patient,'/app/plan');await reloadContains('Indicación publicada');
   check(true,'recuperación real de contraseña y nuevo ingreso conservan datos');
   phase='corregir ficha enviada';await B('goto',origin+'/app/ficha');await button('Editar mi ficha inicial');await button('Corregir mi ficha enviada');await B('wait','.nvon-profile input');await field('¿Cómo preferís que te nombremos?','Prueba corregida');await button('Continuar');await B('wait','.nvon-health');await button('Continuar');await B('wait','.nvon-review');await button('Enviar a mi nutricionista');await readUntil(patient,`/api/patients/${pid}/intake`,r=>r.intake.status==='submitted'&&r.intake.payload.preferred_name==='Prueba corregida');await readUntil(professional,`/api/patients/${pid}/intake/professional`,r=>r.intake.status==='submitted'&&r.intake.payload.preferred_name==='Prueba corregida');await button('Ver mi plan');await reloadContains('Indicación publicada');check(true,'corrección de ficha enviada recibida por profesional conserva consentimiento y plan publicado');
+  phase='persistencia tras reiniciar la API';
+  const beforeRestart=(await read(patient,`/api/patients/${pid}/plans`)).plan;
+  const oldApi=apiProcess;
+  await new Promise((resolve,reject)=>{const timeout=setTimeout(()=>reject(Error('La API temporal no cerró')),10000);oldApi.once('exit',()=>{clearTimeout(timeout);resolve();});oldApi.kill();});
+  apiProcess=spawn(process.execPath,['--import','tsx','server/index.ts'],{env,stdio:'ignore'});
+  let restarted=false;for(let i=0;i<80;i++){try{if((await fetch(apiOrigin+'/api/health')).ok){restarted=true;break;}}catch{}await new Promise(r=>setTimeout(r,250));}if(!restarted)throw Error('La API temporal no reinició');
+  const afterRestart=(await read(patient,`/api/patients/${pid}/plans`)).plan;
+  const ledgerAfterRestart=(await read(patient,`/api/patients/${pid}/ledger?audience=patient`)).ledger;
+  check(afterRestart.id===beforeRestart.id&&afterRestart.version===beforeRestart.version&&afterRestart.items[0].public_note==='Indicación publicada'&&ledgerAfterRestart.payments.some(p=>p.status==='confirmed'&&p.amount===1000),'reinicio del servidor conserva el plan publicado y el pago confirmado');
+  await B('goto',origin+'/app/plan');await reloadContains('Indicación publicada');check(true,'paciente recupera el plan desde el navegador después del reinicio');
   await writeFile('.gstack/product-browser-evidence.json',JSON.stringify({result:'passed',screenshots:false,provider:'disabled',checks:evidence},null,2));
 } catch (error) {
   console.error('Falló la comprobación del navegador en: '+phase+'; control: '+lastAction+'. No se imprimen cuentas, tokens ni contenido de sesión.');

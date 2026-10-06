@@ -1,3 +1,4 @@
+import { useModalFocus } from './use-modal-focus';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { recipesApi } from '../../api/recipes';
 import { resourcesApi } from '../../api/resources';
@@ -13,6 +14,7 @@ import './recipe-catalog.css';
 import { recipeNutritionLabel } from '../../types/ai-nutrition';
 import { RecipeManualCoverAction } from './RecipeManualCoverAction';
 import { dateId } from '../../features/nutrigo/screens/shared';
+import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
 
 function emptyDraft(id = crypto.randomUUID()): RecipeWizardInput {
   return {
@@ -63,6 +65,9 @@ export function useRecipeCatalog(patientId: string) {
   const [day, setDay] = useState(() => dateId(new Date()));
   const lock = useRef(false);
   const [slot, setSlot] = useState<PlanSlot>('Almuerzo');
+  const [editorBaseline, setEditorBaseline] = useState('');
+  useUnsavedChanges(Boolean(editing && JSON.stringify(editing) !== editorBaseline) || (path === 'ai' && Boolean(description.trim())), busy);
+  const openStored = (recipe: ProfessionalRecipe) => { const draft = recipeEditorFromStored(recipe); setEditing(draft); setEditorBaseline(JSON.stringify(draft)); };
 
   async function reload() {
     setError('');
@@ -105,7 +110,7 @@ export function useRecipeCatalog(patientId: string) {
       setError('Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
       return;
     }
-    void run(async () => { const saved = await recipesApi.save(parsed.data); setEditing(recipeEditorFromStored(saved.recipe)); }, 'Borrador guardado en el catálogo.');
+    void run(async () => { const saved = await recipesApi.save(parsed.data); openStored(saved.recipe); }, 'Borrador guardado en el catálogo.');
   }
 
   function quickAiDraft() {
@@ -126,7 +131,7 @@ export function useRecipeCatalog(patientId: string) {
       await aiJobsApi.apply(created.job.id);
       const saved = (await recipesApi.list()).recipes.find(recipe => recipe.id === created.job.artifact!.payload.id);
       if (!saved) throw new Error('La receta quedó guardada, pero falta confirmar su lectura. Recargá el catálogo.');
-      setEditing(recipeEditorFromStored(saved));
+      openStored(saved);
       setPath('manual');
     }, 'Propuesta lista para revisar. Los nutrientes son estimaciones de IA; la foto puede subirse manualmente.');
   }
@@ -134,13 +139,16 @@ export function useRecipeCatalog(patientId: string) {
   return {
     patientId, recipes, source, imageGeneration, error, status, busy, editing, path, description, assigning, day, slot,
     setEditing, setPath, setDescription, setDay, setSlot, reload, run, submit, submitAi, quickAiDraft,
-    recoverEditing: () => void run(async () => { const saved = (await recipesApi.list()).recipes.find(recipe => recipe.id === editing?.id); if (saved) setEditing(recipeEditorFromStored(saved)); }, 'Versión guardada recuperada. Revisala antes de continuar.'),
-    startNew: () => { setPath('choose'); setEditing(null); setStatus(''); setError(''); },
-    chooseManual: () => { setPath('manual'); setEditing(emptyDraft()); },
+    recoverEditing: () => void run(async () => { const saved = (await recipesApi.list()).recipes.find(recipe => recipe.id === editing?.id); if (saved) openStored(saved); }, 'Versión guardada recuperada. Revisala antes de continuar.'),
+    startNew: () => { if (!canLeaveWorkspace()) return; setPath('choose'); setEditing(null); setStatus(''); setError(''); },
+    chooseManual: () => { const draft = emptyDraft(); setPath('manual'); setEditing(draft); setEditorBaseline(JSON.stringify(draft)); },
     chooseAi: () => { setPath('ai'); setEditing(null); },
-    closeEditor: () => { setEditing(null); setPath(null); },
-    startEdit: (recipe: ProfessionalRecipe) => { setEditing(recipeEditorFromStored(recipe)); setPath('manual'); setStatus(''); setError(''); },
-    publish: (recipe: ProfessionalRecipe) => void run(() => recipesApi.publish(recipe.id, recipe.current.version, recipe.current.revision), 'Revisión publicada. El paciente la ve cuando la asignás.'),
+    closeEditor: () => { if (!canLeaveWorkspace()) return; setEditing(null); setPath(null); },
+    startEdit: (recipe: ProfessionalRecipe) => { if (!canLeaveWorkspace()) return; openStored(recipe); setPath('manual'); setStatus(''); setError(''); },
+    publish: (recipe: ProfessionalRecipe) => {
+      if (editing?.id === recipe.id && JSON.stringify(editing) !== editorBaseline) { setError('Guardá y revisá los cambios de esta receta antes de publicar.'); return; }
+      void run(() => recipesApi.publish(recipe.id, recipe.current.version, recipe.current.revision), 'Revisión publicada. El paciente la ve cuando la asignás.');
+    },
     retryCover: (recipe: ProfessionalRecipe) => void run(async () => {
       if (!recipe.published) return;
       const saved = await recipesApi.cover(recipe.id, recipe.published.version);
@@ -257,8 +265,9 @@ export function RecipeEditorForm({ catalog }: { catalog: RecipeCatalogState }) {
 /** Vista previa de lo que ve el paciente + día y momento; confirma la asignación al día. */
 export function RecipeAssignDialog({ catalog }: { catalog: RecipeCatalogState }) {
   const { assigning, day, setDay, slot, setSlot, busy, confirmAssign, closeAssign } = catalog;
+  const dialog = useModalFocus(Boolean(assigning?.published), () => { if (!busy) closeAssign(); });
   if (!assigning?.published) return null;
-  return <div className="recipe-overlay" role="dialog" aria-label="Así lo ve tu asesorado">
+  return <div className="recipe-overlay" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Así lo ve tu asesorado">
     <div className="recipe-overlay-card">
       <h2>Así lo ve tu asesorado</h2>
       <label>Día<input type="date" value={day} onChange={(event) => setDay(event.target.value)} /></label>
@@ -289,7 +298,7 @@ export function RecipeCatalog({ patientId }: { patientId: string }) {
       </div>
       <div className="recipe-header-actions">
         <NvButton className="nv-ghost" disabled={busy} onClick={catalog.startNew}>Nueva receta</NvButton>
-        <NvButton disabled={busy} onClick={catalog.quickAiDraft}>Generar borrador con IA</NvButton>
+        <NvButton disabled={busy || !patientId} onClick={catalog.quickAiDraft}>Generar borrador con IA</NvButton>
       </div>
     </header>
     {source === 'memory' && <p className="recipe-demo">Vista demo · el catálogo se conserva mientras la API siga encendida.</p>}
@@ -303,9 +312,9 @@ export function RecipeCatalog({ patientId }: { patientId: string }) {
     <div className="recipe-grid">{recipes?.map((recipe) => {
       const card = recipe.current.card ?? unavailableCard(recipe.title);
       return <RecipePlateCard key={recipe.id} title={recipe.title} portions={recipe.current.yield_portions} card={card} actions={<>
-        <NvButton className="nv-ghost" disabled={busy} onClick={() => catalog.startEdit(recipe)}>Editar</NvButton>
+        <NvButton className="nv-ghost" aria-label={`Editar ${recipe.title}`} disabled={busy} onClick={() => catalog.startEdit(recipe)}>Editar</NvButton>
         {!recipe.current.published_at && <NvButton disabled={busy} onClick={() => catalog.publish(recipe)}>Publicar</NvButton>}
-        {recipe.published && <NvButton disabled={busy} onClick={() => catalog.startAssign(recipe)}>Asignar</NvButton>}
+        {recipe.published && <NvButton aria-label={`Asignar ${recipe.title}`} disabled={busy || !patientId} onClick={() => catalog.startAssign(recipe)}>Asignar</NvButton>}
         <RecipeCoverAction catalog={catalog} recipe={recipe} className="nv-button nv-ghost" />
         <RecipeManualCoverAction recipe={recipe} disabled={busy} onSaved={catalog.reload} />
       </>} />;
