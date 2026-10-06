@@ -29,6 +29,7 @@ import type { ZodType } from 'zod';
 import { generateCopilotBrief } from './ai/copilot.js';
 import { AIUnavailableError } from './ai/errors.js';
 import { readRuntimeConfig } from './config/runtime.js';
+import { persistDemoState, startDemoState } from './demo/state.js';
 import { processQueue } from './jobs/queue.js';
 import { startJobWorker } from './jobs/worker.js';
 import { authMiddleware } from './middleware/auth.js';
@@ -201,6 +202,10 @@ app.use('/api/*', async (c, next) => {
 });
 app.use('/api/*', authMiddleware);
 app.use('/api/*', securityLimits.protected);
+app.use('/api/*', async (c, next) => {
+  await next();
+  if (!['/api/health','/api/ready'].includes(c.req.path)) persistDemoState();
+});
 
 app.onError((error, c) => {
   if (error instanceof CareError) return c.json({ error: error.message }, error.status);
@@ -1151,7 +1156,13 @@ if (isMainModule) {
     process.exit(1);
   }
   const port = Number(process.env.PORT ?? 3001);
+  if (process.env.DEMO_STATE_FILE && isSupabaseEnabled()) throw new Error('La simulación guardada sólo permite datos locales, sin conexión a Supabase.');
+  const demoState = startDemoState(process.env.DEMO_STATE_FILE, config);
+  if (demoState) {
+    process.once('exit', () => demoState.close());
+    for (const signal of ['SIGINT','SIGTERM'] as const) process.once(signal, () => process.exit(0));
+  }
   if (process.env.WORKER_SEPARATE !== '1') startJobWorker();
   writeOpsLog('info', 'api_listen', { mode: config.mode, data: config.dataMode, ai: config.aiMode, port: String(port) });
-  serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
+  serve({ fetch: app.fetch, port, hostname: demoState ? '127.0.0.1' : '0.0.0.0' });
 }

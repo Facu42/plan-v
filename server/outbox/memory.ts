@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import { CareError } from '../care/errors.js';
 import {
@@ -232,3 +233,5 @@ export function memoryHasSentEmailOrPush(patientId?: string) {
     return event?.patient_id === patientId;
   });
 }
+
+registerDemoState('outbox/memory', () => ({ events, deliveries, clientIndex, dedupeIndex, prefs, unlinked }));

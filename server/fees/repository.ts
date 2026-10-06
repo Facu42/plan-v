@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
@@ -313,3 +314,5 @@ function paymentDuplicate(patientId: string, input: PaymentInput, operation: str
   if (prior) return true;
   paymentReceipts.set(input.client_id,body); return false;
 }
+
+registerDemoState('fees/repository', () => ({ settings, fees, charges, payments, paymentReceipts }));

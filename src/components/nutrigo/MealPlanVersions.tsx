@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { careErrorMessage } from '../../api/care';
+import { careErrorMessage, notifyCareChanged } from '../../api/care';
 import { plansApi } from '../../api/plans';
 import { recipesApi } from '../../api/recipes';
 import { aiJobsApi } from '../../api/ai-jobs';
 import type { AiJobView } from '../../types/ai-jobs';
+import { menuPreferences } from '../../lib/menu-preferences';
 import { PLAN_SLOTS, buildPublishedPlanDays, mealPlanDraftSchema, toPublishedPatientPlan, type MealPlanDraftInput, type PatientMealPlan, type PlanItemView, type PlanSlot, type ProfessionalMealPlan } from '../../types/plans';
 import type { ProfessionalRecipe } from '../../types/recipes';
 import { NvButton, NvState } from './primitives';
@@ -133,7 +134,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
   async function run(work: () => Promise<unknown>, success: string) {
     if (lock.current) return;
     lock.current = true; setBusy(true); setError(''); setStatus('');
-    try { await work(); setStatus(success); await reload(); onChanged?.(); }
+    try { await work(); setStatus(success); await reload(); onChanged?.(); notifyCareChanged(); }
     catch (caught) { setError(careErrorMessage(caught)); }
     finally { lock.current = false; setBusy(false); }
   }
@@ -178,6 +179,8 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
 
   async function generateProposal() {
     if (lock.current) return;
+    const preferences = menuPreferences(dietaryPreferences);
+    if (preferences.error) { setError(preferences.error); return; }
     lock.current = true;
     setBusy(true); setError(''); setStatus(''); setProposal(null);
     try {
@@ -187,7 +190,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
         period_start: periodStart,
         period_end: periodEnd,
         slots: selectedSlots,
-        dietary_preferences: dietaryPreferences.split('\n').map((entry) => entry.trim()).filter(Boolean),
+        dietary_preferences: preferences.values,
       });
       if (!proposalFrom(created.job)) {
         throw new Error(created.job.error_code === 'stale_context'
@@ -195,6 +198,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
           : 'La IA no pudo preparar un menú para revisar. No se publicó nada.');
       }
       setProposal(created.job);
+      notifyCareChanged();
       setStatus('Propuesta lista para revisar. El paciente todavía no la ve.');
     } catch (caught) {
       setError(careErrorMessage(caught));
@@ -211,6 +215,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
       await aiJobsApi.reject(proposal.id);
       setProposal(null);
       setStatus('Propuesta rechazada. El plan publicado no cambió.');
+      notifyCareChanged();
     } catch (caught) {
       setError(careErrorMessage(caught));
     } finally {
@@ -242,6 +247,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
         : careErrorMessage(caught));
       if (applied) await reload();
     } finally {
+      if (applied) notifyCareChanged();
       lock.current = false; setBusy(false);
     }
   }
@@ -267,7 +273,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
         <p>El paciente sólo ve la versión publicada. Publicar revalida alergias, unidades y la versión esperada. La IA propone un borrador; no publica sola.</p>
       </div>
     </header>
-    {source === 'memory' && <p className="meal-plan-demo">Vista demo · el plan fechado se conserva mientras la API siga encendida.</p>}
+    {source === 'memory' && <p className="meal-plan-demo">Vista demo · plan ficticio para probar edición y publicación.</p>}
     {error && <p className="meal-plan-error" role="alert">{error}</p>}
     {status && <p className="meal-plan-status" role="status">{status}</p>}
     {plan?.published && <PublishedDatedPlanView plan={toPublishedPatientPlan(plan)} audience="pro" />}
@@ -280,7 +286,8 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
         <label>Hasta<input type="date" value={periodEnd} onChange={(event) => setPeriodEnd(event.target.value)} /></label>
       </div>
       <fieldset><legend>Momentos para la propuesta</legend>{PLAN_SLOTS.map((slot) => <label key={slot}><input type="checkbox" checked={selectedSlots.includes(slot)} onChange={(event) => setSelectedSlots(event.target.checked ? [...selectedSlots, slot] : selectedSlots.filter((entry) => entry !== slot))} />{slot}</label>)}</fieldset>
-      <label>Preferencias alimentarias<textarea maxLength={809} placeholder="Un alimento o preferencia por línea; hasta diez. Ejemplo: platos con legumbres." value={dietaryPreferences} onChange={(event) => setDietaryPreferences(event.target.value)} /></label>
+      <label>Preferencias alimentarias<textarea aria-describedby="menu-preferences-help" maxLength={809} placeholder="Una preferencia por línea, hasta 10 de 80 caracteres. Ejemplo: platos con legumbres." value={dietaryPreferences} onChange={(event) => setDietaryPreferences(event.target.value)} /></label>
+      <small id="menu-preferences-help">Hasta 10 preferencias de 80 caracteres cada una. Separalas con un salto de línea.</small>
       {draftItems.map((item, index) => <div className="meal-plan-item-row" key={index}>
         <input aria-label={`Fecha ${index + 1}`} type="date" value={item.for_date} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, for_date: event.target.value } : current))} />
         <select aria-label={`Momento ${index + 1}`} value={item.slot} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, slot: event.target.value as PlanSlot } : current))}>

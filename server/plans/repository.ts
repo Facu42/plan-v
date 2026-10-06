@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
 import { getPatient } from '../store.js';
@@ -449,3 +450,5 @@ export async function publishMealPlan(
   mealPlanDbError(error);
   return asProfessional(data as Record<string, unknown>);
 }
+
+registerDemoState('plans/repository', () => ({ plans, versions, items }));

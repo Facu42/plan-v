@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
@@ -132,3 +133,5 @@ export async function registerRecipeDay(
   if (!data) throw new CareError(501, 'Registrar la comida asignada requiere instalar la migración de este módulo.');
   return data as { assignment: RecipeDayAssignment; duplicate: boolean };
 }
+
+registerDemoState('recipes/day', () => ({ days }));

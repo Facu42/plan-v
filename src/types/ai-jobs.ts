@@ -18,6 +18,8 @@ export const AI_JOB_MAX_ACTIVE = 3;
 export const AI_JOB_LEASE_MS = 120_000;
 
 const isoDate = z.iso.date();
+export const MAX_DIETARY_PREFERENCES = 10;
+export const MAX_DIETARY_PREFERENCE_LENGTH = 80;
 
 export const aiJobEnqueueSchema = z.object({
   patient_id: z.string().trim().min(1).max(80),
@@ -26,7 +28,7 @@ export const aiJobEnqueueSchema = z.object({
   period_start: isoDate.optional(),
   period_end: isoDate.optional(),
   slots: z.array(z.enum(PLAN_SLOTS)).min(1).max(6).optional(),
-  dietary_preferences: z.array(z.string().trim().min(1).max(80)).max(10).optional(),
+  dietary_preferences: z.array(z.string().trim().min(1).max(MAX_DIETARY_PREFERENCE_LENGTH)).max(MAX_DIETARY_PREFERENCES).optional(),
 }).strict().superRefine((value, ctx) => {
   if (value.job_type === 'menu_draft') {
     if (!value.period_start || !value.period_end) {
