@@ -310,9 +310,9 @@ export function RecipeCatalog({ patientId }: { patientId: string }) {
     <div className="recipe-grid">{recipes?.map((recipe) => {
       const card = recipe.current.card ?? unavailableCard(recipe.title);
       return <RecipePlateCard key={recipe.id} title={recipe.title} portions={recipe.current.yield_portions} card={card} actions={<>
-        <NvButton className="nv-ghost" disabled={busy} onClick={() => catalog.startEdit(recipe)}>Editar</NvButton>
+        <NvButton className="nv-ghost" aria-label={`Editar ${recipe.title}`} disabled={busy} onClick={() => catalog.startEdit(recipe)}>Editar</NvButton>
         {!recipe.current.published_at && <NvButton disabled={busy} onClick={() => catalog.publish(recipe)}>Publicar</NvButton>}
-        {recipe.published && <NvButton disabled={busy || !patientId} onClick={() => catalog.startAssign(recipe)}>Asignar</NvButton>}
+        {recipe.published && <NvButton aria-label={`Asignar ${recipe.title}`} disabled={busy || !patientId} onClick={() => catalog.startAssign(recipe)}>Asignar</NvButton>}
         <RecipeCoverAction catalog={catalog} recipe={recipe} className="nv-button nv-ghost" />
         <RecipeManualCoverAction recipe={recipe} disabled={busy} onSaved={catalog.reload} />
       </>} />;
