@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import type { FoodItem, Macros, MealLog, MealStatus } from '../../src/types/index.js';
 import { getRequestDb } from '../db/supabase-client.js';
@@ -281,3 +282,5 @@ export async function reviewMealLog(
   attachToPatient(publicLog(current), false);
   return publicLog(current);
 }
+
+registerDemoState('diary/repository', () => ({ logs, clientIndex, analysisRuns, reviews }));

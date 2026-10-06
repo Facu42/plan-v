@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('ai', () => ({ generateText: vi.fn(), Output: { object: vi.fn((input) => input) } }));
 import { generateText } from 'ai';
-import { generateMenuDraft } from './menu-draft.js';
+import { demoMenuPlan, generateMenuDraft } from './menu-draft.js';
 import { generateRecipeDraft } from './recipe-draft.js';
 import { buildMenuJobContext, buildRecipeJobContext } from './context.js';
 import { emptyIntakePayload } from '../intake/payload.js';
@@ -16,6 +16,14 @@ beforeEach(() => { vi.clearAllMocks(); vi.stubEnv('APP_MODE', 'test'); vi.stubEn
 afterEach(() => vi.unstubAllEnvs());
 
 describe('contrato del proveedor para propuestas estimadas', () => {
+  it('la simulación cubre todas las fechas y momentos sin fingir una recomendación revisada', () => {
+    const plan = demoMenuPlan({ ...context(), period_start: '2026-10-05', period_end: '2026-10-11', slots: [] });
+    expect(plan.items).toHaveLength(28);
+    expect(new Set(plan.items.map(item => item.for_date))).toHaveLength(7);
+    expect(new Set(plan.items.map(item => `${item.for_date}|${item.slot}`))).toHaveLength(28);
+    expect(plan.items.every(item => item.free_text?.includes('completar antes de publicar'))).toBe(true);
+    expect(plan.items.every(item => !item.recipe_proposal)).toBe(true);
+  });
   it('fuerza procedencia de IA, calcula porciones en servidor y no envía marcadores de permiso ni identidad', async () => {
     vi.mocked(generateText).mockResolvedValueOnce({ output: output() } as never);
     const result = await generateMenuDraft(context());

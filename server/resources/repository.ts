@@ -205,15 +205,40 @@ export async function getPatientLibrary(patientId: string, persistent: boolean, 
   return asLibraryView(await rpc('get_patient_library', { target_patient: patientId, query }), patientId);
 }
 
+export async function getEditorialCatalog(persistent: boolean, nutritionistId?: string): Promise<EditorialResource[]> {
+  if (!persistent) return catalogResources();
+  if (!nutritionistId) throw new CareError(403, 'Solo profesionales del consultorio.');
+  const result: EditorialResource[] = [];
+  for (let offset = 0; ; offset += 250) {
+    const read = await getRequestDb().from('resources').select('*')
+      .or(`nutritionist_id.is.null,nutritionist_id.eq.${nutritionistId}`).order('id').range(offset, offset + 249);
+    resourceDbError(read.error);
+    result.push(...asResources(read.data));
+    if ((read.data?.length ?? 0) < 250) return result;
+  }
+}
+
+async function lookupEditorial(value: string, persistent: boolean): Promise<EditorialResource | null> {
+  if (!persistent) return findResource(value);
+  const field = /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(value) ? 'id' : 'slug';
+  const result = await getRequestDb().from('resources').select('*').eq(field, value).maybeSingle();
+  resourceDbError(result.error);
+  return asResource(result.data);
+}
+
 export async function assignEditorialResource(
   resourceId: string,
   patientIds: string[],
   persistent: boolean,
   professional: boolean,
+  nutritionistId?: string,
 ): Promise<{ patients: ReturnType<typeof getPatient>[]; assigned_count: number; existing_count: number; library?: PatientLibraryView }> {
-  const resource = findResource(resourceId);
+  const resource = await lookupEditorial(resourceId, persistent);
   if (!resource || !resource.published) throw new CareError(400, 'Recurso inválido');
   if (!professional) throw new CareError(403, 'Sólo una profesional puede asignar un recurso.');
+  if (persistent && resource.nutritionist_id && resource.nutritionist_id !== nutritionistId) {
+    throw new CareError(403, 'Ese recurso no pertenece a tu consultorio.');
+  }
   if (!persistent) {
     const result = assignResourceToPatients(resource.slug, patientIds);
     if (!result) throw new CareError(404, 'Paciente no encontrado.');
@@ -235,7 +260,7 @@ export async function assignEditorialResource(
 }
 
 export async function markEditorialRead(patientId: string, resourceId: string, persistent: boolean, professional: boolean) {
-  const resource = findResource(resourceId);
+  const resource = await lookupEditorial(resourceId, persistent);
   if (!resource) throw new CareError(400, 'Recurso inválido');
   if (professional) throw new CareError(403, 'Sólo la paciente puede marcar la lectura.');
   if (!persistent) {
@@ -312,8 +337,16 @@ export async function saveEditorialDraft(
   sections: EditorialResource['sections'],
   persistent: boolean,
   professional: boolean,
+  nutritionistId?: string,
 ): Promise<EditorialResource> {
   if (!professional) throw new CareError(403, 'Sólo una profesional puede crear un artículo.');
+  const existing = await lookupEditorial(slug, persistent);
+  if (existing) {
+    const owner = persistent ? nutritionistId : 'nutri-demo';
+    if (existing.nutritionist_id === owner && existing.title === title && existing.summary === summary
+      && existing.category === category && JSON.stringify(existing.sections) === JSON.stringify(sections)) return existing;
+    throw new CareError(409, 'Ese recurso ya tiene contenido guardado. Creá una nueva versión para conservarlo.');
+  }
   if (!persistent) {
     if (findResource(slug)) throw new CareError(400, 'Revisá el recurso, la autoría y las reglas de publicación.');
     const entry: EditorialResource = {

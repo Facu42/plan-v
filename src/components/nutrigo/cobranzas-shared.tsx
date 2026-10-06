@@ -1,5 +1,6 @@
+import { useUnsavedChanges } from './unsaved-changes';
 import { writeWasRejected } from '../../api/write-outcome';
-import { useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { formatPesos, PAYMENT_METHOD_LABELS, type FeeState, type FeeSummary } from '../../fees';
 import { localBillingDate } from '../../billing';
 import type { PaymentInput, PaymentMethod, PaymentStatus } from '../../types/fees';
@@ -49,6 +50,8 @@ export function PaymentForm({ idPrefix, defaultAmount, submitLabel, hint, onSubm
   const [error, setError] = useState('');
   const pending = useRef<PaymentInput | null>(null);
   const lock = useRef(false);
+  const [baseline, setBaseline] = useState(() => JSON.stringify([amount, paidOn, method, note]));
+  useUnsavedChanges(JSON.stringify([amount, paidOn, method, note]) !== baseline || Boolean(pending.current), busy);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -61,7 +64,7 @@ export function PaymentForm({ idPrefix, defaultAmount, submitLabel, hint, onSubm
       pending.current ??= { client_id: crypto.randomUUID(), amount: pesos, paid_on: paidOn, method, ...(note.trim() ? { note: note.trim() } : {}) };
       await onSubmit(pending.current);
       pending.current = null;
-      setNote('');
+      setNote(''); setBaseline(JSON.stringify([amount, paidOn, method, '']));
     } catch (reason) {
       if (writeWasRejected(reason)) pending.current = null;
       setError(feeErrorMessage(reason));
@@ -84,8 +87,21 @@ export function PaymentForm({ idPrefix, defaultAmount, submitLabel, hint, onSubm
 export function ConfirmDialog({ title, description, confirmLabel, busy, error, onConfirm, onCancel }: {
   title: string; description: string; confirmLabel: string; busy: boolean; error: string; onConfirm: () => void; onCancel: () => void;
 }) {
+  const dialog = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    dialog.current?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();
+    return () => { if (opener?.isConnected) opener.focus(); };
+  }, []);
   return <div className="nv-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !busy && onCancel()}>
-    <section className="nv-dialog cbz-dialog" role="dialog" aria-modal="true" aria-labelledby="cbz-confirm-title">
+    <section ref={dialog} className="nv-dialog cbz-dialog" role="dialog" aria-modal="true" aria-labelledby="cbz-confirm-title" onKeyDown={event => {
+      if (event.key === 'Escape' && !busy) { event.preventDefault(); onCancel(); }
+      if (event.key !== 'Tab') return;
+      const controls = [...(dialog.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') ?? [])];
+      if (!controls.length) { event.preventDefault(); return; }
+      if (event.shiftKey && document.activeElement === controls[0]) { event.preventDefault(); controls[controls.length - 1]?.focus(); }
+      else if (!event.shiftKey && document.activeElement === controls[controls.length - 1]) { event.preventDefault(); controls[0]?.focus(); }
+    }}>
       <h2 id="cbz-confirm-title">{title}</h2>
       <p>{description}</p>
       <FeeError message={error} />

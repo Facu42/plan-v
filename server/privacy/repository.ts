@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
@@ -286,3 +287,5 @@ export async function anonymizePatientLater(payload: Record<string, unknown>) {
   if (!patient?.deactivated_at) return;
   patient.anonymized_at = new Date().toISOString();
 }
+
+registerDemoState('privacy/repository', () => ({ requests, accessEvents }));

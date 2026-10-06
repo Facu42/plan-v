@@ -1,10 +1,12 @@
 import { randomUUID } from 'node:crypto';
+import { registerDemoState } from '../demo/state.js';
 import type { JobKind, JobStore, ProcessingJob } from './types.js';
 
 const backoffMs = (attempts: number) => Math.min(60_000, 500 * 2 ** Math.max(0, attempts - 1));
 
-export function createMemoryJobStore(now: () => Date = () => new Date()): JobStore {
+export function createMemoryJobStore(now: () => Date = () => new Date(), demoDomain?: string): JobStore {
   const jobs = new Map<string, ProcessingJob>();
+  if (demoDomain) registerDemoState(demoDomain, () => ({ jobs }));
 
   return {
     async enqueue(input) {
@@ -43,7 +45,7 @@ export function createMemoryJobStore(now: () => Date = () => new Date()): JobSto
       job.updated_at = current;
       return { ...job, payload: { ...job.payload } };
     },
-    async complete(id, error) {
+    async complete(id, error, retryAfterMs) {
       const job = jobs.get(id);
       if (!job) throw new Error('job_missing');
       const stamp = now().toISOString();
@@ -64,7 +66,7 @@ export function createMemoryJobStore(now: () => Date = () => new Date()): JobSto
         job.last_error = lastError;
         job.lease_owner = null;
         job.lease_until = null;
-        job.run_after = new Date(now().getTime() + backoffMs(job.attempts)).toISOString();
+        job.run_after = new Date(now().getTime() + (job.kind === 'menu_cover' ? Math.min(86_460_000, Math.max(60_000, retryAfterMs || 60_000)) : backoffMs(job.attempts))).toISOString();
       }
       job.updated_at = stamp;
       return { ...job, payload: { ...job.payload } };
@@ -95,6 +97,7 @@ export function createMemoryJobStore(now: () => Date = () => new Date()): JobSto
 export function assertJobKind(value: string): JobKind {
   if (
     value === 'menu_draft'
+    || value === 'menu_cover'
     || value === 'recipe_draft'
     || value === 'purge_asset'
     || value === 'privacy_export'

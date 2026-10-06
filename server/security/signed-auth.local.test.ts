@@ -9,7 +9,7 @@ import { CONSENT_CATALOG } from '../intake/consent.js';
 import { createPostgresJobStore } from '../jobs/postgres.js';
 
 const enabled = process.env.PLANV_LOCAL_SIGNED_AUTH === '1';
-const INTERNAL = ['audit_events','notification_deliveries','notification_preferences','nutritionist_subscriptions','outbox_events','patient_invite_events','payment_webhook_events','platform_admins','platform_settings','privacy_access_events','privacy_export_packages','privacy_requests','processing_jobs','recipe_cover_requests','recipe_day_assignments','recipe_version_cards','service_payments'];
+const INTERNAL = ['audit_events','menu_dish_covers','notification_deliveries','notification_preferences','nutritionist_subscriptions','outbox_events','patient_invite_events','payment_webhook_events','platform_admins','platform_settings','privacy_access_events','privacy_export_packages','privacy_requests','processing_jobs','recipe_cover_requests','recipe_day_assignments','recipe_version_cards','service_payments'];
 const canary = 'NOTA PROFESIONAL FICTICIA: prueba de acceso';
 const inputs: TargetInput = { sex: 'femenino', age: 30, weight_kg: 65, height_cm: 165, activity: 'ligera', ...defaultsForGoal('bajar') };
 const body = { sex: 'femenino', birth_date: '1990-05-10', height_cm: 165, weight_kg: 65 };
@@ -89,6 +89,47 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
   afterAll(async () => {
     // La eliminación de todos los datos/usuarios la hace el runner al quitar SU entorno.
     await pool?.end();
+  });
+
+  it('la bandeja agrega metadata con PostgREST y aísla dos consultorios y los pacientes', async () => {
+    const id = randomUUID();
+    await pool.query("insert into public.meal_logs(id,patient_id,slot_label,status,description,note_for_nutri) values($1,$2,'Almuerzo','pending_review','Descripción ficticia',$3)", [id,pidA,canary]);
+    try {
+      const [a,b,p] = await Promise.all([api(ownerA,'/api/crm/work-queue'),api(ownerB,'/api/crm/work-queue'),api(patientA,'/api/crm/work-queue')]);
+      expect(a.status).toBe(200); expect(b.status).toBe(200); expect(p.status).toBe(403);
+      const first = await a.json(); const second = await b.json();
+      expect(first.items).toContainEqual(expect.objectContaining({ id: `meal:${id}`, patient_id: pidA, kind: 'meal' }));
+      expect(first.items.every((item: {patient_id:string}) => item.patient_id === pidA)).toBe(true);
+      expect(second.items.every((item: {patient_id:string}) => item.patient_id === pidB)).toBe(true);
+      expect(JSON.stringify(first)).not.toContain(canary);
+      expect((await api(ownerB,`/api/crm/work-queue?patient_id=${pidA}`)).status).toBe(403);
+    } finally { await pool.query('delete from public.meal_logs where id=$1',[id]); }
+  });
+
+  it('catálogo y publicación de recursos propios con lectura paciente y aislamiento de consultorios', async () => {
+    const slug = 'recurso-auth-' + randomUUID();
+    const input = {slug,title:'Guía ficticia propia',summary:'Texto ficticio revisado',category:'Organización',sections:[{title:'Paso',body:'Contenido ficticio del consultorio A.'}]};
+    expect((await api(patientA,'/api/resources')).status).toBe(403);
+    expect((await api(patientA,'/api/resources','POST',input)).status).toBe(403);
+    const written = await api(ownerA,'/api/resources','POST',input);
+    expect(written.status).toBe(201);
+    const resource = (await written.json()).resource;
+    const own = (await (await api(ownerA,'/api/resources')).json()).resources;
+    const other = (await (await api(ownerB,'/api/resources')).json()).resources;
+    expect(own).toContainEqual(expect.objectContaining({id:resource.id,published:false}));
+    expect(other.some((r:{id:string})=>r.id===resource.id)).toBe(false);
+    expect((await api(ownerB,`/api/resources/${resource.id}/publish`,'POST',{})).status).toBe(403);
+    expect((await api(patientA,`/api/resources/${resource.id}/publish`,'POST',{})).status).toBe(403);
+    expect((await api(ownerA,`/api/resources/${resource.id}/publish`,'POST',{})).status).toBe(200);
+    expect((await ownerB.client.from('resources').select('id').eq('id',resource.id)).data).toEqual([]);
+    expect((await ownerB.client.rpc('assign_editorial_resource',{resource_slug:slug,patient_ids:[pidB]})).error?.code).toBe('42501');
+    expect((await api(ownerB,'/api/resources/assign','POST',{resource_id:slug,patient_ids:[pidB]})).status).toBe(400);
+    expect((await api(ownerA,'/api/resources/assign','POST',{resource_id:slug,patient_ids:[pidA]})).status).toBe(200);
+    const seen = (await (await api(patientA,`/api/patients/${pidA}/library`)).json()).library;
+    expect(seen.articles).toContainEqual(expect.objectContaining({id:resource.id,sections:input.sections,published:true}));
+    expect((await api(patientA,`/api/patients/${pidA}/resources/${slug}/read`,'POST',{})).status).toBe(200);
+    const libraryB = (await (await api(patientB,`/api/patients/${pidB}/library`)).json()).library;
+    expect(libraryB.articles.some((r:{id:string})=>r.id===resource.id)).toBe(false);
   });
 
   it('dos conexiones reales no reservan el mismo trabajo mientras la primera transacción sigue abierta', async () => {

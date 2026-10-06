@@ -28,6 +28,13 @@ function jpegWithExif() {
 }
 
 describe('PV-15 inspección de archivos privados', () => {
+  it('limpia un JPEG de tamaño real sin expandir todos sus bytes como argumentos',()=>{
+    const original=jpegWithExif();const scan=original.indexOf(Buffer.from([0xff,0xda]));
+    const large=Buffer.concat([original.subarray(0,scan+10),Buffer.alloc(600_000,0x7f),Buffer.from([0xff,0xd9])]);
+    const cleaned=stripJpegMetadata(large);
+    expect(cleaned.includes(Buffer.from('Exif'))).toBe(false);expect(cleaned.length).toBeGreaterThan(600_000);expect(jpegDimensions(cleaned)).toEqual({width:1,height:1});
+    expect(inspectPrivateFile('body_progress',large,'image/jpeg').bytes).toEqual(cleaned);
+  });
   it('acepta PNG 1×1 y rechaza magic bytes falsos', () => {
     expect(detectMagic(PNG)).toBe('image/png');
     const inspected = inspectPrivateFile('body_progress', PNG, 'image/png');

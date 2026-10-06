@@ -31,14 +31,14 @@ async function access(
     if ((action === 'read_resource' || action === 'manage_favorites') && audience === 'pro') {
       throw new repo.CareError(403, 'Sólo la paciente puede hacer esta acción.');
     }
-    return { persistent: false, professional };
+    return { persistent: false, professional, nutritionistId: undefined };
   }
   const actor = await authorizePatientAction(auth.userId, patientId, action, {
     getActor: sb.sbGetActor,
     getPatientResource: sb.sbGetPatientResource,
   });
   if (!actor) throw new repo.CareError(403, 'No tenés permiso para esta acción.');
-  return { persistent: true, professional: actor.role === 'nutri' };
+  return { persistent: true, professional: actor.role === 'nutri', nutritionistId: actor.role === 'nutri' ? actor.nutritionistId : undefined };
 }
 
 const assignSchema = z.object({
@@ -61,6 +61,16 @@ const draftSchema = z.object({
 }).strict();
 
 export function registerResourceRoutes(app: Hono) {
+  app.get('/api/resources', async c => {
+    const auth = c.get('auth');
+    const persistent = 'userId' in auth && isSupabaseEnabled();
+    const actor = persistent && 'userId' in auth ? await sb.sbGetActor(auth.userId) : null;
+    if (persistent ? actor?.role !== 'nutri' : c.req.query('audience') !== 'pro') {
+      throw new repo.CareError(403, 'Solo profesionales del consultorio.');
+    }
+    const resources = await repo.getEditorialCatalog(persistent, actor?.role === 'nutri' ? actor.nutritionistId : undefined);
+    return c.json({ resources, source: persistent ? 'supabase' : 'memory' });
+  });
   app.get('/api/patients/:id/library', async (c) => {
     const id = c.req.param('id');
     const { persistent, professional } = await access(c, id, 'read_patient');
@@ -71,7 +81,7 @@ export function registerResourceRoutes(app: Hono) {
   app.post('/api/resources/assign', async (c) => {
     const input = await body(c, assignSchema, 'Datos inválidos');
     const first = input.patient_ids[0];
-    const { persistent, professional } = await access(c, first, 'assign_resource');
+    const { persistent, professional, nutritionistId } = await access(c, first, 'assign_resource');
     if (persistent) {
       const auth = c.get('auth');
       if ('userId' in auth) {
@@ -86,7 +96,7 @@ export function registerResourceRoutes(app: Hono) {
         if (!getPatient(patientId)) throw new repo.CareError(404, 'Paciente no encontrado.');
       }
     }
-    const result = await repo.assignEditorialResource(input.resource_id, input.patient_ids, persistent, professional);
+    const result = await repo.assignEditorialResource(input.resource_id, input.patient_ids, persistent, professional, nutritionistId);
     const patients = persistent ? await Promise.all(input.patient_ids.map(id => sb.sbGetPatientById(id, 'professional'))) : result.patients;
     if (patients.some(patient => !patient)) throw new repo.CareError(503, 'Las asignaciones se guardaron, pero no se pudo recuperar la ficha. Recargá para comprobarlas.');
     return c.json({
@@ -126,7 +136,7 @@ export function registerResourceRoutes(app: Hono) {
     if (persistent) {
       const actor = await sb.sbGetActor(auth.userId);
       if (actor?.role !== 'nutri') throw new repo.CareError(403, 'Sólo una profesional puede crear un artículo.');
-      const resource = await repo.saveEditorialDraft(input.slug, input.title, input.summary, input.category, input.sections, true, true);
+      const resource = await repo.saveEditorialDraft(input.slug, input.title, input.summary, input.category, input.sections, true, true, actor.nutritionistId);
       return c.json({ resource, source: 'supabase' }, 201);
     }
     const resource = await repo.saveEditorialDraft(input.slug, input.title, input.summary, input.category, input.sections, false, professional);

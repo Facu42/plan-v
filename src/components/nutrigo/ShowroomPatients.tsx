@@ -7,6 +7,10 @@ import { NvBadge, NvButton, NvCard, NvProgress, NvState } from './primitives';
 import { hasFullPatientAccess } from '../../billing';
 import { createPatientWithInvitation, invitationReady } from './patient-invite-actions';
 import './showroom-patients.css';
+import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
+import { buildBoardRows } from './cobranzas-utils';
+import { formatPesos } from '../../fees';
+import type { BillingBoard } from '../../types/fees';
 
 const STAGE_LABELS: Record<Stage, string> = { ingreso: 'Ingreso', plan: 'Plan', seguimiento: 'Seguimiento', alta: 'Alta' };
 
@@ -20,11 +24,21 @@ const FILTERS: Array<{ id: PatientDirectoryFilter; label: string }> = [
 ];
 
 function useDialogKeys(onClose: () => void, busy: boolean) {
+  const latest = useRef({ onClose, busy }); latest.current = { onClose, busy };
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape' && !busy) onClose(); };
+    const opener = document.activeElement as HTMLElement | null;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !latest.current.busy && canLeaveWorkspace()) { event.preventDefault(); latest.current.onClose(); }
+      if (event.key !== 'Tab') return;
+      const dialog = document.querySelector<HTMLElement>('.nv-dialog');
+      const controls = [...(dialog?.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href],[tabindex="0"]') ?? [])].filter((element) => element.getClientRects().length);
+      if (!controls.length) return;
+      const target = event.shiftKey ? controls[controls.length - 1] : controls[0];
+      if ((event.shiftKey && document.activeElement === controls[0]) || (!event.shiftKey && document.activeElement === controls[controls.length - 1])) { event.preventDefault(); target.focus(); }
+    };
     document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [onClose, busy]);
+    return () => { document.removeEventListener('keydown', onKeyDown); if (opener?.isConnected) opener.focus(); };
+  }, []);
 }
 
 export function inviteLink(inviteId: string, origin = typeof window === 'undefined' ? '' : window.location.origin) {
@@ -73,7 +87,7 @@ export function InviteShare({ name, invite, onClose }: { name: string; invite: P
     {!linked && <span className="nv-invite-actions">
       {ready ? <><NvButton className="nv-soft" onClick={copy}>{copied ? 'Copiado' : 'Copiar enlace'}</NvButton><a className="nv-button nv-ghost" href={`https://wa.me/?text=${encodeURIComponent(inviteMessage(name, link))}`} target="_blank" rel="noreferrer">WhatsApp</a></> : <NvButton className="nv-soft" disabled={busy} onClick={() => void prepare()}>{busy ? 'Preparando…' : 'Reintentar preparar invitación'}</NvButton>}
     </span>}
-    <button type="button" disabled={busy} onClick={onClose} aria-label="Cerrar aviso">×</button>
+    <button type="button" disabled={busy} onClick={() => { if (canLeaveWorkspace()) onClose(); }} aria-label="Cerrar aviso">×</button>
   </div>;
 }
 
@@ -85,6 +99,7 @@ export function ShowroomPatientCreate({ onClose, onCreated }: { onClose: () => v
   const [error, setError] = useState('');
   const nameInput = useRef<HTMLInputElement>(null);
   const creationLock = useRef(false);
+  useUnsavedChanges(Boolean(name.trim() || email.trim() || goal.trim()), busy);
   useDialogKeys(onClose, busy);
   useEffect(() => { nameInput.current?.focus(); }, []);
 
@@ -104,11 +119,11 @@ export function ShowroomPatientCreate({ onClose, onCreated }: { onClose: () => v
     }
   };
 
-  return <div className="nv-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !busy && onClose()}>
+  return <div className="nv-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !busy && canLeaveWorkspace() && onClose()}>
     <section className="nv-dialog" role="dialog" aria-modal="true" aria-labelledby="nv-create-title">
       <header className="nv-dialog-head">
         <div><p className="nv-eyebrow">Ingreso</p><h2 id="nv-create-title">Nuevo paciente</h2><p>Creá la ficha inicial. El acceso comienza pendiente hasta que definas la cobranza.</p></div>
-        <button type="button" onClick={onClose} disabled={busy} aria-label="Cerrar">×</button>
+        <button type="button" onClick={() => { if (canLeaveWorkspace()) onClose(); }} disabled={busy} aria-label="Cerrar">×</button>
       </header>
       <form className="nv-dialog-form" onSubmit={submit}>
         <label>Nombre completo<input ref={nameInput} value={name} onChange={(e) => setName(e.target.value)} required minLength={2} maxLength={80} autoComplete="name" /></label>
@@ -117,7 +132,7 @@ export function ShowroomPatientCreate({ onClose, onCreated }: { onClose: () => v
         <p className="nv-dialog-hint"><Icon name="message" size={14} />La invitación es de un uso y vence. En demo no sale un email real.</p>
         {error && <p className="nv-dialog-error" role="alert">{error}</p>}
         <footer className="nv-dialog-actions">
-          <NvButton className="nv-ghost" onClick={onClose} disabled={busy}>Cancelar</NvButton>
+          <NvButton className="nv-ghost" onClick={() => { if (canLeaveWorkspace()) onClose(); }} disabled={busy}>Cancelar</NvButton>
           <NvButton type="submit" disabled={busy}><Icon name={busy ? 'loader' : 'plus'} size={14} className={busy ? 'spin' : ''} />{busy ? 'Creando…' : 'Crear alta'}</NvButton>
         </footer>
       </form>
@@ -137,6 +152,7 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const nameInput = useRef<HTMLInputElement>(null);
+  useUnsavedChanges(name !== patient.name || status !== patient.status || stage !== patient.stage || sensitiveHours !== patient.sensitive_hours || planB !== patient.plan_b || nextFocus !== patient.next_focus || access !== patient.billing_status || accessUntil !== (patient.billing_until ?? ''), busy);
   useDialogKeys(onClose, busy);
   useEffect(() => { nameInput.current?.focus(); }, []);
 
@@ -161,11 +177,11 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
     }
   };
 
-  return <div className="nv-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !busy && onClose()}>
+  return <div className="nv-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !busy && canLeaveWorkspace() && onClose()}>
     <section className="nv-dialog" role="dialog" aria-modal="true" aria-labelledby="nv-edit-title">
       <header className="nv-dialog-head">
         <div><p className="nv-eyebrow">Directorio</p><h2 id="nv-edit-title">Editar ficha de {patient.name}</h2><p>Actualizá los datos operativos del acompañamiento.</p></div>
-        <button type="button" onClick={onClose} disabled={busy} aria-label="Cerrar editor">×</button>
+        <button type="button" onClick={() => { if (canLeaveWorkspace()) onClose(); }} disabled={busy} aria-label="Cerrar editor">×</button>
       </header>
       <form className="nv-dialog-form" onSubmit={submit}>
         <div className="nv-dialog-grid">
@@ -187,7 +203,7 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
         <label>Próximo foco<textarea value={nextFocus} onChange={(e) => setNextFocus(e.target.value)} maxLength={240} rows={2} /></label>
         {error && <p className="nv-dialog-error" role="alert">{error}</p>}
         <footer className="nv-dialog-actions">
-          <NvButton className="nv-ghost" onClick={onClose} disabled={busy}>Cancelar</NvButton>
+          <NvButton className="nv-ghost" onClick={() => { if (canLeaveWorkspace()) onClose(); }} disabled={busy}>Cancelar</NvButton>
           <NvButton type="submit" disabled={busy}>{busy ? 'Guardando…' : 'Guardar cambios'}</NvButton>
         </footer>
       </form>
@@ -210,13 +226,23 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
 }) {
   const [filter, setFilter] = useState<PatientDirectoryFilter>(initialFilter);
   const [creating, setCreating] = useState(false);
+  const [stageFilter, setStageFilter] = useState<Stage | ''>('');
+  const [unlinkedOnly, setUnlinkedOnly] = useState(false);
   const [editing, setEditing] = useState<Patient | null>(null);
   const [archiveConfirmation, setArchiveConfirmation] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [share, setShare] = useState<{ name: string; invite: PatientInvite } | null>(null);
+  const [billing, setBilling] = useState<BillingBoard | null>(null);
+  const [billingError, setBillingError] = useState('');
+  useEffect(() => {
+    let active = true;
+    api.getBillingBoard().then(({ board }) => { if (active) setBilling(board); }).catch(() => { if (active) setBillingError('No pudimos consultar las deudas. Abrí Cobranzas para reintentar.'); });
+    return () => { active = false; };
+  }, []);
+  const feeRows = billing ? buildBoardRows(billing) : [];
   const metrics = getPatientDirectoryMetrics(patients);
-  const visible = filterDirectoryPatients(patients, query, filter);
+  const visible = filterDirectoryPatients(patients, query, filter).filter((person) => (!stageFilter || person.stage === stageFilter) && (!unlinkedOnly || person.has_account === false));
 
   const setArchived = async (patient: Patient, archived: boolean) => {
     if (archived && archiveConfirmation !== patient.id) { setArchiveConfirmation(patient.id); return; }
@@ -264,6 +290,8 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
   }, [initialAction]);
 
   return <>
+    <div className="pw-work-filters" aria-label="Filtros de gestión"><label>Etapa<select value={stageFilter} onChange={(event) => setStageFilter(event.target.value as Stage | '')}><option value="">Todas las etapas</option>{(Object.keys(STAGE_LABELS) as Stage[]).map((id) => <option key={id} value={id}>{STAGE_LABELS[id]}</option>)}</select></label><label><span>Invitación</span><select value={unlinkedOnly ? 'pending' : 'all'} onChange={(event) => setUnlinkedOnly(event.target.value === 'pending')}><option value="all">Todas las cuentas</option><option value="pending">Pendientes de vincular</option></select></label></div>
+    {billingError && <p role="alert">{billingError}</p>}
     <dl className="nv-directory-summary" aria-label="Resumen del directorio">
       <div><dt>Pacientes activos</dt><dd>{metrics.active}</dd></div>
       <div><dt>Necesitan atención</dt><dd>{metrics.attention}</dd></div>
@@ -283,7 +311,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
         <div role="row" className="nv-table-head"><span role="columnheader">Paciente</span><span role="columnheader">Estado</span><span role="columnheader">Próximo foco</span><span role="columnheader">Adherencia</span><span role="columnheader">Acciones</span></div>
         {visible.map((patient) => <div role="row" key={patient.id}>
           <span role="cell"><span className="nv-avatar">{patient.initials}</span><span><strong>{patient.name}</strong><small>{patient.goal}</small></span></span>
-          <span role="cell"><strong>{patient.status}</strong><small>{STAGE_LABELS[patient.stage]}</small>{!hasFullPatientAccess(patient) && <NvBadge tone="coral">{accessLabel(patient)}</NvBadge>}{patient.has_account === false && <NvBadge tone="gold">Sin cuenta</NvBadge>}</span>
+          <span role="cell"><strong>{patient.status}</strong><small>{STAGE_LABELS[patient.stage]}</small>{!hasFullPatientAccess(patient) && <NvBadge tone="coral">{accessLabel(patient)}</NvBadge>}{patient.has_account === false && <NvBadge tone="gold">Sin cuenta</NvBadge>}{(() => { const fee = feeRows.find((row) => row.patient.patient_id === patient.id)?.summary; return fee && fee.owed > 0 ? <NvBadge tone="coral">Debe {formatPesos(fee.owed)}</NvBadge> : null; })()}</span>
           <span role="cell"><strong>{patient.next_focus || 'Sin foco cargado'}</strong><small>{patient.appointment?.when ?? 'Sin consulta'}</small></span>
           <span role="cell"><NvProgress value={patient.adherence_score} label={`Adherencia de ${patient.name}`} /><strong>{patient.adherence_score}%</strong></span>
           <span role="cell" className="nv-directory-actions">

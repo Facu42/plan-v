@@ -51,12 +51,16 @@ describe.each([false, true])('pantallas desde MCP (celular: %s)', mobile => {
     expect(html).toContain('data-calendar-date="2026-10-03"'); expect(html).toContain('data-calendar-date="2026-10-05"');
     expect(html).not.toContain('Morning Yoga'); expect(html).not.toContain('General Health Check-up'); expect(html).not.toContain('September 2028');
     expect(html.match(/aria-label="Mostrar plan"/g)?.length).toBe(1);
+    expect(html.match(/aria-label="Mostrar diario"/g)?.length).toBe(1);
+    expect(html).toContain('box-shadow:inset 0 0 0 2px #c2e66e');
+    expect(html).toContain('background:#ffffff');
   });
   it('compras muestra cantidades del servidor y permite completar cada producto', () => {
     context.mobile = mobile; context.data = { items: [{ id: 'i1', source_key: 'manual:i1', name: 'Tomate real', kind: 'manual', quantity: 500, unit: 'g', checked: false }] };
     const html = renderToStaticMarkup(<NutrigoShopping patient={patient} onNavigate={navigate} />);
     expect(html).toContain('Tomate real'); expect(html).toContain('500 g'); expect(html).toContain('Marcar como comprado: Tomate real'); expect(html).toContain('Eliminar Tomate real');
     expect(html).not.toContain('Almond Butter'); expect(html).not.toContain('$157');
+    expect(html).not.toContain('data-name="Pagination"');expect(html).toContain('1 de 1 productos');
   });
   it('ejercicio conserva la tabla sin rutinas o calorías inventadas', () => {
     context.mobile = mobile; context.data = { assignments: [], activities: [{ id: 'a1', activity: 'Caminata real', duration_minutes: 25, intensity: 'suave', note: null, logged_at: '2026-10-03T14:00:00Z', sets: null, reps: null }] };
@@ -84,6 +88,7 @@ describe.each([false, true])('pantallas desde MCP (celular: %s)', mobile => {
   it('el detalle publica únicamente secciones, autoría y vínculos del recurso disponible', () => {
     context.mobile = mobile; context.data = { resources: [{ id: 'r1', slug: 'guia-real', kind: 'operational', title: 'Guía real publicada', summary: 'Contenido del servidor', category: 'Diario', author_name: 'Equipo Plan V', minutes: 2, reviewed_at: null, cover_url: null, tags: ['diario'], sections: [{ title: 'Sección revisada real', body: 'Texto publicado exacto del servidor.' }], related: ['otra-guia'], action_page: 'diario', action_label: 'Abrir diario', license_note: 'Recurso interno Plan V' }, { id: 'r2', slug: 'otra-guia', kind: 'operational', title: 'Otra guía real', category: 'Hábitos', author_name: 'Plan V', minutes: 2, reviewed_at: null, cover_url: null, tags: [], sections: [], related: [] }], articles: [], favorites: [], assignments: [] } as unknown as PatientLibraryView;
     const html = renderToStaticMarkup(<NutrigoResources patient={patient} onNavigate={navigate} resourceId="guia-real" />);
+    expect(html).toContain('Detalle del recurso');
     expect(html).toContain('Sección revisada real'); expect(html).toContain('Texto publicado exacto del servidor.'); expect(html).toContain('Guardar recurso'); expect(html).toContain('Leer Otra guía real');
     expect(html).toContain('aria-label="Volver a Recursos"');
     expect(html).not.toContain('general guideline'); expect(html).not.toContain('Science Behind Hydration'); expect(html).not.toContain('Dr. Amelia Johnson');

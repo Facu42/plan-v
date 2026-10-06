@@ -18,6 +18,18 @@ const navigate=()=>undefined;
 const recipe:DisplayRecipe={id:'real-r',title:'Preparación real aprobada',version:2,yield_portions:2,ingredients:[{id:'real-i',name:'Lentejas reales',quantity:200,unit:'g'}],steps:['Lavar la preparación real.','Cocinar hasta el punto indicado.'],nutrient_source:'Estimación de IA revisada',nutrition:{origin:'ai_estimate',source:'Estimación de IA revisada',per_portion:{kcal:620,carbs_g:80,protein_g:20,fat_g:15}},card:unavailableCard('Preparación real aprobada','Almuerzo')};
 beforeEach(()=>{context.mobile=false;context.data=null;});
 describe.each([false,true])('pantallas principales MCP (celular %s)',mobile=>{
+  it('inicio respeta las dos tarjetas del diseño y el orden diario con porciones exactas',()=>{
+    context.mobile=mobile;
+    context.data={body:null,target:null,recipes:[recipe,{...recipe,id:'r2',title:'Otra receta aprobada'},{...recipe,id:'r3',title:'Tercera receta aprobada'}],plan:{items:[
+      {id:'cena',for_date:'2026-10-03',slot:'Cena',free_text:'Comida nocturna publicada',portions:1,recipe_proposal:recipe},
+      {id:'desayuno',for_date:'2026-10-03',slot:'Desayuno',free_text:'Comida de mañana publicada',portions:1.25,recipe_proposal:recipe},
+    ]},exercise:{assignments:[]},care:null,failed:false};
+    const html=renderToStaticMarkup(<NutrigoHome patient={patient} now={new Date('2026-10-03T12:00:00-03:00')} onNavigate={navigate} onRecord={navigate} onHydration={navigate} onRest={navigate} onLogMeal={navigate}/>);
+    expect(html.match(/data-name="Card Recommended Menu"/g)).toHaveLength(2);
+    expect(html).not.toContain('Tercera receta aprobada');
+    expect(html.indexOf('aria-label="Registrar Desayuno"')).toBeLessThan(html.indexOf('aria-label="Registrar Cena"'));
+    expect(html).toContain('1,25 porciones');
+  });
   it('inicio muestra registros reales sin duplicar tarjetas ni usar métricas de ejemplo',()=>{
     context.mobile=mobile;context.data={body:{weight_kg:72},target:null,recipes:[],plan:null,exercise:null,care:{measurements:[]},failed:false};
     const html=renderToStaticMarkup(<NutrigoHome patient={{...patient,hydration:5,sleepMinutes:450,nutritionLogCount:0}} onNavigate={navigate} onRecord={navigate} onHydration={navigate} onRest={navigate} onLogMeal={navigate}/>);
@@ -31,6 +43,9 @@ describe.each([false,true])('pantallas principales MCP (celular %s)',mobile=>{
     expect(html).toContain(recipe.title);expect(html).toContain('620');expect(html).toContain('Ver '+recipe.title);
     expect(html).toContain('Nutrientes estimados por IA');
     expect(html).not.toContain('Grilled Turkey');expect(html).not.toContain('Avocado Toast');
+    expect(html).not.toContain('Greek Salad');expect(html).not.toContain('Blueberry Protein');expect(html).not.toContain('Oatmeal with Almond');
+    expect(html).not.toContain('125');expect(html).not.toContain('85/100');expect(html).not.toContain('/10');expect(html).not.toContain('4.9');
+    expect(html).toContain('Tus favoritas');expect(html).toContain('Recetas asignadas');
   });
   it('inicio conecta nutrientes, porciones y procedencia de recomendaciones y comidas publicadas',()=>{
     context.mobile=mobile;
@@ -45,6 +60,20 @@ describe.each([false,true])('pantallas principales MCP (celular %s)',mobile=>{
     expect(html).toContain('50 g Lentejas reales');expect(html).toContain('310');expect(html).toContain('Nutrientes estimados por IA');
     expect(html).toContain(recipe.steps[0]);expect(html).toContain(recipe.steps[1]);expect(html).not.toContain('Grilled Turkey');
     expect(html).toContain('aria-label="Volver al menú"');
+    expect(html).not.toContain('12:30');expect(html).not.toContain('15 minutes');expect(html).not.toContain('9/10');
+    expect(html).toContain('2 pasos');
+  });
+  it('el menú vacío no conserva recetas, puntuaciones ni valoraciones del archivo',()=>{
+    context.mobile=mobile;context.data={recipes:[],favorites:[]};
+    const html=renderToStaticMarkup(<NutrigoMenu patient={patient} onNavigate={navigate}/>);
+    const text=html.replace(/<[^>]*>/g,' ');
+    expect(text).not.toContain('Grilled');expect(text).not.toContain('Oatmeal');expect(text).not.toContain('/5');expect(text).not.toContain('/10');
+    expect(html).toContain('Todavía no guardaste recetas.');
+  });
+  it('el detalle usa el tiempo de preparación declarado y deja vacíos los datos no disponibles',()=>{
+    context.mobile=mobile;
+    const html=renderToStaticMarkup(<NutrigoRecipeDetail recipe={{...recipe,card:{...recipe.card!,prep_minutes:37}}} onBack={navigate} patientName={patient.name} onNavigate={navigate}/>);
+    expect(html).toContain('37 min');expect(html).not.toContain('10 minutes');expect(html).not.toContain('15 minutes');expect(html.replace(/<[^>]*>/g,' ')).not.toContain('Medium');
   });
   it('inicio muestra nutrientes declarados parciales del catálogo manual sin inventar los restantes',()=>{
     context.mobile=mobile;
@@ -58,6 +87,15 @@ describe.each([false,true])('pantallas principales MCP (celular %s)',mobile=>{
     const html=renderToStaticMarkup(<NutrigoPlan patient={patient} onNavigate={navigate}/>);
     expect(html).toContain(recipe.title);expect(html).toContain('Sábado');expect(html).toContain('Indicación pública');expect(html).not.toContain('September 2028');expect(html).not.toContain('Avocado Toast');
     expect(html.match(/<button[^>]*aria-label="Semana anterior"[^>]*>/)?.[0]).toContain('disabled');expect(html.match(/<button[^>]*aria-label="Semana siguiente"[^>]*>/)?.[0]).toContain('disabled');
+  });
+  it('buscar en el plan filtra también colaciones, notas y accesos al detalle',()=>{
+    context.mobile=mobile;context.data={plan:{id:'plan-real',version:1,period_start:'2026-10-03',period_end:'2026-10-03',items:[
+      {id:'almuerzo',for_date:'2026-10-03',slot:'Almuerzo',free_text:recipe.title,public_note:'Nota de la preparación excluida',recipe_proposal:recipe},
+      {id:'colacion',for_date:'2026-10-03',slot:'Colación',free_text:'Fruta real del día',public_note:'Nota de la fruta encontrada'},
+    ]}};
+    const html=renderToStaticMarkup(<NutrigoPlan patient={patient} onNavigate={navigate} query="Fruta"/>);
+    expect(html).toContain('Fruta real del día');expect(html).toContain('Nota de la fruta encontrada');
+    expect(html).not.toContain(recipe.title);expect(html).not.toContain('Nota de la preparación excluida');expect(html).not.toContain('aria-label="Ver Almuerzo');
   });
 });
 it('el renderer reutiliza un subtree enlazado sin agregar otra copia del marco',()=>{

@@ -8,6 +8,7 @@ import { NvBadge, NvButton, NvCard, NvState } from './primitives';
 import { ConfirmDialog, FeeError, FeeStateBadge, PAYMENT_STATUS_LABELS, PaymentForm } from './cobranzas-shared';
 import { BOARD_FILTERS, boardTotals, buildBoardRows, feeErrorMessage, filterBoardRows, parsePesos, replaceLedger, suggestedPaymentAmount, type BoardFilter } from './cobranzas-utils';
 import './cobranzas-fig.css';
+import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
 
 function SettingsCard({ settings, onSaved }: { settings: PaymentSettings; onSaved: (settings: PaymentSettings) => void }) {
   const [fee, setFee] = useState(settings.default_fee ? String(settings.default_fee) : '');
@@ -17,6 +18,7 @@ function SettingsCard({ settings, onSaved }: { settings: PaymentSettings; onSave
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
+  useUnsavedChanges(fee !== (settings.default_fee ? String(settings.default_fee) : '') || alias.trim() !== settings.alias || link.trim() !== settings.payment_link || instructions.trim() !== settings.instructions, busy);
 
   const save = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -49,9 +51,12 @@ function SettingsCard({ settings, onSaved }: { settings: PaymentSettings; onSave
 function FeeEditor({ patient, defaultFee, onLedger }: { patient: BillingBoardPatient; defaultFee: number | null; onLedger: (ledger: PatientLedger) => void }) {
   const [amount, setAmount] = useState(String(patient.fee?.amount ?? defaultFee ?? ''));
   const [firstDue, setFirstDue] = useState(patient.fee?.first_due_on ?? localBillingDate());
+  const [initialFee] = useState(() => String(patient.fee?.amount ?? defaultFee ?? ''));
+  const [initialDue] = useState(() => patient.fee?.first_due_on ?? localBillingDate());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
+  useUnsavedChanges(amount !== initialFee || firstDue !== initialDue, busy);
   const save = async (fee: { amount: number; first_due_on: string } | null) => {
     setBusy(true); setError('');
     try { onLedger((await api.setPatientFee(patient.patient_id, fee)).ledger); }
@@ -85,6 +90,7 @@ export function PatientPanel({ patient, settings, onLedger, onBack, today }: {
   const [busyId, setBusyId] = useState('');
   const [error, setError] = useState('');
   const [voiding, setVoiding] = useState<string | null>(null);
+  useUnsavedChanges(false, Boolean(busyId));
 
   const act = async (id: string, run: () => Promise<{ ledger: PatientLedger }>): Promise<boolean> => {
     setBusyId(id); setError('');
@@ -99,7 +105,7 @@ export function PatientPanel({ patient, settings, onLedger, onBack, today }: {
   const busy = Boolean(busyId);
 
   return <aside className="cbz-panel" aria-label={`Cobranzas de ${patient.full_name}`}>
-    <button type="button" className="cbz-back" onClick={onBack}><Icon name="chevron" size={14} />Volver a la lista</button>
+    <button type="button" className="cbz-back" onClick={() => { if (canLeaveWorkspace()) onBack(); }}><Icon name="chevron" size={14} />Volver a la lista</button>
     <header className="cbz-panel-head">
       <div><h2>{patient.full_name}</h2><p>{patient.fee ? `Cuota de ${formatPesos(patient.fee.amount)} por mes` : 'Sin cuota definida'}</p></div>
       <FeeStateBadge summary={summary} />
@@ -181,7 +187,7 @@ export function CobranzasScreen({ board, onBoard, today, initialSelectedId = nul
           {!rows.length ? <NvState title="Todavía no hay pacientes" description="Cuando sumes pacientes vas a poder definir su cuota y registrar sus pagos acá." />
             : !visible.length ? <p className="cbz-muted cbz-pad">No hay pacientes en este filtro.</p>
             : <ul className="cbz-patients">{visible.map(({ patient, summary }) => <li key={patient.patient_id}>
-              <button type="button" className={patient.patient_id === selectedId ? 'cbz-selected' : ''} aria-pressed={patient.patient_id === selectedId} aria-label={`Ver cobranzas de ${patient.full_name}`} onClick={() => setSelectedId(patient.patient_id)}>
+              <button type="button" className={patient.patient_id === selectedId ? 'cbz-selected' : ''} aria-pressed={patient.patient_id === selectedId} aria-label={`Ver cobranzas de ${patient.full_name}`} onClick={() => { if (canLeaveWorkspace()) setSelectedId(patient.patient_id); }}>
                 <span className="cbz-who"><strong>{patient.full_name}</strong><small>{patient.fee ? `${formatPesos(patient.fee.amount)} por mes` : 'Sin cuota'}</small></span>
                 <span className="cbz-side">{summary.owed > 0 && <b className="cbz-owed">{formatPesos(summary.owed)}</b>}
                   <FeeStateBadge summary={summary} />
@@ -197,7 +203,7 @@ export function CobranzasScreen({ board, onBoard, today, initialSelectedId = nul
   </div>;
 }
 
-export function ShowroomCobranzas() {
+export function ShowroomCobranzas({ initialSelectedId }: { initialSelectedId?: string } = {}) {
   const [board, setBoard] = useState<BillingBoard | null>(null);
   const [error, setError] = useState('');
   const load = useCallback(() => {
@@ -208,5 +214,5 @@ export function ShowroomCobranzas() {
 
   if (error) return <NvState kind="error" title="No pudimos cargar las cobranzas" description={error} action={<NvButton className="nv-soft" onClick={load}>Reintentar</NvButton>} />;
   if (!board) return <NvState kind="loading" title="Cargando cobranzas…" description="Estamos buscando las cuotas de tus pacientes." />;
-  return <CobranzasScreen board={board} onBoard={setBoard} />;
+  return <CobranzasScreen board={board} onBoard={setBoard} initialSelectedId={initialSelectedId} />;
 }

@@ -95,11 +95,13 @@ describe('PV-27 jobs de IA versionados', () => {
     expect(body.job.prompt_version).toBe('menu_draft.v2');
     expect((await post(`/api/ai/jobs/${body.job.id}/apply`, {})).status).toBe(200);
     const pro = await (await app.request(`/api/patients/${patient}/plans?audience=pro`)).json() as {
-      plan: { current: { published_at: string | null; items: Array<{ slot: string }> }; published: null };
+      plan: { current: { published_at: string | null; items: Array<{ slot: string; for_date: string }> }; published: null };
     };
     expect(pro.plan.current.published_at).toBeNull();
     expect(pro.plan.published).toBeNull();
-    expect(pro.plan.current.items.map((item) => item.slot)).toEqual(['Almuerzo', 'Cena']);
+    expect(pro.plan.current.items.map((item) => `${item.for_date}|${item.slot}`)).toEqual([
+      '2026-09-21|Almuerzo', '2026-09-21|Cena', '2026-09-22|Almuerzo', '2026-09-22|Cena',
+    ]);
     expect((await (await app.request(`/api/patients/${patient}/plans`)).json()).plan).toBeNull();
   });
 

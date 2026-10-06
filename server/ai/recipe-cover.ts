@@ -1,10 +1,74 @@
-export type RecipeCoverContext = { title: string; items: Array<{ name: string }> };
+import { inspectPrivateFile } from '../assets/inspect.js';
+import { logProviderFailure } from './mode.js';
+
+export type RecipeCoverContext = { title: string; items: Array<{ name: string; quantity?: number; unit?: string }>; steps?: string[] };
 export type RecipeCoverResult =
   | { status: 'ready'; bytes: Buffer; mime: 'image/png' | 'image/jpeg' | 'image/webp'; alt: string }
-  | { status: 'failed' };
+  | { status: 'failed'; retry_after_ms?: number };
 
-/** No free image provider has been verified. Manual upload remains available. */
-export function recipeCoverEnabled(): boolean { return false; }
-export async function generateRecipeCoverImage(_context: RecipeCoverContext): Promise<RecipeCoverResult> {
-  return { status: 'failed' };
+// The provider and model are fixed: no paid router or fallback. The account must
+// remain on Workers Free, which refuses requests after the daily free quota.
+export function recipeCoverEnabled(): boolean {
+  return process.env.IMAGE_PROVIDER === 'cloudflare_free' && process.env.CLOUDFLARE_FREE_TIER === '1'
+    && /^[a-f0-9]{32}$/i.test(process.env.CLOUDFLARE_ACCOUNT_ID ?? '') && Boolean(process.env.CLOUDFLARE_API_TOKEN?.trim());
+}
+// FLUX follows English food names more reliably. Translate common culinary
+// vocabulary only; retain unfamiliar names and never infer missing ingredients.
+function culinaryEnglish(value: string): string {
+  let text = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const words: Record<string, string> = {
+    'yogur griego': 'Greek yogurt', 'aceite de oliva': 'olive oil', 'al horno': 'baked',
+    'merluza': 'rectangular portion of flaky white fish meat', 'pescado': 'rectangular portion of cooked fish meat',
+    'ensalada': 'salad', 'lentejas': 'lentils', 'vegetales': 'vegetables', 'verduras': 'vegetables',
+    'tortilla': 'frittata', 'espinaca': 'spinach', 'espinacas': 'spinach', 'huevo': 'egg', 'huevos': 'eggs',
+    'pollo': 'chicken', 'papas': 'potatoes', 'papa': 'potato', 'patatas': 'potatoes',
+    'arroz': 'rice', 'avena': 'oats', 'tomate': 'tomato', 'tomates': 'tomatoes',
+    'zanahoria': 'carrot', 'cebolla': 'onion', 'zapallito': 'zucchini', 'zapallo': 'squash',
+    'lechuga': 'lettuce', 'garbanzos': 'chickpeas', 'porotos': 'beans', 'quinoa': 'quinoa',
+    'frutas': 'fruit', 'fruta': 'fruit', 'frutos rojos': 'berries', 'banana': 'banana',
+    'manzana': 'apple', 'frutillas': 'strawberries', 'yogur': 'yogurt', 'leche': 'milk',
+    'queso': 'cheese', 'pan': 'bread', 'integral': 'wholegrain', 'granola': 'granola',
+    'sal': 'salt', 'pimienta': 'pepper', 'limon': 'lemon', 'cocidas': 'cooked', 'cocidos': 'cooked',
+    'cocida': 'cooked', 'cocido': 'cooked', 'tibio': 'warm', 'hervida': 'boiled',
+    'hornear': 'bake', 'cocinar': 'cook', 'servir': 'serve', 'mezclar': 'mix', 'hervir': 'boil',
+    'cortar': 'cut', 'agregar': 'add', 'saltear': 'saute', 'lavar': 'wash', 'calentar': 'heat',
+    'de': 'of', 'con': 'with', 'y': 'and', 'la': 'the', 'el': 'the', 'las': 'the', 'los': 'the',
+  };
+  const pattern = new RegExp(`\\b(${Object.keys(words).sort((a,b) => b.length-a.length).join('|')})\\b`, 'g');
+  text = text.replace(pattern, word => words[word]);
+  return text;
+}
+export function recipeCoverPrompt(context: RecipeCoverContext): string {
+  return [
+    `Food photograph of ${culinaryEnglish(context.title.slice(0, 180))}.`,
+    `Visible food ingredients: ${context.items.slice(0, 20).map(i => culinaryEnglish(i.name.slice(0, 80))).join(', ')}. Show those ingredients clearly in the finished dish.`,
+    'A single edible dish on a white ceramic plate or bowl, warm cream background, soft natural daylight, three-quarter overhead view, centered square composition. No extra ingredients, garnish, people, cutlery, text, labels, logos or collage.',
+    `Preparation: ${culinaryEnglish((context.steps ?? []).join(' ').slice(0, 650))}`,
+  ].join(' ').slice(0, 2048);
+}
+export async function generateRecipeCoverImage(context: RecipeCoverContext): Promise<RecipeCoverResult> {
+  if (!recipeCoverEnabled() || !context.title.trim() || !context.items.length) return { status: 'failed' };
+  try {
+    const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/black-forest-labs/flux-1-schnell`, {
+      method: 'POST', headers: { Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: recipeCoverPrompt(context), steps: 4 }), signal: AbortSignal.timeout(60_000), redirect: 'error',
+    });
+    if (response.status === 429) {
+      const nextDay = new Date(); nextDay.setUTCHours(24, 1, 0, 0);
+      return { status: 'failed', retry_after_ms: nextDay.getTime() - Date.now() };
+    }
+    if (!response.ok) return { status: 'failed', retry_after_ms: response.status === 401 || response.status === 403 ? 3_600_000 : 60_000 };
+    // Bound the streamed body before parsing; never log prompts, images or keys.
+    if (Number(response.headers.get('content-length')) > 7_100_000) return { status: 'failed' };
+    const reader = response.body?.getReader(); if (!reader) return { status: 'failed' };
+    const chunks: Uint8Array[] = []; let size = 0;
+    for (;;) { const { done, value } = await reader.read(); if (done) break; size += value.length; if (size > 7_100_000) { await reader.cancel(); return { status: 'failed' }; } chunks.push(value); }
+    const result = JSON.parse(Buffer.concat(chunks).toString('utf8')) as { success?: boolean; result?: { image?: string }; errors?: Array<{ code?: number }> };
+    if (!result.success || typeof result.result?.image !== 'string') return { status: 'failed', retry_after_ms: 60_000 };
+    const bytes = Buffer.from(result.result.image, 'base64');
+    if (bytes.length > 5 * 1024 * 1024) return { status: 'failed' };
+    const image = inspectPrivateFile('body_progress', bytes, 'image/jpeg');
+    if (image.mime === 'application/pdf') return { status: 'failed' };
+    return { status: 'ready', bytes: image.bytes, mime: image.mime, alt: `${context.title} · imagen ilustrativa generada con IA` };
+  } catch (error) { logProviderFailure('cloudflare-cover', error); return { status: 'failed', retry_after_ms: 60_000 }; }
 }

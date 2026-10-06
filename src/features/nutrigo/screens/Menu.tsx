@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FramePair } from '../FramePair';
 import { nodeName, sourceText, type SourceResolver, type SourceNode } from '../SourceView';
 import { recipesApi } from '../../../api/recipes';
 import { resourcesApi } from '../../../api/resources';
+import { plansApi } from '../../../api/plans';
+import { patientMenuRecipes, recipePresentationKey } from '../plan-recipe';
 import type { PatientRecipe } from '../../../types/recipes';
 import { recipeNutritionLabel } from '../../../types/ai-nutrition';
 import { descendants, fields, formatNumber, leaf, objects, idEnds, errorText, searchBinding, Stateful, useRemote, type ScreenProps } from './shared';
@@ -12,8 +14,19 @@ function nutrients(recipe:DisplayRecipe) {return recipe.nutrition?.per_portion??
 function imageBinding(node:SourceNode,recipe:DisplayRecipe) {
   return ['Image','Image Area','Place Image Here'].includes(nodeName(node))&&recipe.card?.cover_status==='ready'&&recipe.card.cover_url ? {children:<img src={recipe.card.cover_url} alt={recipe.card.cover_alt||recipe.title} className="absolute inset-0 block size-full object-cover"/>}:undefined;
 }
+// Keep the original information rows, but only show values declared by the
+// published recipe. Difficulty, ratings and cooking time have no API field.
+function recipeInfoBinding(node:SourceNode,recipe:DisplayRecipe) {
+  if(nodeName(node)!=='Item Detail Info')return undefined;
+  const text=sourceText(node);
+  const value=text.startsWith('Total Steps')?`${recipe.steps.length} ${recipe.steps.length===1?'paso':'pasos'}`
+    :text.startsWith('Prep Time')&&recipe.card?.prep_minutes!=null?`${recipe.card.prep_minutes} min`:'—';
+  const labels=['Eat Time','Prep Time','Cook Time','Difficulty','Total Steps','Health Score','Cook Duration'];
+  return {children:fields(node,{},child=>leaf(child)&&sourceText(child)==='Health Score'?{text:'Evaluación'}:leaf(child)&&!labels.includes(sourceText(child))?{text:value}:undefined)};
+}
 export function NutrigoRecipeDetail({recipe,onBack,patientName,onNavigate,onSignOut,onFavorite,saved=false,busy=false,error='',initialPortions,backLabel='Volver al menú'}:{recipe:DisplayRecipe;onBack:()=>void;patientName:string;onNavigate:ScreenProps['onNavigate'];onSignOut?:()=>void;onFavorite?:()=>void;saved?:boolean;busy?:boolean;error?:string;initialPortions?:number;backLabel?:string}) {
   const [portions,setPortions]=useState(initialPortions??recipe.yield_portions);
+  useEffect(()=>{window.scrollTo(0,0);},[recipe.id,recipe.version]);
   const macro=nutrients(recipe);
   const origin=recipeNutritionLabel(recipe.nutrition,recipe.nutrient_source,macro);
   const resolver:SourceResolver=node=>{
@@ -22,6 +35,7 @@ export function NutrigoRecipeDetail({recipe,onBack,patientName,onNavigate,onSign
     if(name==='Button Nav'&&descendants(node).some(child=>nodeName(child)==='Icon/ArrowLeft'))return {onClick:onBack,label:backLabel};
     if(leaf(node)&&text==='Grilled Turkey Breast with Steamed Asparagus and Brown Rice')return {text:recipe.title};
     const image=imageBinding(node,recipe);if(image)return image;
+    const info=recipeInfoBinding(node,recipe);if(info)return info;
     if(name==='Section Reviews')return {children:<p className="text-[12px]">Sin valoraciones registradas.</p>};
     if(name==='Section Tools')return {children:<p className="text-[12px]">La receta no declara utensilios.</p>};
     if(name==='Section Notes')return {children:<p className="text-[12px]">{origin}{recipe.nutrient_source?` · ${recipe.nutrient_source}`:''}</p>};
@@ -41,32 +55,35 @@ export function NutrigoRecipeDetail({recipe,onBack,patientName,onNavigate,onSign
       return {children:fields(node,{},child=>leaf(child)&&/^\d/.test(sourceText(child))?{text:formatNumber(macro?.[key]!=null?macro[key]!*portions:null)}:undefined)};
     }
     if(name==='Widget Nutrition Facts')return {children:fields(node,{},child=>nodeName(child)==='List Nutrition Facts'?{children:<dl className="flex flex-col gap-[16px] text-[14px]">{[['kcal','Calorías','kcal'],['carbs_g','Carbohidratos','g'],['protein_g','Proteínas','g'],['fat_g','Grasas','g']].map(([key,label,unit])=><div className="flex justify-between" key={key}><dt>{label}</dt><dd>{formatNumber(macro?.[key as keyof typeof macro]!=null?macro[key as keyof typeof macro]!*portions:null)} {unit}</dd></div>)}<p className="text-[12px]">{origin} · {formatNumber(portions)} porciones</p></dl>}:undefined)};
-    if(name==='Item Detail Info')return {children:fields(node,{},child=>leaf(child)&&['10 minutes','5 steps','4 steps'].includes(sourceText(child))?{text:sourceText(child).includes('steps')?`${recipe.steps.length} pasos`:recipe.card?.prep_minutes?`${recipe.card.prep_minutes} min`:'—'}:undefined)};
     if(leaf(node)&&text==='Recipe Details')return {text:'Detalle de receta'};
     return undefined;
   };
   return <FramePair nodes={['84:3145','457:13264']} resolve={resolver} patientName={patientName} onNavigate={onNavigate} onSignOut={onSignOut}>
-    <div className="mcp-screen-state"><button className="mcp-action" onClick={onBack}>{backLabel}</button>{onFavorite&&<button className="mcp-action" disabled={busy} aria-pressed={saved} onClick={onFavorite}>{saved?'Guardada':'Guardar en favoritos'}</button>}<p>{origin}</p>{error&&<p role="alert">{error}</p>}</div>
+    <div className="mcp-screen-state"><button className="mcp-action" onClick={onBack}>{backLabel}</button>{onFavorite&&<button className="mcp-action" disabled={busy} aria-pressed={saved} onClick={onFavorite}>{saved?'Guardada':'Guardar en favoritos'}</button>}<p>{origin}</p>{recipe.card?.cover_alt?.includes('imagen ilustrativa generada con IA')&&<small>Imagen ilustrativa generada con IA. Las cantidades indicadas en la receta son la referencia.</small>}{['queued','leased'].includes(recipe.card?.cover_generation??'')&&<small>La foto del plato está pendiente.</small>}{recipe.card?.cover_generation==='failed'&&<small>No se pudo preparar la foto. La receta sigue disponible.</small>}{error&&<p role="alert">{error}</p>}</div>
   </FramePair>;
 }
 export function NutrigoMenu({patient,onNavigate,onSignOut,query=''}:ScreenProps) {
   const remote=useRemote(`${patient.id}:menu`,async signal=>{
-    const [recipes,library]=await Promise.all([recipesApi.assigned(patient.id,signal),resourcesApi.library(patient.id,'',false,signal)]);
-    return {recipes:recipes.recipes,favorites:library.library.favorites.filter(f=>f.item_kind==='recipe').map(f=>f.item_id)};
+    const [recipes,library,plan]=await Promise.all([recipesApi.assigned(patient.id,signal),resourcesApi.library(patient.id,'',false,signal),plansApi.published(patient.id,signal)]);
+    return {recipes:patientMenuRecipes(plan.plan,recipes.recipes),favoriteRecipeIds:recipes.recipes.map(recipe=>recipe.id),favorites:library.library.favorites.filter(f=>f.item_kind==='recipe').map(f=>f.item_id)};
   });
   const [opened,setOpened]=useState<string|null>(null),[search,setSearch]=useState(query),[onlySaved,setOnlySaved]=useState(false),[alphabetic,setAlphabetic]=useState(false),[byCalories,setByCalories]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
   const recipes=(remote.data?.recipes??[]).filter(r=>r.title.toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'))&&(!onlySaved||remote.data?.favorites.includes(r.id))).slice().sort((a,b)=>byCalories?((nutrients(a)?.kcal??Infinity)-(nutrients(b)?.kcal??Infinity)||a.title.localeCompare(b.title,'es')):alphabetic?a.title.localeCompare(b.title,'es'):0);
   const toggle=async(id:string)=>{if(busy)return;setBusy(true);setError('');try{const response=await resourcesApi.favorite(patient.id,'recipe',id);if(remote.data)remote.setData({...remote.data,favorites:response.library.favorites.filter(f=>f.item_kind==='recipe').map(f=>f.item_id)});}catch(e){setError(errorText(e));}finally{setBusy(false);}};
-  const chosen=remote.data?.recipes.find(r=>r.id===opened);
-  if(chosen)return <NutrigoRecipeDetail key={`${chosen.id}:${chosen.version}`} recipe={chosen} onBack={()=>setOpened(null)} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut} saved={remote.data?.favorites.includes(chosen.id)} onFavorite={()=>void toggle(chosen.id)} busy={busy} error={error}/>;
-  const card=(prototype:SourceNode,recipe:PatientRecipe)=>{
+  const chosen=remote.data?.recipes.find(r=>recipePresentationKey(r)===opened);
+  useEffect(()=>{if(!remote.data?.recipes.some(recipe=>['queued','leased'].includes(recipe.card?.cover_generation??'')))return;const timer=setInterval(remote.reload,4000);return()=>clearInterval(timer);},[remote.data,remote.reload]);
+  if(chosen)return <NutrigoRecipeDetail key={recipePresentationKey(chosen)} recipe={chosen} onBack={()=>setOpened(null)} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut} saved={remote.data?.favorites.includes(chosen.id)} onFavorite={remote.data?.favoriteRecipeIds?.includes(chosen.id)?()=>void toggle(chosen.id):undefined} busy={busy} error={error}/>;
+  const card=(prototype:SourceNode,recipe:DisplayRecipe)=>{
     const macro=nutrients(recipe);
     return fields(prototype,{'236:9386':recipe.title,'453:11817':recipe.title,'228:6622':recipe.title,'228:7500':recipe.title,'236:9444':recipe.card?.category??'Receta','453:11793':recipe.card?.category??'Receta','228:6649':recipe.card?.category??'Receta','228:7503':recipe.card?.category??'Receta','236:9421':`${formatNumber(macro?.kcal)} kcal`,'453:11823':`${formatNumber(macro?.kcal)} kcal`,'228:7541':`${formatNumber(macro?.kcal)} kcal`,'243:6430':`${formatNumber(macro?.carbs_g)} g`,'453:11829':`${formatNumber(macro?.carbs_g)} g`,'228:7519':`${formatNumber(macro?.carbs_g)} g`,'243:6449':`${formatNumber(macro?.protein_g)} g`,'453:11835':`${formatNumber(macro?.protein_g)} g`,'228:7524':`${formatNumber(macro?.protein_g)} g`,'243:6453':`${formatNumber(macro?.fat_g)} g`,'453:11841':`${formatNumber(macro?.fat_g)} g`,'228:7529':`${formatNumber(macro?.fat_g)} g`},child=>{
       const image=imageBinding(child,recipe);if(image)return image;
-      if(/^Button/.test(nodeName(child)))return {onClick:()=>setOpened(recipe.id),label:`Ver ${recipe.title}`,children:<span>Ver receta</span>};
+      if(nodeName(child)==='Info Rating')return {text:'Sin valoraciones'};
+      if(nodeName(child)==='Info Level')return {text:recipe.card?.prep_minutes!=null?`${recipe.card.prep_minutes} min`:'Sin tiempo declarado'};
+      if(nodeName(child)==='Chart Health Score')return {text:recipeNutritionLabel(recipe.nutrition,recipe.nutrient_source,macro)};
+      if(/^Button/.test(nodeName(child)))return {onClick:()=>setOpened(recipePresentationKey(recipe)),label:`Ver ${recipe.title}`,children:<span>Ver receta</span>};
         if(leaf(child)&&sourceText(child)==='Health Score:')return {text:recipeNutritionLabel(recipe.nutrition,recipe.nutrient_source,macro)};
       return undefined;
-    },recipe.id);
+    },recipePresentationKey(recipe));
   };
   const resolver:SourceResolver=node=>{
     const name=nodeName(node),text=sourceText(node);
@@ -80,8 +97,20 @@ export function NutrigoMenu({patient,onNavigate,onSignOut,query=''}:ScreenProps)
       return {children:fields(node,{},child=>{
         if(leaf(child)&&sourceText(child)==='Grilled Turkey Breast with Steamed Asparagus and Brown Rice')return {text:recipe.title};
         const image=imageBinding(child,recipe);if(image)return image;
-        if(/^Button/.test(nodeName(child)))return {onClick:()=>setOpened(recipe.id),text:'Ver receta'};
+        const info=recipeInfoBinding(child,recipe);if(info)return info;
+        if(nodeName(child)==='Badge Meal Category')return {text:sourceText(child)==='Lunch'?recipe.card?.category??'Receta':'Sin valoraciones'};
+        if(/^Button/.test(nodeName(child)))return {onClick:()=>setOpened(recipePresentationKey(recipe)),text:'Ver receta'};
         if(/Item Detail Meal Value/.test(nodeName(child))) {const m=nutrients(recipe),t=sourceText(child),k=t.startsWith('Calories')?'kcal':t.startsWith('Carbs')?'carbs_g':t.startsWith('Protein')?'protein_g':'fat_g';return {children:fields(child,{},n=>leaf(n)&&/^\d/.test(sourceText(n))?{text:formatNumber(m?.[k])}:undefined)};}
+        return undefined;
+      })};
+    }
+    if(name==='Widget Popular Menu'||name==='Widget Recommended Menu') {
+      const savedWidget=text.startsWith('Popular Menu');
+      const selected=savedWidget?recipes.filter(recipe=>remote.data?.favorites.includes(recipe.id)):recipes;
+      return {children:fields(node,{},child=>{
+        if(leaf(child)&&['Popular Menu','Recommended Menu'].includes(sourceText(child)))return {text:savedWidget?'Tus favoritas':'Recetas asignadas'};
+        if(['List Menu','List Exercise'].includes(nodeName(child))){const prototype=objects(child)[0];return {children:!remote.data?<Stateful loading={!remote.error} error={remote.error} onRetry={remote.reload}/>:selected.length&&prototype?selected.slice(0,3).map(recipe=>card(prototype,recipe)):<Stateful empty={savedWidget?'Todavía no guardaste recetas.':'Todavía no hay recetas asignadas que coincidan.'}/>};}
+        if(nodeName(child)==='Button More')return {onClick:()=>setOnlySaved(savedWidget),label:savedWidget?'Ver favoritas':'Ver recetas asignadas'};
         return undefined;
       })};
     }

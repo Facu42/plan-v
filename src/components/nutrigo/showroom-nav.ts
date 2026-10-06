@@ -36,28 +36,20 @@ export const PATIENT_MORE: ShellTab[] = PATIENT_SURFACES.filter((surface) => !PA
 export const PRO_TABS: ShellTab[] = [
   { id: 'inicio', icon: 'home', label: 'Inicio' },
   { id: 'pacientes', icon: 'users', label: 'Pacientes' },
-  { id: 'diario', icon: 'history', label: 'Diario' },
+  { id: 'seguimiento', icon: 'sparkle', label: 'Seguimiento' },
   { id: 'agenda', icon: 'calendar', label: 'Agenda' },
 ];
 
-/** El consultorio prioriza las tres tareas que usa la profesional con cada paciente. */
+/** Gestión del consultorio; los detalles del paciente viven en su ficha. */
 export const PRO_SURFACES: ShellTab[] = [
   { id: 'inicio', icon: 'home', label: 'Inicio' },
   { id: 'pacientes', icon: 'users', label: 'Pacientes' },
-  { id: 'ficha', icon: 'contact', label: 'Fichas' },
   { id: 'plan', icon: 'list', label: 'Planes' },
+  { id: 'seguimiento', icon: 'sparkle', label: 'Seguimiento' },
   { id: 'agenda', icon: 'calendar', label: 'Agenda' },
   { id: 'mensajes', icon: 'message', label: 'Mensajes' },
-  { id: 'recetas', icon: 'leaf', label: 'Menú' },
-  { id: 'compras', icon: 'check', label: 'Compras' },
-  { id: 'diario', icon: 'history', label: 'Diario' },
-  { id: 'progreso', icon: 'trend', label: 'Progreso' },
-  { id: 'ejercicio', icon: 'heart', label: 'Ejercicio' },
-  { id: 'recursos', icon: 'pin', label: 'Recursos' },
+  { id: 'biblioteca', icon: 'leaf', label: 'Biblioteca' },
   { id: 'cobranzas', icon: 'wallet', label: 'Cobranzas' },
-  { id: 'consultas', icon: 'video', label: 'Consultas' },
-  { id: 'objetivos', icon: 'target', label: 'Objetivos' },
-  { id: 'seguimiento', icon: 'sparkle', label: 'Seguimiento' },
 ];
 
 /** Sólo para el administrador de la plataforma (getAdminMe); nunca para pacientes. */
@@ -70,13 +62,13 @@ export function proSurfaces(isAdmin: boolean): ShellTab[] {
 export const PRO_MORE: ShellTab[] = PRO_SURFACES.filter((surface) => !PRO_TABS.some((tab) => tab.id === surface.id));
 
 /** Siguen abriendo por enlace directo, fuera del menú. */
-export const PRO_HIDDEN_PAGES: ShowroomPage[] = ['reciente', 'guardado', 'paneles', 'videollamadas', 'servicio'];
+export const PRO_HIDDEN_PAGES: ShowroomPage[] = ['ficha', 'diario', 'progreso', 'compras', 'ejercicio', 'consultas', 'objetivos', 'recetas', 'recursos', 'reciente', 'guardado', 'paneles', 'videollamadas', 'servicio'];
 
 export function proMore(isAdmin: boolean): ShellTab[] {
   return isAdmin ? [...PRO_MORE, SERVICE_TAB] : PRO_MORE;
 }
 
-export const PATIENT_CRM_PAGES: ShowroomPage[] = ['ficha', 'pacientes', 'consultas', 'objetivos', 'reciente', 'guardado', 'seguimiento', 'paneles', 'videollamadas'];
+export const PATIENT_CRM_PAGES: ShowroomPage[] = ['biblioteca', 'ficha', 'pacientes', 'consultas', 'objetivos', 'reciente', 'guardado', 'seguimiento', 'paneles', 'videollamadas'];
 
 export function tabBarState(page: ShowroomPage, tabs: ShellTab[], more: ShellTab[]) {
   const onPrimary = tabs.some((tab) => tab.id === page);

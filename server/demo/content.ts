@@ -146,6 +146,10 @@ export async function seedDemoContent(fetcher: Fetcher, now = new Date(), target
   for (const id of target.intakePatients ?? [MAIN]) {
     const intake = await call(`ingreso ${id}`, `/api/patients/${id}/intake`, 'GET');
     if (!intake) continue;
+    if (intake.intake.status !== 'draft' && ['none','reported'].includes(intake.intake.payload?.allergies?.state) && ['none','reported'].includes(intake.intake.payload?.restrictions?.state)) {
+      steps.push({step:`declaración vigente ${id}`,ok:true});
+      continue;
+    }
     await call(`alergias ${id}`, `/api/patients/${id}/intake`, 'PATCH', {
       expected_revision: intake.intake.revision,
       step: 'allergies',

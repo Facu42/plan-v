@@ -93,7 +93,7 @@ export function registerRecipeRoutes(app: Hono) {
   app.get('/api/recipes', async (c) => {
     const { persistent, nutritionistId } = await professional(c);
     const recipes = await repo.listProfessionalRecipes(nutritionistId, persistent);
-    return c.json({ recipes, source: persistent ? 'supabase' : 'memory', image_generation: persistent && recipeCoverEnabled() });
+    return c.json({ recipes, source: persistent ? 'supabase' : 'memory', image_generation: recipeCoverEnabled() });
   });
 
   app.post('/api/recipes', async (c) => c.json(await saveWizard(c)));

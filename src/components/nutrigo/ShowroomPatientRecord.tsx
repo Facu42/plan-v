@@ -24,12 +24,13 @@ export function professionalMealNotes(patient: Pick<Patient, 'id' | 'meal_logs'>
     .sort((a, b) => b.logged_at.localeCompare(a.logged_at));
 }
 
-export function ShowroomPatientRecord({ patient, patients = [patient], onSelect, onEdit, onOpen }: {
+export function ShowroomPatientRecord({ patient, patients = [patient], onSelect, onEdit, onOpen, summaryOnly = false }: {
   patient: Patient;
   patients?: Patient[];
   onSelect?: (id: string) => void;
   onEdit: () => void;
   onOpen: (entry: CrmEntry) => void;
+  summaryOnly?: boolean;
 }) {
   const goal = getGoalSnapshot(patient);
   const notes = professionalMealNotes(patient);
@@ -66,7 +67,7 @@ export function ShowroomPatientRecord({ patient, patients = [patient], onSelect,
       </article>
     </div>
 
-    <CarePanel patientId={patient.id} mode="professional" />
+    {!summaryOnly && <CarePanel patientId={patient.id} mode="professional" />}
 
     <section className="nr-private" aria-label="Información profesional privada">
       <header><div><span className="nr-lock"><Icon name="pin" size={15} /></span><div><h3>Información profesional privada</h3><p>Solo visible para profesionales. No se comparte con el paciente.</p></div></div></header>
@@ -78,8 +79,8 @@ export function ShowroomPatientRecord({ patient, patients = [patient], onSelect,
       </dl>
     </section>
 
-    <ShowroomIntakeReview key={patient.id} patientId={patient.id} />
-    <NutritionTargetPanel key={patient.id} patientId={patient.id} patientName={patient.name} />
+    {!summaryOnly && <><ShowroomIntakeReview key={patient.id} patientId={patient.id} />
+    <NutritionTargetPanel key={patient.id} patientId={patient.id} patientName={patient.name} /></>}
 
     <div className="nr-history-grid">
       <section className="nr-card nr-timeline">

@@ -13,6 +13,15 @@ apartados que también hacen falta para salir al mercado: lo legal y la calidad 
   chicos). Eso sigue en el hilo "Plan V listo para el mercado". Acá solo se anota qué agentes le
   sirven a ese hilo (ver "Lo que ya tiene dueño").
 
+## Consultorio y paciente — 5/10/2026
+
+Implementación del plan aprobado por Facundo, desde la versión principal vigente y en copia aislada. Entregas encadenadas por apartado: backend, consultorio, planes e IA, y paciente Nutrigo.
+
+- [Bandeja y biblioteca: alcance, comprobaciones y migración preparada](consultorio-backend-2026-10-05.md).
+- [Consultorio: ficha, seguimiento, biblioteca y cobranzas](consultorio-interfaz-2026-10-05.md).
+- [Planes y aprobación de IA](consultorio-planes-2026-10-05.md).
+- [Paciente Nutrigo: doce superficies, fuentes y evidencia](paciente-nutrigo-2026-10-05.md). Producción requiere autorización escrita específica.
+
 ## Orden
 
 | Ola | Apartado | Puede arrancar | Depende de |
@@ -282,6 +291,9 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 | Fecha | Apartado | Qué se hizo |
 | --- | --- | --- |
+| 2026-10-06 | Fotos del menú aprobado | Cloudflare Workers Free conectado localmente: cuatro fotos reales generadas, manual conservada, cinco platos compartidos en 28 comidas. Cola por versión y aprobación, reintentos y prioridad manual; Menú, Inicio y Plan usan fotos persistidas. Reinicio comprobado. Migración y configuración de producción preparadas, sin aplicar. [Guía, evidencia y límites](fotos-menu-cloudflare-2026-10-06.md). |
+| 2026-10-06 | Simulación de consultorio y paciente | Datos ficticios cargados y conservados: ficha, plan de 28 comidas, mensajes/adjuntos, seguimiento, agenda, recursos, compras, ejercicio y cobranzas. Correcciones de IA, bandeja, duplicación, teclado y tarjetas de Inicio. Reinicio comprobado con 14 respuestas y 4 archivos; 46 vistas más comprobación final de Inicio. 1.402 pruebas generales y 27 de sesiones firmadas en GitHub; auditoría de dependencias sin vulnerabilidades. [Guía, evidencia y límites](simulacion-consultorio-2026-10-06.md). |
+| 2026-10-06 | Coherencia visual Nutrigo | Revisión de paciente y consultorio en 1440/390, colores y proporciones contra las fuentes; correcciones de formularios, títulos, cabecera, espacio y diálogos. 46 vistas y 10.628 atributos comprobados. [Evidencia y límites](revision-visual-nutrigo-2026-10-06.md). |
 | 2026-10-05 | Producto funcional | Ensayo previo a publicar: 1358 pruebas generales, 24 de sesiones reales y 36 comprobaciones de navegador. Después se aplicaron las cinco migraciones aprobadas y se publicaron #54/#56/#57. Portada HTTPS y generación gratuita real de cuatro recetas editadas/publicadas comprobadas; en #57 pasaron 1364 generales, 25 nativas y 40 comprobaciones de navegador. La repetición final queda en el PR de cierre. [Evidencia actual y guía](cierre-producto-publicado-2026-10-05.md) · [registro previo](cierre-funcional-plan-v-2026-10-05.md) · [acciones y permisos](recorridos-y-contratos-plan-v-2026-10-05.md) · [paquete SQL](paquete-produccion-pr54-2026-10-05.md). |
 | 2026-10-03 | Producto Nutrigo | Frontend de las 24 fuentes MCP, español y Plan V. PR #54, #56 y #57 publicados, cinco migraciones aprobadas aplicadas. Foto manual, planes, meta publicada, comidas y hábitos comprobados. Cuatro recetas nuevas de IA gratuita editadas/publicadas como v2; paciente recibe la misma copia con estimaciones conservadas. `codex/plan-v-functional-closure` corrige la espera del ensayo de fotos y registra CI/despliegues finales en su PR. Fotos IA pendientes. [Registro propio](producto-nutrigo-mcp-2026-10-03.md), [historial](publicacion-producto-plan-v-2026-10-05.md), [evidencia actual y guía](cierre-producto-publicado-2026-10-05.md). |
 | 2026-09-28 | Organización | Se trajeron 43 agentes a `.claude/agents/`, se escribieron las reglas y este plan. Revisión de seguridad de Supabase leída (129 + 1 advertencias, 12 avisos). |
