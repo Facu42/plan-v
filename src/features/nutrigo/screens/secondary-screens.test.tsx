@@ -88,6 +88,7 @@ describe.each([false, true])('pantallas desde MCP (celular: %s)', mobile => {
   it('el detalle publica únicamente secciones, autoría y vínculos del recurso disponible', () => {
     context.mobile = mobile; context.data = { resources: [{ id: 'r1', slug: 'guia-real', kind: 'operational', title: 'Guía real publicada', summary: 'Contenido del servidor', category: 'Diario', author_name: 'Equipo Plan V', minutes: 2, reviewed_at: null, cover_url: null, tags: ['diario'], sections: [{ title: 'Sección revisada real', body: 'Texto publicado exacto del servidor.' }], related: ['otra-guia'], action_page: 'diario', action_label: 'Abrir diario', license_note: 'Recurso interno Plan V' }, { id: 'r2', slug: 'otra-guia', kind: 'operational', title: 'Otra guía real', category: 'Hábitos', author_name: 'Plan V', minutes: 2, reviewed_at: null, cover_url: null, tags: [], sections: [], related: [] }], articles: [], favorites: [], assignments: [] } as unknown as PatientLibraryView;
     const html = renderToStaticMarkup(<NutrigoResources patient={patient} onNavigate={navigate} resourceId="guia-real" />);
+    expect(html).toContain('Detalle del recurso');
     expect(html).toContain('Sección revisada real'); expect(html).toContain('Texto publicado exacto del servidor.'); expect(html).toContain('Guardar recurso'); expect(html).toContain('Leer Otra guía real');
     expect(html).toContain('aria-label="Volver a Recursos"');
     expect(html).not.toContain('general guideline'); expect(html).not.toContain('Science Behind Hydration'); expect(html).not.toContain('Dr. Amelia Johnson');

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FramePair } from '../FramePair';
 import { nodeName, sourceText, type SourceResolver, type SourceNode } from '../SourceView';
 import { recipesApi } from '../../../api/recipes';
@@ -17,13 +17,14 @@ function imageBinding(node:SourceNode,recipe:DisplayRecipe) {
 function recipeInfoBinding(node:SourceNode,recipe:DisplayRecipe) {
   if(nodeName(node)!=='Item Detail Info')return undefined;
   const text=sourceText(node);
-  const value=text.startsWith('Total Steps')?`${recipe.steps.length} pasos`
+  const value=text.startsWith('Total Steps')?`${recipe.steps.length} ${recipe.steps.length===1?'paso':'pasos'}`
     :text.startsWith('Prep Time')&&recipe.card?.prep_minutes!=null?`${recipe.card.prep_minutes} min`:'—';
   const labels=['Eat Time','Prep Time','Cook Time','Difficulty','Total Steps','Health Score','Cook Duration'];
-  return {children:fields(node,{},child=>leaf(child)&&!labels.includes(sourceText(child))?{text:value}:undefined)};
+  return {children:fields(node,{},child=>leaf(child)&&sourceText(child)==='Health Score'?{text:'Evaluación'}:leaf(child)&&!labels.includes(sourceText(child))?{text:value}:undefined)};
 }
 export function NutrigoRecipeDetail({recipe,onBack,patientName,onNavigate,onSignOut,onFavorite,saved=false,busy=false,error='',initialPortions,backLabel='Volver al menú'}:{recipe:DisplayRecipe;onBack:()=>void;patientName:string;onNavigate:ScreenProps['onNavigate'];onSignOut?:()=>void;onFavorite?:()=>void;saved?:boolean;busy?:boolean;error?:string;initialPortions?:number;backLabel?:string}) {
   const [portions,setPortions]=useState(initialPortions??recipe.yield_portions);
+  useEffect(()=>{window.scrollTo(0,0);},[recipe.id,recipe.version]);
   const macro=nutrients(recipe);
   const origin=recipeNutritionLabel(recipe.nutrition,recipe.nutrient_source,macro);
   const resolver:SourceResolver=node=>{
