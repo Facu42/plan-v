@@ -145,7 +145,7 @@ try {
   await button('Guardar borrador');await until("document.body.innerText.includes('Borrador guardado en el catálogo')");
   const catalog=await read(professional,'/api/recipes');const recipe=catalog.recipes.find(r=>r.title==='Arroz con vegetales');check(recipe?.current.card.macros.kcal===200,'receta manual conserva calorías declaradas');
   await button('Cerrar');await until('!document.querySelector(".recipe-form")');await button('Publicar');await until("document.body.innerText.includes('Revisión publicada')");
-  await button('Agregar al plan');await field('Día',today,'.recipe-overlay ');await button('Confirmar asignación');await until("document.body.innerText.includes('Asignada al día')");
+  await button('Asignar');await field('Día',today,'.recipe-overlay ');await button('Confirmar asignación');await until("document.body.innerText.includes('Asignada al día')");
   check((await read(patient,`/api/patients/${pid}/recipe-days?date=${today}`)).assignments.length===1,'receta publicada asignada por fecha');
   phase='plan manual';await B('goto',origin+`/crm/plan?paciente=${pid}`);await B('wait','.meal-plan-form');
   await field('Desde',today,'.meal-plan-form ');await field('Hasta',today,'.meal-plan-form ');
