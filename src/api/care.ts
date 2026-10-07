@@ -1,3 +1,4 @@
+import { friendlyError } from '../lib/error-messages';
 import { request } from './client';
 import type { CareSnapshot, CareInput, CareRecord, CarePreferences, CareAlert, ReplacementRecipe } from '../types/care';
 const base = (id: string) => `/api/patients/${encodeURIComponent(id)}/care`;
@@ -18,7 +19,6 @@ export const careApi = {
   alerts: (signal?: AbortSignal) => request<{alerts:CareAlert[]}>('/api/care/alerts', { signal }),
 };
 export function careErrorMessage(error: unknown) {
-  const message = error instanceof Error ? error.message : 'No se pudo completar la operación.';
-  try { const json = JSON.parse(message); return String(json.error ?? json.message ?? message); } catch { return message; }
+  return friendlyError(error);
 }
 export function notifyCareChanged() { window.dispatchEvent(new Event('plan-v:care-changed')); }

@@ -4,6 +4,7 @@ import type { ShowroomPage } from '../../../components/nutrigo/ShowroomPanels';
 import { nodeId, nodeName, renderSource, sourceText, type SourceBinding, type SourceNode, type SourceResolver } from '../SourceView';
 import { translateSource } from '../translation';
 import { secondaryLabels } from '../secondaryTranslation';
+import { friendlyError } from '../../../lib/error-messages';
 import { canLeaveWorkspace, useUnsavedChanges } from '../../../components/nutrigo/unsaved-changes';
 
 export type ScreenProps = { patient: ShowroomPatient; query?: string; now?: Date; onNavigate: (page: ShowroomPage) => void; onSignOut?: () => void };
@@ -87,7 +88,7 @@ export function useRemote<T>(key: string, load: (signal: AbortSignal) => Promise
   const generation = useRef(0); const currentKey = useRef(key); currentKey.current = key;
   const loader = useRef(load); loader.current = load;
   const reload = useCallback(() => setRevision(value => value + 1), []);
-  useEffect(() => { const controller = new AbortController(); const attempt = ++generation.current; setFailure(null); void loader.current(controller.signal).then(value => { if (!controller.signal.aborted && attempt === generation.current) setState({ key, value }); }).catch(error => { if (!controller.signal.aborted && attempt === generation.current) setFailure({ key, text: error instanceof Error ? error.message : 'No se pudo cargar. Reintentá.' }); }); return () => controller.abort(); }, [key, revision]);
+  useEffect(() => { const controller = new AbortController(); const attempt = ++generation.current; setFailure(null); void loader.current(controller.signal).then(value => { if (!controller.signal.aborted && attempt === generation.current) setState({ key, value }); }).catch(error => { if (!controller.signal.aborted && attempt === generation.current) setFailure({ key, text: friendlyError(error) }); }); return () => controller.abort(); }, [key, revision]);
   return { data: state?.key === key ? state.value : null, error: failure?.key === key ? failure.text : '', reload, setData: (value: T) => { if (currentKey.current !== key) return; generation.current += 1; setFailure(null); setState({ key, value }); } };
 }
 export function searchBinding(node: SourceNode, value: string, onChange: (value: string) => void, placeholder: string) {
@@ -96,4 +97,4 @@ export function searchBinding(node: SourceNode, value: string, onChange: (value:
   const input = <input type="search" aria-label={placeholder} placeholder={placeholder} value={value} onChange={event => onChange(event.target.value)} className={String(originalText?.props.className ?? '')} style={{ background: 'transparent', border: 0, outlineOffset: 3, minWidth: 0, width: '100%' }} />;
   return { children: node.children.map((child, index) => typeof child === 'object' && originalText && descendants(child).includes(originalText) ? input : typeof child === 'object' ? source(child, () => undefined, index) : null) };
 }
-export const errorText = (error: unknown) => { const text = error instanceof Error ? error.message : 'No se pudo guardar.'; try { const parsed = JSON.parse(text); return String(parsed.error ?? text); } catch { return text; } };
+export const errorText = (error: unknown) => friendlyError(error);

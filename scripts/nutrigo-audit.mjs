@@ -60,7 +60,7 @@ const inspectDialog = (page, english) => page.evaluate(englishSource => {
   if (dialog.scrollWidth > dialog.clientWidth + 2) issues.push(`Desborde horizontal dentro del diálogo (${dialog.scrollWidth} px en ${dialog.clientWidth} px).`);
   if (document.documentElement.scrollWidth > innerWidth + 2) issues.push('La página tiene scroll horizontal con el diálogo abierto.');
   const fields = [...dialog.querySelectorAll('input:not([type=hidden]), select, textarea, button')].filter(el => el.getClientRects().length);
-  const rects = fields.filter(el => el.type !== 'file' && getComputedStyle(el).opacity !== '0' && el.getBoundingClientRect().width > 8 && el.getBoundingClientRect().height > 8).map(el => ({ el, r: el.getBoundingClientRect() }));
+  const rects = fields.filter(el => !el.closest('details:not([open])') && el.type !== 'file' && getComputedStyle(el).opacity !== '0' && el.getBoundingClientRect().width > 8 && el.getBoundingClientRect().height > 8).map(el => ({ el, r: el.getBoundingClientRect() }));
   for (const { el, r } of rects) {
     if (r.right > box.right + 2 || r.left < box.left - 2) issues.push(`«${(el.getAttribute('aria-label') || el.name || el.textContent || el.tagName).trim().slice(0, 30)}» se sale del diálogo por los costados.`);
   }
@@ -92,7 +92,8 @@ for (const [width, height, suffix] of VIEWPORTS) {
   const page = await context.newPage();
   const consoleErrors = []; page.on('pageerror', e => consoleErrors.push(String(e).slice(0, 160)));
   page.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) consoleErrors.push(m.text().slice(0, 160)); });
-  page.on('response', r => { if (r.status() >= 400) consoleErrors.push(`${r.status()} ${new URL(r.url()).pathname}`.slice(0, 160)); });
+  let lastControl = 'carga';
+  page.on('response', r => { if (r.status() >= 400) consoleErrors.push(`${r.status()} ${r.request().method()} ${new URL(r.url()).pathname} (tras «${lastControl}»)`.slice(0, 200)); });
   await enterDemo(page);
   for (const slug of PAGES) {
     if (only && only !== slug) continue;
@@ -104,6 +105,7 @@ for (const [width, height, suffix] of VIEWPORTS) {
     for (let i = 0; i < controls.length; i++) {
       const label = controls[i];
       await go(page, slug); await listControls(page);
+      lastControl = `${slug}: ${label}`;
       const target = page.locator(`[data-audit="${i}"]`).first();
       if (!(await target.count())) continue;
       const before = page.url();

@@ -205,7 +205,7 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
             </button>
             <input
               className="text-input optional-desc"
-              placeholder="Detalle opcional (ej: con aceite de oliva)"
+              aria-label="Detalle opcional de la comida" placeholder="Detalle opcional (ej: con aceite de oliva)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />

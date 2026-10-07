@@ -70,6 +70,15 @@
 .fp-record-dialog input,.fp-record-dialog select,.fp-record-dialog textarea {font:inherit;color:var(--nv-ink)}
 .fp-record-dialog form>fieldset>label {display:grid;gap:6px;margin:12px 0;font-size:14px}
 .fp-record-dialog form>fieldset>label>input {min-height:44px;padding:9px 12px;border:1px solid var(--nv-line);border-radius:12px;background:var(--nv-bg)}
+/* «Mis registros»: el diálogo ya es la tarjeta; sus tarjetas internas no suman otro margen. En el celular se achican
+   los rellenos para que los campos y botones tengan ancho útil (antes quedaban unos 250 px). */
+.fp-record-dialog .nvt-card {margin-inline:0}
+.fp-record-dialog form>fieldset>label {min-width:0}
+.fp-record-dialog form>fieldset>label>:is(input,select) {width:100%;min-width:0;box-sizing:border-box}
+@media (max-width:480px) {
+  .fp-record-dialog {padding:16px}
+  .fp-record-dialog .care-panel {padding:16px 12px;border-radius:12px}
+}
 
 /* Conservar los tamaños fuente en 1440/390 y permitir acceder al contenido en los anchos intermedios. */
 @media(max-width:389px) {
