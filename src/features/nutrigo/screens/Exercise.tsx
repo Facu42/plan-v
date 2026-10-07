@@ -7,9 +7,14 @@ import { api } from '../../../api/client';
 import { useAppStore } from '../../../store/useAppStore';
 import { canLeaveWorkspace,useUnsavedChanges } from '../../../components/nutrigo/unsaved-changes';
 import type { ExerciseIntensity, RoutineAssignmentView } from '../../../types/exercise';
+import { GREY_BG, WHITE_BG, swapBackground } from '../source-tone';
+import { lineClamp } from '../text-fit';
+import { leftAlignedSearch } from './search-align';
 import { dateLabel, descendants, EmptyState, errorText, leaf, objects, searchBinding, source, RecordDialog, Stateful, useRemote, type ScreenProps } from './shared';
 
 type Row = { id: string; title: string; sets: number | null; reps: number | null; rest: number | null; duration?: number; note: string; recorded: boolean; date?: string; assignment?: RoutineAssignmentView };
+/** Valor ausente: «—» dentro de la misma celda del archivo. */
+const NONE = '—';
 const is = (node: SourceNode, ...samples: string[]) => leaf(node) && samples.includes(sourceText(node));
 const inner = (node: SourceNode, resolve: SourceResolver): ReactNode[] => node.children.map((child, index) => typeof child === 'object' ? source(child, resolve, index) : child);
 /** Celda con número y unidad (dos textos del archivo). */
@@ -48,17 +53,17 @@ export function NutrigoExercise({ patient, query = '', onNavigate, onSignOut }: 
     const prototypes = parts.filter(child => nodeName(child) === 'Table-Row-Exercises' && child !== header);
     const trailing = parts.filter(child => child !== header && !prototypes.includes(child));
     const badges = descendants(node).filter(child => nodeName(child) === 'Cell-Status').flatMap(objects);
-    // El celular usa columnas angostas («reps»): rótulos cortos para que nada se pise.
+    // El celular usa columnas angostas («reps»): rótulos cortos para que nada se pise. Su marco no trae paginación: muestra todas las filas (si no, las posteriores a la página 1 serían inalcanzables).
     const compact = descendants(node).some(child => is(child, 'reps'));
     const badge = (sample: string) => badges.find(child => sourceText(child) === sample) ?? badges[0];
     const renderRow = (prototype: SourceNode, item: Row) => source(prototype, child => {
       const name = nodeName(child);
-      if (name === 'Cell-Name') return { children: inner(child, part => leaf(part) ? { children: <>{item.title}<span title={item.note} className="block max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap text-[11px] leading-[1.3] text-[#8a8c90]">{item.note}</span></> } : undefined) };
-      if (name === 'Cell-Sets') return { children: inner(child, part => leaf(part) ? { text: item.sets == null ? '-' : String(item.sets) } : undefined) };
-      if (name === 'Cell-Reps') return pair(child, item.duration ? String(item.duration) : item.reps == null ? '-' : String(item.reps), item.duration ? 'min' : item.reps == null ? '' : compact ? 'rep.' : item.reps === 1 ? 'repetición' : 'repeticiones');
-      if (name === 'Cell-Rest') return pair(child, item.rest == null ? '-' : String(item.rest), item.rest == null ? '' : 'seg');
-      // Plan V no registra peso levantado ni calorías por ejercicio: la celda queda en «-», como el archivo cuando no aplica.
-      if (name === 'Cell-Weight' || name === 'Cell-Calories') return pair(child, '-', '');
+      if (name === 'Cell-Name') return { children: inner(child, part => leaf(part) ? { props: { style: { minWidth: 0, flexShrink: 1 } }, children: <><span title={item.title} style={lineClamp(2)}>{item.title}</span><span title={item.note} className="block max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap text-[11px] leading-[1.3] text-[#8a8c90]">{item.note}</span></> } : undefined) };
+      if (name === 'Cell-Sets') return { children: inner(child, part => leaf(part) ? { text: item.sets == null ? NONE : String(item.sets) } : undefined) };
+      if (name === 'Cell-Reps') return pair(child, item.duration ? String(item.duration) : item.reps == null ? NONE : String(item.reps), item.duration ? 'min' : item.reps == null ? '' : compact ? 'rep.' : item.reps === 1 ? 'repetición' : 'repeticiones');
+      if (name === 'Cell-Rest') return pair(child, item.rest == null ? NONE : String(item.rest), item.rest == null ? '' : 'seg');
+      // Plan V no registra peso levantado ni calorías por ejercicio: la celda queda en «—», como el archivo cuando no aplica.
+      if (name === 'Cell-Weight' || name === 'Cell-Calories') return pair(child, NONE, '');
       if (name === 'Cell-Status') {
         const done = item.recorded;
         const chip = badge(done ? 'Completed' : 'In Progress');
@@ -70,7 +75,7 @@ export function NutrigoExercise({ patient, query = '', onNavigate, onSignOut }: 
       }
       return undefined;
     }, item.id);
-    const body = remote.error ? <Stateful error={remote.error} onRetry={remote.reload} /> : !remote.data ? <EmptyState text="Cargando…" /> : !rows.length ? <EmptyState text={all.length ? 'No hay actividades con este filtro.' : 'Todavía no hay actividades ni rutinas indicadas.'} /> : shown.map((item, index) => renderRow(prototypes[index % prototypes.length], item));
+    const body = remote.error ? <Stateful error={remote.error} onRetry={remote.reload} /> : !remote.data ? <EmptyState text="Cargando…" /> : !rows.length ? <EmptyState text={all.length ? 'No hay actividades con este filtro.' : 'Todavía no hay actividades ni rutinas indicadas.'} /> : (compact ? rows : shown).map((item, index) => renderRow(prototypes[index % prototypes.length], item));
     return { children: <>{header && source(header, child => compact && is(child, 'Reps') ? { text: 'Rep.' } : compact && is(child, 'Rest') ? { text: 'Pausa' } : undefined, 'header')}{prototypes.length ? body : null}{trailing.map((child, index) => source(child, () => undefined, `end-${index}`))}</> };
   };
   const pagination = (node: SourceNode): SourceBinding => {
@@ -82,15 +87,15 @@ export function NutrigoExercise({ patient, query = '', onNavigate, onSignOut }: 
     const first = Math.max(0, Math.min(current - 1, pages - 3));
     const visible = Array.from({ length: Math.min(3, pages) }, (_, index) => first + index);
     return { children: <>
-      {previous && source(previous, child => child === previous ? { onClick: () => setPage(Math.max(0, current - 1)), label: 'Página anterior', props: { disabled: current === 0, style: current === 0 ? { background: '#f6f6f7' } : { background: '#ffffff' } } } : undefined, 'previous')}
+      {previous && source(previous, child => child === previous ? { onClick: () => setPage(Math.max(0, current - 1)), label: 'Página anterior', props: { disabled: current === 0, ...swapBackground(previous, [GREY_BG, WHITE_BG], current === 0 ? GREY_BG : WHITE_BG).props } } : undefined, 'previous')}
       {active && visible.map(number => source(number === current ? active : idle!, child => child === active || child === idle ? { onClick: () => setPage(number), label: `Página ${number + 1}`, props: { 'aria-current': number === current ? 'page' : undefined } } : leaf(child) ? { text: String(number + 1) } : undefined, number))}
-      {next && next !== previous && source(next, child => child === next ? { onClick: () => setPage(Math.min(pages - 1, current + 1)), label: 'Página siguiente', props: { disabled: current >= pages - 1, style: current >= pages - 1 ? { background: '#f6f6f7' } : { background: '#ffffff' } } } : undefined, 'next')}
+      {next && next !== previous && source(next, child => child === next ? { onClick: () => setPage(Math.min(pages - 1, current + 1)), label: 'Página siguiente', props: { disabled: current >= pages - 1, ...swapBackground(next, [GREY_BG, WHITE_BG], current >= pages - 1 ? GREY_BG : WHITE_BG).props } } : undefined, 'next')}
     </> };
   };
   const picker = (node: SourceNode, text: string, onClick: () => void, extra: Record<string, unknown> = {}): SourceBinding => ({ onClick, props: extra, children: inner(node, child => leaf(child) ? { text } : undefined) });
   const resolver: SourceResolver = node => {
     const name = nodeName(node); const text = sourceText(node);
-    const input = searchBinding(node, search, value => { setSearch(value); setPage(0); }, 'Buscar actividad'); if (input) return input;
+    const input = leftAlignedSearch(searchBinding(node, search, value => { setSearch(value); setPage(0); }, 'Buscar actividad')); if (input) return input;
     if (name === 'Table') return table(node);
     if (name === 'Pagination') return pagination(node);
     if (name === 'Button CTA' && text === 'Add Exercise') return { onClick: openActivity, label: 'Registrar actividad', children: inner(node, child => is(child, 'Add Exercise') ? { text: 'Registrar actividad' } : undefined) };
@@ -100,7 +105,7 @@ export function NutrigoExercise({ patient, query = '', onNavigate, onSignOut }: 
     if (name === 'Button More' && !text) return { onClick: filter(() => setRecordedOnly(value => !value)), label: recordedOnly ? 'Mostrar todas las actividades' : 'Mostrar sólo las registradas', props: { 'aria-pressed': recordedOnly } };
     if (name === 'Section Result') return { children: inner(node, child => {
       if (is(child, 'Showing')) return { text: 'Mostrando' };
-      if (nodeName(child) === 'Button') return { onClick: filter(() => setPageSize(value => value === 12 ? 24 : value === 24 ? 48 : 12)), label: `Filas por página: ${pageSize}. Cambiar`, children: inner(child, part => leaf(part) ? { text: String(Math.min(pageSize, Math.max(rows.length, 0)) || pageSize) } : undefined) };
+      if (nodeName(child) === 'Button') return { onClick: filter(() => setPageSize(value => value === 12 ? 24 : value === 24 ? 48 : 12)), label: `Filas por página: ${pageSize}. Cambiar`, children: inner(child, part => leaf(part) ? { text: String(shown.length) } : undefined) };
       if (is(child, 'out of 28')) return { text: `de ${rows.length}` };
       return undefined;
     }) };

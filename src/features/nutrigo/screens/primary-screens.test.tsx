@@ -41,7 +41,7 @@ describe.each([false,true])('pantallas principales MCP (celular %s)',mobile=>{
     expect(html).toContain('weight-hatch.svg');expect(html).toContain('#ffcb65');expect(html).not.toContain('repeating-linear-gradient');
     // La silueta del medidor son las dos piezas SVG originales del archivo (Donut Base y Donut Progress), no un anillo propio.
     expect(html).toContain('f641d.svg');expect(html).toContain('16730.svg');
-    expect(html).toContain('1,3/2');
+    expect(html).toContain('1,25/2');
   });
   it('calorías: conserva las capas originales (círculo gris y anillo amarillo) y suma el arco naranja original según el dato',()=>{
     context.mobile=mobile;

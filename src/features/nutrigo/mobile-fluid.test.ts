@@ -9,3 +9,9 @@ describe('marco de celular fluido', () => {
     expect(css).toMatch(/@media\s*\(max-width:\s*799px\)\s*\{[^}]*\.mcp-nutrigo div\[data-name="Navbar"\]\s*\{[^}]*width:\s*100%/);
   });
 });
+
+describe('nombre largo en el perfil del encabezado', () => {
+  it('el nombre de la paciente se corta con puntos suspensivos en vez de empujar la campana', () => {
+    expect(css).toMatch(/\.mcp-nutrigo \[data-name="User Profile"\] p\s*\{[^}]*text-overflow:\s*ellipsis/);
+  });
+});

@@ -16,9 +16,11 @@ export const leaf = (node: SourceNode) => node.children.some(child => typeof chi
 export const matches = (node: SourceNode, name: string) => nodeName(node) === name;
 export const idEnds = (node: SourceNode, id: string) => nodeId(node) === id || nodeId(node).endsWith(`;${id}`) || nodeId(node) === `node-${id.replace(':', '_')}`;
 export const formatNumber = (value: number | null | undefined) => value == null ? '—' : new Intl.NumberFormat('es-AR', { maximumFractionDigits: 1 }).format(value);
-export const dateId = (value: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(value);
+/** Día (AAAA-MM-DD) en Buenos Aires; una fecha inválida da '' en vez de tirar la pantalla. */
+export const dateId = (value: Date) => Number.isNaN(value.getTime()) ? '' : new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(value);
 export { dateLabel } from './date-label';
-export const timeLabel = (value: string) => Number.isNaN(Date.parse(value)) ? '' : new Date(value).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+/** Hora de una marca de tiempo, siempre en Argentina; vacío si la fecha no es válida. */
+export const timeLabel = (value: string) => Number.isNaN(Date.parse(value)) ? '' : new Date(value).toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit' });
 export const safeUrl = (value: string | null | undefined) => { try { const url = new URL(value ?? ''); return url.protocol === 'https:' ? url.href : null; } catch { return null; } };
 
 export const translate = (text: string) => secondaryLabels[text] ?? translateSource(text);
@@ -50,15 +52,16 @@ export function EmptyState({ text }: { text: string }) {
 }
 /** Porcentaje acotado a 0–100 (o null si falta alguno de los dos valores). */
 export const percent = (value: number | null | undefined, total: number | null | undefined) =>
-  value == null || total == null || total <= 0 ? null : Math.max(0, Math.min(100, (value / total) * 100));
+  value == null || total == null || !Number.isFinite(value) || !Number.isFinite(total) || total <= 0 ? null : Math.max(0, Math.min(100, (value / total) * 100));
 /**
  * Barra del archivo partida en tramo lleno y tramo vacío: se reparte el ancho con el porcentaje
  * real en vez de ocultarla. Sin dato, la barra queda vacía (0 %), como el archivo dibuja un inicio.
  */
 export function barFill(pct: number | null, part: 'filled' | 'empty'): SourceBinding {
-  const value = pct ?? 0;
+  // El tramo en 0 queda con ancho 0 pero sigue en el DOM: nunca se esconde un nodo del archivo.
+  const value = pct == null || !Number.isFinite(pct) ? 0 : Math.max(0, Math.min(100, pct));
   const grow = part === 'filled' ? value : 100 - value;
-  return { props: { style: { flex: `${grow} 1 0%`, minWidth: 0, paddingRight: 0, display: grow === 0 ? 'none' : undefined } } };
+  return { props: { style: { flex: `${grow} 1 0%`, minWidth: 0, paddingRight: 0 } } };
 }
 /** Arco de dona con los colores del archivo, para superponer al dibujo de ejemplo. Con `hatch`, el tramo que falta va rayado como en el archivo. */
 export function Ring({ pct, color, track = 'transparent', thickness = 14, half = false, hatch }: { pct: number | null; color: string; track?: string; thickness?: number; half?: boolean; hatch?: string }) {

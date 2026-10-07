@@ -37,7 +37,7 @@ describe.each([false, true])('pantallas desde MCP (celular: %s)', mobile => {
     const html = renderToStaticMarkup(<NutrigoDiary patient={{ ...patient, logs } as unknown as ShowroomPatient} onNavigate={navigate} now={now} />);
     // Dos páginas reales (12 + 1), sin las páginas 3 y 7 del ejemplo.
     expect(html).toContain('data-name="Pagination"'); expect(html).toContain('aria-label="Página 2"'); expect(html).not.toContain('aria-label="Página 3"'); expect(html).not.toContain('>7<');
-    expect(html.match(/Registro actual \d+/g)).toHaveLength(12);
+    expect(html.match(/>Registro actual \d+</g)).toHaveLength(12);
     if (!mobile) expect(html).toContain('de 13 registros');
     expect(html).not.toContain('out of 84');
   });

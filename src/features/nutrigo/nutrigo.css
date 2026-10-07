@@ -93,3 +93,6 @@
 
 /* El archivo fija la barra superior del celular en 390 px; entre 391 y 799 px debe llegar de borde a borde. */
 @media(max-width:799px){.mcp-nutrigo div[data-name="Navbar"]{width:100%}}
+
+/* Perfil del encabezado: un nombre largo se corta con puntos suspensivos y no empuja la campana. */
+.mcp-nutrigo [data-name="User Profile"] p{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

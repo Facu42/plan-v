@@ -12,7 +12,14 @@ export function mealLogWasKept(log: Pick<MealLog, 'foods' | 'macros' | 'analysis
 
 export const MEAL_KEPT_COPY = 'No pudimos estimar alimentos ni macros. Verónica lo revisará. Tu registro no se perdió.';
 
-/** Momento de la comida más probable según la hora local (0 a 23). */
+/** Hora (0 a 23) en Argentina; con una fecha inválida devuelve 12 (mediodía) para no sugerir nada raro. */
+export function argentinaHour(date: Date): number {
+  if (Number.isNaN(date.getTime())) return 12;
+  const hour = Number(new Intl.DateTimeFormat('en-GB', { hour: '2-digit', hourCycle: 'h23', timeZone: 'America/Argentina/Buenos_Aires' }).format(date));
+  return Number.isFinite(hour) ? hour : 12;
+}
+
+/** Momento de la comida más probable según la hora de Argentina (0 a 23). */
 export function suggestSlot(hour: number): MealSlot {
   if (hour >= 5 && hour < 10) return 'Desayuno';
   if (hour >= 10 && hour < 12) return 'Colación';

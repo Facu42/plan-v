@@ -5,7 +5,7 @@ import type { MealLog, Patient } from '../../types';
 import { MEAL_KEPT_COPY, MealLogModal, mealLogWasKept } from './MealLogModal';
 import {
   MEAL_SLOTS, analyzingMessages, base64Payload, captureProblem, remainingNotice, confidenceLevel, countAt, macroShares, messageAt,
-  photoProblem, resolveInitialSlot, stepProgress, suggestSlot,
+  argentinaHour, photoProblem, resolveInitialSlot, stepProgress, suggestSlot,
 } from './meal-log-helpers';
 import { StepIndicator } from './MealLogStepper';
 import { CaptureView, ConsentGroup, ModeToggle, PhotoDrop, SlotChips } from './MealLogCapture';
@@ -306,5 +306,17 @@ describe('revisión del code-reviewer (M, L)', () => {
     expect(css).not.toMatch(/(?<![-\w])color: var\(--mlm-muted\)/);
     expect(css.indexOf('92vh')).toBeGreaterThan(-1);
     expect(css.indexOf('92vh')).toBeLessThan(css.indexOf('92dvh'));
+  });
+});
+
+describe('hora para sugerir el momento de la comida', () => {
+  it('es la hora de Argentina, sin importar la zona del dispositivo', () => {
+    // 01:00 UTC = 22:00 en Buenos Aires.
+    expect(argentinaHour(new Date('2026-10-03T01:00:00Z'))).toBe(22);
+    expect(argentinaHour(new Date('2026-10-03T15:00:00Z'))).toBe(12);
+    expect(suggestSlot(argentinaHour(new Date('2026-10-03T01:00:00Z')))).toBe('Cena');
+  });
+  it('una fecha inválida cae en un valor seguro', () => {
+    expect(argentinaHour(new Date('no es fecha'))).toBe(12);
   });
 });
