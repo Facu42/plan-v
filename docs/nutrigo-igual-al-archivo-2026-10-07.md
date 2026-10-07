@@ -89,6 +89,19 @@ Hoy se ve en cero o "Sin dato" dentro de su bloque. Cada punto es una propuesta 
 - `npm run check`, `npm run check:migrations` y `npm run build`: sin errores.
 - Comparación visual lado a lado de las diez pantallas en 1440 y 390.
 
+## Publicación (2026-10-07)
+
+- **PR:** [PR #68](https://github.com/Facu42/plan-v/pull/68), unido a `main` como `03a6aeb`.
+- **CI en verde:**
+  - `verify`: pruebas, tipos, compilación, migraciones y secretos;
+  - `signed-auth`: sesiones firmadas y recorrido completo en navegador.
+- **Correcciones hechas antes de unir:**
+  - el recorrido en navegador se adaptó al diseño nuevo: registro del Diario desde «Registrar», botones de ícono por su nombre accesible, favoritas en el detalle de receta, «Registrar peso y medidas» en Progreso y el selector «Elegir mes» en Agenda;
+  - una prueba vencía con la fecha (pago de ejemplo hasta el 6/10).
+- **Vercel:** producción READY (`dpl_FAUvXSCNke3ukajUKGryAVMLndyN`); `/app/inicio` responde 200 con el build nuevo.
+- **Railway:** API (`api_listen`, producción con Supabase) y worker (`worker_listen`) en SUCCESS para `03a6aeb`.
+- **Límite:** la API publicada no se pudo abrir desde el entorno de trabajo, porque el proxy la bloquea. Se comprobó con los conectores de Vercel y Railway.
+
 ## Fuera de este paso
 
 Pantallas de la nutricionista, ingreso y administración (Figma no las dibuja). Van en otra rama, armadas
