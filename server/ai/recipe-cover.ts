@@ -46,17 +46,22 @@ export function recipeCoverPrompt(context: RecipeCoverContext): string {
     `Preparation: ${culinaryEnglish((context.steps ?? []).join(' ').slice(0, 650))}`,
   ].join(' ').slice(0, 2048);
 }
+/** Deja en el registro por qué no hubo foto: solo el motivo y el código HTTP, nunca claves, textos ni imágenes. */
+function logCoverFailure(reason: string) { console.error('[ai:cloudflare-cover] sin foto', { reason }); }
 export async function generateRecipeCoverImage(context: RecipeCoverContext): Promise<RecipeCoverResult> {
-  if (!recipeCoverEnabled() || !context.title.trim() || !context.items.length) return { status: 'failed' };
+  if (!recipeCoverEnabled()) { logCoverFailure('proveedor_no_configurado'); return { status: 'failed' }; }
+  if (!context.title.trim() || !context.items.length) return { status: 'failed' };
   try {
     const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/black-forest-labs/flux-1-schnell`, {
       method: 'POST', headers: { Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: recipeCoverPrompt(context), steps: 4 }), signal: AbortSignal.timeout(60_000), redirect: 'error',
     });
     if (response.status === 429) {
+      logCoverFailure('limite_diario');
       const nextDay = new Date(); nextDay.setUTCHours(24, 1, 0, 0);
       return { status: 'failed', retry_after_ms: nextDay.getTime() - Date.now() };
     }
+    if (!response.ok) logCoverFailure(`http_${response.status}`);
     if (!response.ok) return { status: 'failed', retry_after_ms: response.status === 401 || response.status === 403 ? 3_600_000 : 60_000 };
     // Bound the streamed body before parsing; never log prompts, images or keys.
     if (Number(response.headers.get('content-length')) > 7_100_000) return { status: 'failed' };
@@ -64,6 +69,7 @@ export async function generateRecipeCoverImage(context: RecipeCoverContext): Pro
     const chunks: Uint8Array[] = []; let size = 0;
     for (;;) { const { done, value } = await reader.read(); if (done) break; size += value.length; if (size > 7_100_000) { await reader.cancel(); return { status: 'failed' }; } chunks.push(value); }
     const result = JSON.parse(Buffer.concat(chunks).toString('utf8')) as { success?: boolean; result?: { image?: string }; errors?: Array<{ code?: number }> };
+    if (!result.success || typeof result.result?.image !== 'string') logCoverFailure('respuesta_sin_imagen');
     if (!result.success || typeof result.result?.image !== 'string') return { status: 'failed', retry_after_ms: 60_000 };
     const bytes = Buffer.from(result.result.image, 'base64');
     if (bytes.length > 5 * 1024 * 1024) return { status: 'failed' };

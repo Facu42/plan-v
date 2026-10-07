@@ -65,6 +65,9 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 
 ## Lo pendiente
 
+- Auditoría de la demo del 2026-10-07 (rama `claude/inspiring-lovelace-nfsot9`): superficies fuera del
+  archivo que todavía tienen estilo viejo y la primera prueba de fotos con Cloudflare en producción.
+  Ver `docs/auditoria-demo-2026-10-07.md`.
 - Pantallas de la nutricionista, ingreso y administración con piezas del archivo de Nutrigo
   (Figma no las dibuja); van en otra rama.
 
