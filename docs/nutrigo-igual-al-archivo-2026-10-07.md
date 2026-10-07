@@ -66,7 +66,7 @@ plan, medidas, rutina con series hechas y pasos.
 - **Referencia:** Plan V no guarda metas de pasos ni de agua. Las barras usan una referencia general (8.000 pasos y 2 L) y la pantalla la llama «referencia», nunca meta.
 - **Dispositivos:** no se importan datos de dispositivos (decisión de alcance vigente).
 - **Orden de publicación:** si la web y la API se publican antes de aplicar la migración, guardar agua y descanso sigue funcionando. Solo registrar pasos falla hasta que exista la columna.
-- **Estado:** no está aplicada en producción. Necesita la frase escrita de Facundo: «aplicá la migración de pasos en la base».
+- **Estado:** **aplicada en producción** (`plan-v-app`) el 2026-10-07, con la frase escrita de Facundo «Aplicá la migración de pasos en la base». Se comprobó la columna `habit_logs.steps` (entero, opcional). El asesor de seguridad quedó igual que antes: 20 informativos, 3 errores y 119 advertencias, todos previos.
 
 ## Lo que el diseño muestra y Plan V todavía no guarda
 
