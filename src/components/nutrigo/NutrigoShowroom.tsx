@@ -64,6 +64,7 @@ import './shell-fig.css';
 import './figma-source.css';
 import './patient-figma-front.css';
 import './motion.css';
+import './ace-step-polish.css';
 import { NV_ICONS, NvIcon, type NvIconName } from './NvIcon';
 import { CaretDown, CaretUp, LockSimple } from '@phosphor-icons/react';
 import { FigmaDetailContext, FigmaPatientFooter, FigmaPlanCard, PATIENT_FIGMA_NODES, type FigmaDetail } from './FigmaPatientFront';
