@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { ShowroomPatient } from '../../../components/nutrigo/showroom-model';
 import type { ShowroomPage } from '../../../components/nutrigo/ShowroomPanels';
-import { nodeId, nodeName, renderSource, sourceText, type SourceNode, type SourceResolver } from '../SourceView';
+import { nodeId, nodeName, renderSource, sourceText, type SourceBinding, type SourceNode, type SourceResolver } from '../SourceView';
 import { translateSource } from '../translation';
 import { secondaryLabels } from '../secondaryTranslation';
 import { canLeaveWorkspace, useUnsavedChanges } from '../../../components/nutrigo/unsaved-changes';
@@ -22,6 +22,45 @@ export const translate = (text: string) => secondaryLabels[text] ?? translateSou
 export function source(node: SourceNode, resolve: SourceResolver, key?: string | number) { return renderSource(node, resolve, translate, key); }
 export function fields(node: SourceNode, values: Record<string, ReactNode>, extra?: SourceResolver, key?: string | number) {
   return source(node, child => { const custom = extra?.(child); if (custom) return custom; for (const [id, text] of Object.entries(values)) if (idEnds(child, id)) return { text }; return undefined; }, key);
+}
+/**
+ * Repite los ítems originales de una lista del archivo con datos reales. Usa los ítems en ciclo
+ * (1.º, 2.º, 3.º, 1.º…) para conservar sus colores; nunca reemplaza la lista por texto suelto.
+ */
+export function cloneList<T>(list: SourceNode, items: readonly T[], bind: (node: SourceNode, item: T, index: number) => SourceBinding | undefined, options: { key?: (item: T, index: number) => string | number; only?: (node: SourceNode) => boolean } = {}): ReactNode[] {
+  const prototypes = objects(list).filter(options.only ?? (() => true));
+  if (!prototypes.length) return [];
+  return items.map((item, index) => source(prototypes[index % prototypes.length], node => bind(node, item, index), options.key?.(item, index) ?? index));
+}
+/** Hijos de una lista: los ítems clonados y, sin datos, un estado vacío con la tipografía del archivo. */
+export function listChildren<T>(list: SourceNode, items: readonly T[], bind: (node: SourceNode, item: T, index: number) => SourceBinding | undefined, empty: string, options: Parameters<typeof cloneList<T>>[3] = {}): SourceBinding {
+  return { children: items.length ? cloneList(list, items, bind, options) : <EmptyState text={empty} /> };
+}
+export function EmptyState({ text }: { text: string }) {
+  return <p className="w-full py-[16px] text-center font-['Poppins:Regular'] text-[12px] leading-[1.5] text-[#8a8c90]">{text}</p>;
+}
+/** Porcentaje acotado a 0–100 (o null si falta alguno de los dos valores). */
+export const percent = (value: number | null | undefined, total: number | null | undefined) =>
+  value == null || total == null || total <= 0 ? null : Math.max(0, Math.min(100, (value / total) * 100));
+/**
+ * Barra del archivo partida en tramo lleno y tramo vacío: se reparte el ancho con el porcentaje
+ * real en vez de ocultarla. Sin dato, la barra queda vacía (0 %), como el archivo dibuja un inicio.
+ */
+export function barFill(pct: number | null, part: 'filled' | 'empty'): SourceBinding {
+  const value = pct ?? 0;
+  const grow = part === 'filled' ? value : 100 - value;
+  return { props: { style: { flex: `${grow} 1 0%`, minWidth: 0, paddingRight: 0, display: grow === 0 ? 'none' : undefined } } };
+}
+/** Arco de dona con los colores del archivo, para superponer al dibujo de ejemplo. */
+export function Ring({ pct, color, track = 'transparent', thickness = 14, half = false }: { pct: number | null; color: string; track?: string; thickness?: number; half?: boolean }) {
+  const value = Math.max(0, Math.min(100, pct ?? 0));
+  const turn = half ? 0.5 : 1;
+  const start = half ? 270 : 0;
+  const mask = `radial-gradient(farthest-side, transparent calc(100% - ${thickness}px), #000 calc(100% - ${thickness}px + 1px))`;
+  return <span aria-hidden="true" className="pointer-events-none absolute inset-0 block rounded-full" style={{
+    background: `conic-gradient(from ${start}deg, ${color} 0turn ${(value / 100) * turn}turn, ${track} ${(value / 100) * turn}turn ${turn}turn, transparent ${turn}turn 1turn)`,
+    WebkitMask: mask, mask,
+  }} />;
 }
 export function Stateful({ loading, error, empty, onRetry }: { loading?: boolean; error?: string; empty?: string; onRetry?: () => void }) {
   if (error) return <div role="alert" className="p-[16px] text-[#a32929]">{error}{onRetry && <button type="button" className="ml-[8px] underline" onClick={onRetry}>Reintentar</button>}</div>;
