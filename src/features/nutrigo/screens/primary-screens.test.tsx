@@ -37,6 +37,8 @@ describe.each([false,true])('pantallas principales MCP (celular %s)',mobile=>{
     expect(html.match(/data-name="Card Statistic - Dashboard"/g)?.length).toBe(4);
     expect(html).toContain('data-name="Chart"');
     expect(html).toContain('data-name="Icon/Special/PersonSimpleRun"');
+    expect(html).toContain('style="height:62.5%;flex:none;min-height:16px"');
+    expect(html).toContain('aria-label="Cargar comida"');
     expect(html).toContain('background:transparent');
   });
   it('menú conserva datos y estimación de la receta asignada',()=>{

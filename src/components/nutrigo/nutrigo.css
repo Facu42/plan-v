@@ -169,4 +169,10 @@
 @media(max-width:390px) { .nv-metrics { grid-template-columns:1fr; }.nv-page-head h1 { font-size:22px; }.nv-plan-grid { grid-template-columns:1fr; }.nv-nutrition { grid-template-columns:1fr; } }
 @media(max-width:360px) { .nv-main { padding:20px 12px; }.nv-role-switch button { padding:7px; font-size:13px; }.nv-topbar { padding-inline:10px; }.nv-metric { padding:10px; }.nv-metric>strong { font-size:22px; }.nv-metric h2 { font-size:13px; }.nv-metric .nv-icon-tile { width:25px; height:25px; }.nv-nutrition { grid-template-columns:1fr; }.nv-calorie { width:160px; }.nv-plan-grid { grid-template-columns:1fr; }.nv-patient-table [role=row] { grid-template-columns:1fr; }.nv-card { padding:16px; }.nv-card-head { flex-wrap:wrap; } }
 @media(max-width:320px) { .nv-main { padding:16px 10px; }.nv-page-head h1 { font-size:20px; }.nv-metric>strong { font-size:20px; } }
+@media(min-width:761px) {
+  .nv-app { height:100dvh; min-height:0; overflow:hidden; }
+  .nv-workspace { height:100dvh; min-height:0; display:flex; flex-direction:column; }
+  .nv-content-layout { flex:1; min-height:0; overflow:hidden; }
+  .nv-main, .nv-daily { min-height:0; overflow-y:auto; overscroll-behavior:contain; }
+}
 @media(prefers-reduced-motion:reduce) { .nv-app *, .nv-app *::before,.nv-app *::after { scroll-behavior:auto!important; transition:none!important; animation:none!important; } }

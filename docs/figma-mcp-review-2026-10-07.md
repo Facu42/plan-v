@@ -15,3 +15,12 @@ También se verificó que el botón de avisos conserve el contexto del paciente.
 La consulta posterior confirmó que `74:2056` contiene el gráfico de hidratación de Figma (borde Saffron, barra y rótulo inferior), mientras que `71:1235` contiene tres tarjetas de actividad con fondos Green, Saffron y Orange e íconos originales de correr, fuerza y tai chi. La adaptación de actividad estaba reemplazando ese `Body` entero por párrafos de texto, por eso desaparecían los dibujos. Ahora se conserva cada subtree del frame y sólo se reemplazan nombre, porcentaje, series y categoría con datos reales; si faltan datos se muestran las mismas tarjetas con “Sin rutina asignada”.
 
 La hidratación mantiene el gráfico y sus proporciones visuales del archivo, pero reemplaza los números de ejemplo por el registro real del paciente. No se inventa una meta: el estado sigue identificando que es un registro de agua sin meta prescrita.
+
+## Correcciones aplicadas después de la revisión visual
+
+- `Home.tsx` conserva `Chart` de `74:2056` y calcula sólo la altura visual de la barra a partir de los vasos registrados; el rótulo sigue diciendo `vasos` y no convierte esa proporción en una meta clínica.
+- `Widget Workout Progress` conserva `71:1235` completo, incluidos los SVG de `PersonSimpleRun`, `PersonSimpleDeadlifts` y `PersonSimpleTaiChi`.
+- `Widget Weight Data` conserva el anillo de Figma y muestra el peso real junto con el objetivo profesional disponible (`Bajar de peso`, `Mantener el peso` o `Subir de peso`). Si no existe un objetivo en backend, muestra `Meta de peso no registrada` y elimina las cifras de ejemplo `85` y `65`.
+- `Widget Calories Intake` agrega `Cargar comida` en el mismo encabezado visual y abre el formulario persistente del diario.
+- `FramePair` lleva el ícono de avisos directamente a Mensajes; ya no abre una hoja de navegación general sin relación con la notificación.
+- `nutrigo-overrides.css` fija el marco a la ventana en escritorio y deja el scroll en `Content`, evitando que una ficha larga desplace toda la aplicación. En móvil conserva el scroll natural de la pantalla.

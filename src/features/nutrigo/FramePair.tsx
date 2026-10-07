@@ -6,6 +6,7 @@ import { patientNavigation as nav, patientNavBinding } from './patient-navigatio
 import type { ShowroomPage } from '../../components/nutrigo/ShowroomPanels';
 import { FigmaRecordDialog } from '../../components/nutrigo/FigmaPatientFront';
 import './nutrigo.generated.css';
+import './nutrigo-overrides.css';
 
 const frames = import.meta.glob<{default:SourceNode}>('./source/*.json');
 export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, children, onSearch, query = '', unread = 0 }: {
@@ -39,8 +40,12 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
     if(name==='Social Media')return {props:{'aria-hidden':true}};
     if(node.tag==='p'&&/Adam Vasylenko/.test(text))return {text:patientName};
     if(node.tag==='p'&&/Search (anything|placeholder|articles|food|recipes)/.test(text))return onSearch?{tag:'input',props:{type:'search',value:query,placeholder:translateSource(text),'aria-label':'Buscar',onChange:(event:{target:{value:string}})=>onSearch(event.target.value)}}:{onClick:()=>onNavigate('recetas'),label:'Buscar recetas',text:'Buscar recetas'};
-    // Source icon-only menu controls gain an explicit, reversible action.
-    if((name==='Button Icon'||name==='Button More')&&!text)return {onClick:()=>setMenu(true),label:'Abrir acciones'};
+    // Header notification icon is a direct, contextual destination. It must
+    // not open the generic navigation sheet detached from the notification.
+    if(name==='Button Icon'&&!text)return {onClick:()=>onNavigate('mensajes'),label:'Abrir mensajes'};
+    // Card overflow controls keep a compact actions sheet only when no screen
+    // resolver supplied a more specific action.
+    if(name==='Button More'&&!text)return {onClick:()=>setMenu(true),label:'Abrir acciones'};
     return undefined;
   };
   return <div className="mcp-nutrigo" data-figma-frame={id}>

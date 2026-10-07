@@ -1,0 +1,13 @@
+/* Overrides for the exported Figma frames. The frame is fixed to the
+   viewport and its Content layer owns scrolling, so ficha/forms never move
+   the whole page. */
+.mcp-nutrigo { height: 100dvh; min-height: 0; display: flex; overflow: hidden; }
+.mcp-nutrigo > [data-name] { height: 100%; min-height: 0; min-width: 0; overflow: hidden; }
+.mcp-nutrigo [data-name="Content"] { min-height: 0; overflow-y: auto; overflow-x: hidden; }
+.mcp-load-meal { margin-top: 8px; align-self: flex-start; font-size: 12px !important; }
+
+@media (max-width: 799px) {
+  .mcp-nutrigo { height: auto; min-height: 100dvh; overflow: visible; }
+  .mcp-nutrigo > [data-name] { height: auto; min-height: 100dvh; overflow: visible; }
+  .mcp-nutrigo [data-name="Content"] { overflow: visible; }
+}
