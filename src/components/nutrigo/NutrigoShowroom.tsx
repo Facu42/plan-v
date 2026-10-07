@@ -248,6 +248,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
   const currentDay = buildCalendarWeek(now)[dayIndex];
   const meals = p ? resolveCalendarMeals(p, now, dayIndex) : [];
   const pageTitle = pendingModule || (page === 'inicio' ? role === 'patient' ? `Hola, ${preferredName || p?.name.split(' ')[0] || 'bienvenida'}` : 'Tu consultorio' : PAGE_LABELS[page]);
+  const libraryRecipeTitle = role === 'pro' && page === 'biblioteca' && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('biblioteca') !== 'recursos' && !hasResourceHash(window.location.hash) ? 'Recetas' : undefined;
   const tabs = role === 'patient' ? PATIENT_TABS : PRO_TABS;
   const moreItems = role === 'patient' ? PATIENT_MORE : proMore(isAdmin === true);
   const { moreCurrent } = tabBarState(page, tabs, moreItems);
@@ -412,9 +413,9 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
     <div className="nv-workspace">
       <header className="nv-topbar" ref={topbarRef}>
         <a className="nv-brand" href={buildAppHref(typeof window === 'undefined' ? 'https://plan.v/app/inicio' : window.location.href, role, 'inicio')} onClick={(event) => { event.preventDefault(); navigate('inicio'); }}><Mark /><span>Plan V</span></a>
-        <h1 className="nv-topbar-title" aria-label={figmaDetail?.title ?? PAGE_LABELS[page]}>
-          <span className="nv-topbar-label-desktop">{figmaDetail?.title ?? PAGE_LABELS[page]}</span>
-          <span className="nv-topbar-label-mobile" aria-hidden="true">{figmaDetail?.title ?? MOBILE_PAGE_LABELS[page] ?? PAGE_LABELS[page]}</span>
+        <h1 className="nv-topbar-title" aria-label={figmaDetail?.title ?? libraryRecipeTitle ?? PAGE_LABELS[page]}>
+          <span className="nv-topbar-label-desktop">{figmaDetail?.title ?? libraryRecipeTitle ?? PAGE_LABELS[page]}</span>
+          <span className="nv-topbar-label-mobile" aria-hidden="true">{figmaDetail?.title ?? libraryRecipeTitle ?? MOBILE_PAGE_LABELS[page] ?? PAGE_LABELS[page]}</span>
         </h1>
         <div className="nv-desktop-account">{!compactHeader && accountMenu()}</div>
         <button type="button" className="nv-button nv-ghost nv-menu-toggle" ref={menuButtonRef} aria-label={menuOpen ? 'Cerrar el menú' : 'Abrir el menú'} aria-expanded={menuOpen} aria-controls="nv-drawer" onClick={() => setMenuOpen((open) => !open)}><Icon name="list" size={20} /></button>

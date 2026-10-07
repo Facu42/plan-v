@@ -376,9 +376,9 @@ export function RecipeCatalog({ patientId, patients }: { patientId: string; pati
   return <section className="recipe-catalog" aria-label="Catálogo profesional de recetas">
     <header>
       <div>
-        <span>CATÁLOGO DEL CONSULTORIO</span>
-        <h2>Recetas e ingredientes</h2>
-        <p>Elegí alimentos, medidas y porciones para calcular la composición. Un borrador privado no cambia la revisión publicada. La IA propone nutrientes estimados que requieren revisión; la etiqueta de estimación se conserva al publicar. Publicar revalida alergias y la versión.</p>
+
+        <h2 className="recipe-catalog-title">Recetas</h2>
+        <p>Preparaciones, ingredientes y composición de tu consultorio.</p>
       </div>
       <div className="recipe-header-actions">
         <NvButton className="nv-ghost" disabled={busy} onClick={catalog.startNew}>Nueva receta</NvButton>
@@ -414,7 +414,7 @@ export function RecipeCatalog({ patientId, patients }: { patientId: string; pati
         <label className="recipe-filter-check"><input type="checkbox" checked={filters.favoritesOnly} disabled={catalog.favoriteIds === null} onChange={event => setFilters({ ...filters, favoritesOnly: event.target.checked })} />Solo favoritas</label>
         <button type="button" className="recipe-cancel" onClick={() => setFilters({ query: '', category: '', state: 'all', favoritesOnly: false })}>Limpiar filtros</button>
       </div>
-      {recipes && <p role="status">{favoritesReady ? `${visible.length} de ${recipes.length} recetas` : 'Cargando favoritos…'}</p>}
+      {recipes && <p role="status">{source === 'memory' && 'Demo · '}{favoritesReady ? `${visible.length} de ${recipes.length} recetas` : 'Cargando favoritos…'}</p>}
       {recipes && recipes.length > 0 && favoritesReady && visible.length === 0 && <NvState title="No hay recetas con estos filtros" description="Probá otro nombre, ingrediente o momento, o limpiá los filtros." />}
       <div className="recipe-grid">{favoritesReady && visible.map((recipe) => {
       const storedCard = recipe.current.card ?? unavailableCard(recipe.title);
@@ -426,7 +426,7 @@ export function RecipeCatalog({ patientId, patients }: { patientId: string; pati
       </>} /></div>;
     })}</div></>}
     <RecipeAssignDialog catalog={catalog} />
-  </section>;
+  <details className="recipe-catalog-guidance"><summary>Publicación y estimaciones de IA</summary><p>Un borrador privado no cambia la revisión publicada. La IA propone nutrientes estimados que requieren revisión; la etiqueta de estimación se conserva al publicar. Publicar revalida alergias y la versión.</p></details></section>;
 }
 
 export function AssignedRecipesView({ recipes, query = '', error = '', patientId, savedIds = [], onToggleFavorite }: {

@@ -14,7 +14,7 @@ export function ProfessionalLibrary({ patient, patients, query, onQueryChange, o
 }) {
   const [tab, setTab] = useState<'recetas' | 'recursos'>(() => typeof window !== 'undefined' && (window.location.hash.startsWith('#recurso=') || new URLSearchParams(window.location.search).get('biblioteca') === 'recursos') ? 'recursos' : 'recetas');
   const [resources, setResources] = useState<EditorialResource[] | null>(null);
-  return <section className="pw-library" aria-label="Biblioteca del consultorio"><header><h2>Biblioteca</h2><p>Preparaciones y material para el acompañamiento.</p></header>
+  return <section className={`pw-library${tab === 'recetas' ? ' pw-library-recipes' : ''}`} aria-label="Biblioteca del consultorio">{tab === 'recursos' && <header><h2>Biblioteca</h2><p>Preparaciones y material para el acompañamiento.</p></header>}
     <nav className="pw-tabs" aria-label="Contenido de la biblioteca">{(['recetas', 'recursos'] as const).map((id) => <button key={id} type="button" aria-current={tab === id ? 'page' : undefined} onClick={() => {
       if (id === tab) return;
       const url = new URL(window.location.href); url.searchParams.set('biblioteca', id); url.hash = '';

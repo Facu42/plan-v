@@ -8,7 +8,7 @@ Cada incremento registra comportamiento visto, afirmaciones sin demostración, A
 
 ## Contraste realizado antes de los cambios
 
-Fuente: [demo de Nutriboost](https://www.loom.com/share/35b428b996314f9c8f5505de4a6297cb), pantallas del tramo 6:12–6:46. Capturas renovadas aproximadamente a 6:25 (catálogo) y 6:40 (detalle); se revisaron los subtítulos visibles. No se afirma escucha directa del audio completo. Se mantiene la limitación del relevamiento general.
+Fuente: [demo de Nutriboost](https://www.loom.com/share/35b428b996314f9c8f5505de4a6297cb), pantallas del tramo 6:12–6:46. Capturas renovadas aproximadamente a 6:25 (catálogo) y 6:40 (detalle); se revisaron los subtítulos visibles. No se afirma escucha directa del audio completo. Facundo reemplazó el requisito de escucha por el relevamiento de lo visible en pantalla; el audio no es un pendiente.
 
 | Función | Nutriboost observado | Plan V comprobado | Acción |
 |---|---|---|---|
@@ -28,7 +28,7 @@ Se mostró el formulario existente debajo del catálogo vacío: empujaba las acc
 
 1. **Verificado:** ventana nativa de creación/edición; paciente contextual; reutilización de API de IA; estados de espera; consultar la misma propuesta; abrirla en el editor; advertencias y estimaciones visibles; protección de cambios sin guardar.
 2. **Verificado localmente:** vínculo de ingredientes con Alimentos; medidas caseras; cálculo reproducible de 11 nutrientes por porción, receta completa y por peso final; fuentes/versiones guardadas; desconocidos como desconocidos; preparación, cocción y peso final. Migración preparada y probada en PostgreSQL local; sin aplicar en producción.
-3. **En revisión:** búsqueda por título/ingrediente, filtros por momento/estado/favoritos, favoritos profesionales privados y detalle del catálogo con versiones separadas. Funcionalidad local implementada; pausa de diseño solicitada por exceso de encabezados. Categorías culinarias y vínculo completo con el editor del plan siguen pendientes.
+3. **En revisión:** búsqueda por título/ingrediente, filtros por momento/estado/favoritos, favoritos profesionales privados y detalle del catálogo con versiones separadas. Funcionalidad local implementada; compactación de encabezados autorizada y aplicada. Categorías culinarias y vínculo completo con el editor del plan siguen pendientes.
 
 ## Contrato del primer incremento
 
@@ -54,7 +54,7 @@ Verificación final del segundo incremento: **260 archivos aprobados; 1476 prueb
 
 Navegador demo: guardado y recarga de receta ficticia con 2 cucharadas de 10 g, 2 porciones, peso final 40 g, preparación 10 min y cocción 0 min. Resultado confirmado: 38 kcal por porción; 190 kcal por 100 g preparados. Ingrediente sin composición produce «Sin dato»; quitar peso final impide calcular por 100 g. A 1440×1000 y 1280×800 no hay desborde horizontal; acciones permanecen visibles. Sin errores de consola. Capturas: [1440](evidencia-recetas/plan-v-composicion-1440.png) y [1280](evidencia-recetas/plan-v-composicion-1280.png).
 
-Límites: sin importar SARA 2/ArgenFoods/USDA; sin porcentajes de ingesta diaria; sin escucha directa exhaustiva del audio del video; sin nueva llamada al proveedor IA real; sin migración de producción ni desarrollo móvil. La receta ficticia del navegador quedó como borrador privado, sin asignarse a pacientes.
+Límites: sin importar SARA 2/ArgenFoods/USDA; sin porcentajes de ingesta diaria; sin nueva llamada al proveedor IA real; sin migración de producción ni desarrollo móvil. La receta ficticia del navegador quedó como borrador privado, sin asignarse a pacientes.
 
 ## Tercer incremento: contraste renovado antes de desarrollar
 
@@ -69,6 +69,16 @@ Revisión visual renovada del video: [catálogo 6:16](evidencia-recetas/nutriboo
 
 Pruebas de navegador del incremento: búsqueda «aVÉná» encuentra Avena; favorito conservado tras recarga; filtro y búsqueda conservados al volver del detalle; foco devuelto al botón; mensaje de cero resultados; detalle sin desborde horizontal a 1440/1280. Evidencia: [detalle 1440](evidencia-recetas/plan-v-detalle-tercero-1440.png) y [detalle 1280](evidencia-recetas/plan-v-detalle-tercero-1280.png). La demo encontrada durante esta revisión ya tenía una receta ficticia publicada; este incremento no la publicó ni la asignó.
 
-**Pausa de experiencia de uso:** [el catálogo actual](evidencia-recetas/plan-v-catalogo-tercero-1440-antes.png) repite encabezados de Biblioteca y desplaza nutrientes/acciones bajo el primer pliegue. Se mostró a Facundo y se propuso un solo encabezado de Recetas, explicación breve y filtros/tarjetas más arriba. La decisión está pendiente; no aplicar compactación hasta su respuesta. La funcionalidad no acredita cierre del diseño.
+**Pausa de experiencia de uso:** [el catálogo actual](evidencia-recetas/plan-v-catalogo-tercero-1440-antes.png) repite encabezados de Biblioteca y desplaza nutrientes/acciones bajo el primer pliegue. Se mostró a Facundo y se propuso un solo encabezado de Recetas, explicación breve y filtros/tarjetas más arriba. Facundo indicó continuar; se aplicó la compactación descrita en el cierre de este documento.
 
-Verificación final del tercer incremento: **262 archivos aprobados; 1481 pruebas aprobadas y 2 omitidas**. Tipos, compilación y validación de migraciones aprobados. PostgreSQL local verifica favoritos privados, idempotencia, aislamiento entre profesionales y rechazo de pacientes/escrituras directas. Revisión de código aprobada y revisión de realidad realizada sin nuevos bloqueos funcionales; el diseño permanece abierto. La compactación del catálogo continúa pendiente de la respuesta de Facundo. Migraciones sin aplicar en producción.
+Verificación final del tercer incremento: **262 archivos aprobados; 1481 pruebas aprobadas y 2 omitidas**. Tipos, compilación y validación de migraciones aprobados. PostgreSQL local verifica favoritos privados, idempotencia, aislamiento entre profesionales y rechazo de pacientes/escrituras directas. Revisión de código aprobada y revisión de realidad realizada sin nuevos bloqueos funcionales; el diseño permanece abierto. La compactación fue autorizada en el mensaje posterior y aplicada. Migraciones sin aplicar en producción.
+
+## Cierre de la compactación autorizada
+
+Facundo indicó: «la escucha pendiente reemplázala con lo q muestra en pantalla. continúa». Desde este punto la referencia es lo observado visualmente; no se exige audio ni se afirma haberlo escuchado. Lo anunciado sin flujo visible sigue separado de lo demostrado.
+
+Un único título visible de Recetas, pestañas preservadas y explicación breve. Avisos de publicación/estimaciones en una sección desplegable al pie; accesibles por teclado y sin eliminar el contenido. Tarjetas profesionales con espacios ajustados y placeholders más cortos; fotografías reales mantienen 150 px. Recursos y tarjetas de paciente no reciben estas reglas.
+
+Navegador: sin desborde horizontal a 1280×800 y 1440×1000. En las dos recetas ficticias sin foto del ensayo, «Ver receta» termina en 799,8 px con el aviso de instalación visible; títulos más largos, fotos y distintos datos pueden requerir desplazamiento. No se promete una altura fija para todas las recetas. [1280](evidencia-recetas/plan-v-catalogo-compacto-1280.png) · [1440](evidencia-recetas/plan-v-catalogo-compacto-1440.png). Revisión de código aprobada.
+Verificación del ajuste visual: tipos y compilación aprobados; 8 pruebas de catálogo/detalle aprobadas en 2 archivos. Suite general del incremento anterior: 1481 aprobadas, 2 omitidas; no se atribuye esa corrida al ajuste visual posterior. Las advertencias de compilación de Zod/tamaño de paquete permanecen. Categorías culinarias e integración con editor del plan siguen pendientes.
+Revisión de realidad de la compactación aprobada; no representa cierre de todos los pendientes de Recetas ni publicación.
