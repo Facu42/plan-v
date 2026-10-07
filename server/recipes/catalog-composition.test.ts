@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { resetFoodsMemory, saveFood } from '../foods/repository.js';
-import { listProfessionalRecipes, publishRecipe, resetRecipeMemory, saveRecipeDraft } from './repository.js';
+import { listProfessionalRecipes, listProfessionalRecipeFavorites, setProfessionalRecipeFavorite, publishRecipe, resetRecipeMemory, saveRecipeDraft } from './repository.js';
 import { recipeDraftSchema } from '../../src/types/recipes.js';
 import { NUTRIENTS, type FoodNutrients } from '../../src/types/foods.js';
 
@@ -11,6 +11,19 @@ const draft = () => recipeDraftSchema.parse({ id: crypto.randomUUID(), expected_
   steps: ['Mezclar y servir.'], items: [{ name: 'Avena', quantity: 2, unit: 'g', catalog_ref: { id: foodInput.id, revision: 1, measure: 'Cucharada' } }] });
 beforeEach(() => { resetFoodsMemory(); resetRecipeMemory(); });
 describe('guardado de composición propia', () => {
+  it('los favoritos son privados, idempotentes y no cambian la revisión de la receta', async () => {
+    await saveFood(owner, foodInput, false);
+    const input = draft(); const saved = await saveRecipeDraft(owner, input, false);
+    await setProfessionalRecipeFavorite(owner, input.id, true, false);
+    await setProfessionalRecipeFavorite(owner, input.id, true, false);
+    expect(await listProfessionalRecipeFavorites(owner, false)).toEqual([input.id]);
+    expect(await listProfessionalRecipeFavorites('otra-nutri', false)).toEqual([]);
+    await expect(setProfessionalRecipeFavorite('otra-nutri', input.id, true, false)).rejects.toThrow('permiso');
+    expect((await listProfessionalRecipes(owner, false))[0].current.revision).toBe(saved.current.revision);
+    await setProfessionalRecipeFavorite(owner, input.id, false, false);
+    await setProfessionalRecipeFavorite(owner, input.id, false, false);
+    expect(await listProfessionalRecipeFavorites(owner, false)).toEqual([]);
+  });
   it('persiste medidas, peso final y nutrientes sin cambiar una revisión publicada', async () => {
     await saveFood(owner, foodInput, false);
     const input = draft();

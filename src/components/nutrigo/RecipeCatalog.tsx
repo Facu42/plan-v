@@ -1,5 +1,6 @@
 import { useModalFocus } from './use-modal-focus';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { Heart } from '@phosphor-icons/react';
 import { recipesApi } from '../../api/recipes';
 import { resourcesApi } from '../../api/resources';
 import { aiJobsApi } from '../../api/ai-jobs';
@@ -22,6 +23,8 @@ import { FigmaRecordDialog } from './FigmaPatientFront';
 import { foodApi } from '../../api/foods';
 import type { Food } from '../../types/foods';
 import { RecipeCatalogIngredients, RecipeComposition } from './RecipeCatalogIngredients';
+import { filterProfessionalRecipes, type RecipeCatalogQuery } from '../../types/recipe-catalog-query';
+import { RecipeProfessionalDetail } from './RecipeProfessionalDetail';
 
 function emptyDraft(id = crypto.randomUUID()): RecipeWizardInput {
   return {
@@ -68,6 +71,14 @@ export function recipeEditorFromAi(payload: Record<string, unknown>): RecipeWiza
 
 /** Estado y acciones reales del catálogo profesional (crear, IA, editar, publicar, asignar al día). */
 export function useRecipeCatalog(patientId: string) {
+  const [favoriteIds, setFavoriteIds] = useState<string[] | null>(null);
+  const [favoriteError, setFavoriteError] = useState('');
+  const [favoriteAttempt, setFavoriteAttempt] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController(); setFavoriteIds(null); setFavoriteError('');
+    void recipesApi.favorites(controller.signal).then(result => setFavoriteIds(result.favorite_ids)).catch(error => { if (!isAbortError(error)) setFavoriteError(careErrorMessage(error)); });
+    return () => controller.abort();
+  }, [favoriteAttempt]);
   const [foods, setFoods] = useState<Food[]>([]);
   const [foodsError, setFoodsError] = useState('');
   const [foodsLoading, setFoodsLoading] = useState(true);
@@ -182,6 +193,11 @@ export function useRecipeCatalog(patientId: string) {
   return {
     patientId, recipes, source, imageGeneration, error, status, busy, editing, path, description, assigning, day, slot, aiProgress, pendingAiJob, aiWarnings, foods, foodsError, foodsLoading,
     reloadFoods: () => setFoodsAttempt(value => value + 1),
+    favoriteIds, favoriteError, reloadFavorites: () => setFavoriteAttempt(value => value + 1),
+    setFavorite: (recipeId: string, favorite: boolean) => void run(async () => {
+      const result = await recipesApi.setFavorite(recipeId, favorite);
+      setFavoriteIds(current => result.favorite ? [...new Set([...(current ?? []), result.recipe_id])] : (current ?? []).filter(id => id !== result.recipe_id));
+    }, favorite ? 'Receta guardada en tus favoritos.' : 'Receta quitada de tus favoritos.'),
     resumeAi: () => { if (canLeaveWorkspace()) generateAiProposal(); },
     setEditing, setPath, setDescription, setDay, setSlot, reload, run, submit, submitAi, quickAiDraft,
     recoverEditing: () => void run(async () => { const saved = (await recipesApi.list()).recipes.find(recipe => recipe.id === editing?.id); if (saved) openStored(saved); }, 'Versión guardada recuperada. Revisala antes de continuar.'),
@@ -291,6 +307,7 @@ export function RecipeEditorForm({ catalog }: { catalog: RecipeCatalogState }) {
       <label>Preparación (min)<input type="number" min="1" max="240" value={editing.prep_minutes ?? ''} onChange={event => setEditing({ ...editing, prep_minutes: event.target.value === '' ? null : Number(event.target.value) })} /></label>
       <label>Cocción (min)<input type="number" min="0" max="1440" value={editing.cooking_minutes ?? ''} onChange={event => setEditing({ ...editing, cooking_minutes: event.target.value === '' ? null : Number(event.target.value) })} /></label>
     </div>
+    <label>Momento<select value={editing.category} onChange={event => setEditing({ ...editing, category: event.target.value as PlanSlot })}>{PLAN_SLOTS.map(slot => <option key={slot}>{slot}</option>)}</select></label>
     <RecipeCatalogIngredients draft={editing} onChange={setEditing} foods={catalog.foods ?? []} prior={prior} loading={catalog.foodsLoading} error={catalog.foodsError} retry={catalog.reloadFoods} />
     {linked && <RecipeComposition draft={editing} foods={catalog.foods ?? []} prior={prior} />}
     {!linked && <>
@@ -339,11 +356,23 @@ export function RecipeAssignDialog({ catalog }: { catalog: RecipeCatalogState })
 }
 
 export function RecipeCatalog({ patientId, patients }: { patientId: string; patients?: readonly RecipePatientOption[] }) {
+  const [filters, setFilters] = useState<RecipeCatalogQuery>({ query: '', category: '', state: 'all', favoritesOnly: false });
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const returnFocus = useRef<string | null>(null);
+  const detailHeading = useRef<HTMLHeadingElement>(null);
   const [recipePatientId, setRecipePatientId] = useState(patientId);
   const hook = useRecipeCatalog(recipePatientId);
   const catalog: RecipeCatalogState = { ...hook, patientOptions: patients, onSelectPatient: setRecipePatientId };
   const { recipes, source, error, status, busy, editing, path } = catalog;
   const editorOpen = path === 'choose' || path === 'ai' || Boolean(editing);
+  const detailRecipe = recipes?.find(recipe => recipe.id === detailId);
+  const visible = filterProfessionalRecipes(recipes ?? [], filters, catalog.favoriteIds ?? []);
+  const favoritesReady = !filters.favoritesOnly || catalog.favoriteIds !== null;
+  useEffect(() => {
+    if (detailId) detailHeading.current?.focus();
+    else if (returnFocus.current) { document.getElementById(returnFocus.current)?.focus(); returnFocus.current = null; }
+  }, [detailId]);
+  const favoriteButton = (recipe: ProfessionalRecipe) => <button type="button" className="recipe-favorite" aria-label={`${catalog.favoriteIds?.includes(recipe.id) ? 'Quitar de' : 'Guardar en'} favoritos ${recipe.title}`} aria-pressed={catalog.favoriteIds?.includes(recipe.id) ?? false} disabled={busy || catalog.favoriteIds === null} onClick={() => catalog.setFavorite(recipe.id, !catalog.favoriteIds?.includes(recipe.id))}><Heart size={20} weight={catalog.favoriteIds?.includes(recipe.id) ? 'fill' : 'regular'} /><span>{catalog.favoriteIds?.includes(recipe.id) ? 'Favorita' : 'Guardar'}</span></button>;
   return <section className="recipe-catalog" aria-label="Catálogo profesional de recetas">
     <header>
       <div>
@@ -359,6 +388,7 @@ export function RecipeCatalog({ patientId, patients }: { patientId: string; pati
     {source === 'memory' && <p className="recipe-demo">Vista demo · recetas ficticias para probar el catálogo.</p>}
     {error && <p className="recipe-error" role="alert">{error}</p>}
     {status && <p className="recipe-status" role="status">{status}</p>}
+    {catalog.favoriteError && <p className="recipe-error" role="alert">{catalog.favoriteError} <button type="button" onClick={catalog.reloadFavorites}>Reintentar favoritos</button></p>}
     {!editorOpen && <RecipeAiNotices catalog={catalog} />}
     {!recipes && !error && <p role="status">Cargando catálogo…</p>}
     {recipes && !recipes.length && !editing && <NvState title="Todavía no hay recetas en el catálogo" description="Creá un borrador con ingredientes, rinde y pasos. El paciente no lo ve hasta publicarlo y asignarlo." />}
@@ -370,16 +400,31 @@ export function RecipeCatalog({ patientId, patients }: { patientId: string; pati
       <RecipeAiNotices catalog={catalog} />
       <RecipeEditorForm catalog={catalog} />
     </FigmaRecordDialog>}
-    <div className="recipe-grid">{recipes?.map((recipe) => {
-      const card = recipe.current.card ?? unavailableCard(recipe.title);
-      return <RecipePlateCard key={recipe.id} title={recipe.title} portions={recipe.current.yield_portions} card={card} actions={<>
+    {detailRecipe ? <RecipeProfessionalDetail key={detailRecipe.id} recipe={detailRecipe} headingRef={detailHeading} onBack={() => setDetailId(null)} renderComposition={version => <RecipeComposition draft={recipeEditorFromStored({ ...detailRecipe, title: version.title ?? detailRecipe.title, current: version })} foods={[]} prior={version.catalog_recipe} />} favorite={favoriteButton(detailRecipe)} actions={<>
+        <NvButton className="nv-ghost" disabled={busy} onClick={() => catalog.startEdit(detailRecipe)}>{detailRecipe.current.published_at ? 'Crear nueva versión' : 'Editar borrador'}</NvButton>
+        {!detailRecipe.current.published_at && <NvButton disabled={busy} onClick={() => catalog.publish(detailRecipe)}>Publicar borrador</NvButton>}
+        {detailRecipe.published && <NvButton disabled={busy || (!recipePatientId && !patients?.length)} onClick={() => catalog.startAssign(detailRecipe)}>Asignar versión publicada</NvButton>}
+        <RecipeCoverAction catalog={catalog} recipe={detailRecipe} className="nv-button nv-ghost" />
+        <RecipeManualCoverAction recipe={detailRecipe} disabled={busy} onSaved={catalog.reload} />
+      </>} /> : <>
+      <div className="recipe-catalog-filters">
+        <label>Buscar recetas<input type="search" value={filters.query} placeholder="Nombre o ingrediente" onChange={event => setFilters({ ...filters, query: event.target.value })} /></label>
+        <label>Momento<select value={filters.category} onChange={event => setFilters({ ...filters, category: event.target.value })}><option value="">Todos los momentos</option>{PLAN_SLOTS.map(slot => <option key={slot}>{slot}</option>)}</select></label>
+        <label>Estado<select value={filters.state} onChange={event => setFilters({ ...filters, state: event.target.value as RecipeCatalogQuery['state'] })}><option value="all">Todas</option><option value="draft">Con borrador</option><option value="published">Con versión publicada</option></select></label>
+        <label className="recipe-filter-check"><input type="checkbox" checked={filters.favoritesOnly} disabled={catalog.favoriteIds === null} onChange={event => setFilters({ ...filters, favoritesOnly: event.target.checked })} />Solo favoritas</label>
+        <button type="button" className="recipe-cancel" onClick={() => setFilters({ query: '', category: '', state: 'all', favoritesOnly: false })}>Limpiar filtros</button>
+      </div>
+      {recipes && <p role="status">{favoritesReady ? `${visible.length} de ${recipes.length} recetas` : 'Cargando favoritos…'}</p>}
+      {recipes && recipes.length > 0 && favoritesReady && visible.length === 0 && <NvState title="No hay recetas con estos filtros" description="Probá otro nombre, ingrediente o momento, o limpiá los filtros." />}
+      <div className="recipe-grid">{favoritesReady && visible.map((recipe) => {
+      const storedCard = recipe.current.card ?? unavailableCard(recipe.title);
+      const per100 = recipe.current.catalog_recipe?.per_100g;
+      const card = per100 ? { ...storedCard, macros: { kcal: per100.kcal, protein_g: per100.protein, carbs_g: per100.carbs, fat_g: per100.fat } } : storedCard;
+      return <div key={recipe.id} className="recipe-catalog-card"><div className="recipe-card-origin"><span>Consultorio · {recipe.current.published_at ? 'Publicada' : 'Borrador'}</span>{favoriteButton(recipe)}</div><RecipePlateCard title={recipe.title} portions={recipe.current.yield_portions} card={card} nutritionBasis={per100 ? 'Valores por 100 g preparados' : 'Valores por porción'} actions={<>
+        <NvButton id={`recipe-open-${recipe.id}`} aria-label={`Ver receta ${recipe.title}`} disabled={busy} onClick={() => { returnFocus.current = `recipe-open-${recipe.id}`; setDetailId(recipe.id); }}>Ver receta</NvButton>
         <NvButton className="nv-ghost" aria-label={`Editar ${recipe.title}`} disabled={busy} onClick={() => catalog.startEdit(recipe)}>Editar</NvButton>
-        {!recipe.current.published_at && <NvButton disabled={busy} onClick={() => catalog.publish(recipe)}>Publicar</NvButton>}
-        {recipe.published && <NvButton aria-label={`Asignar ${recipe.title}`} disabled={busy || (!recipePatientId && !patients?.length)} onClick={() => catalog.startAssign(recipe)}>Asignar</NvButton>}
-        <RecipeCoverAction catalog={catalog} recipe={recipe} className="nv-button nv-ghost" />
-        <RecipeManualCoverAction recipe={recipe} disabled={busy} onSaved={catalog.reload} />
-      </>} />;
-    })}</div>
+      </>} /></div>;
+    })}</div></>}
     <RecipeAssignDialog catalog={catalog} />
   </section>;
 }

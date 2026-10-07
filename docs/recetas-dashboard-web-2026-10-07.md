@@ -28,7 +28,7 @@ Se mostró el formulario existente debajo del catálogo vacío: empujaba las acc
 
 1. **Verificado:** ventana nativa de creación/edición; paciente contextual; reutilización de API de IA; estados de espera; consultar la misma propuesta; abrirla en el editor; advertencias y estimaciones visibles; protección de cambios sin guardar.
 2. **Verificado localmente:** vínculo de ingredientes con Alimentos; medidas caseras; cálculo reproducible de 11 nutrientes por porción, receta completa y por peso final; fuentes/versiones guardadas; desconocidos como desconocidos; preparación, cocción y peso final. Migración preparada y probada en PostgreSQL local; sin aplicar en producción.
-3. **Pendiente:** categorías culinarias, favoritos profesionales, filtros y detalle del catálogo; integrar al editor del plan. Conservar lo ya publicado.
+3. **En revisión:** búsqueda por título/ingrediente, filtros por momento/estado/favoritos, favoritos profesionales privados y detalle del catálogo con versiones separadas. Funcionalidad local implementada; pausa de diseño solicitada por exceso de encabezados. Categorías culinarias y vínculo completo con el editor del plan siguen pendientes.
 
 ## Contrato del primer incremento
 
@@ -55,3 +55,20 @@ Verificación final del segundo incremento: **260 archivos aprobados; 1476 prueb
 Navegador demo: guardado y recarga de receta ficticia con 2 cucharadas de 10 g, 2 porciones, peso final 40 g, preparación 10 min y cocción 0 min. Resultado confirmado: 38 kcal por porción; 190 kcal por 100 g preparados. Ingrediente sin composición produce «Sin dato»; quitar peso final impide calcular por 100 g. A 1440×1000 y 1280×800 no hay desborde horizontal; acciones permanecen visibles. Sin errores de consola. Capturas: [1440](evidencia-recetas/plan-v-composicion-1440.png) y [1280](evidencia-recetas/plan-v-composicion-1280.png).
 
 Límites: sin importar SARA 2/ArgenFoods/USDA; sin porcentajes de ingesta diaria; sin escucha directa exhaustiva del audio del video; sin nueva llamada al proveedor IA real; sin migración de producción ni desarrollo móvil. La receta ficticia del navegador quedó como borrador privado, sin asignarse a pacientes.
+
+## Tercer incremento: contraste renovado antes de desarrollar
+
+Revisión visual renovada del video: [catálogo 6:16](evidencia-recetas/nutriboost-revision-0616.png), [categorías y composición 6:22](evidencia-recetas/nutriboost-revision-0622.png) y [detalle 6:38](evidencia-recetas/nutriboost-revision-0638.png). Tiempos comprobados en el reproductor. Se revisaron pantallas y subtítulos disponibles; no equivale a escucha directa exhaustiva del audio. Fuente: [demo de Nutriboost](https://www.loom.com/share/35b428b996314f9c8f5505de4a6297cb).
+
+- Observado: grilla de tarjetas, origen «Plataforma»/recetario, categorías culinarias, corazón, contador y macros explícitos por 100 g. No se demuestra el filtro completo ni la persistencia del favorito al recargar.
+- Observado: detalle con ingredientes/cantidades, pasos, preparación/cocción, rinde, peso final, selección de base y análisis por porción. El segmento no demuestra creación de recetas mediante IA.
+- Adaptación propia: búsqueda por título e ingrediente sin depender de mayúsculas/acentos; momento, estado («Con borrador» y «Con versión publicada») y favoritos combinables. Ambos estados pueden coincidir cuando hay copia publicada y un borrador posterior. Las categorías culinarias no se confunden con momentos del día y quedan pendientes.
+- Tarjetas de Plan V: origen «Consultorio», estado, favorito, consulta y edición. Macros por 100 g preparados cuando existe peso final; de lo contrario, por porción. La base se indica explícitamente. Publicación, asignación y fotos están en el detalle para reducir acciones por tarjeta.
+- Detalle: «Volver al catálogo» conserva búsqueda y filtros y devuelve el foco a la receta. El título recibe foco al abrir. Un selector separa borrador actual y copia publicada, sin mezclar ingredientes o nutrientes de distintas versiones. Crear nueva versión, publicar y asignar actúan según el circuito existente.
+- Favoritos profesionales: API propia con booleano explícito e idempotencia; separados de los del paciente. Demo y SQL comprueban propietario; RPC/RLS rechazan nutricionista ajeno y paciente. Error visible con reintento, sin confirmar un cambio fallido. La copia local anterior de demo se amplía sin perder recetas; regresión de reapertura incluida.
+
+Pruebas de navegador del incremento: búsqueda «aVÉná» encuentra Avena; favorito conservado tras recarga; filtro y búsqueda conservados al volver del detalle; foco devuelto al botón; mensaje de cero resultados; detalle sin desborde horizontal a 1440/1280. Evidencia: [detalle 1440](evidencia-recetas/plan-v-detalle-tercero-1440.png) y [detalle 1280](evidencia-recetas/plan-v-detalle-tercero-1280.png). La demo encontrada durante esta revisión ya tenía una receta ficticia publicada; este incremento no la publicó ni la asignó.
+
+**Pausa de experiencia de uso:** [el catálogo actual](evidencia-recetas/plan-v-catalogo-tercero-1440-antes.png) repite encabezados de Biblioteca y desplaza nutrientes/acciones bajo el primer pliegue. Se mostró a Facundo y se propuso un solo encabezado de Recetas, explicación breve y filtros/tarjetas más arriba. La decisión está pendiente; no aplicar compactación hasta su respuesta. La funcionalidad no acredita cierre del diseño.
+
+Verificación final del tercer incremento: **262 archivos aprobados; 1481 pruebas aprobadas y 2 omitidas**. Tipos, compilación y validación de migraciones aprobados. PostgreSQL local verifica favoritos privados, idempotencia, aislamiento entre profesionales y rechazo de pacientes/escrituras directas. Revisión de código aprobada y revisión de realidad realizada sin nuevos bloqueos funcionales; el diseño permanece abierto. La compactación del catálogo continúa pendiente de la respuesta de Facundo. Migraciones sin aplicar en producción.

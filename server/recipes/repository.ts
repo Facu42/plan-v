@@ -51,6 +51,7 @@ const recipes = new Map<string, MemRecipe>();
 const versions = new Map<string, MemVersion>();
 const lines = new Map<string, MemLine>();
 const assignments = new Map<string, MemAssignment>();
+const professionalFavorites = new Map<string, { nutritionistId: string; recipeId: string }>();
 
 export function resetRecipeMemory() {
   ingredients.clear();
@@ -58,6 +59,7 @@ export function resetRecipeMemory() {
   versions.clear();
   lines.clear();
   assignments.clear();
+  professionalFavorites.clear();
   resetRecipeCards();
 }
 
@@ -593,4 +595,25 @@ export function readPublishedMemory(nutritionistId: string, recipeId: string, ex
   };
 }
 
-registerDemoState('recipes/repository', () => ({ ingredients, recipes, versions, lines, assignments }));
+export async function listProfessionalRecipeFavorites(nutritionistId: string, persistent: boolean): Promise<string[]> {
+  if (!persistent) return [...professionalFavorites.values()].filter(value => value.nutritionistId === nutritionistId).map(value => value.recipeId);
+  const { data, error } = await getRequestDb().rpc('list_professional_recipe_favorites');
+  recipeDbError(error);
+  if (!Array.isArray(data) || data.some(id => typeof id !== 'string')) throw new CareError(503, 'No pudimos cargar tus favoritos. Reintentá.');
+  return data as string[];
+}
+
+export async function setProfessionalRecipeFavorite(nutritionistId: string, recipeId: string, favorite: boolean, persistent: boolean) {
+  if (!persistent) {
+    if (recipes.get(recipeId)?.nutritionist_id !== nutritionistId) throw new CareError(403, 'No tenés permiso para guardar esta receta.');
+    const key = `${nutritionistId}:${recipeId}`;
+    if (favorite) professionalFavorites.set(key, { nutritionistId, recipeId }); else professionalFavorites.delete(key);
+    return { recipe_id: recipeId, favorite };
+  }
+  const { data, error } = await getRequestDb().rpc('set_professional_recipe_favorite', { target_recipe: recipeId, is_favorite: favorite });
+  recipeDbError(error);
+  if (!data || data.recipe_id !== recipeId || data.favorite !== favorite) throw new CareError(503, 'No pudimos confirmar el favorito. Reintentá.');
+  return { recipe_id: recipeId, favorite };
+}
+
+registerDemoState('recipes/repository', () => ({ ingredients, recipes, versions, lines, assignments, professionalFavorites }));

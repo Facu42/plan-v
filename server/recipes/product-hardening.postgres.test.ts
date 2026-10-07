@@ -89,6 +89,23 @@ afterAll(async () => {
 
 
 describe('composición del catálogo persistente', () => {
+  it('aísla favoritos profesionales, evita duplicados y bloquea escrituras directas', async () => {
+    const rid = randomUUID();
+    const saved = await rpc(nutriA, 'save_recipe_draft', [{ ...draft, id: rid, expected_revision: null }]) as any;
+    expect(await rpc(nutriA, 'set_professional_recipe_favorite', [rid, true])).toEqual({ recipe_id: rid, favorite: true });
+    await rpc(nutriA, 'set_professional_recipe_favorite', [rid, true]);
+    expect(await rpc(nutriA, 'list_professional_recipe_favorites')).toEqual([rid]);
+    expect(await rpc(nutriB, 'list_professional_recipe_favorites')).toEqual([]);
+    await expect(rpc(patientAUser, 'list_professional_recipe_favorites')).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(patientAUser, 'set_professional_recipe_favorite', [rid, true])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(nutriB, 'set_professional_recipe_favorite', [rid, true])).rejects.toMatchObject({ code: '42501' });
+    expect(await asUser(nutriB, 'select * from public.professional_recipe_favorites')).toEqual([]);
+    await expect(asUser(nutriA, 'insert into public.professional_recipe_favorites(nutritionist_id,recipe_id) values($1,$2)', [nutriAId, rid])).rejects.toMatchObject({ code: '42501' });
+    await rpc(nutriA, 'set_professional_recipe_favorite', [rid, false]);
+    await rpc(nutriA, 'set_professional_recipe_favorite', [rid, false]);
+    expect(await rpc(nutriA, 'list_professional_recipe_favorites')).toEqual([]);
+    expect((await rpc(nutriA, 'list_professional_recipes') as any[]).find(recipe => recipe.id === rid).current.revision).toBe(saved.current.revision);
+  });
   it('deriva valores autorizados y congela la fuente entre revisiones, incluso si una receta de IA pierde composición', async () => {
     const fid = randomUUID(); const rid = randomUUID();
     const nutrients = { kcal: 380, protein: 13, carbs: 60, fat: 7, fiber: null, sodium: 0, calcium: null, iron: null, potassium: null, magnesium: null, vitamin_c: null };
