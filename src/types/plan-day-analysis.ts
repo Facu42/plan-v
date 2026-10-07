@@ -35,3 +35,27 @@ export function analyzePlanDay(lines: readonly DayAnalysisLine[]) {
   });
   return { count: lines.length, estimated, nutrients };
 }
+
+export function analyzePlanWeek(days: readonly { date: string; lines: readonly DayAnalysisLine[] }[]) {
+  const analyses = days.map(day => analyzePlanDay(day.lines));
+  return {
+    count: analyses.reduce((sum, day) => sum + day.count, 0),
+    estimated: analyses.some(day => day.estimated),
+    dayCount: days.length,
+    emptyDays: analyses.filter(day => !day.count).length,
+    nutrients: NUTRIENTS.map(([key, label, unit], index) => {
+      const complete = analyses.map(day => day.nutrients[index]).filter(nutrient => nutrient.total != null);
+      const mean = complete.length ? Math.round(complete.reduce((sum, nutrient) => sum + nutrient.total!, 0) / complete.length * 10000) / 10000 : null;
+      return { key, label, unit, known: complete.length, missing: days.length - complete.length, total: days.length && complete.length === days.length ? mean : null, subtotal: mean };
+    }),
+  };
+}
+
+export function copyPlanDay<T extends { for_date: string; slot: string }>(items: readonly T[], source: string, destinations: readonly string[], allowedDates: readonly string[]): T[] {
+  const originals = items.filter(item => item.for_date === source);
+  if (!originals.length || !allowedDates.includes(source)) throw new Error('Elegí un día con indicaciones dentro del período.');
+  if (!destinations.length || new Set(destinations).size !== destinations.length || destinations.some(date => date === source || !allowedDates.includes(date))) throw new Error('Elegí días de destino distintos dentro del período.');
+  if (destinations.some(date => items.some(item => item.for_date === date))) throw new Error('Los días de destino tienen indicaciones. No se reemplazó su contenido.');
+  if (items.length + originals.length * destinations.length > 42) throw new Error('La copia supera el límite de 42 indicaciones del plan. Elegí menos días.');
+  return [...items, ...destinations.flatMap(for_date => originals.map(item => ({ ...structuredClone(item), for_date })))];
+}

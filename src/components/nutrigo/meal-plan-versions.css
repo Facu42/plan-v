@@ -78,3 +78,11 @@
 .plan-day-analysis small{display:block;font-size:11px;line-height:1.5;color:var(--nv-ink-soft)}
 .plan-day-analysis .plan-day-estimate{color:var(--nv-ink);background:var(--nv-gold-soft);padding:8px;border-radius:8px}
 @media(prefers-reduced-motion:reduce){.plan-editor-days button{transition:none}}
+.plan-analysis-switch{display:flex;gap:6px;margin-bottom:12px}
+.plan-analysis-switch button{font:inherit;font-size:12px;padding:8px;border:1px solid var(--nv-border);border-radius:8px;background:var(--nv-card);color:var(--nv-ink);cursor:pointer}
+.plan-analysis-switch button[aria-pressed=true]{background:var(--nv-accent-soft);border-color:var(--nv-accent)}
+.plan-analysis-switch button:focus-visible{outline:2px solid var(--nv-ink);outline-offset:2px}
+.plan-copy-day fieldset{max-height:32vh;overflow:auto;border:1px solid var(--nv-border);border-radius:10px;padding:12px}
+.plan-copy-day label{display:flex;gap:10px;align-items:center;margin:10px 0;font-size:13px}
+.plan-copy-day p,.plan-copy-day li{font-size:13px;line-height:1.6}
+.plan-copy-day ul{max-height:20vh;overflow:auto}

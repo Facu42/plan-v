@@ -310,3 +310,5 @@ Recetas continúa en `codex/nutri-recetas`: [contraste previo con Nutriboost, AP
 Recetas/Planes · 2026-10-07: integrado selector de recetas publicadas, cantidades, nutrientes y versiones históricas; editor primero autorizado. Ver cierre y pendientes en [registro de Recetas](recetas-dashboard-web-2026-10-07.md). Local, sin publicación en producción.
 
 Planes web · 2026-10-07: primer editor por días y momentos y análisis del día en vivo. Contraste Nutriboost 2:44, validación local y pendientes (promedio semanal, copia de días y varias entradas por comida) en [registro del editor semanal](planes-semanal-web-2026-10-07.md). Rama codex/nutri-plan-semanal basada en Recetas; sin producción.
+
+Planes web · segundo incremento: copia explícita a días vacíos, versiones/cantidades/notas conservadas y promedio semanal completo/parcial por nutriente. 1501 pruebas aprobadas/2 omitidas; evidencia y alcance en [registro del editor semanal](planes-semanal-web-2026-10-07.md). Pendiente selección de alimentos y varias entradas por comida. Local; sin producción.
