@@ -27,11 +27,12 @@ se apaga con `DEMO_SEED=0`). Salidas en `design/auditoria/` (capturas e `informe
 | Aviso de cuota pendiente perdido en el diseño nuevo | Va dentro del banner amarillo del archivo («Ver pagos»); en celular, junto a «Pagos» del menú |
 | Ingreso: «Atrás» y «Continuar después» daban 400 si «Sí» no tenía alimentos escritos, y decían «sin conexión» | Ahora muestran «Si hay alimentos a evitar, escribilós» y no mandan el pedido |
 | `public/offline.html` con colores viejos | Colores de Nutrigo |
+| Botones de «Mi ficha» grandes y menú del celular como nube de botones | Botones con la medida del archivo (13 px, radio 10). Menú nuevo (`PatientMenuSheet`): hoja inferior en celular y tarjeta centrada en escritorio, con perfil, filas con ícono, sección activa en verde, aviso de mensajes y cuota, «Mi cuenta» y «Cerrar sesión» |
+| Páginas legales sin cargar Poppins (caían a la letra del sistema) | Poppins propia servida desde `public/legal/fonts/` |
 
 ## Resultado de la auditoría final
 
-- 368 controles probados, 0 con hallazgos; 252 no abren diálogo (cambian la pantalla en el lugar).
-- Única queja de consola: el 400 del ingreso, ya corregido.
+- Segunda pasada tras los arreglos: 342 controles probados, 0 con hallazgos y 0 problemas de página ni de consola (el 400 del ingreso ya no ocurre).
 - Diferencia con Figma (píxeles distintos, cargados los datos de ejemplo): escritorio entre 2,6 % (Ejercicio) y
   10,8 % (Agenda); celular entre 2,3 % (Plan) y 10,4 % (Recetas). Nunca da 0 % porque los textos y datos son
   los de Plan V; el alto de cada pantalla coincide con el del archivo.
@@ -54,7 +55,6 @@ se apaga con `DEMO_SEED=0`). Salidas en `design/auditoria/` (capturas e `informe
 
 ## Pendiente
 
-- Superficies fuera del archivo todavía con estilo viejo: `MealLogModal`, `ShowroomPagos`, subdiálogos de
-  cuidado, menú «Plan V» del celular, revisión de comidas de la nutricionista, radios del ingreso inicial,
-  páginas legales (Poppins).
+- Pantallas de la nutricionista (incluida la revisión de comidas), administración y diálogos secundarios de cuidado:
+  van en otra rama, armadas con piezas del archivo, como se acordó.
 - Campana y recordatorios: el texto no coincide del todo con el archivo.

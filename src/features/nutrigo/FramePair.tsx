@@ -2,9 +2,9 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { SourceView, nodeName, sourceText, renderSource, type SourceNode, type SourceResolver } from './SourceView';
 import { translateSource } from './translation';
 import { planVBrandBinding } from './branding';
-import { patientNavigation as nav, patientNavBinding } from './patient-navigation';
+import { patientNavBinding } from './patient-navigation';
 import type { ShowroomPage } from '../../components/nutrigo/ShowroomPanels';
-import { FigmaRecordDialog } from '../../components/nutrigo/FigmaPatientFront';
+import { PatientMenuSheet } from './PatientMenuSheet';
 import { feeBannerBinding, useFeeNotice } from './fee-notice';
 import './nutrigo.generated.css';
 
@@ -49,6 +49,6 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
   return <div className="mcp-nutrigo" data-figma-frame={id}>
     {loadError?<div className="mcp-state" role="alert"><p>No se pudo cargar esta pantalla.</p><button onClick={()=>setAttempt(v=>v+1)}>Reintentar</button></div>:source?<SourceView source={source} resolve={common} translate={translateSource}/>:<p className="mcp-state" role="status">Cargando pantalla…</p>}
     {children}
-    {menu&&<FigmaRecordDialog title="Plan V" onClose={()=>setMenu(false)}><nav aria-label="Navegación">{Object.entries(nav).map(([label,page])=><button className="mcp-action" key={page} onClick={()=>{setMenu(false);onNavigate(page);}}>{translateSource(label)}</button>)}<button className="mcp-action" onClick={()=>{setMenu(false);onNavigate('pagos');}}>Pagos{feeNotice&&<small className="mcp-action-note">{feeNotice}</small>}</button><button className="mcp-action" onClick={()=>{setMenu(false);onNavigate('ficha');}}>Mi ficha y permisos</button>{onSignOut&&<button onClick={onSignOut}>Salir</button>}</nav></FigmaRecordDialog>}
+    {menu&&<PatientMenuSheet patientName={patientName} unread={unread} feeNotice={feeNotice} onNavigate={onNavigate} onSignOut={onSignOut} onClose={()=>setMenu(false)}/>}
   </div>;
 }
