@@ -54,7 +54,8 @@ export function NutrigoMessages({ patient, onNavigate, onSignOut, now = new Date
   useUnsavedChanges(Boolean(text.trim() || file || pending), busy);
   const all = patient.messages.filter(item => item.sent_at).slice().sort((a, b) => a.sent_at.localeCompare(b.sent_at)); const messages = all.filter(item => `${item.text} ${item.attachment?.filename ?? ''}`.toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'))); const unread = unreadCount(all, 'patient'); const latest = all[all.length - 1];
   const images = all.filter(item => item.attachment?.kind === 'image'); const documents = all.filter(item => item.attachment && item.attachment.kind !== 'image');
-  const links = [...new Set(all.flatMap(message => message.text.match(/https:\/\/[^\s<>]+/g) ?? []))].map(value => safeUrl(value)).filter((value): value is string => !!value);
+  // Normaliza primero (sin puntuación final) y después quita repetidos, para que cada enlace tenga una clave única.
+  const links = [...new Set(all.flatMap(message => message.text.match(/https:\/\/[^\s<>]+/g) ?? []).map(value => safeUrl(value.replace(/[.,;:!?)\]]+$/, ''))).filter((value): value is string => !!value))];
   useEffect(() => { if (chat.current) chat.current.scrollTop = chat.current.scrollHeight; }, [all.length]);
   useEffect(() => { if (!unread) return; let active = true; void api.markMessagesRead(patient.id, 'patient').then(() => { if (active) return refresh(patient.id); }).catch(() => { if (active) setError('No se pudo actualizar la confirmación de lectura.'); }); return () => { active = false; }; }, [patient.id, unread, refresh]);
   const pick = (next: File | null) => { if (!next) { setFile(null); return; } try { assertChatFile(next); setFile(next); setError(''); } catch (caught) { setFile(null); setError(errorText(caught)); if (picker.current) picker.current.value = ''; } };

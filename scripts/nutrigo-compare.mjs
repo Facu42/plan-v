@@ -98,6 +98,15 @@ for (const [width, suffix, column] of [[1440, 'escritorio', 1], [390, 'celular',
 }
 await browser.close();
 const previous = existsSync(`${out}/informe.md`) ? await readFile(`${out}/informe.md`, 'utf8') : '';
+// Con una sola pantalla se conservan las filas de las demás del informe anterior.
+if (only && previous) {
+  const fresh = new Set(rows.map(row => row[0]));
+  for (const line of previous.split('\n')) {
+    const cells = line.split('|').slice(1, -1).map(cell => cell.trim());
+    if (cells.length === 5 && !fresh.has(cells[0]) && cells[0] !== 'Pantalla' && !cells[0].startsWith('---')) rows.push(cells);
+  }
+  const order = PATIENT_PAGES.flatMap(([slug]) => [`${slug}-escritorio`, `${slug}-celular`]);
+  rows.sort((a, b) => (a[0].endsWith('celular') - b[0].endsWith('celular')) || order.indexOf(a[0]) - order.indexOf(b[0]));
+}
 const table = ['| Pantalla | Nodo Figma | Píxeles distintos | Alto Figma | Alto app |', '|---|---|---|---|---|', ...rows.map(row => `| ${row.join(' | ')} |`)].join('\n');
 await writeFile(`${out}/informe.md`, `# Comparación con Nutrigo\n\nGenerado por \`scripts/nutrigo-compare.mjs\` el ${new Date().toISOString().slice(0, 10)}.\nLos datos y textos de Plan V nunca dan 0 %: la cifra sirve para ver qué pantalla se aleja más.\n\n${table}\n`);
-if (previous && only) console.log('Informe reescrito solo con la pantalla pedida.');

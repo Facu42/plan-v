@@ -21,11 +21,13 @@ async function homeData(id: string, signal: AbortSignal) {
     failed:[body,target,recipes,plan,exercise,care].some(row=>row.status==='rejected'&&!(row.reason instanceof DOMException&&row.reason.name==='AbortError')) };
 }
 
-/** Un vaso son 250 ml; la meta por defecto es de ocho vasos (2 L) mientras la nutricionista no indique otra. */
+/**
+ * Un vaso son 250 ml. Plan V no guarda metas de agua ni de pasos: las barras usan una referencia
+ * general (2 L y 8.000 pasos) y la pantalla la nombra como «referencia», nunca como meta indicada.
+ */
 const GLASS_LITRES = 0.25;
 const DEFAULT_WATER_GLASSES = 8;
 const litres = (glasses: number) => formatNumber(glasses * GLASS_LITRES);
-/** Meta de pasos por defecto mientras la nutricionista no indique otra. */
 const DEFAULT_STEPS_GOAL = 8000;
 const text = (node: SourceNode, ...samples: string[]) => leaf(node) && samples.includes(sourceText(node));
 const sample = (node: SourceNode, pattern: RegExp) => leaf(node) && pattern.test(sourceText(node));
@@ -122,7 +124,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
           if(nodeName(child)==='Empty Bar')return barFill(stepsPct,'empty');
           if(text(child,'8050'))return {text:formatNumber(steps??0)};
           if(text(child,'76%'))return {text:`${Math.round(stepsPct??0)}%`};
-          if(sample(child,/steps left/))return {text:steps==null?'Registrá tus pasos':steps>=DEFAULT_STEPS_GOAL?'Meta cumplida':`Faltan ${formatNumber(DEFAULT_STEPS_GOAL-steps)}`};
+          if(sample(child,/steps left/))return {text:steps==null?'Registrá tus pasos':`Referencia: ${formatNumber(DEFAULT_STEPS_GOAL)}`};
           return undefined;
         })};
       }
@@ -138,9 +140,9 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
         return undefined;
       })};
       return {onClick:onHydration,label:'Registrar hidratación',children:fields(node,{},child=>{
-        if(nodeName(child)==='Chart'&&objects(child).some(n=>nodeName(n)==='Progress Bar'))return {props:{style:{justifyContent:'flex-end'}},children:objects(child).map((n,i)=>source(n,m=>nodeName(m)==='Progress Bar'?{props:{style:{flex:`0 0 ${Math.max(waterPct,24)}%`}},children:fields(m,{},leafNode=>text(leafNode,'1.3/2')?{text:`${litres(glasses)}/${litres(DEFAULT_WATER_GLASSES)}`}:text(leafNode,'litre')?{text:'L'}:undefined)}:undefined,i))};
-        if(text(child,'0.7'))return {text:litres(Math.max(0,DEFAULT_WATER_GLASSES-glasses))};
-        if(text(child,'litre left'))return {text:'L restantes'};
+        if(nodeName(child)==='Chart'&&objects(child).some(n=>nodeName(n)==='Progress Bar'))return {props:{style:{justifyContent:'flex-end'}},children:objects(child).map((n,i)=>source(n,m=>nodeName(m)==='Progress Bar'?{props:{style:{flex:`0 0 ${Math.max(waterPct,24)}%`}},children:fields(m,{},leafNode=>text(leafNode,'1.3/2')?{text:`${litres(glasses)}/${litres(DEFAULT_WATER_GLASSES)}`}:text(leafNode,'litre')?{text:'L (ref.)'}:undefined)}:undefined,i))};
+        if(text(child,'0.7'))return {text:litres(glasses)};
+        if(text(child,'litre left'))return {text:`L · ${formatNumber(glasses)} vasos`};
         return undefined;
       })};
     }
@@ -154,6 +156,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
       if(text(child,'85'))return {text:startWeight==null?'':String(Math.round(startWeight))};
       if(text(child,'65'))return {text:goalWeight!=null?String(Math.round(goalWeight)):''};
       if(/Button/.test(nodeName(child)))return {onClick:onRecord,label:'Registrar peso'};
+      if(text(child,'🎉'))return {text:''};
       return undefined;
     };return {children:fields(node,{},weightLeaf)};}
     if(name==='Widget Calories Intake'){const calorieLeaf:SourceResolver=child=>{
@@ -166,7 +169,8 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
       }
       if(!leaf(child))return undefined;
       const value=sourceText(child);
-      const substitutions:Record<string,string>={'1240':target&&kcal!==null?formatNumber(Math.max(0,target.kcal-kcal)):'0','1750':kcal==null?'0':formatNumber(kcal),'510':formatNumber(burned),'120':known?formatNumber(patient.macros.carbs_g):'0','70':known?formatNumber(patient.macros.protein_g):'0','20':known?formatNumber(patient.macros.fat_g):'0','/325gr':target?`/${formatNumber(target.carbs_g)} g`:'/— g','/75gr':target?`/${formatNumber(target.protein_g)} g`:'/— g','/44gr':target?`/${formatNumber(target.fat_g)} g`:'/— g','37%':`${Math.round(macroPct.carbs??0)}%`,'93%':`${Math.round(macroPct.protein??0)}%`,'45%':`${Math.round(macroPct.fat??0)}%`};
+      // Sin comidas revisadas o sin meta, el valor es desconocido (no cero).
+      const substitutions:Record<string,string>={'1240':target&&kcal!==null?formatNumber(Math.max(0,target.kcal-kcal)):'—','1750':formatNumber(kcal),'510':formatNumber(burned),'120':known?formatNumber(patient.macros.carbs_g):'—','70':known?formatNumber(patient.macros.protein_g):'—','20':known?formatNumber(patient.macros.fat_g):'—','/325gr':target?`/${formatNumber(target.carbs_g)} g`:'/— g','/75gr':target?`/${formatNumber(target.protein_g)} g`:'/— g','/44gr':target?`/${formatNumber(target.fat_g)} g`:'/— g','37%':macroPct.carbs==null?'—':`${Math.round(macroPct.carbs)}%`,'93%':macroPct.protein==null?'—':`${Math.round(macroPct.protein)}%`,'45%':macroPct.fat==null?'—':`${Math.round(macroPct.fat)}%`};
       return value in substitutions?{text:substitutions[value]}:undefined;
     };return {children:fields(node,{},calorieLeaf)};}
     if(name==='Widget Workout Progress')return {children:fields(node,{},child=>{

@@ -9,7 +9,7 @@ import type { CareRecord } from '../../../types/care';
 import { PROGRESS_PERIODS, type ProgressPeriodDays, type ProgressPoint } from '../../../types/progress';
 import { dateId, dateLabel, descendants, EmptyState, errorText, formatNumber, leaf, objects, percent, safeUrl, source, Stateful, useRemote, type ScreenProps } from './shared';
 
-/** Un vaso son 250 ml y la meta por defecto es de ocho vasos (2 L), igual que en Inicio. */
+/** Un vaso son 250 ml. Plan V no guarda una meta de agua: los porcentajes usan la referencia general de 8 vasos (2 L), igual que en Inicio. */
 const GLASS_LITRES = 0.25;
 const WATER_GOAL_GLASSES = 8;
 /** El gráfico de descanso va de 0 a 10 horas (las cinco marcas del archivo). */

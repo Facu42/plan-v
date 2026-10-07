@@ -244,7 +244,9 @@ export async function seedDemoContent(fetcher: Fetcher, now = new Date(), target
   }
 
   // Hábitos de hoy.
-  await call('hábitos de hoy', `/api/patients/${MAIN}/habits`, 'PATCH', { hydration: 5, sleep_minutes: 445, energy: 'Buena', steps: 6420 });
+  await call('hábitos de hoy', `/api/patients/${MAIN}/habits`, 'PATCH', { hydration: 5, sleep_minutes: 445, energy: 'Buena' });
+  // Aparte: si la base todavía no tiene la columna de pasos, el resto de los hábitos ya quedó guardado.
+  await call('pasos de hoy', `/api/patients/${MAIN}/habits`, 'PATCH', { steps: 6420 });
 
   // Actividad del dispositivo (card superior de Ejercicio) y la declarada a mano.
   for (const [daysAgo, activity, minutes, intensity, kcal] of [[1, 'Caminata', 40, 'moderada', 180], [3, 'Bicicleta fija', 30, 'intensa', 240], [5, 'Pilates', 50, 'suave', null]] as const) {
