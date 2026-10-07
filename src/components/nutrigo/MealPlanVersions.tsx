@@ -15,6 +15,9 @@ import { RECIPE_UNITS } from '../../types/recipes';
 import { AiPlanNutritionSummary } from './AiPlanNutritionSummary';
 import { PlanRecipePicker, PlanRecipePreview } from './PlanRecipePicker';
 import { publishedRecipeDetail, resolvePlanRecipeSelection } from '../../types/plan-recipe-selection';
+import { editorPlanDates } from '../../types/plan-day-analysis';
+import { planWeekdayLabel } from '../../types/plans';
+import { PlanDayAnalysis } from './PlanDayAnalysis';
 
 type DraftItem = { for_date: string; slot: PlanSlot; free_text: string; recipe_id: string; recipe_version?: number; portions: string; public_note: string; recipe_proposal?: ProposedRecipe; recipePreview?: PlanRecipeDetail };
 
@@ -109,6 +112,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
   const [proposal, setProposal] = useState<AiJobView | null>(null);
   const [periodStart, setPeriodStart] = useState('');
   const [periodEnd, setPeriodEnd] = useState('');
+  const [activeDate, setActiveDate] = useState('');
   const [draftItems, setDraftItems] = useState<DraftItem[]>([emptyItem(new Date().toISOString().slice(0, 10))]);
   const [selectedSlots, setSelectedSlots] = useState<PlanSlot[]>(['Desayuno', 'Almuerzo', 'Merienda', 'Cena']);
   const [dietaryPreferences, setDietaryPreferences] = useState('');
@@ -272,6 +276,11 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
   }
 
   const proposedPlan = proposalFrom(proposal);
+  const editorDates = editorPlanDates(periodStart, periodEnd, draftItems.map(item => item.for_date));
+  const selectedDate = editorDates.includes(activeDate) ? activeDate : editorDates[0] ?? '';
+  const dayItems = draftItems.filter(item => item.for_date === selectedDate || !editorDates.includes(item.for_date));
+  const availableSlot = PLAN_SLOTS.find(slot => !dayItems.some(item => item.slot === slot));
+  const weekOffset = Math.max(0, Math.floor(editorDates.indexOf(selectedDate) / 7) * 7);
   const dirty = !plan || !matchesMenuForm(plan, formInput());
   useUnsavedChanges(plan ? dirty : Boolean(periodStart || periodEnd || dietaryPreferences || draftItems.some((item) => item.free_text.trim() || item.recipe_id || item.public_note || item.recipe_proposal)), busy);
   function publishVisible() {
@@ -292,7 +301,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
     {status && <p className="meal-plan-status" role="status">{status}</p>}
     {proposal && !proposedPlan && <p className="meal-plan-error" role="alert">La propuesta no tiene un menú válido. Regenerala antes de aprobar.</p>}
     {proposedPlan && <MenuProposalReview key={proposal!.id} proposal={proposedPlan} warnings={proposal?.warnings ?? []} busy={busy} recipes={recipes} onEdit={() => void editProposal()} onApprove={() => void approveProposal()} onReject={() => void rejectProposal()} />}
-    <AiPlanNutritionSummary nutrition={plan?.current.nutrition} />
+
     {plan?.published&&<section aria-label="Fotos del menú publicado" className="meal-plan-actions">
       <p>Las fotos se preparan después de aprobar el menú. Se reutilizan para los platos repetidos.</p>
       <NvButton type="button" className="nv-ghost" disabled={busy||dirty||!imageGeneration} onClick={()=>void run(()=>plansApi.covers(plan.id,plan.published!.version),'Fotos pendientes enviadas a preparar. El menú conserva su contenido.')}>Preparar fotos pendientes</NvButton>
@@ -304,31 +313,43 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
         <label>Desde<input type="date" value={periodStart} onChange={(event) => setPeriodStart(event.target.value)} /></label>
         <label>Hasta<input type="date" value={periodEnd} onChange={(event) => setPeriodEnd(event.target.value)} /></label>
       </div>
-      <fieldset><legend>Momentos para la propuesta</legend>{PLAN_SLOTS.map((slot) => <label key={slot}><input type="checkbox" checked={selectedSlots.includes(slot)} onChange={(event) => setSelectedSlots(event.target.checked ? [...selectedSlots, slot] : selectedSlots.filter((entry) => entry !== slot))} />{slot}</label>)}</fieldset>
+      <details className="plan-ai-preferences"><summary>Preferencias para generar un menú con IA</summary><fieldset><legend>Momentos para la propuesta</legend>{PLAN_SLOTS.map((slot) => <label key={slot}><input type="checkbox" checked={selectedSlots.includes(slot)} onChange={(event) => setSelectedSlots(event.target.checked ? [...selectedSlots, slot] : selectedSlots.filter((entry) => entry !== slot))} />{slot}</label>)}</fieldset>
       <label>Preferencias alimentarias<textarea aria-describedby="menu-preferences-help" maxLength={809} placeholder="Una preferencia por línea, hasta 10 de 80 caracteres. Ejemplo: platos con legumbres." value={dietaryPreferences} onChange={(event) => setDietaryPreferences(event.target.value)} /></label>
-      <small id="menu-preferences-help">Hasta 10 preferencias de 80 caracteres cada una. Separalas con un salto de línea.</small>
-      {draftItems.map((item, index) => <div className="meal-plan-item-row" key={index}>
-        <input aria-label={`Fecha ${index + 1}`} type="date" value={item.for_date} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, for_date: event.target.value } : current))} />
-        <select aria-label={`Momento ${index + 1}`} value={item.slot} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, slot: event.target.value as PlanSlot } : current))}>
+      <small id="menu-preferences-help">Hasta 10 preferencias de 80 caracteres cada una. Separalas con un salto de línea.</small></details>
+      <nav className="plan-editor-days" aria-label="Días del plan">
+        <button type="button" disabled={weekOffset === 0} onClick={() => setActiveDate(editorDates[Math.max(0, weekOffset - 7)])}>Semana anterior</button>
+        {editorDates.slice(weekOffset, weekOffset + 7).map(date => <button type="button" key={date} aria-pressed={selectedDate === date} onClick={() => setActiveDate(date)}><strong>{planWeekdayLabel(date)}</strong><span>{date.slice(8)}/{date.slice(5, 7)}</span><small>{draftItems.filter(item => item.for_date === date).length} indicaciones</small></button>)}
+        <button type="button" disabled={weekOffset + 7 >= editorDates.length} onClick={() => setActiveDate(editorDates[weekOffset + 7])}>Semana siguiente</button>
+      </nav>
+      {editorDates.some(date => date < periodStart || date > periodEnd) && <p role="alert">Hay indicaciones fuera del período. Sus días siguen disponibles arriba; corregí las fechas antes de guardar.</p>}
+      <div className="plan-editor-day-layout"><div className="plan-editor-meals">
+      {PLAN_SLOTS.map(slot => <section className="plan-editor-meal" key={slot} aria-label={`${slot} del día seleccionado`}><header><h3>{slot}</h3><button type="button" disabled={!selectedDate || draftItems.length >= 42 || dayItems.some(item => item.slot === slot)} onClick={() => setDraftItems([...draftItems, { ...emptyItem(selectedDate), slot }])}>Agregar a {slot.toLocaleLowerCase('es-AR')}</button></header>
+      {!dayItems.some(item => item.slot === slot) && <p>Sin indicaciones para este momento.</p>}
+      {draftItems.map((item, index) => item.slot === slot && (item.for_date === selectedDate || !editorDates.includes(item.for_date)) ? <div className="meal-plan-item-row" key={index}>
+        <label>Fecha<input aria-label={`Fecha ${index + 1}`} type="date" value={item.for_date} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, for_date: event.target.value } : current))} /></label>
+        <label>Momento<select aria-label={`Momento ${index + 1}`} value={item.slot} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, slot: event.target.value as PlanSlot } : current))}>
           {PLAN_SLOTS.map((slot) => <option key={slot} value={slot}>{slot}</option>)}
-        </select>
+        </select></label>
         <div className="meal-plan-recipe-choice"><button type="button" aria-label={`Elegir receta para indicación ${index + 1}`} onClick={() => setPickerIndex(index)}>{item.recipe_id ? `${resolvePlanRecipeSelection(item, recipes, plan?.current.items ?? [])?.title ?? 'Receta seleccionada'} · v${item.recipe_version} · Cambiar` : 'Elegir receta publicada'}</button>{item.recipe_id && <button type="button" onClick={() => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, recipe_id: '', recipe_version: undefined, recipePreview: undefined, recipe_proposal: undefined } : current))}>Usar texto libre</button>}</div>
-        <input aria-label={`Texto ${index + 1}`} placeholder="Indicación" value={item.free_text} disabled={Boolean(item.recipe_id)} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, free_text: event.target.value, ...(current.recipe_proposal ? { recipe_proposal: { ...current.recipe_proposal, title: event.target.value } } : {}) } : current))} />
-        <input aria-label={`Porciones ${index + 1}`} type="number" min={0.0001} max={50} step="0.0001" placeholder="Rinde" value={item.portions} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, portions: event.target.value } : current))} />
+        <label>Indicación<input aria-label={`Texto ${index + 1}`} placeholder="Indicación" value={item.free_text} disabled={Boolean(item.recipe_id)} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, free_text: event.target.value, ...(current.recipe_proposal ? { recipe_proposal: { ...current.recipe_proposal, title: event.target.value } } : {}) } : current))} /></label>
+        <label>Porciones<input aria-label={`Porciones ${index + 1}`} type="number" min={0.0001} max={50} step="0.0001" placeholder="Rinde" value={item.portions} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, portions: event.target.value } : current))} /></label>
         {item.recipe_id && <details className="meal-plan-recipe-inline"><summary>Revisar receta v{item.recipe_version} y nutrientes para esta indicación</summary>{(() => { const detail = resolvePlanRecipeSelection(item, recipes, plan?.current.items ?? []); return detail ? <PlanRecipePreview recipe={detail} portions={item.portions.trim() ? Number(item.portions) : NaN} /> : <p role="alert">No pudimos cargar el detalle de esta versión. No se reemplazará por otra receta al guardar.</p>; })()}</details>}
         {item.recipe_proposal && <PlanRecipeProposalEditor proposal={item.recipe_proposal} index={index} onChange={(recipe_proposal) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, recipe_proposal } : current))} />}
         <label>Nota para la paciente<input maxLength={200} aria-label={`Nota ${index + 1}`} value={item.public_note} onChange={event => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, public_note: event.target.value } : current))} /></label>
         <button type="button" disabled={busy} onClick={() => setDraftItems(draftItems.filter((_, currentIndex) => currentIndex !== index))}>Quitar indicación {index + 1}</button>
-      </div>)}
+      </div> : null)}
+      </section>)}
+      </div><PlanDayAnalysis date={selectedDate} lines={draftItems.filter(item => item.for_date === selectedDate).map(item => ({ portions: item.portions, recipe: resolvePlanRecipeSelection(item, recipes, plan?.current.items ?? []), proposal: item.recipe_proposal }))} target={plan?.current.nutrition_target} /></div>
       </fieldset>{plan && !plan.current.published_at && dirty && <p role="status">Tenés cambios sin guardar. Guardalos y revisalos antes de publicar.</p>}
       {error && <button type="button" disabled={busy} onClick={() => void reload()}>Recuperar la versión guardada y reemplazar este formulario</button>}
       <div className="meal-plan-actions">
-        <button type="button" className="meal-plan-add" onClick={() => setDraftItems([...draftItems, emptyItem(periodStart || draftItems[0]?.for_date || '')])} disabled={busy}>Agregar indicación</button>
+        <button type="button" className="meal-plan-add" onClick={() => setDraftItems([...draftItems, { ...emptyItem(selectedDate), slot: availableSlot ?? 'Almuerzo' }])} disabled={busy || draftItems.length >= 42 || !selectedDate || !availableSlot}>Agregar indicación</button>
         <NvButton type="button" className="nv-ghost" disabled={busy || !periodStart || !periodEnd || !selectedSlots.length || Boolean(proposal)} onClick={() => void generateProposal()}>Generar propuesta de menú</NvButton>
         <NvButton type="submit" disabled={busy}>Guardar borrador</NvButton>
         {plan && !plan.current.published_at && <NvButton type="button" disabled={busy || dirty} onClick={publishVisible}>Publicar v{plan.current.version}</NvButton>}
       </div>
     </form>
+    {plan?.current.nutrition && <details><summary>Ver análisis de la versión guardada</summary><AiPlanNutritionSummary nutrition={plan.current.nutrition} /></details>}
     {plan?.published && <details className="meal-plan-published-copy"><summary>Ver copia publicada · v{plan.published.version}</summary><PublishedDatedPlanView plan={toPublishedPatientPlan(plan)} audience="pro" /></details>}
     {pickerIndex !== null && draftItems[pickerIndex] && <PlanRecipePicker recipes={recipes} loading={catalogLoading} error={catalogError} onRetry={() => void reloadCatalog()} initialPortions={draftItems[pickerIndex].portions} onClose={() => setPickerIndex(null)} onChoose={(recipe, portions) => { const version = recipe.published; if (!version) return; setDraftItems(current => current.map((item, index) => index === pickerIndex ? { ...item, recipe_id: recipe.id, recipe_version: version.version, recipePreview: publishedRecipeDetail(recipe) ?? undefined, portions: String(portions), free_text: '', recipe_proposal: undefined } : item)); setPickerIndex(null); }} />}
   </section>;

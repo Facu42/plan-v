@@ -71,7 +71,10 @@ describe('Plan fechado profesional y publicado', () => {
     expect(html).toContain('no publica sola');
     expect(html).toContain('PLAN FECHADO');
     expect(html).toContain('Almuerzo');
-    expect(html).not.toMatch(/\bkcal\b|proteína|carbohidrato/i);
+    expect(html).toContain('Análisis del día');
+    expect(html).toContain('Sin total completo');
+    expect(html).toContain('Sin objetivo nutricional guardado');
+    expect(html).not.toMatch(/\d+(?:[,.]\d+)?\s*kcal/);
   });
 
   it('el vacío publicado no simula un plan fechado', () => {

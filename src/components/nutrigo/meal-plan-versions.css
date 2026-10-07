@@ -56,3 +56,25 @@
 .plan-recipe-nutrients dd{margin:4px 0 0;font-size:14px;font-weight:600}
 .plan-recipe-picker-actions{display:flex;gap:10px;position:sticky;bottom:0;background:var(--nv-card);padding:14px 0 0;margin-top:12px}
 .plan-recipe-picker button:focus-visible,.meal-plan-recipe-choice button:focus-visible{outline:2px solid var(--nv-strong);outline-offset:3px}
+.plan-editor-days{display:flex;gap:8px;overflow:auto;padding:12px 0;margin:12px 0}
+.plan-editor-days button{flex:1;min-width:92px;border:1px solid var(--nv-border);border-radius:10px;background:var(--nv-card);color:var(--nv-ink);padding:10px;font:inherit;font-size:12px;cursor:pointer;transition:background .15s ease}
+.plan-editor-days button strong,.plan-editor-days button span,.plan-editor-days button small{display:block}
+.plan-editor-days button[aria-pressed=true]{background:var(--nv-accent-soft);border-color:var(--nv-accent)}
+.plan-editor-days button:focus-visible,.plan-editor-meal button:focus-visible{outline:2px solid var(--nv-ink);outline-offset:3px}
+.plan-editor-day-layout{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:16px;align-items:start}
+.plan-editor-meals{min-width:0;display:grid;gap:12px}
+.plan-editor-meal{padding:14px;border:1px solid var(--nv-border);border-radius:12px;background:var(--nv-card)}
+.plan-editor-meal>header{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.plan-editor-meal h3,.plan-day-analysis h3{margin:0;font-size:16px}
+.plan-editor-meal>header button{padding:8px;border:1px solid var(--nv-border);border-radius:8px;background:var(--nv-bg);color:var(--nv-ink);font:inherit;font-size:12px;cursor:pointer}
+.plan-editor-meal .meal-plan-item-row{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px 0;border-top:1px solid var(--nv-border)}
+.plan-editor-meal .meal-plan-item-row input,.plan-editor-meal .meal-plan-item-row select{min-width:0;width:100%;box-sizing:border-box}
+.plan-editor-meal .meal-plan-recipe-choice,.plan-editor-meal .meal-plan-item-row>fieldset{grid-column:1/-1}
+.plan-day-analysis{padding:16px;border:1px solid var(--nv-border);border-radius:12px;background:var(--nv-bg);position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto}
+.plan-day-analysis dl{margin:12px 0;display:grid;gap:10px}
+.plan-day-analysis dl>div{padding:10px;background:var(--nv-card);border-radius:8px}
+.plan-day-analysis dt{font-size:12px;color:var(--nv-muted)}
+.plan-day-analysis dd{margin:4px 0;font-size:15px;font-weight:600}
+.plan-day-analysis small{display:block;font-size:11px;line-height:1.5;color:var(--nv-ink-soft)}
+.plan-day-analysis .plan-day-estimate{color:var(--nv-ink);background:var(--nv-gold-soft);padding:8px;border-radius:8px}
+@media(prefers-reduced-motion:reduce){.plan-editor-days button{transition:none}}
