@@ -212,6 +212,16 @@ Shell (`shell-fig.css`): Header 84:2568 en todas las páginas salvo Inicio (tít
 
 Cada pantalla tiene su CSS propio: `messages-fig.css`, `menu-fig.css`, `plan-fig.css`, `agenda-diario-fig.css`, `progreso-recursos-fig.css`. El nutricionista usa los mismos frames con los datos del paciente elegido. Lo que el archivo dibuja sin dato real en Plan V (teléfono, precios, calorías de compras, puntajes, autores, fotos) se omite o se reemplaza por el registro real más cercano.
 
+## Regla de bloques completos (2026-10-07)
+
+Ningún bloque del archivo se oculta ni se vacía. Con dato, el mismo bloque lleva el valor real; sin
+dato, el mismo bloque en cero o con un texto corto en español adentro. Listas con los ítems
+originales en ciclo (`cloneList`), barras con `barFill` y donas con `Ring`
+(`src/features/nutrigo/screens/shared.tsx`). Nada visible fuera del marco salvo errores y carga.
+Medición: `scripts/nutrigo-compare.mjs` contra `design/nutrigo-frames/`. La cuenta de Figma es Pro
+con puesto Full desde octubre: ya no rige el límite de unas veinte llamadas al mes.
+Ver `docs/nutrigo-igual-al-archivo-2026-10-07.md`.
+
 ## Copy
 
 **La interfaz va en español.** El .fig manda en composición, color, tipo y densidad; no en idioma. Ningún rótulo, vacío ni mensaje queda en inglés por copiar el frame. Las cifras y nombres de ejemplo del pack no se copian: los datos son de Plan V.
