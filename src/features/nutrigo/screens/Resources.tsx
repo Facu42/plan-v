@@ -1,20 +1,41 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { FramePair } from '../FramePair';
-import { nodeName, sourceText, type SourceNode, type SourceResolver } from '../SourceView';
+import { nodeName, sourceText, type SourceBinding, type SourceNode, type SourceResolver } from '../SourceView';
 import { resourcesApi } from '../../../api/resources';
 import { api } from '../../../api/client';
 import { favoriteKindForResource, type EditorialResource } from '../../../types/resources';
 import { isAllowedPage } from '../../../components/nutrigo/app-location';
-import { dateLabel, descendants, errorText, idEnds, leaf, objects, safeUrl, searchBinding, source, Stateful, useRemote, type ScreenProps } from './shared';
+import { dateLabel, descendants, EmptyState, errorText, leaf, listChildren, objects, safeUrl, searchBinding, source, Stateful, useRemote, type ScreenProps } from './shared';
 
 type Props = ScreenProps & { resourceId?: string | null; onOpenResource?: (slug: string | null) => void };
+type View = 'all' | 'recent' | 'saved' | 'assigned' | 'short';
+/** Las cinco pastillas del buscador del archivo pasan a ser los filtros de Plan V. */
+const VIEWS: { id: View; label: string; hint: string }[] = [
+  { id: 'all', label: 'Todos', hint: 'Ver todos los recursos' }, { id: 'recent', label: 'Recientes', hint: 'Ordenar por fecha de revisión' },
+  { id: 'saved', label: 'Guardados', hint: 'Ver mis recursos guardados' }, { id: 'assigned', label: 'Indicados', hint: 'Ver los recursos que te indicó tu nutricionista' },
+  { id: 'short', label: 'Lectura breve', hint: 'Ver recursos de hasta 3 minutos' },
+];
+const is = (node: SourceNode, ...samples: string[]) => leaf(node) && samples.includes(sourceText(node));
+const inner = (node: SourceNode, resolve: SourceResolver): ReactNode[] => node.children.map((child, index) => typeof child === 'object' ? source(child, resolve, index) : child);
 const hashResource = () => { if (typeof window === 'undefined') return null; try { return window.location.hash.startsWith('#recurso=') ? decodeURIComponent(window.location.hash.slice(9)) : null; } catch { return null; } };
 export function NutrigoResources({ patient, query = '', onNavigate, onSignOut, resourceId, onOpenResource }: Props) {
   const remote = useRemote(patient.id, signal => resourcesApi.library(patient.id, '', false, signal).then(result => result.library));
-  const [search, setSearch] = useState(query); const [category, setCategory] = useState(''); const [savedOnly, setSavedOnly] = useState(false); const [selected, setSelected] = useState<string | null>(resourceId ?? hashResource());
+  const [search, setSearch] = useState(query); const [category, setCategory] = useState(''); const [view, setView] = useState<View>('all'); const [moreTags, setMoreTags] = useState(false); const [moreAuthors, setMoreAuthors] = useState(false); const [selected, setSelected] = useState<string | null>(resourceId ?? hashResource());
   const [error, setError] = useState(''); const [status, setStatus] = useState(''); const [busy, setBusy] = useState(false); const lock = useRef(false);
   const catalog = [...(remote.data?.articles ?? []), ...(remote.data?.resources ?? [])]; const categories = [...new Set(catalog.map(item => item.category))]; const favorites = new Set(remote.data?.favorites.map(item => item.item_id) ?? []);
-  const visible = catalog.filter(item => (!category || item.category === category) && (!savedOnly || favorites.has(item.id)) && `${item.title} ${item.summary} ${item.tags.join(' ')}`.toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es')));
+  const assignedIds = new Set(remote.data?.assignments.flatMap(item => [item.slug, item.resource_id]) ?? []);
+  const matches = (item: EditorialResource) => (!category || item.category === category) && (view !== 'saved' || favorites.has(item.id)) && (view !== 'assigned' || assignedIds.has(item.slug) || assignedIds.has(item.id)) && (view !== 'short' || item.minutes <= 3) && `${item.title} ${item.summary} ${item.author_name} ${item.tags.join(' ')}`.toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'));
+  const filtered = catalog.filter(matches);
+  const visible = view === 'recent' ? filtered.slice().sort((a, b) => (b.reviewed_at ?? '').localeCompare(a.reviewed_at ?? '')) : filtered;
+  // Lugares del archivo: destacado (1), lista (2), recomendados (2) y «Más recursos» (2, el bloque de videos: Plan V no tiene videos).
+  // Lo que sobra se suma a la lista para no perder nada.
+  const popular = [...visible.slice(1, 3), ...visible.slice(7)];
+  const recommended = visible.slice(3, 5);
+  const more = visible.slice(5, 7);
+  const count = <K extends string>(keys: K[]) => keys.reduce((map, key) => map.set(key, (map.get(key) ?? 0) + 1), new Map<K, number>());
+  const tagCounts = count(catalog.flatMap(item => item.tags));
+  const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'es')).map(([tag, total]) => { const kinds = count(catalog.filter(item => item.tags.includes(tag)).map(item => item.category)); return [tag, { count: total, category: [...kinds.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? '' }] as const; });
+  const authors = [...count(catalog.map(item => item.author_name)).entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'es'));
   const current = catalog.find(item => item.slug === selected || item.id === selected);
   const assigned = current ? remote.data?.assignments.find(item => item.slug === current.slug || item.resource_id === current.id) : undefined;
   useEffect(() => { const changed = () => setSelected(hashResource()); window.addEventListener('popstate', changed); window.addEventListener('hashchange', changed); return () => { window.removeEventListener('popstate', changed); window.removeEventListener('hashchange', changed); }; }, []);
@@ -23,49 +44,150 @@ export function NutrigoResources({ patient, query = '', onNavigate, onSignOut, r
   const open = (slug: string | null) => { window.scrollTo(0, 0); setSelected(slug); setError(''); setStatus(''); if (onOpenResource) onOpenResource(slug); else { const url = new URL(window.location.href); url.hash = slug ? `recurso=${encodeURIComponent(slug)}` : ''; window.history.pushState(null, '', url); } };
   const favorite = async (item: EditorialResource) => { if (lock.current) return; lock.current = true; setBusy(true); setError(''); setStatus(''); try { const saved = await resourcesApi.favorite(patient.id, favoriteKindForResource(item.kind), item.id); remote.setData(saved.library); setStatus(saved.library.favorites.some(entry => entry.item_id === item.id) ? 'Recurso guardado.' : 'Recurso quitado de guardados.'); } catch (caught) { setError(errorText(caught)); } finally { lock.current = false; setBusy(false); } };
   const share = async (item: EditorialResource) => { try { const url = new URL(window.location.href); url.pathname = '/app/recursos'; url.search = ''; url.hash = `recurso=${encodeURIComponent(item.slug)}`; if (typeof navigator.share === 'function') await navigator.share({ title: item.title, url: url.href }); else await navigator.clipboard.writeText(url.href); setStatus(typeof navigator.share === 'function' ? 'Recurso compartido.' : 'Enlace copiado.'); } catch (caught) { if (!(caught instanceof DOMException && caught.name === 'AbortError')) setError('No se pudo compartir el enlace.'); } };
-  const card = (prototype: SourceNode, item: EditorialResource, key = item.id) => source(prototype, child => {
-    const name = nodeName(child); const text = sourceText(child);
-    if (name === 'Info Category') return { text: item.category };
-    if (name === 'Info Date') return { text: item.reviewed_at ? dateLabel(item.reviewed_at) : `${item.minutes} min` };
-    if (name === 'Info Author' || name === 'Left Info' && /Dr\.|Coach|Chef/.test(text)) return { text: item.author_name };
-    if (idEnds(child, '263:7130') || idEnds(child, '267:8210') || idEnds(child, '276:9120') || idEnds(child, '507:15800') || idEnds(child, '507:16192') || idEnds(child, '290:7831')) return { onClick: () => open(item.slug), text: item.title, label: `Leer ${item.title}` };
-    if (idEnds(child, '265:8107') || idEnds(child, '267:8226') || idEnds(child, '507:15801') || idEnds(child, '507:16193')) return { text: item.summary };
-    if (idEnds(child, '276:9115') || idEnds(child, '507:16187') || idEnds(child, '290:7830')) return { text: item.category };
-    if (idEnds(child, '276:9118') || idEnds(child, '507:16190')) return { text: item.reviewed_at ? dateLabel(item.reviewed_at) : 'Guía de uso' };
-    if (leaf(child) && /^Dr\. Amelia Johnson$/.test(text)) return { text: item.author_name };
-    if (name === 'Image') return { children: safeUrl(item.cover_url) ? <img src={safeUrl(item.cover_url)!} alt="" className="h-full w-full rounded-[12px] object-cover" /> : <span aria-hidden="true" className="flex h-full w-full items-center justify-center rounded-[12px] bg-[#f3f2eb] text-[40px] text-[#272932]">◇</span> };
-    if (name === 'Avatar' || name === 'Play') return { hidden: true };
-    return undefined;
-  }, key);
-  const state = () => <Stateful loading={!remote.data && !remote.error} error={remote.error || undefined} empty="No hay recursos que coincidan." onRetry={remote.reload} />;
+  const dateText = (item: EditorialResource) => item.reviewed_at ? dateLabel(item.reviewed_at) : `${item.minutes} min de lectura`;
+  /** Tarjeta del archivo con los datos del recurso: cada texto conserva su tipografía. */
+  const card = (prototype: SourceNode, item: EditorialResource, key: string | number = item.id) => {
+    const inside = (name: string) => new Set(descendants(prototype).filter(node => nodeName(node) === name).flatMap(descendants));
+    const categories = inside('Info Category'); const authors = new Set([...inside('Info Author'), ...descendants(prototype).filter(node => nodeName(node) === 'Info Date' && descendants(node).some(child => nodeName(child) === 'Avatar')).flatMap(descendants)]); const dates = inside('Info Date');
+    return source(prototype, node => {
+      const name = nodeName(node);
+      if (name === 'Play') return { hidden: true };
+      if (name === 'Image' && safeUrl(item.cover_url)) return { children: <img src={safeUrl(item.cover_url)!} alt="" className="absolute inset-0 block size-full object-cover" /> };
+      if (!leaf(node)) return undefined;
+      const text = sourceText(node);
+      if (categories.has(node)) return { text: item.category };
+      if (authors.has(node) || /^(Dr\.|Coach|Chef) /.test(text)) return { text: item.author_name };
+      if (dates.has(node) || /\b20\d\d$/.test(text)) return { text: dateText(item) };
+      if (/SemiBold/.test(String(node.props.className))) return { onClick: () => open(item.slug), text: item.title, label: `Leer ${item.title}`, props: { style: { textAlign: 'left', cursor: 'pointer' } } };
+      if (text.length > 30) return { text: item.summary };
+      return undefined;
+    }, key);
+  };
+  const reset = () => { setCategory(''); setSearch(''); setView('all'); };
+  const seeAll: SourceBinding = { onClick: reset, label: 'Ver todos los recursos' };
+  const stateText = (empty: string) => remote.error ? 'No se pudieron cargar los recursos.' : !remote.data ? 'Cargando…' : empty;
+  const state = (empty: string) => <EmptyState text={stateText(empty)} />;
+  const header = (node: SourceNode, more?: SourceBinding) => source(node, child => nodeName(child) === 'Button More' ? more ?? { props: { 'aria-hidden': true } } : nodeName(child) === 'Button CTA' ? seeAll : undefined, 'header');
   const listResolver: SourceResolver = node => {
     const name = nodeName(node); const text = sourceText(node);
     const input = searchBinding(node, search, setSearch, 'Buscar recurso'); if (input) return input;
-    if (name === 'Featured Articles') return visible[0] ? { children: objects(node).map((child,index) => card(child, visible[0]!,`${visible[0]!.id}:${index}`)) } : { children: state() };
-    if (name === 'List Menu' && objects(node).some(child => nodeName(child) === 'Card Popular Insights')) { const prototype = objects(node).find(child => nodeName(child) === 'Card Popular Insights'); return { children: prototype && visible.slice(1).map(item => card(prototype, item)) }; }
-    if (name === 'List Rcommendation') { const prototype = objects(node).find(child => nodeName(child) === 'Card Recommended Insights'); return { children: prototype && visible.slice(1).map(item => card(prototype, item)) }; }
-    if (name === 'Widget Trending Tags') { const header = objects(node).find(child => nodeName(child) === 'Header-Section'); return { children: <>{header && source(header, child => /Button/.test(nodeName(child)) ? { hidden: true } : undefined)}<div className="flex flex-col gap-[12px]">{categories.map(value => <button key={value} type="button" onClick={() => setCategory(category === value ? '' : value)} aria-pressed={category === value} className="rounded-[8px] border border-[#e1e1e2] px-[12px] py-[8px] text-left text-[14px]">{value} · {catalog.filter(item => item.category === value).length}</button>)}</div></> }; }
-    if (name === 'Widget Top Author') { const header = objects(node).find(child => nodeName(child) === 'Header-Section'); return { children: <>{header && source(header, child => /Button/.test(nodeName(child)) ? { hidden: true } : undefined)}{[...new Set(catalog.map(item => item.author_name))].map(author => <p key={author} className="py-[8px] text-[14px]">{author}</p>)}</> }; }
-    if (name === 'Categories' || name === 'Tab') return { props: { style: { flexWrap: 'wrap' } }, children: <>{['', ...categories].map(value => <button key={value} type="button" aria-pressed={category === value} onClick={() => setCategory(value)} className="rounded-[8px] border border-[#e1e1e2] px-[12px] py-[8px] text-[14px]">{value || 'Todos'}</button>)}</> };
-    if (/Button/.test(name) && ['Recent', 'Featured', 'Trending', 'Popular', 'Recommended', 'See All'].includes(text)) return { onClick: () => { setCategory(''); setSearch(''); setSavedOnly(false); }, label: 'Ver todos los recursos' };
+    if (name === 'Button More' && !text && descendants(node).some(child => nodeName(child) === 'Icon/MagnifyingGlass')) return { onClick: () => document.querySelector<HTMLInputElement>('input[type="search"][aria-label="Buscar recurso"]')?.focus(), label: 'Buscar recurso' };
+    if (name === 'Categories' && objects(node).some(child => nodeName(child) === 'Chips Category')) {
+      const chips = objects(node).filter(child => nodeName(child) === 'Chips Category');
+      return { children: chips.map((chip, index) => { const option = VIEWS[index]; if (!option) return null; const active = view === option.id; return source(chip, child => child === chip ? { onClick: () => setView(active && option.id !== 'all' ? 'all' : option.id), label: option.hint, props: { 'aria-pressed': active, style: active ? { background: '#c2e66e' } : undefined } } : leaf(child) ? { text: option.label } : undefined, option.id); }) };
+    }
+    if (name === 'Tab') {
+      const buttons = objects(node); const active = buttons.find(child => /bg-\[#c2e66e\]/.test(String(child.props.className))) ?? buttons[0]; const idle = buttons.find(child => child !== active) ?? active;
+      if (!active || !idle) return undefined;
+      return { props: { style: { overflowX: 'auto', gap: '8px' } }, children: ['', ...categories].map(value => source(category === value ? active : idle, child => child === active || child === idle ? { onClick: () => setCategory(value), label: value ? `Ver ${value}` : 'Ver todas las categorías', props: { 'aria-pressed': category === value } } : leaf(child) ? { text: value || 'Todos' } : undefined, value || 'todos')) };
+    }
+    if (name === 'Featured Articles') {
+      const top = objects(node).find(child => nodeName(child) === 'Header-Section');
+      if (!visible[0]) return { children: <>{top && header(top)}{state('No hay recursos que coincidan.')}</> };
+      return { children: objects(node).map((child, index) => child === top ? header(child) : card(child, visible[0]!, `featured-${index}`)) };
+    }
+    if (name === 'Widget Popular Menu') return { children: objects(node).map((child, index) => {
+      if (nodeName(child) === 'Header-Section') return header(child);
+      if (nodeName(child) !== 'List Menu') return source(child, () => undefined, index);
+      const prototypes = objects(child).filter(part => nodeName(part) === 'Card Popular Insights');
+      return source(child, list => list === child ? { children: popular.length ? popular.map((item, position) => card(prototypes[position % prototypes.length], item)) : state(visible.length ? 'No hay más recursos por ahora.' : 'No hay recursos que coincidan.') } : undefined, index);
+    }) };
+    if (name === 'Widget Recommnded Article') {
+      const video = text.includes('Recommended Video');
+      return { children: objects(node).map((child, index) => nodeName(child) === 'Header-Section' ? header(child) : nodeName(child) === 'List Rcommendation' ? source(child, list => list === child ? { children: (video ? more : recommended).length ? (video ? more : recommended).map((item, position) => card(objects(list)[position % objects(list).length], item)) : state('No hay más recursos por ahora.') } : undefined, index) : source(child, () => undefined, index)) };
+    }
+    if (name === 'Widget Trending Tags') {
+      const shown = tags.slice(0, moreTags ? tags.length : 6);
+      return { children: objects(node).map((child, index) => {
+        if (nodeName(child) === 'Header-Section') return header(child, { onClick: () => setMoreTags(value => !value), label: moreTags ? 'Ver menos temas' : 'Ver todos los temas' });
+        if (nodeName(child) === 'List Menu') return source(child, list => list === child ? listChildren(list, shown, (part, [tag, info]) => {
+          if (!leaf(part)) return undefined;
+          const sample = sourceText(part);
+          if (sample.startsWith('#')) return { onClick: () => { setSearch(tag); setCategory(''); }, text: `#${tag}`, label: `Buscar recursos sobre ${tag}`, props: { style: { textAlign: 'left' } } };
+          if (/posts$/.test(sample)) return { text: `${info.count} ${info.count === 1 ? 'recurso' : 'recursos'}` };
+          return { text: info.category };
+        }, stateText('Todavía no hay temas.'), { key: ([tag]) => tag }) : undefined, index);
+        if (nodeName(child) === 'Button') return source(child, part => part === child ? { onClick: () => setMoreTags(value => !value), label: moreTags ? 'Ver menos temas' : 'Ver más temas', props: { disabled: tags.length <= 6 } } : leaf(part) ? { text: moreTags ? 'Ver menos' : 'Ver más' } : undefined, index);
+        return source(child, () => undefined, index);
+      }) };
+    }
+    if (name === 'Widget Top Author') {
+      const shown = authors.slice(0, moreAuthors ? authors.length : 6);
+      return { children: objects(node).map((child, index) => {
+        if (nodeName(child) === 'Header-Section') return header(child, { onClick: () => setMoreAuthors(value => !value), label: moreAuthors ? 'Ver menos autores' : 'Ver todos los autores' });
+        if (nodeName(child) === 'List Menu') return source(child, list => list === child ? listChildren(list, shown, (part, [author, count]) => {
+          if (nodeName(part) === 'User Profile') return { onClick: () => { setSearch(author); setCategory(''); }, label: `Ver recursos de ${author}`, props: { style: { textAlign: 'left' } } };
+          if (!leaf(part)) return undefined;
+          return /Followers$/.test(sourceText(part)) ? { text: `${count} ${count === 1 ? 'recurso' : 'recursos'}` } : { text: author };
+        }, stateText('Todavía no hay autores.'), { key: ([author]) => author }) : undefined, index);
+        if (nodeName(child) === 'Button') return source(child, part => part === child ? { onClick: () => setMoreAuthors(value => !value), label: moreAuthors ? 'Ver menos autores' : 'Ver más autores', props: { disabled: authors.length <= 6 } } : leaf(part) ? { text: moreAuthors ? 'Ver menos' : 'Ver más' } : undefined, index);
+        return source(child, () => undefined, index);
+      }) };
+    }
     return undefined;
   };
+
+  const actions = current ? [
+    { text: favorites.has(current.id) ? 'Quitar de guardados' : 'Guardar recurso', label: favorites.has(current.id) ? `Quitar ${current.title} de guardados` : `Guardar ${current.title}`, run: () => void favorite(current), pressed: favorites.has(current.id) },
+    ...(isAllowedPage('patient', current.action_page) ? [{ text: current.action_label, label: current.action_label, run: () => onNavigate(current.action_page as Parameters<typeof onNavigate>[0]) }] : []),
+    { text: 'Consultar', label: 'Consultar a tu nutricionista sobre este recurso', run: () => onNavigate('mensajes') },
+  ] : [];
+  const actionText = "px-[4px] font-['Poppins:Medium'] text-[12px] leading-[18px] text-[#272932] whitespace-nowrap";
   const detailResolver: SourceResolver = node => {
     const name = nodeName(node); const text = sourceText(node);
-    if (name === 'Back Button') return { onClick: () => open(null), label: 'Volver a Recursos', text: 'Volver a Recursos' };
+    if (name === 'Back Button') return { onClick: () => open(null), label: 'Volver a Recursos', children: inner(node, child => leaf(child) ? { text: 'Volver a Recursos' } : undefined) };
     if (name === 'Button Nav' && descendants(node).some(child => nodeName(child) === 'Icon/ArrowLeft')) return { onClick: () => open(null), label: 'Volver a Recursos' };
-    if (leaf(node) && ['Insight Details','Insights Details'].includes(text)) return { text: 'Detalle del recurso' };
-    if (idEnds(node, '281:9834') || idEnds(node, '507:17793')) {
-      if (!current) return { children: state() };
-      const parts = objects(node); const heading = parts.find(child => idEnds(child, '281:9835') || idEnds(child, '507:17800')); const metadata = parts.find(child => nodeName(child) === 'Header'); const byline = parts.find(child => nodeName(child) === 'Footer'); const image = parts.find(child => nodeName(child) === 'Image'); const paragraph = parts.find(child => nodeName(child) === 'Pharagraph' && descendants(child).some(n => nodeName(n) === 'Div Title'));
-      return { children: <>{metadata && source(metadata, child => nodeName(child) === 'Info Category' || idEnds(child, '507:17796') ? { text: current.category } : nodeName(child) === 'Info Date' || idEnds(child, '507:17799') ? { text: `${current.minutes} min de lectura` } : undefined)}{heading && source(heading, () => ({ text: current.title }))}{byline && source(byline, child => nodeName(child) === 'Avatar' ? { hidden: true } : leaf(child) && /Dr\./.test(sourceText(child)) ? { text: current.author_name } : leaf(child) && /2028/.test(sourceText(child)) ? { text: current.reviewed_at ? dateLabel(current.reviewed_at) : 'Guía de uso' } : undefined)}{image && card(image, current)}{current.sections.map((section, index) => paragraph ? source(paragraph, child => nodeName(child) === 'Div Title' ? { text: section.title } : leaf(child) ? { text: section.body } : undefined, index) : <article key={index}><h2>{section.title}</h2><p>{section.body}</p></article>)}<p className="text-[12px] text-[#8a8c90]">{current.published && current.license_note === 'Borrador sin publicar. Sin imagen remota.' ? 'Material del consultorio. Sin imagen remota.' : current.license_note}</p><div className="flex flex-wrap gap-[8px]"><button type="button" disabled={busy} aria-pressed={favorites.has(current.id)} onClick={() => void favorite(current)} className="rounded-[8px] bg-[#c2e66e] px-[16px] py-[10px] text-[#272932]">{favorites.has(current.id) ? 'Quitar de guardados' : 'Guardar recurso'}</button>{isAllowedPage('patient', current.action_page) && <button type="button" onClick={() => onNavigate(current.action_page as Parameters<typeof onNavigate>[0])} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">{current.action_label}</button>}</div></> };
+    if (leaf(node) && ['Insight Details', 'Insights Details'].includes(text)) return { text: 'Detalle del recurso' };
+    if (name === 'Content' && objects(node).some(child => nodeName(child) === 'Pharagraph')) {
+      if (!current) return { children: state('Ese recurso no está disponible.') };
+      const parts = objects(node);
+      const entry = parts.find(child => nodeName(child) === 'Pharagraph' && /border-l/.test(String(child.props.className)));
+      const plain = parts.find(child => nodeName(child) === 'Pharagraph' && child !== entry && !descendants(child).some(n => nodeName(n) === 'Div Title'));
+      const section = parts.find(child => nodeName(child) === 'Pharagraph' && objects(child).length === 2 && descendants(child).some(n => nodeName(n) === 'Div Title'));
+      const license = current.published && current.license_note === 'Borrador sin publicar. Sin imagen remota.' ? 'Material del consultorio. Sin imagen remota.' : current.license_note;
+      return { children: <>{parts.map((child, index) => {
+        const childName = nodeName(child);
+        if (childName === 'Header') return source(child, part => leaf(part) && descendants(child).filter(n => nodeName(n) === 'Info Category').flatMap(descendants).includes(part) ? { text: current.category } : leaf(part) ? { text: `${current.minutes} min de lectura` } : undefined, index);
+        if (leaf(child)) return source(child, () => ({ text: current.title }), index);
+        if (childName === 'Footer') return source(child, part => leaf(part) && descendants(child).filter(n => nodeName(n) === 'Info Author').flatMap(descendants).includes(part) ? { text: current.author_name } : leaf(part) ? { text: current.reviewed_at ? dateLabel(current.reviewed_at) : 'Guía de uso' } : undefined, index);
+        if (childName === 'Image') return source(child, () => safeUrl(current.cover_url) ? { children: <img src={safeUrl(current.cover_url)!} alt="" className="absolute inset-0 block size-full object-cover" /> } : undefined, index);
+        if (child === entry) return source(child, part => leaf(part) ? { text: current.summary } : undefined, index);
+        if (child === plain) return section ? current.sections.map((item, position) => source(section, part => nodeName(part) === 'Div Title' ? { children: inner(part, title => leaf(title) ? { text: item.title } : undefined) } : leaf(part) ? { text: item.body } : undefined, `section-${position}`)) : null;
+        if (child === section && plain && license) return source(plain, part => leaf(part) ? { text: license, props: { style: { fontSize: '12px', color: '#8a8c90' } } } : undefined, index);
+        // Citas y listas del artículo de ejemplo: Plan V publica el recurso por secciones.
+        return null;
+      })}</> };
     }
-    if (name === 'Section Tags') return { children: text.startsWith('Share') ? <><h3>Compartir</h3><button type="button" onClick={() => current && void share(current)} disabled={!current} className="rounded-[8px] border border-[#e1e1e2] px-[12px] py-[8px]">Copiar o compartir enlace</button></> : <><h3>Temas</h3><div className="flex flex-wrap gap-[8px]">{current?.tags.map(tag => <button type="button" key={tag} onClick={() => { setSearch(tag); open(null); }} className="rounded-[8px] border border-[#e1e1e2] px-[8px] py-[4px]">#{tag}</button>)}</div></> };
-    if (name === 'List Rcommendation') { const prototype = objects(node)[0]; const related = catalog.filter(item => current?.related.includes(item.slug)); return { children: prototype ? related.map(item => card(prototype, item)) : null }; }
-    if (name === 'Section Related VIdeo') return { hidden: true };
+    if (name === 'Section Tags' && text.startsWith('Share')) {
+      return { children: inner(node, child => {
+        if (is(child, 'Share')) return { text: 'Guardar y compartir' };
+        if (nodeName(child) !== 'Categories') return undefined;
+        const icons = objects(child);
+        return { children: icons.map((icon, index) => {
+          if (index === 0) return source(icon, part => part === icon ? { onClick: () => current && void share(current), label: 'Copiar o compartir el enlace', props: { disabled: !current } } : undefined, 'share');
+          const action = actions[index - 1];
+          if (!action) return null;
+          return source(icon, part => part === icon ? { onClick: action.run, label: action.label, props: { disabled: busy, 'aria-pressed': action.pressed } } : nodeName(part).startsWith('Icon/') ? { tag: 'span', props: { className: actionText }, children: action.text } : undefined, `action-${index}`);
+        }) };
+      }) };
+    }
+    if (name === 'Categories' && objects(node).some(child => nodeName(child) === 'Chips Tag')) return listChildren(node, current?.tags ?? [], (part, tag) => {
+      if (nodeName(part) === 'Chips Tag') return { onClick: () => { setSearch(tag); open(null); }, label: `Buscar recursos sobre ${tag}` };
+      return leaf(part) ? { text: sourceText(part) === '#' ? '#' : tag } : undefined;
+    }, 'Sin temas.', { key: tag => tag });
+    if (name === 'Section Related Articles' || name === 'Section Related VIdeo') {
+      // El bloque de videos del archivo muestra otros recursos: Plan V no publica videos.
+      const video = name === 'Section Related VIdeo';
+      const related = catalog.filter(item => item.id !== current?.id && (video ? !current?.related.includes(item.slug) : current?.related.includes(item.slug))).slice(0, video ? 2 : undefined);
+      return { children: inner(node, child => {
+        if (nodeName(child) !== 'List Rcommendation') return undefined;
+        const prototypes = objects(child);
+        return { children: related.length ? related.map((item, index) => card(prototypes[index % prototypes.length], item)) : <EmptyState text={video ? 'Sin otros recursos por ahora.' : 'Sin recursos relacionados.'} /> };
+      }) };
+    }
     return undefined;
   };
   return <FramePair nodes={selected ? ['279:9301', '507:17412'] : ['263:6588', '504:15334']} resolve={selected ? detailResolver : listResolver} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut} onSearch={setSearch} query={search}>
-    {!selected && <div className="mx-[24px] mb-[24px] flex gap-[8px]"><button type="button" aria-pressed={savedOnly} onClick={() => setSavedOnly(value => !value)} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">{savedOnly ? 'Ver todos' : 'Mis guardados'}</button></div>}{selected && remote.data && !current && <Stateful error="Ese recurso no está disponible para tu cuenta." />}{error && <Stateful error={error} />}{status && <p role="status" className="mx-[24px] p-[16px] text-[#272932]">{status}</p>}
+    {selected && remote.data && !current && <Stateful error="Ese recurso no está disponible para tu cuenta." />}{error && <Stateful error={error} />}{status && <p role="status" className="mx-[24px] p-[16px] text-[#272932]">{status}</p>}
   </FramePair>;
 }
