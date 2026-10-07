@@ -3,6 +3,7 @@ import { resetFoodsMemory, saveFood } from '../foods/repository.js';
 import { listProfessionalRecipes, listProfessionalRecipeFavorites, setProfessionalRecipeFavorite, publishRecipe, resetRecipeMemory, saveRecipeDraft } from './repository.js';
 import { recipeDraftSchema } from '../../src/types/recipes.js';
 import { NUTRIENTS, type FoodNutrients } from '../../src/types/foods.js';
+import { unavailableCard } from '../../src/types/recipe-plate.js';
 
 const owner = 'nutri-composition';
 const foodInput = { id: '11111111-1111-4111-8111-111111111111', expected_revision: 0, name: 'Avena', brand: '', category: '', kind: 'food' as const, source: 'Etiqueta ficticia', reference: '',
@@ -11,6 +12,17 @@ const draft = () => recipeDraftSchema.parse({ id: crypto.randomUUID(), expected_
   steps: ['Mezclar y servir.'], items: [{ name: 'Avena', quantity: 2, unit: 'g', catalog_ref: { id: foodInput.id, revision: 1, measure: 'Cucharada' } }] });
 beforeEach(() => { resetFoodsMemory(); resetRecipeMemory(); });
 describe('guardado de composición propia', () => {
+  it('conserva categorías de la copia publicada al reclasificar el borrador', async () => {
+    await saveFood(owner, foodInput, false);
+    const input = draft();
+    const card = { ...unavailableCard(input.title, 'Cena'), culinary_categories: ['Guisos'] };
+    const initial = await saveRecipeDraft(owner, input, false, card);
+    const published = await publishRecipe(owner, input.id, 1, false, initial.current.revision);
+    const changed = await saveRecipeDraft(owner, { ...input, expected_revision: published.current.revision }, false, { ...card, culinary_categories: ['Platos principales'] });
+    expect(changed.current.card).toMatchObject({ category: 'Cena', culinary_categories: ['Platos principales'] });
+    expect(changed.published?.card?.culinary_categories).toEqual(['Guisos']);
+    expect(changed.current.catalog_recipe?.per_portion.kcal).toBe(38);
+  });
   it('los favoritos son privados, idempotentes y no cambian la revisión de la receta', async () => {
     await saveFood(owner, foodInput, false);
     const input = draft(); const saved = await saveRecipeDraft(owner, input, false);

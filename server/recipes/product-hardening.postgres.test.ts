@@ -89,6 +89,21 @@ afterAll(async () => {
 
 
 describe('composición del catálogo persistente', () => {
+  it('valida categorías culinarias y congela la clasificación publicada', async () => {
+    const rid = randomUUID();
+    const card = { category: 'Cena', culinary_categories: ['Guisos', 'Pollo'], prep_minutes: null, macro_status: 'unavailable', macros: null, cover_status: 'none', cover_url: null, cover_alt: draft.title };
+    const input = { ...draft, id: rid, expected_revision: null, card };
+    let saved = await rpc(nutriA, 'save_recipe_draft', [input]) as any;
+    expect(saved.current.card).toMatchObject({ category: 'Cena', culinary_categories: ['Guisos', 'Pollo'] });
+    for (const invalid of [['Guisos', 'GUÍSOS'], [' '], ['a','b','c','d','e','f','g'], [4], null]) {
+      await expect(rpc(nutriA, 'save_recipe_draft', [{ ...input, expected_revision: saved.current.revision, card: { ...card, culinary_categories: invalid } }])).rejects.toMatchObject({ code: '22023' });
+    }
+    await expect(rpc(nutriB, 'save_recipe_draft', [{ ...input, expected_revision: saved.current.revision }])).rejects.toMatchObject({ code: '42501' });
+    saved = await rpc(nutriA, 'publish_recipe', [rid, 1, saved.current.revision]) as any;
+    saved = await rpc(nutriA, 'save_recipe_draft', [{ ...input, expected_revision: saved.current.revision, card: { ...card, culinary_categories: [] } }]) as any;
+    expect(saved.current.card.culinary_categories).toEqual([]);
+    expect(saved.published.card.culinary_categories).toEqual(['Guisos', 'Pollo']);
+  });
   it('aísla favoritos profesionales, evita duplicados y bloquea escrituras directas', async () => {
     const rid = randomUUID();
     const saved = await rpc(nutriA, 'save_recipe_draft', [{ ...draft, id: rid, expected_revision: null }]) as any;

@@ -2,6 +2,7 @@ import { useState, type ReactNode, type RefObject } from 'react';
 import type { ProfessionalRecipe, RecipeVersionView } from '../../types/recipes';
 import { recipeNutritionLabel } from '../../types/ai-nutrition';
 import { RecipeDishWell, RecipeMacroGrid } from './RecipePlate';
+import { recipeCulinaryCategories } from '../../types/recipe-categories';
 
 export function RecipeProfessionalDetail({ recipe, onBack, headingRef, renderComposition, favorite, actions }: {
   recipe: ProfessionalRecipe; onBack: () => void; headingRef: RefObject<HTMLHeadingElement | null>;
@@ -15,6 +16,7 @@ export function RecipeProfessionalDetail({ recipe, onBack, headingRef, renderCom
     <header><div><p>Consultorio · Versión {version.version} · {version.published_at ? 'Publicada' : 'Borrador privado'}</p><h2 ref={headingRef} tabIndex={-1}>{version.title ?? recipe.title}</h2></div>{favorite}</header>
     {recipe.published && recipe.published.id !== recipe.current.id && <label>Versión que estás consultando<select value={showPublished ? 'published' : 'current'} onChange={event => setShowPublished(event.target.value === 'published')}><option value="current">Borrador actual · versión {recipe.current.version}</option><option value="published">Publicada · versión {recipe.published.version}</option></select></label>}
     {estimate && <p className="recipe-ai-warnings">Propuesta de IA · los nutrientes requieren revisión. La composición del catálogo conserva la procedencia de la receta.</p>}
+    <section className="recipe-detail-categories" aria-label="Clasificación de esta versión"><p>Momento: {version.card?.category ?? 'Sin dato'}</p><p>Categorías culinarias: {recipeCulinaryCategories(version.card).join(' · ') || 'Sin clasificar'}</p></section>
     <div className="recipe-detail-meta"><div><span>Preparación</span><strong>{version.card?.prep_minutes == null ? 'Sin dato' : `${version.card.prep_minutes} min`}</strong></div><div><span>Cocción</span><strong>{version.cooking_minutes == null ? 'Sin dato' : `${version.cooking_minutes} min`}</strong></div><div><span>Rinde</span><strong>{version.yield_portions} porciones</strong></div><div><span>Peso final</span><strong>{version.final_weight_g == null ? 'Sin dato' : `${version.final_weight_g} g`}</strong></div></div>
     <div className="recipe-detail-columns"><div>
       <RecipeDishWell title={version.title ?? recipe.title} status={version.card?.cover_status ?? 'none'} url={version.card?.cover_url} alt={version.card?.cover_alt} />

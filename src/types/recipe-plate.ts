@@ -1,6 +1,7 @@
 import type { RecipeNutrition } from './ai-nutrition';
 import { z } from 'zod';
 import { PLAN_SLOTS } from './plans';
+import { culinaryCategoriesSchema } from './recipe-categories';
 import { recipeDraftSchema, recipeItemInputSchema, type RecipeCard, type RecipeMacros } from './recipes';
 
 const macroNumber = z.number().nonnegative().max(20000);
@@ -10,6 +11,7 @@ export const recipeWizardSchema = recipeDraftSchema.extend({
     line_kcal: macroNumber.optional(),
   }).strict()).min(1).max(20),
   category: z.enum(PLAN_SLOTS).default('Almuerzo'),
+  culinary_categories: culinaryCategoriesSchema.optional(),
   prep_minutes: z.number().int().positive().max(240).nullable().optional(),
   kcal: macroNumber.nullable().optional(),
   protein_g: macroNumber.max(2000).nullable().optional(),
@@ -64,7 +66,7 @@ export function unavailableCard(title: string, category = 'Almuerzo'): RecipeCar
 
 export function buildRecipeCard(input: RecipeWizardInput): RecipeCard {
   // The repository / database derives linked composition from authorized foods.
-  if (input.items.some(item => item.catalog_ref)) return { ...unavailableCard(input.title, input.category), prep_minutes: input.prep_minutes ?? null };
+  if (input.items.some(item => item.catalog_ref)) return { ...unavailableCard(input.title, input.category), ...(input.culinary_categories ? { culinary_categories: input.culinary_categories } : {}), prep_minutes: input.prep_minutes ?? null };
   const portions = input.yield_portions;
   const lineKcal = input.items.map((item) => item.line_kcal);
   const declaredLines = lineKcal.filter((value): value is number => value != null);
@@ -82,6 +84,7 @@ export function buildRecipeCard(input: RecipeWizardInput): RecipeCard {
     : null);
   return {
     category: input.category,
+    ...(input.culinary_categories ? { culinary_categories: input.culinary_categories } : {}),
     prep_minutes: input.prep_minutes ?? null,
     macro_status: macros ? 'declared' : 'unavailable',
     macros,

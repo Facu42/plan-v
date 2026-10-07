@@ -49,6 +49,7 @@ export type RecipeMacros = {
 };
 
 export type RecipeCard = {
+  culinary_categories?: string[];
   category: string;
   prep_minutes: number | null;
   macro_status: 'declared' | 'unavailable' | 'failed';

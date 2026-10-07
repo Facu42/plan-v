@@ -98,3 +98,13 @@ body:has(dialog.recipe-editor-dialog[open]){overflow:hidden}
 .nv-app .pw-library-recipes .recipe-catalog-card .recipe-macros div{min-height:50px;padding:8px;justify-content:center}
 .nv-app .pw-library-recipes .recipe-catalog-card h3{font-size:20px;line-height:1.2}
 .pw-library-recipes .recipe-card-origin{padding:8px 14px}
+.recipe-catalog-filters{grid-template-columns:minmax(180px,2fr) 1fr 1fr 1fr auto auto}
+.recipe-category-editor{margin:14px 0;padding:14px;border:1px solid var(--nv-border);border-radius:12px}
+.recipe-category-entry{display:flex;gap:12px;align-items:end}
+.recipe-category-entry label{flex:1;min-width:0}
+.recipe-category-tags{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0}
+.recipe-category-tags li{display:flex;align-items:center;gap:8px;padding:4px 10px;background:var(--nv-bg);border-radius:8px}
+.recipe-category-tags button{padding:5px;border:0;background:transparent;color:var(--nv-ink);font:inherit;cursor:pointer}
+.recipe-category-tags button:focus-visible{outline:2px solid var(--nv-strong);outline-offset:2px}
+.recipe-detail-categories{padding:8px 0}
+.recipe-culinary-label{font-size:12px;overflow-wrap:anywhere}

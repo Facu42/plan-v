@@ -44,6 +44,7 @@ export function RecipePlateCard({
   actions,
   ingredients,
   nutritionBasis,
+  culinaryCategories,
 }: {
   title: string;
   portions: number;
@@ -51,6 +52,7 @@ export function RecipePlateCard({
   actions?: ReactNode;
   ingredients?: Array<{ id: string; name: string; quantity: number; unit: string }>;
   nutritionBasis?: string;
+  culinaryCategories?: readonly string[];
 }) {
   const meta = card.prep_minutes ? `${portions} porciones · ${card.prep_minutes} min` : `${portions} porciones`;
   return <article className="recipe-plate">
@@ -58,6 +60,7 @@ export function RecipePlateCard({
     <div className="recipe-plate-body">
       <span className="recipe-plate-badge">{card.category}</span>
       <h3>{title}</h3>
+      {culinaryCategories?.length ? <p className="recipe-culinary-label" aria-label="Categorías culinarias">{culinaryCategories.join(' · ')}</p> : null}
       <p className="recipe-plate-meta">{meta}</p>
       {nutritionBasis && <p className="recipe-nutrition-basis">{nutritionBasis}</p>}
       {card.macro_status === 'declared' && card.macros

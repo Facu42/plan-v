@@ -25,11 +25,13 @@ import type { Food } from '../../types/foods';
 import { RecipeCatalogIngredients, RecipeComposition } from './RecipeCatalogIngredients';
 import { filterProfessionalRecipes, type RecipeCatalogQuery } from '../../types/recipe-catalog-query';
 import { RecipeProfessionalDetail } from './RecipeProfessionalDetail';
+import { RecipeCategoryEditor } from './RecipeCategoryEditor';
+import { recipeCulinaryCategories } from '../../types/recipe-categories';
 
 function emptyDraft(id = crypto.randomUUID()): RecipeWizardInput {
   return {
     id, expected_revision: null, title: '', yield_portions: 1, steps: [''], nutrient_source: '', category: 'Almuerzo', prep_minutes: null,
-    items: [{ name: '', quantity: 1, unit: 'g' }],
+    culinary_categories: [], items: [{ name: '', quantity: 1, unit: 'g' }],
   };
 }
 
@@ -44,6 +46,7 @@ export function recipeEditorFromStored(recipe: ProfessionalRecipe): RecipeWizard
     ...(recipe.current.nutrition ? { nutrition: recipe.current.nutrition } : {}),
     category: (PLAN_SLOTS as readonly string[]).includes(recipe.current.card?.category ?? '') ? recipe.current.card!.category as PlanSlot : 'Almuerzo',
     prep_minutes: recipe.current.card?.prep_minutes ?? null,
+    culinary_categories: recipeCulinaryCategories(recipe.current.card),
     final_weight_g: recipe.current.final_weight_g ?? null,
     cooking_minutes: recipe.current.cooking_minutes ?? null,
     kcal: recipe.current.card?.macros?.kcal ?? null,
@@ -308,6 +311,7 @@ export function RecipeEditorForm({ catalog }: { catalog: RecipeCatalogState }) {
       <label>Cocción (min)<input type="number" min="0" max="1440" value={editing.cooking_minutes ?? ''} onChange={event => setEditing({ ...editing, cooking_minutes: event.target.value === '' ? null : Number(event.target.value) })} /></label>
     </div>
     <label>Momento<select value={editing.category} onChange={event => setEditing({ ...editing, category: event.target.value as PlanSlot })}>{PLAN_SLOTS.map(slot => <option key={slot}>{slot}</option>)}</select></label>
+    <RecipeCategoryEditor key={editing.id} values={editing.culinary_categories ?? []} onChange={values => setEditing({ ...editing, culinary_categories: values })} />
     <RecipeCatalogIngredients draft={editing} onChange={setEditing} foods={catalog.foods ?? []} prior={prior} loading={catalog.foodsLoading} error={catalog.foodsError} retry={catalog.reloadFoods} />
     {linked && <RecipeComposition draft={editing} foods={catalog.foods ?? []} prior={prior} />}
     {!linked && <>
@@ -356,7 +360,7 @@ export function RecipeAssignDialog({ catalog }: { catalog: RecipeCatalogState })
 }
 
 export function RecipeCatalog({ patientId, patients }: { patientId: string; patients?: readonly RecipePatientOption[] }) {
-  const [filters, setFilters] = useState<RecipeCatalogQuery>({ query: '', category: '', state: 'all', favoritesOnly: false });
+  const [filters, setFilters] = useState<RecipeCatalogQuery>({ query: '', category: '', culinaryCategory: '', state: 'all', favoritesOnly: false });
   const [detailId, setDetailId] = useState<string | null>(null);
   const returnFocus = useRef<string | null>(null);
   const detailHeading = useRef<HTMLHeadingElement>(null);
@@ -410,9 +414,10 @@ export function RecipeCatalog({ patientId, patients }: { patientId: string; pati
       <div className="recipe-catalog-filters">
         <label>Buscar recetas<input type="search" value={filters.query} placeholder="Nombre o ingrediente" onChange={event => setFilters({ ...filters, query: event.target.value })} /></label>
         <label>Momento<select value={filters.category} onChange={event => setFilters({ ...filters, category: event.target.value })}><option value="">Todos los momentos</option>{PLAN_SLOTS.map(slot => <option key={slot}>{slot}</option>)}</select></label>
+        <label>Categoría culinaria<select value={filters.culinaryCategory ?? ''} onChange={event => setFilters({ ...filters, culinaryCategory: event.target.value })}><option value="">Todas las categorías</option>{Array.from(new Set((recipes ?? []).flatMap(recipe => recipeCulinaryCategories(recipe.current.card)))).sort((a, b) => a.localeCompare(b, 'es')).map(value => <option key={value}>{value}</option>)}</select></label>
         <label>Estado<select value={filters.state} onChange={event => setFilters({ ...filters, state: event.target.value as RecipeCatalogQuery['state'] })}><option value="all">Todas</option><option value="draft">Con borrador</option><option value="published">Con versión publicada</option></select></label>
         <label className="recipe-filter-check"><input type="checkbox" checked={filters.favoritesOnly} disabled={catalog.favoriteIds === null} onChange={event => setFilters({ ...filters, favoritesOnly: event.target.checked })} />Solo favoritas</label>
-        <button type="button" className="recipe-cancel" onClick={() => setFilters({ query: '', category: '', state: 'all', favoritesOnly: false })}>Limpiar filtros</button>
+        <button type="button" className="recipe-cancel" onClick={() => setFilters({ query: '', category: '', culinaryCategory: '', state: 'all', favoritesOnly: false })}>Limpiar filtros</button>
       </div>
       {recipes && <p role="status">{source === 'memory' && 'Demo · '}{favoritesReady ? `${visible.length} de ${recipes.length} recetas` : 'Cargando favoritos…'}</p>}
       {recipes && recipes.length > 0 && favoritesReady && visible.length === 0 && <NvState title="No hay recetas con estos filtros" description="Probá otro nombre, ingrediente o momento, o limpiá los filtros." />}
@@ -420,7 +425,7 @@ export function RecipeCatalog({ patientId, patients }: { patientId: string; pati
       const storedCard = recipe.current.card ?? unavailableCard(recipe.title);
       const per100 = recipe.current.catalog_recipe?.per_100g;
       const card = per100 ? { ...storedCard, macros: { kcal: per100.kcal, protein_g: per100.protein, carbs_g: per100.carbs, fat_g: per100.fat } } : storedCard;
-      return <div key={recipe.id} className="recipe-catalog-card"><div className="recipe-card-origin"><span>Consultorio · {recipe.current.published_at ? 'Publicada' : 'Borrador'}</span>{favoriteButton(recipe)}</div><RecipePlateCard title={recipe.title} portions={recipe.current.yield_portions} card={card} nutritionBasis={per100 ? 'Valores por 100 g preparados' : 'Valores por porción'} actions={<>
+      return <div key={recipe.id} className="recipe-catalog-card"><div className="recipe-card-origin"><span>Consultorio · {recipe.current.published_at ? 'Publicada' : 'Borrador'}</span>{favoriteButton(recipe)}</div><RecipePlateCard title={recipe.title} portions={recipe.current.yield_portions} card={card} culinaryCategories={recipeCulinaryCategories(recipe.current.card)} nutritionBasis={per100 ? 'Valores por 100 g preparados' : 'Valores por porción'} actions={<>
         <NvButton id={`recipe-open-${recipe.id}`} aria-label={`Ver receta ${recipe.title}`} disabled={busy} onClick={() => { returnFocus.current = `recipe-open-${recipe.id}`; setDetailId(recipe.id); }}>Ver receta</NvButton>
         <NvButton className="nv-ghost" aria-label={`Editar ${recipe.title}`} disabled={busy} onClick={() => catalog.startEdit(recipe)}>Editar</NvButton>
       </>} /></div>;
