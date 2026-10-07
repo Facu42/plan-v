@@ -5,6 +5,7 @@ import { bodyDataApi, nutritionTargetApi } from '../../../api/nutrition-target';
 import { recipesApi } from '../../../api/recipes';
 import { plansApi } from '../../../api/plans';
 import { exerciseApi } from '../../../api/exercise';
+import { EXERCISE_CATEGORY_LABELS } from '../../../types/exercise';
 import { careApi } from '../../../api/care';
 import { patientMenuRecipes, planRecipe } from '../plan-recipe';
 import { latestWeight } from '../../../lib/measurement-display';
@@ -48,7 +49,9 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
   const today=dateId(now);
   const meals=(current?.plan?.items.filter(item=>item.for_date===today)??[]).slice().sort((a,b)=>PLAN_SLOT_KEYS.indexOf(planSlotKey(a.slot)!)-PLAN_SLOT_KEYS.indexOf(planSlotKey(b.slot)!));
   const recipes=patientMenuRecipes(current?.plan??null,current?.recipes??[]);
-  const routines=current?.exercise?.assignments.filter(a=>a.status==='active').flatMap(a=>a.items)??[];
+  const activeAssignments=current?.exercise?.assignments.filter(a=>a.status==='active')??[];
+  const routines=activeAssignments.flatMap(a=>a.items);
+  const workoutItems=activeAssignments.flatMap(assignment=>assignment.items.map(item=>({ item, assignment })));
   const resolve:SourceResolver=node=>{
     const name=nodeName(node),text=sourceText(node);
     if(name==='Card Statistic - Dashboard') {
@@ -65,7 +68,28 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
       const value=sourceText(child);const substitutions:Record<string,string>={'1240':target&&kcal!==null?formatNumber(target.kcal-kcal):'—','1750':formatNumber(kcal),'510':'—','120':known?formatNumber(patient.macros.carbs_g):'—','70':known?formatNumber(patient.macros.protein_g):'—','20':known?formatNumber(patient.macros.fat_g):'—','/325gr':target?`/${formatNumber(target.carbs_g)} g`:'','/75gr':target?`/${formatNumber(target.protein_g)} g`:'','/44gr':target?`/${formatNumber(target.fat_g)} g`:'','37%':target&&known?`${Math.round(patient.macros.carbs_g/target.carbs_g*100)}%`:'—','93%':target&&known?`${Math.round(patient.macros.protein_g/target.protein_g*100)}%`:'—','45%':target&&known?`${Math.round(patient.macros.fat_g/target.fat_g*100)}%`:'—'};
       return value in substitutions?{text:substitutions[value]}:undefined;
     })};
-    if(name==='Widget Workout Progress')return {children:fields(node,{},child=>nodeName(child)==='Body'?{children:routines.length?routines.map(item=><p key={item.id} className="text-[14px] leading-[1.5]">{item.name} · {item.sets} series · {item.reps} repeticiones</p>):<p>Sin rutina asignada.</p>}:/Button/.test(nodeName(child))?{onClick:()=>onNavigate('ejercicio'),label:'Ver ejercicio'}:undefined)};
+    if(name==='Widget Workout Progress')return {children:fields(node,{},child=>{
+      if(nodeName(child)==='Body') {
+        const prototypes=child.children.filter((value): value is SourceNode=>typeof value==='object');
+        return {children:prototypes.map((prototype,index)=>{
+          const row=workoutItems[index];
+          const completed=row?.assignment.feedback?.sets_completed ?? null;
+          const expected=row?.item.sets ?? null;
+          const progress=expected && completed!=null ? Math.min(100,Math.round(completed/expected*100)) : null;
+          return fields(prototype,{
+            '71:1391':row?.item.name ?? 'Sin rutina asignada',
+            '71:1388':progress==null?'—':`${progress}%`,
+            '71:1387':completed==null?'':expected?`(${completed}/${expected})`:`(${completed})`,
+            '72:1403':row?.item.category ? EXERCISE_CATEGORY_LABELS[row.item.category] : 'Ejercicio',
+          },inner=>{
+            if(nodeName(inner)==='Progress Bar')return {props:{style:{width:`${progress ?? 0}%`}}};
+            if(nodeName(inner)==='Empty Bar')return {props:{style:{opacity:progress==null?.7:.35}}};
+            return undefined;
+          },`${patient.id}:workout:${index}`);
+        })};
+      }
+      return /Button/.test(nodeName(child))?{onClick:()=>onNavigate('ejercicio'),label:'Ver ejercicio'}:undefined;
+    })};
     if(name==='Widget Recommended Menu')return {children:fields(node,{},child=>nodeName(child)==='List Exercise'?{children:recipes.length?recipes.slice(0,child.children.filter(n=>typeof n==='object'&&nodeName(n)==='Card Recommended Menu').length).map(recipe=>{
       const prototype=descendants(child).find(n=>/Item List/.test(nodeName(n)))??child.children.find(n=>typeof n==='object');
       if(typeof prototype!=='object')return null;

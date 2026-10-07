@@ -9,3 +9,9 @@ Se volvió a consultar el archivo `OTolnKfsxUFjaZOhhdb04i` mediante el MCP de Fi
 La implementación conserva esos valores en `nutrigo-fidelity.css`, `patient-figma-front.css` y `FigmaPatientFront.tsx`. La revisión de esta etapa agrega el comportamiento que el archivo no puede expresar por sí solo: el cajón lateral móvil entra desde el borde sin desplazar el lienzo, el velo bloquea el fondo durante la apertura y el contenido mantiene `min-width: 0` para no provocar scroll horizontal.
 
 También se verificó que el botón de avisos conserve el contexto del paciente. Si el paciente no puede seleccionarse (por ejemplo, por cambios sin guardar o porque dejó de estar autorizado), la acción se detiene en lugar de llevar a otra pantalla.
+
+## Corrección de hidratación y actividad
+
+La consulta posterior confirmó que `74:2056` contiene el gráfico de hidratación de Figma (borde Saffron, barra y rótulo inferior), mientras que `71:1235` contiene tres tarjetas de actividad con fondos Green, Saffron y Orange e íconos originales de correr, fuerza y tai chi. La adaptación de actividad estaba reemplazando ese `Body` entero por párrafos de texto, por eso desaparecían los dibujos. Ahora se conserva cada subtree del frame y sólo se reemplazan nombre, porcentaje, series y categoría con datos reales; si faltan datos se muestran las mismas tarjetas con “Sin rutina asignada”.
+
+La hidratación mantiene el gráfico y sus proporciones visuales del archivo, pero reemplaza los números de ejemplo por el registro real del paciente. No se inventa una meta: el estado sigue identificando que es un registro de agua sin meta prescrita.
