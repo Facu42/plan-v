@@ -28,9 +28,15 @@ export function fields(node: SourceNode, values: Record<string, ReactNode>, extr
  * (1.º, 2.º, 3.º, 1.º…) para conservar sus colores; nunca reemplaza la lista por texto suelto.
  */
 export function cloneList<T>(list: SourceNode, items: readonly T[], bind: (node: SourceNode, item: T, index: number) => SourceBinding | undefined, options: { key?: (item: T, index: number) => string | number; only?: (node: SourceNode) => boolean } = {}): ReactNode[] {
-  const prototypes = objects(list).filter(options.only ?? (() => true));
+  // Las líneas divisorias del archivo no son ítems: se repiten entre ítems, como en el diseño.
+  const divider = objects(list).find(node => nodeName(node) === 'Divider');
+  const prototypes = objects(list).filter(options.only ?? (node => nodeName(node) !== 'Divider'));
   if (!prototypes.length) return [];
-  return items.map((item, index) => source(prototypes[index % prototypes.length], node => bind(node, item, index), options.key?.(item, index) ?? index));
+  return items.flatMap((item, index) => {
+    const key = options.key?.(item, index) ?? index;
+    const row = source(prototypes[index % prototypes.length], node => bind(node, item, index), key);
+    return divider && index > 0 ? [source(divider, () => undefined, `divider-${key}`), row] : [row];
+  });
 }
 /** Hijos de una lista: los ítems clonados y, sin datos, un estado vacío con la tipografía del archivo. */
 export function listChildren<T>(list: SourceNode, items: readonly T[], bind: (node: SourceNode, item: T, index: number) => SourceBinding | undefined, empty: string, options: Parameters<typeof cloneList<T>>[3] = {}): SourceBinding {

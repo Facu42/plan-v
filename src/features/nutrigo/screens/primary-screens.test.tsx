@@ -35,7 +35,9 @@ describe.each([false,true])('pantallas principales MCP (celular %s)',mobile=>{
     const html=renderToStaticMarkup(<NutrigoHome patient={{...patient,hydration:5,sleepMinutes:450,nutritionLogCount:0}} onNavigate={navigate} onRecord={navigate} onHydration={navigate} onRest={navigate} onLogMeal={navigate}/>);
     expect(html).toContain('72');expect(html).toContain('7,5');expect(html).not.toContain('8050');expect(html).not.toContain('1240');expect(html).not.toContain('1.3/2');
     expect(html.match(/data-name="Card Statistic - Dashboard"/g)?.length).toBe(4);
-    expect(html).toContain('background:transparent');
+    // Los gráficos del archivo se dibujan con el valor real; ningún bloque queda oculto.
+    expect(html).toContain('conic-gradient');expect(html).not.toContain('visibility:hidden');
+    expect(html).toContain('1,3/2');
   });
   it('menú conserva datos y estimación de la receta asignada',()=>{
     context.mobile=mobile;context.data={recipes:[recipe],favorites:[]};
