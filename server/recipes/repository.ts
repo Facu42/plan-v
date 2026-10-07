@@ -215,6 +215,7 @@ export function getRecipeSnapshot(recipeVersionId: string | null) {
     steps: version.steps,
     nutrient_source: version.nutrient_source,
     card: getRecipeCard(version.id, version.title),
+    ...(version.catalog_recipe ? { catalog_recipe: version.catalog_recipe } : {}),
     ...(nutrition ? { nutrition } : {}),
     ingredients: versionItems(version.id),
   };

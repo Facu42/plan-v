@@ -33,3 +33,26 @@
 @media(max-width:800px){.meal-plan-item-row,.meal-plan-form-row{grid-template-columns:1fr}}
 @media(max-width:390px){.meal-plan-versions,.published-dated-plan{padding:16px 12px}.meal-plan-actions{flex-direction:column;align-items:stretch}.published-plan-item{padding:10px}}
 @media(max-width:320px){.meal-plan-versions,.published-dated-plan{padding:12px 10px}.meal-plan-versions h2,.published-dated-plan h2{font-size:18px}}
+.meal-plan-recipe-choice{display:flex;flex-direction:column;gap:6px;min-width:0}
+.meal-plan-recipe-choice button,.plan-recipe-picker-results button{font:inherit;text-align:left;color:var(--nv-ink);background:var(--nv-bg);border:1px solid var(--nv-border);border-radius:10px;padding:10px;cursor:pointer}
+.meal-plan-recipe-inline{grid-column:1/-1;padding:8px 12px;border:1px solid var(--nv-border);border-radius:10px}
+.meal-plan-recipe-inline summary{cursor:pointer;font-size:13px}
+.plan-recipe-picker{width:min(1040px,calc(100vw - 64px));max-width:none;max-height:calc(100vh - 48px)}
+.plan-recipe-picker label{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.plan-recipe-picker input,.plan-recipe-picker select{padding:10px;border:1px solid var(--nv-border);border-radius:10px;font:inherit;color:var(--nv-ink);background:var(--nv-card);min-width:0}
+.plan-recipe-picker-filters{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin:12px 0}
+.plan-recipe-picker-columns{display:grid;grid-template-columns:minmax(260px,1fr) minmax(360px,1.5fr);gap:20px}
+.plan-recipe-picker-results{display:flex;flex-direction:column;gap:10px;max-height:50vh;overflow:auto}
+.plan-recipe-picker-results button{display:flex;flex-direction:column;gap:6px}
+.plan-recipe-picker-results button[aria-pressed=true]{border-color:var(--nv-strong);background:var(--nv-green)}
+.plan-recipe-picker-results small{color:var(--nv-muted)}
+.plan-recipe-picker .plan-recipe-preview{max-height:48vh;overflow:auto;padding:0 8px}
+.plan-recipe-preview h3{font-size:18px;margin:14px 0 8px}
+.plan-recipe-preview p,.plan-recipe-preview li{font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.plan-recipe-preview details{margin:12px 0}
+.plan-recipe-nutrients{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.plan-recipe-nutrients div{padding:8px;background:var(--nv-bg);border-radius:8px}
+.plan-recipe-nutrients dt{font-size:11px;color:var(--nv-muted)}
+.plan-recipe-nutrients dd{margin:4px 0 0;font-size:14px;font-weight:600}
+.plan-recipe-picker-actions{display:flex;gap:10px;position:sticky;bottom:0;background:var(--nv-card);padding:14px 0 0;margin-top:12px}
+.plan-recipe-picker button:focus-visible,.meal-plan-recipe-choice button:focus-visible{outline:2px solid var(--nv-strong);outline-offset:3px}

@@ -35,6 +35,23 @@ describe('PV-19 planes fechados versionados', () => {
     await declareKnownHealth(patient);
   });
 
+  it('guarda un plan con la receta publicada antigua aunque exista una publicación nueva', async () => {
+    const rid = randomUUID();
+    const recipeInput = { id: rid, title: 'Arroz publicado v1', yield_portions: 2, steps: ['Cocinar y servir.'], nutrient_source: 'Etiqueta ficticia', items: [{ name: 'Arroz', quantity: 100, unit: 'g' }], kcal: 100, protein_g: 2, carbs_g: 20, fat_g: 1 };
+    expect((await post('/api/recipes', recipeInput)).status).toBe(200);
+    expect((await post(`/api/recipes/${rid}/publish`, { expected_version: 1 })).status).toBe(200);
+    const input = planDraft({ items: [{ for_date: '2026-09-21', slot: 'Almuerzo', recipe_id: rid, recipe_version: 1, portions: 0.5 }] });
+    expect((await post(`/api/patients/${patient}/plans`, input)).status).toBe(200);
+    expect((await post(`/api/plans/${input.id}/publish`, { expected_version: 1 })).status).toBe(200);
+    expect((await post('/api/recipes', { ...recipeInput, title: 'Arroz publicado v2', kcal: 200 })).status).toBe(200);
+    expect((await post(`/api/recipes/${rid}/publish`, { expected_version: 2 })).status).toBe(200);
+    const saved = await post(`/api/patients/${patient}/plans`, input);
+    expect(saved.status).toBe(200);
+    const result = await saved.json();
+    expect(result.plan.current.items[0].recipe).toMatchObject({ title: 'Arroz publicado v1', version: 1, card: { macros: { kcal: 100 } } });
+    const visible = await (await app.request(`/api/patients/${patient}/plans`)).json();
+    expect(visible.plan.items[0].recipe).toMatchObject({ title: 'Arroz publicado v1', version: 1 });
+  });
   it('no publica si falta la copia revisada en el pedido', async () => {
     const input = planDraft();
     expect((await post('/api/patients/'+patient+'/plans',input)).status).toBe(200);

@@ -5,7 +5,8 @@ import { getPatient } from '../store.js';
 import { assertReadyToPublish, evaluateMealPlanDraft } from '../ai-eval/evaluate.js';
 import { loadEvalHealth } from '../ai-eval/health.js';
 import { canonicalJson } from '../ai/context.js';
-import { getRecipeSnapshot, listProfessionalRecipes } from '../recipes/repository.js';
+import { getRecipeSnapshot, listProfessionalRecipes, readPublishedMemory } from '../recipes/repository.js';
+import type { RecipeCatalogSnapshot } from '../../src/types/recipe-catalog-nutrition.js';
 import { enqueueMemoryDish, memoryDishKey, proposalCoverContext } from '../recipes/menu-covers.js';
 import { getRecipeCard } from '../recipes/presentation.js';
 import type { RecipeCard } from '../../src/types/recipes.js';
@@ -120,6 +121,7 @@ function asRecipeDetail(row: unknown, fallbackTitle: string | null, fallbackVers
     nutrient_source: String(detail.nutrient_source ?? ''),
     ...(nutrition ? { nutrition } : {}),
     ...(card ? { card } : {}),
+    ...(detail.catalog_recipe && typeof detail.catalog_recipe === 'object' ? { catalog_recipe: detail.catalog_recipe as RecipeCatalogSnapshot } : {}),
     ingredients: ingredientsRaw.map((item) => {
       const line = item as Record<string, unknown>;
       return {
@@ -281,6 +283,11 @@ function memPatient(row: MemPlan): PatientMealPlan | null {
 }
 
 async function resolveRecipe(nutritionistId: string, recipeId: string, recipeVersion: number | undefined, persistent: boolean) {
+  if (!persistent && recipeVersion != null) {
+    const version = readPublishedMemory(nutritionistId, recipeId, recipeVersion);
+    if (!version) throw new CareError(400, 'La versión publicada de la receta no está disponible. Revisá la selección.');
+    return { recipe_id: recipeId, recipe_version: version.version, recipe_title: version.title, recipe_version_id: version.versionId };
+  }
   const catalog = await listProfessionalRecipes(nutritionistId, persistent);
   const recipe = catalog.find((entry) => entry.id === recipeId);
   const published = recipe?.published;

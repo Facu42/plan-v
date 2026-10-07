@@ -5,7 +5,7 @@ import { recipesApi } from '../../api/recipes';
 import { aiJobsApi } from '../../api/ai-jobs';
 import type { AiJobView } from '../../types/ai-jobs';
 import { menuPreferences } from '../../lib/menu-preferences';
-import { PLAN_SLOTS, buildPublishedPlanDays, mealPlanDraftSchema, toPublishedPatientPlan, type MealPlanDraftInput, type PatientMealPlan, type PlanItemView, type PlanSlot, type ProfessionalMealPlan } from '../../types/plans';
+import { PLAN_SLOTS, buildPublishedPlanDays, mealPlanDraftSchema, toPublishedPatientPlan, type MealPlanDraftInput, type PatientMealPlan, type PlanItemView, type PlanRecipeDetail, type PlanSlot, type ProfessionalMealPlan } from '../../types/plans';
 import type { ProfessionalRecipe } from '../../types/recipes';
 import { NvButton, NvState } from './primitives';
 import './meal-plan-versions.css';
@@ -13,8 +13,10 @@ import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
 import { recipeNutritionLabel, type ProposedRecipe } from '../../types/ai-nutrition';
 import { RECIPE_UNITS } from '../../types/recipes';
 import { AiPlanNutritionSummary } from './AiPlanNutritionSummary';
+import { PlanRecipePicker, PlanRecipePreview } from './PlanRecipePicker';
+import { publishedRecipeDetail, resolvePlanRecipeSelection } from '../../types/plan-recipe-selection';
 
-type DraftItem = { for_date: string; slot: PlanSlot; free_text: string; recipe_id: string; recipe_version?: number; portions: string; public_note: string; recipe_proposal?: ProposedRecipe };
+type DraftItem = { for_date: string; slot: PlanSlot; free_text: string; recipe_id: string; recipe_version?: number; portions: string; public_note: string; recipe_proposal?: ProposedRecipe; recipePreview?: PlanRecipeDetail };
 
 function emptyItem(date: string): DraftItem {
   return { for_date: date, slot: 'Almuerzo', free_text: '', recipe_id: '', portions: '1', public_note: '' };
@@ -29,6 +31,7 @@ function itemsFrom(plan: ProfessionalMealPlan | null): DraftItem[] {
     free_text: item.free_text ?? '',
     recipe_id: item.recipe_id ?? '',
     recipe_version: item.recipe_version ?? undefined,
+    ...(item.recipe ? { recipePreview: item.recipe } : {}),
     portions: item.portions != null ? String(item.portions) : '',
     public_note: item.public_note,
     ...(item.recipe_proposal ? { recipe_proposal: item.recipe_proposal } : {}),
@@ -95,6 +98,9 @@ export function MenuProposalReview({ proposal, warnings, busy, onApprove, onReje
 export function MealPlanEditor({ patientId, onChanged }: { patientId: string; onChanged?: () => void }) {
   const [plan, setPlan] = useState<ProfessionalMealPlan | null>(null);
   const [recipes, setRecipes] = useState<ProfessionalRecipe[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [catalogError, setCatalogError] = useState('');
+  const [pickerIndex, setPickerIndex] = useState<number | null>(null);
   const [source, setSource] = useState('');
   const [imageGeneration, setImageGeneration] = useState(false);
   const [error, setError] = useState('');
@@ -110,13 +116,19 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
   const planId = plan?.id ?? newPlanId;
   const lock = useRef(false);
 
+  async function reloadCatalog() {
+    setCatalogLoading(true); setCatalogError('');
+    try { const catalog = await recipesApi.list(); setRecipes(catalog.recipes.filter(recipe => recipe.published)); }
+    catch (caught) { setCatalogError(careErrorMessage(caught)); }
+    finally { setCatalogLoading(false); }
+  }
+
   async function reload() {
     try {
-      const [plans, catalog, aiJobs] = await Promise.all([plansApi.professional(patientId), recipesApi.list(), aiJobsApi.list(patientId)]);
+      const [plans, , aiJobs] = await Promise.all([plansApi.professional(patientId), reloadCatalog(), aiJobsApi.list(patientId)]);
       setPlan(plans.plan);
       setSource(plans.source);
       setImageGeneration(plans.image_generation === true);
-      setRecipes(catalog.recipes.filter((recipe) => recipe.published));
       const requested = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('propuesta');
       const nextProposal = aiJobs.jobs.find((job) => job.job_type === 'menu_draft' && (requested ? job.id === requested : Boolean(proposalFrom(job)))) ?? null;
       setProposal(nextProposal && proposalFrom(nextProposal) ? nextProposal : null);
@@ -278,7 +290,6 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
     {source === 'memory' && <p className="meal-plan-demo">Vista demo · plan ficticio para probar edición y publicación.</p>}
     {error && <p className="meal-plan-error" role="alert">{error}</p>}
     {status && <p className="meal-plan-status" role="status">{status}</p>}
-    {plan?.published && <PublishedDatedPlanView plan={toPublishedPatientPlan(plan)} audience="pro" />}
     {proposal && !proposedPlan && <p className="meal-plan-error" role="alert">La propuesta no tiene un menú válido. Regenerala antes de aprobar.</p>}
     {proposedPlan && <MenuProposalReview key={proposal!.id} proposal={proposedPlan} warnings={proposal?.warnings ?? []} busy={busy} recipes={recipes} onEdit={() => void editProposal()} onApprove={() => void approveProposal()} onReject={() => void rejectProposal()} />}
     <AiPlanNutritionSummary nutrition={plan?.current.nutrition} />
@@ -301,12 +312,10 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
         <select aria-label={`Momento ${index + 1}`} value={item.slot} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, slot: event.target.value as PlanSlot } : current))}>
           {PLAN_SLOTS.map((slot) => <option key={slot} value={slot}>{slot}</option>)}
         </select>
-        <select aria-label={`Receta ${index + 1}`} value={item.recipe_id} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, recipe_id: event.target.value, recipe_version: recipes.find((recipe) => recipe.id === event.target.value)?.published?.version, recipe_proposal: undefined, free_text: event.target.value ? '' : current.free_text } : current))}>
-          <option value="">Texto libre</option>
-          {recipes.map((recipe) => <option key={recipe.id} value={recipe.id}>{recipe.published?.title ?? recipe.title} · v{recipe.published?.version}</option>)}
-        </select>
+        <div className="meal-plan-recipe-choice"><button type="button" aria-label={`Elegir receta para indicación ${index + 1}`} onClick={() => setPickerIndex(index)}>{item.recipe_id ? `${resolvePlanRecipeSelection(item, recipes, plan?.current.items ?? [])?.title ?? 'Receta seleccionada'} · v${item.recipe_version} · Cambiar` : 'Elegir receta publicada'}</button>{item.recipe_id && <button type="button" onClick={() => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, recipe_id: '', recipe_version: undefined, recipePreview: undefined, recipe_proposal: undefined } : current))}>Usar texto libre</button>}</div>
         <input aria-label={`Texto ${index + 1}`} placeholder="Indicación" value={item.free_text} disabled={Boolean(item.recipe_id)} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, free_text: event.target.value, ...(current.recipe_proposal ? { recipe_proposal: { ...current.recipe_proposal, title: event.target.value } } : {}) } : current))} />
         <input aria-label={`Porciones ${index + 1}`} type="number" min={0.0001} max={50} step="0.0001" placeholder="Rinde" value={item.portions} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, portions: event.target.value } : current))} />
+        {item.recipe_id && <details className="meal-plan-recipe-inline"><summary>Revisar receta v{item.recipe_version} y nutrientes para esta indicación</summary>{(() => { const detail = resolvePlanRecipeSelection(item, recipes, plan?.current.items ?? []); return detail ? <PlanRecipePreview recipe={detail} portions={item.portions.trim() ? Number(item.portions) : NaN} /> : <p role="alert">No pudimos cargar el detalle de esta versión. No se reemplazará por otra receta al guardar.</p>; })()}</details>}
         {item.recipe_proposal && <PlanRecipeProposalEditor proposal={item.recipe_proposal} index={index} onChange={(recipe_proposal) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, recipe_proposal } : current))} />}
         <label>Nota para la paciente<input maxLength={200} aria-label={`Nota ${index + 1}`} value={item.public_note} onChange={event => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, public_note: event.target.value } : current))} /></label>
         <button type="button" disabled={busy} onClick={() => setDraftItems(draftItems.filter((_, currentIndex) => currentIndex !== index))}>Quitar indicación {index + 1}</button>
@@ -320,6 +329,8 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
         {plan && !plan.current.published_at && <NvButton type="button" disabled={busy || dirty} onClick={publishVisible}>Publicar v{plan.current.version}</NvButton>}
       </div>
     </form>
+    {plan?.published && <details className="meal-plan-published-copy"><summary>Ver copia publicada · v{plan.published.version}</summary><PublishedDatedPlanView plan={toPublishedPatientPlan(plan)} audience="pro" /></details>}
+    {pickerIndex !== null && draftItems[pickerIndex] && <PlanRecipePicker recipes={recipes} loading={catalogLoading} error={catalogError} onRetry={() => void reloadCatalog()} initialPortions={draftItems[pickerIndex].portions} onClose={() => setPickerIndex(null)} onChoose={(recipe, portions) => { const version = recipe.published; if (!version) return; setDraftItems(current => current.map((item, index) => index === pickerIndex ? { ...item, recipe_id: recipe.id, recipe_version: version.version, recipePreview: publishedRecipeDetail(recipe) ?? undefined, portions: String(portions), free_text: '', recipe_proposal: undefined } : item)); setPickerIndex(null); }} />}
   </section>;
 }
 

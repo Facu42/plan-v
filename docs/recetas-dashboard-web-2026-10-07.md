@@ -96,3 +96,17 @@ Verificación: **263 archivos, 1486 pruebas aprobadas y 2 omitidas** en la suite
 Navegador demo: se agregó «Prueba local» y «Platos principales» al borrador ficticio, declarando «Datos ficticios de prueba» como fuente de sus macros existentes. Tras recarga y reapertura conserva ambas etiquetas. Filtro «Prueba local» encuentra sólo esa receta; volver del detalle conserva filtro y devuelve el foco. No se publicó ni asignó ese borrador. [Catálogo 1280](evidencia-recetas/plan-v-categorias-1280.png), [filtro 1440](evidencia-recetas/plan-v-categorias-1440.png) y [detalle](evidencia-recetas/plan-v-categorias-detalle.png). Sin desborde horizontal en ambos tamaños; no se exige que todas las tarjetas quepan en el primer pliegue.
 
 Migración preparada `20261007210000_recipe_culinary_categories.sql`, sin aplicar en producción. Recetas sigue abierta por integración completa con el editor del plan y bases externas autorizadas/porcentajes diarios. Mobile y Academy excluidas.
+
+## Recetas dentro del plan: integración y disposición autorizada
+
+Referencia visual previa: Nutriboost muestra «Agregar al plan» con pestañas Alimentos/Recetas a [2:16](evidencia-recetas/nutriboost-plan-selector-0216.png) y selección de cantidad de un alimento a [2:30](evidencia-recetas/nutriboost-plan-cantidad-0230.png). Ese tramo no demuestra el recorrido completo de agregar una receta. Plan V adapta el selector a recetas publicadas, con búsqueda por título/ingrediente y categoría culinaria.
+
+Vista previa de 11 nutrientes para las porciones elegidas, ingredientes escalados según rinde, pasos y fuentes conservadas. Datos desconocidos muestran «Sin dato», sin transformarse en cero. Sólo confirmar agrega la referencia al borrador; cancelar/Escape conserva la indicación. Guardar no publica. La versión histórica permanece aunque se publique una receta nueva; demo y API recuperan la composición congelada.
+
+Facundo autorizó con «dale. hacelo» el editor primero: bandeja de IA cerrada inicialmente y situada después del editor; copia publicada desplegable después del formulario. Las propuestas abiertas desde un enlace siguen siendo revisables en el editor. No cambia la publicación ni la pantalla del paciente.
+
+Navegador con datos ficticios: media porción de Avena muestra 19 kcal; guardado y recarga conservan receta v1 y 0,5 porciones. No se publicó el plan. Escape cierra sin alterar la cantidad. Sin desborde horizontal a 1280. [Selector 1440](evidencia-recetas/plan-v-plan-selector-1440.png), [selector 1280](evidencia-recetas/plan-v-plan-selector-1280.png) y [editor 1280](evidencia-recetas/plan-v-plan-editor-1280.png).
+
+Verificación funcional previa al último ajuste de disposición: 265 archivos, 1491 pruebas aprobadas y 2 omitidas. Después del ajuste: tipos y 10 pruebas en 3 archivos aprobados. Compilación aprobada (advertencias existentes de Zod/tamaño). Revisión de código aprobada; revisión de realidad sin bloqueos funcionales, con documentación/evidencia completadas aquí. Sin migración nueva ni cambios de producción.
+
+Pendiente: editor semanal completo, selección directa de alimentos, totales por día y bases externas autorizadas/porcentajes diarios. Este incremento no cierra todo Planes ni todo Recetas. Web solamente; mobile y Academy fuera de alcance.

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { RecipeCard } from './recipes.js';
+import type { RecipeCatalogSnapshot } from './recipe-catalog-nutrition.js';
 import { menuTargetSchema, menuNutritionSummarySchema, proposedRecipeSchema, type ProposedRecipe, type MenuNutritionTarget, type MenuNutritionSummary, type RecipeNutrition } from './ai-nutrition.js';
 
 export const PLAN_SLOTS = ['Desayuno', 'Colación', 'Almuerzo', 'Merienda', 'Cena', 'Extra'] as const;
@@ -95,6 +96,7 @@ export const mealPlanPublishSchema = z.object({
 
 export type MealPlanDraftInput = z.infer<typeof mealPlanDraftSchema>;
 export type PlanRecipeDetail = {
+  catalog_recipe?: RecipeCatalogSnapshot;
   title: string;
   version: number;
   yield_portions: number;
