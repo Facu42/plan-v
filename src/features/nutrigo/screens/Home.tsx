@@ -93,9 +93,9 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
   const recipes=patientMenuRecipes(current?.plan??null,current?.recipes??[]);
   const loggedSlots=new Set(patient.logs.filter(log=>dateId(new Date(log.logged_at))===today).map(log=>log.slot));
 
-  // Semana del calendario (lunes a sábado, como el archivo) con hoy marcado.
-  const monday=new Date(`${today}T12:00:00`);monday.setDate(monday.getDate()-((monday.getDay()+6)%7));
-  const week=Array.from({length:6},(_,i)=>{const d=new Date(monday);d.setDate(monday.getDate()+i);return {id:dateId(d),day:d.getDate()};});
+  // Semana del calendario con hoy marcado: el escritorio dibuja lunes a sábado; el celular, domingo a sábado.
+  const week=(columns:number)=>{const start=new Date(`${today}T12:00:00`);start.setDate(start.getDate()-(columns===7?start.getDay():(start.getDay()+6)%7));
+    return Array.from({length:columns},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return {id:dateId(d),day:d.getDate(),label:['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()]};});};
 
   const activity:Activity[]=[
     ...(patient.logs??[]).map(log=>({at:log.logged_at,color:0,bold:log.slot,rest:` ${log.status==='pending_review'?'registrada, pendiente de revisión':'revisada'}: ${log.description}`})),
@@ -150,8 +150,9 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
       if(text(child,'kg','Kg'))return {text:weightDisplay.unit};
       if(text(child,'Current Weight'))return {text:'Peso actual'};
       if(sample(child,/kg left/))return {text:goalWeight!=null&&weight!=null?`${formatNumber(Math.abs(weight-goalWeight))} ${weightDisplay.unit} para la meta`:startWeight!=null&&weight!=null&&weights.length>1?`${weight<=startWeight?'−':'+'}${formatNumber(Math.abs(weight-startWeight))} ${weightDisplay.unit} desde el inicio`:'Primer registro'};
-      if(text(child,'85'))return {text:formatNumber(startWeight)};
-      if(text(child,'65'))return {text:goalWeight!=null?formatNumber(goalWeight):'Meta'};
+      // Extremos del arco: peso inicial y meta (sin meta cargada, queda vacío; el ancho del archivo es de dos cifras).
+      if(text(child,'85'))return {text:startWeight==null?'':String(Math.round(startWeight))};
+      if(text(child,'65'))return {text:goalWeight!=null?String(Math.round(goalWeight)):''};
       if(/Button/.test(nodeName(child)))return {onClick:onRecord,label:'Registrar peso'};
       return undefined;
     };return {children:fields(node,{},weightLeaf)};}
@@ -228,8 +229,8 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
       if(nodeName(child)==='Icon'&&/bg-\[#/.test(String(child.props.className)))return {props:{style:{background:['#c2e66e','#ffcb65','#ffa257'][row.color]}}};
       if(nodeName(child)==='Line'&&index===activity.length-1)return hide;
       if(sample(child,/^\d{1,2}:\d{2} (AM|PM)$/))return {text:dateId(new Date(row.at))===today?timeLabel(row.at):`${new Date(row.at).toLocaleDateString('es-AR',{day:'numeric',month:'short'})} · ${timeLabel(row.at)}`};
-      if(child.tag==='span'&&/SemiBold/.test(String(child.props.className)))return {text:row.bold};
-      if(child.tag==='span')return {text:row.rest};
+      const spans=objects(child);
+      if(child.tag==='p'&&spans.length===2&&spans.every(n=>n.tag==='span'))return {children:<><span className={String(spans[0].props.className??'')} style={{fontFamily:"'Poppins:SemiBold', Poppins, sans-serif",fontWeight:600}}>{row.bold}</span><span className={String(spans[1].props.className??'')}>{row.rest}</span></>};
       return undefined;
     },'Todavía no hay actividad registrada esta semana.',{only:n=>n===objects(node)[0]});
     if(name==='Calendar')return {onClick:()=>onNavigate('agenda'),label:'Ver agenda',children:fields(node,{},child=>{
@@ -237,7 +238,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
       if(text(child,'2028'))return {text:String(now.getFullYear())};
       if(nodeName(child)==='Row Calendar'){
         const cells=objects(child);const active=cells.find(cell=>/bg-\[#c2e66e\]/.test(String(cell.props.className)))??cells[1];const idle=cells.find(cell=>cell!==active)??cells[0];
-        return {children:week.map((day,index)=>source(day.id===today?active:idle,n=>leaf(n)&&/^\d+$/.test(sourceText(n))?{text:String(day.day)}:leaf(n)&&/^(Mon|Tue|Wed|Thu|Fri|Sat)$/.test(sourceText(n))?{text:['Lun','Mar','Mié','Jue','Vie','Sáb'][index]}:undefined,day.id))};
+        return {children:week(cells.length).map(day=>source(day.id===today?active:idle,n=>leaf(n)&&/^\d+$/.test(sourceText(n))?{text:String(day.day)}:leaf(n)&&/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)$/.test(sourceText(n))?{text:day.label}:undefined,day.id))};
       }
       return undefined;
     })};
