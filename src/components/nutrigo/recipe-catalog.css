@@ -37,6 +37,15 @@ body:has(dialog.recipe-editor-dialog[open]){overflow:hidden}
 @keyframes recipe-dialog-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.recipe-editor-dialog{animation:none}}
 .nv-app.nv-dark .recipe-error{color:var(--nv-danger)}
+.recipe-catalog-line{border:1px solid var(--nv-border);border-radius:12px;padding:12px;margin:8px 0;background:var(--nv-card)}
+.recipe-line-amount{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:12px;align-items:center}
+.recipe-line-amount:has(input[aria-label^="Kcal"]){grid-template-columns:100px minmax(0,1fr) 100px auto}
+.recipe-form .recipe-food-source{font-size:11px;margin:8px 0 0;overflow-wrap:anywhere}
+.recipe-composition{padding:16px;border:1px solid var(--nv-border);border-radius:12px;background:var(--nv-card)}
+.recipe-composition h3{font-size:16px;margin:8px 0}
+.recipe-composition dl{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;margin:8px 0}
+.recipe-composition dl>div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--nv-border);padding:8px 0;font-size:12px}
+.recipe-composition dd{margin:0;white-space:nowrap;font-weight:600}
 @media(max-width:800px){.recipe-form-row,.recipe-item-row{grid-template-columns:1fr}.recipe-catalog,.assigned-recipes{padding:20px 16px}}
 @media(max-width:700px){.recipe-catalog,.assigned-recipes{padding:18px 14px}.recipe-form-row,.recipe-item-row{grid-template-columns:1fr}}
 @media(max-width:390px){.recipe-catalog,.assigned-recipes{padding:14px 12px}.recipe-catalog h2,.assigned-recipes h2{font-size:19px}.recipe-actions{flex-direction:column}.recipe-actions .nv-button{width:100%}}

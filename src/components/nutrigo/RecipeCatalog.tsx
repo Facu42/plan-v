@@ -7,7 +7,7 @@ import type { AiJobView } from '../../types/ai-jobs';
 import { ApiError, isAbortError } from '../../api/client';
 import { waitForRecipeProposal } from './recipe-ai-flow';
 import { careErrorMessage } from '../../api/care';
-import { RECIPE_UNITS, type ProfessionalRecipe, type RecipeUnit } from '../../types/recipes';
+import { type ProfessionalRecipe, type RecipeUnit } from '../../types/recipes';
 import { PLAN_SLOTS, type PlanSlot } from '../../types/plans';
 import { recipeWizardSchema, unavailableCard, type RecipeWizardInput } from '../../types/recipe-plate';
 import { RecipePlateCard } from './RecipePlate';
@@ -19,6 +19,9 @@ import { RecipeManualCoverAction } from './RecipeManualCoverAction';
 import { dateId } from '../../features/nutrigo/screens/shared';
 import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
 import { FigmaRecordDialog } from './FigmaPatientFront';
+import { foodApi } from '../../api/foods';
+import type { Food } from '../../types/foods';
+import { RecipeCatalogIngredients, RecipeComposition } from './RecipeCatalogIngredients';
 
 function emptyDraft(id = crypto.randomUUID()): RecipeWizardInput {
   return {
@@ -38,12 +41,17 @@ export function recipeEditorFromStored(recipe: ProfessionalRecipe): RecipeWizard
     ...(recipe.current.nutrition ? { nutrition: recipe.current.nutrition } : {}),
     category: (PLAN_SLOTS as readonly string[]).includes(recipe.current.card?.category ?? '') ? recipe.current.card!.category as PlanSlot : 'Almuerzo',
     prep_minutes: recipe.current.card?.prep_minutes ?? null,
+    final_weight_g: recipe.current.final_weight_g ?? null,
+    cooking_minutes: recipe.current.cooking_minutes ?? null,
     kcal: recipe.current.card?.macros?.kcal ?? null,
     protein_g: recipe.current.card?.macros?.protein_g ?? null,
     carbs_g: recipe.current.card?.macros?.carbs_g ?? null,
     fat_g: recipe.current.card?.macros?.fat_g ?? null,
     items: recipe.current.ingredients.length
-      ? recipe.current.ingredients.map((item) => ({ name: item.name, quantity: item.quantity, unit: item.unit }))
+      ? recipe.current.ingredients.map((item) => {
+        const frozen = recipe.current.catalog_recipe?.lines.find(line => line.name.trim().replace(/\s+/g, ' ').toLocaleLowerCase('es') === item.name.trim().replace(/\s+/g, ' ').toLocaleLowerCase('es'));
+        return frozen ? { name: frozen.name, quantity: frozen.quantity, unit: frozen.unit as RecipeUnit, ...(frozen.catalog_ref ? { catalog_ref: frozen.catalog_ref } : {}) } : { name: item.name, quantity: item.quantity, unit: item.unit };
+      })
       : [{ name: '', quantity: 1, unit: 'g' }],
   };
 }
@@ -60,6 +68,15 @@ export function recipeEditorFromAi(payload: Record<string, unknown>): RecipeWiza
 
 /** Estado y acciones reales del catálogo profesional (crear, IA, editar, publicar, asignar al día). */
 export function useRecipeCatalog(patientId: string) {
+  const [foods, setFoods] = useState<Food[]>([]);
+  const [foodsError, setFoodsError] = useState('');
+  const [foodsLoading, setFoodsLoading] = useState(true);
+  const [foodsAttempt, setFoodsAttempt] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController(); setFoodsLoading(true); setFoodsError('');
+    void foodApi.list(controller.signal).then(result => setFoods(result.foods)).catch(error => { if (!isAbortError(error)) setFoodsError(careErrorMessage(error)); }).finally(() => { if (!controller.signal.aborted) setFoodsLoading(false); });
+    return () => controller.abort();
+  }, [foodsAttempt]);
   const [recipes, setRecipes] = useState<ProfessionalRecipe[] | null>(null);
   const [source, setSource] = useState('');
   const [imageGeneration, setImageGeneration] = useState(false);
@@ -163,7 +180,8 @@ export function useRecipeCatalog(patientId: string) {
   function submitAi(event: FormEvent) { event.preventDefault(); generateAiProposal(description.trim()); }
 
   return {
-    patientId, recipes, source, imageGeneration, error, status, busy, editing, path, description, assigning, day, slot, aiProgress, pendingAiJob, aiWarnings,
+    patientId, recipes, source, imageGeneration, error, status, busy, editing, path, description, assigning, day, slot, aiProgress, pendingAiJob, aiWarnings, foods, foodsError, foodsLoading,
+    reloadFoods: () => setFoodsAttempt(value => value + 1),
     resumeAi: () => { if (canLeaveWorkspace()) generateAiProposal(); },
     setEditing, setPath, setDescription, setDay, setSlot, reload, run, submit, submitAi, quickAiDraft,
     recoverEditing: () => void run(async () => { const saved = (await recipesApi.list()).recipes.find(recipe => recipe.id === editing?.id); if (saved) openStored(saved); }, 'Versión guardada recuperada. Revisala antes de continuar.'),
@@ -211,7 +229,7 @@ export function RecipeChoice({ catalog }: { catalog: RecipeCatalogState }) {
   return <div className="recipe-choice" aria-label="Paso 1 de 2">
     <button type="button" disabled={catalog.busy} onClick={catalog.chooseManual}>
       <strong>Carga manual</strong>
-      <span>Ingredientes, cantidades y macros que declares. Nada se completa solo.</span>
+      <span>Elegí alimentos del catálogo o cargá ingredientes y valores declarados.</span>
     </button>
     <button type="button" disabled={catalog.busy || (!catalog.patientId && !catalog.patientOptions?.length)} onClick={catalog.chooseAi}>
       <strong>Asistente IA</strong>
@@ -255,43 +273,27 @@ export function RecipeAiNotices({ catalog }: { catalog: RecipeCatalogState }) {
 export function RecipeEditorForm({ catalog }: { catalog: RecipeCatalogState }) {
   const { editing, setEditing, busy, submit, closeEditor } = catalog;
   if (!editing) return null;
+  const prior = catalog.recipes?.find(recipe => recipe.id === editing.id)?.current.catalog_recipe;
+  const linked = editing.items.some(item => item.catalog_ref) || Boolean(prior);
   return <form className="recipe-form" onSubmit={submit}><fieldset disabled={busy} className="recipe-edit-fields">
     <p className="recipe-wizard-note">Paso 2 de 2 · revisá ingredientes, macros y foto antes de asignar.</p>
-    {editing.nutrition && <p>{recipeNutritionLabel(editing.nutrition)} · revisar no convierte la estimación en un valor medido.</p>}
+    {(editing.nutrition || prior?.estimate_origin) && <p>{prior?.estimate_origin ? 'Nutrientes estimados por IA' : recipeNutritionLabel(editing.nutrition)}{editing.nutrition?.origin === 'ai_estimate' || prior?.estimate_origin ? ' · revisar no convierte la estimación en un valor medido.' : ''}</p>}
     <label>Título<input value={editing.title} maxLength={150} onChange={(event) => setEditing({ ...editing, title: event.target.value })} /></label>
-    {editing.nutrition && <fieldset><legend>Nutrientes por porción · estimación para revisar</legend>
+    {editing.nutrition && !linked && <fieldset><legend>Nutrientes por porción · estimación para revisar</legend>
       {(['kcal', 'protein_g', 'carbs_g', 'fat_g'] as const).map((key) => <label key={key}>{({ kcal: 'Calorías (kcal)', protein_g: 'Proteínas (g)', carbs_g: 'Hidratos (g)', fat_g: 'Grasas (g)' })[key]}
         <input type="number" min={key === 'kcal' ? 0.1 : 0} step="0.1" value={editing.nutrition!.per_portion[key]} onChange={(event) => setEditing({ ...editing, nutrition: { ...editing.nutrition!, per_portion: { ...editing.nutrition!.per_portion, [key]: Number(event.target.value) } } })} />
       </label>)}
     </fieldset>}
     <div className="recipe-form-row">
       <label>Rinde (porciones)<input type="number" min={1} max={50} step="0.5" value={editing.yield_portions} onChange={(event) => setEditing({ ...editing, yield_portions: Number(event.target.value) })} /></label>
-      <label>Fuente nutricional<input value={editing.nutrient_source} maxLength={200} placeholder="Declarada; vacía si no hay base" onChange={(event) => setEditing({ ...editing, nutrient_source: event.target.value })} /></label>
+      {!linked && <label>Fuente nutricional<input value={editing.nutrient_source} maxLength={200} placeholder="Declarada; vacía si no hay base" onChange={(event) => setEditing({ ...editing, nutrient_source: event.target.value })} /></label>}
+      <label>Peso final preparado (g)<input type="number" min="0.1" max="100000" step="0.1" placeholder="Opcional" value={editing.final_weight_g ?? ''} onChange={event => setEditing({ ...editing, final_weight_g: event.target.value === '' ? null : Number(event.target.value) })} /></label>
+      <label>Preparación (min)<input type="number" min="1" max="240" value={editing.prep_minutes ?? ''} onChange={event => setEditing({ ...editing, prep_minutes: event.target.value === '' ? null : Number(event.target.value) })} /></label>
+      <label>Cocción (min)<input type="number" min="0" max="1440" value={editing.cooking_minutes ?? ''} onChange={event => setEditing({ ...editing, cooking_minutes: event.target.value === '' ? null : Number(event.target.value) })} /></label>
     </div>
-    <fieldset>
-      <legend>Ingredientes</legend>
-      {editing.items.map((item, index) => <div className="recipe-item-row" key={index}>
-        <input aria-label={`Ingrediente ${index + 1}`} placeholder="Nombre" value={item.name} onChange={(event) => setEditing({
-          ...editing,
-          items: editing.items.map((current, currentIndex) => currentIndex === index ? { ...current, name: event.target.value } : current),
-        })} />
-        <input aria-label={`Cantidad ${index + 1}`} type="number" min={0.1} step="0.1" value={item.quantity} onChange={(event) => setEditing({
-          ...editing,
-          items: editing.items.map((current, currentIndex) => currentIndex === index ? { ...current, quantity: Number(event.target.value) } : current),
-        })} />
-        {!editing.nutrition && <input aria-label={`Kcal de línea ${index + 1}`} type="number" min={0} step="1" placeholder="kcal" value={item.line_kcal ?? ''} onChange={(event) => setEditing({
-          ...editing,
-          items: editing.items.map((current, currentIndex) => currentIndex === index ? { ...current, line_kcal: event.target.value === '' ? undefined : Number(event.target.value) } : current),
-        })} />}
-        <select aria-label={`Unidad ${index + 1}`} value={item.unit} onChange={(event) => setEditing({
-          ...editing,
-          items: editing.items.map((current, currentIndex) => currentIndex === index ? { ...current, unit: event.target.value as RecipeUnit } : current),
-        })}>
-          {RECIPE_UNITS.map((unit) => <option key={unit} value={unit}>{unit}</option>)}
-        </select>
-      </div>)}
-      <button type="button" className="recipe-add" onClick={() => setEditing({ ...editing, items: [...editing.items, { name: '', quantity: 1, unit: 'g' }] })}>Agregar ingrediente</button>
-    </fieldset>
+    <RecipeCatalogIngredients draft={editing} onChange={setEditing} foods={catalog.foods ?? []} prior={prior} loading={catalog.foodsLoading} error={catalog.foodsError} retry={catalog.reloadFoods} />
+    {linked && <RecipeComposition draft={editing} foods={catalog.foods ?? []} prior={prior} />}
+    {!linked && <>
     {!editing.nutrition && <div className="recipe-form-row">
       <p>Valores por porción. Si cambiás ingredientes, cantidades o rinde, revisá y corregí estos nutrientes antes de guardar.</p>
       <label>KCAL<input type="number" min={0} max={20000} step="0.1" value={editing.kcal ?? ''} onChange={(event) => setEditing({ ...editing, kcal: event.target.value === '' ? null : Number(event.target.value) })} /></label>
@@ -299,6 +301,7 @@ export function RecipeEditorForm({ catalog }: { catalog: RecipeCatalogState }) {
       <label>CARBS g<input type="number" min={0} step="0.1" value={editing.carbs_g ?? ''} onChange={(event) => setEditing({ ...editing, carbs_g: event.target.value === '' ? null : Number(event.target.value) })} /></label>
       <label>GRASAS g<input type="number" min={0} step="0.1" value={editing.fat_g ?? ''} onChange={(event) => setEditing({ ...editing, fat_g: event.target.value === '' ? null : Number(event.target.value) })} /></label>
     </div>}
+    </>}
     <fieldset>
       <legend>Pasos</legend>
       <textarea aria-label="Pasos de la receta" value={editing.steps.join('\n')} onChange={(event) => setEditing({ ...editing, steps: event.target.value.split('\n') })} />
@@ -346,7 +349,7 @@ export function RecipeCatalog({ patientId, patients }: { patientId: string; pati
       <div>
         <span>CATÁLOGO DEL CONSULTORIO</span>
         <h2>Recetas e ingredientes</h2>
-        <p>Porciones, pasos y fuente nutricional declarada. Un borrador privado no cambia la revisión publicada. La IA propone nutrientes estimados que requieren revisión; la etiqueta de estimación se conserva al publicar. Publicar revalida alergias y la versión. Vos publicás.</p>
+        <p>Elegí alimentos, medidas y porciones para calcular la composición. Un borrador privado no cambia la revisión publicada. La IA propone nutrientes estimados que requieren revisión; la etiqueta de estimación se conserva al publicar. Publicar revalida alergias y la versión.</p>
       </div>
       <div className="recipe-header-actions">
         <NvButton className="nv-ghost" disabled={busy} onClick={catalog.startNew}>Nueva receta</NvButton>

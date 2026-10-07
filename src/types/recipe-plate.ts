@@ -63,6 +63,8 @@ export function unavailableCard(title: string, category = 'Almuerzo'): RecipeCar
 }
 
 export function buildRecipeCard(input: RecipeWizardInput): RecipeCard {
+  // The repository / database derives linked composition from authorized foods.
+  if (input.items.some(item => item.catalog_ref)) return { ...unavailableCard(input.title, input.category), prep_minutes: input.prep_minutes ?? null };
   const portions = input.yield_portions;
   const lineKcal = input.items.map((item) => item.line_kcal);
   const declaredLines = lineKcal.filter((value): value is number => value != null);

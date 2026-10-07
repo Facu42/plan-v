@@ -88,6 +88,44 @@ afterAll(async () => {
 });
 
 
+describe('composición del catálogo persistente', () => {
+  it('deriva valores autorizados y congela la fuente entre revisiones, incluso si una receta de IA pierde composición', async () => {
+    const fid = randomUUID(); const rid = randomUUID();
+    const nutrients = { kcal: 380, protein: 13, carbs: 60, fat: 7, fiber: null, sodium: 0, calcium: null, iron: null, potassium: null, magnesium: null, vitamin_c: null };
+    const food = { id: fid, expected_revision: 0, name: 'Avena composición', brand: '', category: '', kind: 'food', source: 'Etiqueta ficticia', reference: '', nutrients, portions: [{ name: 'Cucharada', grams: 10 }] };
+    const { id: _foodId, expected_revision: _foodRevision, ...foodPayload } = food;
+    await rpc(nutriA, 'save_food_catalog_item', [fid, 0, foodPayload]);
+    const input = { id: rid, expected_revision: null, title: 'Avena preparada', yield_portions: 2, final_weight_g: 40, cooking_minutes: 0, steps: ['Mezclar y servir.'], nutrient_source: 'propuesta_ia.v2',
+      nutrition: { origin: 'ai_estimate', source: 'propuesta_ia.v2', per_portion: { kcal: 900, protein_g: 20, carbs_g: 30, fat_g: 8 } },
+      items: [{ name: 'Avena', quantity: 2, unit: 'g', catalog_ref: { id: fid, revision: 1, measure: 'Cucharada' } }] };
+    await expect(rpc(nutriB, 'save_recipe_draft', [{ ...input, id: randomUUID() }])).rejects.toMatchObject({ code: '42501' });
+    let saved = await rpc(nutriA, 'save_recipe_draft', [input]) as any;
+    expect(saved.current.catalog_recipe.per_portion).toMatchObject({ kcal: 38, sodium: 0, fiber: null });
+    expect(saved.current.catalog_recipe.per_100g.kcal).toBe(190);
+    expect(saved.current.ingredients[0].quantity).toBe(20);
+    expect(saved.current.nutrition).toMatchObject({ origin: 'ai_estimate', per_portion: { kcal: 38 } });
+    saved = await rpc(nutriA, 'publish_recipe', [rid, 1, saved.current.revision]) as any;
+    await rpc(nutriA, 'save_food_catalog_item', [fid, 1, { ...foodPayload, nutrients: { ...nutrients, kcal: 500 } }]);
+    saved = await rpc(nutriA, 'save_recipe_draft', [{ ...input, expected_revision: saved.current.revision, yield_portions: 4 }]) as any;
+    expect(saved.current.version).toBe(2);
+    expect(saved.current.catalog_recipe.per_portion.kcal).toBe(19);
+    expect(saved.published.catalog_recipe.per_portion.kcal).toBe(38);
+    expect(saved.published.nutrition.per_portion.kcal).toBe(38);
+    const { nutrition: _nutrition, ...withoutNutrition } = input;
+    saved = await rpc(nutriA, 'save_recipe_draft', [{ ...withoutNutrition, expected_revision: saved.current.revision, items: [{ name: 'Sin composición', quantity: 1, unit: 'u' }] }]) as any;
+    expect(saved.current.catalog_recipe.estimate_origin).toBe(true);
+    expect((await db.query<{ nutrition: unknown }>('select nutrition from public.recipe_versions where id=$1', [saved.current.id])).rows[0].nutrition).toBeNull();
+    expect(saved.current.nutrition).toBeUndefined();
+    expect(saved.current.card.macros).toBeNull();
+    saved = await rpc(nutriA, 'save_recipe_draft', [{ ...withoutNutrition, expected_revision: saved.current.revision, items: [{ ...input.items[0], catalog_ref: { ...input.items[0].catalog_ref, revision: 2 } }] }]) as any;
+    expect(saved.current.nutrition.origin).toBe('ai_estimate');
+    expect(saved.current.nutrition.per_portion.kcal).toBe(50);
+    await expect(rpc(nutriA, 'save_recipe_draft', [{ ...input, id: randomUUID() }])).rejects.toMatchObject({ code: 'PT409' });
+    await expect(rpc(nutriA, 'save_recipe_draft', [{ ...input, id: randomUUID(), items: [{ ...input.items[0], catalog_ref: { id: fid, revision: 2, measure: 'Vaso' } }] }])).rejects.toMatchObject({ code: '22023' });
+    await expect(asUser(nutriA, 'update public.recipe_versions set catalog_recipe=$1 where id=$2', [{ forged: true }, saved.published.id])).rejects.toBeDefined();
+  });
+});
+
 describe('cierre funcional: revisiones, privacidad y reintentos persistentes', () => {
   let recipe: any; let plan: any;
   const title = 'Arroz con vegetales publicado';

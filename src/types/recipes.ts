@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { recipeNutritionSchema, type RecipeNutrition } from './ai-nutrition.js';
+import type { RecipeCatalogSnapshot } from './recipe-catalog-nutrition.js';
 
 export const RECIPE_UNITS = ['g', 'ml', 'u', 'cdita', 'cda', 'taza'] as const;
 export type RecipeUnit = (typeof RECIPE_UNITS)[number];
@@ -14,6 +15,7 @@ export const recipeItemInputSchema = z.object({
   name: z.string().trim().min(1).max(80),
   quantity: z.number().positive().max(100000),
   unit: recipeUnitSchema,
+  catalog_ref: z.object({ id: z.uuid(), revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER), measure: z.string().min(1).max(80).nullable() }).strict().optional(),
 }).strict();
 export const recipeDraftSchema = z.object({
   id: z.uuid(),
@@ -24,6 +26,8 @@ export const recipeDraftSchema = z.object({
   nutrient_source: z.string().trim().max(200).default(''),
   items: z.array(recipeItemInputSchema).min(1).max(20),
   nutrition: recipeNutritionSchema.optional(),
+  final_weight_g: z.number().finite().positive().max(100000).nullable().optional(),
+  cooking_minutes: z.number().int().min(0).max(1440).nullable().optional(),
 }).strict();
 export const recipePublishSchema = z.object({ expected_version: z.number().int().min(1), expected_revision: z.uuid().optional() }).strict();
 export const recipeAssignSchema = z.object({
@@ -68,6 +72,9 @@ export type RecipeVersionView = {
   ingredients: RecipeItem[];
   card?: RecipeCard;
   nutrition?: RecipeNutrition;
+  catalog_recipe?: RecipeCatalogSnapshot;
+  final_weight_g?: number | null;
+  cooking_minutes?: number | null;
 };
 export type ProfessionalRecipe = {
   id: string;

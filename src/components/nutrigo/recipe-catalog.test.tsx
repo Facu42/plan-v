@@ -2,7 +2,7 @@ import { buildRecipeCard } from '../../types/recipe-plate';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { PatientRecipe, ProfessionalRecipe } from '../../types/recipes';
-import { AssignedRecipes, AssignedRecipesView, RecipeAiForm, RecipeAiNotices, RecipeCatalog, recipeEditorFromAi, recipeEditorFromStored, type RecipeCatalogState } from './RecipeCatalog';
+import { AssignedRecipes, AssignedRecipesView, RecipeAiForm, RecipeAiNotices, RecipeCatalog, RecipeEditorForm, recipeEditorFromAi, recipeEditorFromStored, type RecipeCatalogState } from './RecipeCatalog';
 
 const assigned: PatientRecipe = {
   id: 'r1',
@@ -17,6 +17,14 @@ const assigned: PatientRecipe = {
 };
 
 describe('Catálogo profesional y recetas asignadas', () => {
+  it('el editor conserva el aviso IA cuando una composición incompleta no tiene nutrientes estructurados', () => {
+    const editing = { id: 'recipe', title: 'Borrador', yield_portions: 2, steps: ['Mezclar.'], nutrient_source: 'propuesta_ia.v2', items: [{ name: 'Ingrediente escrito', quantity: 1, unit: 'u' }] };
+    const catalog = { editing, setEditing: () => {}, recipes: [{ id: 'recipe', current: { catalog_recipe: { lines: [], estimate_origin: true, estimate_source: 'propuesta_ia.v2' } } }], foods: [], busy: false, error: '', submit: () => {}, closeEditor: () => {} } as unknown as RecipeCatalogState;
+    const html = renderToStaticMarkup(<RecipeEditorForm catalog={catalog} />);
+    expect(html).toContain('Nutrientes estimados por IA');
+    expect(html).toContain('Sin dato');
+    expect(html).not.toContain('KCAL');
+  });
   it('una propuesta pendiente ofrece consulta y conserva la descripción sin generar otra', () => {
     const catalog = { busy: false, description: 'Tortilla de verduras', pendingAiJob: { id: 'job-1' }, aiProgress: '', aiWarnings: ['Revisar posible presencia de huevo.'], path: 'manual',
       setDescription: () => {}, closeEditor: () => {}, submitAi: () => {}, resumeAi: () => {} } as unknown as RecipeCatalogState;

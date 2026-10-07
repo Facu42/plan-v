@@ -66,7 +66,9 @@ function coreDraft(input: ReturnType<typeof recipeWizardSchema.parse>) {
     steps: input.steps,
     nutrient_source: input.nutrient_source,
     ...(input.nutrition ? { nutrition: input.nutrition } : {}),
-    items: input.items.map(({ name, quantity, unit }) => ({ name, quantity, unit })),
+    ...(input.final_weight_g !== undefined ? { final_weight_g: input.final_weight_g } : {}),
+    ...(input.cooking_minutes !== undefined ? { cooking_minutes: input.cooking_minutes } : {}),
+    items: input.items.map(({ name, quantity, unit, catalog_ref }) => ({ name, quantity, unit, ...(catalog_ref ? { catalog_ref } : {}) })),
   };
 }
 

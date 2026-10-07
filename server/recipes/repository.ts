@@ -20,6 +20,8 @@ import { unavailableCard } from '../../src/types/recipe-plate.js';
 import { generateRecipeCoverImage, recipeCoverEnabled } from '../ai/recipe-cover.js';
 import { logProviderFailure } from '../ai/mode.js';
 import { recipeNutritionSchema, resolveRecipeNutrition, type RecipeNutrition } from '../../src/types/ai-nutrition.js';
+import { calculateRecipeCatalog, type RecipeCatalogSnapshot } from '../../src/types/recipe-catalog-nutrition.js';
+import { listFoods } from '../foods/repository.js';
 
 export { CareError } from '../care/errors.js';
 
@@ -37,6 +39,9 @@ type MemVersion = {
   published_at: string | null;
   created_at: string;
   nutrition?: RecipeNutrition;
+  catalog_recipe?: RecipeCatalogSnapshot;
+  final_weight_g?: number | null;
+  cooking_minutes?: number | null;
 };
 type MemLine = { id: string; recipe_version_id: string; ingredient_id: string; quantity: number; unit: RecipeUnit };
 type MemAssignment = { recipe_id: string; patient_id: string; nutritionist_id: string; recipe_version_id: string; assigned_at: string };
@@ -113,6 +118,9 @@ function asVersion(row: Record<string, unknown>, title: string): RecipeVersionVi
     steps: Array.isArray(row.steps) ? row.steps.map((step) => String(step)) : [],
     nutrient_source: String(row.nutrient_source ?? ''),
     ...(row.nutrition ? { nutrition: recipeNutritionSchema.parse(row.nutrition) } : {}),
+    ...(row.catalog_recipe ? { catalog_recipe: row.catalog_recipe as RecipeCatalogSnapshot } : {}),
+    final_weight_g: row.final_weight_g == null ? null : asNumber(row.final_weight_g),
+    cooking_minutes: row.cooking_minutes == null ? null : asNumber(row.cooking_minutes),
     published_at: row.published_at ? String(row.published_at) : null,
     ingredients: ingredientsRaw.map((item) => asItem(item as { id?: string; name?: string; quantity?: unknown; unit?: string })),
     card: row.card ? (row.card as RecipeCard) : asCover(row, title),
@@ -183,6 +191,9 @@ function memVersionView(row: MemVersion): RecipeVersionView {
     steps: row.steps,
     nutrient_source: row.nutrient_source,
     ...(row.nutrition ? { nutrition: row.nutrition } : {}),
+    ...(row.catalog_recipe ? { catalog_recipe: structuredClone(row.catalog_recipe) } : {}),
+    final_weight_g: row.final_weight_g ?? null,
+    cooking_minutes: row.cooking_minutes ?? null,
     published_at: row.published_at,
     ingredients: versionItems(row.id),
     card: getRecipeCard(row.id, row.title),
@@ -322,7 +333,39 @@ export async function saveRecipeDraft(
   persistent: boolean,
   card?: RecipeCard,
 ): Promise<ProfessionalRecipe> {
-  if (!persistent) return writeDraft(nutritionistId, input, card);
+  if (!persistent) {
+    const existing = recipes.get(input.id);
+    if (existing && existing.nutritionist_id !== nutritionistId) throw new CareError(403, 'No tenés permiso para esta acción.');
+    const history = recipeVersions(input.id);
+    const prior = history[history.length - 1];
+    const linked = input.items.some(item => item.catalog_ref) || Boolean(prior?.catalog_recipe);
+    let snapshot: RecipeCatalogSnapshot | undefined;
+    let derived: RecipeNutrition | undefined;
+    let prepared = input;
+    if (linked) {
+      try { snapshot = calculateRecipeCatalog(input, await listFoods(nutritionistId, false), prior?.catalog_recipe); }
+      catch (error) { throw new CareError(409, error instanceof Error ? error.message : 'Revisá los alimentos de la receta.'); }
+      const estimateSource = prior?.catalog_recipe?.estimate_source ?? (prior?.nutrition?.origin === 'ai_estimate' ? prior.nutrition.source : input.nutrition?.origin === 'ai_estimate' ? input.nutrition.source : /^(estimacion_ia|propuesta_ia)\./.test(prior?.nutrient_source ?? '') ? prior!.nutrient_source : /^(estimacion_ia|propuesta_ia)\./.test(input.nutrient_source) ? input.nutrient_source : null);
+      snapshot.estimate_origin = Boolean(estimateSource);
+      snapshot.estimate_source = estimateSource;
+      const source = estimateSource ?? 'catalogo_alimentos.v1';
+      const p = snapshot.per_portion;
+      const macros = { kcal: p.kcal, protein_g: p.protein, carbs_g: p.carbs, fat_g: p.fat };
+      const parsed = recipeNutritionSchema.safeParse({ origin: estimateSource ? 'ai_estimate' : 'declared', source, per_portion: macros });
+      derived = parsed.success ? parsed.data : undefined;
+      if ((p.kcal ?? 0) > 20000 || [p.protein, p.carbs, p.fat].some(value => (value ?? 0) > 2000)) throw new CareError(400, 'Revisá las cantidades y el rinde: los valores por porción son demasiado altos.');
+      prepared = { ...input, nutrient_source: source, nutrition: derived, items: snapshot.lines.map(line => ({ name: line.name, quantity: line.food ? line.grams! : line.quantity, unit: line.food ? 'g' as const : line.unit as RecipeUnit })) };
+      card = { ...(card ?? unavailableCard(input.title)), macros: Object.values(macros).some(value => value != null) ? macros : null, macro_status: Object.values(macros).some(value => value != null) ? 'declared' : 'unavailable' };
+    }
+    const result = writeDraft(nutritionistId, prepared, card);
+    const saved = versions.get(result.current.id)!;
+    saved.catalog_recipe = snapshot;
+    saved.final_weight_g = input.final_weight_g ?? null;
+    saved.cooking_minutes = input.cooking_minutes ?? null;
+    if (linked) saved.nutrition = derived;
+    else if (prior?.catalog_recipe && !input.nutrition) saved.nutrition = undefined;
+    return memProfessional(recipes.get(input.id)!);
+  }
   const { data, error } = await getRequestDb().rpc('save_recipe_draft', { payload: { ...input, ...(card ? { card } : {}) } });
   recipeDbError(error);
   return asProfessional(data as Record<string, unknown>);

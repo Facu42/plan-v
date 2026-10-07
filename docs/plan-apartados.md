@@ -305,4 +305,4 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 Alcance confirmado: todo el dashboard de escritorio; mobile para otra etapa; Academy excluida. [Avance, orden de trabajo y verificación](dashboard-nutricionista-web-2026-10-07.md).
 
-Recetas continúa en `codex/nutri-recetas`: [contraste previo con Nutriboost, API de IA, decisión de ventana y tareas pendientes](recetas-dashboard-web-2026-10-07.md). Siempre contrastar cada apartado antes de desarrollarlo, incluyendo sus funciones de IA.
+Recetas continúa en `codex/nutri-recetas`: [contraste previo con Nutriboost, API de IA, ventana y composición vinculada a Alimentos](recetas-dashboard-web-2026-10-07.md). Dos incrementos verificados localmente: ventana con paciente contextual y composición reproducible de 11 nutrientes, medidas, tiempos y peso final. Migración preparada, sin aplicar en producción. Pendientes: filtros, favoritos, categorías culinarias y detalle. Siempre contrastar cada apartado antes de desarrollarlo, incluyendo sus funciones de IA.
