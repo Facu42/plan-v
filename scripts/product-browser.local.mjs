@@ -41,7 +41,8 @@ async function until(expression) {
 }
 async function button(text) {
   lastAction='botón '+text;
-  await until(`(()=>{const e=Array.from(document.querySelectorAll('button')).find(e=>e.textContent.trim()===${JSON.stringify(text)}&&!e.matches(':disabled')&&e.getClientRects().length);if(!e)return false;e.click();return true;})()`);
+  // Nombre accesible: texto visible o aria-label (los botones de ícono del diseño Nutrigo lo nombran así).
+  await until(`(()=>{const e=Array.from(document.querySelectorAll('button')).find(e=>(e.textContent.trim()===${JSON.stringify(text)}||e.getAttribute('aria-label')===${JSON.stringify(text)})&&!e.matches(':disabled')&&e.getClientRects().length);if(!e)return false;e.click();return true;})()`);
 }
 async function control(selector) {
   lastAction='control '+selector;
@@ -166,15 +167,15 @@ try {
   check(Boolean(resource),'turno, cuota y recurso guardados por la profesional');
   await logout();phase='paciente y recarga';await login(patient,'/app/plan');await reloadContains('Arroz con vegetales');
   for(const size of ['1440x1000','390x844']){await B('viewport',size);await until("document.body.innerText.includes('Arroz con vegetales')");check(!(await B('js',"document.body.innerText.includes('Borrador privado nuevo')")).includes('true'),'borrador oculto para paciente '+size);}
-  phase='comidas y hábitos';await B('goto',origin+'/app/diario');await button('Registrar esta comida');await until("document.body.innerText.includes('Ya registraste esta comida')");
+  phase='comidas y hábitos';await B('goto',origin+'/app/diario');await control('[aria-label="Registrar comida, agua o descanso"]');await button('Registrar esta comida');await until("document.body.innerText.includes('Ya registraste esta comida')");
   const mealRead=await read(professional,`/api/patients/${pid}`);check(mealRead.patient.meal_logs.length===1&&mealRead.patient.meal_logs[0].nutrition_origin==='declared','comida guardada desde receta y visible para profesional');
   await button('Registrar agua');await field('Vasos tomados hoy','3');await button('Guardar registro');await readUntil(patient,`/api/patients/${pid}`,r=>r.patient.hydration===3);
-  await button('Registrar descanso');await field('Minutos dormidos','480');await button('Guardar registro');await readUntil(patient,`/api/patients/${pid}`,r=>r.patient.sleep_minutes===480);
-  await reloadContains('Agua: 3 vasos');check((await read(professional,`/api/patients/${pid}`)).patient.sleep_minutes===480,'hidratación y descanso conservados al recargar y releer');
+  await control('[aria-label="Registrar comida, agua o descanso"]');await button('Registrar descanso');await field('Minutos dormidos','480');await button('Guardar registro');await readUntil(patient,`/api/patients/${pid}`,r=>r.patient.sleep_minutes===480);
+  await B('reload');await control('[aria-label="Registrar comida, agua o descanso"]');await until("document.body.innerText.includes('Agua: 3 vasos')");check((await read(professional,`/api/patients/${pid}`)).patient.sleep_minutes===480,'hidratación y descanso conservados al recargar y releer');
   phase='compras';await B('goto',origin+'/app/compras');await B('click','[aria-label="Agregar producto"]');await field('Producto','Manzana de prueba');await field('Cantidad','2');await button('Guardar');await until("document.body.innerText.includes('Producto agregado.')");
   await control('[aria-label="Marcar como comprado: Manzana de prueba"]');await until("document.body.innerText.includes('Lista guardada.')");await reloadContains('Manzana de prueba');
   check((await read(patient,`/api/patients/${pid}/shopping`)).list.items.some(i=>i.name==='Manzana de prueba'&&i.checked),'compras y marcas sobreviven a recarga');
-  phase='receta y favoritos';await B('goto',origin+'/app/recetas');await control('[aria-label="Ver Arroz con vegetales"]');await button('Guardar en favoritos');await until("document.body.innerText.includes('Guardada')");
+  phase='receta y favoritos';await B('goto',origin+'/app/recetas');await control('[aria-label="Ver Arroz con vegetales"]');await button('Guardar en favoritas');await until('!!document.querySelector(\'[aria-label="Quitar de favoritas"][aria-pressed="true"]\')');
   check((await read(patient,`/api/patients/${pid}/library`)).library.favorites.some(f=>f.item_id===recipe.id),'favorito guardado con la receta publicada');
   phase='mensajes';await B('goto',origin+'/app/mensajes');await B('fill','[aria-label="Escribir mensaje"]','Consulta ficticia del recorrido');await B('click','[aria-label="Enviar mensaje"]');await until("document.body.innerText.includes('Mensaje enviado.')");await reloadContains('Consulta ficticia del recorrido');
   check((await read(professional,`/api/patients/${pid}`)).patient.messages.some(m=>m.text==='Consulta ficticia del recorrido'),'mensaje persistente visible desde ambos roles');
@@ -183,16 +184,16 @@ try {
   pieces.forEach((content,index)=>{offsets.push(Buffer.byteLength(pdf));pdf+=`${index+1} 0 obj\n${content}\nendobj\n`;});const xref=Buffer.byteLength(pdf);pdf+='xref\n0 4\n0000000000 65535 f \n'+offsets.slice(1).map(offset=>String(offset).padStart(10,'0')+' 00000 n \n').join('')+`trailer\n<< /Size 4 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;await writeFile(pdfPath,pdf);
   phase='adjunto privado';await B('upload','[aria-label="Archivo adjunto"]',pdfPath);await until("document.body.innerText.includes('Adjunto: plan-v-prueba.pdf')");await B('fill','[aria-label="Escribir mensaje"]','Adjunto ficticio del recorrido');await B('click','[aria-label="Enviar mensaje"]');await until("document.body.innerText.includes('Mensaje enviado.')");await reloadContains('plan-v-prueba.pdf');
   const attached=(await read(professional,`/api/patients/${pid}`)).patient.messages.find(m=>m.text==='Adjunto ficticio del recorrido');check(attached?.attachment?.filename==='plan-v-prueba.pdf','adjunto guardado y visible desde ambos roles');
-  await button('Ver adjunto: plan-v-prueba.pdf');await until("Array.from(document.querySelectorAll('a')).some(a=>a.textContent.trim()==='Abrir plan-v-prueba.pdf')");
+  await button('Ver adjunto: plan-v-prueba.pdf');await until("Array.from(document.querySelectorAll('a')).some(a=>(a.textContent.trim()==='Abrir plan-v-prueba.pdf'||a.getAttribute('aria-label')==='Abrir plan-v-prueba.pdf'))");
   const documentUrl=await B('js',"Array.from(document.querySelectorAll('a')).find(a=>a.textContent.trim()==='Abrir plan-v-prueba.pdf').href");
   const documentResponse=await fetch(documentUrl);check(documentResponse.ok&&Buffer.from(await documentResponse.arrayBuffer()).equals(Buffer.from(pdf)),'paciente abre y descarga el PDF real del almacenamiento temporal');
   const proDocumentResponse=await fetch(apiOrigin+`/api/patients/${pid}/messages/${attached.id}/attachment`,{method:'POST',headers:{Authorization:'Bearer '+professional.token}});if(!proDocumentResponse.ok)throw Error('No se pudo abrir el adjunto profesional');const proDocument=await proDocumentResponse.json();const proResponse=await fetch(proDocument.url);check(proResponse.ok&&Buffer.from(await proResponse.arrayBuffer()).equals(Buffer.from(pdf)),'profesional descarga el mismo adjunto privado');
   const stranger=await identity('Paciente ajena ficticia');const denied=await fetch(apiOrigin+`/api/patients/${pid}/messages/${attached.id}/attachment`,{method:'POST',headers:{Authorization:'Bearer '+stranger.token}});check(denied.status===403,'otra paciente no obtiene el enlace del adjunto');
   phase='actividad';await B('goto',origin+'/app/ejercicio');await button('Registrar actividad');await field('Actividad','Caminata');await button('Guardar');await until("document.body.innerText.includes('Actividad guardada.')");
   await reloadContains('Caminata');check((await read(professional,`/api/patients/${pid}/exercise?audience=pro`)).exercise.activities.length===1,'actividad visible desde ambos roles tras recarga');
-  phase='medidas';await B('goto',origin+'/app/progreso');await button('Registrar medidas y archivos');await B('click','.care-consent label:has-text("Puedo cargar peso o medidas") input');await readUntil(patient,`/api/patients/${pid}/care?audience=patient`,r=>r.consented.includes('measurement'));await button('Registrar peso');await field('Peso','63','.care-form ');await button('Guardar registro');await until("document.body.innerText.includes('Registro guardado y disponible')");await B('click','[aria-label="Cerrar registros"]');await B('reload');
+  phase='medidas';await B('goto',origin+'/app/progreso');await button('Registrar peso y medidas');await B('click','.care-consent label:has-text("Puedo cargar peso o medidas") input');await readUntil(patient,`/api/patients/${pid}/care?audience=patient`,r=>r.consented.includes('measurement'));await button('Registrar peso');await field('Peso','63','.care-form ');await button('Guardar registro');await until("document.body.innerText.includes('Registro guardado y disponible')");await B('click','[aria-label="Cerrar registros"]');await B('reload');
   check((await read(professional,`/api/patients/${pid}/care?audience=pro`)).measurements.some(m=>m.kind==='weight'&&m.value_numeric===63&&m.unit==='kg'&&m.source==='patient'),'medida opcional persistente con consentimiento y origen paciente');
-  phase='fotos y estudios privados';await button('Registrar medidas y archivos');
+  phase='fotos y estudios privados';await button('Registrar peso y medidas');
   // El catálogo abre el acordeón al cargar y puede cerrarlo al terminar si ya
   // existe el permiso de medidas. Esperar los controles antes de abrirlo evita
   // intentar pulsar una casilla mientras cambia ese estado de carga.

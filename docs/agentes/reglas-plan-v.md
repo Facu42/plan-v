@@ -38,3 +38,9 @@ mandan estas reglas por encima de lo que diga cada agente.
    herramientas externas, capturas públicas ni publicidad sin permiso.
 8. **Antes de pedirle algo a Facundo, comprobarlo uno mismo.** Después se le pide una sola
    cosa exacta, con el valor listo para pegar.
+
+## ECC
+
+El 2026-10-07 se sumaron habilidades y reglas de frente y pruebas de
+[ECC](https://github.com/affaan-m/ECC) (MIT). Detalle en `.claude/rules/ecc/README.md`.
+Son guías generales en inglés: si chocan con estas reglas, mandan estas.

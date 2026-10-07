@@ -147,6 +147,8 @@ export type HabitLog = {
   hydration: number;
   energy: string | null;
   sleep_minutes: number | null;
+  /** Pasos del día declarados por la paciente (no se importan de dispositivos). */
+  steps?: number | null;
 };
 
 export type ActivityLog = {
@@ -194,6 +196,7 @@ export type Patient = {
   hydration: number;
   energy: string | null;
   sleep_minutes: number | null;
+  steps?: number | null;
   appointment: {
     when: string;
     duration: number;
@@ -1068,7 +1071,7 @@ export function recalculateAdherence(id: string): Patient | undefined {
   return updatePatient(id, { adherence_score: score, adherence_why: why });
 }
 
-export function upsertHabitLog(id: string, patch: { hydration?: number; energy?: string | null; sleep_minutes?: number }): Patient | undefined {
+export function upsertHabitLog(id: string, patch: { hydration?: number; energy?: string | null; sleep_minutes?: number; steps?: number }): Patient | undefined {
   const patient = getPatient(id);
   if (!patient) return undefined;
 
@@ -1081,6 +1084,7 @@ export function upsertHabitLog(id: string, patch: { hydration?: number; energy?:
   if (patch.hydration !== undefined) snapshot.hydration = patch.hydration;
   if (patch.energy !== undefined) snapshot.energy = patch.energy;
   if (patch.sleep_minutes !== undefined) snapshot.sleep_minutes = patch.sleep_minutes;
+  if (patch.steps !== undefined) snapshot.steps = patch.steps;
 
   updatePatient(id, snapshot);
   return recalculateAdherence(id);

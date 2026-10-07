@@ -91,6 +91,8 @@ export type HabitLog = {
   hydration: number;
   energy: string | null;
   sleep_minutes: number | null;
+  /** Pasos del día declarados por la paciente (no se importan de dispositivos). */
+  steps?: number | null;
 };
 
 export type ActivityLog = {
@@ -164,6 +166,7 @@ export type Patient = {
   hydration: number;
   energy: string | null;
   sleep_minutes: number | null;
+  steps?: number | null;
   appointment: {
     when: string;
     duration: number;

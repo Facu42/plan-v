@@ -35,13 +35,17 @@ describe.each([false,true])('pantallas principales MCP (celular %s)',mobile=>{
     const html=renderToStaticMarkup(<NutrigoHome patient={{...patient,hydration:5,sleepMinutes:450,nutritionLogCount:0}} onNavigate={navigate} onRecord={navigate} onHydration={navigate} onRest={navigate} onLogMeal={navigate}/>);
     expect(html).toContain('72');expect(html).toContain('7,5');expect(html).not.toContain('8050');expect(html).not.toContain('1240');expect(html).not.toContain('1.3/2');
     expect(html.match(/data-name="Card Statistic - Dashboard"/g)?.length).toBe(4);
-    expect(html).toContain('background:transparent');
+    // Los gráficos del archivo se dibujan con el valor real; ningún bloque queda oculto.
+    expect(html).toContain('conic-gradient');expect(html).not.toContain('visibility:hidden');
+    expect(html).toContain('1,3/2');
   });
   it('menú conserva datos y estimación de la receta asignada',()=>{
     context.mobile=mobile;context.data={recipes:[recipe],favorites:[]};
     const html=renderToStaticMarkup(<NutrigoMenu patient={patient} onNavigate={navigate}/>);
     expect(html).toContain(recipe.title);expect(html).toContain('620');expect(html).toContain('Ver '+recipe.title);
-    expect(html).toContain('Nutrientes estimados por IA');
+    // La ficha destacada muestra la procedencia («Procedencia: Estimados por IA») en el lugar del puntaje.
+    expect(html).toContain('Procedencia');expect(html).toContain('Estimados por IA');expect(html).toContain('Sin puntaje');expect(html).toContain('Sin reseñas');
+    expect(html).not.toContain('mcp-screen-state');if(!mobile)expect(html).toContain('aria-label="Ver plan por fecha"');expect(html).toContain('aria-label="Mostrar sólo favoritas"');
     expect(html).not.toContain('Grilled Turkey');expect(html).not.toContain('Avocado Toast');
     expect(html).not.toContain('Greek Salad');expect(html).not.toContain('Blueberry Protein');expect(html).not.toContain('Oatmeal with Almond');
     expect(html).not.toContain('125');expect(html).not.toContain('85/100');expect(html).not.toContain('/10');expect(html).not.toContain('4.9');
@@ -86,7 +90,11 @@ describe.each([false,true])('pantallas principales MCP (celular %s)',mobile=>{
     context.mobile=mobile;context.data={plan:{id:'plan-real',version:1,timezone:'America/Argentina/Buenos_Aires',period_start:'2026-10-03',period_end:'2026-10-03',published_at:'2026-10-03T12:00:00Z',items:[{id:'real-item',for_date:'2026-10-03',slot:'Almuerzo',recipe_id:null,recipe_version:null,recipe_title:null,recipe:null,free_text:recipe.title,portions:.5,public_note:'Indicación pública',recipe_proposal:recipe}]}};
     const html=renderToStaticMarkup(<NutrigoPlan patient={patient} onNavigate={navigate}/>);
     expect(html).toContain(recipe.title);expect(html).toContain('Sábado');expect(html).toContain('Indicación pública');expect(html).not.toContain('September 2028');expect(html).not.toContain('Avocado Toast');
-    expect(html.match(/<button[^>]*aria-label="Semana anterior"[^>]*>/)?.[0]).toContain('disabled');expect(html.match(/<button[^>]*aria-label="Semana siguiente"[^>]*>/)?.[0]).toContain('disabled');
+    // El escritorio tiene flechas de semana; el celular sólo el selector de semana del archivo.
+    if(!mobile){expect(html.match(/<button[^>]*aria-label="Semana anterior"[^>]*>/)?.[0]).toContain('disabled');expect(html.match(/<button[^>]*aria-label="Semana siguiente"[^>]*>/)?.[0]).toContain('disabled');}
+    expect(html.match(/<button[^>]*aria-label="Semana del plan"[^>]*>/)?.[0]).toContain('disabled');
+    // Fecha corta y período en el lugar del mes del archivo; nada fuera del marco.
+    expect(html).toContain('3 oct');expect(html).not.toContain('mcp-screen-state');
   });
   it('buscar en el plan filtra también colaciones, notas y accesos al detalle',()=>{
     context.mobile=mobile;context.data={plan:{id:'plan-real',version:1,period_start:'2026-10-03',period_end:'2026-10-03',items:[

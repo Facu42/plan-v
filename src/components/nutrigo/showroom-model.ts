@@ -25,6 +25,7 @@ export function buildShowroomPatient(patient: Patient, now = new Date()) {
     hydration: patient.hydration, energy: patient.energy ?? 'Sin registro',
     sleep: patient.sleep_minutes === null ? 'Sin registro' : `${Math.round(patient.sleep_minutes / 6) / 10} h`,
     sleepMinutes: patient.sleep_minutes,
+    steps: patient.steps ?? null,
     adherence: patient.adherence_score, macros, kcal: macros.kcal, nutritionLogCount: nutritionLogs.length, nutritionEstimated: nutritionLogs.some(log=>log.nutrition_origin==='ai_estimate'), journey,
     appointment: patient.appointment ? {
       when: patient.appointment.when,

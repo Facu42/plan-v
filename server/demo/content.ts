@@ -36,11 +36,13 @@ function mondayOf(iso: string): string {
   return addDays(iso, -((weekday + 6) % 7));
 }
 
-type Recipe = { title: string; portions: number; steps: string[]; items: Array<{ name: string; quantity: number; unit: 'g' | 'ml' | 'u' | 'cdita' | 'cda' | 'taza' }> };
+/** Nutrientes por porción declarados por el consultorio (kcal, proteínas, carbohidratos, grasas). */
+type Recipe = { title: string; portions: number; per_portion: { kcal: number; protein_g: number; carbs_g: number; fat_g: number }; steps: string[]; items: Array<{ name: string; quantity: number; unit: 'g' | 'ml' | 'u' | 'cdita' | 'cda' | 'taza' }> };
 
 const RECIPES: Recipe[] = [
   {
     title: 'Bowl tibio de pollo y vegetales',
+    per_portion: { kcal: 480, protein_g: 38, carbs_g: 46, fat_g: 14 },
     portions: 2,
     steps: ['Cortar el pollo en tiras y dorarlo a la plancha.', 'Saltear zapallo, zanahoria y brócoli 8 minutos.', 'Servir sobre arroz integral con semillas.'],
     items: [
@@ -53,6 +55,7 @@ const RECIPES: Recipe[] = [
   },
   {
     title: 'Yogur griego, granola y frutas',
+    per_portion: { kcal: 320, protein_g: 18, carbs_g: 38, fat_g: 10 },
     portions: 1,
     steps: ['Servir el yogur en un bowl.', 'Sumar la fruta cortada y la granola por encima.'],
     items: [
@@ -64,6 +67,7 @@ const RECIPES: Recipe[] = [
   },
   {
     title: 'Tortilla de espinaca al horno',
+    per_portion: { kcal: 210, protein_g: 16, carbs_g: 8, fat_g: 12 },
     portions: 3,
     steps: ['Batir los huevos con la ricota.', 'Sumar la espinaca salteada y la cebolla.', 'Hornear 25 minutos a 180 °C.'],
     items: [
@@ -75,6 +79,7 @@ const RECIPES: Recipe[] = [
   },
   {
     title: 'Ensalada de lentejas y vegetales',
+    per_portion: { kcal: 390, protein_g: 20, carbs_g: 52, fat_g: 10 },
     portions: 2,
     steps: ['Cocinar las lentejas 20 minutos y enfriar.', 'Mezclar con tomate, pepino y cebolla morada.', 'Condimentar con limón y aceite de oliva.'],
     items: [
@@ -86,6 +91,7 @@ const RECIPES: Recipe[] = [
   },
   {
     title: 'Merluza al horno con papas',
+    per_portion: { kcal: 360, protein_g: 30, carbs_g: 38, fat_g: 8 },
     portions: 2,
     steps: ['Cortar las papas en rodajas finas y hornear 15 minutos.', 'Sumar la merluza con limón y perejil.', 'Hornear 15 minutos más.'],
     items: [
@@ -168,6 +174,7 @@ export async function seedDemoContent(fetcher: Fetcher, now = new Date(), target
       steps: recipe.steps,
       nutrient_source: 'Tabla del consultorio 2026',
       items: recipe.items,
+      nutrition: { origin: 'declared', source: 'Tabla del consultorio 2026', per_portion: recipe.per_portion },
     });
     if (!saved) continue;
     await call(`publicar ${recipe.title}`, `/api/recipes/${id}/publish`, 'POST', { expected_version: 1, expected_revision: saved.recipe.current.revision });
@@ -189,6 +196,13 @@ export async function seedDemoContent(fetcher: Fetcher, now = new Date(), target
     });
     if (plan) await call('publicar plan', `/api/plans/${planId}/publish`, 'POST', { expected_version: 1, expected_snapshot: planReviewSnapshot(plan.plan.current) });
   }
+
+  // Meta de calorías y macros publicada por la nutricionista (Mifflin-St Jeor).
+  const workspace = await call('meta actual', `/api/patients/${MAIN}/nutrition-target?audience=pro`, 'GET');
+  if (workspace) await call('meta de calorías', `/api/patients/${MAIN}/nutrition-target?audience=pro`, 'PUT', {
+    inputs: { sex: 'femenino', age: 34, weight_kg: 66.3, height_cm: 165, activity: 'ligera', goal: 'bajar', adjust_pct: -15, protein_g_per_kg: 1.6, fat_pct: 30 },
+    publish: true, expected_revision: workspace.revision,
+  });
 
   // Medidas: permiso y seis semanas de peso, cintura y cadera.
   const consent = (purpose: ConsentPurpose) => {
@@ -231,6 +245,8 @@ export async function seedDemoContent(fetcher: Fetcher, now = new Date(), target
 
   // Hábitos de hoy.
   await call('hábitos de hoy', `/api/patients/${MAIN}/habits`, 'PATCH', { hydration: 5, sleep_minutes: 445, energy: 'Buena' });
+  // Aparte: si la base todavía no tiene la columna de pasos, el resto de los hábitos ya quedó guardado.
+  await call('pasos de hoy', `/api/patients/${MAIN}/habits`, 'PATCH', { steps: 6420 });
 
   // Actividad del dispositivo (card superior de Ejercicio) y la declarada a mano.
   for (const [daysAgo, activity, minutes, intensity, kcal] of [[1, 'Caminata', 40, 'moderada', 180], [3, 'Bicicleta fija', 30, 'intensa', 240], [5, 'Pilates', 50, 'suave', null]] as const) {
@@ -246,7 +262,7 @@ export async function seedDemoContent(fetcher: Fetcher, now = new Date(), target
     await call(`actividad ${activity.activity}`, `/api/patients/${MAIN}/activities`, 'POST', activity);
   }
   const [mobility, squat, bridge, walk] = SEEDED_EXERCISES;
-  await call('rutina', `/api/patients/${MAIN}/routines?audience=pro`, 'POST', {
+  const routine = await call('rutina', `/api/patients/${MAIN}/routines?audience=pro`, 'POST', {
     title: 'Fuerza suave en casa',
     items: [
       { exercise_id: mobility.id, sets: 2, reps: 10, rest_seconds: 30 },
@@ -255,6 +271,15 @@ export async function seedDemoContent(fetcher: Fetcher, now = new Date(), target
       { exercise_id: walk.id, sets: 1, reps: 1, rest_seconds: 0 },
     ],
   });
+  // Series ya hechas de la rutina esta semana (progreso de la tarjeta «Actividad»).
+  const assignment = (routine?.exercise?.assignments as Array<{ id: string; status: string }> | undefined)?.find((row) => row.status === 'active');
+  if (assignment) {
+    for (const [activity, sets, reps] of [[mobility.name, 2, 10], [squat.name, 2, 12], [bridge.name, 1, 12]] as const) {
+      await call(`series ${activity}`, `/api/patients/${MAIN}/activities`, 'POST', {
+        activity, duration_minutes: 15, intensity: 'suave', assignment_id: assignment.id, sets, reps,
+      });
+    }
+  }
 
   // Historial de consultas: Sofía confirma y Marina pide otro horario.
   if (target.appointments) {

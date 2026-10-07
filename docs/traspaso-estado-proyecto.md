@@ -57,6 +57,13 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 
 ## Lo pendiente
 
+- Pantallas de la paciente iguales a Nutrigo (2026-10-07), rama `claude/inspiring-lovelace-nfsot9`:
+  ya no se oculta ni se vacía ningún bloque del archivo; comparador `scripts/nutrigo-compare.mjs`.
+  Migración de pasos `20261007120000_habit_steps.sql` **aplicada en producción** el 2026-10-07
+  con la frase escrita de Facundo; asesor de seguridad sin avisos nuevos. Datos que el diseño muestra y faltan, con propuestas:
+  `docs/nutrigo-igual-al-archivo-2026-10-07.md`. Pantallas de la nutricionista, ingreso y
+  administración van en otra rama.
+
 - IA gratuita, pedido del 2/10: el predeterminado seguía siendo `gpt-4o-mini` y no cumplía
   lo acordado. Rama `codex/ia-solo-modelos-gratuitos`: `openrouter/free`, rechazo de pagos
   salvo habilitación explícita, límite de precio cero y fotos pagas deshabilitadas.
