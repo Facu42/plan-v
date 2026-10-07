@@ -71,9 +71,14 @@ de seguridad están documentadas y probadas. Ante un rechazo definitivo de una
 reserva, se elimina sólo el candidato no referenciado; una respuesta de red incierta
 conserva el archivo hasta que se pueda confirmar su uso.
 
-**No se aplicó la migración ni se cambiaron variables de producción.** Las reglas
-del proyecto requieren el OK escrito de Facundo antes de ese paso. El PR se prepara
-sobre la rama de la simulación del consultorio para preservar la pila anterior.
+**Estado en producción (comprobado el 2026-10-07):** la migración `menu_dish_covers`
+está aplicada en `plan-v-app` (versión `20261006234740`, con su disparador activo) y
+la API y el worker de Railway tienen las cuatro variables de Cloudflare (se comprobaron
+solo los nombres, no los valores). **Todavía nunca se generó una foto en producción:** la
+cola tiene 0 filas, porque los tres planes publicados son del 5/10, anteriores al
+disparador. Para encolarlas, la nutricionista publica un menú de nuevo o aprieta
+«Preparar fotos pendientes» en la pestaña Planes. Falta confirmar con esa prueba el plan
+gratuito de la cuenta de Cloudflare y los permisos del token.
 
 ## Evidencia de aceptación
 
