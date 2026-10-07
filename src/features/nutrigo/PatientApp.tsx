@@ -9,6 +9,7 @@ import { PatientBodyDataCard, PatientNutritionTarget } from '../../components/nu
 import { ShowroomPagos } from '../../components/nutrigo/ShowroomPagos';
 import { ShowroomPrivacy } from '../../components/nutrigo/ShowroomPrivacy';
 import { MealLogModal } from '../../components/patient/MealLogModal';
+import { suggestSlot } from '../../components/patient/meal-log-helpers';
 import { FramePair } from './FramePair';
 import { FeeNoticeProvider } from './fee-notice';
 import { nodeName } from './SourceView';
@@ -41,7 +42,7 @@ export function NutrigoPatientApp({patient,page,onNavigate,onSignOut,onEditIntak
   const fullPatient=useAppStore(state=>state.patients.find(item=>item.id===patient.id));
   const [dialog,setDialog]=useState<'records'|'water'|'rest'|'steps'|null>(null),[slot,setSlot]=useState<string|null>(null),[privacy,setPrivacy]=useState(false);
   const common={patient,onNavigate,onSignOut,query,now};
-  const onRecord=()=>setDialog('records'),onHydration=()=>setDialog('water'),onRest=()=>setDialog('rest'),onSteps=()=>setDialog('steps'),onLogMeal=(mealSlot='Almuerzo')=>setSlot(mealSlot);
+  const onRecord=()=>setDialog('records'),onHydration=()=>setDialog('water'),onRest=()=>setDialog('rest'),onSteps=()=>setDialog('steps'),onLogMeal=(mealSlot:string=suggestSlot(new Date().getHours()))=>setSlot(mealSlot);
   let screen;
   if(page==='inicio')screen=<NutrigoHome {...common} onRecord={onRecord} onHydration={onHydration} onRest={onRest} onSteps={onSteps} onLogMeal={onLogMeal}/>;
   else if(page==='recetas')screen=<NutrigoMenu {...common}/>;

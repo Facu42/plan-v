@@ -11,6 +11,8 @@ import { latestWeight } from '../../../lib/measurement-display';
 import { recipeNutritionLabel, type NutrientAmounts } from '../../../types/ai-nutrition';
 import { planSlotKey, PLAN_SLOT_KEYS } from '../../../types/plans';
 import { EXERCISE_CATEGORY_LABELS } from '../../../types/exercise';
+import { weightGauge } from './weight-gauge';
+import '../home-motion.css';
 import { barFill, descendants, fields, formatNumber, leaf, listChildren, objects, percent, Ring, source, Stateful, timeLabel, useRemote, dateId, type ScreenProps } from './shared';
 
 async function homeData(id: string, signal: AbortSignal) {
@@ -65,7 +67,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
   const startWeight=weights[0]?.value_numeric??weight;
   // Plan V todavía no guarda una meta de peso: los extremos muestran el inicio y «Meta».
   const goalWeight:number|null=null;
-  const weightPct=goalWeight!=null&&startWeight!=null&&weight!=null&&startWeight!==goalWeight?percent(startWeight-weight,startWeight-goalWeight):null;
+  const gauge=weightGauge(weight,goalWeight,startWeight);
   const ruler=weight==null?[]:[10,5,0,-5,-10].map(step=>Math.round(weight/5)*5+step);
 
   // Calorías y macros revisados del día contra la meta indicada.
@@ -147,14 +149,14 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
       })};
     }
     if(name==='Widget Weight Data'){const weightLeaf:SourceResolver=child=>{
-      if(nodeName(child)==='Chart'&&descendants(child).some(n=>nodeName(n)==='Donut Progress'))return donut(child,<span className="absolute left-0 top-0 block size-[204px]"><Ring pct={weightPct??(weight!=null?100:0)} color="#ffa257" track="#ffe6b5" thickness={30} half/></span>,['Donut Base','Mask group','Donut Progress'],weightLeaf);
+      if(nodeName(child)==='Chart'&&descendants(child).some(n=>nodeName(n)==='Donut Progress'))return donut(child,<span className="absolute left-0 top-0 block size-[204px]"><Ring pct={gauge.pct} color="#ffa257" thickness={30} half hatch="#ffcb65"/></span>,['Donut Base','Mask group','Donut Progress'],weightLeaf);
       if(text(child,'78'))return {text:formatNumber(weight)};
       if(text(child,'kg','Kg'))return {text:weightDisplay.unit};
       if(text(child,'Current Weight'))return {text:'Peso actual'};
       if(sample(child,/kg left/))return {text:goalWeight!=null&&weight!=null?`${formatNumber(Math.abs(weight-goalWeight))} ${weightDisplay.unit} para la meta`:startWeight!=null&&weight!=null&&weights.length>1?`${weight<=startWeight?'−':'+'}${formatNumber(Math.abs(weight-startWeight))} ${weightDisplay.unit} desde el inicio`:'Primer registro'};
-      // Extremos del arco: peso inicial y meta (sin meta cargada, queda vacío; el ancho del archivo es de dos cifras).
-      if(text(child,'85'))return {text:startWeight==null?'':String(Math.round(startWeight))};
-      if(text(child,'65'))return {text:goalWeight!=null?String(Math.round(goalWeight)):''};
+      // Extremos del arco: escala de la regla (o inicio y meta si la nutricionista cargó una).
+      if(text(child,'85'))return {text:gauge.from==null?'':String(gauge.from)};
+      if(text(child,'65'))return {text:gauge.to==null?'':String(gauge.to)};
       if(/Button/.test(nodeName(child)))return {onClick:onRecord,label:'Registrar peso'};
       if(text(child,'🎉'))return {text:''};
       return undefined;

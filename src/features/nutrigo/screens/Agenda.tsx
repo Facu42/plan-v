@@ -2,18 +2,18 @@ import { useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react
 import { FramePair } from '../FramePair';
 import { nodeName, sourceText, type SourceBinding, type SourceNode, type SourceResolver } from '../SourceView';
 import { api } from '../../../api/client';
-import { plansApi } from '../../../api/plans';
 import { useAppStore } from '../../../store/useAppStore';
+import { Icon, type IconName } from '../../../components/shared/Icon';
 import { canLeaveWorkspace } from '../../../components/nutrigo/unsaved-changes';
-import { descendants, EmptyState, errorText, idEnds, leaf, objects, RecordDialog, safeUrl, source, Stateful, useRemote, type ScreenProps } from './shared';
+import { descendants, EmptyState, errorText, idEnds, leaf, objects, RecordDialog, safeUrl, source, Stateful, type ScreenProps } from './shared';
 import { agendaDateId as dateId, agendaWeekdays as weekdays, buildAgendaEvents, monthAnchor, wallDate, wallDateId, type AgendaEvent as Event } from './agenda-data';
 export { nextConsultation } from './agenda-data';
 
 type Props = ScreenProps & { onConfirm?: (reply: 'attending' | 'needs_change') => Promise<void> | void; onReschedule?: (day: string, time: string) => Promise<void> | void };
 type View = 'month' | 'week' | 'day';
-const kindLabel = { plan: 'Plan', meal: 'Diario', activity: 'Actividad', consult: 'Consulta' };
-const eventColor = { plan: '#c2e66e', meal: '#dff9a2', activity: '#ffcb65', consult: '#ffa257' };
-const kindOrder: Event['kind'][] = ['consult', 'plan', 'meal', 'activity'];
+const kindLabel = { consult: 'Consulta' };
+const eventColor = { consult: '#ffa257' };
+const kindOrder: Event['kind'][] = ['consult'];
 const viewLabel: Record<View, string> = { month: 'Mes', week: 'Semana', day: 'Día' };
 /** El panel de detalle muestra dos tarjetas por página, como el archivo. */
 const DETAIL_PAGE = 2;
@@ -28,7 +28,6 @@ const sample = (node: SourceNode, ...texts: string[]) => leaf(node) && texts.inc
 const startsWith = (node: SourceNode, ...texts: string[]) => leaf(node) && texts.some(text => sourceText(node).startsWith(text));
 
 export function NutrigoAgenda({ patient, now = new Date(), onNavigate, onSignOut, onConfirm, onReschedule }: Props) {
-  const plan = useRemote(`${patient.id}:agenda-plan`, signal => plansApi.published(patient.id, signal));
   const today = dateId(now);
   const [month, setMonth] = useState(() => monthAnchor(wallDate(today))); const [selected, setSelected] = useState(today); const [view, setView] = useState<View>('month'); const [hidden, setHidden] = useState<Set<Event['kind']>>(new Set());
   const [detail, setDetail] = useState({ day: today, page: 0 }); const page = detail.day === selected ? detail.page : 0;
@@ -38,7 +37,14 @@ export function NutrigoAgenda({ patient, now = new Date(), onNavigate, onSignOut
   const closeReschedule = () => { if (canLeaveWorkspace()) setChanging(false); };
   const openReschedule = () => { setError(''); setChanging(true); };
   const rescheduleDirty = proposedDay !== (patient.appointment?.when.split(' · ')[0] || 'Lunes') || proposedTime !== (patient.appointment?.when.split(' · ')[1] || '15:00');
-  const all = useMemo(() => buildAgendaEvents(patient, plan.data?.plan ?? null, now), [patient, plan.data, now]);
+  const all = useMemo(() => buildAgendaEvents(patient, now), [patient, now]);
+  const upcoming = all.filter(item => item.day >= today);
+  const confirmed = upcoming.filter(() => patient.appointment?.patient_reply === 'attending');
+  const stats: { label: string; total: number; icon: IconName }[] = [
+    { label: 'Próximas', total: upcoming.length, icon: 'calendar' },
+    { label: 'Confirmadas', total: confirmed.length, icon: 'check' },
+    { label: 'Por confirmar', total: upcoming.length - confirmed.length, icon: 'clock' },
+  ];
   const events = all.filter(item => !hidden.has(item.kind));
   const selectedEvents = events.filter(item => item.day === selected).sort((a, b) => kindOrder.indexOf(a.kind) - kindOrder.indexOf(b.kind) || a.time.localeCompare(b.time));
   const pages = Math.max(1, Math.ceil(selectedEvents.length / DETAIL_PAGE)); const shownPage = Math.min(page, pages - 1);
@@ -106,45 +112,36 @@ export function NutrigoAgenda({ patient, now = new Date(), onNavigate, onSignOut
           if (startsWith(child, 'Morning Yoga', 'General Health')) return { text: item.title };
           if (startsWith(child, 'Tuesday,')) return { text: fullDate(item.day) };
           if (leaf(child) && /^\d{1,2}:\d{2} (AM|PM)$/.test(sourceText(child))) return { text: item.time || 'Sin horario' };
-          if (startsWith(child, 'Sunrise Yoga', 'Central Health')) return { text: item.kind === 'consult' ? (appointment?.channel === 'video' ? 'Videollamada' : 'Consultorio de tu nutricionista') : item.kind === 'plan' ? 'Plan de comidas publicado' : item.kind === 'meal' ? 'Registrado en tu diario' : 'Actividad registrada' };
+          if (startsWith(child, 'Sunrise Yoga', 'Central Health')) return { text: appointment?.channel === 'video' ? 'Videollamada' : 'Consultorio de tu nutricionista' };
           if (startsWith(child, 'Focus on', 'Annual check-up')) return { text: item.detail || 'Sin indicaciones adicionales.' };
           if (nodeName(child) === 'Details' && child.props.className && /h-\[108px\]/.test(String(child.props.className))) return { props: { style: { height: 'auto', minHeight: 108 } } };
-          if (nodeName(child) === 'Action' && !(item.kind === 'consult' && meetUrl && editButton)) return { props: { style: { flexWrap: 'wrap' } } };
+          if (nodeName(child) === 'Action' && !(meetUrl && editButton)) return { props: { style: { flexWrap: 'wrap' } } };
           if (nodeName(child) === 'Action' && editButton) return { props: { style: { flexWrap: 'wrap' } }, children: <>{source(editButton, node => node === editButton ? { tag: 'a', props: { href: meetUrl, target: '_blank', rel: 'noopener noreferrer' } } : leaf(node) ? { text: 'Entrar a videollamada' } : undefined, 'video')}{objects(child).map((button, position) => source(button, bind, position))}</> };
           if (nodeName(child) === 'Button CTA') {
             const secondary = sourceText(child) === 'Edit';
-            if (item.kind === 'consult') return secondary ? { onClick: openReschedule, label: 'Cambiar horario de la consulta', props: { disabled: busy } } : { onClick: () => void reply('attending'), label: 'Confirmar asistencia a la consulta', props: { disabled: busy || appointment?.patient_reply === 'attending' } };
-            return secondary ? { onClick: () => onNavigate('mensajes'), label: `Consultar sobre ${item.title}` } : { onClick: () => onNavigate(item.kind === 'activity' ? 'ejercicio' : item.kind === 'meal' ? 'diario' : 'plan'), label: `Ver ${item.title} en ${kindLabel[item.kind].toLocaleLowerCase('es')}` };
+            return secondary ? { onClick: openReschedule, label: 'Cambiar horario de la consulta', props: { disabled: busy } } : { onClick: () => void reply('attending'), label: 'Confirmar asistencia a la consulta', props: { disabled: busy || appointment?.patient_reply === 'attending' } };
           }
-          if (sample(child, 'Edit')) return { text: item.kind === 'consult' ? 'Cambiar' : 'Consultar' };
-          if (sample(child, 'Remove')) return { text: item.kind === 'consult' ? (appointment?.patient_reply === 'attending' ? 'Confirmada' : 'Confirmar') : `Ver ${kindLabel[item.kind].toLocaleLowerCase('es')}` };
+          if (sample(child, 'Edit')) return { text: 'Cambiar' };
+          if (sample(child, 'Remove')) return { text: appointment?.patient_reply === 'attending' ? 'Confirmada' : 'Confirmar' };
           return undefined;
         };
         return source(card, bind, item.id);
-      }) : <EmptyState text={`${fullDate(selected)}: sin eventos.`} />}
-      {pages > 1 && <div className="flex w-full items-center justify-between gap-[8px]"><p className="font-['Poppins:Regular'] text-[12px] leading-[1.3] text-[#8a8c90]">{shownPage * DETAIL_PAGE + 1}–{Math.min(selectedEvents.length, (shownPage + 1) * DETAIL_PAGE)} de {selectedEvents.length} eventos</p><div className="flex gap-[8px]">{pageButton('Anteriores', -1)}{pageButton('Siguientes', 1)}</div></div>}
-      <p className="w-full font-['Poppins:Regular'] text-[11px] leading-[1.4] text-[#8a8c90]">Fechas y horas de Argentina. Las comidas siguen las fechas del plan publicado.</p>
+      }) : <EmptyState text={`${fullDate(selected)}: sin citas.`} />}
+      {pages > 1 && <div className="flex w-full items-center justify-between gap-[8px]"><p className="font-['Poppins:Regular'] text-[12px] leading-[1.3] text-[#8a8c90]">{shownPage * DETAIL_PAGE + 1}–{Math.min(selectedEvents.length, (shownPage + 1) * DETAIL_PAGE)} de {selectedEvents.length} citas</p><div className="flex gap-[8px]">{pageButton('Anteriores', -1)}{pageButton('Siguientes', 1)}</div></div>}
+      <p className="w-full font-['Poppins:Regular'] text-[11px] leading-[1.4] text-[#8a8c90]">Fechas y horas de Argentina. Acá solo ves tus citas con la nutricionista.</p>
     </>;
   };
 
-  const category = (node: SourceNode, kind: Event['kind'], label?: string): SourceBinding => ({
+  const category = (kind: Event['kind']): SourceBinding => ({
     onClick: () => toggle(kind), label: `Mostrar ${kindLabel[kind].toLocaleLowerCase('es')}`,
     props: { 'aria-pressed': !hidden.has(kind), style: { opacity: hidden.has(kind) ? 0.5 : 1 } },
-    ...(label ? { children: objects(node).map((child, index) => source(child, part => {
-      // Diario no existe en el archivo: misma casilla de 16 con el Green-Light del pack.
-      if (nodeName(part) === 'Checkbox') return { children: <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center rounded-[4px]" style={{ background: eventColor.meal }}><svg viewBox="0 0 16 16" width="12" height="12"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="#272932" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg></span> };
-      if (leaf(part)) return { text: label };
-      return undefined;
-    }, index)) } : {}),
   });
 
   const resolver: SourceResolver = node => {
     const name = nodeName(node); const text = sourceText(node);
-    if (name === 'Category List') {
-      const first = objects(node).find(child => nodeName(child) === 'Category');
-      return { props: { style: { flexWrap: 'wrap', rowGap: 8 } }, children: <>{objects(node).map((child, index) => source(child, resolver, index))}{first && source(first, child => child === first ? category(first, 'meal', 'Diario') : undefined, 'meal')}</> };
-    }
-    if (name === 'Category' && node.tag !== 'p' && ['Meal Planning', 'Physical Activities', 'Appointments/Events'].includes(text) && has(node, 'Checkbox')) return category(node, text === 'Meal Planning' ? 'plan' : text === 'Physical Activities' ? 'activity' : 'consult');
+    // La agenda solo tiene citas: queda la categoría del archivo «Appointments/Events» y se ocultan las de comidas y actividad.
+    if (name === 'Category List') return { props: { style: { flexWrap: 'wrap', rowGap: 8 } }, children: <>{objects(node).filter(child => /Appointments/.test(sourceText(child))).map((child, index) => source(child, resolver, index))}</> };
+    if (name === 'Category' && node.tag !== 'p' && /Appointments/.test(text) && has(node, 'Checkbox')) return { ...category('consult'), children: objects(node).map((child, index) => source(child, part => leaf(part) && /Appointments/.test(sourceText(part)) ? { text: 'Citas' } : undefined, index)) };
     if (name === 'Calendar' && has(node, 'Row-Calendar-Body')) {
       const parts = objects(node); const rows = parts.filter(child => nodeName(child) === 'Row-Calendar-Body'); const row = rows[0];
       const head = parts.find(child => nodeName(child) === 'Row-Calendar-Head');
@@ -172,8 +169,17 @@ export function NutrigoAgenda({ patient, now = new Date(), onNavigate, onSignOut
     if (name === 'Button More' && idEnds(node, '2:4233')) return { onClick: () => { setSelected(today); setMonth(monthAnchor(wallDate(today))); }, label: 'Volver al día de hoy' };
     if (name === 'Button More' && idEnds(node, '433:18171')) return schedule;
     if (name === 'Card Statistic - Calendar' || (name === '' && /^(Total Meal Planning Schedule|Meal Planning)/.test(text) && text.endsWith('agendas'))) {
-      const kind = /Physical/.test(text) ? 'activity' : /Appointments/.test(text) ? 'consult' : 'plan'; const total = all.filter(item => item.kind === kind).length;
-      return { children: objects(node).map((child, index) => source(child, part => leaf(part) && /^\d+$/.test(sourceText(part)) ? { text: total } : sample(part, 'agendas') ? { text: total === 1 ? 'evento' : 'eventos' } : sample(part, 'Meal Planning') ? { text: 'Plan' } : sample(part, 'Physical Activities') ? { text: 'Actividad' } : sample(part, 'Appointments/Events') ? { text: 'Consultas' } : undefined, index)) };
+      const stat = /Physical/.test(text) ? stats[1] : /Appointments/.test(text) ? stats[2] : stats[0];
+      return { children: objects(node).map((child, index) => source(child, part => {
+        if (nodeName(part) === 'Icon/Special/ForkKnife' || /^Icon\//.test(nodeName(part))) return { children: <Icon name={stat.icon} size={16} /> };
+        if (leaf(part) && /^\d+$/.test(sourceText(part))) return { text: stat.total };
+        if (sample(part, 'agendas')) return { text: stat.total === 1 ? 'cita' : 'citas' };
+        if (leaf(part) && /^Total /.test(sourceText(part))) return { text: stat.label };
+        if (sample(part, 'Meal Planning')) return { text: stats[0].label };
+        if (sample(part, 'Physical Activities')) return { text: stats[1].label };
+        if (sample(part, 'Appointments/Events')) return { text: stats[2].label };
+        return undefined;
+      }, index)) };
     }
     if (name === 'Left Section' && has(node, 'Div Title')) return { props: { style: { position: 'relative' } }, children: <>{objects(node).map((child, index) => source(child, resolver, index))}<input ref={picker} tabIndex={-1} aria-hidden="true" aria-label="Elegir mes" type="month" value={`${month.getUTCFullYear()}-${String(month.getUTCMonth() + 1).padStart(2, '0')}`} onChange={event => { const [year, value] = event.target.value.split('-').map(Number); if (year && value) setMonth(new Date(Date.UTC(year, value - 1, 1, 12))); }} className="pointer-events-none absolute bottom-0 right-0 h-px w-px opacity-0" /></> };
     if (name === 'Div Title' && /September 2028/.test(text)) return { onClick: openPicker, label: `Elegir mes: ${monthName} de ${month.getUTCFullYear()}`, children: objects(node).map((child, index) => source(child, part => sample(part, 'September') ? { text: monthName } : sample(part, '2028') ? { text: String(month.getUTCFullYear()) } : undefined, index)) };
@@ -185,7 +191,6 @@ export function NutrigoAgenda({ patient, now = new Date(), onNavigate, onSignOut
     return undefined;
   };
   return <FramePair nodes={['84:1666', '433:17250']} resolve={resolver} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut}>
-    {(!plan.data || plan.error) && <Stateful loading={!plan.data && !plan.error} error={plan.error || undefined} onRetry={plan.reload} />}
     {error && !changing && <Stateful error={error} />}{status && <p role="status" className="p-[16px] text-[#272932]">{status}</p>}
     {changing && <RecordDialog title="Cambiar horario de mi consulta" onClose={closeReschedule} busy={busy} dirty={rescheduleDirty}><form onSubmit={event => void reschedule(event)} className="flex w-full max-w-[420px] flex-col gap-[16px] rounded-[16px] bg-white p-[24px]"><h2 className="text-[22px] font-medium">Cambiar horario</h2><label>Día<select value={proposedDay} onChange={event => setProposedDay(event.target.value)} className="mt-[4px] w-full rounded-[8px] border border-[#e1e1e2] p-[10px]">{weekdays.map(day => <option key={day}>{day}</option>)}</select></label><label>Hora<input required type="time" value={proposedTime} onChange={event => setProposedTime(event.target.value)} className="mt-[4px] w-full rounded-[8px] border border-[#e1e1e2] p-[10px]" /></label>{error && <Stateful error={error} />}<div className="flex flex-wrap gap-[8px]"><button type="submit" disabled={busy} className="rounded-[8px] bg-[#c2e66e] px-[16px] py-[10px] text-[#272932]">{busy ? 'Guardando…' : 'Guardar horario'}</button><button type="button" disabled={busy} onClick={() => void reply('needs_change')} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">Sólo avisar que necesito otro horario</button><button type="button" disabled={busy} onClick={closeReschedule} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">Cancelar</button></div></form></RecordDialog>}
   </FramePair>;

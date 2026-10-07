@@ -37,6 +37,8 @@ describe.each([false,true])('pantallas principales MCP (celular %s)',mobile=>{
     expect(html.match(/data-name="Card Statistic - Dashboard"/g)?.length).toBe(4);
     // Los gráficos del archivo se dibujan con el valor real; ningún bloque queda oculto.
     expect(html).toContain('conic-gradient');expect(html).not.toContain('visibility:hidden');
+    // Como en el archivo, el tramo que falta del medidor de peso va rayado.
+    expect(html).toContain('repeating-linear-gradient');
     expect(html).toContain('1,3/2');
   });
   it('menú conserva datos y estimación de la receta asignada',()=>{

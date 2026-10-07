@@ -59,15 +59,26 @@ export function barFill(pct: number | null, part: 'filled' | 'empty'): SourceBin
   return { props: { style: { flex: `${grow} 1 0%`, minWidth: 0, paddingRight: 0, display: grow === 0 ? 'none' : undefined } } };
 }
 /** Arco de dona con los colores del archivo, para superponer al dibujo de ejemplo. */
-export function Ring({ pct, color, track = 'transparent', thickness = 14, half = false }: { pct: number | null; color: string; track?: string; thickness?: number; half?: boolean }) {
+/** Color rayado del tramo que falta (como el medidor del archivo). */
+const hatchPattern = (color: string) => `repeating-linear-gradient(135deg, ${color} 0 2px, transparent 2px 6px)`;
+
+export function Ring({ pct, color, track = 'transparent', thickness = 14, half = false, hatch }: { pct: number | null; color: string; track?: string; thickness?: number; half?: boolean; hatch?: string }) {
   const value = Math.max(0, Math.min(100, pct ?? 0));
   const turn = half ? 0.5 : 1;
   const start = half ? 270 : 0;
   const mask = `radial-gradient(farthest-side, transparent calc(100% - ${thickness}px), #000 calc(100% - ${thickness}px + 1px))`;
-  return <span aria-hidden="true" className="pointer-events-none absolute inset-0 block rounded-full" style={{
-    background: `conic-gradient(from ${start}deg, ${color} 0turn ${(value / 100) * turn}turn, ${track} ${(value / 100) * turn}turn ${turn}turn, transparent ${turn}turn 1turn)`,
-    WebkitMask: mask, mask,
-  }} />;
+  const filled = (value / 100) * turn;
+  const fill = `conic-gradient(from ${start}deg, ${color} 0turn ${filled}turn, ${track} ${filled}turn ${turn}turn, transparent ${turn}turn 1turn)`;
+  const ring = { WebkitMask: mask, mask } as const;
+  const layer = 'pointer-events-none absolute inset-0 block rounded-full';
+  if (!hatch) return <span aria-hidden="true" className={layer} style={{ background: fill, ...ring }} />;
+  // Tramo restante rayado, como el medidor del archivo: el anillo recorta a una capa de color y a otra de franjas
+  // que solo se ve donde falta recorrer (máscara cónica propia, sin combinar máscaras).
+  const rest = `conic-gradient(from ${start}deg, transparent 0turn ${filled}turn, #000 ${filled}turn ${turn}turn, transparent ${turn}turn 1turn)`;
+  return <span aria-hidden="true" className={layer} style={ring}>
+    <span className={layer} style={{ background: fill }} />
+    <span className={layer} style={{ background: hatchPattern(hatch), WebkitMask: rest, mask: rest }} />
+  </span>;
 }
 export function Stateful({ loading, error, empty, onRetry }: { loading?: boolean; error?: string; empty?: string; onRetry?: () => void }) {
   if (error) return <div role="alert" className="p-[16px] text-[#a32929]">{error}{onRetry && <button type="button" className="ml-[8px] underline" onClick={onRetry}>Reintentar</button>}</div>;

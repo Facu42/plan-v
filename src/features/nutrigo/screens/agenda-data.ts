@@ -1,9 +1,8 @@
 import type { ShowroomPatient } from '../../../components/nutrigo/showroom-model';
-import type { PatientMealPlan } from '../../../types/plans';
 
 export const AGENDA_TIMEZONE = 'America/Argentina/Buenos_Aires';
 export const agendaWeekdays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-export type AgendaEvent = { id: string; kind: 'plan' | 'meal' | 'activity' | 'consult'; day: string; title: string; detail: string; time: string };
+export type AgendaEvent = { id: string; kind: 'consult'; day: string; title: string; detail: string; time: string };
 export const agendaDateId = (value: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: AGENDA_TIMEZONE }).format(value);
 export const agendaClock = (value: string) => Number.isNaN(Date.parse(value)) ? '' : new Date(value).toLocaleTimeString('es-AR', { timeZone: AGENDA_TIMEZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 // Calendar cells are wall dates, not instants in the device's timezone.
@@ -23,10 +22,9 @@ export function nextConsultation(when: string | undefined, now: Date) {
   return at;
 }
 
-export function buildAgendaEvents(patient: ShowroomPatient, plan: PatientMealPlan | null, now: Date): AgendaEvent[] {
-  const events: AgendaEvent[] = patient.logs.map(log => ({ id: log.id, kind: 'meal', day: agendaDateId(new Date(log.logged_at)), title: log.slot, detail: log.description || 'Registro de comida', time: agendaClock(log.logged_at) }));
-  events.push(...patient.activities.map(item => ({ id: item.id, kind: 'activity' as const, day: agendaDateId(new Date(item.logged_at)), title: item.activity, detail: `${item.duration_minutes} min · ${item.intensity}`, time: agendaClock(item.logged_at) })));
-  events.push(...(plan?.items ?? []).map(item => ({ id: `plan:${item.id}`, kind: 'plan' as const, day: item.for_date, title: item.recipe_title ?? item.free_text ?? 'Comida del plan', detail: [item.slot, item.portions ? `${item.portions} ${item.portions === 1 ? 'porción' : 'porciones'}` : '', item.public_note].filter(Boolean).join(' · '), time: item.slot })));
+/** La agenda es solo de citas con la nutricionista; comidas, actividad y plan viven en sus propias pantallas. */
+export function buildAgendaEvents(patient: ShowroomPatient, now: Date): AgendaEvent[] {
+  const events: AgendaEvent[] = [];
   const slot = patient.appointment;
   const saved = slot?.starts_at ? new Date(slot.starts_at) : null;
   const appointment = saved && !Number.isNaN(saved.getTime()) ? saved : nextConsultation(slot?.when, now);
