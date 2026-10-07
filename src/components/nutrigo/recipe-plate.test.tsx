@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { RecipeDayAssignment } from '../../types/recipe-plate';
 import { DayAssignedMealsView } from './DayMeals';
-import { RecipeCatalog } from './RecipeCatalog';
+import { RecipeCatalog, RecipeChoice, type RecipeCatalogState } from './RecipeCatalog';
 import { RecipeDetails, RecipePlateCard, scaleQuantity } from './RecipePlate';
 
 const card = {
@@ -70,8 +70,11 @@ describe('PV-40 formato de card y CTA', () => {
     expect(meal).toContain('80 g Lentejas');
     expect(meal).toContain('COMIDAS DEL DÍA');
     const catalog = renderToStaticMarkup(<RecipeCatalog patientId="pat-sofia" />);
-    expect(catalog).toContain('Carga manual');
-    expect(catalog).toContain('Asistente IA');
+    expect(catalog).not.toContain('Carga manual');
+    expect(catalog).toContain('Generar borrador con IA');
+    const choice = renderToStaticMarkup(<RecipeChoice catalog={{ patientId: 'pat-sofia', busy: false, chooseManual: () => {}, chooseAi: () => {} } as RecipeCatalogState} />);
+    expect(choice).toContain('Carga manual');
+    expect(choice).toContain('Asistente IA');
     expect(catalog).toContain('Nueva receta');
     expect(catalog).toContain('nutrientes estimados que requieren revisión');
     expect(catalog).toContain('la etiqueta de estimación se conserva al publicar');

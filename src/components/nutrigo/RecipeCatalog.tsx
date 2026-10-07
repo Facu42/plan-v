@@ -3,6 +3,9 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { recipesApi } from '../../api/recipes';
 import { resourcesApi } from '../../api/resources';
 import { aiJobsApi } from '../../api/ai-jobs';
+import type { AiJobView } from '../../types/ai-jobs';
+import { ApiError, isAbortError } from '../../api/client';
+import { waitForRecipeProposal } from './recipe-ai-flow';
 import { careErrorMessage } from '../../api/care';
 import { RECIPE_UNITS, type ProfessionalRecipe, type RecipeUnit } from '../../types/recipes';
 import { PLAN_SLOTS, type PlanSlot } from '../../types/plans';
@@ -15,6 +18,7 @@ import { recipeNutritionLabel } from '../../types/ai-nutrition';
 import { RecipeManualCoverAction } from './RecipeManualCoverAction';
 import { dateId } from '../../features/nutrigo/screens/shared';
 import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
+import { FigmaRecordDialog } from './FigmaPatientFront';
 
 function emptyDraft(id = crypto.randomUUID()): RecipeWizardInput {
   return {
@@ -44,7 +48,11 @@ export function recipeEditorFromStored(recipe: ProfessionalRecipe): RecipeWizard
   };
 }
 
-export type RecipeCatalogState = ReturnType<typeof useRecipeCatalog>;
+type RecipePatientOption = { id: string; name: string };
+export type RecipeCatalogState = ReturnType<typeof useRecipeCatalog> & {
+  patientOptions?: readonly RecipePatientOption[];
+  onSelectPatient?: (id: string) => void;
+};
 
 export function recipeEditorFromAi(payload: Record<string, unknown>): RecipeWizardInput {
   return recipeWizardSchema.parse({ ...payload, category: 'Almuerzo', cover_status: 'none' });
@@ -61,6 +69,11 @@ export function useRecipeCatalog(patientId: string) {
   const [editing, setEditing] = useState<RecipeWizardInput | null>(null);
   const [path, setPath] = useState<'choose' | 'manual' | 'ai' | null>(null);
   const [description, setDescription] = useState('');
+  const [pendingAiJob, setPendingAiJob] = useState<AiJobView | null>(null);
+  const [aiProgress, setAiProgress] = useState('');
+  const [aiWarnings, setAiWarnings] = useState<string[]>([]);
+  const aiController = useRef<AbortController | null>(null);
+  useEffect(() => () => aiController.current?.abort(), []);
   const [assigning, setAssigning] = useState<ProfessionalRecipe | null>(null);
   const [day, setDay] = useState(() => dateId(new Date()));
   const lock = useRef(false);
@@ -78,7 +91,7 @@ export function useRecipeCatalog(patientId: string) {
       setImageGeneration(result.image_generation === true);
     } catch (caught) {
       setRecipes([]);
-      setError(careErrorMessage(caught));
+      if (!isAbortError(caught)) setError(careErrorMessage(caught));
     }
   }
 
@@ -92,7 +105,7 @@ export function useRecipeCatalog(patientId: string) {
       setStatus(success);
       await reload();
     } catch (caught) {
-      setError(careErrorMessage(caught));
+      if (!isAbortError(caught)) setError(careErrorMessage(caught));
     } finally {
       lock.current = false; setBusy(false);
     }
@@ -113,38 +126,52 @@ export function useRecipeCatalog(patientId: string) {
     void run(async () => { const saved = await recipesApi.save(parsed.data); openStored(saved.recipe); }, 'Borrador guardado en el catálogo.');
   }
 
-  function quickAiDraft() {
+  function generateAiProposal(titleHint?: string) {
+    if (!patientId) { setError('Elegí el paciente para adaptar la propuesta a sus alergias y restricciones.'); return; }
     void run(async () => {
-      const created = await aiJobsApi.enqueue({ patient_id: patientId, job_type: 'recipe_draft', title_hint: editing?.title || undefined });
-      if (created.job.status !== 'succeeded' || !created.job.artifact) throw new Error(created.job.error_code === 'stale_context' ? 'El ingreso cambió. Regenerá la propuesta.' : 'No se pudo preparar el borrador de IA.');
-      await aiJobsApi.apply(created.job.id);
-    }, 'Borrador de IA listo para tu revisión. No se publicó.');
-  }
-
-  function submitAi(event: FormEvent) {
-    event.preventDefault();
-    void run(async () => {
-      const created = await aiJobsApi.enqueue({ patient_id: patientId, job_type: 'recipe_draft', title_hint: description.trim() });
-      if (created.job.status === 'failed' || created.job.status !== 'succeeded' || !created.job.artifact) {
-        throw new Error('La IA no pudo armar la receta. Reintentá; no se publicó ninguna propuesta.');
+      const controller = new AbortController(); aiController.current = controller;
+      setAiWarnings([]);
+      setAiProgress(pendingAiJob ? 'Consultando la propuesta existente…' : 'Preparando una propuesta para revisar…');
+      try {
+        const initial = pendingAiJob ?? (await aiJobsApi.enqueue({ patient_id: patientId, job_type: 'recipe_draft', title_hint: titleHint }, controller.signal)).job;
+        setPendingAiJob(initial);
+        const completed = await waitForRecipeProposal(initial, {
+          get: aiJobsApi.get, signal: controller.signal,
+          onProgress: (job) => {
+            setPendingAiJob(['failed', 'cancelled', 'stale'].includes(job.status) ? null : job);
+            setAiProgress(job.status === 'queued' ? 'Propuesta en espera…' : job.status === 'running' ? 'La IA está preparando la receta…' : 'Abriendo el borrador para tu revisión…');
+          },
+        });
+        await aiJobsApi.apply(completed.id, controller.signal);
+        const saved = (await recipesApi.list(controller.signal)).recipes.find(recipe => recipe.id === completed.artifact!.payload.id);
+        if (!saved) throw new Error('El borrador quedó guardado, pero falta confirmar su lectura. Usá «Consultar propuesta» para recuperarlo.');
+        openStored(saved);
+        setAiWarnings(completed.warnings);
+        setPendingAiJob(null);
+        setPath('manual');
+      } catch (caught) {
+        // Un conflicto de contexto exige otra propuesta; una caída de red permite consultar la misma.
+        if (caught instanceof ApiError && caught.status === 409) setPendingAiJob(null);
+        throw caught;
+      } finally {
+        setAiProgress(''); aiController.current = null;
       }
-      await aiJobsApi.apply(created.job.id);
-      const saved = (await recipesApi.list()).recipes.find(recipe => recipe.id === created.job.artifact!.payload.id);
-      if (!saved) throw new Error('La receta quedó guardada, pero falta confirmar su lectura. Recargá el catálogo.');
-      openStored(saved);
-      setPath('manual');
     }, 'Propuesta lista para revisar. Los nutrientes son estimaciones de IA; la foto puede subirse manualmente.');
   }
 
+  function quickAiDraft() { if (!canLeaveWorkspace()) return; setPath('ai'); setEditing(null); setError(''); setStatus(''); }
+  function submitAi(event: FormEvent) { event.preventDefault(); generateAiProposal(description.trim()); }
+
   return {
-    patientId, recipes, source, imageGeneration, error, status, busy, editing, path, description, assigning, day, slot,
+    patientId, recipes, source, imageGeneration, error, status, busy, editing, path, description, assigning, day, slot, aiProgress, pendingAiJob, aiWarnings,
+    resumeAi: () => { if (canLeaveWorkspace()) generateAiProposal(); },
     setEditing, setPath, setDescription, setDay, setSlot, reload, run, submit, submitAi, quickAiDraft,
     recoverEditing: () => void run(async () => { const saved = (await recipesApi.list()).recipes.find(recipe => recipe.id === editing?.id); if (saved) openStored(saved); }, 'Versión guardada recuperada. Revisala antes de continuar.'),
-    startNew: () => { if (!canLeaveWorkspace()) return; setPath('choose'); setEditing(null); setStatus(''); setError(''); },
-    chooseManual: () => { const draft = emptyDraft(); setPath('manual'); setEditing(draft); setEditorBaseline(JSON.stringify(draft)); },
-    chooseAi: () => { setPath('ai'); setEditing(null); },
-    closeEditor: () => { if (!canLeaveWorkspace()) return; setEditing(null); setPath(null); },
-    startEdit: (recipe: ProfessionalRecipe) => { if (!canLeaveWorkspace()) return; openStored(recipe); setPath('manual'); setStatus(''); setError(''); },
+    startNew: () => { if (!canLeaveWorkspace()) return; setPath('choose'); setEditing(null); setAiWarnings([]); setStatus(''); setError(''); },
+    chooseManual: () => { if (!canLeaveWorkspace()) return; const draft = emptyDraft(); setPath('manual'); setEditing(draft); setAiWarnings([]); setEditorBaseline(JSON.stringify(draft)); },
+    chooseAi: () => { if (!canLeaveWorkspace()) return; setPath('ai'); setEditing(null); },
+    closeEditor: () => { if (!canLeaveWorkspace()) return; setEditing(null); setPath(null); if (!pendingAiJob) setDescription(''); },
+    startEdit: (recipe: ProfessionalRecipe) => { if (!canLeaveWorkspace()) return; openStored(recipe); setAiWarnings([]); setPath('manual'); setStatus(''); setError(''); },
     publish: (recipe: ProfessionalRecipe) => {
       if (editing?.id === recipe.id && JSON.stringify(editing) !== editorBaseline) { setError('Guardá y revisá los cambios de esta receta antes de publicar.'); return; }
       void run(() => recipesApi.publish(recipe.id, recipe.current.version, recipe.current.revision), 'Revisión publicada. El paciente la ve cuando la asignás.');
@@ -182,11 +209,11 @@ export function RecipeCoverAction({ catalog, recipe, className = '' }: { catalog
 /** Paso 1: carga manual o asistente IA. */
 export function RecipeChoice({ catalog }: { catalog: RecipeCatalogState }) {
   return <div className="recipe-choice" aria-label="Paso 1 de 2">
-    <button type="button" onClick={catalog.chooseManual}>
+    <button type="button" disabled={catalog.busy} onClick={catalog.chooseManual}>
       <strong>Carga manual</strong>
       <span>Ingredientes, cantidades y macros que declares. Nada se completa solo.</span>
     </button>
-    <button type="button" onClick={catalog.chooseAi}>
+    <button type="button" disabled={catalog.busy || (!catalog.patientId && !catalog.patientOptions?.length)} onClick={catalog.chooseAi}>
       <strong>Asistente IA</strong>
       <span>Describí el plato. La propuesta queda para revisar antes de asignar.</span>
     </button>
@@ -194,15 +221,35 @@ export function RecipeChoice({ catalog }: { catalog: RecipeCatalogState }) {
 }
 
 export function RecipeAiForm({ catalog }: { catalog: RecipeCatalogState }) {
-  const { busy, description, setDescription, setPath, submitAi } = catalog;
-  return <form className="recipe-form" onSubmit={submitAi}>
+  const { busy, description, setDescription, closeEditor, submitAi, pendingAiJob, aiProgress } = catalog;
+  return <form className="recipe-form" onSubmit={submitAi} aria-busy={busy}>
     <p className="recipe-wizard-note">Paso 1 de 2 · describí el plato. No se publica sola.</p>
-    <label>Describí el plato<textarea value={description} maxLength={150} onChange={(event) => setDescription(event.target.value)} /></label>
+    <p>La propuesta usa las alergias y restricciones del paciente seleccionado. Queda como borrador privado para revisar.</p>
+    <RecipePatientPicker catalog={catalog} purpose="Propuesta para" />
+    <label>Describí el plato<textarea disabled={busy || Boolean(pendingAiJob)} value={description} maxLength={150} placeholder="Por ejemplo: tortilla de verduras para dos porciones" onChange={(event) => setDescription(event.target.value)} /></label>
+    {aiProgress && <p role="status">{aiProgress}</p>}
     <footer>
-      <NvButton type="submit" disabled={busy || description.trim().length < 2}>Completar con IA</NvButton>
-      <button type="button" className="recipe-cancel" onClick={() => setPath(null)}>Cerrar</button>
+      <NvButton type="submit" disabled={busy || !catalog.patientId || (!pendingAiJob && description.trim().length < 2)}>{busy ? 'Preparando propuesta…' : pendingAiJob ? 'Consultar propuesta' : 'Completar con IA'}</NvButton>
+      <button type="button" className="recipe-cancel" disabled={busy} onClick={closeEditor}>Cerrar</button>
     </footer>
   </form>;
+}
+
+function RecipePatientPicker({ catalog, purpose }: { catalog: RecipeCatalogState; purpose: string }) {
+  if (!catalog.patientOptions || !catalog.onSelectPatient) return null;
+  const proposal = purpose === 'Propuesta para';
+  return <label>{purpose}<select value={proposal ? catalog.pendingAiJob?.patient_id ?? catalog.patientId : catalog.patientId} disabled={catalog.busy || (proposal && Boolean(catalog.pendingAiJob))} onChange={event => catalog.onSelectPatient?.(event.target.value)}>
+    <option value="" disabled>Elegí un paciente</option>
+    {catalog.patientOptions.map(patient => <option key={patient.id} value={patient.id}>{patient.name}</option>)}
+  </select></label>;
+}
+
+export function RecipeAiNotices({ catalog }: { catalog: RecipeCatalogState }) {
+  return <>
+    {catalog.aiWarnings.length > 0 && <div className="recipe-ai-warnings" role="status"><strong>Antes de usar esta propuesta</strong><ul>{catalog.aiWarnings.map((warning, index) => <li key={index}>{warning}</li>)}</ul></div>}
+    {catalog.aiProgress && catalog.path !== 'ai' && <p role="status">{catalog.aiProgress}</p>}
+    {catalog.pendingAiJob && !catalog.busy && catalog.path !== 'ai' && <NvButton onClick={catalog.resumeAi}>Consultar propuesta</NvButton>}
+  </>;
 }
 
 export function RecipeEditorForm({ catalog }: { catalog: RecipeCatalogState }) {
@@ -271,6 +318,7 @@ export function RecipeAssignDialog({ catalog }: { catalog: RecipeCatalogState })
   return <div className="recipe-overlay" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Así lo ve tu asesorado">
     <div className="recipe-overlay-card">
       <h2>Así lo ve tu asesorado</h2>
+      <RecipePatientPicker catalog={catalog} purpose="Asignar a" />
       <label>Día<input type="date" value={day} onChange={(event) => setDay(event.target.value)} /></label>
       <label>Momento<select value={slot} onChange={(event) => setSlot(event.target.value as PlanSlot)}>{PLAN_SLOTS.map((item) => <option key={item}>{item}</option>)}</select></label>
       <RecipePlateCard
@@ -280,16 +328,19 @@ export function RecipeAssignDialog({ catalog }: { catalog: RecipeCatalogState })
         ingredients={assigning.published.ingredients}
       />
       <footer className="recipe-actions">
-        <NvButton disabled={busy} onClick={confirmAssign}>Confirmar asignación</NvButton>
+        <NvButton disabled={busy || !catalog.patientId} onClick={confirmAssign}>Confirmar asignación</NvButton>
         <button type="button" className="recipe-cancel" onClick={closeAssign}>Cerrar</button>
       </footer>
     </div>
   </div>;
 }
 
-export function RecipeCatalog({ patientId }: { patientId: string }) {
-  const catalog = useRecipeCatalog(patientId);
+export function RecipeCatalog({ patientId, patients }: { patientId: string; patients?: readonly RecipePatientOption[] }) {
+  const [recipePatientId, setRecipePatientId] = useState(patientId);
+  const hook = useRecipeCatalog(recipePatientId);
+  const catalog: RecipeCatalogState = { ...hook, patientOptions: patients, onSelectPatient: setRecipePatientId };
   const { recipes, source, error, status, busy, editing, path } = catalog;
+  const editorOpen = path === 'choose' || path === 'ai' || Boolean(editing);
   return <section className="recipe-catalog" aria-label="Catálogo profesional de recetas">
     <header>
       <div>
@@ -299,23 +350,29 @@ export function RecipeCatalog({ patientId }: { patientId: string }) {
       </div>
       <div className="recipe-header-actions">
         <NvButton className="nv-ghost" disabled={busy} onClick={catalog.startNew}>Nueva receta</NvButton>
-        <NvButton disabled={busy || !patientId} onClick={catalog.quickAiDraft}>Generar borrador con IA</NvButton>
+        <NvButton disabled={busy || (!recipePatientId && !patients?.length)} onClick={catalog.quickAiDraft}>Generar borrador con IA</NvButton>
       </div>
     </header>
     {source === 'memory' && <p className="recipe-demo">Vista demo · recetas ficticias para probar el catálogo.</p>}
     {error && <p className="recipe-error" role="alert">{error}</p>}
     {status && <p className="recipe-status" role="status">{status}</p>}
+    {!editorOpen && <RecipeAiNotices catalog={catalog} />}
     {!recipes && !error && <p role="status">Cargando catálogo…</p>}
     {recipes && !recipes.length && !editing && <NvState title="Todavía no hay recetas en el catálogo" description="Creá un borrador con ingredientes, rinde y pasos. El paciente no lo ve hasta publicarlo y asignarlo." />}
-    {(path === 'choose' || path === null) && <RecipeChoice catalog={catalog} />}
-    {path === 'ai' && <RecipeAiForm catalog={catalog} />}
-    <RecipeEditorForm catalog={catalog} />
+    {editorOpen && <FigmaRecordDialog title={editing ? editing.title || 'Nueva receta' : path === 'ai' ? 'Crear receta con IA' : 'Nueva receta'} className="recipe-editor-dialog" closeLabel="Cerrar creación de receta" onClose={catalog.closeEditor}>
+      {error && <p className="recipe-error" role="alert">{error}</p>}
+      {status && <p className="recipe-status" role="status">{status}</p>}
+      {path === 'choose' && !editing && <RecipeChoice catalog={catalog} />}
+      {path === 'ai' && <RecipeAiForm catalog={catalog} />}
+      <RecipeAiNotices catalog={catalog} />
+      <RecipeEditorForm catalog={catalog} />
+    </FigmaRecordDialog>}
     <div className="recipe-grid">{recipes?.map((recipe) => {
       const card = recipe.current.card ?? unavailableCard(recipe.title);
       return <RecipePlateCard key={recipe.id} title={recipe.title} portions={recipe.current.yield_portions} card={card} actions={<>
         <NvButton className="nv-ghost" aria-label={`Editar ${recipe.title}`} disabled={busy} onClick={() => catalog.startEdit(recipe)}>Editar</NvButton>
         {!recipe.current.published_at && <NvButton disabled={busy} onClick={() => catalog.publish(recipe)}>Publicar</NvButton>}
-        {recipe.published && <NvButton aria-label={`Asignar ${recipe.title}`} disabled={busy || !patientId} onClick={() => catalog.startAssign(recipe)}>Asignar</NvButton>}
+        {recipe.published && <NvButton aria-label={`Asignar ${recipe.title}`} disabled={busy || (!recipePatientId && !patients?.length)} onClick={() => catalog.startAssign(recipe)}>Asignar</NvButton>}
         <RecipeCoverAction catalog={catalog} recipe={recipe} className="nv-button nv-ghost" />
         <RecipeManualCoverAction recipe={recipe} disabled={busy} onSaved={catalog.reload} />
       </>} />;

@@ -304,3 +304,5 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 ## Dashboard profesional web — 7 de octubre de 2026
 
 Alcance confirmado: todo el dashboard de escritorio; mobile para otra etapa; Academy excluida. [Avance, orden de trabajo y verificación](dashboard-nutricionista-web-2026-10-07.md).
+
+Recetas continúa en `codex/nutri-recetas`: [contraste previo con Nutriboost, API de IA, decisión de ventana y tareas pendientes](recetas-dashboard-web-2026-10-07.md). Siempre contrastar cada apartado antes de desarrollarlo, incluyendo sus funciones de IA.

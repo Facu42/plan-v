@@ -21,6 +21,21 @@
 .recipe-list h4{font-size:13px;margin:12px 0 4px}
 .recipe-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .recipe-error{color:var(--nv-danger)}
+.recipe-editor-dialog{width:min(780px,calc(100vw - 48px));max-height:calc(100dvh - 48px);box-sizing:border-box;border:1px solid var(--nv-border);border-radius:20px;padding:24px;color:var(--nv-ink);background:var(--nv-card);animation:recipe-dialog-in 180ms ease-out}
+.recipe-editor-dialog::backdrop{background:rgba(20,29,23,.35)}
+.recipe-editor-dialog .recipe-form{margin:14px 0 0}
+.recipe-editor-dialog>.recipe-choice{margin-top:20px}
+.recipe-editor-dialog>header{display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:-24px;z-index:2;background:var(--nv-card);padding:12px 0}
+.recipe-editor-dialog>header h2{font-size:22px;margin:0}
+.recipe-editor-dialog>header button{border:0;border-radius:50%;width:36px;height:36px;font:inherit;font-size:24px;background:var(--nv-bg);color:var(--nv-ink)}
+.recipe-ai-warnings{padding:14px;border:1px solid var(--nv-border);border-radius:12px;background:var(--nv-bg);font-size:13px;line-height:1.6}
+.recipe-editor-dialog .recipe-item-row:has(input[placeholder="kcal"]){grid-template-columns:minmax(0,1fr) 80px 80px 80px}
+.recipe-editor-dialog .recipe-form-row>p{grid-column:1/-1;margin:0}
+.recipe-editor-dialog .recipe-form label,.recipe-editor-dialog .recipe-form fieldset{margin:8px 0}
+.recipe-editor-dialog .recipe-form footer{position:sticky;bottom:-24px;z-index:1;background:var(--nv-card);border-top:1px solid var(--nv-border);padding:12px 0}
+body:has(dialog.recipe-editor-dialog[open]){overflow:hidden}
+@keyframes recipe-dialog-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.recipe-editor-dialog{animation:none}}
 .nv-app.nv-dark .recipe-error{color:var(--nv-danger)}
 @media(max-width:800px){.recipe-form-row,.recipe-item-row{grid-template-columns:1fr}.recipe-catalog,.assigned-recipes{padding:20px 16px}}
 @media(max-width:700px){.recipe-catalog,.assigned-recipes{padding:18px 14px}.recipe-form-row,.recipe-item-row{grid-template-columns:1fr}}
