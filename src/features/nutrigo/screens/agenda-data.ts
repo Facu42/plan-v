@@ -26,7 +26,7 @@ export function nextConsultation(when: string | undefined, now: Date) {
 export function buildAgendaEvents(patient: ShowroomPatient, plan: PatientMealPlan | null, now: Date): AgendaEvent[] {
   const events: AgendaEvent[] = patient.logs.map(log => ({ id: log.id, kind: 'meal', day: agendaDateId(new Date(log.logged_at)), title: log.slot, detail: log.description || 'Registro de comida', time: agendaClock(log.logged_at) }));
   events.push(...patient.activities.map(item => ({ id: item.id, kind: 'activity' as const, day: agendaDateId(new Date(item.logged_at)), title: item.activity, detail: `${item.duration_minutes} min · ${item.intensity}`, time: agendaClock(item.logged_at) })));
-  events.push(...(plan?.items ?? []).map(item => ({ id: `plan:${item.id}`, kind: 'plan' as const, day: item.for_date, title: item.recipe_title ?? item.free_text ?? 'Comida del plan', detail: [item.slot, item.portions ? `${item.portions} porciones` : '', item.public_note].filter(Boolean).join(' · '), time: item.slot })));
+  events.push(...(plan?.items ?? []).map(item => ({ id: `plan:${item.id}`, kind: 'plan' as const, day: item.for_date, title: item.recipe_title ?? item.free_text ?? 'Comida del plan', detail: [item.slot, item.portions ? `${item.portions} ${item.portions === 1 ? 'porción' : 'porciones'}` : '', item.public_note].filter(Boolean).join(' · '), time: item.slot })));
   const slot = patient.appointment;
   const saved = slot?.starts_at ? new Date(slot.starts_at) : null;
   const appointment = saved && !Number.isNaN(saved.getTime()) ? saved : nextConsultation(slot?.when, now);
