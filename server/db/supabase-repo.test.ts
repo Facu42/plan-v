@@ -801,6 +801,17 @@ describe('habit_logs (016 v2)', () => {
     expect(harness.calls.filter((call) => call.table === 'patients' && call.op === 'update')).toHaveLength(0);
   });
 
+  it('conserva los pasos ya guardados y los escribe sólo cuando la columna existe', async () => {
+    const today = localDateId(new Date());
+    harness.push('habit_logs', {
+      data: { id: 'h-1', patient_id: 'patient-1', date: today, hydration: 2, energy: null, sleep_minutes: null, steps: 5000 },
+      error: null,
+    });
+    await sbUpdateHabits('patient-1', { steps: 6420 });
+    const upsert = harness.calls.find((call) => call.table === 'habit_logs' && call.op === 'upsert');
+    expect(upsert?.payload).toMatchObject({ steps: 6420, hydration: 2 });
+  });
+
   it('inserts a fresh row when the day has no log yet', async () => {
     const today = localDateId(new Date());
     harness.push('habit_logs', { data: null, error: null });

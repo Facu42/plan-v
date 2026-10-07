@@ -28,20 +28,21 @@ import { PatientAiPermissions } from './PatientAiPermissions';
 import { canLeaveWorkspace,useUnsavedChanges } from '../../components/nutrigo/unsaved-changes';
 import { patientExtraBinding } from './patient-extra-binding';
 
-function HabitForm({patient,kind,onClose}:{patient:ShowroomPatient;kind:'water'|'rest';onClose:()=>void}) {
-  const [value,setValue]=useState(kind==='water'?String(patient.hydration):patient.sleepMinutes==null?'':String(patient.sleepMinutes));
+function HabitForm({patient,kind,onClose}:{patient:ShowroomPatient;kind:'water'|'rest'|'steps';onClose:()=>void}) {
+  const initial=kind==='water'?String(patient.hydration):kind==='steps'?patient.steps==null?'':String(patient.steps):patient.sleepMinutes==null?'':String(patient.sleepMinutes);
+  const [value,setValue]=useState(initial);
   const [busy,setBusy]=useState(false),[error,setError]=useState('');const lock=useRef(false);const add=useAppStore(s=>s.addPatient);
-  useUnsavedChanges(value!==(kind==='water'?String(patient.hydration):patient.sleepMinutes==null?'':String(patient.sleepMinutes)),busy);
-  const submit=async(event:FormEvent)=>{event.preventDefault();if(lock.current)return;const number=parseHabitInput(value,kind);if(number===null){setError('Revisá el valor antes de guardar.');return;}lock.current=true;setBusy(true);setError('');try{const response=await api.updateHabits(patient.id,kind==='water'?{hydration:number}:{sleep_minutes:number});add(response.patient);notifyCareChanged();onClose();}catch(e){setError(errorText(e));}finally{lock.current=false;setBusy(false);}};
-  return <FigmaRecordDialog title={kind==='water'?'Registrar agua':'Registrar descanso'} onClose={()=>{if(canLeaveWorkspace())onClose();}}><form onSubmit={submit} aria-busy={busy}><fieldset disabled={busy}><label>{kind==='water'?'Vasos tomados hoy':'Minutos dormidos'}<input type="number" min="0" max={HABIT_LIMITS[kind]} step="1" required value={value} onChange={e=>setValue(e.target.value)}/></label>{error&&<p role="alert">{error}</p>}<button type="submit" className="mcp-action">{busy?'Guardando…':'Guardar registro'}</button></fieldset></form></FigmaRecordDialog>;
+  useUnsavedChanges(value!==initial,busy);
+  const submit=async(event:FormEvent)=>{event.preventDefault();if(lock.current)return;const number=parseHabitInput(value,kind);if(number===null){setError('Revisá el valor antes de guardar.');return;}lock.current=true;setBusy(true);setError('');try{const response=await api.updateHabits(patient.id,kind==='water'?{hydration:number}:kind==='steps'?{steps:number}:{sleep_minutes:number});add(response.patient);notifyCareChanged();onClose();}catch(e){setError(errorText(e));}finally{lock.current=false;setBusy(false);}};
+  return <FigmaRecordDialog title={kind==='water'?'Registrar agua':kind==='steps'?'Registrar pasos':'Registrar descanso'} onClose={()=>{if(canLeaveWorkspace())onClose();}}><form onSubmit={submit} aria-busy={busy}><fieldset disabled={busy}><label>{kind==='water'?'Vasos tomados hoy':kind==='steps'?'Pasos de hoy':'Minutos dormidos'}<input type="number" min="0" max={HABIT_LIMITS[kind]} step="1" required value={value} onChange={e=>setValue(e.target.value)}/></label>{error&&<p role="alert">{error}</p>}<button type="submit" className="mcp-action">{busy?'Guardando…':'Guardar registro'}</button></fieldset></form></FigmaRecordDialog>;
 }
 export function NutrigoPatientApp({patient,page,onNavigate,onSignOut,onEditIntake,query='',now=new Date(),onConfirm,onReschedule,demoRoleSwitch}:{patient:ShowroomPatient;page:ShowroomPage;onNavigate:(page:ShowroomPage)=>void;onSignOut?:()=>void;onEditIntake:()=>void;query?:string;now?:Date;onConfirm:(reply:'attending'|'needs_change')=>Promise<void>;onReschedule:(day:string,time:string)=>Promise<void>;demoRoleSwitch?:()=>void}) {
   const fullPatient=useAppStore(state=>state.patients.find(item=>item.id===patient.id));
-  const [dialog,setDialog]=useState<'records'|'water'|'rest'|null>(null),[slot,setSlot]=useState<string|null>(null),[privacy,setPrivacy]=useState(false);
+  const [dialog,setDialog]=useState<'records'|'water'|'rest'|'steps'|null>(null),[slot,setSlot]=useState<string|null>(null),[privacy,setPrivacy]=useState(false);
   const common={patient,onNavigate,onSignOut,query,now};
-  const onRecord=()=>setDialog('records'),onHydration=()=>setDialog('water'),onRest=()=>setDialog('rest'),onLogMeal=(mealSlot='Almuerzo')=>setSlot(mealSlot);
+  const onRecord=()=>setDialog('records'),onHydration=()=>setDialog('water'),onRest=()=>setDialog('rest'),onSteps=()=>setDialog('steps'),onLogMeal=(mealSlot='Almuerzo')=>setSlot(mealSlot);
   let screen;
-  if(page==='inicio')screen=<NutrigoHome {...common} onRecord={onRecord} onHydration={onHydration} onRest={onRest} onLogMeal={onLogMeal}/>;
+  if(page==='inicio')screen=<NutrigoHome {...common} onRecord={onRecord} onHydration={onHydration} onRest={onRest} onSteps={onSteps} onLogMeal={onLogMeal}/>;
   else if(page==='recetas')screen=<NutrigoMenu {...common}/>;
   else if(page==='plan')screen=<NutrigoPlan {...common}/>;
   else if(page==='diario')screen=<NutrigoDiary {...common} onLogMeal={onLogMeal} onHydration={onHydration} onRest={onRest}/>;
@@ -74,7 +75,7 @@ export function NutrigoPatientApp({patient,page,onNavigate,onSignOut,onEditIntak
   return <>{screen}{demoRoleSwitch&&<div className="mcp-nutrigo mcp-screen-state"><button className="mcp-action" onClick={demoRoleSwitch}>Ver consultorio de demostración</button></div>}
     <div className="mcp-patient-overlays">
     {dialog==='records'&&<FigmaRecordDialog title="Mis registros" onClose={()=>{if(canLeaveWorkspace())setDialog(null);}}><PatientBodyDataCard patientId={patient.id} forceOpen onSaved={notifyCareChanged}/><CarePanel patientId={patient.id}/></FigmaRecordDialog>}
-    {(dialog==='water'||dialog==='rest')&&<HabitForm patient={patient} kind={dialog} onClose={()=>setDialog(null)}/>}
+    {(dialog==='water'||dialog==='rest'||dialog==='steps')&&<HabitForm patient={patient} kind={dialog} onClose={()=>setDialog(null)}/>}
     {slot&&fullPatient&&<MealLogModal patient={fullPatient} defaultSlot={slot} close={()=>setSlot(null)}/>}
     {privacy&&<ShowroomPrivacy patientId={patient.id} onClose={()=>setPrivacy(false)} onDeleted={()=>{setPrivacy(false);onSignOut?.();}}/>}
     </div>

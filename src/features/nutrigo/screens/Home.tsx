@@ -25,6 +25,8 @@ async function homeData(id: string, signal: AbortSignal) {
 const GLASS_LITRES = 0.25;
 const DEFAULT_WATER_GLASSES = 8;
 const litres = (glasses: number) => formatNumber(glasses * GLASS_LITRES);
+/** Meta de pasos por defecto mientras la nutricionista no indique otra. */
+const DEFAULT_STEPS_GOAL = 8000;
 const text = (node: SourceNode, ...samples: string[]) => leaf(node) && samples.includes(sourceText(node));
 const sample = (node: SourceNode, pattern: RegExp) => leaf(node) && pattern.test(sourceText(node));
 const hide: SourceBinding = { props: { style: { visibility: 'hidden' }, 'aria-hidden': true } };
@@ -45,7 +47,7 @@ function donut(node: SourceNode, ring: ReactNode, drawn: string[], resolve: Sour
 
 type Activity = { at: string; color: number; bold: string; rest: string };
 
-export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onRecord,onHydration,onRest,onLogMeal }: ScreenProps & {onRecord:()=>void;onHydration:()=>void;onRest:()=>void;onLogMeal:(slot?:string)=>void}) {
+export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onRecord,onHydration,onRest,onSteps=onHydration,onLogMeal }: ScreenProps & {onRecord:()=>void;onHydration:()=>void;onRest:()=>void;onSteps?:()=>void;onLogMeal:(slot?:string)=>void}) {
   const [refresh,setRefresh]=useState(0);
   const data=useRemote(`${patient.id}:home:${refresh}`, signal=>homeData(patient.id,signal));
   useEffect(()=>{const reload=()=>setRefresh(v=>v+1);window.addEventListener('plan-v:care-changed',reload);return()=>window.removeEventListener('plan-v:care-changed',reload);},[]);
@@ -112,13 +114,15 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
         return undefined;
       })};
       if(content.startsWith('Steps')){
-        // Plan V todavía no recibe pasos (no importa datos de dispositivos): la barra queda en cero.
-        return {onClick:()=>onNavigate('ejercicio'),label:'Ver actividad',children:fields(node,{},child=>{
-          if(nodeName(child)==='Progress Bar')return barFill(0,'filled');
-          if(nodeName(child)==='Empty Bar')return barFill(0,'empty');
-          if(text(child,'8050'))return {text:'0'};
-          if(text(child,'76%'))return {text:'0%'};
-          if(sample(child,/steps left/))return {text:'Sin pasos registrados'};
+        // Pasos declarados por la paciente (Plan V no importa datos de dispositivos).
+        const steps=patient.steps??null;
+        const stepsPct=percent(steps??0,DEFAULT_STEPS_GOAL);
+        return {onClick:onSteps,label:'Registrar pasos',children:fields(node,{},child=>{
+          if(nodeName(child)==='Progress Bar')return barFill(stepsPct,'filled');
+          if(nodeName(child)==='Empty Bar')return barFill(stepsPct,'empty');
+          if(text(child,'8050'))return {text:formatNumber(steps??0)};
+          if(text(child,'76%'))return {text:`${Math.round(stepsPct??0)}%`};
+          if(sample(child,/steps left/))return {text:steps==null?'Registrá tus pasos':steps>=DEFAULT_STEPS_GOAL?'Meta cumplida':`Faltan ${formatNumber(DEFAULT_STEPS_GOAL-steps)}`};
           return undefined;
         })};
       }

@@ -250,7 +250,7 @@ export function mapMessage(row: Record<string, unknown>, authorRole: unknown): M
 async function loadPatientExtras(
   patientId: string,
   audience: 'professional' | 'patient' = 'professional',
-): Promise<Pick<Patient, 'todayPlan' | 'weekPlan' | 'meal_logs' | 'messages' | 'brief' | 'briefDismissed' | 'timeline' | 'habit_logs' | 'hydration' | 'energy' | 'sleep_minutes' | 'appointment' | 'appointment_history' | 'resource_assignments'>> {
+): Promise<Pick<Patient, 'todayPlan' | 'weekPlan' | 'meal_logs' | 'messages' | 'brief' | 'briefDismissed' | 'timeline' | 'habit_logs' | 'hydration' | 'energy' | 'sleep_minutes' | 'steps' | 'appointment' | 'appointment_history' | 'resource_assignments'>> {
   const sb = getRequestDb();
 
   const timelineQuery = sb.from('timeline_events').select('id,kind,title,body,visibility,occurred_at').eq('patient_id', patientId);
@@ -347,6 +347,7 @@ async function loadPatientExtras(
     hydration: (h.hydration as number) ?? 0,
     energy: (h.energy as string | null) ?? null,
     sleep_minutes: (h.sleep_minutes as number | null) ?? null,
+    steps: (h.steps as number | null) ?? null,
   }));
   const todayHabit = habit_logs.find((h) => h.date === localDateId(new Date()));
 
@@ -367,6 +368,7 @@ async function loadPatientExtras(
     hydration: todayHabit?.hydration ?? 0,
     energy: todayHabit?.energy ?? null,
     sleep_minutes: todayHabit?.sleep_minutes ?? null,
+    steps: todayHabit?.steps ?? null,
     appointment,
     appointment_history,
     resource_assignments: resourceAssignments.get(patientId) ?? [],
@@ -717,7 +719,7 @@ export async function sbDismissBrief(patientId: string, dismissedBy: string): Pr
   if (error) throwWriteError(error);
 }
 
-export async function sbUpdateHabits(patientId: string, data: { hydration?: number; energy?: string | null; sleep_minutes?: number | null }): Promise<void> {
+export async function sbUpdateHabits(patientId: string, data: { hydration?: number; energy?: string | null; sleep_minutes?: number | null; steps?: number | null }): Promise<void> {
   const sb = getRequestDb();
   const today = localDateId(new Date());
   const { data: existing } = await sb.from('habit_logs').select('*')
@@ -730,11 +732,14 @@ export async function sbUpdateHabits(patientId: string, data: { hydration?: numb
       hydration: existing.hydration,
       energy: existing.energy,
       sleep_minutes: existing.sleep_minutes,
+      // Sólo si la columna existe: la app puede publicarse antes que la migración de pasos.
+      ...('steps' in existing ? { steps: existing.steps } : {}),
     } : {}),
   };
   if (data.hydration !== undefined) payload.hydration = data.hydration;
   if (data.energy !== undefined) payload.energy = data.energy;
   if (data.sleep_minutes !== undefined) payload.sleep_minutes = data.sleep_minutes;
+  if (data.steps !== undefined) payload.steps = data.steps;
 
   const { error } = await sb.from('habit_logs').upsert(payload, { onConflict: 'patient_id,date' });
   if (error) throwWriteError(error);
