@@ -154,7 +154,7 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
         <p className="text-[14px]">Hoy, {dateLabel(dateId(now))} · Agua: {patient.hydration} {patient.hydration === 1 ? 'vaso' : 'vasos'} · Descanso: {patient.sleep}</p>
         <div className="flex flex-wrap gap-[8px]">
           <button type="button" disabled={!logMeal} onClick={logMeal} className="rounded-[8px] bg-[#c2e66e] px-[16px] py-[10px] text-[#272932]">Registrar comida</button>
-          <button type="button" disabled={busy} onClick={onHydration ? () => { setDialog(null); onHydration(); } : () => void addWater()} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">{busy ? 'Guardando…' : 'Registrar un vaso de agua'}</button>
+          <button type="button" disabled={busy} onClick={onHydration ? () => { setDialog(null); onHydration(); } : () => void addWater()} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">{busy ? 'Guardando…' : onHydration ? 'Registrar agua' : 'Registrar un vaso de agua'}</button>
           <button type="button" onClick={() => { setDialog(null); if (onRest) onRest(); else onNavigate('progreso'); }} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">Registrar descanso</button>
         </div>
         {error && <Stateful error={error} />}
