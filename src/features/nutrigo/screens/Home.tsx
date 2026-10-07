@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { FramePair } from '../FramePair';
 import { nodeName, sourceText, type SourceBinding, type SourceNode, type SourceResolver } from '../SourceView';
 import { bodyDataApi, nutritionTargetApi } from '../../../api/nutrition-target';
@@ -12,6 +12,7 @@ import { recipeNutritionLabel, type NutrientAmounts } from '../../../types/ai-nu
 import { planSlotKey, PLAN_SLOT_KEYS } from '../../../types/plans';
 import { EXERCISE_CATEGORY_LABELS } from '../../../types/exercise';
 import { rulerFor, weightGauge } from './weight-gauge';
+import { CalorieArc, WeightArc } from './arcs';
 import '../home-motion.css';
 import { barFill, descendants, fields, formatNumber, leaf, listChildren, objects, percent, Ring, source, Stateful, timeLabel, useRemote, dateId, type ScreenProps } from './shared';
 
@@ -46,7 +47,9 @@ function nutrientBinding(node:SourceNode,amounts:Partial<Record<keyof NutrientAm
 
 /** El dibujo de la dona del archivo se reemplaza por el mismo arco con el valor real (nunca se oculta el bloque). */
 function donut(node: SourceNode, ring: ReactNode, drawn: string[], resolve: SourceResolver): SourceBinding {
-  return { children: <>{ring}{objects(node).map((child, index) => drawn.includes(nodeName(child)) ? null : source(child, resolve, index))}</> };
+  // El arco ocupa el lugar de la primera capa que reemplaza, para respetar el orden de capas del archivo.
+  const firstDrawn = objects(node).findIndex(child => drawn.includes(nodeName(child)));
+  return { children: <>{objects(node).map((child, index) => index === firstDrawn ? <Fragment key={index}>{ring}</Fragment> : drawn.includes(nodeName(child)) ? null : source(child, resolve, index))}</> };
 }
 
 type Activity = { at: string; color: number; bold: string; rest: string };
@@ -149,7 +152,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
       })};
     }
     if(name==='Widget Weight Data'){const weightLeaf:SourceResolver=child=>{
-      if(nodeName(child)==='Chart'&&descendants(child).some(n=>nodeName(n)==='Donut Progress'))return donut(child,<span className="absolute left-0 top-0 block size-[204px]"><Ring pct={gauge.pct} color="#ffa257" thickness={30} half hatch="#ffcb65"/></span>,['Donut Base','Mask group','Donut Progress'],weightLeaf);
+      if(nodeName(child)==='Chart'&&descendants(child).some(n=>nodeName(n)==='Donut Progress'))return donut(child,<WeightArc pct={gauge.pct}/>,['Donut Base','Mask group','Donut Progress'],weightLeaf);
       if(text(child,'78'))return {text:formatNumber(weight)};
       if(text(child,'kg','Kg'))return {text:weightDisplay.unit};
       if(text(child,'Current Weight'))return {text:'Peso actual'};
@@ -163,7 +166,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
     };return {children:fields(node,{},weightLeaf)};}
     if(name==='Widget Calories Intake'){const calorieLeaf:SourceResolver=child=>{
       if(nodeName(child)==='Button More')return {onClick:()=>onLogMeal(),label:'Registrar comida'};
-      if(nodeName(child)==='Chart'&&objects(child).some(n=>nodeName(n)==='Donut Progress'))return donut(child,<span className="absolute block" style={{inset:'4.63% 4.17% 4.63% 5.09%'}}><Ring pct={percent(kcal,target?.kcal)} color="#ffcb65" track="#fefcfb" thickness={14}/></span>,['Donut Progress'],calorieLeaf);
+      if(nodeName(child)==='Chart'&&objects(child).some(n=>nodeName(n)==='Donut Progress'))return donut(child,<CalorieArc pct={percent(kcal,target?.kcal)}/>,['Donut Progress'],calorieLeaf);
       if(nodeName(child)==='Item List Macronutrients'){
         const label=descendants(child).map(sourceText).find(t=>['Carbohydrates','Proteins','Fats'].includes(t));
         const pct=label==='Carbohydrates'?macroPct.carbs:label==='Proteins'?macroPct.protein:macroPct.fat;

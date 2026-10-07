@@ -39,7 +39,26 @@ describe.each([false,true])('pantallas principales MCP (celular %s)',mobile=>{
     expect(html).toContain('conic-gradient');expect(html).not.toContain('visibility:hidden');
     // Como en el archivo, el tramo que falta del medidor de peso va rayado con las líneas blancas del propio archivo sobre el amarillo #ffcb65.
     expect(html).toContain('weight-hatch.svg');expect(html).toContain('#ffcb65');expect(html).not.toContain('repeating-linear-gradient');
+    // La silueta del medidor son las dos piezas SVG originales del archivo (Donut Base y Donut Progress), no un anillo propio.
+    expect(html).toContain('f641d.svg');expect(html).toContain('16730.svg');
     expect(html).toContain('1,3/2');
+  });
+  it('calorías: conserva las capas originales (círculo gris y anillo amarillo) y suma el arco naranja original según el dato',()=>{
+    context.mobile=mobile;
+    const target={result:{kcal:2000,carbs_g:250,protein_g:100,fat_g:60}};
+    const render=(kcal:number)=>{context.data={body:null,target,recipes:[],plan:null,exercise:null,care:{measurements:[]},failed:false};
+      return renderToStaticMarkup(<NutrigoHome patient={{...patient,nutritionLogCount:1,kcal,macros:{kcal,carbs_g:100,protein_g:40,fat_g:20}} as unknown as ShowroomPatient} onNavigate={navigate} onRecord={navigate} onHydration={navigate} onRest={navigate} onLogMeal={navigate}/>);};
+    const medio=render(1000);
+    expect(medio).toContain('data-name="Ellipse Base"');expect(medio).toContain('data-name="Donut Base"');
+    // 50 % del anillo = 180°: el arco original (≈140°) aparece dos veces, la segunda girada.
+    const copias=(html:string)=>html.match(/<img[^>]*1af77\.svg/g)?.length??0;
+    expect(copias(medio)).toBe(2);expect(medio).toContain('rotate(140deg)');
+    const poco=render(200);expect(copias(poco)).toBe(1);
+    // Orden de capas del archivo: círculo gris → anillo amarillo → arco naranja (arriba de los dos).
+    expect(medio.indexOf('data-name="Ellipse Base"')).toBeLessThan(medio.indexOf('data-name="Donut Base"'));
+    expect(medio.indexOf('data-name="Donut Base"')).toBeLessThan(medio.indexOf('data-arc="calories"'));
+    const vacio=render(0);expect(copias(vacio)).toBe(0);
+    const lleno=render(5000);expect(copias(lleno)).toBe(3);
   });
   it('menú conserva datos y estimación de la receta asignada',()=>{
     context.mobile=mobile;context.data={recipes:[recipe],favorites:[]};
