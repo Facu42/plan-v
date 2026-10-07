@@ -15,6 +15,23 @@ node scripts/nutrigo-audit.mjs                  # abre cada control de 12 págin
 La API de demo carga sola los datos de ejemplo al iniciar (`server/demo/autoseed.ts`, no duplica;
 se apaga con `DEMO_SEED=0`). Salidas en `design/auditoria/` (capturas e `informe.md`, fuera de git).
 
+## Cómo probarlo (Facundo)
+
+En la computadora, dentro de la carpeta del proyecto:
+
+```
+git fetch origin
+git checkout claude/inspiring-lovelace-nfsot9
+git pull
+npm install
+npm run local
+```
+
+Abrí `http://127.0.0.1:5173` y elegí **Continuar en modo demo**. Entra como Sofía con todos los datos
+cargados. Probá en ancho de computadora y en celular (F12 → ícono de celular, 390 de ancho): las diez
+pantallas, el menú (ícono de las tres rayas en celular), «Mis registros» en Inicio, Pagos y Mi ficha.
+Los datos de la demo viven en memoria: al reiniciar `npm run local` vuelven a cargarse solos.
+
 ## Qué se encontró y se arregló
 
 | Hallazgo | Arreglo |
