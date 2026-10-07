@@ -1,13 +1,19 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useModalFocus } from '../nutrigo/use-modal-focus';
 import { useUnsavedChanges, canLeaveWorkspace } from '../nutrigo/unsaved-changes';
-import { useRef, useState } from 'react';
 import { api } from '../../api/client';
 import { useAppStore } from '../../store/useAppStore';
 import type { MealLog, Patient } from '../../types';
-import { Icon, MacroBar } from '../shared/Icon';
 import { careErrorMessage, notifyCareChanged } from '../../api/care';
 import { useCare } from '../nutrigo/useCare';
 import { CareConsent } from '../nutrigo/CarePanel';
+import { CaptureView, type Draft } from './MealLogCapture';
+import { AnalyzingView, ReviewView, SuccessView } from './MealLogResult';
+import { StepIndicator } from './MealLogStepper';
+import { base64Payload, captureProblem, photoProblem, resolveInitialSlot, type Step } from './meal-log-helpers';
+import './meal-log-modal.css';
+
+export { MEAL_KEPT_COPY, mealLogWasKept } from './meal-log-helpers';
 
 type Props = {
   patient: Patient;
@@ -15,73 +21,68 @@ type Props = {
   close: () => void;
 };
 
-type Step = 'capture' | 'analyzing' | 'review' | 'success';
+const READ_ERROR = 'No pudimos leer esa foto. Probá con otra.';
 
-const SLOTS = ['Desayuno', 'Colación', 'Almuerzo', 'Merienda', 'Cena', 'Extra'];
-
-export function mealLogWasKept(log: Pick<MealLog, 'foods' | 'macros' | 'analysis_status'>) {
-  return log.analysis_status === 'failed' || (log.foods.length === 0 && !log.macros);
-}
-
-export const MEAL_KEPT_COPY = 'No pudimos estimar alimentos ni macros. Verónica lo revisará. Tu registro no se perdió.';
-
-export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props) {
-  const care=useCare(patient.id);
-  const lock=useRef(false);
+export function MealLogModal({ patient, defaultSlot, close }: Props) {
+  const care = useCare(patient.id);
+  const lock = useRef(false);
   const clientId = useRef(crypto.randomUUID());
   const refreshPatient = useAppStore((s) => s.refreshPatient);
   const [step, setStep] = useState<Step>('capture');
-  const [mode, setMode] = useState<'photo' | 'text'>('photo');
-  const [slot, setSlot] = useState(defaultSlot);
-  const [description, setDescription] = useState('');
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [imageBase64, setImageBase64] = useState<string | undefined>();
+  const [draft, setDraft] = useState<Draft>(() => ({
+    mode: 'photo', slot: resolveInitialSlot(defaultSlot, new Date().getHours()), description: '', photoPreview: null,
+  }));
   const [result, setResult] = useState<MealLog | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-  useUnsavedChanges(step === 'capture' && Boolean(description.trim() || imageBase64), step === 'analyzing');
+  const imageBase64 = useMemo(() => base64Payload(draft.photoPreview), [draft.photoPreview]);
+  const consented = care.data?.consented ?? null;
+  useUnsavedChanges(step === 'capture' && Boolean(draft.description.trim() || imageBase64), step === 'analyzing');
   const closeSafely = () => { if (canLeaveWorkspace()) close(); };
   const dialog = useModalFocus(true, closeSafely);
 
+  const lastStep = useRef(step);
+  useEffect(() => {
+    if (lastStep.current === step) return;
+    lastStep.current = step;
+    dialog.current?.querySelector<HTMLElement>('[data-mlm-heading]')?.focus({ preventScroll: true });
+  }, [step, dialog]);
+
+  const patchDraft = (patch: Partial<Draft>) => setDraft((current) => ({ ...current, ...patch }));
+
+  // Una sola lectura de foto a la vez: si empieza otra o se cierra el diálogo, la vieja se descarta.
+  const reading = useRef<FileReader | null>(null);
+  useEffect(() => () => reading.current?.abort(), []);
+
   const handleFile = (file: File) => {
-    if(file.size>5*1024*1024 || !['image/jpeg','image/png','image/webp'].includes(file.type)){setError('Elegí una foto JPG, PNG o WebP de hasta 5 MB.');return;}
+    const problem = photoProblem(file);
+    if (problem) { setError(problem); return; }
+    reading.current?.abort();
     const reader = new FileReader();
+    reading.current = reader;
     reader.onload = () => {
-      const dataUrl = reader.result as string;
-      setPhotoPreview(dataUrl);
-      setImageBase64(dataUrl.split(',')[1]);
+      if (reading.current !== reader) return;
+      patchDraft({ photoPreview: reader.result as string });
+      setError(null);
     };
+    reader.onerror = () => { if (reading.current === reader) setError(READ_ERROR); };
     reader.readAsDataURL(file);
   };
 
   const analyze = async () => {
-    if(lock.current)return;
-    const text = description.trim();
-    if (care.data && !care.data.consented.includes('ai_meal_analysis')) {
-      setError('Activá el permiso de análisis con IA para continuar.');
-      return;
-    }
-    if (mode === 'photo' && care.data && !care.data.consented.includes('meal_photo')) {
-      setError('Activá el permiso de fotos de comidas para subir una imagen.');
-      return;
-    }
-    if (mode === 'photo' && !imageBase64 && !text) {
-      setError('Subí una foto o contanos qué comiste en texto.');
-      return;
-    }
-    if (mode === 'text' && !text) {
-      setError('Describí qué comiste.');
-      return;
-    }
+    if (lock.current) return;
+    const text = draft.description.trim();
+    const problem = captureProblem({ mode: draft.mode, text, hasImage: Boolean(imageBase64), consented });
+    if (problem) { setError(problem); return; }
     setError(null);
-    lock.current=true;
+    lock.current = true;
     setStep('analyzing');
     try {
+      const withPhoto = draft.mode === 'photo' && imageBase64;
       const { log } = await api.analyzeMeal(patient.id, {
         description: text || undefined,
-        imageBase64: mode === 'photo' && imageBase64 ? imageBase64 : undefined,
-        slot,
-        photoPreview: mode === 'photo' ? photoPreview ?? undefined : undefined,
+        imageBase64: withPhoto ? imageBase64 : undefined,
+        slot: draft.slot,
+        photoPreview: draft.mode === 'photo' ? draft.photoPreview ?? undefined : undefined,
         client_id: clientId.current,
       });
       setResult(log);
@@ -91,139 +92,37 @@ export function MealLogModal({ patient, defaultSlot = 'Almuerzo', close }: Props
     } catch (e) {
       setError(careErrorMessage(e));
       setStep('capture');
-    } finally { lock.current=false; }
+    } finally { lock.current = false; }
   };
 
-  const confirm = () => {
-    setStep('success');
-  };
-
-  if (step === 'success' && result) {
-    return (
-      <div className="modal-backdrop" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Registrar comida">
-        <div className="photo-modal photo-success">
-          <button className="modal-close" onClick={closeSafely} aria-label="Cerrar">×</button>
-          <span><Icon name="check" size={30} /></span>
-          <p className="eyebrow">Comida registrada</p>
-          <h2>¡Listo, {patient.name.split(' ')[0]}!</h2>
-          <p>Quedó como estimación. Verónica lo revisa cuando corresponda.</p>
-          {result.macros && <MacroBar macros={result.macros} />}
-          <button className="primary-button" onClick={closeSafely}>Volver a mi día</button>
-        </div>
-      </div>
-    );
-  }
-
-  if (step === 'analyzing') {
-    return (
-      <div className="modal-backdrop" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Registrar comida">
-        <div className="photo-modal analyzing-modal">
-          <Icon name="loader" size={32} className="spin" />
-          <h2>Analizando tu comida…</h2>
-          <p>La IA estima alimentos y macros. Verónica confirma antes de que cuente.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (step === 'review' && result) {
-    const estimationUnavailable = mealLogWasKept(result);
-    return (
-      <div className="modal-backdrop" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Registrar comida">
-        <div className="photo-modal">
-          <button className="modal-close" onClick={closeSafely} aria-label="Cerrar">×</button>
-          {photoPreview ? (
-            <div className="modal-camera preview"><img src={photoPreview} alt="Tu comida" /></div>
-          ) : (
-            <div className="modal-camera text-preview"><Icon name="edit" size={28} /><p>{description}</p></div>
-          )}
-          <p className="eyebrow">{estimationUnavailable ? 'Registro guardado' : 'Lectura asistida'} · {slot}</p>
-          <h2>{estimationUnavailable ? 'Registramos tu comida' : 'Esto es lo que vemos'}</h2>
-          {estimationUnavailable ? (
-            <p className="modal-note">{MEAL_KEPT_COPY}</p>
-          ) : (
-            <>
-              <div className="food-tags">
-                {result.foods.map((f) => (
-                  <span key={f.name}>{f.name}{f.portion_est ? ` · ~${f.portion_est}${f.portion_unit}` : ''}</span>
-                ))}
-              </div>
-              {result.macros ? (
-                <>
-                  <MacroBar macros={result.macros} />
-                  <p className={`confidence-badge ${result.confidence >= 0.75 ? 'high' : result.confidence >= 0.45 ? 'medium' : 'low'}`}>
-                    Estimación · confianza {(result.confidence * 100).toFixed(0)}% · pendiente de Verónica
-                  </p>
-                </>
-              ) : (
-                <p className="modal-note">No pudimos estimar macros con confianza. Verónica lo revisará.</p>
-              )}
-            </>
-          )}
-          <p className="modal-note">No es una medida exacta. Verónica confirma antes de que cuente para tu seguimiento.</p>
-          <button className="primary-button wide" onClick={confirm}><Icon name="check" size={17} />Guardar comida</button>
-        </div>
-      </div>
-    );
-  }
-
+  const preview = draft.mode === 'photo' ? draft.photoPreview : null;
+  const showCapture = step === 'capture' || (!result && step !== 'analyzing');
   return (
-    <div className="modal-backdrop" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Registrar comida">
-      <div className="photo-modal meal-capture-modal">
-        <button className="modal-close" onClick={closeSafely} aria-label="Cerrar">×</button>
-        <p className="eyebrow">Registrar comida</p>
-        <h2>¿Qué comiste?</h2>
-        {care.data && <CareConsent patientId={patient.id} snapshot={care.data} meals />}
-
-        <div className="capture-tabs">
-          <button className={mode === 'photo' ? 'active' : ''} onClick={() => setMode('photo')} type="button">
-            <Icon name="camera" size={16} /> Foto
-          </button>
-          <button className={mode === 'text' ? 'active' : ''} onClick={() => setMode('text')} type="button">
-            <Icon name="edit" size={16} /> Describir
-          </button>
-        </div>
-
-        <label className="field-label">Comida</label>
-        <div className="slot-pills">
-          {SLOTS.map((s) => (
-            <button key={s} type="button" className={slot === s ? 'active' : ''} onClick={() => setSlot(s)}>{s}</button>
-          ))}
-        </div>
-
-        {mode === 'photo' ? (
-          <>
-            <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
-            <button type="button" className="upload-zone" disabled={Boolean(care.data) && !care.data?.consented.includes('meal_photo')} onClick={() => fileRef.current?.click()}>
-              {photoPreview ? <img src={photoPreview} alt="Vista previa" /> : (
-                <>
-                  <Icon name="camera" size={28} />
-                  <strong>Tocá para sacar o subir foto</strong>
-                  <small>Una foto clara ayuda a estimar mejor</small>
-                </>
-              )}
-            </button>
-            <input
-              className="text-input optional-desc"
-              aria-label="Detalle opcional de la comida" placeholder="Detalle opcional (ej: con aceite de oliva)"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+    <div className="mlm-backdrop" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Registrar comida"
+      onMouseDown={(event) => { if (event.target === event.currentTarget) closeSafely(); }}
+      onDragOver={(event) => event.preventDefault()} onDrop={(event) => event.preventDefault()}>
+      <p className="mlm-sr" aria-live="assertive" aria-atomic="true">{error}</p>
+      <div className="mlm-sheet" data-step={step}>
+        <header className="mlm-head">
+          <span className="mlm-grab" aria-hidden />
+          <StepIndicator step={step} />
+          <button className="mlm-close" type="button" onClick={closeSafely} disabled={step === 'analyzing'} aria-label="Cerrar">×</button>
+        </header>
+        <div className="mlm-stage" key={step}>
+          {step === 'analyzing' && <AnalyzingView mode={draft.mode} preview={preview} description={draft.description} />}
+          {step === 'review' && result && (
+            <ReviewView result={result} slot={draft.slot} preview={preview} description={draft.description} onConfirm={() => setStep('success')} />
+          )}
+          {step === 'success' && result && <SuccessView name={patient.name} macros={result.macros} onClose={closeSafely} />}
+          {showCapture && (
+            <CaptureView
+              draft={draft} error={error} onChange={patchDraft} onFile={handleFile} onAnalyze={() => void analyze()}
+              photoBlocked={Boolean(consented) && !consented?.includes('meal_photo')}
+              aiBlocked={Boolean(consented) && !consented?.includes('ai_meal_analysis')}
+              consent={care.data && <CareConsent patientId={patient.id} snapshot={care.data} meals />}
             />
-          </>
-        ) : (
-          <textarea
-            className="text-input meal-desc"
-            placeholder="Ej: milanesa de pollo con ensalada mixta y un poco de arroz"
-            rows={4}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        )}
-
-        {error && <p className="form-error">{error}</p>}
-        <button className="primary-button wide" type="button" onClick={analyze} disabled={Boolean(care.data) && !care.data?.consented.includes('ai_meal_analysis')}>
-          <Icon name="sparkle" size={17} />Analizar con IA
-        </button>
+          )}
+        </div>
       </div>
     </div>
   );

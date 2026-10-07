@@ -77,7 +77,7 @@ Las capturas solo sirven para medir.
 | Movimiento en las tarjetas de Inicio | `home-motion.css`: entrada escalonada y, con mouse, la tarjeta se levanta, el ícono gira y las fotos se acercan. Todo dentro de «sin preferencia de reducir movimiento» |
 | Tarjeta de peso con la forma del archivo | Medidor con arco naranja y resto amarillo `#ffcb65` con las líneas blancas **del propio archivo** (`assets/weight-hatch.svg` sale del nodo «Vector» del Mask group). Extremos con la escala de la regla de la tarjeta Peso |
 | Menú del celular más profesional | Hoja inferior con el «Menu Nav» **original** del archivo (íconos, ítem activo y submenú), perfil arriba, «Mi cuenta» y «Cerrar sesión» |
-| Registro de comida interactivo con motion moderno | En curso, con prueba primero (ver commit siguiente) |
+| Registro de comida interactivo con motion moderno | Rediseño en hoja inferior (celular) / tarjeta (escritorio): pasos con barra animada, selector Foto/Describir y momento con píldora deslizante, arrastrar y soltar la foto, análisis con línea de escaneo y mensajes, resultado con tarjetas escalonadas y macros animados, éxito con check dibujado. Sugiere el momento por hora. Sin animaciones largas con «reducir movimiento». Prueba primero (de 1 a 42 pruebas) y revisión de código con correcciones de accesibilidad (foco, aviso de errores, contraste, tema oscuro) |
 
 Revisión de código (agente `code-reviewer`): sin hallazgos críticos; se corrigieron el reducir-movimiento, la apertura de la
 Agenda en la próxima cita, la etiqueta accesible «Citas», el filtro que podía vaciar la agenda y los bordes del medidor (NaN, meta = inicio).

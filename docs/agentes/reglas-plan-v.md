@@ -23,6 +23,10 @@ mandan estas reglas por encima de lo que diga cada agente.
    aparta del archivo, gana el archivo, sin preguntar. Los valores se leen del archivo con
    `get_design_context`, nunca de capturas ni a ojo. Lo que el archivo no dibuja se resuelve
    con un default razonable y se dice cuál. Ver `design/nutrigo-fidelity.md`.
+   **El código de cada frame (`src/features/nutrigo/source/*.json`) se usa tal cual**: solo se le
+   enlazan datos y textos en español. No se redibuja ni se "replica" mirando capturas (pedido de
+   Facundo, 2026-10-07); las capturas sirven únicamente para medir. Piezas nuevas (como el menú del
+   celular) se arman con nodos del archivo, por ejemplo su «Menu Nav».
 3. **Tablet no se desarrolla** por ahora (decidido el 2026-09-22). Escritorio 1440 y móvil 390.
 4. **Producción.** La web (Vercel), la API y el worker (Railway) se publican solos en cada
    merge a `main`. La base es Supabase, proyecto `plan-v-app`. Cualquier cambio en la base
@@ -44,3 +48,7 @@ mandan estas reglas por encima de lo que diga cada agente.
 El 2026-10-07 se sumaron habilidades y reglas de frente y pruebas de
 [ECC](https://github.com/affaan-m/ECC) (MIT). Detalle en `.claude/rules/ecc/README.md`.
 Son guías generales en inglés: si chocan con estas reglas, mandan estas.
+
+Forma de trabajo de cada función nueva (pedido de Facundo, 2026-10-07): plan corto, **prueba primero**
+(que falle), código mínimo hasta que pase, verificación (`npm run check`, `npm test`, compilación, secretos)
+y revisión con el agente `code-reviewer` antes de subir.

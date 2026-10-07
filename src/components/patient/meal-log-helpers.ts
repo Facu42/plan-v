@@ -91,3 +91,19 @@ export function captureProblem(input: { mode: CaptureMode; text: string; hasImag
   if (mode === 'text' && !text) return 'Describí qué comiste.';
   return null;
 }
+
+/** Contenido base64 de una foto en data URL, sin partir el texto entero. */
+export function base64Payload(dataUrl: string | null): string | undefined {
+  if (!dataUrl) return undefined;
+  const comma = dataUrl.indexOf(',');
+  return comma < 0 ? undefined : dataUrl.slice(comma + 1);
+}
+
+const NOTICE_AT = [200, 100, 50, 10];
+
+/** Aviso para lectores de pantalla: solo en umbrales, para no leer cada letra. */
+export function remainingNotice(length: number, max: number): string {
+  const left = max - length;
+  if (left <= 0) return 'Llegaste al límite de caracteres.';
+  return NOTICE_AT.includes(left) ? `Te quedan ${left} caracteres.` : '';
+}
