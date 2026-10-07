@@ -422,7 +422,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
       <div className="nv-content-layout">
         {/* Cambiar de pantalla o paciente desmonta los datos y formularios anteriores. */}
         <main key={`${contentIdentity(role,page,selected?.id)}:${workspaceRevision}`} id="nv-main" tabIndex={-1} className="nv-main" data-figma-node={role === 'patient' ? (figmaDetail?.nodes ?? PATIENT_FIGMA_NODES[page])?.[compactHeader ? 1 : 0] : undefined}>
-          {role === 'pro' && <nav className="nv-clinic-shortcuts" aria-label="Accesos del consultorio">
+          {role === 'pro' && page !== 'alimentos' && <nav className="nv-clinic-shortcuts" aria-label="Accesos del consultorio">
             <button type="button" aria-current={page === 'pacientes' ? 'page' : undefined} onClick={() => navigate('pacientes')}><Icon name="users" size={18} />Pacientes</button>
             <button type="button" aria-current={page === 'ficha' ? 'page' : undefined} disabled={!selected} onClick={() => navigate('ficha')}><Icon name="contact" size={18} />Ficha</button>
             <button type="button" aria-current={page === 'plan' ? 'page' : undefined} disabled={!selected} onClick={() => navigate('plan')}><NvIcon name="plan" size={18} />Plan</button>
