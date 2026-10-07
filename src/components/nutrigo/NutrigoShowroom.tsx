@@ -63,6 +63,7 @@ import './nutrigo-fidelity.css';
 import './shell-fig.css';
 import './figma-source.css';
 import './patient-figma-front.css';
+import './ace-step-polish.css';
 import './motion.css';
 import { NV_ICONS, NvIcon, type NvIconName } from './NvIcon';
 import { CaretDown, CaretUp, LockSimple } from '@phosphor-icons/react';
@@ -265,6 +266,10 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
   const habitReminders = p ? buildShowroomReminders(p, now) : [];
   const nextHabitReminder = habitReminders.find((reminder) => reminder.state !== 'done' && reminder.kind !== 'consulta') ?? null;
   const openReminder = (reminder: (typeof habitReminders)[number]) => navigate(reminderPage(reminder.kind));
+  const openPatientNotification = (patientId: string, target: ShowroomPage) => {
+    if (role === 'pro' && !selectPatient(patientId)) return;
+    navigate(target);
+  };
   const rescheduleAppointment = async (day: string, time: string) => {
     if (!selected) return;
     const result = await api.rescheduleAppointment(selected.id, { day, time });
@@ -340,7 +345,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
 
   const accountMenu = () => (
 <div className="nv-header-menu">
-          <ShowroomConsultAlerts key={alertAudience} audience={alertAudience} alerts={consultAlerts} reminders={habitReminders} patientId={selected?.id} onOpen={(alert) => { if (role === 'pro') selectPatient(alert.patientId); navigate('agenda'); }} onManage={role === 'pro' ? (alert) => { selectPatient(alert.patientId); navigate('consultas'); } : undefined} onOpenReminder={openReminder} onOpenCare={(notice) => { if (role === 'pro') selectPatient(notice.patient_id); navigate(notice.target); }} />
+          <ShowroomConsultAlerts key={alertAudience} audience={alertAudience} alerts={consultAlerts} reminders={habitReminders} patientId={selected?.id} onOpen={(alert) => openPatientNotification(alert.patientId, 'agenda')} onManage={role === 'pro' ? (alert) => openPatientNotification(alert.patientId, 'consultas') : undefined} onOpenReminder={openReminder} onOpenCare={(notice) => openPatientNotification(notice.patient_id, notice.target)} />
           <div className="nv-user">
             <span className="nv-user-avatar" aria-hidden="true">{userInitials}</span>
             <span className="nv-user-name"><strong>{displayName}</strong><small>{role === 'pro' ? 'Nutricionista' : 'Paciente'}</small></span>

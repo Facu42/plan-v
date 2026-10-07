@@ -3,7 +3,7 @@
 @font-face {font-family:'Poppins:SemiBold';src:url('../../../node_modules/@fontsource/poppins/files/poppins-latin-600-normal.woff2') format('woff2');font-weight:600;font-display:swap}
 @font-face {font-family:'Poppins:Bold';src:url('../../../node_modules/@fontsource/poppins/files/poppins-latin-700-normal.woff2') format('woff2');font-weight:700;font-display:swap}
 
-.mcp-nutrigo {font-family:Poppins,sans-serif;color:#272932;background:#f9f4f2;min-height:100vh;line-height:1.5}
+.mcp-nutrigo {font-family:Poppins,sans-serif;color:#272932;background:#f9f4f2;min-height:100vh;width:100%;max-width:100%;overflow-x:clip;line-height:1.5}
 /* Los formularios compartidos y los diálogos viven fuera de .nv-app.
    Usan los mismos tokens literales de Nutrigo (nutrigo-fidelity.css). */
 .mcp-nutrigo,.fp-record-dialog,.mcp-patient-overlays {
@@ -42,12 +42,27 @@
 .mcp-nutrigo img {border:0}
 .mcp-state {padding:20px;border:1px solid #e1e1e2;border-radius:16px;background:white;margin:16px}
 .mcp-state button,.mcp-action {padding:9px 13px;border-radius:12px;background:#c2e66e!important;font-weight:500}
-.mcp-dialog {border:1px solid #e1e1e2;border-radius:16px;padding:20px;width:min(640px,calc(100vw - 32px));max-height:90vh;overflow:auto;color:#272932;background:white;font-family:Poppins,sans-serif}
-.mcp-dialog::backdrop {background:#27293266}
+.mcp-dialog,.fp-record-dialog {border:1px solid #e1e1e2;border-radius:16px;padding:20px;width:min(640px,calc(100vw - 32px));max-width:calc(100vw - 24px);max-height:90vh;overflow:auto;color:#272932;background:white;font-family:Poppins,sans-serif}
+.mcp-dialog::backdrop,.fp-record-dialog::backdrop {background:#27293266}
+.fp-record-dialog {transform:translateY(14px) scale(.98);opacity:0;transition:transform 240ms cubic-bezier(.23,1,.32,1),opacity 180ms ease}
+.fp-record-dialog[open] {transform:none;opacity:1}
 .mcp-dialog header {display:flex;justify-content:space-between;gap:16px;margin-bottom:16px}
 .mcp-dialog nav {display:flex;flex-direction:column;gap:12px}
 .mcp-dialog button,.mcp-dialog select,.mcp-dialog input {font:inherit}
 .mcp-dialog button {cursor:pointer}
+.mcp-nutrigo [data-name="Card"],
+.mcp-nutrigo [data-name="Card Statistic - Dashboard"],
+.mcp-nutrigo [data-name="Card Food"],
+.mcp-nutrigo [data-name="Button Nav"] {transition:transform 180ms cubic-bezier(.23,1,.32,1),box-shadow 180ms ease,background-color 180ms ease}
+@media (hover:hover) and (pointer:fine) {
+  .mcp-nutrigo [data-name="Card"]:hover,
+  .mcp-nutrigo [data-name="Card Statistic - Dashboard"]:hover,
+  .mcp-nutrigo [data-name="Card Food"]:hover {transform:translateY(-2px);box-shadow:0 12px 28px rgba(39,41,50,.10)}
+  .mcp-nutrigo [data-name="Button Nav"]:hover {transform:translateX(3px);background:#f6f6f7}
+}
+@media (prefers-reduced-motion:reduce) {
+  .fp-record-dialog,.mcp-nutrigo [data-name="Card"],.mcp-nutrigo [data-name="Card Statistic - Dashboard"],.mcp-nutrigo [data-name="Card Food"],.mcp-nutrigo [data-name="Button Nav"] {transition:none}
+}
 .mcp-screen-state {display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:#fff;min-height:0}
 .mcp-screen-state p {margin:0}
 .mcp-extra-content {display:grid;gap:20px;padding:24px;background:var(--nv-bg);width:100%;min-width:0}

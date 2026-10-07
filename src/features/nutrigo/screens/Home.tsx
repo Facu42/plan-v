@@ -5,11 +5,13 @@ import { bodyDataApi, nutritionTargetApi } from '../../../api/nutrition-target';
 import { recipesApi } from '../../../api/recipes';
 import { plansApi } from '../../../api/plans';
 import { exerciseApi } from '../../../api/exercise';
+import { EXERCISE_CATEGORY_LABELS } from '../../../types/exercise';
 import { careApi } from '../../../api/care';
 import { patientMenuRecipes, planRecipe } from '../plan-recipe';
 import { latestWeight } from '../../../lib/measurement-display';
 import { recipeNutritionLabel, type NutrientAmounts } from '../../../types/ai-nutrition';
 import { planSlotKey, PLAN_SLOT_KEYS } from '../../../types/plans';
+import { GOAL_LABELS, type TargetGoal } from '../../../lib/nutrition-target';
 import { descendants, fields, formatNumber, leaf, Stateful, useRemote, dateId, type ScreenProps } from './shared';
 
 async function homeData(id: string, signal: AbortSignal) {
@@ -43,29 +45,69 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
   const weightDisplay=latestWeight(current?.care?.measurements??[],current?.body?.weight_kg??null);
   const weight=weightDisplay.value;
   const target=current?.target?.result;
+  const targetGoal=current?.target?.inputs.goal as TargetGoal|undefined;
+  const weightGoal=targetGoal?GOAL_LABELS[targetGoal]:'Meta de peso no registrada';
   const known=patient.nutritionLogCount>0;
   const kcal=known?patient.kcal:null;
   const today=dateId(now);
   const meals=(current?.plan?.items.filter(item=>item.for_date===today)??[]).slice().sort((a,b)=>PLAN_SLOT_KEYS.indexOf(planSlotKey(a.slot)!)-PLAN_SLOT_KEYS.indexOf(planSlotKey(b.slot)!));
   const recipes=patientMenuRecipes(current?.plan??null,current?.recipes??[]);
-  const routines=current?.exercise?.assignments.filter(a=>a.status==='active').flatMap(a=>a.items)??[];
+  const activeAssignments=current?.exercise?.assignments.filter(a=>a.status==='active')??[];
+  const routines=activeAssignments.flatMap(a=>a.items);
+  const workoutItems=activeAssignments.flatMap(assignment=>assignment.items.map(item=>({ item, assignment })));
   const resolve:SourceResolver=node=>{
     const name=nodeName(node),text=sourceText(node);
     if(name==='Card Statistic - Dashboard') {
       if(text.startsWith('Weight'))return {onClick:onRecord,label:'Registrar peso y medidas',children:fields(node,{'84:1483':formatNumber(weight),'427:14421':formatNumber(weight)},child=>neutralGraph(child,{'78':formatNumber(weight),'Kg':weightDisplay.unit,'kg':weightDisplay.unit})??(leaf(child)&&['Kg','kg'].includes(sourceText(child))?{text:weightDisplay.unit}:leaf(child)&&sourceText(child)==='78'?{text:formatNumber(weight)}:leaf(child)&&/^\d+$/.test(sourceText(child))?{text:''}:undefined))};
       if(text.startsWith('Steps'))return {onClick:()=>onNavigate('ejercicio'),label:'Ver actividad',children:fields(node,{},child=>neutralGraph(child)??(leaf(child)&&/^8050|76%|1950/.test(sourceText(child))?{text:'—'}:undefined))};
       if(text.startsWith('Sleep'))return {onClick:onRest,label:'Registrar descanso',children:fields(node,{},child=>nodeName(child)==='Column Ruler'?{props:{style:{visibility:'hidden'},'aria-hidden':true}}:leaf(child)&&sourceText(child)==='6.5'?{text:patient.sleepMinutes==null?'—':formatNumber(patient.sleepMinutes/60)}:undefined)};
-      return {onClick:onHydration,label:'Registrar hidratación',children:fields(node,{},child=>neutralGraph(child,{'1.3/2':formatNumber(patient.hydration),'litre':'vasos'})??(leaf(child)&&sourceText(child)==='1.3/2'?{text:formatNumber(patient.hydration)}:leaf(child)&&['0.7','litre left','litre'].includes(sourceText(child))?{text:sourceText(child)==='litre'?'vasos':''}:undefined))};
+      const hydrationFill=Math.min(100,Math.max(0,patient.hydration/8*100));
+      return {onClick:onHydration,label:'Registrar hidratación',children:fields(node,{},child=>{
+        if(nodeName(child)==='Progress Bar')return {props:{style:{height:`${hydrationFill}%`,flex:'none',minHeight:patient.hydration?'16px':'0'}}};
+        if(leaf(child)&&sourceText(child)==='1.3/2')return {text:formatNumber(patient.hydration)};
+        if(leaf(child)&&sourceText(child)==='0.7')return {text:'—'};
+        if(leaf(child)&&['litre left','litre'].includes(sourceText(child)))return {text:'vasos'};
+        return undefined;
+      })};
     }
-    if(name==='Widget Weight Data')return {children:fields(node,{},child=>neutralGraph(child)??(leaf(child)&&['Kg','kg'].includes(sourceText(child))?{text:weightDisplay.unit}:leaf(child)&&sourceText(child)==='78'?{text:formatNumber(weight)}:/Button/.test(nodeName(child))?{onClick:onRecord,label:'Registrar peso'}:undefined))};
+    if(name==='Widget Weight Data')return {children:fields(node,{},child=>{
+      if(nodeName(child)==='Button More')return {onClick:onRecord,label:'Registrar peso y medidas'};
+      if(['Donut Base','Mask group','Donut Progress'].includes(nodeName(child)))return {props:{style:{opacity:nodeName(child)==='Donut Progress'?'.7':'.45'}}};
+      if(sourceText(child)==='78 kg')return {children:fields(child,{},inner=>leaf(inner)&&sourceText(inner)==='78'?{text:formatNumber(weight)}:leaf(inner)&&['Kg','kg'].includes(sourceText(inner))?{text:weightDisplay.unit}:undefined)};
+      if(sourceText(child)==='13 kg left')return {text:weightGoal};
+      if(leaf(child)&&['85','65'].includes(sourceText(child)))return {text:''};
+      return leaf(child)&&['Kg','kg'].includes(sourceText(child))?{text:weightDisplay.unit}:leaf(child)&&sourceText(child)==='78'?{text:formatNumber(weight)}:/Button/.test(nodeName(child))?{onClick:onRecord,label:'Registrar peso'}:undefined;
+    })};
     if(name==='Widget Calories Intake')return {children:fields(node,{},child=>{
+      if(nodeName(child)==='Header-Section')return {children:<>{fields(child,{},inner=>nodeName(inner)==='Button More'?{hidden:true}:undefined)}<button type="button" className="mcp-action mcp-load-meal" onClick={()=>onLogMeal()} aria-label="Cargar comida">Cargar comida</button></>};
       if(nodeName(child)==='Button More')return {onClick:()=>onLogMeal(),label:'Registrar comida'};
       const graph=neutralGraph(child);if(graph)return graph;
       if(!leaf(child))return undefined;
       const value=sourceText(child);const substitutions:Record<string,string>={'1240':target&&kcal!==null?formatNumber(target.kcal-kcal):'—','1750':formatNumber(kcal),'510':'—','120':known?formatNumber(patient.macros.carbs_g):'—','70':known?formatNumber(patient.macros.protein_g):'—','20':known?formatNumber(patient.macros.fat_g):'—','/325gr':target?`/${formatNumber(target.carbs_g)} g`:'','/75gr':target?`/${formatNumber(target.protein_g)} g`:'','/44gr':target?`/${formatNumber(target.fat_g)} g`:'','37%':target&&known?`${Math.round(patient.macros.carbs_g/target.carbs_g*100)}%`:'—','93%':target&&known?`${Math.round(patient.macros.protein_g/target.protein_g*100)}%`:'—','45%':target&&known?`${Math.round(patient.macros.fat_g/target.fat_g*100)}%`:'—'};
       return value in substitutions?{text:substitutions[value]}:undefined;
     })};
-    if(name==='Widget Workout Progress')return {children:fields(node,{},child=>nodeName(child)==='Body'?{children:routines.length?routines.map(item=><p key={item.id} className="text-[14px] leading-[1.5]">{item.name} · {item.sets} series · {item.reps} repeticiones</p>):<p>Sin rutina asignada.</p>}:/Button/.test(nodeName(child))?{onClick:()=>onNavigate('ejercicio'),label:'Ver ejercicio'}:undefined)};
+    if(name==='Widget Workout Progress')return {children:fields(node,{},child=>{
+      if(nodeName(child)==='Body') {
+        const prototypes=child.children.filter((value): value is SourceNode=>typeof value==='object');
+        return {children:prototypes.map((prototype,index)=>{
+          const row=workoutItems[index];
+          const completed=row?.assignment.feedback?.sets_completed ?? null;
+          const expected=row?.item.sets ?? null;
+          const progress=expected && completed!=null ? Math.min(100,Math.round(completed/expected*100)) : null;
+          return fields(prototype,{
+            '71:1391':row?.item.name ?? 'Sin rutina asignada',
+            '71:1388':progress==null?'—':`${progress}%`,
+            '71:1387':completed==null?'':expected?`(${completed}/${expected})`:`(${completed})`,
+            '72:1403':row?.item.category ? EXERCISE_CATEGORY_LABELS[row.item.category] : 'Ejercicio',
+          },inner=>{
+            if(nodeName(inner)==='Progress Bar')return {props:{style:{width:`${progress ?? 0}%`}}};
+            if(nodeName(inner)==='Empty Bar')return {props:{style:{opacity:progress==null?.7:.35}}};
+            return undefined;
+          },`${patient.id}:workout:${index}`);
+        })};
+      }
+      return /Button/.test(nodeName(child))?{onClick:()=>onNavigate('ejercicio'),label:'Ver ejercicio'}:undefined;
+    })};
     if(name==='Widget Recommended Menu')return {children:fields(node,{},child=>nodeName(child)==='List Exercise'?{children:recipes.length?recipes.slice(0,child.children.filter(n=>typeof n==='object'&&nodeName(n)==='Card Recommended Menu').length).map(recipe=>{
       const prototype=descendants(child).find(n=>/Item List/.test(nodeName(n)))??child.children.find(n=>typeof n==='object');
       if(typeof prototype!=='object')return null;

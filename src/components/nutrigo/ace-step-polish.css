@@ -1,0 +1,213 @@
+/*
+ * Pulido de interacción inspirado en ACE-Step UI:
+ * superficies con profundidad, estados inmediatos y movimiento corto.
+ * El lenguaje de Plan V sigue siendo Nutrigo; sólo toma prestada la
+ * sensación de producto vivo de una herramienta creativa.
+ */
+.nv-app {
+  --nv-motion-out: cubic-bezier(.23, 1, .32, 1);
+  --nv-motion-in-out: cubic-bezier(.77, 0, .175, 1);
+}
+
+/* El lienzo se encoge con la ventana. Las grillas internas no pueden
+   imponerle un ancho mínimo al contenido ni crear scroll horizontal. */
+.nv-app .nv-main,
+.nv-app .nv-topbar,
+.nv-app .nv-page,
+.nv-app .nv-content-layout,
+.nv-app .nv-workspace {
+  min-width: 0;
+}
+
+.nv-app .nv-main {
+  overflow-x: clip;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nv-app .nv-topbar,
+  .nv-app .nv-sidebar,
+  .nv-app .nv-card,
+  .nv-app .nv-metric,
+  .nv-app .nv-food-card,
+  .nv-app .nv-plan-grid article,
+  .nv-app .nv-thread .nv-bubble,
+  .nv-app .nv-tabbar,
+  .nv-app .nv-more-sheet {
+    transition: transform 200ms var(--nv-motion-out), box-shadow 200ms var(--nv-motion-out),
+      border-color 200ms var(--nv-motion-out), background-color 200ms var(--nv-motion-out);
+  }
+
+  .nv-app .nv-card,
+  .nv-app .nv-metric,
+  .nv-app .nv-food-card,
+  .nv-app .nv-plan-grid article {
+    border: 1px solid color-mix(in srgb, var(--nv-border) 86%, transparent);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .nv-app .nv-card:hover,
+    .nv-app .nv-metric:hover,
+    .nv-app .nv-food-card:hover,
+    .nv-app .nv-plan-grid article:hover,
+    .nv-app.nv-patient .nv-followup:hover,
+    .nv-app.nv-patient .nv-shortcut:hover,
+    .nv-app.nv-patient .nv-resource-card:hover,
+    .nv-app.nv-patient .nv-recipe-card:hover {
+      border-color: color-mix(in srgb, var(--nv-accent) 34%, var(--nv-border));
+      box-shadow: 0 12px 28px rgba(8, 58, 48, .09);
+      transform: translateY(-2px);
+    }
+
+    .nv-app.nv-patient .nv-food-card:hover img,
+    .nv-app.nv-patient .nv-recipe-card:hover img {
+      transform: scale(1.035);
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .nv-app.nv-dark .nv-card:hover,
+    .nv-app.nv-dark .nv-metric:hover,
+    .nv-app.nv-dark .nv-food-card:hover,
+    .nv-app.nv-dark .nv-plan-grid article:hover,
+    .nv-app.nv-dark .nv-patient .nv-followup:hover,
+    .nv-app.nv-dark .nv-patient .nv-shortcut:hover,
+    .nv-app.nv-dark .nv-patient .nv-resource-card:hover,
+    .nv-app.nv-dark .nv-patient .nv-recipe-card:hover {
+      box-shadow: 0 14px 30px rgba(0, 0, 0, .22);
+    }
+  }
+
+  .nv-app .nv-sidebar nav button,
+  .nv-app .nv-clinic-shortcuts button,
+  .nv-app .nv-tabbar button,
+  .nv-app .nv-more-grid button {
+    transition: transform 160ms var(--nv-motion-out), background-color 160ms var(--nv-motion-out),
+      color 160ms var(--nv-motion-out), box-shadow 160ms var(--nv-motion-out);
+  }
+
+  .nv-app .nv-sidebar nav button:active,
+  .nv-app .nv-clinic-shortcuts button:active,
+  .nv-app .nv-tabbar button:active,
+  .nv-app .nv-more-grid button:active {
+    transform: scale(.97);
+  }
+
+  .nv-app .nv-sidebar nav button[aria-current=page],
+  .nv-app .nv-tabbar button[aria-current=page] {
+    box-shadow: inset 3px 0 0 var(--nv-accent);
+  }
+
+  .nv-app .nv-tabbar button[aria-current=page] {
+    box-shadow: inset 0 2px 0 var(--nv-accent);
+  }
+
+  .nv-app .nv-button:not(:disabled),
+  .nv-app .nv-search,
+  .nv-app .nv-role-switch,
+  .nv-app .nv-user-avatar {
+    transition: transform 160ms var(--nv-motion-out), box-shadow 160ms var(--nv-motion-out),
+      filter 160ms ease, border-color 160ms ease;
+  }
+
+  .nv-app .nv-button:not(:disabled):hover {
+    box-shadow: 0 7px 18px rgba(8, 58, 48, .14);
+    transform: translateY(-1px);
+  }
+
+  .nv-app .nv-button:not(:disabled):active {
+    transform: scale(.97);
+  }
+
+  .nv-app .nv-search:focus-within {
+    border-color: color-mix(in srgb, var(--nv-accent) 72%, var(--nv-border));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--nv-accent) 18%, transparent);
+  }
+
+  /* El cambio de página ya desmonta el contenido; este efecto hace visible
+     ese cambio sin animar el layout completo ni bloquear el teclado. */
+  .nv-app .nv-main > *:first-child {
+    animation: nv-ace-page-enter 260ms var(--nv-motion-out) both;
+  }
+
+  .nv-app .nv-main > .nv-card:nth-child(n + 2),
+  .nv-app .nv-main > .nv-metric:nth-child(n + 2) {
+    animation: nv-ace-card-enter 240ms var(--nv-motion-out) both;
+  }
+
+  .nv-app .nv-main > .nv-card:nth-child(2),
+  .nv-app .nv-main > .nv-metric:nth-child(2) { animation-delay: 30ms; }
+  .nv-app .nv-main > .nv-card:nth-child(3),
+  .nv-app .nv-main > .nv-metric:nth-child(3) { animation-delay: 60ms; }
+
+  .nv-app .nv-more-sheet {
+    transform-origin: bottom center;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .nv-app .nv-more-grid button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 16px rgba(8, 58, 48, .1);
+    }
+  }
+}
+
+/* El menú móvil conserva la columna de 223 px del archivo de Nutrigo, pero
+   entra desde el borde y deja la página visible detrás del velo. */
+@media (max-width: 799px) and (prefers-reduced-motion: no-preference) {
+  .nv-app .nv-sidebar {
+    transition: transform 280ms var(--nv-motion-out), box-shadow 280ms var(--nv-motion-out);
+    box-shadow: 16px 0 36px rgba(39, 41, 50, 0);
+  }
+
+  .nv-app.nv-menu-open .nv-sidebar {
+    box-shadow: 16px 0 36px rgba(39, 41, 50, .16);
+  }
+
+  .nv-app .nv-drawer-scrim {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 240ms var(--nv-motion-out);
+  }
+
+  .nv-app.nv-menu-open .nv-drawer-scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (max-width: 799px) {
+  .nv-app .nv-main {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .nv-app .nv-card,
+  .nv-app .nv-metric,
+  .nv-app .nv-food-card,
+  .nv-app .nv-plan-grid article,
+  .nv-app.nv-patient .nv-followup,
+  .nv-app.nv-patient .nv-shortcut,
+  .nv-app.nv-patient .nv-resource-card,
+  .nv-app.nv-patient .nv-recipe-card {
+    min-width: 0;
+  }
+}
+
+@keyframes nv-ace-page-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes nv-ace-card-enter {
+  from { opacity: 0; transform: translateY(8px) scale(.99); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nv-app .nv-card,
+  .nv-app .nv-metric,
+  .nv-app .nv-food-card,
+  .nv-app .nv-plan-grid article {
+    transition: none;
+  }
+}
