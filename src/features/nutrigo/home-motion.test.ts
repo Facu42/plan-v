@@ -21,9 +21,12 @@ describe('movimiento de las tarjetas de Inicio', () => {
     expect(css).toMatch(/animation-delay/);
   });
 
-  it('todo el movimiento se apaga con «reducir movimiento»', () => {
-    const reduced = css.match(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?\n\}/)?.[0] ?? '';
-    expect(reduced).toMatch(/animation:\s*none/);
-    expect(reduced).toMatch(/transition:\s*none/);
+  it('todo el movimiento vive dentro de «sin preferencia de reducir movimiento»', () => {
+    // Fuera de ese bloque no puede quedar ninguna regla: así «reducir movimiento» apaga todo sin pelear especificidad.
+    const [before, inside] = css.split('@media (prefers-reduced-motion: no-preference)');
+    expect(inside).toBeDefined();
+    expect(before.replace(/\/\*[\s\S]*?\*\//g, '').trim()).toBe('');
+    expect(inside).toMatch(/animation:\s*mcp-rise/);
+    expect(css).not.toMatch(/prefers-reduced-motion:\s*reduce/);
   });
 });

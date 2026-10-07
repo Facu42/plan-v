@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { SourceView, nodeName, sourceText, renderSource, type SourceNode, type SourceResolver } from './SourceView';
+import { SourceView, findSource, nodeName, sourceText, renderSource, type SourceNode, type SourceResolver } from './SourceView';
 import { translateSource } from './translation';
 import { planVBrandBinding } from './branding';
 import { patientNavBinding } from './patient-navigation';
@@ -17,10 +17,13 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
   const [loadError,setLoadError] = useState(false);
   const [menu,setMenu] = useState(false);
   const [attempt,setAttempt] = useState(0);
+  const [menuNav,setMenuNav] = useState<SourceNode|null>(null);
   const feeNotice = useFeeNotice();
   useEffect(() => { const media = window.matchMedia('(max-width: 799px)'); const update=()=>setMobile(media.matches); media.addEventListener('change',update); return ()=>media.removeEventListener('change',update); },[]);
   const id = nodes[mobile ? 1 : 0];
   useEffect(() => { let active=true; setSource(null);setLoadError(false); const load=frames[`./source/${id.replace(':','-')}.json`]; if (!load) {setLoadError(true);return;} load().then(module=>{if(active)setSource(module.default);}).catch(()=>{if(active)setLoadError(true);});return()=>{active=false;}; },[id,attempt]);
+  // El menú del celular usa el «Menu Nav» original del marco de escritorio de esta misma pantalla (con su ítem activo).
+  useEffect(() => { if(!menu)return; let active=true; const load=frames[`./source/${nodes[0].replace(':','-')}.json`]; load?.().then(module=>{if(active)setMenuNav(findSource(module.default,n=>nodeName(n)==='Menu Nav')??null);}).catch(()=>{if(active)setMenuNav(null);}); return()=>{active=false;}; },[menu,nodes[0]]);
   const common:SourceResolver = node => {
     const brand=planVBrandBinding(node);if(brand)return brand;
     const specific=resolve(node);if(specific)return specific;
@@ -49,6 +52,6 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
   return <div className="mcp-nutrigo" data-figma-frame={id}>
     {loadError?<div className="mcp-state" role="alert"><p>No se pudo cargar esta pantalla.</p><button onClick={()=>setAttempt(v=>v+1)}>Reintentar</button></div>:source?<SourceView source={source} resolve={common} translate={translateSource}/>:<p className="mcp-state" role="status">Cargando pantalla…</p>}
     {children}
-    {menu&&<PatientMenuSheet patientName={patientName} unread={unread} feeNotice={feeNotice} onNavigate={onNavigate} onSignOut={onSignOut} onClose={()=>setMenu(false)}/>}
+    {menu&&<PatientMenuSheet patientName={patientName} unread={unread} feeNotice={feeNotice} menuNav={menuNav} onNavigate={onNavigate} onSignOut={onSignOut} onClose={()=>setMenu(false)}/>}
   </div>;
 }

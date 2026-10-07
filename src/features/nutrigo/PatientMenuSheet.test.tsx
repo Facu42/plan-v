@@ -1,5 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
+import dashboard from './source/12-792.json';
+import { findSource, nodeName, type SourceNode } from './SourceView';
 import { PatientMenuSheet } from './PatientMenuSheet';
 
 const render = (props: Partial<Parameters<typeof PatientMenuSheet>[0]> = {}) =>
@@ -26,5 +28,18 @@ describe('menú de la paciente', () => {
     expect(html).toContain('aria-label="3 sin leer"');
     expect(html).toContain('Tenés una cuota pendiente de $ 30.000');
     expect(render()).not.toContain('sin leer');
+  });
+
+  it('con el código del archivo, el menú es el «Menu Nav» original (íconos, activo y submenú) en español', () => {
+    const menuNav = findSource(dashboard as SourceNode, node => nodeName(node) === 'Menu Nav')!;
+    const html = render({ menuNav });
+    expect(html).toContain('data-name="Menu Nav"');
+    // Mismos <img> de íconos del archivo y su fondo verde activo (Dashboard).
+    expect(html).toMatch(/src="[^"]*assets\/[^"]+\.svg/);
+    expect(html).toContain('bg-[#c2e66e]');
+    for (const label of ['Inicio', 'Agenda', 'Mensajes', 'Menú', 'Plan', 'Diario', 'Progreso', 'Ejercicio', 'Recursos']) expect(html).toContain(label);
+    expect(html).not.toMatch(/Dashboard|Calendar|Healthy Menu|Food Diary/);
+    // Dentro del envoltorio que trae los estilos del archivo.
+    expect(html).toMatch(/class="[^"]*mcp-nutrigo[^"]*"/);
   });
 });

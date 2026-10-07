@@ -11,7 +11,7 @@ import { latestWeight } from '../../../lib/measurement-display';
 import { recipeNutritionLabel, type NutrientAmounts } from '../../../types/ai-nutrition';
 import { planSlotKey, PLAN_SLOT_KEYS } from '../../../types/plans';
 import { EXERCISE_CATEGORY_LABELS } from '../../../types/exercise';
-import { weightGauge } from './weight-gauge';
+import { rulerFor, weightGauge } from './weight-gauge';
 import '../home-motion.css';
 import { barFill, descendants, fields, formatNumber, leaf, listChildren, objects, percent, Ring, source, Stateful, timeLabel, useRemote, dateId, type ScreenProps } from './shared';
 
@@ -68,7 +68,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
   // Plan V todavía no guarda una meta de peso: los extremos muestran el inicio y «Meta».
   const goalWeight:number|null=null;
   const gauge=weightGauge(weight,goalWeight,startWeight);
-  const ruler=weight==null?[]:[10,5,0,-5,-10].map(step=>Math.round(weight/5)*5+step);
+  const ruler=rulerFor(weight);
 
   // Calorías y macros revisados del día contra la meta indicada.
   const target=current?.target?.result;

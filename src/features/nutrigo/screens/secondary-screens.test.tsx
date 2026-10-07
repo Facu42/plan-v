@@ -56,9 +56,14 @@ describe.each([false, true])('pantallas desde MCP (celular: %s)', mobile => {
     expect(html).toContain('data-calendar-date="2026-10-03"'); expect(html).toContain('data-calendar-date="2026-10-05"');
     expect(html).not.toContain('Morning Yoga'); expect(html).not.toContain('General Health Check-up'); expect(html).not.toContain('September 2028');
     // Solo la categoría de citas; las tarjetas cuentan citas, no comidas ni actividad.
-    expect(html.match(/aria-label="Mostrar consulta"/g)?.length).toBe(1);
+    // La leyenda es solo una etiqueta: no se puede apagar y dejar el calendario sin la única categoría.
+    expect(html).not.toContain('aria-label="Mostrar consulta"'); expect(html).toContain('>Citas<');
+    // Abre en el día de la próxima cita, para que «Confirmar» esté a la vista sin buscar en el calendario.
+    expect(html).toContain('aria-label="Confirmar asistencia a la consulta"');
     for (const gone of ['Mostrar plan', 'Mostrar diario', 'Mostrar actividad', 'Meal Planning', 'Physical Activities']) expect(html).not.toContain(gone);
     for (const label of ['Próximas', 'Confirmadas', 'Por confirmar']) expect(html).toContain(label);
+    // Los íconos de las tarjetas son los del archivo (CalendarDots, MapPinArea, Clock), no dibujos propios.
+    for (const asset of ['b3414', 'f9b60', '148cc']) expect(html).toContain(asset);
     expect(html).toContain('box-shadow:inset 0 0 0 2px #c2e66e');
     expect(html).toContain('background:#ffffff');
     // El turno vive dentro del marco: botón del encabezado y tarjeta del detalle, sin controles sueltos.

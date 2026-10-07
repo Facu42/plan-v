@@ -3,6 +3,8 @@ import type { ShowroomPatient } from '../../../components/nutrigo/showroom-model
 import type { ShowroomPage } from '../../../components/nutrigo/ShowroomPanels';
 import { nodeId, nodeName, renderSource, sourceText, type SourceBinding, type SourceNode, type SourceResolver } from '../SourceView';
 import { translateSource } from '../translation';
+// Líneas blancas del rayado del medidor de peso: es el trazo «Vector» del Mask group del archivo (35603.svg).
+import hatchLines from '../assets/weight-hatch.svg?no-inline';
 import { secondaryLabels } from '../secondaryTranslation';
 import { friendlyError } from '../../../lib/error-messages';
 import { canLeaveWorkspace, useUnsavedChanges } from '../../../components/nutrigo/unsaved-changes';
@@ -58,10 +60,7 @@ export function barFill(pct: number | null, part: 'filled' | 'empty'): SourceBin
   const grow = part === 'filled' ? value : 100 - value;
   return { props: { style: { flex: `${grow} 1 0%`, minWidth: 0, paddingRight: 0, display: grow === 0 ? 'none' : undefined } } };
 }
-/** Arco de dona con los colores del archivo, para superponer al dibujo de ejemplo. */
-/** Color rayado del tramo que falta (como el medidor del archivo). */
-const hatchPattern = (color: string) => `repeating-linear-gradient(135deg, ${color} 0 2px, transparent 2px 6px)`;
-
+/** Arco de dona con los colores del archivo, para superponer al dibujo de ejemplo. Con `hatch`, el tramo que falta va rayado como en el archivo. */
 export function Ring({ pct, color, track = 'transparent', thickness = 14, half = false, hatch }: { pct: number | null; color: string; track?: string; thickness?: number; half?: boolean; hatch?: string }) {
   const value = Math.max(0, Math.min(100, pct ?? 0));
   const turn = half ? 0.5 : 1;
@@ -77,7 +76,7 @@ export function Ring({ pct, color, track = 'transparent', thickness = 14, half =
   const rest = `conic-gradient(from ${start}deg, transparent 0turn ${filled}turn, #000 ${filled}turn ${turn}turn, transparent ${turn}turn 1turn)`;
   return <span aria-hidden="true" className={layer} style={ring}>
     <span className={layer} style={{ background: fill }} />
-    <span className={layer} style={{ background: hatchPattern(hatch), WebkitMask: rest, mask: rest }} />
+    <span className={layer} style={{ background: `url(${hatchLines}) center / 100% 100% no-repeat, ${hatch}`, WebkitMask: rest, mask: rest }} />
   </span>;
 }
 export function Stateful({ loading, error, empty, onRetry }: { loading?: boolean; error?: string; empty?: string; onRetry?: () => void }) {

@@ -65,6 +65,23 @@ Los datos de la demo viven en memoria: al reiniciar `npm run local` vuelven a ca
   `limite_diario`, `http_<código>`, `respuesta_sin_imagen`), sin claves ni textos.
 - Sigue sin confirmarse el plan gratuito de la cuenta ni los permisos del token: se ve con esa primera prueba.
 
+## Segunda ronda (pedidos de Facundo tras probar la demo)
+
+Regla que se confirmó: **se usa el código del archivo de Figma tal cual**; no se redibuja mirando capturas.
+Las capturas solo sirven para medir.
+
+| Pedido | Qué se hizo |
+|---|---|
+| La agenda es solo de citas con la nutricionista | La Agenda ya no mezcla plan, diario ni actividad. Tarjetas: Próximas / Confirmadas / Por confirmar con los íconos del archivo (CalendarDots, MapPinArea, Clock). Abre en el día de la próxima cita; la leyenda «Citas» es solo una etiqueta |
+| Barra superior | La `Navbar` del archivo mide 390 px fijos; entre 391 y 799 px ahora ocupa todo el ancho |
+| Movimiento en las tarjetas de Inicio | `home-motion.css`: entrada escalonada y, con mouse, la tarjeta se levanta, el ícono gira y las fotos se acercan. Todo dentro de «sin preferencia de reducir movimiento» |
+| Tarjeta de peso con la forma del archivo | Medidor con arco naranja y resto amarillo `#ffcb65` con las líneas blancas **del propio archivo** (`assets/weight-hatch.svg` sale del nodo «Vector» del Mask group). Extremos con la escala de la regla de la tarjeta Peso |
+| Menú del celular más profesional | Hoja inferior con el «Menu Nav» **original** del archivo (íconos, ítem activo y submenú), perfil arriba, «Mi cuenta» y «Cerrar sesión» |
+| Registro de comida interactivo con motion moderno | En curso, con prueba primero (ver commit siguiente) |
+
+Revisión de código (agente `code-reviewer`): sin hallazgos críticos; se corrigieron el reducir-movimiento, la apertura de la
+Agenda en la próxima cita, la etiqueta accesible «Citas», el filtro que podía vaciar la agenda y los bordes del medidor (NaN, meta = inicio).
+
 ## Lo que no se aplicó
 
 - Migración de aislamiento editorial: **no** se aplicó en la base; necesita la frase escrita de Facundo

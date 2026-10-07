@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Icon, type IconName } from '../../components/shared/Icon';
 import type { ShowroomPage } from '../../components/nutrigo/ShowroomPanels';
-import { patientNavigation } from './patient-navigation';
+import { patientNavBinding, patientNavigation } from './patient-navigation';
+import { SourceView, type SourceNode } from './SourceView';
 import { translateSource } from './translation';
 import './patient-menu-sheet.css';
 
@@ -20,6 +21,8 @@ type Props = {
   patientName: string;
   unread?: number;
   feeNotice?: string | null;
+  /** «Menu Nav» original del marco de escritorio del archivo; sin él se usa una lista armada con sus tokens. */
+  menuNav?: SourceNode | null;
   onNavigate: (page: ShowroomPage) => void;
   onSignOut?: () => void;
   onClose: () => void;
@@ -29,7 +32,7 @@ type Props = {
  * Menú de la paciente como hoja inferior (celular) o tarjeta centrada (escritorio).
  * Figma no dibuja este menú: se arma con las piezas del archivo (Poppins, Cream/Green, radio 16/12).
  */
-export function PatientMenuSheet({ patientName, unread = 0, feeNotice = null, onNavigate, onSignOut, onClose }: Props) {
+export function PatientMenuSheet({ patientName, unread = 0, feeNotice = null, menuNav = null, onNavigate, onSignOut, onClose }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const active = currentPage();
   const initial = (patientName.trim()[0] ?? 'P').toUpperCase();
@@ -64,7 +67,9 @@ export function PatientMenuSheet({ patientName, unread = 0, feeNotice = null, on
           <button type="button" className="pms-close" onClick={onClose} aria-label="Cerrar menú">×</button>
         </header>
         <nav aria-label="Navegación">
-          <ul className="pms-list">{MAIN_PAGES.map(({ page, label }) => row(page, label, null, page === 'mensajes' ? unread : 0))}</ul>
+          {menuNav
+            ? <div className="mcp-nutrigo pms-figma"><SourceView source={menuNav} resolve={node => patientNavBinding(node, go, unread)} translate={translateSource} /></div>
+            : <ul className="pms-list">{MAIN_PAGES.map(({ page, label }) => row(page, label, null, page === 'mensajes' ? unread : 0))}</ul>}
           <p className="pms-group">Mi cuenta</p>
           <ul className="pms-list">
             {row('pagos', 'Pagos', feeNotice)}

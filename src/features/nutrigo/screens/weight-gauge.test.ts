@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { weightGauge } from './weight-gauge';
+import { rulerFor, weightGauge } from './weight-gauge';
 
 describe('medidor de peso (misma escala que la regla de la tarjeta)', () => {
   it('sin peso queda vacío', () => {
@@ -25,5 +25,23 @@ describe('medidor de peso (misma escala que la regla de la tarjeta)', () => {
 
   it('con meta igual al inicio ya está cumplida', () => {
     expect(weightGauge(70, 70, 70).pct).toBe(100);
+  });
+
+  it('con meta igual al inicio solo está cumplida si el peso ya la alcanzó', () => {
+    expect(weightGauge(72, 70, 70).pct).toBe(0);
+  });
+
+  it('también sirve para subir de peso (meta mayor que el inicio)', () => {
+    expect(weightGauge(66, 70, 60)).toEqual({ from: 60, to: 70, pct: 60 });
+  });
+
+  it('un peso inválido se trata como sin dato y no rompe el dibujo', () => {
+    expect(weightGauge(Number.NaN, null, null)).toEqual({ from: null, to: null, pct: 0 });
+  });
+
+  it('la regla de la tarjeta Peso y el medidor comparten la misma escala', () => {
+    expect(rulerFor(66.3)).toEqual([75, 70, 65, 60, 55]);
+    expect(rulerFor(null)).toEqual([]);
+    expect(weightGauge(66.3, null, null).from).toBe(rulerFor(66.3)[0]);
   });
 });

@@ -3,7 +3,6 @@ import { FramePair } from '../FramePair';
 import { nodeName, sourceText, type SourceBinding, type SourceNode, type SourceResolver } from '../SourceView';
 import { api } from '../../../api/client';
 import { useAppStore } from '../../../store/useAppStore';
-import { Icon, type IconName } from '../../../components/shared/Icon';
 import { canLeaveWorkspace } from '../../../components/nutrigo/unsaved-changes';
 import { descendants, EmptyState, errorText, idEnds, leaf, objects, RecordDialog, safeUrl, source, Stateful, type ScreenProps } from './shared';
 import { agendaDateId as dateId, agendaWeekdays as weekdays, buildAgendaEvents, monthAnchor, wallDate, wallDateId, type AgendaEvent as Event } from './agenda-data';
@@ -29,26 +28,27 @@ const startsWith = (node: SourceNode, ...texts: string[]) => leaf(node) && texts
 
 export function NutrigoAgenda({ patient, now = new Date(), onNavigate, onSignOut, onConfirm, onReschedule }: Props) {
   const today = dateId(now);
-  const [month, setMonth] = useState(() => monthAnchor(wallDate(today))); const [selected, setSelected] = useState(today); const [view, setView] = useState<View>('month'); const [hidden, setHidden] = useState<Set<Event['kind']>>(new Set());
-  const [detail, setDetail] = useState({ day: today, page: 0 }); const page = detail.day === selected ? detail.page : 0;
+  const all = useMemo(() => buildAgendaEvents(patient, now), [patient, now]);
+  // Abre en el día de la próxima cita (o en hoy si no hay): así «Confirmar» y «Cambiar» quedan a la vista.
+  const firstDay = all.find(item => item.day >= today)?.day ?? today;
+  const [month, setMonth] = useState(() => monthAnchor(wallDate(firstDay))); const [selected, setSelected] = useState(firstDay); const [view, setView] = useState<View>('month');
+  const [detail, setDetail] = useState({ day: firstDay, page: 0 }); const page = detail.day === selected ? detail.page : 0;
   const [busy, setBusy] = useState(false); const [error, setError] = useState(''); const [status, setStatus] = useState(''); const lock = useRef(false); const refresh = useAppStore(state => state.refreshPatient);
   const picker = useRef<HTMLInputElement | null>(null);
   const [changing, setChanging] = useState(false); const [proposedDay, setProposedDay] = useState(() => patient.appointment?.when.split(' · ')[0] || 'Lunes'); const [proposedTime, setProposedTime] = useState(() => patient.appointment?.when.split(' · ')[1] || '15:00');
   const closeReschedule = () => { if (canLeaveWorkspace()) setChanging(false); };
   const openReschedule = () => { setError(''); setChanging(true); };
   const rescheduleDirty = proposedDay !== (patient.appointment?.when.split(' · ')[0] || 'Lunes') || proposedTime !== (patient.appointment?.when.split(' · ')[1] || '15:00');
-  const all = useMemo(() => buildAgendaEvents(patient, now), [patient, now]);
   const upcoming = all.filter(item => item.day >= today);
   const confirmed = upcoming.filter(() => patient.appointment?.patient_reply === 'attending');
-  const stats: { label: string; total: number; icon: IconName }[] = [
-    { label: 'Próximas', total: upcoming.length, icon: 'calendar' },
-    { label: 'Confirmadas', total: confirmed.length, icon: 'check' },
-    { label: 'Por confirmar', total: upcoming.length - confirmed.length, icon: 'clock' },
+  const stats: { label: string; total: number; icon: string }[] = [
+    { label: 'Próximas', total: upcoming.length, icon: 'asset:b3414.svg' }, // Icon/Nav/CalendarDots
+    { label: 'Confirmadas', total: confirmed.length, icon: 'asset:f9b60.svg' }, // Icon/MapPinArea
+    { label: 'Por confirmar', total: upcoming.length - confirmed.length, icon: 'asset:148cc.svg' }, // Icon/Clock
   ];
-  const events = all.filter(item => !hidden.has(item.kind));
+  const events = all;
   const selectedEvents = events.filter(item => item.day === selected).sort((a, b) => kindOrder.indexOf(a.kind) - kindOrder.indexOf(b.kind) || a.time.localeCompare(b.time));
   const pages = Math.max(1, Math.ceil(selectedEvents.length / DETAIL_PAGE)); const shownPage = Math.min(page, pages - 1);
-  const toggle = (kind: Event['kind']) => setHidden(previous => { const next = new Set(previous); if (next.has(kind)) next.delete(kind); else next.add(kind); return next; });
   const reply = async (value: 'attending' | 'needs_change') => { if (lock.current) return; lock.current = true; setBusy(true); setError(''); setStatus(''); try { if (onConfirm) await onConfirm(value); else { await api.confirmAppointment(patient.id, value); await refresh(patient.id); } setStatus(value === 'attending' ? 'Asistencia confirmada.' : 'Cambio de horario solicitado.'); if (value === 'needs_change') setChanging(false); } catch (caught) { setError(errorText(caught)); } finally { lock.current = false; setBusy(false); } };
   const reschedule = async (event: FormEvent) => { event.preventDefault(); if (lock.current) return; lock.current = true; setBusy(true); setError(''); setStatus(''); try { if (onReschedule) await onReschedule(proposedDay, proposedTime); else { await api.rescheduleAppointment(patient.id, { day: proposedDay, time: proposedTime }); await refresh(patient.id); } setChanging(false); setStatus('Nuevo horario guardado.'); } catch (caught) { setError(errorText(caught)); } finally { lock.current = false; setBusy(false); } };
   const move = (delta: number) => { if (view === 'month') setMonth(current => new Date(Date.UTC(current.getUTCFullYear(), current.getUTCMonth() + delta, 1, 12))); else { const next = wallDate(selected); next.setUTCDate(next.getUTCDate() + delta * (view === 'week' ? 7 : 1)); setSelected(wallDateId(next)); setMonth(monthAnchor(next)); } };
@@ -79,7 +79,7 @@ export function NutrigoAgenda({ patient, now = new Date(), onNavigate, onSignOut
     const inside = new Set(single ? descendants(single) : []);
     return source(prototype, child => {
       if (single && inside.has(child)) return scheduleResolver(single, own[0], false, view === 'month')(child);
-      if (child === prototype) return { tag: 'button', onClick: () => setSelected(id), label: `${fullDate(id)}, ${own.length} ${own.length === 1 ? 'evento' : 'eventos'}`, props: { 'aria-pressed': isSelected, 'data-calendar-date': id, style: { textAlign: 'left', ...(inMonth ? { background: '#ffffff' } : {}), boxShadow: isSelected ? 'inset 0 0 0 2px #c2e66e' : undefined, borderRightWidth: column === 6 ? 0 : undefined, ...(view === 'month' ? {} : { height: 'auto', alignSelf: 'stretch' }) } } };
+      if (child === prototype) return { tag: 'button', onClick: () => setSelected(id), label: `${fullDate(id)}, ${own.length} ${own.length === 1 ? 'cita' : 'citas'}`, props: { 'aria-pressed': isSelected, 'data-calendar-date': id, style: { textAlign: 'left', ...(inMonth ? { background: '#ffffff' } : {}), boxShadow: isSelected ? 'inset 0 0 0 2px #c2e66e' : undefined, borderRightWidth: column === 6 ? 0 : undefined, ...(view === 'month' ? {} : { height: 'auto', alignSelf: 'stretch' }) } } };
       if (nodeName(child) === 'Day') return { props: { style: { background: isToday ? '#c2e66e' : own.length > 1 ? '#dff9a2' : undefined, borderRadius: 4 } } };
       if (leaf(child) && /^\d+$/.test(sourceText(child))) return { text: day.getUTCDate() };
       if (nodeName(child) === 'Schedules') {
@@ -98,7 +98,7 @@ export function NutrigoAgenda({ patient, now = new Date(), onNavigate, onSignOut
     const firstButton = descendants(cards[0]).find(child => nodeName(child) === 'Button CTA');
     const pageButton = (label: string, delta: number) => {
       const disabled = shownPage + delta < 0 || shownPage + delta >= pages;
-      return firstButton ? source(firstButton, child => child === firstButton ? { onClick: () => setDetail({ day: selected, page: shownPage + delta }), label: `${label} eventos del día`, props: { disabled, style: { opacity: disabled ? 0.5 : 1 } } } : leaf(child) ? { text: label } : undefined, label) : null;
+      return firstButton ? source(firstButton, child => child === firstButton ? { onClick: () => setDetail({ day: selected, page: shownPage + delta }), label: `${label} citas del día`, props: { disabled, style: { opacity: disabled ? 0.5 : 1 } } } : leaf(child) ? { text: label } : undefined, label) : null;
     };
     const visible = selectedEvents.slice(shownPage * DETAIL_PAGE, shownPage * DETAIL_PAGE + DETAIL_PAGE);
     return <>
@@ -132,16 +132,11 @@ export function NutrigoAgenda({ patient, now = new Date(), onNavigate, onSignOut
     </>;
   };
 
-  const category = (kind: Event['kind']): SourceBinding => ({
-    onClick: () => toggle(kind), label: `Mostrar ${kindLabel[kind].toLocaleLowerCase('es')}`,
-    props: { 'aria-pressed': !hidden.has(kind), style: { opacity: hidden.has(kind) ? 0.5 : 1 } },
-  });
-
   const resolver: SourceResolver = node => {
     const name = nodeName(node); const text = sourceText(node);
     // La agenda solo tiene citas: queda la categoría del archivo «Appointments/Events» y se ocultan las de comidas y actividad.
     if (name === 'Category List') return { props: { style: { flexWrap: 'wrap', rowGap: 8 } }, children: <>{objects(node).filter(child => /Appointments/.test(sourceText(child))).map((child, index) => source(child, resolver, index))}</> };
-    if (name === 'Category' && node.tag !== 'p' && /Appointments/.test(text) && has(node, 'Checkbox')) return { ...category('consult'), children: objects(node).map((child, index) => source(child, part => leaf(part) && /Appointments/.test(sourceText(part)) ? { text: 'Citas' } : undefined, index)) };
+    if (name === 'Category' && node.tag !== 'p' && /Appointments/.test(text) && has(node, 'Checkbox')) return { children: objects(node).map((child, index) => source(child, part => leaf(part) && /Appointments/.test(sourceText(part)) ? { text: 'Citas' } : undefined, index)) };
     if (name === 'Calendar' && has(node, 'Row-Calendar-Body')) {
       const parts = objects(node); const rows = parts.filter(child => nodeName(child) === 'Row-Calendar-Body'); const row = rows[0];
       const head = parts.find(child => nodeName(child) === 'Row-Calendar-Head');
@@ -171,7 +166,8 @@ export function NutrigoAgenda({ patient, now = new Date(), onNavigate, onSignOut
     if (name === 'Card Statistic - Calendar' || (name === '' && /^(Total Meal Planning Schedule|Meal Planning)/.test(text) && text.endsWith('agendas'))) {
       const stat = /Physical/.test(text) ? stats[1] : /Appointments/.test(text) ? stats[2] : stats[0];
       return { children: objects(node).map((child, index) => source(child, part => {
-        if (nodeName(part) === 'Icon/Special/ForkKnife' || /^Icon\//.test(nodeName(part))) return { children: <Icon name={stat.icon} size={16} /> };
+        // Mismo <img> del archivo, con el ícono de agenda que corresponde a cada tarjeta.
+        if (/^Icon\//.test(nodeName(part))) return { children: source({ tag: 'img', props: { alt: '', className: 'absolute block inset-0 max-w-none size-full', src: stat.icon }, children: [] }, () => undefined, 'icon') };
         if (leaf(part) && /^\d+$/.test(sourceText(part))) return { text: stat.total };
         if (sample(part, 'agendas')) return { text: stat.total === 1 ? 'cita' : 'citas' };
         if (leaf(part) && /^Total /.test(sourceText(part))) return { text: stat.label };

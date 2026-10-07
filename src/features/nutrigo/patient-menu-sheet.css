@@ -36,3 +36,8 @@
 @keyframes pms-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes pms-pop { from { transform: scale(.97); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .pms-sheet { animation: none; } }
+
+/* «Menu Nav» original del archivo dentro de la hoja: sin el fondo crema ni la altura de sobra del marco de escritorio. */
+.pms .pms-figma.mcp-nutrigo { min-height: 0; height: auto; background: transparent; }
+.pms .pms-figma [data-name="Menu Nav"] { width: 100%; height: auto; min-height: 0; flex: none; }
+.pms .pms-figma [data-name="Menu Nav"] > * { width: 100%; }
