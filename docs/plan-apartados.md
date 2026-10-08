@@ -344,3 +344,6 @@ IMC y referencias generales de peso incorporadas con fuente CDC, límite de edad
 
 ### Planificación: comparación de metas (2026-10-08)
 Propuesta vs meta confirmada con diferencias de calorías/macros, revisada contra Nutriboost. Facundo decide conservar objetivos sin exigir peso numérico. 2136 pruebas aprobadas/2 omitidas. CI de db09fd9 completo aprobado. Detalle y evidencia en docs/planificacion-dashboard-web-2026-10-08.md. Sin producción; PR #78.
+
+### Integración paciente-dashboard (2026-10-08)
+Leídos definición de producto y auditoría de conexión del hilo paciente en634b0c6. Secuencia recomendada: iniciar integración ahora por alergias/permisos → plan/meta/versión recibida → registros/seguimiento → agenda/mensajes → objetivos/recursos/cuota. No esperar paridad completa. Responsabilidades, pendientes y decisiones no confirmadas registrados en [coordinación](coordinacion-paciente-dashboard-2026-10-08.md). Sin cambios productivos ni integración automática de ramas.
