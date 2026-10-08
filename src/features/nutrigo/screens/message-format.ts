@@ -17,13 +17,20 @@ export function fileSize(bytes: number | null | undefined): string {
   return `${Math.max(1, Math.round(bytes / 1024))} KB`;
 }
 
-/** Dirección para abrir un adjunto: https firmado o una ruta propia; cualquier otra cosa no se abre. */
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]']);
+
+/** Dirección para abrir un adjunto: https firmado, una ruta propia o http en la propia máquina (entorno local); lo demás no se abre. */
 export function attachmentHref(value: unknown): string | null {
   if (typeof value !== 'string') return null;
   const text = value.trim();
   if (!text) return null;
   if (/^\/(?![/\\])/.test(text)) return text;
-  try { return new URL(text).protocol === 'https:' ? text : null; } catch { return null; }
+  try {
+    const url = new URL(text);
+    if (url.protocol === 'https:') return text;
+    // El almacenamiento del entorno local responde por http en la propia máquina; en cualquier otro servidor se exige https.
+    return url.protocol === 'http:' && LOOPBACK_HOSTS.has(url.hostname) && !url.username && !url.password ? text : null;
+  } catch { return null; }
 }
 
 /** Dirección que devuelve la API al abrir un adjunto; si no es segura se corta con un mensaje en español en lugar de abrirla. */

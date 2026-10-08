@@ -43,6 +43,11 @@ describe('dirección para abrir un adjunto', () => {
     expect(attachmentHref('https://x.supabase.co/storage/v1/object/sign/a.pdf?token=1')).toBe('https://x.supabase.co/storage/v1/object/sign/a.pdf?token=1');
     expect(attachmentHref('/api/assets/access/abc123')).toBe('/api/assets/access/abc123');
   });
+  it('acepta http sólo cuando el almacenamiento está en la propia máquina (entorno local)', () => {
+    expect(attachmentHref('http://127.0.0.1:54321/storage/v1/object/sign/a.pdf?token=1')).toBe('http://127.0.0.1:54321/storage/v1/object/sign/a.pdf?token=1');
+    expect(attachmentHref('http://localhost:3001/api/assets/access/abc')).toBe('http://localhost:3001/api/assets/access/abc');
+    for (const value of ['http://evil.example/a.pdf', 'http://127.0.0.1.evil.example/a.pdf', 'http://user@evil.example/a.pdf']) expect(attachmentHref(value)).toBeNull();
+  });
   it('rechaza esquemas que ejecutan código o no son de archivos', () => {
     for (const value of ['javascript:alert(1)', 'data:text/html,<b>x</b>', '//evil.example/x', 'ftp://x', '', '   ', undefined, null, 5]) expect(attachmentHref(value)).toBeNull();
   });
