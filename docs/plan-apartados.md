@@ -350,3 +350,5 @@ Leídos definición de producto y auditoría de conexión del hilo paciente en63
 
 ### Integración: alergias al asignar receta por día (2026-10-08)
 Backend local corregido en codex/recipe-day-allergies: evaluador existente y control SQL atómico, no asigna ni reemplaza ante conflicto. 2140pruebas aprobadas/2omitidas. Ensayo visual detectó error detrás de ventana; ajuste UI detenido según pedido de Facundo, pregunta de ubicación pendiente. No se acredita terminado ni publicado. [Registro y evidencia](integracion-receta-alergias-2026-10-08.md).
+
+Cierre de la pausa de asignación (2026-10-08): Facundo aprobó error dentro de ventana encima deConfirmar. Implementado aviso único, accesible y visible; paciente/fecha conservados. Navegador ficticio rechaza, luego asigna compatible desde misma ventana; lectura paciente verificada. Ensayo firmado actualizado, pendienteCI. Registro: integracion-receta-alergias-2026-10-08.md. Sin producción.

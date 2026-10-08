@@ -149,7 +149,8 @@ try {
   await button('Asignar versión publicada');await B('select','.recipe-overlay label:has-text("Asignar a") select',pid);await field('Día',today,'.recipe-overlay ');phase='asignación incompatible bloqueada';
   try {
     await pool.query("update public.intake_sessions set payload=jsonb_set(payload,'{allergies}',$2::jsonb) where patient_id=$1",[pid,JSON.stringify({state:'reported',items:['Arroz']})]);
-    await button('Confirmar asignación');await until("document.body.innerText.includes('antes de asignar')");
+    await button('Confirmar asignación');await until("document.querySelector('.recipe-overlay [role=alert]')?.textContent.includes('antes de asignar')");
+    await until(`document.querySelector('.recipe-overlay label input[type=date]')?.value===${JSON.stringify(today)} && document.querySelector('.recipe-overlay label select')?.value===${JSON.stringify(pid)}`);
     check((await read(patient,`/api/patients/${pid}/recipe-days?date=${today}`)).assignments.length===0,'asignación incompatible rechazada sin llegar al día de la paciente');
     check(!(await read(patient,`/api/patients/${pid}/recipes`)).recipes.some(r=>r.id===recipe.id),'receta incompatible no entra en las recetas asignadas');
     await until('!!document.querySelector(".recipe-overlay")');

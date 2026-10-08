@@ -35,3 +35,11 @@ La lógica de rechazo está implementada; el incremento completo no se declara t
 ## Límites
 
 Reutiliza la política existente de coincidencias por palabras y alias; no es una certificación de ausencia de alérgenos ni cubre contaminación cruzada. La revisión profesional sigue vigente. No retira retroactivamente asignaciones previas si después cambian los antecedentes; ese recorrido requiere evaluación independiente. No cambia el motor de IA ni amplía acceso. No se aplicó migración ni cambio alguno en producción.
+
+## Decisión y cierre del ajuste de interfaz
+
+Facundo aceptó la recomendación: mensaje dentro de ventana, encima de Confirmar asignación. Implementado `role=alert`, vinculado al botón; desplazamiento inmediato dentro del contexto cuando aparece, sin animación ni cambio de foco. El aviso global se oculta durante esa ventana para evitar duplicarlo; los errores de la vista paciente independiente se conservan.
+
+Navegador local ficticio1440: una alergia bloqueó, mensaje visible dentro de ventana, pacienteLucía y fecha9/10 conservados, un único alert. Antecedentes ficticios restaurados; nuevo intento compatible desde la misma ventana guardó y cerró. Lectura de día devolvió receta, fecha y momento correctos. Captura receta-alergia-error-visible.png. No se acredita como ejecución firmada productiva: el ensayo firmado queda paraCI.
+
+El script firmado ahora exige error dentro de ventana y conserva paciente/fecha antes de continuar. Se mantienen pruebas de ausencia de ambas asignaciones ante rechazo. Migración preparada, sin aplicar en producción. El estado de pausa anterior queda resuelto por la decisión de Facundo.
