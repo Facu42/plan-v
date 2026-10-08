@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { RecipeCard } from './recipes.js';
+import type { IngredientPhoto, RecipeCard } from './recipes.js';
 import { menuTargetSchema, menuNutritionSummarySchema, proposedRecipeSchema, type ProposedRecipe, type MenuNutritionTarget, type MenuNutritionSummary, type RecipeNutrition } from './ai-nutrition.js';
 
 export const PLAN_SLOTS = ['Desayuno', 'Colación', 'Almuerzo', 'Merienda', 'Cena', 'Extra'] as const;
@@ -100,7 +100,7 @@ export type PlanRecipeDetail = {
   yield_portions: number;
   steps: string[];
   nutrient_source: string;
-  ingredients: Array<{ id: string; name: string; quantity: number; unit: string }>;
+  ingredients: Array<{ id: string; name: string; quantity: number; unit: string } & IngredientPhoto>;
   nutrition?: RecipeNutrition;
   card?: RecipeCard;
 };

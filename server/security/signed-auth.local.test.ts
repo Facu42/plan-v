@@ -9,7 +9,7 @@ import { CONSENT_CATALOG } from '../intake/consent.js';
 import { createPostgresJobStore } from '../jobs/postgres.js';
 
 const enabled = process.env.PLANV_LOCAL_SIGNED_AUTH === '1';
-const INTERNAL = ['audit_events','menu_dish_covers','notification_deliveries','notification_preferences','nutritionist_subscriptions','outbox_events','patient_invite_events','payment_webhook_events','platform_admins','platform_settings','privacy_access_events','privacy_export_packages','privacy_requests','processing_jobs','recipe_cover_requests','recipe_day_assignments','recipe_version_cards','service_payments'];
+const INTERNAL = ['audit_events','cover_daily_usage','ingredient_covers','menu_dish_covers','notification_deliveries','notification_preferences','nutritionist_subscriptions','outbox_events','patient_invite_events','payment_webhook_events','platform_admins','platform_settings','privacy_access_events','privacy_export_packages','privacy_requests','processing_jobs','recipe_cover_requests','recipe_day_assignments','recipe_version_cards','service_payments'];
 const canary = 'NOTA PROFESIONAL FICTICIA: prueba de acceso';
 const inputs: TargetInput = { sex: 'femenino', age: 30, weight_kg: 65, height_cm: 165, activity: 'ligera', ...defaultsForGoal('bajar') };
 const body = { sex: 'femenino', birth_date: '1990-05-10', height_cm: 165, weight_kg: 65 };

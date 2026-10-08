@@ -7,6 +7,7 @@ import { loadEvalHealth } from '../ai-eval/health.js';
 import { canonicalJson } from '../ai/context.js';
 import { getRecipeSnapshot, listProfessionalRecipes } from '../recipes/repository.js';
 import { enqueueMemoryDish, memoryDishKey, proposalCoverContext } from '../recipes/menu-covers.js';
+import { planVersionIngredients, queueIngredientCovers, type IngredientSource } from '../recipes/ingredient-covers.js';
 import { getRecipeCard } from '../recipes/presentation.js';
 import type { RecipeCard } from '../../src/types/recipes.js';
 import {
@@ -457,7 +458,10 @@ export async function publishMealPlan(
     ...(expectedSnapshot ? { expected_snapshot: expectedSnapshot } : {}),
   });
   mealPlanDbError(error);
-  return asProfessional(data as Record<string, unknown>);
+  const published = asProfessional(data as Record<string, unknown>);
+  // Las fotos de ingredientes nunca frenan la publicación: queueIngredientCovers no lanza.
+  await queueIngredientCovers(() => planVersionIngredients(published.published), { persistent: true });
+  return published;
 }
 
 function memoryDishCard(item: MemItem) {
@@ -474,6 +478,12 @@ async function enqueuePlanMemoryCovers(plan: MemPlan, version: MemVersion, retry
     if (!recipe) continue; // A public instruction alone is not a defined recipe.
     await enqueueMemoryDish(plan.nutritionist_id, proposalCoverContext(recipe), item.recipe_version_id, retry);
   }
+  await queueIngredientCovers(() => planVersionIngredients({ items: memoryIngredientItems(version) }), { persistent: false, retry });
+}
+/** Ingredientes de cada comida con receta o propuesta: la misma fuente que usan las fotos de platos. */
+function memoryIngredientItems(version: MemVersion): IngredientSource[] {
+  return [...items.values()].filter(row => row.version_id === version.id)
+    .map(row => ({ recipe: getRecipeSnapshot(row.recipe_version_id) ?? row.recipe_proposal ?? null }));
 }
 export async function retryMealPlanCovers(nutritionistId: string, planId: string, expectedVersion: number, persistent: boolean) {
   if (!recipeCoverEnabled()) throw new CareError(503, 'La generación de fotos todavía no está habilitada. El menú sigue publicado.');
@@ -487,7 +497,9 @@ export async function retryMealPlanCovers(nutritionistId: string, planId: string
   }
   const { data, error } = await getRequestDb().rpc('retry_menu_dish_covers', { target_plan: planId, expected_version: expectedVersion });
   mealPlanDbError(error);
-  return asProfessional(data as Record<string, unknown>);
+  const retried = asProfessional(data as Record<string, unknown>);
+  await queueIngredientCovers(() => planVersionIngredients(retried.published), { persistent: true, retry: true });
+  return retried;
 }
 
 registerDemoState('plans/repository', () => ({ plans, versions, items }));

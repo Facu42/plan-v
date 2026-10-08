@@ -40,17 +40,16 @@ Se leyeron los nodos `57:1509` (Weight Data) y `62:1513` (Calories Intake). El a
 | Recursos | Tarjetas, filtros, detalle | Filtro activo sin doble fondo; textos largos; foto ausente |
 | Común | Barra lateral, perfil, banner, menú del celular | Nombre largo con puntos suspensivos; globo de mensajes «99+»; `percent`/`dateId` robustos; horas y fechas en Argentina |
 
-## Decisiones que quedan para Facundo
+## Decisiones de Facundo (2026-10-07)
 
-Piezas que el archivo de Figma **no dibuja** y hoy están armadas con piezas y tokens del archivo:
-1. Nota «los nutrientes de hoy incluyen estimaciones de IA» y avisos de carga/error: se muestran bajo el marco.
-2. Diálogos: Registrar comida, Registrar/Filtrar del Diario, Agregar producto, Opciones del plan, formularios de Ejercicio.
-3. Favorita en el detalle de receta: el archivo no trae corazón; se usa la estrella del propio archivo.
-4. «×» de borrar en Compras (no hay papelera en los íconos del archivo) e íconos de series/repeticiones en Ejercicio recomendado.
-5. Actividad reciente clona el primer ítem del archivo y lo pinta según el tipo.
-6. Adjuntos dentro de la burbuja del chat: hoy enlace de texto; podrían usar las filas de documento/imagen del archivo (nodos `209:5633` y `210:6186`).
-7. Progreso: la leyenda de Descanso conserva «Ligero» y «REM» aunque Plan V no guarda fases.
-8. Ejercicio en celular: el marco no trae paginación.
+1. **No agregar** la nota «estimaciones de IA» fuera del marco: se quitó de Inicio. (Siguen los avisos de carga y de error, que son necesarios para que una falla no pase inadvertida.)
+2. **Sí** a los diálogos armados con piezas y tokens del archivo (Registrar comida, Registrar/Filtrar del Diario, Agregar producto, Opciones del plan, formularios de Ejercicio).
+3. **Sí** a la estrella del archivo como favorita en el detalle de receta.
+4. **Sí** al «×» de borrar en Compras y a los íconos de series/repeticiones.
+5. **Sí** a Actividad reciente clonando el primer ítem del archivo.
+6. **Sí** a que los adjuntos del chat usen las filas originales: documentos con «Item List Docs» (`209:5633`) e imágenes con el tile «Media N» (`210:6186`). Hecho en `screens/message-attachments.tsx`.
+7. **Sí** a la leyenda de Descanso en Progreso.
+8. **Sí** a Ejercicio en celular mostrando todas las filas.
 
 ## Qué no se pudo verificar
 

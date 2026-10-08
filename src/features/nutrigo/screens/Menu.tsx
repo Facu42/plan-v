@@ -5,7 +5,7 @@ import { recipesApi } from '../../../api/recipes';
 import { resourcesApi } from '../../../api/resources';
 import { plansApi } from '../../../api/plans';
 import { patientMenuRecipes, recipePresentationKey } from '../plan-recipe';
-import type { PatientRecipe } from '../../../types/recipes';
+import type { IngredientPhoto, PatientRecipe } from '../../../types/recipes';
 import { recipeNutritionLabel } from '../../../types/ai-nutrition';
 import starIcon from '../assets/c88d0.svg?no-inline';
 import { plateImage } from '../plate-photo';
@@ -14,7 +14,7 @@ import { lineClamp } from '../text-fit';
 import { NO_VALUE, effectiveYield, formatAmount, isAmount, scaleQuantity } from '../recipe-format';
 import { descendants, fields, leaf, listChildren, objects, errorText, searchBinding, Stateful, useRemote, type ScreenProps } from './shared';
 
-export type DisplayRecipe = Pick<PatientRecipe,'id'|'title'|'version'|'yield_portions'|'steps'|'nutrient_source'|'card'|'nutrition'> & {ingredients:Array<{id:string;name:string;quantity:number;unit:string}>};
+export type DisplayRecipe = Pick<PatientRecipe,'id'|'title'|'version'|'yield_portions'|'steps'|'nutrient_source'|'card'|'nutrition'> & {ingredients:Array<{id:string;name:string;quantity:number;unit:string}&IngredientPhoto>};
 type MacroKey = 'kcal'|'carbs_g'|'protein_g'|'fat_g';
 function nutrients(recipe:DisplayRecipe) {return recipe.nutrition?.per_portion??recipe.card?.macros??null;}
 const macroValue=(recipe:DisplayRecipe|null|undefined,key:MacroKey,portions=1)=>{const value=recipe?nutrients(recipe)?.[key]:null;return isAmount(value)?value*portions:null;};

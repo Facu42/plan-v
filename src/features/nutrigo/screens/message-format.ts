@@ -26,6 +26,13 @@ export function attachmentHref(value: unknown): string | null {
   try { return new URL(text).protocol === 'https:' ? text : null; } catch { return null; }
 }
 
+/** Dirección que devuelve la API al abrir un adjunto; si no es segura se corta con un mensaje en español en lugar de abrirla. */
+export function openedAttachmentUrl(result: { url?: unknown } | null | undefined): string {
+  const href = attachmentHref(result?.url);
+  if (!href) throw new Error('El adjunto no se pudo abrir.');
+  return href;
+}
+
 const SHORT_DATE = new Intl.DateTimeFormat('es-AR', { timeZone: ARGENTINA_ZONE, day: 'numeric', month: 'short' });
 const WEEKDAY = new Intl.DateTimeFormat('es-AR', { timeZone: ARGENTINA_ZONE, weekday: 'long' });
 const shortDate = (when: Date) => SHORT_DATE.format(when);

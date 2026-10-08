@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { attachmentHref, dayLabel, fileSize, listTime, orderedMessages } from './message-format';
+import { attachmentHref, dayLabel, fileSize, listTime, openedAttachmentUrl, orderedMessages } from './message-format';
 
 const original = process.env.TZ;
 afterEach(() => { if (original === undefined) delete process.env.TZ; else process.env.TZ = original; });
@@ -60,5 +60,13 @@ describe('día y hora de la lista y del chat', () => {
   });
   it('una fecha inválida da texto vacío en lugar de un error', () => {
     expect(dayLabel('ayer', now)).toBe(''); expect(listTime('ayer', now)).toBe('');
+  });
+});
+
+describe('respuesta de la API al abrir un adjunto', () => {
+  it('devuelve la dirección segura', () => { expect(openedAttachmentUrl({ url: 'https://x.supabase.co/a.pdf?t=1' })).toBe('https://x.supabase.co/a.pdf?t=1'); });
+  it('rechaza javascript:, // y data: con un error en español, sin abrir nada', () => {
+    for (const url of ['javascript:alert(1)', '//evil.example/x', 'data:text/html,x', '']) expect(() => openedAttachmentUrl({ url })).toThrow('El adjunto no se pudo abrir.');
+    expect(() => openedAttachmentUrl(null)).toThrow('El adjunto no se pudo abrir.');
   });
 });

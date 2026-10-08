@@ -96,6 +96,60 @@ describe.each([false, true])('mensajes con datos variados (celular: %s)', mobile
     expect(panel).toContain(`title="${filename}"`); expect(panel).toMatch(/title="Plan alimentario[^"]*"[^>]*style="[^"]*width:100%/);
   });
 
+  describe('adjuntos dentro de la burbuja con las piezas originales del archivo', () => {
+    const pdf = (id: string, extra: Raw = {}, attachment: Raw = {}) => message(id, 'vero', '2026-10-03T14:00:00Z', { attachment: { asset_id: id, filename: `${id}.pdf`, mime: 'application/pdf', byte_size: 2.5 * 1048576, kind: 'pdf', ...attachment }, ...extra });
+    /** Sólo el chat: entre el registro de la conversación y el perfil. */
+    const chatOf = (html: string) => html.slice(html.indexOf('role="log"'), html.indexOf('>Perfil<'));
+
+    it('un documento usa la fila original «Item List Docs» con nombre, tamaño y la acción de abrir', () => {
+      const chat = chatOf(render([pdf('plan')]));
+      expect(chat).toContain('data-name="Item List Docs"'); expect(chat).toContain('>plan.pdf<'); expect(chat).toContain('2,5 MB · de tu nutricionista');
+      expect(chat).toMatch(/aria-label="Abrir plan\.pdf \(mensaje de /); expect(chat).not.toContain('Ver adjunto: plan.pdf</button>');
+    });
+
+    it('un documento sin tamaño no escribe NaN y conserva su fila', () => {
+      const chat = chatOf(render([pdf('sin', {}, { byte_size: undefined })]));
+      expect(chat).toContain('data-name="Item List Docs"'); expect(chat).not.toContain('NaN'); expect(chat).toContain('>de tu nutricionista<');
+    });
+
+    it('un nombre larguísimo se recorta con puntos suspensivos dentro de la fila y conserva el nombre completo', () => {
+      const filename = `${'Plan alimentario semanal actualizado '.repeat(4)}.pdf`;
+      const chat = chatOf(render([pdf('largo', {}, { filename })]));
+      expect(chat).toContain(`title="${filename}"`); expect(chat).toMatch(/title="Plan alimentario[^"]*"[^>]*style="[^"]*width:100%/);
+    });
+
+    it('un adjunto que ya no está disponible lo dice y no ofrece abrirlo', () => {
+      const chat = chatOf(render([pdf('viejo', {}, { available: false })]));
+      expect(chat).toContain('viejo.pdf: ya no está disponible'); expect(chat).toContain('opacity:0.5'); expect(chat).not.toContain('aria-label="Abrir viejo.pdf'); expect(chat).not.toContain('<button type="button" aria-label="Ver adjunto');
+    });
+
+    it('un mensaje con sólo adjunto no deja un renglón de texto vacío', () => {
+      const chat = chatOf(render([pdf('solo', { text: '' })]));
+      expect(chat).toContain('data-name="Item List Docs"'); expect(chat).not.toMatch(/pre-wrap[^>]*><\/p>/);
+    });
+
+    it('varios adjuntos del mismo tipo tienen cada uno su fila y un nombre accesible distinto', () => {
+      const list = [pdf('a', { sent_at: '2026-10-03T14:00:00Z' }), pdf('b', { sent_at: '2026-10-03T14:05:00Z' }), pdf('c', { sent_at: '2026-10-03T14:10:00Z' })];
+      const chat = chatOf(render(list));
+      expect(chat.match(/data-name="Item List Docs"/g)).toHaveLength(3);
+      const labels = [...chat.matchAll(/aria-label="(Abrir [^"]+)"/g)].map(match => match[1]);
+      expect(labels).toHaveLength(3); expect(new Set(labels).size).toBe(3);
+    });
+
+    it('una imagen usa el tile original «Media N» de 92 con bordes redondeados y se puede abrir', () => {
+      const image = message('foto', 'vero', '2026-10-03T14:00:00Z', { text: '', attachment: { asset_id: 'f', filename: 'foto.jpg', mime: 'image/jpeg', byte_size: 2048, kind: 'image' } });
+      const chat = chatOf(render([image]));
+      expect(chat).toMatch(/data-name="Media \d"/); expect(chat).toContain('size-[92px]'); expect(chat).toContain('rounded-[12px]');
+      expect(chat).toMatch(/aria-label="Abrir foto\.jpg \(mensaje de /); expect(chat).not.toContain('data-name="Play"');
+    });
+
+    it('el perfil sigue mostrando sus imágenes y archivos con las mismas piezas', () => {
+      const html = render([pdf('plan')]);
+      expect(html.slice(html.indexOf('>Archivos (1)<'))).toContain('data-name="Item List Docs"');
+      expect(html).toContain('aria-label="Ver adjunto: plan.pdf"');
+    });
+  });
+
   it('un archivo sin tamaño no muestra NaN', () => {
     const doc = message('doc', 'vero', '2026-10-03T14:00:00Z', { attachment: { asset_id: 'b', filename: 'plan.pdf', mime: 'application/pdf', byte_size: undefined, kind: 'pdf' } });
     const html = render([doc]);

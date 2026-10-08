@@ -17,3 +17,31 @@ export function plateImage(card: PhotoCard, alt: string): SourceBinding | undefi
   const src = photoUrl(card);
   return src ? { children: <img key={src} src={src} alt={card?.cover_alt || alt} loading="lazy" decoding="async" onError={hideBrokenPhoto} className="absolute inset-0 block size-full object-cover" /> } : undefined;
 }
+
+type IngredientPhotoSource = { name: string; ingredient_cover_url?: string | null; ingredient_cover_alt?: string };
+const INGREDIENT_HTTPS_PATH = /^\/storage\/v1\/object\/public\/recipe-covers\/ingredients\/[a-z0-9]+(-[a-z0-9]+)*\.(png|jpg|webp)$/;
+const INGREDIENT_DATA = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+const isDemo = () => import.meta.env.DEV && import.meta.env.VITE_ALLOW_DEMO === 'true';
+function sameSupabaseHost(host: string): boolean {
+  const configured = import.meta.env.VITE_SUPABASE_URL;
+  if (!configured) return true; // El servidor ya comparó el host; aquí se vuelve a comprobar cuando se conoce.
+  try { return new URL(configured).host === host; } catch { return false; }
+}
+/** Mismas reglas que el servidor: https del bucket público bajo `ingredients/`, o la imagen incrustada (png, jpeg, webp) sólo en la demostración. */
+export function ingredientPhotoUrl(ingredient: IngredientPhotoSource): string | null {
+  const value = ingredient.ingredient_cover_url;
+  if (typeof value !== 'string' || !value) return null;
+  if (INGREDIENT_DATA.test(value)) return isDemo() ? value : null;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && INGREDIENT_HTTPS_PATH.test(url.pathname) && !url.search && !url.hash && sameSupabaseHost(url.host) ? value : null;
+  } catch { return null; }
+}
+/**
+ * Listo para el recuadro de ingrediente. El archivo de Nutrigo todavía no dibuja un lugar para esta foto en el detalle
+ * de la receta (cada fila sólo tiene el número y el texto), por eso la pantalla aún no lo usa: ver docs/fotos-menu-cloudflare-2026-10-06.md.
+ */
+export function ingredientImage(ingredient: IngredientPhotoSource): SourceBinding | undefined {
+  const src = ingredientPhotoUrl(ingredient);
+  return src ? plateImage({ cover_status: 'ready', cover_url: src, cover_alt: ingredient.ingredient_cover_alt }, ingredient.name) : undefined;
+}

@@ -60,6 +60,11 @@ describe.each([false,true])('pantallas principales MCP (celular %s)',mobile=>{
     const vacio=render(0);expect(copias(vacio)).toBe(0);
     const lleno=render(5000);expect(copias(lleno)).toBe(3);
   });
+  it('inicio no agrega la nota «estimaciones de IA» fuera del marco del archivo',()=>{
+    context.mobile=mobile;context.data={body:null,target:null,recipes:[],plan:null,exercise:null,care:{measurements:[]},failed:false};
+    const html=renderToStaticMarkup(<NutrigoHome patient={{...patient,nutritionLogCount:1,nutritionEstimated:true,kcal:100,macros:{kcal:100,carbs_g:10,protein_g:5,fat_g:3}} as unknown as ShowroomPatient} onNavigate={navigate} onRecord={navigate} onHydration={navigate} onRest={navigate} onLogMeal={navigate}/>);
+    expect(html).not.toContain('estimaciones de IA');
+  });
   it('menú conserva datos y estimación de la receta asignada',()=>{
     context.mobile=mobile;context.data={recipes:[recipe],favorites:[]};
     const html=renderToStaticMarkup(<NutrigoMenu patient={patient} onNavigate={navigate}/>);

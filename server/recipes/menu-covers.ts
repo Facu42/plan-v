@@ -60,15 +60,19 @@ export async function handleMemoryDish(job: ProcessingJob) {
 
 let running = false;
 /** Durable database queue. Only the worker's service client can lease or finish. */
-export async function runPersistentDishCover() {
-  if (running || !recipeCoverEnabled()) return;
-  const db = getSupabaseAdmin(); if (!db) return;
+/** Devuelve verdadero si tomó una foto de plato o ya hay una pasada en curso: así las fotos de ingredientes esperan su turno. */
+export async function runPersistentDishCover(): Promise<boolean> {
+  if (running) return true;
+  if (!recipeCoverEnabled()) return false;
+  const db = getSupabaseAdmin(); if (!db) return false;
   running = true;
+  let worked = false;
   try {
     const leased = await db.rpc('lease_menu_dish_cover');
-    if (leased.error) { logProviderFailure('menu-cover-lease', leased.error); return; }
+    if (leased.error) { logProviderFailure('menu-cover-lease', leased.error); return false; }
     const job = leased.data as null | { id: string; run_token: string; nutritionist_id: string; recipe_version_id: string | null; context: { title: string; steps: string[]; ingredients: RecipeCoverContext['items'] } };
-    if (!job) return;
+    if (!job) return false;
+    worked = true;
     const generated = await generateRecipeCoverImage({ title: job.context.title, steps: job.context.steps, items: job.context.ingredients });
     let url: string | null = null, path: string | null = null;
     const bucket = db.storage.from('recipe-covers');
@@ -96,6 +100,9 @@ export async function runPersistentDishCover() {
         if (removed.error) logProviderFailure('menu-cover-cleanup', removed.error);
       }
     }
+    // Cuota compartida con las fotos de ingredientes: cuenta el intento sin tocar la tabla de platos. Si el contador no existe, no pasa nada.
+    try { await db.rpc('record_cover_attempt', { usage_kind: 'dish' }); } catch { /* sin contador no se frena la foto */ }
   } catch (error) { logProviderFailure('menu-cover-worker', error); }
   finally { running = false; }
+  return worked;
 }

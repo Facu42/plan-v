@@ -269,7 +269,6 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
     return undefined;
   };
   return <FramePair nodes={['12:792','427:14405']} resolve={resolve} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut}>
-    {patient.nutritionEstimated && <p className="mcp-screen-state">Los nutrientes registrados de hoy incluyen estimaciones de IA revisadas por tu nutricionista.</p>}
     {(!current||current.failed||data.error)&&<Stateful loading={!current&&!data.error} error={data.error|| (current?.failed?'Algunos datos no se pudieron cargar.':undefined)} onRetry={data.reload}/>}
   </FramePair>;
 }

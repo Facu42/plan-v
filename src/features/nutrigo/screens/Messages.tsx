@@ -2,16 +2,16 @@ import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 
 import { FramePair } from '../FramePair';
 import { nodeName, sourceText, type SourceBinding, type SourceNode, type SourceResolver } from '../SourceView';
 import { api } from '../../../api/client';
-import { assertChatFile, CHAT_ATTACHMENT_ACCEPT, openChatAttachment, uploadChatAttachment } from '../../../api/assets';
+import { assertChatFile, CHAT_ATTACHMENT_ACCEPT, uploadChatAttachment } from '../../../api/assets';
 import { useAppStore } from '../../../store/useAppStore';
 import { messageReceipt, messageReceiptLabel, unreadCount } from '../../../components/nutrigo/message-receipts';
 import { FigmaRecordDialog } from '../../../components/nutrigo/FigmaPatientFront';
-import type { MessageAttachment } from '../../../types';
 import { createMessageWrite } from './message-write';
 import { useUnsavedChanges } from '../../../components/nutrigo/unsaved-changes';
 import { descendants, EmptyState, errorText, idEnds, leaf, objects, safeUrl, searchBinding, source, Stateful, type ScreenProps } from './shared';
 import { argentinaDay, argentinaTime } from './ar-time';
-import { attachmentHref, dayLabel, fileSize, hasDate, listTime, orderedMessages } from './message-format';
+import { BubbleAttachment, Attachment, documentRow, imageTile, kitFromPanel, type AttachmentKit } from './message-attachments';
+import { dayLabel, fileSize, hasDate, listTime, orderedMessages } from './message-format';
 import { ATTACH_ICON, MESSAGE_LABELS, headerActions } from './header-actions';
 import { unreadBadge } from '../patient-navigation';
 
@@ -22,26 +22,10 @@ const has = (node: SourceNode, name: string) => descendants(node).some(child => 
 /** Estilo para anunciar algo sólo a lectores de pantalla (el mensaje ya se ve en el chat). */
 const SR_ONLY = { position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' } as const;
 
-function Attachment({ patientId, messageId, attachment }: { patientId: string; messageId: string; attachment: MessageAttachment }) {
-  const [url, setUrl] = useState<string | null>(null); const [busy, setBusy] = useState(false); const [error, setError] = useState('');
-  const open = async () => { if (busy) return; setBusy(true); setError(''); try { const result = await openChatAttachment(patientId, messageId); const href = attachmentHref(result.url); if (!href) throw new Error('El adjunto no se pudo abrir.'); setUrl(href); } catch (caught) { setError(errorText(caught)); } finally { setBusy(false); } };
-  if (attachment.available === false) return <p className="text-[12px]">El adjunto ya no está disponible.</p>;
-  return <div className="text-[12px]">{url ? <a href={url} target="_blank" rel="noopener noreferrer" className="underline">Abrir {attachment.filename}</a> : <button type="button" disabled={busy} onClick={() => void open()} className="underline">{busy ? 'Preparando…' : `Ver adjunto: ${attachment.filename}`}</button>}{error && <p role="alert">{error}</p>}</div>;
-}
-/** Capa clickeable sobre una pieza del archivo (miniatura o fila de documento) que abre el adjunto real. */
-function AttachmentCover({ patientId, messageId, attachment }: { patientId: string; messageId: string; attachment: MessageAttachment }) {
-  const [url, setUrl] = useState<string | null>(null); const [busy, setBusy] = useState(false); const [error, setError] = useState('');
-  const open = async () => { if (busy) return; setBusy(true); setError(''); try { const result = await openChatAttachment(patientId, messageId); const href = attachmentHref(result.url); if (!href) throw new Error('El adjunto no se pudo abrir.'); setUrl(href); } catch (caught) { setError(errorText(caught)); } finally { setBusy(false); } };
-  const cover = 'absolute inset-0 z-[1] flex items-end justify-end rounded-[inherit] p-[6px] text-[10px] text-[#272932]';
-  if (attachment.available === false) return <span className={cover} title="El adjunto ya no está disponible."><span className="sr-only">{attachment.filename}: ya no está disponible</span></span>;
-  if (url) return <a href={url} target="_blank" rel="noopener noreferrer" aria-label={`Abrir ${attachment.filename}`} className={cover}><span className="rounded-[6px] bg-[#fefcfb] px-[6px] py-[2px] underline">Abrir</span></a>;
-  return <button type="button" disabled={busy} onClick={() => void open()} aria-label={`Ver adjunto: ${attachment.filename}`} title={error || attachment.filename} className={cover}>{busy && <span className="rounded-[6px] bg-[#fefcfb] px-[6px] py-[2px]">Preparando…</span>}{error && <span role="alert" className="rounded-[6px] bg-[#fefcfb] px-[6px] py-[2px] text-[#a32929]">No se pudo abrir</span>}</button>;
-}
-
 export function NutrigoMessages({ patient, onNavigate, onSignOut, now = new Date() }: ScreenProps) {
   const refresh = useAppStore(state => state.refreshPatient); const [search, setSearch] = useState(''); const [text, setText] = useState(''); const [file, setFile] = useState<File | null>(null); const [busy, setBusy] = useState(false); const [error, setError] = useState(''); const [notice, setNotice] = useState({ text: '', loud: false });
   const announce = (text: string, loud = false) => setNotice({ text, loud });
-  const compose = useRef<HTMLTextAreaElement | null>(null); const picker = useRef<HTMLInputElement | null>(null); const chat = useRef<HTMLDivElement | null>(null); const lock = useRef(false); const [unreadOnly, setUnreadOnly] = useState(false);
+  const kit = useRef<AttachmentKit>({ tiles: [] }); const compose = useRef<HTMLTextAreaElement | null>(null); const picker = useRef<HTMLInputElement | null>(null); const chat = useRef<HTMLDivElement | null>(null); const lock = useRef(false); const [unreadOnly, setUnreadOnly] = useState(false);
   const [pending, setPending] = useState(false); const [showAll, setShowAll] = useState<Shared | null>(null);
   const [delivery] = useState(() => createMessageWrite(patient.id, { upload: selected => uploadChatAttachment(patient.id, selected, false), send: api.sendMessage, refresh }));
   useUnsavedChanges(Boolean(text.trim() || file || pending), busy);
@@ -67,7 +51,7 @@ export function NutrigoMessages({ patient, onNavigate, onSignOut, now = new Date
     const resolve: SourceResolver = child => {
       if (nodeName(child) === 'Bubble') {
         const body = objects(child)[0];
-        return { props: { 'aria-label': message.from === 'patient' ? 'Mensaje enviado' : 'Mensaje de tu nutricionista', style: message.attachment ? { flexDirection: 'column', alignItems: 'flex-start', gap: 6 } : undefined }, children: <>{body && source(body, () => ({ text: message.text, props: { style: { whiteSpace: 'pre-wrap', width: '100%' } } }), 'text')}{message.attachment && <Attachment patientId={patient.id} messageId={message.id} attachment={message.attachment} />}</> };
+        return { props: { 'aria-label': message.from === 'patient' ? 'Mensaje enviado' : 'Mensaje de tu nutricionista', style: message.attachment ? { flexDirection: 'column', alignItems: 'flex-start', gap: 6 } : undefined }, children: <>{body && (message.text.trim() || !message.attachment) && source(body, () => ({ text: message.text, props: { style: { whiteSpace: 'pre-wrap', width: '100%' } } }), 'text')}{message.attachment && <BubbleAttachment kit={kit} patientId={patient.id} message={message} />}</> };
       }
       if (nodeName(child) === 'Checks') return { props: { 'aria-hidden': true, style: { opacity: receipt === 'read' ? 1 : 0.35 } } };
       if (leaf(child) && /^\d{1,2}:\d{2} (AM|PM)$/.test(sourceText(child))) return { text: receipt ? `${argentinaTime(message.sent_at)} · ${messageReceiptLabel(receipt)}` : argentinaTime(message.sent_at) };
@@ -87,21 +71,18 @@ export function NutrigoMessages({ patient, onNavigate, onSignOut, now = new Date
     if (content.startsWith('Media')) return { children: objects(node).map((child, index) => source(child, part => {
       const title = titleNode(`Imágenes (${images.length})`, 'media', images.length)(part); if (title) return title;
       if (nodeName(part) === 'Row') {
-        const tiles = objects(part).filter(tile => /^Media \d$/.test(nodeName(tile))); const fade = objects(part).find(tile => !/^Media \d$/.test(nodeName(tile)));
+        const tiles = objects(part).filter(tile => /^Media \d$/.test(nodeName(tile))); kitFromPanel([], tiles, kit.current); const fade = objects(part).find(tile => !/^Media \d$/.test(nodeName(tile)));
         if (!images.length) return { children: <EmptyState text="Todavía no compartieron imágenes." /> };
-        return { children: <>{images.slice(-tiles.length).reverse().map((message, position) => source(tiles[position % tiles.length], tile => tile === tiles[position % tiles.length] ? { children: <><span className="absolute inset-x-[6px] top-[6px] truncate font-['Poppins:Regular'] text-[10px] leading-[1.3] text-[#52545b]">{message.attachment!.filename}</span><AttachmentCover patientId={patient.id} messageId={message.id} attachment={message.attachment!} /></> } : undefined, message.id))}{images.length > tiles.length && fade && source(fade, () => undefined, 'fade')}</> };
+        return { children: <>{images.slice(-tiles.length).reverse().map((message, position) => imageTile(tiles[position % tiles.length], message, patient.id, message.id))}{images.length > tiles.length && fade && source(fade, () => undefined, 'fade')}</> };
       }
       return undefined;
     }, index)) };
     if (content.startsWith('Documents')) return { children: objects(node).map((child, index) => source(child, part => {
       const title = titleNode(`Archivos (${documents.length})`, 'docs', documents.length)(part); if (title) return title;
       if (nodeName(part) === 'List Docs') {
-        const rows = objects(part);
+        const rows = objects(part); kitFromPanel(rows, [], kit.current);
         if (!documents.length) return { children: <EmptyState text="Todavía no compartieron archivos." /> };
-        return { children: documents.slice(-rows.length).reverse().map((message, position) => { const row = rows[position % rows.length]; return source(row, item => {
-          if (item === row) return { children: <>{objects(row).map((piece, order) => source(piece, inner => leaf(inner) && /\.(pdf|xls)$/.test(sourceText(inner)) ? { text: message.attachment!.filename, props: { title: message.attachment!.filename, style: { width: '100%' } } } : leaf(inner) && /mb$/.test(sourceText(inner)) ? { text: `${fileSize(message.attachment!.byte_size) ? `${fileSize(message.attachment!.byte_size)} · ` : ''}${message.from === 'patient' ? 'enviado por vos' : 'de tu nutricionista'}` } : undefined, order))}<AttachmentCover patientId={patient.id} messageId={message.id} attachment={message.attachment!} /></> };
-          return undefined;
-        }, message.id); }) };
+        return { children: documents.slice(-rows.length).reverse().map((message, position) => documentRow(rows[position % rows.length], message, patient.id, message.id)) };
       }
       return undefined;
     }, index)) };

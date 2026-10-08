@@ -65,3 +65,41 @@ describe('limpieza de archivos de fotos después de finalizar una reserva', () =
     expect(bucket.remove).not.toHaveBeenCalled();
   });
 });
+
+describe('aviso de ocupación para repartir la cuota entre platos e ingredientes', () => {
+  it('informa que trabajó cuando tomó una reserva', async () => {
+    mocks.db.rpc.mockResolvedValueOnce({ data: { cover_url: url }, error: null });
+    expect(await runPersistentDishCover()).toBe(true);
+  });
+
+  it('informa que no hay trabajo cuando la cola está vacía o falla la reserva', async () => {
+    mocks.db.rpc = vi.fn().mockResolvedValueOnce({ data: null, error: null }).mockResolvedValueOnce({ data: null, error: { code: '42883' } });
+    expect(await runPersistentDishCover()).toBe(false);
+    expect(await runPersistentDishCover()).toBe(false);
+  });
+
+  it('informa ocupado mientras otra pasada sigue en curso', async () => {
+    let release!: () => void;
+    mocks.db.rpc = vi.fn().mockImplementationOnce(() => new Promise(resolve => { release = () => resolve({ data: null, error: null }); }));
+    const first = runPersistentDishCover();
+    expect(await runPersistentDishCover()).toBe(true);
+    release(); expect(await first).toBe(false);
+  });
+});
+
+describe('cuota compartida: cada foto de plato intentada se registra para repartir el día', () => {
+  it('registra un intento de plato después de tomar una reserva', async () => {
+    mocks.db.rpc.mockResolvedValueOnce({ data: { cover_url: url }, error: null });
+    await runPersistentDishCover();
+    expect(mocks.db.rpc.mock.calls.map((call: unknown[]) => call[0])).toEqual(['lease_menu_dish_cover', 'finish_menu_dish_cover', 'record_cover_attempt']);
+    expect(mocks.db.rpc.mock.calls[2][1]).toEqual({ usage_kind: 'dish' });
+  });
+
+  it('no registra nada si no había trabajo y nunca falla si el contador no existe todavía', async () => {
+    mocks.db.rpc = vi.fn().mockResolvedValueOnce({ data: null, error: null });
+    await runPersistentDishCover();
+    expect(mocks.db.rpc).toHaveBeenCalledTimes(1);
+    mocks.db.rpc = vi.fn().mockResolvedValueOnce({ data: leased, error: null }).mockResolvedValueOnce({ data: { cover_url: url }, error: null }).mockRejectedValueOnce(new Error('sin tabla'));
+    await expect(runPersistentDishCover()).resolves.toBe(true);
+  });
+});
