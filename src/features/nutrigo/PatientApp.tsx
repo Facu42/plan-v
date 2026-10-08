@@ -9,7 +9,9 @@ import { PatientBodyDataCard, PatientNutritionTarget } from '../../components/nu
 import { ShowroomPagos } from '../../components/nutrigo/ShowroomPagos';
 import { ShowroomPrivacy } from '../../components/nutrigo/ShowroomPrivacy';
 import { MealLogModal } from '../../components/patient/MealLogModal';
+import { argentinaHour, suggestSlot } from '../../components/patient/meal-log-helpers';
 import { FramePair } from './FramePair';
+import { FeeNoticeProvider } from './fee-notice';
 import { nodeName } from './SourceView';
 import { NutrigoHome } from './screens/Home';
 import { NutrigoMenu } from './screens/Menu';
@@ -40,7 +42,7 @@ export function NutrigoPatientApp({patient,page,onNavigate,onSignOut,onEditIntak
   const fullPatient=useAppStore(state=>state.patients.find(item=>item.id===patient.id));
   const [dialog,setDialog]=useState<'records'|'water'|'rest'|'steps'|null>(null),[slot,setSlot]=useState<string|null>(null),[privacy,setPrivacy]=useState(false);
   const common={patient,onNavigate,onSignOut,query,now};
-  const onRecord=()=>setDialog('records'),onHydration=()=>setDialog('water'),onRest=()=>setDialog('rest'),onSteps=()=>setDialog('steps'),onLogMeal=(mealSlot='Almuerzo')=>setSlot(mealSlot);
+  const onRecord=()=>setDialog('records'),onHydration=()=>setDialog('water'),onRest=()=>setDialog('rest'),onSteps=()=>setDialog('steps'),onLogMeal=(mealSlot:string=suggestSlot(argentinaHour(new Date())))=>setSlot(mealSlot);
   let screen;
   if(page==='inicio')screen=<NutrigoHome {...common} onRecord={onRecord} onHydration={onHydration} onRest={onRest} onSteps={onSteps} onLogMeal={onLogMeal}/>;
   else if(page==='recetas')screen=<NutrigoMenu {...common}/>;
@@ -72,12 +74,12 @@ export function NutrigoPatientApp({patient,page,onNavigate,onSignOut,onEditIntak
       </>}
     </section>};
   }}/>;
-  return <>{screen}{demoRoleSwitch&&<div className="mcp-nutrigo mcp-screen-state"><button className="mcp-action" onClick={demoRoleSwitch}>Ver consultorio de demostración</button></div>}
+  return <FeeNoticeProvider patientId={patient.id}>{screen}{demoRoleSwitch&&<div className="mcp-nutrigo mcp-screen-state"><button className="mcp-action" onClick={demoRoleSwitch}>Ver consultorio de demostración</button></div>}
     <div className="mcp-patient-overlays">
     {dialog==='records'&&<FigmaRecordDialog title="Mis registros" onClose={()=>{if(canLeaveWorkspace())setDialog(null);}}><PatientBodyDataCard patientId={patient.id} forceOpen onSaved={notifyCareChanged}/><CarePanel patientId={patient.id}/></FigmaRecordDialog>}
     {(dialog==='water'||dialog==='rest'||dialog==='steps')&&<HabitForm patient={patient} kind={dialog} onClose={()=>setDialog(null)}/>}
     {slot&&fullPatient&&<MealLogModal patient={fullPatient} defaultSlot={slot} close={()=>setSlot(null)}/>}
     {privacy&&<ShowroomPrivacy patientId={patient.id} onClose={()=>setPrivacy(false)} onDeleted={()=>{setPrivacy(false);onSignOut?.();}}/>}
     </div>
-  </>;
+  </FeeNoticeProvider>;
 }

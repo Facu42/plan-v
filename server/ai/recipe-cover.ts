@@ -4,7 +4,8 @@ import { logProviderFailure } from './mode.js';
 export type RecipeCoverContext = { title: string; items: Array<{ name: string; quantity?: number; unit?: string }>; steps?: string[] };
 export type RecipeCoverResult =
   | { status: 'ready'; bytes: Buffer; mime: 'image/png' | 'image/jpeg' | 'image/webp'; alt: string }
-  | { status: 'failed'; retry_after_ms?: number };
+  /** `blocked`: el proveedor no atendió (clave, permisos o cuota): no es culpa del pedido y no debe gastar intentos. */
+  | { status: 'failed'; retry_after_ms?: number; blocked?: true };
 
 // The provider and model are fixed: no paid router or fallback. The account must
 // remain on Workers Free, which refuses requests after the daily free quota.
@@ -14,7 +15,7 @@ export function recipeCoverEnabled(): boolean {
 }
 // FLUX follows English food names more reliably. Translate common culinary
 // vocabulary only; retain unfamiliar names and never infer missing ingredients.
-function culinaryEnglish(value: string): string {
+export function culinaryEnglish(value: string): string {
   let text = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const words: Record<string, string> = {
     'yogur griego': 'Greek yogurt', 'aceite de oliva': 'olive oil', 'al horno': 'baked',
@@ -38,37 +39,65 @@ function culinaryEnglish(value: string): string {
   text = text.replace(pattern, word => words[word]);
   return text;
 }
+// Platos con nombre propio que el diccionario palabra por palabra describe mal («tortilla» no es una frittata).
+// Sólo describen la forma del plato: nunca ingredientes, cocción ni recipientes que la receta no declara.
+const DISH_PHRASES: Array<[RegExp, string]> = [
+  [/\btortilla de (papas?|patatas?)\b/, 'a Spanish potato omelette (tortilla espanola), a thick round golden omelette with one wedge cut out to show the layers'],
+  [/\bmilanesas?\b/, 'a golden breaded cutlet (milanesa)'],
+  [/\bempanadas?\b/, 'Argentine empanadas, half-moon pastries with a folded edge'],
+  [/\bpure de (papas?|patatas?)\b/, 'smooth mashed potatoes'],
+];
+/** Plato en inglés: el nombre propio conocido, o el nombre original traducido palabra por palabra. */
+function dishPhrase(title: string): string {
+  const plain = title.slice(0, 180).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  return DISH_PHRASES.find(([pattern]) => pattern.test(plain))?.[1] ?? culinaryEnglish(title.slice(0, 180));
+}
+// Sólo título e ingredientes: los pasos están en español y confunden al modelo, que dibuja palabras sueltas.
 export function recipeCoverPrompt(context: RecipeCoverContext): string {
   return [
-    `Food photograph of ${culinaryEnglish(context.title.slice(0, 180))}.`,
-    `Visible food ingredients: ${context.items.slice(0, 20).map(i => culinaryEnglish(i.name.slice(0, 80))).join(', ')}. Show those ingredients clearly in the finished dish.`,
-    'A single edible dish on a white ceramic plate or bowl, warm cream background, soft natural daylight, three-quarter overhead view, centered square composition. No extra ingredients, garnish, people, cutlery, text, labels, logos or collage.',
-    `Preparation: ${culinaryEnglish((context.steps ?? []).join(' ').slice(0, 650))}`,
+    `Professional food photograph of ${dishPhrase(context.title)}.`,
+    `Main ingredients: ${context.items.slice(0, 20).map(i => culinaryEnglish(i.name.slice(0, 80))).join(', ')}. Show only these ingredients, clearly recognizable in the finished dish.`,
+    'Exactly one single dish served on a white ceramic plate or bowl, warm cream background, soft natural daylight, three-quarter overhead view, centered square composition. No extra ingredients, garnish, people, cutlery, text, labels, logos or collage.',
   ].join(' ').slice(0, 2048);
 }
+/** Deja en el registro por qué no hubo foto: solo el motivo y el código HTTP, nunca claves, textos ni imágenes. */
+function logCoverFailure(reason: string) { console.error('[ai:cloudflare-cover] sin foto', { reason }); }
 export async function generateRecipeCoverImage(context: RecipeCoverContext): Promise<RecipeCoverResult> {
-  if (!recipeCoverEnabled() || !context.title.trim() || !context.items.length) return { status: 'failed' };
+  if (!recipeCoverEnabled()) { logCoverFailure('proveedor_no_configurado'); return { status: 'failed' }; }
+  if (!context.title.trim() || !context.items.length) return { status: 'failed' };
+  return generateCoverFromPrompt(recipeCoverPrompt(context), `${context.title} · imagen ilustrativa generada con IA`);
+}
+/**
+ * Núcleo compartido por las fotos de platos y de ingredientes: un solo modelo, sin alternativas.
+ * El texto de la petición lo arma quien llama; aquí nunca se registran ni textos ni imágenes.
+ */
+export async function generateCoverFromPrompt(prompt: string, alt: string): Promise<RecipeCoverResult> {
+  if (!recipeCoverEnabled()) { logCoverFailure('proveedor_no_configurado'); return { status: 'failed' }; }
   try {
     const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/black-forest-labs/flux-1-schnell`, {
       method: 'POST', headers: { Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: recipeCoverPrompt(context), steps: 4 }), signal: AbortSignal.timeout(60_000), redirect: 'error',
+      body: JSON.stringify({ prompt, steps: 4 }), signal: AbortSignal.timeout(60_000), redirect: 'error',
     });
     if (response.status === 429) {
+      logCoverFailure('limite_diario');
       const nextDay = new Date(); nextDay.setUTCHours(24, 1, 0, 0);
-      return { status: 'failed', retry_after_ms: nextDay.getTime() - Date.now() };
+      return { status: 'failed', retry_after_ms: nextDay.getTime() - Date.now(), blocked: true };
     }
-    if (!response.ok) return { status: 'failed', retry_after_ms: response.status === 401 || response.status === 403 ? 3_600_000 : 60_000 };
+    if (!response.ok) logCoverFailure(`http_${response.status}`);
+    if (response.status === 401 || response.status === 403) return { status: 'failed', retry_after_ms: 3_600_000, blocked: true };
+    if (!response.ok) return { status: 'failed', retry_after_ms: 60_000 };
     // Bound the streamed body before parsing; never log prompts, images or keys.
     if (Number(response.headers.get('content-length')) > 7_100_000) return { status: 'failed' };
     const reader = response.body?.getReader(); if (!reader) return { status: 'failed' };
     const chunks: Uint8Array[] = []; let size = 0;
     for (;;) { const { done, value } = await reader.read(); if (done) break; size += value.length; if (size > 7_100_000) { await reader.cancel(); return { status: 'failed' }; } chunks.push(value); }
     const result = JSON.parse(Buffer.concat(chunks).toString('utf8')) as { success?: boolean; result?: { image?: string }; errors?: Array<{ code?: number }> };
+    if (!result.success || typeof result.result?.image !== 'string') logCoverFailure('respuesta_sin_imagen');
     if (!result.success || typeof result.result?.image !== 'string') return { status: 'failed', retry_after_ms: 60_000 };
     const bytes = Buffer.from(result.result.image, 'base64');
     if (bytes.length > 5 * 1024 * 1024) return { status: 'failed' };
     const image = inspectPrivateFile('body_progress', bytes, 'image/jpeg');
     if (image.mime === 'application/pdf') return { status: 'failed' };
-    return { status: 'ready', bytes: image.bytes, mime: image.mime, alt: `${context.title} · imagen ilustrativa generada con IA` };
+    return { status: 'ready', bytes: image.bytes, mime: image.mime, alt };
   } catch (error) { logProviderFailure('cloudflare-cover', error); return { status: 'failed', retry_after_ms: 60_000 }; }
 }

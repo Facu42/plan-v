@@ -31,11 +31,10 @@ const frames = resolve('design/nutrigo-frames');
 const only = args.find(arg => !arg.startsWith('--'));
 
 async function seed() {
-  // Carga el contenido de ejemplo (recetas, plan, medidas, rutina) en la API de demo en memoria.
-  const { seedDemoContent } = await import('../server/demo/content.ts');
-  const steps = await seedDemoContent((path, init) => fetch(api + path, init));
-  const failed = steps.filter(step => !step.ok);
-  console.log(`Contenido de ejemplo: ${steps.length - failed.length}/${steps.length} pasos.`);
+  // La API de demo ya carga el contenido al iniciar; esto sólo lo completa si faltara (no duplica).
+  const { seedDemoOnBoot } = await import('../server/demo/autoseed.ts');
+  const { seeded, failed } = await seedDemoOnBoot((path, init) => fetch(api + path, init));
+  console.log(seeded ? `Contenido de ejemplo cargado (${failed.length} pasos con error).` : 'La demo ya tenía el contenido de ejemplo.');
   if (failed.length) console.log(failed);
 }
 

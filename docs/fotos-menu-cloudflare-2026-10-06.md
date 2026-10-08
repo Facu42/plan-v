@@ -27,7 +27,7 @@ Son ilustraciones: los ingredientes y cantidades escritos siguen siendo la refer
 ## Comportamiento y límites
 
 - Modelo fijo `@cf/black-forest-labs/flux-1-schnell`, cuatro pasos, sin router ni
-  proveedor pago alternativo. Sólo enviar título, ingredientes y preparación;
+  proveedor pago alternativo. Sólo enviar título e ingredientes (los pasos están en español y confundían al modelo);
   los identificadores de paciente, antecedentes y notas no forman parte de la petición.
 - Mantener **Workers Free** en la cuenta de Cloudflare. La confirmación de entorno
   no verifica el plan de facturación de la cuenta. El límite diario gratuito es
@@ -71,9 +71,117 @@ de seguridad están documentadas y probadas. Ante un rechazo definitivo de una
 reserva, se elimina sólo el candidato no referenciado; una respuesta de red incierta
 conserva el archivo hasta que se pueda confirmar su uso.
 
-**No se aplicó la migración ni se cambiaron variables de producción.** Las reglas
-del proyecto requieren el OK escrito de Facundo antes de ese paso. El PR se prepara
-sobre la rama de la simulación del consultorio para preservar la pila anterior.
+**Estado en producción (comprobado el 2026-10-07):** la migración `menu_dish_covers`
+está aplicada en `plan-v-app` (versión `20261006234740`, con su disparador activo) y
+la API y el worker de Railway tienen las cuatro variables de Cloudflare (se comprobaron
+solo los nombres, no los valores). **Todavía nunca se generó una foto en producción:** la
+cola tiene 0 filas, porque los tres planes publicados son del 5/10, anteriores al
+disparador. Para encolarlas, la nutricionista publica un menú de nuevo o aprieta
+«Preparar fotos pendientes» en la pestaña Planes. Falta confirmar con esa prueba el plan
+gratuito de la cuenta de Cloudflare y los permisos del token.
+
+## Fotos de ingredientes
+
+**Estado: migración preparada, sin aplicar en producción.** El código está en la rama; en producción todavía no
+existe la tabla ni se genera nada hasta que Facundo dé su frase escrita (pasos al final de esta sección).
+
+### Cómo funciona
+
+- **Una foto por ingrediente, para todo el servicio.** Catálogo compartido `ingredient_covers`: «tomates», «100 g de tomate»
+  y «Tomate» comparten la clave `tomate`. La clave sale del nombre en minúsculas, sin tildes, sin cantidades ni unidades,
+  sin «cocido/picado/fresco» y en singular razonable (`aceite-de-oliva`, `lenteja`, `limon`). Es un catálogo sin datos
+  de personas: guarda solo la clave, el estado y la dirección de la foto.
+- **Solo ingredientes conocidos.** Únicamente generan foto los nombres del vocabulario curado
+  (`server/ai/ingredient-vocabulary.ts`, unos 250 ingredientes y modificadores de la cocina argentina). Un nombre que no
+  está (texto libre, un nombre propio, cualquier dato escrito por error en un ingrediente) **no se encola, no viaja a
+  Cloudflare y la receta queda sin foto en ese ingrediente**. Para sumar un ingrediente hay que agregarlo a ese archivo
+  (y hay una prueba que comprueba que cada nombre del catálogo se alcanza escribiéndolo normalmente).
+- **Se pide solo, sin esperar a nadie.** Al publicar un menú se reservan los ingredientes únicos conocidos de sus recetas y
+  platos que todavía no tienen foto lista ni reservada, con un tope de 60 claves nuevas por publicación (el resto se
+  completa con «Preparar fotos pendientes»). También lo hacen «Preparar fotos pendientes» y pedir la foto de una receta
+  publicada. Publicar una receta de la Biblioteca sin menú no pide nada (igual que con las fotos de platos). Todo el
+  encolado va aislado: ante cualquier error, o si tarda más de un instante, la publicación sigue igual y la paciente ve el
+  mismo plan.
+- **Mismo proveedor y límites que los platos.** Mismo modelo fijo (FLUX.1 Schnell en Workers Free). Lo único que viaja al
+  proveedor es el nombre normalizado de un ingrediente conocido dentro de una descripción de «foto de estudio de un solo
+  ingrediente, fondo claro, sin texto ni platos». Nunca pacientes, notas, cantidades ni recetas.
+- **Caídas del proveedor no gastan intentos.** Un 401, 403 o 429 no cuenta como intento del ingrediente ni de la cuota del
+  día, nunca deja la fila en «falló» y pausa al trabajador hasta la hora que indica el proveedor (un 429 espera al próximo
+  día UTC). Solo los errores propios del pedido (imagen inválida, error 500) cuentan: tres intentos y después queda en
+  «falló» hasta un reintento explícito.
+- **Cuota diaria repartida.** La tabla `cover_daily_usage` cuenta INTENTOS reales por día UTC. Los ingredientes usan como
+  máximo la mitad de la cuota total: `IMAGE_DAILY_LIMIT` (total, por omisión 100) e `INGREDIENT_COVERS_DAILY_LIMIT`
+  (ingredientes, por omisión 30, siempre limitado a la mitad del total; `0` los pausa). Los platos tienen prioridad: el
+  trabajador solo avanza con ingredientes cuando no hay ningún plato pendiente, y cada foto de plato intentada se suma al
+  contador del día (`record_cover_attempt`, sin tocar la tabla de platos). Limitación: los platos no tienen tope propio ni se
+  frenan por este contador; solo ceden lugar a los ingredientes. Las cifras por omisión son una estimación a confirmar con
+  la primera prueba en la cuenta real. Un menú trae unos 20 a 40 ingredientes únicos y, como el catálogo es compartido,
+  cada uno se genera una sola vez para todas las nutricionistas.
+- **Dónde se guardan y quién lee.** Bucket público `recipe-covers`, ruta `ingredients/<clave>.<ext>`. La tabla tiene
+  seguridad por filas activada **sin políticas**: ni anon ni personas con sesión leen ni escriben directamente. La API lee
+  con la clave de servicio, solo las fotos listas de las claves pedidas (en lotes de 100), y entrega la dirección dentro de
+  la receta o el plan de la paciente. La base solo acepta direcciones https de ese bucket con el archivo realmente guardado.
+- **Qué recibe la paciente.** Cada ingrediente de las recetas asignadas (`/api/patients/:id/recipes`) y del plan publicado
+  (`/api/patients/:id/plans`) trae `ingredient_cover_url` e `ingredient_cover_alt` cuando hay foto lista. Se descarta lo que
+  no sea https del mismo proyecto de Supabase (mismo host que `SUPABASE_URL`), bucket público y ruta `ingredients/`, o la
+  imagen incrustada de la demo (solo con la demo activa). Si la tabla aún no existe, la lectura falla o tarda, la receta
+  se ve igual, sin fotos; el fallo queda registrado (código de error, nunca textos) cada diez minutos. La vista de la
+  profesional y la copia a revisar no cambian.
+- **Pantalla.** El detalle de receta del archivo de Nutrigo (`84:3145` y `457:13264`) dibuja cada ingrediente solo con su
+  número y su texto: no tiene lugar para una foto. Por la regla del archivo no se inventó un diseño. Quedan listos los datos
+  y `ingredientImage` en `plate-photo.tsx` (con las mismas reglas de seguridad y pruebas); falta que el archivo dibuje el
+  recuadro (por ejemplo una miniatura de 32 px al lado del número) para conectarlo.
+
+### Cómo probarlo en la demo
+
+1. `npm run local` y «Continuar en modo demo». En la demo sin Cloudflare la generación es **simulada**: una esfera de color
+   propia de cada ingrediente (PNG chico hecho en el servidor, alt «ilustración simulada de la demostración»). Con las
+   credenciales de Cloudflare en el entorno se usa el proveedor real, con el mismo tope diario.
+2. En `http://127.0.0.1:5173/crm/plan?paciente=pat-sofia`, pestaña Planes, publicar un menú nuevo. Los ingredientes únicos
+   conocidos se encolan solos; el trabajador los atiende en segundos.
+3. Comprobar los datos que recibe la paciente (el detalle de receta todavía no los dibuja, ver arriba):
+   `curl http://127.0.0.1:3001/api/patients/pat-sofia/recipes` y `.../plans`: cada ingrediente conocido trae
+   `ingredient_cover_url`; uno que no está en el vocabulario no.
+4. Reiniciar `npm run local` conserva las fotos simuladas junto con el resto de la demo (usa la misma tabla de fotos en
+   memoria, con la clave `ingredient:<clave>`).
+
+### Pruebas
+
+- `server/ai/ingredient-cover.test.ts`: claves, vocabulario curado, descripción y generación (modelo fijo, 429, bloqueos).
+- `server/ai/simulated-image.test.ts`: la imagen simulada pasa la misma inspección que una foto real.
+- `server/recipes/ingredient-covers.test.ts`: demo en memoria, trabajo persistente, cuota por intentos, caídas del
+  proveedor, lectura segura (host, lotes, registro) y respuestas que nunca se rompen.
+- `server/recipes/ingredient-covers.integration.test.ts`: del menú publicado a lo que recibe la paciente.
+- `server/plans/ingredient-queue.test.ts`: publicación persistente con el encolado caído, colgado o con un plan raro.
+- `server/recipes/ingredient-covers.postgres.integration.test.ts`: la migración completa sobre PGlite (permisos, sin
+  lectura directa, idempotencia, reservas, cuota por intentos y reparto con platos, caídas del proveedor, direcciones).
+- `server/recipes/cover-workers.test.ts` y `menu-covers-worker.test.ts`: prioridad de los platos y registro de sus intentos.
+
+### Estado en producción (2026-10-08)
+
+- Migración de ingredientes **aplicada** en `plan-v-app` con la autorización escrita de Facundo: las dos tablas tienen RLS
+  y ninguna política; solo `service_role` las lee y escribe y ejecuta las cuatro funciones.
+- Foto de plato probada con Cloudflare real: fila de prueba `f9bdc800-bae4-4bf6-88f1-7fc75d275c8a` en estado `ready`
+  (JPEG de 468 KB en `recipe-covers`). Se conserva hasta que Facundo la apruebe; después se borran la fila y el archivo.
+- 2026-10-08, con el código nuevo ya publicado (PR #74, Railway en SUCCESS): se cargaron `tomate` y `huevo` con
+  `enqueue_ingredient_covers`; el worker los tomó solo y en segundos quedaron `ready` (JPEG de 226 KB y 300 KB en
+  `recipe-covers/ingredients/`, un intento cada uno; la cuota del día suma 2 intentos de ingredientes). Siguen como
+  prueba hasta que Facundo las vea y apruebe.
+- La foto del plato de prueba («Tortilla de papas») no se entendía: se mejoró la descripción (plato con nombre propio,
+  sin pasos en español). Pendiente de publicar y volver a probar.
+
+### Pasos para activarlo (el primero ya se hizo)
+
+1. Aplicar `supabase/migrations/20261008120000_ingredient_covers.sql` en `plan-v-app` (crea dos tablas sin acceso directo,
+   `ingredient_covers` y `cover_daily_usage`, y cuatro funciones solo para el servicio; no toca nada existente). Después
+   revisar el asesor de seguridad de Supabase (las dos tablas nuevas deberían figurar como «con RLS y sin políticas»).
+2. Nada que configurar si API y worker ya tienen `IMAGE_PROVIDER`, `CLOUDFLARE_FREE_TIER`, `CLOUDFLARE_ACCOUNT_ID` y
+   `CLOUDFLARE_API_TOKEN` y la clave de servicio de Supabase. Opcional en el worker: `IMAGE_DAILY_LIMIT` e
+   `INGREDIENT_COVERS_DAILY_LIMIT`.
+3. Publicar la rama (merge a `main`: Vercel y Railway se despliegan solos). Antes de la migración el código no rompe nada:
+   no encola y la lectura vuelve vacía (con un aviso en el registro cada diez minutos).
+4. Probar: la nutricionista publica un menú o aprieta «Preparar fotos pendientes»; en unos minutos `ingredient_covers` tiene
+   filas `ready`, `cover_daily_usage` suma los intentos del día y los archivos aparecen en `recipe-covers/ingredients/`.
 
 ## Evidencia de aceptación
 

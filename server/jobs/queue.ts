@@ -15,7 +15,7 @@ export async function runOne(store: JobStore, owner: string, handler: JobHandler
     await handler(job);
     return await store.complete(job.id);
   } catch (error) {
-    const delay = job.kind === 'menu_cover' && error && typeof error === 'object' && 'retryAfterMs' in error ? Number(error.retryAfterMs) : undefined;
+    const delay = (job.kind === 'menu_cover' || job.kind === 'ingredient_cover') && error && typeof error === 'object' && 'retryAfterMs' in error ? Number(error.retryAfterMs) : undefined;
     const done = await store.complete(job.id, jobErrorMessage(error), delay);
     if (done.status === 'dead') emitOpsAlert({ kind: 'dead_letter', status: 500, detail: done.kind });
     return done;

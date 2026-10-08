@@ -3,7 +3,10 @@ import type { ShowroomPatient } from '../../../components/nutrigo/showroom-model
 import type { ShowroomPage } from '../../../components/nutrigo/ShowroomPanels';
 import { nodeId, nodeName, renderSource, sourceText, type SourceBinding, type SourceNode, type SourceResolver } from '../SourceView';
 import { translateSource } from '../translation';
+// Líneas blancas del rayado del medidor de peso: es el trazo «Vector» del Mask group del archivo (35603.svg).
+import hatchLines from '../assets/weight-hatch.svg?no-inline';
 import { secondaryLabels } from '../secondaryTranslation';
+import { friendlyError } from '../../../lib/error-messages';
 import { canLeaveWorkspace, useUnsavedChanges } from '../../../components/nutrigo/unsaved-changes';
 
 export type ScreenProps = { patient: ShowroomPatient; query?: string; now?: Date; onNavigate: (page: ShowroomPage) => void; onSignOut?: () => void };
@@ -13,9 +16,11 @@ export const leaf = (node: SourceNode) => node.children.some(child => typeof chi
 export const matches = (node: SourceNode, name: string) => nodeName(node) === name;
 export const idEnds = (node: SourceNode, id: string) => nodeId(node) === id || nodeId(node).endsWith(`;${id}`) || nodeId(node) === `node-${id.replace(':', '_')}`;
 export const formatNumber = (value: number | null | undefined) => value == null ? '—' : new Intl.NumberFormat('es-AR', { maximumFractionDigits: 1 }).format(value);
-export const dateId = (value: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(value);
+/** Día (AAAA-MM-DD) en Buenos Aires; una fecha inválida da '' en vez de tirar la pantalla. */
+export const dateId = (value: Date) => Number.isNaN(value.getTime()) ? '' : new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(value);
 export { dateLabel } from './date-label';
-export const timeLabel = (value: string) => Number.isNaN(Date.parse(value)) ? '' : new Date(value).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+/** Hora de una marca de tiempo, siempre en Argentina; vacío si la fecha no es válida. */
+export const timeLabel = (value: string) => Number.isNaN(Date.parse(value)) ? '' : new Date(value).toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit' });
 export const safeUrl = (value: string | null | undefined) => { try { const url = new URL(value ?? ''); return url.protocol === 'https:' ? url.href : null; } catch { return null; } };
 
 export const translate = (text: string) => secondaryLabels[text] ?? translateSource(text);
@@ -47,26 +52,35 @@ export function EmptyState({ text }: { text: string }) {
 }
 /** Porcentaje acotado a 0–100 (o null si falta alguno de los dos valores). */
 export const percent = (value: number | null | undefined, total: number | null | undefined) =>
-  value == null || total == null || total <= 0 ? null : Math.max(0, Math.min(100, (value / total) * 100));
+  value == null || total == null || !Number.isFinite(value) || !Number.isFinite(total) || total <= 0 ? null : Math.max(0, Math.min(100, (value / total) * 100));
 /**
  * Barra del archivo partida en tramo lleno y tramo vacío: se reparte el ancho con el porcentaje
  * real en vez de ocultarla. Sin dato, la barra queda vacía (0 %), como el archivo dibuja un inicio.
  */
 export function barFill(pct: number | null, part: 'filled' | 'empty'): SourceBinding {
-  const value = pct ?? 0;
+  // El tramo en 0 queda con ancho 0 pero sigue en el DOM: nunca se esconde un nodo del archivo.
+  const value = pct == null || !Number.isFinite(pct) ? 0 : Math.max(0, Math.min(100, pct));
   const grow = part === 'filled' ? value : 100 - value;
-  return { props: { style: { flex: `${grow} 1 0%`, minWidth: 0, paddingRight: 0, display: grow === 0 ? 'none' : undefined } } };
+  return { props: { style: { flex: `${grow} 1 0%`, minWidth: 0, paddingRight: 0 } } };
 }
-/** Arco de dona con los colores del archivo, para superponer al dibujo de ejemplo. */
-export function Ring({ pct, color, track = 'transparent', thickness = 14, half = false }: { pct: number | null; color: string; track?: string; thickness?: number; half?: boolean }) {
+/** Arco de dona con los colores del archivo, para superponer al dibujo de ejemplo. Con `hatch`, el tramo que falta va rayado como en el archivo. */
+export function Ring({ pct, color, track = 'transparent', thickness = 14, half = false, hatch }: { pct: number | null; color: string; track?: string; thickness?: number; half?: boolean; hatch?: string }) {
   const value = Math.max(0, Math.min(100, pct ?? 0));
   const turn = half ? 0.5 : 1;
   const start = half ? 270 : 0;
   const mask = `radial-gradient(farthest-side, transparent calc(100% - ${thickness}px), #000 calc(100% - ${thickness}px + 1px))`;
-  return <span aria-hidden="true" className="pointer-events-none absolute inset-0 block rounded-full" style={{
-    background: `conic-gradient(from ${start}deg, ${color} 0turn ${(value / 100) * turn}turn, ${track} ${(value / 100) * turn}turn ${turn}turn, transparent ${turn}turn 1turn)`,
-    WebkitMask: mask, mask,
-  }} />;
+  const filled = (value / 100) * turn;
+  const fill = `conic-gradient(from ${start}deg, ${color} 0turn ${filled}turn, ${track} ${filled}turn ${turn}turn, transparent ${turn}turn 1turn)`;
+  const ring = { WebkitMask: mask, mask } as const;
+  const layer = 'pointer-events-none absolute inset-0 block rounded-full';
+  if (!hatch) return <span aria-hidden="true" className={layer} style={{ background: fill, ...ring }} />;
+  // Tramo restante rayado, como el medidor del archivo: el anillo recorta a una capa de color y a otra de franjas
+  // que solo se ve donde falta recorrer (máscara cónica propia, sin combinar máscaras).
+  const rest = `conic-gradient(from ${start}deg, transparent 0turn ${filled}turn, #000 ${filled}turn ${turn}turn, transparent ${turn}turn 1turn)`;
+  return <span aria-hidden="true" className={layer} style={ring}>
+    <span className={layer} style={{ background: fill }} />
+    <span className={layer} style={{ background: `url(${hatchLines}) center / 100% 100% no-repeat, ${hatch}`, WebkitMask: rest, mask: rest }} />
+  </span>;
 }
 export function Stateful({ loading, error, empty, onRetry }: { loading?: boolean; error?: string; empty?: string; onRetry?: () => void }) {
   if (error) return <div role="alert" className="p-[16px] text-[#a32929]">{error}{onRetry && <button type="button" className="ml-[8px] underline" onClick={onRetry}>Reintentar</button>}</div>;
@@ -87,7 +101,7 @@ export function useRemote<T>(key: string, load: (signal: AbortSignal) => Promise
   const generation = useRef(0); const currentKey = useRef(key); currentKey.current = key;
   const loader = useRef(load); loader.current = load;
   const reload = useCallback(() => setRevision(value => value + 1), []);
-  useEffect(() => { const controller = new AbortController(); const attempt = ++generation.current; setFailure(null); void loader.current(controller.signal).then(value => { if (!controller.signal.aborted && attempt === generation.current) setState({ key, value }); }).catch(error => { if (!controller.signal.aborted && attempt === generation.current) setFailure({ key, text: error instanceof Error ? error.message : 'No se pudo cargar. Reintentá.' }); }); return () => controller.abort(); }, [key, revision]);
+  useEffect(() => { const controller = new AbortController(); const attempt = ++generation.current; setFailure(null); void loader.current(controller.signal).then(value => { if (!controller.signal.aborted && attempt === generation.current) setState({ key, value }); }).catch(error => { if (!controller.signal.aborted && attempt === generation.current) setFailure({ key, text: friendlyError(error) }); }); return () => controller.abort(); }, [key, revision]);
   return { data: state?.key === key ? state.value : null, error: failure?.key === key ? failure.text : '', reload, setData: (value: T) => { if (currentKey.current !== key) return; generation.current += 1; setFailure(null); setState({ key, value }); } };
 }
 export function searchBinding(node: SourceNode, value: string, onChange: (value: string) => void, placeholder: string) {
@@ -96,4 +110,4 @@ export function searchBinding(node: SourceNode, value: string, onChange: (value:
   const input = <input type="search" aria-label={placeholder} placeholder={placeholder} value={value} onChange={event => onChange(event.target.value)} className={String(originalText?.props.className ?? '')} style={{ background: 'transparent', border: 0, outlineOffset: 3, minWidth: 0, width: '100%' }} />;
   return { children: node.children.map((child, index) => typeof child === 'object' && originalText && descendants(child).includes(originalText) ? input : typeof child === 'object' ? source(child, () => undefined, index) : null) };
 }
-export const errorText = (error: unknown) => { const text = error instanceof Error ? error.message : 'No se pudo guardar.'; try { const parsed = JSON.parse(text); return String(parsed.error ?? text); } catch { return text; } };
+export const errorText = (error: unknown) => friendlyError(error);

@@ -7,6 +7,7 @@ import { DEMO_NUTRITIONIST_ID, getPatient } from '../store.js';
 import { mealPlanDraftSchema, mealPlanPublishSchema } from '../../src/types/plans.js';
 import * as repo from './repository.js';
 import { recipeCoverEnabled } from '../ai/recipe-cover.js';
+import { patientPlanWithPhotos } from '../recipes/ingredient-covers.js';
 
 async function body<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
   const raw = await c.req.text();
@@ -69,7 +70,7 @@ export function registerPlanRoutes(app: Hono) {
       const plan = await repo.getProfessionalMealPlan(nutritionistId, id, persistent);
       return c.json({ plan, source: persistent ? 'supabase' : 'memory', image_generation: recipeCoverEnabled() });
     }
-    const plan = await repo.getPublishedMealPlan(id, persistent);
+    const plan = await patientPlanWithPhotos(await repo.getPublishedMealPlan(id, persistent), persistent);
     return c.json({ plan, source: persistent ? 'supabase' : 'memory' });
   });
 

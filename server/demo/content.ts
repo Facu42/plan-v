@@ -197,6 +197,9 @@ export async function seedDemoContent(fetcher: Fetcher, now = new Date(), target
     if (plan) await call('publicar plan', `/api/plans/${planId}/publish`, 'POST', { expected_version: 1, expected_snapshot: planReviewSnapshot(plan.plan.current) });
   }
 
+  // Datos corporales que la paciente declaró (alimentan «Tus datos para el plan» y la meta).
+  await call('datos corporales', `/api/patients/${MAIN}/body-data?audience=patient`, 'PUT', { sex: 'femenino', birth_date: '1992-03-14', height_cm: 165, weight_kg: 66.3 });
+
   // Meta de calorías y macros publicada por la nutricionista (Mifflin-St Jeor).
   const workspace = await call('meta actual', `/api/patients/${MAIN}/nutrition-target?audience=pro`, 'GET');
   if (workspace) await call('meta de calorías', `/api/patients/${MAIN}/nutrition-target?audience=pro`, 'PUT', {

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { planGuidanceSchema, type PlanGuidance } from './plan-guidance.js';
 import { planComponentsSchema, type PlanComponentView } from './plan-components.js';
-import type { RecipeCard } from './recipes.js';
+import type { IngredientPhoto, RecipeCard } from './recipes.js';
 import type { RecipeCatalogSnapshot } from './recipe-catalog-nutrition.js';
 import { menuTargetSchema, menuNutritionSummarySchema, proposedRecipeSchema, type ProposedRecipe, type MenuNutritionTarget, type MenuNutritionSummary, type RecipeNutrition } from './ai-nutrition.js';
 
@@ -110,7 +110,7 @@ export type PlanRecipeDetail = {
   yield_portions: number;
   steps: string[];
   nutrient_source: string;
-  ingredients: Array<{ id: string; name: string; quantity: number; unit: string }>;
+  ingredients: Array<{ id: string; name: string; quantity: number; unit: string } & IngredientPhoto>;
   nutrition?: RecipeNutrition;
   card?: RecipeCard;
 };

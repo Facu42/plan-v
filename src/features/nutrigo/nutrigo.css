@@ -41,7 +41,9 @@
 .mcp-nutrigo :focus-visible {outline:2px solid #272932;outline-offset:3px}
 .mcp-nutrigo img {border:0}
 .mcp-state {padding:20px;border:1px solid #e1e1e2;border-radius:16px;background:white;margin:16px}
-.mcp-state button,.mcp-action {padding:9px 13px;border-radius:12px;background:#c2e66e!important;font-weight:500}
+.mcp-state button,.mcp-action {padding:10px 14px;border-radius:10px;background:#c2e66e!important;color:#272932;font:500 13px/1.2 Poppins,sans-serif}
+.mcp-action .mcp-action-note{display:block;margin-top:2px;font-size:11px;font-weight:400;line-height:1.3}
+.mcp-screen-state .mcp-action{font-size:12px;padding:8px 12px}
 .mcp-dialog {border:1px solid #e1e1e2;border-radius:16px;padding:20px;width:min(640px,calc(100vw - 32px));max-height:90vh;overflow:auto;color:#272932;background:white;font-family:Poppins,sans-serif}
 .mcp-dialog::backdrop {background:#27293266}
 .mcp-dialog header {display:flex;justify-content:space-between;gap:16px;margin-bottom:16px}
@@ -70,6 +72,15 @@
 .fp-record-dialog input,.fp-record-dialog select,.fp-record-dialog textarea {font:inherit;color:var(--nv-ink)}
 .fp-record-dialog form>fieldset>label {display:grid;gap:6px;margin:12px 0;font-size:14px}
 .fp-record-dialog form>fieldset>label>input {min-height:44px;padding:9px 12px;border:1px solid var(--nv-line);border-radius:12px;background:var(--nv-bg)}
+/* «Mis registros»: el diálogo ya es la tarjeta; sus tarjetas internas no suman otro margen. En el celular se achican
+   los rellenos para que los campos y botones tengan ancho útil (antes quedaban unos 250 px). */
+.fp-record-dialog .nvt-card {margin-inline:0}
+.fp-record-dialog form>fieldset>label {min-width:0}
+.fp-record-dialog form>fieldset>label>:is(input,select) {width:100%;min-width:0;box-sizing:border-box}
+@media (max-width:480px) {
+  .fp-record-dialog {padding:16px}
+  .fp-record-dialog .care-panel {padding:16px 12px;border-radius:12px}
+}
 
 /* Conservar los tamaños fuente en 1440/390 y permitir acceder al contenido en los anchos intermedios. */
 @media(max-width:389px) {
@@ -79,3 +90,9 @@
   .mcp-nutrigo [data-name="Content"] {overflow-x:auto}
   .mcp-nutrigo [data-name="Tab"] {max-width:100%;overflow-x:auto}
 }
+
+/* El archivo fija la barra superior del celular en 390 px; entre 391 y 799 px debe llegar de borde a borde. */
+@media(max-width:799px){.mcp-nutrigo div[data-name="Navbar"]{width:100%}}
+
+/* Perfil del encabezado: un nombre largo se corta con puntos suspensivos y no empuja la campana. */
+.mcp-nutrigo [data-name="User Profile"] p{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

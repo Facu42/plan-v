@@ -224,8 +224,14 @@ export function ShowroomPatientOnboarding({
     finally { actionRef.current = false; setConsentBusy(false); }
   };
 
+  /** El servidor rechaza un borrador con «Sí» sin alimentos: se avisa acá, no como falla de conexión. */
+  const draftBlocksSave = () => {
+    const invalid = stepFieldError('allergies', draft);
+    setFieldError(invalid);
+    return invalid !== null;
+  };
   const moveTo = async (destination: OnboardingStep) => {
-    if (actionRef.current || disabled) return;
+    if (actionRef.current || disabled || draftBlocksSave()) return;
     cancelTimer();
     actionRef.current = true;
     setNavigating(true);
@@ -239,7 +245,7 @@ export function ShowroomPatientOnboarding({
   };
   const exit = async () => {
     if (step === 'ready' || !loaded) { onExit(); return; }
-    if (actionRef.current || disabled) return;
+    if (actionRef.current || disabled || draftBlocksSave()) return;
     cancelTimer(); actionRef.current = true; setNavigating(true);
     try { if (await persist(step, draft)) onExit(); }
     finally { actionRef.current = false; setNavigating(false); }

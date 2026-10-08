@@ -1,6 +1,6 @@
 import { handleProcessingJob } from './handlers.js';
 import { drain, processQueue } from './queue.js';
-import { runPersistentDishCover } from '../recipes/menu-covers.js';
+import { runCoverWorkers } from '../recipes/cover-workers.js';
 
 let timer: ReturnType<typeof setInterval> | null = null;
 let draining = false;
@@ -13,7 +13,7 @@ export function startJobWorker(owner = 'plan-v-worker', keepAlive = false) {
       draining = true;
       void drain(processQueue, owner, handleProcessingJob, 5).catch(() => undefined).finally(() => { draining = false; });
     }
-    void runPersistentDishCover();
+    void runCoverWorkers();
   }, 1_000);
   if (!keepAlive) timer.unref?.();
 }

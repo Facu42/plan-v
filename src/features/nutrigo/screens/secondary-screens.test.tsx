@@ -24,12 +24,12 @@ const navigate = () => undefined;
 beforeEach(() => { context.mobile = false; context.data = null; });
 
 describe.each([false, true])('pantallas desde MCP (celular: %s)', mobile => {
-  it('agenda conecta plan publicado fechado sin inventar comidas legacy', () => {
+  it('agenda es solo de citas: ni el plan publicado ni comidas legacy aparecen', () => {
     context.mobile = mobile;
     context.data = { plan: { items: [{ id: 'dated', for_date: '2026-10-03', slot: 'Almuerzo', portions: 1, free_text: 'Plan publicado real', public_note: 'Nota profesional vigente' }] } };
     const actual = { ...patient, weekPlan: [{ day: 'Sábado', meals: [{ label: 'Legacy incorrecto' }] }] } as unknown as ShowroomPatient;
     const html = renderToStaticMarkup(<NutrigoAgenda patient={actual} onNavigate={navigate} now={now} />);
-    expect(html).toContain('Plan publicado real'); expect(html).toContain('Nota profesional vigente'); expect(html).not.toContain('Legacy incorrecto');
+    expect(html).not.toContain('Plan publicado real'); expect(html).not.toContain('Nota profesional vigente'); expect(html).not.toContain('Legacy incorrecto');
   });
   it('el diario pagina los registros reales con la paginación del archivo', () => {
     context.mobile = mobile;
@@ -37,7 +37,7 @@ describe.each([false, true])('pantallas desde MCP (celular: %s)', mobile => {
     const html = renderToStaticMarkup(<NutrigoDiary patient={{ ...patient, logs } as unknown as ShowroomPatient} onNavigate={navigate} now={now} />);
     // Dos páginas reales (12 + 1), sin las páginas 3 y 7 del ejemplo.
     expect(html).toContain('data-name="Pagination"'); expect(html).toContain('aria-label="Página 2"'); expect(html).not.toContain('aria-label="Página 3"'); expect(html).not.toContain('>7<');
-    expect(html.match(/Registro actual \d+/g)).toHaveLength(12);
+    expect(html.match(/>Registro actual \d+</g)).toHaveLength(12);
     if (!mobile) expect(html).toContain('de 13 registros');
     expect(html).not.toContain('out of 84');
   });
@@ -55,8 +55,15 @@ describe.each([false, true])('pantallas desde MCP (celular: %s)', mobile => {
     const html = renderToStaticMarkup(<NutrigoAgenda patient={actual} onNavigate={navigate} now={now} />);
     expect(html).toContain('data-calendar-date="2026-10-03"'); expect(html).toContain('data-calendar-date="2026-10-05"');
     expect(html).not.toContain('Morning Yoga'); expect(html).not.toContain('General Health Check-up'); expect(html).not.toContain('September 2028');
-    expect(html.match(/aria-label="Mostrar plan"/g)?.length).toBe(1);
-    expect(html.match(/aria-label="Mostrar diario"/g)?.length).toBe(1);
+    // Solo la categoría de citas; las tarjetas cuentan citas, no comidas ni actividad.
+    // La leyenda es solo una etiqueta: no se puede apagar y dejar el calendario sin la única categoría.
+    expect(html).not.toContain('aria-label="Mostrar consulta"'); expect(html).toContain('>Citas<');
+    // Abre en el día de la próxima cita, para que «Confirmar» esté a la vista sin buscar en el calendario.
+    expect(html).toContain('aria-label="Confirmar asistencia a la consulta"');
+    for (const gone of ['Mostrar plan', 'Mostrar diario', 'Mostrar actividad', 'Meal Planning', 'Physical Activities']) expect(html).not.toContain(gone);
+    for (const label of ['Próximas', 'Confirmadas', 'Por confirmar']) expect(html).toContain(label);
+    // Los íconos de las tarjetas son los del archivo (CalendarDots, MapPinArea, Clock), no dibujos propios.
+    for (const asset of ['b3414', 'f9b60', '148cc']) expect(html).toContain(asset);
     expect(html).toContain('box-shadow:inset 0 0 0 2px #c2e66e');
     expect(html).toContain('background:#ffffff');
     // El turno vive dentro del marco: botón del encabezado y tarjeta del detalle, sin controles sueltos.

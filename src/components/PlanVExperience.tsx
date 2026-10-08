@@ -1,3 +1,8 @@
+import '@fontsource/poppins/latin-400.css';
+import '@fontsource/poppins/latin-500.css';
+import '@fontsource/poppins/latin-600.css';
+import '@fontsource/poppins/latin-700.css';
+import { friendlyError } from '../lib/error-messages';
 import { lazy, Suspense, useEffect, useState } from 'react';
 
 const PatientApp = lazy(() => import('./patient/PatientApp').then(({ PatientApp }) => ({ default: PatientApp })));
@@ -170,8 +175,8 @@ export function PlanVExperience() {
           <Mark />
           <p className="eyebrow">Plan V</p>
           <h2>No pudimos conectar</h2>
-          <p>{error}</p>
-          <p className="hint">Ejecutá <code>npm run dev</code> (incluye el servidor API).</p>
+          <p>{friendlyError(error)}</p>
+          {import.meta.env.DEV && <p className="hint">Ejecutá <code>npm run dev</code> (incluye el servidor API).</p>}
         </div>
       </div>
     );

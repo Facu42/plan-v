@@ -10,6 +10,7 @@ import * as days from './day.js';
 import * as repo from './repository.js';
 import { recipeCoverEnabled } from '../ai/recipe-cover.js';
 import { saveManualRecipeCover } from './manual-cover.js';
+import { patientRecipesWithPhotos } from './ingredient-covers.js';
 
 async function body<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
   const raw = await c.req.text();
@@ -162,7 +163,7 @@ export function registerRecipeRoutes(app: Hono) {
   app.get('/api/patients/:id/recipes', async (c) => {
     const id = c.req.param('id');
     const { persistent } = await patientAccess(c, id);
-    const recipes = await repo.listAssignedRecipes(id, persistent);
+    const recipes = await patientRecipesWithPhotos(await repo.listAssignedRecipes(id, persistent), persistent);
     return c.json({ recipes, source: persistent ? 'supabase' : 'memory' });
   });
 

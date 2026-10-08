@@ -10,9 +10,11 @@ import { getPatient } from '../store.js';
 import { PermanentJobError } from './errors.js';
 import type { ProcessingJob } from './types.js';
 import { handleMemoryDish } from '../recipes/menu-covers.js';
+import { handleMemoryIngredient } from '../recipes/ingredient-covers.js';
 
 export async function handleProcessingJob(job: ProcessingJob) {
   if (job.kind === 'menu_cover') return handleMemoryDish(job);
+  if (job.kind === 'ingredient_cover') return handleMemoryIngredient(job);
   if (job.kind === 'fail') throw new Error('forced_failure');
   if (job.kind === 'purge_asset') {
     const path = String(job.payload.path ?? '');

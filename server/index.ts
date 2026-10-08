@@ -32,6 +32,7 @@ import { generateCopilotBrief } from './ai/copilot.js';
 import { AIUnavailableError } from './ai/errors.js';
 import { readRuntimeConfig } from './config/runtime.js';
 import { persistDemoState, startDemoState } from './demo/state.js';
+import { seedDemoOnBoot } from './demo/autoseed.js';
 import { processQueue } from './jobs/queue.js';
 import { startJobWorker } from './jobs/worker.js';
 import { authMiddleware } from './middleware/auth.js';
@@ -1169,4 +1170,10 @@ if (isMainModule) {
   if (process.env.WORKER_SEPARATE !== '1') startJobWorker();
   writeOpsLog('info', 'api_listen', { mode: config.mode, data: config.dataMode, ai: config.aiMode, port: String(port) });
   serve({ fetch: app.fetch, port, hostname: demoState ? '127.0.0.1' : '0.0.0.0' });
+  // Sólo la demo local en memoria: nunca con datos reales ni en producción.
+  if (config.mode === 'demo' && config.dataMode === 'memory') {
+    void seedDemoOnBoot((path, init) => app.request(path, init))
+      .then(({ seeded, failed }) => writeOpsLog(failed.length ? 'warn' : 'info', 'demo_seed', { seeded: String(seeded), failed: String(failed.length) }))
+      .catch(() => writeOpsLog('warn', 'demo_seed', { seeded: 'false', failed: 'error' }));
+  }
 }

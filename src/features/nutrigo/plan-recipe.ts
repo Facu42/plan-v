@@ -2,7 +2,29 @@ import type { PlanItemView, PatientMealPlan } from '../../types/plans';
 import type { PatientRecipe } from '../../types/recipes';
 import { unavailableCard } from '../../types/recipe-plate';
 
+/** Adapt component copies to the existing recipe viewer without consulting mutable catalogs. */
+export function planComponentItems(item: PlanItemView): PlanItemView[] {
+  if (!item.components) return [item];
+  return item.components.map(component => ({ ...item, id: `${item.id}:${component.id}`, components: undefined,
+    recipe: component.kind === 'recipe' ? component.recipe_snapshot ?? null : null,
+    recipe_id: component.kind === 'recipe' ? component.recipe_id : null,
+    recipe_version: component.kind === 'recipe' ? component.recipe_version : null,
+    recipe_title: component.kind === 'recipe' ? component.recipe_snapshot?.title ?? null : null,
+    recipe_proposal: component.kind === 'text' ? component.recipe_proposal : undefined,
+    portions: component.kind === 'food' ? null : component.portions ?? null,
+    free_text: component.kind === 'text' ? component.free_text : null,
+    public_note: component.public_note,
+    dish_card: undefined,
+  }));
+}
 export function planRecipe(item: PlanItemView) {
+  if (item.components) {
+    for (const entry of planComponentItems(item)) { const recipe = singlePlanRecipe(entry); if (recipe) return recipe; }
+    return null;
+  }
+  return singlePlanRecipe(item);
+}
+function singlePlanRecipe(item: PlanItemView) {
   const recipe = item.recipe ?? item.recipe_proposal;
   if (!recipe) return null;
   const originalCard = 'card' in recipe ? recipe.card : undefined;
@@ -21,7 +43,7 @@ export function recipePresentationKey(recipe: { id: string; version: number }) {
 /** Published plan versions take precedence over separately assigned library versions. */
 export function patientMenuRecipes(plan: PatientMealPlan | null, assigned: PatientRecipe[]) {
   const result: Array<Omit<PatientRecipe, 'ingredients'> & { ingredients: Array<{ id: string; name: string; quantity: number; unit: string }> }> = [], seen = new Set<string>();
-  for (const item of plan?.items ?? []) {
+  for (const item of (plan?.items ?? []).flatMap(planComponentItems)) {
     const recipe = planRecipe(item); if (!recipe) continue;
     const identity = item.recipe_id ? `${item.recipe_id}:${recipe.version}` : JSON.stringify([recipe.title, recipe.steps, recipe.ingredients.map(({ name, quantity, unit }) => ({ name, quantity, unit }))]);
     if (seen.has(identity)) continue; seen.add(identity);

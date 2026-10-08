@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { registerDemoState } from '../demo/state.js';
 import type { JobKind, JobStore, ProcessingJob } from './types.js';
 
+const COVER_KINDS = new Set<JobKind>(['menu_cover', 'ingredient_cover']);
 const backoffMs = (attempts: number) => Math.min(60_000, 500 * 2 ** Math.max(0, attempts - 1));
 
 export function createMemoryJobStore(now: () => Date = () => new Date(), demoDomain?: string): JobStore {
@@ -50,6 +51,8 @@ export function createMemoryJobStore(now: () => Date = () => new Date(), demoDom
       if (!job) throw new Error('job_missing');
       const stamp = now().toISOString();
       const permanent = Boolean(error?.startsWith('permanent:'));
+      // «provider_wait»: el proveedor no atendió (clave, permisos o cuota); no es un intento de la tarea.
+      if (error?.startsWith('provider_wait')) job.attempts = Math.max(0, job.attempts - 1);
       const lastError = error ? error.replace(/^permanent:/, '') : null;
       if (!error) {
         job.status = 'succeeded';
@@ -66,7 +69,7 @@ export function createMemoryJobStore(now: () => Date = () => new Date(), demoDom
         job.last_error = lastError;
         job.lease_owner = null;
         job.lease_until = null;
-        job.run_after = new Date(now().getTime() + (job.kind === 'menu_cover' ? Math.min(86_460_000, Math.max(60_000, retryAfterMs || 60_000)) : backoffMs(job.attempts))).toISOString();
+        job.run_after = new Date(now().getTime() + (COVER_KINDS.has(job.kind) ? Math.min(86_460_000, Math.max(60_000, retryAfterMs || 60_000)) : backoffMs(job.attempts))).toISOString();
       }
       job.updated_at = stamp;
       return { ...job, payload: { ...job.payload } };
@@ -98,6 +101,7 @@ export function assertJobKind(value: string): JobKind {
   if (
     value === 'menu_draft'
     || value === 'menu_cover'
+    || value === 'ingredient_cover'
     || value === 'recipe_draft'
     || value === 'purge_asset'
     || value === 'privacy_export'
