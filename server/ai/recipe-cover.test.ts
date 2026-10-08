@@ -38,6 +38,10 @@ it('el pedido es sólo positivo: no nombra gente, cubiertos, texto ni logos, que
   expect(prompt).not.toMatch(/people|cutlery|logos|labels|collage|garnish|\bno \b/i);
   expect(prompt).toContain('single dish');expect(prompt).toContain('plate or bowl');
 });
+it('dice que la lista de ingredientes es completa, sin nombrar nada prohibido',()=>{
+  const prompt=recipeCoverPrompt({title:'Ensalada de lentejas',items:[{name:'lentejas'},{name:'tomate'}]});
+  expect(prompt).toContain('made only of lentils, tomato');
+});
 it('las descripciones de platos conocidos no agregan ingredientes, cocción ni recipientes que la receta no tiene',()=>{
   const milanesa=recipeCoverPrompt({title:'Milanesa de pollo',items:[{name:'pollo'}]});
   expect(milanesa).toContain('milanesa');expect(milanesa).not.toMatch(/lemon|limon/i);

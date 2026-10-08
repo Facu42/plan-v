@@ -57,7 +57,7 @@ function dishPhrase(title: string): string {
 export function recipeCoverPrompt(context: RecipeCoverContext): string {
   return [
     `Professional food photograph of ${dishPhrase(context.title)}.`,
-    `The dish is made of ${context.items.slice(0, 20).map(i => culinaryEnglish(i.name.slice(0, 80))).join(', ')}, all clearly recognizable.`,
+    `The dish is made only of ${context.items.slice(0, 20).map(i => culinaryEnglish(i.name.slice(0, 80))).join(', ')}, all clearly recognizable.`,
     'Served as a single dish on a white ceramic plate or bowl, centered on a warm cream background, soft natural daylight, three-quarter overhead view, square composition, clean and simple.',
   ].join(' ').slice(0, 2048);
 }
