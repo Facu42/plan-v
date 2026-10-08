@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { planComponentsSchema, type PlanComponentView } from './plan-components.js';
 import type { RecipeCard } from './recipes.js';
 import type { RecipeCatalogSnapshot } from './recipe-catalog-nutrition.js';
 import { menuTargetSchema, menuNutritionSummarySchema, proposedRecipeSchema, type ProposedRecipe, type MenuNutritionTarget, type MenuNutritionSummary, type RecipeNutrition } from './ai-nutrition.js';
@@ -46,8 +47,13 @@ export const planItemInputSchema = z.object({
   portions: z.number().positive().max(50).optional(),
   public_note: z.string().trim().max(200).default(''),
   recipe_proposal: proposedRecipeSchema.optional(),
+  components: planComponentsSchema.optional(),
 }).strict().superRefine((value, ctx) => {
   if (!planSlotKey(value.slot)) ctx.addIssue({ code: 'custom', message: 'slot', path: ['slot'] });
+  if (value.components) {
+    if (value.recipe_id != null || value.recipe_version != null || value.free_text != null || value.recipe_proposal != null || value.portions != null) ctx.addIssue({ code: 'custom', message: 'No mezcles componentes y la indicación anterior.', path: ['components'] });
+    return;
+  }
   const hasRecipe = Boolean(value.recipe_id);
   const hasText = Boolean(value.free_text && value.free_text.length > 0);
   if (hasRecipe === hasText) ctx.addIssue({ code: 'custom', message: 'item', path: hasRecipe ? ['free_text'] : ['recipe_id'] });
@@ -107,6 +113,7 @@ export type PlanRecipeDetail = {
   card?: RecipeCard;
 };
 export type PlanItemView = {
+  components?: PlanComponentView[];
   id: string;
   for_date: string;
   slot: PlanSlot;

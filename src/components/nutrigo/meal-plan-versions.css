@@ -86,3 +86,11 @@
 .plan-copy-day label{display:flex;gap:10px;align-items:center;margin:10px 0;font-size:13px}
 .plan-copy-day p,.plan-copy-day li{font-size:13px;line-height:1.6}
 .plan-copy-day ul{max-height:20vh;overflow:auto}
+.plan-component-rows{grid-column:1/-1;min-width:0}
+.plan-component-row{padding:12px 0;border-bottom:1px solid var(--nv-border)}
+.plan-component-main{display:grid;grid-template-columns:minmax(0,1fr) 95px 105px 85px 30px;gap:8px;align-items:center}
+.plan-component-main small{display:block;color:var(--nv-muted);font-size:11px;overflow-wrap:anywhere}
+.plan-component-main label{font-size:11px}.plan-component-main span{font-size:12px}
+.plan-component-main button{border:0;border-radius:8px;color:var(--nv-ink);background:var(--nv-bg);padding:8px;cursor:pointer}
+.plan-component-row details{margin-top:6px;font-size:12px}.plan-component-row summary{cursor:pointer}
+.plan-component-main:has(label:only-of-type){grid-template-columns:minmax(0,1fr) 110px 85px 30px}

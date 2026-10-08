@@ -2,6 +2,7 @@ import { NUTRIENTS, type FoodNutrients } from './foods';
 import type { ProposedRecipe } from './ai-nutrition';
 import type { PlanRecipeDetail } from './plans';
 import { recipePortionNutrients } from './plan-recipe-selection';
+import { componentNutrients, type PlanComponentView } from './plan-components';
 
 export function editorPlanDates(start: string, end: string, itemDates: readonly string[]) {
   const valid = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(`${value}T12:00:00Z`)) && new Date(`${value}T12:00:00Z`).toISOString().slice(0, 10) === value;
@@ -14,10 +15,16 @@ export function editorPlanDates(start: string, end: string, itemDates: readonly 
   return Array.from(new Set([...days, ...itemDates.filter(valid)])).sort();
 }
 
-export type DayAnalysisLine = { portions: string; recipe?: PlanRecipeDetail | null; proposal?: ProposedRecipe };
+export type DayAnalysisLine = { portions: string; recipe?: PlanRecipeDetail | null; proposal?: ProposedRecipe; component?: PlanComponentView };
 export function analyzePlanDay(lines: readonly DayAnalysisLine[]) {
   let estimated = false;
   const amounts = lines.map(line => {
+    if (line.component) {
+      const component = line.component;
+      if (component.kind === 'text') return analyzeProposal(component.portions ?? NaN, component.recipe_proposal);
+      estimated ||= component.recipe_snapshot?.nutrition?.origin === 'ai_estimate' || Boolean(component.recipe_snapshot?.catalog_recipe?.estimate_origin) || /^(estimacion_ia|propuesta_ia)\./.test(component.recipe_snapshot?.nutrient_source ?? '');
+      return componentNutrients(component);
+    }
     const portions = line.portions.trim() ? Number(line.portions) : NaN;
     if (line.recipe) {
       estimated ||= line.recipe.nutrition?.origin === 'ai_estimate' || Boolean(line.recipe.catalog_recipe?.estimate_origin) || /^(estimacion_ia|propuesta_ia)\./.test(line.recipe.nutrient_source);
@@ -34,6 +41,13 @@ export function analyzePlanDay(lines: readonly DayAnalysisLine[]) {
     return { key, label, unit, known: known.length, missing: lines.length - known.length, total: lines.length && known.length === lines.length ? subtotal : null, subtotal: known.length ? subtotal : null };
   });
   return { count: lines.length, estimated, nutrients };
+
+  function analyzeProposal(portions: number, proposal?: ProposedRecipe): Partial<FoodNutrients> | null {
+    if (!proposal?.nutrition || !Number.isFinite(portions) || portions <= 0 || portions > 50) return null;
+    estimated ||= proposal.nutrition.origin === 'ai_estimate';
+    const values = proposal.nutrition.per_portion;
+    return { kcal: values.kcal * portions, protein: values.protein_g * portions, carbs: values.carbs_g * portions, fat: values.fat_g * portions };
+  }
 }
 
 export function analyzePlanWeek(days: readonly { date: string; lines: readonly DayAnalysisLine[] }[]) {

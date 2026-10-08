@@ -1,3 +1,7 @@
+import { PlanRecipeProposalEditor } from './PlanRecipeProposalEditor';
+import { componentInput, componentTitle, type PlanComponentView } from '../../types/plan-components';
+import { PlanFoodPicker } from './PlanFoodPicker';
+import { PlanComponentRows } from './PlanComponentRows';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { careErrorMessage, notifyCareChanged } from '../../api/care';
 import { plansApi } from '../../api/plans';
@@ -11,16 +15,15 @@ import { NvButton, NvState } from './primitives';
 import './meal-plan-versions.css';
 import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
 import { recipeNutritionLabel, type ProposedRecipe } from '../../types/ai-nutrition';
-import { RECIPE_UNITS } from '../../types/recipes';
 import { AiPlanNutritionSummary } from './AiPlanNutritionSummary';
 import { PlanRecipePicker, PlanRecipePreview } from './PlanRecipePicker';
 import { publishedRecipeDetail, resolvePlanRecipeSelection } from '../../types/plan-recipe-selection';
-import { editorPlanDates, copyPlanDay } from '../../types/plan-day-analysis';
+import { editorPlanDates, copyPlanDay, type DayAnalysisLine } from '../../types/plan-day-analysis';
 import { planWeekdayLabel } from '../../types/plans';
 import { PlanDayAnalysis } from './PlanDayAnalysis';
 import { PlanCopyDayDialog } from './PlanCopyDayDialog';
 
-type DraftItem = { for_date: string; slot: PlanSlot; free_text: string; recipe_id: string; recipe_version?: number; portions: string; public_note: string; recipe_proposal?: ProposedRecipe; recipePreview?: PlanRecipeDetail };
+type DraftItem = { components?: PlanComponentView[]; for_date: string; slot: PlanSlot; free_text: string; recipe_id: string; recipe_version?: number; portions: string; public_note: string; recipe_proposal?: ProposedRecipe; recipePreview?: PlanRecipeDetail };
 
 function emptyItem(date: string): DraftItem {
   return { for_date: date, slot: 'Almuerzo', free_text: '', recipe_id: '', portions: '1', public_note: '' };
@@ -32,11 +35,12 @@ function itemsFrom(plan: ProfessionalMealPlan | null): DraftItem[] {
   return source.map((item) => ({
     for_date: item.for_date,
     slot: item.slot,
-    free_text: item.free_text ?? '',
+    free_text: item.components ? '' : item.free_text ?? '',
     recipe_id: item.recipe_id ?? '',
     recipe_version: item.recipe_version ?? undefined,
     ...(item.recipe ? { recipePreview: item.recipe } : {}),
-    portions: item.portions != null ? String(item.portions) : '',
+    portions: item.components ? '' : item.portions != null ? String(item.portions) : '',
+    ...(item.components ? { components: item.components } : {}),
     public_note: item.public_note,
     ...(item.recipe_proposal ? { recipe_proposal: item.recipe_proposal } : {}),
   }));
@@ -57,8 +61,8 @@ export function matchesMenuForm(plan: ProfessionalMealPlan, proposal: MealPlanDr
   if (plan.id !== proposal.id) return false;
   if (plan.current.period_start !== proposal.period_start || plan.current.period_end !== proposal.period_end) return false;
   if (JSON.stringify(plan.current.nutrition_target ?? null) !== JSON.stringify(proposal.nutrition_target ?? null)) return false;
-  const key = (item: { for_date: string; slot: string; recipe_id?: string | null; recipe_version?: number | null; free_text?: string | null; portions?: number | null; public_note?: string | null; recipe_proposal?: ProposedRecipe }) =>
-    JSON.stringify([item.for_date, item.slot, item.recipe_id ?? null, item.recipe_version ?? null, item.free_text ?? null, item.portions ?? null, item.public_note ?? '', item.recipe_proposal ?? null]);
+  const key = (item: { for_date: string; slot: string; recipe_id?: string | null; recipe_version?: number | null; free_text?: string | null; portions?: number | null; public_note?: string | null; recipe_proposal?: ProposedRecipe; components?: PlanComponentView[] }) =>
+    JSON.stringify([item.for_date, item.slot, item.recipe_id ?? null, item.recipe_version ?? null, item.components ? null : item.free_text ?? null, item.components ? null : item.portions ?? null, item.public_note ?? '', item.recipe_proposal ?? null, item.components?.map(componentInput) ?? null]);
   return JSON.stringify(plan.current.items.map(key).sort()) === JSON.stringify(proposal.items.map(key).sort());
 }
 
@@ -114,6 +118,8 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
   const [periodStart, setPeriodStart] = useState('');
   const [periodEnd, setPeriodEnd] = useState('');
   const [activeDate, setActiveDate] = useState('');
+  const [componentTarget, setComponentTarget] = useState<{ index: number; slot: PlanSlot } | null>(null);
+  const [componentTab, setComponentTab] = useState<'food' | 'recipe'>('food');
   const [copySource, setCopySource] = useState<string | null>(null);
   const [draftItems, setDraftItems] = useState<DraftItem[]>([emptyItem(new Date().toISOString().slice(0, 10))]);
   const [selectedSlots, setSelectedSlots] = useState<PlanSlot[]>(['Desayuno', 'Almuerzo', 'Merienda', 'Cena']);
@@ -163,7 +169,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
     return { id: planId, expected_revision: plan?.current.revision ?? null, period_start: periodStart, period_end: periodEnd,
       timezone: 'America/Argentina/Buenos_Aires' as const,
       ...(plan?.current.nutrition_target ? { nutrition_target: plan.current.nutrition_target } : {}),
-      items: draftItems.map(item => ({ for_date: item.for_date, slot: item.slot, recipe_id: item.recipe_id || undefined,
+      items: draftItems.map(item => ({ ...(item.components ? { components: item.components.map(componentInput) } : {}), for_date: item.for_date, slot: item.slot, recipe_id: item.recipe_id || undefined,
         recipe_version: item.recipe_id ? item.recipe_version : undefined, free_text: item.free_text.trim() || undefined,
         portions: item.portions ? Number(item.portions) : undefined, public_note: item.public_note,
         ...(item.recipe_proposal ? { recipe_proposal: item.recipe_proposal } : {}) })),
@@ -180,6 +186,7 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
       timezone: 'America/Argentina/Buenos_Aires',
       ...(plan?.current.nutrition_target ? { nutrition_target: plan.current.nutrition_target } : {}),
       items: draftItems.map((item) => ({
+        ...(item.components ? { components: item.components.map(componentInput) } : {}),
         for_date: item.for_date,
         slot: item.slot,
         recipe_id: item.recipe_id || undefined,
@@ -286,8 +293,20 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
   const dayItems = draftItems.filter(item => item.for_date === selectedDate || !editorDates.includes(item.for_date));
   const availableSlot = PLAN_SLOTS.find(slot => !dayItems.some(item => item.slot === slot));
   const weekOffset = Math.max(0, Math.floor(editorDates.indexOf(selectedDate) / 7) * 7);
+  function analysisLines(items: DraftItem[]): DayAnalysisLine[] { return items.flatMap<DayAnalysisLine>(item => item.components ? item.components.map(component => ({ portions: '', component })) : [{ portions: item.portions, recipe: resolvePlanRecipeSelection(item, recipes, plan?.current.items ?? []), proposal: item.recipe_proposal }]); }
+  function addComponent(component: PlanComponentView) {
+    if (!componentTarget) return;
+    const { index, slot } = componentTarget;
+    setDraftItems(current => {
+      const item = current[index];
+      if (!item) return [...current, { ...emptyItem(selectedDate), slot, portions: '', components: [component] }];
+      const previous: PlanComponentView[] = item.components ?? (item.recipe_id ? [{ kind: 'recipe', id: crypto.randomUUID(), recipe_id: item.recipe_id, recipe_version: item.recipe_version!, portions: Number(item.portions), public_note: '', recipe_snapshot: resolvePlanRecipeSelection(item, recipes, plan?.current.items ?? []) ?? undefined }] : item.free_text.trim() ? [{ kind: 'text', id: crypto.randomUUID(), free_text: item.free_text, public_note: '', ...(item.recipe_proposal ? { recipe_proposal: item.recipe_proposal, portions: Number(item.portions) } : {}) }] : []);
+      return current.map((row, position) => position === index ? { ...row, components: [...previous, component], free_text: '', recipe_id: '', recipe_version: undefined, recipePreview: undefined, recipe_proposal: undefined, portions: '' } : row);
+    });
+    setComponentTarget(null);
+  }
   const dirty = !plan || !matchesMenuForm(plan, formInput());
-  useUnsavedChanges(plan ? dirty : Boolean(periodStart || periodEnd || dietaryPreferences || draftItems.some((item) => item.free_text.trim() || item.recipe_id || item.public_note || item.recipe_proposal)), busy);
+  useUnsavedChanges(plan ? dirty : Boolean(periodStart || periodEnd || dietaryPreferences || draftItems.some((item) => item.free_text.trim() || item.recipe_id || item.public_note || item.recipe_proposal || item.components?.length)), busy);
   function publishVisible() {
     if (!plan || dirty) { setError('Guardá y revisá los cambios antes de publicar.'); return; }
     void run(() => plansApi.publish(plan.id, plan.current.version, plan.current), 'Plan publicado. La paciente ve la versión revisada.');
@@ -331,21 +350,23 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
       <div className="plan-editor-day-layout"><div className="plan-editor-meals">
       {PLAN_SLOTS.map(slot => <section className="plan-editor-meal" key={slot} aria-label={`${slot} del día seleccionado`}><header><h3>{slot}</h3><button type="button" disabled={!selectedDate || draftItems.length >= 42 || dayItems.some(item => item.slot === slot)} onClick={() => setDraftItems([...draftItems, { ...emptyItem(selectedDate), slot }])}>Agregar a {slot.toLocaleLowerCase('es-AR')}</button></header>
       {!dayItems.some(item => item.slot === slot) && <p>Sin indicaciones para este momento.</p>}
+      <button type="button" className="meal-plan-add" aria-label={`Agregar alimento o receta a ${slot.toLocaleLowerCase('es-AR')}`} disabled={!selectedDate || ((dayItems.find(item => item.slot === slot)?.components?.length ?? 0) >= 12) || (!dayItems.some(item => item.slot === slot) && draftItems.length >= 42)} onClick={() => { setComponentTab('food'); setComponentTarget({ index: draftItems.findIndex(item => item.for_date === selectedDate && item.slot === slot), slot }); }}>Agregar alimento o receta</button>
       {draftItems.map((item, index) => item.slot === slot && (item.for_date === selectedDate || !editorDates.includes(item.for_date)) ? <div className="meal-plan-item-row" key={index}>
         <label>Fecha<input aria-label={`Fecha ${index + 1}`} type="date" value={item.for_date} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, for_date: event.target.value } : current))} /></label>
         <label>Momento<select aria-label={`Momento ${index + 1}`} value={item.slot} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, slot: event.target.value as PlanSlot } : current))}>
           {PLAN_SLOTS.map((slot) => <option key={slot} value={slot}>{slot}</option>)}
         </select></label>
+        {item.components ? <PlanComponentRows components={item.components} onChange={components => setDraftItems(current => current.map((row, position) => position === index ? { ...row, components: components.length ? components : undefined, portions: components.length ? '' : '1' } : row))} /> : <>
         <div className="meal-plan-recipe-choice"><button type="button" aria-label={`Elegir receta para indicación ${index + 1}`} onClick={() => setPickerIndex(index)}>{item.recipe_id ? `${resolvePlanRecipeSelection(item, recipes, plan?.current.items ?? [])?.title ?? 'Receta seleccionada'} · v${item.recipe_version} · Cambiar` : 'Elegir receta publicada'}</button>{item.recipe_id && <button type="button" onClick={() => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, recipe_id: '', recipe_version: undefined, recipePreview: undefined, recipe_proposal: undefined } : current))}>Usar texto libre</button>}</div>
         <label>Indicación<input aria-label={`Texto ${index + 1}`} placeholder="Indicación" value={item.free_text} disabled={Boolean(item.recipe_id)} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, free_text: event.target.value, ...(current.recipe_proposal ? { recipe_proposal: { ...current.recipe_proposal, title: event.target.value } } : {}) } : current))} /></label>
         <label>Porciones<input aria-label={`Porciones ${index + 1}`} type="number" min={0.0001} max={50} step="0.0001" placeholder="Rinde" value={item.portions} onChange={(event) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, portions: event.target.value } : current))} /></label>
         {item.recipe_id && <details className="meal-plan-recipe-inline"><summary>Revisar receta v{item.recipe_version} y nutrientes para esta indicación</summary>{(() => { const detail = resolvePlanRecipeSelection(item, recipes, plan?.current.items ?? []); return detail ? <PlanRecipePreview recipe={detail} portions={item.portions.trim() ? Number(item.portions) : NaN} /> : <p role="alert">No pudimos cargar el detalle de esta versión. No se reemplazará por otra receta al guardar.</p>; })()}</details>}
         {item.recipe_proposal && <PlanRecipeProposalEditor proposal={item.recipe_proposal} index={index} onChange={(recipe_proposal) => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, recipe_proposal } : current))} />}
-        <label>Nota para la paciente<input maxLength={200} aria-label={`Nota ${index + 1}`} value={item.public_note} onChange={event => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, public_note: event.target.value } : current))} /></label>
+        </>}<label>Nota para la paciente<input maxLength={200} aria-label={`Nota ${index + 1}`} value={item.public_note} onChange={event => setDraftItems(draftItems.map((current, currentIndex) => currentIndex === index ? { ...current, public_note: event.target.value } : current))} /></label>
         <button type="button" disabled={busy} onClick={() => setDraftItems(draftItems.filter((_, currentIndex) => currentIndex !== index))}>Quitar indicación {index + 1}</button>
       </div> : null)}
       </section>)}
-      </div><PlanDayAnalysis date={selectedDate} lines={draftItems.filter(item => item.for_date === selectedDate).map(item => ({ portions: item.portions, recipe: resolvePlanRecipeSelection(item, recipes, plan?.current.items ?? []), proposal: item.recipe_proposal }))} target={plan?.current.nutrition_target} week={weekDates.map(date => ({ date, lines: draftItems.filter(item => item.for_date === date).map(item => ({ portions: item.portions, recipe: resolvePlanRecipeSelection(item, recipes, plan?.current.items ?? []), proposal: item.recipe_proposal })) }))} /></div>
+      </div><PlanDayAnalysis date={selectedDate} lines={analysisLines(draftItems.filter(item => item.for_date === selectedDate))} target={plan?.current.nutrition_target} week={weekDates.map(date => ({ date, lines: analysisLines(draftItems.filter(item => item.for_date === date)) }))} /></div>
       </fieldset>{plan && !plan.current.published_at && dirty && <p role="status">Tenés cambios sin guardar. Guardalos y revisalos antes de publicar.</p>}
       {error && <button type="button" disabled={busy} onClick={() => void reload()}>Recuperar la versión guardada y reemplazar este formulario</button>}
       <div className="meal-plan-actions">
@@ -357,31 +378,16 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
     </form>
     {plan?.current.nutrition && <details><summary>Ver análisis de la versión guardada</summary><AiPlanNutritionSummary nutrition={plan.current.nutrition} /></details>}
     {plan?.published && <details className="meal-plan-published-copy"><summary>Ver copia publicada · v{plan.published.version}</summary><PublishedDatedPlanView plan={toPublishedPatientPlan(plan)} audience="pro" /></details>}
-    {copySource && <PlanCopyDayDialog source={copySource} dates={periodDates} occupied={draftItems.map(item => item.for_date)} itemCount={draftItems.length} descriptions={draftItems.filter(item => item.for_date === copySource).map(item => `${item.slot}: ${resolvePlanRecipeSelection(item, recipes, plan?.current.items ?? [])?.title ?? item.free_text ?? 'Indicación'}${item.recipe_id ? ` · v${item.recipe_version}` : ''} · ${item.portions || 'sin cantidad'} porciones${item.public_note ? ` · Nota: ${item.public_note}` : ''}`)} onClose={() => setCopySource(null)} onCopy={destinations => { try { setDraftItems(copyPlanDay(draftItems, copySource, destinations, periodDates)); setStatus('Día copiado al borrador. Revisá los destinos y guardá los cambios.'); setError(''); setCopySource(null); } catch (caught) { setError(careErrorMessage(caught)); } }} />}
+    {componentTarget && (componentTab === 'food' ? <PlanFoodPicker onClose={() => setComponentTarget(null)} onRecipe={() => setComponentTab('recipe')} onChoose={addComponent} /> : <PlanRecipePicker onFood={() => setComponentTab('food')} recipes={recipes} loading={catalogLoading} error={catalogError} onRetry={() => void reloadCatalog()} initialPortions="1" onClose={() => setComponentTarget(null)} onChoose={(recipe, portions) => addComponent({ kind: 'recipe', id: crypto.randomUUID(), recipe_id: recipe.id, recipe_version: recipe.published!.version, portions, public_note: '', recipe_snapshot: publishedRecipeDetail(recipe) ?? undefined })} />)}
+    {copySource && <PlanCopyDayDialog source={copySource} dates={periodDates} occupied={draftItems.map(item => item.for_date)} itemCount={draftItems.length} descriptions={draftItems.filter(item => item.for_date === copySource).map(item => item.components ? `${item.slot}: ${item.components.map(component => `${componentTitle(component)} · ${component.kind === 'food' ? `${component.quantity} ${component.measure ?? 'g'}` : component.kind === 'recipe' ? `${component.portions} porciones · v${component.recipe_version}` : 'Indicación'}${component.public_note ? ` · Nota: ${component.public_note}` : ''}`).join(' / ')}${item.public_note ? ` \u00b7 Nota de la comida: ${item.public_note}` : ''}` : `${item.slot}: ${resolvePlanRecipeSelection(item, recipes, plan?.current.items ?? [])?.title ?? item.free_text ?? 'Indicación'}${item.recipe_id ? ` · v${item.recipe_version}` : ''} · ${item.portions || 'sin cantidad'} porciones${item.public_note ? ` · Nota: ${item.public_note}` : ''}`)} onClose={() => setCopySource(null)} onCopy={destinations => { try { setDraftItems(copyPlanDay(draftItems, copySource, destinations, periodDates)); setStatus('Día copiado al borrador. Revisá los destinos y guardá los cambios.'); setError(''); setCopySource(null); } catch (caught) { setError(careErrorMessage(caught)); } }} />}
     {pickerIndex !== null && draftItems[pickerIndex] && <PlanRecipePicker recipes={recipes} loading={catalogLoading} error={catalogError} onRetry={() => void reloadCatalog()} initialPortions={draftItems[pickerIndex].portions} onClose={() => setPickerIndex(null)} onChoose={(recipe, portions) => { const version = recipe.published; if (!version) return; setDraftItems(current => current.map((item, index) => index === pickerIndex ? { ...item, recipe_id: recipe.id, recipe_version: version.version, recipePreview: publishedRecipeDetail(recipe) ?? undefined, portions: String(portions), free_text: '', recipe_proposal: undefined } : item)); setPickerIndex(null); }} />}
   </section>;
 }
 
-function PlanRecipeProposalEditor({ proposal, index, onChange }: { proposal: ProposedRecipe; index: number; onChange: (proposal: ProposedRecipe) => void }) {
-  return <fieldset><legend>Receta propuesta {index + 1} · {recipeNutritionLabel(proposal.nutrition)}</legend>
-    <label>Rinde<input type="number" min={0.1} max={50} step="0.1" value={proposal.yield_portions} onChange={(event) => onChange({ ...proposal, yield_portions: Number(event.target.value) })} /></label>
-    {proposal.ingredients.map((ingredient, ingredientIndex) => <div key={ingredientIndex}>
-      <input aria-label={`Ingrediente ${index + 1}.${ingredientIndex + 1}`} value={ingredient.name} onChange={(event) => onChange({ ...proposal, ingredients: proposal.ingredients.map((entry, position) => position === ingredientIndex ? { ...entry, name: event.target.value } : entry) })} />
-      <input aria-label={`Cantidad ${index + 1}.${ingredientIndex + 1}`} type="number" min={0.1} max={100000} step="0.1" value={ingredient.quantity} onChange={(event) => onChange({ ...proposal, ingredients: proposal.ingredients.map((entry, position) => position === ingredientIndex ? { ...entry, quantity: Number(event.target.value) } : entry) })} />
-      <select aria-label={`Unidad ${index + 1}.${ingredientIndex + 1}`} value={ingredient.unit} onChange={(event) => onChange({ ...proposal, ingredients: proposal.ingredients.map((entry, position) => position === ingredientIndex ? { ...entry, unit: event.target.value as typeof entry.unit } : entry) })}>{RECIPE_UNITS.map((unit) => <option key={unit}>{unit}</option>)}</select>
-      <button type="button" disabled={proposal.ingredients.length === 1} onClick={() => onChange({ ...proposal, ingredients: proposal.ingredients.filter((_, position) => position !== ingredientIndex) })}>Quitar ingrediente</button>
-    </div>)}
-    <button type="button" disabled={proposal.ingredients.length >= 20} onClick={() => onChange({ ...proposal, ingredients: [...proposal.ingredients, { name: '', quantity: 1, unit: 'g' }] })}>Agregar ingrediente</button>
-    <label>Pasos<textarea value={proposal.steps.join('\n')} onChange={(event) => onChange({ ...proposal, steps: event.target.value.split('\n') })} /></label>
-    {proposal.nutrition && <div>{(['kcal', 'protein_g', 'carbs_g', 'fat_g'] as const).map((key) => <label key={key}>{({ kcal: 'Calorías por porción', protein_g: 'Proteínas por porción', carbs_g: 'Hidratos por porción', fat_g: 'Grasas por porción' })[key]}
-      <input type="number" min={key === 'kcal' ? 0.1 : 0} step="0.1" value={proposal.nutrition!.per_portion[key]} onChange={(event) => onChange({ ...proposal, nutrition: { ...proposal.nutrition!, per_portion: { ...proposal.nutrition!.per_portion, [key]: Number(event.target.value) } } })} />
-    </label>)}</div>}
-    <p>Guardar recalcula los totales. Revisá cómo cambiaron las calorías después de editar ingredientes, rinde o porciones.</p>
-  </fieldset>;
-}
 
 export function PlanPublishedItem({ item }: { item: PlanItemView }) {
   const recipe = item.recipe;
+  if (item.components) return <article className="published-plan-item"><strong>{item.slot}</strong>{item.components.map(component => <section key={component.id}><h3>{componentTitle(component)}</h3><p>{component.kind === 'food' ? `${component.quantity} ${component.measure ?? 'g'} · Fuente: ${component.food_snapshot?.source} · r${component.food_revision}` : component.kind === 'recipe' ? `${component.portions} porciones · v${component.recipe_version}` : component.free_text}</p>{component.kind === 'text' && component.recipe_proposal && <><p>{component.portions} porciones · {recipeNutritionLabel(component.recipe_proposal.nutrition)}</p><ul>{component.recipe_proposal.ingredients.map((line, position) => <li key={position}>{line.quantity * (component.portions ?? 1) / component.recipe_proposal!.yield_portions} {line.unit} {line.name}</li>)}</ul><ol>{component.recipe_proposal.steps.map((step, position) => <li key={position}>{step}</li>)}</ol></>}{component.recipe_snapshot && <><ul>{component.recipe_snapshot.ingredients.map(line => <li key={line.id}>{line.name}: {line.quantity * (component.kind === 'recipe' ? component.portions : 1) / component.recipe_snapshot!.yield_portions} {line.unit}</li>)}</ul><ol>{component.recipe_snapshot.steps.map((step, position) => <li key={position}>{step}</li>)}</ol></>}{component.public_note && <p>{component.public_note}</p>}</section>)}{item.public_note && <p>{item.public_note}</p>}</article>;
   return <article className="published-plan-item">
     <header>
       <strong>{item.slot}</strong>
@@ -420,7 +426,7 @@ export function PublishedDatedPlanView({
   const days = plan ? buildPublishedPlanDays(plan).map((day) => ({
     ...day,
     items: term
-      ? day.items.filter((item) => `${item.slot} ${item.recipe?.title ?? ''} ${item.free_text ?? ''} ${item.public_note}`.toLocaleLowerCase('es-AR').includes(term))
+      ? day.items.filter((item) => `${item.slot} ${item.components?.map(component => `${componentTitle(component)} ${component.public_note}`).join(' ') ?? ''} ${item.recipe?.title ?? ''} ${item.free_text ?? ''} ${item.public_note}`.toLocaleLowerCase('es-AR').includes(term))
       : day.items,
   })).filter((day) => !term || day.items.length > 0) : [];
   return <section className="published-dated-plan" aria-label={audience === 'pro' ? 'Copia publicada que ve el paciente' : 'Plan fechado publicado'}>

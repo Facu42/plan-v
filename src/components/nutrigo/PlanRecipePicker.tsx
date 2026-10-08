@@ -22,9 +22,9 @@ export function PlanRecipePreview({ recipe, portions }: { recipe: PlanRecipeDeta
   </section>;
 }
 
-export function PlanRecipePicker({ recipes, loading, error, onRetry, initialPortions, onChoose, onClose }: {
+export function PlanRecipePicker({ recipes, loading, error, onRetry, initialPortions, onChoose, onClose, onFood }: {
   recipes: ProfessionalRecipe[]; loading: boolean; error: string; onRetry: () => void; initialPortions: string;
-  onChoose: (recipe: ProfessionalRecipe, portions: number) => void; onClose: () => void;
+  onChoose: (recipe: ProfessionalRecipe, portions: number) => void; onClose: () => void; onFood?: () => void;
 }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('');
@@ -35,6 +35,7 @@ export function PlanRecipePicker({ recipes, loading, error, onRetry, initialPort
   const amount = portions.trim() ? Number(portions) : NaN;
   const valid = detail && recipePortionNutrients(detail, amount) !== null;
   return <FigmaRecordDialog title="Agregar receta al plan" className="plan-recipe-picker" closeLabel="Cerrar selección de receta" onClose={onClose}>
+    {onFood && <div className="plan-analysis-switch"><button type="button" onClick={onFood}>Alimentos</button><button type="button" aria-pressed="true">Recetas</button></div>}
     <p>Elegí una versión publicada. Se agrega al borrador; el plan del paciente se conserva hasta que publiques.</p>
     <div className="plan-recipe-picker-filters"><label>Buscar receta<input type="search" value={query} placeholder="Título o ingrediente" onChange={event => setQuery(event.target.value)} /></label><label>Categoría culinaria<select value={category} onChange={event => setCategory(event.target.value)}><option value="">Todas las categorías</option>{Array.from(new Set(recipes.flatMap(recipe => recipe.published?.card?.culinary_categories ?? []))).sort((a,b) => a.localeCompare(b, 'es')).map(value => <option key={value}>{value}</option>)}</select></label></div>
     {loading && <p role="status">Cargando recetas publicadas…</p>}

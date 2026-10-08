@@ -1,3 +1,5 @@
+import { resolvePlanComponents } from './components.js';
+import type { PlanComponentView } from '../../src/types/plan-components.js';
 import { registerDemoState } from '../demo/state.js';
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
@@ -31,6 +33,7 @@ import { recipeCoverEnabled } from '../ai/recipe-cover.js';
 export { CareError } from '../care/errors.js';
 
 type MemItem = {
+  components?: PlanComponentView[];
   id: string;
   version_id: string;
   for_date: string;
@@ -150,6 +153,7 @@ function asItem(row: Record<string, unknown>, snapshot?: PlanRecipeDetail | null
     free_text: row.free_text ? String(row.free_text) : null,
     portions: row.portions == null ? null : asNumber(row.portions),
     public_note: String(row.public_note ?? ''),
+    ...(Array.isArray(row.components) ? { components: row.components as PlanComponentView[] } : {}),
     ...(row.dish_card ? { dish_card: row.dish_card as RecipeCard } : {}),
     ...(row.recipe_proposal ? { recipe_proposal: proposedRecipeSchema.parse(row.recipe_proposal) } : {}),
   };
@@ -173,7 +177,7 @@ function asVersion(row: Record<string, unknown>): PlanVersionView {
     published_at: row.published_at ? String(row.published_at) : null,
     items: preparedItems,
     ...(target ? { nutrition_target: target } : {}),
-    ...(target || preparedItems.some((item) => item.recipe_proposal) ? { nutrition: summarizeView(preparedItems, target, row) } : {}),
+    ...(target || preparedItems.some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(preparedItems, target, row) } : {}),
   };
 }
 
@@ -201,7 +205,7 @@ function asPatient(row: Record<string, unknown>): PatientMealPlan {
     published_at: String(row.published_at),
     items: preparedItems,
     ...(target ? { nutrition_target: target } : {}),
-    ...(target || preparedItems.some((item) => item.recipe_proposal) ? { nutrition: summarizeView(preparedItems, target, row) } : {}),
+    ...(target || preparedItems.some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(preparedItems, target, row) } : {}),
   };
 }
 
@@ -224,6 +228,7 @@ function versionItems(versionId: string): PlanItemView[] {
       free_text: item.free_text,
       portions: item.portions,
       public_note: item.public_note,
+      ...(item.components ? { components: structuredClone(item.components) } : {}),
       ...memoryDishCard(item),
       ...(item.recipe_proposal ? { recipe_proposal: item.recipe_proposal } : {}),
     }));
@@ -247,7 +252,7 @@ function memVersionView(row: MemVersion): PlanVersionView {
     published_at: row.published_at,
     items: preparedItems,
     ...(row.nutrition_target ? { nutrition_target: row.nutrition_target } : {}),
-    ...(row.nutrition_target || preparedItems.some((item) => item.recipe_proposal) ? { nutrition: summarizeView(preparedItems, row.nutrition_target, row) } : {}),
+    ...(row.nutrition_target || preparedItems.some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(preparedItems, row.nutrition_target, row) } : {}),
   };
 }
 
@@ -278,7 +283,7 @@ function memPatient(row: MemPlan): PatientMealPlan | null {
     published_at: published.published_at,
     items: versionItems(published.id),
     ...(published.nutrition_target ? { nutrition_target: published.nutrition_target } : {}),
-    ...(published.nutrition_target || versionItems(published.id).some((item) => item.recipe_proposal) ? { nutrition: summarizeView(versionItems(published.id), published.nutrition_target, published) } : {}),
+    ...(published.nutrition_target || versionItems(published.id).some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(versionItems(published.id), published.nutrition_target, published) } : {}),
   };
 }
 
@@ -317,7 +322,7 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
     if (seen.has(key)) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
     seen.add(key);
     const hasRecipe = Boolean(item.recipe_id);
-    const freeText = item.free_text?.trim() || null;
+    const freeText = item.components ? 'Comida compuesta' : item.free_text?.trim() || null;
     if (hasRecipe === Boolean(freeText)) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
     if (item.recipe_proposal && !(item.portions && item.portions > 0 && item.portions <= 50)) {
       throw new CareError(400, 'Las recetas del plan necesitan porciones positivas.');
@@ -337,6 +342,7 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
       free_text: linked.recipe_id ? null : freeText,
       portions: item.portions ?? null,
       public_note: item.public_note ?? '',
+      ...(item.components ? { components: await resolvePlanComponents(nutritionistId, item.components, previous.flatMap<PlanComponentView>(row => row.components ?? (row.recipe_proposal ? [{ kind: 'text', id: row.id, free_text: row.free_text!, portions: row.portions ?? undefined, recipe_proposal: row.recipe_proposal, public_note: row.public_note }] : []))) } : {}),
       ...(item.recipe_proposal ? { recipe_proposal: retainProposalEstimate(item.recipe_proposal, prior?.recipe_proposal) } : {}),
     });
   }
@@ -477,6 +483,13 @@ function memoryDishCard(item: MemItem) {
 }
 async function enqueuePlanMemoryCovers(plan: MemPlan, version: MemVersion, retry = false) {
   for (const item of [...items.values()].filter(row => row.version_id === version.id)) {
+    if (item.components) {
+      for (const component of item.components) {
+        const recipe = component.kind === 'recipe' ? component.recipe_snapshot : component.kind === 'text' ? component.recipe_proposal : null;
+        if (recipe) await enqueueMemoryDish(plan.nutritionist_id, proposalCoverContext(recipe), component.kind === 'recipe' ? readPublishedMemory(plan.nutritionist_id, component.recipe_id, component.recipe_version)?.versionId ?? null : null, retry);
+      }
+      continue;
+    }
     const recipe = getRecipeSnapshot(item.recipe_version_id) ?? item.recipe_proposal;
     if (!recipe) continue; // A public instruction alone is not a defined recipe.
     await enqueueMemoryDish(plan.nutritionist_id, proposalCoverContext(recipe), item.recipe_version_id, retry);
