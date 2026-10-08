@@ -30,8 +30,17 @@ it('rechaza contenido no imagen y respuestas demasiado grandes',async()=>{
 it('la descripción tiene un límite y conserva sólo receta, ingredientes y preparación',()=>{expect(recipeCoverPrompt({title:'x'.repeat(500),items:Array.from({length:20},()=>({name:'x'.repeat(200)})),steps:['x'.repeat(3000)]}).length).toBeLessThanOrEqual(2048);});
 it('describe la tortilla de papas como el plato que es y no mezcla pasos en español',()=>{
   const prompt=recipeCoverPrompt({title:'Tortilla de papas',items:[{name:'papa',unit:'g',quantity:400},{name:'huevo'},{name:'cebolla'}],steps:['Cortar las papas y la cebolla en rodajas finas.','Freír a fuego bajo y mezclar con los huevos batidos.']});
-  expect(prompt).toContain('Spanish potato omelette');expect(prompt).toContain('potato, egg, onion');
+  expect(prompt).toContain('potato omelette');expect(prompt).not.toMatch(/tortilla/i);expect(prompt).toContain('potato, egg, onion');
   expect(prompt).not.toMatch(/rodajas|fuego|batidos|freir|frittata/i);
+});
+it('el pedido es sólo positivo: no nombra gente, cubiertos, texto ni logos, que el modelo termina dibujando',()=>{
+  const prompt=recipeCoverPrompt({title:'Ensalada de lentejas',items:[{name:'lentejas'}]});
+  expect(prompt).not.toMatch(/people|cutlery|logos|labels|collage|garnish|\bno \b/i);
+  expect(prompt).toContain('single dish');expect(prompt).toContain('plate or bowl');
+});
+it('dice que la lista de ingredientes es completa, sin nombrar nada prohibido',()=>{
+  const prompt=recipeCoverPrompt({title:'Ensalada de lentejas',items:[{name:'lentejas'},{name:'tomate'}]});
+  expect(prompt).toContain('made only of lentils, tomato');
 });
 it('las descripciones de platos conocidos no agregan ingredientes, cocción ni recipientes que la receta no tiene',()=>{
   const milanesa=recipeCoverPrompt({title:'Milanesa de pollo',items:[{name:'pollo'}]});
