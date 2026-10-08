@@ -48,15 +48,14 @@ const REMINDER_ENUM_TO_LABEL: Record<string, string> = Object.fromEntries(
 
 // weekday del contrato: 0 = Lunes … 6 = Domingo, con fecha local (nunca UTC).
 export function menuWeekdayIndex(date: Date): number {
-  return (date.getDay() + 6) % 7;
+  return (tzParts(date).weekday + 6) % 7;
 }
 
-// YYYY-MM-DD del calendario local; nunca toISOString (el rollover UTC excluye días).
+// YYYY-MM-DD del calendario de Argentina (PATIENT_TIMEZONE), no el de la máquina que corre el servidor:
+// Railway corre en UTC y entre las 21:00 y las 23:59 de Argentina ya sería el día siguiente.
 export function localDateId(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  const { year, month, day } = tzParts(date);
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
 // ============================================================
@@ -127,8 +126,8 @@ export function timelineAtLabel(isoDate: string, now = new Date()): string {
   const todayId = localDateId(now);
   const dateId = localDateId(date);
   if (dateId === todayId) return 'HOY';
-  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-  if (dateId === localDateId(yesterday)) return 'AYER';
+  // Argentina no tiene horario de verano: 24 h atrás es siempre el día anterior.
+  if (dateId === localDateId(new Date(now.getTime() - 86_400_000))) return 'AYER';
   return dateId.slice(8, 10) + '/' + dateId.slice(5, 7);
 }
 
