@@ -53,3 +53,13 @@
 .nvt-body-reference[open]>summary{margin-bottom:16px}
 .nvt-body-reference>summary:focus-visible{outline:2px solid var(--nv-ink);outline-offset:6px;border-radius:8px}
 .nvt-reference-preview{font-size:12px;font-variant-numeric:tabular-nums;color:var(--nv-ink-soft)}
+
+.nvt-comparison h3{font-size:14px;font-weight:600;margin:0 0 6px}
+.nvt-comparison>p{font-size:12px;color:var(--nv-ink-soft);margin:0 0 12px}
+.nvt-comparison table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums;margin-bottom:12px}
+.nvt-comparison caption{text-align:left;color:var(--nv-ink-soft);margin-bottom:8px;font-size:11px}
+.nvt-comparison th,.nvt-comparison td{padding:10px 3px;text-align:right;vertical-align:top;border-bottom:1px solid var(--nv-line);overflow-wrap:break-word}
+.nvt-comparison th:first-child{text-align:left;width:27%}
+.nvt-comparison thead th{font-weight:500;color:var(--nv-ink-soft)}
+.nvt-comparison tbody th small{display:block;font-weight:400;color:var(--nv-ink-soft)}
+.nvt-comparison tbody td:nth-child(3){font-weight:600;background:var(--nv-accent-soft,#DFF9A2)}

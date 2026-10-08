@@ -75,3 +75,20 @@ Verificación: 14 pruebas nuevas de fórmula, límites sin redondear, edad e ent
 El CI anterior encontró una carrera en el ensayo: navegación antes de terminar revisión de ingreso (guardado bloquea salir). Corregido en 69e8f13 esperando «Ya revisado». Controles generales repetidos aprobados; recorrido firmado todavía en ejecución al registrar esta actualización.
 
 Pendiente: metas de peso definidas por profesional y comparación objetivo, otras medidas y referencias de composición corporal, fórmulas alternativas. No se acredita el apartado completo. Sigue en PR borrador #78, sin producción.
+
+## Tercer incremento: comparación antes de confirmar · 2026-10-08
+
+Se repitió el contraste visual con Nutriboost alrededor de 1:48: cuadro «Actual vs objetivo vs referencia». Nuestra extensión compara propuesta energética/macros con la meta confirmada que ve la paciente, sin presentar el gasto basal como ingesta registrada ni confundirlo con el plan publicado.
+
+Decisión de Facundo: «Por ahora, conservar objetivos sin exigir un peso numérico». No se incorpora meta obligatoria de peso ni se deriva una desde el intervalo de referencia. Los objetivos de seguimiento existentes se conservan.
+
+Tabla Nutrigo en el panel de propuesta: medida, vigente, propuesta y cambio. Se indican aumentos/reducciones/sin cambio, y guiones cuando aún no hay meta confirmada. No inventa cero ni publica al editar. Si el formulario está incompleto, la meta confirmada sigue disponible en su resumen anterior. No hay cambios de API, migraciones ni persistencia.
+
+| Antes | Después | Motivo |
+| --- | --- | --- |
+| Dos bloques de macros sin diferencia explícita | Tabla con propuesta, meta vigente y variación | Facilitar revisión antes de compartir |
+| Título Confirmada envuelve una letra en panel angosto | Vigente, explicado como meta que ve paciente | Lectura cómoda sin cambiar estructura Nutrigo |
+
+Pruebas nuevas primero fallaron por módulo ausente; 3 dirigidas aprobadas después. Suite general: 308 archivos, 2.136 aprobadas, 2 omitidas. Tipos, compilación y secretos aprobados. Navegador local ficticio1440, sin desborde: ajuste -15 a -10 produjo 1605→1699 kcal (+94), proteína108 sin cambio, hidratos174→189 (+15), grasas53→57 (+4), conservando confirmada. Ajuste restaurado sin guardar/publicar. Captura del panel en evidencia-planificacion/comparacion-metas-1440.png. Revisión de código sin bloqueantes; revisión funcional local acreditada por recorrido y captura.
+
+CI del incremento db09fd9 completamente aprobado, incluido signed-auth (5m56s). Este nuevo cambio se suma al PR #78 y repetirá CI. Sin aplicación a producción. Otras fórmulas, medidas de composición corporal y sus referencias permanecen pendientes de relevamiento específico y fuente primaria.

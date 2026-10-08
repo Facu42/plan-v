@@ -10,6 +10,7 @@ import {
 import { NvBadge, NvButton, NvMetric } from './primitives';
 import './nutrition-target.css';
 import { PlanningBodyReference } from './PlanningBodyReference';
+import { NutritionTargetComparison } from './NutritionTargetComparison';
 
 type Draft = { sex: string; age: string; weight_kg: string; height_cm: string; activity: string; goal: TargetGoal; adjust_pct: string; protein_g_per_kg: string; fat_pct: string };
 
@@ -147,7 +148,7 @@ export function NutritionTargetPanel({ patientId, patientName, onOpenPlan }: { p
           <TargetSummary target={{ patient_id: patientId, inputs: parsed.data, result: live, published_at: null, updated_at: '' }} heading="Meta propuesta" />
           {live.warnings.map((w) => <p key={w} className="nvt-warning" role="status">{w}</p>)}
         </> : <p className="nvt-empty">Completá edad, peso y talla para ver el cálculo.</p>}
-        {published && <TargetSummary target={published} heading="Meta que ve la paciente" />}
+        {live ? <NutritionTargetComparison proposed={live} confirmed={published?.result ?? null} /> : published && <TargetSummary target={published} heading="Meta que ve la paciente" />}
         {error && <p className="nv-dialog-error" role="alert">{error} <button type="button" className="nvt-link" disabled={busy} onClick={() => setRefresh((r) => r + 1)}>Recargar meta</button></p>}
         {message && <p className="nvt-ok" role="status">{message}</p>}
         {changedSincePublish && <p className="nvt-warning" role="status">Cambiaste datos: la paciente sigue viendo la meta anterior hasta que confirmes de nuevo.</p>}

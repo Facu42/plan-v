@@ -341,3 +341,6 @@ Planificación web · cierre del incremento, 2026-10-08: Facundo rechazó la maq
 
 ### Planificación: segundo incremento (2026-10-08)
 IMC y referencias generales de peso incorporadas con fuente CDC, límite de edad20+, resumen desplegable Nutrigo y pruebas de límites. Detalle, evidencias y pendientes en docs/planificacion-dashboard-web-2026-10-08.md. Sin producción. PR #78.
+
+### Planificación: comparación de metas (2026-10-08)
+Propuesta vs meta confirmada con diferencias de calorías/macros, revisada contra Nutriboost. Facundo decide conservar objetivos sin exigir peso numérico. 2136 pruebas aprobadas/2 omitidas. CI de db09fd9 completo aprobado. Detalle y evidencia en docs/planificacion-dashboard-web-2026-10-08.md. Sin producción; PR #78.
