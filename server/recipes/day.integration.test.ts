@@ -115,3 +115,24 @@ describe('PV-40 asignar al día y registrar', () => {
     })).status).toBe(400);
   });
 });
+
+describe('asignación al día respeta antecedentes vigentes', () => {
+  beforeEach(async () => { resetStore(); await declareKnownHealth(patient); });
+  it.each(['allergy', 'restriction', 'unknown'] as const)('rechaza %s sin reemplazar la asignación compatible anterior', async (kind) => {
+    const safe = draft({ title: 'Receta compatible', items: [{ name: 'Arroz', quantity: 100, unit: 'g' }] });
+    await post('/api/recipes', safe); await post(`/api/recipes/${safe.id}/publish`, { expected_version: 1 });
+    const assignment = { patient_id: patient, expected_version: 1, for_date: '2026-10-09', slot: 'Almuerzo' };
+    expect((await post(`/api/recipes/${safe.id}/day`, assignment)).status).toBe(200);
+    const unsafe = draft({ title: 'Receta con lentejas' });
+    await post('/api/recipes', unsafe); await post(`/api/recipes/${unsafe.id}/publish`, { expected_version: 1 });
+    if (kind === 'unknown') {
+      const { getIntakeRecord } = await import('../intake/memory.js');
+      getIntakeRecord(patient).payload.allergies = { state: 'unknown', items: [] };
+    } else await declareKnownHealth(patient, kind === 'allergy' ? { state: 'reported', items: ['Lentejas'] } : undefined, kind === 'restriction' ? { state: 'reported', items: ['Lentejas'] } : undefined);
+    const blocked = await post(`/api/recipes/${unsafe.id}/day`, assignment);
+    expect(blocked.status).toBe(409);
+    const result = await (await app.request(`/api/patients/${patient}/recipe-days?date=2026-10-09`)).json();
+    expect(result.assignments).toHaveLength(1);
+    expect(result.assignments[0].recipe_id).toBe(safe.id);
+  });
+});

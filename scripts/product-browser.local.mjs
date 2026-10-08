@@ -146,7 +146,17 @@ try {
   await button('Guardar borrador');await until("document.body.innerText.includes('Borrador guardado en el catálogo')");
   const catalog=await read(professional,'/api/recipes');const recipe=catalog.recipes.find(r=>r.title==='Arroz con vegetales');check(recipe?.current.card.macros.kcal===200,'receta manual conserva calorías declaradas');
   await button('Cerrar creación de receta');await until('!document.querySelector(".recipe-form")');await control('[aria-label="Ver receta Arroz con vegetales"]');await button('Publicar borrador');await until("document.body.innerText.includes('Revisión publicada')");
-  await button('Asignar versión publicada');await B('select','.recipe-overlay label:has-text("Asignar a") select',pid);await field('Día',today,'.recipe-overlay ');await button('Confirmar asignación');await until("document.body.innerText.includes('Asignada al día')");
+  await button('Asignar versión publicada');await B('select','.recipe-overlay label:has-text("Asignar a") select',pid);await field('Día',today,'.recipe-overlay ');phase='asignación incompatible bloqueada';
+  try {
+    await pool.query("update public.intake_sessions set payload=jsonb_set(payload,'{allergies}',$2::jsonb) where patient_id=$1",[pid,JSON.stringify({state:'reported',items:['Arroz']})]);
+    await button('Confirmar asignación');await until("document.body.innerText.includes('antes de asignar')");
+    check((await read(patient,`/api/patients/${pid}/recipe-days?date=${today}`)).assignments.length===0,'asignación incompatible rechazada sin llegar al día de la paciente');
+    check(!(await read(patient,`/api/patients/${pid}/recipes`)).recipes.some(r=>r.id===recipe.id),'receta incompatible no entra en las recetas asignadas');
+    await until('!!document.querySelector(".recipe-overlay")');
+  } finally {
+    await pool.query("update public.intake_sessions set payload=jsonb_set(payload,'{allergies}',$2::jsonb) where patient_id=$1",[pid,JSON.stringify({state:'none',items:[]})]);
+  }
+  phase='asignación compatible';await button('Confirmar asignación');await until("document.body.innerText.includes('Asignada al día')");
   check((await read(patient,`/api/patients/${pid}/recipe-days?date=${today}`)).assignments.length===1,'receta publicada asignada por fecha');
   phase='plan manual';await B('goto',origin+`/crm/plan?paciente=${pid}`);await B('wait','.meal-plan-form');
   await field('Desde',today,'.meal-plan-form ');await field('Hasta',today,'.meal-plan-form ');

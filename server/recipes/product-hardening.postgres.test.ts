@@ -351,3 +351,32 @@ describe('cierre funcional: revisiones, privacidad y reintentos persistentes', (
     expect((await rpc(nutriA,'get_patient_ledger',[patientA]) as any).payments).toHaveLength(2);
   });
 });
+
+describe('seguridad de receta asignada al día en PostgreSQL', () => {
+  it('revalida antecedentes al asignar y no escribe ninguna asignación ante conflicto', async () => {
+    const rid = randomUUID();
+    const saved = await rpc(nutriA, 'save_recipe_draft', [{ ...draft, id: rid, expected_revision: null }]) as any;
+    await rpc(nutriA, 'publish_recipe', [rid, 1, saved.current.revision]);
+    const input = { recipe_id: rid, patient_id: patientA, expected_version: 1, for_date: '2026-10-10', slot: 'Cena' };
+    const original = await rpc(nutriA, 'assign_recipe_day', [input]) as any;
+    const none = { state: 'none', items: [] };
+    const cases = [
+      { allergies: { state: 'reported', items: ['Quinoa'] }, restrictions: none, error: 'meal_plan_allergies' },
+      { allergies: none, restrictions: { state: 'reported', items: ['Quinoa'] }, error: 'meal_plan_allergies' },
+      { allergies: { state: 'unknown', items: [] }, restrictions: none, error: 'meal_plan_allergies_unknown' },
+    ];
+    try {
+      for (const facts of cases) {
+        await db.query("update public.intake_sessions set payload=jsonb_set(jsonb_set(payload,'{allergies}',$2::jsonb),'{restrictions}',$3::jsonb) where patient_id=$1", [patientA, JSON.stringify(facts.allergies), JSON.stringify(facts.restrictions)]);
+        await expect(rpc(nutriA, 'assign_recipe_day', [{ ...input, for_date: '2026-10-11' }])).rejects.toMatchObject({ code: 'PT409', message: facts.error });
+        const rows = await rpc(patientAUser, 'list_recipe_days', [patientA, '2026-10-10']) as any[];
+        expect(rows.find(row => row.id === original.id)?.recipe_id).toBe(rid);
+        expect(await rpc(patientAUser, 'list_recipe_days', [patientA, '2026-10-11'])).toEqual([]);
+      }
+      await expect(rpc(nutriB, 'assign_recipe_day', [input])).rejects.toMatchObject({ code: '42501' });
+      await expect(rpc(patientAUser, 'assign_recipe_day', [input])).rejects.toMatchObject({ code: '42501' });
+    } finally {
+      await db.query("update public.intake_sessions set payload=jsonb_set(jsonb_set(payload,'{allergies}',$2::jsonb),'{restrictions}',$2::jsonb) where patient_id=$1", [patientA, JSON.stringify(none)]);
+    }
+  });
+});

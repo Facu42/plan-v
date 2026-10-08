@@ -347,3 +347,6 @@ Propuesta vs meta confirmada con diferencias de calorías/macros, revisada contr
 
 ### Integración paciente-dashboard (2026-10-08)
 Leídos definición de producto y auditoría de conexión del hilo paciente en634b0c6. Secuencia recomendada: iniciar integración ahora por alergias/permisos → plan/meta/versión recibida → registros/seguimiento → agenda/mensajes → objetivos/recursos/cuota. No esperar paridad completa. Responsabilidades, pendientes y decisiones no confirmadas registrados en [coordinación](coordinacion-paciente-dashboard-2026-10-08.md). Sin cambios productivos ni integración automática de ramas.
+
+### Integración: alergias al asignar receta por día (2026-10-08)
+Backend local corregido en codex/recipe-day-allergies: evaluador existente y control SQL atómico, no asigna ni reemplaza ante conflicto. 2140pruebas aprobadas/2omitidas. Ensayo visual detectó error detrás de ventana; ajuste UI detenido según pedido de Facundo, pregunta de ubicación pendiente. No se acredita terminado ni publicado. [Registro y evidencia](integracion-receta-alergias-2026-10-08.md).
