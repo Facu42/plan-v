@@ -20,3 +20,4 @@ credentials.json
 # Capturas de comparación con Nutrigo (se regeneran con scripts/nutrigo-compare.mjs)
 design/nutrigo-compare/app/
 design/nutrigo-compare/diff/
+design/auditoria/

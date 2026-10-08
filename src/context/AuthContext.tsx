@@ -1,3 +1,4 @@
+import { friendlyError } from '../lib/error-messages';
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { legalAcceptance } from '../legal';
 import { googleSignupMetadata, PENDING_GOOGLE_SIGNUP_KEY, rememberGoogleSignup, takeGoogleSignup } from './google-signup';
@@ -187,7 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signIn: async (email, password) => {
       if (!supabase) return { error: 'Supabase no configurado' };
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return { error: error.message };
+      if (error) return { error: friendlyError(error.message) };
       setDemoMode(false);
       return {};
     },
@@ -198,7 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password,
         options: { data: { full_name: fullName, role: PUBLIC_SIGNUP_ROLE, ...legalAcceptance(), ...(professional ? { [PROFESSIONAL_SIGNUP_FLAG]: true } : {}) } },
       });
-      if (error) return { error: error.message };
+      if (error) return { error: friendlyError(error.message) };
       return {};
     },
     requestPasswordReset: async (email) => {
@@ -206,7 +207,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: typeof window === 'undefined' ? undefined : window.location.origin,
       });
-      if (error) return { error: error.message };
+      if (error) return { error: friendlyError(error.message) };
       return {};
     },
     googleAvailable,

@@ -1,4 +1,5 @@
 import type { HabitLog, MealLog } from '../../types';
+import { argentinaDay } from '../../features/nutrigo/screens/ar-time';
 
 export type JourneyInput = {
   meal_logs: readonly MealLog[];
@@ -27,26 +28,23 @@ export type JourneySummary = {
   sleepAverageMinutes: number | null;
 };
 
-function localDateId(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
+const DAY_MS = 86_400_000;
+const WEEK_DAYS = 7;
+const weekdayLabel = new Intl.DateTimeFormat('es-AR', { weekday: 'short', timeZone: 'UTC' });
 
+/** Los días se cuentan siempre en Buenos Aires (una sola función de «día argentino»), sin depender de la zona del dispositivo. */
 export function buildJourneySummary(input: JourneyInput, now = new Date()): JourneySummary {
   const habitByDate = new Map(input.habit_logs.map((habit) => [habit.date, habit]));
-  const days = Array.from({ length: 7 }, (_, index): JourneyDay => {
-    const date = new Date(now);
-    date.setHours(12, 0, 0, 0);
-    date.setDate(date.getDate() - (6 - index));
-    const dateId = localDateId(date);
+  const today = argentinaDay(now);
+  const days = Array.from({ length: WEEK_DAYS }, (_, index): JourneyDay => {
+    const noon = new Date(Date.parse(`${today}T12:00:00Z`) - (WEEK_DAYS - 1 - index) * DAY_MS);
+    const dateId = noon.toISOString().slice(0, 10);
     const habit = habitByDate.get(dateId);
 
     return {
       date: dateId,
-      label: new Intl.DateTimeFormat('es-AR', { weekday: 'short' }).format(date).replace('.', ''),
-      isToday: index === 6,
+      label: weekdayLabel.format(noon).replace('.', ''),
+      isToday: index === WEEK_DAYS - 1,
       hydration: habit?.hydration ?? 0,
       energy: habit?.energy ?? null,
       sleepMinutes: habit?.sleep_minutes ?? null,
@@ -61,7 +59,7 @@ export function buildJourneySummary(input: JourneyInput, now = new Date()): Jour
   for (const log of input.meal_logs) {
     const loggedAt = new Date(log.logged_at);
     if (Number.isNaN(loggedAt.getTime())) continue;
-    const day = dayByDate.get(localDateId(loggedAt));
+    const day = dayByDate.get(argentinaDay(loggedAt));
     if (!day) continue;
 
     day.mealLogIds.push(log.id);

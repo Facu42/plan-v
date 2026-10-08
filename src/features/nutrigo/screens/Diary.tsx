@@ -5,11 +5,13 @@ import { nodeName, sourceText, type SourceBinding, type SourceNode, type SourceR
 import { api } from '../../../api/client';
 import { useAppStore } from '../../../store/useAppStore';
 import { FigmaRecordDialog } from '../../../components/nutrigo/FigmaPatientFront';
-import { dateId, dateLabel, descendants, EmptyState, errorText, formatNumber, idEnds, leaf, objects, source, Stateful, timeLabel, type ScreenProps } from './shared';
+import { dateId, dateLabel, descendants, EmptyState, errorText, formatNumber, idEnds, leaf, objects, source, Stateful, type ScreenProps } from './shared';
+import { argentinaDate, argentinaTime } from './ar-time';
+import { GREEN_BG, swapBackground } from '../source-tone';
+import { macroCell, mealTitle, newestFirst, nutrientTotal, statNumber, type Nutrient } from './diary-format';
 
 type Props = ScreenProps & { onLogMeal?: (slot?: string) => void; onHydration?: () => void; onRest?: () => void };
 type Log = ScreenProps['patient']['logs'][number];
-type Nutrient = 'kcal' | 'carbs_g' | 'protein_g' | 'fat_g';
 
 /** Tamaños de página que ofrece el selector "Showing 12" del archivo. */
 const PAGE_SIZES = [12, 24, 48];
@@ -47,14 +49,13 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const refresh = useAppStore(state => state.refreshPatient);
-  const matches = (log: Log) => (!pendingOnly || log.status === 'pending_review') && `${log.description} ${log.slot}`.toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'));
+  const matches = (log: Log) => (!pendingOnly || log.status === 'pending_review') && `${mealTitle(log)} ${log.slot ?? ''}`.toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'));
   const inWindow = (log: Log, from: number, to: number) => { const at = new Date(log.logged_at).getTime(); return at >= from && at < to; };
   const end = now.getTime() + 86400000; const start = now.getTime() - days * 86400000;
-  const rows = patient.logs.filter(log => (!days || inWindow(log, start, end)) && matches(log)).slice().sort((a, b) => b.logged_at.localeCompare(a.logged_at));
+  const rows = newestFirst(patient.logs.filter(log => (!days || inWindow(log, start, end)) && matches(log)));
   const previous = days ? patient.logs.filter(log => inWindow(log, start - days * 86400000, start) && matches(log)) : [];
   const reviewedOf = (list: Log[]) => list.filter(row => row.status !== 'pending_review' && row.macros);
   const reviewed = reviewedOf(rows);
-  const sum = (list: Log[], key: Nutrient) => reviewedOf(list).reduce((total, row) => total + (row.macros?.[key] ?? 0), 0);
   const pages = Math.max(1, Math.ceil(rows.length / pageSize)); const current = Math.min(page, pages);
   const shown = rows.slice((current - 1) * pageSize, current * pageSize);
   const goTo = (value: number) => setPage(Math.max(1, Math.min(pages, value)));
@@ -64,11 +65,11 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
 
   /** Tarjeta de estadística: total revisado del período y su variación real contra el período anterior. */
   const statistic = (node: SourceNode, nutrient: Nutrient): SourceBinding => {
-    const total = sum(rows, nutrient); const before = sum(previous, nutrient);
+    const total = nutrientTotal(rows, nutrient); const before = nutrientTotal(previous, nutrient);
     const change = days && before > 0 ? ((total - before) / before) * 100 : null;
     return { children: objects(node).map((child, index) => source(child, part => {
       if (leaf(part) && /^Total /.test(sourceText(part))) return { text: nutrientLabel[nutrient] };
-      if (leaf(part) && /^[\d,]+$/.test(sourceText(part))) return { text: formatNumber(Math.round(total)) };
+      if (leaf(part) && /^[\d,]+$/.test(sourceText(part))) return { text: statNumber(total) };
       if (leaf(part) && ['kcal', 'gr'].includes(sourceText(part))) return { text: nutrient === 'kcal' ? 'kcal' : 'g' };
       if (nodeName(part) === 'Icon/TrendUp') return { props: { style: { transform: change != null && change < 0 ? 'scaleY(-1)' : undefined, opacity: change == null ? 0.4 : 1 } } };
       if (leaf(part) && /^[+-][\d.]+%$/.test(sourceText(part))) return { text: change == null ? `${reviewed.length}` : `${change > 0 ? '+' : ''}${formatNumber(change)} %` };
@@ -80,22 +81,33 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
   /** Fila de la tabla: la fila del archivo del mismo momento del día, con los datos del registro. */
   const tableRow = (prototype: SourceNode, log: Log): ReactNode => {
     const pending = log.status === 'pending_review';
-    const value = (key: Nutrient) => pending || !log.macros ? '—' : formatNumber(log.macros[key]);
+    const value = (key: Nutrient) => pending || !log.macros ? '—' : macroCell(log.macros[key]);
     const unit = (text: string) => pending || !log.macros ? '' : text;
+    const title = mealTitle(log); const slot = log.slot || 'Comida';
     const cells: Record<string, ReactNode[]> = {
-      'Cell-Date': [dateLabel(log.logged_at), timeLabel(log.logged_at)],
-      'Cell-Category': [log.slot],
-      'Cell-Menu': [log.description || log.foods.map(food => food.name).join(', ') || 'Comida registrada'],
+      'Cell-Date': [argentinaDate(log.logged_at) || '—', argentinaTime(log.logged_at)],
+      'Cell-Category': [slot],
+      'Cell-Menu': [title],
       'Cell-Amount': amount(log),
       'Cell-Calories': [value('kcal'), unit('kcal')],
       'Data-Carbs': [value('carbs_g'), unit('g')], 'Data-Protein': [value('protein_g'), unit('g')], 'Data-Fats': [value('fat_g'), unit('g')],
-      // Plan V no registra azúcar: la celda queda vacía en lugar de inventar un cero.
+      // Plan V no registra azúcar: la celda muestra «—» en lugar de inventar un cero.
       'Cell-Sugar': ['—', ''],
       'Cell-Thoughts': [reviewLabel(log)],
     };
+    // Textos largos: el nombre de la comida se recorta a dos renglones y el momento del día a uno, con el texto completo en `title`.
+    const clip: Record<string, Record<string, unknown>> = {
+      'Cell-Menu': { title, style: { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } },
+      'Cell-Category': { title: slot, style: { overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0, flexShrink: 1 } },
+    };
     const fill = (cell: SourceNode, values: ReactNode[]): SourceBinding => {
       const leaves = descendants(cell).filter(child => leaf(child) && child.tag === 'p');
-      return { props: { title: nodeName(cell) === 'Cell-Thoughts' ? reviewDetail(log) : nodeName(cell) === 'Cell-Sugar' ? 'Plan V no registra azúcar' : undefined }, children: objects(cell).map((child, index) => source(child, part => { const position = leaves.indexOf(part); return position >= 0 ? { text: values[position] ?? '' } : undefined; }, index)) };
+      const kind = nodeName(cell);
+      return { props: { title: kind === 'Cell-Thoughts' ? reviewDetail(log) : kind === 'Cell-Sugar' ? 'Plan V no registra azúcar' : undefined }, children: objects(cell).map((child, index) => source(child, part => {
+        if (kind === 'Cell-Category' && nodeName(part) === 'Badge Category - Meal Time') return { props: { style: { maxWidth: '100%', overflow: 'hidden' } } };
+        const position = leaves.indexOf(part);
+        return position >= 0 ? { text: values[position] ?? '', props: position === 0 ? clip[kind] : undefined } : undefined;
+      }, index)) };
     };
     return source(prototype, child => {
       const values = cells[nodeName(child)];
@@ -140,7 +152,7 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
       const box = objects(node); const original = descendants(node).find(child => leaf(child) && sourceText(child) === 'Search menu');
       return { props: { style: { minWidth: 0 } }, children: <>{box[0] && source(box[0], () => undefined, 'icon')}<input type="search" aria-label="Buscar comida" placeholder="Buscar comida" value={search} onChange={event => { setSearch(event.target.value); setPage(1); }} className={String(original?.props.className ?? '').replace('text-center', 'text-left').replace('whitespace-nowrap', '')} style={{ flex: '1 1 0%', minWidth: 0, background: 'transparent', border: 0, outlineOffset: 3 }} /></> };
     }
-    if (name === 'Button Picker' && text === 'Filter') return { onClick: () => { setPendingOnly(value => !value); setPage(1); }, props: { 'aria-pressed': pendingOnly, style: pendingOnly ? { background: '#c2e66e' } : undefined }, label: 'Mostrar sólo comidas pendientes de revisión', children: objects(node).map((child, index) => source(child, part => leaf(part) && sourceText(part) === 'Filter' ? { text: pendingOnly ? 'Pendientes' : 'Filtrar' } : undefined, index)) };
+    if (name === 'Button Picker' && text === 'Filter') return { onClick: () => { setPendingOnly(value => !value); setPage(1); }, props: { 'aria-pressed': pendingOnly, ...(pendingOnly ? swapBackground(node, ['bg-[#eeeeef]', 'bg-white'], GREEN_BG).props : {}) }, label: 'Mostrar sólo comidas pendientes de revisión', children: objects(node).map((child, index) => source(child, part => leaf(part) && sourceText(part) === 'Filter' ? { text: pendingOnly ? 'Pendientes' : 'Filtrar' } : undefined, index)) };
     // En el celular el archivo tiene un único botón de ícono: abre período y filtro.
     if (name === 'Button Picker' && idEnds(node, '498:16354')) return { onClick: () => setDialog('filter'), label: 'Filtrar el diario' };
     if (name === 'Button Picker' && text === 'This Week') return { onClick: () => setPeriod(PERIODS[(PERIODS.indexOf(days) + 1) % PERIODS.length]), label: `Período: ${periodLabel(days)}. Cambiar período`, children: objects(node).map((child, index) => source(child, part => leaf(part) && sourceText(part) === 'This Week' ? { text: periodLabel(days) } : undefined, index)) };

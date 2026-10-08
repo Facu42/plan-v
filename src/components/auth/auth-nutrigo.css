@@ -1,0 +1,121 @@
+/*
+ * Piel Nutrigo para las pantallas de entrada: ingreso, recuperar contraseña, «Antes de seguir»,
+ * cuenta sin vincular, cargando y error de conexión. Figma no dibuja estas pantallas, así que se
+ * arman con los valores del archivo (design/nutrigo-fidelity.md): Poppins, Cream-BG #F9F4F2,
+ * tarjeta blanca radio 16 con la sombra del archivo, campos Gray-BG-Subtle radio 12, CTA Green
+ * #C2E66E con texto Black #272932, grupo segmentado Gray-BG con la opción activa en Green.
+ * El tema oscuro se deriva de la paleta (el archivo no trae pantallas oscuras).
+ */
+.plan-v-app {
+  --ni-bg: #F9F4F2; --ni-card: #FFFFFF; --ni-ink: #272932; --ni-soft: #52545B; --ni-muted: #8A8C90;
+  --ni-line: #E1E1E2; --ni-fill: #EEEEEF; --ni-field: #F6F6F7; --ni-accent: #C2E66E; --ni-accent-soft: #DFF9A2;
+  --ni-error: #B3261E; --ni-shadow: 0 4px 12px rgba(176,176,176,.14);
+}
+.plan-v-app.dark {
+  --ni-bg: #1B1C22; --ni-card: #24262E; --ni-ink: #F6F6F7; --ni-soft: #C9CAD0; --ni-muted: #A8AAB0;
+  --ni-line: #343640; --ni-fill: #2C2E37; --ni-field: #2C2E37; --ni-accent: #C2E66E; --ni-accent-soft: #3A4A28;
+  --ni-error: #FFB4AB; --ni-shadow: 0 4px 12px rgba(0,0,0,.28);
+}
+
+.plan-v-app .auth-screen,
+.plan-v-app.loading-screen,
+.plan-v-app .loading-screen {
+  font-family: Poppins, 'DM Sans', Arial, sans-serif; color: var(--ni-ink); background: var(--ni-bg);
+}
+.plan-v-app.dark .auth-screen { background: var(--ni-bg); }
+.plan-v-app.loading-screen { min-height: 100vh; }
+
+.plan-v-app .auth-card,
+.plan-v-app .loading-card {
+  border: 0; border-radius: 16px; background: var(--ni-card); color: var(--ni-ink); box-shadow: var(--ni-shadow);
+  backdrop-filter: none;
+}
+.plan-v-app .auth-card { width: min(100%, 420px); padding: 28px; }
+.plan-v-app .loading-card { padding: 32px; }
+.plan-v-app .loading-card.error { border: 1px solid var(--ni-line); }
+.plan-v-app .loading-card h2 { margin: 0 0 6px; font: 600 22px/1.08 Poppins, sans-serif; letter-spacing: 0; }
+.plan-v-app .loading-card p { font-size: 12px; line-height: 1.5; color: var(--ni-muted); }
+.plan-v-app .loading-card .hint { color: var(--ni-muted); }
+.plan-v-app .loading-card .primary-button { margin-top: 16px; }
+
+.plan-v-app .auth-card h1,
+.plan-v-app .consent-card h2 { margin: 0 0 6px; font: 600 22px/1.08 Poppins, sans-serif; letter-spacing: 0; color: var(--ni-ink); }
+.plan-v-app .auth-brand strong { font: 700 18px/1.2 Poppins, sans-serif; letter-spacing: 0; color: var(--ni-ink); }
+.plan-v-app .auth-brand small { font-size: 11px; line-height: 1.3; color: var(--ni-muted); }
+.plan-v-app .auth-sub,
+.plan-v-app .auth-card p { font-size: 12px; line-height: 1.5; color: var(--ni-muted); }
+.plan-v-app .auth-card h1 + p { margin-bottom: 16px; }
+.plan-v-app .eyebrow { font-family: Poppins, sans-serif; color: var(--ni-muted); }
+
+/* Grupo segmentado del archivo: fondo Gray-BG, opción activa en Green. */
+.plan-v-app .auth-tabs,
+.plan-v-app .role-pills { gap: 4px; padding: 4px; border-radius: 12px; background: var(--ni-fill); }
+.plan-v-app .auth-tabs button,
+.plan-v-app .role-pills button {
+  padding: 8px 10px; border: 0; border-radius: 8px; color: var(--ni-soft); background: transparent;
+  font: 500 12px/1 Poppins, sans-serif;
+}
+.plan-v-app .auth-tabs button.active,
+.plan-v-app .role-pills button.active,
+.plan-v-app.dark .auth-tabs button.active,
+.plan-v-app.dark .role-pills button.active { color: #272932; background: var(--ni-accent); border: 0; }
+
+/* Campos: Gray-BG-Subtle, radio 12, 14 px. */
+.plan-v-app .auth-card .text-input,
+.plan-v-app .consent-card .text-input {
+  padding: 10px 13px; border: 1px solid transparent; border-radius: 12px; color: var(--ni-ink); background: var(--ni-field);
+  font: 400 14px/1.25 Poppins, sans-serif;
+}
+.plan-v-app .auth-card .text-input::placeholder { color: var(--ni-muted); }
+.plan-v-app .auth-card .text-input:focus-visible,
+.plan-v-app .auth-screen :is(button, a, input):focus-visible { outline: 2px solid var(--ni-ink); outline-offset: 2px; }
+
+/* Botones: CTA verde, secundarios en Gray-BG, sin pastilla. */
+.plan-v-app .auth-card .primary-button,
+.plan-v-app .consent-card .primary-button,
+.plan-v-app .loading-card .primary-button {
+  min-height: 44px; border-radius: 12px; color: #272932; background: var(--ni-accent); box-shadow: none;
+  font: 500 14px/1 Poppins, sans-serif;
+}
+.plan-v-app .auth-card .primary-button:disabled,
+.plan-v-app .consent-card .primary-button:disabled { opacity: .5; }
+.plan-v-app .auth-card .soft-button,
+.plan-v-app .consent-card .soft-button,
+.plan-v-app.dark .auth-card .soft-button {
+  min-height: 44px; border-radius: 12px; color: var(--ni-ink); background: var(--ni-fill); box-shadow: none;
+  font: 500 14px/1 Poppins, sans-serif;
+}
+.plan-v-app .auth-card .primary-button.wide,
+.plan-v-app .auth-card .soft-button.wide { width: 100%; }
+.plan-v-app .auth-card .soft-button.wide { margin-top: 10px; }
+.plan-v-app .google-button {
+  min-height: 44px; border: 1px solid var(--ni-line); border-radius: 12px; color: #272932; background: #fff;
+  font: 500 14px/1 Poppins, sans-serif; box-shadow: none;
+}
+.plan-v-app .round-button { border-radius: 10px; color: var(--ni-ink); background: var(--ni-fill); box-shadow: none; }
+
+.plan-v-app .auth-divider { color: var(--ni-muted); font-size: 11px; }
+.plan-v-app .auth-divider::before,
+.plan-v-app .auth-divider::after { background: var(--ni-line); }
+.plan-v-app .auth-foot { font-size: 11px; color: var(--ni-muted); }
+.plan-v-app .auth-consent { font-size: 12px; color: var(--ni-soft); }
+.plan-v-app .auth-consent input { accent-color: #73A107; }
+.plan-v-app .auth-consent a,
+.plan-v-app .auth-legal a { color: var(--ni-ink); }
+.plan-v-app .form-error { padding: 8px 12px; border-radius: 12px; color: var(--ni-error); background: color-mix(in srgb, var(--ni-error) 10%, transparent); font-size: 12px; }
+.plan-v-app .brand-mark { border: 0; background: var(--ni-field); box-shadow: none; }
+
+/* Tema oscuro: las reglas viejas de plan-v.css también apuntan a estas clases; estas igualan su peso y vienen después. */
+.plan-v-app.dark .auth-screen { background: var(--ni-bg); }
+.plan-v-app.dark .auth-card,
+.plan-v-app.dark .loading-card { border-color: var(--ni-line); background: var(--ni-card); box-shadow: var(--ni-shadow); }
+.plan-v-app.dark .auth-card h1,
+.plan-v-app.dark .consent-card h2,
+.plan-v-app.dark .loading-card h2 { color: var(--ni-ink); }
+.plan-v-app.dark .auth-tabs button,
+.plan-v-app.dark .role-pills button { color: var(--ni-soft); background: transparent; }
+.plan-v-app.dark .auth-tabs button.active,
+.plan-v-app.dark .role-pills button.active { color: #272932; background: var(--ni-accent); border: 0; }
+.plan-v-app.dark .soft-button { color: var(--ni-ink); background: var(--ni-fill); }
+.plan-v-app.dark .auth-card .text-input,
+.plan-v-app.dark .consent-card .text-input { border-color: transparent; color: var(--ni-ink); background: var(--ni-field); }

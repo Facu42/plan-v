@@ -71,7 +71,7 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
     <div className="auth-screen">
       <div className="auth-card">
         <div className="auth-head">
-          <div className="auth-brand"><Mark /><div><strong>Plan V</strong><small>Centro profesional</small></div></div>
+          <div className="auth-brand"><Mark /><div><strong>Plan V</strong><small>Nutrición</small></div></div>
           <button className="round-button theme-toggle" type="button" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} aria-pressed={darkMode} onClick={onToggleTheme}>
             <Icon name={darkMode ? 'sun' : 'moon'} size={18} />
           </button>
@@ -115,13 +115,13 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
                   <button type="button" className={professional ? '' : 'active'} aria-pressed={!professional} onClick={() => setProfessional(false)}>Soy paciente</button>
                   <button type="button" className={professional ? 'active' : ''} aria-pressed={professional} onClick={() => setProfessional(true)}>Soy nutricionista</button>
                 </div>
-                <input className="text-input" placeholder={professional ? 'Nombre profesional' : 'Nombre completo'} value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                <input className="text-input" aria-label={professional ? 'Nombre profesional' : 'Nombre completo'} autoComplete="name" placeholder={professional ? 'Nombre profesional' : 'Nombre completo'} value={fullName} onChange={(e) => setFullName(e.target.value)} />
               </>
             )}
 
-            <input className="text-input" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+            <input className="text-input" type="email" aria-label="Correo electrónico" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
             {mode !== 'recover' && (
-              <input className="text-input" type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
+              <input className="text-input" type="password" aria-label="Contraseña" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
             )}
 
             {mode === 'signup' && (
@@ -163,9 +163,6 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
             <button type="button" className="soft-button wide" onClick={enterDemoMode}>Continuar en modo demo</button>
             <p className="auth-foot">Modo demo usa datos locales sin persistencia. No está disponible en un build de producción.</p>
           </>
-        )}
-        {!demoAllowed && (
-          <p className="auth-foot">El acceso demo no está habilitado en esta sesión.</p>
         )}
         <p className="auth-foot auth-legal"><a href={PRIVACY_URL} target="_blank" rel="noreferrer">Privacidad</a> · <a href={TERMS_URL} target="_blank" rel="noreferrer">Términos</a></p>
       </div>

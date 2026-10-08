@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import type { HabitLog, MealLog } from '../../types';
 import { buildJourneySummary } from './journey-summary';
 
@@ -95,5 +95,35 @@ describe('buildJourneySummary', () => {
     expect(summary.sleepRecordedDays).toBe(2);
     expect(summary.sleepAverageMinutes).toBe(420);
     expect(summary.days[0]).toMatchObject({ hydration: 0, sleepMinutes: null, energy: null });
+  });
+});
+
+/** vite.config.ts fija la zona de Buenos Aires para toda la suite: acá se cambia solo dentro de la prueba y se restaura. */
+const originalZone = process.env.TZ;
+afterEach(() => { if (originalZone === undefined) delete process.env.TZ; else process.env.TZ = originalZone; });
+
+describe.each(['Asia/Tokyo', 'America/Los_Angeles', 'Pacific/Auckland'])('buildJourneySummary con el dispositivo en %s', zone => {
+  const lateEvening = new Date('2026-10-07T22:00:00-03:00');
+  const afterMidnight = new Date('2026-10-08T01:30:00-03:00');
+
+  it('cuenta los días de Buenos Aires: a las 22:00 de allá hoy sigue siendo hoy', () => {
+    process.env.TZ = zone;
+    const days = buildJourneySummary({ meal_logs: [], habit_logs: [] }, lateEvening).days;
+    expect(days[6]).toMatchObject({ date: '2026-10-07', isToday: true, label: 'mié' });
+    expect(days[0].date).toBe('2026-10-01');
+  });
+  it('cruza el medianoche de Buenos Aires sin adelantar ni atrasar el día', () => {
+    process.env.TZ = zone;
+    expect(buildJourneySummary({ meal_logs: [], habit_logs: [] }, afterMidnight).days[6].date).toBe('2026-10-08');
+  });
+  it('una comida y el agua de las 22:00 de Buenos Aires caen en el mismo día argentino', () => {
+    process.env.TZ = zone;
+    const summary = buildJourneySummary({ habit_logs: [habit('2026-10-07', 5, 420)], meal_logs: [meal('cena', 'confirmed', '2026-10-07T22:00:00-03:00')] }, lateEvening);
+    expect(summary.days[6]).toMatchObject({ date: '2026-10-07', hydration: 5, reviewedMeals: 1, mealLogIds: ['cena'] });
+  });
+  it('cruza fin de mes y de año', () => {
+    process.env.TZ = zone;
+    const days = buildJourneySummary({ meal_logs: [], habit_logs: [] }, new Date('2027-01-02T23:00:00-03:00')).days;
+    expect(days.map(day => day.date)).toEqual(['2026-12-27', '2026-12-28', '2026-12-29', '2026-12-30', '2026-12-31', '2027-01-01', '2027-01-02']);
   });
 });

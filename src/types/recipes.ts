@@ -36,7 +36,9 @@ export const ingredientInputSchema = z.object({
 }).strict();
 
 export type RecipeDraftInput = z.infer<typeof recipeDraftSchema>;
-export type RecipeItem = { id: string; name: string; quantity: number; unit: RecipeUnit };
+/** Foto del ingrediente del catálogo compartido. Sólo viene en lo que lee la paciente y solo si existe y es segura. */
+export type IngredientPhoto = { ingredient_cover_url?: string | null; ingredient_cover_alt?: string };
+export type RecipeItem = { id: string; name: string; quantity: number; unit: RecipeUnit } & IngredientPhoto;
 export type RecipeMacros = {
   kcal: number | null;
   protein_g: number | null;

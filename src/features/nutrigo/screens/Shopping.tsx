@@ -6,7 +6,11 @@ import { RECIPE_UNITS, type RecipeUnit } from '../../../types/recipes';
 import type { ShoppingKind, ShoppingLine } from '../../../types/shopping';
 import { createPendingWrite } from './pending-write';
 import { canLeaveWorkspace,useUnsavedChanges } from '../../../components/nutrigo/unsaved-changes';
-import { cloneList, descendants, EmptyState, errorText, fields, formatNumber, leaf, objects, percent, Ring, searchBinding, source, RecordDialog, Stateful, useRemote, type ScreenProps } from './shared';
+import { cloneList, descendants, EmptyState, errorText, fields, leaf, objects, percent, Ring, searchBinding, source, RecordDialog, Stateful, useRemote, type ScreenProps } from './shared';
+import { argentinaMonth } from './ar-time';
+import { boughtLabel, monthName, productCount, quantityLabel, recentMonths } from './shopping-format';
+import { leftAlignedSearch } from './search-align';
+import { GREEN_BG, swapBackground } from '../source-tone';
 
 /** Solapas del archivo (All Categories, Grains…) con los filtros reales de la lista de Plan V. */
 const TABS=[{id:'all',label:'Todos'},{id:'pending',label:'Pendientes'},{id:'checked',label:'Comprados'},{id:'plan',label:'Del plan'},{id:'manual',label:'Agregados'}] as const;
@@ -22,8 +26,6 @@ const ORIGINS:Array<{kind:ShoppingKind;label:string;badge:string;color:string}>=
 const originOf=(kind:ShoppingKind)=>ORIGINS.find(origin=>origin.kind===kind)??ORIGINS[0];
 const HEADER_LABELS:Record<string,string>={'Item Name':'Producto','Category':'Origen','Qty':'Cantidad','Calories':'Calorías','Cost':'Costo','Actual':'Pagado','Status':'Estado'};
 const MONTH_SAMPLE=/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$/;
-const monthLabel=(date:Date)=>date.toLocaleDateString('es-AR',{month:'short'}).replace('.','').replace(/^./,c=>c.toUpperCase());
-const items=(count:number)=>`${count} ${count===1?'producto':'productos'}`;
 
 /** Cambia sólo las hojas de texto de un subárbol del archivo y conserva íconos y estilos. */
 function relabel(node:SourceNode,text:(sample:string,child:SourceNode)=>ReactNode|undefined,extra?:SourceResolver,key?:string|number) {
@@ -35,6 +37,8 @@ function relabel(node:SourceNode,text:(sample:string,child:SourceNode)=>ReactNod
     return value===undefined?undefined:{text:value};
   },key);
 }
+/** Textos de ancho fijo del archivo («Purchased» en 60, «Protein» en una columna angosta): con otras palabras no se parten en dos renglones. */
+const oneLine={whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'} as const;
 const dim:SourceBinding={props:{style:{opacity:.4},'aria-hidden':true}};
 
 export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut, now = new Date() }: ScreenProps) {
@@ -66,14 +70,14 @@ export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut, no
   const row = (prototype: SourceNode, item: ShoppingLine, last: boolean) => source(prototype, child => {
     const cell = nodeName(child);
     if (child === prototype) return last ? { props: { style: { borderBottomWidth: 0 } } } : undefined;
-    if (cell === 'Cell-Item Name') return { children: relabel(child, () => item.name, n => leaf(n) ? { text: item.name, props: { style: { flexShrink: 1, minWidth: 0 } } } : nodeName(n) === 'Image' && item.kind === 'manual'
+    if (cell === 'Cell-Item Name') return { children: relabel(child, () => item.name, n => leaf(n) ? { text: item.name, props: { title: item.name, style: { flexShrink: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' } } } : nodeName(n) === 'Image' && item.kind === 'manual'
       ? { onClick: () => void mutate(() => shoppingApi.remove(patient.id, item.id)), label: `Eliminar ${item.name}`, props: { disabled: busy, style: { display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8a8c90', fontSize: 18 } }, children: <span aria-hidden="true">×</span> }
       : undefined) };
     if (cell === 'Cell-Category') return { children: relabel(child, () => originOf(item.kind).badge, n => nodeName(n) === 'Badge Category - Grocery List' ? { props: { style: { background: originOf(item.kind).color } } } : undefined) };
-    if (cell === 'Cell-Qty') return { children: relabel(child, sample => /^\d/.test(sample) ? (item.quantity === null ? '-' : formatNumber(item.quantity)) : (item.unit ?? ''), n => nodeName(n) === 'Button Group' ? dim : undefined) };
+    if (cell === 'Cell-Qty') return { children: relabel(child, sample => /^\d/.test(sample) ? quantityLabel(item.quantity) : (item.unit ?? ''), n => nodeName(n) === 'Button Group' ? dim : leaf(n) && /^\d/.test(sourceText(n)) ? { text: quantityLabel(item.quantity), props: { title: quantityLabel(item.quantity), style: oneLine } } : undefined) };
     // Plan V no tiene calorías ni precios por producto: las columnas quedan sin dato, como «Actual» en el archivo.
     if (['Cell-Calories', 'Cell-Cost', 'Cell-Actual'].includes(cell)) return { children: relabel(child, sample => /^\d/.test(sample) ? '-' : '') };
-    if (cell === 'Cell-Status') return { children: relabel(child, () => item.checked ? 'Comprado' : 'Pendiente', n => n !== child && objects(child).includes(n) ? { onClick: () => void mutate(() => shoppingApi.check(patient.id, { source_key: item.source_key, checked: !item.checked })), label: `${item.checked ? 'Desmarcar' : 'Marcar como comprado'}: ${item.name}`, props: { disabled: busy, 'aria-pressed': item.checked } } : undefined) };
+    if (cell === 'Cell-Status') return { children: relabel(child, () => item.checked ? 'Comprado' : 'Pendiente', n => leaf(n) ? { text: item.checked ? 'Comprado' : 'Pendiente', props: { style: { width: 'auto', whiteSpace: 'nowrap' } } } : n !== child && objects(child).includes(n) ? { onClick: () => void mutate(() => shoppingApi.check(patient.id, { source_key: item.source_key, checked: !item.checked })), label: `${item.checked ? 'Desmarcar' : 'Marcar como comprado'}: ${item.name}`, props: { disabled: busy, 'aria-pressed': item.checked } } : undefined) };
     return undefined;
   }, item.source_key);
 
@@ -96,9 +100,12 @@ export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut, no
     return { children: columns.map((column, index) => source(column, n => n === column ? { children: index === 0 ? cloneList(column, byOrigin, bind, { key: origin => origin.kind }) : null } : undefined, index)) };
   };
 
+  /** Sólo el rótulo del origen (no el importe ni el porcentaje) se recorta con puntos suspensivos y lleva su texto completo en `title`. */
+  const legendLabel = (n: SourceNode, label: string) => /^(\$|\d)|items$|%$/.test(sourceText(n)) ? undefined : { title: label, style: oneLine };
+
   const resolver: SourceResolver = node => {
     const name = nodeName(node); const text = sourceText(node);
-    const input = searchBinding(node, search, value => { setSearch(value); setPage(0); }, 'Buscar producto'); if (input) return input;
+    const input = leftAlignedSearch(searchBinding(node, search, value => { setSearch(value); setPage(0); }, 'Buscar producto')); if (input) return input;
     if (name === 'Table' && objects(node).some(child => nodeName(child) === 'Table-Row-Grocery List')) return tableBinding(node);
     if (name === 'Tab') {
       const tabs = objects(node);
@@ -112,8 +119,8 @@ export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut, no
     if (leaf(node) && text === 'Sort by:') return { text: 'Ordenar por:' };
     if (/Button/.test(name) && text === 'Newest') { const next = SORTS.find(entry => entry.id !== sort)!; return { onClick: () => setSort(next.id), label: `Ordenar por ${next.label.toLocaleLowerCase('es')}`, children: relabel(node, () => SORTS.find(entry => entry.id === sort)!.label) }; }
     if (/Button/.test(name) && text === 'Add Item') return { onClick: () => setAdding(true), label: 'Agregar producto', children: relabel(node, () => 'Agregar producto') };
-    if (/Button/.test(name) && text === 'Filter') return { onClick: () => choose(tab === 'pending' ? 'all' : 'pending'), props: { 'aria-pressed': tab === 'pending', style: tab === 'pending' ? { background: '#c2e66e' } : undefined }, label: 'Ver sólo pendientes', children: relabel(node, () => 'Pendientes') };
-    if (name === 'Footer' && objects(node).some(child => nodeName(child) === 'Pagination' || nodeName(child) === 'Section Result')) return { children: relabel(node, sample => sample === 'Showing' ? 'Mostrando' : /^out of/.test(sample) ? `de ${items(rows.length)}` : undefined, child => {
+    if (/Button/.test(name) && text === 'Filter') return { onClick: () => choose(tab === 'pending' ? 'all' : 'pending'), props: { 'aria-pressed': tab === 'pending', ...(tab === 'pending' ? swapBackground(node, ['bg-white', 'bg-[#eeeeef]'], GREEN_BG).props : {}) }, label: 'Ver sólo pendientes', children: relabel(node, () => 'Pendientes') };
+    if (name === 'Footer' && objects(node).some(child => nodeName(child) === 'Pagination' || nodeName(child) === 'Section Result')) return { children: relabel(node, sample => sample === 'Showing' ? 'Mostrando' : /^out of/.test(sample) ? `de ${productCount(rows.length)}` : undefined, child => {
       if (nodeName(child) === 'Button' && sourceText(child) === '10') { const next = PAGE_SIZES[(PAGE_SIZES.indexOf(pageSize) + 1) % PAGE_SIZES.length]; return { onClick: () => { setPageSize(next); setPage(0); }, label: `Productos por página: ${pageSize}. Cambiar a ${next}`, children: relabel(child, () => String(pageSize)) }; }
       if (nodeName(child) === 'Pagination') {
         const parts = objects(child), arrows = parts.filter(part => nodeName(part) === 'Button Icon'), numbers = parts.filter(part => nodeName(part) === 'Button');
@@ -129,25 +136,25 @@ export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut, no
       return { children: relabel(node, (sample, child) => {
         if (['Estimated Cost', 'Total Items', 'Total Calories'].includes(sample)) return kind === 'cost' ? 'Costo' : kind === 'items' ? 'Productos' : 'Calorías';
         // Sin precios ni calorías por producto, las fichas quedan en cero y la etiqueta lo aclara.
-        if (/%$/.test(sample)) return kind === 'items' ? `${checked} comprados` : kind === 'cost' ? 'Sin precios' : 'Sin calcular';
+        if (/%$/.test(sample)) return kind === 'items' ? boughtLabel(checked) : kind === 'cost' ? 'Sin precios' : 'Sin calcular';
         if (/SemiBold/.test(String(child.props.className))) return kind === 'items' ? String(all.length) : kind === 'cost' ? '$0' : '0';
         return kind === 'items' ? (all.length === 1 ? 'producto' : 'productos') : kind === 'calories' ? 'kcal' : '';
       }) };
     }
     if (name === 'Widget Expense Overview') {
       const count = descendants(node).filter(child => leaf(child) && MONTH_SAMPLE.test(sourceText(child))).length;
-      const months = Array.from({ length: count }, (_, index) => new Date(now.getFullYear(), now.getMonth() - count + 1 + index, 1));
+      const months = recentMonths(now, count); const thisMonth = months[months.length - 1] ?? argentinaMonth(now);
       let month = 0;
       return { children: relabel(node, sample => {
         if (/^Last \d+ Months$/.test(sample)) return `Últimos ${count} meses`;
-        if (MONTH_SAMPLE.test(sample)) return monthLabel(months[month++] ?? now);
+        if (MONTH_SAMPLE.test(sample)) return monthName((months[month++] ?? thisMonth).month);
         if (/^\$\d+$/.test(sample)) return sample === '$0' ? '$0' : '';
         return undefined;
-      }, child => nodeName(child) === 'Div Bar' ? { props: { style: { height: 0 } } } : nodeName(child) === 'Tooltip' ? { children: relabel(child, sample => /\d{4}$/.test(sample) ? `${monthLabel(now)} ${now.getFullYear()}` : 'Sin precios') } : undefined) };
+      }, child => nodeName(child) === 'Div Bar' ? { props: { style: { height: 0 } } } : nodeName(child) === 'Tooltip' ? { children: relabel(child, sample => /\d{4}$/.test(sample) ? `${monthName(thisMonth.month)} ${thisMonth.year}` : 'Sin precios') } : undefined) };
     }
     if (name === 'Widget Expense Breakdown') return { children: relabel(node, sample => sample === 'Total Expense' ? 'Sin precios cargados' : sample === 'This Week' ? 'Esta semana' : /^\d+$/.test(sample) ? '0' : undefined, child => {
       if (nodeName(child) === 'Chart') return { children: <><Ring pct={0} color="#c2e66e" track="#eeeeef" thickness={22} />{objects(child).filter(part => !/^Donut/.test(nodeName(part))).map((part, index) => source(part, n => !leaf(n) ? undefined : /^\d+$/.test(sourceText(n)) ? { text: '0' } : sourceText(n) === '$' ? { text: '$' } : sourceText(n) === 'Total Expense' ? { text: 'Sin precios' } : undefined, index))}</> };
-      if (nodeName(child) === 'List Expense Breakdown') return legend(child, (n, origin) => leaf(n) ? { text: /^\$/.test(sourceText(n)) ? '$0' : /%$/.test(sourceText(n)) ? '0%' : origin.label } : undefined);
+      if (nodeName(child) === 'List Expense Breakdown') return legend(child, (n, origin) => leaf(n) ? { text: /^\$/.test(sourceText(n)) ? '$0' : /%$/.test(sourceText(n)) ? '0%' : origin.label, props: legendLabel(n, origin.label) } : undefined);
       return undefined;
     }) };
     if (name === 'Widget Grocery Category') return { children: relabel(node, sample => sample === 'Total' ? 'Total' : /^\d+$/.test(sample) ? String(all.length) : sample === 'Items' ? (all.length === 1 ? 'producto' : 'productos') : undefined, child => {
@@ -156,7 +163,7 @@ export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut, no
         if (!all.length) return { children: bars.slice(-1).map((bar, index) => source(bar, () => ({ props: { style: { width: 'auto', flex: '1 1 0%' } } }), index)) };
         return { children: byOrigin.map((origin, index) => bars[index] ? source(bars[index], n => n === bars[index] ? { props: { style: { width: 'auto', minWidth: 0, flex: `${origin.count} 1 0%`, display: origin.count ? undefined : 'none' } } } : undefined, origin.kind) : null) };
       }
-      if (nodeName(child) === 'List Expense Breakdown') return legend(child, (n, origin) => leaf(n) ? { text: /items$/.test(sourceText(n)) ? items(origin.count) : /%$/.test(sourceText(n)) ? `${Math.round(percent(origin.count, all.length) ?? 0)}%` : origin.label } : undefined);
+      if (nodeName(child) === 'List Expense Breakdown') return legend(child, (n, origin) => leaf(n) ? { text: /items$/.test(sourceText(n)) ? productCount(origin.count) : /%$/.test(sourceText(n)) ? `${Math.round(percent(origin.count, all.length) ?? 0)}%` : origin.label, props: legendLabel(n, origin.label) } : undefined);
       return undefined;
     }) };
     return undefined;

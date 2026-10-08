@@ -18,6 +18,7 @@ import {
 import { getRecipeCard, resetRecipeCards, setRecipeCard } from './presentation.js';
 import { unavailableCard } from '../../src/types/recipe-plate.js';
 import { generateRecipeCoverImage, recipeCoverEnabled } from '../ai/recipe-cover.js';
+import { queueIngredientCovers } from './ingredient-covers.js';
 import { logProviderFailure } from '../ai/mode.js';
 import { recipeNutritionSchema, resolveRecipeNutrition, type RecipeNutrition } from '../../src/types/ai-nutrition.js';
 
@@ -427,6 +428,8 @@ export async function retryRecipeCover(nutritionistId: string, recipeId: string,
   if (!recipe.published || recipe.published.version !== expectedVersion) {
     throw new CareError(409, 'La receta cambió. Volvé a abrir la revisión publicada antes de generar la foto.');
   }
+  // Los ingredientes comparten el catálogo: también se reservan si el plato ya tiene foto.
+  if (recipeCoverEnabled()) await queueIngredientCovers(() => recipe.published?.ingredients ?? [], { persistent, retry: true });
   if (recipe.published.card?.cover_status === 'ready') return recipe;
   if (!recipeCoverEnabled()) {
     throw new CareError(503, 'La generación de fotos todavía no está habilitada. La receta sigue publicada.');

@@ -1,0 +1,38 @@
+/*
+ * Movimiento de Inicio (Figma no dibuja estados de hover ni de entrada): las tarjetas entran con un
+ * ascenso escalonado y, con mouse, se levantan al pasar. Solo transform/opacity/sombra (baratos de
+ * animar), con la curva y la sombra de design/nutrigo-fidelity.md.
+ * Todo vive dentro de «sin preferencia de reducir movimiento»: con «reducir movimiento» no se anima nada.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes mcp-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  .mcp-nutrigo :is([data-name="Card Statistic - Dashboard"], [data-name="Widget Weight Data"], [data-name="Widget Calories Intake"],
+    [data-name="Card Recommended Menu"], [data-name="Card Recommended Exercise"], [data-name="Item List Macronutrients"]) {
+    transition: transform .28s cubic-bezier(.2, .8, .2, 1), box-shadow .28s cubic-bezier(.2, .8, .2, 1);
+    animation: mcp-rise .5s cubic-bezier(.2, .8, .2, 1) backwards; /* backwards: al terminar suelta el transform para que el hover funcione */
+  }
+  .mcp-nutrigo [data-name="Card Statistic - Dashboard"]:nth-child(2) { animation-delay: .06s; }
+  .mcp-nutrigo [data-name="Card Statistic - Dashboard"]:nth-child(3) { animation-delay: .12s; }
+  .mcp-nutrigo [data-name="Card Statistic - Dashboard"]:nth-child(4) { animation-delay: .18s; }
+  .mcp-nutrigo [data-name="Widget Weight Data"] { animation-delay: .22s; }
+  .mcp-nutrigo [data-name="Widget Calories Intake"] { animation-delay: .28s; }
+  .mcp-nutrigo [data-name="Card Recommended Menu"]:nth-child(2) { animation-delay: .06s; }
+  .mcp-nutrigo [data-name="Card Recommended Exercise"]:nth-child(2) { animation-delay: .06s; }
+  .mcp-nutrigo [data-name="Card Recommended Exercise"]:nth-child(3) { animation-delay: .12s; }
+  .mcp-nutrigo [data-name="Card Statistic - Dashboard"] [data-name="Icon"] { transition: transform .3s cubic-bezier(.2, .8, .2, 1); }
+  .mcp-nutrigo :is([data-name="Card Recommended Menu"], [data-name="Card Recommended Exercise"]) img { transition: transform .5s cubic-bezier(.2, .8, .2, 1); }
+
+  @media (hover: hover) {
+    .mcp-nutrigo :is([data-name="Card Statistic - Dashboard"]:hover, [data-name="Widget Weight Data"]:hover, [data-name="Widget Calories Intake"]:hover,
+      [data-name="Card Recommended Menu"]:hover, [data-name="Card Recommended Exercise"]:hover) {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(39, 41, 50, .10);
+    }
+    .mcp-nutrigo [data-name="Item List Macronutrients"]:hover { transform: translateX(4px); }
+    /* El ícono de cada tarjeta de estadística da un saltito y vuelve suave. */
+    .mcp-nutrigo [data-name="Card Statistic - Dashboard"]:hover [data-name="Icon"] { transform: scale(1.1) rotate(-6deg); }
+    /* La foto del menú y del ejercicio se acerca despacio dentro de su marco. */
+    .mcp-nutrigo :is([data-name="Card Recommended Menu"], [data-name="Card Recommended Exercise"]):hover img { transform: scale(1.04); }
+  }
+}

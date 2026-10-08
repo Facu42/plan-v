@@ -23,6 +23,12 @@ describe('navegación del paciente desde el archivo',()=>{
     const render=(unread:number)=>renderToStaticMarkup(<SourceView source={messages} resolve={node=>patientNavBinding(node,()=>undefined,unread)} translate={translateSource}/>);
     expect(render(0)).not.toContain('data-name="Badge"');expect(render(3)).toContain('>3</p>');expect(render(3)).not.toContain('>6</p>');
   });
+  it('el contador tolera cifras grandes, negativas o inválidas sin romper el diseño',()=>{
+    const messages=findSource(shopping as SourceNode,node=>nodeName(node)==='Button Nav'&&sourceText(node).startsWith('Messages'))!;
+    const render=(unread:number)=>renderToStaticMarkup(<SourceView source={messages} resolve={node=>patientNavBinding(node,()=>undefined,unread)} translate={translateSource}/>);
+    expect(render(0.5)).not.toContain('data-name="Badge"');expect(render(250)).toContain('>99+</p>');expect(render(99)).toContain('>99</p>');
+    for(const bad of [-2,Number.NaN,Number.POSITIVE_INFINITY*0])expect(render(bad)).not.toContain('data-name="Badge"');
+  });
   it('incluye los diez destinos principales reales',()=>{
     expect(new Set(Object.values(patientNavigation))).toEqual(new Set(['inicio','agenda','mensajes','recetas','plan','compras','diario','progreso','ejercicio','recursos']));
   });

@@ -5,5 +5,6 @@ export function dateLabel(value: string): string {
     if (date.toISOString().slice(0, 10) !== value) return value;
     return date.toLocaleDateString('es-AR', { timeZone: 'UTC' });
   }
-  return date.toLocaleDateString('es-AR');
+  // Marca de tiempo: el día es el de Argentina, no el del dispositivo.
+  return date.toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
 }
