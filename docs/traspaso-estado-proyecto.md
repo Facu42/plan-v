@@ -65,6 +65,12 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 
 ## Lo pendiente
 
+- Producción, 2026-10-08 (con la frase escrita de Facundo): aplicadas `20261008120000_ingredient_covers` (fotos de
+  ingredientes; dos tablas sin acceso directo) y `20261005224500_editorial_clinic_isolation` (cada consultorio solo lee y
+  asigna sus propios materiales; se aplicó por partes —función y política— porque el conector cortaba a los 60 s, y quedó
+  anotada en el historial de migraciones). La foto de prueba de un plato está en producción y **no se borra hasta que
+  Facundo la vea y la apruebe**; la prueba de ingredientes completa necesita publicar el código nuevo (merge a `main`).
+  Detalle: `docs/fotos-menu-cloudflare-2026-10-06.md`.
 - Auditoría de la demo del 2026-10-07 (rama `claude/inspiring-lovelace-nfsot9`): superficies fuera del
   archivo que todavía tienen estilo viejo y la primera prueba de fotos con Cloudflare en producción.
   Ver `docs/auditoria-demo-2026-10-07.md`.

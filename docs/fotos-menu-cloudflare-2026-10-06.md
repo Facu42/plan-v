@@ -157,7 +157,16 @@ existe la tabla ni se genera nada hasta que Facundo dé su frase escrita (pasos 
   lectura directa, idempotencia, reservas, cuota por intentos y reparto con platos, caídas del proveedor, direcciones).
 - `server/recipes/cover-workers.test.ts` y `menu-covers-worker.test.ts`: prioridad de los platos y registro de sus intentos.
 
-### Para activarlo en producción (no ejecutado; necesita la frase escrita de Facundo)
+### Estado en producción (2026-10-08)
+
+- Migración de ingredientes **aplicada** en `plan-v-app` con la autorización escrita de Facundo: las dos tablas tienen RLS
+  y ninguna política; solo `service_role` las lee y escribe y ejecuta las cuatro funciones.
+- Foto de plato probada con Cloudflare real: fila de prueba `f9bdc800-bae4-4bf6-88f1-7fc75d275c8a` en estado `ready`
+  (JPEG de 468 KB en `recipe-covers`). Se conserva hasta que Facundo la apruebe; después se borran la fila y el archivo.
+- La prueba completa de ingredientes requiere el código nuevo del worker (merge a `main`). Mientras tanto no hay filas de
+  ingredientes en producción.
+
+### Pasos para activarlo (el primero ya se hizo)
 
 1. Aplicar `supabase/migrations/20261008120000_ingredient_covers.sql` en `plan-v-app` (crea dos tablas sin acceso directo,
    `ingredient_covers` y `cover_daily_usage`, y cuatro funciones solo para el servicio; no toca nada existente). Después
