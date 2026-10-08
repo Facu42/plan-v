@@ -45,6 +45,11 @@ export class DemoStateFile {
     const saved = deserialize(readFileSync(this.file)) as { version?: number; domains?: Record<string, Group> };
     if (saved?.version !== 1 || !saved.domains || Object.getPrototypeOf(saved.domains) !== Object.prototype) throw new Error('Copia local incompatible o dañada; se conservó el archivo');
     const current = Object.fromEntries([...this.domains].map(([name, read]) => [name, read()]));
+    // Ampliación v1 conocida: el catálogo de modelos inicia vacío. No admitir
+    // otros dominios faltantes ni modificar el archivo antes de validar todo.
+    if (current.models?.models instanceof Map && !Object.prototype.hasOwnProperty.call(saved.domains, 'models')) {
+      saved.domains.models = { models: new Map() };
+    }
     if (keys(current) !== keys(saved.domains)) throw new Error('La copia local tiene dominios diferentes; se conservó el archivo');
     // Validar todo antes de restaurar para no dejar un estado parcial.
     for (const [name, values] of Object.entries(current)) {

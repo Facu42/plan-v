@@ -1,0 +1,226 @@
+.mc-nutrients { margin: 16px 0; padding-top: 12px; border-top: 1px solid #e0e7da; }
+.mc-nutrients dl { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; margin: 10px 0; }
+.mc-nutrients dt { font-size: 11px; color: var(--nv-muted,#68766f); }
+.mc-nutrients dd { margin: 3px 0; font-size: 13px; font-weight: 600; }
+.mc-content details { margin: 10px 0; }
+.mc-content summary, .mc-editor summary { cursor:pointer; font-size:13px; }
+.mc-catalog {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 24px;
+  color: var(--nv-text, #26382f);
+}
+.mc-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+.mc-heading h1 {
+  font-size: 30px;
+  margin: 8px 0;
+}
+.mc-heading p,
+.mc-caption {
+  color: var(--nv-muted, #68766f);
+  line-height: 1.6;
+}
+.mc-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.13em;
+  font-weight: 600;
+  color: #628769;
+}
+.mc-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #e0e7df;
+  margin-bottom: 22px;
+}
+.mc-tabs button {
+  padding: 14px 18px;
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+.mc-tabs button[aria-pressed='true'] {
+  border-color: #688c60;
+  background: #f0f5ec;
+  color: #355832;
+}
+.mc-tabs span {
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: #e5ecdf;
+  font-size: 12px;
+}
+.mc-search {
+  display: grid;
+  gap: 6px;
+  max-width: 480px;
+  font-size: 13px;
+  margin: 0 0 24px;
+}
+.mc-catalog input:not([type='checkbox']),
+.mc-catalog textarea,
+.mc-dialog input:not([type='checkbox']),
+.mc-dialog textarea,
+.mc-dialog select {
+  padding: 11px 13px;
+  border: 1px solid #d8e1d5;
+  border-radius: 10px;
+  font: inherit;
+  color: inherit;
+  background: var(--nv-card, #fff);
+  width: 100%;
+  box-sizing: border-box;
+}
+.mc-catalog input:focus-visible,
+.mc-dialog input:focus-visible,
+.mc-dialog textarea:focus-visible,
+.mc-dialog select:focus-visible {
+  outline: 3px solid #bdcfa9;
+  outline-offset: 2px;
+}
+.mc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 20px;
+}
+.mc-card {
+  border: 1px solid #dde5d8;
+  border-radius: 18px;
+  background: var(--nv-card, #fff);
+  padding: 22px;
+  box-shadow: 0 4px 20px #36512c08;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.mc-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 9px 25px #36512c12;
+}
+.mc-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+.mc-card h2 {
+  font-size: 19px;
+  margin: 20px 0 8px;
+  overflow-wrap: anywhere;
+}
+.mc-card p {
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+.mc-card footer {
+  margin-top: auto;
+  padding-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.mc-archive {
+  font: inherit;
+  color: #7b635e;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  padding: 10px;
+}
+.mc-dialog {
+  width: min(780px, calc(100vw - 56px));
+  max-height: 90vh;
+}
+.mc-editor,
+.mc-review {
+  padding: 24px;
+  line-height: 1.6;
+}
+.mc-editor fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  display: grid;
+  gap: 18px;
+}
+.mc-editor label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+.mc-source {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+}
+.mc-source label {
+  flex: 1;
+}
+.mc-meal,
+.mc-content article {
+  background: var(--nv-card, #f7f9f3);
+  border: 1px solid #e0e7da;
+  border-radius: 12px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+.mc-content {
+  display: grid;
+  gap: 12px;
+}
+.mc-content ul {
+  margin: 0;
+  padding-left: 20px;
+}
+.mc-content li {
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+.mc-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 22px 0;
+}
+.mc-confirm input {
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+.mc-editor footer,
+.mc-review footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 14px;
+}
+.mc-meal label input[type='number'] {
+  max-width: 200px;
+}
+.mc-dialog [role='alert'] {
+  color: #a43d31;
+}
+.mc-caption {
+  font-size: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mc-card {
+    transition: none;
+  }
+  .mc-card:hover {
+    transform: none;
+  }
+}

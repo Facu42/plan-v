@@ -13,6 +13,8 @@ const ALLOWED = [
   'accept_org_invite',
   'accept_patient_invite',
   'ack_thread_delivery',
+  // Catálogo privado: profesional titular y revisión vigente obligatorios.
+  'act_professional_model',
   'add_patient_clinical_note',
   'add_shopping_manual',
   'admin_extend_trial',
@@ -115,6 +117,7 @@ const ALLOWED = [
   'save_my_body_data',
   'save_notification_preferences',
   'save_patient_intake',
+  'save_professional_model',
   'save_recipe_draft',
   'save_routine_feedback',
   'schedule_appointment',

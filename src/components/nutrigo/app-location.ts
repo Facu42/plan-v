@@ -4,7 +4,7 @@ import { PATIENT_SURFACES, PRO_HIDDEN_PAGES, PRO_SURFACES } from './showroom-nav
 export type AppRole = 'patient' | 'pro';
 /** La primera alta cambia la selección, pero conserva el formulario y su enlace del directorio. */
 export function contentIdentity(role:AppRole,page:ShowroomPage,patientId?:string) {
-  return `${role}:${page}:${page==='pacientes'?'directorio':patientId??''}`;
+  return `${role}:${page}:${page==='modelos'?'catalogo':page==='pacientes'?'directorio':patientId??''}`;
 }
 
 export const PATIENT_PAGES: ShowroomPage[] = [...PATIENT_SURFACES.map((item) => item.id), 'ficha'];

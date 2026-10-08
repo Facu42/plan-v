@@ -8,6 +8,15 @@ import { DemoStateFile } from './state.js';
 const demo = { mode: 'demo', dataMode: 'memory', aiMode: 'demo' } as const;
 function temporary(run: (file: string) => void) { const dir=mkdtempSync(join(tmpdir(),'plan-v-demo-'));try{run(join(dir,'state.bin'));}finally{rmSync(dir,{recursive:true,force:true});} }
 describe('guardado de la simulación local',()=>{
+  it('incorpora modelos vacíos sin perder la copia anterior y los conserva al reiniciar',()=>temporary(file=>{
+    writeFileSync(file,serialize({version:1,domains:{test:{values:new Map([['existing',1]])}}}));
+    const values=new Map<string,number>(),models=new Map<string,unknown>();
+    const domains=new Map<string,()=>Record<string,unknown>>([['test',()=>({values})],['models',()=>({models})]]);
+    const before=readFileSync(file),first=new DemoStateFile(file,demo,domains);
+    expect(values.get('existing')).toBe(1);expect(models.size).toBe(0);expect(readFileSync(file)).toEqual(before);
+    models.set('model',{title:'Modelo ficticio'});first.close();values.clear();models.clear();
+    const second=new DemoStateFile(file,demo,domains);expect(values.get('existing')).toBe(1);expect(models.get('model')).toEqual({title:'Modelo ficticio'});second.close();
+  }));
   it('amplía una copia anterior de recetas sin perder registros y conserva los nuevos favoritos al reiniciar',()=>temporary(file=>{
     const recipes=new Map([['recipe-1',{title:'Receta ficticia'}]]);
     const previous={ingredients:new Map(),recipes,versions:new Map(),lines:new Map(),assignments:new Map()};
