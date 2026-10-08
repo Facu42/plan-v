@@ -56,8 +56,8 @@ export function PlanSafetySummary({ patientId }: { patientId: string }) {
   </section>;
 }
 
-export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEdit, onOpen, onOpenHref, onReview, onNavigate, now }: {
-  patient: Patient; patients: Patient[]; onSelect: (id: string) => void; onEdit: () => void;
+export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEdit, onOpen, onOpenHref, onReview, onNavigate, now, professionalName }: {
+  patient: Patient; patients: Patient[]; professionalName?: string; onSelect: (id: string) => void; onEdit: () => void;
   onOpen: (entry: CrmEntry) => void; onOpenHref: (href: string) => void; onReview: (meal: MealLog) => void; onNavigate: (page: ShowroomPage) => void; now: Date;
 }) {
   const tab = recordTab(typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('seccion'));
@@ -75,7 +75,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
       {tab === 'resumen' && <><ShowroomPatientRecord patient={patient} patients={patients} onSelect={onSelect} onEdit={onEdit} onOpen={onOpen} summaryOnly /><ProfessionalLedgerSummary patientId={patient.id} onOpen={() => change('cobros')} /></>}
       {tab === 'ingreso' && <><ShowroomIntakeReview patientId={patient.id} /><NutritionTargetPanel patientId={patient.id} patientName={patient.name} /></>}
       {tab === 'registros' && <><ShowroomMeals patient={patient} query="" onSelect={onSelect} onReview={onReview} now={now} /><ShowroomProgress patient={p} professional /><ShowroomGoals patient={patient} patients={patients} onSelect={onSelect} onChanged={addPatient} onOpenPatient={onSelect} /></>}
-      {tab === 'plan' && <><PlanSafetySummary patientId={patient.id} /><MealPlanEditor patientId={patient.id} onChanged={() => void api.getPatient(patient.id).then(({ patient: updated }) => addPatient(updated)).catch(() => undefined)} /></>}
+      {tab === 'plan' && <><PlanSafetySummary patientId={patient.id} /><MealPlanEditor key={patient.id} patientId={patient.id} patientName={patient.name} professionalName={professionalName} onChanged={() => void api.getPatient(patient.id).then(({ patient: updated }) => addPatient(updated)).catch(() => undefined)} /></>}
       {tab === 'consultas' && <ShowroomConsultations patient={patient} now={now} onSelect={onSelect} onChanged={addPatient} />}
       {tab === 'mensajes' && <NutrigoMessages patient={p} patients={patients.map((person) => buildShowroomPatient(person, now))} role="pro" onSelect={onSelect} onNavigate={onNavigate} />}
       {tab === 'cobros' && <ShowroomCobranzas initialSelectedId={patient.id} />}

@@ -22,6 +22,7 @@ import { editorPlanDates, copyPlanDay, type DayAnalysisLine } from '../../types/
 import { planWeekdayLabel } from '../../types/plans';
 import { PlanDayAnalysis } from './PlanDayAnalysis';
 import { PlanCopyDayDialog } from './PlanCopyDayDialog';
+import { PlanPrintDialog } from './PlanPrintDialog';
 
 type DraftItem = { components?: PlanComponentView[]; for_date: string; slot: PlanSlot; free_text: string; recipe_id: string; recipe_version?: number; portions: string; public_note: string; recipe_proposal?: ProposedRecipe; recipePreview?: PlanRecipeDetail };
 
@@ -103,8 +104,11 @@ export function MenuProposalReview({ proposal, warnings, busy, onApprove, onReje
   </section>;
 }
 
-export function MealPlanEditor({ patientId, onChanged }: { patientId: string; onChanged?: () => void }) {
+export function MealPlanEditor({ patientId, patientName = '', professionalName, onChanged }: { patientId: string; patientName?: string; professionalName?: string; onChanged?: () => void }) {
   const [plan, setPlan] = useState<ProfessionalMealPlan | null>(null);
+  const [printCopy, setPrintCopy] = useState<{ plan: ProfessionalMealPlan; patientName: string; professionalName?: string; currentAllowed: boolean; demo: boolean } | null>(null);
+  const printRequest = useRef(0);
+  useEffect(() => { setPrintCopy(null); return () => { printRequest.current += 1; }; }, [patientId]);
   const [recipes, setRecipes] = useState<ProfessionalRecipe[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogError, setCatalogError] = useState('');
@@ -312,6 +316,21 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
     void run(() => plansApi.publish(plan.id, plan.current.version, plan.current), 'Plan publicado. La paciente ve la versión revisada.');
   }
 
+  async function openPrint() {
+    if (!plan || lock.current) return;
+    const request = ++printRequest.current;
+    lock.current = true; setBusy(true); setError('');
+    try {
+      const saved = await plansApi.professional(patientId);
+      if (request !== printRequest.current) return;
+      if (!saved.plan || saved.plan.id !== plan.id) throw new Error('El plan guardado cambió. Volvé a abrirlo antes de imprimir.');
+      const currentAllowed = !dirty && saved.plan.current.revision === plan.current.revision && saved.plan.current.version === plan.current.version;
+      if (!currentAllowed && !saved.plan.published) throw new Error('Guardá los cambios o recuperá la versión guardada antes de imprimir.');
+      setPrintCopy({ plan: structuredClone(saved.plan), patientName, professionalName, currentAllowed, demo: saved.source === 'memory' });
+    } catch (caught) { if (request === printRequest.current) setError(careErrorMessage(caught)); }
+    finally { if (request === printRequest.current) { lock.current = false; setBusy(false); } }
+  }
+
   return <section className="meal-plan-versions" aria-label="Plan fechado versionado">
     <header>
       <div>
@@ -321,6 +340,8 @@ export function MealPlanEditor({ patientId, onChanged }: { patientId: string; on
       </div>
     </header>
     {source === 'memory' && <p className="meal-plan-demo">Vista demo · plan ficticio para probar edición y publicación.</p>}
+    <div className="meal-plan-actions"><NvButton type="button" className="nv-ghost" disabled={busy || !plan || (dirty && !plan.published)} onClick={() => void openPrint()}>Imprimir / guardar PDF</NvButton>{(!plan || dirty) && <small>Guardá el borrador para imprimirlo. Los cambios sin guardar no forman parte del documento.</small>}</div>
+    {printCopy && <PlanPrintDialog plan={printCopy.plan} patientName={printCopy.patientName} professionalName={printCopy.professionalName} currentAllowed={printCopy.currentAllowed} demo={printCopy.demo} onClose={() => setPrintCopy(null)} />}
     {error && <p className="meal-plan-error" role="alert">{error}</p>}
     {status && <p className="meal-plan-status" role="status">{status}</p>}
     {proposal && !proposedPlan && <p className="meal-plan-error" role="alert">La propuesta no tiene un menú válido. Regenerala antes de aprobar.</p>}
