@@ -25,7 +25,7 @@ import { ProfessionalLedgerSummary } from './ProfessionalLedgerSummary';
 
 export const RECORD_TABS = [
   ['resumen', 'Resumen'], ['ingreso', 'Ingreso y antecedentes'], ['registros', 'Registros y evolución'],
-  ['plan', 'Plan alimentario'], ['consultas', 'Consultas'], ['mensajes', 'Mensajes'], ['cobros', 'Cobros'],
+  ['planificacion', 'Planificación'], ['plan', 'Plan alimentario'], ['consultas', 'Consultas'], ['mensajes', 'Mensajes'], ['cobros', 'Cobros'],
 ] as const;
 export type RecordTab = typeof RECORD_TABS[number][0];
 export function recordTab(value: string | null): RecordTab {
@@ -73,8 +73,9 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
     <nav className="pw-tabs" aria-label="Secciones de la ficha">{RECORD_TABS.map(([id, label]) => <button type="button" key={id} aria-current={id === tab ? 'page' : undefined} onClick={() => change(id)}>{label}</button>)}</nav>
     <div key={`${patient.id}:${tab}`} className="pw-record-content">
       {tab === 'resumen' && <><ShowroomPatientRecord patient={patient} patients={patients} onSelect={onSelect} onEdit={onEdit} onOpen={onOpen} summaryOnly /><ProfessionalLedgerSummary patientId={patient.id} onOpen={() => change('cobros')} /></>}
-      {tab === 'ingreso' && <><ShowroomIntakeReview patientId={patient.id} /><NutritionTargetPanel patientId={patient.id} patientName={patient.name} /></>}
-      {tab === 'registros' && <><ShowroomMeals patient={patient} query="" onSelect={onSelect} onReview={onReview} now={now} /><ShowroomProgress patient={p} professional /><ShowroomGoals patient={patient} patients={patients} onSelect={onSelect} onChanged={addPatient} onOpenPatient={onSelect} /></>}
+      {tab === 'ingreso' && <ShowroomIntakeReview patientId={patient.id} />}
+      {tab === 'planificacion' && <NutritionTargetPanel patientId={patient.id} patientName={patient.name} onOpenPlan={() => change('plan')} />}
+      {tab === 'registros' && <><ShowroomMeals patient={patient} query="" onSelect={onSelect} onReview={onReview} now={now} /><ShowroomProgress patient={p} professional /><ShowroomGoals patient={patient} patients={patients} onSelect={onSelect} onChanged={addPatient} onOpenPatient={onSelect} showNutritionTarget={false} /></>}
       {tab === 'plan' && <><PlanSafetySummary patientId={patient.id} /><MealPlanEditor key={patient.id} patientId={patient.id} patientName={patient.name} professionalName={professionalName} onChanged={() => void api.getPatient(patient.id).then(({ patient: updated }) => addPatient(updated)).catch(() => undefined)} /></>}
       {tab === 'consultas' && <ShowroomConsultations patient={patient} now={now} onSelect={onSelect} onChanged={addPatient} />}
       {tab === 'mensajes' && <NutrigoMessages patient={p} patients={patients.map((person) => buildShowroomPatient(person, now))} role="pro" onSelect={onSelect} onNavigate={onNavigate} />}

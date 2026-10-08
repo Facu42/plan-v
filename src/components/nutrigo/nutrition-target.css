@@ -7,3 +7,27 @@
 @media(max-width:390px){.nvt-card{margin-inline:-16px;border-radius:0}}
 .nvt-source{margin:0;color:var(--nv-muted);font-size:12px}.nvt-link{padding:0;border:0;color:var(--nv-strong);background:none;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}.nvt-body{margin-bottom:16px}.nvt-body-form{gap:10px}
 .nvt-link{position:relative}.nvt-link::after{content:"";position:absolute;inset:-4px 0}
+
+/* Extensión del consultorio con la piel y los componentes originales de Nutrigo. */
+.nv-pro .nvt-planning{padding:20px;box-shadow:var(--nv-shadow,0 4px 12px rgba(176,176,176,.14))}
+.nv-pro .nvt-planning>header h2{font-size:22px;line-height:1.24;font-weight:600}
+.nvt-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:20px 0}
+.nvt-metrics .nv-metric{min-width:0}
+.nv-pro .nvt-metrics .nv-metric{padding:16px;border-radius:16px;min-height:130px;border:0;box-shadow:none}
+.nv-pro .nvt-metrics .nv-coral{background:var(--nv-coral-soft,#FFE1C9)}
+.nv-pro .nvt-metrics .nv-gold{background:var(--nv-gold-soft,#FFE6B5)}
+.nv-pro .nvt-metrics .nv-green{background:var(--nv-accent-soft,#DFF9A2)}
+.nv-pro .nvt-metrics .nv-metric strong{font-size:22px}
+.nv-pro .nvt-metrics .nv-metric small{color:var(--nv-ink-soft)}
+.nvt-metrics .nv-metric strong{font-size:22px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.nv-pro .nvt-planning .nvt-result{background:var(--nv-card-warm,#FEFCFB);border:1px solid var(--nv-line);padding:20px;gap:18px}
+.nv-pro .nvt-planning .nvt-form fieldset{padding:16px;gap:14px;background:var(--nv-card-warm,#FEFCFB)}
+.nv-pro .nvt-planning .nvt-form legend{color:var(--nv-ink);font-size:14px}
+.nv-pro .nvt-planning .nvt-form label{color:var(--nv-ink-soft);gap:7px}
+.nv-pro .nvt-planning .nvt-form input,.nv-pro .nvt-planning .nvt-form select{background:var(--nv-track,#F6F6F7);min-height:44px}
+.nv-pro .nvt-planning .nvt-form input:focus-visible,.nv-pro .nvt-planning .nvt-form select:focus-visible{outline:2px solid var(--nv-ink);outline-offset:3px}
+.nv-pro .nvt-planning .nvt-macros li:nth-child(1){background:var(--nv-coral-soft,#FFE1C9)}
+.nv-pro .nvt-planning .nvt-macros li:nth-child(2){background:var(--nv-gold-soft,#FFE6B5)}
+.nv-pro .nvt-planning .nvt-macros li:nth-child(3){background:var(--nv-accent-soft,#DFF9A2)}
+.nv-pro .nvt-planning .nvt-macros small{color:var(--nv-ink-soft)}
+.nv-pro .nvt-planning .nvt-kcal strong,.nv-pro .nvt-planning .nvt-macros b{font-variant-numeric:tabular-nums}

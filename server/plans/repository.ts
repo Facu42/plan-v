@@ -31,6 +31,7 @@ import {
 import { menuTargetSchema, proposedRecipeSchema, recipeNutritionSchema, resolveRecipeNutrition, retainProposalEstimate, type MenuNutritionTarget, type ProposedRecipe } from '../../src/types/ai-nutrition.js';
 import { summarizeMenuNutrition } from '../ai/menu-nutrition.js';
 import { getTarget } from '../targets/repository.js';
+import { confirmedPlanTarget } from '../../src/lib/confirmed-plan-target.js';
 import { logProviderFailure } from '../ai/mode.js';
 import { recipeCoverEnabled } from '../ai/recipe-cover.js';
 
@@ -80,6 +81,28 @@ export function resetMealPlanMemory() {
   plans.clear();
   versions.clear();
   items.clear();
+}
+
+/** Confirming a patient target changes only the professional draft. Frozen published copies remain intact. */
+export function syncConfirmedMemoryTarget(patientId: string, target: MenuNutritionTarget) {
+  for (const plan of plans.values()) {
+    if (plan.patient_id !== patientId) continue;
+    const list = planVersions(plan.id);
+    const latest = list[list.length - 1];
+    if (!latest) continue;
+    if (latest.status === 'draft') {
+      latest.nutrition_target = structuredClone(target);
+      latest.revision = crypto.randomUUID();
+      continue;
+    }
+    const next: MemVersion = { ...structuredClone(latest), id: crypto.randomUUID(), revision: crypto.randomUUID(),
+      version: latest.version + 1, status: 'draft', published_at: null, created_at: new Date().toISOString(), nutrition_target: structuredClone(target) };
+    versions.set(next.id, next);
+    for (const item of [...items.values()].filter(item => item.version_id === latest.id)) {
+      const copy = { ...structuredClone(item), id: crypto.randomUUID(), version_id: next.id };
+      items.set(copy.id, copy);
+    }
+  }
 }
 
 export function mealPlanDbError(error: { code?: string; message?: string } | null) {
@@ -464,6 +487,10 @@ export async function saveMealPlanDraft(
   input: MealPlanDraftInput,
   persistent: boolean,
 ): Promise<ProfessionalMealPlan> {
+  if (!input.nutrition_target) {
+    const confirmed = confirmedPlanTarget(await getTarget(patientId, persistent));
+    if (confirmed) input = { ...input, nutrition_target: confirmed };
+  }
   await assertCurrentNutritionTarget(patientId, input.nutrition_target, persistent);
   if (!persistent) return writeDraft(nutritionistId, patientId, input, false);
   const { data, error } = await getRequestDb().rpc('save_meal_plan_draft', { target_patient: patientId, payload: input });

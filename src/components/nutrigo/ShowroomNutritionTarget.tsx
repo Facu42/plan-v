@@ -7,7 +7,7 @@ import {
   ACTIVITY_FACTORS, ACTIVITY_LABELS, ACTIVITY_LEVELS, GOAL_LABELS, SEX_LABELS, SEX_OPTIONS, TARGET_GOALS,
   ageFromBirthDate, bodyDataSchema, calculateTarget, defaultsForGoal, targetInputSchema, type TargetGoal, type TargetInput,
 } from '../../lib/nutrition-target';
-import { NvBadge, NvButton } from './primitives';
+import { NvBadge, NvButton, NvMetric } from './primitives';
 import './nutrition-target.css';
 
 type Draft = { sex: string; age: string; weight_kg: string; height_cm: string; activity: string; goal: TargetGoal; adjust_pct: string; protein_g_per_kg: string; fat_pct: string };
@@ -51,7 +51,7 @@ export function PatientNutritionTarget({ patientId }: { patientId: string }) {
 }
 
 /** Calculadora de la nutricionista: calcula con Mifflin-St Jeor, ella revisa y confirma. */
-export function NutritionTargetPanel({ patientId, patientName }: { patientId: string; patientName: string }) {
+export function NutritionTargetPanel({ patientId, patientName, onOpenPlan }: { patientId: string; patientName: string; onOpenPlan?: () => void }) {
   const activePatient = useRef(patientId);
   activePatient.current = patientId;
   const saving = useRef(false);
@@ -99,7 +99,7 @@ export function NutritionTargetPanel({ patientId, patientName }: { patientId: st
       const workspace = await nutritionTargetApi.save(patientId, parsed.data, publish, revision);
       if (activePatient.current !== patientId) return;
       setStored(workspace.target); setPublished(workspace.published); setRevision(workspace.revision); setBaseline(JSON.stringify(draft));
-      setMessage(publish ? `Meta confirmada: ${patientName} ya la ve en su plan.` : 'Borrador guardado. La paciente conserva su última meta confirmada.');
+      setMessage(publish ? `Meta confirmada: ${patientName} ya la ve. Si tiene un plan, actualizamos su objetivo en el borrador. El plan publicado se conserva hasta que publiques los cambios.` : 'Borrador guardado. La paciente conserva su última meta confirmada.');
     } catch (reason) { if (activePatient.current === patientId) setError(careErrorMessage(reason)); } finally { saving.current = false; setBusy(false); }
   };
   const askPatient = async () => {
@@ -113,16 +113,21 @@ export function NutritionTargetPanel({ patientId, patientName }: { patientId: st
   const onSubmit = (event: FormEvent) => { event.preventDefault(); void save(false); };
   const changedSincePublish = published && parsed.success && JSON.stringify(parsed.data) !== JSON.stringify(published.inputs);
 
-  return <section className="nvt-card" aria-label={`Calorías y macros de ${patientName}`}>
-    <header><div><p className="nv-eyebrow">Ecuación de Mifflin-St Jeor</p><h2>Calorías y macronutrientes de {patientName}</h2><p>Calculadas con una fórmula fija a partir de sus datos. Vos revisás y confirmás antes de que las vea.</p></div>{stored && <NvBadge tone={stored.published_at ? 'green' : 'gold'}>{stored.published_at ? 'Confirmada' : 'Borrador'}</NvBadge>}</header>
+  return <section className="nvt-card nvt-planning" aria-label={`Calorías y macros de ${patientName}`}>
+    <header><div><h2>Planificación nutricional</h2><p>Definí la meta de {patientName}. Al confirmarla, el objetivo del borrador del plan se actualiza automáticamente.</p></div>{stored && <NvBadge tone={stored.published_at ? 'green' : 'gold'}>{stored.published_at ? 'Confirmada' : 'Borrador'}</NvBadge>}</header>
+    <div className="nvt-metrics">
+      <NvMetric label="Metabolismo basal" value={live ? `${live.bmr} kcal` : 'Sin cálculo'} note="Mifflin-St Jeor" icon="target" nvIcon="quemadas" tone="coral" />
+      <NvMetric label="Gasto diario" value={live ? `${live.tdee} kcal` : 'Sin cálculo'} note="Según el nivel de actividad" icon="target" nvIcon="ejercicio" tone="gold" />
+      <NvMetric label="Meta propuesta" value={live ? `${live.kcal} kcal` : 'Por definir'} note="Revisala antes de confirmar" icon="target" nvIcon="calorias" />
+    </div>
     <form className="nvt-layout" onSubmit={onSubmit}>
       <div className="nvt-form">
         <fieldset><legend>Datos de la paciente</legend>
           <p className="nvt-source nvt-wide">{bodyNote}{body?.requested_at ? ' Pedido enviado, esperando su respuesta.' : ''} <button type="button" className="nvt-link" onClick={() => void askPatient()} disabled={busy}>{body?.requested_at ? 'Volver a pedir' : 'Pedir que los cargue o actualice'}</button></p>
           <label>Sexo<select value={draft.sex} onChange={(e) => set('sex', e.target.value)}>{SEX_OPTIONS.map((s) => <option key={s} value={s}>{SEX_LABELS[s]}</option>)}</select></label>
-          <label>Edad<input inputMode="numeric" value={draft.age} onChange={(e) => set('age', e.target.value)} placeholder="años" /></label>
-          <label>Peso<input inputMode="decimal" value={draft.weight_kg} onChange={(e) => set('weight_kg', e.target.value)} placeholder="kg" /></label>
-          <label>Talla<input inputMode="decimal" value={draft.height_cm} onChange={(e) => set('height_cm', e.target.value)} placeholder="cm" /></label>
+          <label>Edad · años<input inputMode="numeric" value={draft.age} onChange={(e) => set('age', e.target.value)} placeholder="años" /></label>
+          <label>Peso · kg<input inputMode="decimal" value={draft.weight_kg} onChange={(e) => set('weight_kg', e.target.value)} placeholder="kg" /></label>
+          <label>Talla · cm<input inputMode="decimal" value={draft.height_cm} onChange={(e) => set('height_cm', e.target.value)} placeholder="cm" /></label>
         </fieldset>
         <fieldset><legend>Actividad y objetivo</legend>
           <label className="nvt-wide">Nivel de actividad<select value={draft.activity} onChange={(e) => set('activity', e.target.value)}>{ACTIVITY_LEVELS.map((a) => <option key={a} value={a}>{ACTIVITY_LABELS[a]} (×{ACTIVITY_FACTORS[a]})</option>)}</select></label>
@@ -137,7 +142,6 @@ export function NutritionTargetPanel({ patientId, patientName }: { patientId: st
       <aside className="nvt-result" aria-live="polite">
         {revision === null && !error && <p role="status">Cargando meta guardada…</p>}
         {live && parsed.success ? <>
-          <dl className="nvt-steps"><div><dt>Metabolismo basal</dt><dd>{live.bmr} kcal</dd></div><div><dt>Gasto total diario</dt><dd>{live.tdee} kcal</dd></div></dl>
           <TargetSummary target={{ patient_id: patientId, inputs: parsed.data, result: live, published_at: null, updated_at: '' }} heading="Meta propuesta" />
           {live.warnings.map((w) => <p key={w} className="nvt-warning" role="status">{w}</p>)}
         </> : <p className="nvt-empty">Completá edad, peso y talla para ver el cálculo.</p>}
@@ -145,7 +149,9 @@ export function NutritionTargetPanel({ patientId, patientName }: { patientId: st
         {error && <p className="nv-dialog-error" role="alert">{error} <button type="button" className="nvt-link" disabled={busy} onClick={() => setRefresh((r) => r + 1)}>Recargar meta</button></p>}
         {message && <p className="nvt-ok" role="status">{message}</p>}
         {changedSincePublish && <p className="nvt-warning" role="status">Cambiaste datos: la paciente sigue viendo la meta anterior hasta que confirmes de nuevo.</p>}
+        <p className="nvt-note">Confirmar la meta actualiza el objetivo del borrador. Publicar el plan es un paso separado.</p>
         <div className="nvt-actions"><NvButton type="submit" className="nv-ghost" disabled={busy || !live || revision === null}>Guardar borrador</NvButton><NvButton disabled={busy || !live || revision === null} onClick={() => void save(true)}>{busy ? 'Guardando…' : 'Confirmar y compartir'}</NvButton></div>
+        {onOpenPlan && <NvButton className="nv-soft" onClick={onOpenPlan} disabled={busy}>Revisar plan alimentario</NvButton>}
       </aside>
     </form>
   </section>;
