@@ -163,8 +163,12 @@ existe la tabla ni se genera nada hasta que Facundo dé su frase escrita (pasos 
   y ninguna política; solo `service_role` las lee y escribe y ejecuta las cuatro funciones.
 - Foto de plato probada con Cloudflare real: fila de prueba `f9bdc800-bae4-4bf6-88f1-7fc75d275c8a` en estado `ready`
   (JPEG de 468 KB en `recipe-covers`). Se conserva hasta que Facundo la apruebe; después se borran la fila y el archivo.
-- La prueba completa de ingredientes requiere el código nuevo del worker (merge a `main`). Mientras tanto no hay filas de
-  ingredientes en producción.
+- 2026-10-08, con el código nuevo ya publicado (PR #74, Railway en SUCCESS): se cargaron `tomate` y `huevo` con
+  `enqueue_ingredient_covers`; el worker los tomó solo y en segundos quedaron `ready` (JPEG de 226 KB y 300 KB en
+  `recipe-covers/ingredients/`, un intento cada uno; la cuota del día suma 2 intentos de ingredientes). Siguen como
+  prueba hasta que Facundo las vea y apruebe.
+- La foto del plato de prueba («Tortilla de papas») no se entendía: se mejoró la descripción (plato con nombre propio,
+  sin pasos en español). Pendiente de publicar y volver a probar.
 
 ### Pasos para activarlo (el primero ya se hizo)
 
