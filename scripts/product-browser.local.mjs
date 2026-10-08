@@ -136,7 +136,7 @@ try {
   check((await read(patient,`/api/patients/${pid}/care`)).consented.includes('ai_menu_draft')===false,'catálogo de permisos recuperado en la misma pantalla tras un error sin alterar la decisión guardada');
   await B('viewport','1440x1000');
   await logout();phase='ficha y meta profesional';await login(professional,`/crm/ficha?paciente=${pid}&seccion=ingreso`);
-  await button('Marcar ingreso como revisado');await button('Planificación');await button('Confirmar y compartir');await until("document.body.innerText.includes('Meta confirmada:')");
+  await button('Marcar ingreso como revisado');await until("document.body.innerText.includes('Ya revisado')" );await button('Planificación');await button('Confirmar y compartir');await until("document.body.innerText.includes('Meta confirmada:')");
   const target=await read(patient,`/api/patients/${pid}/nutrition-target`);check(Boolean(target.target?.published_at),'meta confirmada visible sólo al publicarse');
   phase='receta manual y asignación';
   await B('goto',origin+`/crm/recetas?paciente=${pid}`);await button('Nueva receta');await B('click','.recipe-choice button:first-child');
