@@ -25,7 +25,23 @@ La integración detectó y corrigió dos omisiones antes del despliegue: las fot
 
 Pruebas de regresión primero fallaron y luego pasaron. QA local ficticia a 1440: receta de 2 porciones y alimento de 50 g visibles, nota conservada, ventana de detalle y apertura de receta correctas, sin desbordamiento horizontal. Capturas locales en evidencia-modelos. No equivalen a una sesión autenticada de producción.
 
-Estado de despliegue y verificación final: pendiente de integrar el PR y comprobar los tres servicios. La base ya está aplicada; no declarar publicación web/API hasta confirmar el commit desplegado.
+El PR #73 se integró el 2026-10-08 a las 11:04 (Argentina), commit 03d405ba9c6e700e44e6509a793b93f75c34bc11. Los PR dependientes #70–#72 se cerraron después de verificar que todos sus commits están incorporados en main.
 
 
 Verificación local final integrada: 305 archivos, 2114 pruebas aprobadas y 2 omitidas; tipos, compilación y control de migraciones aprobados. Revisiones independientes de código y funcionamiento sin bloqueantes. El ensayo CI anterior pasó 27 casos con sesiones firmadas, pero su navegador falló por un selector de calorías ambiguo del nuevo editor: se adapta el recorrido y se exige repetir antes del merge.
+
+## Publicación comprobada
+
+El ensayo final del PR pasó 27 pruebas con sesiones firmadas y 42 comprobaciones de navegador en Supabase descartable: creación, publicación, asignación, conservación de borradores y versiones, edición, recarga y reinicio. [Sesiones y navegador](https://github.com/Facu42/plan-v/actions/runs/37788399512), [CI general](https://github.com/Facu42/plan-v/actions/runs/37788399491).
+
+Los servicios no iniciaron inmediatamente su despliegue automático. Se conectó de nuevo la misma fuente Facu42/plan-v@main para API/worker sin fijar SHA ni cambiar variables, réplicas o comandos; Vercel se desplegó desde el commit exacto mediante su API sobre el proyecto existente. Todos mantienen las funciones anteriores y la configuración de proveedores vigente.
+
+| Servicio | Despliegue de 03d405b | Resultado |
+|---|---|---|
+| Web | dpl_4oMKjYF2D2hgCzToSD3JZQSQLg9s | READY, alias plan-v-eight.vercel.app asignado |
+| API | 4af2c65c-676c-484e-9178-0bb75bd69afa | SUCCESS, /api/health 200 con SHA correcto |
+| Worker | 50b55e23-69ce-45aa-9b2f-8ba88cafe0e3 | SUCCESS, mismo SHA y una réplica activa |
+
+No se crearon cuentas ni se modificaron fichas clínicas de producción para esta publicación. La comprobación clínica completa usa sesiones ficticias descartables y demo local. La comprobación productiva acredita migraciones, permisos, despliegue y salud de servicios; no se presenta como un recorrido autenticado de producción. No se ejecutó una generación IA paga ni se cambió su proveedor.
+
+La API también devolvió /api/ready 200, worker externo disponible, sin trabajos en espera, reservados ni fallidos, y SHA 03d405b. El dominio público se comprueba sin sesión; no se copian datos reales.

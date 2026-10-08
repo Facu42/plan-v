@@ -97,3 +97,5 @@ Cierre: reality-checker verificó 12 pruebas dirigidas y capturas de revisión, 
 Capturas de este incremento: [comparación Nutriboost](evidencia-modelos/nutriboost-indicaciones-previa.png), [recomendaciones](evidencia-modelos/planv-recomendaciones-aplicar-1440.png), [evitar](evidencia-modelos/planv-evitar-aplicar-1440.png), [sin duplicados 1280](evidencia-modelos/planv-indicaciones-dedup-1280.png), [editor aprobado](evidencia-modelos/planv-indicaciones-editor-1440.png), [impresión](evidencia-modelos/planv-indicaciones-impresion-1440.png).
 
 La revisión de menús IA muestra también las indicaciones conservadas y las compara antes de publicar; un cambio posterior requiere volver a revisar. Historial verificado: [versión anterior](evidencia-modelos/planv-indicaciones-historial-1440.png).
+
+Publicación autorizada por Facundo el 2026-10-08 e integrada por PR73 en 03d405b, junto a las dependencias Alimentos/Recetas/Planes. Las ocho migraciones están aplicadas. Web, API y worker desplegados con el mismo commit. [Registro de publicación](publicacion-dashboard-web-2026-10-08.md).
