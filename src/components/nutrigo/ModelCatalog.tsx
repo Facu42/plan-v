@@ -785,7 +785,7 @@ export function ModelCatalog({
                     Ver copia publicada
                   </NvButton>
                 )}
-                {m.kind === 'plan' && m.published && (
+                {m.published && (
                   <NvButton
                     onClick={() => {
                       setApplying(structuredClone(m));

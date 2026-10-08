@@ -5,6 +5,7 @@ import type { PlanItemView, PlanRecipeDetail, PlanVersionView } from '../../type
 import { eachIsoDate, PLAN_SLOTS, planWeekdayLabel } from '../../types/plans';
 import { recipeNutritionLabel, type ProposedRecipe } from '../../types/ai-nutrition';
 import logo from '../../assets/plan-v-logo-256.png';
+import { PlanGuidanceView } from './PlanGuidance';
 
 export type PlanPrintCopy = { version: PlanVersionView; patientName: string; professionalName: string; demo: boolean };
 const amount = (value: number) => Number.isFinite(value) ? value.toLocaleString('es-AR', value !== 0 && Math.abs(value) < 0.0001 ? { maximumSignificantDigits: 4 } : { maximumFractionDigits: 4 }) : 'Cantidad sin confirmar';
@@ -35,6 +36,7 @@ export function PlanPrintDocument({ version, patientName, professionalName, demo
     <p>Del {dateLabel(version.period_start)} al {dateLabel(version.period_end)} · Argentina</p>
     {!published && <p className="pv-draft">Copia para revisión profesional. Este borrador todavía no fue publicado para la paciente.</p>}
     {demo && <p className="pv-draft">DEMOSTRACIÓN · Datos ficticios para pruebas.</p>}
+    <PlanGuidanceView guidance={version.guidance} />
     {eachIsoDate(version.period_start, version.period_end).map(date => { const items = version.items.filter(item => item.for_date === date).sort((a,b) => PLAN_SLOTS.indexOf(a.slot) - PLAN_SLOTS.indexOf(b.slot)); return <section key={date} className="pv-day"><h2>{planWeekdayLabel(date)} · {dateLabel(date)}</h2>{items.length ? items.map(item => <Meal key={item.id} item={item} />) : <p>Sin indicaciones para este día.</p>}</section>; })}
     <footer>Versión {version.version} · {published ? `Publicada el ${new Date(version.published_at!).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}` : 'Borrador guardado, sin publicación'}. Las cantidades y fuentes corresponden a esta copia.</footer>
   </main>;

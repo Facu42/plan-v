@@ -1,5 +1,6 @@
 import { PlanRecipeProposalEditor } from './PlanRecipeProposalEditor';
 import { PlanHistory } from './PlanHistory';
+import { PlanGuidanceView } from './PlanGuidance';
 import { componentInput, componentTitle, type PlanComponentView } from '../../types/plan-components';
 import { PlanFoodPicker } from './PlanFoodPicker';
 import { PlanComponentRows } from './PlanComponentRows';
@@ -63,6 +64,7 @@ export function matchesMenuForm(plan: ProfessionalMealPlan, proposal: MealPlanDr
   if (plan.id !== proposal.id) return false;
   if (plan.current.period_start !== proposal.period_start || plan.current.period_end !== proposal.period_end) return false;
   if (JSON.stringify(plan.current.nutrition_target ?? null) !== JSON.stringify(proposal.nutrition_target ?? null)) return false;
+  if (JSON.stringify(plan.current.guidance ?? null) !== JSON.stringify(proposal.guidance ?? null)) return false;
   const key = (item: { for_date: string; slot: string; recipe_id?: string | null; recipe_version?: number | null; free_text?: string | null; portions?: number | null; public_note?: string | null; recipe_proposal?: ProposedRecipe; components?: PlanComponentView[] }) =>
     JSON.stringify([item.for_date, item.slot, item.recipe_id ?? null, item.recipe_version ?? null, item.components ? null : item.free_text ?? null, item.components ? null : item.portions ?? null, item.public_note ?? '', item.recipe_proposal ?? null, item.components?.map(componentInput) ?? null]);
   return JSON.stringify(plan.current.items.map(key).sort()) === JSON.stringify(proposal.items.map(key).sort());
@@ -95,6 +97,7 @@ export function MenuProposalReview({ proposal, warnings, busy, onApprove, onReje
         <ol>{item.recipe_proposal.steps.map((step, index) => <li key={index}>{step}</li>)}</ol>
       </details>}
     </li>)}</ul>
+    <PlanGuidanceView guidance={proposal.guidance} />
     <AiPlanNutritionSummary nutrition={proposal.nutrition} />
     {estimated && <label><input type="checkbox" checked={reviewed} onChange={(event) => setReviewed(event.target.checked)} />Revisé ingredientes, cantidades y nutrientes estimados. La etiqueta de estimación se conserva al publicar.</label>}
     <div className="meal-plan-actions">
@@ -122,6 +125,8 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
   const [proposal, setProposal] = useState<AiJobView | null>(null);
   const [periodStart, setPeriodStart] = useState('');
   const [periodEnd, setPeriodEnd] = useState('');
+  const [recommendations, setRecommendations] = useState('');
+  const [avoid, setAvoid] = useState('');
   const [activeDate, setActiveDate] = useState('');
   const [componentTarget, setComponentTarget] = useState<{ index: number; slot: PlanSlot } | null>(null);
   const [componentTab, setComponentTab] = useState<'food' | 'recipe'>('food');
@@ -144,6 +149,8 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
     try {
       const [plans, , aiJobs] = await Promise.all([plansApi.professional(patientId), reloadCatalog(), aiJobsApi.list(patientId)]);
       setPlan(plans.plan);
+      setRecommendations((plans.plan?.current.guidance?.recommendations ?? []).join('\n'));
+      setAvoid((plans.plan?.current.guidance?.avoid ?? []).join('\n'));
       setSource(plans.source);
       setImageGeneration(plans.image_generation === true);
       const requested = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('propuesta');
@@ -173,12 +180,18 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
   function formInput() {
     return { id: planId, expected_revision: plan?.current.revision ?? null, period_start: periodStart, period_end: periodEnd,
       timezone: 'America/Argentina/Buenos_Aires' as const,
+      ...guidanceInput(),
       ...(plan?.current.nutrition_target ? { nutrition_target: plan.current.nutrition_target } : {}),
       items: draftItems.map(item => ({ ...(item.components ? { components: item.components.map(componentInput) } : {}), for_date: item.for_date, slot: item.slot, recipe_id: item.recipe_id || undefined,
         recipe_version: item.recipe_id ? item.recipe_version : undefined, free_text: item.free_text.trim() || undefined,
         portions: item.portions ? Number(item.portions) : undefined, public_note: item.public_note,
         ...(item.recipe_proposal ? { recipe_proposal: item.recipe_proposal } : {}) })),
     };
+  }
+
+  function guidanceInput() {
+    if (!recommendations.trim() && !avoid.trim() && !plan?.current.guidance) return {};
+    return { guidance: { recommendations: recommendations.split('\n').map(line => line.trim()).filter(Boolean), avoid: avoid.split('\n').map(line => line.trim()).filter(Boolean) } };
   }
 
   function submit(event: FormEvent) {
@@ -189,6 +202,7 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
       period_start: periodStart,
       period_end: periodEnd,
       timezone: 'America/Argentina/Buenos_Aires',
+      ...guidanceInput(),
       ...(plan?.current.nutrition_target ? { nutrition_target: plan.current.nutrition_target } : {}),
       items: draftItems.map((item) => ({
         ...(item.components ? { components: item.components.map(componentInput) } : {}),
@@ -256,7 +270,7 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
   }
 
   async function approveProposal() {
-    const candidate = proposalFrom(proposal);
+    const candidate = proposedPlan;
     if (!proposal || !candidate || lock.current || !canLeaveWorkspace()) return;
     lock.current = true;
     setBusy(true); setError(''); setStatus('');
@@ -289,7 +303,8 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
     await run(async () => { await aiJobsApi.apply(proposal.id); setProposal(null); }, 'Propuesta guardada como borrador privado. Editala y revisala antes de publicar.');
   }
 
-  const proposedPlan = proposalFrom(proposal);
+  const rawProposedPlan = proposalFrom(proposal);
+  const proposedPlan = rawProposedPlan ? { ...rawProposedPlan, ...(plan?.current.guidance ? { guidance: plan.current.guidance } : {}) } : null;
   const editorDates = editorPlanDates(periodStart, periodEnd, draftItems.map(item => item.for_date));
   const selectedDate = editorDates.includes(activeDate) ? activeDate : editorDates[0] ?? '';
   const periodDates = editorPlanDates(periodStart, periodEnd, []);
@@ -369,6 +384,11 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
       </nav>
 <button type="button" className="meal-plan-add" disabled={busy || !periodDates.includes(selectedDate) || !draftItems.some(item => item.for_date === selectedDate) || periodDates.length < 2} onClick={() => setCopySource(selectedDate)}>Copiar día seleccionado</button>
       {editorDates.some(date => date < periodStart || date > periodEnd) && <p role="alert">Hay indicaciones fuera del período. Sus días siguen disponibles arriba; corregí las fechas antes de guardar.</p>}
+      <details className="meal-plan-published-copy plan-guidance-editor"><summary>Recomendaciones y alimentos a evitar · borrador</summary>
+        <p>Una indicación por línea; hasta 100 por categoría y 500 caracteres por indicación. Se entregan al publicar el plan.</p>
+        <label>Recomendaciones<textarea disabled={busy} value={recommendations} onChange={e => setRecommendations(e.target.value)} /></label>
+        <label>Alimentos a evitar<textarea disabled={busy} value={avoid} onChange={e => setAvoid(e.target.value)} /></label>
+      </details>
       <div className="plan-editor-day-layout"><div className="plan-editor-meals">
       {PLAN_SLOTS.map(slot => <section className="plan-editor-meal" key={slot} aria-label={`${slot} del día seleccionado`}><header><h3>{slot}</h3><button type="button" disabled={!selectedDate || draftItems.length >= 42 || dayItems.some(item => item.slot === slot)} onClick={() => setDraftItems([...draftItems, { ...emptyItem(selectedDate), slot }])}>Agregar a {slot.toLocaleLowerCase('es-AR')}</button></header>
       {!dayItems.some(item => item.slot === slot) && <p>Sin indicaciones para este momento.</p>}
@@ -465,6 +485,7 @@ export function PublishedDatedPlanView({
     {plan && <div>
       <p>Del {plan.period_start} al {plan.period_end} · revisión {plan.version}</p>
       <AiPlanNutritionSummary nutrition={plan.nutrition} />
+      <PlanGuidanceView guidance={plan.guidance} />
       {days.map((day) => <section className="published-plan-day" key={day.isoDate} data-plan-date={day.isoDate}>
         <h3>{day.weekday} {day.isoDate}</h3>
         {day.items.length

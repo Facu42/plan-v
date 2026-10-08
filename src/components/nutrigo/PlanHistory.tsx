@@ -3,6 +3,7 @@ import { plansApi } from '../../api/plans';
 import { careErrorMessage } from '../../api/care';
 import type { PlanVersionView } from '../../types/plans';
 import { PlanPublishedItem } from './MealPlanVersions';
+import { PlanGuidanceView } from './PlanGuidance';
 export function PlanHistory({
   patientId,
   currentId,
@@ -70,6 +71,7 @@ export function PlanHistory({
                 Esta copia se conserva para consulta. No modifica el plan
                 actual.
               </p>
+              <PlanGuidanceView guidance={v.guidance} />
               {v.items.map((item) => (
                 <section key={item.id}>
                   <h4>{item.for_date}</h4>

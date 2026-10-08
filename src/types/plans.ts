@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { planGuidanceSchema, type PlanGuidance } from './plan-guidance.js';
 import { planComponentsSchema, type PlanComponentView } from './plan-components.js';
 import type { RecipeCard } from './recipes.js';
 import type { RecipeCatalogSnapshot } from './recipe-catalog-nutrition.js';
@@ -72,6 +73,7 @@ function utcDays(start: string, end: string) {
 }
 
 export const mealPlanDraftSchema = z.object({
+  guidance: planGuidanceSchema.optional(),
   id: z.uuid(),
   expected_revision: z.uuid().nullable().optional(),
   period_start: isoDate,
@@ -128,6 +130,7 @@ export type PlanItemView = {
   recipe_proposal?: ProposedRecipe;
 };
 export type PlanVersionView = {
+  guidance?: PlanGuidance;
   id: string;
   revision?: string;
   version: number;
@@ -153,6 +156,7 @@ export function planReviewSnapshot(version: PlanVersionView) {
   return { ...head, items: items.map(({ recipe: _recipe, recipe_title: _title, dish_card: _card, ...item }) => item) };
 }
 export type PatientMealPlan = {
+  guidance?: PlanGuidance;
   id: string;
   timezone: string;
   version: number;
@@ -203,6 +207,7 @@ export function toPublishedPatientPlan(plan: ProfessionalMealPlan): PatientMealP
     period_end: plan.published.period_end,
     published_at: plan.published.published_at,
     items: plan.published.items,
+    ...(plan.published.guidance ? { guidance: plan.published.guidance } : {}),
     ...(plan.published.nutrition_target ? { nutrition_target: plan.published.nutrition_target } : {}),
     ...(plan.published.nutrition ? { nutrition: plan.published.nutrition } : {}),
   };

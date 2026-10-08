@@ -188,3 +188,16 @@ it('rechaza cambios antiguos, propietarios distintos, snapshots inventados y mod
     ),
   ).rejects.toMatchObject({ status: 400 });
 });
+it('agrega indicaciones sin duplicar y conserva comidas e historial', async () => {
+ const original=await saveMealPlanDraft(DEMO_NUTRITIONIST_ID,'pat-sofia',{id:crypto.randomUUID(),period_start:'2026-10-07',period_end:'2026-10-13',timezone:'America/Argentina/Buenos_Aires',guidance:{recommendations:['Organizar los ingredientes.'],avoid:['Indicación previa ficticia']},items:[{for_date:'2026-10-09',slot:'Almuerzo',free_text:'Comida conservada',portions:2,public_note:'Nota'}]},false);
+ const draft=await saveModel(DEMO_NUTRITIONIST_ID,{...input(),lines:[' ORGANIZAR   LOS INGREDIENTES. ','Recomendación nueva ficticia']},false);
+ const model=await modelAction(DEMO_NUTRITIONIST_ID,draft.id,draft.revision,'publish',false);
+ const payload=modelApplySchema.parse({patient_id:'pat-sofia',expected_revision:model.revision,expected_version:1,expected_plan_revision:original.current.revision,period_start:'2026-11-01',reviewed:true});
+ const result=await applyModel(DEMO_NUTRITIONIST_ID,model.id,payload,false);
+ expect(result.current).toMatchObject({version:2,period_start:original.current.period_start,guidance:{recommendations:['Organizar los ingredientes.','Recomendación nueva ficticia'],avoid:['Indicación previa ficticia']}});
+ expect(result.current.items.map(({id,...item})=>item)).toEqual(original.current.items.map(({id,...item})=>item));
+ expect((await getMealPlanHistory(DEMO_NUTRITIONIST_ID,'pat-sofia',false))[1].guidance).toEqual(original.current.guidance);
+ const saved=await saveMealPlanDraft(DEMO_NUTRITIONIST_ID,'pat-sofia',{id:result.id,expected_revision:result.current.revision,period_start:result.current.period_start,period_end:result.current.period_end,timezone:'America/Argentina/Buenos_Aires',items:[{for_date:'2026-10-09',slot:'Almuerzo',free_text:'Comida editada',portions:2,public_note:'Nota'}]},false);
+ expect(saved.current.guidance).toEqual(result.current.guidance);
+ await expect(applyModel(DEMO_NUTRITIONIST_ID,model.id,{...payload,patient_id:'pat-marina',expected_plan_revision:null},false)).rejects.toMatchObject({status:409});
+});

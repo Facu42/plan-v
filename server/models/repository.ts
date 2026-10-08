@@ -4,6 +4,7 @@ import { CareError } from '../care/errors.js';
 import {
   asProfessional,
   forkModelPlanMemory,
+  forkGuidanceMemory,
   getProfessionalMealPlan,
 } from '../plans/repository.js';
 import type { ModelApplyInput } from '../../src/types/models.js';
@@ -39,13 +40,13 @@ export async function applyModel(
   const model = owned(owner, id, input.expected_revision);
   if (
     !model?.published ||
-    model.kind !== 'plan' ||
     model.published.version !== input.expected_version
   )
     throw new CareError(
       409,
       'Revisá la copia publicada del modelo antes de aplicar.',
     );
+  if (model.kind !== 'plan') return forkGuidanceMemory(owner, input.patient_id, model.kind, structuredClone(model.published), input.expected_plan_revision);
   return forkModelPlanMemory(
     owner,
     input.patient_id,

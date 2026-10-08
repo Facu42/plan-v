@@ -80,3 +80,8 @@ it('permite revisar sólo la copia publicada cuando el formulario no coincide y 
   expect(html).toMatch(/<button[^>]*disabled=""[^>]*>Imprimir \/ guardar PDF/);
   expect(html).not.toContain('private-patient-id');
 });
+
+it('incluye ambas categorías revisadas en la impresión y escapa textos', () => {
+ const html=planPrintHtml({...copy,version:{...version,guidance:{recommendations:['Recomendación ficticia <script>'],avoid:['Indicación ficticia para evitar']}}});
+ expect(html).toContain('Recomendaciones');expect(html).toContain('Alimentos a evitar');expect(html).toContain('Recomendación ficticia &lt;script&gt;');expect(html).toContain('Indicación ficticia para evitar');expect(html).not.toContain('<script>');
+});

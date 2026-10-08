@@ -19,7 +19,7 @@ Facundo eligió: **aplicar crea un nuevo borrador, conserva la versión anterior
 - [x] Catálogo en API/memoria y migración con propietario/revisiones.
 - [x] Modelos en barra izquierda, categorías, búsqueda y ventanas.
 - [x] Vista previa de aplicación de Planes modelo, nuevo borrador e historial conservado.
-- [ ] Aplicación de Recomendaciones y Alimentos a evitar como indicaciones separadas.
+- [x] Aplicación de Recomendaciones y Alimentos a evitar como indicaciones separadas.
 - [x] Verificar API, aislamiento, PostgreSQL descartable y navegador 1440/1280.
 - [x] Revisiones de código/realidad; suite, tipos, compilación y migraciones.
 - [x] Registrar evidencia y actualizar plan de acción/PR en borrador.
@@ -72,6 +72,28 @@ Evidencia: [comparación 1440](evidencia-modelos/planv-aplicar-modelo-1440.png),
 
 Validación: suite general **273 archivos/1522 pruebas aprobadas y 2 omitidas**; después, **2 pruebas adicionales** de traslado entre meses, independencia de copia y diferencias por notas/porciones. Pruebas de memoria y esquema PostgreSQL completo validan acceso profesional, propiedad, confirmación, revisiones, nueva versión, historial y conservación de la copia publicada. Tipos, compilación y control de migraciones aprobados. Revisiones de código y realidad sin bloqueantes; evidencia local, sin aplicar la nueva migración en producción.
 
-**Siguiente incremento:** contrastar e incorporar Recomendaciones y Alimentos a evitar al documento del paciente, con revisión, publicación e impresión. Este cierre alcanza aplicación de Planes modelo; no cierra todo Modelos ni todo el dashboard. Academy y mobile siguen excluidos.
+En este cierre parcial el siguiente incremento fue incorporar Recomendaciones y Alimentos a evitar al documento del paciente; quedó implementado el 2026-10-08, según registro debajo. No se cierra todo el dashboard. Academy y mobile siguen excluidos.
 
 Nota de cierre (2026-10-08): el code-reviewer y reality-checker completaron la lectura funcional previa sin bloqueantes. La segunda revisión independiente de las capturas finales no pudo ejecutarse por límite de uso del agente. Las capturas finales fueron verificadas por el agente principal; no se presenta esa segunda revisión como completada.
+
+## Indicaciones del plan: Recomendaciones y Alimentos a evitar (2026-10-08)
+
+Contraste previo repetido del Loom en 431,022 segundos (7:11): muestra ambas categorías en Modelos, sin abrir el recorrido para aplicarlas. No se atribuye al video la comparación ni la forma de combinar listas. Facundo eligió agregar al nuevo borrador, conservar lo anterior y evitar duplicados. Los textos se comparan sin diferencias de mayúsculas ni espacios consecutivos; se conserva la redacción previa. No se equiparan instrucciones distintas ni se inventan recomendaciones clínicas.
+
+Implementado: Aplicar al paciente disponible para las tres categorías publicadas. Recomendaciones/evitar requieren un plan guardado: crean otra versión del mismo período, copian comidas, cantidades, composición histórica y objetivo clínico sin modificarlos, suman únicamente la categoría elegida y conservan el publicado/historial. Revisión previa de lista resultante y cantidad de indicaciones nuevas. Límite de 100 por categoría/500 caracteres por indicación; modelo hasta 50. Los borradores y copias publicadas posteriores del catálogo no alteran documentos ya copiados.
+
+Las listas se pueden ajustar en el borrador y guardar; la revisión para publicar incluye su contenido y evita cambios concurrentes. Publicación/entrega siguen siendo explícitas. Se incorporan al documento publicado que se consulta y a la impresión, y aparecen también en versiones anteriores. Al guardar comidas o aplicar otro Plan modelo se conservan las indicaciones. La base protege las listas de versiones publicadas/archivadas contra modificaciones. Migración preparada mediante CLI y probada en esquema PostgreSQL completo, sin producción.
+
+Revisión de comodidad con Facundo: se detectaron campos sin delimitación visual; se frenó el ajuste y se mostró una propuesta. Aprobó bloque desplegable con dos campos claramente delimitados. El estilo se incorpora al editor existente usando sus colores y foco de teclado; no se crea otro sistema visual. Se mantiene ECC selectivo para composición, formularios y verificación.
+
+Pruebas: suite completa **274 archivos/1527 aprobadas, 2 omitidas**; tipos, compilación y control de migraciones aprobados. Pruebas de memoria, PostgreSQL, aislamiento, revisión para publicar y documento imprimible con escape de texto. Code-reviewer sin bloqueantes; comprobación visual y revisión de realidad se registran en el cierre de este incremento.
+
+Evidencia ficticia: recomendaciones crean v3 con dos líneas; evitar crea v4 con una línea y conserva las recomendaciones. Al volver a aplicar informa 0 nuevas; se canceló sin crear v5. La comida mantiene 50 g y receta v1; la impresión v4 muestra ambas categorías. Se revisó 1440/1280 sin desbordamiento horizontal. Capturas en evidencia-modelos con prefijo planv-indicaciones, planv-recomendaciones y planv-evitar.
+
+Este incremento completa el recorrido básico de las tres categorías de Modelos en la web. No cierra todo el dashboard. Pendientes generales de impresión: identidad profesional persistente/logo, tablas nutricionales y descarga directa; se conserva Imprimir/Guardar como PDF mediante navegador. Academy/mobile siguen fuera de alcance.
+
+Cierre: reality-checker verificó 12 pruebas dirigidas y capturas de revisión, deduplicación e impresión, sin bloqueantes. Tras aprobar el ajuste visual, se comprobó edición/guardado de una tercera recomendación ficticia en v4, conservando alimento 50 g; las dos listas quedaron en campos con borde visible y foco de teclado. El plan demo no se publicó por estar su ingreso pendiente: la entrega publicada se validó en base descartable.
+
+Capturas de este incremento: [comparación Nutriboost](evidencia-modelos/nutriboost-indicaciones-previa.png), [recomendaciones](evidencia-modelos/planv-recomendaciones-aplicar-1440.png), [evitar](evidencia-modelos/planv-evitar-aplicar-1440.png), [sin duplicados 1280](evidencia-modelos/planv-indicaciones-dedup-1280.png), [editor aprobado](evidencia-modelos/planv-indicaciones-editor-1440.png), [impresión](evidencia-modelos/planv-indicaciones-impresion-1440.png).
+
+La revisión de menús IA muestra también las indicaciones conservadas y las compara antes de publicar; un cambio posterior requiere volver a revisar. Historial verificado: [versión anterior](evidencia-modelos/planv-indicaciones-historial-1440.png).

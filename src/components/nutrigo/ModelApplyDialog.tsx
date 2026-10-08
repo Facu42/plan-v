@@ -15,6 +15,8 @@ import { FigmaRecordDialog } from './FigmaPatientFront';
 import { ModelContent } from './ModelCatalog';
 import { useUnsavedChanges } from './unsaved-changes';
 import { NvButton } from './primitives';
+import { PlanGuidanceView } from './PlanGuidance';
+import { mergeGuidance } from '../../types/plan-guidance';
 
 export function ModelApplyDialog({
   model,
@@ -65,14 +67,30 @@ export function ModelApplyDialog({
     return () => controller.abort();
   }, [patient]);
   const copy = model.published;
+  const isPlan = model.kind === 'plan';
+  let merged = plan?.current.guidance;
+  let guidanceError = '';
+  if (!isPlan && plan && copy) {
+    try {
+      merged = mergeGuidance(
+        plan.current.guidance,
+        model.kind as 'recommendations' | 'avoid',
+        copy.lines,
+      );
+    } catch {
+      guidanceError =
+        'El plan admite hasta 100 indicaciones por categoría. Revisá las existentes.';
+    }
+  }
   async function apply() {
-    if (busy || !loaded || !copy) return;
+    if (busy || !loaded || !copy || (!isPlan && (!plan || guidanceError)))
+      return;
     const parsed = modelApplySchema.safeParse({
       patient_id: patient,
       expected_revision: model.revision,
       expected_version: copy.version,
       expected_plan_revision: plan?.current.revision ?? null,
-      period_start: start,
+      period_start: isPlan ? start : plan!.current.period_start,
       reviewed,
     });
     if (!parsed.success) {
@@ -90,18 +108,23 @@ export function ModelApplyDialog({
       setBusy(false);
     }
   }
-  if (!copy?.plan) return null;
+  if (!copy || (isPlan && !copy.plan)) return null;
   const valid = modelApplySchema.shape.period_start.safeParse(start).success;
   const end = valid
     ? new Date(
-        Date.parse(`${start}T12:00:00Z`) + (copy.plan.days - 1) * 86400000,
+        Date.parse(`${start}T12:00:00Z`) +
+          ((copy.plan?.days ?? 1) - 1) * 86400000,
       )
         .toISOString()
         .slice(0, 10)
     : '';
-  const changes = valid
-    ? modelPlanChanges(plan?.current.items ?? [], datedModelItems(copy, start))
-    : null;
+  const changes =
+    valid && isPlan
+      ? modelPlanChanges(
+          plan?.current.items ?? [],
+          datedModelItems(copy, start),
+        )
+      : null;
   return (
     <FigmaRecordDialog
       title={`Aplicar modelo · copia publicada v${copy.version}`}
@@ -133,29 +156,43 @@ export function ModelApplyDialog({
           {loading && <p role="status">Cargando el plan actual…</p>}
           {loaded && (
             <>
-              <label>
-                Primer día del nuevo borrador
-                <input
-                  type="date"
-                  max="9999-12-10"
-                  value={start}
-                  onChange={(e) => {
-                    setStart(e.target.value);
-                    setReviewed(false);
-                  }}
-                />
-              </label>
-              {valid && (
+              {isPlan && (
+                <label>
+                  Primer día del nuevo borrador
+                  <input
+                    type="date"
+                    max="9999-12-10"
+                    value={start}
+                    onChange={(e) => {
+                      setStart(e.target.value);
+                      setReviewed(false);
+                    }}
+                  />
+                </label>
+              )}
+              {valid && isPlan && (
                 <p>
                   Del {start.split('-').reverse().join('/')} al{' '}
                   {end.split('-').reverse().join('/')}. Las cantidades se copian
                   tal como están, sin ajuste automático.
                 </p>
               )}
+              {!isPlan && (
+                <p>
+                  Se agregan las indicaciones sin duplicar textos iguales; las
+                  comidas, cantidades y fechas se conservan.{' '}
+                  {plan
+                    ? `Período: ${plan.current.period_start} a ${plan.current.period_end}.`
+                    : 'Guardá primero un plan del paciente para incorporar indicaciones.'}
+                </p>
+              )}
+              {guidanceError && <p role="alert">{guidanceError}</p>}
               <p>
                 {plan
                   ? `Se creará el borrador v${plan.current.version + 1}. La versión v${plan.current.version} se conservará en el historial.`
-                  : 'Se creará el primer borrador del paciente.'}
+                  : isPlan
+                    ? 'Se creará el primer borrador del paciente.'
+                    : 'Primero necesitás un plan guardado.'}
                 {plan?.published
                   ? ` El paciente seguirá viendo su plan publicado v${plan.published.version} hasta que publiques otro.`
                   : ' Este borrador todavía no se entregará al paciente.'}
@@ -167,6 +204,17 @@ export function ModelApplyDialog({
                   anterior que quedarán únicamente en el historial.
                 </p>
               )}
+              {!isPlan && plan && merged && !guidanceError && (
+                <p role="status">
+                  Se sumarán{' '}
+                  {merged[model.kind as 'recommendations' | 'avoid'].length -
+                    (plan.current.guidance?.[
+                      model.kind as 'recommendations' | 'avoid'
+                    ].length ?? 0)}{' '}
+                  indicaciones nuevas. Los textos repetidos no se agregan otra
+                  vez.
+                </p>
+              )}
               <div className="mc-comparison">
                 <details>
                   <summary>
@@ -176,22 +224,29 @@ export function ModelApplyDialog({
                       : 'sin plan'}
                   </summary>
                   {plan ? (
-                    <ModelContent
-                      copy={{
-                        version: plan.current.version,
-                        title: 'Plan anterior',
-                        description: '',
-                        lines: [],
-                        plan: modelPlanFrom(plan.current),
-                        published_at: plan.current.published_at,
-                      }}
-                    />
+                    <>
+                      <PlanGuidanceView guidance={plan.current.guidance} />
+                      <ModelContent
+                        copy={{
+                          version: plan.current.version,
+                          title: 'Plan anterior',
+                          description: '',
+                          lines: [],
+                          plan: modelPlanFrom(plan.current),
+                          published_at: plan.current.published_at,
+                        }}
+                      />
+                    </>
                   ) : (
                     <p>No hay un plan guardado.</p>
                   )}
                 </details>
                 <h3>Nuevo borrador · {copy.title}</h3>
-                <ModelContent copy={copy} />
+                {isPlan ? (
+                  <ModelContent copy={copy} />
+                ) : (
+                  <PlanGuidanceView guidance={merged} />
+                )}
               </div>
               <label className="mc-confirm">
                 <input
@@ -199,8 +254,8 @@ export function ModelApplyDialog({
                   checked={reviewed}
                   onChange={(e) => setReviewed(e.target.checked)}
                 />
-                Revisé las comidas, cantidades, notas y fechas. Quiero crear
-                otro borrador y conservar el plan anterior.
+                Revisé el contenido y las fechas. Quiero crear otro borrador y
+                conservar el plan anterior.
               </label>
             </>
           )}
@@ -215,7 +270,13 @@ export function ModelApplyDialog({
           <footer>
             <NvButton onClick={onClose}>Cancelar</NvButton>
             <NvButton
-              disabled={!loaded || !reviewed || !valid || busy}
+              disabled={
+                !loaded ||
+                !reviewed ||
+                !valid ||
+                busy ||
+                (!isPlan && (!plan || Boolean(guidanceError)))
+              }
               onClick={() => void apply()}
             >
               {busy ? 'Creando borrador…' : 'Crear nuevo borrador'}
