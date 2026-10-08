@@ -39,12 +39,24 @@ export function culinaryEnglish(value: string): string {
   text = text.replace(pattern, word => words[word]);
   return text;
 }
+// Platos con nombre propio que el diccionario palabra por palabra describe mal («tortilla» no es una frittata).
+const DISH_PHRASES: Array<[RegExp, string]> = [
+  [/\btortilla de (papas?|patatas?)\b/, 'a Spanish potato omelette (tortilla espanola), a thick round golden omelette of potato, egg and onion, with one wedge cut out to show the layers'],
+  [/\bmilanesas?\b/, 'a golden breaded cutlet (milanesa) served with a lemon wedge'],
+  [/\bempanadas?\b/, 'baked Argentine empanadas, half-moon pastries with a folded edge'],
+  [/\bpure de (papas?|patatas?)\b/, 'a bowl of smooth mashed potatoes'],
+];
+/** Plato en inglés: el nombre propio conocido, o el nombre original traducido palabra por palabra. */
+function dishPhrase(title: string): string {
+  const plain = title.slice(0, 180).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  return DISH_PHRASES.find(([pattern]) => pattern.test(plain))?.[1] ?? culinaryEnglish(title.slice(0, 180));
+}
+// Sólo título e ingredientes: los pasos están en español y confunden al modelo, que dibuja palabras sueltas.
 export function recipeCoverPrompt(context: RecipeCoverContext): string {
   return [
-    `Food photograph of ${culinaryEnglish(context.title.slice(0, 180))}.`,
-    `Visible food ingredients: ${context.items.slice(0, 20).map(i => culinaryEnglish(i.name.slice(0, 80))).join(', ')}. Show those ingredients clearly in the finished dish.`,
-    'A single edible dish on a white ceramic plate or bowl, warm cream background, soft natural daylight, three-quarter overhead view, centered square composition. No extra ingredients, garnish, people, cutlery, text, labels, logos or collage.',
-    `Preparation: ${culinaryEnglish((context.steps ?? []).join(' ').slice(0, 650))}`,
+    `Professional food photograph of ${dishPhrase(context.title)}.`,
+    `Main ingredients: ${context.items.slice(0, 20).map(i => culinaryEnglish(i.name.slice(0, 80))).join(', ')}. Show only these ingredients, clearly recognizable in the finished dish.`,
+    'Exactly one single dish served on a white ceramic plate, warm cream background, soft natural daylight, three-quarter overhead view, centered square composition. No extra ingredients, garnish, people, cutlery, text, labels, logos or collage.',
   ].join(' ').slice(0, 2048);
 }
 /** Deja en el registro por qué no hubo foto: solo el motivo y el código HTTP, nunca claves, textos ni imágenes. */

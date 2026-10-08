@@ -27,7 +27,7 @@ Son ilustraciones: los ingredientes y cantidades escritos siguen siendo la refer
 ## Comportamiento y límites
 
 - Modelo fijo `@cf/black-forest-labs/flux-1-schnell`, cuatro pasos, sin router ni
-  proveedor pago alternativo. Sólo enviar título, ingredientes y preparación;
+  proveedor pago alternativo. Sólo enviar título e ingredientes (los pasos están en español y confundían al modelo);
   los identificadores de paciente, antecedentes y notas no forman parte de la petición.
 - Mantener **Workers Free** en la cuenta de Cloudflare. La confirmación de entorno
   no verifica el plan de facturación de la cuenta. El límite diario gratuito es

@@ -16,7 +16,7 @@ it('sólo habilita el proveedor elegido y la confirmación de Workers Free',()=>
 it('genera y valida bytes reales con el modelo fijo, sin mandar datos extra',async()=>{
   enabled();const fetcher=vi.fn().mockResolvedValue(new Response(JSON.stringify({success:true,result:{image:jpeg.toString('base64')}})));vi.stubGlobal('fetch',fetcher);
   expect(await generateRecipeCoverImage({...context,patient_name:'Nunca enviar'} as typeof context)).toMatchObject({status:'ready',mime:'image/jpeg',bytes:jpeg,alt:expect.stringContaining('imagen ilustrativa generada con IA')});
-  const [url,init]=fetcher.mock.calls[0];expect(url).toContain('/@cf/black-forest-labs/flux-1-schnell');expect(JSON.parse(init.body)).toMatchObject({steps:4});expect(init.body).toContain('cook and serve.');expect(init.body).not.toContain('Nunca enviar');expect(fetcher).toHaveBeenCalledTimes(1);
+  const [url,init]=fetcher.mock.calls[0];expect(url).toContain('/@cf/black-forest-labs/flux-1-schnell');expect(JSON.parse(init.body)).toMatchObject({steps:4});expect(init.body).not.toContain('cook and serve.');expect(init.body).not.toContain('Nunca enviar');expect(fetcher).toHaveBeenCalledTimes(1);
 });
 it('una cuota agotada espera al siguiente día sin un proveedor pago alternativo',async()=>{
   enabled();const fetcher=vi.fn().mockResolvedValue(new Response('{}',{status:429}));vi.stubGlobal('fetch',fetcher);
@@ -28,6 +28,15 @@ it('rechaza contenido no imagen y respuestas demasiado grandes',async()=>{
   expect(await generateRecipeCoverImage(context)).toMatchObject({status:'failed'});expect(await generateRecipeCoverImage(context)).toMatchObject({status:'failed'});
 });
 it('la descripción tiene un límite y conserva sólo receta, ingredientes y preparación',()=>{expect(recipeCoverPrompt({title:'x'.repeat(500),items:Array.from({length:20},()=>({name:'x'.repeat(200)})),steps:['x'.repeat(3000)]}).length).toBeLessThanOrEqual(2048);});
+it('describe la tortilla de papas como el plato que es y no mezcla pasos en español',()=>{
+  const prompt=recipeCoverPrompt({title:'Tortilla de papas',items:[{name:'papa',unit:'g',quantity:400},{name:'huevo'},{name:'cebolla'}],steps:['Cortar las papas y la cebolla en rodajas finas.','Freír a fuego bajo y mezclar con los huevos batidos.']});
+  expect(prompt).toContain('Spanish potato omelette');expect(prompt).toContain('potato, egg, onion');
+  expect(prompt).not.toMatch(/rodajas|fuego|batidos|freir|frittata/i);
+});
+it('un plato desconocido conserva su nombre y pide una foto simple de un solo plato',()=>{
+  const prompt=recipeCoverPrompt({title:'Locro criollo',items:[{name:'maiz'}]});
+  expect(prompt).toContain('locro criollo');expect(prompt).toContain('single dish');
+});
 it('describe los alimentos españoles en inglés sin agregar pescado a los otros platos',()=>{
   const salad=recipeCoverPrompt({title:'Ensalada de lentejas y vegetales',items:[{name:'Lentejas cocidas'},{name:'Tomate'}]});
   expect(salad).toContain('salad of lentils and vegetables');expect(salad).toContain('lentils cooked, tomato');expect(salad).not.toContain('fish');
