@@ -33,6 +33,16 @@ it('describe la tortilla de papas como el plato que es y no mezcla pasos en espa
   expect(prompt).toContain('Spanish potato omelette');expect(prompt).toContain('potato, egg, onion');
   expect(prompt).not.toMatch(/rodajas|fuego|batidos|freir|frittata/i);
 });
+it('las descripciones de platos conocidos no agregan ingredientes, cocción ni recipientes que la receta no tiene',()=>{
+  const milanesa=recipeCoverPrompt({title:'Milanesa de pollo',items:[{name:'pollo'}]});
+  expect(milanesa).toContain('milanesa');expect(milanesa).not.toMatch(/lemon|limon/i);
+  const empanadas=recipeCoverPrompt({title:'Empanadas de verdura',items:[{name:'verduras'}]});
+  expect(empanadas).toContain('empanadas');expect(empanadas).not.toMatch(/baked|fried/i);
+  const tortilla=recipeCoverPrompt({title:'Tortilla de papas',items:[{name:'papa'},{name:'huevo'}]});
+  expect(tortilla).not.toMatch(/onion/i);
+  const pure=recipeCoverPrompt({title:'Puré de papas',items:[{name:'papa'}]});
+  expect(pure).not.toMatch(/\bbowl of\b/);expect(pure).toContain('plate or bowl');
+});
 it('un plato desconocido conserva su nombre y pide una foto simple de un solo plato',()=>{
   const prompt=recipeCoverPrompt({title:'Locro criollo',items:[{name:'maiz'}]});
   expect(prompt).toContain('locro criollo');expect(prompt).toContain('single dish');
