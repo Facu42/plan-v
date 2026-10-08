@@ -21,7 +21,7 @@ Facundo eligió: **aplicar crea un nuevo borrador, conserva la versión anterior
 - [ ] Vista previa de aplicación, nuevo borrador e historial conservado.
 - [x] Verificar API, aislamiento, PostgreSQL descartable y navegador 1440/1280.
 - [x] Revisiones de código/realidad; suite, tipos, compilación y migraciones.
-- [ ] Registrar evidencia y actualizar plan de acción/PR en borrador.
+- [x] Registrar evidencia y actualizar plan de acción/PR en borrador.
 
 Arquitectura: componentes React existentes, Hono, tipos Zod y PostgreSQL; ECC para componentes/pruebas y Supabase para permisos. Sin dependencias nuevas de aplicación. Migración sólo preparada/probada localmente; no modificar producción sin autorización específica. Procedencia de IA conservada en planes copiados; no se observó generación directa de modelos con IA en este segmento.
 
@@ -54,3 +54,5 @@ La aplicación al paciente todavía está pendiente: este incremento no expone u
 6. Revisión clínica y publicación explícitas mediante el recorrido existente. Comprobar permisos, conservación de versiones y copias frente a cambios del catálogo y de modelos.
 
 No se considera cerrado todo Modelos ni todo el dashboard. Mobile y Academy continúan fuera del alcance.
+
+PR en borrador: [#73 · Modelos web: catálogo privado y copias revisadas](https://github.com/Facu42/plan-v/pull/73), basado en #72. El cierre local del catálogo fue revalidado por reality-checker con la evidencia visual; aplicación al paciente pendiente.
