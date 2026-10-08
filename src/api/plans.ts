@@ -2,6 +2,7 @@ import { request } from './client';
 import { planReviewSnapshot, type MealPlanDraftInput, type PatientMealPlan, type ProfessionalMealPlan, type PlanVersionView } from '../types/plans';
 
 export const plansApi = {
+  history:(patientId:string,signal?:AbortSignal)=>request<{versions:PlanVersionView[]}>(`/api/patients/${encodeURIComponent(patientId)}/plans/history`,{signal}),
   professional: (patientId: string, signal?: AbortSignal) => request<{ plan: ProfessionalMealPlan | null; source: string; image_generation?: boolean }>(
     `/api/patients/${encodeURIComponent(patientId)}/plans?audience=pro`,
     { signal },

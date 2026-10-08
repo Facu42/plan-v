@@ -1,4 +1,5 @@
 import { resolvePlanComponents } from './components.js';
+import { datedModelItems, type ModelCopy } from '../../src/types/models.js';
 import type { PlanComponentView } from '../../src/types/plan-components.js';
 import { registerDemoState } from '../demo/state.js';
 import { getRequestDb } from '../db/supabase-client.js';
@@ -181,7 +182,7 @@ function asVersion(row: Record<string, unknown>): PlanVersionView {
   };
 }
 
-function asProfessional(row: Record<string, unknown>): ProfessionalMealPlan {
+export function asProfessional(row: Record<string, unknown>): ProfessionalMealPlan {
   return {
     id: String(row.id),
     patient_id: String(row.patient_id),
@@ -396,6 +397,32 @@ export async function getProfessionalMealPlan(nutritionistId: string, patientId:
   mealPlanDbError(error);
   if (!data) return null;
   return asProfessional(data as Record<string, unknown>);
+}
+
+/** Only trusted published model copies may reach this function, never client snapshots. */
+export function forkModelPlanMemory(owner:string,patientId:string,copy:ModelCopy,start:string,expected:string|null):ProfessionalMealPlan {
+  const patient=getPatient(patientId);if(!patient || patient.archived_at) throw new CareError(404,'Paciente no disponible.');
+  const existing=[...plans.values()].find(p=>p.patient_id===patientId&&p.nutritionist_id===owner);
+  const previous=existing ? planVersions(existing.id).slice(-1)[0] : undefined;
+  if((previous?.revision??null)!==expected) throw new CareError(409,'El plan cambió. Volvé a revisar los cambios antes de aplicar.');
+  if(!copy.plan?.items.length) throw new CareError(400,'El modelo necesita comidas publicadas.');
+  const dated=datedModelItems(copy,start);
+  const prepared=dated.map(item=>{
+    const recipe=item.recipe_id&&item.recipe_version ? readPublishedMemory(owner,item.recipe_id,item.recipe_version) : null;
+    if(item.recipe_id&&!recipe) throw new CareError(400,'La receta histórica del modelo no está disponible.');
+    const {id:_id,recipe:_detail,dish_card:_card,...rest}=item;
+    return {...rest,recipe_version_id:recipe?.versionId??null};
+  });
+  const now=new Date().toISOString();const plan=existing??{id:crypto.randomUUID(),patient_id:patientId,nutritionist_id:owner,timezone:'America/Argentina/Buenos_Aires',created_at:now};
+  const version:MemVersion={id:crypto.randomUUID(),revision:crypto.randomUUID(),meal_plan_id:plan.id,version:(previous?.version??0)+1,status:'draft',period_start:start,period_end:new Date(Date.parse(`${start}T12:00:00Z`)+(copy.plan.days-1)*86400000).toISOString().slice(0,10),published_at:null,created_at:now,...(previous?.nutrition_target?{nutrition_target:structuredClone(previous.nutrition_target)}:{})};
+  if(previous?.status==='draft')previous.status='archived';
+  plans.set(plan.id,plan);versions.set(version.id,version);
+  for(const item of prepared){const row:MemItem={...item,id:crypto.randomUUID(),version_id:version.id};items.set(row.id,row);}
+  return memProfessional(plan);
+}
+export async function getMealPlanHistory(owner:string,patientId:string,persistent:boolean):Promise<PlanVersionView[]> {
+  if(persistent){const {data,error}=await getRequestDb().rpc('list_meal_plan_history',{target_patient:patientId});mealPlanDbError(error);return (data??[]).map((row:Record<string,unknown>)=>asVersion(row));}
+  const plan=[...plans.values()].find(p=>p.patient_id===patientId&&p.nutritionist_id===owner);return plan ? planVersions(plan.id).reverse().map(memVersionView) : [];
 }
 
 export async function getPublishedMealPlan(patientId: string, persistent: boolean): Promise<PatientMealPlan | null> {

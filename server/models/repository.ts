@@ -1,7 +1,13 @@
 import { registerDemoState } from '../demo/state.js';
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
-import { getProfessionalMealPlan } from '../plans/repository.js';
+import {
+  asProfessional,
+  forkModelPlanMemory,
+  getProfessionalMealPlan,
+} from '../plans/repository.js';
+import type { ModelApplyInput } from '../../src/types/models.js';
+import type { ProfessionalMealPlan } from '../../src/types/plans.js';
 import {
   applyModelOverrides,
   modelPlanFrom,
@@ -14,6 +20,39 @@ const models = new Map<string, ProfessionalModel & { owner: string }>();
 registerDemoState('models', () => ({ models }));
 export function resetModelsMemory() {
   models.clear();
+}
+export async function applyModel(
+  owner: string,
+  id: string,
+  input: ModelApplyInput,
+  persistent: boolean,
+): Promise<ProfessionalMealPlan> {
+  if (persistent) {
+    const { data, error } = await getRequestDb().rpc(
+      'apply_professional_model',
+      { model_id: id, payload: input },
+    );
+    dbError(error);
+    if (!data) throw new CareError(503, 'No pudimos recuperar el borrador.');
+    return asProfessional(data);
+  }
+  const model = owned(owner, id, input.expected_revision);
+  if (
+    !model?.published ||
+    model.kind !== 'plan' ||
+    model.published.version !== input.expected_version
+  )
+    throw new CareError(
+      409,
+      'Revisá la copia publicada del modelo antes de aplicar.',
+    );
+  return forkModelPlanMemory(
+    owner,
+    input.patient_id,
+    structuredClone(model.published),
+    input.period_start,
+    input.expected_plan_revision,
+  );
 }
 function dbError(error: { code?: string } | null) {
   if (!error) return;

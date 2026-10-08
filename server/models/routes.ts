@@ -4,8 +4,15 @@ import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { sbGetActor } from '../db/supabase-repo.js';
 import { DEMO_NUTRITIONIST_ID } from '../store.js';
 import { CareError } from '../care/errors.js';
-import { modelSaveSchema } from '../../src/types/models.js';
-import { listModels, modelAction, saveModel } from './repository.js';
+import { modelApplySchema, modelSaveSchema } from '../../src/types/models.js';
+import {
+  applyModel,
+  listModels,
+  modelAction,
+  saveModel,
+} from './repository.js';
+import { authorizePatientAction } from '../security/authorization.js';
+import { sbGetPatientResource } from '../db/supabase-repo.js';
 async function professional(c: Context) {
   const auth = c.get('auth');
   if ('demo' in auth) return { owner: DEMO_NUTRITIONIST_ID, persistent: false };
@@ -24,6 +31,27 @@ async function body(c: Context) {
   }
 }
 export function registerModelRoutes(app: Hono) {
+  app.post('/api/models/:id/apply', async (c) => {
+    const a = await professional(c);
+    const id = z.uuid().safeParse(c.req.param('id'));
+    const parsed = modelApplySchema.safeParse(await body(c));
+    if (!id.success || !parsed.success)
+      throw new CareError(
+        400,
+        'Revisá paciente, fechas y copia del modelo antes de confirmar.',
+      );
+    const auth = c.get('auth');
+    if (a.persistent && 'userId' in auth)
+      await authorizePatientAction(
+        auth.userId,
+        parsed.data.patient_id,
+        'edit_menu',
+        { getActor: sbGetActor, getPatientResource: sbGetPatientResource },
+      );
+    return c.json({
+      plan: await applyModel(a.owner, id.data, parsed.data, a.persistent),
+    });
+  });
   app.get('/api/models', async (c) => {
     const a = await professional(c);
     return c.json({ models: await listModels(a.owner, a.persistent) });

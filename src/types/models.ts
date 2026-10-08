@@ -79,6 +79,68 @@ export const modelSaveSchema = z
     }
   });
 export type ModelSaveInput = z.infer<typeof modelSaveSchema>;
+export const modelApplySchema = z
+  .object({
+    patient_id: z.string().min(1).max(80),
+    expected_revision: z.uuid(),
+    expected_version: z.number().int().positive(),
+    expected_plan_revision: z.uuid().nullable(),
+    period_start: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .refine(
+        (v) =>
+          Number.isFinite(Date.parse(`${v}T12:00:00Z`)) &&
+          new Date(`${v}T12:00:00Z`).toISOString().slice(0, 10) === v &&
+          v <= '9999-12-10',
+      ),
+    reviewed: z.literal(true),
+  })
+  .strict();
+export type ModelApplyInput = z.infer<typeof modelApplySchema>;
+export function datedModelItems(
+  copy: ModelCopy,
+  start: string,
+): PlanItemView[] {
+  return (copy.plan?.items ?? []).map(({ day, ...item }, index) => ({
+    ...structuredClone(item),
+    id: `preview-${index}`,
+    for_date: new Date(Date.parse(`${start}T12:00:00Z`) + (day - 1) * 86400000)
+      .toISOString()
+      .slice(0, 10),
+  }));
+}
+export function modelPlanChanges(
+  before: PlanItemView[],
+  after: PlanItemView[],
+) {
+  const key = (item: PlanItemView) => `${item.for_date}|${item.slot}`;
+  const stable = (value: unknown): unknown =>
+    Array.isArray(value)
+      ? value.map(stable)
+      : value && typeof value === 'object'
+        ? Object.fromEntries(
+            Object.entries(value)
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([k, v]) => [k, stable(v)]),
+          )
+        : value;
+  const content = ({
+    id: _id,
+    for_date: _date,
+    dish_card: _card,
+    ...item
+  }: PlanItemView) => JSON.stringify(stable(item));
+  const old = new Map(before.map((i) => [key(i), content(i)])),
+    next = new Map(after.map((i) => [key(i), content(i)]));
+  return {
+    added: [...next.keys()].filter((k) => !old.has(k)).length,
+    removed: [...old.keys()].filter((k) => !next.has(k)).length,
+    changed: [...next.keys()].filter(
+      (k) => old.has(k) && old.get(k) !== next.get(k),
+    ).length,
+  };
+}
 export type ModelPlanItem = Omit<
   PlanItemView,
   'id' | 'for_date' | 'dish_card'

@@ -6,7 +6,9 @@ import {
   resetMealPlanMemory,
   saveMealPlanDraft,
 } from '../plans/repository.js';
-import { modelAction, resetModelsMemory, saveModel } from './repository.js';
+import { applyModel, modelAction, resetModelsMemory, saveModel } from './repository.js';
+import { getMealPlanHistory } from '../plans/repository.js';
+import { modelApplySchema } from '../../src/types/models.js';
 import { modelSaveSchema } from '../../src/types/models.js';
 
 const input = () =>
@@ -27,6 +29,21 @@ const post = (path: string, data: unknown) =>
 beforeEach(() => {
   resetModelsMemory();
   resetMealPlanMemory();
+});
+it('aplica la copia publicada como otro borrador, conserva anterior consultable y rechaza repetir revisión',async()=>{
+ const original=await saveMealPlanDraft(DEMO_NUTRITIONIST_ID,'pat-sofia',{id:crypto.randomUUID(),period_start:'2026-10-07',period_end:'2026-10-13',timezone:'America/Argentina/Buenos_Aires',items:[{for_date:'2026-10-09',slot:'Almuerzo',free_text:'Contenido anterior',portions:2,public_note:'Nota'}]},false);
+ const draft=await saveModel(DEMO_NUTRITIONIST_ID,modelSaveSchema.parse({...input(),kind:'plan',lines:[],source:{patient_id:'pat-sofia',version:1,revision:original.current.revision}}),false);
+ const published=await modelAction(DEMO_NUTRITIONIST_ID,draft.id,draft.revision,'publish',false);
+ const model=await saveModel(DEMO_NUTRITIONIST_ID,modelSaveSchema.parse({...input(),kind:'plan',lines:[],id:published.id,expected_revision:published.revision,overrides:[{index:0,public_note:'Nota de edición',portions:3}]}),false);
+ const data=modelApplySchema.parse({patient_id:'pat-sofia',expected_revision:model.revision,expected_version:1,expected_plan_revision:original.current.revision,period_start:'2026-11-01',reviewed:true});
+ const result=await applyModel(DEMO_NUTRITIONIST_ID,model.id,data,false);
+ expect(result.current).toMatchObject({version:2,status:'draft',period_start:'2026-11-01',period_end:'2026-11-07',items:[{for_date:'2026-11-03',portions:2,public_note:'Nota'}]});
+ const history=await getMealPlanHistory(DEMO_NUTRITIONIST_ID,'pat-sofia',false);expect(history).toHaveLength(2);expect(history[1]).toMatchObject({id:original.current.id,status:'archived',items:original.current.items});
+ await expect(applyModel(DEMO_NUTRITIONIST_ID,model.id,data,false)).rejects.toMatchObject({status:409});
+ expect((await getMealPlanHistory(DEMO_NUTRITIONIST_ID,'pat-sofia',false))).toHaveLength(2);
+ expect((await post(`/api/models/${model.id}/apply`,{...data,reviewed:false})).status).toBe(400);
+ await expect(applyModel('foreign-owner',model.id,data,false)).rejects.toMatchObject({status:403});
+ expect(modelApplySchema.safeParse({...data,period_start:'2026-02-30'}).success).toBe(false);
 });
 it('publicar exige revisión y editar conserva la copia publicada; archivar retira el catálogo', async () => {
   const first = await post('/api/models', input());

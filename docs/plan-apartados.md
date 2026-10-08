@@ -289,6 +289,10 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 ## Registro
 
+### Modelos: aplicación de planes e historial (2026-10-07)
+
+Contraste previo del video Nutriboost 7:11 y 7:21: botón en modelos publicados, sin demostrar el recorrido de aplicación. Implementado el recorrido elegido por Facundo: paciente/fecha, comparación, confirmación y nuevo borrador conservando versiones anteriores; la copia publicada del paciente sigue vigente. Historial profesional de sólo lectura. Se aplica la copia publicada del modelo, aunque tenga una edición posterior en borrador. Sin ajuste automático ni publicación automática. Prueba ficticia: nuevo plan 50 g frente historial anterior 40 g; edición 55 g del modelo queda fuera. Suite general 1522 aprobadas/2 omitidas, más 2 adicionales de fechas/comparación; tipos, compilación, migraciones y revisión aprobados. [Evidencia y próximos pasos](modelos-dashboard-web-2026-10-07.md). Recomendaciones y Alimentos a evitar al documento quedan para el siguiente incremento. Migración local preparada, sin producción; web solamente, Academy/mobile excluidos.
+
 | Fecha | Apartado | Qué se hizo |
 | --- | --- | --- |
 | 2026-10-07 | Pantallas de la paciente iguales a Nutrigo | Las diez pantallas dejan de ocultar o vaciar bloques del archivo: gráficos, listas y tarjetas originales con datos reales. Comparador píxel por píxel contra los 20 frames (Agenda 3871→1050 px, Compras 3296→1421 px; el archivo mide 1048 y 1412). Pasos del día de punta a punta (migración **aplicada en producción** con la frase escrita de Facundo, sin avisos de seguridad nuevos). Demo completa. ECC selectivo. 1.443 pruebas, tipos y compilación en verde. Publicado por [PR #68](https://github.com/Facu42/plan-v/pull/68) (`03a6aeb`). [Registro y pendientes](nutrigo-igual-al-archivo-2026-10-07.md). |

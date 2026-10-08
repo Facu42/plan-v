@@ -18,7 +18,8 @@ Facundo eligió: **aplicar crea un nuevo borrador, conserva la versión anterior
 - [x] Tipos y pruebas de copias/ajustes permitidos.
 - [x] Catálogo en API/memoria y migración con propietario/revisiones.
 - [x] Modelos en barra izquierda, categorías, búsqueda y ventanas.
-- [ ] Vista previa de aplicación, nuevo borrador e historial conservado.
+- [x] Vista previa de aplicación de Planes modelo, nuevo borrador e historial conservado.
+- [ ] Aplicación de Recomendaciones y Alimentos a evitar como indicaciones separadas.
 - [x] Verificar API, aislamiento, PostgreSQL descartable y navegador 1440/1280.
 - [x] Revisiones de código/realidad; suite, tipos, compilación y migraciones.
 - [x] Registrar evidencia y actualizar plan de acción/PR en borrador.
@@ -33,7 +34,7 @@ Publicación con confirmación y revisión vigente; editar publicado crea edici�
 
 El encabezado, fechas y objetivo clínico del paciente quedan fuera de la copia. **Las notas y textos libres no se anonimizan automáticamente:** se revisan antes de publicar; el formulario lo explicita. No hay selector de versiones históricas arbitrarias del plan.
 
-La aplicación al paciente todavía está pendiente: este incremento no expone un botón que simule aplicar ni modifica sus planes. Publicar un modelo prepara una copia profesional; no entrega ni notifica un plan.
+En el cierre del catálogo la aplicación todavía estaba pendiente. El siguiente incremento, documentado debajo, incorpora la aplicación de Planes modelo. Publicar un modelo prepara una copia profesional; no entrega ni notifica un plan.
 
 ## Evidencia y validación
 
@@ -44,7 +45,7 @@ La aplicación al paciente todavía está pendiente: este incremento no expone u
 - Suite general: **273 archivos, 1520 pruebas aprobadas, 2 omitidas**. Última verificación dirigida tras reforzar acceso al paciente de origen: **6 archivos/22 pruebas aprobadas**. Incluye permisos de funciones en esquema completo, almacenamiento local descartable, revisión y conservación, fuente propia/actual, cantidades/gramos, notas y vista de revisión.
 - Tipos, compilación, control de migraciones y revisión del cambio aprobados. Code-reviewer y reality-checker revisaron; se corrigió contenido oculto y la afirmación de copias históricas. Evidencia local: no certifica un despliegue productivo.
 
-## Siguiente incremento autorizado: aplicar al paciente
+## Recorrido autorizado: aplicar al paciente
 
 1. Contrastar nuevamente lo visible en Nutriboost sobre aplicar a cliente, sin inventar pasos no observados.
 2. Elegir paciente y fechas; mostrar contenido que se incorporará y diferencias contra la versión actual, sin escalado automático.
@@ -55,4 +56,22 @@ La aplicación al paciente todavía está pendiente: este incremento no expone u
 
 No se considera cerrado todo Modelos ni todo el dashboard. Mobile y Academy continúan fuera del alcance.
 
-PR en borrador: [#73 · Modelos web: catálogo privado y copias revisadas](https://github.com/Facu42/plan-v/pull/73), basado en #72. El cierre local del catálogo fue revalidado por reality-checker con la evidencia visual; aplicación al paciente pendiente.
+PR en borrador: [#73 · Modelos web: catálogo y aplicación con historial](https://github.com/Facu42/plan-v/pull/73), basado en #72.
+
+## Incremento implementado: aplicar Planes modelo (2026-10-07)
+
+Contraste repetido antes de desarrollar: pantalla 7:11 muestra «Aplicar a cliente» en modelos publicados; el video pasa a Academy a los 440,890 segundos (7:21) sin demostrar la aplicación. El recorrido de comparación y nuevo borrador es una adaptación acordada con Facundo, no una función detallada observada en el video. La escucha pendiente fue reemplazada por evidencia visual por su instrucción.
+
+Ventana con paciente y primer día elegidos explícitamente. Usa la copia publicada concreta del modelo, incluso si existe una edición posterior en borrador; muestra duración, comidas, ingredientes, cantidades, notas, versiones y diferencia por fecha/momento frente al plan actual. Confirmación explícita antes de crear otro borrador. Cantidades sin escalado automático; se conserva el objetivo nutricional del paciente, sin importar un objetivo personal del origen.
+
+El guardado crea otra versión aunque ya haya un borrador, archiva el borrador anterior conservando su contenido y mantiene vigente la copia publicada del paciente. El historial profesional permite consultar versiones anteriores en modo de sólo lectura; se carga al abrirlo. Publicación y revisión clínica continúan mediante el recorrido existente, sin notificaciones automáticas. Se comprueban propietario, paciente, copia publicada y revisiones del modelo/plan; un cambio concurrente o repetición de la solicitud se rechaza para evitar sobrescrituras.
+
+Verificación con datos ficticios en navegador: aplicación v1 del modelo con 50 g y nota revisada crea borrador v2; el historial v1 conserva 40 g. La edición v2 del modelo con 55 g no se aplica. En 1280 la comparación siguiente informa cero cambios y crear v3; se canceló, sin generar otra versión. Ventana y confirmación desplazables, sin desbordamiento horizontal.
+
+Evidencia: [comparación 1440](evidencia-modelos/planv-aplicar-modelo-1440.png), [confirmación](evidencia-modelos/planv-confirmar-modelo-1440.png), [ventana 1280](evidencia-modelos/planv-aplicar-modelo-1280.png), [historial conservado](evidencia-modelos/planv-historial-modelo-1440.png), [video pasa a Academy 7:21](evidencia-modelos/nutriboost-posterior-modelos-0721.png).
+
+Validación: suite general **273 archivos/1522 pruebas aprobadas y 2 omitidas**; después, **2 pruebas adicionales** de traslado entre meses, independencia de copia y diferencias por notas/porciones. Pruebas de memoria y esquema PostgreSQL completo validan acceso profesional, propiedad, confirmación, revisiones, nueva versión, historial y conservación de la copia publicada. Tipos, compilación y control de migraciones aprobados. Revisiones de código y realidad sin bloqueantes; evidencia local, sin aplicar la nueva migración en producción.
+
+**Siguiente incremento:** contrastar e incorporar Recomendaciones y Alimentos a evitar al documento del paciente, con revisión, publicación e impresión. Este cierre alcanza aplicación de Planes modelo; no cierra todo Modelos ni todo el dashboard. Academy y mobile siguen excluidos.
+
+Nota de cierre (2026-10-08): el code-reviewer y reality-checker completaron la lectura funcional previa sin bloqueantes. La segunda revisión independiente de las capturas finales no pudo ejecutarse por límite de uso del agente. Las capturas finales fueron verificadas por el agente principal; no se presenta esa segunda revisión como completada.

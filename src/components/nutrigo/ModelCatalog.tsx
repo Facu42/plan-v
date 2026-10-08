@@ -28,10 +28,22 @@ import { FigmaRecordDialog } from './FigmaPatientFront';
 import { canLeaveWorkspace, useUnsavedChanges } from './unsaved-changes';
 import { NvBadge, NvButton, NvState } from './primitives';
 import './model-catalog.css';
+import { ModelApplyDialog } from './ModelApplyDialog';
 
-function errorMessage(error:unknown,fallback:string) {
-  if(!(error instanceof Error)) return fallback;
-  try { const parsed:unknown=JSON.parse(error.message);if(parsed && typeof parsed==='object' && 'error' in parsed && typeof parsed.error==='string') return parsed.error; } catch { /* Plain application error. */ }
+function errorMessage(error: unknown, fallback: string) {
+  if (!(error instanceof Error)) return fallback;
+  try {
+    const parsed: unknown = JSON.parse(error.message);
+    if (
+      parsed &&
+      typeof parsed === 'object' &&
+      'error' in parsed &&
+      typeof parsed.error === 'string'
+    )
+      return parsed.error;
+  } catch {
+    /* Plain application error. */
+  }
   return error.message;
 }
 
@@ -269,7 +281,7 @@ function Editor({
         overrides: [],
       }));
     } catch (e) {
-      setError(errorMessage(e,'No pudimos cargar el plan.'));
+      setError(errorMessage(e, 'No pudimos cargar el plan.'));
     } finally {
       setBusy(false);
     }
@@ -325,7 +337,7 @@ function Editor({
     try {
       onSaved((await modelsApi.save(parsed.data)).model);
     } catch (e) {
-      setError(errorMessage(e,'No pudimos guardar.'));
+      setError(errorMessage(e, 'No pudimos guardar.'));
     } finally {
       setBusy(false);
     }
@@ -387,8 +399,8 @@ function Editor({
             </div>
             <p className="mc-caption">
               Se copian comidas, cantidades y notas. El nombre del paciente, sus
-              fechas y su objetivo personal quedan fuera del modelo.
-              {' '}Revisá las notas por si contienen información personal antes de publicar.
+              fechas y su objetivo personal quedan fuera del modelo. Revisá las
+              notas por si contienen información personal antes de publicar.
             </p>
             {preview?.items.map((item, index) => (
               <article className="mc-meal" key={index}>
@@ -544,7 +556,15 @@ function Editor({
     </form>
   );
 }
-export function ModelCatalog({ patients }: { patients: Patient[] }) {
+export function ModelCatalog({
+  patients,
+  onOpenHref,
+}: {
+  patients: Patient[];
+  onOpenHref?: (href: string) => void;
+}) {
+  const [applying, setApplying] = useState<ProfessionalModel | null>(null),
+    [draftHref, setDraftHref] = useState('');
   const [models, setModels] = useState<ProfessionalModel[]>([]);
   const [kind, setKind] = useState<ModelKind>('plan');
   const [query, setQuery] = useState('');
@@ -573,9 +593,7 @@ export function ModelCatalog({ patients }: { patients: Patient[] }) {
       })
       .catch((e) => {
         if (!controller.signal.aborted)
-          setError(
-            errorMessage(e,'No pudimos cargar Modelos.'),
-          );
+          setError(errorMessage(e, 'No pudimos cargar Modelos.'));
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
@@ -584,6 +602,7 @@ export function ModelCatalog({ patients }: { patients: Patient[] }) {
   }, [retry]);
   function close() {
     if (busy || !canLeaveWorkspace()) return;
+    setApplying(null);
     setEditor(null);
     setReview(null);
     setChecked(false);
@@ -608,9 +627,7 @@ export function ModelCatalog({ patients }: { patients: Patient[] }) {
       setReview(null);
       setChecked(false);
     } catch (e) {
-      setError(
-        errorMessage(e,'No pudimos confirmar la operación.'),
-      );
+      setError(errorMessage(e, 'No pudimos confirmar la operación.'));
     } finally {
       setBusy(false);
     }
@@ -661,7 +678,27 @@ export function ModelCatalog({ patients }: { patients: Patient[] }) {
           onChange={(e) => setQuery(e.target.value)}
         />
       </label>
-      {notice && <p role="status">{notice}</p>}
+      {notice && (
+        <p role="status">
+          {notice}
+          {draftHref && (
+            <>
+              {' '}
+              <a
+                href={draftHref}
+                onClick={(e) => {
+                  if (onOpenHref) {
+                    e.preventDefault();
+                    onOpenHref(draftHref);
+                  }
+                }}
+              >
+                Abrir borrador para revisar
+              </a>
+            </>
+          )}
+        </p>
+      )}
       {error && !review && (
         <NvState
           kind="error"
@@ -748,6 +785,17 @@ export function ModelCatalog({ patients }: { patients: Patient[] }) {
                     Ver copia publicada
                   </NvButton>
                 )}
+                {m.kind === 'plan' && m.published && (
+                  <NvButton
+                    onClick={() => {
+                      setApplying(structuredClone(m));
+                      setDraftHref('');
+                      setNotice('');
+                    }}
+                  >
+                    Aplicar al paciente
+                  </NvButton>
+                )}
                 <button
                   className="mc-archive"
                   type="button"
@@ -763,6 +811,25 @@ export function ModelCatalog({ patients }: { patients: Patient[] }) {
             </article>
           ))}
         </div>
+      )}
+      {applying && (
+        <ModelApplyDialog
+          model={applying}
+          patients={patients}
+          onClose={() => {
+            close();
+            setRetry((v) => v + 1);
+          }}
+          onApplied={(id, plan) => {
+            setApplying(null);
+            setDraftHref(
+              `/crm/ficha?paciente=${encodeURIComponent(id)}&seccion=plan`,
+            );
+            setNotice(
+              `Borrador v${plan.current.version} creado para ${patients.find((p) => p.id === id)?.name ?? 'el paciente'}. Las versiones anteriores se conservaron.`,
+            );
+          }}
+        />
       )}
       {editor && (
         <FigmaRecordDialog
