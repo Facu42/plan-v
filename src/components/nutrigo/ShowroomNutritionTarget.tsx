@@ -9,6 +9,7 @@ import {
 } from '../../lib/nutrition-target';
 import { NvBadge, NvButton, NvMetric } from './primitives';
 import './nutrition-target.css';
+import { PlanningBodyReference } from './PlanningBodyReference';
 
 type Draft = { sex: string; age: string; weight_kg: string; height_cm: string; activity: string; goal: TargetGoal; adjust_pct: string; protein_g_per_kg: string; fat_pct: string };
 
@@ -120,6 +121,7 @@ export function NutritionTargetPanel({ patientId, patientName, onOpenPlan }: { p
       <NvMetric label="Gasto diario" value={live ? `${live.tdee} kcal` : 'Sin cálculo'} note="Según el nivel de actividad" icon="target" nvIcon="ejercicio" tone="gold" />
       <NvMetric label="Meta propuesta" value={live ? `${live.kcal} kcal` : 'Por definir'} note="Revisala antes de confirmar" icon="target" nvIcon="calorias" />
     </div>
+    {parsed.success && <PlanningBodyReference weight={parsed.data.weight_kg} height={parsed.data.height_cm} age={parsed.data.age} />}
     <form className="nvt-layout" onSubmit={onSubmit}>
       <div className="nvt-form">
         <fieldset><legend>Datos de la paciente</legend>

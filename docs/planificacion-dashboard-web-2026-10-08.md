@@ -55,3 +55,23 @@ Producción usa una transacción SQL para confirmar y sincronizar, con validaci�
 IMC y referencias por métrica, comparación clínica actual/objetivo/referencia y otras ecuaciones siguen pendientes. Se incorporarán tras contraste específico y fuentes primarias verificadas. No se presentan como terminados ni se inventan rangos desde una captura.
 
 El enlace de propuesta anterior redirige al apartado real de prueba. Este incremento está listo para revisión de diseño; publicar y aplicar la migración productiva requieren autorización correspondiente. Sin llamadas pagas de IA, recursos nuevos ni cambios a pacientes reales.
+
+## Segundo incremento: IMC y referencias · 2026-10-08
+
+Comparación visual repetida con el video de Nutriboost alrededor de 1:43: indicador de IMC, basal Mifflin-St Jeor, energía y tabla actual/objetivo/referencia. La captura no acredita una política clínica para fijar metas de peso ni suficientes datos para todas las referencias de composición corporal.
+
+Se incorpora resumen de IMC siempre visible y detalle desplegable de peso/IMC, con los tokens Nutrigo, tabla semántica y apertura por teclado. Cerrado inicialmente para conservar el acceso cómodo a la calculadora. Es una extensión con componentes existentes; no hay un frame original de Nutrigo para este bloque. No se agrega movimiento a números ni al desplegable de uso frecuente.
+
+Fuente primaria consultada con /browse: [CDC, Adult BMI Categories](https://www.cdc.gov/bmi/adult-calculator/bmi-categories.html). Cálculo peso kg / talla m²; clasificación sin redondear. Referencias generales desde los 20 años: <18,5; 18,5 a <25; 25 a <30; ≥30. El peso de referencia se deriva del intervalo 18,5 a <25 multiplicado por talla m². En menores de 20 se muestra solamente el cálculo, sin clasificación ni intervalo de adultos. La edad sigue siendo la de la propuesta existente. No se fijan automáticamente metas de peso, no se reemplaza evaluación profesional ni se cambia la meta energética o el plan por consultar referencias.
+
+| Antes | Después | Motivo |
+| --- | --- | --- |
+| Sin indicador de IMC | Resumen numérico y categoría junto a planificación | Incorporar función observada en Nutriboost |
+| Referencias pendientes sin fuente | Tabla con fuente CDC y límite de edad explícito | Evitar inventar rangos desde el video |
+| Tabla completa desplaza formulario | Resumen visible y detalle desplegable | Mantener calculadora accesible |
+
+Verificación: 14 pruebas nuevas de fórmula, límites sin redondear, edad e entradas no finitas; fallaron antes de crear el módulo. Suite: 307 archivos, 2.133 aprobadas y 2 omitidas. Tipos, compilación, migraciones y secretos correctos. Navegador ficticio local a 1440: temas claro/oscuro, sin desborde, apertura con mouse y cierre con Enter, cambio a 19 años sin clasificación adulta y regreso sin guardar. Evidencias en evidencia-planificacion/planificacion-imc*.png. No datos reales ni escrituras productivas.
+
+El CI anterior encontró una carrera en el ensayo: navegación antes de terminar revisión de ingreso (guardado bloquea salir). Corregido en 69e8f13 esperando «Ya revisado». Controles generales repetidos aprobados; recorrido firmado todavía en ejecución al registrar esta actualización.
+
+Pendiente: metas de peso definidas por profesional y comparación objetivo, otras medidas y referencias de composición corporal, fórmulas alternativas. No se acredita el apartado completo. Sigue en PR borrador #78, sin producción.
