@@ -169,6 +169,7 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - Sistema de diseño de las páginas públicas: `docs/sistema-de-diseno-publico.md` (y `.html` para verlo), con las variables en `src/landing/tokens.css`. Los colores son los del logo. Reemplaza la paleta de la guía de redes (`docs/redes`). La app no lo usa.
 - Movimiento (cinta, números, parallax); con "reducir movimiento" queda quieta.
 - Fotos ilustrativas generadas con IA (API de Higgsfield, script fuera del repo); la de Verónica Trenti es real y Facundo la autorizó por escrito en el chat (2026-10-02). El pie lo aclara.
+- Rediseño de `/pacientes` (PR en borrador, rama `claude/pacientes-rediseno`): portada con zoom al bajar, beneficios que se corren de costado, textos desde el dolor de quien necesita seguimiento, todos los colores del logo y personas variadas. Estilos y script propios en `src/landing/pacientes.css` y `pacientes.ts`. No se junta sin la frase "publicalo".
 - Pendiente: el botón principal lleva hoy a `/` (la entrada de la app); falta definir el destino real. La landing para nutricionistas (`/nutricionistas`) sigue en borrador en el PR 45.
 
 ## Cómo se registra
