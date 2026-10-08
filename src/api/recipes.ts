@@ -3,6 +3,8 @@ import type { PatientRecipe, ProfessionalRecipe } from '../types/recipes';
 import type { RecipeDayAssignment, RecipeWizardInput } from '../types/recipe-plate';
 
 export const recipesApi = {
+  favorites: (signal?: AbortSignal) => request<{ favorite_ids: string[] }>('/api/recipes/favorites', { signal }),
+  setFavorite: (id: string, favorite: boolean) => request<{ recipe_id: string; favorite: boolean }>(`/api/recipes/${id}/favorite`, { method: 'POST', body: JSON.stringify({ favorite }) }),
   list: (signal?: AbortSignal) => request<{ recipes: ProfessionalRecipe[]; source: string; image_generation?: boolean }>('/api/recipes', { signal }),
   save: (input: RecipeWizardInput) => request<{ recipe: ProfessionalRecipe; source: string }>('/api/recipes', {
     method: 'POST',

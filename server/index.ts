@@ -4,6 +4,8 @@ import { createBodyGuard, createOriginGuard, createRateLimits, readCorsOrigins }
 import { CareError } from './care/repository.js';
 import { registerAssetRoutes } from './assets/routes.js';
 import { registerRecipeRoutes } from './recipes/routes.js';
+import { registerFoodRoutes } from './foods/routes.js';
+import { registerModelRoutes } from './models/routes.js';
 import { registerPlanRoutes } from './plans/routes.js';
 import { registerTargetRoutes } from './targets/routes.js';
 import { registerDiaryRoutes } from './diary/routes.js';
@@ -266,6 +268,8 @@ app.get('/api/ready', async (c) => {
 registerCareRoutes(app);
 registerAssetRoutes(app);
 registerRecipeRoutes(app);
+registerFoodRoutes(app);
+  registerModelRoutes(app);
 registerPlanRoutes(app);
 registerTargetRoutes(app);
 registerDiaryRoutes(app);

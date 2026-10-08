@@ -20,7 +20,7 @@ import { PLAN_SLOTS } from '../../types/plans';
 import { unavailableCard } from '../../types/recipe-plate';
 import { MealThumbnail } from './PatientOverview';
 import { mealSlotTone, NvState } from './primitives';
-import { RecipeAiForm, RecipeAssignDialog, RecipeChoice, RecipeCoverAction, RecipeEditorForm, useAssignedRecipes, useRecipeCatalog, type RecipeCatalogState } from './RecipeCatalog';
+import { RecipeAiForm, RecipeAiNotices, RecipeAssignDialog, RecipeChoice, RecipeCoverAction, RecipeEditorForm, useAssignedRecipes, useRecipeCatalog, type RecipeCatalogState } from './RecipeCatalog';
 import { RecipeDetails, RecipeDishWell, RecipeMacroTiles, type RecipeDetailData } from './RecipePlate';
 import type { ShowroomPage } from './ShowroomPanels';
 import type { ShowroomPatient } from './showroom-model';
@@ -427,6 +427,7 @@ function ProHealthyMenu({ patient, query }: { patient: ShowroomPatient; query: s
         {catalog.path === 'choose' && !catalog.editing && <RecipeChoice catalog={catalog} />}
         {catalog.path === 'ai' && <RecipeAiForm catalog={catalog} />}
         <RecipeEditorForm catalog={catalog} />
+        <RecipeAiNotices catalog={catalog} />
       </div>
     </div>}
     <RecipeAssignDialog catalog={catalog} />
@@ -452,6 +453,7 @@ function ProHealthyMenu({ patient, query }: { patient: ShowroomPatient; query: s
     {catalog.source === 'memory' && <p className="mf-notice">Vista demo · recetas ficticias para probar el menú.</p>}
     {catalog.error && !editorOpen && <p className="recipe-error" role="alert">{catalog.error}</p>}
     {catalog.status && <p className="recipe-status" role="status">{catalog.status}</p>}
+    {!editorOpen && <RecipeAiNotices catalog={catalog} />}
   </>;
 
   const aside = <>

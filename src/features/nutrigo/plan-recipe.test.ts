@@ -6,6 +6,13 @@ const image={...unavailableCard('Tomate'),cover_status:'ready' as const,cover_ur
 const recipe={title:'Tomate aprobado',version:2,yield_portions:1,ingredients:[{id:'i',name:'Tomate',quantity:100,unit:'g' as const}],steps:['Cocinar.'],nutrient_source:'',card:image};
 const item:PlanItemView={id:'item',for_date:'2026-10-06',slot:'Almuerzo',recipe_id:'r1',recipe_version:2,recipe_title:recipe.title,recipe,portions:1,public_note:'',free_text:null};
 describe('misma foto de la versión aprobada en todas las pantallas',()=>{
+  it('incluye todas las recetas de componentes con versión y fotos congeladas',()=>{
+    const composed={...item,recipe:null,recipe_id:null,components:[{id:'c1',kind:'recipe',recipe_id:'r1',recipe_version:2,portions:2,public_note:'Nota',recipe_snapshot:recipe},{id:'c2',kind:'recipe',recipe_id:'r2',recipe_version:3,portions:0.5,public_note:'',recipe_snapshot:{...recipe,title:'Segunda receta',version:3}}]} as PlanItemView;
+    const menu=patientMenuRecipes({items:[composed],published_at:'2026-10-06'} as PatientMealPlan,[]);
+    expect(menu.map(r=>[r.id,r.version])).toEqual([['r1',2],['r2',3]]);
+    expect(menu[0].card).toMatchObject(image);
+    expect(planRecipe(composed)?.title).toBe(recipe.title);
+  });
   it('conserva foto y versión de receta al abrir desde plan',()=>{expect(planRecipe(item)).toMatchObject({version:2,card:image});});
   it('la foto de cada ingrediente llega intacta al abrir la receta desde el plan',()=>{const photo={ingredient_cover_url:'https://abc.supabase.co/storage/v1/object/public/recipe-covers/ingredients/tomate.jpg',ingredient_cover_alt:'Tomate'};const withPhoto={...item,recipe:{...recipe,ingredients:[{...recipe.ingredients[0],...photo}]}};expect(planRecipe(withPhoto)?.ingredients[0]).toMatchObject({name:'Tomate',quantity:100,unit:'g',...photo});const inline={...item,recipe_id:null,recipe:null,recipe_proposal:{...recipe,nutrition:null,ingredients:[{name:'Tomate',quantity:100,unit:'g' as const,...photo}]}};expect(planRecipe(inline as never)?.ingredients[0]).toMatchObject(photo);});
   it('dos versiones del mismo ID tienen claves de apertura y render diferentes',()=>{expect(recipePresentationKey({id:'r1',version:1})).not.toBe(recipePresentationKey({id:'r1',version:2}));});

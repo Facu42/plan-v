@@ -272,8 +272,18 @@ export async function patientRecipesWithPhotos<T extends { ingredients: Readonly
     return recipes.map(recipe => withPhotosIfList(recipe, lookup));
   } catch (error) { logIngredientFailure('lectura', error); return [...recipes]; }
 }
-export type IngredientSource = { recipe?: { ingredients: ReadonlyArray<{ name: string }> } | null; recipe_proposal?: { ingredients: ReadonlyArray<{ name: string }> } | null };
-const itemIngredients = (item: IngredientSource | null | undefined) => [...namesOf(item?.recipe?.ingredients), ...namesOf(item?.recipe_proposal?.ingredients)];
+type IngredientRecipe = { ingredients: ReadonlyArray<{ name: string }> };
+export type IngredientSource = {
+  recipe?: IngredientRecipe | null;
+  recipe_proposal?: IngredientRecipe | null;
+  components?: ReadonlyArray<{ recipe_snapshot?: IngredientRecipe | null; recipe_proposal?: IngredientRecipe | null }>;
+};
+const itemIngredients = (item: IngredientSource | null | undefined) => [
+  ...namesOf(item?.recipe?.ingredients), ...namesOf(item?.recipe_proposal?.ingredients),
+  ...(Array.isArray(item?.components) ? item.components.flatMap(component => [
+    ...namesOf(component?.recipe_snapshot?.ingredients), ...namesOf(component?.recipe_proposal?.ingredients),
+  ]) : []),
+];
 function withPhotosIfList<T extends { ingredients: ReadonlyArray<{ name: string }> }>(recipe: T, lookup: IngredientPhotoLookup): T {
   return Array.isArray(recipe?.ingredients) ? { ...recipe, ingredients: withIngredientPhotos(recipe.ingredients, lookup) } : recipe;
 }
@@ -286,6 +296,11 @@ export async function patientPlanWithPhotos(plan: PatientMealPlan | null, persis
       ...item,
       ...(item.recipe ? { recipe: withPhotosIfList(item.recipe, lookup) } : {}),
       ...(item.recipe_proposal ? { recipe_proposal: withPhotosIfList(item.recipe_proposal, lookup) } : {}),
+      ...(Array.isArray(item.components) ? { components: item.components.map(component => ({
+        ...component,
+        ...(component.recipe_snapshot ? { recipe_snapshot: withPhotosIfList(component.recipe_snapshot, lookup) } : {}),
+        ...(component.kind === 'text' && component.recipe_proposal ? { recipe_proposal: withPhotosIfList(component.recipe_proposal, lookup) } : {}),
+      })) } : {}),
     }));
     return { ...plan, items };
   } catch (error) { logIngredientFailure('lectura', error); return plan; }

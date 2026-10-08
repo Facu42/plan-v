@@ -32,6 +32,23 @@ describe.each([false, true])('variabilidad de datos en el plan (celular: %s)', m
     const html = text(render(plan([item({ free_text: null, recipe_title: null, public_note: 'Sin sal' })])));
     expect(html).toContain('Comida sin nombre'); expect(html).toContain('Sin sal');
   });
+  it('presenta cantidades de todos los componentes y busca alimentos sin depender del título anterior', () => {
+    const food={id:'food',kind:'food',food_id:'f',food_revision:1,quantity:2,measure:'Cucharada',public_note:'Sin sal',food_snapshot:{name:'Avena',portions:[{name:'Cucharada',grams:10}]}};
+    const recipe={id:'recipe',kind:'recipe',recipe_id:'r',recipe_version:3,portions:0.5,public_note:'',recipe_snapshot:{title:'Tortilla',version:3,yield_portions:1,ingredients:[],steps:[]}};
+    const html=render(plan([item({components:[food,recipe],free_text:null})]),'avena');
+    expect(text(html)).toContain('Avena · 20 g + Tortilla · 0,5 porciones');
+    expect(html).toContain('Ver Almuerzo: Avena');
+    expect(text(html)).not.toContain('No hay comidas que coincidan');
+  });
+  it('sitúa indicaciones publicadas junto al plan y no muestra indicaciones sin copia publicada', () => {
+    const data=plan([item()]);
+    const html=render({...data,plan:{...data.plan,guidance:{recommendations:['Recomendación publicada'],avoid:['Evitar publicado']}}});
+    expect(text(html)).toContain('Recomendaciones y alimentos a evitar');
+    expect(text(html)).toContain('Recomendación publicada');
+    expect(text(html)).toContain('Evitar publicado');
+    expect(html.indexOf('Recomendación publicada')).toBeLessThan(html.indexOf('data-name="Table-row-meal plan"'));
+    expect(text(render({plan:null}))).not.toContain('Recomendaciones y alimentos a evitar');
+  });
   it('la foto del plato usa el recuadro del archivo: lista y con dirección segura se muestra; el resto deja el gris original', () => {
     const ok = render(plan([photoItem('https://x.test/a.jpg')])); expect(ok).toContain('src="https://x.test/a.jpg"'); expect(ok).toContain('loading="lazy"');
     for (const bad of [photoItem(null, 'none'), photoItem('https://x.test/a.jpg', 'failed'), photoItem('javascript:alert(1)'), photoItem('/relativa.png')]) {

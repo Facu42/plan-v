@@ -88,6 +88,76 @@ afterAll(async () => {
 });
 
 
+describe('composición del catálogo persistente', () => {
+  it('valida categorías culinarias y congela la clasificación publicada', async () => {
+    const rid = randomUUID();
+    const card = { category: 'Cena', culinary_categories: ['Guisos', 'Pollo'], prep_minutes: null, macro_status: 'unavailable', macros: null, cover_status: 'none', cover_url: null, cover_alt: draft.title };
+    const input = { ...draft, id: rid, expected_revision: null, card };
+    let saved = await rpc(nutriA, 'save_recipe_draft', [input]) as any;
+    expect(saved.current.card).toMatchObject({ category: 'Cena', culinary_categories: ['Guisos', 'Pollo'] });
+    for (const invalid of [['Guisos', 'GUÍSOS'], [' '], ['a','b','c','d','e','f','g'], [4], null]) {
+      await expect(rpc(nutriA, 'save_recipe_draft', [{ ...input, expected_revision: saved.current.revision, card: { ...card, culinary_categories: invalid } }])).rejects.toMatchObject({ code: '22023' });
+    }
+    await expect(rpc(nutriB, 'save_recipe_draft', [{ ...input, expected_revision: saved.current.revision }])).rejects.toMatchObject({ code: '42501' });
+    saved = await rpc(nutriA, 'publish_recipe', [rid, 1, saved.current.revision]) as any;
+    saved = await rpc(nutriA, 'save_recipe_draft', [{ ...input, expected_revision: saved.current.revision, card: { ...card, culinary_categories: [] } }]) as any;
+    expect(saved.current.card.culinary_categories).toEqual([]);
+    expect(saved.published.card.culinary_categories).toEqual(['Guisos', 'Pollo']);
+  });
+  it('aísla favoritos profesionales, evita duplicados y bloquea escrituras directas', async () => {
+    const rid = randomUUID();
+    const saved = await rpc(nutriA, 'save_recipe_draft', [{ ...draft, id: rid, expected_revision: null }]) as any;
+    expect(await rpc(nutriA, 'set_professional_recipe_favorite', [rid, true])).toEqual({ recipe_id: rid, favorite: true });
+    await rpc(nutriA, 'set_professional_recipe_favorite', [rid, true]);
+    expect(await rpc(nutriA, 'list_professional_recipe_favorites')).toEqual([rid]);
+    expect(await rpc(nutriB, 'list_professional_recipe_favorites')).toEqual([]);
+    await expect(rpc(patientAUser, 'list_professional_recipe_favorites')).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(patientAUser, 'set_professional_recipe_favorite', [rid, true])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(nutriB, 'set_professional_recipe_favorite', [rid, true])).rejects.toMatchObject({ code: '42501' });
+    expect(await asUser(nutriB, 'select * from public.professional_recipe_favorites')).toEqual([]);
+    await expect(asUser(nutriA, 'insert into public.professional_recipe_favorites(nutritionist_id,recipe_id) values($1,$2)', [nutriAId, rid])).rejects.toMatchObject({ code: '42501' });
+    await rpc(nutriA, 'set_professional_recipe_favorite', [rid, false]);
+    await rpc(nutriA, 'set_professional_recipe_favorite', [rid, false]);
+    expect(await rpc(nutriA, 'list_professional_recipe_favorites')).toEqual([]);
+    expect((await rpc(nutriA, 'list_professional_recipes') as any[]).find(recipe => recipe.id === rid).current.revision).toBe(saved.current.revision);
+  });
+  it('deriva valores autorizados y congela la fuente entre revisiones, incluso si una receta de IA pierde composición', async () => {
+    const fid = randomUUID(); const rid = randomUUID();
+    const nutrients = { kcal: 380, protein: 13, carbs: 60, fat: 7, fiber: null, sodium: 0, calcium: null, iron: null, potassium: null, magnesium: null, vitamin_c: null };
+    const food = { id: fid, expected_revision: 0, name: 'Avena composición', brand: '', category: '', kind: 'food', source: 'Etiqueta ficticia', reference: '', nutrients, portions: [{ name: 'Cucharada', grams: 10 }] };
+    const { id: _foodId, expected_revision: _foodRevision, ...foodPayload } = food;
+    await rpc(nutriA, 'save_food_catalog_item', [fid, 0, foodPayload]);
+    const input = { id: rid, expected_revision: null, title: 'Avena preparada', yield_portions: 2, final_weight_g: 40, cooking_minutes: 0, steps: ['Mezclar y servir.'], nutrient_source: 'propuesta_ia.v2',
+      nutrition: { origin: 'ai_estimate', source: 'propuesta_ia.v2', per_portion: { kcal: 900, protein_g: 20, carbs_g: 30, fat_g: 8 } },
+      items: [{ name: 'Avena', quantity: 2, unit: 'g', catalog_ref: { id: fid, revision: 1, measure: 'Cucharada' } }] };
+    await expect(rpc(nutriB, 'save_recipe_draft', [{ ...input, id: randomUUID() }])).rejects.toMatchObject({ code: '42501' });
+    let saved = await rpc(nutriA, 'save_recipe_draft', [input]) as any;
+    expect(saved.current.catalog_recipe.per_portion).toMatchObject({ kcal: 38, sodium: 0, fiber: null });
+    expect(saved.current.catalog_recipe.per_100g.kcal).toBe(190);
+    expect(saved.current.ingredients[0].quantity).toBe(20);
+    expect(saved.current.nutrition).toMatchObject({ origin: 'ai_estimate', per_portion: { kcal: 38 } });
+    saved = await rpc(nutriA, 'publish_recipe', [rid, 1, saved.current.revision]) as any;
+    await rpc(nutriA, 'save_food_catalog_item', [fid, 1, { ...foodPayload, nutrients: { ...nutrients, kcal: 500 } }]);
+    saved = await rpc(nutriA, 'save_recipe_draft', [{ ...input, expected_revision: saved.current.revision, yield_portions: 4 }]) as any;
+    expect(saved.current.version).toBe(2);
+    expect(saved.current.catalog_recipe.per_portion.kcal).toBe(19);
+    expect(saved.published.catalog_recipe.per_portion.kcal).toBe(38);
+    expect(saved.published.nutrition.per_portion.kcal).toBe(38);
+    const { nutrition: _nutrition, ...withoutNutrition } = input;
+    saved = await rpc(nutriA, 'save_recipe_draft', [{ ...withoutNutrition, expected_revision: saved.current.revision, items: [{ name: 'Sin composición', quantity: 1, unit: 'u' }] }]) as any;
+    expect(saved.current.catalog_recipe.estimate_origin).toBe(true);
+    expect((await db.query<{ nutrition: unknown }>('select nutrition from public.recipe_versions where id=$1', [saved.current.id])).rows[0].nutrition).toBeNull();
+    expect(saved.current.nutrition).toBeUndefined();
+    expect(saved.current.card.macros).toBeNull();
+    saved = await rpc(nutriA, 'save_recipe_draft', [{ ...withoutNutrition, expected_revision: saved.current.revision, items: [{ ...input.items[0], catalog_ref: { ...input.items[0].catalog_ref, revision: 2 } }] }]) as any;
+    expect(saved.current.nutrition.origin).toBe('ai_estimate');
+    expect(saved.current.nutrition.per_portion.kcal).toBe(50);
+    await expect(rpc(nutriA, 'save_recipe_draft', [{ ...input, id: randomUUID() }])).rejects.toMatchObject({ code: 'PT409' });
+    await expect(rpc(nutriA, 'save_recipe_draft', [{ ...input, id: randomUUID(), items: [{ ...input.items[0], catalog_ref: { id: fid, revision: 2, measure: 'Vaso' } }] }])).rejects.toMatchObject({ code: '22023' });
+    await expect(asUser(nutriA, 'update public.recipe_versions set catalog_recipe=$1 where id=$2', [{ forged: true }, saved.published.id])).rejects.toBeDefined();
+  });
+});
+
 describe('cierre funcional: revisiones, privacidad y reintentos persistentes', () => {
   let recipe: any; let plan: any;
   const title = 'Arroz con vegetales publicado';

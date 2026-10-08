@@ -67,7 +67,9 @@ function coreDraft(input: ReturnType<typeof recipeWizardSchema.parse>) {
     steps: input.steps,
     nutrient_source: input.nutrient_source,
     ...(input.nutrition ? { nutrition: input.nutrition } : {}),
-    items: input.items.map(({ name, quantity, unit }) => ({ name, quantity, unit })),
+    ...(input.final_weight_g !== undefined ? { final_weight_g: input.final_weight_g } : {}),
+    ...(input.cooking_minutes !== undefined ? { cooking_minutes: input.cooking_minutes } : {}),
+    items: input.items.map(({ name, quantity, unit, catalog_ref }) => ({ name, quantity, unit, ...(catalog_ref ? { catalog_ref } : {}) })),
   };
 }
 
@@ -91,6 +93,17 @@ const recipeIdParam = z.uuid();
 const manualCoverSchema = z.object({ expected_version: z.number().int().positive(), expected_cover_url: z.string().max(7_000_000).nullable(), data_url: z.string().max(7_000_000) }).strict();
 
 export function registerRecipeRoutes(app: Hono) {
+  app.get('/api/recipes/favorites', async c => {
+    const { persistent, nutritionistId } = await professional(c);
+    return c.json({ favorite_ids: await repo.listProfessionalRecipeFavorites(nutritionistId, persistent) });
+  });
+  app.post('/api/recipes/:id/favorite', async c => {
+    const { persistent, nutritionistId } = await professional(c);
+    const id = z.uuid().safeParse(c.req.param('id'));
+    if (!id.success) throw new repo.CareError(400, 'Volvé a abrir la receta.');
+    const input = await body(c, z.object({ favorite: z.boolean() }).strict());
+    return c.json(await repo.setProfessionalRecipeFavorite(nutritionistId, id.data, input.favorite, persistent));
+  });
   app.get('/api/recipes', async (c) => {
     const { persistent, nutritionistId } = await professional(c);
     const recipes = await repo.listProfessionalRecipes(nutritionistId, persistent);

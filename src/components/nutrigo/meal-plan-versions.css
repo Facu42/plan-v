@@ -33,3 +33,68 @@
 @media(max-width:800px){.meal-plan-item-row,.meal-plan-form-row{grid-template-columns:1fr}}
 @media(max-width:390px){.meal-plan-versions,.published-dated-plan{padding:16px 12px}.meal-plan-actions{flex-direction:column;align-items:stretch}.published-plan-item{padding:10px}}
 @media(max-width:320px){.meal-plan-versions,.published-dated-plan{padding:12px 10px}.meal-plan-versions h2,.published-dated-plan h2{font-size:18px}}
+.meal-plan-recipe-choice{display:flex;flex-direction:column;gap:6px;min-width:0}
+.meal-plan-recipe-choice button,.plan-recipe-picker-results button{font:inherit;text-align:left;color:var(--nv-ink);background:var(--nv-bg);border:1px solid var(--nv-border);border-radius:10px;padding:10px;cursor:pointer}
+.meal-plan-recipe-inline{grid-column:1/-1;padding:8px 12px;border:1px solid var(--nv-border);border-radius:10px}
+.meal-plan-recipe-inline summary{cursor:pointer;font-size:13px}
+.plan-recipe-picker{width:min(1040px,calc(100vw - 64px));max-width:none;max-height:calc(100vh - 48px)}
+.plan-recipe-picker label{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.plan-recipe-picker input,.plan-recipe-picker select{padding:10px;border:1px solid var(--nv-border);border-radius:10px;font:inherit;color:var(--nv-ink);background:var(--nv-card);min-width:0}
+.plan-recipe-picker-filters{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin:12px 0}
+.plan-recipe-picker-columns{display:grid;grid-template-columns:minmax(260px,1fr) minmax(360px,1.5fr);gap:20px}
+.plan-recipe-picker-results{display:flex;flex-direction:column;gap:10px;max-height:50vh;overflow:auto}
+.plan-recipe-picker-results button{display:flex;flex-direction:column;gap:6px}
+.plan-recipe-picker-results button[aria-pressed=true]{border-color:var(--nv-strong);background:var(--nv-green)}
+.plan-recipe-picker-results small{color:var(--nv-muted)}
+.plan-recipe-picker .plan-recipe-preview{max-height:48vh;overflow:auto;padding:0 8px}
+.plan-recipe-preview h3{font-size:18px;margin:14px 0 8px}
+.plan-recipe-preview p,.plan-recipe-preview li{font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.plan-recipe-preview details{margin:12px 0}
+.plan-recipe-nutrients{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.plan-recipe-nutrients div{padding:8px;background:var(--nv-bg);border-radius:8px}
+.plan-recipe-nutrients dt{font-size:11px;color:var(--nv-muted)}
+.plan-recipe-nutrients dd{margin:4px 0 0;font-size:14px;font-weight:600}
+.plan-recipe-picker-actions{display:flex;gap:10px;position:sticky;bottom:0;background:var(--nv-card);padding:14px 0 0;margin-top:12px}
+.plan-recipe-picker button:focus-visible,.meal-plan-recipe-choice button:focus-visible{outline:2px solid var(--nv-strong);outline-offset:3px}
+.plan-editor-days{display:flex;gap:8px;overflow:auto;padding:12px 0;margin:12px 0}
+.plan-editor-days button{flex:1;min-width:92px;border:1px solid var(--nv-border);border-radius:10px;background:var(--nv-card);color:var(--nv-ink);padding:10px;font:inherit;font-size:12px;cursor:pointer;transition:background .15s ease}
+.plan-editor-days button strong,.plan-editor-days button span,.plan-editor-days button small{display:block}
+.plan-editor-days button[aria-pressed=true]{background:var(--nv-accent-soft);border-color:var(--nv-accent)}
+.plan-editor-days button:focus-visible,.plan-editor-meal button:focus-visible{outline:2px solid var(--nv-ink);outline-offset:3px}
+.plan-editor-day-layout{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:16px;align-items:start}
+.plan-editor-meals{min-width:0;display:grid;gap:12px}
+.plan-editor-meal{padding:14px;border:1px solid var(--nv-border);border-radius:12px;background:var(--nv-card)}
+.plan-editor-meal>header{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.plan-editor-meal h3,.plan-day-analysis h3{margin:0;font-size:16px}
+.plan-editor-meal>header button{padding:8px;border:1px solid var(--nv-border);border-radius:8px;background:var(--nv-bg);color:var(--nv-ink);font:inherit;font-size:12px;cursor:pointer}
+.plan-editor-meal .meal-plan-item-row{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px 0;border-top:1px solid var(--nv-border)}
+.plan-editor-meal .meal-plan-item-row input,.plan-editor-meal .meal-plan-item-row select{min-width:0;width:100%;box-sizing:border-box}
+.plan-editor-meal .meal-plan-recipe-choice,.plan-editor-meal .meal-plan-item-row>fieldset{grid-column:1/-1}
+.plan-day-analysis{padding:16px;border:1px solid var(--nv-border);border-radius:12px;background:var(--nv-bg);position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto}
+.plan-day-analysis dl{margin:12px 0;display:grid;gap:10px}
+.plan-day-analysis dl>div{padding:10px;background:var(--nv-card);border-radius:8px}
+.plan-day-analysis dt{font-size:12px;color:var(--nv-muted)}
+.plan-day-analysis dd{margin:4px 0;font-size:15px;font-weight:600}
+.plan-day-analysis small{display:block;font-size:11px;line-height:1.5;color:var(--nv-ink-soft)}
+.plan-day-analysis .plan-day-estimate{color:var(--nv-ink);background:var(--nv-gold-soft);padding:8px;border-radius:8px}
+@media(prefers-reduced-motion:reduce){.plan-editor-days button{transition:none}}
+.plan-analysis-switch{display:flex;gap:6px;margin-bottom:12px}
+.plan-analysis-switch button{font:inherit;font-size:12px;padding:8px;border:1px solid var(--nv-border);border-radius:8px;background:var(--nv-card);color:var(--nv-ink);cursor:pointer}
+.plan-analysis-switch button[aria-pressed=true]{background:var(--nv-accent-soft);border-color:var(--nv-accent)}
+.plan-analysis-switch button:focus-visible{outline:2px solid var(--nv-ink);outline-offset:2px}
+.plan-copy-day fieldset{max-height:32vh;overflow:auto;border:1px solid var(--nv-border);border-radius:10px;padding:12px}
+.plan-copy-day label{display:flex;gap:10px;align-items:center;margin:10px 0;font-size:13px}
+.plan-copy-day p,.plan-copy-day li{font-size:13px;line-height:1.6}
+.plan-copy-day ul{max-height:20vh;overflow:auto}
+.plan-component-rows{grid-column:1/-1;min-width:0}
+.plan-component-row{padding:12px 0;border-bottom:1px solid var(--nv-border)}
+.plan-component-main{display:grid;grid-template-columns:minmax(0,1fr) 95px 105px 85px 30px;gap:8px;align-items:center}
+.plan-component-main small{display:block;color:var(--nv-muted);font-size:11px;overflow-wrap:anywhere}
+.plan-component-main label{font-size:11px}.plan-component-main span{font-size:12px}
+.plan-component-main button{border:0;border-radius:8px;color:var(--nv-ink);background:var(--nv-bg);padding:8px;cursor:pointer}
+.plan-component-row details{margin-top:6px;font-size:12px}.plan-component-row summary{cursor:pointer}
+.plan-component-main:has(label:only-of-type){grid-template-columns:minmax(0,1fr) 110px 85px 30px}
+.plan-guidance-editor{padding:18px;border:1px solid var(--nv-border);border-radius:14px;margin:16px 0;background:var(--nv-bg)}
+.plan-guidance-editor label{display:grid;gap:8px;margin-top:16px;font-weight:600}
+.plan-guidance-editor textarea{display:block;min-height:112px;resize:vertical;padding:12px;border:1px solid var(--nv-border);border-radius:10px;background:var(--nv-surface,#fff);color:var(--nv-ink);font:inherit;font-weight:400;width:100%;line-height:1.6}
+.plan-guidance-editor textarea:focus-visible{outline:2px solid var(--nv-strong);outline-offset:2px}

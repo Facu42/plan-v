@@ -50,6 +50,28 @@ describe('fotos de ingredientes: del plan publicado al detalle de la receta', ()
     expect(await ingredientJobs()).toHaveLength(0);
   });
 
+  it('publica componentes con fotos de ingredientes sin modificar la copia clínica congelada', async () => {
+    const proposal = { title: 'Arroz con arvejas', yield_portions: 2, steps: ['Servir.'], nutrition: null,
+      ingredients: [{ name: 'Arroz integral', quantity: 100, unit: 'g' }, { name: 'Arvejas', quantity: 50, unit: 'g' }] };
+    const components = [
+      { id: randomUUID(), kind: 'recipe', recipe_id: recipeId, recipe_version: 1, portions: 1, public_note: 'Nota histórica' },
+      { id: randomUUID(), kind: 'text', free_text: proposal.title, recipe_proposal: proposal, portions: 2, public_note: '' },
+    ];
+    expect((await call(`/api/patients/${patient}/plans`, 'POST', { id: planId, period_start: '2026-10-05', period_end: '2026-10-11', items: [{ for_date: '2026-10-05', slot: 'Almuerzo', components }] })).status).toBe(200);
+    const saved = (await (await call(`/api/patients/${patient}/plans?audience=pro`)).json()).plan;
+    expect((await call(`/api/plans/${planId}/publish`, 'POST', { expected_version: 1, expected_snapshot: planReviewSnapshot(saved.current) })).status).toBe(200);
+    expect(await keys()).toEqual(['arroz-integral', 'arveja', 'cebolla', 'tomate']);
+    const before = (await (await call(`/api/patients/${patient}/plans?audience=pro`)).json()).plan;
+    await drain(processQueue, 'test-worker', handleProcessingJob, 40);
+    const patientPlan = (await (await call(`/api/patients/${patient}/plans`)).json()).plan;
+    const [recipeComponent, proposalComponent] = patientPlan.items[0].components;
+    for (const ingredient of [...recipeComponent.recipe_snapshot.ingredients, ...proposalComponent.recipe_proposal.ingredients]) expect(ingredient.ingredient_cover_url).toContain('data:image/png');
+    expect(recipeComponent).toMatchObject({ recipe_version: 1, portions: 1, public_note: 'Nota histórica' });
+    const after = (await (await call(`/api/patients/${patient}/plans?audience=pro`)).json()).plan;
+    expect(planReviewSnapshot(after.current)).toEqual(planReviewSnapshot(before.current));
+    expect(JSON.stringify(after)).not.toContain('ingredient_cover');
+  });
+
   it('publicar el plan encola los ingredientes únicos sin bloquear ni cambiar el plan de la paciente', async () => {
     expect((await publishPlan(planId, recipeId)).status).toBe(200);
     expect(await keys()).toEqual(['arroz-integral', 'arveja', 'cebolla', 'tomate']);

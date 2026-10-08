@@ -1,3 +1,4 @@
+import type { PlanComponentView } from '../../src/types/plan-components.js';
 import { RECIPE_UNITS } from '../../src/types/recipes.js';
 import { planSlotKey } from '../../src/types/plans.js';
 import { CareError } from '../care/errors.js';
@@ -146,6 +147,7 @@ export function evaluateRecipeDraft(input: RecipeEvalInput, health?: EvalHealth 
 }
 
 export type PlanEvalItem = {
+  components?: PlanComponentView[];
   for_date: string;
   slot: string;
   recipe_id?: string | null;
@@ -176,6 +178,7 @@ export function evaluateMealPlanDraft(input: PlanEvalInput, health?: EvalHealth 
   }
   const keys = new Set<string>();
   for (const [index, item] of input.items.entries()) {
+    if (item.components) { const componentText = JSON.stringify(item.components); scanDeclared(componentText, known.health, result, `items.${index}.components`); scanIncomplete(componentText, result, `items.${index}.components`); scanMinutes(componentText, known.health.cooking_time_minutes, result, `items.${index}.components`); }
     const hasRecipe = Boolean(item.recipe_id || item.recipe);
     const text = item.free_text?.trim() || '';
     if (hasRecipe === Boolean(text)) {

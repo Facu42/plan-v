@@ -45,10 +45,22 @@ export class DemoStateFile {
     const saved = deserialize(readFileSync(this.file)) as { version?: number; domains?: Record<string, Group> };
     if (saved?.version !== 1 || !saved.domains || Object.getPrototypeOf(saved.domains) !== Object.prototype) throw new Error('Copia local incompatible o dañada; se conservó el archivo');
     const current = Object.fromEntries([...this.domains].map(([name, read]) => [name, read()]));
+    // Ampliación v1 conocida: el catálogo de modelos inicia vacío. No admitir
+    // otros dominios faltantes ni modificar el archivo antes de validar todo.
+    if (current.models?.models instanceof Map && !Object.prototype.hasOwnProperty.call(saved.domains, 'models')) {
+      saved.domains.models = { models: new Map() };
+    }
     if (keys(current) !== keys(saved.domains)) throw new Error('La copia local tiene dominios diferentes; se conservó el archivo');
     // Validar todo antes de restaurar para no dejar un estado parcial.
     for (const [name, values] of Object.entries(current)) {
       const other = saved.domains[name];
+      // Única ampliación conocida del formato v1: favoritos profesionales.
+      // La copia previa queda intacta hasta completar todas las validaciones.
+      if (name === 'recipes/repository' && values.professionalFavorites instanceof Map && other &&
+        Object.getPrototypeOf(other) === Object.prototype && !Object.prototype.hasOwnProperty.call(other, 'professionalFavorites')) {
+        const { professionalFavorites: _favorites, ...previousShape } = values;
+        if (keys(previousShape) === keys(other)) other.professionalFavorites = new Map();
+      }
       if (!other || Object.getPrototypeOf(other) !== Object.prototype || keys(values) !== keys(other)) throw new Error('Copia local incompleta');
       for (const key of Object.keys(values)) if (kind(values[key]) !== kind(other[key])) throw new Error('Copia local inválida');
     }

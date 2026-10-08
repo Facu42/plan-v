@@ -46,7 +46,7 @@ export function FigmaPatientFooter({ year, onContact }: { year: number; onContac
 
 /** Diálogo nativo: formularios conservados fuera de la composición del frame.
  * showModal proporciona foco contenido, Escape y retorno al botón de apertura. */
-export function FigmaRecordDialog({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+export function FigmaRecordDialog({ title, onClose, children, className = '', closeLabel = 'Cerrar registros' }: { title: string; onClose: () => void; children: ReactNode; className?: string; closeLabel?: string }) {
   const ref = useRef<HTMLDialogElement>(null);
   const [closeStatus, setCloseStatus] = useState('');
   const requestClose = () => {
@@ -59,8 +59,8 @@ export function FigmaRecordDialog({ title, onClose, children }: { title: string;
     dialog?.showModal();
     return () => { dialog?.close(); if (opener?.isConnected) opener.focus(); };
   }, []);
-  return <dialog ref={ref} className="fp-record-dialog" aria-labelledby="fp-record-title" onCancel={(event) => { event.preventDefault(); requestClose(); }}>
-    <header><h2 id="fp-record-title">{title}</h2><button type="button" onClick={requestClose} aria-label="Cerrar registros">×</button></header>
+  return <dialog ref={ref} className={`fp-record-dialog ${className}`} aria-labelledby="fp-record-title" onCancel={(event) => { event.preventDefault(); requestClose(); }}>
+    <header><h2 id="fp-record-title">{title}</h2><button type="button" onClick={requestClose} aria-label={closeLabel}>×</button></header>
     {closeStatus && <p role="status">{closeStatus}</p>}
     {children}
   </dialog>;

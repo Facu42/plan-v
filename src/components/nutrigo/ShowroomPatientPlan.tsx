@@ -1,3 +1,4 @@
+import { componentTitle } from '../../types/plan-components';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { CaretDown, CaretLeft, CaretRight, Funnel, MagnifyingGlass, ShoppingCart, Swap, X } from '@phosphor-icons/react';
 import { careErrorMessage } from '../../api/care';
@@ -78,7 +79,7 @@ export function weekdayPlural(day: string): string {
 }
 
 export function planItemTitle(item: PlanItemView): string {
-  return item.recipe?.title ?? item.recipe_title ?? item.free_text ?? item.slot;
+  return item.components?.map(componentTitle).join(' + ') ?? item.recipe?.title ?? item.recipe_title ?? item.free_text ?? item.slot;
 }
 
 /** Dentro del período de un plan fechado publicado manda esa copia (los días sin indicación quedan vacíos);

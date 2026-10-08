@@ -54,6 +54,7 @@ async function readAccess(c: Context, patientId: string) {
 const planIdParam = z.uuid();
 
 export function registerPlanRoutes(app: Hono) {
+  app.get('/api/patients/:id/plans/history',async c=>{const id=c.req.param('id');const actor=await professional(c,id);return c.json({versions:await repo.getMealPlanHistory(actor.nutritionistId,id,actor.persistent)});});
   app.post('/api/plans/:id/covers', async (c) => {
     const id = planIdParam.safeParse(c.req.param('id'));
     if (!id.success) throw new repo.CareError(400, 'Volvé a abrir el plan publicado.');

@@ -1,3 +1,8 @@
+import { resolvePlanComponents } from './components.js';
+import { mergeGuidance, planGuidanceSchema, type PlanGuidance } from '../../src/types/plan-guidance.js';
+import { modelPlanFrom } from '../../src/types/models.js';
+import { datedModelItems, type ModelCopy } from '../../src/types/models.js';
+import type { PlanComponentView } from '../../src/types/plan-components.js';
 import { registerDemoState } from '../demo/state.js';
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
@@ -5,7 +10,8 @@ import { getPatient } from '../store.js';
 import { assertReadyToPublish, evaluateMealPlanDraft } from '../ai-eval/evaluate.js';
 import { loadEvalHealth } from '../ai-eval/health.js';
 import { canonicalJson } from '../ai/context.js';
-import { getRecipeSnapshot, listProfessionalRecipes } from '../recipes/repository.js';
+import { getRecipeSnapshot, listProfessionalRecipes, readPublishedMemory } from '../recipes/repository.js';
+import type { RecipeCatalogSnapshot } from '../../src/types/recipe-catalog-nutrition.js';
 import { enqueueMemoryDish, memoryDishKey, proposalCoverContext } from '../recipes/menu-covers.js';
 import { planVersionIngredients, queueIngredientCovers, type IngredientSource } from '../recipes/ingredient-covers.js';
 import { getRecipeCard } from '../recipes/presentation.js';
@@ -31,6 +37,7 @@ import { recipeCoverEnabled } from '../ai/recipe-cover.js';
 export { CareError } from '../care/errors.js';
 
 type MemItem = {
+  components?: PlanComponentView[];
   id: string;
   version_id: string;
   for_date: string;
@@ -45,6 +52,7 @@ type MemItem = {
   recipe_proposal?: ProposedRecipe;
 };
 type MemVersion = {
+  guidance?: PlanGuidance;
   id: string;
   revision: string;
   meal_plan_id: string;
@@ -121,6 +129,7 @@ function asRecipeDetail(row: unknown, fallbackTitle: string | null, fallbackVers
     nutrient_source: String(detail.nutrient_source ?? ''),
     ...(nutrition ? { nutrition } : {}),
     ...(card ? { card } : {}),
+    ...(detail.catalog_recipe && typeof detail.catalog_recipe === 'object' ? { catalog_recipe: detail.catalog_recipe as RecipeCatalogSnapshot } : {}),
     ingredients: ingredientsRaw.map((item) => {
       const line = item as Record<string, unknown>;
       return {
@@ -149,6 +158,7 @@ function asItem(row: Record<string, unknown>, snapshot?: PlanRecipeDetail | null
     free_text: row.free_text ? String(row.free_text) : null,
     portions: row.portions == null ? null : asNumber(row.portions),
     public_note: String(row.public_note ?? ''),
+    ...(Array.isArray(row.components) ? { components: row.components as PlanComponentView[] } : {}),
     ...(row.dish_card ? { dish_card: row.dish_card as RecipeCard } : {}),
     ...(row.recipe_proposal ? { recipe_proposal: proposedRecipeSchema.parse(row.recipe_proposal) } : {}),
   };
@@ -171,12 +181,13 @@ function asVersion(row: Record<string, unknown>): PlanVersionView {
     period_end: String(row.period_end).slice(0, 10),
     published_at: row.published_at ? String(row.published_at) : null,
     items: preparedItems,
+    ...(row.guidance ? { guidance: planGuidanceSchema.parse(row.guidance) } : {}),
     ...(target ? { nutrition_target: target } : {}),
-    ...(target || preparedItems.some((item) => item.recipe_proposal) ? { nutrition: summarizeView(preparedItems, target, row) } : {}),
+    ...(target || preparedItems.some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(preparedItems, target, row) } : {}),
   };
 }
 
-function asProfessional(row: Record<string, unknown>): ProfessionalMealPlan {
+export function asProfessional(row: Record<string, unknown>): ProfessionalMealPlan {
   return {
     id: String(row.id),
     patient_id: String(row.patient_id),
@@ -199,8 +210,9 @@ function asPatient(row: Record<string, unknown>): PatientMealPlan {
     period_end: String(row.period_end).slice(0, 10),
     published_at: String(row.published_at),
     items: preparedItems,
+    ...(row.guidance ? { guidance: planGuidanceSchema.parse(row.guidance) } : {}),
     ...(target ? { nutrition_target: target } : {}),
-    ...(target || preparedItems.some((item) => item.recipe_proposal) ? { nutrition: summarizeView(preparedItems, target, row) } : {}),
+    ...(target || preparedItems.some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(preparedItems, target, row) } : {}),
   };
 }
 
@@ -223,6 +235,7 @@ function versionItems(versionId: string): PlanItemView[] {
       free_text: item.free_text,
       portions: item.portions,
       public_note: item.public_note,
+      ...(item.components ? { components: structuredClone(item.components) } : {}),
       ...memoryDishCard(item),
       ...(item.recipe_proposal ? { recipe_proposal: item.recipe_proposal } : {}),
     }));
@@ -245,8 +258,9 @@ function memVersionView(row: MemVersion): PlanVersionView {
     period_end: row.period_end,
     published_at: row.published_at,
     items: preparedItems,
+    ...(row.guidance ? { guidance: structuredClone(row.guidance) } : {}),
     ...(row.nutrition_target ? { nutrition_target: row.nutrition_target } : {}),
-    ...(row.nutrition_target || preparedItems.some((item) => item.recipe_proposal) ? { nutrition: summarizeView(preparedItems, row.nutrition_target, row) } : {}),
+    ...(row.nutrition_target || preparedItems.some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(preparedItems, row.nutrition_target, row) } : {}),
   };
 }
 
@@ -275,13 +289,19 @@ function memPatient(row: MemPlan): PatientMealPlan | null {
     period_start: published.period_start,
     period_end: published.period_end,
     published_at: published.published_at,
+    ...(published.guidance ? { guidance: structuredClone(published.guidance) } : {}),
     items: versionItems(published.id),
     ...(published.nutrition_target ? { nutrition_target: published.nutrition_target } : {}),
-    ...(published.nutrition_target || versionItems(published.id).some((item) => item.recipe_proposal) ? { nutrition: summarizeView(versionItems(published.id), published.nutrition_target, published) } : {}),
+    ...(published.nutrition_target || versionItems(published.id).some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(versionItems(published.id), published.nutrition_target, published) } : {}),
   };
 }
 
 async function resolveRecipe(nutritionistId: string, recipeId: string, recipeVersion: number | undefined, persistent: boolean) {
+  if (!persistent && recipeVersion != null) {
+    const version = readPublishedMemory(nutritionistId, recipeId, recipeVersion);
+    if (!version) throw new CareError(400, 'La versión publicada de la receta no está disponible. Revisá la selección.');
+    return { recipe_id: recipeId, recipe_version: version.version, recipe_title: version.title, recipe_version_id: version.versionId };
+  }
   const catalog = await listProfessionalRecipes(nutritionistId, persistent);
   const recipe = catalog.find((entry) => entry.id === recipeId);
   const published = recipe?.published;
@@ -311,7 +331,7 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
     if (seen.has(key)) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
     seen.add(key);
     const hasRecipe = Boolean(item.recipe_id);
-    const freeText = item.free_text?.trim() || null;
+    const freeText = item.components ? 'Comida compuesta' : item.free_text?.trim() || null;
     if (hasRecipe === Boolean(freeText)) throw new CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
     if (item.recipe_proposal && !(item.portions && item.portions > 0 && item.portions <= 50)) {
       throw new CareError(400, 'Las recetas del plan necesitan porciones positivas.');
@@ -331,6 +351,7 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
       free_text: linked.recipe_id ? null : freeText,
       portions: item.portions ?? null,
       public_note: item.public_note ?? '',
+      ...(item.components ? { components: await resolvePlanComponents(nutritionistId, item.components, previous.flatMap<PlanComponentView>(row => row.components ?? (row.recipe_proposal ? [{ kind: 'text', id: row.id, free_text: row.free_text!, portions: row.portions ?? undefined, recipe_proposal: row.recipe_proposal, public_note: row.public_note }] : []))) } : {}),
       ...(item.recipe_proposal ? { recipe_proposal: retainProposalEstimate(item.recipe_proposal, prior?.recipe_proposal) } : {}),
     });
   }
@@ -368,6 +389,7 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
     for (const item of [...items.values()].filter((row) => row.version_id === target.id)) items.delete(item.id);
   }
   target.revision = crypto.randomUUID();
+  target.guidance = input.guidance ? structuredClone(input.guidance) : latest?.guidance;
   for (const item of prepared) {
     const row: MemItem = { id: crypto.randomUUID(), version_id: target.id, ...item };
     items.set(row.id, row);
@@ -384,6 +406,45 @@ export async function getProfessionalMealPlan(nutritionistId: string, patientId:
   mealPlanDbError(error);
   if (!data) return null;
   return asProfessional(data as Record<string, unknown>);
+}
+
+/** Only trusted published model copies may reach this function, never client snapshots. */
+export function forkModelPlanMemory(owner:string,patientId:string,copy:ModelCopy,start:string,expected:string|null):ProfessionalMealPlan {
+  const patient=getPatient(patientId);if(!patient || patient.archived_at) throw new CareError(404,'Paciente no disponible.');
+  const existing=[...plans.values()].find(p=>p.patient_id===patientId&&p.nutritionist_id===owner);
+  const previous=existing ? planVersions(existing.id).slice(-1)[0] : undefined;
+  if((previous?.revision??null)!==expected) throw new CareError(409,'El plan cambió. Volvé a revisar los cambios antes de aplicar.');
+  if(!copy.plan?.items.length) throw new CareError(400,'El modelo necesita comidas publicadas.');
+  const dated=datedModelItems(copy,start);
+  const prepared=dated.map(item=>{
+    const recipe=item.recipe_id&&item.recipe_version ? readPublishedMemory(owner,item.recipe_id,item.recipe_version) : null;
+    if(item.recipe_id&&!recipe) throw new CareError(400,'La receta histórica del modelo no está disponible.');
+    const {id:_id,recipe:_detail,dish_card:_card,...rest}=item;
+    return {...rest,recipe_version_id:recipe?.versionId??null};
+  });
+  const now=new Date().toISOString();const plan=existing??{id:crypto.randomUUID(),patient_id:patientId,nutritionist_id:owner,timezone:'America/Argentina/Buenos_Aires',created_at:now};
+  const version:MemVersion={id:crypto.randomUUID(),revision:crypto.randomUUID(),meal_plan_id:plan.id,version:(previous?.version??0)+1,status:'draft',period_start:start,period_end:new Date(Date.parse(`${start}T12:00:00Z`)+(copy.plan.days-1)*86400000).toISOString().slice(0,10),published_at:null,created_at:now,...(previous?.nutrition_target?{nutrition_target:structuredClone(previous.nutrition_target)}:{})};
+  if(previous?.status==='draft')previous.status='archived';
+  if(previous?.guidance) version.guidance = structuredClone(previous.guidance);
+  plans.set(plan.id,plan);versions.set(version.id,version);
+  for(const item of prepared){const row:MemItem={...item,id:crypto.randomUUID(),version_id:version.id};items.set(row.id,row);}
+  return memProfessional(plan);
+}
+export function forkGuidanceMemory(owner:string, patientId:string, kind:'recommendations'|'avoid', copy:ModelCopy, expected:string|null):ProfessionalMealPlan {
+  const plan = [...plans.values()].find(p => p.patient_id === patientId && p.nutritionist_id === owner);
+  const prior = plan ? planVersions(plan.id).slice(-1)[0] : undefined;
+  if (!prior) throw new CareError(409, 'Guardá primero un plan del paciente para incorporar indicaciones.');
+  let guidance: PlanGuidance;
+  try { guidance = mergeGuidance(prior.guidance, kind, copy.lines); }
+  catch { throw new CareError(400, 'El plan admite hasta 100 indicaciones por categoría. Revisá las existentes.'); }
+  const current = memVersionView(prior);
+  const result = forkModelPlanMemory(owner, patientId, { ...copy, plan: modelPlanFrom(current) }, prior.period_start, expected);
+  versions.get(result.current.id)!.guidance = guidance;
+  return memProfessional(plan!);
+}
+export async function getMealPlanHistory(owner:string,patientId:string,persistent:boolean):Promise<PlanVersionView[]> {
+  if(persistent){const {data,error}=await getRequestDb().rpc('list_meal_plan_history',{target_patient:patientId});mealPlanDbError(error);return (data??[]).map((row:Record<string,unknown>)=>asVersion(row));}
+  const plan=[...plans.values()].find(p=>p.patient_id===patientId&&p.nutritionist_id===owner);return plan ? planVersions(plan.id).reverse().map(memVersionView) : [];
 }
 
 export async function getPublishedMealPlan(patientId: string, persistent: boolean): Promise<PatientMealPlan | null> {
@@ -474,6 +535,13 @@ function memoryDishCard(item: MemItem) {
 }
 async function enqueuePlanMemoryCovers(plan: MemPlan, version: MemVersion, retry = false) {
   for (const item of [...items.values()].filter(row => row.version_id === version.id)) {
+    if (item.components) {
+      for (const component of item.components) {
+        const recipe = component.kind === 'recipe' ? component.recipe_snapshot : component.kind === 'text' ? component.recipe_proposal : null;
+        if (recipe) await enqueueMemoryDish(plan.nutritionist_id, proposalCoverContext(recipe), component.kind === 'recipe' ? readPublishedMemory(plan.nutritionist_id, component.recipe_id, component.recipe_version)?.versionId ?? null : null, retry);
+      }
+      continue;
+    }
     const recipe = getRecipeSnapshot(item.recipe_version_id) ?? item.recipe_proposal;
     if (!recipe) continue; // A public instruction alone is not a defined recipe.
     await enqueueMemoryDish(plan.nutritionist_id, proposalCoverContext(recipe), item.recipe_version_id, retry);
@@ -483,7 +551,7 @@ async function enqueuePlanMemoryCovers(plan: MemPlan, version: MemVersion, retry
 /** Ingredientes de cada comida con receta o propuesta: la misma fuente que usan las fotos de platos. */
 function memoryIngredientItems(version: MemVersion): IngredientSource[] {
   return [...items.values()].filter(row => row.version_id === version.id)
-    .map(row => ({ recipe: getRecipeSnapshot(row.recipe_version_id) ?? row.recipe_proposal ?? null }));
+    .map(row => ({ recipe: getRecipeSnapshot(row.recipe_version_id) ?? row.recipe_proposal ?? null, components: row.components }));
 }
 export async function retryMealPlanCovers(nutritionistId: string, planId: string, expectedVersion: number, persistent: boolean) {
   if (!recipeCoverEnabled()) throw new CareError(503, 'La generación de fotos todavía no está habilitada. El menú sigue publicado.');

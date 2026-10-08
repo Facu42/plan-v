@@ -1,5 +1,8 @@
 import { z } from 'zod';
+import { planGuidanceSchema, type PlanGuidance } from './plan-guidance.js';
+import { planComponentsSchema, type PlanComponentView } from './plan-components.js';
 import type { IngredientPhoto, RecipeCard } from './recipes.js';
+import type { RecipeCatalogSnapshot } from './recipe-catalog-nutrition.js';
 import { menuTargetSchema, menuNutritionSummarySchema, proposedRecipeSchema, type ProposedRecipe, type MenuNutritionTarget, type MenuNutritionSummary, type RecipeNutrition } from './ai-nutrition.js';
 
 export const PLAN_SLOTS = ['Desayuno', 'Colación', 'Almuerzo', 'Merienda', 'Cena', 'Extra'] as const;
@@ -45,8 +48,13 @@ export const planItemInputSchema = z.object({
   portions: z.number().positive().max(50).optional(),
   public_note: z.string().trim().max(200).default(''),
   recipe_proposal: proposedRecipeSchema.optional(),
+  components: planComponentsSchema.optional(),
 }).strict().superRefine((value, ctx) => {
   if (!planSlotKey(value.slot)) ctx.addIssue({ code: 'custom', message: 'slot', path: ['slot'] });
+  if (value.components) {
+    if (value.recipe_id != null || value.recipe_version != null || value.free_text != null || value.recipe_proposal != null || value.portions != null) ctx.addIssue({ code: 'custom', message: 'No mezcles componentes y la indicación anterior.', path: ['components'] });
+    return;
+  }
   const hasRecipe = Boolean(value.recipe_id);
   const hasText = Boolean(value.free_text && value.free_text.length > 0);
   if (hasRecipe === hasText) ctx.addIssue({ code: 'custom', message: 'item', path: hasRecipe ? ['free_text'] : ['recipe_id'] });
@@ -65,6 +73,7 @@ function utcDays(start: string, end: string) {
 }
 
 export const mealPlanDraftSchema = z.object({
+  guidance: planGuidanceSchema.optional(),
   id: z.uuid(),
   expected_revision: z.uuid().nullable().optional(),
   period_start: isoDate,
@@ -95,6 +104,7 @@ export const mealPlanPublishSchema = z.object({
 
 export type MealPlanDraftInput = z.infer<typeof mealPlanDraftSchema>;
 export type PlanRecipeDetail = {
+  catalog_recipe?: RecipeCatalogSnapshot;
   title: string;
   version: number;
   yield_portions: number;
@@ -105,6 +115,7 @@ export type PlanRecipeDetail = {
   card?: RecipeCard;
 };
 export type PlanItemView = {
+  components?: PlanComponentView[];
   id: string;
   for_date: string;
   slot: PlanSlot;
@@ -119,6 +130,7 @@ export type PlanItemView = {
   recipe_proposal?: ProposedRecipe;
 };
 export type PlanVersionView = {
+  guidance?: PlanGuidance;
   id: string;
   revision?: string;
   version: number;
@@ -144,6 +156,7 @@ export function planReviewSnapshot(version: PlanVersionView) {
   return { ...head, items: items.map(({ recipe: _recipe, recipe_title: _title, dish_card: _card, ...item }) => item) };
 }
 export type PatientMealPlan = {
+  guidance?: PlanGuidance;
   id: string;
   timezone: string;
   version: number;
@@ -194,6 +207,7 @@ export function toPublishedPatientPlan(plan: ProfessionalMealPlan): PatientMealP
     period_end: plan.published.period_end,
     published_at: plan.published.published_at,
     items: plan.published.items,
+    ...(plan.published.guidance ? { guidance: plan.published.guidance } : {}),
     ...(plan.published.nutrition_target ? { nutrition_target: plan.published.nutrition_target } : {}),
     ...(plan.published.nutrition ? { nutrition: plan.published.nutrition } : {}),
   };

@@ -19,6 +19,19 @@ const ok = { id: 'x', ingredients: [{ id: 'a', name: 'Tomate', quantity: 1, unit
 beforeEach(() => { vi.resetAllMocks(); vi.spyOn(console, 'error').mockImplementation(() => undefined); });
 
 describe('publicación persistente: las fotos de ingredientes nunca cambian el resultado', () => {
+  it('publicación y reintento incluyen recetas y propuestas dentro de componentes sin enviar notas', async () => {
+    const components = [
+      { id: 'c1', kind: 'recipe', recipe_id: 'r1', recipe_version: 1, portions: 1, public_note: 'Nota privada', recipe_snapshot: recipe(ok.ingredients) },
+      { id: 'c2', kind: 'text', free_text: 'Texto privado', portions: 1, public_note: '', recipe_proposal: { ...recipe([{ name: 'Cebolla', quantity: 20, unit: 'g' }]), nutrition: null } },
+    ];
+    mocks.requestRpc.mockResolvedValue({ data: row([item({ components })]), error: null });
+    mocks.adminRpc.mockResolvedValue({ data: null, error: null });
+    const published = await publishMealPlan('n', 'p1', 1, true, { any: 1 });
+    expect(published.published?.items[0].components).toEqual(components);
+    expect(mocks.adminRpc).toHaveBeenCalledWith('enqueue_ingredient_covers', { keys: ['tomate', 'cebolla'], retry_failed: false });
+    await retryMealPlanCovers('n', 'p1', 1, true);
+    expect(mocks.adminRpc).toHaveBeenCalledWith('enqueue_ingredient_covers', { keys: ['tomate', 'cebolla'], retry_failed: true });
+  });
   it('con el encolado caído devuelve el plan publicado', async () => {
     mocks.requestRpc.mockResolvedValue({ data: row([item({ recipe: recipe(ok.ingredients) })]), error: null });
     mocks.adminRpc.mockRejectedValue(new Error('caído'));

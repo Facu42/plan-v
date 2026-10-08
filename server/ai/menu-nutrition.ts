@@ -1,8 +1,10 @@
-import type { MealPlanDraftInput, PlanItemView } from '../../src/types/plans.js';
+import type { PlanComponentView } from '../../src/types/plan-components.js';
+import { analyzePlanDay, type DayAnalysisLine } from '../../src/types/plan-day-analysis.js';
+import type { MealPlanDraftInput, PlanItemView, PlanRecipeDetail } from '../../src/types/plans.js';
 import { eachIsoDate } from '../../src/types/plans.js';
 import type { MenuNutritionSummary, MenuNutritionTarget, NutrientAmounts, RecipeNutrition } from '../../src/types/ai-nutrition.js';
 
-type NutritionItem = Pick<PlanItemView, 'for_date' | 'recipe_proposal'> & { portions?: number | null; recipe_id?: string | null; recipe_version?: number | null };
+type NutritionItem = { components?: PlanComponentView[] } & Pick<PlanItemView, 'for_date' | 'recipe_proposal'> & { portions?: number | null; recipe_id?: string | null; recipe_version?: number | null };
 export type CatalogNutrition = { id: string; version: number; nutrition: RecipeNutrition | null };
 const round = (value: number) => Math.round(value * 10000) / 10000;
 
@@ -17,6 +19,14 @@ export function summarizeMenuNutrition(items: NutritionItem[], target: MenuNutri
     target,
     days: dates.map((for_date) => {
       const day = items.filter((item) => item.for_date === for_date);
+      if (day.some(item => item.components)) {
+        const analysis = analyzePlanDay(day.flatMap<DayAnalysisLine>(item => item.components ? item.components.map(component => ({ portions: '', component })) : [{ portions: String(item.portions ?? ''), recipe: item.recipe_id ? ({ title: '', version: item.recipe_version ?? 1, yield_portions: 1, nutrition: itemNutrition(item, catalog) ?? undefined, nutrient_source: '', ingredients: [], steps: [] } satisfies PlanRecipeDetail) : null, proposal: item.recipe_proposal }]));
+        const values = analysis.nutrients.slice(0, 4).map(value => value.total);
+        if (values.some(value => value == null)) return { for_date, totals: null, difference: null, estimated: analysis.estimated, status: 'missing_nutrients' as const };
+        const totals = { kcal: values[0]!, protein_g: values[1]!, carbs_g: values[2]!, fat_g: values[3]! };
+        const difference = target ? { kcal: round(totals.kcal - target.kcal), protein_g: round(totals.protein_g - target.protein_g), carbs_g: round(totals.carbs_g - target.carbs_g), fat_g: round(totals.fat_g - target.fat_g) } : null;
+        return { for_date, totals, difference, estimated: analysis.estimated, status: !target ? 'no_target' as const : Math.abs(difference!.kcal) <= Math.max(1, target.kcal * 0.001) ? 'adjusted' as const : 'outside_target' as const };
+      }
       const evidence = day.map((item) => itemNutrition(item, catalog));
       const estimated = evidence.some((nutrition) => nutrition?.origin === 'ai_estimate');
       if (!day.length || evidence.some((nutrition) => !nutrition) || day.some((item) => !item.portions || item.portions > 50)) {
@@ -46,6 +56,7 @@ export function adjustMenuPortions(plan: MealPlanDraftInput, target: MenuNutriti
     if (!day.totals || day.totals.kcal <= 0) continue;
     const factor = target.kcal / day.totals.kcal;
     const selected = items.filter((item) => item.for_date === day.for_date);
+    if (selected.some(item => item.components)) continue;
     const amounts = selected.map((item) => round((item.portions ?? 1) * factor));
     if (amounts.some((amount) => amount <= 0 || amount > 50 || !Number.isFinite(amount))) {
       limited.add(day.for_date);
