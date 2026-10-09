@@ -214,6 +214,7 @@ try {
   await B('click','.care-consent label:has-text("Puedo cargar peso o medidas") input');
   await readUntil(patient,`/api/patients/${pid}/care`,r=>r.consented.includes('measurement')&&r.measurements.some(m=>m.kind==='weight'&&m.value_numeric===63));
   check((await read(professional,`/api/patients/${pid}/care?audience=pro`)).measurements.some(m=>m.kind==='weight'&&m.value_numeric===63),'renovar el permiso conserva el historial anterior');
+  await until('(()=>{const label=Array.from(document.querySelectorAll(".care-consent label")).find(e=>e.textContent.includes("Puedo cargar peso o medidas"));const input=label?.querySelector("input");return !!input&&input.checked&&!input.disabled;})()');
   phase='fotos y estudios privados';
   // El catálogo abre el acordeón al cargar y puede cerrarlo al terminar si ya
   // existe el permiso de medidas. Esperar los controles antes de abrirlo evita
