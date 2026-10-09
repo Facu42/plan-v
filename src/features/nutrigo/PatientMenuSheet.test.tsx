@@ -23,6 +23,13 @@ describe('menú de la paciente', () => {
     expect(render({ onSignOut: vi.fn() })).toContain('Cerrar sesión');
   });
 
+  it('en el celular ofrece instalar dentro de «Mi cuenta» solo si hay oferta', () => {
+    expect(render()).not.toContain('Instalar Plan V');
+    const html = render({ installOffer: { title: 'Instalar Plan V', card: 'Instalá Plan V en este teléfono y abrila como una app.' }, onInstall: vi.fn() });
+    expect(html).toContain('Instalar Plan V');
+    expect(html).toContain('abrila como una app');
+  });
+
   it('marca los mensajes sin leer y el aviso de cuota junto a Pagos', () => {
     const html = render({ unread: 3, feeNotice: 'Tenés una cuota pendiente de $ 30.000' });
     expect(html).toContain('aria-label="3 sin leer"');
