@@ -318,7 +318,7 @@ describe('cierre funcional: revisiones, privacidad y reintentos persistentes', (
     const stored=(await db.query<{nutrition_origin:string;note_for_nutri:string}>('select nutrition_origin,note_for_nutri from public.meal_logs where id=$1',[registered.assignment.registered_meal_id])).rows[0];
     expect(stored.nutrition_origin).toBe('ai_estimate');expect(stored.note_for_nutri).toContain('estimados por IA');expect(stored.note_for_nutri).not.toContain('no estimados');
     const mid=registered.assignment.registered_meal_id;
-    expect((await asUser(patientAUser,`select ${mealLogColumns.patient} from public.meal_logs_patient_view where id=$1`,[mid]))[0]).toMatchObject({nutrition_origin:'ai_estimate'});
+    expect((await asUser(patientAUser,`select ${mealLogColumns.patient} from public.get_patient_meal_logs($2) where id=$1`,[mid,patientA]))[0]).toMatchObject({nutrition_origin:'ai_estimate'});
     expect((await asUser(nutriA,`select ${mealLogColumns.professional} from public.meal_logs where id=$1`,[mid]))[0]).toMatchObject({nutrition_origin:'ai_estimate'});
     await expect(asUser(nutriA,"update public.meal_logs set nutrition_origin='declared' where id=$1",[mid])).rejects.toMatchObject({code:'42501'});
     await expect(asUser(patientAUser,"insert into public.meal_logs(patient_id,slot_label,description,nutrition_origin) values($1,'Almuerzo','Inventada','declared')",[patientA])).rejects.toMatchObject({code:'42501'});

@@ -489,5 +489,25 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     const saved=await api(patientB,`/api/patients/${pidB}/favorites`,'POST',{item_kind:'resource',item_id:resource.id});expect(saved.status).toBe(200);expect((await saved.json()).library.favorites.some((r:{item_id:string})=>r.item_id===resource.id)).toBe(true);
     const removed=await api(patientB,`/api/patients/${pidB}/favorites`,'POST',{item_kind:'resource',item_id:resource.slug});expect(removed.status).toBe(200);expect((await removed.json()).library.favorites.some((r:{item_id:string})=>r.item_id===resource.id)).toBe(false);
   });
+
+  it('la vista de comidas niega escrituras cruzadas y la RPC conserva sólo la lectura propia',async()=>{
+    const ma=randomUUID(),mb=randomUUID();
+    await pool.query("insert into public.meal_logs(id,patient_id,slot_label,description,note_for_nutri) values($1,$2,'Almuerzo','A ficticia','Privada A'),($3,$4,'Cena','B ficticia','Privada B')",[ma,pidA,mb,pidB]);
+    try {
+      for(const client of [patientA.client,anonymous]) {
+        expect((await client.from('meal_logs_patient_view').insert({patient_id:pidB,slot_label:'Cena'})).error?.code).toBe('42501');
+        expect((await client.from('meal_logs_patient_view').update({patient_id:pidB}).eq('id',ma)).error?.code).toBe('42501');
+        expect((await client.from('meal_logs_patient_view').delete().eq('id',mb)).error?.code).toBe('42501');
+      }
+      expect((await patientA.client.from('meal_logs_patient_view').select('id').eq('patient_id',pidB)).data).toEqual([]);
+      const own=await patientA.client.rpc('get_patient_meal_logs',{target_patient:pidA});
+      expect(own.error).toBeNull();expect(own.data.some((r:any)=>r.id===ma)).toBe(true);
+      expect(own.data.every((r:any)=>r.patient_id===pidA&&!('note_for_nutri' in r)&&!('client_id' in r))).toBe(true);
+      expect((await patientA.client.rpc('get_patient_meal_logs',{target_patient:pidB})).error?.code).toBe('42501');
+      const detail=await api(patientA,'/api/patients/'+pidA);expect(detail.status).toBe(200);
+      expect((await detail.json()).patient.meal_logs.some((r:any)=>r.id===ma)).toBe(true);
+      expect((await pool.query('select patient_id from public.meal_logs where id=$1',[mb])).rows[0].patient_id).toBe(pidB);
+    } finally {await pool.query('delete from public.meal_logs where id in ($1,$2)',[ma,mb]);}
+  });
 });
 

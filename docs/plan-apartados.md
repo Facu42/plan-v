@@ -334,3 +334,6 @@ Comparación previa Nutriboost 7:11: ambas categorías presentes, aplicación no
 2026-10-08: Facundo autorizó aplicar a producción el dashboard desarrollado. Ocho migraciones aplicadas; integración de cambios vigentes y correcciones de lectura de componentes/indicaciones en paciente. Registro: [publicación del dashboard web](publicacion-dashboard-web-2026-10-08.md). Web/API/worker pendientes de verificación final en ese registro.
 
 Cierre productivo del dashboard desarrollado: PR73 integrado en 03d405b, ocho migraciones aplicadas y web/API/worker con la nueva versión comprobada. Suite 2114 aprobadas/2 omitidas; ensayo descartable con sesiones firmadas 27 casos y navegador 42 comprobaciones aprobados. [Registro](publicacion-dashboard-web-2026-10-08.md).
+
+## Seguridad de vistas de paciente · 2026-10-09
+Arreglo independiente del dashboard, con ECC y reproducción descartable. Ver docs/security/meal-view-fix-2026-10-09.md. Se cierra escritura de meal_logs_patient_view, se auditan vistas equivalentes y se preserva lectura propia pública mediante RPC autorizada; producción sin modificar. CI con advisors antes/después y sesiones firmadas pendiente.
