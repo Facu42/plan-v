@@ -204,7 +204,16 @@ try {
   await reloadContains('Caminata');check((await read(professional,`/api/patients/${pid}/exercise?audience=pro`)).exercise.activities.length===1,'actividad visible desde ambos roles tras recarga');
   phase='medidas';await B('goto',origin+'/app/progreso');await button('Registrar peso y medidas');await B('click','.care-consent label:has-text("Puedo cargar peso o medidas") input');await readUntil(patient,`/api/patients/${pid}/care?audience=patient`,r=>r.consented.includes('measurement'));await button('Registrar peso');await field('Peso','63','.care-form ');await button('Guardar registro');await until("document.body.innerText.includes('Registro guardado y disponible')");await B('click','[aria-label="Cerrar registros"]');await B('reload');
   check((await read(professional,`/api/patients/${pid}/care?audience=pro`)).measurements.some(m=>m.kind==='weight'&&m.value_numeric===63&&m.unit==='kg'&&m.source==='patient'),'medida opcional persistente con consentimiento y origen paciente');
-  phase='fotos y estudios privados';await button('Registrar peso y medidas');
+  phase='retiro del permiso de medidas';await button('Registrar peso y medidas');
+  await until('(()=>{const e=document.querySelector(".care-consent");if(!e||e.querySelector("[role=status]")||e.querySelectorAll("input[type=checkbox]").length!==3)return false;if(!e.open)e.querySelector("summary").click();return e.open;})()');
+  await B('click','.care-consent label:has-text("Puedo cargar peso o medidas") input');
+  await readUntil(patient,`/api/patients/${pid}/care`,r=>!r.consented.includes('measurement')&&r.measurements.length===0&&r.records.every(x=>!['weight','waist','hip'].includes(x.data.kind)));
+  const withdrawn=await read(professional,`/api/patients/${pid}/care?audience=pro`);
+  check(withdrawn.measurements.length===0&&withdrawn.records.every(x=>!['weight','waist','hip'].includes(x.data.kind)),'retirar medidas corta el acceso del paciente y la profesional');
+  await B('click','.care-consent label:has-text("Puedo cargar peso o medidas") input');
+  await readUntil(patient,`/api/patients/${pid}/care`,r=>r.consented.includes('measurement')&&r.measurements.some(m=>m.kind==='weight'&&m.value_numeric===63));
+  check((await read(professional,`/api/patients/${pid}/care?audience=pro`)).measurements.some(m=>m.kind==='weight'&&m.value_numeric===63),'renovar el permiso conserva el historial anterior');
+  phase='fotos y estudios privados';
   // El catálogo abre el acordeón al cargar y puede cerrarlo al terminar si ya
   // existe el permiso de medidas. Esperar los controles antes de abrirlo evita
   // intentar pulsar una casilla mientras cambia ese estado de carga.

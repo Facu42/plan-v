@@ -43,4 +43,6 @@ D1–D7 del relevamiento del hilo paciente se conservan pendientes; sus recomend
 
 ## Publicación
 
+Integración de permisos de medidas preparada y verificada localmente: [alcance y evidencia](integracion-permiso-medidas-2026-10-08.md). Recetas por día: PR #79, todos los controles de CI aprobados, incluido navegador con usuarios autenticados. Sin producción.
+
 La preparación y las pruebas de integración pueden empezar ya. La publicación de Planificación y cualquier migración productiva conservan la autorización específica requerida. No mezclar ni fusionar automáticamente la rama del hilo paciente: primero revisar compatibilidad con main y #78 y repartir cambios compartidos.
