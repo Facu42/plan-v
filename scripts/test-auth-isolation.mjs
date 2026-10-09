@@ -102,6 +102,14 @@ try {
     }
   }
   if (!snapshotApplied) await pool.query(snapshot);
+  phase = 'control de vistas públicas';
+  const checker = fileURLToPath(new URL('../server/security/check-public-view-grants.ts', import.meta.url));
+  const tsx = fileURLToPath(new URL('../node_modules/tsx/dist/cli.mjs', import.meta.url));
+  const viewCheck = await exec(process.execPath, [tsx, checker], {
+    env: { ...process.env, APP_MODE: 'test', CHECK_VIEWS_DATABASE_URL: dbUrl },
+    timeout: 120000,
+  });
+  console.log(String(viewCheck.stdout).trim());
   await pool.query("notify pgrst, 'reload schema'");
   await pool.end(); pool = undefined;
   // Esperar solo el refresco del catálogo; las pruebas hacen además controles positivos.
