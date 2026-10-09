@@ -337,3 +337,5 @@ Cierre productivo del dashboard desarrollado: PR73 integrado en 03d405b, ocho mi
 
 ## Seguridad de vistas de paciente · 2026-10-09
 Arreglo independiente del dashboard, con ECC y reproducción descartable. Ver docs/security/meal-view-fix-2026-10-09.md. Se cierra escritura de meal_logs_patient_view, se auditan vistas equivalentes y se preserva lectura propia pública mediante RPC autorizada; producción sin modificar. CI con advisors antes/después y sesiones firmadas pendiente.
+
+Cierre seguridad: PR83 y ensayo Supabase temporal 37944764953 aprobados. Advisors comparados antes/después, lectura y escrituras A/B, privacidad y retirada de acceso acreditadas. Producción intacta.
