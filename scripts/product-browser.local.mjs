@@ -239,9 +239,9 @@ try {
   phase='consulta en curso';
   const originalAppointment=(await pool.query("select id,starts_at from public.appointments where patient_id=$1 and status='scheduled' order by starts_at limit 1",[pid])).rows[0];
   try {
-    await pool.query("update public.appointments set starts_at=clock_timestamp()-interval '10 minutes' where id=$1",[originalAppointment.id]);
+    const ongoing=(await pool.query("update public.appointments set starts_at=clock_timestamp()-interval '10 minutes' where id=$1 returning (starts_at at time zone 'America/Argentina/Buenos_Aires')::date::text as day",[originalAppointment.id])).rows[0];
     for(const actor of [patient,professional]) check((await read(actor,`/api/patients/${pid}`)).patient.appointment?.meet_url==='https://example.test/consulta','consulta en curso conserva el enlace para ambos roles');
-    await B('reload');await B('fill','[aria-label="Elegir mes"]',today.slice(0,7));await B('click',`[data-calendar-date="${today}"]`);await until("document.body.innerText.includes('Abrir videollamada')");
+    await B('reload');await B('wait','[aria-label="Elegir mes"]');await B('fill','[aria-label="Elegir mes"]',ongoing.day.slice(0,7));await control(`[data-calendar-date="${ongoing.day}"]`);await until("document.body.innerText.includes('Abrir videollamada')");
     check(true,'paciente mantiene la videollamada al recargar durante la consulta');
     await pool.query("update public.appointments set starts_at=clock_timestamp()-make_interval(mins=>duration_min+1) where id=$1",[originalAppointment.id]);
     for(const actor of [patient,professional]) check((await read(actor,`/api/patients/${pid}`)).patient.appointment===null,'consulta finalizada deja de aparecer como vigente');

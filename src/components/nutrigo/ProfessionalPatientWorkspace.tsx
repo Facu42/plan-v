@@ -62,6 +62,13 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
 }) {
   const tab = recordTab(typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('seccion'));
   const addPatient = useAppStore((store) => store.addPatient);
+  const refreshPatient = useAppStore(store => store.refreshPatient);
+  const [refreshError,setRefreshError] = useState('');
+  useEffect(()=>{
+    const refresh=()=>{void refreshPatient(patient.id).then(()=>setRefreshError('')).catch(()=>setRefreshError('No pudimos actualizar el resumen semanal. Recargá para consultar los pendientes.'));};
+    window.addEventListener('plan-v:care-changed',refresh);
+    return ()=>window.removeEventListener('plan-v:care-changed',refresh);
+  },[patient.id,refreshPatient]);
   const change = (next: RecordTab) => {
     if (next === tab) return;
     const url = new URL(window.location.href); url.searchParams.set('seccion', next);
@@ -71,6 +78,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   return <section className="pw-record" aria-label={`Espacio de ${patient.name}`}>
     <header className="pw-record-head"><div><p>Ficha del paciente</p><h2>{patient.name}</h2><span>{patient.goal || 'Objetivo por definir'}</span></div><NvButton className="nv-soft" onClick={onEdit}>Editar datos de ficha</NvButton></header>
     <nav className="pw-tabs" aria-label="Secciones de la ficha">{RECORD_TABS.map(([id, label]) => <button type="button" key={id} aria-current={id === tab ? 'page' : undefined} onClick={() => change(id)}>{label}</button>)}</nav>
+    {refreshError && <p role="alert">{refreshError}</p>}
     <div key={`${patient.id}:${tab}`} className="pw-record-content">
       {tab === 'resumen' && <><ShowroomPatientRecord patient={patient} patients={patients} onSelect={onSelect} onEdit={onEdit} onOpen={onOpen} summaryOnly /><ProfessionalLedgerSummary patientId={patient.id} onOpen={() => change('cobros')} /></>}
       {tab === 'ingreso' && <ShowroomIntakeReview patientId={patient.id} />}

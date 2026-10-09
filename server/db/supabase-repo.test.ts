@@ -770,6 +770,12 @@ describe('habit_logs (016 v2)', () => {
     expect(patient!.habit_logs[0]).toMatchObject({ id: 'h-today', date: today, hydration: 6, sleep_minutes: 450 });
   });
 
+  it('lee el mismo día argentino aunque el servidor ya esté en el día UTC siguiente',async()=>{
+    vi.useFakeTimers();vi.setSystemTime(new Date('2026-10-10T01:30:00Z'));vi.stubEnv('TZ','UTC');
+    try {pushPatientWithHabits([{id:'h-night',patient_id:'patient-1',date:'2026-10-09',hydration:3,hydration_declared:true,energy:null,sleep_minutes:null}]);
+      const patient=await sbGetPatientById('patient-1');expect(patient!.hydration).toBe(3);
+    } finally {vi.useRealTimers();vi.unstubAllEnvs();}
+  });
   it('defaults the snapshot when there is no habit log for today', async () => {
     pushPatientWithHabits([
       { id: 'h-old', patient_id: 'patient-1', date: '2026-08-30', hydration: 2, energy: 'Baja', sleep_minutes: 300 },
@@ -796,6 +802,7 @@ describe('habit_logs (016 v2)', () => {
       patient_id: 'patient-1',
       date: today,
       hydration: 5,
+      hydration_declared: true,
       energy: 'Baja',
       sleep_minutes: 400,
     });

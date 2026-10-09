@@ -1,3 +1,5 @@
+import { argentinaToday } from './progress/derive.js';
+import type { WeeklyRegistration } from '../src/types/weekly-registration.js';
 import { registerDemoState } from './demo/state.js';
 import { randomUUID } from 'node:crypto';
 import { calculateAdherence } from './adherence.js';
@@ -145,6 +147,7 @@ export type HabitLog = {
   patient_id: string;
   date: string;
   hydration: number;
+  hydration_declared?: boolean;
   energy: string | null;
   sleep_minutes: number | null;
   /** Pasos del día declarados por la paciente (no se importan de dispositivos). */
@@ -170,6 +173,7 @@ export type ResourceAssignment = {
 };
 
 export type Patient = {
+  weekly_registration?: WeeklyRegistration | null;
   id: string;
   name: string;
   initials: string;
@@ -1075,10 +1079,11 @@ export function upsertHabitLog(id: string, patch: { hydration?: number; energy?:
   const patient = getPatient(id);
   if (!patient) return undefined;
 
-  const today = localDateId(new Date());
+  const today = argentinaToday(new Date());
+  const declaredPatch = { ...patch, ...(patch.hydration !== undefined ? { hydration_declared: true } : {}) };
   const habit_logs = patient.habit_logs.some((h) => h.date === today)
-    ? patient.habit_logs.map((h) => (h.date === today ? { ...h, ...patch } : h))
-    : [{ id: randomUUID(), patient_id: id, date: today, hydration: 0, energy: null, sleep_minutes: null, ...patch }, ...patient.habit_logs];
+    ? patient.habit_logs.map((h) => (h.date === today ? { ...h, ...declaredPatch } : h))
+    : [{ id: randomUUID(), patient_id: id, date: today, hydration: 0, energy: null, sleep_minutes: null, ...declaredPatch }, ...patient.habit_logs];
 
   const snapshot: Partial<Patient> = { habit_logs };
   if (patch.hydration !== undefined) snapshot.hydration = patch.hydration;

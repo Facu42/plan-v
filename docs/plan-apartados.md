@@ -356,3 +356,9 @@ Cierre de la pausa de asignación (2026-10-08): Facundo aprobó error dentro de 
 Integración paciente/CRM · 2026-10-08: retiro y renovación del permiso de medidas, lecturas protegidas en ambos roles y alertas, revisión denegada sin permiso y conservación del historial. Detalle en [permiso de medidas](integracion-permiso-medidas-2026-10-08.md). Sin producción.
 
 Agenda compartida · 2026-10-08: consulta visible durante su duración para paciente y profesional, enlace conservado y filtro de consultas terminadas en ficha/lista. [Evidencia y límites](integracion-consulta-en-curso-2026-10-08.md). Migración preparada; sin producción.
+
+### Registro semanal del dashboard — 2026-10-09
+Resumen profesional compartido y migración preparados localmente; pendientes reales y agua desconocida/cero explícito verificados. Detenido ajuste visual de tabla por comodidad para decidir con Facundo. [Acciones y evidencia](registro-semanal-dashboard-2026-10-09.md). Sin producción.
+
+### Rediseño del consultorio · 2026-10-09
+Ver docs/redisenio-directorio-dashboard-2026-10-09.md: navegación y directorio preservan Nutrigo; mapa de alcance disponible/futuro excluye Academy. Registro semanal integrado y verificado; 2159 pruebas pasan. Sin publicación productiva.

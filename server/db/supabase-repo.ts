@@ -1,3 +1,4 @@
+import { argentinaToday } from '../progress/derive.js';
 import type { Brief, MealLog, Message, Patient } from '../../src/types/index.ts';
 import { signMealPhotos } from '../care/meal-photos.js';
 import { resolveBillingStatus } from '../../src/billing.ts';
@@ -347,11 +348,12 @@ async function loadPatientExtras(
     patient_id: h.patient_id as string,
     date: h.date as string,
     hydration: (h.hydration as number) ?? 0,
+    hydration_declared: h.hydration_declared === true,
     energy: (h.energy as string | null) ?? null,
     sleep_minutes: (h.sleep_minutes as number | null) ?? null,
     steps: (h.steps as number | null) ?? null,
   }));
-  const todayHabit = habit_logs.find((h) => h.date === localDateId(new Date()));
+  const todayHabit = habit_logs.find((h) => h.date === argentinaToday(new Date()));
 
   const listedAppt = await listPatientAppointmentPersist(patientId);
   const nextAppt = rows(appts).find(appt => appointmentHasNotEnded(appt, appointmentNow));
@@ -725,7 +727,7 @@ export async function sbDismissBrief(patientId: string, dismissedBy: string): Pr
 
 export async function sbUpdateHabits(patientId: string, data: { hydration?: number; energy?: string | null; sleep_minutes?: number | null; steps?: number | null }): Promise<void> {
   const sb = getRequestDb();
-  const today = localDateId(new Date());
+  const today = argentinaToday(new Date());
   const { data: existing } = await sb.from('habit_logs').select('*')
     .eq('patient_id', patientId).eq('date', today).maybeSingle();
 
@@ -740,7 +742,7 @@ export async function sbUpdateHabits(patientId: string, data: { hydration?: numb
       ...('steps' in existing ? { steps: existing.steps } : {}),
     } : {}),
   };
-  if (data.hydration !== undefined) payload.hydration = data.hydration;
+  if (data.hydration !== undefined) { payload.hydration = data.hydration; payload.hydration_declared = true; }
   if (data.energy !== undefined) payload.energy = data.energy;
   if (data.sleep_minutes !== undefined) payload.sleep_minutes = data.sleep_minutes;
   if (data.steps !== undefined) payload.steps = data.steps;

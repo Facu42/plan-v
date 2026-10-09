@@ -62,8 +62,8 @@ export function ShowroomPatientRecord({ patient, patients = [patient], onSelect,
         <p>{patient.appointment ? `${patient.appointment.duration} min · ${patient.appointment.channel}` : 'Podés gestionarla desde Consultas.'}</p>
       </article>
       <article className="nr-card nr-adherence">
-        <header><span className="nr-icon"><Icon name="target" size={19} /></span><span className="nr-kicker">Adherencia · 7 días</span></header>
-        <strong>{patient.adherence_score}%</strong><NvProgress value={patient.adherence_score} label={`Adherencia de ${patient.name}`} /><small>{patient.time || 'Sin actualización registrada'}</small>
+        <header><span className="nr-icon"><Icon name="target" size={19} /></span><span className="nr-kicker">Registro semanal · 7 días</span></header>
+        {patient.weekly_registration ? <><strong>{patient.weekly_registration.recorded_days} de 7 días</strong><small>{patient.weekly_registration.meals_logged} comidas registradas</small><small>{patient.weekly_registration.water_average === null ? 'Agua sin registrar' : 'Agua: '+patient.weekly_registration.water_average.toLocaleString('es-AR')+' vasos por día registrado · '+patient.weekly_registration.water_days+' días'}</small><small>{patient.weekly_registration.pending_review} registros pendientes de revisión</small></> : <p>Resumen no disponible. Recargá para volver a consultar.</p>}
       </article>
     </div>
 
@@ -75,7 +75,7 @@ export function ShowroomPatientRecord({ patient, patients = [patient], onSelect,
         <div><dt>Horario sensible</dt><dd>{patient.sensitive_hours || 'Sin dato cargado'}</dd></div>
         <div><dt>Plan B</dt><dd>{patient.plan_b || 'Sin dato cargado'}</dd></div>
         <div><dt>Próximo foco</dt><dd>{patient.next_focus || 'Sin dato cargado'}</dd></div>
-        <div><dt>Lectura de adherencia</dt><dd>{patient.adherence_why || 'Sin observación profesional'}</dd></div>
+        <div><dt>Observación de seguimiento</dt><dd>{patient.adherence_why || 'Sin observación profesional'}</dd></div>
       </dl>
     </section>
 

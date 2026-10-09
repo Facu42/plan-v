@@ -26,6 +26,10 @@ const patient: Patient = {
 const render = (value = patient) => renderToStaticMarkup(<ShowroomPatientRecord patient={value} onEdit={vi.fn()} onOpen={vi.fn()} />);
 
 describe('Ficha profesional en el showroom', () => {
+  it('separa días, comidas y agua sin interpretar ausencia como incumplimiento',()=>{
+    const html=render({...patient,weekly_registration:{start:'2026-10-03',end:'2026-10-09',recorded_days:2,meals_logged:4,meals_pending:1,water_days:0,water_average:null,pending_review:1}});
+    expect(html).toContain('Registro semanal');expect(html).toContain('2 de 7 días');expect(html).toContain('4 comidas registradas');expect(html).toContain('Agua sin registrar');expect(html).not.toContain('Adherencia ·');
+  });
   it('presenta identidad, estado, etapa, objetivo y próxima consulta', () => {
     const html = render();
     expect(html).toContain('Ficha de Ana Ruiz');
