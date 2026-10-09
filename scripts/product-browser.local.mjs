@@ -160,8 +160,8 @@ try {
   phase='asignación compatible';await button('Confirmar asignación');await until("document.body.innerText.includes('Asignada al día')");
   check((await read(patient,`/api/patients/${pid}/recipe-days?date=${today}`)).assignments.length===1,'receta publicada asignada por fecha');
   phase='plan manual';await B('goto',origin+`/crm/plan?paciente=${pid}`);await B('wait','.meal-plan-form');await B('wait','[aria-label="Fecha 1"]');
-  await field('Desde',today,'.meal-plan-form ');await field('Hasta',today,'.meal-plan-form ');
-  await B('fill','[aria-label="Fecha 1"]',today);await control('[aria-label="Elegir receta para indicación 1"]');await B('wait','.plan-recipe-picker-results');await B('click','.plan-recipe-picker-results button:has-text("Arroz con vegetales")');await field('Porciones a agregar','1','.plan-recipe-picker ');await button('Agregar al borrador');await until('!document.querySelector(".plan-recipe-picker")');await B('fill','[aria-label="Nota 1"]','Indicación publicada');
+  await B('fill','[aria-label="Fecha 1"]',today);await field('Desde',today,'.meal-plan-form ');await field('Hasta',today,'.meal-plan-form ');
+  await control('[aria-label="Elegir receta para indicación 1"]');await B('wait','.plan-recipe-picker-results');await B('click','.plan-recipe-picker-results button:has-text("Arroz con vegetales")');await field('Porciones a agregar','1','.plan-recipe-picker ');await button('Agregar al borrador');await until('!document.querySelector(".plan-recipe-picker")');await B('fill','[aria-label="Nota 1"]','Indicación publicada');
   await B('click','.meal-plan-form button[type="submit"]');await until("document.body.innerText.includes('Borrador guardado')");
   await button('Publicar v1');await until("document.body.innerText.includes('Plan publicado')");
   let published=await read(patient,`/api/patients/${pid}/plans`);check(published.plan?.items[0].public_note==='Indicación publicada','publicación del contenido revisado');
