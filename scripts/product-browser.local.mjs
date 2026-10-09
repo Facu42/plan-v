@@ -210,6 +210,7 @@ try {
   await readUntil(patient,`/api/patients/${pid}/care`,r=>!r.consented.includes('measurement')&&r.measurements.length===0&&r.records.every(x=>!['weight','waist','hip'].includes(x.data.kind)));
   const withdrawn=await read(professional,`/api/patients/${pid}/care?audience=pro`);
   check(withdrawn.measurements.length===0&&withdrawn.records.every(x=>!['weight','waist','hip'].includes(x.data.kind)),'retirar medidas corta el acceso del paciente y la profesional');
+  await until('(()=>{const label=Array.from(document.querySelectorAll(".care-consent label")).find(e=>e.textContent.includes("Puedo cargar peso o medidas"));const input=label?.querySelector("input");return !!input&&!input.checked&&!input.disabled;})()');
   await B('click','.care-consent label:has-text("Puedo cargar peso o medidas") input');
   await readUntil(patient,`/api/patients/${pid}/care`,r=>r.consented.includes('measurement')&&r.measurements.some(m=>m.kind==='weight'&&m.value_numeric===63));
   check((await read(professional,`/api/patients/${pid}/care?audience=pro`)).measurements.some(m=>m.kind==='weight'&&m.value_numeric===63),'renovar el permiso conserva el historial anterior');
