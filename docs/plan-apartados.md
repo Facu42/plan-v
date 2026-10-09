@@ -366,3 +366,5 @@ Ver docs/redisenio-directorio-dashboard-2026-10-09.md: navegación y directorio 
 Arreglo independiente del dashboard, con ECC y reproducción descartable. Ver docs/security/meal-view-fix-2026-10-09.md. Se cierra escritura de meal_logs_patient_view, se auditan vistas equivalentes y se preserva lectura propia pública mediante RPC autorizada; producción sin modificar. CI con advisors antes/después y sesiones firmadas pendiente.
 
 Cierre seguridad: PR83 y ensayo Supabase temporal 37944764953 aprobados. Advisors comparados antes/después, lectura y escrituras A/B, privacidad y retirada de acceso acreditadas. Producción intacta.
+
+Control para que no vuelva: en cada PR, después de aplicar las migraciones en una base temporal, falla si una vista de public concede escritura a anon o authenticated, o si no tiene security_invoker. Quedan exceptuadas solo la ficha y el acceso, con el motivo escrito. Las tablas que ya escriben conservan su permiso; una tabla o vista nueva ya no nace con escritura para esas dos cuentas. Producción sin cambios. [Cómo funciona](security/control-vistas-publicas-2026-10-09.md).

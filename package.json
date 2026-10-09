@@ -23,6 +23,7 @@
     "test": "vitest run",
     "test:auth-isolation": "node scripts/test-auth-isolation.mjs",
     "check:migrations": "node scripts/check-migration-safety.mjs",
+    "check:views": "tsx server/security/check-public-view-grants.ts",
     "apply:disposable": "node scripts/apply-disposable.mjs",
     "seed:demo": "node scripts/seed-demo.mjs",
     "figma:pull": "node scripts/figma-pull.mjs",
