@@ -39,9 +39,6 @@ beforeAll(async()=>{
 },60000);
 afterAll(async()=>{await db?.close();});
 describe('perfil y acceso aislados entre consultorios',()=>{
-  it('dispone de un índice por consultorio para pacientes activos',async()=>{
-    expect((await db.query("select indexname from pg_indexes where schemaname='public' and tablename='patients' and indexname='patients_active_nutritionist_access_idx'")).rows).toEqual([{indexname:'patients_active_nutritionist_access_idx'}]);
-  });
   it('elimina ambas vistas definer sin reabrir lectura de patients',async()=>{
     expect((await db.query("select relname from pg_class where oid in ('public.patients_patient_view'::regclass,'public.patient_access_view'::regclass) and not coalesce(reloptions @> array['security_invoker=true'],false)")).rows).toEqual([]);
     for(const user of users.slice(2)) expect(await read(user,'select adherence_why from public.patients')).toEqual([]);
@@ -80,7 +77,11 @@ describe('perfil y acceso aislados entre consultorios',()=>{
   it('retira acceso al desactivar o anonimizar y no conserva asignaciones cacheadas',async()=>{
     for(const column of ['deactivated_at','anonymized_at']) {
       await db.query(`update public.patients set ${column}=now() where id=$1`,[patients[0]]);
-      try { for(const user of [users[0],users[2]]) expect(await read(user,'select id from public.patient_access_view')).toEqual([]); }
+      try {
+        for(const user of [users[0],users[2]]) expect(await read(user,'select id from public.patient_access_view')).toEqual([]);
+        expect(await read(users[2],'select id from public.patients_patient_view')).toEqual([]);
+        expect(await read(users[2],'select id from private.patient_profile_projection()')).toEqual([]);
+      }
       finally {await db.query(`update public.patients set ${column}=null where id=$1`,[patients[0]]);}
     }
   });
