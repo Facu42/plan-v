@@ -183,6 +183,15 @@ existe la tabla ni se genera nada hasta que Facundo dé su frase escrita (pasos 
 4. Probar: la nutricionista publica un menú o aprieta «Preparar fotos pendientes»; en unos minutos `ingredient_covers` tiene
    filas `ready`, `cover_daily_usage` suma los intentos del día y los archivos aparecen en `recipe-covers/ingredients/`.
 
+## Desarrollo futuro (planteado por Facundo, 2026-10-08)
+
+- **Mostrar las fotos de ingredientes en la app.** Hoy se generan y se guardan en `recipe-covers/ingredients/<clave>.jpg`
+  (la API ya devuelve su dirección dentro de la receta o el plan de la paciente), pero el diseño de Nutrigo no tiene un
+  lugar para ellas. Cuando se decida el lugar (lista de ingredientes de la receta, lista de compras) se agrega con una
+  pieza tomada del archivo de Figma, no inventada. No se hace hasta que Facundo lo pida.
+- **Platos ya publicados sin foto.** Las fotos de platos se generan al publicar un menú o con «Preparar fotos pendientes»;
+  los planes publicados antes del disparador no las tienen. Facundo lo aceptó así por ahora.
+
 ## Evidencia de aceptación
 
 - API real de Cloudflare: cuatro fotos JPEG guardadas, foto manual intacta;

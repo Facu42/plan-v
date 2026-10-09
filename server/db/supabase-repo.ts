@@ -268,7 +268,9 @@ async function loadPatientExtras(
 
   const [{ data: slots }, { data: logs }, { data: msgs }, briefsResult, { data: habits }, { data: appts }, { data: timelineRows }, resourceAssignments] = await Promise.all([
     sb.from('meal_slots').select('weekday, slot, title').eq('patient_id', patientId).order('weekday').order('slot'),
-    sb.from(audience === 'patient' ? 'meal_logs_patient_view' : 'meal_logs').select(mealLogColumns[audience]).eq('patient_id', patientId).order('logged_at', { ascending: false }).limit(20),
+    audience === 'patient'
+      ? sb.rpc('get_patient_meal_logs', { target_patient: patientId })
+      : sb.from('meal_logs').select(mealLogColumns.professional).eq('patient_id', patientId).order('logged_at', { ascending: false }).limit(20),
     sb.from(audience === 'patient' ? 'messages_patient_view' : 'messages').select(messageColumns[audience]).eq('patient_id', patientId).order('sent_at', { ascending: false }).limit(MESSAGE_PAGE_SIZE),
     briefQuery,
     sb.from('habit_logs').select('*').eq('patient_id', patientId).order('date', { ascending: false }).limit(14),

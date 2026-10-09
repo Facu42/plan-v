@@ -8,13 +8,28 @@ import { randomUUID } from 'node:crypto';
 import pg from 'pg';
 
 const exec = promisify(execFile);
-const cliVersion = '2.107.0';
+const cliVersion = '2.120.0';
 const prefix = join(tmpdir(), 'plan-v-signed-auth-');
 const workdir = await mkdtemp(prefix);
 const projectId = 'plan-v-signed-auth-' + randomUUID().slice(0, 8);
 let pool;
 let startAttempted = false;
 let phase = 'comprobar Docker';
+
+async function advisors(label, dbUrl) {
+  const { stdout } = await cli(['db','advisors','--db-url',dbUrl,'--type','security','--output-format','json'],120000);
+  const report = JSON.parse(stdout);
+  const views = report.results.filter(item => item.name === 'security_definer_view');
+  if (label === 'after' && views.some(item => item.metadata?.name === 'meal_logs_patient_view')) {
+    throw new Error('El advisor sigue detectando la vista de comidas con permisos de dueño.');
+  }
+  const evidence = process.env.PLANV_SECURITY_EVIDENCE_DIR;
+  if (evidence) {
+    await mkdir(evidence,{recursive:true});
+    await writeFile(join(evidence,`security-${label}.json`),stdout);
+  }
+  console.log('Advisors de seguridad ejecutados: ' + label + '; vistas definer: ' + views.length + '.');
+}
 
 async function cli(args, timeout = 60000) {
   const executable = process.env.PLANV_SUPABASE_CLI;
@@ -62,7 +77,29 @@ try {
       await pool.query(await readFile(new URL('../supabase/auth-isolation/live-view-options.sql', import.meta.url), 'utf8'));
       snapshotApplied = true;
     }
+    if (file.endsWith('_readonly_patient_meal_views.sql')) {
+      phase = 'advisors antes del cierre de vistas';
+      await advisors('before',dbUrl);
+      // Real Supabase reproduction with fictional identities, always rolled back.
+      await pool.query('begin');
+      try {
+        const owner=randomUUID(),a=randomUUID(),b=randomUUID(),pa=randomUUID(),pb=randomUUID(),mid=randomUUID();
+        await pool.query("insert into auth.users(id,email,email_confirmed_at) values($1,'view-owner@example.test',now()),($2,'view-a@example.test',now()),($3,'view-b@example.test',now())",[owner,a,b]);
+        const nid=(await pool.query("select public.provision_nutritionist($1,'Ficticia') as id",[owner])).rows[0].id;
+        await pool.query("insert into public.patients(id,nutritionist_id,user_id,full_name,billing_status) values($1,$2,$3,'A ficticia','waived'),($4,$2,$5,'B ficticia','waived')",[pa,nid,a,pb,b]);
+        await pool.query('set local role authenticated');
+        await pool.query("select set_config('request.jwt.claim.sub',$1,true)",[a]);
+        await pool.query("insert into public.meal_logs_patient_view(id,patient_id,slot_label) values($1,$2,'Cena')",[mid,pb]);
+        await pool.query('reset role');
+        if((await pool.query('select patient_id from public.meal_logs where id=$1',[mid])).rows[0]?.patient_id!==pb) throw new Error('No se reprodujo el INSERT cruzado.');
+        console.log('INSERT cruzado reproducido en Supabase temporal; datos revertidos.');
+      } finally { await pool.query('rollback'); }
+    }
     await pool.query(await readFile(new URL(file, migrations), 'utf8'));
+    if (file.endsWith('_readonly_patient_meal_views.sql')) {
+      phase = 'advisors después del cierre de vistas';
+      await advisors('after',dbUrl);
+    }
   }
   if (!snapshotApplied) await pool.query(snapshot);
   await pool.query("notify pgrst, 'reload schema'");

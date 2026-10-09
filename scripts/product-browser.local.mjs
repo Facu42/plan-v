@@ -235,13 +235,13 @@ try {
   phase='confirmación y aviso de pago';
   const appointment=(await read(patient,`/api/patients/${pid}`)).patient.appointment;
   const appointmentDay=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(appointment.starts_at));
-  await B('goto',origin+'/app/agenda');await B('fill','[aria-label="Elegir mes"]',appointmentDay.slice(0,7));await B('click',`[data-calendar-date="${appointmentDay}"]`);await button('Confirmar');await readUntil(professional,`/api/patients/${pid}`,r=>r.patient.appointment?.patient_reply==='attending');await B('reload');check(true,'confirmación de turno persistente');
+  await B('goto',origin+'/app/agenda');await B('select','[aria-label="Elegir mes"]',appointmentDay.slice(0,4)+'-'+(Number(appointmentDay.slice(5,7))-1));await B('click',`[data-patient-agenda-day="${appointmentDay}"]`);await button('Confirmar');await readUntil(professional,`/api/patients/${pid}`,r=>r.patient.appointment?.patient_reply==='attending');await B('reload');check(true,'confirmación de turno persistente');
   phase='consulta en curso';
   const originalAppointment=(await pool.query("select id,starts_at from public.appointments where patient_id=$1 and status='scheduled' order by starts_at limit 1",[pid])).rows[0];
   try {
     const ongoing=(await pool.query("update public.appointments set starts_at=clock_timestamp()-interval '10 minutes' where id=$1 returning (starts_at at time zone 'America/Argentina/Buenos_Aires')::date::text as day",[originalAppointment.id])).rows[0];
     for(const actor of [patient,professional]) check((await read(actor,`/api/patients/${pid}`)).patient.appointment?.meet_url==='https://example.test/consulta','consulta en curso conserva el enlace para ambos roles');
-    await B('reload');await B('wait','[aria-label="Elegir mes"]');await B('fill','[aria-label="Elegir mes"]',ongoing.day.slice(0,7));await control(`[data-calendar-date="${ongoing.day}"]`);await until("document.body.innerText.includes('Abrir videollamada')");
+    await B('reload');await B('wait','[aria-label="Elegir mes"]');await B('select','[aria-label="Elegir mes"]',ongoing.day.slice(0,4)+'-'+(Number(ongoing.day.slice(5,7))-1));await control(`[data-patient-agenda-day="${ongoing.day}"]`);await until("document.body.innerText.includes('Abrir videollamada')");
     check(true,'paciente mantiene la videollamada al recargar durante la consulta');
     await pool.query("update public.appointments set starts_at=clock_timestamp()-make_interval(mins=>duration_min+1) where id=$1",[originalAppointment.id]);
     for(const actor of [patient,professional]) check((await read(actor,`/api/patients/${pid}`)).patient.appointment===null,'consulta finalizada deja de aparecer como vigente');

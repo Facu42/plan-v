@@ -80,7 +80,10 @@ const harness = vi.hoisted(() => {
       calls.length = 0;
       queues.clear();
     },
-    client: { from },
+    client: { from, rpc(name: string, payload: unknown) {
+      calls.push({ table: 'rpc:' + name, op: 'rpc', payload, filters: [] });
+      return Promise.resolve(next('rpc:' + name));
+    } },
   };
 });
 
@@ -639,7 +642,7 @@ describe('timeline_events (016 v2)', () => {
       error: null,
     });
     harness.push('meal_slots', { data: [], error: null });
-    harness.push('meal_logs_patient_view', { data: [], error: null });
+    harness.push('rpc:get_patient_meal_logs', { data: [], error: null });
     harness.push('messages_patient_view', { data: [], error: null });
     harness.push('habit_logs', { data: [], error: null });
     harness.push('appointments_patient_view', { data: [], error: null });
@@ -870,7 +873,7 @@ describe('patient audience queries', () => {
       error: null,
     });
     harness.push('meal_slots', { data: [], error: null });
-    harness.push('meal_logs_patient_view', { data: [], error: null });
+    harness.push('rpc:get_patient_meal_logs', { data: [], error: null });
     harness.push('messages_patient_view', { data: [], error: null });
     harness.push('habit_logs', { data: [], error: null });
     harness.push('appointments_patient_view', { data: [], error: null });
@@ -884,9 +887,9 @@ describe('patient audience queries', () => {
     const patientsSelect = harness.calls.find((call) => call.table === 'patients_patient_view' && call.op === 'select');
     expect(String(patientsSelect?.payload)).not.toContain('plan_b');
     expect(String(patientsSelect?.payload)).not.toContain('*');
-    const mealSelect = harness.calls.find((call) => call.table === 'meal_logs_patient_view' && call.op === 'select');
-    expect(String(mealSelect?.payload)).not.toContain('note_for_nutri');
-    expect(String(mealSelect?.payload)).toContain('nutrition_origin');
+    const mealRead = harness.calls.find((call) => call.table === 'rpc:get_patient_meal_logs');
+    expect(mealRead?.payload).toEqual({ target_patient: 'patient-1' });
+    expect(harness.calls.some(call => call.table === 'meal_logs_patient_view' || call.table === 'meal_logs')).toBe(false);
     expect(harness.calls.some((call) => call.table === 'ai_briefs')).toBe(false);
   });
 });
