@@ -73,6 +73,9 @@ describe('vistas públicas de comidas: aislamiento y sólo lectura',()=>{
     await db.query("update public.patients set billing_status='pending' where id=$1",[pa]);
     expect(await asUser(a,'select * from public.get_patient_meal_logs($1)',[pa])).toEqual([]);
     await db.query("update public.patients set billing_status='waived' where id=$1",[pa]);
+    await db.query('update public.patients set deactivated_at=now() where id=$1',[pa]);
+    await expect(asUser(a,'select * from public.get_patient_meal_logs($1)',[pa])).rejects.toMatchObject({code:'42501'});
+    await db.query('update public.patients set deactivated_at=null where id=$1',[pa]);
     expect(await asUser(owner,'select note_for_nutri from public.meal_logs where id=$1',[ma])).toEqual([{note_for_nutri:'Nota privada A'}]);
   });
   it('cierra también concesiones por columna y PUBLIC de otras vistas vulnerables, de forma idempotente',async()=>{
