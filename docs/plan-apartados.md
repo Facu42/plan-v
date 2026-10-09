@@ -367,9 +367,11 @@ Arreglo independiente del dashboard, con ECC y reproducción descartable. Ver do
 
 Cierre seguridad: PR83 y ensayo Supabase temporal 37944764953 aprobados. Advisors comparados antes/después, lectura y escrituras A/B, privacidad y retirada de acceso acreditadas. Producción intacta.
 
+Control para que no vuelva: en cada PR, después de aplicar las migraciones en una base temporal, falla si una vista de public concede escritura a anon o authenticated, o si no tiene security_invoker. La lista de excepciones queda vacía: la ficha y el acceso también tienen security_invoker. Las tablas que ya escriben conservan su permiso; una tabla o vista nueva ya no nace con escritura para esas dos cuentas. [Cómo funciona](security/control-vistas-publicas-2026-10-09.md).
+
 ## Perfil, acceso y varios consultorios · 2026-10-09
 Facundo administra el servicio y lo venderá a varias nutricionistas. Corrección de
 las dos vistas restantes preparada sin abrir datos clínicos ni permisos globales
 al administrador. [Implementación, pruebas y criterios de escala](security/perfiles-consultorios-2026-10-09.md).
-Migración y ensayo Auth/PostgREST/advisors preparados; esta nueva corrección aún
-no se aplica a producción.
+Migración y ensayo Auth/PostgREST/advisors preparados. La migración
+`invoker_patient_profile_projections` va con esta publicación.
