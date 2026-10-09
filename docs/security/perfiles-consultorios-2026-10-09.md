@@ -24,7 +24,8 @@ La lectura mínima autorizada pasa por dos funciones en el esquema privado:
 identidad de la sesión, columnas explícitas, búsqueda de objetos fija, sin aceptar
 identidad ni consultorio suministrados por el cliente. Una paciente recibe sólo su
 perfil; el estado de acceso se limita a ella o a pacientes del consultorio del
-profesional autenticado. Se excluyen desactivados y anonimizados en el acceso.
+profesional autenticado. Se excluyen desactivados y anonimizados tanto en el perfil
+como en el acceso, incluso cuando su sesión anterior aún es válida.
 Ser administrador no añade un permiso clínico; si esa misma persona tiene además
 un rol clínico legítimo, conserva exclusivamente los permisos de ese rol.
 
@@ -34,16 +35,19 @@ escribir. Las funciones privadas también verifican identidad aunque se llamen
 directamente por SQL. El esquema privado no se expone en el ensayo PostgREST.
 No debe añadirse a los esquemas expuestos del servicio.
 
-Para crecer, un índice parcial agrupa pacientes activos por nutricionista. Los
-identificadores del caller se calculan una vez por consulta. Esto prepara la
-búsqueda por consultorio; no equivale a una prueba de capacidad ni garantiza un
-número concreto de usuarios simultáneos.
+Los identificadores del caller se calculan una vez por consulta y la lectura se
+filtra por consultorio. La ampliación incluye un índice parcial por nutricionista,
+que debe prepararse mediante una operación concurrente fuera de la transacción de
+esta migración. Se retiró su creación convencional para no bloquear escrituras en
+una tabla grande. No se declara un número concreto de usuarios simultáneos.
 
 ## Evidencia y publicación
 
 ECC: prueba inicial falló al detectar las dos vistas definer (commit6974ad8).
 El comportamiento de pacientes/consultorios ya estaba aislado; los avisos no eran
-una reproducción de filtración. Tras el cambio, ocho pruebas de PostgreSQL
+una reproducción de filtración. La revisión posterior detectó perfil visible tras
+desactivación: se reprodujo con prueba RED y se cerró también esa lectura.
+Tras el cambio, siete pruebas de PostgreSQL
 descartable verifican aislamiento, acceso administrativo separado, ACL de tabla y
 columna, escritura denegada, funciones privadas, retiro de acceso y reaplicación.
 La prueba histórica de vistas crudas conserva el esquema anterior para reproducir
@@ -62,10 +66,14 @@ previamente como una aprobación posterior. PR y CI quedan registrados al finali
 
 ## Criterios para los próximos apartados
 
-Validación local final: 313 archivos, 2173 pruebas aprobadas y 2 omitidas;
+Validación local final con el ajuste de ciclo de vida: 313 archivos, 2172 pruebas
+aprobadas y 2 omitidas;
 tipos, compilación, secretos y migraciones aprobados. Revisión de código y
 comportamiento sin bloqueantes. La verificación Auth/PostgREST y advisors reales
 se ejecuta en CI; no se sustituye por el simulador local.
+El ensayo previo37955099725 aprobó Auth/PostgREST/navegador; advisors de vistas
+6→2→0. Se repite en la versión final para acreditar además el retiro del perfil
+con sesiones anteriores a la desactivación.
 
 1. Todos los accesos clínicos y archivos deben verificar paciente y consultorio
    en el servidor y en la base; cambiar una URL o un identificador no otorga acceso.

@@ -1,10 +1,6 @@
 -- Preserve the column-limited API contract without granting patient SELECT on
 -- raw patients. Privileged projections live outside the exposed public schema,
 -- take no caller-supplied identity, and validate the real session internally.
-create index if not exists patients_active_nutritionist_access_idx
-  on public.patients(nutritionist_id,id)
-  where deactivated_at is null and anonymized_at is null;
-
 create or replace function private.patient_profile_projection()
 returns table(id uuid,user_id uuid,full_name text,initials text,tone text,
   billing_status public.billing_status,billing_until date,status text,
@@ -14,7 +10,8 @@ begin
   if auth.uid() is null then return; end if;
   return query select p.id,p.user_id,p.full_name,p.initials,p.tone,
     p.billing_status,p.billing_until,p.status,p.stage,p.goal,p.adherence_score,p.created_at
-    from public.patients p where p.user_id=auth.uid();
+    from public.patients p where p.user_id=auth.uid()
+      and p.deactivated_at is null and p.anonymized_at is null;
 end $$;
 
 create or replace function private.patient_access_projection()

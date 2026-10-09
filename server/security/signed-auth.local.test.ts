@@ -206,6 +206,22 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     expect(unchanged.error).toBeNull(); expect(unchanged.data?.billing_status).toBe('waived');
   });
 
+  it('una sesión firmada previa no conserva perfil o acceso después de desactivar o anonimizar', async () => {
+    for(const column of ['deactivated_at','anonymized_at']) {
+      await pool.query(`update public.patients set ${column}=now() where id=$1`,[pidB]);
+      try {
+        for(const view of ['patients_patient_view','patient_access_view']) {
+          const denied=await patientB.client.from(view).select('id').eq('id',pidB);
+          expect(denied.error).toBeNull(); expect(denied.data).toEqual([]);
+        }
+        const deniedPro=await ownerB.client.from('patient_access_view').select('id').eq('id',pidB);
+        expect(deniedPro.error).toBeNull(); expect(deniedPro.data).toEqual([]);
+      } finally {await pool.query(`update public.patients set ${column}=null where id=$1`,[pidB]);}
+    }
+    const restored=await patientB.client.from('patients_patient_view').select('id').eq('id',pidB);
+    expect(restored.error).toBeNull(); expect(restored.data).toEqual([{id:pidB}]);
+  });
+
   it('la paciente no lee las notas profesionales de su fila cruda', async () => {
     const professional = await ownerA.client.from('patients').select('adherence_why').eq('id',pidA).single();
     expect(professional.error).toBeNull(); expect(professional.data?.adherence_why).toBe(canary);
