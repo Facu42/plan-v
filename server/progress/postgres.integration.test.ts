@@ -122,6 +122,18 @@ describe('PV-34 progreso en PostgreSQL descartable', () => {
     await expect(rpc(patientAUser, 'get_patient_progress', [patientA, 14])).rejects.toMatchObject({ code: '22023' });
   });
 
+  it('resume más de veinte comidas, conserva cero declarado y aísla profesionales', async () => {
+    const today=progressWindows(7).current.end;
+    await db.query("insert into public.habit_logs(patient_id,date,hydration,hydration_declared) values ($1,$2,0,true)",[patientA,today]);
+    await db.query("insert into public.meal_logs(patient_id,slot_label,status,logged_at) select $1,'Almuerzo','pending_review',$2::timestamptz from generate_series(1,35)",[patientA,today+'T15:00:00-03:00']);
+    const all=await rpc(nutriA,'get_weekly_registrations',[[patientA]]) as Record<string,any>;
+    expect(all[patientA]).toMatchObject({recorded_days:1,meals_logged:36,water_days:1,water_average:0});
+    expect(all[patientA].pending_review).toBeGreaterThanOrEqual(36);
+    await expect(rpc(nutriB,'get_weekly_registrations',[[patientA]])).rejects.toMatchObject({code:'42501'});
+    await expect(rpc(patientAUser,'get_weekly_registrations',[[patientA]])).rejects.toMatchObject({code:'42501'});
+    await expect(rpc(nutriA,'get_weekly_registrations',[[patientA,patientB]])).rejects.toMatchObject({code:'42501'});
+  });
+
   it('sin consentimiento omite medidas; sin RPC falla cerrado', async () => {
     const catalog = CONSENT_CATALOG.find((entry) => entry.purpose === 'measurement')!;
     await rpc(patientAUser, 'record_patient_consent', [patientA, catalog.purpose, catalog.text_version, catalog.text_hash, 'withdrawn']);

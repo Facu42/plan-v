@@ -7,6 +7,9 @@ import { PlanComponentRows } from './PlanComponentRows';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { careErrorMessage, notifyCareChanged } from '../../api/care';
 import { plansApi } from '../../api/plans';
+import { nutritionTargetApi } from '../../api/nutrition-target';
+import { confirmedPlanTarget } from '../../lib/confirmed-plan-target';
+import type { MenuNutritionTarget } from '../../types/ai-nutrition';
 import { recipesApi } from '../../api/recipes';
 import { aiJobsApi } from '../../api/ai-jobs';
 import type { AiJobView } from '../../types/ai-jobs';
@@ -134,6 +137,7 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
   const [draftItems, setDraftItems] = useState<DraftItem[]>([emptyItem(new Date().toISOString().slice(0, 10))]);
   const [selectedSlots, setSelectedSlots] = useState<PlanSlot[]>(['Desayuno', 'Almuerzo', 'Merienda', 'Cena']);
   const [dietaryPreferences, setDietaryPreferences] = useState('');
+  const [confirmedTarget, setConfirmedTarget] = useState<MenuNutritionTarget | undefined>();
   const [newPlanId] = useState(() => crypto.randomUUID());
   const planId = plan?.id ?? newPlanId;
   const lock = useRef(false);
@@ -147,7 +151,8 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
 
   async function reload() {
     try {
-      const [plans, , aiJobs] = await Promise.all([plansApi.professional(patientId), reloadCatalog(), aiJobsApi.list(patientId)]);
+      const [plans, , aiJobs, targets] = await Promise.all([plansApi.professional(patientId), reloadCatalog(), aiJobsApi.list(patientId), nutritionTargetApi.get(patientId, true)]);
+      setConfirmedTarget(confirmedPlanTarget(targets.published ?? null));
       setPlan(plans.plan);
       setRecommendations((plans.plan?.current.guidance?.recommendations ?? []).join('\n'));
       setAvoid((plans.plan?.current.guidance?.avoid ?? []).join('\n'));
@@ -181,7 +186,7 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
     return { id: planId, expected_revision: plan?.current.revision ?? null, period_start: periodStart, period_end: periodEnd,
       timezone: 'America/Argentina/Buenos_Aires' as const,
       ...guidanceInput(),
-      ...(plan?.current.nutrition_target ? { nutrition_target: plan.current.nutrition_target } : {}),
+      ...(plan?.current.nutrition_target ?? confirmedTarget ? { nutrition_target: plan?.current.nutrition_target ?? confirmedTarget } : {}),
       items: draftItems.map(item => ({ ...(item.components ? { components: item.components.map(componentInput) } : {}), for_date: item.for_date, slot: item.slot, recipe_id: item.recipe_id || undefined,
         recipe_version: item.recipe_id ? item.recipe_version : undefined, free_text: item.free_text.trim() || undefined,
         portions: item.portions ? Number(item.portions) : undefined, public_note: item.public_note,
@@ -203,7 +208,7 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
       period_end: periodEnd,
       timezone: 'America/Argentina/Buenos_Aires',
       ...guidanceInput(),
-      ...(plan?.current.nutrition_target ? { nutrition_target: plan.current.nutrition_target } : {}),
+      ...(plan?.current.nutrition_target ?? confirmedTarget ? { nutrition_target: plan?.current.nutrition_target ?? confirmedTarget } : {}),
       items: draftItems.map((item) => ({
         ...(item.components ? { components: item.components.map(componentInput) } : {}),
         for_date: item.for_date,
@@ -408,7 +413,7 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
         <button type="button" disabled={busy} onClick={() => setDraftItems(draftItems.filter((_, currentIndex) => currentIndex !== index))}>Quitar indicación {index + 1}</button>
       </div> : null)}
       </section>)}
-      </div><PlanDayAnalysis date={selectedDate} lines={analysisLines(draftItems.filter(item => item.for_date === selectedDate))} target={plan?.current.nutrition_target} week={weekDates.map(date => ({ date, lines: analysisLines(draftItems.filter(item => item.for_date === date)) }))} /></div>
+      </div><PlanDayAnalysis date={selectedDate} lines={analysisLines(draftItems.filter(item => item.for_date === selectedDate))} target={plan?.current.nutrition_target ?? confirmedTarget} week={weekDates.map(date => ({ date, lines: analysisLines(draftItems.filter(item => item.for_date === date)) }))} /></div>
       </fieldset>{plan && !plan.current.published_at && dirty && <p role="status">Tenés cambios sin guardar. Guardalos y revisalos antes de publicar.</p>}
       {error && <button type="button" disabled={busy} onClick={() => void reload()}>Recuperar la versión guardada y reemplazar este formulario</button>}
       <div className="meal-plan-actions">

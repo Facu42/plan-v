@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 type Call = {
   table: string;
@@ -80,7 +80,10 @@ const harness = vi.hoisted(() => {
       calls.length = 0;
       queues.clear();
     },
-    client: { from },
+    client: { from, rpc(name: string, payload: unknown) {
+      calls.push({ table: 'rpc:' + name, op: 'rpc', payload, filters: [] });
+      return Promise.resolve(next('rpc:' + name));
+    } },
   };
 });
 
@@ -126,6 +129,7 @@ const row = {
   suggested_by_ai: false,
   sent_at: '2026-09-05T15:00:00.000Z',
 };
+afterEach(()=>vi.useRealTimers());
 
 beforeEach(() => {
   harness.reset();
@@ -452,6 +456,7 @@ describe('appointments (016 v2)', () => {
   });
 
   it('maps the next scheduled appointment into the domain patient', async () => {
+    vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(new Date('2026-09-10T17:40:00Z'));
     harness.push('patients', {
       data: {
         id: 'patient-1',
@@ -476,7 +481,7 @@ describe('appointments (016 v2)', () => {
     harness.push('ai_briefs', { data: null, error: null });
     harness.push('habit_logs', { data: [], error: null });
     harness.push('appointments', {
-      data: [{
+      data: [{id:'ended',starts_at:'2026-09-10T16:30:00Z',duration_min:30,channel:'video'}, {
         id: 'appt-1',
         starts_at: '2026-09-10T17:30:00.000Z',
         duration_min: 45,
@@ -637,7 +642,7 @@ describe('timeline_events (016 v2)', () => {
       error: null,
     });
     harness.push('meal_slots', { data: [], error: null });
-    harness.push('meal_logs_patient_view', { data: [], error: null });
+    harness.push('rpc:get_patient_meal_logs', { data: [], error: null });
     harness.push('messages_patient_view', { data: [], error: null });
     harness.push('habit_logs', { data: [], error: null });
     harness.push('appointments_patient_view', { data: [], error: null });
@@ -768,6 +773,12 @@ describe('habit_logs (016 v2)', () => {
     expect(patient!.habit_logs[0]).toMatchObject({ id: 'h-today', date: today, hydration: 6, sleep_minutes: 450 });
   });
 
+  it('lee el mismo día argentino aunque el servidor ya esté en el día UTC siguiente',async()=>{
+    vi.useFakeTimers();vi.setSystemTime(new Date('2026-10-10T01:30:00Z'));vi.stubEnv('TZ','UTC');
+    try {pushPatientWithHabits([{id:'h-night',patient_id:'patient-1',date:'2026-10-09',hydration:3,hydration_declared:true,energy:null,sleep_minutes:null}]);
+      const patient=await sbGetPatientById('patient-1');expect(patient!.hydration).toBe(3);
+    } finally {vi.useRealTimers();vi.unstubAllEnvs();}
+  });
   it('defaults the snapshot when there is no habit log for today', async () => {
     pushPatientWithHabits([
       { id: 'h-old', patient_id: 'patient-1', date: '2026-08-30', hydration: 2, energy: 'Baja', sleep_minutes: 300 },
@@ -794,6 +805,7 @@ describe('habit_logs (016 v2)', () => {
       patient_id: 'patient-1',
       date: today,
       hydration: 5,
+      hydration_declared: true,
       energy: 'Baja',
       sleep_minutes: 400,
     });
@@ -861,7 +873,7 @@ describe('patient audience queries', () => {
       error: null,
     });
     harness.push('meal_slots', { data: [], error: null });
-    harness.push('meal_logs_patient_view', { data: [], error: null });
+    harness.push('rpc:get_patient_meal_logs', { data: [], error: null });
     harness.push('messages_patient_view', { data: [], error: null });
     harness.push('habit_logs', { data: [], error: null });
     harness.push('appointments_patient_view', { data: [], error: null });
@@ -875,9 +887,9 @@ describe('patient audience queries', () => {
     const patientsSelect = harness.calls.find((call) => call.table === 'patients_patient_view' && call.op === 'select');
     expect(String(patientsSelect?.payload)).not.toContain('plan_b');
     expect(String(patientsSelect?.payload)).not.toContain('*');
-    const mealSelect = harness.calls.find((call) => call.table === 'meal_logs_patient_view' && call.op === 'select');
-    expect(String(mealSelect?.payload)).not.toContain('note_for_nutri');
-    expect(String(mealSelect?.payload)).toContain('nutrition_origin');
+    const mealRead = harness.calls.find((call) => call.table === 'rpc:get_patient_meal_logs');
+    expect(mealRead?.payload).toEqual({ target_patient: 'patient-1' });
+    expect(harness.calls.some(call => call.table === 'meal_logs_patient_view' || call.table === 'meal_logs')).toBe(false);
     expect(harness.calls.some((call) => call.table === 'ai_briefs')).toBe(false);
   });
 });
@@ -897,6 +909,7 @@ describe('PV-11 directory summaries', () => {
   };
 
   it('pages directory rows without loading meal logs or messages', async () => {
+    vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(new Date('2026-09-17T17:40:00Z'));
     harness.push('nutritionists', { data: { id: 'nutri-1' }, error: null });
     harness.push('patients', {
       data: [summaryRow, { ...summaryRow, id: 'patient-2', full_name: 'Ana' }, { ...summaryRow, id: 'patient-3', full_name: 'Beto' }],

@@ -336,7 +336,9 @@ export function RecipeEditorForm({ catalog }: { catalog: RecipeCatalogState }) {
 
 /** Vista previa de lo que ve el paciente + día y momento; confirma la asignación al día. */
 export function RecipeAssignDialog({ catalog }: { catalog: RecipeCatalogState }) {
-  const { assigning, day, setDay, slot, setSlot, busy, confirmAssign, closeAssign } = catalog;
+  const { assigning, day, setDay, slot, setSlot, busy, error, confirmAssign, closeAssign } = catalog;
+  const assignError = useRef<HTMLParagraphElement>(null);
+  useEffect(() => { if (assigning && error) assignError.current?.scrollIntoView({ block: 'nearest' }); }, [assigning, error]);
   const dialog = useModalFocus(Boolean(assigning?.published), () => { if (!busy) closeAssign(); });
   if (!assigning?.published) return null;
   return <div className="recipe-overlay" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Así lo ve tu asesorado">
@@ -351,8 +353,9 @@ export function RecipeAssignDialog({ catalog }: { catalog: RecipeCatalogState })
         card={assigning.published.card ?? unavailableCard(assigning.title)}
         ingredients={assigning.published.ingredients}
       />
+      {error && <p ref={assignError} id="recipe-assign-error" className="recipe-error" role="alert">{error}</p>}
       <footer className="recipe-actions">
-        <NvButton disabled={busy || !catalog.patientId} onClick={confirmAssign}>Confirmar asignación</NvButton>
+        <NvButton aria-describedby={error ? 'recipe-assign-error' : undefined} disabled={busy || !catalog.patientId} onClick={confirmAssign}>Confirmar asignación</NvButton>
         <button type="button" className="recipe-cancel" onClick={closeAssign}>Cerrar</button>
       </footer>
     </div>
@@ -390,14 +393,14 @@ export function RecipeCatalog({ patientId, patients }: { patientId: string; pati
       </div>
     </header>
     {source === 'memory' && <p className="recipe-demo">Vista demo · recetas ficticias para probar el catálogo.</p>}
-    {error && <p className="recipe-error" role="alert">{error}</p>}
+    {error && !catalog.assigning && <p className="recipe-error" role="alert">{error}</p>}
     {status && <p className="recipe-status" role="status">{status}</p>}
     {catalog.favoriteError && <p className="recipe-error" role="alert">{catalog.favoriteError} <button type="button" onClick={catalog.reloadFavorites}>Reintentar favoritos</button></p>}
     {!editorOpen && <RecipeAiNotices catalog={catalog} />}
     {!recipes && !error && <p role="status">Cargando catálogo…</p>}
     {recipes && !recipes.length && !editing && <NvState title="Todavía no hay recetas en el catálogo" description="Creá un borrador con ingredientes, rinde y pasos. El paciente no lo ve hasta publicarlo y asignarlo." />}
     {editorOpen && <FigmaRecordDialog title={editing ? editing.title || 'Nueva receta' : path === 'ai' ? 'Crear receta con IA' : 'Nueva receta'} className="recipe-editor-dialog" closeLabel="Cerrar creación de receta" onClose={catalog.closeEditor}>
-      {error && <p className="recipe-error" role="alert">{error}</p>}
+      {error && !catalog.assigning && <p className="recipe-error" role="alert">{error}</p>}
       {status && <p className="recipe-status" role="status">{status}</p>}
       {path === 'choose' && !editing && <RecipeChoice catalog={catalog} />}
       {path === 'ai' && <RecipeAiForm catalog={catalog} />}

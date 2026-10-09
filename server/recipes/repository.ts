@@ -64,7 +64,7 @@ export function resetRecipeMemory() {
   resetRecipeCards();
 }
 
-export function recipeDbError(error: { code?: string; message?: string } | null) {
+export function recipeDbError(error: { code?: string; message?: string } | null, action: 'publicar' | 'asignar' = 'publicar') {
   if (!error) return;
   if (['42P01', '42883', 'PGRST202', 'PGRST205'].includes(error.code ?? '')) {
     throw new CareError(501, 'El catálogo de recetas requiere instalar la migración de este módulo.');
@@ -73,10 +73,10 @@ export function recipeDbError(error: { code?: string; message?: string } | null)
   if (error.code === 'PT404') throw new CareError(404, 'No encontramos esa comida asignada.');
   if (error.code === '23505' || error.code === 'PT409') {
     if (error.message === 'meal_plan_allergies' || error.message === 'recipe_allergies') {
-      throw new CareError(409, 'El contenido incluye un alimento declarado como alergia o restricción. Revisalo antes de publicar.');
+      throw new CareError(409, `El contenido incluye un alimento declarado como alergia o restricción. Revisalo antes de ${action}.`);
     }
     if (error.message === 'meal_plan_allergies_unknown') {
-      throw new CareError(409, 'Completá alergias y restricciones con el paciente antes de publicar.');
+      throw new CareError(409, `Completá alergias y restricciones con el paciente antes de ${action}.`);
     }
     if (error.message === 'recipe_incomplete' || error.message === 'meal_plan_incomplete') {
       throw new CareError(409, 'Este borrador todavía tiene texto de demostración o pendientes. Completalo antes de publicar.');
@@ -592,6 +592,7 @@ export function readPublishedMemory(nutritionistId: string, recipeId: string, ex
     title: version.title,
     version: version.version,
     versionId: version.id,
+    steps: [...version.steps],
     nutrition: resolveRecipeNutrition(version.nutrition, getRecipeCard(version.id,version.title).macros, version.nutrient_source) ?? undefined,
     yield_portions: version.yield_portions,
     ingredients: versionItems(version.id),

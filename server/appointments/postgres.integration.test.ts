@@ -148,6 +148,18 @@ describe('PV-25 turnos en PostgreSQL descartable', () => {
     expect(afterDelete).toEqual(beforeDelete);
   });
 
+  it('conserva el enlace durante la consulta y deja de mostrarla al terminar',async()=>{
+    await db.query("update public.appointments set status='cancelled' where patient_id=$1",[patientA]);
+    const id='20000000-0000-4000-a000-0000000000a9';
+    await db.query("insert into public.appointments(id,patient_id,nutritionist_id,starts_at,duration_min,channel,status,meet_url,timezone) select $1,$2,nutritionist_id,clock_timestamp()-interval '10 minutes',45,'video','scheduled','https://meet.example.test/ongoing','America/Argentina/Buenos_Aires' from public.patients where id=$2",[id,patientA]);
+    for(const user of [nutriA,patientAUser]) {
+      const result=await rpc(user,'get_patient_appointment',[patientA]) as {appointment:{meet_url:string}};
+      expect(result.appointment?.meet_url).toBe('https://meet.example.test/ongoing');
+    }
+    await expect(rpc(patientBUser,'get_patient_appointment',[patientA])).rejects.toMatchObject({code:'42501'});
+    await db.query("update public.appointments set starts_at=clock_timestamp()-interval '46 minutes' where id=$1",[id]);
+    for(const user of [nutriA,patientAUser]) expect((await rpc(user,'get_patient_appointment',[patientA]) as {appointment:unknown}).appointment).toBeNull();
+  });
   it('sin RPC de turnos el persistente falla cerrado', async () => {
     await db.exec('alter function public.schedule_appointment(jsonb) rename to schedule_appointment_pv25_hidden');
     try {

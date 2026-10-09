@@ -108,3 +108,4 @@ body:has(dialog.recipe-editor-dialog[open]){overflow:hidden}
 .recipe-category-tags button:focus-visible{outline:2px solid var(--nv-strong);outline-offset:2px}
 .recipe-detail-categories{padding:8px 0}
 .recipe-culinary-label{font-size:12px;overflow-wrap:anywhere}
+#recipe-assign-error{margin:12px 0;padding:10px 12px;border:1px solid var(--nv-danger);border-radius:10px;color:var(--nv-danger);background:var(--nv-bg);font-size:13px;line-height:1.5}

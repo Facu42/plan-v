@@ -3,7 +3,7 @@ import { api, type PatientInvite } from '../../api/client';
 import type { Patient, Stage } from '../../types';
 import { filterDirectoryPatients, getPatientDirectoryMetrics, type PatientDirectoryFilter } from '../crm/crm-patients';
 import { Icon } from '../shared/Icon';
-import { NvBadge, NvButton, NvCard, NvProgress, NvState } from './primitives';
+import { NvBadge, NvButton, NvCard, NvState } from './primitives';
 import { hasFullPatientAccess } from '../../billing';
 import { createPatientWithInvitation, invitationReady } from './patient-invite-actions';
 import './showroom-patients.css';
@@ -19,7 +19,7 @@ export function followFromDirectory(patientId: string) {
 }
 const FILTERS: Array<{ id: PatientDirectoryFilter; label: string }> = [
   { id: 'active', label: 'Activos' },
-  { id: 'attention', label: 'Necesitan atención' },
+  { id: 'attention', label: 'Pendientes de revisión' },
   { id: 'archived', label: 'Archivados' },
 ];
 
@@ -289,35 +289,42 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
     onActionConsumed?.();
   }, [initialAction]);
 
-  return <>
+  return <section className="nv-directory-workspace" aria-label="Gestión de pacientes">
     <div className="pw-work-filters" aria-label="Filtros de gestión"><label>Etapa<select value={stageFilter} onChange={(event) => setStageFilter(event.target.value as Stage | '')}><option value="">Todas las etapas</option>{(Object.keys(STAGE_LABELS) as Stage[]).map((id) => <option key={id} value={id}>{STAGE_LABELS[id]}</option>)}</select></label><label><span>Invitación</span><select value={unlinkedOnly ? 'pending' : 'all'} onChange={(event) => setUnlinkedOnly(event.target.value === 'pending')}><option value="all">Todas las cuentas</option><option value="pending">Pendientes de vincular</option></select></label></div>
     {billingError && <p role="alert">{billingError}</p>}
-    <dl className="nv-directory-summary" aria-label="Resumen del directorio">
-      <div><dt>Pacientes activos</dt><dd>{metrics.active}</dd></div>
-      <div><dt>Necesitan atención</dt><dd>{metrics.attention}</dd></div>
-      <div><dt>Con próxima consulta</dt><dd>{metrics.appointments}</dd></div>
-      <div><dt>Archivados</dt><dd>{metrics.archived}</dd></div>
-    </dl>
-    <NvCard title="Directorio de pacientes" action={<NvButton className="nv-soft" onClick={() => setCreating(true)}><Icon name="plus" size={14} />Nuevo paciente</NvButton>}>
-      <nav className="nv-directory-filters" aria-label="Filtrar pacientes">
+    <div className="nv-directory-summary" aria-label="Resumen del directorio">
+      <button type="button" className="nv-summary-active" aria-label="Filtrar pacientes activos" aria-pressed={filter==='active'} onClick={()=>setFilter('active')}><span><Icon name="users" size={18}/>Pacientes activos</span><strong>{metrics.active}</strong><small>En tu consultorio</small></button>
+      <button type="button" className="nv-summary-pending" disabled={metrics.attention===null} aria-label="Filtrar pacientes pendientes de revisión" aria-pressed={filter==='attention'} onClick={()=>setFilter('attention')}><span><Icon name="camera" size={18}/>Pendientes de revisión</span><strong>{metrics.attention ?? '—'}</strong><small>Pacientes con registros por revisar</small></button>
+      <div><span><Icon name="calendar" size={18}/>Con próxima consulta</span><strong>{metrics.appointments}</strong><small>Pacientes con turno vigente</small></div>
+      <button type="button" className="nv-summary-archived" aria-label="Filtrar pacientes archivados" aria-pressed={filter==='archived'} onClick={()=>setFilter('archived')}><span><Icon name="history" size={18}/>Archivados</span><strong>{metrics.archived}</strong><small>Consultar o restaurar</small></button>
+    </div>
+    <NvCard className="nv-directory-panel" title="Directorio de pacientes" action={<NvButton className="nv-soft" onClick={() => setCreating(true)}><Icon name="plus" size={14} />Nuevo paciente</NvButton>}>
+      <div className="nv-directory-toolbar"><nav className="nv-directory-filters" aria-label="Filtrar pacientes">
         {FILTERS.map((item) => {
           const count = item.id === 'active' ? metrics.active : item.id === 'attention' ? metrics.attention : metrics.archived;
-          return <button type="button" key={item.id} aria-pressed={filter === item.id} onClick={() => { setFilter(item.id); setArchiveConfirmation(null); }}>{item.label}<span>{count}</span></button>;
+          return <button type="button" key={item.id} disabled={item.id === 'attention' && metrics.attention === null} aria-pressed={filter === item.id} onClick={() => { setFilter(item.id); setArchiveConfirmation(null); }}>{item.label}<span>{count ?? "—"}</span></button>;
         })}
-      </nav>
+      </nav><span className="nv-directory-results" role="status">{visible.length} {visible.length===1 ? 'paciente' : 'pacientes'}</span></div>
+      {metrics.attention === null && <p role="status">No pudimos cargar todos los resúmenes semanales. Recargá para consultar los pendientes.</p>}
       {share && <InviteShare name={share.name} invite={share.invite} onClose={() => setShare(null)} />}
       {error && <p className="nv-dialog-error" role="alert">{error}</p>}
-      <div className="nv-patient-table nv-directory-table" role="table" aria-label="Pacientes del directorio">
-        <div role="row" className="nv-table-head"><span role="columnheader">Paciente</span><span role="columnheader">Estado</span><span role="columnheader">Próximo foco</span><span role="columnheader">Adherencia</span><span role="columnheader">Acciones</span></div>
+      <div className="nv-directory-scroll"><div className="nv-patient-table nv-directory-table" role="table" aria-label="Pacientes del directorio">
+        <div role="row" className="nv-table-head"><span role="columnheader">Paciente</span><span role="columnheader">Estado</span><span role="columnheader">Próximo foco</span><span role="columnheader">Registro semanal</span><span role="columnheader">Acciones</span></div>
         {visible.map((patient) => <div role="row" key={patient.id}>
-          <span role="cell"><span className="nv-avatar">{patient.initials}</span><span><strong>{patient.name}</strong><small>{patient.goal}</small></span></span>
+          <span role="cell"><span className={`nv-avatar nv-directory-avatar person-${patient.tone}`}>{patient.initials}</span><span><strong>{patient.name}</strong><small>{patient.goal}</small></span></span>
           <span role="cell"><strong>{patient.status}</strong><small>{STAGE_LABELS[patient.stage]}</small>{!hasFullPatientAccess(patient) && <NvBadge tone="coral">{accessLabel(patient)}</NvBadge>}{patient.has_account === false && <NvBadge tone="gold">Sin cuenta</NvBadge>}{(() => { const fee = feeRows.find((row) => row.patient.patient_id === patient.id)?.summary; return fee && fee.owed > 0 ? <NvBadge tone="coral">Debe {formatPesos(fee.owed)}</NvBadge> : null; })()}</span>
           <span role="cell"><strong>{patient.next_focus || 'Sin foco cargado'}</strong><small>{patient.appointment?.when ?? 'Sin consulta'}</small></span>
-          <span role="cell"><NvProgress value={patient.adherence_score} label={`Adherencia de ${patient.name}`} /><strong>{patient.adherence_score}%</strong></span>
+          <span role="cell" className="nv-directory-weekly">{patient.weekly_registration ? <>
+            <strong>{patient.weekly_registration.recorded_days} de 7 días</strong>
+            <small>{patient.weekly_registration.meals_logged} comidas registradas</small>
+            <small>{patient.weekly_registration.water_average===null?'Agua sin registrar':'Promedio: '+patient.weekly_registration.water_average.toLocaleString('es-AR')+' vasos/día registrado'}</small>
+            {patient.weekly_registration.water_average!==null&&<small>{patient.weekly_registration.water_days} días con registro de agua</small>}
+            {patient.weekly_registration.pending_review>0&&<span className="nv-weekly-pending"><Icon name="clock" size={12}/>{patient.weekly_registration.pending_review} por revisar</span>}
+          </> : <small>Resumen no disponible</small>}</span>
           <span role="cell" className="nv-directory-actions">
             {!patient.archived_at && onRecord && <NvButton className="nv-soft" aria-label={`Abrir ficha de ${patient.name}`} onClick={() => onRecord(patient.id)}><Icon name="contact" size={14} />Ficha</NvButton>}
             {!patient.archived_at && onPlan && <NvButton className="nv-soft" aria-label={`Abrir plan de ${patient.name}`} onClick={() => onPlan(patient.id)}><Icon name="list" size={14} />Plan</NvButton>}
-            {!patient.archived_at && <NvButton className="nv-soft" aria-label={`Ver seguimiento de ${patient.name}`} onClick={() => onFollow(patient.id)}>Ver seguimiento</NvButton>}
+            {!patient.archived_at && <NvButton className="nv-soft" aria-label={`Ver seguimiento de ${patient.name}`} onClick={() => onFollow(patient.id)}><Icon name="trend" size={14}/>Seguimiento</NvButton>}
             {!patient.archived_at && patient.has_account === false && <NvButton className="nv-ghost" aria-label={`Invitar a ${patient.name}`} disabled={busyId === patient.id} onClick={() => invite(patient)}><Icon name="message" size={13} />Invitar</NvButton>}
             {!patient.archived_at && <NvButton className="nv-ghost" aria-label={`Editar ficha de ${patient.name}`} onClick={() => setEditing(patient)}><Icon name="edit" size={13} />Editar</NvButton>}
             <NvButton className={`nv-ghost${archiveConfirmation === patient.id ? ' nv-confirm' : ''}`} aria-label={patient.archived_at ? `Restaurar ${patient.name}` : archiveConfirmation === patient.id ? `Confirmar archivo de ${patient.name}` : `Archivar ${patient.name}`} disabled={busyId === patient.id} onClick={() => setArchived(patient, !patient.archived_at)}>
@@ -325,10 +332,10 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
             </NvButton>
           </span>
         </div>)}
-      </div>
+      </div></div>
       {!visible.length && <NvState title="Sin coincidencias" description="Probá otra búsqueda o filtro." />}
     </NvCard>
     {creating && <ShowroomPatientCreate onClose={() => setCreating(false)} onCreated={created} />}
     {editing && <ShowroomPatientEdit patient={editing} onClose={() => setEditing(null)} onSaved={(updated) => { onChanged(updated); setEditing(null); }} />}
-  </>;
+  </section>;
 }

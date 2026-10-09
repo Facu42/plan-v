@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { planReviewSnapshot, type PlanVersionView } from '../../src/types/plans.js';
 import type { ProfessionalModel } from '../../src/types/models.js';
 import type { ProfessionalMealPlan } from '../../src/types/plans.js';
+import { calculateTarget, defaultsForGoal } from '../../src/lib/nutrition-target.js';
 
 let db: PGlite;
 let dir: string;
@@ -189,6 +190,32 @@ describe('PV-19 planes en PostgreSQL descartable', () => {
     expect(still.items[0].recipe.version).toBe(1);
     expect(Number(still.items[0].recipe.yield_portions)).toBe(2);
     expect(Number(still.items[0].recipe.ingredients.find((line) => line.name === 'Quinoa')?.quantity)).toBe(60);
+  });
+  it('confirmar una meta sincroniza el borrador en la misma transacción y preserva el plan publicado', async () => {
+    const before = await rpc(nutriA, 'list_professional_meal_plan', [patientA]) as ProfessionalMealPlan;
+    const visible = await rpc(patientAUser, 'list_published_meal_plan', [patientA]);
+    const input = { sex: 'femenino' as const, age: 30, weight_kg: 65, height_cm: 165, activity: 'ligera' as const, ...defaultsForGoal('mantener') };
+    const current = await rpc(nutriA, 'get_nutrition_target_workspace', [patientA]) as { revision: number };
+    await rpc(nutriA, 'save_nutrition_target_versioned', [patientA, input, calculateTarget(input), false, current.revision]);
+    expect(await rpc(nutriA, 'list_professional_meal_plan', [patientA])).toEqual(before);
+    const confirmed = await rpc(nutriA, 'save_nutrition_target_versioned', [patientA, input, calculateTarget(input), true, current.revision + 1]) as { published: { updated_at: string; published_at: string; result: { kcal: number } } };
+    const after = await rpc(nutriA, 'list_professional_meal_plan', [patientA]) as ProfessionalMealPlan;
+    expect(after.current.status).toBe('draft');
+    expect(after.current.version).toBe(before.current.version + 1);
+    expect(after.current.nutrition_target).toMatchObject({ kcal: confirmed.published.result.kcal, revision: confirmed.published.updated_at, published_at: confirmed.published.published_at });
+    expect(after.current.guidance).toEqual(before.current.guidance);
+    expect(after.current.items.map(item => ({ free_text: item.free_text, note: item.public_note, recipe: item.recipe, components: item.components }))).toEqual(before.current.items.map(item => ({ free_text: item.free_text, note: item.public_note, recipe: item.recipe, components: item.components })));
+    expect(await rpc(patientAUser, 'list_published_meal_plan', [patientA])).toEqual(visible);
+    const changedInput = { ...input, weight_kg: 72 };
+    const nextConfirmed = await rpc(nutriA, 'save_nutrition_target_versioned', [patientA, changedInput, calculateTarget(changedInput), true, current.revision + 2]) as typeof confirmed;
+    const nextDraft = await rpc(nutriA, 'list_professional_meal_plan', [patientA]) as ProfessionalMealPlan;
+    expect(nextDraft.current.version).toBe(after.current.version);
+    expect(nextDraft.current.revision).not.toBe(after.current.revision);
+    expect(nextDraft.current.nutrition_target?.revision).toBe(nextConfirmed.published.updated_at);
+    await expect(rpc(nutriB, 'save_nutrition_target_versioned', [patientA, input, calculateTarget(input), true, current.revision + 2])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(nutriA, 'save_nutrition_target_versioned', [patientA, input, calculateTarget(input), true, current.revision])).rejects.toMatchObject({ code: 'PT409' });
+    expect(await rpc(nutriA, 'list_professional_meal_plan', [patientA])).toEqual(nextDraft);
+    expect((await asUser<{ allowed: boolean }>(nutriA, "select has_function_privilege('authenticated','private.save_nutrition_target_before_plan_sync(uuid,jsonb,jsonb,boolean,bigint)','execute') as allowed"))[0].allowed).toBe(false);
   });
 });
 

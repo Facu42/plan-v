@@ -3,7 +3,9 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Patient } from '../../types';
 import { ShowroomPatientCreate, ShowroomPatientEdit, ShowroomPatients, followFromDirectory } from './ShowroomPatients';
 
+const emptyWeek = {start:'2026-10-03',end:'2026-10-09',recorded_days:0,meals_logged:0,meals_pending:0,water_days:0,water_average:null,pending_review:0};
 const base: Patient = {
+  weekly_registration:emptyWeek,
   id: 'sofia', name: 'Sofía', initials: 'S', tone: 'mint', status: 'En ritmo',
   billing_status: 'active', billing_until: null, stage: 'seguimiento', goal: 'Organizar comidas',
   sensitive_hours: 'después de las 20:30', plan_b: 'Ensalada a mano', next_focus: 'Sumar proteína',
@@ -13,7 +15,7 @@ const base: Patient = {
 };
 const patients: Patient[] = [
   base,
-  { ...base, id: 'marina', name: 'Marina', initials: 'M', adherence_score: 55, status: 'A mirar', appointment: null },
+  { ...base, id: 'marina', name: 'Marina', initials: 'M', adherence_score: 55, status: 'A mirar', appointment: null, weekly_registration:{...emptyWeek,pending_review:2} },
   { ...base, id: 'laura', name: 'Laura', initials: 'L', adherence_score: 92, archived_at: '2026-09-01T00:00:00.000Z' },
 ];
 
@@ -21,10 +23,18 @@ const render = (props?: Partial<Parameters<typeof ShowroomPatients>[0]>) =>
   renderToStaticMarkup(<ShowroomPatients patients={patients} query="" onChanged={vi.fn()} onFollow={vi.fn()} {...props} />);
 
 describe('directorio de pacientes del showroom', () => {
+  it('mantiene acciones e identifica días, comidas, agua y pendientes por separado',()=>{
+    const html=render({onRecord:vi.fn(),onPlan:vi.fn()});
+    for(const label of ['Abrir ficha de Sofía','Abrir plan de Sofía','Ver seguimiento de Sofía','Editar ficha de Sofía','Archivar Sofía'])expect(html).toContain(label);
+    expect(html).toContain('nv-directory-weekly');expect(html).toContain('Agua sin registrar');expect(html).toContain('0 de 7 días');
+    expect(html).toContain('Filtrar pacientes activos');
+    const missing=render({patients:[{...base,has_account:false,weekly_registration:null}]});
+    expect(missing).toContain('Invitar a Sofía');expect(missing).toContain('Resumen no disponible');expect(missing).not.toContain('0 de 7 días');
+  });
   it('resume el directorio completo y muestra activos por defecto', () => {
     const html = render();
     expect(html).toContain('Pacientes activos');
-    expect(html).toContain('Necesitan atención');
+    expect(html).toContain('Pendientes de revisión');
     expect(html).toContain('Archivados');
     expect(html).toContain('Sofía');
     expect(html).toContain('Marina');
@@ -55,7 +65,7 @@ describe('directorio de pacientes del showroom', () => {
     expect(html).not.toContain('Sofía');
   });
 
-  it('necesitan atención lista solo adherencias bajas activas', () => {
+  it('pendientes lista registros sin revisar y excluye archivados', () => {
     const html = render({ initialFilter: 'attention' });
     expect(html).toContain('Marina');
     expect(html).not.toContain('Sofía');

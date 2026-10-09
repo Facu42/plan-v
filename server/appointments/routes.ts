@@ -1,3 +1,4 @@
+import { withWeeklyRegistration } from '../progress/weekly-repository.js';
 import type { Hono, Context } from 'hono';
 import { z } from 'zod';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
@@ -67,12 +68,12 @@ export function registerAppointmentRoutes(app: Hono) {
       }
       const patient = await sb.sbGetPatientById(patientId);
       if (!patient) return c.notFound();
-      return c.json({ patient, source: 'supabase' });
+      return c.json({ patient: (await withWeeklyRegistration([patient],true))[0], source: 'supabase' });
     }
 
     const patient = await repo.scheduleAppointment(patientId, parsedBody.data.appointment, false);
     if (!patient) return c.notFound();
-    return c.json({ patient, source: 'memory' });
+    return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
   });
 
   app.post('/api/patients/:id/appointment/reschedule', async (c) => {

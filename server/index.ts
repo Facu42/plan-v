@@ -1,3 +1,4 @@
+import { withWeeklyRegistration } from './progress/weekly-repository.js';
 import { serve } from '@hono/node-server';
 import { registerCareRoutes, requireCareConsent } from './care/routes.js';
 import { createBodyGuard, createOriginGuard, createRateLimits, readCorsOrigins } from './security/http.js';
@@ -130,8 +131,8 @@ function queryAudience(role: 'nutri' | 'paciente') {
   return role === 'paciente' ? 'patient' as const : 'professional' as const;
 }
 
-function serializePatient(patient: NonNullable<Awaited<ReturnType<typeof sb.sbGetPatientById>>>, role: 'nutri' | 'paciente') {
-  return role === 'paciente' ? toPatientSelfView(patient) : patient;
+async function serializePatient(patient: NonNullable<Awaited<ReturnType<typeof sb.sbGetPatientById>>>, role: 'nutri' | 'paciente') {
+  return role === 'paciente' ? toPatientSelfView(patient) : (await withWeeklyRegistration([patient],true))[0];
 }
 
 async function parseJsonBody<T>(c: Context, schema: ZodType<T>) {
@@ -159,7 +160,7 @@ async function persistPatientWrite(
   }
   const patient = await sb.sbGetPatientById(patientId, queryAudience(role));
   if (!patient) return c.notFound();
-  return c.json({ patient: serializePatient(patient, role), source: 'supabase' });
+  return c.json({ patient: await serializePatient(patient, role), source: 'supabase' });
 }
 
 // Cabeceras de seguridad. La API sólo devuelve JSON: no se deja embeber en otra
@@ -302,14 +303,14 @@ app.get('/api/patients', async (c) => {
       return c.json({ error: 'Prohibido' }, 403);
     }
     const listed = await sb.sbListPatientsForNutri(auth.userId, { limit, offset });
-    return c.json({ patients: listed.patients, page: listed.page, source: 'supabase' });
+    return c.json({ patients: await withWeeklyRegistration(listed.patients,true), page: listed.page, source: 'supabase' });
   }
 
   const listed = paginateItems(getStore().patients.map((patient) => {
     const brief = briefForDisplay(patient);
     return { ...patient, brief: brief ?? (patient.brief ? { ...patient.brief, suggested_action: null, up_next_title: null, up_next_body: null, draft_message: null } : null) };
   }), offset, limit);
-  return c.json({ patients: listed.items, page: listed.page, source: 'memory' });
+  return c.json({ patients: await withWeeklyRegistration(listed.items,false), page: listed.page, source: 'memory' });
 });
 
 app.post('/api/patients', async (c) => {
@@ -329,7 +330,7 @@ app.post('/api/patients', async (c) => {
         email: parsedBody.data.email,
         goal: parsedBody.data.goal,
       });
-      return c.json({ ...created, source: 'supabase' }, 201);
+      return c.json({ ...created, patient: (await withWeeklyRegistration([created.patient], true))[0], source: 'supabase' }, 201);
     } catch (error) {
       if (error instanceof sb.UniqueInviteError) return c.json({ error: error.message }, 409);
       if (error instanceof sb.SchemaUnavailableError) {
@@ -341,7 +342,7 @@ app.post('/api/patients', async (c) => {
 
   const created = createPatient(parsedBody.data);
   if (!created) return c.json({ error: 'Ya existe una invitación para ese email' }, 409);
-  return c.json({ ...created, source: 'memory' }, 201);
+  return c.json({ ...created, patient: (await withWeeklyRegistration([created.patient], false))[0], source: 'memory' }, 201);
 });
 
 app.get('/api/patients/:id', async (c) => {
@@ -355,7 +356,7 @@ app.get('/api/patients/:id', async (c) => {
     const patient = await sb.sbGetPatientById(id, actor.role === 'paciente' ? 'patient' : 'professional');
     if (!patient) return c.notFound();
     return c.json({
-      patient: actor.role === 'paciente' ? toPatientSelfView(patient) : patient,
+      patient: await serializePatient(patient,actor.role),
       shoppingList: sb.computeShoppingList(patient),
       source: 'supabase',
     });
@@ -363,7 +364,7 @@ app.get('/api/patients/:id', async (c) => {
 
   const patient = getPatient(id);
   if (!patient) return c.notFound();
-  return c.json({ patient, shoppingList: computeShoppingList(patient), source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], shoppingList: computeShoppingList(patient), source: 'memory' });
 });
 
 app.patch('/api/patients/:id/profile', async (c) => {
@@ -380,7 +381,7 @@ app.patch('/api/patients/:id/profile', async (c) => {
 
   const patient = setPatientProfile(patientId, parsedBody.data);
   if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
 });
 
 app.patch('/api/patients/:id/archive', async (c) => {
@@ -407,12 +408,12 @@ app.patch('/api/patients/:id/archive', async (c) => {
     }
     const updated = await sb.sbGetPatientById(patientId, 'professional');
     if (!updated) return c.notFound();
-    return c.json({ patient: updated, source: 'supabase' });
+    return c.json({ patient: updated ? (await withWeeklyRegistration([updated],true))[0] : null, source: 'supabase' });
   }
 
   const patient = setPatientArchived(patientId, parsedBody.data.archived);
   if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
 });
 
 app.get('/api/me/patient', async (c) => {
@@ -523,7 +524,7 @@ app.patch('/api/patients/:id/habits', async (c) => {
 
   const patient = upsertHabitLog(patientId, body);
   if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
 });
 
 app.patch('/api/patients/:id/billing', async (c) => {
@@ -552,12 +553,12 @@ app.patch('/api/patients/:id/billing', async (c) => {
     }
     const updated = await sb.sbGetPatientById(patientId, 'professional');
     if (!updated) return c.notFound();
-    return c.json({ patient: updated, source: 'supabase' });
+    return c.json({ patient: updated ? (await withWeeklyRegistration([updated],true))[0] : null, source: 'supabase' });
   }
 
   const patient = setBillingStatus(patientId, parsedBody.data);
   if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
 });
 
 app.patch('/api/patients/:id/goal', async (c) => {
@@ -580,7 +581,7 @@ app.patch('/api/patients/:id/goal', async (c) => {
 
   const patient = setGoal(patientId, parsedBody.data);
   if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
 });
 
 app.patch('/api/patients/:id/menu', async (c) => {
@@ -606,7 +607,7 @@ app.patch('/api/patients/:id/menu', async (c) => {
 
   const patient = upsertMenuSlot(patientId, body.day, body.slot, body.title);
   if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
 });
 
 app.delete('/api/patients/:id/menu/:day/:slot', async (c) => {
@@ -632,7 +633,7 @@ app.delete('/api/patients/:id/menu/:day/:slot', async (c) => {
 
   const patient = removeMenuSlot(patientId, day, slot);
   if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
 });
 
 app.post('/api/nutritionist/setup', async (c) => {
