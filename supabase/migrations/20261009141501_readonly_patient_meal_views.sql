@@ -41,6 +41,7 @@ begin
      or target_patient is distinct from public.my_patient_id() then
     raise exception using errcode='42501',message='patient_meals_forbidden';
   end if;
+  perform public.intake_assert_access(target_patient, false);
   if not public.patient_has_full_access(target_patient) then return; end if;
   return query select m.id,m.patient_id,m.meal_slot_id,m.slot_label,m.photo_path,
     m.description,m.foods,m.macros,m.confidence::numeric,m.status::text,

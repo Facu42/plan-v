@@ -18,12 +18,17 @@ let phase = 'comprobar Docker';
 
 async function advisors(label, dbUrl) {
   const { stdout } = await cli(['db','advisors','--db-url',dbUrl,'--type','security','--output-format','json'],120000);
+  const report = JSON.parse(stdout);
+  const views = report.results.filter(item => item.name === 'security_definer_view');
+  if (label === 'after' && views.some(item => item.metadata?.name === 'meal_logs_patient_view')) {
+    throw new Error('El advisor sigue detectando la vista de comidas con permisos de dueño.');
+  }
   const evidence = process.env.PLANV_SECURITY_EVIDENCE_DIR;
   if (evidence) {
     await mkdir(evidence,{recursive:true});
     await writeFile(join(evidence,`security-${label}.json`),stdout);
   }
-  console.log('Advisors de seguridad ejecutados: ' + label + '.');
+  console.log('Advisors de seguridad ejecutados: ' + label + '; vistas definer: ' + views.length + '.');
 }
 
 async function cli(args, timeout = 60000) {

@@ -23,3 +23,8 @@ Docker local no inicia; no hay rama Supabase existente y el conector de costos n
 No se aplica ninguna migración ni cambio de configuración en wvosvlxpfytokwfbcero. PR sobre main independiente del dashboard. Aplicación productiva sólo tras aprobación escrita de Facundo y revisión del resultado CI.
 
 Cierre local: tipos, migraciones y secretos aprobados; revisión de código/seguridad sin bloqueantes. El ensayo remoto es requisito pendiente de acreditación, no se declara aprobado todavía.
+
+## Ensayo Supabase real: primera ejecución
+Run 37943817585: reprodujo INSERT A→B con datos ficticios y transacción revertida. Advisors descargados en meal-view-advisors-local-2026-10-09: seis avisos de vistas definer antes, dos después (patient_access_view y patients_patient_view); desaparece meal_logs_patient_view y se corrigen también las tres vistas de la instantánea local con ACL vulnerables. Permanece el aviso anterior de search_path en storage_object_patient_id, fuera del alcance. Producción tenía otras opciones ya invoker en esas tres vistas, por eso su baseline era tres.
+
+27 pruebas firmadas aprobadas; una falló al intentar abrir API de una paciente retirada en una prueba anterior. Además se añadió regresión de RPC tras deactivated_at: falló antes y pasa al incorporar intake_assert_access. La prueba positiva se ejecuta antes del retiro, y la prueba de retiro verifica explícitamente que la misma sesión ya no llama la RPC. No se reabre la paciente ni se debilita la prueba. Segundo ensayo pendiente.
