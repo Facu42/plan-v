@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 type Call = {
   table: string;
@@ -126,6 +126,7 @@ const row = {
   suggested_by_ai: false,
   sent_at: '2026-09-05T15:00:00.000Z',
 };
+afterEach(()=>vi.useRealTimers());
 
 beforeEach(() => {
   harness.reset();
@@ -452,6 +453,7 @@ describe('appointments (016 v2)', () => {
   });
 
   it('maps the next scheduled appointment into the domain patient', async () => {
+    vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(new Date('2026-09-10T17:40:00Z'));
     harness.push('patients', {
       data: {
         id: 'patient-1',
@@ -476,7 +478,7 @@ describe('appointments (016 v2)', () => {
     harness.push('ai_briefs', { data: null, error: null });
     harness.push('habit_logs', { data: [], error: null });
     harness.push('appointments', {
-      data: [{
+      data: [{id:'ended',starts_at:'2026-09-10T16:30:00Z',duration_min:30,channel:'video'}, {
         id: 'appt-1',
         starts_at: '2026-09-10T17:30:00.000Z',
         duration_min: 45,
@@ -897,6 +899,7 @@ describe('PV-11 directory summaries', () => {
   };
 
   it('pages directory rows without loading meal logs or messages', async () => {
+    vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(new Date('2026-09-17T17:40:00Z'));
     harness.push('nutritionists', { data: { id: 'nutri-1' }, error: null });
     harness.push('patients', {
       data: [summaryRow, { ...summaryRow, id: 'patient-2', full_name: 'Ana' }, { ...summaryRow, id: 'patient-3', full_name: 'Beto' }],

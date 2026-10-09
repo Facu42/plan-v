@@ -354,3 +354,5 @@ Backend local corregido en codex/recipe-day-allergies: evaluador existente y con
 Cierre de la pausa de asignación (2026-10-08): Facundo aprobó error dentro de ventana encima deConfirmar. Implementado aviso único, accesible y visible; paciente/fecha conservados. Navegador ficticio rechaza, luego asigna compatible desde misma ventana; lectura paciente verificada. Ensayo firmado actualizado, pendienteCI. Registro: integracion-receta-alergias-2026-10-08.md. Sin producción.
 
 Integración paciente/CRM · 2026-10-08: retiro y renovación del permiso de medidas, lecturas protegidas en ambos roles y alertas, revisión denegada sin permiso y conservación del historial. Detalle en [permiso de medidas](integracion-permiso-medidas-2026-10-08.md). Sin producción.
+
+Agenda compartida · 2026-10-08: consulta visible durante su duración para paciente y profesional, enlace conservado y filtro de consultas terminadas en ficha/lista. [Evidencia y límites](integracion-consulta-en-curso-2026-10-08.md). Migración preparada; sin producción.

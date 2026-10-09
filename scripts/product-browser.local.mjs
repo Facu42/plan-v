@@ -234,6 +234,16 @@ try {
   const appointment=(await read(patient,`/api/patients/${pid}`)).patient.appointment;
   const appointmentDay=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(appointment.starts_at));
   await B('goto',origin+'/app/agenda');await B('fill','[aria-label="Elegir mes"]',appointmentDay.slice(0,7));await B('click',`[data-calendar-date="${appointmentDay}"]`);await button('Confirmar');await readUntil(professional,`/api/patients/${pid}`,r=>r.patient.appointment?.patient_reply==='attending');await B('reload');check(true,'confirmación de turno persistente');
+  phase='consulta en curso';
+  const originalAppointment=(await pool.query("select id,starts_at from public.appointments where patient_id=$1 and status='scheduled' order by starts_at limit 1",[pid])).rows[0];
+  try {
+    await pool.query("update public.appointments set starts_at=clock_timestamp()-interval '10 minutes' where id=$1",[originalAppointment.id]);
+    for(const actor of [patient,professional]) check((await read(actor,`/api/patients/${pid}`)).patient.appointment?.meet_url==='https://example.test/consulta','consulta en curso conserva el enlace para ambos roles');
+    await B('reload');await B('fill','[aria-label="Elegir mes"]',today.slice(0,7));await B('click',`[data-calendar-date="${today}"]`);await until("document.body.innerText.includes('Abrir videollamada')");
+    check(true,'paciente mantiene la videollamada al recargar durante la consulta');
+    await pool.query("update public.appointments set starts_at=clock_timestamp()-make_interval(mins=>duration_min+1) where id=$1",[originalAppointment.id]);
+    for(const actor of [patient,professional]) check((await read(actor,`/api/patients/${pid}`)).patient.appointment===null,'consulta finalizada deja de aparecer como vigente');
+  } finally { await pool.query('update public.appointments set starts_at=$1 where id=$2',[originalAppointment.starts_at,originalAppointment.id]); }
   await B('goto',origin+'/app/pagos');await B('fill','#cbz-report-amount','1000');await B('fill','#cbz-report-note','Aviso ficticio del recorrido');await button('Avisar que pagué');await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.payments.some(p=>p.status==='reported'));
   await logout();await B('viewport','1440x1000');await login(professional,'/crm/cobranzas');await B('click','[aria-label="Ver cobranzas de Paciente ficticia"]');await button('Confirmar');await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.payments.some(p=>p.status==='confirmed'&&p.amount===1000));await B('reload');check(true,'aviso de pago confirmado por profesional persiste sin cobro automático');
   phase='seguimiento profesional';await B('goto',origin+`/crm/ficha?paciente=${pid}&seccion=registros`);await button('Marcar revisado');await readUntil(patient,`/api/patients/${pid}/care`,r=>r.records.some(x=>x.reviewed_at));await B('reload');check(true,'revisión profesional de un registro conserva su estado');
