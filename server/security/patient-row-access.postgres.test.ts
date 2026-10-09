@@ -36,6 +36,9 @@ beforeAll(async () => {
   `);
   const migrations = new URL('../../supabase/migrations/',import.meta.url);
   for (const file of (await readdir(migrations)).filter(name => name.endsWith('.sql')).sort()) {
+    // This suite reproduces the historical raw-table view regression. The new
+    // function-backed projections are independently covered by profile-view-isolation.
+    if (file.endsWith('_invoker_patient_profile_projections.sql')) continue;
     await db.exec(await readFile(new URL(file,migrations),'utf8'));
   }
   for (const [id,email] of [[owner,'owner@example.test'],[patientUser,'patient@example.test'],[outsider,'other@example.test']]) {

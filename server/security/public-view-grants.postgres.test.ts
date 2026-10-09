@@ -48,7 +48,8 @@ describe('control de vistas públicas', () => {
     expect(assertLocalDatabaseUrl('postgresql://planv@127.0.0.1:55433/planv_disposable')).toContain('127.0.0.1');
   });
 
-  it('pasa con el esquema corregido y deja afuera solo las dos vistas de identidad', async () => {
+  it('pasa con el esquema corregido y exige security_invoker en todas las vistas', async () => {
+    expect(publicViewInvokerAllowlist).toEqual([]);
     expect(await publicViewGrantProblems(db)).toEqual([]);
     const invoker = await db.query<{ name: string; options: string[] | null }>(`
       select c.relname as name, c.reloptions as options
@@ -58,11 +59,10 @@ describe('control de vistas públicas', () => {
     `);
     const byName = new Map(invoker.rows.map((row) => [row.name, row.options ?? []]));
     expect(byName.get('meal_logs_patient_view')).toContain('security_invoker=true');
-    expect(byName.get('patients_patient_view')).toContain('security_invoker=false');
-    expect(byName.get('patient_access_view')).toContain('security_invoker=false');
-    for (const entry of publicViewInvokerAllowlist) {
-      expect(entry.reason.trim().length).toBeGreaterThan(40);
-      expect(byName.has(entry.name)).toBe(true);
+    expect(byName.get('patients_patient_view')).toContain('security_invoker=true');
+    expect(byName.get('patient_access_view')).toContain('security_invoker=true');
+    for (const options of byName.values()) {
+      expect(options).toContain('security_invoker=true');
     }
   });
 

@@ -2,23 +2,12 @@ import { readdir, readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 
 // Excepciones de security_invoker. No perdonan INSERT, UPDATE ni DELETE:
-// si una de estas vistas gana escritura, el control falla igual.
+// si una vista de esta lista gana escritura, el control falla igual.
 // Cada reason es obligatorio y tiene que decir por qué la vista puede
 // quedar con los permisos del dueño.
-export const publicViewInvokerAllowlist: { name: string; reason: string }[] = [
-  {
-    name: 'patients_patient_view',
-    // La tabla patients está cerrada a la paciente. Con security_invoker la
-    // ficha propia queda vacía. La vista filtra por auth.uid() y solo tiene SELECT.
-    reason: 'La ficha de la paciente filtra por su identidad y la tabla cruda no le deja leer. Con security_invoker dejaría de ver su ficha. Solo tiene SELECT.',
-  },
-  {
-    name: 'patient_access_view',
-    // El acceso se resuelve con el dueño de la vista y un filtro de identidad.
-    // security_invoker heredaría el cierre de la tabla y la paciente perdería la fila.
-    reason: 'El acceso se resuelve con el dueño de la vista y un filtro de identidad. Con security_invoker la paciente pierde la fila. Solo tiene SELECT.',
-  },
-];
+// Vacía: la ficha y el acceso leen por funciones privadas y ya tienen
+// security_invoker. Una vista nueva sin esa opción vuelve a fallar el control.
+export const publicViewInvokerAllowlist: { name: string; reason: string }[] = [];
 
 const WRITE_PRIVILEGES = ['INSERT', 'UPDATE', 'DELETE'] as const;
 const COLUMN_PRIVILEGES = ['INSERT', 'UPDATE'] as const;
@@ -123,6 +112,9 @@ export async function publicViewGrantProblems(db: Queryable) {
 
 export function formatPublicViewGrantReport(problems: string[]) {
   if (!problems.length) {
+    if (publicViewInvokerAllowlist.length === 0) {
+      return 'Vistas públicas revisadas. Sin escritura para anon ni authenticated. security_invoker en todas.';
+    }
     const names = publicViewInvokerAllowlist.map((entry) => entry.name).join(', ');
     return `Vistas públicas revisadas. Sin escritura para anon ni authenticated. security_invoker en todas, salvo la lista (${names}).`;
   }

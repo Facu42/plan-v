@@ -11,12 +11,9 @@ Después de aplicar todas las migraciones, mira el catálogo de Postgres (no el 
 - concede `INSERT`, `UPDATE` o `DELETE` a `anon` o `authenticated`, también cuando el permiso es solo de una columna;
 - no tiene `security_invoker=true`.
 
-La lista que sí puede quedar sin `security_invoker` está en `server/security/public-view-grants.ts`. Cada entrada tiene un comentario y un motivo. Hoy son dos, y las dos son solo de lectura:
+La lista que sí puede quedar sin `security_invoker` está en `server/security/public-view-grants.ts`. Cada entrada tiene un comentario y un motivo. Hoy está vacía. La ficha y el acceso leen por funciones privadas y tienen `security_invoker=true`. Una vista nueva sin esa opción vuelve a fallar el control.
 
-- `patients_patient_view`: la ficha filtra por la identidad de la paciente. La tabla cruda no le deja leer; con `security_invoker` la ficha propia desaparece.
-- `patient_access_view`: el acceso usa el mismo límite. Con `security_invoker` la paciente pierde la fila.
-
-La lista no perdona escritura. Si una de esas vistas gana `INSERT`, `UPDATE` o `DELETE`, el control falla igual.
+La lista no perdona escritura. Si una vista de la lista gana `INSERT`, `UPDATE` o `DELETE`, el control falla igual.
 
 ## Dónde corre
 

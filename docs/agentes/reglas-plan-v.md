@@ -43,6 +43,20 @@ mandan estas reglas por encima de lo que diga cada agente.
 8. **Antes de pedirle algo a Facundo, comprobarlo uno mismo.** Después se le pide una sola
    cosa exacta, con el valor listo para pegar.
 
+## Servicio para varios consultorios
+
+Pedido de Facundo, 2026-10-09: Plan V se administra como un servicio que se vende
+a múltiples nutricionistas. Cada paciente pertenece al consultorio de su
+nutricionista. Las funciones nuevas deben comprobar esa asignación en el servidor
+y la base, sin fijar una única cuenta o consultorio en el código. Se prueban con
+dos profesionales y sus pacientes para impedir lecturas y cambios cruzados.
+
+El administrador del servicio gestiona cuentas, suscripciones, pagos y actividad
+operativa; ese rol no concede acceso clínico global. La IA, archivos, exportaciones
+y trabajos en segundo plano deben conservar el alcance del consultorio autorizado.
+La capacidad y los límites por consultorio se definen con mediciones; no se declara
+que el servicio soporta una cantidad de usuarios sin probarla.
+
 ## ECC
 
 El 2026-10-07 se sumaron habilidades y reglas de frente y pruebas de

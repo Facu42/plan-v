@@ -17,6 +17,7 @@ type Actor = { id: string; token: string; client: SupabaseClient };
 let pool: pg.Pool;
 let anonymous: SupabaseClient;
 let ownerA: Actor; let ownerB: Actor; let patientA: Actor; let patientB: Actor;
+let platformAdmin: Actor;
 const pidA = randomUUID(); const pidB = randomUUID();
 let nidA: string;
 let messageA: string;
@@ -68,6 +69,8 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     }
     ownerA = await actor('nutri-a'); ownerB = await actor('nutri-b');
     patientA = await actor('paciente-a'); patientB = await actor('paciente-b');
+    platformAdmin = await actor('admin-servicio');
+    await pool.query('insert into public.platform_admins(user_id) values($1)',[platformAdmin.id]);
     nidA = (await pool.query("select public.provision_nutritionist($1,'Profesional ficticia A') as id", [ownerA.id])).rows[0].id;
     const nidB = (await pool.query("select public.provision_nutritionist($1,'Profesional ficticia B') as id", [ownerB.id])).rows[0].id;
     await pool.query(
@@ -183,6 +186,40 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     expect(own.error).toBeNull(); expect(own.data).toEqual([{ id: pidA }]);
     const foreign = await patientB.client.from('patients_patient_view').select('id').eq('id',pidA);
     expect(foreign.error).toBeNull(); expect(foreign.data).toEqual([]);
+  });
+
+  it('vistas invoker conservan lectura propia y asignación por PostgREST sin acceso clínico administrativo', async () => {
+    expect((await pool.query("select relname from pg_class where oid in ('public.patients_patient_view'::regclass,'public.patient_access_view'::regclass) and not coalesce(reloptions @> array['security_invoker=true'],false)")).rows).toEqual([]);
+    for(const [actor,expected] of [[ownerA,pidA],[ownerB,pidB],[patientA,pidA],[patientB,pidB]] as const) {
+      const access=await actor.client.from('patient_access_view').select('id');
+      expect(access.error).toBeNull(); expect(access.data).toEqual([{id:expected}]);
+    }
+    for(const view of ['patients_patient_view','patient_access_view']) {
+      const access=await platformAdmin.client.from(view).select('id');
+      expect(access.error).toBeNull(); expect(access.data).toEqual([]);
+      const anonymousRead=await anonymous.from(view).select('id');
+      expect(anonymousRead.error).not.toBeNull();
+      const write=await patientA.client.from(view).update({billing_status:'pending'}).eq('id',pidB).select('id');
+      expect(write.error).not.toBeNull();
+    }
+    const unchanged=await ownerB.client.from('patients').select('billing_status').eq('id',pidB).single();
+    expect(unchanged.error).toBeNull(); expect(unchanged.data?.billing_status).toBe('waived');
+  });
+
+  it('una sesión firmada previa no conserva perfil o acceso después de desactivar o anonimizar', async () => {
+    for(const column of ['deactivated_at','anonymized_at']) {
+      await pool.query(`update public.patients set ${column}=now() where id=$1`,[pidB]);
+      try {
+        for(const view of ['patients_patient_view','patient_access_view']) {
+          const denied=await patientB.client.from(view).select('id').eq('id',pidB);
+          expect(denied.error).toBeNull(); expect(denied.data).toEqual([]);
+        }
+        const deniedPro=await ownerB.client.from('patient_access_view').select('id').eq('id',pidB);
+        expect(deniedPro.error).toBeNull(); expect(deniedPro.data).toEqual([]);
+      } finally {await pool.query(`update public.patients set ${column}=null where id=$1`,[pidB]);}
+    }
+    const restored=await patientB.client.from('patients_patient_view').select('id').eq('id',pidB);
+    expect(restored.error).toBeNull(); expect(restored.data).toEqual([{id:pidB}]);
   });
 
   it('la paciente no lee las notas profesionales de su fila cruda', async () => {
