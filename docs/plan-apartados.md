@@ -366,3 +366,10 @@ Ver docs/redisenio-directorio-dashboard-2026-10-09.md: navegación y directorio 
 Arreglo independiente del dashboard, con ECC y reproducción descartable. Ver docs/security/meal-view-fix-2026-10-09.md. Se cierra escritura de meal_logs_patient_view, se auditan vistas equivalentes y se preserva lectura propia pública mediante RPC autorizada; producción sin modificar. CI con advisors antes/después y sesiones firmadas pendiente.
 
 Cierre seguridad: PR83 y ensayo Supabase temporal 37944764953 aprobados. Advisors comparados antes/después, lectura y escrituras A/B, privacidad y retirada de acceso acreditadas. Producción intacta.
+
+## Perfil, acceso y varios consultorios · 2026-10-09
+Facundo administra el servicio y lo venderá a varias nutricionistas. Corrección de
+las dos vistas restantes preparada sin abrir datos clínicos ni permisos globales
+al administrador. [Implementación, pruebas y criterios de escala](security/perfiles-consultorios-2026-10-09.md).
+Migración y ensayo Auth/PostgREST/advisors preparados; esta nueva corrección aún
+no se aplica a producción.

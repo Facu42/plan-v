@@ -23,6 +23,9 @@ async function advisors(label, dbUrl) {
   if (label === 'after' && views.some(item => item.metadata?.name === 'meal_logs_patient_view')) {
     throw new Error('El advisor sigue detectando la vista de comidas con permisos de dueño.');
   }
+  if (label === 'profile-after' && views.some(item => ['patients_patient_view','patient_access_view'].includes(item.metadata?.name))) {
+    throw new Error('El advisor sigue detectando las vistas de perfil/acceso con permisos de dueño.');
+  }
   const evidence = process.env.PLANV_SECURITY_EVIDENCE_DIR;
   if (evidence) {
     await mkdir(evidence,{recursive:true});
@@ -96,6 +99,10 @@ try {
       } finally { await pool.query('rollback'); }
     }
     await pool.query(await readFile(new URL(file, migrations), 'utf8'));
+    if (file.endsWith('_invoker_patient_profile_projections.sql')) {
+      phase = 'advisors después del cierre de perfil y acceso';
+      await advisors('profile-after',dbUrl);
+    }
     if (file.endsWith('_readonly_patient_meal_views.sql')) {
       phase = 'advisors después del cierre de vistas';
       await advisors('after',dbUrl);
