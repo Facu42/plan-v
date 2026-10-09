@@ -65,6 +65,12 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 
 ## Lo pendiente
 
+- Revisión del front de la paciente contra Nutrigo, 2026-10-09 (rama `claude/front-paciente-nutrigo-tuezz8`):
+  las diez pantallas ya coinciden con Figma en modo demo; Facundo no lo ve porque producción no tiene demo y las
+  pantallas de entrada siguen con estilo viejo. Reglas de diseño en `CLAUDE.md`; diagnóstico, matriz y plan en
+  `docs/revision-front-paciente-2026-10-09.md`. Piloto: invitación a instalar dentro de la tarjeta del menú.
+
+
 - Producción, 2026-10-08 (con la frase escrita de Facundo): aplicadas `20261008120000_ingredient_covers` (fotos de
   ingredientes; dos tablas sin acceso directo) y `20261005224500_editorial_clinic_isolation` (cada consultorio solo lee y
   asigna sus propios materiales; se aplicó por partes —función y política— porque el conector cortaba a los 60 s, y quedó

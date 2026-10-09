@@ -6,6 +6,8 @@ import { patientNavBinding } from './patient-navigation';
 import type { ShowroomPage } from '../../components/nutrigo/ShowroomPanels';
 import { PatientMenuSheet } from './PatientMenuSheet';
 import { feeBannerBinding, useFeeNotice } from './fee-notice';
+import { installCardBinding } from './install-card';
+import { useInstallOffer } from '../../pwa/install-offer';
 import './nutrigo.generated.css';
 
 const frames = import.meta.glob<{default:SourceNode}>('./source/*.json');
@@ -19,6 +21,7 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
   const [attempt,setAttempt] = useState(0);
   const [menuNav,setMenuNav] = useState<SourceNode|null>(null);
   const feeNotice = useFeeNotice();
+  const { offer: installOffer, install } = useInstallOffer();
   useEffect(() => { const media = window.matchMedia('(max-width: 799px)'); const update=()=>setMobile(media.matches); media.addEventListener('change',update); return ()=>media.removeEventListener('change',update); },[]);
   const id = nodes[mobile ? 1 : 0];
   useEffect(() => { let active=true; setSource(null);setLoadError(false); const load=frames[`./source/${id.replace(':','-')}.json`]; if (!load) {setLoadError(true);return;} load().then(module=>{if(active)setSource(module.default);}).catch(()=>{if(active)setLoadError(true);});return()=>{active=false;}; },[id,attempt]);
@@ -41,6 +44,7 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
     if(node.tag==='p'&&text==='Term and conditions')return {tag:'a',text:'Términos y condiciones',props:{href:'/legal/terminos.html',target:'_blank',rel:'noreferrer'}};
     if(node.tag==='p'&&text==='Contact')return {onClick:()=>onNavigate('mensajes'),text:'Contacto'};
     const fee=feeBannerBinding(node,feeNotice,onNavigate);if(fee)return fee;
+    const installCard=installCardBinding(node,installOffer,install);if(installCard)return installCard;
     if(name==='Button'&&text==='Claim Now!')return {onClick:()=>onNavigate('plan'),label:'Ver mi plan'};
     if(name==='Social Media')return {props:{'aria-hidden':true}};
     if(node.tag==='p'&&/Adam Vasylenko/.test(text))return {text:patientName};
@@ -52,6 +56,6 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
   return <div className="mcp-nutrigo" data-figma-frame={id}>
     {loadError?<div className="mcp-state" role="alert"><p>No se pudo cargar esta pantalla.</p><button onClick={()=>setAttempt(v=>v+1)}>Reintentar</button></div>:source?<SourceView source={source} resolve={common} translate={translateSource}/>:<p className="mcp-state" role="status">Cargando pantalla…</p>}
     {children}
-    {menu&&<PatientMenuSheet patientName={patientName} unread={unread} feeNotice={feeNotice} menuNav={menuNav} onNavigate={onNavigate} onSignOut={onSignOut} onClose={()=>setMenu(false)}/>}
+    {menu&&<PatientMenuSheet patientName={patientName} unread={unread} feeNotice={feeNotice} installOffer={installOffer} onInstall={install} menuNav={menuNav} onNavigate={onNavigate} onSignOut={onSignOut} onClose={()=>setMenu(false)}/>}
   </div>;
 }
