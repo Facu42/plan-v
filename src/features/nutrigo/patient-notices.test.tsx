@@ -19,6 +19,11 @@ describe('avisos de la paciente', () => {
     expect(items[0].title).toBe('Tenés 2 mensajes sin leer');
   });
 
+  it('suma el aviso de un plan nuevo y nada más si no hay novedades', () => {
+    const { items } = buildNotices({ messages: [], appointment: null } as never, null, now, { title: 'Tenés un plan nuevo', note: 'Empieza el 20 oct. Hasta entonces seguís con el actual.' });
+    expect(items).toEqual([expect.objectContaining({ id: 'plan', page: 'plan', title: 'Tenés un plan nuevo' })]);
+  });
+
   it('sin novedades no inventa avisos', () => {
     const patient = { messages: [], appointment: { when: 'x', starts_at: '2026-10-15T14:30:00Z', patient_reply: 'attending' } } as never;
     expect(buildNotices(patient, null, now).items).toEqual([]);

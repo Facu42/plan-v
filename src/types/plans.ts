@@ -134,7 +134,7 @@ export type PlanVersionView = {
   id: string;
   revision?: string;
   version: number;
-  status: 'draft' | 'published' | 'archived';
+  status: 'draft' | 'published' | 'scheduled' | 'archived';
   period_start: string;
   period_end: string;
   published_at: string | null;
@@ -149,6 +149,8 @@ export type ProfessionalMealPlan = {
   created_at: string;
   current: PlanVersionView;
   published: PlanVersionView | null;
+  /** Publicado, pero la paciente sigue con el anterior hasta period_start. */
+  scheduled?: PlanVersionView | null;
 };
 
 export function planReviewSnapshot(version: PlanVersionView) {
@@ -195,6 +197,16 @@ export function buildPublishedPlanDays(plan: Pick<PatientMealPlan, 'period_start
     weekday: planWeekdayLabel(isoDate),
     items: plan.items.filter((item) => item.for_date === isoDate),
   }));
+}
+
+/** Semana (de a 7 días desde el inicio) que contiene hoy. Si hoy cae afuera, la primera o la última. */
+export function planWeekIndex(periodStart: string, periodEnd: string, today: string): number {
+  const days = eachIsoDate(periodStart, periodEnd);
+  const weeks = Math.max(1, Math.ceil(days.length / 7));
+  if (today <= periodStart) return 0;
+  if (today > periodEnd) return weeks - 1;
+  const index = days.indexOf(today);
+  return index < 0 ? 0 : Math.floor(index / 7);
 }
 
 export function toPublishedPatientPlan(plan: ProfessionalMealPlan): PatientMealPlan | null {

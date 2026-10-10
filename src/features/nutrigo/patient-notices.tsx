@@ -1,4 +1,6 @@
-import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, useRef, type ReactNode } from 'react';
+import { plansApi } from '../../api/plans';
+import { planHandoverNotice } from '../../types/plan-handover';
 import { Icon, type IconName } from '../../components/shared/Icon';
 import type { ShowroomPage } from '../../components/nutrigo/ShowroomPanels';
 import type { ShowroomPatient } from '../../components/nutrigo/showroom-model';
@@ -12,8 +14,13 @@ export type PatientNotices = { items: PatientNotice[]; unreadMessages: number };
 
 const EMPTY: PatientNotices = { items: [], unreadMessages: 0 };
 
-/** Avisos reales de la paciente: mensajes sin leer, consulta por confirmar y cuota. Nada inventado. */
-export function buildNotices(patient: Pick<ShowroomPatient, 'messages' | 'appointment'>, feeNotice: string | null, now: Date = new Date()): PatientNotices {
+/** Avisos reales de la paciente: mensajes sin leer, consulta por confirmar, cuota y plan nuevo. Nada inventado. */
+export function buildNotices(
+  patient: Pick<ShowroomPatient, 'messages' | 'appointment'>,
+  feeNotice: string | null,
+  now: Date = new Date(),
+  planNotice: { title: string; note: string } | null = null,
+): PatientNotices {
   const items: PatientNotice[] = [];
   const unread = unreadCount(patient.messages ?? [], 'patient');
   if (unread > 0) items.push({ id: 'messages', icon: 'message', title: unread === 1 ? 'Tenés 1 mensaje sin leer' : `Tenés ${unread} mensajes sin leer`, note: 'Tu nutricionista te escribió.', page: 'mensajes' });
@@ -23,14 +30,28 @@ export function buildNotices(patient: Pick<ShowroomPatient, 'messages' | 'appoin
     items.push({ id: 'appointment', icon: 'calendar', title: 'Confirmá tu próxima consulta', note: appointment.when, page: 'agenda' });
   }
   if (feeNotice) items.push({ id: 'fee', icon: 'wallet', title: 'Tenés una cuota para revisar', note: feeNotice, page: 'pagos' });
+  if (planNotice) items.push({ id: 'plan', icon: 'list', title: planNotice.title, note: planNotice.note, page: 'plan' });
   return { items, unreadMessages: unread };
 }
 
 const NoticesContext = createContext<PatientNotices>(EMPTY);
 
-export function PatientNoticesProvider({ patient, children }: { patient: Pick<ShowroomPatient, 'messages' | 'appointment'>; children: ReactNode }) {
+export function PatientNoticesProvider({ patient, patientId, children }: { patient: Pick<ShowroomPatient, 'messages' | 'appointment'>; patientId?: string; children: ReactNode }) {
   const feeNotice = useFeeNotice();
-  const value = useMemo(() => buildNotices(patient, feeNotice), [patient, feeNotice]);
+  const [planNotice, setPlanNotice] = useState<{ title: string; note: string } | null>(null);
+  useEffect(() => {
+    if (!patientId) return undefined;
+    let active = true;
+    const load = () => {
+      plansApi.published(patientId)
+        .then(result => { if (active) setPlanNotice(planHandoverNotice(result.handover)); })
+        .catch(() => undefined);
+    };
+    load();
+    window.addEventListener('plan-v:plan-handover', load);
+    return () => { active = false; window.removeEventListener('plan-v:plan-handover', load); };
+  }, [patientId]);
+  const value = useMemo(() => buildNotices(patient, feeNotice, new Date(), planNotice), [patient, feeNotice, planNotice]);
   return <NoticesContext.Provider value={value}>{children}</NoticesContext.Provider>;
 }
 

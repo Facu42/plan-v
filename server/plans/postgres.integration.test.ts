@@ -8,6 +8,7 @@ import { planReviewSnapshot, type PlanVersionView } from '../../src/types/plans.
 import type { ProfessionalModel } from '../../src/types/models.js';
 import type { ProfessionalMealPlan } from '../../src/types/plans.js';
 import { calculateTarget, defaultsForGoal } from '../../src/lib/nutrition-target.js';
+import { shiftIsoDate } from '../progress/derive.js';
 
 let db: PGlite;
 let dir: string;
@@ -288,5 +289,59 @@ describe('Publicación de una propuesta revisada', () => {
     const published = await rpc(nutriA, 'publish_reviewed_meal_plan', [id, changed.current.version, planReviewSnapshot(changed.current)]) as { current: PlanVersionView };
     expect(published.current.published_at).not.toBeNull();
     expect(published.current.items[0].free_text).toBe('Arroz con verduras');
+  });
+});
+
+describe('D7 el plan nuevo espera su fecha', () => {
+  it('la paciente sigue con el anterior, ve los cambios y pasa al nuevo cuando empieza', async () => {
+    const before = await rpc(patientAUser, 'list_published_meal_plan', [patientA]) as { version: number; items: Array<{ free_text: string | null }> };
+    const today = (await db.query<{ today: string }>("select (timezone('America/Argentina/Buenos_Aires', clock_timestamp()))::date::text as today")).rows[0].today;
+    const start = shiftIsoDate(today, 7);
+    const end = shiftIsoDate(start, 6);
+    const saved = await rpc(nutriA, 'save_meal_plan_draft', [patientA, planDraft({
+      period_start: start,
+      period_end: end,
+      items: [{ for_date: start, slot: 'Cena', free_text: 'Tortilla de verdura', portions: 1, public_note: 'Sin sal' }],
+    })]) as { current: PlanVersionView; published: { version: number }; scheduled: unknown };
+    expect(saved.published.version).toBe(before.version);
+    expect(saved.scheduled).toBeNull();
+    const scheduled = await rpc(nutriA, 'publish_meal_plan', [planId, saved.current.version]) as {
+      published: { version: number }; scheduled: { version: number; status: string; period_start: string };
+    };
+    expect(scheduled.published.version).toBe(before.version);
+    expect(scheduled.scheduled).toMatchObject({ version: saved.current.version, status: 'scheduled', period_start: start });
+    const waiting = await rpc(patientAUser, 'list_published_meal_plan', [patientA]) as {
+      version: number;
+      items: Array<{ free_text: string | null }>;
+      handover: { waiting: boolean; version: number; previous_version: number; changes: { added: number; removed: number; lines: Array<{ kind: string; after: string | null }> } };
+    };
+    expect(waiting.version).toBe(before.version);
+    expect(waiting.items[0].free_text).toBe(before.items[0].free_text);
+    expect(waiting.handover.waiting).toBe(true);
+    expect(waiting.handover.version).toBe(saved.current.version);
+    expect(waiting.handover.previous_version).toBe(before.version);
+    expect(waiting.handover.changes.added).toBe(1);
+    expect(waiting.handover.changes.removed).toBeGreaterThan(0);
+    expect(waiting.handover.changes.lines.some(line => line.kind === 'added' && line.after === 'Tortilla de verdura')).toBe(true);
+    await expect(rpc(nutriA, 'mark_meal_plan_handover_seen', [patientA])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(patientBUser, 'mark_meal_plan_handover_seen', [patientA])).rejects.toMatchObject({ code: '42501' });
+    await expect(asUser(patientAUser, 'select meal_plan_version_id from public.meal_plan_handovers')).rejects.toMatchObject({ code: '42501' });
+    const seen = await rpc(patientAUser, 'mark_meal_plan_handover_seen', [patientA]) as { version: number; handover: { seen: boolean; waiting: boolean } };
+    expect(seen.version).toBe(before.version);
+    expect(seen.handover).toMatchObject({ seen: true, waiting: true });
+
+    const versionId = (await db.query<{ id: string }>('select id from public.meal_plan_versions where meal_plan_id = $1 and status = $2', [planId, 'scheduled'])).rows[0].id;
+    await db.exec('alter table public.meal_plan_versions disable trigger meal_plan_versions_immutable');
+    await db.query('update public.meal_plan_versions set period_start = $2::date where id = $1', [versionId, shiftIsoDate(today, -1)]);
+    await db.exec('alter table public.meal_plan_versions enable trigger meal_plan_versions_immutable');
+    const active = await rpc(patientAUser, 'list_published_meal_plan', [patientA]) as {
+      version: number; items: Array<{ free_text: string | null }>; handover: { waiting: boolean };
+    };
+    expect(active.version).toBe(saved.current.version);
+    expect(active.items[0].free_text).toBe('Tortilla de verdura');
+    expect(active.handover.waiting).toBe(false);
+    const shopping = await rpc(patientAUser, 'get_shopping_list', [patientA]) as { items: Array<{ name: string }> };
+    expect(shopping.items.some(line => line.name === 'Tortilla de verdura')).toBe(true);
+    expect((await db.query<{ status: string }>('select status from public.meal_plan_versions where version = $1 and meal_plan_id = $2', [before.version, planId])).rows[0].status).toBe('archived');
   });
 });
