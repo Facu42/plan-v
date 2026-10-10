@@ -181,6 +181,21 @@ describe('cobranzas de pacientes (PGlite)', () => {
     await expect(rpc(patientAUser, 'report_patient_payment', [patientA, 100, await today(), 'efectivo', ''])).rejects.toMatchObject({ code: '22023' });
   });
 
+  it('cambiar el día de vencimiento no genera una segunda cuota en el mismo mes', async () => {
+    const patientC = '10000000-0000-4000-a000-0000000000f9';
+    const patientCUser = '00000000-0000-4000-a000-0000000000f9';
+    await db.query("insert into auth.users(id,email,email_confirmed_at) values($1,'paciente-c@example.test',now())", [patientCUser]);
+    await db.query(`insert into public.patients(id,nutritionist_id,user_id,full_name,billing_status) values ($1,$2,$3,'Paciente C','pending')`, [patientC, nutriAId, patientCUser]);
+    const thisMonth = (await today()).slice(0, 7);
+    const [year, month] = thisMonth.split('-').map(Number);
+    const twoMonthsAgo = new Date(Date.UTC(year, month - 3, 1)).toISOString().slice(0, 10);
+    await rpc<PatientLedger>(nutriA, 'set_patient_fee', [patientC, 25000, twoMonthsAgo]);
+    const moved = await rpc<PatientLedger>(nutriA, 'set_patient_fee', [patientC, 25000, `${thisMonth}-15`]);
+    const months = moved.charges.map((charge) => charge.due_on.slice(0, 7));
+    expect(months.filter((value) => value === thisMonth)).toHaveLength(1);
+    expect(new Set(months).size).toBe(months.length);
+  });
+
   it('quitar la cuota corta las próximas pero deja lo vencido', async () => {
     const ledger = await rpc<PatientLedger>(nutriA, 'set_patient_fee', [patientA, null, null]);
     expect(ledger.fee).toBeNull();

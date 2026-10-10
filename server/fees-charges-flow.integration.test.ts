@@ -108,4 +108,16 @@ describe('cobros por paciente en modo demo: nuevo cobro, programas y link', () =
     expect(programs).toHaveLength(1);
     expect(programs[0].amount).toBe(12000);
   });
+
+  it('asignar el programa con otro día no duplica la cuota del mes y los cobros sueltos siguen aparte', async () => {
+    const { programs } = await (await send('/api/billing/programs', 'POST', { name: 'Plan', amount: 20000 })).json() as { programs: Array<{ id: string }> };
+    await send('/api/patients/pat-lucia/charges', 'POST', { amount: 3000, due_on: localBillingDate(), concept: 'Pesaje' });
+    await send('/api/patients/pat-lucia/program', 'PUT', { program_id: programs[0].id, first_due_on: localBillingDate() });
+    const later = inDays(-1);
+    const response = await send('/api/patients/pat-lucia/program', 'PUT', { program_id: programs[0].id, first_due_on: later });
+    const { ledger } = await response.json() as { ledger: PatientLedger };
+    const monthly = ledger.charges.filter((charge) => charge.kind === 'fee');
+    expect(new Set(monthly.map((charge) => charge.due_on.slice(0, 7))).size).toBe(monthly.length);
+    expect(ledger.charges.filter((charge) => charge.kind === 'extra')).toHaveLength(1);
+  });
 });

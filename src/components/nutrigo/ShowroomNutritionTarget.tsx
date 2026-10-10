@@ -1,6 +1,9 @@
 import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { careErrorMessage } from '../../api/care';
+import { careApi, careErrorMessage } from '../../api/care';
+import { latestMetric } from '../../lib/energy-equations';
+import type { Measurement } from '../../types/care';
+import { EnergyEquationComparison } from './EnergyEquationComparison';
 import { isAbortError } from '../../api/client';
 import { bodyDataApi, nutritionTargetApi, type BodyDataView, type NutritionTarget } from '../../api/nutrition-target';
 import {
@@ -62,6 +65,7 @@ export function NutritionTargetPanel({ patientId, patientName, onOpenPlan }: { p
   const [revision, setRevision] = useState<number | null>(null);
   const [refresh, setRefresh] = useState(0);
   const [body, setBody] = useState<BodyDataView | null>(null);
+  const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const [draft, setDraft] = useState<Draft>(() => toDraft(null));
   const [baseline, setBaseline] = useState(() => JSON.stringify(toDraft(null)));
   const [busy, setBusy] = useState(false);
@@ -72,7 +76,9 @@ export function NutritionTargetPanel({ patientId, patientName, onOpenPlan }: { p
   useEffect(() => {
     const controller = new AbortController();
     setMessage(''); setError('');
-    setBody(null); setStored(null); setPublished(null); setRevision(null); setDraft(toDraft(null)); setBaseline(JSON.stringify(toDraft(null)));
+    setBody(null); setMeasurements([]); setStored(null); setPublished(null); setRevision(null); setDraft(toDraft(null)); setBaseline(JSON.stringify(toDraft(null)));
+    // Las mediciones solo suman la comparación de fórmulas: si no hay permiso o fallan, la meta sigue igual.
+    careApi.snapshot(patientId, true, controller.signal).then((c) => { if (!controller.signal.aborted) setMeasurements(c.measurements ?? []); }).catch(() => undefined);
     Promise.all([nutritionTargetApi.get(patientId, true, controller.signal), bodyDataApi.get(patientId, true, controller.signal).catch(() => null)]).then(([r, b]) => {
       if (controller.signal.aborted) return;
       setStored(r.target); setBody(b); setPublished(r.published ?? null); setRevision(r.revision ?? null);
@@ -123,6 +129,7 @@ export function NutritionTargetPanel({ patientId, patientName, onOpenPlan }: { p
       <NvMetric label="Meta propuesta" value={live ? `${live.kcal} kcal` : 'Por definir'} note="Revisala antes de confirmar" icon="target" nvIcon="calorias" />
     </div>
     {parsed.success && <PlanningBodyReference weight={parsed.data.weight_kg} height={parsed.data.height_cm} age={parsed.data.age} />}
+    {parsed.success && <EnergyEquationComparison input={parsed.data} bodyFat={latestMetric(measurements, 'body_fat_pct')} scaleBmr={latestMetric(measurements, 'bmr')} />}
     <form className="nvt-layout" onSubmit={onSubmit}>
       <div className="nvt-form">
         <fieldset><legend>Datos de la paciente</legend>

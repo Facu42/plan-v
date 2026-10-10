@@ -87,7 +87,8 @@ function syncMemory(patientId: string): void {
   const list = charges.get(patientId) ?? [];
   for (let n = 0; n <= 600; n += 1) {
     const due = addMonths(fee.first_due_on, n);
-    if ((!fee.charges_from || due > fee.charges_from) && !list.some((charge) => charge.kind !== 'extra' && charge.due_on === due)) {
+    // Una cuota por mes: si ya hubo una en el mes de charges_from, la próxima es la del mes siguiente.
+    if ((!fee.charges_from || due.slice(0, 7) > fee.charges_from.slice(0, 7)) && !list.some((charge) => charge.kind !== 'extra' && charge.due_on === due)) {
       list.push({ id: randomUUID(), due_on: due, amount: fee.amount, status: 'open', kind: 'fee', concept: '' });
     }
     if (due > today) break;
