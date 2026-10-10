@@ -54,7 +54,7 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
   const end = now.getTime() + 86400000; const start = now.getTime() - days * 86400000;
   const rows = newestFirst(patient.logs.filter(log => (!days || inWindow(log, start, end)) && matches(log)));
   const previous = days ? patient.logs.filter(log => inWindow(log, start - days * 86400000, start) && matches(log)) : [];
-  const reviewedOf = (list: Log[]) => list.filter(row => row.status !== 'pending_review' && row.macros);
+  const reviewedOf = (list: Log[]) => list.filter(row => row.macros);
   const reviewed = reviewedOf(rows);
   const pages = Math.max(1, Math.ceil(rows.length / pageSize)); const current = Math.min(page, pages);
   const shown = rows.slice((current - 1) * pageSize, current * pageSize);

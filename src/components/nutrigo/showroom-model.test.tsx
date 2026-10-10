@@ -34,6 +34,12 @@ describe('modelo seguro del showroom', () => {
     expect(model.logs).toHaveLength(3);
     expect(JSON.stringify(model)).not.toContain('SECRETO');
   });
+  it("la paciente suma al instante lo que carga, aunque falte la revisión", () => {
+    const base = { id: 'm', patient_id: 'p1', slot: 'Almuerzo', photo_url: null, description: '', foods: [], macros: { kcal: 400, protein_g: 20, carbs_g: 40, fat_g: 10 }, confidence: 1, note_for_nutri: 'SECRETO', status: 'confirmed' as const, logged_at: now.toISOString() };
+    const model = buildShowroomPatient({ ...patient, meal_logs: [base, { ...base, id: 'pending', status: 'pending_review' }] }, now, true);
+    expect(model.kcal).toBe(800);
+    expect(model.nutritionLogCount).toBe(2);
+  });
   it('distingue macros ausentes de un valor cero efectivamente registrado', () => {
     const base = { id: 'm', patient_id: 'p1', slot: 'Almuerzo', photo_url: null, description: '', foods: [], confidence: 1, note_for_nutri: '', status: 'confirmed' as const, logged_at: now.toISOString() };
     const withoutMacros = buildShowroomPatient({ ...patient, meal_logs: [{ ...base, macros: null }] }, now);

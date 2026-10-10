@@ -192,7 +192,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
     };
   }, [lockedRole, closeProfessionalIntro]);
   const selected = role === 'patient' || !selectedId ? activePatients[0] : activePatients.find((p) => p.id === selectedId);
-  const p = selected ? buildShowroomPatient(selected, now) : null;
+  const p = selected ? buildShowroomPatient(selected, now, role === 'patient') : null;
   useEffect(() => {
     if (lockedRole !== 'patient' || !selected?.id) return;
     const controller = new AbortController();
