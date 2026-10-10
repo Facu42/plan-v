@@ -5,6 +5,7 @@ import * as sb from '../db/supabase-repo.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { getPatient, getStore, DEMO_NUTRITIONIST_ID } from '../store.js';
 import { careInputSchema, carePreferencesSchema, replacementRecipeSchema, CARE_LABELS, isMeasurementData, type CareAlert } from '../../src/types/care.js';
+import { bodyMetricBatchSchema } from '../../src/lib/body-metrics.js';
 import * as repo from './repository.js';
 import { ingestReadyAsset } from '../assets/repository.js';
 import { handleProcessingJob } from '../jobs/handlers.js';
@@ -42,6 +43,12 @@ export function registerCareRoutes(app: Hono) {
     const { persistent } = await access(c, id, input.data.kind === 'payment' || professionalMeasure ? 'professional' : 'patient');
     if (measurement) await requireCareConsent(id, persistent, 'measurement');
     const record = await repo.saveCareRecord(id, input, persistent); return c.json({ record });
+  });
+  app.post('/api/patients/:id/care/body-metrics', async c => {
+    const id = c.req.param('id'); const { persistent } = await access(c, id, 'professional');
+    const batch = await body(c, bodyMetricBatchSchema, 20_000);
+    await requireCareConsent(id, persistent, 'measurement');
+    return c.json({ measurements: await repo.saveBodyMetrics(id, batch, persistent) });
   });
   app.patch('/api/patients/:id/care/records/:recordId/review', async c => {
     const id = c.req.param('id'); const { persistent } = await access(c, id, 'professional');
