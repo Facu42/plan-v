@@ -68,10 +68,10 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - Conexión paciente ↔ panel (2026-10-10): decisiones D1–D7 en `docs/decisiones-producto-2026-10-10.md`; estado de cada
   hallazgo en `docs/auditoria-conexion-paciente-crm-2026-10-08.md`; producto y orden de trabajo en
   `docs/producto-definicion-2026-10-08.md`. PR #94 (día de Argentina en el servidor) ya está en `main`. D7 (plan nuevo
-  con vigencia) está en código: si el plan nuevo empieza más adelante, la paciente sigue con el anterior, ve qué cambia
-  y recibe el aviso en la campana. La migración `20261010180000_meal_plan_effective_date` queda solo en el repositorio
-  hasta que Facundo escriba la frase para aplicarla. No se corrió en la base hospedada. El correo de D3 sigue esperando
-  un proveedor de mail. Fotos de ingredientes y de platos con el modelo gratuito: pruebas en producción (tortilla ×3,
+  con vigencia) está en el borrador #103: si el plan nuevo empieza más adelante, la paciente sigue con el anterior, ve
+  qué cambia y recibe el aviso en la campana. La migración `20261010180000_meal_plan_effective_date` queda solo en el
+  repositorio hasta que Facundo escriba la frase para aplicarla. No se corrió en la base hospedada. El correo de D3
+  sigue esperando un proveedor de mail. Fotos de ingredientes y de platos con el modelo gratuito: pruebas en producción (tortilla ×3,
   tomate, huevo) hasta que Facundo las apruebe.
 - Revisión del front de la paciente contra Nutrigo, 2026-10-09 (rama `claude/front-paciente-nutrigo-tuezz8`):
   las diez pantallas ya coinciden con Figma en modo demo; Facundo no lo ve porque producción no tiene demo y las
