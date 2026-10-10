@@ -36,6 +36,12 @@ describe('novedades de la cartera', () => {
     expect(html).toContain('aria-label="Abrir la ficha de Ana"');
   });
 
+  it('desde cada paciente se puede escribirle sin salir a buscarla', () => {
+    const html = render();
+    expect(html).toContain('href="/crm/ficha?paciente=p1&amp;seccion=mensajes"');
+    expect(html).toContain('aria-label="Escribirle a Ana"');
+  });
+
   it('ofrece filtros de período, revisión y paciente', () => {
     const html = render();
     for (const text of ['Últimos 7 días', 'Últimos 14 días', 'Últimos 30 días', 'Todas', 'Por revisar', 'Revisadas', 'Todas las pacientes', 'Bea']) expect(html).toContain(text);

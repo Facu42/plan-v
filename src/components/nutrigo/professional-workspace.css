@@ -58,3 +58,4 @@
 .pw-feed-patients>li { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 .pw-feed-patients h4 { margin:0 0 4px; font-size:13px; }
 .pw-feed-patients ul li { display:flex; align-items:center; gap:8px; font-size:12px; }
+.pw-feed-actions { display:flex; gap:8px; flex-wrap:wrap; }
