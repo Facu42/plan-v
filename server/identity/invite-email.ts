@@ -1,6 +1,8 @@
 import { CareError } from '../care/errors.js';
 import { writeOpsLog } from '../ops/log.js';
 import { PUBLIC_SIGNUP_ROLE } from '../../src/context/auth-policy.js';
+import type { BrevoMessage } from '../mail/brevo.js';
+import { inviteEmail } from '../mail/templates.js';
 
 type MailError = { code?: string; status?: number; message?: string } | null;
 type MailResult = Promise<{ error: MailError }>;
@@ -45,4 +47,34 @@ export async function emailPatientInvite(invite: { id: string; email: string }, 
   const linked = await mailer.magicLink(invite.email, redirectTo);
   if (linked.error) mailFailure(linked.error, 'magic_link');
   return { delivery: 'magic_link' };
+}
+
+/** Con Brevo: Supabase sólo arma el enlace (sin mandar nada) y el mail sale en castellano por Brevo. */
+export type BrevoInviteMailer = {
+  generate(type: 'invite' | 'magiclink', email: string, redirectTo: string): Promise<{ link: string | null; error: MailError }>;
+  send(message: BrevoMessage): Promise<unknown>;
+};
+
+export async function emailPatientInviteWithBrevo(
+  invite: { id: string; email: string; patientName: string; nutritionistName: string },
+  site: string | undefined,
+  mailer: BrevoInviteMailer,
+): Promise<{ delivery: InviteEmailDelivery }> {
+  if (!site) throw new CareError(503, 'Falta la dirección del sitio publicado para armar el enlace. Copiá el enlace mientras tanto.');
+  const redirectTo = `${site}/app/inicio?invite=${encodeURIComponent(invite.id)}`;
+  let delivery: InviteEmailDelivery = 'invite';
+  let generated = await mailer.generate('invite', invite.email, redirectTo);
+  if (generated.error && alreadyRegistered(generated.error)) {
+    delivery = 'magic_link';
+    generated = await mailer.generate('magiclink', invite.email, redirectTo);
+  }
+  if (generated.error || !generated.link) mailFailure(generated.error ?? { code: 'no_link' }, delivery);
+  const content = inviteEmail({ patientName: invite.patientName, nutritionistName: invite.nutritionistName, link: generated.link, existing: delivery === 'magic_link' });
+  try {
+    await mailer.send({ to: { email: invite.email, name: invite.patientName }, ...content });
+  } catch (error) {
+    writeOpsLog('warn', 'invite_email_failed', { step: 'brevo', code: error instanceof Error ? error.message.slice(0, 40) : 'unknown' });
+    throw new CareError(503, 'No se pudo mandar el mail. Copiá el enlace o reintentá en un momento.');
+  }
+  return { delivery };
 }

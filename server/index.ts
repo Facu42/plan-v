@@ -83,7 +83,9 @@ import { toPatientIntakeView, toProfessionalIntakeView } from './intake/views.js
 import * as intakeDb from './intake/repository.js';
 import { IntakeRepositoryError } from './intake/repository.js';
 import { getAuthAccount, getRequestDb, isSupabaseEnabled, privilegedDb } from './db/supabase-client.js';
-import { emailPatientInvite } from './identity/invite-email.js';
+import { emailPatientInvite, emailPatientInviteWithBrevo } from './identity/invite-email.js';
+import { brevoConfig, sendBrevoEmail } from './mail/brevo.js';
+import { PUBLIC_SIGNUP_ROLE } from '../src/context/auth-policy.js';
 import { siteUrl } from './admin/accounts.js';
 import * as sb from './db/supabase-repo.js';
 import { recoveryAcknowledgement, provisionSecretMatches, validateProvisionInput } from './identity/provision.js';
@@ -743,6 +745,22 @@ app.post('/api/invites/:id/email', async (c) => {
     if (!invite || invite.nutritionist_id !== actor.nutritionistId) return c.json({ error: 'Prohibido' }, 403);
     if (!usable(invite)) return c.json(unavailable, 409);
     const admin = privilegedDb();
+    const brevo = brevoConfig();
+    if (brevo) {
+      const [{ data: patient }, { data: pro }] = await Promise.all([
+        admin.from('patients').select('full_name').eq('id', invite.patient_id).maybeSingle(),
+        admin.from('nutritionists').select('display_name').eq('id', invite.nutritionist_id).maybeSingle(),
+      ]);
+      return c.json(await emailPatientInviteWithBrevo({ ...invite, patientName: String(patient?.full_name ?? ''), nutritionistName: String(pro?.display_name ?? '') }, siteUrl(), {
+        generate: async (type, email, redirectTo) => {
+          const { data, error } = type === 'invite'
+            ? await admin.auth.admin.generateLink({ type: 'invite', email, options: { redirectTo, data: { role: PUBLIC_SIGNUP_ROLE } } })
+            : await admin.auth.admin.generateLink({ type: 'magiclink', email, options: { redirectTo } });
+          return { link: data?.properties?.action_link ?? null, error };
+        },
+        send: (message) => sendBrevoEmail(brevo, message),
+      }));
+    }
     return c.json(await emailPatientInvite(invite, siteUrl(), {
       invite: (email, options) => admin.auth.admin.inviteUserByEmail(email, options),
       magicLink: (email, redirectTo) => admin.auth.signInWithOtp({ email, options: { shouldCreateUser: false, emailRedirectTo: redirectTo } }),
