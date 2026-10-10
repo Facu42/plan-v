@@ -50,3 +50,15 @@ describe('menú de la paciente', () => {
     expect(html).toMatch(/class="[^"]*mcp-nutrigo[^"]*"/);
   });
 });
+
+describe('fila de avisos en «Mi cuenta»', () => {
+  it('muestra cuántos avisos hay y abre el panel', () => {
+    const html = renderToStaticMarkup(<PatientMenuSheet patientName="Sofía Ramos" noticeCount={2} onOpenNotices={() => undefined} onNavigate={() => undefined} onClose={() => undefined} />);
+    expect(html).toContain('Avisos');
+    expect(html).toContain('2 para revisar');
+  });
+  it('sin avisos dice que está al día y sin la fila si no hay panel', () => {
+    expect(renderToStaticMarkup(<PatientMenuSheet patientName="Sofía Ramos" noticeCount={0} onOpenNotices={() => undefined} onNavigate={() => undefined} onClose={() => undefined} />)).toContain('Estás al día');
+    expect(renderToStaticMarkup(<PatientMenuSheet patientName="Sofía Ramos" onNavigate={() => undefined} onClose={() => undefined} />)).not.toContain('Avisos');
+  });
+});

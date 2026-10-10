@@ -69,6 +69,7 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
   las diez pantallas ya coinciden con Figma en modo demo; Facundo no lo ve porque producción no tiene demo y las
   pantallas de entrada siguen con estilo viejo. Reglas de diseño en `CLAUDE.md`; diagnóstico, matriz y plan en
   `docs/revision-front-paciente-2026-10-09.md`. Piloto: invitación a instalar dentro de la tarjeta del menú.
+  Segunda tanda (2026-10-10, con su cuenta de prueba en producción): la campana ahora abre un panel de avisos (antes abría el menú) y los «…» de cada tarjeta llevan a su pantalla; la comida cargada sin descripción ya no escribe «null»; las calorías de comidas sin revisar dicen «en revisión»; sin rutina asignada, Inicio muestra las actividades que la paciente registró. Sin cambios de base ni API. Pendiente: fotos de platos (dependen de que las recetas tengan portada), pantallas sin datos.
 
 
 - Producción, 2026-10-08 (con la frase escrita de Facundo): aplicadas `20261008120000_ingredient_covers` (fotos de
