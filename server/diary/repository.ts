@@ -7,7 +7,7 @@ import { getPatient, recalculateAdherence } from '../store.js';
 
 export { CareError } from '../care/errors.js';
 
-export type AnalysisStatus = 'pending' | 'succeeded' | 'failed';
+export type AnalysisStatus = 'pending' | 'succeeded' | 'failed' | 'skipped';
 
 export type MealAnalysisRun = {
   id: string;
@@ -70,7 +70,7 @@ export function diaryDbError(error: { code?: string; message?: string } | null) 
   throw new CareError(503, 'No se pudo confirmar el guardado. Reintentá sin cerrar el formulario.');
 }
 
-const STATUSES: AnalysisStatus[] = ['pending', 'succeeded', 'failed'];
+const STATUSES: AnalysisStatus[] = ['pending', 'succeeded', 'failed', 'skipped'];
 
 function asAnalysisStatus(value: unknown): AnalysisStatus {
   if (typeof value === 'string' && STATUSES.includes(value as AnalysisStatus)) return value as AnalysisStatus;
@@ -175,7 +175,7 @@ export async function recordMealAnalysis(
   patientId: string,
   mealId: string,
   input: {
-    status: 'succeeded' | 'failed';
+    status: 'succeeded' | 'failed' | 'skipped';
     foods: FoodItem[];
     macros: Macros | null;
     confidence: number;
@@ -228,7 +228,7 @@ export async function recordMealAnalysis(
     current.confidence = input.confidence;
     current.note_for_nutri = input.note_for_nutri;
     current.analysis_status = input.status;
-    if(input.macros) current.nutrition_origin = input.nutrition_origin ?? 'ai_estimate';
+    if (input.macros && input.status !== 'skipped') current.nutrition_origin = input.nutrition_origin ?? 'ai_estimate';
     attachToPatient(publicLog(current), false);
   }
   return publicLog(current);

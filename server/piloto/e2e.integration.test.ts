@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { app } from '../index.js';
 import { DEMO_NUTRITIONIST_ID, getPatient, resetStore } from '../store.js';
+import { grantMealAiConsent } from '../diary/grant-ai.js';
 import { declareKnownHealth } from '../test/declare-health.js';
 import { evaluatePilotoActa, environmentLiveFlags } from './acta.js';
 
@@ -71,6 +72,7 @@ describe('PV-33 circuito E2E demo (Sofía / Marina)', () => {
     expect(published.plan.version).toBe(1);
     expect((await (await json(`/api/patients/${marina}/plans`)).json()).plan).toBeNull();
 
+    grantMealAiConsent(sofia);
     const logged = await json(`/api/patients/${sofia}/meals/analyze`, { slot: 'Almuerzo', description: MEAL });
     expect(logged.status).toBe(200);
     vi.stubEnv('AI_MODE', 'disabled');

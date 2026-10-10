@@ -215,6 +215,7 @@ export async function seedDemoContent(fetcher: Fetcher, now = new Date(), target
     });
   };
   await consent('measurement');
+  await consent('ai_meal_analysis');
   const weights = [68.4, 68.0, 67.7, 67.1, 66.8, 66.3];
   for (const [index, value] of weights.entries()) {
     const recorded_on = addDays(today, -7 * (weights.length - 1 - index));

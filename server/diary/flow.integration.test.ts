@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { app } from '../index.js';
 import { getPatient, resetStore } from '../store.js';
+import { grantMealAiConsent } from './grant-ai.js';
 import { listMealAnalysisRuns, listMealReviews } from './repository.js';
+import { TEXT_ONLY_ERROR, TEXT_ONLY_MEAL_NOTE } from './text-only.js';
 
 function jsonRequest(method: string, body: unknown) {
   return {
@@ -21,7 +23,62 @@ describe('PV-22 diario: guardar antes de la IA', () => {
     vi.unstubAllEnvs();
   });
 
+  it('guarda el texto sin llamar a la IA cuando no hay permiso', async () => {
+    const before = getPatient('pat-sofia')!.meal_logs.length;
+    const response = await app.request(
+      '/api/patients/pat-sofia/meals/analyze',
+      jsonRequest('POST', { slot: 'Cena', description: 'Sopa de verdura', client_id: '88888888-8888-4888-8888-888888888888' }),
+    );
+    const body = await response.json();
+    const stored = getPatient('pat-sofia')!.meal_logs.find((log) => log.description === 'Sopa de verdura');
+
+    expect(response.status).toBe(200);
+    expect(body.log).toMatchObject({
+      slot: 'Cena',
+      status: 'pending_review',
+      description: 'Sopa de verdura',
+      foods: [],
+      macros: null,
+      confidence: 0,
+      analysis_status: 'skipped',
+    });
+    expect(body.log).not.toHaveProperty('note_for_nutri');
+    expect(body.analysis).not.toHaveProperty('note_for_nutri');
+    expect(stored).toMatchObject({ analysis_status: 'skipped', foods: [], macros: null });
+    expect(stored?.note_for_nutri).toBe(TEXT_ONLY_MEAL_NOTE);
+    expect(stored?.nutrition_origin).toBeUndefined();
+    expect(listMealAnalysisRuns(body.log.id)).toEqual([
+      expect.objectContaining({ status: 'skipped', error_code: TEXT_ONLY_ERROR, foods: [], macros: null }),
+    ]);
+    expect(getPatient('pat-sofia')!.timeline[0]).toMatchObject({
+      title: 'Cena · texto en revisión',
+    });
+    expect(getPatient('pat-sofia')!.timeline[0].body).toContain('texto sin estimación');
+    expect(getPatient('pat-sofia')!.meal_logs).toHaveLength(before + 1);
+
+    const replay = await app.request(
+      '/api/patients/pat-sofia/meals/analyze',
+      jsonRequest('POST', { slot: 'Cena', description: 'otra sopa', client_id: '88888888-8888-4888-8888-888888888888' }),
+    );
+    const replayed = await replay.json();
+    expect(replay.status).toBe(200);
+    expect(replayed.log.id).toBe(body.log.id);
+    expect(replayed.log.analysis_status).toBe('skipped');
+    expect(listMealAnalysisRuns(body.log.id)).toHaveLength(1);
+  });
+
+  it('la foto sin permiso de IA no se guarda ni se estima', async () => {
+    const before = getPatient('pat-sofia')!.meal_logs.length;
+    const response = await app.request(
+      '/api/patients/pat-sofia/meals/analyze',
+      jsonRequest('POST', { slot: 'Cena', imageBase64: 'AAAA' }),
+    );
+    expect(response.status).toBe(403);
+    expect(getPatient('pat-sofia')!.meal_logs).toHaveLength(before);
+  });
+
   it('crea el registro antes de analizar y no duplica con el mismo client_id', async () => {
+    grantMealAiConsent('pat-sofia');
     const clientId = '11111111-1111-4111-8111-111111111111';
     const first = await app.request(
       '/api/patients/pat-sofia/meals/analyze',
@@ -49,6 +106,7 @@ describe('PV-22 diario: guardar antes de la IA', () => {
   });
 
   it('conserva foto/texto si la IA falla y deja el análisis en failed', async () => {
+    grantMealAiConsent('pat-sofia');
     vi.stubEnv('AI_MODE', 'disabled');
     const description = 'Yogur con fruta sin estimación';
     const response = await app.request(
@@ -79,6 +137,7 @@ describe('PV-22 diario: guardar antes de la IA', () => {
   });
 
   it('reintenta la IA sobre la misma comida si el análisis anterior falló', async () => {
+    grantMealAiConsent('pat-sofia');
     const clientId = '33333333-3333-4333-8333-333333333333';
     vi.stubEnv('AI_MODE', 'disabled');
     const failed = await app.request(
@@ -102,6 +161,7 @@ describe('PV-22 diario: guardar antes de la IA', () => {
   });
 
   it('guarda la revisión profesional en meal_reviews y la copia al registro', async () => {
+    grantMealAiConsent('pat-sofia');
     const createdResponse = await app.request(
       '/api/patients/pat-sofia/meals/analyze',
       jsonRequest('POST', { slot: 'Almuerzo', description: 'pollo con arroz y ensalada' }),
