@@ -4,7 +4,9 @@ Pedido de Facundo: empezar a tener el producto definido, dejando la app de la pa
 conectada con el panel de la nutricionista que desarrolla otro hilo. Base: `docs/mvp-v0.md`,
 `docs/traspaso-estado-proyecto.md`, `docs/plan-apartados.md` y la auditoría de conexión
 ([auditoria-conexion-paciente-crm-2026-10-08.md](auditoria-conexion-paciente-crm-2026-10-08.md)).
-Lo marcado **DECIDIR** necesita la respuesta de Facundo; hasta entonces se toma la opción recomendada.
+**Actualizado el 2026-10-10:** Facundo pidió tomar las recomendaciones; las decisiones D1–D7 están registradas en
+[decisiones-producto-2026-10-10.md](decisiones-producto-2026-10-10.md) (fuente única). El estado real de cada hallazgo
+se mantiene en la auditoría. El hilo del panel ya resolvió y publicó varios (alergias, permiso de medidas, consulta en curso).
 
 ## 1. Qué es
 
@@ -62,29 +64,26 @@ Dos caras y un mismo dato:
 - Hallazgo **1 (alergias)** es de seguridad clínica y cae en el territorio del hilo CRM: se recomienda avisarle antes
   de cualquier otro arreglo.
 
-## 5. DECIDIR (con la opción recomendada)
+## 5. Decisiones
 
-| # | Pregunta | Recomendación |
-|---|---|---|
-| D1 | ¿El objetivo, su estado y su avance los ve la paciente? | Sí, el objetivo y el estado; el avance manual con nota. Persistirlos en la base. |
-| D2 | Paciente con cuota impaga o pendiente: ¿ve el plan completo o solo la pantalla de pago y los mensajes (como dice `mvp-v0.md`)? | Que la deuda de cuota no bloquee (lo que dice `cobros-y-panel.md`); bloquear solo si la profesional corta el acceso. |
-| D3 | ¿Cómo se entera la paciente de turno nuevo, recurso asignado o plan nuevo? | Aviso dentro de la app (campana) y correo; sin WhatsApp por ahora. |
-| D4 | ¿La paciente puede corregir o borrar una comida o medida propia? | Sí, mientras no esté revisada; después, pedir corrección. |
-| D5 | ¿Cargar una comida exige permiso de IA? | No: el diario de texto va sin IA; la IA solo con permiso. |
-| D6 | Paciente archivada que escribe | Avisar a la paciente que su cuenta está archivada y bloquear el envío. |
-| D7 | Publicar un plan nuevo: ¿archiva el anterior entero? | Que la versión nueva muestre qué cambia y avise a la paciente; mantener lo anterior hasta que la nueva empiece. |
-| D8 | Fotos de ingredientes en la app | Desarrollo futuro (decidido el 2026-10-08). |
-| D9 | Foto de plato con el modelo gratuito | Dejar el modelo actual; revisar el modelo más adelante (decidido el 2026-10-08). |
+Todas las decisiones de producto (D1 a D9) están en [decisiones-producto-2026-10-10.md](decisiones-producto-2026-10-10.md).
+Resumen: la paciente ve objetivo y estado; la cuota impaga no bloquea; avisos en la app y por correo; corregir registros
+propios mientras no estén revisados; diario de texto sin IA; archivada avisada y sin poder escribir; plan nuevo con aviso
+y sin cortar el anterior; fotos de ingredientes y cambio de modelo, a futuro.
 
-## 6. Orden de trabajo propuesto
+## 6. Orden de trabajo (revisado el 2026-10-10)
 
-1. **Datos correctos (solo código)**: día en hora de Argentina en el servidor; aviso «hoy» consistente. Con prueba en zona UTC.
-2. **Seguridad clínica y privacidad (migraciones, con frase de Facundo)**: alergias al asignar por día (hilo CRM),
-   medidas con permiso retirado, permisos sobrantes en `patients`.
-3. **Turnos y avisos**: que el turno siga visible durante la consulta, que editar no borre la confirmación, y avisos a la paciente.
-4. **Seguimiento real**: adherencia calculada en producción, pasos visibles, actividad y calorías.
-5. **Que se sienta vivo**: actualización de mensajes y turnos sin recargar, no leídos correctos, paginación del chat.
-6. **Decisiones D1–D7** hechas funcionalidad (objetivo visible, corregir registros, plan nuevo con aviso).
-7. **Cobertura**: un recorrido en navegador por cada fila corregida.
+Ya resuelto y publicado (hilo del panel): alergias al asignar por día, permiso de medidas, consulta en curso, registro
+semanal, meta que actualiza el borrador, campana de avisos (hilo de la paciente). En el código y pendiente de publicar:
+el día en hora de Argentina del servidor (PR #94).
 
-Cada paso es una rama y un PR; los que tocan la base esperan la frase de Facundo.
+Lo que sigue, en este orden (cada paso, una rama y un PR; los que tocan la base esperan la frase de Facundo):
+
+1. **Seguimiento real**: adherencia calculada en producción con definición explícita, pasos y actividad reales,
+   calorías quemadas y avance de rutina en el Inicio (coordinar con el orden 3 del panel).
+2. **Diario y registros (D4, D5)**: diario de texto sin IA y corrección de registros propios.
+3. **Comunicación (D3, D6)**: recurso y plan nuevo en la campana, correo, archivada que no puede escribir; no leídos y
+   actualización sin recargar (con el orden 4 del panel).
+4. **Objetivo y plan nuevo (D1, D7)**: guardar y mostrar objetivo, estado y avance; vigencia del plan con aviso.
+5. **Privacidad de la base**: quitar `insert, delete` sobre `patients` a las cuentas con sesión.
+6. **Cobertura**: un recorrido firmado por cada fila corregida.
