@@ -65,7 +65,7 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 
 ## Lo pendiente
 
-- Mediciones de la ficha (2026-10-10, rama `claude/project-thread-ngsfiv`, PR borrador): composición corporal, perímetros, detalle con mín/prom/máx y carga por fecha. Migración `20261010120000_body_metrics` preparada, **sin aplicar** (pide la frase de Facundo). Detalle: `docs/mediciones-dashboard-2026-10-10.md`.
+- Mediciones de la ficha (2026-10-10, rama `claude/project-thread-ngsfiv`, PR borrador): composición corporal, perímetros, detalle con mín/prom/máx y carga por fecha. Migración `20261010120000_body_metrics` preparada, **sin aplicar** (pide la frase de Facundo). Lista de pacientes con columnas y densidad elegibles (guardado en el navegador). Detalle: `docs/mediciones-dashboard-2026-10-10.md`.
 
 - Revisión del front de la paciente contra Nutrigo, 2026-10-09 (rama `claude/front-paciente-nutrigo-tuezz8`):
   las diez pantallas ya coinciden con Figma en modo demo; Facundo no lo ve porque producción no tiene demo y las
