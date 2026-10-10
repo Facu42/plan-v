@@ -175,6 +175,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
     billing_status: resolveBillingStatus(billing),
     billing_until: billing.billing_until,
     ...(audience === 'professional' && 'user_id' in row ? { has_account: row.user_id != null } : {}),
+    ...(audience === 'professional' && typeof row.created_at === 'string' ? { created_at: row.created_at } : {}),
     stage: row.stage as Patient['stage'],
     goal: row.goal as string,
     sensitive_hours: audience === 'patient' ? '' : row.sensitive_hours as string,

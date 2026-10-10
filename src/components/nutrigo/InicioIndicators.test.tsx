@@ -19,6 +19,13 @@ describe('indicadores de Inicio', () => {
     expect(html).toContain('1 paciente pagó');
     expect(html).toContain('28.000');
   });
+  it('muestra pacientes nuevas del período con su comparación, y «Sin dato» si el servidor no trae la fecha de alta', () => {
+    const nuevas = [{ ...withHistory(), created_at: '2026-10-06T12:00:00Z' }, { ...withHistory(), created_at: '2026-09-30T12:00:00Z' }] as Patient[];
+    const html = render({ patients: nuevas });
+    expect(html).toContain('Pacientes nuevas');
+    expect(html).toContain('↔ Igual que el período anterior (1)');
+    expect(render()).toMatch(/Pacientes nuevas.*Sin dato/);
+  });
   it('ofrece 7, 30 y 90 días', () => {
     const html = render();
     for (const days of [7, 30, 90]) expect(html).toContain(`Últimos ${days} días`);

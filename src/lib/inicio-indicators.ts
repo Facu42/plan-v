@@ -35,6 +35,15 @@ export function countConsultations(patients: readonly Pick<Patient, 'appointment
   return { total: first + followUp, first, followUp };
 }
 
+const argentinaDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+
+/** Pacientes dadas de alta dentro del período, por fecha de Argentina. Null si ninguna trae fecha de alta (dato no disponible, no cero). */
+export function countNewPatients(patients: readonly { created_at?: string | null }[], window: DateWindow): number | null {
+  const dated = patients.filter((patient) => patient.created_at);
+  if (patients.length && !dated.length) return null;
+  return dated.filter((patient) => inWindow(argentinaDay.format(new Date(patient.created_at as string)), window)).length;
+}
+
 export interface IncomeTotal { amount: number; payers: number }
 
 /** Pagos confirmados con fecha de pago dentro del período. No cuenta pagos informados sin confirmar, rechazados ni anulados. */
