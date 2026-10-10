@@ -6,6 +6,8 @@ import { getStore } from '../store.js';
 import { localBillingDate } from '../../src/billing.js';
 import type {
   BillingBoard,
+  BillingProgram,
+  ChargeInput,
   PatientCharge,
   PatientFee,
   PatientLedger,
@@ -33,6 +35,8 @@ export function feesDbError(error: { code?: string; message?: string } | null): 
 // ---------- Modo demo (memoria) ----------
 
 type MemoryFee = PatientFee & { charges_from: string | null };
+
+const programs = new Map<string, BillingProgram>();
 
 const settings: PaymentSettings = { default_fee: null, alias: '', payment_link: '', instructions: '' };
 const fees = new Map<string, MemoryFee>();
@@ -62,6 +66,7 @@ export function resetFeesMemory(): void {
   Object.assign(settings, { default_fee: null, alias: '', payment_link: '', instructions: '' });
   fees.clear();
   charges.clear();
+  programs.clear();
   payments.clear();
   paymentReceipts.clear();
   seedDemo();
@@ -82,8 +87,8 @@ function syncMemory(patientId: string): void {
   const list = charges.get(patientId) ?? [];
   for (let n = 0; n <= 600; n += 1) {
     const due = addMonths(fee.first_due_on, n);
-    if ((!fee.charges_from || due > fee.charges_from) && !list.some((charge) => charge.due_on === due)) {
-      list.push({ id: randomUUID(), due_on: due, amount: fee.amount, status: 'open' });
+    if ((!fee.charges_from || due > fee.charges_from) && !list.some((charge) => charge.kind !== 'extra' && charge.due_on === due)) {
+      list.push({ id: randomUUID(), due_on: due, amount: fee.amount, status: 'open', kind: 'fee', concept: '' });
     }
     if (due > today) break;
   }
@@ -96,7 +101,7 @@ function memoryLedger(patientId: string): PatientLedger {
   const fee = fees.get(patientId);
   return {
     patient_id: patientId,
-    fee: fee ? { amount: fee.amount, first_due_on: fee.first_due_on } : null,
+    fee: fee ? { amount: fee.amount, first_due_on: fee.first_due_on, program_name: fee.program_name ?? '' } : null,
     charges: [...(charges.get(patientId) ?? [])],
     payments: [...(payments.get(patientId) ?? [])].sort((a, b) => b.paid_on.localeCompare(a.paid_on) || b.created_at.localeCompare(a.created_at)),
   };
@@ -149,12 +154,14 @@ function asLedger(data: unknown): PatientLedger {
   const fee = row.fee as Record<string, unknown> | null;
   return {
     patient_id: String(row.patient_id),
-    fee: fee ? { amount: Number(fee.amount), first_due_on: String(fee.first_due_on) } : null,
+    fee: fee ? { amount: Number(fee.amount), first_due_on: String(fee.first_due_on), program_name: String(fee.program_name ?? '') } : null,
     charges: ((row.charges as Record<string, unknown>[]) ?? []).map((charge) => ({
       id: String(charge.id),
       due_on: String(charge.due_on),
       amount: Number(charge.amount),
       status: charge.status === 'waived' ? 'waived' : 'open',
+      kind: charge.kind === 'extra' ? 'extra' : 'fee',
+      concept: String(charge.concept ?? ''),
     })),
     payments: ((row.payments as Record<string, unknown>[]) ?? []).map((payment) => ({
       id: String(payment.id),
@@ -167,6 +174,14 @@ function asLedger(data: unknown): PatientLedger {
       created_at: String(payment.created_at),
     })),
   };
+}
+
+function asPrograms(data: unknown): BillingProgram[] {
+  return ((data as Record<string, unknown>[] | null) ?? []).map((row) => ({ id: String(row.id), name: String(row.name), amount: Number(row.amount) }));
+}
+
+function listPrograms(): BillingProgram[] {
+  return [...programs.values()].sort((a, b) => a.name.localeCompare(b.name, 'es'));
 }
 
 function asSettings(data: unknown): PaymentSettings {
@@ -194,6 +209,7 @@ export async function getBoard(persistent: boolean): Promise<BillingBoard> {
         ...asLedger(entry),
         full_name: String((entry as Record<string, unknown>).full_name ?? ''),
       })),
+      programs: asPrograms(data.programs),
     };
   }
   return {
@@ -202,6 +218,7 @@ export async function getBoard(persistent: boolean): Promise<BillingBoard> {
       .filter((patient) => !patient.archived_at && !patient.deactivated_at && !patient.anonymized_at)
       .map((patient) => ({ ...memoryLedger(patient.id), full_name: patient.name }))
       .sort((a, b) => a.full_name.localeCompare(b.full_name, 'es')),
+    programs: listPrograms(),
   };
 }
 
@@ -255,11 +272,63 @@ export async function setFee(patientId: string, input: PatientFee | null, persis
   memoryPatient(patientId);
   syncMemory(patientId);
   const today = localBillingDate();
-  const kept = (charges.get(patientId) ?? []).filter((charge) => charge.due_on <= today);
-  charges.set(patientId, kept);
+  const all = charges.get(patientId) ?? [];
+  const keptFees = all.filter((charge) => charge.kind !== 'extra' && charge.due_on <= today);
+  charges.set(patientId, [...keptFees, ...all.filter((charge) => charge.kind === 'extra')]);
   if (!input) fees.delete(patientId);
-  else fees.set(patientId, { ...input, charges_from: kept[kept.length - 1]?.due_on ?? null });
+  else fees.set(patientId, { ...input, charges_from: keptFees[keptFees.length - 1]?.due_on ?? null });
   return memoryLedger(patientId);
+}
+
+const CHARGE_WINDOW_PAST_DAYS = 730;
+const CHARGE_WINDOW_FUTURE_DAYS = 365;
+
+function shiftDate(days: number): string {
+  const date = new Date(`${localBillingDate()}T12:00:00`);
+  date.setDate(date.getDate() + days);
+  return localBillingDate(date);
+}
+
+/** Nuevo cobro: un cobro suelto con su concepto, fuera de la cuota mensual. */
+export async function addCharge(patientId: string, input: ChargeInput, persistent: boolean): Promise<PatientLedger> {
+  if (input.due_on < shiftDate(-CHARGE_WINDOW_PAST_DAYS) || input.due_on > shiftDate(CHARGE_WINDOW_FUTURE_DAYS)) {
+    throw new CareError(400, 'Revisá el monto, la fecha y el concepto del cobro.');
+  }
+  if (persistent) {
+    return asLedger(await call('add_patient_charge', { target: patientId, amount: input.amount, due_on: input.due_on, concept: input.concept }));
+  }
+  memoryPatient(patientId);
+  syncMemory(patientId);
+  const list = charges.get(patientId) ?? [];
+  list.push({ id: randomUUID(), due_on: input.due_on, amount: input.amount, status: 'open', kind: 'extra', concept: input.concept.trim() });
+  list.sort((a, b) => a.due_on.localeCompare(b.due_on));
+  charges.set(patientId, list);
+  return memoryLedger(patientId);
+}
+
+/** Crea el programa, o actualiza su monto si ya hay uno con ese nombre (sin distinguir mayúsculas). */
+export async function saveProgram(input: { name: string; amount: number }, persistent: boolean): Promise<BillingProgram[]> {
+  if (persistent) return asPrograms(await call('save_billing_program', { program_name: input.name, amount: input.amount }));
+  const name = input.name.trim();
+  const existing = [...programs.values()].find((program) => program.name.toLowerCase() === name.toLowerCase());
+  const id = existing?.id ?? randomUUID();
+  programs.set(id, { id, name: existing?.name ?? name, amount: input.amount });
+  return listPrograms();
+}
+
+export async function deleteProgram(programId: string, persistent: boolean): Promise<BillingProgram[]> {
+  if (persistent) return asPrograms(await call('delete_billing_program', { program_id: programId }));
+  if (!programs.delete(programId)) throw new CareError(404, 'Ese programa no existe.');
+  return listPrograms();
+}
+
+/** Asignar programa: la cuota de la paciente pasa a ser la del programa. Sin programa, se quita la cuota. */
+export async function assignProgram(patientId: string, programId: string | null, firstDueOn: string | null, persistent: boolean): Promise<PatientLedger> {
+  if (persistent) return asLedger(await call('assign_patient_program', { target: patientId, program_id: programId, first_due_on: firstDueOn }));
+  if (!programId) return setFee(patientId, null, false);
+  const program = programs.get(programId);
+  if (!program) throw new CareError(404, 'Ese programa no existe.');
+  return setFee(patientId, { amount: program.amount, first_due_on: firstDueOn ?? localBillingDate(), program_name: program.name }, false);
 }
 
 export async function recordPayment(patientId: string, input: PaymentInput, persistent: boolean): Promise<PatientLedger> {
@@ -315,4 +384,4 @@ function paymentDuplicate(patientId: string, input: PaymentInput, operation: str
   paymentReceipts.set(input.client_id,body); return false;
 }
 
-registerDemoState('fees/repository', () => ({ settings, fees, charges, payments, paymentReceipts }));
+registerDemoState('fees/repository', () => ({ settings, fees, charges, programs, payments, paymentReceipts }));

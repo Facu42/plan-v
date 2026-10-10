@@ -104,3 +104,7 @@
   .cbz-form .nv-button[type=submit], .cbz-whatsapp { width: 100%; }
   .cbz-form input, .cbz-form select { font-size: 16px; }
 }
+.cbz-tools { margin: 4px 0 2px; }
+.cbz-copy { display: inline-flex; flex-direction: column; gap: 6px; }
+.cbz-copy input { min-height: 36px; padding: 6px 10px; border: 1px solid var(--nv-border); border-radius: 9px; background: var(--nv-bg); color: var(--nv-ink); font: inherit; font-size: 12px; width: 100%; box-sizing: border-box; }
+.cbz-program-new { padding-top: 12px; border-top: 1px solid var(--nv-border); }

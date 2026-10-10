@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { api } from '../../api/client';
-import { formatFeeDate, formatPesos, PAYMENT_METHOD_LABELS, reminderWhatsAppHref, summarizeLedger } from '../../fees';
+import { chargeTitle, formatFeeDate, formatPesos, PAYMENT_METHOD_LABELS, reminderWhatsAppHref, summarizeLedger } from '../../fees';
 import { localBillingDate } from '../../billing';
-import type { BillingBoard, BillingBoardPatient, PatientLedger, PaymentDecision, PaymentInput, PaymentSettings } from '../../types/fees';
+import type { BillingBoard, BillingBoardPatient, BillingProgram, PatientLedger, PaymentDecision, PaymentInput, PaymentSettings } from '../../types/fees';
 import { Icon } from '../shared/Icon';
 import { NvBadge, NvButton, NvCard, NvState } from './primitives';
 import { ConfirmDialog, FeeError, FeeStateBadge, PAYMENT_STATUS_LABELS, PaymentForm } from './cobranzas-shared';
 import { BOARD_FILTERS, boardTotals, buildBoardRows, feeErrorMessage, filterBoardRows, parsePesos, replaceLedger, suggestedPaymentAmount, type BoardFilter } from './cobranzas-utils';
+import { CopyLinkButton, NewChargeForm, ProgramAssigner } from './cobranzas-cobros';
 import './cobranzas-fig.css';
 import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
 
@@ -83,9 +84,13 @@ function FeeEditor({ patient, defaultFee, onLedger }: { patient: BillingBoardPat
   </form>;
 }
 
-export function PatientPanel({ patient, settings, onLedger, onBack, today }: {
-  patient: BillingBoardPatient; settings: PaymentSettings; onLedger: (ledger: PatientLedger) => void; onBack: () => void; today?: string;
+export type PatientTool = 'cobro' | 'programa';
+
+export function PatientPanel({ patient, settings, programs = [], onPrograms = () => undefined, onLedger, onBack, today, initialTool = null }: {
+  patient: BillingBoardPatient; settings: PaymentSettings; programs?: BillingProgram[]; onPrograms?: (programs: BillingProgram[]) => void;
+  onLedger: (ledger: PatientLedger) => void; onBack: () => void; today?: string; initialTool?: PatientTool | null;
 }) {
+  const [tool, setTool] = useState<PatientTool | null>(initialTool);
   const summary = useMemo(() => summarizeLedger(patient, today), [patient, today]);
   const [busyId, setBusyId] = useState('');
   const [error, setError] = useState('');
@@ -103,11 +108,16 @@ export function PatientPanel({ patient, settings, onLedger, onBack, today }: {
   const reported = patient.payments.filter((payment) => payment.status === 'reported');
   const history = [...patient.payments].sort((a, b) => b.paid_on.localeCompare(a.paid_on) || b.created_at.localeCompare(a.created_at));
   const busy = Boolean(busyId);
+  const pendingCharge = summary.charges.find((charge) => charge.status === 'open' && charge.paid < charge.amount && charge.due)
+    ?? summary.charges.find((charge) => charge.status === 'open' && charge.paid < charge.amount);
+  const nextChargeTitle = pendingCharge ? chargeTitle(pendingCharge) : 'Cuota mensual';
+  const nextChargeAmount = pendingCharge ? pendingCharge.amount - pendingCharge.paid : patient.fee?.amount ?? 0;
+  const nextChargeDue = pendingCharge?.due_on ?? today ?? localBillingDate();
 
   return <aside className="cbz-panel" aria-label={`Cobranzas de ${patient.full_name}`}>
     <button type="button" className="cbz-back" onClick={() => { if (canLeaveWorkspace()) onBack(); }}><Icon name="chevron" size={14} />Volver a la lista</button>
     <header className="cbz-panel-head">
-      <div><h2>{patient.full_name}</h2><p>{patient.fee ? `Cuota de ${formatPesos(patient.fee.amount)} por mes` : 'Sin cuota definida'}</p></div>
+      <div><h2>{patient.full_name}</h2><p>{patient.fee ? `${patient.fee.program_name ? `${patient.fee.program_name} · ` : ''}Cuota de ${formatPesos(patient.fee.amount)} por mes` : 'Sin cuota definida'}</p></div>
       <FeeStateBadge summary={summary} />
     </header>
     <dl className="cbz-figures">
@@ -116,6 +126,15 @@ export function PatientPanel({ patient, settings, onLedger, onBack, today }: {
       <div><dt>Pagado este mes</dt><dd>{formatPesos(summary.paid_this_month)}</dd></div>
     </dl>
     <FeeError message={error} />
+    <div className="cbz-actions cbz-tools" role="group" aria-label="Cobros de la paciente">
+      <NvButton aria-expanded={tool === 'cobro'} onClick={() => setTool(tool === 'cobro' ? null : 'cobro')}>Nuevo cobro</NvButton>
+      <NvButton className="nv-soft" aria-expanded={tool === 'programa'} onClick={() => setTool(tool === 'programa' ? null : 'programa')}>Asignar programa</NvButton>
+      <CopyLinkButton input={{ patientName: patient.full_name, title: nextChargeTitle, amount: nextChargeAmount, dueOn: nextChargeDue, alias: settings.alias, paymentLink: settings.payment_link }} />
+    </div>
+    {!settings.alias && !settings.payment_link && <p className="cbz-muted">Cargá tu link o alias en «Datos de cobro» para poder copiar el link de pago.</p>}
+    {tool === 'cobro' && <section className="cbz-block"><h3>Nuevo cobro</h3><NewChargeForm patientId={patient.patient_id} onLedger={onLedger} onDone={() => setTool(null)} /></section>}
+    {tool === 'programa' && <section className="cbz-block"><h3>Asignar programa</h3>
+      <ProgramAssigner patientId={patient.patient_id} currentName={patient.fee?.program_name ?? ''} programs={programs} onPrograms={onPrograms} onLedger={onLedger} onDone={() => setTool(null)} /></section>}
     {summary.owed > 0 && <a className="nv-button nv-soft cbz-whatsapp" href={reminderWhatsAppHref({ patientName: patient.full_name, owed: summary.owed, alias: settings.alias, paymentLink: settings.payment_link })} target="_blank" rel="noopener noreferrer">Recordar por WhatsApp</a>}
 
     {reported.length > 0 && <section className="cbz-block cbz-reports" aria-label="Avisos de pago por confirmar">
@@ -141,8 +160,8 @@ export function PatientPanel({ patient, settings, onLedger, onBack, today }: {
         const done = !waived && charge.paid >= charge.amount;
         const label = waived ? 'Perdonada' : done ? 'Pagada' : charge.paid > 0 ? `Parcial · ${formatPesos(charge.paid)} de ${formatPesos(charge.amount)}` : charge.due ? 'Vencida' : 'Pendiente';
         return <li key={charge.id} className="cbz-row">
-          <div><strong>{formatPesos(charge.amount)}</strong><small>Vence {formatFeeDate(charge.due_on)}</small></div>
-          <div className="cbz-actions"><NvBadge tone={waived || done ? 'green' : charge.due ? 'coral' : 'gold'}>{label}</NvBadge>
+          <div><strong>{formatPesos(charge.amount)}</strong><small>{chargeTitle(charge)} · vence {formatFeeDate(charge.due_on)}</small></div>
+          <div className="cbz-actions">{!waived && !done && <CopyLinkButton className="nv-ghost" label="Copiar link" input={{ patientName: patient.full_name, title: chargeTitle(charge), amount: charge.amount - charge.paid, dueOn: charge.due_on, alias: settings.alias, paymentLink: settings.payment_link }} />}<NvBadge tone={waived || done ? 'green' : charge.due ? 'coral' : 'gold'}>{label}</NvBadge>
             <NvButton className="nv-ghost" disabled={busy} onClick={() => void act(charge.id, () => api.setChargeWaived(charge.id, !waived))}>{busyId === charge.id ? '…' : waived ? 'Volver a cobrar' : 'Perdonar'}</NvButton></div>
         </li>;
       })}</ul> : <p className="cbz-muted">Todavía no hay cuotas generadas.</p>}
@@ -161,8 +180,8 @@ export function PatientPanel({ patient, settings, onLedger, onBack, today }: {
   </aside>;
 }
 
-export function CobranzasScreen({ board, onBoard, today, initialSelectedId = null, initialFilter = 'todas' }: {
-  board: BillingBoard; onBoard: (board: BillingBoard) => void; today?: string; initialSelectedId?: string | null; initialFilter?: BoardFilter;
+export function CobranzasScreen({ board, onBoard, today, initialSelectedId = null, initialFilter = 'todas', initialTool = null }: {
+  board: BillingBoard; onBoard: (board: BillingBoard) => void; today?: string; initialSelectedId?: string | null; initialFilter?: BoardFilter; initialTool?: PatientTool | null;
 }) {
   const [filter, setFilter] = useState<BoardFilter>(initialFilter);
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId);
@@ -197,7 +216,7 @@ export function CobranzasScreen({ board, onBoard, today, initialSelectedId = nul
         </section>
         <SettingsCard settings={board.settings} onSaved={(settings) => onBoard({ ...board, settings })} />
       </div>
-      {selected ? <PatientPanel patient={selected} settings={board.settings} today={today} onBack={() => setSelectedId(null)} onLedger={(ledger) => onBoard(replaceLedger(board, ledger))} />
+      {selected ? <PatientPanel key={selected.patient_id} patient={selected} settings={board.settings} programs={board.programs ?? []} onPrograms={(programs) => onBoard({ ...board, programs })} initialTool={initialTool} today={today} onBack={() => setSelectedId(null)} onLedger={(ledger) => onBoard(replaceLedger(board, ledger))} />
         : <aside className="cbz-panel cbz-panel-empty" aria-label="Detalle de cobranzas"><p>Elegí un paciente para ver su cuota, registrar pagos y revisar sus avisos.</p></aside>}
     </div>
   </div>;
