@@ -192,3 +192,6 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 Continuación del cierre de paciente y nutricionista: [correcciones, evidencia y paquete de cinco migraciones](cierre-funcional-plan-v-2026-10-05.md).
 
 Contrato de cada acción, permisos y lecturas al recargar: [recorridos y guía para ambas experiencias](recorridos-y-contratos-plan-v-2026-10-05.md).
+
+## Movimiento de la paciente, primer pase (2026-10-10)
+Se cerró el PR #67 (conflictos, inspirado en otra interfaz). Pase nuevo desde main: en Inicio, pasos y calorías (consumidas, quemadas, restantes) suben contando (`CountUp`, desde cero al entrar y desde el valor anterior al cambiar) y las barras de progreso se llenan al aparecer. Todo apagado con «reducir movimiento». Siguen: peso, macros, pulso al cargar, Ejercicio y Progreso.
