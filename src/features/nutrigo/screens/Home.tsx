@@ -103,15 +103,20 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
     return {item,done:Math.min(done,item.sets),total:item.sets};
   });
 
+  // Sin rutina asignada, la paciente ve sus propias actividades de la semana (las que registró) en el mismo bloque.
+  const workoutRows=routineProgress.length?routineProgress.map(({item,done,total})=>({id:item.id,name:item.name,pct:safePercent(done,total),count:`(${done}/${total})`,tag:EXERCISE_CATEGORY_LABELS[item.category]})):
+    (patient.activities??[]).filter(row=>(dayOfIso(row.logged_at)??'')>=weekStart).slice().sort((a,b)=>Date.parse(b.logged_at)-Date.parse(a.logged_at)).map(row=>({id:row.id,name:row.activity,pct:100 as number|null,count:`(${row.duration_minutes} min)`,tag:`${row.intensity.charAt(0).toUpperCase()}${row.intensity.slice(1)}`}));
+
   const meals=(current?.plan?.items.filter(item=>item.for_date===today)??[]).slice().sort((a,b)=>PLAN_SLOT_KEYS.indexOf(planSlotKey(a.slot)!)-PLAN_SLOT_KEYS.indexOf(planSlotKey(b.slot)!));
   const recipes=patientMenuRecipes(current?.plan??null,current?.recipes??[]);
+  const pendingToday=patient.logs.some(log=>log.status==='pending_review'&&dayOfIso(log.logged_at)===today);
   const loggedSlots=new Set(patient.logs.filter(log=>dayOfIso(log.logged_at)===today).map(log=>log.slot));
 
   // Semana del calendario con hoy marcado: el escritorio dibuja lunes a sábado; el celular, domingo a sábado.
   const week=(columns:number)=>weekDays(today,columns);
 
   const activity:Activity[]=[
-    ...(patient.logs??[]).map(log=>({at:log.logged_at,color:0,bold:log.slot,rest:` ${log.status==='pending_review'?'registrada, pendiente de revisión':'revisada'}: ${log.description}`})),
+    ...(patient.logs??[]).map(log=>({at:log.logged_at,color:0,bold:log.slot,rest:` ${log.status==='pending_review'?'registrada, pendiente de revisión':'revisada'}${log.description?.trim()?`: ${log.description.trim()}`:''}`})),
     ...(patient.activities??[]).map(row=>({at:row.logged_at,color:1,bold:row.activity,rest:` registrada: ${row.duration_minutes} min, intensidad ${row.intensity}.`})),
     ...(patient.messages??[]).map(message=>({at:message.sent_at,color:2,bold:message.from==='patient'?'Mensaje enviado:':'Mensaje de tu nutricionista:',rest:` "${message.text.length>80?`${message.text.slice(0,80)}…`:message.text}"`})),
   ].filter(row=>!Number.isNaN(Date.parse(row.at))).sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)).slice(0,4);
@@ -183,23 +188,25 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
       }
       if(!leaf(child))return undefined;
       const value=sourceText(child);
+      // Lo que la paciente cargó hoy y su nutricionista todavía no revisó se nombra, en vez de dejar el guion sin explicación.
+      if(value==='Eaten calories'&&!known&&pendingToday)return {text:'Calorías en revisión'};
       // Sin comidas revisadas o sin meta, el valor es desconocido (no cero).
       const substitutions:Record<string,string>={'1240':target&&kcal!==null?formatNumber(Math.max(0,target.kcal-kcal)):'—','1750':formatNumber(kcal),'510':formatNumber(burned),'120':known?formatNumber(eaten.carbs):'—','70':known?formatNumber(eaten.protein):'—','20':known?formatNumber(eaten.fat):'—','/325gr':target?`/${formatNumber(target.carbs_g)} g`:'/— g','/75gr':target?`/${formatNumber(target.protein_g)} g`:'/— g','/44gr':target?`/${formatNumber(target.fat_g)} g`:'/— g','37%':macroLabel.carbs,'93%':macroLabel.protein,'45%':macroLabel.fat};
       return value in substitutions?{text:substitutions[value]}:undefined;
     };return {children:fields(node,{},calorieLeaf)};}
     if(name==='Widget Workout Progress')return {children:fields(node,{},child=>{
-      if(nodeName(child)==='Body')return listChildren(child,routineProgress.slice(0,3),(n,row)=>{
-        const pct=safePercent(row.done,row.total);
+      if(nodeName(child)==='Body')return listChildren(child,workoutRows.slice(0,3),(n,row)=>{
+        const pct=row.pct;
         if(n===child)return undefined;
-        if(nodeName(n)==='Item List Macronutrients')return {onClick:()=>onNavigate('ejercicio'),label:`Ver ${row.item.name}`};
+        if(nodeName(n)==='Item List Macronutrients')return {onClick:()=>onNavigate('ejercicio'),label:`Ver ${row.name}`};
         if(nodeName(n)==='Progress Bar')return barFill(pct,'filled');
         if(nodeName(n)==='Empty Bar')return barFill(pct,'empty');
         if(sample(n,/^\d+%$/))return {text:`${Math.round(pct??0)}%`};
-        if(sample(n,/^\(\d+\/\d+\)$/))return {text:`(${row.done}/${row.total})`};
-        if(text(n,'Cardio','Strength','Flexibility'))return {text:EXERCISE_CATEGORY_LABELS[row.item.category]};
-        if(leaf(n)&&sourceText(n).length>8)return {text:row.item.name,props:{style:{whiteSpace:'normal'}}};
+        if(sample(n,/^\(\d+\/\d+\)$/))return {text:row.count};
+        if(text(n,'Cardio','Strength','Flexibility'))return {text:row.tag};
+        if(leaf(n)&&sourceText(n).length>8)return {text:row.name,props:{style:{whiteSpace:'normal'}}};
         return undefined;
-      },'Tu nutricionista todavía no te asignó una rutina.',{key:row=>row.item.id});
+      },'Todavía no registraste actividad esta semana. Tu nutricionista puede asignarte una rutina.',{key:row=>row.id});
       if(/Button/.test(nodeName(child)))return {onClick:()=>onNavigate('ejercicio'),label:'Ver ejercicio'};
       if(text(child,'This Week'))return {text:'Esta semana'};
       return undefined;

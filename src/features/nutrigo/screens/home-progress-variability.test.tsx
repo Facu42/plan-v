@@ -203,6 +203,29 @@ describe.each([false, true])('Inicio: nodos originales siempre presentes y fotos
     const list = html.slice(html.indexOf('data-name="List Recent Activity"'));
     expect(count(list, /data-name="Line"/g)).toBe(2);
   });
+  it('una comida cargada sin descripción no escribe «null» en la actividad reciente', () => {
+    context.data = homeData();
+    const logs = [{ id: 'l1', slot: 'Cena', description: null, status: 'pending_review', logged_at: '2026-10-07T20:00:00Z', foods: [], macros: null }];
+    const out = text(home(patientWith({ logs })));
+    expect(out).toContain('Cena');
+    expect(out).toContain('pendiente de revisión');
+    expect(out).not.toContain('null');
+  });
+  it('sin rutina asignada, el bloque Actividad muestra las actividades que la paciente registró esta semana', () => {
+    context.data = homeData();
+    const activities = [{ id: 'a1', activity: 'Caminata al aire libre', duration_minutes: 35, intensity: 'moderada', logged_at: '2026-10-07T13:00:00Z' }];
+    const out = text(home(patientWith({ activities })));
+    expect(out).toContain('Caminata al aire libre');
+    expect(out).toContain('(35 min)');
+    expect(out).toContain('Moderada');
+    expect(out).not.toContain('Tu nutricionista todavía no te asignó una rutina');
+  });
+  it('con comidas cargadas hoy y sin revisar, las calorías consumidas dicen que están en revisión', () => {
+    context.data = homeData({ target });
+    const logs = [{ id: 'l1', slot: 'Almuerzo', description: 'Ensalada', status: 'pending_review', logged_at: '2026-10-07T15:00:00Z', foods: [], macros: null }];
+    const out = text(home(patientWith({ logs, nutritionLogCount: 0 })));
+    expect(out).toContain('Calorías en revisión');
+  });
   it('sin minutos de descanso las barras de la tarjeta Descanso siguen en su lugar, con alto 0', () => {
     context.data = homeData();
     const html = home(patientWith({ sleepMinutes: null, journey: { days: [] } }));

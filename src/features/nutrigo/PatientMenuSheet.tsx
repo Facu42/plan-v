@@ -25,6 +25,9 @@ type Props = {
   /** En el celular la tarjeta amarilla no está a la vista: la invitación a instalar va como fila de «Mi cuenta». */
   installOffer?: Pick<InstallOffer, 'title' | 'card'> | null;
   onInstall?: () => void;
+  /** En el celular no hay campana en el marco: los avisos van como fila de «Mi cuenta». */
+  noticeCount?: number;
+  onOpenNotices?: () => void;
   /** «Menu Nav» original del marco de escritorio del archivo; sin él se usa una lista armada con sus tokens. */
   menuNav?: SourceNode | null;
   onNavigate: (page: ShowroomPage) => void;
@@ -36,7 +39,7 @@ type Props = {
  * Menú de la paciente como hoja inferior (celular) o tarjeta centrada (escritorio).
  * Figma no dibuja este menú: se arma con las piezas del archivo (Poppins, Cream/Green, radio 16/12).
  */
-export function PatientMenuSheet({ patientName, unread = 0, feeNotice = null, installOffer = null, onInstall, menuNav = null, onNavigate, onSignOut, onClose }: Props) {
+export function PatientMenuSheet({ patientName, unread = 0, feeNotice = null, installOffer = null, onInstall, noticeCount = 0, onOpenNotices, menuNav = null, onNavigate, onSignOut, onClose }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const active = currentPage();
   const initial = (patientName.trim()[0] ?? 'P').toUpperCase();
@@ -76,6 +79,16 @@ export function PatientMenuSheet({ patientName, unread = 0, feeNotice = null, in
             : <ul className="pms-list">{MAIN_PAGES.map(({ page, label }) => row(page, label, null, page === 'mensajes' ? unread : 0))}</ul>}
           <p className="pms-group">Mi cuenta</p>
           <ul className="pms-list">
+            {onOpenNotices && (
+              <li>
+                <button type="button" className="pms-row" onClick={() => { onClose(); onOpenNotices(); }}>
+                  <span className="pms-icon" aria-hidden="true"><Icon name="bell" size={18} /></span>
+                  <span className="pms-text"><span className="pms-label">Avisos</span><small>{noticeCount ? `${noticeCount} para revisar` : 'Estás al día'}</small></span>
+                  {noticeCount ? <span className="pms-badge" aria-label={`${noticeCount} avisos`}>{noticeCount}</span> : null}
+                  <span className="pms-chevron" aria-hidden="true"><Icon name="chevron" size={16} /></span>
+                </button>
+              </li>
+            )}
             {row('pagos', 'Pagos', feeNotice)}
             {row('ficha', 'Mi ficha y permisos')}
             {installOffer && onInstall && (
