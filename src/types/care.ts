@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { BodyMetricKind } from '../lib/body-metrics';
 
 export const careDate = z.iso.date().refine(value => value <= new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date()), 'La fecha no puede ser futura');
 export function careDateConstraintMessage(validity: { rangeOverflow: boolean; valueMissing: boolean }): string {
@@ -65,7 +66,8 @@ export type CareReplacement = { id: string; patient_id: string; request_id: stri
 export type Measurement = {
   id: string;
   patient_id: string;
-  kind: MeasurementKind;
+  /** Peso, cintura y cadera vienen de los registros de seguimiento; el resto lo carga la profesional (`lib/body-metrics`). */
+  kind: MeasurementKind | BodyMetricKind;
   value_numeric: number;
   unit: string;
   source: MeasurementSource;

@@ -1,6 +1,7 @@
 import { registerDemoState } from '../demo/state.js';
 import { getRequestDb, privilegedDb } from '../db/supabase-client.js';
 import { DEFAULT_CARE_PREFERENCES, isMeasurementData, isMeasurementKind, type CareInput, type CareRecord, type CarePreferences, type CareReplacement, type Measurement, type ReplacementRecipe } from '../../src/types/care.js';
+import { isBodyMetricKind, metricDefinition, type BodyMetricBatch } from '../../src/lib/body-metrics.js';
 import { inspectPrivateFile } from '../assets/inspect.js';
 import { requireProductBuckets } from '../assets/storage.js';
 import { CareError } from './errors.js';
@@ -65,7 +66,7 @@ function rememberMeasurement(record: CareRecord) {
   });
 }
 function asMeasurement(row: { id: string; patient_id: string; kind: string; value_numeric: number | string; unit: string; source: string; captured_on: string; created_at: string }): Measurement {
-  if (!isMeasurementKind(row.kind)) throw new CareError(400, 'Revisá los datos del registro.');
+  if (!isMeasurementKind(row.kind) && !isBodyMetricKind(row.kind)) throw new CareError(400, 'Revisá los datos del registro.');
   if (row.source !== 'patient' && row.source !== 'professional') throw new CareError(400, 'Revisá los datos del registro.');
   return {
     id: row.id,
@@ -77,6 +78,23 @@ function asMeasurement(row: { id: string; patient_id: string; kind: string; valu
     captured_on: row.captured_on,
     created_at: row.created_at,
   };
+}
+export async function saveBodyMetrics(patientId: string, batch: BodyMetricBatch, persistent: boolean): Promise<Measurement[]> {
+  if (persistent) {
+    const { data, error } = await getRequestDb().rpc('save_body_metrics', { target: patientId, captured: batch.captured_on, items: batch.items });
+    careDbError(error);
+    return (data as Parameters<typeof asMeasurement>[0][]).map(asMeasurement);
+  }
+  const saved = batch.items.map((item) => {
+    const old = measurements.get(item.id);
+    const unit = metricDefinition(item.kind).unit;
+    if (old && (old.patient_id !== patientId || old.kind !== item.kind || old.value_numeric !== item.value || old.unit !== unit || old.captured_on !== batch.captured_on || old.source !== 'professional')) {
+      throw new CareError(409, 'Ese registro ya existe con otros datos. Recargá para revisarlo.');
+    }
+    return old ?? { id: item.id, patient_id: patientId, kind: item.kind, value_numeric: item.value, unit, source: 'professional' as const, captured_on: batch.captured_on, created_at: new Date().toISOString() };
+  });
+  for (const entry of saved) measurements.set(entry.id, entry);
+  return saved;
 }
 export async function listMeasurements(patientId: string, persistent: boolean): Promise<Measurement[]> {
   if (!persistent) {
