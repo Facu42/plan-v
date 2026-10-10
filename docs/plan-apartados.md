@@ -178,6 +178,12 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 - **Terminado cuando:** todas las pantallas tienen movimiento y estados, revisadas en 1440 y
   390 con capturas, y la revisión de accesibilidad sin errores graves.
 
+- **Pendiente agendado (2026-10-10, pedido de Facundo): mejora para los botones de Plan V** a partir de esta publicación:
+  <https://www.threads.com/share/BAUe9JfuYu/>. Desde el entorno de desarrollo no se pudo abrir (dominio bloqueado), así que
+  **todavía no se sabe qué idea propone**. Para hacerlo falta que Facundo pegue el texto o una captura. Reglas al
+  implementarlo: usar la pieza `Button` del archivo de Nutrigo (nodo `2:3312`) y no inventar una nueva; movimiento solo
+  con `prefers-reduced-motion: no-preference`; mismo comportamiento en escritorio 1440 y móvil 390.
+
 ## C. Marketing: estrategia y contenido
 
 - **Lidera:** `social-media-strategist`. **Apoyo:** `brand-guardian`, `content-creator`,
