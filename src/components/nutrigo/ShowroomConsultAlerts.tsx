@@ -21,6 +21,7 @@ import {
   writeNoticePrefs,
   type NoticePrefs,
 } from './showroom-notices';
+import { markAllRead, markRead, unreadProNotices, type ProNotice } from './pro-notices';
 import './consult-alerts.css';
 
 const REMINDER_KIND_LABEL: Record<DailyReminder['kind'], string> = {
@@ -39,6 +40,8 @@ export function ShowroomConsultAlerts({
   onManage,
   onOpenReminder,
   onOpenCare,
+  proNotices = [],
+  onOpenProNotice,
   defaultOpen = false,
   storage = typeof window === 'undefined' ? null : window.localStorage,
 }: {
@@ -50,6 +53,8 @@ export function ShowroomConsultAlerts({
   onManage?: (alert: ConsultAlert) => void;
   onOpenReminder?: (reminder: DailyReminder) => void;
   onOpenCare?: (notice: CareNotice) => void;
+  proNotices?: ProNotice[];
+  onOpenProNotice?: (notice: ProNotice) => void;
   defaultOpen?: boolean;
   storage?: Pick<Storage, 'getItem' | 'setItem'> | null;
 }) {
@@ -63,7 +68,8 @@ export function ShowroomConsultAlerts({
     () => reminders.filter((reminder) => reminder.state !== 'done' && reminder.kind !== 'consulta' && !(care.hasPreferences && (reminder.kind === 'agua' || reminder.kind === 'sueno'))),
     [reminders, care.hasPreferences],
   );
-  const badge = visible.length + openReminders.length + care.notices.length;
+  const unreadPro = useMemo(() => (audience === 'pro' ? unreadProNotices(proNotices, storage) : []), [audience, proNotices, storage, tick]);
+  const badge = visible.length + openReminders.length + care.notices.length + unreadPro.length;
   const title = audience === 'patient' ? 'Avisos' : 'Avisos del consultorio';
 
   useEffect(() => {
@@ -110,6 +116,9 @@ export function ShowroomConsultAlerts({
       api.enqueueReminderNotice({ patientId, title: REMINDER_KIND_LABEL[reminder.kind], detail: reminder.detail }).catch(() => undefined);
     });
   }, [prefs.email, openReminders, patientId, storage]);
+
+  const readProNotice = (notice: ProNotice) => { markRead(storage, notice.id); setTick((value) => value + 1); };
+  const readAllProNotices = () => { markAllRead(storage, unreadPro); setTick((value) => value + 1); };
 
   const dismiss = (alert: ConsultAlert) => {
     dismissConsultAlert(storage, audience, alert.id);
@@ -171,6 +180,17 @@ export function ShowroomConsultAlerts({
       </div>
       {care.error && <p role="alert">No se pudieron actualizar los avisos de seguimiento: {care.error}</p>}
       {care.notices.length > 0 && <section className="nv-alerts-habits" aria-label="Avisos de seguimiento"><h3>{audience === 'pro' ? 'Registros de pacientes' : 'Tu seguimiento'}</h3><ul>{care.notices.map(notice => <li key={notice.id}><div><strong>{notice.patient_name ? `${notice.patient_name} · ` : ''}{notice.title}</strong><small>{notice.detail}</small></div>{onOpenCare && <div className="nv-alerts-actions"><NvButton onClick={() => { setOpen(false); onOpenCare(notice); }}>{audience === 'pro' ? 'Revisar registro' : 'Abrir'}</NvButton></div>}</li>)}</ul></section>}
+      {audience === 'pro' && unreadPro.length > 0 && <section className="nv-alerts-habits" aria-label="Novedades del consultorio">
+        <h3>Novedades del consultorio</h3>
+        <ul>{unreadPro.map((notice) => <li key={notice.id}>
+          <div><strong>{notice.title}</strong><small>{notice.detail}</small></div>
+          <div className="nv-alerts-actions">
+            {onOpenProNotice && <NvButton onClick={() => { setOpen(false); onOpenProNotice(notice); }}>Abrir</NvButton>}
+            <NvButton className="nv-ghost" onClick={() => readProNotice(notice)}>Marcar como leída</NvButton>
+          </div>
+        </li>)}</ul>
+        {unreadPro.length > 1 && <div className="nv-alerts-actions"><NvButton className="nv-ghost" onClick={readAllProNotices}>Marcar todas como leídas</NvButton></div>}
+      </section>}
       {visible.length ? <ul>{visible.map((alert) => <li key={alert.id}>
         <span className={`nv-alerts-urgency ${alert.urgency}`}>{alert.urgencyLabel}</span>
         <div>
