@@ -77,3 +77,12 @@ Actualización 2026-10-01 ~02:10Z: se intentó desde la PC de Facundo; la copia 
 la del 30/9 06:38 UTC (completada) y Supabase mostraba US$9,68/mes por el proyecto nuevo.
 Facundo la canceló: no quiere gastos fuera del plan Pro. Comprobado con el conector: no se
 creó ningún proyecto (siguen plan-v-app, ruti-chat-crm y "Plan V" pausado). Prueba descartada.
+
+## 2026-10-10: revisión final y cierre del hilo
+
+Comprobado con los conectores: organización en Pro, `plan-v-app` activo y sano, solo dos
+proyectos (`plan-v-app` y `ruti-chat-crm`; el viejo "Plan V" pausado ya no figura y no hay
+proyectos de restauración). El asesor de seguridad no muestra el aviso de contraseñas
+filtradas. PR #27 sigue en borrador, limpio y con las pruebas en verde. Las migraciones del
+PR #27 siguen sin aplicarse en producción (necesitan el OK escrito de Facundo). Prueba de
+restaurar: descartada por costo.
