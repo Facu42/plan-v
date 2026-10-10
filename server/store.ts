@@ -185,6 +185,7 @@ export type Patient = {
   billing_status: BillingStatus;
   billing_until: string | null;
   has_account?: boolean;
+  created_at?: string;
   stage: Stage;
   goal: string;
   goal_status?: GoalStatus;
@@ -286,6 +287,7 @@ function seedPatients(): Patient[] {
   return [
     {
       id: 'pat-sofia',
+      created_at: daysAgo(75),
       name: 'Sofía R.',
       initials: 'SR',
       tone: 'peach',
@@ -383,6 +385,7 @@ function seedPatients(): Patient[] {
     },
     {
       id: 'pat-marina',
+      created_at: daysAgo(20),
       name: 'Marina C.',
       initials: 'MC',
       tone: 'lilac',
@@ -452,6 +455,7 @@ function seedPatients(): Patient[] {
     },
     {
       id: 'pat-lucia',
+      created_at: daysAgo(4),
       name: 'Lucía F.',
       initials: 'LF',
       tone: 'mint',
@@ -672,6 +676,7 @@ export function createPatient(input: { name: string; email: string; goal: string
     billing_status: 'pending',
     billing_until: null,
     has_account: false,
+    created_at: now(),
     stage: 'ingreso',
     goal: input.goal.trim(),
     goal_status: 'active',

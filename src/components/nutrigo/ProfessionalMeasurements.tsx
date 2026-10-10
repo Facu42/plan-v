@@ -24,7 +24,7 @@ function rowsFor(measurements: readonly Measurement[], kind: MetricKind, rangeId
 }
 const argentinaToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
 
-function MetricDetail({ kind, measurements, onClose }: { kind: MetricKind; measurements: readonly Measurement[]; onClose: () => void }) {
+function MetricDetail({ kind, measurements, onClose, onEnter }: { kind: MetricKind; measurements: readonly Measurement[]; onClose: () => void; onEnter: () => void }) {
   const [range, setRange] = useState<RangeId>('all');
   const definition = metricDefinition(kind);
   const summary = useMemo(() => summarizeMetric(rowsFor(measurements, kind, range, argentinaToday())), [measurements, kind, range]);
@@ -33,6 +33,7 @@ function MetricDetail({ kind, measurements, onClose }: { kind: MetricKind; measu
       <div><p className="nv-eyebrow">{METRIC_GROUPS.find((group) => group.id === definition.group)?.label}</p><h3>{definition.label}</h3></div>
       <div className="pm-detail-tools">
         <label>Período<select value={range} onChange={(event) => setRange(event.target.value as RangeId)}>{RANGES.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
+        <NvButton type="button" className="nv-soft" onClick={onEnter}>Registrar nueva medición</NvButton>
         <NvButton type="button" className="nv-ghost" onClick={onClose}>Cerrar detalle</NvButton>
       </div>
     </header>
@@ -64,12 +65,13 @@ function MetricCard({ kind, summary, onOpen }: { kind: MetricKind; summary: Metr
   return <NvMetric label={definition.label} icon="trend" tone="green" value={summary ? formatMetricValue(summary.last.value, summary.unit) : 'Sin dato'} note={summary ? cardNote(summary) : 'Todavía sin medir'} onOpen={onOpen}>{summary && <MetricSparkline values={[...summary.history].reverse().map((entry) => entry.value)} />}</NvMetric>;
 }
 
-/** Evolución del peso: diferencia desde la primera medición, cantidad de registros y fecha del último. */
+/** Evolución del peso: diferencia desde la primera medición, cantidad de registros, fecha del último y mínimo, promedio y máximo. */
 function WeightEvolution({ summary }: { summary: MetricSummary | null }) {
   const change = summary?.changeFromFirst ?? null;
   const value = !summary ? 'Sin dato' : change === null ? 'Primer registro' : change === 0 ? 'Sin cambios' : formatChange(change, summary.unit);
   const note = summary ? `${summary.count} ${summary.count === 1 ? 'registro' : 'registros'} · último ${formatMetricDate(summary.last.date)}` : 'Todavía sin medir';
-  return <NvMetric label="Evolución del peso" icon="trend" tone="green" value={value} note={note} />;
+  const range = summary && summary.count > 1 ? `Mín ${formatMetricValue(summary.min, summary.unit)} · Prom ${formatMetricValue(summary.average, summary.unit)} · Máx ${formatMetricValue(summary.max, summary.unit)}` : null;
+  return <NvMetric label="Evolución del peso" icon="trend" tone="green" value={value} note={note}>{range && <span className="pm-range">{range}</span>}</NvMetric>;
 }
 
 /** Mediciones de la ficha: tres grupos, tendencia, detalle con mínimo, promedio y máximo, y carga por fecha. */
@@ -91,7 +93,7 @@ export function MeasurementsBoard({ measurements, allowed, patientName, onEnter,
     {!allowed ? <NvState title="Falta el permiso de medidas" description={`${patientName} todavía no autorizó compartir sus medidas. Cuando lo haga, aparecen acá.`} /> : METRIC_GROUPS.map((group) => <section key={group.id} className="pm-group-view" aria-label={group.label}>
       <h3>{group.label}</h3>
       <div className="pm-cards">{METRIC_KINDS.filter((kind) => metricDefinition(kind).group === group.id).map((kind) => <MetricCard key={kind} kind={kind} summary={summaries.get(kind) ?? null} onOpen={() => setOpen(kind)} />)}{group.id === 'basicas' && <WeightEvolution summary={summaries.get('weight') ?? null} />}{group.id === 'basicas' && <NvMetric label="IMC" icon="target" tone="gold" value={bmi ? formatNumber(Math.round(bmi.bmi * 10) / 10) : 'Sin dato'} note={bmi ? (bmi.category ?? 'Referencia adulta desde los 20 años') : 'Necesita peso (kg) y altura'} />}</div>
-      {open && metricDefinition(open).group === group.id && <MetricDetail kind={open} measurements={measurements} onClose={() => setOpen(null)} />}
+      {open && metricDefinition(open).group === group.id && <MetricDetail kind={open} measurements={measurements} onClose={() => setOpen(null)} onEnter={onEnter} />}
     </section>)}
   </>;
 }

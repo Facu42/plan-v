@@ -83,6 +83,20 @@ describe('evolución del peso y mini gráficos', () => {
     expect(one).toContain('1 registro · último 1 sep 2026');
   });
 
+  it('muestra mínimo, promedio y máximo del peso como en la ficha de Nutriboost', () => {
+    const html = render([row('weight', 63.8, '2026-09-01', 'kg'), row('weight', 63.5, '2026-09-15', 'kg'), row('weight', 62.5, '2026-10-01', 'kg')]);
+    expect(html).toContain('Mín 62,5 kg · Prom 63,3 kg · Máx 63,8 kg');
+  });
+
+  it('con un solo peso no repite mínimo, promedio y máximo iguales', () => {
+    expect(render([row('weight', 70, '2026-09-01', 'kg')])).not.toContain('Mín ');
+  });
+
+  it('el detalle ofrece registrar una nueva medición sólo si hay permiso para cargar', () => {
+    const rows = [row('weight', 70, '2026-09-01', 'kg')];
+    expect(render(rows, true, 'weight')).toContain('Registrar nueva medición');
+  });
+
   it('dibuja el mini gráfico sólo con dos o más registros', () => {
     expect(render([row('arm', 30, '2026-09-01')])).not.toContain('pm-spark');
     expect(render([row('arm', 30, '2026-09-01'), row('arm', 31, '2026-10-01')])).toContain('pm-spark');

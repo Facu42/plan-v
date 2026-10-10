@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { countConsultations, incomeIn, periodWindows, variation } from './inicio-indicators';
+import { countNewPatients } from './inicio-indicators';
 
 const history = (...ids: string[]) => ({ appointment_history: ids.map((dateId) => ({ id: dateId, when: '', dateId, duration: 30, channel: '', action: 'elapsed' as const, actor: 'system' as const, at: '' })) });
 
@@ -52,5 +53,18 @@ describe('variación contra el período anterior', () => {
   it('sin datos en el período anterior no inventa un porcentaje', () => {
     expect(variation(3, 0)).toEqual({ kind: 'no-baseline' });
     expect(variation(0, 0)).toEqual({ kind: 'same', delta: 0 });
+  });
+});
+
+describe('pacientes nuevas del período', () => {
+  const window = { from: '2026-10-04', to: '2026-10-10' };
+  it('cuenta las altas con fecha de Argentina dentro del período', () => {
+    const patients = [{ created_at: '2026-10-05T15:00:00Z' }, { created_at: '2026-10-11T02:00:00Z' }, { created_at: '2026-10-04T02:00:00Z' }, { created_at: '2026-09-01T12:00:00Z' }];
+    // 2026-10-11T02:00Z es el 10/10 en Argentina (entra); 2026-10-04T02:00Z es el 3/10 (no entra).
+    expect(countNewPatients(patients, window)).toBe(2);
+  });
+  it('si ninguna paciente trae fecha de alta devuelve null, no cero', () => {
+    expect(countNewPatients([{}, { created_at: null }], window)).toBeNull();
+    expect(countNewPatients([], window)).toBe(0);
   });
 });
