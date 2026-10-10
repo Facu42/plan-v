@@ -245,7 +245,7 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
       });
       if (!proposalFrom(created.job)) {
         throw new Error(created.job.error_code === 'stale_context'
-          ? 'El ingreso cambió. Regenerá la propuesta.'
+          ? 'Cambiaron el ingreso, la meta o el plan después de esta propuesta. Regenerala con los datos nuevos.'
           : 'La IA no pudo preparar un menú para revisar. No se publicó nada.');
       }
       setProposal(created.job);
