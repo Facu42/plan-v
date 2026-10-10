@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../../api/client';
 import { formatPesos } from '../../fees';
-import { PERIOD_OPTIONS, countConsultations, incomeIn, periodWindows, variation, type PeriodDays, type Variation } from '../../lib/inicio-indicators';
+import { PERIOD_OPTIONS, countConsultations, countNewPatients, incomeIn, periodWindows, variation, type PeriodDays, type Variation } from '../../lib/inicio-indicators';
 import type { Patient } from '../../types';
 import type { BillingBoard } from '../../types/fees';
 import { NvMetric } from './primitives';
@@ -21,6 +21,8 @@ export function InicioIndicatorsView({ patients, board, boardError, days, onDays
   const { current, previous } = useMemo(() => periodWindows(todayId, days), [todayId, days]);
   const consultations = countConsultations(patients, current);
   const previousConsultations = countConsultations(patients, previous);
+  const newPatients = countNewPatients(patients, current);
+  const previousNewPatients = countNewPatients(patients, previous);
   const income = board ? incomeIn(board, current) : null;
   const previousIncome = board ? incomeIn(board, previous) : null;
   return <section className="pw-indicators" aria-label="Indicadores del consultorio">
@@ -31,12 +33,15 @@ export function InicioIndicatorsView({ patients, board, boardError, days, onDays
     <div className="pw-indicator-cards">
       <NvMetric label="Consultas" icon="calendar" tone="green" value={String(consultations.total)}
         note={`${consultations.first} ${consultations.first === 1 ? 'primera' : 'primeras'} · ${consultations.followUp} de seguimiento. ${variationText(variation(consultations.total, previousConsultations.total), String(previousConsultations.total))}`} />
+      {newPatients !== null && previousNewPatients !== null
+        ? <NvMetric label="Pacientes nuevas" icon="users" tone="coral" value={String(newPatients)} note={variationText(variation(newPatients, previousNewPatients), String(previousNewPatients))} />
+        : <NvMetric label="Pacientes nuevas" icon="users" tone="coral" value="Sin dato" note="Todavía no tenemos la fecha de alta de tus pacientes." />}
       {income && previousIncome
         ? <NvMetric label="Ingresos" icon="wallet" tone="gold" value={formatPesos(income.amount)}
           note={`${income.payers} ${income.payers === 1 ? 'paciente pagó' : 'pacientes pagaron'}. ${variationText(variation(income.amount, previousIncome.amount), formatPesos(previousIncome.amount))}`} />
         : <NvMetric label="Ingresos" icon="wallet" tone="gold" value="Sin dato" note={boardError ? 'No pudimos consultar los cobros. Abrí Cobranzas para reintentar.' : 'Consultando cobros…'} />}
     </div>
-    <p className="pw-indicator-foot">Consultas: horarios de turno ya transcurridos. Ingresos: pagos confirmados por fecha de pago.</p>
+    <p className="pw-indicator-foot">Consultas: horarios de turno ya transcurridos. Pacientes nuevas: fecha de alta en el consultorio. Ingresos: pagos confirmados por fecha de pago.</p>
   </section>;
 }
 

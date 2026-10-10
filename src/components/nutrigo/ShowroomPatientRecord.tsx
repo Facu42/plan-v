@@ -40,7 +40,7 @@ export function ShowroomPatientRecord({ patient, patients = [patient], onSelect,
   return <section className="nr-record" aria-labelledby="nr-record-title">
     <header className="nr-hero">
       <span className="nv-avatar nr-avatar">{patient.initials}</span>
-      <div className="nr-identity"><p>Ficha profesional</p><h2 id="nr-record-title">Ficha de {patient.name}</h2><div><NvBadge>{patient.status}</NvBadge><span>{STAGE_LABELS[patient.stage]}</span><span>{BILLING_LABELS[patient.billing_status]}</span></div></div>
+      <div className="nr-identity"><p>Ficha profesional</p><h2 id="nr-record-title">Ficha de {patient.name}</h2><div><NvBadge>{patient.status}</NvBadge><span>{STAGE_LABELS[patient.stage]}</span><span>{BILLING_LABELS[patient.billing_status]}</span><span>{patient.has_account === false ? 'App de la paciente: sin cuenta' : 'App de la paciente: conectada'}</span></div></div>
       {onSelect && <label className="nr-patient-select">Paciente<select aria-label="Paciente de la ficha" value={patient.id} onChange={(event) => onSelect(event.target.value)}>{patients.map((person) => <option key={person.id} value={person.id}>{person.name}</option>)}</select></label>}
       <NvButton className="nv-soft" onClick={onEdit}><Icon name="edit" size={14} />Editar datos de ficha</NvButton>
     </header>

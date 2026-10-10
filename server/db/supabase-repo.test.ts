@@ -59,6 +59,7 @@ const harness = vi.hoisted(() => {
     builder.eq = filter('eq');
     builder.in = filter('in');
     builder.gte = filter('gte');
+    builder.lt = filter('lt');
     builder.order = filter('order');
     builder.limit = filter('limit');
     builder.range = (from: number, to: number) => {
@@ -944,6 +945,23 @@ describe('PV-11 directory summaries', () => {
     expect(harness.calls.find((call) => call.table === 'patients')?.filters).toEqual(
       expect.arrayContaining([['range', [0, 2]]]),
     );
+  });
+  it('arma el historial de consultas pasadas con turnos ya terminados, para última consulta e Inicio', async () => {
+    vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(new Date('2026-10-10T15:00:00Z'));
+    harness.push('nutritionists', { data: { id: 'nutri-1' }, error: null });
+    harness.push('patients', { data: [summaryRow], error: null });
+    harness.push('appointments', { data: [], error: null });
+    harness.push('appointments', { data: [
+      { id: 'p1', patient_id: 'patient-1', starts_at: '2026-10-08T02:30:00Z', duration_min: 45, channel: 'video', status: 'scheduled'},
+      { id: 'p2', patient_id: 'patient-1', starts_at: '2026-10-10T14:45:00Z', duration_min: 45, channel: 'video', status: 'scheduled'},
+    ], error: null });
+    const listed = await sbListPatientsForNutri('user-1', { offset: 0, limit: 2 });
+    const history = listed.patients[0].appointment_history ?? [];
+    // p1 terminó el 7/10 a la noche en Argentina; p2 todavía no terminó (14:45 + 45 min).
+    expect(history).toHaveLength(1);
+    expect(history[0]).toMatchObject({ id: 'p1', action: 'elapsed', actor: 'system', dateId: '2026-10-07', duration: 45 });
+    const past = harness.calls.filter((call) => call.table === 'appointments')[1];
+    expect(past?.filters).toEqual(expect.arrayContaining([['in', ['patient_id', ['patient-1']]], ['in', ['status', ['scheduled', 'done']]]]));
   });
   it('carga las asignaciones autorizadas con el identificador de recurso usado por el consultorio',async()=>{
     harness.push('nutritionists',{data:{id:'nutri-1'},error:null});
