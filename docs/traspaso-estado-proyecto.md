@@ -41,6 +41,7 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - Diseño y movimiento, carga y errores, primer uso de la nutricionista, accesibilidad, botones del
   celular: `docs/diseno-movimiento.md`.
 - Ingreso con Google y pantalla "Antes de seguir": `docs/autenticacion.md`.
+- Cobros por paciente (rama claude/nutri-cobros-por-paciente-46sdfg, PR borrador sobre #89): Nuevo cobro, Asignar programa y Copiar link; migración 20261010150000 sin aplicar. Detalle en docs/cobros-por-paciente-2026-10-10.md.
 - Cobranzas, Pagos de la paciente y Panel del servicio (altas, cuentas de prueba, actividad):
   `docs/cobros-y-panel.md`.
 - Calorías y macros (Mifflin-St Jeor) con migración aplicada: `docs/calorias-macros.md`.

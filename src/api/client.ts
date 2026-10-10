@@ -5,7 +5,7 @@ import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } fr
 import type { PrivacyRequestKind, PrivacyRequestView } from '../types/privacy';
 import { resolveApiUrl } from './origin';
 import type { NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
-import type { BillingBoard, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
+import type { BillingBoard, BillingProgram, ChargeInput, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
 
 export { ApiError } from './error';
 
@@ -265,6 +265,20 @@ export const api = {
 
   reviewPatientPayment: (paymentId: string, decision: PaymentDecision) =>
     request<{ ledger: PatientLedger }>(`/api/payments/${paymentId}`, { method: 'PATCH', body: JSON.stringify({ decision }) }),
+
+  /** Nuevo cobro: un cobro suelto con concepto para una paciente. */
+  addPatientCharge: (patientId: string, charge: ChargeInput) =>
+    request<{ ledger: PatientLedger }>(`/api/patients/${patientId}/charges`, { method: 'POST', body: JSON.stringify(charge) }),
+
+  /** Asignar programa: la cuota de la paciente toma el monto del programa; programId null la quita. */
+  assignPatientProgram: (patientId: string, programId: string | null, firstDueOn?: string) =>
+    request<{ ledger: PatientLedger }>(`/api/patients/${patientId}/program`, { method: 'PUT', body: JSON.stringify({ program_id: programId, first_due_on: firstDueOn }) }),
+
+  saveBillingProgram: (program: { name: string; amount: number }) =>
+    request<{ programs: BillingProgram[] }>('/api/billing/programs', { method: 'POST', body: JSON.stringify(program) }),
+
+  deleteBillingProgram: (programId: string) =>
+    request<{ programs: BillingProgram[] }>(`/api/billing/programs/${programId}`, { method: 'DELETE' }),
 
   setChargeWaived: (chargeId: string, waived: boolean) =>
     request<{ ledger: PatientLedger }>(`/api/charges/${chargeId}`, { method: 'PATCH', body: JSON.stringify({ waived }) }),
