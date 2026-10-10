@@ -13,7 +13,7 @@ import { DEMO_NUTRITIONIST_ID, getStore } from '../store.js';
 import { CONSENT_CATALOG } from '../intake/consent.js';
 
 type Row = Record<string, unknown>;
-export type WorkPatient = { id: string; name: string; user_id?: string | null; archived_at?: string | null; deactivated_at?: string | null; anonymized_at?: string | null };
+export type WorkPatient = { id: string; name: string; user_id?: string | null; created_at?: string | null; archived_at?: string | null; deactivated_at?: string | null; anonymized_at?: string | null };
 export type WorkScope = { nutritionistId: string; actorId: string; persistent: boolean; patients: WorkPatient[] };
 export type WorkSnapshot = {
   intakes: Array<{ id: string; patient_id: string; status: string; updated_at: string }>;
@@ -25,6 +25,18 @@ export type WorkSnapshot = {
   ledgers: PatientLedger[];
   consents: Map<string, string[]>;
 };
+
+/** Permisos vigentes por paciente: el último evento de cada propósito, con el texto actual. */
+export function consentPurposes(events: Row[], ids: string[]): Map<string, string[]> {
+  const latestConsents = new Map<string, Row>();
+  for (const consent of events) latestConsents.set(`${consent.patient_id}:${consent.purpose}`, consent);
+  const result = new Map<string, string[]>();
+  for (const patientId of ids) result.set(patientId, CONSENT_CATALOG.filter(text => {
+    const latest = latestConsents.get(`${patientId}:${text.purpose}`);
+    return latest?.decision === 'granted' && latest.text_version === text.text_version && latest.text_hash === text.text_hash;
+  }).map(text => text.purpose));
+  return result;
+}
 
 export function queueDbError(error: { code?: string } | null) {
   if (!error) return;
@@ -60,20 +72,20 @@ export async function resolveWorkScope(actorId: string | null, persistent: boole
   if (!nutri.data?.id) throw new CareError(403, 'No encontramos tu consultorio.');
   const nutritionistId = String(nutri.data.id);
   const patients = await readAllRows((offset, end) => db.from('patients')
-    .select('id,full_name,user_id,archived_at,deactivated_at,anonymized_at')
+    .select('id,full_name,user_id,created_at,archived_at,deactivated_at,anonymized_at')
     .eq('nutritionist_id', nutritionistId).order('id').range(offset, end));
   return {
     nutritionistId, actorId, persistent: true,
-    patients: patients.map(row => ({ id: String(row.id), name: String(row.full_name), user_id: row.user_id as string | null,
+    patients: patients.map(row => ({ id: String(row.id), name: String(row.full_name), user_id: row.user_id as string | null, created_at: row.created_at as string | null,
       archived_at: row.archived_at as string | null, deactivated_at: row.deactivated_at as string | null, anonymized_at: row.anonymized_at as string | null })),
   };
 }
 
-function activePatients(scope: WorkScope) {
+export function activePatients(scope: WorkScope) {
   return scope.patients.filter(patient => !patient.archived_at && !patient.deactivated_at && !patient.anonymized_at);
 }
 
-async function scopedRows(db: SupabaseClient, table: string, columns: string, ids: string[], order: string, equals: Record<string, string | null> = {}): Promise<Row[]> {
+export async function scopedRows(db: SupabaseClient, table: string, columns: string, ids: string[], order: string, equals: Record<string, string | null> = {}, since?: { column: string; value: string }): Promise<Row[]> {
   // Los lotes mantienen acotados los filtros en la URL, sin excluir consultorios grandes.
   const rows: Row[] = [];
   for (let index = 0; index < ids.length; index += 100) {
@@ -81,6 +93,7 @@ async function scopedRows(db: SupabaseClient, table: string, columns: string, id
     rows.push(...await readAllRows((offset, end) => {
       let query = db.from(table).select(columns).in('patient_id', batch).order(order).order('id');
       for (const [column, value] of Object.entries(equals)) query = value == null ? query.is(column, null) : query.eq(column, value);
+      if (since) query = query.gte(since.column, since.value);
       return query.range(offset, end);
     }));
   }
@@ -136,12 +149,7 @@ export async function loadWorkSnapshot(scope: WorkScope): Promise<WorkSnapshot> 
   ]);
   snapshot.ledgers = board.patients;
   snapshot.intakes = intakes.map(row => ({ id: String(row.id), patient_id: String(row.patient_id), status: String(row.status), updated_at: String(row.updated_at) }));
-  const latestConsents = new Map<string, Row>();
-  for (const consent of consents) latestConsents.set(`${consent.patient_id}:${consent.purpose}`, consent);
-  for (const patientId of ids) snapshot.consents.set(patientId, CONSENT_CATALOG.filter(text => {
-    const latest = latestConsents.get(`${patientId}:${text.purpose}`);
-    return latest?.decision === 'granted' && latest.text_version === text.text_version && latest.text_hash === text.text_hash;
-  }).map(text => text.purpose));
+  snapshot.consents = consentPurposes(consents, ids);
   snapshot.jobs = jobs.map(row => asAiJob({ ...row, request: { period_start: row.period_start, period_end: row.period_end } }));
   snapshot.meals = meals.map(row => ({ id: String(row.id), patient_id: String(row.patient_id), slot: String(row.slot_label), status: String(row.status), logged_at: String(row.logged_at) }));
   snapshot.records = records.map(row => ({ id: String(row.id), patient_id: String(row.patient_id), kind: row.kind as CareData['kind'], source: row.source as string | undefined, reviewed_at: row.reviewed_at as string | null, created_at: String(row.created_at) }));

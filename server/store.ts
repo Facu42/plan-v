@@ -42,6 +42,7 @@ import { enqueueMemoryOutbox, listMemoryMailbox, processMemoryDeliveries, resetO
 import { resetExerciseMemory } from './exercise/memory.js';
 import { resetResourceMemory } from './resources/memory.js';
 import { resetOrgMemory } from './orgs/memory.js';
+import { resetCarteraMemory } from './cartera/repository.js';
 import type { OutboxEventType } from '../src/types/outbox.js';
 
 export type { PatientInvite, InviteEvent } from './identity/invites.js';
@@ -173,6 +174,8 @@ export type ResourceAssignment = {
 };
 
 export type Patient = {
+  /** Alta de la ficha; ausente en pacientes de ejemplo. */
+  created_at?: string | null;
   weekly_registration?: WeeklyRegistration | null;
   id: string;
   name: string;
@@ -665,6 +668,7 @@ export function createPatient(input: { name: string; email: string; goal: string
   const patient: Patient = {
     id,
     name: input.name.trim(),
+    created_at: new Date().toISOString(),
     initials,
     tone: tones[store.patients.length % tones.length],
     status: 'Ingreso',
@@ -812,6 +816,7 @@ export function resetStore(): void {
   resetExerciseMemory();
   resetResourceMemory();
   resetOrgMemory();
+  resetCarteraMemory();
   store = {
     patients: seedPatients(),
     patientInvites: [],

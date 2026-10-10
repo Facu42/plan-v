@@ -143,6 +143,8 @@ export type DemoNotice = {
 export type Patient = {
   weekly_registration?: WeeklyRegistration | null;
   id: string;
+  /** Alta de la ficha; ausente en pacientes de ejemplo anteriores a este dato. */
+  created_at?: string | null;
   name: string;
   initials: string;
   tone: 'peach' | 'lilac' | 'mint';
