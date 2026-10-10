@@ -6,7 +6,7 @@ import { resourcesApi } from '../../api/resources';
 import { aiJobsApi } from '../../api/ai-jobs';
 import type { AiJobView } from '../../types/ai-jobs';
 import { ApiError, isAbortError } from '../../api/client';
-import { waitForRecipeProposal } from './recipe-ai-flow';
+import { recoverableRecipeJob, waitForRecipeProposal } from './recipe-ai-flow';
 import { careErrorMessage } from '../../api/care';
 import { type ProfessionalRecipe, type RecipeUnit } from '../../types/recipes';
 import { PLAN_SLOTS, type PlanSlot } from '../../types/plans';
@@ -105,6 +105,17 @@ export function useRecipeCatalog(patientId: string) {
   const [aiWarnings, setAiWarnings] = useState<string[]>([]);
   const aiController = useRef<AbortController | null>(null);
   useEffect(() => () => aiController.current?.abort(), []);
+  useEffect(() => {
+    // Una recarga no pierde la propuesta: se retoma la última sin abrir, sin pedir otra.
+    if (!patientId || pendingAiJob) return;
+    const controller = new AbortController();
+    aiJobsApi.list(patientId, controller.signal).then(({ jobs }) => {
+      const recovered = recoverableRecipeJob(jobs);
+      if (!recovered || controller.signal.aborted) return;
+      setPendingAiJob(current => current ?? recovered);
+    }).catch(() => undefined);
+    return () => controller.abort();
+  }, [patientId]); // eslint-disable-line react-hooks/exhaustive-deps
   const [assigning, setAssigning] = useState<ProfessionalRecipe | null>(null);
   const [day, setDay] = useState(() => dateId(new Date()));
   const lock = useRef(false);
@@ -257,6 +268,8 @@ export function RecipeChoice({ catalog }: { catalog: RecipeCatalogState }) {
   </div>;
 }
 
+export const PENDING_PROPOSAL_NOTE = 'Hay una propuesta de receta para este paciente que todavía no abriste. Consultala antes de pedir otra.';
+
 export function RecipeAiForm({ catalog }: { catalog: RecipeCatalogState }) {
   const { busy, description, setDescription, closeEditor, submitAi, pendingAiJob, aiProgress } = catalog;
   return <form className="recipe-form" onSubmit={submitAi} aria-busy={busy}>
@@ -264,7 +277,7 @@ export function RecipeAiForm({ catalog }: { catalog: RecipeCatalogState }) {
     <p>La propuesta usa las alergias y restricciones del paciente seleccionado. Queda como borrador privado para revisar.</p>
     <RecipePatientPicker catalog={catalog} purpose="Propuesta para" />
     <label>Describí el plato<textarea disabled={busy || Boolean(pendingAiJob)} value={description} maxLength={150} placeholder="Por ejemplo: tortilla de verduras para dos porciones" onChange={(event) => setDescription(event.target.value)} /></label>
-    {aiProgress && <p role="status">{aiProgress}</p>}
+    {aiProgress ? <p role="status">{aiProgress}</p> : pendingAiJob && <p role="status">{PENDING_PROPOSAL_NOTE}</p>}
     <footer>
       <NvButton type="submit" disabled={busy || !catalog.patientId || (!pendingAiJob && description.trim().length < 2)}>{busy ? 'Preparando propuesta…' : pendingAiJob ? 'Consultar propuesta' : 'Completar con IA'}</NvButton>
       <button type="button" className="recipe-cancel" disabled={busy} onClick={closeEditor}>Cerrar</button>
@@ -285,7 +298,7 @@ export function RecipeAiNotices({ catalog }: { catalog: RecipeCatalogState }) {
   return <>
     {catalog.aiWarnings.length > 0 && <div className="recipe-ai-warnings" role="status"><strong>Antes de usar esta propuesta</strong><ul>{catalog.aiWarnings.map((warning, index) => <li key={index}>{warning}</li>)}</ul></div>}
     {catalog.aiProgress && catalog.path !== 'ai' && <p role="status">{catalog.aiProgress}</p>}
-    {catalog.pendingAiJob && !catalog.busy && catalog.path !== 'ai' && <NvButton onClick={catalog.resumeAi}>Consultar propuesta</NvButton>}
+    {catalog.pendingAiJob && !catalog.busy && catalog.path !== 'ai' && <><p role="status">{PENDING_PROPOSAL_NOTE}</p><NvButton onClick={catalog.resumeAi}>Consultar propuesta</NvButton></>}
   </>;
 }
 
