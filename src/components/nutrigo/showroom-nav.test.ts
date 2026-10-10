@@ -23,7 +23,7 @@ describe('navegación del espacio paciente', () => {
 describe('navegación del nutricionista', () => {
   it('prioriza pacientes, fichas y planes sin perder los destinos existentes', () => {
     expect(PRO_SURFACES.map((tab) => tab.id)).toEqual([
-      'inicio', 'pacientes', 'plan', 'seguimiento', 'agenda', 'mensajes', 'alimentos', 'biblioteca', 'modelos', 'cobranzas',
+      'inicio', 'pacientes', 'plan', 'seguimiento', 'progreso-global', 'agenda', 'mensajes', 'alimentos', 'biblioteca', 'modelos', 'cobranzas',
     ]);
     expect(PLAN_SUBPAGES.map((tab) => tab.id)).toEqual(['plan', 'compras']);
   });

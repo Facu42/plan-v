@@ -46,6 +46,7 @@ export const PRO_SURFACES: ShellTab[] = [
   { id: 'pacientes', icon: 'users', label: 'Pacientes' },
   { id: 'plan', icon: 'list', label: 'Planes' },
   { id: 'seguimiento', icon: 'sparkle', label: 'Seguimiento' },
+  { id: 'progreso-global', icon: 'trend', label: 'Progreso global' },
   { id: 'agenda', icon: 'calendar', label: 'Agenda' },
   { id: 'mensajes', icon: 'message', label: 'Mensajes' },
   { id: 'alimentos', icon: 'leaf', label: 'Alimentos' },
