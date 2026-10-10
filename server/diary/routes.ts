@@ -27,7 +27,7 @@ function audience(role: 'nutri' | 'paciente') {
 }
 
 function mealLoggedTimelineBody(confidence: number, foodCount: number, macros: { kcal: number } | null) {
-  const time = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  const time = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
   if (foodCount === 0 && confidence === 0 && macros == null) {
     return `${time} · estimación no disponible. Pendiente de Vero.`;
   }
