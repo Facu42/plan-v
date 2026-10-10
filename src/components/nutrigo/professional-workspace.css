@@ -44,3 +44,9 @@
 .pw-indicators label { display:flex; align-items:center; gap:8px; font-size:12px; }
 .pw-indicator-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
 .pw-indicator-foot { margin:0; color:var(--nv-ink-soft); font-size:11px; }
+.pw-global-period { display:flex; align-items:center; gap:8px; font-size:12px; }
+.pw-global-period select { font:inherit; font-size:12px; border:1px solid var(--nv-line); background:var(--nv-card); color:var(--nv-ink); border-radius:12px; padding:10px 14px; }
+.pw-global-alert { margin:0; padding:12px 14px; border:1px solid var(--nv-line); border-radius:12px; font-size:12px; background:var(--nv-card); }
+.pw-global .nv-directory-panel { min-width:0; }
+.pw-cell-label { display:none; font-style:normal; font-size:11px; color:var(--nv-ink-soft); }
+@media(max-width:799px){.pw-global .pw-cell-label{display:block}}

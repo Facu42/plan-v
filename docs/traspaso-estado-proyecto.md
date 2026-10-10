@@ -190,3 +190,6 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 Continuación del cierre de paciente y nutricionista: [correcciones, evidencia y paquete de cinco migraciones](cierre-funcional-plan-v-2026-10-05.md).
 
 Contrato de cada acción, permisos y lecturas al recargar: [recorridos y guía para ambas experiencias](recorridos-y-contratos-plan-v-2026-10-05.md).
+
+## Progreso global (2026-10-10)
+Pantalla `/crm/progreso-global` (rama `claude/progreso-global`, sobre la del PR #89): peso y comidas de toda la cartera por período. Sin migración. Detalle en `docs/progreso-global-2026-10-10.md`.
