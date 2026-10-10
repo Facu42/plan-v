@@ -186,7 +186,8 @@ export function PlanVExperience() {
     const lockedRole = session ? (isNutri ? 'pro' as const : 'patient' as const) : null;
     return (
       <Suspense fallback={<LoadingScreen />}>
-        <PwaChrome />
+        {/* La app de la paciente ofrece instalar en la tarjeta amarilla del menú, como el archivo de Nutrigo. */}
+        <PwaChrome install={lockedRole === 'pro'} />
         <NutrigoShowroom
           darkMode={darkMode}
           onToggleTheme={toggleTheme}

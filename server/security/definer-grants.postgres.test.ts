@@ -60,9 +60,12 @@ const ALLOWED = [
   'get_patient_intake',
   'get_patient_ledger',
   'get_patient_library',
+  // Identity must equal my_patient_id; public projection only; full access required.
+  'get_patient_meal_logs',
   'get_patient_progress',
   'get_privacy_package',
   'get_shopping_list',
+  'get_weekly_registrations',
   'invite_org_member',
   'is_assigned_patient',
   'is_assigned_patient_path',

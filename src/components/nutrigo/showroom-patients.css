@@ -1,4 +1,57 @@
 /* Operational patients directory, scoped to the Nutrigo showroom (.nv-app). */
+.nv-directory-workspace { --directory-ease:cubic-bezier(.23,1,.32,1); display:flex; flex-direction:column; gap:20px; }
+.nv-directory-workspace .pw-work-filters { margin:0; padding:0; gap:14px; }
+.nv-directory-workspace .pw-work-filters label { font-size:12px; color:var(--nv-ink-soft); }
+.nv-directory-workspace .pw-work-filters select { min-height:42px; border-radius:10px; }
+.nv-directory-workspace .nv-directory-summary { margin:0; gap:14px; }
+.nv-directory-workspace .nv-directory-summary>button,.nv-directory-workspace .nv-directory-summary>div { position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:5px; min-height:125px; padding:18px; border:1px solid var(--nv-border); border-radius:14px; background:var(--nv-card); color:var(--nv-ink); text-align:left; font:inherit; }
+.nv-directory-workspace .nv-directory-summary>button { cursor:pointer; }
+.nv-directory-workspace .nv-directory-summary>button:disabled { cursor:default; }
+.nv-directory-workspace .nv-directory-summary>button[aria-pressed=true] { background:var(--nv-green); border-color:var(--nv-accent); }
+.nv-directory-workspace .nv-directory-summary .nv-summary-pending[aria-pressed=true] { background:var(--nv-gold-soft); border-color:var(--nv-gold); }
+.nv-directory-workspace .nv-directory-summary>button>span,.nv-directory-workspace .nv-directory-summary>div>span { display:flex; align-items:center; gap:9px; font-size:12px; font-weight:500; color:var(--nv-ink-soft); }
+.nv-directory-workspace .nv-directory-summary strong { font-size:28px; font-weight:600; line-height:1.3; font-variant-numeric:tabular-nums; }
+.nv-directory-workspace .nv-directory-summary small { font-size:11px; line-height:1.45; color:var(--nv-ink-soft); }
+.nv-app.nv-pro .nv-directory-panel { padding:22px; border:1px solid var(--nv-border); border-radius:16px; background:var(--nv-card); }
+.nv-directory-panel .nv-card-head { margin:0 0 22px; padding:0; }
+.nv-directory-panel .nv-card-head h2 { font-size:18px; font-weight:600; }
+.nv-directory-panel .nv-card-head .nv-button { display:inline-flex; align-items:center; gap:8px; min-height:40px; }
+.nv-directory-toolbar { display:flex; align-items:center; justify-content:space-between; gap:14px; padding-bottom:20px; }
+.nv-directory-toolbar .nv-directory-filters { margin:0; gap:6px; }
+.nv-directory-workspace .nv-directory-filters button { min-height:37px; font-size:12px; padding:8px 13px; }
+.nv-directory-workspace .nv-directory-filters button:not([aria-pressed=true]) { background:var(--nv-track); }
+.nv-directory-workspace .nv-directory-filters span { display:inline-grid; place-items:center; min-width:19px; font-size:11px; color:var(--nv-ink-soft); font-variant-numeric:tabular-nums; }
+.nv-directory-results { color:var(--nv-ink-soft); font-size:12px; white-space:nowrap; }
+.nv-directory-scroll { overflow:auto; }
+.nv-app.nv-pro .nv-directory-panel .nv-directory-table [role=row] { grid-template-columns:minmax(180px,1.2fr) minmax(115px,.8fr) minmax(140px,.9fr) minmax(155px,1fr) minmax(225px,1.35fr); gap:16px; padding:22px 0; align-items:center; }
+.nv-app.nv-pro .nv-directory-panel .nv-directory-table .nv-table-head { padding:13px 0; color:var(--nv-ink-soft); font-size:12px; }
+.nv-directory-panel .nv-directory-table [role=cell] { min-width:0; }
+.nv-directory-panel .nv-directory-table [role=cell]:not(:first-child):not(.nv-directory-actions) { display:flex; flex-direction:column; align-items:flex-start; gap:5px; }
+.nv-directory-panel .nv-directory-table [role=cell] strong { font-size:12px; font-weight:600; line-height:1.5; }
+.nv-directory-panel .nv-directory-table [role=cell] small { color:var(--nv-ink-soft); font-size:11px; line-height:1.5; }
+.nv-directory-panel .nv-directory-table [role=cell]:first-child { gap:10px; align-items:flex-start; }
+.nv-directory-panel .nv-directory-avatar { width:38px; height:38px; min-width:38px; border-radius:12px; font-size:12px; }
+.nv-directory-panel .nv-directory-table [role=cell]:first-child>span:last-child { gap:3px; }
+.nv-directory-panel .nv-directory-table .nv-weekly-pending { display:inline-flex; flex-direction:row; align-items:center; gap:5px; padding:4px 7px; margin-top:3px; border-radius:6px; color:var(--nv-ink); background:var(--nv-gold-soft); font-size:10px; font-weight:500; font-variant-numeric:tabular-nums; }
+.nv-directory-panel .nv-directory-actions { align-content:center; gap:7px; }
+.nv-directory-panel .nv-directory-actions .nv-button { display:inline-flex; align-items:center; gap:5px; min-height:32px; padding:7px 9px; font-size:11px; border-radius:8px; }
+.nv-directory-panel .nv-directory-actions .nv-soft { background:var(--nv-track); border:1px solid var(--nv-border); color:var(--nv-ink); }
+.nv-directory-panel .nv-directory-actions .nv-soft:first-child { background:var(--nv-green); border-color:transparent; }
+.nv-directory-panel .nv-directory-actions .nv-ghost { color:var(--nv-ink-soft); }
+.nv-directory-workspace ::selection { color:var(--nv-ink); background:var(--nv-green); }
+.nv-directory-workspace button:focus-visible { outline:2px solid var(--nv-ink); outline-offset:3px; }
+@media(hover:hover) { .nv-directory-workspace .nv-directory-summary>button:not(:disabled):hover { border-color:var(--nv-ink-soft); } .nv-directory-panel .nv-directory-actions .nv-button:hover { background:var(--nv-green); color:var(--nv-ink); } }
+.nv-app.nv-pro.nv-dark .nv-directory-panel .nv-card-head .nv-button { color:#272932; }
+.nv-app.nv-pro.nv-dark .nv-directory-panel .nv-directory-actions .nv-button.nv-soft { background:var(--nv-track); color:var(--nv-ink); border-color:var(--nv-border); }
+.nv-app.nv-pro.nv-dark .nv-directory-panel .nv-directory-actions .nv-button.nv-soft:first-child { background:var(--nv-green); }
+.nv-app.nv-pro.nv-dark .nv-clinic-shortcuts button:is([aria-current=page],[aria-pressed=true]) { color:#272932; }
+@media(prefers-reduced-motion:no-preference) {
+  .nv-directory-workspace :is(.nv-directory-summary>button,.nv-directory-filters button,.nv-directory-actions .nv-button) { transition:background-color 160ms ease,border-color 160ms ease,transform 120ms var(--directory-ease); }
+  .nv-directory-workspace :is(.nv-directory-summary>button,.nv-directory-filters button,.nv-directory-actions .nv-button):active:not(:disabled) { transform:scale(.98); }
+  .nv-directory-workspace button:focus-visible { transition:none; transform:none; }
+  .nv-directory-workspace .nv-dialog { animation:nv-directory-dialog 220ms var(--directory-ease); transform-origin:center; }
+  @keyframes nv-directory-dialog { from { opacity:.65; transform:translateY(7px) scale(.98); } to { opacity:1; transform:none; } }
+}
 .nv-directory-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:0 0 16px; }
 .nv-directory-summary>div { margin:0; padding:12px 14px; border-radius:10px; background:var(--nv-card); border:1px solid var(--nv-border); }
 .nv-directory-summary dt { font-size:13px; color:var(--nv-muted); }

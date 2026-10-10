@@ -64,7 +64,7 @@ export function proSurfaces(isAdmin: boolean): ShellTab[] {
 export const PRO_MORE: ShellTab[] = PRO_SURFACES.filter((surface) => !PRO_TABS.some((tab) => tab.id === surface.id));
 
 /** Siguen abriendo por enlace directo, fuera del menú. */
-export const PRO_HIDDEN_PAGES: ShowroomPage[] = ['ficha', 'diario', 'progreso', 'compras', 'ejercicio', 'consultas', 'objetivos', 'recetas', 'recursos', 'reciente', 'guardado', 'paneles', 'videollamadas', 'servicio'];
+export const PRO_HIDDEN_PAGES: ShowroomPage[] = ['desarrollo', 'ficha', 'diario', 'progreso', 'compras', 'ejercicio', 'consultas', 'objetivos', 'recetas', 'recursos', 'reciente', 'guardado', 'paneles', 'videollamadas', 'servicio'];
 
 export function proMore(isAdmin: boolean): ShellTab[] {
   return isAdmin ? [...PRO_MORE, SERVICE_TAB] : PRO_MORE;

@@ -25,6 +25,7 @@ jobs:
       - run: npm run check
       - run: npm run build
       - run: npm run check:migrations
+      - run: npm run check:views
       - run: npm run check:secrets
 
   secrets:

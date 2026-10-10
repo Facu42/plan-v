@@ -112,7 +112,7 @@ describe.skipIf(!url)('corte 1 en Postgres descartable local (Docker)', () => {
 
   it('RLS-03 Paciente A sólo ve sus vistas, nunca a B', async () => {
     expect(await asUser(patientAUser, 'select id from public.patients_patient_view')).toEqual([{ id: patientA }]);
-    expect(await asUser(patientAUser, 'select id from public.meal_logs_patient_view')).not.toHaveLength(0);
+    expect(await asUser(patientAUser, 'select id from public.get_patient_meal_logs($1)', [patientA])).not.toHaveLength(0);
     expect(await asUser(patientAUser, 'select id from public.appointments_patient_view')).toHaveLength(1);
     expect(await asUser(patientAUser, 'select * from public.patients_patient_view where id=$1', [patientB])).toEqual([]);
     expect(await asUser(patientBUser, 'select id from public.patients_patient_view')).toEqual([{ id: patientB }]);
@@ -127,7 +127,7 @@ describe.skipIf(!url)('corte 1 en Postgres descartable local (Docker)', () => {
 
   it('RLS-05 las vistas de paciente no exponen columnas profesionales', async () => {
     const patientCols = Object.keys((await asUser(patientAUser, 'select * from public.patients_patient_view'))[0]);
-    const mealCols = Object.keys((await asUser(patientAUser, 'select * from public.meal_logs_patient_view'))[0]);
+    const mealCols = Object.keys((await asUser(patientAUser, 'select * from public.get_patient_meal_logs($1)',[patientA]))[0]);
     const apptCols = Object.keys((await asUser(patientAUser, 'select * from public.appointments_patient_view'))[0]);
     for (const column of ['adherence_why', 'plan_b', 'next_focus', 'sensitive_hours']) {
       expect(patientCols).not.toContain(column);
@@ -142,7 +142,7 @@ describe.skipIf(!url)('corte 1 en Postgres descartable local (Docker)', () => {
   it('RLS-06 Paciente A inserta meal_logs propios pendientes', async () => {
     const logId = '20000000-0000-4000-a000-0000000000a6';
     await asUser(patientAUser, `insert into public.meal_logs(id,patient_id,slot_label,status,note_for_nutri,photo_path) values($1,$2,'Cena','pending_review','',$3)`, [logId, patientA, `patients/${patientA}/foto.jpg`]);
-    expect(await asUser(patientAUser, 'select id from public.meal_logs_patient_view where id=$1', [logId])).toEqual([{ id: logId }]);
+    expect(await asUser(patientAUser, 'select id from public.get_patient_meal_logs($2) where id=$1', [logId,patientA])).toEqual([{ id: logId }]);
   });
 
   it('RLS-07 rechaza logs confirmados, nota interna o path de B', async () => {
@@ -161,7 +161,7 @@ describe.skipIf(!url)('corte 1 en Postgres descartable local (Docker)', () => {
   it('RLS-09 pendiente no lee menú/logs/turnos; mensajes enviados sí', async () => {
     await asUser(nutriA, `insert into public.messages(nutritionist_id,patient_id,author_id,body,sent_at) values($1,$2,$3,'Bienvenida',now())`, [nutriAId, pendingA, nutriA]);
     expect(await asUser(pendingUser, 'select * from public.meal_slots')).toEqual([]);
-    expect(await asUser(pendingUser, 'select * from public.meal_logs_patient_view')).toEqual([]);
+    expect(await asUser(pendingUser, 'select * from public.get_patient_meal_logs($1)',[pendingA])).toEqual([]);
     expect(await asUser(pendingUser, 'select * from public.appointments_patient_view')).toEqual([]);
     expect(await asUser(pendingUser, 'select body from public.messages_patient_view')).toEqual([{ body: 'Bienvenida' }]);
     await expect(asUser(pendingUser, `insert into storage.objects(bucket_id,name) values('meal-photos',$1)`, [`patients/${pendingA}/foto.jpg`])).rejects.toMatchObject({ code: '42501' });

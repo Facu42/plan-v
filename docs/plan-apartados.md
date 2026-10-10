@@ -340,3 +340,44 @@ Comparación previa Nutriboost 7:11: ambas categorías presentes, aplicación no
 2026-10-08: Facundo autorizó aplicar a producción el dashboard desarrollado. Ocho migraciones aplicadas; integración de cambios vigentes y correcciones de lectura de componentes/indicaciones en paciente. Registro: [publicación del dashboard web](publicacion-dashboard-web-2026-10-08.md). Web/API/worker pendientes de verificación final en ese registro.
 
 Cierre productivo del dashboard desarrollado: PR73 integrado en 03d405b, ocho migraciones aplicadas y web/API/worker con la nueva versión comprobada. Suite 2114 aprobadas/2 omitidas; ensayo descartable con sesiones firmadas 27 casos y navegador 42 comprobaciones aprobados. [Registro](publicacion-dashboard-web-2026-10-08.md).
+
+Planificación web · 2026-10-08: instalado emilkowalski/skills por pedido de Facundo y aplicada su guía de diseño. Contraste previo Nutriboost 1:43; detectada diferencia entre meta confirmada y objetivo guardado en el plan. Propuesta visual preparada, recorrido de incorporación al borrador pendiente de elección del usuario por claridad de experiencia. [Registro y acción](planificacion-dashboard-web-2026-10-08.md). Sin producción ni cambios a pacientes.
+
+Planificación web · cierre del incremento, 2026-10-08: Facundo rechazó la maqueta independiente y pidió respetar Nutrigo; aplicada pestaña propia con componentes originales. Decidió actualización automática del objetivo del borrador al confirmar meta. Implementada en memoria y SQL transaccional, conserva publicado; nuevos planes toman confirmada. 2119 pruebas aprobadas/2 omitidas, tipos/build/migraciones/secretos y revisión de código/realidad aprobados; recorrido local confirmado. IMC/referencias y otras ecuaciones siguen pendientes. [Registro actualizado](planificacion-dashboard-web-2026-10-08.md). Sin producción.
+
+### Planificación: segundo incremento (2026-10-08)
+IMC y referencias generales de peso incorporadas con fuente CDC, límite de edad20+, resumen desplegable Nutrigo y pruebas de límites. Detalle, evidencias y pendientes en docs/planificacion-dashboard-web-2026-10-08.md. Sin producción. PR #78.
+
+### Planificación: comparación de metas (2026-10-08)
+Propuesta vs meta confirmada con diferencias de calorías/macros, revisada contra Nutriboost. Facundo decide conservar objetivos sin exigir peso numérico. 2136 pruebas aprobadas/2 omitidas. CI de db09fd9 completo aprobado. Detalle y evidencia en docs/planificacion-dashboard-web-2026-10-08.md. Sin producción; PR #78.
+
+### Integración paciente-dashboard (2026-10-08)
+Leídos definición de producto y auditoría de conexión del hilo paciente en634b0c6. Secuencia recomendada: iniciar integración ahora por alergias/permisos → plan/meta/versión recibida → registros/seguimiento → agenda/mensajes → objetivos/recursos/cuota. No esperar paridad completa. Responsabilidades, pendientes y decisiones no confirmadas registrados en [coordinación](coordinacion-paciente-dashboard-2026-10-08.md). Sin cambios productivos ni integración automática de ramas.
+
+### Integración: alergias al asignar receta por día (2026-10-08)
+Backend local corregido en codex/recipe-day-allergies: evaluador existente y control SQL atómico, no asigna ni reemplaza ante conflicto. 2140pruebas aprobadas/2omitidas. Ensayo visual detectó error detrás de ventana; ajuste UI detenido según pedido de Facundo, pregunta de ubicación pendiente. No se acredita terminado ni publicado. [Registro y evidencia](integracion-receta-alergias-2026-10-08.md).
+
+Cierre de la pausa de asignación (2026-10-08): Facundo aprobó error dentro de ventana encima deConfirmar. Implementado aviso único, accesible y visible; paciente/fecha conservados. Navegador ficticio rechaza, luego asigna compatible desde misma ventana; lectura paciente verificada. Ensayo firmado actualizado, pendienteCI. Registro: integracion-receta-alergias-2026-10-08.md. Sin producción.
+
+Integración paciente/CRM · 2026-10-08: retiro y renovación del permiso de medidas, lecturas protegidas en ambos roles y alertas, revisión denegada sin permiso y conservación del historial. Detalle en [permiso de medidas](integracion-permiso-medidas-2026-10-08.md). Sin producción.
+
+Agenda compartida · 2026-10-08: consulta visible durante su duración para paciente y profesional, enlace conservado y filtro de consultas terminadas en ficha/lista. [Evidencia y límites](integracion-consulta-en-curso-2026-10-08.md). Migración preparada; sin producción.
+
+### Registro semanal del dashboard — 2026-10-09
+Resumen profesional compartido y migración preparados localmente; pendientes reales y agua desconocida/cero explícito verificados. Detenido ajuste visual de tabla por comodidad para decidir con Facundo. [Acciones y evidencia](registro-semanal-dashboard-2026-10-09.md). Sin producción.
+
+### Rediseño del consultorio · 2026-10-09
+Ver docs/redisenio-directorio-dashboard-2026-10-09.md: navegación y directorio preservan Nutrigo; mapa de alcance disponible/futuro excluye Academy. Registro semanal integrado y verificado; 2159 pruebas pasan. Sin publicación productiva.
+## Seguridad de vistas de paciente · 2026-10-09
+Arreglo independiente del dashboard, con ECC y reproducción descartable. Ver docs/security/meal-view-fix-2026-10-09.md. Se cierra escritura de meal_logs_patient_view, se auditan vistas equivalentes y se preserva lectura propia pública mediante RPC autorizada; producción sin modificar. CI con advisors antes/después y sesiones firmadas pendiente.
+
+Cierre seguridad: PR83 y ensayo Supabase temporal 37944764953 aprobados. Advisors comparados antes/después, lectura y escrituras A/B, privacidad y retirada de acceso acreditadas. Producción intacta.
+
+Control para que no vuelva: en cada PR, después de aplicar las migraciones en una base temporal, falla si una vista de public concede escritura a anon o authenticated, o si no tiene security_invoker. La lista de excepciones queda vacía: la ficha y el acceso también tienen security_invoker. Las tablas que ya escriben conservan su permiso; una tabla o vista nueva ya no nace con escritura para esas dos cuentas. [Cómo funciona](security/control-vistas-publicas-2026-10-09.md).
+
+## Perfil, acceso y varios consultorios · 2026-10-09
+Facundo administra el servicio y lo venderá a varias nutricionistas. Corrección de
+las dos vistas restantes preparada sin abrir datos clínicos ni permisos globales
+al administrador. [Implementación, pruebas y criterios de escala](security/perfiles-consultorios-2026-10-09.md).
+Migración y ensayo Auth/PostgREST/advisors preparados. La migración
+`invoker_patient_profile_projections` va con esta publicación.

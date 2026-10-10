@@ -2,6 +2,7 @@ import { registerDemoState } from '../demo/state.js';
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError as TargetError } from '../care/errors.js';
 import type { BodyData, TargetInput, TargetResult } from '../../src/lib/nutrition-target.js';
+import { syncConfirmedMemoryTarget } from '../plans/repository.js';
 
 
 export type StoredTarget = { patient_id: string; inputs: TargetInput; result: TargetResult; published_at: string | null; updated_at: string };
@@ -46,6 +47,7 @@ export async function saveTarget(patientId: string, inputs: TargetInput, result:
   const published = publish ? row : previous.published;
   const draft = publish ? null : row;
   const workspace = { target: draft ?? published, draft, published, revision: previous.revision + 1 };
+  if (publish) syncConfirmedMemoryTarget(patientId, { kcal: result.kcal, protein_g: result.protein_g, carbs_g: result.carbs_g, fat_g: result.fat_g, revision: row.updated_at, published_at: now });
   memory.set(patientId, workspace);
   return workspace;
 }

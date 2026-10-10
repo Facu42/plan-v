@@ -58,4 +58,12 @@ jobs:
       - run: npm run test:auth-isolation
         env:
           PLANV_PRODUCT_BROWSER: '1'
+          PLANV_SECURITY_EVIDENCE_DIR: ${{ runner.temp }}/planv-security-advisors
+      - name: Guardar advisors de la base de prueba
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-view-advisors
+          path: ${{ runner.temp }}/planv-security-advisors
+          if-no-files-found: ignore
 

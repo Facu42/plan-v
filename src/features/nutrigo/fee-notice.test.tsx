@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import inicio from './source/12-792.json';
-import { findSource, nodeName, sourceText, type SourceNode } from './SourceView';
+import { findSource, nodeName, sourceText, SourceView, type SourceNode } from './SourceView';
 import { feeBannerBinding, noticeFromLedger } from './fee-notice';
 import type { PatientLedger } from '../../types/fees';
 
@@ -26,7 +26,9 @@ describe('aviso de cuota en el banner del archivo', () => {
     // El <p> del archivo tiene text-[0px]: el tamaño real va en el <span>.
     expect(html).toBe('<span class="leading-[1.5] text-[12px]">Tenés una cuota pendiente de $45.000</span>');
     const action = feeBannerBinding(button, 'aviso', navigate)!;
-    expect(action.text).toBe('Ver pagos');
+    expect(action.label).toBe('Ver pagos');
+    expect(action.text).toBeUndefined();
+    expect(renderToStaticMarkup(<SourceView source={button} resolve={node => feeBannerBinding(node, 'aviso', navigate)} translate={t => t} />)).toMatch(/text-\[12px\][^>]*>Ver pagos</);
     action.onClick?.();
     expect(navigate).toHaveBeenCalledWith('pagos');
   });

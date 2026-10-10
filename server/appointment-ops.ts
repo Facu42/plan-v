@@ -2,6 +2,17 @@ export const WEEK_DAY_NAMES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viern
 
 export const DEFAULT_APPOINTMENT_TIMEZONE = 'America/Argentina/Buenos_Aires';
 
+// El contrato de turnos admite hasta 180 minutos. Amplía la consulta a
+// posibles turnos en curso; después se comprueba su fin real.
+export function appointmentReadSince(now: Date): string {
+  return new Date(now.getTime() - 180 * 60_000).toISOString();
+}
+export function appointmentHasNotEnded(row: { starts_at?: unknown; duration_min?: unknown }, now: Date): boolean {
+  const start = Date.parse(String(row.starts_at ?? ''));
+  const duration = Number(row.duration_min);
+  return Number.isFinite(start) && Number.isFinite(duration) && duration > 0 && start + duration * 60_000 > now.getTime();
+}
+
 export type AppointmentSlot = {
   when: string;
   duration: number;

@@ -17,7 +17,8 @@ export function feeBannerBinding(node: SourceNode, notice: string | null, onNavi
   if (!notice) return undefined;
   const text = sourceText(node);
   if (node.tag === 'p' && /^Start your health journey/.test(text)) return { children: <span className="leading-[1.5] text-[12px]">{notice}</span> };
-  if (nodeName(node) === 'Button' && text === 'Claim Now!') return { onClick: () => onNavigate('pagos'), label: 'Ver pagos', text: 'Ver pagos' };
+  if (nodeName(node) === 'Button' && text === 'Claim Now!') return { onClick: () => onNavigate('pagos'), label: 'Ver pagos' };
+  if (node.tag === 'p' && text === 'Claim Now!') return { text: 'Ver pagos' };
   return undefined;
 }
 

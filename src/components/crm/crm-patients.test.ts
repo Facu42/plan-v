@@ -3,6 +3,7 @@ import type { Patient } from '../../types';
 import { filterDirectoryPatients, getPatientDirectoryMetrics } from './crm-patients';
 
 const patient = (overrides: Partial<Patient> = {}): Patient => ({
+  weekly_registration: {start:'2026-10-03',end:'2026-10-09',recorded_days:0,meals_logged:0,meals_pending:0,water_days:0,water_average:null,pending_review:0},
   id: 'pat-1',
   name: 'Ana Pérez',
   initials: 'AP',
@@ -35,11 +36,16 @@ const patient = (overrides: Partial<Patient> = {}): Patient => ({
 
 const patients = [
   patient({ id: 'ana', name: 'Ana Pérez', goal: 'Organizar las cenas' }),
-  patient({ id: 'sofia', name: 'Sofía Ruiz', status: 'Atención', goal: 'Mejorar la hidratación', adherence_score: 58 }),
+  patient({ id: 'sofia', name: 'Sofía Ruiz', status: 'Atención', goal: 'Mejorar la hidratación', adherence_score: 58, weekly_registration: {start:'2026-10-03',end:'2026-10-09',recorded_days:1,meals_logged:1,meals_pending:1,water_days:0,water_average:null,pending_review:1} }),
   patient({ id: 'marina', name: 'Marina Costa', archived_at: '2026-09-08T20:00:00.000Z' }),
 ];
 
 describe('CRM patient directory helpers', () => {
+  it('no convierte falta de registros ni puntaje bajo en un pendiente',()=>{
+    const empty=patient({adherence_score:0});
+    expect(filterDirectoryPatients([empty],'','attention')).toEqual([]);
+    expect(getPatientDirectoryMetrics([patient({weekly_registration:null})]).attention).toBeNull();
+  });
   it('searches active patients by name, status and goal', () => {
     expect(filterDirectoryPatients(patients, 'sofía', 'active').map(({ id }) => id)).toEqual(['sofia']);
     expect(filterDirectoryPatients(patients, 'atención', 'active').map(({ id }) => id)).toEqual(['sofia']);

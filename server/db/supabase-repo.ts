@@ -1,3 +1,4 @@
+import { argentinaToday } from '../progress/derive.js';
 import type { Brief, MealLog, Message, Patient } from '../../src/types/index.ts';
 import { signMealPhotos } from '../care/meal-photos.js';
 import { resolveBillingStatus } from '../../src/billing.ts';
@@ -7,6 +8,7 @@ import type { ListPage } from '../pagination.ts';
 import { getRequestDb, privilegedDb } from './supabase-client.ts';
 import { listThreadMessagesPersist } from '../messages/repository.js';
 import { listPatientAppointmentPersist } from '../appointments/repository.js';
+import { appointmentHasNotEnded, appointmentReadSince } from '../appointment-ops.js';
 import { writeOpsLog } from '../ops/log.js';
 import {
   appointmentColumns,
@@ -253,6 +255,7 @@ async function loadPatientExtras(
   const sb = getRequestDb();
 
   const timelineQuery = sb.from('timeline_events').select('id,kind,title,body,visibility,occurred_at').eq('patient_id', patientId);
+  const appointmentNow = new Date();
   const scopedTimeline = audience === 'patient'
     ? timelineQuery.eq('visibility', 'patient')
     : timelineQuery;
@@ -264,11 +267,13 @@ async function loadPatientExtras(
 
   const [{ data: slots }, { data: logs }, { data: msgs }, briefsResult, { data: habits }, { data: appts }, { data: timelineRows }, resourceAssignments] = await Promise.all([
     sb.from('meal_slots').select('weekday, slot, title').eq('patient_id', patientId).order('weekday').order('slot'),
-    sb.from(audience === 'patient' ? 'meal_logs_patient_view' : 'meal_logs').select(mealLogColumns[audience]).eq('patient_id', patientId).order('logged_at', { ascending: false }).limit(20),
+    audience === 'patient'
+      ? sb.rpc('get_patient_meal_logs', { target_patient: patientId })
+      : sb.from('meal_logs').select(mealLogColumns.professional).eq('patient_id', patientId).order('logged_at', { ascending: false }).limit(20),
     sb.from(audience === 'patient' ? 'messages_patient_view' : 'messages').select(messageColumns[audience]).eq('patient_id', patientId).order('sent_at', { ascending: false }).limit(MESSAGE_PAGE_SIZE),
     briefQuery,
     sb.from('habit_logs').select('*').eq('patient_id', patientId).order('date', { ascending: false }).limit(14),
-    sb.from(audience === 'patient' ? 'appointments_patient_view' : 'appointments').select(appointmentColumns[audience]).eq('patient_id', patientId).eq('status', 'scheduled').gte('starts_at', new Date().toISOString()).order('starts_at', { ascending: true }).limit(1),
+    sb.from(audience === 'patient' ? 'appointments_patient_view' : 'appointments').select(appointmentColumns[audience]).eq('patient_id', patientId).eq('status', 'scheduled').gte('starts_at', appointmentReadSince(appointmentNow)).order('starts_at', { ascending: true }),
     scopedTimeline.order('occurred_at', { ascending: false }).limit(20),
     loadResourceAssignments([patientId]),
   ]);
@@ -344,14 +349,15 @@ async function loadPatientExtras(
     patient_id: h.patient_id as string,
     date: h.date as string,
     hydration: (h.hydration as number) ?? 0,
+    hydration_declared: h.hydration_declared === true,
     energy: (h.energy as string | null) ?? null,
     sleep_minutes: (h.sleep_minutes as number | null) ?? null,
     steps: (h.steps as number | null) ?? null,
   }));
-  const todayHabit = habit_logs.find((h) => h.date === localDateId(new Date()));
+  const todayHabit = habit_logs.find((h) => h.date === argentinaToday(new Date()));
 
   const listedAppt = await listPatientAppointmentPersist(patientId);
-  const nextAppt = rows(appts)[0];
+  const nextAppt = rows(appts).find(appt => appointmentHasNotEnded(appt, appointmentNow));
   const appointment = listedAppt ? listedAppt.appointment : mapScheduledAppointment(nextAppt);
   const appointment_history = listedAppt?.history ?? [];
 
@@ -447,6 +453,7 @@ export async function sbListPatientsForNutri(userId: string, query: { offset: nu
   const ids = pageRows.map((patientRow) => String(patientRow.id));
 
   const nextByPatient = new Map<string, Record<string, unknown>>();
+  const appointmentNow = new Date();
   if (ids.length > 0) {
     // Sin permiso de tabla para la nutricionista: lo lee el servidor, sólo de las pacientes de esta página
     // (salieron de su consulta con permisos de fila).
@@ -454,9 +461,10 @@ export async function sbListPatientsForNutri(userId: string, query: { offset: nu
       .select(appointmentColumns.professional)
       .in('patient_id', ids)
       .eq('status', 'scheduled')
-      .gte('starts_at', new Date().toISOString())
+      .gte('starts_at', appointmentReadSince(appointmentNow))
       .order('starts_at', { ascending: true });
     for (const appt of rows(appts)) {
+      if (!appointmentHasNotEnded(appt, appointmentNow)) continue;
       const patientId = String(appt.patient_id);
       if (!nextByPatient.has(patientId)) nextByPatient.set(patientId, appt);
     }
@@ -720,7 +728,7 @@ export async function sbDismissBrief(patientId: string, dismissedBy: string): Pr
 
 export async function sbUpdateHabits(patientId: string, data: { hydration?: number; energy?: string | null; sleep_minutes?: number | null; steps?: number | null }): Promise<void> {
   const sb = getRequestDb();
-  const today = localDateId(new Date());
+  const today = argentinaToday(new Date());
   const { data: existing } = await sb.from('habit_logs').select('*')
     .eq('patient_id', patientId).eq('date', today).maybeSingle();
 
@@ -735,7 +743,7 @@ export async function sbUpdateHabits(patientId: string, data: { hydration?: numb
       ...('steps' in existing ? { steps: existing.steps } : {}),
     } : {}),
   };
-  if (data.hydration !== undefined) payload.hydration = data.hydration;
+  if (data.hydration !== undefined) { payload.hydration = data.hydration; payload.hydration_declared = true; }
   if (data.energy !== undefined) payload.energy = data.energy;
   if (data.sleep_minutes !== undefined) payload.sleep_minutes = data.sleep_minutes;
   if (data.steps !== undefined) payload.steps = data.steps;

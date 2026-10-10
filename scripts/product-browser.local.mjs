@@ -136,7 +136,7 @@ try {
   check((await read(patient,`/api/patients/${pid}/care`)).consented.includes('ai_menu_draft')===false,'catálogo de permisos recuperado en la misma pantalla tras un error sin alterar la decisión guardada');
   await B('viewport','1440x1000');
   await logout();phase='ficha y meta profesional';await login(professional,`/crm/ficha?paciente=${pid}&seccion=ingreso`);
-  await button('Marcar ingreso como revisado');await button('Confirmar y compartir');await until("document.body.innerText.includes('Meta confirmada:')");
+  await button('Marcar ingreso como revisado');await until("document.body.innerText.includes('Ya revisado')" );await button('Planificación');await button('Confirmar y compartir');await until("document.body.innerText.includes('Meta confirmada:')");
   const target=await read(patient,`/api/patients/${pid}/nutrition-target`);check(Boolean(target.target?.published_at),'meta confirmada visible sólo al publicarse');
   phase='receta manual y asignación';
   await B('goto',origin+`/crm/recetas?paciente=${pid}`);await button('Nueva receta');await B('click','.recipe-choice button:first-child');
@@ -146,11 +146,22 @@ try {
   await button('Guardar borrador');await until("document.body.innerText.includes('Borrador guardado en el catálogo')");
   const catalog=await read(professional,'/api/recipes');const recipe=catalog.recipes.find(r=>r.title==='Arroz con vegetales');check(recipe?.current.card.macros.kcal===200,'receta manual conserva calorías declaradas');
   await button('Cerrar creación de receta');await until('!document.querySelector(".recipe-form")');await control('[aria-label="Ver receta Arroz con vegetales"]');await button('Publicar borrador');await until("document.body.innerText.includes('Revisión publicada')");
-  await button('Asignar versión publicada');await B('select','.recipe-overlay label:has-text("Asignar a") select',pid);await field('Día',today,'.recipe-overlay ');await button('Confirmar asignación');await until("document.body.innerText.includes('Asignada al día')");
+  await button('Asignar versión publicada');await B('select','.recipe-overlay label:has-text("Asignar a") select',pid);await field('Día',today,'.recipe-overlay ');phase='asignación incompatible bloqueada';
+  try {
+    await pool.query("update public.intake_sessions set payload=jsonb_set(payload,'{allergies}',$2::jsonb) where patient_id=$1",[pid,JSON.stringify({state:'reported',items:['Arroz']})]);
+    await button('Confirmar asignación');await until("document.querySelector('.recipe-overlay [role=alert]')?.textContent.includes('antes de asignar')");
+    await until(`document.querySelector('.recipe-overlay label input[type=date]')?.value===${JSON.stringify(today)} && document.querySelector('.recipe-overlay label select')?.value===${JSON.stringify(pid)}`);
+    check((await read(patient,`/api/patients/${pid}/recipe-days?date=${today}`)).assignments.length===0,'asignación incompatible rechazada sin llegar al día de la paciente');
+    check(!(await read(patient,`/api/patients/${pid}/recipes`)).recipes.some(r=>r.id===recipe.id),'receta incompatible no entra en las recetas asignadas');
+    await until('!!document.querySelector(".recipe-overlay")');
+  } finally {
+    await pool.query("update public.intake_sessions set payload=jsonb_set(payload,'{allergies}',$2::jsonb) where patient_id=$1",[pid,JSON.stringify({state:'none',items:[]})]);
+  }
+  phase='asignación compatible';await button('Confirmar asignación');await until("document.body.innerText.includes('Asignada al día')");
   check((await read(patient,`/api/patients/${pid}/recipe-days?date=${today}`)).assignments.length===1,'receta publicada asignada por fecha');
-  phase='plan manual';await B('goto',origin+`/crm/plan?paciente=${pid}`);await B('wait','.meal-plan-form');
-  await field('Desde',today,'.meal-plan-form ');await field('Hasta',today,'.meal-plan-form ');
-  await B('fill','[aria-label="Fecha 1"]',today);await control('[aria-label="Elegir receta para indicación 1"]');await B('wait','.plan-recipe-picker-results');await B('click','.plan-recipe-picker-results button:has-text("Arroz con vegetales")');await field('Porciones a agregar','1','.plan-recipe-picker ');await button('Agregar al borrador');await until('!document.querySelector(".plan-recipe-picker")');await B('fill','[aria-label="Nota 1"]','Indicación publicada');
+  phase='plan manual';await B('goto',origin+`/crm/plan?paciente=${pid}`);await B('wait','.meal-plan-form');await B('wait','[aria-label="Fecha 1"]');
+  await B('fill','[aria-label="Fecha 1"]',today);await field('Desde',today,'.meal-plan-form ');await field('Hasta',today,'.meal-plan-form ');
+  await control('[aria-label="Elegir receta para indicación 1"]');await B('wait','.plan-recipe-picker-results');await B('click','.plan-recipe-picker-results button:has-text("Arroz con vegetales")');await field('Porciones a agregar','1','.plan-recipe-picker ');await button('Agregar al borrador');await until('!document.querySelector(".plan-recipe-picker")');await B('fill','[aria-label="Nota 1"]','Indicación publicada');
   await B('click','.meal-plan-form button[type="submit"]');await until("document.body.innerText.includes('Borrador guardado')");
   await button('Publicar v1');await until("document.body.innerText.includes('Plan publicado')");
   let published=await read(patient,`/api/patients/${pid}/plans`);check(published.plan?.items[0].public_note==='Indicación publicada','publicación del contenido revisado');
@@ -193,7 +204,18 @@ try {
   await reloadContains('Caminata');check((await read(professional,`/api/patients/${pid}/exercise?audience=pro`)).exercise.activities.length===1,'actividad visible desde ambos roles tras recarga');
   phase='medidas';await B('goto',origin+'/app/progreso');await button('Registrar peso y medidas');await B('click','.care-consent label:has-text("Puedo cargar peso o medidas") input');await readUntil(patient,`/api/patients/${pid}/care?audience=patient`,r=>r.consented.includes('measurement'));await button('Registrar peso');await field('Peso','63','.care-form ');await button('Guardar registro');await until("document.body.innerText.includes('Registro guardado y disponible')");await B('click','[aria-label="Cerrar registros"]');await B('reload');
   check((await read(professional,`/api/patients/${pid}/care?audience=pro`)).measurements.some(m=>m.kind==='weight'&&m.value_numeric===63&&m.unit==='kg'&&m.source==='patient'),'medida opcional persistente con consentimiento y origen paciente');
-  phase='fotos y estudios privados';await button('Registrar peso y medidas');
+  phase='retiro del permiso de medidas';await button('Registrar peso y medidas');
+  await until('(()=>{const e=document.querySelector(".care-consent");if(!e||e.querySelector("[role=status]")||e.querySelectorAll("input[type=checkbox]").length!==3)return false;if(!e.open)e.querySelector("summary").click();return e.open;})()');
+  await B('click','.care-consent label:has-text("Puedo cargar peso o medidas") input');
+  await readUntil(patient,`/api/patients/${pid}/care`,r=>!r.consented.includes('measurement')&&r.measurements.length===0&&r.records.every(x=>!['weight','waist','hip'].includes(x.data.kind)));
+  const withdrawn=await read(professional,`/api/patients/${pid}/care?audience=pro`);
+  check(withdrawn.measurements.length===0&&withdrawn.records.every(x=>!['weight','waist','hip'].includes(x.data.kind)),'retirar medidas corta el acceso del paciente y la profesional');
+  await until('(()=>{const label=Array.from(document.querySelectorAll(".care-consent label")).find(e=>e.textContent.includes("Puedo cargar peso o medidas"));const input=label?.querySelector("input");return !!input&&!input.checked&&!input.disabled;})()');
+  await B('click','.care-consent label:has-text("Puedo cargar peso o medidas") input');
+  await readUntil(patient,`/api/patients/${pid}/care`,r=>r.consented.includes('measurement')&&r.measurements.some(m=>m.kind==='weight'&&m.value_numeric===63));
+  check((await read(professional,`/api/patients/${pid}/care?audience=pro`)).measurements.some(m=>m.kind==='weight'&&m.value_numeric===63),'renovar el permiso conserva el historial anterior');
+  await until('(()=>{const label=Array.from(document.querySelectorAll(".care-consent label")).find(e=>e.textContent.includes("Puedo cargar peso o medidas"));const input=label?.querySelector("input");return !!input&&input.checked&&!input.disabled;})()');
+  phase='fotos y estudios privados';
   // El catálogo abre el acordeón al cargar y puede cerrarlo al terminar si ya
   // existe el permiso de medidas. Esperar los controles antes de abrirlo evita
   // intentar pulsar una casilla mientras cambia ese estado de carga.
@@ -214,6 +236,17 @@ try {
   const appointment=(await read(patient,`/api/patients/${pid}`)).patient.appointment;
   const appointmentDay=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(appointment.starts_at));
   await B('goto',origin+'/app/agenda');await B('fill','[aria-label="Elegir mes"]',appointmentDay.slice(0,7));await B('click',`[data-calendar-date="${appointmentDay}"]`);await button('Confirmar');await readUntil(professional,`/api/patients/${pid}`,r=>r.patient.appointment?.patient_reply==='attending');await B('reload');check(true,'confirmación de turno persistente');
+  phase='consulta en curso';
+  const originalAppointment=(await pool.query("select id,starts_at from public.appointments where patient_id=$1 and status='scheduled' order by starts_at limit 1",[pid])).rows[0];
+  try {
+    const ongoing=(await pool.query("update public.appointments set starts_at=clock_timestamp()-interval '10 minutes' where id=$1 returning (starts_at at time zone 'America/Argentina/Buenos_Aires')::date::text as day",[originalAppointment.id])).rows[0];
+    for(const actor of [patient,professional]) check((await read(actor,`/api/patients/${pid}`)).patient.appointment?.meet_url==='https://example.test/consulta','consulta en curso conserva el enlace para ambos roles');
+    await B('reload');await until("document.body.innerText.includes('Entrar a videollamada')");
+    check((await B('js',"Array.from(document.querySelectorAll('a')).some(a=>a.textContent.includes('Entrar a videollamada')&&a.getAttribute('href')==='https://example.test/consulta')")).includes('true'),'enlace de videollamada corresponde a la consulta vigente');
+    check(true,'paciente mantiene la videollamada al recargar durante la consulta');
+    await pool.query("update public.appointments set starts_at=clock_timestamp()-make_interval(mins=>duration_min+1) where id=$1",[originalAppointment.id]);
+    for(const actor of [patient,professional]) check((await read(actor,`/api/patients/${pid}`)).patient.appointment===null,'consulta finalizada deja de aparecer como vigente');
+  } finally { await pool.query('update public.appointments set starts_at=$1 where id=$2',[originalAppointment.starts_at,originalAppointment.id]); }
   await B('goto',origin+'/app/pagos');await B('fill','#cbz-report-amount','1000');await B('fill','#cbz-report-note','Aviso ficticio del recorrido');await button('Avisar que pagué');await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.payments.some(p=>p.status==='reported'));
   await logout();await B('viewport','1440x1000');await login(professional,'/crm/cobranzas');await B('click','[aria-label="Ver cobranzas de Paciente ficticia"]');await button('Confirmar');await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.payments.some(p=>p.status==='confirmed'&&p.amount===1000));await B('reload');check(true,'aviso de pago confirmado por profesional persiste sin cobro automático');
   phase='seguimiento profesional';await B('goto',origin+`/crm/ficha?paciente=${pid}&seccion=registros`);await button('Marcar revisado');await readUntil(patient,`/api/patients/${pid}/care`,r=>r.records.some(x=>x.reviewed_at));await B('reload');check(true,'revisión profesional de un registro conserva su estado');

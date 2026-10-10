@@ -17,6 +17,7 @@ type Actor = { id: string; token: string; client: SupabaseClient };
 let pool: pg.Pool;
 let anonymous: SupabaseClient;
 let ownerA: Actor; let ownerB: Actor; let patientA: Actor; let patientB: Actor;
+let platformAdmin: Actor;
 const pidA = randomUUID(); const pidB = randomUUID();
 let nidA: string;
 let messageA: string;
@@ -68,6 +69,8 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     }
     ownerA = await actor('nutri-a'); ownerB = await actor('nutri-b');
     patientA = await actor('paciente-a'); patientB = await actor('paciente-b');
+    platformAdmin = await actor('admin-servicio');
+    await pool.query('insert into public.platform_admins(user_id) values($1)',[platformAdmin.id]);
     nidA = (await pool.query("select public.provision_nutritionist($1,'Profesional ficticia A') as id", [ownerA.id])).rows[0].id;
     const nidB = (await pool.query("select public.provision_nutritionist($1,'Profesional ficticia B') as id", [ownerB.id])).rows[0].id;
     await pool.query(
@@ -183,6 +186,40 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     expect(own.error).toBeNull(); expect(own.data).toEqual([{ id: pidA }]);
     const foreign = await patientB.client.from('patients_patient_view').select('id').eq('id',pidA);
     expect(foreign.error).toBeNull(); expect(foreign.data).toEqual([]);
+  });
+
+  it('vistas invoker conservan lectura propia y asignación por PostgREST sin acceso clínico administrativo', async () => {
+    expect((await pool.query("select relname from pg_class where oid in ('public.patients_patient_view'::regclass,'public.patient_access_view'::regclass) and not coalesce(reloptions @> array['security_invoker=true'],false)")).rows).toEqual([]);
+    for(const [actor,expected] of [[ownerA,pidA],[ownerB,pidB],[patientA,pidA],[patientB,pidB]] as const) {
+      const access=await actor.client.from('patient_access_view').select('id');
+      expect(access.error).toBeNull(); expect(access.data).toEqual([{id:expected}]);
+    }
+    for(const view of ['patients_patient_view','patient_access_view']) {
+      const access=await platformAdmin.client.from(view).select('id');
+      expect(access.error).toBeNull(); expect(access.data).toEqual([]);
+      const anonymousRead=await anonymous.from(view).select('id');
+      expect(anonymousRead.error).not.toBeNull();
+      const write=await patientA.client.from(view).update({billing_status:'pending'}).eq('id',pidB).select('id');
+      expect(write.error).not.toBeNull();
+    }
+    const unchanged=await ownerB.client.from('patients').select('billing_status').eq('id',pidB).single();
+    expect(unchanged.error).toBeNull(); expect(unchanged.data?.billing_status).toBe('waived');
+  });
+
+  it('una sesión firmada previa no conserva perfil o acceso después de desactivar o anonimizar', async () => {
+    for(const column of ['deactivated_at','anonymized_at']) {
+      await pool.query(`update public.patients set ${column}=now() where id=$1`,[pidB]);
+      try {
+        for(const view of ['patients_patient_view','patient_access_view']) {
+          const denied=await patientB.client.from(view).select('id').eq('id',pidB);
+          expect(denied.error).toBeNull(); expect(denied.data).toEqual([]);
+        }
+        const deniedPro=await ownerB.client.from('patient_access_view').select('id').eq('id',pidB);
+        expect(deniedPro.error).toBeNull(); expect(deniedPro.data).toEqual([]);
+      } finally {await pool.query(`update public.patients set ${column}=null where id=$1`,[pidB]);}
+    }
+    const restored=await patientB.client.from('patients_patient_view').select('id').eq('id',pidB);
+    expect(restored.error).toBeNull(); expect(restored.data).toEqual([{id:pidB}]);
   });
 
   it('la paciente no lee las notas profesionales de su fila cruda', async () => {
@@ -331,6 +368,26 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     expect(role.error).toBeNull(); expect(role.data?.role).toBe('paciente');
   });
 
+  it('la vista de comidas niega escrituras cruzadas y la RPC conserva sólo la lectura propia',async()=>{
+    const ma=randomUUID(),mb=randomUUID();
+    await pool.query("insert into public.meal_logs(id,patient_id,slot_label,description,note_for_nutri) values($1,$2,'Almuerzo','A ficticia','Privada A'),($3,$4,'Cena','B ficticia','Privada B')",[ma,pidA,mb,pidB]);
+    try {
+      for(const client of [patientA.client,anonymous]) {
+        expect((await client.from('meal_logs_patient_view').insert({patient_id:pidB,slot_label:'Cena'})).error?.code).toBe('42501');
+        expect((await client.from('meal_logs_patient_view').update({patient_id:pidB}).eq('id',ma)).error?.code).toBe('42501');
+        expect((await client.from('meal_logs_patient_view').delete().eq('id',mb)).error?.code).toBe('42501');
+      }
+      expect((await patientA.client.from('meal_logs_patient_view').select('id').eq('patient_id',pidB)).data).toEqual([]);
+      const own=await patientA.client.rpc('get_patient_meal_logs',{target_patient:pidA});
+      expect(own.error).toBeNull();expect(own.data.some((r:any)=>r.id===ma)).toBe(true);
+      expect(own.data.every((r:any)=>r.patient_id===pidA&&!('note_for_nutri' in r)&&!('client_id' in r))).toBe(true);
+      expect((await patientA.client.rpc('get_patient_meal_logs',{target_patient:pidB})).error?.code).toBe('42501');
+      const detail=await api(patientA,'/api/patients/'+pidA);expect(detail.status).toBe(200);
+      expect((await detail.json()).patient.meal_logs.some((r:any)=>r.id===ma)).toBe(true);
+      expect((await pool.query('select patient_id from public.meal_logs where id=$1',[mb])).rows[0].patient_id).toBe(pidB);
+    } finally {await pool.query('delete from public.meal_logs where id in ($1,$2)',[ma,mb]);}
+  });
+
   it('el retiro cierra lectura y escritura con la misma sesión emitida antes', async () => {
     const request = await patientA.client.rpc('request_privacy_action',{payload:{patient_id:pidA,kind:'delete'}});
     expect(request.error).toBeNull();
@@ -342,6 +399,7 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
       expect((await api(actor,'/api/patients/' + pidA + '/nutrition-target')).status).toBe(403);
     }
     expect((await patientA.client.rpc('save_my_body_data',{body})).error?.code).toBe('42501');
+    expect((await patientA.client.rpc('get_patient_meal_logs',{target_patient:pidA})).error?.code).toBe('42501');
     expect((await ownerA.client.rpc('request_body_data',{target:pidA})).error?.code).toBe('42501');
     const other = await api(patientB,'/api/patients/' + pidB + '/nutrition-target');
     expect(other.status).toBe(200); expect((await other.json()).target.patient_id).toBe(pidB);
@@ -489,5 +547,6 @@ describe.skipIf(!enabled)('aislamiento mediante Auth y PostgREST locales con ses
     const saved=await api(patientB,`/api/patients/${pidB}/favorites`,'POST',{item_kind:'resource',item_id:resource.id});expect(saved.status).toBe(200);expect((await saved.json()).library.favorites.some((r:{item_id:string})=>r.item_id===resource.id)).toBe(true);
     const removed=await api(patientB,`/api/patients/${pidB}/favorites`,'POST',{item_kind:'resource',item_id:resource.slug});expect(removed.status).toBe(200);expect((await removed.json()).library.favorites.some((r:{item_id:string})=>r.item_id===resource.id)).toBe(false);
   });
+
 });
 

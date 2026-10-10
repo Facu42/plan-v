@@ -23,6 +23,13 @@ describe('menú de la paciente', () => {
     expect(render({ onSignOut: vi.fn() })).toContain('Cerrar sesión');
   });
 
+  it('en el celular ofrece instalar dentro de «Mi cuenta» solo si hay oferta', () => {
+    expect(render()).not.toContain('Instalar Plan V');
+    const html = render({ installOffer: { title: 'Instalar Plan V', card: 'Instalá Plan V en este teléfono y abrila como una app.' }, onInstall: vi.fn() });
+    expect(html).toContain('Instalar Plan V');
+    expect(html).toContain('abrila como una app');
+  });
+
   it('marca los mensajes sin leer y el aviso de cuota junto a Pagos', () => {
     const html = render({ unread: 3, feeNotice: 'Tenés una cuota pendiente de $ 30.000' });
     expect(html).toContain('aria-label="3 sin leer"');
@@ -41,5 +48,17 @@ describe('menú de la paciente', () => {
     expect(html).not.toMatch(/Dashboard|Calendar|Healthy Menu|Food Diary/);
     // Dentro del envoltorio que trae los estilos del archivo.
     expect(html).toMatch(/class="[^"]*mcp-nutrigo[^"]*"/);
+  });
+});
+
+describe('fila de avisos en «Mi cuenta»', () => {
+  it('muestra cuántos avisos hay y abre el panel', () => {
+    const html = renderToStaticMarkup(<PatientMenuSheet patientName="Sofía Ramos" noticeCount={2} onOpenNotices={() => undefined} onNavigate={() => undefined} onClose={() => undefined} />);
+    expect(html).toContain('Avisos');
+    expect(html).toContain('2 para revisar');
+  });
+  it('sin avisos dice que está al día y sin la fila si no hay panel', () => {
+    expect(renderToStaticMarkup(<PatientMenuSheet patientName="Sofía Ramos" noticeCount={0} onOpenNotices={() => undefined} onNavigate={() => undefined} onClose={() => undefined} />)).toContain('Estás al día');
+    expect(renderToStaticMarkup(<PatientMenuSheet patientName="Sofía Ramos" onNavigate={() => undefined} onClose={() => undefined} />)).not.toContain('Avisos');
   });
 });

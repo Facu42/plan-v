@@ -1,3 +1,4 @@
+import type { WeeklyRegistration } from './weekly-registration';
 export type MealStatus = 'pending_review' | 'confirmed' | 'adjusted';
 export type SuggestedAction = 'mensaje' | 'ajuste_menu' | 'turno';
 export type Stage = 'ingreso' | 'plan' | 'seguimiento' | 'alta';
@@ -89,6 +90,7 @@ export type HabitLog = {
   patient_id: string;
   date: string;
   hydration: number;
+  hydration_declared?: boolean;
   energy: string | null;
   sleep_minutes: number | null;
   /** Pasos del día declarados por la paciente (no se importan de dispositivos). */
@@ -139,6 +141,7 @@ export type DemoNotice = {
 };
 
 export type Patient = {
+  weekly_registration?: WeeklyRegistration | null;
   id: string;
   name: string;
   initials: string;

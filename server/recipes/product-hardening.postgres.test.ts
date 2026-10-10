@@ -318,7 +318,7 @@ describe('cierre funcional: revisiones, privacidad y reintentos persistentes', (
     const stored=(await db.query<{nutrition_origin:string;note_for_nutri:string}>('select nutrition_origin,note_for_nutri from public.meal_logs where id=$1',[registered.assignment.registered_meal_id])).rows[0];
     expect(stored.nutrition_origin).toBe('ai_estimate');expect(stored.note_for_nutri).toContain('estimados por IA');expect(stored.note_for_nutri).not.toContain('no estimados');
     const mid=registered.assignment.registered_meal_id;
-    expect((await asUser(patientAUser,`select ${mealLogColumns.patient} from public.meal_logs_patient_view where id=$1`,[mid]))[0]).toMatchObject({nutrition_origin:'ai_estimate'});
+    expect((await asUser(patientAUser,`select ${mealLogColumns.patient} from public.get_patient_meal_logs($2) where id=$1`,[mid,patientA]))[0]).toMatchObject({nutrition_origin:'ai_estimate'});
     expect((await asUser(nutriA,`select ${mealLogColumns.professional} from public.meal_logs where id=$1`,[mid]))[0]).toMatchObject({nutrition_origin:'ai_estimate'});
     await expect(asUser(nutriA,"update public.meal_logs set nutrition_origin='declared' where id=$1",[mid])).rejects.toMatchObject({code:'42501'});
     await expect(asUser(patientAUser,"insert into public.meal_logs(patient_id,slot_label,description,nutrition_origin) values($1,'Almuerzo','Inventada','declared')",[patientA])).rejects.toMatchObject({code:'42501'});
@@ -349,5 +349,34 @@ describe('cierre funcional: revisiones, privacidad y reintentos persistentes', (
     expect((await rpc(patientAUser,'list_published_meal_plan',[patientA]) as any).items[0].recipe.title).toBe(title);
     expect((await rpc(patientAUser,'get_patient_exercise',[patientA]) as any).activities).toHaveLength(1);
     expect((await rpc(nutriA,'get_patient_ledger',[patientA]) as any).payments).toHaveLength(2);
+  });
+});
+
+describe('seguridad de receta asignada al día en PostgreSQL', () => {
+  it('revalida antecedentes al asignar y no escribe ninguna asignación ante conflicto', async () => {
+    const rid = randomUUID();
+    const saved = await rpc(nutriA, 'save_recipe_draft', [{ ...draft, id: rid, expected_revision: null }]) as any;
+    await rpc(nutriA, 'publish_recipe', [rid, 1, saved.current.revision]);
+    const input = { recipe_id: rid, patient_id: patientA, expected_version: 1, for_date: '2026-10-10', slot: 'Cena' };
+    const original = await rpc(nutriA, 'assign_recipe_day', [input]) as any;
+    const none = { state: 'none', items: [] };
+    const cases = [
+      { allergies: { state: 'reported', items: ['Quinoa'] }, restrictions: none, error: 'meal_plan_allergies' },
+      { allergies: none, restrictions: { state: 'reported', items: ['Quinoa'] }, error: 'meal_plan_allergies' },
+      { allergies: { state: 'unknown', items: [] }, restrictions: none, error: 'meal_plan_allergies_unknown' },
+    ];
+    try {
+      for (const facts of cases) {
+        await db.query("update public.intake_sessions set payload=jsonb_set(jsonb_set(payload,'{allergies}',$2::jsonb),'{restrictions}',$3::jsonb) where patient_id=$1", [patientA, JSON.stringify(facts.allergies), JSON.stringify(facts.restrictions)]);
+        await expect(rpc(nutriA, 'assign_recipe_day', [{ ...input, for_date: '2026-10-11' }])).rejects.toMatchObject({ code: 'PT409', message: facts.error });
+        const rows = await rpc(patientAUser, 'list_recipe_days', [patientA, '2026-10-10']) as any[];
+        expect(rows.find(row => row.id === original.id)?.recipe_id).toBe(rid);
+        expect(await rpc(patientAUser, 'list_recipe_days', [patientA, '2026-10-11'])).toEqual([]);
+      }
+      await expect(rpc(nutriB, 'assign_recipe_day', [input])).rejects.toMatchObject({ code: '42501' });
+      await expect(rpc(patientAUser, 'assign_recipe_day', [input])).rejects.toMatchObject({ code: '42501' });
+    } finally {
+      await db.query("update public.intake_sessions set payload=jsonb_set(jsonb_set(payload,'{allergies}',$2::jsonb),'{restrictions}',$2::jsonb) where patient_id=$1", [patientA, JSON.stringify(none)]);
+    }
   });
 });
