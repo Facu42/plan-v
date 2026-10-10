@@ -1,0 +1,15 @@
+.gs-root{position:relative;flex:0 1 340px;min-width:200px}
+.gs-field{display:flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;border:1px solid var(--nv-border);border-radius:12px;background:var(--nv-bg);color:var(--nv-muted)}
+.gs-field:focus-within{outline:2px solid var(--nv-strong);outline-offset:2px}
+.gs-field input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--nv-ink);font:inherit;font-size:13px}
+.gs-panel{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:70;max-height:min(480px,70vh);overflow:auto;padding:8px;border:1px solid var(--nv-border);border-radius:14px;background:var(--nv-card);box-shadow:0 16px 40px rgba(8,58,48,.16)}
+.gs-note{margin:0;padding:14px 12px;color:var(--nv-muted);font-size:13px;line-height:1.5}
+.gs-note p{margin:0 0 8px}
+.gs-group+.gs-group{margin-top:6px;padding-top:6px;border-top:1px solid var(--nv-border)}
+.gs-group h3{display:flex;align-items:baseline;justify-content:space-between;margin:0;padding:8px 10px 4px;color:var(--nv-muted);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.gs-group h3 small{font-size:11px;font-weight:500;letter-spacing:0;text-transform:none}
+.gs-group ul{margin:0;padding:0;list-style:none}
+.gs-group li button{display:grid;gap:2px;width:100%;padding:9px 10px;border:0;border-radius:10px;background:transparent;color:var(--nv-ink);font:inherit;text-align:left;cursor:pointer}
+.gs-group li button:hover,.gs-group li button:focus-visible{background:var(--nv-track)}
+.gs-group li strong{font-size:14px;font-weight:600}
+.gs-group li small{color:var(--nv-muted);font-size:12px}

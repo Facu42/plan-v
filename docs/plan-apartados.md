@@ -21,6 +21,7 @@ Implementación del plan aprobado por Facundo, desde la versión principal vigen
 - [Consultorio: ficha, seguimiento, biblioteca y cobranzas](consultorio-interfaz-2026-10-05.md).
 - [Planes y aprobación de IA](consultorio-planes-2026-10-05.md).
 - [Paciente Nutrigo: doce superficies, fuentes y evidencia](paciente-nutrigo-2026-10-05.md). Producción requiere autorización escrita específica.
+- [Centro de ayuda, mensajes en la campana y buscador global (2026-10-10)](ayuda-avisos-vs-nutriboost-2026-10-10.md): visto vs. propuesta propia, aislamiento con dos consultorios y decisiones pendientes.
 
 ## Orden
 

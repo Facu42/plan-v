@@ -4,7 +4,9 @@ import { api } from '../../api/client';
 import type { DemoNotice } from '../../types';
 import { Icon } from '../shared/Icon';
 import { NvBadge, NvButton } from './primitives';
+import { MessageNotices, useUnreadMessageNotices } from './MessageNotices';
 import {
+  dismissAllConsultAlerts,
   dismissConsultAlert,
   visibleConsultAlerts,
   type ConsultAlert,
@@ -39,6 +41,8 @@ export function ShowroomConsultAlerts({
   onManage,
   onOpenReminder,
   onOpenCare,
+  onOpenConversation,
+  onViewAllMessages,
   defaultOpen = false,
   storage = typeof window === 'undefined' ? null : window.localStorage,
 }: {
@@ -50,6 +54,9 @@ export function ShowroomConsultAlerts({
   onManage?: (alert: ConsultAlert) => void;
   onOpenReminder?: (reminder: DailyReminder) => void;
   onOpenCare?: (notice: CareNotice) => void;
+  /** Sólo profesionales: abre la conversación de un paciente con mensajes sin leer. */
+  onOpenConversation?: (patientId: string) => void;
+  onViewAllMessages?: () => void;
   defaultOpen?: boolean;
   storage?: Pick<Storage, 'getItem' | 'setItem'> | null;
 }) {
@@ -58,6 +65,7 @@ export function ShowroomConsultAlerts({
   const [prefs, setPrefs] = useState(() => readNoticePrefs(storage, audience));
   const [notices, setNotices] = useState<DemoNotice[]>([]);
   const care = useCareNotices(patientId ?? '', audience === 'pro');
+  const messages = useUnreadMessageNotices(open && audience === 'pro');
   const visible = useMemo(() => visibleConsultAlerts(alerts, audience, storage), [alerts, audience, storage, tick]);
   const openReminders = useMemo(
     () => reminders.filter((reminder) => reminder.state !== 'done' && reminder.kind !== 'consulta' && !(care.hasPreferences && (reminder.kind === 'agua' || reminder.kind === 'sueno'))),
@@ -116,6 +124,11 @@ export function ShowroomConsultAlerts({
     setTick((value) => value + 1);
   };
 
+  const dismissAll = () => {
+    dismissAllConsultAlerts(storage, audience, visible);
+    setTick((value) => value + 1);
+  };
+
   const persistServerPrefs = (next: NoticePrefs) => {
     if (!storage) return;
     void api.saveNotificationPrefs(
@@ -164,6 +177,13 @@ export function ShowroomConsultAlerts({
         <div><strong>{title}</strong><small>Consultas, comidas y hábitos publicados. El teléfono usa avisos de este navegador. Mail y push quedan encolados en el buzón demo; no salen a internet sin claves del proveedor.</small></div>
         <button type="button" aria-label="Cerrar avisos" onClick={() => setOpen(false)}>×</button>
       </header>
+      {audience === 'pro' && <MessageNotices
+        state={messages.state}
+        now={new Date()}
+        onRetry={messages.retry}
+        onOpen={(group) => { setOpen(false); onOpenConversation?.(group.patientId); }}
+        onViewAll={() => { setOpen(false); onViewAllMessages?.(); }}
+      />}
       <div className="nv-alerts-prefs">
         <label><input type="checkbox" checked={prefs.browser} disabled={!browserNoticesSupported()} onChange={() => { void toggleBrowser(); }} /> Avisos en este dispositivo</label>
         <label><input type="checkbox" checked={prefs.email} onChange={toggleEmail} /> Buzón demo por mail</label>
@@ -171,6 +191,7 @@ export function ShowroomConsultAlerts({
       </div>
       {care.error && <p role="alert">No se pudieron actualizar los avisos de seguimiento: {care.error}</p>}
       {care.notices.length > 0 && <section className="nv-alerts-habits" aria-label="Avisos de seguimiento"><h3>{audience === 'pro' ? 'Registros de pacientes' : 'Tu seguimiento'}</h3><ul>{care.notices.map(notice => <li key={notice.id}><div><strong>{notice.patient_name ? `${notice.patient_name} · ` : ''}{notice.title}</strong><small>{notice.detail}</small></div>{onOpenCare && <div className="nv-alerts-actions"><NvButton onClick={() => { setOpen(false); onOpenCare(notice); }}>{audience === 'pro' ? 'Revisar registro' : 'Abrir'}</NvButton></div>}</li>)}</ul></section>}
+      {visible.length > 1 && <div className="nv-alerts-actions nv-alerts-all"><NvButton className="nv-ghost" onClick={dismissAll}>Marcar los avisos de consulta como listos</NvButton></div>}
       {visible.length ? <ul>{visible.map((alert) => <li key={alert.id}>
         <span className={`nv-alerts-urgency ${alert.urgency}`}>{alert.urgencyLabel}</span>
         <div>

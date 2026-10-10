@@ -92,6 +92,7 @@ export function buildAppHref(originHref: string, role: AppRole, page: ShowroomPa
     if (page !== 'ficha') url.searchParams.delete('seccion');
     if (page !== 'plan') url.searchParams.delete('propuesta');
     if (page !== 'biblioteca') url.searchParams.delete('biblioteca');
+    if (page !== 'ayuda') url.searchParams.delete('articulo');
   }
   return `${url.pathname}${url.search}${url.hash}`;
 }

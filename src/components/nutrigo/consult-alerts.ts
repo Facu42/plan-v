@@ -46,6 +46,11 @@ export function dismissConsultAlert(storage: Pick<Storage, 'setItem'> | null, au
   storage?.setItem(consultAlertKey(audience, alertId), 'dismissed');
 }
 
+/** Propuesta propia: retira de una vez todos los avisos de consulta visibles. No toca mensajes ni registros. */
+export function dismissAllConsultAlerts(storage: Pick<Storage, 'setItem'> | null, audience: ConsultAlertAudience, alerts: readonly Pick<ConsultAlert, 'id'>[]) {
+  for (const alert of alerts) dismissConsultAlert(storage, audience, alert.id);
+}
+
 export function consultAlertUrgency(at: Date, now: Date): ConsultAlertUrgency {
   const delta = at.getTime() - now.getTime();
   if (delta <= SOON_MS) return 'soon';
