@@ -69,7 +69,7 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
   hallazgo en `docs/auditoria-conexion-paciente-crm-2026-10-08.md`; producto y orden de trabajo en
   `docs/producto-definicion-2026-10-08.md`. PR #94 (día de Argentina en el servidor) ya está en `main`. Fotos de ingredientes
   y de platos con el modelo gratuito: pruebas en producción (tortilla ×3, tomate, huevo) hasta que Facundo las apruebe.
-- Diario de texto sin permiso de IA (D5, 2026-10-10): la paciente guarda la descripción aunque no haya activado el análisis.
+- Diario de texto sin permiso de IA (D5, 2026-10-10, [PR #101](https://github.com/Facu42/plan-v/pull/101)): la paciente guarda la descripción aunque no haya activado el análisis.
   La estimación, y la foto, solo corren con ese permiso. Migración `20261010233000_meal_text_without_ai.sql` en el repo,
   sin aplicar en la base en línea: espera la frase escrita de Facundo. No se apoya en los PR #98, #99 ni #100.
 - Revisión del front de la paciente contra Nutrigo, 2026-10-09 (rama `claude/front-paciente-nutrigo-tuezz8`):
