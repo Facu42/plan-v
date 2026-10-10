@@ -7,6 +7,13 @@ El Loom (`loom.com/share/35b428b9…`) y `nutriboost.ar` **no se pudieron abrir 
 del video. La comparación usa la matriz de la v3 (§3, §4.2 y Anexo A, tramos 0:40 y 1:10–1:30) y su clasificación «visto». Para observar el video
 hace falta una sesión en la PC de Facundo con navegador (gstack `/browse`). Nada de lo siguiente se presenta como reproducción nueva.
 
+## Capturas tomadas en la PC de Facundo (10/10, 6 capturas, `motion-reel-kit\nutriboost-capturas`)
+Una sesión en su PC abrió el Loom y el sitio y sacó 4 capturas del video (0:42, 1:11, 1:20, 1:30) y 2 del sitio; no revisó cuadro por cuadro. Son de ~800 px: el texto chico no se lee.
+- **Visto en la lista (0:42):** 4 indicadores (clientes totales, activos este mes, con próxima consulta, sin consulta agendada), pestañas Todos/Activos/Inactivos, filtros, buscador, vista cómoda/compacta, columnas Teléfono, Última consulta («Hace 5 días»), Próxima consulta y Estado, botón «Registrar cliente». **El indicador de conexión no se distingue** en la captura.
+- **Visto en Mediciones (1:11–1:30):** peso grande con gráfico de evolución, una fila de unos 5 medidores circulares, grupo «Medidas básicas» con mini gráfico, tres cifras (62,5 / 63,3 / 63,8 kg; probablemente mín./prom./máx., rótulos ilegibles) y formulario de carga manual.
+- **Sólo dicho, no visto:** balanzas femmto/InBody con OCR (Loom 1:45) y «la IA importa el PDF» (sitio). **El aviso de importar PDF que la v3 marca como visto en 1:10 no apareció en estas capturas**; no se pudo confirmar. El sitio es una sola página, sin pantallas de pacientes propias (tarjeta «Mediciones con IA» y paso «ficha + PDF de balanza»).
+- **Diferencias con Plan V que quedan:** los 4 indicadores de la lista de Nutriboost son otros (totales, activos del mes, con próxima consulta, sin consulta agendada) frente a Activos / Pendientes de revisión / Con próxima consulta / Archivados de Plan V (los de Plan V siguen la decisión de Facundo; no se cambiaron); pestañas Todos/Activos/Inactivos; columna Teléfono; medidores circulares y el peso grande con gráfico arriba de Mediciones.
+
 ## Matriz: Mediciones (v3 §4.2, tramo 1:10–1:30)
 | Función | Fuente / minuto | Estado en Plan V | Falta |
 |---|---|---|---|

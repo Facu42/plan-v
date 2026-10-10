@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { crmWorkApi } from '../../api/crm-work';
 import { CRM_WORK_KINDS, type CrmWorkItem, type CrmWorkKind, type CrmWorkResponse } from '../../types/crm-work';
 import type { Patient } from '../../types';
+import { InicioIndicators } from './InicioIndicators';
 import { NvButton, NvState } from './primitives';
 import './professional-workspace.css';
 
@@ -50,6 +51,7 @@ export function ProfessionalWorkQueue({ patients, mode = 'inicio', initialKind =
   const chooseKind = (next: CrmWorkKind | '') => { setKind(next); setCursor(undefined); };
   return <section className="pw-work" aria-label={mode === 'planes' ? 'Propuestas de IA del consultorio' : 'Bandeja del consultorio'}>
     <header className="pw-work-head"><div><h2>{mode === 'inicio' ? 'Tu consultorio, hoy' : mode === 'planes' ? 'Menús pendientes de revisión' : 'Seguimiento de pacientes'}</h2><p>Revisá los pendientes y continuá el trabajo en la ficha correspondiente.</p></div><NvButton className="nv-soft" disabled={loading} onClick={() => { setCursor(undefined); setRefresh((value) => value + 1); }}>Actualizar pendientes</NvButton></header>
+    {mode === 'inicio' && <InicioIndicators patients={patients} />}
     {loading ? <NvState kind="loading" title="Consultando pendientes…" description="Estamos buscando el trabajo de tu consultorio." /> : error ? <NvState kind="error" title="No pudimos cargar la bandeja" description={error} action={<NvButton onClick={() => setRefresh((value) => value + 1)}>Reintentar bandeja</NvButton>} /> : data && <>
       <div className="pw-work-counts" aria-label="Pendientes por tipo">{CRM_WORK_KINDS.map((id) => <button key={id} type="button" aria-pressed={kind === id} onClick={() => chooseKind(kind === id ? '' : id)}><strong>{data.counts[id]}</strong><span>{WORK_LABELS[id]}</span></button>)}</div>
       <div className="pw-work-filters"><label>Paciente<select value={patientId} onChange={(event) => { setPatientId(event.target.value); setCursor(undefined); }}><option value="">Todo el consultorio</option>{patients.map((patient) => <option key={patient.id} value={patient.id}>{patient.name}</option>)}</select></label>
