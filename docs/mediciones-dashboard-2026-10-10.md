@@ -31,4 +31,5 @@ paciente no pueden. Las unidades las fija la base. Pruebas en PostgreSQL descart
 - Pendiente de este apartado: medidores de composición con rangos de referencia (necesitan fuente clínica); probar con PDF reales de InBody y femmto.
 - Lista de pacientes: «Columnas y densidad» permite ocultar Estado, Próximo foco y Registro semanal (Paciente y Acciones quedan siempre)
   y elegir filas cómodas o compactas. Se guarda en el navegador de la profesional (`directory-columns.ts`), sin tocar el servidor.
-  Faltan «última consulta» y «conexión» porque el sistema todavía no guarda esos datos.
+  También hay «Última consulta» (desde el historial de turnos vencidos) y «Conexión» como columnas opcionales, y el botón «Mensaje».
+  Comparación con la matriz de Nutriboost: `docs/mediciones-vs-nutriboost-2026-10-10.md`.

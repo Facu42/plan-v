@@ -45,3 +45,4 @@
 .pm-import-list li { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; border-radius:10px; background:var(--nv-track); font-size:12px; }
 .pm-import-list li>span { display:flex; flex-direction:column; gap:2px; min-width:0; }
 .pm-import-list small { color:var(--nv-ink-soft); font-size:11px; overflow-wrap:anywhere; }
+.pm-spark { display:block; width:100%; max-width:110px; height:18px; color:var(--nv-ink-soft); }

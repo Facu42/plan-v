@@ -10,7 +10,7 @@ describe('columnas del directorio de pacientes', () => {
 
   it('ocultar una columna saca su ancho y volver a elegirla la devuelve', () => {
     const hidden = toggleDirectoryColumn(DEFAULT_DIRECTORY_LAYOUT, 'focus');
-    expect(hidden.hidden).toEqual(['focus']);
+    expect(hidden.hidden).toEqual(['lastVisit', 'connection', 'focus']);
     expect(directoryGridTemplate(hidden)).not.toContain('140px');
     expect(directoryGridTemplate(toggleDirectoryColumn(hidden, 'focus'))).toBe(directoryGridTemplate(DEFAULT_DIRECTORY_LAYOUT));
   });
@@ -36,5 +36,13 @@ describe('columnas del directorio de pacientes', () => {
     const broken = { getItem: () => { throw new Error('bloqueado'); }, setItem: () => { throw new Error('bloqueado'); } };
     expect(() => saveDirectoryLayout(DEFAULT_DIRECTORY_LAYOUT, broken)).not.toThrow();
     expect(loadDirectoryLayout(broken)).toEqual(DEFAULT_DIRECTORY_LAYOUT);
+  });
+});
+
+describe('columnas opcionales del directorio', () => {
+  it('Última consulta y Conexión arrancan ocultas y al activarlas suman su ancho', () => {
+    expect(DEFAULT_DIRECTORY_LAYOUT.hidden).toEqual(['lastVisit', 'connection']);
+    const shown = toggleDirectoryColumn(toggleDirectoryColumn(DEFAULT_DIRECTORY_LAYOUT, 'lastVisit'), 'connection');
+    expect(directoryGridTemplate(shown).split(') ')).toHaveLength(7);
   });
 });

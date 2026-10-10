@@ -7,6 +7,7 @@ import { NvBadge, NvButton, NvCard, NvState } from './primitives';
 import { hasFullPatientAccess } from '../../billing';
 import { createPatientWithInvitation, invitationReady } from './patient-invite-actions';
 import './showroom-patients.css';
+import { daysAgoText, lastVisit } from './directory-last-visit';
 import { DIRECTORY_COLUMNS, directoryGridTemplate, isColumnVisible, loadDirectoryLayout, saveDirectoryLayout, toggleDirectoryColumn, type DirectoryLayout } from './directory-columns';
 import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
 import { buildBoardRows } from './cobranzas-utils';
@@ -214,7 +215,7 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
 
 export type DirectoryAction = 'create' | { share: { name: string; invite: PatientInvite } };
 
-export function ShowroomPatients({ patients, query, initialFilter = 'active', initialAction, onActionConsumed, onChanged, onFollow, onRecord, onPlan }: {
+export function ShowroomPatients({ patients, query, initialFilter = 'active', initialAction, onActionConsumed, onChanged, onFollow, onRecord, onPlan, onMessage }: {
   patients: Patient[];
   query: string;
   initialFilter?: PatientDirectoryFilter;
@@ -224,6 +225,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
   onFollow: (id: string) => void;
   onRecord?: (id: string) => void;
   onPlan?: (id: string) => void;
+  onMessage?: (id: string) => void;
 }) {
   const [filter, setFilter] = useState<PatientDirectoryFilter>(initialFilter);
   const [creating, setCreating] = useState(false);
@@ -245,6 +247,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
   const changeLayout = (next: DirectoryLayout) => { setLayout(next); saveDirectoryLayout(next); };
   const show = (id: (typeof DIRECTORY_COLUMNS)[number]['id']) => isColumnVisible(layout, id);
   const feeRows = billing ? buildBoardRows(billing) : [];
+  const todayId = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
   const metrics = getPatientDirectoryMetrics(patients);
   const visible = filterDirectoryPatients(patients, query, filter).filter((person) => (!stageFilter || person.stage === stageFilter) && (!unlinkedOnly || person.has_account === false));
 
@@ -313,7 +316,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
       {share && <InviteShare name={share.name} invite={share.invite} onClose={() => setShare(null)} />}
       {error && <p className="nv-dialog-error" role="alert">{error}</p>}
       <div className="nv-directory-scroll"><div className={`nv-patient-table nv-directory-table${layout.density === 'compact' ? ' nv-density-compact' : ''}`} style={{ '--dir-cols': directoryGridTemplate(layout) } as CSSProperties} role="table" aria-label="Pacientes del directorio">
-        <div role="row" className="nv-table-head"><span role="columnheader">Paciente</span>{show('status') && <span role="columnheader">Estado</span>}{show('focus') && <span role="columnheader">Próximo foco</span>}{show('weekly') && <span role="columnheader">Registro semanal</span>}<span role="columnheader">Acciones</span></div>
+        <div role="row" className="nv-table-head"><span role="columnheader">Paciente</span>{show('status') && <span role="columnheader">Estado</span>}{show('focus') && <span role="columnheader">Próximo foco</span>}{show('weekly') && <span role="columnheader">Registro semanal</span>}{show('lastVisit') && <span role="columnheader">Última consulta</span>}{show('connection') && <span role="columnheader">Conexión</span>}<span role="columnheader">Acciones</span></div>
         {visible.map((patient) => <div role="row" key={patient.id}>
           <span role="cell"><span className={`nv-avatar nv-directory-avatar person-${patient.tone}`}>{patient.initials}</span><span><strong>{patient.name}</strong><small>{patient.goal}</small></span></span>
           {show('status') && <span role="cell"><strong>{patient.status}</strong><small>{STAGE_LABELS[patient.stage]}</small>{!hasFullPatientAccess(patient) && <NvBadge tone="coral">{accessLabel(patient)}</NvBadge>}{patient.has_account === false && <NvBadge tone="gold">Sin cuenta</NvBadge>}{(() => { const fee = feeRows.find((row) => row.patient.patient_id === patient.id)?.summary; return fee && fee.owed > 0 ? <NvBadge tone="coral">Debe {formatPesos(fee.owed)}</NvBadge> : null; })()}</span>}
@@ -325,8 +328,11 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
             {patient.weekly_registration.water_average!==null&&<small>{patient.weekly_registration.water_days} días con registro de agua</small>}
             {patient.weekly_registration.pending_review>0&&<span className="nv-weekly-pending"><Icon name="clock" size={12}/>{patient.weekly_registration.pending_review} por revisar</span>}
           </> : <small>Resumen no disponible</small>}</span>}
+          {show('lastVisit') && <span role="cell">{(() => { const last = lastVisit(patient.appointment_history, todayId); return last ? <><strong>{daysAgoText(last.daysAgo)}</strong><small>{last.dateId.split('-').reverse().join('/')}</small></> : <small>Sin consultas registradas</small>; })()}</span>}
+          {show('connection') && <span role="cell"><strong>{patient.has_account === false ? 'Sin cuenta' : 'Cuenta vinculada'}</strong><small>{patient.has_account === false ? 'Falta que acepte la invitación' : 'Ya usa la app'}</small></span>}
           <span role="cell" className="nv-directory-actions">
             {!patient.archived_at && onRecord && <NvButton className="nv-soft" aria-label={`Abrir ficha de ${patient.name}`} onClick={() => onRecord(patient.id)}><Icon name="contact" size={14} />Ficha</NvButton>}
+            {!patient.archived_at && onMessage && patient.has_account !== false && <NvButton className="nv-soft" aria-label={`Escribirle a ${patient.name}`} onClick={() => onMessage(patient.id)}><Icon name="message" size={14} />Mensaje</NvButton>}
             {!patient.archived_at && onPlan && <NvButton className="nv-soft" aria-label={`Abrir plan de ${patient.name}`} onClick={() => onPlan(patient.id)}><Icon name="list" size={14} />Plan</NvButton>}
             {!patient.archived_at && <NvButton className="nv-soft" aria-label={`Ver seguimiento de ${patient.name}`} onClick={() => onFollow(patient.id)}><Icon name="trend" size={14}/>Seguimiento</NvButton>}
             {!patient.archived_at && patient.has_account === false && <NvButton className="nv-ghost" aria-label={`Invitar a ${patient.name}`} disabled={busyId === patient.id} onClick={() => invite(patient)}><Icon name="message" size={13} />Invitar</NvButton>}

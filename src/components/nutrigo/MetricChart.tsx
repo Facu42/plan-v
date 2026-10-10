@@ -23,3 +23,17 @@ export function MetricChart({ points, unit, label }: { points: readonly MetricPo
     {ordered.map((point, index) => <circle key={`${point.date}-${index}`} cx={x(index)} cy={y(point.value)} r={3.5} fill="currentColor" vectorEffect="non-scaling-stroke" />)}
   </svg>;
 }
+
+/** Mini gráfico de la tarjeta: sólo la forma de la serie. Los valores y la tendencia van en el texto de la tarjeta. */
+export function MetricSparkline({ values }: { values: readonly number[] }) {
+  if (values.length < 2) return null;
+  const width = 100;
+  const height = 18;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const span = max - min || 1;
+  const points = values.map((value, index) => `${(width * index / (values.length - 1)).toFixed(1)},${(max === min ? height / 2 : height - 2 - (height - 4) * (value - min) / span).toFixed(1)}`).join(' ');
+  return <svg className="pm-spark" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <polyline points={points} fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+  </svg>;
+}

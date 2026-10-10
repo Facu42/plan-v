@@ -3,12 +3,15 @@ export const DIRECTORY_COLUMNS = [
   { id: 'status', label: 'Estado', width: 'minmax(115px,.8fr)' },
   { id: 'focus', label: 'Próximo foco', width: 'minmax(140px,.9fr)' },
   { id: 'weekly', label: 'Registro semanal', width: 'minmax(155px,1fr)' },
+  { id: 'lastVisit', label: 'Última consulta', width: 'minmax(120px,.8fr)' },
+  { id: 'connection', label: 'Conexión', width: 'minmax(120px,.8fr)' },
 ] as const;
 export type DirectoryColumnId = (typeof DIRECTORY_COLUMNS)[number]['id'];
 export type DirectoryDensity = 'comfortable' | 'compact';
 
 export interface DirectoryLayout { hidden: DirectoryColumnId[]; density: DirectoryDensity }
-export const DEFAULT_DIRECTORY_LAYOUT: DirectoryLayout = { hidden: [], density: 'comfortable' };
+/** Las columnas sumadas después del diseño original arrancan ocultas; se activan desde «Columnas y densidad». */
+export const DEFAULT_DIRECTORY_LAYOUT: DirectoryLayout = { hidden: ['lastVisit', 'connection'], density: 'comfortable' };
 export const DIRECTORY_LAYOUT_KEY = 'plan-v:directorio:columnas';
 
 const PATIENT_WIDTH = 'minmax(180px,1.2fr)';
@@ -38,7 +41,7 @@ export function parseDirectoryLayout(raw: string | null): DirectoryLayout {
     const { hidden, density } = value as { hidden?: unknown; density?: unknown };
     const known = new Set<string>(DIRECTORY_COLUMNS.map((column) => column.id));
     return {
-      hidden: Array.isArray(hidden) ? [...new Set(hidden.filter((id): id is DirectoryColumnId => typeof id === 'string' && known.has(id)))] : [],
+      hidden: Array.isArray(hidden) ? [...new Set(hidden.filter((id): id is DirectoryColumnId => typeof id === 'string' && known.has(id)))] : DEFAULT_DIRECTORY_LAYOUT.hidden,
       density: density === 'compact' ? 'compact' : 'comfortable',
     };
   } catch { return DEFAULT_DIRECTORY_LAYOUT; }

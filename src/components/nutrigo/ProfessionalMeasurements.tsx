@@ -6,7 +6,7 @@ import { METRIC_GROUPS, METRIC_KINDS, metricDefinition, summarizeMetric, type Me
 import type { Measurement } from '../../types/care';
 import { MeasurementEntryDialog, type MeasurementEntryInitial } from './MeasurementEntryDialog';
 import { ScaleImportDialog } from './ScaleImportDialog';
-import { MetricChart } from './MetricChart';
+import { MetricChart, MetricSparkline } from './MetricChart';
 import { cardNote, formatChange, formatNumber, formatMetricDate, formatMetricValue, trendText } from './measurement-format';
 import { NvBadge, NvButton, NvMetric, NvState } from './primitives';
 import { useCare } from './useCare';
@@ -61,7 +61,15 @@ function MetricDetail({ kind, measurements, onClose }: { kind: MetricKind; measu
 
 function MetricCard({ kind, summary, onOpen }: { kind: MetricKind; summary: MetricSummary | null; onOpen: () => void }) {
   const definition = metricDefinition(kind);
-  return <NvMetric label={definition.label} icon="trend" tone="green" value={summary ? formatMetricValue(summary.last.value, summary.unit) : 'Sin dato'} note={summary ? cardNote(summary) : 'Todavía sin medir'} onOpen={onOpen} />;
+  return <NvMetric label={definition.label} icon="trend" tone="green" value={summary ? formatMetricValue(summary.last.value, summary.unit) : 'Sin dato'} note={summary ? cardNote(summary) : 'Todavía sin medir'} onOpen={onOpen}>{summary && <MetricSparkline values={[...summary.history].reverse().map((entry) => entry.value)} />}</NvMetric>;
+}
+
+/** Evolución del peso: diferencia desde la primera medición, cantidad de registros y fecha del último. */
+function WeightEvolution({ summary }: { summary: MetricSummary | null }) {
+  const change = summary?.changeFromFirst ?? null;
+  const value = !summary ? 'Sin dato' : change === null ? 'Primer registro' : change === 0 ? 'Sin cambios' : formatChange(change, summary.unit);
+  const note = summary ? `${summary.count} ${summary.count === 1 ? 'registro' : 'registros'} · último ${formatMetricDate(summary.last.date)}` : 'Todavía sin medir';
+  return <NvMetric label="Evolución del peso" icon="trend" tone="green" value={value} note={note} />;
 }
 
 /** Mediciones de la ficha: tres grupos, tendencia, detalle con mínimo, promedio y máximo, y carga por fecha. */
@@ -82,7 +90,7 @@ export function MeasurementsBoard({ measurements, allowed, patientName, onEnter,
     </header>
     {!allowed ? <NvState title="Falta el permiso de medidas" description={`${patientName} todavía no autorizó compartir sus medidas. Cuando lo haga, aparecen acá.`} /> : METRIC_GROUPS.map((group) => <section key={group.id} className="pm-group-view" aria-label={group.label}>
       <h3>{group.label}</h3>
-      <div className="pm-cards">{METRIC_KINDS.filter((kind) => metricDefinition(kind).group === group.id).map((kind) => <MetricCard key={kind} kind={kind} summary={summaries.get(kind) ?? null} onOpen={() => setOpen(kind)} />)}{group.id === 'basicas' && <NvMetric label="IMC" icon="target" tone="gold" value={bmi ? formatNumber(Math.round(bmi.bmi * 10) / 10) : 'Sin dato'} note={bmi ? (bmi.category ?? 'Referencia adulta desde los 20 años') : 'Necesita peso (kg) y altura'} />}</div>
+      <div className="pm-cards">{METRIC_KINDS.filter((kind) => metricDefinition(kind).group === group.id).map((kind) => <MetricCard key={kind} kind={kind} summary={summaries.get(kind) ?? null} onOpen={() => setOpen(kind)} />)}{group.id === 'basicas' && <WeightEvolution summary={summaries.get('weight') ?? null} />}{group.id === 'basicas' && <NvMetric label="IMC" icon="target" tone="gold" value={bmi ? formatNumber(Math.round(bmi.bmi * 10) / 10) : 'Sin dato'} note={bmi ? (bmi.category ?? 'Referencia adulta desde los 20 años') : 'Necesita peso (kg) y altura'} />}</div>
       {open && metricDefinition(open).group === group.id && <MetricDetail kind={open} measurements={measurements} onClose={() => setOpen(null)} />}
     </section>)}
   </>;

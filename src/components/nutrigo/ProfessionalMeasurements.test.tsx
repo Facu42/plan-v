@@ -67,3 +67,24 @@ describe('mediciones de la ficha', () => {
     expect(html).toContain('Evolución de Brazo: 1 sep 2026 30 cm; 1 oct 2026 31 cm');
   });
 });
+
+describe('evolución del peso y mini gráficos', () => {
+  it('resume la diferencia desde la primera medición, la cantidad de registros y la fecha del último', () => {
+    const html = render([row('weight', 70, '2026-09-01', 'kg'), row('weight', 68.5, '2026-09-15', 'kg'), row('weight', 67.7, '2026-10-01', 'kg')]);
+    expect(html).toContain('Evolución del peso');
+    expect(html).toContain('−2,3 kg');
+    expect(html).toContain('3 registros · último 1 oct 2026');
+  });
+
+  it('sin peso cargado lo dice, y con un solo registro no inventa una diferencia', () => {
+    expect(render([])).toContain('Todavía sin medir');
+    const one = render([row('weight', 70, '2026-09-01', 'kg')]);
+    expect(one).toContain('Primer registro');
+    expect(one).toContain('1 registro · último 1 sep 2026');
+  });
+
+  it('dibuja el mini gráfico sólo con dos o más registros', () => {
+    expect(render([row('arm', 30, '2026-09-01')])).not.toContain('pm-spark');
+    expect(render([row('arm', 30, '2026-09-01'), row('arm', 31, '2026-10-01')])).toContain('pm-spark');
+  });
+});

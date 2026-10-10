@@ -39,6 +39,13 @@ describe('directorio de pacientes del showroom', () => {
     expect(html).toContain('Cómoda');
     expect(html).toContain('Compacta');
   });
+  it('suma la acción de mensaje sólo para quien ya tiene cuenta y deja la última consulta y la conexión como columnas opcionales', () => {
+    const html = render({ onMessage: vi.fn() });
+    expect(html).toContain('Escribirle a Sofía');
+    expect(render({ onMessage: vi.fn(), patients: [{ ...base, has_account: false }] })).not.toContain('Escribirle a Sofía');
+    expect(html).toContain('<input type="checkbox"/>Última consulta');
+    expect(html).toContain('<input type="checkbox"/>Conexión');
+  });
   it('resume el directorio completo y muestra activos por defecto', () => {
     const html = render();
     expect(html).toContain('Pacientes activos');
