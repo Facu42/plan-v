@@ -5,10 +5,10 @@ import { planVBrandBinding } from './branding';
 import { patientNavBinding } from './patient-navigation';
 import type { ShowroomPage } from '../../components/nutrigo/ShowroomPanels';
 import { PatientMenuSheet } from './PatientMenuSheet';
-import { feeBannerBinding, useFeeNotice } from './fee-notice';
+import { accountBannerBinding, feeBannerBinding, useFeeNotice } from './fee-notice';
 import { installCardBinding } from './install-card';
 import { useInstallOffer } from '../../pwa/install-offer';
-import { NoticesSheet, usePatientNotices } from './patient-notices';
+import { NoticesSheet, useAccountArchived, usePatientNotices } from './patient-notices';
 import { iconButtonAction, iconButtonLabel, mapIconButtons } from './icon-buttons';
 import './nutrigo.generated.css';
 
@@ -23,6 +23,7 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
   const [attempt,setAttempt] = useState(0);
   const [menuNav,setMenuNav] = useState<SourceNode|null>(null);
   const feeNotice = useFeeNotice();
+  const accountArchived = useAccountArchived();
   const notices = usePatientNotices();
   const [noticesOpen,setNoticesOpen] = useState(false);
   const unreadMessages = unread || notices.unreadMessages;
@@ -49,7 +50,7 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
     if(node.tag==='p'&&text==='Privacy Policy')return {tag:'a',text:'Privacidad',props:{href:'/legal/privacidad.html',target:'_blank',rel:'noreferrer'}};
     if(node.tag==='p'&&text==='Term and conditions')return {tag:'a',text:'Términos y condiciones',props:{href:'/legal/terminos.html',target:'_blank',rel:'noreferrer'}};
     if(node.tag==='p'&&text==='Contact')return {onClick:()=>onNavigate('mensajes'),text:'Contacto'};
-    const fee=feeBannerBinding(node,feeNotice,onNavigate);if(fee)return fee;
+    const banner=accountArchived?accountBannerBinding(node,onNavigate):feeBannerBinding(node,feeNotice,onNavigate);if(banner)return banner;
     const installCard=installCardBinding(node,installOffer,install);if(installCard)return installCard;
     if(name==='Button'&&text==='Claim Now!')return {onClick:()=>onNavigate('plan'),label:'Ver mi plan'};
     if(name==='Social Media')return {props:{'aria-hidden':true}};

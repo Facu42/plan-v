@@ -19,6 +19,13 @@ describe('avisos de la paciente', () => {
     expect(items[0].title).toBe('Tenés 2 mensajes sin leer');
   });
 
+  it('avisa que la cuenta está archivada y que no puede escribir', () => {
+    const patient = { messages: [], appointment: null, archived: true } as never;
+    const { items } = buildNotices(patient, null, now);
+    expect(items.map(item => item.id)).toEqual(['archived']);
+    expect(items[0]).toMatchObject({ title: 'Tu cuenta está archivada', note: 'No podés enviar mensajes.', page: 'mensajes' });
+  });
+
   it('sin novedades no inventa avisos', () => {
     const patient = { messages: [], appointment: { when: 'x', starts_at: '2026-10-15T14:30:00Z', patient_reply: 'attending' } } as never;
     expect(buildNotices(patient, null, now).items).toEqual([]);

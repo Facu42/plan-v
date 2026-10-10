@@ -65,6 +65,7 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 
 ## Lo pendiente
 
+- Cuenta archivada (D6, 2026-10-10): la paciente ve que su cuenta está archivada y no puede enviar mensajes; puede seguir leyendo el hilo. La nutricionista puede escribir. Migración `20261010143000_archived_patient_cannot_message` en el repositorio, sin aplicar en la base hospedada hasta la frase escrita de Facundo. Decisión en `docs/decisiones-producto-2026-10-10.md`.
 - Conexión paciente ↔ panel (2026-10-10): decisiones D1–D7 en `docs/decisiones-producto-2026-10-10.md`; estado de cada
   hallazgo en `docs/auditoria-conexion-paciente-crm-2026-10-08.md`; producto y orden de trabajo en
   `docs/producto-definicion-2026-10-08.md`. PR #94 (día de Argentina en el servidor) en revisión. Fotos de ingredientes

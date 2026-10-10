@@ -225,3 +225,94 @@ describe('PV-24 adjuntos en PostgreSQL descartable', () => {
     }
   });
 });
+
+describe('D6 paciente archivada no envía mensajes', () => {
+  const fresh = 'dddddddd-dddd-4ddd-8ddd-ddddddddddd1';
+  const replay = 'dddddddd-dddd-4ddd-8ddd-ddddddddddd2';
+  const blocked = 'dddddddd-dddd-4ddd-8ddd-ddddddddddd3';
+  const fromPro = 'dddddddd-dddd-4ddd-8ddd-ddddddddddd4';
+  const restored = 'dddddddd-dddd-4ddd-8ddd-ddddddddddd5';
+  const attachment = 'dddddddd-dddd-4ddd-8ddd-ddddddddddd6';
+
+  it('avisa en la base, conserva el hilo y deja escribir a la nutricionista', async () => {
+    const nutriId = (await db.query<{ nutritionist_id: string }>('select nutritionist_id from public.patients where id=$1', [patientA])).rows[0].nutritionist_id;
+    const before = (await db.query<{ n: number }>('select count(*)::int as n from public.messages where patient_id=$1', [patientA])).rows[0].n;
+
+    expect(await rpc(patientAUser, 'my_archived_at')).toBeNull();
+    const prior = await rpc(patientAUser, 'send_thread_message', [{
+      patient_id: patientA,
+      client_id: replay,
+      text: 'Antes de archivar',
+    }]) as { message: { id: string }; duplicate: boolean };
+    expect(prior.duplicate).toBe(false);
+
+    await asUser(patientAUser, `insert into public.messages(nutritionist_id,patient_id,author_id,body,suggested_by_ai,sent_at) values($1,$2,$3,'Línea directa',false,now())`, [nutriId, patientA, patientAUser]);
+
+    await db.query('update public.patients set archived_at=clock_timestamp() where id=$1', [patientA]);
+    try {
+      const stamp = await rpc(patientAUser, 'my_archived_at');
+      expect(stamp instanceof Date || typeof stamp === 'string').toBe(true);
+      expect(await rpc(patientBUser, 'my_archived_at')).toBeNull();
+      expect(await rpc(nutriA, 'my_archived_at')).toBeNull();
+
+      await expect(rpc(patientAUser, 'send_thread_message', [{
+        patient_id: patientA,
+        client_id: blocked,
+        text: 'Esto no debe guardarse',
+      }])).rejects.toMatchObject({ code: '42501', message: expect.stringContaining('thread_archived') });
+
+      const again = await rpc(patientAUser, 'send_thread_message', [{
+        patient_id: patientA,
+        client_id: replay,
+        text: 'Otro texto',
+      }]) as { message: { id: string; text: string }; duplicate: boolean };
+      expect(again.duplicate).toBe(true);
+      expect(again.message.id).toBe(prior.message.id);
+      expect(again.message.text).toBe('Antes de archivar');
+
+      await expect(asUser(patientAUser, `insert into public.messages(nutritionist_id,patient_id,author_id,body,suggested_by_ai,sent_at) values($1,$2,$3,'Tampoco por la tabla',false,now())`, [nutriId, patientA, patientAUser])).rejects.toMatchObject({ code: '42501', message: expect.stringContaining('thread_archived') });
+
+      const assetId = 'a0000000-0000-4000-a000-0000000000d6';
+      await db.query(
+        `insert into public.patient_assets (id,patient_id,nutritionist_id,bucket,object_path,category,mime,byte_size,checksum_sha256,status)
+         values ($1,$2,$3,'care-documents',$4,'chat_attachment','image/png',40,'bb','ready')`,
+        [assetId, patientA, nutriId, `patients/${patientA}/${assetId}`],
+      );
+      await expect(rpc(patientAUser, 'send_thread_attachment', [{
+        patient_id: patientA,
+        client_id: attachment,
+        text: 'Foto nueva',
+        asset_id: assetId,
+        filename: 'nueva.png',
+      }])).rejects.toMatchObject({ code: '42501', message: expect.stringContaining('thread_archived') });
+
+      const written = await rpc(nutriA, 'send_thread_message', [{
+        patient_id: patientA,
+        client_id: fromPro,
+        text: 'Sigo acá cuando quieras.',
+      }]) as { message: { from: string; text: string } };
+      expect(written.message).toMatchObject({ from: 'vero', text: 'Sigo acá cuando quieras.' });
+
+      await expect(rpc(patientBUser, 'send_thread_message', [{
+        patient_id: patientA,
+        client_id: fresh,
+        text: 'Ajena',
+      }])).rejects.toMatchObject({ code: '42501', message: expect.stringContaining('thread_forbidden') });
+
+      const hidden = (await db.query<{ n: number }>("select count(*)::int as n from public.messages where body in ('Esto no debe guardarse','Tampoco por la tabla','Foto nueva','Ajena')")).rows[0].n;
+      expect(hidden).toBe(0);
+    } finally {
+      await db.query('update public.patients set archived_at=null where id=$1', [patientA]);
+    }
+
+    const back = await rpc(patientAUser, 'send_thread_message', [{
+      patient_id: patientA,
+      client_id: restored,
+      text: 'Ya puedo escribir',
+    }]) as { duplicate: boolean; message: { text: string } };
+    expect(back.duplicate).toBe(false);
+    expect(back.message.text).toBe('Ya puedo escribir');
+    expect(await rpc(patientAUser, 'my_archived_at')).toBeNull();
+    expect((await db.query<{ n: number }>('select count(*)::int as n from public.messages where patient_id=$1', [patientA])).rows[0].n).toBeGreaterThan(before);
+  });
+});

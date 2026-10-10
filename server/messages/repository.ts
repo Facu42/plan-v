@@ -1,6 +1,7 @@
 import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import type { Message, MessageAttachment, Patient } from '../../src/types/index.js';
+import { ARCHIVED_ACCOUNT_NOTICE } from '../../src/lib/account-archive.js';
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
 import { getPatient } from '../store.js';
@@ -57,6 +58,9 @@ export function messageDbError(error: { code?: string; message?: string } | null
   if (!error) return;
   if (MISSING_SCHEMA.includes(error.code ?? '')) {
     throw new CareError(501, 'Los hilos de mensajes requieren instalar la migración de este módulo.');
+  }
+  if ((error.message ?? '').includes('thread_archived')) {
+    throw new CareError(403, ARCHIVED_ACCOUNT_NOTICE);
   }
   if (error.code === '42501') throw new CareError(403, 'No tenés permiso para esta acción.');
   if (error.code === 'PT409' || error.code === '23505') {
@@ -211,7 +215,8 @@ export function sendMemoryMessage(
   patientId: string,
   input: ThreadSendInput,
 ): { message: Message; duplicate: boolean } {
-  if (!getPatient(patientId)) throw new CareError(404, 'No encontramos esa conversación.');
+  const patient = getPatient(patientId);
+  if (!patient) throw new CareError(404, 'No encontramos esa conversación.');
   const key = `${patientId}:${input.client_id}`;
   const existingId = clientIndex.get(key);
   if (existingId) {
@@ -222,6 +227,9 @@ export function sendMemoryMessage(
       throw new CareError(409, 'Ese identificador ya se usó con otro adjunto.');
     }
     return { message: project(existing), duplicate: true };
+  }
+  if (input.from === 'patient' && patient.archived_at) {
+    throw new CareError(403, ARCHIVED_ACCOUNT_NOTICE);
   }
   const attachment = input.asset_id ? memoryAttachmentFor(patientId, input.asset_id, input.filename) : undefined;
   const entry: MemMessage = {

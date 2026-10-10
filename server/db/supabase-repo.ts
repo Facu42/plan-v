@@ -516,13 +516,24 @@ export async function sbGetPatientsForNutri(userId: string): Promise<Patient[]> 
   return listed.patients;
 }
 
+// La vista de la paciente no trae archived_at. La función llega con la migración
+// de D6; si todavía no está, se lee la columna que ya existe, sólo de su ficha.
+async function loadOwnArchivedAt(patientId: string): Promise<string | null> {
+  const { data, error } = await getRequestDb().rpc('my_archived_at');
+  if (!error) return data == null || data === '' ? null : String(data);
+  const { data: row, error: readError } = await privilegedDb().from('patients').select('archived_at').eq('id', patientId).maybeSingle();
+  if (readError || !row) return null;
+  return (row.archived_at as string | null) ?? null;
+}
+
 export async function sbGetPatientForUser(userId: string): Promise<Patient | null> {
   const sb = getRequestDb();
   const { data } = await sb.from('patients_patient_view').select(patientTableColumns.patient).eq('user_id', userId).maybeSingle();
   const patientRow = row(data);
   if (!patientRow) return null;
   const extras = await loadPatientExtras(patientRow.id as string, 'patient');
-  return mapPatient(patientRow, extras, 'patient');
+  const archivedAt = await loadOwnArchivedAt(String(patientRow.id));
+  return mapPatient({ ...patientRow, archived_at: archivedAt }, extras, 'patient');
 }
 
 export async function sbGetPatientById(id: string, audience: QueryAudience = 'professional'): Promise<Patient | null> {
@@ -535,7 +546,8 @@ export async function sbGetPatientById(id: string, audience: QueryAudience = 'pr
     const archivedAt = await loadArchivedAt([String(patientRow.id)]);
     return mapPatient({ ...patientRow, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, extras, audience);
   }
-  return mapPatient(patientRow, extras, audience);
+  const archivedAt = await loadOwnArchivedAt(String(patientRow.id));
+  return mapPatient({ ...patientRow, archived_at: archivedAt }, extras, audience);
 }
 
 export async function sbAddMealLog(patientId: string, log: Omit<MealLog, 'id' | 'patient_id' | 'logged_at' | 'status'>): Promise<MealLog> {
