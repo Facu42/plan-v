@@ -4,7 +4,8 @@ import { ageFromBirthDate } from '../../lib/nutrition-target';
 import { latestBmi } from '../../lib/measurement-bmi';
 import { METRIC_GROUPS, METRIC_KINDS, metricDefinition, summarizeMetric, type MetricKind, type MetricSummary } from '../../lib/body-metrics';
 import type { Measurement } from '../../types/care';
-import { MeasurementEntryDialog } from './MeasurementEntryDialog';
+import { MeasurementEntryDialog, type MeasurementEntryInitial } from './MeasurementEntryDialog';
+import { ScaleImportDialog } from './ScaleImportDialog';
 import { MetricChart } from './MetricChart';
 import { cardNote, formatChange, formatNumber, formatMetricDate, formatMetricValue, trendText } from './measurement-format';
 import { NvBadge, NvButton, NvMetric, NvState } from './primitives';
@@ -64,8 +65,8 @@ function MetricCard({ kind, summary, onOpen }: { kind: MetricKind; summary: Metr
 }
 
 /** Mediciones de la ficha: tres grupos, tendencia, detalle con mínimo, promedio y máximo, y carga por fecha. */
-export function MeasurementsBoard({ measurements, allowed, patientName, onEnter, initialOpen = null, age = null }: {
-  measurements: readonly Measurement[]; allowed: boolean; patientName: string; onEnter: () => void; initialOpen?: MetricKind | null; age?: number | null;
+export function MeasurementsBoard({ measurements, allowed, patientName, onEnter, onImport, initialOpen = null, age = null }: {
+  measurements: readonly Measurement[]; allowed: boolean; patientName: string; onEnter: () => void; onImport?: () => void; initialOpen?: MetricKind | null; age?: number | null;
 }) {
   const [open, setOpen] = useState<MetricKind | null>(initialOpen);
   const summaries = useMemo(() => {
@@ -77,7 +78,7 @@ export function MeasurementsBoard({ measurements, allowed, patientName, onEnter,
   return <>
     <header className="pm-head">
       <div><p className="nv-eyebrow">Mediciones</p><h2>Cuerpo y evolución</h2><p>Valores cargados a mano, con fecha y origen. Lo que no se midió se muestra sin dato, nunca como cero.</p></div>
-      {allowed && <NvButton type="button" onClick={onEnter}>Cargar mediciones</NvButton>}
+      {allowed && <div className="pm-head-actions">{onImport && <NvButton type="button" className="nv-soft" onClick={onImport}>Importar informe de balanza</NvButton>}<NvButton type="button" onClick={onEnter}>Cargar mediciones</NvButton></div>}
     </header>
     {!allowed ? <NvState title="Falta el permiso de medidas" description={`${patientName} todavía no autorizó compartir sus medidas. Cuando lo haga, aparecen acá.`} /> : METRIC_GROUPS.map((group) => <section key={group.id} className="pm-group-view" aria-label={group.label}>
       <h3>{group.label}</h3>
@@ -89,7 +90,8 @@ export function MeasurementsBoard({ measurements, allowed, patientName, onEnter,
 
 export function ProfessionalMeasurements({ patientId, patientName }: { patientId: string; patientName: string }) {
   const { data, error, reload } = useCare(patientId, true);
-  const [entering, setEntering] = useState(false);
+  const [entering, setEntering] = useState<MeasurementEntryInitial | null>(null);
+  const [importing, setImporting] = useState(false);
   const [age, setAge] = useState<number | null>(null);
   useEffect(() => {
     const controller = new AbortController();
@@ -101,7 +103,8 @@ export function ProfessionalMeasurements({ patientId, patientName }: { patientId
   if (!data) return <section className="pm-panel" aria-label="Mediciones"><NvState kind="loading" title="Cargando mediciones…" description="Estamos consultando las medidas de la ficha." /></section>;
   return <section className="pm-panel" aria-label={`Mediciones de ${patientName}`}>
     {error && <p role="alert" className="pm-note">{error}</p>}
-    <MeasurementsBoard measurements={data.measurements} allowed={data.consented.includes('measurement')} patientName={patientName} onEnter={() => setEntering(true)} age={age} />
-    {entering && <MeasurementEntryDialog patientId={patientId} patientName={patientName} onClose={() => setEntering(false)} />}
+    <MeasurementsBoard measurements={data.measurements} allowed={data.consented.includes('measurement')} patientName={patientName} onEnter={() => setEntering({ date: null, values: {} })} onImport={() => setImporting(true)} age={age} />
+    {importing && <ScaleImportDialog measurements={data.measurements} onClose={() => setImporting(false)} onReview={(initial) => { setImporting(false); setEntering(initial); }} />}
+    {entering && <MeasurementEntryDialog patientId={patientId} patientName={patientName} initial={entering} onClose={() => setEntering(null)} />}
   </section>;
 }

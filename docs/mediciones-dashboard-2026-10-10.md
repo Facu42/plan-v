@@ -23,8 +23,12 @@ paciente no pueden. Las unidades las fija la base. Pruebas en PostgreSQL descart
 - Migración `20261010120000_body_metrics.sql` **preparada, sin aplicar en producción** (necesita la frase escrita de Facundo).
 - Sin tocar la pantalla de la paciente. Sin móvil propio (sólo se adapta a 2 columnas). Academy excluida.
 - IMC con el último peso (kg) y la última altura, referencia general (CDC, desde los 20 años) ya existente en Planificación.
-- Pendiente de este apartado: medidores de composición con rangos de referencia, importación de PDF de balanza (femmto/InBody) con vista
-  previa. Los valores de referencia necesitan fuente clínica.
+- Importar informe de balanza (PDF): se lee en el navegador de la profesional con `pdfjs-dist` (el archivo no sale de su computadora; carga
+  perezosa, sólo al usarlo). `scale-report.ts` reconoce rótulos en español e inglés (peso, altura, grasa, masa muscular, agua, proteína,
+  grasa visceral, metabolismo basal, edad metabólica), la fecha, valores fuera de rango o en otra unidad (libras: se marcan, no se
+  convierten) y duplicados (misma métrica, fecha y valor). Nada se guarda al importar: se abre la carga por fecha con los valores
+  precargados para revisar y corregir. No promete leer cualquier marca; escaneos o fotos (sin texto) se cargan a mano. Sin OCR/IA todavía.
+- Pendiente de este apartado: medidores de composición con rangos de referencia (necesitan fuente clínica); probar con PDF reales de InBody y femmto.
 - Lista de pacientes: «Columnas y densidad» permite ocultar Estado, Próximo foco y Registro semanal (Paciente y Acciones quedan siempre)
   y elegir filas cómodas o compactas. Se guarda en el navegador de la profesional (`directory-columns.ts`), sin tocar el servidor.
   Faltan «última consulta» y «conexión» porque el sistema todavía no guarda esos datos.

@@ -10,9 +10,11 @@ import { useUnsavedChanges } from './unsaved-changes';
 const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
 
 /** Formulario por fecha con todas las métricas. Lo que queda vacío no se guarda ni se toma como cero. */
-export function MeasurementEntryDialog({ patientId, patientName, onClose }: { patientId: string; patientName: string; onClose: () => void }) {
-  const [date, setDate] = useState(today);
-  const [values, setValues] = useState<Partial<Record<MetricKind, string>>>({});
+export interface MeasurementEntryInitial { date: string | null; values: Partial<Record<MetricKind, string>>; imported?: boolean }
+
+export function MeasurementEntryDialog({ patientId, patientName, onClose, initial }: { patientId: string; patientName: string; onClose: () => void; initial?: MeasurementEntryInitial }) {
+  const [date, setDate] = useState(initial?.date ?? today());
+  const [values, setValues] = useState<Partial<Record<MetricKind, string>>>(initial?.values ?? {});
   const [saved, setSaved] = useState<ReadonlySet<string>>(new Set());
   const [errors, setErrors] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -54,7 +56,7 @@ export function MeasurementEntryDialog({ patientId, patientName, onClose }: { pa
 
   return <FigmaRecordDialog title="Cargar mediciones" closeLabel="Cerrar carga de mediciones" onClose={onClose} className="pm-dialog">
     <form onSubmit={submit} noValidate lang="es-AR">
-      <p className="pm-hint"><b>{patientName}</b> · Completá sólo lo que mediste. Lo que dejes vacío no se guarda.</p>
+      <p className="pm-hint"><b>{patientName}</b> · {initial?.imported ? 'Valores leídos del informe: revisalos y corregí lo que haga falta antes de guardar.' : 'Completá sólo lo que mediste. Lo que dejes vacío no se guarda.'}</p>
       <fieldset disabled={busy} className="pm-fields">
         <label className="pm-date">Fecha de la medición
           <input type="date" max={today()} value={date} required onChange={(event) => { event.currentTarget.setCustomValidity(''); setDate(event.target.value); }}

@@ -40,3 +40,8 @@
 @keyframes pm-enter{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media(max-width:700px){.pm-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.pm-panel{padding:16px}.pm-head{flex-direction:column}.pm-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){.pm-detail{animation:none}}
+.pm-head-actions { display:flex; gap:10px; flex-wrap:wrap; }
+.pm-import-list { display:grid; gap:8px; margin:12px 0; padding:0; list-style:none; }
+.pm-import-list li { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; border-radius:10px; background:var(--nv-track); font-size:12px; }
+.pm-import-list li>span { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.pm-import-list small { color:var(--nv-ink-soft); font-size:11px; overflow-wrap:anywhere; }
