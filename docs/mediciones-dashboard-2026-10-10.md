@@ -22,5 +22,6 @@ paciente no pueden. Las unidades las fija la base. Pruebas en PostgreSQL descart
 ## Estado
 - Migración `20261010120000_body_metrics.sql` **preparada, sin aplicar en producción** (necesita la frase escrita de Facundo).
 - Sin tocar la pantalla de la paciente. Sin móvil propio (sólo se adapta a 2 columnas). Academy excluida.
-- Pendiente de este apartado: medidores con rangos de referencia, importación de PDF de balanza (femmto/InBody) con vista
+- IMC con el último peso (kg) y la última altura, referencia general (CDC, desde los 20 años) ya existente en Planificación.
+- Pendiente de este apartado: medidores de composición con rangos de referencia, importación de PDF de balanza (femmto/InBody) con vista
   previa, columnas configurables en la lista de pacientes. Los valores de referencia necesitan fuente clínica.

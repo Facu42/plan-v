@@ -8,6 +8,16 @@ const row = (kind: Measurement['kind'], value: number, captured_on: string, unit
 const render = (measurements: Measurement[], allowed = true, initialOpen: Parameters<typeof MeasurementsBoard>[0]['initialOpen'] = null) =>
   renderToStaticMarkup(<MeasurementsBoard measurements={measurements} allowed={allowed} patientName="Sofía" onEnter={() => undefined} initialOpen={initialOpen} />);
 
+describe('IMC en la ficha', () => {
+  it('se calcula con último peso y altura y lleva la referencia general desde los 20 años', () => {
+    const rows = [row('weight', 65, '2026-10-01', 'kg'), row('height', 160, '2026-10-01')];
+    const html = renderToStaticMarkup(<MeasurementsBoard measurements={rows} allowed patientName="Sofía" onEnter={() => undefined} age={30} />);
+    expect(html).toContain('IMC'); expect(html).toContain('25,4'); expect(html).toContain('Por encima del rango');
+    expect(render(rows)).toContain('Referencia adulta desde los 20 años');
+    expect(render([])).toContain('Necesita peso (kg) y altura');
+  });
+});
+
 describe('mediciones de la ficha', () => {
   it('muestra los tres grupos y sus métricas, con «Sin dato» donde no se midió y nunca un cero inventado', () => {
     const html = render([]);
