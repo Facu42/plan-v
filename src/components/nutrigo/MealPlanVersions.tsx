@@ -28,6 +28,8 @@ import { planWeekdayLabel } from '../../types/plans';
 import { PlanDayAnalysis } from './PlanDayAnalysis';
 import { PlanCopyDayDialog } from './PlanCopyDayDialog';
 import { PlanPrintDialog } from './PlanPrintDialog';
+import { PlanNotifyPatient, planPublishedNoticeText } from './PlanNotifyPatient';
+import { api } from '../../api/client';
 
 type DraftItem = { components?: PlanComponentView[]; for_date: string; slot: PlanSlot; free_text: string; recipe_id: string; recipe_version?: number; portions: string; public_note: string; recipe_proposal?: ProposedRecipe; recipePreview?: PlanRecipeDetail };
 
@@ -124,6 +126,7 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
   const [imageGeneration, setImageGeneration] = useState(false);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
+  const [noticeSent, setNoticeSent] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [proposal, setProposal] = useState<AiJobView | null>(null);
   const [periodStart, setPeriodStart] = useState('');
@@ -337,6 +340,15 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
     void run(() => plansApi.publish(plan.id, plan.current.version, plan.current), 'Plan publicado. La paciente ve la versión revisada.');
   }
 
+  async function notifyPatient() {
+    const version = plan?.published?.version;
+    if (!version || lock.current) return;
+    lock.current = true; setBusy(true); setError('');
+    try { await api.sendMessage(patientId, planPublishedNoticeText(patientName, version), 'vero', false, crypto.randomUUID()); setNoticeSent(version); }
+    catch (caught) { setError(careErrorMessage(caught)); }
+    finally { lock.current = false; setBusy(false); }
+  }
+
   async function openPrint() {
     if (!plan || lock.current) return;
     const request = ++printRequest.current;
@@ -361,7 +373,7 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
       </div>
     </header>
     {source === 'memory' && <p className="meal-plan-demo">Vista demo · plan ficticio para probar edición y publicación.</p>}
-    <div className="meal-plan-actions"><NvButton type="button" className="nv-ghost" disabled={busy || !plan || (dirty && !plan.published)} onClick={() => void openPrint()}>Imprimir / guardar PDF</NvButton>{(!plan || dirty) && <small>Guardá el borrador para imprimirlo. Los cambios sin guardar no forman parte del documento.</small>}</div>
+    <div className="meal-plan-actions"><NvButton type="button" className="nv-ghost" disabled={busy || !plan || (dirty && !plan.published)} onClick={() => void openPrint()}>Imprimir / guardar PDF</NvButton>{(!plan || dirty) && <small>Guardá el borrador para imprimirlo. Los cambios sin guardar no forman parte del documento.</small>}<PlanNotifyPatient patientName={patientName} publishedVersion={plan?.published?.version ?? null} busy={busy} sentVersion={noticeSent} onNotify={() => void notifyPatient()} /></div>
     {printCopy && <PlanPrintDialog plan={printCopy.plan} patientName={printCopy.patientName} professionalName={printCopy.professionalName} currentAllowed={printCopy.currentAllowed} demo={printCopy.demo} onClose={() => setPrintCopy(null)} />}
     {error && <p className="meal-plan-error" role="alert">{error}</p>}
     {status && <p className="meal-plan-status" role="status">{status}</p>}
