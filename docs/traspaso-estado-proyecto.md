@@ -70,9 +70,12 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
   `docs/producto-definicion-2026-10-08.md`. PR #94 (día de Argentina en el servidor) en revisión. Fotos de ingredientes
   y de platos con el modelo gratuito: pruebas en producción (tortilla ×3, tomate, huevo) hasta que Facundo las apruebe.
 - Revisión del front de la paciente contra Nutrigo, 2026-10-09 (rama `claude/front-paciente-nutrigo-tuezz8`):
-  las diez pantallas ya coinciden con Figma en modo demo; Facundo no lo ve porque producción no tiene demo y las
-  pantallas de entrada siguen con estilo viejo. Reglas de diseño en `CLAUDE.md`; diagnóstico, matriz y plan en
-  `docs/revision-front-paciente-2026-10-09.md`. Piloto: invitación a instalar dentro de la tarjeta del menú.
+  las diez pantallas ya coinciden con Figma en modo demo. Producción no tiene modo demo. El ingreso, recuperar
+  la clave, «Antes de seguir», la cuenta sin vincular, la carga y el error de conexión se arman con piezas del
+  archivo (logo, título, control segmentado, campo y botón verde). Figma no dibuja esas pantallas: la tarjeta
+  blanca de 420 es el default. No hay franja de instalar en la entrada. Falta que Facundo compare la entrada;
+  este cambio no afirma que coincida. Diagnóstico en `docs/revision-front-paciente-2026-10-09.md`. Piloto:
+  invitación a instalar dentro de la tarjeta del menú.
   Segunda tanda (2026-10-10, con su cuenta de prueba en producción): la campana ahora abre un panel de avisos (antes abría el menú) y los «…» de cada tarjeta llevan a su pantalla; la comida cargada sin descripción ya no escribe «null»; las calorías de comidas sin revisar dicen «en revisión»; sin rutina asignada, Inicio muestra las actividades que la paciente registró. Sin cambios de base ni API. Pendiente: fotos de platos (dependen de que las recetas tengan portada), pantallas sin datos.
 
 
@@ -85,8 +88,8 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - Auditoría de la demo del 2026-10-07 (rama `claude/inspiring-lovelace-nfsot9`): superficies fuera del
   archivo que todavía tienen estilo viejo y la primera prueba de fotos con Cloudflare en producción.
   Ver `docs/auditoria-demo-2026-10-07.md`.
-- Pantallas de la nutricionista, ingreso y administración con piezas del archivo de Nutrigo
-  (Figma no las dibuja); van en otra rama.
+- Pantallas de la nutricionista y la administración con piezas del archivo de Nutrigo
+  (Figma no las dibuja); van en otra rama. El ingreso de la paciente ya usa esas piezas.
 
 - IA gratuita, pedido del 2/10: el predeterminado seguía siendo `gpt-4o-mini` y no cumplía
   lo acordado. Rama `codex/ia-solo-modelos-gratuitos`: `openrouter/free`, rechazo de pagos
