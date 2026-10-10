@@ -472,14 +472,50 @@ export async function sbListPatientsForNutri(userId: string, query: { offset: nu
     }
   }
 
+  const pastByPatient = await loadPastConsultations(ids, appointmentNow);
   const [archivedAt, resourceAssignments] = await Promise.all([loadArchivedAt(ids), loadResourceAssignments(ids)]);
   return {
     patients: pageRows.map((patientRow) => mapPatient({ ...patientRow, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, {
       appointment: mapScheduledAppointment(nextByPatient.get(String(patientRow.id))),
+      appointment_history: pastByPatient.get(String(patientRow.id)) ?? [],
       resource_assignments: resourceAssignments.get(String(patientRow.id)) ?? [],
     }, 'professional')),
     page: { offset: query.offset, limit: query.limit, has_more: hasMore },
   };
+}
+
+const PAST_CONSULTATION_DAYS = 400;
+const ARGENTINA_DAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+
+/**
+ * Turnos ya terminados (no cancelados) de las pacientes de la página, como historial «elapsed» con fecha local.
+ * Alimenta «última consulta» del directorio y las consultas del período en Inicio. Un turno pasado no prueba
+ * asistencia: sólo que el horario se cumplió sin cancelarse.
+ */
+async function loadPastConsultations(ids: string[], now: Date): Promise<Map<string, NonNullable<Patient['appointment_history']>>> {
+  const grouped = new Map<string, NonNullable<Patient['appointment_history']>>();
+  if (!ids.length) return grouped;
+  // Mismo criterio que el próximo turno: lo lee el servidor, sólo de pacientes que salieron de la consulta con permisos de fila.
+  const { data } = await privilegedDb().from('appointments')
+    .select('id,patient_id,starts_at,duration_min,channel,status')
+    .in('patient_id', ids)
+    .in('status', ['scheduled', 'done'])
+    .gte('starts_at', new Date(now.getTime() - PAST_CONSULTATION_DAYS * 86_400_000).toISOString())
+    .lt('starts_at', now.toISOString())
+    .order('starts_at', { ascending: false });
+  for (const appt of rows(data)) {
+    const startsAt = new Date(String(appt.starts_at));
+    const duration = Number(appt.duration_min) || 0;
+    const endsAt = new Date(startsAt.getTime() + duration * 60_000);
+    if (Number.isNaN(startsAt.getTime()) || endsAt.getTime() > now.getTime()) continue;
+    // Columnas comunes a todas las versiones de la tabla: la fecha se toma en hora de Argentina.
+    const dateId = ARGENTINA_DAY.format(startsAt);
+    const patientId = String(appt.patient_id);
+    const list = grouped.get(patientId) ?? [];
+    list.push({ id: String(appt.id), when: '', dateId, duration, channel: String(appt.channel ?? ''), action: 'elapsed', actor: 'system', at: endsAt.toISOString() });
+    grouped.set(patientId, list);
+  }
+  return grouped;
 }
 
 async function loadResourceAssignments(ids: string[]) {

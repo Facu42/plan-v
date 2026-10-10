@@ -15,6 +15,10 @@ Nada de lo siguiente se presenta como reproducción nueva del video.
 
 Código: `src/lib/inicio-indicators.ts`, `src/components/nutrigo/InicioIndicators.tsx` (con pruebas).
 
+**Corrección (10/10):** en la base real nadie escribe el historial «elapsed»; sólo el modo demo lo generaba. Sin arreglo, en la web
+publicada «Consultas» daba cero y «Última consulta» decía «Sin consultas registradas». Ahora el servidor arma ese historial con los turnos
+no cancelados cuyo horario ya terminó (últimos 400 días), en la lista de pacientes. Sigue contando turnos cumplidos, no asistencia confirmada.
+
 ## Falta (con el motivo)
 | Función v3 | Motivo |
 |---|---|
