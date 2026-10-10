@@ -192,3 +192,6 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 Continuación del cierre de paciente y nutricionista: [correcciones, evidencia y paquete de cinco migraciones](cierre-funcional-plan-v-2026-10-05.md).
 
 Contrato de cada acción, permisos y lecturas al recargar: [recorridos y guía para ambas experiencias](recorridos-y-contratos-plan-v-2026-10-05.md).
+
+## Calorías de la paciente suman al instante (2026-10-10)
+Facundo: lo que aprueba la nutricionista es el plan, no lo que la paciente carga al comer. En la vista de la paciente (Inicio, Diario, Progreso) las comidas pendientes de revisión ya suman calorías y macros (estimadas). La vista de la nutricionista no cambia. PR en borrador, sin juntar.
