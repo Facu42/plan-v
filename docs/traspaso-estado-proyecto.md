@@ -67,8 +67,12 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 
 - Conexión paciente ↔ panel (2026-10-10): decisiones D1–D7 en `docs/decisiones-producto-2026-10-10.md`; estado de cada
   hallazgo en `docs/auditoria-conexion-paciente-crm-2026-10-08.md`; producto y orden de trabajo en
-  `docs/producto-definicion-2026-10-08.md`. PR #94 (día de Argentina en el servidor) en revisión. Fotos de ingredientes
+  `docs/producto-definicion-2026-10-08.md`. PR #94 (día de Argentina en el servidor) ya está en `main`. Fotos de ingredientes
   y de platos con el modelo gratuito: pruebas en producción (tortilla ×3, tomate, huevo) hasta que Facundo las apruebe.
+  Corregir una comida o medida propia (D4): mientras no está revisada, la paciente la corrige o la borra; si ya fue
+  revisada, le pide el cambio a su nutricionista y el registro no se toca. La hoja del diario no está dibujada en el
+  archivo: se abre con el mismo diálogo de registros. La migración queda en el repositorio y no se aplica en la base
+  en línea hasta la frase escrita de Facundo. El aviso por correo (D3) sigue pendiente: hace falta definir cómo se mandan.
 - Revisión del front de la paciente contra Nutrigo, 2026-10-09 (rama `claude/front-paciente-nutrigo-tuezz8`):
   las diez pantallas ya coinciden con Figma en modo demo; Facundo no lo ve porque producción no tiene demo y las
   pantallas de entrada siguen con estilo viejo. Reglas de diseño en `CLAUDE.md`; diagnóstico, matriz y plan en

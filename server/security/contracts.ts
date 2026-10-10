@@ -37,6 +37,8 @@ export type PatientAction =
   | 'read_patient'
   | 'read_clinical'
   | 'analyze_meal'
+  | 'correct_own_meal'
+  | 'correct_own_measurement'
   | 'review_meal'
   | 'update_habits'
   | 'log_activity'
@@ -87,6 +89,8 @@ const PATIENT_ACTIONS = new Set<PatientAction>([
   'read_self',
   'read_patient',
   'analyze_meal',
+  'correct_own_meal',
+  'correct_own_measurement',
   'update_habits',
   'log_activity',
   'delete_activity',

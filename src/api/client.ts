@@ -155,6 +155,21 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
+  correctMeal: (patientId: string, mealId: string, data: { slot: string; description: string | null }) =>
+    request<{ log: MealLog; patient: Patient }>(`/api/patients/${patientId}/meals/${mealId}/correct`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  deleteMeal: (patientId: string, mealId: string) =>
+    request<{ deleted: boolean; patient: Patient }>(`/api/patients/${patientId}/meals/${mealId}`, { method: 'DELETE' }),
+
+  requestMealCorrection: (patientId: string, mealId: string, data: { note: string; client_id: string }) =>
+    request<{ requested: boolean; patient: Patient }>(`/api/patients/${patientId}/meals/${mealId}/correction-request`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
   updateMenuSlot: (patientId: string, data: { day: string; slot: string; title: string }) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/menu`, {
       method: 'PATCH',
