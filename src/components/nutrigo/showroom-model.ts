@@ -21,7 +21,11 @@ export function buildShowroomPatient(patient: Patient, now = new Date()) {
   }), { kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 });
   return {
     id: patient.id, name: patient.name, initials: patient.initials,
-    goal: patient.goal, goalProgress: patient.goal_progress ?? 0,
+    goal: patient.goal,
+    goalStatus: patient.goal_status ?? null,
+    goalProgress: patient.goal_progress ?? null,
+    goalUpdatedAt: patient.goal_updated_at ?? null,
+    goalUpdates: (patient.goal_updates ?? patient.goal_history ?? []).map(({ id, goal, status, progress, updated_at }) => ({ id, goal, status, progress, updated_at })),
     hydration: patient.hydration, energy: patient.energy ?? 'Sin registro',
     sleep: patient.sleep_minutes === null ? 'Sin registro' : `${Math.round(patient.sleep_minutes / 6) / 10} h`,
     sleepMinutes: patient.sleep_minutes,

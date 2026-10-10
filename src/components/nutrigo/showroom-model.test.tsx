@@ -20,6 +20,8 @@ describe('modelo seguro del showroom', () => {
   it('excluye campos profesionales y no inventa un objetivo calórico', () => {
     const model = buildShowroomPatient(patient, now);
     expect(JSON.stringify(model)).not.toContain('SECRETO');
+    expect(model.goalUpdates).toEqual([{ id: 'g', goal: 'G', status: 'active', progress: 20, updated_at: '' }]);
+    expect(model.goalUpdates[0]).not.toHaveProperty('note');
     expect(model.kcal).toBe(0);
     expect(model.nutritionLogCount).toBe(0);
     expect(model.sleep).toBe('Sin registro');

@@ -133,6 +133,8 @@ const ALLOWED = [
   'set_patient_billing',
   'set_patient_charge_waived',
   'set_patient_fee',
+  // Objetivo de seguimiento: solo la nutricionista dueña, con estado y avance válidos.
+  'set_patient_goal',
   'set_payment_settings',
   'set_professional_recipe_favorite',
   'set_recipe_cover',

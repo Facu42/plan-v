@@ -10,6 +10,7 @@ import { PROGRESS_PERIODS, type ProgressPeriodDays, type ProgressPoint, type Pro
 import { dateLabel, descendants, EmptyState, errorText, formatNumber, leaf, objects, source, Stateful, useRemote, type ScreenProps } from './shared';
 import { attachmentHref } from './message-format';
 import { dayOfIso, cleanAmount, litresLabel, percentLabel, safePercent } from './home-values';
+import { PatientGoalCard } from '../PatientGoalCard';
 
 /** Un vaso son 250 ml. Plan V no guarda una meta de agua: los porcentajes usan la referencia general de 8 vasos (2 L), igual que en Inicio. */
 const WATER_GOAL_GLASSES = 8;
@@ -323,6 +324,7 @@ export function NutrigoProgress({ patient, onNavigate, onSignOut, onRecord, onHy
     return undefined;
   };
   return <FramePair nodes={['105:2790', '498:18237']} resolve={resolver} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut}>
+    <PatientGoalCard patient={patient} history />
     {remote.error && <Stateful error={remote.error} onRetry={remote.reload} />}{error && <Stateful error={error} />}
   </FramePair>;
 }

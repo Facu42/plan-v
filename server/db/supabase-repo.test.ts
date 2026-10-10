@@ -887,10 +887,64 @@ describe('patient audience queries', () => {
     const patientsSelect = harness.calls.find((call) => call.table === 'patients_patient_view' && call.op === 'select');
     expect(String(patientsSelect?.payload)).not.toContain('plan_b');
     expect(String(patientsSelect?.payload)).not.toContain('*');
+    const updatesSelect = harness.calls.find((call) => call.table === 'goal_updates_patient_view' && call.op === 'select');
+    expect(String(updatesSelect?.payload)).not.toContain('note');
     const mealRead = harness.calls.find((call) => call.table === 'rpc:get_patient_meal_logs');
     expect(mealRead?.payload).toEqual({ target_patient: 'patient-1' });
     expect(harness.calls.some(call => call.table === 'meal_logs_patient_view' || call.table === 'meal_logs')).toBe(false);
     expect(harness.calls.some((call) => call.table === 'ai_briefs')).toBe(false);
+  });
+
+  it('muestra a la paciente el estado y el avance, y deja la nota fuera', async () => {
+    harness.push('patients_patient_view', {
+      data: {
+        id: 'patient-1',
+        full_name: 'Sofía',
+        status: 'En ritmo',
+        stage: 'seguimiento',
+        goal: 'Comer con regularidad',
+        adherence_score: 60,
+        billing_status: 'waived',
+        billing_until: null,
+      },
+      error: null,
+    });
+    harness.push('patient_goal_patient_view', {
+      data: [{
+        id: 'patient-1',
+        goal_status: 'paused',
+        goal_progress: 40,
+        goal_updated_at: '2026-10-10T15:00:00.000Z',
+      }],
+      error: null,
+    });
+    harness.push('goal_updates_patient_view', {
+      data: [{
+        id: 'goal-1',
+        patient_id: 'patient-1',
+        goal: 'Comer con regularidad',
+        status: 'paused',
+        progress: 40,
+        updated_at: '2026-10-10T15:00:00.000Z',
+        note: 'Nota que no debe salir',
+      }],
+      error: null,
+    });
+    const patient = await sbGetPatientForUser('user-1');
+    expect(patient).toMatchObject({
+      goal: 'Comer con regularidad',
+      goal_status: 'paused',
+      goal_progress: 40,
+    });
+    expect(patient!.goal_updates).toEqual([{
+      id: 'goal-1',
+      goal: 'Comer con regularidad',
+      status: 'paused',
+      progress: 40,
+      updated_at: '2026-10-10T15:00:00.000Z',
+    }]);
+    expect(patient).not.toHaveProperty('goal_history');
+    expect(JSON.stringify(patient)).not.toContain('Nota que no debe salir');
   });
 });
 
@@ -968,10 +1022,21 @@ describe('PV-10 persistent writes', () => {
     expect(JSON.stringify(update?.payload)).not.toContain('billing');
   });
 
-  it('persists the published goal text', async () => {
-    await sbUpdateGoal('patient-1', 'Comer con regularidad');
-    const update = harness.calls.find((call) => call.table === 'patients' && call.op === 'update');
-    expect(update?.payload).toEqual({ goal: 'Comer con regularidad' });
+  it('persists the published goal text, status, progress and note', async () => {
+    await sbUpdateGoal('patient-1', {
+      goal: 'Comer con regularidad',
+      status: 'active',
+      progress: 45,
+      note: '  Acordado en la consulta.  ',
+    });
+    const call = harness.calls.find((entry) => entry.table === 'rpc:set_patient_goal');
+    expect(call?.payload).toEqual({
+      target: 'patient-1',
+      next_goal: 'Comer con regularidad',
+      next_status: 'active',
+      next_progress: 45,
+      next_note: 'Acordado en la consulta.',
+    });
   });
 
   it('reads the next scheduled appointment as local day and time', async () => {

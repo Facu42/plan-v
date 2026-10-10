@@ -67,8 +67,13 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 
 - Conexión paciente ↔ panel (2026-10-10): decisiones D1–D7 en `docs/decisiones-producto-2026-10-10.md`; estado de cada
   hallazgo en `docs/auditoria-conexion-paciente-crm-2026-10-08.md`; producto y orden de trabajo en
-  `docs/producto-definicion-2026-10-08.md`. PR #94 (día de Argentina en el servidor) en revisión. Fotos de ingredientes
+  `docs/producto-definicion-2026-10-08.md`. PR #94 (día de Argentina en el servidor) ya está en `main`. Fotos de ingredientes
   y de platos con el modelo gratuito: pruebas en producción (tortilla ×3, tomate, huevo) hasta que Facundo las apruebe.
+- Objetivo de la paciente (D1, 2026-10-10): el panel ya mandaba estado, avance y nota; ahora se guardan en la base
+  (migración `20261010183000_patient_goal_followup`) y la paciente los ve en Inicio y en Progreso. La nota queda para
+  la nutricionista. No es la meta de calorías. **La migración no se aplicó en la base en línea**: espera la frase
+  escrita de Facundo. Hasta entonces la app sigue mostrando el texto del objetivo. El archivo de Nutrigo no dibuja
+  este objetivo (dibuja el peso): la tarjeta usa la card blanca del archivo y va debajo del marco. No hay visto bueno visual.
 - Revisión del front de la paciente contra Nutrigo, 2026-10-09 (rama `claude/front-paciente-nutrigo-tuezz8`):
   las diez pantallas ya coinciden con Figma en modo demo; Facundo no lo ve porque producción no tiene demo y las
   pantallas de entrada siguen con estilo viejo. Reglas de diseño en `CLAUDE.md`; diagnóstico, matriz y plan en

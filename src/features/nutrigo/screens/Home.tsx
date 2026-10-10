@@ -18,6 +18,7 @@ import { CalorieArc, WeightArc } from './arcs';
 import '../home-motion.css';
 import { barFill, descendants, EmptyState, fields, formatNumber, leaf, listChildren, objects, source, Stateful, timeLabel, useRemote, dateId, type ScreenProps } from './shared';
 import { dayOfIso, cleanAmount, daysBefore, litresLabel, monthYearLabel, percentLabel, portionsLabel, safePercent, weekDays, weightChangeLabel } from './home-values';
+import { PatientGoalCard } from '../PatientGoalCard';
 
 async function homeData(id: string, signal: AbortSignal) {
   const [body,target,recipes,plan,exercise,care] = await Promise.allSettled([
@@ -276,6 +277,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
     return undefined;
   };
   return <FramePair nodes={['12:792','427:14405']} resolve={resolve} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut}>
+    <PatientGoalCard patient={patient} />
     {(!current||current.failed||data.error)&&<Stateful loading={!current&&!data.error} error={data.error|| (current?.failed?'Algunos datos no se pudieron cargar.':undefined)} onRetry={data.reload}/>}
   </FramePair>;
 }

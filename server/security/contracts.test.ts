@@ -214,6 +214,14 @@ describe('toPatientSelfView', () => {
     expect(serialized).not.toHaveProperty('adherence_why');
     expect(serialized).not.toHaveProperty('brief');
     expect(serialized).not.toHaveProperty('goal_history');
+    expect(serialized.goal_updates).toEqual([{
+      id: 'goal-1',
+      goal: 'Comer con regularidad',
+      status: 'active',
+      progress: 55,
+      updated_at: '2026-09-05T00:00:00.000Z',
+    }]);
+    expect(JSON.stringify(serialized)).not.toContain('Nota interna sobre el objetivo');
     expect(serialized.meal_logs[0]).not.toHaveProperty('note_for_nutri');
     expect(serialized.activity_logs).toEqual(patient.activity_logs);
     expect(serialized.messages).toEqual([{
@@ -249,6 +257,9 @@ describe('toPatientSelfView', () => {
   it('returns only identity, billing state and sent messages when access is locked', () => {
     const view = toPatientSelfView({ ...patient, billing_status: 'pending', billing_until: null });
 
+    expect(view.goal).toBe('');
+    expect(view.goal_updates).toEqual([]);
+    expect(JSON.stringify(view)).not.toContain('Nota interna sobre el objetivo');
     expect(view.todayPlan).toEqual([]);
     expect(view.weekPlan).toEqual([]);
     expect(view.meal_logs).toEqual([]);

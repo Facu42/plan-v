@@ -14,6 +14,15 @@ export type GoalHistoryEntry = {
   updated_at: string;
 };
 
+/** Cambio del objetivo que sí puede ver la paciente: sin la nota de la profesional. */
+export type GoalUpdate = {
+  id: string;
+  goal: string;
+  status: GoalStatus;
+  progress: number;
+  updated_at: string;
+};
+
 export type FoodItem = {
   name: string;
   portion_est: number | null;
@@ -160,6 +169,8 @@ export type Patient = {
   goal_progress?: number;
   goal_updated_at?: string | null;
   goal_history?: GoalHistoryEntry[];
+  /** Historial visible para la paciente, sin la nota profesional. */
+  goal_updates?: GoalUpdate[];
   sensitive_hours: string;
   plan_b: string;
   next_focus: string;

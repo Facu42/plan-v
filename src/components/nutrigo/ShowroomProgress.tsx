@@ -179,7 +179,7 @@ export function ShowroomProgress({
   const weight = remote?.measurements_included ? remote.series.find((series) => series.kind === 'weight') ?? null : null;
   const weightPoints = weight ? [...weight.previous, ...weight.current] : [];
   const rows = remote?.measurements_included ? buildMeasurementRows(remote.series) : [];
-  const goalProgress = Math.max(0, Math.min(100, patient.goalProgress));
+  const goalProgress = Math.max(0, Math.min(100, patient.goalProgress ?? 0));
   const maxSleep = Math.max(600, ...patient.journey.days.map((day) => day.sleepMinutes ?? 0));
   const sleepTicks = [1, 0.75, 0.5, 0.25, 0].map((share) => `${formatQty(Math.round(maxSleep * share / 6) / 10)} h`);
   const mealScale = Math.max(4, Math.ceil(view.maxMeals / 4) * 4);
