@@ -130,7 +130,7 @@ describe('resolveRequestAuth', () => {
 describe('canAccessPatient', () => {
   const patientOwner = { id: 'patient-1', nutritionistId: 'nutri-1', billing_status: 'active' as const, billing_until: '2099-10-06' };
 
-  it.each<PatientAction>(['read_self', 'read_patient', 'analyze_meal', 'update_habits', 'log_activity', 'read_resource', 'manage_favorites', 'send_message', 'reschedule_appointment', 'confirm_appointment', 'read_intake', 'edit_intake', 'submit_intake', 'grant_consent', 'read_consent', 'request_privacy', 'read_privacy'])(
+  it.each<PatientAction>(['read_self', 'read_patient', 'analyze_meal', 'correct_own_meal', 'correct_own_measurement', 'update_habits', 'log_activity', 'read_resource', 'manage_favorites', 'send_message', 'reschedule_appointment', 'confirm_appointment', 'read_intake', 'edit_intake', 'submit_intake', 'grant_consent', 'read_consent', 'request_privacy', 'read_privacy'])(
     'allows a patient to perform %s only on their own record',
     (action) => {
       const actor: Actor = { role: 'paciente', userId: 'user-patient', patientId: 'patient-1' };
@@ -200,6 +200,8 @@ describe('canAccessPatient', () => {
     expect(canAccessPatient(actor, locked, 'request_privacy')).toBe(true);
     expect(canAccessPatient(actor, locked, 'read_privacy')).toBe(true);
     expect(canAccessPatient(actor, locked, 'analyze_meal')).toBe(false);
+    expect(canAccessPatient(actor, locked, 'correct_own_meal')).toBe(false);
+    expect(canAccessPatient(actor, locked, 'correct_own_measurement')).toBe(false);
     expect(canAccessPatient(actor, locked, 'update_habits')).toBe(false);
     expect(canAccessPatient(actor, locked, 'log_activity')).toBe(false);
     expect(canAccessPatient(actor, locked, 'reschedule_appointment')).toBe(false);

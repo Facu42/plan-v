@@ -107,6 +107,16 @@ export const analyzeMealInputSchema = z.object({
   message: 'Se requiere una descripción o imagen',
 });
 
+export const mealCorrectionInputSchema = z.object({
+  slot: mealSlotSchema,
+  description: z.string().trim().max(1000).nullable(),
+}).strict();
+
+export const mealCorrectionRequestSchema = z.object({
+  note: z.string().trim().min(1).max(500),
+  client_id: z.uuid(),
+}).strict();
+
 export const mealReviewInputSchema = z.object({
   status: z.enum(['confirmed', 'adjusted']),
   foods: z.array(foodItemSchema).min(1).max(8).optional(),

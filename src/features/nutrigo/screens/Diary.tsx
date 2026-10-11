@@ -9,6 +9,7 @@ import { dateId, dateLabel, descendants, EmptyState, errorText, formatNumber, id
 import { argentinaDate, argentinaTime } from './ar-time';
 import { GREEN_BG, swapBackground } from '../source-tone';
 import { macroCell, mealTitle, newestFirst, nutrientTotal, statNumber, type Nutrient } from './diary-format';
+import { MealCorrectionDialog } from './meal-correction';
 
 type Props = ScreenProps & { onLogMeal?: (slot?: string) => void; onHydration?: () => void; onRest?: () => void };
 type Log = ScreenProps['patient']['logs'][number];
@@ -46,6 +47,7 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
   const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
   const [page, setPage] = useState(1);
   const [dialog, setDialog] = useState<'add' | 'filter' | null>(null);
+  const [selected, setSelected] = useState<Log | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const refresh = useAppStore(state => state.refreshPatient);
@@ -62,6 +64,13 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
   const setPeriod = (value: number) => { setDays(value); setPage(1); };
   const addWater = async () => { if (busy) return; setBusy(true); setError(''); try { await api.updateHabits(patient.id, { hydration: patient.hydration + 1 }); await refresh(patient.id); } catch (caught) { setError(errorText(caught)); } finally { setBusy(false); } };
   const logMeal = onLogMeal ? () => { setDialog(null); onLogMeal(); } : undefined;
+  const runCorrection = async (work: () => Promise<void>) => {
+    if (busy) return;
+    setBusy(true); setError('');
+    try { await work(); await refresh(patient.id); setSelected(null); }
+    catch (caught) { setError(errorText(caught)); }
+    finally { setBusy(false); }
+  };
 
   /** Tarjeta de estadística: total del período (la paciente suma al instante lo que carga, estimado) y su variación real contra el período anterior. */
   const statistic = (node: SourceNode, nutrient: Nutrient): SourceBinding => {
@@ -110,6 +119,7 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
       }, index)) };
     };
     return source(prototype, child => {
+      if (child === prototype) return { tag: 'button', onClick: () => { setError(''); setSelected(log); }, label: pending ? `Corregir o borrar ${title}` : `Pedir corrección de ${title}` };
       const values = cells[nodeName(child)];
       if (values) return fill(child, values);
       return undefined;
@@ -179,5 +189,6 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
       </fieldset>
       <label className="mt-[16px] flex items-center gap-[8px] text-[14px] text-[#272932]"><input type="checkbox" checked={pendingOnly} onChange={event => { setPendingOnly(event.target.checked); setPage(1); }} />Sólo comidas pendientes de revisión</label>
     </FigmaRecordDialog>}
+    {selected && <MealCorrectionDialog meal={{ id: selected.id, slot: selected.slot, description: selected.description, status: selected.status, title: mealTitle(selected) }} busy={busy} error={error} onClose={() => { if (!busy) { setSelected(null); setError(''); } }} onCorrect={(slot, description) => void runCorrection(() => api.correctMeal(patient.id, selected.id, { slot, description }).then(() => undefined))} onDelete={() => void runCorrection(() => api.deleteMeal(patient.id, selected.id).then(() => undefined))} onRequest={(note, clientId) => void runCorrection(() => api.requestMealCorrection(patient.id, selected.id, { note, client_id: clientId }).then(() => undefined))} />}
   </FramePair>;
 }

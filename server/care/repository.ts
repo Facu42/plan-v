@@ -16,10 +16,16 @@ const photos = new Map<string, string>();
 const documents = new Map<string, string>();
 const measurements = new Map<string, Measurement>();
 export function resetCareMemory() { records.clear(); preferences.clear(); replacements.clear(); photos.clear(); documents.clear(); measurements.clear(); }
-export function careDbError(error: { code?: string } | null) {
+export function careDbError(error: { code?: string; message?: string } | null) {
   if (!error) return;
   if (['42P01','42883','PGRST202','PGRST205'].includes(error.code ?? '')) throw new CareError(501, 'El seguimiento requiere instalar la migración de este módulo.');
   if (error.code === '42501') throw new CareError(403, 'No tenés permiso o falta el consentimiento vigente.');
+  if (error.code === 'PT409' && (error.message ?? '').includes('measure_open')) {
+    throw new CareError(409, 'Esta medida todavía no está revisada. Podés corregirla o borrarla vos.');
+  }
+  if (error.code === 'PT409' && (error.message ?? '').includes('measure_reviewed')) {
+    throw new CareError(409, 'Esta medida ya está revisada. Pedile a tu nutricionista que la corrija.');
+  }
   if (error.code === '23505' || error.code === 'PT409') throw new CareError(409, 'Ese registro ya existe con otros datos. Recargá para revisarlo.');
   if (['22023','23514','22P02'].includes(error.code ?? '')) throw new CareError(400, 'Revisá los datos del registro.');
   throw new CareError(503, 'No se pudo confirmar el guardado. Reintentá sin cerrar el formulario.');
@@ -117,6 +123,71 @@ export async function reviewCareRecord(patientId: string, id: string, persistent
   const record = records.get(id); if (!record || record.patient_id !== patientId) throw new CareError(404, 'Registro no encontrado.');
   if (isMeasurementData(record.data)) await requireCareConsent(patientId, false, 'measurement');
   record.reviewed_at ??= new Date().toISOString();
+}
+
+const MEASURE_LABELS = { weight: 'Peso', waist: 'Cintura', hip: 'Cadera' } as const;
+
+function ownMeasurement(patientId: string, recordId: string): CareRecord {
+  const record = records.get(recordId);
+  if (!record || record.patient_id !== patientId || !isMeasurementData(record.data)) throw new CareError(404, 'Registro no encontrado.');
+  if (record.data.source !== 'patient') throw new CareError(403, 'No tenés permiso o falta el consentimiento vigente.');
+  return record;
+}
+
+export function measurementCorrectionRequest(kind: 'weight' | 'waist' | 'hip', recordedOn: string, note: string): string {
+  const [year, month, day] = recordedOn.split('-');
+  return `Quiero corregir una medida ya revisada (${MEASURE_LABELS[kind]}, ${day}/${month}/${year}): ${note.trim()}`;
+}
+
+export async function correctOwnMeasurement(patientId: string, recordId: string, value: number, persistent: boolean): Promise<void> {
+  if (persistent) {
+    const { error } = await getRequestDb().rpc('correct_own_measurement', { payload: { patient_id: patientId, record_id: recordId, value } });
+    careDbError(error);
+    return;
+  }
+  await requireCareConsent(patientId, false, 'measurement');
+  const record = ownMeasurement(patientId, recordId);
+  if (!isMeasurementData(record.data)) throw new CareError(400, 'Revisá los datos del registro.');
+  if (record.reviewed_at) throw new CareError(409, 'Esta medida ya está revisada. Pedile a tu nutricionista que la corrija.');
+  const limits = record.data.kind === 'weight' ? [1, 500] : [10, 300];
+  if (!Number.isFinite(value) || value < limits[0] || value > limits[1]) throw new CareError(400, 'Revisá los datos del registro.');
+  record.data = { ...record.data, value };
+  rememberMeasurement(record);
+}
+
+export async function deleteOwnMeasurement(patientId: string, recordId: string, persistent: boolean): Promise<void> {
+  if (persistent) {
+    const { error } = await getRequestDb().rpc('delete_own_measurement', { payload: { patient_id: patientId, record_id: recordId } });
+    careDbError(error);
+    return;
+  }
+  await requireCareConsent(patientId, false, 'measurement');
+  const record = ownMeasurement(patientId, recordId);
+  if (record.reviewed_at) throw new CareError(409, 'Esta medida ya está revisada. Pedile a tu nutricionista que la corrija.');
+  records.delete(recordId);
+  measurements.delete(recordId);
+}
+
+export async function requestMeasurementCorrection(
+  patientId: string,
+  recordId: string,
+  input: { note: string; client_id: string },
+  persistent: boolean,
+): Promise<{ text: string | null; duplicate: boolean }> {
+  const note = input.note.trim();
+  if (note.length < 1 || note.length > 500) throw new CareError(400, 'Revisá los datos del registro.');
+  if (persistent) {
+    const { data, error } = await getRequestDb().rpc('request_measurement_correction', {
+      payload: { patient_id: patientId, record_id: recordId, note, client_id: input.client_id },
+    });
+    careDbError(error);
+    return { text: null, duplicate: Boolean((data as { duplicate?: boolean } | null)?.duplicate) };
+  }
+  await requireCareConsent(patientId, false, 'measurement');
+  const record = ownMeasurement(patientId, recordId);
+  if (!isMeasurementData(record.data)) throw new CareError(400, 'Revisá los datos del registro.');
+  if (!record.reviewed_at) throw new CareError(409, 'Esta medida todavía no está revisada. Podés corregirla o borrarla vos.');
+  return { text: measurementCorrectionRequest(record.data.kind, record.recorded_on, note), duplicate: false };
 }
 export async function getCarePreferences(patientId: string, persistent: boolean): Promise<CarePreferences> {
   if (!persistent) return preferences.get(patientId) ?? { ...DEFAULT_CARE_PREFERENCES };
