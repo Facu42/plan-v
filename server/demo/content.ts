@@ -193,6 +193,7 @@ export async function seedDemoContent(fetcher: Fetcher, now = new Date(), target
     }));
     const plan = await call('plan de la semana', `/api/patients/${MAIN}/plans`, 'POST', {
       id: planId, period_start: monday, period_end: addDays(monday, 6), timezone: TZ, items,
+      meal_times: { Desayuno: '08:00', Almuerzo: '13:00', Merienda: '17:00', Cena: '21:00' },
     });
     if (plan) await call('publicar plan', `/api/plans/${planId}/publish`, 'POST', { expected_version: 1, expected_snapshot: planReviewSnapshot(plan.plan.current) });
   }
