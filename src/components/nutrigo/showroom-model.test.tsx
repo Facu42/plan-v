@@ -75,6 +75,12 @@ describe('modelo seguro del showroom', () => {
     expect(model.appointment).toEqual({ when: 'Jueves · 14:30', duration: 45, channel: 'video', meet_url: 'https://meet.example.com/ana' });
     expect(model.appointment).not.toHaveProperty('prep_note');
   });
+  it('marca la cuenta archivada sin copiar la fecha interna', () => {
+    expect(buildShowroomPatient(patient, now).archived).toBe(false);
+    const archived = buildShowroomPatient({ ...patient, archived_at: '2026-10-10T12:00:00.000Z' }, now);
+    expect(archived.archived).toBe(true);
+    expect(JSON.stringify(archived)).not.toContain('2026-10-10T12:00:00.000Z');
+  });
   it('busca sin acentos y excluye archivados', () => {
     expect(filterShowroomPatients([{ ...patient, name: 'Sofía' }, { ...patient, id: 'arch', archived_at: '2026-09-01' }], 'sofia')).toHaveLength(1);
     expect(filterShowroomPatients([patient], 'inexistente')).toEqual([]);

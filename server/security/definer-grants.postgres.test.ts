@@ -88,6 +88,7 @@ const ALLOWED = [
   'log_patient_activity',
   'mark_editorial_resource_read',
   'mark_thread_read',
+  'my_archived_at',
   'my_nutritionist_id',
   'my_patient_id',
   'open_message_attachment',

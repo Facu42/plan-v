@@ -12,9 +12,10 @@ export type PatientNotices = { items: PatientNotice[]; unreadMessages: number };
 
 const EMPTY: PatientNotices = { items: [], unreadMessages: 0 };
 
-/** Avisos reales de la paciente: mensajes sin leer, consulta por confirmar y cuota. Nada inventado. */
-export function buildNotices(patient: Pick<ShowroomPatient, 'messages' | 'appointment'>, feeNotice: string | null, now: Date = new Date()): PatientNotices {
+/** Avisos reales de la paciente: cuenta archivada, mensajes sin leer, consulta por confirmar y cuota. Nada inventado. */
+export function buildNotices(patient: Pick<ShowroomPatient, 'messages' | 'appointment'> & { archived?: boolean }, feeNotice: string | null, now: Date = new Date()): PatientNotices {
   const items: PatientNotice[] = [];
+  if (patient.archived) items.push({ id: 'archived', icon: 'history', title: 'Tu cuenta está archivada', note: 'No podés enviar mensajes.', page: 'mensajes' });
   const unread = unreadCount(patient.messages ?? [], 'patient');
   if (unread > 0) items.push({ id: 'messages', icon: 'message', title: unread === 1 ? 'Tenés 1 mensaje sin leer' : `Tenés ${unread} mensajes sin leer`, note: 'Tu nutricionista te escribió.', page: 'mensajes' });
   const appointment = patient.appointment;
@@ -27,12 +28,16 @@ export function buildNotices(patient: Pick<ShowroomPatient, 'messages' | 'appoin
 }
 
 const NoticesContext = createContext<PatientNotices>(EMPTY);
+const ArchivedContext = createContext(false);
 
-export function PatientNoticesProvider({ patient, children }: { patient: Pick<ShowroomPatient, 'messages' | 'appointment'>; children: ReactNode }) {
+export function PatientNoticesProvider({ patient, children }: { patient: Pick<ShowroomPatient, 'messages' | 'appointment' | 'archived'>; children: ReactNode }) {
   const feeNotice = useFeeNotice();
+  const archived = Boolean(patient.archived);
   const value = useMemo(() => buildNotices(patient, feeNotice), [patient, feeNotice]);
-  return <NoticesContext.Provider value={value}>{children}</NoticesContext.Provider>;
+  return <ArchivedContext.Provider value={archived}><NoticesContext.Provider value={value}>{children}</NoticesContext.Provider></ArchivedContext.Provider>;
 }
+
+export const useAccountArchived = (): boolean => useContext(ArchivedContext);
 
 export const usePatientNotices = (): PatientNotices => useContext(NoticesContext);
 

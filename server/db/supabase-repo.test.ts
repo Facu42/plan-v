@@ -880,10 +880,13 @@ describe('patient audience queries', () => {
     harness.push('appointments_patient_view', { data: [], error: null });
     harness.push('timeline_events', { data: [], error: null });
 
+    harness.push('rpc:my_archived_at', { data: '2026-10-10T15:00:00.000Z', error: null });
     const patient = await sbGetPatientForUser('user-1');
     expect(patient).not.toBeNull();
     expect(patient!.plan_b).toBe('');
     expect(patient!.adherence_why).toBe('');
+    expect(patient!.archived_at).toBe('2026-10-10T15:00:00.000Z');
+    expect(harness.calls.some((call) => call.table === 'rpc:my_archived_at')).toBe(true);
 
     const patientsSelect = harness.calls.find((call) => call.table === 'patients_patient_view' && call.op === 'select');
     expect(String(patientsSelect?.payload)).not.toContain('plan_b');

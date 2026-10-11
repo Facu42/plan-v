@@ -19,6 +19,16 @@ const original = process.env.TZ;
 beforeEach(() => { context.mobile = false; });
 afterEach(() => { if (original === undefined) delete process.env.TZ; else process.env.TZ = original; });
 
+describe('cuenta archivada', () => {
+  it('avisa y deja el campo de escritura del archivo, sin poder usarlo', () => {
+    const html = renderToStaticMarkup(<NutrigoMessages patient={{ ...base, archived: true } as unknown as ShowroomPatient} onNavigate={() => undefined} now={now} />);
+    expect(html).toContain('Tu cuenta está archivada. No podés enviar mensajes.');
+    expect(html).toContain('aria-label="Escribir mensaje"');
+    expect(html).toContain('disabled=""');
+    expect(html).toContain('Enviar mensaje');
+  });
+});
+
 describe.each([false, true])('mensajes con datos variados (celular: %s)', mobile => {
   beforeEach(() => { context.mobile = mobile; });
 

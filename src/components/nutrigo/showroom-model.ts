@@ -52,6 +52,7 @@ export function buildShowroomPatient(patient: Patient, now = new Date(), countPe
         id, text, from, sent_at, delivered_at: delivered_at ?? null, read_at: read_at ?? null,
         ...(attachment ? { attachment } : {}),
       })),
+    archived: Boolean(patient.archived_at),
   };
 }
 export type ShowroomPatient = ReturnType<typeof buildShowroomPatient>;
