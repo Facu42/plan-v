@@ -76,11 +76,14 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
   repositorio hasta que Facundo escriba la frase para aplicarla. No se corrió en la base hospedada. El correo de D3
   sigue esperando un proveedor de mail. Fotos de ingredientes y de platos con el modelo gratuito: pruebas en producción (tortilla ×3,
   tomate, huevo) hasta que Facundo las apruebe.
-  `docs/producto-definicion-2026-10-08.md`. PR #94 (día de Argentina en el servidor) publicado. Fotos de ingredientes
-  y de platos con el modelo gratuito: pruebas en producción (tortilla ×3, tomate, huevo) hasta que Facundo las apruebe.
 - Cuota impaga (D2, 2026-10-10, rama `cursor/cuota-no-bloquea-39fa`): no bloquea la app ni vacía el Inicio. Solo el
   corte de acceso de la profesional lo hace. En el celular el aviso es la tarjeta amarilla del archivo, arriba del
   contenido. Sin migración. Sigue abierto el recargo al cambiar el día de vencimiento.
+- Objetivo de la paciente (D1, 2026-10-10): el panel ya mandaba estado, avance y nota; ahora se guardan en la base
+  (migración `20261010183000_patient_goal_followup`) y la paciente los ve en Inicio y en Progreso. La nota queda para
+  la nutricionista. No es la meta de calorías. **La migración no se aplicó en la base en línea**: espera la frase
+  escrita de Facundo. Hasta entonces la app sigue mostrando el texto del objetivo. El archivo de Nutrigo no dibuja
+  este objetivo (dibuja el peso): la tarjeta usa la card blanca del archivo y va debajo del marco. No hay visto bueno visual.
 - Revisión del front de la paciente contra Nutrigo, 2026-10-09 (rama `claude/front-paciente-nutrigo-tuezz8`):
   las diez pantallas ya coinciden con Figma en modo demo. Producción no tiene modo demo. El ingreso, recuperar
   la clave, «Antes de seguir», la cuenta sin vincular, la carga y el error de conexión se arman con piezas del

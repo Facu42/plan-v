@@ -575,13 +575,20 @@ app.patch('/api/patients/:id/goal', async (c) => {
   if ('userId' in auth && isSupabaseEnabled()) {
     const actor = await authorizePatient(auth.userId, patientId, 'edit_goal');
     if (!actor) return c.json({ error: 'Prohibido' }, 403);
-    return persistPatientWrite(
-      c,
-      patientId,
-      actor.role,
-      () => sb.sbUpdateGoal(patientId, parsedBody.data.goal),
-      'No se pudo guardar el objetivo',
-    );
+    try {
+      await sb.sbUpdateGoal(patientId, parsedBody.data);
+    } catch (error) {
+      if (error instanceof sb.SchemaUnavailableError) {
+        return c.json({ error: 'Guardar el estado y el avance del objetivo requiere instalar la migración de este módulo.' }, 501);
+      }
+      const code = typeof error === 'object' && error && 'code' in error ? String((error as { code?: unknown }).code) : '';
+      if (code === '42501') return c.json({ error: 'Prohibido' }, 403);
+      if (code === '22023') return c.json({ error: 'Datos inválidos' }, 400);
+      throw error;
+    }
+    const updated = await sb.sbGetPatientById(patientId, 'professional');
+    if (!updated) return c.notFound();
+    return c.json({ patient: (await withWeeklyRegistration([updated], true))[0], source: 'supabase' });
   }
 
   const patient = setGoal(patientId, parsedBody.data);
