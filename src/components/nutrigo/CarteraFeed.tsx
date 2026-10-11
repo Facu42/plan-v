@@ -24,6 +24,12 @@ export function groupFeedByDay(items: readonly CrmFeedItem[]): FeedDay[] {
   return [...days.values()].sort((a, b) => b.date.localeCompare(a.date));
 }
 
+const messagesHref = (patientId: string) => `/crm/ficha?paciente=${encodeURIComponent(patientId)}&seccion=mensajes`;
+
+function FeedLink({ href, label, onOpen, children }: { href: string; label: string; onOpen: (href: string) => void; children: string }) {
+  return <a className="nv-button nv-soft" href={href} aria-label={label} onClick={(event) => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); onOpen(href); }}>{children}</a>;
+}
+
 function daySummary(day: FeedDay) {
   return [plural(day.meals, 'comida', 'comidas'), day.pending ? `${day.pending} por revisar` : '', day.water ? `agua de ${plural(day.water, 'paciente', 'pacientes')}` : ''].filter(Boolean).join(' · ');
 }
@@ -53,7 +59,10 @@ export function CarteraFeedView({ feed, loading, error, patients, days, status, 
             <div><h4>{patient.name}</h4><ul>{patient.items.map((item) => <li key={item.id}>{item.kind === 'meal'
               ? <><span>{item.slot}</span><NvBadge tone={item.status === 'pending_review' ? 'gold' : 'green'}>{MEAL_STATUS[item.status] ?? 'Registrada'}</NvBadge></>
               : <span>{plural(item.glasses, 'vaso de agua', 'vasos de agua')}</span>}</li>)}</ul></div>
-            <a className="nv-button nv-soft" href={patient.href} aria-label={`Abrir la ficha de ${patient.name}`} onClick={(event) => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); onOpen(patient.href); }}>Ver registros</a>
+            <div className="pw-feed-actions">
+              <FeedLink href={patient.href} label={`Abrir la ficha de ${patient.name}`} onOpen={onOpen}>Ver registros</FeedLink>
+              <FeedLink href={messagesHref(patient.id)} label={`Escribirle a ${patient.name}`} onOpen={onOpen}>Escribirle</FeedLink>
+            </div>
           </li>)}</ul>
         </details>
       </li>)}</ol>}

@@ -406,7 +406,7 @@ export async function applyAiJob(nutritionistId: string, jobId: string, persiste
     }
     if (job.applied_at) return publicJob(job);
     const latest = await currentHash(job, false);
-    if (latest.hash !== job.context_hash) throw new CareError(409, 'El ingreso cambió. Regenerá la propuesta.');
+    if (latest.hash !== job.context_hash) throw new CareError(409, 'Cambiaron el ingreso, la meta o el plan después de esta propuesta. Regenerala con los datos nuevos.');
     if (job.artifact.kind === 'recipe_draft') {
       const recipe = await saveRecipeDraft(nutritionistId, job.artifact.payload as unknown as RecipeDraftInput, false);
       if (recipe.current.published_at) throw new CareError(409, 'Ese borrador ya no se puede aplicar. Regenerá la propuesta.');
@@ -421,7 +421,7 @@ export async function applyAiJob(nutritionistId: string, jobId: string, persiste
   const existing = await getAiJob(nutritionistId, jobId, true);
   if (!existing.applied_at) {
     const latest = await currentHash({ ...existing, nutritionist_id: nutritionistId }, true);
-    if (latest.hash !== existing.context_hash) throw new CareError(409, 'El ingreso cambió. Regenerá la propuesta.');
+    if (latest.hash !== existing.context_hash) throw new CareError(409, 'Cambiaron el ingreso, la meta o el plan después de esta propuesta. Regenerala con los datos nuevos.');
   }
   const data = await callRpc('apply_ai_job', { target_job: jobId });
   return asAiJob(data as Record<string, unknown>);
