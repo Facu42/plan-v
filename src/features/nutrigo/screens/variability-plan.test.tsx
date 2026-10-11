@@ -49,6 +49,13 @@ describe.each([false, true])('variabilidad de datos en el plan (celular: %s)', m
     expect(html.indexOf('Recomendación publicada')).toBeLessThan(html.indexOf('data-name="Table-row-meal plan"'));
     expect(text(render({plan:null}))).not.toContain('Recomendaciones y alimentos a evitar');
   });
+  it('muestra la hora indicada junto al nombre de cada comida y nada si no hay horario', () => {
+    const data=plan([item()]);
+    const html=text(render({...data,plan:{...data.plan,meal_times:{Desayuno:'08:00',Cena:'21:30'}}}));
+    expect(html).toContain('Desayuno · 08:00'); expect(html).toContain('Cena · 21:30');
+    expect(html).toContain('Almuerzo'); expect(html).not.toContain('Almuerzo ·');
+    expect(text(render(data))).not.toMatch(/Desayuno · \d/);
+  });
   it('la foto del plato usa el recuadro del archivo: lista y con dirección segura se muestra; el resto deja el gris original', () => {
     const ok = render(plan([photoItem('https://x.test/a.jpg')])); expect(ok).toContain('src="https://x.test/a.jpg"'); expect(ok).toContain('loading="lazy"');
     for (const bad of [photoItem(null, 'none'), photoItem('https://x.test/a.jpg', 'failed'), photoItem('javascript:alert(1)'), photoItem('/relativa.png')]) {
@@ -63,6 +70,10 @@ describe.each([false, true])('variabilidad de datos en el plan (celular: %s)', m
   it('sin plan, con plan sin comidas o sin coincidencias queda el bloque con su texto, sin NaN ni «Invalid Date»', () => {
     for (const data of [{ plan: null }, plan([]), plan([item()])]) { const out = text(render(data, data === context.data ? '' : 'zzz')); expect(out).not.toMatch(/NaN|Invalid Date|undefined/); }
     expect(text(render({ plan: null }))).toContain('Todavía no tenés un plan publicado.');
+    const withChange = plan([item()], '2026-10-11');
+    const html = text(render({ ...withChange, handover: { version: 2, previous_version: 1, starts_on: '2026-10-20', waiting: true, seen: false, changes: { added: 1, removed: 0, changed: 0, lines: [] } } }));
+    expect(html).toContain('Seguís con este plan hasta el');
+    expect(html).toContain('Ver qué cambia');
     expect(text(render(plan([item()]), 'zzz'))).toContain('No hay comidas que coincidan con la búsqueda.');
     expect(text(render(plan([])))).toContain('Sin indicación');
   });

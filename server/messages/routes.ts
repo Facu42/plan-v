@@ -10,6 +10,7 @@ import { getPatient } from '../store.js';
 import * as repo from './repository.js';
 import { writeOpsLog } from '../ops/log.js';
 import { enqueueOutboxBestEffort } from '../outbox/repository.js';
+import { ARCHIVED_ACCOUNT_NOTICE } from '../../src/lib/account-archive.js';
 
 const access = {
   getActor: sb.sbGetActor,
@@ -52,6 +53,9 @@ export function registerMessageRoutes(app: Hono) {
       const patient = await sb.sbGetPatientById(patientId, audience(actor.role));
       const resource = await sb.sbGetPatientResource(patientId);
       if (!patient || !resource) return c.notFound();
+      if (actor.role === 'paciente' && patient.archived_at) {
+        return c.json({ error: ARCHIVED_ACCOUNT_NOTICE }, 403);
+      }
       await repo.sendThreadMessage(patientId, {
         text: body.text,
         from: partyFromRole(actor.role),
@@ -75,7 +79,11 @@ export function registerMessageRoutes(app: Hono) {
       });
     }
 
-    if (!getPatient(patientId)) return c.notFound();
+    const stored = getPatient(patientId);
+    if (!stored) return c.notFound();
+    if (body.from === 'patient' && stored.archived_at) {
+      return c.json({ error: ARCHIVED_ACCOUNT_NOTICE }, 403);
+    }
     await repo.sendThreadMessage(patientId, {
       text: body.text,
       from: body.from,

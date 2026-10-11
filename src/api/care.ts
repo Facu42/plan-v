@@ -1,11 +1,13 @@
 import { friendlyError } from '../lib/error-messages';
 import { request } from './client';
-import type { CareSnapshot, CareInput, CareRecord, CarePreferences, CareAlert, ReplacementRecipe } from '../types/care';
+import type { BodyMetricBatch } from '../lib/body-metrics';
+import type { Measurement, CareSnapshot, CareInput, CareRecord, CarePreferences, CareAlert, ReplacementRecipe } from '../types/care';
 const base = (id: string) => `/api/patients/${encodeURIComponent(id)}/care`;
 const json = (method: string, data: unknown) => ({ method, body: JSON.stringify(data) });
 export const careApi = {
   snapshot: (id: string, professional = false, signal?: AbortSignal) => request<CareSnapshot>(`${base(id)}?audience=${professional ? 'pro' : 'patient'}`, { signal }),
   save: (id: string, input: CareInput) => request<{record: CareRecord}>(`${base(id)}/records`, json('POST', input)),
+  bodyMetrics: (id: string, batch: BodyMetricBatch) => request<{measurements: Measurement[]}>(`${base(id)}/body-metrics`, json('POST', batch)),
   preferences: (id: string, settings: CarePreferences) => request(`${base(id)}/preferences`, json('PUT', settings)),
   photo: (id: string, input: {id:string;recorded_on:string;image:string;note:string}) => request(`${base(id)}/photos`, json('POST', input)),
   openPhoto: (id: string, recordId: string) => request<{url:string;expires_in:number}>(`${base(id)}/photos/${recordId}`),
@@ -14,6 +16,9 @@ export const careApi = {
   openDocument: (id: string, recordId: string) => request<{url:string;expires_in:number;mime:string;filename:string}>(`${base(id)}/documents/${recordId}`),
   deleteDocument: (id:string,recordId:string)=>request(`${base(id)}/documents/${recordId}`,{method:'DELETE'}),
   review: (id: string, recordId: string) => request(`${base(id)}/records/${recordId}/review`, { method:'PATCH' }),
+  correctMeasurement: (id: string, recordId: string, value: number) => request(`${base(id)}/records/${recordId}/correct`, json('POST', { value })),
+  deleteMeasurement: (id: string, recordId: string) => request(`${base(id)}/records/${recordId}`, { method: 'DELETE' }),
+  requestMeasurementCorrection: (id: string, recordId: string, data: { note: string; client_id: string }) => request(`${base(id)}/records/${recordId}/correction-request`, json('POST', data)),
   generate: (id: string, recordId: string) => request(`${base(id)}/replacements/${recordId}/generate`, { method:'POST' }),
   publish: (id: string, replacementId: string, expected_recipe:ReplacementRecipe, recipe:ReplacementRecipe) => request(`${base(id)}/replacements/${replacementId}/publish`, json('POST',{expected_recipe,recipe})),
   alerts: (signal?: AbortSignal) => request<{alerts:CareAlert[]}>('/api/care/alerts', { signal }),

@@ -22,6 +22,15 @@ afterEach(() => { if (original === undefined) delete process.env.TZ; else proces
 describe.each([false, true])('diario con datos variados (celular: %s)', mobile => {
   beforeEach(() => { context.mobile = mobile; });
 
+  it('cada comida abre su corrección: borrar si está pendiente y pedirla si ya fue revisada', () => {
+    const html = render([
+      log('abierta', { status: 'pending_review', description: 'Ensalada pendiente' }),
+      log('cerrada', { status: 'confirmed', description: 'Sopa revisada' }),
+    ]);
+    expect(html).toContain('aria-label="Corregir o borrar Ensalada pendiente"');
+    expect(html).toContain('aria-label="Pedir corrección de Sopa revisada"');
+  });
+
   it('ordena por el instante real aunque las horas vengan con distinta zona', () => {
     // 14:00Z son las 11:00 en Buenos Aires: es más viejo que las 11:30 aunque como texto «14» sea mayor que «11».
     const html = render([log('viejo', { logged_at: '2026-10-03T14:00:00Z' }), log('nuevo', { logged_at: '2026-10-03T11:30:00-03:00' })]);

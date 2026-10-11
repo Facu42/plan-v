@@ -26,4 +26,9 @@ describe('PV-22 diario', () => {
       expect(error).toMatchObject({ status: 501 });
     }
   });
+
+  it('distingue una comida ya revisada de una que todavía puede corregirse', () => {
+    expect(() => diaryDbError({ code: 'PT409', message: 'meal_reviewed' })).toThrow(/ya está revisada/);
+    expect(() => diaryDbError({ code: 'PT409', message: 'meal_open' })).toThrow(/todavía no está revisada/);
+  });
 });

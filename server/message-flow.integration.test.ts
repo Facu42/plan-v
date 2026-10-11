@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { app } from './index.js';
+import { ARCHIVED_ACCOUNT_NOTICE } from '../src/lib/account-archive.js';
 import { getPatient, resetStore } from './store.js';
 
 function postMessage(body: unknown, patientId = 'pat-sofia') {
@@ -57,6 +58,30 @@ describe('message API flow in memory mode', () => {
 
     expect(blank.status).toBe(400);
     expect(missing.status).toBe(404);
+  });
+
+  it('una paciente archivada no deja un mensaje nuevo y la profesional sí puede escribir', async () => {
+    const patient = getPatient('pat-sofia');
+    expect(patient).toBeTruthy();
+    patient!.archived_at = new Date().toISOString();
+    const before = patient!.messages.length;
+
+    const blocked = await postMessage({ text: '¿Me leés?', from: 'patient' });
+    expect(blocked.status).toBe(403);
+    expect(await blocked.json()).toEqual({ error: ARCHIVED_ACCOUNT_NOTICE });
+    expect(getPatient('pat-sofia')?.messages).toHaveLength(before);
+
+    const fromPro = await postMessage({ text: 'Cuando vuelvas, seguimos.', from: 'vero' });
+    expect(fromPro.status).toBe(200);
+    expect((await fromPro.json()).patient.messages.at(-1)).toMatchObject({
+      from: 'vero',
+      text: 'Cuando vuelvas, seguimos.',
+    });
+
+    patient!.archived_at = null;
+    const restored = await postMessage({ text: 'Ya volví', from: 'patient' });
+    expect(restored.status).toBe(200);
+    expect((await restored.json()).patient.messages.at(-1).text).toBe('Ya volví');
   });
 
   it('marks incoming messages as read for the reader without changing authorship', async () => {

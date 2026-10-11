@@ -1,5 +1,5 @@
 import { argentinaToday } from '../progress/derive.js';
-import type { Brief, MealLog, Message, Patient } from '../../src/types/index.ts';
+import type { Brief, GoalHistoryEntry, GoalStatus, GoalUpdate, MealLog, Message, Patient } from '../../src/types/index.ts';
 import { signMealPhotos } from '../care/meal-photos.js';
 import { resolveBillingStatus } from '../../src/billing.ts';
 import type { Actor, PatientResource } from '../security/contracts.ts';
@@ -137,6 +137,103 @@ function rows(data: unknown): Record<string, unknown>[] {
   return Array.isArray(data) ? data as Record<string, unknown>[] : [];
 }
 
+function asGoalStatus(value: unknown): GoalStatus | undefined {
+  return value === 'active' || value === 'paused' || value === 'completed' ? value : undefined;
+}
+
+function asProgress(value: unknown): number | undefined {
+  const number = typeof value === 'number' ? value : typeof value === 'string' && value.trim() !== '' ? Number(value) : Number.NaN;
+  return Number.isInteger(number) && number >= 0 && number <= 100 ? number : undefined;
+}
+
+function mapGoalHistory(entry: Record<string, unknown>): GoalHistoryEntry | null {
+  const status = asGoalStatus(entry.status);
+  const progress = asProgress(entry.progress);
+  if (!entry.id || typeof entry.goal !== 'string' || !status || progress === undefined) return null;
+  return {
+    id: String(entry.id),
+    goal: entry.goal,
+    status,
+    progress,
+    note: entry.note == null ? null : String(entry.note),
+    updated_at: String(entry.updated_at ?? ''),
+  };
+}
+
+function mapGoalUpdate(entry: Record<string, unknown>): GoalUpdate | null {
+  const status = asGoalStatus(entry.status);
+  const progress = asProgress(entry.progress);
+  if (!entry.id || typeof entry.goal !== 'string' || !status || progress === undefined) return null;
+  return {
+    id: String(entry.id),
+    goal: entry.goal,
+    status,
+    progress,
+    updated_at: String(entry.updated_at ?? ''),
+  };
+}
+
+type GoalFollowup = Pick<Patient, 'goal_status' | 'goal_progress' | 'goal_updated_at' | 'goal_history' | 'goal_updates'>;
+
+function rememberedGoal(entry: Record<string, unknown>): GoalFollowup {
+  const status = asGoalStatus(entry.goal_status);
+  const progress = asProgress(entry.goal_progress);
+  return {
+    ...(status ? { goal_status: status } : {}),
+    ...(progress !== undefined ? { goal_progress: progress } : {}),
+    ...(entry.goal_updated_at != null ? { goal_updated_at: String(entry.goal_updated_at) } : {}),
+  };
+}
+
+/**
+ * Estado, avance e historial. Si la migración todavía no está en la base,
+ * estas lecturas fallan y se ignoran: el texto del objetivo sigue llegando.
+ */
+async function loadGoalFollowup(ids: string[], audience: QueryAudience): Promise<Map<string, GoalFollowup>> {
+  const found = new Map<string, GoalFollowup>();
+  if (ids.length === 0) return found;
+  const sb = getRequestDb();
+  const table = audience === 'patient' ? 'patient_goal_patient_view' : 'patients';
+  const columns = await sb.from(table).select('id,goal_status,goal_progress,goal_updated_at').in('id', ids);
+  if (!columns.error) {
+    for (const entry of rows(columns.data)) found.set(String(entry.id), rememberedGoal(entry));
+  }
+  if (audience === 'professional') {
+    const history = await sb.from('goal_history')
+      .select('id,patient_id,goal,status,progress,note,updated_at')
+      .in('patient_id', ids)
+      .order('updated_at', { ascending: false })
+      .limit(Math.min(200, ids.length * 20));
+    if (history.error) return found;
+    const grouped = new Map<string, GoalHistoryEntry[]>();
+    for (const entry of rows(history.data)) {
+      const mapped = mapGoalHistory(entry);
+      if (!mapped) continue;
+      const list = grouped.get(String(entry.patient_id)) ?? [];
+      if (list.length < 20) list.push(mapped);
+      grouped.set(String(entry.patient_id), list);
+    }
+    for (const [id, goal_history] of grouped) found.set(id, { ...found.get(id), goal_history });
+    return found;
+  }
+  const updates = await sb.from('goal_updates_patient_view')
+    .select('id,patient_id,goal,status,progress,updated_at')
+    .in('patient_id', ids)
+    .order('updated_at', { ascending: false })
+    .limit(20);
+  if (updates.error) return found;
+  const grouped = new Map<string, GoalUpdate[]>();
+  for (const entry of rows(updates.data)) {
+    const mapped = mapGoalUpdate(entry);
+    if (!mapped) continue;
+    const list = grouped.get(String(entry.patient_id)) ?? [];
+    if (list.length < 20) list.push(mapped);
+    grouped.set(String(entry.patient_id), list);
+  }
+  for (const [id, goal_updates] of grouped) found.set(id, { ...found.get(id), goal_updates });
+  return found;
+}
+
 function row(data: unknown): Record<string, unknown> | null {
   return data !== null && typeof data === 'object' && !Array.isArray(data)
     ? data as Record<string, unknown>
@@ -174,8 +271,14 @@ function mapPatient(row: Record<string, unknown>, extras: {
     billing_status: resolveBillingStatus(billing),
     billing_until: billing.billing_until,
     ...(audience === 'professional' && 'user_id' in row ? { has_account: row.user_id != null } : {}),
+    ...(audience === 'professional' && typeof row.created_at === 'string' ? { created_at: row.created_at } : {}),
     stage: row.stage as Patient['stage'],
     goal: row.goal as string,
+    ...(asGoalStatus(row.goal_status) ? { goal_status: asGoalStatus(row.goal_status) } : {}),
+    ...(asProgress(row.goal_progress) !== undefined ? { goal_progress: asProgress(row.goal_progress) } : {}),
+    ...(typeof row.goal_updated_at === 'string' ? { goal_updated_at: row.goal_updated_at } : {}),
+    ...(Array.isArray(row.goal_history) ? { goal_history: row.goal_history as GoalHistoryEntry[] } : {}),
+    ...(Array.isArray(row.goal_updates) ? { goal_updates: row.goal_updates as GoalUpdate[] } : {}),
     sensitive_hours: audience === 'patient' ? '' : row.sensitive_hours as string,
     plan_b: audience === 'patient' ? '' : row.plan_b as string,
     next_focus: audience === 'patient' ? '' : row.next_focus as string,
@@ -470,14 +573,51 @@ export async function sbListPatientsForNutri(userId: string, query: { offset: nu
     }
   }
 
+  const follow = await loadGoalFollowup(ids, 'professional');
+  const pastByPatient = await loadPastConsultations(ids, appointmentNow);
   const [archivedAt, resourceAssignments] = await Promise.all([loadArchivedAt(ids), loadResourceAssignments(ids)]);
   return {
-    patients: pageRows.map((patientRow) => mapPatient({ ...patientRow, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, {
+    patients: pageRows.map((patientRow) => mapPatient({ ...patientRow, ...follow.get(String(patientRow.id)), archived_at: archivedAt.get(String(patientRow.id)) ?? null }, {
       appointment: mapScheduledAppointment(nextByPatient.get(String(patientRow.id))),
+      appointment_history: pastByPatient.get(String(patientRow.id)) ?? [],
       resource_assignments: resourceAssignments.get(String(patientRow.id)) ?? [],
     }, 'professional')),
     page: { offset: query.offset, limit: query.limit, has_more: hasMore },
   };
+}
+
+const PAST_CONSULTATION_DAYS = 400;
+const ARGENTINA_DAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+
+/**
+ * Turnos ya terminados (no cancelados) de las pacientes de la página, como historial «elapsed» con fecha local.
+ * Alimenta «última consulta» del directorio y las consultas del período en Inicio. Un turno pasado no prueba
+ * asistencia: sólo que el horario se cumplió sin cancelarse.
+ */
+async function loadPastConsultations(ids: string[], now: Date): Promise<Map<string, NonNullable<Patient['appointment_history']>>> {
+  const grouped = new Map<string, NonNullable<Patient['appointment_history']>>();
+  if (!ids.length) return grouped;
+  // Mismo criterio que el próximo turno: lo lee el servidor, sólo de pacientes que salieron de la consulta con permisos de fila.
+  const { data } = await privilegedDb().from('appointments')
+    .select('id,patient_id,starts_at,duration_min,channel,status')
+    .in('patient_id', ids)
+    .in('status', ['scheduled', 'done'])
+    .gte('starts_at', new Date(now.getTime() - PAST_CONSULTATION_DAYS * 86_400_000).toISOString())
+    .lt('starts_at', now.toISOString())
+    .order('starts_at', { ascending: false });
+  for (const appt of rows(data)) {
+    const startsAt = new Date(String(appt.starts_at));
+    const duration = Number(appt.duration_min) || 0;
+    const endsAt = new Date(startsAt.getTime() + duration * 60_000);
+    if (Number.isNaN(startsAt.getTime()) || endsAt.getTime() > now.getTime()) continue;
+    // Columnas comunes a todas las versiones de la tabla: la fecha se toma en hora de Argentina.
+    const dateId = ARGENTINA_DAY.format(startsAt);
+    const patientId = String(appt.patient_id);
+    const list = grouped.get(patientId) ?? [];
+    list.push({ id: String(appt.id), when: '', dateId, duration, channel: String(appt.channel ?? ''), action: 'elapsed', actor: 'system', at: endsAt.toISOString() });
+    grouped.set(patientId, list);
+  }
+  return grouped;
 }
 
 async function loadResourceAssignments(ids: string[]) {
@@ -516,13 +656,25 @@ export async function sbGetPatientsForNutri(userId: string): Promise<Patient[]> 
   return listed.patients;
 }
 
+// La vista de la paciente no trae archived_at. La función llega con la migración
+// de D6; si todavía no está, se lee la columna que ya existe, sólo de su ficha.
+async function loadOwnArchivedAt(patientId: string): Promise<string | null> {
+  const { data, error } = await getRequestDb().rpc('my_archived_at');
+  if (!error) return data == null || data === '' ? null : String(data);
+  const { data: row, error: readError } = await privilegedDb().from('patients').select('archived_at').eq('id', patientId).maybeSingle();
+  if (readError || !row) return null;
+  return (row.archived_at as string | null) ?? null;
+}
+
 export async function sbGetPatientForUser(userId: string): Promise<Patient | null> {
   const sb = getRequestDb();
   const { data } = await sb.from('patients_patient_view').select(patientTableColumns.patient).eq('user_id', userId).maybeSingle();
   const patientRow = row(data);
   if (!patientRow) return null;
   const extras = await loadPatientExtras(patientRow.id as string, 'patient');
-  return mapPatient(patientRow, extras, 'patient');
+  const follow = (await loadGoalFollowup([String(patientRow.id)], 'patient')).get(String(patientRow.id));
+  const archivedAt = await loadOwnArchivedAt(String(patientRow.id));
+  return mapPatient({ ...patientRow, ...follow, archived_at: archivedAt }, extras, 'patient');
 }
 
 export async function sbGetPatientById(id: string, audience: QueryAudience = 'professional'): Promise<Patient | null> {
@@ -531,11 +683,13 @@ export async function sbGetPatientById(id: string, audience: QueryAudience = 'pr
   const patientRow = row(data);
   if (!patientRow) return null;
   const extras = await loadPatientExtras(patientRow.id as string, audience);
+  const follow = (await loadGoalFollowup([String(patientRow.id)], audience)).get(String(patientRow.id));
   if (audience === 'professional') {
     const archivedAt = await loadArchivedAt([String(patientRow.id)]);
-    return mapPatient({ ...patientRow, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, extras, audience);
+    return mapPatient({ ...patientRow, ...follow, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, extras, audience);
   }
-  return mapPatient(patientRow, extras, audience);
+  const archivedAt = await loadOwnArchivedAt(String(patientRow.id));
+  return mapPatient({ ...patientRow, ...follow, archived_at: archivedAt }, extras, audience);
 }
 
 export async function sbAddMealLog(patientId: string, log: Omit<MealLog, 'id' | 'patient_id' | 'logged_at' | 'status'>): Promise<MealLog> {
@@ -775,10 +929,23 @@ export async function sbUpdatePatientProfile(patientId: string, input: {
   if (error) throwWriteError(error);
 }
 
-export async function sbUpdateGoal(patientId: string, goal: string): Promise<void> {
+export async function sbUpdateGoal(
+  patientId: string,
+  input: { goal: string; status: GoalStatus; progress: number; note?: string },
+): Promise<void> {
   const sb = getRequestDb();
-  const { error } = await sb.from('patients').update({ goal }).eq('id', patientId);
-  if (error) throwWriteError(error);
+  const { error } = await sb.rpc('set_patient_goal', {
+    target: patientId,
+    next_goal: input.goal,
+    next_status: input.status,
+    next_progress: input.progress,
+    next_note: input.note?.trim() ? input.note.trim() : null,
+  });
+  if (!error) return;
+  if (error.code === '42501') throw Object.assign(new Error('Prohibido'), { code: '42501' });
+  if (error.code === '22023') throw Object.assign(new Error('Datos inválidos'), { code: '22023' });
+  if (isMissingRelation(error) || error.code === '42883' || error.code === 'PGRST202') throw new SchemaUnavailableError();
+  throwWriteError(error);
 }
 
 export type ScheduledAppointment = {

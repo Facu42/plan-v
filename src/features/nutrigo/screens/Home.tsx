@@ -15,9 +15,11 @@ import { planSlotKey, PLAN_SLOT_KEYS } from '../../../types/plans';
 import { EXERCISE_CATEGORY_LABELS } from '../../../types/exercise';
 import { rulerFor, weightGauge } from './weight-gauge';
 import { CalorieArc, WeightArc } from './arcs';
+import { CountUp } from '../CountUp';
 import '../home-motion.css';
 import { barFill, descendants, EmptyState, fields, formatNumber, leaf, listChildren, objects, source, Stateful, timeLabel, useRemote, dateId, type ScreenProps } from './shared';
 import { dayOfIso, cleanAmount, daysBefore, litresLabel, monthYearLabel, percentLabel, portionsLabel, safePercent, weekDays, weightChangeLabel } from './home-values';
+import { PatientGoalCard } from '../PatientGoalCard';
 
 async function homeData(id: string, signal: AbortSignal) {
   const [body,target,recipes,plan,exercise,care] = await Promise.allSettled([
@@ -138,7 +140,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
         return {onClick:onSteps,label:'Registrar pasos',children:fields(node,{},child=>{
           if(nodeName(child)==='Progress Bar')return barFill(stepsPct,'filled');
           if(nodeName(child)==='Empty Bar')return barFill(stepsPct,'empty');
-          if(text(child,'8050'))return {text:formatNumber(steps??0)};
+          if(text(child,'8050'))return {children:<CountUp value={steps??0} format={formatNumber}/>};
           if(text(child,'76%'))return {text:`${Math.round(stepsPct??0)}%`};
           if(sample(child,/steps left/))return {text:steps==null?'Registrá tus pasos':`Referencia: ${formatNumber(DEFAULT_STEPS_GOAL)}`};
           return undefined;
@@ -191,8 +193,8 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
       // Lo que la paciente cargó hoy y su nutricionista todavía no revisó se nombra, en vez de dejar el guion sin explicación.
       if(value==='Eaten calories'&&!known&&pendingToday)return {text:'Calorías en revisión'};
       // Sin comidas revisadas o sin meta, el valor es desconocido (no cero).
-      const substitutions:Record<string,string>={'1240':target&&kcal!==null?formatNumber(Math.max(0,target.kcal-kcal)):'—','1750':formatNumber(kcal),'510':formatNumber(burned),'120':known?formatNumber(eaten.carbs):'—','70':known?formatNumber(eaten.protein):'—','20':known?formatNumber(eaten.fat):'—','/325gr':target?`/${formatNumber(target.carbs_g)} g`:'/— g','/75gr':target?`/${formatNumber(target.protein_g)} g`:'/— g','/44gr':target?`/${formatNumber(target.fat_g)} g`:'/— g','37%':macroLabel.carbs,'93%':macroLabel.protein,'45%':macroLabel.fat};
-      return value in substitutions?{text:substitutions[value]}:undefined;
+      const substitutions:Record<string,ReactNode>={'1240':target&&kcal!==null?<CountUp value={Math.max(0,target.kcal-kcal)} format={formatNumber}/>:'—','1750':kcal===null?formatNumber(kcal):<CountUp value={kcal} format={formatNumber}/>,'510':<CountUp value={burned} format={formatNumber}/>,'120':known?formatNumber(eaten.carbs):'—','70':known?formatNumber(eaten.protein):'—','20':known?formatNumber(eaten.fat):'—','/325gr':target?`/${formatNumber(target.carbs_g)} g`:'/— g','/75gr':target?`/${formatNumber(target.protein_g)} g`:'/— g','/44gr':target?`/${formatNumber(target.fat_g)} g`:'/— g','37%':macroLabel.carbs,'93%':macroLabel.protein,'45%':macroLabel.fat};
+      return value in substitutions?{children:substitutions[value]}:undefined;
     };return {children:fields(node,{},calorieLeaf)};}
     if(name==='Widget Workout Progress')return {children:fields(node,{},child=>{
       if(nodeName(child)==='Body')return listChildren(child,workoutRows.slice(0,3),(n,row)=>{
@@ -276,6 +278,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
     return undefined;
   };
   return <FramePair nodes={['12:792','427:14405']} resolve={resolve} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut}>
+    <PatientGoalCard patient={patient} />
     {(!current||current.failed||data.error)&&<Stateful loading={!current&&!data.error} error={data.error|| (current?.failed?'Algunos datos no se pudieron cargar.':undefined)} onRetry={data.reload}/>}
   </FramePair>;
 }

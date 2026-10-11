@@ -5,6 +5,7 @@ import { careApi, careErrorMessage, notifyCareChanged } from '../../api/care';
 import { CARE_DOCUMENT_KIND_LABELS, CARE_DOCUMENT_KINDS, CARE_LABELS, MEASUREMENT_SOURCE_LABELS, careDateConstraintMessage, careInputSchema, describeCareRecord, describeMeasurement, dueCareReminders, isMeasurementKind, type CareData, type CarePreferences, type CareSnapshot } from '../../types/care';
 import { useCare } from './useCare';
 import { CareRecipeEditor } from './CareRecipeEditor';
+import { metricLabel } from '../../lib/body-metrics';
 import { Icon } from '../shared/Icon';
 import './care-panel.css';
 
@@ -13,6 +14,14 @@ type Mode = 'progress' | 'activity' | 'menu' | 'professional';
 type Kind = CareData['kind'];
 const titles: Record<Mode,string> = { progress:'Tus registros personales', activity:'Tu actividad física', menu:'Alternativas para tu menú', professional:'Registros y seguimiento' };
 const PROGRESS_KINDS = ['weight','waist','hip','body_photo','clinical_document'] as const;
+
+/** Mientras no está revisada, la paciente corrige o borra su medida. Después, sólo pide la corrección. */
+export function measurementCorrectionMode(record: { reviewed_at: string | null; data: { kind: string; source?: string } }, professional: boolean): 'edit' | 'request' | null {
+  if (professional) return null;
+  if (record.data.kind !== 'weight' && record.data.kind !== 'waist' && record.data.kind !== 'hip') return null;
+  if (record.data.source !== 'patient') return null;
+  return record.reviewed_at ? 'request' : 'edit';
+}
 function careActionLabel(kind: Kind) {
   if (kind === 'menu_request') return 'Pedir un reemplazo';
   if (kind === 'body_photo') return 'Agregar foto corporal';
@@ -41,6 +50,8 @@ function CarePanelContent({patientId,mode}:{patientId:string;mode:Mode}) {
   const professional = mode === 'professional';
   const {data,error,reload} = useCare(patientId,professional);
   const [form,setForm] = useState<Kind|null>(null);
+  const [fix,setFix] = useState<{id:string;mode:'edit'|'request';value:string;note:string}|null>(null);
+  const fixClient = useRef('');
   const [busy,setBusy] = useState(false); const lock = useRef(false);
   const [status,setStatus] = useState('');
   const [preview,setPreview] = useState<{url:string;mime:string;filename:string;kind:'body_photo'|'clinical_document'}|null>(null);
@@ -77,16 +88,25 @@ function CarePanelContent({patientId,mode}:{patientId:string;mode:Mode}) {
         {record.data.kind==='clinical_document' && <button className="nv-button" type="button" disabled={busy || !data.consented.includes('clinical_document')} onClick={()=>void action(async()=>{const result=await careApi.openDocument(patientId,record.id);setPreview({url:result.url,mime:result.mime,filename:result.filename,kind:'clinical_document'});},'Estudio abierto durante un minuto.')}>Ver estudio</button>}
         {!professional && record.data.kind==='body_photo' && <button className="nv-button" type="button" disabled={busy} onClick={()=>{if(window.confirm('¿Eliminar esta foto corporal de tu registro?'))void action(async()=>{await careApi.deletePhoto(patientId,record.id);setPreview(null);},'Foto eliminada.');}}>Eliminar foto</button>}
         {!professional && record.data.kind==='clinical_document' && <button className="nv-button" type="button" disabled={busy} onClick={()=>{if(window.confirm('¿Retirar este estudio de tu registro? Tu nutricionista dejará de verlo.'))void action(async()=>{await careApi.deleteDocument(patientId,record.id);setPreview(null);},'Estudio retirado.');}}>Retirar estudio</button>}
+        {measurementCorrectionMode(record, professional) === 'edit' && isMeasurementKind(record.data.kind) && <>
+          <button className="nv-button" type="button" disabled={busy} onClick={()=>{setFix({id:record.id,mode:'edit',value:String(record.data.kind==='weight'||record.data.kind==='waist'||record.data.kind==='hip'?record.data.value:''),note:''});setStatus('');}}>Corregir valor</button>
+          <button className="nv-button" type="button" disabled={busy} onClick={()=>{if(window.confirm('¿Borrar esta medida? Tu nutricionista ya no la va a ver.'))void action(()=>careApi.deleteMeasurement(patientId,record.id),'Medida borrada.');}}>Borrar medida</button>
+        </>}
+        {measurementCorrectionMode(record, professional) === 'request' && <button className="nv-button" type="button" disabled={busy} onClick={()=>{fixClient.current=crypto.randomUUID();setFix({id:record.id,mode:'request',value:'',note:''});setStatus('');}}>Pedir corrección</button>}
         {professional && !record.reviewed_at && <button className="nv-button" type="button" disabled={busy} onClick={()=>void action(()=>careApi.review(patientId,record.id),'Registro revisado.')}>Marcar revisado</button>}
         {professional && record.data.kind==='menu_request' && !data.replacements.some(r=>r.request_id===record.id) && <button className="nv-button primary" type="button" disabled={busy || !data.consented.includes('ai_menu_draft')} onClick={()=>void action(()=>careApi.generate(patientId,record.id),'Propuesta preparada para tu revisión.')}>Preparar alternativa con IA</button>}
       </div></article>) : <p className="care-empty">Todavía no hay registros en esta sección.</p>}</div>
 {(mode==='menu'||professional) && <section className="care-recipes" aria-label="Reemplazos de menú"><h3>{professional?'Propuestas de reemplazo':'Alternativas revisadas'}</h3>{professional && !data.consented.includes('ai_menu_draft') && <p>El paciente debe habilitar el consentimiento de IA para preparar propuestas.</p>}{data.replacements.map(entry=><article key={entry.id}><span className="care-eyebrow">{entry.source==='demo'?'EJEMPLO DEMO · ':''}{entry.published_at?'COMPARTIDA CON EL PACIENTE':'BORRADOR PRIVADO'}</span><h3>{entry.recipe.title}</h3><p>{entry.recipe.explanation}</p><h4>Ingredientes</h4><ul>{entry.recipe.ingredients.map((i,index)=><li key={index}>{i}</li>)}</ul><h4>Preparación</h4><ol>{entry.recipe.steps.map((s,index)=><li key={index}>{s}</li>)}</ol>{professional && !entry.published_at && <CareRecipeEditor recipe={entry.recipe} busy={busy} onPublish={recipe=>void action(()=>careApi.publish(patientId,entry.id,entry.recipe,recipe),'Alternativa revisada y compartida.')} />}</article>)}{!data.replacements.length && <p>Todavía no hay alternativas compartidas.</p>}</section>}
       {!professional && mode==='menu' && <CareConsent patientId={patientId} snapshot={data} onlyAI />}
       {!professional && mode==='progress' && <CareReminderSettings patientId={patientId} settings={data.preferences} />}
-      {(mode==='progress' || professional) && <section className="care-history" aria-label="Historial de medidas"><h3>Historial de medidas</h3><p>Sólo valores cargados a mano, con fecha, unidad y origen. Las fotos y los estudios no estiman peso ni contornos.</p>{data.measurements.length ? <ol>{data.measurements.map(entry => <li key={entry.id}><span className="care-eyebrow">{CARE_LABELS[entry.kind]} · <time>{entry.captured_on}</time></span><strong>{describeMeasurement(entry)}</strong></li>)}</ol> : <p className="care-empty">Todavía no hay medidas registradas.</p>}</section>}
+      {(mode==='progress' || professional) && <section className="care-history" aria-label="Historial de medidas"><h3>Historial de medidas</h3><p>Sólo valores cargados a mano, con fecha, unidad y origen. Las fotos y los estudios no estiman peso ni contornos.</p>{data.measurements.length ? <ol>{data.measurements.map(entry => <li key={entry.id}><span className="care-eyebrow">{isMeasurementKind(entry.kind) ? CARE_LABELS[entry.kind] : metricLabel(entry.kind)} · <time>{entry.captured_on}</time></span><strong>{describeMeasurement(entry)}</strong></li>)}</ol> : <p className="care-empty">Todavía no hay medidas registradas.</p>}</section>}
     </>}
     {status && <p className="care-status" role="status">{status}</p>}
     {form && <CareRecordForm patientId={patientId} kind={form} professional={professional} onClose={()=>setForm(null)} onSaved={()=>{setForm(null);setStatus('Registro guardado y disponible en la ficha de tu nutricionista.');notifyCareChanged();}}/>}
+    {fix && <div className="care-modal" role="dialog" aria-modal="true" aria-labelledby="care-fix-title"><form className="care-form" lang="es-AR" onSubmit={event=>{event.preventDefault();const current=fix;void action(async()=>{if(current.mode==='edit')await careApi.correctMeasurement(patientId,current.id,Number(current.value));else await careApi.requestMeasurementCorrection(patientId,current.id,{note:current.note.trim(),client_id:fixClient.current||crypto.randomUUID()});setFix(null);},current.mode==='edit'?'Medida corregida.':'Pedido enviado a tu nutricionista.');}}><header><h2 id="care-fix-title">{fix.mode==='edit'?'Corregir medida':'Pedir una corrección'}</h2><button type="button" aria-label="Cerrar corrección" disabled={busy} onClick={()=>setFix(null)}>×</button></header>
+      {fix.mode==='edit' ? <label>Nuevo valor<input type="number" step="0.01" value={fix.value} onChange={event=>setFix({...fix,value:event.target.value})} required autoFocus/></label> : <><p>Tu nutricionista ya la revisó. El número no cambia: le pedís que lo corrija.</p><label>Qué hay que corregir<textarea value={fix.note} onChange={event=>setFix({...fix,note:event.target.value})} maxLength={500} required autoFocus/></label></>}
+      <footer><button className="nv-button" type="button" disabled={busy} onClick={()=>setFix(null)}>Cancelar</button><button className="nv-button primary" type="submit" disabled={busy}>{busy?'Guardando…':fix.mode==='edit'?'Guardar corrección':'Pedir corrección'}</button></footer>
+    </form></div>}
     {preview && <div className="care-modal" role="dialog" aria-modal="true" aria-label={preview.kind==='clinical_document' ? 'Estudio clínico privado' : 'Foto corporal privada'}><div className="care-photo-view"><button className="nv-button" type="button" autoFocus onClick={()=>setPreview(null)}>{preview.kind==='clinical_document' ? 'Cerrar estudio' : 'Cerrar foto'}</button>{preview.mime.startsWith('image/') ? <img src={preview.url} alt={preview.kind==='clinical_document' ? 'Estudio en imagen cargado por el paciente' : 'Foto corporal cargada por el paciente'} /> : <object className="care-document-view" data={preview.url} type={preview.mime}><p>No se pudo mostrar el PDF en el visor. <a href={preview.url} download={preview.filename}>Descargar {preview.filename}</a></p></object>}</div></div>}
   </section>;
 }

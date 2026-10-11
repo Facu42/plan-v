@@ -5,7 +5,9 @@ import * as sb from '../db/supabase-repo.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { getPatient, getStore, DEMO_NUTRITIONIST_ID } from '../store.js';
 import { careInputSchema, carePreferencesSchema, replacementRecipeSchema, CARE_LABELS, isMeasurementData, type CareAlert } from '../../src/types/care.js';
+import { bodyMetricBatchSchema } from '../../src/lib/body-metrics.js';
 import * as repo from './repository.js';
+import { sendThreadMessage } from '../messages/repository.js';
 import { ingestReadyAsset } from '../assets/repository.js';
 import { handleProcessingJob } from '../jobs/handlers.js';
 import { processQueue, runOne } from '../jobs/queue.js';
@@ -42,6 +44,34 @@ export function registerCareRoutes(app: Hono) {
     const { persistent } = await access(c, id, input.data.kind === 'payment' || professionalMeasure ? 'professional' : 'patient');
     if (measurement) await requireCareConsent(id, persistent, 'measurement');
     const record = await repo.saveCareRecord(id, input, persistent); return c.json({ record });
+  });
+  app.post('/api/patients/:id/care/records/:recordId/correct', async c => {
+    const id = c.req.param('id'); const recordId = c.req.param('recordId');
+    const input = await body(c, z.object({ value: z.number().finite() }).strict());
+    const { persistent } = await access(c, id, 'patient');
+    await repo.correctOwnMeasurement(id, recordId, input.value, persistent);
+    return c.json({ corrected: true });
+  });
+  app.delete('/api/patients/:id/care/records/:recordId', async c => {
+    const id = c.req.param('id'); const { persistent } = await access(c, id, 'patient');
+    await repo.deleteOwnMeasurement(id, c.req.param('recordId'), persistent);
+    return c.json({ deleted: true });
+  });
+  app.post('/api/patients/:id/care/records/:recordId/correction-request', async c => {
+    const id = c.req.param('id'); const recordId = c.req.param('recordId');
+    const input = await body(c, z.object({ note: z.string().trim().min(1).max(500), client_id: z.uuid() }).strict());
+    const { persistent } = await access(c, id, 'patient');
+    const result = await repo.requestMeasurementCorrection(id, recordId, input, persistent);
+    if (!persistent && result.text) {
+      await sendThreadMessage(id, { text: result.text, from: 'patient', suggestedByAi: false, client_id: input.client_id }, false);
+    }
+    return c.json({ requested: true, duplicate: result.duplicate });
+  });
+  app.post('/api/patients/:id/care/body-metrics', async c => {
+    const id = c.req.param('id'); const { persistent } = await access(c, id, 'professional');
+    const batch = await body(c, bodyMetricBatchSchema, 20_000);
+    await requireCareConsent(id, persistent, 'measurement');
+    return c.json({ measurements: await repo.saveBodyMetrics(id, batch, persistent) });
   });
   app.patch('/api/patients/:id/care/records/:recordId/review', async c => {
     const id = c.req.param('id'); const { persistent } = await access(c, id, 'professional');

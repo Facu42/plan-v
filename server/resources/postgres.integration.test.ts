@@ -122,6 +122,22 @@ describe('PV-36 recursos en PostgreSQL descartable', () => {
     await expect(rpc(patientAUser, 'publish_editorial_resource', [draft[0].result.id])).rejects.toMatchObject({ code: '42501' });
   });
 
+  it('firma con el nombre de la nutricionista y permite despublicar sólo a la autora', async () => {
+    const draft = await rpc(nutriA, 'save_editorial_resource', ['nota-autora', 'Nota con autora', 'Resumen revisable de la nota.', 'Hábitos', JSON.stringify([{ title: 'Uno', body: 'Cuerpo' }]), 'clinical']) as { id: string; author_name: string };
+    expect(draft.author_name).toBe('Nutri A');
+    await rpc(nutriA, 'publish_editorial_resource', [draft.id]);
+    await asUser(nutriA, 'select public.assign_editorial_resource($1,$2::uuid[])', ['nota-autora', [patientA]]);
+    const visible = await rpc(patientAUser, 'get_patient_library', [patientA, '']) as PatientLibraryView;
+    expect(visible.articles.find((entry) => entry.slug === 'nota-autora')?.author_name).toBe('Nutri A');
+
+    await expect(rpc(nutriB, 'unpublish_editorial_resource', [draft.id])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(patientAUser, 'unpublish_editorial_resource', [draft.id])).rejects.toMatchObject({ code: '42501' });
+    const hidden = await rpc(nutriA, 'unpublish_editorial_resource', [draft.id]) as { published: boolean };
+    expect(hidden.published).toBe(false);
+    const after = await rpc(patientAUser, 'get_patient_library', [patientA, '']) as PatientLibraryView;
+    expect(after.articles.some((entry) => entry.slug === 'nota-autora')).toBe(false);
+  });
+
   it('sin RPC falla cerrado', async () => {
     await db.exec('drop function public.get_patient_library(uuid, text)');
     await expect(rpc(patientAUser, 'get_patient_library', [patientA, ''])).rejects.toMatchObject({ code: '42883' });

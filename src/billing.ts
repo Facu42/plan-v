@@ -21,6 +21,7 @@ export function resolveBillingStatus(
   return 'active';
 }
 
+/** Lo marca la profesional. Una cuota impaga del libro de cobranzas no entra acá y no bloquea la app. */
 export function hasFullPatientAccess(
   billing: BillingSnapshot,
   today = localBillingDate(),

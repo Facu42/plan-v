@@ -7,7 +7,8 @@ import { validatePhoto } from '../care/repository.js';
 import { signMealPhotos, uploadMealPhoto } from '../care/meal-photos.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import * as sb from '../db/supabase-repo.js';
-import { analyzeMealInputSchema, mealReviewInputSchema } from '../schemas.js';
+import { analyzeMealInputSchema, mealCorrectionInputSchema, mealCorrectionRequestSchema, mealReviewInputSchema } from '../schemas.js';
+import { sendThreadMessage } from '../messages/repository.js';
 import { authorizePatientAction } from '../security/authorization.js';
 import { toPatientMealAnalysis, toPatientSelfMealLog, toPatientSelfView, type PatientAction } from '../security/contracts.js';
 import { getPatient } from '../store.js';
@@ -224,5 +225,69 @@ export function registerDiaryRoutes(app: Hono) {
       log.macros ? `${log.foods.map((food) => food.name).join(', ')} · ${log.macros.kcal} kcal` : 'Sin macros',
     );
     return c.json({ log, patient: getPatient(patientId), source: 'memory' });
+  });
+
+  app.post('/api/patients/:id/meals/:mealId/correct', async (c) => {
+    const auth = c.get('auth');
+    const { id: patientId, mealId } = c.req.param();
+    const parsedBody = await jsonBody(c, mealCorrectionInputSchema);
+    if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
+    const persistent = 'userId' in auth && isSupabaseEnabled();
+    if (persistent) {
+      const actor = await authorize(auth.userId, patientId, 'correct_own_meal');
+      if (!actor || actor.role !== 'paciente') return c.json({ error: 'Prohibido' }, 403);
+    } else if (!getPatient(patientId)) return c.notFound();
+    const log = await repo.correctOwnMeal(patientId, mealId, {
+      slot: parsedBody.data.slot,
+      description: parsedBody.data.description,
+    }, persistent);
+    const visible = toPatientSelfMealLog(log);
+    if (persistent) {
+      const patient = await sb.sbGetPatientById(patientId, 'patient');
+      return c.json({ log: visible, patient: patient ? toPatientSelfView(patient) : null, source: 'supabase' });
+    }
+    return c.json({ log: visible, patient: toPatientSelfView(getPatient(patientId)!), source: 'memory' });
+  });
+
+  app.delete('/api/patients/:id/meals/:mealId', async (c) => {
+    const auth = c.get('auth');
+    const { id: patientId, mealId } = c.req.param();
+    const persistent = 'userId' in auth && isSupabaseEnabled();
+    if (persistent) {
+      const actor = await authorize(auth.userId, patientId, 'correct_own_meal');
+      if (!actor || actor.role !== 'paciente') return c.json({ error: 'Prohibido' }, 403);
+    } else if (!getPatient(patientId)) return c.notFound();
+    await repo.deleteOwnMeal(patientId, mealId, persistent);
+    if (persistent) {
+      const patient = await sb.sbGetPatientById(patientId, 'patient');
+      return c.json({ deleted: true, patient: patient ? toPatientSelfView(patient) : null, source: 'supabase' });
+    }
+    return c.json({ deleted: true, patient: toPatientSelfView(getPatient(patientId)!), source: 'memory' });
+  });
+
+  app.post('/api/patients/:id/meals/:mealId/correction-request', async (c) => {
+    const auth = c.get('auth');
+    const { id: patientId, mealId } = c.req.param();
+    const parsedBody = await jsonBody(c, mealCorrectionRequestSchema);
+    if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
+    const persistent = 'userId' in auth && isSupabaseEnabled();
+    if (persistent) {
+      const actor = await authorize(auth.userId, patientId, 'correct_own_meal');
+      if (!actor || actor.role !== 'paciente') return c.json({ error: 'Prohibido' }, 403);
+    } else if (!getPatient(patientId)) return c.notFound();
+    const result = await repo.requestMealCorrection(patientId, mealId, parsedBody.data, persistent);
+    if (!persistent && result.text) {
+      await sendThreadMessage(patientId, {
+        text: result.text,
+        from: 'patient',
+        suggestedByAi: false,
+        client_id: parsedBody.data.client_id,
+      }, false);
+    }
+    if (persistent) {
+      const patient = await sb.sbGetPatientById(patientId, 'patient');
+      return c.json({ requested: true, duplicate: result.duplicate, patient: patient ? toPatientSelfView(patient) : null, source: 'supabase' });
+    }
+    return c.json({ requested: true, patient: toPatientSelfView(getPatient(patientId)!), source: 'memory' });
   });
 }
