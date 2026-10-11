@@ -56,7 +56,7 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
   const end = now.getTime() + 86400000; const start = now.getTime() - days * 86400000;
   const rows = newestFirst(patient.logs.filter(log => (!days || inWindow(log, start, end)) && matches(log)));
   const previous = days ? patient.logs.filter(log => inWindow(log, start - days * 86400000, start) && matches(log)) : [];
-  const reviewedOf = (list: Log[]) => list.filter(row => row.status !== 'pending_review' && row.macros);
+  const reviewedOf = (list: Log[]) => list.filter(row => row.macros);
   const reviewed = reviewedOf(rows);
   const pages = Math.max(1, Math.ceil(rows.length / pageSize)); const current = Math.min(page, pages);
   const shown = rows.slice((current - 1) * pageSize, current * pageSize);
@@ -72,9 +72,9 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
     finally { setBusy(false); }
   };
 
-  /** Tarjeta de estadística: total revisado del período y su variación real contra el período anterior. */
+  /** Tarjeta de estadística: total del período (la paciente suma al instante lo que carga, estimado) y su variación real contra el período anterior. */
   const statistic = (node: SourceNode, nutrient: Nutrient): SourceBinding => {
-    const total = nutrientTotal(rows, nutrient); const before = nutrientTotal(previous, nutrient);
+    const total = nutrientTotal(rows, nutrient, true); const before = nutrientTotal(previous, nutrient, true);
     const change = days && before > 0 ? ((total - before) / before) * 100 : null;
     return { children: objects(node).map((child, index) => source(child, part => {
       if (leaf(part) && /^Total /.test(sourceText(part))) return { text: nutrientLabel[nutrient] };
@@ -82,7 +82,7 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
       if (leaf(part) && ['kcal', 'gr'].includes(sourceText(part))) return { text: nutrient === 'kcal' ? 'kcal' : 'g' };
       if (nodeName(part) === 'Icon/TrendUp') return { props: { style: { transform: change != null && change < 0 ? 'scaleY(-1)' : undefined, opacity: change == null ? 0.4 : 1 } } };
       if (leaf(part) && /^[+-][\d.]+%$/.test(sourceText(part))) return { text: change == null ? `${reviewed.length}` : `${change > 0 ? '+' : ''}${formatNumber(change)} %` };
-      if (leaf(part) && sourceText(part) === 'vs last week') return { text: change == null ? (reviewed.length === 1 ? 'comida revisada' : 'comidas revisadas') : 'respecto del período anterior' };
+      if (leaf(part) && sourceText(part) === 'vs last week') return { text: change == null ? (reviewed.length === 1 ? 'comida registrada' : 'comidas registradas') : 'respecto del período anterior' };
       return undefined;
     }, index)) };
   };

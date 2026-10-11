@@ -15,6 +15,7 @@ const ALLOWED = [
   'ack_thread_delivery',
   // Catálogo privado: profesional titular y revisión vigente obligatorios.
   'act_professional_model',
+  'add_patient_charge',
   'add_patient_clinical_note',
   'add_shopping_manual',
   'admin_extend_trial',
@@ -30,6 +31,7 @@ const ALLOWED = [
   'apply_professional_model',
   'assign_editorial_resource',
   'assign_exercise_routine',
+  'assign_patient_program',
   'assign_recipe',
   'assign_recipe_day',
   'care_can_read',
@@ -45,6 +47,7 @@ const ALLOWED = [
   'create_organization',
   'create_patient_with_invite',
   'delegate_patient_care',
+  'delete_billing_program',
   'delete_care_document',
   'delete_care_photo',
   'delete_own_meal',
@@ -91,7 +94,9 @@ const ALLOWED = [
   'list_thread_messages',
   'log_patient_activity',
   'mark_editorial_resource_read',
+  'mark_meal_plan_handover_seen',
   'mark_thread_read',
+  'my_archived_at',
   'my_nutritionist_id',
   'my_patient_id',
   'open_message_attachment',
@@ -120,6 +125,8 @@ const ALLOWED = [
   'review_patient_intake',
   'review_patient_payment',
   'revoke_patient_care',
+  'save_billing_program',
+  'save_body_metrics',
   'save_care_preferences',
   'save_care_record',
   'save_editorial_resource',
@@ -139,6 +146,8 @@ const ALLOWED = [
   'set_patient_billing',
   'set_patient_charge_waived',
   'set_patient_fee',
+  // Objetivo de seguimiento: solo la nutricionista dueña, con estado y avance válidos.
+  'set_patient_goal',
   'set_payment_settings',
   'set_professional_recipe_favorite',
   'set_recipe_cover',
@@ -146,6 +155,7 @@ const ALLOWED = [
   'submit_patient_intake',
   'toggle_favorite',
   'transfer_patient_ownership',
+  'unpublish_editorial_resource',
 ];
 
 let db: PGlite;

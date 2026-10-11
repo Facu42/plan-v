@@ -381,3 +381,7 @@ las dos vistas restantes preparada sin abrir datos clínicos ni permisos globale
 al administrador. [Implementación, pruebas y criterios de escala](security/perfiles-consultorios-2026-10-09.md).
 Migración y ensayo Auth/PostgREST/advisors preparados. La migración
 `invoker_patient_profile_projections` va con esta publicación.
+
+## Objetivo de seguimiento de la paciente · 2026-10-10
+
+D1 de `docs/decisiones-producto-2026-10-10.md`. La profesional sigue cargando a mano el objetivo, el estado, el avance y la nota. La migración guarda estado, avance e historial; la nota no llega a la paciente. Inicio y Progreso muestran objetivo, estado y avance (en Progreso, también los cambios). No es la meta de calorías. La base en línea no se tocó: falta la frase escrita de Facundo para aplicar `20261010183000_patient_goal_followup`.

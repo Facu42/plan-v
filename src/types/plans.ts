@@ -66,6 +66,24 @@ export const planItemInputSchema = z.object({
   }
 });
 
+/** Hora orientativa de cada momento del plan, en formato 24 h («08:00»). */
+export const planMealTimesSchema = z.partialRecord(z.enum(PLAN_SLOTS), z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/));
+export type PlanMealTimes = z.infer<typeof planMealTimesSchema>;
+
+export function hasMealTimes(times: PlanMealTimes | undefined): times is PlanMealTimes {
+  return Boolean(times && Object.keys(times).length);
+}
+
+/** «Desayuno · 08:00» cuando el plan indica la hora; si no, sólo el nombre del momento. */
+export function mealSlotLabel(slot: PlanSlot, times?: PlanMealTimes): string {
+  const time = times?.[slot];
+  return time ? `${slot} · ${time}` : slot;
+}
+
+export function sameMealTimes(a: PlanMealTimes | undefined, b: PlanMealTimes | undefined): boolean {
+  return PLAN_SLOTS.every(slot => (a?.[slot] ?? '') === (b?.[slot] ?? ''));
+}
+
 function utcDays(start: string, end: string) {
   const from = Date.UTC(Number(start.slice(0, 4)), Number(start.slice(5, 7)) - 1, Number(start.slice(8, 10)));
   const to = Date.UTC(Number(end.slice(0, 4)), Number(end.slice(5, 7)) - 1, Number(end.slice(8, 10)));
@@ -74,6 +92,7 @@ function utcDays(start: string, end: string) {
 
 export const mealPlanDraftSchema = z.object({
   guidance: planGuidanceSchema.optional(),
+  meal_times: planMealTimesSchema.optional(),
   id: z.uuid(),
   expected_revision: z.uuid().nullable().optional(),
   period_start: isoDate,
@@ -131,10 +150,11 @@ export type PlanItemView = {
 };
 export type PlanVersionView = {
   guidance?: PlanGuidance;
+  meal_times?: PlanMealTimes;
   id: string;
   revision?: string;
   version: number;
-  status: 'draft' | 'published' | 'archived';
+  status: 'draft' | 'published' | 'scheduled' | 'archived';
   period_start: string;
   period_end: string;
   published_at: string | null;
@@ -149,6 +169,8 @@ export type ProfessionalMealPlan = {
   created_at: string;
   current: PlanVersionView;
   published: PlanVersionView | null;
+  /** Publicado, pero la paciente sigue con el anterior hasta period_start. */
+  scheduled?: PlanVersionView | null;
 };
 
 export function planReviewSnapshot(version: PlanVersionView) {
@@ -157,6 +179,7 @@ export function planReviewSnapshot(version: PlanVersionView) {
 }
 export type PatientMealPlan = {
   guidance?: PlanGuidance;
+  meal_times?: PlanMealTimes;
   id: string;
   timezone: string;
   version: number;
@@ -197,6 +220,16 @@ export function buildPublishedPlanDays(plan: Pick<PatientMealPlan, 'period_start
   }));
 }
 
+/** Semana (de a 7 días desde el inicio) que contiene hoy. Si hoy cae afuera, la primera o la última. */
+export function planWeekIndex(periodStart: string, periodEnd: string, today: string): number {
+  const days = eachIsoDate(periodStart, periodEnd);
+  const weeks = Math.max(1, Math.ceil(days.length / 7));
+  if (today <= periodStart) return 0;
+  if (today > periodEnd) return weeks - 1;
+  const index = days.indexOf(today);
+  return index < 0 ? 0 : Math.floor(index / 7);
+}
+
 export function toPublishedPatientPlan(plan: ProfessionalMealPlan): PatientMealPlan | null {
   if (!plan.published?.published_at) return null;
   return {
@@ -208,6 +241,7 @@ export function toPublishedPatientPlan(plan: ProfessionalMealPlan): PatientMealP
     published_at: plan.published.published_at,
     items: plan.published.items,
     ...(plan.published.guidance ? { guidance: plan.published.guidance } : {}),
+    ...(hasMealTimes(plan.published.meal_times) ? { meal_times: plan.published.meal_times } : {}),
     ...(plan.published.nutrition_target ? { nutrition_target: plan.published.nutrition_target } : {}),
     ...(plan.published.nutrition ? { nutrition: plan.published.nutrition } : {}),
   };

@@ -96,3 +96,25 @@ export function reminderWhatsAppHref(input: { patientName: string; owed: number;
   parts.push('Cuando pagues, avisame desde Plan V con "Ya pagué". ¡Gracias!');
   return `https://wa.me/?text=${encodeURIComponent(parts.join(' '))}`;
 }
+
+/** De qué es un cobro: su concepto si es suelto, «Cuota mensual» si es de la cuota. */
+export function chargeTitle(charge: { kind?: string; concept?: string }): string {
+  return charge.kind === 'extra' && charge.concept ? charge.concept : 'Cuota mensual';
+}
+
+/**
+ * Mensaje con el link de pago de un cobro, listo para pegar en WhatsApp o mail. Usa el link y el alias
+ * que la nutricionista ya cargó (Plan V no genera links de cobro). Sin ninguno, no hay nada que copiar.
+ */
+export function chargeLinkText(input: { patientName: string; title: string; amount: number; dueOn: string; alias?: string; paymentLink?: string }): string | null {
+  const link = input.paymentLink?.trim() ?? '';
+  const safeLink = /^https:\/\//i.test(link) ? link : '';
+  const alias = input.alias?.trim() ?? '';
+  if (!safeLink && !alias) return null;
+  const firstName = input.patientName.split(' ')[0] || input.patientName;
+  const parts = [`Hola ${firstName}, te paso lo de «${input.title}»: ${formatPesos(input.amount)}, vence el ${formatFeeDate(input.dueOn)}.`];
+  if (safeLink) parts.push(`Podés pagar desde este link: ${safeLink}`);
+  if (alias) parts.push(safeLink ? `O transferir al alias ${alias}.` : `Podés transferir al alias ${alias}.`);
+  parts.push('Cuando pagues, avisame desde Plan V con "Ya pagué". ¡Gracias!');
+  return parts.join(' ');
+}

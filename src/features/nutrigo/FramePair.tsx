@@ -5,10 +5,10 @@ import { planVBrandBinding } from './branding';
 import { patientNavBinding } from './patient-navigation';
 import type { ShowroomPage } from '../../components/nutrigo/ShowroomPanels';
 import { PatientMenuSheet } from './PatientMenuSheet';
-import { feeBannerBinding, useFeeNotice } from './fee-notice';
+import { accountBannerBinding, feeBannerBinding, insertMobileFeeBanner, useFeeNotice } from './fee-notice';
 import { installCardBinding } from './install-card';
 import { useInstallOffer } from '../../pwa/install-offer';
-import { NoticesSheet, usePatientNotices } from './patient-notices';
+import { NoticesSheet, useAccountArchived, usePatientNotices } from './patient-notices';
 import { iconButtonAction, iconButtonLabel, mapIconButtons } from './icon-buttons';
 import './nutrigo.generated.css';
 
@@ -23,12 +23,23 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
   const [attempt,setAttempt] = useState(0);
   const [menuNav,setMenuNav] = useState<SourceNode|null>(null);
   const feeNotice = useFeeNotice();
+  const accountArchived = useAccountArchived();
+  const [promo, setPromo] = useState<SourceNode | null>(null);
+  const bannerActive = accountArchived || Boolean(feeNotice);
   const notices = usePatientNotices();
   const [noticesOpen,setNoticesOpen] = useState(false);
   const unreadMessages = unread || notices.unreadMessages;
   const iconButtons = useMemo(()=>source?mapIconButtons(source):null,[source]);
   const { offer: installOffer, install } = useInstallOffer();
   useEffect(() => { const media = window.matchMedia('(max-width: 799px)'); const update=()=>setMobile(media.matches); media.addEventListener('change',update); return ()=>media.removeEventListener('change',update); },[]);
+  const desktopId = nodes[0];
+  useEffect(() => {
+    if (!mobile || !bannerActive) { setPromo(null); return; }
+    let active = true;
+    const load = frames[`./source/${desktopId.replace(':','-')}.json`];
+    load?.().then(module => { if (active) setPromo(findSource(module.default, node => nodeName(node) === 'Promotional Banner') ?? null); }).catch(() => { if (active) setPromo(null); });
+    return () => { active = false; };
+  }, [mobile, bannerActive, desktopId]);
   const id = nodes[mobile ? 1 : 0];
   useEffect(() => { let active=true; setSource(null);setLoadError(false); const load=frames[`./source/${id.replace(':','-')}.json`]; if (!load) {setLoadError(true);return;} load().then(module=>{if(active)setSource(module.default);}).catch(()=>{if(active)setLoadError(true);});return()=>{active=false;}; },[id,attempt]);
   // El menú del celular usa el «Menu Nav» original del marco de escritorio de esta misma pantalla (con su ítem activo).
@@ -49,7 +60,7 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
     if(node.tag==='p'&&text==='Privacy Policy')return {tag:'a',text:'Privacidad',props:{href:'/legal/privacidad.html',target:'_blank',rel:'noreferrer'}};
     if(node.tag==='p'&&text==='Term and conditions')return {tag:'a',text:'Términos y condiciones',props:{href:'/legal/terminos.html',target:'_blank',rel:'noreferrer'}};
     if(node.tag==='p'&&text==='Contact')return {onClick:()=>onNavigate('mensajes'),text:'Contacto'};
-    const fee=feeBannerBinding(node,feeNotice,onNavigate);if(fee)return fee;
+    const banner=accountArchived?accountBannerBinding(node,onNavigate):feeBannerBinding(node,feeNotice,onNavigate);if(banner)return banner;
     const installCard=installCardBinding(node,installOffer,install);if(installCard)return installCard;
     if(name==='Button'&&text==='Claim Now!')return {onClick:()=>onNavigate('plan'),label:'Ver mi plan'};
     if(name==='Social Media')return {props:{'aria-hidden':true}};
@@ -65,8 +76,9 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
     }
     return undefined;
   };
+  const shown = source && mobile && bannerActive && promo ? insertMobileFeeBanner(source, promo) : source;
   return <div className="mcp-nutrigo" data-figma-frame={id}>
-    {loadError?<div className="mcp-state" role="alert"><p>No se pudo cargar esta pantalla.</p><button onClick={()=>setAttempt(v=>v+1)}>Reintentar</button></div>:source?<SourceView source={source} resolve={common} translate={translateSource}/>:<p className="mcp-state" role="status">Cargando pantalla…</p>}
+    {loadError?<div className="mcp-state" role="alert"><p>No se pudo cargar esta pantalla.</p><button onClick={()=>setAttempt(v=>v+1)}>Reintentar</button></div>:shown?<SourceView source={shown} resolve={common} translate={translateSource}/>:<p className="mcp-state" role="status">Cargando pantalla…</p>}
     {children}
     {noticesOpen&&<NoticesSheet items={notices.items} onNavigate={onNavigate} onClose={()=>setNoticesOpen(false)}/>}
     {menu&&<PatientMenuSheet patientName={patientName} unread={unreadMessages} feeNotice={feeNotice} installOffer={installOffer} onInstall={install} noticeCount={notices.items.length} onOpenNotices={()=>setNoticesOpen(true)} menuNav={menuNav} onNavigate={onNavigate} onSignOut={onSignOut} onClose={()=>setMenu(false)}/>}

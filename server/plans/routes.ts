@@ -70,8 +70,18 @@ export function registerPlanRoutes(app: Hono) {
       const plan = await repo.getProfessionalMealPlan(nutritionistId, id, persistent);
       return c.json({ plan, source: persistent ? 'supabase' : 'memory', image_generation: recipeCoverEnabled() });
     }
-    const plan = await patientPlanWithPhotos(await repo.getPublishedMealPlan(id, persistent), persistent);
-    return c.json({ plan, source: persistent ? 'supabase' : 'memory' });
+    const published = await repo.readPublishedMealPlan(id, persistent);
+    const plan = await patientPlanWithPhotos(published.plan, persistent);
+    return c.json({ plan, handover: published.handover, source: persistent ? 'supabase' : 'memory' });
+  });
+
+  app.post('/api/patients/:id/plans/handover-seen', async (c) => {
+    const id = c.req.param('id');
+    const access = await readAccess(c, id);
+    if (access.professional) throw new repo.CareError(403, 'No tenés permiso para esta acción.');
+    const published = await repo.markMealPlanHandoverSeen(id, access.persistent);
+    const plan = await patientPlanWithPhotos(published.plan, access.persistent);
+    return c.json({ plan, handover: published.handover, source: access.persistent ? 'supabase' : 'memory' });
   });
 
   app.post('/api/patients/:id/plans', async (c) => {

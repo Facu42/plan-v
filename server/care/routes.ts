@@ -5,6 +5,7 @@ import * as sb from '../db/supabase-repo.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { getPatient, getStore, DEMO_NUTRITIONIST_ID } from '../store.js';
 import { careInputSchema, carePreferencesSchema, replacementRecipeSchema, CARE_LABELS, isMeasurementData, type CareAlert } from '../../src/types/care.js';
+import { bodyMetricBatchSchema } from '../../src/lib/body-metrics.js';
 import * as repo from './repository.js';
 import { sendThreadMessage } from '../messages/repository.js';
 import { ingestReadyAsset } from '../assets/repository.js';
@@ -65,6 +66,12 @@ export function registerCareRoutes(app: Hono) {
       await sendThreadMessage(id, { text: result.text, from: 'patient', suggestedByAi: false, client_id: input.client_id }, false);
     }
     return c.json({ requested: true, duplicate: result.duplicate });
+  });
+  app.post('/api/patients/:id/care/body-metrics', async c => {
+    const id = c.req.param('id'); const { persistent } = await access(c, id, 'professional');
+    const batch = await body(c, bodyMetricBatchSchema, 20_000);
+    await requireCareConsent(id, persistent, 'measurement');
+    return c.json({ measurements: await repo.saveBodyMetrics(id, batch, persistent) });
   });
   app.patch('/api/patients/:id/care/records/:recordId/review', async c => {
     const id = c.req.param('id'); const { persistent } = await access(c, id, 'professional');

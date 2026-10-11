@@ -23,6 +23,9 @@ import {
   type ResourceAssignmentView,
 } from '../../src/types/resources.js';
 
+/** En la demo no hay nombre de la profesional; la base usa el de la nutricionista. */
+const DEMO_AUTHOR = 'Tu nutricionista';
+
 export { CareError } from '../care/errors.js';
 export { resetResourceMemory } from './memory.js';
 
@@ -365,7 +368,7 @@ export async function saveEditorialDraft(
       related: [],
       action_label: '',
       action_page: '',
-      author_name: 'Equipo editorial Plan V',
+      author_name: DEMO_AUTHOR,
       reviewed_at: null,
       published: false,
       license_kind: 'placeholder',
@@ -405,6 +408,20 @@ export async function publishEditorial(id: string, persistent: boolean, professi
     return published;
   }
   const parsed = asResource(await rpc('publish_editorial_resource', { target: id }));
+  if (!parsed) throw new CareError(503, 'No se pudo guardar el recurso. Reintentá en un momento.');
+  return parsed;
+}
+
+export async function unpublishEditorial(id: string, persistent: boolean, professional: boolean): Promise<EditorialResource> {
+  if (!professional) throw new CareError(403, 'Sólo una profesional puede despublicar un artículo.');
+  if (!persistent) {
+    const current = findResource(id);
+    if (!current || current.nutritionist_id !== 'nutri-demo') throw new CareError(404, 'No encontramos ese recurso.');
+    const hidden: EditorialResource = { ...current, published: false, eyebrow: 'BORRADOR' };
+    putResource(hidden);
+    return hidden;
+  }
+  const parsed = asResource(await rpc('unpublish_editorial_resource', { target: id }));
   if (!parsed) throw new CareError(503, 'No se pudo guardar el recurso. Reintentá en un momento.');
   return parsed;
 }

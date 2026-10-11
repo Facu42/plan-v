@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { summarizeLedger } from '../../src/fees.js';
 import type { Patient } from '../../src/types/index.js';
 import {
   canAccessPatient,
@@ -216,6 +217,14 @@ describe('toPatientSelfView', () => {
     expect(serialized).not.toHaveProperty('adherence_why');
     expect(serialized).not.toHaveProperty('brief');
     expect(serialized).not.toHaveProperty('goal_history');
+    expect(serialized.goal_updates).toEqual([{
+      id: 'goal-1',
+      goal: 'Comer con regularidad',
+      status: 'active',
+      progress: 55,
+      updated_at: '2026-09-05T00:00:00.000Z',
+    }]);
+    expect(JSON.stringify(serialized)).not.toContain('Nota interna sobre el objetivo');
     expect(serialized.meal_logs[0]).not.toHaveProperty('note_for_nutri');
     expect(serialized.activity_logs).toEqual(patient.activity_logs);
     expect(serialized.messages).toEqual([{
@@ -248,9 +257,33 @@ describe('toPatientSelfView', () => {
     expect(patient.messages).toHaveLength(2);
   });
 
+  it('la deuda de la cuota no vacía el inicio; el corte de acceso sí', () => {
+    const summary = summarizeLedger({
+      patient_id: patient.id,
+      fee: { amount: 45000, first_due_on: '2026-01-10' },
+      charges: [{ id: 'c1', due_on: '2026-01-10', amount: 45000, status: 'open' }],
+      payments: [],
+    }, '2026-10-10');
+    expect(summary.state).toBe('debe');
+    expect(summary.owed).toBe(45000);
+    const home = { slot: 'Almuerzo', title: 'Ensalada publicada', time: '13:00' };
+    const withDebt = toPatientSelfView({ ...patient, billing_status: 'active', billing_until: '2099-12-31', todayPlan: [home] });
+    expect(withDebt.todayPlan).toEqual([home]);
+    expect(withDebt.meal_logs).toHaveLength(1);
+    expect(withDebt.activity_logs).toHaveLength(1);
+    const cut = toPatientSelfView({ ...patient, billing_status: 'past_due', billing_until: '2020-01-01', todayPlan: [home] });
+    expect(cut.todayPlan).toEqual([]);
+    expect(cut.meal_logs).toEqual([]);
+    expect(cut.activity_logs).toEqual([]);
+    expect(cut.messages).toHaveLength(1);
+  });
+
   it('returns only identity, billing state and sent messages when access is locked', () => {
     const view = toPatientSelfView({ ...patient, billing_status: 'pending', billing_until: null });
 
+    expect(view.goal).toBe('');
+    expect(view.goal_updates).toEqual([]);
+    expect(JSON.stringify(view)).not.toContain('Nota interna sobre el objetivo');
     expect(view.todayPlan).toEqual([]);
     expect(view.weekPlan).toEqual([]);
     expect(view.meal_logs).toEqual([]);

@@ -10,6 +10,7 @@ import { PROGRESS_PERIODS, type ProgressPeriodDays, type ProgressPoint, type Pro
 import { dateLabel, descendants, EmptyState, errorText, formatNumber, leaf, objects, source, Stateful, useRemote, type ScreenProps } from './shared';
 import { attachmentHref } from './message-format';
 import { dayOfIso, cleanAmount, litresLabel, percentLabel, safePercent } from './home-values';
+import { PatientGoalCard } from '../PatientGoalCard';
 
 /** Un vaso son 250 ml. Plan V no guarda una meta de agua: los porcentajes usan la referencia general de 8 vasos (2 L), igual que en Inicio. */
 const WATER_GOAL_GLASSES = 8;
@@ -116,7 +117,7 @@ export function NutrigoProgress({ patient, onNavigate, onSignOut, onRecord, onHy
 
   // Hábitos de los últimos siete días que ya registró la paciente.
   const week = patient.journey?.days ?? [];
-  const kcalOn = (date: string) => patient.logs.filter(log => dayOfIso(log.logged_at) === date && log.status !== 'pending_review' && log.macros).reduce((sum, log) => sum + (cleanAmount(log.macros?.kcal) ?? 0), 0);
+  const kcalOn = (date: string) => patient.logs.filter(log => dayOfIso(log.logged_at) === date && log.macros).reduce((sum, log) => sum + (cleanAmount(log.macros?.kcal) ?? 0), 0);
   const burnedOn = (date: string) => (remote.data?.care.records ?? []).reduce((sum, row) => sum + (row.recorded_on === date && row.data.kind === 'activity' ? cleanAmount(row.data.kcal) ?? 0 : 0), 0);
   const calorieDays = week.slice(-4).map(day => ({ date: day.date, eaten: kcalOn(day.date), burned: burnedOn(day.date) }));
   const target = cleanAmount(remote.data?.target?.result?.kcal) || null;
@@ -323,6 +324,7 @@ export function NutrigoProgress({ patient, onNavigate, onSignOut, onRecord, onHy
     return undefined;
   };
   return <FramePair nodes={['105:2790', '498:18237']} resolve={resolver} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut}>
+    <PatientGoalCard patient={patient} history />
     {remote.error && <Stateful error={remote.error} onRetry={remote.reload} />}{error && <Stateful error={error} />}
   </FramePair>;
 }

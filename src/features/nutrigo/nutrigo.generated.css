@@ -57,6 +57,20 @@
 .mcp-extra-content>section[aria-label="Permisos para la IA"] {padding:16px;border-radius:16px;background:var(--nv-card);font-size:14px}
 .mcp-extra-content>section[aria-label="Permisos para la IA"] h2 {font-size:18px;font-weight:600;margin-bottom:12px}
 @media(max-width:799px){.mcp-extra-content{padding:16px}.mcp-extra-actions{flex-direction:column}.mcp-extra-actions button{min-height:44px}}
+.mcp-goal-card{margin:20px;padding:16px;border-radius:16px;background:#fff;box-shadow:0 4px 12px rgba(176,176,176,.14);display:grid;gap:12px;max-width:836px}
+.mcp-goal-card h2{margin:0;font:600 18px/1.2 Poppins,sans-serif;color:#272932}
+.mcp-goal-card h3{margin:0;font:600 14px/1.25 Poppins,sans-serif;color:#272932}
+.mcp-goal-card p,.mcp-goal-card li,.mcp-goal-card dd{margin:0;font:400 12px/1.5 Poppins,sans-serif;color:#52545b}
+.mcp-goal-card header p{color:#8a8c90}
+.mcp-goal-card .mcp-goal-text{font:600 16px/1.24 Poppins,sans-serif;color:#272932}
+.mcp-goal-card dl{display:grid;gap:12px;margin:0}
+.mcp-goal-card dt{font:600 12px/1.3 Poppins,sans-serif;color:#272932}
+.mcp-goal-card .mcp-goal-track{display:block;height:6px;margin-top:6px;border-radius:6px;background:#eeeef;overflow:hidden}
+.mcp-goal-card .mcp-goal-track>span{display:block;height:100%;border-radius:6px;background:#c2e66e}
+.mcp-goal-card ol{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.mcp-goal-card li{display:grid;gap:2px;padding-top:8px;border-top:1px solid #e1e1e2}
+.mcp-goal-card li strong{font:600 14px/1.25 Poppins,sans-serif;color:#272932}
+@media(max-width:799px){.mcp-goal-card{margin:16px}}
 
 /* Los controles fuente mantienen sus utilidades; estos son los componentes
    adicionales ya compartidos con el consultorio. */

@@ -35,6 +35,7 @@ describe('actualización de shell PWA', () => {
   it('los avisos PWA cubren login, Nutrigo y el shell legado', () => {
     const source = readFileSync(new URL('../components/PlanVExperience.tsx', import.meta.url), 'utf8');
     expect(source).toContain('PwaChrome');
-    expect(source.match(/<PwaChrome \/>/g)?.length).toBeGreaterThanOrEqual(5);
+    expect(source.match(/<PwaChrome\b/g)?.length).toBeGreaterThanOrEqual(5);
+    expect(source.match(/<PwaChrome install=\{false\} \/>/g)?.length).toBeGreaterThanOrEqual(7);
   });
 });
