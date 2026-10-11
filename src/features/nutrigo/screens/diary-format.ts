@@ -8,10 +8,10 @@ export function newestFirst<T extends { logged_at: string }>(logs: readonly T[])
   return logs.map((log, index) => ({ log, index, time: instant(log.logged_at) })).sort((a, b) => (a.time === b.time ? a.index - b.index : b.time - a.time)).map(entry => entry.log);
 }
 
-/** Suma un nutriente de las comidas revisadas; ignora lo que no sea un número positivo. */
-export function nutrientTotal(logs: readonly LogLike[], key: Nutrient): number {
+/** Suma un nutriente de las comidas revisadas (con `countPending`, también las estimadas pendientes); ignora lo que no sea un número positivo. */
+export function nutrientTotal(logs: readonly LogLike[], key: Nutrient, countPending = false): number {
   return logs.reduce((total, log) => {
-    if (log.status === 'pending_review' || !log.macros) return total;
+    if ((!countPending && log.status === 'pending_review') || !log.macros) return total;
     const value = log.macros[key];
     return typeof value === 'number' && Number.isFinite(value) && value > 0 ? total + value : total;
   }, 0);
