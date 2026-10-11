@@ -15,6 +15,7 @@ import { aiJobsApi } from '../../api/ai-jobs';
 import type { AiJobView } from '../../types/ai-jobs';
 import { menuPreferences } from '../../lib/menu-preferences';
 import { PLAN_SLOTS, buildPublishedPlanDays, hasMealTimes, mealPlanDraftSchema, mealSlotLabel, sameMealTimes, type PlanMealTimes, toPublishedPatientPlan, type MealPlanDraftInput, type PatientMealPlan, type PlanItemView, type PlanRecipeDetail, type PlanSlot, type ProfessionalMealPlan } from '../../types/plans';
+import { argentinaDateId, planDateLabel, planTakesEffectNow } from '../../types/plan-handover';
 import type { ProfessionalRecipe } from '../../types/recipes';
 import { NvButton, NvState } from './primitives';
 import './meal-plan-versions.css';
@@ -308,7 +309,10 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
       }
       await plansApi.publish(current.id, current.current.version, current.current);
       setProposal(null);
-      setStatus('Menú aprobado y publicado. El paciente ya puede ver el plan fechado.');
+      const startsLater = Boolean(plan?.published) && !planTakesEffectNow(candidate.period_start, argentinaDateId(), true);
+      setStatus(startsLater
+        ? `Menú aprobado. La paciente sigue con el plan actual hasta el ${planDateLabel(candidate.period_start)}.`
+        : 'Menú aprobado y publicado. El paciente ya puede ver el plan fechado.');
       await reload();
       onChanged?.();
     } catch (caught) {
@@ -353,7 +357,10 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
   useUnsavedChanges(plan ? dirty : Boolean(periodStart || periodEnd || dietaryPreferences || draftItems.some((item) => item.free_text.trim() || item.recipe_id || item.public_note || item.recipe_proposal || item.components?.length)), busy);
   function publishVisible() {
     if (!plan || dirty) { setError('Guardá y revisá los cambios antes de publicar.'); return; }
-    void run(() => plansApi.publish(plan.id, plan.current.version, plan.current), 'Plan publicado. La paciente ve la versión revisada.');
+    const startsLater = Boolean(plan.published) && !planTakesEffectNow(plan.current.period_start, argentinaDateId(), true);
+    void run(() => plansApi.publish(plan.id, plan.current.version, plan.current), startsLater
+      ? `Plan publicado. La paciente sigue con el actual hasta el ${planDateLabel(plan.current.period_start)}.`
+      : 'Plan publicado. La paciente ve la versión revisada.');
   }
 
   async function notifyPatient() {
@@ -385,7 +392,8 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
       <div>
         <span>PLAN FECHADO</span>
         <h2>Versiones del plan</h2>
-        <p>El paciente sólo ve la versión publicada. Publicar revalida alergias, unidades y la versión esperada. La IA propone un borrador; no publica sola.</p>
+        <p>La paciente ve el plan vigente. Si publicás uno que empieza más adelante, sigue con el actual hasta esa fecha y recibe un aviso con los cambios. Publicar revalida alergias, unidades y la versión esperada. La IA propone un borrador; no publica sola.</p>
+        {plan?.scheduled && <p>Hay un plan nuevo que empieza el {planDateLabel(plan.scheduled.period_start)}. Hasta ese día la paciente sigue con la copia publicada.</p>}
       </div>
     </header>
     {source === 'memory' && <p className="meal-plan-demo">Vista demo · plan ficticio para probar edición y publicación.</p>}

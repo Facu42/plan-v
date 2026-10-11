@@ -18,7 +18,7 @@ ser decisiones, con estas aclaraciones de lo que ya existe:
 | D4 | La paciente puede **corregir o borrar** una comida o medida propia **mientras no esté revisada**; después, pedir corrección a la profesional. | Nada. | Rutas, reglas en la base y pantalla. | Paciente + servidor |
 | D5 | El **diario de texto funciona sin permiso de IA**; la IA solo con permiso. | Hoy toda comida pasa por la IA y exige el permiso. | Camino sin IA en el servidor y en el registro de comida. | Paciente + servidor |
 | D6 | Paciente **archivada**: se le avisa que su cuenta está archivada y no puede enviar mensajes. | La API respondía bien y nadie veía el mensaje. | Hecho en la rama de cuenta archivada: aviso en la campana, en el banner del archivo y en Mensajes; el envío queda bloqueado. La nutricionista puede escribir. La migración `20261010143000_archived_patient_cannot_message` no se aplica en la base hospedada hasta la frase de Facundo. | Paciente + servidor |
-| D7 | Plan nuevo: la paciente **ve qué cambia**, se le **avisa**, y **sigue viendo el anterior hasta que empiece el nuevo**. | Publicar archiva el anterior entero. | Vigencia por fecha, aviso y vista de cambios. | Panel + paciente |
+| D7 | Plan nuevo: la paciente **ve qué cambia**, se le **avisa**, y **sigue viendo el anterior hasta que empiece el nuevo**. | Publicar archiva el anterior entero. | Hecho en código (vigencia por fecha, aviso en la campana y vista de cambios). La migración queda en el repositorio hasta la frase escrita de Facundo. | Panel + paciente |
 
 ## Decididas antes
 

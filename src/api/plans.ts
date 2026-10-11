@@ -1,4 +1,5 @@
 import { request } from './client';
+import type { PlanHandover } from '../types/plan-handover';
 import { planReviewSnapshot, type MealPlanDraftInput, type PatientMealPlan, type ProfessionalMealPlan, type PlanVersionView } from '../types/plans';
 
 export const plansApi = {
@@ -7,9 +8,13 @@ export const plansApi = {
     `/api/patients/${encodeURIComponent(patientId)}/plans?audience=pro`,
     { signal },
   ),
-  published: (patientId: string, signal?: AbortSignal) => request<{ plan: PatientMealPlan | null; source: string }>(
+  published: (patientId: string, signal?: AbortSignal) => request<{ plan: PatientMealPlan | null; handover: PlanHandover | null; source: string }>(
     `/api/patients/${encodeURIComponent(patientId)}/plans`,
     { signal },
+  ),
+  seenHandover: (patientId: string) => request<{ plan: PatientMealPlan | null; handover: PlanHandover | null; source: string }>(
+    `/api/patients/${encodeURIComponent(patientId)}/plans/handover-seen`,
+    { method: 'POST' },
   ),
   save: (patientId: string, input: MealPlanDraftInput) => request<{ plan: ProfessionalMealPlan; source: string }>(
     `/api/patients/${encodeURIComponent(patientId)}/plans`,

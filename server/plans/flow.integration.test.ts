@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { app } from '../index.js';
 import { resetStore } from '../store.js';
 import { declareKnownHealth } from '../test/declare-health.js';
+import { argentinaToday, shiftIsoDate } from '../progress/derive.js';
 
 const patient = 'pat-sofia';
 const other = 'pat-marina';
@@ -182,5 +183,41 @@ describe('PV-19 planes fechados versionados', () => {
     const body = await saved.json() as { plan: { current: { items: Array<{ slot: string; recipe_title: string | null; free_text: string | null }> } } };
     expect(body.plan.current.items[0]).toMatchObject({ slot: 'Colación', recipe_title: 'Ensalada', free_text: null });
     expect(JSON.stringify(body)).not.toMatch(/proteína|carbohidrato|kcal/i);
+  });
+
+  it('un plan que empieza más adelante deja el vigente y avisa los cambios', async () => {
+    const input = planDraft();
+    expect((await post(`/api/patients/${patient}/plans`, input)).status).toBe(200);
+    expect((await post(`/api/plans/${input.id}/publish`, { expected_version: 1 })).status).toBe(200);
+    const start = shiftIsoDate(argentinaToday(), 7);
+    const end = shiftIsoDate(start, 6);
+    const next = {
+      ...input,
+      period_start: start,
+      period_end: end,
+      items: [{ for_date: start, slot: 'Cena', free_text: 'Tortilla de verdura', portions: 1, public_note: '' }],
+    };
+    expect((await post(`/api/patients/${patient}/plans`, next)).status).toBe(200);
+    expect((await post(`/api/plans/${input.id}/publish`, { expected_version: 2 })).status).toBe(200);
+    const visible = await (await app.request(`/api/patients/${patient}/plans`)).json() as {
+      plan: { version: number; items: Array<{ free_text: string | null }> };
+      handover: { waiting: boolean; seen: boolean; version: number; previous_version: number; changes: { added: number; removed: number } };
+    };
+    expect(visible.plan.version).toBe(1);
+    expect(visible.plan.items[0].free_text).toBe('Pollo con vegetales');
+    expect(visible.handover).toMatchObject({ waiting: true, seen: false, version: 2, previous_version: 1 });
+    expect(visible.handover.changes.added).toBe(1);
+    expect(visible.handover.changes.removed).toBe(1);
+    const pro = await (await app.request(`/api/patients/${patient}/plans?audience=pro`)).json() as {
+      plan: { published: { version: number }; scheduled: { version: number; status: string; period_start: string } | null };
+    };
+    expect(pro.plan.published.version).toBe(1);
+    expect(pro.plan.scheduled).toMatchObject({ version: 2, status: 'scheduled', period_start: start });
+    expect((await app.request(`/api/patients/${patient}/plans/handover-seen?audience=pro`, { method: 'POST' })).status).toBe(403);
+    const seen = await (await app.request(`/api/patients/${patient}/plans/handover-seen`, { method: 'POST' })).json() as {
+      plan: { version: number }; handover: { seen: boolean; waiting: boolean };
+    };
+    expect(seen.plan.version).toBe(1);
+    expect(seen.handover).toMatchObject({ seen: true, waiting: true });
   });
 });

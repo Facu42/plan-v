@@ -90,6 +90,7 @@ const ALLOWED = [
   'list_thread_messages',
   'log_patient_activity',
   'mark_editorial_resource_read',
+  'mark_meal_plan_handover_seen',
   'mark_thread_read',
   'my_archived_at',
   'my_nutritionist_id',
