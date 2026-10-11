@@ -31,6 +31,21 @@ describe('directorio de pacientes del showroom', () => {
     const missing=render({patients:[{...base,has_account:false,weekly_registration:null}]});
     expect(missing).toContain('Invitar a Sofía');expect(missing).toContain('Resumen no disponible');expect(missing).not.toContain('0 de 7 días');
   });
+  it('ofrece elegir columnas y densidad, con las cinco columnas a la vista por defecto', () => {
+    const html = render();
+    expect(html).toContain('Columnas y densidad');
+    for (const label of ['Estado', 'Próximo foco', 'Registro semanal']) expect(html).toContain(`<input type="checkbox" checked=""/>${label}`);
+    expect(html.match(/role="columnheader"/g)).toHaveLength(5);
+    expect(html).toContain('Cómoda');
+    expect(html).toContain('Compacta');
+  });
+  it('suma la acción de mensaje sólo para quien ya tiene cuenta y deja la última consulta y la conexión como columnas opcionales', () => {
+    const html = render({ onMessage: vi.fn() });
+    expect(html).toContain('Escribirle a Sofía');
+    expect(render({ onMessage: vi.fn(), patients: [{ ...base, has_account: false }] })).not.toContain('Escribirle a Sofía');
+    expect(html).toContain('<input type="checkbox"/>Última consulta');
+    expect(html).toContain('<input type="checkbox"/>Conexión');
+  });
   it('resume el directorio completo y muestra activos por defecto', () => {
     const html = render();
     expect(html).toContain('Pacientes activos');

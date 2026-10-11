@@ -21,6 +21,11 @@ describe('movimiento de las tarjetas de Inicio', () => {
     expect(css).toMatch(/animation-delay/);
   });
 
+  it('las barras de progreso se llenan al aparecer', () => {
+    expect(css).toMatch(/@keyframes mcp-fill/);
+    expect(css).toMatch(/\[data-name="Progress Bar"\][^}]*animation:\s*mcp-fill/);
+  });
+
   it('todo el movimiento vive dentro de «sin preferencia de reducir movimiento»', () => {
     // Fuera de ese bloque no puede quedar ninguna regla: así «reducir movimiento» apaga todo sin pelear especificidad.
     const [before, inside] = css.split('@media (prefers-reduced-motion: no-preference)');

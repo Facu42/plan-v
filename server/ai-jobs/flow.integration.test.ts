@@ -190,7 +190,7 @@ describe('PV-27 jobs de IA versionados', () => {
     expect((await runAiJob(DEMO_NUTRITIONIST_ID, queued.id, false)).status).toBe('succeeded');
     const workspace = await draft.json();
     expect((await post(`/api/patients/${patient}/nutrition-target?audience=pro`, { inputs: { ...input, adjust_pct: 10 }, publish: true, expected_revision: workspace.revision }, 'PUT')).status).toBe(200);
-    await expect(applyAiJob(DEMO_NUTRITIONIST_ID, queued.id, false)).rejects.toMatchObject({ status: 409 });
+    await expect(applyAiJob(DEMO_NUTRITIONIST_ID, queued.id, false)).rejects.toMatchObject({ status: 409, message: 'Cambiaron el ingreso, la meta o el plan después de esta propuesta. Regenerala con los datos nuevos.' });
   });
   it('retirar y volver a otorgar IA no revalida una propuesta del permiso anterior', async () => {
     await consentAi(); await declareAllergies();

@@ -32,7 +32,7 @@ Se mostró el formulario existente debajo del catálogo vacío: empujaba las acc
 
 ## Contrato del primer incremento
 
-`recipe-ai-flow.ts` consulta una propuesta existente mientras esté en cola o ejecución. Si termina con un resultado válido, el cliente aplica únicamente el borrador y confirma su lectura antes de abrirlo. Agotar la espera ofrece «Consultar propuesta», sin pedir otra generación. Fallos, cancelación o contexto vencido impiden usar la propuesta. Salir de la vista detiene las consultas locales. El estado de espera es temporal en esta vista; recuperar propuestas tras recargar sigue pendiente.
+`recipe-ai-flow.ts` consulta una propuesta existente mientras esté en cola o ejecución. Si termina con un resultado válido, el cliente aplica únicamente el borrador y confirma su lectura antes de abrirlo. Agotar la espera ofrece «Consultar propuesta», sin pedir otra generación. Fallos, cancelación o contexto vencido impiden usar la propuesta. Salir de la vista detiene las consultas locales. Al recargar, la última propuesta sin abrir del paciente elegido se retoma con «Consultar propuesta» (10/10), sin pedir otra.
 
 `RecipeCatalog.tsx` conserva borradores, publicación, asignación, permisos y fuentes existentes. La generación se inicia desde una ventana donde se eligen paciente y descripción. La API sigue exigiendo consentimiento y alergias/restricciones; no se conceden permisos automáticamente. El segundo incremento suma análisis de composición; no cambia el proveedor ni dispara generaciones automáticamente.
 

@@ -86,6 +86,20 @@ describe('Plan fechado profesional y publicado', () => {
     expect(html).not.toMatch(/\d+(?:[,.]\d+)?\s*kcal/);
   });
 
+  it('los horarios de cada comida se editan por momento, cuentan como cambio y se ven en la copia publicada', () => {
+    const plan = { id: 'plan-1', current: { period_start: '2026-09-21', period_end: '2026-09-27', published_at: null, meal_times: { Desayuno: '08:00', Cena: '21:00' }, items: [] } } as unknown as ProfessionalMealPlan;
+    const form: MealPlanDraftInput = { id: 'plan-1', period_start: '2026-09-21', period_end: '2026-09-27', timezone: 'America/Argentina/Buenos_Aires', items: [] };
+    expect(matchesMenuForm(plan, form)).toBe(true);
+    expect(matchesMenuForm(plan, { ...form, meal_times: { Cena: '21:00', Desayuno: '08:00' } })).toBe(true);
+    expect(matchesMenuForm(plan, { ...form, meal_times: { Desayuno: '08:30', Cena: '21:00' } })).toBe(false);
+    expect(matchesMenuForm(plan, { ...form, meal_times: {} })).toBe(false);
+    const editor = renderToStaticMarkup(<MealPlanEditor patientId="pat-sofia" />);
+    expect(editor).toContain('aria-label="Hora de Desayuno"');
+    expect(editor).toContain('type="time"');
+    const html = renderToStaticMarkup(<PublishedDatedPlanView plan={{ ...published, meal_times: { Almuerzo: '13:00' } }} audience="pro" />);
+    expect(html).toContain('Almuerzo · 13:00');
+  });
+
   it('el vacío publicado no simula un plan fechado', () => {
     const html = renderToStaticMarkup(<PublishedDatedPlan patientId="pat-sofia" />);
     expect(html).toContain('Todavía no hay un plan fechado publicado');
