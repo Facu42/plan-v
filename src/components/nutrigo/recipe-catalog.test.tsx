@@ -35,6 +35,8 @@ describe('Catálogo profesional y recetas asignadas', () => {
     const notices = renderToStaticMarkup(<RecipeAiNotices catalog={catalog} />);
     expect(notices).toContain('Revisar posible presencia de huevo.');
     expect(notices).toContain('Consultar propuesta');
+    expect(form).toContain('todavía no abriste');
+    expect(notices).toContain('todavía no abriste');
   });
   it('reabrir y editar título/pasos conserva las calorías declaradas por porción',()=>{
     const recipe = {id:'11111111-1111-4111-8111-111111111111',title:'Bowl',current:{revision:'22222222-2222-4222-8222-222222222222',yield_portions:2,steps:['Cocinar.'],nutrient_source:'Tabla declarada',ingredients:[{id:'i1',name:'Arroz',quantity:100,unit:'g'}],card:{category:'Almuerzo',prep_minutes:20,macros:{kcal:200,protein_g:10,carbs_g:35,fat_g:3}}}} as ProfessionalRecipe;

@@ -58,6 +58,18 @@ describe('PV-09 invite lifecycle in memory', () => {
     expect(accepted.status).toBe(401);
   });
 
+  it('manda la invitación por mail sólo si está vigente; en la demo no sale ningún mail real', async () => {
+    const created = await (await json('/api/patients', { name: 'Ana Pérez', email: 'ana@example.com', goal: 'Comer mejor' })).json();
+    expect((await json(`/api/invites/${created.invite.id}/email`, {})).status).toBe(409);
+    await json(`/api/invites/${created.invite.id}/send`, {});
+    const mailed = await json(`/api/invites/${created.invite.id}/email`, {});
+    expect(mailed.status).toBe(200);
+    expect(await mailed.json()).toEqual({ delivery: 'demo' });
+    await json(`/api/invites/${created.invite.id}/revoke`, {});
+    expect((await json(`/api/invites/${created.invite.id}/email`, {})).status).toBe(409);
+    expect((await json('/api/invites/no-es-un-id/email', {})).status).toBe(400);
+  });
+
   it('acknowledges recovery without revealing the address', async () => {
     const response = await json('/api/auth/recover', { email: 'ana@example.com' });
     expect(response.status).toBe(200);

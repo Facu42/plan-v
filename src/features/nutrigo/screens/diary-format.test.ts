@@ -31,6 +31,11 @@ describe('total de un nutriente', () => {
     const list = bad.map((kcal, index) => row(`m${index}`, '2026-10-03T10:00:00-03:00', { macros: { kcal, carbs_g: 0, protein_g: 0, fat_g: 0 } }));
     expect(nutrientTotal([...list, row('ok', '2026-10-03T10:00:00-03:00', { macros: { kcal: 250, carbs_g: 1, protein_g: 1, fat_g: 1 } })], 'kcal')).toBe(250);
   });
+  it('con countPending suma también las comidas pendientes', () => {
+    const pending = row('p', '2026-10-03T10:00:00-03:00', { status: 'pending_review', macros: { kcal: 300, carbs_g: 1, protein_g: 1, fat_g: 1 } });
+    expect(nutrientTotal([pending], 'kcal')).toBe(0);
+    expect(nutrientTotal([pending], 'kcal', true)).toBe(300);
+  });
   it('sin registros es cero, no NaN', () => { expect(nutrientTotal([], 'fat_g')).toBe(0); });
 });
 

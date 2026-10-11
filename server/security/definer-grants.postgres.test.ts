@@ -114,6 +114,7 @@ const ALLOWED = [
   'review_patient_intake',
   'review_patient_payment',
   'revoke_patient_care',
+  'save_body_metrics',
   'save_care_preferences',
   'save_care_record',
   'save_editorial_resource',
@@ -140,6 +141,7 @@ const ALLOWED = [
   'submit_patient_intake',
   'toggle_favorite',
   'transfer_patient_ownership',
+  'unpublish_editorial_resource',
 ];
 
 let db: PGlite;
