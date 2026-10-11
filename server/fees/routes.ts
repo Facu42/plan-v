@@ -25,6 +25,13 @@ const paymentSchema = z.object({
   method: z.enum(['efectivo', 'transferencia', 'mercado_pago', 'otro']),
   note: z.string().trim().max(280).optional(),
 });
+const chargeSchema = z.object({
+  amount: amountSchema,
+  due_on: dateSchema,
+  concept: z.string().trim().min(1).max(80),
+});
+const programSchema = z.object({ name: z.string().trim().min(1).max(60), amount: amountSchema });
+const assignSchema = z.object({ program_id: z.uuid().nullable(), first_due_on: dateSchema.optional() });
 const reviewSchema = z.object({ decision: z.enum(['confirm', 'reject', 'void']) });
 const waiveSchema = z.object({ waived: z.boolean() });
 const idSchema = z.uuid();
@@ -90,6 +97,37 @@ export function registerFeeRoutes(app: Hono) {
     if (role !== 'nutri') throw new repo.CareError(403, 'No tenés permiso para esta acción.');
     const input = await body(c, feeSchema);
     return c.json({ ledger: await repo.setFee(id, input.fee, persistent), source: source(persistent) });
+  });
+
+  // Nuevo cobro: un cobro suelto con su concepto. Solo la nutricionista con permiso de cobranzas.
+  app.post('/api/patients/:id/charges', async (c) => {
+    const id = c.req.param('id');
+    const { persistent, role } = await patientActor(c, id, 'edit_billing');
+    if (role !== 'nutri') throw new repo.CareError(403, 'No tenés permiso para esta acción.');
+    const input = await body(c, chargeSchema);
+    return c.json({ ledger: await repo.addCharge(id, input, persistent), source: source(persistent) }, 201);
+  });
+
+  // Asignar programa: la cuota de la paciente toma el monto del programa; program_id null la quita.
+  app.put('/api/patients/:id/program', async (c) => {
+    const id = c.req.param('id');
+    const { persistent, role } = await patientActor(c, id, 'edit_billing');
+    if (role !== 'nutri') throw new repo.CareError(403, 'No tenés permiso para esta acción.');
+    const input = await body(c, assignSchema);
+    return c.json({ ledger: await repo.assignProgram(id, input.program_id, input.first_due_on ?? null, persistent), source: source(persistent) });
+  });
+
+  app.post('/api/billing/programs', async (c) => {
+    const persistent = await requireNutri(c);
+    const input = await body(c, programSchema);
+    return c.json({ programs: await repo.saveProgram(input, persistent), source: source(persistent) }, 201);
+  });
+
+  app.delete('/api/billing/programs/:programId', async (c) => {
+    const parsed = idSchema.safeParse(c.req.param('programId'));
+    if (!parsed.success) throw new repo.CareError(404, 'Ese programa no existe.');
+    const persistent = await requireNutri(c);
+    return c.json({ programs: await repo.deleteProgram(parsed.data, persistent), source: source(persistent) });
   });
 
   // La nutricionista registra un pago; la paciente avisa "Ya pagué" (queda a confirmar).

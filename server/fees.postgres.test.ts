@@ -87,7 +87,7 @@ describe('cobranzas de pacientes (PGlite)', () => {
   it('genera las cuotas vencidas y la próxima, y calcula la deuda', async () => {
     const first = await monthsAgo(2);
     const ledger = await rpc<PatientLedger>(nutriA, 'set_patient_fee', [patientA, 30000, first]);
-    expect(ledger.fee).toEqual({ amount: 30000, first_due_on: first });
+    expect(ledger.fee).toEqual({ amount: 30000, first_due_on: first, program_name: '' });
     // Dos meses atrás, el mes pasado, este mes y la próxima por vencer.
     expect(ledger.charges.length).toBeGreaterThanOrEqual(3);
     expect(ledger.charges.filter((charge) => charge.due_on <= first)).toHaveLength(1);
