@@ -145,6 +145,7 @@ const ALLOWED = [
   'submit_patient_intake',
   'toggle_favorite',
   'transfer_patient_ownership',
+  'unpublish_editorial_resource',
 ];
 
 let db: PGlite;
