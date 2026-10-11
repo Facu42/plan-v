@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { ProfessionalIntakeView } from '../../types/intake';
 import { healthFactLabel, intakeMissingItems } from './intake-review';
-import { IntakeReviewPanel } from './ShowroomIntakeReview';
+import { IntakeReviewPanel, intakeUpdateRequestText } from './ShowroomIntakeReview';
 
 const submitted: ProfessionalIntakeView = {
   intake: {
@@ -34,5 +34,24 @@ describe('revisión profesional del ingreso', () => {
     expect(html).toContain('Marcar ingreso como revisado');
     expect(html).toContain('Guardar observación profesional');
     expect(html).not.toContain('Agregar nota');
+  });
+
+  it('la nutricionista puede pedirle a la paciente que actualice un ingreso ya enviado', () => {
+    const html = renderToStaticMarkup(
+      <IntakeReviewPanel view={submitted} note="" error="" busy={false} onNoteChange={vi.fn()} onReview={vi.fn()} onSaveNote={vi.fn()} onRequestUpdate={vi.fn()} />,
+    );
+    expect(html).toContain('Pedirle que actualice su ingreso');
+    const draft = renderToStaticMarkup(
+      <IntakeReviewPanel view={{ ...submitted, intake: { ...submitted.intake, status: 'draft' } }} note="" error="" busy={false} onNoteChange={vi.fn()} onReview={vi.fn()} onSaveNote={vi.fn()} onRequestUpdate={vi.fn()} />,
+    );
+    expect(draft).not.toContain('Pedirle que actualice su ingreso');
+  });
+
+  it('el mensaje usa el nombre preferido, el enlace al ingreso y el botón que ve la paciente', () => {
+    const text = intakeUpdateRequestText('Sofi', 'https://plan-v-eight.vercel.app');
+    expect(text).toContain('Hola Sofi');
+    expect(text).toContain('https://plan-v-eight.vercel.app/?onboarding=1');
+    expect(text).toContain('«Corregir mi ficha enviada»');
+    expect(intakeUpdateRequestText('', 'https://x.test')).toMatch(/^Hola,/);
   });
 });

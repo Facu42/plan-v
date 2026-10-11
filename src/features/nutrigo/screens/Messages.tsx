@@ -14,6 +14,7 @@ import { BubbleAttachment, Attachment, documentRow, imageTile, kitFromPanel, typ
 import { dayLabel, fileSize, hasDate, listTime, orderedMessages } from './message-format';
 import { ATTACH_ICON, MESSAGE_LABELS, headerActions } from './header-actions';
 import { unreadBadge } from '../patient-navigation';
+import { ARCHIVED_ACCOUNT_NOTICE } from '../../../lib/account-archive';
 
 type Message = ScreenProps['patient']['messages'][number];
 type Shared = { kind: 'media' | 'docs' | 'links'; title: string };
@@ -29,6 +30,8 @@ export function NutrigoMessages({ patient, onNavigate, onSignOut, now = new Date
   const [pending, setPending] = useState(false); const [showAll, setShowAll] = useState<Shared | null>(null);
   const [delivery] = useState(() => createMessageWrite(patient.id, { upload: selected => uploadChatAttachment(patient.id, selected, false), send: api.sendMessage, refresh }));
   useUnsavedChanges(Boolean(text.trim() || file || pending), busy);
+  const archived = Boolean(patient.archived);
+  const composerLocked = busy || pending || archived;
   const all = orderedMessages(patient.messages); const messages = all.filter(item => `${item.text} ${item.attachment?.filename ?? ''}`.toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'))); const unread = unreadCount(all, 'patient'); const dated = all.filter(hasDate); const latest = dated[dated.length - 1] ?? all[all.length - 1];
   const images = all.filter(item => item.attachment?.kind === 'image'); const documents = all.filter(item => item.attachment && item.attachment.kind !== 'image');
   // Normaliza primero (sin puntuación final) y después quita repetidos, para que cada enlace tenga una clave única.
@@ -37,7 +40,7 @@ export function NutrigoMessages({ patient, onNavigate, onSignOut, now = new Date
   useEffect(() => { if (!unread) return; let active = true; void api.markMessagesRead(patient.id, 'patient').then(() => { if (active) return refresh(patient.id); }).catch(() => { if (active) setError('No se pudo actualizar la confirmación de lectura.'); }); return () => { active = false; }; }, [patient.id, unread, refresh]);
   const pick = (next: File | null) => { if (!next) { setFile(null); return; } try { assertChatFile(next); setFile(next); setError(''); } catch (caught) { setFile(null); setError(errorText(caught)); if (picker.current) picker.current.value = ''; } };
   const clearFile = () => { setFile(null); if (picker.current) picker.current.value = ''; };
-  const send = async () => { if (lock.current || (!text.trim() && !file)) return; lock.current = true; setBusy(true); setError(''); announce(''); try { const result = await delivery.run({ text, file, client_id: crypto.randomUUID() }); setText(''); clearFile(); announce(result === 'sent' ? 'Mensaje enviado.' : 'Mensaje enviado. Actualizá la conversación para verlo; no hace falta reenviarlo.', result !== 'sent'); } catch (caught) { setError(errorText(caught)); announce(delivery.pending ? 'Conservamos este mensaje y su adjunto. Reintentá enviarlo para confirmar el resultado.' : 'El mensaje todavía no se envió. Podés corregir el archivo y reintentar.', true); } finally { setPending(delivery.pending); lock.current = false; setBusy(false); } };
+  const send = async () => { if (archived || lock.current || (!text.trim() && !file)) return; lock.current = true; setBusy(true); setError(''); announce(''); try { const result = await delivery.run({ text, file, client_id: crypto.randomUUID() }); setText(''); clearFile(); announce(result === 'sent' ? 'Mensaje enviado.' : 'Mensaje enviado. Actualizá la conversación para verlo; no hace falta reenviarlo.', result !== 'sent'); } catch (caught) { setError(errorText(caught)); announce(delivery.pending ? 'Conservamos este mensaje y su adjunto. Reintentá enviarlo para confirmar el resultado.' : 'El mensaje todavía no se envió. Podés corregir el archivo y reintentar.', true); } finally { setPending(delivery.pending); lock.current = false; setBusy(false); } };
   const keyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); void send(); } };
   const reload = () => void refresh(patient.id).catch(() => setError('No se pudo actualizar la conversación.'));
   const write = () => { setSearch(''); compose.current?.focus(); };
@@ -148,15 +151,15 @@ export function NutrigoMessages({ patient, onNavigate, onSignOut, now = new Date
       const [icon, textArea] = objects(node); const originalText = descendants(node).find(child => leaf(child) && sourceText(child) === 'Type a message..');
       return { children: <>
         {/* El archivo dibuja una lupa; adjuntar usa el «+» del propio archivo (Icon/Plus) en el mismo marco del ícono. */}
-        {icon && source(icon, child => child === icon ? { onClick: () => picker.current?.click(), label: MESSAGE_LABELS.attach, props: { disabled: busy || pending }, children: objects(icon).map((piece, order) => source(piece, inner => inner.tag === 'img' ? { props: { src: ATTACH_ICON } } : undefined, order)) } : undefined, 'attach')}
+        {icon && source(icon, child => child === icon ? { onClick: () => picker.current?.click(), label: MESSAGE_LABELS.attach, props: { disabled: composerLocked }, children: objects(icon).map((piece, order) => source(piece, inner => inner.tag === 'img' ? { props: { src: ATTACH_ICON } } : undefined, order)) } : undefined, 'attach')}
         {textArea && source(textArea, child => child === textArea ? { props: { style: { flexDirection: 'column', alignItems: 'stretch' } }, children: <>
-          <textarea disabled={busy || pending} ref={compose} aria-label="Escribir mensaje" placeholder="Escribí un mensaje…" maxLength={2000} rows={1} value={text} onChange={event => setText(event.target.value)} onKeyDown={keyDown} className={String(originalText?.props.className ?? '')} style={{ flex: 'none', width: '100%', border: 0, background: 'transparent', resize: 'none', color: '#272932', outlineOffset: 3 }} />
+          <textarea disabled={composerLocked} ref={compose} aria-label="Escribir mensaje" placeholder="Escribí un mensaje…" maxLength={2000} rows={1} value={text} onChange={event => setText(event.target.value)} onKeyDown={keyDown} className={String(originalText?.props.className ?? '')} style={{ flex: 'none', width: '100%', border: 0, background: 'transparent', resize: 'none', color: '#272932', outlineOffset: 3 }} />
           {file && <span className="flex items-center gap-[6px] font-['Poppins:Regular'] text-[11px] leading-[1.3] text-[#52545b]">Adjunto: {file.name}<button type="button" disabled={busy || pending} onClick={clearFile} className="underline">Quitar</button></span>}
         </> } : undefined, 'text')}
       </> };
     }
     const input = searchBinding(node, search, setSearch, 'Buscar mensajes'); if (input && content !== 'Type a message..') return input;
-    if (/Button/.test(name) && content === 'Send') return { onClick: () => void send(), label: 'Enviar mensaje', props: { disabled: busy || pending || (!text.trim() && !file) } };
+    if (/Button/.test(name) && content === 'Send') return { onClick: () => void send(), label: 'Enviar mensaje', props: { disabled: composerLocked || (!text.trim() && !file) } };
     if (/Button/.test(name) && content === 'New Message') return writeToNutritionist;
     if (name === 'Button Icon' && (idEnds(node, '198:5973') || idEnds(node, '433:20363'))) return toggleUnread;
     if (name === 'Button Icon' && idEnds(node, '445:8570')) return writeToNutritionist;
@@ -165,11 +168,12 @@ export function NutrigoMessages({ patient, onNavigate, onSignOut, now = new Date
     if (name === 'Section Features') return feature(node, content);
     if (leaf(node) && content === 'Alex Foster') return { text: 'Tu nutricionista' };
     if (leaf(node) && content === 'Personal Trainer') return { text: 'Nutricionista' };
-    if (leaf(node) && content === 'last seen recently') return { text: latest?.from === 'vero' ? `Último mensaje: ${listTime(latest.sent_at, now)}` : 'Conversación privada' };
+    if (leaf(node) && content === 'last seen recently') return { text: archived ? ARCHIVED_ACCOUNT_NOTICE : latest?.from === 'vero' ? `Último mensaje: ${listTime(latest.sent_at, now)}` : 'Conversación privada' };
     return undefined;
   };
   return <FramePair nodes={['84:2565', '433:19982']} resolve={resolver} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut} unread={unread}>
-    <input disabled={busy || pending} ref={picker} type="file" accept={CHAT_ATTACHMENT_ACCEPT} onChange={event => pick(event.target.files?.[0] ?? null)} className="hidden" aria-label="Archivo adjunto" />
+    <input disabled={composerLocked} ref={picker} type="file" accept={CHAT_ATTACHMENT_ACCEPT} onChange={event => pick(event.target.files?.[0] ?? null)} className="hidden" aria-label="Archivo adjunto" />
+    {archived && <p role="status" className="mx-[24px] p-[16px] text-[#272932]">{ARCHIVED_ACCOUNT_NOTICE}</p>}
     {error && <Stateful error={error} />}{notice.text && <p role="status" className={notice.loud ? 'mx-[24px] p-[16px] text-[#272932]' : undefined} style={notice.loud ? undefined : SR_ONLY}>{notice.text}</p>}
     {showAll && <FigmaRecordDialog title={showAll.title} onClose={() => setShowAll(null)}>
       {showAll.kind === 'links' ? <ul className="flex flex-col gap-[8px]">{links.map(url => <li key={url}><a href={url} target="_blank" rel="noopener noreferrer" className="break-all text-[14px] underline">{url}</a></li>)}</ul>

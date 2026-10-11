@@ -271,6 +271,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
     billing_status: resolveBillingStatus(billing),
     billing_until: billing.billing_until,
     ...(audience === 'professional' && 'user_id' in row ? { has_account: row.user_id != null } : {}),
+    ...(audience === 'professional' && typeof row.created_at === 'string' ? { created_at: row.created_at } : {}),
     stage: row.stage as Patient['stage'],
     goal: row.goal as string,
     ...(asGoalStatus(row.goal_status) ? { goal_status: asGoalStatus(row.goal_status) } : {}),
@@ -573,14 +574,50 @@ export async function sbListPatientsForNutri(userId: string, query: { offset: nu
   }
 
   const follow = await loadGoalFollowup(ids, 'professional');
+  const pastByPatient = await loadPastConsultations(ids, appointmentNow);
   const [archivedAt, resourceAssignments] = await Promise.all([loadArchivedAt(ids), loadResourceAssignments(ids)]);
   return {
     patients: pageRows.map((patientRow) => mapPatient({ ...patientRow, ...follow.get(String(patientRow.id)), archived_at: archivedAt.get(String(patientRow.id)) ?? null }, {
       appointment: mapScheduledAppointment(nextByPatient.get(String(patientRow.id))),
+      appointment_history: pastByPatient.get(String(patientRow.id)) ?? [],
       resource_assignments: resourceAssignments.get(String(patientRow.id)) ?? [],
     }, 'professional')),
     page: { offset: query.offset, limit: query.limit, has_more: hasMore },
   };
+}
+
+const PAST_CONSULTATION_DAYS = 400;
+const ARGENTINA_DAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+
+/**
+ * Turnos ya terminados (no cancelados) de las pacientes de la página, como historial «elapsed» con fecha local.
+ * Alimenta «última consulta» del directorio y las consultas del período en Inicio. Un turno pasado no prueba
+ * asistencia: sólo que el horario se cumplió sin cancelarse.
+ */
+async function loadPastConsultations(ids: string[], now: Date): Promise<Map<string, NonNullable<Patient['appointment_history']>>> {
+  const grouped = new Map<string, NonNullable<Patient['appointment_history']>>();
+  if (!ids.length) return grouped;
+  // Mismo criterio que el próximo turno: lo lee el servidor, sólo de pacientes que salieron de la consulta con permisos de fila.
+  const { data } = await privilegedDb().from('appointments')
+    .select('id,patient_id,starts_at,duration_min,channel,status')
+    .in('patient_id', ids)
+    .in('status', ['scheduled', 'done'])
+    .gte('starts_at', new Date(now.getTime() - PAST_CONSULTATION_DAYS * 86_400_000).toISOString())
+    .lt('starts_at', now.toISOString())
+    .order('starts_at', { ascending: false });
+  for (const appt of rows(data)) {
+    const startsAt = new Date(String(appt.starts_at));
+    const duration = Number(appt.duration_min) || 0;
+    const endsAt = new Date(startsAt.getTime() + duration * 60_000);
+    if (Number.isNaN(startsAt.getTime()) || endsAt.getTime() > now.getTime()) continue;
+    // Columnas comunes a todas las versiones de la tabla: la fecha se toma en hora de Argentina.
+    const dateId = ARGENTINA_DAY.format(startsAt);
+    const patientId = String(appt.patient_id);
+    const list = grouped.get(patientId) ?? [];
+    list.push({ id: String(appt.id), when: '', dateId, duration, channel: String(appt.channel ?? ''), action: 'elapsed', actor: 'system', at: endsAt.toISOString() });
+    grouped.set(patientId, list);
+  }
+  return grouped;
 }
 
 async function loadResourceAssignments(ids: string[]) {
@@ -619,6 +656,16 @@ export async function sbGetPatientsForNutri(userId: string): Promise<Patient[]> 
   return listed.patients;
 }
 
+// La vista de la paciente no trae archived_at. La función llega con la migración
+// de D6; si todavía no está, se lee la columna que ya existe, sólo de su ficha.
+async function loadOwnArchivedAt(patientId: string): Promise<string | null> {
+  const { data, error } = await getRequestDb().rpc('my_archived_at');
+  if (!error) return data == null || data === '' ? null : String(data);
+  const { data: row, error: readError } = await privilegedDb().from('patients').select('archived_at').eq('id', patientId).maybeSingle();
+  if (readError || !row) return null;
+  return (row.archived_at as string | null) ?? null;
+}
+
 export async function sbGetPatientForUser(userId: string): Promise<Patient | null> {
   const sb = getRequestDb();
   const { data } = await sb.from('patients_patient_view').select(patientTableColumns.patient).eq('user_id', userId).maybeSingle();
@@ -626,7 +673,8 @@ export async function sbGetPatientForUser(userId: string): Promise<Patient | nul
   if (!patientRow) return null;
   const extras = await loadPatientExtras(patientRow.id as string, 'patient');
   const follow = (await loadGoalFollowup([String(patientRow.id)], 'patient')).get(String(patientRow.id));
-  return mapPatient({ ...patientRow, ...follow }, extras, 'patient');
+  const archivedAt = await loadOwnArchivedAt(String(patientRow.id));
+  return mapPatient({ ...patientRow, ...follow, archived_at: archivedAt }, extras, 'patient');
 }
 
 export async function sbGetPatientById(id: string, audience: QueryAudience = 'professional'): Promise<Patient | null> {
@@ -640,7 +688,8 @@ export async function sbGetPatientById(id: string, audience: QueryAudience = 'pr
     const archivedAt = await loadArchivedAt([String(patientRow.id)]);
     return mapPatient({ ...patientRow, ...follow, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, extras, audience);
   }
-  return mapPatient({ ...patientRow, ...follow }, extras, audience);
+  const archivedAt = await loadOwnArchivedAt(String(patientRow.id));
+  return mapPatient({ ...patientRow, ...follow, archived_at: archivedAt }, extras, audience);
 }
 
 export async function sbAddMealLog(patientId: string, log: Omit<MealLog, 'id' | 'patient_id' | 'logged_at' | 'status'>): Promise<MealLog> {

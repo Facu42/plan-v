@@ -1,0 +1,104 @@
+import { renderToStaticMarkup } from 'react-dom/server';
+import { describe, expect, it } from 'vitest';
+import type { Measurement } from '../../types/care';
+import { MeasurementsBoard } from './ProfessionalMeasurements';
+
+const row = (kind: Measurement['kind'], value: number, captured_on: string, unit = 'cm', id = `${kind}-${captured_on}`): Measurement =>
+  ({ id, patient_id: 'p', kind, value_numeric: value, unit, source: 'professional', captured_on, created_at: `${captured_on}T12:00:00Z` });
+const render = (measurements: Measurement[], allowed = true, initialOpen: Parameters<typeof MeasurementsBoard>[0]['initialOpen'] = null) =>
+  renderToStaticMarkup(<MeasurementsBoard measurements={measurements} allowed={allowed} patientName="Sofía" onEnter={() => undefined} initialOpen={initialOpen} />);
+
+describe('IMC en la ficha', () => {
+  it('se calcula con último peso y altura y lleva la referencia general desde los 20 años', () => {
+    const rows = [row('weight', 65, '2026-10-01', 'kg'), row('height', 160, '2026-10-01')];
+    const html = renderToStaticMarkup(<MeasurementsBoard measurements={rows} allowed patientName="Sofía" onEnter={() => undefined} age={30} />);
+    expect(html).toContain('IMC'); expect(html).toContain('25,4'); expect(html).toContain('Por encima del rango');
+    expect(render(rows)).toContain('Referencia adulta desde los 20 años');
+    expect(render([])).toContain('Necesita peso (kg) y altura');
+  });
+});
+
+describe('mediciones de la ficha', () => {
+  it('muestra los tres grupos y sus métricas, con «Sin dato» donde no se midió y nunca un cero inventado', () => {
+    const html = render([]);
+    for (const text of ['Básicas', 'Composición corporal', 'Perímetros', 'Grasa corporal', 'Masa muscular', 'Agua corporal', 'Abdominal', 'Muslo', 'Altura', 'Cintura']) expect(html).toContain(text);
+    expect(html).toContain('Sin dato');
+    expect(html).toContain('Todavía sin medir');
+    expect(html).not.toMatch(/>0 (cm|kg|%)</);
+    expect(html).toContain('Cargar mediciones');
+  });
+
+  it('muestra el último valor de cada métrica, su fecha y su tendencia en palabras', () => {
+    const html = render([row('thigh', 55, '2026-09-01'), row('thigh', 53.5, '2026-10-01'), row('body_fat_pct', 27.5, '2026-10-01', '%')]);
+    expect(html).toContain('53,5 cm');
+    expect(html).toContain('1 oct 2026 · ↓ 1,5 cm');
+    expect(html).toContain('27,5 %');
+    expect(html).toContain('1 oct 2026 · 1 registro');
+  });
+
+  it('cada tarjeta se puede abrir con un botón con nombre accesible', () => {
+    expect(render([])).toContain('aria-label="Ver detalle de Grasa corporal"');
+  });
+
+  it('el detalle muestra mínimo, promedio, máximo, historial con diferencias y marca la última medición', () => {
+    const html = render([row('thigh', 55, '2026-09-01'), row('thigh', 53, '2026-09-15'), row('thigh', 54, '2026-10-01')], true, 'thigh');
+    expect(html).toContain('Detalle de Muslo');
+    expect(html).toContain('Mínimo'); expect(html).toContain('53 cm');
+    expect(html).toContain('Promedio'); expect(html).toContain('54 cm');
+    expect(html).toContain('Máximo'); expect(html).toContain('55 cm');
+    expect(html).toContain('Última');
+    expect(html).toContain('+1 cm');
+    expect(html).toContain('−2 cm');
+    expect(html).toContain('Primer registro');
+    expect(html).toContain('Historial de muslo');
+    expect(html).toContain('Subió 1 cm desde el registro anterior');
+  });
+
+  it('sin permiso de medidas no muestra valores ni deja cargar', () => {
+    const html = render([row('thigh', 55, '2026-09-01')], false);
+    expect(html).toContain('Falta el permiso de medidas');
+    expect(html).toContain('Sofía todavía no autorizó');
+    expect(html).not.toContain('55 cm');
+    expect(html).not.toContain('Cargar mediciones');
+  });
+
+  it('el gráfico tiene descripción textual con todas las fechas y valores', () => {
+    const html = render([row('arm', 30, '2026-09-01'), row('arm', 31, '2026-10-01')], true, 'arm');
+    expect(html).toContain('Evolución de Brazo: 1 sep 2026 30 cm; 1 oct 2026 31 cm');
+  });
+});
+
+describe('evolución del peso y mini gráficos', () => {
+  it('resume la diferencia desde la primera medición, la cantidad de registros y la fecha del último', () => {
+    const html = render([row('weight', 70, '2026-09-01', 'kg'), row('weight', 68.5, '2026-09-15', 'kg'), row('weight', 67.7, '2026-10-01', 'kg')]);
+    expect(html).toContain('Evolución del peso');
+    expect(html).toContain('−2,3 kg');
+    expect(html).toContain('3 registros · último 1 oct 2026');
+  });
+
+  it('sin peso cargado lo dice, y con un solo registro no inventa una diferencia', () => {
+    expect(render([])).toContain('Todavía sin medir');
+    const one = render([row('weight', 70, '2026-09-01', 'kg')]);
+    expect(one).toContain('Primer registro');
+    expect(one).toContain('1 registro · último 1 sep 2026');
+  });
+
+  it('muestra mínimo, promedio y máximo del peso como en la ficha de Nutriboost', () => {
+    const html = render([row('weight', 63.8, '2026-09-01', 'kg'), row('weight', 63.5, '2026-09-15', 'kg'), row('weight', 62.5, '2026-10-01', 'kg')]);
+    expect(html).toContain('Mín 62,5 kg · Prom 63,3 kg · Máx 63,8 kg');
+  });
+
+  it('con un solo peso no repite mínimo, promedio y máximo iguales', () => {
+    expect(render([row('weight', 70, '2026-09-01', 'kg')])).not.toContain('Mín ');
+  });
+
+  it('el detalle ofrece registrar una nueva medición sólo si hay permiso para cargar', () => {
+    const rows = [row('weight', 70, '2026-09-01', 'kg')];
+    expect(render(rows, true, 'weight')).toContain('Registrar nueva medición');
+  });
+
+  it('dibuja el mini gráfico sólo con dos o más registros', () => {
+    expect(render([row('arm', 30, '2026-09-01')])).not.toContain('pm-spark');
+    expect(render([row('arm', 30, '2026-09-01'), row('arm', 31, '2026-10-01')])).toContain('pm-spark');
+  });
+});

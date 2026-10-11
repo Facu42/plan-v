@@ -1,0 +1,105 @@
+/*
+ * Composición de pantallas que el archivo no dibuja (ingreso, cuenta sin vincular,
+ * carga, error). Las piezas de adentro son nodos del archivo. Acá solo está el
+ * lienzo, la tarjeta y lo que el archivo no trae (tema, Google, errores).
+ * Lienzo Cream-BG #F9F4F2, tarjeta blanca radio 16, sombra del archivo.
+ * Tema oscuro derivado: el archivo no tiene pantallas oscuras.
+ */
+.entry-screen {
+  display: grid;
+  min-height: 100vh;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 24px 16px;
+  background: #F9F4F2;
+  color: #272932;
+}
+.entry-card {
+  display: flex;
+  width: min(100%, 420px);
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(176, 176, 176, 0.14);
+}
+.entry-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 32px; }
+.entry-logo { position: relative; height: 32px; min-width: 0; flex: 1; }
+.entry-logo [data-name="symbol"] img { width: 100%; height: 100%; object-fit: contain; }
+.entry-theme {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  color: #272932;
+  background: #EEEEEF;
+}
+.entry-copy { display: flex; flex-direction: column; gap: 6px; }
+.entry-screen [data-name="Segmented Button"] { width: 100%; }
+.entry-screen [data-name="Button Picker"] { flex: 1 0 0; }
+.entry-fields { display: flex; flex-direction: column; gap: 10px; }
+/* El nodo es blanco porque en el archivo se apoya en el crema del contenido.
+   En esta tarjeta blanca se lee con el relleno de campo del archivo (Gray-BG-Subtle). */
+.entry-screen [data-name="Input-search"] { width: 100%; flex: none; background: #F6F6F7; }
+.entry-screen [data-name="Input-search"] input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  color: #272932;
+  background: transparent;
+  font: 400 14px/1.25 Poppins, sans-serif;
+}
+.entry-screen [data-name="Input-search"] input::placeholder { color: #8A8C90; }
+.entry-actions { display: flex; flex-direction: column; gap: 10px; }
+.entry-actions [data-name="Button"] { width: 100%; flex: none; }
+.entry-screen [data-name="Button"] p { white-space: normal; }
+.entry-label { display: grid; gap: 6px; color: #8A8C90; font: 400 12px/1.3 Poppins, sans-serif; }
+.entry-check { display: flex; gap: 10px; align-items: flex-start; color: #52545B; font: 400 12px/1.5 Poppins, sans-serif; }
+.entry-check input { width: 16px; height: 16px; flex: none; margin-top: 2px; accent-color: #73A107; }
+.entry-check a, .entry-legal a { color: #272932; text-decoration: underline; }
+.entry-error { margin: 0; padding: 8px 12px; border-radius: 12px; color: #272932; background: #FFE1C9; font: 400 12px/1.5 Poppins, sans-serif; }
+.entry-divider { display: flex; align-items: center; gap: 10px; color: #8A8C90; font: 400 11px/1.6 Poppins, sans-serif; }
+.entry-divider::before, .entry-divider::after { content: ''; height: 1px; flex: 1; background: #E1E1E2; }
+.entry-google {
+  display: flex;
+  width: 100%;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border: 1px solid #E1E1E2;
+  border-radius: 12px;
+  color: #272932;
+  background: #fff;
+  font: 500 14px/1 Poppins, sans-serif;
+}
+.entry-google:disabled { opacity: 0.5; }
+.entry-note, .entry-legal { margin: 0; color: #8A8C90; font: 400 11px/1.6 Poppins, sans-serif; }
+.entry-hint { margin: 0; color: #8A8C90; font: 400 12px/1.5 Poppins, sans-serif; }
+.plan-v-app .entry-screen :focus-visible { outline: 2px solid #272932; outline-offset: 3px; }
+
+.plan-v-app.dark .entry-screen { background: #1B1C22; color: #F6F6F7; }
+.plan-v-app.dark .entry-card { background: #24262E; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28); }
+.plan-v-app.dark .entry-theme { color: #F6F6F7; background: #2C2E37; }
+.plan-v-app.dark .entry-screen [data-name="Logo"] p,
+.plan-v-app.dark .entry-copy h1 { color: #F6F6F7; }
+.plan-v-app.dark .entry-copy p,
+.plan-v-app.dark .entry-label,
+.plan-v-app.dark .entry-note,
+.plan-v-app.dark .entry-legal,
+.plan-v-app.dark .entry-hint,
+.plan-v-app.dark .entry-divider { color: #A8AAB0; }
+.plan-v-app.dark .entry-check { color: #C9CAD0; }
+.plan-v-app.dark .entry-check a,
+.plan-v-app.dark .entry-legal a { color: #F6F6F7; }
+.plan-v-app.dark .entry-screen [data-name="Input-search"],
+.plan-v-app.dark .entry-screen [data-name="Segmented Button"] { background: #2C2E37; }
+.plan-v-app.dark .entry-screen [data-name="Input-search"] input { border: 0; color: #F6F6F7; background: transparent; box-shadow: none; }
+.plan-v-app.dark .entry-screen [data-name="Input-search"] input::placeholder { color: #A8AAB0; }
+.plan-v-app.dark .entry-screen [data-name="Button Picker"][aria-pressed="false"] { background: transparent; }
+.plan-v-app.dark .entry-error { color: #272932; }

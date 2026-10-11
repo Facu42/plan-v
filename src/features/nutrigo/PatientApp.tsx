@@ -75,7 +75,7 @@ export function NutrigoPatientApp({patient,page,onNavigate,onSignOut,onEditIntak
       </>}
     </section>};
   }}/>;
-  return <FeeNoticeProvider patientId={patient.id}><PatientNoticesProvider patient={patient}>{screen}{demoRoleSwitch&&<div className="mcp-nutrigo mcp-screen-state"><button className="mcp-action" onClick={demoRoleSwitch}>Ver consultorio de demostración</button></div>}
+  return <FeeNoticeProvider patientId={patient.id}><PatientNoticesProvider patient={patient} patientId={patient.id}>{screen}{demoRoleSwitch&&<div className="mcp-nutrigo mcp-screen-state"><button className="mcp-action" onClick={demoRoleSwitch}>Ver consultorio de demostración</button></div>}
     <div className="mcp-patient-overlays">
     {dialog==='records'&&<FigmaRecordDialog title="Mis registros" onClose={()=>{if(canLeaveWorkspace())setDialog(null);}}><PatientBodyDataCard patientId={patient.id} forceOpen onSaved={notifyCareChanged}/><CarePanel patientId={patient.id}/></FigmaRecordDialog>}
     {(dialog==='water'||dialog==='rest'||dialog==='steps')&&<HabitForm patient={patient} kind={dialog} onClose={()=>setDialog(null)}/>}

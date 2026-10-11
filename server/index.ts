@@ -82,7 +82,11 @@ import { parseIntakePayload, type IntakeStep } from './intake/payload.js';
 import { toPatientIntakeView, toProfessionalIntakeView } from './intake/views.js';
 import * as intakeDb from './intake/repository.js';
 import { IntakeRepositoryError } from './intake/repository.js';
-import { getAuthAccount, getRequestDb, isSupabaseEnabled } from './db/supabase-client.js';
+import { getAuthAccount, getRequestDb, isSupabaseEnabled, privilegedDb } from './db/supabase-client.js';
+import { emailPatientInvite, emailPatientInviteWithBrevo } from './identity/invite-email.js';
+import { brevoConfig, sendBrevoEmail } from './mail/brevo.js';
+import { PUBLIC_SIGNUP_ROLE } from '../src/context/auth-policy.js';
+import { siteUrl } from './admin/accounts.js';
 import * as sb from './db/supabase-repo.js';
 import { recoveryAcknowledgement, provisionSecretMatches, validateProvisionInput } from './identity/provision.js';
 import { authorizePatientAction } from './security/authorization.js';
@@ -97,6 +101,7 @@ import {
   computeShoppingList,
   createPatient,
   acceptPatientInvite,
+  type PatientInvite,
   dismissBrief,
   getInviteById,
   getPatient,
@@ -727,6 +732,50 @@ app.post('/api/invites/:id/send', async (c) => {
   const invite = sendPatientInvite(inviteId.data);
   if (!invite) return c.json({ error: 'Invitación no disponible' }, 409);
   return c.json({ invite, source: 'memory' });
+});
+
+// Manda por mail el enlace vigente con los mails de Supabase Auth (sin servicio nuevo). En la demo no sale nada.
+app.post('/api/invites/:id/email', async (c) => {
+  const auth = c.get('auth');
+  const inviteId = inviteIdParamSchema.safeParse(c.req.param('id'));
+  if (!inviteId.success) return c.json({ error: 'Datos inválidos' }, 400);
+  const usable = (invite: PatientInvite | null | undefined): invite is PatientInvite =>
+    Boolean(invite && invite.status === 'pending' && invite.expires_at && Date.parse(invite.expires_at) > Date.now());
+  const unavailable = { error: 'Prepará un enlace vigente antes de mandarlo por mail.' };
+
+  if ('userId' in auth && isSupabaseEnabled()) {
+    const actor = await sb.sbGetActor(auth.userId);
+    if (!actor || actor.role !== 'nutri' || !canManagePatients(actor, 'create_patient')) {
+      return c.json({ error: 'Prohibido' }, 403);
+    }
+    const invite = await sb.sbGetInvite(inviteId.data);
+    if (!invite || invite.nutritionist_id !== actor.nutritionistId) return c.json({ error: 'Prohibido' }, 403);
+    if (!usable(invite)) return c.json(unavailable, 409);
+    const admin = privilegedDb();
+    const brevo = brevoConfig();
+    if (brevo) {
+      const [{ data: patient }, { data: pro }] = await Promise.all([
+        admin.from('patients').select('full_name').eq('id', invite.patient_id).maybeSingle(),
+        admin.from('nutritionists').select('display_name').eq('id', invite.nutritionist_id).maybeSingle(),
+      ]);
+      return c.json(await emailPatientInviteWithBrevo({ ...invite, patientName: String(patient?.full_name ?? ''), nutritionistName: String(pro?.display_name ?? '') }, siteUrl(), {
+        generate: async (type, email, redirectTo) => {
+          const { data, error } = type === 'invite'
+            ? await admin.auth.admin.generateLink({ type: 'invite', email, options: { redirectTo, data: { role: PUBLIC_SIGNUP_ROLE } } })
+            : await admin.auth.admin.generateLink({ type: 'magiclink', email, options: { redirectTo } });
+          return { link: data?.properties?.action_link ?? null, error };
+        },
+        send: (message) => sendBrevoEmail(brevo, message),
+      }));
+    }
+    return c.json(await emailPatientInvite(invite, siteUrl(), {
+      invite: (email, options) => admin.auth.admin.inviteUserByEmail(email, options),
+      magicLink: (email, redirectTo) => admin.auth.signInWithOtp({ email, options: { shouldCreateUser: false, emailRedirectTo: redirectTo } }),
+    }));
+  }
+
+  if (!usable(getInviteById(inviteId.data))) return c.json(unavailable, 409);
+  return c.json({ delivery: 'demo' });
 });
 
 app.post('/api/invites/:id/revoke', async (c) => {

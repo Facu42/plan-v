@@ -17,17 +17,28 @@ import { planVersionIngredients, queueIngredientCovers, type IngredientSource } 
 import { getRecipeCard } from '../recipes/presentation.js';
 import type { RecipeCard } from '../../src/types/recipes.js';
 import {
+  hasMealTimes,
+  planMealTimesSchema,
   planSlotKey,
   planSlotLabel,
   planReviewSnapshot,
   type MealPlanDraftInput,
   type PatientMealPlan,
   type PlanItemView,
+  type PlanMealTimes,
   type PlanRecipeDetail,
   type PlanSlot,
   type PlanVersionView,
   type ProfessionalMealPlan,
 } from '../../src/types/plans.js';
+import {
+  planChangeSummary,
+  planItemLabel,
+  planTakesEffectNow,
+  type PlanChangeItem,
+  type PlanHandover,
+} from '../../src/types/plan-handover.js';
+import { argentinaToday } from '../progress/derive.js';
 import { menuTargetSchema, proposedRecipeSchema, recipeNutritionSchema, resolveRecipeNutrition, retainProposalEstimate, type MenuNutritionTarget, type ProposedRecipe } from '../../src/types/ai-nutrition.js';
 import { summarizeMenuNutrition } from '../ai/menu-nutrition.js';
 import { getTarget } from '../targets/repository.js';
@@ -54,11 +65,12 @@ type MemItem = {
 };
 type MemVersion = {
   guidance?: PlanGuidance;
+  meal_times?: PlanMealTimes;
   id: string;
   revision: string;
   meal_plan_id: string;
   version: number;
-  status: 'draft' | 'published' | 'archived';
+  status: 'draft' | 'published' | 'scheduled' | 'archived';
   period_start: string;
   period_end: string;
   published_at: string | null;
@@ -76,11 +88,21 @@ type MemPlan = {
 const plans = new Map<string, MemPlan>();
 const versions = new Map<string, MemVersion>();
 const items = new Map<string, MemItem>();
+type MemHandover = {
+  version_id: string;
+  meal_plan_id: string;
+  previous_version_id: string | null;
+  starts_on: string;
+  changes: PlanHandover['changes'];
+  seen_at: string | null;
+};
+const handovers = new Map<string, MemHandover>();
 
 export function resetMealPlanMemory() {
   plans.clear();
   versions.clear();
   items.clear();
+  handovers.clear();
 }
 
 /** Confirming a patient target changes only the professional draft. Frozen published copies remain intact. */
@@ -189,7 +211,7 @@ function asItem(row: Record<string, unknown>, snapshot?: PlanRecipeDetail | null
 
 function asVersion(row: Record<string, unknown>): PlanVersionView {
   const status = row.status;
-  if (status !== 'draft' && status !== 'published' && status !== 'archived') {
+  if (status !== 'draft' && status !== 'published' && status !== 'scheduled' && status !== 'archived') {
     throw new CareError(503, 'No se pudo confirmar el guardado. Reintentá sin cerrar el formulario.');
   }
   const rawItems = Array.isArray(row.items) ? row.items : [];
@@ -205,6 +227,7 @@ function asVersion(row: Record<string, unknown>): PlanVersionView {
     published_at: row.published_at ? String(row.published_at) : null,
     items: preparedItems,
     ...(row.guidance ? { guidance: planGuidanceSchema.parse(row.guidance) } : {}),
+    ...(row.meal_times ? { meal_times: planMealTimesSchema.parse(row.meal_times) } : {}),
     ...(target ? { nutrition_target: target } : {}),
     ...(target || preparedItems.some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(preparedItems, target, row) } : {}),
   };
@@ -218,6 +241,7 @@ export function asProfessional(row: Record<string, unknown>): ProfessionalMealPl
     created_at: String(row.created_at),
     current: asVersion(row.current as Record<string, unknown>),
     published: row.published ? asVersion(row.published as Record<string, unknown>) : null,
+    scheduled: row.scheduled ? asVersion(row.scheduled as Record<string, unknown>) : null,
   };
 }
 
@@ -234,6 +258,7 @@ function asPatient(row: Record<string, unknown>): PatientMealPlan {
     published_at: String(row.published_at),
     items: preparedItems,
     ...(row.guidance ? { guidance: planGuidanceSchema.parse(row.guidance) } : {}),
+    ...(row.meal_times ? { meal_times: planMealTimesSchema.parse(row.meal_times) } : {}),
     ...(target ? { nutrition_target: target } : {}),
     ...(target || preparedItems.some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(preparedItems, target, row) } : {}),
   };
@@ -282,16 +307,54 @@ function memVersionView(row: MemVersion): PlanVersionView {
     published_at: row.published_at,
     items: preparedItems,
     ...(row.guidance ? { guidance: structuredClone(row.guidance) } : {}),
+    ...(row.meal_times ? { meal_times: { ...row.meal_times } } : {}),
     ...(row.nutrition_target ? { nutrition_target: row.nutrition_target } : {}),
     ...(row.nutrition_target || preparedItems.some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(preparedItems, row.nutrition_target, row) } : {}),
   };
 }
 
+function comparableItems(list: PlanItemView[]): PlanChangeItem[] {
+  return list.map(item => ({
+    for_date: item.for_date,
+    slot: item.slot,
+    label: planItemLabel(item),
+    public_note: item.public_note ?? '',
+    portions: item.portions,
+  }));
+}
+
+function promoteDueMemory(planId: string) {
+  const today = argentinaToday();
+  const due = planVersions(planId).find(row => row.status === 'scheduled' && row.period_start <= today);
+  if (!due) return;
+  for (const row of planVersions(planId)) if (row.status === 'published') row.status = 'archived';
+  due.status = 'published';
+}
+
+function memHandoverView(planId: string): PlanHandover | null {
+  promoteDueMemory(planId);
+  const list = planVersions(planId);
+  const target = list.find(row => row.status === 'scheduled') ?? list.find(row => row.status === 'published');
+  const row = target ? handovers.get(target.id) : undefined;
+  if (!target || !row) return null;
+  const previous = row.previous_version_id ? versions.get(row.previous_version_id) : undefined;
+  return {
+    version: target.version,
+    previous_version: previous?.version ?? null,
+    starts_on: row.starts_on,
+    waiting: target.status === 'scheduled',
+    seen: row.seen_at != null,
+    changes: row.changes,
+  };
+}
+
 function memProfessional(row: MemPlan): ProfessionalMealPlan {
+  promoteDueMemory(row.id);
   const list = planVersions(row.id);
   const current = list[list.length - 1];
   if (!current) throw new CareError(404, 'Plan no encontrado.');
   const published = list.find((entry) => entry.status === 'published') ?? null;
+  const scheduled = list.find((entry) => entry.status === 'scheduled') ?? null;
   return {
     id: row.id,
     patient_id: row.patient_id,
@@ -299,10 +362,12 @@ function memProfessional(row: MemPlan): ProfessionalMealPlan {
     created_at: row.created_at,
     current: memVersionView(current),
     published: published ? memVersionView(published) : null,
+    scheduled: scheduled ? memVersionView(scheduled) : null,
   };
 }
 
 function memPatient(row: MemPlan): PatientMealPlan | null {
+  promoteDueMemory(row.id);
   const published = planVersions(row.id).find((entry) => entry.status === 'published');
   if (!published || !published.published_at) return null;
   return {
@@ -313,6 +378,7 @@ function memPatient(row: MemPlan): PatientMealPlan | null {
     period_end: published.period_end,
     published_at: published.published_at,
     ...(published.guidance ? { guidance: structuredClone(published.guidance) } : {}),
+    ...(published.meal_times ? { meal_times: { ...published.meal_times } } : {}),
     items: versionItems(published.id),
     ...(published.nutrition_target ? { nutrition_target: published.nutrition_target } : {}),
     ...(published.nutrition_target || versionItems(published.id).some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(versionItems(published.id), published.nutrition_target, published) } : {}),
@@ -413,6 +479,9 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
   }
   target.revision = crypto.randomUUID();
   target.guidance = input.guidance ? structuredClone(input.guidance) : latest?.guidance;
+  // Un objeto vacío borra los horarios; si el pedido no los trae, se conservan los anteriores.
+  const times = input.meal_times ?? latest?.meal_times;
+  target.meal_times = hasMealTimes(times) ? { ...times } : undefined;
   for (const item of prepared) {
     const row: MemItem = { id: crypto.randomUUID(), version_id: target.id, ...item };
     items.set(row.id, row);
@@ -449,6 +518,7 @@ export function forkModelPlanMemory(owner:string,patientId:string,copy:ModelCopy
   const version:MemVersion={id:crypto.randomUUID(),revision:crypto.randomUUID(),meal_plan_id:plan.id,version:(previous?.version??0)+1,status:'draft',period_start:start,period_end:new Date(Date.parse(`${start}T12:00:00Z`)+(copy.plan.days-1)*86400000).toISOString().slice(0,10),published_at:null,created_at:now,...(previous?.nutrition_target?{nutrition_target:structuredClone(previous.nutrition_target)}:{})};
   if(previous?.status==='draft')previous.status='archived';
   if(previous?.guidance) version.guidance = structuredClone(previous.guidance);
+  if(previous?.meal_times) version.meal_times = { ...previous.meal_times };
   plans.set(plan.id,plan);versions.set(version.id,version);
   for(const item of prepared){const row:MemItem={...item,id:crypto.randomUUID(),version_id:version.id};items.set(row.id,row);}
   return memProfessional(plan);
@@ -470,15 +540,73 @@ export async function getMealPlanHistory(owner:string,patientId:string,persisten
   const plan=[...plans.values()].find(p=>p.patient_id===patientId&&p.nutritionist_id===owner);return plan ? planVersions(plan.id).reverse().map(memVersionView) : [];
 }
 
-export async function getPublishedMealPlan(patientId: string, persistent: boolean): Promise<PatientMealPlan | null> {
+function asHandover(value: unknown): PlanHandover | null {
+  if (!value || typeof value !== 'object') return null;
+  const row = value as Record<string, unknown>;
+  const changes = row.changes;
+  if (!changes || typeof changes !== 'object') return null;
+  const summary = changes as Record<string, unknown>;
+  const lines = Array.isArray(summary.lines) ? summary.lines : [];
+  return {
+    version: asNumber(row.version),
+    previous_version: row.previous_version == null ? null : asNumber(row.previous_version),
+    starts_on: String(row.starts_on).slice(0, 10),
+    waiting: Boolean(row.waiting),
+    seen: Boolean(row.seen),
+    changes: {
+      added: asNumber(summary.added),
+      removed: asNumber(summary.removed),
+      changed: asNumber(summary.changed),
+      lines: lines.map(line => {
+        const item = line as Record<string, unknown>;
+        const kind = item.kind;
+        if (kind !== 'added' && kind !== 'removed' && kind !== 'changed') {
+          throw new CareError(503, 'No se pudo confirmar el guardado. Reintentá sin cerrar el formulario.');
+        }
+        return {
+          kind,
+          for_date: String(item.for_date).slice(0, 10),
+          slot: String(item.slot),
+          before: item.before == null ? null : String(item.before),
+          after: item.after == null ? null : String(item.after),
+        };
+      }),
+    },
+  };
+}
+
+export async function readPublishedMealPlan(patientId: string, persistent: boolean): Promise<{ plan: PatientMealPlan | null; handover: PlanHandover | null }> {
   if (!persistent) {
     const plan = [...plans.values()].find((row) => row.patient_id === patientId);
-    return plan ? memPatient(plan) : null;
+    if (!plan) return { plan: null, handover: null };
+    return { plan: memPatient(plan), handover: memHandoverView(plan.id) };
   }
   const { data, error } = await getRequestDb().rpc('list_published_meal_plan', { target_patient: patientId });
   mealPlanDbError(error);
-  if (!data) return null;
-  return asPatient(data as Record<string, unknown>);
+  if (!data) return { plan: null, handover: null };
+  const row = data as Record<string, unknown>;
+  return { plan: asPatient(row), handover: asHandover(row.handover) };
+}
+
+export async function getPublishedMealPlan(patientId: string, persistent: boolean): Promise<PatientMealPlan | null> {
+  return (await readPublishedMealPlan(patientId, persistent)).plan;
+}
+
+export async function markMealPlanHandoverSeen(patientId: string, persistent: boolean): Promise<{ plan: PatientMealPlan | null; handover: PlanHandover | null }> {
+  if (!persistent) {
+    const plan = [...plans.values()].find((row) => row.patient_id === patientId);
+    if (!plan) return { plan: null, handover: null };
+    const view = memHandoverView(plan.id);
+    const version = view ? planVersions(plan.id).find(row => row.version === view.version) : undefined;
+    const row = version ? handovers.get(version.id) : undefined;
+    if (row && !row.seen_at) row.seen_at = new Date().toISOString();
+    return { plan: memPatient(plan), handover: memHandoverView(plan.id) };
+  }
+  const { data, error } = await getRequestDb().rpc('mark_meal_plan_handover_seen', { target_patient: patientId });
+  mealPlanDbError(error);
+  if (!data) return { plan: null, handover: null };
+  const row = data as Record<string, unknown>;
+  return { plan: asPatient(row), handover: asHandover(row.handover) };
 }
 
 export async function saveMealPlanDraft(
@@ -530,14 +658,30 @@ export async function publishMealPlan(
       period_end: version.period_end,
       items: versionItems(version.id),
     }, health));
-    if (version.status === 'published') return memProfessional(plan);
+    if (version.status === 'published' || version.status === 'scheduled') return memProfessional(plan);
     if (version.status !== 'draft') throw new CareError(409, 'El plan publicado no se puede sobrescribir. Publicá una versión nueva.');
-    for (const row of planVersions(planId)) {
-      if (row.status === 'published') row.status = 'archived';
+    promoteDueMemory(planId);
+    const live = planVersions(planId).find(row => row.status === 'published');
+    const takesNow = planTakesEffectNow(version.period_start, argentinaToday(), Boolean(live));
+    if (!takesNow) {
+      for (const row of planVersions(planId)) if (row.status === 'scheduled') row.status = 'archived';
+      version.status = 'scheduled';
+    } else {
+      for (const row of planVersions(planId)) if (row.status === 'published' || row.status === 'scheduled') row.status = 'archived';
+      version.status = 'published';
     }
-    version.status = 'published';
     version.published_at = new Date().toISOString();
-    try { await enqueuePlanMemoryCovers(plan, version); } catch (error) { logProviderFailure('menu-cover-enqueue', error); }
+    handovers.set(version.id, {
+      version_id: version.id,
+      meal_plan_id: plan.id,
+      previous_version_id: live?.id ?? null,
+      starts_on: version.period_start,
+      changes: planChangeSummary(live ? comparableItems(versionItems(live.id)) : null, comparableItems(versionItems(version.id))),
+      seen_at: null,
+    });
+    if (version.status === 'published') {
+      try { await enqueuePlanMemoryCovers(plan, version); } catch (error) { logProviderFailure('menu-cover-enqueue', error); }
+    }
     return memProfessional(plan);
   }
   if (!expectedSnapshot) throw new CareError(409, 'Revisá la copia guardada antes de publicar.');

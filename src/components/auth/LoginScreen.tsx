@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { pendingInviteIdFromLocation } from '../../context/invite-link';
-import { Icon, Mark } from '../shared/Icon';
 import { PRIVACY_URL, TERMS_URL } from '../../legal';
+import { EntryButton, EntryChrome, EntryField, EntrySegments } from './entry-shell';
 
 export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; onToggleTheme: () => void }) {
   const { signIn, signUp, enterDemoMode, loading, demoAllowed, googleAvailable, signInWithGoogle } = useAuth();
@@ -59,114 +59,109 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
     }
   };
 
+  const backToLogin = () => { setSignupOk(false); setRecoverOk(false); setMode('login'); };
+
   if (loading) {
+    return <EntryChrome title="Cargando sesión…" role="status" />;
+  }
+
+  if (signupOk || recoverOk) {
     return (
-      <div className="auth-screen">
-        <div className="auth-card"><p>Cargando sesión…</p></div>
-      </div>
+      <EntryChrome
+        title="Revisá tu email"
+        subtitle={signupOk
+          ? `Te enviamos un link de confirmación. Después de confirmarlo podés iniciar sesión${professional ? ' y tu consultorio queda listo para invitar pacientes' : invitePending ? ' y aceptar la invitación' : ''}.`
+          : 'Si hay una cuenta con ese email, vas a recibir un mensaje para recuperarla.'}
+        darkMode={darkMode}
+        onToggleTheme={onToggleTheme}
+      >
+        <div className="entry-actions">
+          <EntryButton label="Ir a iniciar sesión" onClick={backToLogin} />
+        </div>
+      </EntryChrome>
     );
   }
 
+  const title = mode === 'login' ? 'Iniciar sesión' : mode === 'signup' ? 'Crear cuenta' : 'Recuperar cuenta';
+  const subtitle = mode === 'login'
+    ? (invitePending
+      ? 'Entrá con el email invitado. La cuenta tiene que estar verificada para vincularte.'
+      : 'Accedé a tu panel o app de paciente.')
+    : mode === 'signup'
+      ? (professional
+        ? 'Creás tu consultorio y después invitás a tus pacientes con un enlace.'
+        : 'Si tu nutricionista te mandó un enlace, abrilo primero para quedar vinculada.')
+      : 'Ingresá el email de la cuenta. No vamos a decir si el correo existe o no.';
+
   return (
-    <div className="auth-screen">
-      <div className="auth-card">
-        <div className="auth-head">
-          <div className="auth-brand"><Mark /><div><strong>Plan V</strong><small>Nutrición</small></div></div>
-          <button className="round-button theme-toggle" type="button" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} aria-pressed={darkMode} onClick={onToggleTheme}>
-            <Icon name={darkMode ? 'sun' : 'moon'} size={18} />
-          </button>
-        </div>
+    <EntryChrome title={title} subtitle={subtitle} darkMode={darkMode} onToggleTheme={onToggleTheme}>
+      {mode !== 'recover' && (
+        <EntrySegments label="Entrar o crear cuenta" options={[
+          { id: 'login', label: 'Entrar', active: mode === 'login', onClick: () => setMode('login') },
+          { id: 'signup', label: 'Registro', active: mode === 'signup', onClick: () => setMode('signup') },
+        ]} />
+      )}
 
-        {signupOk ? (
-          <>
-            <h1>Revisá tu email</h1>
-            <p>Te enviamos un link de confirmación. Después de confirmarlo podés iniciar sesión{professional ? ' y tu consultorio queda listo para invitar pacientes' : invitePending ? ' y aceptar la invitación' : ''}.</p>
-            <button type="button" className="primary-button wide" onClick={() => { setSignupOk(false); setMode('login'); }}>Ir a iniciar sesión</button>
-          </>
-        ) : recoverOk ? (
-          <>
-            <h1>Revisá tu email</h1>
-            <p>Si hay una cuenta con ese email, vas a recibir un mensaje para recuperarla.</p>
-            <button type="button" className="primary-button wide" onClick={() => { setRecoverOk(false); setMode('login'); }}>Ir a iniciar sesión</button>
-          </>
-        ) : (
-          <>
-            <h1>{mode === 'login' ? 'Iniciar sesión' : mode === 'signup' ? 'Crear cuenta' : 'Recuperar cuenta'}</h1>
-            <p className="auth-sub">
-              {mode === 'login' && (invitePending
-                ? 'Entrá con el email invitado. La cuenta tiene que estar verificada para vincularte.'
-                : 'Accedé a tu panel o app de paciente.')}
-              {mode === 'signup' && (professional
-                ? 'Creás tu consultorio y después invitás a tus pacientes con un enlace.'
-                : 'Si tu nutricionista te mandó un enlace, abrilo primero para quedar vinculada.')}
-              {mode === 'recover' && 'Ingresá el email de la cuenta. No vamos a decir si el correo existe o no.'}
-            </p>
+      {mode === 'signup' && (
+        <EntrySegments label="Tipo de cuenta" options={[
+          { id: 'patient', label: 'Soy paciente', active: !professional, onClick: () => setProfessional(false) },
+          { id: 'pro', label: 'Soy nutricionista', active: professional, onClick: () => setProfessional(true) },
+        ]} />
+      )}
 
-            {mode !== 'recover' && (
-              <div className="auth-tabs">
-                <button type="button" className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')}>Entrar</button>
-                <button type="button" className={mode === 'signup' ? 'active' : ''} onClick={() => setMode('signup')}>Registro</button>
-              </div>
-            )}
-
-            {mode === 'signup' && (
-              <>
-                <div className="auth-tabs" role="group" aria-label="Tipo de cuenta">
-                  <button type="button" className={professional ? '' : 'active'} aria-pressed={!professional} onClick={() => setProfessional(false)}>Soy paciente</button>
-                  <button type="button" className={professional ? 'active' : ''} aria-pressed={professional} onClick={() => setProfessional(true)}>Soy nutricionista</button>
-                </div>
-                <input className="text-input" aria-label={professional ? 'Nombre profesional' : 'Nombre completo'} autoComplete="name" placeholder={professional ? 'Nombre profesional' : 'Nombre completo'} value={fullName} onChange={(e) => setFullName(e.target.value)} />
-              </>
-            )}
-
-            <input className="text-input" type="email" aria-label="Correo electrónico" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
-            {mode !== 'recover' && (
-              <input className="text-input" type="password" aria-label="Contraseña" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
-            )}
-
-            {mode === 'signup' && (
-              <label className="auth-consent">
-                <input type="checkbox" checked={acceptedLegal} onChange={(e) => setAcceptedLegal(e.target.checked)} />
-                <span>Leí y acepto los <a href={TERMS_URL} target="_blank" rel="noreferrer">términos y condiciones</a> y la <a href={PRIVACY_URL} target="_blank" rel="noreferrer">política de privacidad</a>, y doy mi consentimiento expreso para que se traten mis datos de salud, incluso en servidores fuera de Argentina, para los fines que ahí se explican.</span>
-              </label>
-            )}
-
-            {error && <p className="form-error">{error}</p>}
-
-            <button type="button" className="primary-button wide" disabled={busy || !email || (mode !== 'recover' && !password) || (mode === 'signup' && professional && fullName.trim().length < 2) || (mode === 'signup' && !acceptedLegal)} onClick={submit}>
-              {busy ? 'Un momento…' : mode === 'login' ? 'Entrar' : mode === 'signup' ? 'Crear cuenta' : 'Enviar recuperación'}
-            </button>
-
-            {googleAvailable && mode !== 'recover' && (
-              <>
-                <div className="auth-divider"><span>o</span></div>
-                <button type="button" className="google-button wide" disabled={busy || (mode === 'signup' && !acceptedLegal)} onClick={google}>
-                  <GoogleMark />
-                  <span>{mode === 'signup' ? 'Registrarme con Google' : 'Continuar con Google'}</span>
-                </button>
-                {mode === 'signup' && !acceptedLegal && <p className="auth-foot">Para registrarte con Google, primero marcá la casilla de arriba.</p>}
-              </>
-            )}
-
-            {mode === 'login' && (
-              <button type="button" className="soft-button wide" onClick={() => { setError(null); setMode('recover'); }}>Olvidé mi contraseña</button>
-            )}
-            {mode === 'recover' && (
-              <button type="button" className="soft-button wide" onClick={() => { setError(null); setMode('login'); }}>Volver a iniciar sesión</button>
-            )}
-          </>
+      <div className="entry-fields">
+        {mode === 'signup' && (
+          <EntryField label={professional ? 'Nombre profesional' : 'Nombre completo'} autoComplete="name" placeholder={professional ? 'Nombre profesional' : 'Nombre completo'} value={fullName} onChange={(event) => setFullName(event.target.value)} />
         )}
-
-        {demoAllowed && (
-          <>
-            <div className="auth-divider"><span>o</span></div>
-            <button type="button" className="soft-button wide" onClick={enterDemoMode}>Continuar en modo demo</button>
-            <p className="auth-foot">Modo demo usa datos locales sin persistencia. No está disponible en un build de producción.</p>
-          </>
+        <EntryField label="Correo electrónico" type="email" placeholder="Email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" />
+        {mode !== 'recover' && (
+          <EntryField label="Contraseña" type="password" placeholder="Contraseña" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
         )}
-        <p className="auth-foot auth-legal"><a href={PRIVACY_URL} target="_blank" rel="noreferrer">Privacidad</a> · <a href={TERMS_URL} target="_blank" rel="noreferrer">Términos</a></p>
       </div>
-    </div>
+
+      {mode === 'signup' && (
+        <label className="entry-check">
+          <input type="checkbox" checked={acceptedLegal} onChange={(event) => setAcceptedLegal(event.target.checked)} />
+          <span>Leí y acepto los <a href={TERMS_URL} target="_blank" rel="noreferrer">términos y condiciones</a> y la <a href={PRIVACY_URL} target="_blank" rel="noreferrer">política de privacidad</a>, y doy mi consentimiento expreso para que se traten mis datos de salud, incluso en servidores fuera de Argentina, para los fines que ahí se explican.</span>
+        </label>
+      )}
+
+      {error && <p className="entry-error" role="alert">{error}</p>}
+
+      <div className="entry-actions">
+        <EntryButton
+          label={busy ? 'Un momento…' : mode === 'login' ? 'Entrar' : mode === 'signup' ? 'Crear cuenta' : 'Enviar recuperación'}
+          disabled={busy || !email || (mode !== 'recover' && !password) || (mode === 'signup' && professional && fullName.trim().length < 2) || (mode === 'signup' && !acceptedLegal)}
+          onClick={() => { void submit(); }}
+        />
+        {mode === 'login' && (
+          <EntryButton tone="secondary" label="Olvidé mi contraseña" onClick={() => { setError(null); setMode('recover'); }} />
+        )}
+        {mode === 'recover' && (
+          <EntryButton tone="secondary" label="Volver a iniciar sesión" onClick={() => { setError(null); setMode('login'); }} />
+        )}
+      </div>
+
+      {googleAvailable && mode !== 'recover' && (
+        <>
+          <div className="entry-divider"><span>o</span></div>
+          <button type="button" className="entry-google" disabled={busy || (mode === 'signup' && !acceptedLegal)} onClick={() => { void google(); }}>
+            <GoogleMark />
+            <span>{mode === 'signup' ? 'Registrarme con Google' : 'Continuar con Google'}</span>
+          </button>
+          {mode === 'signup' && !acceptedLegal && <p className="entry-note">Para registrarte con Google, primero marcá la casilla de arriba.</p>}
+        </>
+      )}
+
+      {demoAllowed && (
+        <>
+          <div className="entry-divider"><span>o</span></div>
+          <EntryButton tone="secondary" label="Continuar en modo demo" onClick={enterDemoMode} />
+          <p className="entry-note">Modo demo usa datos locales sin persistencia. No está disponible en un build de producción.</p>
+        </>
+      )}
+      <p className="entry-legal"><a href={PRIVACY_URL} target="_blank" rel="noreferrer">Privacidad</a> · <a href={TERMS_URL} target="_blank" rel="noreferrer">Términos</a></p>
+    </EntryChrome>
   );
 }
 

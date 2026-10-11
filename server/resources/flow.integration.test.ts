@@ -58,6 +58,20 @@ describe('PV-36 recursos editoriales y favoritos unificados', () => {
     expect((await library()).body.library.articles.find(r=>r.id===draft.id)?.sections[0].body).toBe('Contenido original del consultorio.');
   });
 
+  it('despublicar oculta el recurso a la paciente y sólo lo hace la profesional', async () => {
+    const input = { slug: 'recurso-despublicar-' + randomUUID(), title: 'Guía para despublicar', summary: 'Material revisado', category: 'Organización', sections: [{ title: 'Uno', body: 'Contenido.' }] };
+    const draft = (await (await post('/api/resources?audience=pro', input)).json()).resource;
+    expect(draft.author_name).toBe('Tu nutricionista');
+    await post('/api/resources/' + draft.id + '/publish?audience=pro', {});
+    await post('/api/resources/assign', { resource_id: draft.slug, patient_ids: [patient] });
+    expect((await library()).body.library.articles.some(r => r.id === draft.id)).toBe(true);
+    expect((await post('/api/resources/' + draft.id + '/unpublish', {})).status).toBe(403);
+    const hidden = await post('/api/resources/' + draft.id + '/unpublish?audience=pro', {});
+    expect(hidden.status).toBe(200);
+    expect((await hidden.json()).resource.published).toBe(false);
+    expect((await library()).body.library.articles.some(r => r.id === draft.id)).toBe(false);
+  });
+
   it('muestra guías operativas, oculta artículos clínicos sin asignar y aísla a la otra paciente', async () => {
     const mine = await library();
     expect(mine.status).toBe(200);

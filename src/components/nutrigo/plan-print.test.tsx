@@ -85,3 +85,9 @@ it('incluye ambas categorías revisadas en la impresión y escapa textos', () =>
  const html=planPrintHtml({...copy,version:{...version,guidance:{recommendations:['Recomendación ficticia <script>'],avoid:['Indicación ficticia para evitar']}}});
  expect(html).toContain('Recomendaciones');expect(html).toContain('Alimentos a evitar');expect(html).toContain('Recomendación ficticia &lt;script&gt;');expect(html).toContain('Indicación ficticia para evitar');expect(html).not.toContain('<script>');
 });
+
+it('imprime la hora de cada comida cuando el plan la indica', () => {
+  const html = planPrintHtml({ ...copy, version: { ...version, meal_times: { Almuerzo: '13:00' } } });
+  expect(html).toContain('Almuerzo · 13:00');
+  expect(planPrintHtml(copy)).not.toContain('Almuerzo ·');
+});

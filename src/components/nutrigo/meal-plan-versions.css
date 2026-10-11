@@ -64,9 +64,11 @@
 .plan-editor-day-layout{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:16px;align-items:start}
 .plan-editor-meals{min-width:0;display:grid;gap:12px}
 .plan-editor-meal{padding:14px;border:1px solid var(--nv-border);border-radius:12px;background:var(--nv-card)}
-.plan-editor-meal>header{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.plan-editor-meal>header{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center}
 .plan-editor-meal h3,.plan-day-analysis h3{margin:0;font-size:16px}
 .plan-editor-meal>header button{padding:8px;border:1px solid var(--nv-border);border-radius:8px;background:var(--nv-bg);color:var(--nv-ink);font:inherit;font-size:12px;cursor:pointer}
+.plan-editor-time{display:flex;align-items:center;gap:6px;margin-left:auto;font-size:12px}
+.plan-editor-time input{padding:6px;border:1px solid var(--nv-border);border-radius:8px;background:var(--nv-bg);color:var(--nv-ink);font:inherit;font-size:12px}
 .plan-editor-meal .meal-plan-item-row{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px 0;border-top:1px solid var(--nv-border)}
 .plan-editor-meal .meal-plan-item-row input,.plan-editor-meal .meal-plan-item-row select{min-width:0;width:100%;box-sizing:border-box}
 .plan-editor-meal .meal-plan-recipe-choice,.plan-editor-meal .meal-plan-item-row>fieldset{grid-column:1/-1}
@@ -78,6 +80,12 @@
 .plan-day-analysis small{display:block;font-size:11px;line-height:1.5;color:var(--nv-ink-soft)}
 .plan-day-analysis .plan-day-estimate{color:var(--nv-ink);background:var(--nv-gold-soft);padding:8px;border-radius:8px}
 @media(prefers-reduced-motion:reduce){.plan-editor-days button{transition:none}}
+.plan-analysis-distribution{margin:12px 0}
+.plan-analysis-subtitle{margin:16px 0 0;font-size:14px}
+.plan-analysis-distribution h4{margin:0 0 8px;font-size:14px}
+.plan-analysis-distribution ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.plan-analysis-distribution li{display:grid;grid-template-columns:1fr auto;gap:4px 8px;padding:10px;background:var(--nv-card);border-radius:8px;font-size:12px}
+.plan-analysis-distribution li i{grid-column:1/-1;display:block;height:6px;border-radius:999px;background:var(--nv-forest)}
 .plan-analysis-switch{display:flex;gap:6px;margin-bottom:12px}
 .plan-analysis-switch button{font:inherit;font-size:12px;padding:8px;border:1px solid var(--nv-border);border-radius:8px;background:var(--nv-card);color:var(--nv-ink);cursor:pointer}
 .plan-analysis-switch button[aria-pressed=true]{background:var(--nv-accent-soft);border-color:var(--nv-accent)}

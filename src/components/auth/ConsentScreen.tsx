@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { PRIVACY_URL, TERMS_URL } from '../../legal';
-import { Mark } from '../shared/Icon';
+import { EntryButton, EntryChrome } from './entry-shell';
 
 // Aparece una sola vez a quien entró sin haber aceptado la versión vigente de los
 // términos (por ejemplo, alguien que entró con Google sin pasar por el registro).
@@ -20,18 +20,16 @@ export function ConsentScreen() {
   };
 
   return (
-      <div className="loading-card consent-card">
-        <Mark />
-        <p className="eyebrow">Plan V</p>
-        <h2>Antes de seguir</h2>
-        <p>Para usar Plan V necesitamos que aceptes cómo cuidamos tus datos.</p>
-        <label className="auth-consent">
-          <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} />
-          <span>Leí y acepto los <a href={TERMS_URL} target="_blank" rel="noreferrer">términos y condiciones</a> y la <a href={PRIVACY_URL} target="_blank" rel="noreferrer">política de privacidad</a>, y doy mi consentimiento expreso para que se traten mis datos de salud, incluso en servidores fuera de Argentina, para los fines que ahí se explican.</span>
-        </label>
-        {error && <p className="form-error">{error}</p>}
-        <button type="button" className="primary-button" disabled={!accepted || busy} onClick={accept}>{busy ? 'Un momento…' : 'Aceptar y seguir'}</button>
-        <button type="button" className="soft-button" onClick={() => signOut()}>Salir</button>
+    <EntryChrome title="Antes de seguir" subtitle="Para usar Plan V necesitamos que aceptes cómo cuidamos tus datos.">
+      <label className="entry-check">
+        <input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} />
+        <span>Leí y acepto los <a href={TERMS_URL} target="_blank" rel="noreferrer">términos y condiciones</a> y la <a href={PRIVACY_URL} target="_blank" rel="noreferrer">política de privacidad</a>, y doy mi consentimiento expreso para que se traten mis datos de salud, incluso en servidores fuera de Argentina, para los fines que ahí se explican.</span>
+      </label>
+      {error && <p className="entry-error" role="alert">{error}</p>}
+      <div className="entry-actions">
+        <EntryButton label={busy ? 'Un momento…' : 'Aceptar y seguir'} disabled={!accepted || busy} onClick={() => { void accept(); }} />
+        <EntryButton tone="secondary" label="Salir" onClick={() => { void signOut(); }} />
       </div>
+    </EntryChrome>
   );
 }
