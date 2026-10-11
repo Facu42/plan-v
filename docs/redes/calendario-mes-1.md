@@ -105,6 +105,8 @@ Formato 1080x1350. Colores y plantillas según `guia-marca-redes.md`: si la diap
 >
 > Probala gratis desde el link de la bio. O escribime PLAN por mensaje y te ayudo a cargar tu primera paciente.
 >
+> Para colegas. Si sos paciente de Verónica: tus datos son tuyos y de tu nutricionista, y la app no cambia cómo te atiende.
+>
 > Las capturas son del modo demo, con datos inventados.
 >
 > Plan V — Verónica Trenti | @planv.nutricion

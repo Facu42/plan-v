@@ -26,8 +26,8 @@ cara de Verónica ya está. El riesgo es que unas se aburran con lo de las otras
    celular" (siempre con datos inventados). Los textos de esas piezas los escribe Verónica
    o se redactan con su OK.
 4. **Las pacientes no ven datos de nadie.** Todo lo de Plan V sale en modo demo con datos
-   inventados, igual que antes. Además, en la presentación (carrusel C1 y reel R1) se aclara
-   a las pacientes que sus datos son de ellas y de su nutricionista, y que la app no cambia
+   inventados, igual que antes. Además, el pie de la presentación (carrusel C1, ya agregado) y, cuando vuelvan los videos, el reel R1
+   aclaran a las pacientes que sus datos son de ellas y de su nutricionista, y que la app no cambia
    cómo las atiende Verónica.
 5. **Verónica aclara su interés.** Que la cuenta promocione un producto del que es cofundadora
    se dice de entrada ("Creé Plan V con mi equipo"). Ya estaba pendiente consultar al colegio

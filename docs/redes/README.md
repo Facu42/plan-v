@@ -21,8 +21,9 @@ textos y las ideas de crecimiento están en la estrategia (sección 8).
 ## En una línea
 
 Le hablamos a la nutricionista que trabaja por su cuenta en Argentina con el mensaje
-**"Abrí el día sabiendo qué hacer con cada paciente"**, desde una cuenta nueva de la app con
-Verónica como cara, con 2 reels, 1 carrusel e historias por semana. La meta del primer mes
+**"Abrí el día sabiendo qué hacer con cada paciente"**, desde la cuenta de Verónica,
+@planv.nutricion (decisión de Facundo del 2026-10-11), con 3 piezas por semana para colegas
+más 1 para pacientes. La meta del primer mes
 es que entre 5 y 10 nutricionistas inviten a su primera paciente.
 
 ## Lo que falta de Facundo
