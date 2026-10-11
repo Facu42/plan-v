@@ -34,3 +34,9 @@ export async function waitForRecipeProposal(initial: AiJobView, options: {
     polls += 1;
   }
 }
+
+/** After a reload, the newest recipe proposal still waiting or not yet opened can be resumed without generating another. */
+export function recoverableRecipeJob(jobs: readonly AiJobView[]): AiJobView | null {
+  const open = jobs.filter(job => job.job_type === 'recipe_draft' && !job.applied_at && (job.status === 'queued' || job.status === 'running' || job.status === 'succeeded'));
+  return [...open].sort((a, b) => b.created_at.localeCompare(a.created_at))[0] ?? null;
+}

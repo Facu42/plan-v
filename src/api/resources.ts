@@ -6,6 +6,7 @@ export const resourcesApi = {
   save: (input: Pick<EditorialResource, 'slug' | 'title' | 'summary' | 'category' | 'sections'>) =>
     request<{resource: EditorialResource}>('/api/resources?audience=pro', {method:'POST', body:JSON.stringify(input)}),
   publish: (id: string) => request<{resource: EditorialResource}>(`/api/resources/${encodeURIComponent(id)}/publish?audience=pro`, {method:'POST'}),
+  unpublish: (id: string) => request<{resource: EditorialResource}>(`/api/resources/${encodeURIComponent(id)}/unpublish?audience=pro`, {method:'POST'}),
   library: (patientId: string, query = '', professional = false, signal?: AbortSignal) =>
     request<{ library: PatientLibraryView; source: string }>(
       `/api/patients/${encodeURIComponent(patientId)}/library?q=${encodeURIComponent(query)}${professional ? '&audience=pro' : ''}`,

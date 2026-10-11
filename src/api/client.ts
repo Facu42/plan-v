@@ -9,6 +9,7 @@ import type { BillingBoard, PatientFee, PatientLedger, PatientLedgerView, Paymen
 
 export { ApiError } from './error';
 
+export type InviteEmailDelivery = 'invite' | 'magic_link' | 'demo';
 export type PatientInvite = {
   id: string;
   patient_id: string;
@@ -89,6 +90,9 @@ export const api = {
 
   sendInvite: (inviteId: string) =>
     request<{ invite: PatientInvite; source: string }>(`/api/invites/${inviteId}/send`, { method: 'POST' }),
+
+  emailInvite: (inviteId: string) =>
+    request<{ delivery: InviteEmailDelivery }>(`/api/invites/${inviteId}/email`, { method: 'POST' }),
 
   patientInvite: (patientId: string) =>
     request<{ invite: PatientInvite; source: string }>(`/api/patients/${patientId}/invite`, { method: 'POST' }),

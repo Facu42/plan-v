@@ -75,7 +75,7 @@ export function PlanHistory({
               {v.items.map((item) => (
                 <section key={item.id}>
                   <h4>{item.for_date}</h4>
-                  <PlanPublishedItem item={item} />
+                  <PlanPublishedItem item={item} times={v.meal_times} />
                 </section>
               ))}
             </details>

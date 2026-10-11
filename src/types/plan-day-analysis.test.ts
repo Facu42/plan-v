@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { analyzePlanDay, analyzePlanWeek, copyPlanDay, editorPlanDates } from './plan-day-analysis';
+import { analyzePlanDay, analyzePlanWeek, copyPlanDay, editorPlanDates, macroEnergyShare, momentEnergy } from './plan-day-analysis';
 import type { PlanRecipeDetail } from './plans';
 
 const recipe = { title: 'Prueba', version: 1, yield_portions: 2, ingredients: [], steps: [], nutrient_source: 'fuente de prueba', card: { macros: { kcal: 100, protein_g: 2, carbs_g: 3, fat_g: 4 } } } as unknown as PlanRecipeDetail;
@@ -68,5 +68,27 @@ describe('días accesibles del editor', () => {
     expect(editorPlanDates('2026-02-30', '2026-03-01', [])).toEqual([]);
     expect(editorPlanDates('2026-10-09', '2026-10-07', ['2026-10-07'])).toEqual(['2026-10-07']);
     expect(editorPlanDates('2026-01-01', '2099-01-01', [])).toEqual([]);
+  });
+});
+
+describe('distribución del día', () => {
+  it('reparte la energía por momento con su porcentaje del día', () => {
+    const rows = momentEnergy([{ slot: 'Desayuno', lines: [{ portions: '1', recipe }] }, { slot: 'Almuerzo', lines: [{ portions: '3', recipe }] }, { slot: 'Cena', lines: [] }]);
+    expect(rows).toEqual([
+      { slot: 'Desayuno', kcal: 100, share: 25, complete: true },
+      { slot: 'Almuerzo', kcal: 300, share: 75, complete: true },
+    ]);
+  });
+  it('no calcula porcentajes si un momento no tiene la energía completa', () => {
+    const rows = momentEnergy([{ slot: 'Desayuno', lines: [{ portions: '1', recipe }] }, { slot: 'Almuerzo', lines: [{ portions: '1' }] }]);
+    expect(rows).toEqual([
+      { slot: 'Desayuno', kcal: 100, share: null, complete: true },
+      { slot: 'Almuerzo', kcal: null, share: null, complete: false },
+    ]);
+  });
+  it('calcula qué parte de la energía aporta cada macronutriente', () => {
+    const day = analyzePlanDay([{ portions: '1', recipe: { ...recipe, card: { macros: { kcal: 400, protein_g: 25, carbs_g: 50, fat_g: 11.1 } } } as PlanRecipeDetail }]);
+    expect(macroEnergyShare(day.nutrients)).toEqual({ protein: 25, carbs: 50, fat: 25 });
+    expect(macroEnergyShare(analyzePlanDay([{ portions: '1' }]).nutrients)).toBeNull();
   });
 });

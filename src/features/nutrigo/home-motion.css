@@ -23,6 +23,10 @@
   .mcp-nutrigo [data-name="Card Statistic - Dashboard"] [data-name="Icon"] { transition: transform .3s cubic-bezier(.2, .8, .2, 1); }
   .mcp-nutrigo :is([data-name="Card Recommended Menu"], [data-name="Card Recommended Exercise"]) img { transition: transform .5s cubic-bezier(.2, .8, .2, 1); }
 
+  /* Las barras de pasos, ejercicio y macros se llenan desde la izquierda al aparecer. */
+  @keyframes mcp-fill { from { transform: scaleX(0); } to { transform: none; } }
+  .mcp-nutrigo [data-name="Progress Bar"] { transform-origin: left center; animation: mcp-fill .7s cubic-bezier(.2, .8, .2, 1) .15s backwards; }
+
   @media (hover: hover) {
     .mcp-nutrigo :is([data-name="Card Statistic - Dashboard"]:hover, [data-name="Widget Weight Data"]:hover, [data-name="Widget Calories Intake"]:hover,
       [data-name="Card Recommended Menu"]:hover, [data-name="Card Recommended Exercise"]:hover) {
