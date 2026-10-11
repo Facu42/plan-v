@@ -6,13 +6,14 @@ export function filterShowroomPatients(patients: readonly Patient[], query = '')
   return patients.filter((p) => !p.archived_at && normalize(`${p.name} ${p.goal}`).includes(normalize(query)));
 }
 
+// countPending: la paciente suma lo que carga al instante (estimado); la revisión profesional corrige después.
 // Explicit allowlist: the preview must not display professional notes in patient mode.
-export function buildShowroomPatient(patient: Patient, now = new Date()) {
+export function buildShowroomPatient(patient: Patient, now = new Date(), countPending = false) {
   const meals = patient.meal_logs.filter((log) => log.patient_id === patient.id);
   const habits = patient.habit_logs.filter((log) => log.patient_id === patient.id);
   const journey = buildJourneySummary({ meal_logs: meals, habit_logs: habits }, now);
   const todayIds = new Set(journey.days[journey.days.length - 1]?.mealLogIds ?? []);
-  const nutritionLogs = meals.filter((log) => todayIds.has(log.id) && log.status !== 'pending_review' && log.macros != null);
+  const nutritionLogs = meals.filter((log) => todayIds.has(log.id) && (countPending || log.status !== 'pending_review') && log.macros != null);
   const macros = nutritionLogs.reduce((sum, log) => ({
     kcal: sum.kcal + (log.macros?.kcal ?? 0),
     protein_g: sum.protein_g + (log.macros?.protein_g ?? 0),

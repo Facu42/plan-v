@@ -51,7 +51,7 @@ async function control(selector) {
 async function login(actor,path='/') {
   await B('goto',origin+path);await B('wait','input[placeholder="Email"]');
   await B('fill','input[placeholder="Email"]',actor.email);await B('fill','input[placeholder="Contraseña"]',actor.password);
-  await B('click','button.primary-button');
+  await control('.entry-actions > button:first-child');
   await until('!document.querySelector("input[placeholder=Email]")');
 }
 async function logout() {

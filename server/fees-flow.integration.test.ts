@@ -63,6 +63,18 @@ describe('cobranzas en modo demo', () => {
     expect((await removed.json() as { ledger: PatientLedger }).ledger.fee).toBeNull();
   });
 
+  it('cambiar el día de vencimiento no genera una segunda cuota en el mismo mes', async () => {
+    const thisMonth = localBillingDate().slice(0, 7);
+    const [year, month] = thisMonth.split('-').map(Number);
+    const twoMonthsAgo = new Date(Date.UTC(year, month - 3, 1)).toISOString().slice(0, 10);
+    await send('/api/patients/pat-lucia/fee', 'PUT', { fee: { amount: 25000, first_due_on: twoMonthsAgo } });
+    const moved = await send('/api/patients/pat-lucia/fee', 'PUT', { fee: { amount: 25000, first_due_on: `${thisMonth}-15` } });
+    const { ledger } = await moved.json() as { ledger: PatientLedger };
+    const months = ledger.charges.map((charge) => charge.due_on.slice(0, 7));
+    expect(months.filter((value) => value === thisMonth)).toHaveLength(1);
+    expect(new Set(months).size).toBe(months.length);
+  });
+
   it('la paciente no ve el tablero ni cambia la cuota', async () => {
     expect((await send('/api/billing?audience=patient', 'GET')).status).toBe(403);
     expect((await send('/api/patients/pat-lucia/fee?audience=patient', 'PUT', { fee: null })).status).toBe(403);

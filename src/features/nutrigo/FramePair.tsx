@@ -5,7 +5,7 @@ import { planVBrandBinding } from './branding';
 import { patientNavBinding } from './patient-navigation';
 import type { ShowroomPage } from '../../components/nutrigo/ShowroomPanels';
 import { PatientMenuSheet } from './PatientMenuSheet';
-import { accountBannerBinding, feeBannerBinding, useFeeNotice } from './fee-notice';
+import { accountBannerBinding, feeBannerBinding, insertMobileFeeBanner, useFeeNotice } from './fee-notice';
 import { installCardBinding } from './install-card';
 import { useInstallOffer } from '../../pwa/install-offer';
 import { NoticesSheet, useAccountArchived, usePatientNotices } from './patient-notices';
@@ -24,12 +24,21 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
   const [menuNav,setMenuNav] = useState<SourceNode|null>(null);
   const feeNotice = useFeeNotice();
   const accountArchived = useAccountArchived();
+  const [promo, setPromo] = useState<SourceNode | null>(null);
   const notices = usePatientNotices();
   const [noticesOpen,setNoticesOpen] = useState(false);
   const unreadMessages = unread || notices.unreadMessages;
   const iconButtons = useMemo(()=>source?mapIconButtons(source):null,[source]);
   const { offer: installOffer, install } = useInstallOffer();
   useEffect(() => { const media = window.matchMedia('(max-width: 799px)'); const update=()=>setMobile(media.matches); media.addEventListener('change',update); return ()=>media.removeEventListener('change',update); },[]);
+  const desktopId = nodes[0];
+  useEffect(() => {
+    if (!mobile || !feeNotice) { setPromo(null); return; }
+    let active = true;
+    const load = frames[`./source/${desktopId.replace(':','-')}.json`];
+    load?.().then(module => { if (active) setPromo(findSource(module.default, node => nodeName(node) === 'Promotional Banner') ?? null); }).catch(() => { if (active) setPromo(null); });
+    return () => { active = false; };
+  }, [mobile, feeNotice, desktopId]);
   const id = nodes[mobile ? 1 : 0];
   useEffect(() => { let active=true; setSource(null);setLoadError(false); const load=frames[`./source/${id.replace(':','-')}.json`]; if (!load) {setLoadError(true);return;} load().then(module=>{if(active)setSource(module.default);}).catch(()=>{if(active)setLoadError(true);});return()=>{active=false;}; },[id,attempt]);
   // El menú del celular usa el «Menu Nav» original del marco de escritorio de esta misma pantalla (con su ítem activo).
@@ -66,8 +75,9 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
     }
     return undefined;
   };
+  const shown = source && mobile && feeNotice && promo ? insertMobileFeeBanner(source, promo) : source;
   return <div className="mcp-nutrigo" data-figma-frame={id}>
-    {loadError?<div className="mcp-state" role="alert"><p>No se pudo cargar esta pantalla.</p><button onClick={()=>setAttempt(v=>v+1)}>Reintentar</button></div>:source?<SourceView source={source} resolve={common} translate={translateSource}/>:<p className="mcp-state" role="status">Cargando pantalla…</p>}
+    {loadError?<div className="mcp-state" role="alert"><p>No se pudo cargar esta pantalla.</p><button onClick={()=>setAttempt(v=>v+1)}>Reintentar</button></div>:shown?<SourceView source={shown} resolve={common} translate={translateSource}/>:<p className="mcp-state" role="status">Cargando pantalla…</p>}
     {children}
     {noticesOpen&&<NoticesSheet items={notices.items} onNavigate={onNavigate} onClose={()=>setNoticesOpen(false)}/>}
     {menu&&<PatientMenuSheet patientName={patientName} unread={unreadMessages} feeNotice={feeNotice} installOffer={installOffer} onInstall={install} noticeCount={notices.items.length} onOpenNotices={()=>setNoticesOpen(true)} menuNav={menuNav} onNavigate={onNavigate} onSignOut={onSignOut} onClose={()=>setMenu(false)}/>}

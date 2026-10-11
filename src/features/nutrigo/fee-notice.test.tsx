@@ -2,7 +2,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import inicio from './source/12-792.json';
 import { findSource, nodeName, sourceText, SourceView, type SourceNode } from './SourceView';
-import { accountBannerBinding, feeBannerBinding, noticeFromLedger } from './fee-notice';
+import { accountBannerBinding, feeBannerBinding, insertMobileFeeBanner, noticeFromLedger } from './fee-notice';
+import mobileHome from './source/427-14405.json';
 import type { PatientLedger } from '../../types/fees';
 
 const ledger = (charges: PatientLedger['charges']): PatientLedger => ({ patient_id: 'pat-1', fee: null, charges, payments: [] });
@@ -46,5 +47,34 @@ describe('aviso de cuota en el banner del archivo', () => {
   it('sin aviso, el banner queda como en el archivo', () => {
     expect(feeBannerBinding(banner, null, vi.fn())).toBeUndefined();
     expect(feeBannerBinding(button, null, vi.fn())).toBeUndefined();
+  });
+});
+
+describe('aviso de cuota en el celular', () => {
+  const mobile = mobileHome as SourceNode;
+  const promo = findSource(source, node => nodeName(node) === 'Promotional Banner')!;
+
+  it('el marco del celular no trae la tarjeta amarilla', () => {
+    expect(findSource(mobile, node => nodeName(node) === 'Promotional Banner')).toBeUndefined();
+    expect(insertMobileFeeBanner(mobile, null)).toBe(mobile);
+  });
+
+  it('con aviso, muestra la tarjeta del archivo y deja las cuatro medidas del inicio', () => {
+    const navigate = vi.fn();
+    const tree = insertMobileFeeBanner(mobile, promo);
+    const again = insertMobileFeeBanner(tree, promo);
+    expect(again.children).toEqual(tree.children);
+    const html = renderToStaticMarkup(
+      <SourceView source={tree} resolve={node => feeBannerBinding(node, 'Tenés una cuota pendiente de $45.000', navigate)} translate={text => text} />,
+    );
+    expect(html).toContain('data-name="Promotional Banner"');
+    expect(html).toContain('Tenés una cuota pendiente de $45.000');
+    expect(html).toContain('Ver pagos');
+    expect(html.match(/data-name="Card Statistic - Dashboard"/g)).toHaveLength(4);
+    expect(html).toContain('bg-[#ffcb65]');
+    expect(html).toContain('bg-[#c2e66e]');
+    const buttonNode = findSource(tree, node => nodeName(node) === 'Button' && sourceText(node) === 'Claim Now!')!;
+    feeBannerBinding(buttonNode, 'aviso', navigate)?.onClick?.();
+    expect(navigate).toHaveBeenCalledWith('pagos');
   });
 });

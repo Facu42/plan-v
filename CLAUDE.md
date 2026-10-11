@@ -1,5 +1,7 @@
 # Plan V · reglas permanentes para Claude Code
 
+Antes de cambiar código, leé y seguí `.claude/skills/regression-guard/SKILL.md` y poné el informe del paso 10 en el PR.
+
 Empezá por `AGENTS.md`, `docs/traspaso-estado-proyecto.md` y `docs/agentes/reglas-plan-v.md`.
 Este archivo suma las reglas de diseño que pidió Facundo el 2026-10-09; no reemplaza a las otras.
 Respuestas a Facundo en español simple, sin jerga ni nombres de variables.

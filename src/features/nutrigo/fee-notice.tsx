@@ -14,6 +14,26 @@ export const noticeFromLedger = (ledger: PatientLedger, today?: string): string 
  * Con aviso, el banner amarillo del archivo cuenta la cuota y su botón lleva a Pagos.
  * Sin aviso devuelve undefined y el banner queda como en el archivo.
  */
+/**
+ * El celular no trae la tarjeta amarilla del archivo. Si hay aviso, se copia esa tarjeta
+ * (nodo «Promotional Banner» del escritorio de la misma pantalla) arriba del contenido.
+ * Sin aviso no se agrega nada: el marco del celular queda como está.
+ */
+export function insertMobileFeeBanner(root: SourceNode, banner: SourceNode | null): SourceNode {
+  if (!banner) return root;
+  let placed = false;
+  const walk = (node: SourceNode): SourceNode => {
+    if (placed) return node;
+    if (nodeName(node) === 'Content') {
+      placed = true;
+      if (node.children.some((child) => typeof child === 'object' && nodeName(child) === 'Promotional Banner')) return node;
+      return { ...node, children: [banner, ...node.children] };
+    }
+    return { ...node, children: node.children.map((child) => (typeof child === 'object' ? walk(child) : child)) };
+  };
+  return walk(root);
+}
+
 export function feeBannerBinding(node: SourceNode, notice: string | null, onNavigate: (page: ShowroomPage) => void): SourceBinding | undefined {
   if (!notice) return undefined;
   const text = sourceText(node);

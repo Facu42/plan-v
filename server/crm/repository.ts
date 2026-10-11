@@ -11,6 +11,11 @@ import { asAiJob, listAiJobs } from '../ai-jobs/repository.js';
 import { getBoard } from '../fees/repository.js';
 import { DEMO_NUTRITIONIST_ID, getStore } from '../store.js';
 import { CONSENT_CATALOG } from '../intake/consent.js';
+import { getPatientProgress } from '../progress/repository.js';
+import { progressWindows } from '../progress/derive.js';
+import { summarizePatient, totalsFor } from './progress-global.js';
+import type { ProgressPeriodDays } from '../../src/types/progress.js';
+import type { GlobalPatientProgress, GlobalProgressResponse } from '../../src/types/progress-global.js';
 
 type Row = Record<string, unknown>;
 export type WorkPatient = { id: string; name: string; user_id?: string | null; archived_at?: string | null; deactivated_at?: string | null; anonymized_at?: string | null };
@@ -212,4 +217,24 @@ export function buildWorkItems(scope: WorkScope, snapshot: WorkSnapshot, now = n
     add('record', record.id, record.patient_id, 'pending_review', record.created_at, `Revisar registro · ${CARE_LABELS[record.kind] ?? 'Registro'}`);
   }
   return items;
+}
+
+/** Resumen de progreso de toda la cartera: reutiliza el cálculo por paciente (mismo permiso y mismas reglas de consentimiento). */
+export async function loadGlobalProgress(scope: WorkScope, days: ProgressPeriodDays, now = new Date()): Promise<GlobalProgressResponse> {
+  const patients = activePatients(scope);
+  const rows: GlobalPatientProgress[] = [];
+  const unavailable: GlobalProgressResponse['unavailable'] = [];
+  let windows = progressWindows(days, now);
+  for (let index = 0; index < patients.length; index += 5) {
+    const batch = patients.slice(index, index + 5);
+    const results = await Promise.allSettled(batch.map(patient => getPatientProgress(patient.id, days, scope.persistent)));
+    results.forEach((result, position) => {
+      const patient = batch[position]!;
+      if (result.status === 'rejected') { unavailable.push({ patient_id: patient.id, patient_name: patient.name }); return; }
+      windows = { current: result.value.current, previous: result.value.previous };
+      rows.push(summarizePatient(patient.id, patient.name, result.value));
+    });
+  }
+  rows.sort((a, b) => a.patient_name.localeCompare(b.patient_name, 'es-AR'));
+  return { period_days: days, ...windows, patients: rows, totals: totalsFor(rows, unavailable.length), unavailable, source: scope.persistent ? 'supabase' : 'memory' };
 }

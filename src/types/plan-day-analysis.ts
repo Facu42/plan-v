@@ -73,3 +73,24 @@ export function copyPlanDay<T extends { for_date: string; slot: string }>(items:
   if (items.length + originals.length * destinations.length > 42) throw new Error('La copia supera el límite de 42 indicaciones del plan. Elegí menos días.');
   return [...items, ...destinations.flatMap(for_date => originals.map(item => ({ ...structuredClone(item), for_date })))];
 }
+
+type AnalyzedNutrient = { key: string; total: number | null };
+/** Energy per meal moment; shares only when every listed moment has complete energy. */
+export function momentEnergy(moments: readonly { slot: string; lines: readonly DayAnalysisLine[] }[]) {
+  const rows = moments.filter(moment => moment.lines.length).map(moment => {
+    const kcal = analyzePlanDay(moment.lines).nutrients.find(nutrient => nutrient.key === 'kcal')?.total ?? null;
+    return { slot: moment.slot, kcal, complete: kcal != null };
+  });
+  const day = rows.every(row => row.complete) ? rows.reduce((sum, row) => sum + row.kcal!, 0) : 0;
+  return rows.map(row => ({ slot: row.slot, kcal: row.kcal, share: day > 0 ? Math.round(row.kcal! / day * 100) : null, complete: row.complete }));
+}
+
+/** Share of energy from protein, carbs and fat (4/4/9 kcal per gram). */
+export function macroEnergyShare(nutrients: readonly AnalyzedNutrient[]) {
+  const grams = (key: string) => nutrients.find(nutrient => nutrient.key === key)?.total ?? null;
+  const protein = grams('protein'), carbs = grams('carbs'), fat = grams('fat');
+  if (protein == null || carbs == null || fat == null) return null;
+  const total = protein * 4 + carbs * 4 + fat * 9;
+  if (total <= 0) return null;
+  return { protein: Math.round(protein * 4 / total * 100), carbs: Math.round(carbs * 4 / total * 100), fat: Math.round(fat * 9 / total * 100) };
+}

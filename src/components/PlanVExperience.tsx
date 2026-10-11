@@ -10,6 +10,7 @@ const CrmDashboard = lazy(() => import('./crm/CrmDashboard').then(({ CrmDashboar
 import { LoginScreen } from './auth/LoginScreen';
 import { PasswordResetScreen } from './auth/PasswordResetScreen';
 import { ConsentScreen } from './auth/ConsentScreen';
+import { EntryStatus } from './auth/entry-shell';
 import { hasCurrentLegalAcceptance } from '../legal';
 import { useAuth } from '../context/AuthContext';
 import { forgetPendingInvite, pendingInviteIdFromLocation, PENDING_INVITE_STORAGE_KEY } from '../context/invite-link';
@@ -93,21 +94,23 @@ export function PlanVExperience() {
 
   if (authLoading) {
     return (
-      <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}>
-        <PwaChrome />
-        <div className="loading-card"><Mark /><p className="eyebrow">Plan V</p><h2>Cargando…</h2></div>
+      <div className={`plan-v-app${darkMode ? ' dark' : ''}`}>
+        <PwaChrome install={false} />
+        <EntryStatus title="Cargando…" />
       </div>
     );
   }
 
-  if (passwordRecovery) return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PasswordResetScreen /></div>;
+  if (passwordRecovery) {
+    return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PwaChrome install={false} /><PasswordResetScreen /></div>;
+  }
 
   if (!session && !demoMode) {
-    return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PwaChrome /><LoginScreen darkMode={darkMode} onToggleTheme={toggleTheme} /></div>;
+    return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PwaChrome install={false} /><LoginScreen darkMode={darkMode} onToggleTheme={toggleTheme} /></div>;
   }
 
   if (session && !legalOk) {
-    return <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}><PwaChrome /><ConsentScreen /></div>;
+    return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PwaChrome install={false} /><ConsentScreen /></div>;
   }
 
   // /admin: pantalla propia del administrador del servicio. La base confirma si la cuenta lo es;
@@ -123,15 +126,13 @@ export function PlanVExperience() {
 
   if (session && !isNutri && !isPatient) {
     return (
-      <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}>
-        <PwaChrome />
-        <div className="loading-card">
-          <Mark />
-          <p className="eyebrow">Plan V</p>
-          <h2>Tu cuenta todavía no está vinculada</h2>
-          <p>Cuando aceptes la invitación de tu nutricionista vas a ver tu plan. No se listan pacientes de otras cuentas.</p>
-          <button type="button" className="primary-button" onClick={() => signOut()}>Cerrar sesión</button>
-        </div>
+      <div className={`plan-v-app${darkMode ? ' dark' : ''}`}>
+        <PwaChrome install={false} />
+        <EntryStatus
+          title="Tu cuenta todavía no está vinculada"
+          subtitle="Cuando aceptes la invitación de tu nutricionista vas a ver tu plan. No se listan pacientes de otras cuentas."
+          action={{ label: 'Cerrar sesión', onClick: () => { void signOut(); } }}
+        />
       </div>
     );
   }
@@ -145,39 +146,32 @@ export function PlanVExperience() {
           ? 'Estamos vinculando tu cuenta con el consultorio…'
           : 'Todavía no hay una ficha vinculada a esta cuenta. Abrí el enlace de invitación o esperá a que tu nutricionista te invite.';
     return (
-      <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}>
-        <PwaChrome />
-        <div className="loading-card">
-          <Mark />
-          <p className="eyebrow">Plan V</p>
-          <h2>Tu cuenta todavía no está vinculada</h2>
-          <p>{waiting}</p>
-          <button type="button" className="primary-button" onClick={() => signOut()}>Cerrar sesión</button>
-        </div>
+      <div className={`plan-v-app${darkMode ? ' dark' : ''}`}>
+        <PwaChrome install={false} />
+        <EntryStatus title="Tu cuenta todavía no está vinculada" subtitle={waiting} action={{ label: 'Cerrar sesión', onClick: () => { void signOut(); } }} />
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}>
-        <PwaChrome />
-        <div className="loading-card"><Mark /><p className="eyebrow">Plan V</p><h2>Cargando datos…</h2></div>
+      <div className={`plan-v-app${darkMode ? ' dark' : ''}`}>
+        <PwaChrome install={false} />
+        <EntryStatus title="Cargando datos…" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className={`plan-v-app loading-screen${darkMode ? ' dark' : ''}`}>
-        <PwaChrome />
-        <div className="loading-card error">
-          <Mark />
-          <p className="eyebrow">Plan V</p>
-          <h2>No pudimos conectar</h2>
-          <p>{friendlyError(error)}</p>
-          {import.meta.env.DEV && <p className="hint">Ejecutá <code>npm run dev</code> (incluye el servidor API).</p>}
-        </div>
+      <div className={`plan-v-app${darkMode ? ' dark' : ''}`}>
+        <PwaChrome install={false} />
+        <EntryStatus
+          title="No pudimos conectar"
+          subtitle={friendlyError(error)}
+          role="alert"
+          hint={import.meta.env.DEV ? <p className="entry-hint">Ejecutá <code>npm run dev</code> (incluye el servidor API).</p> : undefined}
+        />
       </div>
     );
   }

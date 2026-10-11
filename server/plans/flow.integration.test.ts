@@ -140,6 +140,24 @@ describe('PV-19 planes fechados versionados', () => {
     expect(mine.plan.items[0].free_text).toBe('Yogur');
   });
 
+  it('guarda el horario de cada comida, lo conserva al volver a guardar y lo muestra a la paciente', async () => {
+    const input = planDraft({ meal_times: { Desayuno: '08:00', Almuerzo: '13:30' } });
+    const withoutTimes = planDraft({ id: input.id });
+    const first = await (await post(`/api/patients/${patient}/plans`, input)).json();
+    expect(first.plan.current.meal_times).toEqual({ Desayuno: '08:00', Almuerzo: '13:30' });
+    const kept = await (await post(`/api/patients/${patient}/plans`, withoutTimes)).json();
+    expect(kept.plan.current.meal_times).toEqual({ Desayuno: '08:00', Almuerzo: '13:30' });
+    expect((await post(`/api/plans/${input.id}/publish`, { expected_version: 1 })).status).toBe(200);
+    const visible = await (await app.request(`/api/patients/${patient}/plans`)).json();
+    expect(visible.plan.meal_times).toEqual({ Desayuno: '08:00', Almuerzo: '13:30' });
+    const next = await (await post(`/api/patients/${patient}/plans`, withoutTimes)).json();
+    expect(next.plan.current).toMatchObject({ version: 2, meal_times: { Desayuno: '08:00', Almuerzo: '13:30' } });
+    const cleared = await (await post(`/api/patients/${patient}/plans`, { ...input, meal_times: {} })).json();
+    expect(cleared.plan.current.meal_times).toBeUndefined();
+    expect((await post(`/api/patients/${patient}/plans`, { ...input, meal_times: { Cena: '25:00' } })).status).toBe(400);
+    expect((await post(`/api/patients/${patient}/plans`, { ...input, meal_times: { Brunch: '11:00' } })).status).toBe(400);
+  });
+
   it('rechaza receta y texto juntos, receta no publicada y no inventa macros', async () => {
     const recipeId = randomUUID();
     expect((await post('/api/recipes', {
