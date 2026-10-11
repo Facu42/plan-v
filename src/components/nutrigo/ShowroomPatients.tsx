@@ -1,11 +1,19 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { api, type PatientInvite } from '../../api/client';
+import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react';
+import { api, type InviteEmailDelivery, type PatientInvite } from '../../api/client';
+import { careErrorMessage } from '../../api/care';
 import type { Patient, Stage } from '../../types';
 import { filterDirectoryPatients, getPatientDirectoryMetrics, type PatientDirectoryFilter } from '../crm/crm-patients';
 import { Icon } from '../shared/Icon';
-import { NvBadge, NvButton, NvCard, NvProgress, NvState } from './primitives';
+import { NvBadge, NvButton, NvCard, NvState } from './primitives';
 import { hasFullPatientAccess } from '../../billing';
+import { createPatientWithInvitation, invitationReady } from './patient-invite-actions';
 import './showroom-patients.css';
+import { daysAgoText, lastVisit } from './directory-last-visit';
+import { DIRECTORY_COLUMNS, directoryGridTemplate, isColumnVisible, loadDirectoryLayout, saveDirectoryLayout, toggleDirectoryColumn, type DirectoryLayout } from './directory-columns';
+import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
+import { buildBoardRows } from './cobranzas-utils';
+import { formatPesos } from '../../fees';
+import type { BillingBoard } from '../../types/fees';
 
 const STAGE_LABELS: Record<Stage, string> = { ingreso: 'Ingreso', plan: 'Plan', seguimiento: 'Seguimiento', alta: 'Alta' };
 
@@ -14,16 +22,26 @@ export function followFromDirectory(patientId: string) {
 }
 const FILTERS: Array<{ id: PatientDirectoryFilter; label: string }> = [
   { id: 'active', label: 'Activos' },
-  { id: 'attention', label: 'Necesitan atención' },
+  { id: 'attention', label: 'Pendientes de revisión' },
   { id: 'archived', label: 'Archivados' },
 ];
 
 function useDialogKeys(onClose: () => void, busy: boolean) {
+  const latest = useRef({ onClose, busy }); latest.current = { onClose, busy };
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape' && !busy) onClose(); };
+    const opener = document.activeElement as HTMLElement | null;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !latest.current.busy && canLeaveWorkspace()) { event.preventDefault(); latest.current.onClose(); }
+      if (event.key !== 'Tab') return;
+      const dialog = document.querySelector<HTMLElement>('.nv-dialog');
+      const controls = [...(dialog?.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href],[tabindex="0"]') ?? [])].filter((element) => element.getClientRects().length);
+      if (!controls.length) return;
+      const target = event.shiftKey ? controls[controls.length - 1] : controls[0];
+      if ((event.shiftKey && document.activeElement === controls[0]) || (!event.shiftKey && document.activeElement === controls[controls.length - 1])) { event.preventDefault(); target.focus(); }
+    };
     document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [onClose, busy]);
+    return () => { document.removeEventListener('keydown', onKeyDown); if (opener?.isConnected) opener.focus(); };
+  }, []);
 }
 
 export function inviteLink(inviteId: string, origin = typeof window === 'undefined' ? '' : window.location.origin) {
@@ -35,6 +53,12 @@ export function inviteMessage(patientName: string, link: string) {
   return `Hola ${first}, te invito a Plan V para seguir tu plan conmigo. Creá tu cuenta con este enlace: ${link}`;
 }
 
+export function inviteEmailNotice(delivery: InviteEmailDelivery, email: string) {
+  if (delivery === 'demo') return 'En la demostración no se mandan mails reales.';
+  if (delivery === 'magic_link') return `Ya tenía cuenta: le mandamos a ${email} un enlace para entrar y vincularse.`;
+  return `Le mandamos la invitación a ${email}.`;
+}
+
 export function accessLabel(patient: Pick<Patient, 'billing_status' | 'billing_until'>) {
   if (patient.billing_status === 'waived') return 'Acceso sin cargo';
   if (patient.billing_status === 'active') return `Acceso hasta ${patient.billing_until?.split('-').reverse().join('/') ?? ''}`;
@@ -42,24 +66,45 @@ export function accessLabel(patient: Pick<Patient, 'billing_status' | 'billing_u
   return 'Acceso pendiente';
 }
 
-function InviteShare({ name, invite, onClose }: { name: string; invite: PatientInvite; onClose: () => void }) {
-  const link = inviteLink(invite.id);
+export function InviteShare({ name, invite, onClose }: { name: string; invite: PatientInvite; onClose: () => void }) {
+  const [current, setCurrent] = useState(invite);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const lock = useRef(false);
+  const ready = invitationReady(current);
+  const linked = current.status === 'accepted';
+  const link = inviteLink(current.id);
   const [copied, setCopied] = useState(false);
+  const [mailed, setMailed] = useState('');
+  useEffect(() => { setCurrent(invite); setError(''); setCopied(false); setMailed(''); }, [invite.id, invite.updated_at]);
+  const email = async () => {
+    if (lock.current) return; lock.current = true; setBusy(true); setError(''); setMailed('');
+    try { setMailed(inviteEmailNotice((await api.emailInvite(current.id)).delivery, current.email)); }
+    catch (caught) { setError(careErrorMessage(caught)); }
+    finally { lock.current = false; setBusy(false); }
+  };
+  const prepare = async () => {
+    if (lock.current) return; lock.current = true; setBusy(true); setError('');
+    try { const saved = (await api.patientInvite(current.patient_id)).invite; setCurrent(saved); if (saved.status !== 'accepted' && !invitationReady(saved)) setError('El enlace todavía no está habilitado. Reintentá preparar la invitación.'); }
+    catch { setError('La ficha está guardada, pero no pudimos preparar el enlace. Reintentá sin crear otra ficha.'); }
+    finally { lock.current = false; setBusy(false); }
+  };
   const copy = async () => {
+    if (!invitationReady(current)) { setError('La invitación venció. Prepará un enlace vigente antes de compartirlo.'); return; }
     try { await navigator.clipboard.writeText(link); setCopied(true); } catch { setCopied(false); }
   };
   return <div className="nv-directory-notice nv-invite-share" role="status">
-    <Icon name="check" size={15} />
+    <Icon name={ready || linked ? 'check' : 'clock'} size={15} />
     <span>
-      <strong>Invitación lista para {name}</strong>
-      <small>Mandale este enlace: crea su cuenta con {invite.email} y queda vinculada a tu consultorio. Vence en 7 días.</small>
-      <input readOnly value={link} aria-label="Enlace de invitación" onFocus={(event) => event.currentTarget.select()} />
+      <strong>{linked ? `Cuenta vinculada de ${name}` : ready ? `Invitación lista para ${name}` : `Ficha creada para ${name}; falta preparar su acceso`}</strong>
+      {linked ? <small>Esta paciente ya aceptó la invitación. Se recuperó su ficha existente.</small> : ready ? <><small>Mandale este enlace: crea su cuenta con {current.email} y queda vinculada a tu consultorio. Vence el {new Date(current.expires_at!).toLocaleString('es-AR')}.</small><input readOnly value={link} aria-label="Enlace de invitación" onFocus={(event) => event.currentTarget.select()} /></> : <small>El enlace todavía no está habilitado. Podés reintentar sin repetir el alta.</small>}
+      {mailed && <small>{mailed}</small>}
+      {error && <small role="alert">{error}</small>}
     </span>
-    <span className="nv-invite-actions">
-      <NvButton className="nv-soft" onClick={copy}>{copied ? 'Copiado' : 'Copiar enlace'}</NvButton>
-      <a className="nv-button nv-ghost" href={`https://wa.me/?text=${encodeURIComponent(inviteMessage(name, link))}`} target="_blank" rel="noreferrer">WhatsApp</a>
-    </span>
-    <button type="button" onClick={onClose} aria-label="Cerrar aviso">×</button>
+    {!linked && <span className="nv-invite-actions">
+      {ready ? <><NvButton className="nv-soft" onClick={copy}>{copied ? 'Copiado' : 'Copiar enlace'}</NvButton><NvButton className="nv-ghost" disabled={busy} onClick={() => void email()}>{busy ? 'Mandando…' : 'Mandar por mail'}</NvButton><a className="nv-button nv-ghost" href={`https://wa.me/?text=${encodeURIComponent(inviteMessage(name, link))}`} target="_blank" rel="noreferrer">WhatsApp</a></> : <NvButton className="nv-soft" disabled={busy} onClick={() => void prepare()}>{busy ? 'Preparando…' : 'Reintentar preparar invitación'}</NvButton>}
+    </span>}
+    <button type="button" disabled={busy} onClick={() => { if (canLeaveWorkspace()) onClose(); }} aria-label="Cerrar aviso">×</button>
   </div>;
 }
 
@@ -70,32 +115,32 @@ export function ShowroomPatientCreate({ onClose, onCreated }: { onClose: () => v
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const nameInput = useRef<HTMLInputElement>(null);
+  const creationLock = useRef(false);
+  useUnsavedChanges(Boolean(name.trim() || email.trim() || goal.trim()), busy);
   useDialogKeys(onClose, busy);
   useEffect(() => { nameInput.current?.focus(); }, []);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (creationLock.current) return;
+    creationLock.current = true;
     setBusy(true);
     setError('');
     try {
-      const result = await api.createPatient({ name, email, goal });
-      try {
-        result.invite = (await api.sendInvite(result.invite.id)).invite;
-      } catch {
-        // The patient exists even if the one-use window could not start.
-      }
+      const result = await createPatientWithInvitation({ name, email, goal }, { create: api.createPatient, activate: api.sendInvite });
       onCreated(result.patient, result.invite);
     } catch {
+      creationLock.current = false;
       setError('No pudimos crear el alta. Revisá los datos o si el email ya está registrado.');
       setBusy(false);
     }
   };
 
-  return <div className="nv-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !busy && onClose()}>
+  return <div className="nv-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !busy && canLeaveWorkspace() && onClose()}>
     <section className="nv-dialog" role="dialog" aria-modal="true" aria-labelledby="nv-create-title">
       <header className="nv-dialog-head">
         <div><p className="nv-eyebrow">Ingreso</p><h2 id="nv-create-title">Nuevo paciente</h2><p>Creá la ficha inicial. El acceso comienza pendiente hasta que definas la cobranza.</p></div>
-        <button type="button" onClick={onClose} disabled={busy} aria-label="Cerrar">×</button>
+        <button type="button" onClick={() => { if (canLeaveWorkspace()) onClose(); }} disabled={busy} aria-label="Cerrar">×</button>
       </header>
       <form className="nv-dialog-form" onSubmit={submit}>
         <label>Nombre completo<input ref={nameInput} value={name} onChange={(e) => setName(e.target.value)} required minLength={2} maxLength={80} autoComplete="name" /></label>
@@ -104,7 +149,7 @@ export function ShowroomPatientCreate({ onClose, onCreated }: { onClose: () => v
         <p className="nv-dialog-hint"><Icon name="message" size={14} />La invitación es de un uso y vence. En demo no sale un email real.</p>
         {error && <p className="nv-dialog-error" role="alert">{error}</p>}
         <footer className="nv-dialog-actions">
-          <NvButton className="nv-ghost" onClick={onClose} disabled={busy}>Cancelar</NvButton>
+          <NvButton className="nv-ghost" onClick={() => { if (canLeaveWorkspace()) onClose(); }} disabled={busy}>Cancelar</NvButton>
           <NvButton type="submit" disabled={busy}><Icon name={busy ? 'loader' : 'plus'} size={14} className={busy ? 'spin' : ''} />{busy ? 'Creando…' : 'Crear alta'}</NvButton>
         </footer>
       </form>
@@ -124,6 +169,7 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const nameInput = useRef<HTMLInputElement>(null);
+  useUnsavedChanges(name !== patient.name || status !== patient.status || stage !== patient.stage || sensitiveHours !== patient.sensitive_hours || planB !== patient.plan_b || nextFocus !== patient.next_focus || access !== patient.billing_status || accessUntil !== (patient.billing_until ?? ''), busy);
   useDialogKeys(onClose, busy);
   useEffect(() => { nameInput.current?.focus(); }, []);
 
@@ -148,11 +194,11 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
     }
   };
 
-  return <div className="nv-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !busy && onClose()}>
+  return <div className="nv-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !busy && canLeaveWorkspace() && onClose()}>
     <section className="nv-dialog" role="dialog" aria-modal="true" aria-labelledby="nv-edit-title">
       <header className="nv-dialog-head">
         <div><p className="nv-eyebrow">Directorio</p><h2 id="nv-edit-title">Editar ficha de {patient.name}</h2><p>Actualizá los datos operativos del acompañamiento.</p></div>
-        <button type="button" onClick={onClose} disabled={busy} aria-label="Cerrar editor">×</button>
+        <button type="button" onClick={() => { if (canLeaveWorkspace()) onClose(); }} disabled={busy} aria-label="Cerrar editor">×</button>
       </header>
       <form className="nv-dialog-form" onSubmit={submit}>
         <div className="nv-dialog-grid">
@@ -174,7 +220,7 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
         <label>Próximo foco<textarea value={nextFocus} onChange={(e) => setNextFocus(e.target.value)} maxLength={240} rows={2} /></label>
         {error && <p className="nv-dialog-error" role="alert">{error}</p>}
         <footer className="nv-dialog-actions">
-          <NvButton className="nv-ghost" onClick={onClose} disabled={busy}>Cancelar</NvButton>
+          <NvButton className="nv-ghost" onClick={() => { if (canLeaveWorkspace()) onClose(); }} disabled={busy}>Cancelar</NvButton>
           <NvButton type="submit" disabled={busy}>{busy ? 'Guardando…' : 'Guardar cambios'}</NvButton>
         </footer>
       </form>
@@ -182,22 +228,43 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
   </div>;
 }
 
-export function ShowroomPatients({ patients, query, initialFilter = 'active', onChanged, onFollow }: {
+export type DirectoryAction = 'create' | { share: { name: string; invite: PatientInvite } };
+
+export function ShowroomPatients({ patients, query, initialFilter = 'active', initialAction, onActionConsumed, onChanged, onFollow, onRecord, onPlan, onMessage }: {
   patients: Patient[];
   query: string;
   initialFilter?: PatientDirectoryFilter;
+  initialAction?: DirectoryAction | null;
+  onActionConsumed?: () => void;
   onChanged: (patient: Patient) => void;
   onFollow: (id: string) => void;
+  onRecord?: (id: string) => void;
+  onPlan?: (id: string) => void;
+  onMessage?: (id: string) => void;
 }) {
   const [filter, setFilter] = useState<PatientDirectoryFilter>(initialFilter);
   const [creating, setCreating] = useState(false);
+  const [stageFilter, setStageFilter] = useState<Stage | ''>('');
+  const [unlinkedOnly, setUnlinkedOnly] = useState(false);
   const [editing, setEditing] = useState<Patient | null>(null);
   const [archiveConfirmation, setArchiveConfirmation] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [share, setShare] = useState<{ name: string; invite: PatientInvite } | null>(null);
+  const [billing, setBilling] = useState<BillingBoard | null>(null);
+  const [billingError, setBillingError] = useState('');
+  useEffect(() => {
+    let active = true;
+    api.getBillingBoard().then(({ board }) => { if (active) setBilling(board); }).catch(() => { if (active) setBillingError('No pudimos consultar las deudas. Abrí Cobranzas para reintentar.'); });
+    return () => { active = false; };
+  }, []);
+  const [layout, setLayout] = useState<DirectoryLayout>(() => loadDirectoryLayout());
+  const changeLayout = (next: DirectoryLayout) => { setLayout(next); saveDirectoryLayout(next); };
+  const show = (id: (typeof DIRECTORY_COLUMNS)[number]['id']) => isColumnVisible(layout, id);
+  const feeRows = billing ? buildBoardRows(billing) : [];
+  const todayId = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
   const metrics = getPatientDirectoryMetrics(patients);
-  const visible = filterDirectoryPatients(patients, query, filter);
+  const visible = filterDirectoryPatients(patients, query, filter).filter((person) => (!stageFilter || person.stage === stageFilter) && (!unlinkedOnly || person.has_account === false));
 
   const setArchived = async (patient: Patient, archived: boolean) => {
     if (archived && archiveConfirmation !== patient.id) { setArchiveConfirmation(patient.id); return; }
@@ -233,31 +300,56 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', on
     }
   };
 
-  return <>
-    <dl className="nv-directory-summary" aria-label="Resumen del directorio">
-      <div><dt>Pacientes activos</dt><dd>{metrics.active}</dd></div>
-      <div><dt>Necesitan atención</dt><dd>{metrics.attention}</dd></div>
-      <div><dt>Con próxima consulta</dt><dd>{metrics.appointments}</dd></div>
-      <div><dt>Archivados</dt><dd>{metrics.archived}</dd></div>
-    </dl>
-    <NvCard title="Directorio de pacientes" action={<NvButton className="nv-soft" onClick={() => setCreating(true)}><Icon name="plus" size={14} />Nuevo paciente</NvButton>}>
-      <nav className="nv-directory-filters" aria-label="Filtrar pacientes">
+  useEffect(() => {
+    if (!initialAction) return;
+    if (initialAction === 'create') {
+      setCreating(true);
+      onActionConsumed?.();
+      return;
+    }
+    setShare(initialAction.share);
+    onActionConsumed?.();
+  }, [initialAction]);
+
+  return <section className="nv-directory-workspace" aria-label="Gestión de pacientes">
+    <div className="pw-work-filters" aria-label="Filtros de gestión"><label>Etapa<select value={stageFilter} onChange={(event) => setStageFilter(event.target.value as Stage | '')}><option value="">Todas las etapas</option>{(Object.keys(STAGE_LABELS) as Stage[]).map((id) => <option key={id} value={id}>{STAGE_LABELS[id]}</option>)}</select></label><label><span>Invitación</span><select value={unlinkedOnly ? 'pending' : 'all'} onChange={(event) => setUnlinkedOnly(event.target.value === 'pending')}><option value="all">Todas las cuentas</option><option value="pending">Pendientes de vincular</option></select></label></div>
+    {billingError && <p role="alert">{billingError}</p>}
+    <div className="nv-directory-summary" aria-label="Resumen del directorio">
+      <button type="button" className="nv-summary-active" aria-label="Filtrar pacientes activos" aria-pressed={filter==='active'} onClick={()=>setFilter('active')}><span><Icon name="users" size={18}/>Pacientes activos</span><strong>{metrics.active}</strong><small>En tu consultorio</small></button>
+      <button type="button" className="nv-summary-pending" disabled={metrics.attention===null} aria-label="Filtrar pacientes pendientes de revisión" aria-pressed={filter==='attention'} onClick={()=>setFilter('attention')}><span><Icon name="camera" size={18}/>Pendientes de revisión</span><strong>{metrics.attention ?? '—'}</strong><small>Pacientes con registros por revisar</small></button>
+      <div><span><Icon name="calendar" size={18}/>Con próxima consulta</span><strong>{metrics.appointments}</strong><small>Pacientes con turno vigente</small></div>
+      <button type="button" className="nv-summary-archived" aria-label="Filtrar pacientes archivados" aria-pressed={filter==='archived'} onClick={()=>setFilter('archived')}><span><Icon name="history" size={18}/>Archivados</span><strong>{metrics.archived}</strong><small>Consultar o restaurar</small></button>
+    </div>
+    <NvCard className="nv-directory-panel" title="Directorio de pacientes" action={<NvButton className="nv-soft" onClick={() => setCreating(true)}><Icon name="plus" size={14} />Nuevo paciente</NvButton>}>
+      <div className="nv-directory-toolbar"><nav className="nv-directory-filters" aria-label="Filtrar pacientes">
         {FILTERS.map((item) => {
           const count = item.id === 'active' ? metrics.active : item.id === 'attention' ? metrics.attention : metrics.archived;
-          return <button type="button" key={item.id} aria-pressed={filter === item.id} onClick={() => { setFilter(item.id); setArchiveConfirmation(null); }}>{item.label}<span>{count}</span></button>;
+          return <button type="button" key={item.id} disabled={item.id === 'attention' && metrics.attention === null} aria-pressed={filter === item.id} onClick={() => { setFilter(item.id); setArchiveConfirmation(null); }}>{item.label}<span>{count ?? "—"}</span></button>;
         })}
-      </nav>
+      </nav><div className="nv-directory-tools"><details className="nv-directory-columns"><summary>Columnas y densidad</summary><div className="nv-directory-columns-panel"><fieldset><legend>Mostrar columnas</legend>{DIRECTORY_COLUMNS.map((column) => <label key={column.id}><input type="checkbox" checked={show(column.id)} onChange={() => changeLayout(toggleDirectoryColumn(layout, column.id))} />{column.label}</label>)}</fieldset><fieldset><legend>Densidad</legend><label><input type="radio" name="directory-density" checked={layout.density === 'comfortable'} onChange={() => changeLayout({ ...layout, density: 'comfortable' })} />Cómoda</label><label><input type="radio" name="directory-density" checked={layout.density === 'compact'} onChange={() => changeLayout({ ...layout, density: 'compact' })} />Compacta</label></fieldset></div></details><span className="nv-directory-results" role="status">{visible.length} {visible.length===1 ? 'paciente' : 'pacientes'}</span></div></div>
+      {metrics.attention === null && <p role="status">No pudimos cargar todos los resúmenes semanales. Recargá para consultar los pendientes.</p>}
       {share && <InviteShare name={share.name} invite={share.invite} onClose={() => setShare(null)} />}
       {error && <p className="nv-dialog-error" role="alert">{error}</p>}
-      <div className="nv-patient-table nv-directory-table" role="table" aria-label="Pacientes del directorio">
-        <div role="row" className="nv-table-head"><span role="columnheader">Paciente</span><span role="columnheader">Estado</span><span role="columnheader">Próximo foco</span><span role="columnheader">Adherencia</span><span role="columnheader">Acciones</span></div>
+      <div className="nv-directory-scroll"><div className={`nv-patient-table nv-directory-table${layout.density === 'compact' ? ' nv-density-compact' : ''}`} style={{ '--dir-cols': directoryGridTemplate(layout) } as CSSProperties} role="table" aria-label="Pacientes del directorio">
+        <div role="row" className="nv-table-head"><span role="columnheader">Paciente</span>{show('status') && <span role="columnheader">Estado</span>}{show('focus') && <span role="columnheader">Próximo foco</span>}{show('weekly') && <span role="columnheader">Registro semanal</span>}{show('lastVisit') && <span role="columnheader">Última consulta</span>}{show('connection') && <span role="columnheader">Conexión</span>}<span role="columnheader">Acciones</span></div>
         {visible.map((patient) => <div role="row" key={patient.id}>
-          <span role="cell"><span className="nv-avatar">{patient.initials}</span><span><strong>{patient.name}</strong><small>{patient.goal}</small></span></span>
-          <span role="cell"><strong>{patient.status}</strong><small>{STAGE_LABELS[patient.stage]}</small>{!hasFullPatientAccess(patient) && <NvBadge tone="coral">{accessLabel(patient)}</NvBadge>}{patient.has_account === false && <NvBadge tone="gold">Sin cuenta</NvBadge>}</span>
-          <span role="cell"><strong>{patient.next_focus || 'Sin foco cargado'}</strong><small>{patient.appointment?.when ?? 'Sin consulta'}</small></span>
-          <span role="cell"><NvProgress value={patient.adherence_score} label={`Adherencia de ${patient.name}`} /><strong>{patient.adherence_score}%</strong></span>
+          <span role="cell"><span className={`nv-avatar nv-directory-avatar person-${patient.tone}`}>{patient.initials}</span><span><strong>{patient.name}</strong><small>{patient.goal}</small></span></span>
+          {show('status') && <span role="cell"><strong>{patient.status}</strong><small>{STAGE_LABELS[patient.stage]}</small>{!hasFullPatientAccess(patient) && <NvBadge tone="coral">{accessLabel(patient)}</NvBadge>}{patient.has_account === false && <NvBadge tone="gold">Sin cuenta</NvBadge>}{(() => { const fee = feeRows.find((row) => row.patient.patient_id === patient.id)?.summary; return fee && fee.owed > 0 ? <NvBadge tone="coral">Debe {formatPesos(fee.owed)}</NvBadge> : null; })()}</span>}
+          {show('focus') && <span role="cell"><strong>{patient.next_focus || 'Sin foco cargado'}</strong><small>{patient.appointment?.when ?? 'Sin consulta'}</small></span>}
+          {show('weekly') && <span role="cell" className="nv-directory-weekly">{patient.weekly_registration ? <>
+            <strong>{patient.weekly_registration.recorded_days} de 7 días</strong>
+            <small>{patient.weekly_registration.meals_logged} comidas registradas</small>
+            <small>{patient.weekly_registration.water_average===null?'Agua sin registrar':'Promedio: '+patient.weekly_registration.water_average.toLocaleString('es-AR')+' vasos/día registrado'}</small>
+            {patient.weekly_registration.water_average!==null&&<small>{patient.weekly_registration.water_days} días con registro de agua</small>}
+            {patient.weekly_registration.pending_review>0&&<span className="nv-weekly-pending"><Icon name="clock" size={12}/>{patient.weekly_registration.pending_review} por revisar</span>}
+          </> : <small>Resumen no disponible</small>}</span>}
+          {show('lastVisit') && <span role="cell">{(() => { const last = lastVisit(patient.appointment_history, todayId); return last ? <><strong>{daysAgoText(last.daysAgo)}</strong><small>{last.dateId.split('-').reverse().join('/')}</small></> : <small>Sin consultas registradas</small>; })()}</span>}
+          {show('connection') && <span role="cell"><strong>{patient.has_account === false ? 'Sin cuenta' : 'Cuenta vinculada'}</strong><small>{patient.has_account === false ? 'Falta que acepte la invitación' : 'Ya usa la app'}</small></span>}
           <span role="cell" className="nv-directory-actions">
-            {!patient.archived_at && <NvButton className="nv-soft" aria-label={`Ver seguimiento de ${patient.name}`} onClick={() => onFollow(patient.id)}>Ver seguimiento</NvButton>}
+            {!patient.archived_at && onRecord && <NvButton className="nv-soft" aria-label={`Abrir ficha de ${patient.name}`} onClick={() => onRecord(patient.id)}><Icon name="contact" size={14} />Ficha</NvButton>}
+            {!patient.archived_at && onMessage && patient.has_account !== false && <NvButton className="nv-soft" aria-label={`Escribirle a ${patient.name}`} onClick={() => onMessage(patient.id)}><Icon name="message" size={14} />Mensaje</NvButton>}
+            {!patient.archived_at && onPlan && <NvButton className="nv-soft" aria-label={`Abrir plan de ${patient.name}`} onClick={() => onPlan(patient.id)}><Icon name="list" size={14} />Plan</NvButton>}
+            {!patient.archived_at && <NvButton className="nv-soft" aria-label={`Ver seguimiento de ${patient.name}`} onClick={() => onFollow(patient.id)}><Icon name="trend" size={14}/>Seguimiento</NvButton>}
             {!patient.archived_at && patient.has_account === false && <NvButton className="nv-ghost" aria-label={`Invitar a ${patient.name}`} disabled={busyId === patient.id} onClick={() => invite(patient)}><Icon name="message" size={13} />Invitar</NvButton>}
             {!patient.archived_at && <NvButton className="nv-ghost" aria-label={`Editar ficha de ${patient.name}`} onClick={() => setEditing(patient)}><Icon name="edit" size={13} />Editar</NvButton>}
             <NvButton className={`nv-ghost${archiveConfirmation === patient.id ? ' nv-confirm' : ''}`} aria-label={patient.archived_at ? `Restaurar ${patient.name}` : archiveConfirmation === patient.id ? `Confirmar archivo de ${patient.name}` : `Archivar ${patient.name}`} disabled={busyId === patient.id} onClick={() => setArchived(patient, !patient.archived_at)}>
@@ -265,10 +357,10 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', on
             </NvButton>
           </span>
         </div>)}
-      </div>
+      </div></div>
       {!visible.length && <NvState title="Sin coincidencias" description="Probá otra búsqueda o filtro." />}
     </NvCard>
     {creating && <ShowroomPatientCreate onClose={() => setCreating(false)} onCreated={created} />}
     {editing && <ShowroomPatientEdit patient={editing} onClose={() => setEditing(null)} onSaved={(updated) => { onChanged(updated); setEditing(null); }} />}
-  </>;
+  </section>;
 }

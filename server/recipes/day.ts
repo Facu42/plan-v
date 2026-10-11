@@ -1,6 +1,9 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
+import { loadEvalHealth } from '../ai-eval/health.js';
+import { evaluateRecipeDraft } from '../ai-eval/evaluate.js';
 import { getPatient } from '../store.js';
 import type { FoodItem, Macros } from '../../src/types/index.js';
 import type { RecipeDayAssignment } from '../../src/types/recipe-plate.js';
@@ -42,6 +45,10 @@ export async function assignRecipeDay(
     if (!getPatient(input.patient_id)) throw new CareError(404, 'Paciente no encontrado.');
     const published = readPublishedMemory(nutritionistId, recipeId, input.expected_version);
     if (!published) throw new CareError(400, 'Publicá la revisión antes de asignarla a un día.');
+    const health = await loadEvalHealth(input.patient_id, false);
+    const evaluation = evaluateRecipeDraft({ title: published.title, yield_portions: published.yield_portions, steps: published.steps, items: published.ingredients }, health, { requireHealth: true });
+    const blocker = evaluation.blockers[0];
+    if (blocker) throw new CareError(409, blocker.message.replace('antes de publicar', 'antes de asignar'));
     const existing = [...days.values()].find((row) => row.patient_id === input.patient_id && row.for_date === input.for_date && row.slot === input.slot);
     const row: MemDay = {
       id: existing?.id ?? randomUUID(),
@@ -55,6 +62,7 @@ export async function assignRecipeDay(
       yield_portions: published.yield_portions,
       ingredients: published.ingredients,
       card: published.card,
+      ...(published.nutrition ? {nutrition:published.nutrition} : {}),
       registered_meal_id: existing?.registered_meal_id ?? null,
       client_id: existing?.client_id ?? null,
     };
@@ -64,7 +72,7 @@ export async function assignRecipeDay(
   const { data, error } = await getRequestDb().rpc('assign_recipe_day', {
     payload: { recipe_id: recipeId, ...input },
   });
-  recipeDbError(error);
+  recipeDbError(error, 'asignar');
   if (!data) throw new CareError(501, 'Asignar la receta a un día requiere instalar la migración de este módulo.');
   return data as RecipeDayAssignment;
 }
@@ -113,9 +121,10 @@ export async function registerRecipeDay(
       status: macros ? 'succeeded' : 'failed',
       foods,
       macros,
-      confidence: macros ? 1 : 0,
+      nutrition_origin: row.nutrition?.origin === 'ai_estimate' ? 'ai_estimate' : 'declared',
+      confidence: macros ? (row.nutrition?.origin === 'ai_estimate' ? 0.5 : 1) : 0,
       note_for_nutri: macros
-        ? 'Registrada desde la receta asignada. Macros declarados por la nutricionista, no estimados por IA.'
+        ? (row.nutrition?.origin === 'ai_estimate' ? 'Registrada desde la receta asignada. Nutrientes estimados por IA y revisados por la nutricionista.' : 'Registrada desde la receta asignada. Macros declarados por la nutricionista, no estimados por IA.')
         : 'Registrada desde la receta asignada. Sin macros declarados.',
       error_code: macros ? null : 'macros_unavailable',
     }, false);
@@ -130,3 +139,5 @@ export async function registerRecipeDay(
   if (!data) throw new CareError(501, 'Registrar la comida asignada requiere instalar la migración de este módulo.');
   return data as { assignment: RecipeDayAssignment; duplicate: boolean };
 }
+
+registerDemoState('recipes/day', () => ({ days }));

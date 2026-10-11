@@ -1,0 +1,61 @@
+{
+  "before": [
+    {
+      "name": "rls_enabled_no_policy",
+      "count": 16
+    },
+    {
+      "name": "security_definer_view",
+      "count": 2
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "count": 116
+    }
+  ],
+  "after": [
+    {
+      "name": "rls_enabled_no_policy",
+      "count": 17
+    },
+    {
+      "name": "security_definer_view",
+      "count": 2
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "count": 120
+    }
+  ],
+  "delta": [
+    {
+      "category": "rls_enabled_no_policy",
+      "object": "recipe_cover_requests",
+      "url": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+    },
+    {
+      "category": "authenticated_security_definer_function_executable",
+      "object": "claim_ai_job",
+      "arguments": "target_job uuid",
+      "url": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable"
+    },
+    {
+      "category": "authenticated_security_definer_function_executable",
+      "object": "claim_recipe_cover",
+      "arguments": "target_version uuid, retry boolean",
+      "url": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable"
+    },
+    {
+      "category": "authenticated_security_definer_function_executable",
+      "object": "finish_recipe_cover",
+      "arguments": "target_version uuid, claim_token uuid, cover_status text, cover_url text, cover_alt text",
+      "url": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable"
+    },
+    {
+      "category": "authenticated_security_definer_function_executable",
+      "object": "publish_reviewed_meal_plan",
+      "arguments": "target_plan uuid, expected_version integer, expected_snapshot jsonb",
+      "url": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable"
+    }
+  ]
+}

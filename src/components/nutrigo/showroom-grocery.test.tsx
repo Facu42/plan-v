@@ -103,6 +103,7 @@ describe('Lista de compras Nutrigo', () => {
   it('muestra un vacío honesto cuando no existe plan semanal', () => {
     const html = renderToStaticMarkup(<ShowroomGrocery patient={{ ...patient, weekPlan: [] }} />);
     expect(html).toContain('Sin lista para generar');
-    expect(html).not.toContain('Más acciones de la lista');
+    expect(html).toContain('Lista de compras');
+    expect(html).not.toContain('Pollo con vegetales');
   });
 });

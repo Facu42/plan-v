@@ -11,20 +11,23 @@ export function detectInstallPlatform(input: {
   return 'desktop';
 }
 
-export const INSTALL_COPY: Record<Exclude<InstallPlatform, 'standalone'>, { title: string; body: string; action: string }> = {
+export const INSTALL_COPY: Record<Exclude<InstallPlatform, 'standalone'>, { title: string; body: string; card: string; action: string }> = {
   ios: {
     title: 'Agregar a pantalla de inicio',
     body: 'En Safari: tocá Compartir y después Agregar a pantalla de inicio. No uses las instrucciones de Android.',
+    card: 'Para tenerla como app: en Safari tocá Compartir y después Agregar a pantalla de inicio.',
     action: 'Entendido',
   },
   android: {
     title: 'Instalar Plan V',
     body: 'Podés instalar la app en este teléfono. Los datos clínicos no se guardan sin conexión.',
+    card: 'Instalá Plan V en este teléfono y abrila como una app.',
     action: 'Instalar',
   },
   desktop: {
     title: 'Instalar Plan V',
     body: 'En Chrome o Edge podés instalar el consultorio o la app como una ventana propia.',
+    card: 'Instalá Plan V en esta computadora y abrila como una app.',
     action: 'Instalar',
   },
 };

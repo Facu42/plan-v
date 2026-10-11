@@ -1,3 +1,4 @@
+import { useUnsavedChanges, canLeaveWorkspace } from '../nutrigo/unsaved-changes';
 import { useState } from 'react';
 import { api } from '../../api/client';
 import { useAppStore } from '../../store/useAppStore';
@@ -24,6 +25,7 @@ export function MealReviewPanel({ patient, log, onClose }: Props) {
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useUnsavedChanges(JSON.stringify(draft) !== JSON.stringify(createMealReviewDraft(log)), busy);
 
   const updateFood = (index: number, patch: Partial<FoodItem>) => {
     setDraft((current) => ({
@@ -48,6 +50,7 @@ export function MealReviewPanel({ patient, log, onClose }: Props) {
   };
 
   const submit = async (status: 'confirmed' | 'adjusted') => {
+    if (busy) return;
     const payload = status === 'confirmed' ? { status } : buildAdjustedMealPatch(draft);
     if (!payload) {
       setError('Revisá que los alimentos y macros tengan valores válidos.');
@@ -76,7 +79,7 @@ export function MealReviewPanel({ patient, log, onClose }: Props) {
     >
       <div className="review-head">
         <h3 id="meal-review-title">Revisar comida · {log.slot}</h3>
-        <button type="button" onClick={onClose} aria-label="Cerrar" disabled={busy}>×</button>
+        <button type="button" onClick={() => { if (canLeaveWorkspace()) onClose(); }} aria-label="Cerrar" disabled={busy}>×</button>
       </div>
       {log.photo_url && <img src={log.photo_url} alt="Comida de la paciente" className="review-photo" />}
       {log.description && !log.photo_url && <p className="review-desc">“{log.description}”</p>}

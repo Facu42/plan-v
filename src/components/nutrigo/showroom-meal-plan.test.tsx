@@ -33,11 +33,11 @@ describe('Plan semanal profesional en Nutrigo', () => {
     const html = render();
     expect(html).toContain('Plan semanal de Ana Ruiz');
     expect(html).toContain('Paciente del plan');
-    expect(html).toContain('Versiones');
-    expect(html).toContain('Agregar comida');
+    expect(html).toContain('Borrador y publicación');
+    expect(html).toContain('Crear plan');
     expect((html.match(/data-plan-day=/g) ?? [])).toHaveLength(7);
-    expect(html).toContain('Lunes · Desayuno: Yogur con fruta');
-    expect(html).toContain('Miércoles · Cena: Sopa de calabaza');
+    expect(html).not.toContain('Yogur con fruta');
+    expect(html).not.toContain('Sopa de calabaza');
     expect(html).toContain('Agregar Merienda el Lunes');
     // Las herramientas del plan fechado no se apilan en la página: viven detrás de "Versiones".
     expect(html).not.toContain('Guardar borrador');
@@ -50,8 +50,8 @@ describe('Plan semanal profesional en Nutrigo', () => {
 
   it('la búsqueda atenúa celdas sin quitar las siete filas', () => {
     const html = render('sopa');
-    expect(html).toContain('Sopa de calabaza');
+    expect(html).not.toContain('Sopa de calabaza');
     expect((html.match(/data-plan-day=/g) ?? [])).toHaveLength(7);
-    expect(html.match(/data-dim="true"/g)).toHaveLength(2);
+    expect(html.match(/data-dim="true"/g) ?? []).toHaveLength(0);
   });
 });

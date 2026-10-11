@@ -1,3 +1,6 @@
+import { argentinaToday } from './progress/derive.js';
+import type { WeeklyRegistration } from '../src/types/weekly-registration.js';
+import { registerDemoState } from './demo/state.js';
 import { randomUUID } from 'node:crypto';
 import { calculateAdherence } from './adherence.js';
 import { CareError } from './care/errors.js';
@@ -33,6 +36,8 @@ import { markMemoryRead, resetMessageMemory, sendMemoryMessage } from './message
 import { resetAiJobMemory } from './ai-jobs/repository.js';
 import { resetPrivacyMemory } from './privacy/repository.js';
 import { resetShoppingMemory } from './shopping/repository.js';
+import { resetFeesMemory } from './fees/repository.js';
+import { resetServiceMemory } from './admin/repository.js';
 import { enqueueMemoryOutbox, listMemoryMailbox, processMemoryDeliveries, resetOutboxMemory } from './outbox/memory.js';
 import { resetExerciseMemory } from './exercise/memory.js';
 import { resetResourceMemory } from './resources/memory.js';
@@ -75,6 +80,7 @@ export type Macros = {
 export type MealAnalysisStatus = 'pending' | 'succeeded' | 'failed';
 
 export type MealLog = {
+  nutrition_origin?: 'declared' | 'ai_estimate';
   id: string;
   patient_id: string;
   slot: string;
@@ -141,8 +147,11 @@ export type HabitLog = {
   patient_id: string;
   date: string;
   hydration: number;
+  hydration_declared?: boolean;
   energy: string | null;
   sleep_minutes: number | null;
+  /** Pasos del día declarados por la paciente (no se importan de dispositivos). */
+  steps?: number | null;
 };
 
 export type ActivityLog = {
@@ -164,6 +173,7 @@ export type ResourceAssignment = {
 };
 
 export type Patient = {
+  weekly_registration?: WeeklyRegistration | null;
   id: string;
   name: string;
   initials: string;
@@ -175,6 +185,7 @@ export type Patient = {
   billing_status: BillingStatus;
   billing_until: string | null;
   has_account?: boolean;
+  created_at?: string;
   stage: Stage;
   goal: string;
   goal_status?: GoalStatus;
@@ -190,6 +201,7 @@ export type Patient = {
   hydration: number;
   energy: string | null;
   sleep_minutes: number | null;
+  steps?: number | null;
   appointment: {
     when: string;
     duration: number;
@@ -275,6 +287,7 @@ function seedPatients(): Patient[] {
   return [
     {
       id: 'pat-sofia',
+      created_at: daysAgo(75),
       name: 'Sofía R.',
       initials: 'SR',
       tone: 'peach',
@@ -372,6 +385,7 @@ function seedPatients(): Patient[] {
     },
     {
       id: 'pat-marina',
+      created_at: daysAgo(20),
       name: 'Marina C.',
       initials: 'MC',
       tone: 'lilac',
@@ -441,6 +455,7 @@ function seedPatients(): Patient[] {
     },
     {
       id: 'pat-lucia',
+      created_at: daysAgo(4),
       name: 'Lucía F.',
       initials: 'LF',
       tone: 'mint',
@@ -661,6 +676,7 @@ export function createPatient(input: { name: string; email: string; goal: string
     billing_status: 'pending',
     billing_until: null,
     has_account: false,
+    created_at: now(),
     stage: 'ingreso',
     goal: input.goal.trim(),
     goal_status: 'active',
@@ -795,6 +811,8 @@ export function resetStore(): void {
   resetAiJobMemory();
   resetPrivacyMemory();
   resetShoppingMemory();
+  resetFeesMemory();
+  resetServiceMemory();
   resetOutboxMemory();
   resetExerciseMemory();
   resetResourceMemory();
@@ -1062,19 +1080,21 @@ export function recalculateAdherence(id: string): Patient | undefined {
   return updatePatient(id, { adherence_score: score, adherence_why: why });
 }
 
-export function upsertHabitLog(id: string, patch: { hydration?: number; energy?: string | null; sleep_minutes?: number }): Patient | undefined {
+export function upsertHabitLog(id: string, patch: { hydration?: number; energy?: string | null; sleep_minutes?: number; steps?: number }): Patient | undefined {
   const patient = getPatient(id);
   if (!patient) return undefined;
 
-  const today = localDateId(new Date());
+  const today = argentinaToday(new Date());
+  const declaredPatch = { ...patch, ...(patch.hydration !== undefined ? { hydration_declared: true } : {}) };
   const habit_logs = patient.habit_logs.some((h) => h.date === today)
-    ? patient.habit_logs.map((h) => (h.date === today ? { ...h, ...patch } : h))
-    : [{ id: randomUUID(), patient_id: id, date: today, hydration: 0, energy: null, sleep_minutes: null, ...patch }, ...patient.habit_logs];
+    ? patient.habit_logs.map((h) => (h.date === today ? { ...h, ...declaredPatch } : h))
+    : [{ id: randomUUID(), patient_id: id, date: today, hydration: 0, energy: null, sleep_minutes: null, ...declaredPatch }, ...patient.habit_logs];
 
   const snapshot: Partial<Patient> = { habit_logs };
   if (patch.hydration !== undefined) snapshot.hydration = patch.hydration;
   if (patch.energy !== undefined) snapshot.energy = patch.energy;
   if (patch.sleep_minutes !== undefined) snapshot.sleep_minutes = patch.sleep_minutes;
+  if (patch.steps !== undefined) snapshot.steps = patch.steps;
 
   updatePatient(id, snapshot);
   return recalculateAdherence(id);
@@ -1287,3 +1307,5 @@ export function computeShoppingList(patient: Patient): string[] {
   for (const meal of patient.todayPlan) items.add(meal.title);
   return [...items];
 }
+
+registerDemoState('store', () => ({ store }));

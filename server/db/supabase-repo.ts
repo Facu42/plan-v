@@ -1,3 +1,4 @@
+import { argentinaToday } from '../progress/derive.js';
 import type { Brief, MealLog, Message, Patient } from '../../src/types/index.ts';
 import { signMealPhotos } from '../care/meal-photos.js';
 import { resolveBillingStatus } from '../../src/billing.ts';
@@ -7,6 +8,7 @@ import type { ListPage } from '../pagination.ts';
 import { getRequestDb, privilegedDb } from './supabase-client.ts';
 import { listThreadMessagesPersist } from '../messages/repository.js';
 import { listPatientAppointmentPersist } from '../appointments/repository.js';
+import { appointmentHasNotEnded, appointmentReadSince } from '../appointment-ops.js';
 import { writeOpsLog } from '../ops/log.js';
 import {
   appointmentColumns,
@@ -48,15 +50,14 @@ const REMINDER_ENUM_TO_LABEL: Record<string, string> = Object.fromEntries(
 
 // weekday del contrato: 0 = Lunes … 6 = Domingo, con fecha local (nunca UTC).
 export function menuWeekdayIndex(date: Date): number {
-  return (date.getDay() + 6) % 7;
+  return (tzParts(date).weekday + 6) % 7;
 }
 
-// YYYY-MM-DD del calendario local; nunca toISOString (el rollover UTC excluye días).
+// YYYY-MM-DD del calendario de Argentina (PATIENT_TIMEZONE), no el de la máquina que corre el servidor:
+// Railway corre en UTC y entre las 21:00 y las 23:59 de Argentina ya sería el día siguiente.
 export function localDateId(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  const { year, month, day } = tzParts(date);
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
 // ============================================================
@@ -127,8 +128,8 @@ export function timelineAtLabel(isoDate: string, now = new Date()): string {
   const todayId = localDateId(now);
   const dateId = localDateId(date);
   if (dateId === todayId) return 'HOY';
-  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-  if (dateId === localDateId(yesterday)) return 'AYER';
+  // Argentina no tiene horario de verano: 24 h atrás es siempre el día anterior.
+  if (dateId === localDateId(new Date(now.getTime() - 86_400_000))) return 'AYER';
   return dateId.slice(8, 10) + '/' + dateId.slice(5, 7);
 }
 
@@ -156,6 +157,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
   briefDismissed?: boolean;
   appointment?: Patient['appointment'];
   appointment_history?: Patient['appointment_history'];
+  resource_assignments?: Patient['resource_assignments'];
 }, audience: QueryAudience = 'professional'): Patient {
   const billing = {
     billing_status: (row.billing_status as Patient['billing_status']) ?? 'pending',
@@ -172,6 +174,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
     billing_status: resolveBillingStatus(billing),
     billing_until: billing.billing_until,
     ...(audience === 'professional' && 'user_id' in row ? { has_account: row.user_id != null } : {}),
+    ...(audience === 'professional' && typeof row.created_at === 'string' ? { created_at: row.created_at } : {}),
     stage: row.stage as Patient['stage'],
     goal: row.goal as string,
     sensitive_hours: audience === 'patient' ? '' : row.sensitive_hours as string,
@@ -193,6 +196,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
     timeline: extras.timeline ?? [],
     meal_logs: extras.meal_logs ?? [],
     messages: extras.messages ?? [],
+    resource_assignments: extras.resource_assignments ?? [],
   };
 }
 
@@ -206,6 +210,7 @@ function mapMealLog(row: Record<string, unknown>): MealLog {
     foods: row.foods as MealLog['foods'],
     macros: row.macros as MealLog['macros'],
     confidence: Number(row.confidence),
+    ...(row.nutrition_origin === 'declared' || row.nutrition_origin === 'ai_estimate' ? {nutrition_origin:row.nutrition_origin} : {}),
     note_for_nutri: (row.note_for_nutri as string) ?? '',
     status: row.status as MealLog['status'],
     logged_at: row.logged_at as string,
@@ -247,26 +252,31 @@ export function mapMessage(row: Record<string, unknown>, authorRole: unknown): M
 async function loadPatientExtras(
   patientId: string,
   audience: 'professional' | 'patient' = 'professional',
-): Promise<Pick<Patient, 'todayPlan' | 'weekPlan' | 'meal_logs' | 'messages' | 'brief' | 'briefDismissed' | 'timeline' | 'habit_logs' | 'hydration' | 'energy' | 'sleep_minutes' | 'appointment' | 'appointment_history'>> {
+): Promise<Pick<Patient, 'todayPlan' | 'weekPlan' | 'meal_logs' | 'messages' | 'brief' | 'briefDismissed' | 'timeline' | 'habit_logs' | 'hydration' | 'energy' | 'sleep_minutes' | 'steps' | 'appointment' | 'appointment_history' | 'resource_assignments'>> {
   const sb = getRequestDb();
 
   const timelineQuery = sb.from('timeline_events').select('id,kind,title,body,visibility,occurred_at').eq('patient_id', patientId);
+  const appointmentNow = new Date();
   const scopedTimeline = audience === 'patient'
     ? timelineQuery.eq('visibility', 'patient')
     : timelineQuery;
 
   const briefQuery = audience === 'patient'
     ? Promise.resolve({ data: null as Record<string, unknown> | null })
-    : sb.from('ai_briefs').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }).limit(1).maybeSingle();
+    // Sin permiso de tabla para la nutricionista: lo lee el servidor; quien llama ya la autorizó sobre esta paciente.
+    : privilegedDb().from('ai_briefs').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }).limit(1).maybeSingle();
 
-  const [{ data: slots }, { data: logs }, { data: msgs }, briefsResult, { data: habits }, { data: appts }, { data: timelineRows }] = await Promise.all([
+  const [{ data: slots }, { data: logs }, { data: msgs }, briefsResult, { data: habits }, { data: appts }, { data: timelineRows }, resourceAssignments] = await Promise.all([
     sb.from('meal_slots').select('weekday, slot, title').eq('patient_id', patientId).order('weekday').order('slot'),
-    sb.from(audience === 'patient' ? 'meal_logs_patient_view' : 'meal_logs').select(mealLogColumns[audience]).eq('patient_id', patientId).order('logged_at', { ascending: false }).limit(20),
+    audience === 'patient'
+      ? sb.rpc('get_patient_meal_logs', { target_patient: patientId })
+      : sb.from('meal_logs').select(mealLogColumns.professional).eq('patient_id', patientId).order('logged_at', { ascending: false }).limit(20),
     sb.from(audience === 'patient' ? 'messages_patient_view' : 'messages').select(messageColumns[audience]).eq('patient_id', patientId).order('sent_at', { ascending: false }).limit(MESSAGE_PAGE_SIZE),
     briefQuery,
     sb.from('habit_logs').select('*').eq('patient_id', patientId).order('date', { ascending: false }).limit(14),
-    sb.from(audience === 'patient' ? 'appointments_patient_view' : 'appointments').select(appointmentColumns[audience]).eq('patient_id', patientId).eq('status', 'scheduled').gte('starts_at', new Date().toISOString()).order('starts_at', { ascending: true }).limit(1),
+    sb.from(audience === 'patient' ? 'appointments_patient_view' : 'appointments').select(appointmentColumns[audience]).eq('patient_id', patientId).eq('status', 'scheduled').gte('starts_at', appointmentReadSince(appointmentNow)).order('starts_at', { ascending: true }),
     scopedTimeline.order('occurred_at', { ascending: false }).limit(20),
+    loadResourceAssignments([patientId]),
   ]);
   const briefs = briefsResult.data;
 
@@ -340,13 +350,15 @@ async function loadPatientExtras(
     patient_id: h.patient_id as string,
     date: h.date as string,
     hydration: (h.hydration as number) ?? 0,
+    hydration_declared: h.hydration_declared === true,
     energy: (h.energy as string | null) ?? null,
     sleep_minutes: (h.sleep_minutes as number | null) ?? null,
+    steps: (h.steps as number | null) ?? null,
   }));
-  const todayHabit = habit_logs.find((h) => h.date === localDateId(new Date()));
+  const todayHabit = habit_logs.find((h) => h.date === argentinaToday(new Date()));
 
   const listedAppt = await listPatientAppointmentPersist(patientId);
-  const nextAppt = rows(appts)[0];
+  const nextAppt = rows(appts).find(appt => appointmentHasNotEnded(appt, appointmentNow));
   const appointment = listedAppt ? listedAppt.appointment : mapScheduledAppointment(nextAppt);
   const appointment_history = listedAppt?.history ?? [];
 
@@ -362,8 +374,10 @@ async function loadPatientExtras(
     hydration: todayHabit?.hydration ?? 0,
     energy: todayHabit?.energy ?? null,
     sleep_minutes: todayHabit?.sleep_minutes ?? null,
+    steps: todayHabit?.steps ?? null,
     appointment,
     appointment_history,
+    resource_assignments: resourceAssignments.get(patientId) ?? [],
   };
 }
 
@@ -440,26 +454,85 @@ export async function sbListPatientsForNutri(userId: string, query: { offset: nu
   const ids = pageRows.map((patientRow) => String(patientRow.id));
 
   const nextByPatient = new Map<string, Record<string, unknown>>();
+  const appointmentNow = new Date();
   if (ids.length > 0) {
-    const { data: appts } = await sb.from('appointments')
+    // Sin permiso de tabla para la nutricionista: lo lee el servidor, sólo de las pacientes de esta página
+    // (salieron de su consulta con permisos de fila).
+    const { data: appts } = await privilegedDb().from('appointments')
       .select(appointmentColumns.professional)
       .in('patient_id', ids)
       .eq('status', 'scheduled')
-      .gte('starts_at', new Date().toISOString())
+      .gte('starts_at', appointmentReadSince(appointmentNow))
       .order('starts_at', { ascending: true });
     for (const appt of rows(appts)) {
+      if (!appointmentHasNotEnded(appt, appointmentNow)) continue;
       const patientId = String(appt.patient_id);
       if (!nextByPatient.has(patientId)) nextByPatient.set(patientId, appt);
     }
   }
 
-  const archivedAt = await loadArchivedAt(ids);
+  const pastByPatient = await loadPastConsultations(ids, appointmentNow);
+  const [archivedAt, resourceAssignments] = await Promise.all([loadArchivedAt(ids), loadResourceAssignments(ids)]);
   return {
     patients: pageRows.map((patientRow) => mapPatient({ ...patientRow, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, {
       appointment: mapScheduledAppointment(nextByPatient.get(String(patientRow.id))),
+      appointment_history: pastByPatient.get(String(patientRow.id)) ?? [],
+      resource_assignments: resourceAssignments.get(String(patientRow.id)) ?? [],
     }, 'professional')),
     page: { offset: query.offset, limit: query.limit, has_more: hasMore },
   };
+}
+
+const PAST_CONSULTATION_DAYS = 400;
+const ARGENTINA_DAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+
+/**
+ * Turnos ya terminados (no cancelados) de las pacientes de la página, como historial «elapsed» con fecha local.
+ * Alimenta «última consulta» del directorio y las consultas del período en Inicio. Un turno pasado no prueba
+ * asistencia: sólo que el horario se cumplió sin cancelarse.
+ */
+async function loadPastConsultations(ids: string[], now: Date): Promise<Map<string, NonNullable<Patient['appointment_history']>>> {
+  const grouped = new Map<string, NonNullable<Patient['appointment_history']>>();
+  if (!ids.length) return grouped;
+  // Mismo criterio que el próximo turno: lo lee el servidor, sólo de pacientes que salieron de la consulta con permisos de fila.
+  const { data } = await privilegedDb().from('appointments')
+    .select('id,patient_id,starts_at,duration_min,channel,status')
+    .in('patient_id', ids)
+    .in('status', ['scheduled', 'done'])
+    .gte('starts_at', new Date(now.getTime() - PAST_CONSULTATION_DAYS * 86_400_000).toISOString())
+    .lt('starts_at', now.toISOString())
+    .order('starts_at', { ascending: false });
+  for (const appt of rows(data)) {
+    const startsAt = new Date(String(appt.starts_at));
+    const duration = Number(appt.duration_min) || 0;
+    const endsAt = new Date(startsAt.getTime() + duration * 60_000);
+    if (Number.isNaN(startsAt.getTime()) || endsAt.getTime() > now.getTime()) continue;
+    // Columnas comunes a todas las versiones de la tabla: la fecha se toma en hora de Argentina.
+    const dateId = ARGENTINA_DAY.format(startsAt);
+    const patientId = String(appt.patient_id);
+    const list = grouped.get(patientId) ?? [];
+    list.push({ id: String(appt.id), when: '', dateId, duration, channel: String(appt.channel ?? ''), action: 'elapsed', actor: 'system', at: endsAt.toISOString() });
+    grouped.set(patientId, list);
+  }
+  return grouped;
+}
+
+async function loadResourceAssignments(ids: string[]) {
+  const grouped = new Map<string, NonNullable<Patient['resource_assignments']>>();
+  if (!ids.length) return grouped;
+  // La sesión y las reglas de ambas tablas delimitan las asignaciones visibles.
+  const { data, error } = await getRequestDb().from('resource_assignments')
+    .select('id,patient_id,assigned_at,first_read_at,resources!inner(slug)').in('patient_id', ids);
+  if (error) throwWriteError(error);
+  for (const assignment of rows(data)) {
+    const resource = row(assignment.resources);
+    if (typeof resource?.slug !== 'string') throw new Error('Resource assignment returned no slug');
+    const patientId = String(assignment.patient_id);
+    const list = grouped.get(patientId) ?? [];
+    list.push({id:String(assignment.id),patient_id:patientId,resource_id:resource.slug,assigned_at:String(assignment.assigned_at),read_at:assignment.first_read_at == null ? null : String(assignment.first_read_at)});
+    grouped.set(patientId, list);
+  }
+  return grouped;
 }
 
 // archived_at llega con la migración 20260928140000; si la base todavía no la
@@ -559,11 +632,14 @@ export async function sbUpdateMealLog(patientId: string, mealId: string, patch: 
 
 export async function sbSetBrief(patientId: string, nutritionistId: string, brief: Brief): Promise<void> {
   const sb = getRequestDb();
+  // La nutricionista no tiene permiso de tabla sobre los briefs: los escribe el servidor, que ya
+  // comprobó en la ruta que la paciente es de su consultorio.
+  const admin = privilegedDb();
   // Not transactional yet: a later RPC in PV-08 must make delete/insert/update atomic.
-  const { error: deleteError } = await sb.from('ai_briefs').delete().eq('patient_id', patientId).eq('status', 'pending_review');
+  const { error: deleteError } = await admin.from('ai_briefs').delete().eq('patient_id', patientId).eq('status', 'pending_review');
   if (deleteError) throw deleteError;
   if (brief.suggested_action) {
-    const { error: insertError } = await sb.from('ai_briefs').insert({
+    const { error: insertError } = await admin.from('ai_briefs').insert({
       patient_id: patientId,
       nutritionist_id: nutritionistId,
       suggested_action: brief.suggested_action,
@@ -676,7 +752,8 @@ export async function sbSetAppointment(
 }
 
 export async function sbDismissBrief(patientId: string, dismissedBy: string): Promise<void> {
-  const sb = getRequestDb();
+  // Sin permiso de tabla para la nutricionista: lo escribe el servidor tras autorizar la ruta.
+  const sb = privilegedDb();
   // Sólo el brief pendiente: si ya estaba dismissed/done, es un no-op idempotente.
   const { error } = await sb.from('ai_briefs').update({
     status: 'dismissed',
@@ -686,9 +763,9 @@ export async function sbDismissBrief(patientId: string, dismissedBy: string): Pr
   if (error) throwWriteError(error);
 }
 
-export async function sbUpdateHabits(patientId: string, data: { hydration?: number; energy?: string | null; sleep_minutes?: number | null }): Promise<void> {
+export async function sbUpdateHabits(patientId: string, data: { hydration?: number; energy?: string | null; sleep_minutes?: number | null; steps?: number | null }): Promise<void> {
   const sb = getRequestDb();
-  const today = localDateId(new Date());
+  const today = argentinaToday(new Date());
   const { data: existing } = await sb.from('habit_logs').select('*')
     .eq('patient_id', patientId).eq('date', today).maybeSingle();
 
@@ -699,11 +776,14 @@ export async function sbUpdateHabits(patientId: string, data: { hydration?: numb
       hydration: existing.hydration,
       energy: existing.energy,
       sleep_minutes: existing.sleep_minutes,
+      // Sólo si la columna existe: la app puede publicarse antes que la migración de pasos.
+      ...('steps' in existing ? { steps: existing.steps } : {}),
     } : {}),
   };
-  if (data.hydration !== undefined) payload.hydration = data.hydration;
+  if (data.hydration !== undefined) { payload.hydration = data.hydration; payload.hydration_declared = true; }
   if (data.energy !== undefined) payload.energy = data.energy;
   if (data.sleep_minutes !== undefined) payload.sleep_minutes = data.sleep_minutes;
+  if (data.steps !== undefined) payload.steps = data.steps;
 
   const { error } = await sb.from('habit_logs').upsert(payload, { onConflict: 'patient_id,date' });
   if (error) throwWriteError(error);
@@ -853,41 +933,14 @@ export async function sbCreatePatient(input: {
   email: string;
   goal: string;
 }): Promise<{ patient: Patient; invite: PatientInvite }> {
-  const sb = getRequestDb();
-  const fullName = input.name.trim();
-  const { data: patientRow, error: patientError } = await sb.from('patients').insert({
-    nutritionist_id: input.nutritionistId,
-    full_name: fullName,
-    initials: patientInitials(fullName),
-    tone: 'mint',
-    status: 'Ingreso',
-    billing_status: 'pending',
-    billing_until: null,
-    stage: 'ingreso',
-    goal: input.goal.trim(),
-    adherence_score: 0,
-    next_focus: 'Completar evaluación inicial',
-  }).select(patientTableColumns.professional).single();
-  if (patientError || !patientRow) throwWriteError(patientError);
-
-  const inserted = row(patientRow);
-  if (!inserted) throw new Error('Patient insert returned no row');
-
-  const { data: inviteRow, error: inviteError } = await sb.from('patient_invites').insert({
-    patient_id: inserted.id,
-    nutritionist_id: input.nutritionistId,
-    email: input.email.trim().toLowerCase(),
-    status: 'not_sent',
-  }).select('*').single();
-  if (inviteError || !inviteRow) throwWriteError(inviteError);
-
-  const invite = mapInvite(row(inviteRow) ?? {});
-  await sb.from('patient_invite_events').insert({
-    invite_id: invite.id,
-    event: 'created',
-  });
-
-  return { patient: mapPatient(inserted, {}, 'professional'), invite };
+  const sb=getRequestDb();
+  const {data,error}=await sb.rpc('create_patient_with_invite',{payload:{name:input.name,email:input.email,goal:input.goal}});
+  if(error){if(error.code==='PT409')throw new UniqueInviteError();throwWriteError(error);}
+  const saved=row(data);const inviteRow=row(saved?.invite);
+  if(!saved||!inviteRow)throw new Error('Patient creation returned no invitation');
+  const patient=await sbGetPatientById(String(saved.patient_id),'professional');
+  if(!patient)throw new Error('Created patient is not accessible');
+  return {patient,invite:mapInvite(inviteRow)};
 }
 
 export async function sbGetInvite(inviteId: string): Promise<PatientInvite | null> {
@@ -898,22 +951,43 @@ export async function sbGetInvite(inviteId: string): Promise<PatientInvite | nul
   return mapped ? mapInvite(mapped) : null;
 }
 
+// El historial de invitaciones es sólo del servidor (la tabla no tiene reglas
+// para usuarias). Antes se escribía con la sesión de la nutricionista y la base
+// lo rechazaba sin avisar: se perdía. La invitación ya se validó con su sesión.
+async function logInviteEvent(inviteId: string, event: 'created' | 'sent' | 'resent' | 'revoked'): Promise<void> {
+  try {
+    const { error } = await privilegedDb().from('patient_invite_events').insert({ invite_id: inviteId, event });
+    if (error) writeOpsLog('warn', 'invite_event_failed', { event, code: error.code ?? 'unknown' });
+  } catch {
+    writeOpsLog('warn', 'invite_event_failed', { event, code: 'no_admin' });
+  }
+}
+
 export async function sbSendInvite(inviteId: string, ttlMs = 7 * 24 * 60 * 60 * 1000): Promise<PatientInvite> {
   const current = await sbGetInvite(inviteId);
+  if (current?.status === 'accepted') return current;
   if (!current || (current.status !== 'not_sent' && current.status !== 'pending')) {
     throw new Error('Invite unavailable');
   }
   const now = new Date();
   const event = current.status === 'pending' ? 'resent' : 'sent';
-  const sb = getRequestDb();
+  // La nutricionista sólo puede leer y crear invitaciones (permiso de tabla); el cambio de estado lo hace
+  // el servidor. `current` ya salió con su sesión, así que la invitación es de su consultorio.
+  const sb = privilegedDb();
   const { data, error } = await sb.from('patient_invites').update({
     status: 'pending',
     invited_at: now.toISOString(),
     expires_at: new Date(now.getTime() + ttlMs).toISOString(),
     updated_at: now.toISOString(),
-  }).eq('id', inviteId).select('*').single();
-  if (error || !data) throwWriteError(error);
-  await sb.from('patient_invite_events').insert({ invite_id: inviteId, event });
+  }).eq('id', inviteId).in('status', ['not_sent', 'pending']).select('*').maybeSingle();
+  if (error) throwWriteError(error);
+  if (!data) {
+    // La aceptación puede ocurrir después de la lectura. No reabrir su enlace.
+    const latest = await sbGetInvite(inviteId);
+    if (latest?.status === 'accepted') return latest;
+    throw new Error('Invite unavailable');
+  }
+  await logInviteEvent(inviteId, event);
   return mapInvite(row(data) ?? {});
 }
 
@@ -923,14 +997,16 @@ export async function sbRevokeInvite(inviteId: string): Promise<PatientInvite> {
     throw new Error('Invite unavailable');
   }
   const now = new Date().toISOString();
-  const sb = getRequestDb();
+  // Igual que al enviar: `current` salió con la sesión de la nutricionista; el cambio lo hace el servidor.
+  const sb = privilegedDb();
   const { data, error } = await sb.from('patient_invites').update({
     status: 'revoked',
     revoked_at: now,
     updated_at: now,
-  }).eq('id', inviteId).select('*').single();
-  if (error || !data) throwWriteError(error);
-  await sb.from('patient_invite_events').insert({ invite_id: inviteId, event: 'revoked' });
+  }).eq('id', inviteId).in('status', ['not_sent', 'pending']).select('*').maybeSingle();
+  if (error) throwWriteError(error);
+  if (!data) throw new Error('Invite unavailable');
+  await logInviteEvent(inviteId, 'revoked');
   return mapInvite(row(data) ?? {});
 }
 
@@ -956,7 +1032,7 @@ export async function sbRenewPatientInvite(patientId: string, nutritionistId: st
   }).select('*').single();
   if (createError || !created) throwWriteError(createError);
   const invite = mapInvite(row(created) ?? {});
-  await sb.from('patient_invite_events').insert({ invite_id: invite.id, event: 'created' });
+  await logInviteEvent(invite.id, 'created');
   return sbSendInvite(invite.id);
 }
 

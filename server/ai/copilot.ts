@@ -73,21 +73,14 @@ export async function generateCopilotBrief(patient: AppStore['patients'][0]): Pr
   const pending = patient.meal_logs.filter((l) => l.status === 'pending_review');
   const confirmed = patient.meal_logs.filter((l) => l.status === 'confirmed' || l.status === 'adjusted');
 
-  const context = `
-paciente: ${patient.name}
-stage: ${patient.stage}
-status: ${patient.status}
-goal: ${patient.goal}
-adherence_score: ${patient.adherence_score} (no recalcular)
-adherence_why actual: ${patient.adherence_why}
-fotos_pending_review: ${pending.length}
-comidas_confirmadas: ${confirmed.length}
-agua_hoy: ${patient.hydration}/8
-eventos recientes:
-${patient.timeline.slice(0, 6).map((e) => `- ${e.title}: ${e.body}`).join('\n')}
-meal_logs pendientes:
-${pending.map((l) => `- ${l.slot}: confianza ${l.confidence}, nota: ${l.note_for_nutri}`).join('\n') || 'ninguno'}
-`;
+  // Do not send names, IDs, clinical notes, messages, or timeline free text.
+  const context = JSON.stringify({
+    adherence_score: patient.adherence_score,
+    pending_review_count: pending.length,
+    confirmed_meal_count: confirmed.length,
+    hydration: patient.hydration,
+  });
+
 
   try {
     const { output } = await generateText({

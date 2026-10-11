@@ -2,6 +2,7 @@ import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
 import { addActivityLog, deleteActivityLog, getPatient } from '../store.js';
 import {
+  activityReceipts,
   catalogExercises,
   extraActivity,
   forgetActivityMeta,
@@ -35,6 +36,7 @@ type AssignInput = {
 };
 
 type ActivityInput = {
+  client_id?: string;
   activity: string;
   duration_minutes: number;
   intensity: 'suave' | 'moderada' | 'intensa';
@@ -49,6 +51,7 @@ export function exerciseDbError(error: { code?: string; message?: string } | nul
   if (['42P01', '42883', 'PGRST202', 'PGRST205'].includes(error.code ?? '')) {
     throw new CareError(501, 'La biblioteca de ejercicio requiere instalar la migración de este módulo.');
   }
+  if (error.code === 'PT409') throw new CareError(409, 'Ese reintento contiene datos distintos. Recuperá la actividad guardada.');
   if (error.code === '42501') {
     if ((error.message ?? '').includes('exercise_habilitation')) {
       throw new CareError(403, 'Hace falta habilitación verificada para asignar una rutina. El rol nutricionista no alcanza.');
@@ -207,6 +210,8 @@ export async function getPatientExercise(patientId: string, persistent: boolean,
 
 export async function logPatientActivity(patientId: string, input: ActivityInput, persistent: boolean): Promise<PatientExerciseView> {
   if (!persistent) {
+    if (!getPatient(patientId)) throw new CareError(404, 'Paciente no encontrado.');
+    if (activityDuplicate(patientId, input)) return memorySnapshot(patientId, false);
     const patient = addActivityLog(patientId, input);
     if (!patient) throw new CareError(404, 'Paciente no encontrado.');
     const created = patient.activity_logs?.[0];
@@ -221,6 +226,7 @@ export async function logPatientActivity(patientId: string, input: ActivityInput
   }
   return asExerciseView(await rpc('log_patient_activity', {
     target_patient: patientId,
+    client_id: input.client_id,
     input_activity: input.activity,
     input_duration: input.duration_minutes,
     input_intensity: input.intensity,
@@ -310,4 +316,13 @@ export async function saveRoutineFeedback(
     input_reps: input.reps_completed,
     input_note: input.note ?? null,
   }), patientId);
+}
+
+function activityDuplicate(patientId: string, input: ActivityInput) {
+  if (!input.client_id) return false;
+  const body = JSON.stringify([patientId,input.activity,input.duration_minutes,input.intensity,input.note ?? '',input.assignment_id ?? null,input.sets ?? null,input.reps ?? null]);
+  const prior = activityReceipts.get(input.client_id);
+  if (prior && prior !== body) throw new CareError(409,'Ese reintento contiene datos distintos. Recuperá la actividad guardada.');
+  if (prior) return true;
+  activityReceipts.set(input.client_id,body); return false;
 }

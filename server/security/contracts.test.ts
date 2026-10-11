@@ -18,7 +18,7 @@ const patient: Patient = {
   tone: 'peach',
   status: 'Atención',
   billing_status: 'active',
-  billing_until: '2026-10-06',
+  billing_until: '2099-10-06',
   stage: 'seguimiento',
   goal: 'Comer con regularidad',
   goal_status: 'active',

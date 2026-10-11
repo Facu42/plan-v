@@ -1,7 +1,8 @@
+import { buildRecipeCard } from '../../types/recipe-plate';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import type { PatientRecipe } from '../../types/recipes';
-import { AssignedRecipes, AssignedRecipesView, RecipeCatalog } from './RecipeCatalog';
+import type { PatientRecipe, ProfessionalRecipe } from '../../types/recipes';
+import { AssignedRecipes, AssignedRecipesView, RecipeAiForm, RecipeAiNotices, RecipeCatalog, RecipeEditorForm, recipeEditorFromAi, recipeEditorFromStored, type RecipeCatalogState } from './RecipeCatalog';
 
 const assigned: PatientRecipe = {
   id: 'r1',
@@ -16,10 +17,46 @@ const assigned: PatientRecipe = {
 };
 
 describe('Catálogo profesional y recetas asignadas', () => {
+  it('el editor conserva el aviso IA cuando una composición incompleta no tiene nutrientes estructurados', () => {
+    const editing = { id: 'recipe', title: 'Borrador', yield_portions: 2, steps: ['Mezclar.'], nutrient_source: 'propuesta_ia.v2', items: [{ name: 'Ingrediente escrito', quantity: 1, unit: 'u' }] };
+    const catalog = { editing, setEditing: () => {}, recipes: [{ id: 'recipe', current: { catalog_recipe: { lines: [], estimate_origin: true, estimate_source: 'propuesta_ia.v2' } } }], foods: [], busy: false, error: '', submit: () => {}, closeEditor: () => {} } as unknown as RecipeCatalogState;
+    const html = renderToStaticMarkup(<RecipeEditorForm catalog={catalog} />);
+    expect(html).toContain('Nutrientes estimados por IA');
+    expect(html).toContain('Sin dato');
+    expect(html).not.toContain('KCAL');
+  });
+  it('una propuesta pendiente ofrece consulta y conserva la descripción sin generar otra', () => {
+    const catalog = { busy: false, description: 'Tortilla de verduras', pendingAiJob: { id: 'job-1' }, aiProgress: '', aiWarnings: ['Revisar posible presencia de huevo.'], path: 'manual',
+      setDescription: () => {}, closeEditor: () => {}, submitAi: () => {}, resumeAi: () => {} } as unknown as RecipeCatalogState;
+    const form = renderToStaticMarkup(<RecipeAiForm catalog={catalog} />);
+    expect(form).toContain('Consultar propuesta');
+    expect(form).toContain('disabled=""');
+    expect(form).toContain('Tortilla de verduras');
+    const notices = renderToStaticMarkup(<RecipeAiNotices catalog={catalog} />);
+    expect(notices).toContain('Revisar posible presencia de huevo.');
+    expect(notices).toContain('Consultar propuesta');
+    expect(form).toContain('todavía no abriste');
+    expect(notices).toContain('todavía no abriste');
+  });
+  it('reabrir y editar título/pasos conserva las calorías declaradas por porción',()=>{
+    const recipe = {id:'11111111-1111-4111-8111-111111111111',title:'Bowl',current:{revision:'22222222-2222-4222-8222-222222222222',yield_portions:2,steps:['Cocinar.'],nutrient_source:'Tabla declarada',ingredients:[{id:'i1',name:'Arroz',quantity:100,unit:'g'}],card:{category:'Almuerzo',prep_minutes:20,macros:{kcal:200,protein_g:10,carbs_g:35,fat_g:3}}}} as ProfessionalRecipe;
+    const editor=recipeEditorFromStored(recipe);
+    expect(editor.expected_revision).toBe(recipe.current.revision);
+    expect(buildRecipeCard({...editor,title:'Nuevo título',steps:['Cocinar y servir.']}).macros).toEqual(recipe.current.card!.macros);
+    expect(editor.nutrient_source).toBe('Tabla declarada');
+  });
+  it('la edición asistida conserva la receta aplicada y su procedencia', () => {
+    const payload = { id: '11111111-1111-4111-8111-111111111111', title: 'Bowl', yield_portions: 1,
+      steps: ['Cocinar.'], nutrient_source: 'propuesta_ia.v1', items: [{ name: 'Arroz', quantity: 80, unit: 'g' }] };
+    const draft = recipeEditorFromAi(payload);
+    expect(draft.id).toBe(payload.id); expect(draft.nutrient_source).toBe('propuesta_ia.v1');
+    expect(draft.protein_g).toBeUndefined(); expect(draft.cover_status).toBe('none');
+    expect(() => recipeEditorFromAi({ ...payload, id: 'invalid' })).toThrow();
+  });
   it('el catálogo profesional explica borrador vs publicada sin inventar macros', () => {
     const html = renderToStaticMarkup(<RecipeCatalog patientId="pat-sofia" />);
-    expect(html).toContain('Recetas e ingredientes');
-    expect(html).toContain('No se inventan calorías ni macros');
+    expect(html).toContain('Recetas</h2>');
+    expect(html).toContain('nutrientes estimados que requieren revisión');
     expect(html).toContain('Generar borrador con IA');
     expect(html).toContain('alergias');
     expect(html).toContain('borrador privado');

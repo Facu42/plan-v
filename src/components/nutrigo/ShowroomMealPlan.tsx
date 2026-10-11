@@ -59,7 +59,7 @@ export function ShowroomMealPlan({ patient, patients = [], query, onSelect, onCh
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const table = useMemo(() => buildWeekTable(patient.weekPlan, published, nav.week), [patient.weekPlan, published, nav.week]);
+  const table = useMemo(() => buildWeekTable([], published, nav.week), [patient.weekPlan, published, nav.week]);
   const columns = table.columns.filter((column) => !hidden.has(column.slot));
   const days = useMemo(() => buildPlanDays(patient.weekPlan), [patient.weekPlan]);
 
@@ -117,9 +117,9 @@ export function ShowroomMealPlan({ patient, patients = [], query, onSelect, onCh
           </select>
           <span className="pf-picker-caret"><CaretDown size={14} /></span>
         </label>}
-        <button type="button" className="pf-picker pf-collapse" aria-label="Versiones del plan fechado" onClick={() => setVersionsOpen(true)}><span className="pf-picker-icon"><ClockCounterClockwise size={14} /></span><span className="pf-picker-text">Versiones</span></button>
+        <button type="button" className="pf-picker pf-collapse" aria-label="Crear y editar plan fechado" onClick={() => setVersionsOpen(true)}><span className="pf-picker-icon"><ClockCounterClockwise size={14} /></span><span className="pf-picker-text">Borrador y publicación</span></button>
       </>}
-      cta={<button type="button" className="pf-cta pf-collapse" aria-label="Agregar comida" onClick={() => open({ kind: 'add', day: PLAN_DAYS[0], slot: '', locked: false })}><span className="pf-cta-icon"><Plus size={18} /></span><span className="pf-cta-text">Agregar comida</span></button>}
+      cta={<button type="button" className="pf-cta pf-collapse" aria-label="Crear o editar plan" onClick={() => setVersionsOpen(true)}><span className="pf-cta-icon"><Plus size={18} /></span><span className="pf-cta-text">{published ? 'Editar plan' : 'Crear plan'}</span></button>}
     />
     {(error && !editing) && <p className="pf-error" role="alert">{error}</p>}
     {planError && <p className="pf-error" role="alert">{planError}</p>}
@@ -127,7 +127,7 @@ export function ShowroomMealPlan({ patient, patients = [], query, onSelect, onCh
       const cell = row.cells[column.slot];
       if (cell) return <PlanMealCell row={row} column={column} cell={cell} dim={!matchesPlanSearch(cell, search)} onOpen={() => open(cell.source === 'dated' ? { kind: 'dated', row, cell } : { kind: 'edit', row, cell })} />;
       if (row.dated) return <div className="pf-cell pf-cell-empty" data-tone={column.tone}><span className="pf-cell-image" aria-hidden="true" /><span className="pf-cell-text"><span>Sin indicación</span></span></div>;
-      return <button type="button" className="pf-cell pf-cell-empty pf-cell-add" data-tone={column.tone} aria-label={`Agregar ${column.slot} el ${row.day}`} onClick={() => open({ kind: 'add', day: row.day, slot: column.slot, locked: true })}>
+      return <button type="button" className="pf-cell pf-cell-empty pf-cell-add" data-tone={column.tone} aria-label={`Agregar ${column.slot} el ${row.day}`} onClick={() => setVersionsOpen(true)}>
         <span className="pf-cell-image" aria-hidden="true"><Plus size={18} /></span><span className="pf-cell-text"><span>Agregar</span></span>
       </button>;
     }} />
@@ -165,7 +165,7 @@ export function ShowroomMealPlan({ patient, patients = [], query, onSelect, onCh
     </PlanSheet>}
 
     {versionsOpen && <PlanSheet title="Versiones del plan" wide hideTitle onClose={() => setVersionsOpen(false)}>
-      <MealPlanEditor patientId={patient.id} onChanged={() => setRefresh((value) => value + 1)} />
+      <MealPlanEditor key={patient.id} patientId={patient.id} onChanged={() => setRefresh((value) => value + 1)} />
     </PlanSheet>}
   </section>;
 }

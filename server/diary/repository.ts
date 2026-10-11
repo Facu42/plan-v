@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import type { FoodItem, Macros, MealLog, MealStatus } from '../../src/types/index.js';
 import { getRequestDb } from '../db/supabase-client.js';
@@ -90,6 +91,7 @@ function asLog(row: Record<string, unknown>): MealLog {
     foods: Array.isArray(row.foods) ? row.foods as FoodItem[] : [],
     macros: row.macros && typeof row.macros === 'object' ? row.macros as Macros : null,
     confidence: Number(row.confidence ?? 0),
+    ...(row.nutrition_origin === 'declared' || row.nutrition_origin === 'ai_estimate' ? {nutrition_origin:row.nutrition_origin} : {}),
     note_for_nutri: String(row.note_for_nutri ?? ''),
     status,
     logged_at: String(row.logged_at),
@@ -179,6 +181,7 @@ export async function recordMealAnalysis(
     confidence: number;
     note_for_nutri: string;
     error_code?: string | null;
+    nutrition_origin?: 'declared' | 'ai_estimate';
   },
   persistent: boolean,
 ): Promise<MealLog> {
@@ -225,6 +228,7 @@ export async function recordMealAnalysis(
     current.confidence = input.confidence;
     current.note_for_nutri = input.note_for_nutri;
     current.analysis_status = input.status;
+    if(input.macros) current.nutrition_origin = input.nutrition_origin ?? 'ai_estimate';
     attachToPatient(publicLog(current), false);
   }
   return publicLog(current);
@@ -278,3 +282,5 @@ export async function reviewMealLog(
   attachToPatient(publicLog(current), false);
   return publicLog(current);
 }
+
+registerDemoState('diary/repository', () => ({ logs, clientIndex, analysisRuns, reviews }));

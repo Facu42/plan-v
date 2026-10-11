@@ -1,0 +1,9 @@
+{
+  "path": "/app/inicio",
+  "patientUI": true,
+  "selfStatus": 200,
+  "publishedPlanStatus": 200,
+  "professionalCatalogStatus": 403,
+  "coverAttemptStatus": 403,
+  "alerts": []
+}

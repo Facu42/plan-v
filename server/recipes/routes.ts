@@ -8,6 +8,9 @@ import { recipeAssignSchema, recipePublishSchema } from '../../src/types/recipes
 import { buildRecipeCard, recipeDayAssignSchema, recipeRegisterSchema, recipeWizardSchema } from '../../src/types/recipe-plate.js';
 import * as days from './day.js';
 import * as repo from './repository.js';
+import { recipeCoverEnabled } from '../ai/recipe-cover.js';
+import { saveManualRecipeCover } from './manual-cover.js';
+import { patientRecipesWithPhotos } from './ingredient-covers.js';
 
 async function body<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
   const raw = await c.req.text();
@@ -58,17 +61,22 @@ async function patientWrite(c: Context, patientId: string) {
 function coreDraft(input: ReturnType<typeof recipeWizardSchema.parse>) {
   return {
     id: input.id,
+    expected_revision: input.expected_revision,
     title: input.title,
     yield_portions: input.yield_portions,
     steps: input.steps,
     nutrient_source: input.nutrient_source,
-    items: input.items.map(({ name, quantity, unit }) => ({ name, quantity, unit })),
+    ...(input.nutrition ? { nutrition: input.nutrition } : {}),
+    ...(input.final_weight_g !== undefined ? { final_weight_g: input.final_weight_g } : {}),
+    ...(input.cooking_minutes !== undefined ? { cooking_minutes: input.cooking_minutes } : {}),
+    items: input.items.map(({ name, quantity, unit, catalog_ref }) => ({ name, quantity, unit, ...(catalog_ref ? { catalog_ref } : {}) })),
   };
 }
 
-async function saveWizard(c: Context) {
+async function saveWizard(c: Context, expectedId?: string) {
   const { persistent, nutritionistId } = await professional(c);
   const input = await body(c, recipeWizardSchema);
+  if (expectedId && input.id !== expectedId) throw new repo.CareError(400, 'El identificador de la receta no coincide. No se guardó nada.');
   let card;
   try { card = buildRecipeCard(input); }
   catch (error) {
@@ -82,12 +90,24 @@ async function saveWizard(c: Context) {
 }
 
 const recipeIdParam = z.uuid();
+const manualCoverSchema = z.object({ expected_version: z.number().int().positive(), expected_cover_url: z.string().max(7_000_000).nullable(), data_url: z.string().max(7_000_000) }).strict();
 
 export function registerRecipeRoutes(app: Hono) {
+  app.get('/api/recipes/favorites', async c => {
+    const { persistent, nutritionistId } = await professional(c);
+    return c.json({ favorite_ids: await repo.listProfessionalRecipeFavorites(nutritionistId, persistent) });
+  });
+  app.post('/api/recipes/:id/favorite', async c => {
+    const { persistent, nutritionistId } = await professional(c);
+    const id = z.uuid().safeParse(c.req.param('id'));
+    if (!id.success) throw new repo.CareError(400, 'Volvé a abrir la receta.');
+    const input = await body(c, z.object({ favorite: z.boolean() }).strict());
+    return c.json(await repo.setProfessionalRecipeFavorite(nutritionistId, id.data, input.favorite, persistent));
+  });
   app.get('/api/recipes', async (c) => {
     const { persistent, nutritionistId } = await professional(c);
     const recipes = await repo.listProfessionalRecipes(nutritionistId, persistent);
-    return c.json({ recipes, source: persistent ? 'supabase' : 'memory' });
+    return c.json({ recipes, source: persistent ? 'supabase' : 'memory', image_generation: recipeCoverEnabled() });
   });
 
   app.post('/api/recipes', async (c) => c.json(await saveWizard(c)));
@@ -95,8 +115,7 @@ export function registerRecipeRoutes(app: Hono) {
   app.post('/api/recipes/:id/versions', async (c) => {
     const id = recipeIdParam.safeParse(c.req.param('id'));
     if (!id.success) throw new repo.CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
-    const saved = await saveWizard(c);
-    if (saved.recipe.id !== id.data) throw new repo.CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
+    const saved = await saveWizard(c, id.data);
     return c.json(saved);
   });
 
@@ -105,7 +124,7 @@ export function registerRecipeRoutes(app: Hono) {
     const id = recipeIdParam.safeParse(c.req.param('id'));
     if (!id.success) throw new repo.CareError(400, 'Revisá el título, las porciones, los pasos, los ingredientes y la fuente nutricional.');
     const input = await body(c, recipePublishSchema);
-    const recipe = await repo.publishRecipe(nutritionistId, id.data, input.expected_version, persistent);
+    const recipe = await repo.publishRecipe(nutritionistId, id.data, input.expected_version, persistent, input.expected_revision);
     return c.json({ recipe, source: persistent ? 'supabase' : 'memory' });
   });
 
@@ -118,10 +137,33 @@ export function registerRecipeRoutes(app: Hono) {
     return c.json({ recipe, source: persistent ? 'supabase' : 'memory' });
   });
 
+  app.post('/api/recipes/:id/cover', async (c) => {
+    const { persistent, nutritionistId } = await professional(c);
+    const id = recipeIdParam.safeParse(c.req.param('id'));
+    if (!id.success) throw new repo.CareError(400, 'Volvé a abrir la receta antes de generar la foto.');
+    const input = await body(c, recipePublishSchema);
+    const recipe = await repo.retryRecipeCover(nutritionistId, id.data, input.expected_version, persistent);
+    return c.json({ recipe, source: persistent ? 'supabase' : 'memory' });
+  });
+
+  app.post('/api/recipes/:id/cover/manual', async (c) => {
+    const { persistent, nutritionistId } = await professional(c);
+    if (c.req.query('audience') === 'patient') throw new repo.CareError(403, 'Sólo la nutricionista puede subir la foto.');
+    const id = recipeIdParam.safeParse(c.req.param('id'));
+    if (!id.success) throw new repo.CareError(400, 'Volvé a abrir la receta antes de subir la foto.');
+    if (Number(c.req.header('Content-Length')) > 7_100_000) throw new repo.CareError(413, 'La foto debe pesar como máximo 5 MB.');
+    const raw = await c.req.text();
+    if (Buffer.byteLength(raw) > 7_100_000) throw new repo.CareError(413, 'La foto debe pesar como máximo 5 MB.');
+    let input: z.infer<typeof manualCoverSchema>;
+    try { input = manualCoverSchema.parse(JSON.parse(raw)); } catch { throw new repo.CareError(400, 'Seleccioná una foto JPG, PNG o WebP y volvé a abrir la receta.'); }
+    const recipe = await saveManualRecipeCover(nutritionistId, id.data, input.expected_version, input.expected_cover_url, input.data_url, persistent);
+    return c.json({ recipe, source: persistent ? 'supabase' : 'memory' });
+  });
+
   app.get('/api/patients/:id/recipes', async (c) => {
     const id = c.req.param('id');
     const { persistent } = await patientAccess(c, id);
-    const recipes = await repo.listAssignedRecipes(id, persistent);
+    const recipes = await patientRecipesWithPhotos(await repo.listAssignedRecipes(id, persistent), persistent);
     return c.json({ recipes, source: persistent ? 'supabase' : 'memory' });
   });
 

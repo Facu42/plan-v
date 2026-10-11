@@ -141,6 +141,8 @@ describe('cors and readiness', () => {
     expect(releaseSha({ GIT_SHA: 'abc1234' })).toBe('abc1234');
     expect(releaseSha({ RAILWAY_GIT_COMMIT_SHA: 'railsha1' })).toBe('railsha1');
     expect(maxBodyBytes('/api/patients/x/meals')).toBeGreaterThan(maxBodyBytes('/api/patients'));
+    expect(maxBodyBytes('/api/recipes/x/cover/manual')).toBe(7_100_000);
+    expect(maxBodyBytes('/api/recipes/x/versions')).toBe(1024 * 1024);
   });
 });
 
@@ -148,11 +150,20 @@ describe('deploy contract', () => {
   it('keeps the Vercel artifact as the Vite frontend, not the Node API', () => {
     const vercel = JSON.parse(readFileSync(new URL('../../vercel.json', import.meta.url), 'utf8')) as {
       outputDirectory: string;
-      rewrites?: unknown[];
+      rewrites?: { source: string; destination: string }[];
     };
     expect(vercel.outputDirectory).toBe('dist');
     expect(JSON.stringify(vercel)).not.toMatch(/server\/index/);
-    expect(vercel.rewrites ?? []).toEqual([]);
+    // Sólo rutas de la pantalla (abrir o recargar /admin, /app/*, /crm/*) hacia index.html; nunca a la API.
+    // /pacientes sirve la landing estática exportada, sin sesión.
+    expect(vercel.rewrites).toEqual([
+      { source: '/pacientes', destination: '/pacientes/index.html' },
+      { source: '/admin', destination: '/index.html' },
+      { source: '/app', destination: '/index.html' },
+      { source: '/app/:path*', destination: '/index.html' },
+      { source: '/crm', destination: '/index.html' },
+      { source: '/crm/:path*', destination: '/index.html' },
+    ]);
   });
 
   it('check:secrets refuses a leaked VITE_ service role and passes in test mode', () => {

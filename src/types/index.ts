@@ -1,3 +1,4 @@
+import type { WeeklyRegistration } from './weekly-registration';
 export type MealStatus = 'pending_review' | 'confirmed' | 'adjusted';
 export type SuggestedAction = 'mensaje' | 'ajuste_menu' | 'turno';
 export type Stage = 'ingreso' | 'plan' | 'seguimiento' | 'alta';
@@ -42,6 +43,7 @@ export type MealLog = {
   status: MealStatus;
   logged_at: string;
   analysis_status?: MealAnalysisStatus;
+  nutrition_origin?: 'declared' | 'ai_estimate';
 };
 
 export type TimelineEvent = {
@@ -88,8 +90,11 @@ export type HabitLog = {
   patient_id: string;
   date: string;
   hydration: number;
+  hydration_declared?: boolean;
   energy: string | null;
   sleep_minutes: number | null;
+  /** Pasos del día declarados por la paciente (no se importan de dispositivos). */
+  steps?: number | null;
 };
 
 export type ActivityLog = {
@@ -136,6 +141,7 @@ export type DemoNotice = {
 };
 
 export type Patient = {
+  weekly_registration?: WeeklyRegistration | null;
   id: string;
   name: string;
   initials: string;
@@ -148,6 +154,8 @@ export type Patient = {
   billing_until: string | null;
   /** Sólo en la vista profesional: si la paciente ya vinculó su cuenta. */
   has_account?: boolean;
+  /** Fecha de alta en el consultorio (sólo para la profesional). */
+  created_at?: string;
   stage: Stage;
   goal: string;
   goal_status?: GoalStatus;
@@ -163,6 +171,7 @@ export type Patient = {
   hydration: number;
   energy: string | null;
   sleep_minutes: number | null;
+  steps?: number | null;
   appointment: {
     when: string;
     duration: number;

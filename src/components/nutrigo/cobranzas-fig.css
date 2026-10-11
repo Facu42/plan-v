@@ -1,0 +1,106 @@
+/* Cobranzas (nutricionista) y Pagos (paciente). Usa las variables Nutrigo, así que sigue el modo oscuro. */
+.nv-app.nv-fees-page:not(#cbz-page) .nv-content-layout { grid-template-columns: minmax(0, 1fr) !important; }
+.nv-app.nv-fees-page .nv-main { width: 100%; }
+.cbz { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.cbz h2, .cbz h3 { color: var(--nv-ink); }
+.cbz-muted { margin: 0; color: var(--nv-muted); font-size: 12px; }
+.cbz-pad { padding: 20px 16px; }
+.cbz-hint { margin: 0 0 12px; color: var(--nv-muted); font-size: 12px; }
+.cbz-error { margin: 0; padding: 10px 12px; border-radius: 9px; background: var(--nv-coral); color: var(--nv-ink); font-size: 12px; }
+.cbz-ok { margin: 0; padding: 10px 12px; border-radius: 9px; background: var(--nv-green); color: var(--nv-ink); font-size: 12px; }
+
+.cbz-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 0; }
+.cbz-stat { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 4px; padding: 16px; border-radius: 16px; background: var(--nv-card); box-shadow: 0 4px 12px rgba(176, 176, 176, .14); }
+.cbz-stat dt { color: var(--nv-muted); font-size: 12px; }
+.cbz-stat dd { margin: 0; font-size: 22px; font-weight: 700; color: var(--nv-ink); }
+
+.cbz-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, 440px); gap: 20px; align-items: start; }
+.cbz-list-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.cbz-directory, .cbz-panel { border-radius: 16px; background: var(--nv-card); box-shadow: 0 4px 12px rgba(176, 176, 176, .14); min-width: 0; }
+.cbz-directory > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 16px; border-bottom: 1px solid var(--nv-border); }
+.cbz-directory h2 { font-size: 14px; margin: 0; }
+.cbz-directory nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.cbz-directory nav button { min-height: 32px; padding: 4px 12px; border: 1px solid var(--nv-border); border-radius: 999px; background: transparent; color: var(--nv-muted); font-size: 12px; }
+.cbz-directory nav button[aria-pressed=true] { background: var(--nv-green); color: var(--nv-ink); border-color: transparent; font-weight: 600; }
+.cbz-patients { margin: 0; padding: 0; list-style: none; }
+.cbz-patients li + li { border-top: 1px solid var(--nv-border); }
+.cbz-patients button { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; min-height: 64px; padding: 12px 16px; border: 0; background: transparent; color: var(--nv-ink); text-align: left; box-shadow: inset 3px 0 transparent; }
+.cbz-patients button:hover { background: var(--nv-track); }
+.cbz-patients button.cbz-selected { background: color-mix(in srgb, var(--nv-mint) 54%, transparent); box-shadow: inset 3px 0 var(--nv-strong); }
+.cbz-who { display: flex; flex-direction: column; min-width: 0; }
+.cbz-who strong { font-size: 13px; overflow-wrap: anywhere; }
+.cbz-who small { color: var(--nv-muted); font-size: 12px; }
+.cbz-side { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: 0 0 auto; }
+.cbz-owed { font-size: 13px; }
+.cbz-pending { display: inline-flex; align-items: center; gap: 4px; color: var(--nv-muted); font-size: 11px; font-weight: 600; }
+
+.cbz-panel { display: flex; flex-direction: column; gap: 16px; padding: 16px; }
+.cbz-panel-empty { color: var(--nv-muted); font-size: 12px; text-align: center; padding: 32px 16px; }
+.cbz-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.cbz-panel-head h2 { margin: 0; font-size: 16px; overflow-wrap: anywhere; }
+.cbz-panel-head p { margin: 2px 0 0; color: var(--nv-muted); font-size: 12px; }
+.cbz-back { display: none; align-items: center; gap: 4px; min-height: 40px; padding: 0; border: 0; background: transparent; color: var(--nv-ink); font-size: 12px; font-weight: 600; }
+.cbz-back svg { transform: rotate(180deg); }
+.cbz-figures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0; }
+.cbz-figures div { padding: 10px; border-radius: 12px; background: var(--nv-bg); }
+.cbz-figures dt { color: var(--nv-muted); font-size: 11px; }
+.cbz-figures dd { margin: 0; font-size: 14px; font-weight: 700; }
+.cbz-whatsapp { align-self: flex-start; }
+.cbz-block { display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px solid var(--nv-border); }
+.cbz-block h3 { margin: 0; font-size: 13px; }
+.cbz-reports { padding: 12px; border: 0; border-radius: 12px; background: var(--nv-gold); }
+
+.cbz-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.cbz-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.cbz-row > div:first-child { display: flex; flex-direction: column; min-width: 0; }
+.cbz-row strong { font-size: 13px; }
+.cbz-row small { color: var(--nv-muted); font-size: 12px; overflow-wrap: anywhere; }
+.cbz-dim { opacity: .65; }
+.cbz-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.cbz-form { display: flex; flex-direction: column; gap: 12px; }
+.cbz-form label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 500; }
+.cbz-form input, .cbz-form select, .cbz-form textarea { min-height: 42px; padding: 9px 12px; border: 1px solid var(--nv-border); border-radius: 9px; background: var(--nv-bg); color: var(--nv-ink); font: inherit; font-size: 13px; width: 100%; box-sizing: border-box; }
+.cbz-form input:focus-visible, .cbz-form select:focus-visible, .cbz-form textarea:focus-visible { outline: 2px solid var(--nv-strong); outline-offset: 1px; }
+.cbz-form .nv-button[type=submit] { align-self: flex-start; }
+.cbz-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.cbz-grid-2 { grid-template-columns: 1fr 1fr; }
+.cbz-dialog h2 { margin: 0 0 8px; font-size: 16px; }
+.cbz-dialog p { margin: 0 0 14px; color: var(--nv-muted); font-size: 13px; }
+
+.cbz-patient { max-width: 980px; }
+.cbz-status { padding: 20px; border-radius: 16px; background: var(--nv-card); box-shadow: 0 4px 12px rgba(176, 176, 176, .14); border-left: 6px solid var(--nv-green); }
+.cbz-status-debe { border-left-color: #ffa257; }
+.cbz-status-por_vencer { border-left-color: #ffcb65; }
+.cbz-status h2 { margin: 10px 0 4px; font-size: 18px; }
+.cbz-status p { margin: 2px 0 0; color: var(--nv-muted); font-size: 13px; display: flex; align-items: center; gap: 6px; }
+.cbz-patient-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.cbz-howto { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.cbz-alias { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 12px; border-radius: 12px; background: var(--nv-bg); }
+.cbz-alias small { display: block; color: var(--nv-muted); font-size: 11px; }
+.cbz-alias strong { overflow-wrap: anywhere; font-size: 14px; }
+.cbz-instructions { margin: 0; font-size: 13px; white-space: pre-line; overflow-wrap: anywhere; }
+
+.cbz-notice { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; padding: 10px 14px; border-radius: 12px; background: var(--nv-gold); color: var(--nv-ink); }
+.cbz-notice p { margin: 0; flex: 1 1 200px; font-size: 13px; font-weight: 500; }
+.cbz-notice .nv-button { min-height: 36px; }
+
+@media (max-width: 1050px) {
+  .cbz-layout { grid-template-columns: 1fr; }
+  .cbz-layout.cbz-has-selection .cbz-list-col { display: none; }
+  .cbz-layout:not(.cbz-has-selection) .cbz-panel-empty { display: none; }
+  .cbz-back { display: inline-flex; }
+  .cbz-patient-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  .cbz { gap: 16px; }
+  .cbz-summary { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cbz-stat { padding: 12px; }
+  .cbz-stat dd { font-size: 18px; }
+  .cbz-grid { grid-template-columns: 1fr; }
+  .cbz-grid-2 { grid-template-columns: 1fr; }
+  .cbz-figures { grid-template-columns: 1fr 1fr 1fr; }
+  .cbz-patients button { align-items: flex-start; }
+  .cbz-form .nv-button[type=submit], .cbz-whatsapp { width: 100%; }
+  .cbz-form input, .cbz-form select { font-size: 16px; }
+}

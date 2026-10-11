@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { app } from './index.js';
 import { getPatient, resetStore } from './store.js';
 
@@ -11,7 +11,10 @@ function jsonRequest(method: string, body: unknown) {
 }
 
 describe('appointment API flow in memory mode', () => {
+  afterEach(() => vi.useRealTimers());
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-09-30T12:00:00-03:00'));
     resetStore();
   });
 

@@ -6,13 +6,13 @@ export const PRIVATE_MESSAGE_COLUMNS = ['suggested_by_ai'] as const;
 export const PRIVATE_APPOINTMENT_COLUMNS = ['prep_note'] as const;
 
 export const patientTableColumns: Record<QueryAudience, string> = {
-  professional: 'id,full_name,initials,tone,status,billing_status,billing_until,stage,goal,adherence_score,user_id,nutritionist_id,plan_b,next_focus,sensitive_hours,adherence_why',
+  professional: 'id,full_name,initials,tone,status,billing_status,billing_until,stage,goal,adherence_score,user_id,nutritionist_id,plan_b,next_focus,sensitive_hours,adherence_why,created_at',
   patient: 'id,full_name,initials,tone,status,billing_status,billing_until,stage,goal,adherence_score,user_id',
 };
 
 export const mealLogColumns: Record<QueryAudience, string> = {
-  professional: 'id,patient_id,slot_label,photo_path,description,foods,macros,confidence,status,logged_at,note_for_nutri',
-  patient: 'id,patient_id,slot_label,photo_path,description,foods,macros,confidence,status,logged_at',
+  professional: 'id,patient_id,slot_label,photo_path,description,foods,macros,confidence,status,logged_at,note_for_nutri,nutrition_origin',
+  patient: 'id,patient_id,slot_label,photo_path,description,foods,macros,confidence,status,logged_at,nutrition_origin',
 };
 
 export const messageColumns: Record<QueryAudience, string> = {

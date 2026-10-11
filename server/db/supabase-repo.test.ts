@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 type Call = {
   table: string;
@@ -59,6 +59,7 @@ const harness = vi.hoisted(() => {
     builder.eq = filter('eq');
     builder.in = filter('in');
     builder.gte = filter('gte');
+    builder.lt = filter('lt');
     builder.order = filter('order');
     builder.limit = filter('limit');
     builder.range = (from: number, to: number) => {
@@ -80,7 +81,10 @@ const harness = vi.hoisted(() => {
       calls.length = 0;
       queues.clear();
     },
-    client: { from },
+    client: { from, rpc(name: string, payload: unknown) {
+      calls.push({ table: 'rpc:' + name, op: 'rpc', payload, filters: [] });
+      return Promise.resolve(next('rpc:' + name));
+    } },
   };
 });
 
@@ -110,6 +114,8 @@ import {
   sbListPatientsForNutri,
   sbSetAppointment,
   sbSetBrief,
+  sbSendInvite,
+  sbRevokeInvite,
   sbUpdateGoal,
   sbUpdateHabits,
   sbUpdatePatientProfile,
@@ -124,9 +130,34 @@ const row = {
   suggested_by_ai: false,
   sent_at: '2026-09-05T15:00:00.000Z',
 };
+afterEach(()=>vi.useRealTimers());
 
 beforeEach(() => {
   harness.reset();
+});
+
+describe('invitaciones aceptadas durante una escritura', () => {
+  const pending = { id:'invite-1', patient_id:'patient-1', nutritionist_id:'nutri-1', email:'patient@example.test', status:'pending' };
+  it('enviar no reabre una aceptación posterior ni registra un reenvío falso', async () => {
+    harness.push('patient_invites', { data:pending, error:null });
+    harness.push('patient_invites', { data:null, error:null });
+    harness.push('patient_invites', { data:{...pending,status:'accepted'}, error:null });
+    expect((await sbSendInvite(pending.id)).status).toBe('accepted');
+    expect(harness.calls.find(c=>c.table==='patient_invites'&&c.op==='update')?.filters).toContainEqual(['in',['status',['not_sent','pending']]]);
+    expect(harness.calls.some(c=>c.table==='patient_invite_events')).toBe(false);
+  });
+  it('revocar no cambia una invitación que dejó de estar abierta', async () => {
+    harness.push('patient_invites', { data:pending, error:null });
+    harness.push('patient_invites', { data:null, error:null });
+    await expect(sbRevokeInvite(pending.id)).rejects.toThrow('Invite unavailable');
+    expect(harness.calls.find(c=>c.table==='patient_invites'&&c.op==='update')?.filters).toContainEqual(['in',['status',['not_sent','pending']]]);
+    expect(harness.calls.some(c=>c.table==='patient_invite_events')).toBe(false);
+  });
+  it('recupera la invitación aceptada sin efectuar ninguna mutación', async () => {
+    harness.push('patient_invites', { data:{...pending,status:'accepted'}, error:null });
+    expect((await sbSendInvite(pending.id)).status).toBe('accepted');
+    expect(harness.calls).toHaveLength(1);
+  });
 });
 
 describe('mapMessage', () => {
@@ -426,6 +457,7 @@ describe('appointments (016 v2)', () => {
   });
 
   it('maps the next scheduled appointment into the domain patient', async () => {
+    vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(new Date('2026-09-10T17:40:00Z'));
     harness.push('patients', {
       data: {
         id: 'patient-1',
@@ -450,7 +482,7 @@ describe('appointments (016 v2)', () => {
     harness.push('ai_briefs', { data: null, error: null });
     harness.push('habit_logs', { data: [], error: null });
     harness.push('appointments', {
-      data: [{
+      data: [{id:'ended',starts_at:'2026-09-10T16:30:00Z',duration_min:30,channel:'video'}, {
         id: 'appt-1',
         starts_at: '2026-09-10T17:30:00.000Z',
         duration_min: 45,
@@ -611,7 +643,7 @@ describe('timeline_events (016 v2)', () => {
       error: null,
     });
     harness.push('meal_slots', { data: [], error: null });
-    harness.push('meal_logs_patient_view', { data: [], error: null });
+    harness.push('rpc:get_patient_meal_logs', { data: [], error: null });
     harness.push('messages_patient_view', { data: [], error: null });
     harness.push('habit_logs', { data: [], error: null });
     harness.push('appointments_patient_view', { data: [], error: null });
@@ -742,6 +774,12 @@ describe('habit_logs (016 v2)', () => {
     expect(patient!.habit_logs[0]).toMatchObject({ id: 'h-today', date: today, hydration: 6, sleep_minutes: 450 });
   });
 
+  it('lee el mismo día argentino aunque el servidor ya esté en el día UTC siguiente',async()=>{
+    vi.useFakeTimers();vi.setSystemTime(new Date('2026-10-10T01:30:00Z'));vi.stubEnv('TZ','UTC');
+    try {pushPatientWithHabits([{id:'h-night',patient_id:'patient-1',date:'2026-10-09',hydration:3,hydration_declared:true,energy:null,sleep_minutes:null}]);
+      const patient=await sbGetPatientById('patient-1');expect(patient!.hydration).toBe(3);
+    } finally {vi.useRealTimers();vi.unstubAllEnvs();}
+  });
   it('defaults the snapshot when there is no habit log for today', async () => {
     pushPatientWithHabits([
       { id: 'h-old', patient_id: 'patient-1', date: '2026-08-30', hydration: 2, energy: 'Baja', sleep_minutes: 300 },
@@ -768,11 +806,23 @@ describe('habit_logs (016 v2)', () => {
       patient_id: 'patient-1',
       date: today,
       hydration: 5,
+      hydration_declared: true,
       energy: 'Baja',
       sleep_minutes: 400,
     });
     expect(upsert?.options).toMatchObject({ onConflict: 'patient_id,date' });
     expect(harness.calls.filter((call) => call.table === 'patients' && call.op === 'update')).toHaveLength(0);
+  });
+
+  it('conserva los pasos ya guardados y los escribe sólo cuando la columna existe', async () => {
+    const today = localDateId(new Date());
+    harness.push('habit_logs', {
+      data: { id: 'h-1', patient_id: 'patient-1', date: today, hydration: 2, energy: null, sleep_minutes: null, steps: 5000 },
+      error: null,
+    });
+    await sbUpdateHabits('patient-1', { steps: 6420 });
+    const upsert = harness.calls.find((call) => call.table === 'habit_logs' && call.op === 'upsert');
+    expect(upsert?.payload).toMatchObject({ steps: 6420, hydration: 2 });
   });
 
   it('inserts a fresh row when the day has no log yet', async () => {
@@ -824,7 +874,7 @@ describe('patient audience queries', () => {
       error: null,
     });
     harness.push('meal_slots', { data: [], error: null });
-    harness.push('meal_logs_patient_view', { data: [], error: null });
+    harness.push('rpc:get_patient_meal_logs', { data: [], error: null });
     harness.push('messages_patient_view', { data: [], error: null });
     harness.push('habit_logs', { data: [], error: null });
     harness.push('appointments_patient_view', { data: [], error: null });
@@ -838,8 +888,9 @@ describe('patient audience queries', () => {
     const patientsSelect = harness.calls.find((call) => call.table === 'patients_patient_view' && call.op === 'select');
     expect(String(patientsSelect?.payload)).not.toContain('plan_b');
     expect(String(patientsSelect?.payload)).not.toContain('*');
-    const mealSelect = harness.calls.find((call) => call.table === 'meal_logs_patient_view' && call.op === 'select');
-    expect(String(mealSelect?.payload)).not.toContain('note_for_nutri');
+    const mealRead = harness.calls.find((call) => call.table === 'rpc:get_patient_meal_logs');
+    expect(mealRead?.payload).toEqual({ target_patient: 'patient-1' });
+    expect(harness.calls.some(call => call.table === 'meal_logs_patient_view' || call.table === 'meal_logs')).toBe(false);
     expect(harness.calls.some((call) => call.table === 'ai_briefs')).toBe(false);
   });
 });
@@ -859,6 +910,7 @@ describe('PV-11 directory summaries', () => {
   };
 
   it('pages directory rows without loading meal logs or messages', async () => {
+    vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(new Date('2026-09-17T17:40:00Z'));
     harness.push('nutritionists', { data: { id: 'nutri-1' }, error: null });
     harness.push('patients', {
       data: [summaryRow, { ...summaryRow, id: 'patient-2', full_name: 'Ana' }, { ...summaryRow, id: 'patient-3', full_name: 'Beto' }],
@@ -893,6 +945,31 @@ describe('PV-11 directory summaries', () => {
     expect(harness.calls.find((call) => call.table === 'patients')?.filters).toEqual(
       expect.arrayContaining([['range', [0, 2]]]),
     );
+  });
+  it('arma el historial de consultas pasadas con turnos ya terminados, para última consulta e Inicio', async () => {
+    vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(new Date('2026-10-10T15:00:00Z'));
+    harness.push('nutritionists', { data: { id: 'nutri-1' }, error: null });
+    harness.push('patients', { data: [summaryRow], error: null });
+    harness.push('appointments', { data: [], error: null });
+    harness.push('appointments', { data: [
+      { id: 'p1', patient_id: 'patient-1', starts_at: '2026-10-08T02:30:00Z', duration_min: 45, channel: 'video', status: 'scheduled'},
+      { id: 'p2', patient_id: 'patient-1', starts_at: '2026-10-10T14:45:00Z', duration_min: 45, channel: 'video', status: 'scheduled'},
+    ], error: null });
+    const listed = await sbListPatientsForNutri('user-1', { offset: 0, limit: 2 });
+    const history = listed.patients[0].appointment_history ?? [];
+    // p1 terminó el 7/10 a la noche en Argentina; p2 todavía no terminó (14:45 + 45 min).
+    expect(history).toHaveLength(1);
+    expect(history[0]).toMatchObject({ id: 'p1', action: 'elapsed', actor: 'system', dateId: '2026-10-07', duration: 45 });
+    const past = harness.calls.filter((call) => call.table === 'appointments')[1];
+    expect(past?.filters).toEqual(expect.arrayContaining([['in', ['patient_id', ['patient-1']]], ['in', ['status', ['scheduled', 'done']]]]));
+  });
+  it('carga las asignaciones autorizadas con el identificador de recurso usado por el consultorio',async()=>{
+    harness.push('nutritionists',{data:{id:'nutri-1'},error:null});
+    harness.push('patients',{data:[summaryRow],error:null});
+    harness.push('resource_assignments',{data:[{id:'a1',patient_id:'patient-1',assigned_at:'2026-10-05T10:00:00Z',first_read_at:'2026-10-05T11:00:00Z',resources:{slug:'leer-plan-semanal'}}],error:null});
+    const result=await sbListPatientsForNutri('user-1',{offset:0,limit:2});
+    expect(result.patients[0].resource_assignments).toEqual([{id:'a1',patient_id:'patient-1',resource_id:'leer-plan-semanal',assigned_at:'2026-10-05T10:00:00Z',read_at:'2026-10-05T11:00:00Z'}]);
+    expect(harness.calls.find(c=>c.table==='resource_assignments')?.filters).toContainEqual(['in',['patient_id',['patient-1']]]);
   });
 });
 

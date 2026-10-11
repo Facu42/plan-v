@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import type { Message, MessageAttachment, Patient } from '../../src/types/index.js';
 import { getRequestDb } from '../db/supabase-client.js';
@@ -375,3 +376,5 @@ export async function openThreadAttachment(
   const grant = await accessPrivateAsset(attachment.asset_id, patientId, true);
   return { ...grant, filename: attachment.filename };
 }
+
+registerDemoState('messages/repository', () => ({ messages, clientIndex, receipts, attachments, assetIndex }));

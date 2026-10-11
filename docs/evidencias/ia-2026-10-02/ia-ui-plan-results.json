@@ -1,0 +1,29 @@
+[
+  {
+    "label": "plan-review",
+    "path": "/crm/plan",
+    "width": 1440,
+    "overflow": false,
+    "alerts": []
+  },
+  {
+    "label": "plan-rejected",
+    "patientPlan": null
+  },
+  {
+    "label": "plan-approved-mock",
+    "published": true,
+    "items": [
+      "Arroz con verduras",
+      "Vegetales al horno"
+    ],
+    "notice": "Menú aprobado y publicado. El paciente ya puede ver el plan fechado."
+  },
+  {
+    "label": "plan-published",
+    "path": "/crm/plan",
+    "width": 390,
+    "overflow": false,
+    "alerts": []
+  }
+]

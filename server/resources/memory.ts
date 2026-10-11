@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import {
   SEEDED_RESOURCES,
@@ -23,7 +24,9 @@ export function catalogResources() {
 }
 
 export function findResource(idOrSlug: string) {
-  return catalogResources().find((entry) => entry.slug === idOrSlug || entry.id === idOrSlug) ?? null;
+  const resources = catalogResources();
+  return resources.find((entry) => entry.id === idOrSlug)
+    ?? resources.find((entry) => entry.slug === idOrSlug) ?? null;
 }
 
 export function putResource(entry: EditorialResource) {
@@ -95,3 +98,5 @@ export function buildHits(
 }
 
 export type { PatientLibraryView };
+
+registerDemoState('resources/memory', () => ({ extras, favorites }));

@@ -1,10 +1,15 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { friendlyError } from '../lib/error-messages';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { legalAcceptance } from '../legal';
+import { googleSignupMetadata, PENDING_GOOGLE_SIGNUP_KEY, rememberGoogleSignup, takeGoogleSignup } from './google-signup';
+import { rememberAdminReturn } from './admin-return';
 import type { Session, User } from '@supabase/supabase-js';
-import { getProfile, supabase, supabaseConfigured, type Profile } from '../lib/supabase';
+import { getProfile, googleSignInEnabled, supabase, supabaseConfigured, type Profile } from '../lib/supabase';
 import { api } from '../api/client';
 import { isLocalDemoAllowed, professionalDisplayName, PROFESSIONAL_SIGNUP_FLAG, PUBLIC_SIGNUP_ROLE, wantsProfessionalSignup } from './auth-policy';
 import { pendingInviteIdFromLocation, rememberPendingInvite, PENDING_INVITE_STORAGE_KEY } from './invite-link';
 import { useAppStore } from '../store/useAppStore';
+import { isPasswordRecovery, PASSWORD_RECOVERY_KEY } from './password-recovery';
 
 type AuthState = {
   loading: boolean;
@@ -14,10 +19,15 @@ type AuthState = {
   isNutri: boolean;
   isPatient: boolean;
   demoMode: boolean;
+  passwordRecovery: boolean;
+  updatePassword: (password: string) => Promise<{ error?: string }>;
   demoAllowed: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signUp: (email: string, password: string, fullName: string, professional?: boolean) => Promise<{ error?: string }>;
   requestPasswordReset: (email: string) => Promise<{ error?: string }>;
+  googleAvailable: boolean;
+  signInWithGoogle: (choice?: { professional?: boolean; acceptedLegal?: boolean }) => Promise<{ error?: string }>;
+  acceptLegal: () => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   enterDemoMode: () => void;
 };
@@ -31,7 +41,40 @@ function frontAuthEnv() {
   };
 }
 
-async function loadProfile(user: User): Promise<Profile | null> {
+function browserStorage(): Storage | null {
+  try {
+    return typeof window === 'undefined' ? null : window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+// Al volver de Google: pasa a la cuenta lo elegido antes de salir (nutricionista, términos).
+async function applyPendingGoogleSignup(user: User): Promise<User> {
+  const store = browserStorage();
+  if (!supabase || !store) return user;
+  const pending = takeGoogleSignup(store);
+  if (!pending) return user;
+  const data = googleSignupMetadata(pending, user);
+  if (!data) return user;
+  const { data: updated, error } = await supabase.auth.updateUser({ data });
+  return error || !updated.user ? user : updated.user;
+}
+
+// getSession y el aviso de ingreso llegan casi juntos: una sola carga por usuaria.
+let inflightProfile: { userId: string; promise: Promise<Profile | null> } | null = null;
+
+function loadProfile(user: User): Promise<Profile | null> {
+  if (inflightProfile?.userId === user.id) return inflightProfile.promise;
+  const promise = loadProfileOnce(user).finally(() => {
+    if (inflightProfile?.promise === promise) inflightProfile = null;
+  });
+  inflightProfile = { userId: user.id, promise };
+  return promise;
+}
+
+async function loadProfileOnce(initialUser: User): Promise<Profile | null> {
+  const user = await applyPendingGoogleSignup(initialUser);
   const profile = await getProfile(user.id);
   if (!supabase || profile?.role !== 'paciente' || !wantsProfessionalSignup(user.user_metadata)) return profile;
   try {
@@ -46,10 +89,19 @@ async function loadProfile(user: User): Promise<Profile | null> {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const demoAllowed = isLocalDemoAllowed(frontAuthEnv());
+  const authSequence = useRef(0);
   const [loading, setLoading] = useState(supabaseConfigured);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [demoMode, setDemoMode] = useState(false);
+  const [passwordRecovery, setPasswordRecovery] = useState(() => typeof window !== 'undefined' && isPasswordRecovery(window.location.hash, window.sessionStorage.getItem(PASSWORD_RECOVERY_KEY)));
+  const [googleAvailable, setGoogleAvailable] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    googleSignInEnabled().then((enabled) => { if (!cancelled) setGoogleAvailable(enabled); });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -71,24 +123,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!cancelled) setLoading(false);
     }, 2500);
 
+    const initialSequence = authSequence.current;
     supabase.auth.getSession().then(async ({ data }) => {
-      if (cancelled) return;
+      if (cancelled || initialSequence !== authSequence.current) return;
       setSession(data.session);
       if (data.session?.user) {
-        setProfile(await loadProfile(data.session.user));
+        const loaded = await loadProfile(data.session.user);
+        if (!cancelled && initialSequence === authSequence.current) setProfile(loaded);
       }
       setLoading(false);
     }).catch(() => {
       if (!cancelled) setLoading(false);
-    }).finally(() => window.clearTimeout(timeout));
+    });
 
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, next) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
+      const sequence = ++authSequence.current;
+      if (event === 'PASSWORD_RECOVERY') {
+        window.sessionStorage.setItem(PASSWORD_RECOVERY_KEY, '1');
+        setPasswordRecovery(true);
+      }
+      if (event === 'SIGNED_OUT') {
+        window.sessionStorage.removeItem(PASSWORD_RECOVERY_KEY);
+        setPasswordRecovery(false);
+      }
       setSession(next);
       if (next?.user) {
-        setProfile(await loadProfile(next.user));
+        // Auth libera su lock antes de consultar perfiles o volver a usar el SDK.
+        window.setTimeout(() => {
+          void loadProfile(next.user).then(value => { if (!cancelled && sequence === authSequence.current) setProfile(value); }).catch(() => { if (!cancelled && sequence === authSequence.current) setProfile(null); }).finally(() => { if (!cancelled && sequence === authSequence.current) setLoading(false); });
+        }, 0);
         setDemoMode(false);
       } else {
-        setProfile(null);
+        setProfile(null); setLoading(false);
       }
     });
 
@@ -107,11 +173,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isNutri: profile?.role === 'nutri',
     isPatient: profile?.role === 'paciente',
     demoMode,
+    passwordRecovery,
+    updatePassword: async (password) => {
+      if (!supabase || !session) return { error: 'El enlace no está disponible. Solicitá uno nuevo desde el ingreso.' };
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) return { error: 'No pudimos cambiar la contraseña. Revisá el enlace e intentá nuevamente.' };
+      await supabase.auth.signOut();
+      window.sessionStorage.removeItem(PASSWORD_RECOVERY_KEY);
+      setPasswordRecovery(false); setSession(null); setProfile(null);
+      useAppStore.getState().reset();
+      return {};
+    },
     demoAllowed,
     signIn: async (email, password) => {
       if (!supabase) return { error: 'Supabase no configurado' };
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return { error: error.message };
+      if (error) return { error: friendlyError(error.message) };
       setDemoMode(false);
       return {};
     },
@@ -120,9 +197,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName, role: PUBLIC_SIGNUP_ROLE, ...(professional ? { [PROFESSIONAL_SIGNUP_FLAG]: true } : {}) } },
+        options: { data: { full_name: fullName, role: PUBLIC_SIGNUP_ROLE, ...legalAcceptance(), ...(professional ? { [PROFESSIONAL_SIGNUP_FLAG]: true } : {}) } },
       });
-      if (error) return { error: error.message };
+      if (error) return { error: friendlyError(error.message) };
       return {};
     },
     requestPasswordReset: async (email) => {
@@ -130,10 +207,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: typeof window === 'undefined' ? undefined : window.location.origin,
       });
-      if (error) return { error: error.message };
+      if (error) return { error: friendlyError(error.message) };
+      return {};
+    },
+    googleAvailable,
+    signInWithGoogle: async ({ professional = false, acceptedLegal = false } = {}) => {
+      if (!supabase) return { error: 'Supabase no configurado' };
+      const store = browserStorage();
+      if (store) rememberGoogleSignup(store, { professional, acceptedLegal });
+      if (store && typeof window !== 'undefined') rememberAdminReturn(store, window.location.pathname);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: typeof window === 'undefined' ? undefined : window.location.origin,
+          queryParams: { prompt: 'select_account' },
+        },
+      });
+      if (error) {
+        store?.removeItem(PENDING_GOOGLE_SIGNUP_KEY);
+        return { error: 'No se pudo entrar con Google. Probá de nuevo o entrá con tu email.' };
+      }
+      return {};
+    },
+    acceptLegal: async () => {
+      if (!supabase) return { error: 'Supabase no configurado' };
+      const { data, error } = await supabase.auth.updateUser({ data: legalAcceptance() });
+      if (error) return { error: 'No se pudo guardar. Probá de nuevo.' };
+      if (data.user) setSession((current) => (current ? { ...current, user: data.user } : current));
       return {};
     },
     signOut: async () => {
+      if (typeof window !== 'undefined') window.sessionStorage.removeItem(PASSWORD_RECOVERY_KEY);
+      setPasswordRecovery(false);
       useAppStore.getState().reset();
       setSession(null);
       setProfile(null);
@@ -147,7 +252,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(null);
       setDemoMode(true);
     },
-  }), [loading, session, profile, demoMode, demoAllowed]);
+  }), [loading, session, profile, demoMode, demoAllowed, googleAvailable, passwordRecovery]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

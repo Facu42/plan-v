@@ -1,0 +1,35 @@
+[
+  {
+    "label": "professional-from-messages",
+    "width": 1440,
+    "overflow": false,
+    "title": "Tu consultorio empieza acá",
+    "bodyForm": false
+  },
+  {
+    "label": "create-opens-form",
+    "dialog": "Nuevo paciente"
+  },
+  {
+    "label": "professional",
+    "width": 1440,
+    "overflow": false,
+    "title": "Tu consultorio empieza acá",
+    "bodyForm": false
+  },
+  {
+    "label": "professional",
+    "width": 390,
+    "overflow": false,
+    "title": "Tu consultorio empieza acá",
+    "bodyForm": false
+  },
+  {
+    "label": "invite-selected-patient",
+    "patientMatched": true
+  },
+  {
+    "label": "plan-selected-patient",
+    "patientMatched": true
+  }
+]

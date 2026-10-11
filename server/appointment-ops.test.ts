@@ -1,9 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { historyEntry, occurrenceFromWhen, resolveAppointmentState, stampStartsAt } from './appointment-ops.js';
+import { appointmentHasNotEnded, appointmentReadSince, historyEntry, occurrenceFromWhen, resolveAppointmentState, stampStartsAt } from './appointment-ops.js';
 
 const now = new Date(2026, 8, 16, 10, 0, 0);
 
 describe('appointment history ops', () => {
+  it('conserva el turno desde su inicio hasta antes del fin, incluido el máximo de tres horas',()=>{
+    const start=new Date('2026-10-08T17:00:00Z');
+    const slot={starts_at:start.toISOString(),duration_min:180};
+    expect(appointmentHasNotEnded(slot,start)).toBe(true);
+    const lastInstant=new Date('2026-10-08T19:59:59.999Z');
+    expect(appointmentHasNotEnded(slot,lastInstant)).toBe(true);
+    expect(Date.parse(appointmentReadSince(lastInstant))).toBeLessThan(start.getTime());
+    expect(appointmentHasNotEnded(slot,new Date('2026-10-08T20:00:00Z'))).toBe(false);
+    expect(appointmentHasNotEnded({starts_at:'invalid',duration_min:45},start)).toBe(false);
+  });
   it('derives the next published occurrence without inventing past visits', () => {
     const at = occurrenceFromWhen('Jueves · 14:30', now);
     expect(at?.getFullYear()).toBe(2026);

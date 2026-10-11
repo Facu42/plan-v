@@ -3,7 +3,9 @@ import type { PatientRecipe, ProfessionalRecipe } from '../types/recipes';
 import type { RecipeDayAssignment, RecipeWizardInput } from '../types/recipe-plate';
 
 export const recipesApi = {
-  list: (signal?: AbortSignal) => request<{ recipes: ProfessionalRecipe[]; source: string }>('/api/recipes', { signal }),
+  favorites: (signal?: AbortSignal) => request<{ favorite_ids: string[] }>('/api/recipes/favorites', { signal }),
+  setFavorite: (id: string, favorite: boolean) => request<{ recipe_id: string; favorite: boolean }>(`/api/recipes/${id}/favorite`, { method: 'POST', body: JSON.stringify({ favorite }) }),
+  list: (signal?: AbortSignal) => request<{ recipes: ProfessionalRecipe[]; source: string; image_generation?: boolean }>('/api/recipes', { signal }),
   save: (input: RecipeWizardInput) => request<{ recipe: ProfessionalRecipe; source: string }>('/api/recipes', {
     method: 'POST',
     body: JSON.stringify(input),
@@ -12,9 +14,12 @@ export const recipesApi = {
     method: 'POST',
     body: JSON.stringify(input),
   }),
-  publish: (id: string, expected_version: number) => request<{ recipe: ProfessionalRecipe; source: string }>(`/api/recipes/${id}/publish`, {
+  publish: (id: string, expected_version: number, expected_revision?: string) => request<{ recipe: ProfessionalRecipe; source: string }>(`/api/recipes/${id}/publish`, {
     method: 'POST',
-    body: JSON.stringify({ expected_version }),
+    body: JSON.stringify({ expected_version, expected_revision }),
+  }),
+  cover: (id: string, expected_version: number) => request<{ recipe: ProfessionalRecipe; source: string }>(`/api/recipes/${id}/cover`, {
+    method: 'POST', body: JSON.stringify({ expected_version }),
   }),
   assign: (id: string, patient_id: string, expected_version: number) => request<{ recipe: PatientRecipe; source: string }>(`/api/recipes/${id}/assign`, {
     method: 'POST',

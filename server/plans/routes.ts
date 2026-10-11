@@ -6,10 +6,12 @@ import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { DEMO_NUTRITIONIST_ID, getPatient } from '../store.js';
 import { mealPlanDraftSchema, mealPlanPublishSchema } from '../../src/types/plans.js';
 import * as repo from './repository.js';
+import { recipeCoverEnabled } from '../ai/recipe-cover.js';
+import { patientPlanWithPhotos } from '../recipes/ingredient-covers.js';
 
 async function body<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
   const raw = await c.req.text();
-  if (raw.length > 24_000) throw new repo.CareError(413, 'El archivo es demasiado grande.');
+  if (raw.length > 262_144) throw new repo.CareError(413, 'El archivo es demasiado grande.');
   try { return schema.parse(JSON.parse(raw)); } catch { throw new repo.CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.'); }
 }
 
@@ -52,14 +54,23 @@ async function readAccess(c: Context, patientId: string) {
 const planIdParam = z.uuid();
 
 export function registerPlanRoutes(app: Hono) {
+  app.get('/api/patients/:id/plans/history',async c=>{const id=c.req.param('id');const actor=await professional(c,id);return c.json({versions:await repo.getMealPlanHistory(actor.nutritionistId,id,actor.persistent)});});
+  app.post('/api/plans/:id/covers', async (c) => {
+    const id = planIdParam.safeParse(c.req.param('id'));
+    if (!id.success) throw new repo.CareError(400, 'Volvé a abrir el plan publicado.');
+    const { persistent, nutritionistId } = await professional(c);
+    const input = await body(c, z.object({ expected_version: z.number().int().positive() }).strict());
+    const plan = await repo.retryMealPlanCovers(nutritionistId, id.data, input.expected_version, persistent);
+    return c.json({ plan, source: persistent ? 'supabase' : 'memory' });
+  });
   app.get('/api/patients/:id/plans', async (c) => {
     const id = c.req.param('id');
     const { persistent, professional, nutritionistId } = await readAccess(c, id);
     if (professional) {
       const plan = await repo.getProfessionalMealPlan(nutritionistId, id, persistent);
-      return c.json({ plan, source: persistent ? 'supabase' : 'memory' });
+      return c.json({ plan, source: persistent ? 'supabase' : 'memory', image_generation: recipeCoverEnabled() });
     }
-    const plan = await repo.getPublishedMealPlan(id, persistent);
+    const plan = await patientPlanWithPhotos(await repo.getPublishedMealPlan(id, persistent), persistent);
     return c.json({ plan, source: persistent ? 'supabase' : 'memory' });
   });
 
@@ -76,7 +87,7 @@ export function registerPlanRoutes(app: Hono) {
     if (!id.success) throw new repo.CareError(400, 'Revisá las fechas, los momentos y las recetas o textos del plan.');
     const { persistent, nutritionistId } = await professional(c);
     const input = await body(c, mealPlanPublishSchema);
-    const plan = await repo.publishMealPlan(nutritionistId, id.data, input.expected_version, persistent);
+    const plan = await repo.publishMealPlan(nutritionistId, id.data, input.expected_version, persistent, input.expected_snapshot);
     return c.json({ plan, source: persistent ? 'supabase' : 'memory' });
   });
 }

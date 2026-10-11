@@ -1,0 +1,51 @@
+{
+  "project": "wvosvlxpfytokwfbcero",
+  "read_only": true,
+  "stage": "before_production_unchanged",
+  "lints": [
+    {
+      "name": "rls_enabled_no_policy",
+      "level": "INFO",
+      "count": 22
+    },
+    {
+      "name": "security_definer_view",
+      "level": "ERROR",
+      "count": 3,
+      "findings": [
+        {
+          "detail": "View \\`public.patient_access_view\\` is defined with the SECURITY DEFINER property",
+          "metadata": {
+            "name": "patient_access_view",
+            "type": "view",
+            "schema": "public"
+          },
+          "observed_at": "2026-10-09T14:19:55.038Z"
+        },
+        {
+          "detail": "View \\`public.patients_patient_view\\` is defined with the SECURITY DEFINER property",
+          "metadata": {
+            "name": "patients_patient_view",
+            "type": "view",
+            "schema": "public"
+          },
+          "observed_at": "2026-10-09T14:19:55.038Z"
+        },
+        {
+          "detail": "View \\`public.meal_logs_patient_view\\` is defined with the SECURITY DEFINER property",
+          "metadata": {
+            "name": "meal_logs_patient_view",
+            "type": "view",
+            "schema": "public"
+          },
+          "observed_at": "2026-10-09T14:19:55.038Z"
+        }
+      ]
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "count": 125
+    }
+  ]
+}

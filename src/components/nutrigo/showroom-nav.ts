@@ -15,6 +15,7 @@ export const PATIENT_SURFACES: ShellTab[] = [
   { id: 'progreso', icon: 'trend', label: 'Progreso' },
   { id: 'ejercicio', icon: 'heart', label: 'Ejercicio' },
   { id: 'recursos', icon: 'pin', label: 'Recursos' },
+  { id: 'pagos', icon: 'wallet', label: 'Pagos' },
 ];
 
 /** El grupo desplegable del Navbar (84:2994): Meal Plan abre Meal Plan y Grocery List. */
@@ -35,35 +36,41 @@ export const PATIENT_MORE: ShellTab[] = PATIENT_SURFACES.filter((surface) => !PA
 export const PRO_TABS: ShellTab[] = [
   { id: 'inicio', icon: 'home', label: 'Inicio' },
   { id: 'pacientes', icon: 'users', label: 'Pacientes' },
-  { id: 'diario', icon: 'history', label: 'Diario' },
+  { id: 'seguimiento', icon: 'sparkle', label: 'Seguimiento' },
   { id: 'agenda', icon: 'calendar', label: 'Agenda' },
 ];
 
-/** Menú del nutricionista: primero los destinos que dibuja la Navbar del archivo (12:793), en su orden; después las pantallas propias de Plan V. */
+/** Gestión del consultorio; los detalles del paciente viven en su ficha. */
 export const PRO_SURFACES: ShellTab[] = [
   { id: 'inicio', icon: 'home', label: 'Inicio' },
+  { id: 'pacientes', icon: 'users', label: 'Pacientes' },
+  { id: 'plan', icon: 'list', label: 'Planes' },
+  { id: 'seguimiento', icon: 'sparkle', label: 'Seguimiento' },
   { id: 'agenda', icon: 'calendar', label: 'Agenda' },
   { id: 'mensajes', icon: 'message', label: 'Mensajes' },
-  { id: 'recetas', icon: 'leaf', label: 'Menú' },
-  { id: 'plan', icon: 'list', label: 'Plan' },
-  { id: 'compras', icon: 'check', label: 'Compras' },
-  { id: 'diario', icon: 'history', label: 'Diario' },
-  { id: 'progreso', icon: 'trend', label: 'Progreso' },
-  { id: 'ejercicio', icon: 'heart', label: 'Ejercicio' },
-  { id: 'recursos', icon: 'pin', label: 'Recursos' },
-  { id: 'pacientes', icon: 'users', label: 'Pacientes' },
-  { id: 'ficha', icon: 'contact', label: 'Ficha' },
-  { id: 'consultas', icon: 'video', label: 'Consultas' },
-  { id: 'objetivos', icon: 'target', label: 'Objetivos' },
-  { id: 'seguimiento', icon: 'sparkle', label: 'Seguimiento' },
+  { id: 'alimentos', icon: 'leaf', label: 'Alimentos' },
+  { id: 'biblioteca', icon: 'leaf', label: 'Biblioteca' },
+  { id: 'modelos', icon: 'list', label: 'Modelos' },
+  { id: 'cobranzas', icon: 'wallet', label: 'Cobranzas' },
 ];
+
+/** Sólo para el administrador de la plataforma (getAdminMe); nunca para pacientes. */
+export const SERVICE_TAB: ShellTab = { id: 'servicio', icon: 'wallet', label: 'Panel del servicio' };
+
+export function proSurfaces(isAdmin: boolean): ShellTab[] {
+  return isAdmin ? [...PRO_SURFACES, SERVICE_TAB] : PRO_SURFACES;
+}
 
 export const PRO_MORE: ShellTab[] = PRO_SURFACES.filter((surface) => !PRO_TABS.some((tab) => tab.id === surface.id));
 
 /** Siguen abriendo por enlace directo, fuera del menú. */
-export const PRO_HIDDEN_PAGES: ShowroomPage[] = ['reciente', 'guardado', 'paneles', 'videollamadas'];
+export const PRO_HIDDEN_PAGES: ShowroomPage[] = ['desarrollo', 'ficha', 'diario', 'progreso', 'compras', 'ejercicio', 'consultas', 'objetivos', 'recetas', 'recursos', 'reciente', 'guardado', 'paneles', 'videollamadas', 'servicio'];
 
-export const PATIENT_CRM_PAGES: ShowroomPage[] = ['ficha', 'pacientes', 'consultas', 'objetivos', 'reciente', 'guardado', 'seguimiento', 'paneles', 'videollamadas'];
+export function proMore(isAdmin: boolean): ShellTab[] {
+  return isAdmin ? [...PRO_MORE, SERVICE_TAB] : PRO_MORE;
+}
+
+export const PATIENT_CRM_PAGES: ShowroomPage[] = ['modelos', 'alimentos', 'biblioteca', 'ficha', 'pacientes', 'consultas', 'objetivos', 'reciente', 'guardado', 'seguimiento', 'paneles', 'videollamadas'];
 
 export function tabBarState(page: ShowroomPage, tabs: ShellTab[], more: ShellTab[]) {
   const onPrimary = tabs.some((tab) => tab.id === page);

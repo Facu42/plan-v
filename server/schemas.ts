@@ -161,7 +161,8 @@ export const habitUpdateInputSchema = z.object({
   hydration: z.number().int().min(0).max(8).optional(),
   energy: z.string().trim().min(1).max(80).nullable().optional(),
   sleep_minutes: z.number().int().min(0).max(1440).optional(),
-}).refine((input) => input.hydration !== undefined || input.energy !== undefined || input.sleep_minutes !== undefined, {
+  steps: z.number().int().min(0).max(100000).optional(),
+}).refine((input) => input.hydration !== undefined || input.energy !== undefined || input.sleep_minutes !== undefined || input.steps !== undefined, {
   message: 'Se requiere al menos un hábito',
 });
 
@@ -243,6 +244,7 @@ export const consentDecisionInputSchema = z.object({
     'measurement',
     'ai_meal_analysis',
     'ai_menu_draft',
+    'ai_followup',
   ]),
   text_version: z.string().trim().min(3).max(80),
   text_hash: z.string().trim().min(16).max(128),

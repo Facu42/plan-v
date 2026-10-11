@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { CareError } from '../care/errors.js';
 import { processQueue } from '../jobs/queue.js';
@@ -351,3 +352,5 @@ export function memoryBlob(bucket: string, path: string) {
   if (!blob) return null;
   return `data:${blob.mime};base64,${blob.bytes.toString('base64')}`;
 }
+
+registerDemoState('assets/repository', () => ({ intents, assets, blobs, accessTokens }));

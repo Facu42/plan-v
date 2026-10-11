@@ -286,7 +286,7 @@ export function ShowroomPatientAgenda({
   const allEvents = useMemo(() => buildPatientCalendarEvents(patient, now), [patient, now]);
   const counts = countByKind(allEvents);
   const eventsById = useMemo(() => new Map(allEvents.map((event) => [event.id, event])), [allEvents]);
-  const items = useMemo<FigCalendarItem[]>(() => allEvents.map((event) => ({ id: event.id, dateId: event.dateId, at: event.at, category: event.kind, time: eventTime(event), title: event.title, priority: event.kind === 'consult' ? 0 : 1 })), [allEvents]);
+  const items = useMemo<FigCalendarItem[]>(() => allEvents.map((event) => ({ id: event.id, dateId: event.dateId, at: event.at, category: event.kind === 'meal' ? 'plan' : event.kind, time: eventTime(event), title: event.title, priority: event.kind === 'consult' ? 0 : 1 })), [allEvents]);
   const dateIds = useMemo(() => allEvents.map((event) => event.dateId), [allEvents]);
   const nav = useCalendarNav(dateIds, now, patient.id);
   const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
@@ -390,11 +390,14 @@ export function ShowroomPatientAgenda({
     <div className="nvcal-main">
       <section className="nvcal-stats" aria-label="Resumen del calendario">
         <FigStatCard label="Comidas del plan" value={counts.plan} unit={counts.plan === 1 ? 'comida' : 'comidas'} tone="green" icon={<ForkKnife size={16} />} />
-        <FigStatCard label="Registros del diario" value={counts.meal} unit={counts.meal === 1 ? 'registro' : 'registros'} tone="mint" icon={<Notebook size={16} />} />
         <FigStatCard label="Actividad física" value={counts.activity} unit={counts.activity === 1 ? 'registro' : 'registros'} tone="saffron" icon={<PersonSimpleRun size={16} />} />
         <FigStatCard label="Consultas" value={counts.consult} unit={counts.consult === 1 ? 'consulta' : 'consultas'} tone="orange" icon={<CalendarCheck size={16} />} />
       </section>
-      <FigCalendarBoard nav={nav} items={items} categories={PATIENT_CATEGORIES} hidden={hidden} onToggle={(id) => setHidden((set) => toggleInSet(set, id))}
+      <FigCalendarBoard nav={nav} items={items} categories={PATIENT_CATEGORIES.filter((category) => category.id !== 'meal')} hidden={hidden} onToggle={(id) => setHidden((set) => {
+        const next = toggleInSet(set, id);
+        if (id === 'plan') { if (next.has(id)) next.add('meal'); else next.delete('meal'); }
+        return next;
+      })}
         cta={{ label: 'Nueva consulta', onClick: onMessage }} dayAttr="patient-agenda"
         caption="Las indicaciones del plan se muestran sólo sobre la semana calendario actual."
         renderDay={(list) => list.length ? list.map((item) => { const event = eventsById.get(item.id); return event ? (event.kind === 'consult' ? consultCard : eventCard(event)) : null; })

@@ -1,3 +1,4 @@
+import type { PlanComponentView } from '../../src/types/plan-components.js';
 import { RECIPE_UNITS } from '../../src/types/recipes.js';
 import { planSlotKey } from '../../src/types/plans.js';
 import { CareError } from '../care/errors.js';
@@ -146,12 +147,14 @@ export function evaluateRecipeDraft(input: RecipeEvalInput, health?: EvalHealth 
 }
 
 export type PlanEvalItem = {
+  components?: PlanComponentView[];
   for_date: string;
   slot: string;
   recipe_id?: string | null;
   free_text?: string | null;
   portions?: number | null;
   public_note?: string;
+  recipe_proposal?: { title: string; yield_portions: number; steps: string[]; ingredients: Array<{ name: string; quantity: number; unit: string }> };
   recipe?: {
     title: string;
     steps: string[];
@@ -175,6 +178,7 @@ export function evaluateMealPlanDraft(input: PlanEvalInput, health?: EvalHealth 
   }
   const keys = new Set<string>();
   for (const [index, item] of input.items.entries()) {
+    if (item.components) { const componentText = JSON.stringify(item.components); scanDeclared(componentText, known.health, result, `items.${index}.components`); scanIncomplete(componentText, result, `items.${index}.components`); scanMinutes(componentText, known.health.cooking_time_minutes, result, `items.${index}.components`); }
     const hasRecipe = Boolean(item.recipe_id || item.recipe);
     const text = item.free_text?.trim() || '';
     if (hasRecipe === Boolean(text)) {
@@ -189,21 +193,22 @@ export function evaluateMealPlanDraft(input: PlanEvalInput, health?: EvalHealth 
       push(result, { code: 'duplicate_slot', message: 'Hay dos indicaciones en la misma fecha y momento.', path: `items.${index}.slot` });
     }
     keys.add(key);
-    if (hasRecipe && !(item.portions && item.portions > 0)) {
+    if ((hasRecipe || item.recipe_proposal) && !(item.portions && item.portions > 0 && item.portions <= 50)) {
       push(result, { code: 'missing_portion', message: 'Las recetas del plan necesitan porciones positivas.', path: `items.${index}.portions` });
     }
-    if (item.recipe) {
+    const detail = item.recipe ?? item.recipe_proposal;
+    if (detail) {
       const nested = evaluateRecipeDraft({
-        title: item.recipe.title,
+        title: detail.title,
         yield_portions: 1,
-        steps: item.recipe.steps,
-        items: item.recipe.ingredients,
+        steps: detail.steps,
+        items: detail.ingredients,
       }, known.health);
       for (const issue of nested.blockers) {
         result.blockers.push({ ...issue, path: issue.path ? `items.${index}.${issue.path}` : `items.${index}.recipe` });
       }
     }
-    const haystack = [text, item.public_note ?? '', item.recipe?.title ?? '', ...(item.recipe?.ingredients.map((line) => line.name) ?? [])].join(' ');
+    const haystack = [text, item.public_note ?? '', detail?.title ?? '', ...(detail?.ingredients.map((line) => line.name) ?? [])].join(' ');
     scanIncomplete(haystack, result, `items.${index}`);
     scanDeclared(haystack, known.health, result, `items.${index}`);
     scanMinutes(haystack, known.health.cooking_time_minutes, result, `items.${index}`);

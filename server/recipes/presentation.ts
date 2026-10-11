@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import type { RecipeCard } from '../../src/types/recipes.js';
 import { unavailableCard } from '../../src/types/recipe-plate.js';
 
@@ -14,3 +15,5 @@ export function setRecipeCard(versionId: string, card: RecipeCard) {
 export function getRecipeCard(versionId: string, title: string): RecipeCard {
   return cards.get(versionId) ?? unavailableCard(title);
 }
+
+registerDemoState('recipes/presentation', () => ({ cards }));

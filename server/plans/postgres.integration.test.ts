@@ -1,8 +1,13 @@
+import { productFixtureArgs } from '../testing/product-rpc-fixture';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
 import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { planReviewSnapshot, type PlanVersionView } from '../../src/types/plans.js';
+import type { ProfessionalModel } from '../../src/types/models.js';
+import type { ProfessionalMealPlan } from '../../src/types/plans.js';
+import { calculateTarget, defaultsForGoal } from '../../src/lib/nutrition-target.js';
 
 let db: PGlite;
 let dir: string;
@@ -23,6 +28,8 @@ async function asUser<T = Record<string, unknown>>(user: string, sql: string, pa
   });
 }
 async function rpc(user: string, name: string, args: unknown[] = []) {
+  args = await productFixtureArgs(db, name, args);
+  if (name === 'publish_meal_plan') name = 'publish_reviewed_meal_plan';
   const rows = await asUser<{ result: unknown }>(user, `select public.${name}(${args.map((_, i) => `$${i + 1}`).join(',')}) as result`, args);
   return rows[0].result;
 }
@@ -127,9 +134,9 @@ describe('PV-19 planes en PostgreSQL descartable', () => {
     expect(still.items[0].free_text).toBe('Pollo con vegetales');
 
     const publishedId = (await asUser<{ id: string }>(nutriA, 'select id from public.meal_plan_versions where meal_plan_id=$1 and version=1', [planId]))[0].id;
-    await expect(asUser(nutriA, 'update public.meal_plan_versions set period_end=period_end + 1 where id=$1', [publishedId])).rejects.toMatchObject({ code: 'PT409' });
-    await expect(asUser(nutriA, "insert into public.meal_plan_items(meal_plan_version_id, for_date, slot, free_text) values ($1,'2026-09-24','extra','no')", [publishedId])).rejects.toMatchObject({ code: 'PT409' });
-    await expect(asUser(nutriA, 'delete from public.meal_plan_items where meal_plan_version_id=$1', [publishedId])).rejects.toMatchObject({ code: 'PT409' });
+    await expect(asUser(nutriA, 'update public.meal_plan_versions set period_end=period_end + 1 where id=$1', [publishedId])).rejects.toMatchObject({ code: '42501' });
+    await expect(asUser(nutriA, "insert into public.meal_plan_items(meal_plan_version_id, for_date, slot, free_text) values ($1,'2026-09-24','extra','no')", [publishedId])).rejects.toMatchObject({ code: '42501' });
+    await expect(asUser(nutriA, 'delete from public.meal_plan_items where meal_plan_version_id=$1', [publishedId])).rejects.toMatchObject({ code: '42501' });
   });
 
   it('resuelve receta publicada XOR texto, rechaza receta borrador y falla cerrado sin tablas', async () => {
@@ -183,5 +190,122 @@ describe('PV-19 planes en PostgreSQL descartable', () => {
     expect(still.items[0].recipe.version).toBe(1);
     expect(Number(still.items[0].recipe.yield_portions)).toBe(2);
     expect(Number(still.items[0].recipe.ingredients.find((line) => line.name === 'Quinoa')?.quantity)).toBe(60);
+  });
+  it('confirmar una meta sincroniza el borrador en la misma transacción y preserva el plan publicado', async () => {
+    const before = await rpc(nutriA, 'list_professional_meal_plan', [patientA]) as ProfessionalMealPlan;
+    const visible = await rpc(patientAUser, 'list_published_meal_plan', [patientA]);
+    const input = { sex: 'femenino' as const, age: 30, weight_kg: 65, height_cm: 165, activity: 'ligera' as const, ...defaultsForGoal('mantener') };
+    const current = await rpc(nutriA, 'get_nutrition_target_workspace', [patientA]) as { revision: number };
+    await rpc(nutriA, 'save_nutrition_target_versioned', [patientA, input, calculateTarget(input), false, current.revision]);
+    expect(await rpc(nutriA, 'list_professional_meal_plan', [patientA])).toEqual(before);
+    const confirmed = await rpc(nutriA, 'save_nutrition_target_versioned', [patientA, input, calculateTarget(input), true, current.revision + 1]) as { published: { updated_at: string; published_at: string; result: { kcal: number } } };
+    const after = await rpc(nutriA, 'list_professional_meal_plan', [patientA]) as ProfessionalMealPlan;
+    expect(after.current.status).toBe('draft');
+    expect(after.current.version).toBe(before.current.version + 1);
+    expect(after.current.nutrition_target).toMatchObject({ kcal: confirmed.published.result.kcal, revision: confirmed.published.updated_at, published_at: confirmed.published.published_at });
+    expect(after.current.guidance).toEqual(before.current.guidance);
+    expect(after.current.items.map(item => ({ free_text: item.free_text, note: item.public_note, recipe: item.recipe, components: item.components }))).toEqual(before.current.items.map(item => ({ free_text: item.free_text, note: item.public_note, recipe: item.recipe, components: item.components })));
+    expect(await rpc(patientAUser, 'list_published_meal_plan', [patientA])).toEqual(visible);
+    const changedInput = { ...input, weight_kg: 72 };
+    const nextConfirmed = await rpc(nutriA, 'save_nutrition_target_versioned', [patientA, changedInput, calculateTarget(changedInput), true, current.revision + 2]) as typeof confirmed;
+    const nextDraft = await rpc(nutriA, 'list_professional_meal_plan', [patientA]) as ProfessionalMealPlan;
+    expect(nextDraft.current.version).toBe(after.current.version);
+    expect(nextDraft.current.revision).not.toBe(after.current.revision);
+    expect(nextDraft.current.nutrition_target?.revision).toBe(nextConfirmed.published.updated_at);
+    await expect(rpc(nutriB, 'save_nutrition_target_versioned', [patientA, input, calculateTarget(input), true, current.revision + 2])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(nutriA, 'save_nutrition_target_versioned', [patientA, input, calculateTarget(input), true, current.revision])).rejects.toMatchObject({ code: 'PT409' });
+    expect(await rpc(nutriA, 'list_professional_meal_plan', [patientA])).toEqual(nextDraft);
+    expect((await asUser<{ allowed: boolean }>(nutriA, "select has_function_privilege('authenticated','private.save_nutrition_target_before_plan_sync(uuid,jsonb,jsonb,boolean,bigint)','execute') as allowed"))[0].allowed).toBe(false);
+  });
+});
+
+describe('Publicación de una propuesta revisada', () => {
+  it('aplicar modelo crea versión nueva, preserva publicado e historial y no acepta revisiones ni propietarios ajenos',async()=>{
+    const before=await rpc(nutriA,'list_professional_meal_plan',[patientA]) as ProfessionalMealPlan;
+    const draft=await rpc(nutriA,'save_professional_model',[{id:crypto.randomUUID(),expected_revision:null,kind:'plan',title:'Modelo propio',description:'',lines:[],overrides:[],source:{patient_id:patientA,version:before.current.version,revision:before.current.revision}}]) as ProfessionalModel;
+    const model=await rpc(nutriA,'act_professional_model',[draft.id,draft.revision,'publish']) as ProfessionalModel;
+    const payload={patient_id:patientA,period_start:'2026-11-01',expected_revision:model.revision,expected_version:model.published!.version,expected_plan_revision:before.current.revision,reviewed:true};
+    await expect(rpc(patientAUser,'apply_professional_model',[model.id,payload])).rejects.toMatchObject({code:'42501'});
+    await expect(rpc(nutriB,'apply_professional_model',[model.id,payload])).rejects.toMatchObject({code:'42501'});
+    await expect(rpc(nutriA,'apply_professional_model',[model.id,{...payload,reviewed:false}])).rejects.toMatchObject({code:'22023'});
+    const after=await rpc(nutriA,'apply_professional_model',[model.id,payload]) as ProfessionalMealPlan;
+    expect(after.current.version).toBe(before.current.version+1);expect(after.current.status).toBe('draft');expect(after.published).toEqual(before.published);
+    const history=await rpc(nutriA,'list_meal_plan_history',[patientA]) as PlanVersionView[];
+    expect(history.find(v=>v.id===before.current.id)?.items).toEqual(before.current.items);
+    await expect(rpc(nutriA,'apply_professional_model',[model.id,payload])).rejects.toMatchObject({code:'PT409'});
+    await expect(rpc(patientAUser,'list_meal_plan_history',[patientA])).rejects.toMatchObject({code:'42501'});
+    await expect(rpc(nutriB,'list_meal_plan_history',[patientA])).rejects.toMatchObject({code:'42501'});
+  });
+  it('agrega indicaciones al borrador, deduplica y revisa la copia al publicar', async () => {
+    const before = await rpc(nutriA,'list_professional_meal_plan',[patientA]) as ProfessionalMealPlan;
+    const draft = await rpc(nutriA,'save_professional_model',[{id:crypto.randomUUID(),expected_revision:null,kind:'recommendations',title:'Indicaciones ficticias',description:'',overrides:[],lines:['Texto ficticio',' TEXTO   FICTICIO ','Otra indicación']}]) as ProfessionalModel;
+    const model = await rpc(nutriA,'act_professional_model',[draft.id,draft.revision,'publish']) as ProfessionalModel;
+    const payload = {patient_id:patientA,expected_revision:model.revision,expected_version:1,expected_plan_revision:before.current.revision,period_start:before.current.period_start,reviewed:true};
+    const after = await rpc(nutriA,'apply_professional_model',[model.id,payload]) as ProfessionalMealPlan;
+    expect(after.current.guidance).toEqual({recommendations:['Texto ficticio','Otra indicación'],avoid:[]});
+    expect(after.published).toEqual(before.published);
+    const second = await rpc(nutriA,'apply_professional_model',[model.id,{...payload,expected_plan_revision:after.current.revision}]) as ProfessionalMealPlan;
+    expect(second.current.guidance).toEqual(after.current.guidance);
+    const modified = await rpc(nutriA,'save_meal_plan_draft',[patientA,{...planDraft(),guidance:{recommendations:['Texto modificado'],avoid:['Indicación para evitar ficticia']}}]) as ProfessionalMealPlan;
+    await expect(rpc(nutriA,'publish_reviewed_meal_plan',[planId,modified.current.version,planReviewSnapshot(second.current)])).rejects.toMatchObject({code:'PT409'});
+    await rpc(nutriA,'publish_reviewed_meal_plan',[planId,modified.current.version,planReviewSnapshot(modified.current)]);
+    const visible = await rpc(patientAUser,'list_published_meal_plan',[patientA]) as {guidance:unknown};
+    expect(visible.guidance).toEqual(modified.current.guidance);
+    await expect(rpc(nutriB,'apply_professional_model',[model.id,payload])).rejects.toMatchObject({code:'42501'});
+  });
+  it('guarda los horarios de cada comida, los conserva y la paciente los ve al publicar', async () => {
+    const times = { Desayuno: '08:00', Cena: '21:00' };
+    const saved = await rpc(nutriA,'save_meal_plan_draft',[patientA,{...planDraft(),meal_times:times}]) as ProfessionalMealPlan;
+    expect(saved.current.meal_times).toEqual(times);
+    const kept = await rpc(nutriA,'save_meal_plan_draft',[patientA,planDraft()]) as ProfessionalMealPlan;
+    expect(kept.current.meal_times).toEqual(times);
+    const draft = await rpc(nutriA,'save_professional_model',[{id:crypto.randomUUID(),expected_revision:null,kind:'avoid',title:'Evitar ficticio',description:'',overrides:[],lines:['Ultraprocesados']}]) as ProfessionalModel;
+    const model = await rpc(nutriA,'act_professional_model',[draft.id,draft.revision,'publish']) as ProfessionalModel;
+    const applied = await rpc(nutriA,'apply_professional_model',[model.id,{patient_id:patientA,expected_revision:model.revision,expected_version:1,expected_plan_revision:kept.current.revision,period_start:kept.current.period_start,reviewed:true}]) as ProfessionalMealPlan;
+    expect(applied.current.meal_times).toEqual(times);
+    await expect(rpc(nutriA,'save_meal_plan_draft',[patientA,{...planDraft(),meal_times:{Cena:'25:00'}}])).rejects.toMatchObject({code:'22023'});
+    await expect(rpc(nutriA,'save_meal_plan_draft',[patientA,{...planDraft(),meal_times:{Brunch:'11:00'}}])).rejects.toMatchObject({code:'22023'});
+    await rpc(nutriA,'publish_reviewed_meal_plan',[planId,applied.current.version,planReviewSnapshot(applied.current)]);
+    const visible = await rpc(patientAUser,'list_published_meal_plan',[patientA]) as {meal_times:unknown};
+    expect(visible.meal_times).toEqual(times);
+    await expect(db.query("update public.meal_plan_versions set meal_times='{}'::jsonb where id=$1",[applied.current.id])).rejects.toThrow(/meal_times_immutable/);
+    const cleared = await rpc(nutriA,'save_meal_plan_draft',[patientA,{...planDraft(),meal_times:{}}]) as ProfessionalMealPlan;
+    expect(cleared.current.meal_times).toBeUndefined();
+  });
+  it('guarda componentes confiables, congela alimentos y publica la misma copia y compras', async () => {
+    const foodId = '60000000-0000-4000-a000-0000000000a1';
+    const foodPayload = { name: 'Avena', brand: '', category: 'Cereales', kind: 'food', source: 'Etiqueta', reference: '', nutrients: Object.fromEntries(['kcal','protein','carbs','fat','fiber','sodium','calcium','iron','potassium','magnesium','vitamin_c'].map(key => [key, key === 'kcal' ? 380 : null])), portions: [{ name: 'Cucharada', grams: 10 }] };
+    await rpc(nutriA, 'save_food_catalog_item', [foodId, 0, foodPayload]);
+    const part = { id: '70000000-0000-4000-a000-0000000000a1', kind: 'food', food_id: foodId, food_revision: 1, quantity: 2, measure: 'Cucharada', public_note: 'Medida revisada' };
+    const item = { for_date: '2026-09-21', slot: 'Desayuno', public_note: 'Nota general', components: [part, { id: '70000000-0000-4000-a000-0000000000a2', kind: 'recipe', recipe_id: recipeId, recipe_version: 1, portions: 0.5, public_note: '' }] };
+    const input = planDraft({ items: [item] });
+    await expect(rpc(nutriA, 'save_meal_plan_draft', [patientA, planDraft({ items: [{ ...item, components: [{ ...part, food_snapshot: foodPayload }] }] })])).rejects.toMatchObject({ code: '22023' });
+    await expect(rpc(nutriB, 'save_meal_plan_draft', [patientB, planDraft({ id: '40000000-0000-4000-a000-0000000000b1', items: [item] })])).rejects.toMatchObject({ code: '42501' });
+    const first = await rpc(nutriA, 'save_meal_plan_draft', [patientA, input]) as { current: PlanVersionView };
+    expect(first.current.items[0].components?.[0].food_snapshot).toMatchObject({ name: 'Avena', revision: 1 });
+    await rpc(nutriA, 'save_food_catalog_item', [foodId, 1, { ...foodPayload, name: 'Avena nueva' }]);
+    const saved = await rpc(nutriA, 'save_meal_plan_draft', [patientA, planDraft({ items: [item, { ...item, for_date: '2026-09-22' }] })]) as { current: PlanVersionView };
+    expect(saved.current.items[1].components?.[0].food_snapshot?.name).toBe('Avena');
+    const reviewed = planReviewSnapshot(first.current);
+    await expect(rpc(nutriA, 'publish_reviewed_meal_plan', [planId, saved.current.version, reviewed])).rejects.toMatchObject({ code: 'PT409' });
+    await rpc(nutriA, 'publish_reviewed_meal_plan', [planId, saved.current.version, planReviewSnapshot(saved.current)]);
+    const visible = await rpc(patientAUser, 'list_published_meal_plan', [patientA]) as { items: unknown[] };
+    expect(visible.items).toEqual(saved.current.items);
+    const shopping = await rpc(patientAUser, 'get_shopping_list', [patientA]) as { items: Array<{ name: string; quantity: number; unit: string }> };
+    expect(shopping.items.find(line => line.name === 'Avena')).toMatchObject({ quantity: 40, unit: 'g' });
+    expect(shopping.items.find(line => line.name === 'Quinoa')).toMatchObject({ quantity: 30, unit: 'g' });
+    expect(shopping.items.some(line => line.name === 'Comida compuesta')).toBe(false);
+  });
+  it('bloquea cambios de otra pestaña aunque el número de revisión sea el mismo', async () => {
+    const id = planId;
+    const first = await rpc(nutriA, 'save_meal_plan_draft', [patientA, planDraft({ id })]) as { current: PlanVersionView };
+    const reviewed = planReviewSnapshot(first.current);
+    const changed = await rpc(nutriA, 'save_meal_plan_draft', [patientA, planDraft({ id, items: [{ for_date: '2026-09-21', slot: 'Almuerzo', free_text: 'Arroz con verduras', portions: 1 }] })]) as { current: PlanVersionView };
+    expect(changed.current.version).toBe(first.current.version);
+    await expect(rpc(nutriA, 'publish_reviewed_meal_plan', [id, changed.current.version, reviewed])).rejects.toMatchObject({ code: 'PT409' });
+    await expect(rpc(nutriB, 'publish_reviewed_meal_plan', [id, changed.current.version, planReviewSnapshot(changed.current)])).rejects.toMatchObject({ code: '42501' });
+    const published = await rpc(nutriA, 'publish_reviewed_meal_plan', [id, changed.current.version, planReviewSnapshot(changed.current)]) as { current: PlanVersionView };
+    expect(published.current.published_at).not.toBeNull();
+    expect(published.current.items[0].free_text).toBe('Arroz con verduras');
   });
 });

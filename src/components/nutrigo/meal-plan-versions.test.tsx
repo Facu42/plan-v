@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { MealPlanDraftInput, PatientMealPlan, ProfessionalMealPlan } from '../../types/plans';
-import { matchesMenuProposal, MealPlanEditor, MenuProposalReview, PublishedDatedPlan, PublishedDatedPlanView } from './MealPlanVersions';
+import { matchesMenuForm, matchesMenuProposal, MealPlanEditor, MenuProposalReview, PublishedDatedPlan, PublishedDatedPlanView } from './MealPlanVersions';
 
 const published: PatientMealPlan = {
   id: 'plan-1',
@@ -55,6 +55,18 @@ describe('Plan fechado profesional y publicado', () => {
       },
     } as ProfessionalMealPlan;
     expect(matchesMenuProposal(current, proposal)).toBe(true);
+    const guidance = { recommendations: ['Organizar los utensilios.'], avoid: ['Ejemplo ficticio'] };
+    const guided = { ...current, current: { ...current.current, guidance } };
+    const reviewed = { ...proposal, guidance };
+    expect(matchesMenuProposal(guided, proposal)).toBe(false);
+    expect(matchesMenuProposal(guided, reviewed)).toBe(true);
+    expect(matchesMenuProposal({ ...guided, current: { ...guided.current, guidance: { ...guidance, avoid: ['Otra indicación'] } } }, reviewed)).toBe(false);
+    const reviewedHtml = renderToStaticMarkup(<MenuProposalReview proposal={reviewed} warnings={[]} busy={false} onApprove={() => undefined} onReject={() => undefined} />);
+    expect(reviewedHtml).toContain('Organizar los utensilios.');
+    expect(reviewedHtml).toContain('Ejemplo ficticio');
+    const alreadyPublished = { ...current, current: { ...current.current, published_at: '2026-09-21T12:00:00Z' } };
+    expect(matchesMenuForm(alreadyPublished, proposal)).toBe(true);
+    expect(matchesMenuProposal(alreadyPublished, proposal)).toBe(false);
     expect(matchesMenuProposal({ ...current, current: { ...current.current, items: [{ ...current.current.items[0], free_text: 'Otro plato' }] } }, proposal)).toBe(false);
   });
 
@@ -68,7 +80,24 @@ describe('Plan fechado profesional y publicado', () => {
     expect(html).toContain('no publica sola');
     expect(html).toContain('PLAN FECHADO');
     expect(html).toContain('Almuerzo');
-    expect(html).not.toMatch(/\bkcal\b|proteína|carbohidrato/i);
+    expect(html).toContain('Análisis del día');
+    expect(html).toContain('Sin total completo');
+    expect(html).toContain('Sin objetivo nutricional guardado');
+    expect(html).not.toMatch(/\d+(?:[,.]\d+)?\s*kcal/);
+  });
+
+  it('los horarios de cada comida se editan por momento, cuentan como cambio y se ven en la copia publicada', () => {
+    const plan = { id: 'plan-1', current: { period_start: '2026-09-21', period_end: '2026-09-27', published_at: null, meal_times: { Desayuno: '08:00', Cena: '21:00' }, items: [] } } as unknown as ProfessionalMealPlan;
+    const form: MealPlanDraftInput = { id: 'plan-1', period_start: '2026-09-21', period_end: '2026-09-27', timezone: 'America/Argentina/Buenos_Aires', items: [] };
+    expect(matchesMenuForm(plan, form)).toBe(true);
+    expect(matchesMenuForm(plan, { ...form, meal_times: { Cena: '21:00', Desayuno: '08:00' } })).toBe(true);
+    expect(matchesMenuForm(plan, { ...form, meal_times: { Desayuno: '08:30', Cena: '21:00' } })).toBe(false);
+    expect(matchesMenuForm(plan, { ...form, meal_times: {} })).toBe(false);
+    const editor = renderToStaticMarkup(<MealPlanEditor patientId="pat-sofia" />);
+    expect(editor).toContain('aria-label="Hora de Desayuno"');
+    expect(editor).toContain('type="time"');
+    const html = renderToStaticMarkup(<PublishedDatedPlanView plan={{ ...published, meal_times: { Almuerzo: '13:00' } }} audience="pro" />);
+    expect(html).toContain('Almuerzo · 13:00');
   });
 
   it('el vacío publicado no simula un plan fechado', () => {

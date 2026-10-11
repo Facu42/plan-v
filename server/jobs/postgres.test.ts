@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
 import { readFile } from 'node:fs/promises';
 import { createPostgresJobStore } from './postgres.js';
-import { drain } from './queue.js';
+import { drain, runOne } from './queue.js';
 
 let db: PGlite;
 let dir: string;
@@ -49,5 +49,26 @@ describe('cola durable en PGlite', () => {
     expect(second).toBeNull();
     const dead = await store.complete(created.id, 'boom');
     expect(dead.status).toBe('dead');
+  });
+
+  it('la reserva SQL del worker sigue cerrada mientras el proveedor tarda 89 segundos', async () => {
+    let stamp = Date.parse('2026-10-05T12:00:00Z');
+    const store = createPostgresJobStore(db, () => new Date(stamp));
+    const job = await store.enqueue({ kind: 'menu_draft' });
+    let entered!: () => void;
+    let release!: () => void;
+    const running = new Promise<void>((resolve) => { entered = resolve; });
+    const finish = new Promise<void>((resolve) => { release = resolve; });
+    let calls = 0;
+    const handler = async () => { calls += 1; entered(); await finish; };
+    const first = runOne(store, 'primero', handler, new Date(stamp));
+    await running;
+    try {
+      stamp += 89_000;
+      expect(await runOne(store, 'segundo', handler, new Date(stamp))).toBeNull();
+      expect(calls).toBe(1);
+      expect((await store.get(job.id))?.attempts).toBe(1);
+    } finally { release(); }
+    expect((await first)?.status).toBe('succeeded');
   });
 });

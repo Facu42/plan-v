@@ -1,3 +1,4 @@
+import { componentTitle } from '../../types/plan-components';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { CaretDown, CaretLeft, CaretRight, Funnel, MagnifyingGlass, ShoppingCart, Swap, X } from '@phosphor-icons/react';
 import { careErrorMessage } from '../../api/care';
@@ -5,6 +6,7 @@ import { isAbortError } from '../../api/client';
 import { plansApi } from '../../api/plans';
 import type { PatientMealPlan, PlanItemView } from '../../types/plans';
 import { CarePanel } from './CarePanel';
+import { PatientNutritionTarget } from './ShowroomNutritionTarget';
 import { PlanPublishedItem } from './MealPlanVersions';
 import { mealSlotTone, NvBadge, NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
@@ -77,7 +79,7 @@ export function weekdayPlural(day: string): string {
 }
 
 export function planItemTitle(item: PlanItemView): string {
-  return item.recipe?.title ?? item.recipe_title ?? item.free_text ?? item.slot;
+  return item.components?.map(componentTitle).join(' + ') ?? item.recipe?.title ?? item.recipe_title ?? item.free_text ?? item.slot;
 }
 
 /** Dentro del período de un plan fechado publicado manda esa copia (los días sin indicación quedan vacíos);
@@ -253,11 +255,11 @@ export function PlanMealCell({ row, column, cell, dim, onOpen }: { row: PlanRow;
   </button>;
 }
 
-export function PlanCellDetail({ row, cell, plan }: { row: PlanRow; cell: PlanCell; plan?: Pick<PatientMealPlan, 'version' | 'period_start' | 'period_end'> | null }) {
+export function PlanCellDetail({ row, cell, plan }: { row: PlanRow; cell: PlanCell; plan?: Pick<PatientMealPlan, 'version' | 'period_start' | 'period_end' | 'meal_times'> | null }) {
   return <div className="pf-detail">
     <div className="pf-detail-meta"><NvBadge tone={mealSlotTone(cell.slot)}>{cell.slot}</NvBadge><span>{row.day} {row.date.toLocaleDateString('es-AR', { day: 'numeric', month: 'long' })}</span></div>
     {cell.item ? <>
-      <PlanPublishedItem item={cell.item} />
+      <PlanPublishedItem item={cell.item} times={plan?.meal_times} />
       {plan && <p className="pf-detail-note">Plan publicado · revisión {plan.version}, del {plan.period_start} al {plan.period_end}.</p>}
     </> : <>
       <h3>{cell.title}</h3>
@@ -311,15 +313,17 @@ export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
     cta={<button type="button" className="pf-cta pf-collapse" aria-label="Lista de compras" onClick={onShopping}><span className="pf-cta-icon"><ShoppingCart size={18} /></span><span className="pf-cta-text">Lista de compras</span></button>}
   />;
 
-  return <section className="pf-plan" aria-label="Tu plan semanal">
+  return <><section className="pf-plan" aria-label="Tu plan semanal">
     {toolbar}
     {error && <p className="pf-error" role="alert">{error}</p>}
-    {hasAnyPlan ? <PlanWeekTable rows={table.rows} columns={columns} nav={nav} label="Plan semanal" renderCell={(row, column) => {
+    <PlanWeekTable rows={table.rows} columns={columns} nav={nav} label="Plan semanal" renderCell={(row, column) => {
       const cell = row.cells[column.slot];
       if (!cell) return <div className="pf-cell pf-cell-empty" data-tone={column.tone}><span className="pf-cell-image" aria-hidden="true" /><span className="pf-cell-text"><span>Sin indicación</span></span></div>;
       return <PlanMealCell row={row} column={column} cell={cell} dim={!matchesPlanSearch(cell, search)} onOpen={() => setOpen({ row, cell })} />;
-    }} /> : <NvState title="Tu plan está en preparación" description="Cuando tu nutricionista publique comidas, las vas a encontrar acá organizadas por día." />}
+    }} />
+    {!hasAnyPlan && <p className="pf-note" role="status">Tu plan está en preparación. Cuando tu nutricionista publique comidas, las vas a encontrar acá organizadas por día.</p>}
+    <details className="fp-plan-target"><summary>Mi información nutricional</summary><PatientNutritionTarget patientId={patient.id} /></details>
     {open && <PlanSheet title={`${open.cell.slot} · ${open.row.day}`} onClose={() => setOpen(null)}><PlanCellDetail row={open.row} cell={open.cell} plan={open.cell.source === 'dated' ? plan : null} /></PlanSheet>}
     {alternatives && <PlanSheet title="Alternativas" wide onClose={() => setAlternatives(false)}><CarePanel patientId={patient.id} mode="menu" /></PlanSheet>}
-  </section>;
+  </section></>;
 }

@@ -37,6 +37,14 @@ export function createActorClient(accessToken: string | undefined): SupabaseClie
   });
 }
 
+/** Cliente con la clave pública, sin sesión guardada: para entrar con una cuenta desde el servidor. */
+export function createAnonClient(): SupabaseClient | null {
+  const url = supabaseUrl();
+  const key = anonKey();
+  if (!url || !key) return null;
+  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+}
+
 export function bindActorClient<T>(client: SupabaseClient, run: () => T): T {
   return actorDb.run(client, run);
 }

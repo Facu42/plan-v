@@ -1,3 +1,4 @@
+import { productFixtureArgs } from '../testing/product-rpc-fixture';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
 import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
@@ -23,6 +24,7 @@ async function asUser<T = Record<string, unknown>>(user: string, sql: string, pa
   });
 }
 async function rpc(user: string, name: string, args: unknown[] = []) {
+  args = await productFixtureArgs(db, name, args);
   const rows = await asUser<{ result: unknown }>(user, `select public.${name}(${args.map((_, i) => `$${i + 1}`).join(',')}) as result`, args);
   return rows[0].result;
 }
@@ -118,8 +120,8 @@ describe('PV-18 recetas en PostgreSQL descartable', () => {
     expect(Number(still[0].yield_portions)).toBe(2);
 
     const publishedId = (await asUser<{ id: string }>(nutriA, 'select id from public.recipe_versions where recipe_id=$1 and version=1', [recipeId]))[0].id;
-    await expect(asUser(nutriA, 'update public.recipe_versions set yield_portions=9 where id=$1', [publishedId])).rejects.toMatchObject({ code: 'PT409' });
-    await expect(asUser(nutriA, 'delete from public.recipe_ingredients where recipe_version_id=$1', [publishedId])).rejects.toMatchObject({ code: 'PT409' });
+    await expect(asUser(nutriA, 'update public.recipe_versions set yield_portions=9 where id=$1', [publishedId])).rejects.toMatchObject({ code: '42501' });
+    await expect(asUser(nutriA, 'delete from public.recipe_ingredients where recipe_version_id=$1', [publishedId])).rejects.toMatchObject({ code: '42501' });
   });
 
   it('sin tablas de recetas el RPC falla cerrado', async () => {
@@ -204,15 +206,13 @@ describe('PV-47 ficha de receta y receta del día en PostgreSQL', () => {
   };
 
   it('guarda la ficha declarada del borrador y la muestra al publicar', async () => {
-    const saved = await rpc(nutriA, 'save_recipe_draft', [{ ...draft, id: dayRecipe, title: 'Bowl de lentejas' }]) as { current: { id: string } };
-    const stored = await rpc(nutriA, 'set_recipe_card', [saved.current.id, card]) as Record<string, unknown>;
-    expect(stored).toMatchObject({ macro_status: 'declared', macros: { kcal: 420 } });
-    expect(stored.cover_status).toBeUndefined();
+    const saved = await rpc(nutriA, 'save_recipe_draft', [{ ...draft, id: dayRecipe, title: 'Bowl de lentejas', card }]) as { current: { id: string; card: Record<string, unknown> } };
+    expect(saved.current.card).toMatchObject({ macro_status: 'declared', macros: { kcal: 420 } });
     await expect(rpc(nutriB, 'set_recipe_card', [saved.current.id, card])).rejects.toMatchObject({ code: '42501' });
-    await expect(rpc(nutriA, 'set_recipe_card', [saved.current.id, { ...card, macro_status: 'inventado' }])).rejects.toMatchObject({ code: '22023' });
+    await expect(rpc(nutriA, 'save_recipe_draft', [{ ...draft, id: dayRecipe, title: 'Bowl de lentejas', card: { ...card, macro_status: 'inventado' } }])).rejects.toMatchObject({ code: '22023' });
     const published = await rpc(nutriA, 'publish_recipe', [dayRecipe, 1]) as { published: { card: Record<string, unknown> } };
     expect(published.published.card).toMatchObject({ macro_status: 'declared', category: 'Almuerzo', cover_status: 'none', cover_alt: 'Bowl de lentejas' });
-    await expect(rpc(nutriA, 'set_recipe_card', [saved.current.id, card])).rejects.toMatchObject({ code: '22023' });
+    await expect(rpc(nutriA, 'set_recipe_card', [saved.current.id, card])).rejects.toMatchObject({ code: '42501' });
   });
 
   it('asigna al día, la paciente la ve y registrarla crea una sola comida con los macros declarados', async () => {
@@ -238,5 +238,33 @@ describe('PV-47 ficha de receta y receta del día en PostgreSQL', () => {
     const meals = await db.query<{ macros: { kcal: number }; analysis_status: string }>('select macros, analysis_status from public.meal_logs where id=$1', [first.assignment.registered_meal_id]);
     expect(meals.rows[0]).toMatchObject({ analysis_status: 'succeeded', macros: { kcal: 420 } });
     await expect(rpc(patientBUser, 'register_recipe_day', [{ patient_id: patientA, assignment_id: assigned.id, client_id: clientId }])).rejects.toMatchObject({ code: '42501' });
+  });
+  it('reserva una sola generación, exige dueño, permite reintento con espera y descarta el resultado tardío', async () => {
+    const coverPath = (versionId: string) => `${nutriAId}/${versionId}/00000000-0000-4000-a000-0000000000c4.png`;
+    const coverUrl = (versionId: string) => `https://synthetic.supabase.co/storage/v1/object/public/recipe-covers/${coverPath(versionId)}`;
+    const saved = await rpc(nutriA, 'save_recipe_draft', [{ ...draft, id: '30000000-0000-4000-a000-0000000000a4' }]) as { id: string; current: { id: string } };
+    const vid = saved.current.id;
+    await expect(rpc(nutriA, 'claim_recipe_cover', [vid, false])).rejects.toMatchObject({ code: '42501' });
+    await rpc(nutriA, 'publish_recipe', [saved.id, 1]);
+    await expect(rpc(nutriB, 'claim_recipe_cover', [vid, true])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(patientAUser, 'claim_recipe_cover', [vid, true])).rejects.toMatchObject({ code: '42501' });
+    const claims = await Promise.all([rpc(nutriA, 'claim_recipe_cover', [vid, false]), rpc(nutriA, 'claim_recipe_cover', [vid, false])]);
+    expect(claims.filter(Boolean)).toHaveLength(1);
+    const token = claims.find(Boolean);
+    expect(await rpc(nutriA, 'claim_recipe_cover', [vid, true])).toBeNull();
+    await rpc(nutriA, 'finish_recipe_cover', [vid, token, 'failed', null, draft.title]);
+    expect(await rpc(nutriA, 'claim_recipe_cover', [vid, false])).toBeNull();
+    expect(await rpc(nutriA, 'claim_recipe_cover', [vid, true])).toBeNull();
+    await db.query("update public.recipe_cover_requests set finished_at = now() - interval '2 minutes' where recipe_version_id=$1", [vid]);
+    const retry = await rpc(nutriA, 'claim_recipe_cover', [vid, true]);
+    expect(retry).not.toBe(token);
+    await expect(rpc(nutriA, 'finish_recipe_cover', [vid, token, 'failed', null, 'late'])).rejects.toMatchObject({ code: 'PT409' });
+    await db.query("update public.recipe_cover_requests set claimed_at=now()-interval '4 minutes' where recipe_version_id=$1", [vid]);
+    const recovered = await rpc(nutriA, 'claim_recipe_cover', [vid, true]);
+    await expect(rpc(nutriA, 'finish_recipe_cover', [vid, retry, 'failed', null, 'late'])).rejects.toMatchObject({ code: 'PT409' });
+    await asUser(nutriA, "insert into storage.objects(bucket_id,name) values('recipe-covers',$1)", [coverPath(vid)]);
+    await rpc(nutriA, 'finish_recipe_cover', [vid, recovered, 'ready', coverUrl(vid), draft.title]);
+    expect(await rpc(nutriA, 'claim_recipe_cover', [vid, true])).toBeNull();
+    await expect(asUser(patientAUser, 'select * from public.recipe_cover_requests')).rejects.toMatchObject({ code: '42501' });
   });
 });

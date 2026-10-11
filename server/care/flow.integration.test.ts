@@ -12,6 +12,25 @@ async function consent(purpose:ConsentPurpose,decision='granted') {
 }
 describe('seguimiento conectado',()=>{
   beforeEach(()=>{resetStore();});
+  it('retirar medidas corta lecturas y alertas sin borrar el historial',async()=>{
+    await consent('measurement');
+    const id=randomUUID();
+    await post(`${base}/records`,{id,recorded_on:'2026-09-10',data:{kind:'weight',value:64.5,note:''}});
+    for(const kind of ['waist','hip']) expect((await post(`${base}/records`,{id:randomUUID(),recorded_on:'2026-09-10',data:{kind,value:85,unit:'cm',note:''}})).status).toBe(200);
+    const activityId=randomUUID();
+    expect((await post(`${base}/records`,{id:activityId,recorded_on:'2026-09-10',data:{kind:'activity',activity:'Caminar',minutes:30,intensity:'suave',kcal:null,note:''}})).status).toBe(200);
+    await consent('measurement','withdrawn');
+    for(const path of [base,`${base}?audience=pro`]) {
+      const body=await(await app.request(path)).json();
+      expect(body.records.map((r:any)=>r.id)).toEqual([activityId]);expect(body.measurements).toEqual([]);
+    }
+    expect((await(await app.request('/api/care/alerts')).json()).alerts.some((a:any)=>a.id===id)).toBe(false);
+    expect((await post(`${base}/records/${id}/review`,{},'PATCH')).status).toBe(403);
+    await consent('measurement');
+    const restored=await(await app.request(base)).json();
+    expect(restored.records.some((r:any)=>r.id===id)).toBe(true);expect(restored.measurements.some((m:any)=>m.id===id)).toBe(true);
+    expect(restored.measurements).toHaveLength(3);
+  });
   it('exige permiso, conserva la fecha y evita duplicados al reintentar una medida',async()=>{
     const input={id:randomUUID(),recorded_on:'2026-09-10',data:{kind:'weight',value:64.5,note:''}};
     expect((await post(`${base}/records`,input)).status).toBe(403);

@@ -5,6 +5,7 @@ import { Icon } from '../shared/Icon';
 import { NvBadge, NvButton } from './primitives';
 import { AppointmentHistoryList } from './AppointmentHistory';
 import './showroom-consultations.css';
+import { useUnsavedChanges } from './unsaved-changes';
 
 const WEEK_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const;
 const DURATIONS = [15, 30, 45, 60, 90];
@@ -86,6 +87,7 @@ export function ShowroomConsultations({ patient, patients = [], now, onSelect, o
   const channelLabel = CHANNELS.find((channel) => channel.id === current?.channel)?.label ?? current?.channel ?? 'Sin definir';
   const channelMetric = current?.channel === 'video' ? 'Video' : current?.channel === 'presencial' ? 'Presencial' : 'Sin definir';
   const safeUrl = secureMeetUrl(current?.meet_url);
+  useUnsavedChanges(editing && JSON.stringify(form) !== JSON.stringify(formFrom(current)), busy);
 
   useEffect(() => { setEditing(!patient.appointment); setConfirmingCancel(false); setError(null); setForm(formFrom(patient.appointment)); }, [patient.id, patient.appointment]);
 

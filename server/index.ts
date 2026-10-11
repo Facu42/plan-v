@@ -1,28 +1,39 @@
+import { withWeeklyRegistration } from './progress/weekly-repository.js';
 import { serve } from '@hono/node-server';
-import { registerCareRoutes } from './care/routes.js';
+import { registerCareRoutes, requireCareConsent } from './care/routes.js';
+import { createBodyGuard, createOriginGuard, createRateLimits, readCorsOrigins } from './security/http.js';
 import { CareError } from './care/repository.js';
 import { registerAssetRoutes } from './assets/routes.js';
 import { registerRecipeRoutes } from './recipes/routes.js';
+import { registerFoodRoutes } from './foods/routes.js';
+import { registerModelRoutes } from './models/routes.js';
 import { registerPlanRoutes } from './plans/routes.js';
+import { registerTargetRoutes } from './targets/routes.js';
 import { registerDiaryRoutes } from './diary/routes.js';
 import { registerMessageRoutes } from './messages/routes.js';
 import { registerAppointmentRoutes } from './appointments/routes.js';
 import { registerAiJobRoutes } from './ai-jobs/routes.js';
 import { registerPrivacyRoutes } from './privacy/routes.js';
 import { registerShoppingRoutes } from './shopping/routes.js';
+import { registerFeeRoutes } from './fees/routes.js';
+import { registerAdminRoutes } from './admin/routes.js';
 import { registerOutboxRoutes } from './outbox/routes.js';
 import { registerProgressRoutes } from './progress/routes.js';
 import { registerExerciseRoutes } from './exercise/routes.js';
 import { registerResourceRoutes } from './resources/routes.js';
 import { registerOrgRoutes } from './orgs/routes.js';
 import { registerAlcanceRoutes } from './alcance/routes.js';
+import { registerCrmRoutes } from './crm/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
+import { secureHeaders } from 'hono/secure-headers';
 import type { ZodType } from 'zod';
 import { generateCopilotBrief } from './ai/copilot.js';
 import { AIUnavailableError } from './ai/errors.js';
 import { readRuntimeConfig } from './config/runtime.js';
+import { persistDemoState, startDemoState } from './demo/state.js';
+import { seedDemoOnBoot } from './demo/autoseed.js';
 import { processQueue } from './jobs/queue.js';
 import { startJobWorker } from './jobs/worker.js';
 import { authMiddleware } from './middleware/auth.js';
@@ -30,7 +41,7 @@ import { emitOpsAlert } from './ops/alerts.js';
 import { resolveCorsOrigin } from './ops/cors.js';
 import { safePath, writeOpsLog } from './ops/log.js';
 import { createRateLimitMiddleware } from './ops/rate-limit.js';
-import { createBodyLimitMiddleware, evaluateReadiness, releaseSha } from './ops/readiness.js';
+import { maxBodyBytes, evaluateReadiness, releaseSha } from './ops/readiness.js';
 import { assertSecretBoundary, inspectSecrets } from './ops/secrets.js';
 import {
   authRecoverInputSchema,
@@ -63,6 +74,7 @@ import {
   listClinicalNotes,
   listConsentEvents,
   patchIntake,
+  reopenIntake,
   reviewIntake,
   submitIntake,
 } from './intake/memory.js';
@@ -70,7 +82,11 @@ import { parseIntakePayload, type IntakeStep } from './intake/payload.js';
 import { toPatientIntakeView, toProfessionalIntakeView } from './intake/views.js';
 import * as intakeDb from './intake/repository.js';
 import { IntakeRepositoryError } from './intake/repository.js';
-import { getAuthAccount, getRequestDb, isSupabaseEnabled } from './db/supabase-client.js';
+import { getAuthAccount, getRequestDb, isSupabaseEnabled, privilegedDb } from './db/supabase-client.js';
+import { emailPatientInvite, emailPatientInviteWithBrevo } from './identity/invite-email.js';
+import { brevoConfig, sendBrevoEmail } from './mail/brevo.js';
+import { PUBLIC_SIGNUP_ROLE } from '../src/context/auth-policy.js';
+import { siteUrl } from './admin/accounts.js';
 import * as sb from './db/supabase-repo.js';
 import { recoveryAcknowledgement, provisionSecretMatches, validateProvisionInput } from './identity/provision.js';
 import { authorizePatientAction } from './security/authorization.js';
@@ -85,6 +101,7 @@ import {
   computeShoppingList,
   createPatient,
   acceptPatientInvite,
+  type PatientInvite,
   dismissBrief,
   getInviteById,
   getPatient,
@@ -119,8 +136,8 @@ function queryAudience(role: 'nutri' | 'paciente') {
   return role === 'paciente' ? 'patient' as const : 'professional' as const;
 }
 
-function serializePatient(patient: NonNullable<Awaited<ReturnType<typeof sb.sbGetPatientById>>>, role: 'nutri' | 'paciente') {
-  return role === 'paciente' ? toPatientSelfView(patient) : patient;
+async function serializePatient(patient: NonNullable<Awaited<ReturnType<typeof sb.sbGetPatientById>>>, role: 'nutri' | 'paciente') {
+  return role === 'paciente' ? toPatientSelfView(patient) : (await withWeeklyRegistration([patient],true))[0];
 }
 
 async function parseJsonBody<T>(c: Context, schema: ZodType<T>) {
@@ -148,19 +165,32 @@ async function persistPatientWrite(
   }
   const patient = await sb.sbGetPatientById(patientId, queryAudience(role));
   if (!patient) return c.notFound();
-  return c.json({ patient: serializePatient(patient, role), source: 'supabase' });
+  return c.json({ patient: await serializePatient(patient, role), source: 'supabase' });
 }
 
+// Cabeceras de seguridad. La API sólo devuelve JSON: no se deja embeber en otra
+// página ni que el navegador adivine el tipo. El recurso se lee desde la web (otro
+// dominio) con CORS, por eso la política de recursos cruzados queda abierta.
+app.use('/*', secureHeaders({
+  xFrameOptions: 'DENY',
+  crossOriginResourcePolicy: 'cross-origin',
+  crossOriginOpenerPolicy: false,
+  contentSecurityPolicy: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] },
+}));
+app.use('/api/*', async (c, next) => {
+  c.header('Cache-Control', 'no-store');
+  await next();
+  c.header('Cache-Control', 'no-store');
+});
+app.use('/api/*', createOriginGuard(() => ({ ...process.env, CORS_ALLOWED_ORIGINS: process.env.CORS_ORIGINS })));
+const securityLimits = createRateLimits();
+app.use('/api/*', securityLimits.public);
 app.use('/*', cors({
   origin: (origin) => resolveCorsOrigin(origin ?? '', process.env),
   allowHeaders: ['Authorization', 'Content-Type', 'X-Request-Id'],
   exposeHeaders: ['X-Request-Id', 'Retry-After', 'X-RateLimit-Remaining'],
 }));
-app.use('/api/*', async (c, next) => {
-  await next();
-  c.header('Cache-Control', 'no-store');
-});
-app.use('/api/*', createBodyLimitMiddleware());
+app.use('/api/*', createBodyGuard(c => maxBodyBytes(c.req.path)));
 app.use('/api/*', createRateLimitMiddleware());
 app.use('/api/*', async (c, next) => {
   const started = Date.now();
@@ -180,6 +210,11 @@ app.use('/api/*', async (c, next) => {
   });
 });
 app.use('/api/*', authMiddleware);
+app.use('/api/*', securityLimits.protected);
+app.use('/api/*', async (c, next) => {
+  await next();
+  if (!['/api/health','/api/ready'].includes(c.req.path)) persistDemoState();
+});
 
 app.onError((error, c) => {
   if (error instanceof CareError) return c.json({ error: error.message }, error.status);
@@ -239,19 +274,25 @@ app.get('/api/ready', async (c) => {
 registerCareRoutes(app);
 registerAssetRoutes(app);
 registerRecipeRoutes(app);
+registerFoodRoutes(app);
+  registerModelRoutes(app);
 registerPlanRoutes(app);
+registerTargetRoutes(app);
 registerDiaryRoutes(app);
 registerMessageRoutes(app);
 registerAppointmentRoutes(app);
 registerAiJobRoutes(app);
 registerPrivacyRoutes(app);
 registerShoppingRoutes(app);
+registerFeeRoutes(app);
+registerAdminRoutes(app);
 registerOutboxRoutes(app);
 registerProgressRoutes(app);
 registerExerciseRoutes(app);
 registerResourceRoutes(app);
 registerOrgRoutes(app);
 registerAlcanceRoutes(app);
+registerCrmRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({
@@ -267,14 +308,14 @@ app.get('/api/patients', async (c) => {
       return c.json({ error: 'Prohibido' }, 403);
     }
     const listed = await sb.sbListPatientsForNutri(auth.userId, { limit, offset });
-    return c.json({ patients: listed.patients, page: listed.page, source: 'supabase' });
+    return c.json({ patients: await withWeeklyRegistration(listed.patients,true), page: listed.page, source: 'supabase' });
   }
 
   const listed = paginateItems(getStore().patients.map((patient) => {
     const brief = briefForDisplay(patient);
     return { ...patient, brief: brief ?? (patient.brief ? { ...patient.brief, suggested_action: null, up_next_title: null, up_next_body: null, draft_message: null } : null) };
   }), offset, limit);
-  return c.json({ patients: listed.items, page: listed.page, source: 'memory' });
+  return c.json({ patients: await withWeeklyRegistration(listed.items,false), page: listed.page, source: 'memory' });
 });
 
 app.post('/api/patients', async (c) => {
@@ -294,7 +335,7 @@ app.post('/api/patients', async (c) => {
         email: parsedBody.data.email,
         goal: parsedBody.data.goal,
       });
-      return c.json({ ...created, source: 'supabase' }, 201);
+      return c.json({ ...created, patient: (await withWeeklyRegistration([created.patient], true))[0], source: 'supabase' }, 201);
     } catch (error) {
       if (error instanceof sb.UniqueInviteError) return c.json({ error: error.message }, 409);
       if (error instanceof sb.SchemaUnavailableError) {
@@ -306,7 +347,7 @@ app.post('/api/patients', async (c) => {
 
   const created = createPatient(parsedBody.data);
   if (!created) return c.json({ error: 'Ya existe una invitación para ese email' }, 409);
-  return c.json({ ...created, source: 'memory' }, 201);
+  return c.json({ ...created, patient: (await withWeeklyRegistration([created.patient], false))[0], source: 'memory' }, 201);
 });
 
 app.get('/api/patients/:id', async (c) => {
@@ -320,7 +361,7 @@ app.get('/api/patients/:id', async (c) => {
     const patient = await sb.sbGetPatientById(id, actor.role === 'paciente' ? 'patient' : 'professional');
     if (!patient) return c.notFound();
     return c.json({
-      patient: actor.role === 'paciente' ? toPatientSelfView(patient) : patient,
+      patient: await serializePatient(patient,actor.role),
       shoppingList: sb.computeShoppingList(patient),
       source: 'supabase',
     });
@@ -328,7 +369,7 @@ app.get('/api/patients/:id', async (c) => {
 
   const patient = getPatient(id);
   if (!patient) return c.notFound();
-  return c.json({ patient, shoppingList: computeShoppingList(patient), source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], shoppingList: computeShoppingList(patient), source: 'memory' });
 });
 
 app.patch('/api/patients/:id/profile', async (c) => {
@@ -345,7 +386,7 @@ app.patch('/api/patients/:id/profile', async (c) => {
 
   const patient = setPatientProfile(patientId, parsedBody.data);
   if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
 });
 
 app.patch('/api/patients/:id/archive', async (c) => {
@@ -372,12 +413,12 @@ app.patch('/api/patients/:id/archive', async (c) => {
     }
     const updated = await sb.sbGetPatientById(patientId, 'professional');
     if (!updated) return c.notFound();
-    return c.json({ patient: updated, source: 'supabase' });
+    return c.json({ patient: updated ? (await withWeeklyRegistration([updated],true))[0] : null, source: 'supabase' });
   }
 
   const patient = setPatientArchived(patientId, parsedBody.data.archived);
   if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
 });
 
 app.get('/api/me/patient', async (c) => {
@@ -442,6 +483,7 @@ app.post('/api/patients/:id/copilot', async (c) => {
   }
   if (!patient) return c.notFound();
 
+  if ('userId' in auth && isSupabaseEnabled()) await requireCareConsent(patientId, true, 'ai_followup');
   const brief = await generateCopilotBrief(patient as Parameters<typeof generateCopilotBrief>[0]);
 
   if ('userId' in auth && isSupabaseEnabled()) {
@@ -487,7 +529,7 @@ app.patch('/api/patients/:id/habits', async (c) => {
 
   const patient = upsertHabitLog(patientId, body);
   if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
 });
 
 app.patch('/api/patients/:id/billing', async (c) => {
@@ -516,12 +558,12 @@ app.patch('/api/patients/:id/billing', async (c) => {
     }
     const updated = await sb.sbGetPatientById(patientId, 'professional');
     if (!updated) return c.notFound();
-    return c.json({ patient: updated, source: 'supabase' });
+    return c.json({ patient: updated ? (await withWeeklyRegistration([updated],true))[0] : null, source: 'supabase' });
   }
 
   const patient = setBillingStatus(patientId, parsedBody.data);
   if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
 });
 
 app.patch('/api/patients/:id/goal', async (c) => {
@@ -544,7 +586,7 @@ app.patch('/api/patients/:id/goal', async (c) => {
 
   const patient = setGoal(patientId, parsedBody.data);
   if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
 });
 
 app.patch('/api/patients/:id/menu', async (c) => {
@@ -570,7 +612,7 @@ app.patch('/api/patients/:id/menu', async (c) => {
 
   const patient = upsertMenuSlot(patientId, body.day, body.slot, body.title);
   if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
 });
 
 app.delete('/api/patients/:id/menu/:day/:slot', async (c) => {
@@ -596,7 +638,7 @@ app.delete('/api/patients/:id/menu/:day/:slot', async (c) => {
 
   const patient = removeMenuSlot(patientId, day, slot);
   if (!patient) return c.notFound();
-  return c.json({ patient, source: 'memory' });
+  return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
 });
 
 app.post('/api/nutritionist/setup', async (c) => {
@@ -663,7 +705,7 @@ app.post('/api/invites/:id/send', async (c) => {
       const invite = await sb.sbGetInvite(inviteId.data);
       if (!invite || invite.nutritionist_id !== actor.nutritionistId) return c.json({ error: 'Prohibido' }, 403);
       const sent = await sb.sbSendInvite(inviteId.data);
-      await enqueueOutboxBestEffort({
+      if (sent.status === 'pending') await enqueueOutboxBestEffort({
         patient_id: invite.patient_id,
         event_type: 'invite_sent',
         client_id: inviteId.data,
@@ -683,6 +725,50 @@ app.post('/api/invites/:id/send', async (c) => {
   const invite = sendPatientInvite(inviteId.data);
   if (!invite) return c.json({ error: 'Invitación no disponible' }, 409);
   return c.json({ invite, source: 'memory' });
+});
+
+// Manda por mail el enlace vigente con los mails de Supabase Auth (sin servicio nuevo). En la demo no sale nada.
+app.post('/api/invites/:id/email', async (c) => {
+  const auth = c.get('auth');
+  const inviteId = inviteIdParamSchema.safeParse(c.req.param('id'));
+  if (!inviteId.success) return c.json({ error: 'Datos inválidos' }, 400);
+  const usable = (invite: PatientInvite | null | undefined): invite is PatientInvite =>
+    Boolean(invite && invite.status === 'pending' && invite.expires_at && Date.parse(invite.expires_at) > Date.now());
+  const unavailable = { error: 'Prepará un enlace vigente antes de mandarlo por mail.' };
+
+  if ('userId' in auth && isSupabaseEnabled()) {
+    const actor = await sb.sbGetActor(auth.userId);
+    if (!actor || actor.role !== 'nutri' || !canManagePatients(actor, 'create_patient')) {
+      return c.json({ error: 'Prohibido' }, 403);
+    }
+    const invite = await sb.sbGetInvite(inviteId.data);
+    if (!invite || invite.nutritionist_id !== actor.nutritionistId) return c.json({ error: 'Prohibido' }, 403);
+    if (!usable(invite)) return c.json(unavailable, 409);
+    const admin = privilegedDb();
+    const brevo = brevoConfig();
+    if (brevo) {
+      const [{ data: patient }, { data: pro }] = await Promise.all([
+        admin.from('patients').select('full_name').eq('id', invite.patient_id).maybeSingle(),
+        admin.from('nutritionists').select('display_name').eq('id', invite.nutritionist_id).maybeSingle(),
+      ]);
+      return c.json(await emailPatientInviteWithBrevo({ ...invite, patientName: String(patient?.full_name ?? ''), nutritionistName: String(pro?.display_name ?? '') }, siteUrl(), {
+        generate: async (type, email, redirectTo) => {
+          const { data, error } = type === 'invite'
+            ? await admin.auth.admin.generateLink({ type: 'invite', email, options: { redirectTo, data: { role: PUBLIC_SIGNUP_ROLE } } })
+            : await admin.auth.admin.generateLink({ type: 'magiclink', email, options: { redirectTo } });
+          return { link: data?.properties?.action_link ?? null, error };
+        },
+        send: (message) => sendBrevoEmail(brevo, message),
+      }));
+    }
+    return c.json(await emailPatientInvite(invite, siteUrl(), {
+      invite: (email, options) => admin.auth.admin.inviteUserByEmail(email, options),
+      magicLink: (email, redirectTo) => admin.auth.signInWithOtp({ email, options: { shouldCreateUser: false, emailRedirectTo: redirectTo } }),
+    }));
+  }
+
+  if (!usable(getInviteById(inviteId.data))) return c.json(unavailable, 409);
+  return c.json({ delivery: 'demo' });
 });
 
 app.post('/api/invites/:id/revoke', async (c) => {
@@ -937,6 +1023,25 @@ app.patch('/api/patients/:id/intake', async (c) => {
   }
 });
 
+app.post('/api/patients/:id/intake/reopen', async (c) => {
+  const auth = c.get('auth');
+  const patientId = c.req.param('id');
+  const parsedBody = await parseJsonBody(c, intakeSubmitInputSchema);
+  if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
+  if ('userId' in auth) {
+    if (!await authorizePatient(auth.userId, patientId, 'edit_intake')) return c.json({ error: 'Prohibido' }, 403);
+    if (isSupabaseEnabled()) {
+      try {
+        const bundle = await intakeDb.reopenIntake(patientId, parsedBody.data.expected_revision);
+        return c.json({ ...toPatientIntakeView(bundle.intake, bundle.consents), source: 'supabase' });
+      } catch (error) { return intakeFailure(c, error); }
+    }
+  }
+  if (!getPatient(patientId)) return c.notFound();
+  try { return c.json({ ...toPatientIntakeView(reopenIntake(patientId, parsedBody.data.expected_revision), listConsentEvents(patientId)), source: 'memory' }); }
+  catch (error) { if (error instanceof IntakeConflictError) return c.json({ error: error.message }, 409); throw error; }
+});
+
 app.post('/api/patients/:id/intake/submit', async (c) => {
   const auth = c.get('auth');
   const patientId = c.req.param('id');
@@ -1098,6 +1203,7 @@ const isMainModule = Boolean(process.argv[1]) && import.meta.url === pathToFileU
 
 if (isMainModule) {
   const config = readRuntimeConfig(process.env);
+  readCorsOrigins({ ...process.env, CORS_ALLOWED_ORIGINS: process.env.CORS_ORIGINS }, true);
   assertSecretBoundary(process.env);
   const secrets = inspectSecrets(process.env);
   if (!secrets.ok) {
@@ -1105,7 +1211,19 @@ if (isMainModule) {
     process.exit(1);
   }
   const port = Number(process.env.PORT ?? 3001);
+  if (process.env.DEMO_STATE_FILE && isSupabaseEnabled()) throw new Error('La simulación guardada sólo permite datos locales, sin conexión a Supabase.');
+  const demoState = startDemoState(process.env.DEMO_STATE_FILE, config);
+  if (demoState) {
+    process.once('exit', () => demoState.close());
+    for (const signal of ['SIGINT','SIGTERM'] as const) process.once(signal, () => process.exit(0));
+  }
   if (process.env.WORKER_SEPARATE !== '1') startJobWorker();
   writeOpsLog('info', 'api_listen', { mode: config.mode, data: config.dataMode, ai: config.aiMode, port: String(port) });
-  serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
+  serve({ fetch: app.fetch, port, hostname: demoState ? '127.0.0.1' : '0.0.0.0' });
+  // Sólo la demo local en memoria: nunca con datos reales ni en producción.
+  if (config.mode === 'demo' && config.dataMode === 'memory') {
+    void seedDemoOnBoot((path, init) => app.request(path, init))
+      .then(({ seeded, failed }) => writeOpsLog(failed.length ? 'warn' : 'info', 'demo_seed', { seeded: String(seeded), failed: String(failed.length) }))
+      .catch(() => writeOpsLog('warn', 'demo_seed', { seeded: 'false', failed: 'error' }));
+  }
 }

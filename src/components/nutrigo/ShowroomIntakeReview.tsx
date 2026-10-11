@@ -3,11 +3,18 @@ import { api, isAbortError } from '../../api/client';
 import type { ProfessionalIntakeView } from '../../types/intake';
 import { NvBadge, NvButton } from './primitives';
 import { healthFactLabel, intakeMissingItems, intakeStatusLabel } from './intake-review';
+import { useUnsavedChanges } from './unsaved-changes';
 
 function readableDate(value: string | null | undefined) {
   if (!value) return 'Sin fecha';
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? 'Sin fecha' : new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date);
+}
+
+/** Mensaje que recibe la paciente: ella decide si reabre su ingreso (la nutricionista no lo cambia por ella). */
+export function intakeUpdateRequestText(preferredName: string, origin: string): string {
+  const greeting = preferredName.trim() ? `Hola ${preferredName.trim()},` : 'Hola,';
+  return `${greeting} ¿podés revisar y actualizar tu cuestionario de ingreso? Entrá en ${origin}/?onboarding=1 y tocá «Corregir mi ficha enviada». Cuando lo vuelvas a enviar, lo reviso.`;
 }
 
 export function IntakeReviewPanel({
@@ -19,6 +26,8 @@ export function IntakeReviewPanel({
   onReview,
   onSaveNote,
   onReload,
+  onRequestUpdate,
+  requestNotice,
 }: {
   view: ProfessionalIntakeView;
   note: string;
@@ -28,6 +37,8 @@ export function IntakeReviewPanel({
   onReview: () => void;
   onSaveNote: () => void;
   onReload?: () => void;
+  onRequestUpdate?: () => void;
+  requestNotice?: string;
 }) {
   const payload = view.intake.payload ?? {};
   const missing = intakeMissingItems(view);
@@ -66,7 +77,9 @@ export function IntakeReviewPanel({
       <div className="nr-intake-actions">
         <NvButton className="nv-soft" onClick={onSaveNote} disabled={busy || note.trim().length < 2}>Guardar observación profesional</NvButton>
         <NvButton onClick={onReview} disabled={busy || !canReview}>{view.intake.status === 'reviewed' ? 'Ya revisado' : 'Marcar ingreso como revisado'}</NvButton>
+        {onRequestUpdate && view.intake.status !== 'draft' && <NvButton className="nv-soft" onClick={onRequestUpdate} disabled={busy}>Pedirle que actualice su ingreso</NvButton>}
       </div>
+      {requestNotice && <p role="status">{requestNotice}</p>}
     </section>
   </section>;
 }
@@ -77,7 +90,9 @@ export function ShowroomIntakeReview({ patientId, initialView }: { patientId: st
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [reload, setReload] = useState(0);
+  const [requestNotice, setRequestNotice] = useState('');
   const action = useRef(false);
+  useUnsavedChanges(Boolean(note.trim()), busy);
 
   useEffect(() => {
     if (initialView) {
@@ -132,5 +147,23 @@ export function ShowroomIntakeReview({ patientId, initialView }: { patientId: st
     }
   };
 
-  return <IntakeReviewPanel view={view} note={note} error={error} busy={busy} onNoteChange={setNote} onReview={() => void review()} onSaveNote={() => void saveNote()} onReload={() => setReload(value => value + 1)} />;
+  const requestUpdate = async () => {
+    if (action.current) return;
+    action.current = true;
+    setBusy(true);
+    setError('');
+    setRequestNotice('');
+    try {
+      const text = intakeUpdateRequestText(view.intake.payload?.preferred_name ?? '', window.location.origin);
+      await api.sendMessage(patientId, text, 'vero', false, crypto.randomUUID());
+      setRequestNotice('Le mandamos el pedido por Mensajes. Cuando vuelva a enviar el ingreso, aparece acá para revisar.');
+    } catch {
+      setError('No pudimos mandar el pedido. Probá de nuevo o escribile desde Mensajes.');
+    } finally {
+      action.current = false;
+      setBusy(false);
+    }
+  };
+
+  return <IntakeReviewPanel view={view} note={note} error={error} busy={busy} onNoteChange={setNote} onReview={() => void review()} onSaveNote={() => void saveNote()} onReload={() => setReload(value => value + 1)} onRequestUpdate={() => void requestUpdate()} requestNotice={requestNotice} />;
 }

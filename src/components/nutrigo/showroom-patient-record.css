@@ -77,3 +77,5 @@
   .nr-actions { display:grid; grid-template-columns:1fr; }
   .nr-actions .nv-button { min-height:44px; }
 }
+
+.nr-adherence>small { display:block; margin-top:6px; line-height:1.4; }

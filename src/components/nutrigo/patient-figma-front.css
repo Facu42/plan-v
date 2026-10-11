@@ -1,0 +1,252 @@
+/* Front del paciente: traducción de los 24 frames del MCP, sin la inversión de
+   lienzos ni las sustituciones de bloques de las capas históricas. Sólo paciente.
+   Navbar223; Dashboard/Calendar892+325; Content p28/gap28; móvil390/p16. */
+.fp-asset { display: inline-flex; flex: none; align-items: center; justify-content: center; }
+.fp-asset img { display: block; max-width: 100%; max-height: 100%; }
+.fp-sr { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.nv-app .fp-more { display: inline-flex; align-items: center; justify-content: center; padding: 3px; border: 0; border-radius: 5px; background: transparent; color: var(--nv-ink); cursor: pointer; }
+.fp-record-dialog { width: min(760px, calc(100% - 32px)); max-height: calc(100dvh - 48px); margin: auto; padding: 24px; border: 0; border-radius: 16px; background: var(--nv-card); color: var(--nv-ink); overflow: auto; }
+.fp-record-dialog::backdrop { background: rgba(39,41,50,.4); }
+.fp-record-dialog > header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.fp-record-dialog > header h2 { font: 600 18px/1.2 Poppins,sans-serif; }
+.fp-record-dialog > header button { width: 32px; height: 32px; border: 0; border-radius: 8px; background: var(--nv-bg); color: var(--nv-ink); cursor: pointer; font-size: 22px; }
+.nv-app.nv-patient { --nv-ink-soft: #555555; }
+.nv-app.nv-patient .nv-sidebar { display: flex; gap: 28px; padding: 28px 20px; background: var(--nv-card); }
+.nv-app.nv-patient .nv-sidebar > .nv-brand { height: 50px; min-height: 50px; margin: 0; padding: 9px 8px; align-items: center; }
+.nv-app.nv-patient .nv-sidebar .nv-brand small { display: none; }
+.nv-app.nv-patient .nv-sidebar nav { display: flex; flex-direction: column; gap: 8px; margin: 0; }
+.nv-app.nv-patient .nv-sidebar nav button { min-height: 40px; height: 40px; padding: 10px 8px 10px 16px; border-radius: 14px; gap: 12px; font: 500 14px/1 Poppins,sans-serif; }
+.nv-app.nv-patient .nv-sidebar .nv-nav-sub-head > span:not(.nv-source-icon) { flex: 1; text-align: left; }
+.nv-app.nv-patient .nv-sidebar .nv-nav-sub.nv-open { padding: 0; }
+.nv-app.nv-patient .nv-sidebar .nv-nav-sub-items { gap: 0; padding: 0; }
+.nv-app.nv-patient .nv-sidebar .nv-nav-sub-items button { justify-content: flex-start; padding-left: 56px; }
+.fp-plan-card { display: flex; flex-direction: column; gap: 16px; margin-top: auto; padding: 16px; min-height: 228px; border-radius: 16px; background: var(--nv-gold); color: #272932; }
+.fp-plan-card-image { min-height: 76px; }
+.fp-plan-card p { margin: 0; font: 400 12px/1.5 Poppins,sans-serif; }
+.fp-plan-card strong { font-weight: 600; }
+.fp-plan-card button { align-self: flex-start; border: 0; border-radius: 14px; padding: 10px 14px; background: var(--nv-accent); color: #272932; font: 500 12px/1 Poppins,sans-serif; cursor: pointer; }
+.nv-app.nv-patient .nv-sidebar .nv-logout { margin: 0; min-height: 40px; border: 0; padding: 10px 16px; border-radius: 14px; background: var(--nv-bg); font: 500 14px/1 Poppins,sans-serif; }
+.nv-app.nv-patient .fp-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; border: 0; margin-top: 28px; padding: 0; min-height: 20px; color: var(--nv-muted); font: 400 11px/1.24 Poppins,sans-serif; }
+.nv-app.nv-patient .fp-footer p { color: var(--nv-ink-soft); font: 600 11px/1.24 Poppins,sans-serif; }
+.nv-app.nv-patient .fp-footer a, .nv-app.nv-patient .fp-footer button { padding: 0; border: 0; background: transparent; color: var(--nv-muted); font: inherit; text-decoration: none; cursor: pointer; }
+.fp-social { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.nv-app.nv-patient .fp-footer { gap: 12px; }
+.fp-footer-links { display: flex; align-items: center; flex-wrap: wrap; gap: 24px; }
+.fp-rating-empty, .fp-rating-empty > span { display: flex; align-items: center; gap: 2px; }
+.fp-rating-empty { gap: 10px; }
+.fp-rating-empty > span { filter: grayscale(1); opacity: .35; }
+.nv-app .mf-detail-info dt > span > .fp-asset { padding: 0; margin: 0; border-radius: 0; background: transparent; }
+.fp-recipe-tools, .fp-recipe-notes { display: grid; grid-template-columns: 90px minmax(0,1fr); gap: 16px; padding-block: 16px; }
+.fp-recipe-tools h3, .fp-recipe-notes h3, .fp-recipe-reviews h3 { margin: 0; font: 600 14px/1.25 Poppins,sans-serif; }
+.fp-recipe-tools > div { min-height: 128px; }
+.fp-recipe-notes p { font: 400 12px/1.5 Poppins,sans-serif; }
+.fp-recipe-reviews { display: flex; flex-direction: column; gap: 16px; padding: 16px; border-top: 1px solid var(--nv-line); }
+.fp-recipe-reviews header { display: flex; justify-content: space-between; gap: 10px; }
+.fp-recipe-reviews header > span { font: 400 12px/1.3 Poppins,sans-serif; color: var(--nv-muted); }
+.fp-review-empty { display: flex; flex-direction: column; gap: 16px; padding: 16px; border-radius: 16px; background: #fefcfb; }
+.fp-review-empty p { margin: 0; color: var(--nv-muted); font: 400 12px/1.5 Poppins,sans-serif; }
+.fp-review-avatar { width: 36px; height: 36px; border-radius: 24px; background: var(--nv-accent); }
+.fp-resource-author { display: flex; align-items: center; gap: 12px; padding-block: 12px; }
+.fp-resource-author strong { display: block; font: 600 14px/1.25 Poppins,sans-serif; }
+.fp-resource-author .nvrf-avatar { width: 36px; height: 36px; flex: none; }
+.fp-resource-author small { display: block; margin-top: 6px; color: var(--nv-muted); font: 400 11px/1.24 Poppins,sans-serif; }
+.fp-resource-saved { font: 400 11px/1.24 Poppins,sans-serif; }
+.fp-resource-saved > summary { cursor: pointer; }
+.fp-video-empty { min-width: 0; }
+.fp-video-empty .nvrf-image { height: 150px; border-radius: 16px; }
+.fp-video-empty p { color: var(--nv-muted); font: 400 12px/1.3 Poppins,sans-serif; }
+.nv-app .fp-resource-share button { width: 30px; height: 30px; min-height: 30px; padding: 6px; border: 0; border-radius: 8px; background: var(--nv-bg); }
+.fp-resource-save { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.fp-video-placeholder { display: flex; align-items: center; justify-content: center; }
+.fp-related-videos article { min-width: 0; }
+.fp-related-videos p { margin: 10px 4px 0; color: var(--nv-muted); font: 400 12px/1.3 Poppins,sans-serif; }
+.nvexercise-table thead th > button { display: flex; align-items: center; gap: 4px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.nv-app.nv-patient .np-plan-meal.fp-home-meal { display: flex; flex-direction: column; border: 0; border-radius: 16px; }
+.nv-app.nv-patient .fp-home-meal > .fp-home-meal-photo { position: relative; display: block; padding: 0; width: 100%; height: 160px; overflow: hidden; border-radius: 16px; }
+.nv-app.nv-patient .fp-home-meal-photo > .np-food-photo { padding: 0; height: 160px; }
+.fp-home-meal-photo > span:last-child { position: absolute; top: 14px; left: 14px; display: flex; align-items: center; gap: 8px; }
+.fp-home-meal-photo small { display: flex; align-items: center; gap: 4px; padding: 4px 6px; border-radius: 6px; background: var(--nv-card); font: 400 11px/1.24 Poppins,sans-serif; }
+.nv-app.nv-patient .fp-home-meal .nv-badge { border-radius: 6px; padding: 4px 6px; font-size: 11px; background: var(--nv-accent); }
+.nv-app.nv-patient .fp-home-meal > .fp-home-meal-body { display: flex; flex-direction: column; align-items: stretch; gap: 14px; padding: 16px; width: 100%; }
+.fp-home-nutrients { display: flex; gap: 8px; }
+.fp-home-nutrients > span { display: flex; align-items: center; justify-content: center; flex: 1; gap: 4px; padding: 6px; border-radius: 8px; background: var(--nv-accent-soft); font: 400 11px/1.24 Poppins,sans-serif; }
+.fp-home-nutrients > span:nth-child(2) { background: #ffe6b5; }
+.fp-home-nutrients > span:nth-child(3) { background: #ffd2ad; }
+.fp-home-meal-body > strong { font: 600 14px/1.25 Poppins,sans-serif; }
+.fp-home-meal-body > small { color: var(--nv-muted); font: 400 11px/1.6 Poppins,sans-serif; }
+.nv-app.nv-patient .nv-page-head h1 { font-size: 22px; font-weight: 600; line-height: 1.08; }
+.nv-app.nv-patient .nv-page-head p { font-size: 11px; line-height: 1.24; }
+.nv-app.nv-patient .np-metrics .nv-metric > strong { font-size: 16px; line-height: 1.24; }
+.nv-app.nv-patient .np-metrics .nv-metric > strong em { font-size: 12px; }
+.nv-app.nv-patient .np-metrics .nv-icon-tile { background: var(--nv-accent); }
+.np-source-calories { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.np-source-calories > div { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.np-source-calories strong { display: block; font-size: 18px; line-height: 1.2; font-weight: 600; white-space: nowrap; }
+.np-source-calories small { display: block; font-size: 11px; line-height: 1.24; color: var(--nv-muted); }
+.np-source-calories strong small { display: inline; font-size: 14px; color: var(--nv-ink); font-weight: 400; }
+.np-source-calories .nv-icon-tile { padding: 8px; border-radius: 20px; background: var(--nv-accent-soft); }
+.nv-app.nv-patient .fp-workout .np-followup-grid button { padding: 16px; min-height: 92px; border-radius: 16px; gap: 16px; }
+.nv-app.nv-patient .fp-workout .np-action-icon { width: 60px; height: 60px; border-radius: 12px; background: var(--nv-card); }
+.nv-app.nv-patient .fp-workout .np-followup-grid > button > span:last-child { flex: 1; min-width: 0; }
+.nv-app.nv-patient .fp-workout .np-followup-grid > button > span > span { font-size: 12px; line-height: 1.3; }
+.fp-workout-info { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 12px 0 8px; }
+.nv-app.nv-patient .fp-workout-info strong { font-size: 12px; font-weight: 600; }
+.fp-workout-info small { font-size: 11px; font-weight: 400; }
+.nv-app.nv-patient .fp-workout .nv-progress { height: 5px; width: 100%; background: rgba(255,255,255,.5); border-radius: 4px; }
+.fp-daily-plan { display: flex; flex-direction: column; gap: 20px; }
+.fp-daily-plan > h2 { display: none; }
+.nv-app.nv-patient .np-exercise-card { background: transparent; padding: 0; }
+.nv-app.nv-patient .np-routine-item { background: var(--nv-card); }
+.nv-app.nv-patient .np-routine-item .np-food-photo { width: 78px; height: 78px; border-radius: 10px; }
+.nv-app.nv-patient .nvcal-board { border: 0; background: var(--nv-card); }
+.nv-app.nv-patient .nvcal-stat, .nv-app.nv-patient .nvcal-arrows button, .nv-app.nv-patient .nvcal-views { background: var(--nv-card); }
+.nv-app.nv-patient .fp-grocery-charts { display: grid; grid-template-columns: minmax(0,472fr) minmax(0,374fr); gap: 20px; }
+.nv-app.nv-patient .fp-grocery-overview { height: 244px; }
+.fp-chart-period { padding: 8px 10px; border-radius: 8px; background: var(--nv-track); color: var(--nv-muted); font: 500 11px/1.05 Poppins,sans-serif; }
+.fp-grocery-columns { display: flex; flex: 1; align-items: stretch; gap: 12px; min-height: 0; }
+.fp-grocery-columns > div { display: flex; flex: 1; flex-direction: column; align-items: center; gap: 8px; min-width: 0; }
+.fp-grocery-columns > div > span { display: flex; align-items: end; width: 100%; flex: 1; border-radius: 8px 8px 0 0; background: var(--nv-track); }
+.fp-grocery-columns i { width: 100%; min-height: 0; border-radius: 8px 8px 0 0; background: var(--nv-gold); }
+.fp-grocery-columns strong { font: 600 11px/1.24 Poppins,sans-serif; }
+.fp-grocery-columns small { color: var(--nv-muted); font: 400 10px/1.35 Poppins,sans-serif; text-align: center; }
+.nv-app.nv-patient .gf-status-body { gap: 16px; padding-left: 0; }
+.nv-app.nv-patient .gf-status .gf-donut { width: 149px; flex: 0 0 149px; }
+.nv-app.nv-patient .gf-legend { flex: 1; }
+.nv-app.nv-patient .nvpf-main { padding: 16px; border-radius: 16px; background: var(--nv-card); }
+.nv-app.nv-patient .nvpf-main .nvpf-weight { background: var(--nv-bg); }
+.nv-app.nv-patient .nvpf-table { width: 100%; overflow-x: auto; background: var(--nv-bg); }
+.nv-app.nv-patient .nvpf-table .nvpf-empty-row { height: 168px; }
+.nv-app.nv-patient .nvpf-weight-body { min-height: 302px; }
+.fp-body-map { position: relative; height: 674px; width: 440px; max-width: 100%; overflow: hidden; background: var(--nv-fill); }
+.fp-body-picker { position: absolute; top: 0; left: 0; z-index: 1; padding: 6px 10px; border: 0; border-radius: 8px; background: var(--nv-accent); color: #272932; font: 500 11px/1.05 Poppins,sans-serif; cursor: pointer; }
+.fp-body-label { position: absolute; display: flex; flex-direction: column; gap: 8px; padding: 0 8px; white-space: nowrap; }
+.fp-body-label small { font: 400 11px/1.24 Poppins,sans-serif; color: var(--nv-muted); }
+.fp-body-label span { display: flex; align-items: baseline; gap: 4px; font: 400 12px/1.3 Poppins,sans-serif; color: var(--nv-muted); }
+.fp-body-label strong { font: 600 14px/1.25 Poppins,sans-serif; color: var(--nv-ink); }
+.fp-body-chest { left: 354px; top: 104px; }
+.fp-body-waist { left: 354px; top: 216px; }
+.fp-body-hip { left: 20px; top: 374px; }
+.fp-body-arm { left: 20px; top: 167px; }
+.fp-body-thigh { left: 354px; top: 464px; }
+.fp-body-line, .fp-body-point { position: absolute; pointer-events: none; }
+.fp-body-line img, .fp-body-point img { display: block; max-width: none; }
+.fp-body-line { z-index: 0; }
+.fp-body-line { left: 20px; top: 185px; }
+.fp-body-line1 { left: 220px; top: 117px; }
+.fp-body-line2 { left: 250px; top: 423px; }
+.fp-body-line3 { left: 220px; top: 228px; }
+.fp-body-line4 { left: 20px; top: 330px; }
+.fp-body-point-0 { left: 138px; top: 216px; }
+.fp-body-point-1 { left: 212px; top: 180px; }
+.fp-body-point-2 { left: 212px; top: 253px; }
+.fp-body-point-3 { left: 242px; top: 416px; }
+.fp-body-point-4 { left: 212px; top: 323px; }
+.fp-photo-slots { display: flex; overflow: hidden; gap: 16px; }
+.nv-app .fp-photo-slots > button { display: flex; flex-direction: column; gap: 12px; flex: 1; min-width: 0; padding: 16px 12px 12px; border: 0; border-radius: 16px; background: var(--nv-bg); color: var(--nv-ink); text-align: left; cursor: pointer; }
+.fp-photo-slots > button > span:first-child { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.fp-photo-slots small { font: 400 11px/1.24 Poppins,sans-serif; color: var(--nv-muted); }
+.fp-photo-slots strong { font: 600 14px/1.25 Poppins,sans-serif; }
+.fp-photo-placeholder { display: block; height: 155px; border-radius: 16px; background: var(--nv-fill); }
+.fp-plan-target { margin-top: 20px; font: 400 11px/1.24 Poppins,sans-serif; color: var(--nv-muted); }
+.fp-plan-target summary { cursor: pointer; }
+.nv-app.nv-patient .nvfd-table:not(.nvfd-pro) { min-width: 1024px; }
+.nv-app.nv-patient .nvfd-table:not(.nvfd-pro) .nvfd-row { grid-template-columns: 20px 106px 104px minmax(160px,1fr) 58px 78px 178px 48px 136px; column-gap: 12px; }
+.nv-app.nv-patient .nvfd-row input[type=checkbox] { width: 12px; height: 12px; min-height: 0; padding: 0; margin: 0; accent-color: var(--nv-accent); }
+@media (min-width: 800px) {
+  .nv-app.nv-patient .mf-featured-main { flex: 0 0 670px; }
+  .nv-app.nv-patient .mf-featured-image { flex: none; width: 298px; height: 298px; aspect-ratio: auto; }
+  .nv-app.nv-patient .nv-sidebar { position: relative; top: auto; height: auto; min-height: 100dvh; align-self: stretch; }
+  .nv-app.nv-patient .nv-workspace { min-width: 0; }
+  .nv-app.nv-patient .nv-topbar { height: 78px; min-height: 78px; padding: 28px 28px 0 32px; }
+  .nv-app.nv-patient .nv-main { padding: 28px; }
+  .nv-app.nv-patient.nv-home .nv-topbar { height: auto; min-height: 0; }
+  .nv-app.nv-patient.nv-home .nv-content-layout { grid-template-columns: minmax(0,1fr) 325px; }
+  .nv-app.nv-patient.nv-home .nv-main { padding-top: 28px; }
+  .nv-app.nv-patient.nv-patient-agenda :is(.nv-workspace,.nv-main,.nv-content-layout) { background: var(--nv-bg); }
+  .nv-app.nv-patient.nv-patient-agenda .nvcal { grid-template-columns: minmax(0,1fr) 297px; min-height: 842px; }
+  .nv-app.nv-patient.nv-patient-agenda .nvcal-aside { margin: -106px -28px -28px 0; padding: 28px 20px; min-height: calc(100% + 134px); max-height: 1048px; overflow-y: auto; border: 0; background: var(--nv-card); }
+  .nv-app.nv-patient.nv-patient-agenda .nv-topbar .nv-header-menu { margin-right: 325px; }
+  .nv-app.nv-patient.nv-home .np-bottom-grid > .nv-card { min-height: 404px; }
+  .nv-app.nv-patient .nvexercise-table { table-layout: fixed; }
+  .nv-app.nv-patient .nvexercise-table thead th { font-size: 11px; }
+  .nv-app.nv-patient .nvrf-detail-rail { padding: 36px; }
+}
+@media (max-width: 799px) {
+  .nv-app .nvrf-related { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+  .nv-app .fp-resource-share button { background: var(--nv-card); }
+  .nv-app.nv-patient .mf-detail-left { display: contents; }
+  .nv-app.nv-patient .mf-detail-image { order: 1; height: 275px; aspect-ratio: auto; border-radius: 0; }
+  .nv-app.nv-patient .mf-detail-info { order: 2; padding: 16px; background: var(--nv-bg); border-radius: 0 0 16px 16px; }
+  .nv-app.nv-patient .mf-detail-content > h2 { order: 3; }
+  .nv-app.nv-patient .mf-detail-about { order: 4; }
+  .nv-app.nv-patient .mf-detail-right > .mf-macros-row { order: 5; }
+  .nv-app.nv-patient .mf-detail-right > .mf-macros-row { padding-inline: 16px; gap: 12px; }
+  .nv-app.nv-patient .mf-servings { order: 6; }
+  .nv-app.nv-patient .fp-recipe-tools { order: 7; grid-template-columns: 1fr; }
+  .nv-app.nv-patient .mf-detail-steps { order: 8; }
+  .nv-app.nv-patient .fp-recipe-notes { order: 9; grid-template-columns: 1fr; }
+  .nv-app.nv-patient .mf-detail-right > .mf-facts { order: 10; height: 441px; min-height: 441px; }
+  .nv-app.nv-patient .mf-facts dl { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: space-between; }
+  .nv-app.nv-patient .mf-facts dl > div { flex-shrink: 1; }
+  .nv-app.nv-patient .mf-facts dl > div:not(:last-child) { margin-bottom: -1.875px; }
+  .nv-app.nv-patient .mf-facts-missing { order: 11; }
+  .nv-app.nv-patient .fp-recipe-reviews { order: 12; padding: 0; border: 0; }
+  .nv-app.nv-patient .nv-main { padding: 24px 16px; }
+  .nv-app.nv-patient .nv-sidebar .fp-plan-card { display: none; }
+  .nv-app.nv-patient .nv-sidebar { gap: 20px; }
+  .nv-app.nv-patient .nv-topbar { height: 64px; min-height: 64px; padding: 16px; }
+  .nv-app.nv-patient .fp-footer { padding: 0 16px 24px; justify-content: center; gap: 16px 24px; }
+  .nv-app.nv-patient .fp-footer p { width: 100%; text-align: center; }
+  .fp-social { width: 100%; margin: 0; justify-content: center; }
+  .nv-app.nv-patient.nv-home .nv-daily { padding: 0 16px 24px; gap: 32px; }
+  .nv-app.nv-patient.nv-home .fp-daily-plan { padding: 16px; border-radius: 16px; background: var(--nv-card); }
+  .fp-daily-plan > h2 { display: block; font: 600 14px/1.25 Poppins,sans-serif; }
+  .nv-app.nv-patient .nvcal-stats { display: flex; flex-wrap: nowrap; gap: 16px; }
+  .nv-app.nv-patient .nvcal-stat { flex: 1; min-width: 0; padding: 16px; background: var(--nv-card); }
+  .nv-app.nv-patient .nvcal-stat > p { min-height: 27px; font-size: 11px; }
+  .nv-app.nv-patient .nvcal-stat > div { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .nv-app.nv-patient .nvcal-stat small { font-size: 11px; }
+  .nv-app.nv-patient .nvcal-stat strong { font-size: 22px; }
+  .nv-app.nv-patient .mf-featured { margin-inline: -16px; padding-top: 20px; background: var(--nv-bg); }
+  .nv-app.nv-patient .mf-featured > .mf-section-head { padding-inline: 16px; }
+  .nv-app.nv-patient .mf-featured-main { padding: 0 16px 20px; border-radius: 0; gap: 20px; }
+  .nv-app.nv-patient .mf-featured-body { border-radius: 0; }
+  .nv-app.nv-patient .mf-featured-image { width: 100%; max-width: none; height: 298px; aspect-ratio: auto; }
+  .nv-app.nv-patient .mf-featured-image .np-food-photo { height: 298px; width: 100%; }
+  .nv-app.nv-patient .mf-featured-body .mf-macros-column { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); margin: 0 16px 20px; }
+  .nv-app.nv-patient .fp-grocery-charts { grid-template-columns: 1fr; gap: 20px; }
+  .nv-app.nv-patient .gf-status { height: 342px; }
+  .nv-app.nv-patient .gf-status-body { flex-direction: row; }
+  .nv-app.nv-patient .gf-status .gf-donut { width: 132px; flex-basis: 132px; }
+  .nv-app.nv-patient .nvpf-main { padding: 0; background: var(--nv-card); }
+  .nv-app.nv-patient.nv-progress-page :is(.nv-workspace,.nv-content-layout,.nv-main) { background: var(--nv-card); }
+  .fp-body-map { width: 358px; height: 556px; }
+  .fp-body-chest { left: 292px; top: 65px; }
+  .fp-body-waist { left: 293px; top: 157px; }
+  .fp-body-hip { left: 13px; top: 294px; }
+  .fp-body-arm { left: 13px; top: 121px; }
+  .fp-body-thigh { left: 292px; top: 369px; }
+  .fp-body-line { left: 13px; top: 136px; }
+  .fp-body-line1 { left: 179px; top: 79px; }
+  .fp-body-line2 { left: 205px; top: 335px; }
+  .fp-body-line3 { left: 179px; top: 171px; }
+  .fp-body-line4 { left: 13px; top: 257px; }
+  .fp-body-point-0 { left: 111px; top: 161px; }
+  .fp-body-point-1 { left: 172px; top: 132px; }
+  .fp-body-point-2 { left: 172px; top: 193px; }
+  .fp-body-point-3 { left: 197px; top: 329px; }
+  .fp-body-point-4 { left: 172px; top: 251px; }
+  .nv-app.nv-patient .nvpf-info { gap: 32px; }
+  .nv-app.nv-patient .nvpf-side { gap: 24px; }
+  .nv-app.nv-patient .nvpf-table table { min-width: 610px; }
+  .nv-app.nv-patient .nvrf-hero { margin-inline: -16px; padding: 32px 16px; border-radius: 0; }
+  .nv-app.nv-patient .nvrf-hero h2 { display: none; }
+  .nv-app.nv-patient .nvrf-featured { margin-inline: -16px; }
+  .nv-app.nv-patient .nvrf-featured > button .nvrf-image { width: 390px; height: 196px; border-radius: 0; }
+  .nv-app.nv-patient .nvrf-featured-info { padding-inline: 16px; }
+  .nv-app.nv-patient.nv-messaging .nm-layout .nm-conversation { height: 900px; min-height: 900px; }
+  .nv-app.nv-patient.nv-messaging .nm-layout .nm-thread { flex: 1; height: auto; min-height: 0; max-height: none; }
+  .nv-app.nv-patient .nvexercise-table { table-layout: fixed; width: 652px; }
+  .nv-app.nv-patient .nvexercise-table tbody th { width: 169px; }
+  .nv-app.nv-patient .nvexercise-table thead th { font-size: 10px; }
+}

@@ -1,3 +1,4 @@
+import { useUnsavedChanges } from './unsaved-changes';
 // Mensajes — frame 84:2565 (desktop) y 433:19982 (mobile) del archivo Nutrigo.
 // Tres columnas: "Section Messages" 198:5969 (búsqueda, filtro, lista y "New
 // Message"), "Center Section" 198:5995 (chat en Cream-BG) y el perfil 207:6722
@@ -14,6 +15,7 @@ import type { ShowroomPage } from './ShowroomPanels';
 import type { ShowroomPatient } from './showroom-model';
 import { sendShowroomMessage } from './message-send';
 import { messageReceipt, messageReceiptLabel, unreadCount } from './message-receipts';
+import { MESSAGES_READ_EVENT, mergeUnread } from './cartera-unread';
 import { CHAT_ATTACHMENT_ACCEPT, assertChatFile, uploadChatAttachment } from '../../api/assets';
 import { ChatAttachmentView } from './ChatAttachment';
 import { NvState } from './primitives';
@@ -25,9 +27,10 @@ import './messages.css';
 import './messages-fig.css';
 
 type Role = 'patient' | 'pro';
-type Props = { patient: ShowroomPatient; patients: ShowroomPatient[]; role: Role; onSelect: (id: string) => void; onNavigate: (page: ShowroomPage) => void };
+type Props = { patient: ShowroomPatient; patients: ShowroomPatient[]; role: Role; remoteUnread?: ReadonlyMap<string, number> | null; onSelect: (id: string) => void; onNavigate: (page: ShowroomPage) => void };
+const ACTIVE_REFRESH_MS = 15000;
 
-const NUTRITIONIST = { name: 'Verónica Trenti', initials: 'VT', role: 'Nutricionista' };
+const NUTRITIONIST = { name: 'Tu nutricionista', initials: 'N', role: 'Nutricionista' };
 const normalized = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const sentMessages = (patient: ShowroomPatient) => patient.messages.filter((m) => Boolean(m.sent_at)).slice().sort((a, b) => Date.parse(a.sent_at) - Date.parse(b.sent_at));
 const latestAt = (patient: ShowroomPatient) => {
@@ -39,7 +42,7 @@ const contactOf = (patient: ShowroomPatient, role: Role) => role === 'pro'
   : NUTRITIONIST;
 const narrow = () => typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 760px)').matches;
 
-export function NutrigoMessages({ patient, patients, role, onSelect, onNavigate }: Props) {
+export function NutrigoMessages({ patient, patients, role, remoteUnread = null, onSelect, onNavigate }: Props) {
   const [query, setQuery] = useState('');
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [profileOpen, setProfileOpen] = useState(true);
@@ -49,7 +52,7 @@ export function NutrigoMessages({ patient, patients, role, onSelect, onNavigate 
   const people = role === 'pro' ? [...patients].sort((a, b) => latestAt(b) - latestAt(a) || a.name.localeCompare(b.name, 'es')) : [patient];
   const contacts = people.filter((p) => {
     const thread = sentMessages(p);
-    if (unreadOnly && unreadCount(thread, role) === 0) return false;
+    if (unreadOnly && mergeUnread(unreadCount(thread, role), remoteUnread, p.id) === 0) return false;
     if (!q) return true;
     return normalized(contactOf(p, role).name).includes(q) || thread.some((m) => normalized(`${m.text} ${m.attachment?.filename ?? ''}`).includes(q));
   });
@@ -74,7 +77,7 @@ export function NutrigoMessages({ patient, patients, role, onSelect, onNavigate 
       <div className="nm-contact-list">{contacts.map((p) => {
         const thread = sentMessages(p);
         const latest = thread[thread.length - 1];
-        const unread = unreadCount(thread, role);
+        const unread = mergeUnread(unreadCount(thread, role), remoteUnread, p.id);
         const contact = contactOf(p, role);
         const preview = latest ? (latest.text || latest.attachment?.filename || 'Adjunto') : 'Iniciar conversación';
         return <button type="button" key={p.id} aria-pressed={p.id === patient.id} aria-label={unread > 0 ? `${contact.name}, ${unread} sin leer` : undefined} onClick={() => select(p.id)}>
@@ -115,13 +118,19 @@ function MessageConversation({ patient, role, composeRef, profileOpen, onToggleP
   const ownFrom = role === 'pro' ? 'vero' : 'patient';
   const reader = ownFrom;
   const canSend = Boolean(text.trim() || file);
+  useUnsavedChanges(canSend, busy);
   const seen = lastSeenAt(messages, ownFrom);
   const meetUrl = patient.appointment?.channel === 'video' ? secureMeetUrl(patient.appointment.meet_url) : null;
   useEffect(() => { if (list.current) list.current.scrollTop = list.current.scrollHeight; }, [messages.length]);
   useEffect(() => {
     if (!unreadIncoming) return;
-    void api.markMessagesRead(patient.id, reader).then(() => refresh(patient.id)).catch(() => undefined);
+    void api.markMessagesRead(patient.id, reader).then(() => { window.dispatchEvent(new Event(MESSAGES_READ_EVENT)); return refresh(patient.id); }).catch(() => undefined);
   }, [patient.id, reader, refresh, unreadIncoming]);
+  useEffect(() => {
+    // La conversación abierta trae mensajes nuevos sin recargar la página.
+    const timer = window.setInterval(() => { if (document.visibilityState === 'visible') void refresh(patient.id).catch(() => undefined); }, ACTIVE_REFRESH_MS);
+    return () => window.clearInterval(timer);
+  }, [patient.id, refresh]);
   const pickFile = (next: File | null) => {
     if (!next) { setFile(null); if (fileRef.current) fileRef.current.value = ''; return; }
     try { assertChatFile(next); setFile(next); setError(''); }
@@ -179,7 +188,7 @@ function MessageConversation({ patient, role, composeRef, profileOpen, onToggleP
       {messages.map((m, index) => {
         const own = m.from === ownFrom;
         const receipt = messageReceipt(m);
-        const sender = m.from === 'vero' ? 'Verónica' : patient.name;
+        const sender = m.from === 'vero' ? 'Tu nutricionista' : patient.name;
         const divider = index === 0 || !sameDay(messages[index - 1].sent_at, m.sent_at);
         return <div key={m.id} className="nmf-row-wrap">
           {divider && <p className="nmf-day"><span>{dayDividerLabel(m.sent_at)}</span></p>}
@@ -198,7 +207,7 @@ function MessageConversation({ patient, role, composeRef, profileOpen, onToggleP
       <label htmlFor="nm-message" className="nmf-sr">Mensaje para {contact.name}</label>
       {file && <div className="nmf-file-chip"><Paperclip size={14} aria-hidden /><span>{file.name}</span><button type="button" onClick={() => pickFile(null)} disabled={busy} aria-label={`Quitar ${file.name}`}><X size={14} aria-hidden /></button></div>}
       <div className="nm-compose-row">
-        <input ref={fileRef} id="nm-attach" className="nmf-sr" tabIndex={-1} type="file" accept={CHAT_ATTACHMENT_ACCEPT} disabled={busy} onChange={(e) => pickFile(e.target.files?.[0] ?? null)} aria-describedby="nm-attach-hint" />
+        <input ref={fileRef} id="nm-attach" className="nmf-sr" tabIndex={-1} aria-label="Adjuntar archivo" type="file" accept={CHAT_ATTACHMENT_ACCEPT} disabled={busy} onChange={(e) => pickFile(e.target.files?.[0] ?? null)} aria-describedby="nm-attach-hint" />
         <button type="button" className="nmf-attach-btn" onClick={() => fileRef.current?.click()} disabled={busy} aria-label="Adjuntar archivo" aria-describedby="nm-attach-hint" title="Adjuntar archivo"><Paperclip size={18} aria-hidden /></button>
         <span id="nm-attach-hint" className="nmf-sr">JPG, PNG, WebP o PDF de hasta 10 MB.</span>
         <textarea ref={composeRef} id="nm-message" rows={1} maxLength={2000} placeholder="Escribí un mensaje…" value={text} disabled={busy} onChange={(e) => setText(e.target.value)} onKeyDown={onKeyDown} aria-describedby={error ? 'nm-error' : 'nm-status'} />

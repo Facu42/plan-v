@@ -6,7 +6,7 @@ import { generateReplacement } from './replacements.js';
 import { emptyIntakePayload } from '../intake/payload.js';
 const request={kind:'menu_request' as const,target:'Arroz',reason:'No consigo',replacement:'ingredient' as const};
 describe('alternativas con IA',()=>{
- beforeEach(()=>{vi.clearAllMocks();vi.stubEnv('AI_MODE','live');vi.stubEnv('OPENROUTER_API_KEY','');vi.stubEnv('OPENAI_API_KEY','test-only');});
+ beforeEach(()=>{vi.clearAllMocks();vi.stubEnv('AI_MODE','live');vi.stubEnv('OPENROUTER_API_KEY','test-only');vi.stubEnv('OPENAI_API_KEY','');});
  afterEach(()=>vi.unstubAllEnvs());
  it('bloquea alergias/restricciones sin completar antes de llamar al proveedor',async()=>{
    await expect(generateReplacement(request,emptyIntakePayload(),[])).rejects.toMatchObject({status:409});expect(mocks.generateText).not.toHaveBeenCalled();

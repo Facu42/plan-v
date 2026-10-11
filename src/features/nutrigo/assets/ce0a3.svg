@@ -1,0 +1,8 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Icon/Plus">
+<g id="Vector">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M3.75 10C3.75 9.65482 3.98319 9.375 4.27083 9.375H15.7292C16.0168 9.375 16.25 9.65482 16.25 10C16.25 10.3452 16.0168 10.625 15.7292 10.625H4.27083C3.98319 10.625 3.75 10.3452 3.75 10Z" fill="#272932"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M10 3.75C10.3452 3.75 10.625 3.98319 10.625 4.27083V15.7292C10.625 16.0168 10.3452 16.25 10 16.25C9.65482 16.25 9.375 16.0168 9.375 15.7292V4.27083C9.375 3.98319 9.65482 3.75 10 3.75Z" fill="#272932"/>
+</g>
+</g>
+</svg>

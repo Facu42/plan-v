@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { RecipeDayAssignment } from '../../types/recipe-plate';
 import { DayAssignedMealsView } from './DayMeals';
-import { RecipeCatalog } from './RecipeCatalog';
+import { RecipeCatalog, RecipeChoice, type RecipeCatalogState } from './RecipeCatalog';
 import { RecipeDetails, RecipePlateCard, scaleQuantity } from './RecipePlate';
 
 const card = {
@@ -70,13 +70,17 @@ describe('PV-40 formato de card y CTA', () => {
     expect(meal).toContain('80 g Lentejas');
     expect(meal).toContain('COMIDAS DEL DÍA');
     const catalog = renderToStaticMarkup(<RecipeCatalog patientId="pat-sofia" />);
-    expect(catalog).toContain('Carga manual');
-    expect(catalog).toContain('Asistente IA');
+    expect(catalog).not.toContain('Carga manual');
+    expect(catalog).toContain('Generar borrador con IA');
+    const choice = renderToStaticMarkup(<RecipeChoice catalog={{ patientId: 'pat-sofia', busy: false, chooseManual: () => {}, chooseAi: () => {} } as RecipeCatalogState} />);
+    expect(choice).toContain('Carga manual');
+    expect(choice).toContain('Asistente IA');
     expect(catalog).toContain('Nueva receta');
-    expect(catalog).toContain('No se inventan calorías ni macros');
+    expect(catalog).toContain('nutrientes estimados que requieren revisión');
+    expect(catalog).toContain('la etiqueta de estimación se conserva al publicar');
   });
 
-  it('el detalle de receta sigue el archivo con datos reales y sin reseñas ni health score', () => {
+  it('el detalle conserva los campos del archivo sin inventar reseñas ni valores nutricionales', () => {
     const detail = {
       id: 'r1', title: 'Bowl de lentejas', version: 2, yieldPortions: 2, steps: ['Lavar.', 'Cocinar.'],
       nutrientSource: 'Tabla del consultorio', ingredients: [{ id: 'i1', name: 'Lentejas', quantity: 80, unit: 'g' as const }],
@@ -89,10 +93,13 @@ describe('PV-40 formato de card y CTA', () => {
     expect(html).toContain('Información nutricional');
     expect(html).toContain('185 kcal');
     expect(html).toContain('Publicada');
-    expect(html).not.toMatch(/reseñas|reviews|health score|dificultad|fibra|sodio/i);
+    expect(html).toContain('No hay reseñas disponibles');
+    expect(html).toContain('Sin utensilios declarados');
+    expect(html.replace(/<[^>]*>/g, '')).not.toMatch(/125 personas|4\.8|9\/10|Sarah Murad/i);
     const bare = renderToStaticMarkup(<RecipeDetails recipe={{ ...detail, card: { ...card, macro_status: 'unavailable', macros: null } }} onBack={() => {}} />);
     expect(bare).toContain('Sin macros declarados.');
-    expect(bare).not.toContain('Información nutricional');
+    expect(bare).toContain('Información nutricional');
+    expect(bare).not.toContain('185 kcal');
   });
 
   it('las porciones escalan las cantidades de la receta sin inventar datos', () => {

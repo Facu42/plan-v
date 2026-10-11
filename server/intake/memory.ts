@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import type { ConsentDecision, ConsentPurpose } from './consent.js';
 import {
@@ -18,6 +19,7 @@ let intakes = new Map<string, IntakeRecord>();
 let consents = new Map<string, ConsentRecord[]>();
 let notes = new Map<string, ClinicalNoteRecord[]>();
 let submittedRevisions = new Map<string, number>();
+let history = new Map<string, Array<IntakeRecord & { submitted_revision: number | null }>>();
 
 export class IntakeConflictError extends Error {
   constructor(message = 'La revisión del ingreso cambió') {
@@ -38,6 +40,7 @@ export function resetIntakeMemory(): void {
   consents = new Map();
   notes = new Map();
   submittedRevisions = new Map();
+  history = new Map();
 }
 
 function nowIso() {
@@ -70,6 +73,21 @@ export function listConsentEvents(patientId: string): ConsentRecord[] {
 
 export function listClinicalNotes(patientId: string): ClinicalNoteRecord[] {
   return [...(notes.get(patientId) ?? [])];
+}
+
+// Internal history is never returned by patient/admin HTTP views.
+export function listIntakeRevisionHistory(patientId: string) {
+  return structuredClone(history.get(patientId) ?? []);
+}
+export function reopenIntake(patientId: string, expectedRevision: number): IntakeRecord {
+  const current = getIntakeRecord(patientId);
+  if (current.revision !== expectedRevision) throw new IntakeConflictError();
+  if (current.status === 'draft') return current;
+  history.set(patientId, [...(history.get(patientId) ?? []), structuredClone({ ...current, submitted_revision: submittedRevisions.get(patientId) ?? null })]);
+  const next: IntakeRecord = { ...current, status: 'draft', step: 'profile', revision: current.revision + 1, submitted_at: null, reviewed_by: null, reviewed_at: null, updated_at: nowIso() };
+  intakes.set(patientId, next);
+  submittedRevisions.delete(patientId);
+  return next;
 }
 
 export function patchIntake(patientId: string, input: {
@@ -171,3 +189,5 @@ export function addClinicalNote(patientId: string, authorId: string, body: strin
   notes.set(patientId, [...existing, note]);
   return note;
 }
+
+registerDemoState('intake/memory', () => ({ intakes, consents, notes, submittedRevisions, history }));

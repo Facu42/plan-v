@@ -1,3 +1,4 @@
+import { registerDemoState } from '../demo/state.js';
 import { randomUUID } from 'node:crypto';
 import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
@@ -169,3 +170,5 @@ export async function deleteShoppingManual(patientId: string, itemId: string, pe
   shoppingDbError(error);
   return asList(data);
 }
+
+registerDemoState('shopping/repository', () => ({ manuals, checks }));

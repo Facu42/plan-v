@@ -1,0 +1,4 @@
+User-Agent: *
+Allow: /
+
+Sitemap: https://plan-v-eight.vercel.app/pacientes/sitemap.xml

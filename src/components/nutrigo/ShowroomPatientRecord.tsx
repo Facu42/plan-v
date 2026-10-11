@@ -1,3 +1,4 @@
+import { NutritionTargetPanel } from './ShowroomNutritionTarget';
 import type { MealLog, Patient, Stage } from '../../types';
 import type { CrmEntry } from '../crm/crm-entry';
 import { getGoalSnapshot, GOAL_STATUS_LABELS } from '../crm/crm-goals';
@@ -23,12 +24,13 @@ export function professionalMealNotes(patient: Pick<Patient, 'id' | 'meal_logs'>
     .sort((a, b) => b.logged_at.localeCompare(a.logged_at));
 }
 
-export function ShowroomPatientRecord({ patient, patients = [patient], onSelect, onEdit, onOpen }: {
+export function ShowroomPatientRecord({ patient, patients = [patient], onSelect, onEdit, onOpen, summaryOnly = false }: {
   patient: Patient;
   patients?: Patient[];
   onSelect?: (id: string) => void;
   onEdit: () => void;
   onOpen: (entry: CrmEntry) => void;
+  summaryOnly?: boolean;
 }) {
   const goal = getGoalSnapshot(patient);
   const notes = professionalMealNotes(patient);
@@ -38,7 +40,7 @@ export function ShowroomPatientRecord({ patient, patients = [patient], onSelect,
   return <section className="nr-record" aria-labelledby="nr-record-title">
     <header className="nr-hero">
       <span className="nv-avatar nr-avatar">{patient.initials}</span>
-      <div className="nr-identity"><p>Ficha profesional</p><h2 id="nr-record-title">Ficha de {patient.name}</h2><div><NvBadge>{patient.status}</NvBadge><span>{STAGE_LABELS[patient.stage]}</span><span>{BILLING_LABELS[patient.billing_status]}</span></div></div>
+      <div className="nr-identity"><p>Ficha profesional</p><h2 id="nr-record-title">Ficha de {patient.name}</h2><div><NvBadge>{patient.status}</NvBadge><span>{STAGE_LABELS[patient.stage]}</span><span>{BILLING_LABELS[patient.billing_status]}</span><span>{patient.has_account === false ? 'App de la paciente: sin cuenta' : 'App de la paciente: conectada'}</span></div></div>
       {onSelect && <label className="nr-patient-select">Paciente<select aria-label="Paciente de la ficha" value={patient.id} onChange={(event) => onSelect(event.target.value)}>{patients.map((person) => <option key={person.id} value={person.id}>{person.name}</option>)}</select></label>}
       <NvButton className="nv-soft" onClick={onEdit}><Icon name="edit" size={14} />Editar datos de ficha</NvButton>
     </header>
@@ -60,12 +62,12 @@ export function ShowroomPatientRecord({ patient, patients = [patient], onSelect,
         <p>{patient.appointment ? `${patient.appointment.duration} min · ${patient.appointment.channel}` : 'Podés gestionarla desde Consultas.'}</p>
       </article>
       <article className="nr-card nr-adherence">
-        <header><span className="nr-icon"><Icon name="target" size={19} /></span><span className="nr-kicker">Adherencia · 7 días</span></header>
-        <strong>{patient.adherence_score}%</strong><NvProgress value={patient.adherence_score} label={`Adherencia de ${patient.name}`} /><small>{patient.time || 'Sin actualización registrada'}</small>
+        <header><span className="nr-icon"><Icon name="target" size={19} /></span><span className="nr-kicker">Registro semanal · 7 días</span></header>
+        {patient.weekly_registration ? <><strong>{patient.weekly_registration.recorded_days} de 7 días</strong><small>{patient.weekly_registration.meals_logged} comidas registradas</small><small>{patient.weekly_registration.water_average === null ? 'Agua sin registrar' : 'Agua: '+patient.weekly_registration.water_average.toLocaleString('es-AR')+' vasos por día registrado · '+patient.weekly_registration.water_days+' días'}</small><small>{patient.weekly_registration.pending_review} registros pendientes de revisión</small></> : <p>Resumen no disponible. Recargá para volver a consultar.</p>}
       </article>
     </div>
 
-    <CarePanel patientId={patient.id} mode="professional" />
+    {!summaryOnly && <CarePanel patientId={patient.id} mode="professional" />}
 
     <section className="nr-private" aria-label="Información profesional privada">
       <header><div><span className="nr-lock"><Icon name="pin" size={15} /></span><div><h3>Información profesional privada</h3><p>Solo visible para profesionales. No se comparte con el paciente.</p></div></div></header>
@@ -73,11 +75,12 @@ export function ShowroomPatientRecord({ patient, patients = [patient], onSelect,
         <div><dt>Horario sensible</dt><dd>{patient.sensitive_hours || 'Sin dato cargado'}</dd></div>
         <div><dt>Plan B</dt><dd>{patient.plan_b || 'Sin dato cargado'}</dd></div>
         <div><dt>Próximo foco</dt><dd>{patient.next_focus || 'Sin dato cargado'}</dd></div>
-        <div><dt>Lectura de adherencia</dt><dd>{patient.adherence_why || 'Sin observación profesional'}</dd></div>
+        <div><dt>Observación de seguimiento</dt><dd>{patient.adherence_why || 'Sin observación profesional'}</dd></div>
       </dl>
     </section>
 
-    <ShowroomIntakeReview patientId={patient.id} />
+    {!summaryOnly && <><ShowroomIntakeReview key={patient.id} patientId={patient.id} />
+    <NutritionTargetPanel key={patient.id} patientId={patient.id} patientName={patient.name} /></>}
 
     <div className="nr-history-grid">
       <section className="nr-card nr-timeline">

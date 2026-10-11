@@ -1,0 +1,14 @@
+[
+  {
+    "label": "photo-ready",
+    "path": "/crm/recetas",
+    "width": 390,
+    "overflow": false,
+    "alerts": []
+  },
+  {
+    "label": "photo-ui-mock",
+    "calls": 1,
+    "loaded": true
+  }
+]

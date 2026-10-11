@@ -79,7 +79,7 @@ describe('Agenda paciente Nutrigo', () => {
     expect(eventTime({ kind: 'plan', at, subtitle: 'Almuerzo · indicación de esta semana' })).toBe('Almuerzo');
     expect(eventTime({ kind: 'plan', at, subtitle: 'Almuerzo · 13:00' })).toBe('Almuerzo · 13:00');
     const html = renderToStaticMarkup(<ShowroomPatientAgenda patient={patient} now={now} onMessage={vi.fn()} storage={null} />);
-    expect((html.match(/class="nvcal-stat"/g) ?? [])).toHaveLength(4);
+    expect((html.match(/class="nvcal-stat"/g) ?? [])).toHaveLength(3);
     expect(html).toContain('Detalle del día');
     expect(html).toContain('Nueva consulta');
     expect(html).toContain('aria-label="Elegir mes"');

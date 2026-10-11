@@ -1,0 +1,302 @@
+{
+  "fileKey": "OTolnKfsxUFjaZOhhdb04i",
+  "source": "https://www.figma.com/design/OTolnKfsxUFjaZOhhdb04i/Nutrigo---Nutrition---Diet-Dashboard",
+  "retrievedOn": "2026-10-01",
+  "method": "Figma MCP get_design_context; forceCode=true; screenshot included",
+  "nodes": [
+    {
+      "screen": "Inicio",
+      "nodeId": "12:792",
+      "viewport": "desktop",
+      "width": 1440,
+      "component": "PatientOverview.tsx",
+      "codeBytes": 177299,
+      "codeSha256": "b1a489917d54b069fd735647b064cf9f47a4798928a0e985284b6aed21157622"
+    },
+    {
+      "screen": "Inicio",
+      "nodeId": "427:14405",
+      "viewport": "mobile",
+      "width": 390,
+      "component": "PatientOverview.tsx",
+      "codeBytes": 157666,
+      "codeSha256": "72b0ffb9a6ec179aee6db5a7894cdfeb9047113a0c497b9e10e210ebe69eb1f8"
+    },
+    {
+      "screen": "Agenda",
+      "nodeId": "84:1666",
+      "viewport": "desktop",
+      "width": 1440,
+      "component": "ShowroomPatientAgenda.tsx / ShowroomAgenda.tsx",
+      "codeBytes": 96273,
+      "codeSha256": "652682f3d3ef0b4c1a52e30cc0d920036744ac25f943842f11f3414818c348fa"
+    },
+    {
+      "screen": "Agenda",
+      "nodeId": "433:17250",
+      "viewport": "mobile",
+      "width": 390,
+      "component": "ShowroomPatientAgenda.tsx / ShowroomAgenda.tsx",
+      "codeBytes": 76556,
+      "codeSha256": "29907881a657bfd567e2fe58a07e51d98019e032bd11d0eeb4d9f1bff7ecffa4"
+    },
+    {
+      "screen": "Mensajes",
+      "nodeId": "84:2565",
+      "viewport": "desktop",
+      "width": 1440,
+      "component": "NutrigoMessages.tsx",
+      "codeBytes": 83232,
+      "codeSha256": "ff5ff397fc90a72d0ea83079190e55990b6b7d422ea1497fafdf7c01b99e37c1"
+    },
+    {
+      "screen": "Mensajes",
+      "nodeId": "433:19982",
+      "viewport": "mobile",
+      "width": 390,
+      "component": "NutrigoMessages.tsx",
+      "codeBytes": 71856,
+      "codeSha256": "301c4e8234e9d7db5a9523098a4c5af7bed3e4e7325b8d401836277d4dd26c33"
+    },
+    {
+      "screen": "Menú",
+      "nodeId": "84:2716",
+      "viewport": "desktop",
+      "width": 1440,
+      "component": "ShowroomHealthyMenu.tsx",
+      "codeBytes": 128213,
+      "codeSha256": "2131c8177a97b0946b6d9e6c1661e16b18646969dd258fe3aff2cea2004eeea2"
+    },
+    {
+      "screen": "Menú",
+      "nodeId": "445:10499",
+      "viewport": "mobile",
+      "width": 390,
+      "component": "ShowroomHealthyMenu.tsx",
+      "codeBytes": 119734,
+      "codeSha256": "bac02821eccbefc98175f715d0ae39a04449bc5cf7bdf520150746cb39560271"
+    },
+    {
+      "screen": "Detalle de receta",
+      "nodeId": "84:3145",
+      "viewport": "desktop",
+      "width": 1440,
+      "component": "RecipePlate.tsx",
+      "codeBytes": 75852,
+      "codeSha256": "720b44bb64648f3398185760b7d8d43b7557644a30d326a905b3c3928dea91a3"
+    },
+    {
+      "screen": "Detalle de receta",
+      "nodeId": "457:13264",
+      "viewport": "mobile",
+      "width": 390,
+      "component": "RecipePlate.tsx",
+      "codeBytes": 57504,
+      "codeSha256": "6a3d8044732900f3d51ce7e9eb2bbcd829cfe8a3ab65ade03d9e76adb93dec98"
+    },
+    {
+      "screen": "Plan",
+      "nodeId": "84:2994",
+      "viewport": "desktop",
+      "width": 1440,
+      "component": "ShowroomPatientPlan.tsx / ShowroomMealPlan.tsx",
+      "codeBytes": 73208,
+      "codeSha256": "860aa90959fb5f9af86e21fbf1510979d24f8e9dce05abf71420aad007742115"
+    },
+    {
+      "screen": "Plan",
+      "nodeId": "470:15300",
+      "viewport": "mobile",
+      "width": 390,
+      "component": "ShowroomPatientPlan.tsx / ShowroomMealPlan.tsx",
+      "codeBytes": 54962,
+      "codeSha256": "c2278c8528c00f083878a0d6aa181bdcfb9e3b4952a791bbc1510ff8df862d96"
+    },
+    {
+      "screen": "Compras",
+      "nodeId": "105:2472",
+      "viewport": "desktop",
+      "width": 1440,
+      "component": "ShowroomGrocery.tsx",
+      "codeBytes": 186717,
+      "codeSha256": "edc20ee989f69b40e019dd0390f4ca877c1a0347f30bf9e26a9fe169a4f89ec5"
+    },
+    {
+      "screen": "Compras",
+      "nodeId": "492:11324",
+      "viewport": "mobile",
+      "width": 390,
+      "component": "ShowroomGrocery.tsx",
+      "codeBytes": 161285,
+      "codeSha256": "94e531bba0650d9cc7309939aeefd9acbb6b86a8164f8c5e6d66c3698edd02b4"
+    },
+    {
+      "screen": "Diario",
+      "nodeId": "105:2649",
+      "viewport": "desktop",
+      "width": 1440,
+      "component": "ShowroomPatientDiary.tsx / ShowroomMeals.tsx",
+      "codeBytes": 131171,
+      "codeSha256": "457f81621a860361cf6ea81f1d9832c3c2de40ca904101c395a116e2e804c99f"
+    },
+    {
+      "screen": "Diario",
+      "nodeId": "492:14886",
+      "viewport": "mobile",
+      "width": 390,
+      "component": "ShowroomPatientDiary.tsx / ShowroomMeals.tsx",
+      "codeBytes": 109110,
+      "codeSha256": "2acfa36f78c75c96dc12c9690f91d47393cf2fa99f75c271f091f5b9d2394e7a"
+    },
+    {
+      "screen": "Progreso",
+      "nodeId": "105:2790",
+      "viewport": "desktop",
+      "width": 1440,
+      "component": "ShowroomProgress.tsx",
+      "codeBytes": 142571,
+      "codeSha256": "f4dc50e86f257df63c5dbda6d372d0c64bc25cd069d84caa9ba2ff244710a144"
+    },
+    {
+      "screen": "Progreso",
+      "nodeId": "498:18237",
+      "viewport": "mobile",
+      "width": 390,
+      "component": "ShowroomProgress.tsx",
+      "codeBytes": 116626,
+      "codeSha256": "041f454d6698ff7ef9c0b122b92ebdc4584726f348718f9207e43ca4df101892"
+    },
+    {
+      "screen": "Ejercicio",
+      "nodeId": "105:2931",
+      "viewport": "desktop",
+      "width": 1440,
+      "component": "ShowroomExercise.tsx",
+      "codeBytes": 92895,
+      "codeSha256": "27befeb03f16d63fc82d736d77f04672f47542d9be3b68ccb8e17af8d2091d82"
+    },
+    {
+      "screen": "Ejercicio",
+      "nodeId": "501:22824",
+      "viewport": "mobile",
+      "width": 390,
+      "component": "ShowroomExercise.tsx",
+      "codeBytes": 67840,
+      "codeSha256": "f847eea508cf4801d0e225b1b16acade114fc1726fde20ed52631f55357ad965"
+    },
+    {
+      "screen": "Recursos",
+      "nodeId": "263:6588",
+      "viewport": "desktop",
+      "width": 1440,
+      "component": "ShowroomResources.tsx",
+      "codeBytes": 75732,
+      "codeSha256": "3e3acb48ac09bf5388510ff2c4038423a86f7fb0c765fa5f02536fb4ada969d8"
+    },
+    {
+      "screen": "Recursos",
+      "nodeId": "504:15334",
+      "viewport": "mobile",
+      "width": 390,
+      "component": "ShowroomResources.tsx",
+      "codeBytes": 57810,
+      "codeSha256": "5434c282690bd48d013b016d1a9b7a4f9077d4e612672255e77417994ca8c103"
+    },
+    {
+      "screen": "Detalle de recurso",
+      "nodeId": "279:9301",
+      "viewport": "desktop",
+      "width": 1440,
+      "component": "ShowroomResources.tsx",
+      "codeBytes": 54561,
+      "codeSha256": "0968de8053736ea2be18dafdb5af27466e4613149363f11cb64adf8ecb5428ff"
+    },
+    {
+      "screen": "Detalle de recurso",
+      "nodeId": "507:17412",
+      "viewport": "mobile",
+      "width": 390,
+      "component": "ShowroomResources.tsx",
+      "codeBytes": 36035,
+      "codeSha256": "4258bc3fdde4a6693c3a43a10cbf5ccf02f8c87a1887fa2f0cd4f9a168d6e6f9"
+    }
+  ],
+  "assets": [
+    {
+      "file": "src/assets/nutrigo/adherencia.svg",
+      "sha256": "8681e56beace1588ef0ccd29039dfaca282ed0377958eb44ac07698df1f5178d"
+    },
+    {
+      "file": "src/assets/nutrigo/agenda.svg",
+      "sha256": "a8d254ca348241255d1f9fe828d2c5d534fb1092ca674470d074c7d4c47a3550"
+    },
+    {
+      "file": "src/assets/nutrigo/calorias.svg",
+      "sha256": "cc30c688c7cce5f54bd955bdd7eb539f4bf0191a2a96a8155c04b71bc03d3373"
+    },
+    {
+      "file": "src/assets/nutrigo/calorie-ring.svg",
+      "sha256": "e803951af2ad9b8a2af2a5f602cda4a2858b604fecd91e87dd78e1bb373b275d"
+    },
+    {
+      "file": "src/assets/nutrigo/descanso.svg",
+      "sha256": "0a0e913c78cd984bb3b92ebdc8414912066c173d00f4e87c626520f0cc061007"
+    },
+    {
+      "file": "src/assets/nutrigo/desplegar.svg",
+      "sha256": "86972a2157275536759c79836fbf87fbfe8838774064f98546755f6ffa0769ce"
+    },
+    {
+      "file": "src/assets/nutrigo/diario.svg",
+      "sha256": "c23b7918a298b70037e7af124c2592b4edbf5a6f75aa38360765d45d183560bb"
+    },
+    {
+      "file": "src/assets/nutrigo/ejercicio.svg",
+      "sha256": "7daca15469ab9c76599df524c6911ca86f408cd3076aa4fc6b0d96534e471af6"
+    },
+    {
+      "file": "src/assets/nutrigo/hidratacion.svg",
+      "sha256": "6f4b41a94102af0bf6f1b8dcaa315fddea9e7bd1247665b62b6d8c1e5397313b"
+    },
+    {
+      "file": "src/assets/nutrigo/inicio.svg",
+      "sha256": "4b55f02d7fed196dc534851c397ea94bd469fe6ef2c6d424c927daefda58ba99"
+    },
+    {
+      "file": "src/assets/nutrigo/mensajes.svg",
+      "sha256": "bf1baf6e0beed78a24e36d0134df21a8ffe1c822e6717f02d48ed148cc184f3a"
+    },
+    {
+      "file": "src/assets/nutrigo/menu.svg",
+      "sha256": "de4423d21f1c339f7ed7c573a556f8cce7aca4d320ed5f1097b69ca2fd08bad9"
+    },
+    {
+      "file": "src/assets/nutrigo/pasos.svg",
+      "sha256": "7a99a7228687aa78204a14c5ba651b11bb9c80a19dc1fd5888d97d5a1860c65c"
+    },
+    {
+      "file": "src/assets/nutrigo/plan.svg",
+      "sha256": "54dbc29c518e61ab62491d36b296ceddda32d92486c902bb249b0f7d6774258a"
+    },
+    {
+      "file": "src/assets/nutrigo/progreso.svg",
+      "sha256": "f7f9c77ee361a66c72c6d865e9535b7737970046bc7a5bbe27eaf30ba25b9229"
+    },
+    {
+      "file": "src/assets/nutrigo/quemadas.svg",
+      "sha256": "b6d40c99f8fed791c86ed4cbe205bed26408ffa1716e83aa8ea09c5727f719b1"
+    },
+    {
+      "file": "src/assets/nutrigo/recursos.svg",
+      "sha256": "f27cc40c05ee6136e5870bb694c244c3846d8f7acde06f7c01c23f2a1656ae05"
+    },
+    {
+      "file": "src/assets/nutrigo/salir.svg",
+      "sha256": "bc4fd9e3d8ea031a584ac5ea5c943bba6465d5b4db0ad1c31a544b64fbc1bd79"
+    },
+    {
+      "file": "src/assets/nutrigo/weight-gauge.svg",
+      "sha256": "ca4e28774c89fe8636cc5de5a7c1221a1f5d37bd055c0dedff546642ea69661b"
+    }
+  ]
+}

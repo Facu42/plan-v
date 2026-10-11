@@ -88,6 +88,7 @@ export function createPostgresJobStore(db: JobSqlClient, now: () => Date = () =>
              and (status = 'queued' or (status = 'leased' and lease_until is not null and lease_until <= $3))
            order by created_at
            limit 1
+           for update skip locked
          )
          returning *`,
         [owner, until, current],

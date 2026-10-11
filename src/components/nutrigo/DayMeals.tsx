@@ -1,3 +1,4 @@
+import { recipeNutritionLabel } from '../../types/ai-nutrition';
 import { useEffect, useState } from 'react';
 import { recipesApi } from '../../api/recipes';
 import { careErrorMessage } from '../../api/care';
@@ -30,9 +31,9 @@ export function DayAssignedMealsView({
         portions={assignment.yield_portions}
         card={assignment.card}
         ingredients={assignment.ingredients}
-        actions={assignment.registered_meal_id
+        actions={<><small>{recipeNutritionLabel(assignment.nutrition)}</small>{assignment.registered_meal_id
           ? <p role="status">Ya registraste esta comida.</p>
-          : <NvButton disabled={busy} onClick={() => onRegister?.(assignment)}>Registrar esta comida</NvButton>}
+          : <NvButton disabled={busy} onClick={() => onRegister?.(assignment)}>Registrar esta comida</NvButton>}</>}
       />)}
     </div>
   </section>;

@@ -158,7 +158,7 @@ function StatusDonut({ done, total }: { done: number; total: number }) {
   const share = total ? done / total : 0;
   const gap = share > 0 && share < 1 ? 6 : 0;
   const doneLength = Math.max(0, share * length - gap);
-  const pendingLength = Math.max(0, (1 - share) * length - gap);
+  const pendingLength = total ? Math.max(0, (1 - share) * length - gap) : 0;
   return <div className="gf-donut" role="img" aria-label={`${done} de ${total} elementos comprados`}>
     <svg viewBox="0 0 149 149" aria-hidden="true">
       <circle cx="74.5" cy="74.5" r={radius} fill="none" stroke="var(--pf-image)" strokeWidth="18" />
@@ -324,7 +324,7 @@ export function ShowroomGrocery({ patient, list, readOnly = isProfessionalSurfac
     ? `Del plan publicado. ${readOnly ? 'El paciente marca lo comprado; los checks se sincronizan en su cuenta.' : 'El check se sincroniza en tu cuenta.'}`
     : `Derivada de ${readOnly ? 'su' : 'tu'} plan semanal${extras.length ? ' y de las alternativas compartidas' : ''}. No incluye cantidades ni porciones.${readOnly ? '' : ' El check se guarda en este navegador.'}`;
 
-  if (!rows.length) return <section className="gf" aria-label="Lista de compras">
+  if (!rows.length && readOnly) return <section className="gf" aria-label="Lista de compras">
     <NvState title="Sin lista para generar" description="Cuando tu nutricionista publique comidas para la semana, vas a encontrar acá una lista derivada de esos títulos." />
   </section>;
 
@@ -344,6 +344,7 @@ export function ShowroomGrocery({ patient, list, readOnly = isProfessionalSurfac
             {stat.badge && <span className="gf-stat-badge" data-tone={stat.key === 'pending' ? 'orange' : undefined}>{stat.badge}</span>}
           </article>)}
         </div>
+        <div className={readOnly ? undefined : 'fp-grocery-charts'}>{!readOnly && <section className="gf-widget fp-grocery-overview" aria-label="Compras por categoría"><header className="gf-widget-head"><h3>Resumen de compras</h3><span className="fp-chart-period">Esta semana</span></header><div className="fp-grocery-columns" role="img" aria-label={breakdown.map((entry) => `${entry.category}: ${entry.done} de ${entry.total} comprados`).join('; ')}>{breakdown.map((entry) => <div key={entry.category}><strong>{entry.done}/{entry.total}</strong><span><i style={{ height: `${percent(entry.done, entry.total)}%` }} /></span><small>{entry.category}</small></div>)}</div></section>}
         <section className="gf-widget gf-status" aria-label="Estado de compras">
           <header className="gf-widget-head"><h3>Estado de compras</h3></header>
           <div className="gf-status-body">
@@ -354,7 +355,7 @@ export function ShowroomGrocery({ patient, list, readOnly = isProfessionalSurfac
               <span className="gf-legend-numbers"><span>{entry.done} de {entry.total}</span><i aria-hidden="true" /><strong>{percent(entry.done, entry.total)}%</strong></span>
             </li>)}</ul>
           </div>
-        </section>
+        </section></div>
       </div>
       <section className="gf-widget gf-category" aria-label="Categorías de la lista">
         <header className="gf-widget-head"><h3>Categorías</h3>
@@ -441,7 +442,7 @@ export function ShowroomGrocery({ patient, list, readOnly = isProfessionalSurfac
                 </div>
               </div>;
             })}
-            {!pageRows.length && <div className="gf-empty"><NvState title="Sin coincidencias" description="Probá otro filtro, categoría o búsqueda." /></div>}
+            {!pageRows.length && <div className="gf-empty"><NvState title={rows.length ? 'Sin coincidencias' : 'Sin lista para generar'} description={rows.length ? 'Probá otro filtro, categoría o búsqueda.' : 'Cuando tu nutricionista publique comidas para la semana, vas a encontrar acá tu lista.'} /></div>}
           </div>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { planReviewSnapshot } from '../../src/types/plans.js';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { app } from '../index.js';
@@ -7,11 +8,16 @@ import { declareKnownHealth } from '../test/declare-health.js';
 
 const patient = 'pat-sofia';
 const other = 'pat-marina';
-const post = (path: string, body: unknown, method = 'POST') => app.request(path, {
+const post = async (path: string, body: unknown, method = 'POST') => {
+  if (path.startsWith('/api/plans/') && path.endsWith('/publish')) {
+    const saved = await (await app.request(`/api/patients/${patient}/plans?audience=pro`)).json();
+    body = { ...(body as object), expected_snapshot: planReviewSnapshot(saved.plan.current) };
+  }
+  return app.request(path, {
   method,
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(body),
-});
+}); };
 
 async function consentAi() {
   const text = CONSENT_CATALOG.find((entry) => entry.purpose === 'ai_menu_draft')!;

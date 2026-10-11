@@ -187,6 +187,7 @@ export function toPatientSelfMealLog(log: MealLog): PatientSelfMealLog {
     status: log.status,
     logged_at: log.logged_at,
     ...(log.analysis_status ? { analysis_status: log.analysis_status } : {}),
+    ...(log.nutrition_origin ? {nutrition_origin:log.nutrition_origin} : {}),
   };
 }
 
@@ -210,13 +211,14 @@ function publicAppointment(appointment: Patient['appointment']): Patient['appoin
 }
 
 function publicHabitLogs(logs: Patient['habit_logs']): Patient['habit_logs'] {
-  return logs.map(({ id, patient_id, date, hydration, energy, sleep_minutes }) => ({
+  return logs.map(({ id, patient_id, date, hydration, energy, sleep_minutes, steps }) => ({
     id,
     patient_id,
     date,
     hydration,
     energy,
     sleep_minutes,
+    steps: steps ?? null,
   }));
 }
 
@@ -294,6 +296,7 @@ export function toPatientSelfView(patient: Patient): PatientSelfView {
     hydration: patient.hydration,
     energy: patient.energy,
     sleep_minutes: patient.sleep_minutes,
+    steps: patient.steps ?? null,
     appointment: publicAppointment(patient.appointment),
     appointment_history: publicAppointmentHistory(patient.appointment_history ?? []),
     habit_logs: publicHabitLogs(patient.habit_logs),
@@ -323,6 +326,7 @@ export function toPatientSelfView(patient: Patient): PatientSelfView {
     hydration: 0,
     energy: null,
     sleep_minutes: null,
+    steps: null,
     appointment: null,
     appointment_history: [],
     habit_logs: [],

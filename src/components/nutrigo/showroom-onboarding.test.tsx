@@ -16,10 +16,12 @@ describe('pantallas de ingreso del paciente', () => {
     const html = renderToStaticMarkup(
       <ShowroomPatientOnboarding patient={patient} darkMode={false} onToggleTheme={vi.fn()} onExit={vi.fn()} onFinished={vi.fn()} />,
     );
-    expect(html).toContain('Tu nutricionista te espera en Plan V');
-    expect(html).toContain('Verónica Trenti');
-    expect(html).toContain('Sofía Ruiz');
-    expect(html).toContain('Continuar');
+    expect(html).toContain('Bienvenida a tu espacio');
+    expect(html).not.toContain('Verónica');
+    expect(html).toContain('Tu bienestar, acompañado');
+    expect(html).toContain('Comenzar');
+    expect(html).toContain('Continuar después');
+    expect(html).toContain('1 de 5');
     expect(html).not.toContain('Peso');
     expect(html).not.toContain('foto corporal');
   });

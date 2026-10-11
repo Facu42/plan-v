@@ -1,0 +1,36 @@
+{
+  "healthStatus": 200,
+  "health": {
+    "status": "ok",
+    "mode": "production",
+    "ai": true,
+    "supabase": true,
+    "jobs": {
+      "queued": 0,
+      "leased": 0,
+      "dead": 0,
+      "succeeded": 0
+    },
+    "sha": "d313a62e50175c5c5202ced24713ff8ceb6cd4e8",
+    "worker": "external"
+  },
+  "readyStatus": 200,
+  "ready": {
+    "status": "ready",
+    "worker": "external",
+    "jobs": {
+      "queued": 0,
+      "leased": 0,
+      "dead": 0,
+      "succeeded": 0
+    },
+    "sha": "d313a62e50175c5c5202ced24713ff8ceb6cd4e8"
+  },
+  "recipesStatus": 200,
+  "imageGeneration": false,
+  "recipeCount": 0,
+  "patientsStatus": 200,
+  "professionalPlanStatus": 200,
+  "invalidPeriodStatus": 400,
+  "anonymousRecipeStatus": 401
+}

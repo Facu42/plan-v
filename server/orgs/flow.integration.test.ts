@@ -22,7 +22,7 @@ async function asJson<T>(response: Response) {
 describe('PV-38 organizaciones, equipos y ownership', () => {
   beforeEach(() => resetStore());
 
-  it('crea un consultorio con equipo y suscripción B2B waived, sin claves de cobro', async () => {
+  it('crea un consultorio con equipo y suscripción B2B en prueba, sin claves de cobro', async () => {
     const created = await asJson<{ organization: OrganizationView; source: string }>(
       await request('/api/orgs?audience=pro', { name: 'Consultorio Sur', slug: 'consultorio-sur' }),
     );
@@ -31,9 +31,9 @@ describe('PV-38 organizaciones, equipos y ownership', () => {
     expect(created.body.organization.slug).toBe('consultorio-sur');
     expect(created.body.organization.teams[0].name).toBe('consultorio');
     expect(created.body.organization.subscription).toMatchObject({
-      status: 'waived',
+      status: 'trialing',
       plan_code: 'b2b_team',
-      note: 'piloto gratuito manual',
+      note: 'prueba',
     });
     expect(JSON.stringify(created.body)).not.toMatch(/mercadopago|stripe_secret|provider_customer|OPENAI_API_KEY/i);
 

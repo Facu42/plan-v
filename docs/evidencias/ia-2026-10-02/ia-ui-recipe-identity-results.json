@@ -1,0 +1,13 @@
+[
+  {
+    "label": "recipe-edited-and-published",
+    "count": 1,
+    "sameId": true,
+    "origin": "propuesta_ia.v1",
+    "published": true,
+    "steps": [
+      "Cocinar el arroz y mezclar con vegetales."
+    ],
+    "ingredient": "Arroz"
+  }
+]

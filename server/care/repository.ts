@@ -1,10 +1,13 @@
+import { registerDemoState } from '../demo/state.js';
 import { getRequestDb, privilegedDb } from '../db/supabase-client.js';
 import { DEFAULT_CARE_PREFERENCES, isMeasurementData, isMeasurementKind, type CareInput, type CareRecord, type CarePreferences, type CareReplacement, type Measurement, type ReplacementRecipe } from '../../src/types/care.js';
+import { isBodyMetricKind, metricDefinition, type BodyMetricBatch } from '../../src/lib/body-metrics.js';
 import { inspectPrivateFile } from '../assets/inspect.js';
 import { requireProductBuckets } from '../assets/storage.js';
 import { CareError } from './errors.js';
 import { assertReadyToPublish, evaluateReplacementDraft } from '../ai-eval/evaluate.js';
 import { loadEvalHealth } from '../ai-eval/health.js';
+import { currentCareConsents, requireCareConsent } from './consents.js';
 export { CareError } from './errors.js';
 const records = new Map<string, CareRecord>();
 const preferences = new Map<string, CarePreferences>();
@@ -22,7 +25,14 @@ export function careDbError(error: { code?: string } | null) {
   throw new CareError(503, 'No se pudo confirmar el guardado. Reintentá sin cerrar el formulario.');
 }
 export async function listCareRecords(patientId: string | null, persistent: boolean): Promise<CareRecord[]> {
-  if (!persistent) return [...records.values()].filter(r => !patientId || r.patient_id === patientId).sort((a,b) => b.created_at.localeCompare(a.created_at));
+  if (!persistent) {
+    const rows = [...records.values()].filter(r => !patientId || r.patient_id === patientId);
+    const patients = [...new Set(rows.filter(r => isMeasurementData(r.data)).map(r => r.patient_id))];
+    const allowed = new Set((await Promise.all(patients.map(async id =>
+      (await currentCareConsents(id, false)).consented.includes('measurement') ? id : null
+    ))).filter((id): id is string => id !== null));
+    return rows.filter(r => !isMeasurementData(r.data) || allowed.has(r.patient_id)).sort((a,b) => b.created_at.localeCompare(a.created_at));
+  }
   let query = getRequestDb().from('care_records').select('id,patient_id,recorded_on,data,created_at,reviewed_at').order('created_at', { ascending: false }).limit(500);
   if (patientId) query = query.eq('patient_id', patientId);
   const { data, error } = await query; careDbError(error); return data as CareRecord[];
@@ -56,7 +66,7 @@ function rememberMeasurement(record: CareRecord) {
   });
 }
 function asMeasurement(row: { id: string; patient_id: string; kind: string; value_numeric: number | string; unit: string; source: string; captured_on: string; created_at: string }): Measurement {
-  if (!isMeasurementKind(row.kind)) throw new CareError(400, 'Revisá los datos del registro.');
+  if (!isMeasurementKind(row.kind) && !isBodyMetricKind(row.kind)) throw new CareError(400, 'Revisá los datos del registro.');
   if (row.source !== 'patient' && row.source !== 'professional') throw new CareError(400, 'Revisá los datos del registro.');
   return {
     id: row.id,
@@ -69,8 +79,26 @@ function asMeasurement(row: { id: string; patient_id: string; kind: string; valu
     created_at: row.created_at,
   };
 }
+export async function saveBodyMetrics(patientId: string, batch: BodyMetricBatch, persistent: boolean): Promise<Measurement[]> {
+  if (persistent) {
+    const { data, error } = await getRequestDb().rpc('save_body_metrics', { target: patientId, captured: batch.captured_on, items: batch.items });
+    careDbError(error);
+    return (data as Parameters<typeof asMeasurement>[0][]).map(asMeasurement);
+  }
+  const saved = batch.items.map((item) => {
+    const old = measurements.get(item.id);
+    const unit = metricDefinition(item.kind).unit;
+    if (old && (old.patient_id !== patientId || old.kind !== item.kind || old.value_numeric !== item.value || old.unit !== unit || old.captured_on !== batch.captured_on || old.source !== 'professional')) {
+      throw new CareError(409, 'Ese registro ya existe con otros datos. Recargá para revisarlo.');
+    }
+    return old ?? { id: item.id, patient_id: patientId, kind: item.kind, value_numeric: item.value, unit, source: 'professional' as const, captured_on: batch.captured_on, created_at: new Date().toISOString() };
+  });
+  for (const entry of saved) measurements.set(entry.id, entry);
+  return saved;
+}
 export async function listMeasurements(patientId: string, persistent: boolean): Promise<Measurement[]> {
   if (!persistent) {
+    if (!(await currentCareConsents(patientId, false)).consented.includes('measurement')) return [];
     return [...measurements.values()]
       .filter((entry) => entry.patient_id === patientId)
       .sort((a, b) => b.captured_on.localeCompare(a.captured_on) || b.created_at.localeCompare(a.created_at));
@@ -87,6 +115,7 @@ export async function listMeasurements(patientId: string, persistent: boolean): 
 export async function reviewCareRecord(patientId: string, id: string, persistent: boolean) {
   if (persistent) { const { error } = await getRequestDb().rpc('review_care_record', { target: patientId, record_id: id }); careDbError(error); return; }
   const record = records.get(id); if (!record || record.patient_id !== patientId) throw new CareError(404, 'Registro no encontrado.');
+  if (isMeasurementData(record.data)) await requireCareConsent(patientId, false, 'measurement');
   record.reviewed_at ??= new Date().toISOString();
 }
 export async function getCarePreferences(patientId: string, persistent: boolean): Promise<CarePreferences> {
@@ -217,3 +246,5 @@ export async function careDocumentUrl(path: string, persistent: boolean) {
   const { data, error } = await getRequestDb().storage.from('care-documents').createSignedUrl(path, 60);
   if (error || !data) throw new CareError(503, 'No se pudo abrir el estudio.'); return data.signedUrl;
 }
+
+registerDemoState('care/repository', () => ({ records, preferences, replacements, photos, documents, measurements }));

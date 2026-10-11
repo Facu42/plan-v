@@ -29,6 +29,49 @@ async function library(id = patient, professional = false, query = '') {
 describe('PV-36 recursos editoriales y favoritos unificados', () => {
   beforeEach(() => resetStore());
 
+  it('crea, revisa, publica y asigna una nueva versión sin cambiar la anterior', async () => {
+    expect((await app.request('/api/resources')).status).toBe(403);
+    const input = {
+      slug: 'recurso-propio-' + randomUUID(), title: 'Guía del consultorio', summary: 'Material revisado',
+      category: 'Organización', sections: [{ title: 'Preparación', body: 'Contenido original del consultorio.' }],
+    };
+    const first = await post('/api/resources?audience=pro', input);
+    expect(first.status).toBe(201);
+    const draft = (await first.json()).resource;
+    const retry = await post('/api/resources?audience=pro', input);
+    expect(retry.status).toBe(201);
+    expect((await retry.json()).resource.id).toBe(draft.id);
+    expect((await post('/api/resources?audience=pro', {...input,title:'Cambio concurrente'})).status).toBe(409);
+    const privateCatalog = (await (await app.request('/api/resources?audience=pro')).json()).resources;
+    expect(privateCatalog).toContainEqual(expect.objectContaining({id: draft.id, published:false}));
+    expect((await library()).body.library.articles.some(r => r.id === draft.id)).toBe(false);
+    expect((await post('/api/resources/' + draft.id + '/publish?audience=pro', {})).status).toBe(200);
+    const assigned = await post('/api/resources/assign', {resource_id: draft.slug, patient_ids:[patient]});
+    expect(assigned.status).toBe(200);
+    expect((await library()).body.library.articles).toContainEqual(expect.objectContaining({id:draft.id,published:true}));
+    expect((await library(other)).body.library.articles.some(r => r.id === draft.id)).toBe(false);
+    const newer = await post('/api/resources?audience=pro', {
+      slug: 'recurso-version-' + randomUUID(), title: 'Guía del consultorio actualizada', summary: 'Otra versión',
+      category:'Organización', sections:[{title:'Preparación',body:'Contenido actualizado.'}],
+    });
+    expect(newer.status).toBe(201);
+    expect((await library()).body.library.articles.find(r=>r.id===draft.id)?.sections[0].body).toBe('Contenido original del consultorio.');
+  });
+
+  it('despublicar oculta el recurso a la paciente y sólo lo hace la profesional', async () => {
+    const input = { slug: 'recurso-despublicar-' + randomUUID(), title: 'Guía para despublicar', summary: 'Material revisado', category: 'Organización', sections: [{ title: 'Uno', body: 'Contenido.' }] };
+    const draft = (await (await post('/api/resources?audience=pro', input)).json()).resource;
+    expect(draft.author_name).toBe('Tu nutricionista');
+    await post('/api/resources/' + draft.id + '/publish?audience=pro', {});
+    await post('/api/resources/assign', { resource_id: draft.slug, patient_ids: [patient] });
+    expect((await library()).body.library.articles.some(r => r.id === draft.id)).toBe(true);
+    expect((await post('/api/resources/' + draft.id + '/unpublish', {})).status).toBe(403);
+    const hidden = await post('/api/resources/' + draft.id + '/unpublish?audience=pro', {});
+    expect(hidden.status).toBe(200);
+    expect((await hidden.json()).resource.published).toBe(false);
+    expect((await library()).body.library.articles.some(r => r.id === draft.id)).toBe(false);
+  });
+
   it('muestra guías operativas, oculta artículos clínicos sin asignar y aísla a la otra paciente', async () => {
     const mine = await library();
     expect(mine.status).toBe(200);
@@ -59,7 +102,8 @@ describe('PV-36 recursos editoriales y favoritos unificados', () => {
     const savedGuide = await post(`/api/patients/${patient}/favorites`, { item_kind: 'resource', item_id: 'leer-plan-semanal' });
     expect(savedGuide.status).toBe(200);
     const guideBody = await savedGuide.json() as { library: PatientLibraryView };
-    expect(guideBody.library.favorites[0]).toMatchObject({ item_kind: 'resource', item_id: 'leer-plan-semanal' });
+    const guide=guideBody.library.resources.find((r:{slug:string})=>r.slug==='leer-plan-semanal');expect(guide).toBeTruthy();
+    expect(guideBody.library.favorites[0]).toMatchObject({ item_kind: 'resource', item_id: guide?.id });
 
     const savedArticle = await post(`/api/patients/${patient}/favorites`, { item_kind: 'article', item_id: 'hidratacion-cotidiana' });
     expect(savedArticle.status).toBe(200);
@@ -92,7 +136,7 @@ describe('PV-36 recursos editoriales y favoritos unificados', () => {
     expect((await post(`/api/patients/${patient}/favorites`, { item_kind: 'plan_b', item_id: patient })).status).toBe(400);
     expect((await post(`/api/patients/${other}/favorites`, { item_kind: 'resource', item_id: 'leer-plan-semanal' })).status).toBe(200);
     expect((await library(other)).body.library.favorites).toHaveLength(1);
-    expect((await library()).body.library.favorites.some((row) => row.item_id === 'leer-plan-semanal')).toBe(true);
+    expect((await library()).body.library.favorites.some((row) => row.item_id === guideBody.library.favorites[0].item_id)).toBe(true);
   });
 
   it('no publica un borrador clínico hasta la revisión explícita', async () => {

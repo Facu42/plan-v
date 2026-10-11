@@ -65,4 +65,18 @@ describe('habit history API flow in memory mode', () => {
     expect(sofia.habit_logs.length).toBeGreaterThanOrEqual(7);
     expect(dates).toContain(todayId());
   });
+
+  it('guarda los pasos del día declarados y rechaza valores fuera de rango', async () => {
+    const saved = await app.request('/api/patients/pat-sofia/habits', jsonRequest('PATCH', { steps: 6420 }));
+    expect(saved.status).toBe(200);
+    const body = await saved.json();
+    expect(body.patient.steps).toBe(6420);
+    expect(body.patient.habit_logs.find((h: { date: string }) => h.date === todayId()).steps).toBe(6420);
+    expect(getPatient('pat-sofia')?.steps).toBe(6420);
+
+    for (const steps of [-1, 100001, 12.5]) {
+      const rejected = await app.request('/api/patients/pat-sofia/habits', jsonRequest('PATCH', { steps }));
+      expect(rejected.status).toBe(400);
+    }
+  });
 });

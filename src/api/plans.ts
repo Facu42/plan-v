@@ -1,8 +1,9 @@
 import { request } from './client';
-import type { MealPlanDraftInput, PatientMealPlan, ProfessionalMealPlan } from '../types/plans';
+import { planReviewSnapshot, type MealPlanDraftInput, type PatientMealPlan, type ProfessionalMealPlan, type PlanVersionView } from '../types/plans';
 
 export const plansApi = {
-  professional: (patientId: string, signal?: AbortSignal) => request<{ plan: ProfessionalMealPlan | null; source: string }>(
+  history:(patientId:string,signal?:AbortSignal)=>request<{versions:PlanVersionView[]}>(`/api/patients/${encodeURIComponent(patientId)}/plans/history`,{signal}),
+  professional: (patientId: string, signal?: AbortSignal) => request<{ plan: ProfessionalMealPlan | null; source: string; image_generation?: boolean }>(
     `/api/patients/${encodeURIComponent(patientId)}/plans?audience=pro`,
     { signal },
   ),
@@ -14,8 +15,11 @@ export const plansApi = {
     `/api/patients/${encodeURIComponent(patientId)}/plans`,
     { method: 'POST', body: JSON.stringify(input) },
   ),
-  publish: (planId: string, expected_version: number) => request<{ plan: ProfessionalMealPlan; source: string }>(
+  publish: (planId: string, expected_version: number, reviewed: PlanVersionView) => request<{ plan: ProfessionalMealPlan; source: string }>(
     `/api/plans/${planId}/publish`,
-    { method: 'POST', body: JSON.stringify({ expected_version }) },
+    { method: 'POST', body: JSON.stringify({ expected_version, expected_snapshot: reviewed ? planReviewSnapshot(reviewed) : undefined }) },
+  ),
+  covers: (planId: string, expected_version: number) => request<{ plan: ProfessionalMealPlan; source: string }>(
+    `/api/plans/${planId}/covers`, { method: 'POST', body: JSON.stringify({ expected_version }) },
   ),
 };

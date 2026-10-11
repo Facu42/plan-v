@@ -251,6 +251,7 @@ export function FoodDiaryBoard({ rows, now, audience, query, defaultScope, onAdd
   const bounds = useMemo(() => diaryWeekBounds(rows.map((row) => row.logged_at), now), [rows, now]);
   const table = useMemo(() => buildDiaryTable(rows, { now, scope, filter, query: term, page, pageSize }), [rows, now, scope, filter, term, page, pageSize]);
   const pro = audience === 'professional';
+  const [selectedRows, setSelectedRows] = useState<ReadonlySet<string>>(() => new Set());
   const weekOptions = [
     ...Array.from({ length: 1 - bounds.minOffset }, (_, index) => {
       const offset = -index;
@@ -284,13 +285,16 @@ export function FoodDiaryBoard({ rows, now, audience, query, defaultScope, onAdd
         </div>
       </header>
 
-      {table.rows.length ? <div className="nvfd-scroll"><div className={`nvfd-table${pro ? ' nvfd-pro' : ''}`} role="table" aria-label={pro ? 'Historial de comidas' : 'Registros del diario'}>
+      <div className="nvfd-scroll"><div className={`nvfd-table${pro ? ' nvfd-pro' : ''}`} role="table" aria-label={pro ? 'Historial de comidas' : 'Registros del diario'}>
         <div className="nvfd-row nvfd-row-head" role="row">
+          {!pro && <span role="columnheader"><input type="checkbox" aria-label="Seleccionar registros visibles" checked={table.rows.length > 0 && table.rows.every((row) => selectedRows.has(row.id))} onChange={(event) => setSelectedRows(event.target.checked ? new Set(table.rows.map((row) => row.id)) : new Set())} /></span>}
           <span role="columnheader">Fecha y hora</span>
           <span role="columnheader">Momento</span>
           <span role="columnheader">Comida</span>
+          {!pro && <span role="columnheader">Cantidad</span>}
           <span role="columnheader">Calorías</span>
           <span role="columnheader" className="nvfd-macro-head">Macronutrientes<span><i>Carb.</i><i>Prot.</i><i>Grasas</i></span></span>
+          {!pro && <span role="columnheader">Azúcar</span>}
           <span role="columnheader">Estado</span>
           {pro && <span role="columnheader">Nota IA</span>}
           {pro && <span role="columnheader"><span className="nvfd-sr">Acción</span></span>}
@@ -299,6 +303,7 @@ export function FoodDiaryBoard({ rows, now, audience, query, defaultScope, onAdd
           const reviewed = row.status !== 'pending_review';
           const macros = reviewed ? row.macros : null;
           return <div role="row" key={row.id} className={`nvfd-row${reviewed ? '' : ' nvfd-pending'}`} data-diary-row={row.id}>
+            {!pro && <span role="cell"><input type="checkbox" aria-label={`Seleccionar ${row.slot} del ${dateFmt(row.logged_at)}`} checked={selectedRows.has(row.id)} onChange={(event) => setSelectedRows((current) => { const next = new Set(current); if (event.target.checked) next.add(row.id); else next.delete(row.id); return next; })} /></span>}
             <span role="cell" className="nvfd-date"><time dateTime={row.logged_at}>{dateFmt(row.logged_at)}</time><small>{timeFmt(row.logged_at)}</small></span>
             <span role="cell"><span className={`nvfd-slot ${slotTone(row.slot)}`}>{row.slot}</span></span>
             <span role="cell" className="nvfd-menu">
@@ -306,18 +311,21 @@ export function FoodDiaryBoard({ rows, now, audience, query, defaultScope, onAdd
               {reviewed && row.foods.length > 0 && Boolean(row.description?.trim()) && normalize(row.foods.join(', ')) !== normalize(row.description ?? '') && <small>Alimentos: {row.foods.join(', ')}</small>}
               {row.relation && row.relation !== 'unknown' && <small className={`nvfd-plan-tag ${row.relation}`}>{row.relation === 'planned' ? 'Del plan' : 'Fuera del plan'}</small>}
             </span>
+            {!pro && <span role="cell" className="nvfd-num" title="Cantidad no declarada">—</span>}
             <span role="cell" className="nvfd-num">{macros ? <><b>{numberFmt.format(macros.kcal)}</b> kcal</> : <span title="Sin valores confirmados">—</span>}</span>
             <span role="cell" className="nvfd-macros">{(['carbs_g', 'protein_g', 'fat_g'] as const).map((key) => <span key={key}>{macros ? <><b>{numberFmt.format(macros[key])}</b> g</> : '—'}</span>)}</span>
+            {!pro && <span role="cell" className="nvfd-num" title="Azúcar no declarado">—</span>}
             <span role="cell"><span className="nvfd-status" title={pro ? statusLabel(row.status) : row.status === 'adjusted' ? 'Tu nutricionista ajustó este registro' : row.status === 'confirmed' ? 'Tu nutricionista confirmó este registro' : statusLabel(row.status)}>{reviewed ? <CheckCircle size={14} aria-hidden="true" /> : <Clock size={14} aria-hidden="true" />}{reviewed ? statusLabel(row.status) : pro ? 'Pendiente' : 'En revisión'}</span></span>
             {pro && <span role="cell"><span className="nvfd-note" title={row.note || undefined}><Note size={14} aria-hidden="true" /><span>{row.note?.trim() || 'Sin nota'}</span></span></span>}
             {pro && <span role="cell" className="nvfd-action">{reviewed ? <small>Revisada</small> : <button type="button" className="nvfd-cta" onClick={() => onReview?.(row.id)}>Revisar</button>}</span>}
           </div>;
         })}
-      </div></div> : <NvState
+      {!table.rows.length && <div role="row"><div role="cell"><NvState
         title={emptyScoped && !term && filter === 'all' ? emptyWeekTitle : 'Sin registros para mostrar'}
         description={emptyScoped && !term && filter === 'all'
           ? (pro ? 'Las comidas enviadas por la paciente aparecerán acá.' : scope === 0 ? 'Todavía no registraste comidas esta semana.' : 'No hay registros en ese período. El diario no inventa historial.')
-          : 'Usá otra búsqueda o cambiá el filtro.'} />}
+          : 'Usá otra búsqueda o cambiá el filtro.'} /></div></div>}
+      </div></div>
 
       <footer className="nvfd-foot">
         <div className="nvfd-count"><span>Mostrando</span>

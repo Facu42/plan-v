@@ -1,0 +1,1161 @@
+{
+  "observed_at": "2026-10-01T18:53:41.410Z",
+  "supplemental_checks_at": "2026-10-01T19:00:37.894Z",
+  "project_id": "wvosvlxpfytokwfbcero",
+  "project_name": "plan-v-app",
+  "source_commit": "4b54dc1e4dab11de9a3428d26f4ef0847f4dac95",
+  "scope": "Catalog metadata only; no patient rows, production writes, resource provisioning or plan changes.",
+  "advisors": {
+    "rls_enabled_no_policy": {
+      "level": "INFO",
+      "count": 16,
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+    },
+    "authenticated_security_definer_function_executable": {
+      "level": "WARN",
+      "count": 116
+    }
+  },
+  "dependent_views_and_materialized_views": [],
+  "user_triggers_on_internal_tables": [],
+  "function_reference_method": "Textual references in pg_get_functiondef for public/private functions, not a complete transitive or dynamic dependency graph.",
+  "tables": [
+    {
+      "table_name": "audit_events",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "auditoría",
+      "purpose": "Actividad administrativa y cambios de suscripción.",
+      "authorized_access": "Funciones administrativas; service_audit cerrado como auxiliar.",
+      "functions_with_textual_reference": [
+        {
+          "function_name": "public.admin_get_service_board()",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.admin_set_service_settings(monthly_price integer, trial_days integer)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.service_audit(target uuid, input_action text, details jsonb)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        },
+        {
+          "function_name": "public.set_organization_subscription_status(org_id uuid, input_status text, input_note text)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        }
+      ]
+    },
+    {
+      "table_name": "notification_deliveries",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "avisos",
+      "purpose": "Estado e intentos de entrega.",
+      "authorized_access": "enqueue_outbox_event/process_outbox_deliveries filtran paciente; auxiliares de lectura cerrados.",
+      "functions_with_textual_reference": [
+        {
+          "function_name": "public.enqueue_outbox_event(payload jsonb)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.outbox_delivery_json(d notification_deliveries)",
+          "security_definer": false,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.outbox_event_json(e outbox_events)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        },
+        {
+          "function_name": "public.outbox_mailbox_json(target uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        },
+        {
+          "function_name": "public.process_outbox_deliveries(input jsonb)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        }
+      ]
+    },
+    {
+      "table_name": "notification_preferences",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "avisos",
+      "purpose": "Preferencias propias de cada usuaria.",
+      "authorized_access": "get/save_notification_preferences usan auth.uid(), sin aceptar otra identidad.",
+      "functions_with_textual_reference": [
+        {
+          "function_name": "public.get_notification_preferences()",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.outbox_pref_on(uid uuid, channel text)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        },
+        {
+          "function_name": "public.save_notification_preferences(payload jsonb)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        }
+      ]
+    },
+    {
+      "table_name": "nutritionist_subscriptions",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "servicio",
+      "purpose": "Prueba, habilitación y vencimiento de la nutricionista.",
+      "authorized_access": "Operaciones admin_* verifican service_assert_admin; service_start_trial y service_recompute son internos.",
+      "functions_with_textual_reference": [
+        {
+          "function_name": "public.admin_extend_trial(target uuid, days integer)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.admin_log_service_event(target uuid, input_action text, input_mode text)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.admin_mark_test_account(target uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.admin_record_service_payment(target uuid, amount integer, months integer, paid_on date, method text, note text)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.admin_set_service_note(target uuid, note text)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.admin_set_service_override(target uuid, input_override text, note text)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.service_nutritionist_json(target uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        },
+        {
+          "function_name": "public.service_recompute(target uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        },
+        {
+          "function_name": "public.service_start_trial()",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        }
+      ]
+    },
+    {
+      "table_name": "outbox_events",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "avisos",
+      "purpose": "Cola de avisos por paciente.",
+      "authorized_access": "Funciones de entrada validan vínculo con paciente; auxiliares cerrados.",
+      "functions_with_textual_reference": [
+        {
+          "function_name": "public.enqueue_outbox_event(payload jsonb)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.list_outbox_snapshot(target_patient uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.outbox_event_json(e outbox_events)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        },
+        {
+          "function_name": "public.outbox_mailbox_json(target uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        },
+        {
+          "function_name": "public.process_outbox_deliveries(input jsonb)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        }
+      ]
+    },
+    {
+      "table_name": "patient_invite_events",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "auditoría",
+      "purpose": "Historial de invitaciones.",
+      "authorized_access": "accept_patient_invite valida destinataria; la API escribe con privilegedDb después de validar la invitación con la sesión.",
+      "functions_with_textual_reference": [
+        {
+          "function_name": "public.accept_patient_invite(invite_id uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        }
+      ]
+    },
+    {
+      "table_name": "payment_webhook_events",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "reservada",
+      "purpose": "Registro de eventos externos de pago y deduplicación.",
+      "authorized_access": "Sin escritor en la API ni función pública que la use; reserva para futura integración, no prueba de uso real.",
+      "functions_with_textual_reference": []
+    },
+    {
+      "table_name": "platform_admins",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "servicio",
+      "purpose": "Lista de administradores de la plataforma.",
+      "authorized_access": "is_platform_admin devuelve solo si auth.uid() es administrador; no devuelve la lista.",
+      "functions_with_textual_reference": [
+        {
+          "function_name": "public.is_platform_admin()",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        }
+      ]
+    },
+    {
+      "table_name": "platform_settings",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "servicio",
+      "purpose": "Precio y días de prueba.",
+      "authorized_access": "Lectura/escritura del panel por funciones administrativas; create_organization lee la configuración sin exponer tabla.",
+      "functions_with_textual_reference": [
+        {
+          "function_name": "public.admin_get_service_board()",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.admin_set_service_settings(monthly_price integer, trial_days integer)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.create_organization(input_name text, input_slug text)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.service_start_trial()",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        }
+      ]
+    },
+    {
+      "table_name": "privacy_access_events",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "privacidad",
+      "purpose": "Registro de acceso a operaciones de privacidad.",
+      "authorized_access": "record_privacy_access valida la paciente propia.",
+      "functions_with_textual_reference": [
+        {
+          "function_name": "public.record_privacy_access(payload jsonb)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        }
+      ]
+    },
+    {
+      "table_name": "privacy_export_packages",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "privacidad",
+      "purpose": "Paquetes temporales de exportación.",
+      "authorized_access": "get_privacy_package valida identidad y vencimiento; complete_privacy_export valida paciente. Contrato de finalización pendiente, ver límites.",
+      "functions_with_textual_reference": [
+        {
+          "function_name": "public.complete_privacy_export(payload jsonb)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.get_privacy_package(target_request uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.privacy_request_json(rid uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        }
+      ]
+    },
+    {
+      "table_name": "privacy_requests",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "privacidad",
+      "purpose": "Pedidos de exportación y retiro.",
+      "authorized_access": "Funciones públicas validan paciente propia; auxiliares de respuesta cerrados. Contrato de borrado pendiente, ver límites.",
+      "functions_with_textual_reference": [
+        {
+          "function_name": "public.complete_privacy_delete(target_request uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.complete_privacy_export(payload jsonb)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.get_privacy_package(target_request uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.list_privacy_requests(target_patient uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.privacy_request_json(rid uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        },
+        {
+          "function_name": "public.request_privacy_action(payload jsonb)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        }
+      ]
+    },
+    {
+      "table_name": "processing_jobs",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "reservada",
+      "purpose": "Almacenamiento previsto para tareas persistentes.",
+      "authorized_access": "createPostgresJobStore solo existe como adaptador y pruebas; processQueue usa memoria y no lo conecta. No se afirma persistencia en producción.",
+      "functions_with_textual_reference": []
+    },
+    {
+      "table_name": "recipe_day_assignments",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "recetas",
+      "purpose": "Recetas asignadas a fecha y comida.",
+      "authorized_access": "assign/list/register_recipe_day verifican profesional/paciente; recipe_day_json cerrado.",
+      "functions_with_textual_reference": [
+        {
+          "function_name": "public.assign_recipe_day(payload jsonb)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.list_recipe_days(target uuid, for_date date)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.recipe_day_json(aid uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        },
+        {
+          "function_name": "public.register_recipe_day(payload jsonb)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        }
+      ]
+    },
+    {
+      "table_name": "recipe_version_cards",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "recetas",
+      "purpose": "Ficha y macros declarados de cada versión.",
+      "authorized_access": "set_recipe_card verifica dueña y borrador; lectura a través de recetas autorizadas, recipe_card_json cerrado.",
+      "functions_with_textual_reference": [
+        {
+          "function_name": "public.recipe_card_json(vid uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        },
+        {
+          "function_name": "public.register_recipe_day(payload jsonb)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.set_recipe_card(target_version uuid, card jsonb)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        }
+      ]
+    },
+    {
+      "table_name": "service_payments",
+      "owner": "postgres",
+      "rls": true,
+      "force_rls": false,
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false,
+          "trigger": false,
+          "truncate": false,
+          "references": false,
+          "column_insert": false,
+          "column_select": false,
+          "column_update": false,
+          "maintain": false,
+          "column_references": false
+        }
+      },
+      "column_acls": [],
+      "policy_count": 0,
+      "classification": "internal_no_direct_client_access",
+      "group": "servicio",
+      "purpose": "Pagos de la nutricionista a Plan V.",
+      "authorized_access": "admin_record/void_service_payment verifican administrador; recomputación y representación internas.",
+      "functions_with_textual_reference": [
+        {
+          "function_name": "public.admin_record_service_payment(target uuid, amount integer, months integer, paid_on date, method text, note text)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.admin_void_service_payment(payment_id uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": true
+        },
+        {
+          "function_name": "public.service_nutritionist_json(target uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        },
+        {
+          "function_name": "public.service_recompute(target uuid)",
+          "security_definer": true,
+          "anon_execute": false,
+          "authenticated_execute": false
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "SQL tests use simulated auth.uid() claims, not signed JWTs through Auth/PostgREST.",
+    "This classification does not certify all 116 public functions or resolve the pending privacy finalization/deletion contract.",
+    "processing_jobs is not wired into processQueue; payment_webhook_events has no current application writer."
+  ]
+}
