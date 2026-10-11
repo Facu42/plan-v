@@ -194,6 +194,9 @@ Continuación del cierre de paciente y nutricionista: [correcciones, evidencia y
 
 Contrato de cada acción, permisos y lecturas al recargar: [recorridos y guía para ambas experiencias](recorridos-y-contratos-plan-v-2026-10-05.md).
 
+## Movimiento de la paciente, primer pase (2026-10-10)
+Se cerró el PR #67 (conflictos, inspirado en otra interfaz). Pase nuevo desde main: en Inicio, pasos y calorías (consumidas, quemadas, restantes) suben contando (`CountUp`, desde cero al entrar y desde el valor anterior al cambiar) y las barras de progreso se llenan al aparecer. Todo apagado con «reducir movimiento». Siguen: peso, macros, pulso al cargar, Ejercicio y Progreso.
+
 ## Calorías de la paciente suman al instante (2026-10-10)
 Facundo: lo que aprueba la nutricionista es el plan, no lo que la paciente carga al comer. En la vista de la paciente (Inicio, Diario, Progreso) las comidas pendientes de revisión ya suman calorías y macros (estimadas). La vista de la nutricionista no cambia. PR en borrador, sin juntar.
 
