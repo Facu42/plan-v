@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { PatientInvite } from '../../api/client';
 import type { Patient } from '../../types';
-import { InviteShare } from './ShowroomPatients';
+import { InviteShare, inviteEmailNotice } from './ShowroomPatients';
 import { createPatientWithInvitation, invitationReady } from './patient-invite-actions';
 
 const invite = { id: 'i1', patient_id: 'p1', email: 'patient@example.test', status: 'not_sent', expires_at: null } as PatientInvite;
@@ -38,11 +38,16 @@ describe('alta e invitación sin falso éxito', () => {
     const result = await createPatientWithInvitation({ name: 'Ana', email: invite.email, goal: 'Comidas' }, { create: vi.fn().mockResolvedValue(created), activate: vi.fn().mockResolvedValue({ invite: pending, source: 'supabase' }) });
     expect(invitationReady(result.invite)).toBe(true);
     const html = renderToStaticMarkup(<InviteShare name="Ana" invite={result.invite} onClose={() => undefined} />);
-    expect(html).toContain('Invitación lista'); expect(html).toContain('Enlace de invitación'); expect(html).toContain('WhatsApp'); expect(html).toContain('2099'); expect(html).not.toContain('7 días');
+    expect(html).toContain('Invitación lista'); expect(html).toContain('Enlace de invitación'); expect(html).toContain('WhatsApp'); expect(html).toContain('Mandar por mail'); expect(html).toContain('2099'); expect(html).not.toContain('7 días');
   });
   it.each([invite, { ...invite, status: 'pending' as const, expires_at: '2020-01-01T00:00:00Z' }, { ...invite, status: 'revoked' as const, expires_at: '2099-01-01T00:00:00Z' }])('no ofrece compartir un acceso no habilitado (%j)', value => {
     const html = renderToStaticMarkup(<InviteShare name="Ana" invite={value} onClose={() => undefined} />);
     expect(html).toContain('Ficha creada'); expect(html).toContain('Reintentar preparar invitación');
-    expect(html).not.toContain('Invitación lista'); expect(html).not.toContain('Enlace de invitación'); expect(html).not.toContain('WhatsApp');
+    expect(html).not.toContain('Invitación lista'); expect(html).not.toContain('Enlace de invitación'); expect(html).not.toContain('WhatsApp'); expect(html).not.toContain('Mandar por mail');
+  });
+  it('cuenta en castellano qué mail salió, sin prometer uno real en la demo', () => {
+    expect(inviteEmailNotice('invite', 'ana@example.test')).toBe('Le mandamos la invitación a ana@example.test.');
+    expect(inviteEmailNotice('magic_link', 'ana@example.test')).toBe('Ya tenía cuenta: le mandamos a ana@example.test un enlace para entrar y vincularse.');
+    expect(inviteEmailNotice('demo', 'ana@example.test')).toBe('En la demostración no se mandan mails reales.');
   });
 });

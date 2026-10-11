@@ -15,6 +15,7 @@ import type { ShowroomPage } from './ShowroomPanels';
 import type { ShowroomPatient } from './showroom-model';
 import { sendShowroomMessage } from './message-send';
 import { messageReceipt, messageReceiptLabel, unreadCount } from './message-receipts';
+import { MESSAGES_READ_EVENT, mergeUnread } from './cartera-unread';
 import { CHAT_ATTACHMENT_ACCEPT, assertChatFile, uploadChatAttachment } from '../../api/assets';
 import { ChatAttachmentView } from './ChatAttachment';
 import { NvState } from './primitives';
@@ -26,7 +27,8 @@ import './messages.css';
 import './messages-fig.css';
 
 type Role = 'patient' | 'pro';
-type Props = { patient: ShowroomPatient; patients: ShowroomPatient[]; role: Role; onSelect: (id: string) => void; onNavigate: (page: ShowroomPage) => void };
+type Props = { patient: ShowroomPatient; patients: ShowroomPatient[]; role: Role; remoteUnread?: ReadonlyMap<string, number> | null; onSelect: (id: string) => void; onNavigate: (page: ShowroomPage) => void };
+const ACTIVE_REFRESH_MS = 15000;
 
 const NUTRITIONIST = { name: 'Tu nutricionista', initials: 'N', role: 'Nutricionista' };
 const normalized = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -40,7 +42,7 @@ const contactOf = (patient: ShowroomPatient, role: Role) => role === 'pro'
   : NUTRITIONIST;
 const narrow = () => typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 760px)').matches;
 
-export function NutrigoMessages({ patient, patients, role, onSelect, onNavigate }: Props) {
+export function NutrigoMessages({ patient, patients, role, remoteUnread = null, onSelect, onNavigate }: Props) {
   const [query, setQuery] = useState('');
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [profileOpen, setProfileOpen] = useState(true);
@@ -50,7 +52,7 @@ export function NutrigoMessages({ patient, patients, role, onSelect, onNavigate 
   const people = role === 'pro' ? [...patients].sort((a, b) => latestAt(b) - latestAt(a) || a.name.localeCompare(b.name, 'es')) : [patient];
   const contacts = people.filter((p) => {
     const thread = sentMessages(p);
-    if (unreadOnly && unreadCount(thread, role) === 0) return false;
+    if (unreadOnly && mergeUnread(unreadCount(thread, role), remoteUnread, p.id) === 0) return false;
     if (!q) return true;
     return normalized(contactOf(p, role).name).includes(q) || thread.some((m) => normalized(`${m.text} ${m.attachment?.filename ?? ''}`).includes(q));
   });
@@ -75,7 +77,7 @@ export function NutrigoMessages({ patient, patients, role, onSelect, onNavigate 
       <div className="nm-contact-list">{contacts.map((p) => {
         const thread = sentMessages(p);
         const latest = thread[thread.length - 1];
-        const unread = unreadCount(thread, role);
+        const unread = mergeUnread(unreadCount(thread, role), remoteUnread, p.id);
         const contact = contactOf(p, role);
         const preview = latest ? (latest.text || latest.attachment?.filename || 'Adjunto') : 'Iniciar conversación';
         return <button type="button" key={p.id} aria-pressed={p.id === patient.id} aria-label={unread > 0 ? `${contact.name}, ${unread} sin leer` : undefined} onClick={() => select(p.id)}>
@@ -122,8 +124,13 @@ function MessageConversation({ patient, role, composeRef, profileOpen, onToggleP
   useEffect(() => { if (list.current) list.current.scrollTop = list.current.scrollHeight; }, [messages.length]);
   useEffect(() => {
     if (!unreadIncoming) return;
-    void api.markMessagesRead(patient.id, reader).then(() => refresh(patient.id)).catch(() => undefined);
+    void api.markMessagesRead(patient.id, reader).then(() => { window.dispatchEvent(new Event(MESSAGES_READ_EVENT)); return refresh(patient.id); }).catch(() => undefined);
   }, [patient.id, reader, refresh, unreadIncoming]);
+  useEffect(() => {
+    // La conversación abierta trae mensajes nuevos sin recargar la página.
+    const timer = window.setInterval(() => { if (document.visibilityState === 'visible') void refresh(patient.id).catch(() => undefined); }, ACTIVE_REFRESH_MS);
+    return () => window.clearInterval(timer);
+  }, [patient.id, refresh]);
   const pickFile = (next: File | null) => {
     if (!next) { setFile(null); if (fileRef.current) fileRef.current.value = ''; return; }
     try { assertChatFile(next); setFile(next); setError(''); }
