@@ -1,7 +1,7 @@
 import type { Hono } from 'hono';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
-import { buildWorkItems, loadWorkSnapshot, resolveWorkScope } from './repository.js';
+import { buildWorkItems, loadGlobalProgress, loadWorkSnapshot, resolveWorkScope } from './repository.js';
 import { paginateWorkQueue, workQueueQuerySchema } from './work-queue.js';
 import { buildFeed, feedFrom, feedQuerySchema } from './feed.js';
 import { loadFeedRows } from './feed-repository.js';
