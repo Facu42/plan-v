@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ARCHIVED_ACCOUNT_NOTICE } from '../../src/lib/account-archive.js';
 import { CareError, messageDbError } from './repository.js';
 
 describe('PV-23 hilos', () => {
@@ -36,6 +37,12 @@ describe('PV-23 hilos', () => {
       throw new Error('expected CareError');
     } catch (error) {
       expect(error).toMatchObject({ status: 404, message: 'El adjunto ya no está disponible.' });
+    }
+    try {
+      messageDbError({ code: '42501', message: 'thread_archived' });
+      throw new Error('expected CareError');
+    } catch (error) {
+      expect(error).toMatchObject({ status: 403, message: ARCHIVED_ACCOUNT_NOTICE });
     }
   });
 });

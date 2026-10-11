@@ -65,6 +65,8 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 
 ## Lo pendiente
 
+- Cuenta archivada (D6, 2026-10-10): la paciente ve que su cuenta está archivada y no puede enviar mensajes; puede seguir leyendo el hilo. La nutricionista puede escribir. Migración `20261010143000_archived_patient_cannot_message` en el repositorio, sin aplicar en la base hospedada hasta la frase escrita de Facundo. Decisión en `docs/decisiones-producto-2026-10-10.md`.
+- Mediciones de la ficha (2026-10-10, rama `claude/project-thread-ngsfiv`, PR borrador): composición corporal, perímetros, detalle con mín/prom/máx y carga por fecha. Migración `20261010120000_body_metrics` preparada, **sin aplicar** (pide la frase de Facundo). Lista de pacientes con columnas y densidad elegibles (guardado en el navegador). Importar informe de balanza en PDF (se lee en el navegador, vista previa y confirmación antes de guardar; probado sólo con un PDF de ejemplo, falta probar con InBody/femmto reales). Página andando con datos de ejemplo: https://claude.ai/artifact/Psg642ViPdzAXNbmr4PXhd. Comparado con la v3 (`docs/mediciones-vs-nutriboost-2026-10-10.md`; el Loom no abre desde la nube): se sumaron evolución del peso, mini gráficos, última consulta, conexión y mensaje. Falta: medidores con rangos (fuente clínica a elegir por Facundo) y teléfono (no se guarda). Segunda pasada completa del video desde la PC de Facundo (10/10): se sumaron mín./prom./máx. del peso, «Registrar nueva medición», «App de la paciente: conectada» en la ficha y pacientes nuevas en Inicio; modelos de plan ya existían (8/10). Inicio: selector de período e indicadores de consultas, ingresos y pacientes nuevas con comparación. Seguimiento: novedades de la cartera (comidas y agua, filtros de período, revisión y paciente, detalle por día, «Escribirle»). Planificación: comparación de fórmulas (Harris-Benedict, FAO/OMS/ONU, Katch-McArdle y basal de la balanza; la meta sigue con Mifflin-St Jeor). Cobranzas: cambiar el día de vencimiento ya no genera una segunda cuota en el mismo mes (migración `20261010170000_fee_one_charge_per_month`, sin aplicar; no toca cuotas ya creadas). Ficha: «Pedirle que actualice su ingreso» manda un mensaje con el enlace; la paciente decide si lo reabre. Planes: «Avisarle a la paciente» (el «Notificar cliente» del video) le manda por Mensajes que la versión publicada ya está en su sección Plan; el análisis del plan suma energía por momento y reparto de proteínas, carbohidratos y grasas, como el «Análisis del plan» del video (2:44). Recetas: una propuesta de IA sin abrir se retoma después de recargar la página, sin pedir otra. Mensajes: los sin leer de toda la cartera y la conversación abierta se actualizan solos (cada 30 y 15 segundos) sin recargar. Recursos: firman con el nombre de la nutricionista y se pueden despublicar (migración `20261010190000_resource_author_unpublish`, sin aplicar). Horarios por comida: la nutricionista indica la hora de cada momento (misma para todos los días del plan) y se ve en su editor, la impresión y, por decisión de Facundo (10/10), junto al nombre de cada comida en el plan de la paciente («Desayuno · 08:00»); queda fija al publicar y pasa a la versión siguiente (migración `20261010200000_plan_meal_times`, sin aplicar). Mails (Facundo eligió Brevo): «Mandar por mail» en la invitación de pacientes (enlace de Supabase, mail en castellano por Brevo) y recordatorio de cada turno 24 h antes, sin migración; se activan al cargar `BREVO_API_KEY` y `BREVO_SENDER_EMAIL` en Railway (`docs/mails-supabase-2026-10-10.md`). Estado de los 15 apartados para Facundo: https://claude.ai/artifact/KP8CCeQCVprNEL2avqyMmU. Corregido: «última consulta» y consultas de Inicio salen de los turnos ya terminados (antes sólo funcionaban en demo) (`docs/inicio-seguimiento-vs-nutriboost-2026-10-10.md`, con lo que falta y por qué). Para verlo en producción faltan su frase «aplicá la migración de mediciones en la base de producción», «aplicá la migración de una cuota por mes en la base de producción», «aplicá la migración de recursos en la base de producción», «aplicá la migración de horarios del plan en la base de producción» y su «publicalo». Detalle: `docs/mediciones-dashboard-2026-10-10.md`.
 - Conexión paciente ↔ panel (2026-10-10): decisiones D1–D7 en `docs/decisiones-producto-2026-10-10.md`; estado de cada
   hallazgo en `docs/auditoria-conexion-paciente-crm-2026-10-08.md`; producto y orden de trabajo en
   `docs/producto-definicion-2026-10-08.md`. PR #94 (día de Argentina en el servidor) ya está en `main`. D7 (plan nuevo
@@ -73,10 +75,18 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
   repositorio hasta que Facundo escriba la frase para aplicarla. No se corrió en la base hospedada. El correo de D3
   sigue esperando un proveedor de mail. Fotos de ingredientes y de platos con el modelo gratuito: pruebas en producción (tortilla ×3,
   tomate, huevo) hasta que Facundo las apruebe.
+  `docs/producto-definicion-2026-10-08.md`. PR #94 (día de Argentina en el servidor) publicado. Fotos de ingredientes
+  y de platos con el modelo gratuito: pruebas en producción (tortilla ×3, tomate, huevo) hasta que Facundo las apruebe.
+- Cuota impaga (D2, 2026-10-10, rama `cursor/cuota-no-bloquea-39fa`): no bloquea la app ni vacía el Inicio. Solo el
+  corte de acceso de la profesional lo hace. En el celular el aviso es la tarjeta amarilla del archivo, arriba del
+  contenido. Sin migración. Sigue abierto el recargo al cambiar el día de vencimiento.
 - Revisión del front de la paciente contra Nutrigo, 2026-10-09 (rama `claude/front-paciente-nutrigo-tuezz8`):
-  las diez pantallas ya coinciden con Figma en modo demo; Facundo no lo ve porque producción no tiene demo y las
-  pantallas de entrada siguen con estilo viejo. Reglas de diseño en `CLAUDE.md`; diagnóstico, matriz y plan en
-  `docs/revision-front-paciente-2026-10-09.md`. Piloto: invitación a instalar dentro de la tarjeta del menú.
+  las diez pantallas ya coinciden con Figma en modo demo. Producción no tiene modo demo. El ingreso, recuperar
+  la clave, «Antes de seguir», la cuenta sin vincular, la carga y el error de conexión se arman con piezas del
+  archivo (logo, título, control segmentado, campo y botón verde). Figma no dibuja esas pantallas: la tarjeta
+  blanca de 420 es el default. No hay franja de instalar en la entrada. Falta que Facundo compare la entrada;
+  este cambio no afirma que coincida. Diagnóstico en `docs/revision-front-paciente-2026-10-09.md`. Piloto:
+  invitación a instalar dentro de la tarjeta del menú.
   Segunda tanda (2026-10-10, con su cuenta de prueba en producción): la campana ahora abre un panel de avisos (antes abría el menú) y los «…» de cada tarjeta llevan a su pantalla; la comida cargada sin descripción ya no escribe «null»; las calorías de comidas sin revisar dicen «en revisión»; sin rutina asignada, Inicio muestra las actividades que la paciente registró. Sin cambios de base ni API. Pendiente: fotos de platos (dependen de que las recetas tengan portada), pantallas sin datos.
 
 
@@ -89,8 +99,8 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - Auditoría de la demo del 2026-10-07 (rama `claude/inspiring-lovelace-nfsot9`): superficies fuera del
   archivo que todavía tienen estilo viejo y la primera prueba de fotos con Cloudflare en producción.
   Ver `docs/auditoria-demo-2026-10-07.md`.
-- Pantallas de la nutricionista, ingreso y administración con piezas del archivo de Nutrigo
-  (Figma no las dibuja); van en otra rama.
+- Pantallas de la nutricionista y la administración con piezas del archivo de Nutrigo
+  (Figma no las dibuja); van en otra rama. El ingreso de la paciente ya usa esas piezas.
 
 - IA gratuita, pedido del 2/10: el predeterminado seguía siendo `gpt-4o-mini` y no cumplía
   lo acordado. Rama `codex/ia-solo-modelos-gratuitos`: `openrouter/free`, rechazo de pagos
@@ -196,3 +206,12 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 Continuación del cierre de paciente y nutricionista: [correcciones, evidencia y paquete de cinco migraciones](cierre-funcional-plan-v-2026-10-05.md).
 
 Contrato de cada acción, permisos y lecturas al recargar: [recorridos y guía para ambas experiencias](recorridos-y-contratos-plan-v-2026-10-05.md).
+
+## Movimiento de la paciente, primer pase (2026-10-10)
+Se cerró el PR #67 (conflictos, inspirado en otra interfaz). Pase nuevo desde main: en Inicio, pasos y calorías (consumidas, quemadas, restantes) suben contando (`CountUp`, desde cero al entrar y desde el valor anterior al cambiar) y las barras de progreso se llenan al aparecer. Todo apagado con «reducir movimiento». Siguen: peso, macros, pulso al cargar, Ejercicio y Progreso.
+
+## Calorías de la paciente suman al instante (2026-10-10)
+Facundo: lo que aprueba la nutricionista es el plan, no lo que la paciente carga al comer. En la vista de la paciente (Inicio, Diario, Progreso) las comidas pendientes de revisión ya suman calorías y macros (estimadas). La vista de la nutricionista no cambia. PR en borrador, sin juntar.
+
+## Progreso global (2026-10-10)
+Pantalla `/crm/progreso-global` (PR #93): peso y comidas de toda la cartera por período. Sin migración. Detalle en `docs/progreso-global-2026-10-10.md`.

@@ -154,6 +154,8 @@ export type Patient = {
   billing_until: string | null;
   /** Sólo en la vista profesional: si la paciente ya vinculó su cuenta. */
   has_account?: boolean;
+  /** Fecha de alta en el consultorio (sólo para la profesional). */
+  created_at?: string;
   stage: Stage;
   goal: string;
   goal_status?: GoalStatus;

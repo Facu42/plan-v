@@ -34,6 +34,12 @@ describe('modelo seguro del showroom', () => {
     expect(model.logs).toHaveLength(3);
     expect(JSON.stringify(model)).not.toContain('SECRETO');
   });
+  it("la paciente suma al instante lo que carga, aunque falte la revisión", () => {
+    const base = { id: 'm', patient_id: 'p1', slot: 'Almuerzo', photo_url: null, description: '', foods: [], macros: { kcal: 400, protein_g: 20, carbs_g: 40, fat_g: 10 }, confidence: 1, note_for_nutri: 'SECRETO', status: 'confirmed' as const, logged_at: now.toISOString() };
+    const model = buildShowroomPatient({ ...patient, meal_logs: [base, { ...base, id: 'pending', status: 'pending_review' }] }, now, true);
+    expect(model.kcal).toBe(800);
+    expect(model.nutritionLogCount).toBe(2);
+  });
   it('distingue macros ausentes de un valor cero efectivamente registrado', () => {
     const base = { id: 'm', patient_id: 'p1', slot: 'Almuerzo', photo_url: null, description: '', foods: [], confidence: 1, note_for_nutri: '', status: 'confirmed' as const, logged_at: now.toISOString() };
     const withoutMacros = buildShowroomPatient({ ...patient, meal_logs: [{ ...base, macros: null }] }, now);
@@ -68,6 +74,12 @@ describe('modelo seguro del showroom', () => {
     const model = buildShowroomPatient({ ...patient, appointment: { when: 'Jueves · 14:30', duration: 45, channel: 'video', meet_url: 'https://meet.example.com/ana' } }, now);
     expect(model.appointment).toEqual({ when: 'Jueves · 14:30', duration: 45, channel: 'video', meet_url: 'https://meet.example.com/ana' });
     expect(model.appointment).not.toHaveProperty('prep_note');
+  });
+  it('marca la cuenta archivada sin copiar la fecha interna', () => {
+    expect(buildShowroomPatient(patient, now).archived).toBe(false);
+    const archived = buildShowroomPatient({ ...patient, archived_at: '2026-10-10T12:00:00.000Z' }, now);
+    expect(archived.archived).toBe(true);
+    expect(JSON.stringify(archived)).not.toContain('2026-10-10T12:00:00.000Z');
   });
   it('busca sin acentos y excluye archivados', () => {
     expect(filterShowroomPatients([{ ...patient, name: 'Sofía' }, { ...patient, id: 'arch', archived_at: '2026-09-01' }], 'sofia')).toHaveLength(1);

@@ -14,14 +14,15 @@ export type PatientNotices = { items: PatientNotice[]; unreadMessages: number };
 
 const EMPTY: PatientNotices = { items: [], unreadMessages: 0 };
 
-/** Avisos reales de la paciente: mensajes sin leer, consulta por confirmar, cuota y plan nuevo. Nada inventado. */
+/** Avisos reales de la paciente: cuenta archivada, mensajes sin leer, consulta por confirmar, cuota y plan nuevo. Nada inventado. */
 export function buildNotices(
-  patient: Pick<ShowroomPatient, 'messages' | 'appointment'>,
+  patient: Pick<ShowroomPatient, 'messages' | 'appointment'> & { archived?: boolean },
   feeNotice: string | null,
   now: Date = new Date(),
   planNotice: { title: string; note: string } | null = null,
 ): PatientNotices {
   const items: PatientNotice[] = [];
+  if (patient.archived) items.push({ id: 'archived', icon: 'history', title: 'Tu cuenta está archivada', note: 'No podés enviar mensajes.', page: 'mensajes' });
   const unread = unreadCount(patient.messages ?? [], 'patient');
   if (unread > 0) items.push({ id: 'messages', icon: 'message', title: unread === 1 ? 'Tenés 1 mensaje sin leer' : `Tenés ${unread} mensajes sin leer`, note: 'Tu nutricionista te escribió.', page: 'mensajes' });
   const appointment = patient.appointment;
@@ -35,9 +36,11 @@ export function buildNotices(
 }
 
 const NoticesContext = createContext<PatientNotices>(EMPTY);
+const ArchivedContext = createContext(false);
 
-export function PatientNoticesProvider({ patient, patientId, children }: { patient: Pick<ShowroomPatient, 'messages' | 'appointment'>; patientId?: string; children: ReactNode }) {
+export function PatientNoticesProvider({ patient, patientId, children }: { patient: Pick<ShowroomPatient, 'messages' | 'appointment' | 'archived'>; patientId?: string; children: ReactNode }) {
   const feeNotice = useFeeNotice();
+  const archived = Boolean(patient.archived);
   const [planNotice, setPlanNotice] = useState<{ title: string; note: string } | null>(null);
   useEffect(() => {
     if (!patientId) return undefined;
@@ -52,8 +55,10 @@ export function PatientNoticesProvider({ patient, patientId, children }: { patie
     return () => { active = false; window.removeEventListener('plan-v:plan-handover', load); };
   }, [patientId]);
   const value = useMemo(() => buildNotices(patient, feeNotice, new Date(), planNotice), [patient, feeNotice, planNotice]);
-  return <NoticesContext.Provider value={value}>{children}</NoticesContext.Provider>;
+  return <ArchivedContext.Provider value={archived}><NoticesContext.Provider value={value}>{children}</NoticesContext.Provider></ArchivedContext.Provider>;
 }
+
+export const useAccountArchived = (): boolean => useContext(ArchivedContext);
 
 export const usePatientNotices = (): PatientNotices => useContext(NoticesContext);
 

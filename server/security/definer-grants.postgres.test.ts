@@ -89,6 +89,7 @@ const ALLOWED = [
   'mark_editorial_resource_read',
   'mark_meal_plan_handover_seen',
   'mark_thread_read',
+  'my_archived_at',
   'my_nutritionist_id',
   'my_patient_id',
   'open_message_attachment',
@@ -115,6 +116,7 @@ const ALLOWED = [
   'review_patient_intake',
   'review_patient_payment',
   'revoke_patient_care',
+  'save_body_metrics',
   'save_care_preferences',
   'save_care_record',
   'save_editorial_resource',
@@ -141,6 +143,7 @@ const ALLOWED = [
   'submit_patient_intake',
   'toggle_favorite',
   'transfer_patient_ownership',
+  'unpublish_editorial_resource',
 ];
 
 let db: PGlite;

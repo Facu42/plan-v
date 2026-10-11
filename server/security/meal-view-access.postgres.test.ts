@@ -78,6 +78,15 @@ describe('vistas públicas de comidas: aislamiento y sólo lectura',()=>{
     await db.query('update public.patients set deactivated_at=null where id=$1',[pa]);
     expect(await asUser(owner,'select note_for_nutri from public.meal_logs where id=$1',[ma])).toEqual([{note_for_nutri:'Nota privada A'}]);
   });
+  it('una cuota vencida sin pagar deja las comidas a la vista', async () => {
+    await db.query("update public.patients set billing_status='waived', deactivated_at=null where id=$1", [pa]);
+    const nid = (await db.query<{ nutritionist_id: string }>('select nutritionist_id from public.patients where id=$1', [pa])).rows[0].nutritionist_id;
+    await db.query("insert into public.patient_charges(patient_id,nutritionist_id,due_on,amount,status) values($1,$2,'2020-01-10',45000,'open')", [pa, nid]);
+    const rows = await asUser(a, 'select id, description from public.get_patient_meal_logs($1)', [pa]);
+    expect(rows).toEqual([{ id: ma, description: 'Comida A' }]);
+    await db.query('delete from public.patient_charges where patient_id=$1', [pa]);
+  });
+
   it('cierra también concesiones por columna y PUBLIC de otras vistas vulnerables, de forma idempotente',async()=>{
     await db.exec('create view public.extra_meal_test as select id,patient_id,description from public.meal_logs; revoke all on public.extra_meal_test from anon,authenticated; grant select on public.extra_meal_test to authenticated; grant update(patient_id) on public.extra_meal_test to public;');
     await db.exec(await readFile(migration,'utf8'));

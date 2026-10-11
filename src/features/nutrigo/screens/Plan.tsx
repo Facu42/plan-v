@@ -2,7 +2,7 @@ import { useEffect,useState,type ReactNode,type UIEvent } from 'react';
 import { FramePair } from '../FramePair';
 import { nodeId, nodeName, sourceText, type SourceBinding, type SourceNode, type SourceResolver } from '../SourceView';
 import { plansApi } from '../../../api/plans';
-import { buildPublishedPlanDays, planWeekIndex, type PlanItemView } from '../../../types/plans';
+import { buildPublishedPlanDays, mealSlotLabel, planWeekIndex, type PlanItemView } from '../../../types/plans';
 import { planChangeLineText, planDateLabel, planHandoverBanner, type PlanHandover } from '../../../types/plan-handover';
 import { planRecipe, planComponentItems } from '../plan-recipe';
 import { componentTitle, componentGrams } from '../../../types/plan-components';
@@ -18,6 +18,8 @@ import { EmptyState, dateId, fields, leaf, objects, searchBinding, source, State
 const MAIN_SLOTS=['Desayuno','Almuerzo','Merienda','Cena'] as const;
 /** Las colaciones van con el desayuno y los extras con la cena: el archivo sólo tiene cuatro columnas. */
 const EXTRA_SLOT:Record<string,(typeof MAIN_SLOTS)[number]>={'Colación':'Desayuno','Extra':'Cena'};
+/** Encabezados del archivo para cada columna; la hora del plan va junto al nombre («Desayuno · 08:00»). */
+const HEAD_SLOT:Record<string,(typeof MAIN_SLOTS)[number]>={Breakfast:'Desayuno',Lunch:'Almuerzo',Snack:'Merienda',Dinner:'Cena'};
 const WEEKDAY_SAMPLE=/^(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)$/;
 const DAY_SAMPLE=/^\d{1,2} Sep$/;
 
@@ -105,6 +107,8 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
       const children=objects(node),head=children[0],prototype=children.find(child=>nodeName(child)==='Table-row-meal plan'&&!sourceText(child).startsWith('Week'));
       const scrollBar=children.find(child=>nodeName(child)==='Scroll Bar');
       const header=head?fields(head,{},child=>{
+        const slot=leaf(child)?HEAD_SLOT[sourceText(child)]:undefined;
+        if(slot&&plan?.meal_times?.[slot])return {text:mealSlotLabel(slot,plan.meal_times)};
         if(nodeName(child)==='Button Picker'&&sourceText(child)==='Week 2')return {onClick:nextWeek,label:weeks>1?`Semana ${page+1} de ${weeks}: cambiar semana`:'Semana del plan',props:{disabled:weeks<=1},children:relabel(child,()=>`Semana ${page+1}`)};
         return undefined;
       },'head'):null;

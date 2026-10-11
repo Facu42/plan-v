@@ -1,8 +1,8 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { PlanComponentView } from '../../types/plan-components';
 import { componentGrams, componentTitle } from '../../types/plan-components';
-import type { PlanItemView, PlanRecipeDetail, PlanVersionView } from '../../types/plans';
-import { eachIsoDate, PLAN_SLOTS, planWeekdayLabel } from '../../types/plans';
+import type { PlanItemView, PlanMealTimes, PlanRecipeDetail, PlanVersionView } from '../../types/plans';
+import { eachIsoDate, mealSlotLabel, PLAN_SLOTS, planWeekdayLabel } from '../../types/plans';
 import { recipeNutritionLabel, type ProposedRecipe } from '../../types/ai-nutrition';
 import logo from '../../assets/plan-v-logo-256.png';
 import { PlanGuidanceView } from './PlanGuidance';
@@ -26,8 +26,8 @@ function Component({ component }: { component: PlanComponentView }) {
     {component.public_note && <p className="pv-note">{component.public_note}</p>}
   </section>;
 }
-function Meal({ item }: { item: PlanItemView }) {
-  return <article className="pv-meal"><h3>{item.slot}</h3>{item.components ? item.components.map(component => <Component key={component.id} component={component} />) : <section className="pv-component"><h4>{item.recipe?.title ?? item.recipe_proposal?.title ?? item.free_text ?? item.recipe_title}</h4>{item.recipe ? <><small>Receta publicada · versión {item.recipe_version}</small><RecipeInstructions recipe={item.recipe} portions={item.portions ?? NaN} /></> : item.recipe_proposal ? <RecipeInstructions recipe={item.recipe_proposal} portions={item.portions ?? NaN} /> : item.portions != null ? <p>{declaredAmount(item.portions)} {item.portions === 1 ? 'porción' : 'porciones'}</p> : null}</section>}{item.public_note && <p className="pv-note">Nota de la comida: {item.public_note}</p>}</article>;
+function Meal({ item, times }: { item: PlanItemView; times?: PlanMealTimes }) {
+  return <article className="pv-meal"><h3>{mealSlotLabel(item.slot, times)}</h3>{item.components ? item.components.map(component => <Component key={component.id} component={component} />) : <section className="pv-component"><h4>{item.recipe?.title ?? item.recipe_proposal?.title ?? item.free_text ?? item.recipe_title}</h4>{item.recipe ? <><small>Receta publicada · versión {item.recipe_version}</small><RecipeInstructions recipe={item.recipe} portions={item.portions ?? NaN} /></> : item.recipe_proposal ? <RecipeInstructions recipe={item.recipe_proposal} portions={item.portions ?? NaN} /> : item.portions != null ? <p>{declaredAmount(item.portions)} {item.portions === 1 ? 'porción' : 'porciones'}</p> : null}</section>}{item.public_note && <p className="pv-note">Nota de la comida: {item.public_note}</p>}</article>;
 }
 export function PlanPrintDocument({ version, patientName, professionalName, demo }: PlanPrintCopy) {
   const published = Boolean(version.published_at);
@@ -37,7 +37,7 @@ export function PlanPrintDocument({ version, patientName, professionalName, demo
     {!published && <p className="pv-draft">Copia para revisión profesional. Este borrador todavía no fue publicado para la paciente.</p>}
     {demo && <p className="pv-draft">DEMOSTRACIÓN · Datos ficticios para pruebas.</p>}
     <PlanGuidanceView guidance={version.guidance} />
-    {eachIsoDate(version.period_start, version.period_end).map(date => { const items = version.items.filter(item => item.for_date === date).sort((a,b) => PLAN_SLOTS.indexOf(a.slot) - PLAN_SLOTS.indexOf(b.slot)); return <section key={date} className="pv-day"><h2>{planWeekdayLabel(date)} · {dateLabel(date)}</h2>{items.length ? items.map(item => <Meal key={item.id} item={item} />) : <p>Sin indicaciones para este día.</p>}</section>; })}
+    {eachIsoDate(version.period_start, version.period_end).map(date => { const items = version.items.filter(item => item.for_date === date).sort((a,b) => PLAN_SLOTS.indexOf(a.slot) - PLAN_SLOTS.indexOf(b.slot)); return <section key={date} className="pv-day"><h2>{planWeekdayLabel(date)} · {dateLabel(date)}</h2>{items.length ? items.map(item => <Meal key={item.id} item={item} times={version.meal_times} />) : <p>Sin indicaciones para este día.</p>}</section>; })}
     <footer>Versión {version.version} · {published ? `Publicada el ${new Date(version.published_at!).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}` : 'Borrador guardado, sin publicación'}. Las cantidades y fuentes corresponden a esta copia.</footer>
   </main>;
 }

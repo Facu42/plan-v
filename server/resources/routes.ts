@@ -157,4 +157,19 @@ export function registerResourceRoutes(app: Hono) {
     const resource = await repo.publishEditorial(id, false, professional);
     return c.json({ resource, source: 'memory' });
   });
+
+  app.post('/api/resources/:id/unpublish', async (c) => {
+    const id = c.req.param('id');
+    const auth = c.get('auth');
+    const persistent = 'userId' in auth && isSupabaseEnabled();
+    if (persistent) {
+      const actor = await sb.sbGetActor(auth.userId);
+      if (actor?.role !== 'nutri') throw new repo.CareError(403, 'Sólo una profesional puede despublicar un artículo.');
+      const resource = await repo.unpublishEditorial(id, true, true);
+      return c.json({ resource, source: 'supabase' });
+    }
+    const professional = c.req.query('audience') === 'pro';
+    const resource = await repo.unpublishEditorial(id, false, professional);
+    return c.json({ resource, source: 'memory' });
+  });
 }

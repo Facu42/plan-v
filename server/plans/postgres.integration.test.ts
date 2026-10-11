@@ -254,6 +254,25 @@ describe('Publicación de una propuesta revisada', () => {
     expect(visible.guidance).toEqual(modified.current.guidance);
     await expect(rpc(nutriB,'apply_professional_model',[model.id,payload])).rejects.toMatchObject({code:'42501'});
   });
+  it('guarda los horarios de cada comida, los conserva y la paciente los ve al publicar', async () => {
+    const times = { Desayuno: '08:00', Cena: '21:00' };
+    const saved = await rpc(nutriA,'save_meal_plan_draft',[patientA,{...planDraft(),meal_times:times}]) as ProfessionalMealPlan;
+    expect(saved.current.meal_times).toEqual(times);
+    const kept = await rpc(nutriA,'save_meal_plan_draft',[patientA,planDraft()]) as ProfessionalMealPlan;
+    expect(kept.current.meal_times).toEqual(times);
+    const draft = await rpc(nutriA,'save_professional_model',[{id:crypto.randomUUID(),expected_revision:null,kind:'avoid',title:'Evitar ficticio',description:'',overrides:[],lines:['Ultraprocesados']}]) as ProfessionalModel;
+    const model = await rpc(nutriA,'act_professional_model',[draft.id,draft.revision,'publish']) as ProfessionalModel;
+    const applied = await rpc(nutriA,'apply_professional_model',[model.id,{patient_id:patientA,expected_revision:model.revision,expected_version:1,expected_plan_revision:kept.current.revision,period_start:kept.current.period_start,reviewed:true}]) as ProfessionalMealPlan;
+    expect(applied.current.meal_times).toEqual(times);
+    await expect(rpc(nutriA,'save_meal_plan_draft',[patientA,{...planDraft(),meal_times:{Cena:'25:00'}}])).rejects.toMatchObject({code:'22023'});
+    await expect(rpc(nutriA,'save_meal_plan_draft',[patientA,{...planDraft(),meal_times:{Brunch:'11:00'}}])).rejects.toMatchObject({code:'22023'});
+    await rpc(nutriA,'publish_reviewed_meal_plan',[planId,applied.current.version,planReviewSnapshot(applied.current)]);
+    const visible = await rpc(patientAUser,'list_published_meal_plan',[patientA]) as {meal_times:unknown};
+    expect(visible.meal_times).toEqual(times);
+    await expect(db.query("update public.meal_plan_versions set meal_times='{}'::jsonb where id=$1",[applied.current.id])).rejects.toThrow(/meal_times_immutable/);
+    const cleared = await rpc(nutriA,'save_meal_plan_draft',[patientA,{...planDraft(),meal_times:{}}]) as ProfessionalMealPlan;
+    expect(cleared.current.meal_times).toBeUndefined();
+  });
   it('guarda componentes confiables, congela alimentos y publica la misma copia y compras', async () => {
     const foodId = '60000000-0000-4000-a000-0000000000a1';
     const foodPayload = { name: 'Avena', brand: '', category: 'Cereales', kind: 'food', source: 'Etiqueta', reference: '', nutrients: Object.fromEntries(['kcal','protein','carbs','fat','fiber','sodium','calcium','iron','potassium','magnesium','vitamin_c'].map(key => [key, key === 'kcal' ? 380 : null])), portions: [{ name: 'Cucharada', grams: 10 }] };
