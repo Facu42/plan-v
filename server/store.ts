@@ -77,7 +77,7 @@ export type Macros = {
   fat_g: number;
 };
 
-export type MealAnalysisStatus = 'pending' | 'succeeded' | 'failed';
+export type MealAnalysisStatus = 'pending' | 'succeeded' | 'failed' | 'skipped';
 
 export type MealLog = {
   nutrition_origin?: 'declared' | 'ai_estimate';

@@ -4,6 +4,7 @@ import { AIUnavailableError } from './ai/errors.js';
 import { UNAVAILABLE_MEAL_NOTE } from './ai/meal-analyzer.js';
 
 const analyzeMocks = vi.hoisted(() => ({ analyzeMeal: vi.fn() }));
+const consentGate = vi.hoisted(() => ({ allowAi: true }));
 vi.mock('./ai/meal-analyzer.js', async () => {
   const actual = await vi.importActual<typeof import('./ai/meal-analyzer.js')>('./ai/meal-analyzer.js');
   return { ...actual, analyzeMeal: analyzeMocks.analyzeMeal };
@@ -13,7 +14,9 @@ vi.mock('./intake/repository.js', async (original) => ({
   ...await original<typeof import('./intake/repository.js')>(),
   readIntakeBundle: async () => ({
     intake: {},
-    consents: CONSENT_CATALOG.map((entry) => ({ ...entry, decision: 'granted' })),
+    consents: CONSENT_CATALOG
+      .filter((entry) => consentGate.allowAi || entry.purpose !== 'ai_meal_analysis')
+      .map((entry) => ({ ...entry, decision: 'granted' as const })),
   }),
 }));
 
@@ -62,6 +65,7 @@ function authedJson(body: unknown) {
 describe('meal analyze keeps the log when AI is unavailable (supabase)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    consentGate.allowAi = true;
     analyzeMocks.analyzeMeal.mockRejectedValue(new AIUnavailableError());
     sbMocks.sbGetActor.mockResolvedValue({ role: 'paciente', userId: 'user-1', patientId: 'pat-1' });
     sbMocks.sbGetPatientResource.mockResolvedValue({
@@ -164,5 +168,35 @@ describe('meal analyze keeps the log when AI is unavailable (supabase)', () => {
     expect(body.log).not.toHaveProperty('note_for_nutri');
     expect(body.analysis).not.toHaveProperty('note_for_nutri');
     expect(sbMocks.sbAddTimelineEvent.mock.calls[0][1].body).toContain('estimación no disponible');
+  });
+
+  it('guarda el texto sin llamar a la IA cuando falta el permiso', async () => {
+    consentGate.allowAi = false;
+    const response = await app.request('/api/patients/pat-1/meals/analyze', authedJson({
+      slot: 'Cena',
+      description: 'Sopa de verdura',
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(analyzeMocks.analyzeMeal).not.toHaveBeenCalled();
+    expect(diaryMocks.saveMealLog).toHaveBeenCalledOnce();
+    expect(diaryMocks.recordMealAnalysis).toHaveBeenCalledOnce();
+    const [, , analysis] = diaryMocks.recordMealAnalysis.mock.calls[0];
+    expect(analysis).toMatchObject({
+      status: 'skipped',
+      foods: [],
+      macros: null,
+      confidence: 0,
+      error_code: 'TEXT_ONLY',
+    });
+    expect(diaryMocks.saveMealLog.mock.calls[0][1]).toMatchObject({ description: 'Sopa de verdura', photo_url: null });
+    expect(body.log).toMatchObject({ analysis_status: 'skipped', foods: [], macros: null });
+    expect(body.log).not.toHaveProperty('note_for_nutri');
+    expect(body.analysis).not.toHaveProperty('note_for_nutri');
+    expect(sbMocks.sbAddTimelineEvent.mock.calls[0][1]).toMatchObject({
+      title: 'Cena · texto en revisión',
+    });
+    expect(sbMocks.sbAddTimelineEvent.mock.calls[0][1].body).toContain('texto sin estimación');
   });
 });

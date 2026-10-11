@@ -2,7 +2,7 @@ import type { Hono, Context } from 'hono';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { analysisOrUnavailable, analyzeMeal } from '../ai/meal-analyzer.js';
-import { requireCareConsent } from '../care/consents.js';
+import { currentCareConsents, requireCareConsent } from '../care/consents.js';
 import { validatePhoto } from '../care/repository.js';
 import { signMealPhotos, uploadMealPhoto } from '../care/meal-photos.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
@@ -13,6 +13,7 @@ import { authorizePatientAction } from '../security/authorization.js';
 import { toPatientMealAnalysis, toPatientSelfMealLog, toPatientSelfView, type PatientAction } from '../security/contracts.js';
 import { getPatient } from '../store.js';
 import * as repo from './repository.js';
+import { TEXT_ONLY_ERROR, TEXT_ONLY_MEAL_NOTE } from './text-only.js';
 
 const access = {
   getActor: sb.sbGetActor,
@@ -85,12 +86,18 @@ export function registerDiaryRoutes(app: Hono) {
     if (!patient) return c.notFound();
 
     const preview = photoDataUrl(body);
+    const hasPhoto = Boolean(body.photoPreview || body.imageBase64);
     if (persistent) {
       if (body.photoPreview) validatePhoto(body.photoPreview);
       if (body.imageBase64) validatePhoto(photoDataUrl({ imageBase64: body.imageBase64 })!);
-      await requireCareConsent(patientId, true, 'ai_meal_analysis');
-      if (body.photoPreview || body.imageBase64) await requireCareConsent(patientId, true, 'meal_photo');
     }
+    // La foto sigue pidiendo el permiso de IA: estimar un plato es análisis.
+    // El texto sin ese permiso se guarda igual y no llama al modelo.
+    if (hasPhoto) {
+      await requireCareConsent(patientId, persistent, 'ai_meal_analysis');
+      if (persistent) await requireCareConsent(patientId, true, 'meal_photo');
+    }
+    const aiAllowed = hasPhoto || (await currentCareConsents(patientId, persistent)).consented.includes('ai_meal_analysis');
 
     let photoPath: string | null = null;
     if (persistent && preview) {
@@ -107,39 +114,63 @@ export function registerDiaryRoutes(app: Hono) {
 
     let analysis;
     let log = saved.log;
-    const skipAnalysis = saved.duplicate && saved.log.analysis_status === 'succeeded';
-    if (skipAnalysis) {
+    if (!aiAllowed) {
+      const alreadyClosed = saved.duplicate && (saved.log.analysis_status === 'skipped' || saved.log.analysis_status === 'succeeded');
+      if (!alreadyClosed) {
+        log = await repo.recordMealAnalysis(patientId, saved.log.id, {
+          status: 'skipped',
+          foods: [],
+          macros: null,
+          confidence: 0,
+          note_for_nutri: TEXT_ONLY_MEAL_NOTE,
+          error_code: TEXT_ONLY_ERROR,
+        }, persistent);
+      }
       analysis = {
-        foods: saved.log.foods,
-        macros: saved.log.macros,
-        confidence: saved.log.confidence,
-        note_for_nutri: saved.log.note_for_nutri,
+        foods: log.foods,
+        macros: log.macros,
+        confidence: log.confidence,
+        note_for_nutri: log.note_for_nutri || TEXT_ONLY_MEAL_NOTE,
       };
     } else {
-      try {
-        analysis = await analyzeMeal({
-          description: body.description,
-          imageBase64: body.imageBase64,
-          slot: body.slot,
-          scheduledTitle: scheduled?.title,
-        });
-      } catch (error) {
-        analysis = analysisOrUnavailable(error);
+      const skipAnalysis = saved.duplicate && saved.log.analysis_status === 'succeeded';
+      if (skipAnalysis) {
+        analysis = {
+          foods: saved.log.foods,
+          macros: saved.log.macros,
+          confidence: saved.log.confidence,
+          note_for_nutri: saved.log.note_for_nutri,
+        };
+      } else {
+        try {
+          analysis = await analyzeMeal({
+            description: body.description,
+            imageBase64: body.imageBase64,
+            slot: body.slot,
+            scheduledTitle: scheduled?.title,
+          });
+        } catch (error) {
+          analysis = analysisOrUnavailable(error);
+        }
+        const failed = analysis.foods.length === 0 && analysis.macros == null && analysis.confidence === 0;
+        log = await repo.recordMealAnalysis(patientId, saved.log.id, {
+          status: failed ? 'failed' : 'succeeded',
+          foods: analysis.foods,
+          macros: analysis.macros,
+          confidence: analysis.confidence,
+          note_for_nutri: analysis.note_for_nutri,
+          error_code: failed ? 'AI_UNAVAILABLE' : null,
+          nutrition_origin: failed ? undefined : 'ai_estimate',
+        }, persistent);
       }
-      const failed = analysis.foods.length === 0 && analysis.macros == null && analysis.confidence === 0;
-      log = await repo.recordMealAnalysis(patientId, saved.log.id, {
-        status: failed ? 'failed' : 'succeeded',
-        foods: analysis.foods,
-        macros: analysis.macros,
-        confidence: analysis.confidence,
-        note_for_nutri: analysis.note_for_nutri,
-        error_code: failed ? 'AI_UNAVAILABLE' : null,
-      }, persistent);
     }
 
     if (!saved.duplicate) {
-      const title = `${body.slot} · foto en revisión`;
-      const timelineBody = mealLoggedTimelineBody(analysis.confidence, analysis.foods.length, analysis.macros);
+      const title = aiAllowed ? `${body.slot} · foto en revisión` : `${body.slot} · texto en revisión`;
+      const time = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
+      const timelineBody = aiAllowed
+        ? mealLoggedTimelineBody(analysis.confidence, analysis.foods.length, analysis.macros)
+        : `${time} · texto sin estimación. Pendiente de Vero.`;
       if (persistent) {
         await sb.sbAddTimelineEventBestEffort(patientId, { kind: 'meal_logged', title, body: timelineBody });
       } else {

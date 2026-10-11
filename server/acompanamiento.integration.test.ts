@@ -57,6 +57,7 @@ describe('acompañamiento conectado (demo memoria)', () => {
     }, { method: 'PATCH' });
     expect(saved.status).toBe(200);
 
+    expect((await consent(sofia, 'ai_meal_analysis')).status).toBe(201);
     const logged = await json(`/api/patients/${sofia}/meals/analyze`, { slot: 'Almuerzo', description: MEAL });
     expect(logged.status).toBe(200);
     const created = await logged.json() as { log: { id: string; status: string; foods: unknown[] }; analysis: { note_for_nutri?: string } };

@@ -127,6 +127,54 @@ describe('PV-22 diario en PostgreSQL descartable', () => {
     expect(await asUser(nutriB, 'select id from public.meal_analysis_runs')).toEqual([]);
   });
 
+  it('el texto sin IA queda skipped, sin nutrientes estimados, y después se puede estimar', async () => {
+    const client = '99999999-9999-4999-8999-999999999999';
+    const saved = await rpc(patientAUser, 'save_meal_log', [savePayload({ client_id: client, description: 'Sopa' })]) as { log: { id: string } };
+    const skipped = await rpc(patientAUser, 'record_meal_analysis', [{
+      meal_id: saved.log.id,
+      status: 'skipped',
+      foods: [],
+      macros: null,
+      confidence: 0,
+      note_for_nutri: 'Registro de texto. La paciente no autorizó el análisis con IA.',
+      error_code: 'TEXT_ONLY',
+    }]) as { id: string; analysis_status: string; macros: null; nutrition_origin?: string; note_for_nutri?: string };
+    expect(skipped).toMatchObject({ id: saved.log.id, analysis_status: 'skipped', macros: null });
+    expect(skipped).not.toHaveProperty('note_for_nutri');
+    expect(await asUser(nutriA, 'select analysis_status, nutrition_origin, note_for_nutri from public.meal_logs where id=$1', [saved.log.id])).toEqual([{
+      analysis_status: 'skipped',
+      nutrition_origin: null,
+      note_for_nutri: 'Registro de texto. La paciente no autorizó el análisis con IA.',
+    }]);
+    expect(await asUser(patientAUser, 'select id from public.meal_analysis_runs where meal_log_id=$1', [saved.log.id])).toEqual([]);
+    expect(await asUser(nutriA, 'select status, error_code from public.meal_analysis_runs where meal_log_id=$1', [saved.log.id])).toEqual([{
+      status: 'skipped',
+      error_code: 'TEXT_ONLY',
+    }]);
+    await expect(rpc(patientAUser, 'record_meal_analysis', [{
+      meal_id: saved.log.id,
+      status: 'skipped',
+      foods: [{ name: 'sopa', portion_est: 200, portion_unit: 'g', confidence: 1 }],
+      macros: null,
+      confidence: 0,
+      note_for_nutri: '',
+    }])).rejects.toMatchObject({ code: '22023' });
+
+    const estimated = await rpc(patientAUser, 'record_meal_analysis', [{
+      meal_id: saved.log.id,
+      status: 'succeeded',
+      foods: [{ name: 'sopa', portion_est: 250, portion_unit: 'ml', confidence: 0.8 }],
+      macros: { kcal: 180, protein_g: 8, carbs_g: 22, fat_g: 6 },
+      confidence: 0.8,
+      note_for_nutri: 'Estimación posterior, con permiso.',
+    }]) as { analysis_status: string; nutrition_origin?: string };
+    expect(estimated.analysis_status).toBe('succeeded');
+    expect(await asUser(nutriA, 'select analysis_status, nutrition_origin from public.meal_logs where id=$1', [saved.log.id])).toEqual([{
+      analysis_status: 'succeeded',
+      nutrition_origin: 'ai_estimate',
+    }]);
+  });
+
   it('sin RPC de diario el persistente falla cerrado', async () => {
     await db.exec('alter function public.save_meal_log(jsonb) rename to save_meal_log_pv22_hidden');
     try {
