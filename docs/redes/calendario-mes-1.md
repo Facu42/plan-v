@@ -1,13 +1,12 @@
 # Plan V: calendario de Instagram, mes 1 (4 semanas)
 
 Borrador para que lo revise Facundo. **Nada se publica sin su OK.**
-Cuenta: **@planv.app** (nombre tentativo, falta que Facundo lo confirme). Cara visible: la Lic. Verónica Trenti.
+Cuenta: **@planv.nutricion** (decidido por Facundo el 2026-10-11). Cara visible: la Lic. Verónica Trenti. Esta cuenta ya tiene seguidoras que son pacientes: ver `cuenta-planv-nutricion.md` para cómo se cuida a las dos audiencias.
 Arranca el lunes que elija Facundo. Por eso dice "Semana 1 – lunes" y no hay fechas.
 
 **Ritmo fijo de cada semana**
 - **Lunes:** reel · **Miércoles:** carrusel · **Viernes:** reel (los reels se suben también a TikTok).
-- **Historias en @planv.app:** martes, jueves y sábado (en la semana 1 también el lunes).
-- **@planv.nutricion:** 1 historia por semana, los jueves.
+- **Historias en @planv.nutricion:** martes, jueves y sábado (en la semana 1 también el lunes).
 - **Guiones de los reels:** R1 a R8 están en otro archivo. Acá van solo el título, el pilar y el gancho (la primera frase).
 - **Pilares:** 1 = Vida real del consultorio · 2 = Así funciona Plan V · 3 = Verónica · 4 = Oficio y organización · 5 = Comunidad y colegas.
 
@@ -22,28 +21,24 @@ Arranca el lunes que elija Facundo. Por eso dice "Semana 1 – lunes" y no hay f
 | 1 | Martes | Historias | 1 Consultorio | ¿Cómo armás tus planes hoy? |
 | 1 | Miércoles | Carrusel **C1** (fijado) | 2 Así funciona | Abrí el día sabiendo qué hacer |
 | 1 | Jueves | Historias | 2 Así funciona | Así se ve mi lista (modo demo) |
-| 1 | Jueves | Historia @planv.nutricion | 3 Verónica | Les cuento algo nuevo |
 | 1 | Viernes | Reel **R2** | 1 Consultorio | El PDF del plan perdido en el chat |
 | 1 | Sábado | Historias | 5 Comunidad | Respondo sus preguntas |
 | 2 | Lunes | Reel **R3** (fijado) | 2 Así funciona | Invitá a una paciente en 3 pasos |
 | 2 | Martes | Historias | 1 Consultorio | "¿Me reenviás el plan?" |
 | 2 | Miércoles | Carrusel **C2** | 4 Oficio | Seguimiento entre consultas: 5 ideas simples |
 | 2 | Jueves | Historias | 4 Oficio | Mensajes para retomar contacto |
-| 2 | Jueves | Historia @planv.nutricion | 3 Verónica | Así reciben su plan mis pacientes |
 | 2 | Viernes | Reel **R4** | 1 Consultorio | La foto del almuerzo a las 23 h |
 | 2 | Sábado | Historias | 2 Así funciona | La lista de compras, tildada |
 | 3 | Lunes | Reel **R5** | 2 Así funciona | Abrí el día sabiendo qué hacer con cada paciente |
 | 3 | Martes | Historias | 1 Consultorio | Mensajes de noche |
 | 3 | Miércoles | Carrusel **C3** | 4 Oficio | Los datos de tus pacientes son sensibles |
 | 3 | Jueves | Historias | 4 Oficio | Antes de subir una captura |
-| 3 | Jueves | Historia @planv.nutricion | 4 Oficio | Cómo cuido los datos de mis pacientes |
 | 3 | Viernes | Reel **R6** | 4 Oficio | 3 mensajes amables para retomar contacto |
 | 3 | Sábado | Historias | 5 Comunidad | Dejame tu pregunta |
 | 4 | Lunes | Reel **R7** | 3 Verónica | ¿La app decide por mí? No. |
 | 4 | Martes | Historias | 1 Consultorio | ¿Qué te frena para probarla? |
 | 4 | Miércoles | Carrusel **C4** | 5 Comunidad | Lo que más nos preguntaron este mes |
 | 4 | Jueves | Historias | 5 Comunidad | Preguntas y respuestas |
-| 4 | Jueves | Historia @planv.nutricion | 3 Verónica | La app sugiere, yo decido |
 | 4 | Viernes | Reel **R8** | 5 Comunidad | ¿Cómo armás tus planes hoy? |
 | 4 | Sábado | Historias | 5 Comunidad | Gracias por el primer mes |
 
@@ -87,7 +82,7 @@ Con esas tres, quien entra al perfil por primera vez entiende qué es, quién es
 
 ## Carruseles
 
-Formato 1080x1350. Colores y plantillas según `guia-marca-redes.md`: si la diapositiva muestra la app, paleta de la app (lienzo, lima, carbón); si habla Verónica, paleta del consultorio (crema, verde). Todas las capturas salen del **modo demo con datos inventados**. En cada diapositiva, abajo y chiquito: "Plan V | @planv.app". Cuando hay capturas, la última diapositiva lleva la aclaración "Capturas del modo demo, datos inventados".
+Formato 1080x1350. Colores y plantillas según `guia-marca-redes.md`: si la diapositiva muestra la app, paleta de la app (lienzo, lima, carbón); si habla Verónica, paleta del consultorio (crema, verde). Todas las capturas salen del **modo demo con datos inventados**. En cada diapositiva, abajo y chiquito: "Plan V | @planv.nutricion". Cuando hay capturas, la última diapositiva lleva la aclaración "Capturas del modo demo, datos inventados".
 
 ### C1 · Semana 1 – miércoles · Pilar 2 · "Abrí el día sabiendo qué hacer" (FIJADO)
 
@@ -286,16 +281,11 @@ Reglas para todas las historias:
 
 ---
 
-## Historia semanal en @planv.nutricion (jueves)
-
-Las seguidoras de esta cuenta son pacientes. Por eso las historias van siempre desde el "así trabajo", nunca vendiéndoles la app, y sin datos de ninguna paciente real.
-
-| Semana | Historia | Sticker |
-|---|---|---|
-| 1 | Foto de Verónica. Texto: "Les cuento algo nuevo: armamos una app para colegas nutricionistas. Si sos nutri, te espero en @planv.app." | Mención a @planv.app |
+|---|---|
+| 1 | Foto de Verónica. Texto: "Les cuento algo nuevo: armamos una app para colegas nutricionistas. Si sos nutri, te espero en @planv.nutricion." | Mención a @planv.nutricion |
 | 2 | Captura del modo demo de la vista de la paciente, "Tu plan de hoy" (paciente inventada). Texto: "Así ven su plan del día mis pacientes. Imagen de ejemplo, datos inventados." | **Caja de preguntas:** "¿Qué te gustaría encontrar en tu plan?" |
-| 3 | Se comparte el carrusel C3. Texto: "Para colegas: cómo cuido los datos de mis pacientes." | Mención a @planv.app |
-| 4 | Se comparte el reel R7. Texto: "La app me ayuda a ordenar. Las decisiones sobre tu plan las tomo yo, siempre." | Mención a @planv.app |
+| 3 | Se comparte el carrusel C3. Texto: "Para colegas: cómo cuido los datos de mis pacientes." | Mención a @planv.nutricion |
+| 4 | Se comparte el reel R7. Texto: "La app me ayuda a ordenar. Las decisiones sobre tu plan las tomo yo, siempre." | Mención a @planv.nutricion |
 
 ---
 
@@ -313,7 +303,7 @@ Las seguidoras de esta cuenta son pacientes. Por eso las historias van siempre d
 
 ## Decisiones pendientes de Facundo para este calendario
 
-1. Confirmar el nombre **@planv.app** y quién administra la cuenta.
+1. Quién administra la cuenta y cómo se avisa a las pacientes que ahora también habrá contenido para colegas (ver `cuenta-planv-nutricion.md`).
 2. Elegir el lunes de arranque.
 3. Confirmar que Verónica está de acuerdo con las fotos y los textos en primera persona, **por escrito** (autorización de uso de imagen y voz: Código Civil y Comercial, art. 53), y si su matrícula tiene que aparecer en las piezas.
 4. Confirmar que al publicar ya se puede "probar gratis" (si no, cambiar por "Escribime PLAN").

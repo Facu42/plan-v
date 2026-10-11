@@ -1,6 +1,6 @@
 # Guía de marca para redes: la app Plan V
 
-Para quien arme posts, carruseles, historias y portadas de reels de la **app** Plan V (cuenta nueva, supuesto "@planv.app").
+Para quien arme posts, carruseles, historias y portadas de reels de la **app** Plan V (cuenta decidida: "@planv.nutricion", la de Verónica; ver `cuenta-planv-nutricion.md`).
 Nada se publica sin el OK de Facundo. Los límites éticos (docs/limites-eticos.md y brief) mandan sobre esta guía.
 
 ## 1. Dos paletas, una regla
@@ -126,7 +126,7 @@ Así no:
 Todas: Poppins, isotipo del logo arriba a la izquierda (96 px en post, 110 px en historia), márgenes de la sección 2.
 
 **P1. Post de función (1080x1350, paleta app)**
-Fondo lienzo. Arriba, a 80 px: isotipo + etiqueta píldora lima con texto carbón ("Agenda", "Plan semanal"). Debajo, título carbón de 2 renglones (y 120 a 360 aprox.). Centro-abajo (y 420 a 1180): captura demo en tarjeta blanca o mockup de teléfono centrado. Pie a 60 px del borde: "Plan V · @planv.app" en gris #52545B.
+Fondo lienzo. Arriba, a 80 px: isotipo + etiqueta píldora lima con texto carbón ("Agenda", "Plan semanal"). Debajo, título carbón de 2 renglones (y 120 a 360 aprox.). Centro-abajo (y 420 a 1180): captura demo en tarjeta blanca o mockup de teléfono centrado. Pie a 60 px del borde: "Plan V · @planv.nutricion" en gris #52545B.
 
 **P2. Carrusel "cómo funciona" (1080x1350 por lámina, 5 a 7 láminas, paleta app)**
 Lámina 1: fondo carbón, título en lienzo, palabra clave en lima, flecha "deslizá" abajo a la derecha. Láminas del medio: fondo lienzo, número de paso grande en lima con texto carbón (círculo de 120 px) arriba a la izquierda, texto arriba (máx. 30 palabras) y captura abajo. Última lámina: fondo lima clara #DFF9A2, llamado a la acción en carbón ("Probala gratis: link en la bio") y pie.
@@ -138,13 +138,13 @@ Fondo lienzo. Zona libre arriba 250 px. Título en y 280 a 560. Mockup de teléf
 Todo lo importante dentro del recorte central 1080x1350 (y 285 a 1635). Producto: fondo carbón, título lima o lienzo centrado, mockup chico. Verónica: foto a sangre, franja verde profundo #083A30 abajo del recorte con título crema y detalle dorado. Título de máximo 5 palabras.
 
 **P5. Verónica cuenta (1080x1350, paleta logo)**
-Fondo crema #F9F6EE. Mitad superior: foto de Verónica recortada en rectángulo con esquinas de 40 px (y 80 a 700). Mitad inferior: cita entre comillas en verde profundo, SemiBold 56 a 64 px, máximo 20 palabras; firma "Verónica Trenti, Lic. en Nutrición, M.P./M.N. [N° de matrícula, a confirmar]" en verde #23955D, Medium 30 px. Pie: "Plan V — Verónica Trenti | @planv.app" (o @planv.nutricion si se comparte ahí).
+Fondo crema #F9F6EE. Mitad superior: foto de Verónica recortada en rectángulo con esquinas de 40 px (y 80 a 700). Mitad inferior: cita entre comillas en verde profundo, SemiBold 56 a 64 px, máximo 20 palabras; firma "Verónica Trenti, Lic. en Nutrición, M.P./M.N. [N° de matrícula, a confirmar]" en verde #23955D, Medium 30 px. Pie: "Plan V — Verónica Trenti | @planv.nutricion" (o @planv.nutricion si se comparte ahí).
 
-## 7. Nombre de la cuenta nueva
+## 7. Nombre de la cuenta (histórico: ya se decidió @planv.nutricion)
 
 No pude verificar disponibilidad en Instagram ni TikTok: hay que chequearlo a mano antes de decidir, y conviene reservar el mismo nombre en las dos redes.
 
-1. **@planv.app**: el supuesto actual; corto y deja claro que es la app. (TikTok no siempre acepta el punto en la misma posición; revisar.)
+1. **@planv.nutricion**: el supuesto actual; corto y deja claro que es la app. (TikTok no siempre acepta el punto en la misma posición; revisar.)
 2. **@planvapp**: sin punto, más fácil de dictar y de escribir en las dos redes.
 3. **@usaplanv**: suena a invitación y sirve de reserva si los otros están tomados.
 

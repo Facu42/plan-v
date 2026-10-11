@@ -1,7 +1,7 @@
 # Plan V: guiones de videos cortos (primer mes)
 
 Borrador para que lo revise Facundo. **Nada se publica sin su OK.**
-Cuenta supuesta: **@planv.app** en Instagram y TikTok (a confirmar), con Verónica como cara visible.
+Cuenta: **@planv.nutricion** (decidido el 2026-10-11). **Los videos se retoman más adelante, a pedido de Facundo**: estos guiones quedan guardados, sin producir.
 8 videos, 2 por semana durante 4 semanas. Sirven igual para Reels y TikTok: se editan una vez y se suben a las dos.
 
 ## Cómo se reparten
@@ -417,7 +417,7 @@ Días sugeridos: martes y viernes (el carrusel semanal va el miércoles). Si una
 - [ ] OK de Facundo.
 
 ## Pendientes para Facundo
-1. Confirmar el nombre de la cuenta (@planv.app) y quién la administra.
+1. Confirmar el nombre de la cuenta (@planv.nutricion) y quién la administra.
 2. Pedirle al equipo técnico la versión demo en el teléfono de grabación (la versión publicada no tiene el botón de modo demo).
 3. Confirmar que "probala gratis" es verdad al momento de publicar.
 4. Decidir si hay beneficio para "nutricionistas fundadoras" (R8). Si lo hay, bases y condiciones escritas antes de anunciarlo.

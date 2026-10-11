@@ -11,6 +11,7 @@ Nada de esto está publicado: todo espera el OK de Facundo, pieza por pieza.
 | [guia-marca-redes.md](guia-marca-redes.md) | Cómo se ven las piezas: qué colores usa cada una (con contraste medido), letras y tamaños, capturas, fotos sí y no, voz, 5 plantillas para Canva, nombres de cuenta | `brand-guardian` |
 | [calendario-mes-1.md](calendario-mes-1.md) | Las 4 primeras semanas: bio, 3 fijadas, 4 carruseles con todos los textos, historias de cada día, historia semanal en @planv.nutricion | `instagram-curator` |
 | [guiones-videos.md](guiones-videos.md) | 8 videos cortos (reels y TikTok) con gancho, guion por segundos, pies, notas de grabación y edición en CapCut, e indicaciones para generar imágenes con IA | `tiktok-strategist` con los criterios de `short-video-editing-coach` |
+| [cuenta-planv-nutricion.md](cuenta-planv-nutricion.md) | Decisión de usar @planv.nutricion, reglas para dos audiencias, perfil propuesto y lista de lo que falta para publicar | `social-media-strategist` (Claude) |
 | [lectura-instagram-veronica.md](lectura-instagram-veronica.md) | Qué hay hoy en @planv.nutricion y qué cambia para el plan | lectura del perfil desde la PC de Facundo |
 | [revision-legal.md](revision-legal.md) | Revisión con la ley argentina (orientativa, no reemplaza a una abogada/o): cambios hechos, checklist de 15 reglas para publicar, temas a consultar | `legal-compliance-checker` |
 
@@ -26,8 +27,8 @@ es que entre 5 y 10 nutricionistas inviten a su primera paciente.
 
 ## Lo que falta de Facundo
 
-1. **Cuenta:** confirmar cuenta nueva para la app (supuesto: `@planv.app`; alternativas en la
-   guía) o usar la de Verónica. Hay una tarjeta de decisión en el hilo.
+1. **Cuenta:** decidida, @planv.nutricion. Cómo se cuidan las dos audiencias y qué falta para publicar:
+   [cuenta-planv-nutricion.md](cuenta-planv-nutricion.md).
 2. **Autorización escrita de Verónica** para usar su imagen, voz y nombre, y su OK a los textos
    en primera persona.
 3. **"Probala gratis"** solo se publica si ese día se puede usar sin pagar. Precio y días de
@@ -60,3 +61,4 @@ son del apartado H (ola 3). El precio es del hilo "Plan V listo para el mercado"
 | 2026-09-28 | Se armó el brief común (qué hace la app hoy y qué no, límites) y la estrategia con `social-media-strategist`. Estudio rápido del mercado (Nutrium, Avena, Dietbox, Nutrimind): solo para uso interno. |
 | 2026-09-29 | Guía visual (`brand-guardian`), calendario del mes 1 (`instagram-curator`) y 8 guiones (`tiktok-strategist`). Revisión legal argentina (`legal-compliance-checker`): corrigió 43 líneas, la más importante un video que prometía "30 segundos" acelerado. Se emparejó la numeración de los reels entre calendario y guiones. Se encontró que el modo demo no está en la app publicada. |
 | 2026-10-01 | Se leyó el Instagram de Verónica (solo lectura, desde la PC de Facundo): 4 publicaciones y 79 seguidores, contenido educativo para el público general. Confirma una cuenta aparte para la app. Detalle en `lectura-instagram-veronica.md`. |
+| 2026-10-11 | Facundo eligió @planv.nutricion como cuenta. Se cambiaron los nombres en todos los documentos, se sacó la sección de historias semanales aparte y se escribió `cuenta-planv-nutricion.md`. Videos postergados por pedido de Facundo. |

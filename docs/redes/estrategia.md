@@ -1,7 +1,7 @@
 # Plan V: estrategia de marketing orgánico (sin publicidad paga)
 
 Borrador para que lo revise Facundo. Nada se publica sin su OK.
-Supuesto de trabajo: cuenta nueva de Instagram/TikTok para la app (nombre tentativo **@planv.app**), con Verónica como fundadora y cara visible. **@planv.nutricion** sigue siendo el consultorio. *(Lo tiene que confirmar Facundo.)*
+Cuenta decidida por Facundo (2026-10-11): **@planv.nutricion**, la de Verónica, con ella como cara visible. La cuenta ya tiene seguidoras que son pacientes: cómo se cuidan las dos audiencias está en `cuenta-planv-nutricion.md`, que manda sobre las partes de abajo que hablan de una cuenta aparte.
 
 ---
 
@@ -77,8 +77,8 @@ Reglas cortas: voseo siempre; frases cortas; un emoji como máximo por pieza (o 
 
 | Canal | Para qué | Frecuencia realista |
 |---|---|---|
-| **Instagram @planv.app** (nuevo) | Canal principal. Mostrar la app (modo demo), dolores del consultorio, Verónica contando cómo trabaja. | 3 publicaciones por semana (2 reels + 1 carrusel) + historias 3-4 días por semana |
-| **TikTok @planv.app** | Alcance a colegas jóvenes y estudiantes. Mismos reels, recortados y con texto en pantalla. | Reusar los 2 reels de la semana (sin producir aparte) |
+| **Instagram @planv.nutricion** | Canal principal. Mostrar la app (modo demo), dolores del consultorio, Verónica contando cómo trabaja. | 3 publicaciones por semana (2 reels + 1 carrusel) + historias 3-4 días por semana |
+| **TikTok** (cuenta a definir; los videos se ven más adelante) | Alcance a colegas jóvenes y estudiantes. Mismos reels, recortados y con texto en pantalla. | Reusar los 2 reels de la semana (sin producir aparte) |
 | **Instagram @planv.nutricion** (consultorio de Vero) | Sus seguidoras son pacientes; la usamos poco para la app. Compartir 1 historia por semana del tipo "así trabajo con mis pacientes" y alguna colaboración. | 1 historia por semana, 1 colaboración por mes |
 | **WhatsApp** | Atención 1 a 1 a nutricionistas interesadas y acompañarlas en la primera semana. Más adelante, una comunidad de "nutricionistas fundadoras". | Responder en el día |
 | **LinkedIn** (perfil de Verónica y de Facundo) | Secundario. Sirve para universidades, colegios profesionales y colegas en instituciones. | 1 publicación cada 2 semanas |
@@ -97,7 +97,7 @@ Consejo práctico: producir todo en **un solo día por semana** (grabar 2 reels 
 | **4. Oficio y organización profesional** (valor sin vender) | 15% | Ideas para ordenar el seguimiento entre consultas; cómo cuidar los datos de tus pacientes (datos de salud son sensibles); cómo organizar la agenda; plantillas de mensajes amables para retomar contacto |
 | **5. Comunidad y colegas** | 10% | Testimonios de nutricionistas que la prueban (con permiso por escrito, sin datos de pacientes, sin editar lo que dijeron, y aclarando en la pieza si recibieron algo a cambio, por ejemplo acceso gratis); preguntas abiertas; vivos; saludos por el Día del Nutricionista (11 de agosto) |
 
-Formato visual: piezas IG 1080x1350 según `guia-marca-redes.md` (paleta de la app para piezas de producto, paleta del consultorio para piezas de Verónica); las capturas de la app siempre del **modo demo**. Pie: "Plan V | @planv.app".
+Formato visual: piezas IG 1080x1350 según `guia-marca-redes.md` (paleta de la app para piezas de producto, paleta del consultorio para piezas de Verónica); las capturas de la app siempre del **modo demo**. Pie: "Plan V | @planv.nutricion".
 
 ---
 
@@ -125,7 +125,7 @@ Dónde mirar: estadísticas de Instagram y TikTok (gratis, cuenta profesional), 
 
 | Qué medir | Por qué | Meta inicial razonable (4 semanas) |
 |---|---|---|
-| Seguidores de @planv.app | Crece la audiencia | 150 a 300 |
+| Seguidores nuevos de @planv.nutricion (sobre los 79 de hoy) | Crece la audiencia | 150 a 300 |
 | Guardados y compartidos por post | Señal de que el contenido sirve (pesa más que los "me gusta") | 3% de guardados+compartidos sobre alcance en los mejores posts |
 | Alcance de reels a no seguidores | Llegamos a gente nueva | 60% o más del alcance en no seguidores |
 | Mensajes recibidos de nutricionistas | Interés real | 20 a 40 conversaciones |
@@ -151,7 +151,7 @@ Revisión: 20 minutos cada viernes. Ver qué 2 posts funcionaron mejor y hacer m
 | **La paciente como vidriera** | Que cada paciente vea "Plan V" y el nombre de su nutricionista; pedir a las nutricionistas que compartan en historias "así recibís tu plan" (sin datos reales) | No |
 | **Contenido que se reenvía por WhatsApp** | Plantillas útiles (mensaje amable de seguimiento, checklist de primera consulta) que se pasan entre colegas | No |
 | **Fechas clave** | Día del Nutricionista (11/8), inicio de año, vuelta de vacaciones: "ordená tu consultorio" | No |
-| **Nombre de la cuenta** | Crear @planv.app y TikTok | **Sí:** confirmar nombre y quién la administra |
+| **Nombre de la cuenta** | Mantener @planv.nutricion; TikTok cuando se retomen los videos | **Sí:** confirmar nombre y quién la administra |
 
 ---
 
@@ -196,6 +196,6 @@ Revisión: 20 minutos cada viernes. Ver qué 2 posts funcionaron mejor y hacer m
 ## Resumen
 1. Le hablamos a la nutricionista independiente argentina, cansada de la planilla, el PDF y el WhatsApp mezclado. Las pacientes llegan invitadas y funcionan como vidriera.
 2. Mensaje: "Abrí el día sabiendo qué hacer con cada paciente". Tres apoyos: todo en un lugar, la paciente carga y vos decidís, hecha acá con una nutricionista.
-3. Canal principal: Instagram @planv.app (3 publicaciones por semana), con TikTok reusando los reels y @planv.nutricion en un rol chico. Cinco pilares: dolor 30%, demo 25%, Verónica 20%, oficio 15%, comunidad 10%.
+3. Canal principal: Instagram @planv.nutricion (3 publicaciones por semana para colegas más contenido para pacientes), con TikTok más adelante. Cinco pilares: dolor 30%, demo 25%, Verónica 20%, oficio 15%, comunidad 10%.
 4. Embudo: reel, perfil, "escribime PLAN" o enlace, registro "Soy nutricionista", primera paciente invitada (es la métrica clave: meta de 5 a 10 en 4 semanas).
 5. Facundo tiene que decidir el nombre de la cuenta, los beneficios para fundadoras/recomendaciones/estudiantes/colegios y el precio. Límites: sin promesas de salud, sin datos reales, sin funciones que no existen.
