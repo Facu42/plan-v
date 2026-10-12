@@ -1,5 +1,5 @@
 import { describe,expect,it } from 'vitest';
-import { parseLaboratoryPages,parseSegmentalPages,compareSegmental,bariatricSummary,kerrSummary } from './clinical-workspace';
+import { parseLaboratoryPages,parseSegmentalPages,compareSegmental,bariatricSummary,kerrSummary,intakeExportLines } from './clinical-workspace';
 import { clinicalWorkspaceInputSchema } from '../types/clinical-workspace';
 describe('datos clínicos revisables',()=>{
   it('extrae analito, operador, unidad y rango con página original sin diagnosticar',()=>{
@@ -38,5 +38,11 @@ describe('datos clínicos revisables',()=>{
     expect(clinicalWorkspaceInputSchema.safeParse({...input,data:{...input.data,values:[{...row,unit:'ohm'}]}}).success).toBe(false);
     expect(clinicalWorkspaceInputSchema.safeParse({...input,data:{...input.data,values:[row,row]}}).success).toBe(false);
     expect(clinicalWorkspaceInputSchema.safeParse({...input,data:{...input.data,values:[{...row,unit:'%',value:101}]}}).success).toBe(false);
+  });
+  it('exporta el ingreso en español sin JSON ni nombres internos',()=>{
+    const lines=intakeExportLines({preferred_name:'Sofi',patient_intent:'Regular horarios',phone:'+54 11 0000',allergies:{state:'reported',items:['Maní']},restrictions:{state:'unknown',items:[]},hydration_glasses:0,sleep_hours:8,energy:'Media',conditions_note:'Declaración ficticia',prefers_to_discuss:true});
+    expect(lines).toContain('Nombre preferido: Sofi');expect(lines).toContain('Alergias declaradas: Maní');expect(lines).toContain('Restricciones declaradas: Sin informar');expect(lines).toContain('Agua declarada: 0 vasos por día');
+    expect(lines.join('\n')).not.toMatch(/preferred_name|patient_intent|conditions_note|\{|\}/);
+    expect(intakeExportLines({allergies:{state:'none',items:[]}})).toContain('Alergias declaradas: Declaró que no tiene');
   });
 });
