@@ -18,6 +18,7 @@ apartados que también hacen falta para salir al mercado: lo legal y la calidad 
 - Ampliación de ficha, contraste profesional y fotos de ingredientes (11/10/2026): [implementación y comprobaciones locales](nutridesk-ficha-2026-10-11.md). Espera integración con consultas/importación y pruebas de publicación.
 - Planificación Nutriboost (12/10/2026): [fórmulas efectivas, grupos, referencias, catálogo paginado y documentos con marca](nutridesk-nutricion-2026-10-12.md). Implementación local verificada; integración y activación documentadas por separado.
 Clínica Nutridesk · 12/10/2026: laboratorio local revisable, bioimpedancia segmental, resultados Kerr declarados, seguimiento bariátrico, referencias por profesional, pedidos y ficha PDF. [Contratos, pruebas, límites y Regression Guard](clinica-nutridesk-2026-10-12.md). Rama de integración local; sin producción.
+- [Operaciones de Nutridesk: asistente con fuentes, reportes, consentimiento/baja y resultados de comunicaciones (12/10)](nutridesk-operaciones-2026-10-12.md). Preparado en copia aislada; incluye Regression Guard, límites reales y pendientes de integración. No publicado.
 
 Implementación del plan aprobado por Facundo, desde la versión principal vigente y en copia aislada. Entregas encadenadas por apartado: backend, consultorio, planes e IA, y paciente Nutrigo.
 

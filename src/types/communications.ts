@@ -1,0 +1,3 @@
+export type ContactPreferences={phone:string;reminders:boolean;broadcasts:boolean;consent_version:'whatsapp.v1';updated_at?:string};
+export type CommunicationBoard={mode:'demo'|'persistent';enabled:boolean;patients:Array<{id:string;name:string;broadcasts:boolean;reminders:boolean}>;broadcasts:Array<{id:string;template:string;language:string;created_at:string}>;deliveries:Array<{id:string;broadcast_id:string;patient_id:string;state:'queued'|'sending'|'accepted'|'failed'|'uncertain'|'skipped'|'cancelled';delivery_status:'sent'|'delivered'|'read'|'failed'|null;updated_at:string}>};
+export type ClinicSettings={default_days:7|30|90};

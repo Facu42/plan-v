@@ -8,7 +8,8 @@ const INTERNAL = [
   // Cola de fotos: sólo servicio; lectura mediante el plan autorizado.
   // Catálogo de fotos de ingredientes y su contador diario: sólo servicio, sin lectura directa.
   'audit_events', 'clinical_ai_budget_months', 'clinical_ai_spend', 'consultation_tasks', 'cover_daily_usage', 'ingredient_covers', 'meal_plan_handovers', 'menu_dish_covers', 'notification_deliveries', 'notification_preferences',
-  'nutritionist_subscriptions', 'outbox_events',
+  // Eventos verificados/consentimientos de Meta, privados y sólo para el servicio.
+  'nutritionist_subscriptions', 'ops_contact_events', 'ops_delivery_events', 'outbox_events',
   // Idempotency ledger: only import RPCs; no client grant or read policy.
   'patient_import_applied', 'patient_invite_events',
   'payment_webhook_events', 'platform_admins', 'platform_settings',
