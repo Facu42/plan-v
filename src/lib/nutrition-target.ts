@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { faoWhoUnu, harrisBenedictRevised, katchMcArdle } from './energy-equations';
 
 // Ecuación de Mifflin-St Jeor (la misma que usan Nutrium y la mayoría de las guías clínicas):
 // GEB = 10 × peso(kg) + 6,25 × talla(cm) − 5 × edad + (5 varón | −161 mujer)
@@ -37,7 +38,13 @@ export const targetInputSchema = z.object({
   adjust_pct: z.number().min(-30).max(25),
   protein_g_per_kg: z.number().min(0.8).max(3),
   fat_pct: z.number().min(15).max(45),
-}).strict();
+  formula: z.enum(['mifflin', 'harris', 'fao', 'katch', 'scale']).optional(),
+  body_fat_pct: z.number().finite().min(1).max(80).optional(),
+  scale_bmr: z.number().finite().min(300).max(5000).optional(),
+}).strict().superRefine((value, ctx) => {
+  if (value.formula === 'katch' && value.body_fat_pct === undefined) ctx.addIssue({ code:'custom', path:['body_fat_pct'], message:'Informá la grasa corporal medida.' });
+  if (value.formula === 'scale' && value.scale_bmr === undefined) ctx.addIssue({ code:'custom', path:['scale_bmr'], message:'Informá el metabolismo basal medido por la balanza.' });
+});
 export type TargetInput = z.infer<typeof targetInputSchema>;
 
 export type TargetResult = {
@@ -55,7 +62,12 @@ export function mifflinStJeor(sex: Sex, age: number, weightKg: number, heightCm:
 
 export function calculateTarget(input: TargetInput): TargetResult {
   const warnings: string[] = [];
-  const bmr = mifflinStJeor(input.sex, input.age, input.weight_kg, input.height_cm);
+  const bmr = input.formula === 'harris' ? harrisBenedictRevised(input.sex,input.age,input.weight_kg,input.height_cm)
+    : input.formula === 'fao' ? faoWhoUnu(input.sex,input.age,input.weight_kg)
+    : input.formula === 'katch' ? katchMcArdle(input.weight_kg,input.body_fat_pct ?? null)
+    : input.formula === 'scale' ? input.scale_bmr
+    : mifflinStJeor(input.sex, input.age, input.weight_kg, input.height_cm);
+  if (bmr === null || bmr === undefined || !Number.isFinite(bmr) || bmr <= 0) throw new Error('Faltan datos para la fórmula seleccionada.');
   const tdee = bmr * ACTIVITY_FACTORS[input.activity];
   let kcal = tdee * (1 + input.adjust_pct / 100);
   const floor = input.sex === 'masculino' ? 1500 : 1200;
