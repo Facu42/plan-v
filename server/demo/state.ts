@@ -50,6 +50,9 @@ export class DemoStateFile {
     if (current.models?.models instanceof Map && !Object.prototype.hasOwnProperty.call(saved.domains, 'models')) {
       saved.domains.models = { models: new Map() };
     }
+    if(current.scheduling&&!Object.prototype.hasOwnProperty.call(saved.domains,'scheduling')) {
+      saved.domains.scheduling={profiles:new Map(),bookings:new Map(),connections:new Map()};
+    }
     if (keys(current) !== keys(saved.domains)) throw new Error('La copia local tiene dominios diferentes; se conservó el archivo');
     // Validar todo antes de restaurar para no dejar un estado parcial.
     for (const [name, values] of Object.entries(current)) {

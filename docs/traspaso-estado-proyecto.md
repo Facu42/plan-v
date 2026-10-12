@@ -228,3 +228,7 @@ Facundo: lo que aprueba la nutricionista es el plan, no lo que la paciente carga
 
 ## Progreso global (2026-10-10)
 Pantalla `/crm/progreso-global` (PR #93): peso y comidas de toda la cartera por período. Sin migración. Detalle en `docs/progreso-global-2026-10-10.md`.
+
+## Agenda, reservas y equipo · 2026-10-12 (local)
+
+Preparadas las dos migraciones de scheduling/booking/team, APIs, pantallas de agenda pública/equipo y trabajadores de Google para turnos nuevos y anteriores. Recepción no hereda acceso clínico; las fichas compartidas requieren asignación explícita y muestran ingreso/notas. Integración y pruebas finales en el hilo principal; no publicar ni afirmar conexión externa/fidelidad visual sin evidencia. [Traspaso detallado y controles](nutridesk-agenda-equipo-2026-10-12.md).

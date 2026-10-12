@@ -385,3 +385,7 @@ Migración y ensayo Auth/PostgREST/advisors preparados. La migración
 ## Objetivo de seguimiento de la paciente · 2026-10-10
 
 D1 de `docs/decisiones-producto-2026-10-10.md`. La profesional sigue cargando a mano el objetivo, el estado, el avance y la nota. La migración guarda estado, avance e historial; la nota no llega a la paciente. Inicio y Progreso muestran objetivo, estado y avance (en Progreso, también los cambios). No es la meta de calorías. La base en línea no se tocó: falta la frase escrita de Facundo para aplicar `20261010183000_patient_goal_followup`.
+
+## Agenda, reservas y equipo · 2026-10-12
+
+Entrega local en `codex/nutridesk-agenda`: reservas públicas, disponibilidad, seña/total por profesional, conciliación verificada, Google/Meet con colas para reservas y turnos históricos, recepción operativa y asignación clínica explícita (ingreso/notas). [Contratos, configuración, límites y Regression Guard](nutridesk-agenda-equipo-2026-10-12.md). Sin producción; integración de API, navegación y trabajador a cargo del hilo principal.
