@@ -36,4 +36,28 @@ describe('clínica persistente por consultorio',()=>{
     await asUser(a,'select public.deactivate_clinical_reference($1)',[reference.id]);await expect(asUser(a,'select public.save_clinical_workspace_record($1,$2::jsonb)',[patient,JSON.stringify({...input,id:crypto.randomUUID()})])).rejects.toThrow();
     await consent('measurement','withdrawn');expect(await asUser(a,'select id from public.clinical_workspace_records')).toHaveLength(0);
   });
+  it('la validación de RPC no acepta un valor de laboratorio sin número ni id',async()=>{
+    const value={name:'Glucosa',operator:'',unit:'mg/dL',range_text:'70-110',raw_value:'95',source_line:'Glucosa 95 mg/dL',page:1,reviewed:true};
+    const data={kind:'laboratory',document_id:crypto.randomUUID(),values:[value]};
+    await expect(db.query('select public.clinical_workspace_validate($1::jsonb)',[JSON.stringify(data)])).rejects.toThrow();
+  });
+  it('no habilita unidades incompatibles o segmentos duplicados mediante RPC directo',async()=>{
+    const value={segment:'arm_right',component:'muscle',value:2.4,unit:'ohm',original:'Equipo original'};
+    const data={kind:'segmental',reference_id:crypto.randomUUID(),document_id:null,device:'Equipo declarado',values:[value]};
+    await expect(db.query('select public.clinical_workspace_validate($1::jsonb)',[JSON.stringify(data)])).rejects.toThrow();
+    await expect(db.query('select public.clinical_workspace_validate($1::jsonb)',[JSON.stringify({...data,values:[{...value,unit:'kg'},{...value,unit:'kg'}]})])).rejects.toThrow();
+  });
+  it('oculta mediciones con documento cuando se retira el permiso de documentos',async()=>{
+    await consent('clinical_document','granted');await consent('measurement','granted');
+    const n=(await db.query<{id:string}>('select id from public.nutritionists where user_id=$1',[a])).rows[0].id;
+    const asset=crypto.randomUUID(),doc=crypto.randomUUID(),ref=crypto.randomUUID();
+    await db.query(`insert into public.patient_assets(id,patient_id,nutritionist_id,bucket,object_path,category,mime,byte_size,checksum_sha256,status)values($1,$2,$3,'care-documents',$4,'clinical_document','application/pdf',100,$5,'ready')`,[asset,patient,n,`patients/${patient}/clinical_document/${asset}`,'b'.repeat(64)]);
+    await asUser(a,'select public.save_clinical_source_document($1,$2::jsonb)',[patient,JSON.stringify({id:doc,filename:'bioimpedancia.pdf',asset_id:asset,source_sha256:'b'.repeat(64)})]);
+    await asUser(a,'select public.approve_clinical_reference($1::jsonb)',[JSON.stringify({id:ref,method:'segmental',title:'Fuente del equipo',source_url:'https://example.test/equipo',notes:'Validado por profesional',approved:true})]);
+    const input={id:crypto.randomUUID(),recorded_on:'2026-10-01',note:'',reviewed:true,data:{kind:'segmental',reference_id:ref,document_id:doc,device:'Equipo original',values:[{segment:'arm_right',component:'muscle',value:2,unit:'kg',original:'Página 1: brazo derecho 2 kg'}]}};
+    await asUser(a,'select public.save_clinical_workspace_record($1,$2::jsonb)',[patient,JSON.stringify(input)]);
+    expect(await asUser(a,'select id from public.clinical_workspace_records where id=$1',[input.id])).toHaveLength(1);
+    await consent('clinical_document','withdrawn');
+    expect(await asUser(a,'select id from public.clinical_workspace_records where id=$1',[input.id])).toHaveLength(0);
+  });
 });
