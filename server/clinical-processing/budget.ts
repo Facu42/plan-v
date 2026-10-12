@@ -30,7 +30,8 @@ export class MemoryClinicalBudget implements ClinicalBudget {
     return [...this.rows.values()].filter(r => r.month === month).reduce((sum, r) => sum + (r.status === 'reserved' || r.status === 'uncertain' ? r.micros : r.chargedMicros), 0);
   }
   async reserve(input: Reservation): Promise<void> {
-    if (this.rows.has(input.key)) throw new Error('La operación ya tiene una reserva.');
+    const existing = this.rows.get(input.key);
+    if (existing && existing.status !== 'released') throw new Error('La operación ya tiene una reserva.');
     if (!Number.isSafeInteger(input.micros) || input.micros < 0 || !/^\d{4}-\d{2}$/.test(input.month)) throw new Error('Reserva inválida.');
     // No await entre lectura y escritura: sección crítica de la demo en un único proceso.
     const used = [...this.rows.values()].filter(r => r.month === input.month).reduce((sum, r) => sum + (r.status === 'reserved' || r.status === 'uncertain' ? r.micros : r.chargedMicros), 0);

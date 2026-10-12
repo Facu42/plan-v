@@ -1,13 +1,17 @@
 import { pathToFileURL } from 'node:url';
 
 export function buildAuthSmtpConfig(env) {
-  const sender = env.BREVO_SENDER_EMAIL?.trim() || 'planv.nutricion@gmail.com';
-  const login = env.BREVO_SMTP_LOGIN?.trim();
-  const password = env.BREVO_SMTP_KEY?.trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sender) || !login || !password) throw new Error('Faltan el remitente, usuario o clave SMTP de Brevo.');
-  if (env.BREVO_SENDER_VERIFIED !== '1') throw new Error('Primero verificá el remitente en Brevo.');
+  const provider = env.SMTP_PROVIDER ?? 'brevo';
+  if (!['brevo', 'gmail'].includes(provider)) throw new Error('Proveedor SMTP no admitido.');
+  const gmail = provider === 'gmail';
+  const login = gmail ? env.SMTP_USER?.trim() : env.BREVO_SMTP_LOGIN?.trim();
+  const sender = gmail ? login : env.BREVO_SENDER_EMAIL?.trim() || 'planv.nutricion@gmail.com';
+  const password = gmail ? env.SMTP_PASSWORD?.replace(/\s/g, '') : env.BREVO_SMTP_KEY?.trim();
+  if (!sender || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sender) || !login || !password) throw new Error('Faltan el remitente, usuario o clave SMTP.');
+  if (gmail && !/^[a-z]{16}$/i.test(password)) throw new Error('Usá la contraseña de aplicación de Google de 16 letras.');
+  if (!gmail && env.BREVO_SENDER_VERIFIED !== '1') throw new Error('Primero verificá el remitente en Brevo.');
   return {
-    smtp_host: 'smtp-relay.brevo.com', smtp_port: '587', smtp_user: login, smtp_pass: password,
+    smtp_host: gmail ? 'smtp.gmail.com' : 'smtp-relay.brevo.com', smtp_port: '587', smtp_user: login, smtp_pass: password,
     smtp_admin_email: sender, smtp_sender_name: 'Plan V',
     external_email_enabled: true, mailer_autoconfirm: false,
     site_url: 'https://plan-v-eight.vercel.app',

@@ -3,6 +3,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { buildAuthSmtpConfig, configureAuthSmtp } from '../../scripts/auth-smtp-config.mjs';
 const env = { BREVO_SMTP_LOGIN: 'operator', BREVO_SMTP_KEY: 'fake-key', BREVO_SENDER_VERIFIED: '1' };
 describe('configuración de SMTP revisable y comprobación por defecto', () => {
+  it('admite Gmail con contraseña de aplicación sin necesitar Brevo', async () => {
+    const settings = buildAuthSmtpConfig({ SMTP_PROVIDER: 'gmail', SMTP_USER: 'planv.nutricion@gmail.com', SMTP_PASSWORD: 'abcd efgh ijkl mnop' });
+    expect(settings.smtp_host).toBe('smtp.gmail.com');
+    expect(settings.smtp_user).toBe('planv.nutricion@gmail.com');
+    expect(settings.smtp_pass).toBe('abcdefghijklmnop');
+    expect(() => buildAuthSmtpConfig({ SMTP_PROVIDER: 'gmail', SMTP_USER: 'planv.nutricion@gmail.com', SMTP_PASSWORD: 'normal-password' })).toThrow();
+  });
   it('no modifica configuración al comprobar y exige remitente verificado', async () => {
     const fetchImpl = vi.fn();
     const result = await configureAuthSmtp(env, { fetchImpl });

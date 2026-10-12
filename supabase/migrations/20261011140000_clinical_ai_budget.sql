@@ -25,13 +25,21 @@ begin
   insert into public.clinical_ai_budget_months(month) values(budget_month) on conflict do nothing;
   select * into m from public.clinical_ai_budget_months where month=budget_month for update;
   if m.used_micros+reserve_micros>m.limit_micros then raise exception 'Bolsa agotada'; end if;
-  insert into public.clinical_ai_spend(operation_key,month,reserved_micros) values(operation_key,budget_month,reserve_micros);
+  insert into public.clinical_ai_spend(operation_key,month,reserved_micros) values(operation_key,budget_month,reserve_micros)
+    on conflict on constraint clinical_ai_spend_pkey do update
+    set month=excluded.month,reserved_micros=excluded.reserved_micros,charged_micros=0,status='reserved',created_at=now()
+    where clinical_ai_spend.status='released';
+  if not found then raise exception 'Operación ya reservada'; end if;
   update public.clinical_ai_budget_months set used_micros=used_micros+reserve_micros where month=budget_month;
 end $$;
 create function public.settle_clinical_ai_budget(operation_key text,outcome text,cost_micros bigint)
 returns void language plpgsql security invoker set search_path=public as $$
 declare r public.clinical_ai_spend;
 begin
+  -- Mismo orden de bloqueo que reserve: mes antes de operación.
+  select * into r from public.clinical_ai_spend where clinical_ai_spend.operation_key=settle_clinical_ai_budget.operation_key;
+  if not found then raise exception 'Liquidación inválida'; end if;
+  perform 1 from public.clinical_ai_budget_months where month=r.month for update;
   select * into r from public.clinical_ai_spend where clinical_ai_spend.operation_key=settle_clinical_ai_budget.operation_key for update;
   if not found or outcome not in ('charged','uncertain','released') or cost_micros<0 or cost_micros>r.reserved_micros then raise exception 'Liquidación inválida'; end if;
   if r.status <> 'reserved' then

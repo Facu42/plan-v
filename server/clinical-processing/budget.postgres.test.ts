@@ -16,6 +16,11 @@ describe('bolsa atómica en Postgres, cerrada a usuarias', () => {
       await db.query('select public.settle_clinical_ai_budget($1,$2,$3)', ['a', 'uncertain', 0]);
       const result = (await db.query<{ used_micros: number }>('select used_micros from public.clinical_ai_budget_months')).rows[0];
       expect(Number(result.used_micros)).toBe(4_000_000);
+      await db.query('select public.reserve_clinical_ai_budget($1,$2,$3)', ['retry', month, 1_000_000]);
+      await db.query('select public.settle_clinical_ai_budget($1,$2,$3)', ['retry', 'released', 0]);
+      await db.query('select public.reserve_clinical_ai_budget($1,$2,$3)', ['retry', month, 1_000_000]);
+      await expect(db.query('select public.reserve_clinical_ai_budget($1,$2,$3)', ['retry', month, 0])).rejects.toThrow();
+      expect(Number((await db.query<{ used_micros: number }>('select used_micros from public.clinical_ai_budget_months')).rows[0].used_micros)).toBe(5_000_000);
       await db.exec('reset role; set role authenticated');
       await expect(db.query('select * from public.clinical_ai_spend')).rejects.toThrow();
       await expect(db.query('select public.reserve_clinical_ai_budget($1,$2,$3)', ['c', month, 0])).rejects.toThrow();

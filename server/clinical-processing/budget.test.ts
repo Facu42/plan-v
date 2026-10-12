@@ -2,6 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { MemoryClinicalBudget, argentinaBudgetMonth, estimateAudioMicros, estimateSummaryMicros } from './budget.js';
 
 describe('bolsa global de IA clínica', () => {
+  it('permite reintentar únicamente reservas liberadas sin duplicar gasto', async () => {
+    const ledger = new MemoryClinicalBudget(100);
+    await ledger.reserve({ key: 'retry', month: '2026-10', micros: 100 });
+    await ledger.settle('retry', 'released', 0);
+    await ledger.reserve({ key: 'retry', month: '2026-10', micros: 100 });
+    expect(await ledger.used('2026-10')).toBe(100);
+    await expect(ledger.reserve({ key: 'retry', month: '2026-10', micros: 100 })).rejects.toThrow();
+  });
   it('usa el mes argentino y calcula transcripción con redondeo mínimo del proveedor', () => {
     expect(argentinaBudgetMonth(new Date('2026-11-01T01:00:00Z'))).toBe('2026-10');
     expect(estimateAudioMicros(30)).toBe(925);
