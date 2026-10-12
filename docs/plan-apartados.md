@@ -15,6 +15,8 @@ apartados que también hacen falta para salir al mercado: lo legal y la calidad 
 
 ## Consultorio y paciente — 5/10/2026
 
+Clínica Nutridesk · 12/10/2026: laboratorio local revisable, bioimpedancia segmental, resultados Kerr declarados, seguimiento bariátrico, referencias por profesional, pedidos y ficha PDF. [Contratos, pruebas, límites y Regression Guard](clinica-nutridesk-2026-10-12.md). Rama de integración local; sin producción.
+
 Implementación del plan aprobado por Facundo, desde la versión principal vigente y en copia aislada. Entregas encadenadas por apartado: backend, consultorio, planes e IA, y paciente Nutrigo.
 
 - [Bandeja y biblioteca: alcance, comprobaciones y migración preparada](consultorio-backend-2026-10-05.md).

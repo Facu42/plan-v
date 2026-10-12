@@ -83,7 +83,8 @@ async function pdf(data: Uint8Array, document: LocalDocument, progress: (text: s
     for (let pageNumber=1;pageNumber<=pdf.numPages;pageNumber++) {
       progress(`Leyendo página ${pageNumber} de ${pdf.numPages}…`);
       const page = await pdf.getPage(pageNumber); const content = await page.getTextContent();
-      let text = content.items.map(item=>'str' in item ? item.str + ('hasEOL' in item && item.hasEOL ? '\n' : ' ') : '').join('');
+      let text='';let lastY:number|null=null;
+      for(const item of content.items){if(!('str'in item))continue;const y=item.transform[5];if(lastY!==null&&Math.abs(y-lastY)>3)text+='\n';text+=`${item.str}${item.hasEOL?'\n':' '}`;lastY=item.hasEOL?null:y;}
       if (!text.trim()) {
         const initial = page.getViewport({scale:1}); const scale = Math.min(2,2200/Math.max(initial.width,initial.height));
         const viewport = page.getViewport({scale}); const canvas = window.document.createElement('canvas'); canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);

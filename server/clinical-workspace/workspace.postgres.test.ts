@@ -74,7 +74,7 @@ describe('clínica persistente por consultorio',()=>{
     await asUser(a,'select public.save_clinical_workspace_record($1,$2::jsonb)',[patient,JSON.stringify(input)]);
     await asUser(a,'select public.audit_clinical_access($1,$2)',[patient,'export']);
     await expect(asUser(b,'select public.audit_clinical_access($1,$2)',[patient,'read'])).rejects.toThrow();
-    const events=(await db.query('select action,metadata from public.audit_events where patient_id=$1 and object_type=$2',[patient,'clinical_workspace'])).rows;
+    const events=(await db.query<{action:string;metadata:unknown}>('select action,metadata from public.audit_events where patient_id=$1 and object_type=$2',[patient,'clinical_workspace'])).rows;
     expect(events.some(e=>e.action==='clinical_record_created')).toBe(true);
     expect(events.some(e=>e.action==='clinical_export')).toBe(true);
     expect(JSON.stringify(events)).not.toContain('Motivo privado');

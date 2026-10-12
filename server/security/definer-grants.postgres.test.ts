@@ -31,11 +31,14 @@ const ALLOWED = [
   // Import rows require a reviewed owner-scoped batch, patient scope and live consent.
   'apply_patient_import_row',
   'apply_professional_model',
+  // Clinical references: nutritionist identity, approval and immutable provenance.
+  'approve_clinical_reference',
   'assign_editorial_resource',
   'assign_exercise_routine',
   'assign_patient_program',
   'assign_recipe',
   'assign_recipe_day',
+  'audit_clinical_access',
   'care_can_read',
   'care_consent',
   'care_meal_photo_allowed',
@@ -48,6 +51,7 @@ const ALLOWED = [
   'correct_own_measurement',
   'create_organization',
   'create_patient_with_invite',
+  'deactivate_clinical_reference',
   'delegate_patient_care',
   'delete_billing_program',
   'delete_care_document',
@@ -135,6 +139,10 @@ const ALLOWED = [
   'save_body_metrics',
   'save_care_preferences',
   'save_care_record',
+  // Active assigned patient, live purpose consent, own source/reference and review.
+  'save_clinical_brand',
+  'save_clinical_source_document',
+  'save_clinical_workspace_record',
   'save_editorial_resource',
   'save_meal_log',
   'save_meal_plan_draft',

@@ -1,6 +1,7 @@
 node_modules/
 dist/
 /public/patient-import-ocr/
+/public/clinical-pdf/
 .gstack/
 archive/
 contenido/
