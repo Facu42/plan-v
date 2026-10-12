@@ -5,7 +5,7 @@ import { sbGetActor } from '../db/supabase-repo.js';
 import { DEMO_NUTRITIONIST_ID } from '../store.js';
 import { CareError } from '../care/errors.js';
 import { foodInputSchema } from '../../src/types/foods.js';
-import { filterFoods, listFoods, saveFood } from './repository.js';
+import { filterFoods, listFoods, saveFood, searchFoodPage } from './repository.js';
 
 async function professional(c: Context) {
   const auth = c.get('auth');
@@ -16,6 +16,10 @@ async function professional(c: Context) {
   return { owner: actor.nutritionistId, persistent: true };
 }
 export function registerFoodRoutes(app: Hono) {
+  app.get('/api/foods/search',async c=>{
+    const actor=await professional(c);const parsed=z.object({q:z.string().max(160).default(''),kind:z.enum(['food','supplement']).default('food'),scope:z.enum(['all','own','platform']).default('all'),source:z.string().max(240).default(''),category:z.string().max(80).default(''),order:z.enum(['name-asc','name-desc','kcal-asc','kcal-desc']).default('name-asc'),page:z.coerce.number().int().min(0).max(100000).default(0),page_size:z.coerce.number().int().min(1).max(100).default(50)}).strict().safeParse(c.req.query());
+    if(!parsed.success)throw new CareError(400,'Revisá los filtros y la página de alimentos.');const{page,page_size,...filters}=parsed.data;return c.json(await searchFoodPage(actor.owner,filters,page,page_size,actor.persistent));
+  });
   app.get('/api/foods', async c => {
     const actor = await professional(c);
     const parsed = z.object({ q: z.string().max(160).default(''), kind: z.enum(['food', 'supplement']).optional(), scope: z.enum(['own', 'platform']).optional() }).strict().safeParse(c.req.query());

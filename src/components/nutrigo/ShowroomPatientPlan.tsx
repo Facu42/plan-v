@@ -255,11 +255,11 @@ export function PlanMealCell({ row, column, cell, dim, onOpen }: { row: PlanRow;
   </button>;
 }
 
-export function PlanCellDetail({ row, cell, plan }: { row: PlanRow; cell: PlanCell; plan?: Pick<PatientMealPlan, 'version' | 'period_start' | 'period_end' | 'meal_times'> | null }) {
+export function PlanCellDetail({ row, cell, plan }: { row: PlanRow; cell: PlanCell; plan?: Pick<PatientMealPlan, 'version' | 'period_start' | 'period_end' | 'meal_times' | 'meal_labels'> | null }) {
   return <div className="pf-detail">
     <div className="pf-detail-meta"><NvBadge tone={mealSlotTone(cell.slot)}>{cell.slot}</NvBadge><span>{row.day} {row.date.toLocaleDateString('es-AR', { day: 'numeric', month: 'long' })}</span></div>
     {cell.item ? <>
-      <PlanPublishedItem item={cell.item} times={plan?.meal_times} />
+      <PlanPublishedItem item={cell.item} times={plan?.meal_times} labels={plan?.meal_labels} />
       {plan && <p className="pf-detail-note">Plan publicado · revisión {plan.version}, del {plan.period_start} al {plan.period_end}.</p>}
     </> : <>
       <h3>{cell.title}</h3>

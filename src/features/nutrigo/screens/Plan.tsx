@@ -108,7 +108,7 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
       const scrollBar=children.find(child=>nodeName(child)==='Scroll Bar');
       const header=head?fields(head,{},child=>{
         const slot=leaf(child)?HEAD_SLOT[sourceText(child)]:undefined;
-        if(slot&&plan?.meal_times?.[slot])return {text:mealSlotLabel(slot,plan.meal_times)};
+        if(slot&&(plan?.meal_times?.[slot]||plan?.meal_labels?.[slot]))return {text:mealSlotLabel(slot,plan?.meal_times,plan?.meal_labels)};
         if(nodeName(child)==='Button Picker'&&sourceText(child)==='Week 2')return {onClick:nextWeek,label:weeks>1?`Semana ${page+1} de ${weeks}: cambiar semana`:'Semana del plan',props:{disabled:weeks<=1},children:relabel(child,()=>`Semana ${page+1}`)};
         return undefined;
       },'head'):null;
@@ -155,7 +155,7 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
       <div className="flex flex-col gap-[16px] text-[14px] text-[#272932]">
         <label className="flex flex-col gap-[4px]">Buscar en el plan<input type="search" value={search} onChange={event=>setSearch(event.target.value)} className="rounded-[8px] border border-[#e1e1e2] p-[10px]"/></label>
         <label className="flex items-center gap-[8px]"><input type="checkbox" checked={hideEmpty} onChange={event=>setHideEmpty(event.target.checked)}/>Mostrar sólo días con comidas indicadas</label>
-        {extras.length>0&&<section aria-label="Colaciones y extras"><h3 className="font-['Poppins:SemiBold']">Colaciones y extras</h3>{extras.map(item=><p key={item.id}>{shortDate(item.for_date)} · {item.slot}: {itemTitle(item)}{(item.components||planRecipe(item))&&<button type="button" className="ml-[8px] underline" onClick={()=>{setOptions(false);item.components?setMeal(item):setChosen(item);}}>Ver detalle</button>}</p>)}</section>}
+        {extras.length>0&&<section aria-label="Colaciones y extras"><h3 className="font-['Poppins:SemiBold']">Colaciones y extras</h3>{extras.map(item=><p key={item.id}>{shortDate(item.for_date)} · {mealSlotLabel(item.slot,plan?.meal_times,plan?.meal_labels)}: {itemTitle(item)}{(item.components||planRecipe(item))&&<button type="button" className="ml-[8px] underline" onClick={()=>{setOptions(false);item.components?setMeal(item):setChosen(item);}}>Ver detalle</button>}</p>)}</section>}
         {plan?.nutrition&&<AiPlanNutritionSummary nutrition={plan.nutrition}/>}
         <button type="button" className="mcp-action" onClick={()=>{setOptions(false);onNavigate('compras');}}>Ver la lista de compras</button>
       </div>

@@ -1,13 +1,15 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { PlanComponentView } from '../../types/plan-components';
 import { componentGrams, componentTitle } from '../../types/plan-components';
-import type { PlanItemView, PlanMealTimes, PlanRecipeDetail, PlanVersionView } from '../../types/plans';
+import type { PlanItemView, PlanMealTimes, PlanMealLabels, PlanRecipeDetail, PlanVersionView } from '../../types/plans';
 import { eachIsoDate, mealSlotLabel, PLAN_SLOTS, planWeekdayLabel } from '../../types/plans';
 import { recipeNutritionLabel, type ProposedRecipe } from '../../types/ai-nutrition';
 import logo from '../../assets/plan-v-logo-256.png';
 import { PlanGuidanceView } from './PlanGuidance';
+import { clinicBrandSchema, type ClinicBrand } from '../../types/nutrition-capabilities';
+import { analyzePlanWeek, macroEnergyShare, type DayAnalysisLine } from '../../types/plan-day-analysis';
 
-export type PlanPrintCopy = { version: PlanVersionView; patientName: string; professionalName: string; demo: boolean };
+export type PlanPrintCopy = { version: PlanVersionView; patientName: string; professionalName: string; demo: boolean; brand?:ClinicBrand };
 const amount = (value: number) => Number.isFinite(value) ? value.toLocaleString('es-AR', value !== 0 && Math.abs(value) < 0.0001 ? { maximumSignificantDigits: 4 } : { maximumFractionDigits: 4 }) : 'Cantidad sin confirmar';
 const declaredAmount = (value: number) => Number.isFinite(value) ? value.toLocaleString('es-AR', { maximumSignificantDigits: 15 }) : 'Cantidad sin confirmar';
 const dateLabel = (date: string) => date.split('-').reverse().join('/');
@@ -26,18 +28,28 @@ function Component({ component }: { component: PlanComponentView }) {
     {component.public_note && <p className="pv-note">{component.public_note}</p>}
   </section>;
 }
-function Meal({ item, times }: { item: PlanItemView; times?: PlanMealTimes }) {
-  return <article className="pv-meal"><h3>{mealSlotLabel(item.slot, times)}</h3>{item.components ? item.components.map(component => <Component key={component.id} component={component} />) : <section className="pv-component"><h4>{item.recipe?.title ?? item.recipe_proposal?.title ?? item.free_text ?? item.recipe_title}</h4>{item.recipe ? <><small>Receta publicada · versión {item.recipe_version}</small><RecipeInstructions recipe={item.recipe} portions={item.portions ?? NaN} /></> : item.recipe_proposal ? <RecipeInstructions recipe={item.recipe_proposal} portions={item.portions ?? NaN} /> : item.portions != null ? <p>{declaredAmount(item.portions)} {item.portions === 1 ? 'porción' : 'porciones'}</p> : null}</section>}{item.public_note && <p className="pv-note">Nota de la comida: {item.public_note}</p>}</article>;
+function PlanPrintAnalysis({version}:{version:PlanVersionView}){
+  const days=eachIsoDate(version.period_start,version.period_end).map(date=>({date,lines:version.items.filter(item=>item.for_date===date).flatMap<DayAnalysisLine>(item=>item.components?item.components.map(component=>({component,portions:''})):[{portions:String(item.portions??''),recipe:item.recipe,proposal:item.recipe_proposal}])}));
+  const analysis=analyzePlanWeek(days),shares=macroEnergyShare(analysis.nutrients);
+  if(!analysis.count)return null;
+  return <section aria-label="Resumen nutricional de esta copia"><h2>Composición media por día</h2><p>Calculada desde las cantidades y fuentes de esta versión. {analysis.emptyDays} días sin indicaciones.{analysis.estimated?' Incluye nutrientes estimados por IA.':''}</p><dl>{analysis.nutrients.map(nutrient=><div key={nutrient.key}><dt>{nutrient.label}</dt><dd>{nutrient.total===null?'Sin promedio completo':`${amount(nutrient.total)} ${nutrient.unit}`}{nutrient.total===null&&nutrient.subtotal!==null&&<small> · promedio parcial {amount(nutrient.subtotal)} {nutrient.unit}, {nutrient.known} de {days.length} días</small>}</dd></div>)}</dl>{shares&&<figure><svg viewBox="0 0 300 24" width="300" height="24" role="img" aria-label={`Energía: proteínas ${shares.protein} %, carbohidratos ${shares.carbs} %, grasas ${shares.fat} %`}><rect x="0" width={shares.protein*3} height="24" fill="#C2E66E"/><rect x={shares.protein*3} width={shares.carbs*3} height="24" fill="#FFCB65"/><rect x={(shares.protein+shares.carbs)*3} width={shares.fat*3} height="24" fill="#FFA257"/></svg><figcaption>Proteínas {shares.protein} % · Carbohidratos {shares.carbs} % · Grasas {shares.fat} %</figcaption></figure>}</section>;
 }
-export function PlanPrintDocument({ version, patientName, professionalName, demo }: PlanPrintCopy) {
+function Meal({ item, times, labels }: { item: PlanItemView; times?: PlanMealTimes;labels?:PlanMealLabels }) {
+  return <article className="pv-meal"><h3>{mealSlotLabel(item.slot, times,labels)}</h3>{item.components ? item.components.map(component => <Component key={component.id} component={component} />) : <section className="pv-component"><h4>{item.recipe?.title ?? item.recipe_proposal?.title ?? item.free_text ?? item.recipe_title}</h4>{item.recipe ? <><small>Receta publicada · versión {item.recipe_version}</small><RecipeInstructions recipe={item.recipe} portions={item.portions ?? NaN} /></> : item.recipe_proposal ? <RecipeInstructions recipe={item.recipe_proposal} portions={item.portions ?? NaN} /> : item.portions != null ? <p>{declaredAmount(item.portions)} {item.portions === 1 ? 'porción' : 'porciones'}</p> : null}</section>}{item.public_note && <p className="pv-note">Nota de la comida: {item.public_note}</p>}</article>;
+}
+export function PlanPrintDocument({ version, patientName, professionalName, demo, brand }: PlanPrintCopy) {
   const published = Boolean(version.published_at);
-  return <main className="pv-paper"><header className="pv-head"><div><img src={logo} alt="Plan V" /><span>Plan V · Nutrición</span></div><p className={published ? 'pv-state' : 'pv-state pv-draft'}>{published ? 'PLAN PUBLICADO' : 'BORRADOR GUARDADO · NO PUBLICADO'} · v{version.version}</p></header>
+  const verifiedBrand=brand&&clinicBrandSchema.safeParse(brand);
+  const identity=verifiedBrand?.success?verifiedBrand.data:undefined;
+  return <main className="pv-paper"><header className="pv-head"><div><img src={identity?.logo||logo} alt={identity?.name||"Plan V"} /><span>{identity?.name||"Plan V · Nutrición"}</span></div><p className={published ? 'pv-state' : 'pv-state pv-draft'}>{published ? 'PLAN PUBLICADO' : 'BORRADOR GUARDADO · NO PUBLICADO'} · v{version.version}</p></header>
+    {identity?.contact&&<p>{identity.contact}</p>}
     <h1>Plan de alimentación</h1><p className="pv-patient">{patientName || 'Paciente seleccionado'}</p>{professionalName.trim() && <p>Profesional: {professionalName.trim()}</p>}
     <p>Del {dateLabel(version.period_start)} al {dateLabel(version.period_end)} · Argentina</p>
     {!published && <p className="pv-draft">Copia para revisión profesional. Este borrador todavía no fue publicado para la paciente.</p>}
     {demo && <p className="pv-draft">DEMOSTRACIÓN · Datos ficticios para pruebas.</p>}
     <PlanGuidanceView guidance={version.guidance} />
-    {eachIsoDate(version.period_start, version.period_end).map(date => { const items = version.items.filter(item => item.for_date === date).sort((a,b) => PLAN_SLOTS.indexOf(a.slot) - PLAN_SLOTS.indexOf(b.slot)); return <section key={date} className="pv-day"><h2>{planWeekdayLabel(date)} · {dateLabel(date)}</h2>{items.length ? items.map(item => <Meal key={item.id} item={item} times={version.meal_times} />) : <p>Sin indicaciones para este día.</p>}</section>; })}
+    <PlanPrintAnalysis version={version}/>
+    {eachIsoDate(version.period_start, version.period_end).map(date => { const items = version.items.filter(item => item.for_date === date).sort((a,b) => PLAN_SLOTS.indexOf(a.slot) - PLAN_SLOTS.indexOf(b.slot)); return <section key={date} className="pv-day"><h2>{planWeekdayLabel(date)} · {dateLabel(date)}</h2>{items.length ? items.map(item => <Meal key={item.id} item={item} times={version.meal_times} labels={version.meal_labels} />) : <p>Sin indicaciones para este día.</p>}</section>; })}
     <footer>Versión {version.version} · {published ? `Publicada el ${new Date(version.published_at!).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}` : 'Borrador guardado, sin publicación'}. Las cantidades y fuentes corresponden a esta copia.</footer>
   </main>;
 }

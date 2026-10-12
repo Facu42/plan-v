@@ -15,6 +15,8 @@ apartados que también hacen falta para salir al mercado: lo legal y la calidad 
 
 ## Consultorio y paciente — 5/10/2026
 
+- Planificación Nutriboost (12/10/2026): [fórmulas efectivas, grupos, referencias, catálogo paginado y documentos con marca](nutridesk-nutricion-2026-10-12.md). Implementación local verificada; integración y activación documentadas por separado.
+
 Implementación del plan aprobado por Facundo, desde la versión principal vigente y en copia aislada. Entregas encadenadas por apartado: backend, consultorio, planes e IA, y paciente Nutrigo.
 
 - [Bandeja y biblioteca: alcance, comprobaciones y migración preparada](consultorio-backend-2026-10-05.md).

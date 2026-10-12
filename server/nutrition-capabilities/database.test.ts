@@ -3,6 +3,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { calculateTarget, defaultsForGoal } from '../../src/lib/nutrition-target.js';
 import { defaultNutritionSettings } from '../../src/types/nutrition-capabilities.js';
+import { planReviewSnapshot,type PlanVersionView } from '../../src/types/plans.js';
 let db:PGlite, ownerId:string, otherOwnerId:string;
 const owner='00000000-0000-4000-a000-000000000091', other='00000000-0000-4000-a000-000000000092', patientUser='00000000-0000-4000-a000-000000000093', patient='10000000-0000-4000-a000-000000000091';
 const food='f0000000-0000-4000-a000-000000000091', otherFood='f0000000-0000-4000-a000-000000000092', group='e0000000-0000-4000-a000-000000000091';
@@ -16,6 +17,7 @@ beforeAll(async()=>{
   for(const [id,email] of [[owner,'owner@example.test'],[other,'other@example.test'],[patientUser,'patient@example.test']])await db.query('insert into auth.users(id,email,email_confirmed_at) values($1,$2,now())',[id,email]);
   ownerId=(await db.query<{id:string}>("select public.provision_nutritionist($1,'Primera profesional') as id",[owner])).rows[0].id;otherOwnerId=(await db.query<{id:string}>("select public.provision_nutritionist($1,'Otra profesional') as id",[other])).rows[0].id;
   await db.query("insert into public.patients(id,nutritionist_id,user_id,full_name,billing_status) values($1,$2,$3,'Paciente ficticia','waived')",[patient,ownerId,patientUser]);
+  await rpc(patientUser,'save_patient_intake',[patient,1,'allergies',{preferred_name:'Paciente ficticia',allergies:{state:'none',items:[]},restrictions:{state:'none',items:[]}}]);
 },60000);
 afterAll(async()=>{await db?.close();});
 describe('Persistencia y permisos nutricionales A/B',()=>{
@@ -28,7 +30,7 @@ describe('Persistencia y permisos nutricionales A/B',()=>{
   });
   it('guarda la fórmula aprobada y recalcula en base sin confiar cifras del cliente',async()=>{
     const actual={...input,formula:'harris' as const};const calculated=calculateTarget(actual);
-    const workspace=await rpc<{target:{result:unknown}}>(owner,'save_nutrition_target_versioned',[patient,actual,{kcal:1},true,0]);expect(workspace.target.result).toEqual(calculated);
+    const workspace=await rpc<{target:{result:unknown}}>(owner,'save_nutrition_target_versioned',[patient,actual,{...calculated,kcal:5000},true,0]);expect(workspace.target.result).toEqual(calculated);
     await expect(rpc(other,'save_nutrition_target_versioned',[patient,actual,calculated,true,1])).rejects.toMatchObject({code:'42501'});
     const unapproved={...input,formula:'fao' as const};await expect(rpc(owner,'save_nutrition_target_versioned',[patient,unapproved,calculateTarget(unapproved),true,1])).rejects.toMatchObject({code:'22023'});
   });
@@ -41,5 +43,22 @@ describe('Persistencia y permisos nutricionales A/B',()=>{
     const saved=await rpc<{items:Array<{food:{name:string}}>}>(owner,'save_nutrition_exchange',[{...request,items:[request.items[0],{food_id:second,food_revision:1,grams:150}]}]);expect(saved.items[1].food.name).toBe('Banana propia');
     expect(await asUser(other,'select * from public.nutrition_exchanges')).toEqual([]);expect(await asUser(patientUser,'select * from public.nutrition_exchanges')).toEqual([]);
     await expect(asUser(owner,'insert into public.nutrition_exchanges(id,owner_id,payload) values($1,$2,$3)',[group,otherOwnerId,{}])).rejects.toMatchObject({code:'42501'});
+  });
+  it('nombres de momentos se publican y quedan inmutables por versión',async()=>{
+    const planId='40000000-0000-4000-a000-000000000091';
+    const request={id:planId,expected_revision:null,period_start:'2026-10-01',period_end:'2026-10-01',timezone:'America/Argentina/Buenos_Aires',meal_labels:{Desayuno:'Primera comida'},items:[{for_date:'2026-10-01',slot:'Desayuno',free_text:'Indicación revisada',public_note:''}]};
+    const saved=await rpc<{current:PlanVersionView}>(owner,'save_meal_plan_draft',[patient,request]);expect(saved.current.meal_labels).toEqual(request.meal_labels);
+    await rpc(owner,'publish_reviewed_meal_plan',[planId,1,planReviewSnapshot(saved.current)]);
+    expect(await rpc(patientUser,'list_published_meal_plan',[patient])).toMatchObject({meal_labels:request.meal_labels});
+    await expect(db.query("update public.meal_plan_versions set meal_labels='{}' where id=$1",[saved.current.id])).rejects.toMatchObject({code:'22023'});
+    const next=await rpc<{current:PlanVersionView}>(owner,'save_meal_plan_draft',[patient,{...request,expected_revision:saved.current.revision,meal_labels:undefined}]);expect(next.current.meal_labels).toEqual(request.meal_labels);
+    await expect(rpc(owner,'save_meal_plan_draft',[patient,{...request,expected_revision:next.current.revision,meal_labels:{Desayuno:'Almuerzo'}}])).rejects.toMatchObject({code:'22023'});
+  });
+  it('búsqueda posterior a cinco mil alimentos mantiene total y aislamiento',async()=>{
+    const nutrients={kcal:50,protein:null,carbs:null,fat:null,fiber:null,sodium:null,calcium:null,iron:null,potassium:null,magnesium:null,vitamin_c:null};
+    await db.query("insert into public.food_catalog(id,owner_id,payload) select gen_random_uuid(),$1,jsonb_build_object('name','Avena '||n,'brand','','category','Cereales','kind','food','source','Fuente ficticia','reference','','nutrients',$2::jsonb,'portions','[]'::jsonb) from generate_series(1,5100) n",[ownerId,nutrients]);
+    const result=await rpc<{total:number;foods:unknown[]}>(owner,'search_food_catalog',[{q:'Avena',kind:'food',scope:'own',order:'name-asc'},101,50]);expect(result.total).toBe(5100);expect(result.foods).toHaveLength(50);
+    expect(await rpc(other,'search_food_catalog',[{q:'Avena'},0,50])).toMatchObject({total:0,foods:[]});
+    await expect(rpc(patientUser,'search_food_catalog',[{},0,50])).rejects.toMatchObject({code:'42501'});
   });
 });
