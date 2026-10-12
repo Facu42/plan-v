@@ -11,6 +11,7 @@ import { purgeDelayMs, purgeRunAfter } from './retention.js';
 import { resetPrivateAssets } from '../assets/repository.js';
 import { liveRestoreRefusal } from '../ops/restore.js';
 import { BACKUP_CONFIRM, restoreRefusal } from '../ops/backup.js';
+import { commandMemory, resetConsultationMemory } from '../consultations/memory.js';
 
 const patient = 'pat-sofia';
 const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a3uoAAAAASUVORK5CYII=';
@@ -93,10 +94,15 @@ describe('PV-31 exportación / retiro / purga', () => {
     resetStore();
     resetPrivateAssets();
     resetProcessQueue();
+    resetConsultationMemory();
   });
 
   it('exporta el allowlist y registra el acceso, sin notas ni URLs firmadas', async () => {
     addClinicalNote(patient, 'nutri-demo', 'Nota privada de Verónica');
+    const scope = { patientId: patient, nutritionistId: 'nutri-demo', requestedBy: 'demo' };
+    commandMemory(scope, { action: 'start', id: 'test-session', source: 'manual' });
+    commandMemory(scope, { action: 'draft', id: 'test-session', expected_revision: 1, draft: 'Borrador de consulta privado' });
+    commandMemory(scope, { action: 'publish', id: 'test-session', expected_revision: 2, summary: 'Acuerdo compartido revisado' });
     const created = await post(`/api/patients/${patient}/privacy/requests`, { kind: 'export' });
     expect(created.status).toBe(201);
     const body = await created.json() as { request: { id: string; kind: string; status: string } };
@@ -115,6 +121,8 @@ describe('PV-31 exportación / retiro / purga', () => {
     const raw = JSON.stringify(pack.package);
     expect(raw).toContain('privacy-export.v1');
     expect(raw).not.toContain('Nota privada de Verónica');
+    expect(raw).toContain('Acuerdo compartido revisado');
+    expect(raw).not.toContain('Borrador de consulta privado');
     expect(raw).not.toContain('clinical_notes');
     expect(raw).not.toContain('adherence_why');
     expect(raw).not.toContain('ai_artifacts');

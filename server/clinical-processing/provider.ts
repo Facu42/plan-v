@@ -2,10 +2,11 @@ import { z } from 'zod';
 import { isSupabaseEnabled, privilegedDb } from '../db/supabase-client.js';
 import { getPatient } from '../store.js';
 import { writeOpsLog } from '../ops/log.js';
+import { decodeConsultationWav } from '../consultations/audio.js';
 import { argentinaBudgetMonth, estimateAudioMicros, estimateSummaryMicros, MemoryClinicalBudget, SupabaseClinicalBudget, type ClinicalBudget } from './budget.js';
 
 export type ClinicalScope = { patientId: string; nutritionistId: string; requestedBy: string };
-type Common = { scope: ClinicalScope; sessionId: string; taskId: string; revision: number; consentVersion: 'ai_consultation.v1' };
+type Common = { scope: ClinicalScope; sessionId: string; taskId: string; requestKey: string; revision: number; consentVersion: 'ai_consultation.v1' };
 export type AudioInput = Common & { audio: Uint8Array; mime: 'audio/wav'; durationSeconds: number };
 export type SummaryInput = Common & { text: string };
 type Options = { env?: Record<string, string | undefined>; fetch?: typeof globalThis.fetch; budget: ClinicalBudget; authorize: (input: Common) => Promise<boolean> };
@@ -19,13 +20,14 @@ export function createClinicalProvider(options: Options) {
   const send = options.fetch ?? globalThis.fetch;
   const paid = env.CLINICAL_AI_COST_MODE === 'paid';
   async function allowed(input: Common) {
+    if (!input.requestKey || input.requestKey.length > 100) throw new Error('La solicitud de procesamiento no es válida.');
     if (!env.GROQ_API_KEY || env.GROQ_ZDR_VERIFIED !== '1' || !['free', 'paid'].includes(env.CLINICAL_AI_COST_MODE ?? 'free')) throw new Error('La IA de consultas todavía no está habilitada. Podés guardar notas manuales.');
     if (!paid && env.GROQ_FREE_TIER_VERIFIED !== '1') throw new Error('Primero confirmá que la cuenta de Groq utiliza el nivel gratuito.');
     if (input.consentVersion !== 'ai_consultation.v1' || !await options.authorize(input)) throw new Error('El permiso o la asignación de la consulta cambió.');
   }
   async function call(input: Common, operation: 'transcribe' | 'summary', micros: number, path: string, body: string | FormData) {
     await allowed(input);
-    const key = `${operation}:${input.scope.nutritionistId}:${input.sessionId}:${input.revision}`;
+    const key = `${operation}:${input.requestKey}`;
     await options.budget.reserve({ key, month: argentinaBudgetMonth(), micros: paid ? micros : 0 });
     let response: Response;
     try {
@@ -48,10 +50,11 @@ export function createClinicalProvider(options: Options) {
   return {
     async transcribeClinicalAudio(input: AudioInput) {
       if (input.mime !== 'audio/wav' || input.audio.length > 8 * 1024 * 1024) throw new Error('El audio no es válido.');
+      const { durationSeconds } = decodeConsultationWav(input.audio);
       const form = new FormData();
       form.set('model', 'whisper-large-v3'); form.set('language', 'es'); form.set('response_format', 'verbose_json');
       form.set('file', new Blob([new Uint8Array(input.audio)], { type: 'audio/wav' }), 'consulta.wav');
-      const result = transcriptionSchema.parse(await call(input, 'transcribe', estimateAudioMicros(input.durationSeconds), 'audio/transcriptions', form));
+      const result = transcriptionSchema.parse(await call(input, 'transcribe', estimateAudioMicros(durationSeconds), 'audio/transcriptions', form));
       return { text: result.text, segments: result.segments ?? [] };
     },
     async summarizeClinicalText(input: SummaryInput) {
