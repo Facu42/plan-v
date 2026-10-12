@@ -24,7 +24,7 @@ export function reminderWindow(now: Date): { from: string; to: string } {
   return { from: new Date(slot + REMINDER_LEAD_MS).toISOString(), to: new Date(slot + REMINDER_LEAD_MS + REMINDER_SLOT_MS).toISOString() };
 }
 
-export async function sendDueReminders(list: DueAppointment[], site: string, send: (message: BrevoMessage) => Promise<unknown>) {
+export async function sendDueReminders(list: DueAppointment[], site: string, send: (message: BrevoMessage) => Promise<unknown>, canSend?: (appointment:DueAppointment)=>Promise<boolean>) {
   const result = { sent: 0, failed: 0, skipped: 0 };
   for (const appointment of list) {
     if (!appointment.patient_email) { result.skipped += 1; continue; }
@@ -33,6 +33,7 @@ export async function sendDueReminders(list: DueAppointment[], site: string, sen
       startsAt: appointment.starts_at, channel: appointment.channel, meetUrl: appointment.meet_url, site,
     });
     try {
+      if(canSend&&!await canSend(appointment)){result.skipped+=1;continue;}
       await send({ to: { email: appointment.patient_email, name: appointment.patient_name }, ...content, idempotencyKey: stableUuid(`reminder:${appointment.id}:${appointment.starts_at}`) });
       result.sent += 1;
     } catch {

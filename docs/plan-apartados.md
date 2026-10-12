@@ -15,6 +15,8 @@ apartados que también hacen falta para salir al mercado: lo legal y la calidad 
 
 ## Consultorio y paciente — 5/10/2026
 
+- [Operaciones de Nutridesk: asistente con fuentes, reportes, consentimiento/baja y resultados de comunicaciones (12/10)](nutridesk-operaciones-2026-10-12.md). Preparado en copia aislada; incluye Regression Guard, límites reales y pendientes de integración. No publicado.
+
 Implementación del plan aprobado por Facundo, desde la versión principal vigente y en copia aislada. Entregas encadenadas por apartado: backend, consultorio, planes e IA, y paciente Nutrigo.
 
 - [Bandeja y biblioteca: alcance, comprobaciones y migración preparada](consultorio-backend-2026-10-05.md).

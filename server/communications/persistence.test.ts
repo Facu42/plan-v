@@ -20,6 +20,12 @@ beforeAll(async()=>{
 },30000);
 afterAll(async()=>{await db?.close();});
 describe('difusiones persistentes con baja y aislamiento real SQL',()=>{
+ it('configuración pertenece a un consultorio y no concede acceso al otro profesional',async()=>{
+  await asActor(actor);
+  await rows(`insert into public.ops_clinic_settings(nutritionist_id,default_days) values('${clinic}',7)`);
+  await asActor(other);expect((await rows('select * from public.ops_clinic_settings')).length).toBe(0);
+  await expect(rows(`insert into public.ops_clinic_settings(nutritionist_id,default_days) values('${clinic}',90)`)).rejects.toThrow();
+ });
  it('no permite que la profesional otorgue consentimiento por la paciente ni lea otro consultorio',async()=>{
   await asActor(actor);
   await expect(rows(`select public.ops_set_preferences('${patient}','+5491112345678',true,true,'whatsapp.v1')`)).rejects.toThrow();
@@ -55,7 +61,31 @@ describe('difusiones persistentes con baja y aislamiento real SQL',()=>{
   expect((await rows(`select public.ops_claim_delivery('${clinic}','${id}') as claim`))[0].claim).toBeNull();
   await asActor(actor);expect((await rows(`select state from public.ops_deliveries where id='${id}'`))[0].state).toBe('uncertain');
   await rows(`select public.ops_create_broadcast('99999999-9999-4999-8999-999999999995','aviso','es_AR',array['${patient}']::uuid[])`);
+  await db.exec('reset role; set role service_role;');
+  const queued=(await rows("select id from public.ops_deliveries where state='queued'"))[0].id;
+  const reserved=(await rows(`select public.ops_claim_delivery('${clinic}','${queued}') as claim`))[0].claim as {token:string};
+  expect((await rows(`select public.ops_check_delivery('${clinic}','${queued}','${reserved.token}') as valid`))[0].valid).toBe(true);
+  await asActor(actor);await rows(`select public.ops_create_broadcast('99999999-9999-4999-8999-999999999996','aviso','es_AR',array['${patient}']::uuid[])`);
   await asActor(patientActor);await rows(`select public.ops_set_preferences('${patient}','+5491112345678',false,false,'whatsapp.v1')`);
+  await db.exec('reset role; set role service_role;');
+  expect((await rows(`select public.ops_check_delivery('${clinic}','${queued}','${reserved.token}') as valid`))[0].valid).toBe(false);
   await asActor(actor);expect((await rows("select count(*)::int as count from public.ops_deliveries where state='queued'"))[0].count).toBe(0);
+ });
+ it('conserva webhooks que llegan antes de la finalización y nunca degrada leído a enviado',async()=>{
+  await db.exec('reset role; set role service_role;');
+  await rows("select public.ops_whatsapp_event('wamid.early','read',null)");
+  await asActor(patientActor);await rows(`select public.ops_set_preferences('${patient}','+5491112345678',false,true,'whatsapp.v1')`);
+  await asActor(actor);await rows(`select public.ops_create_broadcast('99999999-9999-4999-8999-999999999997','aviso','es_AR',array['${patient}']::uuid[])`);
+  const id=(await rows("select id from public.ops_deliveries where state='queued'"))[0].id;
+  await db.exec('reset role; set role service_role;');
+  const claim=(await rows(`select public.ops_claim_delivery('${clinic}','${id}') as claim`))[0].claim as {token:string};
+  await rows(`select public.ops_finish_delivery('${id}','${claim.token}','accepted','wamid.early')`);
+  await rows("select public.ops_whatsapp_event('wamid.early','sent',null)");
+  await rows("select public.ops_whatsapp_event('wamid.early','failed',null)");
+  await asActor(actor);expect((await rows(`select delivery_status from public.ops_deliveries where id='${id}'`))[0].delivery_status).toBe('read');
+  await db.exec('reset role; set role service_role;');
+  await rows("select public.ops_whatsapp_event('wamid.x','sent',null)");
+  await rows("select public.ops_whatsapp_event('wamid.x','failed',null)");
+  await asActor(actor);expect((await rows("select delivery_status from public.ops_deliveries where provider_id='wamid.x'"))[0].delivery_status).toBe('failed');
  });
 });

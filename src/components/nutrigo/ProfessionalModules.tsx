@@ -2,6 +2,11 @@ import {PROFESSIONAL_MODULES,plannedModuleHref,type ProfessionalModule} from './
 import {Icon} from '../shared/Icon';
 import {NvButton} from './primitives';
 import './professional-modules.css';
+import { PortfolioAssistant } from './PortfolioAssistant';
+import { HelpCenter } from './HelpCenter';
+import { CommunicationPanel } from './CommunicationPanel';
+import { ConfigurationReports } from './ConfigurationReports';
+import './operational-panels.css';
 
 export function PlannedModulesNav({onOpen,selectedId}:{onOpen:(href:string)=>void;selectedId?:string}){
   return <details className="pm-nav-future" open={Boolean(selectedId)}><summary><Icon name="clock" size={17}/><span>En preparación</span><span className="pm-nav-count">{PROFESSIONAL_MODULES.filter(m=>!m.href).length}</span></summary>
@@ -20,6 +25,10 @@ function ModuleDetail({module:m,onOpen}:{module:ProfessionalModule;onOpen:(href:
 }
 
 export function ProfessionalModules({selectedId,onOpen}:{selectedId?:string;onOpen:(href:string)=>void}){
+  if(selectedId==='asistente-ia') return <PortfolioAssistant onOpen={onOpen}/>;
+  if(selectedId==='ayuda') return <HelpCenter onOpen={onOpen}/>;
+  if(selectedId==='comunicaciones') return <CommunicationPanel/>;
+  if(selectedId==='configuracion') return <ConfigurationReports onOpen={onOpen}/>;
   const selected=PROFESSIONAL_MODULES.find(m=>m.id===selectedId);
   return <section className="pm-modules" aria-label="Funciones del consultorio">
     <header className="pm-page-head"><div><h2>{selected?'Funciones del apartado':'Todas las funciones del consultorio'}</h2><p>Funciones presentes en esta versión de desarrollo y próximos apartados del plan.</p></div>{selected&&<NvButton className="nv-ghost" onClick={()=>onOpen('/crm/desarrollo')}>Ver todas las funciones</NvButton>}</header>

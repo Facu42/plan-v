@@ -100,6 +100,11 @@ const ALLOWED = [
   'my_nutritionist_id',
   'my_patient_id',
   'open_message_attachment',
+  // Metadata operativa aislada; opt-in exige la identidad de la paciente y difusión la profesional titular.
+  'ops_can_read_clinic',
+  'ops_can_read_patient',
+  'ops_create_broadcast',
+  'ops_set_preferences',
   'patient_has_full_access',
   'process_outbox_deliveries',
   'publish_care_replacement',
