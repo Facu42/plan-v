@@ -21,6 +21,8 @@ describe('importación en demostración',()=>{
     const result=await post(`/api/patient-imports/${input.id}/commit`,input); expect((await result.json()).batch.results).toEqual(saved.batch.results);
     expect(getStore().patients.filter(p=>p.name==='Paciente importada')).toHaveLength(1);
     expect(getStore().patientInvites).toHaveLength(before);
+    const manual=await post(`/api/patient-imports/patients/${saved.batch.results[0].patient_id}/invite`,{});
+    expect(manual.status).toBe(200);expect((await manual.json()).invite.status).toBe('pending');
   });
   it('detecta duplicados sin sobrescribir y permite resultados parciales',async()=>{
     const input={id:crypto.randomUUID(),candidates:[candidate(),candidate('Otra paciente')]}; await post('/api/patient-imports',input);

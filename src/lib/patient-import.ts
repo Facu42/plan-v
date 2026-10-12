@@ -76,7 +76,7 @@ export function mapImportRows(rows: string[][], mapping: ImportMapping, origin: 
       const number = parseImportNumber(raw); const date = parseImportDate(value('date'));
       const unit = value(kind === 'weight' ? 'weight_unit' : 'length_unit') || (kind === 'weight' ? 'kg' : 'cm');
       if (number == null || !date || !['kg','lb','cm','in'].includes(unit)) candidate.warnings.push(`Revisá fecha, valor y unidad de ${kind === 'weight' ? 'peso' : kind === 'waist' ? 'cintura' : 'cadera'} en fila ${index+2}.`);
-      else candidate.measurements.push({kind,value:number,unit:unit as 'kg'|'lb'|'cm'|'in',date,origin:source});
+      candidate.measurements.push({kind,value:number??0,unit:unit as 'kg'|'lb'|'cm'|'in',date:date??'',origin:source});
     }
     for (const category of ['history','study','plan'] as const) { const text = value(category); if (text) candidate.history.push({category,text,origin:source}); }
   });

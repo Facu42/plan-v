@@ -28,11 +28,17 @@ const hash = async (data: Uint8Array) => [...new Uint8Array(await crypto.subtle.
 
 async function office(data: Uint8Array, type: string, document: LocalDocument) {
   inspectOfficeZip(data);
-  const { default: JSZip } = await import('jszip'); const zip = await JSZip.loadAsync(data, { checkCRC32: true });
+  const { default: JSZip } = await import('jszip'); const zip = await JSZip.loadAsync(data);
   const read = async (path: string) => { const entry = zip.file(path); if (!entry) throw new Error('Falta una parte del documento de Office.'); return xml(await entry.async('text')); };
   if (type === 'docx') {
     const word = await read('word/document.xml');
-    document.pages.push({page:1,text:elements(word,'p').map(p=>elements(p,'t').map(t=>t.textContent??'').join('')).join('\n')});
+    if(zip.file('docProps/app.xml')){const metadata=await read('docProps/app.xml');const pages=Number(elements(metadata,'Pages')[0]?.textContent??0);if(pages>40)throw new Error('El documento Word tiene más de 40 páginas. Dividilo antes de importar.');}
+    let text='';let page=1;
+    for(const paragraph of elements(word,'p')){
+      text+=elements(paragraph,'t').map(t=>t.textContent??'').join('')+'\n';
+      if(elements(paragraph,'lastRenderedPageBreak').length||elements(paragraph,'br').some(br=>br.getAttribute('w:type')==='page')){document.pages.push({page,text});text='';page++;if(page>40)throw new Error('El documento Word tiene más de 40 páginas.');}
+    }
+    if(text.trim())document.pages.push({page,text});
     return;
   }
   const workbook = await read('xl/workbook.xml'); const relations = await read('xl/_rels/workbook.xml.rels');
@@ -64,7 +70,8 @@ async function office(data: Uint8Array, type: string, document: LocalDocument) {
 }
 async function recognize(image: File | HTMLCanvasElement): Promise<string> {
   const { createWorker } = await import('tesseract.js');
-  const worker = await createWorker('spa', 1, { logger:()=>{}, cacheMethod:'none' });
+  const base=new URL('/patient-import-ocr/',window.location.origin).href;
+  const worker = await createWorker('spa', 1, { logger:()=>{}, cacheMethod:'none',workerBlobURL:false,workerPath:`${base}worker.min.js`,corePath:`${base}tesseract-core-lstm.wasm.js`,langPath:base });
   try { return (await worker.recognize(image)).data.text; } finally { await worker.terminate(); }
 }
 async function pdf(data: Uint8Array, document: LocalDocument, progress: (text: string)=>void) {
@@ -90,7 +97,10 @@ async function pdf(data: Uint8Array, document: LocalDocument, progress: (text: s
 export async function extractImportFile(file: File, progress: (text: string)=>void = ()=>{}): Promise<LocalDocument> {
   const type = validateImportFile(file); const data = new Uint8Array(await file.arrayBuffer());
   const document: LocalDocument = {file:file.name,fingerprint:await hash(data),tables:[],pages:[]};
-  if (type==='csv') document.tables.push({sheet:'CSV',rows:parseCsv(new TextDecoder('utf-8',{fatal:true}).decode(data))});
+  if (type==='csv') {
+    let text:string;try{const encoding=data[0]===255&&data[1]===254?'utf-16le':data[0]===254&&data[1]===255?'utf-16be':'utf-8';text=new TextDecoder(encoding,{fatal:true}).decode(data);}catch{throw new Error('Guardá el archivo como CSV UTF-8 o Unicode antes de importarlo.');}
+    document.tables.push({sheet:'CSV',rows:parseCsv(text)});
+  }
   else if (type==='xlsx'||type==='docx') await office(data,type,document);
   else if (type==='pdf') { if (new TextDecoder().decode(data.slice(0,5))!=='%PDF-') throw new Error('El archivo no es un PDF válido.'); await pdf(data,document,progress); }
   else {

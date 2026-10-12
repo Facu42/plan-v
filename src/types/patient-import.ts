@@ -22,6 +22,8 @@ export const importCandidateSchema = z.object({
 }).strict().superRefine((r, ctx) => {
   if (r.action === 'append' && !r.patient_id) ctx.addIssue({ code: 'custom', message: 'Elegí la ficha a incorporar.' });
   if (r.action === 'create' && (r.history.length || r.measurements.length)) ctx.addIssue({ code: 'custom', message: 'Primero creá el contacto y obtené el consentimiento clínico.' });
+  const originKeys = new Set(r.origins.map(o => JSON.stringify(o)));
+  if ([...r.history,...r.measurements].some(item => !originKeys.has(JSON.stringify(item.origin)))) ctx.addIssue({code:'custom',message:'El origen debe pertenecer al archivo y la fila revisados.'});
 });
 export const importBatchSchema = z.object({ id: z.uuid(), candidates: z.array(importCandidateSchema).min(1).max(100) }).strict();
 export type ImportOrigin = z.infer<typeof importOriginSchema>;
@@ -31,3 +33,4 @@ export type ImportBatchInput = z.infer<typeof importBatchSchema>;
 export type ImportResult = { key: string; status: 'created' | 'appended' | 'discarded' | 'duplicate' | 'error'; patient_id: string | null; message: string };
 export type ImportBatch = ImportBatchInput & { results: ImportResult[]; created_at: string; status: 'review' | 'partial' | 'completed' };
 export type ImportContact = { patient_id: string; name: string; email: string; phone: string };
+export type ImportedHistory = {id:string;patient_id:string;category:'history'|'study'|'plan';body:string;origin:ImportOrigin;created_at:string};
