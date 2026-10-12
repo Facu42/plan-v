@@ -60,4 +60,25 @@ describe('clínica persistente por consultorio',()=>{
     await consent('clinical_document','withdrawn');
     expect(await asUser(a,'select id from public.clinical_workspace_records where id=$1',[input.id])).toHaveLength(0);
   });
+  it('administrar el servicio no concede acceso clínico global y la paciente no aprueba métodos',async()=>{
+    await db.query('insert into public.platform_admins(user_id)values($1)on conflict do nothing',[b]);
+    expect((await asUser(b,'select public.is_platform_admin() as enabled'))[0].enabled).toBe(true);
+    expect(await asUser(b,'select id from public.clinical_method_references')).toHaveLength(0);
+    expect(await asUser(b,'select id from public.clinical_workspace_records')).toHaveLength(0);
+    const reference={id:crypto.randomUUID(),method:'kerr',title:'Declaración ficticia',source_url:'https://example.test/kerr',notes:'Sólo prueba local',approved:true};
+    await expect(asUser(p,'select public.approve_clinical_reference($1::jsonb)',[JSON.stringify(reference)])).rejects.toThrow();
+    await expect(asUser(p,'select public.save_clinical_brand($1::jsonb)',[JSON.stringify({name:'Otro consultorio',contact:'',license:'',logo:null})])).rejects.toThrow();
+  });
+  it('audita acceso y alta con ids opacos sin datos clínicos ni lecturas cruzadas',async()=>{
+    const input={id:crypto.randomUUID(),recorded_on:'2026-10-01',note:'Nota clínica ficticia que no debe quedar en logs',reviewed:true,data:{kind:'study_order',studies:['Estudio declarado ficticio'],reason:'Motivo privado',instructions:''}};
+    await asUser(a,'select public.save_clinical_workspace_record($1,$2::jsonb)',[patient,JSON.stringify(input)]);
+    await asUser(a,'select public.audit_clinical_access($1,$2)',[patient,'export']);
+    await expect(asUser(b,'select public.audit_clinical_access($1,$2)',[patient,'read'])).rejects.toThrow();
+    const events=(await db.query('select action,metadata from public.audit_events where patient_id=$1 and object_type=$2',[patient,'clinical_workspace'])).rows;
+    expect(events.some(e=>e.action==='clinical_record_created')).toBe(true);
+    expect(events.some(e=>e.action==='clinical_export')).toBe(true);
+    expect(JSON.stringify(events)).not.toContain('Motivo privado');
+    expect(JSON.stringify(events)).not.toContain('Nota clínica ficticia');
+    await expect(asUser(a,'select * from public.audit_events')).rejects.toThrow();
+  });
 });
