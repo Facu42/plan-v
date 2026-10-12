@@ -31,6 +31,14 @@ describe('formato de cantidades', () => {
   });
 });
 describe('fotos del plato', () => {
+  it('conecta fotos de ingredientes en escritorio y móvil manteniendo número y cantidades', () => {
+    const photo = 'https://plan-v.supabase.co/storage/v1/object/public/recipe-covers/ingredients/tomate.jpg';
+    for (const mobile of [false, true]) {
+      context.mobile = mobile;
+      const html = detail({ ...base, ingredients: [{ id: 'tomate', name: 'Tomate', quantity: 100, unit: 'g', ingredient_cover_url: photo, ingredient_cover_alt: 'Tomate · imagen ilustrativa generada con IA' }] });
+      expect(html).toContain(photo); expect(html).toContain('>1</p>'); expect(html).toContain('100 g Tomate');
+    }
+  });
   it('sólo se usa la foto lista con dirección segura; el resto deja el recuadro gris del archivo', () => {
     expect(photoUrl(withPhoto('https://x.test/a.jpg').card)).toBe('https://x.test/a.jpg');
     expect(photoUrl(withPhoto('data:image/png;base64,AAAA').card)).toContain('data:image/png');

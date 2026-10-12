@@ -13,6 +13,8 @@ describe('Ficha completa del paciente', () => {
     expect(recordTab('plan')).toBe('plan');
     expect(recordTab('cobros')).toBe('cobros');
     expect(recordTab('desconocida')).toBe('resumen');
+    expect(recordTab('__proto__')).toBe('resumen');
+    expect(recordTab('constructor')).toBe('resumen');
   });
   it('distingue horario transcurrido de asistencia confirmada y deduplica eventos', () => {
     const entry = { id: 'a', action: 'elapsed', dateId: '2026-10-10', when: '', duration: 45, channel: 'video', actor: 'system', at: '' } as AppointmentHistoryEntry;

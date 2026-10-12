@@ -9,6 +9,7 @@ import type { IngredientPhoto, PatientRecipe } from '../../../types/recipes';
 import { recipeNutritionLabel } from '../../../types/ai-nutrition';
 import starIcon from '../assets/c88d0.svg?no-inline';
 import { plateImage } from '../plate-photo';
+import { ingredientNumberBinding } from '../IngredientPhoto';
 import { GREEN_BG, GREY_BG, ORANGE_BG, WHITE_BG, swapBackground } from '../source-tone';
 import { lineClamp } from '../text-fit';
 import { NO_VALUE, effectiveYield, formatAmount, isAmount, scaleQuantity } from '../recipe-format';
@@ -172,6 +173,7 @@ export function NutrigoRecipeDetail({recipe,onBack,patientName,onNavigate,onSign
     },'La receta no tiene pasos cargados.',{key:(_step,index)=>index}));
     if(name==='Section Notes')return listIn(node,list=>listChildren(list,notes,(child,note)=>leaf(child)&&sourceText(child).length>8?{text:note}:undefined,'Sin notas.',{key:(_note,index)=>index}));
     if(name==='Section Ingredients')return listIn(node,list=>listChildren(list,recipe.ingredients,(child,ingredient,index)=>{
+      if(nodeName(child)==='Number')return ingredientNumberBinding(child,ingredient,index);
       if(!leaf(child))return undefined;
       return /^\d+$/.test(sourceText(child))?{text:index+1}:{text:ingredientLine(ingredient)};
     },'La receta no tiene ingredientes cargados.',{key:ingredient=>ingredient.id}));

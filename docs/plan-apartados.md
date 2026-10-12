@@ -15,6 +15,8 @@ apartados que también hacen falta para salir al mercado: lo legal y la calidad 
 
 ## Consultorio y paciente — 5/10/2026
 
+- Ampliación de ficha, contraste profesional y fotos de ingredientes (11/10/2026): [implementación y comprobaciones locales](nutridesk-ficha-2026-10-11.md). Espera integración con consultas/importación y pruebas de publicación.
+
 Implementación del plan aprobado por Facundo, desde la versión principal vigente y en copia aislada. Entregas encadenadas por apartado: backend, consultorio, planes e IA, y paciente Nutrigo.
 
 - [Bandeja y biblioteca: alcance, comprobaciones y migración preparada](consultorio-backend-2026-10-05.md).
