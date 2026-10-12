@@ -28,6 +28,8 @@ const ALLOWED = [
   'admin_set_service_settings',
   'admin_void_service_payment',
   'apply_ai_job',
+  // Import rows require a reviewed owner-scoped batch, patient scope and live consent.
+  'apply_patient_import_row',
   'apply_professional_model',
   'assign_editorial_resource',
   'assign_exercise_routine',
@@ -85,6 +87,7 @@ const ALLOWED = [
   'list_outbox_mailbox',
   'list_outbox_snapshot',
   'list_patient_care_links',
+  'list_patient_import_contacts',
   'list_privacy_requests',
   'list_professional_meal_plan',
   'list_professional_recipe_favorites',
@@ -101,6 +104,9 @@ const ALLOWED = [
   'my_patient_id',
   'open_message_attachment',
   'patient_has_full_access',
+  // Manual preparation only; assigned active patient and imported contact email.
+  'prepare_imported_patient_invite',
+  'prepare_patient_import',
   'process_outbox_deliveries',
   'publish_care_replacement',
   'publish_editorial_resource',
