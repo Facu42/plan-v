@@ -9,7 +9,7 @@ describe('cartera completa sin truncar a cien pacientes', () => {
       return { patients: Array.from({ length: Math.min(limit, 1000 - offset) }, (_, i) => ({ id: `patient-${offset + i}` })), page: { has_more: offset + limit < 1000 } };
     });
     expect(patients).toHaveLength(1000);
-    expect(patients.at(-1)?.id).toBe('patient-999');
+    expect(patients[patients.length - 1]?.id).toBe('patient-999');
     expect(requested).toEqual([0, 100, 200, 300, 400, 500, 600, 700, 800, 900]);
   });
   it('interrumpe una página vacía que afirma tener más, sin devolver una cartera parcial', async () => {

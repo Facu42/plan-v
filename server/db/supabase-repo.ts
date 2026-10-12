@@ -10,6 +10,8 @@ import { listThreadMessagesPersist } from '../messages/repository.js';
 import { listPatientAppointmentPersist } from '../appointments/repository.js';
 import { appointmentHasNotEnded, appointmentReadSince } from '../appointment-ops.js';
 import { writeOpsLog } from '../ops/log.js';
+import { collectPatientPages } from './patient-pages.js';
+import { requestAccountRecovery } from '../mail/recovery.js';
 import {
   appointmentColumns,
   mealLogColumns,
@@ -264,6 +266,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
   return {
     id: row.id as string,
     name: row.full_name as string,
+    ...(audience === 'professional' ? { phone: typeof row.phone === 'string' ? row.phone : null } : {}),
     initials: (row.initials as string) || (row.full_name as string).slice(0, 2).toUpperCase(),
     tone: (row.tone as Patient['tone']) ?? 'mint',
     status: row.status as string,
@@ -487,6 +490,7 @@ function mapScheduledAppointment(nextAppt: Record<string, unknown> | undefined |
   if (!nextAppt?.starts_at) return null;
   const reply = nextAppt.patient_reply;
   return {
+    ...(typeof nextAppt.id === 'string' ? { id: nextAppt.id } : {}),
     when: formatAppointmentWhen(String(nextAppt.starts_at)),
     duration: Number(nextAppt.duration_min),
     channel: String(nextAppt.channel),
@@ -652,8 +656,7 @@ async function loadArchivedAt(ids: string[]): Promise<Map<string, string | null>
 }
 
 export async function sbGetPatientsForNutri(userId: string): Promise<Patient[]> {
-  const listed = await sbListPatientsForNutri(userId, { offset: 0, limit: 100 });
-  return listed.patients;
+  return collectPatientPages((offset, limit) => sbListPatientsForNutri(userId, { offset, limit }));
 }
 
 // La vista de la paciente no trae archived_at. La función llega con la migración
@@ -908,6 +911,7 @@ export async function sbUpdateHabits(patientId: string, data: { hydration?: numb
 
 export async function sbUpdatePatientProfile(patientId: string, input: {
   name?: string;
+  phone?: string | null;
   status?: string;
   stage?: Patient['stage'];
   sensitive_hours?: string;
@@ -921,6 +925,7 @@ export async function sbUpdatePatientProfile(patientId: string, input: {
     patch.initials = patientInitials(input.name);
   }
   if (input.status !== undefined) patch.status = input.status;
+  if (input.phone !== undefined) patch.phone = input.phone;
   if (input.stage !== undefined) patch.stage = input.stage;
   if (input.sensitive_hours !== undefined) patch.sensitive_hours = input.sensitive_hours;
   if (input.plan_b !== undefined) patch.plan_b = input.plan_b;
@@ -1202,10 +1207,7 @@ export async function sbProvisionNutritionist(input: {
 
 export async function sbRequestPasswordRecovery(email: string, redirectTo?: string): Promise<void> {
   const sb = privilegedDb();
-  const { error } = await sb.auth.resetPasswordForEmail(email, redirectTo ? { redirectTo } : undefined);
-  if (error && !isMissingRelation(error)) {
-    return;
-  }
+  await requestAccountRecovery(email, redirectTo, (address, options) => sb.auth.resetPasswordForEmail(address, options));
 }
 
 export function computeShoppingList(patient: Patient): string[] {
