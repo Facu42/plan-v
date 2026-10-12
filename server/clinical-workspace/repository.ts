@@ -9,6 +9,8 @@ import { PDFDocument } from 'pdf-lib';
 import { BYTE_LIMIT_BY_CATEGORY,PATIENT_QUOTA } from '../assets/types.js';
 import { recordMemoryAccess } from '../privacy/repository.js';
 import type { ClinicalDocument,ClinicalWorkspaceInput,ClinicalWorkspaceRecord,ClinicalWorkspaceSnapshot,MethodReference,ClinicBrand } from '../../src/types/clinical-workspace.js';
+import { getNutritionSettings } from '../nutrition-capabilities/repository.js';
+import { clinicalBrandFromNutrition } from '../../src/lib/clinical-brand.js';
 const records=new Map<string,ClinicalWorkspaceRecord>();const documents=new Map<string,ClinicalDocument>();const references=new Map<string,MethodReference>();const brands=new Map<string,ClinicBrand>();
 registerDemoState('clinical-workspace',()=>({records,documents,references,brands}));
 export async function auditClinicalAccess(patientId:string,action:'read'|'export'|'document',persistent:boolean){
@@ -25,13 +27,20 @@ export async function saveReference(nutritionistId:string,input:Omit<MethodRefer
   const saved={...input,nutritionist_id:nutritionistId,approved_at:new Date().toISOString(),active:true};references.set(saved.id,saved);return saved;
 }
 export async function revokeReference(nutritionistId:string,id:string,persistent:boolean){if(persistent){const {error:e}=await getRequestDb().rpc('deactivate_clinical_reference',{reference_id:id});error(e);return;}const ref=references.get(id);if(!ref||ref.nutritionist_id!==nutritionistId)throw new CareError(403,'Referencia no disponible.');ref.active=false;}
-export async function saveBrand(nutritionistId:string,brand:ClinicBrand,persistent:boolean){if(persistent){const {error:e}=await getRequestDb().rpc('save_clinical_brand',{payload:brand});error(e);}else brands.set(nutritionistId,brand);return brand;}
+export async function saveBrand(nutritionistId:string,brand:ClinicBrand,persistent:boolean){
+  const canonical=clinicalBrandFromNutrition((await getNutritionSettings(nutritionistId,persistent)).settings.brand,brand.license);
+  if(!canonical)throw new CareError(400,'Configurá primero el nombre del consultorio en Configuración nutricional.');
+  if(brand.name!==canonical.name||brand.contact!==canonical.contact||brand.logo!==canonical.logo)throw new CareError(409,'La marca cambió. Recargá; nombre, contacto y logo se editan en Configuración nutricional.');
+  // La tabla clínica conserva matrícula; logo siempre se lee de la marca canónica.
+  if(persistent){const {error:e}=await getRequestDb().rpc('save_clinical_brand',{payload:{...canonical,logo:null}});error(e);}else brands.set(nutritionistId,canonical);return canonical;
+}
 export async function clinicalSnapshot(patientId:string,nutritionistId:string,persistent:boolean):Promise<ClinicalWorkspaceSnapshot>{
   await requireCareConsent(patientId,persistent,'care_relationship');const consented=(await currentCareConsents(patientId,persistent)).consented;
   await auditClinicalAccess(patientId,'read',persistent);
   const rows=persistent?await allRows<ClinicalWorkspaceRecord>('clinical_workspace_records','patient_id',patientId):[...records.values()].filter(r=>r.patient_id===patientId);
   const docs=consented.includes('clinical_document')?(persistent?await allRows<ClinicalDocument>('clinical_source_documents','patient_id',patientId):[...documents.values()].filter(d=>d.patient_id===patientId)):[];
   let brand=brands.get(nutritionistId)??null;if(persistent){const {data,error:e}=await getRequestDb().from('clinical_clinic_brands').select('data').eq('nutritionist_id',nutritionistId).maybeSingle();error(e);brand=data?.data??null;}
+  brand=clinicalBrandFromNutrition((await getNutritionSettings(nutritionistId,persistent)).settings.brand,brand?.license??'');
   return {records:rows.filter(r=>{
     if('document_id'in r.data&&r.data.document_id&&!consented.includes('clinical_document'))return false;
     return r.data.kind==='laboratory'?consented.includes('clinical_document'):r.data.kind==='study_order'||consented.includes('measurement');

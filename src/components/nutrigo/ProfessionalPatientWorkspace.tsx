@@ -20,6 +20,7 @@ import { canLeaveWorkspace } from './unsaved-changes';
 import { healthFactLabel } from './intake-review';
 import type { ProfessionalIntakeView } from '../../types/intake';
 import { NvButton } from './primitives';
+import { ClinicalPatientWorkspace } from './ClinicalPatientWorkspace';
 import type { ShowroomPage } from './ShowroomPanels';
 import './professional-workspace.css';
 import { ProfessionalLedgerSummary } from './ProfessionalLedgerSummary';
@@ -88,13 +89,13 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
       {tab === 'historia' && <><ShowroomIntakeReview patientId={patient.id} /><PatientImportedHistory patientId={patient.id} /></>}
       {tab === 'notas' && <ConsultationNotes patientId={patient.id} />}
       {tab === 'planificacion' && <NutritionTargetPanel patientId={patient.id} patientName={patient.name} onOpenPlan={() => change('plan')} />}
-      {tab === 'evolucion' && <><ShowroomMeals patient={patient} query="" onSelect={onSelect} onReview={onReview} now={now} /><ShowroomProgress patient={p} professional /><ProfessionalMeasurements patientId={patient.id} patientName={patient.name} /><ShowroomGoals patient={patient} patients={patients} onSelect={onSelect} onChanged={addPatient} onOpenPatient={onSelect} showNutritionTarget={false} /></>}
+      {tab === 'evolucion' && <><ShowroomMeals patient={patient} query="" onSelect={onSelect} onReview={onReview} now={now} /><ShowroomProgress patient={p} professional /><ProfessionalMeasurements patientId={patient.id} patientName={patient.name} /><ClinicalPatientWorkspace patientId={patient.id} mode="mediciones"/><ShowroomGoals patient={patient} patients={patients} onSelect={onSelect} onChanged={addPatient} onOpenPatient={onSelect} showNutritionTarget={false} /></>}
       {tab === 'alimentario' && <ShowroomMeals patient={patient} query="" onSelect={onSelect} onReview={onReview} now={now} />}
       {tab === 'plan' && <><PlanSafetySummary patientId={patient.id} /><MealPlanEditor key={patient.id} patientId={patient.id} patientName={patient.name} professionalName={professionalName} onChanged={() => void api.getPatient(patient.id).then(({ patient: updated }) => addPatient(updated)).catch(() => undefined)} /></>}
       {tab === 'semanal' && <ShowroomMealPlan patient={patient} patients={patients} query="" onSelect={onSelect} onChanged={addPatient} now={now} />}
       {tab === 'compras' && <ShowroomGrocery patient={p} readOnly />}
-      {tab === 'archivos' && <CarePanel patientId={patient.id} mode="files" />}
-      {tab === 'laboratorio' && <CarePanel patientId={patient.id} mode="laboratory" />}
+      {tab === 'archivos' && <><CarePanel patientId={patient.id} mode="files" /><ClinicalPatientWorkspace patientId={patient.id} mode="exportacion"/></>}
+      {tab === 'laboratorio' && <><CarePanel patientId={patient.id} mode="laboratory" /><ClinicalPatientWorkspace patientId={patient.id} mode="laboratorio"/></>}
       {tab === 'consultas' && <ShowroomConsultations patient={patient} now={now} onSelect={onSelect} onChanged={addPatient} />}
       {tab === 'chat' && <NutrigoMessages patient={p} patients={patients.map((person) => buildShowroomPatient(person, now))} role="pro" onSelect={onSelect} onNavigate={onNavigate} />}
       {tab === 'cobros' && <ShowroomCobranzas initialSelectedId={patient.id} />}

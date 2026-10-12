@@ -11,6 +11,7 @@ export function PlanPrintDialog({ plan, patientName, professionalName = '', demo
   const [selection, setSelection] = useState<'current' | 'published'>(currentAllowed ? 'current' : 'published');
   const [name, setName] = useState(professionalName), [ready, setReady] = useState(false), [error, setError] = useState('');
   const [html, setHtml] = useState('');
+  const [downloading,setDownloading]=useState(false);
   const[brand,setBrand]=useState<ClinicBrand|undefined>(),[brandReady,setBrandReady]=useState(false),[brandError,setBrandError]=useState('');
   useEffect(()=>{const controller=new AbortController();nutritionCapabilityApi.settings(controller.signal).then(view=>{if(!controller.signal.aborted)setBrand(view.settings.brand);}).catch(()=>{if(!controller.signal.aborted)setBrandError('No pudimos consultar la marca del consultorio. Esta copia conserva la identidad de Plan V.');}).finally(()=>{if(!controller.signal.aborted)setBrandReady(true);});return()=>controller.abort();},[]);
   const version = selection === 'published' ? plan.published : currentAllowed ? plan.current : null;
@@ -43,6 +44,16 @@ export function PlanPrintDialog({ plan, patientName, professionalName = '', demo
       setError('');
     } catch { target?.close(); setError('No pudimos abrir la impresión. Volvé a intentar desde esta vista.'); }
   }
+  async function download() {
+    if(!version||!ready||downloading)return;
+    setDownloading(true);setError('');
+    try {
+      const [{buildPlanPdf},{downloadClinicalPdf}]=await Promise.all([import('../../lib/meal-plan-pdf'),import('../../lib/clinical-pdf')]);
+      const bytes=await buildPlanPdf({version,patientName,professionalName:name,demo,brand});
+      downloadClinicalPdf(bytes,`plan-v${version.version}-${version.period_start}.pdf`);
+    }catch{setError('No pudimos preparar la descarga. Conservá la vista y volvé a intentar.');}
+    finally{setDownloading(false);}
+  }
   return <FigmaRecordDialog title="Imprimir o guardar el plan como PDF" className="plan-print-dialog" onClose={onClose} closeLabel="Cerrar vista de impresión">
     <p>Elegí la copia a entregar y revisala. En la ventana de impresión podés elegir «Guardar como PDF». Esta acción no publica ni envía el plan.</p>
     {!currentAllowed && <p role="status">El formulario y el borrador guardado no coinciden. Guardá o recuperá los cambios antes de imprimir el borrador; la copia publicada sigue disponible.</p>}
@@ -51,6 +62,6 @@ export function PlanPrintDialog({ plan, patientName, professionalName = '', demo
     {brandError&&<p role="status">{brandError}</p>}
     {error && <p role="alert">{error}</p>}
     {version ? html ? <PlanPrintPreview html={html} title={`Vista previa del plan ${version.published_at ? 'publicado' : 'en borrador'} versión ${version.version}`} onReady={setReady} /> : <p role="status">Preparando la vista previa…</p> : <p>No hay una copia disponible para imprimir.</p>}
-    <footer><NvButton type="button" disabled={!version || !ready} onClick={print}>Imprimir / guardar PDF</NvButton><NvButton type="button" className="nv-ghost" onClick={onClose}>Cerrar</NvButton></footer>
+    <footer><NvButton type="button" disabled={!version || !ready||downloading} onClick={()=>void download()}>{downloading?'Preparando PDF…':'Descargar PDF'}</NvButton><NvButton type="button" className="nv-ghost" disabled={!version || !ready} onClick={print}>Imprimir / guardar PDF</NvButton><NvButton type="button" className="nv-ghost" onClick={onClose}>Cerrar</NvButton></footer>
   </FigmaRecordDialog>;
 }

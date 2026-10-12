@@ -23,6 +23,6 @@ export type ClinicalWorkspaceInput=z.infer<typeof clinicalWorkspaceInputSchema>;
 export type ClinicalWorkspaceRecord=ClinicalWorkspaceInput&{patient_id:string;created_at:string;source?:ClinicalDocument|null;reference_snapshot?:MethodReference|null};
 export type ClinicalDocument={id:string;patient_id:string;filename:string;mime:string;source_sha256:string;asset_id:string;created_at:string};
 export const clinicalDocumentInputSchema=z.object({id:z.uuid(),filename:z.string().trim().min(1).max(120).refine(s=>!/[\\/]/.test(s)),source_sha256:z.string().regex(/^[a-f0-9]{64}$/),file:z.string().max(28000000)}).strict();
-export const clinicBrandSchema=z.object({name:z.string().trim().min(2).max(160),contact:z.string().trim().max(400),license:z.string().trim().max(120),logo:z.string().max(300000).nullable().refine(s=>s===null||/^data:image\/(png|jpeg);base64,[a-zA-Z0-9+/=]+$/.test(s),'Usá un logo PNG/JPG local.')}).strict();
+export const clinicBrandSchema=z.object({name:z.string().trim().min(2).max(120),contact:z.string().trim().max(240),license:z.string().trim().max(120),logo:z.string().max(700000).nullable().refine(s=>s===null||/^data:image\/(png|jpeg);base64,[a-zA-Z0-9+/]+={0,2}$/.test(s),'Usá un logo PNG/JPG local.')}).strict();
 export type ClinicBrand=z.infer<typeof clinicBrandSchema>;
 export type ClinicalWorkspaceSnapshot={records:ClinicalWorkspaceRecord[];documents:ClinicalDocument[];references:MethodReference[];brand:ClinicBrand|null};
