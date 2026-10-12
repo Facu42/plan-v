@@ -11,7 +11,7 @@ describe('historial autorizado sin corte de quinientos',()=>{
   it('conserva registros antiguos y páginas posteriores con la misma sesión',async()=>{
     state.rows=Array.from({length:1001},(_,i)=>({id:`r${i}`,patient_id:`p${i}`,recorded_on:'2026-10-01',data:{kind:'mood',value:3},created_at:'2026-10-01T00:00:00Z',reviewed_at:null}));
     const rows=await listCareRecords(null,true);
-    expect(rows).toHaveLength(1001);expect(rows.at(-1)?.id).toBe('r1000');expect(state.requested).toEqual([0,500,1000]);
+    expect(rows).toHaveLength(1001);expect(rows[rows.length-1]?.id).toBe('r1000');expect(state.requested).toEqual([0,500,1000]);
   });
   it('no pierde medidas de un historial extenso',async()=>{
     state.rows=Array.from({length:1001},(_,i)=>({id:`m${i}`,patient_id:'p',kind:'weight',value_numeric:70,unit:'kg',source:'professional',captured_on:'2026-10-01',created_at:'2026-10-01T00:00:00Z'}));

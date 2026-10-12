@@ -145,11 +145,16 @@ const ALLOWED = [
   'save_meal_plan_draft',
   'save_my_body_data',
   'save_notification_preferences',
+  // Consultorio derivado de la sesión; revisión CAS y referencias validadas en base.
+  'save_nutrition_exchange',
+  'save_nutrition_settings',
   'save_patient_intake',
   'save_professional_model',
   'save_recipe_draft',
   'save_routine_feedback',
   'schedule_appointment',
+  // Catálogo propio/compartido autorizado; filtros y límites validados por RPC.
+  'search_food_catalog',
   'send_thread_attachment',
   'send_thread_message',
   'set_organization_subscription_status',

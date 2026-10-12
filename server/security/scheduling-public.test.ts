@@ -23,7 +23,7 @@ describe('integración de reserva pública', () => {
     expect((await app.request(endpoint,{method:'GET'})).status).toBe(200);
   });
   it('admite PDF clínico de veinte MB con base64 sólo en el recurso documental', () => {
-    expect(maxBodyBytes('/api/patients/a/clinical/documents')).toBeGreaterThanOrEqual(28_000_000);
-    expect(maxBodyBytes('/api/patients/a/clinical/laboratory')).toBe(1_048_576);
+    expect(maxBodyBytes('/api/patients/a/clinical-workspace/documents')).toBeGreaterThanOrEqual(28_000_000);
+    expect(maxBodyBytes('/api/patients/a/clinical-workspace/records')).toBe(1_048_576);
   });
 });
