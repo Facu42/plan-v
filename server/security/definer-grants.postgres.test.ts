@@ -44,6 +44,11 @@ const ALLOWED = [
   'complete_privacy_delete',
   'complete_privacy_export',
   'confirm_appointment',
+  // Consultas: lectura sólo propia/asignada, comandos con consentimiento y revisión CAS.
+  'consultation_can_read',
+  'consultation_command',
+  'consultation_enqueue_chunk',
+  'consultation_list_tasks',
   'correct_own_meal',
   'correct_own_measurement',
   'create_organization',

@@ -494,6 +494,7 @@ describe('appointments (016 v2)', () => {
 
     const patient = await sbGetPatientById('patient-1');
     expect(patient!.appointment).toEqual({
+      id: 'appt-1',
       when: 'Jueves · 14:30',
       duration: 45,
       channel: 'video',

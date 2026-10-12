@@ -25,6 +25,7 @@ import { registerOrgRoutes } from './orgs/routes.js';
 import { registerAlcanceRoutes } from './alcance/routes.js';
 import { registerCrmRoutes } from './crm/routes.js';
 import { registerConsultationRoutes } from './consultations/routes.js';
+import { registerPatientImportRoutes } from './patient-import/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -294,6 +295,7 @@ registerOrgRoutes(app);
 registerAlcanceRoutes(app);
 registerCrmRoutes(app);
 registerConsultationRoutes(app);
+registerPatientImportRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({

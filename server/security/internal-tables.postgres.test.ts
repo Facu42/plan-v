@@ -7,7 +7,7 @@ import { readFile, readdir } from 'node:fs/promises';
 const INTERNAL = [
   // Cola de fotos: sólo servicio; lectura mediante el plan autorizado.
   // Catálogo de fotos de ingredientes y su contador diario: sólo servicio, sin lectura directa.
-  'audit_events', 'cover_daily_usage', 'ingredient_covers', 'meal_plan_handovers', 'menu_dish_covers', 'notification_deliveries', 'notification_preferences',
+  'audit_events', 'clinical_ai_budget_months', 'clinical_ai_spend', 'consultation_tasks', 'cover_daily_usage', 'ingredient_covers', 'meal_plan_handovers', 'menu_dish_covers', 'notification_deliveries', 'notification_preferences',
   'nutritionist_subscriptions', 'outbox_events',
   // Idempotency ledger: only import RPCs; no client grant or read policy.
   'patient_import_applied', 'patient_invite_events',

@@ -7,7 +7,7 @@ export const RECORD_TABS = SECTION_IDS.map(id => [id, patientRecordLabels[id]] a
 export type RecordTab = typeof RECORD_TABS[number][0];
 const LEGACY: Record<string, RecordTab> = { ingreso: 'historia', registros: 'evolucion', mensajes: 'chat' };
 export function recordTab(value: string | null): RecordTab {
-  if (value && Object.hasOwn(LEGACY, value)) return LEGACY[value];
+  if (value && Object.prototype.hasOwnProperty.call(LEGACY, value)) return LEGACY[value];
   return RECORD_TABS.some(([id]) => id === value) ? value as RecordTab : 'resumen';
 }
 

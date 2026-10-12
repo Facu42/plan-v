@@ -14,7 +14,7 @@ const pro = '00000000-0000-4000-a000-000000000003';
 const other = '00000000-0000-4000-a000-000000000004';
 const patient = '10000000-0000-4000-a000-000000000001';
 const patientB = '10000000-0000-4000-a000-000000000002';
-const care = CONSENT_CATALOG[0];
+const care = CONSENT_CATALOG.find(entry => entry.purpose === 'care_relationship')!;
 
 async function asUser<T = Record<string, unknown>>(user: string, sql: string, params: unknown[] = []) {
   return db.transaction(async tx => {
