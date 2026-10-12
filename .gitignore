@@ -2,6 +2,7 @@ node_modules/
 node_modules-baseline/
 dist/
 /public/patient-import-ocr/
+/public/clinical-pdf/
 .gstack/
 archive/
 contenido/
