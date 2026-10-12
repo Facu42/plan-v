@@ -9,6 +9,8 @@ export const CONSENT_PURPOSES = [
   'ai_meal_analysis',
   'ai_menu_draft',
   'ai_followup',
+  'consultation_recording',
+  'ai_consultation',
 ] as const;
 
 export type ConsentPurpose = (typeof CONSENT_PURPOSES)[number];
@@ -24,6 +26,8 @@ export type ConsentText = {
 };
 
 const TEXTS: Array<Omit<ConsentText, 'text_hash'>> = [
+  { purpose: 'consultation_recording', text_version: 'consultation_recording.v1', title: 'Grabación de consultas', text: 'Autorizo a mi nutricionista a grabar el audio de mis consultas en Plan V. No se guarda video. El audio es privado y se elimina a los siete días. La transcripción y las notas quedan en mi ficha. Puedo retirar este permiso y elegir notas manuales.', required: false },
+  { purpose: 'ai_consultation', text_version: 'ai_consultation.v1', title: 'Transcripción y resumen con IA', text: 'Autorizo a Plan V a enviar el audio o la transcripción de mi consulta a Groq para transcribir y preparar un resumen. Puede contener datos de salud. El proveedor se configura sin retención de datos. Mi nutricionista revisa el borrador y decide qué compartir conmigo. Este permiso es opcional y puedo retirarlo.', required: false },
   {
     purpose: 'care_relationship',
     text_version: 'care_relationship.v1',

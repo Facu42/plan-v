@@ -131,7 +131,7 @@ export function CareConsent({patientId,snapshot,onlyAI=false,meals=false}:{patie
   return <details className="care-consent" open={meals || catalogLoading || Boolean(catalogError) || (onlyAI ? (!snapshot.consented.includes('ai_menu_draft') || !snapshot.consented.includes('ai_followup')) : !snapshot.consented.includes('measurement'))}><summary>Permisos opcionales · vos elegís qué compartir</summary>
     {catalogLoading&&<p role="status">Cargando permisos…</p>}
     {catalogError&&<p role="alert">{catalogError} <button type="button" disabled={busy} onClick={()=>setCatalogRevision(r=>r+1)}>Reintentar permisos</button></p>}
-    {catalog.filter(c=>(meals?['meal_photo','ai_meal_analysis']:onlyAI?['ai_menu_draft','ai_followup']:['measurement','body_progress','clinical_document']).includes(c.purpose)).map(c=><label key={c.purpose}><input type="checkbox" disabled={busy} checked={snapshot.consented.includes(c.purpose)} onChange={()=>void toggle(c.purpose,snapshot.consented.includes(c.purpose))}/><span>{c.text}</span></label>)}{status&&<p role="alert">{status}</p>}
+    {catalog.filter(c=>(meals?['meal_photo','ai_meal_analysis']:onlyAI?['ai_menu_draft','ai_followup','consultation_recording','ai_consultation']:['measurement','body_progress','clinical_document']).includes(c.purpose)).map(c=><label key={c.purpose}><input type="checkbox" disabled={busy} checked={snapshot.consented.includes(c.purpose)} onChange={()=>void toggle(c.purpose,snapshot.consented.includes(c.purpose))}/><span>{c.text}</span></label>)}{status&&<p role="alert">{status}</p>}
   </details>;
 }
 
