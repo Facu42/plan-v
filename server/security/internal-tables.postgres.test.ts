@@ -14,7 +14,9 @@ const INTERNAL = [
   'patient_import_applied', 'patient_invite_events',
   'payment_webhook_events', 'platform_admins', 'platform_settings',
   'privacy_access_events', 'privacy_export_packages', 'privacy_requests',
-  'processing_jobs', 'recipe_cover_requests', 'recipe_day_assignments', 'recipe_version_cards', 'service_payments',
+  'processing_jobs', 'recipe_cover_requests', 'recipe_day_assignments', 'recipe_version_cards',
+  // Agenda: credenciales, links de un uso, estados de cobro y colas son sólo del servicio.
+  'scheduling_appointment_sync_jobs', 'scheduling_checkout_intents', 'scheduling_contact_cards', 'scheduling_integrations', 'scheduling_oauth_states', 'scheduling_payment_balances', 'scheduling_payment_events', 'scheduling_staff_invites', 'scheduling_staff_members', 'scheduling_sync_jobs', 'service_payments',
 ] as const;
 const PUBLIC_ROLES = ['anon', 'authenticated'] as const;
 const TABLE_PRIVILEGES = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER', 'MAINTAIN'];

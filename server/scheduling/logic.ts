@@ -13,7 +13,7 @@ export function moneyMinor(amount:unknown):number|null{if(typeof amount!=='numbe
 export function verifyPayment(payment:Record<string,unknown>,expected:{id:string;account_id:string;currency:string;amount_minor:number}){return payment.status==='approved'&&payment.external_reference===expected.id&&String(payment.collector_id)===expected.account_id&&payment.currency_id===expected.currency&&moneyMinor(payment.transaction_amount)===expected.amount_minor;}
 export function verifyMpSignature(input:{id:string;requestId:string;signature:string;secret:string;now?:number}){
  if(!/^[a-zA-Z0-9-]{1,100}$/.test(input.id)||!input.requestId||input.requestId.length>200||!input.secret)return false;
- const parts=input.signature.split(',').map(p=>p.trim().split('='));if(parts.length!==2)return false;const map=new Map(parts);const ts=map.get('ts'),signature=map.get('v1');
+ const parts=input.signature.split(',').map(p=>p.trim().split('='));if(parts.length!==2||parts.some(p=>p.length!==2))return false;const map=new Map<string,string>(parts.map(p=>[p[0],p[1]]));const ts=map.get('ts'),signature=map.get('v1');
  if(!ts||!/^\d{10,13}$/.test(ts)||!signature||!/^[a-fA-F0-9]{64}$/.test(signature))return false;
  const when=Number(ts)*(ts.length===10?1000:1);if(Math.abs((input.now??Date.now())-when)>5*60000)return false;
  const expected=createHmac('sha256',input.secret).update(`id:${input.id.toLowerCase()};request-id:${input.requestId};ts:${ts};`).digest();return timingSafeEqual(expected,Buffer.from(signature,'hex'));
