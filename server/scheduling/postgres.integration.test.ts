@@ -121,6 +121,14 @@ describe('Google cubre turnos cargados a mano',()=>{
  });
 });
 describe('el token público no crea una segunda vía para miembros revocados',()=>{
+ it('invita por correo confirmado y ofrece nombres sin pedir identificadores técnicos',async()=>{
+  const group=(await actor<{r:{id:string}}>(a,'select public.create_organization($1,$2) r',['Equipo por correo',`grupo-${randomUUID().slice(0,8)}`]))[0].r;
+  await expect(actor(b,'select public.scheduling_invite_professional_email($1,$2)',[group.id,'a@example.test'])).rejects.toMatchObject({code:'42501'});
+  expect((await actor<{r:{accepted:boolean}}>(a,'select public.scheduling_invite_professional_email($1,$2) r',[group.id,'B@example.test']))[0].r.accepted).toBe(true);
+  const directory=(await actor<{r:Array<{name:string;nutritionist_id:string}>}>(a,'select public.scheduling_professional_directory($1) r',[group.id]))[0].r;
+  expect(directory.some(person=>person.name==='Nutri B'&&person.nutritionist_id===nutriB)).toBe(true);
+  await expect(actor(patientUser,'select public.scheduling_professional_directory($1)',[group.id])).rejects.toMatchObject({code:'42501'});
+ });
  it('authenticated no puede reutilizar hashes de reservas ni leerlos directamente',async()=>{
   const booking=(await service<{r:{id:string}}>('select public.scheduling_request_booking($1,$2,$3) r',[nutriA,{client_id:randomUUID(),type_id:type,starts_at:`${day}T13:30:00Z`,name:'Contacto protegido',email:'protegido@example.test',phone:'1144433333',accepted_contact:true},hash]))[0].r;
   await expect(actor(patientUser,'select public.scheduling_change_booking($1,$2,$3,$4)',[nutriA,booking.id,{action:'cancel',expected_revision:1},hash])).rejects.toThrow();
