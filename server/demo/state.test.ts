@@ -8,6 +8,13 @@ import { DemoStateFile } from './state.js';
 const demo = { mode: 'demo', dataMode: 'memory', aiMode: 'demo' } as const;
 function temporary(run: (file: string) => void) { const dir=mkdtempSync(join(tmpdir(),'plan-v-demo-'));try{run(join(dir,'state.bin'));}finally{rmSync(dir,{recursive:true,force:true});} }
 describe('guardado de la simulación local',()=>{
+  it('amplía sólo consultas y claves conocidas sin perder los registros previos',()=>temporary(file=>{
+    writeFileSync(file,serialize({version:1,domains:{test:{values:new Map([['kept',1]])},consultations:{sessions:new Map([['existing-session',{}]]),shared:new Map(),tasks:new Map(),audio:new Map()}}}));
+    const shapes={test:{values:new Map()},consultations:{sessions:new Map(),shared:new Map(),tasks:new Map(),audio:new Map(),completions:new Map(),completion_events:new Map()}};
+    const domains=new Map(Object.entries(shapes).map(([name,value])=>[name,()=>value]));
+    const first=new DemoStateFile(file,demo,domains);expect(shapes.test.values.get('kept')).toBe(1);expect(shapes.consultations.sessions.has('existing-session')).toBe(true);first.close();
+    const next=new DemoStateFile(file,demo,domains);expect(shapes.test.values.get('kept')).toBe(1);next.close();
+  }));
   it('incorpora modelos vacíos sin perder la copia anterior y los conserva al reiniciar',()=>temporary(file=>{
     writeFileSync(file,serialize({version:1,domains:{test:{values:new Map([['existing',1]])}}}));
     const values=new Map<string,number>(),models=new Map<string,unknown>();

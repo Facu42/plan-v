@@ -1,0 +1,26 @@
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+const calls = vi.hoisted(() => ({ reminders: vi.fn(async () => {}), consultations: vi.fn(async () => {}), configure: vi.fn(), covers: vi.fn(), drain: vi.fn(async () => {}) }));
+vi.mock('./handlers.js', () => ({ handleProcessingJob: vi.fn() }));
+vi.mock('./queue.js', () => ({ processQueue: {}, drain: calls.drain }));
+vi.mock('../recipes/cover-workers.js', () => ({ runCoverWorkers: calls.covers }));
+vi.mock('../mail/reminder-worker.js', () => ({ tickAppointmentReminders: calls.reminders }));
+vi.mock('../consultations/worker.js', () => ({ configureConsultationProcessing: calls.configure, runPendingConsultations: calls.consultations }));
+vi.mock('../consultations/repository.js', () => ({ cleanupExpiredConsultationAudio: vi.fn() }));
+vi.mock('../clinical-processing/provider.js', () => ({ transcribeClinicalAudio: vi.fn(), summarizeClinicalText: vi.fn() }));
+vi.mock('../db/supabase-client.js', () => ({ isSupabaseEnabled: () => false }));
+import { startJobWorker, stopJobWorker } from './worker.js';
+beforeEach(() => { vi.useFakeTimers(); vi.stubEnv('VITEST', 'false'); vi.clearAllMocks(); });
+afterEach(() => { stopJobWorker(); vi.useRealTimers(); vi.unstubAllEnvs(); });
+it('suma consultas sin dejar de procesar los recordatorios existentes y detiene ambos al cerrar', async () => {
+  startJobWorker('test-owner');
+  expect(calls.configure).toHaveBeenCalledTimes(1);
+  await vi.advanceTimersByTimeAsync(1000);
+  expect(calls.consultations).toHaveBeenCalledWith(2);
+  expect(calls.reminders).toHaveBeenCalledTimes(1);
+  expect(calls.covers).toHaveBeenCalledTimes(1);
+  expect(calls.drain).toHaveBeenCalledTimes(1);
+  stopJobWorker();
+  await vi.advanceTimersByTimeAsync(1000);
+  expect(calls.reminders).toHaveBeenCalledTimes(1);
+  expect(calls.consultations).toHaveBeenCalledTimes(1);
+});
