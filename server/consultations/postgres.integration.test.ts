@@ -12,9 +12,10 @@ beforeAll(async()=>{
  grant usage on schema public,auth,storage to authenticated,service_role;
  create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
  create table auth.users(id uuid primary key); create table public.nutritionists(id uuid primary key,user_id uuid);
- create table public.patients(id uuid primary key,nutritionist_id uuid,user_id uuid,deactivated_at timestamptz,anonymized_at timestamptz);
+ create table public.patients(id uuid primary key,nutritionist_id uuid,user_id uuid,deactivated_at timestamptz,anonymized_at timestamptz,archived_at timestamptz);
  create table public.appointments(id uuid primary key,patient_id uuid);
  create table public.consent_catalog(purpose text primary key,text_version text,text_hash text,body text,required boolean);
+ insert into public.consent_catalog values('care_relationship','care.v1',repeat('a',64),'Atención ficticia',true);
  create table public.consent_events(sequence serial,patient_id uuid,purpose text,text_version text,text_hash text,decision text);
  create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
  create function public.can_care_for_patient(target uuid) returns boolean language sql stable security definer set search_path='' as $$ select exists(select 1 from public.patients p join public.nutritionists n on n.id=p.nutritionist_id where p.id=target and n.user_id=auth.uid()) $$;
@@ -80,4 +81,42 @@ describe('consultas SQL: dos consultorios, privacidad y recuperación',()=>{
   const recovered=(await db.query<{t:{request_key:string}}>('select public.consultation_claim_task() t')).rows[0].t;
   expect(recovered.request_key).toBe(retried.request_key);
  });
+ it('conserva120KB íntegros y espera todoslossegmentos sin gaps antes del resumen',async()=>{
+  await db.query(`insert into public.consent_events(patient_id,purpose,text_version,text_hash,decision)select $1,purpose,text_version,text_hash,'granted' from public.consent_catalog`,[patient]);
+  const id=crypto.randomUUID();await command({action:'start',id,source:'capture',recording_version:'consultation_recording.v1',microphone:true,remote_audio:true});
+  const rows=[];for(let i=0;i<3;i++){const tid=crypto.randomUUID();await actor(a,'select public.consultation_enqueue_chunk($1,$2,$3)',[patient,id,{client_id:tid,index:i,duration_seconds:30,audio_sha256:'a'.repeat(64),consent_version:'ai_consultation.v1'}]);rows.push(tid);}
+  await command({action:'finish',id,expected_revision:1,interrupted:false,expected_chunks:4});
+  for(const tid of rows){const token=crypto.randomUUID();await db.query("update public.consultation_tasks set status='running',run_token=$2,lease_until=now()+interval '2 minutes' where id=$1",[tid,token]);await db.query('select public.consultation_complete_task($1,$2,$3)',[tid,token,'a'.repeat(40000)]);}
+  expect((await db.query<{transcript:string;incomplete:boolean}>('select transcript,incomplete from public.consultation_sessions where id=$1',[id])).rows[0]).toEqual({transcript:['a'.repeat(40000),'a'.repeat(40000),'a'.repeat(40000)].join('\n'),incomplete:false});
+  expect((await db.query("select id from public.consultation_tasks where session_id=$1 and kind='summary'",[id])).rows).toHaveLength(0);
+  const tid=crypto.randomUUID();await actor(a,'select public.consultation_enqueue_chunk($1,$2,$3)',[patient,id,{client_id:tid,index:3,duration_seconds:1,audio_sha256:'a'.repeat(64),consent_version:'ai_consultation.v1'}]);const token=crypto.randomUUID();await db.query("update public.consultation_tasks set status='running',run_token=$2,lease_until=now()+interval '2 minutes' where id=$1",[tid,token]);await db.query('select public.consultation_complete_task($1,$2,$3)',[tid,token,'Último segmento']);expect((await db.query("select id from public.consultation_tasks where session_id=$1 and kind='summary'",[id])).rows).toHaveLength(1);
+  await db.query("update public.consultation_tasks set status='succeeded' where session_id=$1 and kind='summary'",[id]);
+ });
+ it('persiste etapas privadas con CAS y liquida respuesta en la misma transacción',async()=>{
+  await db.exec(await readFile(new URL('../../supabase/migrations/20261011140000_clinical_ai_budget.sql',import.meta.url),'utf8'));
+  const id=crypto.randomUUID();await command({action:'start',id,source:'manual'});await command({action:'draft',id,expected_revision:1,draft:'',transcript:'Texto ficticio'});await command({action:'summarize',id,expected_revision:2,consent_version:'ai_consultation.v1'});
+  const task=(await db.query<{id:string;request_key:string}>('select id,request_key from public.consultation_tasks where session_id=$1',[id])).rows[0];const token=crypto.randomUUID();await db.query("update public.consultation_tasks set status='running',run_token=$2,lease_until=now()+interval '2 minutes' where id=$1",[task.id,token]);
+  expect((await db.query<{steps:unknown[]}>('select public.consultation_begin_summary($1,$2,$3)steps',[task.id,token,'a'.repeat(64)])).rows[0].steps).toEqual([]);
+  const step={level:0,index:0,digest:'b'.repeat(64),text:'Resultado parcial ficticio'};
+  expect((await db.query<{ok:boolean}>('select public.consultation_save_summary_step($1,$2,$3,$4)ok',[task.id,token,'a'.repeat(64),step])).rows[0].ok).toBe(true);
+  expect((await db.query<{ok:boolean}>('select public.consultation_save_summary_step($1,$2,$3,$4)ok',[task.id,crypto.randomUUID(),'a'.repeat(64),step])).rows[0].ok).toBe(false);
+  await expect(db.query('select public.consultation_save_summary_step($1,$2,$3,$4)',[task.id,token,'a'.repeat(64),{...step,text:'Sobrescribir'}])).rejects.toThrow();
+  const key=`summary:${task.request_key}`,month=(await db.query<{month:string}>("select to_char(now()at time zone'America/Argentina/Buenos_Aires','YYYY-MM') as month")).rows[0].month;
+  await db.query('select public.reserve_clinical_ai_budget($1,$2,$3)',[key,month,100]);const response={fingerprint:'c'.repeat(64),value:{summary:'Respuesta privada ficticia'}};
+  expect((await db.query<{ok:boolean}>('select public.cache_clinical_provider_result($1,$2,$3,$4,$5,$6)ok',[key,100,task.id,token,2,response])).rows[0].ok).toBe(true);
+  expect((await db.query<{status:string;response_cache:unknown}>('select status,response_cache from public.clinical_ai_spend where operation_key=$1',[key])).rows[0]).toEqual({status:'charged',response_cache:{...response,patient_id:patient,task_id:task.id}});
+  await command({action:'draft',id,expected_revision:2,draft:'Edición profesional posterior'});expect((await db.query<{ok:boolean}>('select public.consultation_save_summary_step($1,$2,$3,$4)ok',[task.id,token,'a'.repeat(64),{...step,index:1}])).rows[0].ok).toBe(false);
+  await expect(actor(patientUser,'select public.consultation_begin_summary($1,$2,$3)',[task.id,token,'a'.repeat(64)])).rejects.toThrow();await expect(actor(a,'select * from public.clinical_ai_spend')).rejects.toThrow();
+ });
+ it('retirar Atención cancela el procesamiento aun conservando permisos de IA y grabación',async()=>{
+  const id=crypto.randomUUID();await command({action:'start',id,source:'manual'});await command({action:'draft',id,expected_revision:1,draft:'',transcript:'Texto ficticio'});await command({action:'summarize',id,expected_revision:2,consent_version:'ai_consultation.v1'});
+  const task=(await db.query<{id:string}>('select id from public.consultation_tasks where session_id=$1',[id])).rows[0];
+  await db.query("update public.consultation_tasks set status='running',run_token=$2,lease_until=now()+interval '2 minutes' where id=$1",[task.id,crypto.randomUUID()]);
+  expect((await db.query<{ok:boolean}>('select public.consultation_worker_allowed($1)ok',[task.id])).rows[0].ok).toBe(true);
+  await db.query("insert into public.consent_events(patient_id,purpose,text_version,text_hash,decision)select $1,purpose,text_version,text_hash,'withdrawn' from public.consent_catalog where purpose='care_relationship'",[patient]);
+  expect((await db.query<{ok:boolean}>('select public.consultation_worker_allowed($1)ok',[task.id])).rows[0].ok).toBe(false);
+  expect((await db.query<{status:string}>('select status from public.consultation_tasks where id=$1',[task.id])).rows[0].status).toBe('cancelled');
+  await expect(command({action:'summarize',id,expected_revision:2,consent_version:'ai_consultation.v1'})).rejects.toThrow();
+ });
+
 });
