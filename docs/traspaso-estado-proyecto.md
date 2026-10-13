@@ -1,5 +1,12 @@
 # Traspaso del proyecto (2026-10-01)
 
+## Plan aprobado Nutriboost/Nutridesk · actualización 13/10/2026
+
+Implementación integrada en copia aislada, aún sin publicar. [Estado vigente, límites y verificación](nutridesk-integracion-2026-10-13.md). Esta actualización corrige los estados antiguos de ramas y migraciones que aparecen más abajo. Gmail reemplaza Brevo como opción inicial de acceso; la contraseña de aplicación sigue pendiente. No editar el registro del otro hilo.
+
+[Instructivo actualizado](instructivo-plan-v-actualizado-2026-10-13.md) y [lista de habilitación con manifiesto](deployment/nutridesk-habilitacion-2026-10-13.md). Suite integrada del 13/10: 2.784 aprobadas, cero fallos, dos omitidas; tipos/compilación/migraciones/secretos aprobados. Kerr automático y pruebas reales de correo, voces y proveedores siguen pendientes. No declarar completo ni publicado.
+
+
 Una sola página para que cualquier agente (Claude, Codex u otro) siga sin tener el chat.
 Los detalles de cada tema están en los archivos que se nombran. Este archivo se actualiza
 cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facundo.
@@ -236,3 +243,5 @@ Pantalla `/crm/progreso-global` (PR #93): peso y comidas de toda la cartera por 
 ## Agenda, reservas y equipo · 2026-10-12 (local)
 
 Preparadas las dos migraciones de scheduling/booking/team, APIs, pantallas de agenda pública/equipo y trabajadores de Google para turnos nuevos y anteriores. Recepción no hereda acceso clínico; las fichas compartidas requieren asignación explícita y muestran ingreso/notas. Integración y pruebas finales en el hilo principal; no publicar ni afirmar conexión externa/fidelidad visual sin evidencia. [Traspaso detallado y controles](nutridesk-agenda-equipo-2026-10-12.md).
+
+Correcciones del 13/10: desconexión/refresh con época y CAS, notas delegadas con bloqueo compartido con revocación, escrituras Google cercadas y recuperación explícita de envíos inciertos. Migración nueva `20261012134000_scheduling_concurrency.sql`, sin aplicar. Suite de agenda: 47 pruebas GREEN; sin conexión real al proveedor ni publicación. [Contratos, evidencia y Regression Guard](scheduling-concurrency-2026-10-13.md).

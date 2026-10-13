@@ -13,6 +13,12 @@ const post = (path:string,body:unknown)=>app.request(path,{method:'POST',headers
 
 beforeEach(()=>{resetPatientImportMemory();resetStore();});
 describe('importación en demostración',()=>{
+  it('no completa un antecedente pendiente alretomar contactos sin el texto original',async()=>{
+    const input={id:crypto.randomUUID(),candidates:[{...candidate(),email:'',action:'append',patient_id:'pat-sofia',history:[{category:'history',text:'Antecedente ficticio pendiente',origin}]}]};
+    await post('/api/patient-imports',input);const failed=await(await post(`/api/patient-imports/${input.id}/commit`,input)).json();
+    expect(failed.batch.status).toBe('partial');expect(failed.batch.candidates[0].history).toEqual([]);
+    expect((await post(`/api/patient-imports/${input.id}/commit`,{id:input.id,candidates:failed.batch.candidates})).status).toBe(409);
+  });
   it('crea ficha sin cuenta ni invitación y reintenta sin duplicarla',async()=>{
     const input={id:crypto.randomUUID(),candidates:[candidate()]}; const before=getStore().patientInvites.length;
     expect((await post('/api/patient-imports',input)).status).toBe(201);

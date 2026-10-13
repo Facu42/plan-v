@@ -3,9 +3,14 @@ import { privilegedDb } from '../db/supabase-client.js';
 export const MAX_CLINICAL_MICROS = 5_000_000;
 export type Reservation = { key: string; month: string; micros: number };
 export type BudgetStatus = 'charged' | 'uncertain' | 'released';
+export type CachedClinicalResult={fingerprint:string;value:unknown};
+export type CacheScope={taskId:string;runToken?:string;revision:number};
 export interface ClinicalBudget {
   reserve(input: Reservation): Promise<void>;
   settle(key: string, status: BudgetStatus, chargedMicros: number): Promise<void>;
+  readResult?(key:string):Promise<CachedClinicalResult|undefined>;
+  readState?(key:string):Promise<'reserved'|BudgetStatus|undefined>;
+  chargeResult?(key:string,micros:number,result:CachedClinicalResult,scope:CacheScope):Promise<boolean>;
 }
 
 export function argentinaBudgetMonth(date = new Date()): string {
@@ -22,6 +27,10 @@ export function estimateSummaryMicros(text: string, outputTokens: number): numbe
 }
 
 export class MemoryClinicalBudget implements ClinicalBudget {
+  async readState(key:string){return this.rows.get(key)?.status;}
+  private readonly results=new Map<string,CachedClinicalResult>();
+  async readResult(key:string){return structuredClone(this.results.get(key));}
+  async chargeResult(key:string,micros:number,result:CachedClinicalResult){await this.settle(key,'charged',micros);this.results.set(key,structuredClone(result));return true;}
   private readonly rows = new Map<string, Reservation & { status: 'reserved' | BudgetStatus; chargedMicros: number }>();
   constructor(private readonly cap = MAX_CLINICAL_MICROS) {
     if (!Number.isSafeInteger(cap) || cap < 0 || cap > MAX_CLINICAL_MICROS) throw new Error('El tope no puede superar USD 5.');
@@ -48,9 +57,14 @@ export class MemoryClinicalBudget implements ClinicalBudget {
     this.rows.set(key, { ...row, status, chargedMicros: status === 'released' ? 0 : chargedMicros });
   }
 }
+/** One ledger for every new clinical/document operation in a demo process. */
+export const clinicalMemoryBudget=new MemoryClinicalBudget();
 
 /** Las funciones SQL son exclusivas del trabajador; ninguna usuaria puede gastar el saldo directamente. */
 export class SupabaseClinicalBudget implements ClinicalBudget {
+  async readState(key:string){const {data,error}=await privilegedDb().from('clinical_ai_spend').select('status').eq('operation_key',key).maybeSingle();if(error)throw new Error('No pudimos verificar el procesamiento anterior. Se conserva la reserva.');return data?.status as 'reserved'|BudgetStatus|undefined;}
+  async readResult(key:string){const {data,error}=await privilegedDb().from('clinical_ai_spend').select('response_cache').eq('operation_key',key).eq('status','charged').maybeSingle();if(error)throw new Error('No pudimos recuperar la etapa privada.');return data?.response_cache??undefined;}
+  async chargeResult(key:string,micros:number,result:CachedClinicalResult,scope:CacheScope){const {data,error}=await privilegedDb().rpc('cache_clinical_provider_result',{operation_key:key,cost_micros:micros,task_id:scope.taskId,token:scope.runToken,task_revision:scope.revision,response_value:result});if(error)throw new Error('No pudimos confirmar la etapa y su gasto. La reserva se conserva.');return data===true;}
   async reserve(input: Reservation): Promise<void> {
     const { error } = await privilegedDb().rpc('reserve_clinical_ai_budget', { operation_key: input.key, budget_month: input.month, reserve_micros: input.micros });
     if (error) throw new Error('La bolsa de IA no está disponible o llegó a su límite.');

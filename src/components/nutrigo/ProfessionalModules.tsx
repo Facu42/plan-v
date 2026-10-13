@@ -9,6 +9,7 @@ import { ConfigurationReports } from './ConfigurationReports';
 import './operational-panels.css';
 
 export function PlannedModulesNav({onOpen,selectedId}:{onOpen:(href:string)=>void;selectedId?:string}){
+  if(!PROFESSIONAL_MODULES.some(m=>!m.href))return null;
   return <details className="pm-nav-future" open={Boolean(selectedId)}><summary><Icon name="clock" size={17}/><span>En preparación</span><span className="pm-nav-count">{PROFESSIONAL_MODULES.filter(m=>!m.href).length}</span></summary>
     <div>{PROFESSIONAL_MODULES.filter(m=>!m.href).map(m=><button key={m.id} type="button" aria-current={selectedId===m.id?'page':undefined} onClick={()=>onOpen(plannedModuleHref(m.id))}><Icon name={m.icon} size={17}/><span>{m.title}</span></button>)}</div>
   </details>;

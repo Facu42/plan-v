@@ -53,6 +53,8 @@ describe('importación Postgres multi consultorio',()=>{
     await asUser(a,'select public.prepare_patient_import($1,$2::jsonb)',[id,JSON.stringify({id,candidates:[row,next]})]);
     const clinical={...row,history:[{category:'history',text:'Historia privada',origin}]};
     expect((await asUser(a,'select public.apply_patient_import_row($1,$2::jsonb) as result',[id,JSON.stringify(clinical)]))[0].result.status).toBe('error');
+    await expect(asUser(a,'select public.apply_patient_import_row($1,$2::jsonb)',[id,JSON.stringify(row)])).rejects.toThrow();
+    await expect(asUser(a,'select public.apply_patient_import_row($1,$2::jsonb)',[id,JSON.stringify({...clinical,history:[{...clinical.history[0],text:'Otro contenido'}]})])).rejects.toThrow();
     expect((await asUser(a,'select public.apply_patient_import_row($1,$2::jsonb) as result',[id,JSON.stringify(next)]))[0].result.status).toBe('created');
     expect((await asUser(a,'select status from public.patient_import_batches where id=$1',[id]))[0].status).toBe('partial');
     await expect(asUser(a,'select public.apply_patient_import_row($1,$2::jsonb)',[id,JSON.stringify({...row,name:'Manipulado'})])).rejects.toThrow();

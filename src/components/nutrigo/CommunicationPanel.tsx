@@ -3,6 +3,7 @@ import { request } from '../../api/client';
 import type { CommunicationBoard } from '../../types/communications';
 import { friendlyError } from '../../lib/error-messages';
 import { NvButton,NvCard } from './primitives';
+import {EmailCommunicationPanel} from './EmailCommunicationPanel';
 const labels:Record<string,string>={queued:'Pendiente',sending:'En procesamiento',accepted:'Aceptado por Meta',failed:'Falló',uncertain:'Entrega incierta: revisar',skipped:'Sin consentimiento',cancelled:'Cancelado por baja',sent:'Enviado',delivered:'Entregado',read:'Leído'};
 export function CommunicationPanel() {
  const [board,setBoard]=useState<CommunicationBoard|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[selected,setSelected]=useState<string[]>([]),[template,setTemplate]=useState(''),[language,setLanguage]=useState('es_AR'),[review,setReview]=useState(false),[visible,setVisible]=useState(50);
@@ -15,7 +16,7 @@ export function CommunicationPanel() {
  async function confirm(){if(lock.current||!preview)return;lock.current=true;setBusy(true);setError('');try{requestKey.current??=crypto.randomUUID();await request('/api/portfolio/communications',{method:'POST',body:JSON.stringify({request_key:requestKey.current,template,language,template_hash:preview.hash,patient_ids:selected})});await load();setReview(false);setSelected([]);requestKey.current=null;}catch(e){setError(friendlyError(e));}finally{setBusy(false);lock.current=false;}}
  async function dispatch(id:string){if(lock.current)return;lock.current=true;setBusy(true);setError('');try{await request(`/api/portfolio/communications/${encodeURIComponent(id)}/dispatch`,{method:'POST'});await load();}catch(e){setError(friendlyError(e));}finally{setBusy(false);lock.current=false;}}
  const names=new Map(board?.patients.map(p=>[p.id,p.name])??[]);
- return <NvCard title="Difusiones por WhatsApp" className="care-panel ops-panel">
+ return <><NvCard title="Difusiones por WhatsApp" className="care-panel ops-panel">
   <p>Seleccioná pacientes y revisá una plantilla estática aprobada en tu cuenta de WhatsApp Business. No se envían notas clínicas ni textos libres. Cada destinatario conserva su resultado individual.</p>
   {!board&&!error&&<p role="status">Cargando canales y preferencias…</p>}
   {board&&<><p role="status">{board.mode==='demo'?'Demo: no se envían mensajes externos.':board.enabled?'Integración activada. Los envíos pueden tener costo.':'WhatsApp sin activar. Configurá la cuenta oficial antes de enviar.'}</p>
@@ -29,5 +30,5 @@ export function CommunicationPanel() {
   <ul>{board.deliveries.slice(0,visible).map(d=><li key={d.id}>{names.get(d.patient_id)??'Paciente no disponible'} · {labels[d.state]}{d.delivery_status&&` · ${labels[d.delivery_status]}`}{d.state==='queued'&&<NvButton disabled={busy||!board.enabled} onClick={()=>void dispatch(d.id)}>Procesar envío</NvButton>}{d.state==='sending'&&<NvButton disabled={busy||!board.enabled} onClick={()=>void dispatch(d.id)}>Revisar reserva</NvButton>}</li>)}</ul>{visible<board.deliveries.length&&<NvButton onClick={()=>setVisible(v=>v+50)}>Ver más resultados</NvButton>}
   <p>Un envío incierto no se repite automáticamente. «Aceptado por Meta» requiere un evento verificado para mostrar «Entregado» o «Leído».</p></>}
   {error&&<p role="alert">{error}</p>}
- </NvCard>;
+ </NvCard><EmailCommunicationPanel/></>;
 }

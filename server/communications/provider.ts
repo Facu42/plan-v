@@ -22,7 +22,7 @@ export async function readApprovedTemplate(config:WhatsAppConfig,name:string,lan
     if(!result.ok)throw new DeliveryError(false);
     const body=await result.json() as {data?:Array<{name:string;language:string;status:string;components?:Array<{type?:string;format?:string;text?:string}>}>};
     const template=body.data?.find(t=>t.name===name&&t.language===language&&t.status==='APPROVED'
-      &&t.components?.some(c=>c.type==='BODY'&&/\b(BAJA|STOP)\b/i.test(c.text??''))
+      &&t.components?.length===1&&t.components.some(c=>c.type==='BODY'&&/\b(BAJA|STOP)\b/i.test(c.text??''))
       &&t.components.every(c=>!c.text?.includes('{{')&&(!c.format||c.format==='TEXT')&&c.type!=='BUTTONS'));
     const text=template?.components?.find(c=>c.type==='BODY')?.text;if(!text)throw new DeliveryError(false);return text;
   }catch{throw new DeliveryError(false);}

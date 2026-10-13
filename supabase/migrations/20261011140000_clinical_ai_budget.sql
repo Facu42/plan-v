@@ -10,10 +10,11 @@ create table public.clinical_ai_spend (
   reserved_micros bigint not null check (reserved_micros >= 0),
   charged_micros bigint not null default 0 check (charged_micros >= 0 and charged_micros <= reserved_micros),
   status text not null default 'reserved' check (status in ('reserved','charged','uncertain','released')),
-  created_at timestamptz not null default now()
+  response_cache jsonb, created_at timestamptz not null default now()
 );
 alter table public.clinical_ai_budget_months enable row level security;
 alter table public.clinical_ai_spend enable row level security;
+comment on column public.clinical_ai_spend.response_cache is 'PHI: temporary private provider checkpoint; expired after seven days and on consent withdrawal';
 revoke all on public.clinical_ai_budget_months,public.clinical_ai_spend from public,anon,authenticated;
 grant select,insert,update on public.clinical_ai_budget_months,public.clinical_ai_spend to service_role;
 
@@ -27,7 +28,7 @@ begin
   if m.used_micros+reserve_micros>m.limit_micros then raise exception 'Bolsa agotada'; end if;
   insert into public.clinical_ai_spend(operation_key,month,reserved_micros) values(operation_key,budget_month,reserve_micros)
     on conflict on constraint clinical_ai_spend_pkey do update
-    set month=excluded.month,reserved_micros=excluded.reserved_micros,charged_micros=0,status='reserved',created_at=now()
+    set month=excluded.month,reserved_micros=excluded.reserved_micros,charged_micros=0,response_cache=null,status='reserved',created_at=now()
     where clinical_ai_spend.status='released';
   if not found then raise exception 'Operación ya reservada'; end if;
   update public.clinical_ai_budget_months set used_micros=used_micros+reserve_micros where month=budget_month;

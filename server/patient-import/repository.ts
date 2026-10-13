@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
+import { isDeepStrictEqual } from 'node:util';
 import type { ImportBatch, ImportBatchInput, ImportCandidate, ImportContact, ImportResult, ImportedHistory } from '../../src/types/patient-import.js';
 import { careDataSchema } from '../../src/types/care.js';
 import type { Patient } from '../../src/types/index.js';
@@ -51,7 +52,7 @@ export async function saveImportBatch(input:ImportBatchInput,persistent:boolean)
   const payload=contactSnapshot(input);
   if (persistent) { const {error}=await getRequestDb().rpc('prepare_patient_import',{batch_id:input.id,payload_value:payload});dbError(error);return readImportBatch(input.id,true); }
   const current=batches.get(input.id);
-  if(current){if(JSON.stringify(contactSnapshot(current))!==JSON.stringify(payload))throw new CareError(409,'Ese lote ya contiene otra revisión.');return current;}
+  if(current){if(!isDeepStrictEqual(contactSnapshot(current),payload))throw new CareError(409,'Ese lote ya contiene otra revisión.');return current;}
   const batch:ImportBatch={...payload,results:[],created_at:new Date().toISOString(),status:'review'};batches.set(batch.id,batch);return batch;
 }
 function memoryPatient(row:ImportCandidate):Patient {
@@ -100,12 +101,17 @@ export async function prepareImportedInvite(patientId:string,persistent:boolean)
 }
 export async function commitImportBatch(input:ImportBatchInput,persistent:boolean):Promise<ImportBatch> {
   const batch=await readImportBatch(input.id,persistent);
-  if(JSON.stringify({id:batch.id,candidates:batch.candidates})!==JSON.stringify(contactSnapshot(input)))throw new CareError(409,'La revisión cambió. Prepará un lote nuevo antes de guardar.');
+  if(!isDeepStrictEqual({id:batch.id,candidates:batch.candidates},contactSnapshot(input)))throw new CareError(409,'La revisión cambió. Prepará un lote nuevo antes de guardar.');
   for(const row of input.candidates){
     if(batch.results.some(r=>r.key===row.key&&r.status!=='error'))continue;
+    const previous=batch.results.find(r=>r.key===row.key);
+    const clinicalPending=row.history.length>0||row.measurements.length>0;
+    const clinicalDigest=createHash('sha256').update(JSON.stringify({history:row.history,measurements:row.measurements})).digest('hex');
+    if(previous?.clinical_pending&&(!clinicalPending||(!persistent&&previous.clinical_digest!==clinicalDigest)))throw new CareError(409,'Releé los archivos originales y revisá los datos clínicos pendientes. No se puede completar esta fila sólo con el contacto.');
     if(persistent){const {error}=await getRequestDb().rpc('apply_patient_import_row',{batch_id:input.id,row_value:row});dbError(error);}
     else {
       let result:ImportResult;try{result=await applyMemory(row);}catch{result={key:row.key,status:'error',patient_id:null,message:'No se guardó esta fila. Revisá la ficha, los datos y sus permisos.'};}
+      if(result.status==='error'&&clinicalPending){result.clinical_pending=true;result.clinical_digest=clinicalDigest;}
       batch.results=batch.results.filter(r=>r.key!==row.key).concat(result);
     }
   }

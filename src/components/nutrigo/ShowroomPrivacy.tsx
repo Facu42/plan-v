@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { api } from '../../api/client';
 import { NvButton } from './primitives';
+import { ContactPreferences } from './ContactPreferences';
 
 type Step = 'idle' | 'exporting' | 'exported' | 'confirm-delete' | 'deleting' | 'deleted';
 
@@ -78,6 +79,7 @@ export function ShowroomPrivacy({ patientId, onClose, onDeleted }: { patientId: 
           <NvButton className="nv-danger" onClick={remove} disabled={busy}>{busy ? 'Enviando…' : 'Sí, borrar mi cuenta'}</NvButton>
         </footer>
       </> : <>
+        <ContactPreferences />
         <div className="nv-privacy-row">
           <div><h3>Descargar una copia</h3><p>Un archivo con lo que cargaste: diario, medidas, mensajes, turnos y tu ingreso.</p></div>
           <NvButton className="nv-soft" onClick={download} disabled={busy}>{step === 'exporting' ? 'Preparando…' : step === 'exported' ? 'Descargar otra vez' : 'Descargar'}</NvButton>

@@ -1,5 +1,12 @@
 # Plan por apartados (2026-09-28)
 
+## Plan aprobado Nutriboost/Nutridesk · actualización 13/10/2026
+
+Implementación integrada en copia aislada, aún sin publicar. [Estado vigente, límites y verificación](nutridesk-integracion-2026-10-13.md). Esta actualización corrige los estados antiguos de ramas y migraciones que aparecen más abajo. Gmail reemplaza Brevo como opción inicial de acceso; la contraseña de aplicación sigue pendiente. No editar el registro del otro hilo.
+
+[Instructivo actualizado](instructivo-plan-v-actualizado-2026-10-13.md) y [lista de habilitación con manifiesto](deployment/nutridesk-habilitacion-2026-10-13.md). Revisión independiente clínica/operaciones e integración comprobadas; faltan los pasos externos declarados y PRs por apartado. Los informes anteriores conservan evidencia histórica, no sustituyen el cierre integrado.
+
+
 Pedido de Facundo del 2026-09-28: usar los agentes de
 [agency-agents](https://github.com/msitarzewski/agency-agents) para desarrollar ordenadamente
 todo lo que le falta a Plan V. Sus sugerencias: app móvil, seguridad, diseño y experiencia

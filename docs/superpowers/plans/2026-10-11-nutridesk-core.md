@@ -3,11 +3,12 @@
 Objetivo: implementar el plan aprobado sin alterar main ni producción. Stack: React, Hono, Supabase/Postgres y Vitest. Spec: pedido de implementación del 11/10/2026 y docs/nutridesk-implementacion-2026-10-11.md.
 
 ## Entregas y contratos
-- [ ] Correos: probar destinos y fallos; `requestAccountRecovery(email, redirectTo, send, log)` mantiene reconocimiento genérico y registra sólo estados enumerados. Invitaciones de acceso siempre salen de Supabase Auth; recordatorios conservan Brevo. Configurador SMTP con comprobación por defecto y secretos fuera del repo.
-- [ ] Carteras: `collectPatientPages(loadPage)` recorre todos los lotes; `loadCarteraUnread(list)` sigue cursor y deduplica por id. Probar mil pacientes, página vacía inconsistente y cursores repetidos antes de implementar.
-- [ ] Copiloto: prueba de prompt para servicio multi-consultorio; instrucciones neutrales, sin identidades fijas.
-- [ ] Procesamiento: proveedor Groq autorizado, duración WAV validada, retención cero confirmada y ledger global con reserva atómica, identificador por operación, gasto incierto retenido y máximo USD 5 por mes argentino. Mantener OpenRouter gratuito existente.
-- [ ] Integrar las entregas de ficha, consultas e importación en ramas apiladas; revisar contratos, pruebas focalizadas, suite completa, tipos, migraciones, build y secretos. Registrar informe del guard.
+- [x] Correos: destinos y fallos probados en contratos; `requestAccountRecovery(email, redirectTo, send, log)` mantiene respuesta genérica y registra sólo estados enumerados. Acceso siempre Supabase Auth. Configurador SMTP Gmail según elección del usuario, comprobación por defecto y secretos fuera del repo; Gmail/Brevo operativos separados y desactivados por defecto. Entrega real pendiente de contraseña/configuración.
+- [x] Carteras: `collectPatientPages(loadPage)` recorre todos los lotes; `loadCarteraUnread(list)` sigue cursor y deduplica por id. Casos de mil pacientes, página vacía inconsistente y cursores repetidos cubiertos.
+- [x] Copiloto: prompt multi-consultorio probado, instrucciones neutrales sin identidad fija.
+- [x] Procesamiento implementado: duración WAV validada, ledger global con reserva atómica, identificador por operación, gasto incierto retenido incluso ante claves nuevas, USD 5 por mes argentino. OpenRouter gratuito conservado. La activación de Groq exige comprobar retención cero y cuenta gratuita; aún pendientes.
+- [x] Integración local y revisión independiente de contratos, pruebas, tipos, migraciones, build y secretos. [Informe definitivo y Regression Guard](../../nutridesk-integracion-2026-10-13.md).
+- [ ] PRs por apartado con dependencias explícitas; autorización y habilitación externa por etapas según [lista obligatoria](../../deployment/nutridesk-habilitacion-2026-10-13.md).
 
 ## Flujos críticos
 Registro/login/recuperación, invitación/vinculación, cartera/no leídos, planes publicados, fotos privadas, consentimiento y aislamiento. Hay pruebas en identity, auth, care, assets, plans y contracts. SMTP real y proveedores nuevos requieren cuentas/configuración externa: no contarlos como verificados mediante mocks.

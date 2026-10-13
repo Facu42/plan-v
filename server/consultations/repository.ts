@@ -5,12 +5,30 @@ import { CareError } from '../care/errors.js';
 import { registerDemoState } from '../demo/state.js';
 import { getPatient } from '../store.js';
 import { decodeConsultationWav } from './audio.js';
-import { commandMemory, consultationMemoryView, sessions, shared, tasks } from './memory.js';
-import type { ConsultationCommand, ConsultationScope, ConsultationSession, ConsultationTask, ConsultationView } from '../../src/types/consultations.js';
+import { commandMemory, consultationMemoryView, sessions, shared, tasks,completions,completion_events,completeAppointmentMemory } from './memory.js';
+import type { ConsultationCommand, ConsultationScope, ConsultationSession, ConsultationTask, ConsultationView,ConsultationAppointmentCompletion,ConsultationCompletionView,ConsultationCompletionInput,ConsultationCompletion } from '../../src/types/consultations.js';
 
 export const AUDIO_BUCKET = 'consultation-audio-private';
 export const memoryAudio = new Map<string, Uint8Array>();
-registerDemoState('consultations', () => ({ sessions, shared, tasks, audio: memoryAudio }));
+registerDemoState('consultations', () => ({ sessions, shared, tasks, audio: memoryAudio,completions,completion_events }));
+function memoryAppointments(scope:ConsultationScope):ConsultationAppointmentCompletion[]{
+ const patient=getPatient(scope.patientId);if(!patient||patient.deactivated_at||patient.anonymized_at)throw new CareError(403,'La ficha no está disponible.');
+ const appointments=new Map<string,ConsultationAppointmentCompletion>();const a=patient.appointment;
+ // A history event UUID is not an appointment UUID; never infer one from elapsed events.
+ if(a?.id&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(a.id)&&a.starts_at)appointments.set(a.id,{appointment_id:a.id,starts_at:a.starts_at,duration_min:a.duration,channel:a.channel,status:'scheduled',completed:false,revision:0,marked_at:null,marked_by:null,appointment_starts_at:null});
+ for(const c of completions.values())if(c.patient_id===scope.patientId&&c.nutritionist_id===scope.nutritionistId){const existing=appointments.get(c.appointment_id);appointments.set(c.appointment_id,{appointment_id:c.appointment_id,starts_at:c.appointment_starts_at,duration_min:existing?.duration_min??0,channel:existing?.channel??'consulta',status:existing?.status??'done',...existing,completed:c.completed,revision:c.revision,marked_at:c.marked_at,marked_by:c.marked_by,appointment_starts_at:c.appointment_starts_at});}
+ return [...appointments.values()].sort((a,b)=>b.starts_at.localeCompare(a.starts_at)||a.appointment_id.localeCompare(b.appointment_id));
+}
+export async function consultationCompletionView(scope:ConsultationScope,persistent:boolean,offset=0,limit=50):Promise<ConsultationCompletionView>{
+ await requireCareConsent(scope.patientId,persistent,'care_relationship');
+ if(!persistent){const appointments=memoryAppointments(scope);return{appointments:appointments.slice(offset,offset+limit),has_more:appointments.length>offset+limit,total_completed:appointments.filter(a=>a.completed).length};}
+ const {data,error}=await getRequestDb().rpc('consultation_completion_list',{target:scope.patientId,page_offset:offset,page_limit:limit});consultationDbError(error);return data as ConsultationCompletionView;
+}
+export async function completeConsultationAppointment(scope:ConsultationScope,input:ConsultationCompletionInput,persistent:boolean):Promise<ConsultationCompletion>{
+ await requireCareConsent(scope.patientId,persistent,'care_relationship');
+ if(!persistent){const appointment=memoryAppointments(scope).find(a=>a.appointment_id===input.appointment_id);if(!appointment)throw new CareError(404,'Turno no encontrado en esta ficha.');return completeAppointmentMemory(scope,input,appointment);}
+ const {data,error}=await getRequestDb().rpc('consultation_completion_command',{target:scope.patientId,payload:input});consultationDbError(error);return data as ConsultationCompletion;
+}
 export function consultationDbError(error: {code?:string} | null) {
   if (!error) return;
   if (['42P01','42883','PGRST202','PGRST205'].includes(error.code ?? '')) throw new CareError(501, 'Las consultas requieren instalar su migración en este entorno.');
@@ -45,6 +63,7 @@ export async function enqueueConsultationAudio(scope:ConsultationScope,sessionId
   const hash=createHash('sha256').update(audio).digest('hex'); let task:ConsultationTask;
   if (!persistent) {
     const s=sessions.get(sessionId); if (!s || s.patient_id!==scope.patientId || s.nutritionist_id!==scope.nutritionistId) throw new CareError(404,'Consulta no encontrada.');
+    if(s.expected_chunks!=null&&input.index>=s.expected_chunks)throw new CareError(409,'Ese segmento no forma parte de la consulta finalizada.');
     if (s.source==='manual' || s.manual_transcript) throw new CareError(409,'Esta consulta usa una transcripción manual.');
     const existing=[...tasks.values()].find(t=>t.session_id===sessionId && t.kind==='chunk' && t.index===input.index);
     if (existing && (existing.id!==input.client_id || existing.audio_sha256!==hash)) throw new CareError(409,'Ese segmento ya existe con otro contenido.');
@@ -52,6 +71,7 @@ export async function enqueueConsultationAudio(scope:ConsultationScope,sessionId
     tasks.set(task.id,task); if (task.status==='uploading') { memoryAudio.set(task.audio_path!,new Uint8Array(audio)); task.status='queued'; task.error=null; task.attempts=0; }
   } else {
     const {data,error}=await getRequestDb().rpc('consultation_enqueue_chunk',{target:scope.patientId,sid:sessionId,payload:{client_id:input.client_id,index:input.index,duration_seconds:durationSeconds,audio_sha256:hash,consent_version:input.consent_version}}); consultationDbError(error); task=data as ConsultationTask;
+    if(Math.abs(task.duration_seconds-durationSeconds)>0.000001)throw new CareError(409,'La duración reservada no coincide con el audio real. Prepará un segmento nuevo.');
     if (task.status==='uploading') {
       const db=privilegedDb(); const upload=await db.storage.from(AUDIO_BUCKET).upload(task.audio_path!,audio,{contentType:'audio/wav',upsert:true});
       if (upload.error) throw new CareError(503,'No se pudo guardar el audio privado. Reintentá el mismo segmento.');
@@ -66,6 +86,7 @@ export async function enqueueConsultationAudio(scope:ConsultationScope,sessionId
 /** Only the internal worker uses this; audio is never exposed through a signed public URL. */
 export async function cleanupExpiredConsultationAudio(limit=100) {
   const db=privilegedDb();
+  const cache=await db.from('clinical_ai_spend').update({response_cache:null}).not('response_cache','is',null).lte('created_at',new Date(Date.now()-7*86400000).toISOString());consultationDbError(cache.error);
   const interrupted=await db.from('consultation_sessions').update({status:'finished',incomplete:true,finished_at:new Date().toISOString()}).eq('status','recording').lte('started_at',new Date(Date.now()-3*3600000).toISOString()); consultationDbError(interrupted.error);
   const {data,error}=await db.from('consultation_tasks').select('id,audio_path').not('audio_path','is',null).is('audio_deleted_at',null).lte('expires_at',new Date().toISOString()).limit(Math.min(limit,100)); consultationDbError(error);
   let deleted=0;
@@ -81,6 +102,7 @@ export async function purgeConsultationAudioForPatient(patientId:string,persiste
   if(!persistent){const p=getPatient(patientId);if(!p?.deactivated_at)throw new CareError(403,'Primero debe confirmarse el retiro de la cuenta.');for(const t of tasks.values())if(t.patient_id===patientId){if(t.audio_path)memoryAudio.delete(t.audio_path);t.status='cancelled';t.text='';t.segments=[];t.run_token=null;t.lease_until=null;}return;}
   const db=privilegedDb();const p=await db.from('patients').select('deactivated_at,anonymized_at').eq('id',patientId).single();consultationDbError(p.error);
   if(!p.data?.deactivated_at&&!p.data?.anonymized_at)throw new CareError(403,'Primero debe confirmarse el retiro de la cuenta.');
+  const cache=await db.from('clinical_ai_spend').update({response_cache:null}).eq('response_cache->>patient_id',patientId);consultationDbError(cache.error);
   const cancel=await db.from('consultation_tasks').update({status:'cancelled',run_token:null,lease_until:null,text:'',segments:[]}).eq('patient_id',patientId);consultationDbError(cancel.error);
   for(;;){const pending=await db.from('consultation_tasks').select('id,audio_path').eq('patient_id',patientId).not('audio_path','is',null).is('audio_deleted_at',null).limit(100);consultationDbError(pending.error);if(!pending.data?.length)break;const removal=await db.storage.from(AUDIO_BUCKET).remove(pending.data.map(t=>String(t.audio_path)));if(removal.error)throw new CareError(503,'No se pudo completar el retiro del audio privado.');const done=await db.from('consultation_tasks').update({audio_deleted_at:new Date().toISOString()}).in('id',pending.data.map(t=>String(t.id)));consultationDbError(done.error);}
 }

@@ -11,16 +11,16 @@ export async function buildClinicalPdf(input:{title:string;patientName:string;br
   if(input.brand.logo)logo=input.brand.logo.startsWith('data:image/png')?await document.embedPng(input.brand.logo):await document.embedJpg(input.brand.logo);
   const ink=rgb(39/255,41/255,50/255),line=rgb(225/255,225/255,226/255),green=rgb(194/255,230/255,110/255);let page=document.addPage([595.28,841.89]);let y=760;
   const addPage=()=>{page=document.addPage([595.28,841.89]);y=790;};
-  const write=(text:string,size=10)=>{
+  const write=(text:string,size=10,width=510)=>{
     const normalized=String(text).replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'');
     for(const paragraph of normalized.split('\n')){
       const words=paragraph.split(/\s+/);let current='';
       const flush=()=>{if(y<65)addPage();page.drawText(current,{x:42,y,size,font,color:ink});y-=size*1.6;current='';};
-      for(const word of words){if(font.widthOfTextAtSize(word,size)>510){if(current)flush();for(const char of word){if(font.widthOfTextAtSize(current+char,size)>510)flush();current+=char;}continue;}const next=current?`${current} ${word}`:word;if(font.widthOfTextAtSize(next,size)>510){flush();current=word;}else current=next;}flush();
+      for(const word of words){if(font.widthOfTextAtSize(word,size)>width){if(current)flush();for(const char of word){if(font.widthOfTextAtSize(current+char,size)>width)flush();current+=char;}continue;}const next=current?`${current} ${word}`:word;if(font.widthOfTextAtSize(next,size)>width){flush();current=word;}else current=next;}flush();
     }
   };
   if(logo){const scale=Math.min(72/logo.width,48/logo.height);page.drawImage(logo,{x:480,y:775,width:logo.width*scale,height:logo.height*scale});}
-  page.drawText(input.brand.name,{x:42,y:798,size:16,font,color:ink});write(input.brand.contact,9);if(input.brand.license)write(`Matrícula: ${input.brand.license}`,9);
+  y=798;write(input.brand.name,16,400);y=Math.min(y,760);write(input.brand.contact,9);if(input.brand.license)write(`Matrícula: ${input.brand.license}`,9);
   y-=8;write(input.title,16);write(`Paciente: ${input.patientName}`,12);write(`Preparado el ${new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires'}).format(new Date())}`,9);
   if(input.privateNotes)write('Uso del consultorio: contiene notas privadas.',10);
   for(const chart of input.charts??[]){
@@ -34,7 +34,11 @@ export async function buildClinicalPdf(input:{title:string;patientName:string;br
     y=bottom-28;write(`${points[0].date} — ${points[points.length-1].date}`,8);y-=8;
   }
   for(const section of input.sections){y-=12;write(section.title,12);for(const value of section.lines)write(value);}
-  for(const [index,p]of document.getPages().entries())p.drawText(`${input.brand.name} · ${index+1} / ${document.getPageCount()}`,{x:42,y:30,size:8,font,color:ink});
+  for(const [index,p]of document.getPages().entries()){
+    const footer=`${input.brand.name} · ${index+1} / ${document.getPageCount()}`;
+    const size=Math.min(8,510/Math.max(1,font.widthOfTextAtSize(footer,1)));
+    p.drawText(footer,{x:42,y:30,size,font,color:ink});
+  }
   return document.save();
 }
 export function downloadClinicalPdf(bytes:Uint8Array,filename:string){const blob=new Blob([bytes as Uint8Array<ArrayBuffer>],{type:'application/pdf'});const url=URL.createObjectURL(blob);const anchor=document.createElement('a');anchor.href=url;anchor.download=filename;anchor.click();setTimeout(()=>URL.revokeObjectURL(url),60000);}

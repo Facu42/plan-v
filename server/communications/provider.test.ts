@@ -49,6 +49,13 @@ describe('WhatsApp oficial sin entrega simulada', () => {
     await expect(sendApprovedTemplate(config,'+5491112345678','aviso','es_AR',fetcher,async()=>false)).rejects.toThrow();
     expect(fetcher).toHaveBeenCalledTimes(1);
   });
+  it('rechaza encabezados y pies no incluidos en la revisión del cuerpo',async()=>{
+    for(const type of ['HEADER','FOOTER']){
+      const fetcher=vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({data:[{name:'aviso',language:'es_AR',status:'APPROVED',components:[{type:'BODY',text:'Respondé BAJA'},{type,format:'TEXT',text:'Contenido ajeno a la revisión'}]}]})));
+      await expect(readApprovedTemplate(config,'aviso','es_AR',fetcher)).rejects.toThrow();
+      expect(fetcher).toHaveBeenCalledTimes(1);
+    }
+  });
   it('no envía contenido que cambió después de la revisión profesional',async()=>{
     const fetcher=vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({data:[{name:'aviso',language:'es_AR',status:'APPROVED',components:[{type:'BODY',text:'Respondé BAJA'}]}]})));
     await expect(sendApprovedTemplate(config,'+5491112345678','aviso','es_AR',fetcher,async()=>true,'0'.repeat(64))).rejects.toThrow();

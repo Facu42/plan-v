@@ -3,6 +3,7 @@ import type { MealLog, Patient } from '../../types';
 import type { CrmEntry } from '../crm/crm-entry';
 import { api } from '../../api/client';
 import { careApi } from '../../api/care';
+import { consultationsApi } from '../../api/consultations';
 import { useAppStore } from '../../store/useAppStore';
 import { ShowroomPatientRecord } from './ShowroomPatientRecord';
 import { ShowroomIntakeReview } from './ShowroomIntakeReview';
@@ -27,12 +28,18 @@ import { ProfessionalLedgerSummary } from './ProfessionalLedgerSummary';
 import { CarePanel } from './CarePanel';
 import { ShowroomGrocery } from './ShowroomGrocery';
 import { ShowroomMealPlan } from './ShowroomMealPlan';
-import { ConsultationNotes } from './ConsultationNotes';
+import { ConsultationNotes,ConsultationCompletionPanel } from './ConsultationNotes';
 import { PatientImportedHistory } from './PatientImportedHistory';
 import { RECORD_TABS, recordTab, appointmentRecordSummary, type RecordTab } from './patient-record-sections';
 
 export { RECORD_TABS, recordTab } from './patient-record-sections';
 export type { RecordTab } from './patient-record-sections';
+
+export function CompletedConsultationCount({patientId}:{patientId:string}){
+  const [value,setValue]=useState<{patientId:string;count:number|null;error:boolean}>({patientId,count:null,error:false});
+  useEffect(()=>{let controller=new AbortController();setValue({patientId,count:null,error:false});const load=()=>{controller.abort();controller=new AbortController();const signal=controller.signal;void consultationsApi.completions(patientId,0,1,signal).then(view=>{if(!signal.aborted)setValue({patientId,count:view.total_completed,error:false});}).catch(()=>{if(!signal.aborted)setValue({patientId,count:null,error:true});});};const changed=(event:Event)=>{if((event as CustomEvent<{patientId:string}>).detail?.patientId===patientId)load();};load();window.addEventListener('plan-v:consultation-completion-changed',changed);return()=>{controller.abort();window.removeEventListener('plan-v:consultation-completion-changed',changed);};},[patientId]);
+  return <span>{value.patientId!==patientId||value.count===null?(value.error?'No disponible':'Consultando…'):value.count}</span>;
+}
 
 export function PlanSafetySummary({ patientId }: { patientId: string }) {
   const [view, setView] = useState<ProfessionalIntakeView | null>(null);
@@ -81,7 +88,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   const phone = (patient as Patient & { phone?: string | null }).phone;
   return <section className="pw-record" aria-label={`Espacio de ${patient.name}`}>
     <header className="pw-record-head"><div><p>Ficha del paciente · {patient.archived_at ? 'Archivada' : patient.status}</p><h2>{patient.name}</h2><span>{patient.goal || 'Objetivo por definir'}</span></div><NvButton className="nv-soft" onClick={onEdit}>Editar datos de ficha</NvButton></header>
-    <dl className="pw-record-contact"><div><dt>Teléfono</dt><dd>{phone || 'Sin teléfono registrado'}</dd></div><div><dt>Próxima consulta</dt><dd>{patient.appointment?.when || 'Sin consulta programada'}</dd></div><div><dt>Turnos transcurridos</dt><dd>{appointments.elapsed}</dd></div><div><dt>Asistencias confirmadas</dt><dd>{appointments.confirmed}</dd></div></dl>
+    <dl className="pw-record-contact"><div><dt>Teléfono</dt><dd>{phone || 'Sin teléfono registrado'}</dd></div><div><dt>Próxima consulta</dt><dd>{patient.appointment?.when || 'Sin consulta programada'}</dd></div><div><dt>Consultas realizadas</dt><dd><CompletedConsultationCount patientId={patient.id}/></dd></div><div><dt>Asistencias confirmadas</dt><dd>{appointments.confirmed}</dd></div></dl>
     <nav className="pw-tabs" aria-label="Secciones de la ficha">{RECORD_TABS.map(([id, label]) => <button type="button" key={id} aria-current={id === tab ? 'page' : undefined} onClick={() => change(id)}>{label}</button>)}</nav>
     {refreshError && <p role="alert">{refreshError}</p>}
     <div key={`${patient.id}:${tab}`} className="pw-record-content">
@@ -96,7 +103,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
       {tab === 'compras' && <ShowroomGrocery patient={p} readOnly />}
       {tab === 'archivos' && <><CarePanel patientId={patient.id} mode="files" /><ClinicalPatientWorkspace patientId={patient.id} mode="exportacion"/></>}
       {tab === 'laboratorio' && <><CarePanel patientId={patient.id} mode="laboratory" /><ClinicalPatientWorkspace patientId={patient.id} mode="laboratorio"/></>}
-      {tab === 'consultas' && <ShowroomConsultations patient={patient} now={now} onSelect={onSelect} onChanged={addPatient} />}
+      {tab === 'consultas' && <><ShowroomConsultations patient={patient} now={now} onSelect={onSelect} onChanged={addPatient} /><ConsultationCompletionPanel patientId={patient.id}/></>}
       {tab === 'chat' && <NutrigoMessages patient={p} patients={patients.map((person) => buildShowroomPatient(person, now))} role="pro" onSelect={onSelect} onNavigate={onNavigate} />}
       {tab === 'cobros' && <ShowroomCobranzas initialSelectedId={patient.id} />}
     </div>

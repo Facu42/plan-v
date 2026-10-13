@@ -117,6 +117,7 @@ create function public.apply_patient_import_row(batch_id uuid,row_value jsonb) r
 language plpgsql security definer set search_path='' as $$
 declare n uuid:=public.my_nutritionist_id();batch public.patient_import_batches;snapshot jsonb;expected jsonb;result jsonb;
   target uuid;duplicate uuid;source_digest text;h jsonb;m jsonb;email_value text;measure_data jsonb;
+  clinical_digest text;prior_result jsonb;clinical_pending boolean;
 begin
   if n is null then raise exception using errcode='42501',message='import_professional_only';end if;
   select * into batch from public.patient_import_batches where id=batch_id and nutritionist_id=n for update;
@@ -126,6 +127,11 @@ begin
   if expected is null or expected<>snapshot then raise exception using errcode='PT409',message='import_revision';end if;
   select v into result from jsonb_array_elements(batch.results)v where v->>'key'=row_value->>'key' and v->>'status'<>'error';
   if result is not null then return result;end if;
+  clinical_pending:=jsonb_array_length(coalesce(row_value->'history','[]'))>0 or jsonb_array_length(coalesce(row_value->'measurements','[]'))>0;
+  clinical_digest:=pg_catalog.md5(jsonb_build_object('history',row_value->'history','measurements',row_value->'measurements')::text);
+  select v into prior_result from jsonb_array_elements(batch.results)v where v->>'key'=row_value->>'key';
+  if prior_result->>'clinical_pending'='true' and (not clinical_pending or prior_result->>'clinical_digest' is distinct from clinical_digest)
+    then raise exception using errcode='PT409',message='import_clinical_reread_required';end if;
   -- Every row has its own subtransaction: a failed record never leaves half a patient/history.
   begin
     if row_value->>'action'='discard' then
@@ -187,6 +193,7 @@ begin
     end if;
   exception when others then
     result:=jsonb_build_object('key',row_value->>'key','status','error','patient_id',null,'message','No se guardó esta fila. Revisá la ficha, los datos y sus permisos.');
+    if clinical_pending then result:=result||jsonb_build_object('clinical_pending',true,'clinical_digest',clinical_digest);end if;
   end;
   batch.results:=coalesce((select jsonb_agg(v) from jsonb_array_elements(batch.results)v where v->>'key'<>row_value->>'key'),'[]'::jsonb)||jsonb_build_array(result);
   update public.patient_import_batches set results=batch.results,status=case

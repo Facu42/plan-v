@@ -11,6 +11,7 @@ export const CONSENT_PURPOSES = [
   'ai_followup',
   'consultation_recording',
   'ai_consultation',
+  'ai_document_import',
 ] as const;
 
 export type ConsentPurpose = (typeof CONSENT_PURPOSES)[number];
@@ -84,6 +85,7 @@ const TEXTS: Array<Omit<ConsentText, 'text_hash'>> = [
     text: 'Autorizo a Plan V a enviar a un proveedor externo de IA mis indicadores de adherencia, hidratación y cantidad de comidas registradas para preparar sugerencias y borradores de mensajes para mi nutricionista. No se envían mi nombre, notas clínicas ni mensajes. Nada se me envía sin revisión profesional. Este permiso es opcional y puedo retirarlo.',
     required: false,
   },
+  { purpose: 'ai_document_import', text_version: 'ai_document_import.v1', title: 'Organización de documentos con IA', text: 'Autorizo a Plan V a enviar a Groq el texto de mis documentos ya extraído localmente para proponer categorías y encabezados de mi ficha. Puede contener datos de salud. El proveedor se configura sin retención de datos. No se inventan ni cambian valores o textos originales. Mi nutricionista revisa cada propuesta antes de incorporarla. Este permiso es opcional y puedo retirarlo; puedo continuar con organización manual.', required: false },
 ];
 
 export function hashConsentText(text: string): string {

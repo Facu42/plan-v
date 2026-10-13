@@ -1,9 +1,11 @@
 import { useEffect,useRef,useState,type ChangeEvent } from 'react';
 import { patientImportApi } from '../../api/patient-import';
-import { careErrorMessage } from '../../api/care';
+import { careApi,careErrorMessage } from '../../api/care';
 import { importBatchSchema,type ImportBatch,type ImportBatchInput,type ImportContact } from '../../types/patient-import';
 import { mapImportRows,suggestMapping,type ImportMapping,type LocalCandidate,type LocalDocument,type MappingField } from '../../lib/patient-import';
 import { extractImportFile } from '../../lib/patient-import-files';
+import { organizerInputSchema,validateOrganizerProposals,type OrganizerItem,type OrganizerReviewedItem } from '../../types/document-organizer';
+import { PatientImportOrganizer } from './PatientImportOrganizer';
 import { FigmaRecordDialog } from './FigmaPatientFront';
 import { NvButton } from './primitives';
 import { useUnsavedChanges,canLeaveWorkspace } from './unsaved-changes';
@@ -20,18 +22,43 @@ function mergeCandidates(rows:LocalCandidate[]):LocalCandidate[]{
 export function buildReviewedImport(id:string,rows:ReviewCandidate[]):ImportBatchInput {
   return importBatchSchema.parse({id,candidates:rows.map(({warnings:_,includeClinical,reviewed,...row})=>({...row,history:includeClinical&&row.action==='append'?row.history:[],measurements:includeClinical&&row.action==='append'?row.measurements:[],reviewed}))});
 }
+export function reviewedOrganizerSources(row:ReviewCandidate,contacts:ImportContact[],consented:string[]):OrganizerItem[]{
+  if(!row.reviewed||!row.includeClinical||row.action!=='append'||!row.patient_id||!contacts.some(c=>c.patient_id===row.patient_id)||!consented.includes('care_relationship')||!consented.includes('ai_document_import'))return [];
+  try{buildReviewedImport('00000000-0000-4000-8000-000000000000',[row]);}catch{return [];}
+  const parsed=organizerInputSchema.safeParse({request_key:'00000000-0000-4000-8000-000000000000',items:row.history});
+  return parsed.success?structuredClone(row.history):[];
+}
+const sameSource=(a:OrganizerItem,b:OrganizerItem)=>a.text===b.text&&a.origin.file===b.origin.file&&a.origin.fingerprint===b.origin.fingerprint&&a.origin.page===b.origin.page&&a.origin.row===b.origin.row&&a.origin.sheet===b.origin.sheet;
+export function applyOrganizerReview(row:ReviewCandidate,context:{patientId:string;items:OrganizerItem[]},selected:OrganizerReviewedItem[]):ReviewCandidate{
+  if(!row.reviewed||!row.includeClinical||row.action!=='append'||row.patient_id!==context.patientId||row.history.length!==context.items.length||row.history.some((item,i)=>!sameSource(item,context.items[i])||item.category!==context.items[i].category))throw new Error('La fila cambió. Volvé a revisar las fuentes antes de aplicar una propuesta.');
+  const used=new Set<number>();
+  const choices=selected.map(item=>{const index=context.items.findIndex((source,i)=>!used.has(i)&&sameSource(source,item));if(index<0)throw new Error('La propuesta no coincide con el texto y origen revisados.');used.add(index);return {index,category:item.category,heading:item.heading};});
+  const verified=validateOrganizerProposals(choices,context.items,true);
+  // Only category changes reach the strict import contract. Headings are review aids.
+  return {...row,reviewed:false,history:row.history.map((item,index)=>({...item,category:verified.find(choice=>choice.index===index)?.category??item.category}))};
+}
+function ImportOrganizerForRow({row,contacts,onReviewed}:{row:ReviewCandidate;contacts:ImportContact[];onReviewed:(context:{patientId:string;items:OrganizerItem[]},items:OrganizerReviewedItem[])=>void}){
+  const patientId=row.patient_id??'';
+  const [permission,setPermission]=useState<{patientId:string;consented:string[];error:string}|null>(null);
+  useEffect(()=>{const controller=new AbortController();setPermission(null);if(patientId)void careApi.snapshot(patientId,true,controller.signal).then(snapshot=>{if(!controller.signal.aborted)setPermission({patientId,consented:snapshot.consented,error:''});}).catch(caught=>{if(!controller.signal.aborted)setPermission({patientId,consented:[],error:careErrorMessage(caught)});});return()=>controller.abort();},[patientId]);
+  const items=reviewedOrganizerSources(row,contacts,permission?.patientId===patientId?permission.consented:[]);
+  if(!permission||permission.patientId!==patientId)return <p role="status" className="pi-hint">Comprobando el permiso para organizar documentos…</p>;
+  if(!items.length)return <p className="pi-hint">{permission.error||'La organización con IA requiere el permiso específico vigente de esta paciente, fuentes válidas y la revisión de la fila. Podés continuar manualmente.'}</p>;
+  return <PatientImportOrganizer patientId={patientId} items={items} onReviewed={selected=>onReviewed({patientId,items},selected)}/>;
+}
 export function PatientImportDialog({onClose,onImported}:{onClose:()=>void;onImported?:()=>void}){
   const [contacts,setContacts]=useState<ImportContact[]>([]);const [batches,setBatches]=useState<ImportBatch[]>([]);
   const [documents,setDocuments]=useState<LocalDocument[]>([]);const [mappings,setMappings]=useState<Record<string,ImportMapping>>({});
   const [rows,setRows]=useState<ReviewCandidate[]>([]);const [id,setId]=useState<string>(()=>crypto.randomUUID());
   const [perPage,setPerPage]=useState(false);const [busy,setBusy]=useState(false);const [progress,setProgress]=useState('');const [error,setError]=useState('');
   const [result,setResult]=useState<ImportBatch|null>(null);const [loading,setLoading]=useState(true);const lock=useRef(false);const mounted=useRef(true);
+  const resumed=useRef<ImportBatch|null>(null);
   useUnsavedChanges((documents.length>0||rows.length>0)&&result?.status!=='completed',busy);
   useEffect(()=>{mounted.current=true;const controller=new AbortController();Promise.all([patientImportApi.contacts(controller.signal),patientImportApi.list(controller.signal)]).then(([a,b])=>{setContacts(a.contacts);setBatches(b.batches);}).catch(caught=>{if(!controller.signal.aborted)setError(careErrorMessage(caught));}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});return()=>{mounted.current=false;controller.abort();};},[]);
   const choose=async(event:ChangeEvent<HTMLInputElement>)=>{
     const files=[...(event.target.files??[])];event.target.value='';if(!files.length||lock.current)return;
     if(files.length>20){setError('Cada lote admite hasta veinte archivos.');return;}
-    lock.current=true;setBusy(true);setError('');setRows([]);setResult(null);setId(crypto.randomUUID());
+    lock.current=true;setBusy(true);setError('');setRows([]);setResult(null);setId(resumed.current?.id??crypto.randomUUID());
     const loaded:LocalDocument[]=[];const failed:string[]=[];
     try{
       for(const file of files){setProgress(`Leyendo ${file.name} en tu computadora…`);try{loaded.push(await extractImportFile(file,text=>{if(mounted.current)setProgress(`${file.name}: ${text}`);}));}catch(caught){failed.push(`${file.name}: ${caught instanceof Error?caught.message:'No pudimos leerlo.'}`);}if(!mounted.current)return;}
@@ -51,10 +78,19 @@ export function PatientImportDialog({onClose,onImported}:{onClose:()=>void;onImp
         }
       }
       const merged=mergeCandidates(candidates);if(!merged.length)throw new Error('No encontramos filas o texto. Revisá el mapeo o probá otro archivo.');
-      setRows(merged.map(row=>{const matches=row.email?contacts.filter(c=>c.email.toLowerCase()===row.email.toLowerCase()):[];return {...row,action:matches.length===1?'append':'create',patient_id:matches.length===1?matches[0].patient_id:null,reviewed:false,includeClinical:false,warnings:matches.length>1?[...row.warnings,'Más de una ficha coincide con el email. Elegí cuál corresponde.']:row.warnings};}));
+      const prepared=merged.map(row=>{const matches=row.email?contacts.filter(c=>c.email.toLowerCase()===row.email.toLowerCase()):[];return {...row,action:matches.length===1?'append' as const:'create' as const,patient_id:matches.length===1?matches[0].patient_id:null,reviewed:false,includeClinical:false,warnings:matches.length>1?[...row.warnings,'Más de una ficha coincide con el email. Elegí cuál corresponde.']:row.warnings};});
+      if(resumed.current){
+        const batch=resumed.current;setResult(batch);setRows(batch.candidates.map(original=>{
+          const pending=batch.results.find(r=>r.key===original.key&&r.status==='error');
+          const sameOrigin=(a:LocalCandidate['origins'],b:LocalCandidate['origins'])=>a.length===b.length&&a.every((o,i)=>o.fingerprint===b[i].fingerprint&&o.page===b[i].page&&o.row===b[i].row&&o.sheet===b[i].sheet);
+          const extracted=prepared.find(row=>sameOrigin(row.origins,original.origins));
+          return {...original,history:extracted?.history??[],measurements:extracted?.measurements??[],reviewed:!pending,includeClinical:Boolean(pending?.clinical_pending&&extracted),warnings:pending?.clinical_pending&&!extracted?['Releé todos los archivos originales de esta fila antes de confirmarla.']:[]};
+        }));
+      }else setRows(prepared);
     }catch(caught){setError(caught instanceof Error?caught.message:'No pudimos preparar la revisión.');}
   };
   const patch=(key:string,change:Partial<ReviewCandidate>)=>{setRows(current=>current.map(row=>row.key===key?{...row,...change,reviewed:change.reviewed??false}:row));setResult(null);};
+  const applyOrganized=(key:string,context:{patientId:string;items:OrganizerItem[]},selected:OrganizerReviewedItem[])=>{setRows(current=>current.map(row=>{if(row.key!==key)return row;try{return applyOrganizerReview(row,context,selected);}catch(caught){setError(careErrorMessage(caught));return row;}}));setResult(null);};
   const commit=async()=>{
     if(lock.current)return;let input:ImportBatchInput;
     try{input=buildReviewedImport(id,rows);}catch{setError('Confirmá cada fila. Revisá nombres, emails, fechas, unidades, origen y textos (hasta 3.000 caracteres por página).');return;}
@@ -62,7 +98,7 @@ export function PatientImportDialog({onClose,onImported}:{onClose:()=>void;onImp
     try{await patientImportApi.prepare(input);const saved=(await patientImportApi.commit(input)).batch;setResult(saved);setBatches(current=>[saved,...current.filter(b=>b.id!==saved.id)]);if(saved.results.some(r=>r.status==='created'||r.status==='appended')){onImported?.();try{setContacts((await patientImportApi.contacts()).contacts);}catch{setError('Se guardó la importación. Recargá para actualizar las fichas disponibles.');}}}
     catch(caught){setError(careErrorMessage(caught));}finally{lock.current=false;if(mounted.current){setBusy(false);setProgress('');}}
   };
-  const resume=(batch:ImportBatch)=>{setId(batch.id);setDocuments([]);setRows(batch.candidates.map(row=>({...row,reviewed:true,includeClinical:false,warnings:[]})));setResult(batch);setError('');};
+  const resume=(batch:ImportBatch)=>{resumed.current=batch;setId(batch.id);setDocuments([]);setRows(batch.candidates.map(row=>{const pending=batch.results.some(r=>r.key===row.key&&r.status==='error'&&r.clinical_pending);return {...row,reviewed:!pending,includeClinical:false,warnings:pending?['Hay datos clínicos pendientes. Releé el archivo original para recuperar el texto antes de revisar.']:[]};}));setResult(batch);setError('');};
   const allReviewed=rows.length>0&&rows.every(row=>row.reviewed);
   return <FigmaRecordDialog title="Importar pacientes" closeLabel="Cerrar importación" onClose={()=>{if(!busy&&canLeaveWorkspace())onClose();}} className="pi-dialog">
     <p className="pi-hint">Los archivos se leen en tu computadora. Sólo se guardan los datos que revisás. No se crean cuentas, se mandan invitaciones ni se publican planes.</p>
@@ -89,9 +125,10 @@ export function PatientImportDialog({onClose,onImported}:{onClose:()=>void;onImp
         {row.measurements.map((m,index)=><div className="pi-mapping" key={`${m.kind}:${index}`}><label>{m.kind==='weight'?'Peso':m.kind==='waist'?'Cintura':'Cadera'}<input type="number" step="any" value={m.value} onChange={e=>patch(row.key,{measurements:row.measurements.map((item,i)=>i===index?{...item,value:Number(e.target.value)}:item)})}/></label><label>Fecha<input type="date" value={m.date} onChange={e=>patch(row.key,{measurements:row.measurements.map((item,i)=>i===index?{...item,date:e.target.value}:item)})}/></label><label>Unidad<select value={m.unit} onChange={e=>patch(row.key,{measurements:row.measurements.map((item,i)=>i===index?{...item,unit:e.target.value as typeof m.unit}:item)})}>{(m.kind==='weight'?['kg','lb']:['cm','in']).map(unit=><option key={unit}>{unit}</option>)}</select></label></div>)}
         {row.history.map((h,index)=><div key={`${h.category}:${index}`}><label>Tipo de contenido<select value={h.category} onChange={e=>patch(row.key,{history:row.history.map((item,i)=>i===index?{...item,category:e.target.value as typeof h.category}:item)})}><option value="history">Antecedentes</option><option value="study">Estudio / laboratorio</option><option value="plan">Plan histórico</option></select></label><label>Texto revisado<textarea rows={4} value={h.text} onChange={e=>patch(row.key,{history:row.history.map((item,i)=>i===index?{...item,text:e.target.value}:item)})}/></label><p className="pi-hint">{h.text.length} de 3.000 caracteres; página {h.origin.page??'—'}, fila {h.origin.row??'—'}</p></div>)}</>}
         <label><input type="checkbox" checked={row.reviewed} onChange={e=>patch(row.key,{reviewed:e.target.checked})}/>Revisé esta fila y su correspondencia con la paciente</label>
+        {row.action==='append'&&row.patient_id&&contacts.some(c=>c.patient_id===row.patient_id)&&row.includeClinical&&row.history.length>0&&(row.reviewed?<ImportOrganizerForRow key={row.patient_id} row={row} contacts={contacts} onReviewed={(context,selected)=>applyOrganized(row.key,context,selected)}/>:<p className="pi-hint">Revisá el texto, origen y categoría de cada fuente y confirmá la fila para habilitar la organización opcional con IA. Después de aplicar una propuesta tendrás que confirmar la fila otra vez.</p>)}
         {saved&&<p role={saved.status==='error'?'alert':'status'}>{saved.message}</p>}
       </fieldset>;})}
-      <footer className="pi-actions"><NvButton className="nv-ghost" disabled={busy} onClick={()=>{setRows([]);setResult(null);setId(crypto.randomUUID());}}>Volver a los archivos</NvButton><NvButton disabled={busy||!allReviewed||result?.status==='completed'} onClick={()=>void commit()}>{busy?'Guardando…':result?.status==='partial'?'Reintentar filas pendientes':'Guardar fichas revisadas'}</NvButton></footer>
+      <footer className="pi-actions"><NvButton className="nv-ghost" disabled={busy} onClick={()=>{setRows([]);setResult(null);if(!resumed.current)setId(crypto.randomUUID());}}>Volver a los archivos</NvButton><NvButton disabled={busy||!allReviewed||result?.status==='completed'||rows.some(row=>result?.results.some(r=>r.key===row.key&&r.clinical_pending&&r.status==='error')&&(!row.includeClinical||!row.history.length&&!row.measurements.length))} onClick={()=>void commit()}>{busy?'Guardando…':result?.status==='partial'?'Reintentar filas pendientes':'Guardar fichas revisadas'}</NvButton></footer>
     </div>}
   </FigmaRecordDialog>;
 }

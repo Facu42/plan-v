@@ -29,7 +29,7 @@ export function registerCommunicationRoutes(app:Hono) {
    readAllRows((from,to)=>db.from('ops_contact_preferences').select('patient_id,reminders,broadcasts').order('patient_id').range(from,to)),
    readAllRows((from,to)=>db.from('ops_broadcasts').select('id,template,language,created_at').eq('nutritionist_id',scope.nutritionistId).order('created_at',{ascending:false}).order('id').range(from,to)),
   ]);
-  const deliveries=await readAllRows((from,to)=>db.from('ops_deliveries').select('id,broadcast_id,patient_id,state,delivery_status,updated_at').order('updated_at',{ascending:false}).order('id').range(from,to));
+  const deliveries=await readAllRows((from,to)=>db.from('ops_deliveries').select('id,broadcast_id,patient_id,state,delivery_status,updated_at').eq('channel','whatsapp').order('updated_at',{ascending:false}).order('id').range(from,to));
   const prefs=new Map(preferences.map(p=>[p.patient_id,p]));
   return c.json({mode:'persistent',enabled,patients:scope.patients.filter(p=>!p.archived_at&&!p.deactivated_at&&!p.anonymized_at).map(p=>({id:p.id,name:p.name,broadcasts:prefs.get(p.id)?.broadcasts===true,reminders:prefs.get(p.id)?.reminders===true})),broadcasts,deliveries});
  });
@@ -53,7 +53,7 @@ export function registerCommunicationRoutes(app:Hono) {
   const config=whatsappConfig();if(!config?.enabled)throw new CareError(503,'WhatsApp no está activado.');
   const id=c.req.param('id');if(!z.uuid().safeParse(id).success)throw new CareError(400,'Revisá el envío.');
   // Actor/RLS before service credential: no claim can be made for another clinic.
-  const owned=await getRequestDb().from('ops_deliveries').select('id').eq('id',id).maybeSingle();queueDbError(owned.error);
+  const owned=await getRequestDb().from('ops_deliveries').select('id').eq('id',id).eq('channel','whatsapp').maybeSingle();queueDbError(owned.error);
   if(!owned.data)throw new CareError(404,'No encontramos el envío.');
   const claim=await privilegedDb().rpc('ops_claim_delivery',{p_nutritionist:scope.nutritionistId,p_item:id});rpcError(claim.error);
   if(!claim.data)return c.json({claimed:false});

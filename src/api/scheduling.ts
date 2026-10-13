@@ -1,4 +1,6 @@
-import {request} from './client';
+import {request as apiRequest} from './client';
+// OAuth callback cookies and booking tokens use the narrow web-origin proxy.
+const request = <T>(path:string,init?:RequestInit)=>apiRequest<T>(path,init,'');
 import type {SchedulingSettings,SchedulingBooking,PublicSchedulingPage,PublicBookingInput,PublicBookingReceipt,BookingChange,SchedulingSlot} from '../types/scheduling';
 export type SchedulingWorkspaceSnapshot={profile:{nutritionist_id:string;config:SchedulingSettings;revision:number};connections:{google:boolean;mercadopago:boolean};available:{google:boolean;mercadopago:boolean};bookings:SchedulingBooking[];transfers:Array<{id:string;booking_id:string;amount_minor:number;reference:string}>;has_more:boolean};
 const json=(method:string,data:unknown)=>({method,body:JSON.stringify(data)}),base=(slug:string)=>`/api/public/scheduling/${encodeURIComponent(slug)}`,manage=(slug:string,id:string)=>`${base(slug)}/bookings/${encodeURIComponent(id)}`;
