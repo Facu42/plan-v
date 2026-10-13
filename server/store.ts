@@ -173,6 +173,7 @@ export type ResourceAssignment = {
 };
 
 export type Patient = {
+  phone?: string | null;
   weekly_registration?: WeeklyRegistration | null;
   id: string;
   name: string;
@@ -203,6 +204,7 @@ export type Patient = {
   sleep_minutes: number | null;
   steps?: number | null;
   appointment: {
+    id?: string;
     when: string;
     duration: number;
     channel: string;
@@ -972,7 +974,7 @@ export function updatePatient(id: string, patch: Partial<Patient>): Patient | un
 
 export function setPatientProfile(
   id: string,
-  input: Partial<Pick<Patient, 'name' | 'status' | 'stage' | 'sensitive_hours' | 'plan_b' | 'next_focus'>>,
+  input: Partial<Pick<Patient, 'name' | 'phone' | 'status' | 'stage' | 'sensitive_hours' | 'plan_b' | 'next_focus'>>,
 ): Patient | undefined {
   const patient = getPatient(id);
   if (!patient) return undefined;

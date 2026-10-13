@@ -159,6 +159,8 @@ export function ShowroomPatientCreate({ onClose, onCreated }: { onClose: () => v
 
 export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Patient; onClose: () => void; onSaved: (patient: Patient) => void }) {
   const [name, setName] = useState(patient.name);
+  const initialPhone = (patient as Patient & { phone?: string | null }).phone ?? '';
+  const [phone, setPhone] = useState(initialPhone);
   const [status, setStatus] = useState(patient.status);
   const [stage, setStage] = useState<Stage>(patient.stage);
   const [sensitiveHours, setSensitiveHours] = useState(patient.sensitive_hours);
@@ -169,7 +171,7 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const nameInput = useRef<HTMLInputElement>(null);
-  useUnsavedChanges(name !== patient.name || status !== patient.status || stage !== patient.stage || sensitiveHours !== patient.sensitive_hours || planB !== patient.plan_b || nextFocus !== patient.next_focus || access !== patient.billing_status || accessUntil !== (patient.billing_until ?? ''), busy);
+  useUnsavedChanges(name !== patient.name || phone !== initialPhone || status !== patient.status || stage !== patient.stage || sensitiveHours !== patient.sensitive_hours || planB !== patient.plan_b || nextFocus !== patient.next_focus || access !== patient.billing_status || accessUntil !== (patient.billing_until ?? ''), busy);
   useDialogKeys(onClose, busy);
   useEffect(() => { nameInput.current?.focus(); }, []);
 
@@ -179,7 +181,7 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
     setError('');
     try {
       let { patient: updated } = await api.updatePatientProfile(patient.id, {
-        name, status, stage, sensitive_hours: sensitiveHours, plan_b: planB, next_focus: nextFocus,
+        name, phone: phone.trim() || null, status, stage, sensitive_hours: sensitiveHours, plan_b: planB, next_focus: nextFocus,
       });
       // Sólo si la profesional cambió el acceso; un vencido sin tocar queda como está.
       const accessChanged = access !== patient.billing_status || (access === 'active' && accessUntil !== (patient.billing_until ?? ''));
@@ -203,6 +205,7 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
       <form className="nv-dialog-form" onSubmit={submit}>
         <div className="nv-dialog-grid">
           <label>Nombre completo<input ref={nameInput} value={name} onChange={(e) => setName(e.target.value)} minLength={2} maxLength={80} required /></label>
+          <label>Teléfono<input type="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} maxLength={40} /></label>
           <label>Estado visible<input value={status} onChange={(e) => setStatus(e.target.value)} minLength={2} maxLength={40} required /></label>
           <label>Etapa<select value={stage} onChange={(e) => setStage(e.target.value as Stage)}>{(['ingreso', 'plan', 'seguimiento', 'alta'] as const).map((value) => <option key={value} value={value}>{STAGE_LABELS[value]}</option>)}</select></label>
           <label>Horario sensible<input value={sensitiveHours} onChange={(e) => setSensitiveHours(e.target.value)} maxLength={120} placeholder="Ej.: después de las 20:30" /></label>

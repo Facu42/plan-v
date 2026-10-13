@@ -184,6 +184,7 @@ export const patientCreateInputSchema = z.object({
 
 export const patientProfileUpdateInputSchema = z.object({
   name: z.string().trim().min(2).max(80).optional(),
+  phone: z.string().trim().max(40).nullable().optional(),
   status: z.string().trim().min(2).max(40).optional(),
   stage: z.enum(['ingreso', 'plan', 'seguimiento', 'alta']).optional(),
   sensitive_hours: z.string().trim().max(120).optional(),

@@ -114,6 +114,7 @@ export const api = {
 
   updatePatientProfile: (patientId: string, data: {
     name?: string;
+    phone?: string | null;
     status?: string;
     stage?: Stage;
     sensitive_hours?: string;

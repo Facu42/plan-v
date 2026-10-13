@@ -88,7 +88,7 @@ export function PlanVExperience() {
 
   useEffect(() => {
     if (session && isNutri && profile && legalOk) {
-      api.setupNutritionist(profile.full_name || 'Verónica Trenti').catch(() => {});
+      api.setupNutritionist(profile.full_name || 'Profesional').catch(() => {});
     }
   }, [session, isNutri, profile, legalOk]);
 
