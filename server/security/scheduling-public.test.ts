@@ -9,6 +9,8 @@ describe('integración de reserva pública', () => {
     const decision = (path: string) => resolveRequestAuth({ supabaseEnabled:true, path, verifiedUserId:null, allowDemo:false });
     expect(decision('/api/public/scheduling/profesional/slots')).toEqual({kind:'public'});
     expect(decision('/api/public/scheduling/oauth/google')).toEqual({kind:'public'});
+    expect(decision('/api/public/communications/email-unsubscribe')).toEqual({kind:'public'});
+    expect(decision('/api/public/communications/email-unsubscribe-evil')).toEqual({kind:'unauthorized'});
     for (const path of ['/api/scheduling','/api/public/scheduling-evil/x','/api/public/team','/api/team','/api/patients']) {
       expect(decision(path),path).toEqual({kind:'unauthorized'});
     }
