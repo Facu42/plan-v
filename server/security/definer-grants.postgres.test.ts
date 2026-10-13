@@ -74,6 +74,8 @@ const ALLOWED = [
   'document_organizer_review',
   'enqueue_ai_job',
   'enqueue_outbox_event',
+  // Proyección histórica limitada por titularidad y permisos de cada propósito.
+  'export_patient_imported_history',
   'finish_ai_job',
   'finish_recipe_cover',
   'get_ai_job',
@@ -127,6 +129,9 @@ const ALLOWED = [
   'ops_review_reminder_template',
   'ops_set_preferences',
   'patient_has_full_access',
+  // Evidencia clínica externa: titular actual, actor original, ficha sin cuenta y retiro prevalente.
+  'patient_import_authorization_state',
+  'patient_import_external_allowed',
   // Manual preparation only; assigned active patient and imported contact email.
   'prepare_imported_patient_invite',
   'prepare_patient_import',
@@ -137,6 +142,7 @@ const ALLOWED = [
   'publish_reviewed_meal_plan',
   'record_meal_analysis',
   'record_patient_consent',
+  'record_patient_import_authorization',
   'record_patient_payment',
   'record_privacy_access',
   'register_recipe_day',
@@ -154,6 +160,7 @@ const ALLOWED = [
   'review_patient_intake',
   'review_patient_payment',
   'revoke_patient_care',
+  'revoke_patient_import_authorization',
   'save_billing_program',
   'save_body_metrics',
   'save_care_preferences',

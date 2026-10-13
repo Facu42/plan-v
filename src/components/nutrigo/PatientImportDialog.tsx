@@ -1,7 +1,9 @@
 import { useEffect,useRef,useState,type ChangeEvent } from 'react';
 import { patientImportApi } from '../../api/patient-import';
 import { careApi,careErrorMessage } from '../../api/care';
-import { importBatchSchema,type ImportBatch,type ImportBatchInput,type ImportContact } from '../../types/patient-import';
+import { importBatchSchema,type ImportBatch,type ImportBatchInput,type ImportContact,type ImportResult } from '../../types/patient-import';
+import type {ImportPurpose} from '../../types/import-authorization';
+import {ImportAuthorizationControl} from './ImportAuthorizationControl';
 import { mapImportRows,suggestMapping,type ImportMapping,type LocalCandidate,type LocalDocument,type MappingField } from '../../lib/patient-import';
 import { extractImportFile } from '../../lib/patient-import-files';
 import { organizerInputSchema,validateOrganizerProposals,type OrganizerItem,type OrganizerReviewedItem } from '../../types/document-organizer';
@@ -21,6 +23,9 @@ function mergeCandidates(rows:LocalCandidate[]):LocalCandidate[]{
 }
 export function buildReviewedImport(id:string,rows:ReviewCandidate[]):ImportBatchInput {
   return importBatchSchema.parse({id,candidates:rows.map(({warnings:_,includeClinical,reviewed,...row})=>({...row,history:includeClinical&&row.action==='append'?row.history:[],measurements:includeClinical&&row.action==='append'?row.measurements:[],reviewed}))});
+}
+export function continueCreatedImport(rows:ReviewCandidate[],results:ImportResult[]):ReviewCandidate[]{
+ return rows.flatMap(row=>{const saved=results.find(r=>r.key===row.key&&r.status==='created'&&r.patient_id);return saved&&row.action==='create'&&(row.history.length||row.measurements.length)?[{...structuredClone(row),key:crypto.randomUUID(),action:'append' as const,patient_id:saved.patient_id,reviewed:false,includeClinical:true}]:[];});
 }
 export function reviewedOrganizerSources(row:ReviewCandidate,contacts:ImportContact[],consented:string[]):OrganizerItem[]{
   if(!row.reviewed||!row.includeClinical||row.action!=='append'||!row.patient_id||!contacts.some(c=>c.patient_id===row.patient_id)||!consented.includes('care_relationship')||!consented.includes('ai_document_import'))return [];
@@ -53,7 +58,8 @@ export function PatientImportDialog({onClose,onImported}:{onClose:()=>void;onImp
   const [perPage,setPerPage]=useState(false);const [busy,setBusy]=useState(false);const [progress,setProgress]=useState('');const [error,setError]=useState('');
   const [result,setResult]=useState<ImportBatch|null>(null);const [loading,setLoading]=useState(true);const lock=useRef(false);const mounted=useRef(true);
   const resumed=useRef<ImportBatch|null>(null);
-  useUnsavedChanges((documents.length>0||rows.length>0)&&result?.status!=='completed',busy);
+  const createdPendingCount=result?rows.filter(row=>row.action==='create'&&(row.history.length||row.measurements.length)&&result.results.some(r=>r.key===row.key&&r.status==='created'&&r.patient_id)).length:0;
+  useUnsavedChanges((documents.length>0||rows.length>0)&&(result?.status!=='completed'||createdPendingCount>0),busy);
   useEffect(()=>{mounted.current=true;const controller=new AbortController();Promise.all([patientImportApi.contacts(controller.signal),patientImportApi.list(controller.signal)]).then(([a,b])=>{setContacts(a.contacts);setBatches(b.batches);}).catch(caught=>{if(!controller.signal.aborted)setError(careErrorMessage(caught));}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});return()=>{mounted.current=false;controller.abort();};},[]);
   const choose=async(event:ChangeEvent<HTMLInputElement>)=>{
     const files=[...(event.target.files??[])];event.target.value='';if(!files.length||lock.current)return;
@@ -114,7 +120,7 @@ export function PatientImportDialog({onClose,onImported}:{onClose:()=>void;onImp
       <NvButton disabled={busy} onClick={prepareReview}>Preparar revisión</NvButton>
     </>}
     {!!rows.length&&<div className="pi-review">
-      <p className="pi-hint">{rows.length} fichas para revisar. La coincidencia por email es una sugerencia; confirmá la persona. Para nuevas pacientes se importa sólo el contacto. Para antecedentes, estudios y medidas, elegí una ficha con permisos vigentes.</p>
+      <p className="pi-hint">{rows.length} fichas para revisar. La coincidencia por email es una sugerencia; confirmá la persona. Para nuevas pacientes, primero guardá el contacto; el texto revisado se conserva acá para continuar con su autorización e incorporar la historia sin crear cuentas.</p>
       {rows.map(row=>{const saved=result?.results.find(r=>r.key===row.key);const frozen=saved&&saved.status!=='error';if(frozen)return <article key={row.key}><h3>{row.name||'Paciente'} · {LABELS[saved.status]}</h3><p role="status">{saved.message}</p></article>;return <fieldset key={row.key} disabled={busy}><legend>{row.name||'Asignar paciente'}{saved?` · ${LABELS[saved.status]}`:''}</legend>
         <div className="pi-mapping"><label>Nombre completo<input value={row.name} maxLength={80} onChange={e=>patch(row.key,{name:e.target.value})}/></label><label>Email (opcional)<input type="email" value={row.email} maxLength={254} onChange={e=>patch(row.key,{email:e.target.value.toLowerCase()})}/></label><label>Teléfono<input value={row.phone} maxLength={40} onChange={e=>patch(row.key,{phone:e.target.value})}/></label>
         <label>Acción<select value={row.action} onChange={e=>patch(row.key,{action:e.target.value as ReviewCandidate['action'],includeClinical:false,patient_id:null})}><option value="create">Crear ficha de contacto</option><option value="append">Incorporar a ficha existente</option><option value="discard">Descartar</option></select></label>
@@ -125,10 +131,12 @@ export function PatientImportDialog({onClose,onImported}:{onClose:()=>void;onImp
         {row.measurements.map((m,index)=><div className="pi-mapping" key={`${m.kind}:${index}`}><label>{m.kind==='weight'?'Peso':m.kind==='waist'?'Cintura':'Cadera'}<input type="number" step="any" value={m.value} onChange={e=>patch(row.key,{measurements:row.measurements.map((item,i)=>i===index?{...item,value:Number(e.target.value)}:item)})}/></label><label>Fecha<input type="date" value={m.date} onChange={e=>patch(row.key,{measurements:row.measurements.map((item,i)=>i===index?{...item,date:e.target.value}:item)})}/></label><label>Unidad<select value={m.unit} onChange={e=>patch(row.key,{measurements:row.measurements.map((item,i)=>i===index?{...item,unit:e.target.value as typeof m.unit}:item)})}>{(m.kind==='weight'?['kg','lb']:['cm','in']).map(unit=><option key={unit}>{unit}</option>)}</select></label></div>)}
         {row.history.map((h,index)=><div key={`${h.category}:${index}`}><label>Tipo de contenido<select value={h.category} onChange={e=>patch(row.key,{history:row.history.map((item,i)=>i===index?{...item,category:e.target.value as typeof h.category}:item)})}><option value="history">Antecedentes</option><option value="study">Estudio / laboratorio</option><option value="plan">Plan histórico</option></select></label><label>Texto revisado<textarea rows={4} value={h.text} onChange={e=>patch(row.key,{history:row.history.map((item,i)=>i===index?{...item,text:e.target.value}:item)})}/></label><p className="pi-hint">{h.text.length} de 3.000 caracteres; página {h.origin.page??'—'}, fila {h.origin.row??'—'}</p></div>)}</>}
         <label><input type="checkbox" checked={row.reviewed} onChange={e=>patch(row.key,{reviewed:e.target.checked})}/>Revisé esta fila y su correspondencia con la paciente</label>
+        {row.action==='append'&&row.patient_id&&row.includeClinical&&<ImportAuthorizationControl key={row.patient_id} patientId={row.patient_id} required={[...new Set<ImportPurpose>([...row.history.map(h=>h.category),...(row.measurements.length?['measurement' as const]:[])])]} onChanged={()=>patch(row.key,{reviewed:false})}/>}
         {row.action==='append'&&row.patient_id&&contacts.some(c=>c.patient_id===row.patient_id)&&row.includeClinical&&row.history.length>0&&(row.reviewed?<ImportOrganizerForRow key={row.patient_id} row={row} contacts={contacts} onReviewed={(context,selected)=>applyOrganized(row.key,context,selected)}/>:<p className="pi-hint">Revisá el texto, origen y categoría de cada fuente y confirmá la fila para habilitar la organización opcional con IA. Después de aplicar una propuesta tendrás que confirmar la fila otra vez.</p>)}
         {saved&&<p role={saved.status==='error'?'alert':'status'}>{saved.message}</p>}
       </fieldset>;})}
-      <footer className="pi-actions"><NvButton className="nv-ghost" disabled={busy} onClick={()=>{setRows([]);setResult(null);if(!resumed.current)setId(crypto.randomUUID());}}>Volver a los archivos</NvButton><NvButton disabled={busy||!allReviewed||result?.status==='completed'||rows.some(row=>result?.results.some(r=>r.key===row.key&&r.clinical_pending&&r.status==='error')&&(!row.includeClinical||!row.history.length&&!row.measurements.length))} onClick={()=>void commit()}>{busy?'Guardando…':result?.status==='partial'?'Reintentar filas pendientes':'Guardar fichas revisadas'}</NvButton></footer>
+      {createdPendingCount>0&&<p role="status">El contacto ya está guardado. Quedan datos históricos en esta revisión local: continuá antes de cerrar o conservá los archivos para volver a leerlos.</p>}
+      <footer className="pi-actions"><NvButton className="nv-ghost" disabled={busy} onClick={()=>{setRows([]);setResult(null);if(!resumed.current)setId(crypto.randomUUID());}}>Volver a los archivos</NvButton>{createdPendingCount>0&&<NvButton disabled={busy||result?.status!=='completed'} onClick={()=>{setRows(continueCreatedImport(rows,result?.results??[]));setId(crypto.randomUUID());resumed.current=null;setResult(null);setError('');}}>Continuar con datos históricos de {createdPendingCount} fichas creadas</NvButton>}<NvButton disabled={busy||!allReviewed||result?.status==='completed'||rows.some(row=>result?.results.some(r=>r.key===row.key&&r.clinical_pending&&r.status==='error')&&(!row.includeClinical||!row.history.length&&!row.measurements.length))} onClick={()=>void commit()}>{busy?'Guardando…':result?.status==='partial'?'Reintentar filas pendientes':'Guardar fichas revisadas'}</NvButton></footer>
     </div>}
   </FigmaRecordDialog>;
 }

@@ -6,21 +6,21 @@ import type { Patient } from '../../src/types/index.js';
 import { getRequestDb } from '../db/supabase-client.js';
 import { registerDemoState } from '../demo/state.js';
 import { CareError } from '../care/errors.js';
-import { requireCareConsent } from '../care/consents.js';
 import { saveCareRecord } from '../care/repository.js';
 import { getPatient, getStore,DEMO_NUTRITIONIST_ID,sendPatientInvite } from '../store.js';
 import { createInviteRecord,canOpenInvite } from '../identity/invites.js';
 import { sbSendInvite } from '../db/supabase-repo.js';
+import {resetImportAuthorizations,importAuthorizationState,externalImportAllowed,saveImportedMeasurement} from './external-authorization.js';
 
 const batches = new Map<string, ImportBatch>();
 const contacts = new Map<string, ImportContact>();
 const applied = new Map<string,string>();
 const histories = new Map<string,ImportedHistory>();
 registerDemoState('patient-import',()=>({batches,contacts,applied,histories}));
-export function resetPatientImportMemory() { batches.clear(); contacts.clear(); applied.clear();histories.clear(); }
+export function resetPatientImportMemory() { batches.clear(); contacts.clear(); applied.clear();histories.clear();resetImportAuthorizations(); }
 /** Clinical text remains in the browser during review; drafts persisted here contain contact only. */
 export const contactSnapshot = (input: ImportBatchInput): ImportBatchInput => ({id:input.id,candidates:input.candidates.map(c=>({...c,history:[],measurements:[]}))});
-export const importSourceKey = (row: ImportCandidate) => createHash('sha256').update(JSON.stringify({action:row.action,origins:row.origins,history:row.history,measurements:row.measurements})).digest('hex');
+export const importSourceKey = (row: ImportCandidate) => createHash('sha256').update(JSON.stringify({patient_id:row.action==='append'?row.patient_id:null,action:row.action,origins:row.origins,history:row.history,measurements:row.measurements})).digest('hex');
 function dbError(error: {code?:string}|null) {
   if (!error) return;
   if (['42P01','42883','PGRST202','PGRST205'].includes(error.code??'')) throw new CareError(501,'Falta instalar el módulo de importación en este entorno.');
@@ -61,29 +61,26 @@ function memoryPatient(row:ImportCandidate):Patient {
 async function applyMemory(row:ImportCandidate):Promise<ImportResult> {
   const result=(status:ImportResult['status'],patient_id:string|null,message:string):ImportResult=>({key:row.key,status,patient_id,message});
   if(row.action==='discard')return result('discarded',null,'Descartado por la profesional.');
-  const source=importSourceKey(row);const old=applied.get(source);
-  if(old)return result('duplicate',old,'Este origen ya se importó.');
   const match=row.email?(await listImportContacts(false,'')).find(c=>c.email.toLowerCase()===row.email.toLowerCase()):null;
   if(row.action==='create'&&match)return result('duplicate',match.patient_id,'El email ya corresponde a una ficha. Incorporá los datos tras revisarla.');
   if(row.action==='append'&&row.email&&match&&match.patient_id!==row.patient_id)throw new CareError(409,'El email corresponde a otra ficha.');
   if(row.action==='append'){
     if(!getPatient(row.patient_id!))throw new CareError(403,'La ficha no pertenece a este consultorio.');
-    if(row.history.length||row.measurements.length)await requireCareConsent(row.patient_id!,false,'care_relationship');
-    if(row.measurements.length)await requireCareConsent(row.patient_id!,false,'measurement');
-    if(row.history.some(h=>h.category==='study'))await requireCareConsent(row.patient_id!,false,'clinical_document');
+    if(row.history.length||row.measurements.length){const state=await importAuthorizationState(row.patient_id!,false);if(row.history.some(h=>!state.allowed[h.category])||row.measurements.length&&!state.allowed.measurement)throw new CareError(403,'Falta autorización para incorporar los datos históricos.');}
   }
+  const source=importSourceKey(row),legacy=createHash('sha256').update(JSON.stringify({action:row.action,origins:row.origins,history:row.history,measurements:row.measurements})).digest('hex');
+  const legacyPatient=applied.get(legacy),old=applied.get(source)??(row.action==='create'||legacyPatient===row.patient_id?legacyPatient:undefined);if(old)return result('duplicate',old,'Este origen ya se importó.');
   const patient=row.action==='create'?memoryPatient(row):getPatient(row.patient_id!)!;
   if(!(patient as Patient&{phone?:string|null}).phone&&row.phone)Object.assign(patient,{phone:row.phone});
   if(row.action==='create')getStore().patients.push(patient);
   if(!contacts.has(patient.id))contacts.set(patient.id,{patient_id:patient.id,name:patient.name,email:row.email,phone:row.phone});
   else if(!contacts.get(patient.id)!.email&&row.email)contacts.get(patient.id)!.email=row.email;
-  for(const m of row.measurements)await saveCareRecord(patient.id,{id:randomUUID(),recorded_on:m.date,data:careDataSchema.parse({kind:m.kind,value:m.value,unit:m.unit,source:'professional',note:`Importado de ${m.origin.file}, fila ${m.origin.row??''}, página ${m.origin.page??''}.`})},false);
+  for(const m of row.measurements){if(await externalImportAllowed(patient.id,'measurement',false))saveImportedMeasurement(patient.id,m);else await saveCareRecord(patient.id,{id:randomUUID(),recorded_on:m.date,data:careDataSchema.parse({kind:m.kind,value:m.value,unit:m.unit,source:'professional',note:`Importado de ${m.origin.file}, fila ${m.origin.row??''}, página ${m.origin.page??''}.`})},false);}
   for(const h of row.history){const record:ImportedHistory={id:randomUUID(),patient_id:patient.id,category:h.category,body:h.text,origin:h.origin,created_at:new Date().toISOString()};histories.set(record.id,record);}
   applied.set(source,patient.id);return result(row.action==='create'?'created':'appended',patient.id,row.action==='create'?'Ficha creada sin cuenta ni invitación.':'Datos incorporados sin reemplazar los actuales.');
 }
 export async function listImportedHistory(patientId:string,persistent:boolean):Promise<ImportedHistory[]> {
-  await requireCareConsent(patientId,persistent,'care_relationship');
-  if(!persistent){const rows=[...histories.values()].filter(h=>h.patient_id===patientId);try{await requireCareConsent(patientId,false,'clinical_document');return rows;}catch{return rows.filter(h=>h.category!=='study');}}
+  if(!persistent){const state=await importAuthorizationState(patientId,false);return [...histories.values()].filter(h=>h.patient_id===patientId&&state.allowed[h.category]);}
   const result:ImportedHistory[]=[];
   for(let offset=0;;offset+=250){const {data,error}=await getRequestDb().from('patient_import_history').select('id,patient_id,category,body,origin,created_at').eq('patient_id',patientId).order('created_at',{ascending:false}).order('id').range(offset,offset+249);dbError(error);const rows=(data??[])as ImportedHistory[];result.push(...rows);if(rows.length<250)return result;}
 }

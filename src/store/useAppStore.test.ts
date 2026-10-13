@@ -49,13 +49,41 @@ function patient(overrides: Partial<Patient> = {}): Patient {
 
 describe('session-scoped app store', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    for(const mock of Object.values(apiMocks))mock.mockReset();
     useAppStore.getState().reset();
     apiMocks.health.mockResolvedValue({ status: 'ok', ai: false, supabase: false });
   });
 
   afterEach(() => {
     useAppStore.getState().reset();
+  });
+
+  it('boot real carga mil pacientes y sólo publica la cartera al terminar todas las páginas',async()=>{
+    apiMocks.getPatients.mockImplementation(async(query:{limit:number;offset:number})=>{
+      expect(useAppStore.getState().patients).toEqual([]);
+      return{patients:Array.from({length:Math.min(query.limit,1000-query.offset)},(_,i)=>patient({id:`patient-${query.offset+i}`,name:'Nombre repetido'})),page:{offset:query.offset,limit:query.limit,has_more:query.offset+query.limit<1000}};
+    });
+    apiMocks.getPatient.mockResolvedValue({patient:patient({id:'patient-0'}),shoppingList:[]});
+    await useAppStore.getState().boot({isNutri:true});
+    expect(apiMocks.getPatients).toHaveBeenCalledTimes(20);expect(apiMocks.getPatients.mock.calls.map(([query])=>query.offset)).toEqual(Array.from({length:20},(_,i)=>i*50));
+    expect(useAppStore.getState().patients).toHaveLength(1000);expect(useAppStore.getState().patients[999].id).toBe('patient-999');expect(useAppStore.getState().error).toBeNull();
+    expect(apiMocks.getPatient).toHaveBeenCalledTimes(1);
+  });
+  it('un fallo de la segunda página no publica las primeras pacientes ni hidrata una ficha',async()=>{
+    apiMocks.getPatients.mockResolvedValueOnce({patients:[patient()],page:{offset:0,limit:50,has_more:true}}).mockRejectedValueOnce(new Error('Página interrumpida'));
+    await useAppStore.getState().boot({isNutri:true});expect(useAppStore.getState().patients).toEqual([]);expect(useAppStore.getState().error).toBe('Página interrumpida');expect(apiMocks.getPatient).not.toHaveBeenCalled();
+  });
+  it('una página vacía que anuncia más no progresa ni se presenta como cartera completa',async()=>{
+    apiMocks.getPatients.mockResolvedValue({patients:[],page:{offset:0,limit:50,has_more:true}});
+    await useAppStore.getState().boot({isNutri:true});expect(apiMocks.getPatients).toHaveBeenCalledTimes(1);expect(useAppStore.getState().error).toBeTruthy();expect(useAppStore.getState().patients).toEqual([]);
+  });
+  it('detecta una página repetida en vez de acumular quinientas copias',async()=>{
+    apiMocks.getPatients.mockImplementation(async(query:{limit:number;offset:number})=>({patients:[patient()],page:{...query,has_more:true}}));
+    await useAppStore.getState().boot({isNutri:true});expect(apiMocks.getPatients).toHaveBeenCalledTimes(2);expect(useAppStore.getState().error).toBeTruthy();expect(useAppStore.getState().patients).toEqual([]);
+  });
+  it('rechaza metadatos inválidos y mantiene válido el fin vacío de la cartera',async()=>{
+    for(const page of [{offset:0,limit:0,has_more:true},{offset:50,limit:50,has_more:true},undefined]){apiMocks.getPatients.mockReset();let calls=0;apiMocks.getPatients.mockImplementation(async()=>{if(++calls>2)throw new Error('Protección de la prueba ante bucle');return{patients:[patient()],page};});await useAppStore.getState().boot({isNutri:true});expect(apiMocks.getPatients).toHaveBeenCalledTimes(1);expect(useAppStore.getState().error).toBeTruthy();expect(useAppStore.getState().patients).toEqual([]);}
+    apiMocks.getPatients.mockResolvedValue({patients:[],page:{offset:0,limit:50,has_more:false}});await useAppStore.getState().boot({isNutri:true});expect(useAppStore.getState().error).toBeNull();expect(useAppStore.getState().patients).toEqual([]);
   });
 
   it('loads directory pages and hydrates only the active patient', async () => {

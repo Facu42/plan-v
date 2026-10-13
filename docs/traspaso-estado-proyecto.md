@@ -2,9 +2,13 @@
 
 ## Plan aprobado Nutriboost/Nutridesk · actualización 13/10/2026
 
-Implementación integrada en copia aislada, aún sin publicar. [Estado vigente, límites y verificación](nutridesk-integracion-2026-10-13.md). Esta actualización corrige los estados antiguos de ramas y migraciones que aparecen más abajo. Gmail reemplaza Brevo como opción inicial de acceso; la contraseña de aplicación sigue pendiente. No editar el registro del otro hilo.
+Implementación integrada en copia aislada, aún sin publicar. [Estado vigente, límites y verificación](nutridesk-integracion-2026-10-13.md). Esta actualización corrige los estados antiguos de ramas y migraciones que aparecen más abajo. El usuario pospuso Gmail porque la cuenta pertenece a su cliente. Supabase Auth sigue vigente; el correo incluido sólo sirve para pruebas con miembros del equipo y actualmente está limitado a dos por hora. Un remitente central propio queda para después. No editar el registro del otro hilo.
 
-[Instructivo actualizado](instructivo-plan-v-actualizado-2026-10-13.md) y [lista de habilitación con manifiesto](deployment/nutridesk-habilitacion-2026-10-13.md). Suite integrada del 13/10: 2.784 aprobadas, cero fallos, dos omitidas; tipos/compilación/migraciones/secretos aprobados. Kerr automático y pruebas reales de correo, voces y proveedores siguen pendientes. No declarar completo ni publicado.
+[Instructivo actualizado](instructivo-plan-v-actualizado-2026-10-13.md) y [lista de habilitación con manifiesto](deployment/nutridesk-habilitacion-2026-10-13.md). Suite integrada final, incluidos autorización/exportación histórica y correcciones de notas: 2.836 aprobadas, cero fallos, dos omitidas (437 archivos); tipos/compilación/migraciones/secretos aprobados. Kerr automático y pruebas reales de correo, voces y proveedores siguen pendientes. No declarar completo ni publicado.
+
+[PR borrador 105](https://github.com/Facu42/plan-v/pull/105) preparado para la primera entrega; cabeza `4769b3e`, rama `codex/nutridesk-release-base`, basada en `ae3dc30`. Suite propia 2.504 aprobadas y dos omitidas, 369 archivos. Esos cambios pueden revisarse separados de módulos posteriores; no se hizo merge ni aplicación de SQL. Segunda entrega: [PR borrador 106](https://github.com/Facu42/plan-v/pull/106), `codex/nutridesk-release-consultas` en `a45acf90`, basada en PR105. Suite propia de 2.575 aprobadas y dos omitidas, 384 archivos; tipos, compilación, migraciones y secretos aprobados. Revisión independiente y prueba de navegador de conservación de borradores completadas. Sin merge ni habilitación. La tercera entrega se prepara desde esta cabeza.
+
+Core local `14e3d7f` conserva el paquete integrado; después de ese checkpoint se corrigieron adaptador y arranque de cartera, y se agregó autorización de importación clínica fuera de la app y exportación limitada. Esos cambios, junto con paginación y conservación de borradores, aprobaron el nuevo cierre global de 2.836 casos.
 
 
 Una sola página para que cualquier agente (Claude, Codex u otro) siga sin tener el chat.

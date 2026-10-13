@@ -112,6 +112,7 @@ import {
   sbGetReminderConfig,
   sbGetScheduledAppointment,
   sbListPatientsForNutri,
+  sbGetPatientsForNutri,
   sbSetAppointment,
   sbSetBrief,
   sbSendInvite,
@@ -966,6 +967,34 @@ describe('PV-11 directory summaries', () => {
     billing_status: 'waived',
     billing_until: null,
   };
+
+  it('propaga el fallo del lookup del consultorio y distingue la ausencia legítima',async()=>{
+    const failure={code:'08006',message:'Conexión interrumpida'};harness.push('nutritionists',{data:null,error:failure});
+    await expect(sbListPatientsForNutri('user-1',{offset:0,limit:2})).rejects.toEqual(failure);
+    expect(harness.calls.some(call=>call.table==='patients')).toBe(false);
+    harness.push('nutritionists',{data:null,error:null});expect((await sbListPatientsForNutri('user-1',{offset:0,limit:2})).patients).toEqual([]);
+  });
+  it('no devuelve una cartera parcial si falla la segunda página del adaptador real',async()=>{
+    const failure={code:'42703',message:'Falta la columna phone'};
+    harness.push('nutritionists',{data:{id:'nutri-1'},error:null});harness.push('nutritionists',{data:{id:'nutri-1'},error:null});
+    harness.push('patients',{data:Array.from({length:101},(_,i)=>({...summaryRow,id:`patient-${i}`})),error:null});
+    harness.push('patients',{data:[],error:null}); // Goal followup for the first page.
+    harness.push('patients',{data:[],error:null}); // Archived metadata for the first page.
+    harness.push('patients',{data:null,error:failure});
+    await expect(sbGetPatientsForNutri('user-1')).rejects.toEqual(failure);
+    const pages=harness.calls.filter(call=>call.table==='patients'&&call.filters.some(([name])=>name==='range'));
+    expect(pages.map(call=>call.filters.find(([name])=>name==='range')?.[1])).toEqual([[0,100],[100,200]]);
+  });
+  it('rechaza respuestas inválidas en lugar de interpretarlas como fin de la cartera',async()=>{
+    for(const invalid of [undefined,{},[],{id:''}]){harness.push('nutritionists',{data:invalid,error:null});await expect(sbListPatientsForNutri('user-1',{offset:0,limit:2})).rejects.toThrow();}
+    for(const invalid of [null,{},[null],[{full_name:'Sin identificación'}]]){harness.push('nutritionists',{data:{id:'nutri-1'},error:null});harness.push('patients',{data:invalid,error:null});await expect(sbListPatientsForNutri('user-1',{offset:0,limit:2})).rejects.toThrow();}
+  });
+  it('ordena nombres repetidos por identificación para sostener las páginas',async()=>{
+    harness.push('nutritionists',{data:{id:'nutri-1'},error:null});harness.push('patients',{data:[summaryRow,{...summaryRow,id:'patient-2'}],error:null});
+    await sbListPatientsForNutri('user-1',{offset:0,limit:2});
+    const order=harness.calls.find(call=>call.table==='patients')?.filters.filter(([name])=>name==='order');
+    expect(order).toEqual([['order',['full_name',{ascending:true}]],['order',['id',{ascending:true}]]]);
+  });
 
   it('pages directory rows without loading meal logs or messages', async () => {
     vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(new Date('2026-09-17T17:40:00Z'));

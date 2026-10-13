@@ -2,9 +2,13 @@
 
 ## Plan aprobado Nutriboost/Nutridesk · actualización 13/10/2026
 
-Implementación integrada en copia aislada, aún sin publicar. [Estado vigente, límites y verificación](nutridesk-integracion-2026-10-13.md). Esta actualización corrige los estados antiguos de ramas y migraciones que aparecen más abajo. Gmail reemplaza Brevo como opción inicial de acceso; la contraseña de aplicación sigue pendiente. No editar el registro del otro hilo.
+Implementación integrada en copia aislada, aún sin publicar. [Estado vigente, límites y verificación](nutridesk-integracion-2026-10-13.md). Esta actualización corrige los estados antiguos de ramas y migraciones que aparecen más abajo. El usuario pospuso Gmail porque la cuenta pertenece a su cliente. Supabase Auth sigue vigente; el correo incluido sólo sirve para pruebas con miembros del equipo y actualmente está limitado a dos por hora. Un remitente central propio queda para después. No editar el registro del otro hilo.
 
 [Instructivo actualizado](instructivo-plan-v-actualizado-2026-10-13.md) y [lista de habilitación con manifiesto](deployment/nutridesk-habilitacion-2026-10-13.md). Revisión independiente clínica/operaciones e integración comprobadas; faltan los pasos externos declarados y PRs por apartado. Los informes anteriores conservan evidencia histórica, no sustituyen el cierre integrado.
+
+Primera entrega separada: [PR borrador 105](https://github.com/Facu42/plan-v/pull/105), `codex/nutridesk-release-base` en `4769b3e`. Acceso por Supabase, cartera sin cortes, teléfono, fotos de ingredientes y tokens Nutrigo. Suite propia 2.504 aprobadas, cero fallos y dos omitidas; revisión adicional 63 casos. Sin merge, migraciones ni configuración externa. SMTP propio pospuesto.
+
+Importación sin cuenta y exportación histórica completadas localmente: [autorización limitada](importacion-autorizacion-externa-2026-10-13.md), [PDF y permisos](clinical-import-export-2026-10-13.md) y [revisión independiente con recorrido de navegador](nutridesk-importacion-revision-2026-10-13.md). Manifiesto actual de diecisiete migraciones. Cierre integrado final: 2.836 aprobadas, cero fallos y dos omitidas (437 archivos). Tipos, compilación, diecisiete migraciones/manifiesto, vistas y secretos aprobados. Segunda entrega de consultas: [PR borrador 106](https://github.com/Facu42/plan-v/pull/106), `a45acf90`, con 2.575 casos aprobados y dos omitidos (384 archivos); revisión independiente completada. Tercera entrega en preparación.
 
 
 Pedido de Facundo del 2026-09-28: usar los agentes de

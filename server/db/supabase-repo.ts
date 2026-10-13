@@ -544,16 +544,29 @@ export type PatientListPage = {
 
 export async function sbListPatientsForNutri(userId: string, query: { offset: number; limit: number }): Promise<PatientListPage> {
   const sb = getRequestDb();
-  const { data: nutri } = await sb.from('nutritionists').select('id').eq('user_id', userId).maybeSingle();
-  if (!nutri) return { patients: [], page: { offset: query.offset, limit: query.limit, has_more: false } };
+  const { data: nutriData, error: nutriError } = await sb.from('nutritionists').select('id').eq('user_id', userId).maybeSingle();
+  if (nutriError) throw nutriError;
+  if (nutriData === null) return { patients: [], page: { offset: query.offset, limit: query.limit, has_more: false } };
+  const nutri = row(nutriData);
+  if (!nutri || typeof nutri.id !== 'string' || !nutri.id.trim()) {
+    throw new Error('No pudimos verificar el consultorio.');
+  }
 
   const end = query.offset + query.limit;
-  const { data: rowsData } = await sb.from('patients')
+  const { data: rowsData, error: patientsError } = await sb.from('patients')
     .select(patientTableColumns.professional)
     .eq('nutritionist_id', nutri.id)
     .order('full_name', { ascending: true })
+    .order('id', { ascending: true })
     .range(query.offset, end);
 
+  if (patientsError) throw patientsError;
+  if (!Array.isArray(rowsData) || rowsData.some((value) => {
+    const patientRow = row(value);
+    return !patientRow || typeof patientRow.id !== 'string' || !patientRow.id.trim();
+  })) {
+    throw new Error('La página de pacientes está incompleta o no es válida.');
+  }
   const listed = rows(rowsData);
   const hasMore = listed.length > query.limit;
   const pageRows = hasMore ? listed.slice(0, query.limit) : listed;

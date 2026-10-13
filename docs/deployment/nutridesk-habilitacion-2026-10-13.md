@@ -1,10 +1,10 @@
 # Habilitación por etapas · Plan V
 
-Paquete para revisión; no ejecutado contra producción. Base revisada: `ae3dc30e3095d4856e3a5055fdeca5ebcf2424e3`. Ver [informe y Regression Guard](../nutridesk-integracion-2026-10-13.md), [manifiesto de quince migraciones](nutridesk-migrations-2026-10-13.json) y `.env.example`. No colocar credenciales en este documento, Git, PR ni variables `VITE_`.
+Paquete para revisión; no ejecutado contra producción. Base revisada: `ae3dc30e3095d4856e3a5055fdeca5ebcf2424e3`. Ver [informe y Regression Guard](../nutridesk-integracion-2026-10-13.md), [manifiesto de diecisiete migraciones](nutridesk-migrations-2026-10-13.json) y `.env.example`. No colocar credenciales en este documento, Git, PR ni variables `VITE_`.
 
 ## Puertas obligatorias
 
-- [x] Suite integrada: 2.784 aprobadas, cero fallos, dos omitidas; 430 archivos de resultados.
+- [x] Suite integrada final: 2.836 casos aprobados, cero fallos y dos omitidos, en 437 archivos. Incluye autorización/exportación histórica y correcciones de notas. Tipos y compilación final aprobados; manifiesto canónico de diecisiete migraciones, secretos, migraciones y vistas aprobados.
 - [x] Tipos, compilación web, límites de secretos, seguridad de migraciones y diferencias comprobados.
 - [x] Revisión independiente y correcciones de gasto, consentimiento, cobros y concurrencia.
 - [x] Quince archivos SQL y hashes coinciden con el manifiesto; lectura de versiones alojadas sin aplicarlos.
@@ -15,7 +15,7 @@ Paquete para revisión; no ejecutado contra producción. Base revisada: `ae3dc30
 
 ## Orden de habilitación
 
-1. **Acceso:** preparar Gmail y Supabase Auth mediante `scripts/auth-smtp-config.mjs`, primero en modo de comprobación; conservar destinos existentes. Configurar sólo tras autorización. Probar destinatario acordado, alta, invitación existente, recuperación, enlace vencido y contraseña nueva. Registrar resultado de entrega, nunca el enlace secreto ni la clave.
+1. **Acceso:** Gmail pospuesto por el usuario; elegir más adelante un remitente central propio conectado a Supabase Auth, sin solicitar la clave personal de cada cliente. El correo incluido sólo permite pruebas con miembros del equipo (dos por hora actualmente). Preparar el SMTP elegido mediante `scripts/auth-smtp-config.mjs`, primero en modo de comprobación; conservar destinos existentes. Configurar sólo tras autorización. Probar destinatario acordado, alta, invitación existente, recuperación, enlace vencido y contraseña nueva. Registrar resultado de entrega, nunca el enlace secreto ni la clave.
 2. **Ficha y extracción local:** aplicar únicamente las migraciones nuevas pendientes según manifiesto y dependencias, comprobar permisos y buckets privados. Ensayar con dos consultorios y una recepción. Importación no debe crear cuentas ni invitar automáticamente. Publicar tema/fotos/ficha e importación con IA externa apagada.
 3. **Audio e IA nueva:** API y worker con la misma configuración privada Groq. Mantener `AI_MODE`, `GROQ_ZDR_VERIFIED`, `GROQ_FREE_TIER_VERIFIED` y `CLINICAL_AI_COST_MODE` según verificaciones efectivas; no marcar comprobado por tener una clave. Validar grabación de ambas voces, interrupción, cierre, retiro de consentimiento, retención siete días y gasto concurrente cercano a USD 5. Sin herramientas ni procesamiento por lotes. Claves nuevas de reintento no liberan gasto incierto.
 4. **Agenda y cobros:** `SCHEDULING_PUBLIC_BASE_URL` apunta al origen web; proxies estrechos en Vercel. Configurar claves privadas de firma/cifrado, OAuth por profesional y callbacks/credenciales de Google y Mercado Pago. Probar seña/total, dos cuentas, webhook duplicado, devolución, credencial revocada y revisión explícita de sincronización incierta antes de habilitar cobros reales.

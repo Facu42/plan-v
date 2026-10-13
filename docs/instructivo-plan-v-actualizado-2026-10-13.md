@@ -4,7 +4,9 @@ Actualizada el 13/10/2026 sobre la implementación revisada. Estas funciones tod
 
 ## Correos de acceso
 
-Supabase gestiona confirmación de cuenta, invitación y recuperación de contraseña. Para enviar desde Plan V se eligió el Gmail `planv.nutricion@gmail.com`. Entrá con esa cuenta en [Contraseñas de aplicación de Google](https://myaccount.google.com/apppasswords), creá una llamada «Plan V» y guardá la clave de dieciséis letras en `SMTP_PASSWORD` del archivo privado `C:\Users\facun\.config\plan-v\services.env`. Requiere verificación en dos pasos. No reemplaza la contraseña habitual ni debe pegarse en el chat. La entrega real queda pendiente hasta configurar SMTP y probar un correo autorizado.
+Supabase gestiona confirmación de cuenta, invitación y recuperación de contraseña. Facundo pospuso la conexión con Gmail porque esa cuenta pertenece a su cliente. Por ahora se conserva el correo incluido de Supabase: sólo sirve para pruebas con miembros del equipo del proyecto y actualmente está limitado a dos mensajes por hora; no envía a pacientes externos. [Restricciones oficiales](https://supabase.com/docs/guides/auth/auth-smtp).
+
+Para ofrecerlo cómodamente a distintos consultorios, queda pendiente conectar un servicio de correo central de la plataforma a Supabase con remitente propio. No hace falta pedir la clave personal de Gmail a cada cliente. El configurador de Gmail/Brevo sigue preparado como opción; no se aplicó configuración ni se enviaron correos reales.
 
 ## Ficha de cada paciente
 

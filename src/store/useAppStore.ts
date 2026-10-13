@@ -21,7 +21,6 @@ type AppState = {
 };
 
 const DIRECTORY_PAGE = 50;
-const DIRECTORY_MAX = 500;
 
 let sessionGeneration = 0;
 let bootController: AbortController | null = null;
@@ -36,13 +35,30 @@ function abortInflight() {
 
 async function loadDirectory(signal: AbortSignal): Promise<Patient[]> {
   const patients: Patient[] = [];
+  const seen = new Set<string>();
   let offset = 0;
   let hasMore = true;
-  while (hasMore && offset < DIRECTORY_MAX) {
+  while (hasMore) {
+    if (signal.aborted) throw new DOMException('Carga cancelada', 'AbortError');
     const page = await api.getPatients({ limit: DIRECTORY_PAGE, offset }, { signal });
+    if (signal.aborted) throw new DOMException('Carga cancelada', 'AbortError');
+    if (!page || !Array.isArray(page.patients) || !page.page
+      || page.page.offset !== offset || page.page.limit !== DIRECTORY_PAGE
+      || typeof page.page.has_more !== 'boolean' || page.patients.length > DIRECTORY_PAGE) {
+      throw new Error('No pudimos verificar todas las páginas de pacientes.');
+    }
+    if (page.page.has_more && page.patients.length === 0) {
+      throw new Error('La carga de pacientes no avanzó. Volvé a intentar.');
+    }
+    for (const patient of page.patients) {
+      if (!patient || typeof patient.id !== 'string' || !patient.id.trim() || seen.has(patient.id)) {
+        throw new Error('La carga de pacientes recibió una página repetida o inválida.');
+      }
+      seen.add(patient.id);
+    }
     patients.push(...page.patients);
-    hasMore = page.page?.has_more ?? false;
-    offset += page.page?.limit ?? DIRECTORY_PAGE;
+    hasMore = page.page.has_more;
+    offset += DIRECTORY_PAGE;
   }
   return patients;
 }

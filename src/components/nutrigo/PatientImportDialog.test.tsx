@@ -1,6 +1,6 @@
 import { describe,expect,it,vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { PatientImportDialog,buildReviewedImport,reviewedOrganizerSources,applyOrganizerReview } from './PatientImportDialog';
+import { PatientImportDialog,buildReviewedImport,reviewedOrganizerSources,applyOrganizerReview,continueCreatedImport } from './PatientImportDialog';
 vi.mock('./FigmaPatientFront',()=>({FigmaRecordDialog:({children}:{children:React.ReactNode})=><dialog>{children}</dialog>}));
 vi.mock('./primitives',()=>({NvButton:({children}:{children:React.ReactNode})=><button>{children}</button>}));
 vi.mock('./unsaved-changes',()=>({useUnsavedChanges:()=>{},canLeaveWorkspace:()=>true}));
@@ -8,6 +8,13 @@ vi.mock('./unsaved-changes',()=>({useUnsavedChanges:()=>{},canLeaveWorkspace:()=
 const origin={file:'a.csv',fingerprint:'a'.repeat(64),row:2};
 const row=()=>({key:crypto.randomUUID(),name:'Ana Pérez',email:'',phone:'',action:'create' as const,patient_id:null,origins:[origin],measurements:[],history:[{category:'history' as const,text:'Dato privado',origin}],warnings:[],reviewed:true,includeClinical:true});
 describe('revisión antes de importar',()=>{
+  it('conserva el texto clínico revisado al continuar desde un contacto nuevo sin cuenta',()=>{
+    const original=row(),target=crypto.randomUUID();
+    const pending=continueCreatedImport([original],[{key:original.key,status:'created',patient_id:target,message:'Contacto creado'}]);
+    expect(pending).toHaveLength(1);expect(pending[0]).toMatchObject({action:'append',patient_id:target,reviewed:false,includeClinical:true,history:original.history});
+    expect(pending[0].key).not.toBe(original.key);expect(original.action).toBe('create');
+    expect(continueCreatedImport([original],[{key:original.key,status:'error',patient_id:null,message:'Error'}])).toEqual([]);
+  });
   it('ofrece todos los formatos y explica lectura local y alta sin invitación',()=>{
     const html=renderToStaticMarkup(<PatientImportDialog onClose={()=>{}}/>);
     expect(html).toContain('.xlsx,.csv,.docx,.pdf,.jpg,.jpeg,.png');expect(html).toContain('No se crean cuentas');expect(html).toContain('20 MB');

@@ -11,6 +11,10 @@ import { recordMemoryAccess } from '../privacy/repository.js';
 import type { ClinicalDocument,ClinicalWorkspaceInput,ClinicalWorkspaceRecord,ClinicalWorkspaceSnapshot,MethodReference,ClinicBrand } from '../../src/types/clinical-workspace.js';
 import { getNutritionSettings } from '../nutrition-capabilities/repository.js';
 import { clinicalBrandFromNutrition } from '../../src/lib/clinical-brand.js';
+import { listImportedHistory } from '../patient-import/repository.js';
+import { importAuthorizationState, listImportedMeasurements } from '../patient-import/external-authorization.js';
+import { getPatient } from '../store.js';
+import type { ImportedClinicalExport } from '../../src/types/clinical-export.js';
 const records=new Map<string,ClinicalWorkspaceRecord>();const documents=new Map<string,ClinicalDocument>();const references=new Map<string,MethodReference>();const brands=new Map<string,ClinicBrand>();
 registerDemoState('clinical-workspace',()=>({records,documents,references,brands}));
 export async function auditClinicalAccess(patientId:string,action:'read'|'export'|'document',persistent:boolean){
@@ -39,12 +43,31 @@ export async function clinicalSnapshot(patientId:string,nutritionistId:string,pe
   await auditClinicalAccess(patientId,'read',persistent);
   const rows=persistent?await allRows<ClinicalWorkspaceRecord>('clinical_workspace_records','patient_id',patientId):[...records.values()].filter(r=>r.patient_id===patientId);
   const docs=consented.includes('clinical_document')?(persistent?await allRows<ClinicalDocument>('clinical_source_documents','patient_id',patientId):[...documents.values()].filter(d=>d.patient_id===patientId)):[];
-  let brand=brands.get(nutritionistId)??null;if(persistent){const {data,error:e}=await getRequestDb().from('clinical_clinic_brands').select('data').eq('nutritionist_id',nutritionistId).maybeSingle();error(e);brand=data?.data??null;}
-  brand=clinicalBrandFromNutrition((await getNutritionSettings(nutritionistId,persistent)).settings.brand,brand?.license??'');
+  const brand=await clinicalExportBrand(nutritionistId,persistent);
   return {records:rows.filter(r=>{
     if('document_id'in r.data&&r.data.document_id&&!consented.includes('clinical_document'))return false;
     return r.data.kind==='laboratory'?consented.includes('clinical_document'):r.data.kind==='study_order'||consented.includes('measurement');
   }).sort((a,b)=>b.recorded_on.localeCompare(a.recorded_on)||b.created_at.localeCompare(a.created_at)),documents:docs,references:await referenceList(nutritionistId,persistent),brand};
+}
+export async function clinicalExportBrand(nutritionistId:string,persistent:boolean){
+  let brand=brands.get(nutritionistId)??null;
+  if(persistent){const {data,error:e}=await getRequestDb().from('clinical_clinic_brands').select('data').eq('nutritionist_id',nutritionistId).maybeSingle();error(e);brand=data?.data??null;}
+  return clinicalBrandFromNutrition((await getNutritionSettings(nutritionistId,persistent)).settings.brand,brand?.license??'');
+}
+/** Call only after the route verifies current ownership; the RPC verifies it again. */
+export async function exportImportedClinical(patientId:string,nutritionistId:string,persistent:boolean):Promise<ImportedClinicalExport>{
+  let projected:Omit<ImportedClinicalExport,'brand'>;
+  if(persistent){
+    const {data,error:e}=await getRequestDb().rpc('export_patient_imported_history',{target:patientId});error(e);
+    if(!data?.patient||!Array.isArray(data.imported_history)||!Array.isArray(data.imported_measurements))throw new CareError(503,'No pudimos confirmar la exportación de históricos.');
+    projected=data as Omit<ImportedClinicalExport,'brand'>;
+  }else{
+    const patient=getPatient(patientId),state=await importAuthorizationState(patientId,false);
+    if(!patient||!Object.values(state.allowed).some(Boolean))throw new CareError(403,'Falta autorización vigente para exportar históricos.');
+    projected={patient:{id:patient.id,name:patient.name},imported_history:await listImportedHistory(patientId,false),imported_measurements:await listImportedMeasurements(patientId,false)};
+    recordMemoryAccess({patientId,action:'imported_clinical_export',objectType:'patient_import_history'});
+  }
+  return {...projected,brand:await clinicalExportBrand(nutritionistId,persistent)};
 }
 export async function saveDocument(patientId:string,nutritionistId:string,input:{id:string;filename:string;file:string;source_sha256:string},persistent:boolean):Promise<ClinicalDocument>{
   await requireCareConsent(patientId,persistent,'care_relationship');await requireCareConsent(patientId,persistent,'clinical_document');

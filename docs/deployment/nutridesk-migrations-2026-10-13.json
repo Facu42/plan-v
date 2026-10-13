@@ -87,6 +87,16 @@
       "version": "20261013110000",
       "file": "20261013110000_shared_notes_pagination.sql",
       "sha256": "9c5509564c7d48c29a6abc7b45609db7f767135ab5a430e1edcd2265004535ee"
+    },
+    {
+      "version": "20261013120000",
+      "file": "20261013120000_patient_import_external_authorization.sql",
+      "sha256": "8e1f647194c1491e6480dd988fc2d088497715a547a4c5ff058a1cc017c847aa"
+    },
+    {
+      "version": "20261013123000",
+      "file": "20261013123000_imported_clinical_export.sql",
+      "sha256": "ccba990d2c58255c7e074c65d56378ebc41888664921074389e0347301931adc"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",
