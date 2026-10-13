@@ -12,8 +12,8 @@ describe('funciones presentes y previstas del consultorio',()=>{
   });
   it('distingue futuro de disponible y no ofrece formularios simulados',()=>{
     const html=renderToStaticMarkup(<ProfessionalModules selectedId="pagina-publica" onOpen={vi.fn()} />);
-    expect(html).toContain('Página pública');expect(html).toContain('En preparación');expect(html).toContain('Vista previa');
-    expect(html).not.toContain('<form');expect(html).not.toContain('Abrir módulo');
+    expect(html).toContain('Página pública');expect(html).toContain('Disponible');expect(html).toContain('Vista previa');
+    expect(html).not.toContain('<form');expect(html).toContain('Abrir módulo');
     const available=renderToStaticMarkup(<ProfessionalModules selectedId="alimentos" onOpen={vi.fn()} />);
     expect(available).toContain('Disponible');expect(available).toContain('Abrir módulo');
   });
@@ -26,7 +26,7 @@ describe('funciones presentes y previstas del consultorio',()=>{
   it('ofrece todos los destinos futuros con estado explícito y sólo en CRM',()=>{
     const html=renderToStaticMarkup(<PlannedModulesNav onOpen={vi.fn()} />);
     for(const m of PROFESSIONAL_MODULES.filter(m=>!m.href))expect(html).toContain(m.title);
-    expect(html).toContain('En preparación');
+    expect(html).not.toContain('En preparación');
     expect(isAllowedPage('pro','desarrollo')).toBe(true);expect(isAllowedPage('patient','desarrollo')).toBe(false);
   });
   it('abre difusiones con revisión individual y configuración con reportes',()=>{
