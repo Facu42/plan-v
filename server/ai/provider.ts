@@ -46,7 +46,9 @@ export function createFreeOpenRouterFetch(fetchImpl: typeof globalThis.fetch = g
       body: JSON.stringify({
         ...body,
         // Replace preferences rather than inheriting an external preset or price override.
-        provider: { max_price: { prompt: 0, completion: 0, request: 0, image: 0 }, require_parameters: true },
+        // Every chat call carries patient context (meals, allergies, targets), so only
+        // providers that neither store prompts nor train on them may answer.
+        provider: { max_price: { prompt: 0, completion: 0, request: 0, image: 0 }, require_parameters: true, data_collection: 'deny' },
       }),
       redirect: 'error',
     });

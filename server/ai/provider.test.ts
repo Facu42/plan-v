@@ -93,7 +93,16 @@ describe('free request boundary', () => {
     expect(init.signal).toBe(signal);
     expect(init.headers).toEqual({ Authorization: 'Bearer synthetic-only' });
     expect(init.redirect).toBe('error');
-    expect(JSON.parse(init.body).provider).toEqual({ max_price: { prompt: 0, completion: 0, request: 0, image: 0 }, require_parameters: true });
+    expect(JSON.parse(init.body).provider).toEqual({ max_price: { prompt: 0, completion: 0, request: 0, image: 0 }, require_parameters: true, data_collection: 'deny' });
+  });
+
+  it('asks providers not to store or train on the data, even if the request said otherwise', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response('{}'));
+    await createFreeOpenRouterFetch(fetchMock)(url, {
+      method: 'POST',
+      body: JSON.stringify({ model: 'openrouter/free', messages: [], provider: { data_collection: 'allow' } }),
+    });
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).provider.data_collection).toBe('deny');
   });
 
   it.each([
