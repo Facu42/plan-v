@@ -48,8 +48,8 @@ visto bueno de Facundo.
 | Rango o archivo | Dueño | Estado |
 |---|---|---|
 | `20261011140000_clinical_ai_budget` … `20261013123000_imported_clinical_export` (17 archivos, manifiesto en `docs/deployment/nutridesk-migrations-2026-10-13.json` de la rama de Codex) | Codex | Sin aplicar |
-| `20261015090000_patient_views_read_only` | Claude | PR #110, sin aplicar: espera la frase de Facundo |
-| `20261015100000_habit_symptoms` | Claude | PR #112, sin aplicar: espera la frase de Facundo |
+| `20261015090000_patient_views_read_only` | Claude | PR #110. Aplicada en la base el 14/10 con la frase de Facundo (el historial de la base la anota como `20261014215529`) |
+| `20261015100000_habit_symptoms` | Claude | PR #112. Aplicada en la base el 14/10 con la frase de Facundo (el historial la anota como `20261014215543`) |
 | `20261015*` en adelante | Claude | Se anotan acá al crearlas |
 
 ## 4. Decisiones vigentes de Facundo (fechadas)
@@ -78,3 +78,4 @@ del piloto, entidad legal.
 - **13/10 · Codex** · Pila #105–#108 y copia integrada `codex/nutridesk-core` (respaldada como
   `respaldo/codex-nutridesk-core`). Ver `docs/nutridesk-integracion-2026-10-13.md` en esa rama.
 - **15/10 · Claude** · PR #112: ánimo y síntomas de la paciente (diálogo «Cómo me siento» en el Diario; la nutri los ve en «Registros y evolución»). Toca con cambios mínimos `server/store.ts`, `src/types/index.ts`, `ShowroomProgress.tsx` y `screens/Diary.tsx`.
+- **14/10 · Claude** · Con la frase «aplicá las migraciones de vistas y síntomas en la base» se aplicaron en producción las de #110 y #112. Verificado: las siete vistas de la paciente quedan solo lectura y `habit_logs.symptoms` existe con su regla. Las dos son repetibles sin daño. #110 y #112 siguen sin juntar a main.
