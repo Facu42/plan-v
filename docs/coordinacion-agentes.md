@@ -19,7 +19,7 @@ visto bueno de Facundo.
 | Lo que Codex dejó sin guardar en la PC de Facundo: importar pacientes (otra versión), Equivalencias (otra versión), asistente con IA para la cartera | Codex | solo en la PC (sin respaldo) | Espera la frase de Facundo para respaldarlo |
 | Seguridad y operación (vistas de paciente solo lectura, privacidad de la IA, staging, monitoreo, respaldo de archivos) | Claude | ramas `claude/*` | En curso |
 | Comparación de #105 con Figma y orden de juntado de la pila de Codex | Claude | `docs/coordinacion/` y comentarios en los PR | #105 comparado el 14/10. Claude no empuja a ramas de Codex |
-| Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Por empezar |
+| Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Ánimo y síntomas en PR #112 (borrador). El resto, por empezar |
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
 
@@ -49,6 +49,7 @@ visto bueno de Facundo.
 |---|---|---|
 | `20261011140000_clinical_ai_budget` … `20261013123000_imported_clinical_export` (17 archivos, manifiesto en `docs/deployment/nutridesk-migrations-2026-10-13.json` de la rama de Codex) | Codex | Sin aplicar |
 | `20261015090000_patient_views_read_only` | Claude | PR #110, sin aplicar: espera la frase de Facundo |
+| `20261015100000_habit_symptoms` | Claude | PR #112, sin aplicar: espera la frase de Facundo |
 | `20261015*` en adelante | Claude | Se anotan acá al crearlas |
 
 ## 4. Decisiones vigentes de Facundo (fechadas)
@@ -76,3 +77,4 @@ del piloto, entidad legal.
   siguen aceptando escrituras (arreglo en un PR propio de Claude).
 - **13/10 · Codex** · Pila #105–#108 y copia integrada `codex/nutridesk-core` (respaldada como
   `respaldo/codex-nutridesk-core`). Ver `docs/nutridesk-integracion-2026-10-13.md` en esa rama.
+- **15/10 · Claude** · PR #112: ánimo y síntomas de la paciente (diálogo «Cómo me siento» en el Diario; la nutri los ve en «Registros y evolución»). Toca con cambios mínimos `server/store.ts`, `src/types/index.ts`, `ShowroomProgress.tsx` y `screens/Diary.tsx`.
