@@ -54,6 +54,19 @@ describe('Persistencia y permisos nutricionales A/B',()=>{
     const next=await rpc<{current:PlanVersionView}>(owner,'save_meal_plan_draft',[patient,{...request,expected_revision:saved.current.revision,meal_labels:undefined}]);expect(next.current.meal_labels).toEqual(request.meal_labels);
     await expect(rpc(owner,'save_meal_plan_draft',[patient,{...request,expected_revision:next.current.revision,meal_labels:{Desayuno:'Almuerzo'}}])).rejects.toMatchObject({code:'22023'});
   });
+  it('relee la copia publicada después de editar bajo la política de transacción que usa PostgREST',async()=>{
+    const mode=(await db.query<{provolatile:string}>("select provolatile from pg_catalog.pg_proc where oid='public.list_published_meal_plan(uuid)'::regprocedure")).rows[0].provolatile;
+    // PostgREST uses a read-only transaction for STABLE/IMMUTABLE RPCs. This
+    // read may promote a due plan and always locks its version, so it must be writable.
+    const visible=await db.transaction(async tx=>{
+      if(mode!=='v')await tx.exec('set transaction read only');
+      await tx.exec('set local role authenticated');
+      await tx.query("select set_config('request.jwt.claim.sub',$1,true)",[patientUser]);
+      return(await tx.query<{result:{version:number;meal_labels:unknown}}>('select public.list_published_meal_plan($1) as result',[patient])).rows[0].result;
+    });
+    expect(mode).toBe('v');
+    expect(visible).toMatchObject({version:1,meal_labels:{Desayuno:'Primera comida'}});
+  });
   it('búsqueda posterior a cinco mil alimentos mantiene total y aislamiento',async()=>{
     const nutrients={kcal:50,protein:null,carbs:null,fat:null,fiber:null,sodium:null,calcium:null,iron:null,potassium:null,magnesium:null,vitamin_c:null};
     await db.query("insert into public.food_catalog(id,owner_id,payload) select gen_random_uuid(),$1,jsonb_build_object('name','Avena '||n,'brand','','category','Cereales','kind','food','source','Fuente ficticia','reference','','nutrients',$2::jsonb,'portions','[]'::jsonb) from generate_series(1,5100) n",[ownerId,nutrients]);

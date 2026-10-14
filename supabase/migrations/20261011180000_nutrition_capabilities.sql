@@ -230,7 +230,9 @@ $$;
 revoke all on function public.meal_plan_version_pre_meal_labels(uuid),public.meal_plan_version_json(uuid) from public,anon,authenticated;
 
 alter function public.list_published_meal_plan(uuid) rename to published_plan_pre_meal_labels;
-create function public.list_published_meal_plan(target_patient uuid) returns jsonb language plpgsql stable security definer set search_path='' as $$
+-- This wrapper preserves the writable RPC contract: reading can promote a due
+-- version and always locks versions; PostgREST must not use a read-only transaction.
+create function public.list_published_meal_plan(target_patient uuid) returns jsonb language plpgsql volatile security definer set search_path='' as $$
 declare result jsonb; data jsonb;
 begin
  result:=public.published_plan_pre_meal_labels(target_patient); if result is null then return null; end if;

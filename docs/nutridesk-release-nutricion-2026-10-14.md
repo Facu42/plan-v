@@ -1,6 +1,6 @@
 # Entrega 4: nutrición y PDF del plan
 
-Estado: implementación y verificación propia completadas en `codex/nutridesk-release-nutricion`, copia aislada. Lista para PR en borrador; sin publicación ni cambios de producción.
+Estado: entrega en [PR 108 en borrador](https://github.com/Facu42/plan-v/pull/108), sin publicación ni cambios de producción. Su comprobación de sesiones detectó una regresión de transacción; la [corrección mínima y evidencia posterior](nutridesk-release4-postgrest-readonly-2026-10-14.md) están preparadas y verificadas: 2.679 casos aprobados, cero fallos, dos omitidos y 407 archivos. El CI debe repetirse sobre el nuevo commit. Los 2.678 casos anteriores citados abajo corresponden a `accb97f`.
 
 Fuente de código: `460854a0d087001b06b3c91dfbfc8672e876d842`. Base confirmada de entrega 3: `b143744b4024314e8313662a1a911b70a28c914b`. Las cuarenta rutas finales de la receta conservan el contenido de CORE después de normalizar CRLF/LF; 38 sólo difieren en finales de línea. Los wrappers incorporan únicamente nutrición y PDF del plan. La entrega hereda las correcciones finales de importación, recarga de cartera y origen de filas.
 
@@ -14,8 +14,9 @@ Fuente de código: `460854a0d087001b06b3c91dfbfc8672e876d842`. Base confirmada d
 - **Migración:** única SQL nueva `20261011180000_nutrition_capabilities.sql`. Tablas con RLS de lectura propia y escritura por funciones con propietario y versión; nuevos RPC `save_nutrition_settings`, `save_nutrition_exchange`, `search_food_catalog` registrados en la prueba de permisos. Helpers cerrados a roles públicos. Reversión de aplicación conservando tablas, columnas y versiones, sin eliminar datos. No se aplica en Supabase.
 - **Fire test:** se sustituyó temporalmente el cálculo de Harris por Mifflin en este worktree. La prueba numérica «Harris y FAO cambian realmente el basal y la meta» falló: tres aprobadas y una fallida. Restituidos los bytes originales, la misma prueba completa aprobó los cuatro casos. No se modificó CORE ni producción.
 - **Automatización:** build convierte la fuente Poppins/OFL local a TrueType e incluye archivos generados ignorados; pruebas de contratos, versiones y permisos; scanner de secretos y revisión de migraciones heredados. No se agrega el manifiesto final de diecisiete migraciones porque incluye entregas futuras.
-- **Gate propio:** suite completa de esta cabeza: **2.678 aprobadas, cero fallos, dos omitidas, 407 archivos**. Tipos, build, migraciones, límite de secretos, vistas públicas y `git diff --check` aprobaron. No se atribuyen resultados de CORE a esta cabeza. No hay comando de lint separado configurado ni porcentaje de cobertura medido; no se inventan ambos.
-- **Veredicto:** SHIP para PR en borrador. La revisión independiente no encontró bloqueantes P1/P2. Publicación y configuración externa pendientes de autorización y comprobación correspondientes; nada aplicado en producción.
+- **Gate previo (`accb97f`):** **2.678 aprobadas, cero fallos, dos omitidas, 407 archivos**. Tipos, build, migraciones, límite de secretos, vistas públicas y `git diff --check` aprobaron. Ese resultado precede a la corrección de PostgREST; no se atribuye a la cabeza corregida ni se reutiliza el de CORE. No hay comando de lint separado configurado ni porcentaje de cobertura medido; no se inventan ambos.
+- **Verificación posterior:** la suite corregida terminó el 14/10/2026 a las 10:46 de Argentina: **2.679 aprobadas, cero fallos, dos omitidas, 407 archivos**. Una revisión independiente del fix aprobó trece casos y no encontró P1/P2. Se conserva el resultado anterior para distinguirlo de la evidencia de la corrección.
+- **Veredicto actual:** SHIP para incorporar el fix al PR en borrador; HOLD para publicación hasta comprobar el CI de sesiones y las autorizaciones correspondientes. Nada aplicado en producción.
 
 ## Límites del alcance
 
