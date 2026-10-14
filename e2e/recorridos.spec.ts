@@ -25,9 +25,13 @@ test('2 · la paciente completa su ficha de ingreso y la envía', async ({ page 
   const privacy = page.getByRole('heading', { name: 'Vos elegís qué compartir' });
   const start = page.getByRole('button', { name: 'Comenzar' });
   const back = page.getByRole('button', { name: 'Atrás' });
-  await expect(start.or(back).first()).toBeVisible();
+  const position = page.getByText(/^\d de 5$/);
+  await expect(position).toBeVisible();
   for (let step = 0; step < 5 && !(await privacy.isVisible()); step += 1) {
+    const before = await position.innerText();
     await ((await start.isVisible()) ? start : back).click();
+    // Cada paso se guarda en el servidor: se espera el cambio antes de decidir el siguiente clic.
+    await expect(position).not.toHaveText(before);
   }
   await expect(privacy).toBeVisible();
   const consent = page.getByLabel('Acepto compartir mis registros con mi nutricionista para el acompañamiento.');
