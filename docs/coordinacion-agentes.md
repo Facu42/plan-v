@@ -19,7 +19,7 @@ visto bueno de Facundo.
 | Lo que Codex dejó sin guardar en la PC de Facundo: importar pacientes (otra versión), Equivalencias (otra versión), asistente con IA para la cartera | Codex | solo en la PC (sin respaldo) | Espera la frase de Facundo para respaldarlo |
 | Seguridad y operación (vistas de paciente solo lectura, privacidad de la IA, staging, monitoreo, respaldo de archivos) | Claude | ramas `claude/*` | En curso |
 | Comparación de #105 con Figma y orden de juntado de la pila de Codex | Claude | `docs/coordinacion/` y comentarios en los PR | #105 comparado el 14/10. Claude no empuja a ramas de Codex |
-| Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Ánimo y síntomas en PR #112 (borrador). El resto, por empezar |
+| Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Ánimo y síntomas publicado (PR #112, 14/10). Recorridos de punta a punta y monitor en PR propio (borrador). El resto, por empezar |
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
 
@@ -48,8 +48,8 @@ visto bueno de Facundo.
 | Rango o archivo | Dueño | Estado |
 |---|---|---|
 | `20261011140000_clinical_ai_budget` … `20261013123000_imported_clinical_export` (17 archivos, manifiesto en `docs/deployment/nutridesk-migrations-2026-10-13.json` de la rama de Codex) | Codex | Sin aplicar |
-| `20261015090000_patient_views_read_only` | Claude | PR #110. Aplicada en la base el 14/10 con la frase de Facundo (el historial de la base la anota como `20261014215529`) |
-| `20261015100000_habit_symptoms` | Claude | PR #112. Aplicada en la base el 14/10 con la frase de Facundo (el historial la anota como `20261014215543`) |
+| `20261015090000_patient_views_read_only` | Claude | PR #110, en main desde el 14/10. Aplicada en la base el 14/10 con la frase de Facundo (el historial de la base la anota como `20261014215529`) |
+| `20261015100000_habit_symptoms` | Claude | PR #112, en main desde el 14/10. Aplicada en la base el 14/10 con la frase de Facundo (el historial la anota como `20261014215543`) |
 | `20261015*` en adelante | Claude | Se anotan acá al crearlas |
 
 ## 4. Decisiones vigentes de Facundo (fechadas)
@@ -79,3 +79,4 @@ del piloto, entidad legal.
   `respaldo/codex-nutridesk-core`). Ver `docs/nutridesk-integracion-2026-10-13.md` en esa rama.
 - **15/10 · Claude** · PR #112: ánimo y síntomas de la paciente (diálogo «Cómo me siento» en el Diario; la nutri los ve en «Registros y evolución»). Toca con cambios mínimos `server/store.ts`, `src/types/index.ts`, `ShowroomProgress.tsx` y `screens/Diary.tsx`.
 - **14/10 · Claude** · Con la frase «aplicá las migraciones de vistas y síntomas en la base» se aplicaron en producción las de #110 y #112. Verificado: las siete vistas de la paciente quedan solo lectura y `habit_logs.symptoms` existe con su regla. Las dos son repetibles sin daño. #110 y #112 siguen sin juntar a main.
+- **14/10 · Claude** · Con el «juntalo al main» de Facundo se juntaron #110 y #112. Vercel y Railway publicaron sin errores (API arriba con la base). Nuevo carril de etapa 1: recorridos de punta a punta en modo demo y monitor de producción (rama `claude/recorridos-e2e`); no toca archivos de Codex salvo `package.json`, `vite.config.ts` y `ci.yml` con cambios mínimos.
