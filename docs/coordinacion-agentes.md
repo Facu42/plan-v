@@ -48,6 +48,7 @@ visto bueno de Facundo.
 | Rango o archivo | Dueño | Estado |
 |---|---|---|
 | `20261011140000_clinical_ai_budget` … `20261013123000_imported_clinical_export` (17 archivos, manifiesto en `docs/deployment/nutridesk-migrations-2026-10-13.json` de la rama de Codex) | Codex | Sin aplicar |
+| `20261015090000_patient_views_read_only` | Claude | PR #110, sin aplicar: espera la frase de Facundo |
 | `20261015*` en adelante | Claude | Se anotan acá al crearlas |
 
 ## 4. Decisiones vigentes de Facundo (fechadas)
