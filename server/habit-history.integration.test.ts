@@ -66,6 +66,20 @@ describe('habit history API flow in memory mode', () => {
     expect(dates).toContain(todayId());
   });
 
+  it('guarda ánimo y síntomas del día sin pisar el agua y rechaza síntomas desconocidos', async () => {
+    await app.request('/api/patients/pat-sofia/habits', jsonRequest('PATCH', { hydration: 3 }));
+    const saved = await app.request('/api/patients/pat-sofia/habits', jsonRequest('PATCH', { energy: 'Baja', symptoms: ['hinchazon', 'acidez'] }));
+    expect(saved.status).toBe(200);
+    const body = await saved.json();
+    expect(body.patient.habit_logs.find((h: { date: string }) => h.date === todayId())).toMatchObject({ hydration: 3, energy: 'Baja', symptoms: ['hinchazon', 'acidez'] });
+
+    const cleared = await app.request('/api/patients/pat-sofia/habits', jsonRequest('PATCH', { symptoms: [] }));
+    expect((await cleared.json()).patient.habit_logs.find((h: { date: string }) => h.date === todayId())).toMatchObject({ energy: 'Baja', symptoms: [] });
+
+    const rejected = await app.request('/api/patients/pat-sofia/habits', jsonRequest('PATCH', { symptoms: ['inventado'] }));
+    expect(rejected.status).toBe(400);
+  });
+
   it('guarda los pasos del día declarados y rechaza valores fuera de rango', async () => {
     const saved = await app.request('/api/patients/pat-sofia/habits', jsonRequest('PATCH', { steps: 6420 }));
     expect(saved.status).toBe(200);

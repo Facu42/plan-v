@@ -229,6 +229,8 @@ Facundo: lo que aprueba la nutricionista es el plan, no lo que la paciente carga
 ## Progreso global (2026-10-10)
 Pantalla `/crm/progreso-global` (PR #93): peso y comidas de toda la cartera por período. Sin migración. Detalle en `docs/progreso-global-2026-10-10.md`.
 
+## Ánimo y síntomas de la paciente (2026-10-15)
+En el Diario, «Registrar» → «Cómo me siento»: energía del día (con energía, normal, sin energía; se guarda en la energía que ya existía) y ocho síntomas de una lista cerrada. La nutricionista los ve en la ficha, «Registros y evolución», debajo de «Descanso y energía». Nutrigo no dibuja esta pantalla: se armó con su diálogo de registro y los botones del diario. Migración `20261015100000_habit_symptoms` (agrega una columna con lista cerrada): ya aplicada en la base el 14/10 con la frase de Facundo (el historial de la base la anota como `20261014215543`). La de #110 (vistas solo lectura) también quedó aplicada. PR en borrador: falta su «juntalo al main».
 ## Recorridos de punta a punta y monitor de producción (2026-10-14)
 Etapa 1 del plan (`docs/producto/06-plan-implementacion.md`, puntos 6 y 7, sin costo):
 - `npm run test:e2e` (Playwright) levanta la API y la web en modo demo, con las claves de Supabase vacías, y recorre en orden cinco caminos de dos roles: alta de paciente con invitación, ingreso de la paciente visto por la nutri, plan editado y publicado visto por la paciente, comida registrada en el diario vista por la nutri, y revisión de la nutri vista por la paciente. Corre en cada PR (trabajo «recorridos de punta a punta» de CI). Prueba a propósito: romper «Confirmar sin cambios» hace fallar el recorrido 5.

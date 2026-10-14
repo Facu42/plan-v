@@ -356,7 +356,7 @@ export const api = {
       method: 'POST',
     }),
 
-  updateHabits: (patientId: string, data: { hydration?: number; energy?: string | null; sleep_minutes?: number; steps?: number }) =>
+  updateHabits: (patientId: string, data: { hydration?: number; energy?: string | null; sleep_minutes?: number; steps?: number; symptoms?: string[] }) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/habits`, {
       method: 'PATCH',
       body: JSON.stringify(data),
