@@ -16,6 +16,9 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
   de Nutrigo (Figma `OTolnKfsxUFjaZOhhdb04i`; si Plan V se aparta, gana el archivo); escritorio 1440 y
   móvil 390 (tablet no); una rama y un PR por tema; nada directo a `main`; todo cambio en la base de
   producción o en servicios pagos necesita su frase escrita (un "ok" suelto no alcanza).
+- Habilidades de apoyo (14/10): `security-review`, `postgres-patterns` (ECC) y cuatro de animación y datos
+  extremos de Emil Kowalski en `.claude/skills/`. Solo informan; en la app de la paciente manda Nutrigo.
+  Detalle en `docs/agentes/reglas-plan-v.md`.
 - Antes de un PR: `npm test`, `npm run check` y, si hay migraciones, `npm run check:migrations`.
   Para ver la app con datos de ejemplo: `npm install`, `npm run local` y "Continuar en modo demo".
 
