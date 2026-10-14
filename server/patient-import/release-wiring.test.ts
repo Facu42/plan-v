@@ -11,5 +11,6 @@ it('habilita WASM local para OCR sin evaluación JavaScript ni rutas de entregas
   const history=await readFile(new URL('../../src/components/nutrigo/PatientImportedHistory.tsx',import.meta.url),'utf8');
   expect(history).not.toContain('ImportHistoryPdfExport');
   const index=await readFile(new URL('../index.ts',import.meta.url),'utf8');
-  for(const future of ['clinical-workspace/routes','nutrition-capabilities/routes','scheduling/routes','communications/channel-routes','portfolio/routes'])expect(index).not.toContain(future);
+  expect(index).toContain('nutrition-capabilities/routes');
+  for(const future of ['clinical-workspace/routes','scheduling/routes','communications/channel-routes','portfolio/routes'])expect(index).not.toContain(future);
 });

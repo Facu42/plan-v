@@ -3,7 +3,8 @@ import { z } from 'zod';
 import { authorizePatientAction } from '../security/authorization.js';
 import * as sb from '../db/supabase-repo.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
-import { getPatient } from '../store.js';
+import { getPatient, DEMO_NUTRITIONIST_ID } from '../store.js';
+import { assertFormulaApproval } from '../nutrition-capabilities/repository.js';
 import { bodyDataSchema, calculateTarget, targetInputSchema } from '../../src/lib/nutrition-target.js';
 import * as repo from './repository.js';
 
@@ -36,6 +37,11 @@ export function registerTargetRoutes(app: Hono) {
     if (!professional) throw new repo.TargetError(403, 'Sólo la nutricionista puede definir la meta.');
     let parsed: z.infer<typeof saveSchema>;
     try { parsed = saveSchema.parse(JSON.parse(await c.req.text())); } catch { throw new repo.TargetError(400, 'Revisá los datos y recargá la meta antes de guardarla.'); }
+    const auth=c.get('auth');
+    const actor=persistent&&'userId' in auth?await sb.sbGetActor(auth.userId):null;
+    const owner=actor?.role==='nutri'?actor.nutritionistId:!persistent?DEMO_NUTRITIONIST_ID:null;
+    if(!owner)throw new repo.TargetError(403,'No tenés permiso para definir esta meta.');
+    await assertFormulaApproval(owner,parsed.inputs.formula,persistent);
     // El servidor recalcula: nunca se confía en cifras enviadas por el navegador.
     const result = calculateTarget(parsed.inputs);
     return c.json(await repo.saveTarget(id, parsed.inputs, result, parsed.publish, persistent, parsed.expected_revision));
