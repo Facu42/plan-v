@@ -18,7 +18,7 @@ visto bueno de Facundo.
 | Agenda pública y reservas, varias agendas, Google, Mercado Pago, equipo y recepción, laboratorio, bariátrico, difusiones por WhatsApp, asistente de cartera, ayuda | Codex | rama `respaldo/codex-nutridesk-core` (sin PR) | En código, sin PR. Se separa en entregas cuando Codex vuelva |
 | Lo que Codex dejó sin guardar en la PC de Facundo: importar pacientes (otra versión), Equivalencias (otra versión), asistente con IA para la cartera | Codex | solo en la PC (sin respaldo) | Espera la frase de Facundo para respaldarlo |
 | Seguridad y operación (vistas de paciente solo lectura, privacidad de la IA, staging, monitoreo, respaldo de archivos) | Claude | ramas `claude/*` | En curso |
-| Comparación de #105 con Figma y orden de juntado de la pila de Codex | Claude | este archivo y comentarios en los PR | En curso. Claude no empuja a ramas de Codex |
+| Comparación de #105 con Figma y orden de juntado de la pila de Codex | Claude | `docs/coordinacion/` y comentarios en los PR | #105 comparado el 14/10. Claude no empuja a ramas de Codex |
 | Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Por empezar |
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
@@ -67,6 +67,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **14/10 · Claude** · Comparación de #105 con Figma: la app de la paciente queda igual que en `main` (20 pantallas); el panel cambia el gris de textos secundarios. [Informe](coordinacion/comparacion-pr105-figma-2026-10-14.md).
 - **14/10 · Claude** · PR #110 (vistas de la paciente solo lectura, migración `20261015090000`) y PR #111 (la IA pide `data_collection: deny`; espera decisión de Facundo). Ninguno toca archivos de la pila de Codex.
 - **14/10 · Claude** · Documentos 01–07 y competencia subidos a `docs/producto/` y corregidos contra
   `main`, los PR, las ramas de Codex y Supabase. Creado este archivo. Comprobado en producción:
