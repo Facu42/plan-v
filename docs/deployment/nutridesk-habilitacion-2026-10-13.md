@@ -4,10 +4,10 @@ Paquete para revisión; no ejecutado contra producción. Base revisada: `ae3dc30
 
 ## Puertas obligatorias
 
-- [x] Suite integrada final: 2.836 casos aprobados, cero fallos y dos omitidos, en 437 archivos. Incluye autorización/exportación histórica y correcciones de notas. Tipos y compilación final aprobados; manifiesto canónico de diecisiete migraciones, secretos, migraciones y vistas aprobados.
+- [x] Suite integrada final: 2.848 casos aprobados, cero fallos y dos omitidos, en 437 archivos. Incluye autorización/exportación histórica y correcciones de notas. Tipos y compilación final aprobados; manifiesto canónico de diecisiete migraciones, secretos, migraciones y vistas aprobados.
 - [x] Tipos, compilación web, límites de secretos, seguridad de migraciones y diferencias comprobados.
 - [x] Revisión independiente y correcciones de gasto, consentimiento, cobros y concurrencia.
-- [x] Quince archivos SQL y hashes coinciden con el manifiesto; lectura de versiones alojadas sin aplicarlos.
+- [x] Diecisiete archivos SQL y hashes coinciden con el manifiesto; lectura de versiones alojadas sin aplicarlos.
 - [ ] Revisión y autorización escrita de los PR; no merge automático a main.
 - [ ] Copia previa verificada y ensayo de la cadena en Postgres/Supabase desechable con configuración equivalente. PGlite no sustituye la prueba alojada completa de Auth/Storage ni bloqueo concurrente de conexiones reales.
 - [ ] Revisar aliases antiguos ya aplicados: no volver a ejecutar migraciones antiguas con otro timestamp sólo por su nombre local.

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react';
-import { api, type InviteEmailDelivery, type PatientInvite } from '../../api/client';
+import { api, isAbortError, type InviteEmailDelivery, type PatientInvite } from '../../api/client';
+import { useAppStore } from '../../store/useAppStore';
 import { PatientImportDialog } from './PatientImportDialog';
 import { patientImportApi } from '../../api/patient-import';
 import { ApiError } from '../../api/error';
@@ -368,7 +369,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
       {!visible.length && <NvState title="Sin coincidencias" description="Probá otra búsqueda o filtro." />}
     </NvCard>
     {creating && <ShowroomPatientCreate onClose={() => setCreating(false)} onCreated={created} />}
-    {importing && <PatientImportDialog onClose={()=>setImporting(false)} onImported={()=>{void (async()=>{for(let offset=0;;offset+=100){const page=await api.getPatients({offset,limit:100});page.patients.forEach(onChanged);if(!page.page.has_more)break;}})().catch(()=>setError('La importación se guardó, pero no pudimos actualizar el directorio. Recargá para verlo.'));}}/>}
+    {importing && <PatientImportDialog onClose={()=>setImporting(false)} onImported={()=>{void useAppStore.getState().refreshDirectory().catch(error=>{if(!isAbortError(error))setError('La importación se guardó, pero no pudimos actualizar el directorio. Recargá para verlo.');});}}/>}
     {editing && <ShowroomPatientEdit patient={editing} onClose={() => setEditing(null)} onSaved={(updated) => { onChanged(updated); setEditing(null); }} />}
   </section>;
 }

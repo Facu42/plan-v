@@ -23,17 +23,27 @@ export function parseCsv(text: string): string[][] {
   const first = text.split(/\r?\n/, 1)[0];
   const separator = (first.match(/;/g)?.length ?? 0) > (first.match(/,/g)?.length ?? 0) ? ';' : ',';
   const result: string[][] = []; let row: string[] = []; let cell = ''; let quoted = false;
+  let physicalLine = 1; let rowStart = 1;
+  const appendRow = () => {
+    // El índice conserva la línea de inicio, incluidas vacías y celdas multilínea.
+    while (result.length < rowStart - 1) result.push([]);
+    result.push(row);
+  };
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
     if (char === '"') { if (quoted && text[i + 1] === '"') { cell += '"'; i++; } else quoted = !quoted; }
     else if (char === separator && !quoted) { row.push(cell); cell = ''; }
     else if ((char === '\n' || char === '\r') && !quoted) {
       if (char === '\r' && text[i + 1] === '\n') i++;
-      row.push(cell); if (row.some(Boolean)) result.push(row); row = []; cell = '';
-    } else cell += char;
+      row.push(cell); appendRow(); row = []; cell = '';
+      physicalLine++; rowStart = physicalLine;
+    } else {
+      cell += char;
+      if (char === '\n' || (char === '\r' && text[i + 1] !== '\n')) physicalLine++;
+    }
   }
   if (quoted) throw new Error('Hay una celda con comillas sin cerrar. Revisá el CSV.');
-  row.push(cell); if (row.some(Boolean)) result.push(row);
+  row.push(cell); if (row.some(Boolean)) appendRow();
   return result;
 }
 

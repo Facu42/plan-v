@@ -2,6 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { parseCsv, mapImportRows, validateImportFile, parseImportDate, parseImportNumber } from './patient-import';
 
 describe('importación local revisable', () => {
+  it('conserva la fila física de CSV vacío y de registros que contienen saltos de línea',()=>{
+    const origin={file:'a.csv',fingerprint:'a'.repeat(64),sheet:'CSV'};
+    const rows=parseCsv('Nombre;Antecedentes\r\n\r\nAna;Antecedente revisado\r\n');
+    const result=mapImportRows(rows.slice(1),{name:0,history:1},origin);
+    expect(result).toHaveLength(1);expect(result[0].history[0]).toEqual({category:'history',text:'Antecedente revisado',origin:{...origin,row:3}});
+    const multiline=mapImportRows(parseCsv('Nombre;Antecedentes\nAna;"Primera\nconsulta"\n\nBerta;Antecedente B').slice(1),{name:0,history:1},origin);
+    expect(multiline.map(row=>row.origins[0].row)).toEqual([2,5]);expect(multiline[0].history[0].text).toBe('Primera\nconsulta');
+  });
   it('respeta comillas, separadores argentinos y saltos dentro de celdas', () => {
     expect(parseCsv('Nombre;Email;Notas\r\n"Ana; Pérez";ANA@EXAMPLE.TEST;"Primera\nconsulta"')).toEqual([
       ['Nombre', 'Email', 'Notas'], ['Ana; Pérez', 'ANA@EXAMPLE.TEST', 'Primera\nconsulta'],

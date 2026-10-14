@@ -2,10 +2,22 @@ import { beforeAll,describe,expect,it } from 'vitest';
 import { DOMParser } from '@xmldom/xmldom';
 import JSZip from 'jszip';
 import { extractImportFile,inspectOfficeZip } from './patient-import-files';
+import { mapImportRows } from './patient-import';
 
 beforeAll(()=>{globalThis.DOMParser=DOMParser as unknown as typeof globalThis.DOMParser;});
 const file=(name:string,data:Uint8Array)=>({name,size:data.length,arrayBuffer:async()=>data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength)}) as File;
 describe('extracción de documentos real y local',()=>{
+  it('mantiene la fila de origen al extraer CSV y XLSX con filas vacías',async()=>{
+    const csv=await extractImportFile(file('blank.csv',new TextEncoder().encode('Nombre;Antecedentes\n\nAna;Historia original')));
+    const csvCandidates=mapImportRows(csv.tables[0].rows.slice(1),{name:0,history:1},{file:csv.file,fingerprint:csv.fingerprint,sheet:'CSV'});
+    expect(csvCandidates[0].history[0].origin.row).toBe(3);
+    const zip=new JSZip();zip.file('xl/workbook.xml','<workbook xmlns:r="r"><sheets><sheet name="Históricos" r:id="rId1"/></sheets></workbook>');
+    zip.file('xl/_rels/workbook.xml.rels','<Relationships><Relationship Id="rId1" Target="worksheets/sheet1.xml"/></Relationships>');
+    zip.file('xl/worksheets/sheet1.xml','<worksheet><sheetData><row r="1"><c r="A1" t="inlineStr"><is><t>Nombre</t></is></c></row><row r="5"><c r="A5" t="inlineStr"><is><t>Ana</t></is></c><c r="B5" t="inlineStr"><is><t>Historia original</t></is></c></row></sheetData></worksheet>');
+    const xlsx=await extractImportFile(file('blank.xlsx',await zip.generateAsync({type:'uint8array'})));
+    const candidates=mapImportRows(xlsx.tables[0].rows.slice(1),{name:0,history:1},{file:xlsx.file,fingerprint:xlsx.fingerprint,sheet:'Históricos'});
+    expect(candidates[0].history[0].origin).toEqual({file:'blank.xlsx',fingerprint:xlsx.fingerprint,sheet:'Históricos',row:5});
+  });
   it('lee un CSV real y conserva el hash y nombre del origen',async()=>{
     const doc=await extractImportFile(file('a.csv',new TextEncoder().encode('Nombre;Email\nAna;a@example.test')));
     expect(doc.tables[0].rows[1]).toEqual(['Ana','a@example.test']);expect(doc.fingerprint).toMatch(/^[a-f0-9]{64}$/);
