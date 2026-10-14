@@ -67,6 +67,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **14/10 · Claude** · PR #110 (vistas de la paciente solo lectura, migración `20261015090000`) y PR #111 (la IA pide `data_collection: deny`; espera decisión de Facundo). Ninguno toca archivos de la pila de Codex.
 - **14/10 · Claude** · Documentos 01–07 y competencia subidos a `docs/producto/` y corregidos contra
   `main`, los PR, las ramas de Codex y Supabase. Creado este archivo. Comprobado en producción:
   todas las migraciones de `main` aplicadas; las vistas de paciente de turnos, ingreso y mensajes
