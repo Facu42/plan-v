@@ -68,7 +68,8 @@ del piloto, entidad legal.
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
 - **14/10 · Claude** · Comparación de #105 con Figma: la app de la paciente queda igual que en `main` (20 pantallas); el panel cambia el gris de textos secundarios. [Informe](coordinacion/comparacion-pr105-figma-2026-10-14.md).
-- **14/10 · Claude** · PR #110 (vistas de la paciente solo lectura, migración `20261015090000`) y PR #111 (la IA pide `data_collection: deny`; espera decisión de Facundo). Ninguno toca archivos de la pila de Codex.
+- **14/10 · Claude** · PR #110 (vistas de la paciente solo lectura, migración `20261015090000`). PR #111 (la IA pide `data_collection: deny`) cerrado: Facundo eligió dejar la IA gratis como está. Ninguno toca archivos de la pila de Codex.
+- **14/10 · Facundo** · Gris de textos chicos del panel de la nutricionista: **el de Nutrigo (`#8A8C90`)**, no el `#52545B` de #105. Antes de juntar #105, volver ese gris al de Nutrigo (Codex o quien lo junte).
 - **14/10 · Claude** · Documentos 01–07 y competencia subidos a `docs/producto/` y corregidos contra
   `main`, los PR, las ramas de Codex y Supabase. Creado este archivo. Comprobado en producción:
   todas las migraciones de `main` aplicadas; las vistas de paciente de turnos, ingreso y mensajes
