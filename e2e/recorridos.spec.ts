@@ -21,8 +21,15 @@ test('1 · la nutricionista da de alta a una paciente nueva con invitación', as
 test('2 · la paciente completa su ficha de ingreso y la envía', async ({ page }) => {
   await enterDemo(page, '/app/ficha');
   await page.getByRole('button', { name: 'Editar mi ficha inicial' }).click();
+  // La ficha puede abrir en el primer paso o donde quedó el borrador: se llega al paso de privacidad.
+  const privacy = page.getByRole('heading', { name: 'Vos elegís qué compartir' });
+  const start = page.getByRole('button', { name: 'Comenzar' });
   const back = page.getByRole('button', { name: 'Atrás' });
-  while (!(await page.getByText('Vos elegís qué compartir').isVisible())) await back.click();
+  await expect(start.or(back).first()).toBeVisible();
+  for (let step = 0; step < 5 && !(await privacy.isVisible()); step += 1) {
+    await ((await start.isVisible()) ? start : back).click();
+  }
+  await expect(privacy).toBeVisible();
   const consent = page.getByLabel('Acepto compartir mis registros con mi nutricionista para el acompañamiento.');
   // El permiso se guarda en el servidor antes de quedar marcado.
   await consent.click();
