@@ -10,6 +10,7 @@ import { listThreadMessagesPersist } from '../messages/repository.js';
 import { listPatientAppointmentPersist } from '../appointments/repository.js';
 import { appointmentHasNotEnded, appointmentReadSince } from '../appointment-ops.js';
 import { writeOpsLog } from '../ops/log.js';
+import { normalizeSymptoms } from '../../src/types/symptoms.js';
 import {
   appointmentColumns,
   mealLogColumns,
@@ -456,6 +457,7 @@ async function loadPatientExtras(
     energy: (h.energy as string | null) ?? null,
     sleep_minutes: (h.sleep_minutes as number | null) ?? null,
     steps: (h.steps as number | null) ?? null,
+    symptoms: normalizeSymptoms(h.symptoms),
   }));
   const todayHabit = habit_logs.find((h) => h.date === argentinaToday(new Date()));
 
@@ -880,7 +882,7 @@ export async function sbDismissBrief(patientId: string, dismissedBy: string): Pr
   if (error) throwWriteError(error);
 }
 
-export async function sbUpdateHabits(patientId: string, data: { hydration?: number; energy?: string | null; sleep_minutes?: number | null; steps?: number | null }): Promise<void> {
+export async function sbUpdateHabits(patientId: string, data: { hydration?: number; energy?: string | null; sleep_minutes?: number | null; steps?: number | null; symptoms?: string[] }): Promise<void> {
   const sb = getRequestDb();
   const today = argentinaToday(new Date());
   const { data: existing } = await sb.from('habit_logs').select('*')
@@ -895,12 +897,15 @@ export async function sbUpdateHabits(patientId: string, data: { hydration?: numb
       sleep_minutes: existing.sleep_minutes,
       // Sólo si la columna existe: la app puede publicarse antes que la migración de pasos.
       ...('steps' in existing ? { steps: existing.steps } : {}),
+      // Igual que los pasos: sólo si la migración de síntomas ya está aplicada.
+      ...('symptoms' in existing ? { symptoms: existing.symptoms } : {}),
     } : {}),
   };
   if (data.hydration !== undefined) { payload.hydration = data.hydration; payload.hydration_declared = true; }
   if (data.energy !== undefined) payload.energy = data.energy;
   if (data.sleep_minutes !== undefined) payload.sleep_minutes = data.sleep_minutes;
   if (data.steps !== undefined) payload.steps = data.steps;
+  if (data.symptoms !== undefined) payload.symptoms = data.symptoms;
 
   const { error } = await sb.from('habit_logs').upsert(payload, { onConflict: 'patient_id,date' });
   if (error) throwWriteError(error);

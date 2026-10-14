@@ -10,6 +10,7 @@ import { argentinaDate, argentinaTime } from './ar-time';
 import { GREEN_BG, swapBackground } from '../source-tone';
 import { macroCell, mealTitle, newestFirst, nutrientTotal, statNumber, type Nutrient } from './diary-format';
 import { MealCorrectionDialog } from './meal-correction';
+import { WellbeingForm } from '../WellbeingForm';
 
 type Props = ScreenProps & { onLogMeal?: (slot?: string) => void; onHydration?: () => void; onRest?: () => void };
 type Log = ScreenProps['patient']['logs'][number];
@@ -46,7 +47,7 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
   const [pendingOnly, setPendingOnly] = useState(false);
   const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
   const [page, setPage] = useState(1);
-  const [dialog, setDialog] = useState<'add' | 'filter' | null>(null);
+  const [dialog, setDialog] = useState<'add' | 'filter' | 'feeling' | null>(null);
   const [selected, setSelected] = useState<Log | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -178,11 +179,14 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
           <button type="button" disabled={!logMeal} onClick={logMeal} className="rounded-[8px] bg-[#c2e66e] px-[16px] py-[10px] text-[#272932]">Registrar comida</button>
           <button type="button" disabled={busy} onClick={onHydration ? () => { setDialog(null); onHydration(); } : () => void addWater()} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">{busy ? 'Guardando…' : onHydration ? 'Registrar agua' : 'Registrar un vaso de agua'}</button>
           <button type="button" onClick={() => { setDialog(null); if (onRest) onRest(); else onNavigate('progreso'); }} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">Registrar descanso</button>
+          <button type="button" onClick={() => setDialog('feeling')} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">Cómo me siento</button>
         </div>
         {error && <Stateful error={error} />}
       </section>
       <DayAssignedMeals patientId={patient.id} date={dateId(now)} />
     </FigmaRecordDialog>}
+    {/* Dentro del marco: así toma los estilos de Nutrigo del diario. */}
+    {dialog === 'feeling' && <WellbeingForm patient={patient} onClose={() => setDialog(null)} />}
     {dialog === 'filter' && <FigmaRecordDialog title="Filtrar el diario" onClose={() => setDialog(null)}>
       <fieldset className="flex flex-col gap-[8px] text-[14px] text-[#272932]"><legend className="mb-[8px]">Período</legend>
         {PERIODS.map(value => <label key={value} className="flex items-center gap-[8px]"><input type="radio" name="diary-period" checked={days === value} onChange={() => setPeriod(value)} />{periodLabel(value)}</label>)}

@@ -152,6 +152,8 @@ export type HabitLog = {
   sleep_minutes: number | null;
   /** Pasos del día declarados por la paciente (no se importan de dispositivos). */
   steps?: number | null;
+  /** Síntomas del día marcados por la paciente (claves de src/types/symptoms.ts). */
+  symptoms?: string[];
 };
 
 export type ActivityLog = {
@@ -1080,7 +1082,7 @@ export function recalculateAdherence(id: string): Patient | undefined {
   return updatePatient(id, { adherence_score: score, adherence_why: why });
 }
 
-export function upsertHabitLog(id: string, patch: { hydration?: number; energy?: string | null; sleep_minutes?: number; steps?: number }): Patient | undefined {
+export function upsertHabitLog(id: string, patch: { hydration?: number; energy?: string | null; sleep_minutes?: number; steps?: number; symptoms?: string[] }): Patient | undefined {
   const patient = getPatient(id);
   if (!patient) return undefined;
 
