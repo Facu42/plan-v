@@ -228,3 +228,9 @@ Facundo: lo que aprueba la nutricionista es el plan, no lo que la paciente carga
 
 ## Progreso global (2026-10-10)
 Pantalla `/crm/progreso-global` (PR #93): peso y comidas de toda la cartera por período. Sin migración. Detalle en `docs/progreso-global-2026-10-10.md`.
+
+## Recorridos de punta a punta y monitor de producción (2026-10-14)
+Etapa 1 del plan (`docs/producto/06-plan-implementacion.md`, puntos 6 y 7, sin costo):
+- `npm run test:e2e` (Playwright) levanta la API y la web en modo demo, con las claves de Supabase vacías, y recorre en orden cinco caminos de dos roles: alta de paciente con invitación, ingreso de la paciente visto por la nutri, plan editado y publicado visto por la paciente, comida registrada en el diario vista por la nutri, y revisión de la nutri vista por la paciente. Corre en cada PR (trabajo «recorridos de punta a punta» de CI). Prueba a propósito: romper «Confirmar sin cambios» hace fallar el recorrido 5.
+- `.github/workflows/monitor.yml` mira cada 15 minutos `api/health` (con la base conectada) y la web. Si fallan tres intentos abre un issue con la etiqueta `caida` que menciona a Facundo; cuando vuelve, lo cierra. Arranca recién cuando el archivo está en `main`.
+- Quedan afuera porque cuestan o piden cuenta: base de staging aparte, Sentry y un monitor externo con aviso al celular.
