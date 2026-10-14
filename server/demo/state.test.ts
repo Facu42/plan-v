@@ -8,6 +8,16 @@ import { DemoStateFile } from './state.js';
 const demo = { mode: 'demo', dataMode: 'memory', aiMode: 'demo' } as const;
 function temporary(run: (file: string) => void) { const dir=mkdtempSync(join(tmpdir(),'plan-v-demo-'));try{run(join(dir,'state.bin'));}finally{rmSync(dir,{recursive:true,force:true});} }
 describe('guardado de la simulación local',()=>{
+  it('incorpora sólo dominios conocidos de importación a una copia previa sin alterarla antes de validar',()=>temporary(file=>{
+    writeFileSync(file,serialize({version:1,domains:{test:{values:new Map([['kept',1]])}}}));
+    const shapes={test:{values:new Map<string,number>()},'patient-import':{batches:new Map(),contacts:new Map(),applied:new Map(),histories:new Map()},'import-external-authorization':{authorizations:new Map(),measurements:new Map()}};
+    const before=readFileSync(file),domains=new Map(Object.entries(shapes).map(([name,value])=>[name,()=>value]));
+    const first=new DemoStateFile(file,demo,domains);expect(shapes.test.values.get('kept')).toBe(1);expect(readFileSync(file)).toEqual(before);
+    shapes['patient-import'].contacts.set('patient',{phone:'Ficticio'});first.close();
+    const second=new DemoStateFile(file,demo,domains);expect(shapes['patient-import'].contacts.has('patient')).toBe(true);second.close();
+    const unknown=new Map([...domains,['unexpected',()=>({items:new Map()})]as [string,()=>Record<string,unknown>]]);
+    expect(()=>new DemoStateFile(file,demo,unknown)).toThrow();
+  }));
   it('amplía sólo consultas y claves conocidas sin perder los registros previos',()=>temporary(file=>{
     writeFileSync(file,serialize({version:1,domains:{test:{values:new Map([['kept',1]])},consultations:{sessions:new Map([['existing-session',{}]]),shared:new Map(),tasks:new Map(),audio:new Map()}}}));
     const shapes={test:{values:new Map()},consultations:{sessions:new Map(),shared:new Map(),tasks:new Map(),audio:new Map(),completions:new Map(),completion_events:new Map()}};

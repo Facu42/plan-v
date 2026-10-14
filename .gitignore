@@ -21,3 +21,5 @@ credentials.json
 design/nutrigo-compare/app/
 design/nutrigo-compare/diff/
 design/auditoria/
+
+/public/patient-import-ocr/
