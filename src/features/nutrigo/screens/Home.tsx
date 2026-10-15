@@ -101,13 +101,18 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
   const weekStart=daysBefore(today,6);
   const logs=current?.exercise?.activities??[];
   const routineProgress=routines.map(({item,assignment})=>{
-    const done=logs.filter(log=>log.assignment_id===assignment.id&&log.activity===item.name&&(dayOfIso(log.logged_at)??'')>=weekStart).reduce((sum,log)=>sum+(log.sets??0),0);
+    const logged=logs.filter(log=>log.assignment_id===assignment.id&&log.activity===item.name&&(dayOfIso(log.logged_at)??'')>=weekStart).reduce((sum,log)=>sum+(log.sets??0),0);
+    // «Registrar rutina» guarda las series hechas de toda la rutina: cuentan para cada ejercicio si se cargaron esta semana.
+    const feedback=assignment.feedback&&(dayOfIso(assignment.feedback.recorded_at)??'')>=weekStart?assignment.feedback.sets_completed:0;
+    const done=Math.max(logged,feedback);
     return {item,done:Math.min(done,item.sets),total:item.sets};
   });
+  // Las actividades vienen de la pantalla de Ejercicio (la ficha de la paciente no las trae en producción).
+  const ownActivities=current?.exercise?.activities??patient.activities??[];
 
   // Sin rutina asignada, la paciente ve sus propias actividades de la semana (las que registró) en el mismo bloque.
   const workoutRows=routineProgress.length?routineProgress.map(({item,done,total})=>({id:item.id,name:item.name,pct:safePercent(done,total),count:`(${done}/${total})`,tag:EXERCISE_CATEGORY_LABELS[item.category]})):
-    (patient.activities??[]).filter(row=>(dayOfIso(row.logged_at)??'')>=weekStart).slice().sort((a,b)=>Date.parse(b.logged_at)-Date.parse(a.logged_at)).map(row=>({id:row.id,name:row.activity,pct:100 as number|null,count:`(${row.duration_minutes} min)`,tag:`${row.intensity.charAt(0).toUpperCase()}${row.intensity.slice(1)}`}));
+    ownActivities.filter(row=>(dayOfIso(row.logged_at)??'')>=weekStart).slice().sort((a,b)=>Date.parse(b.logged_at)-Date.parse(a.logged_at)).map(row=>({id:row.id,name:row.activity,pct:100 as number|null,count:`(${row.duration_minutes} min)`,tag:`${row.intensity.charAt(0).toUpperCase()}${row.intensity.slice(1)}`}));
 
   const meals=(current?.plan?.items.filter(item=>item.for_date===today)??[]).slice().sort((a,b)=>PLAN_SLOT_KEYS.indexOf(planSlotKey(a.slot)!)-PLAN_SLOT_KEYS.indexOf(planSlotKey(b.slot)!));
   const recipes=patientMenuRecipes(current?.plan??null,current?.recipes??[]);
@@ -119,7 +124,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
 
   const activity:Activity[]=[
     ...(patient.logs??[]).map(log=>({at:log.logged_at,color:0,bold:log.slot,rest:` ${log.status==='pending_review'?'registrada, pendiente de revisión':'revisada'}${log.description?.trim()?`: ${log.description.trim()}`:''}`})),
-    ...(patient.activities??[]).map(row=>({at:row.logged_at,color:1,bold:row.activity,rest:` registrada: ${row.duration_minutes} min, intensidad ${row.intensity}.`})),
+    ...ownActivities.map(row=>({at:row.logged_at,color:1,bold:row.activity,rest:` registrada: ${row.duration_minutes} min, intensidad ${row.intensity}.`})),
     ...(patient.messages??[]).map(message=>({at:message.sent_at,color:2,bold:message.from==='patient'?'Mensaje enviado:':'Mensaje de tu nutricionista:',rest:` "${message.text.length>80?`${message.text.slice(0,80)}…`:message.text}"`})),
   ].filter(row=>!Number.isNaN(Date.parse(row.at))).sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)).slice(0,4);
 

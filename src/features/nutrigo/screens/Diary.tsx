@@ -12,7 +12,7 @@ import { macroCell, mealTitle, newestFirst, nutrientTotal, statNumber, type Nutr
 import { MealCorrectionDialog } from './meal-correction';
 import { WellbeingForm } from '../WellbeingForm';
 
-type Props = ScreenProps & { onLogMeal?: (slot?: string) => void; onHydration?: () => void; onRest?: () => void };
+type Props = ScreenProps & { onLogMeal?: (slot?: string) => void; onHydration?: () => void; onRest?: () => void; onSteps?: () => void };
 type Log = ScreenProps['patient']['logs'][number];
 
 /** Tamaños de página que ofrece el selector "Showing 12" del archivo. */
@@ -41,7 +41,7 @@ function pageList(pages: number, current: number): (number | null)[] {
   return list;
 }
 
-export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now = new Date(), onLogMeal, onHydration, onRest }: Props) {
+export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now = new Date(), onLogMeal, onHydration, onRest, onSteps }: Props) {
   const [search, setSearch] = useState(query);
   const [days, setDays] = useState(7);
   const [pendingOnly, setPendingOnly] = useState(false);
@@ -167,18 +167,19 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
     // En el celular el archivo tiene un único botón de ícono: abre período y filtro.
     if (name === 'Button Picker' && idEnds(node, '498:16354')) return { onClick: () => setDialog('filter'), label: 'Filtrar el diario' };
     if (name === 'Button Picker' && text === 'This Week') return { onClick: () => setPeriod(PERIODS[(PERIODS.indexOf(days) + 1) % PERIODS.length]), label: `Período: ${periodLabel(days)}. Cambiar período`, children: objects(node).map((child, index) => source(child, part => leaf(part) && sourceText(part) === 'This Week' ? { text: periodLabel(days) } : undefined, index)) };
-    if (name === 'Button CTA' && text === 'Add') return { onClick: () => { setError(''); setDialog('add'); }, label: 'Registrar comida, agua o descanso', children: objects(node).map((child, index) => source(child, part => leaf(part) && sourceText(part) === 'Add' ? { text: 'Registrar' } : undefined, index)) };
+    if (name === 'Button CTA' && text === 'Add') return { onClick: () => { setError(''); setDialog('add'); }, label: 'Registrar comida, agua, descanso o pasos', children: objects(node).map((child, index) => source(child, part => leaf(part) && sourceText(part) === 'Add' ? { text: 'Registrar' } : undefined, index)) };
     return undefined;
   };
   return <FramePair nodes={['105:2649', '492:14886']} resolve={resolver} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut}>
     {error && !dialog && <Stateful error={error} />}
     {dialog === 'add' && <FigmaRecordDialog title="Registrar en mi diario" onClose={() => setDialog(null)}>
       <section aria-label="Hábitos de hoy" className="mb-[16px] flex flex-col gap-[8px] text-[#272932]">
-        <p className="text-[14px]">Hoy, {dateLabel(dateId(now))} · Agua: {patient.hydration} {patient.hydration === 1 ? 'vaso' : 'vasos'} · Descanso: {patient.sleep}</p>
+        <p className="text-[14px]">Hoy, {dateLabel(dateId(now))} · Agua: {patient.hydration} {patient.hydration === 1 ? 'vaso' : 'vasos'} · Descanso: {patient.sleep}{patient.steps != null ? ` · Pasos: ${patient.steps.toLocaleString('es-AR')}` : ''}</p>
         <div className="flex flex-wrap gap-[8px]">
           <button type="button" disabled={!logMeal} onClick={logMeal} className="rounded-[8px] bg-[#c2e66e] px-[16px] py-[10px] text-[#272932]">Registrar comida</button>
           <button type="button" disabled={busy} onClick={onHydration ? () => { setDialog(null); onHydration(); } : () => void addWater()} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">{busy ? 'Guardando…' : onHydration ? 'Registrar agua' : 'Registrar un vaso de agua'}</button>
           <button type="button" onClick={() => { setDialog(null); if (onRest) onRest(); else onNavigate('progreso'); }} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">Registrar descanso</button>
+          {onSteps && <button type="button" onClick={() => { setDialog(null); onSteps(); }} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">Registrar pasos</button>}
           <button type="button" onClick={() => setDialog('feeling')} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">Cómo me siento</button>
         </div>
         {error && <Stateful error={error} />}

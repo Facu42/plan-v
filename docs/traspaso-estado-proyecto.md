@@ -187,6 +187,12 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - App para tiendas (Android primero, empaquetando la web), calidad en producción, publicidad paga y
   página pública con precios (espera el precio). Plan: `docs/plan-apartados.md`.
 
+## Actividad, rutina y pasos de la paciente (2026-10-15)
+- Inicio de la paciente: «Actividad reciente» y el bloque de ejercicio usan las actividades reales de la pantalla de Ejercicio (antes, en producción, quedaban vacíos porque la ficha no las trae).
+- El avance de la rutina en Inicio cuenta las series que la paciente cargó con «Registrar rutina» esa semana (antes quedaba siempre 0).
+- Diario «Registrar» suma «Registrar pasos». La nutri ve los pasos de la semana en «Registros y evolución» (hoy y promedio).
+- Sin migraciones. Sigue en 0: calorías quemadas (la paciente no tiene dónde cargarlas; hace falta decidir si las carga a mano). La meta de agua sigue fija en 8 vasos.
+
 ## Lo que espera de Facundo
 
 - Probar con las cuentas de prueba (ver abajo): panel, Cobranzas, Pagos, calorías.

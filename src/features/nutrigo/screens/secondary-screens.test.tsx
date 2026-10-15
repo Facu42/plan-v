@@ -47,7 +47,7 @@ describe.each([false, true])('pantallas desde MCP (celular: %s)', mobile => {
     const html = renderToStaticMarkup(<NutrigoDiary patient={actual} onNavigate={navigate} now={now} onLogMeal={() => undefined} />);
     expect(html).toContain('Preparación real'); expect(html).toContain('Pendiente de revisión'); expect(html).toContain('data-name="Table-Body"');
     expect(html).not.toContain('999999'); expect(html).not.toContain('Scrambled Eggs'); expect(html).not.toContain('12,615');
-    expect(html).not.toContain('+1.45%'); expect(html).not.toContain('vs last week'); expect(html).toContain('aria-label="Registrar comida, agua o descanso"');
+    expect(html).not.toContain('+1.45%'); expect(html).not.toContain('vs last week'); expect(html).toContain('aria-label="Registrar comida, agua, descanso o pasos"');
   });
   it('agenda genera fechas actuales y no conserva consultas del ejemplo', () => {
     context.mobile = mobile;
