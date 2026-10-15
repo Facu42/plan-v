@@ -69,6 +69,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **15/10 · Claude** · Cobro a nutricionistas (parte 3): aviso en el panel al vencer; solo lectura únicamente si Facundo la suspende desde /admin (elegido el 15/10, nada automático). Toca `server/index.ts` (dos líneas: el control y la ruta `/api/me/service`) y `NutrigoShowroom.tsx` (una línea, el aviso); el resto en archivos nuevos. Sin migraciones.
 - **15/10 · Claude** · Rachas de la paciente en Inicio, en el texto bajo el saludo (`src/features/nutrigo/streak.ts`). Toca con cambios mínimos `src/components/nutrigo/showroom-model.ts` (una línea) y `screens/Home.tsx`; sin migraciones. Facundo pidió seguir con lo propuesto en «Funciones y precios»: próximas acciones, push y cobro a nutricionistas, en PR separados.
 - **15/10 · Claude** · Próximas acciones de la nutricionista: la bandeja de Inicio suma «Cuotas vencidas» y «Sin registros hace 7 días». Toca `server/crm/repository.ts`, `src/types/crm-work.ts`, `ProfessionalWorkQueue.tsx` y su CSS (cambios chicos; la pila de Codex no los modifica). Sin migraciones.
 - **15/10 · Claude** · #117: lista del súper de la paciente agrupada por comercio (los seis colores del widget del archivo) y «Compartir lista» por WhatsApp o copiada. Solo toca `screens/Shopping.tsx`, `screens/shopping-format.ts` y una traducción; nada de la base ni de la pila de Codex. #116 y #117 juntados a `main` con el «junta el 116 y 117 a main» de Facundo.
