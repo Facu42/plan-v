@@ -5,6 +5,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 import pg from 'pg';
+import { waitForBrowserRateWindow } from './browser-rate-window.mjs';
 
 // Sólo la pila descartable del runner: sin URLs hospedadas, proveedores ni capturas.
 const run = promisify(execFile);
@@ -23,7 +24,7 @@ const env = { ...process.env, PORT:'5597', VITE_API_PROXY:apiOrigin, CORS_ORIGIN
 const pool = new pg.Pool({ connectionString:env.PLANV_LOCAL_AUTH_DB_URL });
 const admin = createClient(env.SUPABASE_URL,env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
 let password = 'Local-' + randomBytes(24).toString('base64url') + '-A1!';
-const identities=[]; const evidence=[]; let apiProcess; let webProcess; let phase='preparar identidades';let lastAction='preparación';let failedCheck='ninguna';let lastReadStatus=null;
+const identities=[]; const evidence=[]; let apiProcess; let webProcess; let phase='preparar identidades';let lastAction='preparación';let failedCheck='ninguna';let lastReadStatus=null;let apiReadyAt=0;
 async function identity(label) {
   const email=label.toLowerCase().replaceAll(' ','-')+'-'+randomUUID()+'@example.test';
   const created=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:label,legal_version:'2026-09-29',legal_accepted_at:new Date().toISOString()}});
@@ -89,7 +90,7 @@ try {
   phase='arranque de servicios temporales';
   apiProcess=spawn(process.execPath,['--import','tsx','server/index.ts'],{env,stdio:'ignore'});
   webProcess=spawn(process.execPath,['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','5596'],{env,stdio:'ignore'});
-  for(const endpoint of [apiOrigin+'/api/health',origin]) { let ready=false;for(let i=0;i<80;i++){try{if((await fetch(endpoint)).ok){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,250));}if(!ready)throw Error('Servicio local no disponible'); }
+  for(const endpoint of [apiOrigin+'/api/health',origin]) { let ready=false;for(let i=0;i<80;i++){try{if((await fetch(endpoint)).ok){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,250));}if(!ready)throw Error('Servicio local no disponible');if(endpoint===apiOrigin+'/api/health')apiReadyAt=Date.now(); }
   phase='alta profesional';await B('viewport','1440x1000');await login(professional,'/crm/pacientes');
   await button('Nuevo paciente');await field('Nombre completo','Paciente ficticia');await field('Email para la invitación',patient.email);
   await B('fill','label:has-text("Objetivo declarado") textarea','Organizar las comidas');await button('Crear alta');
@@ -178,6 +179,8 @@ try {
   check(Boolean(resource),'turno, cuota y recurso guardados por la profesional');
   await logout();phase='paciente y recarga';await login(patient,'/app/plan');await reloadContains('Arroz con vegetales');
   for(const size of ['1440x1000','390x844']){await B('viewport',size);await until("document.body.innerText.includes('Arroz con vegetales')");check(!(await B('js',"document.body.innerText.includes('Borrador privado nuevo')")).includes('true'),'borrador oculto para paciente '+size);}
+  // Respect the same fixed window as normal clients; never disable or raise server quotas.
+  await waitForBrowserRateWindow(apiReadyAt);
   phase='comidas y hábitos';await B('goto',origin+'/app/diario');await control('[aria-label="Registrar comida, agua o descanso"]');await button('Registrar esta comida');await until("document.body.innerText.includes('Ya registraste esta comida')");
   const mealRead=await read(professional,`/api/patients/${pid}`);check(mealRead.patient.meal_logs.length===1&&mealRead.patient.meal_logs[0].nutrition_origin==='declared','comida guardada desde receta y visible para profesional');
   await button('Registrar agua');await field('Vasos tomados hoy','3');await button('Guardar registro');await readUntil(patient,`/api/patients/${pid}`,r=>r.patient.hydration===3);
