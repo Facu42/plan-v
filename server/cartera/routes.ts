@@ -24,7 +24,7 @@ async function professionalScope(c: { get: (key: 'auth') => unknown; req: { quer
 export function registerCarteraRoutes(app: Hono) {
   app.get('/api/crm/overview', async c => {
     const parsed = overviewQuerySchema.safeParse(c.req.query());
-    if (!parsed.success || !isCarteraPeriod(parsed.data.days)) throw new CareError(400, 'Elegí un período de 7 o 30 días.');
+    if (!parsed.success || !isCarteraPeriod(parsed.data.days)) throw new CareError(400, 'Elegí un período de 7, 30 o 90 días.');
     const scope = await professionalScope(c);
     const now = new Date();
     const snapshot = await loadCarteraSnapshot(scope, sinceFor(parsed.data.days, now, true), true);

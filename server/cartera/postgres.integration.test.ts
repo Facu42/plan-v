@@ -242,7 +242,7 @@ describe('Inicio y Progreso global con sesiones, migraciones y RLS reales', () =
     expect((await get(`/api/crm/progress?days=30&patient_id=${patientB}`, nutriA)).status).toBe(403);
     const page = await (await get('/api/crm/progress?days=30&limit=1', nutriA)).json() as CarteraProgress;
     expect((await get(`/api/crm/progress?days=30&limit=1&cursor=${page.next_cursor}&patient_id=${patientB}`, nutriB)).status).toBe(400);
-    expect((await get('/api/crm/overview?days=90', nutriA)).status).toBe(400);
+    expect((await get('/api/crm/overview?days=14', nutriA)).status).toBe(400);
     expect((await get('/api/crm/progress?days=30&nutritionist_id=otro', nutriA)).status).toBe(400);
   });
 });

@@ -1,7 +1,7 @@
 /** Seguimiento de la cartera del consultorio: Inicio (indicadores y acciones) y Progreso global. */
-export const CARTERA_PERIODS = [7, 30] as const;
+export const CARTERA_PERIODS = [7, 30, 90] as const;
 export type CarteraPeriodDays = (typeof CARTERA_PERIODS)[number];
-export const CARTERA_PERIOD_LABELS: Record<CarteraPeriodDays, string> = { 7: 'Últimos 7 días', 30: 'Últimos 30 días' };
+export const CARTERA_PERIOD_LABELS: Record<CarteraPeriodDays, string> = { 7: 'Últimos 7 días', 30: 'Últimos 30 días', 90: 'Últimos 90 días' };
 export function isCarteraPeriod(value: number): value is CarteraPeriodDays {
   return (CARTERA_PERIODS as readonly number[]).includes(value);
 }

@@ -110,7 +110,7 @@ export async function loadCarteraSnapshot(scope: WorkScope, since: string, full:
   const [messages, appointments, dismissals, board] = await Promise.all([
     scopedRows(db, 'messages', 'id,patient_id,author_id,sent_at', ids, 'sent_at', {}, { column: 'sent_at', value: sinceInstant }),
     // Los turnos ya se leen con cliente del servidor en el resto del consultorio; los ids salen de la sesión con RLS.
-    scopedRows(privilegedDb(), 'appointments', 'id,patient_id,status,starts_at', ids, 'starts_at'),
+    scopedRows(privilegedDb(), 'appointments', 'id,patient_id,status,starts_at,duration_min', ids, 'starts_at'),
     scopedRows(db, 'crm_action_dismissals', 'patient_id,signal,fingerprint,dismissed_at', ids, 'dismissed_at'),
     getBoard(true),
   ]);
@@ -118,7 +118,7 @@ export async function loadCarteraSnapshot(scope: WorkScope, since: string, full:
   snapshot.messages = messages
     .filter(row => row.sent_at && row.author_id && row.author_id !== accounts.get(String(row.patient_id)))
     .map(row => ({ id: String(row.id), patient_id: String(row.patient_id), sent_at: String(row.sent_at) }));
-  snapshot.appointments = appointments.map(row => ({ patient_id: String(row.patient_id), status: String(row.status), starts_at: String(row.starts_at) }));
+  snapshot.appointments = appointments.map(row => ({ patient_id: String(row.patient_id), status: String(row.status), starts_at: String(row.starts_at), duration_min: num(row.duration_min) ?? 0 }));
   snapshot.dismissals = dismissals.map(row => ({ patient_id: String(row.patient_id), signal: row.signal as ActionSignal, fingerprint: String(row.fingerprint) }));
   for (const ledger of board.patients) {
     if (!idSet.has(ledger.patient_id)) continue;

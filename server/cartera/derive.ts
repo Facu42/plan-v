@@ -27,7 +27,7 @@ export type CarteraPatient = { id: string; name: string; created_at: string | nu
 export type CarteraSnapshot = {
   patients: CarteraPatient[];
   /** Turnos de toda la historia (para saber cuál fue la primera consulta). */
-  appointments: Array<{ patient_id: string; status: string; starts_at: string }>;
+  appointments: Array<{ patient_id: string; status: string; starts_at: string; duration_min?: number }>;
   /** Sólo mensajes escritos por la profesional (o su equipo), nunca los de la paciente. */
   messages: Array<{ id: string; patient_id: string; sent_at: string }>;
   payments: Array<{ id: string; patient_id: string; amount: number; paid_on: string; status: string }>;
@@ -108,10 +108,10 @@ export function deriveOverview(snapshot: CarteraSnapshot, days: CarteraPeriodDay
 
   for (const patient of snapshot.patients) bump(indicators.new_patients, patient.created_at ? localDate(patient.created_at) : null);
 
-  // Una consulta cuenta como realizada si no fue cancelada y su hora de inicio ya pasó.
+  // Mismo criterio que la lista de pacientes: turno no cancelado cuyo horario ya terminó.
   const nowMs = now.getTime();
   const held = snapshot.appointments
-    .filter((appointment) => appointment.status !== 'cancelled' && Date.parse(appointment.starts_at) <= nowMs)
+    .filter((appointment) => appointment.status !== 'cancelled' && Date.parse(appointment.starts_at) + (appointment.duration_min ?? 0) * 60_000 <= nowMs)
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
   const seen = new Set<string>();
   const consultations: Array<{ date: string; first: boolean }> = [];

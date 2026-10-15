@@ -174,8 +174,6 @@ export type ResourceAssignment = {
 };
 
 export type Patient = {
-  /** Alta de la ficha; ausente en pacientes de ejemplo. */
-  created_at?: string | null;
   weekly_registration?: WeeklyRegistration | null;
   id: string;
   name: string;
