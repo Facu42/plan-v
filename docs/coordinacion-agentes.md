@@ -15,8 +15,10 @@ visto bueno de Facundo.
 | Consultas grabadas, borrador privado y resumen revisado | Codex | PR #106 (`codex/nutridesk-release-consultas`) | Borrador, encima de #105. IA externa apagada |
 | Importar pacientes y documentos con OCR | Codex | PR #107 (`codex/nutridesk-release-importacion`) | Borrador, encima de #106 |
 | Fórmulas, equivalencias, micronutrientes, PDF con marca, USDA | Codex | PR #108 (`codex/nutridesk-release-nutricion`) | Borrador, encima de #107 |
-| Ficha clínica, laboratorio y exportaciones en PDF | Codex | PR #115 (encima de #108) | Borrador. Le falla la prueba de sesiones reales («signed-auth»), sin arreglar |
-| Agenda pública y reservas, varias agendas, Google, Mercado Pago, equipo y recepción, laboratorio, bariátrico, difusiones por WhatsApp, asistente de cartera, ayuda | Codex | rama `respaldo/codex-nutridesk-core` (sin PR) | En código, sin PR. Se separa en entregas cuando Codex vuelva |
+| Ficha clínica, laboratorio y exportaciones en PDF | Codex | PR #115 (encima de #108) | Borrador actualizado: comprobación del permiso y pacing reparados; sesiones reales aprobadas en la pila actual |
+| Agenda pública, Google, Mercado Pago, equipo y recepción | Codex | PR #123 (`codex/nutridesk-release-agenda`) | Borrador disponible, encima de #115. Proveedores externos apagados |
+| Operaciones, comunicaciones, asistente de cartera y ayuda | Codex | `codex/nutridesk-release-operaciones` | Entrega 7 verificada localmente, encima de #123; PR pendiente de crear, [informe vigente](nutridesk-release-operaciones-2026-10-15.md) |
+| Tabla de composición SARA 2 solicitada | Codex | `codex/nutridesk-release-sara2` | Entrega 8 en preparación; 930 registros y 39 componentes, todavía sin publicar |
 | Lo que Codex dejó sin guardar en la PC de Facundo: importar pacientes (otra versión), Equivalencias (otra versión), asistente con IA para la cartera | Codex | solo en la PC (sin respaldo) | Espera la frase de Facundo para respaldarlo |
 | Seguridad y operación (vistas de paciente solo lectura, privacidad de la IA, staging, monitoreo, respaldo de archivos) | Claude | ramas `claude/*` | En curso |
 | Comparación de #105 con Figma y orden de juntado de la pila de Codex | Claude | `docs/coordinacion/` y comentarios en los PR | #105 comparado el 14/10. Claude no empuja a ramas de Codex |
@@ -68,6 +70,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **15/10 · Codex** · Entrega 7 verificada desde #123 `d82c590`, con fuente integrada `b727195`: conserva las cinco mejoras heredadas de demo/pacing, OCR/CSP y todo main hasta `9c56854`. Se cerraron el permiso de correo de la paciente y el bloqueo de WhatsApp incompleto. Suite propia final 2.977/0/2 en 452 archivos, focal 214/28, gates y revisión de código aprobados; QA independiente 1440/390 y 1.789 huellas pos-suite/QA sin cambios. [Estado vigente](nutridesk-release-operaciones-2026-10-15.md). PR115 tiene sesiones reparadas; agenda está en #123, el PR de operaciones queda por crear y SARA 2 sigue separado. Sin merge a main ni activaciones externas.
 
 - **15/10 · Codex** · PR123 hereda el pacing del ensayo revisado: 38 casos focales y tipos/sintaxis/secretos aprobados. Suite de producto con MAIN9c: 2.881/0/2 antes de los tres archivos del ensayo; comparación de1.640 archivos confirma cero cambios del producto. [Informe](main-sync-9c568-2026-10-15.md). Fuente para operaciones con tres excepciones del runner frente a CORE; CI nuevo pendiente.
 

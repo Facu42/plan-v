@@ -11,34 +11,31 @@ describe('funciones presentes y previstas del consultorio',()=>{
     expect(ids).not.toContain('academy');expect(new Set(ids).size).toBe(ids.length);
   });
   it('distingue futuro de disponible y no ofrece formularios simulados',()=>{
-    const html=renderToStaticMarkup(<ProfessionalModules selectedId="asistente-ia" onOpen={vi.fn()} />);
-    expect(html).toContain('Asistente IA');expect(html).toContain('En preparación');expect(html).toContain('Fuentes y motivos');
-    expect(html).not.toContain('<form');expect(html).not.toContain('Abrir módulo');
+    const html=renderToStaticMarkup(<ProfessionalModules selectedId="pagina-publica" onOpen={vi.fn()} />);
+    expect(html).toContain('Página pública');expect(html).toContain('Disponible');expect(html).toContain('Vista previa');
+    expect(html).not.toContain('<form');expect(html).toContain('Abrir módulo');
     const available=renderToStaticMarkup(<ProfessionalModules selectedId="alimentos" onOpen={vi.fn()} />);
     expect(available).toContain('Disponible');expect(available).toContain('Abrir módulo');
+  });
+  it('el asistente y ayuda abren funciones reales, con revisión y fuentes',()=>{
+    const assistant=renderToStaticMarkup(<ProfessionalModules selectedId="asistente-ia" onOpen={vi.fn()} />);
+    expect(assistant).toContain('Asistente de cartera');expect(assistant).toContain('Consultar');expect(assistant).not.toContain('En preparación');
+    const help=renderToStaticMarkup(<ProfessionalModules selectedId="ayuda" onOpen={vi.fn()} />);
+    expect(help).toContain('Centro de ayuda');expect(help).toContain('Buscar una guía');expect(help).toContain('Importar una cartera');
   });
   it('ofrece todos los destinos futuros con estado explícito y sólo en CRM',()=>{
     const html=renderToStaticMarkup(<PlannedModulesNav onOpen={vi.fn()} />);
     for(const m of PROFESSIONAL_MODULES.filter(m=>!m.href))expect(html).toContain(m.title);
-    expect(html).toContain('En preparación');
+    expect(html).not.toContain('En preparación');
     expect(isAllowedPage('pro','desarrollo')).toBe(true);expect(isAllowedPage('patient','desarrollo')).toBe(false);
   });
-});
-
-describe('nutrición disponible en entrega 4',()=>{
-  it('ofrece las cinco funciones nutricionales sin anunciar los módulos futuros',()=>{
-    for(const id of ['planificacion','planes','alimentos','equivalencias','configuracion']){const module=PROFESSIONAL_MODULES.find(row=>row.id===id);expect(module?.href).toBeTruthy();expect(module?.current.length).toBeGreaterThan(0);}
-    expect(PROFESSIONAL_MODULES.find(row=>row.id==='asistente-ia')?.href).toBeUndefined();
-    expect(PROFESSIONAL_MODULES.find(row=>row.id==='configuracion')?.current.join(' ')).not.toContain('reportes');
+  it('abre difusiones con revisión individual y configuración con reportes',()=>{
+    const communications=renderToStaticMarkup(<ProfessionalModules selectedId="comunicaciones" onOpen={vi.fn()}/>);
+    expect(communications).toContain('Difusiones por WhatsApp');
+    expect(communications).toContain('Cargando');
+    const settings=renderToStaticMarkup(<ProfessionalModules selectedId="configuracion" onOpen={vi.fn()}/>);
+    expect(settings).toContain('Configuración y reportes');
+    expect(settings).toContain('Descargar indicadores');
+    expect(settings).not.toContain('En preparación');
   });
 });
-
-it('ofrece ficha y clínica de entrega 5 sin atribuir cálculo automático Kerr',()=>{
-  expect(PROFESSIONAL_MODULES.find(row=>row.id==='pacientes')?.current.join(' ')).toContain('Diez secciones');
-  const measurements=PROFESSIONAL_MODULES.find(row=>row.id==='mediciones');
-  expect(measurements?.current.join(' ')).toContain('Kerr declarados');
-  expect(measurements?.next.join(' ')).toContain('Cálculo automático Kerr pendiente');
-  expect(PROFESSIONAL_MODULES.find(row=>row.id==='recursos')?.current.join(' ')).toContain('exportación de ficha PDF');
-});
-
-it('habilita agenda, pagos de reservas y equipo sin activar funciones futuras',()=>{for(const id of ['agenda','cobranzas','pagina-publica','equipo'])expect(PROFESSIONAL_MODULES.find(row=>row.id===id)?.href).toBeTruthy();expect(PROFESSIONAL_MODULES.find(row=>row.id==='equipo')?.href).toBe('/equipo');for(const id of ['asistente-ia','ayuda'])expect(PROFESSIONAL_MODULES.find(row=>row.id===id)?.href).toBeUndefined();});

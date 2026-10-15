@@ -28,8 +28,10 @@ const ALLOWED = [
   'admin_set_service_settings',
   'admin_void_service_payment',
   'apply_ai_job',
+  // Import rows require a reviewed owner-scoped batch, patient scope and live consent.
   'apply_patient_import_row',
   'apply_professional_model',
+  // Clinical references: nutritionist identity, approval and immutable provenance.
   'approve_clinical_reference',
   'assign_editorial_resource',
   'assign_exercise_routine',
@@ -45,7 +47,7 @@ const ALLOWED = [
   'complete_privacy_delete',
   'complete_privacy_export',
   'confirm_appointment',
-  // Consultas: scope profesional/paciente, consentimientos vigentes y revisión CAS.
+  // Consultas: lectura sólo propia/asignada, comandos con consentimiento y revisión CAS.
   'consultation_can_read',
   'consultation_command',
   'consultation_completion_command',
@@ -65,12 +67,14 @@ const ALLOWED = [
   'delete_own_measurement',
   'delete_patient_activity',
   'delete_shopping_manual',
+  // IA documental: consentimiento específico, paciente vinculada y titularidad vigentes.
   'document_organizer_enqueue',
   'document_organizer_list',
   'document_organizer_read',
   'document_organizer_review',
   'enqueue_ai_job',
   'enqueue_outbox_event',
+  // Proyección histórica limitada por titularidad y permisos de cada propósito.
   'export_patient_imported_history',
   'finish_ai_job',
   'finish_recipe_cover',
@@ -118,9 +122,18 @@ const ALLOWED = [
   'my_nutritionist_id',
   'my_patient_id',
   'open_message_attachment',
+  // Metadata operativa aislada; opt-in exige la identidad de la paciente y difusión la profesional titular.
+  'ops_can_read_clinic',
+  'ops_can_read_patient',
+  'ops_create_broadcast',
+  'ops_create_email_broadcast',
+  'ops_review_reminder_template',
+  'ops_set_preferences',
   'patient_has_full_access',
+  // Evidencia clínica externa: titular actual, actor original, ficha sin cuenta y retiro prevalente.
   'patient_import_authorization_state',
   'patient_import_external_allowed',
+  // Manual preparation only; assigned active patient and imported contact email.
   'prepare_imported_patient_invite',
   'prepare_patient_import',
   'process_outbox_deliveries',
@@ -153,6 +166,7 @@ const ALLOWED = [
   'save_body_metrics',
   'save_care_preferences',
   'save_care_record',
+  // Active assigned patient, live purpose consent, own source/reference and review.
   'save_clinical_brand',
   'save_clinical_source_document',
   'save_clinical_workspace_record',
@@ -161,6 +175,7 @@ const ALLOWED = [
   'save_meal_plan_draft',
   'save_my_body_data',
   'save_notification_preferences',
+  // Consultorio derivado de la sesión; revisión CAS y referencias validadas en base.
   'save_nutrition_exchange',
   'save_nutrition_settings',
   'save_patient_intake',
@@ -168,6 +183,7 @@ const ALLOWED = [
   'save_recipe_draft',
   'save_routine_feedback',
   'schedule_appointment',
+  // Agenda/equipo: cada RPC valida dueño, membresía operativa o asignación clínica explícita.
   'scheduling_accept_staff',
   'scheduling_add_existing_charge',
   'scheduling_add_shared_note',
@@ -193,6 +209,7 @@ const ALLOWED = [
   'scheduling_shared_notes',
   'scheduling_shared_patients',
   'scheduling_staff_roster',
+  // Catálogo propio/compartido autorizado; filtros y límites validados por RPC.
   'search_food_catalog',
   'send_thread_attachment',
   'send_thread_message',
