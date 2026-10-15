@@ -11,8 +11,8 @@ describe('funciones presentes y previstas del consultorio',()=>{
     expect(ids).not.toContain('academy');expect(new Set(ids).size).toBe(ids.length);
   });
   it('distingue futuro de disponible y no ofrece formularios simulados',()=>{
-    const html=renderToStaticMarkup(<ProfessionalModules selectedId="asistente-ia" onOpen={vi.fn()} />);
-    expect(html).toContain('Asistente IA');expect(html).toContain('En preparación');expect(html).toContain('Fuentes y motivos');
+    const html=renderToStaticMarkup(<ProfessionalModules selectedId="equivalencias" onOpen={vi.fn()} />);
+    expect(html).toContain('Equivalencias');expect(html).toContain('En preparación');expect(html).toContain('Catálogo y selector');
     expect(html).not.toContain('<form');expect(html).not.toContain('Abrir módulo');
     const available=renderToStaticMarkup(<ProfessionalModules selectedId="alimentos" onOpen={vi.fn()} />);
     expect(available).toContain('Disponible');expect(available).toContain('Abrir módulo');

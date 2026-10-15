@@ -162,7 +162,7 @@ export function createRateLimits(options: {
     },
     protected: async (c, next) => {
       if (!enabled() || c.req.method !== 'POST'
-        || !/\/(copilot|meals\/analyze|ai\/jobs(?:\/[^/]+\/image)?|care\/replacements\/[^/]+\/generate)$/.test(c.req.path)) return next();
+        || !/\/(copilot|crm\/assistant|meals\/analyze|ai\/jobs(?:\/[^/]+\/image)?|care\/replacements\/[^/]+\/generate)$/.test(c.req.path)) return next();
       const auth = c.get('auth') as AuthContext | undefined;
       const identity = auth && 'userId' in auth ? `user:${auth.userId}` : `ip:${address(c)}`;
       const wait = ai(identity);

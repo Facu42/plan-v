@@ -1,4 +1,5 @@
 import { withWeeklyRegistration } from './progress/weekly-repository.js';
+import { registerAssistantRoutes } from './assistant/routes.js';
 import { serve } from '@hono/node-server';
 import { registerCareRoutes, requireCareConsent } from './care/routes.js';
 import { createBodyGuard, createOriginGuard, createRateLimits, readCorsOrigins } from './security/http.js';
@@ -288,6 +289,7 @@ registerResourceRoutes(app);
 registerOrgRoutes(app);
 registerAlcanceRoutes(app);
 registerCrmRoutes(app);
+registerAssistantRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({

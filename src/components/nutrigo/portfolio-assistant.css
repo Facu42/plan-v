@@ -1,0 +1,46 @@
+/* Asistente IA de la cartera: piezas y variables del sistema Nutrigo (Poppins, tarjetas, insignias). */
+.nv-app.nv-pro:has(.pa-assistant) .nv-content-layout {grid-template-columns:minmax(0,1fr)!important}
+.pa-assistant {display:grid;grid-template-rows:auto 1fr auto auto;gap:14px;min-width:0;min-height:min(720px,calc(100vh - 160px));background:var(--nv-card);border:1px solid var(--nv-line,var(--nv-border));border-radius:24px;padding:20px 24px}
+.pa-head {display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:16px;background:var(--nv-green)}
+.pa-head h2 {margin:0;font-size:16px;font-weight:600;color:var(--nv-ink)}
+.pa-head p {margin:2px 0 0;font-size:12px;color:var(--nv-muted)}
+.pa-head-icon,.pa-bot {display:inline-grid;place-items:center;width:32px;height:32px;border-radius:10px;background:var(--nv-forest);color:var(--nv-card);flex-shrink:0}
+.pa-bot {width:28px;height:28px;border-radius:50%}
+.pa-body {overflow-y:auto;min-height:0;display:grid;align-content:start;gap:16px;padding:4px 2px}
+.pa-welcome {display:grid;justify-items:center;text-align:center;gap:10px;margin:auto;max-width:520px;padding:48px 0}
+.pa-welcome-icon {display:grid;place-items:center;width:64px;height:64px;border-radius:50%;background:var(--nv-mint);color:var(--nv-forest)}
+.pa-welcome h3 {margin:6px 0 0;font-size:20px;font-weight:600;color:var(--nv-ink)}
+.pa-welcome p {margin:0;font-size:13px;line-height:1.5;color:var(--nv-muted)}
+.pa-suggestions {display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:8px}
+.pa-suggestions-inline {justify-content:flex-start;margin:0 0 0 40px}
+.pa-suggestions button {font:inherit;font-size:12px;color:var(--nv-ink);background:var(--nv-card);border:1px solid var(--nv-line,var(--nv-border));border-radius:999px;padding:8px 14px;cursor:pointer;transition:background-color .15s ease,border-color .15s ease}
+.pa-suggestions button:hover {background:var(--nv-mint);border-color:var(--nv-forest)}
+.pa-thread {list-style:none;margin:0;padding:0;display:grid;gap:18px}
+.pa-thread > li {display:grid;gap:10px;animation:pa-enter .22s ease-out both}
+.pa-question {justify-self:end;max-width:70%;margin:0;padding:10px 14px;border-radius:16px 16px 4px 16px;background:var(--nv-mint);color:var(--nv-ink);font-size:13px}
+.pa-answer {display:flex;gap:12px;align-items:flex-start;max-width:760px}
+.pa-answer > div {display:grid;gap:10px;min-width:0;flex:1}
+.pa-thinking {margin:4px 0;font-size:13px;color:var(--nv-muted)}
+.pa-summary {margin:4px 0 0;font-size:13px;line-height:1.5;color:var(--nv-ink)}
+.pa-cards {border:1px solid var(--nv-line,var(--nv-border));border-radius:16px;overflow:hidden}
+.pa-cards h3 {display:flex;align-items:center;gap:8px;margin:0;padding:10px 14px;font-size:13px;font-weight:600;background:var(--nv-bg);color:var(--nv-ink)}
+.pa-cards ul {list-style:none;margin:0;padding:0}
+.pa-cards li {display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--nv-line,var(--nv-border))}
+.pa-cards li > div {flex:1;min-width:0}
+.pa-avatar {display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--nv-gold-soft);color:var(--nv-ink);font-weight:600;font-size:14px;flex-shrink:0}
+.pa-name {display:flex;align-items:center;gap:8px;margin:0;font-size:13px;font-weight:600;color:var(--nv-ink)}
+.pa-reason {margin:2px 0 0;font-size:12px;color:var(--nv-muted)}
+.pa-cards a {flex-shrink:0;display:inline-flex;align-items:center;gap:6px;font-size:12px}
+.pa-sources {margin:0;font-size:11px;color:var(--nv-muted)}
+.pa-error {display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px;border-radius:12px;background:var(--nv-coral-soft);color:var(--nv-ink);font-size:13px}
+.pa-error p {margin:0}
+.pa-composer {display:flex;align-items:center;gap:8px;max-width:760px;width:100%;justify-self:center;border:1px solid var(--nv-line,var(--nv-border));border-radius:14px;background:var(--nv-bg);padding:6px 6px 6px 14px}
+.pa-composer:focus-within {border-color:var(--nv-forest)}
+.pa-composer input {flex:1;min-width:0;font:inherit;font-size:13px;border:0;background:transparent;color:var(--nv-ink);outline:none;padding:8px 0}
+.pa-send {display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:10px;background:var(--nv-cta);color:var(--nv-strong-ink);cursor:pointer}
+.pa-send:disabled {opacity:.45;cursor:not-allowed}
+.pa-notice {margin:0;text-align:center;font-size:11px;color:var(--nv-muted)}
+.pa-sr-only {position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.pa-suggestions button:focus-visible,.pa-send:focus-visible,.pa-cards a:focus-visible {outline:2px solid var(--nv-ink);outline-offset:2px}
+@keyframes pa-enter {from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.pa-thread > li{animation:none}.pa-suggestions button{transition:none}}

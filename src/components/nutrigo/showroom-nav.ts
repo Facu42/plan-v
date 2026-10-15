@@ -46,6 +46,7 @@ export const PRO_SURFACES: ShellTab[] = [
   { id: 'pacientes', icon: 'users', label: 'Pacientes' },
   { id: 'plan', icon: 'list', label: 'Planes' },
   { id: 'seguimiento', icon: 'sparkle', label: 'Seguimiento' },
+  { id: 'asistente', icon: 'sparkle', label: 'Asistente IA' },
   { id: 'agenda', icon: 'calendar', label: 'Agenda' },
   { id: 'mensajes', icon: 'message', label: 'Mensajes' },
   { id: 'alimentos', icon: 'leaf', label: 'Alimentos' },
@@ -70,7 +71,7 @@ export function proMore(isAdmin: boolean): ShellTab[] {
   return isAdmin ? [...PRO_MORE, SERVICE_TAB] : PRO_MORE;
 }
 
-export const PATIENT_CRM_PAGES: ShowroomPage[] = ['modelos', 'alimentos', 'biblioteca', 'ficha', 'pacientes', 'consultas', 'objetivos', 'reciente', 'guardado', 'seguimiento', 'paneles', 'videollamadas'];
+export const PATIENT_CRM_PAGES: ShowroomPage[] = ['asistente', 'modelos', 'alimentos', 'biblioteca', 'ficha', 'pacientes', 'consultas', 'objetivos', 'reciente', 'guardado', 'seguimiento', 'paneles', 'videollamadas'];
 
 export function tabBarState(page: ShowroomPage, tabs: ShellTab[], more: ShellTab[]) {
   const onPrimary = tabs.some((tab) => tab.id === page);
