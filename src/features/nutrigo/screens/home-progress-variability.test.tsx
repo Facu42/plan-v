@@ -211,6 +211,28 @@ describe.each([false, true])('Inicio: nodos originales siempre presentes y fotos
     expect(out).toContain('pendiente de revisión');
     expect(out).not.toContain('null');
   });
+  it('las actividades salen de la pantalla de Ejercicio aunque la ficha no las traiga (producción)', () => {
+    const activities = [{ id: 'a1', patient_id: 'p1', activity: 'Bicicleta', duration_minutes: 45, intensity: 'intensa', note: null, logged_at: '2026-10-07T13:00:00Z', assignment_id: null, sets: null, reps: null }];
+    context.data = homeData({ exercise: { assignments: [], activities } });
+    const out = text(home(patientWith({ activities: [] })));
+    expect(out).toContain('Bicicleta');
+    expect(out).toContain('(45 min)');
+    expect(out).toContain('registrada: 45 min, intensidad intensa.');
+  });
+  it('las calorías quemadas suman lo que la paciente declaró hoy al registrar actividades', () => {
+    const activities = [{ id: 'k1', patient_id: 'p1', activity: 'Bicicleta', duration_minutes: 45, intensity: 'intensa', note: null, logged_at: '2026-10-07T13:00:00Z', assignment_id: null, sets: null, reps: null, kcal: 321 }];
+    context.data = homeData({ exercise: { assignments: [], activities } });
+    expect(text(home())).toContain('321');
+  });
+  it('el registro de rutina de esta semana cuenta las series hechas en cada ejercicio', () => {
+    const items = [routineItem('x', 'Sentadilla', { sets: 3 }), routineItem('y', 'Plancha', { sets: 4 })];
+    const withFeedback = (recordedAt: string) => ({ ...assignment(items), feedback: { sets_completed: 2, reps_completed: 20, note: null, recorded_at: recordedAt } });
+    context.data = homeData({ exercise: { assignments: [withFeedback('2026-10-06T20:00:00-03:00')], activities: [] } });
+    expect(text(home())).toContain('(2/3)');
+    expect(text(home())).toContain('(2/4)');
+    context.data = homeData({ exercise: { assignments: [withFeedback('2026-09-20T20:00:00-03:00')], activities: [] } });
+    expect(text(home())).not.toContain('(2/3)');
+  });
   it('sin rutina asignada, el bloque Actividad muestra las actividades que la paciente registró esta semana', () => {
     context.data = homeData();
     const activities = [{ id: 'a1', activity: 'Caminata al aire libre', duration_minutes: 35, intensity: 'moderada', logged_at: '2026-10-07T13:00:00Z' }];
