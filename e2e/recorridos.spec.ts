@@ -63,7 +63,7 @@ test('2 · la paciente completa su ficha de ingreso y la envía', async ({ page 
 
   await enterDemo(page, '/crm/pacientes');
   await page.getByRole('button', { name: 'Abrir ficha de Sofía R.' }).click();
-  await page.getByRole('button', { name: 'Ingreso y antecedentes' }).click();
+  await page.getByRole('button', { name: 'Historia clínica', exact: true }).click();
   const intake = page.getByRole('main');
   await expect(intake.getByText('Tener más energía a la tarde')).toBeVisible();
   await expect(intake.getByText('Declaró que no tiene alergias.')).toBeVisible();

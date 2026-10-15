@@ -28,6 +28,7 @@ import { registerConsultationRoutes } from './consultations/routes.js';
 import { registerPatientImportRoutes } from './patient-import/routes.js';
 import { registerDocumentOrganizerRoutes } from './document-organizer/routes.js';
 import { registerNutritionCapabilityRoutes } from './nutrition-capabilities/routes.js';
+import { registerClinicalWorkspaceRoutes } from './clinical-workspace/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -300,6 +301,7 @@ registerConsultationRoutes(app);
 registerPatientImportRoutes(app);
 registerDocumentOrganizerRoutes(app);
 registerNutritionCapabilityRoutes(app);
+registerClinicalWorkspaceRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({

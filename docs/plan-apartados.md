@@ -392,3 +392,6 @@ D1 de `docs/decisiones-producto-2026-10-10.md`. La profesional sigue cargando a 
 ## Nutriboost: entrega 4 · 14/10/2026
 
 Rama aislada `codex/nutridesk-release-nutricion`, basada en la entrega de importación `b143744`. Fórmula efectiva aprobada por cada profesional, referencias revisadas de micronutrientes, grupos de intercambio, catálogo paginado con incorporación opcional revisada desde USDA, nombres y horarios de los seis momentos existentes y descarga PDF real del plan con marca y gráficos. [Contratos, verificación propia y Regression Guard](nutridesk-release-nutricion-2026-10-14.md). Suite propia: 2.678 aprobadas, cero fallos, dos omitidas y 407 archivos; tipos, build, migraciones, vistas y scanner aprobados, más revisión independiente de 25 casos sin P1/P2. Sin cambios de producción ni proveedores activados. Clínica y ficha/PDF clínico (5), agenda/equipo/cobros (6) y cartera/comunicación/ayuda (7) continúan separados. Kerr automático conserva su pendiente de referencia primaria y aprobación clínica.
+
+
+Quinta entrega apilada: [ficha clínica y exportación histórica, evidencia y límites](nutridesk-release-clinica-2026-10-14.md). Base 304413f; gate previo 2.719 pruebas aprobadas; verificación nueva de marca vigente en curso, sin producción.
