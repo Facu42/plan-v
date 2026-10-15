@@ -69,17 +69,28 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **15/10 · Codex** · PR123 actualizado desde su padre revisado para conservar MAIN9c56854, PR119 y122. Suite local actual: 2881 aprobadas, cero fallos, 2 omitidas; 439 archivos. [Informe](main-sync-9c568-2026-10-15.md). Sin merge a main ni SQL remoto.
+
+- **15/10 · Codex** · PR115 actualizado desde su padre revisado para conservar MAIN9c56854, PR119 y122. Focal propio actual: 129 aprobadas, cero fallos; 9 archivos. La suite global actual se verifica en CI; los conteos locales globales anteriores quedan como históricos. [Informe](main-sync-9c568-2026-10-15.md). Sin merge a main ni SQL remoto.
+
 - **15/10 · Codex** · #115 actualizado desde main y la pila: 2.775 pruebas aprobadas, cero fallos y dos omitidas. El fallo del recorrido fue reproducido: comprobaba grabación en lugar de menú. Se corrigieron dos expresiones, conservando permisos separados y bloqueo403; [evidencia](consent-browser-regression-2026-10-15.md). Cabecera clínica y gris original conservados; CI nuevo pendiente. Sin merge a main ni SQL remoto.
+- **15/10 · Codex** · PR108 actualizado desde su padre revisado para conservar MAIN9c56854, PR119 y122. Focal propio actual: 129 aprobadas, cero fallos; 9 archivos. La suite global actual se verifica en CI; los conteos locales globales anteriores quedan como históricos. [Informe](main-sync-9c568-2026-10-15.md). Sin merge a main ni SQL remoto.
 
 - **15/10 · Codex** · #108 conciliado con main `2d31f9d` y la pila actualizada, preservando síntomas, vistas, avisos, compras, recorridos y el gris original. Suite propia de nutrición: 2.721 aprobadas, cero fallos y dos omitidas; [evidencia](nutridesk-release-nutricion-2026-10-14.md). Sin módulos de agenda/operaciones/SARA ni SQL remoto; CI nuevo pendiente de comprobar sobre su SHA.
+- **15/10 · Codex** · PR107 actualizado desde su padre revisado para conservar MAIN9c56854, PR119 y122. Focal propio actual: 126 aprobadas, cero fallos; 8 archivos. La suite global actual se verifica en CI; los conteos locales globales anteriores quedan como históricos. [Informe](main-sync-9c568-2026-10-15.md). Sin merge a main ni SQL remoto.
 
 - **15/10 · Codex** · PR107 incorpora mediante merge la segunda entrega revisada (`88ce8e6`), con main `2d31f9d` y los siete PR nuevos conservados. El único conflicto fue unir exclusiones de OCR local y resultados e2e en .gitignore; se conserva el procesamiento local y su prueba CSP. Informe en `nutridesk-release-importacion-2026-10-13.md`. Sin merge a main ni SQL remoto.
+- **15/10 · Codex** · PR106 actualizado desde su padre revisado para conservar MAIN9c56854, PR119 y122. Focal propio actual: 126 aprobadas, cero fallos; 8 archivos. La suite global actual se verifica en CI; los conteos locales globales anteriores quedan como históricos. [Informe](main-sync-9c568-2026-10-15.md). Sin merge a main ni SQL remoto.
 
 
 
 - **15/10 · Codex** · PR106 incorpora mediante merge la cabeza revisada de #105 (`a6ab13ae`), con main `2d31f9d` y los siete PR de la paciente/operación conservados. Se repiten los gates propios de consultas y se mantiene Groq apagado y el SMTP pospuesto; informe en `nutridesk-release-consultas-2026-10-13.md`. Sin merge a main ni SQL remoto.
+- **15/10 · Codex** · PR105 actualizado a MAIN9c56854 con PR119 y122 preservados; 2.563 pruebas locales aprobadas. Se propaga la misma cabeza por la pila. [Informe](main-sync-9c568-2026-10-15.md). Sin merge a main ni SQL remoto.
 
 - **15/10 · Codex** · Retomada la pila pendiente desde main `2d31f9d`: se preservaron #109, #110, #112, #113, #114, #116 y #117. Primera entrega #105 actualizada con el gris secundario original de Nutrigo y 2.546 pruebas aprobadas; [informe](main-reconciliation-2026-10-15.md). Se propaga en orden hacia #106–#115 y luego agenda/operaciones; sin merge a main ni SQL remoto. La tabla SARA 2 solicitada se implementa en una entrega propia, con 930 registros y 39 componentes; no está publicada ni incluida todavía en esos conteos. La falla de sesiones de #115 se localizó en una comprobación que miraba el permiso de grabación en lugar del de menús; su corrección tendrá evidencia en la cabeza nueva.
+
+
+- **15/10 · Claude** · Próximas acciones de la nutricionista: la bandeja de Inicio suma «Cuotas vencidas» y «Sin registros hace 7 días». Toca `server/crm/repository.ts`, `src/types/crm-work.ts`, `ProfessionalWorkQueue.tsx` y su CSS (cambios chicos; la pila de Codex no los modifica). Sin migraciones.
 
 - **15/10 · Claude** · #117: lista del súper de la paciente agrupada por comercio (los seis colores del widget del archivo) y «Compartir lista» por WhatsApp o copiada. Solo toca `screens/Shopping.tsx`, `screens/shopping-format.ts` y una traducción; nada de la base ni de la pila de Codex. #116 y #117 juntados a `main` con el «junta el 116 y 117 a main» de Facundo.
 - **15/10 · Claude** · Con el «juntalo al main» de Facundo se juntaron #109 (estos documentos) y #114 (recorridos de punta a punta y monitor). Codex dejó un quinto borrador, #115 (ficha clínica, laboratorio y PDF), anotado en carriles. #116: aviso en la campanita de la paciente cuando la nutri le indica un recurso y no lo leyó (el de plan nuevo ya existía). Toca con cambios mínimos `src/features/nutrigo/patient-notices.tsx` y `screens/Resources.tsx`; sin migraciones.
@@ -95,3 +106,4 @@ del piloto, entidad legal.
 - **15/10 · Claude** · PR #112: ánimo y síntomas de la paciente (diálogo «Cómo me siento» en el Diario; la nutri los ve en «Registros y evolución»). Toca con cambios mínimos `server/store.ts`, `src/types/index.ts`, `ShowroomProgress.tsx` y `screens/Diary.tsx`.
 - **14/10 · Claude** · Con la frase «aplicá las migraciones de vistas y síntomas en la base» se aplicaron en producción las de #110 y #112. Verificado: las siete vistas de la paciente quedan solo lectura y `habit_logs.symptoms` existe con su regla. Las dos son repetibles sin daño. #110 y #112 siguen sin juntar a main.
 - **14/10 · Claude** · Con el «juntalo al main» de Facundo se juntaron #110 y #112. Vercel y Railway publicaron sin errores (API arriba con la base). Nuevo carril de etapa 1: recorridos de punta a punta en modo demo y monitor de producción (rama `claude/recorridos-e2e`); no toca archivos de Codex salvo `package.json`, `vite.config.ts` y `ci.yml` con cambios mínimos.
+- **15/10 · Claude** · Rama `claude/actividad-paciente`: actividad y rutina reales en Inicio, pasos en Diario y en la ficha de la nutri. Toca con cambios mínimos `screens/Home.tsx`, `screens/Diary.tsx`, `features/nutrigo/PatientApp.tsx` y `ShowroomProgress.tsx`. Sin migraciones.

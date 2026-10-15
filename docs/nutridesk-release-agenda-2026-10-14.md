@@ -1,5 +1,10 @@
 # Sexta entrega: agenda, reservas, equipo y cobros
 
+## Actualización vigente de MAIN9c56854 · 15/10/2026
+
+Merge del padre `e6e739c3`, con acciones y actividad/calorías de PR119/122 preservadas. Suite local actual: **2881 aprobadas, cero fallos, 2 omitidas; 439 archivos**. Tipos/build/migraciones/vistas/secretos aprobados. [Informe de actualización](main-sync-9c568-2026-10-15.md). El CI de esta cabeza se observa por separado; los resultados anteriores se mantienen como antecedentes. Sin cambios de producción.
+
+
 **Actualización 15/10:** conciliada con main `2d31f9d`, sin perder síntomas, vistas, avisos, compras ni los recorridos heredados. Suite propia **2.861 aprobadas, cero fallos, dos omitidas; 437 archivos**; tipos, build (8,66 s), migraciones, vistas, secretos y auditoría de dependencias aprobados. Se conservaron el arreglo del permiso de menú y las reglas de cabecera clínica/gris original de CORE `bb4d794`. Nueve casos focales y scanner de fuente/historia/objetos grandes aprobados. El respaldo previo y stash `12b49e6` permanecen disponibles. Los conteos y bases del 14/10 que siguen son históricos; proveedores y pagos reales siguen sin activar.
 
 Rama `codex/nutridesk-release-agenda`, base exacta `66ed0390df888d5b8d44aa9df6de965f9fbd1b2d` de la ficha clínica. Se separaron 42 archivos con huellas verificadas de CORE `460854a0d087001b06b3c91dfbfc8672e876d842`; coinciden también con CORE final `eeeb02e08e09455247ae4ef17c95b56cec9edd9b`. Dieciocho wrappers conservan las funciones heredadas y añaden sólo esta entrega. Sin nuevas dependencias, configuración de proveedores, aplicación de SQL hospedado, merge ni producción.

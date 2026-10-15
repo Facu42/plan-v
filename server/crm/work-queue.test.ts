@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { asAiJob } from '../ai-jobs/repository.js';
-import { buildWorkItems, readAllRows, type WorkScope, type WorkSnapshot } from './repository.js';
+import { buildWorkItems, lastActivity, readAllRows, type WorkScope, type WorkSnapshot } from './repository.js';
 import { paginateWorkQueue, workQueueQuerySchema } from './work-queue.js';
 
 const at = '2026-10-05T15:00:00.000Z';
@@ -102,5 +102,52 @@ describe('Bandeja del consultorio: pendientes, privacidad y paginación', () => 
     await expect(readAllRows(async () => ({ data: null, error: null }))).rejects.toThrow('toda la bandeja');
     expect(workQueueQuerySchema.safeParse({ kind: 'all', limit: 0 }).success).toBe(false);
     expect(workQueueQuerySchema.safeParse({ nutritionist_id: 'consultorio-b' }).success).toBe(false);
+  });
+});
+
+describe('Próximas acciones: cuotas vencidas y pacientes sin registros', () => {
+  const now = new Date('2026-10-15T15:00:00Z');
+  const charge = (id: string, due_on: string) => ({ id, due_on, amount: 30000, status: 'open' as const });
+
+  it('avisa la cuota vencida sin decir el monto y la deja de mostrar si la paciente ya avisó el pago', () => {
+    const snapshot = empty();
+    snapshot.ledgers = [{ patient_id: 'patient-a', fee: { amount: 30000, first_due_on: '2026-09-10' }, charges: [charge('c1', '2026-09-10'), charge('c2', '2026-10-10')], payments: [] }];
+    const [item] = buildWorkItems(scope, snapshot, now);
+    expect(item).toMatchObject({ id: 'fee_overdue:patient-a', kind: 'fee_overdue', title: 'Cuota vencida desde el 10/09/2026', href: '/crm/cobranzas?paciente=patient-a' });
+    expect(JSON.stringify(item)).not.toMatch(/30000|30\.000/);
+    snapshot.ledgers[0].payments = [{ id: 'aviso', amount: 30000, method: 'transferencia', paid_on: '2026-10-14', note: '', reported_by_patient: true, status: 'reported', created_at: '2026-10-14T12:00:00Z' }];
+    expect(buildWorkItems(scope, snapshot, now).map(entry => entry.kind)).toEqual(['payment']);
+  });
+
+  it('no avisa cuotas al día ni por vencer', () => {
+    const snapshot = empty();
+    snapshot.ledgers = [{ patient_id: 'patient-a', fee: { amount: 30000, first_due_on: '2026-10-20' }, charges: [charge('c1', '2026-10-20')], payments: [] }];
+    expect(buildWorkItems(scope, snapshot, now)).toEqual([]);
+  });
+
+  it('marca pacientes con siete días o más sin registros, con los días que pasaron', () => {
+    const snapshot = empty();
+    snapshot.activity = new Map([['patient-a', '2026-10-05']]);
+    expect(buildWorkItems(scope, snapshot, now)).toEqual([expect.objectContaining({ id: 'quiet:patient-a', title: 'Sin registros hace 10 días', href: '/crm/mensajes?paciente=patient-a', updated_at: '2026-10-05T12:00:00.000Z' })]);
+    snapshot.activity = new Map([['patient-a', '2026-10-09']]);
+    expect(buildWorkItems(scope, snapshot, now)).toEqual([]);
+    snapshot.activity = new Map([['patient-a', null]]);
+    expect(buildWorkItems(scope, snapshot, now)[0].title).toBe('Sin registros en los últimos 30 días');
+  });
+
+  it('no marca a quien no tiene acceso a la app ni a quien se dio de alta hace menos de siete días', () => {
+    const snapshot = empty();
+    snapshot.activity = new Map([['patient-a', null]]);
+    const noApp: WorkScope = { ...scope, patients: [{ id: 'patient-a', name: 'Paciente A', user_id: null }] };
+    expect(buildWorkItems(noApp, snapshot, now)).toEqual([]);
+    const recent: WorkScope = { ...scope, patients: [{ id: 'patient-a', name: 'Paciente A', created_at: '2026-10-12T12:00:00Z' }] };
+    expect(buildWorkItems(recent, snapshot, now)).toEqual([]);
+  });
+
+  it('el último registro cuenta comidas y hábitos declarados, no filas vacías, en días de Argentina', () => {
+    const last = lastActivity(['patient-a', 'patient-b'],
+      [{ patient_id: 'patient-a', logged_at: '2026-10-11T02:30:00Z' }],
+      [{ patient_id: 'patient-a', date: '2026-10-13', hydration: 0 }, { patient_id: 'patient-b', date: '2026-10-12', steps: 4000 }, { patient_id: 'ajena', date: '2026-10-14', hydration: 3 }]);
+    expect(Object.fromEntries(last)).toEqual({ 'patient-a': '2026-10-10', 'patient-b': '2026-10-12' });
   });
 });
