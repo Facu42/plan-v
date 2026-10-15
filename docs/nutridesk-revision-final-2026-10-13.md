@@ -9,3 +9,8 @@ Límites de esa revisión: no conexiones PostgreSQL independientes, recorrido de
 Notas de consulta tuvieron revisión cruzada de clínica/operaciones y catorce casos focales, más recorrido real del coordinador: publicar conserva el borrador sin guardar; después se guarda sin modificar la versión compartida; la paciente recibe cero sesiones privadas. Paginación reserva lecturas, conserva selección y bases de revisión y bloquea respuestas de otra paciente. Durante grabación el editor informa que permite corregir notas al finalizar; cargar transcripción confirma descarte una sola vez. Captura física y proveedores siguen pendientes.
 
 Veredicto: código preparado para revisión por entregas. No habilitar desde cabezas intermedias de la pila; producción mantiene los requisitos específicos del traspaso y del informe de integración. PR105 y PR106 son borradores, sin merge ni SQL remoto.
+
+
+## Cierre actualizado del 14/10
+
+Suite posterior a presupuesto de cartera, SQL publicado y PDF marca/lifecycle: 2.886 aprobadas, cero fallos y dos omitidas (442 archivos). Tipos, build28,36s, diecisiete migraciones/manifiesto, vistas y secretos aprobados. [Revisión independiente del presupuesto](portfolio-independent-review-2026-10-14.md): 33 casos sin P1/P2. Arranque del worker: tres casos independientes y fire test RED/GREEN. Ficha clínica entrega5: 2.730 aprobadas y dos omitidas, revisión material final sin P1/P2; [PR115](https://github.com/Facu42/plan-v/pull/115) borrador. Los reportes históricos anteriores describen sus versiones, no se suman ni sustituyen esta evidencia. FuenteSARA2 nueva sigue en implementación separada. No hubo SQL remoto, activación de servicios ni publicación a pacientes.

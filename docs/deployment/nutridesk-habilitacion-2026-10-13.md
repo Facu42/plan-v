@@ -4,7 +4,7 @@ Paquete para revisión; no ejecutado contra producción. Base revisada: `ae3dc30
 
 ## Puertas obligatorias
 
-- [x] Suite integrada final: 2.848 casos aprobados, cero fallos y dos omitidos, en 437 archivos. Incluye autorización/exportación histórica y correcciones de notas. Tipos y compilación final aprobados; manifiesto canónico de diecisiete migraciones, secretos, migraciones y vistas aprobados.
+- [x] Suite integrada actualizada el 14/10: 2.886 casos aprobados, cero fallos y dos omitidos, en 442 archivos. Incluye autorización/exportación histórica, correcciones de notas, PDF vigente y presupuesto nuevo del asistente. No incluye la fuente SARA 2 adicional en preparación. Tipos y compilación final aprobados; manifiesto canónico de diecisiete migraciones, secretos, migraciones y vistas aprobados.
 - [x] Tipos, compilación web, límites de secretos, seguridad de migraciones y diferencias comprobados.
 - [x] Revisión independiente y correcciones de gasto, consentimiento, cobros y concurrencia.
 - [x] Diecisiete archivos SQL y hashes coinciden con el manifiesto; lectura de versiones alojadas sin aplicarlos.
@@ -20,7 +20,7 @@ Paquete para revisión; no ejecutado contra producción. Base revisada: `ae3dc30
 3. **Audio e IA nueva:** API y worker con la misma configuración privada Groq. Mantener `AI_MODE`, `GROQ_ZDR_VERIFIED`, `GROQ_FREE_TIER_VERIFIED` y `CLINICAL_AI_COST_MODE` según verificaciones efectivas; no marcar comprobado por tener una clave. Validar grabación de ambas voces, interrupción, cierre, retiro de consentimiento, retención siete días y gasto concurrente cercano a USD 5. Sin herramientas ni procesamiento por lotes. Claves nuevas de reintento no liberan gasto incierto.
 4. **Agenda y cobros:** `SCHEDULING_PUBLIC_BASE_URL` apunta al origen web; proxies estrechos en Vercel. Configurar claves privadas de firma/cifrado, OAuth por profesional y callbacks/credenciales de Google y Mercado Pago. Probar seña/total, dos cuentas, webhook duplicado, devolución, credencial revocada y revisión explícita de sincronización incierta antes de habilitar cobros reales.
 5. **Comunicación:** `MAIL_ENABLED=false` y `WHATSAPP_ENABLED=false` hasta configuración y autorización propias. Acceso por SMTP Supabase es independiente del transporte operativo. Verificar plantilla aprobada, preferencias/consentimiento, baja real y no reenvío incierto. WhatsApp tiene costos separados de los USD 5 de IA.
-6. **Clínica:** habilitar fórmulas sólo tras validación profesional de referencias. Kerr automático sigue pendiente; no anunciarlo como implementado. USDA requiere clave opcional y procedencia; mantener datos originales de laboratorio y medidas.
+6. **Clínica:** habilitar fórmulas sólo tras validación profesional de referencias. Kerr automático sigue pendiente; no anunciarlo como implementado. USDA requiere clave opcional y procedencia; mantener datos originales de laboratorio y medidas. La fuente adicional SARA 2 se incorpora en una entrega propia, con unidades, valores ausentes, incidencias y snapshots; su SQL y hash deben agregarse al manifiesto cuando esté validada, antes de habilitarla.
 
 ## Reversión y seguimiento
 

@@ -1,8 +1,8 @@
 import { importedClinicalSections } from '../../lib/imported-clinical-export';
-import { useEffect,useRef,useState,type ChangeEvent, type FormEvent } from 'react';
+import { useEffect,useLayoutEffect,useRef,useState,type ChangeEvent, type FormEvent } from 'react';
 import { clinicalWorkspaceApi,type ClinicalExportPackage } from '../../api/clinical-workspace';
 import { careErrorMessage,notifyCareChanged } from '../../api/care';
-import { clinicalWorkspaceInputSchema,SEGMENTS,SEGMENT_LABELS,type ClinicalWorkspaceInput,type ClinicalWorkspaceRecord,type ClinicalWorkspaceSnapshot,type LaboratoryValue,type MethodReference,type ClinicBrand,type SegmentValue } from '../../types/clinical-workspace';
+import { clinicalWorkspaceInputSchema,clinicBrandSchema,SEGMENTS,SEGMENT_LABELS,type ClinicalWorkspaceInput,type ClinicalWorkspaceRecord,type ClinicalWorkspaceSnapshot,type LaboratoryValue,type MethodReference,type ClinicBrand,type SegmentValue } from '../../types/clinical-workspace';
 import { extractImportFile } from '../../lib/patient-import-files';
 import { parseImportNumber } from '../../lib/patient-import';
 import { metricDefinition } from '../../lib/body-metrics';
@@ -76,12 +76,58 @@ function WorkspaceHistory({patientId,snapshot,mode}:{patientId:string;snapshot:C
   return <section><h3>Evaluaciones guardadas</h3>{mode==='mediciones'&&segmental.length>=2&&<><div className="cw-grid"><label>Comparar desde<select value={before} onChange={e=>setBefore(e.target.value)}><option value="">Elegí una fecha</option>{segmental.map(r=><option key={r.id} value={r.id}>{dateLabel(r.recorded_on)} · {r.data.device}</option>)}</select></label><label>Hasta<select value={after} onChange={e=>setAfter(e.target.value)}><option value="">Elegí una fecha</option>{segmental.map(r=><option key={r.id} value={r.id}>{dateLabel(r.recorded_on)} · {r.data.device}</option>)}</select></label></div>{a&&b&&<ul>{compareSegmental(a.data.values,b.data.values).map((v,i)=><li key={i}>{SEGMENT_LABELS[v.segment]} · {COMPONENT_LABEL[v.component]}: {v.value} {v.unit}; cambio: {v.delta===null?'sin valor comparable con la misma unidad':`${v.delta.toFixed(2)} ${v.unit}`}</li>)}</ul>}</>}{!rows.length?<p>Sin evaluaciones revisadas en este apartado.</p>:rows.map(record=><article key={record.id}><h4>{historyTitle(record)} · {dateLabel(record.recorded_on)}</h4>{recordLines(record).map((line,i)=><p key={i}>{line}</p>)}{'document_id'in record.data&&record.data.document_id&&<NvButton className="nv-ghost" onClick={()=>{const docId=(record.data as {document_id:string}).document_id;void clinicalWorkspaceApi.openDocument(patientId,docId).then(result=>{const anchor=document.createElement('a');anchor.href=result.url;anchor.target='_blank';anchor.rel='noreferrer';anchor.download=result.filename;anchor.click();}).catch(caught=>setError(careErrorMessage(caught)));}}>Abrir documento fuente privado</NvButton>}</article>)}{error&&<p role="alert">{error}</p>}</section>;
 }
 
-function ExportWorkspace({patientId,snapshot,onChanged}:{patientId:string;snapshot:ClinicalWorkspaceSnapshot;onChanged:()=>void}){
+type ExportToken={patientId:string;generation:number};
+export function ExportWorkspace({patientId,snapshot,onChanged}:{patientId:string;snapshot:ClinicalWorkspaceSnapshot;onChanged:()=>void}){
   const [studies,setStudies]=useState('');const [reason,setReason]=useState('');const [instructions,setInstructions]=useState('');const [privateNotes,setPrivateNotes]=useState(false);const [busy,setBusy]=useState(false);const [error,setError]=useState('');const id=useRef(crypto.randomUUID());
-  const pdf=async(pkg:ClinicalExportPackage,title:string,sections:PdfSection[],charts:Parameters<typeof buildClinicalPdf>[0]['charts']=[])=>{if(!snapshot.brand)throw new Error('Guardá la firma del consultorio antes de preparar el PDF.');const bytes=await buildClinicalPdf({title,patientName:pkg.patient.name,brand:snapshot.brand,sections,charts,privateNotes});downloadClinicalPdf(bytes,`${title==='Pedido de estudios'?'pedido-estudios':'ficha'}-${today()}.pdf`);};
-  const exportFile=async()=>{if(busy)return;setBusy(true);setError('');try{const pkg=await clinicalWorkspaceApi.export(patientId);const sections:PdfSection[]=[{title:'Ficha',lines:[`Nombre: ${pkg.patient.name}`,`Objetivo declarado: ${pkg.patient.goal||'sin registrar'}`,...intakeExportLines(pkg.intake.payload as Record<string,unknown>)]},{title:'Mediciones autorizadas',lines:pkg.measurements.map(m=>`${dateLabel(m.captured_on)}: ${metricDefinition(m.kind).label} ${m.value_numeric} ${m.unit}`)},...pkg.snapshot.records.map(r=>({title:`${historyTitle(r)} · ${dateLabel(r.recorded_on)}`,lines:recordLines(r)})),...importedClinicalSections(pkg.imported_history,pkg.imported_measurements)];if(privateNotes)sections.push({title:'Notas privadas del consultorio',lines:pkg.clinical_notes.map(n=>n.body)});const weight=pkg.measurements.filter(m=>m.kind==='weight'&&['kg','lb'].includes(m.unit)).map(m=>({date:m.captured_on,value:m.unit==='lb'?m.value_numeric*0.45359237:m.value_numeric}));await pdf(pkg,'Ficha clínica',sections,[{title:'Evolución del peso',unit:'kg',points:weight}]);}catch(caught){setError(caught instanceof Error?caught.message:careErrorMessage(caught));}finally{setBusy(false);}};
-  const order=async(e:FormEvent)=>{e.preventDefault();if(busy)return;setBusy(true);setError('');try{const input=clinicalWorkspaceInputSchema.parse({id:id.current,recorded_on:today(),note:'',reviewed:true,data:{kind:'study_order',studies:studies.split('\n').map(s=>s.trim()).filter(Boolean),reason,instructions}});await clinicalWorkspaceApi.save(patientId,input);onChanged();const pkg=await clinicalWorkspaceApi.export(patientId);await pdf(pkg,'Pedido de estudios',[{title:'Estudios solicitados',lines:input.data.kind==='study_order'?input.data.studies:[]},{title:'Motivo',lines:[reason]},{title:'Indicaciones de la profesional',lines:[instructions]}]);id.current=crypto.randomUUID();setStudies('');setReason('');setInstructions('');}catch(caught){setError(caught instanceof Error&&caught.name==='ZodError'?'Ingresá entre uno y cuarenta estudios, uno por línea.':careErrorMessage(caught));}finally{setBusy(false);}};
-  return <><ClinicBrandForm snapshot={snapshot} onChanged={onChanged}/><h3>Exportar ficha</h3><p>Incluye sólo información autorizada. Se descarga un PDF con la firma y las gráficas del consultorio; no se envía a nadie.</p><label className="cw-check"><input type="checkbox" checked={privateNotes} onChange={e=>setPrivateNotes(e.target.checked)}/>Incluir notas privadas (copia para uso del consultorio)</label><NvButton disabled={busy||!snapshot.brand} onClick={()=>void exportFile()}>Descargar ficha PDF</NvButton><h3>Pedido de estudios</h3><form onSubmit={e=>void order(e)}><fieldset disabled={busy}><label>Estudios, uno por línea<textarea value={studies} onChange={e=>setStudies(e.target.value)} required rows={4}/></label><label>Motivo<textarea maxLength={1000} value={reason} onChange={e=>setReason(e.target.value)}/></label><label>Indicaciones a la paciente<textarea maxLength={2000} value={instructions} onChange={e=>setInstructions(e.target.value)}/></label><NvButton type="submit" disabled={busy||!snapshot.brand}>Guardar pedido y descargar PDF</NvButton></fieldset></form>{error&&<p className="cw-error" role="alert">{error}</p>}</>;
+  const lifecycle=useRef({mounted:true,patientId,generation:0}),locked=useRef(false);
+  useLayoutEffect(()=>{
+    const owner=lifecycle.current;owner.mounted=true;owner.patientId=patientId;
+    return()=>{owner.mounted=false;owner.generation++;locked.current=false;};
+  },[patientId]);
+  useUnsavedChanges(Boolean(studies||reason||instructions),busy);
+  const active=(token:ExportToken)=>lifecycle.current.mounted&&lifecycle.current.patientId===token.patientId&&lifecycle.current.generation===token.generation;
+  const begin=():ExportToken|null=>{
+    if(busy||locked.current||!lifecycle.current.mounted)return null;
+    locked.current=true;setBusy(true);setError('');
+    return{patientId,generation:++lifecycle.current.generation};
+  };
+  const finish=(token:ExportToken)=>{if(active(token)){locked.current=false;setBusy(false);}};
+  const pdf=async(token:ExportToken,pkg:ClinicalExportPackage,title:string,sections:PdfSection[],charts:Parameters<typeof buildClinicalPdf>[0]['charts']=[])=>{
+    if(!active(token))return false;
+    const brand=clinicBrandSchema.safeParse(pkg.snapshot.brand);
+    if(!brand.success)throw new Error('Guardá la firma del consultorio antes de preparar el PDF.');
+    const bytes=await buildClinicalPdf({title,patientName:pkg.patient.name,brand:brand.data,sections,charts,privateNotes});
+    if(!active(token))return false;
+    downloadClinicalPdf(bytes,`${title==='Pedido de estudios'?'pedido-estudios':'ficha'}-${today()}.pdf`);
+    return true;
+  };
+  const exportFile=async()=>{
+    const token=begin();if(!token)return;
+    try{
+      const pkg=await clinicalWorkspaceApi.export(patientId);if(!active(token))return;
+      const sections:PdfSection[]=[{title:'Ficha',lines:[`Nombre: ${pkg.patient.name}`,`Objetivo declarado: ${pkg.patient.goal||'sin registrar'}`,...intakeExportLines(pkg.intake.payload as Record<string,unknown>)]},{title:'Mediciones autorizadas',lines:pkg.measurements.map(m=>`${dateLabel(m.captured_on)}: ${metricDefinition(m.kind).label} ${m.value_numeric} ${m.unit}`)},...pkg.snapshot.records.map(r=>({title:`${historyTitle(r)} · ${dateLabel(r.recorded_on)}`,lines:recordLines(r)})),...importedClinicalSections(pkg.imported_history,pkg.imported_measurements)];
+      if(privateNotes)sections.push({title:'Notas privadas del consultorio',lines:pkg.clinical_notes.map(n=>n.body)});
+      const weight=pkg.measurements.filter(m=>m.kind==='weight'&&['kg','lb'].includes(m.unit)).map(m=>({date:m.captured_on,value:m.unit==='lb'?m.value_numeric*0.45359237:m.value_numeric}));
+      await pdf(token,pkg,'Ficha clínica',sections,[{title:'Evolución del peso',unit:'kg',points:weight}]);
+    }catch(caught){if(active(token))setError(caught instanceof Error?caught.message:careErrorMessage(caught));}
+    finally{finish(token);}
+  };
+  const order=async(e:FormEvent)=>{
+    e.preventDefault();const token=begin();if(!token)return;let saved=false;
+    try{
+      const input=clinicalWorkspaceInputSchema.parse({id:id.current,recorded_on:today(),note:'',reviewed:true,data:{kind:'study_order',studies:studies.split('\n').map(s=>s.trim()).filter(Boolean),reason,instructions}});
+      await clinicalWorkspaceApi.save(patientId,input);saved=true;if(!active(token))return;
+      const pkg=await clinicalWorkspaceApi.export(patientId);if(!active(token))return;
+      if(!await pdf(token,pkg,'Pedido de estudios',[{title:'Estudios solicitados',lines:input.data.kind==='study_order'?input.data.studies:[]},{title:'Motivo',lines:[reason]},{title:'Indicaciones de la profesional',lines:[instructions]}]))return;
+      id.current=crypto.randomUUID();setStudies('');setReason('');setInstructions('');onChanged();
+    }catch(caught){
+      if(active(token)){
+        const message=caught instanceof Error&&caught.name==='ZodError'?'Ingresá entre uno y cuarenta estudios, uno por línea.':caught instanceof Error?caught.message:careErrorMessage(caught);
+        setError(saved?`El pedido quedó guardado. No pudimos descargar el PDF: ${message}`:message);
+      }
+    }finally{finish(token);}
+  };
+  return <><ClinicBrandForm snapshot={snapshot} onChanged={onChanged}/><h3>Exportar ficha</h3><p>Incluye sólo información autorizada. Se descarga un PDF con la firma y las gráficas del consultorio; no se envía a nadie.</p><label className="cw-check"><input type="checkbox" checked={privateNotes} onChange={e=>setPrivateNotes(e.target.checked)}/>Incluir notas privadas (copia para uso del consultorio)</label><NvButton disabled={busy} onClick={exportFile}>Descargar ficha PDF</NvButton><h3>Pedido de estudios</h3><form onSubmit={order}><fieldset disabled={busy}><label>Estudios, uno por línea<textarea value={studies} onChange={e=>setStudies(e.target.value)} required rows={4}/></label><label>Motivo<textarea maxLength={1000} value={reason} onChange={e=>setReason(e.target.value)}/></label><label>Indicaciones a la paciente<textarea maxLength={2000} value={instructions} onChange={e=>setInstructions(e.target.value)}/></label><NvButton type="submit" disabled={busy}>Guardar pedido y descargar PDF</NvButton></fieldset></form>{error&&<p className="cw-error" role="alert">{error}</p>}</>;
 }
 function ClinicalWorkspaceBody({patientId,mode}:{patientId:string;mode:ClinicalWorkspaceMode}){
   const [snapshot,setSnapshot]=useState<ClinicalWorkspaceSnapshot|null>(null);const [loading,setLoading]=useState(true);const [error,setError]=useState('');const [revision,setRevision]=useState(0);

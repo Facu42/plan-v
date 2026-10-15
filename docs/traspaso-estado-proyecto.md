@@ -1,6 +1,14 @@
 # Traspaso del proyecto (2026-10-01)
 
-## Plan aprobado Nutriboost/Nutridesk · actualización 13/10/2026
+## Cierre integrado actualizado · 14/10/2026
+
+Última suite global: **2.886 aprobadas, cero fallos, dos omitidas; 442 archivos**, posterior a las reparaciones del PDF, presupuesto de cartera y modo de transacción del plan publicado. Tipos, build (28,36 segundos), diecisiete migraciones/manifiesto, vistas y límites de secretos aprobados. Focal independiente de arranque del worker: tres casos; el fire test detectó la desconexión de comunicaciones y aprobó al restaurar. La revisión independiente adicional del presupuesto de cartera se registra en su informe. No hay medición porcentual de cobertura/fidelidad.
+
+Quinta entrega: [PR borrador 115](https://github.com/Facu42/plan-v/pull/115), cabeza `66ed0390df888d5b8d44aa9df6de965f9fbd1b2d`, base PR108. Suite propia **2.730 aprobadas, cero fallos, dos omitidas; 418 archivos**, tipos/build/migraciones/vistas/secretos aprobados y revisión independiente final sin P1/P2. [Informe](nutridesk-release-clinica-2026-10-14.md) y [revisión](nutridesk-release-clinica-review-2026-10-14.md). Su CI se comprueba por cabeza exacta después del push. Agenda/equipo/cobros y operaciones se preparan como entregas siguientes; nada aplicado en producción.
+
+Fuente SARA 2 solicitada: extracción exacta verificada, **930 registros y 39 componentes**, con unidades y procedencia conservadas. [Estado y límites](sara2-integracion-2026-10-14.md). Implementación adicional en su propia rama, todavía sin catálogo publicado ni migración aplicada. Los snapshots existentes se conservan. La última suite integrada citada aquí no incluye esa implementación adicional.
+
+## Plan aprobado Nutriboost/Nutridesk · actualización 13/10/2026 (histórico)
 
 Implementación integrada en copia aislada, aún sin publicar. [Estado vigente, límites y verificación](nutridesk-integracion-2026-10-13.md). Esta actualización corrige los estados antiguos de ramas y migraciones que aparecen más abajo. El usuario pospuso Gmail porque la cuenta pertenece a su cliente. Supabase Auth sigue vigente; el correo incluido sólo sirve para pruebas con miembros del equipo y actualmente está limitado a dos por hora. Un remitente central propio queda para después. No editar el registro del otro hilo.
 

@@ -30,7 +30,9 @@ La organización con IA es opcional y requiere paciente vinculada, permisos de a
 
 ## Planes, estudios y documentos
 
-La fórmula y sus referencias deben validarse antes de habilitarlas. Podés personalizar momentos de comidas, usar intercambios/grupos y revisar micronutrientes. Los documentos PDF descargables usan logo y contacto del consultorio y los datos seleccionados. Laboratorio permite revisar valores, unidades, rangos y documento original. Comparaciones segmentales, seguimiento bariátrico y resultados Kerr declarados conservan datos originales; el cálculo automático Kerr sigue pendiente de fuente primaria y validación profesional.
+La fórmula y sus referencias deben validarse antes de habilitarlas. Podés personalizar momentos de comidas, usar intercambios/grupos y revisar micronutrientes. Los documentos PDF descargables usan logo y contacto del consultorio y los datos seleccionados. Laboratorio permite revisar valores, unidades, rangos y documento original. Comparaciones segmentales, seguimiento bariátrico y resultados Kerr declarados conservan datos originales; se localizó la fuente primaria de Kerr, pero el cálculo automático sigue pendiente de resolver sus ambigüedades de unidades y validar las fórmulas profesionalmente. [Revisión de la fuente](kerr-fuente-primaria-2026-10-14.md).
+
+Pedido adicional del 14/10: usar [SARA 2, Ministerio de Salud, edición 2022](https://iah.msal.gov.ar/doc/720.pdf), idéntica al PDF indicado de CONICET, como fuente de composición de alimentos. Su incorporación está en preparación y todavía no forma parte del catálogo publicado. Deben conservarse preparación, base de cantidad, unidades, datos ausentes y procedencia por componente; los suplementos por cien unidades no se pueden interpretar como cien gramos. Las nuevas selecciones usarán esa fuente; las versiones publicadas conservarán sus valores originales.
 
 ## Agenda, equipo y comunicación
 
