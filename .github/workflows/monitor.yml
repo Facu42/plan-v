@@ -1,0 +1,53 @@
+name: Monitor de producción
+
+# Cada 15 minutos mira que la API y la web respondan. Si fallan tres intentos seguidos abre un
+# aviso (issue) que le llega por mail a Facundo; cuando vuelven, lo cierra solo. No usa claves.
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: monitor-produccion
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - id: check
+        run: node scripts/monitor-produccion.mjs
+      - name: Abrir o actualizar el aviso
+        if: steps.check.outputs.ok == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SUMMARY: ${{ steps.check.outputs.summary }}
+        run: |
+          gh label create caida --color B60205 --description "Aviso automático del monitor" 2>/dev/null || true
+          open=$(gh issue list --label caida --state open --json number --jq '.[0].number')
+          if [ -n "$open" ]; then
+            gh issue comment "$open" --body "Sigue fallando ($(date -u '+%d/%m %H:%M') UTC):"$'\n\n'"$SUMMARY"
+          else
+            gh issue create --label caida --title "Plan V no responde" \
+              --body "@Facu42 el monitor detectó un problema en producción ($(date -u '+%d/%m %H:%M') UTC):"$'\n\n'"$SUMMARY"$'\n\n'"Se cierra solo cuando vuelve a responder."
+          fi
+      - name: Cerrar el aviso si ya responde
+        if: steps.check.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          open=$(gh issue list --label caida --state open --json number --jq '.[0].number')
+          if [ -n "$open" ]; then
+            gh issue close "$open" --comment "Volvió a responder ($(date -u '+%d/%m %H:%M') UTC)."
+          fi

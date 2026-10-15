@@ -1,4 +1,9 @@
 # Tercera entrega: importación y organización documental revisable
+## Estado vigente · 15/10/2026
+
+Incorporada por merge la segunda entrega revisada `88ce8e6`, con MAIN `2d31f9d` y sus siete PR nuevos conservados. Suite propia actual: **2.690 aprobadas, cero fallos, dos omitidas; 402 archivos**. Tipos, build con OCR local (7,82 s), migraciones, vistas locales y secretos aprobados; scanner real con control positivo, historial y objetos grandes sin hallazgos. [Informe y Regression Guard de la actualización](nutridesk-importacion-main-sync-2026-10-15.md). CI de la cabeza nueva se verifica por separado; los resultados remotos de b143744 son históricos. Único conflicto resuelto: unión de exclusiones OCR y resultados e2e. Sin cambios de producción ni habilitación de proveedores.
+
+## Antecedentes de la separación · 13/10/2026
 
 Copia aislada `codex/nutridesk-release-importacion`, iniciada desde la segunda entrega, PR 106, en `a45acf90e978fc393a58078adfc77dbf490a9868` y actualizada a `66fe1e03a10ba15004f15c22f116f817b5bce17f`. Módulos recuperados de la versión final integrada `69bcaa4692fcfa3a0c33ae92053c91e18946dbe2`. La actualización de la base cambia únicamente controles de secretos, su documentación y un valor vacío del ejemplo de configuración; se conservaron todos los cambios propios mediante copia previa y avance de la rama. Sin commit propio, publicación ni cambios de producción.
 
