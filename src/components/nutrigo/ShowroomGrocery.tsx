@@ -1,0 +1,120 @@
+import { useEffect, useMemo, useState } from 'react';
+import { buildShoppingExport, buildShoppingList, shoppingChecklistKey, type ShoppingGroup, type ShoppingMeal } from '../patient/shopping-list';
+import { Icon } from '../shared/Icon';
+import type { ShowroomPatient } from './showroom-model';
+import type { CareReplacement } from '../../types/care';
+import { useCare } from './useCare';
+import { usePublishedPlan, weekPlanForPatient } from './usePublishedPlan';
+import { NvBadge, NvButton, NvState } from './primitives';
+import './showroom-grocery.css';
+
+type GroceryFilter = 'all' | 'pending' | 'checked';
+
+function readChecked(key: string): Set<string> {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const value: unknown = JSON.parse(window.localStorage.getItem(key) ?? '[]');
+    return new Set(Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []);
+  } catch { return new Set(); }
+}
+
+function saveChecked(key: string, value: ReadonlySet<string>) {
+  if (typeof window === 'undefined') return;
+  try { window.localStorage.setItem(key, JSON.stringify([...value])); } catch { /* El checklist sigue activo durante esta visita. */ }
+}
+
+function readQuantities(key: string): Record<string, number> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const value: unknown = JSON.parse(window.localStorage.getItem(key) ?? '{}');
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+    return Object.fromEntries(Object.entries(value).filter((entry): entry is [string, number] => Number.isInteger(entry[1]) && Number(entry[1]) >= 0 && Number(entry[1]) <= 999));
+  } catch { return {}; }
+}
+
+export function publishedRecipeMeals(replacements: readonly Pick<CareReplacement, 'published_at' | 'recipe'>[]): ShoppingMeal[] {
+  return replacements
+    .filter((entry) => entry.published_at)
+    .map((entry) => ({ title: entry.recipe.title, detail: entry.recipe.ingredients.join(' ') }));
+}
+
+export function buildGroceryView(
+  patient: Pick<ShowroomPatient, 'weekPlan'>,
+  extras: readonly ShoppingMeal[] = [],
+): { groups: ShoppingGroup[]; totalMeals: number; fallbackItems: number } {
+  const meals = [...patient.weekPlan.flatMap((day) => day.meals.map(({ title }) => ({ title }))), ...extras];
+  const groups = buildShoppingList(meals);
+  return { groups, totalMeals: meals.length, fallbackItems: groups.find((group) => group.category === 'Otros')?.items.length ?? 0 };
+}
+
+export function ShowroomGrocery({ patient }: { patient: ShowroomPatient }) {
+  const care = useCare(patient.id);
+  const { published } = usePublishedPlan(patient.id);
+  const extras = useMemo(() => publishedRecipeMeals(care.data?.replacements ?? []), [care.data]);
+  const storageKey = shoppingChecklistKey(patient.id, 'current');
+  const { groups, fallbackItems } = useMemo(
+    () => buildGroceryView({ ...patient, weekPlan: weekPlanForPatient(patient, published) }, extras),
+    [patient, published, extras],
+  );
+  const items = groups.flatMap((group) => group.items);
+  const [checked, setChecked] = useState<Set<string>>(() => readChecked(storageKey));
+  const [quantities, setQuantities] = useState<Record<string, number>>(() => readQuantities(`${storageKey}:qty`));
+  const [filter, setFilter] = useState<GroceryFilter>('all');
+  const [query, setQuery] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const checkedCount = items.filter((item) => checked.has(item.id)).length;
+  const completion = items.length ? Math.round(checkedCount / items.length * 100) : 0;
+  const largestGroup = Math.max(1, ...groups.map((group) => group.items.length));
+
+  useEffect(() => { setChecked(readChecked(storageKey)); setQuantities(readQuantities(`${storageKey}:qty`)); setFilter('all'); setQuery(''); setFeedback(''); }, [storageKey]);
+
+  const toggle = (itemId: string) => setChecked((previous) => {
+    const next = new Set(previous);
+    if (next.has(itemId)) next.delete(itemId); else next.add(itemId);
+    saveChecked(storageKey, next);
+    return next;
+  });
+  const changeQuantity = (itemId: string, delta: number) => setQuantities((previous) => {
+    const next = { ...previous, [itemId]: Math.max(0, Math.min(999, (previous[itemId] ?? 0) + delta)) };
+    try { window.localStorage.setItem(`${storageKey}:qty`, JSON.stringify(next)); } catch { /* La edición sigue disponible durante esta visita. */ }
+    return next;
+  });
+
+  const visibleGroups = groups.map((group) => ({ ...group, items: group.items.filter((item) => {
+    const matchesQuery = item.label.toLocaleLowerCase('es-AR').normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(query.toLocaleLowerCase('es-AR').normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+    const matchesState = filter === 'all' || (filter === 'checked' ? checked.has(item.id) : !checked.has(item.id));
+    return matchesQuery && matchesState;
+  }) })).filter((group) => group.items.length);
+
+  const exportList = () => {
+    const text = buildShoppingExport({ label: 'Plan semanal vigente', range: 'Derivada de las comidas actualmente publicadas', groups, checkedIds: checked });
+    const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+    const anchor = document.createElement('a');
+    anchor.href = url; anchor.download = 'lista-de-compras-plan-v.txt'; anchor.click(); URL.revokeObjectURL(url);
+    setFeedback('Lista descargada.');
+  };
+
+  const clearChecked = () => { const next = new Set<string>(); setChecked(next); saveChecked(storageKey, next); setFeedback('Checklist reiniciado.'); };
+
+  return <section className="nvgrocery" aria-label="Lista de compras">
+    <header className="nvgrocery-header"><div><span className="nv-icon-tile"><Icon name="check" size={20} /></span><div><h2>Lista de compras</h2><p>{extras.length ? 'Derivada de tu plan semanal y de las alternativas que tu nutricionista ya compartió.' : 'Derivada de tu plan semanal publicado.'}</p></div></div>{items.length > 0 && <NvButton onClick={exportList}><Icon name="download" size={15} />Exportar .txt</NvButton>}</header>
+
+    {items.length > 0 ? <>
+      <section className="nvgrocery-stats" aria-label="Resumen de la lista"><article><span><Icon name="check" size={18} /></span><div><small>Costo estimado</small><strong>Sin dato</strong></div></article><article><span><Icon name="list" size={18} /></span><div><small>Total de elementos</small><strong>{items.length}</strong></div></article><article><span><Icon name="heart" size={18} /></span><div><small>Calorías estimadas</small><strong>Sin dato</strong></div></article></section>
+      <div className="nvgrocery-progress"><div><strong>{checkedCount} de {items.length} listos</strong><small>El check se guarda sólo en este navegador y para este paciente.</small></div><span aria-hidden="true"><i style={{ width: `${items.length ? checkedCount / items.length * 100 : 0}%` }} /></span></div>
+      <section className="nvgrocery-analytics" aria-label="Resumen visual de compras">
+        <article className="nvgrocery-chart-card"><header><h3>Alimentos por categoría</h3><small>{groups.length} categorías</small></header><div className="nvgrocery-bars">{groups.map((group) => <div key={group.category}><span>{group.category}</span><div><i style={{ width: `${group.items.length / largestGroup * 100}%` }} /></div><strong>{group.items.length}</strong></div>)}</div></article>
+        <article className="nvgrocery-chart-card nvgrocery-completion-card"><header><h3>Estado de compras</h3><small>Checklist</small></header><div className="nvgrocery-ring" role="img" aria-label={`${completion}% de elementos listos`} style={{ background: `conic-gradient(var(--nv-strong) ${completion}%, var(--nv-track) 0)` }}><div><strong>{completion}%</strong><span>listos</span></div></div><p>{checkedCount} listos · {items.length - checkedCount} pendientes</p></article>
+        <article className="nvgrocery-chart-card nvgrocery-category-card"><header><h3>Categorías de compras</h3><small>En tu lista</small></header><div className="nvgrocery-category-total"><small>Total</small><strong>{items.length} <small>elementos</small></strong></div><div className="nvgrocery-category-stack" aria-hidden="true">{groups.map((group) => <i key={group.category} style={{ flexGrow: group.items.length }} />)}</div><ul>{groups.map((group) => <li key={group.category}><span><i style={{ width: `${Math.max(8, group.items.length / largestGroup * 100)}%` }} />{group.category}</span><strong>{group.items.length}</strong></li>)}</ul></article>
+      </section>
+      <div className="nvgrocery-layout">
+        <section className="nvgrocery-list-card">
+          <header><div><h3>Lista de compras</h3><p>No incluye cantidades ni porciones porque el plan actual no las guarda.</p></div><div className="nvgrocery-list-actions"><label className="nvgrocery-search"><Icon name="list" size={15} /><input type="search" aria-label="Buscar en la lista" placeholder="Buscar elemento…" value={query} onChange={(event) => setQuery(event.target.value)} /></label><NvButton onClick={exportList}><Icon name="download" size={14} />Exportar</NvButton></div></header>
+          <div className="nvgrocery-filters" aria-label="Filtrar lista">{([{ id: 'all', label: 'Todos' }, { id: 'pending', label: 'Pendientes' }, { id: 'checked', label: 'Listos' }] as const).map((option) => <button type="button" key={option.id} aria-pressed={filter === option.id} onClick={() => setFilter(option.id)}>{option.label}</button>)}</div>
+          {visibleGroups.length ? <div className="nvgrocery-table-wrap"><table className="nvgrocery-table"><thead><tr><th>Elemento</th><th>Categoría</th><th>Cantidad</th><th>Calorías</th><th>Costo</th><th>Real</th><th>Estado</th></tr></thead><tbody>{visibleGroups.flatMap((group) => group.items.map((item) => <tr key={item.id} className={checked.has(item.id) ? 'is-checked' : ''}><td><button type="button" aria-pressed={checked.has(item.id)} onClick={() => toggle(item.id)}><span className="nvgrocery-check">{checked.has(item.id) && <Icon name="check" size={13} />}</span><strong>{item.label}</strong></button></td><td><NvBadge>{group.category}</NvBadge></td><td><span className="nvgrocery-quantity"><output aria-label={`Cantidad de ${item.label}`}>{quantities[item.id] ?? 0}</output><button type="button" aria-label={`Quitar una unidad de ${item.label}`} onClick={() => changeQuantity(item.id, -1)}>−</button><button type="button" aria-label={`Agregar una unidad de ${item.label}`} onClick={() => changeQuantity(item.id, 1)}>+</button></span></td><td>—</td><td>—</td><td>—</td><td><NvBadge tone={checked.has(item.id) ? 'green' : 'gold'}>{checked.has(item.id) ? 'Comprado' : 'Pendiente'}</NvBadge></td></tr>))}</tbody></table></div> : <NvState title="Sin coincidencias" description="Probá otro filtro o término de búsqueda." />}
+        </section>
+        <aside className="nvgrocery-info"><span className="nv-icon-tile"><Icon name="leaf" size={22} /></span><h3>Cómo se armó</h3><p>La lista reconoce ingredientes mencionados en los títulos de las comidas. Cuando no puede reconocerlos, conserva la preparación completa para que no se pierda.</p><dl><div><dt>Categorías</dt><dd>{groups.length}</dd></div><div><dt>Preparaciones por revisar</dt><dd>{fallbackItems}</dd></div></dl>{checkedCount > 0 && <button type="button" onClick={clearChecked}>Desmarcar todo</button>}<p className="nvgrocery-note">Revisá siempre las indicaciones de tu nutricionista. La lista no agrega alimentos ni cantidades que no estén expresados en el plan.</p>{feedback && <p role="status" className="nvgrocery-feedback">{feedback}</p>}</aside>
+      </div>
+    </> : <NvState title="Sin lista para generar" description="Cuando tu nutricionista publique comidas para la semana, vas a encontrar acá una lista derivada de esos títulos." />}
+  </section>;
+}

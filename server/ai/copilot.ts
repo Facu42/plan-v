@@ -1,7 +1,9 @@
 import { generateText, Output } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { openRouterChatModel } from './openrouter.js';
 import { copilotBriefSchema, type CopilotBrief } from '../schemas.js';
 import type { AppStore } from '../store.js';
+import { AIUnavailableError } from './errors.js';
+import { logProviderFailure, resolveAiMode } from './mode.js';
 
 const COPILOT_SYSTEM = `Sos el copiloto de ficha de Plan V para Lic. Verónica Trenti (nutricionista, Argentina).
 Generás Up next y adherence_why. No diagnosticás, no recetás, no hablás al paciente directamente.
@@ -64,36 +66,34 @@ function mockBrief(patient: AppStore['patients'][0]): CopilotBrief {
 }
 
 export async function generateCopilotBrief(patient: AppStore['patients'][0]): Promise<CopilotBrief> {
-  if (!process.env.OPENAI_API_KEY) return mockBrief(patient);
+  const aiMode = resolveAiMode();
+  if (aiMode === 'disabled') throw new AIUnavailableError();
+  if (aiMode === 'demo') return mockBrief(patient);
 
   const pending = patient.meal_logs.filter((l) => l.status === 'pending_review');
   const confirmed = patient.meal_logs.filter((l) => l.status === 'confirmed' || l.status === 'adjusted');
 
-  const context = `
-paciente: ${patient.name}
-stage: ${patient.stage}
-status: ${patient.status}
-goal: ${patient.goal}
-adherence_score: ${patient.adherence_score} (no recalcular)
-adherence_why actual: ${patient.adherence_why}
-fotos_pending_review: ${pending.length}
-comidas_confirmadas: ${confirmed.length}
-agua_hoy: ${patient.hydration}/8
-eventos recientes:
-${patient.timeline.slice(0, 6).map((e) => `- ${e.title}: ${e.body}`).join('\n')}
-meal_logs pendientes:
-${pending.map((l) => `- ${l.slot}: confianza ${l.confidence}, nota: ${l.note_for_nutri}`).join('\n') || 'ninguno'}
-`;
+  // Do not send names, IDs, clinical notes, messages, or timeline free text.
+  const context = JSON.stringify({
+    adherence_score: patient.adherence_score,
+    pending_review_count: pending.length,
+    confirmed_meal_count: confirmed.length,
+    hydration: patient.hydration,
+    pending_meals: pending.slice(0, 20).map(log => ({ slot: log.slot, confidence: log.confidence })),
+  });
 
   try {
     const { output } = await generateText({
-      model: openai('gpt-4o-mini'),
+      model: openRouterChatModel(),
       system: COPILOT_SYSTEM,
       prompt: context,
       output: Output.object({ schema: copilotBriefSchema }),
+      abortSignal: AbortSignal.timeout(20_000),
     });
-    return output ?? mockBrief(patient);
-  } catch {
-    return mockBrief(patient);
+    if (!output) throw new AIUnavailableError();
+    return output;
+  } catch (error) {
+    logProviderFailure('copilot', error);
+    throw error instanceof AIUnavailableError ? error : new AIUnavailableError();
   }
 }

@@ -1,0 +1,35 @@
+.figma-patient-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: min(12vh, 110px) 16px 16px;
+  background: rgb(39 41 50 / 45%);
+}
+.figma-patient-action-dialog {
+  box-sizing: border-box;
+  width: min(100%, 420px);
+  max-height: 75vh;
+  overflow: auto;
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 18px 60px rgb(0 0 0 / 18%);
+  color: #272932;
+  font-family: Poppins, sans-serif;
+}
+.figma-patient-action-dialog header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.figma-patient-action-dialog h2 { margin: 0; font-size: 18px; font-weight: 600; }
+.figma-patient-action-dialog p { margin: 0; font-size: 13px; color: #52545b; }
+.figma-patient-action-dialog input[type="search"] { width: 100%; min-height: 44px; padding: 8px 12px; border: 1px solid #e1e1e2; border-radius: 9px; font: inherit; font-size: 13px; }
+.figma-patient-action-dialog button { min-height: 38px; border: 0; border-radius: 9px; background: #f9f4f2; color: #272932; cursor: pointer; font: inherit; font-size: 13px; text-align: left; padding: 8px 12px; }
+.figma-patient-action-dialog header button { font-size: 22px; line-height: 1; background: transparent; }
+.figma-patient-action-dialog button:hover, .figma-patient-action-dialog button:focus-visible { background: #c2e66e; }
+.figma-patient-search-results { display: grid; gap: 5px; }
+.figma-patient-search-results button { display: flex; align-items: center; justify-content: space-between; }
+.figma-header-search { cursor: pointer; }
+.figma-header-search:focus-visible { outline: 2px solid #90b842; outline-offset: 2px; }

@@ -1,0 +1,36 @@
+.figma-checkin-overlay{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:16px;background:rgb(39 41 50 / 48%)}
+.figma-dash-metric{transition:box-shadow .16s ease,transform .16s ease}
+@media(hover:hover){.figma-dash-metric:hover{box-shadow:0 9px 22px rgb(39 41 50 / 10%);transform:translateY(-2px)}}
+.figma-dash-metric:active{transform:translateY(0)}
+.figma-checkin-dialog{box-sizing:border-box;width:min(100%,480px);max-height:min(760px,calc(100vh - 32px));overflow:auto;border-radius:18px;padding:22px;background:#fff;color:#272932;box-shadow:0 24px 70px rgb(0 0 0 / 20%);font-family:Poppins,sans-serif}
+.figma-checkin-dialog header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.figma-checkin-dialog h2{margin:4px 0 0;font-size:22px;line-height:1.25}
+.figma-checkin-eyebrow{color:#74777c;font-size:10px;font-weight:600;letter-spacing:.12em}
+.figma-checkin-dialog header>button{border:0;background:#f9f4f2;border-radius:9px;width:34px;height:34px;font-size:24px;line-height:1;cursor:pointer}
+.figma-checkin-intro{margin:12px 0 16px;color:#696b70;font-size:13px;line-height:1.5}
+.figma-checkin-dialog form{display:grid;gap:14px}
+.figma-checkin-dialog form>label,.figma-checkin-fields>label{display:grid;gap:6px;color:#52545b;font-size:12px;font-weight:600}
+.figma-checkin-dialog :is(input:not([type=checkbox]),select,textarea){box-sizing:border-box;width:100%;min-height:42px;padding:8px 11px;border:1px solid #d9dbdc;border-radius:9px;background:#fff;color:#272932;font:inherit;font-size:14px}
+.figma-checkin-dialog textarea{min-height:68px;resize:vertical}
+.figma-checkin-dialog small{color:#74777c;font-size:11px;line-height:1.5}
+.figma-checkin-fields{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:10px}
+.figma-checkin-last{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px}
+.figma-checkin-last span{display:grid;gap:4px;padding:12px;border-radius:11px;background:#f9f4f2;color:#777;font-size:11px}
+.figma-checkin-last strong{color:#272932;font-size:16px}
+.figma-checkin-tabs{display:flex;gap:8px}
+.figma-checkin-tabs button,.figma-checkin-water-actions button{border:0;border-radius:9px;padding:9px 14px;background:#f9f4f2;color:#272932;font:inherit;font-size:12px;cursor:pointer}
+.figma-checkin-tabs button.active{background:#c2e66e;font-weight:600}
+.figma-checkin-current{margin:0;padding:11px 12px;border-radius:10px;background:#f9f4f2;font-size:13px}
+.figma-checkin-current strong{font-size:16px}
+.figma-checkin-water-actions{display:flex;gap:8px}
+.figma-checkin-water-actions button{flex:1}
+.figma-checkin-water-actions button:disabled{opacity:.45;cursor:default}
+.figma-checkin-error,.figma-checkin-success{margin:0;padding:10px 12px;border-radius:9px;font-size:12px;line-height:1.5}
+.figma-checkin-error{background:#fff0e9;color:#8d3f1b}
+.figma-checkin-success{background:#eaf7cb;color:#385716}
+.figma-checkin-dialog footer{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+.figma-checkin-dialog footer button{min-height:40px;padding:9px 15px;border:0;border-radius:9px;background:#f9f4f2;color:#272932;font:inherit;font-size:12px;cursor:pointer}
+.figma-checkin-dialog footer button[type=submit]{background:#c2e66e;font-weight:600}
+.figma-checkin-dialog footer button:disabled{opacity:.5;cursor:default}
+.figma-checkin-dialog :is(button,input,select,textarea):focus-visible{outline:3px solid #8fbf33;outline-offset:2px}
+@media(max-width:480px){.figma-checkin-dialog{padding:18px;border-radius:14px}.figma-checkin-dialog h2{font-size:19px}.figma-checkin-last{gap:6px}}

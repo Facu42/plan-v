@@ -1,0 +1,5 @@
+import type { Patient } from '../../types';
+import { Icon } from '../shared/Icon';
+export function SelectedPatientContext({patient,onRecord}:{patient:Patient;onRecord:()=>void}) {
+  return <section className="care-patient-context" aria-label="Paciente seleccionado"><header><span className="nv-avatar">{patient.initials}</span><div><small>ESTÁS ACOMPAÑANDO A</small><strong>{patient.name}</strong></div><button className="nv-button" type="button" onClick={onRecord}>Abrir ficha</button></header><div className="care-context-cards"><article><Icon name="calendar" size={16}/><div><small>Próxima consulta</small><strong>{patient.appointment?.when??'Sin programar'}</strong></div></article><article><Icon name="target" size={16}/><div><small>Objetivo</small><strong>{patient.goal||'Por definir'}</strong></div></article><article><Icon name="history" size={16}/><div><small>Comidas por revisar</small><strong>{patient.meal_logs.filter(log=>log.status==='pending_review').length}</strong></div></article></div></section>;
+}

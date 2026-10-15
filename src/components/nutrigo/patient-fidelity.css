@@ -1,0 +1,1122 @@
+/* Patient web surfaces aligned to the Nutrigo Figma frames, node family 12/84/105/263/279. */
+.nv-app.nv-patient {
+  --nv-bg: #f9f4f2;
+  --nv-card: #fff;
+  --nv-ink: #272932;
+  --nv-muted: #8a8c90;
+  --nv-border: #e1e1e2;
+  --nv-green: #c2e66e;
+  --nv-gold: #ffcb65;
+  --nv-coral: #ffa257;
+  --nv-accent: #c2e66e;
+  --nv-strong: #73a107;
+  --nv-forest: #272932;
+  --nv-track: #eeeeef;
+  --nv-mint: #c2e66e;
+  --nv-gold-soft: #ffedc9;
+  --nv-coral-soft: #fff2e8;
+  --nv-strong-ink: #272932;
+  display: flex;
+  flex-direction: row;
+  padding-bottom: 0;
+  background: #fff;
+  color: var(--nv-ink);
+}
+
+.nv-app.nv-patient .nv-sidebar {
+  display: flex !important;
+  position: sticky;
+  top: 0;
+  width: 223px;
+  height: 100dvh;
+  flex: 0 0 223px;
+  padding: 28px 20px 18px;
+  border-right: 1px solid var(--nv-border);
+  background: #fff;
+}
+.nv-app.nv-patient .nv-sidebar .nv-brand {
+  margin: 0 8px 30px;
+  gap: 9px;
+}
+.nv-app.nv-patient .nv-sidebar .brand-mark { width: 48px; height: 48px; flex: 0 0 48px; }
+.nv-app.nv-patient .nv-sidebar .brand-mark img { transform: scale(1.8); }
+.nv-app.nv-patient .nv-sidebar .nv-brand > span { color: #272932; font-size: 19px; font-weight: 600; letter-spacing: -.5px; }
+.nv-app.nv-patient .nv-sidebar .nv-brand small { display: none; }
+.nv-app.nv-patient .nv-sidebar nav { gap: 8px; }
+.nv-app.nv-patient .nv-sidebar nav > div { display: flex; flex-direction: column; gap: 2px; }
+.nv-app.nv-patient .nv-sidebar nav button {
+  min-height: 40px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  color: #8a8c90;
+  font-size: 13px;
+  font-weight: 500;
+  gap: 10px;
+  white-space: nowrap;
+}
+.nv-app.nv-patient .nv-sidebar nav button svg { width: 15px; height: 15px; }
+.nv-app.nv-patient .nv-sidebar nav button .nv-figma-nav-icon { display: block; width: 20px; height: 20px; flex: 0 0 20px; }
+.nv-app.nv-patient .nv-sidebar nav button[aria-current=page] .nv-figma-nav-icon { filter: brightness(0); }
+.nv-app.nv-patient .nv-sidebar nav button[aria-current=page] { color: #272932; background: #c2e66e; font-weight: 600; }
+.nv-app.nv-patient .nv-sidebar nav button:hover { background: #edffc4; }
+.nv-app.nv-patient .nv-nav-subitems { display: flex; flex-direction: column; gap: 2px; padding-left: 18px; }
+.nv-app.nv-patient .nv-sidebar nav .nv-nav-subitems button { min-height: 30px; padding: 5px 8px; font-size: 10px; }
+.nv-app.nv-patient .nv-sidebar nav .nv-nav-subitems button[aria-current=page] { background: #c2e66e; }
+.nv-app.nv-patient .nv-sidebar nav .nv-nav-chevron { margin-left: auto; transform: rotate(90deg); }
+.nv-app.nv-patient .nv-nav-group { display: none; }
+.nv-patient-sidebar-help {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: auto 0 12px;
+  padding: 15px 13px;
+  border-radius: 11px;
+  background: #ffcb65;
+  min-height: 228px;
+  justify-content: flex-end;
+}
+.nv-patient-sidebar-help > span { display: grid; width: 26px; height: 26px; place-items: center; border-radius: 7px; background: #fff; }
+.nv-patient-sidebar-help p { color: #272932; font-size: 11px; line-height: 1.4; }
+.nv-patient-sidebar-help button { display: flex; align-items: center; justify-content: space-between; gap: 5px; padding: 6px 8px; border: 0; border-radius: 6px; color: #272932; background: #c2e66e; font-size: 10px; font-weight: 600; text-align: left; }
+.nv-app.nv-patient .nv-patient-logout { display: flex; min-height: 36px; align-items: center; gap: 9px; margin-top: 0; padding: 8px 10px; border: 0; border-radius: 8px; color: #737780; background: #f6f6f7; font-size: 11px; text-align: left; }
+
+.nv-app.nv-patient .nv-workspace { min-width: 0; }
+.nv-app.nv-patient .nv-tabbar { display: none !important; }
+.nv-app.nv-patient .nv-topbar {
+  position: static;
+  display: flex;
+  width: auto;
+  min-height: 78px;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 14px 28px 8px;
+  border: 0;
+  background: #f9f4f2;
+}
+.nv-app.nv-patient .nv-topbar > .nv-brand { display: none; }
+.nv-app.nv-patient .nv-topbar .nv-topbar-title { display: block !important; order: 0; margin-right: auto; color: #272932; font-size: 22px; font-weight: 600; letter-spacing: -.5px; }
+.nv-app.nv-patient .nv-role-badge { display: none; }
+.nv-app.nv-patient .nv-patient-header-search { display: grid; order: 1; width: 40px; height: 40px; place-items: center; border: 0; border-radius: 10px; color: #51545c; background: #fff; cursor: pointer; }
+.nv-app.nv-patient .nv-topbar .nv-alerts { order: 2; margin-left: 0; }
+.nv-app.nv-patient .nv-patient-topbar-user { display: flex; order: 3; width: 229px; flex: 0 0 229px; align-items: center; gap: 9px; min-width: 0; margin-right: 0; }
+.nv-app.nv-patient .nv-patient-topbar-user::after { display: grid; width: 30px; height: 30px; margin-left: auto; place-items: center; border-radius: 8px; background: #fff; color: #51545c; content: '⌄'; font-size: 17px; }
+.nv-app.nv-patient .nv-patient-topbar-user > span:last-child { display: flex; flex-direction: column; line-height: 1.25; }
+.nv-app.nv-patient .nv-patient-topbar-user strong { font-size: 12px; font-weight: 600; }
+.nv-app.nv-patient .nv-patient-topbar-user small { color: var(--nv-muted); font-size: 10px; }
+.nv-app.nv-patient .nv-content-layout { display: grid; grid-template-columns: minmax(0,1fr) !important; }
+.nv-app.nv-patient .nv-main { min-width: 0; padding: 28px 28px 24px; background: #f9f4f2; }
+.nv-app.nv-patient .nv-page-head { min-height: 50px; margin: 0 0 20px; }
+.nv-app.nv-patient .nv-page-head h1 { color: #272932; font-size: 22px; font-weight: 600; letter-spacing: -.55px; }
+.nv-app.nv-patient .nv-page-head p { margin-top: 1px; color: #8a8c90; font-size: 11px; }
+.nv-app.nv-patient .nv-title-dot { color: #c2e66e; }
+.nv-app.nv-patient .nv-search { min-height: 36px; padding: 4px 10px; border: 0; border-radius: 8px; background: #f6f6f7; }
+.nv-app.nv-patient .nv-search input { font-size: 11px; }
+.nv-app.nv-patient .nv-button { border-radius: 7px; font-size: 11px !important; }
+.nv-app.nv-patient .nv-button.nv-soft { color: #272932; background: #c2e66e; }
+.nv-app.nv-patient .nv-card { border-radius: 12px; box-shadow: none; }
+.nv-app.nv-patient .nv-daily { min-width: 0; padding: 106px 28px 24px; border: 0; background: #fff; }
+.nv-app.nv-patient.nv-home-page .nv-content-layout { grid-template-columns: minmax(0,1fr) 325px !important; }
+.nv-app.nv-patient.nv-home-page .nv-main { padding-top: 28px; }
+.nv-app.nv-patient .nv-patient-footer {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 28px 16px;
+  border-top: 1px solid var(--nv-border);
+  color: #737780;
+  background: #fff;
+  font-size: 10px;
+}
+.nv-app.nv-patient .nv-alerts { margin-left: 0; }
+.nv-app.nv-patient:not(.nv-home-page) .nv-topbar .nv-theme,
+.nv-app.nv-patient:not(.nv-home-page) .nv-topbar > .nv-button:last-child { display: none; }
+.nv-app.nv-patient .nv-sidebar > nav:nth-of-type(2) { display: none; }
+.nv-patient-footer a, .nv-patient-footer button, .nv-patient-footer > span:not(.nv-patient-footer-social) { padding: 0; border: 0; color: inherit; background: transparent; font-size: inherit; text-decoration: none; }
+.nv-patient-footer-social { margin-left: auto; color: #8a8c90; font-size: 14px; }
+
+/* Dashboard geometry follows Figma frame 12:792: 4 statistics, two data cards, 3 progress tiles and two recommendations. */
+.nv-app.nv-patient.nv-home-page .nv-daily { display: block; }
+.nv-app.nv-patient.nv-home-page .nv-daily-heading { margin: 12px 0 8px; }
+.nv-app.nv-patient.nv-home-page .nv-daily-heading h2 { font-size: 14px; }
+.nv-app.nv-patient.nv-home-page .nv-agenda-meals > button { margin: 0 0 8px; padding: 9px; border: 0; border-radius: 10px; background: #f9f4f2; }
+.nv-app.nv-patient.nv-home-page .nv-meal-meta { margin-bottom: 6px; }
+.nv-app.nv-patient.nv-home-page .nv-meal-body .np-plan-placeholder { display: block; flex: 0 0 57px; width: 57px; height: 57px; border-radius: 8px; background: #ebedef; }
+.nv-app.nv-patient.nv-home-page .nv-meal-body strong { font-size: 11px; }
+.np-dashboard .nv-metrics { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; }
+.np-dashboard .nv-metric,
+.np-dashboard .nv-metric.nv-green,
+.np-dashboard .nv-metric.nv-gold,
+.np-dashboard .nv-metric.nv-coral { background: #fff; }
+.np-dashboard .nv-chart-grid { grid-template-columns: minmax(0,265px) minmax(0,1fr); gap: 20px; }
+.np-dashboard .nv-followup-grid > button { min-height: 82px; border-radius: 9px; }
+.np-dashboard .nv-bottom-grid { grid-template-columns: minmax(0,2fr) minmax(250px,1fr); gap: 16px; }
+.nvpp-figma-board { display: none; }
+.nvp-figma-board { display: none; }
+.nvpdiary-figma-board { display: none; }
+.nvexercise-figma-board { display: none; }
+
+/* Calendar frame 84:1666: 836px calendar canvas and 275px detail rail. */
+@media (min-width: 1200px) {
+  .nv-app.nv-exercise-page .nvexercise { padding: 0; }
+  .nv-app.nv-exercise-page .nvexercise-figma-board { display: block; margin-bottom: 28px; }
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar { display: flex; height: 30px; align-items: center; gap: 10px; }
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar :is(input,select) { height: 30px; padding: 5px 10px; border: 0; border-radius: 8px; background: #fff; color: #51545c; font: inherit; font-size: 11px; }
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar input { width: 223px; }
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar > span { padding: 7px 10px; border-radius: 8px; background: #fff; font-size: 11px; }
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar button { height: 30px; margin-left: auto; padding: 5px 13px; border: 0; border-radius: 8px; background: #c2e66e; color: #272932; font: inherit; font-size: 11px; cursor: pointer; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap { min-height: 854px; margin-top: 20px; padding: 16px; border-radius: 17px; background: #fff; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap th { height: 38px; padding: 8px; color: #8a8c90; font-size: 11px; font-weight: 400; text-align: left; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap th:first-child { width: 23%; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap th:nth-child(2) { width: 13%; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap th:nth-child(3) { width: 17%; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap th:nth-child(4) { width: 23%; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap th:nth-child(5) { width: 12%; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap th:nth-child(6) { width: 12%; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap td { height: 66px; padding: 8px; border-bottom: 1px solid #e1e1e2; color: #51545c; font-size: 12px; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap td:first-child { display: flex; align-items: center; gap: 12px; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap td:first-child span { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; border-radius: 8px; background: #c2e66e; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap td:first-child strong { color: #272932; font-weight: 500; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap td:last-child b { padding: 6px 10px; border-radius: 7px; background: #c2e66e; font-size: 11px; font-weight: 400; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap > p { display: grid; min-height: 400px; place-items: center; color: #8a8c90; font-size: 13px; }
+  .nv-app.nv-patient-diary .nv-main { position: relative; }
+  .nv-app.nv-patient-diary .nv-page-head { position: absolute; z-index: 4; top: 168px; left: 44px; width: 223px; min-height: 30px; margin: 0; }
+  .nv-app.nv-patient-diary .nv-page-head .nv-search { width: 223px; min-height: 30px; background: #f6f6f7; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-board { display: grid; gap: 20px; margin-bottom: 28px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); height: 104px; padding: 16px; border-radius: 17px; background: #fff; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals > div { display: grid; grid-template-columns: 71px minmax(0,1fr); grid-template-rows: auto auto; column-gap: 16px; align-content: center; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals > div > span { display: grid; width: 71px; height: 71px; grid-row: 1/3; place-items: center; border-radius: 12px; background: #c2e66e; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals > div:nth-child(2) > span { background: #ffcb65; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals > div:nth-child(3) > span { background: #ffa257; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals > div:nth-child(4) > span { background: #e6e6e7; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals > div > small { align-self: end; color: #8a8c90; font-size: 11px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals > div > strong { align-self: start; font-size: 21px; font-weight: 600; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals > div > strong small { color: #8a8c90; font-size: 12px; font-weight: 400; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table { overflow: hidden; padding: 16px; border-radius: 17px; background: #fff; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-toolbar { display: flex; height: 50px; align-items: flex-start; justify-content: space-between; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-toolbar > div { display: flex; align-items: center; gap: 10px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-toolbar :is(select,button) { min-height: 30px; padding: 5px 11px; border: 0; border-radius: 8px; color: #272932; background: #f6f6f7; font: inherit; font-size: 11px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-toolbar > div > span { padding: 7px 11px; border-radius: 8px; background: #f6f6f7; font-size: 11px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-toolbar button { background: #c2e66e; cursor: pointer; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-scroll { overflow-x: auto; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table th { height: 68px; padding: 9px 8px; background: #f9f4f2; color: #8a8c90; font-size: 10px; font-weight: 400; text-align: left; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table th:first-child { width: 11%; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table th:nth-child(2) { width: 10%; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table th:nth-child(3) { width: 19%; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table th:nth-child(4) { width: 9%; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table th:nth-child(5) { width: 8%; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table th:nth-child(6) { width: 9%; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table th:nth-child(7) { width: 8%; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table th:nth-child(8) { width: 7%; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table th:nth-child(9) { width: 7%; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table th:nth-child(10) { width: 12%; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table td { height: 68px; padding: 7px 8px; border-bottom: 1px solid #e1e1e2; color: #51545c; font-size: 11px; line-height: 1.35; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table td strong { color: #272932; font-size: 11px; font-weight: 500; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table td time { color: #51545c; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table td:nth-child(n+6):nth-child(-n+9) { color: #8a8c90; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table td:last-child { font-size: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-board { display: grid; grid-template-columns: minmax(0,767fr) minmax(0,374fr); gap: 20px; align-items: stretch; }
+  .nv-app.nv-progress-page .nvp-figma-left { display: flex; min-width: 0; flex-direction: column; gap: 16px; padding: 16px; border-radius: 17px; background: #fff; }
+  .nv-app.nv-progress-page .nvp-figma-top { display: grid; grid-template-columns: minmax(0,440fr) minmax(0,275fr); gap: 20px; height: 681px; }
+  .nv-app.nv-progress-page .nvp-figma-measures { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; height: 674px; margin-top: 0; background: #f0f2f5; color: #8a8c90; text-align: center; }
+  .nv-app.nv-progress-page .nvp-figma-measures > span { position: absolute; top: 0; left: 0; padding: 8px 11px; border-radius: 8px; background: #c2e66e; color: #272932; font-size: 11px; }
+  .nv-app.nv-progress-page .nvp-figma-measures p { max-width: 28ch; margin-bottom: 8px; font-size: 12px; }
+  .nv-app.nv-progress-page .nvp-figma-measures strong { color: #51545c; font-size: 14px; font-weight: 500; }
+  .nv-app.nv-progress-page .nvp-figma-aux { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+  .nv-app.nv-progress-page .nvp-figma-weight { height: 388px; padding: 16px; border-radius: 17px; background: #f9f4f2; }
+  .nv-app.nv-progress-page .nvp-figma-weight header,
+  .nv-app.nv-progress-page .nvp-figma-photos header { display: flex; align-items: center; justify-content: space-between; }
+  .nv-app.nv-progress-page .nvp-figma-weight h3,
+  .nv-app.nv-progress-page .nvp-figma-photos h3,
+  .nv-app.nv-progress-page .nvp-figma-side h3 { font-size: 13px; font-weight: 600; }
+  .nv-app.nv-progress-page .nvp-figma-weight dl { margin: 22px 0; }
+  .nv-app.nv-progress-page .nvp-figma-weight dl div { display: flex; justify-content: space-between; margin-bottom: 13px; }
+  .nv-app.nv-progress-page .nvp-figma-weight dt { color: #8a8c90; font-size: 11px; }
+  .nv-app.nv-progress-page .nvp-figma-weight dd { font-size: 16px; font-weight: 600; }
+  .nv-app.nv-progress-page .nvp-figma-weight-plot { display: grid; height: 170px; place-items: center; border-top: 1px solid #e1e1e2; background: linear-gradient(#fff9f3,#f9f4f2); color: #8a8c90; font-size: 11px; }
+  .nv-app.nv-progress-page .nvp-figma-photos { flex: 1; min-height: 0; }
+  .nv-app.nv-progress-page .nvp-figma-photos header { height: 30px; }
+  .nv-app.nv-progress-page .nvp-figma-photos small { color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-photos > div { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; height: 231px; margin-top: 14px; }
+  .nv-app.nv-progress-page .nvp-figma-photos > div span { display: grid; place-items: center; border-radius: 14px; background: #f0f2f5; color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-measure-table { flex: 1; min-height: 243px; padding: 16px; border-radius: 16px; background: #f9f4f2; }
+  .nv-app.nv-progress-page .nvp-figma-measure-table header { display: grid; grid-template-columns: 152px repeat(5,minmax(0,1fr)); gap: 8px; color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-measure-table header strong { color: #272932; font-size: 11px; }
+  .nv-app.nv-progress-page .nvp-figma-measure-table p { margin-top: 58px; text-align: center; color: #8a8c90; font-size: 12px; }
+  .nv-app.nv-progress-page .nvp-figma-side { display: grid; grid-template-rows: 304px 326px minmax(0,1fr); gap: 20px; }
+  .nv-app.nv-progress-page .nvp-figma-side > section { min-width: 0; overflow: hidden; padding: 16px; border-radius: 17px; background: #fff; }
+  .nv-app.nv-progress-page .nvp-figma-side header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .nv-app.nv-progress-page .nvp-figma-side header small { padding: 7px 9px; border-radius: 8px; background: #c2e66e; color: #272932; font-size: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-calories > strong { display: block; margin-top: 20px; font-size: 22px; }
+  .nv-app.nv-progress-page .nvp-figma-calories > strong small { color: #8a8c90; font-size: 11px; font-weight: 400; }
+  .nv-app.nv-progress-page .nvp-figma-calories > p { margin-top: 4px; color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-calorie-chart { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; height: 168px; margin-top: 12px; border-bottom: 1px solid #e1e1e2; }
+  .nv-app.nv-progress-page .nvp-figma-calorie-chart > div { display: flex; flex-direction: column; align-items: center; justify-content: end; gap: 6px; }
+  .nv-app.nv-progress-page .nvp-figma-calorie-chart span { display: block; width: 22px; min-height: 4px; border-radius: 4px 4px 0 0; background: #ffcb65; }
+  .nv-app.nv-progress-page .nvp-figma-calorie-chart small { height: 22px; color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-sleep-legend { display: flex; gap: 12px; margin-top: 18px; color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-sleep-legend span::before { display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 2px; background: #ffcb65; content: ''; }
+  .nv-app.nv-progress-page .nvp-figma-sleep-legend span:last-child::before { background: #e6e6e7; }
+  .nv-app.nv-progress-page .nvp-figma-sleep-chart { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; height: 230px; margin-top: 8px; }
+  .nv-app.nv-progress-page .nvp-figma-sleep-chart > div { display: flex; flex-direction: column; align-items: center; justify-content: end; gap: 7px; }
+  .nv-app.nv-progress-page .nvp-figma-sleep-chart span { display: block; width: 38px; min-height: 2px; border-radius: 8px 8px 2px 2px; background: repeating-linear-gradient(to bottom,#ffcb65 0 11px,#fff 11px 15px,#ffa257 15px 23px,#fff 23px 27px); }
+  .nv-app.nv-progress-page .nvp-figma-sleep-chart small { height: 23px; color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-water-summary { display: flex; flex-direction: column; gap: 6px; margin: 16px 0; }
+  .nv-app.nv-progress-page .nvp-figma-water-summary span { display: flex; align-items: center; gap: 7px; color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-water-summary strong { font-size: 17px; }
+  .nv-app.nv-progress-page .nvp-figma-water-chart { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; height: 145px; }
+  .nv-app.nv-progress-page .nvp-figma-water-chart > div { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .nv-app.nv-progress-page .nvp-figma-water-chart > div > div { display: flex; width: 38px; height: 95px; flex-direction: column; justify-content: end; padding: 5px; border-radius: 12px; background: #f0f2f5; }
+  .nv-app.nv-progress-page .nvp-figma-water-chart > div > div span { display: block; width: 100%; min-height: 1px; border-radius: 8px; background: #ffcb65; }
+  .nv-app.nv-progress-page .nvp-figma-water-chart strong,
+  .nv-app.nv-progress-page .nvp-figma-water-chart small { color: #8a8c90; font-size: 10px; font-weight: 400; }
+  .nv-app.nv-messaging .nv-main { background: #fff; }
+  .nv-app.nv-messaging .nv-topbar { background: #fff; }
+  .nv-app.nv-messaging .nm-layout { grid-template-columns: 299px minmax(0,547px) minmax(0,275px); min-height: 864px; height: 864px; gap: 20px; }
+  .nv-app.nv-messaging .nm-contacts,
+  .nv-app.nv-messaging .nm-profile { padding: 0; border-radius: 0; background: #fff; }
+  .nv-app.nv-messaging .nm-contacts > h2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .nv-app.nv-messaging .nm-contacts > input { height: 40px; padding: 10px 12px; border: 0; border-radius: 10px; background: #f6f6f7; }
+  .nv-app.nv-messaging .nm-contact-list { margin-top: 8px; }
+  .nv-app.nv-messaging .nm-contact-list > button { min-height: 96px; padding: 16px 8px; border-bottom: 1px solid #e1e1e2; border-radius: 0; }
+  .nv-app.nv-messaging .nm-contact-list > button[aria-pressed=true] { background: #f9f4f2; }
+  .nv-app.nv-messaging .nm-conversation { height: 864px; border-radius: 17px; background: #f9f4f2; }
+  .nv-app.nv-messaging .nm-conversation > header { min-height: 100px; margin: 0; padding: 16px; border: 0; }
+  .nv-app.nv-messaging .nm-conversation > header > .nv-avatar,
+  .nv-app.nv-messaging .nm-conversation > header > div,
+  .nv-app.nv-messaging .nm-conversation > header > button { position: relative; z-index: 1; }
+  .nv-app.nv-messaging .nm-conversation > header::before { position: absolute; inset: 16px 16px auto; height: 68px; border-radius: 14px; background: #fff; content: ''; }
+  .nv-app.nv-messaging .nm-conversation > header { position: relative; }
+  .nv-app.nv-messaging .nm-conversation > header > .nv-avatar { margin-left: 16px; }
+  .nv-app.nv-messaging .nm-conversation > header > button { margin-right: 16px; }
+  .nv-app.nv-messaging .nm-thread { flex: 1; height: auto; min-height: 0; padding: 20px; }
+  .nv-app.nv-messaging .nm-demo-note { display: none; }
+  .nv-app.nv-messaging .nm-bubble { max-width: 85%; background: #fff; }
+  .nv-app.nv-messaging .nm-bubble.nm-own { background: #ffcb65; }
+  .nv-app.nv-messaging .nm-compose { min-height: 88px; margin: 0 16px 16px; padding: 12px; border: 0; border-radius: 14px; background: #fff; }
+  .nv-app.nv-messaging .nm-compose > label { display: none; }
+  .nv-app.nv-messaging .nm-compose textarea { min-height: 40px; height: 40px; resize: none; border: 0; background: #fff; }
+  .nv-app.nv-messaging .nm-compose > div .nv-button { min-height: 38px; background: #c2e66e; }
+  .nv-app.nv-messaging .nm-profile > .nv-avatar { display: block; margin: 45px auto 0; width: 56px; height: 56px; border-radius: 50%; }
+  .nv-app.nv-messaging .nm-profile > h2,
+  .nv-app.nv-messaging .nm-profile > p:first-of-type { text-align: center; }
+  .nv-app.nv-messaging .nm-profile h3 { margin-top: 22px; }
+  .nv-app.nv-messaging .nm-profile hr { margin: 18px 0; }
+  .nv-app.nv-grocery-page .nvgrocery { display: grid; grid-template-columns: minmax(0,472fr) minmax(0,374fr) minmax(0,275fr); column-gap: 20px; row-gap: 21px; }
+  .nv-app.nv-grocery-page .nvgrocery-header { display: none; }
+  .nv-app.nv-grocery-page .nvgrocery-stats { grid-column: 1/3; grid-row: 1; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; }
+  .nv-app.nv-grocery-page .nvgrocery-stats article { display: flex; height: 84px; min-height: 84px; flex-direction: row; align-items: center; justify-content: flex-start; gap: 15px; padding: 16px; border: 0; border-radius: 14px; background: #fff; }
+  .nv-app.nv-grocery-page .nvgrocery-stats article > span { display: grid; width: 51px; height: 51px; flex: 0 0 51px; place-items: center; border-radius: 10px; background: #c2e66e; }
+  .nv-app.nv-grocery-page .nvgrocery-stats article:nth-child(2) > span { background: #ffcb65; }
+  .nv-app.nv-grocery-page .nvgrocery-stats article:nth-child(3) > span { background: #ffa257; }
+  .nv-app.nv-grocery-page .nvgrocery-stats small { font-size: 11px; }
+  .nv-app.nv-grocery-page .nvgrocery-stats strong { display: block; margin-top: 5px; font-size: 19px; line-height: 1; }
+  .nv-app.nv-grocery-page .nvgrocery-analytics { display: contents; }
+  .nv-app.nv-grocery-page .nvgrocery-chart-card { min-height: 244px; padding: 16px; border: 0; border-radius: 14px; background: #fff; }
+  .nv-app.nv-grocery-page .nvgrocery-chart-card:nth-child(1) { grid-column: 1; grid-row: 2; }
+  .nv-app.nv-grocery-page .nvgrocery-chart-card:nth-child(2) { grid-column: 2; grid-row: 2; }
+  .nv-app.nv-grocery-page .nvgrocery-chart-card:nth-child(3) { grid-column: 3; grid-row: 1/3; }
+  .nv-app.nv-grocery-page .nvgrocery-chart-card h3 { font-size: 13px; }
+  .nv-app.nv-grocery-page .nvgrocery-bars { gap: 18px; margin-top: 30px; }
+  .nv-app.nv-grocery-page .nvgrocery-bars > div { grid-template-columns: minmax(80px,.8fr) minmax(0,1.5fr) 20px; font-size: 11px; }
+  .nv-app.nv-grocery-page .nvgrocery-bars > div > div { height: 14px; }
+  .nv-app.nv-grocery-page .nvgrocery-ring { width: 149px; height: 149px; margin-top: 14px; }
+  .nv-app.nv-grocery-page .nvgrocery-ring > div { width: 111px; height: 111px; }
+  .nv-app.nv-grocery-page .nvgrocery-ring strong { font-size: 22px; }
+  .nv-app.nv-grocery-page .nvgrocery-ring span { font-size: 11px; }
+  .nv-app.nv-grocery-page .nvgrocery-completion-card > p { margin-top: 10px; font-size: 10px; }
+  .nv-app.nv-grocery-page .nvgrocery-category-total { margin: 22px 0 16px; }
+  .nv-app.nv-grocery-page .nvgrocery-category-total > small { display: block; color: #8a8c90; font-size: 11px; }
+  .nv-app.nv-grocery-page .nvgrocery-category-total strong { display: block; margin-top: 3px; font-size: 22px; }
+  .nv-app.nv-grocery-page .nvgrocery-category-total strong small { color: #8a8c90; font-size: 11px; font-weight: 400; }
+  .nv-app.nv-grocery-page .nvgrocery-category-stack { display: flex; height: 20px; gap: 4px; margin-bottom: 25px; }
+  .nv-app.nv-grocery-page .nvgrocery-category-stack i { border-radius: 4px; background: #c2e66e; }
+  .nv-app.nv-grocery-page .nvgrocery-category-stack i:nth-child(2) { background: #ffcb65; }
+  .nv-app.nv-grocery-page .nvgrocery-category-stack i:nth-child(3) { background: #ffa257; }
+  .nv-app.nv-grocery-page .nvgrocery-category-stack i:nth-child(4) { background: #ffbd9d; }
+  .nv-app.nv-grocery-page .nvgrocery-category-card ul { gap: 20px; }
+  .nv-app.nv-grocery-page .nvgrocery-category-card li { font-size: 11px; }
+  .nv-app.nv-grocery-page .nvgrocery-layout { grid-column: 1/-1; grid-row: 3; }
+  .nv-app.nv-grocery-page .nvgrocery-list-card { background: transparent; }
+  .nv-app.nv-grocery-page .nvgrocery-list-card > header { min-height: 54px; padding: 0; border: 0; }
+  .nv-app.nv-grocery-page .nvgrocery-list-card > header h3 { font-size: 14px; }
+  .nv-app.nv-grocery-page .nvgrocery-list-card > header p { display: none; }
+  .nv-app.nv-grocery-page .nvgrocery-list-actions { display: flex; align-items: center; gap: 9px; }
+  .nv-app.nv-grocery-page .nvgrocery-list-actions .nv-button { min-height: 30px; padding: 5px 8px; background: #c2e66e; }
+  .nv-app.nv-grocery-page .nvgrocery-search { width: 223px; min-width: 223px; border: 0; background: #fff; }
+  .nv-app.nv-grocery-page .nvgrocery-filters { min-height: 42px; padding: 6px 0; border: 0; }
+  .nv-app.nv-grocery-page .nvgrocery-filters button { border: 0; border-radius: 7px; }
+  .nv-app.nv-grocery-page .nvgrocery-filters button[aria-pressed=true] { background: #fff; color: #272932; }
+  .nv-app.nv-grocery-page .nvgrocery-table-wrap { border-radius: 14px; background: #fff; }
+  .nv-app.nv-grocery-page .nvgrocery-table { table-layout: fixed; }
+  .nv-app.nv-grocery-page .nvgrocery-table th { height: 52px; padding-inline: 15px; font-size: 11px; }
+  .nv-app.nv-grocery-page .nvgrocery-table td { height: 66px; padding-inline: 15px; font-size: 11px; }
+  .nv-app.nv-grocery-page .nvgrocery-table th:nth-child(1) { width: 22%; }
+  .nv-app.nv-grocery-page .nvgrocery-table th:nth-child(2) { width: 13%; }
+  .nv-app.nv-grocery-page .nvgrocery-table th:nth-child(3) { width: 15%; }
+  .nv-app.nv-grocery-page .nvgrocery-table th:nth-child(4) { width: 13%; }
+  .nv-app.nv-grocery-page .nvgrocery-table th:nth-child(5) { width: 10%; }
+  .nv-app.nv-grocery-page .nvgrocery-table th:nth-child(6) { width: 10%; }
+  .nv-app.nv-grocery-page .nvgrocery-table th:nth-child(7) { width: 17%; }
+  .nv-app.nv-grocery-page .nvgrocery-table td > button strong { font-size: 11px; font-weight: 500; }
+  .nv-app.nv-grocery-page .nvgrocery-quantity { display: inline-flex; height: 30px; align-items: center; gap: 0; border-radius: 8px; background: #f0f1f3; }
+  .nv-app.nv-grocery-page .nvgrocery-quantity output { min-width: 36px; padding-left: 10px; color: #272932; }
+  .nv-app.nv-grocery-page .nvgrocery-quantity button { width: 25px; height: 25px; margin-right: 2px; border: 0; border-radius: 6px; background: #fff; color: #51545c; font: inherit; font-size: 15px; cursor: pointer; }
+  .nv-app.nv-grocery-page .nvgrocery-info { margin-top: 15px; }
+  .nv-app.nv-grocery-page .nvgrocery-progress { grid-column: 1/-1; grid-row: 4; }
+  .nv-app.nv-patient-plan .nv-main { position: relative; }
+  .nv-app.nv-patient-plan .nv-page-head { position: absolute; z-index: 4; top: 28px; right: 226px; width: 223px; min-height: 30px; margin: 0; }
+  .nv-app.nv-patient-plan .nv-page-head .nv-search { width: 223px; min-height: 30px; background: #fff; }
+  .nv-app.nv-patient-plan .nvpp-figma-board { display: block; margin-bottom: 28px; }
+  .nv-app.nv-patient-plan .nvpp-figma-toolbar { display: flex; height: 50px; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 14px; background: #f9f4f2; }
+  .nv-app.nv-patient-plan .nvpp-figma-toolbar > div { display: flex; align-items: center; gap: 8px; }
+  .nv-app.nv-patient-plan .nvpp-figma-toolbar button { display: grid; min-width: 30px; height: 30px; place-items: center; border: 0; border-radius: 8px; color: #272932; background: #fff; font: inherit; font-size: 11px; cursor: pointer; }
+  .nv-app.nv-patient-plan .nvpp-figma-toolbar button[disabled] { opacity: .55; cursor: default; }
+  .nv-app.nv-patient-plan .nvpp-figma-toolbar button:first-child svg { transform: rotate(180deg); }
+  .nv-app.nv-patient-plan .nvpp-figma-toolbar strong { margin-left: 8px; font-size: 13px; font-weight: 600; text-transform: capitalize; }
+  .nv-app.nv-patient-plan .nvpp-figma-toolbar .nvpp-figma-shopping { padding: 0 12px; background: #c2e66e; }
+  .nv-app.nv-patient-plan .nvpp-figma-grid { display: grid; gap: 16px; margin-top: 32px; }
+  .nv-app.nv-patient-plan .nvpp-figma-head,
+  .nv-app.nv-patient-plan .nvpp-figma-row { display: grid; grid-template-columns: 120px repeat(4,minmax(0,1fr)); gap: 16px; }
+  .nv-app.nv-patient-plan .nvpp-figma-head { min-height: 40px; }
+  .nv-app.nv-patient-plan .nvpp-figma-head > * { display: flex; align-items: center; justify-content: center; min-width: 0; border-radius: 14px; background: #f9f4f2; color: #272932; font-size: 12px; font-weight: 500; }
+  .nv-app.nv-patient-plan .nvpp-figma-head > :nth-child(2) { background: #c2e66e; }
+  .nv-app.nv-patient-plan .nvpp-figma-head > :nth-child(3) { background: #ffcb65; }
+  .nv-app.nv-patient-plan .nvpp-figma-head > :nth-child(4) { background: #ffa257; }
+  .nv-app.nv-patient-plan .nvpp-figma-head > :nth-child(5) { background: #e6e6e7; }
+  .nv-app.nv-patient-plan .nvpp-figma-row { min-height: 96px; }
+  .nv-app.nv-patient-plan .nvpp-figma-day { display: flex; min-width: 0; flex-direction: column; justify-content: center; gap: 15px; padding: 16px; border-radius: 14px; background: #f9f4f2; }
+  .nv-app.nv-patient-plan .nvpp-figma-day strong { font-size: 14px; font-weight: 600; }
+  .nv-app.nv-patient-plan .nvpp-figma-day time { color: #8a8c90; font-size: 12px; }
+  .nv-app.nv-patient-plan .nvpp-figma-meal { display: grid; grid-template-columns: 88px minmax(0,1fr); min-width: 0; height: 96px; align-items: center; gap: 16px; overflow: hidden; padding: 0 12px 0 0; border: 0; border-radius: 14px; background: #f9f4f2; color: #272932; font: inherit; text-align: left; cursor: pointer; }
+  .nv-app.nv-patient-plan .nvpp-figma-meal:disabled { cursor: default; }
+  .nv-app.nv-patient-plan .nvpp-figma-meal > span { width: 88px; height: 96px; border-radius: 14px; background: #eef0f3; }
+  .nv-app.nv-patient-plan .nvpp-figma-meal strong { display: -webkit-box; overflow: hidden; font-size: 12px; font-weight: 500; line-height: 1.45; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+  .nv-app.nv-patient-plan .nvpp-figma-meal small { color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-patient-plan .nvpp-figma-desayuno { background: #efffc9; }
+  .nv-app.nv-patient-plan .nvpp-figma-almuerzo { background: #fff0ce; }
+  .nv-app.nv-patient-plan .nvpp-figma-merienda { background: #fff1e7; }
+  .nv-app.nv-patient-plan .nvpp-figma-cena { background: #f4f5f7; }
+  .nv-app.nv-healthy-menu .nv-main { position: relative; background: #fff; }
+  .nv-app.nv-healthy-menu .nv-topbar { background: #fff; }
+  .nv-app.nv-healthy-menu .nv-page-head { position: absolute; z-index: 40; top: -45px; right: 541px; width: 212px; min-height: 40px; margin: 0; }
+  .nv-app.nv-healthy-menu .nv-page-head .nv-search { width: 212px; min-height: 40px; }
+  .nv-app.nv-healthy-menu .nvm-layout { grid-template-columns: minmax(0,816fr) minmax(0,289fr); gap: 56px; }
+  .nv-app.nv-healthy-menu .nvm-main { gap: 16px; }
+  .nv-app.nv-healthy-menu .nvm-hero { min-height: 30px; justify-content: space-between; padding: 0; border: 0; color: #272932; background: transparent; }
+  .nv-app.nv-healthy-menu .nvm-hero h2 { margin: 0; font-size: 15px; font-weight: 600; }
+  .nv-app.nv-healthy-menu .nvm-hero > span { color: #272932; font-size: 21px; line-height: 1; }
+  .nv-app.nv-healthy-menu .nvm-featured { display: grid; grid-template-columns: minmax(0,670fr) 134px; gap: 12px; height: 338px; min-height: 338px; overflow: visible; border: 0; background: transparent; }
+  .nv-app.nv-healthy-menu .nvm-featured-main { display: grid; grid-template-columns: minmax(0,298fr) minmax(0,312fr); gap: 20px; min-width: 0; padding: 20px; border-radius: 17px; background: #f9f4f2; }
+  .nv-app.nv-healthy-menu .nvm-featured-image { height: 298px; min-height: 298px; overflow: hidden; border-radius: 14px; }
+  .nv-app.nv-healthy-menu .nvm-featured-image > small { right: 6px; bottom: 6px; }
+  .nv-app.nv-healthy-menu .nvm-featured-copy { justify-content: flex-start; min-height: 0; padding: 0; }
+  .nv-app.nv-healthy-menu .nvm-featured-copy h3 { margin: 4px 0 10px; font-size: 22px; line-height: 1.12; }
+  .nv-app.nv-healthy-menu .nvm-featured-copy > p { margin: 5px 0; font-size: 12px; line-height: 1.4; }
+  .nv-app.nv-healthy-menu .nvm-featured-copy .nvm-slot-list { margin: 6px 0 10px; }
+  .nv-app.nv-healthy-menu .nvm-featured-copy .nv-button { width: 100%; justify-content: center; margin-top: auto; background: #c2e66e; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients { display: grid; grid-template-rows: repeat(4,1fr); gap: 12px; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients > div { display: flex; flex-direction: column; justify-content: center; gap: 2px; min-width: 0; padding: 9px 12px; border-radius: 9px; background: #c2e66e; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients > div:nth-child(2) { background: #ffcb65; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients > div:nth-child(3) { background: #ffa257; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients > div:nth-child(4) { background: #e6e6e7; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients span { font-size: 10px; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients strong { font-size: 17px; line-height: 1; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients small { font-size: 8px; }
+  .nv-app.nv-healthy-menu .nvm-all { padding: 0; border: 0; background: transparent; }
+  .nv-app.nv-healthy-menu .nvm-all > header { min-height: 30px; margin-bottom: 16px; }
+  .nv-app.nv-healthy-menu .nvm-all > header h3 { font-size: 15px; }
+  .nv-app.nv-healthy-menu .nvm-filters { min-height: 30px; margin-bottom: 16px; padding: 0; border-radius: 8px; background: #f6f6f7; }
+  .nv-app.nv-healthy-menu .nvm-filters button { border: 0; border-radius: 8px; background: transparent; color: #51545c; font-size: 11px; font-weight: 400; }
+  .nv-app.nv-healthy-menu .nvm-filters button[aria-pressed=true] { background: #c2e66e; color: #272932; }
+  .nv-app.nv-healthy-menu .nvm-list { gap: 16px; }
+  .nv-app.nv-healthy-menu .nvm-list article { grid-template-columns: 150px minmax(0,1fr) auto; min-height: 136px; padding: 16px; border-radius: 14px; background: #f9f4f2; }
+  .nv-app.nv-healthy-menu .nvm-list article > .np-food-photo,
+  .nv-app.nv-healthy-menu .nvm-list article > .np-food-fallback { width: 150px; height: 104px; }
+  .nv-app.nv-healthy-menu .nvm-list strong { font-size: 15px; white-space: normal; }
+  .nv-app.nv-healthy-menu .nvm-aside { gap: 26px; }
+  .nv-app.nv-healthy-menu .nvm-aside section { padding: 0; border: 0; background: transparent; }
+  .nv-app.nv-healthy-menu .nvm-aside h3 { min-height: 30px; margin: 0 0 16px; font-size: 15px; }
+  .nv-app.nv-healthy-menu .nvm-side-list { display: grid; gap: 16px; }
+  .nv-app.nv-healthy-menu .nvm-side-list button { display: grid; grid-template-columns: 68px minmax(0,1fr) 27px; min-height: 98px; align-items: center; gap: 12px; width: 100%; padding: 14px; border: 0; border-radius: 14px; background: #f9f4f2; color: #272932; text-align: left; cursor: pointer; }
+  .nv-app.nv-healthy-menu .nvm-side-list .np-food-photo,
+  .nv-app.nv-healthy-menu .nvm-side-list .np-food-fallback { width: 68px; height: 68px; border-radius: 10px; }
+  .nv-app.nv-healthy-menu .nvm-side-list span { min-width: 0; }
+  .nv-app.nv-healthy-menu .nvm-side-list strong { display: -webkit-box; overflow: hidden; font-size: 12px; line-height: 1.3; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .nv-app.nv-healthy-menu .nvm-side-list small { display: block; margin-top: 6px; color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-healthy-menu .nvm-side-list b { display: grid; width: 27px; height: 27px; place-items: center; border-radius: 7px; background: #c2e66e; font-size: 20px; font-weight: 400; }
+  .nv-app.nv-patient-agenda .nv-main { background: linear-gradient(to right, #f9f4f2 calc(100% - 325px), #fff calc(100% - 325px)); }
+  .nv-app.nv-patient-agenda .nv-topbar { background: linear-gradient(to right, #f9f4f2 calc(100% - 325px), #fff calc(100% - 325px)); }
+  .nv-app.nv-patient-agenda .nvpa-agenda { display: grid; grid-template-columns: minmax(0,836fr) minmax(0,275fr); column-gap: 48px; row-gap: 20px; align-items: start; }
+  .nv-app.nv-patient-agenda .nvpa-hero { display: none; }
+  .nv-app.nv-patient-agenda .nvpa-summary { grid-column: 1; grid-row: 1; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; }
+  .nv-app.nv-patient-agenda .nvpa-summary > div { height: 108px; padding: 16px; border: 0; border-radius: 14px; }
+  .nv-app.nv-patient-agenda .nvpa-summary dt { min-height: 29px; margin-bottom: 11px; padding-bottom: 10px; border-bottom: 1px solid #e1e1e2; color: #8a8c90; font-size: 11px; }
+  .nv-app.nv-patient-agenda .nvpa-summary dd { display: flex; align-items: center; gap: 8px; color: #8a8c90; font-size: 12px; font-weight: 400; }
+  .nv-app.nv-patient-agenda .nvpa-summary dd span { display: grid; width: 32px; height: 32px; flex: 0 0 32px; place-items: center; border-radius: 9px; color: #272932; background: #c2e66e; }
+  .nv-app.nv-patient-agenda .nvpa-summary > div:nth-child(2) dd span { background: #ffcb65; }
+  .nv-app.nv-patient-agenda .nvpa-summary > div:nth-child(3) dd span { background: #ffa257; }
+  .nv-app.nv-patient-agenda .nvpa-summary dd strong { color: #272932; font-size: 21px; font-weight: 600; }
+  .nv-app.nv-patient-agenda .nvpa-toolbar { grid-column: 1; grid-row: 2; height: 30px; flex-wrap: nowrap; padding: 0; border: 0; background: transparent; }
+  .nv-app.nv-patient-agenda .nvpa-nav { order: 0; gap: 8px; }
+  .nv-app.nv-patient-agenda .nvpa-nav p { min-width: 145px; text-align: left; }
+  .nv-app.nv-patient-agenda .nvpa-nav button { width: 30px; height: 30px; border: 0; }
+  .nv-app.nv-patient-agenda .nvpa-views { order: 1; gap: 0; margin-left: auto; border-radius: 8px; background: #fff; }
+  .nv-app.nv-patient-agenda .nvpa-views button { border: 0; }
+  .nv-app.nv-patient-agenda .nvpa-new-schedule { order: 2; height: 30px; padding: 0 10px; border: 0; border-radius: 8px; background: #c2e66e; color: #272932; font: inherit; font-size: 10px; cursor: pointer; }
+  .nv-app.nv-patient-agenda .nvpa-filters { grid-column: 1; grid-row: 3; height: 48px; align-items: center; padding: 0 16px; border-radius: 14px 14px 0 0; background: #fff; }
+  .nv-app.nv-patient-agenda .nvpa-filters button { border: 0; background: transparent; color: #51545c; font-weight: 400; }
+  .nv-app.nv-patient-agenda .nvpa-filters button::before { display: inline-block; width: 12px; height: 12px; margin-right: 6px; border: 1px solid #e1e1e2; border-radius: 3px; background: #fff; content: ''; vertical-align: -2px; }
+  .nv-app.nv-patient-agenda .nvpa-filters button[aria-pressed=true]::before { border-color: #c2e66e; background: #c2e66e; box-shadow: inset 0 0 0 3px #c2e66e; }
+  .nv-app.nv-patient-agenda .nvpa-layout { display: contents; }
+  .nv-app.nv-patient-agenda .nvpa-calendar { grid-column: 1; grid-row: 4; margin-top: -20px; border: 0; border-radius: 0 0 14px 14px; }
+  .nv-app.nv-patient-agenda .nvpa-weekdays { height: 40px; background: #fff; }
+  .nv-app.nv-patient-agenda .nvpa-weekdays span { color: #8a8c90; font-size: 11px; font-weight: 400; }
+  .nv-app.nv-patient-agenda .nvpa-month-grid > button { min-height: 120px; background: #fff; }
+  .nv-app.nv-patient-agenda .nvpa-month-grid > button.nvpa-outside { background: #f7f8f9; }
+  .nv-app.nv-patient-agenda .nvpa-month-grid > button.nvpa-occupied { background: #fff; }
+  .nv-app.nv-patient-agenda .nvpa-month-grid > button.nvpa-selected { outline: 1px solid #c2e66e; }
+  .nv-app.nv-patient-agenda .nvpa-chip { min-height: 26px; border: 0; border-radius: 4px; background: #c2e66e; }
+  .nv-app.nv-patient-agenda .nvpa-chip.consult { background: #ffa257; }
+  .nv-app.nv-patient-agenda .nvpa-chip.activity { background: #ffcb65; }
+  .nv-app.nv-patient-agenda .nvpa-chip.meal { background: #ebf9c6; }
+  .nv-app.nv-patient-agenda .nvpa-chip b { color: #272932; font-size: 9px; font-weight: 500; }
+  .nv-app.nv-patient-agenda .nvpa-chip small { display: none; }
+  .nv-app.nv-patient-agenda .nvpa-detail { grid-column: 2; grid-row: 1 / span 4; max-height: 866px; overflow: auto; padding: 0; border: 0; border-radius: 0; background: transparent; }
+  .nv-app.nv-patient-agenda .nvpa-detail > header { min-height: 30px; margin-bottom: 16px; padding: 0; border: 0; }
+  .nv-app.nv-patient-agenda .nvpa-detail > header h3 { font-size: 14px; }
+  .nv-app.nv-patient-agenda .nvpa-detail > .nvpa-event { display: block; margin: 0 0 20px; padding: 16px; border: 0; border-radius: 14px; background: #f9f4f2; }
+  .nv-app.nv-patient-agenda .nvpa-detail > .nvpa-event .nvpa-detail-icon { display: none; }
+  .nv-app.nv-patient-agenda .nvpa-detail > .nvpa-event strong { margin-top: 12px; font-size: 15px; }
+  .nv-app.nv-patient-agenda .nvpa-detail > .nvpa-event small { line-height: 1.55; }
+  .nv-app.nv-patient-agenda .nvpa-note { grid-column: 1/-1; }
+}
+
+@media (min-width: 1200px) {
+  .nv-app.nv-patient.nv-home-page .nv-workspace { position: relative; }
+  .nv-app.nv-patient.nv-home-page .nv-topbar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: auto;
+    z-index: 5;
+    width: 325px;
+    height: 78px;
+    min-height: 78px;
+    justify-content: space-between;
+    padding: 28px 28px 8px;
+    background: #fff;
+  }
+  .nv-app.nv-patient.nv-home-page .nv-topbar .nv-theme { display: none; }
+  .nv-app.nv-patient.nv-home-page .nv-topbar .nv-topbar-title { display: none !important; }
+  .nv-app.nv-patient.nv-home-page .nv-topbar > .nv-button:last-child { display: none; }
+  .nv-app.nv-patient.nv-home-page .nv-page-head { margin-bottom: 28px; }
+}
+
+@media (min-width: 761px) and (max-width: 1199px) {
+  .nv-app.nv-patient .nv-sidebar { width: 76px; flex-basis: 76px; align-items: center; padding: 18px 8px; }
+  .nv-app.nv-patient .nv-sidebar .nv-brand { margin: 0 0 24px; }
+  .nv-app.nv-patient .nv-sidebar .nv-brand > span,
+  .nv-app.nv-patient .nv-sidebar nav button:not([aria-current=page]) { font-size: 0; }
+  .nv-app.nv-patient .nv-sidebar .nv-brand > span { display: none; }
+  .nv-app.nv-patient .nv-sidebar nav { width: 100%; }
+  .nv-app.nv-patient .nv-nav-subitems { display: none; }
+  .nv-app.nv-patient .nv-sidebar nav button { justify-content: center; width: 100%; padding: 8px 0; font-size: 0; }
+  .nv-app.nv-patient .nv-sidebar nav button svg { width: 17px; height: 17px; }
+  .nv-app.nv-patient .nv-patient-sidebar-help { display: none; }
+  .nv-app.nv-patient .nv-patient-logout { width: 100%; }
+  .nv-app.nv-patient .nv-main { padding-inline: 22px; }
+  .nv-app.nv-patient.nv-home-page .nv-content-layout { grid-template-columns: minmax(0,1fr) !important; }
+  .nv-app.nv-patient.nv-home-page .nv-daily { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+  .nv-app.nv-patient.nv-home-page .nv-daily > * { min-width: 0; }
+  .nv-app.nv-patient.nv-home-page .nv-person,
+  .nv-app.nv-patient.nv-home-page .nv-recent-activity { grid-column: 1/-1; }
+  .np-dashboard .nv-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .np-dashboard .nv-chart-grid { grid-template-columns: minmax(0,1fr) minmax(0,1.5fr); }
+  .np-dashboard .nv-bottom-grid { grid-template-columns: minmax(0,1.4fr) minmax(220px,1fr); }
+}
+
+@media (max-width: 760px) {
+  .nv-app.nv-patient { display: flex; min-height: 100dvh; flex-direction: column; padding-bottom: 0; }
+  .nv-app.nv-patient .nv-sidebar { display: none !important; }
+  .nv-app.nv-patient .nv-sidebar.nv-open { display: flex !important; position: fixed; z-index: 70; top: 64px; left: 0; width: min(320px,88vw); height: calc(100dvh - 64px); align-items: stretch; padding: 18px 15px; box-shadow: 16px 0 35px rgb(39 41 50 / 16%); }
+  .nv-app.nv-patient .nv-mobile-backdrop { position: fixed; z-index: 60; inset: 64px 0 0; display: block; width: 100%; border: 0; background: rgb(39 41 50 / 24%); }
+  .nv-app.nv-patient .nv-topbar { position: sticky; z-index: 30; top: 0; display: flex; width: 100%; min-height: 64px; justify-content: space-between; padding: 8px 14px; background: #fff; box-shadow: 0 1px 0 var(--nv-border); }
+  .nv-app.nv-patient .nv-topbar > .nv-brand { display: flex; position: absolute; left: 14px; margin: 0; gap: 0; }
+  .nv-app.nv-patient .nv-topbar > .nv-brand .brand-mark { width: 40px; height: 40px; }
+  .nv-app.nv-patient .nv-topbar > .nv-brand > span { display: none; }
+  .nv-app.nv-patient .nv-topbar .nv-topbar-title { display: block !important; position: absolute; left: 50%; max-width: 46vw; overflow: hidden; color: #272932; font-size: 14px; font-weight: 600; text-overflow: ellipsis; transform: translateX(-50%); white-space: nowrap; }
+  .nv-app.nv-patient .nv-patient-header-search { display: none; }
+  .nv-app.nv-patient .nv-button.nv-menu-toggle { display: inline-flex !important; width: 40px; min-width: 40px; height: 40px; min-height: 40px; margin-left: auto; padding: 8px; color: #52545b; background: transparent; }
+  .nv-app.nv-patient .nv-topbar .nv-role-switch,
+  .nv-app.nv-patient .nv-topbar .nv-role-badge,
+  .nv-app.nv-patient .nv-topbar .nv-patient-topbar-user,
+  .nv-app.nv-patient .nv-topbar .nv-theme,
+  .nv-app.nv-patient .nv-topbar .nv-button:not(.nv-menu-toggle),
+  .nv-app.nv-patient .nv-topbar .nv-patient-alerts { display: none !important; }
+  .nv-app.nv-patient .nv-content-layout,
+  .nv-app.nv-patient.nv-home-page .nv-content-layout { display: flex; flex-direction: column; }
+  .nv-app.nv-patient .nv-main { width: 100%; padding: 18px 14px 20px; }
+  .nv-app.nv-patient .nv-page-head { align-items: flex-start; gap: 12px; margin-bottom: 15px; }
+  .nv-app.nv-patient .nv-page-head h1 { font-size: 19px; }
+  .nv-app.nv-patient .nv-page-head p { max-width: 44ch; font-size: 11px; }
+  .nv-app.nv-patient .nv-daily { display: block; padding: 18px 14px; border-top: 1px solid var(--nv-border); }
+  .nv-app.nv-patient .nv-tabbar { display: none !important; }
+  .nv-app.nv-patient .nv-patient-footer { flex-wrap: wrap; gap: 8px 13px; padding: 12px 14px 18px; font-size: 9px; }
+  .nv-patient-footer-social { display: none; }
+  .np-dashboard .nv-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+  .np-dashboard .nv-metric { min-height: 124px; padding: 10px; }
+  .np-dashboard .nv-metric > strong { font-size: 19px; }
+  .np-dashboard .nv-chart-grid { grid-template-columns: minmax(0,1fr); gap: 10px; }
+  .np-dashboard .nv-chart-grid .nv-card { min-height: 0; }
+  .np-dashboard .nv-bottom-grid { grid-template-columns: minmax(0,1fr); gap: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nv-app.nv-patient *, .nv-app.nv-patient *::before, .nv-app.nv-patient *::after { scroll-behavior: auto !important; transition: none !important; }
+}
+
+/* Figma Insights 263:6588 and Insight Details 279:9301. */
+.nv-app.nv-resources-page .nvr-hero { display: block; min-height: 214px; padding: 28px 32px; color: #272932; background: #f1f2f4; }
+.nv-app.nv-resources-page .nvr-hero > div { width: 100%; text-align: center; }
+.nv-app.nv-resources-page .nvr-hero h2 { margin: 2px 0 26px; font-size: 22px; font-weight: 600; }
+.nv-app.nv-resources-page .nvr-hero-search { display: flex; width: min(100%,728px); height: 46px; align-items: center; gap: 8px; margin: auto; padding: 5px 6px 5px 18px; border-radius: 14px; background: #fff; }
+.nv-app.nv-resources-page .nvr-hero-search input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #272932; font: inherit; font-size: 12px; }
+.nv-app.nv-resources-page .nvr-hero-search svg { width: 34px; height: 34px; flex: 0 0 34px; padding: 7px; border-radius: 9px; background: #c2e66e; }
+.nv-app.nv-resources-page .nvr-hero nav { display: flex; justify-content: center; gap: 8px; margin-top: 24px; }
+.nv-app.nv-resources-page .nvr-hero nav span { padding: 7px 10px; border-radius: 9px; background: #fff; font-size: 11px; }
+.nv-app.nv-resources-page .nvr-filters { gap: 14px; padding: 10px 0 12px; }
+.nv-app.nv-resources-page .nvr-filters button { min-height: 34px; padding: 7px 14px; border: 0; border-radius: 10px; background: #f9f4f2; color: #52545b; font-size: 11px; font-weight: 500; }
+.nv-app.nv-resources-page .nvr-filters button[aria-pressed=true] { background: #c2e66e; color: #272932; }
+.nv-app.nv-resources-page .nvr-editorial { display: grid; grid-template-columns: minmax(0,368fr) minmax(0,459fr); gap: 28px; }
+.nv-app.nv-resources-page .nvr-editorial > div > h3 { min-height: 32px; font-size: 15px; font-weight: 600; }
+.nv-app.nv-resources-page .nvr-featured { display: flex; flex-direction: column; overflow: visible; border: 0; }
+.nv-app.nv-resources-page .nvr-featured .nvr-cover { min-height: 196px; border-radius: 16px; background: #f0f1f3; }
+.nv-app.nv-resources-page .nvr-featured .nvr-cover > * { display: none; }
+.nv-app.nv-resources-page .nvr-featured > div:last-child { display: flex; align-items: flex-start; padding: 14px 0; }
+.nv-app.nv-resources-page .nvr-featured h3 { margin: 8px 0; font-size: 19px; }
+.nv-app.nv-resources-page .nvr-featured p { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.nv-app.nv-resources-page .nvr-featured .nv-button { margin-top: 12px; background: #c2e66e; color: #272932; }
+.nv-app.nv-resources-page .nvr-popular { display: grid; grid-template-rows: 32px repeat(2,164px); gap: 18px; }
+.nv-app.nv-resources-page .nvr-popular button { display: grid; grid-template-columns: 165px minmax(0,1fr); gap: 16px; width: 100%; padding: 0; border: 0; background: transparent; color: #272932; text-align: left; font: inherit; cursor: pointer; }
+.nv-app.nv-resources-page .nvr-popular-art { height: 164px; border-radius: 16px; background: #f0f1f3; }
+.nv-app.nv-resources-page .nvr-popular button > span:last-child { min-width: 0; padding-top: 4px; }
+.nv-app.nv-resources-page .nvr-popular small { display: block; color: #658f1d; font-size: 11px; }
+.nv-app.nv-resources-page .nvr-popular strong { display: block; margin: 10px 0; font-size: 15px; line-height: 1.25; }
+.nv-app.nv-resources-page .nvr-popular em { display: -webkit-box; overflow: hidden; color: #8a8c90; font-size: 12px; font-style: normal; line-height: 1.5; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.nv-app.nv-resources-page .nvr-library { padding: 0; border: 0; }
+.nv-app.nv-resources-page .nvr-library > header { margin-bottom: 18px; }
+.nv-app.nv-resources-page .nvr-library > header span { display: none; }
+.nv-app.nv-resources-page .nvr-library h3 { font-size: 15px; }
+.nv-app.nv-resources-page .nvr-grid { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 18px; }
+.nv-app.nv-resources-page .nvr-grid article { min-height: 220px; padding: 0; background: #fff; }
+.nv-app.nv-resources-page .nvr-card-icon { width: 100%; height: 124px; margin-bottom: 12px; border-radius: 16px; background: #f0f1f3; }
+.nv-app.nv-resources-page .nvr-card-icon svg { display: none; }
+.nv-app.nv-resources-page .nvr-grid article .nv-badge { padding: 0; background: transparent; color: #658f1d; }
+.nv-app.nv-resources-page .nvr-grid h4 { margin: 8px 0 4px; font-size: 13px; }
+.nv-app.nv-resources-page .nvr-grid p { display: none; }
+.nv-app.nv-resources-page .nvr-aside section { padding: 0; border: 0; }
+.nv-app.nv-resources-page .nvr-aside section h3 { font-size: 15px; }
+.nv-app.nv-resources-page .nvr-aside section > div > button { padding: 13px 0; border-bottom: 1px solid #e4e4e6; border-radius: 0; background: transparent; }
+.nv-app.nv-resources-page .nvr-aside section > div > button small { width: auto; height: auto; background: transparent; color: #8a8c90; }
+.nv-app.nv-resources-page .nvr-aside section > div > button span { font-size: 13px; }
+.nv-app.nv-resources-page .nvr-note { margin-top: 12px; }
+.nv-app.nv-resources-page .nvr-detail-toolbar { min-height: 28px; }
+.nv-app.nv-resources-page .nvr-detail-toolbar > button { padding: 0; border: 0; background: transparent; color: #8a8c90; }
+.nv-app.nv-resources-page .nvr-detail-layout { grid-template-columns: minmax(0,793fr) minmax(0,368fr); gap: 28px; }
+.nv-app.nv-resources-page .nvr-article { padding: 28px 36px; border: 0; }
+.nv-app.nv-resources-page .nvr-article > header > span { color: #658f1d; font-size: 11px; letter-spacing: 0; text-transform: none; }
+.nv-app.nv-resources-page .nvr-article > header h2 { font-size: 27px; }
+.nv-app.nv-resources-page .nvr-article-author { display: flex; align-items: center; gap: 8px; color: #8a8c90; font-size: 11px; }
+.nv-app.nv-resources-page .nvr-article-author span { width: 18px; height: 18px; border-radius: 50%; background: #ffcb65; }
+.nv-app.nv-resources-page .nvr-article > header > p { margin-top: 18px; color: #52545b; font-size: 13px; }
+.nv-app.nv-resources-page .nvr-article > .nvr-cover { min-height: 320px; margin: 20px 0 28px; background: #f0f1f3; }
+.nv-app.nv-resources-page .nvr-article > .nvr-cover > * { display: none; }
+.nv-app.nv-resources-page .nvr-related { gap: 24px; padding: 26px; border-radius: 14px; background: #fff; }
+.nv-app.nv-resources-page .nvr-related section { padding: 0; border: 0; }
+.nv-app.nv-resources-page .nvr-related section > span { display: block; margin-bottom: 10px; color: #272932; font-size: 15px; letter-spacing: 0; }
+.nv-app.nv-resources-page .nvr-related section > div > button { display: block; padding: 0 0 14px; background: #fff; }
+.nv-app.nv-resources-page .nvr-related section > div > button .nv-icon-tile { width: 100%; height: 100px; margin-bottom: 8px; border-radius: 12px; background: #f0f1f3; }
+.nv-app.nv-resources-page .nvr-related section > div > button .nv-icon-tile svg,
+.nv-app.nv-resources-page .nvr-related section > div > button > svg { display: none; }
+.nv-app.nv-resources-page .nvr-share { display: flex; flex-direction: column; gap: 7px; }
+.nv-app.nv-resources-page .nvr-share button { width: 100%; justify-content: flex-start; padding: 8px; border: 0; border-radius: 8px; background: #f9f4f2; font-size: 11px; }
+.nv-app.nv-resources-page .nvr-tags { display: flex; flex-direction: row !important; }
+.nv-app.nv-resources-page .nvr-tags small { background: #f9f4f2; color: #52545b; }
+.nv-app.nv-healthy-menu .nvm-open-item { width: max-content; margin-top: 8px; padding: 0; border: 0; background: transparent; color: #658f1d; font: inherit; font-size: 11px; font-weight: 600; cursor: pointer; }
+.nv-app.nv-healthy-menu .nvm-placeholder { display: block; flex: none; border-radius: 12px; background: #eff0f2; }
+.nv-app.nv-healthy-menu .nvm-detail-empty { margin: 18px; padding: 14px; border-radius: 10px; background: #f9f4f2; color: #52545b; font-size: 12px; line-height: 1.6; }
+@media (min-width: 1200px) {
+  .nv-app.nv-resources-page .nvr-layout { grid-template-columns: minmax(0,856fr) minmax(0,249fr); gap: 56px; }
+  .nv-app.nv-resources-page .nvr-aside { gap: 32px; }
+  .nv-app.nv-resources-page:has(.nvr-layout) .nv-page-head { display: none; }
+  .nv-app.nv-resources-page:has(.nvr-layout) .nv-topbar { background: transparent; pointer-events: none; }
+  .nv-app.nv-resources-page:has(.nvr-layout) .nv-topbar > * { pointer-events: auto; }
+  .nv-app.nv-resources-page:has(.nvr-layout) .nv-topbar { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; box-shadow: none; }
+  .nv-app.nv-resources-page:has(.nvr-layout) .nv-topbar-title,
+  .nv-app.nv-resources-page:has(.nvr-layout) .nv-patient-header-search { display: none !important; }
+  .nv-app.nv-resources-page .nvr-layout { margin-top: -78px; }
+  .nv-app.nv-resources-page .nvr-aside { padding-top: 78px; }
+  .nv-app.nv-healthy-menu .nvm-detail { display: grid; grid-template-columns: minmax(0,274fr) minmax(0,535fr) minmax(0,295fr); column-gap: 28px; align-items: start; }
+  .nv-app.nv-healthy-menu:has(.nvm-detail) .nv-page-head { display: none; }
+  .nv-app.nv-healthy-menu:has(.nvm-detail) .nv-topbar-title { position: absolute; top: 52px; left: 28px; font-size: 0; }
+  .nv-app.nv-healthy-menu:has(.nvm-detail) .nv-topbar-title::after { content: 'Detalle de receta'; font-size: 20px; }
+  .nv-app.nv-healthy-menu .nvm-detail { position: relative; z-index: 40; }
+  .nv-app.nv-healthy-menu .nvm-detail > .nvm-back { grid-column: 1/-1; min-height: 28px; margin-top: -55px; margin-bottom: 27px; padding: 0; border: 0; background: transparent; color: #8a8c90; }
+  .nv-app.nv-healthy-menu .nvm-detail > .nvm-back { position: fixed; z-index: 1000; top: 24px; left: 251px; margin: 0; transform: none; }
+  .nv-app.nv-resources-page:has(.nvr-detail) .nv-page-head { display: none; }
+  .nv-app.nv-resources-page:has(.nvr-detail) .nv-topbar-title { position: absolute; top: 45px; left: 28px; font-size: 0; }
+  .nv-app.nv-resources-page:has(.nvr-detail) .nv-topbar-title::after { content: 'Detalle del consejo'; font-size: 20px; }
+  .nv-app.nv-resources-page .nvr-detail { position: relative; z-index: 40; margin-top: -84px; }
+  .nv-app.nv-resources-page .nvr-detail-layout { margin-top: 12px; }
+  .nv-app.nv-resources-page .nvr-detail-toolbar > div { display: none; }
+  .nv-app.nv-healthy-menu .nvm-detail-heading { grid-column: 2; grid-row: 2; display: block; min-height: 260px; padding: 0; border: 0; }
+  .nv-app.nv-healthy-menu .nvm-detail-heading > div > span { display: none; }
+  .nv-app.nv-healthy-menu .nvm-detail-heading h2 { margin: 0 0 24px; font-size: 22px; line-height: 1.12; }
+  .nv-app.nv-healthy-menu .nvm-detail-heading p { max-width: none; padding: 22px 18px; border-radius: 14px; background: #f3f4f6; color: #52545b; font-size: 13px; line-height: 1.6; }
+  .nv-app.nv-healthy-menu .nvm-detail-heading > .nv-badge { display: inline-flex; margin-top: 10px; }
+  .nv-app.nv-healthy-menu .nvm-recipe-detail { display: contents; }
+  .nv-app.nv-healthy-menu .nvm-recipe-summary { grid-column: 1; grid-row: 2 / span 2; border: 0; border-radius: 17px; background: #f9f4f2; }
+  .nv-app.nv-healthy-menu .nvm-recipe-summary > .np-food-photo,
+  .nv-app.nv-healthy-menu .nvm-recipe-summary > .np-food-fallback { height: 274px; border-radius: 17px; }
+  .nv-app.nv-healthy-menu .nvm-recipe-summary dl { padding: 18px; }
+  .nv-app.nv-healthy-menu .nvm-recipe-summary dl > div { padding: 14px 0; border-bottom: 0; }
+  .nv-app.nv-healthy-menu .nvm-recipe-summary > small { padding: 18px; white-space: normal; overflow-wrap: anywhere; }
+  .nv-app.nv-healthy-menu .nvm-recipe-steps { grid-column: 2; grid-row: 3; border: 0; }
+  .nv-app.nv-healthy-menu .nvm-recipe-steps > header { padding: 0 0 16px; border: 0; }
+  .nv-app.nv-healthy-menu .nvm-recipe-steps h3 { font-size: 15px; }
+  .nv-app.nv-healthy-menu .nvm-recipe-steps ol { padding: 0; }
+  .nv-app.nv-healthy-menu .nvm-recipe-steps li { grid-template-columns: 30px minmax(0,1fr); padding: 12px 0; border: 0; }
+  .nv-app.nv-healthy-menu .nvm-recipe-steps li > span { width: 30px; height: 30px; background: #ffcb65; }
+  .nv-app.nv-healthy-menu .nvm-recipe-steps li p { color: #52545b; font-size: 12px; }
+  .nv-app.nv-healthy-menu .nvm-recipe-ingredients { grid-column: 3; grid-row: 2 / span 2; border: 0; border-radius: 17px; background: #f9f4f2; }
+  .nv-app.nv-healthy-menu .nvm-recipe-ingredients > header { padding: 20px 16px 16px; border: 0; }
+  .nv-app.nv-healthy-menu .nvm-recipe-ingredients h3 { font-size: 15px; }
+  .nv-app.nv-healthy-menu .nvm-recipe-ingredients ul { padding: 0 16px; }
+  .nv-app.nv-healthy-menu .nvm-recipe-ingredients li { min-height: 48px; border: 0; font-size: 12px; }
+  .nv-app.nv-healthy-menu .nvm-recipe-ingredients li > span { background: #fff; }
+  .nv-app.nv-healthy-menu .nvm-recipe-ingredients > section { margin: 16px; padding: 14px; background: #fff; }
+  .nv-app.nv-healthy-menu .nvm-recipe-ingredients > section p { white-space: normal; overflow-wrap: anywhere; }
+}
+@media (max-width: 1199px) {
+  .nv-app.nv-resources-page .nvr-editorial { grid-template-columns: 1fr 1fr; }
+  .nv-app.nv-resources-page .nvr-popular button { grid-template-columns: 38% minmax(0,1fr); }
+  .nv-app.nv-resources-page .nvr-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 700px) {
+  .nv-app.nv-resources-page .nvr-hero { min-height: 195px; padding: 24px 16px; }
+  .nv-app.nv-resources-page .nvr-hero h2 { font-size: 20px; }
+  .nv-app.nv-resources-page .nvr-hero nav { flex-wrap: wrap; gap: 6px; margin-top: 18px; }
+  .nv-app.nv-resources-page .nvr-editorial { grid-template-columns: 1fr; }
+  .nv-app.nv-resources-page .nvr-popular { grid-template-rows: auto; }
+  .nv-app.nv-resources-page .nvr-popular button { grid-template-columns: 110px minmax(0,1fr); min-height: 110px; }
+  .nv-app.nv-resources-page .nvr-popular-art { height: 110px; }
+  .nv-app.nv-resources-page .nvr-popular em { -webkit-line-clamp: 2; }
+  .nv-app.nv-resources-page .nvr-grid { gap: 10px; }
+  .nv-app.nv-resources-page .nvr-grid article { min-height: 180px; }
+  .nv-app.nv-resources-page .nvr-card-icon { height: 90px; }
+  .nv-app.nv-resources-page .nvr-article { padding: 22px 18px; }
+  .nv-app.nv-resources-page .nvr-related { padding: 18px; }
+}
+
+/* Tablet cards follow the same component order as the corresponding Figma frames. */
+@media (max-width: 1199px) {
+  .nv-app.nv-healthy-menu .nvm-featured { display: flex; flex-direction: column; gap: 12px; overflow: visible; border: 0; background: transparent; }
+  .nv-app.nv-healthy-menu .nvm-featured-main { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); overflow: hidden; border-radius: 14px; background: #f9f4f2; }
+  .nv-app.nv-healthy-menu .nvm-featured-image { min-height: 260px; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients > div { display: flex; min-height: 72px; flex-direction: column; justify-content: center; gap: 2px; padding: 10px; border-radius: 9px; background: #c2e66e; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients > div:nth-child(2) { background: #ffcb65; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients > div:nth-child(3) { background: #ffa257; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients > div:nth-child(4) { background: #e6e6e7; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients strong { font-size: 17px; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients span,
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients small { font-size: 10px; }
+  .nv-app.nv-healthy-menu .nvm-side-list { display: grid; gap: 9px; }
+  .nv-app.nv-healthy-menu .nvm-side-list button { display: grid; grid-template-columns: 62px minmax(0,1fr) 27px; min-height: 76px; align-items: center; gap: 10px; padding: 8px; border: 0; border-radius: 11px; background: #f9f4f2; color: #272932; text-align: left; font: inherit; }
+  .nv-app.nv-healthy-menu .nvm-side-list .np-food-photo,
+  .nv-app.nv-healthy-menu .nvm-side-list .np-food-fallback { width: 62px; height: 62px; border-radius: 8px; }
+  .nv-app.nv-healthy-menu .nvm-side-list strong { display: -webkit-box; overflow: hidden; font-size: 12px; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .nv-app.nv-healthy-menu .nvm-side-list small { display: block; color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-healthy-menu .nvm-side-list b { display: grid; width: 27px; height: 27px; place-items: center; border-radius: 7px; background: #c2e66e; font-size: 19px; font-weight: 400; }
+  .nv-app.nv-patient-agenda .nvpa-hero { display: none; }
+  .nv-app.nv-patient-agenda .nvpa-summary { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .nv-app.nv-patient-agenda .nvpa-summary > div { min-width: 0; }
+}
+
+/* Mobile frames use full-width stacked modules and retain the real patient data. */
+@media (max-width: 700px) {
+  .nv-app.nv-healthy-menu .nv-page-head { display: none; }
+  .nv-app.nv-healthy-menu .nvm-hero { min-height: 28px; padding: 0; border: 0; background: transparent; color: #272932; }
+  .nv-app.nv-healthy-menu .nvm-hero h2 { margin: 0; font-size: 14px; }
+  .nv-app.nv-healthy-menu .nvm-featured-main { display: flex; flex-direction: column; background: #fff; }
+  .nv-app.nv-healthy-menu .nvm-featured-image { height: 210px; min-height: 210px; overflow: hidden; border-radius: 12px; background: #f1f2f4; }
+  .nv-app.nv-healthy-menu .nvm-featured-image .np-food-photo,
+  .nv-app.nv-healthy-menu .nvm-featured-image .np-food-fallback { width: 100%; height: 100%; }
+  .nv-app.nv-healthy-menu .nvm-featured-copy { min-height: 0; align-items: stretch; padding: 14px 0 0; }
+  .nv-app.nv-healthy-menu .nvm-featured-copy h3 { margin: 0 0 10px; font-size: 20px; }
+  .nv-app.nv-healthy-menu .nvm-featured-copy > p { margin: 3px 0; font-size: 11px; }
+  .nv-app.nv-healthy-menu .nvm-featured-copy .nvm-slot-list { margin: 2px 0 8px; }
+  .nv-app.nv-healthy-menu .nvm-featured-copy .nv-button { justify-content: center; width: 100%; min-height: 38px; margin-top: 14px; background: #c2e66e; }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .nv-app.nv-healthy-menu .nvm-featured-nutrients > div { min-height: 62px; }
+  .nv-app.nv-healthy-menu .nvm-all { padding: 0; border: 0; }
+  .nv-app.nv-healthy-menu .nvm-all > header { margin-bottom: 10px; }
+  .nv-app.nv-healthy-menu .nvm-filters { gap: 0; margin-bottom: 12px; border-radius: 8px; background: #f6f6f7; }
+  .nv-app.nv-healthy-menu .nvm-filters button { padding-inline: 10px; border: 0; border-radius: 8px; background: transparent; font-size: 11px; }
+  .nv-app.nv-healthy-menu .nvm-filters button[aria-pressed=true] { background: #c2e66e; color: #272932; }
+  .nv-app.nv-healthy-menu .nvm-list article { grid-template-columns: 92px minmax(0,1fr); gap: 12px; min-height: 112px; padding: 10px; border-radius: 12px; background: #f9f4f2; }
+  .nv-app.nv-healthy-menu .nvm-list article > .np-food-photo,
+  .nv-app.nv-healthy-menu .nvm-list article > .np-food-fallback { width: 92px; height: 92px; }
+  .nv-app.nv-healthy-menu .nvm-list strong { white-space: normal; font-size: 12px; }
+  .nv-app.nv-healthy-menu .nvm-list article > div:nth-child(2) > span { display: none; }
+  .nv-app.nv-healthy-menu .nvm-card-slots { grid-column: 2; }
+  .nv-app.nv-healthy-menu .nvm-aside { gap: 18px; }
+  .nv-app.nv-healthy-menu .nvm-aside section { padding: 0; border: 0; }
+  .nv-app.nv-healthy-menu .nvm-aside h3 { margin: 0 0 10px; }
+  .nv-app.nv-healthy-menu .nvm-side-list button { background: #fff; box-shadow: 0 0 0 1px #f1f1f2; }
+  .nv-app.nv-healthy-menu .nvm-detail-heading { background: #f9f4f2; }
+  .nv-app.nv-healthy-menu .nvm-recipe-summary { display: block; }
+  .nv-app.nv-healthy-menu .nvm-recipe-summary > .np-food-photo,
+  .nv-app.nv-healthy-menu .nvm-recipe-summary > .np-food-fallback { height: 220px; }
+  .nv-app.nv-healthy-menu .nvm-recipe-summary dl { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .nv-app.nv-patient-agenda .nv-main { padding-inline: 0; }
+  .nv-app.nv-patient-agenda .nvpa-agenda { gap: 0; }
+  .nv-app.nv-patient-agenda .nvpa-summary { gap: 10px; padding: 20px 14px; background: #f9f4f2; }
+  .nv-app.nv-patient-agenda .nvpa-summary > div { height: 150px; padding: 12px; border: 0; border-radius: 13px; }
+  .nv-app.nv-patient-agenda .nvpa-summary dt { min-height: 46px; margin-bottom: 8px; padding-bottom: 7px; border-bottom: 1px solid #e9e9ea; font-size: 10px; line-height: 1.3; white-space: normal; }
+  .nv-app.nv-patient-agenda .nvpa-summary dd { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; overflow: visible; white-space: normal; font-size: 10px; }
+  .nv-app.nv-patient-agenda .nvpa-summary dd span { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 8px; background: #c2e66e; }
+  .nv-app.nv-patient-agenda .nvpa-summary > div:nth-child(2) dd span { background: #ffcb65; }
+  .nv-app.nv-patient-agenda .nvpa-summary > div:nth-child(3) dd span { background: #ffa257; }
+  .nv-app.nv-patient-agenda .nvpa-summary dd strong { display: block; font-size: 23px; }
+  .nv-app.nv-patient-agenda .nvpa-toolbar { flex-direction: row; flex-wrap: wrap; gap: 8px; padding: 18px 14px 10px; }
+  .nv-app.nv-patient-agenda .nvpa-nav { flex: 1 1 180px; }
+  .nv-app.nv-patient-agenda .nvpa-nav p { text-align: left; }
+  .nv-app.nv-patient-agenda .nvpa-views { flex: 0 0 auto; }
+  .nv-app.nv-patient-agenda .nvpa-filters { flex-wrap: nowrap; overflow-x: auto; padding: 8px 14px; }
+  .nv-app.nv-patient-agenda .nvpa-filters button { flex: 0 0 auto; }
+  .nv-app.nv-patient-agenda .nvpa-calendar { overflow: hidden; margin: 0; border: 0; border-radius: 0; }
+  .nv-app.nv-patient-agenda .nvpa-calendar > header { display: none; }
+  .nv-app.nv-patient-agenda .nvpa-weekdays { height: 38px; border-top: 0; background: #fff; }
+  .nv-app.nv-patient-agenda .nvpa-weekdays span { font-size: 10px; font-weight: 400; text-transform: capitalize; }
+  .nv-app.nv-patient-agenda .nvpa-month-grid > button { min-height: 105px; align-items: flex-start; gap: 2px; padding: 4px 3px; }
+  .nv-app.nv-patient-agenda .nvpa-month-grid time { width: 20px; height: 20px; font-size: 10px; }
+  .nv-app.nv-patient-agenda .nvpa-month-grid .nvpa-chip { width: 100%; height: auto; min-height: 24px; margin: 0; padding: 2px; border: 0; border-radius: 4px; background: #c2e66e; }
+  .nv-app.nv-patient-agenda .nvpa-month-grid .nvpa-chip.plan { background: #c2e66e; }
+  .nv-app.nv-patient-agenda .nvpa-month-grid .nvpa-chip.meal { background: #ebf9c6; }
+  .nv-app.nv-patient-agenda .nvpa-month-grid .nvpa-chip.activity { background: #ffcb65; }
+  .nv-app.nv-patient-agenda .nvpa-month-grid .nvpa-chip.consult { background: #ffa257; }
+  .nv-app.nv-patient-agenda .nvpa-month-grid .nvpa-chip b { display: -webkit-box !important; overflow: hidden; color: #272932; font-size: 7px; line-height: 1.2; white-space: normal; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+  .nv-app.nv-patient-agenda .nvpa-month-grid .nvpa-chip small { display: none !important; }
+  .nv-app.nv-patient-agenda .nvpa-detail { margin-top: 20px; padding: 18px 14px; border: 0; border-top: 16px solid #f9f4f2; border-radius: 0; }
+  .nv-app.nv-patient-agenda .nvpa-detail > header { padding: 0 0 14px; border: 0; }
+  .nv-app.nv-patient-agenda .nvpa-detail .nvpa-event { margin: 0 0 12px; padding: 16px; border: 0; border-radius: 13px; background: #f9f4f2; }
+  .nv-app.nv-patient-agenda .nvpa-note { margin: 12px 14px; }
+  .nv-app.nv-grocery-page .nvgrocery-header { display: none; }
+  .nv-app.nv-grocery-page .nvgrocery { gap: 14px; }
+  .nv-app.nv-grocery-page .nvgrocery-stats { order: 1; grid-template-columns: 1fr; gap: 12px; }
+  .nv-app.nv-grocery-page .nvgrocery-stats article { display: flex; min-height: 68px; flex-direction: row; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px; border: 0; border-radius: 14px; }
+  .nv-app.nv-grocery-page .nvgrocery-stats article > span { display: grid; width: 40px; height: 40px; flex: 0 0 40px; place-items: center; border-radius: 10px; background: #c2e66e; }
+  .nv-app.nv-grocery-page .nvgrocery-stats article:nth-child(2) > span { background: #ffcb65; }
+  .nv-app.nv-grocery-page .nvgrocery-stats article:nth-child(3) > span { background: #ffa257; }
+  .nv-app.nv-grocery-page .nvgrocery-stats article small { display: block; color: #8a8c90; font-size: 11px; }
+  .nv-app.nv-grocery-page .nvgrocery-stats article strong { display: block; margin: 2px 0 0; font-size: 19px; }
+  .nv-app.nv-grocery-page .nvgrocery-analytics { order: 2; grid-template-columns: 1fr; gap: 12px; }
+  .nv-app.nv-grocery-page .nvgrocery-chart-card,
+  .nv-app.nv-grocery-page .nvgrocery-category-card { grid-column: auto; min-height: 185px; padding: 16px; border: 0; border-radius: 14px; }
+  .nv-app.nv-grocery-page .nvgrocery-chart-card h3 { font-size: 13px; }
+  .nv-app.nv-grocery-page .nvgrocery-bars { gap: 14px; }
+  .nv-app.nv-grocery-page .nvgrocery-bars > div { grid-template-columns: 100px minmax(0,1fr) 22px; font-size: 11px; }
+  .nv-app.nv-grocery-page .nvgrocery-ring { width: 116px; height: 116px; }
+  .nv-app.nv-grocery-page .nvgrocery-ring > div { width: 92px; height: 92px; }
+  .nv-app.nv-grocery-page .nvgrocery-ring strong { font-size: 18px; }
+  .nv-app.nv-grocery-page .nvgrocery-category-card ul { gap: 12px; }
+  .nv-app.nv-grocery-page .nvgrocery-category-card li { font-size: 11px; }
+  .nv-app.nv-grocery-page .nvgrocery-progress { order: 3; }
+  .nv-app.nv-grocery-page .nvgrocery-layout { order: 4; }
+  .nv-app.nv-grocery-page .nvgrocery-list-card { overflow: hidden; border-radius: 14px; }
+  .nv-app.nv-grocery-page .nvgrocery-list-card > header { flex-direction: column; align-items: stretch; gap: 12px; }
+  .nv-app.nv-grocery-page .nvgrocery-list-actions { display: flex; gap: 8px; }
+  .nv-app.nv-grocery-page .nvgrocery-search { flex: 1; min-width: 0; }
+  .nv-app.nv-grocery-page .nvgrocery-list-actions > .nv-button { min-width: 88px; padding-inline: 7px; }
+  .nv-app.nv-grocery-page .nvgrocery-filters { padding: 10px; }
+  .nv-app.nv-grocery-page .nvgrocery-filters button { border: 0; border-radius: 9px; font-size: 11px; }
+  .nv-app.nv-grocery-page .nvgrocery-filters button[aria-pressed=true] { background: #c2e66e; color: #272932; }
+  .nv-app.nv-grocery-page .nvgrocery-table-wrap { max-width: 100%; overflow-x: auto; }
+  .nv-app.nv-grocery-page .nvgrocery-table { width: 900px; min-width: 900px; }
+  .nv-app.nv-grocery-page .nvgrocery-table { table-layout: fixed; }
+  .nv-app.nv-grocery-page .nvgrocery-table th:nth-child(1),
+  .nv-app.nv-grocery-page .nvgrocery-table td:nth-child(1) { width: 140px; min-width: 140px; }
+  .nv-app.nv-grocery-page .nvgrocery-table th:nth-child(2),
+  .nv-app.nv-grocery-page .nvgrocery-table td:nth-child(2) { width: 100px; }
+  .nv-app.nv-grocery-page .nvgrocery-table th:nth-child(3),
+  .nv-app.nv-grocery-page .nvgrocery-table td:nth-child(3) { width: 110px; }
+  .nv-app.nv-grocery-page .nvgrocery-table td:first-child strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nv-app.nv-grocery-page .nvgrocery-table td:nth-child(2) .nv-badge { max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nv-app.nv-grocery-page .nvgrocery-table th:nth-child(3),
+  .nv-app.nv-grocery-page .nvgrocery-table td:nth-child(3) { display: table-cell; }
+  .nv-app.nv-grocery-page .nvgrocery-table th,
+  .nv-app.nv-grocery-page .nvgrocery-table td { height: 48px; padding-inline: 10px; font-size: 10px; }
+  .nv-app.nv-grocery-page .nvgrocery-table td:first-child { min-width: 170px; }
+  .nv-app.nv-grocery-page .nvgrocery-info { display: grid; margin: 0; padding: 14px; border-radius: 14px; }
+}
+
+@media (max-width: 1199px) {
+  .nv-app.nv-patient-plan .nvpp-figma-board,
+  .nv-app.nv-patient-diary .nvpdiary-figma-board,
+  .nv-app.nv-progress-page .nvp-figma-board,
+  .nv-app.nv-exercise-page .nvexercise-figma-board { display: block; }
+  .nv-app.nv-patient-plan .nvpp-figma-toolbar { display: flex; min-height: 52px; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; padding: 8px 12px; border-radius: 12px; background: #f9f4f2; }
+  .nv-app.nv-patient-plan .nvpp-figma-toolbar > div { display: flex; align-items: center; gap: 7px; }
+  .nv-app.nv-patient-plan .nvpp-figma-toolbar button { min-height: 30px; padding: 5px 9px; border: 0; border-radius: 8px; background: #fff; color: #272932; font: inherit; font-size: 11px; }
+  .nv-app.nv-patient-plan .nvpp-figma-toolbar button:first-child svg { transform: rotate(180deg); }
+  .nv-app.nv-patient-plan .nvpp-figma-toolbar .nvpp-figma-shopping { background: #c2e66e; }
+  .nv-app.nv-patient-plan .nvpp-figma-grid { display: grid; gap: 14px; }
+  .nv-app.nv-patient-plan .nvpp-figma-head,
+  .nv-app.nv-patient-plan .nvpp-figma-row { display: grid; grid-template-columns: 110px repeat(4,minmax(130px,1fr)); gap: 14px; }
+  .nv-app.nv-patient-plan .nvpp-figma-head > * { display: grid; min-height: 36px; place-items: center; border-radius: 12px; background: #f9f4f2; font-size: 12px; font-weight: 500; }
+  .nv-app.nv-patient-plan .nvpp-figma-head > :nth-child(2) { background: #c2e66e; }
+  .nv-app.nv-patient-plan .nvpp-figma-head > :nth-child(3) { background: #ffcb65; }
+  .nv-app.nv-patient-plan .nvpp-figma-head > :nth-child(4) { background: #ffa257; }
+  .nv-app.nv-patient-plan .nvpp-figma-head > :nth-child(5) { background: #e6e6e7; }
+  .nv-app.nv-patient-plan .nvpp-figma-day { display: flex; min-height: 150px; flex-direction: column; gap: 8px; padding: 14px; border-radius: 14px; background: #f9f4f2; }
+  .nv-app.nv-patient-plan .nvpp-figma-day strong { font-size: 13px; }
+  .nv-app.nv-patient-plan .nvpp-figma-day time { color: #8a8c90; font-size: 11px; }
+  .nv-app.nv-patient-plan .nvpp-figma-meal { display: flex; min-width: 0; min-height: 150px; flex-direction: column; align-items: stretch; gap: 0; overflow: hidden; padding: 0; border: 0; border-radius: 14px; background: #f1ffc9; color: #272932; font: inherit; text-align: left; }
+  .nv-app.nv-patient-plan .nvpp-figma-meal > span { display: block; height: 70px; flex: 0 0 70px; background: #f0f1f3; }
+  .nv-app.nv-patient-plan .nvpp-figma-meal strong,
+  .nv-app.nv-patient-plan .nvpp-figma-meal small { padding: 11px; font-size: 11px; font-weight: 400; line-height: 1.45; }
+  .nv-app.nv-patient-plan .nvpp-figma-almuerzo { background: #fff0ce; }
+  .nv-app.nv-patient-plan .nvpp-figma-merienda { background: #fff1e7; }
+  .nv-app.nv-patient-plan .nvpp-figma-cena { background: #f4f5f7; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-board { display: grid; gap: 16px; margin-bottom: 22px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; padding: 16px; border-radius: 16px; background: #fff; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals > div { display: grid; grid-template-columns: 50px minmax(0,1fr); gap: 0 12px; align-items: center; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals > div > span { display: grid; width: 50px; height: 50px; grid-row: 1/3; place-items: center; border-radius: 12px; background: #c2e66e; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals > div:nth-child(2) > span { background: #ffcb65; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals > div:nth-child(3) > span { background: #ffa257; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals > div:nth-child(4) > span { background: #e6e6e7; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals small { color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals strong { font-size: 18px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table { overflow: hidden; padding: 12px; border-radius: 16px; background: #fff; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 46px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-toolbar > div { display: flex; align-items: center; gap: 6px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-toolbar :is(select,button) { min-height: 32px; padding: 5px 8px; border: 0; border-radius: 8px; background: #f1f2f4; color: #272932; font: inherit; font-size: 10px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-toolbar button { background: #c2e66e; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-toolbar > div > span { color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-scroll { overflow-x: auto; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table table { width: 1100px; border-collapse: collapse; table-layout: fixed; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table th { height: 52px; padding: 8px; border-bottom: 1px solid #e1e1e2; color: #8a8c90; font-size: 10px; font-weight: 400; text-align: left; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table td { height: 66px; padding: 8px; border-bottom: 1px solid #e1e1e2; color: #52545b; font-size: 11px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table th:nth-child(1) { width: 130px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table th:nth-child(2) { width: 100px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table th:nth-child(3) { width: 210px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table td strong { color: #272932; font-weight: 500; }
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar input { flex: 1; min-width: 160px; min-height: 36px; padding: 8px 12px; border: 0; border-radius: 9px; background: #fff; font: inherit; font-size: 11px; }
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar select,
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar span { min-height: 36px; padding: 8px; border: 0; border-radius: 9px; background: #fff; font: inherit; font-size: 11px; }
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar button { min-height: 36px; padding: 8px 12px; border: 0; border-radius: 9px; background: #c2e66e; color: #272932; font: inherit; font-size: 11px; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap { min-height: 420px; overflow-x: auto; margin-top: 16px; padding: 16px; border-radius: 16px; background: #fff; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap table { width: 800px; border-collapse: collapse; table-layout: fixed; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap th { height: 42px; padding: 8px; color: #8a8c90; font-size: 10px; font-weight: 400; text-align: left; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap td { height: 66px; padding: 8px; border-bottom: 1px solid #e1e1e2; font-size: 11px; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap td:first-child { display: flex; align-items: center; gap: 8px; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap td:first-child span { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 8px; background: #c2e66e; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap > p { display: grid; min-height: 300px; place-items: center; color: #8a8c90; font-size: 12px; text-align: center; }
+}
+
+.nv-app.nv-patient-diary .nvpdiary-figma-week-controls { display: flex; align-items: center; gap: 5px; }
+.nv-app.nv-patient-diary .nvpdiary-figma-week-controls button { min-width: 26px; min-height: 26px; padding: 2px 6px; border: 0; border-radius: 7px; background: #f1f2f4; color: #272932; font: inherit; cursor: pointer; }
+.nv-app.nv-patient-diary .nvpdiary-figma-week-controls button:disabled { opacity: .4; cursor: default; }
+.nv-app.nv-patient-diary .nvpdiary-figma-week-controls span { color: #8a8c90; font-size: 10px; }
+.nv-app.nv-patient-plan .nvpp-board-close { display: none; }
+.nv-app.nv-patient.nv-home-page .np-plan-meal > .np-plan-placeholder { display: block; width: 100%; height: 176px; padding: 0; border-radius: 0; background: #eff0f2; }
+
+@media (min-width: 701px) and (max-width: 1199px) {
+  .nv-app.nv-healthy-menu .nvm-hero { min-height: 30px; padding: 0; border: 0; background: transparent; color: #272932; }
+  .nv-app.nv-healthy-menu .nvm-hero h2 { margin: 0; font-size: 15px; }
+  .nv-app.nv-healthy-menu .nvm-featured-main { background: #f9f4f2; }
+  .nv-app.nv-healthy-menu .nvm-featured-copy { justify-content: center; }
+  .nv-app.nv-progress-page .nvp-figma-board { display: grid; gap: 20px; }
+  .nv-app.nv-progress-page .nvp-figma-left { padding: 16px; border-radius: 16px; background: #fff; }
+  .nv-app.nv-progress-page .nvp-figma-top { display: grid; grid-template-columns: minmax(0,3fr) minmax(220px,1.6fr); gap: 18px; }
+  .nv-app.nv-progress-page .nvp-figma-measures { position: relative; display: grid; min-height: 580px; place-items: center; padding: 24px; background: #f0f2f5; color: #8a8c90; text-align: center; }
+  .nv-app.nv-progress-page .nvp-figma-measures > span { position: absolute; top: 0; left: 0; padding: 8px 10px; border-radius: 8px; background: #c2e66e; color: #272932; }
+  .nv-app.nv-progress-page .nvp-figma-measures p { max-width: 22ch; }
+  .nv-app.nv-progress-page .nvp-figma-aux { display: flex; flex-direction: column; gap: 18px; }
+  .nv-app.nv-progress-page .nvp-figma-weight { min-height: 350px; padding: 16px; border-radius: 16px; background: #f9f4f2; }
+  .nv-app.nv-progress-page .nvp-figma-weight header,
+  .nv-app.nv-progress-page .nvp-figma-photos header,
+  .nv-app.nv-progress-page .nvp-figma-side header { display: flex; align-items: center; justify-content: space-between; }
+  .nv-app.nv-progress-page .nvp-figma-weight dl { margin: 18px 0; }
+  .nv-app.nv-progress-page .nvp-figma-weight dl > div { display: flex; justify-content: space-between; margin-bottom: 14px; }
+  .nv-app.nv-progress-page .nvp-figma-weight dt { color: #8a8c90; font-size: 11px; }
+  .nv-app.nv-progress-page .nvp-figma-weight dd { font-size: 18px; font-weight: 600; }
+  .nv-app.nv-progress-page .nvp-figma-weight-plot { display: grid; min-height: 150px; place-items: center; border-top: 1px solid #e1e1e2; color: #8a8c90; }
+  .nv-app.nv-progress-page .nvp-figma-photos > div { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; margin-top: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-photos > div span { display: grid; min-height: 145px; place-items: center; border-radius: 14px; background: #f0f2f5; color: #8a8c90; }
+  .nv-app.nv-progress-page .nvp-figma-measure-table { margin-top: 18px; padding: 16px; border-radius: 14px; background: #f9f4f2; }
+  .nv-app.nv-progress-page .nvp-figma-measure-table header { display: flex; justify-content: space-between; gap: 8px; color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-measure-table p { min-height: 60px; padding-top: 35px; color: #8a8c90; text-align: center; }
+  .nv-app.nv-progress-page .nvp-figma-side { display: grid; gap: 18px; }
+  .nv-app.nv-progress-page .nvp-figma-side > section { min-height: 230px; padding: 16px; border-radius: 16px; background: #fff; }
+  .nv-app.nv-progress-page .nvp-figma-side header small { padding: 7px 9px; border-radius: 8px; background: #c2e66e; }
+  .nv-app.nv-progress-page .nvp-figma-calories > strong { display: block; margin-top: 18px; font-size: 20px; }
+  .nv-app.nv-progress-page .nvp-figma-calorie-chart,
+  .nv-app.nv-progress-page .nvp-figma-sleep-chart,
+  .nv-app.nv-progress-page .nvp-figma-water-chart { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 10px; height: 150px; margin-top: 14px; }
+  .nv-app.nv-progress-page .nvp-figma-calorie-chart > div,
+  .nv-app.nv-progress-page .nvp-figma-sleep-chart > div { display: flex; flex-direction: column; align-items: center; justify-content: end; gap: 5px; }
+  .nv-app.nv-progress-page .nvp-figma-calorie-chart span { display: block; width: 30px; min-height: 3px; background: #ffcb65; }
+  .nv-app.nv-progress-page .nvp-figma-sleep-chart span { display: block; width: 42px; min-height: 3px; background: repeating-linear-gradient(to bottom,#ffcb65 0 11px,#fff 11px 15px,#ffa257 15px 23px,#fff 23px 27px); }
+  .nv-app.nv-progress-page .nvp-figma-sleep-legend { display: flex; gap: 14px; margin-top: 12px; color: #8a8c90; }
+  .nv-app.nv-progress-page .nvp-figma-calorie-chart small,
+  .nv-app.nv-progress-page .nvp-figma-sleep-chart small { color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-water-summary { display: flex; gap: 10px; margin-top: 16px; }
+  .nv-app.nv-progress-page .nvp-figma-water-chart > div { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .nv-app.nv-progress-page .nvp-figma-water-chart > div > div { display: flex; width: 46px; height: 95px; flex-direction: column; justify-content: end; padding: 5px; border-radius: 12px; background: #f0f2f5; }
+  .nv-app.nv-progress-page .nvp-figma-water-chart > div > div span { display: block; width: 100%; min-height: 2px; border-radius: 6px; background: #ffcb65; }
+  .nv-app.nv-progress-page .nvp-hero,
+  .nv-app.nv-progress-page .nvp-metrics,
+  .nv-app.nv-progress-page .nvp-layout,
+  .nv-app.nv-progress-page .nvp-meals { display: none; }
+  .nv-app.nv-messaging .nm-profile { display: block; grid-column: 1/-1; }
+}
+
+@media (max-width: 700px) {
+  .nv-app.nv-patient.nv-home-page .np-dashboard .nv-metrics { grid-template-columns: 1fr; gap: 10px; }
+  .nv-app.nv-patient.nv-home-page .np-dashboard .nv-metric { min-height: 112px; padding: 14px; }
+  .nv-app.nv-patient.nv-home-page .np-dashboard .nv-metric > strong { font-size: 22px; }
+  .nv-app.nv-patient.nv-home-page .np-dashboard .np-chart-grid { gap: 14px; }
+  .nv-app.nv-patient.nv-home-page .np-dashboard .np-bottom-grid { gap: 14px; }
+  .nv-app.nv-patient.nv-home-page .np-plan-meal > .np-plan-placeholder { height: 160px; }
+  .nv-app.nv-patient.nv-home-page .nv-daily { border-top: 16px solid #f9f4f2; }
+  .nv-app.nv-patient.nv-home-page .nv-daily { display: block; background: #f9f4f2; }
+  .nv-app.nv-patient.nv-home-page .nv-calendar-strip::before { display: block; margin-bottom: 13px; color: #272932; content: 'Plan de comidas'; font-size: 15px; font-weight: 600; }
+  .nv-app.nv-patient.nv-home-page .nv-daily-heading { margin: 16px 0 8px; }
+  .nv-app.nv-patient.nv-home-page .nv-agenda-meals { display: block; }
+  .nv-app.nv-patient.nv-home-page .nv-agenda-meals > button { background: #fff; }
+  .nv-app.nv-patient.nv-home-page .nv-recent-activity { margin-top: 16px; padding: 18px 12px; border: 0; border-radius: 12px; background: #fff; }
+  .nv-app.nv-progress-page .nv-main { background: #fff; }
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar select { width: 48px; min-width: 48px; flex: 0 0 48px; font-size: 0; }
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar button { flex: 0 0 auto; }
+  .nv-app.nv-healthy-menu:has(.nvm-detail) .nv-topbar > .nv-brand { display: none; }
+  .nv-app.nv-healthy-menu:has(.nvm-detail) .nv-topbar-title { font-size: 0; }
+  .nv-app.nv-healthy-menu:has(.nvm-detail) .nv-topbar-title::after { content: 'Detalle de receta'; font-size: 14px; }
+  .nv-app.nv-healthy-menu .nvm-detail > .nvm-back { position: fixed; z-index: 100; top: 13px; left: 14px; min-height: 38px; padding: 8px; background: transparent; font-size: 0; }
+  .nv-app.nv-healthy-menu .nvm-detail > .nvm-back svg { width: 21px; height: 21px; }
+  .nv-app.nv-patient-plan .nv-page-head { display: none; }
+  .nv-app.nv-patient-plan .nvpp-figma-board { margin-inline: -14px; }
+  .nv-app.nv-patient-plan .nvpp-figma-toolbar { margin: 0 0 16px; padding: 10px 14px; border-radius: 0; }
+  .nv-app.nv-patient-plan .nvpp-figma-toolbar strong { max-width: 140px; overflow: hidden; font-size: 12px; text-overflow: ellipsis; text-transform: capitalize; white-space: nowrap; }
+  .nv-app.nv-patient-plan .nvpp-figma-toolbar > div button { display: none; }
+  .nv-app.nv-patient-plan .nvpp-figma-grid { max-width: 100vw; overflow-x: auto; gap: 14px; padding: 0 14px 14px; }
+  .nv-app.nv-patient-plan .nvpp-figma-head,
+  .nv-app.nv-patient-plan .nvpp-figma-row { width: 700px; grid-template-columns: 108px repeat(4,130px); gap: 14px; }
+  .nv-app.nv-patient-plan .nvpp-figma-row { min-height: 182px; }
+  .nv-app.nv-patient-plan .nvpp-figma-day,
+  .nv-app.nv-patient-plan .nvpp-figma-meal { min-height: 182px; }
+  .nv-app.nv-patient-plan .nvpp-figma-meal > span { height: 86px; flex-basis: 86px; }
+  .nv-app.nv-patient-plan .nvpp-hero,
+  .nv-app.nv-patient-plan .nvpp-summary,
+  .nv-app.nv-patient-plan .nvpp-week,
+  .nv-app.nv-patient-plan .nvpp-detail,
+  .nv-app.nv-patient-plan .nvpp-note { display: none; }
+  .nv-app.nv-patient-plan .nvpp-results { margin-top: 18px; }
+  .nv-app.nv-patient-plan .nvpp-detail.is-board-open { display: block; margin-top: 18px; }
+  .nv-app.nv-patient-plan .nvpp-detail.is-board-open .nvpp-board-close { display: inline-flex; padding: 6px 10px; border: 0; border-radius: 8px; background: #c2e66e; font: inherit; font-size: 11px; }
+  .nv-app.nv-patient-plan .care-panel { margin-top: 20px; }
+  .nv-app.nv-patient-diary .nv-page-head { display: none; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals { grid-template-columns: 1fr; gap: 16px; padding: 18px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals > div { grid-template-columns: 64px minmax(0,1fr); min-height: 64px; gap: 0 16px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals > div > span { width: 64px; height: 64px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals small { font-size: 12px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-totals strong { font-size: 22px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-toolbar { flex-wrap: wrap; min-height: 52px; margin-bottom: 8px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-toolbar > div:last-child { flex: 1; justify-content: flex-end; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table { padding: 12px; }
+  .nv-app.nv-patient-diary .nvpdiary-figma-table table { width: 1100px; }
+  .nv-app.nv-patient-diary .nvpdiary-hero,
+  .nv-app.nv-patient-diary .nvpdiary-week,
+  .nv-app.nv-patient-diary .nvpdiary-metrics,
+  .nv-app.nv-patient-diary .nvpdiary-card { display: none; }
+  .nv-app.nv-patient-diary .nvpdiary-note { margin-top: 12px; }
+  .nv-app.nv-progress-page .nvp-progress { gap: 14px; }
+  .nv-app.nv-progress-page .nvp-figma-board { display: flex; flex-direction: column; gap: 16px; }
+  .nv-app.nv-progress-page .nvp-figma-left,
+  .nv-app.nv-progress-page .nvp-figma-side { display: flex; flex-direction: column; gap: 16px; }
+  .nv-app.nv-progress-page .nvp-figma-top,
+  .nv-app.nv-progress-page .nvp-figma-aux { display: flex; flex-direction: column; gap: 16px; }
+  .nv-app.nv-progress-page .nvp-figma-measures { position: relative; display: grid; min-height: 460px; place-items: center; padding: 24px; background: #f0f2f5; color: #8a8c90; text-align: center; }
+  .nv-app.nv-progress-page .nvp-figma-measures > span { position: absolute; top: 0; left: 0; padding: 8px 12px; border-radius: 8px; background: #c2e66e; color: #272932; }
+  .nv-app.nv-progress-page .nvp-figma-measures p { max-width: 24ch; font-size: 12px; }
+  .nv-app.nv-progress-page .nvp-figma-measures strong { font-size: 14px; }
+  .nv-app.nv-progress-page .nvp-figma-measure-table { display: none; }
+  .nv-app.nv-progress-page .nvp-figma-weight,
+  .nv-app.nv-progress-page .nvp-figma-side > section { overflow: hidden; padding: 16px; border-radius: 16px; background: #f9f4f2; }
+  .nv-app.nv-progress-page .nvp-figma-weight header,
+  .nv-app.nv-progress-page .nvp-figma-photos header,
+  .nv-app.nv-progress-page .nvp-figma-side header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .nv-app.nv-progress-page .nvp-figma-weight h3,
+  .nv-app.nv-progress-page .nvp-figma-photos h3,
+  .nv-app.nv-progress-page .nvp-figma-side h3 { font-size: 14px; }
+  .nv-app.nv-progress-page .nvp-figma-weight dl { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+  .nv-app.nv-progress-page .nvp-figma-weight dl > div { display: flex; justify-content: space-between; font-size: 12px; }
+  .nv-app.nv-progress-page .nvp-figma-weight dd { font-size: 18px; font-weight: 600; }
+  .nv-app.nv-progress-page .nvp-figma-weight-plot { display: grid; min-height: 120px; place-items: center; border-top: 1px solid #e1e1e2; color: #8a8c90; font-size: 12px; }
+  .nv-app.nv-progress-page .nvp-figma-photos header { min-height: 36px; }
+  .nv-app.nv-progress-page .nvp-figma-photos > div { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+  .nv-app.nv-progress-page .nvp-figma-photos > div span { display: grid; min-height: 150px; place-items: center; border-radius: 14px; background: #f0f2f5; color: #8a8c90; font-size: 11px; }
+  .nv-app.nv-progress-page .nvp-figma-side > section { min-height: 220px; }
+  .nv-app.nv-progress-page .nvp-figma-side header small { padding: 7px 9px; border-radius: 8px; background: #c2e66e; font-size: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-calories > strong { display: block; margin-top: 18px; font-size: 22px; }
+  .nv-app.nv-progress-page .nvp-figma-calories > strong small,
+  .nv-app.nv-progress-page .nvp-figma-calories > p { color: #8a8c90; font-size: 11px; }
+  .nv-app.nv-progress-page .nvp-figma-calorie-chart,
+  .nv-app.nv-progress-page .nvp-figma-sleep-chart,
+  .nv-app.nv-progress-page .nvp-figma-water-chart { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 8px; height: 150px; margin-top: 14px; }
+  .nv-app.nv-progress-page .nvp-figma-calorie-chart > div,
+  .nv-app.nv-progress-page .nvp-figma-sleep-chart > div { display: flex; flex-direction: column; align-items: center; justify-content: end; gap: 6px; }
+  .nv-app.nv-progress-page .nvp-figma-calorie-chart span { display: block; width: 22px; min-height: 3px; border-radius: 5px 5px 0 0; background: #ffcb65; }
+  .nv-app.nv-progress-page .nvp-figma-sleep-chart span { display: block; width: 28px; min-height: 3px; border-radius: 5px; background: repeating-linear-gradient(to bottom,#ffcb65 0 10px,#fff 10px 14px,#ffa257 14px 22px,#fff 22px 26px); }
+  .nv-app.nv-progress-page .nvp-figma-calorie-chart small,
+  .nv-app.nv-progress-page .nvp-figma-sleep-chart small { color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-sleep-legend { display: flex; gap: 8px; margin-top: 10px; color: #8a8c90; font-size: 10px; }
+  .nv-app.nv-progress-page .nvp-figma-water-summary { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; font-size: 11px; }
+  .nv-app.nv-progress-page .nvp-figma-water-chart { height: 130px; }
+  .nv-app.nv-progress-page .nvp-figma-water-chart > div { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .nv-app.nv-progress-page .nvp-figma-water-chart > div > div { display: flex; width: 38px; height: 90px; flex-direction: column; justify-content: end; padding: 5px; border-radius: 12px; background: #fff; }
+  .nv-app.nv-progress-page .nvp-figma-water-chart > div > div span { display: block; width: 100%; min-height: 2px; border-radius: 7px; background: #ffcb65; }
+  .nv-app.nv-progress-page .nvp-figma-water-chart strong,
+  .nv-app.nv-progress-page .nvp-figma-water-chart small { color: #8a8c90; font-size: 10px; font-weight: 400; }
+  .nv-app.nv-progress-page .nvp-hero,
+  .nv-app.nv-progress-page .nvp-metrics,
+  .nv-app.nv-progress-page .nvp-layout,
+  .nv-app.nv-progress-page .nvp-meals { display: none; }
+  .nv-app.nv-exercise-page .nvexercise-figma-board { margin-bottom: 18px; }
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar { flex-wrap: nowrap; }
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar input { min-width: 0; }
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar > span { display: none; }
+  .nv-app.nv-exercise-page .nvexercise-figma-toolbar button { white-space: nowrap; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap { min-height: 480px; }
+  .nv-app.nv-exercise-page .nvexercise-figma-table-wrap table { width: 800px; }
+  .nv-app.nv-messaging .nm-layout.nm-patient { display: flex; flex-direction: column; gap: 14px; }
+  .nv-app.nv-messaging .nm-layout.nm-patient .nm-contacts { display: block; padding: 0; border: 0; background: #fff; }
+  .nv-app.nv-messaging .nm-layout.nm-patient .nm-contacts > h2 { display: none; }
+  .nv-app.nv-messaging .nm-layout.nm-patient .nm-contacts > input { display: block; width: 100%; height: 40px; padding: 10px; border: 0; border-radius: 9px; background: #f1f2f4; }
+  .nv-app.nv-messaging .nm-layout.nm-patient .nm-contact-list { display: block; margin-top: 10px; }
+  .nv-app.nv-messaging .nm-layout.nm-patient .nm-contact-list > button { width: 100%; min-height: 72px; border-bottom: 1px solid #e1e1e2; }
+  .nv-app.nv-messaging .nm-layout.nm-patient .nm-conversation { height: auto; min-height: 510px; border-radius: 14px; background: #f9f4f2; }
+  .nv-app.nv-messaging .nm-layout.nm-patient .nm-conversation > header { min-height: 75px; padding: 12px; }
+  .nv-app.nv-messaging .nm-layout.nm-patient .nm-thread { height: auto; min-height: 340px; padding: 14px; }
+  .nv-app.nv-messaging .nm-layout.nm-patient .nm-demo-note { display: none; }
+  .nv-app.nv-messaging .nm-layout.nm-patient .nm-compose { padding: 12px; border: 0; background: #fff; }
+  .nv-app.nv-messaging .nm-layout.nm-patient .nm-profile { display: block; padding: 18px; border: 0; background: #fff; }
+  .nv-app.nv-messaging .nm-layout.nm-patient .nm-profile > .nv-avatar { margin: 10px auto; }
+  .nv-app.nv-resources-page .nv-page-head { display: none; }
+}
