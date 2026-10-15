@@ -17,6 +17,7 @@ import { registerPrivacyRoutes } from './privacy/routes.js';
 import { registerShoppingRoutes } from './shopping/routes.js';
 import { registerFeeRoutes } from './fees/routes.js';
 import { registerAdminRoutes } from './admin/routes.js';
+import { createOwnServiceCache, createServiceReadOnlyGuard, loadOwnService, registerOwnServiceRoutes } from './service/own-service.js';
 import { registerOutboxRoutes } from './outbox/routes.js';
 import { registerProgressRoutes } from './progress/routes.js';
 import { registerExerciseRoutes } from './exercise/routes.js';
@@ -211,6 +212,8 @@ app.use('/api/*', async (c, next) => {
 });
 app.use('/api/*', authMiddleware);
 app.use('/api/*', securityLimits.protected);
+const ownService = createOwnServiceCache((userId) => loadOwnService(userId));
+app.use('/api/*', createServiceReadOnlyGuard(ownService.get, ownService.clear));
 app.use('/api/*', async (c, next) => {
   await next();
   if (!['/api/health','/api/ready'].includes(c.req.path)) persistDemoState();
@@ -286,6 +289,7 @@ registerPrivacyRoutes(app);
 registerShoppingRoutes(app);
 registerFeeRoutes(app);
 registerAdminRoutes(app);
+registerOwnServiceRoutes(app, ownService.get);
 registerOutboxRoutes(app);
 registerProgressRoutes(app);
 registerExerciseRoutes(app);
