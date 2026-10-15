@@ -4,3 +4,7 @@ febe01aea4b50c7e1e32924b9fc27e1ebd0dacfc:docs/security/navegador-produccion-2026
 # UUID de despliegue Railway confirmado por el conector; no es una credencial.
 # El rótulo API disparó el detector. Sólo esta línea histórica queda exceptuada.
 0f46a43ac1cd4c045ac320e74d1666a70a181009:docs/figma-crm-funcional-2026-10-01.md:generic-api-key:61
+# GROQ_API_KEY= sin valor en .env.example (commits de Codex a45acf9 y f624f43): el detector toma la línea siguiente
+# (GROQ_ZDR_VERIFIED=0) como si fuera la clave. No hay ninguna clave; el valor está vacío. Solo estas dos líneas históricas.
+a45acf90e978fc393a58078adfc77dbf490a9868:.env.example:generic-api-key:79
+f624f43e43ff3aa6d27b5b05f863ad87b81669ee:.env.example:generic-api-key:40
