@@ -48,7 +48,7 @@ export function NutrigoPatientApp({patient,page,onNavigate,onSignOut,onEditIntak
   if(page==='inicio')screen=<NutrigoHome {...common} onRecord={onRecord} onHydration={onHydration} onRest={onRest} onSteps={onSteps} onLogMeal={onLogMeal}/>;
   else if(page==='recetas')screen=<NutrigoMenu {...common}/>;
   else if(page==='plan')screen=<NutrigoPlan {...common}/>;
-  else if(page==='diario')screen=<NutrigoDiary {...common} onLogMeal={onLogMeal} onHydration={onHydration} onRest={onRest}/>;
+  else if(page==='diario')screen=<NutrigoDiary {...common} onLogMeal={onLogMeal} onHydration={onHydration} onRest={onRest} onSteps={onSteps}/>;
   else if(page==='agenda')screen=<NutrigoAgenda {...common} onConfirm={onConfirm} onReschedule={onReschedule}/>;
   else if(page==='progreso')screen=<NutrigoProgress {...common} onRecord={onRecord} onHydration={onHydration} onRest={onRest}/>;
   else if(page==='ejercicio')screen=<NutrigoExercise {...common}/>;

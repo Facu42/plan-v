@@ -1,4 +1,4 @@
-export const CRM_WORK_KINDS = ['intake', 'meal', 'ai_menu', 'message', 'payment', 'appointment', 'record'] as const;
+export const CRM_WORK_KINDS = ['intake', 'meal', 'ai_menu', 'message', 'payment', 'appointment', 'record', 'fee_overdue', 'quiet'] as const;
 export type CrmWorkKind = (typeof CRM_WORK_KINDS)[number];
 
 /** Metadata de trabajo: no incluye notas clínicas, textos, archivos ni borradores. */
