@@ -187,6 +187,14 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - App para tiendas (Android primero, empaquetando la web), calidad en producción, publicidad paga y
   página pública con precios (espera el precio). Plan: `docs/plan-apartados.md`.
 
+## Recordatorio de consulta al teléfono (2026-10-15)
+
+El día antes de cada consulta agendada, la paciente con avisos activados recibe «Mañana tenés consulta · Mirá el
+horario en Plan V», que abre su Agenda. No lleva la hora, el lugar ni el nombre de la nutri (viaja por Google,
+Apple o Mozilla). Usa el mismo tramo de 10 minutos que el recordatorio por mail (`server/mail/reminders.ts`), sin
+tocar la base. Lo corre el servicio worker de Railway (la API tiene `WORKER_SEPARATE`), así que las tres claves
+`VAPID_*` tienen que estar también en el worker; sin ellas no manda nada. Código: `server/push/reminders.ts`.
+
 ## Mensajes al instante en la app de la paciente (2026-10-15)
 
 Antes la paciente solo veía un mensaje nuevo de su nutri si recargaba la página. Ahora la app trae la ficha
