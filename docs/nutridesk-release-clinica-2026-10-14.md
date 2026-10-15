@@ -1,5 +1,10 @@
 # Quinta entrega: ficha clínica y exportación histórica
 
+## Ajuste del ensayo de sesiones · 15/10/2026
+
+Hereda por merge el arreglo b6baf461 del runner. Focal actual: **38 aprobadas, cero fallos, cuatro archivos**, incluyendo el permiso específico de menú; tipos, sintaxis y límites de secretos aprobados. No cambia código del producto, SQL ni dependencias. Los globales anteriores son históricos respecto del ensayo; el CI nuevo se observa por cabeza. [Evidencia del arreglo](browser-rate-window-2026-10-15.md).
+
+
 ## Actualización vigente de MAIN9c56854 · 15/10/2026
 
 Merge del padre `f0b65c31`, con acciones y actividad/calorías de PR119/122 preservadas. Focal propio actual: **129 aprobadas, cero fallos; 9 archivos**. La suite global actual se verifica en CI; los conteos locales globales anteriores quedan como históricos. Tipos/build/migraciones/vistas/secretos aprobados. [Informe de actualización](main-sync-9c568-2026-10-15.md). El CI de esta cabeza se observa por separado; los resultados anteriores se mantienen como antecedentes. Sin cambios de producción.

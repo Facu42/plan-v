@@ -69,9 +69,13 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **15/10 · Codex** · PR115 hereda el pacing por tráfico real del ensayo signed-auth de PR108, sin tocar límites del producto. Focal propio 38 casos aprobados y tipos/sintaxis/secretos aprobados; CI nuevo pendiente. [Informe](browser-rate-window-2026-10-15.md). Se conserva Historia clínica y el permiso de menú específico.
+
 - **15/10 · Codex** · PR115 actualizado desde su padre revisado para conservar MAIN9c56854, PR119 y122. Focal propio actual: 129 aprobadas, cero fallos; 9 archivos. La suite global actual se verifica en CI; los conteos locales globales anteriores quedan como históricos. [Informe](main-sync-9c568-2026-10-15.md). Sin merge a main ni SQL remoto.
 
 - **15/10 · Codex** · #115 actualizado desde main y la pila: 2.775 pruebas aprobadas, cero fallos y dos omitidas. El fallo del recorrido fue reproducido: comprobaba grabación en lugar de menú. Se corrigieron dos expresiones, conservando permisos separados y bloqueo403; [evidencia](consent-browser-regression-2026-10-15.md). Cabecera clínica y gris original conservados; CI nuevo pendiente. Sin merge a main ni SQL remoto.
+- **15/10 · Codex** · PR108: el recorrido de sesiones reales recibió HTTP429 al comprobar una respuesta profesional después de aprobar los treinta casos nativos. Se reemplazó la espera inicial por control del ritmo en todas las ventanas, sólo en el runner local; límites y permisos del producto intactos. Veinte casos propios y treinta y cinco independientes aprobados; fire test detectó la desconexión. [Informe](browser-rate-window-2026-10-15.md). El recorrido completo de CI queda pendiente en la nueva cabeza; se propaga en orden a #115 y #123 antes de separar operaciones.
+
 - **15/10 · Codex** · PR108 actualizado desde su padre revisado para conservar MAIN9c56854, PR119 y122. Focal propio actual: 129 aprobadas, cero fallos; 9 archivos. La suite global actual se verifica en CI; los conteos locales globales anteriores quedan como históricos. [Informe](main-sync-9c568-2026-10-15.md). Sin merge a main ni SQL remoto.
 
 - **15/10 · Codex** · #108 conciliado con main `2d31f9d` y la pila actualizada, preservando síntomas, vistas, avisos, compras, recorridos y el gris original. Suite propia de nutrición: 2.721 aprobadas, cero fallos y dos omitidas; [evidencia](nutridesk-release-nutricion-2026-10-14.md). Sin módulos de agenda/operaciones/SARA ni SQL remoto; CI nuevo pendiente de comprobar sobre su SHA.
