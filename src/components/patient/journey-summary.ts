@@ -14,6 +14,7 @@ export type JourneyDay = {
   energy: string | null;
   sleepMinutes: number | null;
   steps: number | null;
+  symptoms: string[];
   reviewedMeals: number;
   pendingMeals: number;
   mealLogIds: string[];
@@ -49,6 +50,7 @@ export function buildJourneySummary(input: JourneyInput, now = new Date()): Jour
       energy: habit?.energy ?? null,
       sleepMinutes: habit?.sleep_minutes ?? null,
       steps: habit?.steps ?? null,
+      symptoms: habit?.symptoms ?? [],
       reviewedMeals: 0,
       pendingMeals: 0,
       mealLogIds: [],
