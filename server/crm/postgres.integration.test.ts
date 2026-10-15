@@ -67,6 +67,7 @@ function adapter(actor: string | null) {
           return query;
         },
         eq(column: string, value: unknown) { params.push(value); where.push(`${identifier(column)}=$${params.length}`); return query; },
+        gte(column: string, value: unknown) { params.push(value); where.push(`${identifier(column)}>=$${params.length}`); return query; },
         is(column: string, value: null) { if (value !== null) throw new Error('Sólo null'); where.push(`${identifier(column)} is null`); return query; },
         in(column: string, values: unknown[]) { params.push(values); where.push(`${identifier(column)}::text=any($${params.length}::text[])`); return query; },
         order(column: string) { orders.push(identifier(column)); return query; },
