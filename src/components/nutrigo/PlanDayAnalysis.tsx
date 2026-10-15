@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import type { MenuNutritionTarget } from '../../types/ai-nutrition';
 import { analyzePlanDay, analyzePlanWeek, macroEnergyShare, momentEnergy, type DayAnalysisLine } from '../../types/plan-day-analysis';
+import type { NutritionSettings } from '../../types/nutrition-capabilities';
 
 const MAIN_NUTRIENTS = new Set(['kcal', 'protein', 'carbs', 'fat', 'fiber']);
 type Moment = { slot: string; lines: DayAnalysisLine[] };
 const kcalText = (value: number) => `${Math.round(value).toLocaleString('es-AR')} kcal`;
 
-export function PlanDayAnalysis({ date, lines, target, week = [], moments = [] }: { date: string; lines: DayAnalysisLine[]; target?: MenuNutritionTarget; week?: { date: string; lines: DayAnalysisLine[] }[]; moments?: Moment[] }) {
+export function PlanDayAnalysis({ date, lines, target, week = [], moments = [],references=[] }: { date: string; lines: DayAnalysisLine[]; target?: MenuNutritionTarget; week?: { date: string; lines: DayAnalysisLine[] }[]; moments?: Moment[];references?:NutritionSettings['micronutrients'] }) {
   const [view, setView] = useState<'day' | 'week'>('day');
   const weekly = analyzePlanWeek(week);
   const analysis = view === 'week' ? weekly : analyzePlanDay(lines);
@@ -16,10 +17,12 @@ export function PlanDayAnalysis({ date, lines, target, week = [], moments = [] }
   const goals = target ? { kcal: target.kcal, protein: target.protein_g, carbs: target.carbs_g, fat: target.fat_g } : {};
   const card = (nutrient: typeof analysis.nutrients[number]) => {
     const goal = goals[nutrient.key as keyof typeof goals];
+    const reference=references.find(row=>row.key===nutrient.key);
     return <div key={nutrient.key}><dt>{nutrient.label}</dt><dd>{nutrient.total != null ? `${nutrient.total.toLocaleString('es-AR', { maximumFractionDigits: 2 })} ${nutrient.unit}` : view === 'week' ? 'Sin promedio completo' : 'Sin total completo'}</dd>
       {nutrient.total == null && nutrient.subtotal != null && <small>{view === 'week' ? `Promedio parcial (${nutrient.known} de ${week.length} días): ` : 'Subtotal conocido: '}{nutrient.subtotal.toLocaleString('es-AR', { maximumFractionDigits: 2 })} {nutrient.unit}</small>}
       {nutrient.missing > 0 && <small>Faltan datos en {nutrient.missing} {view === 'week' ? 'días' : entryLabel}</small>}
       {goal != null && <small>Objetivo: {goal.toLocaleString('es-AR')} {nutrient.unit}{goal > 0 && nutrient.total != null ? ` · ${Math.round(nutrient.total / goal * 100)} %` : ''}</small>}
+      {reference&&<small>Referencia revisada: {reference.value.toLocaleString('es-AR')} {nutrient.unit}{nutrient.total!==null?` · ${Math.round(nutrient.total/reference.value*100)} % de esa referencia`:''}. {reference.citation} · <a href={reference.url} target="_blank" rel="noreferrer">Fuente</a></small>}
     </div>;
   };
   return <aside className="plan-day-analysis" aria-label="Análisis nutricional del borrador">

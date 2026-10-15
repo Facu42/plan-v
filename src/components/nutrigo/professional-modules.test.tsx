@@ -24,3 +24,11 @@ describe('funciones presentes y previstas del consultorio',()=>{
     expect(isAllowedPage('pro','desarrollo')).toBe(true);expect(isAllowedPage('patient','desarrollo')).toBe(false);
   });
 });
+
+describe('nutrición disponible en entrega 4',()=>{
+  it('ofrece las cinco funciones nutricionales sin anunciar los módulos futuros',()=>{
+    for(const id of ['planificacion','planes','alimentos','equivalencias','configuracion']){const module=PROFESSIONAL_MODULES.find(row=>row.id===id);expect(module?.href).toBeTruthy();expect(module?.current.length).toBeGreaterThan(0);}
+    expect(PROFESSIONAL_MODULES.find(row=>row.id==='asistente-ia')?.href).toBeUndefined();
+    expect(PROFESSIONAL_MODULES.find(row=>row.id==='configuracion')?.current.join(' ')).not.toContain('reportes');
+  });
+});

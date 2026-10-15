@@ -239,9 +239,13 @@ Facundo: lo que aprueba la nutricionista es el plan, no lo que la paciente carga
 
 ## Progreso global (2026-10-10)
 Pantalla `/crm/progreso-global` (PR #93): peso y comidas de toda la cartera por período. Sin migración. Detalle en `docs/progreso-global-2026-10-10.md`.
+## Continuación Nutriboost: nutrición y PDF del plan · 14/10/2026
+
+Entrega 4 verificada en `codex/nutridesk-release-nutricion`, sobre la cabeza final de importación `b143744b4024314e8313662a1a911b70a28c914b`. Incorpora cálculo efectivo de la fórmula revisada, referencias propias de micronutrientes, grupos, catálogo paginado, seis momentos personalizados y descarga PDF del plan. Suite propia: 2.678 aprobadas, cero fallos, dos omitidas y 407 archivos; tipos/build/migraciones/vistas/scanner y revisión independiente aprobados. [Informe y paso 10](nutridesk-release-nutricion-2026-10-14.md). Sólo SQL nueva `20261011180000`, sin aplicar. No activar USDA ni cambiar Supabase/SMTP/Groq. Las siguientes entregas conservan clínica avanzada/ficha, agenda/equipo/cobros y operaciones generales; el cálculo automático Kerr sigue pendiente.
+
 
 ## Ánimo y síntomas de la paciente (2026-10-15)
-En el Diario, «Registrar» → «Cómo me siento»: energía del día (con energía, normal, sin energía; se guarda en la energía que ya existía) y ocho síntomas de una lista cerrada. La nutricionista los ve en la ficha, «Registros y evolución», debajo de «Descanso y energía». Nutrigo no dibuja esta pantalla: se armó con su diálogo de registro y los botones del diario. Migración `20261015100000_habit_symptoms` (agrega una columna con lista cerrada): ya aplicada en la base el 14/10 con la frase de Facundo (el historial de la base la anota como `20261014215543`). La de #110 (vistas solo lectura) también quedó aplicada. PR en borrador: falta su «juntalo al main».
+En el Diario, «Registrar» → «Cómo me siento»: energía del día (con energía, normal, sin energía; se guarda en la energía que ya existía) y ocho síntomas de una lista cerrada. La nutricionista los ve en la ficha, «Registros y evolución», debajo de «Descanso y energía». Nutrigo no dibuja esta pantalla: se armó con su diálogo de registro y los botones del diario. Migración `20261015100000_habit_symptoms` (agrega una columna con lista cerrada): ya aplicada en la base el 14/10 con la frase de Facundo (el historial de la base la anota como `20261014215543`). La de #110 (vistas solo lectura) también quedó aplicada. PR112 y PR110 ya integrados en main el 14/10; no volver a ejecutar sus migraciones.
 
 ## Recorridos de punta a punta y monitor de producción (2026-10-14)
 Etapa 1 del plan (`docs/producto/06-plan-implementacion.md`, puntos 6 y 7, sin costo):

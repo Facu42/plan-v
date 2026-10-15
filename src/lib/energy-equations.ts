@@ -27,21 +27,22 @@ export function katchMcArdle(weightKg: number, bodyFatPct: number | null): numbe
   return 370 + 21.6 * weightKg * (1 - bodyFatPct / 100);
 }
 
-export type EquationInput = { sex: Sex; age: number; weight_kg: number; height_cm: number; activity: ActivityLevel };
+export type EquationInput = { sex: Sex; age: number; weight_kg: number; height_cm: number; activity: ActivityLevel; formula?:'mifflin'|'harris'|'fao'|'katch'|'scale'; body_fat_pct?:number; scale_bmr?:number };
 export type EquationRow = { id: 'mifflin' | 'harris' | 'fao' | 'katch' | 'scale'; label: string; bmr: number | null; tdee: number | null; used: boolean; missing?: string };
 
 export function compareEquations(input: EquationInput, extra: { bodyFatPct?: number | null; scaleBmr?: number | null }): EquationRow[] {
   const factor = ACTIVITY_FACTORS[input.activity];
   const row = (id: EquationRow['id'], label: string, bmr: number | null, missing?: string): EquationRow => ({
-    id, label, bmr: bmr === null ? null : Math.round(bmr), tdee: bmr === null ? null : Math.round(bmr * factor), used: id === 'mifflin', ...(bmr === null && missing ? { missing } : {}),
+    id, label, bmr: bmr === null ? null : Math.round(bmr), tdee: bmr === null ? null : Math.round(bmr * factor), used: id === (input.formula ?? 'mifflin'), ...(bmr === null && missing ? { missing } : {}),
   });
   const rows = [
     row('mifflin', 'Mifflin-St Jeor', mifflinStJeor(input.sex, input.age, input.weight_kg, input.height_cm)),
     row('harris', 'Harris-Benedict revisada', harrisBenedictRevised(input.sex, input.age, input.weight_kg, input.height_cm)),
     row('fao', 'FAO/OMS/ONU', faoWhoUnu(input.sex, input.age, input.weight_kg)),
-    row('katch', 'Katch-McArdle', katchMcArdle(input.weight_kg, extra.bodyFatPct ?? null), 'Falta la grasa corporal en Mediciones'),
+    row('katch', 'Katch-McArdle', katchMcArdle(input.weight_kg, input.body_fat_pct ?? extra.bodyFatPct ?? null), 'Falta la grasa corporal en Mediciones'),
   ];
-  return extra.scaleBmr ? [...rows, row('scale', 'Medido por la balanza', extra.scaleBmr)] : rows;
+  const measured=input.scale_bmr ?? extra.scaleBmr;
+  return measured ? [...rows, row('scale', 'Medido por la balanza', measured)] : rows;
 }
 
 type MetricLike = { kind: string; value_numeric: number; captured_on: string; created_at: string };

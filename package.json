@@ -16,7 +16,7 @@
     "dev": "concurrently -n api,vite -c blue,green \"npm run dev:api\" \"npm run dev:vite\"",
     "dev:api": "node scripts/with-env.mjs tsx watch server/index.ts",
     "dev:vite": "node scripts/with-env.mjs vite --host",
-    "build": "node scripts/prepare-patient-import-ocr.mjs && npm run nutrigo:styles && vite build",
+    "build": "node scripts/prepare-patient-import-ocr.mjs && node scripts/prepare-clinical-pdf.mjs && npm run nutrigo:styles && vite build",
     "nutrigo:styles": "node scripts/build-nutrigo-styles.mjs",
     "nutrigo:source": "node scripts/build-nutrigo-source.mjs",
     "check": "tsc --noEmit && tsc --noEmit -p tsconfig.server.json && tsc --noEmit -p tsconfig.e2e.json",
@@ -56,7 +56,9 @@
     "zustand": "^5.0.15",
     "jszip": "^3.10.2",
     "tesseract.js": "^7.0.0",
-    "@tesseract.js-data/spa": "^1.0.0"
+    "@tesseract.js-data/spa": "^1.0.0",
+    "@pdf-lib/fontkit": "^1.1.1",
+    "pdf-lib": "^1.17.1"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
@@ -76,6 +78,7 @@
     "typescript": "^5.7.3",
     "vite": "^6.1.0",
     "vitest": "^5.0.0",
-    "@xmldom/xmldom": "^0.9.12"
+    "@xmldom/xmldom": "^0.9.12",
+    "wawoff2": "^2.0.1"
   }
 }
