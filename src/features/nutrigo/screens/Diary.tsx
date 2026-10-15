@@ -167,7 +167,7 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
     // En el celular el archivo tiene un único botón de ícono: abre período y filtro.
     if (name === 'Button Picker' && idEnds(node, '498:16354')) return { onClick: () => setDialog('filter'), label: 'Filtrar el diario' };
     if (name === 'Button Picker' && text === 'This Week') return { onClick: () => setPeriod(PERIODS[(PERIODS.indexOf(days) + 1) % PERIODS.length]), label: `Período: ${periodLabel(days)}. Cambiar período`, children: objects(node).map((child, index) => source(child, part => leaf(part) && sourceText(part) === 'This Week' ? { text: periodLabel(days) } : undefined, index)) };
-    if (name === 'Button CTA' && text === 'Add') return { onClick: () => { setError(''); setDialog('add'); }, label: 'Registrar comida, agua, descanso o pasos', children: objects(node).map((child, index) => source(child, part => leaf(part) && sourceText(part) === 'Add' ? { text: 'Registrar' } : undefined, index)) };
+    if (name === 'Button CTA' && text === 'Add') return { onClick: () => { setError(''); setDialog('add'); }, label: 'Registrar comida, agua o descanso', children: objects(node).map((child, index) => source(child, part => leaf(part) && sourceText(part) === 'Add' ? { text: 'Registrar' } : undefined, index)) };
     return undefined;
   };
   return <FramePair nodes={['105:2649', '492:14886']} resolve={resolver} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut}>
