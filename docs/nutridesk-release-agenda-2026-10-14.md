@@ -1,6 +1,11 @@
 # Sexta entrega: agenda, reservas, equipo y cobros
 
-## Actualización vigente de MAIN9c56854 · 15/10/2026
+## Cabeza final con pacing revisado · 15/10/2026
+
+Hereda por merge 1b43fb6, con MAIN9c56854 y el arreglo del ensayo b6baf461. Focal actual: **38 aprobadas, cero fallos, cuatro archivos**; tipos, sintaxis y secretos aprobados. La suite completa con MAIN9c pasó **2.881/0/2 omitidas en 439 archivos** antes de este último ajuste del runner. Las 1.640 huellas comparadas demuestran que sólo cambiaron dos scripts del ensayo y su prueba: **cero cambios del producto, SQL o dependencias**. El nuevo CI se observa por cabeza, sin trasladar el PASS histórico de beaeb11. [Arreglo y revisión independiente](browser-rate-window-2026-10-15.md).
+
+
+## Suite con MAIN9c anterior al ajuste final del ensayo · 15/10/2026
 
 Merge del padre `e6e739c3`, con acciones y actividad/calorías de PR119/122 preservadas. Suite local actual: **2881 aprobadas, cero fallos, 2 omitidas; 439 archivos**. Tipos/build/migraciones/vistas/secretos aprobados. [Informe de actualización](main-sync-9c568-2026-10-15.md). El CI de esta cabeza se observa por separado; los resultados anteriores se mantienen como antecedentes. Sin cambios de producción.
 
