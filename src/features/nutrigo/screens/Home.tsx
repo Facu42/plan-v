@@ -20,6 +20,7 @@ import '../home-motion.css';
 import { barFill, descendants, EmptyState, fields, formatNumber, leaf, listChildren, objects, source, Stateful, timeLabel, useRemote, dateId, type ScreenProps } from './shared';
 import { dayOfIso, cleanAmount, daysBefore, litresLabel, monthYearLabel, percentLabel, portionsLabel, safePercent, weekDays, weightChangeLabel } from './home-values';
 import { PatientGoalCard } from '../PatientGoalCard';
+import { streakLabel } from '../streak';
 
 async function homeData(id: string, signal: AbortSignal) {
   const [body,target,recipes,plan,exercise,care] = await Promise.allSettled([
@@ -123,8 +124,11 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
     ...(patient.messages??[]).map(message=>({at:message.sent_at,color:2,bold:message.from==='patient'?'Mensaje enviado:':'Mensaje de tu nutricionista:',rest:` "${message.text.length>80?`${message.text.slice(0,80)}…`:message.text}"`})),
   ].filter(row=>!Number.isNaN(Date.parse(row.at))).sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)).slice(0,4);
 
+  const streak=patient.streak?streakLabel(patient.streak):null;
   const resolve:SourceResolver=node=>{
     const name=nodeName(node),content=sourceText(node);
+    // La racha va en el mismo texto bajo el saludo del archivo; con menos de dos días queda el de siempre.
+    if(streak&&node.tag==='p'&&content.startsWith("Let's begin our journey"))return {text:streak};
     if(name==='Card Statistic - Dashboard') {
       if(content.startsWith('Weight'))return {onClick:onRecord,label:'Registrar peso y medidas',children:fields(node,{},child=>{
         if(nodeName(child)==='Slider')return {props:{style:{paddingLeft:weight==null||!ruler.length?'0%':`${Math.max(0,Math.min(92,((ruler[0]-weight)/20)*100))}%`}}};

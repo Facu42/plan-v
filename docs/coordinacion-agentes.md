@@ -69,6 +69,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **15/10 · Claude** · Rachas de la paciente en Inicio, en el texto bajo el saludo (`src/features/nutrigo/streak.ts`). Toca con cambios mínimos `src/components/nutrigo/showroom-model.ts` (una línea) y `screens/Home.tsx`; sin migraciones. Facundo pidió seguir con lo propuesto en «Funciones y precios»: próximas acciones, push y cobro a nutricionistas, en PR separados.
 - **15/10 · Claude** · #117: lista del súper de la paciente agrupada por comercio (los seis colores del widget del archivo) y «Compartir lista» por WhatsApp o copiada. Solo toca `screens/Shopping.tsx`, `screens/shopping-format.ts` y una traducción; nada de la base ni de la pila de Codex. #116 y #117 juntados a `main` con el «junta el 116 y 117 a main» de Facundo.
 - **15/10 · Claude** · Con el «juntalo al main» de Facundo se juntaron #109 (estos documentos) y #114 (recorridos de punta a punta y monitor). Codex dejó un quinto borrador, #115 (ficha clínica, laboratorio y PDF), anotado en carriles. #116: aviso en la campanita de la paciente cuando la nutri le indica un recurso y no lo leyó (el de plan nuevo ya existía). Toca con cambios mínimos `src/features/nutrigo/patient-notices.tsx` y `screens/Resources.tsx`; sin migraciones.
 - **14/10 · Claude** · Comparación de #105 con Figma: la app de la paciente queda igual que en `main` (20 pantallas); el panel cambia el gris de textos secundarios. [Informe](coordinacion/comparacion-pr105-figma-2026-10-14.md).
