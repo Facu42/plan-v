@@ -1,5 +1,10 @@
 # Entrega 4: nutrición y PDF del plan
 
+## Actualización vigente de MAIN9c56854 · 15/10/2026
+
+Merge del padre `7ae9d5e2`, con acciones y actividad/calorías de PR119/122 preservadas. Focal propio actual: **129 aprobadas, cero fallos; 9 archivos**. La suite global actual se verifica en CI; los conteos locales globales anteriores quedan como históricos. Tipos/build/migraciones/vistas/secretos aprobados. [Informe de actualización](main-sync-9c568-2026-10-15.md). El CI de esta cabeza se observa por separado; los resultados anteriores se mantienen como antecedentes. Sin cambios de producción.
+
+
 **Actualización 15/10:** conciliada con main `2d31f9d` y las ramas actualizadas de acceso/consultas/importación. Suite propia **2.721 aprobadas, cero fallos, dos omitidas; 412 archivos**; tipos web/servidor/recorridos, build (10,48 s), migraciones, vistas y secretos aprobados. Las uniones de `.gitignore` conservan OCR/PDF locales y resultados Playwright. Se preservan las siete entregas recientes de main, los 25 JSON originales de Nutrigo y el gris secundario original. Los números anteriores que siguen son históricos. El nuevo CI firmado se comprueba por SHA después del push; el modo `VOLATILE` del RPC publicado y su regresión permanecen intactos.
 
 Estado: entrega en [PR 108 en borrador](https://github.com/Facu42/plan-v/pull/108), sin publicación ni cambios de producción. Su comprobación de sesiones detectó una regresión de transacción; la [corrección mínima y evidencia posterior](nutridesk-release4-postgrest-readonly-2026-10-14.md) están preparadas y verificadas: 2.679 casos aprobados, cero fallos, dos omitidos y 407 archivos. El CI debe repetirse sobre el nuevo commit. Los 2.678 casos anteriores citados abajo corresponden a `accb97f`.

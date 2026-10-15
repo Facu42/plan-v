@@ -1,5 +1,10 @@
 # Tercera entrega: importación y organización documental revisable
-## Estado vigente · 15/10/2026
+
+## Actualización vigente de MAIN9c56854 · 15/10/2026
+
+Merge del padre `2d028e2e`, con acciones y actividad/calorías de PR119/122 preservadas. Focal propio actual: **126 aprobadas, cero fallos; 8 archivos**. La suite global actual se verifica en CI; los conteos locales globales anteriores quedan como históricos. Tipos/build/migraciones/vistas/secretos aprobados. [Informe de actualización](main-sync-9c568-2026-10-15.md). El CI de esta cabeza se observa por separado; los resultados anteriores se mantienen como antecedentes. Sin cambios de producción.
+
+## Estado previo con MAIN2d31 · 15/10/2026
 
 Incorporada por merge la segunda entrega revisada `88ce8e6`, con MAIN `2d31f9d` y sus siete PR nuevos conservados. Suite propia actual: **2.690 aprobadas, cero fallos, dos omitidas; 402 archivos**. Tipos, build con OCR local (7,82 s), migraciones, vistas locales y secretos aprobados; scanner real con control positivo, historial y objetos grandes sin hallazgos. [Informe y Regression Guard de la actualización](nutridesk-importacion-main-sync-2026-10-15.md). CI de la cabeza nueva se verifica por separado; los resultados remotos de b143744 son históricos. Único conflicto resuelto: unión de exclusiones OCR y resultados e2e. Sin cambios de producción ni habilitación de proveedores.
 

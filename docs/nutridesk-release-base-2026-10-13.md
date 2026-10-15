@@ -1,5 +1,10 @@
 # Primera entrega: acceso, cartera, teléfono, aspecto y fotos
 
+## Actualización vigente de MAIN · 15/10/2026
+
+Incorpora MAIN9c56854, incluidos PR119 y122. Suite actual: **2.563 aprobadas, cero fallos, dos omitidas; 375 archivos**. Tipos/build8,45s/migraciones/vistas/secretos aprobados. [Informe de conciliación](main-sync-9c568-2026-10-15.md). Los conteos y cabezas anteriores se conservan como antecedentes; el CI nuevo se verifica aparte.
+
+
 **Actualización 15/10:** conciliada con main `2d31f9d`, incluidos los siete PR posteriores. Gris secundario original de Nutrigo conservado. Suite actual: **2.546 aprobadas, cero fallos, dos omitidas; 374 archivos**. [Evidencia y revisión de regresiones](main-reconciliation-2026-10-15.md). Los conteos y bases del 13/10 que siguen son históricos.
 
 Copia local aislada: `codex/nutridesk-release-base`, iniciada desde `origin/main` en `ae3dc30e3095d4856e3a5055fdeca5ebcf2424e3`. Primera entrega preparada para revisión en PR; se preservó la copia integrada y las demás ramas. Sin cambios de producción. Las siguientes entregas dependerán de esta cabeza revisada y no deben publicarse por separado sin comprobar sus migraciones y configuración.

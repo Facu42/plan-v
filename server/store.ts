@@ -164,6 +164,7 @@ export type ActivityLog = {
   intensity: 'suave' | 'moderada' | 'intensa';
   note: string | null;
   logged_at: string;
+  kcal?: number | null;
 };
 
 export type ResourceAssignment = {
@@ -891,7 +892,7 @@ export function removeMenuSlot(id: string, day: string, slot: string): Patient |
 
 export function addActivityLog(
   id: string,
-  input: Pick<ActivityLog, 'activity' | 'duration_minutes' | 'intensity'> & { note?: string },
+  input: Pick<ActivityLog, 'activity' | 'duration_minutes' | 'intensity'> & { note?: string; kcal?: number },
 ): Patient | undefined {
   const patient = getPatient(id);
   if (!patient) return undefined;
@@ -904,6 +905,7 @@ export function addActivityLog(
     intensity: input.intensity,
     note: input.note?.trim() || null,
     logged_at: loggedAt,
+    ...(input.kcal != null ? { kcal: input.kcal } : {}),
   };
   const timeline: TimelineEvent[] = [{
     id: randomUUID(), kind: 'activity', atLabel: 'HOY',
