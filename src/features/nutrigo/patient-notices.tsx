@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, useRef, type ReactNode } from 'react';
 import { plansApi } from '../../api/plans';
+import { resourcesApi } from '../../api/resources';
+import type { PatientLibraryView } from '../../types/resources';
 import { planHandoverNotice } from '../../types/plan-handover';
 import { Icon, type IconName } from '../../components/shared/Icon';
 import type { ShowroomPage } from '../../components/nutrigo/ShowroomPanels';
@@ -9,17 +11,33 @@ import { unreadBadge } from './patient-navigation';
 import { useFeeNotice } from './fee-notice';
 import './patient-menu-sheet.css';
 
-export type PatientNotice = { id: string; icon: IconName; title: string; note: string; page: ShowroomPage };
+export type PatientNotice = { id: string; icon: IconName; title: string; note: string; page: ShowroomPage; resource?: string };
 export type PatientNotices = { items: PatientNotice[]; unreadMessages: number };
 
 const EMPTY: PatientNotices = { items: [], unreadMessages: 0 };
 
-/** Avisos reales de la paciente: cuenta archivada, mensajes sin leer, consulta por confirmar, cuota y plan nuevo. Nada inventado. */
+/** Evento que avisa que la paciente leyó un recurso indicado (la campanita vuelve a contar). */
+export const RESOURCES_READ_EVENT = 'plan-v:resources-read';
+
+type ResourceNotice = { title: string; note: string; resource?: string };
+
+/** Recursos que la nutricionista le indicó y la paciente todavía no abrió. */
+export function resourceNotice(library: Pick<PatientLibraryView, 'assignments' | 'resources' | 'articles'> | null): ResourceNotice | null {
+  const unread = (library?.assignments ?? []).filter(item => !item.read_at);
+  if (unread.length === 0) return null;
+  if (unread.length > 1) return { title: `Tu nutricionista te indicó ${unread.length} recursos`, note: 'Están en Recursos, en «Indicados».' };
+  const [only] = unread;
+  const found = [...(library?.resources ?? []), ...(library?.articles ?? [])].find(item => item.slug === only.slug || item.id === only.resource_id);
+  return { title: 'Tu nutricionista te indicó un recurso', note: found ? `«${found.title}»` : 'Está en Recursos, en «Indicados».', resource: only.slug };
+}
+
+/** Avisos reales de la paciente: cuenta archivada, mensajes sin leer, consulta por confirmar, cuota, plan nuevo y recursos indicados sin leer. Nada inventado. */
 export function buildNotices(
   patient: Pick<ShowroomPatient, 'messages' | 'appointment'> & { archived?: boolean },
   feeNotice: string | null,
   now: Date = new Date(),
   planNotice: { title: string; note: string } | null = null,
+  resourcesNotice: ResourceNotice | null = null,
 ): PatientNotices {
   const items: PatientNotice[] = [];
   if (patient.archived) items.push({ id: 'archived', icon: 'history', title: 'Tu cuenta está archivada', note: 'No podés enviar mensajes.', page: 'mensajes' });
@@ -32,6 +50,7 @@ export function buildNotices(
   }
   if (feeNotice) items.push({ id: 'fee', icon: 'wallet', title: 'Tenés una cuota para revisar', note: feeNotice, page: 'pagos' });
   if (planNotice) items.push({ id: 'plan', icon: 'list', title: planNotice.title, note: planNotice.note, page: 'plan' });
+  if (resourcesNotice) items.push({ id: 'resources', icon: 'leaf', title: resourcesNotice.title, note: resourcesNotice.note, page: 'recursos', ...(resourcesNotice.resource ? { resource: resourcesNotice.resource } : {}) });
   return { items, unreadMessages: unread };
 }
 
@@ -54,7 +73,20 @@ export function PatientNoticesProvider({ patient, patientId, children }: { patie
     window.addEventListener('plan-v:plan-handover', load);
     return () => { active = false; window.removeEventListener('plan-v:plan-handover', load); };
   }, [patientId]);
-  const value = useMemo(() => buildNotices(patient, feeNotice, new Date(), planNotice), [patient, feeNotice, planNotice]);
+  const [resourcesNotice, setResourcesNotice] = useState<ResourceNotice | null>(null);
+  useEffect(() => {
+    if (!patientId) return undefined;
+    let active = true;
+    const load = () => {
+      resourcesApi.library(patientId)
+        .then(result => { if (active) setResourcesNotice(resourceNotice(result.library)); })
+        .catch(() => undefined);
+    };
+    load();
+    window.addEventListener(RESOURCES_READ_EVENT, load);
+    return () => { active = false; window.removeEventListener(RESOURCES_READ_EVENT, load); };
+  }, [patientId]);
+  const value = useMemo(() => buildNotices(patient, feeNotice, new Date(), planNotice, resourcesNotice), [patient, feeNotice, planNotice, resourcesNotice]);
   return <ArchivedContext.Provider value={archived}><NoticesContext.Provider value={value}>{children}</NoticesContext.Provider></ArchivedContext.Provider>;
 }
 
@@ -88,7 +120,7 @@ export function NoticesSheet({ items, onNavigate, onClose }: { items: PatientNot
             ? <p className="pms-empty">No tenés avisos nuevos.</p>
             : <ul className="pms-list">{items.map(item => (
               <li key={item.id}>
-                <button type="button" className="pms-row" onClick={() => { onClose(); onNavigate(item.page); }}>
+                <button type="button" className="pms-row" onClick={() => { onClose(); onNavigate(item.page); if (item.resource) window.location.hash = `recurso=${encodeURIComponent(item.resource)}`; }}>
                   <span className="pms-icon" aria-hidden="true"><Icon name={item.icon} size={18} /></span>
                   <span className="pms-text"><span className="pms-label">{item.title}</span><small>{item.note}</small></span>
                   <span className="pms-chevron" aria-hidden="true"><Icon name="chevron" size={16} /></span>

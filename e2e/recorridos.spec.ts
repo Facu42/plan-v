@@ -119,3 +119,27 @@ test('5 · la nutricionista revisa la comida y la paciente la ve confirmada', as
   await expect(entry).toContainText('Revisada · IA');
   await expect(entry).toContainText('380');
 });
+
+test('6 · la nutricionista indica un recurso y a la paciente le llega el aviso hasta que lo lee', async ({ page }) => {
+  await enterDemo(page, '/crm/pacientes');
+  const assigned = await page.evaluate(async () => {
+    const response = await fetch('/api/resources/assign', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ resource_id: 'compras-desde-plan', patient_ids: ['pat-sofia'] }),
+    });
+    return response.status;
+  });
+  expect(assigned).toBe(200);
+
+  await enterDemo(page, '/app/inicio');
+  const bell = page.getByRole('button', { name: /^Ver avisos/ }).first();
+  await bell.click();
+  const notices = page.getByRole('dialog', { name: 'Avisos' });
+  const notice = notices.getByRole('button', { name: /Tu nutricionista te indicó un recurso/ });
+  await expect(notice).toBeVisible();
+  await notice.click();
+  await expect(page).toHaveURL(/\/app\/recursos#recurso=compras-desde-plan$/);
+
+  await bell.click();
+  await expect(notices.getByRole('button', { name: /Tu nutricionista te indicó un recurso/ })).toHaveCount(0);
+});

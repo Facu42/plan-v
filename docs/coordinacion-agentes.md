@@ -15,11 +15,12 @@ visto bueno de Facundo.
 | Consultas grabadas, borrador privado y resumen revisado | Codex | PR #106 (`codex/nutridesk-release-consultas`) | Borrador, encima de #105. IA externa apagada |
 | Importar pacientes y documentos con OCR | Codex | PR #107 (`codex/nutridesk-release-importacion`) | Borrador, encima de #106 |
 | Fórmulas, equivalencias, micronutrientes, PDF con marca, USDA | Codex | PR #108 (`codex/nutridesk-release-nutricion`) | Borrador, encima de #107 |
+| Ficha clínica, laboratorio y exportaciones en PDF | Codex | PR #115 (encima de #108) | Borrador. Le falla la prueba de sesiones reales («signed-auth»), sin arreglar |
 | Agenda pública y reservas, varias agendas, Google, Mercado Pago, equipo y recepción, laboratorio, bariátrico, difusiones por WhatsApp, asistente de cartera, ayuda | Codex | rama `respaldo/codex-nutridesk-core` (sin PR) | En código, sin PR. Se separa en entregas cuando Codex vuelva |
 | Lo que Codex dejó sin guardar en la PC de Facundo: importar pacientes (otra versión), Equivalencias (otra versión), asistente con IA para la cartera | Codex | solo en la PC (sin respaldo) | Espera la frase de Facundo para respaldarlo |
 | Seguridad y operación (vistas de paciente solo lectura, privacidad de la IA, staging, monitoreo, respaldo de archivos) | Claude | ramas `claude/*` | En curso |
 | Comparación de #105 con Figma y orden de juntado de la pila de Codex | Claude | `docs/coordinacion/` y comentarios en los PR | #105 comparado el 14/10. Claude no empuja a ramas de Codex |
-| Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Ánimo y síntomas publicado (PR #112, 14/10). Recorridos de punta a punta y monitor en PR propio (borrador). El resto, por empezar |
+| Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Ánimo y síntomas publicado (PR #112, 14/10). Recorridos de punta a punta y monitor en main (#114, 15/10). Aviso de recurso indicado en PR propio. El resto, por empezar |
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
 
@@ -36,7 +37,7 @@ visto bueno de Facundo.
    `server/index.ts`, `server/store.ts`, `src/store/useAppStore.ts`, `src/types/index.ts`,
    `src/main.tsx`, `vite.config.ts`, `src/components/nutrigo/*` (55 archivos),
    `src/features/nutrigo/*` y las rutas de `care`, `foods` y `targets`.
-4. **Orden de juntado.** Primero la pila de Codex, en orden **#105 → #106 → #107 → #108**, después de
+4. **Orden de juntado.** Primero la pila de Codex, en orden **#105 → #106 → #107 → #108 → #115**, después de
    la prueba con Verónica. Los PR de Claude son chicos: si se juntan antes, Codex hace merge de
    `main` en su pila; si se juntan después, Claude hace merge de `main` en su rama.
 5. **Diseño.** La app de la paciente es **igual a Nutrigo, colores incluidos**. Regla fija (Facundo, 14/10).
@@ -68,7 +69,8 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
-- **15/10 · Claude** · Lista del súper de la paciente agrupada por comercio (los seis colores del widget del archivo) y «Compartir lista» por WhatsApp o copiada. Solo toca `screens/Shopping.tsx`, `screens/shopping-format.ts` y una traducción; nada de la base ni de la pila de Codex.
+- **15/10 · Claude** · #117: lista del súper de la paciente agrupada por comercio (los seis colores del widget del archivo) y «Compartir lista» por WhatsApp o copiada. Solo toca `screens/Shopping.tsx`, `screens/shopping-format.ts` y una traducción; nada de la base ni de la pila de Codex. #116 y #117 juntados a `main` con el «junta el 116 y 117 a main» de Facundo.
+- **15/10 · Claude** · Con el «juntalo al main» de Facundo se juntaron #109 (estos documentos) y #114 (recorridos de punta a punta y monitor). Codex dejó un quinto borrador, #115 (ficha clínica, laboratorio y PDF), anotado en carriles. #116: aviso en la campanita de la paciente cuando la nutri le indica un recurso y no lo leyó (el de plan nuevo ya existía). Toca con cambios mínimos `src/features/nutrigo/patient-notices.tsx` y `screens/Resources.tsx`; sin migraciones.
 - **14/10 · Claude** · Comparación de #105 con Figma: la app de la paciente queda igual que en `main` (20 pantallas); el panel cambia el gris de textos secundarios. [Informe](coordinacion/comparacion-pr105-figma-2026-10-14.md).
 - **14/10 · Claude** · PR #110 (vistas de la paciente solo lectura, migración `20261015090000`). PR #111 (la IA pide `data_collection: deny`) cerrado: Facundo eligió dejar la IA gratis como está. Ninguno toca archivos de la pila de Codex.
 - **14/10 · Facundo** · Gris de textos chicos del panel de la nutricionista: **el de Nutrigo (`#8A8C90`)**, no el `#52545B` de #105. Antes de juntar #105, volver ese gris al de Nutrigo (Codex o quien lo junte).
