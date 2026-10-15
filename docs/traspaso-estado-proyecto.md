@@ -187,6 +187,14 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - App para tiendas (Android primero, empaquetando la web), calidad en producción, publicidad paga y
   página pública con precios (espera el precio). Plan: `docs/plan-apartados.md`.
 
+## Mensajes al instante en la app de la paciente (2026-10-15)
+
+Antes la paciente solo veía un mensaje nuevo de su nutri si recargaba la página. Ahora la app trae la ficha
+sola mientras está a la vista: cada 15 s con «Mensajes» abierto (igual que el consultorio) y cada 60 s en las
+demás pantallas, así la campanita avisa del mensaje. Al volver a la pestaña actualiza enseguida. Con la pestaña
+oculta no pide nada. Código: `src/features/nutrigo/use-live-refresh.ts` (con pruebas) y `PatientApp.tsx`.
+No toca la base ni el diseño. Tiempo real de verdad (sin esperar 15 s) necesitaría Supabase Realtime: queda para más adelante.
+
 ## Actividad, rutina y pasos de la paciente (2026-10-15)
 - Inicio de la paciente: «Actividad reciente» y el bloque de ejercicio usan las actividades reales de la pantalla de Ejercicio (antes, en producción, quedaban vacíos porque la ficha no las trae).
 - El avance de la rutina en Inicio cuenta las series que la paciente cargó con «Registrar rutina» esa semana (antes quedaba siempre 0).
