@@ -31,6 +31,14 @@ describe('Progreso paciente dentro de Nutrigo', () => {
     expect(buildProgressView(patient)).toMatchObject({ activeDays: 3, energyRecordedDays: 3, maxHydration: 6, reviewedMeals: 2, pendingMeals: 1 });
   });
 
+  it('resume los síntomas de la semana junto a descanso y energía, o dice que no hay', () => {
+    expect(renderToStaticMarkup(<ShowroomProgress patient={patient} professional />)).toContain('Sin síntomas registrados');
+    const days = patient.journey.days.map((day, index) => ({ ...day, symptoms: index >= 5 ? ['acidez'] : index === 1 ? ['hinchazon'] : [] }));
+    const html = renderToStaticMarkup(<ShowroomProgress patient={{ ...patient, journey: { ...patient.journey, days } } as ShowroomPatient} professional />);
+    expect(html).toContain('aria-label="Síntomas de los últimos 7 días"');
+    expect(html).toContain('Síntomas: Acidez (2 días), Hinchazón (1 día)');
+  });
+
   it('presenta los widgets del archivo sin confundir adherencia con peso', () => {
     const html = renderToStaticMarkup(<ShowroomProgress patient={patient} />);
     expect(html).toContain('Tu objetivo');

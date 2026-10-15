@@ -1,6 +1,7 @@
 # Traspaso del proyecto (2026-10-01)
 
 Una sola página para que cualquier agente (Claude, Codex u otro) siga sin tener el chat.
+**Desde el 14/10:** el reparto de trabajo entre agentes está en [`coordinacion-agentes.md`](coordinacion-agentes.md) y los documentos de producto en [`producto/`](producto/README.md).
 Los detalles de cada tema están en los archivos que se nombran. Este archivo se actualiza
 cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facundo.
 
@@ -16,6 +17,9 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
   de Nutrigo (Figma `OTolnKfsxUFjaZOhhdb04i`; si Plan V se aparta, gana el archivo); escritorio 1440 y
   móvil 390 (tablet no); una rama y un PR por tema; nada directo a `main`; todo cambio en la base de
   producción o en servicios pagos necesita su frase escrita (un "ok" suelto no alcanza).
+- Habilidades de apoyo (14/10): `security-review`, `postgres-patterns` (ECC) y cuatro de animación y datos
+  extremos de Emil Kowalski en `.claude/skills/`. Solo informan; en la app de la paciente manda Nutrigo.
+  Detalle en `docs/agentes/reglas-plan-v.md`.
 - Antes de un PR: `npm test`, `npm run check` y, si hay migraciones, `npm run check:migrations`.
   Para ver la app con datos de ejemplo: `npm install`, `npm run local` y "Continuar en modo demo".
 
@@ -234,3 +238,14 @@ Entrega 4 verificada en `codex/nutridesk-release-nutricion`, sobre la cabeza fin
 
 
 Quinta entrega apilada: [ficha clínica y exportación histórica, evidencia y límites](nutridesk-release-clinica-2026-10-14.md). Base 304413f; gate previo 2.719 pruebas aprobadas; verificación nueva de marca vigente en curso, sin producción.
+
+
+## Ánimo y síntomas de la paciente (2026-10-15)
+En el Diario, «Registrar» → «Cómo me siento»: energía del día (con energía, normal, sin energía; se guarda en la energía que ya existía) y ocho síntomas de una lista cerrada. La nutricionista los ve en la ficha, «Registros y evolución», debajo de «Descanso y energía». Nutrigo no dibuja esta pantalla: se armó con su diálogo de registro y los botones del diario. Migración `20261015100000_habit_symptoms` (agrega una columna con lista cerrada): ya aplicada en la base el 14/10 con la frase de Facundo (el historial de la base la anota como `20261014215543`). La de #110 (vistas solo lectura) también quedó aplicada. PR112 y PR110 ya integrados en main el 14/10; no volver a ejecutar sus migraciones.
+
+## Recorridos de punta a punta y monitor de producción (2026-10-14)
+Etapa 1 del plan (`docs/producto/06-plan-implementacion.md`, puntos 6 y 7, sin costo):
+- `npm run test:e2e` (Playwright) levanta la API y la web en modo demo, con las claves de Supabase vacías, y recorre en orden cinco caminos de dos roles: alta de paciente con invitación, ingreso de la paciente visto por la nutri, plan editado y publicado visto por la paciente, comida registrada en el diario vista por la nutri, y revisión de la nutri vista por la paciente. Corre en cada PR (trabajo «recorridos de punta a punta» de CI). Prueba a propósito: romper «Confirmar sin cambios» hace fallar el recorrido 5.
+- `.github/workflows/monitor.yml` mira cada 15 minutos `api/health` (con la base conectada) y la web. Si fallan tres intentos abre un issue con la etiqueta `caida` que menciona a Facundo; cuando vuelve, lo cierra. Arranca recién cuando el archivo está en `main`.
+- Quedan afuera porque cuestan o piden cuenta: base de staging aparte, Sentry y un monitor externo con aviso al celular.
+
