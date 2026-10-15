@@ -1,5 +1,5 @@
-import { useState, type ReactNode } from 'react';
-import { ArrowLeft, Bread, ChartBar, Clock, CookingPot, Drop, Fire, Fish, Heartbeat, Knife, ListNumbers, Minus, Plus } from '@phosphor-icons/react';
+import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { Bread, Drop, Fire, Fish } from '@phosphor-icons/react';
 import type { RecipeCard, RecipeItem, RecipeMacros } from '../../types/recipes';
 import './recipe-plate.css';
 import './menu-fig.css';
@@ -111,10 +111,14 @@ export function RecipeDetails({ recipe, onBack, actions }: {
   actions?: ReactNode;
 }) {
   const [servings, setServings] = useState(recipe.yieldPortions);
-  useFigmaDetail('Detalle de receta', ['84:3145','457:13264']);
+  const backRef = useRef(onBack);
+  backRef.current = onBack;
+  const detailBack = useCallback(() => backRef.current(), []);
+  useFigmaDetail('Detalle de receta', ['84:3145','457:13264'], detailBack);
   const macros = recipe.card.macro_status === 'declared' ? recipe.card.macros : null;
   const info: Array<[string, string, string]> = [
-    ['Preparación', recipe.card.prep_minutes ? `${recipe.card.prep_minutes} min` : '—', 'recipe-clock'],
+    ['Horario', '—', 'recipe-clock'],
+    ['Preparación', recipe.card.prep_minutes ? `${recipe.card.prep_minutes} min` : '—', 'recipe-preparation'],
     ['Cocción', '—', 'recipe-cooking'],
     ['Dificultad', '—', 'recipe-difficulty'],
     ['Total de pasos', `${recipe.steps.length} ${recipe.steps.length === 1 ? 'paso' : 'pasos'}`, 'recipe-steps'],
@@ -132,11 +136,11 @@ export function RecipeDetails({ recipe, onBack, actions }: {
         <div className="mf-detail-image"><RecipeDishWell title={recipe.title} status={recipe.card.cover_status} url={recipe.card.cover_url} alt={recipe.card.cover_alt} /></div>
         <dl className="mf-detail-info">
           {info.map(([label, value, asset]) => <div key={label}>
-            <dt><span><FigmaAsset name={asset} size={12} /></span>{label}</dt>
+            <dt><span className="mf-detail-info-icon"><FigmaAsset name={asset} size={12} /></span><span className="mf-detail-info-label">{label}</span></dt>
             <dd>{value}</dd>
           </div>)}
         </dl>
-        <section className="fp-recipe-reviews" aria-label="Reseñas"><header><h3>Reseñas</h3><span className="fp-rating-empty"><span aria-hidden="true">{[0,1,2,3,4].map((index) => <FigmaAsset key={index} name="star" size={14} />)}</span>— / 5</span></header><div className="fp-review-empty"><p>No hay reseñas disponibles para esta receta.</p><span className="fp-review-avatar" aria-hidden="true" /></div></section>
+        <section className="fp-recipe-reviews" aria-label="Reseñas"><header><h3>Reseñas</h3><span className="fp-rating-empty"><span aria-hidden="true">{[0,1,2,3,4].map((index) => <FigmaAsset key={index} name="star" size={14} />)}</span>— / 5</span></header><div className="fp-review-empty"><p>No hay reseñas disponibles para esta receta.</p><span className="fp-review-avatar" aria-hidden="true" /></div>{actions && <div className="mf-detail-mobile-actions">{actions}</div>}</section>
       </aside>
 
       <article className="mf-detail-content">

@@ -6,6 +6,7 @@ import type { Macros, MealStatus } from '../../types';
 import { NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
 import { DayAssignedMeals } from './DayMeals';
+import { FigmaAsset } from './FigmaPatientFront';
 import './showroom-patient-diary.css';
 import './agenda-diario-fig.css';
 
@@ -246,6 +247,7 @@ export function FoodDiaryBoard({ rows, now, audience, query, defaultScope, onAdd
   const [scope, setScope] = useState<DiaryScope>(defaultScope);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   useEffect(() => { setTerm(query); }, [query]);
   useEffect(() => { setPage(1); }, [term, filter, scope, pageSize, rows]);
   const bounds = useMemo(() => diaryWeekBounds(rows.map((row) => row.logged_at), now), [rows, now]);
@@ -265,10 +267,10 @@ export function FoodDiaryBoard({ rows, now, audience, query, defaultScope, onAdd
 
   return <div className="nvfd">
     <section className="nvfd-stats" aria-label="Resumen del diario">
-      <DiaryStat label="Calorías totales" value={table.totals.kcal} unit="kcal" tone="green" icon={<Fire size={24} />} trend={table.trend?.kcal} scopeLabel={statScope} />
-      <DiaryStat label="Carbohidratos totales" value={table.totals.carbs_g} unit="g" tone="saffron" icon={<Bread size={24} />} trend={table.trend?.carbs_g} scopeLabel={statScope} />
-      <DiaryStat label="Proteínas totales" value={table.totals.protein_g} unit="g" tone="orange" icon={<Fish size={24} />} trend={table.trend?.protein_g} scopeLabel={statScope} />
-      <DiaryStat label="Grasas totales" value={table.totals.fat_g} unit="g" tone="gray" icon={<Drop size={24} />} trend={table.trend?.fat_g} scopeLabel={statScope} />
+      <DiaryStat label="Calorías totales" value={table.totals.kcal} unit="kcal" tone="green" icon={pro ? <Fire size={24} /> : <FigmaAsset name="diary-fire" size={24} />} trend={table.trend?.kcal} scopeLabel={statScope} />
+      <DiaryStat label="Carbohidratos totales" value={table.totals.carbs_g} unit="g" tone="saffron" icon={pro ? <Bread size={24} /> : <FigmaAsset name="diary-bread" size={24} />} trend={table.trend?.carbs_g} scopeLabel={statScope} />
+      <DiaryStat label="Proteínas totales" value={table.totals.protein_g} unit="g" tone="orange" icon={pro ? <Fish size={24} /> : <FigmaAsset name="diary-fish" size={24} />} trend={table.trend?.protein_g} scopeLabel={statScope} />
+      <DiaryStat label="Grasas totales" value={table.totals.fat_g} unit="g" tone="gray" icon={pro ? <Drop size={24} /> : <FigmaAsset name="diary-drop" size={24} />} trend={table.trend?.fat_g} scopeLabel={statScope} />
     </section>
 
     <section className="nvfd-widget" aria-label={pro ? 'Historial de comidas' : 'Registros del diario'}>
@@ -277,12 +279,17 @@ export function FoodDiaryBoard({ rows, now, audience, query, defaultScope, onAdd
           <label className="nvfd-search"><MagnifyingGlass size={14} aria-hidden="true" /><input type="search" aria-label="Buscar comidas" placeholder="Buscar comidas" value={term} onChange={(event) => setTerm(event.target.value)} /></label>
           <Picker className="nvfd-filter" icon={<Funnel size={14} aria-hidden="true" />} label={filter === 'all' ? 'Filtrar' : FILTER_LABEL[filter]} ariaLabel="Filtrar registros" value={filter} onChange={(value) => setFilter(value as PatientDiaryFilter)}
             options={(['all', 'pending', 'reviewed'] as const).map((id) => ({ value: id, label: `${FILTER_LABEL[id]} (${table.counts[id]})` }))} />
+          {!pro && <button type="button" className="nvfd-mobile-filter" aria-label="Filtros del diario" aria-expanded={mobileFiltersOpen} aria-controls="diary-mobile-filters" onClick={() => setMobileFiltersOpen((open) => !open)}><FigmaAsset name="diary-funnel-mobile" size={18} /></button>}
         </div>
         <div className="nvfd-head-right">
           {patientPicker}
           <Picker icon={<CalendarBlank size={14} aria-hidden="true" />} label={scopeLabel} ariaLabel="Semana del diario" value={String(scope)} onChange={(value) => setScope(value === 'all' ? 'all' : Number(value))} options={weekOptions} />
           {onAdd && <button type="button" className="nvfd-cta" onClick={onAdd}><Plus size={14} aria-hidden="true" />Registrar comida</button>}
         </div>
+        {!pro && mobileFiltersOpen && <div className="nvfd-mobile-filters" id="diary-mobile-filters">
+          <Picker label={FILTER_LABEL[filter]} ariaLabel="Estado de los registros" value={filter} onChange={(value) => setFilter(value as PatientDiaryFilter)} options={(['all', 'pending', 'reviewed'] as const).map((id) => ({ value: id, label: `${FILTER_LABEL[id]} (${table.counts[id]})` }))} />
+          <Picker label={scopeLabel} ariaLabel="Período del diario" value={String(scope)} onChange={(value) => setScope(value === 'all' ? 'all' : Number(value))} options={weekOptions} />
+        </div>}
       </header>
 
       <div className="nvfd-scroll"><div className={`nvfd-table${pro ? ' nvfd-pro' : ''}`} role="table" aria-label={pro ? 'Historial de comidas' : 'Registros del diario'}>

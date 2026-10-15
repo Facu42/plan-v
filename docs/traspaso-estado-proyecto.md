@@ -1,4 +1,4 @@
-# Traspaso del proyecto (2026-10-01)
+# Traspaso del proyecto (2026-10-03)
 
 Una sola página para que cualquier agente (Claude, Codex u otro) siga sin tener el chat.
 Los detalles de cada tema están en los archivos que se nombran. Este archivo se actualiza
@@ -54,6 +54,15 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
   Ver `docs/figma-crm-funcional-2026-10-01.md`.
 
 ## Lo pendiente
+
+- Fidelidad Nutrigo, confirmación «si ese» y pedido de continuar: rama
+  `codex/nutrigo-fidelidad-completa`, revisión de doce vistas/detalles y móviles,
+  130 SVG originales verificados y controles operativos conservados. 1.165 pruebas,
+  TypeScript/build y navegador local 1440/390 aprobados. **No integrar:** Facundo
+  rechazó este enfoque de ajustes y capturas el 2026-10-03. Quiere reutilizar el
+  proyecto fuente completo de Figma; se detuvo QA y no se creó commit/PR ni se
+  publicó. Identificar el proyecto Figma Make o su exportación de código antes de
+  continuar. Ver `docs/nutrigo-fidelidad-2026-10-03.md`.
 
 - IA gratuita, pedido del 2/10: el predeterminado seguía siendo `gpt-4o-mini` y no cumplía
   lo acordado. Rama `codex/ia-solo-modelos-gratuitos`: `openrouter/free`, rechazo de pagos

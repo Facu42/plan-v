@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { CaretDown, CaretLeft, CaretRight, Funnel, MagnifyingGlass, ShoppingCart, Swap, X } from '@phosphor-icons/react';
+import { Swap, X } from '@phosphor-icons/react';
 import { careErrorMessage } from '../../api/care';
 import { isAbortError } from '../../api/client';
 import { plansApi } from '../../api/plans';
@@ -10,6 +10,7 @@ import { PlanPublishedItem } from './MealPlanVersions';
 import { mealSlotTone, NvBadge, NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
 import './plan-fig.css';
+import { FigmaAsset } from './FigmaPatientFront';
 
 /* Meal Plan del .fig (84:2994 escritorio, 470:15300 móvil): barra Cream-BG con mes, búsqueda,
  * filtro y CTA verde; debajo, la tabla semanal: una fila por día y una columna por momento. */
@@ -173,7 +174,7 @@ export function ColumnFilter({ columns, hidden, onToggle }: { columns: PlanColum
   }, [open]);
   return <div className="pf-popover-root" ref={root}>
     <button type="button" className="pf-picker pf-collapse" aria-expanded={open} aria-haspopup="true" aria-label="Filtrar momentos" onClick={() => setOpen(!open)}>
-      <span className="pf-picker-icon"><Funnel size={14} /></span><span className="pf-picker-text">Filtrar</span><span className="pf-picker-caret"><CaretDown size={14} /></span>
+      <span className="pf-picker-icon"><FigmaAsset name="plan-filter" size={14} className="pf-desktop-asset" /><FigmaAsset name="plan-mobile-filter" size={18} className="pf-mobile-asset" /></span><span className="pf-picker-text">Filtrar</span><span className="pf-picker-caret"><FigmaAsset name="plan-caret" size={14} /></span>
     </button>
     {open && <div className="pf-popover" role="group" aria-label="Momentos visibles">
       {columns.map((column) => <label key={column.slot}><input type="checkbox" checked={!hidden.has(column.slot)} onChange={() => onToggle(column.slot)} />{column.slot}</label>)}
@@ -194,12 +195,12 @@ export function PlanToolbar({ nav, search, onSearch, filter, extra, cta, label }
   return <div className="pf-toolbar" role="toolbar" aria-label={label}>
     <div className="pf-toolbar-left">
       <div className="pf-nav-buttons">
-        <button type="button" className="pf-icon-button" aria-label="Semana anterior" onClick={() => nav.setOffset(nav.offset - 1)}><CaretLeft size={18} /></button>
-        <button type="button" className="pf-icon-button" aria-label="Semana siguiente" onClick={() => nav.setOffset(nav.offset + 1)}><CaretRight size={18} /></button>
+        <button type="button" className="pf-icon-button" aria-label="Semana anterior" onClick={() => nav.setOffset(nav.offset - 1)}><FigmaAsset name="plan-left" size={18} /></button>
+        <button type="button" className="pf-icon-button" aria-label="Semana siguiente" onClick={() => nav.setOffset(nav.offset + 1)}><FigmaAsset name="plan-right" size={18} /></button>
       </div>
       <label className="pf-month">
         <span className="pf-month-title"><strong>{nav.monthName}</strong><span>{nav.year}</span></span>
-        <CaretDown size={14} aria-hidden="true" />
+        <FigmaAsset name="plan-caret" size={14} />
         <select aria-label="Elegir mes" value={nav.monthOptions.find((option) => option.key === nav.monthKey)?.value ?? ''} onChange={(event) => nav.setOffset(Number(event.target.value))}>
           {!nav.monthOptions.some((option) => option.key === nav.monthKey) && <option value="">{nav.monthName} {nav.year}</option>}
           {nav.monthOptions.map((option) => <option key={option.key} value={option.value}>{option.label}</option>)}
@@ -208,10 +209,10 @@ export function PlanToolbar({ nav, search, onSearch, filter, extra, cta, label }
     </div>
     <div className="pf-toolbar-right">
       <label className={`pf-search${searchOpen ? ' is-open' : ''}`}>
-        <MagnifyingGlass size={14} aria-hidden="true" />
+        <FigmaAsset name="plan-search" size={14} />
         <input type="search" aria-label="Buscar comidas" placeholder="Buscar comida" value={search} onChange={(event) => onSearch(event.target.value)} />
       </label>
-      <button type="button" className="pf-icon-button pf-search-toggle" aria-label="Buscar comidas" aria-expanded={searchOpen} onClick={() => setSearchOpen(!searchOpen)}><MagnifyingGlass size={18} /></button>
+      <button type="button" className="pf-icon-button pf-search-toggle" aria-label="Buscar comidas" aria-expanded={searchOpen} onClick={() => setSearchOpen(!searchOpen)}><FigmaAsset name="plan-mobile-search" size={18} /></button>
       {filter}
       {extra}
       {cta}
@@ -231,7 +232,7 @@ export function PlanWeekTable({ rows, columns, nav, label, renderCell }: {
       <div className="pf-row pf-head" role="row">
         <div className="pf-week" role="columnheader">
           <label className="pf-week-picker">
-            <span>{nav.weekOptions[nav.weekIndex]?.label ?? 'Semana'}</span><CaretDown size={14} aria-hidden="true" />
+            <span>{nav.weekOptions[nav.weekIndex]?.label ?? 'Semana'}</span><FigmaAsset name="plan-caret" size={14} />
             <select aria-label="Elegir semana" value={nav.weekOptions[nav.weekIndex]?.value ?? nav.offset} onChange={(event) => nav.setOffset(Number(event.target.value))}>
               {nav.weekOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
@@ -308,8 +309,7 @@ export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
     search={search}
     onSearch={setSearch}
     filter={<ColumnFilter columns={table.columns} hidden={hidden} onToggle={(slot) => setHidden((current) => { const next = new Set(current); if (next.has(slot)) next.delete(slot); else next.add(slot); return next; })} />}
-    extra={<button type="button" className="pf-picker pf-collapse" aria-label="Pedir alternativas" onClick={() => setAlternatives(true)}><span className="pf-picker-icon"><Swap size={14} /></span><span className="pf-picker-text">Alternativas</span></button>}
-    cta={<button type="button" className="pf-cta pf-collapse" aria-label="Lista de compras" onClick={onShopping}><span className="pf-cta-icon"><ShoppingCart size={18} /></span><span className="pf-cta-text">Lista de compras</span></button>}
+    cta={<button type="button" className="pf-cta pf-collapse" aria-label="Lista de compras" onClick={onShopping}><span className="pf-cta-icon"><FigmaAsset name="plan-mobile-plus" size={18} /></span><span className="pf-cta-text">Lista de compras</span></button>}
   />;
 
   return <><section className="pf-plan" aria-label="Tu plan semanal">
@@ -321,7 +321,7 @@ export function ShowroomPatientPlan({ patient, now, query, onShopping }: {
       return <PlanMealCell row={row} column={column} cell={cell} dim={!matchesPlanSearch(cell, search)} onOpen={() => setOpen({ row, cell })} />;
     }} />
     {!hasAnyPlan && <p className="pf-note" role="status">Tu plan está en preparación. Cuando tu nutricionista publique comidas, las vas a encontrar acá organizadas por día.</p>}
-    <details className="fp-plan-target"><summary>Mi información nutricional</summary><PatientNutritionTarget patientId={patient.id} /></details>
+    <details className="fp-plan-target"><summary>Mi información nutricional</summary><PatientNutritionTarget patientId={patient.id} /><button type="button" className="pf-picker" aria-label="Pedir alternativas" onClick={() => setAlternatives(true)}><span className="pf-picker-icon"><Swap size={14} /></span><span className="pf-picker-text">Alternativas</span></button></details>
     {open && <PlanSheet title={`${open.cell.slot} · ${open.row.day}`} onClose={() => setOpen(null)}><PlanCellDetail row={open.row} cell={open.cell} plan={open.cell.source === 'dated' ? plan : null} /></PlanSheet>}
     {alternatives && <PlanSheet title="Alternativas" wide onClose={() => setAlternatives(false)}><CarePanel patientId={patient.id} mode="menu" /></PlanSheet>}
   </section></>;

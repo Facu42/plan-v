@@ -1,0 +1,1692 @@
+[
+  {
+    "name": "calendar-left",
+    "variable": "imgIconCaretLeft",
+    "sourceNode": "84:1666",
+    "sourceFile": "4f1bf.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 604,
+    "sha256": "fb30914b2a1003317e0ececef807ad5446511c958f48a58239655f56f805f131"
+  },
+  {
+    "name": "calendar-right",
+    "variable": "imgIconCaretRight",
+    "sourceNode": "84:1666",
+    "sourceFile": "35078.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 606,
+    "sha256": "fe0f893a16d0ae77d295d7691ef30c17dae678da073bef75ca76c4f776fc99ba"
+  },
+  {
+    "name": "calendar-caret",
+    "variable": "imgIconCaretDown2",
+    "sourceNode": "84:1666",
+    "sourceFile": "16cfa.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 585,
+    "sha256": "cf290718f15727c0d85c7282fb27201fef3c0088472e29c92a6ea42dd9bb3e39"
+  },
+  {
+    "name": "calendar-check-green",
+    "variable": "imgCheckbox",
+    "sourceNode": "84:1666",
+    "sourceFile": "63c07.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1395,
+    "sha256": "3b49d2ed9b8ee64d4278a51a187c27661b3266fbeb9762f94acf08b441ea89e6"
+  },
+  {
+    "name": "calendar-check-gold",
+    "variable": "imgCheckbox1",
+    "sourceNode": "84:1666",
+    "sourceFile": "51dee.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1395,
+    "sha256": "9b7e93eb34c31d8ca95bcc67acd56dfaf75cf5faca58ec3fd196e785f21869a7"
+  },
+  {
+    "name": "calendar-check-orange",
+    "variable": "imgCheckbox2",
+    "sourceNode": "84:1666",
+    "sourceFile": "5abdb.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1395,
+    "sha256": "9d7d27b0e81075d332d32677faaebc309e4ee8f7114385c17b6b7760751f1bed"
+  },
+  {
+    "name": "calendar-fork",
+    "variable": "imgIconSpecialForkKnife",
+    "sourceNode": "84:1666",
+    "sourceFile": "7e5b8.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 2588,
+    "sha256": "29730b8a25174ece2c5e0f057bc002dc9b0db2ce55bcf960cbf99b2659d9b9b4"
+  },
+  {
+    "name": "calendar-run",
+    "variable": "imgIconSpecialPersonSimpleRun",
+    "sourceNode": "84:1666",
+    "sourceFile": "6a619.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 2880,
+    "sha256": "348d2df8fc71be9e6265c7bd2c7c7bdfe6cdf075e9530d13083ae0f5a1651360"
+  },
+  {
+    "name": "calendar-consult",
+    "variable": "imgIconSpecialCalendarCheck",
+    "sourceNode": "84:1666",
+    "sourceFile": "c167e.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 2085,
+    "sha256": "97ee69f2b4c55af3f0f9593410fcdd0dec9c396554cd1004a3b2e745485d70e1"
+  },
+  {
+    "name": "calendar-date",
+    "variable": "imgIconNavCalendarDots1",
+    "sourceNode": "84:1666",
+    "sourceFile": "b3414.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 3503,
+    "sha256": "bf25911e57c0dfd23cd4b665a9d5cb024cf6ae79f7f07ff4b041c08c543209e9"
+  },
+  {
+    "name": "calendar-clock",
+    "variable": "imgIconClock",
+    "sourceNode": "84:1666",
+    "sourceFile": "148cc.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 1555,
+    "sha256": "0ec33a62170ee22ef88ea5c97bdcc9395aa1475e96b078a52da9c0bfa40b15f5"
+  },
+  {
+    "name": "calendar-place",
+    "variable": "imgIconMapPinArea",
+    "sourceNode": "84:1666",
+    "sourceFile": "f9b60.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 1874,
+    "sha256": "f29d092895a8cc81289f6c1bd469c92eb4f4d1d22ee740eeb2d024f18230fea5"
+  },
+  {
+    "name": "calendar-outside",
+    "variable": "imgVector1",
+    "sourceNode": "84:1666",
+    "sourceFile": "cb8f9.svg",
+    "dimensions": [
+      "width=\"327.92\"",
+      "height=\"136.857\"",
+      "viewBox=\"0 0 327.92 136.857\""
+    ],
+    "bytes": 595,
+    "sha256": "1828f2d9085b32fd96fdda5359d533e0c6e572dbe24380e86bd55f23778be2b1"
+  },
+  {
+    "name": "recipe-preparation",
+    "variable": "imgIconSpecialKnife",
+    "sourceNode": "84:3145",
+    "sourceFile": "246bc.svg",
+    "dimensions": [
+      "width=\"12\"",
+      "height=\"12\"",
+      "viewBox=\"0 0 12 12\""
+    ],
+    "bytes": 1333,
+    "sha256": "866f4eb86b01cfaf3d7d8a456c242984ea00be5bbc7a156bb8b2c495f73c471f"
+  },
+  {
+    "name": "exercise-squat",
+    "variable": "imgIconSpecialPersonSimpleSquat",
+    "sourceNode": "105:2931",
+    "sourceFile": "a4ab3.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1448,
+    "sha256": "34b1e4ce8a2c2a00d5ba5bebf73fad74f0cf97e3ef9b2799561751c8e9e3e797"
+  },
+  {
+    "name": "exercise-deadlifts",
+    "variable": "imgIconSpecialPersonSimpleDeadlifts",
+    "sourceNode": "105:2931",
+    "sourceFile": "7a56a.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 3750,
+    "sha256": "4b6e1426f90c096383035556c7480b2c52275c1ec0c8d0d9905b54a625e36a19"
+  },
+  {
+    "name": "exercise-bench",
+    "variable": "imgIconSpecialPersonSimpleBenchPress",
+    "sourceNode": "105:2931",
+    "sourceFile": "a719f.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 2985,
+    "sha256": "9263240c7100af3d0668a9f8ffa81bcf251d47fd523c267482d9b92aa7be7550"
+  },
+  {
+    "name": "exercise-pull-ups",
+    "variable": "imgIconSpecialPersonSimplePullUps",
+    "sourceNode": "105:2931",
+    "sourceFile": "bfb23.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1672,
+    "sha256": "21d8d0ebdc064d5bce91d682e6b66a11d187e40777e9638ea642649aec26c508"
+  },
+  {
+    "name": "exercise-plank",
+    "variable": "imgIconSpecialPersonSimplePlank",
+    "sourceNode": "105:2931",
+    "sourceFile": "b7687.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1201,
+    "sha256": "8971ad645c4e9f1debd9c82168cf02c7cf8bb94efabc418c3be1d7bd7ae13d24"
+  },
+  {
+    "name": "exercise-run",
+    "variable": "imgIconNavPersonSimpleRun",
+    "sourceNode": "105:2931",
+    "sourceFile": "deeef.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 3032,
+    "sha256": "230271c4a3b6d69fd6ad9bd513a68bd4960236a939fdf988c15b47a054bbcf06"
+  },
+  {
+    "name": "exercise-lunge",
+    "variable": "imgIconSpecialPersonSimpleLunges",
+    "sourceNode": "105:2931",
+    "sourceFile": "e4162.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1866,
+    "sha256": "c35e077a8ab4037671e09bd36bfc75b24350e84882545ccd6a26293f8dbfe567"
+  },
+  {
+    "name": "exercise-barbell",
+    "variable": "imgIconSpecialBarbell",
+    "sourceNode": "105:2931",
+    "sourceFile": "3a24d.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 2198,
+    "sha256": "995d9c6d16001b288bfa041cf0604c98cd8f5d8960956070c9901ee2cdd7a692"
+  },
+  {
+    "name": "exercise-biceps",
+    "variable": "imgIconSpecialPersonSimpleBicepCurls",
+    "sourceNode": "105:2931",
+    "sourceFile": "f832d.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1784,
+    "sha256": "eacc29c1eb74d9651aafb9f9cb8009a05932e961ed8a5dcf51e492860523f353"
+  },
+  {
+    "name": "exercise-bike",
+    "variable": "imgPersonSimpleBike",
+    "sourceNode": "105:2931",
+    "sourceFile": "0626b.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 4290,
+    "sha256": "40b89f9e0d8d9864c09212c75674437e071ed411352619fdff1dd9d78b9ef20b"
+  },
+  {
+    "name": "exercise-climbers",
+    "variable": "imgIconSpecialPersonSimpleMountClimbers",
+    "sourceNode": "105:2931",
+    "sourceFile": "5cc72.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1978,
+    "sha256": "51b1c0d37d48138e51e84830e94b69a3f30d359870ec92c809afde319f501919"
+  },
+  {
+    "name": "exercise-yoga",
+    "variable": "imgIconSpecialPersonYoga",
+    "sourceNode": "105:2931",
+    "sourceFile": "39546.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 2333,
+    "sha256": "c2202edba9e9b389a36238b40d8c2de510a61784c0d862f9fe313701a5672fa3"
+  },
+  {
+    "name": "exercise-left",
+    "variable": "imgIconCaretLeft",
+    "sourceNode": "105:2931",
+    "sourceFile": "40729.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 604,
+    "sha256": "7f0fe8e63983b3c507c05e0ce48881a6010be6ca6766518e13f2741129bffb20"
+  },
+  {
+    "name": "exercise-right",
+    "variable": "imgIconCaretRight",
+    "sourceNode": "105:2931",
+    "sourceFile": "27dfe.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 606,
+    "sha256": "fe0f893a16d0ae77d295d7691ef30c17dae678da073bef75ca76c4f776fc99ba"
+  },
+  {
+    "name": "exercise-squat-mobile",
+    "variable": "imgIconSpecialPersonSimpleSquat",
+    "sourceNode": "501:22824",
+    "sourceFile": "28a78.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1432,
+    "sha256": "3624547f5793a6bf07d8c20623c8a2ac3fe03c1c2a626145f0546112abf4e2e1"
+  },
+  {
+    "name": "exercise-deadlifts-mobile",
+    "variable": "imgIconSpecialPersonSimpleDeadlifts",
+    "sourceNode": "501:22824",
+    "sourceFile": "c4ef9.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 3856,
+    "sha256": "a36f389f28b6493ea305ab70dfc55f3a67a4130b2e9c0a7bf550447edf9a83b7"
+  },
+  {
+    "name": "exercise-bench-mobile",
+    "variable": "imgIconSpecialPersonSimpleBenchPress",
+    "sourceNode": "501:22824",
+    "sourceFile": "af529.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 2966,
+    "sha256": "dbbfa81e9097c6026cb278bd6f1939a73284759710e3a7051be7cf257456faba"
+  },
+  {
+    "name": "exercise-pull-ups-mobile",
+    "variable": "imgIconSpecialPersonSimplePullUps",
+    "sourceNode": "501:22824",
+    "sourceFile": "21cfd.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1788,
+    "sha256": "bcb66c04541f723da1309cec064c610993158e8935798e463b920555678de8b7"
+  },
+  {
+    "name": "exercise-plank-mobile",
+    "variable": "imgIconSpecialPersonSimplePlank",
+    "sourceNode": "501:22824",
+    "sourceFile": "c909d.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1205,
+    "sha256": "bf3f944ae444e94ccecb1910cd1961bd345add98c5cce00be9039cb4992fa240"
+  },
+  {
+    "name": "exercise-run-mobile",
+    "variable": "imgIconNavPersonSimpleRun",
+    "sourceNode": "501:22824",
+    "sourceFile": "d724b.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 3035,
+    "sha256": "056ed6f3729b084cfba577a9020464b28ba373a4eee549cf5ff61b075ce8606a"
+  },
+  {
+    "name": "exercise-lunge-mobile",
+    "variable": "imgIconSpecialPersonSimpleLunges",
+    "sourceNode": "501:22824",
+    "sourceFile": "92c0e.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1861,
+    "sha256": "eadc0ce1da481835d9d47066a3683e3f612d4cc62e9f96f95b13e3a3ab570452"
+  },
+  {
+    "name": "exercise-barbell-mobile",
+    "variable": "imgIconSpecialBarbell",
+    "sourceNode": "501:22824",
+    "sourceFile": "5b565.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 2206,
+    "sha256": "f8bd32bcef218193277f892e9f8242bcadb8b78db69f43444274eb2fb9952f67"
+  },
+  {
+    "name": "exercise-biceps-mobile",
+    "variable": "imgIconSpecialPersonSimpleBicepCurls",
+    "sourceNode": "501:22824",
+    "sourceFile": "7f465.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1753,
+    "sha256": "acb7027e1a403408c786dc03d4208d4927a68bb09958b655cfc0414ff7f46ed2"
+  },
+  {
+    "name": "exercise-bike-mobile",
+    "variable": "imgPersonSimpleBike",
+    "sourceNode": "501:22824",
+    "sourceFile": "e22bc.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 4284,
+    "sha256": "eb4fa6b849a4f6edeab55e73f0f570aeb6c1dcfaf81e454f564c545f4eff4add"
+  },
+  {
+    "name": "exercise-climbers-mobile",
+    "variable": "imgIconSpecialPersonSimpleMountClimbers",
+    "sourceNode": "501:22824",
+    "sourceFile": "916ca.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1983,
+    "sha256": "a3a065a9d9ffa409b16a084ee502639043bb4bfc117076cdae84371d8160d65e"
+  },
+  {
+    "name": "exercise-yoga-mobile",
+    "variable": "imgIconSpecialPersonYoga",
+    "sourceNode": "501:22824",
+    "sourceFile": "61936.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 2312,
+    "sha256": "6d64ce00d3581615fec082014cd049202dbe80d40943a1667ad9d78caf678de3"
+  },
+  {
+    "name": "exercise-more-mobile",
+    "variable": "imgIconDotsThree",
+    "sourceNode": "501:22824",
+    "sourceFile": "b443c.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 855,
+    "sha256": "f163aef0e44d880112c973bb703a836c8ecc8d81795129689768f2be341e16e8"
+  },
+  {
+    "name": "nav-home",
+    "variable": "imgIconNavSquaresFour",
+    "sourceNode": "12:792",
+    "sourceFile": "a4124.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 1992,
+    "sha256": "4b55f02d7fed196dc534851c397ea94bd469fe6ef2c6d424c927daefda58ba99"
+  },
+  {
+    "name": "nav-agenda",
+    "variable": "imgIconNavCalendarDots",
+    "sourceNode": "12:792",
+    "sourceFile": "63892.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 3785,
+    "sha256": "a8d254ca348241255d1f9fe828d2c5d534fb1092ca674470d074c7d4c47a3550"
+  },
+  {
+    "name": "nav-messages",
+    "variable": "imgIconNavChatTeardropDots",
+    "sourceNode": "12:792",
+    "sourceFile": "de8e1.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 2440,
+    "sha256": "bf1baf6e0beed78a24e36d0134df21a8ffe1c822e6717f02d48ed148cc184f3a"
+  },
+  {
+    "name": "nav-menu",
+    "variable": "imgIconNavForkKnife",
+    "sourceNode": "12:792",
+    "sourceFile": "2be86.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 2744,
+    "sha256": "de4423d21f1c339f7ed7c573a556f8cce7aca4d320ed5f1097b69ca2fd08bad9"
+  },
+  {
+    "name": "nav-plan",
+    "variable": "imgIconNavBowlFood",
+    "sourceNode": "12:792",
+    "sourceFile": "bf5d8.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 2019,
+    "sha256": "54dbc29c518e61ab62491d36b296ceddda32d92486c902bb249b0f7d6774258a"
+  },
+  {
+    "name": "nav-diary",
+    "variable": "imgIconNavNotebook",
+    "sourceNode": "12:792",
+    "sourceFile": "764e2.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 1437,
+    "sha256": "c23b7918a298b70037e7af124c2592b4edbf5a6f75aa38360765d45d183560bb"
+  },
+  {
+    "name": "nav-progress",
+    "variable": "imgIconNavChartLineUp",
+    "sourceNode": "12:792",
+    "sourceFile": "75bf3.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 1633,
+    "sha256": "f7f9c77ee361a66c72c6d865e9535b7737970046bc7a5bbe27eaf30ba25b9229"
+  },
+  {
+    "name": "nav-exercise",
+    "variable": "imgIconNavPersonSimpleTaiChi",
+    "sourceNode": "12:792",
+    "sourceFile": "ac21f.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 2065,
+    "sha256": "7daca15469ab9c76599df524c6911ca86f408cd3076aa4fc6b0d96534e471af6"
+  },
+  {
+    "name": "nav-resources",
+    "variable": "imgIconNavHeartbeat",
+    "sourceNode": "12:792",
+    "sourceFile": "b7ca2.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 2914,
+    "sha256": "f27cc40c05ee6136e5870bb694c244c3846d8f7acde06f7c01c23f2a1656ae05"
+  },
+  {
+    "name": "nav-logout",
+    "variable": "imgIconNavSignOut",
+    "sourceNode": "12:792",
+    "sourceFile": "78605.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 1283,
+    "sha256": "bc4fd9e3d8ea031a584ac5ea5c943bba6465d5b4db0ad1c31a544b64fbc1bd79"
+  },
+  {
+    "name": "home-stat-weight",
+    "variable": "imgIconSpecialSpeedometer",
+    "sourceNode": "12:792",
+    "sourceFile": "7544e.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 3659,
+    "sha256": "8681e56beace1588ef0ccd29039dfaca282ed0377958eb44ac07698df1f5178d"
+  },
+  {
+    "name": "home-stat-steps",
+    "variable": "imgIconSpecialFootprints",
+    "sourceNode": "12:792",
+    "sourceFile": "94e6c.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 2721,
+    "sha256": "7a99a7228687aa78204a14c5ba651b11bb9c80a19dc1fd5888d97d5a1860c65c"
+  },
+  {
+    "name": "home-stat-sleep",
+    "variable": "imgIconSpecialMoonStars",
+    "sourceNode": "12:792",
+    "sourceFile": "7d1c2.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 3367,
+    "sha256": "0a0e913c78cd984bb3b92ebdc8414912066c173d00f4e87c626520f0cc061007"
+  },
+  {
+    "name": "home-stat-water",
+    "variable": "imgIconSpecialPintGlass",
+    "sourceNode": "12:792",
+    "sourceFile": "99830.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1001,
+    "sha256": "6f4b41a94102af0bf6f1b8dcaa315fddea9e7bd1247665b62b6d8c1e5397313b"
+  },
+  {
+    "name": "home-weight-base",
+    "variable": "imgDonutBase",
+    "sourceNode": "12:792",
+    "sourceFile": "f641d.svg",
+    "dimensions": [
+      "width=\"107.451\"",
+      "height=\"101.981\"",
+      "viewBox=\"0 0 107.451 101.981\""
+    ],
+    "bytes": 1237,
+    "sha256": "ca4e28774c89fe8636cc5de5a7c1221a1f5d37bd055c0dedff546642ea69661b"
+  },
+  {
+    "name": "home-weight-pattern",
+    "variable": "imgMaskGroup",
+    "sourceNode": "12:792",
+    "sourceFile": "35603.svg",
+    "dimensions": [
+      "width=\"204\"",
+      "height=\"204\"",
+      "viewBox=\"0 0 204 204\""
+    ],
+    "bytes": 1731,
+    "sha256": "ff2d734325957431c30ad341c59bc729bac056cfcc3ffc9957221807a5adce15"
+  },
+  {
+    "name": "home-weight-progress",
+    "variable": "imgDonutProgress",
+    "sourceNode": "12:792",
+    "sourceFile": "16730.svg",
+    "dimensions": [
+      "width=\"91.1647\"",
+      "height=\"99.9493\"",
+      "viewBox=\"0 0 91.1647 99.9493\""
+    ],
+    "bytes": 1044,
+    "sha256": "577f38bd8a0d6e1bb99ff9726bf33c0c4755df1999c10ba0bb8b729fc4971d87"
+  },
+  {
+    "name": "home-calorie-base",
+    "variable": "imgEllipseBase",
+    "sourceNode": "12:792",
+    "sourceFile": "596c8.svg",
+    "dimensions": [
+      "width=\"228\"",
+      "height=\"228\"",
+      "viewBox=\"0 0 228 228\""
+    ],
+    "bytes": 246,
+    "sha256": "e803951af2ad9b8a2af2a5f602cda4a2858b604fecd91e87dd78e1bb373b275d"
+  },
+  {
+    "name": "home-calorie-track",
+    "variable": "imgDonutBase1",
+    "sourceNode": "12:792",
+    "sourceFile": "57c0c.svg",
+    "dimensions": [
+      "width=\"198.222\"",
+      "height=\"198.222\"",
+      "viewBox=\"0 0 198.222 198.222\""
+    ],
+    "bytes": 291,
+    "sha256": "a86bcc4a5dc73d6fa0b2ee8c4f3a2ae3adfb575706e53c55f685216a2880c7e1"
+  },
+  {
+    "name": "home-calorie-progress",
+    "variable": "imgDonutProgress1",
+    "sourceNode": "12:792",
+    "sourceFile": "1af77.svg",
+    "dimensions": [
+      "width=\"103.444\"",
+      "height=\"188.218\"",
+      "viewBox=\"0 0 103.444 188.218\""
+    ],
+    "bytes": 864,
+    "sha256": "bf28e15c5a5f47d2cec2fcc5c441557f9145fbea76d6ff8940930ff12579b8cf"
+  },
+  {
+    "name": "home-calorie-lightning",
+    "variable": "imgIconSpecialLightning",
+    "sourceNode": "12:792",
+    "sourceFile": "ea252.svg",
+    "dimensions": [
+      "width=\"32\"",
+      "height=\"32\"",
+      "viewBox=\"0 0 32 32\""
+    ],
+    "bytes": 1408,
+    "sha256": "cc30c688c7cce5f54bd955bdd7eb539f4bf0191a2a96a8155c04b71bc03d3373"
+  },
+  {
+    "name": "home-calorie-eaten",
+    "variable": "imgIconSpecialForkKnife",
+    "sourceNode": "12:792",
+    "sourceFile": "63f81.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 2588,
+    "sha256": "ab6c1d21795732c93932460f4e98a686b24fafab24baa63ee5616791202dc8e3"
+  },
+  {
+    "name": "home-calorie-burned",
+    "variable": "imgIconSpecialFire",
+    "sourceNode": "12:792",
+    "sourceFile": "2b142.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 1942,
+    "sha256": "b6d40c99f8fed791c86ed4cbe205bed26408ffa1716e83aa8ea09c5727f719b1"
+  },
+  {
+    "name": "home-recipe-clock",
+    "variable": "imgIconClock",
+    "sourceNode": "12:792",
+    "sourceFile": "5abc0.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1651,
+    "sha256": "0691ac64270c9e984e538225705754883367833471b87310acd8969397661352"
+  },
+  {
+    "name": "home-exercise-level",
+    "variable": "imgIconChartBar",
+    "sourceNode": "12:792",
+    "sourceFile": "a1d03.svg",
+    "dimensions": [
+      "width=\"12\"",
+      "height=\"12\"",
+      "viewBox=\"0 0 12 12\""
+    ],
+    "bytes": 1420,
+    "sha256": "2e9eb12896e6dfa2418e9451991770e7876967a3a27f69b82cf6007be488c00f"
+  },
+  {
+    "name": "home-bell",
+    "variable": "imgIconBell",
+    "sourceNode": "12:792",
+    "sourceFile": "dfce3.svg",
+    "dimensions": [
+      "width=\"22\"",
+      "height=\"22\"",
+      "viewBox=\"0 0 22 22\""
+    ],
+    "bytes": 1865,
+    "sha256": "3f1a39ce3ace822f6dd0be165f5ed8e77647b9e19744ef681a6ec55e55ea314c"
+  },
+  {
+    "name": "home-calendar-left",
+    "variable": "imgIconCaretLeft",
+    "sourceNode": "12:792",
+    "sourceFile": "6e80c.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 604,
+    "sha256": "fb30914b2a1003317e0ececef807ad5446511c958f48a58239655f56f805f131"
+  },
+  {
+    "name": "home-calendar-right",
+    "variable": "imgIconCaretRight",
+    "sourceNode": "12:792",
+    "sourceFile": "27dfe.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 606,
+    "sha256": "fe0f893a16d0ae77d295d7691ef30c17dae678da073bef75ca76c4f776fc99ba"
+  },
+  {
+    "name": "home-meal-check",
+    "variable": "imgCheckbox",
+    "sourceNode": "12:792",
+    "sourceFile": "13628.svg",
+    "dimensions": [
+      "width=\"22\"",
+      "height=\"22\"",
+      "viewBox=\"0 0 22 22\""
+    ],
+    "bytes": 1330,
+    "sha256": "867c8782a5ba7a7ea38c7ff525707cfaf0fbe95ffb22c8ec0cbfaecb4de484f4"
+  },
+  {
+    "name": "home-meal-unchecked-green",
+    "variable": "imgCheckbox1",
+    "sourceNode": "12:792",
+    "sourceFile": "db928.svg",
+    "dimensions": [
+      "width=\"22\"",
+      "height=\"22\"",
+      "viewBox=\"0 0 22 22\""
+    ],
+    "bytes": 1250,
+    "sha256": "ec6d1377a92f453b53db0ceffe0780251ca46de54e5ca52c989a96e2ce41e866"
+  },
+  {
+    "name": "home-meal-unchecked-gold",
+    "variable": "imgCheckbox2",
+    "sourceNode": "12:792",
+    "sourceFile": "82059.svg",
+    "dimensions": [
+      "width=\"22\"",
+      "height=\"22\"",
+      "viewBox=\"0 0 22 22\""
+    ],
+    "bytes": 1250,
+    "sha256": "8bcceeea7488d3d708312c803988e6dbd4087319b1a2b2a5988b8f1465347b6e"
+  },
+  {
+    "name": "home-meal-unchecked-orange",
+    "variable": "imgCheckbox3",
+    "sourceNode": "12:792",
+    "sourceFile": "0280f.svg",
+    "dimensions": [
+      "width=\"22\"",
+      "height=\"22\"",
+      "viewBox=\"0 0 22 22\""
+    ],
+    "bytes": 1250,
+    "sha256": "9b4ff3ebcb0834b43d036ecfc5464cc9384d55b7a4cba359387af51b1d9bdb26"
+  },
+  {
+    "name": "home-meal-up",
+    "variable": "imgIconCaretUp",
+    "sourceNode": "12:792",
+    "sourceFile": "58124.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 595,
+    "sha256": "9e491561a537f789d3915244d42544a56350ec42fbba89be5122731fc0dea57f"
+  },
+  {
+    "name": "home-rail-bread",
+    "variable": "imgIconSpecialBread1",
+    "sourceNode": "12:792",
+    "sourceFile": "0c987.svg",
+    "dimensions": [
+      "width=\"12\"",
+      "height=\"12\"",
+      "viewBox=\"0 0 12 12\""
+    ],
+    "bytes": 2106,
+    "sha256": "d26e94a302dea30592f60e60b4ca0607719eb8cdaeca9cd337981b6095e613d8"
+  },
+  {
+    "name": "home-rail-fish",
+    "variable": "imgIconSpecialFish1",
+    "sourceNode": "12:792",
+    "sourceFile": "d6aa7.svg",
+    "dimensions": [
+      "width=\"12\"",
+      "height=\"12\"",
+      "viewBox=\"0 0 12 12\""
+    ],
+    "bytes": 3073,
+    "sha256": "1dea7f7a0849ed68aba042f980e132addffaf9a552c01c88e7795b8cdcca0982"
+  },
+  {
+    "name": "home-rail-drop",
+    "variable": "imgIconSpecialDrop1",
+    "sourceNode": "12:792",
+    "sourceFile": "188dc.svg",
+    "dimensions": [
+      "width=\"12\"",
+      "height=\"12\"",
+      "viewBox=\"0 0 12 12\""
+    ],
+    "bytes": 1576,
+    "sha256": "395a9747fc3b349ff55597a68d52f2e5c67e308f730483ca2774a506714ec824"
+  },
+  {
+    "name": "shell-menu",
+    "variable": "imgIconList",
+    "sourceNode": "427:14405",
+    "sourceFile": "91e78.svg",
+    "dimensions": [
+      "width=\"24\"",
+      "height=\"24\"",
+      "viewBox=\"0 0 24 24\""
+    ],
+    "bytes": 1251,
+    "sha256": "4287a6d456b96d56d4d3488155573680b5931c2d7f5743123cac10d5df3a9fb4"
+  },
+  {
+    "name": "diary-fire",
+    "variable": "imgIconSpecialFire",
+    "sourceNode": "105:2649",
+    "sourceFile": "5b866.svg",
+    "dimensions": [
+      "width=\"24\"",
+      "height=\"24\"",
+      "viewBox=\"0 0 24 24\""
+    ],
+    "bytes": 1992,
+    "sha256": "b2c16eb71c95c5257d225e63a3b5c82b70a3e579c81e8e0468dc21b5ac141fe6"
+  },
+  {
+    "name": "diary-bread",
+    "variable": "imgIconSpecialBread",
+    "sourceNode": "105:2649",
+    "sourceFile": "e0a2c.svg",
+    "dimensions": [
+      "width=\"24\"",
+      "height=\"24\"",
+      "viewBox=\"0 0 24 24\""
+    ],
+    "bytes": 2048,
+    "sha256": "3a45fb76815bf9f04733bd10223d56740bca903810632283c4e6e8bc20faeef8"
+  },
+  {
+    "name": "diary-fish",
+    "variable": "imgIconSpecialFish",
+    "sourceNode": "105:2649",
+    "sourceFile": "fe941.svg",
+    "dimensions": [
+      "width=\"24\"",
+      "height=\"24\"",
+      "viewBox=\"0 0 24 24\""
+    ],
+    "bytes": 3052,
+    "sha256": "4599919bf1b1b6d52498d4ba15a33c24de6b942a2c87979d175b12bce3a75335"
+  },
+  {
+    "name": "diary-drop",
+    "variable": "imgIconSpecialDrop",
+    "sourceNode": "105:2649",
+    "sourceFile": "fd123.svg",
+    "dimensions": [
+      "width=\"24\"",
+      "height=\"24\"",
+      "viewBox=\"0 0 24 24\""
+    ],
+    "bytes": 1562,
+    "sha256": "951c546970fe0d5247ebf569c15f169a5ce537a62af223cb6a0d6b8126d3036c"
+  },
+  {
+    "name": "diary-funnel-mobile",
+    "variable": "imgIconFunnel",
+    "sourceNode": "492:14886",
+    "sourceFile": "055c8.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1449,
+    "sha256": "7932711dc7c2ef7df31e6a6cfa64609bf41da6d744617a8329e3cd8b61d6a8fd"
+  },
+  {
+    "name": "message-globe",
+    "variable": "imgIconGlobe",
+    "sourceNode": "84:2565",
+    "sourceFile": "19e03.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 1945,
+    "sha256": "2014566c93a527786916bb2943ac80cd20067e41148f031f46faae9487adb9ef"
+  },
+  {
+    "name": "message-copy",
+    "variable": "imgIconCopySimple",
+    "sourceNode": "84:2565",
+    "sourceFile": "151c2.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 994,
+    "sha256": "14373d67fa8eb87a59a0e3b34cc747efe9f455ce2b57aed78bcd374f36a39111"
+  },
+  {
+    "name": "message-pdf",
+    "variable": "imgIconFilePdf",
+    "sourceNode": "84:2565",
+    "sourceFile": "1a24d.svg",
+    "dimensions": [
+      "width=\"24\"",
+      "height=\"24\"",
+      "viewBox=\"0 0 24 24\""
+    ],
+    "bytes": 2567,
+    "sha256": "c17d38a2e7f232e77047d196e668268971ea62c68561628a9215d8067bb8f789"
+  },
+  {
+    "name": "message-checks",
+    "variable": "imgChecks",
+    "sourceNode": "84:2565",
+    "sourceFile": "5a341.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 1876,
+    "sha256": "f8dcb08d341092dea811441d9041251d301713305ac85e6a140edb7d3cf73715"
+  },
+  {
+    "name": "message-filter",
+    "variable": "imgIconFadersHorizontal",
+    "sourceNode": "84:2565",
+    "sourceFile": "5c06e.svg",
+    "dimensions": [
+      "width=\"22\"",
+      "height=\"22\"",
+      "viewBox=\"0 0 22 22\""
+    ],
+    "bytes": 1876,
+    "sha256": "31effce85b28c2088c5304e228fe1d1b9a983a482c49bb9a75537e99e3a32a26"
+  },
+  {
+    "name": "message-phone",
+    "variable": "imgIconPhone",
+    "sourceNode": "84:2565",
+    "sourceFile": "87f30.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 2313,
+    "sha256": "959c272cd0b9693cdeb3584b01c6f8ad423c975f91bc33bd4f6dc27d234bc359"
+  },
+  {
+    "name": "message-video",
+    "variable": "imgIconVideoCamera",
+    "sourceNode": "84:2565",
+    "sourceFile": "2e9a9.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 1075,
+    "sha256": "93e14b8323689b1a2626a731415635c90e17ea28ff5235589a44bd17de5c6087"
+  },
+  {
+    "name": "message-sidebar",
+    "variable": "imgIconSidebarSimple",
+    "sourceNode": "84:2565",
+    "sourceFile": "9f190.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 719,
+    "sha256": "423de575f1b767402f5568b2a24570e141eef3ddc4bf1c8bde297b1534b5434c"
+  },
+  {
+    "name": "message-send",
+    "variable": "imgIconPaperPlaneRight",
+    "sourceNode": "84:2565",
+    "sourceFile": "a79eb.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 1338,
+    "sha256": "d75063eb67f5d5e62c1784e6a01fb886bd52081668a543e8d57ebb9700dd43e5"
+  },
+  {
+    "name": "message-note",
+    "variable": "imgIconNotePencil",
+    "sourceNode": "84:2565",
+    "sourceFile": "66831.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 1495,
+    "sha256": "ae48c5aea9941fba5f9dddcb9697ed3ce43dffed473ccbdeaa09859939c78e04"
+  },
+  {
+    "name": "message-info",
+    "variable": "imgIconInfo",
+    "sourceNode": "84:2565",
+    "sourceFile": "5e8cc.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1198,
+    "sha256": "c6b64494f570c4b6544d50338e3c385d1f4225de321ee9988955acbf6bae1ac7"
+  },
+  {
+    "name": "message-image",
+    "variable": "imgIconImageSquare",
+    "sourceNode": "84:2565",
+    "sourceFile": "e2ca4.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1752,
+    "sha256": "b812f9a03cefbc97c2edf34bf4e35309e763e322949d9176fce6c533c09c9ca3"
+  },
+  {
+    "name": "message-play",
+    "variable": "imgPlay",
+    "sourceNode": "84:2565",
+    "sourceFile": "c1f26.svg",
+    "dimensions": [
+      "width=\"32\"",
+      "height=\"32\"",
+      "viewBox=\"0 0 32 32\""
+    ],
+    "bytes": 830,
+    "sha256": "c74093ced3d2e1c4a949497a6e572ecacc8b85f74b3beb8f747787c8d0c0c8e2"
+  },
+  {
+    "name": "message-file",
+    "variable": "imgIconFileText",
+    "sourceNode": "84:2565",
+    "sourceFile": "ca195.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1622,
+    "sha256": "56f4c86c71e29f750791b71584b4f46d896d13b66b664eab44f5ab2b90e64d21"
+  },
+  {
+    "name": "message-xls",
+    "variable": "imgIconFileXls",
+    "sourceNode": "84:2565",
+    "sourceFile": "754d7.svg",
+    "dimensions": [
+      "width=\"24\"",
+      "height=\"24\"",
+      "viewBox=\"0 0 24 24\""
+    ],
+    "bytes": 4042,
+    "sha256": "d381bad21ae3b5f1448b0b992864ccdbfd7a67934ffa5379dc0a8248b3f3ce5a"
+  },
+  {
+    "name": "message-link",
+    "variable": "imgIconLink",
+    "sourceNode": "84:2565",
+    "sourceFile": "d2da4.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 2710,
+    "sha256": "a17e7ffaa87f4c7a9274448ebba24dcd9724432ba89df1c3c3c67c13ec9a2c96"
+  },
+  {
+    "name": "message-instagram",
+    "variable": "imgIconInstagramLogo",
+    "sourceNode": "84:2565",
+    "sourceFile": "17de0.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 2267,
+    "sha256": "335f7477dec90dcea4f0554e0e411d8ebfbcf3e90a5af5e3f25869621cd61951"
+  },
+  {
+    "name": "message-youtube",
+    "variable": "imgIconYoutubeLogo",
+    "sourceNode": "84:2565",
+    "sourceFile": "f3528.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 2301,
+    "sha256": "4d5d9cfd746f6d55f60855054353fde8c0077421bb89d8750dde5088d0466b8f"
+  },
+  {
+    "name": "nav-agenda-active",
+    "variable": "imgIconNavCalendarDots",
+    "sourceNode": "84:1666",
+    "sourceFile": "a71fb.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 3785,
+    "sha256": "9247b5a5a5ec01a15a32f98396a0f120f82623c0a8dd8e7786b3b3bebd146144"
+  },
+  {
+    "name": "nav-messages-active",
+    "variable": "imgIconNavChatTeardropDots",
+    "sourceNode": "84:2565",
+    "sourceFile": "103fd.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 2440,
+    "sha256": "56de8c4e93fac855d6e8e81674ac1e1caf740cef3d29cc89aae962c6a9ca5705"
+  },
+  {
+    "name": "nav-menu-active",
+    "variable": "imgIconNavForkKnife",
+    "sourceNode": "84:2716",
+    "sourceFile": "2ee85.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 2744,
+    "sha256": "5be96157ccaa35e9cd799772978153d7648fd4b36f69f29e14daae923d82d434"
+  },
+  {
+    "name": "nav-plan-active",
+    "variable": "imgIconNavBowlFood",
+    "sourceNode": "84:2994",
+    "sourceFile": "ac3fd.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 2019,
+    "sha256": "33acc25c05e02d5de288648dc4b1354d4386eacdf65090be200f3b44bdcc0794"
+  },
+  {
+    "name": "nav-diary-active",
+    "variable": "imgIconNavNotebook",
+    "sourceNode": "105:2649",
+    "sourceFile": "4fef5.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 1437,
+    "sha256": "ff703155e34d8b6ec2ffa3abfce505b84769ff9cb5c68ca3be49c0abe6be3c92"
+  },
+  {
+    "name": "nav-progress-active",
+    "variable": "imgIconNavChartLineUp",
+    "sourceNode": "105:2790",
+    "sourceFile": "b9ed6.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 1633,
+    "sha256": "ff5cf899d229234c10b052afeff5e0694b272dccb59d757cc1fafb460ce3d4a8"
+  },
+  {
+    "name": "nav-exercise-active",
+    "variable": "imgIconNavPersonSimpleTaiChi",
+    "sourceNode": "105:2931",
+    "sourceFile": "e3c39.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 2065,
+    "sha256": "832470c24ce3efbf4114d644b9bffe461373268c02ec1e4923191ab0ce5a6367"
+  },
+  {
+    "name": "nav-resources-active",
+    "variable": "imgIconNavHeartbeat",
+    "sourceNode": "263:6588",
+    "sourceFile": "33c19.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 2914,
+    "sha256": "33cf33d6eea2f8d73f64b475e671e93c86de7e1860219a129ae49b9b33750df9"
+  },
+  {
+    "name": "plan-caret",
+    "variable": "imgIconCaretDown",
+    "sourceNode": "84:2994",
+    "sourceFile": "8e5ed.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 585,
+    "sha256": "86972a2157275536759c79836fbf87fbfe8838774064f98546755f6ffa0769ce"
+  },
+  {
+    "name": "plan-left",
+    "variable": "imgIconCaretLeft",
+    "sourceNode": "84:2994",
+    "sourceFile": "6e80c.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 604,
+    "sha256": "fb30914b2a1003317e0ececef807ad5446511c958f48a58239655f56f805f131"
+  },
+  {
+    "name": "plan-right",
+    "variable": "imgIconCaretRight",
+    "sourceNode": "84:2994",
+    "sourceFile": "27dfe.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 606,
+    "sha256": "fe0f893a16d0ae77d295d7691ef30c17dae678da073bef75ca76c4f776fc99ba"
+  },
+  {
+    "name": "plan-search",
+    "variable": "imgIconMagnifyingGlass",
+    "sourceNode": "84:2994",
+    "sourceFile": "843cb.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 986,
+    "sha256": "bbfce0114fd40d176150f84b333c159ca8d0f81af627be2a9836bfe8d9ec5448"
+  },
+  {
+    "name": "plan-filter",
+    "variable": "imgIconFunnel",
+    "sourceNode": "84:2994",
+    "sourceFile": "e3085.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1451,
+    "sha256": "1a72d131743d099bd21510a6329954e12488280af9aec075a979805c7efe1a58"
+  },
+  {
+    "name": "plan-mobile-search",
+    "variable": "imgIconMagnifyingGlass",
+    "sourceNode": "470:15300",
+    "sourceFile": "44561.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 986,
+    "sha256": "d65ad3b6e324a7e740f42b190784c5ffc7d045a4b4da278648a69ea848d4bfce"
+  },
+  {
+    "name": "plan-mobile-filter",
+    "variable": "imgIconFunnel",
+    "sourceNode": "470:15300",
+    "sourceFile": "b7cbe.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1449,
+    "sha256": "d940b6c77d5559e80ec7ee229023ac5ae38d277e2a47c2635708c6bbc92a5b73"
+  },
+  {
+    "name": "plan-mobile-plus",
+    "variable": "imgIconPlus",
+    "sourceNode": "470:15300",
+    "sourceFile": "84d5e.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 734,
+    "sha256": "59f5b50ab692222e2698a2dd810d079fdc5bdb2772356fe39cf6c36deb0d96bd"
+  },
+  {
+    "name": "message-edit",
+    "variable": "imgIconNotePencil",
+    "sourceNode": "84:2565",
+    "sourceFile": "66831.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 1495,
+    "sha256": "ae48c5aea9941fba5f9dddcb9697ed3ce43dffed473ccbdeaa09859939c78e04"
+  },
+  {
+    "name": "message-search-mobile",
+    "variable": "imgIconMagnifyingGlass",
+    "sourceNode": "433:19982",
+    "sourceFile": "d5060.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 878,
+    "sha256": "e335ca490a77d3ae921351d2af1424dbacab90bf90bb82d4c60f42bfc95d6e17"
+  },
+  {
+    "name": "message-filter-mobile",
+    "variable": "imgIconFadersHorizontal",
+    "sourceNode": "433:19982",
+    "sourceFile": "96637.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 1797,
+    "sha256": "b3f9e45b5aa669ca920c73931c939828117cadd241e2d45074747501e15aadae"
+  },
+  {
+    "name": "message-phone-mobile",
+    "variable": "imgIconPhone",
+    "sourceNode": "433:19982",
+    "sourceFile": "d99b5.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 2322,
+    "sha256": "5b46535b5210eba5b1984e974f84b61b8b4f390fcf81127c4f032211823c83d5"
+  },
+  {
+    "name": "message-video-mobile",
+    "variable": "imgIconVideoCamera",
+    "sourceNode": "433:19982",
+    "sourceFile": "38345.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 1109,
+    "sha256": "e027b4b7891dd11762a13090eab0c61741696711d23e9ca578bd6a747daca260"
+  },
+  {
+    "name": "message-sidebar-mobile",
+    "variable": "imgIconSidebarSimple",
+    "sourceNode": "433:19982",
+    "sourceFile": "0aba1.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 741,
+    "sha256": "8def379f05a4888df4c72eb20e9753a69d2c41a831785c53745de57c222f9959"
+  },
+  {
+    "name": "message-send-mobile",
+    "variable": "imgIconPaperPlaneRight",
+    "sourceNode": "433:19982",
+    "sourceFile": "619e6.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1400,
+    "sha256": "65fd3bb9dbc52fb56ad184bb84dd8eb7d5fb643ae70068d3311fcd861de18fe5"
+  },
+  {
+    "name": "message-checks-mobile",
+    "variable": "imgChecks",
+    "sourceNode": "433:19982",
+    "sourceFile": "2cef5.svg",
+    "dimensions": [
+      "width=\"14\"",
+      "height=\"14\"",
+      "viewBox=\"0 0 14 14\""
+    ],
+    "bytes": 1882,
+    "sha256": "e1297d360d2276a33ae4d987898a93cf065185026075d7d1fe49a96d3ed8f9db"
+  },
+  {
+    "name": "shell-back",
+    "variable": "imgIconArrowLeft",
+    "sourceNode": "457:13264",
+    "sourceFile": "7ecad.svg",
+    "dimensions": [
+      "width=\"24\"",
+      "height=\"24\"",
+      "viewBox=\"0 0 24 24\""
+    ],
+    "bytes": 837,
+    "sha256": "b398ed35edad884f5d44a97b346f9f8c1e67191742e04bf3421fd60f40a0d8f1"
+  },
+  {
+    "name": "message-header-search",
+    "variable": "imgIconMagnifyingGlass1",
+    "sourceNode": "84:2565",
+    "sourceFile": "2b979.svg",
+    "dimensions": [
+      "width=\"22\"",
+      "height=\"22\"",
+      "viewBox=\"0 0 22 22\""
+    ],
+    "bytes": 986,
+    "sha256": "ca53b38b657dd2adf07c99557324b873fb699478bb50d36ca0fc525447bdba60"
+  },
+  {
+    "name": "message-search",
+    "variable": "imgIconMagnifyingGlass",
+    "sourceNode": "84:2565",
+    "sourceFile": "f08ac.svg",
+    "dimensions": [
+      "width=\"18\"",
+      "height=\"18\"",
+      "viewBox=\"0 0 18 18\""
+    ],
+    "bytes": 986,
+    "sha256": "4d49828abf2e652d21579346715b108a2f33a1e71cde587291688c9fde83cb8b"
+  },
+  {
+    "name": "nav-home-inactive",
+    "variable": "imgIconNavSquaresFour",
+    "sourceNode": "84:1666",
+    "sourceFile": "13d26.svg",
+    "dimensions": [
+      "width=\"20\"",
+      "height=\"20\"",
+      "viewBox=\"0 0 20 20\""
+    ],
+    "bytes": 1992,
+    "sha256": "a59581ac1aed9d1be2a5e7bbe9daf1490374a895c12feddaab3017db6441a2b0"
+  },
+  {
+    "name": "resource-back",
+    "variable": "imgIconArrowLeft",
+    "sourceNode": "279:9301",
+    "sourceFile": "980a2.svg",
+    "dimensions": [
+      "width=\"16\"",
+      "height=\"16\"",
+      "viewBox=\"0 0 16 16\""
+    ],
+    "bytes": 813,
+    "sha256": "996d5837b790f5f131cf45c3d7c263a13462a6c86337861f5fdac7b1d2018be3"
+  }
+]

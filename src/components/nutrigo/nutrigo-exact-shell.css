@@ -1,0 +1,85 @@
+/* Original patient shell: desktop 223 px sidebar, mobile 64 px header.
+   The CRM keeps its functional shortcuts; no professional frames exist in Nutrigo. */
+.nv-app.nv-patient .nv-sidebar .fp-asset { flex: none; }
+.nv-app.nv-patient .nv-sidebar .nv-nav-sub-head > span.fp-asset { flex: none; }
+.nv-app.nv-patient .nv-detail-back { display: grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px; padding: 4px; border: 0; background: transparent; border-radius: 12px; cursor: pointer; }
+.nv-app.nv-patient.nv-healthy-menu .nv-page-head { display: none; }
+.nv-app.nv-patient .nv-user-caret { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; background: transparent; }
+.nv-app.nv-patient .nv-user-caret > svg { display: none; }
+.nv-app.nv-patient .fp-week-controls { display: flex; align-items: center; gap: 10px; }
+.nv-app.nv-patient .fp-week-controls > button { display: grid; place-items: center; width: 30px; height: 30px; padding: 6px; border: 0; border-radius: 8px; background: var(--nv-card); cursor: pointer; }
+.nv-app.nv-patient .nw-calendar { margin-bottom: 0; }
+.nv-app.nv-patient .nw-calendar > header { margin-bottom: 16px; min-height: 30px; }
+.nv-app.nv-patient .nw-calendar h2 { font: 600 14px/1.25 Poppins,sans-serif; }
+.nv-app.nv-patient .nw-calendar h2 > small { font: inherit; }
+.nv-app.nv-patient .nw-day { padding: 8px 3px; }
+.nv-app.nv-patient .nw-day > time { font: 600 16px/1.24 Poppins,sans-serif; }
+.nv-app.nv-patient .fp-daily-meals { display: flex; flex-direction: column; gap: 20px; }
+.nv-app.nv-patient .fp-daily-meal { display: flex; flex-direction: column; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--nv-line); }
+.nv-app.nv-patient .fp-daily-meal:last-child { padding-bottom: 0; border-bottom: 0; }
+.nv-app.nv-patient .fp-daily-meal > header { display: flex; align-items: center; gap: 8px; }
+.nv-app.nv-patient .fp-daily-meal-label { display: flex; align-items: center; gap: 8px; padding-right: 8px; border-radius: 6px; background: var(--nv-fill); font: 400 11px/1.24 Poppins,sans-serif; }
+.nv-app.nv-patient .fp-daily-meal-label > button { display: grid; place-items: center; width: 22px; height: 22px; flex: none; padding: 0; border: 0; border-radius: 6px; background: transparent; cursor: pointer; }
+.fp-meal-unchecked { display: block; width: 22px; height: 22px; border: 1px solid var(--nv-accent); border-radius: 6px; background: var(--nv-card); }
+.nv-app.nv-patient .fp-daily-meal-energy { display: flex; align-items: center; gap: 4px; padding: 4px 6px; border-radius: 6px; background: var(--nv-fill); font: 400 11px/1.24 Poppins,sans-serif; }
+.nv-app.nv-patient .fp-daily-meal-1 :is(.fp-daily-meal-label,.fp-daily-meal-energy) { background: var(--nv-accent-soft); }
+.nv-app.nv-patient .fp-daily-meal-2 .fp-daily-meal-label { background: var(--nv-gold); }
+.nv-app.nv-patient .fp-daily-meal-2 .fp-daily-meal-energy { background: var(--nv-gold-soft); }
+.nv-app.nv-patient .fp-daily-meal-2 .fp-meal-unchecked { border-color: var(--nv-gold); }
+.nv-app.nv-patient .fp-daily-meal-3 .fp-daily-meal-label { background: var(--nv-coral); }
+.nv-app.nv-patient .fp-daily-meal-3 .fp-daily-meal-energy { background: var(--nv-coral-soft); }
+.nv-app.nv-patient .fp-daily-meal-3 .fp-meal-unchecked { border-color: var(--nv-coral); }
+.nv-app.nv-patient .fp-daily-collapse { display: grid; place-items: center; margin-left: auto; border: 0; border-radius: 6px; background: var(--nv-fill); width: 22px; height: 22px; padding: 3px; cursor: pointer; }
+.fp-daily-collapse .fp-is-collapsed { transform: rotate(180deg); }
+.nv-app.nv-patient .fp-daily-meal-body { display: flex; align-items: center; gap: 16px; width: 100%; padding: 0; margin: 0; border: 0; background: transparent; color: var(--nv-ink); text-align: left; cursor: pointer; }
+.nv-app.nv-patient .fp-daily-meal-body > .np-food-photo { display: block; width: 64px; height: 64px; flex: 0 0 64px; border-radius: 12px; }
+.fp-daily-meal-body > span:last-child { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 8px; }
+.fp-daily-meal-body strong { font: 400 12px/1.3 Poppins,sans-serif; }
+.fp-daily-nutrients { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding-top: 8px; border-top: 1px solid var(--nv-line); }
+.fp-daily-nutrients > span { display: flex; align-items: center; gap: 2px; font: 400 11px/1.24 Poppins,sans-serif; }
+.fp-daily-nutrients small { color: var(--nv-muted); font: inherit; margin-right: 4px; }
+@media (min-width: 800px) {
+ .nv-app.nv-patient { grid-template-columns: 223px minmax(0,1fr); }
+ .nv-app.nv-patient .nv-sidebar { width: 223px; flex-basis: 223px; }
+ .nv-app.nv-patient:is(.nv-patient-agenda,.nv-grocery-page,.nv-patient-diary,.nv-progress-page,.nv-exercise-page) .nv-workspace { border-left: 0; }
+ .nv-app.nv-patient .nv-topbar .nv-brand,.nv-app.nv-patient .nv-menu-toggle { display: none; }
+ .nv-app.nv-patient.nv-home .nv-topbar { position: absolute; top: 0; right: 0; width: 325px; height: 78px; padding: 28px 28px 0; z-index: 5; }
+ .nv-app.nv-patient.nv-home .nv-topbar-title { display: none; }
+ .nv-app.nv-patient.nv-home .nv-daily { display: flex; padding: 106px 28px 28px; gap: 28px; background: var(--nv-card); border: 0; }
+ .nv-app.nv-patient.nv-home .nv-daily > .nv-person { display: none; }
+ .nv-app.nv-patient.nv-home .nv-user { gap: 12px; }
+ .nv-app.nv-patient.nv-home .nv-user-name { max-width: 142px; white-space: normal; }
+ .nv-app.nv-patient.nv-home .nv-header-menu .nv-alerts { order: 2; margin-left: auto; }
+ .nv-app.nv-patient.nv-home .nv-user-caret { background: transparent; }
+ .nv-app.nv-patient.nv-resources-page:not(:has(.nvrf-detail)) .nv-topbar { position: absolute; top: 0; right: 0; width: 305px; height: 78px; padding: 28px 28px 0; z-index: 5; }
+ .nv-app.nv-patient.nv-resources-page:not(:has(.nvrf-detail)) .nv-topbar-title { display: none; }
+ .nv-app.nv-patient.nv-resources-page:not(:has(.nvrf-detail)) .nv-main { padding-top: 28px; }
+ .nv-app.nv-patient.nv-resources-page:not(:has(.nvrf-detail)) .nvrf-rail { margin-top: -28px; padding-top: 106px; }
+ .nv-app.nv-patient.nv-resources-page:not(:has(.nvrf-detail)) .nv-header-menu { gap: 8px; }
+ .nv-app.nv-patient.nv-resources-page:not(:has(.nvrf-detail)) .nv-user-name { max-width: 124px; }
+ .nv-app.nv-patient.nv-resources-page:not(:has(.nvrf-detail)) .nvrf-layout { margin-right: -28px; }
+ .nv-app.nv-patient.nv-resources-page:not(:has(.nvrf-detail)) .nvrf-rail { border-radius: 0; align-self: stretch; }
+ .nv-app.nv-patient.nv-resources-page:not(:has(.nvrf-detail)) .nv-footer { margin-right: 305px; }
+ .nv-app.nv-patient.nv-resources-page:not(:has(.nvrf-detail)) :is(.nv-content-layout,.nv-main) { background: linear-gradient(to left,var(--nv-bg) 305px,var(--nv-card) 305px); }
+}
+@media (max-width: 799px) {
+ .nv-app.nv-patient { display: block; padding-bottom: 0; }
+ .nv-app.nv-patient:not(.nv-onboarding) .nv-sidebar { position: fixed; inset: 0 auto 0 0; width: 223px; min-height: 100dvh; height: 100dvh; z-index: 70; transform: translateX(-100%); }
+ .nv-app.nv-patient.nv-menu-open .nv-sidebar { transform: translateX(0); }
+ .nv-app.nv-patient .nv-workspace { width: 100%; margin-left: 0; }
+ .nv-app.nv-patient .nv-topbar { position: relative; top: auto; width: 100%; height: 64px; min-height: 64px; padding: 16px; gap: 0; background: var(--nv-card); }
+ .nv-app.nv-patient .nv-topbar .nv-topbar-title { flex: 1; margin: 0; font: 600 16px/1.24 Poppins,sans-serif; text-align: center; }
+ .nv-app.nv-patient .nv-topbar .nv-topbar-label-desktop { display: none; }
+ .nv-app.nv-patient .nv-topbar .nv-topbar-label-mobile { display: block; }
+ .nv-app.nv-patient .nv-menu-toggle { display: grid; place-items: center; background: transparent; }
+ .nv-app.nv-patient.nv-menu-open .nv-menu-toggle { background: transparent; }
+ .nv-app.nv-patient .nv-tabbar { display: none; }
+ .nv-app.nv-patient.nv-home .nv-main { padding: 24px 16px; }
+ .nv-app.nv-patient.nv-home .nv-daily { padding: 0 16px 24px; gap: 24px; background: var(--nv-bg); }
+ .nv-app.nv-patient.nv-home .fp-daily-plan { gap: 20px; }
+ .nv-app.nv-patient.nv-resources-page .nv-main { padding-top: 0; }
+ .nv-app.nv-patient.nv-messaging .nv-main { padding-top: 0; }
+ .nv-app.nv-patient.nv-messaging .nm-thread > :first-child { margin-top: 0; }
+ .nv-app.nv-patient.nv-home .fp-daily-plan > h2 { display: block; margin: 0; padding-bottom: 0; font: 600 14px/1.25 Poppins,sans-serif; }
+ .nv-app.nv-patient.nv-home .fp-daily-plan { padding: 16px; border-radius: 16px; background: var(--nv-card); }
+}

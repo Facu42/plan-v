@@ -1,7 +1,4 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import {
-  CalendarCheck, CalendarDots, CaretDown, CaretLeft, CaretRight, Clock, ForkKnife, MapPinArea, Notebook, PersonSimpleRun,
-} from '@phosphor-icons/react';
 import { NvState } from './primitives';
 import { appointmentReplyLabel, readAppointmentReply, writeAppointmentReply, type AppointmentReply } from './appointment-reply';
 import { parseAppointmentWhen, secureMeetUrl } from './ShowroomConsultations';
@@ -28,6 +25,7 @@ import {
 import type { ShowroomPatient } from './showroom-model';
 import './showroom-patient-agenda.css';
 import './agenda-diario-fig.css';
+import { FigmaAsset } from './FigmaPatientFront';
 
 /* ──────────────────────────────────────────────────────────────────────────
    Piezas compartidas del frame "04. Calendar" (84:1666 / móvil 433:17250).
@@ -38,7 +36,7 @@ export type FigTone = 'green' | 'mint' | 'saffron' | 'orange' | 'gray';
 export type FigCategory = { id: string; label: string; tone: FigTone };
 export type FigCalendarItem = { id: string; dateId: string; at: Date; category: string; time: string; title: string; /** menor = primero en la celda */ priority?: number };
 
-const WEEK_DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+const WEEK_DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const RESCHEDULE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const;
 const VIEWS: Array<{ id: CalendarView; label: string }> = [
   { id: 'day', label: 'Día' },
@@ -76,7 +74,7 @@ export function FigScheduleCard({ tone, badge, title, details, note, actions, ch
     <span className={`nvcal-badge ${tone}`}>{badge}</span>
     <strong>{title}</strong>
     <div className="nvcal-card-details">{details.map((detail) => <p key={`${detail.icon}:${detail.text}`}>
-      {detail.icon === 'date' ? <CalendarDots size={16} aria-hidden="true" /> : detail.icon === 'time' ? <Clock size={16} aria-hidden="true" /> : <MapPinArea size={16} aria-hidden="true" />}{detail.text}
+      <FigmaAsset name={`calendar-${detail.icon === 'date' ? 'date' : detail.icon === 'time' ? 'clock' : 'place'}`} size={16} />{detail.text}
     </p>)}</div>
     {note && <div className="nvcal-card-note"><span>{note.label}</span><div>{note.text}</div></div>}
     {children}
@@ -163,6 +161,17 @@ export function FigCalendarBoard({ nav, items, categories, hidden, onToggle, cta
   const selectedLabel = sentenceCase(nav.selectedDate.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }));
   const subLabel = nav.view === 'week' ? nav.weekGrid.label : nav.view === 'day' ? selectedLabel : null;
   const monthValue = `${nav.month.getFullYear()}-${nav.month.getMonth()}`;
+  // Both Calendar frames begin on Sunday. Keep the shared navigation date range
+  // and real event IDs while arranging the visual grid in that original order.
+  const firstOfMonth = monthAnchor(nav.month);
+  const leadingDays = firstOfMonth.getDay();
+  const lastDay = new Date(nav.month.getFullYear(), nav.month.getMonth() + 1, 0).getDate();
+  const todayId = nav.monthGrid.cells.find((cell) => cell.isToday)?.dateId;
+  const monthCells = Array.from({ length: Math.max(35, Math.ceil((leadingDays + lastDay) / 7) * 7) }, (_, index) => {
+    const date = addDays(firstOfMonth, index - leadingDays);
+    const dateId = localDateId(date);
+    return { dateId, day: date.getDate(), inMonth: date.getMonth() === nav.month.getMonth(), isToday: dateId === todayId };
+  });
 
   const renderChips = (dateId: string, max: number) => {
     const dayItems = itemsOn(visible, dateId).sort((a, b) => (a.priority ?? 1) - (b.priority ?? 1));
@@ -177,11 +186,11 @@ export function FigCalendarBoard({ nav, items, categories, hidden, onToggle, cta
     <header className="nvcal-head">
       <div className="nvcal-head-left">
         <div className="nvcal-arrows">
-          <button type="button" aria-label="Anterior" disabled={!nav.canPrev} onClick={() => nav.onNav(-1)}><CaretLeft size={18} aria-hidden="true" /></button>
-          <button type="button" aria-label="Siguiente" disabled={!nav.canNext} onClick={() => nav.onNav(1)}><CaretRight size={18} aria-hidden="true" /></button>
+          <button type="button" aria-label="Anterior" disabled={!nav.canPrev} onClick={() => nav.onNav(-1)}><FigmaAsset name="calendar-left" size={18} /></button>
+          <button type="button" aria-label="Siguiente" disabled={!nav.canNext} onClick={() => nav.onNav(1)}><FigmaAsset name="calendar-right" size={18} /></button>
         </div>
         <label className="nvcal-title">
-          <span>{monthWord}</span><span className="nvcal-title-year">{yearWord}</span><CaretDown size={14} aria-hidden="true" />
+          <span>{monthWord}</span><span className="nvcal-title-year">{yearWord}</span><FigmaAsset name="calendar-caret" size={14} />
           <select aria-label="Elegir mes" value={monthValue} onChange={(event) => {
             const option = nav.monthOptions.find((date) => `${date.getFullYear()}-${date.getMonth()}` === event.target.value);
             if (option) nav.goMonth(option);
@@ -191,17 +200,19 @@ export function FigCalendarBoard({ nav, items, categories, hidden, onToggle, cta
       </div>
       <div className="nvcal-head-right">
         <div className="nvcal-views" aria-label="Vista del calendario">{VIEWS.map((option) => <button type="button" key={option.id} aria-pressed={nav.view === option.id} onClick={() => nav.setView(option.id)}>{option.label}</button>)}</div>
-        {cta && <button type="button" className="nvcal-cta" onClick={cta.onClick}>{cta.label}</button>}
+        <label className="nvcal-view-picker"><span>{VIEWS.find((option) => option.id === nav.view)?.label}</span><FigmaAsset name="calendar-caret" size={14} /><select aria-label="Vista del calendario en el celular" value={nav.view} onChange={(event) => nav.setView(event.target.value as CalendarView)}>{VIEWS.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
+        {cta && <button type="button" className="nvcal-cta" aria-label={cta.label} onClick={cta.onClick}><span className="nvcal-cta-text">{cta.label}</span><span className="nvcal-cta-icon"><FigmaAsset name="plus" size={18} /></span></button>}
       </div>
     </header>
 
     <div className="nvcal-board">
-      <div className="nvcal-categories" aria-label="Filtrar eventos">{categories.map((option) => <button type="button" key={option.id} aria-pressed={!hidden.has(option.id)} onClick={() => onToggle(option.id)}><i className={`nvcal-check ${option.tone}`} aria-hidden="true" />{option.label}</button>)}</div>
+      <div className="nvcal-categories" aria-label="Filtrar eventos">{categories.map((option) => <button type="button" key={option.id} aria-pressed={!hidden.has(option.id)} onClick={() => onToggle(option.id)}><i className={`nvcal-check ${option.tone}`} aria-hidden="true">{['green','saffron','orange'].includes(option.tone) && <FigmaAsset name={`calendar-check-${option.tone === 'saffron' ? 'gold' : option.tone}`} />}</i>{option.label}</button>)}</div>
       {nav.view === 'month' && <>
         <div className="nvcal-weekdays" aria-hidden="true">{WEEK_DAYS.map((day) => <span key={day}>{day}</span>)}</div>
-        <div className="nvcal-month" aria-label="Calendario mensual">{nav.monthGrid.cells.map((cell) => {
+        <div className="nvcal-month" aria-label="Calendario mensual">{monthCells.map((cell) => {
           const count = itemsOn(visible, cell.dateId).length;
           return <button type="button" key={cell.dateId} {...{ [`data-${dayAttr}-day`]: cell.dateId }} aria-pressed={cell.dateId === nav.selectedDateId} aria-label={`${cell.dateId}${count ? `, ${count} ${count === 1 ? 'evento' : 'eventos'}` : ''}`} className={`${cell.inMonth ? '' : 'nvcal-outside'}${cell.isToday ? ' nvcal-today' : ''}${cell.dateId === nav.selectedDateId ? ' nvcal-selected' : ''}${count === 1 ? ' nvcal-solo' : ''}`} onClick={() => nav.selectDate(cell.dateId)}>
+            {!cell.inMonth && <span className="nvcal-outside-pattern" aria-hidden="true"><FigmaAsset name="calendar-outside" /></span>}
             <time dateTime={cell.dateId} className={count > 1 ? 'nvcal-multi' : undefined}>{cell.day}</time>
             {renderChips(cell.dateId, 2)}
           </button>;
@@ -389,9 +400,9 @@ export function ShowroomPatientAgenda({
   return <section className="nvcal" aria-label="Tu calendario">
     <div className="nvcal-main">
       <section className="nvcal-stats" aria-label="Resumen del calendario">
-        <FigStatCard label="Comidas del plan" value={counts.plan} unit={counts.plan === 1 ? 'comida' : 'comidas'} tone="green" icon={<ForkKnife size={16} />} />
-        <FigStatCard label="Actividad física" value={counts.activity} unit={counts.activity === 1 ? 'registro' : 'registros'} tone="saffron" icon={<PersonSimpleRun size={16} />} />
-        <FigStatCard label="Consultas" value={counts.consult} unit={counts.consult === 1 ? 'consulta' : 'consultas'} tone="orange" icon={<CalendarCheck size={16} />} />
+        <FigStatCard label="Comidas del plan" value={counts.plan} unit={counts.plan === 1 ? 'comida' : 'comidas'} tone="green" icon={<FigmaAsset name="calendar-fork" size={16} />} />
+        <FigStatCard label="Actividad física" value={counts.activity} unit={counts.activity === 1 ? 'registro' : 'registros'} tone="saffron" icon={<FigmaAsset name="calendar-run" size={16} />} />
+        <FigStatCard label="Consultas" value={counts.consult} unit={counts.consult === 1 ? 'consulta' : 'consultas'} tone="orange" icon={<FigmaAsset name="calendar-consult" size={16} />} />
       </section>
       <FigCalendarBoard nav={nav} items={items} categories={PATIENT_CATEGORIES.filter((category) => category.id !== 'meal')} hidden={hidden} onToggle={(id) => setHidden((set) => {
         const next = toggleInSet(set, id);

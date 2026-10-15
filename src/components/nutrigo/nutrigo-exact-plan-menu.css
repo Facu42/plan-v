@@ -1,0 +1,155 @@
+/* Literal get_design_context: Calendar 84:1666 / 433:17250, Meal Plan
+   84:2994 / 470:15300, Healthy Menu 84:2716 / 445:10499 and Recipe Details
+   84:3145 / 457:13264. Imported last to retire historical visual adaptations.
+   API values remain dynamic; absent clinical values occupy their original slots. */
+
+.nvcal-view-picker,
+.nvcal-cta-icon,
+.nv-app .pf-mobile-asset,
+.mf-detail-mobile-actions { display: none; }
+.mf-filter-menu { position: relative; }
+.mf-filter-menu summary { cursor: pointer; list-style: none; gap: 4px; }
+.mf-filter-menu summary::-webkit-details-marker { display: none; }
+.mf-filter-panel { position: absolute; top: calc(100% + 8px); right: 0; z-index: 40; display: grid; gap: 12px; width: 248px; padding: 16px; border: 1px solid var(--nv-line); border-radius: 12px; background: var(--nv-card); box-shadow: 0 4px 12px rgba(176,176,176,.14); }
+.mf-filter-panel label { display: grid; gap: 6px; font: 400 12px/1.3 Poppins,sans-serif; }
+.nv-app .mf-filter-panel :is(input,select) { min-width: 0; width: 100%; min-height: 36px; padding: 8px; border: 1px solid var(--nv-line); border-radius: 8px; background: var(--nv-card); color: var(--nv-ink); font: 400 12px/1.3 Poppins,sans-serif; }
+.nvcal-check { position: relative; }
+.nvcal-check > .fp-asset { position: absolute; left: -1px; top: -1px; width: 18px; height: 18px; }
+.nvcal-categories button[aria-pressed=true] .nvcal-check:has(.fp-asset) { border: 0; background: transparent; }
+.nvcal-categories button[aria-pressed=false] .nvcal-check > .fp-asset { visibility: hidden; }
+.nvcal-month .nvcal-outside { position: relative; overflow: hidden; background-image: none; background-color: var(--nv-track); }
+.nvcal-outside-pattern { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); pointer-events: none; }
+.nvcal-month .nvcal-outside > time { position: relative; z-index: 1; color: var(--nv-faint); }
+.nvcal-month .nvcal-outside-pattern img { max-width: none; max-height: none; }
+
+.nv-app.nv-patient .nvcal-stat { background: var(--nv-card); }
+.nv-app.nv-patient .nvcal-arrows button,
+.nv-app.nv-patient .nvcal-views { background: var(--nv-card); }
+.nv-app.nv-patient .nvcal-board { border: 0; }
+.nv-app.nv-patient .nvcal-categories { border-bottom: 1px solid var(--nv-line); }
+.nv-app.nv-patient .nvcal-card { gap: 20px; }
+.nv-app.nv-patient .nvcal-stat-icon { width: 36px; height: 36px; }
+.nv-app.nv-patient .nvcal-month > button { min-height: 120px; height: 120px; padding: 4px; gap: 2px; }
+.nv-app.nv-patient .nvcal-chip { padding: 6px; }
+.nv-app.nv-patient .nvcal-chip :is(b,small) { font: 400 8px/1.3 Poppins,sans-serif; white-space: normal; overflow-wrap: anywhere; }
+.nv-app.nv-patient .nvcal-title-year { font-weight: 600; }
+
+.nv-app.nv-patient .pf-row[aria-current=date] .pf-day { box-shadow: none; }
+.nv-app.nv-patient .pf-cell-empty { opacity: 1; }
+.nv-app.nv-patient .pf-row.pf-head { height: 40px; }
+.nv-app.nv-patient .pf-picker-icon > .fp-asset,
+.nv-app.nv-patient .pf-picker-caret > .fp-asset { padding: 0; }
+.nv-app.nv-patient .pf-week-picker > .fp-asset { flex: none; }
+
+.nv-app.nv-patient .mf-featured-main { align-self: stretch; }
+.nv-app.nv-patient .mf-featured-body > .mf-macros-column { flex: 1 1 0; min-width: 0; }
+.nv-app.nv-patient .mf-featured-meta.mf-rating > .fp-asset,
+.nv-app.nv-patient .mf-rate.mf-rating > .fp-asset { filter: grayscale(1); opacity: .4; }
+.nv-app.nv-patient .mf-card[data-featured] { box-shadow: none; }
+.nv-app.nv-patient .mf-week { width: 109.5px; }
+.nv-app.nv-patient .mf-detail-info dt > .mf-detail-info-label { display: inline; padding: 0; border-radius: 0; background: transparent; color: var(--nv-muted); }
+.nv-app.nv-patient .mf-detail-about p { font: 400 12px/1.5 Poppins,sans-serif; }
+.nv-app.nv-patient .mf-detail-image :is(.recipe-dish,.recipe-placeholder) { display: block; width: 100%; height: 100%; }
+.nv-app.nv-patient .mf-detail-image .recipe-dish img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto; }
+.nv-app.nv-patient .mf-thumb .recipe-placeholder { display: block; width: 100%; height: 100%; background: var(--nv-fill); }
+.nv-app.nv-patient .mf-featured-content > .mf-btn { width: 100%; }
+
+@media (min-width: 800px) {
+  .nv-app.nv-patient .nvcal { grid-template-columns: minmax(0,1fr) 297px; column-gap: 28px; }
+  .nv-app.nv-patient .nvcal-aside { background: var(--nv-card); }
+  .nv-app.nv-patient .mf-featured-main { flex: 0 0 670px; width: 670px; }
+  .nv-app.nv-patient .mf-featured-image { flex: none; width: 298px; height: 298px; aspect-ratio: auto; }
+  .nv-app.nv-patient .mf-detail-grid { grid-template-columns: 275px minmax(0,1fr) 295px; }
+  .nv-app.nv-patient .mf-detail-left { display: flex; flex-direction: column; gap: 16px; }
+  .nv-app.nv-patient .mf-detail-right { display: flex; flex-direction: column; grid-column: auto; gap: 20px; }
+  .nv-app.nv-patient .mf-detail-info { padding: 16px; }
+  .nv-app.nv-patient .mf-detail-content { padding: 4px 28px; }
+}
+
+@media (max-width: 799px) {
+  .nv-app .pf-mobile-asset { display: inline-flex; }
+  .nv-app .pf-desktop-asset { display: none; }
+  .nv-app.nv-patient.nv-patient-agenda :is(.nv-workspace,.nv-content-layout,.nv-main) { background: var(--nv-bg); }
+  .nv-app.nv-patient .nvcal { display: flex; flex-direction: column; gap: 24px; margin-inline: -16px; width: calc(100% + 32px); }
+  .nv-app.nv-patient .nvcal-main { gap: 24px; }
+  .nv-app.nv-patient .nvcal-stats { display: flex; gap: 16px; padding-inline: 16px; }
+  .nv-app.nv-patient .nvcal-stat { padding: 16px; gap: 12px; }
+  .nv-app.nv-patient .nvcal-stat > p { min-height: 27.28px; font: 400 11px/1.24 Poppins,sans-serif; }
+  .nv-app.nv-patient .nvcal-stat > div { flex-direction: column; gap: 16px; }
+  .nv-app.nv-patient .nvcal-stat > div > p { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .nv-app.nv-patient .nvcal-stat strong { font-size: 22px; }
+  .nv-app.nv-patient .nvcal-stat small { font: 400 11px/1.24 Poppins,sans-serif; }
+  .nv-app.nv-patient .nvcal-section { padding: 16px 0 8px; gap: 8px; background: var(--nv-card); border-radius: 0; }
+  .nv-app.nv-patient .nvcal-head { min-height: 30px; padding-inline: 16px; align-items: center; flex-wrap: nowrap; }
+  .nv-app.nv-patient .nvcal-head-left { flex: 1; }
+  .nv-app.nv-patient .nvcal-arrows,
+  .nv-app.nv-patient .nvcal-views { display: none; }
+  .nv-app.nv-patient .nvcal-head-right { width: auto; gap: 10px; }
+  .nv-app.nv-patient .nvcal-view-picker { position: relative; display: flex; align-items: center; gap: 4px; padding: 6px 8px 6px 10px; border-radius: 8px; background: var(--nv-fill); color: var(--nv-ink-soft); font: 500 11px/1.05 Poppins,sans-serif; }
+  .nvcal-view-picker select { position: absolute; inset: 0; width: 100%; min-height: 0; opacity: 0; cursor: pointer; }
+  .nv-app.nv-patient .nvcal-cta { padding: 6px; width: 30px; height: 30px; }
+  .nv-app.nv-patient .nvcal-cta-text { display: none; }
+  .nv-app.nv-patient .nvcal-cta-icon { display: inline-flex; }
+  .nv-app.nv-patient .nvcal-board { border-radius: 16px; }
+  .nv-app.nv-patient .nvcal-categories { padding: 16px; gap: 24px; flex-wrap: nowrap; overflow-x: auto; border: 0; }
+  .nv-app.nv-patient .nvcal .nvcal-categories button { font: 400 11px/1.24 Poppins,sans-serif; }
+  .nv-app.nv-patient .nvcal-weekdays span { padding: 10px; font: 400 11px/1.24 Poppins,sans-serif; }
+  .nv-app.nv-patient .nvcal-month > button { padding: 4px; min-height: 120px; height: 120px; }
+  .nv-app.nv-patient .nvcal-caption { margin: 8px 16px 0; font-size: 11px; }
+  .nv-app.nv-patient .nvcal-aside { margin: 0; padding: 16px 16px 20px; border: 0; gap: 16px; background: var(--nv-card); }
+  .nv-app.nv-patient .nvcal-aside > header { padding-inline: 8px; }
+  .nv-app.nv-patient .nvcal-card { gap: 12px; }
+  .nv-app.nv-patient .nvcal-aside-sub { margin: 0; padding-inline: 8px; }
+
+  .nv-app.nv-patient.nv-patient-plan .nv-main { padding-top: 0; }
+  .nv-app.nv-patient .pf-toolbar { gap: 10px; }
+  .nv-app.nv-patient .pf-row.pf-head { height: auto; }
+  .nv-app.nv-patient .pf-table-scroll { padding-bottom: 0; }
+  .nv-app.nv-patient .pf-cell[data-tone=snack] { background: #FFF2E8; }
+
+  .nv-app.nv-patient.nv-healthy-menu .nv-main { padding-top: 0; }
+  .nv-app.nv-patient.nv-healthy-menu .mf-head-actions { display: none; }
+  .nv-app.nv-patient.nv-healthy-menu .nv-page-head { display: none; }
+  .nv-app.nv-patient .mf-layout { gap: 32px; }
+  .nv-app.nv-patient .mf-main { gap: 32px; }
+  .nv-app.nv-patient .mf-featured { margin-inline: -16px; padding-top: 20px; gap: 20px; background: var(--nv-bg); }
+  .nv-app.nv-patient .mf-featured > .mf-section-head { padding-inline: 16px; height: 30px; }
+  .nv-app.nv-patient .mf-featured-main { flex: auto; padding: 0 16px 20px; gap: 20px; }
+  .nv-app.nv-patient .mf-featured-image { width: 100%; height: 298px; aspect-ratio: auto; }
+  .nv-app.nv-patient .mf-featured-body { gap: 12px; background: var(--nv-card); }
+  .nv-app.nv-patient .mf-featured-body > .mf-macros-column { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); flex: none; margin: 0; padding: 0 16px; gap: 12px; background: var(--nv-card); }
+  .nv-app.nv-patient .mf-macros-column > div { min-height: 58px; }
+  .nv-app.nv-patient .mf-featured-row .mf-badge { font-size: 12px; line-height: 1.3; }
+  .nv-app.nv-patient .mf-card { column-gap: 20px; grid-template-columns: 152px minmax(0,1fr); grid-template-rows: auto 1fr auto auto; grid-template-areas: 'img title' 'img action' 'head head' 'chips chips'; }
+  .nv-app.nv-patient .mf-card-head { flex-wrap: nowrap; margin-top: 20px; gap: 8px; }
+  .nv-app.nv-patient .mf-card-badges { gap: 11px; }
+  .nv-app.nv-patient .mf-score { display: grid; grid-template-columns: 1fr auto auto; font-size: 10px; }
+  .nv-app.nv-patient .mf-score > span:first-child { padding-right: 8px; margin: 0; }
+  .nv-app.nv-patient .mf-week { width: 109.5px; height: 5px; margin-top: 2px; margin-left: 0; grid-column: 1 / -1; }
+  .nv-app.nv-patient .mf-aside { padding: 20px 16px; margin-inline: -16px; border-radius: 0; gap: 28px; }
+  .nv-app.nv-patient .mf-detail { gap: 0; }
+  .nv-app.nv-patient .mf-detail-top { display: none; }
+  .nv-app.nv-patient .mf-detail-grid { display: flex; flex-direction: column; align-items: stretch; gap: 32px; }
+  .nv-app.nv-patient .mf-detail-left,
+  .nv-app.nv-patient .mf-detail-content,
+  .nv-app.nv-patient .mf-detail-right { display: contents; }
+  .nv-app.nv-patient .mf-detail-image { height: 275px; aspect-ratio: auto; border-radius: 16px 16px 0 0; margin-bottom: -32px; }
+  .nv-app.nv-patient .mf-detail-info { display: grid; grid-auto-flow: column; grid-template-columns: repeat(2,minmax(0,1fr)); grid-template-rows: repeat(3,24px); gap: 24px 48px; padding: 24px; background: var(--nv-bg); border-radius: 0 0 16px 16px; }
+  .nv-app.nv-patient .mf-detail-info > div { display: grid; grid-template-columns: 24px minmax(0,1fr); grid-template-rows: repeat(2,auto); column-gap: 10px; align-items: center; min-height: 24px; }
+  .nv-app.nv-patient .mf-detail-info dt { display: contents; }
+  .nv-app.nv-patient .mf-detail-info dt > .mf-detail-info-icon { grid-row: 1 / 3; margin: 0; padding: 6px; width: 24px; height: 24px; }
+  .nv-app.nv-patient .mf-detail-info .mf-detail-info-label { grid-column: 2; font: 400 11px/1.24 Poppins,sans-serif; white-space: nowrap; }
+  .nv-app.nv-patient .mf-detail-info dd { grid-column: 2; padding: 0; font: 600 11px/1.24 Poppins,sans-serif; text-align: left; white-space: nowrap; }
+  .nv-app.nv-patient .mf-detail-content > h2 { font-size: 20px; }
+  .nv-app.nv-patient .mf-detail-about,
+  .nv-app.nv-patient .mf-servings,
+  .nv-app.nv-patient .mf-detail-right > .mf-macros-row,
+  .nv-app.nv-patient .fp-recipe-tools,
+  .nv-app.nv-patient .mf-detail-steps,
+  .nv-app.nv-patient .fp-recipe-notes,
+  .nv-app.nv-patient .mf-detail-right > .mf-facts,
+  .nv-app.nv-patient .fp-recipe-reviews { margin-top: -8px; }
+  .nv-app.nv-patient .mf-detail-right > .mf-macros-row { padding-inline: 16px; gap: 12px; }
+  .nv-app.nv-patient .mf-detail-mobile-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .nv-app.nv-patient .mf-facts-missing { padding: 0; margin-top: -24px; background: none; font-size: 11px; }
+}

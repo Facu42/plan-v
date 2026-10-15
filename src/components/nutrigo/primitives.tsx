@@ -23,8 +23,8 @@ export function NvProgress({ value, label }: { value: number; label: string }) {
   return <div className="nv-progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={safeValue}><span style={{ width: `${safeValue}%` }} /></div>;
 }
 /** `nvIcon` usa el glifo Phosphor del .fig; `icon` es el juego propio de Plan V. */
-export function NvMetric({ label, value, note, icon, nvIcon, tone = 'green', children, onOpen }: { label: string; value: ReactNode; note: string; icon: IconName; nvIcon?: NvIconName; tone?: 'green' | 'gold' | 'coral'; children?: ReactNode; onOpen?: () => void }) {
-  const glyph = nvIcon ? <NvIcon name={nvIcon} size={14} /> : <Icon name={icon} size={14} />;
+export function NvMetric({ label, value, note, icon, nvIcon, glyph: sourceGlyph, tone = 'green', children, onOpen }: { label: string; value: ReactNode; note: string; icon: IconName; nvIcon?: NvIconName; glyph?: ReactNode; tone?: 'green' | 'gold' | 'coral'; children?: ReactNode; onOpen?: () => void }) {
+  const glyph = sourceGlyph ?? (nvIcon ? <NvIcon name={nvIcon} size={14} /> : <Icon name={icon} size={14} />);
   const content = <><div className="nv-metric-label"><h2>{label}</h2><span className="nv-icon-tile">{glyph}</span></div><strong>{value}</strong>{children}<small>{note}</small></>;
   if (onOpen) return <button type="button" className={`nv-metric nv-openable nv-${tone}`} aria-label={`Ver detalle de ${label}`} onClick={onOpen}>{content}</button>;
   return <section className={`nv-metric nv-${tone}`}>{content}</section>;

@@ -6,12 +6,12 @@ import type { ShowroomPage } from './ShowroomPanels';
 import type { ProgressSeries } from '../../types/progress';
 
 const sources = import.meta.glob('../../assets/nutrigo/front/*.svg', { eager: true, query: '?no-inline', import: 'default' }) as Record<string, string>;
-export type FigmaDetail = { title: string; nodes: [string,string] };
+export type FigmaDetail = { title: string; nodes: [string,string]; onBack?: () => void };
 export const FigmaDetailContext = createContext<((detail: FigmaDetail | null) => void) | null>(null);
-export function useFigmaDetail(title: string | null, nodes: [string,string]) {
+export function useFigmaDetail(title: string | null, nodes: [string,string], onBack?: () => void) {
   const setDetail = useContext(FigmaDetailContext);
   const [desktop,mobile] = nodes;
-  useEffect(() => { setDetail?.(title ? {title,nodes:[desktop,mobile]} : null); return () => setDetail?.(null); },[setDetail,title,desktop,mobile]);
+  useEffect(() => { setDetail?.(title ? {title,nodes:[desktop,mobile],onBack} : null); return () => setDetail?.(null); },[setDetail,title,desktop,mobile,onBack]);
 }
 export function FigmaAsset({ name, size, className = '' }: { name: string; size?: number; className?: string }) {
   const src = sources[`../../assets/nutrigo/front/${name}.svg`];
@@ -28,7 +28,7 @@ export const PATIENT_FIGMA_NODES: Partial<Record<ShowroomPage, [string, string]>
 export function FigmaPlanCard({ onOpen }: { onOpen: () => void }) {
   return <section className="fp-plan-card" aria-label="Tu plan de alimentación">
     <div className="fp-plan-card-image" aria-hidden="true" />
-    <p>Seguí tu acompañamiento<br />con <strong>tu plan de alimentación</strong><br />y tus registros de cada día.</p>
+    <p>Seguí tu camino<br />con <strong>tu plan</strong><br />de alimentación.</p>
     <button type="button" onClick={onOpen}>Ver mi plan</button>
   </section>;
 }

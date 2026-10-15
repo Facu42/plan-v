@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ResourceAssignment } from '../../types';
 import { resourcesApi } from '../../api/resources';
 import { isAbortError } from '../../api/client';
@@ -211,7 +211,6 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
   const guides = useMemo(() => filterResourceGuides(catalog, query, category), [catalog, query, category]);
   const tags = useMemo(() => topResourceTags(catalog), [catalog]);
   const selected = catalog.find((guide) => guide.id === selectedId) ?? null;
-  useFigmaDetail(selected ? 'Detalle de recurso' : null, ['279:9301','507:17412']);
   const assignedGuides = (assignments.length ? assignments : snapshot.assignments.map((row) => ({
     id: row.id, patient_id: row.patient_id, resource_id: row.resource_id, assigned_at: row.assigned_at, read_at: row.read_at,
   }))).map((assignment) => ({
@@ -260,14 +259,15 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
     setSelectedId(id);
     setShareStatus('');
   };
-  const closeGuide = () => {
+  const closeGuide = useCallback(() => {
     if (window.history.state?.planVResourceOpen) { window.history.back(); return; }
     const url = new URL(window.location.href);
     url.hash = '';
     window.history.replaceState(window.history.state, '', url);
     setSelectedId(null);
     setShareStatus('');
-  };
+  }, []);
+  useFigmaDetail(selected ? 'Detalle de recurso' : null, ['279:9301','507:17412'], closeGuide);
   const toggleSaved = async (guide: ResourceGuide) => {
     try {
       const result = await resourcesApi.favorite(patientId, favoriteKindForResource(guide.kind), guide.id);
@@ -302,7 +302,6 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
     const isSaved = saved.some((row) => row.item_id === selected.id);
     const date = resourceDateLabel(selected.reviewed_at);
     return <section className="nvrf nvrf-detail" aria-label={`${selected.kind === 'clinical' ? 'Artículo' : 'Guía'}: ${selected.title}`}>
-      <button type="button" className="nvrf-back" onClick={closeGuide}><Icon name="arrow" size={14} /> Volver a Recursos</button>
       <div className="nvrf-detail-layout">
         <article className="nvrf-article">
           <header>
@@ -342,7 +341,7 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
     <div className="nvrf-layout">
       <div className="nvrf-main">
         <header className="nvrf-hero">
-          <h2>Guías y artículos revisados</h2>
+          <h2>Guías y artículos</h2>
           {onQueryChange && <label className="nvrf-search"><span className="nvrf-sr">Buscar recursos y guardados</span><input type="search" placeholder="Buscar guías y artículos" value={query} onChange={(event) => onQueryChange(event.target.value)} /><span className="nvrf-search-go" aria-hidden="true"><MagnifyingGlass size={18} /></span></label>}
           {onQueryChange && tags.length > 0 && <div className="nvrf-chips" aria-label="Etiquetas frecuentes">{tags.slice(0, 5).map(({ tag }) => <button type="button" key={tag} aria-pressed={normalize(query) === normalize(tag)} onClick={() => onQueryChange(normalize(query) === normalize(tag) ? '' : tag)}>{tag}</button>)}</div>}
         </header>

@@ -17,7 +17,7 @@ import {
 } from '../../types/progress';
 import './showroom-progress.css';
 import './progreso-recursos-fig.css';
-import { FigmaBodyMap, FigmaRecordDialog } from './FigmaPatientFront';
+import { FigmaAsset, FigmaBodyMap, FigmaRecordDialog } from './FigmaPatientFront';
 
 /* Progreso = frame 25 "Progress" (105:2790; móvil 498:18237).
    Cuerpo 767 + 20 + 374. Izquierda: Main Info (440 + 20 + 275) y la tabla de medidas;
@@ -110,9 +110,9 @@ function PeriodPicker({ days, onChange }: { days: ProgressPeriodDays; onChange: 
   </label>;
 }
 
-function WeightChart({ series }: { series: ProgressSeries }) {
-  const points = [...series.previous, ...series.current];
-  if (!points.length) return <p className="nvpf-note">Sin pesos declarados en estos períodos.</p>;
+function WeightChart({ series }: { series: ProgressSeries | null }) {
+  const points = series ? [...series.previous, ...series.current] : [];
+  if (!points.length) return <div className="nvpf-weight-empty-chart" role="img" aria-label="Sin pesos declarados en estos períodos"><div className="nvpf-grid-lines" aria-hidden="true">{[0,1,2,3,4].map((line) => <i key={line} />)}</div><span className="fp-sr">Sin pesos declarados en estos períodos.</span></div>;
   const values = points.map((point) => point.value);
   const max = Math.max(...values);
   const min = Math.min(...values);
@@ -121,13 +121,13 @@ function WeightChart({ series }: { series: ProgressSeries }) {
   const y = (value: number) => 24 + (1 - (value - min) / span) * 71.5;
   const x = (index: number) => points.length === 1 ? 50 : (index + 0.5) / points.length * 100;
   const path = points.map((point, index) => `${index ? 'L' : 'M'}${x(index)} ${y(point.value)}`).join(' ');
-  return <div className="nvpf-weight-chart" role="img" aria-label={`Pesos declarados: ${points.map((point) => `${formatQty(point.value)} ${series.unit} el ${shortDate(point.captured_on)}`).join(', ')}`}>
+  return <div className="nvpf-weight-chart" role="img" aria-label={`Pesos declarados: ${points.map((point) => `${formatQty(point.value)} ${series!.unit} el ${shortDate(point.captured_on)}`).join(', ')}`}>
     <div className="nvpf-grid-lines" aria-hidden="true">{[0, 1, 2, 3, 4].map((line) => <i key={line} />)}</div>
     <svg viewBox="0 0 100 181" preserveAspectRatio="none" aria-hidden="true">
       <path className="nvpf-area" d={`${path} L${x(points.length - 1)} 150 L${x(0)} 150 Z`} />
       <path className="nvpf-line" d={path} vectorEffect="non-scaling-stroke" />
     </svg>
-    <ol aria-hidden="true">{points.map((point, index) => <li key={point.id} style={{ left: `${x(index)}%`, top: `${y(point.value)}px` }}><small>{formatQty(point.value)} {series.unit}</small><i /></li>)}</ol>
+    <ol aria-hidden="true">{points.map((point, index) => <li key={point.id} style={{ left: `${x(index)}%`, top: `${y(point.value)}px` }}><small>{formatQty(point.value)} {series!.unit}</small><i /></li>)}</ol>
     <div className="nvpf-weight-x" aria-hidden="true">{points.map((point) => <span key={point.id}>{shortDate(point.captured_on)}</span>)}</div>
   </div>;
 }
@@ -200,9 +200,8 @@ export function ShowroomProgress({
           <div className="nvpf-image">{professional ? <CarePanel patientId={patient.id} mode="professional" /> : <FigmaBodyMap series={remote?.measurements_included ? remote.series : []} onRecord={() => setRecordsOpen(true)} />}</div>
           <div className="nvpf-side">
             <section className="nvpf-widget nvpf-weight" aria-label={professional ? `Objetivo de ${patient.name}` : 'Tu objetivo'}>
-              <header className="nvpf-head"><h3>{professional ? `Objetivo de ${patient.name}` : 'Seguimiento de peso'}</h3>{!professional && <button type="button" className="fp-more" aria-label="Registrar peso y medidas" onClick={() => setRecordsOpen(true)}>···</button>}</header>
+              <header className="nvpf-head"><h3>{professional ? `Objetivo de ${patient.name}` : 'Seguimiento de peso'}</h3>{!professional && <button type="button" className="fp-more" aria-label="Registrar peso y medidas" onClick={() => setRecordsOpen(true)}><FigmaAsset name="more" size={24} /></button>}</header>
               <div className="nvpf-weight-body">
-                {!professional && <PeriodPicker days={days} onChange={setDays} />}
                 {professional && <p className="nvpf-goal-text">{patient.goal || 'Sin objetivo publicado'}</p>}
                 {professional ? <dl className="nvpf-rows">
                   <div><dt>Avance del objetivo</dt><dd><strong>{goalProgress}</strong><span>%</span></dd></div>
@@ -213,9 +212,9 @@ export function ShowroomProgress({
                   <div><dt>Peso del período</dt><dd><strong>{weight?.current_last ? formatQty(weight.current_last.value) : '—'}</strong><span>{weight?.unit ?? 'kg'}</span></dd></div>
                   <div><dt>Meta de peso</dt><dd><strong>—</strong><span>kg</span></dd></div>
                 </dl>}
-                {weight && <WeightChart series={weight} />}
-                {weight && <p className="nvpf-note">{formatDelta(weight)}</p>}
-                {remote && !remote.measurements_included && <p className="nvpf-note">Las medidas no se muestran: falta el permiso de peso y medidas.</p>}
+                {(weight || !professional) && <WeightChart series={weight} />}
+                {weight && <p className={professional ? 'nvpf-note' : 'fp-sr'}>{formatDelta(weight)}</p>}
+                {remote && !remote.measurements_included && <p className={professional ? 'nvpf-note' : 'fp-sr'}>Las medidas no se muestran: falta el permiso de peso y medidas.</p>}
               </div>
             </section>
             {professional ? <section className="nvpf-meals" aria-label="Comidas de esta semana">
@@ -240,7 +239,7 @@ export function ShowroomProgress({
           <header className="nvpf-head"><h3>{professional ? 'Comidas' : 'Actividad calórica'}</h3>{professional ? <PeriodPicker days={days} onChange={setDays} /> : <span className="nvpf-chip">Últimos 7 días</span>}</header>
           {error && <NvState kind="error" title="No se pudo cargar el progreso" description={error} />}
           {loading && !remote && <NvState kind="loading" title="Cargando períodos…" description="Comparativa del mismo paciente, sin rankings." />}
-          {!professional && <div className="nvpf-top"><div className="nvpf-total"><p><strong>{calorieTotal ?? '—'}</strong><span>kcal declaradas</span></p><small>Consumo registrado en los últimos 7 días. Sin calorías quemadas declaradas.</small></div><ul className="nvpf-legend"><li><i className="reviewed" />Consumidas</li><li><i className="pending" />Quemadas · —</li></ul></div>}
+          {!professional && <div className="nvpf-top"><div className="nvpf-total"><p><strong>{calorieTotal ?? '—'}</strong><span>kcal declaradas</span></p><small>Consumo de los últimos 7 días.</small></div><ul className="nvpf-legend"><li><i className="reviewed" />Consumidas</li><li><i className="pending" />Quemadas · —</li></ul><span className="fp-sr">Sin calorías quemadas declaradas.</span></div>}
           {professional && remote && <div className="nvpf-top">
             <div className="nvpf-total"><p><strong>{remote.meals.current.logged}</strong><span>comidas registradas</span></p><small>Período anterior: {remote.meals.previous.logged} · {remote.meals.current.reviewed} revisadas</small></div>
             <ul className="nvpf-legend"><li><i className="reviewed" />Revisadas</li><li><i className="pending" />En revisión</li></ul>
@@ -288,6 +287,6 @@ export function ShowroomProgress({
         </section>
       </div>
     </div>
-    {!professional && recordsOpen && <FigmaRecordDialog title="Mis registros de progreso" onClose={() => setRecordsOpen(false)}><CarePanel patientId={patient.id} mode="progress" /></FigmaRecordDialog>}
+    {!professional && recordsOpen && <FigmaRecordDialog title="Mis registros de progreso" onClose={() => setRecordsOpen(false)}><PeriodPicker days={days} onChange={setDays} />{weight && <p className="nvpf-note">{formatDelta(weight)}</p>}{remote && !remote.measurements_included && <p className="nvpf-note">Las medidas no se muestran: falta el permiso de peso y medidas.</p>}<CarePanel patientId={patient.id} mode="progress" /></FigmaRecordDialog>}
   </section>;
 }

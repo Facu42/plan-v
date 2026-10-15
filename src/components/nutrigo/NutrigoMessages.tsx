@@ -18,6 +18,7 @@ import { CHAT_ATTACHMENT_ACCEPT, assertChatFile, uploadChatAttachment } from '..
 import { ChatAttachmentView } from './ChatAttachment';
 import { NvState } from './primitives';
 import { secureMeetUrl } from './ShowroomConsultations';
+import { FigmaAsset } from './FigmaPatientFront';
 import {
   dayDividerLabel, extractLinks, lastSeenAt, lastSeenLabel, listStamp, messageTime, sameDay, sharedFiles,
 } from './message-panel';
@@ -38,6 +39,10 @@ const contactOf = (patient: ShowroomPatient, role: Role) => role === 'pro'
   ? { name: patient.name, initials: patient.initials, role: 'Paciente' }
   : NUTRITIONIST;
 const narrow = () => typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 760px)').matches;
+
+function MessageIcon({ name, size, mobileSize = size }: { name: string; size: number; mobileSize?: number }) {
+  return mobileSize === size ? <FigmaAsset name={`message-${name}`} size={size} /> : <><FigmaAsset name={`message-${name}`} size={size} className="nmf-source-desktop" /><FigmaAsset name={`message-${name}-mobile`} size={mobileSize} className="nmf-source-mobile" /></>;
+}
 
 export function NutrigoMessages({ patient, patients, role, onSelect, onNavigate }: Props) {
   const [query, setQuery] = useState('');
@@ -65,10 +70,10 @@ export function NutrigoMessages({ patient, patients, role, onSelect, onNavigate 
     <aside className="nm-contacts" aria-label="Conversaciones">
       <div className="nmf-list-head">
         <label className="nmf-search">
-          <MagnifyingGlass size={18} aria-hidden />
+          {role === 'patient' ? <MessageIcon name="search" size={18} mobileSize={16} /> : <MagnifyingGlass size={18} aria-hidden />}
           <input ref={searchRef} type="search" aria-label="Buscar conversaciones" placeholder="Buscar nombre, mensaje…" value={query} onChange={(e) => setQuery(e.target.value)} />
         </label>
-        <button type="button" className="nmf-icon-btn nmf-filter" aria-pressed={unreadOnly} aria-label="Mostrar solo conversaciones sin leer" title="Solo sin leer" onClick={() => setUnreadOnly((value) => !value)}><FadersHorizontal size={22} aria-hidden /></button>
+        <button type="button" className="nmf-icon-btn nmf-filter" aria-pressed={unreadOnly} aria-label="Mostrar solo conversaciones sin leer" title="Solo sin leer" onClick={() => setUnreadOnly((value) => !value)}>{role === 'patient' ? <MessageIcon name="filter" size={22} mobileSize={20} /> : <FadersHorizontal size={22} aria-hidden />}</button>
         <button type="button" className="nmf-icon-btn nmf-new-icon" aria-label="Nuevo mensaje" onClick={newMessage}><Plus size={20} aria-hidden /></button>
       </div>
       <div className="nm-contact-list">{contacts.map((p) => {
@@ -168,9 +173,9 @@ function MessageConversation({ patient, role, composeRef, profileOpen, onToggleP
           {role === 'pro'
             ? <button type="button" className="nmf-picker" onClick={() => onNavigate('consultas')} aria-label="Ver consultas" title="Ver consultas"><CalendarDots size={20} aria-hidden /></button>
             : <button type="button" className="nmf-picker" onClick={() => onNavigate('agenda')} aria-label="Ver mi agenda" title="Ver mi agenda"><CalendarDots size={20} aria-hidden /></button>}
-          {meetUrl && <a className="nmf-picker" href={meetUrl} target="_blank" rel="noopener noreferrer" aria-label="Abrir la videollamada de la consulta" title="Videollamada de la consulta"><VideoCamera size={20} aria-hidden /></a>}
+          {meetUrl && <a className="nmf-picker" href={meetUrl} target="_blank" rel="noopener noreferrer" aria-label="Abrir la videollamada de la consulta" title="Videollamada de la consulta">{role === 'patient' ? <MessageIcon name="video" size={20} mobileSize={18} /> : <VideoCamera size={20} aria-hidden />}</a>}
           <button type="button" className="nmf-picker nm-picker-btn" onClick={reload} disabled={busy} aria-label="Actualizar conversación" title="Actualizar"><ArrowClockwise size={20} aria-hidden /></button>
-          <button type="button" className="nmf-picker nmf-picker-on" onClick={onToggleProfile} aria-pressed={profileOpen} aria-label={profileOpen ? 'Ocultar perfil' : 'Mostrar perfil'} title="Perfil"><SidebarSimple size={20} aria-hidden /></button>
+          <button type="button" className="nmf-picker nmf-picker-on" onClick={onToggleProfile} aria-pressed={profileOpen} aria-label={profileOpen ? 'Ocultar perfil' : 'Mostrar perfil'} title="Perfil">{role === 'patient' ? <MessageIcon name="sidebar" size={20} mobileSize={18} /> : <SidebarSimple size={20} aria-hidden />}</button>
         </div>
       </header>
     </div>
@@ -188,7 +193,7 @@ function MessageConversation({ patient, role, composeRef, profileOpen, onToggleP
             {m.text ? <div className={`nm-bubble${own ? ' nm-own' : ''}`}><p>{m.text}</p></div> : null}
             <footer className="nmf-meta">
               <time dateTime={m.sent_at} title={new Date(m.sent_at).toLocaleString('es-AR')}>{messageTime(m.sent_at)}</time>
-              {own && <span className={`nmf-receipt nmf-receipt-${receipt}`}>{receipt === 'sent' ? <Check size={16} aria-hidden /> : <Checks size={16} aria-hidden />}<span className="nmf-sr">{messageReceiptLabel(receipt)}</span></span>}
+              {own && <span className={`nmf-receipt nmf-receipt-${receipt}`}>{receipt === 'sent' ? <Check size={16} aria-hidden /> : role === 'patient' ? <MessageIcon name="checks" size={16} mobileSize={14} /> : <Checks size={16} aria-hidden />}<span className="nmf-sr">{messageReceiptLabel(receipt)}</span></span>}
             </footer>
           </article>
         </div>;
@@ -202,7 +207,7 @@ function MessageConversation({ patient, role, composeRef, profileOpen, onToggleP
         <button type="button" className="nmf-attach-btn" onClick={() => fileRef.current?.click()} disabled={busy} aria-label="Adjuntar archivo" aria-describedby="nm-attach-hint" title="Adjuntar archivo"><Paperclip size={18} aria-hidden /></button>
         <span id="nm-attach-hint" className="nmf-sr">JPG, PNG, WebP o PDF de hasta 10 MB.</span>
         <textarea ref={composeRef} id="nm-message" rows={1} maxLength={2000} placeholder="Escribí un mensaje…" value={text} disabled={busy} onChange={(e) => setText(e.target.value)} onKeyDown={onKeyDown} aria-describedby={error ? 'nm-error' : 'nm-status'} />
-        <button type="submit" className="nmf-send" disabled={busy || !canSend}>{busy ? 'Enviando…' : 'Enviar'}<PaperPlaneRight size={16} aria-hidden /></button>
+        <button type="submit" className="nmf-send" disabled={busy || !canSend}>{busy ? 'Enviando…' : 'Enviar'}{role === 'patient' ? <MessageIcon name="send" size={16} mobileSize={14} /> : <PaperPlaneRight size={16} aria-hidden />}</button>
       </div>
       <p id="nm-status" role="status" className={status ? 'nmf-note' : 'nmf-sr'}>{status}</p>
       {error && <p id="nm-error" role="alert" className="nmf-note">{error}</p>}
@@ -248,7 +253,7 @@ function ConversationProfile({ patient, role, onNavigate }: Pick<Props, 'patient
       <span className="nmf-role">{contact.role}</span>
     </div>
     <section className="nmf-feature" aria-label="Acerca de">
-      <FeatureTitle icon={<Info size={14} aria-hidden />} title="Acerca de" />
+      <FeatureTitle icon={role === 'patient' ? <MessageIcon name="info" size={14} /> : <Info size={14} aria-hidden />} title="Acerca de" />
       <div className="nmf-about">
         {role === 'patient' && <p>Tu nutricionista de seguimiento en Plan V.</p>}
         <p><b>{role === 'pro' ? 'Objetivo' : 'Objetivo compartido'}:</b> {patient.goal || 'Todavía no definido'}</p>
@@ -257,19 +262,19 @@ function ConversationProfile({ patient, role, onNavigate }: Pick<Props, 'patient
       </div>
     </section>
     {media.length > 0 && <section className="nmf-feature" aria-label="Imágenes compartidas">
-      <FeatureTitle icon={<ImageSquare size={14} aria-hidden />} title={`Imágenes (${media.length})`} action={<ShowAll count={media.length} limit={3} open={expanded.media} onToggle={() => toggle('media')} label="imágenes" />} />
+      <FeatureTitle icon={role === 'patient' ? <MessageIcon name="image" size={14} /> : <ImageSquare size={14} aria-hidden />} title={`Imágenes (${media.length})`} action={<ShowAll count={media.length} limit={3} open={expanded.media} onToggle={() => toggle('media')} label="imágenes" />} />
       <div className={`nmf-gallery${expanded.media ? ' nmf-gallery-all' : ''}`}>{shownMedia.map((item) => <ChatAttachmentView key={item.messageId} variant="tile" patientId={patient.id} messageId={item.messageId} attachment={item.attachment} />)}</div>
     </section>}
     {documents.length > 0 && <section className="nmf-feature" aria-label="Documentos compartidos">
-      <FeatureTitle icon={<FileText size={14} aria-hidden />} title={`Documentos (${documents.length})`} action={<ShowAll count={documents.length} limit={3} open={expanded.docs} onToggle={() => toggle('docs')} label="documentos" />} />
+      <FeatureTitle icon={role === 'patient' ? <MessageIcon name="file" size={14} /> : <FileText size={14} aria-hidden />} title={`Documentos (${documents.length})`} action={<ShowAll count={documents.length} limit={3} open={expanded.docs} onToggle={() => toggle('docs')} label="documentos" />} />
       <div className="nmf-docs">{shownDocs.map((item) => <ChatAttachmentView key={item.messageId} variant="doc" patientId={patient.id} messageId={item.messageId} attachment={item.attachment} />)}</div>
     </section>}
     {links.length > 0 && <section className="nmf-feature" aria-label="Enlaces compartidos">
-      <FeatureTitle icon={<LinkSimple size={14} aria-hidden />} title={`Enlaces (${links.length})`} action={<ShowAll count={links.length} limit={3} open={expanded.links} onToggle={() => toggle('links')} label="enlaces" />} />
+      <FeatureTitle icon={role === 'patient' ? <MessageIcon name="link" size={14} /> : <LinkSimple size={14} aria-hidden />} title={`Enlaces (${links.length})`} action={<ShowAll count={links.length} limit={3} open={expanded.links} onToggle={() => toggle('links')} label="enlaces" />} />
       <ul className="nmf-links">{shownLinks.map((link) => <li key={link.href}>
-        <span className="nmf-link-icon"><Globe size={16} aria-hidden /></span>
+        <span className="nmf-link-icon">{role === 'patient' ? <MessageIcon name="globe" size={16} /> : <Globe size={16} aria-hidden />}</span>
         <a href={link.href} target="_blank" rel="noopener noreferrer nofollow">{link.label}</a>
-        <button type="button" className="nmf-link-icon" onClick={() => void copy(link.href)} aria-label={copied === link.href ? `Copiado: ${link.label}` : `Copiar ${link.label}`} title={copied === link.href ? 'Copiado' : 'Copiar'}>{copied === link.href ? <Check size={16} aria-hidden /> : <CopySimple size={16} aria-hidden />}</button>
+        <button type="button" className="nmf-link-icon" onClick={() => void copy(link.href)} aria-label={copied === link.href ? `Copiado: ${link.label}` : `Copiar ${link.label}`} title={copied === link.href ? 'Copiado' : 'Copiar'}>{copied === link.href ? <Check size={16} aria-hidden /> : role === 'patient' ? <MessageIcon name="copy" size={16} /> : <CopySimple size={16} aria-hidden />}</button>
       </li>)}</ul>
     </section>}
     {!media.length && !documents.length && !links.length && <p className="nmf-empty">Todavía no se compartieron imágenes, documentos ni enlaces en esta conversación.</p>}

@@ -12,8 +12,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import {
-  Bread, CalendarBlank, Check, CookingPot, Drop, Fire, Fish, ForkKnife, GridFour, Knife,
-  List as ListIcon, ListNumbers, PencilSimple, Plus, Repeat, ShoppingCart, Sparkle, Clock, Funnel, CaretDown,
+  Check, CookingPot, GridFour, Knife,
+  List as ListIcon, ListNumbers, PencilSimple, Plus, ShoppingCart, Sparkle, Clock, Funnel, CaretDown,
 } from '@phosphor-icons/react';
 import type { PatientRecipe, ProfessionalRecipe, RecipeMacros } from '../../types/recipes';
 import { PLAN_SLOTS } from '../../types/plans';
@@ -162,20 +162,29 @@ function DetailInfo({ icon, label, value }: { icon: ReactNode; label: string; va
 }
 
 function NutritionChips({ macros }: { macros: RecipeMacros | null }) {
-  if (!macros) return <div className="mf-chips mf-chips-empty">Sin macros declarados</div>;
   const rows = [
-    [Fire, macros.kcal, ' kcal', ' kcal'], [Bread, macros.carbs_g, 'g hidratos', 'g H'],
-    [Fish, macros.protein_g, 'g prot.', 'g P'], [Drop, macros.fat_g, 'g grasas', 'g G'],
+    ['home-fire', macros?.kcal, ' kcal', ' kcal'], ['home-bread', macros?.carbs_g, 'g hidratos', 'g H'],
+    ['home-fish', macros?.protein_g, 'g prot.', 'g P'], ['home-drop', macros?.fat_g, 'g grasas', 'g G'],
   ] as const;
-  return <div className="mf-chips">{rows.map(([Glyph, value, long, short]) => <span key={long}>
-    <Glyph size={12} aria-hidden />{value == null ? '—' : <>{value}<span className="mf-long">{long}</span><span className="mf-short" aria-hidden>{short}</span></>}
+  return <div className="mf-chips" aria-label={macros ? 'Macros declarados' : 'Sin macros declarados'}>{rows.map(([asset, value, long, short]) => <span key={long}>
+    <FigmaAsset name={asset} size={12} />{value ?? '—'}<span className="mf-long">{long}</span><span className="mf-short" aria-hidden>{short}</span>
   </span>)}</div>;
 }
 
-function WeekBars({ days }: { days: string[] }) {
-  return <span className="mf-week" role="img" aria-label={`${days.length} de 7 días: ${days.join(', ')}`}>
-    {WEEK.map((day) => <i key={day} data-on={days.includes(day) || undefined} />)}
-  </span>;
+function HealthScorePlaceholder() {
+  return <span className="mf-score" aria-label="Sin puntuación de salud declarada"><span>Puntaje de salud:</span><strong>—</strong><small>/10</small><span className="mf-week" aria-hidden="true">
+    {Array.from({ length: 10 }, (_, index) => <i key={index} />)}
+  </span></span>;
+}
+
+function RecipeRatingPlaceholder() {
+  return <span className="mf-featured-meta mf-rating"><FigmaAsset name="star" size={14} /><span>—/5 · Sin reseñas</span></span>;
+}
+
+function MenuDish({ recipe, slot }: { recipe?: PatientRecipe; slot?: string }) {
+  return recipe
+    ? <RecipeDishWell title={recipe.title} status={recipe.card?.cover_status ?? 'none'} url={recipe.card?.cover_url} alt={recipe.card?.cover_alt} />
+    : <MealThumbnail slot={slot ?? ''} />;
 }
 
 function SortPicker<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: Array<[T, string]>; onChange: (value: T) => void }) {
@@ -193,6 +202,16 @@ function FilterPicker<T extends string>({ label, value, options, onChange }: { l
     <select value={value} onChange={(event) => onChange(event.target.value as T)}>{options.map(([key, text]) => <option key={key} value={key}>{text}</option>)}</select>
     <CaretDown size={14} aria-hidden />
   </label>;
+}
+
+function PatientMenuFilters({ query, onQuery, day, onDay, options }: { query: string; onQuery: (value: string) => void; day: string; onDay: (value: string) => void; options: Array<[string, string]> }) {
+  return <details className="mf-filter-menu">
+    <summary className="mf-picker"><FigmaAsset name="funnel" size={14} /><span>Filtrar</span><FigmaAsset name="calendar-caret" size={14} /></summary>
+    <div className="mf-filter-panel">
+      <label>Buscar comida<input type="search" value={query} onChange={(event) => onQuery(event.target.value)} placeholder="Buscar por título" /></label>
+      <label>Día<select value={day} onChange={(event) => onDay(event.target.value)}>{options.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+    </div>
+  </details>;
 }
 
 type ListControls = {
@@ -230,16 +249,16 @@ function MenuLayout({ main, aside, notices }: { main: ReactNode; aside: ReactNod
 }
 
 /** Card Popular Menu: los títulos más presentes del plan de la semana. */
-function PopularWidget({ title, items, onPick }: { title: string; items: HealthyMenuItem[]; onPick?: (item: HealthyMenuItem) => void }) {
+function PopularWidget({ title, items, recipes = [], onPick }: { title: string; items: HealthyMenuItem[]; recipes?: PatientRecipe[]; onPick?: (item: HealthyMenuItem) => void }) {
   return <section className="mf-widget" aria-label={title}>
     <SectionHead title={title} level={3} />
     {items.length ? <div className="mf-popular">{items.map((item) => {
       const body = <>
-        <span className="mf-thumb mf-thumb-68"><MealThumbnail slot={item.slots[0]} /></span>
+        <span className="mf-thumb mf-thumb-68"><MenuDish recipe={recipes.find((recipe) => normalize(recipe.title) === normalize(item.title))} slot={item.slots[0]} /></span>
         <span className="mf-popular-info">
           <strong>{item.title}</strong>
           <span className="mf-popular-foot">
-            <span className="mf-rate"><Repeat size={14} aria-hidden />{item.occurrences}<small>/sem</small></span>
+            <span className="mf-rate mf-rating" aria-label="Sin reseñas disponibles"><FigmaAsset name="star" size={14} />—/5</span>
             <SlotBadge slot={item.slots[0]} light />
           </span>
         </span>
@@ -274,12 +293,12 @@ function RecommendedWidget({ title, recipes, emptyText, savedIds, onToggleFavori
           </div>
         </div>
         <hr />
-        {macros ? <dl className="mf-nutrients">
-          <div><dt><Fire size={12} aria-hidden />C</dt><dd>{macros.kcal ?? '—'} kcal</dd></div>
-          <div><dt><Bread size={12} aria-hidden />H</dt><dd>{macros.carbs_g ?? '—'}g</dd></div>
-          <div><dt><Fish size={12} aria-hidden />P</dt><dd>{macros.protein_g ?? '—'}g</dd></div>
-          <div><dt><Drop size={12} aria-hidden />G</dt><dd>{macros.fat_g ?? '—'}g</dd></div>
-        </dl> : <p className="mf-empty-note">{card.macro_status === 'failed' ? 'La IA no devolvió macros.' : 'Sin macros declarados.'}</p>}
+        <dl className="mf-nutrients" aria-label={macros ? 'Macros declarados' : 'Sin macros declarados'}>
+          <div><dt><FigmaAsset name="home-fire" size={12} />C</dt><dd>{macros?.kcal ?? '—'} kcal</dd></div>
+          <div><dt><FigmaAsset name="home-bread" size={12} />H</dt><dd>{macros?.carbs_g ?? '—'}g</dd></div>
+          <div><dt><FigmaAsset name="home-fish" size={12} />P</dt><dd>{macros?.protein_g ?? '—'}g</dd></div>
+          <div><dt><FigmaAsset name="home-drop" size={12} />G</dt><dd>{macros?.fat_g ?? '—'}g</dd></div>
+        </dl>
       </article>;
     })}</div> : <p className="mf-empty-note">{emptyText}</p>}
   </section>;
@@ -287,7 +306,7 @@ function RecommendedWidget({ title, recipes, emptyText, savedIds, onToggleFavori
 
 /* ── Rol paciente ───────────────────────────────────────────────────────── */
 
-function PatientHealthyMenu({ patient, query, onNavigate }: { patient: ShowroomPatient; query: string; onNavigate: (page: ShowroomPage) => void }) {
+function PatientHealthyMenu({ patient, query, onQueryChange, onNavigate }: { patient: ShowroomPatient; query: string; onQueryChange?: (query: string) => void; onNavigate: (page: ShowroomPage) => void }) {
   const menu = useMemo(() => buildHealthyMenu(patient), [patient]);
   const assigned = useAssignedRecipes(patient.id);
   const [slot, setSlot] = useState('Todas');
@@ -296,8 +315,10 @@ function PatientHealthyMenu({ patient, query, onNavigate }: { patient: ShowroomP
   const [view, setView] = useState<'list' | 'grid'>('list');
   const [featuredKey, setFeaturedKey] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [localQuery, setLocalQuery] = useState(query);
+  useEffect(() => setLocalQuery(query), [query]);
 
-  const items = filterHealthyMenu(menu.items, { slot, day, query, sort });
+  const items = filterHealthyMenu(menu.items, { slot, day, query: localQuery, sort });
   const featured = menu.items.find((item) => normalize(item.title) === featuredKey) ?? menu.items[0] ?? { title: 'Tu menú está en preparación', slots: [], days: [], occurrences: 0, order: 0 };
   const recipeByTitle = new Map(assigned.recipes.map((recipe) => [normalize(recipe.title), recipe]));
   const opened = assigned.recipes.find((recipe) => recipe.id === openId);
@@ -314,8 +335,8 @@ function PatientHealthyMenu({ patient, query, onNavigate }: { patient: ShowroomP
   </HeaderActions>;
 
   const aside = <>
-    <PopularWidget title="Más presentes en tu semana" items={menu.items.slice(0, 3)} onPick={(item) => { setSlot('Todas'); setDay('Todos'); setFeaturedKey(normalize(item.title)); }} />
-    <RecommendedWidget title="Recetas de tu nutricionista" recipes={assigned.recipes} emptyText="Todavía no hay recetas publicadas para vos." savedIds={assigned.savedIds} onToggleFavorite={(id) => void assigned.toggleFavorite(id)} onOpen={(recipe) => setOpenId(recipe.id)} />
+    <PopularWidget title="Menú popular" items={menu.items.slice(0, 3)} recipes={assigned.recipes} onPick={(item) => { setSlot('Todas'); setDay('Todos'); setFeaturedKey(normalize(item.title)); }} />
+    <RecommendedWidget title="Menú recomendado" recipes={assigned.recipes} emptyText="Todavía no hay recetas publicadas para vos." savedIds={assigned.savedIds} onToggleFavorite={(id) => void assigned.toggleFavorite(id)} onOpen={(recipe) => setOpenId(recipe.id)} />
     {assigned.error && <p className="recipe-error" role="alert">{assigned.error}</p>}
   </>;
 
@@ -328,12 +349,12 @@ function PatientHealthyMenu({ patient, query, onNavigate }: { patient: ShowroomP
       <SectionHead title="Menú destacado" />
       <div className="mf-featured-body">
         <div className="mf-featured-main">
-          <span className="mf-thumb mf-featured-image"><MealThumbnail slot={featured.slots[0]} /></span>
+          <span className="mf-thumb mf-featured-image"><MenuDish recipe={featuredRecipe} slot={featured.slots[0]} /></span>
           <div className="mf-featured-content">
             <h3>{featured.title}</h3>
             <div className="mf-featured-row">
               {featured.slots.map((value) => <SlotBadge key={value} slot={value} />)}
-              <span className="mf-featured-meta"><Repeat size={14} aria-hidden />{featured.occurrences ? `${times(featured.occurrences)} esta semana` : 'Sin comidas publicadas'}</span>
+              <RecipeRatingPlaceholder />
             </div>
             <div className="mf-details">
               <DetailInfo icon={<FigmaAsset name="difficulty" size={16} />} label="Dificultad" value="—" />
@@ -352,18 +373,19 @@ function PatientHealthyMenu({ patient, query, onNavigate }: { patient: ShowroomP
 
     <section className="mf-all" aria-label="Todo el menú">
       <AllMenuHead slots={menuSlots(menu.slots)} slot={slot} setSlot={setSlot} view={view} setView={setView} count={items.length}
-        filter={<FilterPicker label="Filtrar por día" value={day} options={dayOptions} onChange={setDay} />}
+        filter={<PatientMenuFilters query={localQuery} onQuery={(value) => { setLocalQuery(value); onQueryChange?.(value); }} day={day} onDay={setDay} options={dayOptions} />}
         sort={<SortPicker label="Ordenar por" value={sort} options={[['frecuencia', 'Frecuencia'], ['dia', 'Día'], ['nombre', 'Nombre']]} onChange={setSort} />} />
       {items.length ? <div className="mf-list" data-view={view}>{items.map((item) => {
         const recipe = recipeByTitle.get(normalize(item.title));
         return <article key={normalize(item.title)} className="mf-card" data-featured={item === featured || undefined}>
-          <span className="mf-thumb mf-card-image"><MealThumbnail slot={item.slots[0]} /></span>
+          <span className="mf-thumb mf-card-image"><MenuDish recipe={recipe} slot={item.slots[0]} /></span>
           <div className="mf-card-head">
-            <span className="mf-card-badges">{item.slots.map((value) => <SlotBadge key={value} slot={value} />)}{recipe && <span className="mf-level"><CookingPot size={12} aria-hidden />Receta</span>}</span>
-            <span className="mf-score"><span>Esta semana:</span><strong>{item.days.length}</strong><small>/7</small><WeekBars days={item.days} /></span>
+            <span className="mf-card-badges">{item.slots.map((value) => <SlotBadge key={value} slot={value} />)}<span className="mf-level" aria-label="Sin dificultad declarada"><FigmaAsset name="recipe-difficulty" size={12} />—</span></span>
+            <HealthScorePlaceholder />
           </div>
           <h3><button type="button" onClick={() => setFeaturedKey(normalize(item.title))}>{item.title}</button></h3>
-          <div className="mf-chips"><span><CalendarBlank size={12} aria-hidden />{item.days.join(' · ')}</span><span><Repeat size={12} aria-hidden />{times(item.occurrences)}</span></div>
+          <NutritionChips macros={declaredMacros(recipe?.card)} />
+          <span className="mf-sr">{item.days.join(' · ')} · {times(item.occurrences)} esta semana.</span>
           <div className="mf-card-action">
             {recipe
               ? <button type="button" className="mf-btn mf-btn-small" onClick={() => setOpenId(recipe.id)}>Ver receta</button>
@@ -517,14 +539,15 @@ function ProHealthyMenu({ patient, query }: { patient: ShowroomPatient; query: s
   return <>{header}<MenuLayout notices={notices} main={main} aside={aside} />{dialogs}</>;
 }
 
-export function ShowroomHealthyMenu({ patient, query, onNavigate, role = 'patient' }: {
+export function ShowroomHealthyMenu({ patient, query, onQueryChange, onNavigate, role = 'patient' }: {
   patient: ShowroomPatient;
   query: string;
+  onQueryChange?: (query: string) => void;
   onNavigate: (page: ShowroomPage) => void;
   /** Nutricionista: el catálogo del consultorio es el menú, con el paciente seleccionado a la derecha. */
   role?: 'patient' | 'pro';
 }) {
   return role === 'pro'
     ? <ProHealthyMenu patient={patient} query={query} />
-    : <PatientHealthyMenu patient={patient} query={query} onNavigate={onNavigate} />;
+    : <PatientHealthyMenu patient={patient} query={query} onQueryChange={onQueryChange} onNavigate={onNavigate} />;
 }

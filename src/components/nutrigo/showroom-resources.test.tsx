@@ -47,7 +47,7 @@ describe('ShowroomResources', () => {
 
   it('renderiza biblioteca, filtros, guardado de cuenta y acceso a detalle', () => {
     const html = renderToStaticMarkup(<ShowroomResources patientId="pat-sofia" query="" onNavigate={onNavigate} />);
-    expect(html).toContain('Guías y artículos revisados');
+    expect(html).toContain('Guías y artículos');
     expect(html).toContain('Cómo leer tu plan semanal');
     expect(html).toContain('No queda sólo en este dispositivo');
     expect(html).toContain('Abrir guía');

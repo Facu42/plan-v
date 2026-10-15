@@ -113,6 +113,16 @@ La app para tiendas necesita el ingreso terminado (las tiendas exigen ciertas fo
 
 ## B. Diseño, experiencia y movimiento
 
+- **Fidelidad Nutrigo (2026-10-03), detenida antes de publicar:** Facundo corrigió
+  el enfoque: usar directamente el proyecto fuente de Figma y no seguir ajustando
+  la interfaz existente ni tomar capturas. Los cambios quedan locales, sin PR.
+  La fuente completa de la aplicación aún debe identificarse. Trabajo previo:
+  confirmado el mismo archivo por Facundo;
+  corrección de las doce pantallas/detalles y móviles con los recursos originales,
+  controles conectados al backend y accesos del consultorio conservados. 1.165 pruebas
+  aprobadas; comprobación de 24 vistas a 1440/390. Fuente, diferencias necesarias,
+  revisiones y publicación en [fidelidad Nutrigo](nutrigo-fidelidad-2026-10-03.md).
+
 - **Modelos gratuitos (2026-10-02):** Facundo recordó el acuerdo de no usar modelos pagos.
   Corregido el predeterminado de texto a `openrouter/free`, bloqueo de alternativas pagas
   y precios máximos cero en cada petición. Fotos pagas bloqueadas también con clave.

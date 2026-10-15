@@ -1,0 +1,210 @@
+/* Values from high fidelity Figma MCP sources: 105:2472 / 492:11324,
+   105:2649 / 492:14886, 105:2790 / 498:18237, 105:2931 / 501:22824,
+   263:6588 / 504:15334 and 84:2565 / 433:19982. Patient surfaces only. */
+
+/* Grocery: 866 + 20 + 275; charts 472 + 20 + 374; single column legend. */
+.nv-app.nv-patient .gf-left { flex: 1 1 866px; }
+.nv-app.nv-patient .gf-category { min-height: 349px; }
+.nv-app.nv-patient .gf-status-body { gap: 20px; padding-left: 4px; }
+.nv-app.nv-patient .gf-legend { display: flex; flex-direction: column; justify-content: space-between; align-self: stretch; gap: 8px; padding: 8px 0; }
+.nv-app.nv-patient .gf-legend li { flex-wrap: wrap; gap: 4px 12px; }
+.nv-app.nv-patient .gf-legend .gf-legend-numbers { margin-left: 22px; }
+.nv-app.nv-patient .gf-legend-name { font-size: 11px; }
+.nv-app.nv-patient .gf-category-list { flex: 1; justify-content: space-between; gap: 12px; }
+.nv-app.nv-patient .gf-category-list .gf-legend-numbers { gap: 6px; }
+.nv-app.nv-patient .fp-grocery-columns { gap: 0; }
+.nv-app.nv-patient .fp-grocery-columns > div { position: relative; justify-content: flex-end; padding-bottom: 4px; gap: 8px; }
+.nv-app.nv-patient .fp-grocery-columns > div > span { border-radius: 0; background: repeating-linear-gradient(to top,transparent 0,transparent calc(25% - 1px),var(--nv-line) calc(25% - 1px),var(--nv-line) 25%); }
+.nv-app.nv-patient .fp-grocery-columns i { margin-inline: 16%; width: 68%; border-radius: 5px 5px 0 0; }
+.nv-app.nv-patient .fp-grocery-columns strong { position: absolute; top: 0; left: 50%; transform: translateX(-50%); }
+.nv-app.nv-patient .fp-grocery-columns small { font-size: 11px; line-height: 1.24; }
+.nv-app.nv-patient .gf-row { display: flex; align-items: center; justify-content: space-between; gap: 0; }
+.nv-app.nv-patient .gf-row > div { flex: none; min-width: 0; }
+.nv-app.nv-patient .gf-row > div:nth-child(1) { width: 138px; }
+.nv-app.nv-patient .gf-row > div:nth-child(2) { width: 66px; }
+.nv-app.nv-patient .gf-row > div:nth-child(3) { width: 152px; }
+.nv-app.nv-patient .gf-row > div:nth-child(4) { width: 62px; }
+.nv-app.nv-patient .gf-row > div:nth-child(5) { width: 42px; }
+.nv-app.nv-patient .gf-row > div:nth-child(6) { width: 52px; }
+.nv-app.nv-patient .gf-row > div:nth-child(7) { width: 108px; }
+.nv-app.nv-patient .gf-row .gf-pill { white-space: normal; }
+.nv-app.nv-patient .gf-unknown { color: var(--nv-muted); font: 400 12px/1.3 Poppins,sans-serif; }
+.nv-app.nv-patient .gf-name { position: relative; }
+.nv-app.nv-patient .gf-remove { position: absolute; bottom: -12px; right: 0; padding: 0; font-size: 10px; }
+
+/* Diary statistics are white in both source frames. */
+.nv-app.nv-patient .nvfd-stats { background: var(--nv-card); }
+.nv-app.nv-patient .nvfd-widget { border: 0; min-height: 888px; }
+.nv-app.nv-patient .nvfd-head { min-height: 30px; }
+.nv-app.nv-patient .nvfd-head .nvfd-cta { padding: 6px 10px; }
+.nv-app.nv-patient .nvfd-table:not(.nvfd-pro) { min-width: 980px; }
+.nv-app.nv-patient .nvfd-table:not(.nvfd-pro) .nvfd-row { grid-template-columns: 12px 82px 78px 176px 58px 56px 184px 48px 136px; justify-content: space-between; column-gap: 0; }
+.nv-app.nv-patient .nvfd-row > span:first-child { margin-right: 20px; }
+.nv-app.nv-patient .nvfd-row-head { font-size: 11px; line-height: 1.24; }
+.nv-app.nv-patient .nvfd-head .nvfd-search input { min-height: 0; height: auto; font: 400 11px/1.24 Poppins,sans-serif; }
+.nv-app.nv-patient .nvfd-foot { margin-top: auto; }
+.nvfd-mobile-filter, .nvfd-mobile-filters { display: none; }
+
+/* Progress widgets: source fixed heights, 20 between body and side widgets. */
+.nv-app.nv-patient .nvpf-activity, .nv-app.nv-patient .nvpf-hydration { min-height: 304px; }
+.nv-app.nv-patient .nvpf-activity .nvpf-columns { flex: 1; min-height: 166px; }
+.nv-app.nv-patient .nvpf-top { gap: 8px; }
+.nv-app.nv-patient .nvpf-total small { font-size: 11px; line-height: 1.24; }
+.nv-app.nv-patient .nvpf-meals.fp-progress-photos { gap: 20px; }
+.nv-app.nv-patient .fp-photo-slots > button { flex: 0 0 184px; padding: 16px 12px 12px; }
+.nv-app.nv-patient .fp-photo-placeholder { width: 160px; height: 155px; }
+.nv-app.nv-patient .nvpf-table { border-radius: 12px; }
+.nv-app.nv-patient .nvpf-weight-empty-chart { height: 181px; position: relative; }
+.nv-app.nv-patient .nvpf-weight-empty-chart .nvpf-grid-lines { inset: 0; }
+
+/* Exercise source rows use fixed cell widths distributed over the available width. */
+.nv-app.nv-patient .nvexercise { display: flex; flex-direction: column; gap: 20px; padding: 0; min-width: 0; }
+.nv-app.nv-patient .nvexercise-toolbar { position: relative; flex: none; min-height: 30px; margin: 0; gap: 10px; }
+.nv-app.nv-patient .nvexercise-toolbar > label { width: 224px; min-height: 30px; padding: 6px 8px; gap: 4px; }
+.nv-app.nv-patient .nvexercise-toolbar input { height: auto; min-height: 0; padding: 0 2px; font: 400 11px/1.24 Poppins,sans-serif; }
+.nv-app.nv-patient .nvexercise-filters { display: flex; gap: 10px; }
+.nv-app.nv-patient .nvexercise-picker { display: flex; align-items: center; padding: 6px 8px 6px 10px; border-radius: 8px; background: var(--nv-card); }
+.nv-app.nv-patient .nvexercise-picker select { width: auto; height: auto; min-height: 0; padding: 2px 0; border: 0; border-radius: 0; background: transparent; color: var(--nv-ink-soft); font: 500 11px/1.05 Poppins,sans-serif; }
+.nv-app.nv-patient .nvexercise-add { margin-left: auto; min-height: 30px; padding: 6px 10px; gap: 4px; font: 500 11px/1.05 Poppins,sans-serif; background: var(--nv-accent); }
+.nv-app.nv-patient .nvexercise-add > span:last-child { padding: 0 2px; }
+.nv-app.nv-patient .nvexercise-more { display: none; }
+.nvexercise-icon-mobile { display: none; }
+.nv-app.nv-patient .nvexercise-table-scroll { padding: 8px 16px; flex: none; }
+.nv-app.nv-patient .nvexercise-table { table-layout: auto; width: 100%; min-width: 652px; }
+.nv-app.nv-patient .nvexercise-table :is(thead,tbody) { display: block; width: 100%; }
+.nv-app.nv-patient .nvexercise-table tr { display: flex; align-items: center; justify-content: space-between; padding: 16px 8px; border-bottom: 1px solid var(--nv-line); }
+.nv-app.nv-patient .nvexercise-table th, .nv-app.nv-patient .nvexercise-table td { display: flex; flex: none; align-items: center; padding: 0; border: 0; font: 400 12px/1.3 Poppins,sans-serif; }
+.nv-app.nv-patient .nvexercise-table :is(th,td):nth-child(1) { width: 162px; }
+.nv-app.nv-patient .nvexercise-table :is(th,td):nth-child(2) { width: 38px; }
+.nv-app.nv-patient .nvexercise-table :is(th,td):nth-child(3) { width: 88px; }
+.nv-app.nv-patient .nvexercise-table :is(th,td):nth-child(4) { width: 70px; }
+.nv-app.nv-patient .nvexercise-table :is(th,td):nth-child(5) { width: 90px; }
+.nv-app.nv-patient .nvexercise-table :is(th,td):nth-child(6) { width: 58px; }
+.nv-app.nv-patient .nvexercise-table :is(th,td):nth-child(7) { width: 84px; }
+.nv-app.nv-patient .nvexercise-table thead tr, .nv-app.nv-patient .nvexercise-table tbody tr:last-child { border: 0; }
+.nv-app.nv-patient .nvexercise-table thead th { font: 400 11px/1.24 Poppins,sans-serif; color: var(--nv-muted); }
+.nv-app.nv-patient .nvexercise-table thead th > button { gap: 0; }
+.nv-app.nv-patient .nvexercise-table-icon { flex: none; border-radius: 10px; margin-right: 12px; }
+.nv-app.nv-patient .nvexercise-table .nv-badge { border: 0; padding: 6px 10px; border-radius: 8px; font: 400 11px/1.24 Poppins,sans-serif; white-space: nowrap; }
+.nv-app.nv-patient .nvexercise-pagination { min-height: 30px; margin-top: 0; }
+.nv-app.nv-patient .nvexercise-pagination > label { display: flex; align-items: center; gap: 10px; font: 400 11px/1.24 Poppins,sans-serif; }
+.nv-app.nv-patient .nvexercise-pagination select { width: auto; min-height: 30px; height: 30px; padding: 6px 8px; border: 0; border-radius: 8px; background: var(--nv-card); color: var(--nv-ink-soft); font: 500 11px/1.05 Poppins,sans-serif; }
+.nv-app.nv-patient .nvexercise-pagination nav { display: flex; gap: 8px; }
+.nv-app.nv-patient .nvexercise-pagination nav > button { display: grid; place-items: center; height: 30px; min-width: 30px; padding: 6px; border: 0; border-radius: 8px; color: var(--nv-ink-soft); background: var(--nv-card); font: 500 11px/1.05 Poppins,sans-serif; cursor: pointer; }
+.nv-app.nv-patient .nvexercise-pagination nav > button[aria-current=page] { background: var(--nv-accent); color: var(--nv-ink); }
+.nv-app.nv-patient .nvexercise-pagination nav > button:disabled { background: var(--nv-fill); color: var(--nv-faint); cursor: default; }
+.nv-app.nv-patient .nvexercise-management { margin: 0; }
+
+/* Resources: article image slots remain dynamic; exact source geometry. */
+.nv-app.nv-patient .nvrf-hero h2 { width: 200px; max-width: 100%; }
+.nv-app.nv-patient .nvrf-tabs button { padding: 11px 14px; min-height: 34px; }
+.nv-app.nv-patient .nvrf-search input { height: auto; min-height: 0; }
+.nv-app.nv-patient .nvrf-meta { flex-wrap: wrap; white-space: normal; }
+.nv-app.nv-patient .nvrf-popular-card .nvrf-image { height: 168px; }
+.nv-app.nv-patient .nvrf-article { gap: 20px; padding: 36px; background: var(--nv-card); border-radius: 16px; }
+.nv-app.nv-patient .nvrf-article > header { gap: 20px; }
+.nv-app.nv-patient .nvrf-article > .nvrf-image { height: 408px; aspect-ratio: auto; }
+.nv-app.nv-patient .nvrf-detail-rail { padding: 36px; background: var(--nv-card); }
+.nv-app.nv-patient .nvrf-sections section { gap: 8px; }
+.nv-app.nv-patient .nvrf-sections h3 { display: flex; align-items: center; min-height: 30px; }
+.nv-app.nv-patient .nvrf-detail .nvrf-back { font-size: 12px; }
+
+/* Messages: widths already follow the desktop source; mobile chat has 8px gap. */
+.nv-app.nv-patient.nv-messaging .nmf-chat-head > header { gap: 14px; }
+.nv-app.nv-patient.nv-messaging .nmf-chat-actions { gap: 10px; }
+.nmf-source-mobile { display: none; }
+
+@media (min-width: 800px) {
+  .nv-app.nv-patient .gf { min-height: 842px; }
+  .nv-app.nv-patient .gf-category { height: 349px; }
+  .nv-app.nv-patient .gf-legend .gf-legend-name { flex-basis: 50%; }
+  .nv-app.nv-patient .gf-legend .gf-legend-numbers { margin-left: 22px; }
+  .nv-app.nv-patient .nvexercise { min-height: 888px; }
+  .nv-app.nv-patient .nvexercise-management { margin-top: auto; }
+  .nv-app.nv-patient .fp-body-chest { left: 354px; top: 100px; }
+  .nv-app.nv-patient .fp-body-waist { left: 356px; top: 210px; }
+}
+
+@media (max-width: 799px) {
+  .nv-app.nv-patient .gf { gap: 32px; }
+  .nv-app.nv-patient .gf-data, .nv-app.nv-patient .gf-left { gap: 20px; }
+  .nv-app.nv-patient .gf-stats { flex-direction: column; gap: 16px; }
+  .nv-app.nv-patient .gf-stat { min-height: 84px; padding: 16px; }
+  .nv-app.nv-patient .gf-stat-icon { padding: 16px; }
+  .nv-app.nv-patient .gf-stat-info strong { font-size: 22px; }
+  .nv-app.nv-patient .gf-status-body { gap: 24px; padding-left: 4px; }
+  .nv-app.nv-patient .gf-status .gf-donut { width: 182px; height: 182px; flex-basis: 182px; }
+  .nv-app.nv-patient .gf-legend { justify-content: space-between; padding: 0; }
+  .nv-app.nv-patient .gf-legend li { display: grid; grid-template-columns: 10px minmax(0,1fr); gap: 4px 12px; }
+  .nv-app.nv-patient .gf-legend .gf-swatch-dot { grid-row: 1/3; align-self: start; margin-top: 2px; }
+  .nv-app.nv-patient .gf-legend-name { white-space: normal; }
+  .nv-app.nv-patient .gf-legend .gf-legend-numbers { margin: 0; grid-column: 2; white-space: normal; }
+  .nv-app.nv-patient .gf-category { min-height: 0; }
+  .nv-app.nv-patient .nvfd { gap: 24px; }
+  .nv-app.nv-patient .nvfd-stats { display: flex; flex-direction: column; gap: 16px; padding: 16px; }
+  .nv-app.nv-patient .nvfd-stat { width: 100%; flex: none; }
+  .nv-app.nv-patient .nvfd-stat-icon { padding: 24px; }
+  .nv-app.nv-patient .nvfd-widget { padding: 16px; }
+  .nv-app.nv-patient .nvfd-head { position: relative; flex-wrap: nowrap; gap: 10px; }
+  .nv-app.nv-patient .nvfd-head-left { flex: 1; gap: 10px; }
+  .nv-app.nv-patient .nvfd-search { width: auto; min-width: 0; flex: 1; }
+  .nv-app.nv-patient .nvfd-head-right { flex: none; }
+  .nv-app.nv-patient .nvfd-head-left > .nvfd-picker, .nv-app.nv-patient .nvfd-head-right > .nvfd-picker { display: none; }
+  .nv-app.nv-patient .nvfd-mobile-filter { display: grid; place-items: center; flex: none; width: 30px; height: 30px; padding: 6px; border: 0; border-radius: 8px; background: var(--nv-fill); cursor: pointer; }
+  .nv-app.nv-patient .nvfd-mobile-filters { position: absolute; display: flex; flex-wrap: wrap; gap: 10px; top: 38px; right: 0; z-index: 5; padding: 12px; border-radius: 12px; background: var(--nv-card); box-shadow: 0 4px 16px #27293222; }
+  .nv-app.nv-patient .nvfd-table:not(.nvfd-pro) { width: 980px; min-width: 980px; }
+  .nv-app.nv-patient .nvfd-foot { margin-top: 0; }
+  .nv-app.nv-patient .nvpf-info { gap: 20px; }
+  .nv-app.nv-patient .nvpf-side { gap: 32px; }
+  .nv-app.nv-patient .nvpf-weight { gap: 20px; }
+  .nv-app.nv-patient .fp-photo-slots { gap: 16px; }
+  .nv-app.nv-patient .fp-photo-slots > button { flex: 0 0 184px; }
+  .nv-app.nv-patient .nvpf-table { margin-inline: -16px; width: calc(100% + 32px); border-radius: 0; }
+  .nv-app.nv-patient .nvpf-rail { gap: 24px; }
+  .nv-app.nv-patient .nvpf-hydration-top { gap: 24px; }
+  .nv-app.nv-patient .nvpf-hydration-top strong { font-size: 16px; }
+  .nv-app.nv-patient .nvexercise { gap: 24px; }
+  .nv-app.nv-patient .nvexercise-toolbar { flex-wrap: nowrap; gap: 10px; }
+  .nv-app.nv-patient .nvexercise-toolbar > label { width: auto; flex: 1; min-width: 0; }
+  .nv-app.nv-patient .nvexercise-more { display: grid; place-items: center; width: 30px; height: 30px; min-height: 30px; padding: 6px; border: 0; border-radius: 8px; background: var(--nv-card); cursor: pointer; }
+  .nv-app.nv-patient .nvexercise-filters { display: none; position: absolute; z-index: 5; top: 38px; right: 0; padding: 12px; border-radius: 12px; background: var(--nv-card); box-shadow: 0 4px 16px #27293222; }
+  .nv-app.nv-patient .nvexercise-filters.is-open { display: flex; }
+  .nv-app.nv-patient .nvexercise-add { margin-left: 0; flex: none; }
+  .nv-app.nv-patient .nvexercise-table-scroll { padding: 8px 0; }
+  .nv-app.nv-patient .nvexercise-table tr { width: 652px; padding: 16px; }
+  .nv-app.nv-patient .nvexercise-table :is(th,td) { font-size: 11px; line-height: 1.24; }
+  .nv-app.nv-patient .nvexercise-table :is(th,td):nth-child(1) { width: 144px; }
+  .nv-app.nv-patient .nvexercise-table :is(th,td):nth-child(2) { width: 36px; }
+  .nv-app.nv-patient .nvexercise-table :is(th,td):nth-child(3) { width: 50px; }
+  .nv-app.nv-patient .nvexercise-table :is(th,td):nth-child(4) { width: 42px; }
+  .nv-app.nv-patient .nvexercise-table :is(th,td):nth-child(5) { width: 72px; }
+  .nv-app.nv-patient .nvexercise-table thead th { font-size: 10px; line-height: 1.35; }
+  .nv-app.nv-patient .nvexercise-table-icon { width: 30px; height: 30px; margin-right: 8px; }
+  .nv-app.nv-patient .nvexercise-icon-desktop { display: none; }
+  .nv-app.nv-patient .nvexercise-icon-mobile { display: inline-flex; }
+  .nv-app.nv-patient .nvexercise-pagination { justify-content: center; gap: 16px; }
+  .nv-app.nv-patient .nvexercise-pagination > label { width: 100%; justify-content: center; }
+  .nv-app.nv-patient .nvrf-layout, .nv-app.nv-patient .nvrf-main { gap: 24px; }
+  .nv-app.nv-patient .nvrf-tabs button { padding: 9px 12px; min-height: 30px; }
+  .nv-app.nv-patient .nvrf-featured-row { gap: 24px; }
+  .nv-app.nv-patient .nvrf-popular > div { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+  .nv-app.nv-patient .nvrf-popular-card { flex-direction: column; gap: 12px; min-height: 0; }
+  .nv-app.nv-patient .nvrf-popular-card .nvrf-image { width: 100%; height: 140px; flex: none; border-radius: 16px; }
+  .nv-app.nv-patient .nvrf-popular-info { padding: 0; gap: 10px; }
+  .nv-app.nv-patient .nvrf-popular-info .nvrf-meta { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .nv-app.nv-patient .nvrf-popular-info .nvrf-meta > i { display: none; }
+  .nv-app.nv-patient .nvrf-popular-info .nvrf-desc { -webkit-line-clamp: 4; }
+  .nv-app.nv-patient .nvrf-rail { padding: 28px; margin-inline: -16px; border-radius: 0; }
+  .nv-app.nv-patient .nvrf-detail-layout { gap: 24px; }
+  .nv-app.nv-patient .nvrf-detail { margin-inline: -16px; width: calc(100% + 32px); padding-bottom: 24px; background: var(--nv-bg); }
+  .nv-app.nv-patient .nvrf-article { gap: 20px; padding: 24px 16px; border-radius: 0; }
+  .nv-app.nv-patient .nvrf-article > header h2 { font-size: 28px; }
+  .nv-app.nv-patient .nvrf-article > .nvrf-image { height: 358px; width: 100%; aspect-ratio: auto; border-radius: 16px; }
+  .nv-app.nv-patient .nvrf-detail-rail { padding: 0 16px; background: transparent; gap: 20px; }
+  .nv-app.nv-patient .nvrf-detail-rail > section:nth-child(-n+2) { gap: 8px; }
+  .nv-app.nv-patient .nvrf-detail-rail > section:nth-child(-n+2) .nvrf-head h3 { font: 400 14px/1.25 Poppins,sans-serif; }
+  .nv-app.nv-patient .nvrf-tags small { background: var(--nv-card); }
+  .nv-app.nv-patient.nv-messaging .nm-thread { gap: 8px; }
+  .nv-app.nv-patient.nv-messaging .nmf-source-desktop { display: none; }
+  .nv-app.nv-patient.nv-messaging .nmf-source-mobile { display: inline-flex; }
+}

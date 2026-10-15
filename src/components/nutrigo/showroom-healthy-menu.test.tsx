@@ -13,7 +13,10 @@ const patient = {
 } as unknown as ShowroomPatient;
 
 /** Sólo la sección «Todo el menú» (la columna derecha muestra la semana completa). */
-const allMenu = (html: string) => html.slice(html.indexOf('aria-label="Todo el menú"'), html.indexOf('aria-label="Más del menú"'));
+const allMenu = (html: string) => {
+  const start = html.indexOf('aria-label="Todo el menú"');
+  return html.slice(start, html.indexOf('</section>', start));
+};
 
 describe('Menú saludable paciente Nutrigo', () => {
   it('deriva preparaciones únicas del plan publicado sin crear recetas', () => {
@@ -31,8 +34,8 @@ describe('Menú saludable paciente Nutrigo', () => {
     const html = renderToStaticMarkup(<ShowroomHealthyMenu patient={patient} query="" onNavigate={() => undefined} />);
     expect(html).toContain('Menú destacado');
     expect(html).toContain('Todo el menú');
-    expect(html).toContain('Más presentes en tu semana');
-    expect(html).toContain('Recetas de tu nutricionista');
+    expect(html).toContain('Menú popular');
+    expect(html).toContain('Menú recomendado');
     expect(html).toContain('Lista de compras');
     expect(html).toContain('Pollo con vegetales');
     expect(html).toContain('2 veces esta semana');
@@ -61,7 +64,8 @@ describe('Menú saludable paciente Nutrigo', () => {
     const html = renderToStaticMarkup(<ShowroomHealthyMenu patient={{ ...patient, weekPlan: [] }} query="" onNavigate={() => undefined} />);
     expect(html).toContain('Tu menú está en preparación');
     expect(html).toContain('Todo el menú');
-    expect(html).toContain('Sin comidas publicadas');
+    expect(html).toContain('Sin coincidencias');
+    expect(html.replace(/<[^>]*>/g, '')).not.toMatch(/9\/10|4\.8|350 kcal|45g/i);
   });
 });
 

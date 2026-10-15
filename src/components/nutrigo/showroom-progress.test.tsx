@@ -44,8 +44,8 @@ describe('Progreso paciente dentro de Nutrigo', () => {
     expect(html).toContain('Fotos de progreso');
     expect(html).toContain('Actividad calórica');
     expect(html).toContain('7 días');
-    expect(html).toContain('30 días');
-    expect(html).toContain('90 días');
+    expect(html).toContain('Registrar peso y medidas');
+    expect(html).toContain('Mis registros');
   });
 
   it('no presenta medidas, inferencias clínicas ni campos profesionales', () => {

@@ -423,18 +423,17 @@ export function ShowroomGrocery({ patient, list, readOnly = isProfessionalSurfac
         <div className="gf-table-card" data-first-tab={tab === 'all' || undefined}>
           <div className="gf-table" role="table" aria-label="Lista de compras">
             <div className="gf-row gf-row-head" role="row">
-              {([['name', 'Elemento'], ['category', 'Categoría'], [null, 'Cantidad'], ['meals', 'Comidas'], [null, 'Origen'], ['pending', 'Estado']] as const).map(([key, label]) => <div role="columnheader" key={label} className="gf-head-cell">
+              {(readOnly ? [['name', 'Elemento'], ['category', 'Categoría'], [null, 'Cantidad'], ['meals', 'Comidas'], [null, 'Origen'], ['pending', 'Estado']] as const : [['name', 'Elemento'], ['category', 'Categoría'], [null, 'Cantidad'], [null, 'Calorías'], [null, 'Costo'], [null, 'Real'], ['pending', 'Estado']] as const).map(([key, label]) => <div role="columnheader" key={label} className="gf-head-cell">
                 {key ? <button type="button" onClick={() => setSort(key)} aria-pressed={sort === key}>{label}<CaretUpDown size={14} aria-hidden="true" /></button> : <span>{label}<CaretUpDown size={14} aria-hidden="true" /></span>}
               </div>)}
             </div>
             {pageRows.map((row) => {
               const done = checked.has(row.id);
               return <div className="gf-row" role="row" key={row.id}>
-                <div role="cell" className="gf-name"><span className="gf-thumb" aria-hidden="true"><i /></span><span>{row.name}</span></div>
+                <div role="cell" className="gf-name" title={`${KIND_LABELS[row.kind]}${row.kind === 'manual' ? '' : ` · ${row.occurrences} comidas`}`}><span className="gf-thumb" aria-hidden="true"><i /></span><span>{row.name}{!readOnly && <span className="fp-sr"> · {KIND_LABELS[row.kind]}{row.kind === 'manual' ? '' : ` · ${row.occurrences} comidas`}</span>}</span>{!readOnly && row.kind === 'manual' && row.lineId && <button type="button" className="pf-link-danger gf-remove" disabled={busy} onClick={() => void run(() => shoppingApi.remove(patient.id, row.lineId!), 'Agregado quitado.')}>Quitar</button>}</div>
                 <div role="cell"><span className="gf-pill" data-tone={GROCERY_TONES[row.category]}>{row.category}</span></div>
                 <div role="cell" className="gf-qty"><span className="gf-qty-box">{row.quantity ?? '—'}</span><span className="gf-unit">{row.unit ?? ''}</span></div>
-                <div role="cell" className="gf-meals">{row.kind === 'manual' ? <span className="gf-muted">—</span> : <><span>{row.occurrences}</span><span className="gf-muted">{row.occurrences === 1 ? 'comida' : 'comidas'}</span></>}</div>
-                <div role="cell" className="gf-origin"><span>{KIND_LABELS[row.kind]}</span>{!readOnly && row.kind === 'manual' && row.lineId && <button type="button" className="pf-link-danger" disabled={busy} onClick={() => void run(() => shoppingApi.remove(patient.id, row.lineId!), 'Agregado quitado.')}>Quitar</button>}</div>
+                {readOnly ? <><div role="cell" className="gf-meals">{row.kind === 'manual' ? <span className="gf-muted">—</span> : <><span>{row.occurrences}</span><span className="gf-muted">{row.occurrences === 1 ? 'comida' : 'comidas'}</span></>}</div><div role="cell" className="gf-origin"><span>{KIND_LABELS[row.kind]}</span></div></> : <><div role="cell" className="gf-unknown" title="Calorías no disponibles para este elemento">—</div><div role="cell" className="gf-unknown" title="Costo previsto no registrado">—</div><div role="cell" className="gf-unknown" title="Gasto real no registrado">—</div></>}
                 <div role="cell">
                   <button type="button" className="gf-status-badge" data-done={done || undefined} aria-pressed={done} aria-label={`${row.label}: ${done ? 'comprado' : 'pendiente'}`} disabled={readOnly || busy} onClick={() => toggle(row.id)}>
                     <span className="gf-check">{done && <Check size={11} weight="bold" />}</span><span>{done ? 'Comprado' : 'Pendiente'}</span>
