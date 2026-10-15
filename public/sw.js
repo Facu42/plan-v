@@ -81,3 +81,34 @@ self.addEventListener('fetch', (event) => {
     return response;
   })());
 });
+
+/* Avisos al teléfono: el servidor manda solo un título, un texto genérico y la pantalla a abrir. */
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch { data = {}; }
+  const title = typeof data.title === 'string' ? data.title : 'Plan V';
+  const url = typeof data.url === 'string' && data.url.startsWith('/app/') ? data.url : '/app';
+  event.waitUntil(self.registration.showNotification(title, {
+    body: typeof data.body === 'string' ? data.body : 'Tenés un aviso nuevo.',
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-192.png',
+    tag: typeof data.tag === 'string' ? data.tag : 'plan-v',
+    data: { url },
+  }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = new URL(event.notification.data?.url || '/app', self.location.origin).href;
+  event.waitUntil((async () => {
+    const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of clients) {
+      if (new URL(client.url).origin === self.location.origin && 'focus' in client) {
+        await client.focus();
+        if ('navigate' in client) await client.navigate(target).catch(() => undefined);
+        return;
+      }
+    }
+    await self.clients.openWindow(target);
+  })());
+});
