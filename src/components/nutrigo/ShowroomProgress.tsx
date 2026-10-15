@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CaretDown, DropHalfBottom, PintGlass } from '@phosphor-icons/react';
 import { CarePanel } from './CarePanel';
+import { stepsSummaryText } from './steps-summary';
 import { NvBadge, NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
 import { MEASUREMENT_SOURCE_LABELS } from '../../types/care';
@@ -274,6 +275,7 @@ export function ShowroomProgress({
             </div>)}
           </div>
           <ul className="nvpf-legend nvpf-legend-row" aria-label="Síntomas de los últimos 7 días"><li>{symptoms.length ? `Síntomas: ${symptoms.map((entry) => `${entry.label} (${entry.days} ${entry.days === 1 ? 'día' : 'días'})`).join(', ')}` : 'Sin síntomas registrados'}</li></ul>
+          {professional && <ul className="nvpf-legend nvpf-legend-row" aria-label="Pasos de los últimos 7 días"><li>{stepsSummaryText(patient.journey.days)}</li></ul>}
         </section>
 
         <section className="nvpf-widget nvpf-hydration" aria-label="Hidratación">
