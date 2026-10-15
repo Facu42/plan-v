@@ -1,6 +1,7 @@
 # Traspaso del proyecto (2026-10-01)
 
 Una sola página para que cualquier agente (Claude, Codex u otro) siga sin tener el chat.
+**Desde el 14/10:** el reparto de trabajo entre agentes está en [`coordinacion-agentes.md`](coordinacion-agentes.md) y los documentos de producto en [`producto/`](producto/README.md).
 Los detalles de cada tema están en los archivos que se nombran. Este archivo se actualiza
 cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facundo.
 
