@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type R
 import { legalAcceptance } from '../legal';
 import { googleSignupMetadata, PENDING_GOOGLE_SIGNUP_KEY, rememberGoogleSignup, takeGoogleSignup } from './google-signup';
 import { rememberAdminReturn } from './admin-return';
+import { rememberTeamReturn } from './team-return';
 import type { Session, User } from '@supabase/supabase-js';
 import { getProfile, googleSignInEnabled, supabase, supabaseConfigured, type Profile } from '../lib/supabase';
 import { api } from '../api/client';
@@ -216,6 +217,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const store = browserStorage();
       if (store) rememberGoogleSignup(store, { professional, acceptedLegal });
       if (store && typeof window !== 'undefined') rememberAdminReturn(store, window.location.pathname);
+      if (store && typeof window !== 'undefined') rememberTeamReturn(store, window.location.pathname);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

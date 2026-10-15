@@ -32,7 +32,7 @@ async function authHeaders(): Promise<HeadersInit> {
   return headers;
 }
 
-export async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export async function request<T>(path: string, init?: RequestInit, originOverride?: string): Promise<T> {
   if (init?.signal?.aborted) {
     throw new DOMException('Aborted', 'AbortError');
   }
@@ -40,7 +40,7 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (init?.signal?.aborted) {
     throw new DOMException('Aborted', 'AbortError');
   }
-  const res = await fetch(resolveApiUrl(path), {
+  const res = await fetch(resolveApiUrl(path, originOverride), {
     ...init,
     headers: { ...headers, ...init?.headers },
   });

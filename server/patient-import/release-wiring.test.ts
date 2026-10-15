@@ -13,5 +13,5 @@ it('habilita WASM local para OCR sin evaluación JavaScript ni rutas de entregas
   const index=await readFile(new URL('../index.ts',import.meta.url),'utf8');
   expect(index).toContain('nutrition-capabilities/routes');
   expect(index).toContain('clinical-workspace/routes');
-  for(const future of ['scheduling/routes','communications/channel-routes','portfolio/routes'])expect(index).not.toContain(future);
+  for(const future of ['communications/channel-routes','portfolio/routes'])expect(index).not.toContain(future);
 });

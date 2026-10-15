@@ -69,6 +69,9 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **15/10 · Codex** · PR123 hereda el pacing del ensayo revisado: 38 casos focales y tipos/sintaxis/secretos aprobados. Suite de producto con MAIN9c: 2.881/0/2 antes de los tres archivos del ensayo; comparación de1.640 archivos confirma cero cambios del producto. [Informe](main-sync-9c568-2026-10-15.md). Fuente para operaciones con tres excepciones del runner frente a CORE; CI nuevo pendiente.
+
+- **15/10 · Codex** · PR123 actualizado desde su padre revisado para conservar MAIN9c56854, PR119 y122. Suite local actual: 2881 aprobadas, cero fallos, 2 omitidas; 439 archivos. [Informe](main-sync-9c568-2026-10-15.md). Sin merge a main ni SQL remoto.
 - **15/10 · Codex** · PR115 hereda el pacing por tráfico real del ensayo signed-auth de PR108, sin tocar límites del producto. Focal propio 38 casos aprobados y tipos/sintaxis/secretos aprobados; CI nuevo pendiente. [Informe](browser-rate-window-2026-10-15.md). Se conserva Historia clínica y el permiso de menú específico.
 
 - **15/10 · Codex** · PR115 actualizado desde su padre revisado para conservar MAIN9c56854, PR119 y122. Focal propio actual: 129 aprobadas, cero fallos; 9 archivos. La suite global actual se verifica en CI; los conteos locales globales anteriores quedan como históricos. [Informe](main-sync-9c568-2026-10-15.md). Sin merge a main ni SQL remoto.

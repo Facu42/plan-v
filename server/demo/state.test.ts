@@ -8,6 +8,19 @@ import { DemoStateFile } from './state.js';
 const demo = { mode: 'demo', dataMode: 'memory', aiMode: 'demo' } as const;
 function temporary(run: (file: string) => void) { const dir=mkdtempSync(join(tmpdir(),'plan-v-demo-'));try{run(join(dir,'state.bin'));}finally{rmSync(dir,{recursive:true,force:true});} }
 describe('guardado de la simulación local',()=>{
+  it('incorpora agenda y sus nuevas leases sin borrar reservas existentes ni admitir claves extrañas',()=>temporary(file=>{
+    writeFileSync(file,serialize({version:1,domains:{test:{values:new Map([['kept',1]])}}}));
+    const scheduling={profiles:new Map(),bookings:new Map(),connections:new Map(),connectionEpochs:new Map(),refreshLeases:new Map()};
+    const values=new Map<string,number>(),domains=new Map<string,()=>Record<string,unknown>>([['test',()=>({values})],['scheduling',()=>scheduling]]);
+    const first=new DemoStateFile(file,demo,domains);expect(values.get('kept')).toBe(1);
+    scheduling.bookings.set('reservation',{status:'confirmed'});first.close();
+    writeFileSync(file,serialize({version:1,domains:{test:{values:new Map([['kept',1]])},scheduling:{profiles:new Map(),bookings:new Map([['reservation',{status:'confirmed'}]]),connections:new Map()}}}));
+    const before=readFileSync(file),second=new DemoStateFile(file,demo,domains);
+    expect(scheduling.bookings.has('reservation')).toBe(true);expect(scheduling.connectionEpochs.size).toBe(0);expect(readFileSync(file)).toEqual(before);second.close();
+    scheduling.refreshLeases.set('job',{token:'fictional'});const next=new DemoStateFile(file,demo,domains);next.close();
+    const unknown=new Map<string,()=>Record<string,unknown>>([['test',()=>({values})],['scheduling',()=>({...scheduling,unexpected:new Map()})]]);
+    expect(()=>new DemoStateFile(file,demo,unknown)).toThrow();
+  }));
   it('incorpora sólo dominios conocidos de importación a una copia previa sin alterarla antes de validar',()=>temporary(file=>{
     writeFileSync(file,serialize({version:1,domains:{test:{values:new Map([['kept',1]])}}}));
     const shapes={test:{values:new Map<string,number>()},'patient-import':{batches:new Map(),contacts:new Map(),applied:new Map(),histories:new Map()},'import-external-authorization':{authorizations:new Map(),measurements:new Map()},'nutrition-capabilities':{settings:new Map(),groups:new Map()},'clinical-workspace':{records:new Map(),documents:new Map(),references:new Map(),brands:new Map()}};

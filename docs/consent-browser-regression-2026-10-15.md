@@ -2,6 +2,7 @@
 
 Actualización posterior: el CI firmado sobre `de02375` aprobó. El nuevo recorrido heredado de main detectó otro selector desactualizado: buscaba «Ingreso y antecedentes» después de que esta entrega organizara esa sección como «Historia clínica». Se actualizó únicamente ese nombre accesible del ensayo; se conservan las comprobaciones de antecedentes y datos enviados. Casos de secciones y permiso, más tipos de los recorridos, aprobados; el nuevo recorrido completo se repite por CI.
 
+
 - Commit CI diagnosticado: 66ed0390df888d5b8d44aa9df6de965f9fbd1b2d. Signed Auth/PostgREST: 30/30; recorrido de navegador falla en fase de permiso IA. Diagnóstico obtenido exclusivamente mediante mcp__code_review__pull_requests_checks, job 116188118638.
 - El mensaje `control: wait ...` NO demuestra que falló ese wait. La función B no cambia lastAction para operaciones js; until conserva el nombre del wait anterior. Error sin código y 23,45 segundos entre el último check y el fallo son consistentes con until (20 segundos más recarga), no prueban fallo de locator.waitFor.
 - La prueba comprobaba el primer input de toda la sección para confirmar el permiso ai_menu_draft. El catálogo ahora antepone consultation_recording y ai_consultation. Gstack sobre demo local aislada del mismo release5 (3021/5191, IA y proveedores apagados): wait y click exactos pasan; checks después de habilitar menú = [false,false,true,false]. El primer input corresponde a grabación y sigue correctamente apagado.
