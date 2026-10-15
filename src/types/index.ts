@@ -116,6 +116,7 @@ export type ActivityLog = {
   intensity: 'suave' | 'moderada' | 'intensa';
   note: string | null;
   logged_at: string;
+  kcal?: number | null;
 };
 
 export type ResourceAssignment = {

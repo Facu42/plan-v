@@ -88,3 +88,14 @@ export function dayOfIso(value: string | null | undefined): string | null {
   if (!value || Number.isNaN(Date.parse(value))) return null;
   return argentinaDay(new Date(value));
 }
+
+/** Calorías quemadas de un día: las que declaró la paciente en sus actividades más las de sus registros de progreso. */
+export function burnedKcalOn(
+  date: string,
+  activities: readonly { logged_at: string; kcal?: number | null }[],
+  records: readonly { recorded_on: string; data: { kind: string; kcal?: number | null } }[],
+): number {
+  const fromActivities = activities.reduce((sum, row) => sum + (dayOfIso(row.logged_at) === date ? cleanAmount(row.kcal) ?? 0 : 0), 0);
+  const fromRecords = records.reduce((sum, row) => sum + (row.recorded_on === date && row.data.kind === 'activity' ? cleanAmount(row.data.kcal) ?? 0 : 0), 0);
+  return fromActivities + fromRecords;
+}
