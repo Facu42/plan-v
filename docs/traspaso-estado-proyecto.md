@@ -187,6 +187,15 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - App para tiendas (Android primero, empaquetando la web), calidad en producción, publicidad paga y
   página pública con precios (espera el precio). Plan: `docs/plan-apartados.md`.
 
+## Lista del súper en unidades del comercio (2026-10-15)
+
+La lista suma los gramos del plan, pero en la verdulería o la carnicería nadie pide 480 g. Ahora cada producto se
+muestra como se pide: «1/2 kg», «3/4 kg», «1,25 kg», «1,5 l», «1 docena» de huevos y unidades enteras, siempre
+redondeando para arriba. Lo que no llega a un cuarto queda en gramos de a 50 (150 g); las medidas de cocina (cda,
+cdita, taza) y lo menor a 100 g quedan como vienen. Al pasar el mouse se ve lo que suma el plan. El texto de
+«Compartir lista» usa las mismas cantidades. Solo pantalla: la base guarda lo mismo. Código: `localAmount` en
+`src/features/nutrigo/screens/shopping-format.ts`.
+
 ## Recordatorio de consulta al teléfono (2026-10-15)
 
 El día antes de cada consulta agendada, la paciente con avisos activados recibe «Mañana tenés consulta · Mirá el
