@@ -231,3 +231,6 @@ Pantalla `/crm/progreso-global` (PR #93): peso y comidas de toda la cartera por 
 ## Continuación Nutriboost: nutrición y PDF del plan · 14/10/2026
 
 Entrega 4 verificada en `codex/nutridesk-release-nutricion`, sobre la cabeza final de importación `b143744b4024314e8313662a1a911b70a28c914b`. Incorpora cálculo efectivo de la fórmula revisada, referencias propias de micronutrientes, grupos, catálogo paginado, seis momentos personalizados y descarga PDF del plan. Suite propia: 2.678 aprobadas, cero fallos, dos omitidas y 407 archivos; tipos/build/migraciones/vistas/scanner y revisión independiente aprobados. [Informe y paso 10](nutridesk-release-nutricion-2026-10-14.md). Sólo SQL nueva `20261011180000`, sin aplicar. No activar USDA ni cambiar Supabase/SMTP/Groq. Las siguientes entregas conservan clínica avanzada/ficha, agenda/equipo/cobros y operaciones generales; el cálculo automático Kerr sigue pendiente.
+
+
+Quinta entrega apilada: [ficha clínica y exportación histórica, evidencia y límites](nutridesk-release-clinica-2026-10-14.md). Base 304413f; gate previo 2.719 pruebas aprobadas; verificación nueva de marca vigente en curso, sin producción.

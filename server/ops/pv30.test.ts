@@ -143,6 +143,7 @@ describe('cors and readiness', () => {
     expect(maxBodyBytes('/api/patients/x/meals')).toBeGreaterThan(maxBodyBytes('/api/patients'));
     expect(maxBodyBytes('/api/recipes/x/cover/manual')).toBe(7_100_000);
     expect(maxBodyBytes('/api/recipes/x/versions')).toBe(1024 * 1024);
+    expect(maxBodyBytes('/api/patients/x/clinical-workspace/documents')).toBe(28_000_000);
   });
 });
 

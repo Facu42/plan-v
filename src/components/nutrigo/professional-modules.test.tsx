@@ -32,3 +32,11 @@ describe('nutrición disponible en entrega 4',()=>{
     expect(PROFESSIONAL_MODULES.find(row=>row.id==='configuracion')?.current.join(' ')).not.toContain('reportes');
   });
 });
+
+it('ofrece ficha y clínica de entrega 5 sin atribuir cálculo automático Kerr',()=>{
+  expect(PROFESSIONAL_MODULES.find(row=>row.id==='pacientes')?.current.join(' ')).toContain('Diez secciones');
+  const measurements=PROFESSIONAL_MODULES.find(row=>row.id==='mediciones');
+  expect(measurements?.current.join(' ')).toContain('Kerr declarados');
+  expect(measurements?.next.join(' ')).toContain('Cálculo automático Kerr pendiente');
+  expect(PROFESSIONAL_MODULES.find(row=>row.id==='recursos')?.current.join(' ')).toContain('exportación de ficha PDF');
+});

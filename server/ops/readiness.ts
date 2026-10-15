@@ -29,6 +29,7 @@ export function evaluateReadiness(
 
 export function maxBodyBytes(path: string) {
   if (/^\/api\/patients\/[^/]+\/consultations$/.test(path)) return 7_000_000;
+  if (/^\/api\/patients\/[^/]+\/clinical-workspace\/documents$/.test(path)) return 28_000_000;
   if (/^\/api\/patients\/[^/]+\/consultations\/[^/]+\/chunks$/.test(path)) return 11_201_000;
   if (/^\/api\/recipes\/[^/]+\/cover\/manual$/.test(path)) return 7_100_000;
   if (path.includes('/assets') || path.includes('/documents')) {
