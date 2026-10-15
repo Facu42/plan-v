@@ -17,9 +17,12 @@ describe('loadOwnService', () => {
     const result = await loadOwnService('user', new Date('2026-10-15T15:00:00Z'));
     expect(result).toEqual({ state: 'prueba', until: '2026-10-30', days_left: 15, monthly_price: 20000, read_only: false });
   });
-  it('a los 7 días de vencida pasa a solo lectura (día de Argentina)', async () => {
-    expect((await loadOwnService('user', new Date('2026-11-06T15:00:00Z')))?.read_only).toBe(false);
-    expect(await loadOwnService('user', new Date('2026-11-07T15:00:00Z'))).toMatchObject({ state: 'cortada', read_only: true });
+  it('vencida hace semanas sigue pudiendo escribir: el corte no es automático', async () => {
+    expect(await loadOwnService('user', new Date('2026-12-30T15:00:00Z'))).toMatchObject({ state: 'cortada', read_only: false });
+  });
+  it('suspendida por el administrador queda en solo lectura', async () => {
+    rows.nutritionist_subscriptions = { trial_ends_on: '2026-10-30', paid_until: null, override: 'suspended' };
+    expect(await loadOwnService('user', new Date('2026-10-15T15:00:00Z'))).toMatchObject({ state: 'suspendida', read_only: true });
   });
   it('sin cargo nunca queda en solo lectura', async () => {
     rows.nutritionist_subscriptions = { trial_ends_on: '2026-01-01', paid_until: null, override: 'waived' };

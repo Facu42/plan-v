@@ -5,7 +5,8 @@ import type { OwnService } from '../../src/types/service.js';
 import { writeOpsLog } from '../ops/log.js';
 
 /** Estados en los que la nutricionista ve todo pero no puede cargar ni cambiar nada. */
-export const READ_ONLY_STATES: readonly ServiceState[] = ['cortada', 'suspendida'];
+/** Solo lectura únicamente cuando el administrador la suspende desde su panel: vencer no corta nada solo. */
+export const READ_ONLY_STATES: readonly ServiceState[] = ['suspendida'];
 export const serviceIsReadOnly = (state: ServiceState) => READ_ONLY_STATES.includes(state);
 
 /** Rutas que siguen abiertas en solo lectura: sesión, cuenta propia, panel del administrador y avisos. */
@@ -71,15 +72,11 @@ export function createServiceReadOnlyGuard(get: (userId: string) => Promise<OwnS
       return next();
     }
     if (!service?.read_only) return next();
-    return c.json({ code: 'service_read_only', error: readOnlyMessage(service) }, 403);
+    return c.json({ code: 'service_read_only', error: READ_ONLY_MESSAGE }, 403);
   };
 }
 
-export function readOnlyMessage(service: Pick<OwnService, 'state' | 'until'>) {
-  if (service.state === 'suspendida') return 'Tu cuenta de Plan V está suspendida: podés ver todo, pero no cargar ni cambiar nada. Escribile a Plan V para reactivarla.';
-  const since = service.until ? ` el ${service.until.split('-').reverse().join('/')}` : '';
-  return `Tu servicio de Plan V venció${since}: podés ver todo, pero no cargar ni cambiar nada hasta renovarlo.`;
-}
+export const READ_ONLY_MESSAGE = 'Tu cuenta de Plan V está suspendida: podés ver todo, pero no cargar ni cambiar nada. Escribile a Plan V para reactivarla.';
 
 export function registerOwnServiceRoutes(app: Hono, get: (userId: string) => Promise<OwnService | null>) {
   app.get('/api/me/service', async (c) => {

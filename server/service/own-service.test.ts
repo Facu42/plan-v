@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { describe, expect, it, vi } from 'vitest';
 import type { OwnService } from '../../src/types/service.js';
-import { createOwnServiceCache, createServiceReadOnlyGuard, readOnlyMessage, registerOwnServiceRoutes } from './own-service.js';
+import { createOwnServiceCache, createServiceReadOnlyGuard, READ_ONLY_MESSAGE, registerOwnServiceRoutes } from './own-service.js';
 
 const service = (state: OwnService['state'], read_only: boolean, until: string | null = '2026-10-30'): OwnService => ({ state, until, days_left: -10, monthly_price: 20000, read_only });
 
@@ -18,21 +18,21 @@ function appFor(lookup: (userId: string) => Promise<OwnService | null>, onAdminC
 }
 const post = (app: Hono, path: string, user = 'nutri') => app.request(path, { method: 'POST', headers: { 'x-user': user } });
 
-describe('Solo lectura cuando vence el servicio de la nutricionista', () => {
-  it('frena escrituras con el servicio cortado y explica qué pasa', async () => {
-    const { app } = appFor(async () => service('cortada', true));
+describe('Solo lectura cuando el administrador suspende a la nutricionista', () => {
+  it('frena escrituras con la cuenta suspendida y explica qué pasa', async () => {
+    const { app } = appFor(async () => service('suspendida', true, null));
     const response = await post(app, '/api/patients/p1/plan');
     expect(response.status).toBe(403);
-    expect(await response.json()).toEqual({ code: 'service_read_only', error: 'Tu servicio de Plan V venció el 30/10/2026: podés ver todo, pero no cargar ni cambiar nada hasta renovarlo.' });
+    expect(await response.json()).toEqual({ code: 'service_read_only', error: 'Tu cuenta de Plan V está suspendida: podés ver todo, pero no cargar ni cambiar nada. Escribile a Plan V para reactivarla.' });
   });
 
-  it('deja leer todo aunque esté cortada', async () => {
-    const { app } = appFor(async () => service('cortada', true));
+  it('deja leer todo aunque esté suspendida', async () => {
+    const { app } = appFor(async () => service('suspendida', true, null));
     expect((await app.request('/api/patients/p1', { headers: { 'x-user': 'nutri' } })).status).toBe(200);
   });
 
   it('deja escribir en prueba, vencida dentro de la gracia, activa y sin cargo', async () => {
-    for (const state of ['prueba', 'vencida', 'activa', 'por_vencer', 'sin_cargo'] as const) {
+    for (const state of ['prueba', 'vencida', 'cortada', 'activa', 'por_vencer', 'sin_cargo'] as const) {
       const { app } = appFor(async () => service(state, false));
       expect((await post(app, '/api/patients/p1/plan')).status).toBe(200);
     }
@@ -41,7 +41,7 @@ describe('Solo lectura cuando vence el servicio de la nutricionista', () => {
   it('nunca frena a una paciente ni al modo demo (no tienen servicio)', async () => {
     const { app } = appFor(async () => null);
     expect((await post(app, '/api/patients/p1/plan', 'paciente')).status).toBe(200);
-    const demo = appFor(async () => service('cortada', true)).app;
+    const demo = appFor(async () => service('suspendida', true, null)).app;
     expect((await demo.request('/api/patients/p1/plan', { method: 'POST' })).status).toBe(200);
   });
 
@@ -81,6 +81,6 @@ describe('memoria del estado', () => {
 
 describe('mensaje', () => {
   it('suspendida pide escribir a Plan V', () => {
-    expect(readOnlyMessage({ state: 'suspendida', until: null })).toContain('suspendida');
+    expect(READ_ONLY_MESSAGE).toContain('Escribile a Plan V');
   });
 });
