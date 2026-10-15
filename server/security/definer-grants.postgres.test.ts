@@ -110,6 +110,7 @@ const ALLOWED = [
   'list_recipe_days',
   'list_thread_messages',
   'log_patient_activity',
+  'log_patient_activity_with_kcal',
   'mark_editorial_resource_read',
   'mark_meal_plan_handover_seen',
   'mark_thread_read',

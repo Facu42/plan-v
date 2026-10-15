@@ -1,5 +1,10 @@
 # Segunda entrega: consultas, audio y resúmenes revisados
-## Estado vigente · 15/10/2026
+
+## Actualización vigente de MAIN9c56854 · 15/10/2026
+
+Merge del padre `e13e8042`, con acciones y actividad/calorías de PR119/122 preservadas. Focal propio actual: **126 aprobadas, cero fallos; 8 archivos**. La suite global actual se verifica en CI; los conteos locales globales anteriores quedan como históricos. Tipos/build/migraciones/vistas/secretos aprobados. [Informe de actualización](main-sync-9c568-2026-10-15.md). El CI de esta cabeza se observa por separado; los resultados anteriores se mantienen como antecedentes. Sin cambios de producción.
+
+## Estado previo con MAIN2d31 · 15/10/2026
 
 Incorporada por merge la primera entrega revisada `a6ab13ae`, con MAIN `2d31f9d` y sus siete PR nuevos conservados. Suite propia actual: **2.617 aprobadas, cero fallos, dos omitidas; 389 archivos**. Tipos, build (11,09 s), migraciones, vistas locales y secretos aprobados; scanner real con control positivo, historial y objetos grandes sin hallazgos. [Informe y Regression Guard de la actualización](nutridesk-consultas-main-sync-2026-10-15.md). CI de la cabeza nueva se verifica por separado; los resultados remotos de 66fe1e03 son históricos. Sin cambios de producción ni habilitación de proveedores.
 

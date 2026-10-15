@@ -1,5 +1,10 @@
 # Quinta entrega: ficha clínica y exportación histórica
 
+## Actualización vigente de MAIN9c56854 · 15/10/2026
+
+Merge del padre `f0b65c31`, con acciones y actividad/calorías de PR119/122 preservadas. Focal propio actual: **129 aprobadas, cero fallos; 9 archivos**. La suite global actual se verifica en CI; los conteos locales globales anteriores quedan como históricos. Tipos/build/migraciones/vistas/secretos aprobados. [Informe de actualización](main-sync-9c568-2026-10-15.md). El CI de esta cabeza se observa por separado; los resultados anteriores se mantienen como antecedentes. Sin cambios de producción.
+
+
 **Actualización 15/10:** conciliada con main `2d31f9d` y la pila revisada. Suite propia **2.775 aprobadas, cero fallos, dos omitidas; 424 archivos**; tipos, build (8,51 s), migraciones, vistas y límites de secretos aprobados. Contacto, pestañas y adaptación móvil de la ficha se conservan al recuperar el gris original. Se corrigieron exclusivamente las dos comprobaciones de estado de permiso del recorrido: ahora verifican menú por IA en vez del primer casillero (grabación). Tres casos RED→GREEN y prueba de habilitación/retiro/403 en demo; [diagnóstico y límites](consent-browser-regression-2026-10-15.md). CI firmado nuevo pendiente por SHA. Las referencias y conteos del 14/10 que siguen son históricos.
 
 Rama `codex/nutridesk-release-clinica`, base exacta `304413fcbe3dcec9012edac1952704d7635cd218` de entrega 4. Veintisiete archivos de módulo, contratos, utilidades, componentes y dos migraciones se recuperaron con huellas exactas de CORE `da070fbe7a5a8145985d9d8096d9ac21c0758d0f`, según la receta local y sus SHA256. Sin commit propio, push, configuración de proveedor, merge ni producción.

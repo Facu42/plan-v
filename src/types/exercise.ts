@@ -105,6 +105,8 @@ export const activityLogInputSchema = z.object({
   assignment_id: z.uuid().optional(),
   sets: z.number().int().min(1).max(20).optional(),
   reps: z.number().int().min(1).max(200).optional(),
+  /** Calorías quemadas que declara la paciente (opcional; no es una medición). */
+  kcal: z.number().int().min(0).max(5000).optional(),
 }).strict();
 
 export type ExerciseLibraryItem = {
@@ -151,6 +153,7 @@ export type ActivityLogView = {
   assignment_id: string | null;
   sets: number | null;
   reps: number | null;
+  kcal?: number | null;
 };
 
 export type PatientExerciseView = {

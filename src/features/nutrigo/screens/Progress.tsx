@@ -3,13 +3,14 @@ import { FramePair } from '../FramePair';
 import { nodeName, sourceText, type SourceBinding, type SourceNode, type SourceResolver } from '../SourceView';
 import { progressApi } from '../../../api/progress';
 import { careApi } from '../../../api/care';
+import { exerciseApi } from '../../../api/exercise';
 import { nutritionTargetApi } from '../../../api/nutrition-target';
 import { latestMeasurementSeries } from '../../../lib/measurement-display';
 import type { CareRecord } from '../../../types/care';
 import { PROGRESS_PERIODS, type ProgressPeriodDays, type ProgressPoint, type ProgressSeries } from '../../../types/progress';
 import { dateLabel, descendants, EmptyState, errorText, formatNumber, leaf, objects, source, Stateful, useRemote, type ScreenProps } from './shared';
 import { attachmentHref } from './message-format';
-import { dayOfIso, cleanAmount, litresLabel, percentLabel, safePercent } from './home-values';
+import { burnedKcalOn, dayOfIso, cleanAmount, litresLabel, percentLabel, safePercent } from './home-values';
 import { PatientGoalCard } from '../PatientGoalCard';
 
 /** Un vaso son 250 ml. Plan V no guarda una meta de agua: los porcentajes usan la referencia general de 8 vasos (2 L), igual que en Inicio. */
@@ -83,8 +84,8 @@ type Props = ScreenProps & { onRecord?: () => void; onHydration?: () => void; on
 export function NutrigoProgress({ patient, onNavigate, onSignOut, onRecord, onHydration, onRest }: Props) {
   const [days, setDays] = useState<ProgressPeriodDays>(30);
   const remote = useRemote(`${patient.id}:${days}`, async signal => {
-    const [progress, care, target] = await Promise.all([progressApi.get(patient.id, days, signal), careApi.snapshot(patient.id, false, signal), nutritionTargetApi.get(patient.id, false, signal).then(result => result.target, () => null)]);
-    return { progress: progress.progress, care, target };
+    const [progress, care, target, activities] = await Promise.all([progressApi.get(patient.id, days, signal), careApi.snapshot(patient.id, false, signal), nutritionTargetApi.get(patient.id, false, signal).then(result => result.target, () => null), exerciseApi.get(patient.id, false, signal).then(result => result.exercise.activities, () => null)]);
+    return { progress: progress.progress, care, target, activities };
   });
   useEffect(() => { const update = () => remote.reload(); window.addEventListener('plan-v:care-changed', update); return () => window.removeEventListener('plan-v:care-changed', update); }, [remote.reload]);
   const [error, setError] = useState(''); const [opening, setOpening] = useState<string | null>(null);
@@ -118,7 +119,7 @@ export function NutrigoProgress({ patient, onNavigate, onSignOut, onRecord, onHy
   // Hábitos de los últimos siete días que ya registró la paciente.
   const week = patient.journey?.days ?? [];
   const kcalOn = (date: string) => patient.logs.filter(log => dayOfIso(log.logged_at) === date && log.macros).reduce((sum, log) => sum + (cleanAmount(log.macros?.kcal) ?? 0), 0);
-  const burnedOn = (date: string) => (remote.data?.care.records ?? []).reduce((sum, row) => sum + (row.recorded_on === date && row.data.kind === 'activity' ? cleanAmount(row.data.kcal) ?? 0 : 0), 0);
+  const burnedOn = (date: string) => burnedKcalOn(date, remote.data?.activities ?? patient.activities ?? [], remote.data?.care.records ?? []);
   const calorieDays = week.slice(-4).map(day => ({ date: day.date, eaten: kcalOn(day.date), burned: burnedOn(day.date) }));
   const target = cleanAmount(remote.data?.target?.result?.kcal) || null;
   const today = calorieDays[calorieDays.length - 1];
