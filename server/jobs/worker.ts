@@ -2,6 +2,7 @@ import { handleProcessingJob } from './handlers.js';
 import { drain, processQueue } from './queue.js';
 import { runCoverWorkers } from '../recipes/cover-workers.js';
 import { tickAppointmentReminders } from '../mail/reminder-worker.js';
+import { tickPushReminders } from '../push/reminders.js';
 
 let timer: ReturnType<typeof setInterval> | null = null;
 let draining = false;
@@ -16,6 +17,7 @@ export function startJobWorker(owner = 'plan-v-worker', keepAlive = false) {
     }
     void runCoverWorkers();
     void tickAppointmentReminders().catch(() => undefined);
+    void tickPushReminders().catch(() => undefined);
   }, 1_000);
   if (!keepAlive) timer.unref?.();
 }
