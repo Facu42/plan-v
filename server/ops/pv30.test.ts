@@ -158,6 +158,10 @@ describe('deploy contract', () => {
     // Sólo rutas de la pantalla (abrir o recargar /admin, /app/*, /crm/*) hacia index.html; nunca a la API.
     // /pacientes sirve la landing estática exportada, sin sesión.
     expect(vercel.rewrites).toEqual([
+      { source: '/api/scheduling/:path*', destination: 'https://api-production-aad6.up.railway.app/api/scheduling/:path*' },
+      { source: '/api/public/scheduling/:path*', destination: 'https://api-production-aad6.up.railway.app/api/public/scheduling/:path*' },
+      { source: '/consultorio/:path*', destination: '/index.html' },
+      { source: '/equipo', destination: '/index.html' },
       { source: '/pacientes', destination: '/pacientes/index.html' },
       { source: '/admin', destination: '/index.html' },
       { source: '/app', destination: '/index.html' },

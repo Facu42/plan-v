@@ -11,3 +11,5 @@ Origen: [affaan-m/ECC](https://github.com/affaan-m/ECC), commit `ef648e0`, licen
 No se instalaron agentes (chocan con `.claude/agents/`), ni hooks, ni cambios a `settings.json`.
 Si algo de ECC contradice `docs/agentes/reglas-plan-v.md`, mandan las reglas de Plan V
 (por ejemplo, el diseño exacto al archivo de Nutrigo por encima de cualquier guía visual genérica).
+
+El 2026-10-14 se sumaron `security-review` y `postgres-patterns` (ver `docs/agentes/reglas-plan-v.md`).

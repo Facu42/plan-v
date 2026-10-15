@@ -40,3 +40,5 @@ it('ofrece ficha y clínica de entrega 5 sin atribuir cálculo automático Kerr'
   expect(measurements?.next.join(' ')).toContain('Cálculo automático Kerr pendiente');
   expect(PROFESSIONAL_MODULES.find(row=>row.id==='recursos')?.current.join(' ')).toContain('exportación de ficha PDF');
 });
+
+it('habilita agenda, pagos de reservas y equipo sin activar funciones futuras',()=>{for(const id of ['agenda','cobranzas','pagina-publica','equipo'])expect(PROFESSIONAL_MODULES.find(row=>row.id===id)?.href).toBeTruthy();expect(PROFESSIONAL_MODULES.find(row=>row.id==='equipo')?.href).toBe('/equipo');for(const id of ['asistente-ia','ayuda'])expect(PROFESSIONAL_MODULES.find(row=>row.id===id)?.href).toBeUndefined();});

@@ -122,11 +122,11 @@ try {
   const aiPermission='section[aria-label="Permisos para la IA"] label:has-text("Mi nutricionista puede usar IA") input';
   await B('wait',aiPermission);await B('click',aiPermission);
   await readUntil(patient,`/api/patients/${pid}/care`,r=>r.consented.includes('ai_menu_draft'));
-  await B('reload');await B('wait',aiPermission);await until(`document.querySelector('section[aria-label="Permisos para la IA"] input')?.checked===true`);
+  await B('reload');await B('wait',aiPermission);await until(`Array.from(document.querySelectorAll('section[aria-label="Permisos para la IA"] label')).find(label=>label.textContent.includes('Mi nutricionista puede usar IA'))?.querySelector('input')?.checked===true`);
   check(true,'permiso de IA habilitado desde Mi ficha y confirmado después de recargar');
   await B('viewport','390x844');await B('wait',aiPermission);await B('click',aiPermission);
   await readUntil(patient,`/api/patients/${pid}/care`,r=>!r.consented.includes('ai_menu_draft'));
-  await B('reload');await B('wait',aiPermission);await until(`document.querySelector('section[aria-label="Permisos para la IA"] input')?.checked===false`);
+  await B('reload');await B('wait',aiPermission);await until(`Array.from(document.querySelectorAll('section[aria-label="Permisos para la IA"] label')).find(label=>label.textContent.includes('Mi nutricionista puede usar IA'))?.querySelector('input')?.checked===false`);
   check(true,'retiro del permiso de IA desde celular persiste y se muestra desactivado');
   const deniedAi=await fetch(apiOrigin+'/api/ai/jobs',{method:'POST',headers:{Authorization:'Bearer '+professional.token,'Content-Type':'application/json'},body:JSON.stringify({patient_id:pid,job_type:'menu_draft',period_start:today,period_end:today,slots:['Almuerzo']})});
   check(deniedAi.status===403,'retirar el permiso bloquea la generación profesional antes de llamar al proveedor');

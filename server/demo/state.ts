@@ -53,6 +53,9 @@ export class DemoStateFile {
     if (current.consultations && !Object.prototype.hasOwnProperty.call(saved.domains, 'consultations')) {
       saved.domains.consultations = { sessions: new Map(), shared: new Map(), tasks: new Map(), audio: new Map() };
     }
+    if (current.scheduling && !Object.prototype.hasOwnProperty.call(saved.domains, 'scheduling')) {
+      saved.domains.scheduling = { profiles: new Map(), bookings: new Map(), connections: new Map() };
+    }
     const importDomains: Record<string,string[]> = { 'patient-import': ['batches','contacts','applied','histories'], 'import-external-authorization': ['authorizations','measurements'], 'nutrition-capabilities': ['settings','groups'], 'clinical-workspace': ['records','documents','references','brands'] };
     for (const [name, fields] of Object.entries(importDomains)) {
       if (current[name] && !Object.prototype.hasOwnProperty.call(saved.domains,name) && keys(current[name])===fields.sort().join('\n') && fields.every(field=>current[name][field] instanceof Map)) {
@@ -63,7 +66,7 @@ export class DemoStateFile {
     // Validar todo antes de restaurar para no dejar un estado parcial.
     for (const [name, values] of Object.entries(current)) {
       const other = saved.domains[name];
-      const newFields = name === 'consultations' ? ['completions', 'completion_events'] : [];
+      const newFields = name === 'scheduling' ? ['connectionEpochs', 'refreshLeases'] : name === 'consultations' ? ['completions', 'completion_events'] : [];
       if (other && Object.getPrototypeOf(other) === Object.prototype) {
         const missing = newFields.filter(field => values[field] instanceof Map && !Object.prototype.hasOwnProperty.call(other, field));
         const previous = Object.fromEntries(Object.entries(values).filter(([field]) => !missing.includes(field)));

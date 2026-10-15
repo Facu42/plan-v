@@ -6,10 +6,10 @@
 .pw-record,.pw-library,.pw-work {display:grid;gap:20px;min-width:0}
 .pw-record-head,.pw-work-head {display:flex;align-items:center;justify-content:space-between;gap:16px}
 .pw-record-head h2,.pw-work h2,.pw-library h2 {margin:0;font-size:22px;font-weight:600}
-.pw-record-head p,.pw-work-head p,.pw-library header p {color:var(--nv-ink-soft);font-size:12px;margin:6px 0}
+.pw-record-head p,.pw-work-head p,.pw-library header p {color:var(--nv-muted);font-size:12px;margin:6px 0}
 .pw-record-head span {font-size:13px}
 .pw-record-contact {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0;padding:16px;background:var(--nv-card);border:1px solid var(--nv-line);border-radius:16px;font-size:12px}
-.pw-record-contact dt {color:var(--nv-ink-soft)}
+.pw-record-contact dt {color:var(--nv-muted)}
 .pw-record-contact dd {margin:4px 0 0;overflow-wrap:anywhere}
 .pw-tabs {display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--nv-line);padding-bottom:12px}
 .pw-tabs button,.pw-work-filters select {font:inherit;font-size:12px;border:1px solid var(--nv-line);background:var(--nv-card);color:var(--nv-ink);border-radius:12px;padding:10px 14px;cursor:pointer}
@@ -18,7 +18,7 @@
 .pw-safety {background:var(--nv-card);border-radius:16px;padding:16px;border:1px solid var(--nv-line)}
 .pw-safety h3 {font-size:14px;margin:0 0 12px}
 .pw-safety dl {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0;font-size:12px}
-.pw-safety dt {color:var(--nv-ink-soft)}
+.pw-safety dt {color:var(--nv-muted)}
 .pw-safety dd {margin:4px 0 0;overflow-wrap:anywhere}
 .pw-work-counts {display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:12px}
 .pw-work-counts button {text-align:left;font:inherit;background:var(--nv-card);color:var(--nv-ink);border:1px solid var(--nv-line);border-radius:16px;padding:16px;cursor:pointer}
@@ -30,7 +30,7 @@
 .pw-work-list {list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .pw-work-list li {display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--nv-card);border:1px solid var(--nv-line);border-radius:16px;padding:16px}
 .pw-work-list h3 {margin:4px 0;font-size:14px}
-.pw-work-list p,.pw-work-list time {margin:0;color:var(--nv-ink-soft);font-size:11px}
+.pw-work-list p,.pw-work-list time {margin:0;color:var(--nv-muted);font-size:11px}
 .pw-work-list a {flex-shrink:0}
 .pw-work-pagination {display:flex;gap:12px;align-items:center;font-size:12px}
 .pw-draft-heading {display:flex;justify-content:space-between;gap:12px;align-items:center}

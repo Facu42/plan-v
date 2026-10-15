@@ -25,8 +25,12 @@ import { isAdminPath } from './nutrigo/app-location';
 
 const AdminConsole = lazy(() => import('./nutrigo/AdminConsole').then(({ AdminConsole }) => ({ default: AdminConsole })));
 const NutrigoShowroom = lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })));
+const StandaloneWorkspace = lazy(() => import('./nutrigo/StandaloneWorkspace').then(({ StandaloneWorkspace }) => ({ default: StandaloneWorkspace })));
 
 export function PlanVExperience() {
+  const path=typeof window==='undefined'?'':window.location.pathname;
+  const publicSlug=/^\/consultorio\/([a-z0-9][a-z0-9-]{2,59})\/?$/.exec(path)?.[1];
+  const teamPath=/^\/equipo\/?$/.test(path);
   const { session, demoMode, passwordRecovery, isNutri, isPatient, profile, signOut, loading: authLoading } = useAuth();
   const [view, setView] = useState<'patient' | 'pro'>('patient');
   const [inviteStatus, setInviteStatus] = useState<'idle' | 'accepting' | 'unconfirmed' | 'unavailable' | 'linked'>('idle');
@@ -47,6 +51,7 @@ export function PlanVExperience() {
   }, [theme]);
 
   useEffect(() => {
+    if(publicSlug||teamPath){reset();return;}
     if (authLoading || passwordRecovery) return;
     if (!session && !demoMode) {
       reset();
@@ -55,11 +60,11 @@ export function PlanVExperience() {
     if (session && !isNutri && !isPatient) return;
     if (!legalOk) return;
     void boot({ isNutri, isPatient });
-  }, [authLoading, session, demoMode, isNutri, isPatient, legalOk, boot, reset, passwordRecovery]);
+  }, [authLoading, session, demoMode, isNutri, isPatient, legalOk, boot, reset, passwordRecovery,publicSlug,teamPath]);
 
   useEffect(() => {
     setInviteStatus('idle');
-    if (!sessionUserId || !isPatient || !legalOk) return;
+    if (publicSlug||teamPath||!sessionUserId || !isPatient || !legalOk) return;
     const stored = typeof window === 'undefined' ? null : window.sessionStorage.getItem(PENDING_INVITE_STORAGE_KEY);
     const inviteId = pendingInviteIdFromLocation(typeof window === 'undefined' ? '' : window.location.search, stored);
     if (!inviteId) return;
@@ -79,7 +84,7 @@ export function PlanVExperience() {
       setInviteStatus(message.includes('Confirmá tu email') ? 'unconfirmed' : 'unavailable');
     });
     return () => { cancelled = true; };
-  }, [sessionUserId, isPatient, legalOk, boot]);
+  }, [sessionUserId, isPatient, legalOk, boot,publicSlug,teamPath]);
 
   useEffect(() => {
     if (isNutri) setView('pro');
@@ -91,6 +96,8 @@ export function PlanVExperience() {
       api.setupNutritionist(profile.full_name || 'Profesional').catch(() => {});
     }
   }, [session, isNutri, profile, legalOk]);
+
+  if(publicSlug){return <Suspense fallback={<LoadingScreen/>}><PwaChrome install={false}/><StandaloneWorkspace slug={publicSlug}/></Suspense>;}
 
   if (authLoading) {
     return (
@@ -112,6 +119,8 @@ export function PlanVExperience() {
   if (session && !legalOk) {
     return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PwaChrome install={false} /><ConsentScreen /></div>;
   }
+
+  if(teamPath){return <Suspense fallback={<LoadingScreen/>}><PwaChrome install={false}/><StandaloneWorkspace darkMode={darkMode} onSignOut={()=>void signOut()}/></Suspense>;}
 
   // /admin: pantalla propia del administrador del servicio. La base confirma si la cuenta lo es;
   // no hace falta ser nutricionista ni paciente.

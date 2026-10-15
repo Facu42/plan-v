@@ -22,7 +22,7 @@ export function resolveRequestAuth(input: {
   verifiedUserId: string | null;
   allowDemo: boolean;
 }): RequestAuthDecision {
-  if (PUBLIC_API_PATHS.has(input.path) || input.path.startsWith('/api/assets/blob/')) return { kind: 'public' };
+  if (PUBLIC_API_PATHS.has(input.path) || input.path.startsWith('/api/assets/blob/') || input.path.startsWith('/api/public/scheduling/')) return { kind: 'public' };
   if (!input.supabaseEnabled) return input.allowDemo ? { kind: 'demo' } : { kind: 'unavailable' };
   if (input.verifiedUserId) return { kind: 'user', userId: input.verifiedUserId };
   return { kind: 'unauthorized' };
@@ -215,7 +215,7 @@ function publicAppointment(appointment: Patient['appointment']): Patient['appoin
 }
 
 function publicHabitLogs(logs: Patient['habit_logs']): Patient['habit_logs'] {
-  return logs.map(({ id, patient_id, date, hydration, energy, sleep_minutes, steps }) => ({
+  return logs.map(({ id, patient_id, date, hydration, energy, sleep_minutes, steps, symptoms }) => ({
     id,
     patient_id,
     date,
@@ -223,6 +223,7 @@ function publicHabitLogs(logs: Patient['habit_logs']): Patient['habit_logs'] {
     energy,
     sleep_minutes,
     steps: steps ?? null,
+    symptoms: symptoms ?? [],
   }));
 }
 

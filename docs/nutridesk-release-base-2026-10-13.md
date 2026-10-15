@@ -1,5 +1,7 @@
 # Primera entrega: acceso, cartera, teléfono, aspecto y fotos
 
+**Actualización 15/10:** conciliada con main `2d31f9d`, incluidos los siete PR posteriores. Gris secundario original de Nutrigo conservado. Suite actual: **2.546 aprobadas, cero fallos, dos omitidas; 374 archivos**. [Evidencia y revisión de regresiones](main-reconciliation-2026-10-15.md). Los conteos y bases del 13/10 que siguen son históricos.
+
 Copia local aislada: `codex/nutridesk-release-base`, iniciada desde `origin/main` en `ae3dc30e3095d4856e3a5055fdeca5ebcf2424e3`. Primera entrega preparada para revisión en PR; se preservó la copia integrada y las demás ramas. Sin cambios de producción. Las siguientes entregas dependerán de esta cabeza revisada y no deben publicarse por separado sin comprobar sus migraciones y configuración.
 
 ## Cambios incluidos
@@ -9,7 +11,7 @@ Copia local aislada: `codex/nutridesk-release-base`, iniciada desde `origin/main
 - La cartera, los mensajes pendientes, los avisos y los historiales existentes se recorren por páginas. Se conserva el alcance del actor y los permisos vigentes. Los recordatorios existentes verifican opt-in de correo, relación de atención, cuenta activa y asignación antes de preparar y enviar.
 - Identidad neutral del copiloto y del nombre profesional de respaldo. Sus propuestas requieren revisión; esta entrega no incorpora el asistente global.
 - Teléfono opcional en la ficha y su editor, con máximo de cuarenta caracteres, lectura profesional y políticas existentes de pertenencia. Nueva migración: `20261011141000_patient_phone.sql`.
-- El consultorio usa los tokens y contrastes de Nutrigo. Las fotos de ingredientes se conectan a las piezas originales del archivo, conservando el número y las cantidades y rechazando direcciones privadas o inseguras. Los archivos fuente JSON de Figma permanecen sin modificaciones.
+- El consultorio usa los tokens de Nutrigo y conserva su gris secundario original (`#8A8C90`), según la indicación registrada el 14/10. Las fotos de ingredientes se conectan a las piezas originales del archivo, conservando el número y las cantidades y rechazando direcciones privadas o inseguras. Los archivos fuente JSON de Figma permanecen sin modificaciones.
 
 ## Separación de las entregas posteriores
 
@@ -32,7 +34,7 @@ La revisión independiente detectó que el adaptador descartaba errores de consu
 ## Regression Guard: paso 10
 
 - Flujos críticos: acceso, recuperación e invitaciones cubiertos por contratos y proveedores simulados; recepción real de correos pendiente. Cartera de mil pacientes, pendientes, teléfono, recetas/fotos y permisos cubiertos por pruebas locales.
-- Regresiones: corte a cien fichas o quinientos registros, contador parcial de mensajes, identidad fija, correo alternativo de acceso y datos operativos de bajo contraste. Las pruebas respectivas se conservaron y aprobaron.
+- Regresiones: corte a cien fichas o quinientos registros, contador parcial de mensajes, identidad fija, correo alternativo de acceso y una paleta alternativa en el consultorio. Las pruebas respectivas se conservaron y aprobaron.
 - Contratos: cliente/API, esquemas de teléfono, proyecciones profesionales, autorización de las páginas, Supabase Auth y configuración SMTP comprobados sin depender de módulos futuros.
 - Áreas frágiles: entrega externa de correo, permisos y recorridos extensos. Se mantiene respuesta pública genérica, configuración explícita, controles de opt-in y errores que no devuelven carteras parciales.
 - Migración: columna de teléfono y límite aditivos, sin cambiar políticas existentes ni borrar datos. Rollback operativo: volver al código previo y conservar la columna; cualquier modificación de producción requiere su autorización y copia previa.

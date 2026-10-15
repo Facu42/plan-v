@@ -1,4 +1,5 @@
 import { runPendingDocumentOrganizer } from '../document-organizer/worker.js';
+import {runSchedulingSyncJobs} from '../scheduling/worker.js';
 import { handleProcessingJob } from './handlers.js';
 import { drain, processQueue } from './queue.js';
 import { runCoverWorkers } from '../recipes/cover-workers.js';
@@ -13,6 +14,7 @@ let timer: ReturnType<typeof setInterval> | null = null;
 let draining = false;
 let clinicalDraining = false;
 let organizerDraining = false;
+let schedulingDraining = false;
 let cleanupRunning = false;
 let lastCleanup = 0;
 
@@ -26,6 +28,7 @@ export function startJobWorker(owner = 'plan-v-worker', keepAlive = false) {
       void drain(processQueue, owner, handleProcessingJob, 5).catch(() => undefined).finally(() => { draining = false; });
     }
     void runCoverWorkers();
+    if (!schedulingDraining) { schedulingDraining = true; void runSchedulingSyncJobs(2).catch(() => writeOpsLog('warn', 'scheduling_worker_failed', { status: 'review_pending' })).finally(() => { schedulingDraining = false; }); }
     void tickAppointmentReminders().catch(() => undefined);
     if (!organizerDraining) { organizerDraining = true; void runPendingDocumentOrganizer(2).catch(() => writeOpsLog('warn', 'document_organizer_worker_failed', { status: 'review_pending' })).finally(() => { organizerDraining = false; }); }
     if (!clinicalDraining) {

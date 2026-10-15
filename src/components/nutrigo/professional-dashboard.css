@@ -19,11 +19,11 @@
 .nv-pro-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin:0 0 14px; padding:8px 0; border-block:1px solid var(--nv-border); }
 .nv-pro-summary>div { min-width:0; border-right:1px solid var(--nv-border); padding-right:12px; }
 .nv-pro-summary>div:last-child { border:0; }
-.nv-pro-summary dt { color:var(--nv-ink-soft); font-size:12px; }
+.nv-pro-summary dt { color:var(--nv-muted); font-size:12px; }
 .nv-pro-summary dd { margin:2px 0 0; color:var(--nv-ink); font-size:18px; font-weight:600; line-height:1.25; }
 .nv-work-toolbar { display:grid; grid-template-columns:minmax(170px,210px) minmax(0,1fr); align-items:center; column-gap:18px; row-gap:6px; padding:10px 12px; margin-bottom:14px; background:var(--nv-card); border:1px solid var(--nv-border); border-radius:12px; }
 .nv-work-toolbar header h2 { font-size:13px; font-weight:600; line-height:1.3; }
-.nv-work-toolbar header span { font-size:12px; color:var(--nv-ink-soft); }
+.nv-work-toolbar header span { font-size:12px; color:var(--nv-muted); }
 .nv-work-toolbar .nv-patient-select { grid-column:1; display:grid; grid-template-columns:minmax(0,1fr); align-items:center; margin:0; gap:4px; }
 .nv-work-toolbar .nv-patient-select { font-size:13px; }
 .nv-work-toolbar .nv-patient-select select { min-height:36px; padding:6px 10px; }
