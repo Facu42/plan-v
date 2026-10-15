@@ -3,9 +3,10 @@ import { promisify } from 'node:util';
 import { randomUUID, randomBytes } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { createInterface } from 'node:readline';
 import { createClient } from '@supabase/supabase-js';
 import pg from 'pg';
-import { waitForBrowserRateWindow } from './browser-rate-window.mjs';
+import { createBrowserRatePacer } from './browser-rate-window.mjs';
 
 // Sólo la pila descartable del runner: sin URLs hospedadas, proveedores ni capturas.
 const run = promisify(execFile);
@@ -24,7 +25,13 @@ const env = { ...process.env, PORT:'5597', VITE_API_PROXY:apiOrigin, CORS_ORIGIN
 const pool = new pg.Pool({ connectionString:env.PLANV_LOCAL_AUTH_DB_URL });
 const admin = createClient(env.SUPABASE_URL,env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
 let password = 'Local-' + randomBytes(24).toString('base64url') + '-A1!';
-const identities=[]; const evidence=[]; let apiProcess; let webProcess; let phase='preparar identidades';let lastAction='preparación';let failedCheck='ninguna';let lastReadStatus=null;let apiReadyAt=0;
+const identities=[]; const evidence=[]; let apiProcess; let webProcess; let phase='preparar identidades';let lastAction='preparación';let failedCheck='ninguna';let lastReadStatus=null;
+const ratePacer=createBrowserRatePacer();
+function startLocalApi() {
+  const child=spawn(process.execPath,['--import','tsx','server/index.ts'],{env,stdio:['ignore','pipe','ignore']});
+  createInterface({input:child.stdout}).on('line',line=>ratePacer.observeHttpLine(line));
+  return child;
+}
 async function identity(label) {
   const email=label.toLowerCase().replaceAll(' ','-')+'-'+randomUUID()+'@example.test';
   const created=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:label,legal_version:'2026-09-29',legal_accepted_at:new Date().toISOString()}});
@@ -34,10 +41,10 @@ async function identity(label) {
   if(signed.error) throw Error('Sesión ficticia no iniciada');
   const actor={id:created.data.user.id,email,password,client,token:signed.data.session.access_token};identities.push(actor);return actor;
 }
-async function B(...args) { if(args[0]!=='js')lastAction=args[0]+(['wait','fill','click','select','upload'].includes(args[0])?' '+args[1]:'');return (await run(browse,args,{env,timeout:45000,maxBuffer:2*1024*1024})).stdout.trim(); }
+async function B(...args) { if(args[0]!=='stop')await ratePacer.beforeAction();if(args[0]!=='js')lastAction=args[0]+(['wait','fill','click','select','upload'].includes(args[0])?' '+args[1]:'');return (await run(browse,args,{env,timeout:45000,maxBuffer:2*1024*1024})).stdout.trim(); }
 async function until(expression) {
-  const deadline=Date.now()+20000;
-  while(Date.now()<deadline) { if((await B('js',expression)).includes('true')) return; await new Promise(r=>setTimeout(r,250)); }
+  const deadline=ratePacer.activeNow()+20000;
+  while(ratePacer.activeNow()<deadline) { if((await B('js',expression)).includes('true')) return; await new Promise(r=>setTimeout(r,250)); }
   throw Error('No se confirmó el estado de la interfaz');
 }
 async function button(text) {
@@ -62,6 +69,7 @@ async function logout() {
   await B('wait','input[placeholder="Email"]');
 }
 async function read(actor,path) {
+  await ratePacer.beforeAction();
   let response=await fetch(apiOrigin+path,{headers:{Authorization:'Bearer '+actor.token}});
   // Salir de la app revoca las sesiones del usuario, incluida la del lector de prueba.
   // Comprobar tras un nuevo ingreso exige una sesión nueva, sin eludir la revocación.
@@ -69,15 +77,15 @@ async function read(actor,path) {
     const signed=await actor.client.auth.signInWithPassword({email:actor.email,password:actor.password});
     if(signed.error||!signed.data.session)throw Error('No se pudo renovar la sesión ficticia de lectura');
     actor.token=signed.data.session.access_token;
-    response=await fetch(apiOrigin+path,{headers:{Authorization:'Bearer '+actor.token}});
+    await ratePacer.beforeAction();response=await fetch(apiOrigin+path,{headers:{Authorization:'Bearer '+actor.token}});
   }
   lastReadStatus=response.status;
   if(!response.ok) throw Error('Nueva lectura del servidor falló: '+response.status);
   return response.json();
 }
 async function readUntil(actor,path,predicate) {
-  const deadline=Date.now()+20000;
-  while(Date.now()<deadline){const result=await read(actor,path);if(predicate(result))return result;await new Promise(r=>setTimeout(r,250));}
+  const deadline=ratePacer.activeNow()+20000;
+  while(ratePacer.activeNow()<deadline){const result=await read(actor,path);if(predicate(result))return result;await new Promise(r=>setTimeout(r,250));}
   throw Error('El servidor no confirmó el guardado');
 }
 function check(condition,label) { if(!condition) {failedCheck=label;throw Error(label);}evidence.push(label);console.log('Verificado: '+label); }
@@ -88,9 +96,10 @@ try {
   const professional=await identity('Nutricionista ficticia');const patient=await identity('Paciente ficticia');
   await pool.query("select public.provision_nutritionist($1,'Profesional de prueba')",[professional.id]);
   phase='arranque de servicios temporales';
-  apiProcess=spawn(process.execPath,['--import','tsx','server/index.ts'],{env,stdio:'ignore'});
+  apiProcess=startLocalApi();
   webProcess=spawn(process.execPath,['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','5596'],{env,stdio:'ignore'});
-  for(const endpoint of [apiOrigin+'/api/health',origin]) { let ready=false;for(let i=0;i<80;i++){try{if((await fetch(endpoint)).ok){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,250));}if(!ready)throw Error('Servicio local no disponible');if(endpoint===apiOrigin+'/api/health')apiReadyAt=Date.now(); }
+  for(const endpoint of [apiOrigin+'/api/health',origin]) { let ready=false;for(let i=0;i<80;i++){try{if((await fetch(endpoint)).ok){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,250));}if(!ready)throw Error('Servicio local no disponible'); }
+  ratePacer.start();
   phase='alta profesional';await B('viewport','1440x1000');await login(professional,'/crm/pacientes');
   await button('Nuevo paciente');await field('Nombre completo','Paciente ficticia');await field('Email para la invitación',patient.email);
   await B('fill','label:has-text("Objetivo declarado") textarea','Organizar las comidas');await button('Crear alta');
@@ -179,8 +188,6 @@ try {
   check(Boolean(resource),'turno, cuota y recurso guardados por la profesional');
   await logout();phase='paciente y recarga';await login(patient,'/app/plan');await reloadContains('Arroz con vegetales');
   for(const size of ['1440x1000','390x844']){await B('viewport',size);await until("document.body.innerText.includes('Arroz con vegetales')");check(!(await B('js',"document.body.innerText.includes('Borrador privado nuevo')")).includes('true'),'borrador oculto para paciente '+size);}
-  // Respect the same fixed window as normal clients; never disable or raise server quotas.
-  await waitForBrowserRateWindow(apiReadyAt);
   phase='comidas y hábitos';await B('goto',origin+'/app/diario');await control('[aria-label="Registrar comida, agua o descanso"]');await button('Registrar esta comida');await until("document.body.innerText.includes('Ya registraste esta comida')");
   const mealRead=await read(professional,`/api/patients/${pid}`);check(mealRead.patient.meal_logs.length===1&&mealRead.patient.meal_logs[0].nutrition_origin==='declared','comida guardada desde receta y visible para profesional');
   await button('Registrar agua');await field('Vasos tomados hoy','3');await button('Guardar registro');await readUntil(patient,`/api/patients/${pid}`,r=>r.patient.hydration===3);
@@ -275,8 +282,9 @@ try {
   const beforeRestart=(await read(patient,`/api/patients/${pid}/plans`)).plan;
   const oldApi=apiProcess;
   await new Promise((resolve,reject)=>{const timeout=setTimeout(()=>reject(Error('La API temporal no cerró')),10000);oldApi.once('exit',()=>{clearTimeout(timeout);resolve();});oldApi.kill();});
-  apiProcess=spawn(process.execPath,['--import','tsx','server/index.ts'],{env,stdio:'ignore'});
+  apiProcess=startLocalApi();
   let restarted=false;for(let i=0;i<80;i++){try{if((await fetch(apiOrigin+'/api/health')).ok){restarted=true;break;}}catch{}await new Promise(r=>setTimeout(r,250));}if(!restarted)throw Error('La API temporal no reinició');
+  ratePacer.start();
   const afterRestart=(await read(patient,`/api/patients/${pid}/plans`)).plan;
   const ledgerAfterRestart=(await read(patient,`/api/patients/${pid}/ledger?audience=patient`)).ledger;
   check(afterRestart.id===beforeRestart.id&&afterRestart.version===beforeRestart.version&&afterRestart.items[0].public_note==='Indicación publicada'&&ledgerAfterRestart.payments.some(p=>p.status==='confirmed'&&p.amount===1000),'reinicio del servidor conserva el plan publicado y el pago confirmado');
