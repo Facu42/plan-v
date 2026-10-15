@@ -69,6 +69,14 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **15/10 · Codex** · #115 actualizado desde main y la pila: 2.775 pruebas aprobadas, cero fallos y dos omitidas. El fallo del recorrido fue reproducido: comprobaba grabación en lugar de menú. Se corrigieron dos expresiones, conservando permisos separados y bloqueo403; [evidencia](consent-browser-regression-2026-10-15.md). Cabecera clínica y gris original conservados; CI nuevo pendiente. Sin merge a main ni SQL remoto.
+
+- **15/10 · Codex** · #108 conciliado con main `2d31f9d` y la pila actualizada, preservando síntomas, vistas, avisos, compras, recorridos y el gris original. Suite propia de nutrición: 2.721 aprobadas, cero fallos y dos omitidas; [evidencia](nutridesk-release-nutricion-2026-10-14.md). Sin módulos de agenda/operaciones/SARA ni SQL remoto; CI nuevo pendiente de comprobar sobre su SHA.
+
+- **15/10 · Codex** · PR107 incorpora mediante merge la segunda entrega revisada (`88ce8e6`), con main `2d31f9d` y los siete PR nuevos conservados. El único conflicto fue unir exclusiones de OCR local y resultados e2e en .gitignore; se conserva el procesamiento local y su prueba CSP. Informe en `nutridesk-release-importacion-2026-10-13.md`. Sin merge a main ni SQL remoto.
+
+
+
 - **15/10 · Codex** · PR106 incorpora mediante merge la cabeza revisada de #105 (`a6ab13ae`), con main `2d31f9d` y los siete PR de la paciente/operación conservados. Se repiten los gates propios de consultas y se mantiene Groq apagado y el SMTP pospuesto; informe en `nutridesk-release-consultas-2026-10-13.md`. Sin merge a main ni SQL remoto.
 
 - **15/10 · Codex** · Retomada la pila pendiente desde main `2d31f9d`: se preservaron #109, #110, #112, #113, #114, #116 y #117. Primera entrega #105 actualizada con el gris secundario original de Nutrigo y 2.546 pruebas aprobadas; [informe](main-reconciliation-2026-10-15.md). Se propaga en orden hacia #106–#115 y luego agenda/operaciones; sin merge a main ni SQL remoto. La tabla SARA 2 solicitada se implementa en una entrega propia, con 930 registros y 39 componentes; no está publicada ni incluida todavía en esos conteos. La falla de sesiones de #115 se localizó en una comprobación que miraba el permiso de grabación en lugar del de menús; su corrección tendrá evidencia en la cabeza nueva.
