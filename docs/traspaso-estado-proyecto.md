@@ -240,6 +240,7 @@ Entrega 4 verificada en `codex/nutridesk-release-nutricion`, sobre la cabeza fin
 Quinta entrega apilada: [ficha clínica y exportación histórica, evidencia y límites](nutridesk-release-clinica-2026-10-14.md). Base 304413f; gate previo 2.719 pruebas aprobadas; verificación nueva de marca vigente en curso, sin producción.
 
 
+
 ## Ánimo y síntomas de la paciente (2026-10-15)
 En el Diario, «Registrar» → «Cómo me siento»: energía del día (con energía, normal, sin energía; se guarda en la energía que ya existía) y ocho síntomas de una lista cerrada. La nutricionista los ve en la ficha, «Registros y evolución», debajo de «Descanso y energía». Nutrigo no dibuja esta pantalla: se armó con su diálogo de registro y los botones del diario. Migración `20261015100000_habit_symptoms` (agrega una columna con lista cerrada): ya aplicada en la base el 14/10 con la frase de Facundo (el historial de la base la anota como `20261014215543`). La de #110 (vistas solo lectura) también quedó aplicada. PR112 y PR110 ya integrados en main el 14/10; no volver a ejecutar sus migraciones.
 
