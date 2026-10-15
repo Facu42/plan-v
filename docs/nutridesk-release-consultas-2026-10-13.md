@@ -1,4 +1,9 @@
 # Segunda entrega: consultas, audio y resúmenes revisados
+## Estado vigente · 15/10/2026
+
+Incorporada por merge la primera entrega revisada `a6ab13ae`, con MAIN `2d31f9d` y sus siete PR nuevos conservados. Suite propia actual: **2.617 aprobadas, cero fallos, dos omitidas; 389 archivos**. Tipos, build (11,09 s), migraciones, vistas locales y secretos aprobados; scanner real con control positivo, historial y objetos grandes sin hallazgos. [Informe y Regression Guard de la actualización](nutridesk-consultas-main-sync-2026-10-15.md). CI de la cabeza nueva se verifica por separado; los resultados remotos de 66fe1e03 son históricos. Sin cambios de producción ni habilitación de proveedores.
+
+## Antecedentes de la separación · 13/10/2026
 
 Rama local `codex/nutridesk-release-consultas`, basada en `codex/nutridesk-release-base` (`4769b3e6f647f28fd0e0d93bcef6aa58e01a3140`, PR de acceso). Recupera las versiones finales de consultas y presupuesto de la copia integrada en `14e3d7f`. Preparada para revisión por apartado; sin merge, habilitación de proveedor ni cambios de producción.
 

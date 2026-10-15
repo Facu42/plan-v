@@ -66,3 +66,27 @@ Son guías generales en inglés: si chocan con estas reglas, mandan estas.
 Forma de trabajo de cada función nueva (pedido de Facundo, 2026-10-07): plan corto, **prueba primero**
 (que falle), código mínimo hasta que pase, verificación (`npm run check`, `npm test`, compilación, secretos)
 y revisión con el agente `code-reviewer` antes de subir.
+
+## Habilidades sumadas el 2026-10-14 (ECC y Emil Kowalski)
+
+Pedido de Facundo, 2026-10-14. Se copiaron tal cual, sin hooks ni scripts, a `.claude/skills/`:
+
+- De ECC (MIT): `security-review` (antes de tocar login, datos del usuario, claves o endpoints) y
+  `postgres-patterns` (índices, RLS y consultas lentas en Supabase).
+- De [emilkowalski/skills](https://github.com/emilkowalski/skills) (MIT, copia en
+  `.claude/LICENSE-emil-kowalski-skills`): `review-animations`, `improve-animations`,
+  `animation-performance` y `break-ui`.
+
+Reglas de uso:
+
+1. **No cambian el diseño.** En la app de la paciente el movimiento y los estilos salen de Nutrigo
+   (Figma), colores incluidos. Estas habilidades solo informan o proponen un plan: si una sugerencia
+   choca con el archivo, gana el archivo, sin preguntar.
+2. `break-ui` prueba con datos extremos y sirve para las pantallas sin datos y de error. Con datos de
+   salud se usan solo datos inventados, nunca de pacientes reales.
+3. `postgres-patterns` y `security-review` son guías generales: cualquier cambio en la base de producción
+   sigue necesitando la frase escrita de Facundo (regla 4).
+4. Varias habilidades de Emil empiezan con una frase fija de saludo cuando se las llama sin pedido
+   concreto. Si ya hay una tarea, se ignora ese saludo y se trabaja.
+5. No se instalaron `emil-design-eng`, `apple-design` ni `prototype` (empujan una estética propia),
+   ni los hooks, agentes ni el resto de las habilidades de ECC.
