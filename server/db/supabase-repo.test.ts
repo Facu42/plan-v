@@ -827,6 +827,25 @@ describe('habit_logs (016 v2)', () => {
     expect(upsert?.payload).toMatchObject({ steps: 6420, hydration: 2 });
   });
 
+  it('conserva los síntomas ya guardados al cambiar otro hábito y los reemplaza cuando llegan', async () => {
+    const today = localDateId(new Date());
+    harness.push('habit_logs', {
+      data: { id: 'h-1', patient_id: 'patient-1', date: today, hydration: 2, energy: 'Media', sleep_minutes: null, symptoms: ['acidez'] },
+      error: null,
+    });
+    await sbUpdateHabits('patient-1', { hydration: 4 });
+    const kept = harness.calls.find((call) => call.table === 'habit_logs' && call.op === 'upsert');
+    expect(kept?.payload).toMatchObject({ hydration: 4, energy: 'Media', symptoms: ['acidez'] });
+
+    harness.push('habit_logs', {
+      data: { id: 'h-1', patient_id: 'patient-1', date: today, hydration: 4, energy: 'Media', sleep_minutes: null, symptoms: ['acidez'] },
+      error: null,
+    });
+    await sbUpdateHabits('patient-1', { energy: 'Baja', symptoms: ['hinchazon'] });
+    const replaced = harness.calls.filter((call) => call.table === 'habit_logs' && call.op === 'upsert')[1];
+    expect(replaced?.payload).toMatchObject({ energy: 'Baja', symptoms: ['hinchazon'] });
+  });
+
   it('inserts a fresh row when the day has no log yet', async () => {
     const today = localDateId(new Date());
     harness.push('habit_logs', { data: null, error: null });

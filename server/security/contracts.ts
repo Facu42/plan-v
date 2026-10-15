@@ -216,7 +216,7 @@ function publicAppointment(appointment: Patient['appointment']): Patient['appoin
 }
 
 function publicHabitLogs(logs: Patient['habit_logs']): Patient['habit_logs'] {
-  return logs.map(({ id, patient_id, date, hydration, energy, sleep_minutes, steps }) => ({
+  return logs.map(({ id, patient_id, date, hydration, energy, sleep_minutes, steps, symptoms }) => ({
     id,
     patient_id,
     date,
@@ -224,6 +224,7 @@ function publicHabitLogs(logs: Patient['habit_logs']): Patient['habit_logs'] {
     energy,
     sleep_minutes,
     steps: steps ?? null,
+    symptoms: symptoms ?? [],
   }));
 }
 

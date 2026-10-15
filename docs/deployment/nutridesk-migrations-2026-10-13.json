@@ -1,8 +1,8 @@
 {
   "project": "plan-v-app",
   "projectId": "wvosvlxpfytokwfbcero",
-  "observedOn": "2026-10-13",
-  "mainBase": "ae3dc30e3095d4856e3a5055fdeca5ebcf2424e3",
+  "observedOn": "2026-10-14",
+  "mainBase": "2e28bd8d5443bcc190b584dff9b30c90ce4fab04",
   "productionApplied": false,
   "approvalRequired": true,
   "priorAliasNames": [
@@ -100,5 +100,21 @@
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",
-  "firstVersion": "20261011140000"
+  "firstVersion": "20261011140000",
+  "baselineMigrations": [
+    {
+      "file": "20261015090000_patient_views_read_only.sql",
+      "version": "20261015090000",
+      "sha256": "fdd9e6da09c83a497f29f083dc85efdeb97729960dc6aec8219b5dfeda9bf021",
+      "observedAppliedVersion": "20261014215529",
+      "observedAppliedName": "patient_views_read_only"
+    },
+    {
+      "file": "20261015100000_habit_symptoms.sql",
+      "version": "20261015100000",
+      "sha256": "d85ace8d143445cb73e83e092f7e1d073cae9b5520da9c4c5f6b28dc55a63748",
+      "observedAppliedVersion": "20261014215543",
+      "observedAppliedName": "habit_symptoms"
+    }
+  ]
 }
