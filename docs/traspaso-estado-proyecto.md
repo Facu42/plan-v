@@ -238,7 +238,7 @@ En el Diario, «Registrar» → «Cómo me siento»: energía del día (con ener
 
 ## Avisos al teléfono de la paciente (2026-10-15)
 En la campanita de la paciente, «Avisos», hay una fila «Recibir avisos en este teléfono». Al aceptarla, el teléfono recibe un aviso cuando la nutri le escribe, publica su plan, le indica un recurso o cambia su consulta. Los avisos pasan por Google, Apple o Mozilla, así que solo llevan un texto genérico (nunca el mensaje ni datos de salud). En iPhone hace falta tener Plan V instalada en la pantalla de inicio.
-Queda apagado hasta tener las tres variables `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `VAPID_SUBJECT` en la API de Railway; sin ellas la fila no aparece y no se manda nada. Migración `20261015200000_push_subscriptions` (tabla nueva, solo el servidor la usa). Orden: aplicar la migración, cargar las claves y recién ahí queda andando. El código se puede juntar antes sin efecto. PR en borrador.
+Queda apagado hasta tener las tres variables `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `VAPID_SUBJECT` en la API de Railway; sin ellas la fila no aparece y no se manda nada. Migración `20261015200000_push_subscriptions` (tabla nueva, solo el servidor la usa): **aplicada en producción el 15/10** con la frase de Facundo; el historial de la base la anota como `20261015163006` (es repetible). Falta cargar las claves en Railway y juntar el PR; el código se puede juntar antes sin efecto. PR en borrador.
 
 ## Recorridos de punta a punta y monitor de producción (2026-10-14)
 Etapa 1 del plan (`docs/producto/06-plan-implementacion.md`, puntos 6 y 7, sin costo):
