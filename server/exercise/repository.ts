@@ -44,6 +44,7 @@ type ActivityInput = {
   assignment_id?: string;
   sets?: number;
   reps?: number;
+  kcal?: number;
 };
 
 export function exerciseDbError(error: { code?: string; message?: string } | null) {
@@ -81,6 +82,7 @@ function patientActivities(patientId: string): ActivityLogView[] {
       assignment_id: extra?.assignment_id ?? null,
       sets: extra?.sets ?? null,
       reps: extra?.reps ?? null,
+      kcal: entry.kcal ?? null,
     };
   }).sort((a, b) => b.logged_at.localeCompare(a.logged_at));
 }
@@ -173,6 +175,7 @@ function asActivities(value: unknown): ActivityLogView[] {
       assignment_id: row.assignment_id == null ? null : String(row.assignment_id),
       sets: row.sets == null ? null : Number(row.sets),
       reps: row.reps == null ? null : Number(row.reps),
+      kcal: row.kcal == null || !Number.isFinite(Number(row.kcal)) ? null : Number(row.kcal),
     }];
   });
 }
@@ -209,6 +212,10 @@ export async function getPatientExercise(patientId: string, persistent: boolean,
 }
 
 export async function logPatientActivity(patientId: string, input: ActivityInput, persistent: boolean): Promise<PatientExerciseView> {
+  // Las calorías van solo con actividades libres: una serie de rutina no las lleva.
+  if (input.kcal != null && (input.assignment_id || input.sets != null || input.reps != null)) {
+    throw new CareError(400, 'Las calorías se cargan solo en actividades libres.');
+  }
   if (!persistent) {
     if (!getPatient(patientId)) throw new CareError(404, 'Paciente no encontrado.');
     if (activityDuplicate(patientId, input)) return memorySnapshot(patientId, false);
@@ -223,6 +230,17 @@ export async function logPatientActivity(patientId: string, input: ActivityInput
       });
     }
     return memorySnapshot(patientId, false);
+  }
+  if (input.kcal != null) {
+    return asExerciseView(await rpc('log_patient_activity_with_kcal', {
+      target_patient: patientId,
+      client_id: input.client_id,
+      input_activity: input.activity,
+      input_duration: input.duration_minutes,
+      input_intensity: input.intensity,
+      input_kcal: input.kcal,
+      input_note: input.note ?? null,
+    }), patientId);
   }
   return asExerciseView(await rpc('log_patient_activity', {
     target_patient: patientId,
