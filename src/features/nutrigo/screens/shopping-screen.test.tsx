@@ -70,6 +70,18 @@ describe.each([false, true])('compras con datos variados (celular: %s)', mobile 
     expect(html).toContain(mobile ? 'aria-label="Página siguiente"' : 'de 45 productos');
   });
 
+  it('cada producto muestra su comercio con el color del archivo y el widget cuenta por comercio', () => {
+    const html = render([item('a', { name: 'Banana' }), item('b', { name: 'Pollo' }), item('c', { name: 'Pollo al horno', kind: 'manual' })]);
+    expect(html).toMatch(/background:#c2e66e[^"]*"[^>]*>[\s\S]*?Verdulería/);
+    expect(html).toMatch(/background:#ffa257[^"]*"[^>]*>[\s\S]*?Proteínas/);
+    expect(html).toContain('>Comercio<'); expect(html).toContain('>Por comercio<');
+    expect(html).toContain('>2 productos<'); expect(html).toContain('>67%<');
+  });
+
+  it('tiene el botón para compartir la lista', () => {
+    expect(render([item('a')])).toContain('aria-label="Compartir lista"');
+  });
+
   it('sin productos conserva la tabla, las tarjetas en cero y un texto corto', () => {
     const html = render([]);
     expect(html).toContain('No hay productos'); expect(html).toContain('data-name="Pagination"'); expect(html).toContain('>0<'); expect(html).not.toContain('NaN');
