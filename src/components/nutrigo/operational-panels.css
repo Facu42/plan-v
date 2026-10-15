@@ -1,0 +1,18 @@
+/* Superficies nuevas: card, controles y tokens de Nutrigo; sin modificar sus frames. */
+.ops-panel { min-width:0; }
+.ops-panel > p,.ops-panel > form,.ops-panel > fieldset,.ops-panel [role=log] { margin:16px 0; }
+.nv-app .ops-panel p { color:var(--nv-ink-soft,var(--nv-ink)); overflow-wrap:anywhere; }
+.ops-panel label:not(.care-consent) { display:flex; flex-direction:column; gap:8px; margin:12px 0; min-width:0; }
+.ops-panel :is(input:not([type=checkbox]),select,textarea) { max-width:100%; min-width:0; padding:10px; border:1px solid var(--nv-border); border-radius:10px; font:inherit; background:var(--nv-track); color:var(--nv-ink); }
+.ops-panel textarea { width:100%; min-height:100px; resize:vertical; }
+.ops-panel fieldset { min-width:0; padding:16px; border:1px solid var(--nv-border); border-radius:12px; }
+.ops-panel label.care-consent { display:flex; gap:10px; align-items:flex-start; }
+.ops-panel .care-consent input { margin-top:3px; width:17px; flex:0 0 17px; }
+.ops-panel :is(textarea,select,summary):focus-visible { outline:3px solid var(--nv-ink); outline-offset:3px; }
+.ops-panel [role=log] article,.ops-panel > details { padding:16px 0; border-top:1px solid var(--nv-border); }
+.ops-panel ul { padding-left:20px; }
+.ops-panel li { margin:8px 0; overflow-wrap:anywhere; }
+.ops-panel h3 { margin:12px 0 8px; }
+.ops-panel li .nv-button { margin-left:8px; }
+.ops-panel summary { min-height:40px; cursor:pointer; }
+@media(max-width:760px) { .ops-panel .care-actions { align-items:stretch; }.ops-panel .care-actions > label { width:100%; }.ops-panel li .nv-button { display:flex; margin:8px 0; } }

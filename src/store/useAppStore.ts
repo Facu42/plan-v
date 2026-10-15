@@ -15,6 +15,7 @@ type AppState = {
   boot: (opts?: BootOptions) => Promise<void>;
   reset: () => void;
   addPatient: (patient: Patient) => void;
+  refreshDirectory: () => Promise<void>;
   refreshPatient: (id: string) => Promise<void>;
   setActivePatient: (id: string) => void;
   selectCrmPatient: (id: string) => void;
@@ -22,13 +23,25 @@ type AppState = {
 
 const DIRECTORY_PAGE = 50;
 
+// mapPatient de la lista sólo actualiza perfil, seguimiento, agenda y recursos.
+// Estos campos provienen de la ficha completa: sus valores vacíos de la lista
+// no deben borrar una ficha ya cargada dentro de esta misma sesión.
+const PATIENT_DETAIL_FIELDS = [
+  'todayPlan', 'weekPlan', 'meal_logs', 'messages', 'brief', 'briefDismissed',
+  'timeline', 'habit_logs', 'activity_logs', 'hydration', 'energy',
+  'sleep_minutes', 'steps',
+] as const satisfies readonly (keyof Patient)[];
+
 let sessionGeneration = 0;
 let bootController: AbortController | null = null;
+let directoryController: AbortController | null = null;
 const refreshControllers = new Map<string, AbortController>();
 
 function abortInflight() {
   bootController?.abort();
   bootController = null;
+  directoryController?.abort();
+  directoryController = null;
   for (const controller of refreshControllers.values()) controller.abort();
   refreshControllers.clear();
 }
@@ -137,6 +150,38 @@ export const useAppStore = create<AppState>((set, get) => ({
         : [...state.patients, patient],
       activePatientId: patient.id,
     }));
+  },
+
+  refreshDirectory: async () => {
+    const generation = sessionGeneration;
+    directoryController?.abort();
+    const controller = new AbortController();
+    directoryController = controller;
+    try {
+      const patients = await loadDirectory(controller.signal);
+      if (controller.signal.aborted || generation !== sessionGeneration || directoryController !== controller) return;
+      set((state) => {
+        const activeStillExists = patients.some(patient => patient.id === state.activePatientId);
+        const previous = new Map(state.patients.map(patient => [patient.id, patient]));
+        return {
+          patients: patients.map(patient => {
+            const existing = previous.get(patient.id);
+            if (!existing) return patient;
+            const details = Object.fromEntries(PATIENT_DETAIL_FIELDS
+              .filter(field => Object.prototype.hasOwnProperty.call(existing, field))
+              .map(field => [field, existing[field]]));
+            return { ...patient, ...details };
+          }),
+          activePatientId: activeStillExists ? state.activePatientId : patients[0]?.id ?? '',
+          shoppingList: activeStillExists ? state.shoppingList : [],
+        };
+      });
+    } catch (error) {
+      if (controller.signal.aborted || isAbortError(error) || generation !== sessionGeneration || directoryController !== controller) return;
+      throw error;
+    } finally {
+      if (directoryController === controller) directoryController = null;
+    }
   },
 
   refreshPatient: async (id: string) => {

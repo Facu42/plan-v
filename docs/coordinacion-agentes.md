@@ -69,6 +69,9 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **15/10 · Codex** · PR107 actualizado desde su padre revisado para conservar MAIN9c56854, PR119 y122. Focal propio actual: 126 aprobadas, cero fallos; 8 archivos. La suite global actual se verifica en CI; los conteos locales globales anteriores quedan como históricos. [Informe](main-sync-9c568-2026-10-15.md). Sin merge a main ni SQL remoto.
+
+- **15/10 · Codex** · PR107 incorpora mediante merge la segunda entrega revisada (`88ce8e6`), con main `2d31f9d` y los siete PR nuevos conservados. El único conflicto fue unir exclusiones de OCR local y resultados e2e en .gitignore; se conserva el procesamiento local y su prueba CSP. Informe en `nutridesk-release-importacion-2026-10-13.md`. Sin merge a main ni SQL remoto.
 - **15/10 · Codex** · PR106 actualizado desde su padre revisado para conservar MAIN9c56854, PR119 y122. Focal propio actual: 126 aprobadas, cero fallos; 8 archivos. La suite global actual se verifica en CI; los conteos locales globales anteriores quedan como históricos. [Informe](main-sync-9c568-2026-10-15.md). Sin merge a main ni SQL remoto.
 
 - **15/10 · Codex** · PR106 incorpora mediante merge la cabeza revisada de #105 (`a6ab13ae`), con main `2d31f9d` y los siete PR de la paciente/operación conservados. Se repiten los gates propios de consultas y se mantiene Groq apagado y el SMTP pospuesto; informe en `nutridesk-release-consultas-2026-10-13.md`. Sin merge a main ni SQL remoto.

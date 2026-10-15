@@ -1,3 +1,4 @@
+import { PatientImportedHistory } from './PatientImportedHistory';
 import { useEffect, useState } from 'react';
 import type { MealLog, Patient } from '../../types';
 import type { CrmEntry } from '../crm/crm-entry';
@@ -94,7 +95,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
     <div key={`${patient.id}:${tab}`} className="pw-record-content">
       {tab === 'resumen' && <><ShowroomPatientRecord patient={patient} patients={patients} onSelect={onSelect} onEdit={onEdit} onOpen={onOpen} summaryOnly /><ProfessionalLedgerSummary patientId={patient.id} onOpen={() => change('cobros')} /></>}
       {tab === 'notas' && <ConsultationNotes patientId={patient.id} />}
-      {tab === 'ingreso' && <ShowroomIntakeReview patientId={patient.id} />}
+      {tab === 'ingreso' && <><ShowroomIntakeReview patientId={patient.id} /><PatientImportedHistory patientId={patient.id}/></>}
       {tab === 'planificacion' && <NutritionTargetPanel patientId={patient.id} patientName={patient.name} onOpenPlan={() => change('plan')} />}
       {tab === 'registros' && <><ShowroomMeals patient={patient} query="" onSelect={onSelect} onReview={onReview} now={now} /><ShowroomProgress patient={p} professional /><ProfessionalMeasurements patientId={patient.id} patientName={patient.name} /><ShowroomGoals patient={patient} patients={patients} onSelect={onSelect} onChanged={addPatient} onOpenPatient={onSelect} showNutritionTarget={false} /></>}
       {tab === 'plan' && <><PlanSafetySummary patientId={patient.id} /><MealPlanEditor key={patient.id} patientId={patient.id} patientName={patient.name} professionalName={professionalName} onChanged={() => void api.getPatient(patient.id).then(({ patient: updated }) => addPatient(updated)).catch(() => undefined)} /></>}
