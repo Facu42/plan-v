@@ -67,3 +67,8 @@
 .pw-global .nv-directory-panel { min-width:0; }
 .pw-cell-label { display:none; font-style:normal; font-size:11px; color:var(--nv-ink-soft); }
 @media(max-width:799px){.pw-global .pw-cell-label{display:block}}
+
+.pw-record-contact {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0;padding:16px;background:var(--nv-card);border:1px solid var(--nv-line);border-radius:16px;font-size:12px}
+.pw-record-contact dt {color:var(--nv-ink-soft)}
+.pw-record-contact dd {margin:4px 0 0;overflow-wrap:anywhere}
+@media(max-width:799px){.pw-record-contact{grid-template-columns:repeat(2,minmax(0,1fr))}}

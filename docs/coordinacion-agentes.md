@@ -69,6 +69,9 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **15/10 · Codex** · PR106 actualizado desde su padre revisado para conservar MAIN9c56854, PR119 y122. Focal propio actual: 126 aprobadas, cero fallos; 8 archivos. La suite global actual se verifica en CI; los conteos locales globales anteriores quedan como históricos. [Informe](main-sync-9c568-2026-10-15.md). Sin merge a main ni SQL remoto.
+
+- **15/10 · Codex** · PR106 incorpora mediante merge la cabeza revisada de #105 (`a6ab13ae`), con main `2d31f9d` y los siete PR de la paciente/operación conservados. Se repiten los gates propios de consultas y se mantiene Groq apagado y el SMTP pospuesto; informe en `nutridesk-release-consultas-2026-10-13.md`. Sin merge a main ni SQL remoto.
 - **15/10 · Codex** · PR105 actualizado a MAIN9c56854 con PR119 y122 preservados; 2.563 pruebas locales aprobadas. Se propaga la misma cabeza por la pila. [Informe](main-sync-9c568-2026-10-15.md). Sin merge a main ni SQL remoto.
 
 - **15/10 · Codex** · Retomada la pila pendiente desde main `2d31f9d`: se preservaron #109, #110, #112, #113, #114, #116 y #117. Primera entrega #105 actualizada con el gris secundario original de Nutrigo y 2.546 pruebas aprobadas; [informe](main-reconciliation-2026-10-15.md). Se propaga en orden hacia #106–#115 y luego agenda/operaciones; sin merge a main ni SQL remoto. La tabla SARA 2 solicitada se implementa en una entrega propia, con 930 registros y 39 componentes; no está publicada ni incluida todavía en esos conteos. La falla de sesiones de #115 se localizó en una comprobación que miraba el permiso de grabación en lugar del de menús; su corrección tendrá evidencia en la cabeza nueva.

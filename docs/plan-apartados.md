@@ -1,5 +1,7 @@
 # Plan por apartados (2026-09-28)
 
+Entrega aislada de consultas, audio y resúmenes (13/10/2026): [alcance, verificación y Regression Guard](nutridesk-release-consultas-2026-10-13.md). Basada en el PR de acceso; todavía sin publicar ni habilitar proveedores.
+
 Pedido de Facundo del 2026-09-28: usar los agentes de
 [agency-agents](https://github.com/msitarzewski/agency-agents) para desarrollar ordenadamente
 todo lo que le falta a Plan V. Sus sugerencias: app móvil, seguridad, diseño y experiencia
