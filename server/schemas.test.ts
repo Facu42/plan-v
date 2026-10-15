@@ -108,6 +108,10 @@ describe('API input schemas', () => {
     expect(habitUpdateInputSchema.safeParse({ sleep_minutes: 1441 }).success).toBe(false);
     expect(habitUpdateInputSchema.safeParse({ sleep_minutes: 450.5 }).success).toBe(false);
     expect(habitUpdateInputSchema.safeParse({}).success).toBe(false);
+    expect(habitUpdateInputSchema.safeParse({ symptoms: ['acidez', 'cansancio'] }).success).toBe(true);
+    expect(habitUpdateInputSchema.safeParse({ symptoms: [] }).success).toBe(true);
+    expect(habitUpdateInputSchema.safeParse({ symptoms: ['inventado'] }).success).toBe(false);
+    expect(habitUpdateInputSchema.safeParse({ symptoms: ['acidez', 'acidez'] }).success).toBe(false);
     expect(nutritionistSetupInputSchema.safeParse({ display_name: ' Vero ' }).success).toBe(true);
     expect(nutritionistSetupInputSchema.safeParse({ display_name: ' ' }).success).toBe(false);
   });

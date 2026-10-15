@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SYMPTOM_KEYS } from '../src/types/symptoms.js';
 
 export const foodItemSchema = z.object({
   name: z.string().trim().min(1).max(120),
@@ -172,7 +173,9 @@ export const habitUpdateInputSchema = z.object({
   energy: z.string().trim().min(1).max(80).nullable().optional(),
   sleep_minutes: z.number().int().min(0).max(1440).optional(),
   steps: z.number().int().min(0).max(100000).optional(),
-}).refine((input) => input.hydration !== undefined || input.energy !== undefined || input.sleep_minutes !== undefined || input.steps !== undefined, {
+  symptoms: z.array(z.enum(SYMPTOM_KEYS)).max(SYMPTOM_KEYS.length)
+    .refine((list) => new Set(list).size === list.length, { message: 'Los síntomas no pueden repetirse' }).optional(),
+}).refine((input) => input.hydration !== undefined || input.energy !== undefined || input.sleep_minutes !== undefined || input.steps !== undefined || input.symptoms !== undefined, {
   message: 'Se requiere al menos un hábito',
 });
 
