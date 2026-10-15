@@ -219,6 +219,11 @@ describe.each([false, true])('Inicio: nodos originales siempre presentes y fotos
     expect(out).toContain('(45 min)');
     expect(out).toContain('registrada: 45 min, intensidad intensa.');
   });
+  it('las calorías quemadas suman lo que la paciente declaró hoy al registrar actividades', () => {
+    const activities = [{ id: 'k1', patient_id: 'p1', activity: 'Bicicleta', duration_minutes: 45, intensity: 'intensa', note: null, logged_at: '2026-10-07T13:00:00Z', assignment_id: null, sets: null, reps: null, kcal: 321 }];
+    context.data = homeData({ exercise: { assignments: [], activities } });
+    expect(text(home())).toContain('321');
+  });
   it('el registro de rutina de esta semana cuenta las series hechas en cada ejercicio', () => {
     const items = [routineItem('x', 'Sentadilla', { sets: 3 }), routineItem('y', 'Plancha', { sets: 4 })];
     const withFeedback = (recordedAt: string) => ({ ...assignment(items), feedback: { sets_completed: 2, reps_completed: 20, note: null, recorded_at: recordedAt } });

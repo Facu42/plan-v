@@ -99,7 +99,16 @@ describe('PV-35 ejercicio en PostgreSQL descartable', () => {
     const logged = await rpc(patientAUser, 'log_patient_activity', [patientA, 'Caminata', 30, 'suave', 'Patio', null, null, null]) as PatientExerciseView;
     expect(logged.activities[0].activity).toBe('Caminata');
     expect(logged.activities[0].duration_minutes).toBe(30);
-    expect(JSON.stringify(logged)).not.toMatch(/kcal|calorías/i);
+    expect(logged.activities[0].kcal).toBeNull();
+
+    const clientId = '00000000-0000-4000-8000-0000000000a1';
+    const withKcal = await rpc(patientAUser, 'log_patient_activity_with_kcal', [patientA, 'Bicicleta', 45, 'intensa', 320, null, clientId]) as PatientExerciseView;
+    expect(withKcal.activities.find(row => row.activity === 'Bicicleta')?.kcal).toBe(320);
+    const repeated = await rpc(patientAUser, 'log_patient_activity_with_kcal', [patientA, 'Bicicleta', 45, 'intensa', 320, null, clientId]) as PatientExerciseView;
+    expect(repeated.activities.filter(row => row.activity === 'Bicicleta')).toHaveLength(1);
+    await expect(rpc(patientAUser, 'log_patient_activity_with_kcal', [patientA, 'Bicicleta', 45, 'intensa', 9000, null, '00000000-0000-4000-8000-0000000000a2'])).rejects.toMatchObject({ code: '22023' });
+    await expect(rpc(nutriA, 'log_patient_activity_with_kcal', [patientA, 'Bici', 45, 'intensa', 100, null, '00000000-0000-4000-8000-0000000000a3'])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(patientBUser, 'log_patient_activity_with_kcal', [patientA, 'Bici', 45, 'intensa', 100, null, '00000000-0000-4000-8000-0000000000a4'])).rejects.toMatchObject({ code: '42501' });
 
     await expect(rpc(nutriB, 'get_patient_exercise', [patientA])).rejects.toMatchObject({ code: '42501' });
     await expect(rpc(patientBUser, 'get_patient_exercise', [patientA])).rejects.toMatchObject({ code: '42501' });

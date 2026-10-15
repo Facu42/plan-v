@@ -18,7 +18,7 @@ import { CalorieArc, WeightArc } from './arcs';
 import { CountUp } from '../CountUp';
 import '../home-motion.css';
 import { barFill, descendants, EmptyState, fields, formatNumber, leaf, listChildren, objects, source, Stateful, timeLabel, useRemote, dateId, type ScreenProps } from './shared';
-import { dayOfIso, cleanAmount, daysBefore, litresLabel, monthYearLabel, percentLabel, portionsLabel, safePercent, weekDays, weightChangeLabel } from './home-values';
+import { burnedKcalOn, dayOfIso, cleanAmount, daysBefore, litresLabel, monthYearLabel, percentLabel, portionsLabel, safePercent, weekDays, weightChangeLabel } from './home-values';
 import { PatientGoalCard } from '../PatientGoalCard';
 
 async function homeData(id: string, signal: AbortSignal) {
@@ -84,7 +84,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
   const target=current?.target?.result;
   const known=patient.nutritionLogCount>0;
   const kcal=known?cleanAmount(patient.kcal):null;
-  const burned=(current?.care?.records??[]).filter(row=>row.data.kind==='activity'&&row.recorded_on===today).reduce((sum,row)=>sum+(row.data.kind==='activity'?cleanAmount(row.data.kcal)??0:0),0);
+  const burned=burnedKcalOn(today,current?.exercise?.activities??patient.activities??[],current?.care?.records??[]);
   const eaten={carbs:known?cleanAmount(patient.macros.carbs_g):null,protein:known?cleanAmount(patient.macros.protein_g):null,fat:known?cleanAmount(patient.macros.fat_g):null};
   const macroPct={carbs:safePercent(eaten.carbs,target?.carbs_g),protein:safePercent(eaten.protein,target?.protein_g),fat:safePercent(eaten.fat,target?.fat_g)};
   const macroLabel={carbs:percentLabel(eaten.carbs,target?.carbs_g),protein:percentLabel(eaten.protein,target?.protein_g),fat:percentLabel(eaten.fat,target?.fat_g)};

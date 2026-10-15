@@ -191,7 +191,8 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - Inicio de la paciente: «Actividad reciente» y el bloque de ejercicio usan las actividades reales de la pantalla de Ejercicio (antes, en producción, quedaban vacíos porque la ficha no las trae).
 - El avance de la rutina en Inicio cuenta las series que la paciente cargó con «Registrar rutina» esa semana (antes quedaba siempre 0).
 - Diario «Registrar» suma «Registrar pasos». La nutri ve los pasos de la semana en «Registros y evolución» (hoy y promedio).
-- Sin migraciones. Sigue en 0: calorías quemadas (la paciente no tiene dónde cargarlas; hace falta decidir si las carga a mano). La meta de agua sigue fija en 8 vasos.
+- Calorías quemadas (decisión de Facundo, 15/10: «a mano»): «Registrar actividad» suma un campo opcional «Calorías quemadas»; Inicio y Progreso las suman al bloque «Quemadas» y la tabla de Ejercicio las muestra. Es un dato que declara la paciente, no una medición. Migración `20261015210000_activity_kcal` (columna nueva y función `log_patient_activity_with_kcal`; sin borrar nada). Hasta aplicarla, una actividad con calorías da error y sin calorías sigue igual.
+- La meta de agua sigue fija en 8 vasos.
 
 ## Lo que espera de Facundo
 
