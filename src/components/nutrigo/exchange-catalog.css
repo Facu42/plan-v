@@ -1,0 +1,34 @@
+/* Equivalencias: tarjetas, detalle y editor; reutiliza la base visual del catálogo de Alimentos. */
+.nv-pro .nv-main:has(.ec-catalog){grid-column:auto;width:100%;min-width:0}
+.ec-toolbar{display:grid;grid-template-columns:minmax(220px,2fr) minmax(140px,1fr) auto;gap:9px;align-items:center}
+.ec-toolbar input,.ec-toolbar select{height:40px;font-size:12px!important;padding-block:9px!important}
+.ec-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.ec-card{display:grid;gap:14px;width:100%;height:100%;text-align:left;font:inherit;color:var(--nv-ink);background:var(--nv-card);border:1px solid var(--nv-line);border-radius:16px;padding:18px;cursor:pointer;box-sizing:border-box;transition:border-color 150ms,background-color 150ms}
+.ec-card:hover{border-color:var(--nv-ink);background:var(--nv-accent-soft)}
+.ec-card:focus-visible{outline:2px solid var(--nv-ink);outline-offset:3px}
+.ec-card-head{display:flex;gap:12px;align-items:flex-start;min-width:0}
+.ec-card-icon{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:10px;background:var(--nv-accent-soft)}
+.ec-card-title{display:grid;gap:6px;justify-items:start;min-width:0}.ec-card-title strong{font-size:15px;line-height:1.3;overflow-wrap:anywhere}
+.ec-card-base{display:grid;gap:4px;padding:12px;border-radius:12px;background:var(--nv-surface,var(--nv-accent-soft));font-size:13px;overflow-wrap:anywhere}
+.ec-card-base small{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nv-muted)}
+.ec-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--nv-muted)}
+.ec-table tbody th small{display:block;font-size:10px;font-weight:400;color:var(--nv-muted);margin-top:2px}
+.ec-table tbody th{white-space:normal;min-width:180px;overflow-wrap:anywhere}
+.ec-table td:nth-child(2){text-align:left}
+.ec-base-row{background:var(--nv-accent-soft)}
+.ec-foods{list-style:none;margin:0;padding:0;display:grid;gap:0}.ec-foods li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--nv-line);font-size:13px}.ec-foods small{color:var(--nv-muted);font-size:11px}
+.ec-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:22px}.ec-actions .fc-hint{flex-basis:100%}
+.ec-secondary{background:var(--nv-card)!important;border:1px solid var(--nv-line)}
+.ec-archive p{font-size:13px;line-height:1.6}
+.ec-editor textarea{font:inherit;color:var(--nv-ink);background:var(--nv-card);border:1px solid var(--nv-line);border-radius:10px;padding:11px;width:100%;box-sizing:border-box;resize:vertical}
+.ec-editor :is(input,textarea,select):focus-visible{outline:2px solid var(--nv-ink);outline-offset:3px}
+.ec-wide{margin-top:14px;display:grid;gap:7px;font-size:12px}
+.ec-item-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.2fr) minmax(80px,.8fr) auto auto;gap:12px;align-items:end;margin:12px 0}
+.ec-item-row-plain{grid-template-columns:minmax(0,1fr) auto auto}
+.ec-link{font-size:11px;color:var(--nv-muted);align-self:center;white-space:nowrap}
+.ec-editor label{display:grid;gap:7px;font-size:12px;min-width:0}
+.ec-editor :is(input:not([type=checkbox])){font:inherit;color:var(--nv-ink);background:var(--nv-card);border:1px solid var(--nv-line);border-radius:10px;padding:11px;width:100%;box-sizing:border-box}
+.ec-editor .fc-checkbox{display:flex;align-items:center;gap:9px}
+@media(max-width:1000px){.ec-toolbar{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(max-width:600px){.ec-toolbar{grid-template-columns:1fr}.ec-grid{grid-template-columns:1fr}.ec-item-row,.ec-item-row-plain{grid-template-columns:minmax(0,1fr) minmax(70px,100px)}.ec-item-row>:first-child{grid-column:1 / -1}.ec-link,.ec-item-row>button{justify-self:start}}
+@media(prefers-reduced-motion:reduce){.ec-card{transition:none}}

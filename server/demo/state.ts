@@ -50,6 +50,10 @@ export class DemoStateFile {
     if (current.models?.models instanceof Map && !Object.prototype.hasOwnProperty.call(saved.domains, 'models')) {
       saved.domains.models = { models: new Map() };
     }
+    // Ampliación v1 conocida: el catálogo de equivalencias inicia vacío.
+    if (current.exchanges?.entries instanceof Map && !Object.prototype.hasOwnProperty.call(saved.domains, 'exchanges')) {
+      saved.domains.exchanges = { entries: new Map() };
+    }
     if (keys(current) !== keys(saved.domains)) throw new Error('La copia local tiene dominios diferentes; se conservó el archivo');
     // Validar todo antes de restaurar para no dejar un estado parcial.
     for (const [name, values] of Object.entries(current)) {

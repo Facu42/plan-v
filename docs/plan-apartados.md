@@ -375,3 +375,6 @@ las dos vistas restantes preparada sin abrir datos clínicos ni permisos globale
 al administrador. [Implementación, pruebas y criterios de escala](security/perfiles-consultorios-2026-10-09.md).
 Migración y ensayo Auth/PostgREST/advisors preparados. La migración
 `invoker_patient_profile_projections` va con esta publicación.
+
+## Equivalencias · 2026-10-10
+Listas de equivalentes y grupos de alimentos del dashboard profesional (web, escritorio), con listas de Sistema compartidas de sólo lectura y listas propias por consultorio. Migración escrita y probada en base descartable, sin aplicar en producción. Detalle, evidencia y lo no verificado: [equivalencias-vs-nutriboost-2026-10-10.md](equivalencias-vs-nutriboost-2026-10-10.md).

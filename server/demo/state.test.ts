@@ -17,6 +17,15 @@ describe('guardado de la simulación local',()=>{
     models.set('model',{title:'Modelo ficticio'});first.close();values.clear();models.clear();
     const second=new DemoStateFile(file,demo,domains);expect(values.get('existing')).toBe(1);expect(models.get('model')).toEqual({title:'Modelo ficticio'});second.close();
   }));
+  it('incorpora equivalencias vacías sin perder la copia anterior y las conserva al reiniciar',()=>temporary(file=>{
+    writeFileSync(file,serialize({version:1,domains:{test:{values:new Map([['existing',1]])}}}));
+    const values=new Map<string,number>(),entries=new Map<string,unknown>();
+    const domains=new Map<string,()=>Record<string,unknown>>([['test',()=>({values})],['exchanges',()=>({entries})]]);
+    const first=new DemoStateFile(file,demo,domains);
+    expect(values.get('existing')).toBe(1);expect(entries.size).toBe(0);
+    entries.set('lista',{name:'Lista ficticia'});first.close();values.clear();entries.clear();
+    const second=new DemoStateFile(file,demo,domains);expect(entries.get('lista')).toEqual({name:'Lista ficticia'});second.close();
+  }));
   it('amplía una copia anterior de recetas sin perder registros y conserva los nuevos favoritos al reiniciar',()=>temporary(file=>{
     const recipes=new Map([['recipe-1',{title:'Receta ficticia'}]]);
     const previous={ingredients:new Map(),recipes,versions:new Map(),lines:new Map(),assignments:new Map()};

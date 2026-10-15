@@ -17,6 +17,12 @@ describe('funciones presentes y previstas del consultorio',()=>{
     const available=renderToStaticMarkup(<ProfessionalModules selectedId="alimentos" onOpen={vi.fn()} />);
     expect(available).toContain('Disponible');expect(available).toContain('Abrir módulo');
   });
+  it('Equivalencias ya es un destino real, con su alcance pendiente declarado',()=>{
+    const m=PROFESSIONAL_MODULES.find(x=>x.id==='equivalencias')!;
+    expect(m.href).toBe('/crm/equivalencias');expect(m.current.length).toBeGreaterThan(0);
+    expect(isAllowedPage('pro','equivalencias')).toBe(true);expect(isAllowedPage('patient','equivalencias')).toBe(false);
+    expect(m.next.join(' ')).toContain('plan');
+  });
   it('ofrece todos los destinos futuros con estado explícito y sólo en CRM',()=>{
     const html=renderToStaticMarkup(<PlannedModulesNav onOpen={vi.fn()} />);
     for(const m of PROFESSIONAL_MODULES.filter(m=>!m.href))expect(html).toContain(m.title);
