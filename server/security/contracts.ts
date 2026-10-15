@@ -14,6 +14,7 @@ const PUBLIC_API_PATHS = new Set([
   '/api/auth/recover',
   '/api/ops/nutritionists',
   '/api/alcance',
+  '/api/public/communications/email-unsubscribe',
 ]);
 
 export function resolveRequestAuth(input: {

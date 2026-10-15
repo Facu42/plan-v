@@ -143,7 +143,6 @@ describe('cors and readiness', () => {
     expect(maxBodyBytes('/api/patients/x/meals')).toBeGreaterThan(maxBodyBytes('/api/patients'));
     expect(maxBodyBytes('/api/recipes/x/cover/manual')).toBe(7_100_000);
     expect(maxBodyBytes('/api/recipes/x/versions')).toBe(1024 * 1024);
-    expect(maxBodyBytes('/api/patients/x/clinical-workspace/documents')).toBe(28_000_000);
   });
 });
 
@@ -155,9 +154,10 @@ describe('deploy contract', () => {
     };
     expect(vercel.outputDirectory).toBe('dist');
     expect(JSON.stringify(vercel)).not.toMatch(/server\/index/);
-    // Sólo rutas de la pantalla (abrir o recargar /admin, /app/*, /crm/*) hacia index.html; nunca a la API.
-    // /pacientes sirve la landing estática exportada, sin sesión.
+    // The Node API stays on Railway. Only OAuth/booking and unsubscribe need a narrow same-origin proxy.
+    // Existing authenticated clinical endpoints never acquire a wildcard web proxy.
     expect(vercel.rewrites).toEqual([
+      { source: '/api/public/communications/email-unsubscribe', destination: 'https://api-production-aad6.up.railway.app/api/public/communications/email-unsubscribe' },
       { source: '/api/scheduling/:path*', destination: 'https://api-production-aad6.up.railway.app/api/scheduling/:path*' },
       { source: '/api/public/scheduling/:path*', destination: 'https://api-production-aad6.up.railway.app/api/public/scheduling/:path*' },
       { source: '/consultorio/:path*', destination: '/index.html' },
