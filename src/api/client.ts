@@ -339,7 +339,7 @@ export const api = {
       body: JSON.stringify({ reader }),
     }),
 
-  logActivity: (patientId: string, data: { client_id?: string; activity: string; duration_minutes: number; intensity: 'suave' | 'moderada' | 'intensa'; note?: string }) =>
+  logActivity: (patientId: string, data: { client_id?: string; activity: string; duration_minutes: number; intensity: 'suave' | 'moderada' | 'intensa'; note?: string; kcal?: number }) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/activities`, {
       method: 'POST',
       body: JSON.stringify(data),

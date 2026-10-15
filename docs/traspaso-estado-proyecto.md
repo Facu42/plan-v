@@ -187,6 +187,21 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - App para tiendas (Android primero, empaquetando la web), calidad en producción, publicidad paga y
   página pública con precios (espera el precio). Plan: `docs/plan-apartados.md`.
 
+## Mensajes al instante en la app de la paciente (2026-10-15)
+
+Antes la paciente solo veía un mensaje nuevo de su nutri si recargaba la página. Ahora la app trae la ficha
+sola mientras está a la vista: cada 15 s con «Mensajes» abierto (igual que el consultorio) y cada 60 s en las
+demás pantallas, así la campanita avisa del mensaje. Al volver a la pestaña actualiza enseguida. Con la pestaña
+oculta no pide nada. Código: `src/features/nutrigo/use-live-refresh.ts` (con pruebas) y `PatientApp.tsx`.
+No toca la base ni el diseño. Tiempo real de verdad (sin esperar 15 s) necesitaría Supabase Realtime: queda para más adelante.
+
+## Actividad, rutina y pasos de la paciente (2026-10-15)
+- Inicio de la paciente: «Actividad reciente» y el bloque de ejercicio usan las actividades reales de la pantalla de Ejercicio (antes, en producción, quedaban vacíos porque la ficha no las trae).
+- El avance de la rutina en Inicio cuenta las series que la paciente cargó con «Registrar rutina» esa semana (antes quedaba siempre 0).
+- Diario «Registrar» suma «Registrar pasos». La nutri ve los pasos de la semana en «Registros y evolución» (hoy y promedio).
+- Calorías quemadas (decisión de Facundo, 15/10: «a mano»): «Registrar actividad» suma un campo opcional «Calorías quemadas»; Inicio y Progreso las suman al bloque «Quemadas» y la tabla de Ejercicio las muestra. Es un dato que declara la paciente, no una medición. Migración `20261015210000_activity_kcal` (columna nueva y función `log_patient_activity_with_kcal`; sin borrar nada). **Aplicada en producción el 15/10** con la frase de Facundo; el historial de la base la anota como `20261015173356` (es repetible).
+- La meta de agua sigue fija en 8 vasos.
+
 ## Lo que espera de Facundo
 
 - Probar con las cuentas de prueba (ver abajo): panel, Cobranzas, Pagos, calorías.
@@ -244,3 +259,6 @@ Etapa 1 del plan (`docs/producto/06-plan-implementacion.md`, puntos 6 y 7, sin c
 
 ## Cobro a nutricionistas: aviso al vencer, solo lectura a mano (2026-10-15)
 Parte 3 de `docs/cobros-y-panel.md`. Facundo eligió (15/10) que **vencer no corte nada solo**: la nutricionista vencida sigue usando todo y ve una tarjeta amarilla «Servicio vencido» con la fecha y el precio (`ServiceNotice.tsx`, lee `GET /api/me/service`, sin la nota interna); antes ve «Tu prueba termina pronto» o «Tu servicio vence pronto» (7 días antes). Solo lectura únicamente cuando Facundo la **suspende** desde su panel (`/admin`, «Excepción» → «Suspender»): sigue viendo todo, pero cualquier escritura responde 403 con un mensaje claro (`server/service/own-service.ts`). Quedan abiertas la sesión, `/api/me`, el panel del administrador y los avisos; las pacientes nunca se frenan; si no se puede consultar el estado, deja pasar. El estado se recuerda un minuto y se borra cuando el administrador cambia algo. Sin migraciones.
+
+## Próximas acciones de la nutricionista (2026-10-15)
+La bandeja «Tu consultorio, hoy» suma dos tipos de pendiente: **Cuotas vencidas** (cuota impaga con el vencimiento pasado y sin aviso de pago de la paciente; si avisó, queda «Aviso de pago por confirmar»; abre Cobranzas) y **Sin registros hace 7 días** (paciente con acceso a la app, dada de alta hace 7 días o más, sin comidas ni hábitos declarados en 7 días; dice cuántos días pasaron, o «en los últimos 30 días»; abre Mensajes). Es un aviso para escribirle, nunca un juicio clínico. El servidor solo lee fechas de comidas y hábitos de los últimos 30 días, sin contenido. Código: `server/crm/repository.ts` (con pruebas en `work-queue.test.ts` y en Postgres descartable). Sin migraciones.

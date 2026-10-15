@@ -10,8 +10,9 @@ import './professional-workspace.css';
 export const WORK_LABELS: Record<CrmWorkKind, string> = {
   intake: 'Ingresos por revisar', meal: 'Comidas por revisar', ai_menu: 'Propuestas de IA', message: 'Mensajes sin leer',
   payment: 'Pagos por confirmar', appointment: 'Consultas de hoy', record: 'Registros por revisar',
+  fee_overdue: 'Cuotas vencidas', quiet: 'Sin registros hace 7 días',
 };
-const STATUS_LABELS: Record<string, string> = { succeeded: 'Lista para revisar', failed: 'Requiere reintento', stale: 'Contexto actualizado', queued: 'En espera', running: 'Generando', submitted: 'Enviado', pending_review: 'Pendiente de revisión', reported: 'Por confirmar', unread: 'Sin leer', scheduled: 'Programada' };
+const STATUS_LABELS: Record<string, string> = { succeeded: 'Lista para revisar', failed: 'Requiere reintento', stale: 'Contexto actualizado', queued: 'En espera', running: 'Generando', submitted: 'Enviado', pending_review: 'Pendiente de revisión', reported: 'Por confirmar', unread: 'Sin leer', scheduled: 'Programada', overdue: 'Vencida', quiet: 'Escribile para retomar' };
 
 export function WorkQueueList({ items, onOpen }: { items: CrmWorkItem[]; onOpen: (href: string) => void }) {
   return <ul className="pw-work-list">{items.map((item) => <li key={item.id}>
