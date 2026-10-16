@@ -92,6 +92,19 @@ describe('consultas SQL: dos consultorios, privacidad y recuperación',()=>{
   const tid=crypto.randomUUID();await actor(a,'select public.consultation_enqueue_chunk($1,$2,$3)',[patient,id,{client_id:tid,index:3,duration_seconds:1,audio_sha256:'a'.repeat(64),consent_version:'ai_consultation.v1'}]);const token=crypto.randomUUID();await db.query("update public.consultation_tasks set status='running',run_token=$2,lease_until=now()+interval '2 minutes' where id=$1",[tid,token]);await db.query('select public.consultation_complete_task($1,$2,$3)',[tid,token,'Último segmento']);expect((await db.query("select id from public.consultation_tasks where session_id=$1 and kind='summary'",[id])).rows).toHaveLength(1);
   await db.query("update public.consultation_tasks set status='succeeded' where session_id=$1 and kind='summary'",[id]);
  });
+ it('no pide un resumen cuando todos los segmentos contienen sólo silencio',async()=>{
+  const id=crypto.randomUUID();
+  await command({action:'start',id,source:'upload',recording_version:'consultation_recording.v1'});
+  for(let index=0;index<2;index++){
+   const taskId=crypto.randomUUID(),token=crypto.randomUUID();
+   await actor(a,'select public.consultation_enqueue_chunk($1,$2,$3)',[patient,id,{client_id:taskId,index,duration_seconds:1,audio_sha256:'a'.repeat(64),consent_version:'ai_consultation.v1'}]);
+   await db.query("update public.consultation_tasks set status='running',run_token=$2,lease_until=now()+interval '2 minutes' where id=$1",[taskId,token]);
+   await db.query('select public.consultation_complete_task($1,$2,$3)',[taskId,token,'']);
+  }
+  await command({action:'finish',id,expected_revision:1,interrupted:false,expected_chunks:2});
+  expect((await db.query("select id from public.consultation_tasks where session_id=$1 and kind='summary'",[id])).rows).toHaveLength(0);
+  expect((await db.query<{duration_seconds:number}>("select duration_seconds from public.consultation_sessions where id=$1",[id])).rows[0].duration_seconds).toBe(2);
+ });
  it('persiste etapas privadas con CAS y liquida respuesta en la misma transacción',async()=>{
   await db.exec(await readFile(new URL('../../supabase/migrations/20261011140000_clinical_ai_budget.sql',import.meta.url),'utf8'));
   const id=crypto.randomUUID();await command({action:'start',id,source:'manual'});await command({action:'draft',id,expected_revision:1,draft:'',transcript:'Texto ficticio'});await command({action:'summarize',id,expected_revision:2,consent_version:'ai_consultation.v1'});

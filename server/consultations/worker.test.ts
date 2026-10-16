@@ -13,6 +13,26 @@ function summary(){const s=commandMemory(scope,{action:'start',id:'session',sour
 beforeEach(()=>{resetConsultationMemory();memoryAudio.clear();state.allowed=true;});
 afterEach(()=>{configureConsultationProcessing(undefined);});
 describe('worker consultas: no emula IA y revalida consentimiento/lease/revisión',()=>{
+ it('un tramo sin habla se completa y permite resumir los demás segmentos',async()=>{
+  commandMemory(scope,{action:'start',id:'session',source:'upload'});
+  for(let index=0;index<2;index++){
+   const task:ConsultationTask={id:`chunk-${index}`,request_key:`request-${index}`,session_id:'session',patient_id:'patient',nutritionist_id:'nutri',requested_by:'user',kind:'chunk',revision:1,index,status:'queued',audio_path:`audio-${index}.wav`,expires_at:new Date(Date.now()+86400000).toISOString(),duration_seconds:1,audio_sha256:null,run_token:null,lease_until:null,attempts:0,text:'',error:null,consent_version:'ai_consultation.v1'};
+   tasks.set(task.id,task);memoryAudio.set(task.audio_path!,encodeConsultationWav(new Float32Array(16000),16000));
+  }
+  commandMemory(scope,{action:'finish',id:'session',expected_revision:1,interrupted:false,expected_chunks:2});
+  const summarize=vi.fn(async()=>({summary:'Acuerdo revisado.'}));
+  configureConsultationProcessing({transcribeClinicalAudio:vi.fn().mockResolvedValueOnce({text:'',segments:[]}).mockResolvedValueOnce({text:'Se acordó registrar las comidas.',segments:[]}),summarizeClinicalText:summarize});
+  await runPendingConsultations();
+  expect(tasks.get('chunk-0')!.status).toBe('succeeded');
+  expect(sessions.get('session')!.incomplete).toBe(false);
+  await runPendingConsultations();
+  expect(summarize).toHaveBeenCalledWith(expect.objectContaining({text:expect.stringContaining('Se acordó registrar las comidas.')}));
+  expect(sessions.get('session')!.draft).toBe('Acuerdo revisado.');
+ });
+ it('un resumen vacío sigue siendo un fallo y conserva las notas privadas',async()=>{
+  const task=summary();configureConsultationProcessing({transcribeClinicalAudio:vi.fn(),summarizeClinicalText:async()=>({summary:' '})});
+  await runPendingConsultations();expect(task.status).toBe('failed');expect(sessions.get('session')!.draft).toBe('Nota privada');
+ });
  it('resume textos completos mayores a100KB por etapas persistidas sin exceder60KB',async()=>{
   commandMemory(scope,{action:'start',id:'session',source:'manual'});
   const transcript='Antecedente ficticio con ñ. '.repeat(6000);
