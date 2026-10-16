@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { foodApi, type FoodSearchPage } from '../../api/foods';
-import { foodInputSchema, NUTRIENTS, scaleFoodNutrients, type Food, type FoodInput, type NutrientKey } from '../../types/foods';
+import { foodQuantityUnit, SARA2_SOURCE, foodInputSchema, NUTRIENTS, scaleFoodNutrients, type Food, type FoodInput, type NutrientKey } from '../../types/foods';
 import { NvBadge, NvButton, NvState } from './primitives';
 import { Icon } from '../shared/Icon';
 import { FigmaRecordDialog } from './FigmaPatientFront';
@@ -8,6 +8,7 @@ import { type CatalogFilters, type CatalogOrder } from './food-catalog-model';
 import { canLeaveWorkspace, useUnsavedChanges } from './unsaved-changes';
 import './food-catalog.css';
 import { ExternalFoodCatalog } from './ExternalFoodCatalog';
+import { FoodComposition } from './FoodComposition';
 
 const fmt = (value: number | null, unit = '') => value === null ? 'Sin dato' : `${new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(value)}${unit ? ` ${unit}` : ''}`;
 const decimal = (value: string) => value.trim() === '' ? null : Number(value.trim().replace(',', '.'));
@@ -57,6 +58,7 @@ function FoodEditor({ food, kind, onCancel, onSaved }: { food?: Food; kind: Food
   </form>;
 }
 function FoodDetail({ food, onEdit }: { food: Food; onEdit: () => void }) {
+  const nativeUnit=foodQuantityUnit(food);
   const [portion, setPortion] = useState('grams');
   const [quantity, setQuantity] = useState('100');
   const factor = portion === 'grams' ? 1 : food.portions[Number(portion)]?.grams;
@@ -66,8 +68,9 @@ function FoodDetail({ food, onEdit }: { food: Food; onEdit: () => void }) {
   const nutrients = valid ? scaleFoodNutrients(food.nutrients, grams) : null;
   return <section className="fc-detail" aria-label={`Detalle de ${food.name}`}><header><NvBadge>{food.owner_id ? 'Propio' : 'Plataforma'}</NvBadge><p>{[food.brand, food.category].filter(Boolean).join(' · ') || (food.kind === 'supplement' ? 'Suplemento' : 'Alimento')}</p></header>
     <div className="fc-source"><span className="fc-eyebrow">FUENTE DECLARADA</span><p>{food.source}</p>{food.reference && <small>{food.reference}</small>}</div>
-    <h3>Calculá una porción</h3><div className="fc-fields"><label>Medida<select value={portion} onChange={e => { setPortion(e.target.value); setQuantity(e.target.value === 'grams' ? '100' : '1'); }}><option value="grams">Gramos</option>{food.portions.map((p, i) => <option key={i} value={i}>{p.name} ({fmt(p.grams, 'g')})</option>)}</select></label><label>Cantidad<input inputMode="decimal" value={quantity} onChange={e => setQuantity(e.target.value)} /></label></div>
-    <p aria-live="polite" className="fc-hint">{valid ? `Equivale a ${fmt(grams, 'g')}.` : 'Ingresá una cantidad entre 0 y 100.000 gramos.'}</p><dl className="fc-nutrients">{NUTRIENTS.map(([key, label, unit]) => <div key={key}><dt>{label}</dt><dd>{nutrients ? fmt(nutrients[key], unit) : '—'}</dd></div>)}</dl>
+    <h3>Calculá una porción</h3><div className="fc-fields"><label>Medida<select value={portion} onChange={e => { setPortion(e.target.value); setQuantity(e.target.value === 'grams' ? '100' : '1'); }}><option value="grams">{nativeUnit==='ml'?'Mililitros':'Gramos'}</option>{food.portions.map((p, i) => <option key={i} value={i}>{p.name} ({fmt(p.grams, 'g')})</option>)}</select></label><label>Cantidad<input inputMode="decimal" value={quantity} onChange={e => setQuantity(e.target.value)} /></label></div>
+    <p aria-live="polite" className="fc-hint">{valid ? `Cantidad: ${fmt(grams, nativeUnit)}.` : `Ingresá una cantidad entre 0 y 100.000 ${nativeUnit}.`}</p><dl className="fc-nutrients">{NUTRIENTS.map(([key, label, unit]) => <div key={key}><dt>{key==='carbs'&&food.composition?'Carbohidratos disponibles':label}</dt><dd>{nutrients ? fmt(nutrients[key], unit) : '—'}</dd></div>)}</dl>
+    {food.composition&&<FoodComposition id={food.id}/>}
     <p className="fc-hint">Los valores sin cargar se muestran como «Sin dato». La fuente y sus unidades se conservan al calcular una porción.</p>{food.owner_id && <NvButton onClick={onEdit}>Editar alimento</NvButton>}
   </section>;
 }
@@ -94,7 +97,7 @@ export function FoodCatalog() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [refresh, setRefresh] = useState(0);
-  const [filters, setFilters] = useState<CatalogFilters>({ kind: 'food', query: '', scope: 'all', source: '', category: '', order: 'name-asc' });
+  const [filters, setFilters] = useState<CatalogFilters>({ kind: 'food', query: '', scope: 'all', source: SARA2_SOURCE, category: '', order: 'name-asc' });
   const [columns, setColumns] = useState<NutrientKey[]>(NUTRIENTS.slice(0, 5).map(([key]) => key));
   const [page,setPage]=useState(0);
   const [result,setResult]=useState<FoodSearchPage|null>(null);
@@ -131,10 +134,10 @@ export function FoodCatalog() {
     requestAnimationFrame(() => { (openerRef.current?.isConnected ? openerRef.current : addRef.current)?.focus(); });
   }
   function changeTab(kind: Food['kind']) {
-    setFilters(current => ({ ...current, kind, source: '', category: '' }));
+    setFilters(current => ({ ...current, kind, category: '' }));
   }
   return <section className="fc-catalog" aria-label="Catálogo de alimentos">
-    <header className="fc-heading"><div><span className="fc-eyebrow">PLAN DE ALIMENTACIÓN</span><h1>Alimentos</h1><p>Alimentos y suplementos, con valores por 100 g.</p></div>
+    <header className="fc-heading"><div><span className="fc-eyebrow">PLAN DE ALIMENTACIÓN</span><h1>Alimentos</h1><p>SARA 2 para Argentina. Valores por 100 g o 100 ml, según la fuente.</p></div>
       <button ref={addRef} type="button" className="nv-button" disabled={loading || Boolean(error)} onClick={() => openEditor()}><Icon name="plus" size={16} />Agregar alimento</button>
     </header>
     <div className="fc-stats" aria-label="Resumen del catálogo" aria-busy={loading}>
@@ -162,14 +165,14 @@ export function FoodCatalog() {
       </CatalogMenu>
       <CatalogMenu label="Columnas"><p className="fc-hint">Elegí los nutrientes que querés comparar.</p>{NUTRIENTS.map(([key, label, unit]) => <label className="fc-checkbox" key={key}><input type="checkbox" checked={columns.includes(key)} onChange={event => setColumns(current => event.target.checked ? [...current, key] : current.filter(column => column !== key))} />{label} ({unit})</label>)}</CatalogMenu>
     </div>
-    <div className="fc-results-meta"><p aria-live="polite" className="fc-hint">{loading ? 'Cargando catálogo…' : error ? 'Catálogo no disponible' : `${result?.total??0} ${result?.total === 1 ? 'resultado' : 'resultados'} · valores por 100 g`}</p>{hasFilters && <button type="button" className="fc-text-button" onClick={clearFilters}>Limpiar filtros</button>}</div>
+    <div className="fc-results-meta"><p aria-live="polite" className="fc-hint">{loading ? 'Cargando catálogo…' : error ? 'Catálogo no disponible' : `${result?.total??0} ${result?.total === 1 ? 'resultado' : 'resultados'} · base de 100 g o ml indicada por alimento`}</p>{hasFilters && <button type="button" className="fc-text-button" onClick={clearFilters}>Limpiar filtros</button>}</div>
     <div id="fc-results" role="tabpanel" aria-labelledby={`fc-tab-${filters.kind}`}>
       {loading ? <NvState kind="loading" title="Cargando alimentos…" description="Estamos buscando tu catálogo." /> : error ? <NvState kind="error" title="No pudimos cargar los alimentos" description={error} action={<NvButton onClick={() => setRefresh(value => value + 1)}>Reintentar</NvButton>} /> : shown.length ? <>
         <div className="fc-table-wrap" tabIndex={0} aria-label="Tabla de alimentos, desplazable si mostrás más columnas">
-          <table className="fc-table"><caption className="fc-sr-only">{filters.kind === 'food' ? 'Alimentos' : 'Suplementos'} del consultorio. Todos los valores corresponden a 100 gramos.</caption>
+          <table className="fc-table"><caption className="fc-sr-only">{filters.kind === 'food' ? 'Alimentos' : 'Suplementos'} del consultorio. Cada registro indica su base de 100 g o 100 ml.</caption>
             <thead><tr><th scope="col">Alimento</th>{nutrients.map(([key, label, unit]) => <th key={key} scope="col">{label}<small>{unit}</small></th>)}</tr></thead>
             <tbody>{shown.map(food => <tr key={food.id}>
-              <th scope="row"><button type="button" className="fc-row-open" aria-label={`Ver ${food.name}`} onClick={event => { openerRef.current = event.currentTarget; setSelected(food); }}><span className="fc-row-name">{food.name}</span><span className="fc-row-source" title={food.source}>{food.source}</span><span className="fc-row-origin">{food.owner_id === null ? 'Plataforma' : 'Propio'}</span><span className="fc-row-secondary">{[food.brand, food.category].filter(Boolean).join(' · ')}</span></button></th>
+              <th scope="row"><button type="button" className="fc-row-open" aria-label={`Ver ${food.name}`} onClick={event => { openerRef.current = event.currentTarget; setSelected(food); }}><span className="fc-row-name">{food.name}</span><span className="fc-row-source" title={food.source}>{food.source} · 100 {foodQuantityUnit(food)}{food.composition?' · carbohidratos disponibles':' · carbohidratos según fuente'}</span><span className="fc-row-origin">{food.owner_id === null ? 'Plataforma' : 'Propio'}</span><span className="fc-row-secondary">{[food.brand, food.category].filter(Boolean).join(' · ')}</span></button></th>
               {nutrients.map(([key]) => <td key={key}>{fmt(food.nutrients[key])}</td>)}
             </tr>)}</tbody>
           </table>

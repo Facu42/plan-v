@@ -175,6 +175,7 @@ async function buildContext(nutritionistId: string, input: AiJobEnqueueInput, pe
       return {
         id: recipe.id, version: version.version, title: version.title ?? recipe.title,
         yield_portions: version.yield_portions, steps: version.steps,
+        carbohydrates: version.catalog_recipe?.carbohydrates,
         ingredients: version.ingredients.map(({ name, quantity, unit }) => ({ name, quantity, unit })),
         nutrition: version.nutrition ?? (declared.success && version.nutrient_source ? {
           origin: version.nutrient_source.startsWith('estimacion_ia.') || version.nutrient_source.startsWith('propuesta_ia.') ? 'ai_estimate' as const : 'declared' as const,

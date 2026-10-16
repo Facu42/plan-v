@@ -296,7 +296,7 @@ function versionItems(versionId: string): PlanItemView[] {
 
 function summarizeView(view: PlanItemView[], target?: MenuNutritionTarget, period?: { period_start?: unknown; period_end?: unknown }) {
   return summarizeMenuNutrition(view, target ?? null, view.flatMap((item) => item.recipe_id && item.recipe_version ? [{
-    id: item.recipe_id, version: item.recipe_version, nutrition: item.recipe?.nutrition ?? null,
+    id: item.recipe_id, version: item.recipe_version, nutrition: item.recipe?.nutrition ?? null, carbohydrates: item.recipe?.catalog_recipe?.carbohydrates,
   }] : []), period?.period_start && period.period_end ? { period_start: String(period.period_start).slice(0, 10), period_end: String(period.period_end).slice(0, 10) } : undefined);
 }
 
