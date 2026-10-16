@@ -118,3 +118,13 @@ export interface ServiceTestAccountsResult {
   patient: { email: string };
   created: boolean;
 }
+
+/** Lo que la nutricionista ve de su propio servicio (sin la nota interna del administrador). */
+export interface OwnService {
+  state: import('../service').ServiceState;
+  until: string | null;
+  days_left: number | null;
+  monthly_price: number | null;
+  /** Vencido hace más de la gracia o suspendido: ve todo pero no puede cargar ni cambiar nada. */
+  read_only: boolean;
+}

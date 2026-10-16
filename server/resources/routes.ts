@@ -7,6 +7,7 @@ import { getPatient } from '../store.js';
 import { toPatientSelfView } from '../security/contracts.js';
 import { favoriteInputSchema, resourceSlugSchema } from '../../src/types/resources.js';
 import * as repo from './repository.js';
+import { notifyPatientPush } from '../push/push.js';
 
 async function body<T>(c: Context, schema: z.ZodType<T>, fallback: string): Promise<T> {
   const raw = await c.req.text();
@@ -99,6 +100,7 @@ export function registerResourceRoutes(app: Hono) {
     const result = await repo.assignEditorialResource(input.resource_id, input.patient_ids, persistent, professional, nutritionistId);
     const patients = persistent ? await Promise.all(input.patient_ids.map(id => sb.sbGetPatientById(id, 'professional'))) : result.patients;
     if (patients.some(patient => !patient)) throw new repo.CareError(503, 'Las asignaciones se guardaron, pero no se pudo recuperar la ficha. Recargá para comprobarlas.');
+    if (persistent && result.assigned_count > 0 && result.existing_count === 0) input.patient_ids.forEach(id => notifyPatientPush(id, 'resource'));
     return c.json({
       patients,
       assigned_count: result.assigned_count,

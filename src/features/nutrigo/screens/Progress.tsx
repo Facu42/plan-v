@@ -12,9 +12,9 @@ import { dateLabel, descendants, EmptyState, errorText, formatNumber, leaf, obje
 import { attachmentHref } from './message-format';
 import { burnedKcalOn, dayOfIso, cleanAmount, litresLabel, percentLabel, safePercent } from './home-values';
 import { PatientGoalCard } from '../PatientGoalCard';
+import { waterGoalOf } from '../../../types/water';
 
 /** Un vaso son 250 ml. Plan V no guarda una meta de agua: los porcentajes usan la referencia general de 8 vasos (2 L), igual que en Inicio. */
-const WATER_GOAL_GLASSES = 8;
 /** El gráfico de descanso va de 0 a 10 horas (las cinco marcas del archivo). */
 const SLEEP_SCALE_MINUTES = 600;
 const SLEEP_STAGE_PX = 161;
@@ -125,6 +125,7 @@ export function NutrigoProgress({ patient, onNavigate, onSignOut, onRecord, onHy
   const today = calorieDays[calorieDays.length - 1];
   const scale = Math.max(2000, Math.ceil(Math.max(target ?? 0, ...calorieDays.flatMap(day => [day.eaten, day.burned])) / 500) * 500);
   const sleepDays = week.slice(-5).map(day => ({ ...day, sleepMinutes: cleanAmount(day.sleepMinutes) }));
+  const waterGoal = waterGoalOf({ water_goal_glasses: patient.waterGoal });
   const waterDays = week.slice(-7).map(day => ({ ...day, hydration: cleanAmount(day.hydration) ?? 0 }));
   const waterTotal = waterDays.reduce((sum, day) => sum + day.hydration, 0);
   const waterAverage = waterDays.length ? waterTotal / waterDays.length : 0;
@@ -299,9 +300,9 @@ export function NutrigoProgress({ patient, onNavigate, onSignOut, onRecord, onHy
       if (columns.includes(child)) {
         const day = waterDays[columns.indexOf(child) - (columns.length - waterDays.length)];
         const glasses = day?.hydration ?? 0;
-        const pct = safePercent(glasses, WATER_GOAL_GLASSES) ?? 0;
+        const pct = safePercent(glasses, waterGoal) ?? 0;
         return { children: inner(child, grand => {
-          if (isNamed(grand, 'Amount')) return { props: { style: { flex: `${100 - pct} 1 0%`, paddingTop: 0 } }, children: inner(grand, part => leaf(part) ? { text: percentLabel(glasses, WATER_GOAL_GLASSES) } : undefined) };
+          if (isNamed(grand, 'Amount')) return { props: { style: { flex: `${100 - pct} 1 0%`, paddingTop: 0 } }, children: inner(grand, part => leaf(part) ? { text: percentLabel(glasses, waterGoal) } : undefined) };
           if (isNamed(grand, 'Bar 1')) return { props: { style: { flex: `${pct} 1 0%` } } };
           if (leaf(grand) && /^\d+\.\d L$/.test(sourceText(grand))) return { text: day ? litres(glasses) : '' };
           if (is(grand, 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')) return { text: day ? weekday(day.date) : '' };

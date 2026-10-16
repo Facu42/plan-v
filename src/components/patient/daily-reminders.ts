@@ -1,4 +1,5 @@
 import type { MealLog, Patient } from '../../types';
+import { waterGoalOf } from '../../types/water';
 
 export type DailyReminderKind = 'comida' | 'agua' | 'consulta' | 'sueno';
 export type DailyReminderState = 'done' | 'perdido' | 'ahora' | 'proximo';
@@ -12,7 +13,7 @@ export type DailyReminder = {
   state: DailyReminderState;
 };
 
-export type RemindersInput = Pick<Patient, 'todayPlan' | 'meal_logs' | 'hydration' | 'sleep_minutes' | 'appointment'>;
+export type RemindersInput = Pick<Patient, 'todayPlan' | 'meal_logs' | 'hydration' | 'sleep_minutes' | 'appointment'> & Partial<Pick<Patient, 'water_goal_glasses'>>;
 
 function localDateId(date: Date): string {
   const year = date.getFullYear();
@@ -97,12 +98,13 @@ export function buildDailyReminders(input: RemindersInput, now = new Date()): Da
   });
   timed.sort((a, b) => minutesAt(a.time ?? '23:59') - minutesAt(b.time ?? '23:59'));
 
-  if (input.hydration < 8) {
+  const waterGoal = waterGoalOf(input);
+  if (input.hydration < waterGoal) {
     timed.push({
       id: 'agua',
       kind: 'agua',
       title: 'agua',
-      detail: `${input.hydration} de 8 vasos registrados`,
+      detail: `${input.hydration} de ${waterGoal} vasos registrados`,
       time: null,
       state: 'ahora',
     });
