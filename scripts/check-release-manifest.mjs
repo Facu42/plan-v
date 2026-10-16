@@ -10,8 +10,10 @@ const APPLIED_BASELINE={
  '20261015210000_activity_kcal.sql':{version:'20261015210000',observedAppliedVersion:'20261015173356',observedAppliedName:'activity_kcal'},
  '20261015090000_patient_views_read_only.sql':{version:'20261015090000',observedAppliedVersion:'20261014215529',observedAppliedName:'patient_views_read_only'},
  '20261015100000_habit_symptoms.sql':{version:'20261015100000',observedAppliedVersion:'20261014215543',observedAppliedName:'habit_symptoms'},
+ '20261015200000_push_subscriptions.sql':{version:'20261015200000',observedAppliedVersion:'20261015163006',observedAppliedName:'push_subscriptions'},
+ '20261016090000_water_goal.sql':{version:'20261016090000',observedAppliedVersion:'20261016090000',observedAppliedName:'water_goal'},
 };
-const BASELINE_MAIN='9c568541a4c72633bfdb65090a231c3724a3588d',BASELINE_OBSERVED_ON='2026-10-15';
+const BASELINE_MAIN='ae19e5c49af07cb7451a5aff5048850051d6a909',BASELINE_OBSERVED_ON='2026-10-16';
 const defaultRoot=fileURLToPath(new URL('../',import.meta.url));
 const filename=/^(\d{14})_[A-Za-z0-9_-]+\.sql$/;
 /** UTF-8 is validated; only CRLF/CR become LF. BOM, whitespace and final newline are retained. */
@@ -39,7 +41,7 @@ export async function verifyReleaseManifest({root=defaultRoot}={}){
   if(!entry.isFile()||entry.isSymbolicLink())throw new Error(`Migration must be a regular file: ${entry.name}`);
   actual.push(entry.name);
  }
- actual.sort();const files=new Set(),versions=new Set(),pendingVersions=[],baselineVersions=[],appliedVersions=new Set(),appliedNames=new Set();
+ actual.sort();const files=new Set(),versions=new Set(),pendingVersions=[],baselineVersions=[],appliedVersions=new Set(),appliedNames=new Set(),selfAliases=new Set();
  function entry(item,baseline){
   if(!item||typeof item.file!=='string'||typeof item.version!=='string'||typeof item.sha256!=='string')throw new Error('Invalid migration entry.');
   const match=filename.exec(item.file);
@@ -60,13 +62,14 @@ export async function verifyReleaseManifest({root=defaultRoot}={}){
   if(!expected||Object.entries(expected).some(([key,value])=>item[key]!==value))throw new Error('Invalid baseline migration identity or observed applied alias.');
   if(previous&&item.version<=previous)throw new Error('Baseline migrations must be in increasing version order.');
   if(appliedVersions.has(item.observedAppliedVersion)||appliedNames.has(item.observedAppliedName))throw new Error('Duplicate baseline observed applied alias.');
+  if(item.observedAppliedVersion===item.version)selfAliases.add(item.version);
   previous=item.version;baselineVersions.push(item.version);appliedVersions.add(item.observedAppliedVersion);appliedNames.add(item.observedAppliedName);
  }
  // The local inventory, not optional manifest metadata, requires known applied files to stay in baseline.
  if(manifest.baselineMigrations.length||manifest.mainBase===BASELINE_MAIN||actual.some(name=>Object.hasOwn(APPLIED_BASELINE,name))){
   if(manifest.baselineMigrations.length!==Object.keys(APPLIED_BASELINE).length||manifest.mainBase!==BASELINE_MAIN||manifest.observedOn!==BASELINE_OBSERVED_ON)throw new Error('Invalid baseline MAIN reference, observed date or exact migration inventory.');
  }
- if([...appliedVersions].some(version=>versions.has(version)))throw new Error('Baseline observed alias overlaps a local migration version.');
+ if([...appliedVersions].some(version=>versions.has(version)&&!selfAliases.has(version)))throw new Error('Baseline observed alias overlaps a local migration version.');
  const missing=[...files].filter(name=>!actual.includes(name)),extra=actual.filter(name=>!files.has(name));
  if(missing.length||extra.length)throw new Error(`Release migration inventory mismatch; missing: ${missing.join(', ')||'none'}; extra: ${extra.join(', ')||'none'}.`);
  for(const item of [...manifest.migrations,...manifest.baselineMigrations]){

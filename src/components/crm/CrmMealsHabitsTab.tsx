@@ -1,6 +1,7 @@
 import type { MealLog, Patient } from '../../types';
 import { Icon, MacroBar } from '../shared/Icon';
 import { groupMealLogsForReview } from './meal-history';
+import { waterGoalOf } from '../../types/water';
 
 type Props = {
   patient: Patient;
@@ -58,6 +59,7 @@ function lastWeekHabits(patient: Patient) {
 export function CrmMealsHabitsTab({ patient, onReviewMeal }: Props) {
   const { pending, reviewed } = groupMealLogsForReview(patient.meal_logs);
   const week = lastWeekHabits(patient);
+  const waterGoal = waterGoalOf(patient);
   const recordedSleep = week.filter((day) => day.sleepMinutes !== null);
   const sleepAverage = recordedSleep.length > 0
     ? Math.round(recordedSleep.reduce((sum, day) => sum + (day.sleepMinutes ?? 0), 0) / recordedSleep.length)
@@ -72,15 +74,15 @@ export function CrmMealsHabitsTab({ patient, onReviewMeal }: Props) {
             <Icon name="drop" size={16} />
             <div className="habit-week">
               <b>Hidratación</b>
-              <div className="habit-week-bars" role="img" aria-label={`Agua de los últimos 7 días: ${week.map((d) => `${d.label} ${d.hydration ?? 0} de 8`).join(', ')}`}>
+              <div className="habit-week-bars" role="img" aria-label={`Agua de los últimos 7 días: ${week.map((d) => `${d.label} ${d.hydration ?? 0} de ${waterGoal}`).join(', ')}`}>
                 {week.map((day) => (
                   <span className={`habit-day${day.isToday ? ' today' : ''}`} key={day.id}>
-                    <i style={{ height: `${((day.hydration ?? 0) / 8) * 100}%` }} />
+                    <i style={{ height: `${Math.min(1, (day.hydration ?? 0) / waterGoal) * 100}%` }} />
                     <small>{day.label}</small>
                   </span>
                 ))}
               </div>
-              <small>Hoy {patient.hydration}/8 vasos</small>
+              <small>Hoy {patient.hydration}/{waterGoal} vasos</small>
             </div>
           </div>
           <div className="habit-metric">

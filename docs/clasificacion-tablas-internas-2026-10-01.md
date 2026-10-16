@@ -53,6 +53,7 @@ operaciones específicas con controles de identidad y vínculo.
 | `privacy_export_packages` | Paquetes de exportación temporales. | Funciones validan la paciente y la descarga comprueba vencimiento. Mantener interna; queda pendiente el contrato de finalización indicado abajo. |
 | `privacy_requests` | Pedidos de exportación y retiro. | Funciones comprueban paciente propia; respuesta auxiliar cerrada. Mantener interna; no confundir desactivación con borrado completo. |
 | `processing_jobs` | Almacenamiento previsto para tareas persistentes. | Existe el adaptador `createPostgresJobStore`, pero `processQueue` usa memoria y no lo conecta. Mantener cerrada; no se afirma persistencia ni coordinación entre API y worker. |
+| `push_subscriptions` | Teléfonos donde la persona aceptó avisos push (2026-10-15). | Solo el servidor guarda, borra y lee con el rol de servicio; la ruta borra solo el teléfono de la sesión. Mantener interna. |
 | `recipe_day_assignments` | Recetas asignadas a fecha y comida. | Asignación, listado y registro controlan profesional/paciente; `recipe_day_json` cerrado. Mantener interna. |
 | `recipe_version_cards` | Ficha y macros declarados de una versión. | Escritura verifica dueña y borrador; lectura por recetas autorizadas, auxiliar `recipe_card_json` cerrado. Mantener interna. |
 | `service_payments` | Pagos de la nutricionista a Plan V. | Registrar/anular exige administrador; representación y recomputación son internas. Mantener interna. |
