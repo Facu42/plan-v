@@ -14,17 +14,20 @@ import { NvBadge, NvButton, NvMetric } from './primitives';
 import './nutrition-target.css';
 import { PlanningBodyReference } from './PlanningBodyReference';
 import { NutritionTargetComparison } from './NutritionTargetComparison';
+import { nutritionCapabilityApi } from '../../api/nutrition-capabilities';
+import { defaultNutritionSettings, FORMULAS, FORMULA_LABELS, type NutritionFormula, type NutritionSettings } from '../../types/nutrition-capabilities';
+import { NutritionSettingsPanel } from './NutritionSettingsPanel';
 
-type Draft = { sex: string; age: string; weight_kg: string; height_cm: string; activity: string; goal: TargetGoal; adjust_pct: string; protein_g_per_kg: string; fat_pct: string };
+type Draft = { formula: NutritionFormula; body_fat_pct: string; scale_bmr: string; sex: string; age: string; weight_kg: string; height_cm: string; activity: string; goal: TargetGoal; adjust_pct: string; protein_g_per_kg: string; fat_pct: string };
 
 function toDraft(input: TargetInput | null): Draft {
   const d = input ?? { sex: 'femenino' as const, age: 0, weight_kg: 0, height_cm: 0, activity: 'ligera' as const, ...defaultsForGoal('mantener') };
   const blank = (n: number) => (n ? String(n) : '');
-  return { sex: d.sex, age: blank(d.age), weight_kg: blank(d.weight_kg), height_cm: blank(d.height_cm), activity: d.activity, goal: d.goal, adjust_pct: String(d.adjust_pct), protein_g_per_kg: String(d.protein_g_per_kg), fat_pct: String(d.fat_pct) };
+  return { formula: d.formula ?? 'mifflin', body_fat_pct: d.body_fat_pct === undefined ? '' : String(d.body_fat_pct), scale_bmr: d.scale_bmr === undefined ? '' : String(d.scale_bmr), sex: d.sex, age: blank(d.age), weight_kg: blank(d.weight_kg), height_cm: blank(d.height_cm), activity: d.activity, goal: d.goal, adjust_pct: String(d.adjust_pct), protein_g_per_kg: String(d.protein_g_per_kg), fat_pct: String(d.fat_pct) };
 }
 const num = (v: string) => (v.trim() === '' ? NaN : Number(v.replace(',', '.')));
 function parseDraft(d: Draft) {
-  return targetInputSchema.safeParse({ sex: d.sex, age: num(d.age), weight_kg: num(d.weight_kg), height_cm: num(d.height_cm), activity: d.activity, goal: d.goal, adjust_pct: num(d.adjust_pct), protein_g_per_kg: num(d.protein_g_per_kg), fat_pct: num(d.fat_pct) });
+  return targetInputSchema.safeParse({ ...(d.formula === 'mifflin' ? {} : { formula: d.formula }), ...(d.formula === 'katch' ? { body_fat_pct: num(d.body_fat_pct) } : {}), ...(d.formula === 'scale' ? { scale_bmr: num(d.scale_bmr) } : {}), sex: d.sex, age: num(d.age), weight_kg: num(d.weight_kg), height_cm: num(d.height_cm), activity: d.activity, goal: d.goal, adjust_pct: num(d.adjust_pct), protein_g_per_kg: num(d.protein_g_per_kg), fat_pct: num(d.fat_pct) });
 }
 
 function MacroRow({ label, grams, pct }: { label: string; grams: number; pct: number }) {
@@ -72,6 +75,9 @@ export function NutritionTargetPanel({ patientId, patientName, onOpenPlan }: { p
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   useUnsavedChanges(JSON.stringify(draft) !== baseline, busy);
+  const [settings,setSettings]=useState<NutritionSettings>(defaultNutritionSettings);
+  const [settingsError,setSettingsError]=useState('');
+  useEffect(()=>{const controller=new AbortController();nutritionCapabilityApi.settings(controller.signal).then(view=>{if(!controller.signal.aborted){setSettings(view.settings);setSettingsError('');}}).catch(()=>{if(!controller.signal.aborted)setSettingsError('No pudimos consultar las fórmulas aprobadas. Podés seguir usando la fórmula anterior o recargar Configuración nutricional.');});return()=>controller.abort();},[]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -124,12 +130,14 @@ export function NutritionTargetPanel({ patientId, patientName, onOpenPlan }: { p
   return <section className="nvt-card nvt-planning" aria-label={`Calorías y macros de ${patientName}`}>
     <header><div><h2>Planificación nutricional</h2><p>Definí la meta de {patientName}. Al confirmarla, el objetivo del borrador del plan se actualiza automáticamente.</p></div>{stored && <NvBadge tone={stored.published_at ? 'green' : 'gold'}>{stored.published_at ? 'Confirmada' : 'Borrador'}</NvBadge>}</header>
     <div className="nvt-metrics">
-      <NvMetric label="Metabolismo basal" value={live ? `${live.bmr} kcal` : 'Sin cálculo'} note="Mifflin-St Jeor" icon="target" nvIcon="quemadas" tone="coral" />
+      <NvMetric label="Metabolismo basal" value={live ? `${live.bmr} kcal` : 'Sin cálculo'} note={FORMULA_LABELS[draft.formula]} icon="target" nvIcon="quemadas" tone="coral" />
       <NvMetric label="Gasto diario" value={live ? `${live.tdee} kcal` : 'Sin cálculo'} note="Según el nivel de actividad" icon="target" nvIcon="ejercicio" tone="gold" />
       <NvMetric label="Meta propuesta" value={live ? `${live.kcal} kcal` : 'Por definir'} note="Revisala antes de confirmar" icon="target" nvIcon="calorias" />
     </div>
     {parsed.success && <PlanningBodyReference weight={parsed.data.weight_kg} height={parsed.data.height_cm} age={parsed.data.age} />}
     {parsed.success && <EnergyEquationComparison input={parsed.data} bodyFat={latestMetric(measurements, 'body_fat_pct')} scaleBmr={latestMetric(measurements, 'bmr')} />}
+    <details><summary>Configuración nutricional del consultorio</summary><NutritionSettingsPanel onChanged={view=>{setSettings(view.settings);setSettingsError('');}} /></details>
+    {settingsError&&<p role="status">{settingsError}</p>}
     <form className="nvt-layout" onSubmit={onSubmit}>
       <div className="nvt-form">
         <fieldset><legend>Datos de la paciente</legend>
@@ -140,6 +148,9 @@ export function NutritionTargetPanel({ patientId, patientName, onOpenPlan }: { p
           <label>Talla · cm<input inputMode="decimal" value={draft.height_cm} onChange={(e) => set('height_cm', e.target.value)} placeholder="cm" /></label>
         </fieldset>
         <fieldset><legend>Actividad y objetivo</legend>
+          <label className="nvt-wide">Fórmula para esta meta<select value={draft.formula} onChange={event=>set('formula',event.target.value as NutritionFormula)}>{FORMULAS.map(formula=><option key={formula} value={formula} disabled={formula!=='mifflin'&&!settings.approvals.some(row=>row.formula===formula)}>{FORMULA_LABELS[formula]}{formula!=='mifflin'&&!settings.approvals.some(row=>row.formula===formula)?' · requiere tu aprobación':''}</option>)}</select></label>
+          {draft.formula==='katch'&&<label>Grasa corporal medida · %<input inputMode="decimal" value={draft.body_fat_pct} onChange={event=>set('body_fat_pct',event.target.value)} required /></label>}
+          {draft.formula==='scale'&&<label>Basal informado por la balanza · kcal<input inputMode="decimal" value={draft.scale_bmr} onChange={event=>set('scale_bmr',event.target.value)} required /></label>}
           <label className="nvt-wide">Nivel de actividad<select value={draft.activity} onChange={(e) => set('activity', e.target.value)}>{ACTIVITY_LEVELS.map((a) => <option key={a} value={a}>{ACTIVITY_LABELS[a]} (×{ACTIVITY_FACTORS[a]})</option>)}</select></label>
           <label className="nvt-wide">Objetivo<select value={draft.goal} onChange={(e) => pickGoal(e.target.value as TargetGoal)}>{TARGET_GOALS.map((g) => <option key={g} value={g}>{GOAL_LABELS[g]}</option>)}</select></label>
         </fieldset>

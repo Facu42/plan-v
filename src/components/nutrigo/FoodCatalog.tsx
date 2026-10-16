@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { foodApi } from '../../api/foods';
+import { foodApi, type FoodSearchPage } from '../../api/foods';
 import { foodInputSchema, NUTRIENTS, scaleFoodNutrients, type Food, type FoodInput, type NutrientKey } from '../../types/foods';
 import { NvBadge, NvButton, NvState } from './primitives';
 import { Icon } from '../shared/Icon';
 import { FigmaRecordDialog } from './FigmaPatientFront';
-import { selectCatalogFoods, type CatalogFilters, type CatalogOrder } from './food-catalog-model';
+import { type CatalogFilters, type CatalogOrder } from './food-catalog-model';
 import { canLeaveWorkspace, useUnsavedChanges } from './unsaved-changes';
 import './food-catalog.css';
+import { ExternalFoodCatalog } from './ExternalFoodCatalog';
 
 const fmt = (value: number | null, unit = '') => value === null ? 'Sin dato' : `${new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(value)}${unit ? ` ${unit}` : ''}`;
 const decimal = (value: string) => value.trim() === '' ? null : Number(value.trim().replace(',', '.'));
@@ -95,28 +96,29 @@ export function FoodCatalog() {
   const [refresh, setRefresh] = useState(0);
   const [filters, setFilters] = useState<CatalogFilters>({ kind: 'food', query: '', scope: 'all', source: '', category: '', order: 'name-asc' });
   const [columns, setColumns] = useState<NutrientKey[]>(NUTRIENTS.slice(0, 5).map(([key]) => key));
-  const [visibleCount, setVisibleCount] = useState(50);
+  const [page,setPage]=useState(0);
+  const [result,setResult]=useState<FoodSearchPage|null>(null);
   const [selected, setSelected] = useState<Food | null>(null);
   const [editor, setEditor] = useState<{ food?: Food } | null>(null);
   const addRef = useRef<HTMLButtonElement>(null);
   const openerRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
     const controller = new AbortController(); setLoading(true); setError('');
-    foodApi.list(controller.signal)
-      .then(result => { if (!controller.signal.aborted) setFoods(result.foods); })
+    const timer=window.setTimeout(()=>{void foodApi.search({q:filters.query,kind:filters.kind,scope:filters.scope,source:filters.source,category:filters.category,order:filters.order,page,page_size:50},controller.signal)
+      .then(result => { if (!controller.signal.aborted){setFoods(result.foods);setResult(result);} })
       .catch(reason => { if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : 'No pudimos cargar el catálogo.'); })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
-    return () => controller.abort();
-  }, [refresh]);
-  useEffect(() => { setVisibleCount(50); }, [filters]);
-  const shown = selectCatalogFoods(foods, filters);
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });},250);
+    return () => {controller.abort();window.clearTimeout(timer);};
+  }, [refresh,filters,page]);
+  useEffect(() => { setPage(0); }, [filters]);
+  const shown = foods;
   const tabFoods = foods.filter(food => food.kind === filters.kind);
-  const sources = [...new Set(tabFoods.map(food => food.source))].sort((a, b) => a.localeCompare(b, 'es'));
-  const categories = [...new Set(tabFoods.map(food => food.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+  const sources = result?.sources??[];
+  const categories = result?.categories??[];
   const nutrients = NUTRIENTS.filter(([key]) => columns.includes(key));
   const activeFilters = Number(filters.scope !== 'all') + Number(Boolean(filters.category));
   const hasFilters = Boolean(filters.query || filters.source || activeFilters);
-  const number = (value: number) => loading || error ? '—' : value;
+  const number = (value: number|undefined) => loading || error || value===undefined ? '—' : value;
   function clearFilters() { setFilters(current => ({ ...current, query: '', source: '', scope: 'all', category: '' })); }
   function openEditor(food?: Food) {
     if (!canLeaveWorkspace()) return;
@@ -136,18 +138,19 @@ export function FoodCatalog() {
       <button ref={addRef} type="button" className="nv-button" disabled={loading || Boolean(error)} onClick={() => openEditor()}><Icon name="plus" size={16} />Agregar alimento</button>
     </header>
     <div className="fc-stats" aria-label="Resumen del catálogo" aria-busy={loading}>
-      <div><span className="fc-stat-icon"><Icon name="leaf" size={17} /></span><strong>{number(foods.length)}</strong><span>Total de alimentos</span></div>
-      <div><span className="fc-stat-icon"><Icon name="edit" size={17} /></span><strong>{number(foods.filter(food => food.owner_id !== null).length)}</strong><span>Mis alimentos</span></div>
-      <div><span className="fc-stat-icon"><Icon name="grid" size={17} /></span><strong>{number(foods.filter(food => food.owner_id === null).length)}</strong><span>De la plataforma</span></div>
-      <div><span className="fc-stat-icon"><Icon name="heart" size={17} /></span><strong>{number(foods.filter(food => food.kind === 'supplement').length)}</strong><span>Suplementos</span></div>
+      <div><span className="fc-stat-icon"><Icon name="leaf" size={17} /></span><strong>{number(result?.summary?.total)}</strong><span>Total de alimentos</span></div>
+      <div><span className="fc-stat-icon"><Icon name="edit" size={17} /></span><strong>{number(result?.summary?.own)}</strong><span>Mis alimentos</span></div>
+      <div><span className="fc-stat-icon"><Icon name="grid" size={17} /></span><strong>{number(result?.summary?.platform)}</strong><span>De la plataforma</span></div>
+      <div><span className="fc-stat-icon"><Icon name="heart" size={17} /></span><strong>{number(result?.summary?.supplements)}</strong><span>Suplementos</span></div>
     </div>
     {notice && <p role="status" className="fc-success">{notice}</p>}
+    <details><summary>Buscar en una fuente externa</summary><ExternalFoodCatalog onImported={()=>{setPage(0);setRefresh(value=>value+1);}}/></details>
     <div className="fc-tabs" role="tablist" aria-label="Tipo de alimento">{(['food', 'supplement'] as const).map(kind => <button key={kind} type="button" id={`fc-tab-${kind}`} role="tab" aria-selected={filters.kind === kind} aria-controls="fc-results" tabIndex={filters.kind === kind ? 0 : -1} onClick={() => changeTab(kind)} onKeyDown={event => {
       if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
         event.preventDefault(); const next = event.key === 'Home' ? 'food' : event.key === 'End' ? 'supplement' : kind === 'food' ? 'supplement' : 'food';
         changeTab(next); document.getElementById(`fc-tab-${next}`)?.focus();
       }
-    }}>{kind === 'food' ? 'Alimentos' : 'Suplementos'}<span>{number(foods.filter(food => food.kind === kind).length)}</span></button>)}</div>
+    }}>{kind === 'food' ? 'Alimentos' : 'Suplementos'}<span>{number(kind==='food'?result?.summary?.foods:result?.summary?.supplements)}</span></button>)}</div>
     <div className="fc-toolbar">
       <label><span className="fc-sr-only">Fuente de los alimentos</span><select value={filters.source} onChange={event => setFilters({ ...filters, source: event.target.value })}><option value="">Todas las fuentes</option>{sources.map(source => <option key={source} value={source}>{source}</option>)}</select></label>
       <label className="fc-search"><span className="fc-sr-only">Buscar alimentos</span><input type="search" placeholder="Buscar por nombre, marca o categoría…" value={filters.query} onChange={event => setFilters({ ...filters, query: event.target.value })} /></label>
@@ -159,19 +162,19 @@ export function FoodCatalog() {
       </CatalogMenu>
       <CatalogMenu label="Columnas"><p className="fc-hint">Elegí los nutrientes que querés comparar.</p>{NUTRIENTS.map(([key, label, unit]) => <label className="fc-checkbox" key={key}><input type="checkbox" checked={columns.includes(key)} onChange={event => setColumns(current => event.target.checked ? [...current, key] : current.filter(column => column !== key))} />{label} ({unit})</label>)}</CatalogMenu>
     </div>
-    <div className="fc-results-meta"><p aria-live="polite" className="fc-hint">{loading ? 'Cargando catálogo…' : error ? 'Catálogo no disponible' : `${shown.length} ${shown.length === 1 ? 'resultado' : 'resultados'} · valores por 100 g`}</p>{hasFilters && <button type="button" className="fc-text-button" onClick={clearFilters}>Limpiar filtros</button>}</div>
+    <div className="fc-results-meta"><p aria-live="polite" className="fc-hint">{loading ? 'Cargando catálogo…' : error ? 'Catálogo no disponible' : `${result?.total??0} ${result?.total === 1 ? 'resultado' : 'resultados'} · valores por 100 g`}</p>{hasFilters && <button type="button" className="fc-text-button" onClick={clearFilters}>Limpiar filtros</button>}</div>
     <div id="fc-results" role="tabpanel" aria-labelledby={`fc-tab-${filters.kind}`}>
       {loading ? <NvState kind="loading" title="Cargando alimentos…" description="Estamos buscando tu catálogo." /> : error ? <NvState kind="error" title="No pudimos cargar los alimentos" description={error} action={<NvButton onClick={() => setRefresh(value => value + 1)}>Reintentar</NvButton>} /> : shown.length ? <>
         <div className="fc-table-wrap" tabIndex={0} aria-label="Tabla de alimentos, desplazable si mostrás más columnas">
           <table className="fc-table"><caption className="fc-sr-only">{filters.kind === 'food' ? 'Alimentos' : 'Suplementos'} del consultorio. Todos los valores corresponden a 100 gramos.</caption>
             <thead><tr><th scope="col">Alimento</th>{nutrients.map(([key, label, unit]) => <th key={key} scope="col">{label}<small>{unit}</small></th>)}</tr></thead>
-            <tbody>{shown.slice(0, visibleCount).map(food => <tr key={food.id}>
+            <tbody>{shown.map(food => <tr key={food.id}>
               <th scope="row"><button type="button" className="fc-row-open" aria-label={`Ver ${food.name}`} onClick={event => { openerRef.current = event.currentTarget; setSelected(food); }}><span className="fc-row-name">{food.name}</span><span className="fc-row-source" title={food.source}>{food.source}</span><span className="fc-row-origin">{food.owner_id === null ? 'Plataforma' : 'Propio'}</span><span className="fc-row-secondary">{[food.brand, food.category].filter(Boolean).join(' · ')}</span></button></th>
               {nutrients.map(([key]) => <td key={key}>{fmt(food.nutrients[key])}</td>)}
             </tr>)}</tbody>
           </table>
         </div>
-        {shown.length > visibleCount && <div className="fc-load-more"><NvButton onClick={() => setVisibleCount(value => value + 50)}>Mostrar más · {shown.length - visibleCount} restantes</NvButton></div>}
+        <nav className="fc-load-more" aria-label="Páginas de alimentos"><NvButton disabled={page===0||loading} onClick={()=>setPage(previous=>previous-1)}>Anterior</NvButton><span>Página {page+1} · {result?.total??0} resultados</span><NvButton disabled={loading||(page+1)*50>=(result?.total??0)} onClick={()=>setPage(previous=>previous+1)}>Siguiente</NvButton></nav>
       </> : <NvState title={tabFoods.length ? 'No hay coincidencias' : filters.kind === 'supplement' ? 'Todavía no cargaste suplementos' : 'Tu catálogo empieza acá'} description={tabFoods.length ? 'Probá otro nombre o cambiá los filtros.' : 'Agregá un alimento o suplemento y su fuente para consultar nutrientes y medidas caseras.'} action={<NvButton onClick={tabFoods.length ? clearFilters : () => openEditor()}>{tabFoods.length ? 'Limpiar filtros' : filters.kind === 'supplement' ? 'Agregar suplemento' : 'Agregar mi primer alimento'}</NvButton>} />}
     </div>
     <p className="fc-hint">Abrí un alimento para consultar su fuente, las medidas caseras y los valores de una porción.</p>
@@ -179,7 +182,7 @@ export function FoodCatalog() {
       {editor ? <FoodEditor key={editor.food?.id ?? 'new'} food={editor.food} kind={filters.kind} onCancel={closeDialog} onSaved={food => {
         setFoods(current => [...current.filter(item => item.id !== food.id), food]); setSelected(food); setEditor(null);
         setFilters(current => ({ ...current, kind: food.kind }));
-        setNotice('Alimento guardado. La fuente y las medidas quedaron registradas.');
+        setNotice('Alimento guardado. La fuente y las medidas quedaron registradas.');setRefresh(value=>value+1);
         requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('.fc-dialog > header > button')?.focus());
       }} /> : <FoodDetail key={`${selected!.id}:${selected!.revision}`} food={selected!} onEdit={() => openEditor(selected!)} />}
     </FigmaRecordDialog>}
