@@ -397,3 +397,5 @@ Rama aislada `codex/nutridesk-release-nutricion`, basada en la entrega de import
 
 
 Quinta entrega apilada: [ficha clínica y exportación histórica, evidencia y límites](nutridesk-release-clinica-2026-10-14.md). Base 304413f; gate previo 2.719 pruebas aprobadas; verificación nueva de marca vigente en curso, sin producción.
+
+- Continuación Codex, 15/10: entrega 7 de operaciones/comunicaciones sobre PR123; informe vigente en [nutridesk-release-operaciones-2026-10-15.md](nutridesk-release-operaciones-2026-10-15.md). La tabla SARA 2 continúa en la entrega 8 separada.
