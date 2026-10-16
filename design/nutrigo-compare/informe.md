@@ -1,6 +1,6 @@
 # Comparación con Nutrigo
 
-Generado por `scripts/nutrigo-compare.mjs` el 2026-10-07.
+Generado por `scripts/nutrigo-compare.mjs` el 2026-10-16.
 Los datos y textos de Plan V nunca dan 0 %: la cifra sirve para ver qué pantalla se aleja más.
 
 | Pantalla | Nodo Figma | Píxeles distintos | Alto Figma | Alto app |
@@ -15,7 +15,7 @@ Los datos y textos de Plan V nunca dan 0 %: la cifra sirve para ver qué pantall
 | progreso-escritorio | 105:2790 | 5.7 % | 1157 | 1157 |
 | ejercicio-escritorio | 105:2931 | 3.8 % | 1136 | 1070 |
 | recursos-escritorio | 263:6588 | 4.6 % | 1136 | 1133 |
-| inicio-celular | 427:14405 | 6.6 % | 4514 | 4403 |
+| inicio-celular | 427:14405 | 6.9 % | 4514 | 4403 |
 | agenda-celular | 433:17250 | 9.0 % | 2004 | 1657 |
 | mensajes-celular | 433:19982 | 8.1 % | 2995 | 1879 |
 | recetas-celular | 445:10499 | 10.4 % | 3195 | 3240 |
