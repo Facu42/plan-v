@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../../api/client';
 import { Icon, Mark } from '../shared/Icon';
 import { NvButton, NvState } from './primitives';
-import { ShowroomServicio } from './ShowroomServicio';
+import { SERVICIO_TAB_ICONS, SERVICIO_TABS, ShowroomServicio, type ServicioTab } from './ShowroomServicio';
 import '@fontsource/poppins/latin-400.css';
 import '@fontsource/poppins/latin-500.css';
 import '@fontsource/poppins/latin-600.css';
@@ -15,6 +15,11 @@ import './nutrigo-fidelity.css';
 import './shell-fig.css';
 import './motion.css';
 import './servicio-fig.css';
+import '@fontsource/inter/latin-400.css';
+import '@fontsource/inter/latin-500.css';
+import '@fontsource/inter/latin-600.css';
+import '@fontsource/instrument-serif/latin-400.css';
+import '@fontsource/instrument-serif/latin-400-italic.css';
 import './admin-console.css';
 import './admin-redesign.css';
 
@@ -24,6 +29,7 @@ import './admin-redesign.css';
  */
 export function AdminConsole({ darkMode, onToggleTheme, onSignOut, userName }: { darkMode: boolean; onToggleTheme?: () => void; onSignOut?: () => void; userName?: string }) {
   const [admin, setAdmin] = useState<boolean | null>(null);
+  const [tab, setTab] = useState<ServicioTab>('resumen');
   useEffect(() => {
     let active = true;
     api.getAdminMe().then((result) => { if (active) setAdmin(result.admin === true); }).catch(() => { if (active) setAdmin(false); });
@@ -42,6 +48,7 @@ export function AdminConsole({ darkMode, onToggleTheme, onSignOut, userName }: {
   return <div className={`nv-app nv-pro nv-fees-page nv-admin${darkMode ? ' nv-dark' : ''}`}>
     <nav className="nv-admin-rail" aria-label="Plan V">
       <a className="nv-admin-brand" href="/admin" aria-label="Plan V, panel del servicio"><Mark /></a>
+      {admin ? <div className="nv-admin-rail-links">{SERVICIO_TABS.map((item) => <button key={item.id} type="button" className="nv-admin-rail-link" aria-current={tab === item.id ? 'page' : undefined} aria-label={item.label} title={item.label} onClick={() => setTab(item.id)}><Icon name={SERVICIO_TAB_ICONS[item.id]} size={17} /></button>)}</div> : null}
       <span className="nv-admin-rail-gap" />
       {onToggleTheme ? <button type="button" className="nv-admin-theme" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} aria-pressed={darkMode} title={darkMode ? 'Tema claro' : 'Tema oscuro'} onClick={onToggleTheme}><Icon name={darkMode ? 'sun' : 'moon'} size={18} /></button> : null}
     </nav>
@@ -55,7 +62,7 @@ export function AdminConsole({ darkMode, onToggleTheme, onSignOut, userName }: {
       </header>
     <main id="nv-main" tabIndex={-1} className="nv-main nv-admin-main">
       {admin === null ? <NvState kind="loading" title="Cargando…" description="Estamos verificando tu acceso." />
-        : admin ? <ShowroomServicio />
+        : admin ? <ShowroomServicio tab={tab} onTab={setTab} />
           : <NvState title="No tenés permiso para ver esta pantalla" description="El Panel del servicio es sólo para quien administra Plan V." action={<NvButton className="nv-soft" onClick={() => { window.location.assign('/'); }}>Ir al inicio</NvButton>} />}
     </main>
     </div>

@@ -4,13 +4,13 @@ import { formatFeeDate, formatPesos } from '../../fees';
 import { localBillingDate } from '../../billing';
 import { serviceTotals, SERVICE_METHOD_LABELS, SERVICE_STATE_LABELS, summarizeService, type ServiceState } from '../../service';
 import type { ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServicePaymentMethod, ServiceSettings } from '../../types/service';
-import { Icon } from '../shared/Icon';
+import { Icon, type IconName } from '../shared/Icon';
 import { NvBadge, NvButton, NvCard, NvState } from './primitives';
 import { ConfirmDialog, FeeError } from './cobranzas-shared';
 import { feeErrorMessage, parsePesos } from './cobranzas-utils';
-import { adminErrorMessage, buildMailto, buildServiceRows, daysLeftText, emailsOf, filterServiceRows, mailKindFor, mailTemplate, replaceNutritionist, SERVICE_ORDERS, SERVICE_STATE_FILTERS, SERVICE_STATE_TONE, serviceEventLabel, shortDateTime, type ServiceOrder, type ServiceRow } from './servicio-utils';
+import { adminErrorMessage, buildMailto, buildServiceRows, daysLeftText, emailsOf, filterServiceRows, mailKindFor, mailTemplate, replaceNutritionist, SERVICE_ORDERS, SERVICE_STATE_FILTERS, SERVICE_STATE_TONE, serviceEventLabel, shortDateTime, focusCounts, matchesFocus, monthlyCollections, serviceRowsCsv, SERVICE_FOCUS, type ServiceFocus, type ServiceOrder, type ServiceRow } from './servicio-utils';
 import { ActividadTab, AltasTab, PruebasTab } from './ServicioTabs';
-import { CountUp, StateDonut, type DonutSlice } from './AdminViz';
+import { CollectionsChart, CountUp, StateDonut, type DonutSlice } from './AdminViz';
 import './cobranzas-fig.css';
 import './servicio-fig.css';
 
@@ -193,13 +193,29 @@ export type ServicioTab = 'resumen' | 'altas' | 'pruebas' | 'actividad' | 'preci
 export const SERVICIO_TABS: Array<{ id: ServicioTab; label: string }> = [
   { id: 'resumen', label: 'Resumen' }, { id: 'altas', label: 'Altas' }, { id: 'pruebas', label: 'Cuentas de prueba' }, { id: 'actividad', label: 'Actividad' }, { id: 'precio', label: 'Precio y prueba' },
 ];
+export const SERVICIO_TAB_ICONS: Record<ServicioTab, IconName> = { resumen: 'grid', altas: 'plus', pruebas: 'sparkle', actividad: 'history', precio: 'wallet' };
+
+const SORTABLE: Array<{ label: string; order?: ServiceOrder }> = [
+  { label: '#' }, { label: 'Nutricionista', order: 'nombre' }, { label: 'Estado' }, { label: 'Pacientes', order: 'pacientes' }, { label: 'Vigencia', order: 'vencimiento' }, { label: 'Último ingreso', order: 'ingreso' },
+];
+
+function downloadCsv(text: string): boolean {
+  try {
+    const url = URL.createObjectURL(new Blob([`﻿${text}`], { type: 'text/csv;charset=utf-8' }));
+    const anchor = document.createElement('a');
+    anchor.href = url; anchor.download = `nutricionistas-plan-v-${localBillingDate()}.csv`; anchor.click(); URL.revokeObjectURL(url);
+    return true;
+  } catch { return false; }
+}
 
 function ServiceList({ rows, selectedId, onSelect }: { rows: ServiceRow[]; selectedId: string | null; onSelect: (id: string) => void }) {
   const [query, setQuery] = useState('');
   const [state, setState] = useState<ServiceState | 'todas'>('todas');
   const [order, setOrder] = useState<ServiceOrder>('vencimiento');
+  const [focus, setFocus] = useState<ServiceFocus>('todas');
   const [copied, setCopied] = useState('');
-  const visible = useMemo(() => filterServiceRows(rows, { query, state, order }), [rows, query, state, order]);
+  const counts = useMemo(() => focusCounts(rows), [rows]);
+  const visible = useMemo(() => filterServiceRows(rows, { query, state, order }).filter((row) => matchesFocus(row, focus)), [rows, query, state, order, focus]);
   const maxPatients = Math.max(1, ...visible.map((row) => row.nutritionist.patients_active));
   const emails = emailsOf(visible);
   const template = mailTemplate(state === 'todas' ? 'bienvenida' : mailKindFor(state));
@@ -209,9 +225,12 @@ function ServiceList({ rows, selectedId, onSelect }: { rows: ServiceRow[]; selec
     try { await navigator.clipboard.writeText(emails.join(', ')); setCopied(emails.length === 1 ? 'Copiamos 1 mail.' : `Copiamos ${emails.length} mails.`); }
     catch { setCopied('No pudimos copiar. Probá de nuevo.'); }
   };
+  const download = () => setCopied(downloadCsv(serviceRowsCsv(visible)) ? `Descargamos ${visible.length === 1 ? '1 nutricionista' : `${visible.length} nutricionistas`}.` : 'No pudimos descargar la lista.');
 
   return <section className="cbz-directory" aria-label="Nutricionistas">
-    <header><h2>Nutricionistas <span className="svc-count">{visible.length === rows.length ? rows.length : `${visible.length} de ${rows.length}`}</span></h2></header>
+    <header className="adm-list-head"><h2>Ranking de nutricionistas <span className="svc-count">{visible.length === rows.length ? rows.length : `${visible.length} de ${rows.length}`}</span></h2>
+      {rows.length > 0 && <div className="adm-segment" role="group" aria-label="Mostrar">{SERVICE_FOCUS.map((item) => <button key={item.id} type="button" aria-pressed={focus === item.id} onClick={() => setFocus(item.id)}>{item.label}<span>{counts[item.id]}</span></button>)}</div>}
+    </header>
     {rows.length > 0 && <div className="svc-tools">
       <div className="cbz-form svc-filters">
         <label htmlFor="svc-search">Buscar<input id="svc-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nombre o mail" /></label>
@@ -221,13 +240,16 @@ function ServiceList({ rows, selectedId, onSelect }: { rows: ServiceRow[]; selec
       <div className="cbz-actions">
         <NvButton className="nv-soft" disabled={!emails.length} onClick={() => void copy()}>Copiar mails</NvButton>
         {mailto ? <a className="nv-button nv-soft svc-mail" href={mailto}>Escribir mail</a> : <NvButton className="nv-soft" disabled>Escribir mail</NvButton>}
+        <NvButton className="nv-soft" disabled={!visible.length} onClick={download}><Icon name="download" size={14} />Descargar lista</NvButton>
         {copied && <span className="cbz-muted" role="status">{copied}</span>}
       </div>
     </div>}
     {!rows.length ? <NvState title="Todavía no hay nutricionistas" description="Cuando se sumen las vas a ver acá con su prueba y sus pagos." />
       : !visible.length ? <p className="cbz-muted cbz-pad">Ninguna nutricionista coincide con la búsqueda.</p>
         : <div className="adm-table-wrap"><table className="adm-table">
-          <thead><tr><th scope="col">#</th><th scope="col">Nutricionista</th><th scope="col">Estado</th><th scope="col">Pacientes</th><th scope="col">Vigencia</th><th scope="col">Último ingreso</th></tr></thead>
+          <thead><tr>{SORTABLE.map((column) => <th key={column.label} scope="col" aria-sort={column.order && column.order === order ? (column.order === 'nombre' || column.order === 'vencimiento' ? 'ascending' : 'descending') : undefined}>
+            {column.order ? <button type="button" className={`adm-sort${column.order === order ? ' adm-sort-on' : ''}`} onClick={() => setOrder(column.order!)}>{column.label}<svg viewBox="0 0 10 14" aria-hidden="true"><path d="M5 1 8.5 5h-7zM5 13 1.5 9h7z" /></svg></button> : column.label}
+          </th>)}</tr></thead>
           <tbody>{visible.map(({ nutritionist, summary }, index) => <tr key={nutritionist.id} className={nutritionist.id === selectedId ? 'adm-selected' : ''} style={{ ['--adm-i' as string]: Math.min(index, 14) }}>
             <td className="adm-rank">{index + 1}</td>
             <td><button type="button" className="adm-who" aria-pressed={nutritionist.id === selectedId} aria-label={`Ver servicio de ${nutritionist.display_name}`} onClick={() => onSelect(nutritionist.id)}>
@@ -241,26 +263,33 @@ function ServiceList({ rows, selectedId, onSelect }: { rows: ServiceRow[]; selec
   </section>;
 }
 
-export function ServicioScreen({ board, onBoard, today = localBillingDate(), initialSelectedId = null, initialTab = 'resumen' }: {
+export function ServicioScreen({ board, onBoard, today = localBillingDate(), initialSelectedId = null, initialTab = 'resumen', tab: controlledTab, onTab }: {
   board: ServiceBoard; onBoard: (board: ServiceBoard) => void; today?: string; initialSelectedId?: string | null; initialTab?: ServicioTab;
+  /** Si la pantalla de afuera maneja la sección (la barra lateral del /admin), la pasa acá. */
+  tab?: ServicioTab; onTab?: (tab: ServicioTab) => void;
 }) {
-  const [tab, setTab] = useState<ServicioTab>(initialTab);
+  const [ownTab, setOwnTab] = useState<ServicioTab>(initialTab);
+  const tab = controlledTab ?? ownTab;
+  const setTab = (next: ServicioTab) => { setOwnTab(next); onTab?.(next); };
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId);
   const rows = useMemo(() => buildServiceRows(board, today), [board, today]);
   const totals = serviceTotals(board.nutritionists, today);
+  const collections = useMemo(() => monthlyCollections(board.nutritionists, today), [board.nutritionists, today]);
   const slices: DonutSlice[] = [
-    { id: 'activas', label: 'Activas', value: totals.activas, color: 'var(--adm-lime)' },
-    { id: 'prueba', label: 'En prueba', value: totals.prueba, color: 'var(--adm-blue)' },
-    { id: 'vencidas', label: 'Vencidas', value: totals.vencidas, color: 'var(--adm-coral)' },
-    { id: 'sin_cargo', label: 'Sin cargo', value: totals.sin_cargo, color: 'var(--adm-grey)' },
+    { id: 'activas', label: 'Activas', value: totals.activas, color: 'var(--adm-accent)' },
+    { id: 'prueba', label: 'En prueba', value: totals.prueba, color: 'var(--adm-slice-2)' },
+    { id: 'vencidas', label: 'Vencidas', value: totals.vencidas, color: 'var(--adm-slice-3)' },
+    { id: 'sin_cargo', label: 'Sin cargo', value: totals.sin_cargo, color: 'var(--adm-slice-4)' },
   ];
+  const real = totals.activas + totals.prueba + totals.vencidas + totals.sin_cargo;
   const selected = selectedId ? board.nutritionists.find((item) => item.id === selectedId) ?? null : null;
   const names = useMemo(() => new Map(board.nutritionists.map((item) => [item.id, item.display_name])), [board.nutritionists]);
+  const selectedEvents = selected ? board.events.filter((event) => event.nutritionist_id === selected.id).slice(0, 6) : [];
 
   return <div className="cbz svc">
     <header className="svc-head"><h2>Panel del servicio</h2><p>Acá no hay datos de salud de las pacientes: solo cantidades.</p></header>
     <div className="svc-tabs" role="tablist" aria-label="Secciones del panel">
-      {SERVICIO_TABS.map((item) => <button key={item.id} type="button" role="tab" id={`svc-tab-${item.id}`} aria-selected={tab === item.id} aria-controls="svc-tabpanel" tabIndex={tab === item.id ? 0 : -1} onClick={() => setTab(item.id)}>{item.label}</button>)}
+      {SERVICIO_TABS.map((item) => <button key={item.id} type="button" role="tab" id={`svc-tab-${item.id}`} aria-selected={tab === item.id} aria-controls="svc-tabpanel" tabIndex={tab === item.id ? 0 : -1} onClick={() => setTab(item.id)}><Icon name={SERVICIO_TAB_ICONS[item.id]} size={14} />{item.label}</button>)}
     </div>
     <div id="svc-tabpanel" role="tabpanel" aria-labelledby={`svc-tab-${tab}`} className="svc-tabpanel">
       {tab === 'resumen' && <>
@@ -270,9 +299,15 @@ export function ServicioScreen({ board, onBoard, today = localBillingDate(), ini
           <div className="cbz-stat"><dt>Vencidas</dt><dd><CountUp value={totals.vencidas} /></dd></div>
           <div className="cbz-stat"><dt>Cobrado este mes</dt><dd><CountUp value={totals.cobrado_mes} format={formatPesos} /></dd></div>
         </dl>
-        <div className="adm-hero">
-          <StateDonut slices={slices} centerLabel="nutricionistas" />
-          <div className="adm-hero-note"><h3>Estado del servicio</h3><p>Cada tramo es un estado de las nutricionistas de verdad; las cuentas de prueba no cuentan.</p></div>
+        <div className="adm-charts">
+          <section className="adm-chart-card" aria-label="Estado del servicio">
+            <header><h3>Estado del servicio</h3><strong className="adm-big"><CountUp value={real ? Math.round((totals.activas / real) * 100) : 0} format={(n) => `${n}%`} /></strong><small>{totals.activas === 1 ? "1 activa" : `${totals.activas} activas`} de {real === 1 ? "1 nutricionista" : `${real} nutricionistas`}</small></header>
+            <StateDonut slices={slices} />
+          </section>
+          <section className="adm-chart-card" aria-label="Cobros por mes">
+            <header><h3>Cobros por mes</h3><strong className="adm-big"><CountUp value={collections.reduce((sum, item) => sum + item.total, 0)} format={formatPesos} /></strong><small>En los últimos {collections.length} meses, sin cuentas de prueba</small></header>
+            <CollectionsChart points={collections} format={formatPesos} />
+          </section>
         </div>
         <div className={`cbz-layout${selected ? ' cbz-has-selection' : ''}`}>
           <div className="cbz-list-col">
@@ -284,7 +319,13 @@ export function ServicioScreen({ board, onBoard, today = localBillingDate(), ini
               {board.events.length > 8 && <NvButton className="nv-ghost" onClick={() => setTab('actividad')}>Ver toda la actividad</NvButton>}
             </NvCard>
           </div>
-          {selected ? <NutritionistPanel key={selected.id} nutritionist={selected} monthlyPrice={board.settings.monthly_price} today={today} onBack={() => setSelectedId(null)} onChange={(next) => onBoard(replaceNutritionist(board, next))} />
+          {selected ? <div className="adm-detail-col">
+            <NutritionistPanel key={selected.id} nutritionist={selected} monthlyPrice={board.settings.monthly_price} today={today} onBack={() => setSelectedId(null)} onChange={(next) => onBoard(replaceNutritionist(board, next))} />
+            <NvCard title={`Movimientos de ${selected.display_name.split(' ')[0]}`}>
+              {selectedEvents.length ? <ol className="adm-timeline">{selectedEvents.map((event) => <li key={event.id}><strong>{serviceEventLabel(event.action)}</strong><small>{shortDateTime(event.occurred_at)}</small></li>)}</ol>
+                : <p className="cbz-muted">Todavía no hay movimientos de esta nutricionista.</p>}
+            </NvCard>
+          </div>
             : <aside className="cbz-panel cbz-panel-empty" aria-label="Detalle del servicio"><p>Elegí una nutricionista para registrar pagos, extender su prueba o cambiar su estado.</p></aside>}
         </div>
       </>}
@@ -296,7 +337,7 @@ export function ServicioScreen({ board, onBoard, today = localBillingDate(), ini
   </div>;
 }
 
-export function ShowroomServicio() {
+export function ShowroomServicio({ tab, onTab }: { tab?: ServicioTab; onTab?: (tab: ServicioTab) => void } = {}) {
   const [board, setBoard] = useState<ServiceBoard | null>(null);
   const [error, setError] = useState('');
   const load = useCallback(() => {
@@ -307,5 +348,5 @@ export function ShowroomServicio() {
 
   if (error) return <NvState kind="error" title="No pudimos cargar el panel del servicio" description={error} action={<NvButton className="nv-soft" onClick={load}>Reintentar</NvButton>} />;
   if (!board) return <NvState kind="loading" title="Cargando el panel…" description="Estamos buscando las nutricionistas y sus pagos." />;
-  return <ServicioScreen board={board} onBoard={setBoard} />;
+  return <ServicioScreen board={board} onBoard={setBoard} tab={tab} onTab={onTab} />;
 }
