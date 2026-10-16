@@ -25,6 +25,7 @@ beforeAll(async()=>{
  insert into public.nutritionists values('${a}','${a}'),('${b}','${b}');
  insert into public.patients(id,nutritionist_id,user_id) values('${patient}','${a}','${patientUser}'),('${other}','${b}',null);`);
  await db.exec(await readFile(new URL('../../supabase/migrations/20261011150000_consultation_sessions.sql',import.meta.url),'utf8'));
+ await db.exec(await readFile(new URL('../../supabase/migrations/20261016232547_consultation_silence_summary.sql',import.meta.url),'utf8'));
 },60000);
 afterAll(async()=>{await db?.close();});
 describe('consultas SQL: dos consultorios, privacidad y recuperación',()=>{
