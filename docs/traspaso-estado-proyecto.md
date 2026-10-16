@@ -187,6 +187,15 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - App para tiendas (Android primero, empaquetando la web), calidad en producción, publicidad paga y
   página pública con precios (espera el precio). Plan: `docs/plan-apartados.md`.
 
+## Meta de agua por paciente (2026-10-16)
+
+Decisión de Facundo (15/10, «Meta por paciente»): la nutri elige la meta de agua de cada paciente, de 4 a 16 vasos
+por día, en «Editar ficha» (vacía = 8, la de siempre). La paciente la ve en Inicio, Diario y Progreso, y el aviso de
+agua del día y la adherencia se miden contra esa meta. Además se puede anotar hasta 16 vasos por día (antes el tope
+era 8). Migración `20261016090000_water_goal` (columna `patients.water_goal_glasses`, vista `patient_water_goal_view`
+solo con la fila propia, y la regla de `habit_logs` pasa a 0..16). **Sin aplicar**: lleva un DROP de la regla
+vieja, así que Facundo pega el SQL en Supabase. Sin la migración la app sigue andando con 8 vasos.
+
 ## Recordatorio de consulta al teléfono (2026-10-15)
 
 El día antes de cada consulta agendada, la paciente con avisos activados recibe «Mañana tenés consulta · Mirá el

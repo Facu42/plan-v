@@ -119,6 +119,7 @@ export const api = {
     sensitive_hours?: string;
     plan_b?: string;
     next_focus?: string;
+    water_goal_glasses?: number | null;
   }) => request<{ patient: Patient }>(`/api/patients/${patientId}/profile`, {
     method: 'PATCH',
     body: JSON.stringify(data),

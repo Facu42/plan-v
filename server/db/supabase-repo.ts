@@ -187,6 +187,23 @@ function rememberedGoal(entry: Record<string, unknown>): GoalFollowup {
 }
 
 /**
+ * Meta de agua que eligió la nutri (vasos por día). Si la migración todavía no está en la base,
+ * la lectura falla y se ignora: la app usa la meta de siempre.
+ */
+async function loadWaterGoals(ids: string[], audience: QueryAudience): Promise<Map<string, number>> {
+  const found = new Map<string, number>();
+  if (ids.length === 0) return found;
+  const table = audience === 'patient' ? 'patient_water_goal_view' : 'patients';
+  const { data, error } = await getRequestDb().from(table).select('id,water_goal_glasses').in('id', ids);
+  if (error) return found;
+  for (const entry of rows(data)) {
+    const goal = Number(entry.water_goal_glasses);
+    if (entry.water_goal_glasses != null && Number.isInteger(goal)) found.set(String(entry.id), goal);
+  }
+  return found;
+}
+
+/**
  * Estado, avance e historial. Si la migración todavía no está en la base,
  * estas lecturas fallan y se ignoran: el texto del objetivo sigue llegando.
  */
@@ -287,6 +304,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
     adherence_why: audience === 'patient' ? '' : row.adherence_why as string,
     time: 'hoy',
     hydration: extras.hydration ?? 0,
+    ...(typeof row.water_goal_glasses === 'number' ? { water_goal_glasses: row.water_goal_glasses } : {}),
     energy: extras.energy ?? null,
     sleep_minutes: extras.sleep_minutes ?? null,
     appointment: extras.appointment ?? null,
@@ -575,11 +593,11 @@ export async function sbListPatientsForNutri(userId: string, query: { offset: nu
     }
   }
 
-  const follow = await loadGoalFollowup(ids, 'professional');
+  const [follow, waterGoals] = await Promise.all([loadGoalFollowup(ids, 'professional'), loadWaterGoals(ids, 'professional')]);
   const pastByPatient = await loadPastConsultations(ids, appointmentNow);
   const [archivedAt, resourceAssignments] = await Promise.all([loadArchivedAt(ids), loadResourceAssignments(ids)]);
   return {
-    patients: pageRows.map((patientRow) => mapPatient({ ...patientRow, ...follow.get(String(patientRow.id)), archived_at: archivedAt.get(String(patientRow.id)) ?? null }, {
+    patients: pageRows.map((patientRow) => mapPatient({ ...patientRow, ...follow.get(String(patientRow.id)), water_goal_glasses: waterGoals.get(String(patientRow.id)), archived_at: archivedAt.get(String(patientRow.id)) ?? null }, {
       appointment: mapScheduledAppointment(nextByPatient.get(String(patientRow.id))),
       appointment_history: pastByPatient.get(String(patientRow.id)) ?? [],
       resource_assignments: resourceAssignments.get(String(patientRow.id)) ?? [],
@@ -675,8 +693,9 @@ export async function sbGetPatientForUser(userId: string): Promise<Patient | nul
   if (!patientRow) return null;
   const extras = await loadPatientExtras(patientRow.id as string, 'patient');
   const follow = (await loadGoalFollowup([String(patientRow.id)], 'patient')).get(String(patientRow.id));
+  const waterGoal = (await loadWaterGoals([String(patientRow.id)], 'patient')).get(String(patientRow.id));
   const archivedAt = await loadOwnArchivedAt(String(patientRow.id));
-  return mapPatient({ ...patientRow, ...follow, archived_at: archivedAt }, extras, 'patient');
+  return mapPatient({ ...patientRow, ...follow, water_goal_glasses: waterGoal, archived_at: archivedAt }, extras, 'patient');
 }
 
 export async function sbGetPatientById(id: string, audience: QueryAudience = 'professional'): Promise<Patient | null> {
@@ -686,12 +705,13 @@ export async function sbGetPatientById(id: string, audience: QueryAudience = 'pr
   if (!patientRow) return null;
   const extras = await loadPatientExtras(patientRow.id as string, audience);
   const follow = (await loadGoalFollowup([String(patientRow.id)], audience)).get(String(patientRow.id));
+  const waterGoal = (await loadWaterGoals([String(patientRow.id)], audience)).get(String(patientRow.id));
   if (audience === 'professional') {
     const archivedAt = await loadArchivedAt([String(patientRow.id)]);
-    return mapPatient({ ...patientRow, ...follow, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, extras, audience);
+    return mapPatient({ ...patientRow, ...follow, water_goal_glasses: waterGoal, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, extras, audience);
   }
   const archivedAt = await loadOwnArchivedAt(String(patientRow.id));
-  return mapPatient({ ...patientRow, ...follow, archived_at: archivedAt }, extras, audience);
+  return mapPatient({ ...patientRow, ...follow, water_goal_glasses: waterGoal, archived_at: archivedAt }, extras, audience);
 }
 
 export async function sbAddMealLog(patientId: string, log: Omit<MealLog, 'id' | 'patient_id' | 'logged_at' | 'status'>): Promise<MealLog> {
@@ -918,6 +938,7 @@ export async function sbUpdatePatientProfile(patientId: string, input: {
   sensitive_hours?: string;
   plan_b?: string;
   next_focus?: string;
+  water_goal_glasses?: number | null;
 }): Promise<void> {
   const sb = getRequestDb();
   const patch: Record<string, unknown> = {};
@@ -930,6 +951,7 @@ export async function sbUpdatePatientProfile(patientId: string, input: {
   if (input.sensitive_hours !== undefined) patch.sensitive_hours = input.sensitive_hours;
   if (input.plan_b !== undefined) patch.plan_b = input.plan_b;
   if (input.next_focus !== undefined) patch.next_focus = input.next_focus;
+  if (input.water_goal_glasses !== undefined) patch.water_goal_glasses = input.water_goal_glasses;
   const { error } = await sb.from('patients').update(patch).eq('id', patientId);
   if (error) throwWriteError(error);
 }
