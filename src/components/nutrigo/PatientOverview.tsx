@@ -13,6 +13,7 @@ import type { ShowroomPatient } from './showroom-model';
 import type { ShowroomPage } from './ShowroomPanels';
 import { FigmaAsset, FigmaRecordDialog } from './FigmaPatientFront';
 import { NvIcon } from './NvIcon';
+import { waterGoalOf } from '../../types/water';
 
 // Relative energy from recorded macros (4/4/9), never a prescribed daily target.
 export function macroShares(macros: Macros) {
@@ -63,7 +64,7 @@ export function PatientOverview({ patient: p, onNavigate, audience = 'patient' }
       <NvMetric label="Descanso" value={p.sleep} note="Registro de hoy" icon="moon" nvIcon="descanso" onOpen={() => onNavigate('progreso')}>
         <NvBars label="Horas de sueño" values={p.journey.days.map((d) => ({ label: d.label, value: (d.sleepMinutes ?? 0) / 60 }))} />
       </NvMetric>
-      <NvMetric label="Hidratación" value={<>{p.hydration}<em>vasos</em></>} note="Registro de hoy · sin meta prescrita" icon="drop" nvIcon="hidratacion" onOpen={() => onNavigate('progreso')}>
+      <NvMetric label="Hidratación" value={<>{p.hydration}<em>vasos</em></>} note={`Registro de hoy · meta ${waterGoalOf({ water_goal_glasses: p.waterGoal })} vasos`} icon="drop" nvIcon="hidratacion" onOpen={() => onNavigate('progreso')}>
         <div className="np-water" aria-hidden="true"><Icon name="drop" size={19} /><span>{professional ? 'Agua registrada' : 'Tu registro de agua'}</span></div>
       </NvMetric>
     </div>

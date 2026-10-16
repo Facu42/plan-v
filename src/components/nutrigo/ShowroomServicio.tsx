@@ -166,7 +166,7 @@ export function NutritionistPanel({ nutritionist, monthlyPrice, onChange, onBack
     </section>
 
     <section className="cbz-block"><h3>Excepción</h3>
-      <p className="cbz-hint">{current === 'waived' ? 'Tiene el servicio sin cargo.' : current === 'suspended' ? 'Está suspendida.' : 'Sin excepciones: se rige por la prueba y los pagos.'}</p>
+      <p className="cbz-hint">{current === 'waived' ? 'Tiene el servicio sin cargo.' : current === 'suspended' ? 'Está suspendida: ve todo, pero no puede cargar ni cambiar nada.' : 'Sin excepciones: se rige por la prueba y los pagos. Si vence, sigue andando y ve un aviso; para dejarla en solo lectura, suspendela.'}</p>
       <div className="cbz-form"><label htmlFor="svc-override-note">Nota (opcional)<input id="svc-override-note" value={overrideNote} onChange={(event) => setOverrideNote(event.target.value)} maxLength={280} disabled={busy} /></label></div>
       <div className="cbz-actions">
         {current !== 'waived' && <NvButton className="nv-soft" disabled={busy} onClick={() => void setOverride('waived')}>Sin cargo</NvButton>}

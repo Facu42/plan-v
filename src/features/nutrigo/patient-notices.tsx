@@ -9,6 +9,7 @@ import type { ShowroomPatient } from '../../components/nutrigo/showroom-model';
 import { unreadCount } from '../../components/nutrigo/message-receipts';
 import { unreadBadge } from './patient-navigation';
 import { useFeeNotice } from './fee-notice';
+import { PushRow } from './push-row';
 import './patient-menu-sheet.css';
 
 export type PatientNotice = { id: string; icon: IconName; title: string; note: string; page: ShowroomPage; resource?: string };
@@ -127,6 +128,7 @@ export function NoticesSheet({ items, onNavigate, onClose }: { items: PatientNot
                 </button>
               </li>
             ))}</ul>}
+          <PushRow />
         </nav>
       </div>
     </dialog>

@@ -998,6 +998,7 @@ describe('PV-11 directory summaries', () => {
     harness.push('nutritionists',{data:{id:'nutri-1'},error:null});harness.push('nutritionists',{data:{id:'nutri-1'},error:null});
     harness.push('patients',{data:Array.from({length:101},(_,i)=>({...summaryRow,id:`patient-${i}`})),error:null});
     harness.push('patients',{data:[],error:null}); // Goal followup for the first page.
+    harness.push('patients',{data:[],error:null}); // Water goals for the first page.
     harness.push('patients',{data:[],error:null}); // Archived metadata for the first page.
     harness.push('patients',{data:null,error:failure});
     await expect(sbGetPatientsForNutri('user-1')).rejects.toEqual(failure);
