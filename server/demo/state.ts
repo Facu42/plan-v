@@ -53,6 +53,12 @@ export class DemoStateFile {
     if (current.consultations && !Object.prototype.hasOwnProperty.call(saved.domains, 'consultations')) {
       saved.domains.consultations = { sessions: new Map(), shared: new Map(), tasks: new Map(), audio: new Map() };
     }
+    const importDomains: Record<string,string[]> = { 'patient-import': ['batches','contacts','applied','histories'], 'import-external-authorization': ['authorizations','measurements'] };
+    for (const [name, fields] of Object.entries(importDomains)) {
+      if (current[name] && !Object.prototype.hasOwnProperty.call(saved.domains,name) && keys(current[name])===fields.sort().join('\n') && fields.every(field=>current[name][field] instanceof Map)) {
+        saved.domains[name]=Object.fromEntries(fields.map(field=>[field,new Map()]));
+      }
+    }
     if (keys(current) !== keys(saved.domains)) throw new Error('La copia local tiene dominios diferentes; se conservó el archivo');
     // Validar todo antes de restaurar para no dejar un estado parcial.
     for (const [name, values] of Object.entries(current)) {

@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react';
-import { api, type InviteEmailDelivery, type PatientInvite } from '../../api/client';
+import { api, isAbortError, type InviteEmailDelivery, type PatientInvite } from '../../api/client';
+import { useAppStore } from '../../store/useAppStore';
+import { PatientImportDialog } from './PatientImportDialog';
+import { patientImportApi } from '../../api/patient-import';
+import { ApiError } from '../../api/error';
 import { careErrorMessage } from '../../api/care';
 import type { Patient, Stage } from '../../types';
 import { filterDirectoryPatients, getPatientDirectoryMetrics, type PatientDirectoryFilter } from '../crm/crm-patients';
@@ -253,6 +257,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
 }) {
   const [filter, setFilter] = useState<PatientDirectoryFilter>(initialFilter);
   const [creating, setCreating] = useState(false);
+  const [importing,setImporting] = useState(false);
   const [stageFilter, setStageFilter] = useState<Stage | ''>('');
   const [unlinkedOnly, setUnlinkedOnly] = useState(false);
   const [editing, setEditing] = useState<Patient | null>(null);
@@ -300,7 +305,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
     setBusyId(patient.id);
     setError('');
     try {
-      const { invite: ready } = await api.patientInvite(patient.id);
+      const { invite: ready } = await api.patientInvite(patient.id).catch(error=>{if(error instanceof ApiError&&error.status===409)return patientImportApi.invite(patient.id);throw error;});
       setShare({ name: patient.name, invite: ready });
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'No pudimos preparar la invitación.');
@@ -329,7 +334,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
       <div><span><Icon name="calendar" size={18}/>Con próxima consulta</span><strong>{metrics.appointments}</strong><small>Pacientes con turno vigente</small></div>
       <button type="button" className="nv-summary-archived" aria-label="Filtrar pacientes archivados" aria-pressed={filter==='archived'} onClick={()=>setFilter('archived')}><span><Icon name="history" size={18}/>Archivados</span><strong>{metrics.archived}</strong><small>Consultar o restaurar</small></button>
     </div>
-    <NvCard className="nv-directory-panel" title="Directorio de pacientes" action={<NvButton className="nv-soft" onClick={() => setCreating(true)}><Icon name="plus" size={14} />Nuevo paciente</NvButton>}>
+    <NvCard className="nv-directory-panel" title="Directorio de pacientes" action={<><NvButton className="nv-ghost" onClick={()=>setImporting(true)}>Importar pacientes</NvButton><NvButton className="nv-soft" onClick={() => setCreating(true)}><Icon name="plus" size={14} />Nuevo paciente</NvButton></>}>
       <div className="nv-directory-toolbar"><nav className="nv-directory-filters" aria-label="Filtrar pacientes">
         {FILTERS.map((item) => {
           const count = item.id === 'active' ? metrics.active : item.id === 'attention' ? metrics.attention : metrics.archived;
@@ -370,6 +375,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
       {!visible.length && <NvState title="Sin coincidencias" description="Probá otra búsqueda o filtro." />}
     </NvCard>
     {creating && <ShowroomPatientCreate onClose={() => setCreating(false)} onCreated={created} />}
+    {importing && <PatientImportDialog onClose={()=>setImporting(false)} onImported={()=>{void useAppStore.getState().refreshDirectory().catch(error=>{if(!isAbortError(error))setError('La importación se guardó, pero no pudimos actualizar el directorio. Recargá para verlo.');});}}/>}
     {editing && <ShowroomPatientEdit patient={editing} onClose={() => setEditing(null)} onSaved={(updated) => { onChanged(updated); setEditing(null); }} />}
   </section>;
 }
