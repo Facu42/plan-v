@@ -1,4 +1,5 @@
-import { componentGrams, componentTitle } from '../../src/types/plan-components.js';
+import { componentNativeQuantity, componentTitle } from '../../src/types/plan-components.js';
+import { foodQuantityUnit } from '../../src/types/foods.js';
 import { normalizeIngredientName, roundShoppingQty, shoppingSourceKey, type ShoppingLine, type ShoppingListView } from '../../src/types/shopping.js';
 import type { PatientMealPlan, PlanItemView } from '../../src/types/plans.js';
 
@@ -43,8 +44,8 @@ function addPlanItem(item: PlanItemView, add: (partial: Omit<Acc, 'checked' | 'i
   if (item.components) {
     for (const component of item.components) {
       if (component.kind === 'food') {
-        const grams = componentGrams(component), name = componentTitle(component);
-        add({ kind: grams === null ? 'text' : 'derived', source_key: shoppingSourceKey(grams === null ? 'text' : 'derived', name, grams === null ? null : 'g'), name, quantity: grams === null ? null : roundShoppingQty(grams), unit: grams === null ? null : 'g', occurrences: 1 });
+        const quantity = componentNativeQuantity(component), name = componentTitle(component),unit=component.food_snapshot?foodQuantityUnit(component.food_snapshot):null;
+        add({ kind: quantity === null ? 'text' : 'derived', source_key: shoppingSourceKey(quantity === null ? 'text' : 'derived', name, quantity === null ? null : unit), name, quantity: quantity === null ? null : roundShoppingQty(quantity), unit: quantity === null ? null : unit, occurrences: 1 });
       } else addPlanItem({ ...item, components: undefined, recipe: component.kind === 'recipe' ? component.recipe_snapshot ?? null : null, recipe_proposal: component.kind === 'text' ? component.recipe_proposal : undefined, free_text: component.kind === 'text' ? component.free_text : null, recipe_title: componentTitle(component), portions: component.kind === 'recipe' || component.kind === 'text' ? component.portions ?? null : null }, add);
     }
     return;

@@ -28,7 +28,7 @@ describe('Rutas nutricionales reales',()=>{
     const api=app(),first='a0000000-0000-4000-8000-000000000001',second='a0000000-0000-4000-8000-000000000002';
     for(const[id,name]of[[first,'Manzana'],[second,'Pera']])expect((await send(api,'/api/foods',foodInputSchema.parse({id,expected_revision:0,name,kind:'food',source:'Fuente de prueba',nutrients:{kcal:50},portions:[]}))).status).toBe(200);
     const saved=await send(api,'/api/nutrition/exchanges',{id:'b0000000-0000-4000-8000-000000000001',expected_revision:0,name:'Frutas',reference:'Porciones revisadas',reviewed:true,items:[{food_id:first,food_revision:1,grams:120},{food_id:second,food_revision:1,grams:150}]});expect(saved.status).toBe(200);expect((await saved.json()).group.items[0].food.source).toBe('Fuente de prueba');
-    const result=await(await api.request('/api/foods/search?page=1&page_size=1')).json();expect(result.total).toBe(2);expect(result.foods).toHaveLength(1);expect(result.summary.total).toBe(2);
+    const result=await(await api.request('/api/foods/search?scope=own&page=1&page_size=1')).json();expect(result.total).toBe(2);expect(result.foods).toHaveLength(1);expect(result.summary.own).toBe(2);expect(result.summary.platform).toBe(930);
   });
   it('niega todos los recursos nutricionales a paciente y administrador',async()=>{
     mock.enabled=true;for(const actor of[{role:'paciente',patientId:'patient',userId:'actor'},{role:'admin',userId:'actor'}]){mock.actor.mockResolvedValue(actor);for(const path of['/api/nutrition/settings','/api/nutrition/exchanges','/api/nutrition/external-foods?q=apple'])expect((await app(true).request(path)).status).toBe(403);}

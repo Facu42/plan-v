@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { PlanComponentView } from '../../types/plan-components';
 import { componentGrams, componentTitle } from '../../types/plan-components';
+import { foodQuantityUnit } from '../../types/foods';
 import type { PlanItemView, PlanMealTimes, PlanMealLabels, PlanRecipeDetail, PlanVersionView } from '../../types/plans';
 import { eachIsoDate, mealSlotLabel, PLAN_SLOTS, planWeekdayLabel } from '../../types/plans';
 import { recipeNutritionLabel, type ProposedRecipe } from '../../types/ai-nutrition';
@@ -22,7 +23,7 @@ function RecipeInstructions({ recipe, portions }: { recipe: PlanRecipeDetail | P
 function Component({ component }: { component: PlanComponentView }) {
   const grams = componentGrams(component);
   return <section className="pv-component"><h4>{componentTitle(component)}</h4>
-    {component.kind === 'food' && <><p>{declaredAmount(component.quantity)} {component.measure ?? 'g'}{component.measure && grams != null ? ` (${amount(grams)} g)` : ''}</p><small>Fuente: {component.food_snapshot?.source || 'Sin fuente declarada'} · revisión {component.food_revision}</small></>}
+    {component.kind === 'food' && <><p>{declaredAmount(component.quantity)} {component.measure ?? (component.food_snapshot?foodQuantityUnit(component.food_snapshot):'g')}{component.measure && grams != null ? ` (${amount(grams)} g)` : ''}</p><small>Fuente: {component.food_snapshot?.source || 'Sin fuente declarada'} · revisión {component.food_revision}{component.food_snapshot?.composition?' · Carbohidratos disponibles':''}</small></>}
     {component.kind === 'recipe' && <><small>Receta publicada · versión {component.recipe_version}</small>{component.recipe_snapshot ? <RecipeInstructions recipe={component.recipe_snapshot} portions={component.portions} /> : <p>El detalle de esta receta no está disponible.</p>}</>}
     {component.kind === 'text' && component.recipe_proposal && <RecipeInstructions recipe={component.recipe_proposal} portions={component.portions ?? NaN} />}
     {component.public_note && <p className="pv-note">{component.public_note}</p>}

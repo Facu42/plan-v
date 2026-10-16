@@ -97,9 +97,9 @@ export async function generateMenuDraft(context: MenuJobContext, planId?: string
         if (!recipe) throw new AIUnavailableError('unknown_recipe');
         return { for_date: item.for_date, slot: item.slot, recipe_id: recipe.id, recipe_version: recipe.version, portions: item.portions, public_note: item.public_note };
       }
-      const proposal: ProposedRecipe = { ...item.recipe_proposal!, nutrition: item.recipe_proposal!.nutrition ? {
-        ...item.recipe_proposal!.nutrition, origin: 'ai_estimate', source: 'estimacion_ia.v2',
-      } : null };
+      // Inline proposals cannot freeze institutional references in this contract.
+      // Only published versioned recipes carry trusted composition into menus.
+      const proposal: ProposedRecipe = { ...item.recipe_proposal!, nutrition:null };
       const terms = [...context.allergies.items, ...context.restrictions.items];
       const ingredients = `${proposal.title} ${proposal.ingredients.map((ingredient) => ingredient.name).join(' ')}`.toLocaleLowerCase('es-AR');
       terms.filter((term) => ingredients.includes(term.toLocaleLowerCase('es-AR'))).forEach((term) => warnings.push(`Revisar posible presencia de «${term}».`));
@@ -109,7 +109,7 @@ export async function generateMenuDraft(context: MenuJobContext, planId?: string
       id: z.uuid().parse(planId ?? randomUUID()), period_start: start, period_end: end,
       timezone: 'America/Argentina/Buenos_Aires', items,
     }), context.confirmed_target, context.catalog);
-    warnings.push('Los nutrientes de las recetas nuevas son estimaciones de IA. Revisalos antes de publicar.');
+    warnings.push('Las propuestas nuevas necesitan composición exacta de SARA 2 en el editor de recetas. Usá una receta publicada para incorporar cifras verificables al menú; sin referencia segura no se agregan nutrientes.');
     if (adjusted.nutrition.days.some((day) => day.status !== 'adjusted')) warnings.push('Hay días sin ajuste calórico completo. Revisá nutrientes, meta y límites de porciones.');
     return {
       source: 'ai' as const,

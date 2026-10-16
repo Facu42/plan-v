@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { proposedRecipeSchema } from './ai-nutrition.js';
-import { scaleFoodNutrients, type Food, type FoodNutrients } from './foods.js';
+import { foodNativeQuantity, foodQuantityUnit, scaleFoodNutrients, type Food, type FoodNutrients } from './foods.js';
 import type { PlanRecipeDetail } from './plans.js';
 import { recipePortionNutrients } from './plan-recipe-selection.js';
 
@@ -21,13 +21,16 @@ export function componentInput(component: PlanComponentView): PlanComponentInput
   return input;
 }
 export function componentGrams(component: PlanComponentView) {
+  if (component.kind==='food' && component.food_snapshot && foodQuantityUnit(component.food_snapshot)==='ml') return null;
+  return componentNativeQuantity(component);
+}
+export function componentNativeQuantity(component: PlanComponentView) {
   if (component.kind !== 'food' || !component.food_snapshot) return null;
-  const grams = component.quantity * (component.measure === null ? 1 : component.food_snapshot.portions.find(portion => portion.name === component.measure)?.grams ?? NaN);
-  return Number.isFinite(grams) && grams > 0 && grams <= 100000 ? grams : null;
+  return foodNativeQuantity(component.food_snapshot,component.quantity,component.measure);
 }
 export function componentNutrients(component: PlanComponentView): Partial<FoodNutrients> | null {
   if (component.kind === 'recipe') return component.recipe_snapshot ? recipePortionNutrients(component.recipe_snapshot, component.portions) : null;
-  if (component.kind === 'food') { const grams = componentGrams(component); return grams === null ? null : scaleFoodNutrients(component.food_snapshot!.nutrients, grams); }
+  if (component.kind === 'food') { const amount = componentNativeQuantity(component); return amount === null ? null : scaleFoodNutrients(component.food_snapshot!.nutrients, amount); }
   if (component.kind === 'text' && component.recipe_proposal?.nutrition && Number.isFinite(component.portions) && component.portions! > 0 && component.portions! <= 50) {
     const v = component.recipe_proposal.nutrition.per_portion, n = component.portions!;
     return { kcal: v.kcal * n, protein: v.protein_g * n, carbs: v.carbs_g * n, fat: v.fat_g * n };

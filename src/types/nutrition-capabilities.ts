@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { NUTRIENTS, type Food } from './foods';
+import { foodQuantityUnit, NUTRIENTS, type Food } from './foods';
 import type { PlanComponentView } from './plan-components';
 
 export const FORMULAS = ['mifflin', 'harris', 'fao', 'katch', 'scale'] as const;
@@ -18,14 +18,19 @@ export type NutritionSettings = z.infer<typeof nutritionSettingsSchema>;
 export type NutritionSettingsView = { settings:NutritionSettings; revision:number };
 export const defaultNutritionSettings = ():NutritionSettings => ({approvals:[],micronutrients:[],brand:{name:'',contact:'',logo:''}});
 export const settingsSaveSchema = z.object({expected_revision:z.number().int().min(0).max(Number.MAX_SAFE_INTEGER-1),settings:nutritionSettingsSchema}).strict();
-export const exchangeSaveSchema = z.object({id:z.uuid(),expected_revision:z.number().int().min(0).max(Number.MAX_SAFE_INTEGER-1),name:z.string().trim().min(2).max(80),reference:z.string().trim().min(3).max(500),reviewed:z.literal(true),items:z.array(z.object({food_id:z.uuid(),food_revision:z.number().int().min(1),grams:z.number().finite().positive().max(100000)}).strict()).min(2).max(5)}).strict().superRefine((value,ctx)=>{if(new Set(value.items.map(item=>item.food_id)).size!==value.items.length)ctx.addIssue({code:'custom',path:['items'],message:'No repitas alimentos en el grupo.'});});
+const exchangeIdentity={food_id:z.uuid(),food_revision:z.number().int().min(1)};
+const exchangeItemSchema=z.union([z.object({...exchangeIdentity,grams:z.number().finite().positive().max(100000)}).strict(),z.object({...exchangeIdentity,quantity:z.number().finite().positive().max(100000),unit:z.enum(['g','ml'])}).strict()]);
+export const exchangeSaveSchema = z.object({id:z.uuid(),expected_revision:z.number().int().min(0).max(Number.MAX_SAFE_INTEGER-1),name:z.string().trim().min(2).max(80),reference:z.string().trim().min(3).max(500),reviewed:z.literal(true),items:z.array(exchangeItemSchema).min(2).max(5)}).strict().superRefine((value,ctx)=>{if(new Set(value.items.map(item=>item.food_id)).size!==value.items.length)ctx.addIssue({code:'custom',path:['items'],message:'No repitas alimentos en el grupo.'});});
 export type ExchangeInput = z.infer<typeof exchangeSaveSchema>;
-export type ExchangeGroup = Omit<ExchangeInput,'expected_revision'|'items'|'reviewed'> & {revision:number;owner_id:string;items:Array<{grams:number;food:Food}>;updated_at:string};
+export type ExchangeItem={grams:number|null;quantity?:number;unit?:'g'|'ml';food:Food};
+export const exchangeAmount=(item:ExchangeItem)=>item.quantity??item.grams??NaN;
+export type ExchangeGroup = Omit<ExchangeInput,'expected_revision'|'items'|'reviewed'> & {revision:number;owner_id:string;items:ExchangeItem[];updated_at:string};
 /** Grupos aprobados por la profesional: alimentos concretos, cantidades reales, nunca cantidades inferidas. */
 export function exchangeComponent(group:ExchangeGroup,foodId:string,units:number,id:string):PlanComponentView {
   if(!Number.isFinite(units)||units<=0||units>20)throw new Error('Indicá una cantidad mayor que cero y de hasta veinte intercambios.');
   const item=group.items.find(row=>row.food.id===foodId);
-  if(!item||item.grams*units>100000)throw new Error('Elegí una alternativa del grupo con una cantidad válida.');
-  return {id,kind:'food',food_id:item.food.id,food_revision:item.food.revision,food_snapshot:structuredClone(item.food),quantity:item.grams*units,measure:null,public_note:`Grupo ${group.name} · ${units} intercambios. Revisado por tu nutricionista.`};
+  if(!item||!Number.isFinite(exchangeAmount(item))||exchangeAmount(item)*units>100000)throw new Error('Elegí una alternativa del grupo con una cantidad válida.');
+  if(item.unit&&item.unit!==foodQuantityUnit(item.food))throw new Error('La unidad del intercambio cambió. Revisá el grupo.');
+  return {id,kind:'food',food_id:item.food.id,food_revision:item.food.revision,food_snapshot:structuredClone(item.food),quantity:exchangeAmount(item)*units,measure:null,public_note:`Grupo ${group.name} · ${units} intercambios. Revisado por tu nutricionista.`};
 }
 export const micronutrientLabel = (key:string) => NUTRIENTS.find(([id])=>id===key)?.[1]??key;

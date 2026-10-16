@@ -17,8 +17,8 @@ visto bueno de Facundo.
 | Fórmulas, equivalencias, micronutrientes, PDF con marca, USDA | Codex | PR #108 (`codex/nutridesk-release-nutricion`) | Borrador, encima de #107 |
 | Ficha clínica, laboratorio y exportaciones en PDF | Codex | PR #115 (encima de #108) | Borrador actualizado: comprobación del permiso y pacing reparados; sesiones reales aprobadas en la pila actual |
 | Agenda pública, Google, Mercado Pago, equipo y recepción | Codex | PR #123 (`codex/nutridesk-release-agenda`) | Borrador disponible, encima de #115. Proveedores externos apagados |
-| Operaciones, comunicaciones, asistente de cartera y ayuda | Codex | `codex/nutridesk-release-operaciones` | Entrega 7 verificada localmente, encima de #123; PR pendiente de crear, [informe vigente](nutridesk-release-operaciones-2026-10-15.md) |
-| Tabla de composición SARA 2 solicitada | Codex | `codex/nutridesk-release-sara2` | Entrega 8 en preparación; 930 registros y 39 componentes, todavía sin publicar |
+| Operaciones, comunicaciones, asistente de cartera y ayuda | Codex | PR #127 (`codex/nutridesk-release-operaciones`) | Entrega 7 verificada localmente, encima de #123; [informe vigente](nutridesk-release-operaciones-2026-10-15.md) |
+| Tabla de composición SARA 2 solicitada | Codex | `codex/nutridesk-release-sara2` | Entrega 8 integrada sobre #127 `5c8ea54`; 930 registros y 39 componentes. Suite final 2.999/0/2 en 458 archivos y revisión/QA local aprobados; borrador propio pendiente de subir, sin producción |
 | Lo que Codex dejó sin guardar en la PC de Facundo: importar pacientes (otra versión), Equivalencias (otra versión), asistente con IA para la cartera | Codex | solo en la PC (sin respaldo) | Espera la frase de Facundo para respaldarlo |
 | Seguridad y operación (vistas de paciente solo lectura, privacidad de la IA, staging, monitoreo, respaldo de archivos) | Claude | ramas `claude/*` | En curso |
 | Comparación de #105 con Figma y orden de juntado de la pila de Codex | Claude | `docs/coordinacion/` y comentarios en los PR | #105 comparado el 14/10. Claude no empuja a ramas de Codex |
@@ -30,7 +30,7 @@ visto bueno de Facundo.
 
 1. **Ramas.** Claude trabaja en `claude/*`, Codex en `codex/*`, Cursor en `cursor/*`. Nadie empuja a
    ramas de otro ni a `respaldo/*`. Un PR por tema. Nada directo a `main`.
-2. **Migraciones.** Codex tiene reservado `20261011140000` a `20261014235959` (sus 17 migraciones).
+2. **Migraciones.** Codex tiene reservado `20261011140000` a `20261014235959` (18 migraciones ya escritas, incluida SARA 2 desde el 14/10).
    Claude usa fechas desde `20261015000000`. Si Codex vuelve, usa fechas posteriores a la última que
    figure en `main` **y** en la tabla de abajo. Nunca se edita una migración ya escrita por otro.
    Solo Facundo autoriza aplicar migraciones en producción, con su frase escrita.
@@ -51,8 +51,10 @@ visto bueno de Facundo.
 | Rango o archivo | Dueño | Estado |
 |---|---|---|
 | `20261011140000_clinical_ai_budget` … `20261013123000_imported_clinical_export` (17 archivos, manifiesto en `docs/deployment/nutridesk-migrations-2026-10-13.json` de la rama de Codex) | Codex | Sin aplicar |
+| `20261014180000_sara2_catalog` | Codex | Escrita el 14/10 antes de la regla de fechas nuevas; conservada como entrega 8. Sin aplicar |
 | `20261015090000_patient_views_read_only` | Claude | PR #110, en main desde el 14/10. Aplicada en la base el 14/10 con la frase de Facundo (el historial de la base la anota como `20261014215529`) |
 | `20261015100000_habit_symptoms` | Claude | PR #112, en main desde el 14/10. Aplicada en la base el 14/10 con la frase de Facundo (el historial la anota como `20261014215543`) |
+| `20261015210000_activity_kcal` | Claude | PR #122, en main `9c56854`; ya observada aplicada con alias `20261015173356`. Se conserva como base exacta, no pendiente |
 | `20261015*` en adelante | Claude | Se anotan acá al crearlas |
 
 ## 4. Decisiones vigentes de Facundo (fechadas)
@@ -70,6 +72,10 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **16/10 · Codex** · Entrega 8 cerrada localmente sobre #127 `5c8ea54`, preservando main `9c56854`, las 25 escenas Nutrigo y guardas de la entrega 7. SARA 2: 930 registros/39 componentes; tres P2 visuales y etiquetas de volumen corregidos con evidencia real 1440/390. Suite propia final **2.999 aprobadas, cero fallos, dos omitidas, 458 archivos**, tipos, build 7,80 s, secretos y manifiesto **18 + tres bases exactas** aprobados. Revisión de código y [QA independiente](sara2-qa-2026-10-16.md) sin P1/P2; 1.787 huellas (`2e5bd04d…`) intactas. [Informe y Regression Guard](sara2-verificacion-2026-10-15.md) e [instructivo vigente](instructivo-plan-v-actualizado-2026-10-15.md). Stash/respaldo conservados. CI de la cabeza propia pendiente de subir el borrador; sin merge, SQL ni proveedores reales. SMTP pospuesto, Groq/ZDR y proveedores pendientes de validación, Kerr manual.
+
+- **15/10 · Codex** · Entrega 8 integrada mediante avance directo sobre #127 `5c8ea54`, conservando main `9c56854`, correo y guardas WhatsApp revisadas, pacing, demo estricto y OCR/CSP. Se recuperaron 930 registros SARA 2 y el control de unidades/definiciones; manifiesto de 18 pendientes + tres bases exactas, sin SQL remoto. Verificación final y revisión independiente en curso; [informe vigente](sara2-verificacion-2026-10-15.md) e [instructivo actualizado](instructivo-plan-v-actualizado-2026-10-15.md). Stash y respaldo permanecen conservados.
 
 - **15/10 · Codex** · Entrega 7 verificada desde #123 `d82c590`, con fuente integrada `b727195`: conserva las cinco mejoras heredadas de demo/pacing, OCR/CSP y todo main hasta `9c56854`. Se cerraron el permiso de correo de la paciente y el bloqueo de WhatsApp incompleto. Suite propia final 2.977/0/2 en 452 archivos, focal 214/28, gates y revisión de código aprobados; QA independiente 1440/390 y 1.789 huellas pos-suite/QA sin cambios. [Estado vigente](nutridesk-release-operaciones-2026-10-15.md). PR115 tiene sesiones reparadas; agenda está en #123, el PR de operaciones queda por crear y SARA 2 sigue separado. Sin merge a main ni activaciones externas.
 

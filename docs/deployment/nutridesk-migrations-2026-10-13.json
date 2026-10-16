@@ -97,6 +97,11 @@
       "version": "20261013123000",
       "file": "20261013123000_imported_clinical_export.sql",
       "sha256": "ccba990d2c58255c7e074c65d56378ebc41888664921074389e0347301931adc"
+    },
+    {
+      "version": "20261014180000",
+      "file": "20261014180000_sara2_catalog.sql",
+      "sha256": "074ed4703b754e5e0d3a1696321cb1109c6ba256e430c002f515a25bfcbd4036"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

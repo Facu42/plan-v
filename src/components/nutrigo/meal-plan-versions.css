@@ -106,3 +106,16 @@
 .plan-guidance-editor label{display:grid;gap:8px;margin-top:16px;font-weight:600}
 .plan-guidance-editor textarea{display:block;min-height:112px;resize:vertical;padding:12px;border:1px solid var(--nv-border);border-radius:10px;background:var(--nv-surface,#fff);color:var(--nv-ink);font:inherit;font-weight:400;width:100%;line-height:1.6}
 .plan-guidance-editor textarea:focus-visible{outline:2px solid var(--nv-strong);outline-offset:2px}
+@media(max-width:799px){
+  .pw-record .meal-plan-versions,.pw-record .meal-plan-form,.pw-record .meal-plan-form fieldset{min-width:0;max-width:100%;box-sizing:border-box}
+  .pw-record .meal-plan-form fieldset{margin-inline:0}
+  .pw-record .plan-editor-day-layout{grid-template-columns:minmax(0,1fr)}
+  .pw-record .plan-editor-day-layout>*,.pw-record .plan-editor-meal{min-width:0}
+  .pw-record .plan-editor-meal .meal-plan-item-row{grid-template-columns:minmax(0,1fr)}
+  .pw-record .plan-day-analysis{position:static;max-height:none;overflow:visible}
+  .pw-record .plan-component-main,.pw-record .plan-component-main:has(label:only-of-type){grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pw-record .plan-component-main>*{min-width:0}
+  .pw-record .plan-component-main>div:first-child{grid-column:1/-1;overflow-wrap:anywhere}
+  .pw-record .plan-component-main>button{justify-self:end}
+  .pw-record .plan-editor-days{min-width:0;max-width:100%}
+}
