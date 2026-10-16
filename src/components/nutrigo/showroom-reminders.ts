@@ -18,6 +18,7 @@ export function buildShowroomReminders(patient: ShowroomPatient, now: Date): Dai
       logged_at: log.logged_at,
     })),
     hydration: patient.hydration,
+    water_goal_glasses: patient.waterGoal,
     sleep_minutes: patient.sleepMinutes,
     appointment: patient.appointment,
   }, now);

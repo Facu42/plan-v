@@ -75,6 +75,7 @@ import { NV_ICONS, NvIcon, type NvIconName } from './NvIcon';
 import { CaretDown, CaretUp, LockSimple } from '@phosphor-icons/react';
 import { FigmaDetailContext, FigmaPatientFooter, FigmaPlanCard, PATIENT_FIGMA_NODES, type FigmaDetail } from './FigmaPatientFront';
 import { NutrigoPatientApp } from '../../features/nutrigo/PatientApp';
+import { ServiceNotice } from './ServiceNotice';
 
 
 const WORK_CENTER_PAGES: WorkCenterModule[] = ['reciente', 'guardado', 'seguimiento', 'paneles', 'videollamadas'];
@@ -441,6 +442,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
         <div className="nv-desktop-account">{!compactHeader && accountMenu()}</div>
         <button type="button" className="nv-button nv-ghost nv-menu-toggle" ref={menuButtonRef} aria-label={menuOpen ? 'Cerrar el menú' : 'Abrir el menú'} aria-expanded={menuOpen} aria-controls="nv-drawer" onClick={() => setMenuOpen((open) => !open)}><Icon name="list" size={20} /></button>
       </header>
+      {role === 'pro' && <ServiceNotice />}
       <div className="nv-content-layout">
         {/* Cambiar de pantalla o paciente desmonta los datos y formularios anteriores. */}
         <main key={`${contentIdentity(role,page,selected?.id)}:${workspaceRevision}`} id="nv-main" tabIndex={-1} className="nv-main" data-figma-node={role === 'patient' ? (figmaDetail?.nodes ?? PATIENT_FIGMA_NODES[page])?.[compactHeader ? 1 : 0] : undefined}>

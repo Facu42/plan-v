@@ -9,6 +9,7 @@ import { toPatientSelfView, type PatientAction } from '../security/contracts.js'
 import { getPatient } from '../store.js';
 import * as repo from './repository.js';
 import { enqueueOutboxBestEffort } from '../outbox/repository.js';
+import { notifyPatientPush } from '../push/push.js';
 import { randomUUID } from 'node:crypto';
 
 const access = {
@@ -48,6 +49,7 @@ export function registerAppointmentRoutes(app: Hono) {
       const actor = await authorize(auth.userId, patientId, 'edit_appointment');
       if (!actor || actor.role !== 'nutri') return c.json({ error: 'Prohibido' }, 403);
       await repo.scheduleAppointment(patientId, parsedBody.data.appointment, true);
+      notifyPatientPush(patientId, 'appointment');
       await enqueueOutboxBestEffort({
         patient_id: patientId,
         event_type: parsedBody.data.appointment ? 'appointment_scheduled' : 'appointment_cancelled',
@@ -87,6 +89,7 @@ export function registerAppointmentRoutes(app: Hono) {
       const actor = await authorize(auth.userId, patientId, 'reschedule_appointment');
       if (!actor) return c.json({ error: 'Prohibido' }, 403);
       await repo.rescheduleAppointment(patientId, parsedBody.data, true);
+      if (actor.role === 'nutri') notifyPatientPush(patientId, 'appointment');
       await enqueueOutboxBestEffort({
         patient_id: patientId,
         event_type: 'appointment_rescheduled',

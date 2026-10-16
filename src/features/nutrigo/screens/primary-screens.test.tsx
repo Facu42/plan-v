@@ -30,6 +30,14 @@ describe.each([false,true])('pantallas principales MCP (celular %s)',mobile=>{
     expect(html.indexOf('aria-label="Registrar Desayuno"')).toBeLessThan(html.indexOf('aria-label="Registrar Cena"'));
     expect(html).toContain('1,25 porciones');
   });
+  it('inicio cambia el texto bajo el saludo por la racha solo con dos días o más',()=>{
+    context.mobile=mobile;context.data={body:null,target:null,recipes:[],plan:null,exercise:null,care:null,failed:false};
+    const withStreak=renderToStaticMarkup(<NutrigoHome patient={{...patient,streak:{days:4,today:true,atLeast:false}}} onNavigate={navigate} onRecord={navigate} onHydration={navigate} onRest={navigate} onLogMeal={navigate}/>);
+    expect(withStreak).toContain('¡Llevás 4 días seguidos registrando! 🔥');
+    expect(withStreak).not.toContain('Tu acompañamiento, día a día');
+    const single=renderToStaticMarkup(<NutrigoHome patient={{...patient,streak:{days:1,today:true,atLeast:false}}} onNavigate={navigate} onRecord={navigate} onHydration={navigate} onRest={navigate} onLogMeal={navigate}/>);
+    expect(single).toContain('Tu acompañamiento, día a día');
+  });
   it('inicio muestra registros reales sin duplicar tarjetas ni usar métricas de ejemplo',()=>{
     context.mobile=mobile;context.data={body:{weight_kg:72},target:null,recipes:[],plan:null,exercise:null,care:{measurements:[]},failed:false};
     const html=renderToStaticMarkup(<NutrigoHome patient={{...patient,hydration:5,sleepMinutes:450,nutritionLogCount:0}} onNavigate={navigate} onRecord={navigate} onHydration={navigate} onRest={navigate} onLogMeal={navigate}/>);

@@ -43,3 +43,7 @@
 .pms .pms-figma [data-name="Menu Nav"] > * { width: 100%; }
 
 .pms-empty { margin: 8px; font: 400 13px/1.4 Poppins, sans-serif; color: var(--pms-muted); }
+
+/* Avisos al teléfono: misma fila de la hoja; prendida, el ícono toma el verde del archivo. */
+.pms-push[aria-pressed='true'] .pms-icon { background: var(--pms-green); color: var(--pms-ink); }
+.pms-push:disabled { cursor: default; opacity: .7; }
