@@ -2,7 +2,7 @@
   "project": "plan-v-app",
   "projectId": "wvosvlxpfytokwfbcero",
   "observedOn": "2026-10-16",
-  "mainBase": "ae19e5c49af07cb7451a5aff5048850051d6a909",
+  "mainBase": "bac31c9ad11dd9dd9bc39e111c704450d2e30a14",
   "productionApplied": false,
   "approvalRequired": true,
   "priorAliasNames": [
@@ -141,6 +141,13 @@
       "sha256": "cb7334e581e793c2ab06affba1819982b4c139e0ecf46c59893860a5dff96605",
       "observedAppliedVersion": "20261016090000",
       "observedAppliedName": "water_goal"
+    },
+    {
+      "file": "20261016232547_consultation_silence_summary.sql",
+      "version": "20261016232547",
+      "sha256": "8c9ba1776bc9be923bc8296537072a951be1d8ba506cd898f038d44a884e85be",
+      "observedAppliedVersion": "20261016233443",
+      "observedAppliedName": "consultation_silence_summary"
     }
   ]
 }

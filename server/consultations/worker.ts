@@ -68,7 +68,8 @@ export async function runPendingConsultations(limit=2) {
     else{const current=tasks.get(t.id)!;if(current.source_sha256&&current.source_sha256!==sourceHash)throw new Error('stale_source');current.source_sha256=sourceHash;t.summary_steps=structuredClone(current.summary_steps??[]);}
     text=await hierarchicalConsultationSummary({text:transcript,requestKey:t.request_key,steps:t.summary_steps??[],summarize:async(part,key,mode)=>{await check();return(await provider!.summarizeClinicalText({scope,taskId:t!.id,runToken:t!.run_token??undefined,requestKey:key,previousRequestKeys:(t!.request_history??[]).map(prior=>prior+key.slice(t!.request_key.length)),sessionId:t!.session_id,revision:t!.revision,text:part,summaryMode:mode,consentVersion:'ai_consultation.v1'})).summary;},save:async(step)=>{await check();if(persistent){const r=await privilegedDb().rpc('consultation_save_summary_step',{task_id:t!.id,token:t!.run_token,source_hash:sourceHash,step_value:step});consultationDbError(r.error);if(r.data!==true)throw new Error('stale_stage');}else{const current=tasks.get(t!.id)!;if(current.run_token!==t!.run_token||Date.parse(current.lease_until??'')<=Date.now())throw new Error('stale_lease');current.summary_steps=[...(current.summary_steps??[]),structuredClone(step)];}}});
    }
-   if(!text.trim()||text.length>50000)throw new Error('invalid_provider_result');
+   // A successful transcription may contain silence. Only summaries require words.
+   if((t.kind==='summary'&&!text.trim())||text.length>50000)throw new Error('invalid_provider_result');
    if(!lost)await complete(t,text,null,persistent,segments); processed++;
   }catch{
    if(!lost)await complete(t,'','No se pudo procesar con IA. Revisá la configuración, el presupuesto o los permisos y reintentá.',persistent);
