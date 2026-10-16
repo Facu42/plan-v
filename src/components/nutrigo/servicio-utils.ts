@@ -63,10 +63,11 @@ export const SERVICE_STATE_FILTERS: Array<{ id: ServiceState | 'todas' | 'cuenta
   { id: 'cuentas_prueba', label: 'Cuentas de prueba' },
 ];
 
-export type ServiceOrder = 'vencimiento' | 'ingreso' | 'nombre';
+export type ServiceOrder = 'vencimiento' | 'ingreso' | 'nombre' | 'pacientes';
 export const SERVICE_ORDERS: Array<{ id: ServiceOrder; label: string }> = [
   { id: 'vencimiento', label: 'Vencimiento más cercano' },
   { id: 'ingreso', label: 'Último ingreso' },
+  { id: 'pacientes', label: 'Más pacientes' },
   { id: 'nombre', label: 'Nombre' },
 ];
 
@@ -85,6 +86,7 @@ export function filterServiceRows(rows: ServiceRow[], { query = '', state = 'tod
       && (!needle || normalize(row.nutritionist.display_name).includes(needle) || normalize(row.nutritionist.email).includes(needle)))
     .sort((a, b) => {
       if (order === 'nombre') return byName(a, b);
+      if (order === 'pacientes') return b.nutritionist.patients_active - a.nutritionist.patients_active || byName(a, b);
       if (order === 'ingreso') return (b.nutritionist.last_sign_in_at ?? '').localeCompare(a.nutritionist.last_sign_in_at ?? '') || byName(a, b);
       const au = a.summary.until ?? '9999-12-31';
       const bu = b.summary.until ?? '9999-12-31';

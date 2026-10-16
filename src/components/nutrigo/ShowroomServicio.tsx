@@ -10,6 +10,7 @@ import { ConfirmDialog, FeeError } from './cobranzas-shared';
 import { feeErrorMessage, parsePesos } from './cobranzas-utils';
 import { adminErrorMessage, buildMailto, buildServiceRows, daysLeftText, emailsOf, filterServiceRows, mailKindFor, mailTemplate, replaceNutritionist, SERVICE_ORDERS, SERVICE_STATE_FILTERS, SERVICE_STATE_TONE, serviceEventLabel, shortDateTime, type ServiceOrder, type ServiceRow } from './servicio-utils';
 import { ActividadTab, AltasTab, PruebasTab } from './ServicioTabs';
+import { CountUp, StateDonut, type DonutSlice } from './AdminViz';
 import './cobranzas-fig.css';
 import './servicio-fig.css';
 
@@ -199,6 +200,7 @@ function ServiceList({ rows, selectedId, onSelect }: { rows: ServiceRow[]; selec
   const [order, setOrder] = useState<ServiceOrder>('vencimiento');
   const [copied, setCopied] = useState('');
   const visible = useMemo(() => filterServiceRows(rows, { query, state, order }), [rows, query, state, order]);
+  const maxPatients = Math.max(1, ...visible.map((row) => row.nutritionist.patients_active));
   const emails = emailsOf(visible);
   const template = mailTemplate(state === 'todas' ? 'bienvenida' : mailKindFor(state));
   const mailto = buildMailto(emails, template.subject, template.body);
@@ -224,17 +226,18 @@ function ServiceList({ rows, selectedId, onSelect }: { rows: ServiceRow[]; selec
     </div>}
     {!rows.length ? <NvState title="Todavía no hay nutricionistas" description="Cuando se sumen las vas a ver acá con su prueba y sus pagos." />
       : !visible.length ? <p className="cbz-muted cbz-pad">Ninguna nutricionista coincide con la búsqueda.</p>
-        : <ul className="cbz-patients">{visible.map(({ nutritionist, summary }) => <li key={nutritionist.id}>
-          <button type="button" className={nutritionist.id === selectedId ? 'cbz-selected' : ''} aria-pressed={nutritionist.id === selectedId} aria-label={`Ver servicio de ${nutritionist.display_name}`} onClick={() => onSelect(nutritionist.id)}>
-            <span className="cbz-who"><strong>{nutritionist.display_name}</strong><small>{nutritionist.email}</small>
-              <small>{nutritionist.patients_active === 1 ? '1 paciente activa' : `${nutritionist.patients_active} pacientes activas`} · Último ingreso: {nutritionist.last_sign_in_at ? shortDateTime(nutritionist.last_sign_in_at) : 'nunca'}</small></span>
-            <span className="cbz-side">
-              <ServiceStateBadge state={summary.state} />
-              {summary.until && <small className="svc-until">Hasta {formatFeeDate(summary.until)}</small>}
-              {summary.days_left !== null && <small className="svc-until">{daysLeftText(summary)}</small>}
-            </span>
-          </button>
-        </li>)}</ul>}
+        : <div className="adm-table-wrap"><table className="adm-table">
+          <thead><tr><th scope="col">#</th><th scope="col">Nutricionista</th><th scope="col">Estado</th><th scope="col">Pacientes</th><th scope="col">Vigencia</th><th scope="col">Último ingreso</th></tr></thead>
+          <tbody>{visible.map(({ nutritionist, summary }, index) => <tr key={nutritionist.id} className={nutritionist.id === selectedId ? 'adm-selected' : ''} style={{ ['--adm-i' as string]: Math.min(index, 14) }}>
+            <td className="adm-rank">{index + 1}</td>
+            <td><button type="button" className="adm-who" aria-pressed={nutritionist.id === selectedId} aria-label={`Ver servicio de ${nutritionist.display_name}`} onClick={() => onSelect(nutritionist.id)}>
+              <span className="adm-avatar" aria-hidden="true">{nutritionist.display_name.trim().charAt(0).toUpperCase()}</span>
+              <span><strong>{nutritionist.display_name}</strong><small>{nutritionist.email}</small></span></button></td>
+            <td><ServiceStateBadge state={summary.state} /></td>
+            <td><span className="adm-bar" title={`${nutritionist.patients_active} activas de ${nutritionist.patients_total}`}><i style={{ width: `${Math.round((nutritionist.patients_active / maxPatients) * 100)}%` }} /></span><b>{nutritionist.patients_active === 1 ? '1 paciente activa' : `${nutritionist.patients_active} pacientes activas`}</b></td>
+            <td>{summary.until ? <>Hasta {formatFeeDate(summary.until)}<small>{daysLeftText(summary)}</small></> : <small>Sin fecha</small>}</td>
+            <td>{nutritionist.last_sign_in_at ? shortDateTime(nutritionist.last_sign_in_at) : <small>Último ingreso: nunca</small>}</td>
+          </tr>)}</tbody></table></div>}
   </section>;
 }
 
@@ -245,6 +248,12 @@ export function ServicioScreen({ board, onBoard, today = localBillingDate(), ini
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId);
   const rows = useMemo(() => buildServiceRows(board, today), [board, today]);
   const totals = serviceTotals(board.nutritionists, today);
+  const slices: DonutSlice[] = [
+    { id: 'activas', label: 'Activas', value: totals.activas, color: 'var(--adm-lime)' },
+    { id: 'prueba', label: 'En prueba', value: totals.prueba, color: 'var(--adm-blue)' },
+    { id: 'vencidas', label: 'Vencidas', value: totals.vencidas, color: 'var(--adm-coral)' },
+    { id: 'sin_cargo', label: 'Sin cargo', value: totals.sin_cargo, color: 'var(--adm-grey)' },
+  ];
   const selected = selectedId ? board.nutritionists.find((item) => item.id === selectedId) ?? null : null;
   const names = useMemo(() => new Map(board.nutritionists.map((item) => [item.id, item.display_name])), [board.nutritionists]);
 
@@ -256,11 +265,15 @@ export function ServicioScreen({ board, onBoard, today = localBillingDate(), ini
     <div id="svc-tabpanel" role="tabpanel" aria-labelledby={`svc-tab-${tab}`} className="svc-tabpanel">
       {tab === 'resumen' && <>
         <dl className="cbz-summary">
-          <div className="cbz-stat"><dt>Activas</dt><dd>{totals.activas}</dd></div>
-          <div className="cbz-stat"><dt>En prueba</dt><dd>{totals.prueba}</dd></div>
-          <div className="cbz-stat"><dt>Vencidas</dt><dd>{totals.vencidas}</dd></div>
-          <div className="cbz-stat"><dt>Cobrado este mes</dt><dd>{formatPesos(totals.cobrado_mes)}</dd></div>
+          <div className="cbz-stat"><dt>Activas</dt><dd><CountUp value={totals.activas} /></dd></div>
+          <div className="cbz-stat"><dt>En prueba</dt><dd><CountUp value={totals.prueba} /></dd></div>
+          <div className="cbz-stat"><dt>Vencidas</dt><dd><CountUp value={totals.vencidas} /></dd></div>
+          <div className="cbz-stat"><dt>Cobrado este mes</dt><dd><CountUp value={totals.cobrado_mes} format={formatPesos} /></dd></div>
         </dl>
+        <div className="adm-hero">
+          <StateDonut slices={slices} centerLabel="nutricionistas" />
+          <div className="adm-hero-note"><h3>Estado del servicio</h3><p>Cada tramo es un estado de las nutricionistas de verdad; las cuentas de prueba no cuentan.</p></div>
+        </div>
         <div className={`cbz-layout${selected ? ' cbz-has-selection' : ''}`}>
           <div className="cbz-list-col">
             <ServiceList rows={rows} selectedId={selectedId} onSelect={setSelectedId} />
