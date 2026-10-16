@@ -1,4 +1,4 @@
-import { NUTRIENTS, type Food, type FoodNutrients } from './foods.js';
+import { foodNativeQuantity, foodQuantityUnit, NUTRIENTS, type Food, type FoodNutrients } from './foods.js';
 
 export type RecipeCatalogItem = {
   name: string;
@@ -7,7 +7,8 @@ export type RecipeCatalogItem = {
   catalog_ref?: { id: string; revision: number; measure: string | null };
 };
 export type RecipeCatalogSnapshot = {
-  lines: Array<RecipeCatalogItem & { grams: number | null; food: Food | null }>;
+  carbohydrates?: 'available' | 'source_declared' | 'mixed';
+  lines: Array<RecipeCatalogItem & { grams: number | null; native_quantity?: number | null; food: Food | null }>;
   totals: FoodNutrients;
   per_portion: FoodNutrients;
   per_100g: FoodNutrients | null;
@@ -41,16 +42,20 @@ export function calculateRecipeCatalog(
     if (food.revision !== ref.revision) throw new Error('El alimento cambió. Elegí su versión actual.');
     const portion = ref.measure == null ? null : food.portions.find(candidate => candidate.name === ref.measure);
     if (ref.measure != null && !portion) throw new Error('La medida elegida no está disponible.');
-    const grams = item.quantity * (portion?.grams ?? 1);
-    if (!Number.isFinite(grams) || grams <= 0 || grams > 100000) throw new Error('Revisá la cantidad en gramos.');
-    return { ...item, catalog_ref: { ...ref }, grams, food: structuredClone(food) };
+    if (food.composition && ref.measure===null && item.unit!==foodQuantityUnit(food)) throw new Error('La unidad debe coincidir con la base de la fuente; no se convierte volumen en peso.');
+    const native_quantity=foodNativeQuantity(food,item.quantity,ref.measure);
+    if(native_quantity===null)throw new Error('Revisá la cantidad en gramos o mililitros según la unidad del ingrediente.');
+    const grams=foodQuantityUnit(food)==='g'?native_quantity:null;
+    return { ...item, catalog_ref: { ...ref }, grams, native_quantity, food: structuredClone(food) };
   });
   const totals = Object.fromEntries(NUTRIENTS.map(([key]) => {
-    if (lines.some(line => line.food?.nutrients[key] == null || line.grams == null)) return [key, null];
-    return [key, lines.reduce((sum, line) => sum + line.food!.nutrients[key]! * line.grams! / 100, 0)];
+    if (key==='carbs' && new Set(lines.filter(line=>line.food).map(line=>line.food!.composition?.carbohydrates??'source_declared')).size>1) return [key,null];
+    if (lines.some(line => line.food?.nutrients[key] == null || (('native_quantity' in line?line.native_quantity:line.grams)==null))) return [key, null];
+    return [key, lines.reduce((sum, line) => sum + line.food!.nutrients[key]! * (('native_quantity' in line?line.native_quantity:line.grams)!) / 100, 0)];
   })) as FoodNutrients;
   const scaled = (divisor: number): FoodNutrients => Object.fromEntries(NUTRIENTS.map(([key]) => [key, totals[key] == null ? null : round(totals[key]! / divisor)])) as FoodNutrients;
   return {
+    carbohydrates: new Set(lines.filter(line=>line.food).map(line=>line.food!.composition?.carbohydrates??'source_declared')).size>1?'mixed':lines.some(line=>line.food?.composition)?'available':'source_declared',
     lines,
     totals: scaled(1),
     per_portion: scaled(draft.yield_portions),

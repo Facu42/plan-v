@@ -15,11 +15,21 @@ export const foodInputSchema = z.object({
   kind: z.enum(['food', 'supplement']), source: z.string().trim().min(1, 'Indicá la fuente de los valores.').max(240), reference: z.string().trim().max(500).default(''),
   nutrients: foodNutrientsSchema, portions: z.array(foodPortionSchema).max(30),
 }).strict().superRefine((food, ctx) => {
+  if(food.source==='SARA 2 · Ministerio de Salud · 2022')ctx.addIssue({code:'custom',path:['source'],message:'Esa fuente identifica el catálogo institucional de sólo lectura. Para una carga propia indicá su fuente y referencia como declaración personal.'});
   const names = food.portions.map(p => normalizeFoodSearch(p.name));
   if (new Set(names).size !== names.length) ctx.addIssue({ code: 'custom', path: ['portions'], message: 'Cada medida necesita un nombre distinto.' });
 });
 export type FoodInput = z.infer<typeof foodInputSchema>;
-export type Food = Omit<FoodInput, 'expected_revision'> & { revision: number; owner_id: string | null; updated_at: string };
+export const SARA2_SOURCE = 'SARA 2 · Ministerio de Salud · 2022';
+export type FoodComposition = { dataset: 'sara2-2022-v1'; source_sha256: string; record_id: string; basis: { amount: 100; unit: 'g' | 'ml' }; carbohydrates: 'available'; source_page: number };
+// Institutional metadata is returned by the server, never accepted by foodInputSchema.
+export type Food = Omit<FoodInput, 'expected_revision'> & { revision: number; owner_id: string | null; updated_at: string; composition?: FoodComposition };
+export function foodQuantityUnit(food: Pick<Food,'composition'>): 'g'|'ml' { return food.composition?.basis.unit ?? 'g'; }
+export function foodNativeQuantity(food: Food, quantity: number, measure: string|null): number|null {
+  if (foodQuantityUnit(food)==='ml' && measure!==null) return null;
+  const amount=quantity*(measure===null?1:food.portions.find(p=>p.name===measure)?.grams??NaN);
+  return Number.isFinite(amount)&&amount>0&&amount<=100000?amount:null;
+}
 export function normalizeFoodSearch(value: string) { return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').trim().replace(/\s+/g, ' '); }
 export function scaleFoodNutrients(values: Partial<FoodNutrients>, grams: number): FoodNutrients {
   if (!Number.isFinite(grams) || grams < 0 || grams > 100000) throw new Error('Revisá la cantidad en gramos.');

@@ -15,8 +15,12 @@ export function editorPlanDates(start: string, end: string, itemDates: readonly 
   return Array.from(new Set([...days, ...itemDates.filter(valid)])).sort();
 }
 
-export type DayAnalysisLine = { portions: string; recipe?: PlanRecipeDetail | null; proposal?: ProposedRecipe; component?: PlanComponentView };
+export type CarbohydrateDefinition = 'available' | 'source_declared' | 'mixed';
+// Trusted analysis input, not an HTTP field. Server callers derive it from a saved recipe version.
+export type DayAnalysisLine = { portions: string; recipe?: PlanRecipeDetail | null; proposal?: ProposedRecipe; component?: PlanComponentView; carbohydrates?: CarbohydrateDefinition };
 export function analyzePlanDay(lines: readonly DayAnalysisLine[]) {
+  const definitions=new Set(lines.map(line=>line.carbohydrates??(line.component?.kind==='food'?line.component.food_snapshot?.composition?.carbohydrates??'source_declared':(line.component?.recipe_snapshot??line.recipe)?.catalog_recipe?.carbohydrates??'source_declared')));
+  const mixedCarbohydrates=definitions.size>1||definitions.has('mixed');
   let estimated = false;
   const amounts = lines.map(line => {
     if (line.component) {
@@ -36,11 +40,13 @@ export function analyzePlanDay(lines: readonly DayAnalysisLine[]) {
     return { kcal: nutrition.per_portion.kcal * portions, protein: nutrition.per_portion.protein_g * portions, carbs: nutrition.per_portion.carbs_g * portions, fat: nutrition.per_portion.fat_g * portions } as Partial<FoodNutrients>;
   });
   const nutrients = NUTRIENTS.map(([key, label, unit]) => {
+    if(key==='carbs'&&mixedCarbohydrates)return {key,label:'Carbohidratos · definiciones distintas',unit,known:0,missing:lines.length,total:null,subtotal:null};
     const known = amounts.filter(amount => amount?.[key] != null);
     const subtotal = Math.round(known.reduce((sum, amount) => sum + amount![key]!, 0) * 10000) / 10000;
-    return { key, label, unit, known: known.length, missing: lines.length - known.length, total: lines.length && known.length === lines.length ? subtotal : null, subtotal: known.length ? subtotal : null };
+    return { key, label:key==='carbs'&&definitions.has('available')?'Carbohidratos disponibles':label, unit, known: known.length, missing: lines.length - known.length, total: lines.length && known.length === lines.length ? subtotal : null, subtotal: known.length ? subtotal : null };
   });
-  return { count: lines.length, estimated, nutrients };
+  const carbohydrates:CarbohydrateDefinition|null=!lines.length?null:mixedCarbohydrates?'mixed':definitions.has('available')?'available':'source_declared';
+  return { count: lines.length, estimated, nutrients, carbohydrates };
 
   function analyzeProposal(portions: number, proposal?: ProposedRecipe): Partial<FoodNutrients> | null {
     if (!proposal?.nutrition || !Number.isFinite(portions) || portions <= 0 || portions > 50) return null;
@@ -52,15 +58,18 @@ export function analyzePlanDay(lines: readonly DayAnalysisLine[]) {
 
 export function analyzePlanWeek(days: readonly { date: string; lines: readonly DayAnalysisLine[] }[]) {
   const analyses = days.map(day => analyzePlanDay(day.lines));
+  const definitions=new Set(analyses.flatMap(day=>day.carbohydrates?[day.carbohydrates]:[]));
+  const mixedCarbohydrates=definitions.size>1||definitions.has('mixed');
   return {
     count: analyses.reduce((sum, day) => sum + day.count, 0),
     estimated: analyses.some(day => day.estimated),
     dayCount: days.length,
     emptyDays: analyses.filter(day => !day.count).length,
     nutrients: NUTRIENTS.map(([key, label, unit], index) => {
+      if(key==='carbs'&&mixedCarbohydrates)return {key,label:'Carbohidratos · definiciones distintas',unit,known:0,missing:days.length,total:null,subtotal:null};
       const complete = analyses.map(day => day.nutrients[index]).filter(nutrient => nutrient.total != null);
       const mean = complete.length ? Math.round(complete.reduce((sum, nutrient) => sum + nutrient.total!, 0) / complete.length * 10000) / 10000 : null;
-      return { key, label, unit, known: complete.length, missing: days.length - complete.length, total: days.length && complete.length === days.length ? mean : null, subtotal: mean };
+      return { key, label:key==='carbs'&&definitions.has('available')?'Carbohidratos disponibles':label, unit, known: complete.length, missing: days.length - complete.length, total: days.length && complete.length === days.length ? mean : null, subtotal: mean };
     }),
   };
 }

@@ -1,6 +1,7 @@
 /* Catálogo profesional: tabla compacta y detalle en ventana, acordado con Facundo. */
 .nv-pro .nv-main:has(.fc-catalog){grid-column:auto;width:100%;min-width:0}
-.fc-catalog{display:grid;gap:20px;min-width:0;max-width:1000px;margin-inline:auto;color:var(--nv-ink)}
+.fc-catalog{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;min-width:0;max-width:1000px;margin-inline:auto;color:var(--nv-ink)}
+.fc-catalog>#fc-results{min-width:0}
 .fc-heading{display:flex;align-items:center;justify-content:space-between;gap:20px}
 .fc-heading h1{font-size:26px;line-height:1.2;margin:7px 0}.fc-heading p{font-size:13px;margin:0;color:var(--nv-muted)}
 .fc-heading>.nv-button{display:inline-flex;gap:7px;align-items:center;white-space:nowrap}
@@ -29,7 +30,7 @@
 .fc-catalog .fc-checkbox{display:flex;align-items:center;gap:9px;cursor:pointer}.fc-checkbox input{width:16px;height:16px;accent-color:var(--nv-ink);margin:0}
 .fc-results-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:-8px;margin-bottom:-10px;min-height:28px}
 .fc-results-meta>.fc-text-button{padding:4px 8px;min-height:28px;font-size:12px}
-.fc-table-wrap{overflow-x:auto;border:1px solid var(--nv-line);border-radius:16px;background:var(--nv-card)}
+.fc-table-wrap{min-width:0;overflow-x:auto;border:1px solid var(--nv-line);border-radius:16px;background:var(--nv-card)}
 .fc-table{width:100%;border-collapse:collapse;font-size:12px}
 .fc-table thead{background:var(--nv-surface,var(--nv-card))}.fc-table th,.fc-table td{padding:12px 14px;border-bottom:1px solid var(--nv-line)}
 .fc-table thead th{font-size:11px;font-weight:500;text-align:right;white-space:nowrap;color:var(--nv-muted)}
@@ -53,6 +54,7 @@ body:has(dialog.fc-dialog[open]){overflow:hidden}
 .fc-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .fc-nutrients{margin:16px 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px}
 .fc-nutrients>div{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--nv-line);padding:10px 0;font-size:12px}.fc-nutrients dt{color:var(--nv-muted)}.fc-nutrients dd{margin:0;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fc-composition{min-width:0;overflow-wrap:anywhere}.fc-composition .fc-nutrients{grid-template-columns:minmax(0,1fr)}.fc-composition .fc-nutrients>div{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;min-width:0}.fc-composition .fc-nutrients dd{white-space:normal;overflow-wrap:anywhere;min-width:0}.fc-composition dd small{display:block;font-weight:400;line-height:1.6}.fc-composition nav{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .fc-editor fieldset{border:0;border-top:1px solid var(--nv-line);padding:18px 0 0;margin:22px 0 0;min-width:0}.fc-editor legend{font-size:14px;font-weight:600;padding:0 8px 0 0}.fc-editor fieldset>.fc-hint{margin-bottom:16px}
 .fc-editor summary{cursor:pointer;margin:20px 0;font-size:13px}.fc-portion-row{display:grid;grid-template-columns:2fr 1fr auto;gap:12px;align-items:end;margin:12px 0}
 .fc-text-button{font:inherit;font-size:12px;color:var(--nv-ink);border:0;background:transparent;padding:10px;cursor:pointer;min-height:36px}
@@ -62,3 +64,4 @@ body:has(dialog.fc-dialog[open]){overflow:hidden}
 @media(max-width:1000px){.fc-toolbar{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) auto auto}.fc-toolbar>label:nth-child(3){grid-column:1 / 3;grid-row:2}.fc-menu-panel{max-width:calc(100vw - 64px)}}
 @media(max-width:600px){.fc-heading{align-items:start;flex-direction:column}.fc-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.fc-toolbar{grid-template-columns:1fr 1fr}.fc-toolbar>.fc-search{grid-column:1 / -1}.fc-toolbar>label:nth-child(3){grid-column:1 / -1;grid-row:auto}.fc-fields,.fc-nutrients{grid-template-columns:1fr}.fc-dialog{padding:18px!important}.fc-portion-row{grid-template-columns:minmax(0,1fr) minmax(70px,100px)}.fc-portion-row button{grid-column:1 / -1;justify-self:end}.fc-menu-panel{width:220px}.fc-editor footer{flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){.fc-table tbody tr{transition:none}.fp-record-dialog.fc-dialog{animation:none}}
+@media(max-width:600px){.fc-toolbar>.fc-menu:first-of-type .fc-menu-panel{left:0;right:auto}}

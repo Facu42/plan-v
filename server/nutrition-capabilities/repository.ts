@@ -1,3 +1,4 @@
+import { foodQuantityUnit } from '../../src/types/foods.js';
 import { getRequestDb } from '../db/supabase-client.js';
 import { registerDemoState } from '../demo/state.js';
 import { CareError } from '../care/errors.js';
@@ -29,6 +30,6 @@ export async function listNutritionExchanges(owner:string,persistent:boolean):Pr
 export async function saveNutritionExchange(owner:string,input:ExchangeInput,persistent:boolean):Promise<ExchangeGroup>{
   if(persistent){const{data,error}=await getRequestDb().rpc('save_nutrition_exchange',{request:input});nutritionDbError(error);return data;}
   const prior=groups.get(input.id);if(prior&&prior.owner_id!==owner)throw new CareError(403,'Este grupo pertenece a otro consultorio.');if((prior?.revision??0)!==input.expected_revision)throw new CareError(409,'El grupo cambió. Recargá antes de guardar.');
-  if(!prior&&(await listNutritionExchanges(owner,false)).length>=100)throw new CareError(400,'Tu consultorio alcanzó el límite de cien grupos. Revisá los existentes.');const foods=await listFoods(owner,false);const items=input.items.map(item=>{const food=foods.find(food=>food.id===item.food_id);if(!food)throw new CareError(403,'Un alimento no está disponible para tu consultorio.');if(food.revision!==item.food_revision)throw new CareError(409,'El alimento cambió. Revisá los valores antes de guardar el grupo.');return{grams:item.grams,food:structuredClone(food)};});
+  if(!prior&&(await listNutritionExchanges(owner,false)).length>=100)throw new CareError(400,'Tu consultorio alcanzó el límite de cien grupos. Revisá los existentes.');const foods=await listFoods(owner,false);const items=input.items.map(item=>{const food=foods.find(food=>food.id===item.food_id);if(!food)throw new CareError(403,'Un alimento no está disponible para tu consultorio.');if(food.revision!==item.food_revision)throw new CareError(409,'El alimento cambió. Revisá los valores antes de guardar el grupo.');const unit=foodQuantityUnit(food);if(('unit'in item&&item.unit!==unit)||(!('unit'in item)&&unit==='ml'))throw new CareError(400,'Revisá la unidad nativa del alimento.');const quantity='quantity'in item?item.quantity:item.grams;return{grams:unit==='g'?quantity:null,quantity,unit,food:structuredClone(food)};});
   const group:ExchangeGroup={id:input.id,name:input.name,reference:input.reference,items,owner_id:owner,revision:input.expected_revision+1,updated_at:new Date().toISOString()};groups.set(input.id,group);return structuredClone(group);
 }

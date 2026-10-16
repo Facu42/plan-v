@@ -2,7 +2,7 @@ import { listFoods } from '../foods/repository.js';
 import { CareError } from '../care/errors.js';
 import { readPublishedMemory, getRecipeSnapshot } from '../recipes/repository.js';
 import { retainProposalEstimate } from '../../src/types/ai-nutrition.js';
-import { componentGrams, type PlanComponentInput, type PlanComponentView } from '../../src/types/plan-components.js';
+import { componentNativeQuantity, type PlanComponentInput, type PlanComponentView } from '../../src/types/plan-components.js';
 
 export async function resolvePlanComponents(owner: string, inputs: PlanComponentInput[], prior: PlanComponentView[]) {
   const foods = inputs.some(item => item.kind === 'food') ? await listFoods(owner, false) : [];
@@ -12,7 +12,7 @@ export async function resolvePlanComponents(owner: string, inputs: PlanComponent
       const food = frozen ?? foods.find(food => food.id === input.food_id && food.revision === input.food_revision);
       if (!food) throw new CareError(409, 'El alimento cambió o no está disponible. Volvé a elegirlo.');
       const component = { ...input, food_snapshot: structuredClone(food) };
-      if (componentGrams(component) === null) throw new CareError(400, 'Revisá la cantidad y medida del alimento.');
+      if (componentNativeQuantity(component) === null) throw new CareError(400, 'Revisá la cantidad y medida del alimento.');
       return component;
     }
     if (input.kind === 'recipe') {
