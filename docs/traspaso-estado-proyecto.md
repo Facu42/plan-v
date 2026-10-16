@@ -1,6 +1,16 @@
-# Traspaso del proyecto (2026-10-01)
+# Traspaso del proyecto (actualización vigente: 2026-10-16)
 
-## Entrega 6 aislada · 14/10/2026
+## Estado integrado de la entrega 8 · 16/10/2026
+
+La rama aislada `codex/nutridesk-release-sara2` incorpora mediante avance directo la entrega 7 final `5c8ea5441d466c54be20899b14b8cf0758cbcce4` ([PR #127](https://github.com/Facu42/plan-v/pull/127)) y conserva todo `main` hasta `9c56854`, incluidos los PR #117, #119 y #122. Se recuperó la implementación SARA 2 revisada: 930 registros y 39 componentes, unidades de 100 g/100 ml y copias históricas. [Instructivo vigente](instructivo-plan-v-actualizado-2026-10-15.md), [evidencia de SARA 2](sara2-verificacion-2026-10-15.md) y [coordinación](coordinacion-agentes.md).
+
+El manifiesto separa **18 migraciones pendientes y tres archivos exactos de main ya observados aplicados**. No se vuelve a aplicar esas tres migraciones por el nombre local de su archivo. La suite propia definitiva, finalizada el 16/10 a las **09:11:31 ART**, aprobó **2.999 casos, cero fallos y dos omitidos, en 458 archivos**; tipos, compilación (7,80 segundos), migraciones, manifiesto, vistas y secretos aprobados. Revisión independiente de código y QA de 1440/390 aprobados sin P1/P2: se corrigieron recortes del editor y catálogo cargado, además de etiquetas de volumen. Las **1.787 huellas** permanecen intactas después de la suite y QA (`2e5bd04d…`). [QA final](sara2-qa-2026-10-16.md). Las cifras antiguas de abajo son históricas. El CI de la cabeza propia se comprobará tras subir el borrador; no se publicó esta entrega ni se aplicó su SQL.
+
+El 16/10 ROOT verificó mediante la herramienta oficial que todos los controles de #127 en `5c8ea54` están aprobados: verify, e2e, sesiones firmadas, secretos y vista previa. Es evidencia del padre 7; la entrega 8 requiere su propio CI sobre la cabeza que se publique para revisión.
+
+Continúan pendientes por decisión o validación real: SMTP propio pospuesto (Supabase Auth permanece, sin prometer correos a destinatarios externos), retención cero y modalidad de Groq, captura real de ambas voces y cuentas reales de Google, Mercado Pago y WhatsApp. La IA nueva comparte un límite global autorizado de USD 5 mensuales y permanece apagada. Kerr conserva carga manual hasta resolver unidades y validar la fórmula con la profesional.
+
+## Referencia histórica: entrega 6 aislada · 14/10/2026
 
 Agenda, reservas públicas, equipo con recepción operativa, asignación clínica y cobros por profesional preparados en `codex/nutridesk-release-agenda`, base clínica `66ed039`. [Alcance, evidencia y límites](nutridesk-release-agenda-2026-10-14.md): suite propia de 2.816 aprobadas, cero fallos, dos omitidas (431 archivos), tipos/build/migraciones/vistas/secretos y revisión independiente aprobados. Cinco SQL preparados, sin aplicación hospedada. Navegador público/equipo a 1440/390; asociación de ficha existente con UUID real comprobada en fixtures, no con `pat-sofia` demo. Comunicaciones/cartera finales, configuración de Google/Mercado Pago, SMTP y producción continúan pendientes.
 
@@ -297,3 +307,7 @@ En Inicio, el texto bajo el saludo («Tu acompañamiento, día a día») pasa a 
 
 ## Próximas acciones de la nutricionista (2026-10-15)
 La bandeja «Tu consultorio, hoy» suma dos tipos de pendiente: **Cuotas vencidas** (cuota impaga con el vencimiento pasado y sin aviso de pago de la paciente; si avisó, queda «Aviso de pago por confirmar»; abre Cobranzas) y **Sin registros hace 7 días** (paciente con acceso a la app, dada de alta hace 7 días o más, sin comidas ni hábitos declarados en 7 días; dice cuántos días pasaron, o «en los últimos 30 días»; abre Mensajes). Es un aviso para escribirle, nunca un juicio clínico. El servidor solo lee fechas de comidas y hábitos de los últimos 30 días, sin contenido. Código: `server/crm/repository.ts` (con pruebas en `work-queue.test.ts` y en Postgres descartable). Sin migraciones.
+
+### Operaciones y comunicaciones — entrega 7, 15/10
+
+La rama `codex/nutridesk-release-operaciones` continúa desde PR123 y conserva los cambios de main hasta `9c56854`. El [informe vigente](nutridesk-release-operaciones-2026-10-15.md) documenta asistente, fuentes, CSV, preferencias, comunicaciones y límites externos; sustituye el estado del informe histórico del 12/10. Se cerraron dos P2: permiso de correo accesible con guardado/baja explícitos y bloqueo de WhatsApp sin configuración de bajas. Suite final propia: 2.977 aprobadas, cero fallos y dos omitidas en 452 archivos; tipos, build y gates aprobados. La [revisión de código](nutridesk-release-operaciones-review-2026-10-15.md) y la [QA a 1440/390](nutridesk-release-operaciones-qa-2026-10-15.md) no dejan P1/P2 abiertos en el alcance local; 1.789 huellas exactas tras suite y recorrido. Las cinco mejoras heredadas de demo y pacing, OCR/CSP y los JSON originales se conservan. La entrega de SARA 2 sigue separada. No se publicaron cambios ni se activaron servicios desde esta entrega.

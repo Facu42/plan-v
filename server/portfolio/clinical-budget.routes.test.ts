@@ -1,0 +1,25 @@
+import {beforeEach,afterEach,describe,it,expect,vi} from 'vitest';
+import {Hono} from 'hono';
+const state=vi.hoisted(()=>({legacy:vi.fn(),consented:['care_relationship','ai_followup'],clinic:'clinic-a',count:5}));
+vi.mock('ai',()=>({generateText:state.legacy,Output:{object:vi.fn()}}));
+vi.mock('../ai/provider.js',()=>({getAiModel:()=> 'legacy-paid-model'}));
+vi.mock('../ai/mode.js',()=>({resolveAiMode:()=> 'live'}));
+vi.mock('../db/supabase-client.js',()=>({isSupabaseEnabled:()=>false}));
+vi.mock('../crm/repository.js',()=>({resolveWorkScope:async()=>({nutritionistId:state.clinic,actorId:'actor-a',persistent:false,patients:[]})}));
+vi.mock('../crm/feed-repository.js',()=>({loadFeedRows:async()=>({patients:Array.from({length:state.count},(_,i)=>({id:`private-id-${i}`,name:`PRIVATE NAME ${i}`})),meals:[]})}));
+vi.mock('../care/consents.js',()=>({currentCareConsents:async()=>({consented:state.consented})}));
+vi.mock('../communications/routes.js',()=>({registerCommunicationRoutes:()=>undefined}));
+vi.mock('./settings.js',()=>({registerPortfolioSettings:()=>undefined}));
+import {registerPortfolioRoutes} from './routes.js';
+function app(){const a=new Hono();a.use('*',async(c,next)=>{c.set('auth',{demo:true});await next();});registerPortfolioRoutes(a);return a;}
+const request=(extra:object={})=>app().request('/api/portfolio/assistant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:'PRIVATE QUESTION resumen',days:7,use_ai:true,...extra})});
+beforeEach(()=>{vi.stubEnv('GROQ_API_KEY','');vi.stubEnv('GROQ_ZDR_VERIFIED','0');vi.stubEnv('CLINICAL_AI_COST_MODE','paid');state.consented=['care_relationship','ai_followup'];state.count=5;state.clinic='clinic-a';state.legacy.mockClear();state.legacy.mockResolvedValue({output:{proposals:[{text:'Propuesta anterior'}]}});});
+afterEach(()=>{vi.unstubAllEnvs();vi.unstubAllGlobals();});
+describe('asistente nuevo no elude gates y presupuesto global',()=>{
+ it('sin Groq confirmado conserva indicadores locales y jamás llama al modelo pago heredado',async()=>{const network=vi.fn();vi.stubGlobal('fetch',network);const response=await request();expect(response.status).toBe(200);expect((await response.json()).mode).toBe('local');expect(state.legacy).not.toHaveBeenCalled();expect(network).not.toHaveBeenCalled();});
+ it('Groq confirmado usa sólo agregados y mantiene request_id ante reintento',async()=>{vi.stubEnv('GROQ_API_KEY','fixture');vi.stubEnv('GROQ_ZDR_VERIFIED','1');const network=vi.fn(async(_url:RequestInfo|URL,_init?:RequestInit)=>new Response(JSON.stringify({choices:[{message:{content:'{"proposals":[{"text":"Revisar registros."}]}'}}],usage:{prompt_tokens:10,completion_tokens:10}})));vi.stubGlobal('fetch',network);const request_id=crypto.randomUUID();const first=await request({request_id});expect(first.status).toBe(200);expect((await first.json()).mode).toBe('ai');const body=JSON.parse(String(network.mock.calls[0][1]?.body));expect(body.model).toBe('openai/gpt-oss-120b');expect(JSON.stringify(body)).not.toMatch(/PRIVATE|private-id|clinic-a|actor-a|request_id/);expect(state.legacy).not.toHaveBeenCalled();expect((await(await request({request_id})).json()).mode).toBe('local');expect(network).toHaveBeenCalledTimes(1);});
+ it.each([{permits:['ai_followup']},{permits:['care_relationship']},{permits:[]}])('exige ambos permisos (%j), sin perder fuentes locales',async({permits})=>{vi.stubEnv('GROQ_API_KEY','fixture');vi.stubEnv('GROQ_ZDR_VERIFIED','1');state.consented=permits;const network=vi.fn();vi.stubGlobal('fetch',network);const response=await request({request_id:crypto.randomUUID()});expect(response.status).toBe(200);const result=await response.json();expect(result.mode).toBe('local');expect(result.sources).toHaveLength(5);expect(result.excluded_without_consent).toBe(5);expect(network).not.toHaveBeenCalled();});
+ it('menos de cinco no envía y retorna indicadores locales',async()=>{state.count=4;const network=vi.fn();vi.stubGlobal('fetch',network);const response=await request({request_id:crypto.randomUUID()});expect(response.status).toBe(200);expect((await response.json()).mode).toBe('local');expect(network).not.toHaveBeenCalled();});
+ it.each(['withdraw','transfer'])('cambio durante proveedor %s elimina propuestas y recalcula fuentes',async change=>{vi.stubEnv('GROQ_API_KEY','fixture');vi.stubEnv('GROQ_ZDR_VERIFIED','1');const network=vi.fn(async()=>{if(change==='withdraw')state.consented=[];else{state.clinic='clinic-b';state.count=0;}return new Response(JSON.stringify({choices:[{message:{content:'{"proposals":[{"text":"NO PUBLICAR"}]}'}}],usage:{prompt_tokens:10,completion_tokens:10}}));});vi.stubGlobal('fetch',network);const response=await request({request_id:crypto.randomUUID()});expect(response.status).toBe(200);const result=await response.json();expect(result.mode).toBe('local');expect(JSON.stringify(result)).not.toContain('NO PUBLICAR');if(change==='transfer')expect(result.sources).toEqual([]);expect(network).toHaveBeenCalledTimes(1);});
+
+});

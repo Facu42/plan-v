@@ -1,3 +1,7 @@
+import {registerSchedulingRoutes} from './scheduling/routes.js';
+import {registerSchedulingTeamRoutes} from './scheduling/team-routes.js';
+import {registerDocumentOrganizerRoutes} from './document-organizer/routes.js';
+import {registerCommunicationChannelRoutes} from './communications/channel-routes.js';
 import { withWeeklyRegistration } from './progress/weekly-repository.js';
 import { serve } from '@hono/node-server';
 import { registerCareRoutes, requireCareConsent } from './care/routes.js';
@@ -28,11 +32,9 @@ import { registerAlcanceRoutes } from './alcance/routes.js';
 import { registerCrmRoutes } from './crm/routes.js';
 import { registerConsultationRoutes } from './consultations/routes.js';
 import { registerPatientImportRoutes } from './patient-import/routes.js';
-import { registerDocumentOrganizerRoutes } from './document-organizer/routes.js';
 import { registerNutritionCapabilityRoutes } from './nutrition-capabilities/routes.js';
 import { registerClinicalWorkspaceRoutes } from './clinical-workspace/routes.js';
-import {registerSchedulingRoutes} from './scheduling/routes.js';
-import {registerSchedulingTeamRoutes} from './scheduling/team-routes.js';
+import { registerPortfolioRoutes } from './portfolio/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -183,7 +185,7 @@ app.use('/*', secureHeaders({
   xFrameOptions: 'DENY',
   crossOriginResourcePolicy: 'cross-origin',
   crossOriginOpenerPolicy: false,
-  contentSecurityPolicy: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] },
+  contentSecurityPolicy: { defaultSrc: ["'none'"], frameAncestors: ["'none'"], formAction: [c=>c.req.method==='GET'&&c.req.path==='/api/public/communications/email-unsubscribe'?"'self'":"'none'"] },
 }));
 app.use('/api/*', async (c, next) => {
   c.header('Cache-Control', 'no-store');
@@ -307,12 +309,13 @@ registerAlcanceRoutes(app);
 registerCrmRoutes(app);
 registerConsultationRoutes(app);
 registerPatientImportRoutes(app);
-registerDocumentOrganizerRoutes(app);
 registerNutritionCapabilityRoutes(app);
 registerClinicalWorkspaceRoutes(app);
-
+registerPortfolioRoutes(app);
 registerSchedulingRoutes(app);
 registerSchedulingTeamRoutes(app);
+registerDocumentOrganizerRoutes(app);
+registerCommunicationChannelRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({

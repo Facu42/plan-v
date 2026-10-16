@@ -11,7 +11,7 @@ it('crea, busca por nombre sin tildes y preserva fuente, medidas y datos descono
   expect(response.status).toBe(200);
   const { food } = await response.json();
   expect(food).toMatchObject({ revision: 1, nutrients: { fat: 0, protein: null }, source: 'Etiqueta' });
-  const listed = await (await app.request('/api/foods?q=semola')).json();
+  const listed = await (await app.request('/api/foods?q=semola&scope=own')).json();
   expect(listed.foods).toHaveLength(1);
   expect(listed.foods[0].portions[0].grams).toBe(10);
 });

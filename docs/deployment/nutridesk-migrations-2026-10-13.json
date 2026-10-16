@@ -1,0 +1,146 @@
+{
+  "project": "plan-v-app",
+  "projectId": "wvosvlxpfytokwfbcero",
+  "observedOn": "2026-10-16",
+  "mainBase": "ae19e5c49af07cb7451a5aff5048850051d6a909",
+  "productionApplied": false,
+  "approvalRequired": true,
+  "priorAliasNames": [
+    "body_metrics",
+    "resource_author_unpublish",
+    "fee_one_charge_per_month",
+    "plan_meal_times",
+    "charges_programs"
+  ],
+  "migrations": [
+    {
+      "version": "20261011140000",
+      "file": "20261011140000_clinical_ai_budget.sql",
+      "sha256": "68e1b4cbc5cfdefc4cac2262e4fb4467dca7b3f882d5fa4b5a43fec11cf88157"
+    },
+    {
+      "version": "20261011141000",
+      "file": "20261011141000_patient_phone.sql",
+      "sha256": "de40e41423bd475d643bd85c79d39b84bdb96e8aef1e7b36d2a08fcd598be611"
+    },
+    {
+      "version": "20261011150000",
+      "file": "20261011150000_consultation_sessions.sql",
+      "sha256": "8e078aa566b1a5a8f278b5b7440e301f300faf687c5ea5d43d108495ae4659c0"
+    },
+    {
+      "version": "20261011160000",
+      "file": "20261011160000_patient_import.sql",
+      "sha256": "d86423b610a210b1368104faceee2e576998ed514b3c6e22b94d20f141f63ae5"
+    },
+    {
+      "version": "20261011180000",
+      "file": "20261011180000_nutrition_capabilities.sql",
+      "sha256": "5e047ccf38a3f2465d649ffb11381e59d839dc584a2f52313c7a69dbff7c6df0"
+    },
+    {
+      "version": "20261012100000",
+      "file": "20261012100000_scheduling_and_booking.sql",
+      "sha256": "e9778bd2e647fc7f9cd98496b7908d65e5aa240818dfa5d97a2948e52023629f"
+    },
+    {
+      "version": "20261012113000",
+      "file": "20261012113000_clinical_workspace.sql",
+      "sha256": "c0c4afe420d4931ddeb4666a505acf24627fb564915af79e9252bbc396cb2ed3"
+    },
+    {
+      "version": "20261012120000",
+      "file": "20261012120000_ops_capabilities.sql",
+      "sha256": "68ed2144bf26af53dd50b81b6f9cd1ccad626319a4d44d242e72a12dc2f2b6c7"
+    },
+    {
+      "version": "20261012121000",
+      "file": "20261012121000_booking_team.sql",
+      "sha256": "08fe98a2c158dcc330214f146424fc19daf13bdc976d16f0b1afa08f79708b81"
+    },
+    {
+      "version": "20261012123000",
+      "file": "20261012123000_communications_channels.sql",
+      "sha256": "a5df774d849e130280c120a0662cf57b44a3ac6f793859317a686abeb8eae3c1"
+    },
+    {
+      "version": "20261012130000",
+      "file": "20261012130000_document_organizer.sql",
+      "sha256": "eb381b26eb94063f015257b872dffeb63dfb51d8c04458a89176ac30725855ba"
+    },
+    {
+      "version": "20261012133000",
+      "file": "20261012133000_team_email_invites.sql",
+      "sha256": "d8a872a7069e2634f65f0042cbf120e57dad0f0b1b3e8d00fe13d0a4fdbec23a"
+    },
+    {
+      "version": "20261012134000",
+      "file": "20261012134000_scheduling_concurrency.sql",
+      "sha256": "b39e16f457ee3e1e3492d9be16aae3d7299a2a4118d103ef9421a21980776486"
+    },
+    {
+      "version": "20261013100000",
+      "file": "20261013100000_consultation_completions.sql",
+      "sha256": "f6e97a182f0994ecc422443ff88d0550bcbacc8274a03098c50b9a3a28beaa77"
+    },
+    {
+      "version": "20261013110000",
+      "file": "20261013110000_shared_notes_pagination.sql",
+      "sha256": "9c5509564c7d48c29a6abc7b45609db7f767135ab5a430e1edcd2265004535ee"
+    },
+    {
+      "version": "20261013120000",
+      "file": "20261013120000_patient_import_external_authorization.sql",
+      "sha256": "8e1f647194c1491e6480dd988fc2d088497715a547a4c5ff058a1cc017c847aa"
+    },
+    {
+      "version": "20261013123000",
+      "file": "20261013123000_imported_clinical_export.sql",
+      "sha256": "ccba990d2c58255c7e074c65d56378ebc41888664921074389e0347301931adc"
+    },
+    {
+      "version": "20261014180000",
+      "file": "20261014180000_sara2_catalog.sql",
+      "sha256": "074ed4703b754e5e0d3a1696321cb1109c6ba256e430c002f515a25bfcbd4036"
+    }
+  ],
+  "hashScheme": "sha256-utf8-lf-v1",
+  "firstVersion": "20261011140000",
+  "baselineMigrations": [
+    {
+      "file": "20261015090000_patient_views_read_only.sql",
+      "version": "20261015090000",
+      "sha256": "fdd9e6da09c83a497f29f083dc85efdeb97729960dc6aec8219b5dfeda9bf021",
+      "observedAppliedVersion": "20261014215529",
+      "observedAppliedName": "patient_views_read_only"
+    },
+    {
+      "file": "20261015100000_habit_symptoms.sql",
+      "version": "20261015100000",
+      "sha256": "d85ace8d143445cb73e83e092f7e1d073cae9b5520da9c4c5f6b28dc55a63748",
+      "observedAppliedVersion": "20261014215543",
+      "observedAppliedName": "habit_symptoms"
+    },
+    {
+      "file": "20261015200000_push_subscriptions.sql",
+      "version": "20261015200000",
+      "sha256": "a89293be7e184ec11eebe31a2515756876566165abec854ee11ecb44a890242b",
+      "observedAppliedVersion": "20261015163006",
+      "observedAppliedName": "push_subscriptions"
+    },
+    {
+      "file": "20261015210000_activity_kcal.sql",
+      "version": "20261015210000",
+      "sha256": "02da18732263fd88350b51622c0a6b3ec84f5ca31b2ac9fc898e4ab01e5c0d6f",
+      "observedAppliedVersion": "20261015173356",
+      "observedAppliedName": "activity_kcal"
+    },
+    {
+      "file": "20261016090000_water_goal.sql",
+      "version": "20261016090000",
+      "sha256": "cb7334e581e793c2ab06affba1819982b4c139e0ecf46c59893860a5dff96605",
+      "observedAppliedVersion": "20261016090000",
+      "observedAppliedName": "water_goal"
+    }
+  ]
+}

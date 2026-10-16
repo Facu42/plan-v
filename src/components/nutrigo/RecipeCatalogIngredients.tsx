@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { RecipeWizardInput } from '../../types/recipe-plate';
 import { RECIPE_UNITS, type RecipeUnit } from '../../types/recipes';
-import { NUTRIENTS, normalizeFoodSearch, type Food } from '../../types/foods';
+import { foodQuantityUnit, SARA2_SOURCE, NUTRIENTS, normalizeFoodSearch, type Food } from '../../types/foods';
 import { calculateRecipeCatalog, type RecipeCatalogSnapshot } from '../../types/recipe-catalog-nutrition';
 
 type Props = { draft: RecipeWizardInput; foods: readonly Food[]; prior?: RecipeCatalogSnapshot };
@@ -10,11 +10,13 @@ export function RecipeCatalogIngredients({ draft, foods, prior, onChange, loadin
   onChange: (draft: RecipeWizardInput) => void; loading?: boolean; error?: string; retry?: () => void;
 }) {
   const [search, setSearch] = useState('');
+  const [source,setSource]=useState(SARA2_SOURCE);
   const composed = draft.items.some(item => item.catalog_ref) || Boolean(prior);
-  const matches = foods.filter(food => normalizeFoodSearch(`${food.name} ${food.brand} ${food.category}`).includes(normalizeFoodSearch(search)));
+  const matches = foods.filter(food => (!source||food.source===source)&&normalizeFoodSearch(`${food.name} ${food.brand} ${food.category}`).includes(normalizeFoodSearch(search)));
   const update = (index: number, patch: Partial<RecipeWizardInput['items'][number]>) => onChange({ ...draft, items: draft.items.map((item, i) => i === index ? { ...item, ...patch } : item) });
   return <fieldset className="recipe-catalog-ingredients"><legend>Ingredientes y medidas</legend>
     <label>Buscar en Alimentos<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Nombre, marca o categoría" /></label>
+    <label>Fuente<select value={source} onChange={event=>setSource(event.target.value)}><option value={SARA2_SOURCE}>SARA 2 · Argentina</option><option value="">Otras fuentes y alimentos propios · selección explícita</option></select></label>
     {loading && <p role="status">Cargando alimentos…</p>}
     {error && <div role="alert">{error} <button type="button" onClick={retry}>Reintentar</button></div>}
     {!loading && !error && !foods.length && <p>Tu catálogo está vacío. Podés cargar alimentos en Alimentos o escribir ingredientes sin composición.</p>}
@@ -31,14 +33,14 @@ export function RecipeCatalogIngredients({ draft, foods, prior, onChange, loadin
             let name = selected.name.slice(0, 75);
             const used = draft.items.filter((_, i) => i !== index).map(item => normalizeFoodSearch(item.name));
             if (used.includes(normalizeFoodSearch(name))) { let suffix = 2; while (used.includes(normalizeFoodSearch(`${name} ${suffix}`))) suffix++; name = `${name} ${suffix}`; }
-            update(index, { name, unit: 'g', line_kcal: undefined, catalog_ref: { id: selected.id, revision: selected.revision, measure: null } });
+            update(index, { name, unit: foodQuantityUnit(selected), line_kcal: undefined, catalog_ref: { id: selected.id, revision: selected.revision, measure: null } });
           }}><option value="">Ingrediente escrito · sin composición</option>{options.map(food => <option key={food.id} value={food.id}>{food.name}{food.brand ? ` · ${food.brand}` : ''}</option>)}</select></label>
           <label>Nombre en la receta<input aria-label={`Ingrediente ${index + 1}`} value={item.name} maxLength={80} onChange={event => update(index, { name: event.target.value })} /></label>
         </div>
         <div className="recipe-line-amount">
           <label>Cantidad<input aria-label={`Cantidad ${index + 1}`} type="number" min="0.01" max="100000" step="0.01" value={item.quantity} onChange={event => update(index, { quantity: Number(event.target.value) })} /></label>
           <label>Medida<select aria-label={`Unidad ${index + 1}`} value={item.catalog_ref ? item.catalog_ref.measure ?? '' : item.unit} onChange={event => update(index, item.catalog_ref ? { catalog_ref: { ...item.catalog_ref, measure: event.target.value || null } } : { unit: event.target.value as RecipeUnit })}>
-            {item.catalog_ref ? <><option value="">Gramos</option>{food?.portions.map(portion => <option key={portion.name} value={portion.name}>{portion.name} · {portion.grams} g</option>)}</> : RECIPE_UNITS.map(unit => <option key={unit}>{unit}</option>)}
+            {item.catalog_ref ? <><option value="">{food&&foodQuantityUnit(food)==='ml'?'Mililitros':'Gramos'}</option>{food?.portions.map(portion => <option key={portion.name} value={portion.name}>{portion.name} · {portion.grams} g</option>)}</> : RECIPE_UNITS.map(unit => <option key={unit}>{unit}</option>)}
           </select></label>
           {!composed && !draft.nutrition && <label>Kcal de línea<input aria-label={`Kcal de línea ${index + 1}`} type="number" min="0" max="20000" value={item.line_kcal ?? ''} onChange={event => update(index, { line_kcal: event.target.value === '' ? undefined : Number(event.target.value) })} /></label>}
           <button type="button" className="recipe-cancel" disabled={draft.items.length === 1} aria-label={`Quitar ingrediente ${index + 1}`} onClick={() => onChange({ ...draft, items: draft.items.filter((_, i) => i !== index) })}>Quitar</button>

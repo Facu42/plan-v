@@ -2,6 +2,7 @@ import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
 import { registerDemoState } from '../demo/state.js';
 import { foodInputSchema, normalizeFoodSearch, type Food, type FoodInput } from '../../src/types/foods.js';
+import { sara2Foods } from './sara2.js';
 
 const foods = new Map<string, Food>();
 registerDemoState('foods', () => ({ foods }));
@@ -15,7 +16,7 @@ export function foodDbError(error: { code?: string } | null) {
   throw new CareError(503, 'No pudimos confirmar el guardado. Tus cambios siguen en el formulario.');
 }
 export async function listFoods(owner: string, persistent: boolean): Promise<Food[]> {
-  if (!persistent) return [...foods.values()].filter(f => f.owner_id === null || f.owner_id === owner).map(f => structuredClone(f));
+  if (!persistent) return [...sara2Foods(),...foods.values()].filter(f => f.owner_id === null || f.owner_id === owner).map(f => structuredClone(f));
   const result: Food[] = [];
   const ids = new Set<string>();
   let total: number | undefined;
@@ -31,13 +32,16 @@ export async function listFoods(owner: string, persistent: boolean): Promise<Foo
     for (const row of data ?? []) {
       if (ids.has(row.id)) throw new CareError(503, 'El catálogo cambió mientras se cargaba. Reintentá.');
       ids.add(row.id);
-      const { expected_revision: _, ...food } = foodInputSchema.parse({ ...row.payload, id: row.id, expected_revision: 0 });
-      result.push({ ...food, revision: row.revision, owner_id: row.owner_id, updated_at: row.updated_at });
+      const {composition,...payload}=row.payload;
+      const { expected_revision: _, ...food } = foodInputSchema.parse({ ...payload,source:composition?'Referencia institucional validada':payload.source, id: row.id, expected_revision: 0 });
+      if(composition)food.source=payload.source;
+      result.push({ ...food,...(composition?{composition}:{}), revision: row.revision, owner_id: row.owner_id, updated_at: row.updated_at });
     }
   } while (result.length < total);
   return result;
 }
 export async function saveFood(owner: string, input: FoodInput, persistent: boolean): Promise<Food> {
+  if (sara2Foods().some(food=>food.id===input.id)) throw new CareError(403,'La composición institucional es de sólo lectura. Creá un alimento propio con su fuente.');
   const { expected_revision, id, ...payload } = input;
   if (persistent) {
     const { data, error } = await getRequestDb().rpc('save_food_catalog_item', { food_id: id, expected_revision, food_payload: payload });

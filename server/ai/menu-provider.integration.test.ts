@@ -27,11 +27,11 @@ beforeEach(() => { vi.stubEnv('APP_MODE', 'test'); vi.stubEnv('AI_MODE', 'live')
 afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 describe('menú con el SDK real y un transporte sintético sin red', () => {
-  it('pide la cobertura exacta y procesa una receta estimada sin perder el techo gratuito', async () => {
+  it('pide cobertura exacta y descarta cifras sin fuente conservando techo gratuito', async () => {
     const transport = reply([item()]);
     const result = await generateMenuDraft(context());
-    expect(result.plan.items[0].recipe_proposal?.nutrition).toMatchObject({ origin: 'ai_estimate', source: 'estimacion_ia.v2' });
-    expect(result.nutrition.days[0]).toMatchObject({ status: 'adjusted', estimated: true, totals: { kcal: 1857 } });
+    expect(result.plan.items[0].recipe_proposal?.nutrition).toBeNull();
+    expect(result.nutrition.days[0]).toMatchObject({ status: 'missing_nutrients', totals:null });
     const body = JSON.parse(transport.mock.calls[0][1].body);
     expect(body.provider.max_price).toEqual({ prompt: 0, completion: 0, request: 0, image: 0 });
     const itemsSchema = body.response_format.json_schema.schema.properties.items;
