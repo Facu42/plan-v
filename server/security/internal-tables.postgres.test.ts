@@ -11,7 +11,7 @@ const INTERNAL = [
   'nutritionist_subscriptions', 'outbox_events', 'patient_import_applied', 'patient_invite_events',
   'payment_webhook_events', 'platform_admins', 'platform_settings',
   'privacy_access_events', 'privacy_export_packages', 'privacy_requests',
-  'processing_jobs', 'recipe_cover_requests', 'recipe_day_assignments', 'recipe_version_cards', 'service_payments',
+  'processing_jobs', 'push_subscriptions', 'recipe_cover_requests', 'recipe_day_assignments', 'recipe_version_cards', 'service_payments',
 ] as const;
 const PUBLIC_ROLES = ['anon', 'authenticated'] as const;
 const TABLE_PRIVILEGES = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER', 'MAINTAIN'];
