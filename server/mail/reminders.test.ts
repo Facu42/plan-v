@@ -16,6 +16,12 @@ describe('recordatorios de turnos', () => {
     expect(send).toHaveBeenCalledTimes(2);
     expect(send.mock.calls[1][0]).toMatchObject({ to: { email: 'ana@example.com', name: 'Ana' }, idempotencyKey: stableUuid('reminder:turno-1:2026-10-11T13:30:00Z') });
   });
+  it('vuelve a verificar preferencia y consentimiento antes de enviar y falla cerrado',async()=>{
+    const send=vi.fn();
+    const permitted=vi.fn().mockResolvedValueOnce(false).mockRejectedValueOnce(new Error('unavailable'));
+    expect(await sendDueReminders([due(),due({id:'second'})],'https://plan-v.test',send,permitted)).toEqual({sent:0,failed:1,skipped:1});
+    expect(send).not.toHaveBeenCalled();
+  });
 });
 
 describe('reloj de recordatorios', () => {

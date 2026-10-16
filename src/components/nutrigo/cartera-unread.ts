@@ -1,9 +1,27 @@
 import { useEffect, useState } from 'react';
 import { crmWorkApi } from '../../api/crm-work';
-import type { CrmWorkItem } from '../../types/crm-work';
+import type { CrmWorkItem, CrmWorkQuery, CrmWorkResponse } from '../../types/crm-work';
 
 export const MESSAGES_READ_EVENT = 'plan-v:messages-read';
 const POLL_MS = 30000;
+
+export async function loadCarteraUnread(list: (query: CrmWorkQuery, signal?: AbortSignal) => Promise<CrmWorkResponse>, signal?: AbortSignal): Promise<{ byPatient: Map<string, number>; total: number }> {
+  const messages = new Map<string, CrmWorkItem>();
+  const seen = new Set<string>();
+  let cursor: string | undefined;
+  let total = 0;
+  do {
+    if (signal?.aborted) throw new DOMException('Cancelado', 'AbortError');
+    const page = await list({ kind: 'message', limit: 100, ...(cursor ? { cursor } : {}) }, signal);
+    total = page.total;
+    for (const item of page.items) messages.set(item.id, item);
+    if (!page.next_cursor) break;
+    if (seen.has(page.next_cursor)) throw new Error('No se pudieron cargar todos los mensajes.');
+    seen.add(page.next_cursor);
+    cursor = page.next_cursor;
+  } while (cursor);
+  return { byPatient: unreadByPatient([...messages.values()]), total };
+}
 
 export function unreadByPatient(items: readonly CrmWorkItem[]): Map<string, number> {
   const counts = new Map<string, number>();
@@ -27,8 +45,8 @@ export function useCarteraUnread(enabled: boolean): { byPatient: Map<string, num
       if (loading || document.visibilityState === 'hidden') return;
       loading = true;
       try {
-        const result = await crmWorkApi.list({ kind: 'message', limit: 100 }, controller.signal);
-        if (!controller.signal.aborted) setState({ byPatient: unreadByPatient(result.items), total: result.total });
+        const result = await loadCarteraUnread(crmWorkApi.list, controller.signal);
+        if (!controller.signal.aborted) setState(result);
       } catch {
         // Sin conexión se conserva el último conteo; el de la pantalla sigue funcionando.
       } finally { loading = false; }

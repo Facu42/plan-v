@@ -39,9 +39,15 @@ export async function listCareRecords(patientId: string | null, persistent: bool
     ))).filter((id): id is string => id !== null));
     return rows.filter(r => !isMeasurementData(r.data) || allowed.has(r.patient_id)).sort((a,b) => b.created_at.localeCompare(a.created_at));
   }
-  let query = getRequestDb().from('care_records').select('id,patient_id,recorded_on,data,created_at,reviewed_at').order('created_at', { ascending: false }).limit(500);
-  if (patientId) query = query.eq('patient_id', patientId);
-  const { data, error } = await query; careDbError(error); return data as CareRecord[];
+  const rows: CareRecord[] = [];
+  for (let offset = 0; ; offset += 500) {
+    let query = getRequestDb().from('care_records').select('id,patient_id,recorded_on,data,created_at,reviewed_at')
+      .order('created_at', { ascending: false }).order('id', { ascending: false }).range(offset, offset + 499);
+    if (patientId) query = query.eq('patient_id', patientId);
+    const { data, error } = await query; careDbError(error);
+    rows.push(...(data ?? []) as CareRecord[]);
+    if ((data?.length ?? 0) < 500) return rows;
+  }
 }
 export async function saveCareRecord(patientId: string, input: CareInput, persistent: boolean): Promise<CareRecord> {
   if (persistent) {
@@ -109,14 +115,15 @@ export async function listMeasurements(patientId: string, persistent: boolean): 
       .filter((entry) => entry.patient_id === patientId)
       .sort((a, b) => b.captured_on.localeCompare(a.captured_on) || b.created_at.localeCompare(a.created_at));
   }
-  const { data, error } = await getRequestDb()
-    .from('measurements')
-    .select('id,patient_id,kind,value_numeric,unit,source,captured_on,created_at')
-    .eq('patient_id', patientId)
-    .order('captured_on', { ascending: false })
-    .limit(500);
-  careDbError(error);
-  return (data ?? []).map(asMeasurement);
+  const rows: Measurement[] = [];
+  for (let offset = 0; ; offset += 500) {
+    const { data, error } = await getRequestDb().from('measurements')
+      .select('id,patient_id,kind,value_numeric,unit,source,captured_on,created_at')
+      .eq('patient_id', patientId).order('captured_on', { ascending: false })
+      .order('created_at', { ascending: false }).order('id', { ascending: false }).range(offset, offset + 499);
+    careDbError(error); rows.push(...(data ?? []).map(asMeasurement));
+    if ((data?.length ?? 0) < 500) return rows;
+  }
 }
 export async function reviewCareRecord(patientId: string, id: string, persistent: boolean) {
   if (persistent) { const { error } = await getRequestDb().rpc('review_care_record', { target: patientId, record_id: id }); careDbError(error); return; }

@@ -197,7 +197,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName, role: PUBLIC_SIGNUP_ROLE, ...legalAcceptance(), ...(professional ? { [PROFESSIONAL_SIGNUP_FLAG]: true } : {}) } },
+        options: { emailRedirectTo: typeof window === 'undefined' ? undefined : `${window.location.origin}/`, data: { full_name: fullName, role: PUBLIC_SIGNUP_ROLE, ...legalAcceptance(), ...(professional ? { [PROFESSIONAL_SIGNUP_FLAG]: true } : {}) } },
       });
       if (error) return { error: friendlyError(error.message) };
       return {};

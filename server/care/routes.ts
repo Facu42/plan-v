@@ -155,7 +155,7 @@ export function registerCareRoutes(app: Hono) {
   app.get('/api/care/alerts', async c => {
     const auth = c.get('auth'); const persistent = 'userId' in auth && isSupabaseEnabled();
     if (persistent && await sb.sbGetProfileRole(auth.userId) !== 'nutri') throw new repo.CareError(403, 'Solo profesionales.');
-    const patients = persistent ? (await sb.sbListPatientsForNutri(auth.userId, { limit: 100, offset: 0 })).patients : getStore().patients;
+    const patients = persistent ? await sb.sbGetPatientsForNutri(auth.userId) : getStore().patients;
     const names = new Map(patients.filter(p => !p.archived_at).map(p => [p.id,p.name]));
     const records = await repo.listCareRecords(null, persistent);
     const alerts: CareAlert[] = records.filter(r => !r.reviewed_at && r.data.kind !== 'payment' && names.has(r.patient_id)).map(r => ({ id: r.id, patient_id: r.patient_id, patient_name: names.get(r.patient_id)!, title: r.data.kind === 'body_photo' ? 'Nuevo archivo privado' : r.data.kind === 'clinical_document' ? 'Nuevo estudio' : CARE_LABELS[r.data.kind], detail: r.data.kind === 'menu_request' ? 'El paciente solicitó un reemplazo. Revisá su menú.' : 'Nuevo registro para revisar en la ficha.', target: 'ficha', created_at: r.created_at }));
