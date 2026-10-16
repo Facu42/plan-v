@@ -63,10 +63,11 @@ export const SERVICE_STATE_FILTERS: Array<{ id: ServiceState | 'todas' | 'cuenta
   { id: 'cuentas_prueba', label: 'Cuentas de prueba' },
 ];
 
-export type ServiceOrder = 'vencimiento' | 'ingreso' | 'nombre';
+export type ServiceOrder = 'vencimiento' | 'ingreso' | 'nombre' | 'pacientes';
 export const SERVICE_ORDERS: Array<{ id: ServiceOrder; label: string }> = [
   { id: 'vencimiento', label: 'Vencimiento más cercano' },
   { id: 'ingreso', label: 'Último ingreso' },
+  { id: 'pacientes', label: 'Más pacientes' },
   { id: 'nombre', label: 'Nombre' },
 ];
 
@@ -85,6 +86,7 @@ export function filterServiceRows(rows: ServiceRow[], { query = '', state = 'tod
       && (!needle || normalize(row.nutritionist.display_name).includes(needle) || normalize(row.nutritionist.email).includes(needle)))
     .sort((a, b) => {
       if (order === 'nombre') return byName(a, b);
+      if (order === 'pacientes') return b.nutritionist.patients_active - a.nutritionist.patients_active || byName(a, b);
       if (order === 'ingreso') return (b.nutritionist.last_sign_in_at ?? '').localeCompare(a.nutritionist.last_sign_in_at ?? '') || byName(a, b);
       const au = a.summary.until ?? '9999-12-31';
       const bu = b.summary.until ?? '9999-12-31';
@@ -160,4 +162,66 @@ export function adminErrorMessage(reason: unknown, fallback = 'No pudimos comple
     if (reason.status === 404 || reason.status === 405) return 'El servidor todavía no tiene esta función. Probá de nuevo más tarde.';
   }
   return feeErrorMessage(reason, fallback);
+}
+
+/** Atajos de la lista: qué nutricionistas conviene mirar primero. No incluyen las cuentas de prueba. */
+export type ServiceFocus = 'todas' | 'atender' | 'sin_ingreso' | 'sin_pacientes';
+export const SERVICE_FOCUS: Array<{ id: ServiceFocus; label: string }> = [
+  { id: 'todas', label: 'Todas' },
+  { id: 'atender', label: 'Para atender' },
+  { id: 'sin_ingreso', label: 'Nunca entraron' },
+  { id: 'sin_pacientes', label: 'Sin pacientes' },
+];
+
+const NEEDS_ATTENTION: ServiceState[] = ['por_vencer', 'vencida', 'cortada', 'suspendida'];
+
+export function matchesFocus(row: ServiceRow, focus: ServiceFocus): boolean {
+  if (focus === 'atender') return NEEDS_ATTENTION.includes(row.summary.state);
+  if (focus === 'sin_ingreso') return !row.nutritionist.last_sign_in_at;
+  if (focus === 'sin_pacientes') return row.nutritionist.patients_active === 0;
+  return true;
+}
+
+export function focusCounts(rows: ServiceRow[]): Record<ServiceFocus, number> {
+  const real = rows.filter((row) => row.nutritionist.is_test !== true);
+  return Object.fromEntries(SERVICE_FOCUS.map(({ id }) => [id, real.filter((row) => matchesFocus(row, id)).length])) as Record<ServiceFocus, number>;
+}
+
+const MONTH_NAMES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+
+/** Pagos confirmados por mes (los últimos `months`, el actual incluido). Sin cuentas de prueba. */
+export function monthlyCollections(nutritionists: ServiceNutritionist[], today: string, months = 6): Array<{ month: string; label: string; total: number }> {
+  const [year, month] = today.slice(0, 7).split('-').map(Number);
+  const list = Array.from({ length: months }, (_, index) => {
+    const offset = month - 1 - (months - 1 - index);
+    const y = year + Math.floor(offset / 12);
+    const m = ((offset % 12) + 12) % 12;
+    return { month: `${y}-${String(m + 1).padStart(2, '0')}`, label: MONTH_NAMES[m], total: 0 };
+  });
+  const byMonth = new Map(list.map((item) => [item.month, item]));
+  for (const nutritionist of nutritionists) {
+    if (nutritionist.is_test) continue;
+    for (const payment of nutritionist.payments) {
+      const slot = payment.status === 'confirmed' ? byMonth.get(payment.paid_on.slice(0, 7)) : undefined;
+      if (slot) slot.total += payment.amount;
+    }
+  }
+  return list;
+}
+
+function csvCell(value: string | number): string {
+  const text = String(value);
+  // Una celda que empieza con =, +, - o @ la planilla la toma como fórmula: se antepone una comilla.
+  const safe = /^[=+\-@]/.test(text) ? `'${text}` : text;
+  return /[",\n;]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
+}
+
+/** Lista de nutricionistas para abrir en una planilla. Sin datos de salud: solo cantidades. */
+export function serviceRowsCsv(rows: ServiceRow[]): string {
+  const head = ['Nombre', 'Mail', 'Estado', 'Vigencia hasta', 'Pacientes activas', 'Pacientes en total', 'Último ingreso'];
+  const lines = rows.map(({ nutritionist, summary }) => [
+    nutritionist.display_name, nutritionist.email, SERVICE_STATE_LABELS[summary.state], summary.until ?? '',
+    nutritionist.patients_active, nutritionist.patients_total, nutritionist.last_sign_in_at ? nutritionist.last_sign_in_at.slice(0, 10) : 'Nunca',
+  ].map(csvCell).join(','));
+  return [head.join(','), ...lines].join('\n');
 }
