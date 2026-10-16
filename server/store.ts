@@ -198,6 +198,8 @@ export type Patient = {
   sensitive_hours: string;
   plan_b: string;
   next_focus: string;
+  /** Meta de agua que eligió la nutri (vasos por día); sin dato, 8. */
+  water_goal_glasses?: number | null;
   adherence_score: number;
   adherence_why: string;
   time: string;
@@ -976,7 +978,7 @@ export function updatePatient(id: string, patch: Partial<Patient>): Patient | un
 
 export function setPatientProfile(
   id: string,
-  input: Partial<Pick<Patient, 'name' | 'status' | 'stage' | 'sensitive_hours' | 'plan_b' | 'next_focus'>>,
+  input: Partial<Pick<Patient, 'name' | 'status' | 'stage' | 'sensitive_hours' | 'plan_b' | 'next_focus' | 'water_goal_glasses'>>,
 ): Patient | undefined {
   const patient = getPatient(id);
   if (!patient) return undefined;

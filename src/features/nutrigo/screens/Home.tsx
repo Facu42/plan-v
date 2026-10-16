@@ -21,6 +21,7 @@ import { barFill, descendants, EmptyState, fields, formatNumber, leaf, listChild
 import { burnedKcalOn, dayOfIso, cleanAmount, daysBefore, litresLabel, monthYearLabel, percentLabel, portionsLabel, safePercent, weekDays, weightChangeLabel } from './home-values';
 import { PatientGoalCard } from '../PatientGoalCard';
 import { streakLabel } from '../streak';
+import { waterGoalOf } from '../../../types/water';
 
 async function homeData(id: string, signal: AbortSignal) {
   const [body,target,recipes,plan,exercise,care] = await Promise.allSettled([
@@ -34,7 +35,6 @@ async function homeData(id: string, signal: AbortSignal) {
  * Un vaso son 250 ml. Plan V no guarda metas de agua ni de pasos: las barras usan una referencia
  * general (2 L y 8.000 pasos) y la pantalla la nombra como «referencia», nunca como meta indicada.
  */
-const DEFAULT_WATER_GLASSES = 8;
 const litres = litresLabel;
 const DEFAULT_STEPS_GOAL = 8000;
 const text = (node: SourceNode, ...samples: string[]) => leaf(node) && samples.includes(sourceText(node));
@@ -94,7 +94,8 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
   const days=patient.journey?.days??[];
   const sleepWeek=[...Array(Math.max(0,8-days.length)).fill(null),...days.map(day=>cleanAmount(day.sleepMinutes))].slice(-8);
   const glasses=cleanAmount(patient.hydration)??0;
-  const waterPct=safePercent(glasses,DEFAULT_WATER_GLASSES)??0;
+  const waterGoal=waterGoalOf({water_goal_glasses:patient.waterGoal});
+  const waterPct=safePercent(glasses,waterGoal)??0;
 
   // Rutina asignada: series registradas en los últimos siete días sobre las indicadas.
   const assignments=current?.exercise?.assignments.filter(a=>a.status==='active')??[];
@@ -167,7 +168,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
         return undefined;
       })};
       return {onClick:onHydration,label:'Registrar hidratación',children:fields(node,{},child=>{
-        if(nodeName(child)==='Chart'&&objects(child).some(n=>nodeName(n)==='Progress Bar'))return {props:{style:{justifyContent:'flex-end'}},children:objects(child).map((n,i)=>source(n,m=>nodeName(m)==='Progress Bar'?{props:{style:{flex:`0 0 ${Math.max(waterPct,24)}%`}},children:fields(m,{},leafNode=>text(leafNode,'1.3/2')?{text:`${litres(glasses)}/${litres(DEFAULT_WATER_GLASSES)}`}:text(leafNode,'litre')?{text:'L (ref.)'}:undefined)}:undefined,i))};
+        if(nodeName(child)==='Chart'&&objects(child).some(n=>nodeName(n)==='Progress Bar'))return {props:{style:{justifyContent:'flex-end'}},children:objects(child).map((n,i)=>source(n,m=>nodeName(m)==='Progress Bar'?{props:{style:{flex:`0 0 ${Math.max(waterPct,24)}%`}},children:fields(m,{},leafNode=>text(leafNode,'1.3/2')?{text:`${litres(glasses)}/${litres(waterGoal)}`}:text(leafNode,'litre')?{text:'L (ref.)'}:undefined)}:undefined,i))};
         if(text(child,'0.7'))return {text:litres(glasses)};
         if(text(child,'litre left'))return {text:`L · ${formatNumber(glasses)} vasos`};
         return undefined;
