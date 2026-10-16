@@ -25,9 +25,7 @@ design/auditoria/
 /public/patient-import-ocr/
 
 /public/clinical-pdf/
-
 # Resultados de los recorridos de punta a punta (npm run test:e2e)
 /test-results/
 /playwright-report/
-
 

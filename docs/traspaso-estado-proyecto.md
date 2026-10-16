@@ -1,5 +1,9 @@
 # Traspaso del proyecto (2026-10-01)
 
+## Entrega 6 aislada · 14/10/2026
+
+Agenda, reservas públicas, equipo con recepción operativa, asignación clínica y cobros por profesional preparados en `codex/nutridesk-release-agenda`, base clínica `66ed039`. [Alcance, evidencia y límites](nutridesk-release-agenda-2026-10-14.md): suite propia de 2.816 aprobadas, cero fallos, dos omitidas (431 archivos), tipos/build/migraciones/vistas/secretos y revisión independiente aprobados. Cinco SQL preparados, sin aplicación hospedada. Navegador público/equipo a 1440/390; asociación de ficha existente con UUID real comprobada en fixtures, no con `pat-sofia` demo. Comunicaciones/cartera finales, configuración de Google/Mercado Pago, SMTP y producción continúan pendientes.
+
 Una sola página para que cualquier agente (Claude, Codex u otro) siga sin tener el chat.
 **Desde el 14/10:** el reparto de trabajo entre agentes está en [`coordinacion-agentes.md`](coordinacion-agentes.md) y los documentos de producto en [`producto/`](producto/README.md).
 Los detalles de cada tema están en los archivos que se nombran. Este archivo se actualiza
@@ -270,7 +274,6 @@ Entrega 4 verificada en `codex/nutridesk-release-nutricion`, sobre la cabeza fin
 
 
 Quinta entrega apilada: [ficha clínica y exportación histórica, evidencia y límites](nutridesk-release-clinica-2026-10-14.md). Base 304413f; gate previo 2.719 pruebas aprobadas; verificación nueva de marca vigente en curso, sin producción.
-
 
 
 ## Ánimo y síntomas de la paciente (2026-10-15)

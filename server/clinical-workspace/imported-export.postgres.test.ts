@@ -13,7 +13,7 @@ beforeAll(async () => {
   for (const user of [owner, other, patientUser, admin, reception]) await db.query('insert into auth.users(id,email,email_confirmed_at)values($1,$2,now())', [user, `${user}@example.test`]);
   for (const user of [owner, other]) await db.query('select public.provision_nutritionist($1,$2)', [user, 'Consultorio ficticio']);
   await db.query('insert into public.platform_admins(user_id)values($1)',[admin]);
-  // Entrega 5: identidad sin rol clínico; la tabla real de recepción llega en 6.
+  await db.query('insert into public.scheduling_staff_members(nutritionist_id,user_id,granted_by)select id,$2,$1 from public.nutritionists where user_id=$1',[owner,reception]);
   await db.query("insert into public.patients(id,nutritionist_id,full_name,billing_status)select $1,id,'Ficha sin cuenta','waived'from public.nutritionists where user_id=$2", [target, owner]);
   await actor(owner, 'select public.record_patient_import_authorization($1,$2,0,$3::jsonb)', [target, crypto.randomUUID(), JSON.stringify({ obtained_on: '2026-10-01', source: 'Permiso escrito específico', document: { file: 'permiso.pdf', fingerprint: 'b'.repeat(64) }, purposes: ['history', 'measurement'], confirmed: true })]);
   for (const category of ['history', 'study', 'plan']) await db.query("insert into public.patient_import_history(patient_id,nutritionist_id,category,body,origin)select $1,id,$3,$4,$5::jsonb from public.nutritionists where user_id=$2", [target, owner, category, `Original ${category}`, JSON.stringify(origin)]);

@@ -31,6 +31,8 @@ import { registerPatientImportRoutes } from './patient-import/routes.js';
 import { registerDocumentOrganizerRoutes } from './document-organizer/routes.js';
 import { registerNutritionCapabilityRoutes } from './nutrition-capabilities/routes.js';
 import { registerClinicalWorkspaceRoutes } from './clinical-workspace/routes.js';
+import {registerSchedulingRoutes} from './scheduling/routes.js';
+import {registerSchedulingTeamRoutes} from './scheduling/team-routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -193,7 +195,7 @@ const securityLimits = createRateLimits();
 app.use('/api/*', securityLimits.public);
 app.use('/*', cors({
   origin: (origin) => resolveCorsOrigin(origin ?? '', process.env),
-  allowHeaders: ['Authorization', 'Content-Type', 'X-Request-Id'],
+  allowHeaders: ['Authorization', 'Content-Type', 'X-Request-Id', 'X-Booking-Token'],
   exposeHeaders: ['X-Request-Id', 'Retry-After', 'X-RateLimit-Remaining'],
 }));
 app.use('/api/*', createBodyGuard(c => maxBodyBytes(c.req.path)));
@@ -308,6 +310,9 @@ registerPatientImportRoutes(app);
 registerDocumentOrganizerRoutes(app);
 registerNutritionCapabilityRoutes(app);
 registerClinicalWorkspaceRoutes(app);
+
+registerSchedulingRoutes(app);
+registerSchedulingTeamRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({
