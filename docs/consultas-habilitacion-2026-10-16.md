@@ -6,6 +6,10 @@ Facundo pidió «dejalo funcional» para grabación, transcripción y resumen de
 
 La comprobación actual reemplaza el estado histórico de borrador: consultas ya se integró mediante PR131 (`f5e939a`), y su base, confirmaciones y presupuesto ya estaban aplicados en Supabase. API y worker estaban online, pero sin configuración de Groq. La rama de este arreglo parte de `a2cf37a`, sin recuperar ni sobrescribir las ramas de integración de otros agentes.
 
+Durante la habilitación se integraron operaciones y SARA2 por otros hilos. Se incorporó main `bac31c9` con merge, sin conflictos ni cambios en los tres módulos de audio/worker/proveedor de esta corrección. El manifiesto detectó correctamente la SQL nueva como extra (RED); ahora la registra entre seis archivos aplicados con su hash y alias remoto `20261016233443`, verificado el16/10. Se conservan las18 entradas históricas de la pila, cuyo estado remoto debe comprobarse por nombre/alias antes de cualquier aplicación; el contador «pending» del verificador representa ese inventario histórico, no una instrucción de volver a aplicarlas.
+
+Groq configurado en API y worker con clave privada, ZDR confirmado y modoFree. No se imprimió la clave ni se guardó en el repo. La corrección SQL se aplicó con el pedido de habilitación y se comprobó su condición y permisos efectivos: anon/authenticated no pueden ejecutarla, service_role sí. Reversión local conservada en `planv-consultation-auto-summary-rollback-20261016.sql` del directorio temporal. Publicación del código por PR140; comprobar su estado y servicios para el resultado definitivo.
+
 ## Correcciones
 
 - Una respuesta de transcripción sin palabras es un segmento procesado correctamente. Antes, un silencio cortaba la preparación automática del resumen. Un resumen vacío sigue siendo inválido y no reemplaza las notas.
@@ -17,8 +21,10 @@ La comprobación actual reemplaza el estado histórico de borrador: consultas ya
 - RED: cuatro fallos reproducidos antes del arreglo: silencio del worker, cola corta de captura, cola corta de archivo y resumen automático de silencios en PostgreSQL. Checkpoint `5082e53`.
 - GREEN inicial: 22 casos en tres archivos. Revisión independiente: 39 casos en ocho archivos; sin P1/P2 nuevos. PGlite confirmó ACL, `security definer`, `search_path` y restauración de la definición anterior.
 - Groq real: audio ficticio de 22,785 segundos, generado localmente con dos voces sintéticas. Whisper transcribió las comidas, lista de compras y registro por siete días. El resumen conservó esos acuerdos y próximos pasos. No se usaron datos de pacientes. Evidencia local privada: `planv-groq-smoke-20261016.json` en el directorio temporal.
+- Flujo completo del repositorio y worker con proveedor real y persistencia local de demostración: carga WAV → transcripción → resumen automático → publicación revisada → edición posterior privada. La vista de paciente devolvió cero sesiones/tareas privadas, una versión compartida intacta y ninguna nota privada. Evidencia `planv-consultas-pipeline-20261016.json`; no equivale a una prueba de cuentas y almacenamiento hospedados.
 - Tipos web/servidor/e2e, migraciones, vistas sin escritura pública y control de secretos aprobados. Build aprobado en 11,27 segundos con avisos existentes de tamaño de paquetes.
 - Suite completa: **2.964 aprobadas, cero fallos, dos omitidas, 453 archivos**. Evidencia: `planv-consultas-funcionales-tests.json` en el directorio temporal.
+- Tras incorporar main `bac31c9`: focal de consultas/proveedor/presupuesto/manifiesto **71 aprobadas en15archivos**. La suite completa de la combinación y CI se registran en el PR; no se atribuye el conteo previo a esa base nueva.
 - Chromium real con gstack: dos MediaStreams WebAudio a440/880Hz, código de captura real, dos segmentos de30,037s y1,109s con ambas frecuencias, ambos indicadores activos, todas las pistas cerradas y ningún segmento posterior a detener. Audio cargado de30,03s conservó su cola con relleno a0,1s. Siete comprobaciones aprobadas. Se sustituyó sólo la selección de fuentes; no se certifica el diálogo nativo de permisos de Meet/Zoom. Evidencia: `planv-consultation-browser-20261016/result.json`, hash del módulo `3afaf9815477abbd83d3a755e1e7ea31fdec8504cdd63589a89460da8c73e158`.
 
 ## Uso
