@@ -50,10 +50,19 @@ export class DemoStateFile {
     if (current.models?.models instanceof Map && !Object.prototype.hasOwnProperty.call(saved.domains, 'models')) {
       saved.domains.models = { models: new Map() };
     }
+    if (current.consultations && !Object.prototype.hasOwnProperty.call(saved.domains, 'consultations')) {
+      saved.domains.consultations = { sessions: new Map(), shared: new Map(), tasks: new Map(), audio: new Map() };
+    }
     if (keys(current) !== keys(saved.domains)) throw new Error('La copia local tiene dominios diferentes; se conservó el archivo');
     // Validar todo antes de restaurar para no dejar un estado parcial.
     for (const [name, values] of Object.entries(current)) {
       const other = saved.domains[name];
+      const newFields = name === 'consultations' ? ['completions', 'completion_events'] : [];
+      if (other && Object.getPrototypeOf(other) === Object.prototype) {
+        const missing = newFields.filter(field => values[field] instanceof Map && !Object.prototype.hasOwnProperty.call(other, field));
+        const previous = Object.fromEntries(Object.entries(values).filter(([field]) => !missing.includes(field)));
+        if (missing.length && keys(previous) === keys(other)) for (const field of missing) other[field] = new Map();
+      }
       // Única ampliación conocida del formato v1: favoritos profesionales.
       // La copia previa queda intacta hasta completar todas las validaciones.
       if (name === 'recipes/repository' && values.professionalFavorites instanceof Map && other &&

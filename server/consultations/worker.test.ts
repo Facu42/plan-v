@@ -1,0 +1,41 @@
+import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
+const state=vi.hoisted(()=>({allowed:true}));
+vi.mock('../db/supabase-client.js',()=>({isSupabaseEnabled:()=>false}));
+vi.mock('../care/consents.js',()=>({requireCareConsent:async()=>{if(!state.allowed)throw new Error('withdrawn');}}));
+vi.mock('./repository.js',()=>({AUDIO_BUCKET:'private',memoryAudio:new Map(),consultationDbError:()=>{}}));
+import { configureConsultationProcessing,runPendingConsultations } from './worker.js';
+import { sessions,tasks,resetConsultationMemory,commandMemory,consultationMemoryView } from './memory.js';
+import { memoryAudio } from './repository.js';
+import { encodeConsultationWav } from '../../src/lib/consultation-capture.js';
+import type { ConsultationTask } from '../../src/types/consultations.js';
+const scope={patientId:'patient',nutritionistId:'nutri',requestedBy:'user'};
+function summary(){const s=commandMemory(scope,{action:'start',id:'session',source:'manual'});commandMemory(scope,{action:'draft',id:s.id,expected_revision:1,draft:'Nota privada',transcript:'Texto real'});commandMemory(scope,{action:'summarize',id:s.id,expected_revision:2,consent_version:'ai_consultation.v1'});return [...tasks.values()][0];}
+beforeEach(()=>{resetConsultationMemory();memoryAudio.clear();state.allowed=true;});
+afterEach(()=>{configureConsultationProcessing(undefined);});
+describe('worker consultas: no emula IA y revalida consentimiento/lease/revisión',()=>{
+ it('resume textos completos mayores a100KB por etapas persistidas sin exceder60KB',async()=>{
+  commandMemory(scope,{action:'start',id:'session',source:'manual'});
+  const transcript='Antecedente ficticio con ñ. '.repeat(6000);
+  commandMemory(scope,{action:'draft',id:'session',expected_revision:1,draft:'',transcript});
+  commandMemory(scope,{action:'summarize',id:'session',expected_revision:2,consent_version:'ai_consultation.v1'});
+  const summarize=vi.fn(async(input:{text:string})=>{expect(Buffer.byteLength(input.text)).toBeLessThanOrEqual(60000);return{summary:'Resumen de fragmento ficticio'};});
+  configureConsultationProcessing({summarizeClinicalText:summarize,transcribeClinicalAudio:vi.fn()});
+  await runPendingConsultations();expect(summarize.mock.calls.length).toBeGreaterThan(1);expect(sessions.get('session')!.transcript).toBe(transcript);expect([...tasks.values()][0].summary_steps!.length).toBeGreaterThan(1);
+ });
+ it('retoma etapas confirmadas después de una interrupción sin volver a pedirlas',async()=>{
+  commandMemory(scope,{action:'start',id:'session',source:'manual'});const text='Texto ficticio con á. '.repeat(7000);
+  commandMemory(scope,{action:'draft',id:'session',expected_revision:1,draft:'',transcript:text});commandMemory(scope,{action:'summarize',id:'session',expected_revision:2,consent_version:'ai_consultation.v1'});
+  const first=vi.fn(async()=>{if(first.mock.calls.length===2)throw new Error('interruption');return{summary:'Fragmento confirmado'};});configureConsultationProcessing({summarizeClinicalText:first,transcribeClinicalAudio:vi.fn()});await runPendingConsultations();
+  const task=[...tasks.values()][0];expect(task.status).toBe('failed');expect(task.summary_steps).toHaveLength(1);
+  commandMemory(scope,{action:'retry',id:'session',expected_revision:2,task_id:task.id});const again=vi.fn(async()=>({summary:'Resultado revisable'}));configureConsultationProcessing({summarizeClinicalText:again,transcribeClinicalAudio:vi.fn()});await runPendingConsultations();
+  expect(again).toHaveBeenCalledTimes(3);expect(task.status).toBe('succeeded');expect(task.summary_steps).toHaveLength(3);
+ });
+ it('con proveedor ausente conserva la tarea en espera',async()=>{summary();configureConsultationProcessing(undefined);expect(await runPendingConsultations()).toBe(0);expect([...tasks.values()][0].status).toBe('queued');});
+ it('no envía nada al proveedor tras retirar el permiso',async()=>{const task=summary();state.allowed=false;const summarize=vi.fn();configureConsultationProcessing({summarizeClinicalText:summarize,transcribeClinicalAudio:vi.fn()});await runPendingConsultations();expect(summarize).not.toHaveBeenCalled();expect(task.status).toBe('cancelled');expect(sessions.get('session')!.draft).toBe('Nota privada');});
+ it('un nuevo pedido explícito tras reactivar permiso no anuncia éxito sobre una tarea cancelada',async()=>{const task=summary();state.allowed=false;configureConsultationProcessing({summarizeClinicalText:vi.fn(),transcribeClinicalAudio:vi.fn()});await runPendingConsultations();expect(task.status).toBe('cancelled');state.allowed=true;commandMemory(scope,{action:'summarize',id:'session',expected_revision:2,consent_version:'ai_consultation.v1'});expect(task.status).toBe('queued');});
+ it('descarta resultado si retira el permiso durante la llamada',async()=>{const task=summary();configureConsultationProcessing({summarizeClinicalText:async()=>{state.allowed=false;return {summary:'No persistir'};},transcribeClinicalAudio:vi.fn()});await runPendingConsultations();expect(task.status).toBe('cancelled');expect(sessions.get('session')!.draft).toBe('Nota privada');expect(task.text).toBe('');});
+ it('reintenta lease vencido pero nunca sobrescribe edición o copia revisada',async()=>{const task=summary();commandMemory(scope,{action:'publish',id:'session',expected_revision:2,summary:'Copia revisada'});task.status='running';task.lease_until=new Date(Date.now()-1000).toISOString();task.run_token='worker-viejo';configureConsultationProcessing({summarizeClinicalText:async()=>{commandMemory(scope,{action:'draft',id:'session',expected_revision:2,draft:'Edición nueva'});return {summary:'Resumen obsoleto'};},transcribeClinicalAudio:vi.fn()});await runPendingConsultations();expect(task.status).toBe('cancelled');expect(sessions.get('session')!.draft).toBe('Edición nueva');expect(consultationMemoryView('patient',false).shared[0].summary).toBe('Copia revisada');});
+ it('verifica duración del PCM y produce texto por segmento en orden',async()=>{commandMemory(scope,{action:'start',id:'session',source:'upload'});const task:ConsultationTask={id:'chunk',request_key:'request-a',session_id:'session',patient_id:'patient',nutritionist_id:'nutri',requested_by:'user',kind:'chunk',revision:1,index:4,status:'queued',audio_path:'audio.wav',expires_at:new Date(Date.now()+86400000).toISOString(),duration_seconds:1,audio_sha256:null,run_token:null,lease_until:null,attempts:0,text:'',error:null,consent_version:'ai_consultation.v1'};tasks.set(task.id,task);memoryAudio.set(task.audio_path!,encodeConsultationWav(new Float32Array(16000),16000));const transcribe=vi.fn(async()=>({text:'Transcripción real',segments:[]}));configureConsultationProcessing({transcribeClinicalAudio:transcribe,summarizeClinicalText:vi.fn()});await runPendingConsultations();expect(transcribe).toHaveBeenCalledWith(expect.objectContaining({durationSeconds:1,revision:5,taskId:'chunk',mime:'audio/wav'}));expect(sessions.get('session')!.transcript).toBe('Transcripción real');expect(task.status).toBe('succeeded');});
+ it('no guarda errores del proveedor que contengan datos sensibles',async()=>{const task=summary();configureConsultationProcessing({transcribeClinicalAudio:vi.fn(),summarizeClinicalText:async()=>{throw new Error('patient email SECRET diagnosis');}});await runPendingConsultations();expect(task.status).toBe('failed');expect(task.error).not.toContain('SECRET');});
+ it('conserva la solicitud financiera al recuperar lease y la renueva sólo por reintento explícito',async()=>{const task=summary(),key=task.request_key;task.status='running';task.lease_until=new Date(Date.now()-1000).toISOString();const summarize=vi.fn(async()=>{throw new Error('bad_result');});configureConsultationProcessing({transcribeClinicalAudio:vi.fn(),summarizeClinicalText:summarize});await runPendingConsultations();expect(summarize).toHaveBeenCalledWith(expect.objectContaining({requestKey:key}));expect(task.request_key).toBe(key);commandMemory(scope,{action:'summarize',id:'session',expected_revision:2,consent_version:'ai_consultation.v1'});expect(task.status).toBe('failed');commandMemory(scope,{action:'retry',id:'session',expected_revision:2,task_id:task.id});expect(task.request_key).not.toBe(key);expect(sessions.get('session')!.revision).toBe(2);});
+});
