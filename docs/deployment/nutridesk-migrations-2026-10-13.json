@@ -1,8 +1,8 @@
 {
   "project": "plan-v-app",
   "projectId": "wvosvlxpfytokwfbcero",
-  "observedOn": "2026-10-15",
-  "mainBase": "9c568541a4c72633bfdb65090a231c3724a3588d",
+  "observedOn": "2026-10-16",
+  "mainBase": "ae19e5c49af07cb7451a5aff5048850051d6a909",
   "productionApplied": false,
   "approvalRequired": true,
   "priorAliasNames": [
@@ -117,11 +117,25 @@
       "observedAppliedName": "habit_symptoms"
     },
     {
+      "file": "20261015200000_push_subscriptions.sql",
+      "version": "20261015200000",
+      "sha256": "a89293be7e184ec11eebe31a2515756876566165abec854ee11ecb44a890242b",
+      "observedAppliedVersion": "20261015163006",
+      "observedAppliedName": "push_subscriptions"
+    },
+    {
       "file": "20261015210000_activity_kcal.sql",
       "version": "20261015210000",
       "sha256": "02da18732263fd88350b51622c0a6b3ec84f5ca31b2ac9fc898e4ab01e5c0d6f",
       "observedAppliedVersion": "20261015173356",
       "observedAppliedName": "activity_kcal"
+    },
+    {
+      "file": "20261016090000_water_goal.sql",
+      "version": "20261016090000",
+      "sha256": "cb7334e581e793c2ab06affba1819982b4c139e0ecf46c59893860a5dff96605",
+      "observedAppliedVersion": "20261016090000",
+      "observedAppliedName": "water_goal"
     }
   ]
 }
