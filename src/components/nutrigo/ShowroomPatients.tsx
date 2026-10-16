@@ -18,6 +18,7 @@ import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
 import { buildBoardRows } from './cobranzas-utils';
 import { formatPesos } from '../../fees';
 import type { BillingBoard } from '../../types/fees';
+import { DEFAULT_WATER_GOAL, WATER_GOAL_OPTIONS } from '../../types/water';
 
 const STAGE_LABELS: Record<Stage, string> = { ingreso: 'Ingreso', plan: 'Plan', seguimiento: 'Seguimiento', alta: 'Alta' };
 
@@ -170,12 +171,14 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
   const [sensitiveHours, setSensitiveHours] = useState(patient.sensitive_hours);
   const [planB, setPlanB] = useState(patient.plan_b);
   const [nextFocus, setNextFocus] = useState(patient.next_focus);
+  const savedWaterGoal = patient.water_goal_glasses == null ? '' : String(patient.water_goal_glasses);
+  const [waterGoal, setWaterGoal] = useState(savedWaterGoal);
   const [access, setAccess] = useState(patient.billing_status);
   const [accessUntil, setAccessUntil] = useState(patient.billing_until ?? '');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const nameInput = useRef<HTMLInputElement>(null);
-  useUnsavedChanges(name !== patient.name || phone !== initialPhone || status !== patient.status || stage !== patient.stage || sensitiveHours !== patient.sensitive_hours || planB !== patient.plan_b || nextFocus !== patient.next_focus || access !== patient.billing_status || accessUntil !== (patient.billing_until ?? ''), busy);
+  useUnsavedChanges(name !== patient.name || phone !== initialPhone || status !== patient.status || stage !== patient.stage || sensitiveHours !== patient.sensitive_hours || planB !== patient.plan_b || nextFocus !== patient.next_focus || waterGoal !== savedWaterGoal || access !== patient.billing_status || accessUntil !== (patient.billing_until ?? ''), busy);
   useDialogKeys(onClose, busy);
   useEffect(() => { nameInput.current?.focus(); }, []);
 
@@ -186,6 +189,8 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
     try {
       let { patient: updated } = await api.updatePatientProfile(patient.id, {
         name, phone: phone.trim() || null, status, stage, sensitive_hours: sensitiveHours, plan_b: planB, next_focus: nextFocus,
+        // Solo si la cambió: así la ficha se guarda igual en una base sin la meta de agua.
+        ...(waterGoal !== savedWaterGoal ? { water_goal_glasses: waterGoal ? Number(waterGoal) : null } : {}),
       });
       // Sólo si la profesional cambió el acceso; un vencido sin tocar queda como está.
       const accessChanged = access !== patient.billing_status || (access === 'active' && accessUntil !== (patient.billing_until ?? ''));
@@ -213,6 +218,7 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
           <label>Estado visible<input value={status} onChange={(e) => setStatus(e.target.value)} minLength={2} maxLength={40} required /></label>
           <label>Etapa<select value={stage} onChange={(e) => setStage(e.target.value as Stage)}>{(['ingreso', 'plan', 'seguimiento', 'alta'] as const).map((value) => <option key={value} value={value}>{STAGE_LABELS[value]}</option>)}</select></label>
           <label>Horario sensible<input value={sensitiveHours} onChange={(e) => setSensitiveHours(e.target.value)} maxLength={120} placeholder="Ej.: después de las 20:30" /></label>
+          <label>Meta de agua<select value={waterGoal} onChange={(e) => setWaterGoal(e.target.value)}><option value="">{DEFAULT_WATER_GOAL} vasos por día (la de siempre)</option>{WATER_GOAL_OPTIONS.filter((value) => value !== DEFAULT_WATER_GOAL).map((value) => <option key={value} value={value}>{value} vasos por día</option>)}</select></label>
         </div>
         <div className="nv-dialog-grid">
           <label>Acceso a la app<select value={access} onChange={(e) => setAccess(e.target.value as typeof access)}>

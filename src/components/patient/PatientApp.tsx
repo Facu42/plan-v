@@ -11,6 +11,7 @@ import { buildDailyReminders } from './daily-reminders';
 import { hasFullPatientAccess } from '../../billing';
 import { PatientPaywall } from './PatientPaywall';
 import { flavorTip, PERMITTED_SEASONINGS, preparationSteps, withColacion } from './planContent';
+import { MAX_WATER_GLASSES, waterGoalOf } from '../../types/water';
 
 type Tab = 'hoy' | 'plan' | 'camino' | 'mensajes';
 
@@ -38,9 +39,10 @@ function PatientHome({ openPhoto, onShowPlan, onShowMessages, darkMode, onToggle
     todayPlan,
     meal_logs: patient.meal_logs,
     hydration: patient.hydration,
+    water_goal_glasses: patient.water_goal_glasses,
     sleep_minutes: patient.sleep_minutes,
     appointment: patient.appointment,
-  }), [patient.appointment, patient.hydration, patient.meal_logs, patient.sleep_minutes, todayPlan]);
+  }), [patient.appointment, patient.hydration, patient.water_goal_glasses, patient.meal_logs, patient.sleep_minutes, todayPlan]);
   const [remindersOpen, setRemindersOpen] = useState(false);
   const [sleepHours, setSleepHours] = useState(patient.sleep_minutes === null ? '' : String(patient.sleep_minutes / 60));
   const [sleepSaving, setSleepSaving] = useState(false);
@@ -83,7 +85,7 @@ function PatientHome({ openPhoto, onShowPlan, onShowMessages, darkMode, onToggle
   );
 
   const addWater = async () => {
-    await api.updateHabits(patient.id, { hydration: Math.min(patient.hydration + 1, 8) });
+    await api.updateHabits(patient.id, { hydration: Math.min(patient.hydration + 1, MAX_WATER_GLASSES) });
     await refreshPatient(patient.id);
   };
 
@@ -143,7 +145,7 @@ function PatientHome({ openPhoto, onShowPlan, onShowMessages, darkMode, onToggle
         <div className="pulse-orbit" aria-hidden>
           <div className="orbit orbit-1" /><div className="orbit orbit-2" /><div className="orbit orbit-3" />
           <div className="pulse-core"><Icon name="heart" size={23} /></div>
-          <span className="orbit-tag tag-water"><Icon name="drop" size={13} /> {patient.hydration}/8</span>
+          <span className="orbit-tag tag-water"><Icon name="drop" size={13} /> {patient.hydration}/{waterGoalOf(patient)}</span>
           <span className="orbit-tag tag-meals"><Icon name="check" size={13} /> {loggedSlots.size}/{todayPlan.length}</span>
         </div>
         <div className="pulse-footer">
@@ -211,7 +213,7 @@ function PatientHome({ openPhoto, onShowPlan, onShowMessages, darkMode, onToggle
         </button>
         <div className="water-action">
           <span className="water-icon"><Icon name="drop" size={21} /></span>
-          <div><strong>Un vaso de agua</strong><small>{patient.hydration} de 8 registrados</small></div>
+          <div><strong>Un vaso de agua</strong><small>{patient.hydration} de {waterGoalOf(patient)} registrados</small></div>
           <button type="button" aria-label="Registrar vaso de agua" onClick={addWater}><Icon name="plus" size={18} /></button>
         </div>
       </section>

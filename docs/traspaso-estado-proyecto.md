@@ -191,6 +191,31 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - App para tiendas (Android primero, empaquetando la web), calidad en producción, publicidad paga y
   página pública con precios (espera el precio). Plan: `docs/plan-apartados.md`.
 
+## Meta de agua por paciente (2026-10-16)
+
+Decisión de Facundo (15/10, «Meta por paciente»): la nutri elige la meta de agua de cada paciente, de 4 a 16 vasos
+por día, en «Editar ficha» (vacía = 8, la de siempre). La paciente la ve en Inicio, Diario y Progreso, y el aviso de
+agua del día y la adherencia se miden contra esa meta. Además se puede anotar hasta 16 vasos por día (antes el tope
+era 8). Migración `20261016090000_water_goal` (columna `patients.water_goal_glasses`, vista `patient_water_goal_view`
+solo con la fila propia, y la regla de `habit_logs` pasa a 0..16). **Sin aplicar**: lleva un DROP de la regla
+vieja, así que Facundo pega el SQL en Supabase. Sin la migración la app sigue andando con 8 vasos.
+
+## Recordatorio de consulta al teléfono (2026-10-15)
+
+El día antes de cada consulta agendada, la paciente con avisos activados recibe «Mañana tenés consulta · Mirá el
+horario en Plan V», que abre su Agenda. No lleva la hora, el lugar ni el nombre de la nutri (viaja por Google,
+Apple o Mozilla). Usa el mismo tramo de 10 minutos que el recordatorio por mail (`server/mail/reminders.ts`), sin
+tocar la base. Lo corre el servicio worker de Railway (la API tiene `WORKER_SEPARATE`), así que las tres claves
+`VAPID_*` tienen que estar también en el worker; sin ellas no manda nada. Código: `server/push/reminders.ts`.
+
+## Mensajes al instante en la app de la paciente (2026-10-15)
+
+Antes la paciente solo veía un mensaje nuevo de su nutri si recargaba la página. Ahora la app trae la ficha
+sola mientras está a la vista: cada 15 s con «Mensajes» abierto (igual que el consultorio) y cada 60 s en las
+demás pantallas, así la campanita avisa del mensaje. Al volver a la pestaña actualiza enseguida. Con la pestaña
+oculta no pide nada. Código: `src/features/nutrigo/use-live-refresh.ts` (con pruebas) y `PatientApp.tsx`.
+No toca la base ni el diseño. Tiempo real de verdad (sin esperar 15 s) necesitaría Supabase Realtime: queda para más adelante.
+
 ## Actividad, rutina y pasos de la paciente (2026-10-15)
 - Inicio de la paciente: «Actividad reciente» y el bloque de ejercicio usan las actividades reales de la pantalla de Ejercicio (antes, en producción, quedaban vacíos porque la ficha no las trae).
 - El avance de la rutina en Inicio cuenta las series que la paciente cargó con «Registrar rutina» esa semana (antes quedaba siempre 0).
@@ -254,11 +279,21 @@ Quinta entrega apilada: [ficha clínica y exportación histórica, evidencia y l
 ## Ánimo y síntomas de la paciente (2026-10-15)
 En el Diario, «Registrar» → «Cómo me siento»: energía del día (con energía, normal, sin energía; se guarda en la energía que ya existía) y ocho síntomas de una lista cerrada. La nutricionista los ve en la ficha, «Registros y evolución», debajo de «Descanso y energía». Nutrigo no dibuja esta pantalla: se armó con su diálogo de registro y los botones del diario. Migración `20261015100000_habit_symptoms` (agrega una columna con lista cerrada): ya aplicada en la base el 14/10 con la frase de Facundo (el historial de la base la anota como `20261014215543`). La de #110 (vistas solo lectura) también quedó aplicada. PR112 y PR110 ya integrados en main el 14/10; no volver a ejecutar sus migraciones.
 
+## Avisos al teléfono de la paciente (2026-10-15)
+En la campanita de la paciente, «Avisos», hay una fila «Recibir avisos en este teléfono». Al aceptarla, el teléfono recibe un aviso cuando la nutri le escribe, publica su plan, le indica un recurso o cambia su consulta. Los avisos pasan por Google, Apple o Mozilla, así que solo llevan un texto genérico (nunca el mensaje ni datos de salud). En iPhone hace falta tener Plan V instalada en la pantalla de inicio.
+Queda apagado hasta tener las tres variables `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `VAPID_SUBJECT` en la API de Railway; sin ellas la fila no aparece y no se manda nada. Migración `20261015200000_push_subscriptions` (tabla nueva, solo el servidor la usa): **aplicada en producción el 15/10** con la frase de Facundo; el historial de la base la anota como `20261015163006` (es repetible). Falta cargar las claves en Railway y juntar el PR; el código se puede juntar antes sin efecto. PR en borrador.
+
 ## Recorridos de punta a punta y monitor de producción (2026-10-14)
 Etapa 1 del plan (`docs/producto/06-plan-implementacion.md`, puntos 6 y 7, sin costo):
 - `npm run test:e2e` (Playwright) levanta la API y la web en modo demo, con las claves de Supabase vacías, y recorre en orden cinco caminos de dos roles: alta de paciente con invitación, ingreso de la paciente visto por la nutri, plan editado y publicado visto por la paciente, comida registrada en el diario vista por la nutri, y revisión de la nutri vista por la paciente. Corre en cada PR (trabajo «recorridos de punta a punta» de CI). Prueba a propósito: romper «Confirmar sin cambios» hace fallar el recorrido 5.
 - `.github/workflows/monitor.yml` mira cada 15 minutos `api/health` (con la base conectada) y la web. Si fallan tres intentos abre un issue con la etiqueta `caida` que menciona a Facundo; cuando vuelve, lo cierra. Arranca recién cuando el archivo está en `main`.
 - Quedan afuera porque cuestan o piden cuenta: base de staging aparte, Sentry y un monitor externo con aviso al celular.
+
+## Cobro a nutricionistas: aviso al vencer, solo lectura a mano (2026-10-15)
+Parte 3 de `docs/cobros-y-panel.md`. Facundo eligió (15/10) que **vencer no corte nada solo**: la nutricionista vencida sigue usando todo y ve una tarjeta amarilla «Servicio vencido» con la fecha y el precio (`ServiceNotice.tsx`, lee `GET /api/me/service`, sin la nota interna); antes ve «Tu prueba termina pronto» o «Tu servicio vence pronto» (7 días antes). Solo lectura únicamente cuando Facundo la **suspende** desde su panel (`/admin`, «Excepción» → «Suspender»): sigue viendo todo, pero cualquier escritura responde 403 con un mensaje claro (`server/service/own-service.ts`). Quedan abiertas la sesión, `/api/me`, el panel del administrador y los avisos; las pacientes nunca se frenan; si no se puede consultar el estado, deja pasar. El estado se recuerda un minuto y se borra cuando el administrador cambia algo. Sin migraciones.
+
+## Rachas de la paciente (2026-10-15)
+En Inicio, el texto bajo el saludo («Tu acompañamiento, día a día») pasa a mostrar la racha cuando la paciente lleva dos días seguidos o más registrando una comida o un hábito (agua, sueño, pasos, ánimo o síntomas), contados en días de Argentina. Si hoy todavía no registró, la invita a hacerlo para no cortarla. Como la paciente solo recibe sus últimas 20 comidas y 14 días de hábitos, la cuenta no inventa días: si llega a ese borde dice «o más». Código: `src/features/nutrigo/streak.ts` (con pruebas). El archivo de Nutrigo no dibuja rachas; se usa el mismo texto del archivo, sin piezas nuevas. Sin migraciones.
 
 ## Próximas acciones de la nutricionista (2026-10-15)
 La bandeja «Tu consultorio, hoy» suma dos tipos de pendiente: **Cuotas vencidas** (cuota impaga con el vencimiento pasado y sin aviso de pago de la paciente; si avisó, queda «Aviso de pago por confirmar»; abre Cobranzas) y **Sin registros hace 7 días** (paciente con acceso a la app, dada de alta hace 7 días o más, sin comidas ni hábitos declarados en 7 días; dice cuántos días pasaron, o «en los últimos 30 días»; abre Mensajes). Es un aviso para escribirle, nunca un juicio clínico. El servidor solo lee fechas de comidas y hábitos de los últimos 30 días, sin contenido. Código: `server/crm/repository.ts` (con pruebas en `work-queue.test.ts` y en Postgres descartable). Sin migraciones.
