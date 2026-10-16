@@ -30,6 +30,7 @@ import { HABIT_LIMITS, parseHabitInput } from '../../lib/habit-input';
 import { PatientAiPermissions } from './PatientAiPermissions';
 import { canLeaveWorkspace,useUnsavedChanges } from '../../components/nutrigo/unsaved-changes';
 import { patientExtraBinding } from './patient-extra-binding';
+import { usePatientLiveRefresh } from './use-live-refresh';
 
 function HabitForm({patient,kind,onClose}:{patient:ShowroomPatient;kind:'water'|'rest'|'steps';onClose:()=>void}) {
   const initial=kind==='water'?String(patient.hydration):kind==='steps'?patient.steps==null?'':String(patient.steps):patient.sleepMinutes==null?'':String(patient.sleepMinutes);
@@ -41,6 +42,8 @@ function HabitForm({patient,kind,onClose}:{patient:ShowroomPatient;kind:'water'|
 }
 export function NutrigoPatientApp({patient,page,onNavigate,onSignOut,onEditIntake,query='',now=new Date(),onConfirm,onReschedule,demoRoleSwitch}:{patient:ShowroomPatient;page:ShowroomPage;onNavigate:(page:ShowroomPage)=>void;onSignOut?:()=>void;onEditIntake:()=>void;query?:string;now?:Date;onConfirm:(reply:'attending'|'needs_change')=>Promise<void>;onReschedule:(day:string,time:string)=>Promise<void>;demoRoleSwitch?:()=>void}) {
   const fullPatient=useAppStore(state=>state.patients.find(item=>item.id===patient.id));
+  const refreshPatient=useAppStore(state=>state.refreshPatient);
+  usePatientLiveRefresh(patient.id,page==='mensajes',refreshPatient);
   const [dialog,setDialog]=useState<'records'|'water'|'rest'|'steps'|null>(null),[slot,setSlot]=useState<string|null>(null),[privacy,setPrivacy]=useState(false);
   const common={patient,onNavigate,onSignOut,query,now};
   const onRecord=()=>setDialog('records'),onHydration=()=>setDialog('water'),onRest=()=>setDialog('rest'),onSteps=()=>setDialog('steps'),onLogMeal=(mealSlot:string=suggestSlot(argentinaHour(new Date())))=>setSlot(mealSlot);

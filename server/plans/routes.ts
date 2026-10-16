@@ -8,6 +8,7 @@ import { mealPlanDraftSchema, mealPlanPublishSchema } from '../../src/types/plan
 import * as repo from './repository.js';
 import { recipeCoverEnabled } from '../ai/recipe-cover.js';
 import { patientPlanWithPhotos } from '../recipes/ingredient-covers.js';
+import { notifyPatientPush } from '../push/push.js';
 
 async function body<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
   const raw = await c.req.text();
@@ -98,6 +99,7 @@ export function registerPlanRoutes(app: Hono) {
     const { persistent, nutritionistId } = await professional(c);
     const input = await body(c, mealPlanPublishSchema);
     const plan = await repo.publishMealPlan(nutritionistId, id.data, input.expected_version, persistent, input.expected_snapshot);
+    if (persistent) notifyPatientPush(plan.patient_id, 'plan');
     return c.json({ plan, source: persistent ? 'supabase' : 'memory' });
   });
 }

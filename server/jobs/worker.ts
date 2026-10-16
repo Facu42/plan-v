@@ -8,6 +8,7 @@ import { cleanupExpiredConsultationAudio } from '../consultations/repository.js'
 import { transcribeClinicalAudio, summarizeClinicalText } from '../clinical-processing/provider.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { writeOpsLog } from '../ops/log.js';
+import { tickPushReminders } from '../push/reminders.js';
 
 let timer: ReturnType<typeof setInterval> | null = null;
 let draining = false;
@@ -36,6 +37,7 @@ export function startJobWorker(owner = 'plan-v-worker', keepAlive = false) {
       lastCleanup = Date.now(); cleanupRunning = true;
       void cleanupExpiredConsultationAudio().catch(() => writeOpsLog('warn', 'consultation_cleanup_failed', { status: 'retry_pending' })).finally(() => { cleanupRunning = false; });
     }
+    void tickPushReminders().catch(() => undefined);
   }, 1_000);
   if (!keepAlive) timer.unref?.();
 }
