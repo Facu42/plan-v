@@ -141,6 +141,13 @@
       "sha256": "cb7334e581e793c2ab06affba1819982b4c139e0ecf46c59893860a5dff96605",
       "observedAppliedVersion": "20261016090000",
       "observedAppliedName": "water_goal"
+    },
+    {
+      "file": "20261017010000_performance_indexes.sql",
+      "version": "20261017010000",
+      "sha256": "8b96b1aa98ab7e515e27c637daacdf37dc5ca775fb1b70dd23ce3d628e846126",
+      "observedAppliedVersion": "20261017013123",
+      "observedAppliedName": "performance_indexes"
     }
   ]
 }

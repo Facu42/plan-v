@@ -209,7 +209,9 @@ Migración `20261017010000_performance_indexes`: reescribe esas reglas con `(sel
 sobre la expresión que tienen hoy (mismos permisos) y crea un índice por cada clave sin cubrir en `public` y
 `private`, sin borrar nada. Prueba `server/db-performance.postgres.test.ts`: falla si una clave nueva queda sin
 índice o si una regla vuelve a llamar a `auth.uid()` por fila. Quedan a propósito las advertencias de reglas dobles
-y de índices sin uso (la base es chica y todavía no hay uso real que las mida).
+y de índices sin uso (la base es chica y todavía no hay uso real que las mida). **Aplicada en producción el 17/10** con la frase de
+Facundo; el historial de la base la anota como `20261017013123` (registrada en el manifiesto de migraciones). Verificado:
+0 claves sin índice y las 7 reglas con `(select auth.uid())`.
 
 ## Meta de agua por paciente (2026-10-16)
 
