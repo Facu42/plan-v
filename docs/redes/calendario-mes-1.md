@@ -51,7 +51,7 @@ Arranca el lunes que elija Facundo. Por eso dice "Semana 1 – lunes" y no hay f
 **Nombre del perfil** (aparece en las búsquedas): `Plan V | App para nutricionistas`
 
 **Bio** (129 caracteres, el máximo es 150):
-> Una app para nutricionistas que te ayuda a ver a quién atender hoy. Hecha con la Lic. Verónica Trenti. Probala gratis en el link.
+> Una app para nutricionistas que te ayuda a ver a quién atender hoy. Hecha con la Lic. Verónica Trenti. Conocela en el link.
 
 **Enlace:** https://plan-v-eight.vercel.app
 **Categoría sugerida:** "Aplicación" o "Salud y bienestar" (la elige Facundo).
@@ -94,7 +94,7 @@ Formato 1080x1350. Colores y plantillas según `guia-marca-redes.md`: si la diap
 | 4 | **Tu paciente carga, vos ves cómo viene** | Registra sus comidas con foto, ve su plan del día y tilda lo que compró. Los macros de la foto son una estimación. | Captura del modo demo, vista de la paciente: registro de un almuerzo (foto de un plato de comida, no de una persona) con la etiqueta "estimación". |
 | 5 | **Tu lista: a quién atender hoy** | La app ordena tus pacientes: quién necesita atención, quién va en buen ritmo, quién está estable. Te sugiere un próximo paso. Vos revisás y decidís. Nada se manda solo. | Captura del modo demo: lista de pacientes inventadas con los tres estados en colores. |
 | 6 | **Hecha acá, con una nutricionista** | Creada junto a la Lic. Verónica Trenti, que la usa en su consultorio. La invitación a tus pacientes sale por WhatsApp. | Foto de Verónica en su escritorio, de espaldas a la pantalla o con la pantalla apagada. |
-| 7 | **Probala gratis** | Entrá al link de la bio y elegí "Soy nutricionista". Se abre desde el navegador y la agregás a la pantalla de tu teléfono. ¿Dudas? Escribime PLAN por mensaje. | Maqueta de un teléfono con la pantalla de registro (opción "Soy nutricionista"). Aclaración: "Capturas del modo demo, datos inventados". |
+| 7 | **Conocela** | Entrá al link de la bio y elegí "Soy nutricionista". Se abre desde el navegador y la agregás a la pantalla de tu teléfono. ¿Dudas? Escribime PLAN por mensaje. | Maqueta de un teléfono con la pantalla de registro (opción "Soy nutricionista"). Aclaración: "Capturas del modo demo, datos inventados". |
 
 **Pie de publicación:**
 > Durante años tuve a cada paciente repartida en tres lugares: una planilla, un PDF y el chat. Por eso armamos Plan V.
@@ -103,7 +103,7 @@ Formato 1080x1350. Colores y plantillas según `guia-marca-redes.md`: si la diap
 >
 > Se abre desde el navegador y la agregás a la pantalla de tu teléfono. No hace falta bajar nada de ninguna tienda.
 >
-> Probala gratis desde el link de la bio. O escribime PLAN por mensaje y te ayudo a cargar tu primera paciente.
+> Conocela desde el link de la bio. O escribime PLAN por mensaje y te ayudo a cargar tu primera paciente.
 >
 > Para colegas. Si sos paciente de Verónica: tus datos son tuyos y de tu nutricionista, y la app no cambia cómo te atiende.
 >
@@ -136,7 +136,7 @@ Carrusel para aportar valor, sin venta dura. Plan V aparece recién al final.
 >
 > Guardalo para tenerlo a mano y mandáselo a una colega que viva con el chat explotado.
 >
-> Si querés ver cómo lo ordenamos en Plan V, probala gratis desde el link de la bio.
+> Si querés ver cómo lo ordenamos en Plan V, conocela desde el link de la bio.
 >
 > Plan V — Verónica Trenti | @planv.nutricion
 >
@@ -182,7 +182,7 @@ Las preguntas de abajo son un ejemplo armado con lo que ya sabemos que suele apa
 | 3 | **¿La inteligencia artificial arma el plan sola?** | No. Te resume lo que cargó cada paciente y te sugiere un próximo paso. Vos revisás y decidís; nada se manda solo. Tampoco diagnostica. | Captura del modo demo: tarjeta de sugerencia del día de una paciente inventada, con los botones para revisarla. |
 | 4 | **¿Los macros de las fotos son exactos?** | No, son una estimación para orientarte. La mirada profesional sigue siendo tuya. | Captura del modo demo: foto de un plato con los macros y la palabra "estimación" bien visible. |
 | 5 | **¿Cómo le llega la app a mi paciente?** | La das de alta y le mandás la invitación por WhatsApp. Entra con ese enlace y ya ve su plan. | Captura del modo demo: pantalla para invitar a una paciente inventada, con el botón de WhatsApp. |
-| 6 | **¿Puedo probarla sin pagar?** | Hoy sí: probala gratis. Entrá al link de la bio y elegí "Soy nutricionista". Cuando haya precio, lo vas a ver antes de que se cobre nada. | Maqueta de teléfono con la pantalla de registro. (Revisar al publicar: si ya hay precio, esta respuesta cambia y lleva las condiciones.) |
+| 6 | **¿Cuánto cuesta?** | Todavía lo estamos definiendo. Escribime PLAN por mensaje y te cuento cómo es el acceso y las condiciones antes de que decidas nada. | Maqueta de teléfono con la pantalla de registro. (No hay prueba gratis. Cuando haya precio, esta respuesta cambia y lleva las condiciones completas.) |
 | 7 | **¿Te quedó alguna duda?** | Dejala en los comentarios o escribime PLAN por mensaje. Etiquetá a una colega a la que le sirva. | Fondo verde, ícono de globo de chat. Aclaración: "Capturas del modo demo, datos inventados". |
 
 **Pie de publicación:**
@@ -190,7 +190,7 @@ Las preguntas de abajo son un ejemplo armado con lo que ya sabemos que suele apa
 >
 > Lo más importante: Plan V te ayuda a ordenar y te sugiere, pero la que decide sos vos. Siempre.
 >
-> ¿Tenés otra pregunta? Dejala en los comentarios y la respondo. Si querés verla por dentro, probala gratis desde el link de la bio o escribime PLAN y te acompaño con tu primera paciente.
+> ¿Tenés otra pregunta? Dejala en los comentarios y la respondo. Si querés verla por dentro, conocela desde el link de la bio 
 >
 > Las capturas son del modo demo, con datos inventados.
 >
@@ -223,12 +223,12 @@ Reglas para todas las historias:
 **Semana 1 – jueves**
 1. Video corto recorriendo la lista de pacientes del modo demo. Texto: "Así se ve mi lista (modo demo, datos inventados)."
 2. **Cuestionario:** "¿Qué hace Plan V con lo que carga tu paciente?" · A) "Nada, lo guarda" / B) "Te lo resume y te sugiere un paso" (correcta) / C) "Decide por vos".
-3. Se comparte el carrusel C1. Texto: "Todo lo que hace, en 7 diapositivas." **Sticker de enlace:** "Probala gratis".
+3. Se comparte el carrusel C1. Texto: "Todo lo que hace, en 7 diapositivas." **Sticker de enlace:** "Conocela".
 
 **Semana 1 – sábado**
 1. Fondo crema con 2 respuestas de la caja del martes (sin usuario). Texto de Verónica: "Me pasa igual. Por eso armamos la lista de compras que sale del plan."
 2. Se comparte el reel R2. Texto: "¿A quién no le pasó?"
-3. Texto: "¿Querés que te acompañe a cargar tu primera paciente? Escribime PLAN por mensaje." **Sticker de enlace:** "Probala gratis".
+3. Texto: "¿Querés que te acompañe a cargar tu primera paciente? Escribime PLAN por mensaje." **Sticker de enlace:** "Conocela".
 
 ### Semana 2
 
@@ -262,7 +262,7 @@ Reglas para todas las historias:
 **Semana 3 – sábado**
 1. Foto de Verónica con un café. Texto: "El viernes les dejé 3 mensajes para retomar contacto." Se comparte el reel R6.
 2. Texto: "El miércoles que viene respondo sus preguntas en un carrusel." **Caja de preguntas:** "¿Qué querés saber de Plan V?"
-3. **Sticker de enlace:** "Probala gratis". Texto: "O escribime PLAN y te acompaño."
+3. **Sticker de enlace:** "Conocela". Texto: "O escribime PLAN y te acompaño."
 
 ### Semana 4
 
@@ -274,12 +274,12 @@ Reglas para todas las historias:
 **Semana 4 – jueves**
 1. Se comparte el carrusel C4. Texto: "Sus preguntas, respondidas."
 2. **Cuestionario:** "¿Dónde se abre Plan V?" · "En Google Play" / "Desde el navegador" (correcta) / "En App Store". Texto de respuesta: "Se abre desde el navegador y la agregás a la pantalla de tu teléfono."
-3. **Sticker de enlace:** "Probala gratis".
+3. **Sticker de enlace:** "Conocela".
 
 **Semana 4 – sábado**
 1. Foto de Verónica. Texto: "Primer mes de Plan V en Instagram. Gracias por escribirnos."
 2. **Encuesta (4 opciones):** "¿Qué querés ver el mes que viene?" · "Más de la app" / "Vida de consultorio" / "Más de Vero" / "Un vivo".
-3. Se comparte el reel R8. Texto: "Escribime PLAN y te acompaño con tu primera paciente." **Sticker de enlace:** "Probala gratis".
+3. Se comparte el reel R8. Texto: "Escribime PLAN y te acompaño con tu primera paciente." **Sticker de enlace:** "Conocela".
 
 ---
 
@@ -294,7 +294,7 @@ Reglas para todas las historias:
 ## Antes de publicar cada pieza (repaso rápido)
 
 - [ ] ¿Todas las capturas son del modo demo? ¿No se ven notificaciones, nombres ni chats reales?
-- [ ] ¿No hay precio ni cantidad de días gratis? ¿Sigue siendo verdad que se puede probar sin pagar?
+- [ ] ¿Ninguna pieza dice "gratis" ni "probala gratis"? (No hay prueba gratis.) ¿Ninguna pieza muestra precio hasta que esté definido?
 - [ ] ¿No dice "descargala", "notificaciones", "mails", "cobrás desde la app" ni "se conecta con balanzas o relojes"?
 - [ ] ¿Los macros dicen "estimación"? ¿La IA "te sugiere" y "vos decidís"?
 - [ ] ¿No hay cuerpos, pesos, antes y después ni promesas de resultados?
@@ -308,5 +308,5 @@ Reglas para todas las historias:
 1. Quién administra la cuenta y cómo se avisa a las pacientes que ahora también habrá contenido para colegas (ver `cuenta-planv-nutricion.md`).
 2. Elegir el lunes de arranque.
 3. Confirmar que Verónica está de acuerdo con las fotos y los textos en primera persona, **por escrito** (autorización de uso de imagen y voz: Código Civil y Comercial, art. 53), y si su matrícula tiene que aparecer en las piezas.
-4. Confirmar que al publicar ya se puede "probar gratis" (si no, cambiar por "Escribime PLAN").
+4. Recordar: no hay prueba gratis; los llamados son "Conocela en el link" y "Escribime PLAN".
 5. Revisar C3: no mencionar la seguridad técnica de la app hasta que el equipo técnico la confirme.

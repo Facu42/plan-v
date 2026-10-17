@@ -64,7 +64,7 @@ Cuenta decidida por Facundo (2026-10-11): **@planv.nutricion**, la de Verónica,
 | tus pacientes, acompañar, seguimiento | clientes, usuarias, leads |
 | te sugiere, vos decidís, revisás | la IA decide, automático, diagnostica |
 | estimación (de macros) | medición exacta, calorías reales |
-| probala gratis | gratis para siempre, oferta, últimos lugares |
+| conocela, escribime PLAN | gratis, prueba gratis, gratis para siempre, oferta, últimos lugares (no hay prueba gratis) |
 | hábitos, plan de comidas, bienestar | bajar X kilos, quemar, detox, dieta milagro, cuerpo de verano |
 | hecha con una nutricionista | aprobada por médicos, certificada (no lo está) |
 | app que se instala desde el navegador | "descargala en la App Store / Google Play" (no existe todavía) |
@@ -106,16 +106,16 @@ Formato visual: piezas IG 1080x1350 según `guia-marca-redes.md` (paleta de la a
 1. **Ve un reel** (dolor del consultorio o demo) → se siente identificada.
    *Llamado:* "¿Te pasa? Guardalo" / "Etiquetá a una colega que vive así".
 2. **Entra al perfil** → la bio explica en una línea y tiene el enlace.
-   *Bio sugerida:* "Una app para nutricionistas que te ayuda a ver a quién atender hoy. Hecha con la Lic. Verónica Trenti. Probala gratis." + enlace a https://plan-v-eight.vercel.app
+   *Bio sugerida:* "Una app para nutricionistas que te ayuda a ver a quién atender hoy. Hecha con la Lic. Verónica Trenti." + enlace a https://plan-v-eight.vercel.app
 3. **Escribe por mensaje o entra al enlace.**
-   *Llamado en posts:* "Escribime PLAN por mensaje y te paso el acceso" (así podemos acompañarla en persona) o "Link en la bio, probala gratis".
+   *Llamado en posts:* "Escribime PLAN por mensaje y te paso el acceso" (así podemos acompañarla en persona) o "Link en la bio, conocela".
 4. **Se registra eligiendo "Soy nutricionista".**
    Le mandamos por WhatsApp/mensaje una guía corta (3 pasos, un video de 1 minuto): cargar una paciente, armar su plan semanal, mandarle la invitación.
 5. **Da de alta su primera paciente y le manda la invitación por WhatsApp.** Este es el momento clave ("ya la está usando de verdad").
    Seguimiento humano a las 48 h: "¿Pudiste invitar a tu primera paciente? ¿Te ayudo?"
 6. **Usa la app una semana** → le pedimos opinión y, si está contenta, que la recomiende a una colega.
 
-Llamados a la acción permitidos: "Probala gratis", "Escribime PLAN", "Link en la bio", "Mandáselo a tu colega". Nunca precio, nunca cantidad de días gratis (todavía no están definidos: usar [PRECIO] en borradores). No decir "descargala": se abre desde el enlace y se agrega a la pantalla del teléfono.
+Llamados a la acción permitidos: "Conocela en el link", "Escribime PLAN", "Link en la bio", "Mandáselo a tu colega". Nunca precio (todavía no está definido: usar [PRECIO] en borradores) y nunca "gratis" ni "prueba gratis": Facundo confirmó el 2026-10-17 que no hay prueba gratis. No decir "descargala": se abre desde el enlace y se agrega a la pantalla del teléfono.
 
 ---
 
@@ -170,7 +170,7 @@ Revisión: 20 minutos cada viernes. Ver qué 2 posts funcionaron mejor y hacer m
 - Prometer sólo lo que hoy existe. **No decir:** "está en App Store/Google Play", "te avisa con notificaciones", "manda mails", "cobrás desde la app", "se conecta con tu balanza o reloj", "mirá los precios en nuestra web".
 - Macros de las fotos: siempre "estimación", nunca "cálculo exacto".
 - El copiloto: "te ayuda a ordenar y te sugiere; vos decidís". Nunca "diagnostica", "arma el plan solo", "reemplaza a la nutricionista" ni "manda mensajes automáticamente".
-- "Probala gratis" sólo si al publicar es verdad que se puede probar sin pagar. Sin cantidad de días hasta que esté definido. Cuando haya precio, cada "probala gratis" tiene que llevar a las condiciones (cuántos días, qué pasa después, si pide tarjeta, cómo se da de baja): lo que se promete en la publicidad obliga (Ley 24.240, art. 8).
+- No hay prueba gratis (2026-10-17): ninguna pieza dice "gratis", "probala gratis" ni "sin cargo". Cuando haya precio, se publica junto con sus condiciones (qué incluye, cada cuánto se cobra, cómo se da de baja): lo que se promete en la publicidad obliga (Ley 24.240, art. 8).
 - Afirmaciones de tiempo ("en 30 segundos", "en un minuto"): sólo si se pueden mostrar sin acelerar el video. Si no, "en pocos pasos".
 - Seguridad de la app ("segura", "encriptada", "cumple la ley de datos"): no decir nada hasta que el equipo técnico lo confirme por escrito.
 

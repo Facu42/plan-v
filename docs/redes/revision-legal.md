@@ -26,7 +26,7 @@ Nada de lo revisado promete resultados de peso, muestra cuerpos, habla de dietas
 | estrategia (pilar 5) | "Testimonios… con su permiso" | Permiso por escrito, sin editar lo dicho y aclarando si recibió algo a cambio | Un testimonio con beneficio no declarado engaña sobre la naturaleza del mensaje (DNU 274/2019 art. 11). Imagen: CCyC art. 53. |
 | estrategia (crecer) | Fundadoras con "beneficio especial"; "Invitá a una colega y…" | No anunciar sin bases y condiciones escritas; quien recomienda con premio lo aclara | Una oferta publicada obliga (Ley 24.240 arts. 7 y 8). Sin bases, no se puede cumplir ni probar. |
 | estrategia (colaboraciones) | "si se ofrece algo a cambio" | Etiqueta "Colaboración pagada" de Instagram o "#publicidad" | Regla de contenido de marca de Instagram/Meta (política de la plataforma, no ley) + DNU 274/2019 art. 11. |
-| estrategia (riesgos) | "Probala gratis" sin más | Cuando haya precio: enlace a condiciones (días, qué pasa después, tarjeta, baja) | Ley 24.240 art. 4 (información sobre condiciones de venta) y art. 8. |
+| estrategia (riesgos) | "Probala gratis" sin más | Ya no aplica (2026-10-17: no hay prueba gratis). Con precio definido: enlace a condiciones (qué incluye, cada cuánto se cobra, baja) | Ley 24.240 art. 4 (información sobre condiciones de venta) y art. 8. |
 | estrategia (riesgos) | (no había) | No decir "segura", "encriptada", "cumple la ley" hasta que el equipo técnico lo confirme por escrito | Afirmación de calidad no verificada: DNU 274/2019 art. 11. Datos de salud: Ley 25.326 arts. 2, 7, 8, 9 y 10. |
 | estrategia (reputación) | (no había) | Verónica siempre como cofundadora, no como usuaria independiente; permiso escrito de imagen | Transparencia del interés propio (DNU 274/2019 art. 11) y CCyC art. 53. Ética profesional: ver punto 4. |
 | guía (voz "así no") | (no estaba) | Sumé "La única app…", "100% segura", "Miles de nutricionistas ya la usan" | Superlativos y cifras no comprobables: DNU 274/2019 art. 11. |
@@ -34,7 +34,7 @@ Nada de lo revisado promete resultados de peso, muestra cuerpos, habla de dietas
 | guía (fotos) | (no había) | Imágenes hechas con IA: sólo objetos y manos; etiqueta de IA si son fotorrealistas | Que no parezca un consultorio o una paciente reales (DNU 274/2019 art. 11) + reglas de Instagram y TikTok. |
 | calendario C2 | "Una foto por día suele sostenerse más que un registro completo que se abandona a los tres días." | "En mi experiencia, pedir una foto… se sostiene más…" | Presentado como dato general era una afirmación de salud sin respaldo; como experiencia propia es honesto. Ley 24.301 art. 12 (no engañar). |
 | calendario C3 | "Un solo lugar ordenado es más fácil de cuidar." | "Pedí solo lo que vas a usar." | En un carrusel que termina en la app, sugería que Plan V es más segura. Se reemplazó por el principio de no pedir datos de más (Ley 25.326 art. 4). |
-| calendario C4 | "Sí, probala gratis." | "Hoy sí… Cuando haya precio, lo vas a ver antes de que se cobre nada." + nota de revisión | Condición temporal clara (Ley 24.240 art. 4). **Ojo:** esta frase es un compromiso (art. 8); Facundo tiene que poder cumplirlo. |
+| calendario C4 | "Sí, probala gratis." | **Actualizado 2026-10-17:** como no hay prueba gratis, la respuesta pasó a "¿Cuánto cuesta? Todavía lo estamos definiendo. Escribime PLAN y te cuento las condiciones antes de que decidas nada." | Condición temporal clara (Ley 24.240 art. 4). **Ojo:** esta frase es un compromiso (art. 8); Facundo tiene que poder cumplirlo. |
 | calendario (checklist y pendientes) | — | Sumé 3 controles y la autorización escrita de Verónica | CCyC art. 53; DNU 274/2019 art. 11. |
 | guiones R2 | "Siempre a mano." | "fácil de encontrar" | "Siempre" no se puede garantizar (depende de conexión y del servicio). |
 | guiones R8 | "estar entre las primeras en probarla" | "probarla y decirnos qué cambiar" | Sugería un cupo o privilegio que no existe. |
@@ -47,7 +47,7 @@ Nada de lo revisado promete resultados de peso, muestra cuerpos, habla de dietas
 2. Nada de "la única", "la mejor", "100% segura", "miles de usuarias" ni cifras que no podamos mostrar.
 3. Sin comparaciones con otras apps con nombre. Si hay comparación implícita, que sea verdadera y comprobable (DNU 274/2019 art. 15).
 4. Sin tiempos prometidos si el video está acelerado o editado.
-5. "Probala gratis" sólo si es verdad hoy. Con precio definido: enlace a condiciones (días, qué pasa después, tarjeta, baja).
+5. No decir "gratis" ni "probala gratis": no hay prueba gratis (2026-10-17). Con precio definido: enlace a condiciones (qué incluye, cada cuánto se cobra, baja).
 6. Ningún beneficio (fundadoras, recomendaciones, estudiantes, colegios) se anuncia sin bases y condiciones escritas.
 7. Si alguien recibe algo a cambio (acceso gratis, precio especial, plata), la pieza lo dice: etiqueta "Colaboración pagada" o "#publicidad".
 8. Testimonios: reales, con permiso por escrito, sin editar el sentido, sin datos de pacientes.

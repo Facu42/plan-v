@@ -104,7 +104,7 @@ Así sí:
 7. "Hecha con una nutricionista, pensada para Argentina."
 8. "Tus recetas, con sus macros, en un solo lugar."
 9. "Los macros de la foto son una estimación, no una medición."
-10. "Probala gratis y contanos qué te falta." (sólo si al publicar es verdad; cuando haya precio, con enlace a las condiciones)
+10. "Conocela y contanos qué te falta." (sin "gratis": no hay prueba gratis)
 
 Así no:
 1. "Tus pacientes van a bajar 5 kilos." (promesa de resultado)
@@ -129,7 +129,7 @@ Todas: Poppins, isotipo del logo arriba a la izquierda (96 px en post, 110 px en
 Fondo lienzo. Arriba, a 80 px: isotipo + etiqueta píldora lima con texto carbón ("Agenda", "Plan semanal"). Debajo, título carbón de 2 renglones (y 120 a 360 aprox.). Centro-abajo (y 420 a 1180): captura demo en tarjeta blanca o mockup de teléfono centrado. Pie a 60 px del borde: "Plan V · @planv.nutricion" en gris #52545B.
 
 **P2. Carrusel "cómo funciona" (1080x1350 por lámina, 5 a 7 láminas, paleta app)**
-Lámina 1: fondo carbón, título en lienzo, palabra clave en lima, flecha "deslizá" abajo a la derecha. Láminas del medio: fondo lienzo, número de paso grande en lima con texto carbón (círculo de 120 px) arriba a la izquierda, texto arriba (máx. 30 palabras) y captura abajo. Última lámina: fondo lima clara #DFF9A2, llamado a la acción en carbón ("Probala gratis: link en la bio") y pie.
+Lámina 1: fondo carbón, título en lienzo, palabra clave en lima, flecha "deslizá" abajo a la derecha. Láminas del medio: fondo lienzo, número de paso grande en lima con texto carbón (círculo de 120 px) arriba a la izquierda, texto arriba (máx. 30 palabras) y captura abajo. Última lámina: fondo lima clara #DFF9A2, llamado a la acción en carbón ("Conocela: link en la bio") y pie.
 
 **P3. Historia de producto (1080x1920, paleta app)**
 Fondo lienzo. Zona libre arriba 250 px. Título en y 280 a 560. Mockup de teléfono centrado en y 620 a 1500. Botón píldora lima con texto carbón en y 1520 a 1580 (encima de la zona libre de abajo) para poner el sticker de enlace.

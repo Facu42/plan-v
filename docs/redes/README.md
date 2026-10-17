@@ -30,14 +30,15 @@ es que entre 5 y 10 nutricionistas inviten a su primera paciente.
 
 1. **Cuenta:** decidida, @planv.nutricion. Cómo se cuidan las dos audiencias y qué falta para publicar:
    [cuenta-planv-nutricion.md](cuenta-planv-nutricion.md).
-2. **Autorización escrita de Verónica** para usar su imagen, voz y nombre, y su OK a los textos
-   en primera persona.
-3. **"Probala gratis"** solo se publica si ese día se puede usar sin pagar. Precio y días de
-   prueba se definen en el hilo "Plan V listo para el mercado".
-4. **Beneficios** (fundadoras, recomendaciones, estudiantes, colegios): si se ofrecen, antes
+2. **Autorización de Verónica:** Facundo la confirmó el 2026-10-17 (es su esposa y lo hacen juntos).
+   Conviene dejar un mensaje escrito de ella con su OK a los textos en primera persona.
+3. **Sin prueba gratis** (2026-10-17): ninguna pieza dice "gratis". El precio se define en el hilo
+   "Plan V listo para el mercado".
+4. **Quién publica:** Verónica o Facundo, la cuenta la manejan los dos (recomendado: Meta Business Suite).
+5. **Beneficios** (fundadoras, recomendaciones, estudiantes, colegios): si se ofrecen, antes
    hacen falta bases y condiciones escritas.
-5. **Matrícula de Verónica** en las piezas y uso de @planv.nutricion: consultar con su colegio.
-6. Elegir el lunes de arranque.
+6. **Matrícula de Verónica** en las piezas y uso de @planv.nutricion: consultar con su colegio.
+7. Elegir el lunes de arranque.
 
 ## Lo que falta técnico
 
@@ -52,7 +53,7 @@ es que entre 5 y 10 nutricionistas inviten a su primera paciente.
 
 ## Fuera de este apartado
 
-Publicidad paga, página pública con precios, medición de anuncios y mails de la prueba gratis
+Publicidad paga, página pública con precios, medición de anuncios y mails de bienvenida
 son del apartado H (ola 3). El precio es del hilo "Plan V listo para el mercado".
 
 ## Registro
@@ -63,3 +64,4 @@ son del apartado H (ola 3). El precio es del hilo "Plan V listo para el mercado"
 | 2026-09-29 | Guía visual (`brand-guardian`), calendario del mes 1 (`instagram-curator`) y 8 guiones (`tiktok-strategist`). Revisión legal argentina (`legal-compliance-checker`): corrigió 43 líneas, la más importante un video que prometía "30 segundos" acelerado. Se emparejó la numeración de los reels entre calendario y guiones. Se encontró que el modo demo no está en la app publicada. |
 | 2026-10-01 | Se leyó el Instagram de Verónica (solo lectura, desde la PC de Facundo): 4 publicaciones y 79 seguidores, contenido educativo para el público general. Confirma una cuenta aparte para la app. Detalle en `lectura-instagram-veronica.md`. |
 | 2026-10-11 | Facundo eligió @planv.nutricion como cuenta. Se cambiaron los nombres en todos los documentos, se sacó la sección de historias semanales aparte y se escribió `cuenta-planv-nutricion.md`. Videos postergados por pedido de Facundo. |
+| 2026-10-17 | Facundo confirmó: Verónica autoriza, publican ella o él (cuenta compartida) y **no hay prueba gratis**. Se sacó "probala gratis" de todas las piezas (bio, carruseles, historias, guiones, estrategia, revisión legal); la pregunta del carrusel C4 pasó a "¿Cuánto cuesta?". |

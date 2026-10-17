@@ -39,8 +39,7 @@ cara de Verónica ya está. El riesgo es que unas se aburran con lo de las otras
 
 - **Bio** (máx. 150 caracteres): `Lic. en Nutrición · Planes personalizados y consultas online · Creé Plan V, la app para nutricionistas 👇`
 - **Enlaces** (Instagram permite hasta 5): el sitio del consultorio que ya tiene, y
-  https://plan-v-eight.vercel.app con el nombre "Plan V para nutricionistas, probala gratis"
-  (solo si "probala gratis" es verdad ese día).
+  https://plan-v-eight.vercel.app con el nombre "Plan V para nutricionistas" (sin "gratis": no hay prueba gratis).
 - El nombre del perfil y la categoría quedan como están.
 
 ## Qué hace falta para empezar a publicar
@@ -49,7 +48,7 @@ cara de Verónica ya está. El riesgo es que unas se aburran con lo de las otras
 | --- | --- | --- |
 | 1 | Autorización escrita de Verónica para usar su imagen, voz y nombre, y su OK a los textos en primera persona | Verónica y Facundo |
 | 2 | Quién publica y cómo: lo recomendado es que Verónica dé acceso a la cuenta por **Meta Business Suite** (permite programar sin compartir la contraseña) | Verónica |
-| 3 | Que "probala gratis" sea cierto: depende de la decisión de cobros que Facundo está por confirmar. Hasta entonces, las piezas dicen "escribime PLAN" y evitan el precio y la cantidad de días | Facundo |
+| 3 | ~~Prueba gratis~~: **resuelto 2026-10-17, no hay prueba gratis.** Las piezas dicen "Conocela en el link" o "escribime PLAN" y no muestran precio hasta que esté definido | Hecho |
 | 4 | Capturas del modo demo con datos inventados: las armo yo en la nube (la app publicada no tiene modo demo) y quedan en `docs/redes/capturas/` | Claude |
 | 5 | Las 4 piezas para pacientes (punto 3 de arriba) | Verónica |
 | 6 | Consulta con el colegio de nutricionistas por el uso de la cuenta y la matrícula en las piezas | Verónica |

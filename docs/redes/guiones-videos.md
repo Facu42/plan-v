@@ -31,7 +31,7 @@ Días sugeridos: martes y viernes (el carrusel semanal va el miércoles). Si una
 - Los macros de la foto de comida siempre se dicen o escriben como **"estimación"**.
 - La sugerencia de la app se presenta siempre como **"te sugiere, vos decidís; nada se manda solo"**.
 - No decir "descargala" ni "está en la tienda". Decir "link en la bio", "se abre desde el enlace y la agregás a la pantalla de tu teléfono".
-- Sin precios y sin cantidad de días de prueba. "Probala gratis" sólo si al publicar es verdad.
+- Sin precios. No hay prueba gratis (decisión de Facundo, 2026-10-17): no decir "gratis", "probala gratis" ni "sin cargo". Llamados permitidos: "Escribime PLAN", "Link en la bio".
 - Revisar el fondo de cada toma: que no se vean fichas, papeles con nombres, la pantalla de la compu ni el teléfono con chats.
 
 ### 2. Cómo grabar a Verónica con el celular
@@ -130,13 +130,13 @@ Días sugeridos: martes y viernes (el carrusel semanal va el miércoles). Si una
 | 5-8 | Celular apoyado en la mesa, al lado de una taza | (audio) | Lo mandaste por WhatsApp |
 | 8-12 | Plano quieto del escritorio; aparece el texto grande | (audio) | 5 días después: "¿Me lo reenviás? No lo encuentro" |
 | 12-16 | Grabación del modo demo: vista de la paciente con su plan del día | (audio) | En Plan V el plan está en su app, fácil de encontrar. |
-| 16-18 | Fondo lienzo con el nombre Plan V | (audio) | Link en la bio. Probala gratis. |
+| 16-18 | Fondo lienzo con el nombre Plan V | (audio) | Link en la bio. Escribime PLAN. |
 
-**Cierre:** "Link en la bio, probala gratis." / Pregunta en el pie: "¿Cuántas veces reenviaste el mismo plan esta semana?"
+**Cierre:** "Link en la bio, o escribime PLAN." / Pregunta en el pie: "¿Cuántas veces reenviaste el mismo plan esta semana?"
 
 **Pie (Instagram)**
 > ¿Cuántas veces reenviaste el mismo plan esta semana? Con Plan V tu paciente tiene su plan del día y de la semana en su teléfono, con la lista de compras incluida. Chau PDF perdido en el chat.
-> Link en la bio, probala gratis.
+> Link en la bio, o escribime PLAN.
 
 **Pie (TikTok):** El PDF del plan, perdido en el chat. Otra vez. #nutricionista
 
@@ -172,14 +172,14 @@ Días sugeridos: martes y viernes (el carrusel semanal va el miércoles). Si una
 | 7-14 | Se escribe un nombre inventado ("Lucía Demo") y se guarda | "Cargás su nombre y lo básico. Lo demás lo completás en la consulta." | 2. Sus datos |
 | 14-22 | Se ve el botón para mandar la invitación por WhatsApp o copiar el enlace | "Y le mandás la invitación por WhatsApp. Le llega un enlace y entra desde el navegador." | 3. Invitación por WhatsApp |
 | 22-27 | Vista de la paciente demo: su plan del día | "Ya tiene su plan, su lista de compras y el chat con vos." | Sin descargar nada de ninguna tienda |
-| 27-30 | Fondo lienzo con el nombre Plan V | "Si sos nutri, link en la bio: probala gratis." | Link en la bio. Probala gratis. |
+| 27-30 | Fondo lienzo con el nombre Plan V | "Si sos nutri, link en la bio o escribime PLAN." | Link en la bio. Escribime PLAN. |
 
-**Cierre:** "Link en la bio, probala gratis."
+**Cierre:** "Link en la bio, o escribime PLAN."
 
 **Pie (Instagram)**
 > Invitar a una paciente a Plan V: la cargás, le mandás el enlace por WhatsApp y entra desde el navegador. La agrega a la pantalla de su teléfono como una app más. Ella ve su plan, su lista de compras y te escribe por ahí.
 > (Video hecho con el modo demo y datos inventados.)
-> Link en la bio, probala gratis.
+> Link en la bio, o escribime PLAN.
 
 **Pie (TikTok):** Así invito a una paciente a mi app. 3 pasos. #nutricionista
 
@@ -218,11 +218,11 @@ Días sugeridos: martes y viernes (el carrusel semanal va el miércoles). Si una
 | 15-18 | Modo demo, vista de nutricionista: la comida aparece en la ficha de esa paciente | (audio) | Y vos la ves ordenada, cuando te sirve |
 | 18-20 | Fondo lienzo | (audio) | Tu WhatsApp, más tranquilo. Link en la bio. |
 
-**Cierre:** "Link en la bio, probala gratis." + "Etiquetá a una colega que vive esto."
+**Cierre:** "Link en la bio, o escribime PLAN." + "Etiquetá a una colega que vive esto."
 
 **Pie (Instagram)**
 > Las fotos de comida a cualquier hora, mezcladas con los chats de tu familia. En Plan V tu paciente registra sus comidas con foto en su propia app y vos las ves ordenadas en su ficha. Los macros que muestra son una estimación: la que evalúa sos vos.
-> Etiquetá a una colega que vive esto. Link en la bio, probala gratis.
+> Etiquetá a una colega que vive esto. Link en la bio, o escribime PLAN.
 
 **Pie (TikTok):** 23:14 y llega la foto del almuerzo. ¿Te pasa? #nutricionista
 
@@ -419,5 +419,5 @@ Días sugeridos: martes y viernes (el carrusel semanal va el miércoles). Si una
 ## Pendientes para Facundo
 1. Confirmar el nombre de la cuenta (@planv.nutricion) y quién la administra.
 2. Pedirle al equipo técnico la versión demo en el teléfono de grabación (la versión publicada no tiene el botón de modo demo).
-3. Confirmar que "probala gratis" es verdad al momento de publicar.
+3. Recordar que no hay prueba gratis: los cierres dicen "Link en la bio" o "Escribime PLAN".
 4. Decidir si hay beneficio para "nutricionistas fundadoras" (R8). Si lo hay, bases y condiciones escritas antes de anunciarlo.
