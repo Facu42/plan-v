@@ -1,6 +1,6 @@
 # IA de apoyo a la nutri para armar planes semanales (17/10/2026)
 
-Estado: **apagada por defecto**, sin migraciones, sin cambios de pantalla. Rama `claude/ia-plan-semanal`.
+Estado: **apagada por defecto**, sin migraciones, sin cambios de pantalla. Rama `claude/project-thread-adfvy4`.
 
 ## Qué hace
 El botón de siempre («Generar borrador con IA», en el plan de la paciente, hasta 21 días) pasa a proponer un
