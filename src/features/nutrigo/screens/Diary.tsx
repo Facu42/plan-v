@@ -11,6 +11,7 @@ import { GREEN_BG, swapBackground } from '../source-tone';
 import { macroCell, mealTitle, newestFirst, nutrientTotal, statNumber, type Nutrient } from './diary-format';
 import { MealCorrectionDialog } from './meal-correction';
 import { WellbeingForm } from '../WellbeingForm';
+import { MAX_WATER_GLASSES, waterGoalOf } from '../../../types/water';
 
 type Props = ScreenProps & { onLogMeal?: (slot?: string) => void; onHydration?: () => void; onRest?: () => void; onSteps?: () => void };
 type Log = ScreenProps['patient']['logs'][number];
@@ -63,7 +64,7 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
   const shown = rows.slice((current - 1) * pageSize, current * pageSize);
   const goTo = (value: number) => setPage(Math.max(1, Math.min(pages, value)));
   const setPeriod = (value: number) => { setDays(value); setPage(1); };
-  const addWater = async () => { if (busy) return; setBusy(true); setError(''); try { await api.updateHabits(patient.id, { hydration: patient.hydration + 1 }); await refresh(patient.id); } catch (caught) { setError(errorText(caught)); } finally { setBusy(false); } };
+  const addWater = async () => { if (busy) return; if (patient.hydration >= MAX_WATER_GLASSES) { setError(`Ya anotaste ${MAX_WATER_GLASSES} vasos hoy, el máximo por día.`); return; } setBusy(true); setError(''); try { await api.updateHabits(patient.id, { hydration: patient.hydration + 1 }); await refresh(patient.id); } catch (caught) { setError(errorText(caught)); } finally { setBusy(false); } };
   const logMeal = onLogMeal ? () => { setDialog(null); onLogMeal(); } : undefined;
   const runCorrection = async (work: () => Promise<void>) => {
     if (busy) return;
@@ -174,7 +175,7 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
     {error && !dialog && <Stateful error={error} />}
     {dialog === 'add' && <FigmaRecordDialog title="Registrar en mi diario" onClose={() => setDialog(null)}>
       <section aria-label="Hábitos de hoy" className="mb-[16px] flex flex-col gap-[8px] text-[#272932]">
-        <p className="text-[14px]">Hoy, {dateLabel(dateId(now))} · Agua: {patient.hydration} {patient.hydration === 1 ? 'vaso' : 'vasos'} · Descanso: {patient.sleep}{patient.steps != null ? ` · Pasos: ${patient.steps.toLocaleString('es-AR')}` : ''}</p>
+        <p className="text-[14px]">Hoy, {dateLabel(dateId(now))} · Agua: {patient.hydration} de {waterGoalOf({ water_goal_glasses: patient.waterGoal })} vasos · Descanso: {patient.sleep}{patient.steps != null ? ` · Pasos: ${patient.steps.toLocaleString('es-AR')}` : ''}</p>
         <div className="flex flex-wrap gap-[8px]">
           <button type="button" disabled={!logMeal} onClick={logMeal} className="rounded-[8px] bg-[#c2e66e] px-[16px] py-[10px] text-[#272932]">Registrar comida</button>
           <button type="button" disabled={busy} onClick={onHydration ? () => { setDialog(null); onHydration(); } : () => void addWater()} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">{busy ? 'Guardando…' : onHydration ? 'Registrar agua' : 'Registrar un vaso de agua'}</button>

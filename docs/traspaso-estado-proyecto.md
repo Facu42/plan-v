@@ -1,4 +1,18 @@
-# Traspaso del proyecto (2026-10-01)
+# Traspaso del proyecto (actualización vigente: 2026-10-16)
+
+## Estado integrado de la entrega 8 · 16/10/2026
+
+La rama aislada `codex/nutridesk-release-sara2` incorpora mediante avance directo la entrega 7 final `5c8ea5441d466c54be20899b14b8cf0758cbcce4` ([PR #127](https://github.com/Facu42/plan-v/pull/127)) y conserva todo `main` hasta `9c56854`, incluidos los PR #117, #119 y #122. Se recuperó la implementación SARA 2 revisada: 930 registros y 39 componentes, unidades de 100 g/100 ml y copias históricas. [Instructivo vigente](instructivo-plan-v-actualizado-2026-10-15.md), [evidencia de SARA 2](sara2-verificacion-2026-10-15.md) y [coordinación](coordinacion-agentes.md).
+
+El manifiesto separa **18 migraciones pendientes y tres archivos exactos de main ya observados aplicados**. No se vuelve a aplicar esas tres migraciones por el nombre local de su archivo. La suite propia definitiva, finalizada el 16/10 a las **09:11:31 ART**, aprobó **2.999 casos, cero fallos y dos omitidos, en 458 archivos**; tipos, compilación (7,80 segundos), migraciones, manifiesto, vistas y secretos aprobados. Revisión independiente de código y QA de 1440/390 aprobados sin P1/P2: se corrigieron recortes del editor y catálogo cargado, además de etiquetas de volumen. Las **1.787 huellas** permanecen intactas después de la suite y QA (`2e5bd04d…`). [QA final](sara2-qa-2026-10-16.md). Las cifras antiguas de abajo son históricas. El CI de la cabeza propia se comprobará tras subir el borrador; no se publicó esta entrega ni se aplicó su SQL.
+
+El 16/10 ROOT verificó mediante la herramienta oficial que todos los controles de #127 en `5c8ea54` están aprobados: verify, e2e, sesiones firmadas, secretos y vista previa. Es evidencia del padre 7; la entrega 8 requiere su propio CI sobre la cabeza que se publique para revisión.
+
+Continúan pendientes por decisión o validación real: SMTP propio pospuesto (Supabase Auth permanece, sin prometer correos a destinatarios externos), retención cero y modalidad de Groq, captura real de ambas voces y cuentas reales de Google, Mercado Pago y WhatsApp. La IA nueva comparte un límite global autorizado de USD 5 mensuales y permanece apagada. Kerr conserva carga manual hasta resolver unidades y validar la fórmula con la profesional.
+
+## Referencia histórica: entrega 6 aislada · 14/10/2026
+
+Agenda, reservas públicas, equipo con recepción operativa, asignación clínica y cobros por profesional preparados en `codex/nutridesk-release-agenda`, base clínica `66ed039`. [Alcance, evidencia y límites](nutridesk-release-agenda-2026-10-14.md): suite propia de 2.816 aprobadas, cero fallos, dos omitidas (431 archivos), tipos/build/migraciones/vistas/secretos y revisión independiente aprobados. Cinco SQL preparados, sin aplicación hospedada. Navegador público/equipo a 1440/390; asociación de ficha existente con UUID real comprobada en fixtures, no con `pat-sofia` demo. Comunicaciones/cartera finales, configuración de Google/Mercado Pago, SMTP y producción continúan pendientes.
 
 Una sola página para que cualquier agente (Claude, Codex u otro) siga sin tener el chat.
 **Desde el 14/10:** el reparto de trabajo entre agentes está en [`coordinacion-agentes.md`](coordinacion-agentes.md) y los documentos de producto en [`producto/`](producto/README.md).
@@ -187,6 +201,15 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - App para tiendas (Android primero, empaquetando la web), calidad en producción, publicidad paga y
   página pública con precios (espera el precio). Plan: `docs/plan-apartados.md`.
 
+## Meta de agua por paciente (2026-10-16)
+
+Decisión de Facundo (15/10, «Meta por paciente»): la nutri elige la meta de agua de cada paciente, de 4 a 16 vasos
+por día, en «Editar ficha» (vacía = 8, la de siempre). La paciente la ve en Inicio, Diario y Progreso, y el aviso de
+agua del día y la adherencia se miden contra esa meta. Además se puede anotar hasta 16 vasos por día (antes el tope
+era 8). Migración `20261016090000_water_goal` (columna `patients.water_goal_glasses`, vista `patient_water_goal_view`
+solo con la fila propia, y la regla de `habit_logs` pasa a 0..16). **Aplicada en producción el 16/10** (Facundo pegó el SQL
+porque lleva un DROP de la regla vieja) y publicada con el PR #128.
+
 ## Lista del súper en unidades del comercio (2026-10-15)
 
 La lista suma los gramos del plan, pero en la verdulería o la carnicería nadie pide 480 g. Ahora cada producto se
@@ -264,9 +287,16 @@ Facundo: lo que aprueba la nutricionista es el plan, no lo que la paciente carga
 
 ## Progreso global (2026-10-10)
 Pantalla `/crm/progreso-global` (PR #93): peso y comidas de toda la cartera por período. Sin migración. Detalle en `docs/progreso-global-2026-10-10.md`.
+## Continuación Nutriboost: nutrición y PDF del plan · 14/10/2026
+
+Entrega 4 verificada en `codex/nutridesk-release-nutricion`, sobre la cabeza final de importación `b143744b4024314e8313662a1a911b70a28c914b`. Incorpora cálculo efectivo de la fórmula revisada, referencias propias de micronutrientes, grupos, catálogo paginado, seis momentos personalizados y descarga PDF del plan. Suite propia: 2.678 aprobadas, cero fallos, dos omitidas y 407 archivos; tipos/build/migraciones/vistas/scanner y revisión independiente aprobados. [Informe y paso 10](nutridesk-release-nutricion-2026-10-14.md). Sólo SQL nueva `20261011180000`, sin aplicar. No activar USDA ni cambiar Supabase/SMTP/Groq. Las siguientes entregas conservan clínica avanzada/ficha, agenda/equipo/cobros y operaciones generales; el cálculo automático Kerr sigue pendiente.
+
+
+Quinta entrega apilada: [ficha clínica y exportación histórica, evidencia y límites](nutridesk-release-clinica-2026-10-14.md). Base 304413f; gate previo 2.719 pruebas aprobadas; verificación nueva de marca vigente en curso, sin producción.
+
 
 ## Ánimo y síntomas de la paciente (2026-10-15)
-En el Diario, «Registrar» → «Cómo me siento»: energía del día (con energía, normal, sin energía; se guarda en la energía que ya existía) y ocho síntomas de una lista cerrada. La nutricionista los ve en la ficha, «Registros y evolución», debajo de «Descanso y energía». Nutrigo no dibuja esta pantalla: se armó con su diálogo de registro y los botones del diario. Migración `20261015100000_habit_symptoms` (agrega una columna con lista cerrada): ya aplicada en la base el 14/10 con la frase de Facundo (el historial de la base la anota como `20261014215543`). La de #110 (vistas solo lectura) también quedó aplicada. PR en borrador: falta su «juntalo al main».
+En el Diario, «Registrar» → «Cómo me siento»: energía del día (con energía, normal, sin energía; se guarda en la energía que ya existía) y ocho síntomas de una lista cerrada. La nutricionista los ve en la ficha, «Registros y evolución», debajo de «Descanso y energía». Nutrigo no dibuja esta pantalla: se armó con su diálogo de registro y los botones del diario. Migración `20261015100000_habit_symptoms` (agrega una columna con lista cerrada): ya aplicada en la base el 14/10 con la frase de Facundo (el historial de la base la anota como `20261014215543`). La de #110 (vistas solo lectura) también quedó aplicada. PR112 y PR110 ya integrados en main el 14/10; no volver a ejecutar sus migraciones.
 
 ## Avisos al teléfono de la paciente (2026-10-15)
 En la campanita de la paciente, «Avisos», hay una fila «Recibir avisos en este teléfono». Al aceptarla, el teléfono recibe un aviso cuando la nutri le escribe, publica su plan, le indica un recurso o cambia su consulta. Los avisos pasan por Google, Apple o Mozilla, así que solo llevan un texto genérico (nunca el mensaje ni datos de salud). En iPhone hace falta tener Plan V instalada en la pantalla de inicio.
@@ -286,3 +316,7 @@ En Inicio, el texto bajo el saludo («Tu acompañamiento, día a día») pasa a 
 
 ## Próximas acciones de la nutricionista (2026-10-15)
 La bandeja «Tu consultorio, hoy» suma dos tipos de pendiente: **Cuotas vencidas** (cuota impaga con el vencimiento pasado y sin aviso de pago de la paciente; si avisó, queda «Aviso de pago por confirmar»; abre Cobranzas) y **Sin registros hace 7 días** (paciente con acceso a la app, dada de alta hace 7 días o más, sin comidas ni hábitos declarados en 7 días; dice cuántos días pasaron, o «en los últimos 30 días»; abre Mensajes). Es un aviso para escribirle, nunca un juicio clínico. El servidor solo lee fechas de comidas y hábitos de los últimos 30 días, sin contenido. Código: `server/crm/repository.ts` (con pruebas en `work-queue.test.ts` y en Postgres descartable). Sin migraciones.
+
+### Operaciones y comunicaciones — entrega 7, 15/10
+
+La rama `codex/nutridesk-release-operaciones` continúa desde PR123 y conserva los cambios de main hasta `9c56854`. El [informe vigente](nutridesk-release-operaciones-2026-10-15.md) documenta asistente, fuentes, CSV, preferencias, comunicaciones y límites externos; sustituye el estado del informe histórico del 12/10. Se cerraron dos P2: permiso de correo accesible con guardado/baja explícitos y bloqueo de WhatsApp sin configuración de bajas. Suite final propia: 2.977 aprobadas, cero fallos y dos omitidas en 452 archivos; tipos, build y gates aprobados. La [revisión de código](nutridesk-release-operaciones-review-2026-10-15.md) y la [QA a 1440/390](nutridesk-release-operaciones-qa-2026-10-15.md) no dejan P1/P2 abiertos en el alcance local; 1.789 huellas exactas tras suite y recorrido. Las cinco mejoras heredadas de demo y pacing, OCR/CSP y los JSON originales se conservan. La entrega de SARA 2 sigue separada. No se publicaron cambios ni se activaron servicios desde esta entrega.

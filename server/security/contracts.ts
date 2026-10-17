@@ -14,6 +14,7 @@ const PUBLIC_API_PATHS = new Set([
   '/api/auth/recover',
   '/api/ops/nutritionists',
   '/api/alcance',
+  '/api/public/communications/email-unsubscribe',
 ]);
 
 export function resolveRequestAuth(input: {
@@ -22,7 +23,7 @@ export function resolveRequestAuth(input: {
   verifiedUserId: string | null;
   allowDemo: boolean;
 }): RequestAuthDecision {
-  if (PUBLIC_API_PATHS.has(input.path) || input.path.startsWith('/api/assets/blob/')) return { kind: 'public' };
+  if (PUBLIC_API_PATHS.has(input.path) || input.path.startsWith('/api/assets/blob/') || input.path.startsWith('/api/public/scheduling/')) return { kind: 'public' };
   if (!input.supabaseEnabled) return input.allowDemo ? { kind: 'demo' } : { kind: 'unavailable' };
   if (input.verifiedUserId) return { kind: 'user', userId: input.verifiedUserId };
   return { kind: 'unauthorized' };
@@ -305,6 +306,7 @@ export function toPatientSelfView(patient: Patient): PatientSelfView {
     adherence_score: patient.adherence_score,
     time: patient.time,
     hydration: patient.hydration,
+    water_goal_glasses: patient.water_goal_glasses ?? null,
     energy: patient.energy,
     sleep_minutes: patient.sleep_minutes,
     steps: patient.steps ?? null,
@@ -339,6 +341,7 @@ export function toPatientSelfView(patient: Patient): PatientSelfView {
     adherence_score: 0,
     time: '',
     hydration: 0,
+    water_goal_glasses: null,
     energy: null,
     sleep_minutes: null,
     steps: null,

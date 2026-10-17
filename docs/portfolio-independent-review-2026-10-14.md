@@ -1,0 +1,16 @@
+# Revisión independiente del asistente de cartera · 14/10/2026
+
+Alcance: server/portfolio/provider.ts, routes.ts, provider.test.ts, clinical-budget.routes.test.ts, authorization.test.ts, summary.ts, src/types/portfolio.ts y src/components/nutrigo/PortfolioAssistant.tsx. Revisión de lectura; sin cambios de código ni consultas a servicios reales.
+
+Veredicto: no se encontraron P1/P2 pendientes en este alcance. Apto para integrar en la entrega 7 después de sus gates propios. No declara el proveedor configurado, ZDR verificado realmente, entrega de mensajes ni disponibilidad gratuita.
+
+- La única ruta externa nueva usa Groq y gpt-oss-120b. Falta de configuración, ZDR o confirmación del nivel gratuito detiene la ejecución antes de reservar o enviar. No hay fallback al modelo pago heredado.
+- La reserva precede a la llamada paga y usa el ledger clínico global, con límite de 5.000.000 microdólares mensuales. La estimación cubre bytes UTF-8, overhead y salida máxima. Se liquida consumo verificable; ausencia/imposibilidad de usage y resultados inciertos mantienen reserva. El resultado inválido o un permiso retirado no evita contabilizar una respuesta pagada ya recibida.
+- La clave incorpora actor, consultorio y requestId y no depende del payload mutable. Cambiar el contexto/fingerprint en un reintento con el mismo identificador no evade un resultado reservado, incierto o cobrado. El cliente conserva ese identificador para el reintento del mismo payload; nuevas preguntas explícitas generan otra operación bajo el mismo límite global.
+- El cuerpo externo contiene exclusivamente intent y seis agregados de al menos cinco pacientes autorizadas. No salen texto de pregunta, nombres, identificadores de paciente/actor/consultorio, registros individuales, fuentes ni fingerprint. Esquemas estrictos rechazan propiedades clínicas adicionales.
+- Las rutas reconstruyen alcance, datos y pruebas de care_relationship/ai_followup para autorizar antes y después de procesar. Traspasos y retiros invalidan propuestas. También la ruta de error vuelve a obtener fuentes locales, impidiendo devolver pacientes de un alcance previo.
+- Las respuestas muestran fuentes y propuestas revisables; el cliente no ejecuta acciones clínicas ni envía mensajes automáticamente. La hidratación permanece una respuesta local y no se infiere de comidas.
+
+Focal independiente: 33 aprobadas, cero fallos y cero omitidas en cinco archivos. Reporte local: %TEMP%/planv-portfolio-independent-review-20261014.json. Comando: npm test -- server/portfolio/provider.test.ts server/portfolio/clinical-budget.routes.test.ts server/portfolio/authorization.test.ts server/portfolio/routes.test.ts server/portfolio/summary.test.ts --maxWorkers=1 --reporter=json.
+
+La comprobación usa transportes y credenciales ficticios, Hono local y reservas en memoria. No afirma una prueba nueva de concurrencia entre procesos SQL o de facturación del proveedor; el ledger SQL y esos gates tienen evidencia independiente del coordinador. El total focal se informa por separado y no se suma a la suite completa.

@@ -1,3 +1,4 @@
+import { foodQuantityUnit } from '../../../types/foods';
 import { useEffect,useState,type ReactNode,type UIEvent } from 'react';
 import { FramePair } from '../FramePair';
 import { nodeId, nodeName, sourceText, type SourceBinding, type SourceNode, type SourceResolver } from '../SourceView';
@@ -5,7 +6,7 @@ import { plansApi } from '../../../api/plans';
 import { buildPublishedPlanDays, mealSlotLabel, planWeekIndex, type PlanItemView } from '../../../types/plans';
 import { planChangeLineText, planDateLabel, planHandoverBanner, type PlanHandover } from '../../../types/plan-handover';
 import { planRecipe, planComponentItems } from '../plan-recipe';
-import { componentTitle, componentGrams } from '../../../types/plan-components';
+import { componentTitle, componentGrams, componentNativeQuantity } from '../../../types/plan-components';
 import { PlanGuidanceView } from '../../../components/nutrigo/PlanGuidance';
 import { plateImage } from '../plate-photo';
 export { planRecipe } from '../plan-recipe';
@@ -24,7 +25,7 @@ const WEEKDAY_SAMPLE=/^(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday
 const DAY_SAMPLE=/^\d{1,2} Sep$/;
 
 const NAMELESS='Comida sin nombre';
-export const itemTitle=(item:PlanItemView)=>item.components?.map(component=>`${componentTitle(component)}${component.kind==='food'?` · ${componentGrams(component)?.toLocaleString('es-AR')??'Sin cantidad'} g`:component.kind==='recipe'?` · ${component.portions.toLocaleString('es-AR')} porciones`:''}`).join(' + ')||item.recipe_title||item.free_text||NAMELESS;
+export const itemTitle=(item:PlanItemView)=>item.components?.map(component=>`${componentTitle(component)}${component.kind==='food'?` · ${componentNativeQuantity(component)?.toLocaleString('es-AR')??'Sin cantidad'} ${component.food_snapshot?foodQuantityUnit(component.food_snapshot):'g'}`:component.kind==='recipe'?` · ${component.portions.toLocaleString('es-AR')} porciones`:''}`).join(' + ')||item.recipe_title||item.free_text||NAMELESS;
 /** Alto fijo del archivo (96 px) pasa a alto mínimo: la fila crece con textos largos en vez de pisar la fila de arriba. */
 function growFromFixedHeight(node:SourceNode,fill:'row'|'self'):SourceBinding|undefined {
   const height=/\bh-\[(\d+)px\]/.exec(String(node.props.className??''));
@@ -108,7 +109,7 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
       const scrollBar=children.find(child=>nodeName(child)==='Scroll Bar');
       const header=head?fields(head,{},child=>{
         const slot=leaf(child)?HEAD_SLOT[sourceText(child)]:undefined;
-        if(slot&&plan?.meal_times?.[slot])return {text:mealSlotLabel(slot,plan.meal_times)};
+        if(slot&&(plan?.meal_times?.[slot]||plan?.meal_labels?.[slot]))return {text:mealSlotLabel(slot,plan?.meal_times,plan?.meal_labels)};
         if(nodeName(child)==='Button Picker'&&sourceText(child)==='Week 2')return {onClick:nextWeek,label:weeks>1?`Semana ${page+1} de ${weeks}: cambiar semana`:'Semana del plan',props:{disabled:weeks<=1},children:relabel(child,()=>`Semana ${page+1}`)};
         return undefined;
       },'head'):null;
@@ -139,7 +140,7 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
   return <FramePair nodes={['84:2994','470:15300']} resolve={resolve} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut} query={search} onSearch={setSearch}>
     {meal&&<FigmaRecordDialog title={`${meal.slot} · ${shortDate(meal.for_date)}`} onClose={()=>setMeal(null)}>
       <div className="flex flex-col gap-[16px] text-[14px] text-[#272932]">
-        {meal.components?.map((component,index)=>{const entry=planComponentItems(meal)[index];const recipe=planRecipe(entry);return <section key={component.id}><h3>{componentTitle(component)}</h3><p>{component.kind==='food'?`${component.quantity.toLocaleString('es-AR')} ${component.measure??'g'}${component.measure?` · ${componentGrams(component)?.toLocaleString('es-AR')??'Sin cantidad'} g`:''}`:component.kind==='recipe'?`${component.portions.toLocaleString('es-AR')} porciones`:component.recipe_proposal?`${component.portions??''} porciones`:''}</p>{component.public_note&&<p>{component.public_note}</p>}{recipe&&<button type="button" className="underline" onClick={()=>{setMeal(null);setChosen(entry);}}>Ver ingredientes y preparación</button>}</section>;})}
+        {meal.components?.map((component,index)=>{const entry=planComponentItems(meal)[index];const recipe=planRecipe(entry);return <section key={component.id}><h3>{componentTitle(component)}</h3><p>{component.kind==='food'?`${component.quantity.toLocaleString('es-AR')} ${component.measure??(component.food_snapshot?foodQuantityUnit(component.food_snapshot):'g')}${component.measure?` · ${componentNativeQuantity(component)?.toLocaleString('es-AR')??'Sin cantidad'} ${component.food_snapshot?foodQuantityUnit(component.food_snapshot):'g'}`:''}`:component.kind==='recipe'?`${component.portions.toLocaleString('es-AR')} porciones`:component.recipe_proposal?`${component.portions??''} porciones`:''}</p>{component.public_note&&<p>{component.public_note}</p>}{recipe&&<button type="button" className="underline" onClick={()=>{setMeal(null);setChosen(entry);}}>Ver ingredientes y preparación</button>}</section>;})}
         {meal.public_note&&<p>{meal.public_note}</p>}
       </div>
     </FigmaRecordDialog>}
@@ -155,7 +156,7 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
       <div className="flex flex-col gap-[16px] text-[14px] text-[#272932]">
         <label className="flex flex-col gap-[4px]">Buscar en el plan<input type="search" value={search} onChange={event=>setSearch(event.target.value)} className="rounded-[8px] border border-[#e1e1e2] p-[10px]"/></label>
         <label className="flex items-center gap-[8px]"><input type="checkbox" checked={hideEmpty} onChange={event=>setHideEmpty(event.target.checked)}/>Mostrar sólo días con comidas indicadas</label>
-        {extras.length>0&&<section aria-label="Colaciones y extras"><h3 className="font-['Poppins:SemiBold']">Colaciones y extras</h3>{extras.map(item=><p key={item.id}>{shortDate(item.for_date)} · {item.slot}: {itemTitle(item)}{(item.components||planRecipe(item))&&<button type="button" className="ml-[8px] underline" onClick={()=>{setOptions(false);item.components?setMeal(item):setChosen(item);}}>Ver detalle</button>}</p>)}</section>}
+        {extras.length>0&&<section aria-label="Colaciones y extras"><h3 className="font-['Poppins:SemiBold']">Colaciones y extras</h3>{extras.map(item=><p key={item.id}>{shortDate(item.for_date)} · {mealSlotLabel(item.slot,plan?.meal_times,plan?.meal_labels)}: {itemTitle(item)}{(item.components||planRecipe(item))&&<button type="button" className="ml-[8px] underline" onClick={()=>{setOptions(false);item.components?setMeal(item):setChosen(item);}}>Ver detalle</button>}</p>)}</section>}
         {plan?.nutrition&&<AiPlanNutritionSummary nutrition={plan.nutrition}/>}
         <button type="button" className="mcp-action" onClick={()=>{setOptions(false);onNavigate('compras');}}>Ver la lista de compras</button>
       </div>

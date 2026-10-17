@@ -14,6 +14,6 @@ export function EnergyEquationComparison({ input, bodyFat, scaleBmr }: { input: 
       {rows.map((r) => <tr key={r.id}><th scope="row">{r.label}{r.used && <> <NvBadge tone="green">Usa la meta</NvBadge></>}</th>
         {r.bmr === null ? <td colSpan={2}>{r.missing}</td> : <><td>{r.bmr} kcal</td><td>{r.tdee} kcal</td></>}</tr>)}
     </tbody></table>
-    <p className="nvt-note">La meta se calcula con Mifflin-St Jeor. Las demás sirven para comparar: si preferís otra, ajustá el porcentaje calórico.{sources && ` ${sources}.`}</p>
+    <p className="nvt-note">La meta usa la fórmula seleccionada. Revisá y aprobá su referencia en la configuración del consultorio antes de confirmar un cambio.{sources && ` ${sources}.`}</p>
   </details>;
 }

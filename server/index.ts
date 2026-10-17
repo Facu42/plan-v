@@ -1,3 +1,7 @@
+import {registerSchedulingRoutes} from './scheduling/routes.js';
+import {registerSchedulingTeamRoutes} from './scheduling/team-routes.js';
+import {registerDocumentOrganizerRoutes} from './document-organizer/routes.js';
+import {registerCommunicationChannelRoutes} from './communications/channel-routes.js';
 import { withWeeklyRegistration } from './progress/weekly-repository.js';
 import { serve } from '@hono/node-server';
 import { registerCareRoutes, requireCareConsent } from './care/routes.js';
@@ -26,6 +30,11 @@ import { registerResourceRoutes } from './resources/routes.js';
 import { registerOrgRoutes } from './orgs/routes.js';
 import { registerAlcanceRoutes } from './alcance/routes.js';
 import { registerCrmRoutes } from './crm/routes.js';
+import { registerConsultationRoutes } from './consultations/routes.js';
+import { registerPatientImportRoutes } from './patient-import/routes.js';
+import { registerNutritionCapabilityRoutes } from './nutrition-capabilities/routes.js';
+import { registerClinicalWorkspaceRoutes } from './clinical-workspace/routes.js';
+import { registerPortfolioRoutes } from './portfolio/routes.js';
 import { pathToFileURL } from 'node:url';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
@@ -85,8 +94,7 @@ import { toPatientIntakeView, toProfessionalIntakeView } from './intake/views.js
 import * as intakeDb from './intake/repository.js';
 import { IntakeRepositoryError } from './intake/repository.js';
 import { getAuthAccount, getRequestDb, isSupabaseEnabled, privilegedDb } from './db/supabase-client.js';
-import { emailPatientInvite, emailPatientInviteWithBrevo } from './identity/invite-email.js';
-import { brevoConfig, sendBrevoEmail } from './mail/brevo.js';
+import { emailPatientInvite } from './identity/invite-email.js';
 import { PUBLIC_SIGNUP_ROLE } from '../src/context/auth-policy.js';
 import { siteUrl } from './admin/accounts.js';
 import * as sb from './db/supabase-repo.js';
@@ -177,7 +185,7 @@ app.use('/*', secureHeaders({
   xFrameOptions: 'DENY',
   crossOriginResourcePolicy: 'cross-origin',
   crossOriginOpenerPolicy: false,
-  contentSecurityPolicy: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] },
+  contentSecurityPolicy: { defaultSrc: ["'none'"], frameAncestors: ["'none'"], formAction: [c=>c.req.method==='GET'&&c.req.path==='/api/public/communications/email-unsubscribe'?"'self'":"'none'"] },
 }));
 app.use('/api/*', async (c, next) => {
   c.header('Cache-Control', 'no-store');
@@ -189,7 +197,7 @@ const securityLimits = createRateLimits();
 app.use('/api/*', securityLimits.public);
 app.use('/*', cors({
   origin: (origin) => resolveCorsOrigin(origin ?? '', process.env),
-  allowHeaders: ['Authorization', 'Content-Type', 'X-Request-Id'],
+  allowHeaders: ['Authorization', 'Content-Type', 'X-Request-Id', 'X-Booking-Token'],
   exposeHeaders: ['X-Request-Id', 'Retry-After', 'X-RateLimit-Remaining'],
 }));
 app.use('/api/*', createBodyGuard(c => maxBodyBytes(c.req.path)));
@@ -299,6 +307,15 @@ registerResourceRoutes(app);
 registerOrgRoutes(app);
 registerAlcanceRoutes(app);
 registerCrmRoutes(app);
+registerConsultationRoutes(app);
+registerPatientImportRoutes(app);
+registerNutritionCapabilityRoutes(app);
+registerClinicalWorkspaceRoutes(app);
+registerPortfolioRoutes(app);
+registerSchedulingRoutes(app);
+registerSchedulingTeamRoutes(app);
+registerDocumentOrganizerRoutes(app);
+registerCommunicationChannelRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({
@@ -758,22 +775,6 @@ app.post('/api/invites/:id/email', async (c) => {
     if (!invite || invite.nutritionist_id !== actor.nutritionistId) return c.json({ error: 'Prohibido' }, 403);
     if (!usable(invite)) return c.json(unavailable, 409);
     const admin = privilegedDb();
-    const brevo = brevoConfig();
-    if (brevo) {
-      const [{ data: patient }, { data: pro }] = await Promise.all([
-        admin.from('patients').select('full_name').eq('id', invite.patient_id).maybeSingle(),
-        admin.from('nutritionists').select('display_name').eq('id', invite.nutritionist_id).maybeSingle(),
-      ]);
-      return c.json(await emailPatientInviteWithBrevo({ ...invite, patientName: String(patient?.full_name ?? ''), nutritionistName: String(pro?.display_name ?? '') }, siteUrl(), {
-        generate: async (type, email, redirectTo) => {
-          const { data, error } = type === 'invite'
-            ? await admin.auth.admin.generateLink({ type: 'invite', email, options: { redirectTo, data: { role: PUBLIC_SIGNUP_ROLE } } })
-            : await admin.auth.admin.generateLink({ type: 'magiclink', email, options: { redirectTo } });
-          return { link: data?.properties?.action_link ?? null, error };
-        },
-        send: (message) => sendBrevoEmail(brevo, message),
-      }));
-    }
     return c.json(await emailPatientInvite(invite, siteUrl(), {
       invite: (email, options) => admin.auth.admin.inviteUserByEmail(email, options),
       magicLink: (email, redirectTo) => admin.auth.signInWithOtp({ email, options: { shouldCreateUser: false, emailRedirectTo: redirectTo } }),
@@ -882,7 +883,7 @@ app.post('/api/auth/recover', async (c) => {
   if (!parsedBody.success) return c.json({ error: 'Datos inválidos' }, 400);
   if (isSupabaseEnabled()) {
     try {
-      await sb.sbRequestPasswordRecovery(parsedBody.data.email);
+      await sb.sbRequestPasswordRecovery(parsedBody.data.email, siteUrl() ? `${siteUrl()}/` : undefined);
     } catch {
       // Same acknowledgement whether the provider accepted the address or not.
     }

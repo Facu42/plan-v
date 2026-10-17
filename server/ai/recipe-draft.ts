@@ -8,6 +8,7 @@ import { logProviderFailure, resolveAiMode } from './mode.js';
 import { getAiModel } from './provider.js';
 import { providerJobContext, type RecipeJobContext } from './context.js';
 import { recipeNutritionSchema } from '../../src/types/ai-nutrition.js';
+import { linkSara2Recipe } from '../foods/sara2-ai.js';
 
 const liveRecipeSchema = z.object({
   title: z.string().trim().min(2).max(150),
@@ -60,6 +61,7 @@ export async function generateRecipeDraft(context: RecipeJobContext) {
     const blocked = forbiddenTerms(context);
     const haystack = `${output.title} ${output.items.map((item) => item.name).join(' ')}`.toLocaleLowerCase('es-AR');
     const warnings = blocked.filter((term) => haystack.includes(term)).map((term) => `Revisar posible presencia de «${term}».`);
+    const composition=linkSara2Recipe({yield_portions:output.yield_portions,items:output.items});
     return {
       source: 'ai' as const,
       recipe: recipeDraftSchema.parse({
@@ -68,10 +70,10 @@ export async function generateRecipeDraft(context: RecipeJobContext) {
         yield_portions: output.yield_portions,
         steps: output.steps,
         nutrient_source: 'estimacion_ia.v2',
-        items: output.items,
-        ...(output.nutrition ? { nutrition: { ...output.nutrition, origin: 'ai_estimate', source: 'estimacion_ia.v2' } } : {}),
+        items: composition.items,
+        ...(composition.nutrition ? { nutrition: composition.nutrition } : {}),
       }),
-      warnings: [...warnings, 'Los nutrientes son estimaciones de IA y requieren revisión profesional.'],
+      warnings: [...warnings,...composition.warnings, 'Las cantidades y preparación propuestas por IA requieren revisión. Las cifras sólo provienen de referencias exactas de SARA 2; la procedencia culinaria de IA se conserva.'],
     };
   } catch (error) {
     logProviderFailure('recipe-draft', error);

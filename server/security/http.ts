@@ -40,7 +40,11 @@ export function apiHeaders(): MiddlewareHandler {
     return secureHeaders({
       xFrameOptions: 'DENY',
       strictTransportSecurity: new URL(c.req.url).protocol === 'https:' ? 'max-age=31536000' : false,
-      contentSecurityPolicy: { defaultSrc: ["'none'"], baseUri: ["'none'"], formAction: ["'none'"], frameAncestors: ["'none'"] },
+      contentSecurityPolicy: {
+        defaultSrc: ["'none'"], baseUri: ["'none'"], frameAncestors: ["'none'"],
+        // This one HTML resource confirms a mail preference; every other API forbids forms.
+        formAction: [c.req.method === 'GET' && c.req.path === '/api/public/communications/email-unsubscribe' ? "'self'" : "'none'"],
+      },
     })(c, next);
   };
 }
@@ -51,6 +55,9 @@ export function createOriginGuard(environment: () => Environment = () => process
     let allowed: string[];
     try { allowed = readCorsOrigins(environment()); }
     catch { return c.json({ error: 'Configuración de seguridad no disponible' }, 503); }
+    // no-referrer may make a native mail-unsubscribe form send an opaque Origin.
+    // This exact public command authenticates with its single-use token, not cookies.
+    if(origin==='null'&&c.req.method==='POST'&&c.req.path==='/api/public/communications/email-unsubscribe')return next();
     if (origin && c.req.path === '/api/ops/nutritionists') return c.json({ error: 'Origen no autorizado' }, 403);
     if (origin && !allowed.includes(origin)) {
       c.header('Vary', 'Origin');
@@ -154,7 +161,8 @@ export function createRateLimits(options: {
       const ip = address(c);
       const generalWait = general(ip);
       if (generalWait) return reject(c, generalWait);
-      if (c.req.path === '/api/auth/recover' || c.req.path === '/api/ops/nutritionists') {
+      const bookingMutation = c.req.method === 'POST' && /^\/api\/public\/scheduling\/[^/]+\/bookings(?:\/|$)/.test(c.req.path);
+      if (c.req.path === '/api/auth/recover' || c.req.path === '/api/ops/nutritionists' || bookingMutation) {
         const wait = sensitive(`${c.req.path}:${ip}`);
         if (wait) return reject(c, wait);
       }

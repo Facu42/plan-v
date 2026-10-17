@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react';
-import { api, type InviteEmailDelivery, type PatientInvite } from '../../api/client';
+import { api, isAbortError, type InviteEmailDelivery, type PatientInvite } from '../../api/client';
+import { useAppStore } from '../../store/useAppStore';
+import { PatientImportDialog } from './PatientImportDialog';
+import { patientImportApi } from '../../api/patient-import';
+import { ApiError } from '../../api/error';
 import { careErrorMessage } from '../../api/care';
 import type { Patient, Stage } from '../../types';
 import { filterDirectoryPatients, getPatientDirectoryMetrics, type PatientDirectoryFilter } from '../crm/crm-patients';
@@ -14,6 +18,7 @@ import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
 import { buildBoardRows } from './cobranzas-utils';
 import { formatPesos } from '../../fees';
 import type { BillingBoard } from '../../types/fees';
+import { DEFAULT_WATER_GOAL, WATER_GOAL_OPTIONS } from '../../types/water';
 
 const STAGE_LABELS: Record<Stage, string> = { ingreso: 'Ingreso', plan: 'Plan', seguimiento: 'Seguimiento', alta: 'Alta' };
 
@@ -159,17 +164,21 @@ export function ShowroomPatientCreate({ onClose, onCreated }: { onClose: () => v
 
 export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Patient; onClose: () => void; onSaved: (patient: Patient) => void }) {
   const [name, setName] = useState(patient.name);
+  const initialPhone = (patient as Patient & { phone?: string | null }).phone ?? '';
+  const [phone, setPhone] = useState(initialPhone);
   const [status, setStatus] = useState(patient.status);
   const [stage, setStage] = useState<Stage>(patient.stage);
   const [sensitiveHours, setSensitiveHours] = useState(patient.sensitive_hours);
   const [planB, setPlanB] = useState(patient.plan_b);
   const [nextFocus, setNextFocus] = useState(patient.next_focus);
+  const savedWaterGoal = patient.water_goal_glasses == null ? '' : String(patient.water_goal_glasses);
+  const [waterGoal, setWaterGoal] = useState(savedWaterGoal);
   const [access, setAccess] = useState(patient.billing_status);
   const [accessUntil, setAccessUntil] = useState(patient.billing_until ?? '');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const nameInput = useRef<HTMLInputElement>(null);
-  useUnsavedChanges(name !== patient.name || status !== patient.status || stage !== patient.stage || sensitiveHours !== patient.sensitive_hours || planB !== patient.plan_b || nextFocus !== patient.next_focus || access !== patient.billing_status || accessUntil !== (patient.billing_until ?? ''), busy);
+  useUnsavedChanges(name !== patient.name || phone !== initialPhone || status !== patient.status || stage !== patient.stage || sensitiveHours !== patient.sensitive_hours || planB !== patient.plan_b || nextFocus !== patient.next_focus || waterGoal !== savedWaterGoal || access !== patient.billing_status || accessUntil !== (patient.billing_until ?? ''), busy);
   useDialogKeys(onClose, busy);
   useEffect(() => { nameInput.current?.focus(); }, []);
 
@@ -179,7 +188,9 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
     setError('');
     try {
       let { patient: updated } = await api.updatePatientProfile(patient.id, {
-        name, status, stage, sensitive_hours: sensitiveHours, plan_b: planB, next_focus: nextFocus,
+        name, phone: phone.trim() || null, status, stage, sensitive_hours: sensitiveHours, plan_b: planB, next_focus: nextFocus,
+        // Solo si la cambió: así la ficha se guarda igual en una base sin la meta de agua.
+        ...(waterGoal !== savedWaterGoal ? { water_goal_glasses: waterGoal ? Number(waterGoal) : null } : {}),
       });
       // Sólo si la profesional cambió el acceso; un vencido sin tocar queda como está.
       const accessChanged = access !== patient.billing_status || (access === 'active' && accessUntil !== (patient.billing_until ?? ''));
@@ -203,9 +214,11 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
       <form className="nv-dialog-form" onSubmit={submit}>
         <div className="nv-dialog-grid">
           <label>Nombre completo<input ref={nameInput} value={name} onChange={(e) => setName(e.target.value)} minLength={2} maxLength={80} required /></label>
+          <label>Teléfono<input type="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} maxLength={40} /></label>
           <label>Estado visible<input value={status} onChange={(e) => setStatus(e.target.value)} minLength={2} maxLength={40} required /></label>
           <label>Etapa<select value={stage} onChange={(e) => setStage(e.target.value as Stage)}>{(['ingreso', 'plan', 'seguimiento', 'alta'] as const).map((value) => <option key={value} value={value}>{STAGE_LABELS[value]}</option>)}</select></label>
           <label>Horario sensible<input value={sensitiveHours} onChange={(e) => setSensitiveHours(e.target.value)} maxLength={120} placeholder="Ej.: después de las 20:30" /></label>
+          <label>Meta de agua<select value={waterGoal} onChange={(e) => setWaterGoal(e.target.value)}><option value="">{DEFAULT_WATER_GOAL} vasos por día (la de siempre)</option>{WATER_GOAL_OPTIONS.filter((value) => value !== DEFAULT_WATER_GOAL).map((value) => <option key={value} value={value}>{value} vasos por día</option>)}</select></label>
         </div>
         <div className="nv-dialog-grid">
           <label>Acceso a la app<select value={access} onChange={(e) => setAccess(e.target.value as typeof access)}>
@@ -244,6 +257,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
 }) {
   const [filter, setFilter] = useState<PatientDirectoryFilter>(initialFilter);
   const [creating, setCreating] = useState(false);
+  const [importing,setImporting] = useState(false);
   const [stageFilter, setStageFilter] = useState<Stage | ''>('');
   const [unlinkedOnly, setUnlinkedOnly] = useState(false);
   const [editing, setEditing] = useState<Patient | null>(null);
@@ -291,7 +305,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
     setBusyId(patient.id);
     setError('');
     try {
-      const { invite: ready } = await api.patientInvite(patient.id);
+      const { invite: ready } = await api.patientInvite(patient.id).catch(error=>{if(error instanceof ApiError&&error.status===409)return patientImportApi.invite(patient.id);throw error;});
       setShare({ name: patient.name, invite: ready });
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'No pudimos preparar la invitación.');
@@ -320,7 +334,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
       <div><span><Icon name="calendar" size={18}/>Con próxima consulta</span><strong>{metrics.appointments}</strong><small>Pacientes con turno vigente</small></div>
       <button type="button" className="nv-summary-archived" aria-label="Filtrar pacientes archivados" aria-pressed={filter==='archived'} onClick={()=>setFilter('archived')}><span><Icon name="history" size={18}/>Archivados</span><strong>{metrics.archived}</strong><small>Consultar o restaurar</small></button>
     </div>
-    <NvCard className="nv-directory-panel" title="Directorio de pacientes" action={<NvButton className="nv-soft" onClick={() => setCreating(true)}><Icon name="plus" size={14} />Nuevo paciente</NvButton>}>
+    <NvCard className="nv-directory-panel" title="Directorio de pacientes" action={<><NvButton className="nv-ghost" onClick={()=>setImporting(true)}>Importar pacientes</NvButton><NvButton className="nv-soft" onClick={() => setCreating(true)}><Icon name="plus" size={14} />Nuevo paciente</NvButton></>}>
       <div className="nv-directory-toolbar"><nav className="nv-directory-filters" aria-label="Filtrar pacientes">
         {FILTERS.map((item) => {
           const count = item.id === 'active' ? metrics.active : item.id === 'attention' ? metrics.attention : metrics.archived;
@@ -361,6 +375,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
       {!visible.length && <NvState title="Sin coincidencias" description="Probá otra búsqueda o filtro." />}
     </NvCard>
     {creating && <ShowroomPatientCreate onClose={() => setCreating(false)} onCreated={created} />}
+    {importing && <PatientImportDialog onClose={()=>setImporting(false)} onImported={()=>{void useAppStore.getState().refreshDirectory().catch(error=>{if(!isAbortError(error))setError('La importación se guardó, pero no pudimos actualizar el directorio. Recargá para verlo.');});}}/>}
     {editing && <ShowroomPatientEdit patient={editing} onClose={() => setEditing(null)} onSaved={(updated) => { onChanged(updated); setEditing(null); }} />}
   </section>;
 }

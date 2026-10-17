@@ -1,0 +1,6 @@
+.nv-app.nv-standalone{display:block;min-height:100dvh;padding:24px;color:var(--nv-ink)}
+.nv-standalone>header{display:flex;justify-content:space-between;gap:16px;max-width:960px;margin:0 auto 24px}
+.nv-app.nv-standalone>main{width:100%;max-width:960px;margin:auto;min-width:0}
+.nv-standalone :is(input,select,textarea){max-width:100%;color:var(--nv-ink);background:var(--nv-card)}
+.nv-standalone .scheduling-panel{width:100%;overflow-wrap:anywhere}
+@media(max-width:600px){.nv-app.nv-standalone{padding:16px}}

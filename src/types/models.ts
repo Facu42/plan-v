@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { PlanItemView, PlanVersionView } from './plans.js';
-import { componentGrams } from './plan-components.js';
+import { componentNativeQuantity } from './plan-components.js';
 export const MODEL_KINDS = ['plan', 'recommendations', 'avoid'] as const;
 export type ModelKind = (typeof MODEL_KINDS)[number];
 export const MODEL_LABELS: Record<ModelKind, string> = {
@@ -202,8 +202,8 @@ export function applyModelOverrides(
       if (!component) throw new Error('El componente del modelo cambió.');
       if (component.kind === 'food') {
         component.quantity = amount.quantity;
-        if (componentGrams(component) === null)
-          throw new Error('Revisá los gramos de la medida elegida.');
+        if (componentNativeQuantity(component) === null)
+          throw new Error('Revisá la cantidad de la medida elegida.');
       } else if (component.kind === 'recipe' || component.recipe_proposal) {
         if (amount.quantity > 50) throw new Error('Revisá las porciones.');
         component.portions = amount.quantity;

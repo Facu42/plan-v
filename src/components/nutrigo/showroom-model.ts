@@ -1,6 +1,7 @@
 import type { Patient } from '../../types';
 import { buildJourneySummary } from '../patient/journey-summary';
 import { buildStreak } from '../../features/nutrigo/streak';
+import { waterGoalOf } from '../../types/water';
 
 const normalize = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 export function filterShowroomPatients(patients: readonly Patient[], query = '') {
@@ -28,7 +29,7 @@ export function buildShowroomPatient(patient: Patient, now = new Date(), countPe
     goalProgress: patient.goal_progress ?? null,
     goalUpdatedAt: patient.goal_updated_at ?? null,
     goalUpdates: (patient.goal_updates ?? patient.goal_history ?? []).map(({ id, goal, status, progress, updated_at }) => ({ id, goal, status, progress, updated_at })),
-    hydration: patient.hydration, energy: patient.energy ?? 'Sin registro',
+    hydration: patient.hydration, waterGoal: waterGoalOf(patient), energy: patient.energy ?? 'Sin registro',
     sleep: patient.sleep_minutes === null ? 'Sin registro' : `${Math.round(patient.sleep_minutes / 6) / 10} h`,
     sleepMinutes: patient.sleep_minutes,
     steps: patient.steps ?? null,

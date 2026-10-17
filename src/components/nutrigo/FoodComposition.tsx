@@ -1,0 +1,16 @@
+import { useEffect,useState } from 'react';
+import { foodApi } from '../../api/foods';
+import { COMPOSITION_LABELS,COMPOSITION_FLAGS,COMPOSITION_SOURCES,type FoodCompositionDetail } from '../../types/food-composition';
+import { NvButton } from './primitives';
+
+export function FoodComposition({id}:{id:string}){
+  const [offset,setOffset]=useState(0),[data,setData]=useState<FoodCompositionDetail|null>(null),[error,setError]=useState(''),[retry,setRetry]=useState(0),[loading,setLoading]=useState(true);
+  useEffect(()=>{const abort=new AbortController();setLoading(true);setError('');void foodApi.composition(id,offset,10,abort.signal).then(result=>{if(!abort.signal.aborted)setData(result);}).catch(error=>{if(!abort.signal.aborted)setError(error instanceof Error?error.message:'No pudimos leer la fuente.');}).finally(()=>{if(!abort.signal.aborted)setLoading(false);});return()=>abort.abort();},[id,offset,retry]);
+  return <section className="fc-composition" aria-label="Composición original SARA 2"><h3>Composición original · 39 componentes</h3><p>Valores por 100 {data?.basis.unit??'unidades de la fuente'}. Carbohidratos disponibles y totales se conservan por separado. Preparación y peso de porción comestible corresponden al nombre original.</p>{loading?<p role="status">Cargando composición…</p>:error?<p role="alert">{error} <NvButton onClick={()=>setRetry(n=>n+1)}>Reintentar</NvButton></p>:data&&<>
+    <p><a href={data.source.institutional_pdf} target="_blank" rel="noreferrer">SARA 2 · Ministerio de Salud · 2022</a></p>
+    {data.native_unit_label&&<p>Suplemento: valores por 100 unidades declaradas. Rótulo original: {data.native_unit_label}. No se convierte volumen en peso.</p>}
+    <details><summary>Rótulos y referencias originales</summary>{data.original_names.map((name,index)=>name&&<p key={index}>{name}</p>)}{data.source_headers.map(header=><p key={header.page}>p. {header.page}: {header.raw_header}</p>)}{data.issues.length>0&&<p>El encabezado impreso o la fila complementaria presenta una incidencia. Se conserva el informe original y no se completa con otro alimento.</p>}<small>SHA256 del PDF: {data.source.sha256}. Identificación del catálogo derivada; no es código oficial.</small></details>
+    <dl className="fc-nutrients">{data.components.map(cell=><div key={cell.key}><dt>{COMPOSITION_LABELS[cell.key]??cell.key}</dt><dd>{cell.raw===null||cell.raw===''?'Sin dato':cell.raw} {cell.unit_printed??''}<small> · Definición: {cell.unit_definition}{cell.page!==null?` · p. ${cell.page}, tabla ${cell.table}, fila ${cell.row}`:''} · {cell.provenance?COMPOSITION_SOURCES[cell.provenance.source]??cell.provenance.source:'Sin procedencia'} · {cell.provenance?.label??'Sin color'}{cell.provenance?.rgb?` (RGB ${cell.provenance.rgb.join(', ')})`:''}</small>{cell.flags.map(flag=><p key={flag}>{COMPOSITION_FLAGS[flag]??flag}</p>)}</dd></div>)}</dl>
+    <nav aria-label="Páginas de componentes"><NvButton disabled={offset===0} onClick={()=>setOffset(n=>Math.max(0,n-10))}>Anterior</NvButton><span>{offset+1}–{Math.min(offset+10,data.total)} de {data.total}</span><NvButton disabled={offset+10>=data.total} onClick={()=>setOffset(n=>n+10)}>Siguiente</NvButton></nav>
+  </>}</section>;
+}

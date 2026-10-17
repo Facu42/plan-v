@@ -1,5 +1,11 @@
 # Plan por apartados (2026-09-28)
 
+Sexta entrega aislada de agenda, reservas, equipo y cobros (14/10/2026): [alcance, pruebas y Regression Guard](nutridesk-release-agenda-2026-10-14.md). Base clínica `66ed039`, suite propia de 2.816 casos aprobados y dos omitidos; proveedores, producción y publicación siguen sin activar.
+
+Entrega aislada de importación, OCR local y organización documental (13/10/2026): [alcance, verificación y Regression Guard](nutridesk-release-importacion-2026-10-13.md). Basada en el PR de consultas; sin publicación ni activación de proveedores.
+
+Entrega aislada de consultas, audio y resúmenes (13/10/2026): [alcance, verificación y Regression Guard](nutridesk-release-consultas-2026-10-13.md). Basada en el PR de acceso; todavía sin publicar ni habilitar proveedores.
+
 Pedido de Facundo del 2026-09-28: usar los agentes de
 [agency-agents](https://github.com/msitarzewski/agency-agents) para desarrollar ordenadamente
 todo lo que le falta a Plan V. Sus sugerencias: app móvil, seguridad, diseño y experiencia
@@ -385,3 +391,14 @@ Migración y ensayo Auth/PostgREST/advisors preparados. La migración
 ## Objetivo de seguimiento de la paciente · 2026-10-10
 
 D1 de `docs/decisiones-producto-2026-10-10.md`. La profesional sigue cargando a mano el objetivo, el estado, el avance y la nota. La migración guarda estado, avance e historial; la nota no llega a la paciente. Inicio y Progreso muestran objetivo, estado y avance (en Progreso, también los cambios). No es la meta de calorías. La base en línea no se tocó: falta la frase escrita de Facundo para aplicar `20261010183000_patient_goal_followup`.
+## Nutriboost: entrega 4 · 14/10/2026
+
+Rama aislada `codex/nutridesk-release-nutricion`, basada en la entrega de importación `b143744`. Fórmula efectiva aprobada por cada profesional, referencias revisadas de micronutrientes, grupos de intercambio, catálogo paginado con incorporación opcional revisada desde USDA, nombres y horarios de los seis momentos existentes y descarga PDF real del plan con marca y gráficos. [Contratos, verificación propia y Regression Guard](nutridesk-release-nutricion-2026-10-14.md). Suite propia: 2.678 aprobadas, cero fallos, dos omitidas y 407 archivos; tipos, build, migraciones, vistas y scanner aprobados, más revisión independiente de 25 casos sin P1/P2. Sin cambios de producción ni proveedores activados. Clínica y ficha/PDF clínico (5), agenda/equipo/cobros (6) y cartera/comunicación/ayuda (7) continúan separados. Kerr automático conserva su pendiente de referencia primaria y aprobación clínica.
+
+
+Quinta entrega apilada: [ficha clínica y exportación histórica, evidencia y límites](nutridesk-release-clinica-2026-10-14.md). Base 304413f; gate previo 2.719 pruebas aprobadas; verificación nueva de marca vigente en curso, sin producción.
+
+- Continuación Codex, 15/10: entrega 7 de operaciones/comunicaciones sobre PR123; informe vigente en [nutridesk-release-operaciones-2026-10-15.md](nutridesk-release-operaciones-2026-10-15.md). La tabla SARA 2 continúa en la entrega 8 separada.
+## SARA 2: composición argentina · cierre local 16/10/2026
+
+930 registros de la tabla exacta del Ministerio de Salud/CONICET, con 39 componentes y procedencia por celda, catálogo y selectores iniciales, unidades de 100 g/100 ml, copias históricas y control de definiciones de carbohidratos. Entrega 8 integrada sobre #127 `5c8ea54`, con main `9c56854` conservado. Suite propia final 2.999 aprobadas, cero fallos, dos omitidas y 458 archivos; tipos, build, migraciones, manifiesto 18 + tres bases exactas y secretos aprobados. Revisión de código y [QA 1440/390](sara2-qa-2026-10-16.md) aprobados, con editor/catálogo móvil y etiquetas de volumen corregidos; 1.787 huellas finales intactas. [Plan, contratos](sara2-implementacion-2026-10-14.md), [instructivo vigente](instructivo-plan-v-actualizado-2026-10-15.md) y [verificación propia y Regression Guard](sara2-verificacion-2026-10-15.md). Borrador propio pendiente de subir y comprobar CI. No se aplicó la migración ni se habilitaron proveedores.

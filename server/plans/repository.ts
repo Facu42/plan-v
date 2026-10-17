@@ -19,6 +19,7 @@ import type { RecipeCard } from '../../src/types/recipes.js';
 import {
   hasMealTimes,
   planMealTimesSchema,
+  planMealLabelsSchema,
   planSlotKey,
   planSlotLabel,
   planReviewSnapshot,
@@ -26,6 +27,7 @@ import {
   type PatientMealPlan,
   type PlanItemView,
   type PlanMealTimes,
+  type PlanMealLabels,
   type PlanRecipeDetail,
   type PlanSlot,
   type PlanVersionView,
@@ -66,6 +68,7 @@ type MemItem = {
 type MemVersion = {
   guidance?: PlanGuidance;
   meal_times?: PlanMealTimes;
+  meal_labels?: PlanMealLabels;
   id: string;
   revision: string;
   meal_plan_id: string;
@@ -228,6 +231,7 @@ function asVersion(row: Record<string, unknown>): PlanVersionView {
     items: preparedItems,
     ...(row.guidance ? { guidance: planGuidanceSchema.parse(row.guidance) } : {}),
     ...(row.meal_times ? { meal_times: planMealTimesSchema.parse(row.meal_times) } : {}),
+    ...(row.meal_labels ? { meal_labels: planMealLabelsSchema.parse(row.meal_labels) } : {}),
     ...(target ? { nutrition_target: target } : {}),
     ...(target || preparedItems.some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(preparedItems, target, row) } : {}),
   };
@@ -259,6 +263,7 @@ function asPatient(row: Record<string, unknown>): PatientMealPlan {
     items: preparedItems,
     ...(row.guidance ? { guidance: planGuidanceSchema.parse(row.guidance) } : {}),
     ...(row.meal_times ? { meal_times: planMealTimesSchema.parse(row.meal_times) } : {}),
+    ...(row.meal_labels ? { meal_labels: planMealLabelsSchema.parse(row.meal_labels) } : {}),
     ...(target ? { nutrition_target: target } : {}),
     ...(target || preparedItems.some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(preparedItems, target, row) } : {}),
   };
@@ -291,7 +296,7 @@ function versionItems(versionId: string): PlanItemView[] {
 
 function summarizeView(view: PlanItemView[], target?: MenuNutritionTarget, period?: { period_start?: unknown; period_end?: unknown }) {
   return summarizeMenuNutrition(view, target ?? null, view.flatMap((item) => item.recipe_id && item.recipe_version ? [{
-    id: item.recipe_id, version: item.recipe_version, nutrition: item.recipe?.nutrition ?? null,
+    id: item.recipe_id, version: item.recipe_version, nutrition: item.recipe?.nutrition ?? null, carbohydrates: item.recipe?.catalog_recipe?.carbohydrates,
   }] : []), period?.period_start && period.period_end ? { period_start: String(period.period_start).slice(0, 10), period_end: String(period.period_end).slice(0, 10) } : undefined);
 }
 
@@ -308,6 +313,7 @@ function memVersionView(row: MemVersion): PlanVersionView {
     items: preparedItems,
     ...(row.guidance ? { guidance: structuredClone(row.guidance) } : {}),
     ...(row.meal_times ? { meal_times: { ...row.meal_times } } : {}),
+    ...(row.meal_labels ? { meal_labels: { ...row.meal_labels } } : {}),
     ...(row.nutrition_target ? { nutrition_target: row.nutrition_target } : {}),
     ...(row.nutrition_target || preparedItems.some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(preparedItems, row.nutrition_target, row) } : {}),
   };
@@ -379,6 +385,7 @@ function memPatient(row: MemPlan): PatientMealPlan | null {
     published_at: published.published_at,
     ...(published.guidance ? { guidance: structuredClone(published.guidance) } : {}),
     ...(published.meal_times ? { meal_times: { ...published.meal_times } } : {}),
+    ...(published.meal_labels ? { meal_labels: { ...published.meal_labels } } : {}),
     items: versionItems(published.id),
     ...(published.nutrition_target ? { nutrition_target: published.nutrition_target } : {}),
     ...(published.nutrition_target || versionItems(published.id).some((item) => item.recipe_proposal || item.components) ? { nutrition: summarizeView(versionItems(published.id), published.nutrition_target, published) } : {}),
@@ -482,6 +489,8 @@ async function writeDraft(nutritionistId: string, patientId: string, input: Meal
   // Un objeto vacío borra los horarios; si el pedido no los trae, se conservan los anteriores.
   const times = input.meal_times ?? latest?.meal_times;
   target.meal_times = hasMealTimes(times) ? { ...times } : undefined;
+  const labels=input.meal_labels??latest?.meal_labels;
+  target.meal_labels=labels&&Object.keys(labels).length?{...labels}:undefined;
   for (const item of prepared) {
     const row: MemItem = { id: crypto.randomUUID(), version_id: target.id, ...item };
     items.set(row.id, row);
@@ -519,6 +528,7 @@ export function forkModelPlanMemory(owner:string,patientId:string,copy:ModelCopy
   if(previous?.status==='draft')previous.status='archived';
   if(previous?.guidance) version.guidance = structuredClone(previous.guidance);
   if(previous?.meal_times) version.meal_times = { ...previous.meal_times };
+  if(previous?.meal_labels) version.meal_labels = { ...previous.meal_labels };
   plans.set(plan.id,plan);versions.set(version.id,version);
   for(const item of prepared){const row:MemItem={...item,id:crypto.randomUUID(),version_id:version.id};items.set(row.id,row);}
   return memProfessional(plan);

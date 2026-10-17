@@ -153,6 +153,7 @@ export type DemoNotice = {
 };
 
 export type Patient = {
+  phone?: string | null;
   weekly_registration?: WeeklyRegistration | null;
   id: string;
   name: string;
@@ -179,6 +180,8 @@ export type Patient = {
   sensitive_hours: string;
   plan_b: string;
   next_focus: string;
+  /** Meta de agua que eligió la nutri (vasos por día); sin dato, 8. */
+  water_goal_glasses?: number | null;
   adherence_score: number;
   adherence_why: string;
   time: string;
@@ -187,6 +190,7 @@ export type Patient = {
   sleep_minutes: number | null;
   steps?: number | null;
   appointment: {
+    id?: string;
     when: string;
     duration: number;
     channel: string;

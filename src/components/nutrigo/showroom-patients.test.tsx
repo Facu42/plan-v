@@ -23,6 +23,12 @@ const render = (props?: Partial<Parameters<typeof ShowroomPatients>[0]>) =>
   renderToStaticMarkup(<ShowroomPatients patients={patients} query="" onChanged={vi.fn()} onFollow={vi.fn()} {...props} />);
 
 describe('directorio de pacientes del showroom', () => {
+  it('el editor permite conservar o corregir teléfono opcional sin inventarlo', () => {
+    const patient = { ...base, phone: '+54 11 1234 5678' };
+    const html = renderToStaticMarkup(<ShowroomPatientEdit patient={patient} onClose={vi.fn()} onSaved={vi.fn()} />);
+    expect(html).toContain('Teléfono'); expect(html).toContain('type="tel"'); expect(html).toContain('+54 11 1234 5678');
+    expect(renderToStaticMarkup(<ShowroomPatientEdit patient={base} onClose={vi.fn()} onSaved={vi.fn()} />)).toContain('type="tel"');
+  });
   it('mantiene acciones e identifica días, comidas, agua y pendientes por separado',()=>{
     const html=render({onRecord:vi.fn(),onPlan:vi.fn()});
     for(const label of ['Abrir ficha de Sofía','Abrir plan de Sofía','Ver seguimiento de Sofía','Editar ficha de Sofía','Archivar Sofía'])expect(html).toContain(label);

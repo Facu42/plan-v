@@ -69,15 +69,21 @@ export const planItemInputSchema = z.object({
 /** Hora orientativa de cada momento del plan, en formato 24 h («08:00»). */
 export const planMealTimesSchema = z.partialRecord(z.enum(PLAN_SLOTS), z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/));
 export type PlanMealTimes = z.infer<typeof planMealTimesSchema>;
+export const planMealLabelsSchema=z.partialRecord(z.enum(PLAN_SLOTS),z.string().trim().min(1).max(40)).superRefine((labels,ctx)=>{
+  const names=PLAN_SLOTS.map(slot=>(labels[slot]??slot).toLocaleLowerCase('es').normalize('NFD').replace(/\p{M}/gu,'').replace(/\s+/g,' '));
+  if(new Set(names).size!==names.length)ctx.addIssue({code:'custom',message:'Cada momento necesita un nombre diferente.'});
+});
+export type PlanMealLabels=z.infer<typeof planMealLabelsSchema>;
 
 export function hasMealTimes(times: PlanMealTimes | undefined): times is PlanMealTimes {
   return Boolean(times && Object.keys(times).length);
 }
 
 /** «Desayuno · 08:00» cuando el plan indica la hora; si no, sólo el nombre del momento. */
-export function mealSlotLabel(slot: PlanSlot, times?: PlanMealTimes): string {
+export function mealSlotLabel(slot: PlanSlot, times?: PlanMealTimes,labels?:PlanMealLabels): string {
   const time = times?.[slot];
-  return time ? `${slot} · ${time}` : slot;
+  const label=labels?.[slot]??slot;
+  return time ? `${label} · ${time}` : label;
 }
 
 export function sameMealTimes(a: PlanMealTimes | undefined, b: PlanMealTimes | undefined): boolean {
@@ -93,6 +99,7 @@ function utcDays(start: string, end: string) {
 export const mealPlanDraftSchema = z.object({
   guidance: planGuidanceSchema.optional(),
   meal_times: planMealTimesSchema.optional(),
+  meal_labels: planMealLabelsSchema.optional(),
   id: z.uuid(),
   expected_revision: z.uuid().nullable().optional(),
   period_start: isoDate,
@@ -151,6 +158,7 @@ export type PlanItemView = {
 export type PlanVersionView = {
   guidance?: PlanGuidance;
   meal_times?: PlanMealTimes;
+  meal_labels?: PlanMealLabels;
   id: string;
   revision?: string;
   version: number;
@@ -180,6 +188,7 @@ export function planReviewSnapshot(version: PlanVersionView) {
 export type PatientMealPlan = {
   guidance?: PlanGuidance;
   meal_times?: PlanMealTimes;
+  meal_labels?: PlanMealLabels;
   id: string;
   timezone: string;
   version: number;
@@ -242,6 +251,7 @@ export function toPublishedPatientPlan(plan: ProfessionalMealPlan): PatientMealP
     items: plan.published.items,
     ...(plan.published.guidance ? { guidance: plan.published.guidance } : {}),
     ...(hasMealTimes(plan.published.meal_times) ? { meal_times: plan.published.meal_times } : {}),
+    ...(plan.published.meal_labels ? { meal_labels: plan.published.meal_labels } : {}),
     ...(plan.published.nutrition_target ? { nutrition_target: plan.published.nutrition_target } : {}),
     ...(plan.published.nutrition ? { nutrition: plan.published.nutrition } : {}),
   };

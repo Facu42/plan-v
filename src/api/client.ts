@@ -32,7 +32,7 @@ async function authHeaders(): Promise<HeadersInit> {
   return headers;
 }
 
-export async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export async function request<T>(path: string, init?: RequestInit, originOverride?: string): Promise<T> {
   if (init?.signal?.aborted) {
     throw new DOMException('Aborted', 'AbortError');
   }
@@ -40,7 +40,7 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (init?.signal?.aborted) {
     throw new DOMException('Aborted', 'AbortError');
   }
-  const res = await fetch(resolveApiUrl(path), {
+  const res = await fetch(resolveApiUrl(path, originOverride), {
     ...init,
     headers: { ...headers, ...init?.headers },
   });
@@ -114,11 +114,13 @@ export const api = {
 
   updatePatientProfile: (patientId: string, data: {
     name?: string;
+    phone?: string | null;
     status?: string;
     stage?: Stage;
     sensitive_hours?: string;
     plan_b?: string;
     next_focus?: string;
+    water_goal_glasses?: number | null;
   }) => request<{ patient: Patient }>(`/api/patients/${patientId}/profile`, {
     method: 'PATCH',
     body: JSON.stringify(data),

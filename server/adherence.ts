@@ -1,6 +1,7 @@
 import type { Patient } from './store.js';
+import { waterGoalOf } from '../src/types/water.js';
 
-export type AdherenceInput = Pick<Patient, 'meal_logs' | 'weekPlan' | 'todayPlan' | 'habit_logs'>;
+export type AdherenceInput = Pick<Patient, 'meal_logs' | 'weekPlan' | 'todayPlan' | 'habit_logs'> & Partial<Pick<Patient, 'water_goal_glasses'>>;
 export type AdherenceResult = { score: number; why: string };
 
 const MEAL_WEIGHT = 0.75;
@@ -48,17 +49,18 @@ export function calculateAdherence(patient: AdherenceInput, today = new Date()):
   }
 
   // Agua: promedio semanal; los días sin registro cuentan como 0.
+  const waterGoal = waterGoalOf(patient);
   let hydrationSum = 0;
   for (const habit of patient.habit_logs) {
-    if (windowIds.has(habit.date)) hydrationSum += Math.min(8, Math.max(0, habit.hydration));
+    if (windowIds.has(habit.date)) hydrationSum += Math.min(waterGoal, Math.max(0, habit.hydration));
   }
   const hydrationAverage = hydrationSum / WINDOW_DAYS;
 
   const mealRatio = planned === 0 ? 1 : Math.min(1, counted / planned);
-  const hydrationRatio = Math.min(1, hydrationAverage / 8);
+  const hydrationRatio = Math.min(1, hydrationAverage / waterGoal);
   const score = Math.round(100 * (MEAL_WEIGHT * mealRatio + HYDRATION_WEIGHT * hydrationRatio));
 
-  const why = `${counted} de ${planned} comidas revisadas esta semana. Agua ${hydrationAverage.toFixed(1)}/8 promedio.`
+  const why = `${counted} de ${planned} comidas revisadas esta semana. Agua ${hydrationAverage.toFixed(1)}/${waterGoal} promedio.`
     + (pending > 0 ? ` ${pending} en revisión (no suman).` : '');
 
   return { score, why };

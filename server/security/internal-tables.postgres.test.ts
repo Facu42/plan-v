@@ -7,11 +7,16 @@ import { readFile, readdir } from 'node:fs/promises';
 const INTERNAL = [
   // Cola de fotos: sólo servicio; lectura mediante el plan autorizado.
   // Catálogo de fotos de ingredientes y su contador diario: sólo servicio, sin lectura directa.
-  'audit_events', 'cover_daily_usage', 'ingredient_covers', 'meal_plan_handovers', 'menu_dish_covers', 'notification_deliveries', 'notification_preferences',
-  'nutritionist_subscriptions', 'outbox_events', 'patient_invite_events',
+  'audit_events', 'clinical_ai_budget_months', 'clinical_ai_spend', 'consultation_tasks', 'cover_daily_usage', 'document_organizer_jobs', 'ingredient_covers', 'meal_plan_handovers', 'menu_dish_covers', 'notification_deliveries', 'notification_preferences',
+  // Eventos verificados/consentimientos de Meta, privados y sólo para el servicio.
+  'nutritionist_subscriptions', 'ops_contact_events', 'ops_delivery_events', 'ops_email_unsubscribe_tokens', 'outbox_events',
+  // Idempotency ledger: only import RPCs; no client grant or read policy.
+  'patient_import_applied', 'patient_invite_events',
   'payment_webhook_events', 'platform_admins', 'platform_settings',
   'privacy_access_events', 'privacy_export_packages', 'privacy_requests',
-  'processing_jobs', 'push_subscriptions', 'recipe_cover_requests', 'recipe_day_assignments', 'recipe_version_cards', 'service_payments',
+  'processing_jobs', 'push_subscriptions', 'recipe_cover_requests', 'recipe_day_assignments', 'recipe_version_cards',
+  // Agenda: credenciales, links de un uso, estados de cobro y colas son sólo del servicio.
+  'scheduling_appointment_sync_jobs', 'scheduling_checkout_intents', 'scheduling_connection_epochs', 'scheduling_contact_cards', 'scheduling_integrations', 'scheduling_oauth_states', 'scheduling_payment_balances', 'scheduling_payment_events', 'scheduling_staff_invites', 'scheduling_staff_members', 'scheduling_sync_jobs', 'service_payments',
 ] as const;
 const PUBLIC_ROLES = ['anon', 'authenticated'] as const;
 const TABLE_PRIVILEGES = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER', 'MAINTAIN'];

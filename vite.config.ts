@@ -40,6 +40,8 @@ export default defineConfig({
     },
     exclude: [
       '**/node_modules/**',
+      '**/node_modules-baseline/**',
+      '**/node_modules-import-runtime/**',
       '**/dist/**',
       'e2e/**',
       'server/security/signed-auth.local.test.ts',

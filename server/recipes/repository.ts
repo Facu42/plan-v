@@ -23,6 +23,7 @@ import { logProviderFailure } from '../ai/mode.js';
 import { recipeNutritionSchema, resolveRecipeNutrition, type RecipeNutrition } from '../../src/types/ai-nutrition.js';
 import { calculateRecipeCatalog, type RecipeCatalogSnapshot } from '../../src/types/recipe-catalog-nutrition.js';
 import { listFoods } from '../foods/repository.js';
+import { foodQuantityUnit } from '../../src/types/foods.js';
 
 export { CareError } from '../care/errors.js';
 
@@ -358,7 +359,7 @@ export async function saveRecipeDraft(
       const parsed = recipeNutritionSchema.safeParse({ origin: estimateSource ? 'ai_estimate' : 'declared', source, per_portion: macros });
       derived = parsed.success ? parsed.data : undefined;
       if ((p.kcal ?? 0) > 20000 || [p.protein, p.carbs, p.fat].some(value => (value ?? 0) > 2000)) throw new CareError(400, 'Revisá las cantidades y el rinde: los valores por porción son demasiado altos.');
-      prepared = { ...input, nutrient_source: source, nutrition: derived, items: snapshot.lines.map(line => ({ name: line.name, quantity: line.food ? line.grams! : line.quantity, unit: line.food ? 'g' as const : line.unit as RecipeUnit })) };
+      prepared = { ...input, nutrient_source: source, nutrition: derived, items: snapshot.lines.map(line => ({ name: line.name, quantity: line.food ? line.native_quantity??line.grams! : line.quantity, unit: line.food ? foodQuantityUnit(line.food) : line.unit as RecipeUnit })) };
       card = { ...(card ?? unavailableCard(input.title)), macros: Object.values(macros).some(value => value != null) ? macros : null, macro_status: Object.values(macros).some(value => value != null) ? 'declared' : 'unavailable' };
     }
     const result = writeDraft(nutritionistId, prepared, card);

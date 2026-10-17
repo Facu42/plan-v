@@ -8,6 +8,36 @@ import { DemoStateFile } from './state.js';
 const demo = { mode: 'demo', dataMode: 'memory', aiMode: 'demo' } as const;
 function temporary(run: (file: string) => void) { const dir=mkdtempSync(join(tmpdir(),'plan-v-demo-'));try{run(join(dir,'state.bin'));}finally{rmSync(dir,{recursive:true,force:true});} }
 describe('guardado de la simulación local',()=>{
+  it('incorpora agenda y sus nuevas leases sin borrar reservas existentes ni admitir claves extrañas',()=>temporary(file=>{
+    writeFileSync(file,serialize({version:1,domains:{test:{values:new Map([['kept',1]])}}}));
+    const scheduling={profiles:new Map(),bookings:new Map(),connections:new Map(),connectionEpochs:new Map(),refreshLeases:new Map()};
+    const values=new Map<string,number>(),domains=new Map<string,()=>Record<string,unknown>>([['test',()=>({values})],['scheduling',()=>scheduling]]);
+    const first=new DemoStateFile(file,demo,domains);expect(values.get('kept')).toBe(1);
+    scheduling.bookings.set('reservation',{status:'confirmed'});first.close();
+    writeFileSync(file,serialize({version:1,domains:{test:{values:new Map([['kept',1]])},scheduling:{profiles:new Map(),bookings:new Map([['reservation',{status:'confirmed'}]]),connections:new Map()}}}));
+    const before=readFileSync(file),second=new DemoStateFile(file,demo,domains);
+    expect(scheduling.bookings.has('reservation')).toBe(true);expect(scheduling.connectionEpochs.size).toBe(0);expect(readFileSync(file)).toEqual(before);second.close();
+    scheduling.refreshLeases.set('job',{token:'fictional'});const next=new DemoStateFile(file,demo,domains);next.close();
+    const unknown=new Map<string,()=>Record<string,unknown>>([['test',()=>({values})],['scheduling',()=>({...scheduling,unexpected:new Map()})]]);
+    expect(()=>new DemoStateFile(file,demo,unknown)).toThrow();
+  }));
+  it('incorpora sólo dominios conocidos de importación a una copia previa sin alterarla antes de validar',()=>temporary(file=>{
+    writeFileSync(file,serialize({version:1,domains:{test:{values:new Map([['kept',1]])}}}));
+    const shapes={test:{values:new Map<string,number>()},'patient-import':{batches:new Map(),contacts:new Map(),applied:new Map(),histories:new Map()},'import-external-authorization':{authorizations:new Map(),measurements:new Map()},'nutrition-capabilities':{settings:new Map(),groups:new Map()},'clinical-workspace':{records:new Map(),documents:new Map(),references:new Map(),brands:new Map()}};
+    const before=readFileSync(file),domains=new Map(Object.entries(shapes).map(([name,value])=>[name,()=>value]));
+    const first=new DemoStateFile(file,demo,domains);expect(shapes.test.values.get('kept')).toBe(1);expect(readFileSync(file)).toEqual(before);
+    shapes['patient-import'].contacts.set('patient',{phone:'Ficticio'});shapes['nutrition-capabilities'].groups.set('group',{title:'Grupo ficticio'});shapes['clinical-workspace'].records.set('record',{title:'Dato ficticio'});first.close();
+    const second=new DemoStateFile(file,demo,domains);expect(shapes['patient-import'].contacts.has('patient')).toBe(true);expect(shapes['nutrition-capabilities'].groups.has('group')).toBe(true);expect(shapes['clinical-workspace'].records.has('record')).toBe(true);second.close();
+    const unknown=new Map([...domains,['unexpected',()=>({items:new Map()})]as [string,()=>Record<string,unknown>]]);
+    expect(()=>new DemoStateFile(file,demo,unknown)).toThrow();
+  }));
+  it('amplía sólo consultas y claves conocidas sin perder los registros previos',()=>temporary(file=>{
+    writeFileSync(file,serialize({version:1,domains:{test:{values:new Map([['kept',1]])},consultations:{sessions:new Map([['existing-session',{}]]),shared:new Map(),tasks:new Map(),audio:new Map()}}}));
+    const shapes={test:{values:new Map()},consultations:{sessions:new Map(),shared:new Map(),tasks:new Map(),audio:new Map(),completions:new Map(),completion_events:new Map()}};
+    const domains=new Map(Object.entries(shapes).map(([name,value])=>[name,()=>value]));
+    const first=new DemoStateFile(file,demo,domains);expect(shapes.test.values.get('kept')).toBe(1);expect(shapes.consultations.sessions.has('existing-session')).toBe(true);first.close();
+    const next=new DemoStateFile(file,demo,domains);expect(shapes.test.values.get('kept')).toBe(1);next.close();
+  }));
   it('incorpora modelos vacíos sin perder la copia anterior y los conserva al reiniciar',()=>temporary(file=>{
     writeFileSync(file,serialize({version:1,domains:{test:{values:new Map([['existing',1]])}}}));
     const values=new Map<string,number>(),models=new Map<string,unknown>();
