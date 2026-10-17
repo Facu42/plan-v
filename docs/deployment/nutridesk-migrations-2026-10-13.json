@@ -148,6 +148,13 @@
       "sha256": "8b96b1aa98ab7e515e27c637daacdf37dc5ca775fb1b70dd23ce3d628e846126",
       "observedAppliedVersion": "20261017013123",
       "observedAppliedName": "performance_indexes"
+    },
+    {
+      "file": "20261017020000_fk_full_indexes.sql",
+      "version": "20261017020000",
+      "sha256": "24c13b305f131e8d04a331afaa8fe1bbb578383b626cd98a6a01bc1cb4b0773b",
+      "observedAppliedVersion": "20261017021355",
+      "observedAppliedName": "fk_full_indexes"
     }
   ]
 }

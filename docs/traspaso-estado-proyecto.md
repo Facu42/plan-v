@@ -212,6 +212,9 @@ sobre la expresión que tienen hoy (mismos permisos) y crea un índice por cada 
 y de índices sin uso (la base es chica y todavía no hay uso real que las mida). **Aplicada en producción el 17/10** con la frase de
 Facundo; el historial de la base la anota como `20261017013123` (registrada en el manifiesto de migraciones). Verificado:
 0 claves sin índice y las 7 reglas con `(select auth.uid())`.
+Un revisor automático encontró 4 claves cubiertas solo por índices parciales (con WHERE), que no sirven para la
+clave: `20261017020000_fk_full_indexes` les crea un índice completo (aplicada el 17/10 con la frase de Facundo, historial
+`20261017021355`) y la prueba ahora exige índices válidos, listos y sin WHERE.
 
 ## Meta de agua por paciente (2026-10-16)
 

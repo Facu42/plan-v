@@ -28,7 +28,7 @@ beforeAll(async () => {
 }, 60_000);
 
 describe('rendimiento de la base', () => {
-  it('toda clave foránea de public y private tiene un índice que la cubre', async () => {
+  it('toda clave foránea de public y private tiene un índice completo que la cubre', async () => {
     const { rows } = await db.query<{ tbl: string; conname: string }>(`
       select c.conrelid::regclass::text as tbl, c.conname
       from pg_constraint c join pg_namespace n on n.oid = c.connamespace
@@ -36,6 +36,7 @@ describe('rendimiento de la base', () => {
         and not exists (
           select 1 from pg_index i
           where i.indrelid = c.conrelid
+            and i.indisvalid and i.indisready and i.indpred is null
             and (i.indkey::int2[])[0:array_length(c.conkey, 1) - 1] @> c.conkey
             and (i.indkey::int2[])[0:array_length(c.conkey, 1) - 1] <@ c.conkey)
       order by 1, 2`);
