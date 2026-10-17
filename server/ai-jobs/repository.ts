@@ -35,6 +35,11 @@ import type { RecipeDraftInput } from '../../src/types/recipes.js';
 import type { MealPlanDraftInput } from '../../src/types/plans.js';
 import { getTarget } from '../targets/repository.js';
 import { nutrientAmountsSchema } from '../../src/types/ai-nutrition.js';
+import { buildAssistantReference, planAssistantEnabled } from '../ai/plan-assistant.js';
+import { costMicroUsd, modelPrice, reserveSpend, worstCaseMicroUsd } from '../ai/spend.js';
+import { sara2Foods } from '../foods/sara2.js';
+import { listNutritionExchanges } from '../nutrition-capabilities/repository.js';
+import { listModels } from '../models/repository.js';
 
 export { CareError } from '../care/errors.js';
 
@@ -162,7 +167,17 @@ async function buildContext(nutritionistId: string, input: AiJobEnqueueInput, pe
   }
   const catalog = await listProfessionalRecipes(nutritionistId, persistent);
   const target = await getTarget(input.patient_id, persistent);
+  const assistant = planAssistantEnabled()
+    ? buildAssistantReference({
+      foods: sara2Foods(),
+      exchanges: await listNutritionExchanges(nutritionistId, persistent),
+      models: await listModels(nutritionistId, persistent),
+      allergies: intake.allergies.items,
+      restrictions: intake.restrictions.items,
+    })
+    : undefined;
   return { ...buildMenuJobContext({
+    assistant,
     intake,
     periodStart: input.period_start,
     periodEnd: input.period_end,
@@ -383,7 +398,18 @@ export async function runAiJob(nutritionistId: string, jobId: string, persistent
       artifact = { id: randomUUID(), kind: 'recipe_draft', payload: { ...result.recipe, id: base.recipe_id!, expected_revision: base.revision } as unknown as Record<string, unknown>, created_at: new Date().toISOString() };
       warnings = result.warnings;
     } else {
-      const result = await generateMenuDraft(live.context as Parameters<typeof generateMenuDraft>[0], base.plan_id);
+      const menuContext = live.context as Parameters<typeof generateMenuDraft>[0];
+      const price = modelPrice();
+      // El tope de gasto (bolsa global de US$5 al mes) se controla acá, en el servidor, antes de llamar al proveedor.
+      const reservation = menuContext.assistant ? await reserveSpend(jobId, worstCaseMicroUsd(tokens, price)) : null;
+      let result: Awaited<ReturnType<typeof generateMenuDraft>>;
+      try {
+        result = await generateMenuDraft(menuContext, base.plan_id);
+      } catch (error) {
+        await reservation?.keepReserved();
+        throw error;
+      }
+      await reservation?.charge(result.usage ? costMicroUsd(result.usage, price) : worstCaseMicroUsd(tokens, price));
       artifact = { id: randomUUID(), kind: 'menu_draft', payload: { ...result.plan, id: base.plan_id!, expected_revision: base.revision } as unknown as Record<string, unknown>, created_at: new Date().toISOString() };
       warnings = result.warnings;
     }
