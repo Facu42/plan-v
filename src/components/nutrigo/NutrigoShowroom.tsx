@@ -44,6 +44,9 @@ import { ShowroomExercise } from './ShowroomExercise';
 import { ShowroomResources } from './ShowroomResources';
 import { ShowroomPatientOnboarding } from './ShowroomPatientOnboarding';
 import { ShowroomPrivacy } from './ShowroomPrivacy';
+import { ShowroomSecurity } from './ShowroomSecurity';
+import { supabaseConfigured } from '../../lib/supabase';
+import { mfaEnforcedInApp } from '../../context/mfa';
 import { ShowroomWorkCenter, type WorkCenterModule } from './ShowroomWorkCenter';
 import { PATIENT_MORE, PATIENT_SURFACES, PATIENT_TABS, PLAN_SUBPAGES, PRO_TABS, proMore, proSurfaces, tabBarState } from './showroom-nav';
 import { appPath, buildAppHref, contentIdentity, hasResourceHash, isAdminPath, resolveAppLocation, type AppRole } from './app-location';
@@ -132,6 +135,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
   const [planOpen, setPlanOpen] = useState<boolean | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [securityOpen, setSecurityOpen] = useState(false);
   // Cajón de navegación móvil: el archivo abre el menú desde la barra superior.
   const [menuOpen, setMenuOpen] = useState(false);
   const [compactHeader, setCompactHeader] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 799px)').matches);
@@ -366,6 +370,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
               {demoSwitch && <div className="nv-role-switch" aria-label="Cambiar de rol"><button type="button" aria-pressed={role === 'patient'} onClick={() => { setProfileOpen(false); switchRole('patient'); }}>Paciente</button><button type="button" aria-pressed={role === 'pro'} onClick={() => { setProfileOpen(false); switchRole('pro'); }}>Nutricionista</button></div>}
               <button type="button" className="nv-theme" onClick={() => { setProfileOpen(false); onToggleTheme(); }}><Icon name={darkMode ? 'sun' : 'moon'} size={18} />{darkMode ? 'Tema claro' : 'Tema oscuro'}</button>
               {role === 'patient' && selected && <button type="button" onClick={() => { setProfileOpen(false); setPrivacyOpen(true); }}><LockSimple size={18} aria-hidden="true" />Tus datos</button>}
+              {supabaseConfigured && !demoSwitch && <button type="button" onClick={() => { setProfileOpen(false); setSecurityOpen(true); }}><LockSimple size={18} aria-hidden="true" />Verificación en dos pasos</button>}
               {role === 'patient' && <button type="button" onClick={() => { setProfileOpen(false); navigate('pagos'); }}><Icon name="wallet" size={18} />Mis pagos</button>}
               {role === 'pro' && <button type="button" onClick={() => { setProfileOpen(false); setProfessionalIntro(true); }}><NvIcon name="ingreso" size={18} />Primeros pasos</button>}
               {!lockedRole && role === 'patient' && <button type="button" onClick={() => { setProfileOpen(false); setOnboardingOpen(true); }}><NvIcon name="ingreso" size={18} />Ingreso</button>}
@@ -491,6 +496,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
         <div className="nv-more-grid">{moreItems.map((item) => <button type="button" key={item.id} aria-current={page === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}><Icon name={item.icon} size={20} /><span>{item.label}</span></button>)}{role === 'patient' && !lockedRole && <button type="button" onClick={() => { setMoreOpen(false); setOnboardingOpen(true); }}><Icon name="sparkle" size={20} /><span>Ingreso</span></button>}</div>
       </div>
     </div>}
+    {securityOpen && <ShowroomSecurity canDisable={!(role === 'pro' && mfaEnforcedInApp())} onClose={() => setSecurityOpen(false)} />}
     {privacyOpen && selected && role === 'patient' && <ShowroomPrivacy patientId={selected.id} onClose={() => setPrivacyOpen(false)} onDeleted={() => { setPrivacyOpen(false); onSignOut?.(); }} />}
     {recordEditing && selected && <ShowroomPatientEdit patient={selected} onClose={() => setRecordEditing(false)} onSaved={(updated) => { addPatient(updated); setRecordEditing(false); }} />}
     {reviewLog && selected && <div className="modal-backdrop review-backdrop"><MealReviewPanel patient={selected} log={reviewLog} onClose={() => setReviewLog(null)} /></div>}
