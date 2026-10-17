@@ -1,5 +1,6 @@
 import { request } from './client';
 import type { PlanHandover } from '../types/plan-handover';
+import type { PlanAlternativesView, PlanChoiceSave } from '../types/plan-alternatives';
 import { planReviewSnapshot, type MealPlanDraftInput, type PatientMealPlan, type ProfessionalMealPlan, type PlanVersionView } from '../types/plans';
 
 export const plansApi = {
@@ -15,6 +16,11 @@ export const plansApi = {
   seenHandover: (patientId: string) => request<{ plan: PatientMealPlan | null; handover: PlanHandover | null; source: string }>(
     `/api/patients/${encodeURIComponent(patientId)}/plans/handover-seen`,
     { method: 'POST' },
+  ),
+  alternatives: (patientId: string, signal?: AbortSignal) => request<PlanAlternativesView>(`/api/patients/${encodeURIComponent(patientId)}/plan-alternatives`, { signal }),
+  chooseAlternative: (patientId: string, input: PlanChoiceSave) => request<PlanAlternativesView>(
+    `/api/patients/${encodeURIComponent(patientId)}/plan-alternatives`,
+    { method: 'PUT', body: JSON.stringify(input) },
   ),
   save: (patientId: string, input: MealPlanDraftInput) => request<{ plan: ProfessionalMealPlan; source: string }>(
     `/api/patients/${encodeURIComponent(patientId)}/plans`,

@@ -106,6 +106,8 @@ const ALLOWED = [
   'list_outbox_snapshot',
   'list_patient_care_links',
   'list_patient_import_contacts',
+  // Grupos de la nutri y elecciones de la paciente; lectura de la paciente y su nutri, escritura solo de la paciente.
+  'list_patient_plan_alternatives',
   'list_privacy_requests',
   'list_professional_meal_plan',
   'list_professional_recipe_favorites',
@@ -179,6 +181,7 @@ const ALLOWED = [
   'save_nutrition_exchange',
   'save_nutrition_settings',
   'save_patient_intake',
+  'save_patient_plan_choice',
   'save_professional_model',
   'save_recipe_draft',
   'save_routine_feedback',
