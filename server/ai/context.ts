@@ -10,6 +10,7 @@ import {
 import { CareError } from '../care/errors.js';
 import type { MenuNutritionTarget, RecipeNutrition, ProposedRecipe } from '../../src/types/ai-nutrition.js';
 import type { CarbohydrateDefinition } from '../../src/types/plan-day-analysis.js';
+import type { AssistantReference } from './plan-assistant.js';
 
 export { RECIPE_PROMPT_VERSION, MENU_PROMPT_VERSION };
 
@@ -44,6 +45,8 @@ export type MenuJobContext = {
   preferences: { cooking_time_minutes: number | null; dietary: string[] };
   request: { target: string; reason: string; replacement: 'recipe' | 'ingredient' } | null;
   week_slots: MenuSlotContext[];
+  /** Sólo con el asistente de planes encendido: alimentos SARA 2, equivalencias y modelos de la nutri. */
+  assistant?: AssistantReference;
   validity?: { intake_revision: number; consent_event_id: string | null };
 };
 
@@ -82,6 +85,7 @@ export function buildMenuJobContext(input: {
   dietaryPreferences?: string[];
   request?: { target: string; reason: string; replacement: 'recipe' | 'ingredient' } | null;
   weekPlan?: Patient['weekPlan'];
+  assistant?: AssistantReference;
 }): MenuJobContext {
   assertKnownAllergies(input.intake);
   return {
@@ -101,6 +105,7 @@ export function buildMenuJobContext(input: {
       day: entry.day,
       meals: entry.meals.slice(0, 6).map((meal) => ({ slot: meal.slot, title: meal.title })),
     })),
+    ...(input.assistant ? { assistant: input.assistant } : {}),
   };
 }
 
