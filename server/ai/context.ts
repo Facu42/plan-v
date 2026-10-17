@@ -9,6 +9,7 @@ import {
 } from '../../src/types/ai-jobs.js';
 import { CareError } from '../care/errors.js';
 import type { MenuNutritionTarget, RecipeNutrition, ProposedRecipe } from '../../src/types/ai-nutrition.js';
+import type { CarbohydrateDefinition } from '../../src/types/plan-day-analysis.js';
 
 export { RECIPE_PROMPT_VERSION, MENU_PROMPT_VERSION };
 
@@ -27,7 +28,7 @@ export type RecipeJobContext = {
 };
 
 export type MenuSlotContext = { day: string; meals: Array<{ slot: string; title: string }> };
-export type MenuCatalogRecipe = Omit<ProposedRecipe, 'nutrition'> & { id: string; version: number; nutrition: RecipeNutrition | null };
+export type MenuCatalogRecipe = Omit<ProposedRecipe, 'nutrition'> & { id: string; version: number; nutrition: RecipeNutrition | null; carbohydrates?: CarbohydrateDefinition };
 
 export type MenuJobContext = {
   schema: typeof MENU_PROMPT_VERSION;
@@ -113,6 +114,7 @@ export function canonicalJson(value: unknown): string {
 /** Validity markers stay on our server; providers receive no consent IDs. */
 export function providerJobContext(context: RecipeJobContext | MenuJobContext) {
   const { validity: _validity, ...external } = context;
+  if('catalog' in external)return {...external,catalog:external.catalog.map(({carbohydrates:_localDefinition,...recipe})=>recipe)};
   return external;
 }
 

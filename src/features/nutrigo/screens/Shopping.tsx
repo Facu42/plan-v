@@ -8,7 +8,7 @@ import { createPendingWrite } from './pending-write';
 import { canLeaveWorkspace,useUnsavedChanges } from '../../../components/nutrigo/unsaved-changes';
 import { cloneList, descendants, EmptyState, errorText, fields, leaf, objects, percent, Ring, searchBinding, source, RecordDialog, Stateful, useRemote, type ScreenProps } from './shared';
 import { argentinaMonth } from './ar-time';
-import { boughtLabel, monthName, productCount, quantityLabel, recentMonths } from './shopping-format';
+import { boughtLabel, localAmount, monthName, productCount, recentMonths, SHOPPING_STORES, shoppingShareText, storeBadge, storeOf, whatsappShareUrl } from './shopping-format';
 import { leftAlignedSearch } from './search-align';
 import { GREEN_BG, swapBackground } from '../source-tone';
 
@@ -24,7 +24,8 @@ const ORIGINS:Array<{kind:ShoppingKind;label:string;badge:string;color:string}>=
   {kind:'manual',label:'Agregados',badge:'Agregado',color:'#ffa257'},
 ];
 const originOf=(kind:ShoppingKind)=>ORIGINS.find(origin=>origin.kind===kind)??ORIGINS[0];
-const HEADER_LABELS:Record<string,string>={'Item Name':'Producto','Category':'Origen','Qty':'Cantidad','Calories':'Calorías','Cost':'Costo','Actual':'Pagado','Status':'Estado'};
+const storeColor=(name:string)=>SHOPPING_STORES.find(store=>store.category===storeOf(name))?.color??'#e1e1e2';
+const HEADER_LABELS:Record<string,string>={'Item Name':'Producto','Category':'Comercio','Qty':'Cantidad','Calories':'Calorías','Cost':'Costo','Actual':'Pagado','Status':'Estado'};
 const MONTH_SAMPLE=/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$/;
 
 /** Cambia sólo las hojas de texto de un subárbol del archivo y conserva íconos y estilos. */
@@ -45,7 +46,7 @@ export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut, no
   const list = useRemote(patient.id, signal => shoppingApi.get(patient.id, signal).then(result => result.list));
   const [search, setSearch] = useState(query); const [tab, setTab] = useState<TabId>('all'); const [sort, setSort] = useState<'original'|'name'>('original');
   const [page, setPage] = useState(0); const [pageSize, setPageSize] = useState(10); const [scroll, setScroll] = useState({ offset: 0, size: .7 });
-  const [adding, setAdding] = useState(false); const [error, setError] = useState(''); const [status, setStatus] = useState('');
+  const [adding, setAdding] = useState(false); const [sharing, setSharing] = useState(false); const [error, setError] = useState(''); const [status, setStatus] = useState('');
   const [name, setName] = useState(''); const [quantity, setQuantity] = useState('1'); const [unit, setUnit] = useState<RecipeUnit>('u');
   const [busy, setBusy] = useState(false); const lock = useRef(false); const [pending, setPending] = useState(false);
   const [addition] = useState(() => createPendingWrite((input: Parameters<typeof shoppingApi.add>[1]) => shoppingApi.add(patient.id, input)));
@@ -61,6 +62,9 @@ export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut, no
   const visible = rows.slice(current * pageSize, current * pageSize + pageSize);
   const checked = all.filter(item => item.checked).length;
   const byOrigin = ORIGINS.map(origin => ({ ...origin, count: all.filter(item => item.kind === origin.kind).length }));
+  const byStore = SHOPPING_STORES.map(store => ({ ...store, count: all.filter(item => storeOf(item.name) === store.category).length }));
+  const shareText = shoppingShareText(all);
+  const copyList = async () => { setError(''); try { await navigator.clipboard.writeText(shareText); setStatus('Lista copiada.'); setSharing(false); } catch { setError('No se pudo copiar la lista. Seleccioná el texto y copialo a mano.'); } };
   const choose = (value: TabId) => { setTab(value); setPage(0); };
   const mutate = async (action: () => ReturnType<typeof shoppingApi.get>) => { if (lock.current) return; lock.current = true; setBusy(true); setError(''); setStatus(''); try { const saved = await action(); list.setData(saved.list); setStatus('Lista guardada.'); } catch (caught) { setError(errorText(caught)); } finally { lock.current = false; setBusy(false); } };
   const add = async (event: FormEvent) => { event.preventDefault(); if (lock.current) return; const parsed = Number(quantity); if (!name.trim() || !Number.isFinite(parsed) || parsed <= 0) { setError('Ingresá el nombre y una cantidad válida.'); return; } lock.current = true; setBusy(true); setError(''); setStatus(''); try { const saved = await addition.run({ name: name.trim(), quantity: parsed, unit, client_id: crypto.randomUUID() }); list.setData(saved.list); setName(''); setQuantity('1'); setAdding(false); setStatus('Producto agregado.'); } catch (caught) { setError(errorText(caught)); setStatus(addition.pending ? 'Conservamos este producto. Volvé a guardar para confirmar el resultado sin duplicarlo.' : 'El producto no se guardó. Podés corregirlo y reintentar.'); } finally { setPending(addition.pending); lock.current = false; setBusy(false); } };
@@ -73,8 +77,8 @@ export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut, no
     if (cell === 'Cell-Item Name') return { children: relabel(child, () => item.name, n => leaf(n) ? { text: item.name, props: { title: item.name, style: { flexShrink: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' } } } : nodeName(n) === 'Image' && item.kind === 'manual'
       ? { onClick: () => void mutate(() => shoppingApi.remove(patient.id, item.id)), label: `Eliminar ${item.name}`, props: { disabled: busy, style: { display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8a8c90', fontSize: 18 } }, children: <span aria-hidden="true">×</span> }
       : undefined) };
-    if (cell === 'Cell-Category') return { children: relabel(child, () => originOf(item.kind).badge, n => nodeName(n) === 'Badge Category - Grocery List' ? { props: { style: { background: originOf(item.kind).color } } } : undefined) };
-    if (cell === 'Cell-Qty') return { children: relabel(child, sample => /^\d/.test(sample) ? quantityLabel(item.quantity) : (item.unit ?? ''), n => nodeName(n) === 'Button Group' ? dim : leaf(n) && /^\d/.test(sourceText(n)) ? { text: quantityLabel(item.quantity), props: { title: quantityLabel(item.quantity), style: oneLine } } : undefined) };
+    if (cell === 'Cell-Category') return { children: relabel(child, () => storeBadge(storeOf(item.name)), n => nodeName(n) === 'Badge Category - Grocery List' ? { props: { title: storeOf(item.name), style: { background: storeColor(item.name), maxWidth: '100%' } } } : leaf(n) ? { text: storeBadge(storeOf(item.name)), props: { style: oneLine } } : undefined) };
+    if (cell === 'Cell-Qty') { const local = localAmount(item.quantity, item.unit, item.name); const hint = local.exact && local.exact !== `${local.amount} ${local.unit}`.trim() ? `${local.amount} ${local.unit} · en el plan suma ${local.exact}` : local.amount; return { children: relabel(child, sample => /^\d/.test(sample) ? local.amount : local.unit, n => nodeName(n) === 'Button Group' ? dim : leaf(n) && /^\d/.test(sourceText(n)) ? { text: local.amount, props: { title: hint, style: oneLine } } : undefined) }; }
     // Plan V no tiene calorías ni precios por producto: las columnas quedan sin dato, como «Actual» en el archivo.
     if (['Cell-Calories', 'Cell-Cost', 'Cell-Actual'].includes(cell)) return { children: relabel(child, sample => /^\d/.test(sample) ? '-' : '') };
     if (cell === 'Cell-Status') return { children: relabel(child, () => item.checked ? 'Comprado' : 'Pendiente', n => leaf(n) ? { text: item.checked ? 'Comprado' : 'Pendiente', props: { style: { width: 'auto', whiteSpace: 'nowrap' } } } : n !== child && objects(child).includes(n) ? { onClick: () => void mutate(() => shoppingApi.check(patient.id, { source_key: item.source_key, checked: !item.checked })), label: `${item.checked ? 'Desmarcar' : 'Marcar como comprado'}: ${item.name}`, props: { disabled: busy, 'aria-pressed': item.checked } } : undefined) };
@@ -118,6 +122,13 @@ export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut, no
     }
     if (leaf(node) && text === 'Sort by:') return { text: 'Ordenar por:' };
     if (/Button/.test(name) && text === 'Newest') { const next = SORTS.find(entry => entry.id !== sort)!; return { onClick: () => setSort(next.id), label: `Ordenar por ${next.label.toLocaleLowerCase('es')}`, children: relabel(node, () => SORTS.find(entry => entry.id === sort)!.label) }; }
+    if (name === 'Right Section' && text.includes('Add Item')) {
+      const parts = objects(node); const picker = parts.find(child => nodeName(child) === 'Button Picker' && sourceText(child) === 'Filter');
+      // Escritorio: «Compartir» es una copia del botón blanco del archivo, sin sus íconos, al lado de «Filter».
+      if (picker) return { children: parts.flatMap((child, index) => { const shown = source(child, resolver, index); return child !== picker ? [shown] : [shown, source(picker, n => n === picker ? { onClick: () => setSharing(true), label: 'Compartir lista', children: relabel(picker, sample => sample === 'Filter' ? 'Compartir' : undefined, part => /^Icon/.test(nodeName(part)) ? { props: { style: { display: 'none' } } } : undefined) } : undefined, 'share')]; }) };
+    }
+    // Celular: el botón de ícono del archivo junto a «Add Item» (dibuja un filtro) hace lo mismo que «Filter» en escritorio.
+    if (name === 'Button Picker' && !text && descendants(node).some(child => nodeName(child) === 'Icon/ChatTeardropDots')) return { onClick: () => choose(tab === 'pending' ? 'all' : 'pending'), props: { 'aria-pressed': tab === 'pending' }, label: 'Ver sólo pendientes' };
     if (/Button/.test(name) && text === 'Add Item') return { onClick: () => setAdding(true), label: 'Agregar producto', children: relabel(node, () => 'Agregar producto') };
     if (/Button/.test(name) && text === 'Filter') return { onClick: () => choose(tab === 'pending' ? 'all' : 'pending'), props: { 'aria-pressed': tab === 'pending', ...(tab === 'pending' ? swapBackground(node, ['bg-white', 'bg-[#eeeeef]'], GREEN_BG).props : {}) }, label: 'Ver sólo pendientes', children: relabel(node, () => 'Pendientes') };
     if (name === 'Footer' && objects(node).some(child => nodeName(child) === 'Pagination' || nodeName(child) === 'Section Result')) return { children: relabel(node, sample => sample === 'Showing' ? 'Mostrando' : /^out of/.test(sample) ? `de ${productCount(rows.length)}` : undefined, child => {
@@ -158,18 +169,29 @@ export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut, no
       return undefined;
     }) };
     if (name === 'Widget Grocery Category') return { children: relabel(node, sample => sample === 'Total' ? 'Total' : /^\d+$/.test(sample) ? String(all.length) : sample === 'Items' ? (all.length === 1 ? 'producto' : 'productos') : undefined, child => {
+      // Los tres puntos del widget abren «Compartir lista» (en celular es el único acceso).
+      if (nodeName(child) === 'Button More') return { onClick: () => setSharing(true), label: 'Compartir lista' };
+      // Seis barras y seis filas del archivo, en su orden y con sus colores: una por comercio.
       if (nodeName(child) === 'Chart Bar') {
         const bars = objects(child);
         if (!all.length) return { children: bars.slice(-1).map((bar, index) => source(bar, () => ({ props: { style: { width: 'auto', flex: '1 1 0%' } } }), index)) };
-        return { children: byOrigin.map((origin, index) => bars[index] ? source(bars[index], n => n === bars[index] ? { props: { style: { width: 'auto', minWidth: 0, flex: `${origin.count} 1 0%`, display: origin.count ? undefined : 'none' } } } : undefined, origin.kind) : null) };
+        return { children: byStore.map((store, index) => bars[index] ? source(bars[index], n => n === bars[index] ? { props: { style: { width: 'auto', minWidth: 0, flex: `${store.count} 1 0%`, display: store.count ? undefined : 'none' } } } : undefined, store.category) : null) };
       }
-      if (nodeName(child) === 'List Expense Breakdown') return legend(child, (n, origin) => leaf(n) ? { text: /items$/.test(sourceText(n)) ? productCount(origin.count) : /%$/.test(sourceText(n)) ? `${Math.round(percent(origin.count, all.length) ?? 0)}%` : origin.label, props: legendLabel(n, origin.label) } : undefined);
+      if (nodeName(child) === 'List Expense Breakdown') {
+        const rows = descendants(child).filter(part => part !== child && objects(part).some(inner => nodeName(inner) === 'Main Info'));
+        return { children: relabel(child, () => undefined, part => {
+          const index = rows.indexOf(part); const store = byStore[index];
+          if (!store) return undefined;
+          return { children: relabel(part, sample => /items$/.test(sample) ? productCount(store.count) : /%$/.test(sample) ? `${Math.round(percent(store.count, all.length) ?? 0)}%` : store.category, n => leaf(n) && !/items$|%$/.test(sourceText(n)) ? { text: store.category, props: legendLabel(n, store.category) } : undefined) };
+        }) };
+      }
       return undefined;
     }) };
     return undefined;
   };
   return <FramePair nodes={['105:2472', '492:11324']} resolve={resolver} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut}>
-    {error && !adding && <Stateful error={error} />}{status && <p role="status" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}>{status}</p>}
+    {error && !adding && !sharing && <Stateful error={error} />}{status && <p role="status" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}>{status}</p>}
+    {sharing && <RecordDialog title="Compartir lista" onClose={() => setSharing(false)}><div className="flex w-full max-w-[420px] flex-col gap-[16px] rounded-[16px] bg-white p-[24px]"><h2 className="text-[22px] font-medium">Compartir lista</h2><p className="text-[14px] text-[#8a8c90]">{all.some(item => !item.checked) ? 'Va lo que te falta comprar, agrupado por comercio.' : 'Va la lista completa, agrupada por comercio.'}</p><textarea readOnly aria-label="Texto de la lista" value={shareText} rows={8} className="w-full rounded-[8px] border border-[#e1e1e2] p-[10px] text-[14px]" />{error && <Stateful error={error} />}<div className="flex flex-wrap gap-[8px]"><a href={whatsappShareUrl(shareText)} target="_blank" rel="noopener noreferrer" className="rounded-[8px] bg-[#c2e66e] px-[16px] py-[10px] text-[#272932]">Enviar por WhatsApp</a><button type="button" onClick={() => void copyList()} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">Copiar lista</button><button type="button" onClick={() => setSharing(false)} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">Cerrar</button></div></div></RecordDialog>}
     {adding && <RecordDialog title="Agregar producto" onClose={closeAddition} busy={busy} dirty={additionDirty}><form onSubmit={event => void add(event)} className="flex w-full max-w-[420px] flex-col gap-[16px] rounded-[16px] bg-white p-[24px]"><h2 className="text-[22px] font-medium">Agregar producto</h2><label>Producto<input disabled={busy || pending} required maxLength={80} value={name} onChange={event => setName(event.target.value)} className="mt-[4px] w-full rounded-[8px] border border-[#e1e1e2] p-[10px]" /></label><label>Cantidad<input disabled={busy || pending} required type="number" min="0.01" max="100000" step="0.01" value={quantity} onChange={event => setQuantity(event.target.value)} className="mt-[4px] w-full rounded-[8px] border border-[#e1e1e2] p-[10px]" /></label><label>Unidad<select disabled={busy || pending} value={unit} onChange={event => setUnit(event.target.value as RecipeUnit)} className="mt-[4px] w-full rounded-[8px] border border-[#e1e1e2] p-[10px]">{RECIPE_UNITS.map(value => <option key={value} value={value}>{value}</option>)}</select></label>{error && <Stateful error={error} />}<div className="flex gap-[8px]"><button type="submit" disabled={busy} className="rounded-[8px] bg-[#c2e66e] px-[16px] py-[10px] text-[#272932]">{busy ? 'Guardando…' : pending ? 'Reintentar guardado' : 'Guardar'}</button><button type="button" disabled={busy} onClick={closeAddition} className="rounded-[8px] border border-[#e1e1e2] px-[16px] py-[10px]">{pending ? 'Cerrar' : 'Cancelar'}</button></div></form></RecordDialog>}
   </FramePair>;
 }

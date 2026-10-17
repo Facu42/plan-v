@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { buildNotices, NoticesSheet } from './patient-notices';
+import { buildNotices, NoticesSheet, resourceNotice } from './patient-notices';
 import { iconButtonAction, iconButtonLabel, mapIconButtons } from './icon-buttons';
 import type { SourceNode } from './SourceView';
 
@@ -17,6 +17,38 @@ describe('avisos de la paciente', () => {
     expect(unreadMessages).toBe(2);
     expect(items.map(item => item.page)).toEqual(['mensajes', 'agenda', 'pagos']);
     expect(items[0].title).toBe('Tenés 2 mensajes sin leer');
+  });
+
+  it('suma el aviso de un plan nuevo y nada más si no hay novedades', () => {
+    const { items } = buildNotices({ messages: [], appointment: null } as never, null, now, { title: 'Tenés un plan nuevo', note: 'Empieza el 20 oct. Hasta entonces seguís con el actual.' });
+    expect(items).toEqual([expect.objectContaining({ id: 'plan', page: 'plan', title: 'Tenés un plan nuevo' })]);
+  });
+
+  it('avisa de un recurso indicado sin leer con su título y lleva a Recursos', () => {
+    const library = {
+      assignments: [{ id: 'a1', patient_id: 'p', resource_id: 'r1', slug: 'leer-plan-semanal', assigned_at: '2026-10-09T10:00:00Z', read_at: null }],
+      resources: [{ id: 'r1', slug: 'leer-plan-semanal', title: 'Cómo leer tu plan semanal' }],
+      articles: [],
+    } as never;
+    const notice = resourceNotice(library);
+    expect(notice).toEqual({ title: 'Tu nutricionista te indicó un recurso', note: '«Cómo leer tu plan semanal»', resource: 'leer-plan-semanal' });
+    const { items } = buildNotices({ messages: [], appointment: null } as never, null, now, null, notice);
+    expect(items).toEqual([expect.objectContaining({ id: 'resources', page: 'recursos', resource: 'leer-plan-semanal' })]);
+  });
+
+  it('cuenta varios recursos sin leer y calla cuando ya los leyó', () => {
+    const row = (id: string, read_at: string | null) => ({ id, patient_id: 'p', resource_id: id, slug: id, assigned_at: '2026-10-09T10:00:00Z', read_at });
+    expect(resourceNotice({ assignments: [row('a', null), row('b', null), row('c', '2026-10-09T11:00:00Z')], resources: [], articles: [] } as never))
+      .toEqual({ title: 'Tu nutricionista te indicó 2 recursos', note: 'Están en Recursos, en «Indicados».' });
+    expect(resourceNotice({ assignments: [row('c', '2026-10-09T11:00:00Z')], resources: [], articles: [] } as never)).toBeNull();
+    expect(resourceNotice(null)).toBeNull();
+  });
+
+  it('avisa que la cuenta está archivada y que no puede escribir', () => {
+    const patient = { messages: [], appointment: null, archived: true } as never;
+    const { items } = buildNotices(patient, null, now);
+    expect(items.map(item => item.id)).toEqual(['archived']);
+    expect(items[0]).toMatchObject({ title: 'Tu cuenta está archivada', note: 'No podés enviar mensajes.', page: 'mensajes' });
   });
 
   it('sin novedades no inventa avisos', () => {

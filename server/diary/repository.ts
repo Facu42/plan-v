@@ -7,7 +7,7 @@ import { getPatient, recalculateAdherence } from '../store.js';
 
 export { CareError } from '../care/errors.js';
 
-export type AnalysisStatus = 'pending' | 'succeeded' | 'failed';
+export type AnalysisStatus = 'pending' | 'succeeded' | 'failed' | 'skipped';
 
 export type MealAnalysisRun = {
   id: string;
@@ -63,6 +63,10 @@ export function diaryDbError(error: { code?: string; message?: string } | null) 
     throw new CareError(501, 'El diario de comidas requiere instalar la migración de este módulo.');
   }
   if (error.code === '42501') throw new CareError(403, 'No tenés permiso para esta acción.');
+  if (error.code === 'PT409' && (error.message ?? '').includes('meal_open')) {
+    throw new CareError(409, 'Esta comida todavía no está revisada. Podés corregirla o borrarla vos.');
+  }
+  if (error.code === 'PT409') throw new CareError(409, 'Esta comida ya está revisada. Pedile a tu nutricionista que la corrija.');
   if (error.code === 'PT404' || error.code === 'PGRST116') throw new CareError(404, 'No encontramos esa comida.');
   if (['22023', '23514', '22P02'].includes(error.code ?? '')) {
     throw new CareError(400, 'Revisá la foto, la descripción o el identificador de la comida.');
@@ -70,7 +74,7 @@ export function diaryDbError(error: { code?: string; message?: string } | null) 
   throw new CareError(503, 'No se pudo confirmar el guardado. Reintentá sin cerrar el formulario.');
 }
 
-const STATUSES: AnalysisStatus[] = ['pending', 'succeeded', 'failed'];
+const STATUSES: AnalysisStatus[] = ['pending', 'succeeded', 'failed', 'skipped'];
 
 function asAnalysisStatus(value: unknown): AnalysisStatus {
   if (typeof value === 'string' && STATUSES.includes(value as AnalysisStatus)) return value as AnalysisStatus;
@@ -175,7 +179,7 @@ export async function recordMealAnalysis(
   patientId: string,
   mealId: string,
   input: {
-    status: 'succeeded' | 'failed';
+    status: 'succeeded' | 'failed' | 'skipped';
     foods: FoodItem[];
     macros: Macros | null;
     confidence: number;
@@ -228,7 +232,7 @@ export async function recordMealAnalysis(
     current.confidence = input.confidence;
     current.note_for_nutri = input.note_for_nutri;
     current.analysis_status = input.status;
-    if(input.macros) current.nutrition_origin = input.nutrition_origin ?? 'ai_estimate';
+    if (input.macros && input.status !== 'skipped') current.nutrition_origin = input.nutrition_origin ?? 'ai_estimate';
     attachToPatient(publicLog(current), false);
   }
   return publicLog(current);
@@ -281,6 +285,110 @@ export async function reviewMealLog(
   });
   attachToPatient(publicLog(current), false);
   return publicLog(current);
+}
+
+const MEAL_SLOTS = ['Desayuno', 'Colación', 'Almuerzo', 'Merienda', 'Cena', 'Extra'] as const;
+
+function ownMeal(patientId: string, mealId: string): MemLog {
+  const stored = logs.get(mealId);
+  if (stored) {
+    if (stored.patient_id !== patientId) throw new CareError(404, 'No encontramos esa comida.');
+    return stored;
+  }
+  const row = findPatientLog(patientId, mealId);
+  if (!row) throw new CareError(404, 'No encontramos esa comida.');
+  const entry: MemLog = { ...row, client_id: randomUUID(), analysis_status: row.analysis_status ?? 'pending' };
+  logs.set(entry.id, entry);
+  return entry;
+}
+
+function cleanDescription(value: string | null): string | null {
+  if (value == null) return null;
+  const text = value.trim();
+  if (!text) return null;
+  if (text.length > 1000) throw new CareError(400, 'Revisá la foto, la descripción o el identificador de la comida.');
+  return text;
+}
+
+export function mealCorrectionRequest(slot: string, loggedAt: string, note: string): string {
+  const day = new Intl.DateTimeFormat('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(loggedAt));
+  return `Quiero corregir una comida ya revisada (${slot}, ${day}): ${note.trim()}`;
+}
+
+export async function correctOwnMeal(
+  patientId: string,
+  mealId: string,
+  input: { slot: string; description: string | null },
+  persistent: boolean,
+): Promise<MealLog> {
+  if (persistent) {
+    const { data, error } = await getRequestDb().rpc('correct_own_meal', {
+      payload: { patient_id: patientId, meal_id: mealId, slot: input.slot, description: input.description },
+    });
+    diaryDbError(error);
+    const log = asLog(data as Record<string, unknown>);
+    if (log.patient_id !== patientId) throw new CareError(404, 'No encontramos esa comida.');
+    return log;
+  }
+  const current = ownMeal(patientId, mealId);
+  if (current.status !== 'pending_review') {
+    throw new CareError(409, 'Esta comida ya está revisada. Pedile a tu nutricionista que la corrija.');
+  }
+  if (!MEAL_SLOTS.includes(input.slot as typeof MEAL_SLOTS[number])) {
+    throw new CareError(400, 'Revisá la foto, la descripción o el identificador de la comida.');
+  }
+  const description = cleanDescription(input.description);
+  if (description == null && current.photo_url == null) {
+    throw new CareError(400, 'Revisá la foto, la descripción o el identificador de la comida.');
+  }
+  current.slot = input.slot;
+  current.description = description;
+  attachToPatient(publicLog(current), false);
+  return publicLog(current);
+}
+
+export async function deleteOwnMeal(patientId: string, mealId: string, persistent: boolean): Promise<void> {
+  if (persistent) {
+    const { error } = await getRequestDb().rpc('delete_own_meal', {
+      payload: { patient_id: patientId, meal_id: mealId },
+    });
+    diaryDbError(error);
+    return;
+  }
+  const current = ownMeal(patientId, mealId);
+  if (current.status !== 'pending_review') {
+    throw new CareError(409, 'Esta comida ya está revisada. Pedile a tu nutricionista que la corrija.');
+  }
+  clientIndex.delete(`${patientId}:${current.client_id}`);
+  logs.delete(mealId);
+  const patient = getPatient(patientId);
+  if (patient) patient.meal_logs = patient.meal_logs.filter((row) => row.id !== mealId);
+  recalculateAdherence(patientId);
+}
+
+export async function requestMealCorrection(
+  patientId: string,
+  mealId: string,
+  input: { note: string; client_id: string },
+  persistent: boolean,
+): Promise<{ duplicate: boolean; text: string | null }> {
+  const note = input.note.trim();
+  if (note.length < 1 || note.length > 500) {
+    throw new CareError(400, 'Revisá la foto, la descripción o el identificador de la comida.');
+  }
+  if (persistent) {
+    const { data, error } = await getRequestDb().rpc('request_meal_correction', {
+      payload: { patient_id: patientId, meal_id: mealId, note, client_id: input.client_id },
+    });
+    diaryDbError(error);
+    const row = data as { duplicate?: boolean } | null;
+    return { duplicate: Boolean(row?.duplicate), text: null };
+  }
+  const current = ownMeal(patientId, mealId);
+  if (current.status === 'pending_review') {
+    throw new CareError(409, 'Esta comida todavía no está revisada. Podés corregirla o borrarla vos.');
+  }
+  return { duplicate: false, text: mealCorrectionRequest(current.slot, current.logged_at, note) };
 }
 
 registerDemoState('diary/repository', () => ({ logs, clientIndex, analysisRuns, reviews }));

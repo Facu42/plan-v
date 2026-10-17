@@ -3,6 +3,7 @@ import type { ProfessionalRecipe, RecipeVersionView } from '../../types/recipes'
 import { recipeNutritionLabel } from '../../types/ai-nutrition';
 import { RecipeDishWell, RecipeMacroGrid } from './RecipePlate';
 import { recipeCulinaryCategories } from '../../types/recipe-categories';
+import { NutrigoIngredientPhoto } from '../../features/nutrigo/IngredientPhoto';
 
 export function RecipeProfessionalDetail({ recipe, onBack, headingRef, renderComposition, favorite, actions }: {
   recipe: ProfessionalRecipe; onBack: () => void; headingRef: RefObject<HTMLHeadingElement | null>;
@@ -20,7 +21,7 @@ export function RecipeProfessionalDetail({ recipe, onBack, headingRef, renderCom
     <div className="recipe-detail-meta"><div><span>Preparación</span><strong>{version.card?.prep_minutes == null ? 'Sin dato' : `${version.card.prep_minutes} min`}</strong></div><div><span>Cocción</span><strong>{version.cooking_minutes == null ? 'Sin dato' : `${version.cooking_minutes} min`}</strong></div><div><span>Rinde</span><strong>{version.yield_portions} porciones</strong></div><div><span>Peso final</span><strong>{version.final_weight_g == null ? 'Sin dato' : `${version.final_weight_g} g`}</strong></div></div>
     <div className="recipe-detail-columns"><div>
       <RecipeDishWell title={version.title ?? recipe.title} status={version.card?.cover_status ?? 'none'} url={version.card?.cover_url} alt={version.card?.cover_alt} />
-      <section><h3>Ingredientes</h3><ul className="recipe-detail-ingredients">{version.ingredients.map(item => <li key={item.id}><span>{item.name}</span><strong>{item.quantity.toLocaleString('es-AR', { maximumFractionDigits: 4 })} {item.unit}</strong></li>)}</ul></section>
+      <section><h3>Ingredientes</h3><ul className="recipe-detail-ingredients">{version.ingredients.map((item, index) => <li key={item.id}><NutrigoIngredientPhoto ingredient={item} index={index} /><span>{item.name}</span><strong>{item.quantity.toLocaleString('es-AR', { maximumFractionDigits: 4 })} {item.unit}</strong></li>)}</ul></section>
       <section><h3>Preparación paso a paso</h3><ol className="recipe-detail-steps">{version.steps.map((step, i) => <li key={i}>{step}</li>)}</ol></section>
     </div><div>
       {version.catalog_recipe ? renderComposition(version) : <section className="recipe-composition"><h3>Nutrientes por porción</h3>{version.card?.macros ? <RecipeMacroGrid macros={version.card.macros} /> : <p>Sin datos nutricionales declarados.</p>}<p>{version.nutrient_source ? `Fuente: ${version.nutrient_source}` : 'Sin fuente declarada.'}</p></section>}

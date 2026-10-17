@@ -6,11 +6,17 @@ export type CaptureMode = 'photo' | 'text';
 export const MEAL_SLOTS = ['Desayuno', 'Colación', 'Almuerzo', 'Merienda', 'Cena', 'Extra'] as const;
 export type MealSlot = (typeof MEAL_SLOTS)[number];
 
+export function mealLoggedWithoutAi(log: Pick<MealLog, 'analysis_status'>) {
+  return log.analysis_status === 'skipped';
+}
+
 export function mealLogWasKept(log: Pick<MealLog, 'foods' | 'macros' | 'analysis_status'>) {
+  if (mealLoggedWithoutAi(log)) return false;
   return log.analysis_status === 'failed' || (log.foods.length === 0 && !log.macros);
 }
 
 export const MEAL_KEPT_COPY = 'No pudimos estimar alimentos ni macros. Verónica lo revisará. Tu registro no se perdió.';
+export const MEAL_TEXT_COPY = 'Guardamos tu descripción. Verónica la revisa. No usamos IA.';
 
 /** Hora (0 a 23) en Argentina; con una fecha inválida devuelve 12 (mediodía) para no sugerir nada raro. */
 export function argentinaHour(date: Date): number {
@@ -89,10 +95,11 @@ export function confidenceLevel(confidence: number): 'high' | 'medium' | 'low' {
   return confidence >= 0.75 ? 'high' : confidence >= 0.45 ? 'medium' : 'low';
 }
 
-/** Por qué todavía no se puede analizar, o null si está todo listo. `consented` es null mientras cargan los permisos. */
+/** Por qué todavía no se puede registrar, o null si está todo listo. `consented` es null mientras cargan los permisos.
+ *  El texto se guarda sin permiso de IA. La foto sí lo pide, porque estimar el plato es análisis. */
 export function captureProblem(input: { mode: CaptureMode; text: string; hasImage: boolean; consented: readonly string[] | null }): string | null {
   const { mode, text, hasImage, consented } = input;
-  if (consented && !consented.includes('ai_meal_analysis')) return 'Activá el permiso de análisis con IA para continuar.';
+  if (mode === 'photo' && consented && !consented.includes('ai_meal_analysis')) return 'Activá el permiso de análisis con IA para continuar.';
   if (mode === 'photo' && consented && !consented.includes('meal_photo')) return 'Activá el permiso de fotos de comidas para subir una imagen.';
   if (mode === 'photo' && !hasImage && !text) return 'Subí una foto o contanos qué comiste en texto.';
   if (mode === 'text' && !text) return 'Describí qué comiste.';

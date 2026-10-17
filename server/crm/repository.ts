@@ -9,11 +9,17 @@ import { currentCareConsents } from '../care/consents.js';
 import { listCareRecords } from '../care/repository.js';
 import { asAiJob, listAiJobs } from '../ai-jobs/repository.js';
 import { getBoard } from '../fees/repository.js';
+import { formatFeeDate, summarizeLedger } from '../../src/fees.js';
 import { DEMO_NUTRITIONIST_ID, getStore } from '../store.js';
 import { CONSENT_CATALOG } from '../intake/consent.js';
+import { getPatientProgress } from '../progress/repository.js';
+import { progressWindows } from '../progress/derive.js';
+import { summarizePatient, totalsFor } from './progress-global.js';
+import type { ProgressPeriodDays } from '../../src/types/progress.js';
+import type { GlobalPatientProgress, GlobalProgressResponse } from '../../src/types/progress-global.js';
 
 type Row = Record<string, unknown>;
-export type WorkPatient = { id: string; name: string; user_id?: string | null; archived_at?: string | null; deactivated_at?: string | null; anonymized_at?: string | null };
+export type WorkPatient = { id: string; name: string; user_id?: string | null; archived_at?: string | null; deactivated_at?: string | null; anonymized_at?: string | null; created_at?: string | null };
 export type WorkScope = { nutritionistId: string; actorId: string; persistent: boolean; patients: WorkPatient[] };
 export type WorkSnapshot = {
   intakes: Array<{ id: string; patient_id: string; status: string; updated_at: string }>;
@@ -24,7 +30,17 @@ export type WorkSnapshot = {
   appointments: Array<{ id: string; patient_id: string; status: string; starts_at: string; patient_reply?: string | null }>;
   ledgers: PatientLedger[];
   consents: Map<string, string[]>;
+  /**
+   * Último día con registro de la paciente (comida o hábito declarado) dentro de `QUIET_WINDOW_DAYS`;
+   * `null` si no registró nada en ese lapso. Sin el mapa no se arma el aviso de pacientes sin registros.
+   */
+  activity?: Map<string, string | null>;
 };
+
+/** Días sin registros a partir de los que la paciente aparece en la bandeja (aviso, no juicio clínico). */
+export const QUIET_DAYS = 7;
+/** Hasta dónde se mira para buscar el último registro. */
+export const QUIET_WINDOW_DAYS = 30;
 
 export function queueDbError(error: { code?: string } | null) {
   if (!error) return;
@@ -60,12 +76,13 @@ export async function resolveWorkScope(actorId: string | null, persistent: boole
   if (!nutri.data?.id) throw new CareError(403, 'No encontramos tu consultorio.');
   const nutritionistId = String(nutri.data.id);
   const patients = await readAllRows((offset, end) => db.from('patients')
-    .select('id,full_name,user_id,archived_at,deactivated_at,anonymized_at')
+    .select('id,full_name,user_id,archived_at,deactivated_at,anonymized_at,created_at')
     .eq('nutritionist_id', nutritionistId).order('id').range(offset, end));
   return {
     nutritionistId, actorId, persistent: true,
     patients: patients.map(row => ({ id: String(row.id), name: String(row.full_name), user_id: row.user_id as string | null,
-      archived_at: row.archived_at as string | null, deactivated_at: row.deactivated_at as string | null, anonymized_at: row.anonymized_at as string | null })),
+      archived_at: row.archived_at as string | null, deactivated_at: row.deactivated_at as string | null, anonymized_at: row.anonymized_at as string | null,
+      created_at: row.created_at as string | null })),
   };
 }
 
@@ -85,6 +102,28 @@ async function scopedRows(db: SupabaseClient, table: string, columns: string, id
     }));
   }
   return rows;
+}
+
+async function recentRows(db: SupabaseClient, table: string, columns: string, ids: string[], column: string, since: string): Promise<Row[]> {
+  const rows: Row[] = [];
+  for (let index = 0; index < ids.length; index += 100) {
+    const batch = ids.slice(index, index + 100);
+    rows.push(...await readAllRows((offset, end) => db.from(table).select(columns).in('patient_id', batch).gte(column, since)
+      .order(column).order('id').range(offset, end)));
+  }
+  return rows;
+}
+
+type HabitDay = { patient_id: string; date: string; hydration?: number | null; energy?: string | null; sleep_minutes?: number | null; steps?: number | null; symptoms?: string[] | null };
+const declaredHabit = (habit: HabitDay) => (habit.hydration ?? 0) > 0 || habit.energy != null || habit.sleep_minutes != null || habit.steps != null || (habit.symptoms?.length ?? 0) > 0;
+
+/** Último día (de Argentina) con una comida o un hábito declarado por paciente; `null` si no hay ninguno. */
+export function lastActivity(ids: string[], meals: Array<{ patient_id: string; logged_at: string }>, habits: HabitDay[]): Map<string, string | null> {
+  const last = new Map<string, string | null>(ids.map(id => [id, null]));
+  const keep = (id: string, day: string) => { if (day && last.has(id) && (last.get(id) ?? '') < day) last.set(id, day); };
+  for (const meal of meals) keep(meal.patient_id, localDate(meal.logged_at));
+  for (const habit of habits) if (/^\d{4}-\d{2}-\d{2}$/.test(habit.date) && declaredHabit(habit)) keep(habit.patient_id, habit.date);
+  return last;
 }
 
 export async function loadWorkSnapshot(scope: WorkScope): Promise<WorkSnapshot> {
@@ -111,6 +150,9 @@ export async function loadWorkSnapshot(scope: WorkScope): Promise<WorkSnapshot> 
         starts_at: full.appointment.starts_at, patient_reply: full.appointment.patient_reply,
       });
     }
+    snapshot.activity = lastActivity(patients.map(patient => patient.id),
+      patients.flatMap(patient => memory.get(patient.id)!.meal_logs.map(log => ({ patient_id: patient.id, logged_at: log.logged_at }))),
+      patients.flatMap(patient => memory.get(patient.id)!.habit_logs.map(habit => ({ ...habit, patient_id: patient.id }))));
     snapshot.records = (await listCareRecords(null, false)).map(record => ({
       id: record.id, patient_id: record.patient_id, kind: record.data.kind,
       source: 'source' in record.data ? record.data.source : undefined,
@@ -122,7 +164,8 @@ export async function loadWorkSnapshot(scope: WorkScope): Promise<WorkSnapshot> 
   const db = getRequestDb();
   // En persistencia leer únicamente metadata con la sesión y sus políticas;
   // no cargar notas del ingreso, fotos, textos ni payloads de las propuestas.
-  const [meals, records, messages, appointments, intakes, consents, jobs, board] = await Promise.all([
+  const since = new Date(Date.now() - QUIET_WINDOW_DAYS * 86_400_000).toISOString();
+  const [meals, records, messages, appointments, intakes, consents, jobs, board, recentMeals, recentHabits] = await Promise.all([
     scopedRows(db, 'meal_logs', 'id,patient_id,slot_label,status,logged_at', ids, 'logged_at', { status: 'pending_review' }),
     scopedRows(db, 'care_records', 'id,patient_id,kind:data->>kind,source:data->>source,reviewed_at,created_at', ids, 'created_at', { reviewed_at: null }),
     scopedRows(db, 'messages', 'id,patient_id,author_id,sent_at', ids, 'sent_at'),
@@ -133,7 +176,14 @@ export async function loadWorkSnapshot(scope: WorkScope): Promise<WorkSnapshot> 
     scopedRows(db, 'consent_events', 'id,patient_id,purpose,text_version,text_hash,decision,sequence', ids, 'sequence'),
     scopedRows(db, 'ai_jobs', 'id,patient_id,job_type,status,created_at,started_at,finished_at,applied_at,period_start:request->>period_start,period_end:request->>period_end', ids, 'created_at', { applied_at: null }),
     getBoard(true),
+    // Solo fechas: alcanza para saber cuándo registró por última vez, sin leer qué comió ni cómo se sintió.
+    recentRows(db, 'meal_logs', 'id,patient_id,logged_at', ids, 'logged_at', since),
+    recentRows(db, 'habit_logs', 'id,patient_id,date,hydration,energy,sleep_minutes,steps,symptoms', ids, 'date', since.slice(0, 10)),
   ]);
+  snapshot.activity = lastActivity(ids,
+    recentMeals.map(row => ({ patient_id: String(row.patient_id), logged_at: String(row.logged_at) })),
+    recentHabits.map(row => ({ patient_id: String(row.patient_id), date: String(row.date), hydration: Number(row.hydration ?? 0),
+      energy: row.energy as string | null, sleep_minutes: row.sleep_minutes as number | null, steps: row.steps as number | null, symptoms: row.symptoms as string[] | null })));
   snapshot.ledgers = board.patients;
   snapshot.intakes = intakes.map(row => ({ id: String(row.id), patient_id: String(row.patient_id), status: String(row.status), updated_at: String(row.updated_at) }));
   const latestConsents = new Map<string, Row>();
@@ -165,11 +215,15 @@ function localDate(iso: string) {
   return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(date);
 }
 
+function daysBetween(from: string, to: string) {
+  return Math.round((Date.parse(`${to}T12:00:00Z`) - Date.parse(`${from}T12:00:00Z`)) / 86_400_000);
+}
+
 function destination(kind: CrmWorkKind, patientId: string, entityId: string) {
   const params = new URLSearchParams({ paciente: patientId });
   if (kind === 'ai_menu') { params.set('propuesta', entityId); return `/crm/plan?${params}`; }
-  if (kind === 'message') return `/crm/mensajes?${params}`;
-  if (kind === 'payment') return `/crm/cobranzas?${params}`;
+  if (kind === 'message' || kind === 'quiet') return `/crm/mensajes?${params}`;
+  if (kind === 'payment' || kind === 'fee_overdue') return `/crm/cobranzas?${params}`;
   params.set('seccion', kind === 'intake' ? 'ingreso' : kind === 'appointment' ? 'consultas' : 'registros');
   return `/crm/ficha?${params}`;
 }
@@ -211,5 +265,42 @@ export function buildWorkItems(scope: WorkScope, snapshot: WorkSnapshot, now = n
     if (needed && !snapshot.consents.get(record.patient_id)?.includes(needed)) continue;
     add('record', record.id, record.patient_id, 'pending_review', record.created_at, `Revisar registro · ${CARE_LABELS[record.kind] ?? 'Registro'}`);
   }
+  // Cuota vencida sin aviso de pago: si la paciente ya avisó, queda la tarea «Aviso de pago por confirmar».
+  for (const ledger of snapshot.ledgers) {
+    const summary = summarizeLedger(ledger, today);
+    if (summary.state !== 'debe' || summary.pending_reports > 0 || !summary.debt_since) continue;
+    add('fee_overdue', ledger.patient_id, ledger.patient_id, 'overdue', `${summary.debt_since}T12:00:00.000Z`, `Cuota vencida desde el ${formatFeeDate(summary.debt_since)}`);
+  }
+  if (snapshot.activity) for (const patient of patients.values()) {
+    // Sin acceso a la app no puede registrar; recién dada de alta todavía no tuvo tiempo.
+    if (patient.user_id === null || !snapshot.activity.has(patient.id)) continue;
+    if (patient.created_at && daysBetween(localDate(patient.created_at), today) < QUIET_DAYS) continue;
+    const last = snapshot.activity.get(patient.id) ?? null;
+    const gap = last ? daysBetween(last, today) : null;
+    if (gap != null && gap < QUIET_DAYS) continue;
+    const since = last ?? localDate(new Date(now.getTime() - QUIET_WINDOW_DAYS * 86_400_000).toISOString());
+    add('quiet', patient.id, patient.id, 'quiet', `${since}T12:00:00.000Z`,
+      gap != null ? `Sin registros hace ${gap} días` : `Sin registros en los últimos ${QUIET_WINDOW_DAYS} días`);
+  }
   return items;
+}
+
+/** Resumen de progreso de toda la cartera: reutiliza el cálculo por paciente (mismo permiso y mismas reglas de consentimiento). */
+export async function loadGlobalProgress(scope: WorkScope, days: ProgressPeriodDays, now = new Date()): Promise<GlobalProgressResponse> {
+  const patients = activePatients(scope);
+  const rows: GlobalPatientProgress[] = [];
+  const unavailable: GlobalProgressResponse['unavailable'] = [];
+  let windows = progressWindows(days, now);
+  for (let index = 0; index < patients.length; index += 5) {
+    const batch = patients.slice(index, index + 5);
+    const results = await Promise.allSettled(batch.map(patient => getPatientProgress(patient.id, days, scope.persistent)));
+    results.forEach((result, position) => {
+      const patient = batch[position]!;
+      if (result.status === 'rejected') { unavailable.push({ patient_id: patient.id, patient_name: patient.name }); return; }
+      windows = { current: result.value.current, previous: result.value.previous };
+      rows.push(summarizePatient(patient.id, patient.name, result.value));
+    });
+  }
+  rows.sort((a, b) => a.patient_name.localeCompare(b.patient_name, 'es-AR'));
+  return { period_days: days, ...windows, patients: rows, totals: totalsFor(rows, unavailable.length), unavailable, source: scope.persistent ? 'supabase' : 'memory' };
 }

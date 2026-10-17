@@ -1,6 +1,21 @@
-# Traspaso del proyecto (2026-10-01)
+# Traspaso del proyecto (actualización vigente: 2026-10-16)
+
+## Estado integrado de la entrega 8 · 16/10/2026
+
+La rama aislada `codex/nutridesk-release-sara2` incorpora mediante avance directo la entrega 7 final `5c8ea5441d466c54be20899b14b8cf0758cbcce4` ([PR #127](https://github.com/Facu42/plan-v/pull/127)) y conserva todo `main` hasta `9c56854`, incluidos los PR #117, #119 y #122. Se recuperó la implementación SARA 2 revisada: 930 registros y 39 componentes, unidades de 100 g/100 ml y copias históricas. [Instructivo vigente](instructivo-plan-v-actualizado-2026-10-15.md), [evidencia de SARA 2](sara2-verificacion-2026-10-15.md) y [coordinación](coordinacion-agentes.md).
+
+El manifiesto separa **18 migraciones pendientes y tres archivos exactos de main ya observados aplicados**. No se vuelve a aplicar esas tres migraciones por el nombre local de su archivo. La suite propia definitiva, finalizada el 16/10 a las **09:11:31 ART**, aprobó **2.999 casos, cero fallos y dos omitidos, en 458 archivos**; tipos, compilación (7,80 segundos), migraciones, manifiesto, vistas y secretos aprobados. Revisión independiente de código y QA de 1440/390 aprobados sin P1/P2: se corrigieron recortes del editor y catálogo cargado, además de etiquetas de volumen. Las **1.787 huellas** permanecen intactas después de la suite y QA (`2e5bd04d…`). [QA final](sara2-qa-2026-10-16.md). Las cifras antiguas de abajo son históricas. El CI de la cabeza propia se comprobará tras subir el borrador; no se publicó esta entrega ni se aplicó su SQL.
+
+El 16/10 ROOT verificó mediante la herramienta oficial que todos los controles de #127 en `5c8ea54` están aprobados: verify, e2e, sesiones firmadas, secretos y vista previa. Es evidencia del padre 7; la entrega 8 requiere su propio CI sobre la cabeza que se publique para revisión.
+
+Continúan pendientes por decisión o validación real: SMTP propio pospuesto (Supabase Auth permanece, sin prometer correos a destinatarios externos), retención cero y modalidad de Groq, captura real de ambas voces y cuentas reales de Google, Mercado Pago y WhatsApp. La IA nueva comparte un límite global autorizado de USD 5 mensuales y permanece apagada. Kerr conserva carga manual hasta resolver unidades y validar la fórmula con la profesional.
+
+## Referencia histórica: entrega 6 aislada · 14/10/2026
+
+Agenda, reservas públicas, equipo con recepción operativa, asignación clínica y cobros por profesional preparados en `codex/nutridesk-release-agenda`, base clínica `66ed039`. [Alcance, evidencia y límites](nutridesk-release-agenda-2026-10-14.md): suite propia de 2.816 aprobadas, cero fallos, dos omitidas (431 archivos), tipos/build/migraciones/vistas/secretos y revisión independiente aprobados. Cinco SQL preparados, sin aplicación hospedada. Navegador público/equipo a 1440/390; asociación de ficha existente con UUID real comprobada en fixtures, no con `pat-sofia` demo. Comunicaciones/cartera finales, configuración de Google/Mercado Pago, SMTP y producción continúan pendientes.
 
 Una sola página para que cualquier agente (Claude, Codex u otro) siga sin tener el chat.
+**Desde el 14/10:** el reparto de trabajo entre agentes está en [`coordinacion-agentes.md`](coordinacion-agentes.md) y los documentos de producto en [`producto/`](producto/README.md).
 Los detalles de cada tema están en los archivos que se nombran. Este archivo se actualiza
 cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facundo.
 
@@ -16,6 +31,9 @@ cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facund
   de Nutrigo (Figma `OTolnKfsxUFjaZOhhdb04i`; si Plan V se aparta, gana el archivo); escritorio 1440 y
   móvil 390 (tablet no); una rama y un PR por tema; nada directo a `main`; todo cambio en la base de
   producción o en servicios pagos necesita su frase escrita (un "ok" suelto no alcanza).
+- Habilidades de apoyo (14/10): `security-review`, `postgres-patterns` (ECC) y cuatro de animación y datos
+  extremos de Emil Kowalski en `.claude/skills/`. Solo informan; en la app de la paciente manda Nutrigo.
+  Detalle en `docs/agentes/reglas-plan-v.md`.
 - Antes de un PR: `npm test`, `npm run check` y, si hay migraciones, `npm run check:migrations`.
   Para ver la app con datos de ejemplo: `npm install`, `npm run local` y "Continuar en modo demo".
 
@@ -41,6 +59,7 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - Diseño y movimiento, carga y errores, primer uso de la nutricionista, accesibilidad, botones del
   celular: `docs/diseno-movimiento.md`.
 - Ingreso con Google y pantalla "Antes de seguir": `docs/autenticacion.md`.
+- Cobros por paciente (rama claude/nutri-cobros-por-paciente-46sdfg, PR borrador sobre #89): Nuevo cobro, Asignar programa y Copiar link; migración 20261010150000 sin aplicar. Detalle en docs/cobros-por-paciente-2026-10-10.md.
 - Cobranzas, Pagos de la paciente y Panel del servicio (altas, cuentas de prueba, actividad):
   `docs/cobros-y-panel.md`.
 - Calorías y macros (Mifflin-St Jeor) con migración aplicada: `docs/calorias-macros.md`.
@@ -65,15 +84,40 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 
 ## Lo pendiente
 
+- Cuenta archivada (D6, 2026-10-10): la paciente ve que su cuenta está archivada y no puede enviar mensajes; puede seguir leyendo el hilo. La nutricionista puede escribir. Migración `20261010143000_archived_patient_cannot_message` en el repositorio, sin aplicar en la base hospedada hasta la frase escrita de Facundo. Decisión en `docs/decisiones-producto-2026-10-10.md`.
 - Mediciones de la ficha (2026-10-10, rama `claude/project-thread-ngsfiv`, PR borrador): composición corporal, perímetros, detalle con mín/prom/máx y carga por fecha. Migración `20261010120000_body_metrics` preparada, **sin aplicar** (pide la frase de Facundo). Lista de pacientes con columnas y densidad elegibles (guardado en el navegador). Importar informe de balanza en PDF (se lee en el navegador, vista previa y confirmación antes de guardar; probado sólo con un PDF de ejemplo, falta probar con InBody/femmto reales). Página andando con datos de ejemplo: https://claude.ai/artifact/Psg642ViPdzAXNbmr4PXhd. Comparado con la v3 (`docs/mediciones-vs-nutriboost-2026-10-10.md`; el Loom no abre desde la nube): se sumaron evolución del peso, mini gráficos, última consulta, conexión y mensaje. Falta: medidores con rangos (fuente clínica a elegir por Facundo) y teléfono (no se guarda). Segunda pasada completa del video desde la PC de Facundo (10/10): se sumaron mín./prom./máx. del peso, «Registrar nueva medición», «App de la paciente: conectada» en la ficha y pacientes nuevas en Inicio; modelos de plan ya existían (8/10). Inicio: selector de período e indicadores de consultas, ingresos y pacientes nuevas con comparación. Seguimiento: novedades de la cartera (comidas y agua, filtros de período, revisión y paciente, detalle por día, «Escribirle»). Planificación: comparación de fórmulas (Harris-Benedict, FAO/OMS/ONU, Katch-McArdle y basal de la balanza; la meta sigue con Mifflin-St Jeor). Cobranzas: cambiar el día de vencimiento ya no genera una segunda cuota en el mismo mes (migración `20261010170000_fee_one_charge_per_month`, sin aplicar; no toca cuotas ya creadas). Ficha: «Pedirle que actualice su ingreso» manda un mensaje con el enlace; la paciente decide si lo reabre. Planes: «Avisarle a la paciente» (el «Notificar cliente» del video) le manda por Mensajes que la versión publicada ya está en su sección Plan; el análisis del plan suma energía por momento y reparto de proteínas, carbohidratos y grasas, como el «Análisis del plan» del video (2:44). Recetas: una propuesta de IA sin abrir se retoma después de recargar la página, sin pedir otra. Mensajes: los sin leer de toda la cartera y la conversación abierta se actualizan solos (cada 30 y 15 segundos) sin recargar. Recursos: firman con el nombre de la nutricionista y se pueden despublicar (migración `20261010190000_resource_author_unpublish`, sin aplicar). Horarios por comida: la nutricionista indica la hora de cada momento (misma para todos los días del plan) y se ve en su editor, la impresión y, por decisión de Facundo (10/10), junto al nombre de cada comida en el plan de la paciente («Desayuno · 08:00»); queda fija al publicar y pasa a la versión siguiente (migración `20261010200000_plan_meal_times`, sin aplicar). Mails (Facundo eligió Brevo): «Mandar por mail» en la invitación de pacientes (enlace de Supabase, mail en castellano por Brevo) y recordatorio de cada turno 24 h antes, sin migración; se activan al cargar `BREVO_API_KEY` y `BREVO_SENDER_EMAIL` en Railway (`docs/mails-supabase-2026-10-10.md`). Estado de los 15 apartados para Facundo: https://claude.ai/artifact/KP8CCeQCVprNEL2avqyMmU. Corregido: «última consulta» y consultas de Inicio salen de los turnos ya terminados (antes sólo funcionaban en demo) (`docs/inicio-seguimiento-vs-nutriboost-2026-10-10.md`, con lo que falta y por qué). Para verlo en producción faltan su frase «aplicá la migración de mediciones en la base de producción», «aplicá la migración de una cuota por mes en la base de producción», «aplicá la migración de recursos en la base de producción», «aplicá la migración de horarios del plan en la base de producción» y su «publicalo». Detalle: `docs/mediciones-dashboard-2026-10-10.md`.
 - Conexión paciente ↔ panel (2026-10-10): decisiones D1–D7 en `docs/decisiones-producto-2026-10-10.md`; estado de cada
   hallazgo en `docs/auditoria-conexion-paciente-crm-2026-10-08.md`; producto y orden de trabajo en
-  `docs/producto-definicion-2026-10-08.md`. PR #94 (día de Argentina en el servidor) en revisión. Fotos de ingredientes
+  `docs/producto-definicion-2026-10-08.md`. PR #94 (día de Argentina en el servidor) ya está en `main`. Fotos de ingredientes
   y de platos con el modelo gratuito: pruebas en producción (tortilla ×3, tomate, huevo) hasta que Facundo las apruebe.
+- Diario de texto sin permiso de IA (D5, 2026-10-10, [PR #101](https://github.com/Facu42/plan-v/pull/101)): la paciente guarda la descripción aunque no haya activado el análisis.
+  La estimación, y la foto, solo corren con ese permiso. Migración `20261010233000_meal_text_without_ai.sql` en el repo,
+  sin aplicar en la base en línea: espera la frase escrita de Facundo. No se apoya en los PR #98, #99 ni #100.
+  Corregir una comida o medida propia (D4): mientras no está revisada, la paciente la corrige o la borra; si ya fue
+  revisada, le pide el cambio a su nutricionista y el registro no se toca. La hoja del diario no está dibujada en el
+  archivo: se abre con el mismo diálogo de registros. La migración queda en el repositorio y no se aplica en la base
+  en línea hasta la frase escrita de Facundo. El aviso por correo (D3) sigue pendiente: hace falta definir cómo se mandan.
+  `docs/producto-definicion-2026-10-08.md`. PR #94 (día de Argentina en el servidor) ya está en `main`. D7 (plan nuevo
+  con vigencia) está en el borrador #103: si el plan nuevo empieza más adelante, la paciente sigue con el anterior, ve
+  qué cambia y recibe el aviso en la campana. La migración `20261010180000_meal_plan_effective_date` queda solo en el
+  repositorio hasta que Facundo escriba la frase para aplicarla. No se corrió en la base hospedada. El correo de D3
+  sigue esperando un proveedor de mail. Fotos de ingredientes y de platos con el modelo gratuito: pruebas en producción (tortilla ×3,
+  tomate, huevo) hasta que Facundo las apruebe.
+- Cuota impaga (D2, 2026-10-10, rama `cursor/cuota-no-bloquea-39fa`): no bloquea la app ni vacía el Inicio. Solo el
+  corte de acceso de la profesional lo hace. En el celular el aviso es la tarjeta amarilla del archivo, arriba del
+  contenido. Sin migración. Sigue abierto el recargo al cambiar el día de vencimiento.
+- Objetivo de la paciente (D1, 2026-10-10): el panel ya mandaba estado, avance y nota; ahora se guardan en la base
+  (migración `20261010183000_patient_goal_followup`) y la paciente los ve en Inicio y en Progreso. La nota queda para
+  la nutricionista. No es la meta de calorías. **La migración no se aplicó en la base en línea**: espera la frase
+  escrita de Facundo. Hasta entonces la app sigue mostrando el texto del objetivo. El archivo de Nutrigo no dibuja
+  este objetivo (dibuja el peso): la tarjeta usa la card blanca del archivo y va debajo del marco. No hay visto bueno visual.
 - Revisión del front de la paciente contra Nutrigo, 2026-10-09 (rama `claude/front-paciente-nutrigo-tuezz8`):
-  las diez pantallas ya coinciden con Figma en modo demo; Facundo no lo ve porque producción no tiene demo y las
-  pantallas de entrada siguen con estilo viejo. Reglas de diseño en `CLAUDE.md`; diagnóstico, matriz y plan en
-  `docs/revision-front-paciente-2026-10-09.md`. Piloto: invitación a instalar dentro de la tarjeta del menú.
+  las diez pantallas ya coinciden con Figma en modo demo. Producción no tiene modo demo. El ingreso, recuperar
+  la clave, «Antes de seguir», la cuenta sin vincular, la carga y el error de conexión se arman con piezas del
+  archivo (logo, título, control segmentado, campo y botón verde). Figma no dibuja esas pantallas: la tarjeta
+  blanca de 420 es el default. No hay franja de instalar en la entrada. Falta que Facundo compare la entrada;
+  este cambio no afirma que coincida. Diagnóstico en `docs/revision-front-paciente-2026-10-09.md`. Piloto:
+  invitación a instalar dentro de la tarjeta del menú.
   Segunda tanda (2026-10-10, con su cuenta de prueba en producción): la campana ahora abre un panel de avisos (antes abría el menú) y los «…» de cada tarjeta llevan a su pantalla; la comida cargada sin descripción ya no escribe «null»; las calorías de comidas sin revisar dicen «en revisión»; sin rutina asignada, Inicio muestra las actividades que la paciente registró. Sin cambios de base ni API. Pendiente: fotos de platos (dependen de que las recetas tengan portada), pantallas sin datos.
 
 
@@ -86,8 +130,8 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - Auditoría de la demo del 2026-10-07 (rama `claude/inspiring-lovelace-nfsot9`): superficies fuera del
   archivo que todavía tienen estilo viejo y la primera prueba de fotos con Cloudflare en producción.
   Ver `docs/auditoria-demo-2026-10-07.md`.
-- Pantallas de la nutricionista, ingreso y administración con piezas del archivo de Nutrigo
-  (Figma no las dibuja); van en otra rama.
+- Pantallas de la nutricionista y la administración con piezas del archivo de Nutrigo
+  (Figma no las dibuja); van en otra rama. El ingreso de la paciente ya usa esas piezas.
 
 - IA gratuita, pedido del 2/10: el predeterminado seguía siendo `gpt-4o-mini` y no cumplía
   lo acordado. Rama `codex/ia-solo-modelos-gratuitos`: `openrouter/free`, rechazo de pagos
@@ -157,6 +201,47 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - App para tiendas (Android primero, empaquetando la web), calidad en producción, publicidad paga y
   página pública con precios (espera el precio). Plan: `docs/plan-apartados.md`.
 
+## Meta de agua por paciente (2026-10-16)
+
+Decisión de Facundo (15/10, «Meta por paciente»): la nutri elige la meta de agua de cada paciente, de 4 a 16 vasos
+por día, en «Editar ficha» (vacía = 8, la de siempre). La paciente la ve en Inicio, Diario y Progreso, y el aviso de
+agua del día y la adherencia se miden contra esa meta. Además se puede anotar hasta 16 vasos por día (antes el tope
+era 8). Migración `20261016090000_water_goal` (columna `patients.water_goal_glasses`, vista `patient_water_goal_view`
+solo con la fila propia, y la regla de `habit_logs` pasa a 0..16). **Aplicada en producción el 16/10** (Facundo pegó el SQL
+porque lleva un DROP de la regla vieja) y publicada con el PR #128.
+
+## Lista del súper en unidades del comercio (2026-10-15)
+
+La lista suma los gramos del plan, pero en la verdulería o la carnicería nadie pide 480 g. Ahora cada producto se
+muestra como se pide: «1/2 kg», «3/4 kg», «1,25 kg», «1,5 l», «1 docena» de huevos y unidades enteras, siempre
+redondeando para arriba. Lo que no llega a un cuarto queda en gramos de a 50 (150 g); las medidas de cocina (cda,
+cdita, taza) y lo menor a 100 g quedan como vienen. Al pasar el mouse se ve lo que suma el plan. El texto de
+«Compartir lista» usa las mismas cantidades. Solo pantalla: la base guarda lo mismo. Código: `localAmount` en
+`src/features/nutrigo/screens/shopping-format.ts`.
+
+## Recordatorio de consulta al teléfono (2026-10-15)
+
+El día antes de cada consulta agendada, la paciente con avisos activados recibe «Mañana tenés consulta · Mirá el
+horario en Plan V», que abre su Agenda. No lleva la hora, el lugar ni el nombre de la nutri (viaja por Google,
+Apple o Mozilla). Usa el mismo tramo de 10 minutos que el recordatorio por mail (`server/mail/reminders.ts`), sin
+tocar la base. Lo corre el servicio worker de Railway (la API tiene `WORKER_SEPARATE`), así que las tres claves
+`VAPID_*` tienen que estar también en el worker; sin ellas no manda nada. Código: `server/push/reminders.ts`.
+
+## Mensajes al instante en la app de la paciente (2026-10-15)
+
+Antes la paciente solo veía un mensaje nuevo de su nutri si recargaba la página. Ahora la app trae la ficha
+sola mientras está a la vista: cada 15 s con «Mensajes» abierto (igual que el consultorio) y cada 60 s en las
+demás pantallas, así la campanita avisa del mensaje. Al volver a la pestaña actualiza enseguida. Con la pestaña
+oculta no pide nada. Código: `src/features/nutrigo/use-live-refresh.ts` (con pruebas) y `PatientApp.tsx`.
+No toca la base ni el diseño. Tiempo real de verdad (sin esperar 15 s) necesitaría Supabase Realtime: queda para más adelante.
+
+## Actividad, rutina y pasos de la paciente (2026-10-15)
+- Inicio de la paciente: «Actividad reciente» y el bloque de ejercicio usan las actividades reales de la pantalla de Ejercicio (antes, en producción, quedaban vacíos porque la ficha no las trae).
+- El avance de la rutina en Inicio cuenta las series que la paciente cargó con «Registrar rutina» esa semana (antes quedaba siempre 0).
+- Diario «Registrar» suma «Registrar pasos». La nutri ve los pasos de la semana en «Registros y evolución» (hoy y promedio).
+- Calorías quemadas (decisión de Facundo, 15/10: «a mano»): «Registrar actividad» suma un campo opcional «Calorías quemadas»; Inicio y Progreso las suman al bloque «Quemadas» y la tabla de Ejercicio las muestra. Es un dato que declara la paciente, no una medición. Migración `20261015210000_activity_kcal` (columna nueva y función `log_patient_activity_with_kcal`; sin borrar nada). **Aplicada en producción el 15/10** con la frase de Facundo; el historial de la base la anota como `20261015173356` (es repetible).
+- La meta de agua sigue fija en 8 vasos.
+
 ## Lo que espera de Facundo
 
 - Probar con las cuentas de prueba (ver abajo): panel, Cobranzas, Pagos, calorías.
@@ -193,3 +278,45 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 Continuación del cierre de paciente y nutricionista: [correcciones, evidencia y paquete de cinco migraciones](cierre-funcional-plan-v-2026-10-05.md).
 
 Contrato de cada acción, permisos y lecturas al recargar: [recorridos y guía para ambas experiencias](recorridos-y-contratos-plan-v-2026-10-05.md).
+
+## Movimiento de la paciente, primer pase (2026-10-10)
+Se cerró el PR #67 (conflictos, inspirado en otra interfaz). Pase nuevo desde main: en Inicio, pasos y calorías (consumidas, quemadas, restantes) suben contando (`CountUp`, desde cero al entrar y desde el valor anterior al cambiar) y las barras de progreso se llenan al aparecer. Todo apagado con «reducir movimiento». Siguen: peso, macros, pulso al cargar, Ejercicio y Progreso.
+
+## Calorías de la paciente suman al instante (2026-10-10)
+Facundo: lo que aprueba la nutricionista es el plan, no lo que la paciente carga al comer. En la vista de la paciente (Inicio, Diario, Progreso) las comidas pendientes de revisión ya suman calorías y macros (estimadas). La vista de la nutricionista no cambia. PR en borrador, sin juntar.
+
+## Progreso global (2026-10-10)
+Pantalla `/crm/progreso-global` (PR #93): peso y comidas de toda la cartera por período. Sin migración. Detalle en `docs/progreso-global-2026-10-10.md`.
+## Continuación Nutriboost: nutrición y PDF del plan · 14/10/2026
+
+Entrega 4 verificada en `codex/nutridesk-release-nutricion`, sobre la cabeza final de importación `b143744b4024314e8313662a1a911b70a28c914b`. Incorpora cálculo efectivo de la fórmula revisada, referencias propias de micronutrientes, grupos, catálogo paginado, seis momentos personalizados y descarga PDF del plan. Suite propia: 2.678 aprobadas, cero fallos, dos omitidas y 407 archivos; tipos/build/migraciones/vistas/scanner y revisión independiente aprobados. [Informe y paso 10](nutridesk-release-nutricion-2026-10-14.md). Sólo SQL nueva `20261011180000`, sin aplicar. No activar USDA ni cambiar Supabase/SMTP/Groq. Las siguientes entregas conservan clínica avanzada/ficha, agenda/equipo/cobros y operaciones generales; el cálculo automático Kerr sigue pendiente.
+
+
+Quinta entrega apilada: [ficha clínica y exportación histórica, evidencia y límites](nutridesk-release-clinica-2026-10-14.md). Base 304413f; gate previo 2.719 pruebas aprobadas; verificación nueva de marca vigente en curso, sin producción.
+
+
+## Ánimo y síntomas de la paciente (2026-10-15)
+En el Diario, «Registrar» → «Cómo me siento»: energía del día (con energía, normal, sin energía; se guarda en la energía que ya existía) y ocho síntomas de una lista cerrada. La nutricionista los ve en la ficha, «Registros y evolución», debajo de «Descanso y energía». Nutrigo no dibuja esta pantalla: se armó con su diálogo de registro y los botones del diario. Migración `20261015100000_habit_symptoms` (agrega una columna con lista cerrada): ya aplicada en la base el 14/10 con la frase de Facundo (el historial de la base la anota como `20261014215543`). La de #110 (vistas solo lectura) también quedó aplicada. PR112 y PR110 ya integrados en main el 14/10; no volver a ejecutar sus migraciones.
+
+## Avisos al teléfono de la paciente (2026-10-15)
+En la campanita de la paciente, «Avisos», hay una fila «Recibir avisos en este teléfono». Al aceptarla, el teléfono recibe un aviso cuando la nutri le escribe, publica su plan, le indica un recurso o cambia su consulta. Los avisos pasan por Google, Apple o Mozilla, así que solo llevan un texto genérico (nunca el mensaje ni datos de salud). En iPhone hace falta tener Plan V instalada en la pantalla de inicio.
+Queda apagado hasta tener las tres variables `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `VAPID_SUBJECT` en la API de Railway; sin ellas la fila no aparece y no se manda nada. Migración `20261015200000_push_subscriptions` (tabla nueva, solo el servidor la usa): **aplicada en producción el 15/10** con la frase de Facundo; el historial de la base la anota como `20261015163006` (es repetible). Falta cargar las claves en Railway y juntar el PR; el código se puede juntar antes sin efecto. PR en borrador.
+
+## Recorridos de punta a punta y monitor de producción (2026-10-14)
+Etapa 1 del plan (`docs/producto/06-plan-implementacion.md`, puntos 6 y 7, sin costo):
+- `npm run test:e2e` (Playwright) levanta la API y la web en modo demo, con las claves de Supabase vacías, y recorre en orden cinco caminos de dos roles: alta de paciente con invitación, ingreso de la paciente visto por la nutri, plan editado y publicado visto por la paciente, comida registrada en el diario vista por la nutri, y revisión de la nutri vista por la paciente. Corre en cada PR (trabajo «recorridos de punta a punta» de CI). Prueba a propósito: romper «Confirmar sin cambios» hace fallar el recorrido 5.
+- `.github/workflows/monitor.yml` mira cada 15 minutos `api/health` (con la base conectada) y la web. Si fallan tres intentos abre un issue con la etiqueta `caida` que menciona a Facundo; cuando vuelve, lo cierra. Arranca recién cuando el archivo está en `main`.
+- Quedan afuera porque cuestan o piden cuenta: base de staging aparte, Sentry y un monitor externo con aviso al celular.
+
+## Cobro a nutricionistas: aviso al vencer, solo lectura a mano (2026-10-15)
+Parte 3 de `docs/cobros-y-panel.md`. Facundo eligió (15/10) que **vencer no corte nada solo**: la nutricionista vencida sigue usando todo y ve una tarjeta amarilla «Servicio vencido» con la fecha y el precio (`ServiceNotice.tsx`, lee `GET /api/me/service`, sin la nota interna); antes ve «Tu prueba termina pronto» o «Tu servicio vence pronto» (7 días antes). Solo lectura únicamente cuando Facundo la **suspende** desde su panel (`/admin`, «Excepción» → «Suspender»): sigue viendo todo, pero cualquier escritura responde 403 con un mensaje claro (`server/service/own-service.ts`). Quedan abiertas la sesión, `/api/me`, el panel del administrador y los avisos; las pacientes nunca se frenan; si no se puede consultar el estado, deja pasar. El estado se recuerda un minuto y se borra cuando el administrador cambia algo. Sin migraciones.
+
+## Rachas de la paciente (2026-10-15)
+En Inicio, el texto bajo el saludo («Tu acompañamiento, día a día») pasa a mostrar la racha cuando la paciente lleva dos días seguidos o más registrando una comida o un hábito (agua, sueño, pasos, ánimo o síntomas), contados en días de Argentina. Si hoy todavía no registró, la invita a hacerlo para no cortarla. Como la paciente solo recibe sus últimas 20 comidas y 14 días de hábitos, la cuenta no inventa días: si llega a ese borde dice «o más». Código: `src/features/nutrigo/streak.ts` (con pruebas). El archivo de Nutrigo no dibuja rachas; se usa el mismo texto del archivo, sin piezas nuevas. Sin migraciones.
+
+## Próximas acciones de la nutricionista (2026-10-15)
+La bandeja «Tu consultorio, hoy» suma dos tipos de pendiente: **Cuotas vencidas** (cuota impaga con el vencimiento pasado y sin aviso de pago de la paciente; si avisó, queda «Aviso de pago por confirmar»; abre Cobranzas) y **Sin registros hace 7 días** (paciente con acceso a la app, dada de alta hace 7 días o más, sin comidas ni hábitos declarados en 7 días; dice cuántos días pasaron, o «en los últimos 30 días»; abre Mensajes). Es un aviso para escribirle, nunca un juicio clínico. El servidor solo lee fechas de comidas y hábitos de los últimos 30 días, sin contenido. Código: `server/crm/repository.ts` (con pruebas en `work-queue.test.ts` y en Postgres descartable). Sin migraciones.
+
+### Operaciones y comunicaciones — entrega 7, 15/10
+
+La rama `codex/nutridesk-release-operaciones` continúa desde PR123 y conserva los cambios de main hasta `9c56854`. El [informe vigente](nutridesk-release-operaciones-2026-10-15.md) documenta asistente, fuentes, CSV, preferencias, comunicaciones y límites externos; sustituye el estado del informe histórico del 12/10. Se cerraron dos P2: permiso de correo accesible con guardado/baja explícitos y bloqueo de WhatsApp sin configuración de bajas. Suite final propia: 2.977 aprobadas, cero fallos y dos omitidas en 452 archivos; tipos, build y gates aprobados. La [revisión de código](nutridesk-release-operaciones-review-2026-10-15.md) y la [QA a 1440/390](nutridesk-release-operaciones-qa-2026-10-15.md) no dejan P1/P2 abiertos en el alcance local; 1.789 huellas exactas tras suite y recorrido. Las cinco mejoras heredadas de demo y pacing, OCR/CSP y los JSON originales se conservan. La entrega de SARA 2 sigue separada. No se publicaron cambios ni se activaron servicios desde esta entrega.

@@ -2,6 +2,7 @@ import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
 import { registerDemoState } from '../demo/state.js';
 import { foodInputSchema, normalizeFoodSearch, type Food, type FoodInput } from '../../src/types/foods.js';
+import { sara2Foods } from './sara2.js';
 
 const foods = new Map<string, Food>();
 registerDemoState('foods', () => ({ foods }));
@@ -15,7 +16,7 @@ export function foodDbError(error: { code?: string } | null) {
   throw new CareError(503, 'No pudimos confirmar el guardado. Tus cambios siguen en el formulario.');
 }
 export async function listFoods(owner: string, persistent: boolean): Promise<Food[]> {
-  if (!persistent) return [...foods.values()].filter(f => f.owner_id === null || f.owner_id === owner).map(f => structuredClone(f));
+  if (!persistent) return [...sara2Foods(),...foods.values()].filter(f => f.owner_id === null || f.owner_id === owner).map(f => structuredClone(f));
   const result: Food[] = [];
   const ids = new Set<string>();
   let total: number | undefined;
@@ -27,19 +28,20 @@ export async function listFoods(owner: string, persistent: boolean): Promise<Foo
     if (count === null || count === undefined) throw new CareError(503, 'No pudimos cargar el catálogo completo. Reintentá.');
     if (total !== undefined && total !== count) throw new CareError(503, 'El catálogo cambió mientras se cargaba. Reintentá.');
     total = count;
-    // La primera entrega limita el volumen en el navegador y nunca oculta resultados.
-    if (total > 5000) throw new CareError(503, 'Este catálogo necesita búsqueda paginada antes de incorporar más alimentos.');
     if (!data?.length && result.length < total) throw new CareError(503, 'No pudimos cargar el catálogo completo. Reintentá.');
     for (const row of data ?? []) {
       if (ids.has(row.id)) throw new CareError(503, 'El catálogo cambió mientras se cargaba. Reintentá.');
       ids.add(row.id);
-      const { expected_revision: _, ...food } = foodInputSchema.parse({ ...row.payload, id: row.id, expected_revision: 0 });
-      result.push({ ...food, revision: row.revision, owner_id: row.owner_id, updated_at: row.updated_at });
+      const {composition,...payload}=row.payload;
+      const { expected_revision: _, ...food } = foodInputSchema.parse({ ...payload,source:composition?'Referencia institucional validada':payload.source, id: row.id, expected_revision: 0 });
+      if(composition)food.source=payload.source;
+      result.push({ ...food,...(composition?{composition}:{}), revision: row.revision, owner_id: row.owner_id, updated_at: row.updated_at });
     }
   } while (result.length < total);
   return result;
 }
 export async function saveFood(owner: string, input: FoodInput, persistent: boolean): Promise<Food> {
+  if (sara2Foods().some(food=>food.id===input.id)) throw new CareError(403,'La composición institucional es de sólo lectura. Creá un alimento propio con su fuente.');
   const { expected_revision, id, ...payload } = input;
   if (persistent) {
     const { data, error } = await getRequestDb().rpc('save_food_catalog_item', { food_id: id, expected_revision, food_payload: payload });
@@ -61,4 +63,13 @@ export async function saveFood(owner: string, input: FoodInput, persistent: bool
 export function filterFoods(items: Food[], q: string, kind?: string, scope?: string) {
   const needle = normalizeFoodSearch(q);
   return items.filter(f => (!kind || f.kind === kind) && (!scope || (scope === 'own' ? f.owner_id !== null : f.owner_id === null)) && normalizeFoodSearch(`${f.name} ${f.brand} ${f.category} ${f.source}`).includes(needle)).sort((a, b) => a.name.localeCompare(b.name, 'es'));
+}
+
+export type FoodPageFilters={q:string;kind:'food'|'supplement';scope:'all'|'own'|'platform';source:string;category:string;order:'name-asc'|'name-desc'|'kcal-asc'|'kcal-desc'};
+export async function searchFoodPage(owner:string,filters:FoodPageFilters,page:number,pageSize:number,persistent:boolean):Promise<{foods:Food[];total:number;page:number;page_size:number;summary?:{total:number;own:number;platform:number;supplements:number;foods:number};sources?:string[];categories?:string[]}>{
+  if(persistent){const{data,error}=await getRequestDb().rpc('search_food_catalog',{filters,page,page_size:pageSize});foodDbError(error);return data;}
+  const all=await listFoods(owner,false);
+  const matches=filterFoods(all,filters.q,filters.kind,filters.scope==='all'?undefined:filters.scope).filter(food=>(!filters.source||food.source===filters.source)&&(!filters.category||food.category===filters.category));
+  matches.sort((a,b)=>{const names=a.name.localeCompare(b.name,'es')||a.id.localeCompare(b.id);if(filters.order==='name-asc')return names;if(filters.order==='name-desc')return -names;const left=a.nutrients.kcal,right=b.nutrients.kcal;if(left===null&&right===null)return names;if(left===null)return 1;if(right===null)return -1;return(left-right)*(filters.order==='kcal-asc'?1:-1)||names;});
+  return{foods:matches.slice(page*pageSize,(page+1)*pageSize),total:matches.length,page,page_size:pageSize,summary:{total:all.length,own:all.filter(food=>food.owner_id!==null).length,platform:all.filter(food=>food.owner_id===null).length,supplements:all.filter(food=>food.kind==='supplement').length,foods:all.filter(food=>food.kind==='food').length},sources:[...new Set(all.filter(food=>food.kind===filters.kind).map(food=>food.source))].sort(),categories:[...new Set(all.filter(food=>food.kind===filters.kind&&food.category).map(food=>food.category))].sort()};
 }

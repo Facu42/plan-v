@@ -1,6 +1,10 @@
 import { request } from './client';
 import type { Food, FoodInput } from '../types/foods';
+import type { FoodCompositionDetail } from '../types/food-composition';
+export type FoodSearchPage={foods:Food[];total:number;page:number;page_size:number;summary?:{total:number;own:number;platform:number;supplements:number;foods:number};sources?:string[];categories?:string[]};
 export const foodApi = {
+  composition:(id:string,offset=0,limit=10,signal?:AbortSignal)=>request<FoodCompositionDetail>(`/api/foods/${encodeURIComponent(id)}/composition?offset=${offset}&limit=${limit}`,{signal}),
+  search:(filters:{q?:string;kind?:'food'|'supplement';scope?:'all'|'own'|'platform';source?:string;category?:string;order?:'name-asc'|'name-desc'|'kcal-asc'|'kcal-desc';page?:number;page_size?:number},signal?:AbortSignal)=>request<FoodSearchPage>(`/api/foods/search?${new URLSearchParams(Object.entries(filters).filter(([,value])=>value!==undefined).map(([key,value])=>[key,String(value)]))}`,{signal}),
   list: (signal?: AbortSignal) => request<{ foods: Food[]; total: number; source: string }>('/api/foods', { signal }),
   save: (food: FoodInput) => request<{ food: Food; source: string }>('/api/foods', { method: 'POST', body: JSON.stringify(food) }),
 };

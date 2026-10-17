@@ -1,5 +1,5 @@
 import { argentinaToday } from '../progress/derive.js';
-import type { Brief, MealLog, Message, Patient } from '../../src/types/index.ts';
+import type { Brief, GoalHistoryEntry, GoalStatus, GoalUpdate, MealLog, Message, Patient } from '../../src/types/index.ts';
 import { signMealPhotos } from '../care/meal-photos.js';
 import { resolveBillingStatus } from '../../src/billing.ts';
 import type { Actor, PatientResource } from '../security/contracts.ts';
@@ -10,6 +10,9 @@ import { listThreadMessagesPersist } from '../messages/repository.js';
 import { listPatientAppointmentPersist } from '../appointments/repository.js';
 import { appointmentHasNotEnded, appointmentReadSince } from '../appointment-ops.js';
 import { writeOpsLog } from '../ops/log.js';
+import { collectPatientPages } from './patient-pages.js';
+import { requestAccountRecovery } from '../mail/recovery.js';
+import { normalizeSymptoms } from '../../src/types/symptoms.js';
 import {
   appointmentColumns,
   mealLogColumns,
@@ -137,6 +140,120 @@ function rows(data: unknown): Record<string, unknown>[] {
   return Array.isArray(data) ? data as Record<string, unknown>[] : [];
 }
 
+function asGoalStatus(value: unknown): GoalStatus | undefined {
+  return value === 'active' || value === 'paused' || value === 'completed' ? value : undefined;
+}
+
+function asProgress(value: unknown): number | undefined {
+  const number = typeof value === 'number' ? value : typeof value === 'string' && value.trim() !== '' ? Number(value) : Number.NaN;
+  return Number.isInteger(number) && number >= 0 && number <= 100 ? number : undefined;
+}
+
+function mapGoalHistory(entry: Record<string, unknown>): GoalHistoryEntry | null {
+  const status = asGoalStatus(entry.status);
+  const progress = asProgress(entry.progress);
+  if (!entry.id || typeof entry.goal !== 'string' || !status || progress === undefined) return null;
+  return {
+    id: String(entry.id),
+    goal: entry.goal,
+    status,
+    progress,
+    note: entry.note == null ? null : String(entry.note),
+    updated_at: String(entry.updated_at ?? ''),
+  };
+}
+
+function mapGoalUpdate(entry: Record<string, unknown>): GoalUpdate | null {
+  const status = asGoalStatus(entry.status);
+  const progress = asProgress(entry.progress);
+  if (!entry.id || typeof entry.goal !== 'string' || !status || progress === undefined) return null;
+  return {
+    id: String(entry.id),
+    goal: entry.goal,
+    status,
+    progress,
+    updated_at: String(entry.updated_at ?? ''),
+  };
+}
+
+type GoalFollowup = Pick<Patient, 'goal_status' | 'goal_progress' | 'goal_updated_at' | 'goal_history' | 'goal_updates'>;
+
+function rememberedGoal(entry: Record<string, unknown>): GoalFollowup {
+  const status = asGoalStatus(entry.goal_status);
+  const progress = asProgress(entry.goal_progress);
+  return {
+    ...(status ? { goal_status: status } : {}),
+    ...(progress !== undefined ? { goal_progress: progress } : {}),
+    ...(entry.goal_updated_at != null ? { goal_updated_at: String(entry.goal_updated_at) } : {}),
+  };
+}
+
+/**
+ * Meta de agua que eligió la nutri (vasos por día). Si la migración todavía no está en la base,
+ * la lectura falla y se ignora: la app usa la meta de siempre.
+ */
+async function loadWaterGoals(ids: string[], audience: QueryAudience): Promise<Map<string, number>> {
+  const found = new Map<string, number>();
+  if (ids.length === 0) return found;
+  const table = audience === 'patient' ? 'patient_water_goal_view' : 'patients';
+  const { data, error } = await getRequestDb().from(table).select('id,water_goal_glasses').in('id', ids);
+  if (error) return found;
+  for (const entry of rows(data)) {
+    const goal = Number(entry.water_goal_glasses);
+    if (entry.water_goal_glasses != null && Number.isInteger(goal)) found.set(String(entry.id), goal);
+  }
+  return found;
+}
+
+/**
+ * Estado, avance e historial. Si la migración todavía no está en la base,
+ * estas lecturas fallan y se ignoran: el texto del objetivo sigue llegando.
+ */
+async function loadGoalFollowup(ids: string[], audience: QueryAudience): Promise<Map<string, GoalFollowup>> {
+  const found = new Map<string, GoalFollowup>();
+  if (ids.length === 0) return found;
+  const sb = getRequestDb();
+  const table = audience === 'patient' ? 'patient_goal_patient_view' : 'patients';
+  const columns = await sb.from(table).select('id,goal_status,goal_progress,goal_updated_at').in('id', ids);
+  if (!columns.error) {
+    for (const entry of rows(columns.data)) found.set(String(entry.id), rememberedGoal(entry));
+  }
+  if (audience === 'professional') {
+    const history = await sb.from('goal_history')
+      .select('id,patient_id,goal,status,progress,note,updated_at')
+      .in('patient_id', ids)
+      .order('updated_at', { ascending: false })
+      .limit(Math.min(200, ids.length * 20));
+    if (history.error) return found;
+    const grouped = new Map<string, GoalHistoryEntry[]>();
+    for (const entry of rows(history.data)) {
+      const mapped = mapGoalHistory(entry);
+      if (!mapped) continue;
+      const list = grouped.get(String(entry.patient_id)) ?? [];
+      if (list.length < 20) list.push(mapped);
+      grouped.set(String(entry.patient_id), list);
+    }
+    for (const [id, goal_history] of grouped) found.set(id, { ...found.get(id), goal_history });
+    return found;
+  }
+  const updates = await sb.from('goal_updates_patient_view')
+    .select('id,patient_id,goal,status,progress,updated_at')
+    .in('patient_id', ids)
+    .order('updated_at', { ascending: false })
+    .limit(20);
+  if (updates.error) return found;
+  const grouped = new Map<string, GoalUpdate[]>();
+  for (const entry of rows(updates.data)) {
+    const mapped = mapGoalUpdate(entry);
+    if (!mapped) continue;
+    const list = grouped.get(String(entry.patient_id)) ?? [];
+    if (list.length < 20) list.push(mapped);
+    grouped.set(String(entry.patient_id), list);
+  }
+  for (const [id, goal_updates] of grouped) found.set(id, { ...found.get(id), goal_updates });
+  return found;
+}
+
 function row(data: unknown): Record<string, unknown> | null {
   return data !== null && typeof data === 'object' && !Array.isArray(data)
     ? data as Record<string, unknown>
@@ -167,6 +284,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
   return {
     id: row.id as string,
     name: row.full_name as string,
+    ...(audience === 'professional' ? { phone: typeof row.phone === 'string' ? row.phone : null } : {}),
     initials: (row.initials as string) || (row.full_name as string).slice(0, 2).toUpperCase(),
     tone: (row.tone as Patient['tone']) ?? 'mint',
     status: row.status as string,
@@ -177,6 +295,11 @@ function mapPatient(row: Record<string, unknown>, extras: {
     ...(audience === 'professional' && typeof row.created_at === 'string' ? { created_at: row.created_at } : {}),
     stage: row.stage as Patient['stage'],
     goal: row.goal as string,
+    ...(asGoalStatus(row.goal_status) ? { goal_status: asGoalStatus(row.goal_status) } : {}),
+    ...(asProgress(row.goal_progress) !== undefined ? { goal_progress: asProgress(row.goal_progress) } : {}),
+    ...(typeof row.goal_updated_at === 'string' ? { goal_updated_at: row.goal_updated_at } : {}),
+    ...(Array.isArray(row.goal_history) ? { goal_history: row.goal_history as GoalHistoryEntry[] } : {}),
+    ...(Array.isArray(row.goal_updates) ? { goal_updates: row.goal_updates as GoalUpdate[] } : {}),
     sensitive_hours: audience === 'patient' ? '' : row.sensitive_hours as string,
     plan_b: audience === 'patient' ? '' : row.plan_b as string,
     next_focus: audience === 'patient' ? '' : row.next_focus as string,
@@ -184,6 +307,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
     adherence_why: audience === 'patient' ? '' : row.adherence_why as string,
     time: 'hoy',
     hydration: extras.hydration ?? 0,
+    ...(typeof row.water_goal_glasses === 'number' ? { water_goal_glasses: row.water_goal_glasses } : {}),
     energy: extras.energy ?? null,
     sleep_minutes: extras.sleep_minutes ?? null,
     appointment: extras.appointment ?? null,
@@ -214,7 +338,7 @@ function mapMealLog(row: Record<string, unknown>): MealLog {
     note_for_nutri: (row.note_for_nutri as string) ?? '',
     status: row.status as MealLog['status'],
     logged_at: row.logged_at as string,
-    ...(row.analysis_status === 'pending' || row.analysis_status === 'succeeded' || row.analysis_status === 'failed'
+    ...(row.analysis_status === 'pending' || row.analysis_status === 'succeeded' || row.analysis_status === 'failed' || row.analysis_status === 'skipped'
       ? { analysis_status: row.analysis_status }
       : {}),
   };
@@ -354,6 +478,7 @@ async function loadPatientExtras(
     energy: (h.energy as string | null) ?? null,
     sleep_minutes: (h.sleep_minutes as number | null) ?? null,
     steps: (h.steps as number | null) ?? null,
+    symptoms: normalizeSymptoms(h.symptoms),
   }));
   const todayHabit = habit_logs.find((h) => h.date === argentinaToday(new Date()));
 
@@ -385,6 +510,7 @@ function mapScheduledAppointment(nextAppt: Record<string, unknown> | undefined |
   if (!nextAppt?.starts_at) return null;
   const reply = nextAppt.patient_reply;
   return {
+    ...(typeof nextAppt.id === 'string' ? { id: nextAppt.id } : {}),
     when: formatAppointmentWhen(String(nextAppt.starts_at)),
     duration: Number(nextAppt.duration_min),
     channel: String(nextAppt.channel),
@@ -438,16 +564,29 @@ export type PatientListPage = {
 
 export async function sbListPatientsForNutri(userId: string, query: { offset: number; limit: number }): Promise<PatientListPage> {
   const sb = getRequestDb();
-  const { data: nutri } = await sb.from('nutritionists').select('id').eq('user_id', userId).maybeSingle();
-  if (!nutri) return { patients: [], page: { offset: query.offset, limit: query.limit, has_more: false } };
+  const { data: nutriData, error: nutriError } = await sb.from('nutritionists').select('id').eq('user_id', userId).maybeSingle();
+  if (nutriError) throw nutriError;
+  if (nutriData === null) return { patients: [], page: { offset: query.offset, limit: query.limit, has_more: false } };
+  const nutri = row(nutriData);
+  if (!nutri || typeof nutri.id !== 'string' || !nutri.id.trim()) {
+    throw new Error('No pudimos verificar el consultorio.');
+  }
 
   const end = query.offset + query.limit;
-  const { data: rowsData } = await sb.from('patients')
+  const { data: rowsData, error: patientsError } = await sb.from('patients')
     .select(patientTableColumns.professional)
     .eq('nutritionist_id', nutri.id)
     .order('full_name', { ascending: true })
+    .order('id', { ascending: true })
     .range(query.offset, end);
 
+  if (patientsError) throw patientsError;
+  if (!Array.isArray(rowsData) || rowsData.some((value) => {
+    const patientRow = row(value);
+    return !patientRow || typeof patientRow.id !== 'string' || !patientRow.id.trim();
+  })) {
+    throw new Error('La página de pacientes está incompleta o no es válida.');
+  }
   const listed = rows(rowsData);
   const hasMore = listed.length > query.limit;
   const pageRows = hasMore ? listed.slice(0, query.limit) : listed;
@@ -471,10 +610,11 @@ export async function sbListPatientsForNutri(userId: string, query: { offset: nu
     }
   }
 
+  const [follow, waterGoals] = await Promise.all([loadGoalFollowup(ids, 'professional'), loadWaterGoals(ids, 'professional')]);
   const pastByPatient = await loadPastConsultations(ids, appointmentNow);
   const [archivedAt, resourceAssignments] = await Promise.all([loadArchivedAt(ids), loadResourceAssignments(ids)]);
   return {
-    patients: pageRows.map((patientRow) => mapPatient({ ...patientRow, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, {
+    patients: pageRows.map((patientRow) => mapPatient({ ...patientRow, ...follow.get(String(patientRow.id)), water_goal_glasses: waterGoals.get(String(patientRow.id)), archived_at: archivedAt.get(String(patientRow.id)) ?? null }, {
       appointment: mapScheduledAppointment(nextByPatient.get(String(patientRow.id))),
       appointment_history: pastByPatient.get(String(patientRow.id)) ?? [],
       resource_assignments: resourceAssignments.get(String(patientRow.id)) ?? [],
@@ -549,8 +689,17 @@ async function loadArchivedAt(ids: string[]): Promise<Map<string, string | null>
 }
 
 export async function sbGetPatientsForNutri(userId: string): Promise<Patient[]> {
-  const listed = await sbListPatientsForNutri(userId, { offset: 0, limit: 100 });
-  return listed.patients;
+  return collectPatientPages((offset, limit) => sbListPatientsForNutri(userId, { offset, limit }));
+}
+
+// La vista de la paciente no trae archived_at. La función llega con la migración
+// de D6; si todavía no está, se lee la columna que ya existe, sólo de su ficha.
+async function loadOwnArchivedAt(patientId: string): Promise<string | null> {
+  const { data, error } = await getRequestDb().rpc('my_archived_at');
+  if (!error) return data == null || data === '' ? null : String(data);
+  const { data: row, error: readError } = await privilegedDb().from('patients').select('archived_at').eq('id', patientId).maybeSingle();
+  if (readError || !row) return null;
+  return (row.archived_at as string | null) ?? null;
 }
 
 export async function sbGetPatientForUser(userId: string): Promise<Patient | null> {
@@ -559,7 +708,10 @@ export async function sbGetPatientForUser(userId: string): Promise<Patient | nul
   const patientRow = row(data);
   if (!patientRow) return null;
   const extras = await loadPatientExtras(patientRow.id as string, 'patient');
-  return mapPatient(patientRow, extras, 'patient');
+  const follow = (await loadGoalFollowup([String(patientRow.id)], 'patient')).get(String(patientRow.id));
+  const waterGoal = (await loadWaterGoals([String(patientRow.id)], 'patient')).get(String(patientRow.id));
+  const archivedAt = await loadOwnArchivedAt(String(patientRow.id));
+  return mapPatient({ ...patientRow, ...follow, water_goal_glasses: waterGoal, archived_at: archivedAt }, extras, 'patient');
 }
 
 export async function sbGetPatientById(id: string, audience: QueryAudience = 'professional'): Promise<Patient | null> {
@@ -568,11 +720,14 @@ export async function sbGetPatientById(id: string, audience: QueryAudience = 'pr
   const patientRow = row(data);
   if (!patientRow) return null;
   const extras = await loadPatientExtras(patientRow.id as string, audience);
+  const follow = (await loadGoalFollowup([String(patientRow.id)], audience)).get(String(patientRow.id));
+  const waterGoal = (await loadWaterGoals([String(patientRow.id)], audience)).get(String(patientRow.id));
   if (audience === 'professional') {
     const archivedAt = await loadArchivedAt([String(patientRow.id)]);
-    return mapPatient({ ...patientRow, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, extras, audience);
+    return mapPatient({ ...patientRow, ...follow, water_goal_glasses: waterGoal, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, extras, audience);
   }
-  return mapPatient(patientRow, extras, audience);
+  const archivedAt = await loadOwnArchivedAt(String(patientRow.id));
+  return mapPatient({ ...patientRow, ...follow, water_goal_glasses: waterGoal, archived_at: archivedAt }, extras, audience);
 }
 
 export async function sbAddMealLog(patientId: string, log: Omit<MealLog, 'id' | 'patient_id' | 'logged_at' | 'status'>): Promise<MealLog> {
@@ -763,7 +918,7 @@ export async function sbDismissBrief(patientId: string, dismissedBy: string): Pr
   if (error) throwWriteError(error);
 }
 
-export async function sbUpdateHabits(patientId: string, data: { hydration?: number; energy?: string | null; sleep_minutes?: number | null; steps?: number | null }): Promise<void> {
+export async function sbUpdateHabits(patientId: string, data: { hydration?: number; energy?: string | null; sleep_minutes?: number | null; steps?: number | null; symptoms?: string[] }): Promise<void> {
   const sb = getRequestDb();
   const today = argentinaToday(new Date());
   const { data: existing } = await sb.from('habit_logs').select('*')
@@ -778,12 +933,15 @@ export async function sbUpdateHabits(patientId: string, data: { hydration?: numb
       sleep_minutes: existing.sleep_minutes,
       // Sólo si la columna existe: la app puede publicarse antes que la migración de pasos.
       ...('steps' in existing ? { steps: existing.steps } : {}),
+      // Igual que los pasos: sólo si la migración de síntomas ya está aplicada.
+      ...('symptoms' in existing ? { symptoms: existing.symptoms } : {}),
     } : {}),
   };
   if (data.hydration !== undefined) { payload.hydration = data.hydration; payload.hydration_declared = true; }
   if (data.energy !== undefined) payload.energy = data.energy;
   if (data.sleep_minutes !== undefined) payload.sleep_minutes = data.sleep_minutes;
   if (data.steps !== undefined) payload.steps = data.steps;
+  if (data.symptoms !== undefined) payload.symptoms = data.symptoms;
 
   const { error } = await sb.from('habit_logs').upsert(payload, { onConflict: 'patient_id,date' });
   if (error) throwWriteError(error);
@@ -791,11 +949,13 @@ export async function sbUpdateHabits(patientId: string, data: { hydration?: numb
 
 export async function sbUpdatePatientProfile(patientId: string, input: {
   name?: string;
+  phone?: string | null;
   status?: string;
   stage?: Patient['stage'];
   sensitive_hours?: string;
   plan_b?: string;
   next_focus?: string;
+  water_goal_glasses?: number | null;
 }): Promise<void> {
   const sb = getRequestDb();
   const patch: Record<string, unknown> = {};
@@ -804,18 +964,33 @@ export async function sbUpdatePatientProfile(patientId: string, input: {
     patch.initials = patientInitials(input.name);
   }
   if (input.status !== undefined) patch.status = input.status;
+  if (input.phone !== undefined) patch.phone = input.phone;
   if (input.stage !== undefined) patch.stage = input.stage;
   if (input.sensitive_hours !== undefined) patch.sensitive_hours = input.sensitive_hours;
   if (input.plan_b !== undefined) patch.plan_b = input.plan_b;
   if (input.next_focus !== undefined) patch.next_focus = input.next_focus;
+  if (input.water_goal_glasses !== undefined) patch.water_goal_glasses = input.water_goal_glasses;
   const { error } = await sb.from('patients').update(patch).eq('id', patientId);
   if (error) throwWriteError(error);
 }
 
-export async function sbUpdateGoal(patientId: string, goal: string): Promise<void> {
+export async function sbUpdateGoal(
+  patientId: string,
+  input: { goal: string; status: GoalStatus; progress: number; note?: string },
+): Promise<void> {
   const sb = getRequestDb();
-  const { error } = await sb.from('patients').update({ goal }).eq('id', patientId);
-  if (error) throwWriteError(error);
+  const { error } = await sb.rpc('set_patient_goal', {
+    target: patientId,
+    next_goal: input.goal,
+    next_status: input.status,
+    next_progress: input.progress,
+    next_note: input.note?.trim() ? input.note.trim() : null,
+  });
+  if (!error) return;
+  if (error.code === '42501') throw Object.assign(new Error('Prohibido'), { code: '42501' });
+  if (error.code === '22023') throw Object.assign(new Error('Datos inválidos'), { code: '22023' });
+  if (isMissingRelation(error) || error.code === '42883' || error.code === 'PGRST202') throw new SchemaUnavailableError();
+  throwWriteError(error);
 }
 
 export type ScheduledAppointment = {
@@ -1072,10 +1247,7 @@ export async function sbProvisionNutritionist(input: {
 
 export async function sbRequestPasswordRecovery(email: string, redirectTo?: string): Promise<void> {
   const sb = privilegedDb();
-  const { error } = await sb.auth.resetPasswordForEmail(email, redirectTo ? { redirectTo } : undefined);
-  if (error && !isMissingRelation(error)) {
-    return;
-  }
+  await requestAccountRecovery(email, redirectTo, (address, options) => sb.auth.resetPasswordForEmail(address, options));
 }
 
 export function computeShoppingList(patient: Patient): string[] {

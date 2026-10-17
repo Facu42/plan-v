@@ -10,6 +10,8 @@ describe('Tus datos', () => {
     expect(html).toContain('Borrar mi cuenta');
     expect(html).toContain('/legal/privacidad.html');
     expect(html).toContain('/legal/terminos.html');
+    expect(html).toContain('Mis avisos por correo');
+    expect(html).toContain('Quiero recibir avisos operativos del consultorio por correo.');
   });
 
   it('nombra la copia sólo con la fecha', () => {

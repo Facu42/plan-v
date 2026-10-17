@@ -156,13 +156,14 @@ type CaptureViewProps = {
 
 export function CaptureView({ draft, error, photoBlocked, aiBlocked, consent, onChange, onFile, onAnalyze }: CaptureViewProps) {
   const isPhoto = draft.mode === 'photo';
+  const textWithoutAi = !isPhoto && aiBlocked;
   const ready = isPhoto ? Boolean(draft.photoPreview || draft.description.trim()) : Boolean(draft.description.trim());
   return (
     <>
       <div className="mlm-scroll">
         <p className="mlm-eyebrow">Registrar comida</p>
         <h2 className="mlm-title" tabIndex={-1} data-mlm-heading>¿Qué comiste?</h2>
-        {consent && <ConsentGroup blocked={aiBlocked || (isPhoto && photoBlocked)}>{consent}</ConsentGroup>}
+        {consent && <ConsentGroup blocked={isPhoto && (aiBlocked || photoBlocked)}>{consent}</ConsentGroup>}
         <ModeToggle value={draft.mode} onChange={(mode) => onChange({ mode })} />
         <SlotChips value={draft.slot} onChange={(slot) => onChange({ slot })} />
         <div className="mlm-panel" key={draft.mode}>
@@ -191,9 +192,10 @@ export function CaptureView({ draft, error, photoBlocked, aiBlocked, consent, on
       </div>
       <footer className="mlm-foot">
         <div className="mlm-feedback">{error && <p className="mlm-error">{error}</p>}</div>
-        {aiBlocked && <p className="mlm-hint" id="mlm-ai-hint">Activá el permiso de análisis con IA, arriba, para continuar.</p>}
-        <button className="mlm-cta" type="button" data-ready={ready} onClick={onAnalyze} disabled={aiBlocked} aria-describedby={aiBlocked ? 'mlm-ai-hint' : undefined}>
-          <Icon name="sparkle" size={18} />Analizar con IA
+        {isPhoto && aiBlocked && <p className="mlm-hint" id="mlm-ai-hint">Activá el permiso de análisis con IA, arriba, para continuar.</p>}
+        {textWithoutAi && <p className="mlm-hint" id="mlm-text-hint">Sin el permiso de IA guardamos tu descripción. Si lo activás arriba, estimamos alimentos y macros.</p>}
+        <button className="mlm-cta" type="button" data-ready={ready} onClick={onAnalyze} disabled={isPhoto && aiBlocked} aria-describedby={isPhoto && aiBlocked ? 'mlm-ai-hint' : textWithoutAi ? 'mlm-text-hint' : undefined}>
+          <Icon name={textWithoutAi ? 'edit' : 'sparkle'} size={18} />{textWithoutAi ? 'Registrar comida' : 'Analizar con IA'}
         </button>
       </footer>
     </>

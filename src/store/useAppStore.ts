@@ -15,34 +15,63 @@ type AppState = {
   boot: (opts?: BootOptions) => Promise<void>;
   reset: () => void;
   addPatient: (patient: Patient) => void;
+  refreshDirectory: () => Promise<void>;
   refreshPatient: (id: string) => Promise<void>;
   setActivePatient: (id: string) => void;
   selectCrmPatient: (id: string) => void;
 };
 
 const DIRECTORY_PAGE = 50;
-const DIRECTORY_MAX = 500;
+
+// mapPatient de la lista sólo actualiza perfil, seguimiento, agenda y recursos.
+// Estos campos provienen de la ficha completa: sus valores vacíos de la lista
+// no deben borrar una ficha ya cargada dentro de esta misma sesión.
+const PATIENT_DETAIL_FIELDS = [
+  'todayPlan', 'weekPlan', 'meal_logs', 'messages', 'brief', 'briefDismissed',
+  'timeline', 'habit_logs', 'activity_logs', 'hydration', 'energy',
+  'sleep_minutes', 'steps',
+] as const satisfies readonly (keyof Patient)[];
 
 let sessionGeneration = 0;
 let bootController: AbortController | null = null;
+let directoryController: AbortController | null = null;
 const refreshControllers = new Map<string, AbortController>();
 
 function abortInflight() {
   bootController?.abort();
   bootController = null;
+  directoryController?.abort();
+  directoryController = null;
   for (const controller of refreshControllers.values()) controller.abort();
   refreshControllers.clear();
 }
 
 async function loadDirectory(signal: AbortSignal): Promise<Patient[]> {
   const patients: Patient[] = [];
+  const seen = new Set<string>();
   let offset = 0;
   let hasMore = true;
-  while (hasMore && offset < DIRECTORY_MAX) {
+  while (hasMore) {
+    if (signal.aborted) throw new DOMException('Carga cancelada', 'AbortError');
     const page = await api.getPatients({ limit: DIRECTORY_PAGE, offset }, { signal });
+    if (signal.aborted) throw new DOMException('Carga cancelada', 'AbortError');
+    if (!page || !Array.isArray(page.patients) || !page.page
+      || page.page.offset !== offset || page.page.limit !== DIRECTORY_PAGE
+      || typeof page.page.has_more !== 'boolean' || page.patients.length > DIRECTORY_PAGE) {
+      throw new Error('No pudimos verificar todas las páginas de pacientes.');
+    }
+    if (page.page.has_more && page.patients.length === 0) {
+      throw new Error('La carga de pacientes no avanzó. Volvé a intentar.');
+    }
+    for (const patient of page.patients) {
+      if (!patient || typeof patient.id !== 'string' || !patient.id.trim() || seen.has(patient.id)) {
+        throw new Error('La carga de pacientes recibió una página repetida o inválida.');
+      }
+      seen.add(patient.id);
+    }
     patients.push(...page.patients);
-    hasMore = page.page?.has_more ?? false;
-    offset += page.page?.limit ?? DIRECTORY_PAGE;
+    hasMore = page.page.has_more;
+    offset += DIRECTORY_PAGE;
   }
   return patients;
 }
@@ -121,6 +150,38 @@ export const useAppStore = create<AppState>((set, get) => ({
         : [...state.patients, patient],
       activePatientId: patient.id,
     }));
+  },
+
+  refreshDirectory: async () => {
+    const generation = sessionGeneration;
+    directoryController?.abort();
+    const controller = new AbortController();
+    directoryController = controller;
+    try {
+      const patients = await loadDirectory(controller.signal);
+      if (controller.signal.aborted || generation !== sessionGeneration || directoryController !== controller) return;
+      set((state) => {
+        const activeStillExists = patients.some(patient => patient.id === state.activePatientId);
+        const previous = new Map(state.patients.map(patient => [patient.id, patient]));
+        return {
+          patients: patients.map(patient => {
+            const existing = previous.get(patient.id);
+            if (!existing) return patient;
+            const details = Object.fromEntries(PATIENT_DETAIL_FIELDS
+              .filter(field => Object.prototype.hasOwnProperty.call(existing, field))
+              .map(field => [field, existing[field]]));
+            return { ...patient, ...details };
+          }),
+          activePatientId: activeStillExists ? state.activePatientId : patients[0]?.id ?? '',
+          shoppingList: activeStillExists ? state.shoppingList : [],
+        };
+      });
+    } catch (error) {
+      if (controller.signal.aborted || isAbortError(error) || generation !== sessionGeneration || directoryController !== controller) return;
+      throw error;
+    } finally {
+      if (directoryController === controller) directoryController = null;
+    }
   },
 
   refreshPatient: async (id: string) => {

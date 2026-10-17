@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { MealLog, Patient } from '../../types';
 import { MEAL_KEPT_COPY, MealLogModal, mealLogWasKept } from './MealLogModal';
 import {
-  MEAL_SLOTS, analyzingMessages, base64Payload, captureProblem, remainingNotice, confidenceLevel, countAt, macroShares, messageAt,
+  MEAL_SLOTS, MEAL_TEXT_COPY, analyzingMessages, base64Payload, captureProblem, remainingNotice, confidenceLevel, countAt, macroShares, mealLoggedWithoutAi, messageAt,
   argentinaHour, photoProblem, resolveInitialSlot, stepProgress, suggestSlot,
 } from './meal-log-helpers';
 import { StepIndicator } from './MealLogStepper';
@@ -25,6 +25,8 @@ const KEPT_LOG: MealLog = { ...GOOD_LOG, foods: [], macros: null, analysis_statu
 describe('PV-22 diario UI', () => {
   it('muestra que el registro no se perdió cuando la estimación falla', () => {
     expect(mealLogWasKept({ foods: [], macros: null, analysis_status: 'failed' })).toBe(true);
+    expect(mealLoggedWithoutAi({ analysis_status: 'skipped' })).toBe(true);
+    expect(mealLogWasKept({ foods: [], macros: null, analysis_status: 'skipped' })).toBe(false);
     expect(mealLogWasKept({
       foods: [{ name: 'pollo', portion_est: 120, portion_unit: 'g', confidence: 0.7 }],
       macros: { kcal: 400, protein_g: 30, carbs_g: 20, fat_g: 12 },
@@ -98,6 +100,8 @@ describe('pasos y validaciones puras', () => {
     expect(captureProblem({ ...base, hasImage: false })).toBe('Subí una foto o contanos qué comiste en texto.');
     expect(captureProblem({ ...base, mode: 'text' })).toBe('Describí qué comiste.');
     expect(captureProblem({ ...base, mode: 'text', text: 'arroz', consented: null })).toBeNull();
+    expect(captureProblem({ mode: 'text', text: 'arroz', hasImage: false, consented: [] })).toBeNull();
+    expect(captureProblem({ mode: 'text', text: '', hasImage: false, consented: [] })).toBe('Describí qué comiste.');
   });
 
   it('clasifica la confianza', () => {
@@ -182,6 +186,28 @@ describe('análisis, revisión y éxito', () => {
     expect(html).toContain('pendiente de Verónica');
     expect(html).toContain('Guardar comida');
     expect(html).not.toContain('dato interno');
+  });
+
+  it('la descripción sin permiso de IA se registra y no pide el análisis', () => {
+    const html = renderToStaticMarkup(<CaptureView {...captureProps} draft={{ ...DRAFT, description: 'milanesa' }} aiBlocked />);
+    expect(html).toContain('Registrar comida');
+    expect(html).toContain('Sin el permiso de IA guardamos tu descripción');
+    expect(html).not.toContain('Analizar con IA');
+    expect(html).not.toContain('disabled=""');
+    const photo = renderToStaticMarkup(<CaptureView {...captureProps} draft={{ ...DRAFT, mode: 'photo', description: 'milanesa' }} aiBlocked />);
+    expect(photo).toContain('Analizar con IA');
+    expect(photo).toContain('disabled=""');
+  });
+
+  it('revisión de un texto sin IA dice que no se usó la estimación', () => {
+    const html = renderToStaticMarkup(<ReviewView result={{ ...KEPT_LOG, analysis_status: 'skipped' }} slot="Cena" preview={null} description="sopa" onConfirm={noop} />);
+    expect(html).toContain('Registramos tu descripción');
+    expect(html).toContain(MEAL_TEXT_COPY);
+    expect(html).not.toContain('No pudimos estimar');
+    expect(html).not.toContain('No es una medida exacta');
+    const done = renderToStaticMarkup(<SuccessView name="Ana Pérez" macros={null} withoutAi onClose={noop} />);
+    expect(done).toContain('Quedó tu descripción');
+    expect(done).not.toContain('Quedó como estimación');
   });
 
   it('revisión cuando no se pudo estimar conserva el mensaje de registro guardado', () => {

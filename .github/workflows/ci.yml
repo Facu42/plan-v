@@ -25,8 +25,31 @@ jobs:
       - run: npm run check
       - run: npm run build
       - run: npm run check:migrations
+      - run: npm run check:release-manifest
       - run: npm run check:views
       - run: npm run check:secrets
+
+  e2e:
+    name: recorridos de punta a punta
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recorridos-fallidos
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
 
   secrets:
     runs-on: ubuntu-latest
@@ -47,6 +70,9 @@ jobs:
             --output "$RUNNER_TEMP/gitleaks.tar.gz"
           printf '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  %s\n' "$RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check --strict
           tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+      - name: Verify scanner with disabled flag and synthetic canary
+        shell: bash
+        run: node scripts/test-secret-scanner.mjs "$RUNNER_TEMP/gitleaks"
       - name: Scan Git history with redacted findings
         shell: bash
         run: |

@@ -5,7 +5,7 @@ import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } fr
 import type { PrivacyRequestKind, PrivacyRequestView } from '../types/privacy';
 import { resolveApiUrl } from './origin';
 import type { NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
-import type { BillingBoard, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
+import type { BillingBoard, BillingProgram, ChargeInput, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
 
 export { ApiError } from './error';
 
@@ -32,7 +32,7 @@ async function authHeaders(): Promise<HeadersInit> {
   return headers;
 }
 
-export async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export async function request<T>(path: string, init?: RequestInit, originOverride?: string): Promise<T> {
   if (init?.signal?.aborted) {
     throw new DOMException('Aborted', 'AbortError');
   }
@@ -40,7 +40,7 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (init?.signal?.aborted) {
     throw new DOMException('Aborted', 'AbortError');
   }
-  const res = await fetch(resolveApiUrl(path), {
+  const res = await fetch(resolveApiUrl(path, originOverride), {
     ...init,
     headers: { ...headers, ...init?.headers },
   });
@@ -114,11 +114,13 @@ export const api = {
 
   updatePatientProfile: (patientId: string, data: {
     name?: string;
+    phone?: string | null;
     status?: string;
     stage?: Stage;
     sensitive_hours?: string;
     plan_b?: string;
     next_focus?: string;
+    water_goal_glasses?: number | null;
   }) => request<{ patient: Patient }>(`/api/patients/${patientId}/profile`, {
     method: 'PATCH',
     body: JSON.stringify(data),
@@ -156,6 +158,21 @@ export const api = {
   updateMeal: (patientId: string, mealId: string, data: Partial<MealLog>) =>
     request<{ log: MealLog; patient: Patient }>(`/api/patients/${patientId}/meals/${mealId}`, {
       method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  correctMeal: (patientId: string, mealId: string, data: { slot: string; description: string | null }) =>
+    request<{ log: MealLog; patient: Patient }>(`/api/patients/${patientId}/meals/${mealId}/correct`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  deleteMeal: (patientId: string, mealId: string) =>
+    request<{ deleted: boolean; patient: Patient }>(`/api/patients/${patientId}/meals/${mealId}`, { method: 'DELETE' }),
+
+  requestMealCorrection: (patientId: string, mealId: string, data: { note: string; client_id: string }) =>
+    request<{ requested: boolean; patient: Patient }>(`/api/patients/${patientId}/meals/${mealId}/correction-request`, {
+      method: 'POST',
       body: JSON.stringify(data),
     }),
 
@@ -270,6 +287,20 @@ export const api = {
   reviewPatientPayment: (paymentId: string, decision: PaymentDecision) =>
     request<{ ledger: PatientLedger }>(`/api/payments/${paymentId}`, { method: 'PATCH', body: JSON.stringify({ decision }) }),
 
+  /** Nuevo cobro: un cobro suelto con concepto para una paciente. */
+  addPatientCharge: (patientId: string, charge: ChargeInput) =>
+    request<{ ledger: PatientLedger }>(`/api/patients/${patientId}/charges`, { method: 'POST', body: JSON.stringify(charge) }),
+
+  /** Asignar programa: la cuota de la paciente toma el monto del programa; programId null la quita. */
+  assignPatientProgram: (patientId: string, programId: string | null, firstDueOn?: string) =>
+    request<{ ledger: PatientLedger }>(`/api/patients/${patientId}/program`, { method: 'PUT', body: JSON.stringify({ program_id: programId, first_due_on: firstDueOn }) }),
+
+  saveBillingProgram: (program: { name: string; amount: number }) =>
+    request<{ programs: BillingProgram[] }>('/api/billing/programs', { method: 'POST', body: JSON.stringify(program) }),
+
+  deleteBillingProgram: (programId: string) =>
+    request<{ programs: BillingProgram[] }>(`/api/billing/programs/${programId}`, { method: 'DELETE' }),
+
   setChargeWaived: (chargeId: string, waived: boolean) =>
     request<{ ledger: PatientLedger }>(`/api/charges/${chargeId}`, { method: 'PATCH', body: JSON.stringify({ waived }) }),
 
@@ -310,7 +341,7 @@ export const api = {
       body: JSON.stringify({ reader }),
     }),
 
-  logActivity: (patientId: string, data: { client_id?: string; activity: string; duration_minutes: number; intensity: 'suave' | 'moderada' | 'intensa'; note?: string }) =>
+  logActivity: (patientId: string, data: { client_id?: string; activity: string; duration_minutes: number; intensity: 'suave' | 'moderada' | 'intensa'; note?: string; kcal?: number }) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/activities`, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -327,7 +358,7 @@ export const api = {
       method: 'POST',
     }),
 
-  updateHabits: (patientId: string, data: { hydration?: number; energy?: string | null; sleep_minutes?: number; steps?: number }) =>
+  updateHabits: (patientId: string, data: { hydration?: number; energy?: string | null; sleep_minutes?: number; steps?: number; symptoms?: string[] }) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/habits`, {
       method: 'PATCH',
       body: JSON.stringify(data),

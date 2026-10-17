@@ -8,6 +8,7 @@ import { mealPlanDraftSchema, mealPlanPublishSchema } from '../../src/types/plan
 import * as repo from './repository.js';
 import { recipeCoverEnabled } from '../ai/recipe-cover.js';
 import { patientPlanWithPhotos } from '../recipes/ingredient-covers.js';
+import { notifyPatientPush } from '../push/push.js';
 
 async function body<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
   const raw = await c.req.text();
@@ -70,8 +71,18 @@ export function registerPlanRoutes(app: Hono) {
       const plan = await repo.getProfessionalMealPlan(nutritionistId, id, persistent);
       return c.json({ plan, source: persistent ? 'supabase' : 'memory', image_generation: recipeCoverEnabled() });
     }
-    const plan = await patientPlanWithPhotos(await repo.getPublishedMealPlan(id, persistent), persistent);
-    return c.json({ plan, source: persistent ? 'supabase' : 'memory' });
+    const published = await repo.readPublishedMealPlan(id, persistent);
+    const plan = await patientPlanWithPhotos(published.plan, persistent);
+    return c.json({ plan, handover: published.handover, source: persistent ? 'supabase' : 'memory' });
+  });
+
+  app.post('/api/patients/:id/plans/handover-seen', async (c) => {
+    const id = c.req.param('id');
+    const access = await readAccess(c, id);
+    if (access.professional) throw new repo.CareError(403, 'No tenés permiso para esta acción.');
+    const published = await repo.markMealPlanHandoverSeen(id, access.persistent);
+    const plan = await patientPlanWithPhotos(published.plan, access.persistent);
+    return c.json({ plan, handover: published.handover, source: access.persistent ? 'supabase' : 'memory' });
   });
 
   app.post('/api/patients/:id/plans', async (c) => {
@@ -88,6 +99,7 @@ export function registerPlanRoutes(app: Hono) {
     const { persistent, nutritionistId } = await professional(c);
     const input = await body(c, mealPlanPublishSchema);
     const plan = await repo.publishMealPlan(nutritionistId, id.data, input.expected_version, persistent, input.expected_snapshot);
+    if (persistent) notifyPatientPush(plan.patient_id, 'plan');
     return c.json({ plan, source: persistent ? 'supabase' : 'memory' });
   });
 }

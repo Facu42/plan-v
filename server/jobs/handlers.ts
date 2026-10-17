@@ -5,6 +5,7 @@ import { currentCareConsents, requireCareConsent } from '../care/consents.js';
 import * as repo from '../care/repository.js';
 import { purgePrivateAsset } from '../assets/repository.js';
 import { anonymizePatientLater } from '../privacy/repository.js';
+import { purgeConsultationAudioForPatient } from '../consultations/repository.js';
 import * as sb from '../db/supabase-repo.js';
 import { getPatient } from '../store.js';
 import { PermanentJobError } from './errors.js';
@@ -24,6 +25,7 @@ export async function handleProcessingJob(job: ProcessingJob) {
   }
   if (job.kind === 'privacy_export') return;
   if (job.kind === 'privacy_delete') {
+    await purgeConsultationAudioForPatient(String(job.payload.patient_id ?? ''), Boolean(job.payload.persistent));
     await anonymizePatientLater(job.payload);
     return;
   }

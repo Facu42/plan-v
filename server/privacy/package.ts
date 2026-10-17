@@ -11,6 +11,8 @@ import * as sb from '../db/supabase-repo.js';
 import { PRIVACY_EXPORT_VERSION, type PrivacyAssetMeta } from '../../src/types/privacy.js';
 import { retentionRulesForExport } from './retention.js';
 import type { Patient } from '../../src/types/index.js';
+import { consultationView } from '../consultations/repository.js';
+import type { ConsultationSharedSummary } from '../../src/types/consultations.js';
 
 const FORBIDDEN_KEYS = ['clinical_notes', 'adherence_why', 'ai_artifacts', 'brief', 'goal_history', 'note_for_nutri'];
 
@@ -94,6 +96,13 @@ async function loadPatient(patientId: string, persistent: boolean): Promise<Pati
 }
 
 export async function buildPrivacyPackage(patientId: string, persistent: boolean) {
+  const consultationSummaries: ConsultationSharedSummary[] = [];
+  for (;;) {
+    const page = await consultationView(patientId, false, persistent, consultationSummaries.length, 100);
+    consultationSummaries.push(...page.shared);
+    if (!page.has_more) break;
+    if (!page.shared.length) throw new Error('consultation_export_incomplete');
+  }
   const patient = await loadPatient(patientId, persistent);
   const profile = patient ? stripLiveUrls(toPatientSelfView(patient)) : { id: patientId };
   const intakeBundle = persistent
@@ -115,6 +124,7 @@ export async function buildPrivacyPackage(patientId: string, persistent: boolean
     meals,
     messages,
     measurements,
+    consultation_summaries: consultationSummaries,
     assets: await assetMeta(patientId, persistent),
     retained: {
       payments: 'Pagos y webhooks no se exportan ni se borran con un click (guarda fiscal).',

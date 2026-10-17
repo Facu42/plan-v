@@ -1,18 +1,21 @@
 import type { Patient } from '../../types';
 import { buildJourneySummary } from '../patient/journey-summary';
+import { buildStreak } from '../../features/nutrigo/streak';
+import { waterGoalOf } from '../../types/water';
 
 const normalize = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 export function filterShowroomPatients(patients: readonly Patient[], query = '') {
   return patients.filter((p) => !p.archived_at && normalize(`${p.name} ${p.goal}`).includes(normalize(query)));
 }
 
+// countPending: la paciente suma lo que carga al instante (estimado); la revisión profesional corrige después.
 // Explicit allowlist: the preview must not display professional notes in patient mode.
-export function buildShowroomPatient(patient: Patient, now = new Date()) {
+export function buildShowroomPatient(patient: Patient, now = new Date(), countPending = false) {
   const meals = patient.meal_logs.filter((log) => log.patient_id === patient.id);
   const habits = patient.habit_logs.filter((log) => log.patient_id === patient.id);
   const journey = buildJourneySummary({ meal_logs: meals, habit_logs: habits }, now);
   const todayIds = new Set(journey.days[journey.days.length - 1]?.mealLogIds ?? []);
-  const nutritionLogs = meals.filter((log) => todayIds.has(log.id) && log.status !== 'pending_review' && log.macros != null);
+  const nutritionLogs = meals.filter((log) => todayIds.has(log.id) && (countPending || log.status !== 'pending_review') && log.macros != null);
   const macros = nutritionLogs.reduce((sum, log) => ({
     kcal: sum.kcal + (log.macros?.kcal ?? 0),
     protein_g: sum.protein_g + (log.macros?.protein_g ?? 0),
@@ -21,12 +24,16 @@ export function buildShowroomPatient(patient: Patient, now = new Date()) {
   }), { kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 });
   return {
     id: patient.id, name: patient.name, initials: patient.initials,
-    goal: patient.goal, goalProgress: patient.goal_progress ?? 0,
-    hydration: patient.hydration, energy: patient.energy ?? 'Sin registro',
+    goal: patient.goal,
+    goalStatus: patient.goal_status ?? null,
+    goalProgress: patient.goal_progress ?? null,
+    goalUpdatedAt: patient.goal_updated_at ?? null,
+    goalUpdates: (patient.goal_updates ?? patient.goal_history ?? []).map(({ id, goal, status, progress, updated_at }) => ({ id, goal, status, progress, updated_at })),
+    hydration: patient.hydration, waterGoal: waterGoalOf(patient), energy: patient.energy ?? 'Sin registro',
     sleep: patient.sleep_minutes === null ? 'Sin registro' : `${Math.round(patient.sleep_minutes / 6) / 10} h`,
     sleepMinutes: patient.sleep_minutes,
     steps: patient.steps ?? null,
-    adherence: patient.adherence_score, macros, kcal: macros.kcal, nutritionLogCount: nutritionLogs.length, nutritionEstimated: nutritionLogs.some(log=>log.nutrition_origin==='ai_estimate'), journey,
+    adherence: patient.adherence_score, macros, kcal: macros.kcal, nutritionLogCount: nutritionLogs.length, nutritionEstimated: nutritionLogs.some(log=>log.nutrition_origin==='ai_estimate'), journey, streak: buildStreak(meals, habits, now),
     appointment: patient.appointment ? {
       when: patient.appointment.when,
       duration: patient.appointment.duration,
@@ -51,6 +58,7 @@ export function buildShowroomPatient(patient: Patient, now = new Date()) {
         id, text, from, sent_at, delivered_at: delivered_at ?? null, read_at: read_at ?? null,
         ...(attachment ? { attachment } : {}),
       })),
+    archived: Boolean(patient.archived_at),
   };
 }
 export type ShowroomPatient = ReturnType<typeof buildShowroomPatient>;

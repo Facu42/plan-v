@@ -77,7 +77,7 @@ export type Macros = {
   fat_g: number;
 };
 
-export type MealAnalysisStatus = 'pending' | 'succeeded' | 'failed';
+export type MealAnalysisStatus = 'pending' | 'succeeded' | 'failed' | 'skipped';
 
 export type MealLog = {
   nutrition_origin?: 'declared' | 'ai_estimate';
@@ -152,6 +152,8 @@ export type HabitLog = {
   sleep_minutes: number | null;
   /** Pasos del día declarados por la paciente (no se importan de dispositivos). */
   steps?: number | null;
+  /** Síntomas del día marcados por la paciente (claves de src/types/symptoms.ts). */
+  symptoms?: string[];
 };
 
 export type ActivityLog = {
@@ -162,6 +164,7 @@ export type ActivityLog = {
   intensity: 'suave' | 'moderada' | 'intensa';
   note: string | null;
   logged_at: string;
+  kcal?: number | null;
 };
 
 export type ResourceAssignment = {
@@ -173,6 +176,7 @@ export type ResourceAssignment = {
 };
 
 export type Patient = {
+  phone?: string | null;
   weekly_registration?: WeeklyRegistration | null;
   id: string;
   name: string;
@@ -195,6 +199,8 @@ export type Patient = {
   sensitive_hours: string;
   plan_b: string;
   next_focus: string;
+  /** Meta de agua que eligió la nutri (vasos por día); sin dato, 8. */
+  water_goal_glasses?: number | null;
   adherence_score: number;
   adherence_why: string;
   time: string;
@@ -203,6 +209,7 @@ export type Patient = {
   sleep_minutes: number | null;
   steps?: number | null;
   appointment: {
+    id?: string;
     when: string;
     duration: number;
     channel: string;
@@ -887,7 +894,7 @@ export function removeMenuSlot(id: string, day: string, slot: string): Patient |
 
 export function addActivityLog(
   id: string,
-  input: Pick<ActivityLog, 'activity' | 'duration_minutes' | 'intensity'> & { note?: string },
+  input: Pick<ActivityLog, 'activity' | 'duration_minutes' | 'intensity'> & { note?: string; kcal?: number },
 ): Patient | undefined {
   const patient = getPatient(id);
   if (!patient) return undefined;
@@ -900,6 +907,7 @@ export function addActivityLog(
     intensity: input.intensity,
     note: input.note?.trim() || null,
     logged_at: loggedAt,
+    ...(input.kcal != null ? { kcal: input.kcal } : {}),
   };
   const timeline: TimelineEvent[] = [{
     id: randomUUID(), kind: 'activity', atLabel: 'HOY',
@@ -972,7 +980,7 @@ export function updatePatient(id: string, patch: Partial<Patient>): Patient | un
 
 export function setPatientProfile(
   id: string,
-  input: Partial<Pick<Patient, 'name' | 'status' | 'stage' | 'sensitive_hours' | 'plan_b' | 'next_focus'>>,
+  input: Partial<Pick<Patient, 'name' | 'phone' | 'status' | 'stage' | 'sensitive_hours' | 'plan_b' | 'next_focus' | 'water_goal_glasses'>>,
 ): Patient | undefined {
   const patient = getPatient(id);
   if (!patient) return undefined;
@@ -1080,7 +1088,7 @@ export function recalculateAdherence(id: string): Patient | undefined {
   return updatePatient(id, { adherence_score: score, adherence_why: why });
 }
 
-export function upsertHabitLog(id: string, patch: { hydration?: number; energy?: string | null; sleep_minutes?: number; steps?: number }): Patient | undefined {
+export function upsertHabitLog(id: string, patch: { hydration?: number; energy?: string | null; sleep_minutes?: number; steps?: number; symptoms?: string[] }): Patient | undefined {
   const patient = getPatient(id);
   if (!patient) return undefined;
 

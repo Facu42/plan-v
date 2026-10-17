@@ -14,6 +14,7 @@ const PUBLIC_API_PATHS = new Set([
   '/api/auth/recover',
   '/api/ops/nutritionists',
   '/api/alcance',
+  '/api/public/communications/email-unsubscribe',
 ]);
 
 export function resolveRequestAuth(input: {
@@ -22,7 +23,7 @@ export function resolveRequestAuth(input: {
   verifiedUserId: string | null;
   allowDemo: boolean;
 }): RequestAuthDecision {
-  if (PUBLIC_API_PATHS.has(input.path) || input.path.startsWith('/api/assets/blob/')) return { kind: 'public' };
+  if (PUBLIC_API_PATHS.has(input.path) || input.path.startsWith('/api/assets/blob/') || input.path.startsWith('/api/public/scheduling/')) return { kind: 'public' };
   if (!input.supabaseEnabled) return input.allowDemo ? { kind: 'demo' } : { kind: 'unavailable' };
   if (input.verifiedUserId) return { kind: 'user', userId: input.verifiedUserId };
   return { kind: 'unauthorized' };
@@ -37,6 +38,8 @@ export type PatientAction =
   | 'read_patient'
   | 'read_clinical'
   | 'analyze_meal'
+  | 'correct_own_meal'
+  | 'correct_own_measurement'
   | 'review_meal'
   | 'update_habits'
   | 'log_activity'
@@ -87,6 +90,8 @@ const PATIENT_ACTIONS = new Set<PatientAction>([
   'read_self',
   'read_patient',
   'analyze_meal',
+  'correct_own_meal',
+  'correct_own_measurement',
   'update_habits',
   'log_activity',
   'delete_activity',
@@ -211,7 +216,7 @@ function publicAppointment(appointment: Patient['appointment']): Patient['appoin
 }
 
 function publicHabitLogs(logs: Patient['habit_logs']): Patient['habit_logs'] {
-  return logs.map(({ id, patient_id, date, hydration, energy, sleep_minutes, steps }) => ({
+  return logs.map(({ id, patient_id, date, hydration, energy, sleep_minutes, steps, symptoms }) => ({
     id,
     patient_id,
     date,
@@ -219,6 +224,7 @@ function publicHabitLogs(logs: Patient['habit_logs']): Patient['habit_logs'] {
     energy,
     sleep_minutes,
     steps: steps ?? null,
+    symptoms: symptoms ?? [],
   }));
 }
 
@@ -268,6 +274,11 @@ function publicWeekPlan(plan: Patient['weekPlan']): Patient['weekPlan'] {
   }));
 }
 
+function publicGoalUpdates(patient: Patient): NonNullable<Patient['goal_updates']> {
+  const source = patient.goal_updates ?? patient.goal_history ?? [];
+  return source.map(({ id, goal, status, progress, updated_at }) => ({ id, goal, status, progress, updated_at }));
+}
+
 export function toPatientSelfView(patient: Patient): PatientSelfView {
   const billing_status = resolveBillingStatus(patient);
   const messages = patient.messages
@@ -288,12 +299,14 @@ export function toPatientSelfView(patient: Patient): PatientSelfView {
     goal_status: patient.goal_status,
     goal_progress: patient.goal_progress,
     goal_updated_at: patient.goal_updated_at,
+    goal_updates: publicGoalUpdates(patient),
     sensitive_hours: '',
     plan_b: '',
     next_focus: '',
     adherence_score: patient.adherence_score,
     time: patient.time,
     hydration: patient.hydration,
+    water_goal_glasses: patient.water_goal_glasses ?? null,
     energy: patient.energy,
     sleep_minutes: patient.sleep_minutes,
     steps: patient.steps ?? null,
@@ -318,12 +331,17 @@ export function toPatientSelfView(patient: Patient): PatientSelfView {
     status: '',
     stage: 'ingreso',
     goal: '',
+    goal_status: undefined,
+    goal_progress: undefined,
+    goal_updated_at: null,
+    goal_updates: [],
     sensitive_hours: '',
     plan_b: '',
     next_focus: '',
     adherence_score: 0,
     time: '',
     hydration: 0,
+    water_goal_glasses: null,
     energy: null,
     sleep_minutes: null,
     steps: null,

@@ -16,3 +16,10 @@ id = "generic-api-key"
 description = "Exact historical Figma file identifier, not an API credential"
 regexTarget = "secret"
 regexes = ['''^OTolnKfsxUFjaZOhhdb04i$''']
+
+[[rules.allowlists]]
+description = "Historical empty Groq key captured the next disabled verification flag; no credential"
+condition = "AND"
+regexTarget = "secret"
+paths = ['''(^|/)\.env\.example$''']
+regexes = ['''^GROQ_ZDR_VERIFIED=0$''']

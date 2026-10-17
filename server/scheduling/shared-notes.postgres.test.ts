@@ -1,0 +1,25 @@
+import {beforeAll,afterAll,describe,it,expect} from 'vitest';
+import {PGlite} from '@electric-sql/pglite';
+import {readFile} from 'node:fs/promises';
+const owner='00000000-0000-4000-a000-000000000001',delegate='00000000-0000-4000-a000-000000000002',other='00000000-0000-4000-a000-000000000003',reception='00000000-0000-4000-a000-000000000004',patientUser='00000000-0000-4000-a000-000000000005',admin='00000000-0000-4000-a000-000000000006';
+const pid='10000000-0000-4000-a000-000000000001',foreign='10000000-0000-4000-a000-000000000002';let db:PGlite;
+type Page={notes:Array<{id:string;version:number;body:string}>;has_more:boolean;next_before_version:number|null};
+async function actor(user:string,query:string,values:unknown[]=[]){return db.transaction(async tx=>{await tx.exec('set local role authenticated');await tx.query("select set_config('request.jwt.claim.sub',$1,true)",[user]);return(await tx.query(query,values)).rows;});}
+async function page(user:string=delegate,before:number|null=null,target=pid){return(await actor(user,'select public.scheduling_shared_notes($1,$2,50) result',[target,before]))[0] as {result:Page};}
+beforeAll(async()=>{db=new PGlite();await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;create schema auth;grant usage on schema public,auth to authenticated,service_role;
+ create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+ create table public.patients(id uuid primary key,nutritionist_id uuid,deactivated_at timestamptz,anonymized_at timestamptz);
+ create table public.clinical_notes(id uuid primary key default gen_random_uuid(),patient_id uuid,version integer,body text,created_at timestamptz default now());
+ create table public.shared_links(patient_id uuid,user_id uuid,revoked boolean default false,organization_active boolean default true);
+ create function public.scheduling_owns(nid uuid) returns boolean language sql stable security definer set search_path='' as $$select auth.uid()=nid$$;
+ create function public.scheduling_can_read_shared(pid uuid) returns boolean language sql stable security definer set search_path='' as $$select exists(select 1 from public.shared_links where patient_id=pid and user_id=auth.uid() and not revoked and organization_active)$$;
+ insert into public.patients(id,nutritionist_id) values('${pid}','${owner}'),('${foreign}','${other}');insert into public.shared_links(patient_id,user_id) values('${pid}','${delegate}');
+ insert into public.clinical_notes(patient_id,version,body) select '${pid}',n,'Nota ficticia '||n from generate_series(1,121)n;`);
+ try{await db.exec(await readFile(new URL('../../supabase/migrations/20261013110000_shared_notes_pagination.sql',import.meta.url),'utf8'));}catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+},60000);afterAll(async()=>{await db?.close();});
+describe('notas compartidas completas con autorización por página',()=>{
+ it('lee 121 notas sin duplicar ni omitir antiguas aunque se agregue una nueva entre páginas',async()=>{const first=(await page()).result;expect(first.notes).toHaveLength(50);expect(first.next_before_version).toBe(72);expect(first.has_more).toBe(true);await db.query('insert into public.clinical_notes(patient_id,version,body)values($1,122,$2)',[pid,'Nota nueva']);const second=(await page(delegate,first.next_before_version)).result,third=(await page(delegate,second.next_before_version)).result;expect([...first.notes,...second.notes,...third.notes].map(n=>n.version)).toEqual(Array.from({length:121},(_,i)=>121-i));expect(third.next_before_version).toBeNull();expect(third.has_more).toBe(false);});
+ it('permite titular y asignada; no habilita otro consultorio, recepción, paciente ni administrador',async()=>{expect((await page(owner)).result.notes).toHaveLength(50);for(const user of [other,reception,patientUser,admin])await expect(page(user)).rejects.toThrow();await expect(page(delegate,null,foreign)).rejects.toThrow();await expect(actor(delegate,'select * from public.clinical_notes')).rejects.toThrow();});
+ it('retirar asignación, membresía o cuenta entre páginas bloquea la continuación',async()=>{await db.exec('update public.shared_links set revoked=true');await expect(page(delegate,72)).rejects.toThrow();await db.exec('update public.shared_links set revoked=false,organization_active=false');await expect(page(delegate,72)).rejects.toThrow();await db.exec('update public.shared_links set organization_active=true');await db.query('update public.patients set deactivated_at=now() where id=$1',[pid]);await expect(page(delegate,72)).rejects.toThrow();await expect(page(owner,72)).rejects.toThrow();await db.query('update public.patients set deactivated_at=null where id=$1',[pid]);});
+ it('rechaza límites y cursores inválidos',async()=>{for(const [before,limit]of [[0,50],[72,101],[72,0]])await expect(actor(delegate,'select public.scheduling_shared_notes($1,$2,$3)',[pid,before,limit])).rejects.toThrow();});
+});

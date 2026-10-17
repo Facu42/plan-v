@@ -15,6 +15,7 @@ import {
   type ProfessionalModel,
 } from '../../types/models';
 import { componentGrams, componentTitle } from '../../types/plan-components';
+import { foodQuantityUnit } from '../../types/foods';
 import {
   recipeNutritionLabel,
   type ProposedRecipe,
@@ -160,7 +161,7 @@ export function ModelContent({ copy }: { copy: ModelCopy }) {
                     <li key={c.id}>
                       {componentTitle(c)}
                       {c.kind === 'food'
-                        ? ` · ${c.quantity} ${c.measure ?? 'g'}`
+                        ? ` · ${c.quantity} ${c.measure ?? (c.food_snapshot?foodQuantityUnit(c.food_snapshot):'g')}`
                         : c.kind === 'recipe' || c.recipe_proposal
                           ? ` · ${c.portions} porciones`
                           : ''}
@@ -225,7 +226,7 @@ export function ModelContent({ copy }: { copy: ModelCopy }) {
     </div>
   );
 }
-function Editor({
+export function Editor({
   model,
   kind,
   patients,
@@ -442,7 +443,7 @@ function Editor({
                     )}
                     <small>
                       {c.kind === 'food'
-                        ? (c.measure ?? 'g')
+                        ? (c.measure ?? (c.food_snapshot ? foodQuantityUnit(c.food_snapshot) : 'g'))
                         : c.kind === 'recipe' || c.recipe_proposal
                           ? 'porciones'
                           : ''}

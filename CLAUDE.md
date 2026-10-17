@@ -1,6 +1,9 @@
 # Plan V · reglas permanentes para Claude Code
 
-Empezá por `AGENTS.md`, `docs/traspaso-estado-proyecto.md` y `docs/agentes/reglas-plan-v.md`.
+Antes de cambiar código, leé y seguí `.claude/skills/regression-guard/SKILL.md` y poné el informe del paso 10 en el PR.
+
+Empezá por `AGENTS.md`, `docs/coordinacion-agentes.md` (carriles con Codex: no pisar su trabajo),
+`docs/traspaso-estado-proyecto.md`, `docs/producto/` y `docs/agentes/reglas-plan-v.md`.
 Este archivo suma las reglas de diseño que pidió Facundo el 2026-10-09; no reemplaza a las otras.
 Respuestas a Facundo en español simple, sin jerga ni nombres de variables.
 
@@ -10,6 +13,7 @@ Archivo de Figma: `OTolnKfsxUFjaZOhhdb04i` (Nutrigo). Página "Interface", frame
 Escritorio 1440 y celular 390; tablet no se desarrolla por ahora.
 
 1. **Figma Nutrigo es la única fuente de verdad visual.** No reinterpretar, modernizar ni modificar su diseño.
+   La app de la paciente es igual a Nutrigo **con sus colores** (lima `#C2E66E`): regla fija de Facundo (14/10/2026).
 2. **Plan V es la fuente de verdad funcional.** Conservar backend, API, base de datos, autenticación,
    reglas de negocio y funciones existentes.
 3. **Antes de tocar una pantalla, leerla del archivo** con el MCP de Figma (`get_design_context`, cargando antes

@@ -3,16 +3,18 @@ import { FramePair } from '../FramePair';
 import { nodeName, sourceText, type SourceBinding, type SourceNode, type SourceResolver } from '../SourceView';
 import { progressApi } from '../../../api/progress';
 import { careApi } from '../../../api/care';
+import { exerciseApi } from '../../../api/exercise';
 import { nutritionTargetApi } from '../../../api/nutrition-target';
 import { latestMeasurementSeries } from '../../../lib/measurement-display';
 import type { CareRecord } from '../../../types/care';
 import { PROGRESS_PERIODS, type ProgressPeriodDays, type ProgressPoint, type ProgressSeries } from '../../../types/progress';
 import { dateLabel, descendants, EmptyState, errorText, formatNumber, leaf, objects, source, Stateful, useRemote, type ScreenProps } from './shared';
 import { attachmentHref } from './message-format';
-import { dayOfIso, cleanAmount, litresLabel, percentLabel, safePercent } from './home-values';
+import { burnedKcalOn, dayOfIso, cleanAmount, litresLabel, percentLabel, safePercent } from './home-values';
+import { PatientGoalCard } from '../PatientGoalCard';
+import { waterGoalOf } from '../../../types/water';
 
 /** Un vaso son 250 ml. Plan V no guarda una meta de agua: los porcentajes usan la referencia general de 8 vasos (2 L), igual que en Inicio. */
-const WATER_GOAL_GLASSES = 8;
 /** El gráfico de descanso va de 0 a 10 horas (las cinco marcas del archivo). */
 const SLEEP_SCALE_MINUTES = 600;
 const SLEEP_STAGE_PX = 161;
@@ -82,8 +84,8 @@ type Props = ScreenProps & { onRecord?: () => void; onHydration?: () => void; on
 export function NutrigoProgress({ patient, onNavigate, onSignOut, onRecord, onHydration, onRest }: Props) {
   const [days, setDays] = useState<ProgressPeriodDays>(30);
   const remote = useRemote(`${patient.id}:${days}`, async signal => {
-    const [progress, care, target] = await Promise.all([progressApi.get(patient.id, days, signal), careApi.snapshot(patient.id, false, signal), nutritionTargetApi.get(patient.id, false, signal).then(result => result.target, () => null)]);
-    return { progress: progress.progress, care, target };
+    const [progress, care, target, activities] = await Promise.all([progressApi.get(patient.id, days, signal), careApi.snapshot(patient.id, false, signal), nutritionTargetApi.get(patient.id, false, signal).then(result => result.target, () => null), exerciseApi.get(patient.id, false, signal).then(result => result.exercise.activities, () => null)]);
+    return { progress: progress.progress, care, target, activities };
   });
   useEffect(() => { const update = () => remote.reload(); window.addEventListener('plan-v:care-changed', update); return () => window.removeEventListener('plan-v:care-changed', update); }, [remote.reload]);
   const [error, setError] = useState(''); const [opening, setOpening] = useState<string | null>(null);
@@ -116,13 +118,14 @@ export function NutrigoProgress({ patient, onNavigate, onSignOut, onRecord, onHy
 
   // Hábitos de los últimos siete días que ya registró la paciente.
   const week = patient.journey?.days ?? [];
-  const kcalOn = (date: string) => patient.logs.filter(log => dayOfIso(log.logged_at) === date && log.status !== 'pending_review' && log.macros).reduce((sum, log) => sum + (cleanAmount(log.macros?.kcal) ?? 0), 0);
-  const burnedOn = (date: string) => (remote.data?.care.records ?? []).reduce((sum, row) => sum + (row.recorded_on === date && row.data.kind === 'activity' ? cleanAmount(row.data.kcal) ?? 0 : 0), 0);
+  const kcalOn = (date: string) => patient.logs.filter(log => dayOfIso(log.logged_at) === date && log.macros).reduce((sum, log) => sum + (cleanAmount(log.macros?.kcal) ?? 0), 0);
+  const burnedOn = (date: string) => burnedKcalOn(date, remote.data?.activities ?? patient.activities ?? [], remote.data?.care.records ?? []);
   const calorieDays = week.slice(-4).map(day => ({ date: day.date, eaten: kcalOn(day.date), burned: burnedOn(day.date) }));
   const target = cleanAmount(remote.data?.target?.result?.kcal) || null;
   const today = calorieDays[calorieDays.length - 1];
   const scale = Math.max(2000, Math.ceil(Math.max(target ?? 0, ...calorieDays.flatMap(day => [day.eaten, day.burned])) / 500) * 500);
   const sleepDays = week.slice(-5).map(day => ({ ...day, sleepMinutes: cleanAmount(day.sleepMinutes) }));
+  const waterGoal = waterGoalOf({ water_goal_glasses: patient.waterGoal });
   const waterDays = week.slice(-7).map(day => ({ ...day, hydration: cleanAmount(day.hydration) ?? 0 }));
   const waterTotal = waterDays.reduce((sum, day) => sum + day.hydration, 0);
   const waterAverage = waterDays.length ? waterTotal / waterDays.length : 0;
@@ -297,9 +300,9 @@ export function NutrigoProgress({ patient, onNavigate, onSignOut, onRecord, onHy
       if (columns.includes(child)) {
         const day = waterDays[columns.indexOf(child) - (columns.length - waterDays.length)];
         const glasses = day?.hydration ?? 0;
-        const pct = safePercent(glasses, WATER_GOAL_GLASSES) ?? 0;
+        const pct = safePercent(glasses, waterGoal) ?? 0;
         return { children: inner(child, grand => {
-          if (isNamed(grand, 'Amount')) return { props: { style: { flex: `${100 - pct} 1 0%`, paddingTop: 0 } }, children: inner(grand, part => leaf(part) ? { text: percentLabel(glasses, WATER_GOAL_GLASSES) } : undefined) };
+          if (isNamed(grand, 'Amount')) return { props: { style: { flex: `${100 - pct} 1 0%`, paddingTop: 0 } }, children: inner(grand, part => leaf(part) ? { text: percentLabel(glasses, waterGoal) } : undefined) };
           if (isNamed(grand, 'Bar 1')) return { props: { style: { flex: `${pct} 1 0%` } } };
           if (leaf(grand) && /^\d+\.\d L$/.test(sourceText(grand))) return { text: day ? litres(glasses) : '' };
           if (is(grand, 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')) return { text: day ? weekday(day.date) : '' };
@@ -323,6 +326,7 @@ export function NutrigoProgress({ patient, onNavigate, onSignOut, onRecord, onHy
     return undefined;
   };
   return <FramePair nodes={['105:2790', '498:18237']} resolve={resolver} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut}>
+    <PatientGoalCard patient={patient} history />
     {remote.error && <Stateful error={remote.error} onRetry={remote.reload} />}{error && <Stateful error={error} />}
   </FramePair>;
 }

@@ -5,15 +5,15 @@ import { AIUnavailableError } from './errors.js';
 import { logProviderFailure, resolveAiMode } from './mode.js';
 import { getAiModel } from './provider.js';
 
-const COPILOT_SYSTEM = `Sos el copiloto de ficha de Plan V para Lic. Verónica Trenti (nutricionista, Argentina).
+const COPILOT_SYSTEM = `Sos el copiloto de ficha de Plan V para la profesional autorizada del consultorio (nutricionista, Argentina).
 Generás Up next y adherence_why. No diagnosticás, no recetás, no hablás al paciente directamente.
 Devolvé solo JSON válido.
 
 Reglas:
 - suggested_action ∈ mensaje | ajuste_menu | turno | null
 - up_next_title fijo: "Mandarle un mensaje" | "Ajustar el menú" | "Proponer un turno" | null
-- up_next_body ≤ 240 chars, tono profesional rioplatense, para Vero
-- draft_message solo si action = mensaje. Habla como Vero, humano, no clínico-legal
+- up_next_body ≤ 240 chars, tono profesional rioplatense, para la profesional
+- draft_message solo si action = mensaje. Proponé un texto humano para que la profesional lo revise, sin atribuirle una identidad ni una firma
 - Si no hay nada accionable: suggested_action, up_next_title, up_next_body, draft_message = null
 - adherence_why ≤ 160 chars con números y huecos. No recalcules el score.
 - pending_review se menciona como "N fotos sin revisar". No es adherencia.`;

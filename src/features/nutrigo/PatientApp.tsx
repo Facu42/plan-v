@@ -30,6 +30,7 @@ import { HABIT_LIMITS, parseHabitInput } from '../../lib/habit-input';
 import { PatientAiPermissions } from './PatientAiPermissions';
 import { canLeaveWorkspace,useUnsavedChanges } from '../../components/nutrigo/unsaved-changes';
 import { patientExtraBinding } from './patient-extra-binding';
+import { usePatientLiveRefresh } from './use-live-refresh';
 
 function HabitForm({patient,kind,onClose}:{patient:ShowroomPatient;kind:'water'|'rest'|'steps';onClose:()=>void}) {
   const initial=kind==='water'?String(patient.hydration):kind==='steps'?patient.steps==null?'':String(patient.steps):patient.sleepMinutes==null?'':String(patient.sleepMinutes);
@@ -41,6 +42,8 @@ function HabitForm({patient,kind,onClose}:{patient:ShowroomPatient;kind:'water'|
 }
 export function NutrigoPatientApp({patient,page,onNavigate,onSignOut,onEditIntake,query='',now=new Date(),onConfirm,onReschedule,demoRoleSwitch}:{patient:ShowroomPatient;page:ShowroomPage;onNavigate:(page:ShowroomPage)=>void;onSignOut?:()=>void;onEditIntake:()=>void;query?:string;now?:Date;onConfirm:(reply:'attending'|'needs_change')=>Promise<void>;onReschedule:(day:string,time:string)=>Promise<void>;demoRoleSwitch?:()=>void}) {
   const fullPatient=useAppStore(state=>state.patients.find(item=>item.id===patient.id));
+  const refreshPatient=useAppStore(state=>state.refreshPatient);
+  usePatientLiveRefresh(patient.id,page==='mensajes',refreshPatient);
   const [dialog,setDialog]=useState<'records'|'water'|'rest'|'steps'|null>(null),[slot,setSlot]=useState<string|null>(null),[privacy,setPrivacy]=useState(false);
   const common={patient,onNavigate,onSignOut,query,now};
   const onRecord=()=>setDialog('records'),onHydration=()=>setDialog('water'),onRest=()=>setDialog('rest'),onSteps=()=>setDialog('steps'),onLogMeal=(mealSlot:string=suggestSlot(argentinaHour(new Date())))=>setSlot(mealSlot);
@@ -48,7 +51,7 @@ export function NutrigoPatientApp({patient,page,onNavigate,onSignOut,onEditIntak
   if(page==='inicio')screen=<NutrigoHome {...common} onRecord={onRecord} onHydration={onHydration} onRest={onRest} onSteps={onSteps} onLogMeal={onLogMeal}/>;
   else if(page==='recetas')screen=<NutrigoMenu {...common}/>;
   else if(page==='plan')screen=<NutrigoPlan {...common}/>;
-  else if(page==='diario')screen=<NutrigoDiary {...common} onLogMeal={onLogMeal} onHydration={onHydration} onRest={onRest}/>;
+  else if(page==='diario')screen=<NutrigoDiary {...common} onLogMeal={onLogMeal} onHydration={onHydration} onRest={onRest} onSteps={onSteps}/>;
   else if(page==='agenda')screen=<NutrigoAgenda {...common} onConfirm={onConfirm} onReschedule={onReschedule}/>;
   else if(page==='progreso')screen=<NutrigoProgress {...common} onRecord={onRecord} onHydration={onHydration} onRest={onRest}/>;
   else if(page==='ejercicio')screen=<NutrigoExercise {...common}/>;
@@ -75,7 +78,7 @@ export function NutrigoPatientApp({patient,page,onNavigate,onSignOut,onEditIntak
       </>}
     </section>};
   }}/>;
-  return <FeeNoticeProvider patientId={patient.id}><PatientNoticesProvider patient={patient}>{screen}{demoRoleSwitch&&<div className="mcp-nutrigo mcp-screen-state"><button className="mcp-action" onClick={demoRoleSwitch}>Ver consultorio de demostración</button></div>}
+  return <FeeNoticeProvider patientId={patient.id}><PatientNoticesProvider patient={patient} patientId={patient.id}>{screen}{demoRoleSwitch&&<div className="mcp-nutrigo mcp-screen-state"><button className="mcp-action" onClick={demoRoleSwitch}>Ver consultorio de demostración</button></div>}
     <div className="mcp-patient-overlays">
     {dialog==='records'&&<FigmaRecordDialog title="Mis registros" onClose={()=>{if(canLeaveWorkspace())setDialog(null);}}><PatientBodyDataCard patientId={patient.id} forceOpen onSaved={notifyCareChanged}/><CarePanel patientId={patient.id}/></FigmaRecordDialog>}
     {(dialog==='water'||dialog==='rest'||dialog==='steps')&&<HabitForm patient={patient} kind={dialog} onClose={()=>setDialog(null)}/>}

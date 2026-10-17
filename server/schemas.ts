@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { SYMPTOM_KEYS } from '../src/types/symptoms.js';
+import { MAX_WATER_GLASSES, MIN_WATER_GOAL } from '../src/types/water.js';
 
 export const foodItemSchema = z.object({
   name: z.string().trim().min(1).max(120),
@@ -107,6 +109,16 @@ export const analyzeMealInputSchema = z.object({
   message: 'Se requiere una descripción o imagen',
 });
 
+export const mealCorrectionInputSchema = z.object({
+  slot: mealSlotSchema,
+  description: z.string().trim().max(1000).nullable(),
+}).strict();
+
+export const mealCorrectionRequestSchema = z.object({
+  note: z.string().trim().min(1).max(500),
+  client_id: z.uuid(),
+}).strict();
+
 export const mealReviewInputSchema = z.object({
   status: z.enum(['confirmed', 'adjusted']),
   foods: z.array(foodItemSchema).min(1).max(8).optional(),
@@ -158,11 +170,13 @@ export const resourceAssignmentInputSchema = z.object({
 });
 
 export const habitUpdateInputSchema = z.object({
-  hydration: z.number().int().min(0).max(8).optional(),
+  hydration: z.number().int().min(0).max(MAX_WATER_GLASSES).optional(),
   energy: z.string().trim().min(1).max(80).nullable().optional(),
   sleep_minutes: z.number().int().min(0).max(1440).optional(),
   steps: z.number().int().min(0).max(100000).optional(),
-}).refine((input) => input.hydration !== undefined || input.energy !== undefined || input.sleep_minutes !== undefined || input.steps !== undefined, {
+  symptoms: z.array(z.enum(SYMPTOM_KEYS)).max(SYMPTOM_KEYS.length)
+    .refine((list) => new Set(list).size === list.length, { message: 'Los síntomas no pueden repetirse' }).optional(),
+}).refine((input) => input.hydration !== undefined || input.energy !== undefined || input.sleep_minutes !== undefined || input.steps !== undefined || input.symptoms !== undefined, {
   message: 'Se requiere al menos un hábito',
 });
 
@@ -174,11 +188,13 @@ export const patientCreateInputSchema = z.object({
 
 export const patientProfileUpdateInputSchema = z.object({
   name: z.string().trim().min(2).max(80).optional(),
+  phone: z.string().trim().max(40).nullable().optional(),
   status: z.string().trim().min(2).max(40).optional(),
   stage: z.enum(['ingreso', 'plan', 'seguimiento', 'alta']).optional(),
   sensitive_hours: z.string().trim().max(120).optional(),
   plan_b: z.string().trim().max(240).optional(),
   next_focus: z.string().trim().max(240).optional(),
+  water_goal_glasses: z.number().int().min(MIN_WATER_GOAL).max(MAX_WATER_GLASSES).nullable().optional(),
 }).refine((input) => Object.keys(input).length > 0, {
   message: 'Se requiere al menos un cambio',
 });

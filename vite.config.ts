@@ -40,7 +40,10 @@ export default defineConfig({
     },
     exclude: [
       '**/node_modules/**',
+      '**/node_modules-baseline/**',
+      '**/node_modules-import-runtime/**',
       '**/dist/**',
+      'e2e/**',
       'server/security/signed-auth.local.test.ts',
       ...(process.env.DISPOSABLE_DATABASE_URL ? [] : ['server/cut1.disposable.test.ts']),
       ...(process.env.PLANV_LIVE_AUTH === '1' ? [] : ['server/live-auth-storage.test.ts']),

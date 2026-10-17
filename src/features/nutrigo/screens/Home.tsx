@@ -15,9 +15,13 @@ import { planSlotKey, PLAN_SLOT_KEYS } from '../../../types/plans';
 import { EXERCISE_CATEGORY_LABELS } from '../../../types/exercise';
 import { rulerFor, weightGauge } from './weight-gauge';
 import { CalorieArc, WeightArc } from './arcs';
+import { CountUp } from '../CountUp';
 import '../home-motion.css';
 import { barFill, descendants, EmptyState, fields, formatNumber, leaf, listChildren, objects, source, Stateful, timeLabel, useRemote, dateId, type ScreenProps } from './shared';
-import { dayOfIso, cleanAmount, daysBefore, litresLabel, monthYearLabel, percentLabel, portionsLabel, safePercent, weekDays, weightChangeLabel } from './home-values';
+import { burnedKcalOn, dayOfIso, cleanAmount, daysBefore, litresLabel, monthYearLabel, percentLabel, portionsLabel, safePercent, weekDays, weightChangeLabel } from './home-values';
+import { PatientGoalCard } from '../PatientGoalCard';
+import { streakLabel } from '../streak';
+import { waterGoalOf } from '../../../types/water';
 
 async function homeData(id: string, signal: AbortSignal) {
   const [body,target,recipes,plan,exercise,care] = await Promise.allSettled([
@@ -31,7 +35,6 @@ async function homeData(id: string, signal: AbortSignal) {
  * Un vaso son 250 ml. Plan V no guarda metas de agua ni de pasos: las barras usan una referencia
  * general (2 L y 8.000 pasos) y la pantalla la nombra como «referencia», nunca como meta indicada.
  */
-const DEFAULT_WATER_GLASSES = 8;
 const litres = litresLabel;
 const DEFAULT_STEPS_GOAL = 8000;
 const text = (node: SourceNode, ...samples: string[]) => leaf(node) && samples.includes(sourceText(node));
@@ -82,7 +85,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
   const target=current?.target?.result;
   const known=patient.nutritionLogCount>0;
   const kcal=known?cleanAmount(patient.kcal):null;
-  const burned=(current?.care?.records??[]).filter(row=>row.data.kind==='activity'&&row.recorded_on===today).reduce((sum,row)=>sum+(row.data.kind==='activity'?cleanAmount(row.data.kcal)??0:0),0);
+  const burned=burnedKcalOn(today,current?.exercise?.activities??patient.activities??[],current?.care?.records??[]);
   const eaten={carbs:known?cleanAmount(patient.macros.carbs_g):null,protein:known?cleanAmount(patient.macros.protein_g):null,fat:known?cleanAmount(patient.macros.fat_g):null};
   const macroPct={carbs:safePercent(eaten.carbs,target?.carbs_g),protein:safePercent(eaten.protein,target?.protein_g),fat:safePercent(eaten.fat,target?.fat_g)};
   const macroLabel={carbs:percentLabel(eaten.carbs,target?.carbs_g),protein:percentLabel(eaten.protein,target?.protein_g),fat:percentLabel(eaten.fat,target?.fat_g)};
@@ -91,7 +94,8 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
   const days=patient.journey?.days??[];
   const sleepWeek=[...Array(Math.max(0,8-days.length)).fill(null),...days.map(day=>cleanAmount(day.sleepMinutes))].slice(-8);
   const glasses=cleanAmount(patient.hydration)??0;
-  const waterPct=safePercent(glasses,DEFAULT_WATER_GLASSES)??0;
+  const waterGoal=waterGoalOf({water_goal_glasses:patient.waterGoal});
+  const waterPct=safePercent(glasses,waterGoal)??0;
 
   // Rutina asignada: series registradas en los últimos siete días sobre las indicadas.
   const assignments=current?.exercise?.assignments.filter(a=>a.status==='active')??[];
@@ -99,13 +103,18 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
   const weekStart=daysBefore(today,6);
   const logs=current?.exercise?.activities??[];
   const routineProgress=routines.map(({item,assignment})=>{
-    const done=logs.filter(log=>log.assignment_id===assignment.id&&log.activity===item.name&&(dayOfIso(log.logged_at)??'')>=weekStart).reduce((sum,log)=>sum+(log.sets??0),0);
+    const logged=logs.filter(log=>log.assignment_id===assignment.id&&log.activity===item.name&&(dayOfIso(log.logged_at)??'')>=weekStart).reduce((sum,log)=>sum+(log.sets??0),0);
+    // «Registrar rutina» guarda las series hechas de toda la rutina: cuentan para cada ejercicio si se cargaron esta semana.
+    const feedback=assignment.feedback&&(dayOfIso(assignment.feedback.recorded_at)??'')>=weekStart?assignment.feedback.sets_completed:0;
+    const done=Math.max(logged,feedback);
     return {item,done:Math.min(done,item.sets),total:item.sets};
   });
+  // Las actividades vienen de la pantalla de Ejercicio (la ficha de la paciente no las trae en producción).
+  const ownActivities=current?.exercise?.activities??patient.activities??[];
 
   // Sin rutina asignada, la paciente ve sus propias actividades de la semana (las que registró) en el mismo bloque.
   const workoutRows=routineProgress.length?routineProgress.map(({item,done,total})=>({id:item.id,name:item.name,pct:safePercent(done,total),count:`(${done}/${total})`,tag:EXERCISE_CATEGORY_LABELS[item.category]})):
-    (patient.activities??[]).filter(row=>(dayOfIso(row.logged_at)??'')>=weekStart).slice().sort((a,b)=>Date.parse(b.logged_at)-Date.parse(a.logged_at)).map(row=>({id:row.id,name:row.activity,pct:100 as number|null,count:`(${row.duration_minutes} min)`,tag:`${row.intensity.charAt(0).toUpperCase()}${row.intensity.slice(1)}`}));
+    ownActivities.filter(row=>(dayOfIso(row.logged_at)??'')>=weekStart).slice().sort((a,b)=>Date.parse(b.logged_at)-Date.parse(a.logged_at)).map(row=>({id:row.id,name:row.activity,pct:100 as number|null,count:`(${row.duration_minutes} min)`,tag:`${row.intensity.charAt(0).toUpperCase()}${row.intensity.slice(1)}`}));
 
   const meals=(current?.plan?.items.filter(item=>item.for_date===today)??[]).slice().sort((a,b)=>PLAN_SLOT_KEYS.indexOf(planSlotKey(a.slot)!)-PLAN_SLOT_KEYS.indexOf(planSlotKey(b.slot)!));
   const recipes=patientMenuRecipes(current?.plan??null,current?.recipes??[]);
@@ -117,12 +126,15 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
 
   const activity:Activity[]=[
     ...(patient.logs??[]).map(log=>({at:log.logged_at,color:0,bold:log.slot,rest:` ${log.status==='pending_review'?'registrada, pendiente de revisión':'revisada'}${log.description?.trim()?`: ${log.description.trim()}`:''}`})),
-    ...(patient.activities??[]).map(row=>({at:row.logged_at,color:1,bold:row.activity,rest:` registrada: ${row.duration_minutes} min, intensidad ${row.intensity}.`})),
+    ...ownActivities.map(row=>({at:row.logged_at,color:1,bold:row.activity,rest:` registrada: ${row.duration_minutes} min, intensidad ${row.intensity}.`})),
     ...(patient.messages??[]).map(message=>({at:message.sent_at,color:2,bold:message.from==='patient'?'Mensaje enviado:':'Mensaje de tu nutricionista:',rest:` "${message.text.length>80?`${message.text.slice(0,80)}…`:message.text}"`})),
   ].filter(row=>!Number.isNaN(Date.parse(row.at))).sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)).slice(0,4);
 
+  const streak=patient.streak?streakLabel(patient.streak):null;
   const resolve:SourceResolver=node=>{
     const name=nodeName(node),content=sourceText(node);
+    // La racha va en el mismo texto bajo el saludo del archivo; con menos de dos días queda el de siempre.
+    if(streak&&node.tag==='p'&&content.startsWith("Let's begin our journey"))return {text:streak};
     if(name==='Card Statistic - Dashboard') {
       if(content.startsWith('Weight'))return {onClick:onRecord,label:'Registrar peso y medidas',children:fields(node,{},child=>{
         if(nodeName(child)==='Slider')return {props:{style:{paddingLeft:weight==null||!ruler.length?'0%':`${Math.max(0,Math.min(92,((ruler[0]-weight)/20)*100))}%`}}};
@@ -138,7 +150,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
         return {onClick:onSteps,label:'Registrar pasos',children:fields(node,{},child=>{
           if(nodeName(child)==='Progress Bar')return barFill(stepsPct,'filled');
           if(nodeName(child)==='Empty Bar')return barFill(stepsPct,'empty');
-          if(text(child,'8050'))return {text:formatNumber(steps??0)};
+          if(text(child,'8050'))return {children:<CountUp value={steps??0} format={formatNumber}/>};
           if(text(child,'76%'))return {text:`${Math.round(stepsPct??0)}%`};
           if(sample(child,/steps left/))return {text:steps==null?'Registrá tus pasos':`Referencia: ${formatNumber(DEFAULT_STEPS_GOAL)}`};
           return undefined;
@@ -156,7 +168,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
         return undefined;
       })};
       return {onClick:onHydration,label:'Registrar hidratación',children:fields(node,{},child=>{
-        if(nodeName(child)==='Chart'&&objects(child).some(n=>nodeName(n)==='Progress Bar'))return {props:{style:{justifyContent:'flex-end'}},children:objects(child).map((n,i)=>source(n,m=>nodeName(m)==='Progress Bar'?{props:{style:{flex:`0 0 ${Math.max(waterPct,24)}%`}},children:fields(m,{},leafNode=>text(leafNode,'1.3/2')?{text:`${litres(glasses)}/${litres(DEFAULT_WATER_GLASSES)}`}:text(leafNode,'litre')?{text:'L (ref.)'}:undefined)}:undefined,i))};
+        if(nodeName(child)==='Chart'&&objects(child).some(n=>nodeName(n)==='Progress Bar'))return {props:{style:{justifyContent:'flex-end'}},children:objects(child).map((n,i)=>source(n,m=>nodeName(m)==='Progress Bar'?{props:{style:{flex:`0 0 ${Math.max(waterPct,24)}%`}},children:fields(m,{},leafNode=>text(leafNode,'1.3/2')?{text:`${litres(glasses)}/${litres(waterGoal)}`}:text(leafNode,'litre')?{text:'L (ref.)'}:undefined)}:undefined,i))};
         if(text(child,'0.7'))return {text:litres(glasses)};
         if(text(child,'litre left'))return {text:`L · ${formatNumber(glasses)} vasos`};
         return undefined;
@@ -191,8 +203,8 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
       // Lo que la paciente cargó hoy y su nutricionista todavía no revisó se nombra, en vez de dejar el guion sin explicación.
       if(value==='Eaten calories'&&!known&&pendingToday)return {text:'Calorías en revisión'};
       // Sin comidas revisadas o sin meta, el valor es desconocido (no cero).
-      const substitutions:Record<string,string>={'1240':target&&kcal!==null?formatNumber(Math.max(0,target.kcal-kcal)):'—','1750':formatNumber(kcal),'510':formatNumber(burned),'120':known?formatNumber(eaten.carbs):'—','70':known?formatNumber(eaten.protein):'—','20':known?formatNumber(eaten.fat):'—','/325gr':target?`/${formatNumber(target.carbs_g)} g`:'/— g','/75gr':target?`/${formatNumber(target.protein_g)} g`:'/— g','/44gr':target?`/${formatNumber(target.fat_g)} g`:'/— g','37%':macroLabel.carbs,'93%':macroLabel.protein,'45%':macroLabel.fat};
-      return value in substitutions?{text:substitutions[value]}:undefined;
+      const substitutions:Record<string,ReactNode>={'1240':target&&kcal!==null?<CountUp value={Math.max(0,target.kcal-kcal)} format={formatNumber}/>:'—','1750':kcal===null?formatNumber(kcal):<CountUp value={kcal} format={formatNumber}/>,'510':<CountUp value={burned} format={formatNumber}/>,'120':known?formatNumber(eaten.carbs):'—','70':known?formatNumber(eaten.protein):'—','20':known?formatNumber(eaten.fat):'—','/325gr':target?`/${formatNumber(target.carbs_g)} g`:'/— g','/75gr':target?`/${formatNumber(target.protein_g)} g`:'/— g','/44gr':target?`/${formatNumber(target.fat_g)} g`:'/— g','37%':macroLabel.carbs,'93%':macroLabel.protein,'45%':macroLabel.fat};
+      return value in substitutions?{children:substitutions[value]}:undefined;
     };return {children:fields(node,{},calorieLeaf)};}
     if(name==='Widget Workout Progress')return {children:fields(node,{},child=>{
       if(nodeName(child)==='Body')return listChildren(child,workoutRows.slice(0,3),(n,row)=>{
@@ -276,6 +288,7 @@ export function NutrigoHome({ patient,onNavigate,onSignOut,now=new Date(),onReco
     return undefined;
   };
   return <FramePair nodes={['12:792','427:14405']} resolve={resolve} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut}>
+    <PatientGoalCard patient={patient} />
     {(!current||current.failed||data.error)&&<Stateful loading={!current&&!data.error} error={data.error|| (current?.failed?'Algunos datos no se pudieron cargar.':undefined)} onRetry={data.reload}/>}
   </FramePair>;
 }

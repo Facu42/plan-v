@@ -43,10 +43,20 @@ describe('PV-35 biblioteca de ejercicio y actividad persistida', () => {
       patient_id: patient, activity: 'Caminata al aire libre', duration_minutes: 35, intensity: 'moderada', note: 'Me sentí bien',
     });
     expect(body.exercise.activities[0].activity).toBe('Caminata al aire libre');
-    expect(JSON.stringify(body.exercise)).not.toMatch(/kcal|calorías quemadas|rutina recomendada/i);
+    expect(body.exercise.activities[0].kcal).toBeNull();
+    expect(JSON.stringify(body.exercise)).not.toMatch(/calorías quemadas|rutina recomendada/i);
     expect(getPatient(other)?.activity_logs?.length ?? 0).toBe(beforeOther);
     const otherView = await readExercise(other);
     expect(otherView.body.exercise.activities).toEqual([]);
+  });
+
+  it('guarda las calorías quemadas que declara la paciente y las rechaza en una serie de rutina', async () => {
+    const saved = await post(`/api/patients/${patient}/activities`, { activity: 'Bicicleta', duration_minutes: 45, intensity: 'intensa', kcal: 320 });
+    expect(saved.status).toBe(200);
+    expect(((await saved.json()) as { exercise: PatientExerciseView }).exercise.activities[0]).toMatchObject({ activity: 'Bicicleta', kcal: 320 });
+    const routine = await post(`/api/patients/${patient}/activities`, { activity: 'Sentadilla', duration_minutes: 10, intensity: 'moderada', sets: 3, kcal: 50 });
+    expect(routine.status).toBe(400);
+    expect((await post(`/api/patients/${patient}/activities`, { activity: 'Bici', duration_minutes: 10, intensity: 'moderada', kcal: 9000 })).status).toBe(400);
   });
 
   it('no deja asignar una rutina por ser nutricionista: hace falta habilitación verificada', async () => {

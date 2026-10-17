@@ -7,6 +7,7 @@ import { getPatient, getStore, DEMO_NUTRITIONIST_ID } from '../store.js';
 import { careInputSchema, carePreferencesSchema, replacementRecipeSchema, CARE_LABELS, isMeasurementData, type CareAlert } from '../../src/types/care.js';
 import { bodyMetricBatchSchema } from '../../src/lib/body-metrics.js';
 import * as repo from './repository.js';
+import { sendThreadMessage } from '../messages/repository.js';
 import { ingestReadyAsset } from '../assets/repository.js';
 import { handleProcessingJob } from '../jobs/handlers.js';
 import { processQueue, runOne } from '../jobs/queue.js';
@@ -43,6 +44,28 @@ export function registerCareRoutes(app: Hono) {
     const { persistent } = await access(c, id, input.data.kind === 'payment' || professionalMeasure ? 'professional' : 'patient');
     if (measurement) await requireCareConsent(id, persistent, 'measurement');
     const record = await repo.saveCareRecord(id, input, persistent); return c.json({ record });
+  });
+  app.post('/api/patients/:id/care/records/:recordId/correct', async c => {
+    const id = c.req.param('id'); const recordId = c.req.param('recordId');
+    const input = await body(c, z.object({ value: z.number().finite() }).strict());
+    const { persistent } = await access(c, id, 'patient');
+    await repo.correctOwnMeasurement(id, recordId, input.value, persistent);
+    return c.json({ corrected: true });
+  });
+  app.delete('/api/patients/:id/care/records/:recordId', async c => {
+    const id = c.req.param('id'); const { persistent } = await access(c, id, 'patient');
+    await repo.deleteOwnMeasurement(id, c.req.param('recordId'), persistent);
+    return c.json({ deleted: true });
+  });
+  app.post('/api/patients/:id/care/records/:recordId/correction-request', async c => {
+    const id = c.req.param('id'); const recordId = c.req.param('recordId');
+    const input = await body(c, z.object({ note: z.string().trim().min(1).max(500), client_id: z.uuid() }).strict());
+    const { persistent } = await access(c, id, 'patient');
+    const result = await repo.requestMeasurementCorrection(id, recordId, input, persistent);
+    if (!persistent && result.text) {
+      await sendThreadMessage(id, { text: result.text, from: 'patient', suggestedByAi: false, client_id: input.client_id }, false);
+    }
+    return c.json({ requested: true, duplicate: result.duplicate });
   });
   app.post('/api/patients/:id/care/body-metrics', async c => {
     const id = c.req.param('id'); const { persistent } = await access(c, id, 'professional');
@@ -132,7 +155,7 @@ export function registerCareRoutes(app: Hono) {
   app.get('/api/care/alerts', async c => {
     const auth = c.get('auth'); const persistent = 'userId' in auth && isSupabaseEnabled();
     if (persistent && await sb.sbGetProfileRole(auth.userId) !== 'nutri') throw new repo.CareError(403, 'Solo profesionales.');
-    const patients = persistent ? (await sb.sbListPatientsForNutri(auth.userId, { limit: 100, offset: 0 })).patients : getStore().patients;
+    const patients = persistent ? await sb.sbGetPatientsForNutri(auth.userId) : getStore().patients;
     const names = new Map(patients.filter(p => !p.archived_at).map(p => [p.id,p.name]));
     const records = await repo.listCareRecords(null, persistent);
     const alerts: CareAlert[] = records.filter(r => !r.reviewed_at && r.data.kind !== 'payment' && names.has(r.patient_id)).map(r => ({ id: r.id, patient_id: r.patient_id, patient_name: names.get(r.patient_id)!, title: r.data.kind === 'body_photo' ? 'Nuevo archivo privado' : r.data.kind === 'clinical_document' ? 'Nuevo estudio' : CARE_LABELS[r.data.kind], detail: r.data.kind === 'menu_request' ? 'El paciente solicitó un reemplazo. Revisá su menú.' : 'Nuevo registro para revisar en la ficha.', target: 'ficha', created_at: r.created_at }));

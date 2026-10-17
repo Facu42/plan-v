@@ -14,6 +14,15 @@ export type GoalHistoryEntry = {
   updated_at: string;
 };
 
+/** Cambio del objetivo que sí puede ver la paciente: sin la nota de la profesional. */
+export type GoalUpdate = {
+  id: string;
+  goal: string;
+  status: GoalStatus;
+  progress: number;
+  updated_at: string;
+};
+
 export type FoodItem = {
   name: string;
   portion_est: number | null;
@@ -28,7 +37,7 @@ export type Macros = {
   fat_g: number;
 };
 
-export type MealAnalysisStatus = 'pending' | 'succeeded' | 'failed';
+export type MealAnalysisStatus = 'pending' | 'succeeded' | 'failed' | 'skipped';
 
 export type MealLog = {
   id: string;
@@ -95,6 +104,8 @@ export type HabitLog = {
   sleep_minutes: number | null;
   /** Pasos del día declarados por la paciente (no se importan de dispositivos). */
   steps?: number | null;
+  /** Síntomas del día marcados por la paciente (claves de src/types/symptoms.ts). */
+  symptoms?: string[];
 };
 
 export type ActivityLog = {
@@ -105,6 +116,7 @@ export type ActivityLog = {
   intensity: 'suave' | 'moderada' | 'intensa';
   note: string | null;
   logged_at: string;
+  kcal?: number | null;
 };
 
 export type ResourceAssignment = {
@@ -141,6 +153,7 @@ export type DemoNotice = {
 };
 
 export type Patient = {
+  phone?: string | null;
   weekly_registration?: WeeklyRegistration | null;
   id: string;
   name: string;
@@ -162,9 +175,13 @@ export type Patient = {
   goal_progress?: number;
   goal_updated_at?: string | null;
   goal_history?: GoalHistoryEntry[];
+  /** Historial visible para la paciente, sin la nota profesional. */
+  goal_updates?: GoalUpdate[];
   sensitive_hours: string;
   plan_b: string;
   next_focus: string;
+  /** Meta de agua que eligió la nutri (vasos por día); sin dato, 8. */
+  water_goal_glasses?: number | null;
   adherence_score: number;
   adherence_why: string;
   time: string;
@@ -173,6 +190,7 @@ export type Patient = {
   sleep_minutes: number | null;
   steps?: number | null;
   appointment: {
+    id?: string;
     when: string;
     duration: number;
     channel: string;

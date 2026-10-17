@@ -4,6 +4,7 @@ import type { RecipeCard, RecipeItem, RecipeMacros } from '../../types/recipes';
 import './recipe-plate.css';
 import './menu-fig.css';
 import { FigmaAsset, useFigmaDetail } from './FigmaPatientFront';
+import { NutrigoIngredientPhoto } from '../../features/nutrigo/IngredientPhoto';
 
 const LABELS = [
   ['kcal', 'KCAL', 'kcal'],
@@ -174,7 +175,7 @@ export function RecipeDetails({ recipe, onBack, actions }: {
           </div>
           <h3>Ingredientes</h3>
           {recipe.ingredients.length ? <ol className="mf-ingredients">{recipe.ingredients.map((item, index) => <li key={item.id}>
-            <span>{index + 1}</span>{scaleQuantity(item.quantity, recipe.yieldPortions, servings)} {item.unit} {item.name}
+            <NutrigoIngredientPhoto ingredient={item} index={index} />{scaleQuantity(item.quantity, recipe.yieldPortions, servings)} {item.unit} {item.name}
           </li>)}</ol> : <p className="mf-muted">Sin ingredientes cargados.</p>}
         </section>
         <>

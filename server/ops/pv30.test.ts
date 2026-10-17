@@ -154,9 +154,14 @@ describe('deploy contract', () => {
     };
     expect(vercel.outputDirectory).toBe('dist');
     expect(JSON.stringify(vercel)).not.toMatch(/server\/index/);
-    // Sólo rutas de la pantalla (abrir o recargar /admin, /app/*, /crm/*) hacia index.html; nunca a la API.
-    // /pacientes sirve la landing estática exportada, sin sesión.
+    // The Node API stays on Railway. Only OAuth/booking and unsubscribe need a narrow same-origin proxy.
+    // Existing authenticated clinical endpoints never acquire a wildcard web proxy.
     expect(vercel.rewrites).toEqual([
+      { source: '/api/public/communications/email-unsubscribe', destination: 'https://api-production-aad6.up.railway.app/api/public/communications/email-unsubscribe' },
+      { source: '/api/scheduling/:path*', destination: 'https://api-production-aad6.up.railway.app/api/scheduling/:path*' },
+      { source: '/api/public/scheduling/:path*', destination: 'https://api-production-aad6.up.railway.app/api/public/scheduling/:path*' },
+      { source: '/consultorio/:path*', destination: '/index.html' },
+      { source: '/equipo', destination: '/index.html' },
       { source: '/pacientes', destination: '/pacientes/index.html' },
       { source: '/admin', destination: '/index.html' },
       { source: '/app', destination: '/index.html' },

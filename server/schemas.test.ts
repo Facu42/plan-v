@@ -94,6 +94,9 @@ describe('API input schemas', () => {
 
   it('validates patient profile edits and archive state', () => {
     expect(patientProfileUpdateInputSchema.safeParse({ name: '  Ana López  ', stage: 'seguimiento', plan_b: '' }).success).toBe(true);
+    expect(patientProfileUpdateInputSchema.safeParse({ water_goal_glasses: 12 }).success).toBe(true);
+    expect(patientProfileUpdateInputSchema.safeParse({ water_goal_glasses: null }).success).toBe(true);
+    for (const value of [3, 17, 7.5]) expect(patientProfileUpdateInputSchema.safeParse({ water_goal_glasses: value }).success).toBe(false);
     expect(patientProfileUpdateInputSchema.safeParse({}).success).toBe(false);
     expect(patientProfileUpdateInputSchema.safeParse({ name: 'A' }).success).toBe(false);
     expect(patientProfileUpdateInputSchema.safeParse({ stage: 'archivado' }).success).toBe(false);
@@ -103,11 +106,16 @@ describe('API input schemas', () => {
 
   it('bounds habit and nutritionist setup values', () => {
     expect(habitUpdateInputSchema.safeParse({ hydration: 8, energy: 'Con energía', sleep_minutes: 450 }).success).toBe(true);
-    expect(habitUpdateInputSchema.safeParse({ hydration: 9 }).success).toBe(false);
+    expect(habitUpdateInputSchema.safeParse({ hydration: 17 }).success).toBe(false);
+    expect(habitUpdateInputSchema.safeParse({ hydration: 16 }).success).toBe(true);
     expect(habitUpdateInputSchema.safeParse({ sleep_minutes: -1 }).success).toBe(false);
     expect(habitUpdateInputSchema.safeParse({ sleep_minutes: 1441 }).success).toBe(false);
     expect(habitUpdateInputSchema.safeParse({ sleep_minutes: 450.5 }).success).toBe(false);
     expect(habitUpdateInputSchema.safeParse({}).success).toBe(false);
+    expect(habitUpdateInputSchema.safeParse({ symptoms: ['acidez', 'cansancio'] }).success).toBe(true);
+    expect(habitUpdateInputSchema.safeParse({ symptoms: [] }).success).toBe(true);
+    expect(habitUpdateInputSchema.safeParse({ symptoms: ['inventado'] }).success).toBe(false);
+    expect(habitUpdateInputSchema.safeParse({ symptoms: ['acidez', 'acidez'] }).success).toBe(false);
     expect(nutritionistSetupInputSchema.safeParse({ display_name: ' Vero ' }).success).toBe(true);
     expect(nutritionistSetupInputSchema.safeParse({ display_name: ' ' }).success).toBe(false);
   });

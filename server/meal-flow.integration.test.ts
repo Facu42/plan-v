@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { calculateAdherence } from './adherence.js';
 import { app } from './index.js';
+import { grantMealAiConsent } from './diary/grant-ai.js';
 import { getPatient, resetStore } from './store.js';
 
 function jsonRequest(method: string, body: unknown) {
@@ -22,6 +23,7 @@ describe('meal review API flow in memory mode', () => {
   });
 
   it('keeps a new meal pending until the professional adjusts it', async () => {
+    grantMealAiConsent('pat-sofia');
     const initial = getPatient('pat-sofia')!;
     const initialScore = initial.adherence_score;
     const initialPending = initial.meal_logs.filter((log) => log.status === 'pending_review').length;
@@ -61,6 +63,7 @@ describe('meal review API flow in memory mode', () => {
   });
 
   it('keeps the meal pending without demo foods when AI is unavailable', async () => {
+    grantMealAiConsent('pat-sofia');
     vi.stubEnv('AI_MODE', 'disabled');
     const description = 'Yogur con fruta sin estimación';
     const response = await app.request(

@@ -109,11 +109,18 @@ export function MealLogModal({ patient, defaultSlot, close }: Props) {
           <button className="mlm-close" type="button" onClick={closeSafely} disabled={step === 'analyzing'} aria-label="Cerrar">×</button>
         </header>
         <div className="mlm-stage" key={step}>
-          {step === 'analyzing' && <AnalyzingView mode={draft.mode} preview={preview} description={draft.description} />}
+          {step === 'analyzing' && (
+            <AnalyzingView
+              mode={draft.mode}
+              preview={preview}
+              description={draft.description}
+              withoutAi={draft.mode === 'text' && consented !== null && !consented.includes('ai_meal_analysis')}
+            />
+          )}
           {step === 'review' && result && (
             <ReviewView result={result} slot={draft.slot} preview={preview} description={draft.description} onConfirm={() => setStep('success')} />
           )}
-          {step === 'success' && result && <SuccessView name={patient.name} macros={result.macros} onClose={closeSafely} />}
+          {step === 'success' && result && <SuccessView name={patient.name} macros={result.macros} withoutAi={result.analysis_status === 'skipped'} onClose={closeSafely} />}
           {showCapture && (
             <CaptureView
               draft={draft} error={error} onChange={patchDraft} onFile={handleFile} onAnalyze={() => void analyze()}

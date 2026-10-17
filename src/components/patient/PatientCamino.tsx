@@ -2,6 +2,7 @@ import type { Patient } from '../../types';
 import { gaugeLabel } from '../../store/useAppStore';
 import { Icon, Mark, ScoreRing } from '../shared/Icon';
 import { buildJourneySummary } from './journey-summary';
+import { waterGoalOf } from '../../types/water';
 
 function formatSleep(minutes: number | null): string {
   if (minutes === null) return '—';
@@ -44,7 +45,7 @@ export function PatientCamino({ patient }: { patient: Patient }) {
       </section>
 
       <section className="habit-summary" aria-label="Registros de hoy">
-        <div className="habit-pill"><Icon name="drop" size={16} /><span>Agua hoy</span><strong>{patient.hydration}/8</strong></div>
+        <div className="habit-pill"><Icon name="drop" size={16} /><span>Agua hoy</span><strong>{patient.hydration}/{waterGoalOf(patient)}</strong></div>
         <div className="habit-pill"><Icon name="sparkle" size={16} /><span>Energía</span><strong>{patient.energy ?? '—'}</strong></div>
         <div className="habit-pill"><Icon name="moon" size={16} /><span>Descanso</span><strong>{formatSleep(patient.sleep_minutes)}</strong></div>
       </section>
@@ -68,7 +69,7 @@ export function PatientCamino({ patient }: { patient: Patient }) {
                 <time dateTime={day.date}>{new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' }).format(new Date(`${day.date}T12:00:00`))}</time>
               </div>
               <div className="journey-day-values">
-                <span aria-label={`Agua: ${day.hydration} de 8`}><Icon name="drop" size={13} />{day.hydration}/8</span>
+                <span aria-label={`Agua: ${day.hydration} de ${waterGoalOf(patient)}`}><Icon name="drop" size={13} />{day.hydration}/{waterGoalOf(patient)}</span>
                 <span aria-label={`Descanso: ${formatSleep(day.sleepMinutes)}`}><Icon name="moon" size={13} />{formatSleep(day.sleepMinutes)}</span>
                 <span aria-label={`Comidas revisadas: ${day.reviewedMeals}`}><Icon name="check" size={13} />{day.reviewedMeals}</span>
               </div>

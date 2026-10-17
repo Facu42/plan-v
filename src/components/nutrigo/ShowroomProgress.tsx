@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { CaretDown, DropHalfBottom, PintGlass } from '@phosphor-icons/react';
 import { CarePanel } from './CarePanel';
+import { stepsSummaryText } from './steps-summary';
 import { NvBadge, NvState } from './primitives';
 import type { ShowroomPatient } from './showroom-model';
 import { MEASUREMENT_SOURCE_LABELS } from '../../types/care';
+import { symptomFrequency } from '../../types/symptoms';
 import { progressApi } from '../../api/progress';
 import { isAbortError } from '../../api/client';
 import { careErrorMessage } from '../../api/care';
@@ -179,8 +181,9 @@ export function ShowroomProgress({
   const weight = remote?.measurements_included ? remote.series.find((series) => series.kind === 'weight') ?? null : null;
   const weightPoints = weight ? [...weight.previous, ...weight.current] : [];
   const rows = remote?.measurements_included ? buildMeasurementRows(remote.series) : [];
-  const goalProgress = Math.max(0, Math.min(100, patient.goalProgress));
+  const goalProgress = Math.max(0, Math.min(100, patient.goalProgress ?? 0));
   const maxSleep = Math.max(600, ...patient.journey.days.map((day) => day.sleepMinutes ?? 0));
+  const symptoms = symptomFrequency(patient.journey.days);
   const sleepTicks = [1, 0.75, 0.5, 0.25, 0].map((share) => `${formatQty(Math.round(maxSleep * share / 6) / 10)} h`);
   const mealScale = Math.max(4, Math.ceil(view.maxMeals / 4) * 4);
   const mealTicks = [1, 0.75, 0.5, 0.25, 0].map((share) => mealScale * share);
@@ -271,6 +274,8 @@ export function ShowroomProgress({
               <span><small>{sleepAxisLabel(day.sleepMinutes)}</small><strong>{day.isToday ? 'Hoy' : day.label}</strong></span>
             </div>)}
           </div>
+          <ul className="nvpf-legend nvpf-legend-row" aria-label="Síntomas de los últimos 7 días"><li>{symptoms.length ? `Síntomas: ${symptoms.map((entry) => `${entry.label} (${entry.days} ${entry.days === 1 ? 'día' : 'días'})`).join(', ')}` : 'Sin síntomas registrados'}</li></ul>
+          {professional && <ul className="nvpf-legend nvpf-legend-row" aria-label="Pasos de los últimos 7 días"><li>{stepsSummaryText(patient.journey.days)}</li></ul>}
         </section>
 
         <section className="nvpf-widget nvpf-hydration" aria-label="Hidratación">

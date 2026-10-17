@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dayOfIso, cleanAmount, daysBefore, litresLabel, monthYearLabel, percentLabel, portionsLabel, safePercent, weekDays, weightChangeLabel } from './home-values';
+import { burnedKcalOn, dayOfIso, cleanAmount, daysBefore, litresLabel, monthYearLabel, percentLabel, portionsLabel, safePercent, weekDays, weightChangeLabel } from './home-values';
 
 describe('safePercent', () => {
   it('acota a 0-100 y nunca devuelve NaN ni Infinity', () => {
@@ -117,5 +117,20 @@ describe('dayOfIso', () => {
     expect(dayOfIso('2026-10-01T00:30:00-03:00')).toBe('2026-10-01');
     expect(dayOfIso('no es fecha')).toBeNull();
     expect(dayOfIso(undefined)).toBeNull();
+  });
+});
+
+describe('burnedKcalOn', () => {
+  it('suma las calorías declaradas en actividades y en registros del mismo día argentino', () => {
+    const activities = [
+      { logged_at: '2026-10-07T13:00:00Z', kcal: 300 },
+      { logged_at: '2026-10-08T01:00:00Z', kcal: 100 },
+      { logged_at: '2026-10-07T15:00:00Z', kcal: null },
+    ];
+    const records = [{ recorded_on: '2026-10-07', data: { kind: 'activity', kcal: 50 } }, { recorded_on: '2026-10-07', data: { kind: 'weight' } }];
+    expect(burnedKcalOn('2026-10-07', activities, records)).toBe(450);
+  });
+  it('ignora valores inválidos o negativos', () => {
+    expect(burnedKcalOn('2026-10-07', [{ logged_at: '2026-10-07T13:00:00Z', kcal: Number.NaN }, { logged_at: '2026-10-07T14:00:00Z', kcal: -5 }], [])).toBe(0);
   });
 });
