@@ -8,7 +8,7 @@ import { createPendingWrite } from './pending-write';
 import { canLeaveWorkspace,useUnsavedChanges } from '../../../components/nutrigo/unsaved-changes';
 import { cloneList, descendants, EmptyState, errorText, fields, leaf, objects, percent, Ring, searchBinding, source, RecordDialog, Stateful, useRemote, type ScreenProps } from './shared';
 import { argentinaMonth } from './ar-time';
-import { boughtLabel, monthName, productCount, quantityLabel, recentMonths, SHOPPING_STORES, shoppingShareText, storeBadge, storeOf, whatsappShareUrl } from './shopping-format';
+import { boughtLabel, localAmount, monthName, productCount, recentMonths, SHOPPING_STORES, shoppingShareText, storeBadge, storeOf, whatsappShareUrl } from './shopping-format';
 import { leftAlignedSearch } from './search-align';
 import { GREEN_BG, swapBackground } from '../source-tone';
 
@@ -78,7 +78,7 @@ export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut, no
       ? { onClick: () => void mutate(() => shoppingApi.remove(patient.id, item.id)), label: `Eliminar ${item.name}`, props: { disabled: busy, style: { display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8a8c90', fontSize: 18 } }, children: <span aria-hidden="true">×</span> }
       : undefined) };
     if (cell === 'Cell-Category') return { children: relabel(child, () => storeBadge(storeOf(item.name)), n => nodeName(n) === 'Badge Category - Grocery List' ? { props: { title: storeOf(item.name), style: { background: storeColor(item.name), maxWidth: '100%' } } } : leaf(n) ? { text: storeBadge(storeOf(item.name)), props: { style: oneLine } } : undefined) };
-    if (cell === 'Cell-Qty') return { children: relabel(child, sample => /^\d/.test(sample) ? quantityLabel(item.quantity) : (item.unit ?? ''), n => nodeName(n) === 'Button Group' ? dim : leaf(n) && /^\d/.test(sourceText(n)) ? { text: quantityLabel(item.quantity), props: { title: quantityLabel(item.quantity), style: oneLine } } : undefined) };
+    if (cell === 'Cell-Qty') { const local = localAmount(item.quantity, item.unit, item.name); const hint = local.exact && local.exact !== `${local.amount} ${local.unit}`.trim() ? `${local.amount} ${local.unit} · en el plan suma ${local.exact}` : local.amount; return { children: relabel(child, sample => /^\d/.test(sample) ? local.amount : local.unit, n => nodeName(n) === 'Button Group' ? dim : leaf(n) && /^\d/.test(sourceText(n)) ? { text: local.amount, props: { title: hint, style: oneLine } } : undefined) }; }
     // Plan V no tiene calorías ni precios por producto: las columnas quedan sin dato, como «Actual» en el archivo.
     if (['Cell-Calories', 'Cell-Cost', 'Cell-Actual'].includes(cell)) return { children: relabel(child, sample => /^\d/.test(sample) ? '-' : '') };
     if (cell === 'Cell-Status') return { children: relabel(child, () => item.checked ? 'Comprado' : 'Pendiente', n => leaf(n) ? { text: item.checked ? 'Comprado' : 'Pendiente', props: { style: { width: 'auto', whiteSpace: 'nowrap' } } } : n !== child && objects(child).includes(n) ? { onClick: () => void mutate(() => shoppingApi.check(patient.id, { source_key: item.source_key, checked: !item.checked })), label: `${item.checked ? 'Desmarcar' : 'Marcar como comprado'}: ${item.name}`, props: { disabled: busy, 'aria-pressed': item.checked } } : undefined) };

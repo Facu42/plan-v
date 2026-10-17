@@ -207,8 +207,17 @@ Decisión de Facundo (15/10, «Meta por paciente»): la nutri elige la meta de a
 por día, en «Editar ficha» (vacía = 8, la de siempre). La paciente la ve en Inicio, Diario y Progreso, y el aviso de
 agua del día y la adherencia se miden contra esa meta. Además se puede anotar hasta 16 vasos por día (antes el tope
 era 8). Migración `20261016090000_water_goal` (columna `patients.water_goal_glasses`, vista `patient_water_goal_view`
-solo con la fila propia, y la regla de `habit_logs` pasa a 0..16). **Sin aplicar**: lleva un DROP de la regla
-vieja, así que Facundo pega el SQL en Supabase. Sin la migración la app sigue andando con 8 vasos.
+solo con la fila propia, y la regla de `habit_logs` pasa a 0..16). **Aplicada en producción el 16/10** (Facundo pegó el SQL
+porque lleva un DROP de la regla vieja) y publicada con el PR #128.
+
+## Lista del súper en unidades del comercio (2026-10-15)
+
+La lista suma los gramos del plan, pero en la verdulería o la carnicería nadie pide 480 g. Ahora cada producto se
+muestra como se pide: «1/2 kg», «3/4 kg», «1,25 kg», «1,5 l», «1 docena» de huevos y unidades enteras, siempre
+redondeando para arriba. Lo que no llega a un cuarto queda en gramos de a 50 (150 g); las medidas de cocina (cda,
+cdita, taza) y lo menor a 100 g quedan como vienen. Al pasar el mouse se ve lo que suma el plan. El texto de
+«Compartir lista» usa las mismas cantidades. Solo pantalla: la base guarda lo mismo. Código: `localAmount` en
+`src/features/nutrigo/screens/shopping-format.ts`.
 
 ## Recordatorio de consulta al teléfono (2026-10-15)
 

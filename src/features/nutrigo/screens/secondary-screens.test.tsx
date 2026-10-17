@@ -72,7 +72,7 @@ describe.each([false, true])('pantallas desde MCP (celular: %s)', mobile => {
   it('compras muestra cantidades del servidor y permite completar cada producto', () => {
     context.mobile = mobile; context.data = { items: [{ id: 'i1', source_key: 'manual:i1', name: 'Tomate real', kind: 'manual', quantity: 500, unit: 'g', checked: false }] };
     const html = renderToStaticMarkup(<NutrigoShopping patient={patient} onNavigate={navigate} />);
-    expect(html).toContain('Tomate real'); expect(html).toMatch(/>500<\/p>/); expect(html).toMatch(/>g<\/p>/); expect(html).toContain('Marcar como comprado: Tomate real'); expect(html).toContain('Eliminar Tomate real');
+    expect(html).toContain('Tomate real'); expect(html).toMatch(/>1\/2<\/p>/); expect(html).toMatch(/>kg<\/p>/); expect(html).toContain("en el plan suma 500 g"); expect(html).toContain('Marcar como comprado: Tomate real'); expect(html).toContain('Eliminar Tomate real');
     expect(html).not.toContain('Almond Butter'); expect(html).not.toContain('$157');
     // La tabla conserva la paginación del archivo con el total real, y los bloques de costos quedan en cero sin precios inventados.
     expect(html).toContain('data-name="Pagination"');if(!mobile)expect(html).toContain('de 1 producto');expect(html).toContain('aria-label="Página 1"');
