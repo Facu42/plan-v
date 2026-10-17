@@ -201,6 +201,16 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - App para tiendas (Android primero, empaquetando la web), calidad en producción, publicidad paga y
   página pública con precios (espera el precio). Plan: `docs/plan-apartados.md`.
 
+## Base más rápida: índices y reglas de acceso (2026-10-17)
+
+Retoma el PR #27 (de septiembre, quedó viejo porque entraron muchas tablas). El asesor de rendimiento de Supabase
+marcaba 114 claves hacia otras tablas sin índice y 7 reglas de acceso que calculan la usuaria fila por fila.
+Migración `20261017010000_performance_indexes`: reescribe esas reglas con `(select auth.uid())` usando ALTER POLICY
+sobre la expresión que tienen hoy (mismos permisos) y crea un índice por cada clave sin cubrir en `public` y
+`private`, sin borrar nada. Prueba `server/db-performance.postgres.test.ts`: falla si una clave nueva queda sin
+índice o si una regla vuelve a llamar a `auth.uid()` por fila. Quedan a propósito las advertencias de reglas dobles
+y de índices sin uso (la base es chica y todavía no hay uso real que las mida).
+
 ## Meta de agua por paciente (2026-10-16)
 
 Decisión de Facundo (15/10, «Meta por paciente»): la nutri elige la meta de agua de cada paciente, de 4 a 16 vasos
