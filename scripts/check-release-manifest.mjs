@@ -12,6 +12,8 @@ const APPLIED_BASELINE={
  '20261015100000_habit_symptoms.sql':{version:'20261015100000',observedAppliedVersion:'20261014215543',observedAppliedName:'habit_symptoms'},
  '20261015200000_push_subscriptions.sql':{version:'20261015200000',observedAppliedVersion:'20261015163006',observedAppliedName:'push_subscriptions'},
  '20261016090000_water_goal.sql':{version:'20261016090000',observedAppliedVersion:'20261016090000',observedAppliedName:'water_goal'},
+ '20261017010000_performance_indexes.sql':{version:'20261017010000',observedAppliedVersion:'20261017013123',observedAppliedName:'performance_indexes'},
+ '20261017020000_fk_full_indexes.sql':{version:'20261017020000',observedAppliedVersion:'20261017021355',observedAppliedName:'fk_full_indexes'},
 };
 const BASELINE_MAIN='ae19e5c49af07cb7451a5aff5048850051d6a909',BASELINE_OBSERVED_ON='2026-10-16';
 const defaultRoot=fileURLToPath(new URL('../',import.meta.url));
