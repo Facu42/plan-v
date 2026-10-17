@@ -36,7 +36,8 @@ producción todavía no está tomada. Este cambio no los habilita.
 - `npx vitest run server/ai server/ai-jobs` (alimentos sin alérgenos, equivalencias y modelos, tope de tamaño, tope de
   gasto, avisos de alérgenos y coincidencias con SARA 2, circuito completo con el asistente encendido y apagado).
 - Con datos inventados y `AI_MODE=demo`: el borrador demo cubre todas las fechas y momentos, sin fingir una recomendación.
-- En producción **no** se enciende nada sin la frase de Facundo y sin la prueba con modelos gratis y datos ficticios.
+- Activación en producción (17/10/2026): Facundo lo pidió por escrito («deja todo lo de ia encendido, es parte de la función de la app»). Hace falta además `AI_MODE=live` con la clave y el modelo gratis de OpenRouter (ya cargados) y el tope de US$5 al mes en el servidor. La prueba con datos ficticios son las pruebas automáticas; no hubo prueba en vivo con una cuenta real.
+- Privacidad: el asistente manda a un modelo gratis de OpenRouter las alergias, restricciones y objetivos de la paciente, sin retención cero verificada. Es una decisión de Facundo (la revisión legal la maneja él aparte). Para sacarlo de producción basta borrar `AI_PLAN_ASSISTANT`.
 
 ## Límites conocidos
 - Las recetas nuevas que propone el modelo siguen sin cifras nutricionales confiables (contrato existente): se avisa
