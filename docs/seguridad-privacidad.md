@@ -21,7 +21,7 @@ revisión legal siguen pendientes.
 | 3. 12 tablas con acceso por fila y sin reglas | Revisadas: son sólo del servidor y así deben quedar. Se encontró y arregló un uso roto (ver abajo). |
 | 4. Cabeceras de seguridad de web y API | Hecho en el código, probado en navegador. Se publica con el merge. |
 | 5. Prueba con dos cuentas | Hecha dentro de la base (pruebas automáticas). Falta repetirla sobre la app publicada. |
-| 6. Términos, privacidad, consentimiento, descargar y borrar la cuenta | Hecho. Textos completos con los datos de la responsable (2026-09-29), listos para publicar con el merge. La revisión del abogado queda pendiente (13 puntos en `docs/legal/revision-legal.md`). |
+| 6. Términos, privacidad, consentimiento, descargar y borrar la cuenta | Hecho. Textos completos con los datos de la responsable (2026-09-29), listos para publicar con el merge. La revisión legal la maneja Facundo aparte (notas en `docs/legal/revision-legal.md`). |
 
 ## 2026-09-29: funciones de la base
 
