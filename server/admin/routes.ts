@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import * as repo from './repository.js';
 import * as accounts from './accounts.js';
+import { MFA_REQUIRED_MESSAGE, mfaEnforced, tokenAal } from '../security/mfa.js';
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => !Number.isNaN(Date.parse(`${value}T12:00:00Z`)));
 const settingsSchema = z.object({
@@ -59,6 +60,7 @@ async function requireAdmin(c: Context): Promise<boolean> {
     return false;
   }
   if (!await repo.isAdmin(true)) throw new repo.CareError(403, 'No tenés permiso para esta acción.');
+  if (mfaEnforced() && tokenAal(c.req.header('Authorization')) !== 'aal2') throw new repo.CareError(403, MFA_REQUIRED_MESSAGE);
   return true;
 }
 

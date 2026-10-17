@@ -102,6 +102,11 @@
       "version": "20261014180000",
       "file": "20261014180000_sara2_catalog.sql",
       "sha256": "074ed4703b754e5e0d3a1696321cb1109c6ba256e430c002f515a25bfcbd4036"
+    },
+    {
+      "version": "20261017030000",
+      "file": "20261017030000_mfa_aal2_gate.sql",
+      "sha256": "68eeac7c95f7eb48c14863c8b8cb2ead403d305312ab45852fd2a9c8fa58b0f4"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",
