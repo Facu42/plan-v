@@ -1,4 +1,4 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-16)
+# Traspaso del proyecto (actualización vigente: 2026-10-17)
 
 ## Estado integrado de la entrega 8 · 16/10/2026
 
@@ -8,7 +8,7 @@ El manifiesto separa **18 migraciones pendientes y tres archivos exactos de main
 
 El 16/10 ROOT verificó mediante la herramienta oficial que todos los controles de #127 en `5c8ea54` están aprobados: verify, e2e, sesiones firmadas, secretos y vista previa. Es evidencia del padre 7; la entrega 8 requiere su propio CI sobre la cabeza que se publique para revisión.
 
-Continúan pendientes por decisión o validación real: SMTP propio pospuesto (Supabase Auth permanece, sin prometer correos a destinatarios externos), retención cero y modalidad de Groq, captura real de ambas voces y cuentas reales de Google, Mercado Pago y WhatsApp. La IA nueva comparte un límite global autorizado de USD 5 mensuales y permanece apagada. Kerr conserva carga manual hasta resolver unidades y validar la fórmula con la profesional.
+Continúan pendientes por decisión o validación real: SMTP propio pospuesto (Supabase Auth permanece, sin prometer correos a destinatarios externos), retención cero y modalidad de Groq, captura real de ambas voces y cuentas reales de Google, Mercado Pago y WhatsApp. La IA nueva comparte un límite global autorizado de USD 5 mensuales; desde el 17/10 el asistente de planes está encendido (`AI_PLAN_ASSISTANT=on`, solo modelos gratis). La IA clínica de Groq (resumen de consultas, documentos, cartera) sigue sin atender hasta que Facundo confirme retención cero y nivel gratuito en Groq (`GROQ_ZDR_VERIFIED`, `GROQ_FREE_TIER_VERIFIED`). Kerr conserva carga manual hasta resolver unidades y validar la fórmula con la profesional.
 
 ## Referencia histórica: entrega 6 aislada · 14/10/2026
 
@@ -196,7 +196,7 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
   Facundo cargue el precio mensual y decida los días de prueba (30 por defecto).
 - Prueba real de punta a punta con una nutricionista y una paciente.
 - Mails: confirmar cómo se mandan (Supabase sin costo o Resend con marca propia).
-- Calorías: aviso al pedir los datos (hoy solo dentro de la app) y revisión del consentimiento con abogado.
+- Calorías: aviso al pedir los datos (hoy solo dentro de la app) (la revisión legal la maneja Facundo aparte, ya no es pendiente del proyecto).
 - Revisión legal (13 puntos en `docs/legal/revision-legal.md`).
 - App para tiendas (Android primero, empaquetando la web), calidad en producción, publicidad paga y
   página pública con precios (espera el precio). Plan: `docs/plan-apartados.md`.
@@ -336,5 +336,6 @@ La bandeja «Tu consultorio, hoy» suma dos tipos de pendiente: **Cuotas vencida
 
 La rama `codex/nutridesk-release-operaciones` continúa desde PR123 y conserva los cambios de main hasta `9c56854`. El [informe vigente](nutridesk-release-operaciones-2026-10-15.md) documenta asistente, fuentes, CSV, preferencias, comunicaciones y límites externos; sustituye el estado del informe histórico del 12/10. Se cerraron dos P2: permiso de correo accesible con guardado/baja explícitos y bloqueo de WhatsApp sin configuración de bajas. Suite final propia: 2.977 aprobadas, cero fallos y dos omitidas en 452 archivos; tipos, build y gates aprobados. La [revisión de código](nutridesk-release-operaciones-review-2026-10-15.md) y la [QA a 1440/390](nutridesk-release-operaciones-qa-2026-10-15.md) no dejan P1/P2 abiertos en el alcance local; 1.789 huellas exactas tras suite y recorrido. Las cinco mejoras heredadas de demo y pacing, OCR/CSP y los JSON originales se conservan. La entrega de SARA 2 sigue separada. No se publicaron cambios ni se activaron servicios desde esta entrega.
 
-- IA de apoyo para planes semanales (17/10/2026, rama `claude/project-thread-adfvy4`, PR en borrador): apagada por defecto (`AI_PLAN_ASSISTANT=on` la enciende), sin migraciones ni pantallas nuevas; usa SARA 2, equivalencias, modelos y alergias de la nutri, y la bolsa global de US$5 al mes. Detalle: `docs/ia-asistente-planes-2026-10-17.md`.
+- IA de apoyo para planes semanales (17/10/2026, rama `claude/project-thread-adfvy4`, PR #143 en main): ENCENDIDA en producción desde el 17/10 con `AI_PLAN_ASSISTANT=on` (solo modelos gratis; sin la variable vuelve a apagarse), sin migraciones ni pantallas nuevas; usa SARA 2, equivalencias, modelos y alergias de la nutri, y la bolsa global de US$5 al mes. Detalle: `docs/ia-asistente-planes-2026-10-17.md`.
 - Verificación en dos pasos (2026-10-17, issue #132 tarea 1, rama `claude/project-thread-jlmakv`): pantallas de alta con QR y de código, chequeo `aal2` en el servidor (`MFA_ENFORCE=1`) y en el frente (`VITE_MFA_ENFORCE=1`), y migración `20261017030000_mfa_aal2_gate` **sin aplicar** (interruptor `private.mfa_enforcement.enabled`, apagado). Todo apagado de fábrica. Pasos para prenderlo, uno por uno con la frase de Facundo: `docs/verificacion-dos-pasos-2026-10-17.md`.
+- Regla de Facundo (17/10/2026): la IA queda encendida como parte de la función de la app (solo modelos gratis, tope de US$5 al mes en el servidor). Un PR terminado, en verde y sin conflictos se junta a main sin su frase, salvo que cambie la base, la configuración de producción o active un servicio pago: ahí sigue haciendo falta su frase escrita. Los borradores que esperan su decisión no se juntan.
