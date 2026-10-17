@@ -201,6 +201,18 @@ El [producto desde el código original del MCP](producto-nutrigo-mcp-2026-10-03.
 - App para tiendas (Android primero, empaquetando la web), calidad en producción, publicidad paga y
   página pública con precios (espera el precio). Plan: `docs/plan-apartados.md`.
 
+## Alternativas del plan que elige la paciente (2026-10-17)
+
+En la ventana de cada comida del Plan, cada alimento con alternativas muestra «Alternativas aprobadas por tu
+nutricionista»: las otras opciones del mismo grupo de intercambios (#134), con la cantidad equivalente y las kcal.
+Si no hay alergias y restricciones cargadas en el ingreso no se ofrece nada, y un alimento que coincide por nombre con
+una alergia o restricción nunca se ofrece (si se declara después, la elección guardada deja de verse). La elección
+se guarda aparte; el plan aprobado no cambia. Código: `server/plan-alternatives/`, `src/types/plan-alternatives.ts`,
+`src/features/nutrigo/plan-alternatives.tsx`. Migración `20261017040000_patient_plan_choices` (tabla cerrada al
+cliente y dos funciones: leer la paciente y su nutri, escribir solo la paciente). **Sin aplicar: espera la frase de
+Facundo en la base.** Hasta entonces la pantalla simplemente no muestra alternativas. Falta: que la nutri vea lo que
+eligió cada paciente y que la elección figure en la lista de compras.
+
 ## Base más rápida: índices y reglas de acceso (2026-10-17)
 
 Retoma el PR #27 (de septiembre, quedó viejo porque entraron muchas tablas). El asesor de rendimiento de Supabase

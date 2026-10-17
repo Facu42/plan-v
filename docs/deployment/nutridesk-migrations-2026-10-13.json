@@ -107,6 +107,11 @@
       "version": "20261017030000",
       "file": "20261017030000_mfa_aal2_gate.sql",
       "sha256": "68eeac7c95f7eb48c14863c8b8cb2ead403d305312ab45852fd2a9c8fa58b0f4"
+    },
+    {
+      "version": "20261017040000",
+      "file": "20261017040000_patient_plan_choices.sql",
+      "sha256": "595ee9acdd8c1c5f1f5e8854b4459247e7f81ccf03f705a2d00298229c7eb220"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

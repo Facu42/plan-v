@@ -9,6 +9,8 @@ import { planRecipe, planComponentItems } from '../plan-recipe';
 import { componentTitle, componentGrams, componentNativeQuantity } from '../../../types/plan-components';
 import { PlanGuidanceView } from '../../../components/nutrigo/PlanGuidance';
 import { plateImage } from '../plate-photo';
+import { ComponentAlternatives } from '../plan-alternatives';
+import type { PlanAlternativesView } from '../../../types/plan-alternatives';
 export { planRecipe } from '../plan-recipe';
 import { NutrigoRecipeDetail } from './Menu';
 import { AiPlanNutritionSummary } from '../../../components/nutrigo/AiPlanNutritionSummary';
@@ -54,6 +56,14 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
   const [scroll,setScroll]=useState({offset:0,size:.47});
   const [meal,setMeal]=useState<PlanItemView|null>(null);
   const [changes,setChanges]=useState(false);
+  const alternatives=useRemote(`${patient.id}:plan-alternatives`,signal=>plansApi.alternatives(patient.id,signal));
+  const [choosing,setChoosing]=useState(false),[chooseError,setChooseError]=useState('');
+  const choose=async(itemId:string,componentId:string,foodId:string|null)=>{
+    setChoosing(true);setChooseError('');
+    try{alternatives.setData(await plansApi.chooseAlternative(patient.id,{item_id:itemId,component_id:componentId,food_id:foodId}));}
+    catch{setChooseError('No pudimos guardar tu elección. Probá de nuevo.');}
+    finally{setChoosing(false);}
+  };
   const plan=remote.data?.plan;
   const handover: PlanHandover | null = remote.data?.handover ?? null;
   const banner=planHandoverBanner(handover);
@@ -136,11 +146,17 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
     if(/^Button/.test(name)&&text==='Filter')return {onClick:()=>setOptions(true),label:'Filtrar el plan',props:{'aria-pressed':hideEmpty},children:relabel(node,()=> 'Filtrar')};
     return undefined;
   };
+  const alternativesFor=(view:PlanAlternativesView|null,itemId:string,componentId:string)=>{
+    const slot=view?.slots.find(row=>row.item_id===itemId&&row.component_id===componentId);
+    const base=meal?.components?.find(row=>row.id===componentId);
+    if(!slot||!base)return null;
+    return <ComponentAlternatives slot={slot} choice={view?.choices.find(row=>row.item_id===itemId&&row.component_id===componentId)} original={componentTitle(base)} busy={choosing} error={chooseError} onChoose={foodId=>void choose(itemId,componentId,foodId)}/>;
+  };
   const extras=shown.flatMap(day=>day.items.filter(item=>EXTRA_SLOT[item.slot]&&matchesItem(item)));
   return <FramePair nodes={['84:2994','470:15300']} resolve={resolve} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut} query={search} onSearch={setSearch}>
     {meal&&<FigmaRecordDialog title={`${meal.slot} · ${shortDate(meal.for_date)}`} onClose={()=>setMeal(null)}>
       <div className="flex flex-col gap-[16px] text-[14px] text-[#272932]">
-        {meal.components?.map((component,index)=>{const entry=planComponentItems(meal)[index];const recipe=planRecipe(entry);return <section key={component.id}><h3>{componentTitle(component)}</h3><p>{component.kind==='food'?`${component.quantity.toLocaleString('es-AR')} ${component.measure??(component.food_snapshot?foodQuantityUnit(component.food_snapshot):'g')}${component.measure?` · ${componentNativeQuantity(component)?.toLocaleString('es-AR')??'Sin cantidad'} ${component.food_snapshot?foodQuantityUnit(component.food_snapshot):'g'}`:''}`:component.kind==='recipe'?`${component.portions.toLocaleString('es-AR')} porciones`:component.recipe_proposal?`${component.portions??''} porciones`:''}</p>{component.public_note&&<p>{component.public_note}</p>}{recipe&&<button type="button" className="underline" onClick={()=>{setMeal(null);setChosen(entry);}}>Ver ingredientes y preparación</button>}</section>;})}
+        {meal.components?.map((component,index)=>{const entry=planComponentItems(meal)[index];const recipe=planRecipe(entry);return <section key={component.id}><h3>{componentTitle(component)}</h3><p>{component.kind==='food'?`${component.quantity.toLocaleString('es-AR')} ${component.measure??(component.food_snapshot?foodQuantityUnit(component.food_snapshot):'g')}${component.measure?` · ${componentNativeQuantity(component)?.toLocaleString('es-AR')??'Sin cantidad'} ${component.food_snapshot?foodQuantityUnit(component.food_snapshot):'g'}`:''}`:component.kind==='recipe'?`${component.portions.toLocaleString('es-AR')} porciones`:component.recipe_proposal?`${component.portions??''} porciones`:''}</p>{component.public_note&&<p>{component.public_note}</p>}{recipe&&<button type="button" className="underline" onClick={()=>{setMeal(null);setChosen(entry);}}>Ver ingredientes y preparación</button>}{alternativesFor(alternatives.data,meal.id,component.id)}</section>;})}
         {meal.public_note&&<p>{meal.public_note}</p>}
       </div>
     </FigmaRecordDialog>}
