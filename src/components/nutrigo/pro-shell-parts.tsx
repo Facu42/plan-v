@@ -5,7 +5,7 @@ import type { ShowroomPage } from './ShowroomPanels';
 import { Icon } from '../shared/Icon';
 import { PRO_NAV_GROUPS, rememberPatient, type ProNavItem } from './pro-nav';
 
-const NAV_EASE = [0.23, 1, 0.32, 1] as const;
+const NAV_EASE = [0.22, 1, 0.36, 1] as const;
 
 function followLink(event: React.MouseEvent<HTMLAnchorElement>, href: string, onOpen: (href: string) => void) {
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -32,7 +32,7 @@ function ProNavLink({ item, href, current, unread, onOpen }: {
 }) {
   const reduce = useReducedMotion();
   return <a href={href} aria-current={current ? 'page' : undefined} onClick={(event) => followLink(event, href, onOpen)}>
-    {current && <motion.span className="pv-nav-pill" layoutId="pv-nav-active" transition={{ duration: reduce ? 0.12 : 0.34, ease: NAV_EASE }} />}
+    {current && <motion.span className="pv-nav-pill" layoutId="pv-nav-active" transition={{ duration: reduce ? 0.15 : 0.25, ease: NAV_EASE }} />}
     <Icon name={item.icon} size={20} />
     <span>{item.label}</span>
     {item.soon && <small>Próximamente</small>}

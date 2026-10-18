@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { RECORD_MORE, RECORD_PRIMARY, RECORD_TABS, recordTab, appointmentRecordSummary, documentInSection } from './patient-record-sections';
+import { RECORD_MORE, RECORD_PRIMARY, RECORD_TABS, recordTab, appointmentRecordSummary, documentInSection, consultaNombre } from './patient-record-sections';
 import type { AppointmentHistoryEntry } from '../../types';
 
 describe('Ficha completa del paciente', () => {
@@ -22,6 +22,13 @@ describe('Ficha completa del paciente', () => {
     const entry = { id: 'a', action: 'elapsed', dateId: '2026-10-10', when: '', duration: 45, channel: 'video', actor: 'system', at: '' } as AppointmentHistoryEntry;
     expect(appointmentRecordSummary([entry, entry, { ...entry, id: 'b', action: 'confirmed' }])).toEqual({ elapsed: 1, confirmed: 1 });
     expect(appointmentRecordSummary(undefined)).toEqual({ elapsed: 0, confirmed: 0 });
+  });
+  it('nombra la consulta según la etapa y no usa el horario como título', () => {
+    expect(consultaNombre('seguimiento')).toBe('Consulta de seguimiento');
+    expect(consultaNombre('ingreso')).toBe('Consulta de ingreso');
+    expect(consultaNombre('plan')).toBe('Consulta de plan');
+    expect(consultaNombre('alta')).toBe('Consulta de alta');
+    expect(consultaNombre('seguimiento')).not.toBe('Jueves · 14:30');
   });
   it('laboratorio sólo muestra estudios identificados y archivos conserva todos los adjuntos', () => {
     expect(documentInSection({ kind: 'clinical_document', document_kind: 'laboratorio' }, 'laboratory')).toBe(true);

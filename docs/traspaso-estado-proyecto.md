@@ -1,4 +1,8 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-17)
+# Traspaso del proyecto (actualización vigente: 2026-10-18)
+
+## Panel de la nutricionista · 18/10
+
+La rama `feat/redisenio-panel-nutri-f1` (PR #147, se compara con `chore/design-skills`) redibuja Inicio, Pacientes y Ficha con la piel Nutrigo y Plus Jakarta Sans. El lima marca la acción principal y lo elegido. El azafrán y el naranja marcan avisos. No está publicado. No hubo cambios de base ni de Supabase.
 
 ## Actualización de consultas · 17/10
 

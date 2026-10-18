@@ -75,6 +75,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **18/10 · Cursor** · Segunda vuelta del panel, misma rama `feat/redisenio-panel-nutri-f1` y base `chore/design-skills`. El lima queda para la acción principal y lo elegido; el azafrán y el naranja, para avisos. La ficha nombra la consulta y «Más de esta paciente» se subraya como las otras pestañas. Sin merge, sin deploy y sin base de datos.
 - **18/10 · Cursor** · El panel se acerca a la referencia de Veda: buscador arriba, ficha en dos columnas, sin la columna fija de la paciente, tipografía Plus Jakarta Sans y animaciones cortas. Misma rama `feat/redisenio-panel-nutri-f1`, base `chore/design-skills`. Pruebas, tipos y compilación en verde. Sin merge, sin deploy y sin base de datos.
 - **18/10 · Cursor** · Correcciones del panel, misma rama `feat/redisenio-panel-nutri-f1`. Inicio queda con un solo título. La barra superior (título, campana y cuenta) es la misma en todas las pantallas, también en el celular. El PR #147 se compara contra `chore/design-skills` y se junta después del #146. Sin merge, sin deploy y sin base de datos.
 - **18/10 · Cursor** · Fase 1 del rediseño del panel de la nutricionista, rama `feat/redisenio-panel-nutri-f1`, contra `main`, sin merge y sin base de datos. Shell con menú de cuatro grupos, Inicio, Pacientes y Ficha (Resumen y pestañas). Piel Nutrigo también en el consultorio. No se tocó la app de la paciente ni Supabase.

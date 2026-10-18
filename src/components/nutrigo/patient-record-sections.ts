@@ -1,4 +1,4 @@
-import type { AppointmentHistoryEntry } from '../../types';
+import type { AppointmentHistoryEntry, Stage } from '../../types';
 import { patientRecordLabels } from '../../features/nutrigo/secondaryTranslation';
 
 /** Las diez secciones clínicas conviven con los accesos operativos de Plan V. */
@@ -16,6 +16,16 @@ export const RECORD_PRIMARY = [
 const PRIMARY_IDS = new Set<RecordTab>(RECORD_PRIMARY.map(([id]) => id));
 export const RECORD_MORE = RECORD_TABS.filter(([id]) => !PRIMARY_IDS.has(id));
 const LEGACY: Record<string, RecordTab> = { ingreso: 'historia', registros: 'evolucion', mensajes: 'chat' };
+const CONSULTA: Record<Stage, string> = {
+  ingreso: 'Consulta de ingreso',
+  plan: 'Consulta de plan',
+  seguimiento: 'Consulta de seguimiento',
+  alta: 'Consulta de alta',
+};
+export function consultaNombre(stage: Stage): string {
+  return CONSULTA[stage] ?? 'Consulta';
+}
+
 export function recordTab(value: string | null): RecordTab {
   if (value && Object.prototype.hasOwnProperty.call(LEGACY, value)) return LEGACY[value];
   return RECORD_TABS.some(([id]) => id === value) ? value as RecordTab : 'resumen';

@@ -36,9 +36,10 @@ typography:
     fontWeight: 600
     lineHeight: 1.3
 rounded:
+  nested: "8px"
   control: "12px"
   card: "20px"
-  card-lg: "24px"
+  menu: "28px"
   capsule: "99px"
 spacing:
   card: "16px"
@@ -58,7 +59,7 @@ components:
   card:
     backgroundColor: "{colors.card}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.card-lg}"
+    rounded: "{rounded.card}"
     padding: "20px"
 ---
 
@@ -68,7 +69,7 @@ components:
 
 **Creative North Star: "El mismo consultorio, la misma piel"**
 
-La nutricionista y la paciente usan la piel Nutrigo. Lienzo crema, tarjetas blancas amplias, menú lateral oscuro con la tinta del sistema y el ítem activo en lima. Mucho aire. Los números importantes son grandes. Los estados son pastillas pastel, no cuatro tarjetas iguales.
+La nutricionista y la paciente usan la piel Nutrigo. Lienzo crema, tarjetas gris-crema, menú lateral oscuro con la tinta del sistema y el ítem activo en lima. Mucho aire. Los números importantes son grandes. El color se usa con intención: lima para la acción principal y lo elegido, azafrán y naranja para alertas, y el resto en crema y tinta.
 
 Decisión de Facundo del 18/10/2026. Reemplaza la regla de dos pieles. Una skill no vuelve a separar el consultorio en vidrio y la paciente en Nutrigo.
 
@@ -80,11 +81,12 @@ Decisión de Facundo del 18/10/2026. Reemplaza la regla de dos pieles. Una skill
 
 **Key Characteristics:**
 
-- Lienzo crema `#F9F4F2`. Tarjetas blancas de radio 24.
+- Lienzo crema `#F9F4F2`. Tarjetas gris-crema `#F4F0EC`, radio 20.
 - Menú tinta `#272932`, flotante, radio 28, ítem activo lima `#C2E66E`.
-- Azafrán `#FFCB65` para avisos y «próximamente». Naranja `#FFA257` solo de fondo, con texto tinta.
-- Plus Jakarta Sans en el panel: títulos grandes y livianos, texto chico y limpio. La paciente sigue en Poppins. Números tabulares. Piso de lectura 12 px.
-- Cápsulas para lo elegido. Pastillas pastel para estados y KPIs.
+- Lima solo en la acción principal, el ítem activo y la franja de identidad de la ficha.
+- Azafrán `#FFCB65` y naranja `#FFA257` solo para alertas: «próximamente», vencida, acceso pendiente, sin leer. Texto tinta.
+- Plus Jakarta Sans en el panel: títulos con balance, texto con pretty. La paciente sigue en Poppins. Números tabulares. Piso de lectura 12 px.
+- Cápsula para lo elegido. El resto de las tarjetas se parece entre sí, en crema, sin una etiqueta de color en cada bloque.
 
 ## Colors
 
@@ -93,17 +95,17 @@ Una paleta para las dos apps. Los hex salen de `src/components/nutrigo/nutrigo-f
 ### Primary
 
 - **Tinta** (`#272932`): texto, menú lateral y foco. En el archivo es `--nv-ink`.
-- **Lima** (`#C2E66E`): ítem activo, botón principal y pastilla de «hoy». Texto siempre tinta, nunca blanco.
+- **Lima** (`#C2E66E`): ítem activo y botón principal. En una fila de botones, solo el primero. Texto siempre tinta, nunca blanco.
 
 ### Secondary
 
-- **Azafrán** (`#FFCB65`): «próximamente», contadores y el acceso al asistente. Texto tinta.
-- **Naranja** (`#FFA257`): fondo de aviso. El blanco encima no llega a AA (cerca de 2:1). El texto va en tinta.
+- **Azafrán** (`#FFCB65`): «próximamente», contador sin leer y aviso. Texto tinta. No pinta avatares ni el botón del asistente.
+- **Naranja** (`#FFA257`): alerta (consulta cancelada, aviso). El blanco encima no llega a AA (cerca de 2:1). El texto va en tinta.
 
 ### Neutral
 
 - **Crema** (`#F9F4F2`): lienzo. `--nv-bg`. No se cambia.
-- **Tarjeta** (`#FFFFFF`): bloques de trabajo. Sombra del archivo `0 4px 12px rgba(176, 176, 176, 0.14)`.
+- **Tarjeta** (`#FFFFFF` y, en el panel, `#F4F0EC`): bloques de trabajo. En el panel la sombra es en capas y transparente.
 - **Línea** (`#E1E1E2`): bordes de controles.
 - **Gris del archivo** (`#8A8C90`): está en el archivo como `--nv-muted`. Sobre crema da cerca de 3:1 y no se usa para texto que hay que leer.
 - **Texto secundario del panel** (`#52545B`): reemplaza ese gris solo dentro de `.nv-pro`. Sobre crema queda cerca de 7:1. El cuerpo secundario usa `#3E4046`.
@@ -149,33 +151,33 @@ Los destinos de una persona no son ítems del lateral. Se abren desde la fila de
 
 ## Elevation & Depth
 
-La profundidad es la sombra corta del archivo Nutrigo, no una sombra doble ni vidrio.
+En el panel la profundidad son dos sombras transparentes, suaves, sin borde de color.
 
-- **Tarjeta** (`0 4px 12px rgba(176, 176, 176, 0.14)`).
-- **Menú** (`0 18px 40px rgba(39, 41, 50, 0.18)`): el lateral flota sobre la crema.
+- **Tarjeta** (`0 1px 1px rgba(39, 41, 50, 0.04), 0 8px 20px rgba(39, 41, 50, 0.05)`).
+- **Menú y capas sueltas** (`0 1px 1px rgba(39, 41, 50, 0.08), 0 18px 40px rgba(39, 41, 50, 0.16)`).
 
-El desenfoque de vidrio no entra en el panel. Las entradas animadas usan solo opacidad y transform.
+El borde de una tarjeta es casi invisible (`rgba(39, 41, 50, 0.05)`). No hay una franja de color a la izquierda. El desenfoque de vidrio no entra en el panel. Las entradas animadas usan solo opacidad y transform.
 
 ## Shapes
 
-En el panel, las tarjetas van a 22 px, con fondo gris-crema `#F4F0EC` y un borde casi invisible. El menú sigue a 28 px. El ítem activo del menú y los botones son cápsula. Las pestañas de la ficha se subrayan. La app de la paciente no cambia de forma.
+Escala del panel: 8 px anidado, 12 px en controles, 20 px en tarjetas, 28 px en el menú, cápsula en lo elegido. El radio de afuera es el de adentro más el relleno, cuando el relleno no pasa de 24 px. Un menú con relleno de 8 px y piezas de 12 px cierra en 20 px. Fondo gris-crema `#F4F0EC` y borde casi invisible. Las pestañas de la ficha, incluida «Más de esta paciente», se subrayan. La app de la paciente no cambia de forma.
 
 ## Components
 
 ### Buttons
 
-- **Primary:** lima `#C2E66E`, texto tinta.
-- **Soft:** crema o gris muy claro, texto tinta.
-- **Hover / press:** el press escala a 0.98 en 160 ms. El foco es un anillo de 2 px, lima en el menú y tinta en el contenido, separado 3 px.
+- **Primary:** lima `#C2E66E`, texto tinta. En una fila, uno solo.
+- **Soft:** crema `#F4F0EC`, texto tinta. Es el resto de la fila.
+- **Hover / press:** el press escala a 0.96. Con menos movimiento, a 0.98. El foco es un anillo de 2 px, lima en el menú y tinta en el contenido, separado 3 px. El área de toque va de 40 a 44 px.
 - Un control apagado explica por qué. No queda un botón mudo.
 
 ### Chips
 
-Pastilla pastel (lima lavada `#EDFFC4`, azafrán lavado `#FFEDC9`, durazno `#FFF2E8`) con texto tinta de al menos 12 px.
+Lo elegido es cápsula lima. Una alerta es cápsula azafrán o naranja. El resto no lleva pastilla de color. Texto tinta, al menos 12 px.
 
 ### Cards / Containers
 
-En el panel, fondo `#F4F0EC`, radio 22 y borde casi invisible. Sin blur. La app de la paciente conserva las tarjetas del archivo.
+En el panel, fondo `#F4F0EC`, radio 20, sombra en capas y borde casi invisible. Sin blur. La app de la paciente conserva las tarjetas del archivo.
 
 ### Inputs / Fields
 
@@ -189,7 +191,7 @@ Cada ítem es un enlace real. Página pública se muestra como «próximamente»
 
 ### Ficha
 
-Cuatro pestañas fijas: Resumen, Registro, Plan, Consultas. El resto (historia, evolución, notas, plan semanal, compras, chat, archivos, laboratorio, planificación y cobros) vive en «Más de esta paciente». El nombre largo se corta y el título completo queda en el tooltip.
+Cuatro pestañas fijas: Resumen, Registro, Plan, Consultas. El resto (historia, evolución, notas, plan semanal, compras, chat, archivos, laboratorio, planificación y cobros) vive en «Más de esta paciente», con el mismo subrayado y un chevron que indica el menú. El título grande nombra la consulta (ingreso, plan, seguimiento o alta). Fecha y hora van al lado, en un dato chico. El nombre largo se corta y el título completo queda en el tooltip.
 
 ## Do's and Don'ts
 
@@ -199,7 +201,7 @@ Cuatro pestañas fijas: Resumen, Registro, Plan, Consultas. El resto (historia, 
 - **Do** oscurecer a `#52545B` o `#3E4046` el texto del panel que hoy usa `#8A8C90`.
 - **Do** dejar el menú en tinta y el ítem activo en lima.
 - **Do** mantener los enlaces y las rutas que ya existen. Lo que no existe se dice «próximamente».
-- **Do** animar en 150–400 ms, con una curva suave, solo opacidad y transform. Con menos movimiento, la animación es más corta, no se apaga.
+- **Do** animar con los tiempos 150, 250, 350, 400 y 500 ms y la curva `cubic-bezier(0.22, 1, 0.36, 1)`, solo opacidad y transform. Menú y capas se abren en 250 ms. El check de guardado dura 500 ms. Con menos movimiento, la animación es más corta, no se apaga.
 
 ### Don't
 
@@ -208,3 +210,5 @@ Cuatro pestañas fijas: Resumen, Registro, Plan, Consultas. El resto (historia, 
 - **Don't** tocar la app de la paciente para que el panel se vea mejor.
 - **Don't** esconder archivar, invitar, editar o escribir: si no están en la fila principal, siguen a un clic, con su nombre.
 - **Don't** inventar un ítem de Nutridesk que `docs/` no muestra.
+- **Don't** pintar de lima o azafrán cada tarjeta, cada número o cada etiqueta.
+- **Don't** usar `transition: all`, ni un borde de color a la izquierda, ni un radio fuera de la escala 8, 12, 20, 28 y cápsula.

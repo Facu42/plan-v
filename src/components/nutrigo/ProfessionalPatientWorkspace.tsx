@@ -30,12 +30,12 @@ import { ShowroomGrocery } from './ShowroomGrocery';
 import { ShowroomMealPlan } from './ShowroomMealPlan';
 import { ConsultationNotes,ConsultationCompletionPanel } from './ConsultationNotes';
 import { PatientImportedHistory } from './PatientImportedHistory';
-import { RECORD_MORE, RECORD_PRIMARY, recordTab, appointmentRecordSummary, type RecordTab } from './patient-record-sections';
-import { ArrowRight } from '@phosphor-icons/react';
+import { RECORD_MORE, RECORD_PRIMARY, recordTab, appointmentRecordSummary, consultaNombre, type RecordTab } from './patient-record-sections';
+import { ArrowRight, CaretDown } from '@phosphor-icons/react';
 import { LayoutGroup, motion, useReducedMotion } from 'motion/react';
 import { BlurFade, LevelBar, NumberTicker } from './pro-motion';
 
-const TAB_EASE = [0.23, 1, 0.32, 1] as const;
+const TAB_EASE = [0.22, 1, 0.36, 1] as const;
 
 function fechaCorta(value?: string | null) {
   if (!value) return 'Sin fecha';
@@ -140,7 +140,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
         <BlurFade delay={0.12}>
           <ul className="pv-history">
             {(history.length ? history : [{ id: 'proxima', when: patient.appointment?.when || 'Sin consulta programada', action: 'scheduled' as const }]).map((row) => <li key={row.id}>
-              <span className={`pv-dot pv-dot-${row.action === 'confirmed' ? 'lime' : row.action === 'cancelled' ? 'orange' : 'saffron'}`} aria-hidden="true" />
+              <span className={`pv-dot pv-dot-${row.action === 'confirmed' ? 'lime' : row.action === 'cancelled' ? 'orange' : 'ink'}`} aria-hidden="true" />
               <div><strong>{row.when}</strong><small>{row.action === 'confirmed' ? 'Confirmada' : row.action === 'cancelled' ? 'Cancelada' : 'Consulta'}</small></div>
               <a href={`/crm/ficha?paciente=${encodeURIComponent(patient.id)}&seccion=consultas`} aria-label={`Abrir consultas de ${patient.name}`} onClick={(event) => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return; event.preventDefault(); change('consultas'); }}><ArrowRight size={16} aria-hidden="true" /></a>
             </li>)}
@@ -150,12 +150,15 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
       </aside>
       <div className="pv-sheet-main">
         <BlurFade delay={0.05}>
-          <h2 className="pv-sheet-title">{patient.appointment ? patient.appointment.when : (patient.goal?.trim() || 'Seguimiento')}</h2>
+          <div className="pv-sheet-heading">
+            <h2 className="pv-sheet-title">{consultaNombre(patient.stage)}</h2>
+            <p className="pv-sheet-when">{patient.appointment?.when || 'Sin fecha'}</p>
+          </div>
           <LayoutGroup id={`pv-tabs-${patient.id}`}>
             <nav className="pw-tabs" aria-label="Secciones de la ficha">
-              {RECORD_PRIMARY.map(([id, label]) => <a key={id} href={`/crm/ficha?paciente=${encodeURIComponent(patient.id)}&seccion=${id}`} aria-current={id === tab ? 'page' : undefined} onClick={(event) => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return; event.preventDefault(); change(id); }}>{label}{id === tab && <motion.span className="pv-tab-line" layoutId="pv-tab-line" transition={{ duration: reduce ? 0.12 : 0.34, ease: TAB_EASE }} />}</a>)}
+              {RECORD_PRIMARY.map(([id, label]) => <a key={id} href={`/crm/ficha?paciente=${encodeURIComponent(patient.id)}&seccion=${id}`} aria-current={id === tab ? 'page' : undefined} onClick={(event) => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return; event.preventDefault(); change(id); }}>{label}{id === tab && <motion.span className="pv-tab-line" layoutId="pv-tab-line" transition={{ duration: reduce ? 0.15 : 0.25, ease: TAB_EASE }} />}</a>)}
               <details className="pw-more">
-                <summary aria-current={RECORD_MORE.some(([id]) => id === tab) ? 'page' : undefined}>Más de esta paciente</summary>
+                <summary aria-current={RECORD_MORE.some(([id]) => id === tab) ? 'page' : undefined}>Más de esta paciente<CaretDown size={14} weight="bold" aria-hidden="true" /></summary>
                 <div>{RECORD_MORE.map(([id, label]) => <a key={id} href={`/crm/ficha?paciente=${encodeURIComponent(patient.id)}&seccion=${id}`} aria-current={id === tab ? 'page' : undefined} onClick={(event) => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return; event.preventDefault(); change(id); }}>{label}</a>)}</div>
               </details>
             </nav>

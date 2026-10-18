@@ -53,7 +53,7 @@ export function ShowroomPatientRecord({ patient, patients = [patient], onSelect,
 
     <div className="nr-summary-grid">
       <article className="nr-card nr-goal">
-        <header><div><span className="nr-kicker">Objetivo actual</span><h3>{patient.goal || 'Objetivo por definir'}</h3></div><NvBadge tone="gold">{GOAL_STATUS_LABELS[goal.status]}</NvBadge></header>
+        <header><div><span className="nr-kicker">Objetivo actual</span><h3>{patient.goal || 'Objetivo por definir'}</h3></div><NvBadge>{GOAL_STATUS_LABELS[goal.status]}</NvBadge></header>
         <strong>{goal.progress}%</strong><NvProgress value={goal.progress} label={`Avance del objetivo de ${patient.name}`} /><small>Actualizado: {readableDate(goal.updatedAt)}</small>
       </article>
       <article className="nr-card nr-appointment">
@@ -89,7 +89,7 @@ export function ShowroomPatientRecord({ patient, patients = [patient], onSelect,
       </section>
       <section className="nr-card nr-notes">
         <header><div><span className="nr-kicker">Privado</span><h3>Notas de objetivos</h3></div><Icon name="target" size={17} /></header>
-        {goal.history.length ? <ol>{goal.history.slice(0, 5).map((entry) => <li key={entry.id}><div><strong>{entry.goal}</strong><NvBadge tone="gold">{entry.progress}%</NvBadge></div><p>{entry.note || 'Sin nota profesional'}</p><small>{GOAL_STATUS_LABELS[entry.status]} · {readableDate(entry.updated_at)}</small></li>)}</ol> : <NvState title="Sin notas de objetivos" description="Todavía no hay cambios documentados en el objetivo." />}
+        {goal.history.length ? <ol>{goal.history.slice(0, 5).map((entry) => <li key={entry.id}><div><strong>{entry.goal}</strong><NvBadge>{entry.progress}%</NvBadge></div><p>{entry.note || 'Sin nota profesional'}</p><small>{GOAL_STATUS_LABELS[entry.status]} · {readableDate(entry.updated_at)}</small></li>)}</ol> : <NvState title="Sin notas de objetivos" description="Todavía no hay cambios documentados en el objetivo." />}
       </section>
       <section className="nr-card nr-meal-notes">
         <header><div><span className="nr-kicker">Solo profesional</span><h3>Observaciones de comidas</h3></div><Icon name="camera" size={17} /></header>

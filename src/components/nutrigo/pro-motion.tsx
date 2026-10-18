@@ -1,7 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { animate, motion, useReducedMotion } from 'motion/react';
 
-const EASE = [0.23, 1, 0.32, 1] as const;
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 /**
  * Number ticker de Magic UI, adaptado a `motion` y al formato es-AR.
@@ -17,7 +17,7 @@ export function NumberTicker({ value, format }: { value: number; format?: (amoun
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const from = reduce ? value * 0.92 : 0;
     const controls = animate(from, value, {
-      duration: reduce ? 0.16 : 0.36,
+      duration: reduce ? 0.15 : 0.4,
       ease: EASE,
       onUpdate: (latest) => {
         const shown = Math.abs(latest - value) < 0.5 ? value : Math.round(latest);
@@ -38,7 +38,7 @@ export function BlurFade({ children, delay = 0, className }: { children: ReactNo
     className={className}
     initial={{ opacity: 0, y: reduce ? 2 : 10 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: reduce ? 0.16 : 0.28, delay: reduce ? 0 : delay, ease: EASE }}
+    transition={{ duration: reduce ? 0.15 : 0.25, delay: reduce ? 0 : delay, ease: EASE }}
   >{children}</motion.div>;
 }
 
@@ -52,7 +52,7 @@ export function LevelBar({ value, label }: { value: number | null; label: string
       initial={{ scaleX: reduce ? Math.max(0.08, safe / 100) : 0 }}
       animate={{ scaleX: known ? safe / 100 : 0 }}
       style={{ transformOrigin: 'left center' }}
-      transition={{ duration: reduce ? 0.16 : 0.36, ease: EASE }}
+      transition={{ duration: reduce ? 0.15 : 0.4, ease: EASE }}
     />
   </div>;
 }
