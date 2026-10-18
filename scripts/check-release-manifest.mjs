@@ -13,8 +13,10 @@ const APPLIED_BASELINE={
  '20261015100000_habit_symptoms.sql':{version:'20261015100000',observedAppliedVersion:'20261014215543',observedAppliedName:'habit_symptoms'},
  '20261015200000_push_subscriptions.sql':{version:'20261015200000',observedAppliedVersion:'20261015163006',observedAppliedName:'push_subscriptions'},
  '20261016090000_water_goal.sql':{version:'20261016090000',observedAppliedVersion:'20261016090000',observedAppliedName:'water_goal'},
+ '20261017010000_performance_indexes.sql':{version:'20261017010000',observedAppliedVersion:'20261017013123',observedAppliedName:'performance_indexes'},
+ '20261017020000_fk_full_indexes.sql':{version:'20261017020000',observedAppliedVersion:'20261017021355',observedAppliedName:'fk_full_indexes'},
 };
-const BASELINE_MAIN='bac31c9ad11dd9dd9bc39e111c704450d2e30a14',BASELINE_OBSERVED_ON='2026-10-16';
+const BASELINE_MAIN='49a6a5de8bd19ce89b5a272c1f785c7fc9f906e8',BASELINE_OBSERVED_ON='2026-10-16';
 const defaultRoot=fileURLToPath(new URL('../',import.meta.url));
 const filename=/^(\d{14})_[A-Za-z0-9_-]+\.sql$/;
 /** UTF-8 is validated; only CRLF/CR become LF. BOM, whitespace and final newline are retained. */

@@ -10,6 +10,8 @@ const CrmDashboard = lazy(() => import('./crm/CrmDashboard').then(({ CrmDashboar
 import { LoginScreen } from './auth/LoginScreen';
 import { PasswordResetScreen } from './auth/PasswordResetScreen';
 import { ConsentScreen } from './auth/ConsentScreen';
+import { MfaScreen } from './auth/MfaScreen';
+import { useMfaGate } from '../context/useMfaGate';
 import { EntryStatus } from './auth/entry-shell';
 import { hasCurrentLegalAcceptance } from '../legal';
 import { useAuth } from '../context/AuthContext';
@@ -43,6 +45,7 @@ export function PlanVExperience() {
   // Sin la aceptación vigente no se carga nada ni se acepta la invitación.
   const legalOk = !session || hasCurrentLegalAcceptance(session.user.user_metadata);
   const sessionUserId=session?.user.id??null;
+  const mfa = useMfaGate(session, isNutri || isAdminPath(path), !authLoading && !passwordRecovery);
   const toggleTheme = () => setTheme((current) => current === 'dark' ? 'light' : 'dark');
 
   useEffect(() => {
@@ -58,9 +61,9 @@ export function PlanVExperience() {
       return;
     }
     if (session && !isNutri && !isPatient) return;
-    if (!legalOk) return;
+    if (!legalOk || mfa.step) return;
     void boot({ isNutri, isPatient });
-  }, [authLoading, session, demoMode, isNutri, isPatient, legalOk, boot, reset, passwordRecovery,publicSlug,teamPath]);
+  }, [authLoading, session, demoMode, isNutri, isPatient, legalOk, mfa.step, boot, reset, passwordRecovery,publicSlug,teamPath]);
 
   useEffect(() => {
     setInviteStatus('idle');
@@ -114,6 +117,14 @@ export function PlanVExperience() {
 
   if (!session && !demoMode) {
     return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PwaChrome install={false} /><LoginScreen darkMode={darkMode} onToggleTheme={toggleTheme} /></div>;
+  }
+
+  if (session && mfa.step === 'checking') {
+    return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PwaChrome install={false} /><EntryStatus title="Cargando…" /></div>;
+  }
+
+  if (session && (mfa.step === 'verify' || mfa.step === 'enroll')) {
+    return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PwaChrome install={false} /><MfaScreen mode={mfa.step} onDone={() => { void mfa.refresh(); }} /></div>;
   }
 
   if (session && !legalOk) {

@@ -11,6 +11,38 @@ export function quantityLabel(value: number | null | undefined): string {
   if (value >= 10_000_000) return compact(value);
   return new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(value);
 }
+/** Cómo se pide en un comercio de Argentina lo que suma el plan: «1/2 kg» en vez de 480 g, «1,5 l»,
+ * «1 docena» de huevos, unidades enteras. Siempre redondea para arriba (no falta nada) y a pasos chicos.
+ * Las medidas de cocina (cda, cdita, taza) y las cantidades chicas quedan como vienen. */
+export type LocalAmount = { amount: string; unit: string; exact: string };
+const QUARTERS: Record<number, string> = { 0.25: '1/4', 0.5: '1/2', 0.75: '3/4' };
+const up = (value: number, step: number) => Math.ceil(value / step - 1e-9) * step;
+const named = (value: number) => QUARTERS[value] ?? quantityLabel(value);
+export function localAmount(quantity: number | null | undefined, unit: string | null, name = ''): LocalAmount {
+  const exact = quantityLabel(quantity);
+  const plainUnit = unit ?? '';
+  const exactText = exact === '-' ? '' : `${exact}${plainUnit ? ` ${plainUnit}` : ''}`;
+  const keep = { amount: exact, unit: plainUnit, exact: exactText };
+  if (typeof quantity !== 'number' || !Number.isFinite(quantity) || quantity <= 0 || quantity >= 10_000_000) return keep;
+  if (unit === 'g' || unit === 'ml') {
+    const bigUnit = unit === 'g' ? 'kg' : 'l';
+    if (quantity >= 1000) return { amount: named(up(quantity / 1000, 0.25)), unit: bigUnit, exact: exactText };
+    if (unit === 'g' && quantity >= 100) {
+      const grams = up(quantity, 50);
+      return grams % 250 === 0 ? { amount: named(grams / 1000), unit: 'kg', exact: exactText } : { amount: quantityLabel(grams), unit: 'g', exact: exactText };
+    }
+    if (unit === 'ml' && QUARTERS[quantity / 1000]) return { amount: QUARTERS[quantity / 1000], unit: 'l', exact: exactText };
+    return keep;
+  }
+  if (unit === 'u') {
+    if (/(^|[^a-z])huevos?([^a-z]|$)/.test(plain(name)) && quantity > 1) {
+      const dozens = up(quantity, 6) / 12;
+      return { amount: named(dozens), unit: dozens > 1 ? 'docenas' : 'docena', exact: exactText };
+    }
+    return { amount: quantityLabel(Math.ceil(quantity - 1e-9)), unit: 'u', exact: exactText };
+  }
+  return keep;
+}
 export const productCount = (count: number) => `${count} ${count === 1 ? 'producto' : 'productos'}`;
 export const boughtLabel = (count: number) => `${count} ${count === 1 ? 'comprado' : 'comprados'}`;
 
@@ -80,8 +112,8 @@ export function shoppingShareText(items: readonly ShareLine[]): string {
     if (!group.length) continue;
     lines.push('', category.toLocaleUpperCase('es-AR'));
     for (const item of group) {
-      const amount = quantityLabel(item.quantity);
-      lines.push(`• ${item.name}${amount !== '-' ? ` · ${amount}${item.unit ? ` ${item.unit}` : ''}` : ''}`);
+      const { amount, unit } = localAmount(item.quantity, item.unit, item.name);
+      lines.push(`• ${item.name}${amount !== '-' ? ` · ${amount}${unit ? ` ${unit}` : ''}` : ''}`);
     }
   }
   return lines.join('\n');

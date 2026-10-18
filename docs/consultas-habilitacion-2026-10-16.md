@@ -43,3 +43,7 @@ La grabación conserva audio temporal privado por siete días; no guarda vídeo.
 - Fire test: los cuatro casos fallan con la implementación anterior y pasan con la corrección.
 - Automatizaciones: nuevas regresiones en la suite y condiciones de procesamiento verificadas antes de habilitar.
 - Veredicto local: corrección lista para revisión; publicación sujeta a suite completa, CI y estado de los servicios, registrados en el PR.
+
+## Conciliación del 17/10
+
+Se conservó main `49a6a5d` con los cambios recientes de IA de planes, verificación en dos pasos e índices. Los únicos cruces fueron el inventario de migraciones y su prueba: quedan 19 entradas del paquete y ocho bases exactas, incluida la corrección de silencios ya aplicada. Este inventario local no indica cuáles faltan en producción ni autoriza volver a ejecutarlas. La migración de dos pasos queda en el mismo estado que main. Los resultados finales de la nueva suite, CI y publicación se registran en [PR140](https://github.com/Facu42/plan-v/pull/140).

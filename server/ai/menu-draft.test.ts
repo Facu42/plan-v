@@ -69,3 +69,37 @@ describe('contrato del proveedor para propuestas estimadas', () => {
     expect(result.recipe.nutrition?.per_portion.kcal).not.toBe(nutrition.per_portion.kcal);
   });
 });
+
+describe('asistente de planes: propuesta con referencias', () => {
+  const assistant = { schema: 'plan_assistant.v1' as const, foods: [{ name: 'Achicoria, hervida', unit: 'g' as const, kcal: 12, protein_g: 1.6, carbs_g: 0.7, fat_g: 0.3 }], exchanges: [], models: [] };
+  const withAssistant = () => ({ ...context(), assistant });
+
+  it('manda las referencias al proveedor, avisa cuántos ingredientes coinciden y devuelve el uso real', async () => {
+    const exact = { ...proposal, ingredients: [{ name: 'Achicoria, hervida', quantity: 100, unit: 'g' as const }, { name: 'Ingrediente inventado', quantity: 50, unit: 'g' as const }] };
+    vi.mocked(generateText).mockResolvedValueOnce({
+      output: { items: output().items.map((item) => ({ ...item, recipe_proposal: exact })) },
+      usage: { inputTokens: 1200, outputTokens: 800 },
+    } as never);
+    const result = await generateMenuDraft(withAssistant());
+    const call = vi.mocked(generateText).mock.calls[0][0];
+    expect(String(call.prompt)).toContain('Achicoria, hervida');
+    expect(String(call.system)).toContain('SARA 2');
+    expect(result.usage).toEqual({ inputTokens: 1200, outputTokens: 800 });
+    expect(result.warnings.some((w) => w.startsWith('2 de 4 ingredientes'))).toBe(true);
+    expect(result.plan.items.every((item) => item.recipe_proposal?.nutrition === null)).toBe(true);
+  });
+
+  it('avisa cuando la propuesta nombra un alérgeno aunque el modelo lo haya colado', async () => {
+    const risky = { ...proposal, title: 'Tostada con maní', ingredients: [{ name: 'Maní', quantity: 20, unit: 'g' as const }] };
+    vi.mocked(generateText).mockResolvedValueOnce({ output: { items: output().items.map((item) => ({ ...item, recipe_proposal: risky })) } } as never);
+    const ctx = withAssistant();
+    const result = await generateMenuDraft({ ...ctx, allergies: { state: 'reported', items: ['maní'] } });
+    expect(result.warnings.some((w) => w.includes('«maní»'))).toBe(true);
+  });
+
+  it('sin el asistente el prompt no cambia', async () => {
+    vi.mocked(generateText).mockResolvedValueOnce({ output: output() } as never);
+    await generateMenuDraft(context());
+    expect(String(vi.mocked(generateText).mock.calls[0][0].system)).not.toContain('plan semanal completo');
+  });
+});

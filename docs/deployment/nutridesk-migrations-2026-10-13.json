@@ -2,7 +2,7 @@
   "project": "plan-v-app",
   "projectId": "wvosvlxpfytokwfbcero",
   "observedOn": "2026-10-16",
-  "mainBase": "bac31c9ad11dd9dd9bc39e111c704450d2e30a14",
+  "mainBase": "49a6a5de8bd19ce89b5a272c1f785c7fc9f906e8",
   "productionApplied": false,
   "approvalRequired": true,
   "priorAliasNames": [
@@ -102,6 +102,11 @@
       "version": "20261014180000",
       "file": "20261014180000_sara2_catalog.sql",
       "sha256": "074ed4703b754e5e0d3a1696321cb1109c6ba256e430c002f515a25bfcbd4036"
+    },
+    {
+      "version": "20261017030000",
+      "file": "20261017030000_mfa_aal2_gate.sql",
+      "sha256": "68eeac7c95f7eb48c14863c8b8cb2ead403d305312ab45852fd2a9c8fa58b0f4"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",
@@ -148,6 +153,20 @@
       "sha256": "8c9ba1776bc9be923bc8296537072a951be1d8ba506cd898f038d44a884e85be",
       "observedAppliedVersion": "20261016233443",
       "observedAppliedName": "consultation_silence_summary"
+    },
+    {
+      "file": "20261017010000_performance_indexes.sql",
+      "version": "20261017010000",
+      "sha256": "8b96b1aa98ab7e515e27c637daacdf37dc5ca775fb1b70dd23ce3d628e846126",
+      "observedAppliedVersion": "20261017013123",
+      "observedAppliedName": "performance_indexes"
+    },
+    {
+      "file": "20261017020000_fk_full_indexes.sql",
+      "version": "20261017020000",
+      "sha256": "24c13b305f131e8d04a331afaa8fe1bbb578383b626cd98a6a01bc1cb4b0773b",
+      "observedAppliedVersion": "20261017021355",
+      "observedAppliedName": "fk_full_indexes"
     }
   ]
 }

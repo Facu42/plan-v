@@ -67,7 +67,7 @@ describe('cierre de lectura cruda de paciente en esquema legacy', () => {
   it('puede aplicarse nuevamente sin abrir permisos ni cambiar los datos',async () => {
     await db.exec(await readFile(corrective,'utf8'));
     expect((await db.query("select adherence_why from public.patients where id=$1",[patient])).rows).toEqual([{ adherence_why: note }]);
-    expect((await db.query("select policyname from pg_policies where schemaname='public' and tablename='patients' order by policyname")).rows).toEqual([{ policyname:'patients_nutri_all' }]);
+    expect((await db.query("select policyname from pg_policies where schemaname='public' and tablename='patients' and policyname<>'mfa_aal2_gate' order by policyname")).rows).toEqual([{ policyname:'patients_nutri_all' }]);
   });
 
   it('reproduce las vistas invoker publicadas y recupera la ficha sin exponer filas ni columnas privadas',async () => {
