@@ -115,7 +115,52 @@
 .nv-app.nv-pro .nv-main :focus-visible { outline: 2px solid #272932; outline-offset: 3px; }
 
 .nv-app.nv-pro .nv-workspace { min-width: 0; background: transparent; }
-.nv-app.nv-pro .nv-topbar { background: transparent; border: 0; }
+/* La misma barra en Inicio, Pacientes, Ficha y el resto: título a la izquierda, campana y cuenta a la derecha. */
+.nv-app.nv-pro .nv-topbar,
+.nv-app.nv-pro.nv-home .nv-topbar,
+.nv-app.nv-pro.nv-home:has(.pw-work) .nv-topbar {
+  position: relative !important;
+  inset: auto !important;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between !important;
+  gap: 12px;
+  width: 100% !important;
+  height: auto;
+  min-height: 68px;
+  padding: 28px 28px 0 32px !important;
+  border: 0;
+  background: transparent !important;
+  box-sizing: border-box;
+}
+.nv-app.nv-pro .nv-topbar .nv-brand { display: none !important; }
+.nv-app.nv-pro .nv-topbar .nv-topbar-title,
+.nv-app.nv-pro.nv-home .nv-topbar .nv-topbar-title {
+  display: block !important;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0 !important;
+  overflow: hidden;
+  color: #272932;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: 0;
+  text-align: left !important;
+  text-transform: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nv-app.nv-pro .nv-desktop-account { display: contents; }
+.nv-app.nv-pro .nv-header-menu,
+.nv-app.nv-pro.nv-home .nv-header-menu {
+  width: auto !important;
+  margin-left: auto;
+  flex-wrap: nowrap;
+}
+.nv-app.nv-pro.nv-home .nv-header-menu .nv-alerts,
+.nv-app.nv-pro.nv-home .nv-user { order: 0; margin-left: 0; }
 .nv-app.nv-pro .nv-main { min-width: 0; background: transparent; }
 .nv-app.nv-pro .pv-stage { min-width: 0; }
 
@@ -359,6 +404,17 @@
 }
 
 @media (max-width: 1023px) {
+  .nv-app.nv-pro .nv-topbar,
+  .nv-app.nv-pro.nv-home .nv-topbar,
+  .nv-app.nv-pro.nv-home:has(.pw-work) .nv-topbar {
+    min-height: 64px;
+    padding: 12px 16px !important;
+    background: var(--nv-card) !important;
+  }
+  .nv-app.nv-pro .nv-topbar .nv-topbar-title,
+  .nv-app.nv-pro.nv-home .nv-topbar .nv-topbar-title { font-size: 18px; }
+  .nv-app.nv-pro .nv-desktop-account { display: contents !important; }
+  .nv-app.nv-pro .nv-user-name small { display: none; }
   .nv-app.nv-pro .pv-rail,
   .nv-app.nv-pro .nv-sidebar,
   .nv-app.nv-pro.nv-menu-open .nv-sidebar,
@@ -370,6 +426,15 @@
   .nv-app.nv-pro .nv-row-more > summary,
   .nv-app.nv-pro .nv-work-links a { min-height: 44px; }
   .nv-app.nv-pro .nv-tab-unread { min-width: 18px; height: 18px; font-size: 12px; line-height: 18px; background: #ffcb65; color: #272932; }
+}
+@media (max-width: 520px) {
+  .nv-app.nv-pro .nv-user-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
 }
 
 .nv-app.nv-pro .nv-tabbar a {

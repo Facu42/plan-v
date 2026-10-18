@@ -272,7 +272,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
   const carteraUnread = useCarteraUnread(role === 'pro');
   const moreItems = role === 'patient' ? PATIENT_MORE : proMore(isAdmin === true);
   const { moreCurrent } = tabBarState(page, tabs, moreItems);
-  const showHeading = page === 'inicio';
+  const showHeading = page === 'inicio' && role !== 'pro';
   const localProUnread = role === 'pro' ? activePatients.reduce((sum, person) => sum + unreadCount(person.messages.filter((message) => message.patient_id === person.id && Boolean(message.sent_at)), 'pro'), 0) : 0;
   const messageUnread = role === 'patient' && p
     ? unreadCount(p.messages, 'patient')

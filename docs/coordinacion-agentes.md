@@ -25,7 +25,7 @@ visto bueno de Facundo.
 | Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Ánimo y síntomas publicado (PR #112, 14/10). Recorridos de punta a punta y monitor en main (#114, 15/10). Aviso de recurso indicado en PR propio. El resto, por empezar |
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
-| Rediseño del panel de la nutricionista, fase 1 (shell, Inicio, Pacientes, Ficha) | Cursor | `feat/redisenio-panel-nutri-f1` | En curso. Toca `src/components/nutrigo/*` porque el panel vive ahí; Facundo lo pidió el 18/10. No toca Supabase ni ramas de Codex |
+| Rediseño del panel de la nutricionista, fase 1 (shell, Inicio, Pacientes, Ficha) | Cursor | `feat/redisenio-panel-nutri-f1` | En curso, PR #147 contra `chore/design-skills` (se junta después del #146). Toca `src/components/nutrigo/*` porque el panel vive ahí; Facundo lo pidió el 18/10. No toca Supabase ni ramas de Codex |
 
 ## 2. Reglas para no pisarse
 
@@ -75,6 +75,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **18/10 · Cursor** · Correcciones del panel, misma rama `feat/redisenio-panel-nutri-f1`. Inicio queda con un solo título. La barra superior (título, campana y cuenta) es la misma en todas las pantallas, también en el celular. El PR #147 se compara contra `chore/design-skills` y se junta después del #146. Sin merge, sin deploy y sin base de datos.
 - **18/10 · Cursor** · Fase 1 del rediseño del panel de la nutricionista, rama `feat/redisenio-panel-nutri-f1`, contra `main`, sin merge y sin base de datos. Shell con menú de cuatro grupos, Inicio, Pacientes y Ficha (Resumen y pestañas). Piel Nutrigo también en el consultorio. No se tocó la app de la paciente ni Supabase.
 - **16/10 · Codex** · Pedido «dejalo funcional» para videollamadas: comprobado PR131 y SQL de consultas ya publicados; rama nueva `codex/consultas-funcionales` desde main `a2cf37a`. Corrige silencio que bloqueaba resúmenes y último fragmento menor de0,1s. Migración nueva reservada `20261016232547_consultation_silence_summary`, sin modificar las anteriores. Facundo confirmó retención cero activa y Free en Groq; prueba real con dos voces ficticias, transcripción y resumen aprobados. [Informe y habilitación](consultas-habilitacion-2026-10-16.md). Se mantiene el carril de consultas de Codex, sin tocar la integración de otros agentes.
 
