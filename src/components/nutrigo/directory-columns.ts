@@ -1,10 +1,10 @@
 /** Columnas del directorio de pacientes que la profesional puede mostrar u ocultar, y la densidad de las filas. */
 export const DIRECTORY_COLUMNS = [
-  { id: 'status', label: 'Estado', width: 'minmax(115px,.8fr)' },
-  { id: 'focus', label: 'Próximo foco', width: 'minmax(140px,.9fr)' },
-  { id: 'weekly', label: 'Registro semanal', width: 'minmax(155px,1fr)' },
-  { id: 'lastVisit', label: 'Última consulta', width: 'minmax(120px,.8fr)' },
-  { id: 'connection', label: 'Conexión', width: 'minmax(120px,.8fr)' },
+  { id: 'status', label: 'Estado', width: 'minmax(0,.8fr)' },
+  { id: 'focus', label: 'Próximo foco', width: 'minmax(0,.9fr)' },
+  { id: 'weekly', label: 'Registro semanal', width: 'minmax(0,1fr)' },
+  { id: 'lastVisit', label: 'Última consulta', width: 'minmax(0,.8fr)' },
+  { id: 'connection', label: 'Conexión', width: 'minmax(0,.8fr)' },
 ] as const;
 export type DirectoryColumnId = (typeof DIRECTORY_COLUMNS)[number]['id'];
 export type DirectoryDensity = 'comfortable' | 'compact';
@@ -14,8 +14,8 @@ export interface DirectoryLayout { hidden: DirectoryColumnId[]; density: Directo
 export const DEFAULT_DIRECTORY_LAYOUT: DirectoryLayout = { hidden: ['lastVisit', 'connection'], density: 'comfortable' };
 export const DIRECTORY_LAYOUT_KEY = 'plan-v:directorio:columnas';
 
-const PATIENT_WIDTH = 'minmax(180px,1.2fr)';
-const ACTIONS_WIDTH = 'minmax(225px,1.35fr)';
+const PATIENT_WIDTH = 'minmax(0,1.3fr)';
+const ACTIONS_WIDTH = 'minmax(0,1.25fr)';
 
 export function isColumnVisible(layout: DirectoryLayout, id: DirectoryColumnId) {
   return !layout.hidden.includes(id);

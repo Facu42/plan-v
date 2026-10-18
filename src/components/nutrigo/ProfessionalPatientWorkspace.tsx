@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
 import type { MealLog, Patient } from '../../types';
 import type { CrmEntry } from '../crm/crm-entry';
 import { api } from '../../api/client';
@@ -30,7 +30,18 @@ import { ShowroomGrocery } from './ShowroomGrocery';
 import { ShowroomMealPlan } from './ShowroomMealPlan';
 import { ConsultationNotes,ConsultationCompletionPanel } from './ConsultationNotes';
 import { PatientImportedHistory } from './PatientImportedHistory';
-import { RECORD_TABS, recordTab, appointmentRecordSummary, type RecordTab } from './patient-record-sections';
+import { RECORD_MORE, RECORD_PRIMARY, recordTab, appointmentRecordSummary, consultaNombre, type RecordTab } from './patient-record-sections';
+import { ArrowRight, CaretDown } from '@phosphor-icons/react';
+import { LayoutGroup, motion, useReducedMotion } from 'motion/react';
+import { BlurFade, LevelBar, NumberTicker } from './pro-motion';
+
+const TAB_EASE = [0.22, 1, 0.36, 1] as const;
+
+function fechaCorta(value?: string | null) {
+  if (!value) return 'Sin fecha';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? 'Sin fecha' : new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
+}
 
 export { RECORD_TABS, recordTab } from './patient-record-sections';
 export type { RecordTab } from './patient-record-sections';
@@ -86,10 +97,79 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   const p = buildShowroomPatient(patient, now);
   const appointments = appointmentRecordSummary(patient.appointment_history);
   const phone = (patient as Patient & { phone?: string | null }).phone;
-  return <section className="pw-record" aria-label={`Espacio de ${patient.name}`}>
-    <header className="pw-record-head"><div><p>Ficha del paciente · {patient.archived_at ? 'Archivada' : patient.status}</p><h2>{patient.name}</h2><span>{patient.goal || 'Objetivo por definir'}</span></div><NvButton className="nv-soft" onClick={onEdit}>Editar datos de ficha</NvButton></header>
-    <dl className="pw-record-contact"><div><dt>Teléfono</dt><dd>{phone || 'Sin teléfono registrado'}</dd></div><div><dt>Próxima consulta</dt><dd>{patient.appointment?.when || 'Sin consulta programada'}</dd></div><div><dt>Consultas realizadas</dt><dd><CompletedConsultationCount patientId={patient.id}/></dd></div><div><dt>Asistencias confirmadas</dt><dd>{appointments.confirmed}</dd></div></dl>
-    <nav className="pw-tabs" aria-label="Secciones de la ficha">{RECORD_TABS.map(([id, label]) => <button type="button" key={id} aria-current={id === tab ? 'page' : undefined} onClick={() => change(id)}>{label}</button>)}</nav>
+  const reduce = useReducedMotion();
+  const nameParts = patient.name.trim().split(/\s+/);
+  const restName = nameParts.slice(1).join(' ');
+  const splitName = restName.length > 2;
+  const firstName = splitName ? nameParts[0] : patient.name;
+  const history = (patient.appointment_history ?? []).slice(0, 4);
+  const openPatientList = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    event.preventDefault();
+    onOpenHref('/crm/pacientes');
+  };
+  return <section className="pw-record pv-sheet" aria-label={`Espacio de ${patient.name}`}>
+    <div className="pv-sheet-grid">
+      <aside className="pv-side">
+        <BlurFade>
+          <p className="pv-crumbs"><a href="/crm/pacientes" onClick={openPatientList}>Todos los pacientes</a><span aria-hidden="true">→</span><span>{patient.name}</span></p>
+          <div className="pv-identity">
+            <span className="pv-avatar" aria-hidden="true">{patient.initials}</span>
+            <h2 title={patient.name}><span>{firstName}</span>{splitName && <span>{restName}</span>}</h2>
+          </div>
+        </BlurFade>
+        <BlurFade delay={0.04}>
+          <article className="pv-idcard">
+            <header><strong translate="no">{patient.id}</strong><time>{fechaCorta(patient.created_at)}</time></header>
+            <dl>
+              <div><dt>Teléfono</dt><dd>{phone || 'Sin teléfono registrado'}</dd></div>
+              <div><dt>Próxima consulta</dt><dd>{patient.appointment?.when || 'Sin consulta programada'}</dd></div>
+              <div><dt>Consultas realizadas</dt><dd><CompletedConsultationCount patientId={patient.id}/></dd></div>
+              <div><dt>Asistencias</dt><dd>{appointments.confirmed.toLocaleString('es-AR')}</dd></div>
+              <div><dt>Estado</dt><dd>{patient.archived_at ? 'Archivada' : patient.status}</dd></div>
+            </dl>
+          </article>
+        </BlurFade>
+        <BlurFade delay={0.08}>
+          <div className="pv-mini">
+            <article><h3>Alergias</h3><p>Sin dato cargado</p></article>
+            <article><h3>Intolerancias</h3><p>Sin dato cargado</p></article>
+            <article className="pv-mini-wide"><h3>Objetivo</h3><p>{patient.goal?.trim() || 'Sin objetivo'}</p></article>
+          </div>
+        </BlurFade>
+        <BlurFade delay={0.12}>
+          <ul className="pv-history">
+            {(history.length ? history : [{ id: 'proxima', when: patient.appointment?.when || 'Sin consulta programada', action: 'scheduled' as const }]).map((row) => <li key={row.id}>
+              <span className={`pv-dot pv-dot-${row.action === 'confirmed' ? 'lime' : row.action === 'cancelled' ? 'orange' : 'ink'}`} aria-hidden="true" />
+              <div><strong>{row.when}</strong><small>{row.action === 'confirmed' ? 'Confirmada' : row.action === 'cancelled' ? 'Cancelada' : 'Consulta'}</small></div>
+              <a href={`/crm/ficha?paciente=${encodeURIComponent(patient.id)}&seccion=consultas`} aria-label={`Abrir consultas de ${patient.name}`} onClick={(event) => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return; event.preventDefault(); change('consultas'); }}><ArrowRight size={16} aria-hidden="true" /></a>
+            </li>)}
+          </ul>
+          <NvButton className="nv-soft" onClick={onEdit}>Editar datos de ficha</NvButton>
+        </BlurFade>
+      </aside>
+      <div className="pv-sheet-main">
+        <BlurFade delay={0.05}>
+          <div className="pv-sheet-heading">
+            <h2 className="pv-sheet-title">{consultaNombre(patient.stage)}</h2>
+            <p className="pv-sheet-when">{patient.appointment?.when || 'Sin fecha'}</p>
+          </div>
+          <LayoutGroup id={`pv-tabs-${patient.id}`}>
+            <nav className="pw-tabs" aria-label="Secciones de la ficha">
+              {RECORD_PRIMARY.map(([id, label]) => <a key={id} href={`/crm/ficha?paciente=${encodeURIComponent(patient.id)}&seccion=${id}`} aria-current={id === tab ? 'page' : undefined} onClick={(event) => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return; event.preventDefault(); change(id); }}>{label}{id === tab && <motion.span className="pv-tab-line" layoutId="pv-tab-line" transition={{ duration: reduce ? 0.15 : 0.25, ease: TAB_EASE }} />}</a>)}
+              <details className="pw-more">
+                <summary aria-current={RECORD_MORE.some(([id]) => id === tab) ? 'page' : undefined}>Más de esta paciente<CaretDown size={14} weight="bold" aria-hidden="true" /></summary>
+                <div>{RECORD_MORE.map(([id, label]) => <a key={id} href={`/crm/ficha?paciente=${encodeURIComponent(patient.id)}&seccion=${id}`} aria-current={id === tab ? 'page' : undefined} onClick={(event) => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return; event.preventDefault(); change(id); }}>{label}</a>)}</div>
+              </details>
+            </nav>
+          </LayoutGroup>
+          {tab === 'resumen' && <div className="pv-meters" aria-label="Medidas de la paciente">
+            <article><header>Peso</header><strong>Sin dato</strong><LevelBar value={null} label={`Peso de ${patient.name}`} /><small>Todavía no hay un peso cargado</small></article>
+            <article><header>IMC</header><strong>Sin dato</strong><LevelBar value={null} label={`IMC de ${patient.name}`} /><small>Hace falta el peso y la talla</small></article>
+            <article><header>Cintura</header><strong>Sin dato</strong><LevelBar value={null} label={`Cintura de ${patient.name}`} /><small>Todavía no hay una medida</small></article>
+            <article><header>Adherencia</header><strong><NumberTicker value={patient.adherence_score} />%</strong><LevelBar value={patient.adherence_score} label={`Adherencia de ${patient.name}`} /><small>{patient.adherence_why || 'Sin observación'}</small></article>
+          </div>}
+        </BlurFade>
     {refreshError && <p role="alert">{refreshError}</p>}
     <div key={`${patient.id}:${tab}`} className="pw-record-content">
       {tab === 'resumen' && <><ShowroomPatientRecord patient={patient} patients={patients} onSelect={onSelect} onEdit={onEdit} onOpen={onOpen} summaryOnly /><ProfessionalLedgerSummary patientId={patient.id} onOpen={() => change('cobros')} /></>}
@@ -106,6 +186,8 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
       {tab === 'consultas' && <><ShowroomConsultations patient={patient} now={now} onSelect={onSelect} onChanged={addPatient} /><ConsultationCompletionPanel patientId={patient.id}/></>}
       {tab === 'chat' && <NutrigoMessages patient={p} patients={patients.map((person) => buildShowroomPatient(person, now))} role="pro" onSelect={onSelect} onNavigate={onNavigate} />}
       {tab === 'cobros' && <ShowroomCobranzas initialSelectedId={patient.id} />}
+    </div>
+      </div>
     </div>
   </section>;
 }

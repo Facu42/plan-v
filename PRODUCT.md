@@ -53,18 +53,17 @@ Reglas que no se negocian:
 - Producción, la base y los servicios pagos solo cambian con la frase escrita de Facundo.
 - El panel móvil dedicado de la nutricionista y Academy quedan fuera.
 
-Pendiente de decidir: precio, prueba gratis, presupuesto de IA en producción, correo, y si el menú nuevo entra de una vez o de a un grupo. La comparación completa del menú de Nutridesk también está abierta.
+Pendiente de decidir: precio, prueba gratis, presupuesto de IA en producción y correo. La comparación completa del menú de Nutridesk también está abierta. El menú de cuatro grupos ya entró en el panel (fase 1, 18/10/2026).
 
 ## Brand Commitments
 
 El nombre es Plan V. Se habla en español, de vos. La marca del logo (verde, dorado, coral) se usa en páginas públicas; no reemplaza la paleta de la interfaz.
 
-Dos superficies, las dos intencionales. No se mezclan:
+Una sola piel para las dos apps: Nutrigo. Decisión de Facundo del 18/10/2026. Reemplaza la regla de dos pieles.
 
-- El consultorio de la nutricionista usa neumorfismo y vidrio, con la paleta pastel (menta y el resto) que está en el código. Tipografías, radios, sombras y el desenfoque del vidrio se respetan. El detalle visual está en `DESIGN.md`.
-- El espacio de la paciente es igual a Nutrigo, colores incluidos (lima `#C2E66E`, Poppins). Es regla fija desde el 14/10/2026.
-
-El rediseño visual mejora jerarquía, lectura y comodidad dentro de cada pantalla. La reorganización del menú es otro trabajo, posterior a este documento: no se cambia código de la app en este paso.
+- Consultorio y espacio de la paciente usan crema `#F9F4F2`, tinta `#272932`, lima `#C2E66E`, azafrán `#FFCB65` y naranja `#FFA257`. El panel usa Plus Jakarta Sans; la paciente sigue en Poppins. El detalle está en `DESIGN.md`.
+- La app de la paciente sigue igual al archivo, colores incluidos. Regla fija desde el 14/10/2026. El contraste del panel se corrige solo ahí, oscureciendo el texto.
+- El menú del consultorio tiene los cuatro grupos de arriba. Lo que no existe se muestra como «próximamente».
 
 ## Evidence on Hand
 
@@ -80,8 +79,8 @@ El rediseño visual mejora jerarquía, lectura y comodidad dentro de cada pantal
 2. La IA propone. La profesional publica.
 3. Un hueco en los datos se dice como hueco, nunca como falla de la paciente.
 4. Lo que todavía no funciona se muestra apagado y explicado.
-5. La piel visual no se aplana para parecer genérica. El menú sí se reordena hacia la competencia, en un cambio aparte.
+5. El consultorio y la app de la paciente comparten la piel Nutrigo. El menú del consultorio va en los cuatro grupos de este documento.
 
 ## Accessibility & Inclusion
 
-El texto y el foco cumplen contraste WCAG AA. El foco se ve. El movimiento respeta la preferencia de menos animación. El arreglo de contraste y de foco se hace dentro del estilo de cada superficie: no se elimina el vidrio ni el neumorfismo para «ganar» accesibilidad.
+El texto y el foco cumplen contraste WCAG AA. El foco se ve. El movimiento es corto (150 a 400 ms) y, si la persona pide menos animación, se acorta: no se apaga. El gris `#8A8C90` del archivo no se usa como texto del panel sobre crema.

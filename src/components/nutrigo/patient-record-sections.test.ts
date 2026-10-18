@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { RECORD_TABS, recordTab, appointmentRecordSummary, documentInSection } from './patient-record-sections';
+import { RECORD_MORE, RECORD_PRIMARY, RECORD_TABS, recordTab, appointmentRecordSummary, documentInSection, consultaNombre } from './patient-record-sections';
 import type { AppointmentHistoryEntry } from '../../types';
 
 describe('Ficha completa del paciente', () => {
   it('ofrece las diez secciones y mantiene accesos operativos', () => {
     expect(RECORD_TABS.map(([, label]) => label)).toEqual(expect.arrayContaining(['Historia clínica', 'Evolución', 'Notas de consulta', 'Plan actual', 'Plan semanal', 'Lista de compras', 'Registro alimentario', 'Chat', 'Archivos', 'Laboratorio', 'Resumen', 'Planificación', 'Consultas', 'Cobros']));
+    expect(RECORD_PRIMARY.map(([, label]) => label)).toEqual(['Resumen', 'Registro', 'Plan', 'Consultas']);
+    expect(RECORD_MORE.map(([id]) => id)).toEqual(['historia', 'evolucion', 'notas', 'semanal', 'compras', 'chat', 'archivos', 'laboratorio', 'planificacion', 'cobros']);
   });
   it('conserva enlaces existentes y resuelve enlaces desconocidos al resumen', () => {
     expect(recordTab('ingreso')).toBe('historia');
@@ -20,6 +22,13 @@ describe('Ficha completa del paciente', () => {
     const entry = { id: 'a', action: 'elapsed', dateId: '2026-10-10', when: '', duration: 45, channel: 'video', actor: 'system', at: '' } as AppointmentHistoryEntry;
     expect(appointmentRecordSummary([entry, entry, { ...entry, id: 'b', action: 'confirmed' }])).toEqual({ elapsed: 1, confirmed: 1 });
     expect(appointmentRecordSummary(undefined)).toEqual({ elapsed: 0, confirmed: 0 });
+  });
+  it('nombra la consulta según la etapa y no usa el horario como título', () => {
+    expect(consultaNombre('seguimiento')).toBe('Consulta de seguimiento');
+    expect(consultaNombre('ingreso')).toBe('Consulta de ingreso');
+    expect(consultaNombre('plan')).toBe('Consulta de plan');
+    expect(consultaNombre('alta')).toBe('Consulta de alta');
+    expect(consultaNombre('seguimiento')).not.toBe('Jueves · 14:30');
   });
   it('laboratorio sólo muestra estudios identificados y archivos conserva todos los adjuntos', () => {
     expect(documentInSection({ kind: 'clinical_document', document_kind: 'laboratorio' }, 'laboratory')).toBe(true);

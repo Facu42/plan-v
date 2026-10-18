@@ -1,32 +1,35 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-18T03:45:00.000Z",
+  "generatedAt": "2026-10-18T12:40:00.000Z",
   "title": "Design System: Plan V",
   "extensions": {
     "colorMeta": {
-      "forest": { "role": "primary", "displayName": "Bosque", "canonical": "#083A30" },
-      "gold": { "role": "primary", "displayName": "Dorado de marca", "canonical": "#F9B343" },
-      "mint": { "role": "secondary", "displayName": "Menta", "canonical": "#E3EFE4" },
-      "green": { "role": "secondary", "displayName": "Hoja", "canonical": "#23955D" },
-      "coral": { "role": "tertiary", "displayName": "Coral", "canonical": "#F87D6D" },
-      "cream": { "role": "neutral", "displayName": "Crema de consultorio", "canonical": "#F9F6EE" },
-      "glass": { "role": "neutral", "displayName": "Vidrio", "canonical": "rgba(249, 246, 238, 0.76)" },
-      "nutrigo-lime": { "role": "primary", "displayName": "Lima Nutrigo", "canonical": "#C2E66E" }
+      "cream": { "role": "neutral", "displayName": "Crema", "canonical": "#F9F4F2", "tonalRamp": ["oklch(22% 0.01 40)", "oklch(32% 0.012 40)", "oklch(42% 0.014 40)", "oklch(55% 0.016 40)", "oklch(68% 0.018 45)", "oklch(80% 0.018 50)", "oklch(90% 0.016 55)", "oklch(96% 0.012 55)"] },
+      "ink": { "role": "primary", "displayName": "Tinta", "canonical": "#272932", "tonalRamp": ["oklch(18% 0.02 270)", "oklch(24% 0.02 270)", "oklch(32% 0.02 270)", "oklch(42% 0.02 270)", "oklch(52% 0.018 270)", "oklch(64% 0.014 270)", "oklch(78% 0.01 270)", "oklch(92% 0.006 270)"] },
+      "ink-soft": { "role": "neutral", "displayName": "Tinta suave", "canonical": "#3E4046", "tonalRamp": ["oklch(20% 0.012 270)", "oklch(28% 0.012 270)", "oklch(36% 0.012 270)", "oklch(46% 0.012 270)", "oklch(56% 0.01 270)", "oklch(68% 0.008 270)", "oklch(80% 0.006 270)", "oklch(92% 0.004 270)"] },
+      "muted": { "role": "neutral", "displayName": "Texto secundario", "canonical": "#52545B", "tonalRamp": ["oklch(22% 0.01 270)", "oklch(30% 0.01 270)", "oklch(40% 0.01 270)", "oklch(48% 0.01 270)", "oklch(58% 0.008 270)", "oklch(70% 0.006 270)", "oklch(82% 0.004 270)", "oklch(93% 0.003 270)"] },
+      "gray-file": { "role": "neutral", "displayName": "Gris del archivo", "canonical": "#8A8C90", "tonalRamp": ["oklch(25% 0.005 270)", "oklch(35% 0.005 270)", "oklch(45% 0.005 270)", "oklch(55% 0.005 270)", "oklch(65% 0.005 270)", "oklch(75% 0.004 270)", "oklch(85% 0.003 270)", "oklch(94% 0.002 270)"] },
+      "lime": { "role": "primary", "displayName": "Lima", "canonical": "#C2E66E", "tonalRamp": ["oklch(28% 0.06 125)", "oklch(38% 0.08 125)", "oklch(48% 0.1 125)", "oklch(58% 0.12 122)", "oklch(70% 0.14 120)", "oklch(80% 0.15 118)", "oklch(88% 0.14 116)", "oklch(95% 0.08 115)"] },
+      "saffron": { "role": "secondary", "displayName": "Azafrán", "canonical": "#FFCB65", "tonalRamp": ["oklch(30% 0.06 85)", "oklch(40% 0.08 85)", "oklch(50% 0.1 85)", "oklch(62% 0.12 88)", "oklch(72% 0.13 90)", "oklch(82% 0.13 92)", "oklch(88% 0.12 94)", "oklch(95% 0.06 95)"] },
+      "orange": { "role": "tertiary", "displayName": "Naranja", "canonical": "#FFA257", "tonalRamp": ["oklch(30% 0.06 55)", "oklch(40% 0.08 55)", "oklch(50% 0.1 50)", "oklch(60% 0.12 50)", "oklch(70% 0.13 52)", "oklch(78% 0.13 55)", "oklch(86% 0.1 58)", "oklch(94% 0.05 60)"] },
+      "card": { "role": "neutral", "displayName": "Tarjeta", "canonical": "#FFFFFF", "tonalRamp": ["oklch(20% 0 0)", "oklch(32% 0 0)", "oklch(44% 0 0)", "oklch(56% 0 0)", "oklch(68% 0 0)", "oklch(80% 0 0)", "oklch(90% 0 0)", "oklch(98% 0 0)"] },
+      "line": { "role": "neutral", "displayName": "Línea", "canonical": "#E1E1E2", "tonalRamp": ["oklch(25% 0.004 270)", "oklch(36% 0.004 270)", "oklch(48% 0.004 270)", "oklch(60% 0.004 270)", "oklch(72% 0.004 270)", "oklch(82% 0.004 270)", "oklch(90% 0.003 270)", "oklch(96% 0.002 270)"] }
     },
     "typographyMeta": {
-      "display": { "displayName": "Nombre de ficha", "purpose": "Nombre de la paciente en la cabecera de vidrio." },
-      "title": { "displayName": "Título de columna", "purpose": "Títulos de menú y de lista de trabajo." },
-      "body": { "displayName": "Texto de trabajo", "purpose": "Cuerpo del consultorio. Piso de lectura 12 px." },
-      "label": { "displayName": "Ceja", "purpose": "Metadatos cortos en mayúsculas." },
-      "patient": { "displayName": "Paciente", "purpose": "Solo el espacio Nutrigo. Poppins." }
+      "display": { "displayName": "Nombre de ficha", "purpose": "Nombre de la paciente y título de la consulta. Peso 500, tracking negativo." },
+      "title": { "displayName": "Título de bloque", "purpose": "Títulos de tarjeta y de sección. text-wrap balance." },
+      "body": { "displayName": "Texto de trabajo", "purpose": "Cuerpo del panel. text-wrap pretty. Piso de lectura 12 px." },
+      "label": { "displayName": "Dato chico", "purpose": "Metadatos, fecha de la consulta y grupos del menú." }
     },
     "shadows": [
-      { "name": "neu", "value": "10px 10px 24px rgba(57, 91, 73, 0.1), -8px -8px 20px rgba(255, 255, 255, 0.88)", "purpose": "Tarjetas y botones del consultorio en tema claro." },
-      { "name": "lima", "value": "0 4px 12px rgba(135, 86, 18, 0.14)", "purpose": "Ítem de menú activo." },
-      { "name": "float", "value": "0 8px 30px rgba(38, 77, 58, 0.12)", "purpose": "Capas sueltas." }
+      { "name": "tarjeta", "value": "0 1px 1px rgba(39, 41, 50, 0.04), 0 8px 20px rgba(39, 41, 50, 0.05)", "purpose": "Tarjetas del panel. Dos capas, transparentes." },
+      { "name": "menu", "value": "0 1px 1px rgba(39, 41, 50, 0.08), 0 18px 40px rgba(39, 41, 50, 0.16)", "purpose": "Menú lateral y capas sueltas." }
     ],
     "motion": [
-      { "name": "rise", "value": "transform .2s ease", "purpose": "El hover levanta 2 px. Se apaga si la persona pide menos movimiento." }
+      { "name": "abrir", "value": "250ms cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Menú, desplegable y ventana al abrirse. Solo opacidad y transform." },
+      { "name": "cerrar", "value": "150ms cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Cierre y press. Con menos movimiento no se apaga: se acorta." },
+      { "name": "numero", "value": "400ms cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Aparición de una cifra. Sin desenfoque." },
+      { "name": "guardado", "value": "500ms cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Check de un texto que confirma que algo quedó guardado." }
     ],
     "breakpoints": [
       { "name": "desktop", "value": "1440px" },
@@ -38,58 +41,99 @@
       "name": "Botón principal",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Acción principal del consultorio.",
-      "html": "<button class=\"ds-btn-primary\">Guardar</button>",
-      "css": ".ds-btn-primary { background: #083A30; color: #fff; padding: 12px 16px; border: 0; border-radius: 13px; font-family: 'DM Sans', Arial, sans-serif; font-size: 13px; font-weight: 700; } .ds-btn-primary:hover { transform: translateY(-2px); } .ds-btn-primary:focus-visible { outline: 3px solid rgba(35, 149, 93, 0.42); outline-offset: 3px; }"
+      "description": "La única acción lima de una fila.",
+      "html": "<button class=\"ds-btn-primary\">Revisar comidas</button>",
+      "css": ".ds-btn-primary { min-height: 44px; padding: 10px 14px 10px 12px; border: 0; border-radius: 99px; background: #C2E66E; color: #272932; font-family: 'Plus Jakarta Sans', Poppins, sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1), background-color 150ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-primary:hover { background: #d4f08a; } .ds-btn-primary:active { transform: scale(0.96); } .ds-btn-primary:focus-visible { outline: 2px solid #272932; outline-offset: 3px; }"
+    },
+    {
+      "name": "Botón secundario",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "El resto de la fila. Crema y tinta.",
+      "html": "<button class=\"ds-btn-soft\">Editar plan</button>",
+      "css": ".ds-btn-soft { min-height: 44px; padding: 10px 16px; border: 0; border-radius: 99px; background: #F4F0EC; color: #272932; font-family: 'Plus Jakarta Sans', Poppins, sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1), background-color 150ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-soft:hover { background: #ece7e2; } .ds-btn-soft:active { transform: scale(0.96); } .ds-btn-soft:focus-visible { outline: 2px solid #272932; outline-offset: 3px; }"
     },
     {
       "name": "Ítem activo",
       "kind": "nav",
       "refersTo": "button-active",
-      "description": "Destino elegido del menú, cápsula dorada.",
-      "html": "<button class=\"ds-nav-current\">Pacientes</button>",
-      "css": ".ds-nav-current { background: #F9B343; color: #083A30; padding: 7px 10px; border: 0; border-radius: 99px; box-shadow: 0 4px 12px rgba(135, 86, 18, 0.14); font-family: 'DM Sans', Arial, sans-serif; font-size: 12px; font-weight: 700; } .ds-nav-current:focus-visible { outline: 3px solid rgba(35, 149, 93, 0.42); outline-offset: 3px; }"
+      "description": "Destino elegido del menú, cápsula lima sobre tinta.",
+      "html": "<a class=\"ds-nav-current\" href=\"#pacientes\">Pacientes</a>",
+      "css": ".ds-nav-current { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 14px; border-radius: 99px; background: #C2E66E; color: #272932; font-family: 'Plus Jakarta Sans', Poppins, sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; } .ds-nav-current:focus-visible { outline: 2px solid #C2E66E; outline-offset: 3px; }"
     },
     {
-      "name": "Tarjeta de vidrio",
+      "name": "Tarjeta",
       "kind": "card",
-      "refersTo": "card-glass",
-      "description": "Tarjeta de ficha con vidrio y sombra doble.",
-      "html": "<article class=\"ds-card\"><h3>Próximo paso</h3><p>Revisar el registro de hoy.</p></article>",
-      "css": ".ds-card { background: rgba(249, 246, 238, 0.76); color: #083A30; padding: 16px; border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 20px; box-shadow: 10px 10px 24px rgba(57, 91, 73, 0.1), -8px -8px 20px rgba(255, 255, 255, 0.88); backdrop-filter: blur(8px); font-family: 'DM Sans', Arial, sans-serif; } .ds-card h3 { margin: 0 0 8px; font-family: Fraunces, Georgia, serif; font-size: 14px; }"
+      "refersTo": "card",
+      "description": "Bloque de trabajo del panel, gris-crema, radio 20 y sombra en capas.",
+      "html": "<article class=\"ds-card\"><h3>Peso</h3><p>Sin dato cargado</p></article>",
+      "css": ".ds-card { padding: 16px; border: 1px solid rgba(39, 41, 50, 0.05); border-radius: 20px; background: #F4F0EC; color: #272932; box-shadow: 0 1px 1px rgba(39, 41, 50, 0.04), 0 8px 20px rgba(39, 41, 50, 0.05); font-family: 'Plus Jakarta Sans', Poppins, sans-serif; } .ds-card h3 { margin: 0 0 6px; font-size: 12px; font-weight: 600; color: #52545B; text-wrap: balance; } .ds-card p { margin: 0; font-size: 14px; text-wrap: pretty; }"
+    },
+    {
+      "name": "Campo",
+      "kind": "input",
+      "refersTo": "card",
+      "description": "Buscador y campos. Fondo blanco, radio 12, alto 44.",
+      "html": "<input class=\"ds-field\" type=\"search\" placeholder=\"Buscar pacientes, planes o registros…\" aria-label=\"Buscar en el consultorio\">",
+      "css": ".ds-field { min-height: 44px; width: 100%; padding: 8px 12px; border: 1px solid #E1E1E2; border-radius: 12px; background: #fff; color: #272932; font-family: 'Plus Jakarta Sans', Poppins, sans-serif; font-size: 14px; } .ds-field:focus-visible { outline: 2px solid #272932; outline-offset: 3px; }"
+    },
+    {
+      "name": "Alerta",
+      "kind": "chip",
+      "refersTo": "button-active",
+      "description": "Pastilla de aviso. Azafrán, no un fondo de tarjeta.",
+      "html": "<span class=\"ds-alert\">Próximamente</span>",
+      "css": ".ds-alert { display: inline-flex; align-items: center; min-height: 24px; padding: 2px 8px; border-radius: 99px; background: #FFCB65; color: #272932; font-family: 'Plus Jakarta Sans', Poppins, sans-serif; font-size: 12px; font-weight: 600; }"
+    },
+    {
+      "name": "Pestaña",
+      "kind": "nav",
+      "refersTo": "button-active",
+      "description": "Sección de la ficha. Subrayado, con chevron si abre un menú.",
+      "html": "<a class=\"ds-tab\" href=\"#mas\" aria-current=\"page\">Más de esta paciente <svg width=\"14\" height=\"14\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M3 5.2 7 9l4-3.8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></a>",
+      "css": ".ds-tab { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 8px 2px 12px; border-bottom: 2px solid #272932; color: #272932; background: transparent; font-family: 'Plus Jakarta Sans', Poppins, sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; } .ds-tab:focus-visible { outline: 2px solid #272932; outline-offset: 3px; }"
+    },
+    {
+      "name": "Menú desplegable",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Capa que se abre en 250 ms desde 0.97, con piezas de radio 12.",
+      "html": "<div class=\"ds-menu\"><a href=\"#historia\">Historia clínica</a><a href=\"#notas\">Notas de consulta</a></div>",
+      "css": ".ds-menu { display: grid; gap: 4px; min-width: 220px; padding: 8px; border-radius: 20px; background: #fff; box-shadow: 0 1px 1px rgba(39, 41, 50, 0.04), 0 12px 28px rgba(39, 41, 50, 0.08); transform-origin: top center; animation: ds-drop 250ms cubic-bezier(0.22, 1, 0.36, 1) both; } .ds-menu a { display: flex; align-items: center; min-height: 40px; padding: 8px 12px; border-radius: 12px; color: #272932; font-family: 'Plus Jakarta Sans', Poppins, sans-serif; font-size: 14px; font-weight: 500; text-decoration: none; } .ds-menu a:hover { background: #F4F0EC; } .ds-menu a:focus-visible { outline: 2px solid #272932; outline-offset: 2px; } @keyframes ds-drop { from { opacity: 0; transform: translateY(-4px) scale(0.97); } to { opacity: 1; transform: none; } }"
     }
   ],
   "narrative": {
-    "northStar": "El consultorio de vidrio suave",
-    "overview": "El consultorio se siente como un escritorio claro, con tarjetas que flotan apenas y superficies de vidrio esmerilado sobre un campo pastel. Estas decisiones son de marca. Si una skill marca el vidrio o el neumorfismo como AI slop, se ignora. Solo se corrigen contraste, foco y lectura dentro de ese estilo.",
+    "northStar": "El mismo consultorio, la misma piel",
+    "overview": "La nutricionista y la paciente usan la piel Nutrigo. Lienzo crema, tarjetas gris-crema, menú lateral oscuro con la tinta del sistema y el ítem activo en lima. Mucho aire. Los números importantes son grandes. El color se usa con intención: lima para la acción principal y lo elegido, azafrán y naranja para alertas, y el resto en crema y tinta.\n\nDecisión de Facundo del 18/10/2026. Reemplaza la regla de dos pieles. Una skill no vuelve a separar el consultorio en vidrio y la paciente en Nutrigo.",
     "keyCharacteristics": [
-      "Sombra doble, clara y oscura.",
-      "Vidrio con desenfoque de 8, 12 o 15 px.",
-      "Campo pastel: crema, menta y dorado activo.",
-      "Fraunces y DM Sans en el consultorio. Poppins solo en la paciente.",
-      "El menú se reordena como la competencia, en otro PR."
+      "Lienzo crema `#F9F4F2`. Tarjetas gris-crema `#F4F0EC`, radio 20.",
+      "Menú tinta `#272932`, flotante, radio 28, ítem activo lima `#C2E66E`.",
+      "Lima solo en la acción principal, el ítem activo y la franja de identidad de la ficha.",
+      "Azafrán `#FFCB65` y naranja `#FFA257` solo para alertas: «próximamente», vencida, acceso pendiente, sin leer. Texto tinta.",
+      "Plus Jakarta Sans en el panel: títulos con balance, texto con pretty. La paciente sigue en Poppins. Números tabulares. Piso de lectura 12 px.",
+      "Cápsula para lo elegido. El resto de las tarjetas se parece entre sí, en crema, sin una etiqueta de color en cada bloque."
     ],
     "rules": [
-      { "name": "The Slop Rule", "body": "Si una skill trata el vidrio o el neumorfismo como defecto de moda, se ignora. El arreglo permitido es contraste, foco visible y tamaño de lectura.", "section": "colors" },
-      { "name": "The Two Skins Rule", "body": "El consultorio no hereda Poppins ni la lima de Nutrigo. La paciente no hereda Fraunces ni el dorado como botón.", "section": "colors" },
-      { "name": "The Painted Token Rule", "body": "Manda el valor que queda después de la cascada de src/plan-v.css.", "section": "colors" },
-      { "name": "The Readable Floor Rule", "body": "Se puede subir un texto por debajo de 12 px. No se cambia la familia de los títulos.", "section": "typography" },
-      { "name": "The Dual Shadow Rule", "body": "En tema claro, una tarjeta lleva las dos sombras.", "section": "elevation" },
-      { "name": "The Glass Stays Rule", "body": "El desenfoque de 8, 12 y 15 px se conserva.", "section": "elevation" }
+      { "name": "The One Skin Rule", "body": "El consultorio y la app de la paciente comparten crema, tinta, lima, azafrán y naranja. La tipografía del panel es Plus Jakarta Sans; la de la paciente sigue siendo Poppins. No se vuelve a una piel de vidrio para la nutricionista.", "section": "colors" },
+      { "name": "The Patient File Rule", "body": "La app de la paciente sigue igual al archivo Nutrigo, incluso el gris `#8A8C90` donde el archivo lo dibuja. El oscurecido del texto es solo del panel (`.nv-pro`).", "section": "colors" },
+      { "name": "The Contrast Rule", "body": "Si un color del archivo no llega a AA, se oscurece el texto. No se cambia la lima ni la crema.", "section": "colors" },
+      { "name": "The Readable Floor Rule", "body": "En el panel, 12 px es el mínimo. En la app de la paciente se respeta el archivo (piso 11 px) y no se «corrige» desde el panel.", "section": "typography" }
     ],
     "dos": [
-      "Do conservar la sombra doble del tema claro.",
-      "Do conservar el vidrio y los colores pastel de DESIGN.md.",
-      "Do usar Fraunces y DM Sans en el consultorio, y Poppins solo en la paciente.",
-      "Do subir contraste y foco hasta WCAG AA sin cambiar la familia ni la idea de vidrio.",
-      "Do reordenar el menú a Gestión, Acompañamiento, Plan y Recursos en un PR aparte."
+      "Do usar crema `#F9F4F2`, tinta `#272932`, lima `#C2E66E`, azafrán `#FFCB65` y naranja `#FFA257` en el panel y en la app de la paciente. En el panel, Plus Jakarta Sans. En la paciente, Poppins.",
+      "Do oscurecer a `#52545B` o `#3E4046` el texto del panel que hoy usa `#8A8C90`.",
+      "Do dejar el menú en tinta y el ítem activo en lima.",
+      "Do mantener los enlaces y las rutas que ya existen. Lo que no existe se dice «próximamente».",
+      "Do animar con los tiempos 150, 250, 350, 400 y 500 ms y la curva `cubic-bezier(0.22, 1, 0.36, 1)`, solo opacidad y transform. Menú y capas se abren en 250 ms. El check de guardado dura 500 ms. Con menos movimiento, la animación es más corta, no se apaga."
     ],
     "donts": [
-      "Don't quitar neumorfismo o glassmorphism porque una guía los llame AI slop.",
-      "Don't reemplazar la paleta por un neutro gris ni por la lima del archivo de tokens que el CSS ya no aplica.",
-      "Don't cambiar el espacio de la paciente.",
-      "Don't tratar el menú actual como definitivo.",
-      "Don't inventar un ítem de Nutridesk que docs no muestra."
+      "Don't volver a dos pieles, ni a Fraunces, ni al vidrio, para el panel de la nutricionista.",
+      "Don't cambiar la lima ni la crema para «arreglar» contraste.",
+      "Don't tocar la app de la paciente para que el panel se vea mejor.",
+      "Don't esconder archivar, invitar, editar o escribir: si no están en la fila principal, siguen a un clic, con su nombre.",
+      "Don't inventar un ítem de Nutridesk que `docs/` no muestra.",
+      "Don't pintar de lima o azafrán cada tarjeta, cada número o cada etiqueta.",
+      "Don't usar `transition: all`, ni un borde de color a la izquierda, ni un radio fuera de la escala 8, 12, 20, 28 y cápsula."
     ]
   }
 }

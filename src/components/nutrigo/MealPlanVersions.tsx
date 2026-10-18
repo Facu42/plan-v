@@ -21,6 +21,7 @@ import { menuPreferences } from '../../lib/menu-preferences';
 import { PLAN_SLOTS, buildPublishedPlanDays, hasMealTimes, mealPlanDraftSchema, mealSlotLabel, sameMealTimes, type PlanMealTimes, type PlanMealLabels, toPublishedPatientPlan, type MealPlanDraftInput, type PatientMealPlan, type PlanItemView, type PlanRecipeDetail, type PlanSlot, type ProfessionalMealPlan } from '../../types/plans';
 import { argentinaDateId, planDateLabel, planTakesEffectNow } from '../../types/plan-handover';
 import type { ProfessionalRecipe } from '../../types/recipes';
+import { Check } from '@phosphor-icons/react';
 import { NvButton, NvState } from './primitives';
 import './meal-plan-versions.css';
 import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
@@ -412,7 +413,7 @@ export function MealPlanEditor({ patientId, patientName = '', professionalName, 
     <div className="meal-plan-actions"><NvButton type="button" className="nv-ghost" disabled={busy || !plan || (dirty && !plan.published)} onClick={() => void openPrint()}>Imprimir / guardar PDF</NvButton>{(!plan || dirty) && <small>Guardá el borrador para imprimirlo. Los cambios sin guardar no forman parte del documento.</small>}<PlanNotifyPatient patientName={patientName} publishedVersion={plan?.published?.version ?? null} busy={busy} sentVersion={noticeSent} onNotify={() => void notifyPatient()} /></div>
     {printCopy && <PlanPrintDialog plan={printCopy.plan} patientName={printCopy.patientName} professionalName={printCopy.professionalName} currentAllowed={printCopy.currentAllowed} demo={printCopy.demo} onClose={() => setPrintCopy(null)} />}
     {error && <p className="meal-plan-error" role="alert">{error}</p>}
-    {status && <p className="meal-plan-status" role="status">{status}</p>}
+    {status && <p className="meal-plan-status" role="status">{/guardad/i.test(status) && <Check size={16} weight="bold" aria-hidden="true" />}{status}</p>}
     {proposal && !proposedPlan && <p className="meal-plan-error" role="alert">La propuesta no tiene un menú válido. Regenerala antes de aprobar.</p>}
     {proposedPlan && <MenuProposalReview key={proposal!.id} proposal={proposedPlan} warnings={proposal?.warnings ?? []} busy={busy} recipes={recipes} onEdit={() => void editProposal()} onApprove={() => void approveProposal()} onReject={() => void rejectProposal()} />}
 
