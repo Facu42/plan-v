@@ -1,5 +1,9 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-17)
 
+## Actualización de consultas · 17/10
+
+Facundo confirmó retención cero activada y cuenta Free en Groq. Ya se configuró el proveedor en API y worker y se probó transcripción/resumen real con audio ficticio. PR140 corrige silencios y fragmentos finales de audio, conservando main `49a6a5d`; el estado de publicación definitivo y los controles están en [PR140](https://github.com/Facu42/plan-v/pull/140). Esto sustituye las menciones históricas de Groq pendiente de confirmación para consultas. [Uso, alcance y evidencia](consultas-habilitacion-2026-10-16.md).
+
 ## Estado integrado de la entrega 8 · 16/10/2026
 
 La rama aislada `codex/nutridesk-release-sara2` incorpora mediante avance directo la entrega 7 final `5c8ea5441d466c54be20899b14b8cf0758cbcce4` ([PR #127](https://github.com/Facu42/plan-v/pull/127)) y conserva todo `main` hasta `9c56854`, incluidos los PR #117, #119 y #122. Se recuperó la implementación SARA 2 revisada: 930 registros y 39 componentes, unidades de 100 g/100 ml y copias históricas. [Instructivo vigente](instructivo-plan-v-actualizado-2026-10-15.md), [evidencia de SARA 2](sara2-verificacion-2026-10-15.md) y [coordinación](coordinacion-agentes.md).

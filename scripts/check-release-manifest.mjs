@@ -7,6 +7,7 @@ export const HASH_SCHEME='sha256-utf8-lf-v1';
 export const FIRST_VERSION='20261011140000';
 // Exact MAIN migrations already observed in Supabase under these aliases; never a range exemption.
 const APPLIED_BASELINE={
+ '20261016232547_consultation_silence_summary.sql':{version:'20261016232547',observedAppliedVersion:'20261016233443',observedAppliedName:'consultation_silence_summary'},
  '20261015210000_activity_kcal.sql':{version:'20261015210000',observedAppliedVersion:'20261015173356',observedAppliedName:'activity_kcal'},
  '20261015090000_patient_views_read_only.sql':{version:'20261015090000',observedAppliedVersion:'20261014215529',observedAppliedName:'patient_views_read_only'},
  '20261015100000_habit_symptoms.sql':{version:'20261015100000',observedAppliedVersion:'20261014215543',observedAppliedName:'habit_symptoms'},
@@ -15,7 +16,7 @@ const APPLIED_BASELINE={
  '20261017010000_performance_indexes.sql':{version:'20261017010000',observedAppliedVersion:'20261017013123',observedAppliedName:'performance_indexes'},
  '20261017020000_fk_full_indexes.sql':{version:'20261017020000',observedAppliedVersion:'20261017021355',observedAppliedName:'fk_full_indexes'},
 };
-const BASELINE_MAIN='ae19e5c49af07cb7451a5aff5048850051d6a909',BASELINE_OBSERVED_ON='2026-10-16';
+const BASELINE_MAIN='49a6a5de8bd19ce89b5a272c1f785c7fc9f906e8',BASELINE_OBSERVED_ON='2026-10-16';
 const defaultRoot=fileURLToPath(new URL('../',import.meta.url));
 const filename=/^(\d{14})_[A-Za-z0-9_-]+\.sql$/;
 /** UTF-8 is validated; only CRLF/CR become LF. BOM, whitespace and final newline are retained. */
