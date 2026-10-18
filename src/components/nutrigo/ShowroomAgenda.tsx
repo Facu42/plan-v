@@ -73,10 +73,12 @@ function timeOf(entry: AgendaEntry) {
   return entry.appointment.when.split(' · ')[1] ?? entry.date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
 }
 
-export function ShowroomAgenda({ patients, now, onManage, focusPatient = null }: {
+export function ShowroomAgenda({ patients, now, onManage, onCreate, focusPatient = null }: {
   patients: Patient[];
   now: Date;
   onManage: (patientId: string) => void;
+  /** Abre el alta de consulta en la misma agenda. Sin paciente, el shell explica por qué. */
+  onCreate?: (patientId: string | null) => void;
   focusPatient?: Patient | null;
   /** Se conserva la firma del shell; la agenda ya no embebe el calendario de la paciente. */
   onNavigatePatient?: (patientId: string, page: ShowroomPage) => void;
@@ -124,7 +126,7 @@ export function ShowroomAgenda({ patients, now, onManage, focusPatient = null }:
         <FigStatCard label="Presenciales" value={presencialCount} unit={presencialCount === 1 ? 'consulta' : 'consultas'} tone="saffron" icon={<MapPinArea size={16} />} />
       </section>
       <FigCalendarBoard nav={nav} items={items} categories={CATEGORIES} hidden={hidden} onToggle={(id) => setHidden((set) => toggleInSet(set, id))}
-        cta={ctaPatient ? { label: 'Nueva consulta', onClick: () => onManage(ctaPatient) } : null} dayAttr="agenda"
+        cta={{ label: 'Nueva consulta', onClick: () => { if (onCreate) onCreate(ctaPatient); else if (ctaPatient) onManage(ctaPatient); } }} dayAttr="agenda"
         caption="Se muestra una próxima ocurrencia por paciente, derivada del día y horario guardados."
         renderDay={(list) => list.length ? list.map((item) => { const entry = entries.find((candidate) => candidate.patient.id === item.id); return entry ? entryCard(entry) : null; })
           : <NvState title="Sin consultas este día" description="La agenda sólo muestra turnos guardados." />} />

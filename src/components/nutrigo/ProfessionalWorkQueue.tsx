@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { crmWorkApi } from '../../api/crm-work';
 import { CRM_WORK_KINDS, type CrmWorkItem, type CrmWorkKind, type CrmWorkResponse } from '../../types/crm-work';
 import type { Patient } from '../../types';
 import { InicioIndicators } from './InicioIndicators';
 import { CarteraFeed } from './CarteraFeed';
 import { NvButton, NvState } from './primitives';
+import { BlurFade } from './pro-motion';
 import './professional-workspace.css';
 
 export const WORK_LABELS: Record<CrmWorkKind, string> = {
@@ -14,14 +15,31 @@ export const WORK_LABELS: Record<CrmWorkKind, string> = {
 };
 const STATUS_LABELS: Record<string, string> = { succeeded: 'Lista para revisar', failed: 'Requiere reintento', stale: 'Contexto actualizado', queued: 'En espera', running: 'Generando', submitted: 'Enviado', pending_review: 'Pendiente de revisión', reported: 'Por confirmar', unread: 'Sin leer', scheduled: 'Programada', overdue: 'Vencida', quiet: 'Escribile para retomar' };
 
+function openTask(event: ReactMouseEvent<HTMLAnchorElement>, href: string, onOpen: (href: string) => void) {
+  if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+  event.preventDefault();
+  onOpen(href);
+}
+
 export function WorkQueueList({ items, onOpen }: { items: CrmWorkItem[]; onOpen: (href: string) => void }) {
-  return <ul className="pw-work-list">{items.map((item) => <li key={item.id}>
-    <div><p>{WORK_LABELS[item.kind]} · {STATUS_LABELS[item.status] ?? 'Pendiente'}</p><h3>{item.patient_name}</h3><p>{item.title}</p>
+  return <ul className="pw-work-list">{items.map((item) => {
+    const ficha = `/crm/ficha?paciente=${encodeURIComponent(item.patient_id)}&seccion=resumen`;
+    const registro = `/crm/ficha?paciente=${encodeURIComponent(item.patient_id)}&seccion=alimentario`;
+    const plan = `/crm/plan?paciente=${encodeURIComponent(item.patient_id)}`;
+    const consulta = `/crm/ficha?paciente=${encodeURIComponent(item.patient_id)}&seccion=consultas`;
+    return <li key={item.id}>
+    <div><p>{WORK_LABELS[item.kind]} · {STATUS_LABELS[item.status] ?? 'Pendiente'}</p><h3><a href={ficha} title={item.patient_name} onClick={(event) => openTask(event, ficha, onOpen)}>{item.patient_name}</a></h3><p>{item.title}</p>
       {item.period && <p>{item.period.start} → {item.period.end}</p>}
       <time dateTime={item.updated_at}>{new Date(item.updated_at).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</time>
+      <nav className="nv-work-links" aria-label={`Accesos de ${item.patient_name}`}>
+        <a href={registro} onClick={(event) => openTask(event, registro, onOpen)}>Registro</a>
+        <a href={plan} onClick={(event) => openTask(event, plan, onOpen)}>Plan</a>
+        <a href={consulta} onClick={(event) => openTask(event, consulta, onOpen)}>Consulta</a>
+      </nav>
     </div>
-    <a className="nv-button nv-soft" href={item.href} onClick={(event) => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); onOpen(item.href); }} aria-label={`Abrir ${WORK_LABELS[item.kind].toLocaleLowerCase('es-AR')} de ${item.patient_name}`}>Abrir tarea</a>
-  </li>)}</ul>;
+    <a className="nv-button nv-soft" href={item.href} onClick={(event) => openTask(event, item.href, onOpen)} aria-label={`Abrir ${WORK_LABELS[item.kind].toLocaleLowerCase('es-AR')} de ${item.patient_name}`}>Abrir tarea</a>
+  </li>;
+  })}</ul>;
 }
 
 export function ProfessionalWorkQueue({ patients, mode = 'inicio', initialKind = '', onOpen }: {
@@ -53,12 +71,12 @@ export function ProfessionalWorkQueue({ patients, mode = 'inicio', initialKind =
   const chooseKind = (next: CrmWorkKind | '') => { setKind(next); setCursor(undefined); };
   return <section className="pw-work" aria-label={mode === 'planes' ? 'Propuestas de IA del consultorio' : 'Bandeja del consultorio'}>
     <header className="pw-work-head"><div><h2>{mode === 'inicio' ? 'Tu consultorio, hoy' : mode === 'planes' ? 'Menús pendientes de revisión' : 'Seguimiento de pacientes'}</h2><p>Revisá los pendientes y continuá el trabajo en la ficha correspondiente.</p></div><NvButton className="nv-soft" disabled={loading} onClick={() => { setCursor(undefined); setRefresh((value) => value + 1); }}>Actualizar pendientes</NvButton></header>
-    {mode === 'inicio' && <InicioIndicators patients={patients} />}
+    {mode === 'inicio' && <BlurFade><InicioIndicators patients={patients} /></BlurFade>}
     {mode === 'seguimiento' && <CarteraFeed patients={patients} onOpen={onOpen} />}
-    {loading ? <NvState kind="loading" title="Consultando pendientes…" description="Estamos buscando el trabajo de tu consultorio." /> : error ? <NvState kind="error" title="No pudimos cargar la bandeja" description={error} action={<NvButton onClick={() => setRefresh((value) => value + 1)}>Reintentar bandeja</NvButton>} /> : data && <>
-      <div className="pw-work-counts" aria-label="Pendientes por tipo">{CRM_WORK_KINDS.map((id) => <button key={id} type="button" aria-pressed={kind === id} onClick={() => chooseKind(kind === id ? '' : id)}><strong>{data.counts[id]}</strong><span>{WORK_LABELS[id]}</span></button>)}</div>
+    {loading ? <><div className="pv-skeletons" aria-hidden="true"><span /><span /><span /></div><NvState kind="loading" title="Consultando pendientes…" description="Estamos buscando el trabajo de tu consultorio." /></> : error ? <NvState kind="error" title="No pudimos cargar la bandeja" description={error} action={<NvButton onClick={() => setRefresh((value) => value + 1)}>Reintentar bandeja</NvButton>} /> : data && <>
+      <div className="pw-work-counts" aria-label="Pendientes por tipo">{CRM_WORK_KINDS.map((id) => <button key={id} type="button" aria-pressed={kind === id} onClick={() => chooseKind(kind === id ? '' : id)}><strong>{data.counts[id].toLocaleString('es-AR')}</strong><span>{WORK_LABELS[id]}</span></button>)}</div>
       <div className="pw-work-filters"><label>Paciente<select value={patientId} onChange={(event) => { setPatientId(event.target.value); setCursor(undefined); }}><option value="">Todo el consultorio</option>{patients.map((patient) => <option key={patient.id} value={patient.id}>{patient.name}</option>)}</select></label>
-        <label>Tipo de pendiente<select value={kind} onChange={(event) => chooseKind(event.target.value as CrmWorkKind | '')}><option value="">Todos los pendientes</option>{CRM_WORK_KINDS.map((id) => <option key={id} value={id}>{WORK_LABELS[id]}</option>)}</select></label><p>{data.total} {data.total === 1 ? 'tarea' : 'tareas'}</p></div>
+        <label>Tipo de pendiente<select value={kind} onChange={(event) => chooseKind(event.target.value as CrmWorkKind | '')}><option value="">Todos los pendientes</option>{CRM_WORK_KINDS.map((id) => <option key={id} value={id}>{WORK_LABELS[id]}</option>)}</select></label><p>{data.total.toLocaleString('es-AR')} {data.total === 1 ? 'tarea' : 'tareas'}</p></div>
       {data.items.length ? <WorkQueueList items={data.items} onOpen={onOpen} /> : <NvState title="Sin pendientes en este filtro" description="Podés cambiar el filtro o continuar desde Pacientes y Planes." />}
       <div className="pw-work-pagination">{cursor && <NvButton className="nv-soft" onClick={() => setCursor(undefined)}>Volver al principio</NvButton>}{data.next_cursor && <NvButton onClick={() => setCursor(data.next_cursor!)}>Siguientes pendientes</NvButton>}</div>
       {data.source === 'memory' && <p className="nv-caption">Modo demo · datos ficticios para recorrer el consultorio.</p>}

@@ -30,7 +30,7 @@ import { ShowroomGrocery } from './ShowroomGrocery';
 import { ShowroomMealPlan } from './ShowroomMealPlan';
 import { ConsultationNotes,ConsultationCompletionPanel } from './ConsultationNotes';
 import { PatientImportedHistory } from './PatientImportedHistory';
-import { RECORD_TABS, recordTab, appointmentRecordSummary, type RecordTab } from './patient-record-sections';
+import { RECORD_MORE, RECORD_PRIMARY, recordTab, appointmentRecordSummary, type RecordTab } from './patient-record-sections';
 
 export { RECORD_TABS, recordTab } from './patient-record-sections';
 export type { RecordTab } from './patient-record-sections';
@@ -87,9 +87,15 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   const appointments = appointmentRecordSummary(patient.appointment_history);
   const phone = (patient as Patient & { phone?: string | null }).phone;
   return <section className="pw-record" aria-label={`Espacio de ${patient.name}`}>
-    <header className="pw-record-head"><div><p>Ficha del paciente · {patient.archived_at ? 'Archivada' : patient.status}</p><h2>{patient.name}</h2><span>{patient.goal || 'Objetivo por definir'}</span></div><NvButton className="nv-soft" onClick={onEdit}>Editar datos de ficha</NvButton></header>
-    <dl className="pw-record-contact"><div><dt>Teléfono</dt><dd>{phone || 'Sin teléfono registrado'}</dd></div><div><dt>Próxima consulta</dt><dd>{patient.appointment?.when || 'Sin consulta programada'}</dd></div><div><dt>Consultas realizadas</dt><dd><CompletedConsultationCount patientId={patient.id}/></dd></div><div><dt>Asistencias confirmadas</dt><dd>{appointments.confirmed}</dd></div></dl>
-    <nav className="pw-tabs" aria-label="Secciones de la ficha">{RECORD_TABS.map(([id, label]) => <button type="button" key={id} aria-current={id === tab ? 'page' : undefined} onClick={() => change(id)}>{label}</button>)}</nav>
+    <header className="pw-record-head"><div><p>Ficha del paciente · {patient.archived_at ? 'Archivada' : patient.status}</p><h2 title={patient.name}>{patient.name}</h2><span>{patient.goal?.trim() || 'Sin objetivo'}</span></div><NvButton className="nv-soft" onClick={onEdit}>Editar datos de ficha</NvButton></header>
+    <dl className="pw-record-contact"><div><dt>Teléfono</dt><dd>{phone || 'Sin teléfono registrado'}</dd></div><div><dt>Próxima consulta</dt><dd>{patient.appointment?.when || 'Sin consulta programada'}</dd></div><div><dt>Consultas realizadas</dt><dd><CompletedConsultationCount patientId={patient.id}/></dd></div><div><dt>Asistencias confirmadas</dt><dd>{appointments.confirmed.toLocaleString('es-AR')}</dd></div></dl>
+    <nav className="pw-tabs" aria-label="Secciones de la ficha">
+      {RECORD_PRIMARY.map(([id, label]) => <a key={id} href={`/crm/ficha?paciente=${encodeURIComponent(patient.id)}&seccion=${id}`} aria-current={id === tab ? 'page' : undefined} onClick={(event) => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return; event.preventDefault(); change(id); }}>{label}</a>)}
+      <details className="pw-more">
+        <summary aria-current={RECORD_MORE.some(([id]) => id === tab) ? 'page' : undefined}>Más de esta paciente</summary>
+        <div>{RECORD_MORE.map(([id, label]) => <a key={id} href={`/crm/ficha?paciente=${encodeURIComponent(patient.id)}&seccion=${id}`} aria-current={id === tab ? 'page' : undefined} onClick={(event) => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return; event.preventDefault(); change(id); }}>{label}</a>)}</div>
+      </details>
+    </nav>
     {refreshError && <p role="alert">{refreshError}</p>}
     <div key={`${patient.id}:${tab}`} className="pw-record-content">
       {tab === 'resumen' && <><ShowroomPatientRecord patient={patient} patients={patients} onSelect={onSelect} onEdit={onEdit} onOpen={onOpen} summaryOnly /><ProfessionalLedgerSummary patientId={patient.id} onOpen={() => change('cobros')} /></>}

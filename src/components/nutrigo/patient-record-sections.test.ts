@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { RECORD_TABS, recordTab, appointmentRecordSummary, documentInSection } from './patient-record-sections';
+import { RECORD_MORE, RECORD_PRIMARY, RECORD_TABS, recordTab, appointmentRecordSummary, documentInSection } from './patient-record-sections';
 import type { AppointmentHistoryEntry } from '../../types';
 
 describe('Ficha completa del paciente', () => {
   it('ofrece las diez secciones y mantiene accesos operativos', () => {
     expect(RECORD_TABS.map(([, label]) => label)).toEqual(expect.arrayContaining(['Historia clínica', 'Evolución', 'Notas de consulta', 'Plan actual', 'Plan semanal', 'Lista de compras', 'Registro alimentario', 'Chat', 'Archivos', 'Laboratorio', 'Resumen', 'Planificación', 'Consultas', 'Cobros']));
+    expect(RECORD_PRIMARY.map(([, label]) => label)).toEqual(['Resumen', 'Registro', 'Plan', 'Consultas']);
+    expect(RECORD_MORE.map(([id]) => id)).toEqual(['historia', 'evolucion', 'notas', 'semanal', 'compras', 'chat', 'archivos', 'laboratorio', 'planificacion', 'cobros']);
   });
   it('conserva enlaces existentes y resuelve enlaces desconocidos al resumen', () => {
     expect(recordTab('ingreso')).toBe('historia');

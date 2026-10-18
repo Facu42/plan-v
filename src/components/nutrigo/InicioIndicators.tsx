@@ -5,6 +5,7 @@ import { PERIOD_OPTIONS, countConsultations, countNewPatients, incomeIn, periodW
 import type { Patient } from '../../types';
 import type { BillingBoard } from '../../types/fees';
 import { NvMetric } from './primitives';
+import { NumberTicker } from './pro-motion';
 
 const argentinaToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
 
@@ -31,14 +32,14 @@ export function InicioIndicatorsView({ patients, board, boardError, days, onDays
       <label>Período<select value={days} onChange={(event) => onDays(Number(event.target.value) as PeriodDays)}>{PERIOD_OPTIONS.map((option) => <option key={option} value={option}>Últimos {option} días</option>)}</select></label>
     </header>
     <div className="pw-indicator-cards">
-      <NvMetric label="Consultas" icon="calendar" tone="green" value={String(consultations.total)}
-        note={`${consultations.first} ${consultations.first === 1 ? 'primera' : 'primeras'} · ${consultations.followUp} de seguimiento. ${variationText(variation(consultations.total, previousConsultations.total), String(previousConsultations.total))}`} />
+      <NvMetric label="Consultas" icon="calendar" tone="green" value={<NumberTicker value={consultations.total} />}
+        note={`${consultations.first.toLocaleString('es-AR')} ${consultations.first === 1 ? 'primera' : 'primeras'} · ${consultations.followUp.toLocaleString('es-AR')} de seguimiento. ${variationText(variation(consultations.total, previousConsultations.total), previousConsultations.total.toLocaleString('es-AR'))}`} />
       {newPatients !== null && previousNewPatients !== null
-        ? <NvMetric label="Pacientes nuevas" icon="users" tone="coral" value={String(newPatients)} note={variationText(variation(newPatients, previousNewPatients), String(previousNewPatients))} />
+        ? <NvMetric label="Pacientes nuevas" icon="users" tone="coral" value={<NumberTicker value={newPatients} />} note={variationText(variation(newPatients, previousNewPatients), previousNewPatients.toLocaleString('es-AR'))} />
         : <NvMetric label="Pacientes nuevas" icon="users" tone="coral" value="Sin dato" note="Todavía no tenemos la fecha de alta de tus pacientes." />}
       {income && previousIncome
-        ? <NvMetric label="Ingresos" icon="wallet" tone="gold" value={formatPesos(income.amount)}
-          note={`${income.payers} ${income.payers === 1 ? 'paciente pagó' : 'pacientes pagaron'}. ${variationText(variation(income.amount, previousIncome.amount), formatPesos(previousIncome.amount))}`} />
+        ? <NvMetric label="Ingresos" icon="wallet" tone="gold" value={<NumberTicker value={income.amount} format={formatPesos} />}
+          note={`${income.payers.toLocaleString('es-AR')} ${income.payers === 1 ? 'paciente pagó' : 'pacientes pagaron'}. ${variationText(variation(income.amount, previousIncome.amount), formatPesos(previousIncome.amount))}`} />
         : <NvMetric label="Ingresos" icon="wallet" tone="gold" value="Sin dato" note={boardError ? 'No pudimos consultar los cobros. Abrí Cobranzas para reintentar.' : 'Consultando cobros…'} />}
     </div>
     <p className="pw-indicator-foot">Consultas: horarios de turno ya transcurridos. Pacientes nuevas: fecha de alta en el consultorio. Ingresos: pagos confirmados por fecha de pago.</p>
