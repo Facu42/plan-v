@@ -10,11 +10,11 @@ describe('barra del consultorio', () => {
     expect(showroom).not.toContain("const showHeading = page === 'inicio';");
   });
 
-  it('la barra de Inicio queda en el mismo lugar que el resto y muestra el título', () => {
-    expect(css).toContain('.nv-app.nv-pro.nv-home:has(.pw-work) .nv-topbar');
-    expect(css).toContain('position: relative !important');
-    expect(css).toContain('.nv-app.nv-pro.nv-home .nv-topbar .nv-topbar-title');
-    expect(css).toMatch(/\.nv-app\.nv-pro\.nv-home \.nv-topbar \.nv-topbar-title \{[\s\S]*display: block !important/);
-    expect(css).toContain('.nv-app.nv-pro .nv-desktop-account { display: contents !important; }');
+  it('el buscador ocupa la barra y la ficha no deja una columna fija a la derecha', () => {
+    expect(showroom).toContain('<ProCommandBar');
+    expect(showroom).not.toContain('<ProRail');
+    expect(css).toContain('Plus Jakarta Sans');
+    expect(css).toContain('.nv-app.nv-pro .pv-sheet-grid');
+    expect(css).toContain('grid-template-columns: minmax(0, 1fr) !important');
   });
 });

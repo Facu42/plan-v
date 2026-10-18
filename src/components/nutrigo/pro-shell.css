@@ -6,6 +6,8 @@
   --pv-ease: cubic-bezier(0.23, 1, 0.32, 1);
   --nv-muted: #52545b;
   --nv-ink-soft: #3e4046;
+  --pv-card: #f4f0ec;
+  font-family: "Plus Jakarta Sans", Poppins, sans-serif;
   font-variant-numeric: tabular-nums;
 }
 
@@ -18,11 +20,8 @@
     gap: 16px;
     padding: 16px;
   }
-  .nv-app.nv-pro .nv-main.pv-with-rail {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 280px !important;
-    gap: 18px;
-    align-items: start;
+  .nv-app.nv-pro .nv-main {
+    display: block !important;
   }
   .nv-app.nv-pro .nv-sidebar {
     display: flex !important;
@@ -37,10 +36,10 @@
     color: #f9f4f2;
     box-shadow: 0 18px 40px rgba(39, 41, 50, 0.18);
   }
-  .nv-app.nv-pro .nv-content-layout {
-    grid-template-columns: minmax(0, 1fr) 280px !important;
-    gap: 18px;
-    align-items: start;
+  .nv-app.nv-pro .nv-content-layout,
+  .nv-app.nv-pro.nv-home .nv-content-layout,
+  .nv-app.nv-pro.nv-home:has(.pw-work) .nv-content-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 }
 
@@ -99,8 +98,17 @@
   font-weight: 700;
   text-align: center;
 }
-.nv-app.nv-pro .pv-nav a[aria-current="page"] {
+.nv-app.nv-pro .pv-nav a { position: relative; }
+.nv-app.nv-pro .pv-nav-pill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 999px;
   background: #c2e66e;
+}
+.nv-app.nv-pro .pv-nav a > :not(.pv-nav-pill) { position: relative; z-index: 1; }
+.nv-app.nv-pro .pv-nav a[aria-current="page"] {
+  background: transparent;
   color: #272932;
   font-weight: 600;
 }
@@ -554,4 +562,286 @@
     transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease !important;
   }
   .nv-app.nv-pro .nv-button:active:not(:disabled) { transform: scale(0.99) !important; }
+}
+
+/* Barra de búsqueda y ficha en dos columnas. Solo el consultorio. */
+.nv-app.nv-pro .nv-topbar,
+.nv-app.nv-pro.nv-home .nv-topbar,
+.nv-app.nv-pro.nv-home:has(.pw-work) .nv-topbar {
+  min-height: 0;
+  padding: 10px 16px !important;
+  gap: 10px;
+  background: transparent !important;
+}
+.nv-app.nv-pro .nv-topbar .nv-topbar-title,
+.nv-app.nv-pro.nv-home .nv-topbar .nv-topbar-title {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+}
+.nv-app.nv-pro .pv-command {
+  position: relative;
+  display: flex;
+  flex: 1 1 320px;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 48px;
+  padding: 6px 8px 6px 14px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(39, 41, 50, 0.06);
+}
+.nv-app.nv-pro .pv-command > svg { flex: none; color: #52545b; }
+.nv-app.nv-pro .pv-command input {
+  flex: 1 1 120px;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #272932;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+}
+.nv-app.nv-pro .pv-command input:focus { outline: none; }
+.nv-app.nv-pro .pv-command:focus-within { outline: 2px solid #272932; outline-offset: 3px; }
+.nv-app.nv-pro .pv-command-chips { display: flex; gap: 4px; overflow-x: auto; }
+.nv-app.nv-pro .pv-command-chips a {
+  flex: none;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #3e4046;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.nv-app.nv-pro .pv-command-chips a[aria-current="page"] { background: #c2e66e; color: #272932; }
+.nv-app.nv-pro .pv-command-patient { display: flex; align-items: center; gap: 6px; color: #3e4046; font-size: 12px; font-weight: 600; }
+.nv-app.nv-pro .pv-command-patient select {
+  max-width: 140px;
+  border: 0;
+  background: #f4f0ec;
+  color: #272932;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 6px 8px;
+}
+.nv-app.nv-pro .pv-command-results {
+  position: absolute;
+  z-index: 8;
+  top: calc(100% + 8px);
+  left: 16px;
+  right: 16px;
+  margin: 0;
+  padding: 8px;
+  list-style: none;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(39, 41, 50, 0.12);
+}
+.nv-app.nv-pro .pv-command-results a { display: block; padding: 8px 10px; border-radius: 10px; color: #272932; text-decoration: none; }
+.nv-app.nv-pro .nv-topbar .nv-user-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.nv-app.nv-pro .nv-header-menu { gap: 8px; }
+.nv-app.nv-pro .pv-round,
+.nv-app.nv-pro .nv-topbar .nv-alerts-bell,
+.nv-app.nv-pro .nv-topbar .nv-user-avatar,
+.nv-app.nv-pro .nv-topbar .nv-user-caret {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: #fff;
+  color: #272932;
+  text-decoration: none;
+}
+.nv-app.nv-pro .nv-topbar .nv-user-avatar { background: #ffcb65; }
+.nv-app.nv-pro .nv-main { padding: 8px 16px 32px !important; }
+.nv-app.nv-pro .pw-work,
+.nv-app.nv-pro .nv-directory { gap: 12px; }
+.nv-app.nv-pro .pw-work-head h2,
+.nv-app.nv-pro .pv-sheet-title {
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+.nv-app.nv-pro .pv-sheet-title { margin: 0 0 8px; font-size: 34px; line-height: 1.05; }
+.nv-app.nv-pro .pw-work-counts { gap: 10px; }
+.nv-app.nv-pro .pw-work-counts button,
+.nv-app.nv-pro .pw-work-list li,
+.nv-app.nv-pro .nv-directory-panel,
+.nv-app.nv-pro .nr-card,
+.nv-app.nv-pro .pv-idcard,
+.nv-app.nv-pro .pv-mini article,
+.nv-app.nv-pro .pv-meters article {
+  border: 1px solid rgba(39, 41, 50, 0.06);
+  border-radius: 22px;
+  background: var(--pv-card);
+  box-shadow: none;
+}
+.nv-app.nv-pro .pv-sheet-grid { display: grid; gap: 16px; align-items: start; }
+.nv-app.nv-pro .pv-side { display: grid; gap: 12px; min-width: 0; }
+.nv-app.nv-pro .pv-crumbs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; color: #3e4046; font-size: 13px; }
+.nv-app.nv-pro .pv-crumbs a { color: #272932; font-weight: 600; }
+.nv-app.nv-pro .pv-identity { display: flex; align-items: center; gap: 14px; }
+.nv-app.nv-pro .pv-avatar {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 28px;
+  background: #ffcb65;
+  color: #272932;
+  font-size: 28px;
+  font-weight: 600;
+}
+.nv-app.nv-pro .pv-identity h2 { display: flex; flex-direction: column; min-width: 0; margin: 0; font-size: clamp(26px, 2.4vw, 36px); font-weight: 500; letter-spacing: -0.045em; line-height: 0.95; }
+.nv-app.nv-pro .pv-identity h2 span:only-child { white-space: nowrap; }
+.nv-app.nv-pro .pv-idcard { overflow: hidden; padding: 0; }
+.nv-app.nv-pro .pv-idcard header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #c2e66e;
+  color: #272932;
+  font-size: 12px;
+}
+.nv-app.nv-pro .pv-idcard dl { display: grid; gap: 8px; margin: 0; padding: 12px 14px 14px; }
+.nv-app.nv-pro .pv-idcard dt { color: #52545b; font-size: 12px; }
+.nv-app.nv-pro .pv-idcard dd { margin: 2px 0 0; font-size: 14px; font-weight: 500; }
+.nv-app.nv-pro .pv-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.nv-app.nv-pro .pv-mini article { padding: 12px; }
+.nv-app.nv-pro .pv-mini h3 { margin: 0 0 6px; font-size: 12px; font-weight: 600; }
+.nv-app.nv-pro .pv-mini p { margin: 0; font-size: 13px; }
+.nv-app.nv-pro .pv-mini-wide { grid-column: 1 / -1; background: #edffc4; }
+.nv-app.nv-pro .pv-history { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.nv-app.nv-pro .pv-history li { display: flex; align-items: center; gap: 10px; }
+.nv-app.nv-pro .pv-history strong, .nv-app.nv-pro .pv-history small { display: block; }
+.nv-app.nv-pro .pv-history small { color: #52545b; font-size: 12px; }
+.nv-app.nv-pro .pv-history a {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #fff;
+  color: #272932;
+  text-decoration: none;
+}
+.nv-app.nv-pro .pv-dot { width: 28px; height: 28px; border-radius: 999px; }
+.nv-app.nv-pro .pv-dot-lime { background: #c2e66e; }
+.nv-app.nv-pro .pv-dot-saffron { background: #ffcb65; }
+.nv-app.nv-pro .pv-dot-orange { background: #ffa257; }
+.nv-app.nv-pro .pv-sheet .nr-hero,
+.nv-app.nv-pro .pv-sheet .nr-patient-select { display: none; }
+.nv-app.nv-pro .pv-sheet .pw-tabs { align-items: flex-end; border-bottom: 1px solid rgba(39, 41, 50, 0.08); gap: 4px 16px; }
+.nv-app.nv-pro .pv-sheet .pw-tabs > a {
+  position: relative;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 8px 2px 12px;
+}
+.nv-app.nv-pro .pv-sheet .pw-tabs > a[aria-current="page"] { border: 0; background: transparent; }
+.nv-app.nv-pro .pv-tab-line { position: absolute; right: 0; bottom: 0; left: 0; height: 2px; border-radius: 2px; background: #272932; }
+.nv-app.nv-pro .pv-meters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
+.nv-app.nv-pro .pv-meters article { padding: 14px; }
+.nv-app.nv-pro .pv-meters header { margin-bottom: 8px; border-radius: 10px; background: #edffc4; padding: 4px 8px; font-size: 12px; font-weight: 600; }
+.nv-app.nv-pro .pv-meters article:nth-child(2) header { background: #ffedc9; }
+.nv-app.nv-pro .pv-meters article:nth-child(3) header { background: #fff2e8; }
+.nv-app.nv-pro .pv-meters article:nth-child(4) header { background: #c2e66e; }
+.nv-app.nv-pro .pv-meters strong { display: block; margin: 8px 0; font-size: 28px; font-weight: 500; letter-spacing: -0.04em; }
+.nv-app.nv-pro .pv-meters small { display: block; margin-top: 8px; color: #3e4046; font-size: 12px; }
+.nv-app.nv-pro .pv-level { height: 8px; overflow: hidden; border-radius: 999px; background: rgba(39, 41, 50, 0.08); }
+.nv-app.nv-pro .pv-level span { display: block; width: 100%; height: 100%; border-radius: inherit; background: #272932; transform-origin: left center; }
+.nv-app.nv-pro .pv-meters strong,
+.nv-app.nv-pro .pw-work-counts strong,
+.nv-app.nv-pro .pv-ticker { font-variant-numeric: tabular-nums; }
+.nv-app.nv-pro .nr-card header { margin: -4px -4px 10px; border-radius: 16px; padding: 8px 10px; background: #edffc4; }
+.nv-app.nv-pro .pv-assistant {
+  position: fixed;
+  z-index: 20;
+  right: 20px;
+  bottom: 20px;
+  display: grid;
+  gap: 8px;
+  width: min(280px, calc(100vw - 32px));
+  padding: 16px;
+  border-radius: 24px;
+  background: #272932;
+  color: #f9f4f2;
+  box-shadow: 0 18px 40px rgba(39, 41, 50, 0.28);
+}
+.nv-app.nv-pro .pv-assistant p { margin: 0; }
+.nv-app.nv-pro .pv-assistant p:first-child { font-size: 16px; font-weight: 600; }
+.nv-app.nv-pro .pv-assistant p:nth-child(2) { color: #d5d6d8; font-size: 13px; }
+.nv-app.nv-pro .pv-assistant a {
+  justify-self: start;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #ffcb65;
+  color: #272932;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+@media (min-width: 1024px) {
+  .nv-app.nv-pro .pv-sheet-grid { grid-template-columns: minmax(280px, 0.34fr) minmax(0, 1fr); }
+}
+@media (min-width: 1100px) {
+  .nv-app.nv-pro .pw-work-list { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+  .nv-app.nv-pro .pw-work-list li { align-items: flex-start; height: 100%; }
+}
+@media (max-width: 1023px) {
+  .nv-app.nv-pro .nv-main { padding-bottom: 96px !important; }
+  .nv-app.nv-pro .pv-sheet-main { order: -1; }
+  .nv-app.nv-pro .pv-assistant { display: none; }
+  .nv-app.nv-pro .pv-meters { grid-template-columns: 1fr 1fr; }
+  .nv-app.nv-pro .pv-command { flex-wrap: wrap; border-radius: 22px; }
+  .nv-app.nv-pro .pv-command-chips { display: grid; grid-template-columns: 1fr 1fr; width: 100%; overflow: visible; }
+  .nv-app.nv-pro .pv-command-chips a { min-height: 32px; display: inline-flex; align-items: center; justify-content: center; }
+  .nv-app.nv-pro .pv-command-patient span { display: none; }
+  .nv-app.nv-pro .pv-identity h2,
+  .nv-app.nv-pro .pv-sheet-title { font-size: 28px; }
+  .nv-app.nv-pro .pv-identity h2 span:only-child { white-space: normal; }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .nv-app.nv-pro .pw-work-counts button,
+  .nv-app.nv-pro .pw-work-list li,
+  .nv-app.nv-pro .pv-mini article,
+  .nv-app.nv-pro .pv-meters article,
+  .nv-app.nv-pro .nr-card,
+  .nv-app.nv-pro .nv-directory-panel .nv-directory-table [role="row"]:not(.nv-table-head) {
+    transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .nv-app.nv-pro .pw-work-counts button:hover,
+  .nv-app.nv-pro .pw-work-list li:hover,
+  .nv-app.nv-pro .pv-mini article:hover,
+  .nv-app.nv-pro .pv-meters article:hover,
+  .nv-app.nv-pro .nr-card:hover,
+  .nv-app.nv-pro .nv-directory-panel .nv-directory-table [role="row"]:not(.nv-table-head):hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 28px rgba(39, 41, 50, 0.12);
+  }
+}
+.nv-app.nv-pro .pv-command-chips a:focus-visible,
+.nv-app.nv-pro .pv-round:focus-visible,
+.nv-app.nv-pro .pv-history a:focus-visible,
+.nv-app.nv-pro .pv-command-patient select:focus-visible,
+.nv-app.nv-pro .pv-assistant a:focus-visible {
+  outline: 2px solid #272932;
+  outline-offset: 3px;
 }

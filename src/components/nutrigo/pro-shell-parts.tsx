@@ -1,8 +1,11 @@
 import type { ReactNode } from 'react';
+import { LayoutGroup, motion, useReducedMotion } from 'motion/react';
 import type { Patient } from '../../types';
 import type { ShowroomPage } from './ShowroomPanels';
 import { Icon } from '../shared/Icon';
 import { PRO_NAV_GROUPS, rememberPatient, type ProNavItem } from './pro-nav';
+
+const NAV_EASE = [0.23, 1, 0.32, 1] as const;
 
 function followLink(event: React.MouseEvent<HTMLAnchorElement>, href: string, onOpen: (href: string) => void) {
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -18,16 +21,18 @@ export function ProNav({ page, search, hash, patientId, messageUnread, onOpen }:
   messageUnread: number;
   onOpen: (href: string) => void;
 }) {
-  return <nav className="pv-nav" aria-label="Secciones del consultorio">{PRO_NAV_GROUPS.map((group) => <div className="pv-nav-group" key={group.title}>
+  return <LayoutGroup id="pv-nav"><nav className="pv-nav" aria-label="Secciones del consultorio">{PRO_NAV_GROUPS.map((group) => <div className="pv-nav-group" key={group.title}>
     <p>{group.title}</p>
     {group.items.map((item) => <ProNavLink key={item.id} item={item} href={rememberPatient(item.href, patientId)} current={item.current(page, search, hash)} unread={item.id === 'mensajes' ? messageUnread : 0} onOpen={onOpen} />)}
-  </div>)}</nav>;
+  </div>)}</nav></LayoutGroup>;
 }
 
 function ProNavLink({ item, href, current, unread, onOpen }: {
   item: ProNavItem; href: string; current: boolean; unread: number; onOpen: (href: string) => void;
 }) {
+  const reduce = useReducedMotion();
   return <a href={href} aria-current={current ? 'page' : undefined} onClick={(event) => followLink(event, href, onOpen)}>
+    {current && <motion.span className="pv-nav-pill" layoutId="pv-nav-active" transition={{ duration: reduce ? 0.12 : 0.34, ease: NAV_EASE }} />}
     <Icon name={item.icon} size={20} />
     <span>{item.label}</span>
     {item.soon && <small>Próximamente</small>}

@@ -41,3 +41,18 @@ export function BlurFade({ children, delay = 0, className }: { children: ReactNo
     transition={{ duration: reduce ? 0.16 : 0.28, delay: reduce ? 0 : delay, ease: EASE }}
   >{children}</motion.div>;
 }
+
+/** Barra de nivel. Crece desde la izquierda. Con menos movimiento arranca cerca del valor final. */
+export function LevelBar({ value, label }: { value: number | null; label: string }) {
+  const reduce = useReducedMotion();
+  const known = value != null && Number.isFinite(value);
+  const safe = known ? Math.min(100, Math.max(0, value)) : 0;
+  return <div className="pv-level" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={known ? Math.round(safe) : undefined}>
+    <motion.span
+      initial={{ scaleX: reduce ? Math.max(0.08, safe / 100) : 0 }}
+      animate={{ scaleX: known ? safe / 100 : 0 }}
+      style={{ transformOrigin: 'left center' }}
+      transition={{ duration: reduce ? 0.16 : 0.36, ease: EASE }}
+    />
+  </div>;
+}

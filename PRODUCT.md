@@ -61,7 +61,7 @@ El nombre es Plan V. Se habla en español, de vos. La marca del logo (verde, dor
 
 Una sola piel para las dos apps: Nutrigo. Decisión de Facundo del 18/10/2026. Reemplaza la regla de dos pieles.
 
-- Consultorio y espacio de la paciente usan Poppins, crema `#F9F4F2`, tinta `#272932`, lima `#C2E66E`, azafrán `#FFCB65` y naranja `#FFA257`. El detalle está en `DESIGN.md`.
+- Consultorio y espacio de la paciente usan crema `#F9F4F2`, tinta `#272932`, lima `#C2E66E`, azafrán `#FFCB65` y naranja `#FFA257`. El panel usa Plus Jakarta Sans; la paciente sigue en Poppins. El detalle está en `DESIGN.md`.
 - La app de la paciente sigue igual al archivo, colores incluidos. Regla fija desde el 14/10/2026. El contraste del panel se corrige solo ahí, oscureciendo el texto.
 - El menú del consultorio tiene los cuatro grupos de arriba. Lo que no existe se muestra como «próximamente».
 

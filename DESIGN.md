@@ -14,28 +14,27 @@ colors:
   line: "#E1E1E2"
 typography:
   display:
-    fontFamily: "Poppins, Arial, sans-serif"
-    fontSize: "32px"
-    fontWeight: 600
-    lineHeight: 1.1
-    letterSpacing: "-0.04em"
+    fontFamily: "Plus Jakarta Sans, Poppins, sans-serif"
+    fontSize: "36px"
+    fontWeight: 500
+    lineHeight: 1.05
+    letterSpacing: "-0.045em"
   title:
-    fontFamily: "Poppins, Arial, sans-serif"
+    fontFamily: "Plus Jakarta Sans, Poppins, sans-serif"
     fontSize: "20px"
-    fontWeight: 600
+    fontWeight: 500
     lineHeight: 1.2
     letterSpacing: "-0.03em"
   body:
-    fontFamily: "Poppins, Arial, sans-serif"
+    fontFamily: "Plus Jakarta Sans, Poppins, sans-serif"
     fontSize: "14px"
     fontWeight: 400
     lineHeight: 1.45
   label:
-    fontFamily: "Poppins, Arial, sans-serif"
+    fontFamily: "Plus Jakarta Sans, Poppins, sans-serif"
     fontSize: "12px"
     fontWeight: 600
     lineHeight: 1.3
-    letterSpacing: "0.08em"
 rounded:
   control: "12px"
   card: "20px"
@@ -73,7 +72,7 @@ La nutricionista y la paciente usan la piel Nutrigo. Lienzo crema, tarjetas blan
 
 Decisión de Facundo del 18/10/2026. Reemplaza la regla de dos pieles. Una skill no vuelve a separar el consultorio en vidrio y la paciente en Nutrigo.
 
-- Una sola familia: Poppins.
+- El consultorio usa Plus Jakarta Sans. La app de la paciente sigue en Poppins, igual al archivo.
 - Una sola paleta: la de `src/components/nutrigo/nutrigo-fidelity.css` y `design/figma-reference`.
 - El texto y el foco cumplen contraste WCAG AA. Si un gris del archivo no llega, se oscurece solo el texto.
 - La app de la paciente sigue igual al archivo Nutrigo. El arreglo de contraste del consultorio vive en `.nv-pro` y no pisa los tokens de la paciente.
@@ -84,7 +83,7 @@ Decisión de Facundo del 18/10/2026. Reemplaza la regla de dos pieles. Una skill
 - Lienzo crema `#F9F4F2`. Tarjetas blancas de radio 24.
 - Menú tinta `#272932`, flotante, radio 28, ítem activo lima `#C2E66E`.
 - Azafrán `#FFCB65` para avisos y «próximamente». Naranja `#FFA257` solo de fondo, con texto tinta.
-- Poppins en todo el panel. Números tabulares. Piso de lectura 12 px.
+- Plus Jakarta Sans en el panel: títulos grandes y livianos, texto chico y limpio. La paciente sigue en Poppins. Números tabulares. Piso de lectura 12 px.
 - Cápsulas para lo elegido. Pastillas pastel para estados y KPIs.
 
 ## Colors
@@ -112,7 +111,7 @@ Una paleta para las dos apps. Los hex salen de `src/components/nutrigo/nutrigo-f
 
 ### Named Rules
 
-**The One Skin Rule.** El consultorio y la app de la paciente comparten Poppins, crema, tinta, lima, azafrán y naranja. No se vuelve a una piel de vidrio para la nutricionista.
+**The One Skin Rule.** El consultorio y la app de la paciente comparten crema, tinta, lima, azafrán y naranja. La tipografía del panel es Plus Jakarta Sans; la de la paciente sigue siendo Poppins. No se vuelve a una piel de vidrio para la nutricionista.
 
 **The Patient File Rule.** La app de la paciente sigue igual al archivo Nutrigo, incluso el gris `#8A8C90` donde el archivo lo dibuja. El oscurecido del texto es solo del panel (`.nv-pro`).
 
@@ -120,15 +119,15 @@ Una paleta para las dos apps. Los hex salen de `src/components/nutrigo/nutrigo-f
 
 ## Typography
 
-**Font:** Poppins (con Arial), en el consultorio y en la paciente.
+**Font del panel:** Plus Jakarta Sans. Es la gratuita de Google más cercana a Gilroy: geométrica, con la o redonda, el mismo aire abierto y pesos de 400 a 600 para títulos grandes y livianos. Urbanist es un poco más estrecha y Outfit más compacta. La app de la paciente no cambia: sigue en Poppins, como el archivo Nutrigo.
 
-**Character:** títulos con tracking apenas negativo. El texto de trabajo es 14 px. Nada que la persona tenga que leer baja de 12 px en el panel.
+**Character:** títulos grandes en peso 500, con tracking negativo. El texto de trabajo es 14 px. Nada que la persona tenga que leer baja de 12 px en el panel.
 
 ### Hierarchy
 
-- **Display** (600, 32 px): nombre en la ficha.
-- **KPI** (600, 40 px): las tres cifras de Inicio.
-- **Title** (600, 20 px): títulos de bloque.
+- **Display** (500, 36 px): nombre en la ficha, en dos líneas.
+- **KPI** (500, 28–40 px): cifras de Inicio y de la ficha.
+- **Title** (500, 20 px): títulos de bloque.
 - **Body** (400, 14 px): texto de tarjetas.
 - **Label** (600, 12 px): grupos del menú, metadatos, pastillas. Es el piso.
 
@@ -142,7 +141,7 @@ Las cifras usan separador de miles de Argentina y números tabulares.
 
 Escritorio 1440 y celular 390. Tablet no.
 
-En escritorio el menú es una barra oscura flotante, de 248 px, con radio 28. El contenido va en tarjetas. A la derecha, un panel de 280 px con la paciente abierta y cuatro accesos: Ficha, Registro, Plan y Consulta. Si no hay paciente, el panel lo dice.
+En escritorio el menú es una barra oscura flotante, de 248 px, con radio 28. Arriba hay un buscador en píldora, con filtros (Pacientes, Planes, Registros, Consultas), la paciente elegida y botones redondos de cuenta, avisos y ajustes. El contenido ocupa todo el ancho. La ficha va en dos columnas: una angosta con la persona y otra ancha con la consulta. No hay una columna fija repetida a la derecha. En Inicio el asistente es una tarjeta oscura flotante.
 
 En celular el menú lateral se va. Abajo quedan Inicio, Pacientes, Seguimiento, Agenda y Más. Más abre los mismos cuatro grupos.
 
@@ -159,7 +158,7 @@ El desenfoque de vidrio no entra en el panel. Las entradas animadas usan solo op
 
 ## Shapes
 
-Tarjetas 24 px. Menú 28 px. Ítem activo, botones y pestañas en cápsula. Controles 12 px.
+En el panel, las tarjetas van a 22 px, con fondo gris-crema `#F4F0EC` y un borde casi invisible. El menú sigue a 28 px. El ítem activo del menú y los botones son cápsula. Las pestañas de la ficha se subrayan. La app de la paciente no cambia de forma.
 
 ## Components
 
@@ -176,7 +175,7 @@ Pastilla pastel (lima lavada `#EDFFC4`, azafrán lavado `#FFEDC9`, durazno `#FFF
 
 ### Cards / Containers
 
-Fondo blanco, radio 24, padding 20, sombra del archivo. Sin blur.
+En el panel, fondo `#F4F0EC`, radio 22 y borde casi invisible. Sin blur. La app de la paciente conserva las tarjetas del archivo.
 
 ### Inputs / Fields
 
@@ -196,7 +195,7 @@ Cuatro pestañas fijas: Resumen, Registro, Plan, Consultas. El resto (historia, 
 
 ### Do
 
-- **Do** usar Poppins, crema `#F9F4F2`, tinta `#272932`, lima `#C2E66E`, azafrán `#FFCB65` y naranja `#FFA257` en el panel y en la app de la paciente.
+- **Do** usar crema `#F9F4F2`, tinta `#272932`, lima `#C2E66E`, azafrán `#FFCB65` y naranja `#FFA257` en el panel y en la app de la paciente. En el panel, Plus Jakarta Sans. En la paciente, Poppins.
 - **Do** oscurecer a `#52545B` o `#3E4046` el texto del panel que hoy usa `#8A8C90`.
 - **Do** dejar el menú en tinta y el ítem activo en lima.
 - **Do** mantener los enlaces y las rutas que ya existen. Lo que no existe se dice «próximamente».

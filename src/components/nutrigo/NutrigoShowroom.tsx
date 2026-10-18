@@ -62,6 +62,12 @@ import { useProNotices } from './useProNotices';
 import { buildShowroomReminders, reminderPage } from './showroom-reminders';
 import { buildCalendarWeek, resolveCalendarMeals, WeeklyPlanCalendar } from './WeeklyPlanCalendar';
 import { activityWhen, buildRecentActivity } from './recent-activity';
+import '@fontsource/plus-jakarta-sans/latin-400.css';
+import '@fontsource/plus-jakarta-sans/latin-ext-400.css';
+import '@fontsource/plus-jakarta-sans/latin-500.css';
+import '@fontsource/plus-jakarta-sans/latin-ext-500.css';
+import '@fontsource/plus-jakarta-sans/latin-600.css';
+import '@fontsource/plus-jakarta-sans/latin-ext-600.css';
 import '@fontsource/poppins/latin-400.css';
 import '@fontsource/poppins/latin-500.css';
 import '@fontsource/poppins/latin-600.css';
@@ -84,7 +90,9 @@ import { CaretDown, CaretUp, LockSimple } from '@phosphor-icons/react';
 import { FigmaDetailContext, FigmaPatientFooter, FigmaPlanCard, PATIENT_FIGMA_NODES, type FigmaDetail } from './FigmaPatientFront';
 import { NutrigoPatientApp } from '../../features/nutrigo/PatientApp';
 import { ServiceNotice } from './ServiceNotice';
-import { ComingSoon, ProMobileMore, ProNav, ProRail } from './pro-shell-parts';
+import { ComingSoon, ProMobileMore, ProNav } from './pro-shell-parts';
+import { ProCommandBar } from './pro-command';
+import { Gear } from '@phosphor-icons/react';
 import { proNavItems, PRO_MOBILE_IDS, rememberPatient } from './pro-nav';
 
 
@@ -365,6 +373,7 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
 
   const accountMenu = () => (
 <div className="nv-header-menu">
+          {role === 'pro' && <a className="pv-round" href="/crm/desarrollo?modulo=configuracion" aria-label="Ajustes del consultorio" onClick={(event) => { event.preventDefault(); openWorkHref('/crm/desarrollo?modulo=configuracion'); }}><Gear size={18} aria-hidden="true" /></a>}
           <ShowroomConsultAlerts key={alertAudience} audience={alertAudience} alerts={consultAlerts} reminders={habitReminders} patientId={selected?.id} onOpen={(alert) => { if (role === 'pro') selectPatient(alert.patientId); navigate('agenda'); }} onManage={role === 'pro' ? (alert) => { openWorkHref(`/crm/ficha?paciente=${encodeURIComponent(alert.patientId)}&seccion=consultas`); } : undefined} onOpenReminder={openReminder} onOpenCare={(notice) => { if (role === 'pro') selectPatient(notice.patient_id); navigate(notice.target); }} proNotices={proNotices} onOpenProNotice={(notice) => { if (notice.kind !== 'payment' && notice.kind !== 'debt') selectPatient(notice.patientId); navigate(notice.page); }} />
           <div className="nv-user">
             <span className="nv-user-avatar" aria-hidden="true">{userInitials}</span>
@@ -441,16 +450,17 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
           <span className="nv-topbar-label-desktop">{figmaDetail?.title ?? libraryRecipeTitle ?? PAGE_LABELS[page]}</span>
           <span className="nv-topbar-label-mobile" aria-hidden="true">{figmaDetail?.title ?? libraryRecipeTitle ?? MOBILE_PAGE_LABELS[page] ?? PAGE_LABELS[page]}</span>
         </h1>
+        {role === 'pro' && <ProCommandBar page={page} search={typeof window === 'undefined' ? new URLSearchParams() : new URLSearchParams(window.location.search)} query={query} patients={activePatients} selectedId={selected?.id ?? ''} onQuery={setQuery} onOpen={openWorkHref} onSelect={(id) => { selectPatient(id); openWorkHref(`/crm/ficha?paciente=${encodeURIComponent(id)}&seccion=resumen`); }} />}
         <div className="nv-desktop-account">{(role === 'pro' || !compactHeader) && accountMenu()}</div>
         <button type="button" className="nv-button nv-ghost nv-menu-toggle" ref={menuButtonRef} aria-label={menuOpen ? 'Cerrar el menú' : 'Abrir el menú'} aria-expanded={menuOpen} aria-controls="nv-drawer" onClick={() => setMenuOpen((open) => !open)}><Icon name="list" size={20} /></button>
       </header>
       {role === 'pro' && <ServiceNotice />}
       <div className="nv-content-layout">
         {/* Cambiar de pantalla o paciente desmonta los datos y formularios anteriores. */}
-        <main key={`${contentIdentity(role,page,selected?.id)}:${workspaceRevision}`} id="nv-main" tabIndex={-1} className={`nv-main${role === 'pro' ? ' pv-with-rail' : ''}`} data-figma-node={role === 'patient' ? (figmaDetail?.nodes ?? PATIENT_FIGMA_NODES[page])?.[compactHeader ? 1 : 0] : undefined}><div className="pv-stage">
+        <main key={`${contentIdentity(role,page,selected?.id)}:${workspaceRevision}`} id="nv-main" tabIndex={-1} className="nv-main" data-figma-node={role === 'patient' ? (figmaDetail?.nodes ?? PATIENT_FIGMA_NODES[page])?.[compactHeader ? 1 : 0] : undefined}><div className="pv-stage">
           {role === 'pro' && selected && ['consultas','objetivos','progreso'].includes(page) && <SelectedPatientContext patient={selected} onRecord={() => navigate('ficha')} />}
 
-          {(!figmaDetail && (showHeading || (['pacientes', 'recetas'].includes(page) && !pendingModule))) ? (
+          {(!figmaDetail && (showHeading || (['pacientes', 'recetas'].includes(page) && !pendingModule && !(role === 'pro' && page === 'pacientes')))) ? (
           <div className="nv-page-head">
             {showHeading && <div><h1>{pageTitle}{role === 'patient' ? <span>! 👋</span> : <span className="nv-title-dot">.</span>}</h1>{page === 'inicio' && <p>{role === 'patient' ? 'Empecemos nuestro camino para cuidar tu salud.' : 'Pacientes, planes y pendientes del consultorio.'}</p>}</div>}
             {role === 'patient' && page === 'inicio' && <form className="nv-search np-dashboard-search" onSubmit={(e) => { e.preventDefault(); navigate('plan', query); }}>
@@ -467,8 +477,8 @@ export function NutrigoShowroom({ darkMode, onToggleTheme, lockedRole = null, al
           {role === 'patient' && page === 'agenda' && p && <ConsultationSharedNotes patientId={p.id} />}
           {!(compactHeader && page === 'inicio') && footer}
           </div>
-          {role === 'pro' && <ProRail patient={selected ?? null} patients={activePatients} onSelect={(id) => { if (id) selectPatient(id); }} onOpen={openWorkHref} />}
         </main>
+        {role === 'pro' && page === 'inicio' && <aside className="pv-assistant"><p>Asistente</p><p>Revisá un pendiente o un plan antes de publicarlo.</p><a href="/crm/desarrollo?modulo=asistente-ia" onClick={(event) => { event.preventDefault(); openWorkHref('/crm/desarrollo?modulo=asistente-ia'); }}>Abrir asistente</a></aside>}
 
         {compactHeader && page === 'inicio' && footer}
       </div>
