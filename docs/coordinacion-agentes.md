@@ -1,5 +1,7 @@
 # Coordinación entre agentes (Claude, Codex, Cursor)
 
+19/10 · Codex · Reserva exclusiva de fase 6 (Asistente IA, Seguimiento, Mensajes y Progreso) en `codex/panel-nutri-fase-6`, desde main c09466b con fases 4 y 5 integradas. Boceto aprobado, una rama y PR propios; fases 7–9 fuera del pedido. Sin SQL remoto.
+
 19/10 · Cursor · Fase 5 (Agenda, Cobranzas y Página pública) en `cursor/panel-nutri-fase-5`, [PR #153](https://github.com/Facu42/plan-v/pull/153). Facundo autorizó juntarla. La fase 4 ya está en main por [PR #154](https://github.com/Facu42/plan-v/pull/154). Mercado Pago y Google Calendar muestran «Conectar». WhatsApp salió del panel: los avisos van por la app. Sin SQL remoto.
 
 19/10 · Codex · Fase 4 de Ficha integrada a main por [PR #154](https://github.com/Facu42/plan-v/pull/154). Revisión de código y visual cerradas, seis e2e aprobados y suite estable final verde (3.177 y dos omitidas, 494 archivos). [Informe y límites](panel-nutri-rediseno/fase-4-verificacion.md). Sin SQL remoto.
@@ -16,6 +18,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Rediseño panel nutri, fase 6 exclusivamente | Codex | `codex/panel-nutri-fase-6` | Reservada antes del código. Asistente IA, Seguimiento, Mensajes y Progreso; base main c09466b. No tomar fases 7–9 |
 | Acceso, cartera completa, teléfono de la paciente | Codex | PR #105 (`codex/nutridesk-release-base`) | Borrador. Falta comparar con Figma y la frase de Facundo |
 | Consultas grabadas, borrador privado y resumen revisado | Codex | PR #106 (`codex/nutridesk-release-consultas`) | Borrador, encima de #105. IA externa apagada |
 | Importar pacientes y documentos con OCR | Codex | PR #107 (`codex/nutridesk-release-importacion`) | Borrador, encima de #106 |
@@ -78,6 +81,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **19/10 · Codex · Inicio fase 6** · Facundo pidió exclusivamente fase 6. Reserva previa al código en `codex/panel-nutri-fase-6`, base main c09466b con #153 y #154 integrados. Se conservan contratos y permisos; comparación contra boceto y Regression Guard antes del PR propio. Fases 7–9 fuera de este trabajo.
 
 - **19/10 · Cursor · Fase 5 con la fase 4** · Se trajo main (fase 4, #154) a `cursor/panel-nutri-fase-5`. Conviven el armazón, la ficha y Agenda, Cobranzas y Página pública. [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar hasta que los controles estén verdes.
 - **19/10 · Cursor · Fase 5 comparada y sin WhatsApp** · Capturas en `design/panel-nutri/fase-5/`. [PR #153](https://github.com/Facu42/plan-v/pull/153). WhatsApp salió de Agenda, Cobranzas, Página pública y Conexiones. Los recordatorios abren el chat de la app. El servidor no se tocó.

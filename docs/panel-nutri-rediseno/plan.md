@@ -178,7 +178,7 @@ y link de reserva. Cobranzas con cobrado, por cobrar, vencido, ingresos por mes,
 «Recordar» y movimientos. Página pública con editor y vista previa en celular. Mercado Pago y Google
 Calendar muestran «Conectar» hasta que haya claves (no se finge conexión). WhatsApp no se ofrece en el panel: los mensajes y recordatorios van por el chat y los avisos de la app (decisión de Facundo, 19/10).
 
-### Fase 6. Acompañamiento: Asistente IA, Seguimiento, Mensajes y Progreso · Estado: sin empezar
+### Fase 6. Acompañamiento: Asistente IA, Seguimiento, Mensajes y Progreso · Estado: reservada por Codex
 
 Asistente con la ficha como contexto y el gasto del mes contra el tope; nada se envía a la paciente sin
 aprobar. Seguimiento con comidas con foto, «Confirmar» y «Comentar», cómo se sienten (hábitos y síntomas,
@@ -239,10 +239,18 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
 | 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main `6697d28` |
 | 4 | Codex | `codex/panel-nutri-fase-4` · [PR #154](https://github.com/Facu42/plan-v/pull/154) | Integrada a main |
-| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Lista para juntar; Facundo autorizó. Convive con la ficha de la fase 4 |
-| 6 a 9 | Por coordinar | — | Pendientes, una rama y un PR por fase |
+| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Integrada a main c09466b |
+| 6 | Codex | `codex/panel-nutri-fase-6` | Reservada por pedido exclusivo de Facundo |
+| 7 a 9 | Por coordinar | — | Fuera de este trabajo |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-19 · Codex · Fase 6, paso 0 (reserva)
+- Hecho: reservada exclusivamente la fase 6 antes de cambiar código, por pedido «Seguí con la fase 6 exclusivamente». La fase 5 ya está integrada por #153 en main c09466b; la fase 4 por #154 en b3d6d43, controles y publicación aprobados.
+- Cómo: leídos plan, última Bitácora, coordinación, reglas y Regression Guard. Se sigue el boceto aprobado; no se reabre diseño ni se toman fases 7–9.
+- Rama y base: codex/panel-nutri-fase-6, desde origin/main c09466b. Un PR propio; sin cambios de producción ni activación de proveedores.
+- Falta: inventario de contratos, pruebas RED de huecos, implementación de Asistente IA/Seguimiento/Mensajes/Progreso, verificación visual y funcional, suite final, revisiones e informe del paso 10.
+- Próximo paso exacto: leer los cuatro bloques del boceto y sus componentes/API actuales; registrar flujos críticos y distinguir datos existentes de funciones faltantes antes de implementar.
 
 ### 2026-10-19 18:40 · Cursor · Fase 5, paso 4 (junto con la fase 4)
 - Hecho: se trajo main a esta rama. La ficha de la fase 4 y Agenda, Cobranzas y Página pública conviven. En Cobranzas, Ver vuelve a llamarse «Ver cobranzas de…» para abrir la cuota. Si todavía no hay movimientos, el recorrido abre Registrar cobro.

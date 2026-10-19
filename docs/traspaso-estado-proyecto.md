@@ -1,5 +1,7 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-19)
 
+19/10 · Codex · Facundo autorizó ahora **fase 6 exclusivamente**. Reservada en `codex/panel-nutri-fase-6`, desde main c09466b (#153 y #154 integrados). Asistente IA, Seguimiento, Mensajes y Progreso; plan y avance en [Bitácora](panel-nutri-rediseno/plan.md). Fases 7–9 fuera de este trabajo. Sin SQL remoto.
+
 19/10 · Cursor · Fase 5 trae la fase 4 de main y sigue en [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar hasta que los controles estén verdes. WhatsApp salió del panel. La ficha de #154 convive con Agenda, Cobranzas y Página pública. Sin SQL remoto.
 
 ## 19/10 · Ficha de la nutri, fase 4
