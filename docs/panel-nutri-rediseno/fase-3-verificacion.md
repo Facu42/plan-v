@@ -49,3 +49,5 @@ Sigue fase 4: Ficha con las once pestañas del boceto, conservando los accesos o
 La primera ejecución E2E de CI falló por un selector anterior al rediseño: intentaba Abrir ficha/plan sin abrir Más opciones. Se actualiza el recorrido para pulsar primero el menú visible, conservando todas las aserciones. Integración pendiente hasta que la nueva ejecución y signed-auth estén aprobadas; no se integra con un control rojo.
 
 El nuevo e2e y verify quedaron aprobados en a1b61bf. signed-auth completó plan, cobros, mensajes, archivos, revisión y permisos, y se detuvo en edición por sus selectores anteriores al menú. Se actualiza también ese recorrido para abrir Más opciones, conservando sus comprobaciones y esperando persistencia del archivo antes de restaurar. Se requiere verde en la nueva cabeza antes de integrar.
+
+Recorrido firmado c3c5293: 30 pruebas Auth/PostgREST y todos los recorridos hasta restauración aprobados. La restauración falló porque la prueba cerraba el menú que seguía abierto tras archivar. Se comprueba su estado antes de abrirlo; se conserva la validación de restauración y persistencia. CI se repite; no se considera aprobado hasta terminar.
