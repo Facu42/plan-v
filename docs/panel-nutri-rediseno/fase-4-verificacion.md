@@ -38,6 +38,8 @@ Revisión de código independiente: sin P1/P2, quince pruebas focales aprobadas.
 
 La primera suite tuvo un EBUSY de Windows al preparar la tipografía del PDF y un timeout de reapertura de Postgres. Sus 25 casos focales repitieron verdes y la suite completa serializada aprobó. No se consideran verdes las ejecuciones interrumpidas por recargas del servidor de desarrollo durante conciliaciones o generación de estilos.
 
+CI de c810975: ambas ejecuciones generales y los recorridos aprobaron. El control firmado aprobó 30 casos de Auth/PostgREST, pero el navegador intentaba acceder a Planificación sin abrir su pestaña principal Plan. Se actualiza ese acceso del recorrido, conservando la confirmación y la lectura de la meta publicada; la integración espera su repetición completa en verde.
+
 ## Regression Guard · paso 10
 
 - **Flujos críticos verificados:** ✅ ficha y enlaces anteriores; ingreso/revisión y antecedentes; medidas y objetivos; plan publicado/editor; diario/revisión; notas y publicación; documentos privados; turnos/cierre explícito; cobros; chat. Suite, seis e2e y recorridos locales. La captura de audio y proveedores mantienen sus pruebas existentes; no se ensayó una videollamada física.

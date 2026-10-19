@@ -244,6 +244,13 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-19 · Codex · Fase 4, paso 8 (recorrido firmado)
+- Hecho: las dos ejecuciones generales del PR aprobaron pruebas, tipos, compilación y controles; seis recorridos y secretos aprobados. El control firmado aprobó sus 30 pruebas de Auth/PostgREST y se detuvo en un acceso anterior de la ficha.
+- Cómo: el recorrido abre ahora Plan antes de su subpestaña Planificación, conserva Confirmar y compartir y la comprobación de publicación. Corrección limitada al script; navegación comprobada en demo y sintaxis validada.
+- Rama: codex/panel-nutri-fase-4, PR #154.
+- Qué falta: repetir los controles remotos de esta cabeza e integrar sólo con todos verdes. No cambia el producto ni hay migraciones.
+- Próximo paso exacto: comprobar el recorrido firmado completo, integrar #154 y detener este hilo; fase 5 en otro carril.
+
 ### 2026-10-19 · Codex · Fase 4, paso 7 (entrega en PR #154)
 - Hecho: entregada la ficha de once pestañas en [PR #154](https://github.com/Facu42/plan-v/pull/154), con informe completo del paso 10 y comparación local disponible. Suite estable: 3.177 aprobadas y dos omitidas, 494 archivos; tipos/build/secretos verdes. 28 controles de navegador y 44 tamaños/temas, 47 capturas, seis e2e.
 - Cómo: implementación 8456ded y cierre verificado 0987346; código y visual revisados sin P1/P2. Comparadores manuales preservados, retiro de permisos verificado incluso en vuelo, fire test detectado y restaurado. Sin migraciones ni cambios de producción.
