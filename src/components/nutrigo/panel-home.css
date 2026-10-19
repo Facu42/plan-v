@@ -1,0 +1,167 @@
+/* Inicio: medidas del boceto aprobado; colores del armazón profesional. */
+.pn-panel .ph-home { display:flex; flex-direction:column; gap:16px; min-width:0; }
+.pn-panel.nv-home .nv-clinic-shortcuts { display:none; }
+.pn-panel .ph-home :is(h2,p,ul,ol,dl,dd) { margin:0; }
+.pn-panel .ph-home :is(ul,ol) { padding:0; list-style:none; }
+.pn-panel .ph-home h2 { font-size:16px; line-height:1.25; font-weight:600; letter-spacing:-.01em; }
+.pn-panel :is(.ph-home,.ph-heading,.ph-search) { font-family:Poppins,system-ui,sans-serif; }
+.pn-panel .ph-heading { min-width:0; margin-right:auto; }
+.nv-app.nv-pro.pn-panel.nv-home .nv-header-menu { width:auto; flex:none; }
+.pn-panel.nv-home .nv-header-menu .nv-user-name { display:none; }
+.pn-panel.nv-home .nv-header-menu .nv-alerts { order:0; margin-left:0; }
+.pn-panel.nv-home .ph-heading { flex:1 0 220px; }
+.pn-panel .ph-heading>span { font-size:12px; color:var(--pn-muted); text-transform:capitalize; }
+.pn-panel .ph-heading h1 { margin:3px 0 0; font-size:28px; line-height:1.1; font-weight:600; letter-spacing:-.02em; }
+.pn-panel .ph-search { display:flex; align-items:center; gap:8px; padding:0 10px; border:1px solid var(--pn-line); border-radius:14px; background:var(--pn-white); height:44px; width:280px; }
+.pn-panel .ph-search input { width:100%; min-width:0; outline:none; border:0; background:transparent; font-size:12px; }
+.pn-panel .ph-search button { display:grid; place-items:center; padding:4px; background:none; border:0; color:var(--pn-ink); cursor:pointer; }
+.pn-panel .ph-search kbd { white-space:nowrap; padding:2px 4px; border:1px solid var(--pn-line); border-radius:6px; font:10px Poppins,sans-serif; }
+.pn-panel .ph-button { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:32px; padding:0 12px; border:1px solid var(--pn-line); border-radius:10px; background:var(--pn-white); color:var(--pn-ink); text-decoration:none; font:500 12px/1.3 Poppins,system-ui,sans-serif; cursor:pointer; white-space:nowrap; transition:background-color 200ms ease,transform 200ms var(--pn-ease); }
+.pn-panel .ph-primary { min-height:44px; border-radius:14px; background:var(--pn-lime); color:var(--pn-on-color); border-color:transparent; }
+.pn-panel .ph-ink { background:var(--pn-button); color:var(--pn-on-button); border-color:transparent; }
+.pn-panel .ph-glass { background:color-mix(in srgb,var(--pn-saffron) 45%,var(--pn-on-solid)); color:var(--pn-on-color); border-color:transparent; }
+.pn-panel .ph-button:hover { background:var(--pn-lime-light); color:var(--pn-ink); }
+.pn-panel .ph-button:active { transform:scale(.97); }
+.pn-panel .ph-grid-two { display:grid; grid-template-columns:minmax(0,1.62fr) minmax(0,1fr); gap:18px; }
+.pn-panel .ph-grid-three { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.15fr); gap:18px; }
+.pn-panel :is(.ph-summary,.ph-next,.ph-card) { min-width:0; overflow:hidden; }
+.pn-panel .ph-summary { padding:22px 24px; border-radius:24px; color:var(--pn-on-solid); background:linear-gradient(var(--pn-photo-solid),var(--pn-photo-solid)),url('/panel-nutri/comida-suave.jpg') center/cover; display:flex; flex-direction:column; }
+.pn-panel .ph-eyebrow { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--pn-lime); }
+.pn-panel .ph-summary .ph-summary-text { font-size:21px; font-weight:500; line-height:1.35; letter-spacing:-.01em; margin:12px 0 18px; max-width:38ch; text-wrap:pretty; }
+.pn-panel .ph-summary-text em { color:var(--pn-lime); font-style:normal; }
+.pn-panel .ph-counts { display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; }
+.pn-panel .ph-counts button { display:flex; gap:8px; align-items:center; padding:8px 10px; border-radius:14px; background:color-mix(in srgb,var(--pn-on-solid) 8%,transparent); border:1px solid color-mix(in srgb,var(--pn-on-solid) 10%,transparent); color:var(--pn-on-solid); font:11px Poppins,sans-serif; cursor:pointer; }
+.pn-panel .ph-counts b { font-size:17px; font-weight:600; }
+.pn-panel .ph-counts .ph-hot { background:var(--pn-orange); color:var(--pn-on-color); border-color:transparent; }
+.pn-panel .ph-next { padding:18px 20px; border-radius:24px; color:var(--pn-on-color); background:linear-gradient(var(--pn-photo-saffron),var(--pn-photo-saffron)),url('/panel-nutri/comida-suave.jpg') center/cover; display:flex; flex-direction:column; gap:10px; }
+.pn-panel .ph-chips { display:flex; flex-wrap:wrap; gap:6px; }
+.pn-panel .ph-chips>span { padding:4px 9px; border-radius:999px; background:color-mix(in srgb,var(--pn-saffron) 45%,var(--pn-on-solid)); color:var(--pn-on-color); font-size:10px; font-weight:500; }
+.pn-panel .ph-person { display:flex; align-items:center; gap:12px; min-width:0; }
+.pn-panel .ph-person>div { min-width:0; }
+.pn-panel .ph-person h2 { font-size:17px; overflow-wrap:anywhere; }
+.pn-panel .ph-person p { font-size:12px; }
+.pn-panel .ph-avatar { display:grid; place-items:center; flex:none; width:34px; height:34px; border-radius:50%; background:var(--pn-saffron-light); color:var(--pn-ink); font-size:11px; font-weight:600; }
+.pn-panel .ph-person .ph-avatar { width:46px; height:46px; background:color-mix(in srgb,var(--pn-saffron) 45%,var(--pn-on-solid)); color:var(--pn-on-color); }
+.pn-panel .ph-health { display:flex; flex-wrap:wrap; gap:4px 10px; font-size:10px; overflow-wrap:anywhere; }
+.pn-panel .ph-health b { font-weight:500; }
+.pn-panel .ph-facts { display:grid; grid-template-columns:1fr .9fr 1.25fr; gap:8px; }
+.pn-panel .ph-facts>div { min-width:0; background:color-mix(in srgb,var(--pn-saffron) 45%,var(--pn-on-solid)); padding:9px 10px; border-radius:14px; }
+.pn-panel .ph-facts small { display:block; font-size:10px; }
+.pn-panel .ph-facts b { display:block; font-size:14px; font-weight:600; }
+.pn-panel .ph-facts span { font-size:11px; display:block; overflow-wrap:anywhere; }
+.pn-panel .ph-next-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; }
+.pn-panel .ph-next .ph-retry { color:var(--pn-on-color); }
+.pn-panel .ph-quick { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.pn-panel .ph-quick>:is(a,button) { min-width:0; min-height:54px; display:flex; align-items:center; gap:10px; padding:8px 14px; border:1px solid var(--pn-line); border-radius:16px; background:linear-gradient(var(--pn-photo-overlay),var(--pn-photo-overlay)),url('/panel-nutri/comida-suave.jpg') center/cover; color:var(--pn-ink); font:500 12px Poppins,sans-serif; text-align:left; text-decoration:none; cursor:pointer; }
+.pn-panel .ph-quick svg { flex:none; }
+.pn-panel .ph-quick>:hover { border-color:var(--pn-lime-dark); }
+.pn-panel .ph-card { padding:18px 20px; border-radius:22px; background:var(--pn-white); box-shadow:var(--pn-shadow); display:flex; flex-direction:column; }
+.pn-panel .ph-card>header { display:flex; align-items:center; gap:8px; min-height:20px; margin-bottom:12px; }
+.pn-panel .ph-card>header>a { display:inline-flex; align-items:center; gap:4px; margin-left:auto; color:var(--pn-ink2); font-size:11px; text-decoration:none; }
+.pn-panel .ph-retry { padding:0; border:0; background:none; color:var(--pn-ok); font:500 11px Poppins,sans-serif; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+.pn-panel .ph-retry:disabled { opacity:.6; cursor:wait; }
+.pn-panel .ph-pending>header .ph-retry { margin-left:auto; }
+.pn-panel .ph-tabs { display:flex; gap:3px; padding:3px; border-radius:12px; background:var(--pn-cream); flex-shrink:0; overflow-x:auto; margin-bottom:5px; }
+.pn-panel .ph-tabs :is(button,select) { white-space:nowrap; padding:5px 7px; border:0; border-radius:9px; background:transparent; color:var(--pn-ink2); font:11px Poppins,sans-serif; cursor:pointer; }
+.pn-panel .ph-tabs button[aria-pressed=true] { background:var(--pn-white); color:var(--pn-ink); font-weight:500; box-shadow:var(--pn-shadow); }
+.pn-panel .ph-tabs b { font-weight:600; }
+.pn-panel .ph-scroll { min-height:0; overflow:auto; overscroll-behavior:contain; }
+.pn-panel .ph-task { display:flex; align-items:center; gap:10px; border-top:1px solid var(--pn-line); padding:9px 0; }
+.pn-panel .ph-task>div { flex:1; min-width:0; }
+.pn-panel :is(.ph-task,.ph-notice) b { display:block; font-size:12px; font-weight:500; overflow-wrap:anywhere; }
+.pn-panel :is(.ph-task,.ph-notice) p { font-size:10.5px; color:var(--pn-muted); overflow-wrap:anywhere; }
+.pn-panel .ph-task>.ph-button { min-width:76px; font-size:11px; }
+.pn-panel .ph-icon { width:36px; height:36px; border-radius:12px; display:grid; place-items:center; flex:none; }
+.pn-panel .ph-lime { background:var(--pn-lime-light); color:var(--pn-ink); }
+.pn-panel .ph-orange { background:var(--pn-orange-light); color:var(--pn-ink); }
+.pn-panel .ph-gold { background:var(--pn-saffron-light); color:var(--pn-ink); }
+.pn-panel .ph-empty { padding:12px 0; font-size:12px; color:var(--pn-muted); }
+.pn-panel .ph-empty .ph-retry { display:block; margin-top:8px; }
+.pn-panel .ph-pagination { display:flex; justify-content:space-between; gap:10px; padding:10px 0; }
+.pn-panel .ph-timeline li { display:grid; grid-template-columns:42px 12px minmax(0,1fr); gap:10px; padding-bottom:12px; }
+.pn-panel .ph-timeline time { color:var(--pn-muted); font-size:12px; padding-top:3px; }
+.pn-panel .ph-rail { position:relative; width:2px; background:var(--pn-line); margin:5px auto -7px; }
+.pn-panel .ph-rail::before { content:''; display:block; width:10px; height:10px; margin-left:-4px; border-radius:50%; background:var(--pn-line); }
+.pn-panel .ph-timeline li:last-child .ph-rail { background:none; }
+.pn-panel .ph-timeline a { text-decoration:none; color:var(--pn-ink); min-width:0; }
+.pn-panel .ph-timeline b { display:block; font-size:13px; font-weight:500; overflow-wrap:anywhere; }
+.pn-panel .ph-timeline a>span { display:block; font-size:11px; color:var(--pn-muted); }
+.pn-panel .ph-now a { background:var(--pn-lime-light); border-radius:14px; padding:8px 10px; margin:-5px 0 0 -7px; }
+.pn-panel .ph-now .ph-rail::before { background:var(--pn-solid); box-shadow:0 0 0 3px var(--pn-lime); }
+.pn-panel .ph-done .ph-rail::before { background:var(--pn-lime-dark); }
+.pn-panel .ph-done a { color:var(--pn-muted); }
+.pn-panel .ph-notice { display:flex; align-items:center; gap:8px; padding:8px 0; border-top:1px solid var(--pn-line); }
+.pn-panel .ph-notice>div { flex:1; min-width:0; }
+.pn-panel .ph-notice .ph-button { font-size:10px; padding:0 7px; }
+.pn-panel .ph-pip { width:8px; height:8px; border-radius:50%; flex:none; }
+.pn-panel .ph-pip.ph-orange { background:var(--pn-orange); }
+.pn-panel .ph-pip.ph-lime { background:var(--pn-lime-dark); }
+.pn-panel .ph-month { background:linear-gradient(var(--pn-photo-overlay),var(--pn-photo-overlay)),url('/panel-nutri/comida-suave.jpg') center/cover; }
+.pn-panel .ph-month dl { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.pn-panel .ph-month dl>div { min-width:0; border-radius:16px; padding:8px 10px; background:var(--pn-cream); }
+.pn-panel .ph-month dt,.pn-panel .ph-month small { font-size:10px; color:var(--pn-muted); }
+.pn-panel .ph-month dd { font-size:20px; font-weight:600; letter-spacing:-.01em; overflow-wrap:anywhere; }
+.pn-panel :is(.ph-demo,.ph-feedback,.ph-source-warning) { font-size:10px; color:var(--pn-muted); }
+.pn-panel .ph-demo { display:none; }
+@media(min-width:800px) {
+  .nv-app.nv-pro.pn-panel.nv-home .nv-main { overflow:hidden; gap:0; }
+  .pn-panel.nv-home .nv-clinic-shortcuts { display:none; }
+  .pn-panel.nv-home .nv-main>.ph-home { flex:1; min-height:0; display:grid; grid-template-rows:auto auto minmax(140px,1.15fr) minmax(210px,1fr); gap:16px; }
+  .pn-panel .ph-middle,.pn-panel .ph-bottom { min-height:0; }
+  .pn-panel .ph-card .ph-scroll { flex:1; }
+  .pn-panel .ph-home:has(.ph-feedback) { grid-template-rows:auto auto auto minmax(140px,1.15fr) minmax(210px,1fr); }
+  .pn-panel .ph-congratulate { display:none; }
+}
+@media(min-width:800px) and (max-height:820px) {
+  .pn-panel.nv-home .nv-main>.ph-home { gap:10px; grid-template-rows:auto auto minmax(100px,1fr) minmax(185px,1fr); }
+  .pn-panel .ph-summary { padding:16px 18px; }
+  .pn-panel .ph-summary .ph-summary-text { font-size:18px; margin:8px 0 10px; }
+  .pn-panel .ph-next { padding:12px 16px; gap:6px; }
+  .pn-panel .ph-card { padding:12px 16px; }
+  .pn-panel .ph-card>header { margin-bottom:8px; }
+  .pn-panel .ph-counts button { padding:5px 8px; }
+  .pn-panel .ph-month dl>div { padding:6px 8px; border-radius:12px; }
+  .pn-panel .ph-month dd { font-size:17px; }
+  .pn-panel .ph-quick>:is(a,button) { min-height:44px; }
+}
+@media(max-width:1100px) and (min-width:800px) {
+  .pn-panel .ph-search { width:180px; }
+  .pn-panel.nv-home .ph-heading { flex:1 1 140px; }
+  .pn-panel .ph-search kbd { display:none; }
+  .pn-panel .ph-heading h1 { font-size:23px; }
+  .pn-panel .ph-grid-two { grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); }
+  .pn-panel .ph-grid-three { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .pn-panel .ph-card { padding:12px; }
+}
+@media(max-width:799px) {
+  .nv-app.nv-pro.pn-panel.nv-home .nv-topbar { display:grid; grid-template-columns:40px minmax(0,1fr) 40px; height:auto; min-height:72px; gap:10px; position:relative; }
+  .nv-app.nv-pro.pn-panel.nv-home .nv-topbar>.nv-brand { grid-column:1; grid-row:1; width:40px; height:40px; padding:0; }
+  .nv-app.nv-pro.pn-panel.nv-home .nv-topbar>.nv-brand .brand-mark { width:40px; height:40px; }
+  .pn-panel.nv-home .ph-heading { grid-column:2; grid-row:1; order:0; }
+  .pn-panel .ph-heading h1 { font-size:19px; }
+  .pn-panel .ph-heading>span { font-size:10.5px; }
+  .nv-app.nv-pro.pn-panel.nv-home .nv-topbar>.nv-menu-toggle { grid-column:3; grid-row:1; width:40px; }
+  .pn-panel.nv-home .ph-search,.pn-panel.nv-home .nv-topbar>.ph-primary { display:none; }
+  .pn-panel .ph-home { gap:14px; }
+  .pn-panel :is(.ph-grid-two,.ph-grid-three) { grid-template-columns:1fr; gap:14px; }
+  .pn-panel .ph-top,.pn-panel .ph-middle { display:contents; }
+  .pn-panel .ph-summary { padding:16px 18px; border-radius:22px; }
+  .pn-panel .ph-summary .ph-summary-text { font-size:16px; margin:8px 0 12px; }
+  .pn-panel .ph-eyebrow { font-size:10.5px; }
+  .pn-panel .ph-counts { flex-wrap:nowrap; overflow:auto; }
+  .pn-panel .ph-counts button { flex:none; }
+  .pn-panel .ph-next { padding:16px; border-radius:22px; }
+  .pn-panel .ph-next .ph-health,.pn-panel .ph-next .ph-facts { display:none; }
+  .pn-panel .ph-next .ph-person h2 { font-size:15px; }
+  .pn-panel .ph-quick { order:4; grid-template-columns:1fr 1fr; gap:10px; }
+  .pn-panel .ph-bottom { order:5; }
+  .pn-panel .ph-quick>:is(a,button) { padding:10px; font-size:11px; }
+  .pn-panel .ph-card { padding:18px 16px; }
+  .pn-panel .ph-scroll { max-height:340px; }
+  .pn-panel .ph-button { min-height:36px; }
+  .pn-panel .ph-tabs button { padding:8px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .pn-panel .ph-button { transition:background-color 200ms ease; }
+  .pn-panel .ph-button:active { transform:none; }
+}

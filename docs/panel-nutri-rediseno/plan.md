@@ -252,6 +252,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
 
+### 2026-10-19 · Codex · Fase 2, paso 1 (Inicio conectado)
+- Hecho: resumen calculado, contadores por tipo, próxima consulta con antecedentes y peso, accesos reales, bandeja paginada, reservas por confirmar, agenda del día, atención, noticias y cuatro números del mes. Pruebas iniciales RED (`6930fe2`) y 11 casos GREEN; tipos aprobados. Revisión de código solicitada.
+- Cómo: PanelHome y use-home-data reutilizan las API de bandeja, cobros, agenda, ingreso y seguimiento, sin cambiar permisos ni crear tablas. panel-home deriva fechas argentinas, rachas por días únicos y saldos de cargos del mes. El resumen declara que es calculado; no finge una respuesta de IA. Diseño del boceto en 1440/390; se corrigieron saludo móvil e importes recortados observados en /browse.
+- Rama y commit: `codex/panel-nutri-fase-2`; este paso se respalda antes de la verificación final.
+- Falta: comparación y evidencia final en ambos temas, pruebas de navegación y errores, suite completa, fire test, revisiones independientes e informe Regression Guard para el PR.
+- Próximo paso exacto: ejecutar scripts/panel-nutri-inicio-qa.mjs con la demostración local; comprobar todos los botones y capturas antes de abrir el PR de fase 2.
+
 ### 2026-10-19 · Codex · Fase 2, paso 0 (reserva)
 - Hecho: fase 2 reservada antes de cambiar código. Facundo pidió «Continúa con el resto» después de integrar #150; se continúa en orden, una rama y PR por fase.
 - Cómo: base main `1f48adf` publicada y comprobada (web, API y worker); leídos plan, Bitácora, coordinación y Regression Guard. Se conserva el boceto aprobado y las funciones existentes.
