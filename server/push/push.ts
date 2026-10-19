@@ -8,7 +8,7 @@ import { writeOpsLog } from '../ops/log.js';
  * Mozilla, así que nunca llevan datos de salud: solo un texto genérico y la pantalla que abren.
  * Sin las tres variables VAPID_* en el servidor, todo queda apagado y no se manda nada.
  */
-export type PushKind = 'message' | 'plan' | 'resource' | 'appointment' | 'reminder';
+export type PushKind = 'message' | 'plan' | 'resource' | 'appointment' | 'reminder' | 'subscription';
 export type PushPayload = { title: string; body: string; url: string; tag: string };
 
 export const PUSH_TEXTS: Record<PushKind, PushPayload> = {
@@ -17,6 +17,7 @@ export const PUSH_TEXTS: Record<PushKind, PushPayload> = {
   resource: { title: 'Tu nutricionista te indicó un recurso', body: 'Está en Recursos, en «Indicados».', url: '/app/recursos', tag: 'plan-v-resource' },
   appointment: { title: 'Tu consulta cambió', body: 'Mirá el día y la hora en Plan V.', url: '/app/agenda', tag: 'plan-v-appointment' },
   reminder: { title: 'Mañana tenés consulta', body: 'Mirá el horario en Plan V.', url: '/app/agenda', tag: 'plan-v-reminder' },
+  subscription: { title: 'Novedades de tu plan', body: 'Abrí Plan V para ver el estado de tu pago.', url: '/app/pagos', tag: 'plan-v-subscription' },
 };
 
 export type PushConfig = { publicKey: string; privateKey: string; subject: string };

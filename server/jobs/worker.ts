@@ -10,6 +10,7 @@ import { writeOpsLog } from '../ops/log.js';
 import {runSchedulingSyncJobs} from '../scheduling/worker.js';
 import {runPendingDocumentOrganizer} from '../document-organizer/worker.js';
 import { tickPushReminders } from '../push/reminders.js';
+import { tickPatientSubscriptions } from '../subscriptions/worker.js';
 
 let timer: ReturnType<typeof setInterval> | null = null;
 let draining = false;
@@ -19,6 +20,7 @@ let organizerDraining = false;
 let communicationDraining = false;
 let cleanupRunning = false;
 let lastCleanup = 0;
+let subscriptionDraining = false;
 
 export function startJobWorker(owner = 'plan-v-worker', keepAlive = false) {
   if (process.env.VITEST === 'true') return;
@@ -42,6 +44,10 @@ export function startJobWorker(owner = 'plan-v-worker', keepAlive = false) {
       void cleanupExpiredConsultationAudio().catch(() => writeOpsLog('warn', 'consultation_cleanup_failed', { status: 'retry_pending' })).finally(() => { cleanupRunning = false; });
     }
     void tickPushReminders().catch(() => undefined);
+    if (!subscriptionDraining) {
+      subscriptionDraining = true;
+      void tickPatientSubscriptions().catch(() => writeOpsLog('warn', 'subscription_worker_failed', { status: 'review_pending' })).finally(() => { subscriptionDraining = false; });
+    }
   }, 1_000);
   if (!keepAlive) timer.unref?.();
 }

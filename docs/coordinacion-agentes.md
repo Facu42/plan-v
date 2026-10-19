@@ -29,6 +29,7 @@ visto bueno de Facundo.
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
 | Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (desarrollo) | `codex/panel-nutri-fase-3`, [plan](panel-nutri-rediseno/plan.md) | Fase 1 integrada por #150; fase 2 verificada en [PR #151](https://github.com/Facu42/plan-v/pull/151), CI en curso. Fase 3 reservada y en curso por Codex. Una rama y PR por fase; no modifica #147 de Cursor |
+| Suscripciones de pacientes (débito con Mercado Pago de la nutri) | Cursor | `cursor/suscripciones-pacientes-backend`, [spec](suscripciones-pacientes/spec.md) | Parte 1: backend, migración sin aplicar, bandera apagada. Pantallas en otras ramas. No toca el panel de Codex |
 
 ## 2. Reglas para no pisarse
 
@@ -60,6 +61,7 @@ visto bueno de Facundo.
 | `20261015100000_habit_symptoms` | Claude | PR #112, en main desde el 14/10. Aplicada en la base el 14/10 con la frase de Facundo (el historial la anota como `20261014215543`) |
 | `20261015210000_activity_kcal` | Claude | PR #122, en main `9c56854`; ya observada aplicada con alias `20261015173356`. Se conserva como base exacta, no pendiente |
 | `20261015*` en adelante | Claude | Se anotan acá al crearlas |
+| `20261020120000_patient_subscriptions` | Cursor | Escrita el 19/10. Sin aplicar. Hace falta la frase de Facundo |
 
 ## 4. Decisiones vigentes de Facundo (fechadas)
 
@@ -70,6 +72,7 @@ visto bueno de Facundo.
 | 14/10 | La app de la paciente es igual a Nutrigo, colores incluidos. Regla fija |
 | 14/10 | Claude puede seguir desarrollando por carriles, sin pisar lo de Codex |
 | 14/10 | Documentos de producto ordenados en `docs/producto/` |
+| 19/10 | Suscripciones de pacientes: sin comisión, sin prueba gratis, solo mensual, la paciente puede darse de baja en la app, cambio de precio con 10 días de aviso, si hay débito activo se apaga la cuota manual, solo la nutri activa (equipo y recepción solo ven), se ofrece en la página pública y por link, todos los medios de pago. Cursor hace backend y pantallas. Detalle en `docs/suscripciones-pacientes/spec.md` |
 
 Pendientes de decidir (con recomendación en `docs/producto/07-decisiones-recomendadas.md`): precio y
 prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se use, Android, métricas

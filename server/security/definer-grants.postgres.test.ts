@@ -80,6 +80,8 @@ const ALLOWED = [
   'finish_recipe_cover',
   'get_ai_job',
   'get_billing_board',
+  // La paciente ve solo su débito, sin correo completo ni ids de Mercado Pago.
+  'get_my_subscriptions',
   'get_notification_preferences',
   'get_organization_subscription',
   'get_patient_appointment',

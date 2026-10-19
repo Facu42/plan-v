@@ -11,7 +11,7 @@ const INTERNAL = [
   // Eventos verificados/consentimientos de Meta, privados y sólo para el servicio.
   'nutritionist_subscriptions', 'ops_contact_events', 'ops_delivery_events', 'ops_email_unsubscribe_tokens', 'outbox_events',
   // Idempotency ledger: only import RPCs; no client grant or read policy.
-  'patient_import_applied', 'patient_invite_events',
+  'patient_import_applied', 'patient_invite_events', 'patient_subscription_events',
   'payment_webhook_events', 'platform_admins', 'platform_settings',
   'privacy_access_events', 'privacy_export_packages', 'privacy_requests',
   'processing_jobs', 'push_subscriptions', 'recipe_cover_requests', 'recipe_day_assignments', 'recipe_version_cards',
