@@ -1,7 +1,39 @@
 # Spec: suscripciones de pacientes con Mercado Pago (Plan V)
 
-Versión 1 · 19/10/2026. Las preguntas P1–P10 quedaron cerradas el 19/10 (sección 7.3). El backend de esta rama sigue esas decisiones. La migración se escribe y **no se aplica**; no se toca Railway, Supabase de producción ni Mercado Pago.
-Base leída: `plan-v` en `origin/main` 6697d28 y `plan-v-fase5` en `cursor/panel-nutri-fase-5` (PR #153, 0a485ad). También se miró `codex/panel-nutri-fase-4` (7444eae) para la ficha.
+Versión 1 · 19/10/2026. Las preguntas P1–P10 quedaron cerradas el 19/10 (sección 7.3). La migración se escribe y **no se aplica**; no se toca Railway, Supabase de producción ni Mercado Pago.
+Base de la parte 1: `origin/main` en `c09466b` (fases 4 y 5 ya juntas). El backend vive en `cursor/suscripciones-pacientes-backend` ([PR #155](https://github.com/Facu42/plan-v/pull/155)). Las pantallas de Cobranzas y de la página pública viven en `cursor/suscripciones-cobranzas-pagina` ([PR #156](https://github.com/Facu42/plan-v/pull/156), borrador, apilado sobre el backend y no sobre main).
+
+## Estado al cerrar la parte 2 (19/10, noche)
+
+Otro agente puede seguir desde acá sin el chat.
+
+### Hecho
+- **Parte 1, backend.** Rama `cursor/suscripciones-pacientes-backend`, [PR #155](https://github.com/Facu42/plan-v/pull/155) contra `main`. Trae el merge de main `c09466b` (fase 4 y fase 5). Migración `20261020120000_patient_subscriptions.sql` escrita y sin aplicar. Bandera `PATIENT_SUBSCRIPTIONS_ENABLED` apagada. Webhook general, alta con el token de la nutri, un cobro por aviso, anulación si hay devolución, conciliación y enlaces que vencen a los 7 días.
+- **Parte 2, pantallas.** Rama `cursor/suscripciones-cobranzas-pagina`, [PR #156](https://github.com/Facu42/plan-v/pull/156) contra la rama del backend. Cobranzas (4.1), página pública del panel (4.2) y la página donde la paciente elige el plan (4.3), con la vuelta `/consultorio/<slug>/suscripcion/<id>`. Si la bandera está apagada, el servidor responde 404 y no se ve nada nuevo. Pruebas de esta rama: 3.228 aprobadas y 2 omitidas, en 507 archivos. `npm run check` en verde. No se aplicó la migración.
+
+### Decisiones que las pantallas respetan
+- Sin comisión, sin prueba gratis y solo mensual. El formulario dice «Se cobra una vez por mes». No hay campo de prueba ni de otra frecuencia.
+- Filtros de Cobranzas: Todas, Al día, Con problemas, Sin ficha. «Al día» es un débito autorizado cuyo pago no está rechazado, no está reintentando y no pide revisión.
+- El menú de cada fila es Copiar enlace, Pausar, Reanudar, Conciliar este débito y Cancelar débito. Al cancelar se avisa: «Se dejan de hacer cobros. Para volver hay que generar otro enlace.»
+- No están «Ver ficha» ni «Enviar por el chat». Eso es la parte 3. No hay WhatsApp.
+- La nutri escribe el correo de Mercado Pago. No se lee de la ficha. El texto dice «Correo de la cuenta de Mercado Pago».
+- Sin Mercado Pago conectado se puede guardar el plan, pero no se activa el débito ni se publica. El aviso lleva a Configuración (`/crm/desarrollo?modulo=configuracion`). No existe `/panel/conexiones`.
+- La tarjeta nueva va en la columna derecha, arriba de «Cuotas vencidas». En el celular el orden es ingresos, débito y cuotas.
+- «Programas activos» suma el nombre del plan si ese nombre todavía no está en una cuota. El cálculo viejo de las cuotas no cambia.
+- Un cobro que viene del débito se lee «Débito automático · …» en Movimientos.
+- Cada plan tiene su interruptor para la página pública. Sin Mercado Pago el interruptor queda apagado y bloqueado.
+- La vista `/?vista=suscripciones` solo existe en el servidor de desarrollo, para las capturas. No es un modo demo de producción.
+- El boceto (`design/panel-nutri/bocetos.html`, `#cobranzas` y `#publica`) no dibuja la tarjeta de débito ni el formulario de la paciente, y en «Recordar» todavía muestra WhatsApp. La app no. Las capturas de la app están al lado del boceto en `design/suscripciones/`.
+
+### Qué falta
+- **Parte 3.** Ficha (4.4) y chat (4.5). Crear `cursor/suscripciones-ficha-chat` desde `cursor/suscripciones-cobranzas-pagina`. PR borrador contra esa rama, no contra main. No mergear #155 ni #156.
+- **App de la paciente (4.6).** Después, en `cursor/suscripciones-app-paciente`. Incluye la baja que Facu ya aprobó (P4).
+- **Sandbox de Mercado Pago (6.3).** Sigue pendiente. Un script aparte, sin producción. No afirmar que ya se cobró de verdad.
+- **Facu.** Aplicar la migración con su frase, prender la bandera y tildar «Planes y suscripciones» y «Vinculación de aplicaciones». Sigue anotado en el PR #155.
+- Nada de merge, Railway, Vercel, Supabase de producción ni Mercado Pago hasta esa frase.
+
+### Próximo paso concreto
+Abrir `cursor/suscripciones-ficha-chat` desde `cursor/suscripciones-cobranzas-pagina` e implementar la ficha y el chat (4.4 y 4.5). Al cerrar, actualizar este archivo, la bitácora de `docs/panel-nutri-rediseno/plan.md` y `docs/coordinacion-agentes.md`, y dejar cada captura junto a su pantalla del boceto.
 
 ---
 
@@ -422,6 +454,8 @@ Content-Type: application/json
 
 Se apoya en lo que ya hizo la fase 5 (`PanelCobranzas.tsx`, `PanelPublicPage.tsx`, `PanelConnections.tsx`) y en la ficha de la fase 4 (`PanelPatientBilling.tsx`, tarjeta «Programa y acceso»). Mismo estilo y componentes; no se rediseña.
 
+La parte 2 ya cubre 4.1, 4.2 y 4.3, con los cambios anotados en «Estado al cerrar la parte 2». 4.4, 4.5 y 4.6 siguen sin hacer. Donde este texto todavía dice «Enviar por el chat», «Ver ficha» o «Copiar link», la parte 2 no lo hizo: el chat y la ficha esperan la parte 3, y el texto visible dice «enlace» y «correo».
+
 ### 4.1 Cobranzas (`/panel/cobranzas`)
 - **KPIs**: no se agrega ninguno. Los cobros del débito ya entran en «Cobrado» porque van al libro. «Programas activos» cuenta también los planes de seguimiento.
 - **Tarjeta nueva «Débito automático»** (entre «Ingresos por mes» y «Cuotas vencidas»):
@@ -476,7 +510,7 @@ Una rama y un PR por tema. Las migraciones van con fecha ≥ 20261019000000 y **
 | 0 | Facu | — | Contesta las preguntas de la sección 7 | — |
 | 1 | Codex (o Cursor si Facu autoriza) | `codex/suscripciones-spike-sandbox` | Script de prueba con cuentas de prueba: los 5 puntos de 6.3. Sin tocar producción. | 0 |
 | 2 | Cursor | `cursor/suscripciones-pacientes-backend` | Migración (sin aplicar), endpoints, webhook general, worker, conciliación, libro, push `subscription`, pruebas. Bandera apagada. | Decisiones de 7.3 |
-| 3 | Cursor | `cursor/suscripciones-cobranzas-pagina` | Cobranzas (4.1), Página pública (4.2) y página `/consultorio` (4.3), contra los contratos de 3.4 con datos simulados | #153 mergeado; contratos de 2 |
+| 3 | Cursor | `cursor/suscripciones-cobranzas-pagina` | Cobranzas (4.1), Página pública (4.2) y página `/consultorio` (4.3). Hecho en el [PR #156](https://github.com/Facu42/plan-v/pull/156), borrador contra la rama del backend. Bandera apagada. Capturas en `design/suscripciones/` | #153 ya está en main; contratos de 2 |
 | 4 | Cursor | `cursor/suscripciones-ficha-chat` | Ficha (4.4) y chat (4.5) | Fase 4 mergeada; 3 |
 | 5 | Lane de la app de pacientes (o Cursor) | `cursor/suscripciones-app-paciente` | Pagos (4.6) y aviso en Inicio | 2 |
 | 6 | Facu | — | Aplica la migración con su frase, configura Mercado Pago (6.1), prende la bandera en Railway | 2–5 en verde |
@@ -562,7 +596,7 @@ Estas decisiones reemplazan P1–P10. El backend de esta rama las cumple.
 - **P7. Equipo.** Solo la nutri activa, pausa, reanuda o cancela débitos. Recepción y equipo solo ven.
 - **P8. Página pública.** Se ofrece en la página pública y también por link. Cada plan tiene su interruptor para mostrarse o no.
 - **P9. Medios de pago.** Se aceptan todos los medios que ofrezca Mercado Pago. No se filtran.
-- **P10. Quién programa.** Cursor hace el backend (esta rama) y las pantallas (ramas siguientes). Esta entrega no incluye pantallas.
+- **P10. Quién programa.** Cursor hace el backend y las pantallas. El backend está en el PR #155. Cobranzas y la página pública están en el PR #156. Faltan la ficha, el chat y la app de la paciente.
 
 ---
 

@@ -1,3 +1,5 @@
+19/10 noche · Cursor · Pantallas del débito automático en `cursor/suscripciones-cobranzas-pagina`, [PR #156](https://github.com/Facu42/plan-v/pull/156), borrador contra el backend ([PR #155](https://github.com/Facu42/plan-v/pull/155)). Cobranzas, página pública y la página donde la paciente elige el plan. Bandera apagada. Capturas junto al boceto en `design/suscripciones/`. Siguiente: `cursor/suscripciones-ficha-chat` desde esa rama (ficha y chat). Sin merge, sin migración y sin producción.
+
 # Coordinación entre agentes (Claude, Codex, Cursor)
 
 19/10 · Cursor · Fase 5 (Agenda, Cobranzas y Página pública) en `cursor/panel-nutri-fase-5`, [PR #153](https://github.com/Facu42/plan-v/pull/153). Facundo autorizó juntarla. La fase 4 ya está en main por [PR #154](https://github.com/Facu42/plan-v/pull/154). Mercado Pago y Google Calendar muestran «Conectar». WhatsApp salió del panel: los avisos van por la app. Sin SQL remoto.
@@ -31,7 +33,7 @@ visto bueno de Facundo.
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
 | Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (fases 1 a 4); Cursor (fase 5) | Fases 1 a 5 en main (`c09466b`). [Plan](panel-nutri-rediseno/plan.md) | Fase 4 integrada por #154. Fase 5 integrada por #153. Una rama y un PR por fase; no se usa el PR #147 |
-| Suscripciones de pacientes (débito con Mercado Pago de la nutri) | Cursor | `cursor/suscripciones-pacientes-backend`, [spec](suscripciones-pacientes/spec.md) | Parte 1 lista: backend, migración sin aplicar, bandera apagada. Pantallas (Cobranzas y página pública) en otra rama. No toca la ficha ni el chat |
+| Suscripciones de pacientes (débito con Mercado Pago de la nutri) | Cursor | Backend `cursor/suscripciones-pacientes-backend` ([PR #155](https://github.com/Facu42/plan-v/pull/155)). Pantallas `cursor/suscripciones-cobranzas-pagina` ([PR #156](https://github.com/Facu42/plan-v/pull/156), borrador contra el backend). [Spec](suscripciones-pacientes/spec.md) | Parte 1 y parte 2 listas en borrador. Bandera apagada. Migración sin aplicar. Falta ficha y chat (`cursor/suscripciones-ficha-chat`, desde la rama de pantallas), la app de la paciente y el sandbox de Mercado Pago. No mergear |
 
 ## 2. Reglas para no pisarse
 
@@ -82,6 +84,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **19/10 · Cursor · Pantallas de suscripciones** · [PR #156](https://github.com/Facu42/plan-v/pull/156), rama `cursor/suscripciones-cobranzas-pagina`, borrador contra `cursor/suscripciones-pacientes-backend`. Cobranzas, página pública del panel y la página donde la paciente elige el plan. Bandera apagada. 3.228 pruebas y dos omitidas, tipos en verde. Capturas de la app junto al boceto en `design/suscripciones/`. No se tocó la ficha ni el chat. Sin merge, sin migración aplicada y sin producción. Siguiente: crear `cursor/suscripciones-ficha-chat` desde esta rama (secciones 4.4 y 4.5 de la spec). El sandbox de Mercado Pago sigue pendiente.
 - **19/10 · Cursor · Backend de suscripciones** · [PR #155](https://github.com/Facu42/plan-v/pull/155), rama `cursor/suscripciones-pacientes-backend`. Migración `20261020120000_patient_subscriptions` escrita y sin aplicar. Webhook general de Mercado Pago, alta con el token de la nutri, cobro único en Cobranzas, anulación por devolución, conciliación cada 6 horas y links que vencen a los 7 días. Bandera apagada. Sin pantallas del panel. 3.185 pruebas y dos omitidas, tipos y migraciones en verde. La prueba en sandbox de Mercado Pago sigue pendiente. Main (fases 4 y 5) quedó unido a esta rama.
 - **19/10 · Cursor · Fase 5 con la fase 4** · Se trajo main (fase 4, #154) a `cursor/panel-nutri-fase-5`. Conviven el armazón, la ficha y Agenda, Cobranzas y Página pública. [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar hasta que los controles estén verdes.
 - **19/10 · Cursor · Fase 5 comparada y sin WhatsApp** · Capturas en `design/panel-nutri/fase-5/`. [PR #153](https://github.com/Facu42/plan-v/pull/153). WhatsApp salió de Agenda, Cobranzas, Página pública y Conexiones. Los recordatorios abren el chat de la app. El servidor no se tocó.

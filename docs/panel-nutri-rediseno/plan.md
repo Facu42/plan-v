@@ -239,10 +239,17 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
 | 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main `6697d28` |
 | 4 | Codex | `codex/panel-nutri-fase-4` · [PR #154](https://github.com/Facu42/plan-v/pull/154) | Integrada a main |
-| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Lista para juntar; Facundo autorizó. Convive con la ficha de la fase 4 |
+| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Integrada a main `c09466b`, junto con la fase 4 |
 | 6 a 9 | Por coordinar | — | Pendientes, una rama y un PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-19 21:30 · Cursor · Suscripciones, pantallas de Cobranzas y página pública
+- Hecho: en Cobranzas se crea y se edita el plan mensual, se activa el débito, se copia el enlace, se ve quién está al día y está Conciliar. En la página pública del panel se ve el plan y la consulta suelta. La paciente elige el plan en la página del consultorio. La bandera sigue apagada: si el servidor dice que no existe, no se ve nada nuevo. No se tocó la ficha ni el chat.
+- Cómo: misma pieza visual de la fase 5. El boceto no dibuja el débito; cada captura de la app quedó al lado de `#cobranzas` o `#publica` en `design/suscripciones/`. El formulario de la paciente se comparó con la vista de celular de la página pública, que es lo más parecido. 3.228 pruebas y 2 omitidas, tipos en verde. La prueba de fuego aflojó «Al día» y las pruebas lo cazaron; quedó revertido.
+- Rama y PR: `cursor/suscripciones-cobranzas-pagina`, [PR #156](https://github.com/Facu42/plan-v/pull/156), borrador contra `cursor/suscripciones-pacientes-backend` ([PR #155](https://github.com/Facu42/plan-v/pull/155)). Sin merge, sin migración aplicada y sin producción.
+- Falta: ficha, chat, app de la paciente y la prueba en sandbox de Mercado Pago.
+- Próximo paso exacto: crear `cursor/suscripciones-ficha-chat` desde esta rama y hacer la ficha (4.4) y el chat (4.5). Al cerrar, actualizar `docs/suscripciones-pacientes/spec.md`, esta bitácora y `docs/coordinacion-agentes.md`.
 
 ### 2026-10-19 18:40 · Cursor · Fase 5, paso 4 (junto con la fase 4)
 - Hecho: se trajo main a esta rama. La ficha de la fase 4 y Agenda, Cobranzas y Página pública conviven. En Cobranzas, Ver vuelve a llamarse «Ver cobranzas de…» para abrir la cuota. Si todavía no hay movimientos, el recorrido abre Registrar cobro.
