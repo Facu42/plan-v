@@ -111,7 +111,7 @@ Los enlaces viejos con `?seccion=` tienen que seguir abriendo la sección correc
 
 Cada fase se puede hacer sola, en este orden. Marcá el estado al empezar y al terminar.
 
-### Fase 1. Base visual: colores, tema oscuro y armazón · Estado: sin empezar
+### Fase 1. Base visual: colores, tema oscuro y armazón · Estado: hecha, PR #150 para revisar
 
 - Variables de color del panel en un solo archivo (los valores claros y oscuros están en el `<style>`
   del boceto, bloque `html[data-mock="dark"] .m`). Ningún color escrito a mano en los componentes.
@@ -235,7 +235,8 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | Fase | Dueño | Rama / PR | Estado |
 |---|---|---|---|
 | Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
-| 1 a 9 | Codex (elegido por Facundo el 19/10; si se queda sin crédito sigue Cursor) | — | Sin empezar. Próximo paso: Fase 1 |
+| 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Hecha; lista para revisar, sin integrar |
+| 2 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Próximo paso: fase 2 (Inicio), sobre la base de #150 |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
@@ -249,6 +250,34 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 · Codex · Fase 1, paso 3 (cierre)
+- Hecho: fase 1 entregada en [PR #150](https://github.com/Facu42/plan-v/pull/150), con informe Regression Guard completo en el cuerpo. 3.132 pruebas aprobadas y dos omitidas (483 archivos), tipos, compilación y secretos aprobados. 22 comprobaciones y 72 medidas de navegador; revisión de código y visual independientes aprobadas para el armazón.
+- Cómo: tokens y estilos limitados al panel de la nutri, navegación sobre rutas y componentes existentes; preferencias por cuenta con recuperación local. Capturas y comparación en design/panel-nutri/fase-1/, [informe](fase-1-verificacion.md) y [página de revisión](../../design/panel-nutri/fase-1-verificacion.html).
+- Rama y commit: codex/panel-nutri-fase-1; implementación 419bbd7, verificación/correcciones afd4a83, PR #150. Este commit documental cierra la Bitácora. Sin merge, despliegue ni SQL de producción.
+- Falta: revisión/integración del PR; fases 2–9. En formularios largos se desplaza el área central. AA acotado a tokens/estados nuevos; sincronización con cuenta real no comprobada en producción. Pedidos de cambio y respuestas guardadas quedan para fases 7/6 porque no existen en main.
+- Próximo paso exacto: **fase 2: Inicio**. Crear su rama sobre esta base cuando esté integrada (o declarar dependencia de #150); leer ProfessionalWorkQueue.tsx, InicioIndicators.tsx y server/crm/repository.ts y conectar los bloques del Inicio del boceto con datos reales.
+
+### 2026-10-19 · Codex · Fase 1, paso 2 (verificación)
+- Hecho: base visual verificada en 18 pantallas, dos temas y dos tamaños; 22 comprobaciones y 72 medidas aprobadas. Ficha incluida; barra móvil, retorno del foco, altura de chat y contraste de selección/etiquetas corregidos. Suite completa: 3.132 aprobadas, dos omitidas; 483 archivos.
+- Cómo: /browse, pruebas nuevas de preferencias/navegación/AA, fire test y revisión independiente de code-reviewer y reality-checker. [Informe y Regression Guard](fase-1-verificacion.md); [comparación navegable](../../design/panel-nutri/fase-1-verificacion.html).
+- Rama y commit: codex/panel-nutri-fase-1; se sube este paso antes de abrir el PR propio.
+- Falta: abrir el PR y anotar su número. No se publica desde este hilo. Límite: formularios largos desplazan el área central; el contenido de las fases siguientes sigue como estaba. Sin prueba de sincronización con una cuenta real de producción.
+- Próximo paso exacto: abrir el PR de fase 1 con el informe del paso 10; después, fase 2 (Inicio), conservando esta base y leyendo ProfessionalWorkQueue.tsx e InicioIndicators.tsx.
+
+### 2026-10-19 · Codex · Fase 1, paso 1
+- Hecho: tokens claros/oscuros del boceto, preferencia por cuenta (metadato panel_theme) y navegador, tres temas, menú de 288/84 px, grupos y submenús conectados a filtros existentes. Fondo fotográfico preparado con desenfoque previo. Tipos y 20 pruebas focales aprobados.
+- Cómo: nuevos PanelNavigation, PanelThemePicker y use-panel-theme; estilos sólo en el panel profesional. Bocetos vigentes aplicados directamente (diseño ya aprobado). Habilidades: Regression Guard, Impeccable, Emil, Vercel, accesibilidad, React, pruebas y movimiento del repo.
+- Rama y commit: codex/panel-nutri-fase-1; este paso se sube antes de la comprobación visual final.
+- Falta: QA en navegador de ambos tamaños/temas, teclado y datos extremos; suite completa, fire test y revisiones independientes.
+- Próximo paso exacto: comprobar el panel local con /browse y corregir los problemas observados; las pantallas mantienen su contenido hasta sus fases propias. Pedidos de cambio y respuestas guardadas no existen en main; no se simulan y se incorporan en las fases 7 y 6.
+
+### 2026-10-19 · Codex · Fase 1, paso 0 (reserva)
+- Hecho: fase 1 reservada antes de tocar código, desde main 79056fe (PR #148 integrado).
+- Cómo: leídos plan, Bitácora, CLAUDE.md, coordinación y Regression Guard. El PR #147 de Cursor es anterior al boceto vigente, usa Plus Jakarta Sans y otra base; no se modifica ni se toma como implementación del diseño aprobado.
+- Rama y commit: codex/panel-nutri-fase-1; PR propio al terminar las verificaciones.
+- Falta: variables claras/oscuras, tema persistente, armazón y submenús reales, menú plegable, fondos fotográficos preparados, adaptación y pruebas.
+- Próximo paso exacto: abrir design/panel-nutri/bocetos.html y localizar el armazón profesional vigente antes de escribir pruebas de tema y navegación.
 
 ### 2026-10-19 · Claude · Bocetos y plan
 - Hecho: boceto navegable (`design/panel-nutri/bocetos.html`) y este plan, aprobados por Facundo.

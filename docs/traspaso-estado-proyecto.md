@@ -347,3 +347,8 @@ La rama `codex/nutridesk-release-operaciones` continúa desde PR123 y conserva l
 ## Rediseño del panel de la nutri (19/10/2026)
 
 Facundo aprobó los bocetos del panel nuevo (paleta de la app de la paciente, tema claro y oscuro, menú plegable, ficha con 11 pestañas). Boceto: `design/panel-nutri/bocetos.html`. Plan por fases para cualquier agente: `docs/panel-nutri-rediseno/plan.md`. El 19/10 02:25 se sumaron submenús, paciente que se despliega en la lista, Planes completo (elegir paciente, semana editable, compras, indicaciones, versiones, cuatro maneras de empezar) y fotos de comida difuminadas. Todavía no hay código: el desarrollo espera que Facundo diga quién lo toma.
+
+
+## Rediseño del panel de la nutri · 19/10/2026
+
+Fase 1 del [plan aprobado](panel-nutri-rediseno/plan.md) entregada por Codex en [PR #150](https://github.com/Facu42/plan-v/pull/150), rama `codex/panel-nutri-fase-1`: paleta/tema, menú y armazón. [Verificación y límites](panel-nutri-rediseno/fase-1-verificacion.md). Sigue fase 2 (Inicio); los cuerpos de pantallas se desarrollan por sus fases. Sin integración a main ni cambios de producción.

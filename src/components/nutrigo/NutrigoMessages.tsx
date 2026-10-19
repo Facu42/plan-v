@@ -27,7 +27,7 @@ import './messages.css';
 import './messages-fig.css';
 
 type Role = 'patient' | 'pro';
-type Props = { patient: ShowroomPatient; patients: ShowroomPatient[]; role: Role; remoteUnread?: ReadonlyMap<string, number> | null; onSelect: (id: string) => void; onNavigate: (page: ShowroomPage) => void };
+type Props = { initialUnreadOnly?: boolean; patient: ShowroomPatient; patients: ShowroomPatient[]; role: Role; remoteUnread?: ReadonlyMap<string, number> | null; onSelect: (id: string) => void; onNavigate: (page: ShowroomPage) => void };
 const ACTIVE_REFRESH_MS = 15000;
 
 const NUTRITIONIST = { name: 'Tu nutricionista', initials: 'N', role: 'Nutricionista' };
@@ -42,9 +42,9 @@ const contactOf = (patient: ShowroomPatient, role: Role) => role === 'pro'
   : NUTRITIONIST;
 const narrow = () => typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 760px)').matches;
 
-export function NutrigoMessages({ patient, patients, role, remoteUnread = null, onSelect, onNavigate }: Props) {
+export function NutrigoMessages({ initialUnreadOnly = false, patient, patients, role, remoteUnread = null, onSelect, onNavigate }: Props) {
   const [query, setQuery] = useState('');
-  const [unreadOnly, setUnreadOnly] = useState(false);
+  const [unreadOnly, setUnreadOnly] = useState(initialUnreadOnly);
   const [profileOpen, setProfileOpen] = useState(true);
   const searchRef = useRef<HTMLInputElement>(null);
   const composeRef = useRef<HTMLTextAreaElement>(null);

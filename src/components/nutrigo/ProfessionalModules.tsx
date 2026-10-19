@@ -6,6 +6,7 @@ import { PortfolioAssistant } from './PortfolioAssistant';
 import { HelpCenter } from './HelpCenter';
 import { CommunicationPanel } from './CommunicationPanel';
 import { ConfigurationReports } from './ConfigurationReports';
+import { TeamWorkspace } from './TeamWorkspace';
 import './operational-panels.css';
 
 export function PlannedModulesNav({onOpen,selectedId}:{onOpen:(href:string)=>void;selectedId?:string}){
@@ -26,6 +27,7 @@ function ModuleDetail({module:m,onOpen}:{module:ProfessionalModule;onOpen:(href:
 }
 
 export function ProfessionalModules({selectedId,onOpen}:{selectedId?:string;onOpen:(href:string)=>void}){
+  if(selectedId==='equipo') return <TeamWorkspace/>;
   if(selectedId==='asistente-ia') return <PortfolioAssistant onOpen={onOpen}/>;
   if(selectedId==='ayuda') return <HelpCenter onOpen={onOpen}/>;
   if(selectedId==='comunicaciones') return <CommunicationPanel/>;

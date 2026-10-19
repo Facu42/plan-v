@@ -222,7 +222,7 @@ export function CobranzasScreen({ board, onBoard, today, initialSelectedId = nul
   </div>;
 }
 
-export function ShowroomCobranzas({ initialSelectedId }: { initialSelectedId?: string } = {}) {
+export function ShowroomCobranzas({ initialSelectedId, initialFilter = 'todas', reminders = false }: { initialSelectedId?: string; initialFilter?: BoardFilter; reminders?: boolean } = {}) {
   const [board, setBoard] = useState<BillingBoard | null>(null);
   const [error, setError] = useState('');
   const load = useCallback(() => {
@@ -233,5 +233,5 @@ export function ShowroomCobranzas({ initialSelectedId }: { initialSelectedId?: s
 
   if (error) return <NvState kind="error" title="No pudimos cargar las cobranzas" description={error} action={<NvButton className="nv-soft" onClick={load}>Reintentar</NvButton>} />;
   if (!board) return <NvState kind="loading" title="Cargando cobranzas…" description="Estamos buscando las cuotas de tus pacientes." />;
-  return <CobranzasScreen board={board} onBoard={setBoard} initialSelectedId={initialSelectedId} />;
+  return <>{reminders && <p className="pn-reminder-help" role="status">Elegí una paciente con deuda para ver su recordatorio y compartirlo por WhatsApp.</p>}<CobranzasScreen board={board} onBoard={setBoard} initialSelectedId={initialSelectedId} initialFilter={initialFilter} /></>;
 }

@@ -1,0 +1,677 @@
+{
+  "date": "2026-10-19T03:41:31.495Z",
+  "checks": [
+    "Tema claro elegido",
+    "Menú abierto de 288 px",
+    "Menú plegado de 84 px",
+    "Estado accesible del menú plegado",
+    "Menú recuperado con teclado",
+    "Submenú Archivadas filtra el directorio",
+    "Submenú Acceso pendiente filtra invitaciones",
+    "Submenú Vencidas filtra cobranzas",
+    "Submenú Sin leer filtra conversaciones",
+    "Selectores de tema independientes para teclado",
+    "Tema del sistema coincide con la preferencia del equipo",
+    "Ficha: texto tinta sobre lima, amarillo y naranja",
+    "Cajón móvil aísla el contenido de fondo",
+    "Escape devuelve el foco al botón del menú",
+    "Barra móvil reparte sus cinco destinos sin apiñarlos",
+    "Ficha: texto tinta sobre lima, amarillo y naranja",
+    "Ficha: texto tinta sobre lima, amarillo y naranja",
+    "Cajón móvil aísla el contenido de fondo",
+    "Escape devuelve el foco al botón del menú",
+    "Barra móvil reparte sus cinco destinos sin apiñarlos",
+    "Ficha: texto tinta sobre lima, amarillo y naranja",
+    "Tema restaurado al recargar"
+  ],
+  "measurements": [
+    {
+      "url": "/crm/inicio",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/pacientes",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/ficha",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/agenda",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/cobranzas",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=asistente-ia",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/seguimiento",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/mensajes",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": 812
+    },
+    {
+      "url": "/crm/progreso-global",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/plan",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/alimentos",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/biblioteca?biblioteca=recetas",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=equivalencias",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/modelos",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/biblioteca?biblioteca=recursos",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=ayuda",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=equipo",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=configuracion",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/inicio",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 4045,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/pacientes",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 2501,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/ficha",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 3732,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/agenda",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 2266,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/cobranzas",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 1301,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=asistente-ia",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 1197,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/seguimiento",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 4714,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/mensajes",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 1506,
+      "dark": false,
+      "chatBottom": 961.5
+    },
+    {
+      "url": "/crm/progreso-global",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 2407,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/plan",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 7068,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/alimentos",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 5323,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/biblioteca?biblioteca=recetas",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 3464,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=equivalencias",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 916,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/modelos",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 916,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/biblioteca?biblioteca=recursos",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 6567,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=ayuda",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 1148,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=equipo",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 916,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=configuracion",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 2040,
+      "dark": false,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/inicio",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/pacientes",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/ficha",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/agenda",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/cobranzas",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=asistente-ia",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/seguimiento",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/mensajes",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": 812
+    },
+    {
+      "url": "/crm/progreso-global",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/plan",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/alimentos",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/biblioteca?biblioteca=recetas",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=equivalencias",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/modelos",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/biblioteca?biblioteca=recursos",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=ayuda",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=equipo",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=configuracion",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/inicio",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 4045,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/pacientes",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 2501,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/ficha",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 3732,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/agenda",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 2266,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/cobranzas",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 1301,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=asistente-ia",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 1197,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/seguimiento",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 4714,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/mensajes",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 1506,
+      "dark": true,
+      "chatBottom": 961.5
+    },
+    {
+      "url": "/crm/progreso-global",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 2407,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/plan",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 7068,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/alimentos",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 5323,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/biblioteca?biblioteca=recetas",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 3464,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=equivalencias",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 916,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/modelos",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 916,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/biblioteca?biblioteca=recursos",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 6567,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=ayuda",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 1148,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=equipo",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 916,
+      "dark": true,
+      "chatBottom": null
+    },
+    {
+      "url": "/crm/desarrollo?modulo=configuracion",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 2040,
+      "dark": true,
+      "chatBottom": null
+    }
+  ]
+}
