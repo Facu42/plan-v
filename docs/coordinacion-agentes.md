@@ -74,6 +74,8 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **19/10 · Codex · Inicio fase 3** · Reserva previa al código en `codex/panel-nutri-fase-3`, desde #151 `50c5d21`. Tabla y resumen de pacientes según boceto; se conserva alta/invitación/archivo y permisos. Dependencia declarada de #151 hasta integrarlo; un PR propio al terminar.
+
 - **19/10 · Codex · Cierre fase 2** · [PR #151](https://github.com/Facu42/plan-v/pull/151), `codex/panel-nutri-fase-2`: Inicio conectado con datos reales y metadata autorizada; 3.153 pruebas y dos omitidas, tipos/build/secretos y revisiones independientes aprobados. 13 comprobaciones de navegador y ocho tamaños/temas. [Informe y límites](panel-nutri-rediseno/fase-2-verificacion.md). Sigue fase 3, Pacientes con resumen desplegable. CI en curso, sin SQL remoto.
 
 - **19/10 · Codex · Inicio fase 2** · Reserva previa al código en `codex/panel-nutri-fase-2`, desde main `1f48adf`. #150 integrado con autorización de Facundo; web, API y worker aprobados. Continúa Inicio según el boceto, seguido por las fases restantes, cada una en su rama y PR. Sin cambios de base de producción.

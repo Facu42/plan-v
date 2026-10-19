@@ -146,7 +146,7 @@ lo que quedó pendiente), accesos rápidos (nueva paciente, plan con IA, copiar 
 pendientes con un botón por fila y pestañas por tipo, consultas de hoy, necesitan atención, buenas noticias
 (meta alcanzada, rachas de registro, aniversario) y cuatro números del mes.
 
-### Fase 3. Pacientes con resumen rápido · Estado: sin empezar
+### Fase 3. Pacientes con resumen rápido · Estado: en curso, Codex (`codex/panel-nutri-fase-3`)
 
 - Tabla del boceto con filtros (Todas, Activas, Necesitan atención, Acceso pendiente, Archivadas).
 - **Movimiento al pasar el mouse**: la fila se tiñe, la foto crece un poco con un borde lima, el nombre
@@ -237,7 +237,8 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
 | 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Integrada a main `1f48adf`; web, API y worker comprobados |
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Hecha y verificada; CI del PR en curso |
-| 3 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
+| 3 | Codex | `codex/panel-nutri-fase-3` | Reservada antes del código; depende de #151 hasta integrarlo |
+| 4 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
@@ -251,6 +252,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 · Codex · Fase 3, paso 0 (reserva)
+- Hecho: fase 3 reservada antes del código; Inicio está en #151 y sus controles remotos corren.
+- Cómo: se continúa el pedido de Facundo, una rama y PR por parte. Base explícita de #151, sin modificar su rama. Al integrarlo se concilia main antes de entregar esta fase.
+- Rama y commit: `codex/panel-nutri-fase-3`, desde fase 2 `50c5d21`.
+- Falta: tabla del boceto, filtros, resumen liviano autorizado, despliegue bajo la fila con accesos, movimiento y pruebas completas.
+- Próximo paso exacto: leer ShowroomPatients.tsx y sus helpers, localizar la carga autorizada del directorio y definir/pruebar el contrato del resumen antes de implementarlo.
 
 ### 2026-10-19 · Codex · Fase 2, paso 4 (PR)
 - Hecho: abierto [PR #151](https://github.com/Facu42/plan-v/pull/151) con el informe completo del paso 10 y comparación local disponible. CI en curso.
