@@ -248,7 +248,7 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 - Hecho: Facu rechazó el celular. En la tarjeta de débito el nombre se lee en una línea. En el celular, Movimientos es una lista de tarjetas. Las pestañas bajan de renglón. Suscribirme queda dentro del marco de la vista previa. El menú inferior queda fijo y no tapa el final. Nada se corta en 360, 390 ni 430, y los botones miden al menos 44 px.
 - Cómo: se aplicaron break-ui, frontend-patterns, frontend-a11y y verification-loop. Las vistas siguen recibiendo los mismos datos. Las capturas de celular se sacaron de nuevo dentro del panel, con el menú inferior, y quedaron al lado del boceto de escritorio en `design/suscripciones/`. No hay boceto de celular.
 - Rama y PR: `cursor/suscripciones-cobranzas-pagina`, [PR #156](https://github.com/Facu42/plan-v/pull/156). Lo que ya está en main (título repetido, accesos de paciente y turnos pegados) va en `cursor/arreglo-mobile-fase5`, no en esta rama.
-- Falta: la suite completa de esta rama se anota al cerrar el control. El pago único sigue en su rama. Ficha y chat, después.
+- Falta: el pago único sigue en su rama. Ficha y chat, después. Esta rama quedó con 3.230 pruebas y 2 omitidas, tipos en verde.
 - Próximo paso exacto: cerrar el control de esta rama y seguir el pago único en `cursor/pago-mensual-unico`, trayendo este arreglo.
 
 ### 2026-10-19 22:30 · Cursor · Pago único de la cuota, pedido registrado
