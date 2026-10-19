@@ -146,7 +146,7 @@ lo que quedó pendiente), accesos rápidos (nueva paciente, plan con IA, copiar 
 pendientes con un botón por fila y pestañas por tipo, consultas de hoy, necesitan atención, buenas noticias
 (meta alcanzada, rachas de registro, aniversario) y cuatro números del mes.
 
-### Fase 3. Pacientes con resumen rápido · Estado: sin empezar
+### Fase 3. Pacientes con resumen rápido · Estado: hecha y verificada, PR #152
 
 - Tabla del boceto con filtros (Todas, Activas, Necesitan atención, Acceso pendiente, Archivadas).
 - **Movimiento al pasar el mouse**: la fila se tiñe, la foto crece un poco con un borde lima, el nombre
@@ -236,8 +236,9 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 |---|---|---|---|
 | Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
 | 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Integrada a main `1f48adf`; web, API y worker comprobados |
-| 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Hecha y verificada; CI del PR en curso |
-| 3 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
+| 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
+| 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Hecha y verificada; controles remotos en curso |
+| 4 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
@@ -251,6 +252,55 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 · Codex · Fase 3, paso 6 (recorrido con cuentas)
+- Hecho: e2e y verify aprobados en el control remoto de a1b61bf. signed-auth llegó hasta edición/archivo y encontró sus selectores previos al menú; se actualizan para abrir Más opciones antes de editar, archivar y restaurar.
+- Cómo: sólo cambia el recorrido; mantiene todas las comprobaciones y agrega esperar archivo persistido antes de restaurar. Sintaxis del script aprobada. Sin cambio de app, permisos ni migraciones.
+- Rama y commit: codex/panel-nutri-fase-3, PR #152.
+- Falta: nuevo signed-auth y controles de la cabeza actual. No integrar hasta todos verdes. Fase4 respaldada en 37c239e.
+- Próximo paso exacto: volver a fase4 y completar Laboratorio/Notas/Plan mientras termina CI; después conciliar main al integrar #152.
+
+### 2026-10-19 · Codex · Fase 3, paso 5 (control remoto)
+- Hecho: CI detectó que el recorrido de ingreso seguía pulsando Abrir ficha/plan sin desplegar Más opciones. Actualizado el recorrido para usar el menú visible, sin cambiar la app ni retirar verificaciones.
+- Cómo: tipos, suite completa y /browse del código siguen aprobados. Se ejecuta nuevamente la historia de seis flujos con el selector actual; el entorno local instala el navegador fijado por Playwright. No se integra con CI rojo.
+- Rama y commit: codex/panel-nutri-fase-3, PR #152.
+- Falta: controles remotos nuevos y cierre del recorrido; fase 4 está respaldada en su propia rama 4a6e9aa.
+- Próximo paso exacto: esperar el nuevo control e2e de #152 y signed-auth; integrar sólo con todos verdes. Retomar codex/panel-nutri-fase-4.
+
+### 2026-10-19 08:43 · Codex · Fase 3, paso 4 (PR)
+- Hecho: abierto [PR #152](https://github.com/Facu42/plan-v/pull/152) con el paso 10 completo; controles remotos en curso. Código verificado dc0888a, informe 3e666c3.
+- Cómo: rama propia, main conciliado, evidencia y comparación locales. Cierre sin cambiar lógica ni SQL.
+- Rama y commit: codex/panel-nutri-fase-3, PR #152.
+- Falta: integración cuando todos los controles estén aprobados, más fases 4–9.
+- Próximo paso exacto: reservar fase 4 de Ficha en rama propia desde esta base, declarar dependencia de #152 y continuar mientras termina CI.
+
+### 2026-10-19 08:42 · Codex · Fase 3, paso 3 (cierre estable)
+- Hecho: 3.164 pruebas aprobadas y dos omitidas, 489 archivos; tipos, build y secretos aprobados. 22 comprobaciones /browse y seis combinaciones, ocho capturas; revisión de código y visual sin P1/P2. [Informe completo](fase-3-verificacion.md) y [comparación navegable](../../design/panel-nutri/fase-3-verificacion.html).
+- Cómo: resumen individual liviano y lote de columnas autorizados, sin notas privadas ni cambios de base. Correcciones respaldadas en dc0888a, código estable de esa revisión más cierre documental; fire test detectado y restaurado. Cuenta de atención mantiene su regla previa de revisión, sin inferencias clínicas.
+- Rama y commit: codex/panel-nutri-fase-3; este cierre se sube antes de abrir el PR. Se anota su número al crearlo.
+- Falta: controles remotos e integración del PR; fases 4–9. Demo local, sin lector de pantalla, teléfono físico ni Auth remoto. 403 esperado de consultas completadas por permiso de atención ausente al abrir la ficha.
+- Próximo paso exacto: reservar fase 4 en codex/panel-nutri-fase-4, desde esta base mientras corre CI, y leer ProfessionalPatientWorkspace.tsx junto a las once pestañas del boceto. Conservar enlaces viejos de las 14 secciones.
+
+### 2026-10-19 · Codex · Fase 3, paso 2 (correcciones y QA)
+- Hecho: corregidos resumen/columnas al archivar y restaurar, consultas de consentimiento sin notas clínicas, menú en capa superior y giro de flecha. /browse aprueba 22 comprobaciones y seis combinaciones, ocho capturas en ambos temas/tamaños; comparación navegable comprobada.
+- Cómo: dos revisiones independientes; Postgres prueba consentimiento retirado, peso no futuro y ausencia de RPC global o ingreso completo. Fire test de permiso detectado y restaurado, 11 pruebas API verdes. Se agregó distinción entre falta de registros y adherencia registrada de cero.
+- Rama y commit: codex/panel-nutri-fase-3; respaldo final antes del PR. Base main 4dc9a79 conciliada en b4ad3f4.
+- Falta: registrar suite completa estable y tipos/build finales, abrir PR propio y sus controles remotos. Fases 4–9 siguen autorizadas por Facundo.
+- Próximo paso exacto: cerrar fase-3-verificacion.md con resultados finales y copiar el paso 10 completo al PR; luego reservar fase 4 en rama propia.
+
+### 2026-10-19 · Codex · Fase 3, paso 1 (tabla y contrato)
+- Hecho: tabla del boceto, cinco filtros, columnas/densidad conservadas, acciones en Más opciones, resumen desplegable con 14 accesos y datos por sección. Plan y peso se cargan en lotes de metadata; sólo abrir la fila pide el resumen. Inicio #151 integrado a main 4dc9a79, controles remotos aprobados.
+- Cómo: pruebas RED antes de implementar; 28 casos focales aprobados. API autorizada por consultorio y consentimiento, archivo sin contenido clínico, resumen de consulta publicado acotado. Revisión detectó consulta de cobros global: corregida a get_patient_ledger y cubierta con aserción Postgres. Sin tablas ni SQL remoto.
+- Rama y commit: codex/panel-nutri-fase-3; respaldo de implementación y conciliación con main antes de la QA final.
+- Falta: QA visual y de teclado/móvil, fire test, revisión final de ambos agentes, suite completa, informe y PR propio.
+- Próximo paso exacto: ejecutar recorridos de Pacientes con /browse en ambos temas y tamaños; cerrar observaciones y registrar evidencia.
+
+### 2026-10-19 · Codex · Fase 3, paso 0 (reserva)
+- Hecho: fase 3 reservada antes del código; Inicio está en #151 y sus controles remotos corren.
+- Cómo: se continúa el pedido de Facundo, una rama y PR por parte. Base explícita de #151, sin modificar su rama. Al integrarlo se concilia main antes de entregar esta fase.
+- Rama y commit: `codex/panel-nutri-fase-3`, desde fase 2 `50c5d21`.
+- Falta: tabla del boceto, filtros, resumen liviano autorizado, despliegue bajo la fila con accesos, movimiento y pruebas completas.
+- Próximo paso exacto: leer ShowroomPatients.tsx y sus helpers, localizar la carga autorizada del directorio y definir/pruebar el contrato del resumen antes de implementarlo.
 
 ### 2026-10-19 · Codex · Fase 2, paso 4 (PR)
 - Hecho: abierto [PR #151](https://github.com/Facu42/plan-v/pull/151) con el informe completo del paso 10 y comparación local disponible. CI en curso.
@@ -320,3 +370,10 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Rama y commit: `claude/rediseno-panel-nutri-bocetos-iw3aor`, PR #148 (solo documentos).
 - Próximo paso exacto: Fase 1. Crear la rama desde `main` actualizado, leer la sección 2 y el bloque
   `html[data-mock="dark"] .m` del boceto para pasar los colores a variables del panel.
+
+### 2026-10-19 · Codex · Fase 3, paso 7 (recorrido de restauración)
+- Hecho: localizado el fallo remoto al restaurar: el menú continuaba abierto después del archivo y la prueba lo cerraba. El recorrido ahora abre sólo si está cerrado; conserva todas las comprobaciones de persistencia.
+- Cómo: 30 casos Auth/PostgREST y los recorridos anteriores aprobaron; corrección limitada al script, con sintaxis validada. Nueva ejecución remota pendiente.
+- Rama: codex/panel-nutri-fase-3, PR #152. Sin cambios funcionales ni migraciones.
+- Falta: CI verde para integrar #152; fase 4 en su rama reservada.
+- Próximo paso exacto: revisar el resultado del nuevo recorrido firmado y conciliar main en fase 4 al integrar.

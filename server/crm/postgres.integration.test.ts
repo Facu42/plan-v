@@ -27,6 +27,7 @@ const patientBUser = '00000000-0000-4000-a000-0000000000c4';
 const patientA = '10000000-0000-4000-a000-0000000000c1';
 const patientB = '10000000-0000-4000-a000-0000000000c2';
 let nutriAId = '';
+const rpcCalls: string[] = [];
 
 async function select(sql: string, params: unknown[], actor: string | null) {
   return db.transaction(async tx => {
@@ -68,15 +69,17 @@ function adapter(actor: string | null) {
         },
         eq(column: string, value: unknown) { params.push(value); where.push(`${identifier(column)}=$${params.length}`); return query; },
         gte(column: string, value: unknown) { params.push(value); where.push(`${identifier(column)}>=$${params.length}`); return query; },
+        lte(column: string, value: unknown) { params.push(value); where.push(`${identifier(column)}<=$${params.length}`); return query; },
         is(column: string, value: null) { if (value !== null) throw new Error('Sólo null'); where.push(`${identifier(column)} is null`); return query; },
         in(column: string, values: unknown[]) { params.push(values); where.push(`${identifier(column)}::text=any($${params.length}::text[])`); return query; },
-        order(column: string) { orders.push(identifier(column)); return query; },
+        order(column: string, options?: {ascending?:boolean}) { orders.push(`${identifier(column)} ${options?.ascending===false?'desc':'asc'}`); return query; },
         range(start: number, end: number) { return run(start, end - start + 1); },
         maybeSingle() { return run(0, 1, true); },
       };
       return query;
     },
     async rpc(name: string, args: Record<string, unknown> = {}) {
+      rpcCalls.push(name);
       try {
         const values = Object.values(args);
         const rows = await select(`select public.${identifier(name)}(${Object.keys(args).map((key, index) => `${identifier(key)}=>$${index + 1}`).join(',')}) as result`, values, actor);
@@ -195,5 +198,34 @@ describe('Bandeja: rutas con sesiones y migraciones reales en Postgres descartab
     expect(reprogram.items[0]).toMatchObject({ patient_id: patientA, status: 'needs_change' });
     expect(JSON.stringify(a.home)).not.toMatch(/Descripción privada|Nota privada|Texto privado|Dato privado|context_hash|nutritionist_id/);
     expect((await request(patientAUser, '?include_home=1')).status).toBe(403);
+  }, 30000);
+  it('el resumen de una paciente respeta RLS, rol, archivo y permisos vigentes', async () => {
+    const preview = (user: string,id: string) => app.request(`/api/crm/patients/${id}/preview`, {headers:{'x-test-user':user}});
+    expect((await preview(nutriA,patientB)).status).toBe(403);
+    expect((await preview(patientAUser,patientA)).status).toBe(403);
+    await db.query("insert into public.measurements(id,patient_id,nutritionist_id,kind,value_numeric,unit,source,captured_on) values(gen_random_uuid(),$1,$2,'weight',70,'kg','professional',current_date-2),(gen_random_uuid(),$1,$2,'weight',72,'kg','professional',current_date-1),(gen_random_uuid(),$1,$2,'weight',99,'kg','professional',current_date+1)",[patientA,nutriAId]);
+    rpcCalls.length = 0;
+    const response = await preview(nutriA,patientA);
+    expect(response.status).toBe(200);
+    expect(rpcCalls).toContain('get_patient_ledger');
+    expect(rpcCalls).not.toContain('get_billing_board');
+    expect(rpcCalls).not.toContain('get_patient_intake');
+    const body = await response.json();
+    expect(body.patient_id).toBe(patientA);expect(body.sections).toHaveLength(14);
+    expect(body.latest_weight).toMatchObject({value:72,unit:'kg'});
+    expect(JSON.stringify(body)).not.toMatch(/Paciente B|Descripción privada|Nota privada|Texto privado|Dato privado|audio_path|transcript/);
+    const rows = (user: string,ids: string[]) => app.request('/api/crm/patients/directory-summary', {method:'POST',headers:{'x-test-user':user,'Content-Type':'application/json'},body:JSON.stringify({patient_ids:ids})});
+    expect((await rows(nutriA,[patientB])).status).toBe(403);
+    expect((await rows(patientAUser,[patientA])).status).toBe(403);
+    rpcCalls.length=0;
+    expect((await rows(nutriA,[patientA])).status).toBe(200);
+    expect(rpcCalls).toEqual([]);
+    const measureConsent=CONSENT_CATALOG.find(text=>text.purpose==='measurement')!;
+    await select('select public.record_patient_consent($1,$2,$3,$4,$5)',[patientA,measureConsent.purpose,measureConsent.text_version,measureConsent.text_hash,'withdrawn'],patientAUser);
+    expect((await (await preview(nutriA,patientA)).json()).latest_weight).toBeNull();
+    expect((await (await rows(nutriA,[patientA])).json()).patients[0].latest_weight).toBeNull();
+    await db.query('update public.patients set archived_at=now() where id=$1',[patientA]);
+    const archived = await (await preview(nutriA,patientA)).json();
+    expect(archived.can_open).toBe(false);expect(archived.latest_weight).toBeNull();
   }, 30000);
 });

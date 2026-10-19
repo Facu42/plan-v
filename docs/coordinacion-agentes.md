@@ -1,5 +1,8 @@
 # Coordinación entre agentes (Claude, Codex, Cursor)
 
+19/10 · Codex · Fase 3 de Pacientes verificada en `codex/panel-nutri-fase-3`: tabla y resumen bajo la fila con datos autorizados, 3.164 pruebas y dos omitidas, tipos/build/secretos y revisiones aprobadas, 22 comprobaciones /browse. Informe: [fase 3](panel-nutri-rediseno/fase-3-verificacion.md). Inicio #151 integrado a main 4dc9a79 con web/API/worker en verde. Sigue fase 4, Ficha, en rama y PR propios; sin SQL remoto.
+
+
 Una sola página para que los agentes no se pisen. **Leela antes de empezar una tarea y actualizala al
 terminarla.** Los agentes no comparten memoria: lo único que todos ven es este repositorio.
 Creada el 14/10/2026 por Claude a pedido de Facundo.
@@ -25,7 +28,7 @@ visto bueno de Facundo.
 | Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Ánimo y síntomas publicado (PR #112, 14/10). Recorridos de punta a punta y monitor en main (#114, 15/10). Aviso de recurso indicado en PR propio. El resto, por empezar |
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
-| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (desarrollo) | `codex/panel-nutri-fase-2`, [plan](panel-nutri-rediseno/plan.md) | Fase 1 integrada por #150 (`1f48adf`); fase 2 verificada en [PR #151](https://github.com/Facu42/plan-v/pull/151), CI en curso. Sigue fase 3. Facundo pidió continuar el resto, una rama y PR por fase; no modifica #147 de Cursor |
+| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (desarrollo) | `codex/panel-nutri-fase-3`, [plan](panel-nutri-rediseno/plan.md) | Fase 1 integrada por #150; fase 2 verificada en [PR #151](https://github.com/Facu42/plan-v/pull/151), CI en curso. Fase 3 reservada y en curso por Codex. Una rama y PR por fase; no modifica #147 de Cursor |
 
 ## 2. Reglas para no pisarse
 
@@ -73,6 +76,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **19/10 · Codex · Inicio fase 3** · Reserva previa al código en `codex/panel-nutri-fase-3`, desde #151 `50c5d21`. Tabla y resumen de pacientes según boceto; se conserva alta/invitación/archivo y permisos. Dependencia declarada de #151 hasta integrarlo; un PR propio al terminar.
 
 - **19/10 · Codex · Cierre fase 2** · [PR #151](https://github.com/Facu42/plan-v/pull/151), `codex/panel-nutri-fase-2`: Inicio conectado con datos reales y metadata autorizada; 3.153 pruebas y dos omitidas, tipos/build/secretos y revisiones independientes aprobados. 13 comprobaciones de navegador y ocho tamaños/temas. [Informe y límites](panel-nutri-rediseno/fase-2-verificacion.md). Sigue fase 3, Pacientes con resumen desplegable. CI en curso, sin SQL remoto.
 

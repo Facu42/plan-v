@@ -1,8 +1,11 @@
 import { request } from './client';
 import type { CrmWorkQuery, CrmWorkResponse } from '../types/crm-work';
 import type { CrmFeedQuery, CrmFeedResponse } from '../types/crm-feed';
+import type { PatientQuickPreview, PatientRowPreview } from '../types/patient-preview';
 
 export const crmWorkApi = {
+  patientRows: (patientIds: string[], signal?: AbortSignal) => request<{ patients: PatientRowPreview[] }>('/api/crm/patients/directory-summary', { method: 'POST', body: JSON.stringify({ patient_ids: patientIds }), signal }),
+  patientPreview: (patientId: string, signal?: AbortSignal) => request<PatientQuickPreview>(`/api/crm/patients/${encodeURIComponent(patientId)}/preview`, { signal }),
   list: (query: CrmWorkQuery = {}, signal?: AbortSignal) => {
     const params = new URLSearchParams();
     if (query.include_home) params.set('include_home', query.include_home);

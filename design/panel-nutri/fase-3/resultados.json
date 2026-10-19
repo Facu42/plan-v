@@ -1,0 +1,123 @@
+{
+  "date": "2026-10-19T11:37:06.783Z",
+  "checks": [
+    "Plan visible sin abrir la ficha",
+    "Una fila abierta con 14 destinos: Sofía R.",
+    "Una fila abierta con 14 destinos: Marina C.",
+    "Escape cierra y devuelve foco a su fila",
+    "Enter vuelve a abrir desde la fila",
+    "Búsqueda ignora acentos",
+    "Necesitan atención conserva regla de revisión semanal",
+    "Acceso pendiente muestra vacío real",
+    "Alta real disponible",
+    "Importación real disponible",
+    "Más opciones conserva edición",
+    "Archivar oculta inmediatamente el resumen abierto",
+    "Archivadas contiene la ficha recién archivada",
+    "Archivada no expone accesos clínicos",
+    "La flecha gira al abrir la fila",
+    "Peso autorizado reaparece después de restaurar",
+    "Destino abre registro alimentario de esa paciente",
+    "Error visible sin mostrar datos de otra paciente",
+    "Reintento recupera el resumen",
+    "Resumen sin desborde móvil light",
+    "Resumen sin desborde móvil dark",
+    "Ocultar próxima consulta mantiene tabla móvil sin desborde"
+  ],
+  "measurements": [
+    {
+      "theme": "light",
+      "width": 1440,
+      "pageWidth": 1440,
+      "table": {
+        "x": 331,
+        "y": 316,
+        "width": 1067,
+        "height": 267.390625,
+        "top": 316,
+        "right": 1398,
+        "bottom": 583.390625,
+        "left": 331
+      }
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "pageWidth": 390,
+      "table": {
+        "x": 28,
+        "y": 421.21875,
+        "width": 334,
+        "height": 264.59375,
+        "top": 421.21875,
+        "right": 362,
+        "bottom": 685.8125,
+        "left": 28
+      }
+    },
+    {
+      "theme": "light",
+      "width": 1280,
+      "pageWidth": 1280,
+      "table": {
+        "x": 331,
+        "y": 296,
+        "width": 930,
+        "height": 295.109375,
+        "top": 296,
+        "right": 1261,
+        "bottom": 591.109375,
+        "left": 331
+      }
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "pageWidth": 1440,
+      "table": {
+        "x": 331,
+        "y": 316,
+        "width": 1067,
+        "height": 267.390625,
+        "top": 316,
+        "right": 1398,
+        "bottom": 583.390625,
+        "left": 331
+      }
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "pageWidth": 390,
+      "table": {
+        "x": 28,
+        "y": 421.21875,
+        "width": 334,
+        "height": 264.59375,
+        "top": 421.21875,
+        "right": 362,
+        "bottom": 685.8125,
+        "left": 28
+      }
+    },
+    {
+      "theme": "dark",
+      "width": 1280,
+      "pageWidth": 1280,
+      "table": {
+        "x": 331,
+        "y": 296,
+        "width": 930,
+        "height": 295.109375,
+        "top": 296,
+        "right": 1261,
+        "bottom": 591.109375,
+        "left": 331
+      }
+    }
+  ],
+  "consoleErrors": "--- BEGIN UNTRUSTED EXTERNAL CONTENT (source: http://127.0.0.1:5173/crm/pacientes) ---\n[2026-10-19T11:36:56.546Z] [error] Failed to load resource: the server responded with a status of 403 (Forbidden)\n--- END UNTRUSTED EXTERNAL CONTENT ---",
+  "failed": [
+    "GET http://127.0.0.1:5173/api/patients/pat-sofia/consultations/completions?offset=0&limit=1 → 403 (6ms, 77B)"
+  ]
+}

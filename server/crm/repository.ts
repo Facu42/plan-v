@@ -8,7 +8,7 @@ import { CareError } from '../care/errors.js';
 import { currentCareConsents } from '../care/consents.js';
 import { listCareRecords } from '../care/repository.js';
 import { asAiJob, listAiJobs } from '../ai-jobs/repository.js';
-import { getBoard } from '../fees/repository.js';
+import { getBoard, getLedger } from '../fees/repository.js';
 import { formatFeeDate, summarizeLedger } from '../../src/fees.js';
 import { DEMO_NUTRITIONIST_ID, getStore } from '../store.js';
 import { CONSENT_CATALOG } from '../intake/consent.js';
@@ -26,7 +26,7 @@ export type WorkSnapshot = {
   meals: Array<{ id: string; patient_id: string; slot: string; status: string; logged_at: string }>;
   jobs: AiJobView[];
   messages: Array<{ id: string; patient_id: string; from: string; read_at?: string | null; sent_at: string }>;
-  records: Array<{ id: string; patient_id: string; kind: CareData['kind']; source?: string; reviewed_at: string | null; created_at: string }>;
+  records: Array<{ id: string; patient_id: string; kind: CareData['kind']; source?: string; document_kind?: string; reviewed_at: string | null; created_at: string }>;
   appointments: Array<{ id: string; patient_id: string; status: string; starts_at: string; patient_reply?: string | null }>;
   ledgers: PatientLedger[];
   consents: Map<string, string[]>;
@@ -134,7 +134,7 @@ export async function loadWorkSnapshot(scope: WorkScope): Promise<WorkSnapshot> 
   if (!ids.length) return snapshot;
 
   if (!scope.persistent) {
-    snapshot.ledgers = (await getBoard(false)).patients;
+    snapshot.ledgers = ids.length === 1 ? [await getLedger(ids[0], false)] : (await getBoard(false)).patients;
     const memory = new Map(getStore().patients.map(patient => [patient.id, patient]));
     for (const patient of patients) {
       const [bundle, jobs] = await Promise.all([
@@ -158,6 +158,7 @@ export async function loadWorkSnapshot(scope: WorkScope): Promise<WorkSnapshot> 
     snapshot.records = (await listCareRecords(null, false)).map(record => ({
       id: record.id, patient_id: record.patient_id, kind: record.data.kind,
       source: 'source' in record.data ? record.data.source : undefined,
+      document_kind: record.data.kind === 'clinical_document' ? record.data.document_kind : undefined,
       reviewed_at: record.reviewed_at, created_at: record.created_at,
     }));
     return snapshot;
@@ -169,7 +170,7 @@ export async function loadWorkSnapshot(scope: WorkScope): Promise<WorkSnapshot> 
   const since = new Date(Date.now() - QUIET_WINDOW_DAYS * 86_400_000).toISOString();
   const [meals, records, messages, appointments, intakes, consents, jobs, board, recentMeals, recentHabits] = await Promise.all([
     scopedRows(db, 'meal_logs', 'id,patient_id,slot_label,status,logged_at', ids, 'logged_at', { status: 'pending_review' }),
-    scopedRows(db, 'care_records', 'id,patient_id,kind:data->>kind,source:data->>source,reviewed_at,created_at', ids, 'created_at', { reviewed_at: null }),
+    scopedRows(db, 'care_records', 'id,patient_id,kind:data->>kind,source:data->>source,document_kind:data->>document_kind,reviewed_at,created_at', ids, 'created_at', { reviewed_at: null }),
     scopedRows(db, 'messages', 'id,patient_id,author_id,sent_at', ids, 'sent_at'),
     // Los turnos ya se leen con cliente del servidor en el directorio existente.
     // Nunca se consulta antes de obtener ids con RLS y el consultorio de la sesión.
@@ -177,7 +178,7 @@ export async function loadWorkSnapshot(scope: WorkScope): Promise<WorkSnapshot> 
     scopedRows(db, 'intake_sessions', 'id,patient_id,status,updated_at', ids, 'updated_at', { status: 'submitted' }),
     scopedRows(db, 'consent_events', 'id,patient_id,purpose,text_version,text_hash,decision,sequence', ids, 'sequence'),
     scopedRows(db, 'ai_jobs', 'id,patient_id,job_type,status,created_at,started_at,finished_at,applied_at,period_start:request->>period_start,period_end:request->>period_end', ids, 'created_at', { applied_at: null }),
-    getBoard(true),
+    ids.length === 1 ? getLedger(ids[0], true).then(ledger => ({ patients: [ledger] })) : getBoard(true),
     // Solo fechas: alcanza para saber cuándo registró por última vez, sin leer qué comió ni cómo se sintió.
     recentRows(db, 'meal_logs', 'id,patient_id,logged_at', ids, 'logged_at', since),
     recentRows(db, 'habit_logs', 'id,patient_id,date,hydration,energy,sleep_minutes,steps,symptoms', ids, 'date', since.slice(0, 10)),
@@ -197,7 +198,7 @@ export async function loadWorkSnapshot(scope: WorkScope): Promise<WorkSnapshot> 
   }).map(text => text.purpose));
   snapshot.jobs = jobs.map(row => asAiJob({ ...row, request: { period_start: row.period_start, period_end: row.period_end } }));
   snapshot.meals = meals.map(row => ({ id: String(row.id), patient_id: String(row.patient_id), slot: String(row.slot_label), status: String(row.status), logged_at: String(row.logged_at) }));
-  snapshot.records = records.map(row => ({ id: String(row.id), patient_id: String(row.patient_id), kind: row.kind as CareData['kind'], source: row.source as string | undefined, reviewed_at: row.reviewed_at as string | null, created_at: String(row.created_at) }));
+  snapshot.records = records.map(row => ({ id: String(row.id), patient_id: String(row.patient_id), kind: row.kind as CareData['kind'], source: row.source as string | undefined, document_kind: row.document_kind as string | undefined, reviewed_at: row.reviewed_at as string | null, created_at: String(row.created_at) }));
   snapshot.appointments = appointments.map(row => ({ id: String(row.id), patient_id: String(row.patient_id), status: String(row.status), starts_at: String(row.starts_at), patient_reply: row.patient_reply as string | null }));
 
   const patientUsers = new Map(patients.map(patient => [patient.id, patient.user_id]));

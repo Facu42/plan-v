@@ -6,8 +6,34 @@ import { paginateWorkQueue, workQueueQuerySchema } from './work-queue.js';
 import { buildFeed, feedFrom, feedQuerySchema } from './feed.js';
 import { loadFeedRows } from './feed-repository.js';
 import { argentinaToday, isProgressPeriodDays } from '../progress/derive.js';
+import { loadPatientQuickPreview, loadPatientRowPreview } from './patient-preview.js';
+import { z } from 'zod';
 
 export function registerCrmRoutes(app: Hono) {
+  app.post('/api/crm/patients/directory-summary', async c => {
+    const auth = c.get('auth');
+    const persistent = 'userId' in auth && isSupabaseEnabled();
+    if (!persistent && c.req.query('audience') === 'patient') throw new CareError(403, 'Solo profesionales del consultorio.');
+    if (Object.keys(c.req.query()).length) throw new CareError(400, 'Revisá las pacientes solicitadas.');
+    const parsed = z.object({ patient_ids: z.array(z.string().min(1).max(100)).min(1).max(50) }).strict().safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) throw new CareError(400, 'Revisá las pacientes solicitadas.');
+    const scope = await resolveWorkScope('userId' in auth ? auth.userId : null, persistent);
+    const ids = [...new Set(parsed.data.patient_ids)];
+    if (ids.some(id => !scope.patients.some(p => p.id === id && !p.deactivated_at && !p.anonymized_at))) throw new CareError(403, 'Esa paciente no está disponible en tu consultorio.');
+    const patients = [];
+    // Hasta cinco lecturas simultáneas, sin notas, cobros ni ficha completa.
+    for (let i = 0; i < ids.length; i += 5) patients.push(...await Promise.all(ids.slice(i, i + 5).map(id => loadPatientRowPreview(scope, id))));
+    return c.json({ patients });
+  });
+  app.get('/api/crm/patients/:id/preview', async c => {
+    const auth = c.get('auth');
+    const persistent = 'userId' in auth && isSupabaseEnabled();
+    if (!persistent && c.req.query('audience') === 'patient') throw new CareError(403, 'Solo profesionales del consultorio.');
+    const id = c.req.param('id');
+    if (!id || id.length > 100 || Object.keys(c.req.query()).length) throw new CareError(400, 'Revisá la paciente solicitada.');
+    const scope = await resolveWorkScope('userId' in auth ? auth.userId : null, persistent);
+    return c.json(await loadPatientQuickPreview(scope, id));
+  });
   app.get('/api/crm/work-queue', async c => {
     const auth = c.get('auth');
     const persistent = 'userId' in auth && isSupabaseEnabled();

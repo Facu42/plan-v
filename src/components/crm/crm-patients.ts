@@ -1,6 +1,6 @@
 import type { Patient } from '../../types';
 
-export type PatientDirectoryFilter = 'active' | 'attention' | 'archived';
+export type PatientDirectoryFilter = 'all' | 'active' | 'attention' | 'unlinked' | 'archived';
 
 function normalizedSearch(patient: Patient): string {
   return [patient.name, patient.status, patient.goal, patient.next_focus]
@@ -18,7 +18,7 @@ export function filterDirectoryPatients(
   const term = query.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   return patients.filter((patient) => {
     const archived = Boolean(patient.archived_at);
-    const matchesFilter = filter === 'archived'
+    const matchesFilter = filter === 'all' ? !patient.deactivated_at && !patient.anonymized_at : filter === 'unlinked' ? !archived && patient.has_account === false : filter === 'archived'
       ? archived
       : filter === 'attention'
         ? !archived && (patient.weekly_registration?.pending_review ?? 0) > 0

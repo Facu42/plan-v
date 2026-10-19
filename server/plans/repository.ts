@@ -1,4 +1,5 @@
 import { resolvePlanComponents } from './components.js';
+import type { PatientPlanPreview } from '../../src/types/patient-preview.js';
 import { mergeGuidance, planGuidanceSchema, type PlanGuidance } from '../../src/types/plan-guidance.js';
 import { modelPlanFrom } from '../../src/types/models.js';
 import { datedModelItems, type ModelCopy } from '../../src/types/models.js';
@@ -100,6 +101,29 @@ type MemHandover = {
   seen_at: string | null;
 };
 const handovers = new Map<string, MemHandover>();
+
+/** Solo estado y período: el directorio no necesita recetas, ingredientes ni borradores. */
+export async function getPatientPlanPreview(owner: string, patientId: string, persistent: boolean): Promise<PatientPlanPreview> {
+  let rows: Array<{ status: string; period_start: string; period_end: string; version: number }> = [];
+  if (!persistent) {
+    const plan = [...plans.values()].find(p => p.patient_id === patientId && p.nutritionist_id === owner);
+    if (plan) rows = [...versions.values()].filter(v => v.meal_plan_id === plan.id && v.status !== 'archived');
+  } else {
+    const db = getRequestDb();
+    const plan = await db.from('meal_plans').select('id').eq('patient_id', patientId).eq('nutritionist_id', owner).maybeSingle();
+    mealPlanDbError(plan.error);
+    if (plan.data) {
+      const planId = plan.data.id;
+      const results = await Promise.all(['draft','published','scheduled'].map(status => db.from('meal_plan_versions')
+        .select('status,period_start,period_end,version').eq('meal_plan_id', planId).eq('status',status)
+        .order('version', { ascending: false }).range(0,0)));
+      for (const result of results) { mealPlanDbError(result.error); rows.push(...result.data ?? []); }
+    }
+  }
+  rows.sort((a,b) => b.version - a.version);
+  const current = rows.find(v => v.status === 'published') ?? rows.find(v => v.status === 'scheduled') ?? rows[0];
+  return { status: current?.status as PatientPlanPreview['status'] ?? 'none', period_start: current?.period_start ?? null, period_end: current?.period_end ?? null, has_draft: rows.some(v => v.status === 'draft') };
+}
 
 export function resetMealPlanMemory() {
   plans.clear();
