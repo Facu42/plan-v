@@ -43,6 +43,11 @@
 .pn-panel .p5-now { position:absolute; left:0; right:0; height:2px; background:var(--pn-orange); pointer-events:none; }
 .pn-panel .p5-now::before { content:""; position:absolute; left:-4px; top:-4px; width:10px; height:10px; border-radius:50%; background:var(--pn-orange); }
 .pn-panel .p5-daylist { display:none; list-style:none; margin:0; padding:0; }
+.pn-panel .p5-daylist>li { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.pn-panel .p5-turn { display:flex; align-items:center; gap:10px; min-height:44px; min-width:0; padding:8px 12px; border-radius:14px; background:var(--pn-white); box-shadow:var(--pn-shadow); }
+.pn-panel .p5-turn time { flex:none; font-variant-numeric:tabular-nums; font-weight:600; }
+.pn-panel .p5-turn>span { flex:1; min-width:0; overflow-wrap:break-word; }
+.pn-panel .p5-chip { flex:none; font-style:normal; font-size:11px; font-weight:600; border-radius:999px; padding:4px 8px; background:var(--pn-fill); }
 .pn-panel .p5-month { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; }
 .pn-panel .p5-month>span { font-size:11px; color:var(--pn-muted); text-align:center; }
 .pn-panel .p5-month>div { min-height:72px; border-radius:12px; background:var(--pn-fill); padding:6px; overflow:hidden; }
@@ -110,6 +115,8 @@
   .pn-panel .p5-daylist { display:flex; flex-direction:column; gap:12px; }
   .pn-panel .p5-legend { margin-left:0; }
   .pn-panel .p5-head .p5-pri { width:100%; }
+  .pn-panel .p5-btn,.pn-panel .p5-seg button { min-height:44px; }
+  .pn-panel .p5,.pn-panel .p5-card,.pn-panel .p5-phone { max-width:100%; }
 }
 @media (prefers-reduced-motion:reduce) {
   .pn-panel .p5-btn,.pn-panel .p5-switch::after { transition:none; }

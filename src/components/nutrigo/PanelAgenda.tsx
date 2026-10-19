@@ -92,7 +92,7 @@ function EventBlock({ event, start, rows }: { event: PanelAgendaEvent; start: nu
 }
 
 function DayList({ days, events }: { days: string[]; events: PanelAgendaEvent[] }) {
-  return <ol className="p5-daylist">{days.map(day => <li key={day}><b>{dayHeading(day).name} {dayHeading(day).number}</b>{events.filter(event => event.day === day).map(event => <p key={event.id}><span className={`p5-dot p5-${event.tone}`} />{formatMinutes(event.startMin)} {event.title}<small>{TONE_LABEL[event.tone]}</small></p>)}{!events.some(event => event.day === day) && <p className="p5-empty">Sin turnos</p>}</li>)}</ol>;
+  return <ol className="p5-daylist">{days.map(day => <li key={day}><b>{dayHeading(day).name} {dayHeading(day).number}</b>{events.filter(event => event.day === day).map(event => <article className="p5-turn" key={event.id}><time dateTime={formatMinutes(event.startMin)}>{formatMinutes(event.startMin)}</time><span>{event.title}</span><em className={`p5-chip p5-${event.tone}`}>{TONE_LABEL[event.tone]}</em></article>)}{!events.some(event => event.day === day) && <p className="p5-empty">Sin turnos</p>}</li>)}</ol>;
 }
 
 function Month({ events, anchor, now }: { events: PanelAgendaEvent[]; anchor: string; now: string }) {

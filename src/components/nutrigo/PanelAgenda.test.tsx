@@ -20,6 +20,13 @@ describe('Agenda del boceto', () => {
     expect(html).not.toContain('WhatsApp');
     expect(html).not.toContain('Conectado');
     expect(html).toContain('Todavía no hay turnos esta semana.');
+    const withTurn = renderToStaticMarkup(<PanelAgendaView {...base} events={[{ id: 'e1', tone: 'online', title: 'Sofía R.', subtitle: 'Online', day: '2026-10-21', startMin: 11 * 60 + 30, endMin: 12 * 60 + 30 }]} />);
+    expect(withTurn).toContain('class="p5-turn"');
+    expect(withTurn).toContain('11:30');
+    expect(withTurn).toContain('Sofía R.');
+    expect(withTurn).toContain('class="p5-chip p5-online"');
+    expect(withTurn).toContain('Online');
+    expect(withTurn).not.toContain('11:30 Sofía R.Online');
     expect(CONNECTION_MISSING).toMatch(/No hay una conexión activa/);
   });
 

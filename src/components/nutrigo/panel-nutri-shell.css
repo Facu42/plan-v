@@ -43,6 +43,7 @@
 .nv-app.nv-pro.pn-panel .nv-topbar { position:relative; top:auto; bottom:auto; left:auto; width:auto; min-height:76px; padding:24px 30px 8px; gap:12px; background:transparent; border:0; }
 .nv-app.nv-pro.pn-panel .nv-topbar>.nv-brand { display:none; }
 .nv-app.nv-pro.pn-panel .nv-topbar .nv-topbar-title { display:block; font-size:28px; line-height:1.1; letter-spacing:-.02em; color:var(--pn-ink); }
+.nv-app.nv-pro.pn-panel:is(.nv-agenda-page,.nv-fees-page) .nv-topbar-title { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
 .nv-app.nv-pro.pn-panel .nv-user-avatar { background:var(--pn-saffron); color:var(--pn-on-color); }
 .nv-app.nv-pro.pn-panel .nv-user-menu { background:var(--pn-white); color:var(--pn-ink); border:1px solid var(--pn-line); box-shadow:var(--pn-shadow); min-width:270px; max-width:calc(100vw - 32px); z-index:60; }
 .nv-app.nv-pro.pn-panel .nv-user-menu>button { color:var(--pn-ink); }
@@ -111,7 +112,7 @@
   .pn-panel .pn-nav-heading { margin-top:12px; }
 }
 @media (max-width:799px) {
-  .nv-app.nv-pro.pn-panel { display:block; height:auto; overflow:visible; padding-bottom:calc(72px + env(safe-area-inset-bottom)); }
+  .nv-app.nv-pro.pn-panel { display:block; height:auto; overflow:visible; padding-bottom:calc(108px + env(safe-area-inset-bottom)); }
   .nv-app.nv-pro.pn-panel .nv-workspace { min-height:100dvh; }
   .nv-app.nv-pro.pn-panel .nv-sidebar { position:fixed; top:0; left:0; width:min(320px,calc(100vw - 40px)); height:100dvh; padding:20px 18px; visibility:hidden; transform:translateX(-100%); transition:transform var(--pn-motion) var(--pn-ease),visibility var(--pn-motion); z-index:80; }
   .nv-app.nv-pro.pn-panel.nv-menu-open .nv-sidebar { transform:translateX(0); visibility:visible; }
@@ -119,7 +120,7 @@
   .nv-app.nv-pro.pn-panel .nv-topbar { position:sticky; top:0; padding:14px 16px; min-height:64px; background:var(--pn-cream); z-index:30; }
   .nv-app.nv-pro.pn-panel .nv-topbar-title { font-size:22px; }
   .nv-app.nv-pro.pn-panel .nv-menu-toggle { display:flex !important; margin-left:auto; }
-  .nv-app.nv-pro.pn-panel .nv-main { padding:8px 16px 20px; overflow:visible; gap:14px; }
+  .nv-app.nv-pro.pn-panel .nv-main { padding:8px 16px calc(108px + env(safe-area-inset-bottom)); overflow:visible; gap:14px; }
   .pn-panel .nv-mobile-account { position:relative; margin-top:10px; }
   .pn-panel .nv-mobile-account .nv-header-menu { justify-content:space-between; }
   .pn-panel .nv-mobile-account .nv-user-menu { position:fixed; left:16px; right:16px; bottom:82px; top:auto; max-height:65dvh; overflow:auto; }

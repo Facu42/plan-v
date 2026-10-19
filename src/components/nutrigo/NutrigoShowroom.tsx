@@ -477,7 +477,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
     <div className="nv-workspace" inert={role === 'pro' && compactHeader && menuOpen}>
       <header className="nv-topbar" ref={topbarRef}>
         <a className="nv-brand" href={buildAppHref(typeof window === 'undefined' ? 'https://plan.v/app/inicio' : window.location.href, role, 'inicio')} onClick={(event) => { event.preventDefault(); navigate('inicio'); }}><Mark /><span>Plan V</span></a>
-        {role === 'pro' && page === 'inicio' ? <PanelHomeHeader name={userName ?? ''} now={now} onOpen={openWorkHref} /> : <h1 className="nv-topbar-title" aria-label={figmaDetail?.title ?? libraryRecipeTitle ?? PAGE_LABELS[page]}>
+        {role === 'pro' && page === 'inicio' ? <PanelHomeHeader name={userName ?? ''} now={now} onOpen={openWorkHref} /> : <h1 className="nv-topbar-title" aria-hidden={role === 'pro' && (page === 'agenda' || page === 'cobranzas') ? true : undefined} aria-label={figmaDetail?.title ?? libraryRecipeTitle ?? PAGE_LABELS[page]}>
           <span className="nv-topbar-label-desktop">{figmaDetail?.title ?? libraryRecipeTitle ?? PAGE_LABELS[page]}</span>
           <span className="nv-topbar-label-mobile" aria-hidden="true">{figmaDetail?.title ?? libraryRecipeTitle ?? MOBILE_PAGE_LABELS[page] ?? PAGE_LABELS[page]}</span>
         </h1>}
@@ -488,7 +488,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
       <div className="nv-content-layout">
         {/* Cambiar de pantalla o paciente desmonta los datos y formularios anteriores. */}
         <main key={`${contentIdentity(role,page,selected?.id)}:${workspaceRevision}`} id="nv-main" tabIndex={-1} className="nv-main" data-figma-node={role === 'patient' ? (figmaDetail?.nodes ?? PATIENT_FIGMA_NODES[page])?.[compactHeader ? 1 : 0] : undefined}>
-          {role === 'pro' && page !== 'ficha' && page !== 'pacientes' && page !== 'modelos' && page !== 'alimentos' && !(page === 'biblioteca' && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('biblioteca') !== 'recursos' && !hasResourceHash(window.location.hash)) && <nav className="nv-clinic-shortcuts" aria-label="Accesos del consultorio">
+          {role === 'pro' && !['ficha', 'pacientes', 'modelos', 'alimentos', 'agenda', 'cobranzas'].includes(page) && !(page === 'biblioteca' && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('biblioteca') !== 'recursos' && !hasResourceHash(window.location.hash)) && <nav className="nv-clinic-shortcuts" aria-label="Accesos del consultorio">
             <button type="button" onClick={() => navigate('pacientes')}><Icon name="users" size={18} />Pacientes</button>
             <button type="button" disabled={!selected} onClick={() => navigate('ficha')}><Icon name="contact" size={18} />Ficha</button>
             <button type="button" aria-current={page === 'plan' ? 'page' : undefined} disabled={!selected} onClick={() => navigate('plan')}><NvIcon name="plan" size={18} />Plan</button>
