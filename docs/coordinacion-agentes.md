@@ -1,5 +1,8 @@
 # Coordinación entre agentes (Claude, Codex, Cursor)
 
+19/10 · Codex · Fase 3 de Pacientes verificada en `codex/panel-nutri-fase-3`: tabla y resumen bajo la fila con datos autorizados, 3.164 pruebas y dos omitidas, tipos/build/secretos y revisiones aprobadas, 22 comprobaciones /browse. Informe: [fase 3](panel-nutri-rediseno/fase-3-verificacion.md). Inicio #151 integrado a main 4dc9a79 con web/API/worker en verde. Sigue fase 4, Ficha, en rama y PR propios; sin SQL remoto.
+
+
 Una sola página para que los agentes no se pisen. **Leela antes de empezar una tarea y actualizala al
 terminarla.** Los agentes no comparten memoria: lo único que todos ven es este repositorio.
 Creada el 14/10/2026 por Claude a pedido de Facundo.

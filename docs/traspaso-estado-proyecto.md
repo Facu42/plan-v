@@ -1,5 +1,8 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-17)
 
+19/10 · Codex · Fase 3 de Pacientes verificada en `codex/panel-nutri-fase-3`: tabla y resumen bajo la fila con datos autorizados, 3.164 pruebas y dos omitidas, tipos/build/secretos y revisiones aprobadas, 22 comprobaciones /browse. Informe: [fase 3](panel-nutri-rediseno/fase-3-verificacion.md). Inicio #151 integrado a main 4dc9a79 con web/API/worker en verde. Sigue fase 4, Ficha, en rama y PR propios; sin SQL remoto.
+
+
 ## Rediseño del panel · 19/10
 
 Fase 1 integrada en #150, main `1f48adf`, con web/API/worker comprobados. Inicio se desarrolla en `codex/panel-nutri-fase-2`, siguiendo el boceto aprobado y conservando las API y permisos. [Informe, evidencia y límites de fase 2](panel-nutri-rediseno/fase-2-verificacion.md). Facundo pidió continuar las partes restantes, cada una en su rama y PR; el siguiente paso es fase 3, Pacientes con resumen desplegable. Estado vivo y reservas en la [Bitácora del plan](panel-nutri-rediseno/plan.md).

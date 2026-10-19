@@ -1,5 +1,8 @@
 # Plan por apartados (2026-09-28)
 
+19/10 · Codex · Fase 3 de Pacientes verificada en `codex/panel-nutri-fase-3`: tabla y resumen bajo la fila con datos autorizados, 3.164 pruebas y dos omitidas, tipos/build/secretos y revisiones aprobadas, 22 comprobaciones /browse. Informe: [fase 3](panel-nutri-rediseno/fase-3-verificacion.md). Inicio #151 integrado a main 4dc9a79 con web/API/worker en verde. Sigue fase 4, Ficha, en rama y PR propios; sin SQL remoto.
+
+
 Rediseño del panel de la nutri (19/10/2026): fase 1 integrada en #150; fase 2, Inicio, en `codex/panel-nutri-fase-2`. [Plan por fases y Bitácora](panel-nutri-rediseno/plan.md), [evidencia de Inicio y Regression Guard](panel-nutri-rediseno/fase-2-verificacion.md). Continúa con Pacientes, una rama y PR por fase.
 
 Sexta entrega aislada de agenda, reservas, equipo y cobros (14/10/2026): [alcance, pruebas y Regression Guard](nutridesk-release-agenda-2026-10-14.md). Base clínica `66ed039`, suite propia de 2.816 casos aprobados y dos omitidos; proveedores, producción y publicación siguen sin activar.

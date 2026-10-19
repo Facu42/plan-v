@@ -146,7 +146,7 @@ lo que quedó pendiente), accesos rápidos (nueva paciente, plan con IA, copiar 
 pendientes con un botón por fila y pestañas por tipo, consultas de hoy, necesitan atención, buenas noticias
 (meta alcanzada, rachas de registro, aniversario) y cuatro números del mes.
 
-### Fase 3. Pacientes con resumen rápido · Estado: en curso, Codex (`codex/panel-nutri-fase-3`)
+### Fase 3. Pacientes con resumen rápido · Estado: hecha y verificada, PR propio en apertura
 
 - Tabla del boceto con filtros (Todas, Activas, Necesitan atención, Acceso pendiente, Archivadas).
 - **Movimiento al pasar el mouse**: la fila se tiñe, la foto crece un poco con un borde lima, el nombre
@@ -237,7 +237,7 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
 | 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Integrada a main `1f48adf`; web, API y worker comprobados |
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
-| 3 | Codex | `codex/panel-nutri-fase-3` | Implementada; QA final en curso, #151 integrado |
+| 3 | Codex | `codex/panel-nutri-fase-3` | Hecha y verificada; PR propio en apertura |
 | 4 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
@@ -252,6 +252,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 08:42 · Codex · Fase 3, paso 3 (cierre estable)
+- Hecho: 3.164 pruebas aprobadas y dos omitidas, 489 archivos; tipos, build y secretos aprobados. 22 comprobaciones /browse y seis combinaciones, ocho capturas; revisión de código y visual sin P1/P2. [Informe completo](fase-3-verificacion.md) y [comparación navegable](../../design/panel-nutri/fase-3-verificacion.html).
+- Cómo: resumen individual liviano y lote de columnas autorizados, sin notas privadas ni cambios de base. Correcciones respaldadas en dc0888a, código estable de esa revisión más cierre documental; fire test detectado y restaurado. Cuenta de atención mantiene su regla previa de revisión, sin inferencias clínicas.
+- Rama y commit: codex/panel-nutri-fase-3; este cierre se sube antes de abrir el PR. Se anota su número al crearlo.
+- Falta: controles remotos e integración del PR; fases 4–9. Demo local, sin lector de pantalla, teléfono físico ni Auth remoto. 403 esperado de consultas completadas por permiso de atención ausente al abrir la ficha.
+- Próximo paso exacto: reservar fase 4 en codex/panel-nutri-fase-4, desde esta base mientras corre CI, y leer ProfessionalPatientWorkspace.tsx junto a las once pestañas del boceto. Conservar enlaces viejos de las 14 secciones.
 
 ### 2026-10-19 · Codex · Fase 3, paso 2 (correcciones y QA)
 - Hecho: corregidos resumen/columnas al archivar y restaurar, consultas de consentimiento sin notas clínicas, menú en capa superior y giro de flecha. /browse aprueba 22 comprobaciones y seis combinaciones, ocho capturas en ambos temas/tamaños; comparación navegable comprobada.
