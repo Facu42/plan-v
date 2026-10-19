@@ -245,6 +245,13 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-19 · Codex · Fase 6, paso 5 (Mensajes)
+- Hecho: conversaciones destacadas persistentes y editor de respuestas guardadas, sugerencia local identificada, composición profesional en tres columnas. Insertar conserva el borrador y no envía.
+- Cómo: API con revisión concurrente y controles de rol; editor con protección de cambios, diálogo nativo y foco. RED de IDs duplicados entre diálogos corregido con useId; 10 focales UI aprobados.
+- Rama: codex/panel-nutri-fase-6. SQL preparado y probado sólo localmente.
+- Falta: Asistente, Seguimiento y Progreso; QA visual/funcional, suite completa, revisiones e informe y PR.
+- Próximo paso exacto: conectar las tres pantallas a las lecturas propias y conservar los recorridos existentes.
+
 ### 2026-10-19 · Codex · Fase 6, paso 4 (persistencia y gasto)
 - Hecho: veinte pruebas focales aprobadas, tipos, migraciones y manifiesto verdes. Persistencia de respuestas/favoritos con revisión concurrente por consultorio; Postgres real descartable prueba dos consultorios y rol paciente. Gasto del asistente acotado a jobs propios y cartera del actor, sin consultar saldo global ni cache clínico.
 - Cómo: migración 20261019233000 preparada, con RLS, límites, motivo opcional de archivo y función que bloquea la ficha al comprobar/encolar recordatorio. Cuatro RED de SQL y dos RED de rutas pasaron a GREEN. Reversión conserva datos. No se aplicó en producción.

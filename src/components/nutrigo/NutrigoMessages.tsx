@@ -7,7 +7,7 @@ import { useUnsavedChanges } from './unsaved-changes';
 import { type FormEvent, type KeyboardEvent, type ReactNode, type RefObject, useEffect, useRef, useState } from 'react';
 import {
   ArrowClockwise, CalendarDots, Check, Checks, CopySimple, FadersHorizontal, FileText, Globe, ImageSquare, Info,
-  LinkSimple, MagnifyingGlass, NotePencil, PaperPlaneRight, Paperclip, Plus, SidebarSimple, VideoCamera, X,
+  LinkSimple, MagnifyingGlass, NotePencil, PaperPlaneRight, Paperclip, Plus, SidebarSimple, Star, VideoCamera, X,
 } from '@phosphor-icons/react';
 import { api } from '../../api/client';
 import { useAppStore } from '../../store/useAppStore';
@@ -26,9 +26,13 @@ import {
 } from './message-panel';
 import './messages.css';
 import './messages-fig.css';
+import {useMessageTools,type MessageToolsState} from './use-message-tools';
+import {appendSavedReply,MessageReplyTools} from './MessageReplyTools';
+import './panel-accompaniment.css';
 
 type Role = 'patient' | 'pro';
-type Props = { embedded?: boolean; initialUnreadOnly?: boolean; patient: ShowroomPatient; patients: ShowroomPatient[]; role: Role; remoteUnread?: ReadonlyMap<string, number> | null; onSelect: (id: string) => void; onNavigate: (page: ShowroomPage) => void };
+type Props = { embedded?: boolean; initialUnreadOnly?: boolean; initialStarredOnly?:boolean; showSavedReplies?:boolean; patient: ShowroomPatient; patients: ShowroomPatient[]; role: Role; remoteUnread?: ReadonlyMap<string, number> | null; onSelect: (id: string) => void; onNavigate: (page: ShowroomPage) => void };
+type ReplyInsertion={patientId:string;body:string;nonce:string};
 const ACTIVE_REFRESH_MS = 15000;
 
 const NUTRITIONIST = { name: 'Tu nutricionista', initials: 'N', role: 'Nutricionista' };
@@ -43,26 +47,33 @@ const contactOf = (patient: ShowroomPatient, role: Role) => role === 'pro'
   : NUTRITIONIST;
 const narrow = () => typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 760px)').matches;
 
-export function NutrigoMessages({ embedded = false, initialUnreadOnly = false, patient, patients, role, remoteUnread = null, onSelect, onNavigate }: Props) {
+export function NutrigoMessages({ embedded = false, initialUnreadOnly = false,initialStarredOnly=false,showSavedReplies=false, patient, patients, role, remoteUnread = null, onSelect, onNavigate }: Props) {
   const [query, setQuery] = useState('');
   const [unreadOnly, setUnreadOnly] = useState(initialUnreadOnly);
-  const [profileOpen, setProfileOpen] = useState(()=>embedded?!narrow():true);
+  const [profileOpen, setProfileOpen] = useState(()=>role==='pro'?showSavedReplies||!narrow():true);
+  const [starredOnly,setStarredOnly]=useState(initialStarredOnly),[insertion,setInsertion]=useState<ReplyInsertion|null>(null);
+  const tools=useMessageTools(role==='pro');
+  useEffect(()=>{setUnreadOnly(initialUnreadOnly);setStarredOnly(initialStarredOnly);if(showSavedReplies)setProfileOpen(true);},[initialUnreadOnly,initialStarredOnly,showSavedReplies]);
+  const useReply=(body:string)=>{setInsertion({patientId:patient.id,body,nonce:crypto.randomUUID()});if(role==='pro'&&narrow())setProfileOpen(false);};
+  const toggleStar=()=>{if(!tools.data||tools.busy)return;const ids=tools.data.starred_patient_ids,next=ids.includes(patient.id)?ids.filter(id=>id!==patient.id):[...ids,patient.id];void tools.save({expected_revision:tools.data.revision,replies:tools.data.replies,starred_patient_ids:next}).catch(()=>{});};
   const searchRef = useRef<HTMLInputElement>(null);
   const composeRef = useRef<HTMLTextAreaElement>(null);
   const q = normalized(query.trim());
   const people = role === 'pro' ? [...patients].sort((a, b) => latestAt(b) - latestAt(a) || a.name.localeCompare(b.name, 'es')) : [patient];
   const contacts = people.filter((p) => {
     const thread = sentMessages(p);
+    if(starredOnly&&!tools.data?.starred_patient_ids.includes(p.id))return false;
     if (unreadOnly && mergeUnread(unreadCount(thread, role), remoteUnread, p.id) === 0) return false;
     if (!q) return true;
     return normalized(contactOf(p, role).name).includes(q) || thread.some((m) => normalized(`${m.text} ${m.attachment?.filename ?? ''}`).includes(q));
   });
   const select = (id: string) => {
+    setInsertion(null);
     onSelect(id);
     if (narrow()) requestAnimationFrame(() => document.getElementById('nm-chat')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
   };
   const newMessage = () => {
-    if (role === 'pro') { setQuery(''); setUnreadOnly(false); searchRef.current?.focus(); return; }
+    if (role === 'pro') { setQuery(''); setUnreadOnly(false);setStarredOnly(false); searchRef.current?.focus(); return; }
     composeRef.current?.focus();
   };
   return <section className={`nm-layout nm-${role}${embedded?' pn-record-chat':''}${profileOpen ? '' : ' nmf-profile-closed'}`} aria-label="Mensajería">
@@ -75,6 +86,7 @@ export function NutrigoMessages({ embedded = false, initialUnreadOnly = false, p
         <button type="button" className="nmf-icon-btn nmf-filter" aria-pressed={unreadOnly} aria-label="Mostrar solo conversaciones sin leer" title="Solo sin leer" onClick={() => setUnreadOnly((value) => !value)}><FadersHorizontal size={22} aria-hidden /></button>
         <button type="button" className="nmf-icon-btn nmf-new-icon" aria-label="Nuevo mensaje" onClick={newMessage}><Plus size={20} aria-hidden /></button>
       </div>
+      {role==='pro'&&<div className="pn-message-filters" aria-label="Filtros de conversaciones"><button type="button" aria-pressed={!unreadOnly&&!starredOnly} onClick={()=>{setUnreadOnly(false);setStarredOnly(false);}}>Todas</button><button type="button" aria-pressed={unreadOnly} onClick={()=>{setUnreadOnly(true);setStarredOnly(false);}}>Sin leer</button><button type="button" aria-pressed={starredOnly} disabled={!tools.data} onClick={()=>{setStarredOnly(true);setUnreadOnly(false);}}>Destacadas</button></div>}
       <div className="nm-contact-list">{contacts.map((p) => {
         const thread = sentMessages(p);
         const latest = thread[thread.length - 1];
@@ -85,7 +97,7 @@ export function NutrigoMessages({ embedded = false, initialUnreadOnly = false, p
           <span className="nv-avatar" aria-hidden>{contact.initials}</span>
           <span className="nmf-item-main">
             <span className="nmf-item-head">
-              <span className="nmf-item-user"><strong>{contact.name}</strong><span aria-hidden>-</span><em>{contact.role}</em></span>
+              <span className="nmf-item-user"><strong>{contact.name}</strong>{role==='pro'&&tools.data?.starred_patient_ids.includes(p.id)&&<Star size={12} weight="fill" aria-label="Destacada"/>}<span aria-hidden>-</span><em>{contact.role}</em></span>
               {latest && <time dateTime={latest.sent_at}>{listStamp(latest.sent_at)}</time>}
             </span>
             <span className="nmf-item-body"><small>{preview}</small>{unread > 0 && <span className="nmf-badge" aria-hidden>{unread}</span>}</span>
@@ -95,13 +107,14 @@ export function NutrigoMessages({ embedded = false, initialUnreadOnly = false, p
       {!contacts.length && <p className="nmf-empty">{unreadOnly && !q ? 'No hay conversaciones sin leer.' : 'No hay coincidencias.'}</p>}
       <div className="nm-contacts-footer"><button type="button" className="nmf-new-btn" onClick={newMessage}>Nuevo mensaje</button></div>
     </aside>}
-    <MessageConversation key={`${role}:${patient.id}`} patient={patient} role={role} composeRef={composeRef} profileOpen={profileOpen} onToggleProfile={() => setProfileOpen((open) => !open)} onNavigate={onNavigate} />
-    {profileOpen && (embedded&&narrow()?<FigmaRecordDialog title="Perfil de la conversación" closeLabel="Cerrar perfil" onClose={()=>setProfileOpen(false)}><ConversationProfile patient={patient} role={role} onNavigate={onNavigate}/></FigmaRecordDialog>:<ConversationProfile patient={patient} role={role} onNavigate={onNavigate}/>)}
+    <MessageConversation key={`${role}:${patient.id}`} patient={patient} role={role} composeRef={composeRef} profileOpen={profileOpen} onToggleProfile={() => setProfileOpen((open) => !open)} onNavigate={onNavigate} tools={tools} onToggleStar={toggleStar} insertion={insertion} onInserted={()=>setInsertion(null)}/>
+    {profileOpen && (role==='pro'&&narrow()?<FigmaRecordDialog title="Perfil de la conversación" closeLabel="Cerrar perfil" onClose={()=>setProfileOpen(false)}><ConversationProfile patient={patient} role={role} onNavigate={onNavigate} tools={tools} onUseReply={useReply}/></FigmaRecordDialog>:<ConversationProfile patient={patient} role={role} onNavigate={onNavigate} tools={tools} onUseReply={useReply}/>)}
   </section>;
 }
 
-function MessageConversation({ patient, role, composeRef, profileOpen, onToggleProfile, onNavigate }: Pick<Props, 'patient' | 'role' | 'onNavigate'> & {
+function MessageConversation({ patient, role, composeRef, profileOpen, onToggleProfile, onNavigate,tools,onToggleStar,insertion,onInserted }: Pick<Props, 'patient' | 'role' | 'onNavigate'> & {
   composeRef: RefObject<HTMLTextAreaElement | null>; profileOpen: boolean; onToggleProfile: () => void;
+  tools:MessageToolsState;onToggleStar:()=>void;insertion:ReplyInsertion|null;onInserted:()=>void;
 }) {
   const refresh = useAppStore((s) => s.refreshPatient);
   const [text, setText] = useState('');
@@ -110,6 +123,8 @@ function MessageConversation({ patient, role, composeRef, profileOpen, onToggleP
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const inFlight = useRef(false);
+  const inserted=useRef<string|null>(null);
+  useEffect(()=>{if(!insertion||insertion.patientId!==patient.id||inserted.current===insertion.nonce)return;inserted.current=insertion.nonce;try{if(busy)throw new Error('Esperá a que termine el envío antes de insertar una respuesta.');setText(appendSavedReply(text,insertion.body));setStatus('Respuesta insertada. Revisala antes de enviarla.');setError('');requestAnimationFrame(()=>composeRef.current?.focus());}catch(error){setError(error instanceof Error?error.message:'No pudimos insertar la respuesta.');}onInserted();},[insertion,patient.id,busy,text,onInserted,composeRef]);
   const fileRef = useRef<HTMLInputElement>(null);
   const clientId = useRef(crypto.randomUUID());
   const list = useRef<HTMLDivElement>(null);
@@ -175,6 +190,7 @@ function MessageConversation({ patient, role, composeRef, profileOpen, onToggleP
         <span className="nv-avatar" aria-hidden>{contact.initials}</span>
         <div><h2>{contact.name}</h2><small>{seen ? lastSeenLabel(seen) : role === 'pro' ? 'Paciente' : 'Tu nutricionista'}</small></div>
         <div className="nmf-chat-actions">
+          {role==='pro'&&<button type="button" className="nmf-picker" aria-label={tools.data?.starred_patient_ids.includes(patient.id)?'Quitar conversación de destacadas':'Destacar conversación'} aria-pressed={Boolean(tools.data?.starred_patient_ids.includes(patient.id))} disabled={!tools.data||tools.busy} onClick={onToggleStar}><Star size={20} weight={tools.data?.starred_patient_ids.includes(patient.id)?'fill':'regular'} aria-hidden/></button>}
           {role === 'pro'
             ? <button type="button" className="nmf-picker" onClick={() => onNavigate('consultas')} aria-label="Ver consultas" title="Ver consultas"><CalendarDots size={20} aria-hidden /></button>
             : <button type="button" className="nmf-picker" onClick={() => onNavigate('agenda')} aria-label="Ver mi agenda" title="Ver mi agenda"><CalendarDots size={20} aria-hidden /></button>}
@@ -204,6 +220,7 @@ function MessageConversation({ patient, role, composeRef, profileOpen, onToggleP
         </div>;
       })}
     </div>
+    {role==='pro'&&<div className="pn-message-suggestion"><div><b>Respuesta sugerida</b><p>{tools.data?.replies[0]?.body??'Gracias por escribirme. Voy a revisar tu consulta y te respondo por acá.'}</p><small>{tools.data?.replies[0]?`Respuesta guardada: ${tools.data.replies[0].title}`:'Sugerencia local para revisar · sin IA'}</small></div><button type="button" disabled={busy} onClick={()=>{try{setText(appendSavedReply(text,tools.data?.replies[0]?.body??'Gracias por escribirme. Voy a revisar tu consulta y te respondo por acá.'));setStatus('Respuesta insertada. Revisala antes de enviarla.');setError('');composeRef.current?.focus();}catch(error){setError(error instanceof Error?error.message:'No pudimos insertar la respuesta.');}}}>Usar</button></div>}
     <form className="nm-compose" onSubmit={send}>
       <label htmlFor="nm-message" className="nmf-sr">Mensaje para {contact.name}</label>
       {file && <div className="nmf-file-chip"><Paperclip size={14} aria-hidden /><span>{file.name}</span><button type="button" onClick={() => pickFile(null)} disabled={busy} aria-label={`Quitar ${file.name}`}><X size={14} aria-hidden /></button></div>}
@@ -229,7 +246,7 @@ function ShowAll({ count, limit, open, onToggle, label }: { count: number; limit
   return <button type="button" className="nmf-show-all" aria-expanded={open} aria-label={`${open ? 'Ver menos' : 'Ver todo'}: ${label}`} onClick={onToggle}>{open ? 'Ver menos' : 'Ver todo'}</button>;
 }
 
-function ConversationProfile({ patient, role, onNavigate }: Pick<Props, 'patient' | 'role' | 'onNavigate'>) {
+function ConversationProfile({ patient, role, onNavigate,tools,onUseReply }: Pick<Props, 'patient' | 'role' | 'onNavigate'>&{tools:MessageToolsState;onUseReply:(body:string)=>void}) {
   const raw = useAppStore((s) => (role === 'pro' ? s.patients.find((p) => p.id === patient.id) : undefined));
   const contact = contactOf(patient, role);
   const messages = sentMessages(patient);
@@ -282,6 +299,7 @@ function ConversationProfile({ patient, role, onNavigate }: Pick<Props, 'patient
         <button type="button" className="nmf-link-icon" onClick={() => void copy(link.href)} aria-label={copied === link.href ? `Copiado: ${link.label}` : `Copiar ${link.label}`} title={copied === link.href ? 'Copiado' : 'Copiar'}>{copied === link.href ? <Check size={16} aria-hidden /> : <CopySimple size={16} aria-hidden />}</button>
       </li>)}</ul>
     </section>}
+    {role==='pro'&&<MessageReplyTools tools={tools} onUse={onUseReply}/>}
     {!media.length && !documents.length && !links.length && <p className="nmf-empty">Todavía no se compartieron imágenes, documentos ni enlaces en esta conversación.</p>}
   </aside>;
 }

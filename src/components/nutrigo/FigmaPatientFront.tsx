@@ -1,7 +1,7 @@
 /** Front Nutrigo obtenido por get_design_context (24 nodos en design/figma-reference).
  * Traducción de sus piezas a React/CSS nativo. Los slots reciben datos de Plan V;
  * su ausencia no elimina ni reemplaza la estructura dibujada en Figma. */
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import type { ShowroomPage } from './ShowroomPanels';
 import type { ProgressSeries } from '../../types/progress';
 
@@ -48,6 +48,7 @@ export function FigmaPatientFooter({ year, onContact }: { year: number; onContac
  * showModal proporciona foco contenido, Escape y retorno al botón de apertura. */
 export function FigmaRecordDialog({ title, onClose, children, className = '', closeLabel = 'Cerrar registros' }: { title: string; onClose: () => void; children: ReactNode; className?: string; closeLabel?: string }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
   const [closeStatus, setCloseStatus] = useState('');
   const requestClose = () => {
     if (ref.current?.querySelector('fieldset:disabled, [aria-busy="true"]')) { setCloseStatus('Esperá a que termine el guardado antes de cerrar.'); return; }
@@ -59,8 +60,8 @@ export function FigmaRecordDialog({ title, onClose, children, className = '', cl
     dialog?.showModal();
     return () => { dialog?.close(); if (opener?.isConnected) opener.focus(); };
   }, []);
-  return <dialog ref={ref} className={`fp-record-dialog ${className}`} aria-labelledby="fp-record-title" onCancel={(event) => { event.preventDefault(); requestClose(); }}>
-    <header><h2 id="fp-record-title">{title}</h2><button type="button" onClick={requestClose} aria-label={closeLabel}>×</button></header>
+  return <dialog ref={ref} className={`fp-record-dialog ${className}`} aria-labelledby={titleId} onCancel={(event) => { event.preventDefault(); requestClose(); }}>
+    <header><h2 id={titleId}>{title}</h2><button type="button" onClick={requestClose} aria-label={closeLabel}>×</button></header>
     {closeStatus && <p role="status">{closeStatus}</p>}
     {children}
   </dialog>;

@@ -32,6 +32,7 @@ export function panelNavGroups(patients: readonly Patient[], unread: number, adm
       { label: 'Seguimiento', icon: 'heart', href: '/crm/seguimiento' },
       { label: 'Mensajes', icon: 'message', href: '/crm/mensajes', children: [
         { label: 'Todas', href: '/crm/mensajes' }, { label: 'Sin leer', href: '/crm/mensajes?filtro=unread', count: unread },
+        { label: 'Destacadas', href: '/crm/mensajes?filtro=starred' },{ label: 'Respuestas guardadas', href: '/crm/mensajes?filtro=replies' },
       ] },
       { label: 'Progreso', icon: 'trend', href: '/crm/progreso-global' },
     ] },
