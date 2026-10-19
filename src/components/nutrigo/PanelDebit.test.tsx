@@ -55,6 +55,7 @@ describe('tarjeta de débito automático', () => {
     expect(html).not.toContain('Enviar por el chat');
     expect(html).not.toContain('Ver ficha');
     expect(html).not.toContain('wa.me');
+    expect(html).toContain('p5-li p5-debit');
   });
 
   it('no trata como al día un pago rechazado', () => {
