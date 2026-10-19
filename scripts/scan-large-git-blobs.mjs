@@ -8,6 +8,16 @@ import { pathToFileURL } from 'node:url';
 // component and paint/style asset IDs, not credentials. No other blob is exempt.
 const FIGMA_SCENE_BLOB = '2839c49b25b9cb16e91fd3f560581f9dafc14dfe';
 
+// Audited third-party binary: the Impeccable design-skill engine (21 MB, branch
+// chore/design-skills). One Facebook-token pattern matches random bytes inside
+// it. Only that rule, only fragments of this exact immutable blob, are exempt.
+const IMPECCABLE_ENGINE_BLOB = '664f5dde8309c599f8e1fc4575e58342a9668782';
+
+export function auditedBinaryAllowlist(id) {
+  if (id !== IMPECCABLE_ENGINE_BLOB) return '';
+  return `\n[[rules]]\nid = "facebook-page-access-token"\n[[rules.allowlists]]\ndescription = "Random bytes in the audited Impeccable engine binary (one immutable blob)"\npaths = ['''${id}-[0-9]+\\.txt$''']\n`;
+}
+
 export function figmaAssetIds(node, ids = new Set()) {
   if (!node || typeof node !== 'object') return ids;
   for (const [name, value] of Object.entries(node)) {
@@ -53,6 +63,7 @@ async function main() {
     configuration += `\n[[rules.allowlists]]\ndescription = "Exact public Figma asset IDs and fragment prefixes in one audited immutable scene blob"\ncondition = "AND"\nregexTarget = "secret"\npaths = ['''${FIGMA_SCENE_BLOB}-[0-9]+\\.txt$''']\nregexes = ['''^(${values.join('|')})$''']\n`;
     console.log(JSON.stringify({ auditedPublicAssetIds: ids.length, immutableScene: FIGMA_SCENE_BLOB }));
   }
+  for (const [, id] of large) configuration += auditedBinaryAllowlist(id);
   // The main config ends in generic-api-key: only that rule receives this
   // additional AND allowlist (exact values AND exact immutable blob fragments).
   const configPath = join(directory, 'large-scan.toml');
