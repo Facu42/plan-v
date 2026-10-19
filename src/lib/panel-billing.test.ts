@@ -37,6 +37,16 @@ describe('cobranzas del panel', () => {
     expect(movementsCsv([{ ...rows[0], patientName: 'Ana "Nani" Paz' }])).toContain('"Ana ""Nani"" Paz"');
   });
 
+  it('etiqueta el cobro que llegó por débito automático', () => {
+    const withDebit: BillingBoard = {
+      ...board,
+      patients: board.patients.map(patient => patient.patient_id === 'sofia'
+        ? { ...patient, payments: [{ ...patient.payments[0], note: 'Seguimiento mensual · octubre 2026', source: 'subscription' }] }
+        : patient),
+    };
+    expect(billingMovements(withDebit, '2026-10-21').find(row => row.patientId === 'sofia')?.concept).toBe('Débito automático · Seguimiento mensual · octubre 2026');
+  });
+
   it('suma ingresos por mes y deja en cero los meses sin pagos', () => {
     const bars = incomeMonths(board, '2026-10-21', 6);
     expect(bars).toHaveLength(6);

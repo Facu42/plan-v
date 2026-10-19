@@ -1,4 +1,4 @@
-/** Contratos del débito automático. La bandera arranca apagada; las pantallas llegan en otra rama. */
+/** Contratos del débito automático. La bandera arranca apagada. */
 
 export type SubscriptionPlanStatus = 'active' | 'archived';
 export type SubscriptionStatus =

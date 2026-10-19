@@ -90,7 +90,14 @@
 .pn-panel .p5-state { display:inline-flex; border-radius:999px; padding:2px 8px; font-size:11px; background:var(--pn-fill); }
 .pn-panel .p5-state.p5-cobrado { background:var(--pn-lime-light); }
 .pn-panel .p5-state.p5-pendiente { background:var(--pn-saffron-light); }
-.pn-panel .p5-state.p5-vencido { background:var(--pn-orange-light); }
+.pn-panel .p5-state.p5-vencido,.pn-panel .p5-state.p5-problema { background:var(--pn-orange-light); }
+.pn-panel .p5-state.p5-al-dia { background:var(--pn-lime-light); }
+.pn-panel .p5-state.p5-pausa { background:var(--pn-saffron-light); }
+.pn-panel .p5-state.p5-espera { background:var(--pn-fill); }
+.pn-panel .p5-check { flex-direction:row; align-items:center; }
+.pn-panel .p5-check input { width:18px; min-height:18px; }
+.pn-panel .p5-menu { font-size:12px; }
+.pn-panel .p5-menu summary { cursor:pointer; min-height:36px; display:flex; align-items:center; }
 .pn-panel .p5-slug { display:flex; align-items:center; gap:0; color:var(--pn-muted); }
 .pn-panel .p5-slug input { border:0; min-height:0; padding-left:0; }
 .pn-panel .p5-preview { align-items:center; background:var(--pn-fill); box-shadow:none; }
@@ -100,7 +107,7 @@
 .pn-panel .p5-phone em { margin-left:auto; font-style:normal; font-weight:600; }
 .pn-panel .p5-preview-cta { display:grid; place-items:center; min-height:40px; border-radius:14px; background:var(--pn-lime); font-weight:600; }
 .pn-panel .p5-dialog { position:fixed; inset:0; z-index:40; background:color-mix(in srgb,var(--pn-solid) 35%,transparent); display:grid; place-items:center; padding:18px; }
-.pn-panel .p5-dialog form,.pn-panel .p5-dialog .cbz-panel,.pn-panel .p5-dialog-wide>.p5-card { width:min(520px,100%); max-height:min(84dvh,760px); overflow:auto; background:var(--pn-white); border-radius:22px; padding:18px; }
+.pn-panel .p5-dialog form,.pn-panel .p5-dialog .p5-card,.pn-panel .p5-dialog .cbz-panel,.pn-panel .p5-dialog-wide>.p5-card { width:min(520px,100%); max-height:min(84dvh,760px); overflow:auto; background:var(--pn-white); border-radius:22px; padding:18px; }
 .pn-panel .p5-dialog-wide .cbz-panel { width:min(720px,100%); }
 .pn-panel .p5-row { display:flex; justify-content:flex-end; gap:8px; }
 @media (max-width:800px) {
