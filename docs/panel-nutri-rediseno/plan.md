@@ -244,6 +244,13 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-19 23:20 · Cursor · Celular de Cobranzas y de la página pública
+- Hecho: Facu rechazó el celular. En la tarjeta de débito el nombre se lee en una línea. En el celular, Movimientos es una lista de tarjetas. Las pestañas bajan de renglón. Suscribirme queda dentro del marco de la vista previa. El menú inferior queda fijo y no tapa el final. Nada se corta en 360, 390 ni 430, y los botones miden al menos 44 px.
+- Cómo: se aplicaron break-ui, frontend-patterns, frontend-a11y y verification-loop. Las vistas siguen recibiendo los mismos datos. Las capturas de celular se sacaron de nuevo dentro del panel, con el menú inferior, y quedaron al lado del boceto de escritorio en `design/suscripciones/`. No hay boceto de celular.
+- Rama y PR: `cursor/suscripciones-cobranzas-pagina`, [PR #156](https://github.com/Facu42/plan-v/pull/156). Lo que ya está en main (título repetido, accesos de paciente y turnos pegados) va en `cursor/arreglo-mobile-fase5`, no en esta rama.
+- Falta: el pago único sigue en su rama. Ficha y chat, después. Esta rama quedó con 3.230 pruebas y 2 omitidas, tipos en verde.
+- Próximo paso exacto: cerrar el control de esta rama y seguir el pago único en `cursor/pago-mensual-unico`, trayendo este arreglo.
+
 ### 2026-10-19 22:30 · Cursor · Pago único de la cuota, pedido registrado
 - Hecho: Facu pidió un pago de un solo mes, sin suscripción. Quedó escrito en la spec (sección 2.9) antes de programarlo. La nutri genera un enlace de Mercado Pago para la cuota del mes, lo copia, y la paciente puede pagarlo desde su app o desde la página pública. El cobro entra una sola vez en Movimientos y la cuota pasa a «Al día». Si ya tiene débito activo, no se ofrece.
 - Cómo: misma bandera apagada, mismos textos en español y sin WhatsApp. Se reutiliza el enlace de la seña y la conciliación. Si hace falta una tabla, la migración se escribe y no se aplica. No se toca la ficha ni el chat.

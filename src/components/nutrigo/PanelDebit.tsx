@@ -80,7 +80,7 @@ export function PanelDebitView({
       {subscriptions.length > 0 && !rows.length && <p className="p5-empty">No hay débitos en este filtro.</p>}
       {rows.map(sub => {
         const name = debitPerson(sub, patients);
-        return <div className="p5-li" key={sub.id}>
+        return <div className="p5-li p5-debit" key={sub.id}>
           <div className="p5-tx"><b>{name}</b><span>{sub.plan_name} · {monthlyLabel(sub.amount_cents)} · {nextChargeLabel(sub.next_payment_date)}</span></div>
           <span className={`p5-state p5-${debitTone(sub)}`}>{debitState(sub)}</span>
           <details className="p5-menu">
