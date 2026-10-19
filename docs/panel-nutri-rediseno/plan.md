@@ -23,6 +23,7 @@ Facundo aprobó. La referencia visual es el boceto:
 | 19/10 00:19 | Se deja de copiar Veda: panel propio, moderno, para Plan V. |
 | 19/10 00:30 | Aprobó el Inicio: resumen del día en dos líneas, pendientes con un botón cada uno, consultas de hoy con la próxima preparada, pacientes que necesitan atención, buenas noticias, cuatro números del consultorio y accesos rápidos. Sin gráficos que solo decoran. |
 | 19/10 01:57 | Aprobó el resto de las pantallas y pidió: **todo lo que se ve tiene que funcionar** (incluidas las piezas que sumó Claude), tema oscuro, el panel sin tener que bajar para ver la parte inferior, menú lateral plegable con una flecha dentro de un círculo y animada, movimiento al pasar el mouse por la lista de pacientes y, al tocar una, un resumen con accesos a cada sección de la ficha. |
+| 19/10 02:25 | Pidió: la paciente se **despliega hacia abajo** en la misma lista (no un panel lateral); menú más ancho y con **submenús** (línea en árbol y número en círculo, como su captura); **Planes** más completo y con la paciente elegible; **fotos de comida difuminadas** de fondo en las tarjetas, sin estética de IA; todo adaptable y **sin huecos vacíos** (por ejemplo Mensajes). |
 
 Esto **reemplaza** la regla vieja de usar el gris de Nutrigo en el panel de la nutri (14/10): el panel
 pasa a tener la paleta de la app de la paciente. La app de la paciente sigue igual a Nutrigo, sin cambios.
@@ -96,10 +97,20 @@ Cada fase se puede hacer sola, en este orden. Marcá el estado al empezar y al t
 - Tema claro, oscuro y «como el sistema». Se elige en Configuración y en el menú de la cuenta; se guarda
   en el perfil (y en el navegador para que no parpadee al entrar). El lima y el amarillo no cambian.
 - Contraste AA en los dos temas (texto chico 4,5:1).
-- Armazón nuevo: menú lateral con logo grande de Plan V, grupos Gestión, Acompañamiento, Plan, Recursos y Cuenta.
+- Armazón nuevo: menú lateral de 288 px con logo grande de Plan V, grupos Gestión, Acompañamiento, Plan, Recursos y Cuenta.
+- **Submenús** en Pacientes (Todas, Necesitan atención, Acceso pendiente, Archivadas), Agenda, Cobranzas,
+  Mensajes y Planes (Todos los planes, Armar o editar, Pedidos de cambio): flecha que gira, apertura de
+  260 ms, línea en árbol a la izquierda y el número en un círculo oscuro. Solo queda abierto el de la sección
+  actual; cada opción filtra o lleva a su pantalla de verdad. Si el menú no entra en la altura, se desplaza solo él.
+- **Fotos de comida difuminadas** detrás de las tarjetas destacadas (resumen del día, próxima consulta,
+  accesos rápidos, números): fotos propias de Plan V (`public/landing`, `src/assets/showroom`), achicadas y
+  difuminadas de antemano (no con filtro en vivo), con una capa del color de la tarjeta encima para que el
+  texto se lea. Nada de brillos ni degradés decorativos.
 - **Menú plegable**: botón redondo con una flecha en el borde del menú. Al tocarlo, el menú se angosta a
   84 px y queda solo con íconos (con su nombre al pasar el mouse); la flecha gira 180°. 280 ms con
   curva suave. Se recuerda en el navegador. Con teclado: Enter y Espacio; `aria-expanded`.
+- **Se adapta al ancho y sin huecos**: el contenido usa el ancho disponible (las grillas se estiran entre
+  1280 y 1680 px) y las tarjetas toman el alto de su contenido, sin rellenos vacíos.
 - **Sin bajar para ver la parte de abajo**: el panel ocupa el alto de la ventana (`100dvh`); la página no
   se desplaza a 1440×900. Lo largo (tablas, chats, listas) se desplaza dentro de su tarjeta. En pantallas
   más bajas se achican espacios antes de cortar contenido. En el celular sí se desplaza la página.
@@ -120,10 +131,11 @@ pendientes con un botón por fila y pestañas por tipo, consultas de hoy, necesi
 - **Movimiento al pasar el mouse**: la fila se tiñe, la foto crece un poco con un borde lima, el nombre
   cambia a verde, la barra de adherencia se rellena de nuevo y aparece una flecha que entra desde la
   izquierda. Entrada escalonada de filas (28 ms entre filas, 300 ms cada una). Con «reducir movimiento», solo fundidos.
-- **Al tocar una fila** (o Enter) se abre un panel a la derecha (300 ms) con: foto, nombre, próxima consulta,
+- **Al tocar una fila** (o Enter) **se despliega debajo de esa misma fila** (300 ms, una sola abierta a la vez,
+  la flecha de la fila gira) con: foto, nombre, próxima consulta,
   adherencia, peso, cuota, avisos (adherencia baja, cuota vencida, sin acceso a la app, sin plan), lo último
   de la consulta, y **un acceso por cada sección de la ficha** con un dato corto de cada una. Botones
-  «Escribir» y «Abrir ficha completa». Se cierra con Escape, con la X o tocando afuera; el foco vuelve a la fila.
+  «Escribir», «Armar plan» y «Abrir ficha completa». Se cierra tocando la fila otra vez o con Escape; el foco queda en la fila.
 - Necesita un pedido liviano a la API que traiga ese resumen por paciente (sin traer la ficha entera).
 
 ### Fase 4. Ficha con sus 11 pestañas · Estado: sin empezar
@@ -153,7 +165,13 @@ PR #112) y días registrados. Mensajes en tres columnas con respuesta sugerida. 
 
 ### Fase 7. Plan: Planes, Alimentos, Recetas, Equivalencias y Modelos · Estado: sin empezar
 
-Editor semanal con calorías por comida y por día, macros del día elegido, pedidos de cambio y atajos de IA.
+**Todos los planes**: estado del plan de cada paciente (publicado, borrador, por vencer, sin plan) con filtros,
+números arriba y «Para hacer esta semana». **Plan de una paciente**: selector de paciente con buscador arriba,
+franja de metas (calorías, macros, peso, adherencia, restricciones), pestañas Semana, Lista de compras,
+Indicaciones y Versiones, semanas 1 a 4, publicar como paso aparte. En la semana: tocar un día muestra sus macros;
+tocar una comida muestra sus macros y tres equivalentes para reemplazarla. Pedido de cambio de la paciente con
+Aprobar. Paciente sin plan: cuatro maneras de empezar (asistente, modelo, copiar de otra paciente, desde cero).
+Todo se guarda como borrador y conserva versiones (ya existen `MealPlanEditor` y los modelos de #73).
 Alimentos (SARA 2 y propios), Recetas con foto, Equivalencias con calculadora y opción de mostrarlas en la
 app de la paciente, Modelos (planes, menús, mensajes, formularios) con «Aplicar a paciente».
 
