@@ -244,6 +244,14 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-19 · Codex · Fase 4, paso 6 (cierre verificado)
+- Hecho: once pestañas verificadas, suite estable de 3.177 aprobadas y dos omitidas (494 archivos), tipos/build/secretos verdes. Seis e2e, 14 controles y 44 tamaños/temas, nueve acciones privadas y cinco ensayos de paginación; 47 capturas. Comparación navegable comprobada y abierta para Facundo.
+- Cómo: revisiones independientes de código y visual cerradas sin P1/P2. Fire test detectado y restaurado; comparadores manuales preservados con RED/GREEN. [Informe completo y paso 10](fase-4-verificacion.md). Sin migraciones ni cambios de producción.
+- Rama: codex/panel-nutri-fase-4, base main 6697d28. Este cierre se respalda antes del PR propio.
+- Falta: crear y registrar PR, controles remotos e integración con todo verde.
+- Próximo paso exacto: abrir PR de fase 4 con el paso 10; integrar al aprobar CI y detener este hilo. La fase 5 está a cargo de otro carril por pedido de Facundo.
+
+
 ### 2026-10-19 · Codex · Fase 4, paso 5 (correcciones de revisión)
 - Hecho: Historia agrupada y medidas del primer día autorizado, datos de ingreso preservados; chat con estilos propios de su contexto, visor y perfil con tema del panel, pestaña activa visible en celular. Corregido desborde del plan y retiro de Atención en documentos/evaluaciones.
 - Cómo: revisión independiente de código y visual; nueve acciones privadas reales en demo, incluida apertura pendiente y retiro, laboratorio de tres fechas y nota manual/publicación. Seis e2e aprobados con Chrome local; tipos aprobados. Fire test detectó exposición de foto sin permiso, restaurado y tres casos verdes.

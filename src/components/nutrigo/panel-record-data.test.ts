@@ -16,3 +16,9 @@ it('laboratorio conserva rangos originales y separa unidad y comparadores',()=>{
   expect(groups.find(g=>g.unit==='ng/ml')?.points).toEqual([{date:'2026-10-01',value:14}]);
   expect(groups.every(g=>g.latest.range_text==='Rango original')).toBe(true);
 });
+import {recordLaboratoryText} from './panel-record-data';
+it('la tabla no pierde un comparador agregado a mano ni lo duplica en el texto original',()=>{
+ expect(recordLaboratoryText({raw_value:'20',operator:'<'})).toBe('< 20');
+ expect(recordLaboratoryText({raw_value:'<20',operator:'<'})).toBe('<20');
+ expect(recordLaboratoryText({raw_value:'Negativo',operator:''})).toBe('Negativo');
+});

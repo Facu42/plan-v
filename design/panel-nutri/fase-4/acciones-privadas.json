@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-19T16:48:13.957Z",
+  "checks": [
+    "Carga privada confirmada y listada",
+    "Visor privado decodifica la imagen real de prueba",
+    "Retirar Atención cierra visor y elimina fuente del consultorio",
+    "La apertura puede quedar en vuelo antes del retiro",
+    "Una respuesta anterior al retiro no reabre el visor",
+    "Laboratorio compara tres fechas con rango original",
+    "Retirar Atención limpia la comparación de laboratorio",
+    "Nota manual guardada y resumen revisado publicado",
+    "Exportación PDF existente accesible desde Archivos"
+  ]
+}

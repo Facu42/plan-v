@@ -19,3 +19,6 @@ export function recordLabSeries(records:readonly ClinicalWorkspaceRecord[],patie
   }
   return [...groups.values()].map(group=>({...group,points:group.values.filter(row=>row.value.operator===''&&row.value.value!==null).map(row=>({date:row.date,value:row.value.value!}))}));
 }
+
+/** Conserva el comparador explícito cuando el texto ingresado no lo incluye. */
+export function recordLaboratoryText(value:{raw_value:string;operator:string}){const raw=value.raw_value.trim();return value.operator&&!/^[<>≤≥]/.test(raw)?`${value.operator} ${raw}`:raw;}

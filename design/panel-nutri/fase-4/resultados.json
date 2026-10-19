@@ -1,0 +1,417 @@
+{
+  "date": "2026-10-19T16:54:13.657Z",
+  "checks": [
+    "Alias y subpestaña conservada: ingreso",
+    "Alias y subpestaña conservada: registros",
+    "Alias y subpestaña conservada: mensajes",
+    "Alias y subpestaña conservada: semanal",
+    "Alias y subpestaña conservada: planificacion",
+    "Alias y subpestaña conservada: compras",
+    "Editor completo conserva horarios",
+    "Filtro mensual activo",
+    "Filtro de pendientes activo",
+    "Revisión de registros sigue disponible",
+    "Chat de ficha conserva compositor sin lista duplicada",
+    "Compositor dentro del chat móvil",
+    "Hilo móvil tiene altura útil y mensajes visibles",
+    "Perfil móvil abre y cierra con diálogo accesible"
+  ],
+  "measurements": [
+    {
+      "section": "resumen",
+      "theme": "light",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Resumen",
+      "activeVisible": true
+    },
+    {
+      "section": "historia",
+      "theme": "light",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Historia clínica",
+      "activeVisible": true
+    },
+    {
+      "section": "evolucion",
+      "theme": "light",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Evolución",
+      "activeVisible": true
+    },
+    {
+      "section": "notas",
+      "theme": "light",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Notas de consulta",
+      "activeVisible": true
+    },
+    {
+      "section": "plan",
+      "theme": "light",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Plan",
+      "activeVisible": true
+    },
+    {
+      "section": "alimentario",
+      "theme": "light",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Registro alimentario",
+      "activeVisible": true
+    },
+    {
+      "section": "laboratorio",
+      "theme": "light",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Laboratorio",
+      "activeVisible": true
+    },
+    {
+      "section": "archivos",
+      "theme": "light",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Archivos",
+      "activeVisible": true
+    },
+    {
+      "section": "consultas",
+      "theme": "light",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Consultas",
+      "activeVisible": true
+    },
+    {
+      "section": "cobros",
+      "theme": "light",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Cobros",
+      "activeVisible": true
+    },
+    {
+      "section": "chat",
+      "theme": "light",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Chat",
+      "activeVisible": true
+    },
+    {
+      "section": "resumen",
+      "theme": "light",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Resumen",
+      "activeVisible": true
+    },
+    {
+      "section": "historia",
+      "theme": "light",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Historia clínica",
+      "activeVisible": true
+    },
+    {
+      "section": "evolucion",
+      "theme": "light",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Evolución",
+      "activeVisible": true
+    },
+    {
+      "section": "notas",
+      "theme": "light",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Notas de consulta",
+      "activeVisible": true
+    },
+    {
+      "section": "plan",
+      "theme": "light",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Plan",
+      "activeVisible": true
+    },
+    {
+      "section": "alimentario",
+      "theme": "light",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Registro alimentario",
+      "activeVisible": true
+    },
+    {
+      "section": "laboratorio",
+      "theme": "light",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Laboratorio",
+      "activeVisible": true
+    },
+    {
+      "section": "archivos",
+      "theme": "light",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Archivos",
+      "activeVisible": true
+    },
+    {
+      "section": "consultas",
+      "theme": "light",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Consultas",
+      "activeVisible": true
+    },
+    {
+      "section": "cobros",
+      "theme": "light",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Cobros",
+      "activeVisible": true
+    },
+    {
+      "section": "chat",
+      "theme": "light",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Chat",
+      "activeVisible": true
+    },
+    {
+      "section": "resumen",
+      "theme": "dark",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Resumen",
+      "activeVisible": true
+    },
+    {
+      "section": "historia",
+      "theme": "dark",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Historia clínica",
+      "activeVisible": true
+    },
+    {
+      "section": "evolucion",
+      "theme": "dark",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Evolución",
+      "activeVisible": true
+    },
+    {
+      "section": "notas",
+      "theme": "dark",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Notas de consulta",
+      "activeVisible": true
+    },
+    {
+      "section": "plan",
+      "theme": "dark",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Plan",
+      "activeVisible": true
+    },
+    {
+      "section": "alimentario",
+      "theme": "dark",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Registro alimentario",
+      "activeVisible": true
+    },
+    {
+      "section": "laboratorio",
+      "theme": "dark",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Laboratorio",
+      "activeVisible": true
+    },
+    {
+      "section": "archivos",
+      "theme": "dark",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Archivos",
+      "activeVisible": true
+    },
+    {
+      "section": "consultas",
+      "theme": "dark",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Consultas",
+      "activeVisible": true
+    },
+    {
+      "section": "cobros",
+      "theme": "dark",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Cobros",
+      "activeVisible": true
+    },
+    {
+      "section": "chat",
+      "theme": "dark",
+      "width": 1440,
+      "pageWidth": 1440,
+      "tabs": 11,
+      "active": "Chat",
+      "activeVisible": true
+    },
+    {
+      "section": "resumen",
+      "theme": "dark",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Resumen",
+      "activeVisible": true
+    },
+    {
+      "section": "historia",
+      "theme": "dark",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Historia clínica",
+      "activeVisible": true
+    },
+    {
+      "section": "evolucion",
+      "theme": "dark",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Evolución",
+      "activeVisible": true
+    },
+    {
+      "section": "notas",
+      "theme": "dark",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Notas de consulta",
+      "activeVisible": true
+    },
+    {
+      "section": "plan",
+      "theme": "dark",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Plan",
+      "activeVisible": true
+    },
+    {
+      "section": "alimentario",
+      "theme": "dark",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Registro alimentario",
+      "activeVisible": true
+    },
+    {
+      "section": "laboratorio",
+      "theme": "dark",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Laboratorio",
+      "activeVisible": true
+    },
+    {
+      "section": "archivos",
+      "theme": "dark",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Archivos",
+      "activeVisible": true
+    },
+    {
+      "section": "consultas",
+      "theme": "dark",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Consultas",
+      "activeVisible": true
+    },
+    {
+      "section": "cobros",
+      "theme": "dark",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Cobros",
+      "activeVisible": true
+    },
+    {
+      "section": "chat",
+      "theme": "dark",
+      "width": 390,
+      "pageWidth": 390,
+      "tabs": 11,
+      "active": "Chat",
+      "activeVisible": true
+    }
+  ]
+}
