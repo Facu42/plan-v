@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../../api/client';
+import { ApiError } from '../../api/error';
+import { feeCheckoutApi, type FeeOffer } from '../../api/fee-checkout';
+import { friendlyError } from '../../lib/error-messages';
 import { formatFeeDate, formatPesos, PAYMENT_METHOD_LABELS, summarizeLedger } from '../../fees';
 import type { PatientLedgerView, PaymentInput } from '../../types/fees';
 import { Icon } from '../shared/Icon';
@@ -17,7 +20,12 @@ export function CopyAlias({ alias }: { alias: string }) {
   return <button type="button" className="nv-button nv-soft cbz-copy" onClick={() => void copy()} aria-label="Copiar alias">{copied ? 'Copiado' : 'Copiar'}</button>;
 }
 
-export function PagosScreen({ ledger, onLedger, today }: { ledger: PatientLedgerView; onLedger: (ledger: PatientLedgerView) => void; today?: string }) {
+export function PagosScreen({ ledger, onLedger, today, monthlyPay }: {
+  ledger: PatientLedgerView;
+  onLedger: (ledger: PatientLedgerView) => void;
+  today?: string;
+  monthlyPay?: { title: string; amount: number; busy: boolean; notice: string; onPay: () => void } | null;
+}) {
   const summary = useMemo(() => summarizeLedger(ledger, today), [ledger, today]);
   const info = ledger.payment_info;
   const history = [...ledger.payments].filter((payment) => payment.status !== 'voided').sort((a, b) => b.paid_on.localeCompare(a.paid_on) || b.created_at.localeCompare(a.created_at));
@@ -36,7 +44,11 @@ export function PagosScreen({ ledger, onLedger, today }: { ledger: PatientLedger
     <section className={`cbz-status cbz-status-${summary.state}`} aria-label="Estado de tu cuota">
       <div><FeeStateBadge summary={summary} /><h2>{headline}</h2>
         {ledger.fee && <p>Cuota mensual de {formatPesos(ledger.fee.amount)}.{summary.credit > 0 ? ` Tenés ${formatPesos(summary.credit)} a favor.` : ''}</p>}
-        {summary.pending_reports > 0 && <p><Icon name="clock" size={13} /> Tu aviso de pago está a confirmar por tu nutricionista.</p>}</div>
+        {summary.pending_reports > 0 && <p><Icon name="clock" size={13} /> Tu aviso de pago está a confirmar por tu nutricionista.</p>}
+        {monthlyPay && <p>{monthlyPay.title}. {formatPesos(monthlyPay.amount)}.</p>}
+        {monthlyPay && <button type="button" className="nv-button" disabled={monthlyPay.busy} onClick={monthlyPay.onPay}>Pagar este mes</button>}
+        {monthlyPay?.notice && <p role="status">{monthlyPay.notice}</p>}
+      </div>
     </section>
 
     <div className="cbz-patient-grid">
@@ -67,13 +79,35 @@ export function PagosScreen({ ledger, onLedger, today }: { ledger: PatientLedger
 export function ShowroomPagos({ patientId }: { patientId: string }) {
   const [ledger, setLedger] = useState<PatientLedgerView | null>(null);
   const [error, setError] = useState('');
+  const [offer, setOffer] = useState<FeeOffer | null>(null);
+  const [payBusy, setPayBusy] = useState(false);
+  const [payNotice, setPayNotice] = useState('');
   const load = useCallback(() => {
     setError(''); setLedger(null);
     api.getPatientLedger(patientId, 'patient').then((result) => setLedger(result.ledger)).catch((reason) => setError(feeErrorMessage(reason, 'No pudimos cargar tus pagos.')));
   }, [patientId]);
   useEffect(load, [load]);
+  useEffect(() => {
+    feeCheckoutApi.offer().then(setOffer).catch(reason => {
+      if (!(reason instanceof ApiError && reason.status === 404)) setPayNotice(friendlyError(reason));
+    });
+  }, [patientId]);
+  const monthlyPay = offer?.available ? {
+    title: offer.title,
+    amount: offer.amount,
+    busy: payBusy,
+    notice: payNotice,
+    onPay: () => {
+      setPayBusy(true);
+      setPayNotice('');
+      feeCheckoutApi.pay({ client_request_id: crypto.randomUUID(), due_on: offer.due_on }).then(created => {
+        if (created.init_point?.startsWith('https://')) window.location.assign(created.init_point);
+        else setPayNotice('Estamos preparando el enlace. Reintentá en un momento.');
+      }).catch(reason => setPayNotice(friendlyError(reason))).finally(() => setPayBusy(false));
+    },
+  } : null;
 
   if (error) return <NvState kind="error" title="No pudimos cargar tus pagos" description={error} action={<NvButton className="nv-soft" onClick={load}>Reintentar</NvButton>} />;
   if (!ledger) return <NvState kind="loading" title="Cargando tus pagos…" description="Un momento." />;
-  return <PagosScreen ledger={ledger} onLedger={setLedger} />;
+  return <PagosScreen ledger={ledger} onLedger={setLedger} monthlyPay={monthlyPay} />;
 }

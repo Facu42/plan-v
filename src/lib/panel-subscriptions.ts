@@ -83,6 +83,10 @@ export function payerEmailError(value: string): string {
 
 export function subscriptionConcept(note: string, source?: string): string {
   const text = note.trim();
+  if (source === 'checkout') {
+    const title = text.startsWith('Cuota de ') ? text : (text ? `Cuota de ${text}` : 'Cuota pagada con Mercado Pago');
+    return title.includes('Mercado Pago') ? title : `${title} · Mercado Pago`;
+  }
   if (source !== 'subscription') return text || 'Pago registrado';
   if (text.startsWith('Débito automático')) return text;
   return text ? `Débito automático · ${text}` : 'Débito automático';

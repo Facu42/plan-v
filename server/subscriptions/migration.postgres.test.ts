@@ -152,4 +152,24 @@ describe('suscripciones en la base', () => {
     expect(future.rows[0].n).toBe(0);
     expect(extra.rows).toEqual([{ concept: 'Taller' }]);
   });
+
+  it('el pago único de un mes no se duplica y el libro lo muestra', async () => {
+    const checkout = `insert into public.patient_fee_checkouts
+      (nutritionist_id, patient_id, due_on, amount, status, client_request_id, expires_at)
+      values ($1, $2, '2026-11-10', 28000, 'ready', $3, now() + interval '7 days')`;
+    await db.query(checkout, [nutriAId, patientA, '33333333-3333-4333-8333-333333333331']);
+    await expect(db.query(checkout, [nutriAId, patientA, '33333333-3333-4333-8333-333333333332'])).rejects.toMatchObject({ code: '23505' });
+    const payment = `insert into public.patient_payments
+      (patient_id, nutritionist_id, amount, paid_on, method, note, status, created_by, source, provider, provider_payment_id, covers_due_on)
+      values ($1, $2, 28000, '2026-11-10', 'mercado_pago', 'Cuota de noviembre 2026', 'confirmed', $3, 'checkout', 'mercado_pago', $4, '2026-11-10')`;
+    await db.query(payment, [patientA, nutriAId, nutriA, 'pago-cuota-1']);
+    await expect(db.query(payment, [patientA, nutriAId, nutriA, 'pago-cuota-2'])).rejects.toMatchObject({ code: '23505' });
+    const ledger = (await asUser<{ covers: string | null }>(
+      nutriA,
+      "select public.get_patient_ledger($1) -> 'payments' -> 0 ->> 'covers_due_on' as covers",
+      [patientA],
+    ))[0];
+    expect(ledger.covers).toBe('2026-11-10');
+    await expect(asUser(patientUser, 'select id from public.patient_fee_checkouts')).rejects.toMatchObject({ code: '42501' });
+  });
 });

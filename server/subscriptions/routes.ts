@@ -5,6 +5,7 @@ import { isSupabaseEnabled, getRequestDb } from '../db/supabase-client.js';
 import { sbGetActor } from '../db/supabase-repo.js';
 import { subscriptionsAllowed, subscriptionsEnabled } from './flag.js';
 import * as service from './service.js';
+import * as feeCheckout from '../fees/monthly-checkout.js';
 
 const uuid = z.uuid();
 const amount = z.number().int().min(100_000).max(1_000_000_000).refine(value => value % 100 === 0);
@@ -217,6 +218,35 @@ export function registerPatientSubscriptionRoutes(app: Hono) {
     const patientId = await patient(c);
     const input = await body(c, revisionBody);
     return c.json(await service.cancelForPatient(patientId, parsed(uuid, c.req.param('id')), input.expected_revision));
+  });
+
+  const dueOn = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+  app.post('/api/scheduling/fee-checkouts', async c => {
+    const nutritionistId = await owner(c);
+    const input = await body(c, z.object({ patient_id: uuid, due_on: dueOn, client_request_id: uuid }).strict());
+    return c.json(await feeCheckout.createForNutritionist(nutritionistId, input), 201);
+  });
+  app.get('/api/patient/fee-checkout', async c => {
+    const patientId = await patient(c);
+    const offer = await feeCheckout.offerForPatient(patientId);
+    if (!offer) return c.json({ error: 'No encontrado' }, 404);
+    return c.json(offer);
+  });
+  app.post('/api/patient/fee-checkout', async c => {
+    const patientId = await patient(c);
+    const input = await body(c, z.object({ due_on: dueOn.optional(), client_request_id: uuid }).strict());
+    return c.json(await feeCheckout.createForPatient(patientId, input), 201);
+  });
+  app.get('/api/public/scheduling/:slug/cuota', async c => {
+    enabled();
+    const offer = await feeCheckout.publicEnabled(parsed(slugSchema, c.req.param('slug')));
+    if (!offer) return c.json({ error: 'No encontrado' }, 404);
+    return c.json(offer);
+  });
+  app.post('/api/public/scheduling/:slug/cuota', async c => {
+    enabled();
+    const input = await body(c, z.object({ email: email, client_request_id: uuid }).strict());
+    return c.json(await feeCheckout.createForPublic(parsed(slugSchema, c.req.param('slug')), input));
   });
 }
 

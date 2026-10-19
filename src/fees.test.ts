@@ -53,6 +53,16 @@ describe('resumen de la cuenta de una paciente', () => {
     expect(summarizeLedger({ patient_id: 'p', fee: null, charges: [], payments: [pay(500)] }, '2026-09-20').credit).toBe(500);
   });
 
+  it('un pago único cubre el mes elegido y deja al día si no hay otra deuda', () => {
+    const october = { ...pay(1000, 'confirmed', '2026-10-02'), covers_due_on: '2026-10-10', source: 'checkout' as const };
+    const onlyOctober = summarizeLedger({ ...base, charges: [base.charges[3]], payments: [october] }, '2026-10-20');
+    expect(onlyOctober.state).toBe('al_dia');
+    expect(onlyOctober.charges[0]?.paid).toBe(1000);
+    const olderStillOpen = summarizeLedger({ ...base, payments: [october] }, '2026-10-20');
+    expect(olderStillOpen.charges.map(charge => charge.paid)).toEqual([0, 0, 0, 1000]);
+    expect(olderStillOpen.state).toBe('debe');
+  });
+
   it('suma lo cobrado en el mes', () => {
     expect(summarizeLedger({ ...base, payments: [pay(1000, 'confirmed', '2026-09-01'), pay(700, 'confirmed', '2026-08-30')] }, '2026-09-20').paid_this_month).toBe(1000);
   });
