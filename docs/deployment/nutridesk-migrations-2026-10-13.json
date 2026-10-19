@@ -112,6 +112,11 @@
       "version": "20261020120000",
       "file": "20261020120000_patient_subscriptions.sql",
       "sha256": "f227bfaaff853f596242502429fc405017b7579c8e22f3f99a1a2869a930f2b9"
+    },
+    {
+      "version": "20261020143000",
+      "file": "20261020143000_patient_fee_checkouts.sql",
+      "sha256": "5dd82a568dc7ce36a254b1e133dfb1980ab759fc401cccd9468f98f182854fbc"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",
