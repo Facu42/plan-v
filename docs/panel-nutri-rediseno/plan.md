@@ -244,6 +244,13 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-19 · Codex · Fase 4, paso 9 (selector del acordeón de revisión)
+- Hecho: segunda cabeza con ambas verificaciones generales, recorridos y secretos verdes. El recorrido firmado confirmó publicación/meta, archivos privados, retiro/renovación de permisos, turnos y pagos; llegó a la revisión profesional.
+- Cómo: el selector de texto del acordeón se ejecuta ahora mediante /browse, que lo admite, en lugar de querySelectorAll nativo. Se conserva Marcar revisado y la lectura persistente. Sólo script y documentación; comprobado en demo.
+- Rama: codex/panel-nutri-fase-4, PR #154.
+- Qué falta: recorrido firmado completo y controles de la nueva cabeza en verde antes de integrar.
+- Próximo paso exacto: integrar #154 al aprobar todos los controles y detenerse; no tomar fase 5.
+
 ### 2026-10-19 · Codex · Fase 4, paso 8 (recorrido firmado)
 - Hecho: las dos ejecuciones generales del PR aprobaron pruebas, tipos, compilación y controles; seis recorridos y secretos aprobados. El control firmado aprobó sus 30 pruebas de Auth/PostgREST y se detuvo en un acceso anterior de la ficha.
 - Cómo: el recorrido abre ahora Plan antes de su subpestaña Planificación, conserva Confirmar y compartir y la comprobación de publicación. Corrección limitada al script; navegación comprobada en demo y sintaxis validada.

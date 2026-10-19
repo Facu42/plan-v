@@ -40,6 +40,8 @@ La primera suite tuvo un EBUSY de Windows al preparar la tipografía del PDF y u
 
 CI de c810975: ambas ejecuciones generales y los recorridos aprobaron. El control firmado aprobó 30 casos de Auth/PostgREST, pero el navegador intentaba acceder a Planificación sin abrir su pestaña principal Plan. Se actualiza ese acceso del recorrido, conservando la confirmación y la lectura de la meta publicada; la integración espera su repetición completa en verde.
 
+CI de 511bf2e: ambas verificaciones generales y recorridos volvieron a aprobar. El control firmado confirmó meta, planes, adjuntos privados, permisos, turnos y pagos; se detuvo en un selector de texto enviado a querySelectorAll nativo. El acordeón de revisión se abre ahora con /browse, que admite ese selector; se conserva Marcar revisado y su lectura persistente. Se repite completo antes de integrar.
+
 ## Regression Guard · paso 10
 
 - **Flujos críticos verificados:** ✅ ficha y enlaces anteriores; ingreso/revisión y antecedentes; medidas y objetivos; plan publicado/editor; diario/revisión; notas y publicación; documentos privados; turnos/cierre explícito; cobros; chat. Suite, seis e2e y recorridos locales. La captura de audio y proveedores mantienen sus pruebas existentes; no se ensayó una videollamada física.
