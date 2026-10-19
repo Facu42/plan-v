@@ -1,28 +1,14 @@
+import { previewPermissions } from './patient-permissions.js';
 import type { PatientQuickPreview, PatientRecordSection, PatientRowPreview } from '../../src/types/patient-preview.js';
 import { PATIENT_RECORD_SECTION_IDS } from '../../src/types/patient-preview.js';
-import { currentCareConsents } from '../care/consents.js';
-import { CONSENT_CATALOG } from '../intake/consent.js';
 import { CareError } from '../care/errors.js';
 import { listMeasurements } from '../care/repository.js';
 import { getRequestDb } from '../db/supabase-client.js';
 import { getPatientPlanPreview } from '../plans/repository.js';
 import { shared } from '../consultations/memory.js';
 import { summarizeLedger, formatPesos } from '../../src/fees.js';
-import { buildWorkItems, loadWorkSnapshot, queueDbError, readAllRows, type WorkScope } from './repository.js';
+import { buildWorkItems, loadWorkSnapshot, queueDbError, type WorkScope } from './repository.js';
 
-/** Permisos y estado del ingreso, sin respuestas del cuestionario ni notas clínicas. */
-async function previewPermissions(patientId: string, persistent: boolean) {
-  if (!persistent) return currentCareConsents(patientId, false);
-  const db = getRequestDb();
-  const [events, intake] = await Promise.all([
-    readAllRows((offset,end) => db.from('consent_events').select('id,purpose,text_version,text_hash,decision,sequence').eq('patient_id',patientId).order('sequence').order('id').range(offset,end)),
-    db.from('intake_sessions').select('status').eq('patient_id',patientId).order('updated_at',{ascending:false}).range(0,0),
-  ]);
-  queueDbError(intake.error);
-  const latest = new Map(events.map(event => [String(event.purpose),event]));
-  const consented = CONSENT_CATALOG.filter(text => { const event=latest.get(text.purpose);return event?.decision==='granted'&&event.text_version===text.text_version&&event.text_hash===text.text_hash; }).map(text=>text.purpose);
-  return { consented, intake: { status: String(intake.data?.[0]?.status ?? 'draft') } };
-}
 
 export async function loadPatientQuickPreview(scope: WorkScope, patientId: string, now = new Date()): Promise<PatientQuickPreview> {
   const patient = scope.patients.find(p => p.id === patientId);

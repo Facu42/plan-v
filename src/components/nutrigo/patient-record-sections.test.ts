@@ -1,8 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { RECORD_TABS, recordTab, appointmentRecordSummary, documentInSection } from './patient-record-sections';
+import { RECORD_TABS, RECORD_PRIMARY_TABS, RECORD_PLAN_TABS, recordPrimaryTab, recordTab, appointmentRecordSummary, documentInSection } from './patient-record-sections';
 import type { AppointmentHistoryEntry } from '../../types';
 
 describe('Ficha completa del paciente', () => {
+  it('agrupa las catorce rutas en once pestañas y conserva cada subdestino de Plan',()=>{
+    expect(RECORD_PRIMARY_TABS.map(([id])=>id)).toEqual(['resumen','historia','evolucion','notas','plan','alimentario','laboratorio','archivos','consultas','cobros','chat']);
+    expect(RECORD_PRIMARY_TABS.find(([id])=>id==='plan')?.[1]).toBe('Plan');
+    expect(RECORD_PLAN_TABS.map(([id])=>id)).toEqual(['plan','semanal','planificacion','compras']);
+    for(const [id] of RECORD_TABS){expect(recordTab(id)).toBe(id);expect(RECORD_PRIMARY_TABS.some(([primary])=>primary===recordPrimaryTab(id))).toBe(true);}
+  });
   it('ofrece las diez secciones y mantiene accesos operativos', () => {
     expect(RECORD_TABS.map(([, label]) => label)).toEqual(expect.arrayContaining(['Historia clínica', 'Evolución', 'Notas de consulta', 'Plan actual', 'Plan semanal', 'Lista de compras', 'Registro alimentario', 'Chat', 'Archivos', 'Laboratorio', 'Resumen', 'Planificación', 'Consultas', 'Cobros']));
   });

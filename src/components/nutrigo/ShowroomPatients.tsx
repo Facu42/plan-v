@@ -109,7 +109,7 @@ export function InviteShare({ name, invite, onClose }: { name: string; invite: P
       {error && <small role="alert">{error}</small>}
     </span>
     {!linked && <span className="nv-invite-actions">
-      {ready ? <><NvButton className="nv-soft" onClick={copy}>{copied ? 'Copiado' : 'Copiar enlace'}</NvButton><NvButton className="nv-ghost" disabled={busy} onClick={() => void email()}>{busy ? 'Mandando…' : 'Mandar por mail'}</NvButton><a className="nv-button nv-ghost" href={`https://wa.me/?text=${encodeURIComponent(inviteMessage(name, link))}`} target="_blank" rel="noreferrer">WhatsApp</a></> : <NvButton className="nv-soft" disabled={busy} onClick={() => void prepare()}>{busy ? 'Preparando…' : 'Reintentar preparar invitación'}</NvButton>}
+      {ready ? <><NvButton className="nv-soft" onClick={copy}>{copied ? 'Copiado' : 'Copiar enlace'}</NvButton><NvButton className="nv-ghost" disabled={busy} onClick={() => void email()}>{busy ? 'Mandando…' : 'Mandar por mail'}</NvButton></> : <NvButton className="nv-soft" disabled={busy} onClick={() => void prepare()}>{busy ? 'Preparando…' : 'Reintentar preparar invitación'}</NvButton>}
     </span>}
     <button type="button" disabled={busy} onClick={() => { if (canLeaveWorkspace()) onClose(); }} aria-label="Cerrar aviso">×</button>
   </div>;

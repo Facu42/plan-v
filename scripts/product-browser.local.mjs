@@ -91,6 +91,18 @@ async function readUntil(actor,path,predicate) {
 function check(condition,label) { if(!condition) {failedCheck=label;throw Error(label);}evidence.push(label);console.log('Verificado: '+label); }
 async function reloadContains(text) {await B('reload');await until(`document.body.innerText.includes(${JSON.stringify(text)})`);}
 async function field(label,value,scope='') {await B('fill',`${scope}label:has-text("${label}") input`,value);}
+async function openCobranzas(patientId) {
+  const row = `[aria-label="Ver cobranzas de Paciente ficticia"]`;
+  if ((await B('js', `(()=>{const e=document.querySelector(${JSON.stringify(row)});if(!e||!e.getClientRects().length)return false;e.click();return true;})()`)).includes('true')) {
+    await B('wait', '#cbz-fee-amount');
+    return;
+  }
+  await button('Registrar cobro');
+  await B('wait', 'select[name="paciente"]');
+  await B('select', 'select[name="paciente"]', patientId);
+  await button('Continuar');
+  await B('wait', '#cbz-fee-amount');
+}
 try {
   await mkdir('.gstack',{recursive:true});
   const professional=await identity('Nutricionista ficticia');const patient=await identity('Paciente ficticia');
@@ -146,7 +158,7 @@ try {
   check((await read(patient,`/api/patients/${pid}/care`)).consented.includes('ai_menu_draft')===false,'catálogo de permisos recuperado en la misma pantalla tras un error sin alterar la decisión guardada');
   await B('viewport','1440x1000');
   await logout();phase='ficha y meta profesional';await login(professional,`/crm/ficha?paciente=${pid}&seccion=ingreso`);
-  await button('Marcar ingreso como revisado');await until("document.body.innerText.includes('Ya revisado')" );await button('Planificación');await button('Confirmar y compartir');await until("document.body.innerText.includes('Meta confirmada:')");
+  await button('Marcar ingreso como revisado');await until("document.body.innerText.includes('Ya revisado')" );await button('Plan');await button('Planificación');await button('Confirmar y compartir');await until("document.body.innerText.includes('Meta confirmada:')");
   const target=await read(patient,`/api/patients/${pid}/nutrition-target`);check(Boolean(target.target?.published_at),'meta confirmada visible sólo al publicarse');
   phase='receta manual y asignación';
   await B('goto',origin+`/crm/recetas?paciente=${pid}`);await button('Nueva receta');await B('click','.recipe-choice button:first-child');
@@ -181,7 +193,7 @@ try {
   const weekday=new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',weekday:'long'}).format(new Date());
   await B('select','[aria-label="Día de la consulta"]',weekday[0].toUpperCase()+weekday.slice(1));await B('fill','[aria-label="Hora de la consulta"]','16:00');await B('select','[aria-label="Modalidad de la consulta"]','video');await B('fill','[aria-label="Enlace de videollamada"]','https://example.test/consulta');await button('Guardar turno');
   await readUntil(patient,`/api/patients/${pid}`,r=>r.patient.appointment?.meet_url==='https://example.test/consulta');await reloadContains('Abrir videollamada');
-  await B('goto',origin+'/crm/cobranzas');await B('click','[aria-label="Ver cobranzas de Paciente ficticia"]');await B('fill','#cbz-fee-amount','1000');await B('fill','#cbz-fee-due',today);await button('Guardar cuota');
+  await B('goto',origin+'/crm/cobranzas');await openCobranzas(pid);await B('fill','#cbz-fee-amount','1000');await B('fill','#cbz-fee-due',today);await button('Guardar cuota');
   await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.fee?.amount===1000);
   await B('goto',origin+'/crm/biblioteca?biblioteca=recursos');await B('click','.nvw-resource-picker button:first-child');await B('click','[aria-label="Seleccionar Paciente ficticia"]');await button('Asignar a 1');await until("document.body.innerText.includes('1 asignación creada.')");
   const assignedLibrary=(await read(patient,`/api/patients/${pid}/library`)).library;const resourceAssignment=assignedLibrary.assignments[0];const resource=[...assignedLibrary.resources,...assignedLibrary.articles].find(r=>r.id===resourceAssignment.resource_id||r.slug===resourceAssignment.slug);
@@ -258,8 +270,8 @@ try {
     for(const actor of [patient,professional]) check((await read(actor,`/api/patients/${pid}`)).patient.appointment===null,'consulta finalizada deja de aparecer como vigente');
   } finally { await pool.query('update public.appointments set starts_at=$1 where id=$2',[originalAppointment.starts_at,originalAppointment.id]); }
   await B('goto',origin+'/app/pagos');await B('fill','#cbz-report-amount','1000');await B('fill','#cbz-report-note','Aviso ficticio del recorrido');await button('Avisar que pagué');await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.payments.some(p=>p.status==='reported'));
-  await logout();await B('viewport','1440x1000');await login(professional,'/crm/cobranzas');await B('click','[aria-label="Ver cobranzas de Paciente ficticia"]');await button('Confirmar');await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.payments.some(p=>p.status==='confirmed'&&p.amount===1000));await B('reload');check(true,'aviso de pago confirmado por profesional persiste sin cobro automático');
-  phase='seguimiento profesional';await B('goto',origin+`/crm/ficha?paciente=${pid}&seccion=registros`);await button('Marcar revisado');await readUntil(patient,`/api/patients/${pid}/care`,r=>r.records.some(x=>x.reviewed_at));await B('reload');check(true,'revisión profesional de un registro conserva su estado');
+  await logout();await B('viewport','1440x1000');await login(professional,'/crm/cobranzas');await openCobranzas(pid);await button('Confirmar');await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.payments.some(p=>p.status==='confirmed'&&p.amount===1000));await B('reload');check(true,'aviso de pago confirmado por profesional persiste sin cobro automático');
+  phase='seguimiento profesional';await B('goto',origin+`/crm/ficha?paciente=${pid}&seccion=registros`);await B('click','summary:has-text("Registros compartidos por revisar")');await button('Marcar revisado');await readUntil(patient,`/api/patients/${pid}/care`,r=>r.records.some(x=>x.reviewed_at));await B('reload');check(true,'revisión profesional de un registro conserva su estado');
   phase='respuesta profesional';await B('goto',origin+`/crm/mensajes?paciente=${pid}`);await B('wait','#nm-message');await B('fill','#nm-message','Respuesta ficticia profesional');await button('Enviar');await readUntil(patient,`/api/patients/${pid}`,r=>r.patient.messages.some(m=>m.text==='Respuesta ficticia profesional'&&m.from==='vero'));await reloadContains('Respuesta ficticia profesional');check(true,'respuesta profesional persistente visible para la paciente');
   phase='editar receta publicada';await B('goto',origin+`/crm/recetas?paciente=${pid}`);await control('[aria-label="Editar Arroz con vegetales"]');await field('Título','Borrador privado de receta','.recipe-form ');await button('Guardar borrador');await readUntil(professional,'/api/recipes',r=>r.recipes.some(x=>x.id===recipe.id&&x.title==='Borrador privado de receta'&&x.current.version===2&&x.published.version===1));
   const frozenPlan=(await read(patient,`/api/patients/${pid}/plans`)).plan;check(frozenPlan.items[0].recipe.title==='Arroz con vegetales'&&frozenPlan.items[0].recipe.nutrition.per_portion.kcal===200,'editar receta conserva título y calorías de la versión publicada en el plan');

@@ -1,6 +1,8 @@
 # Coordinación entre agentes (Claude, Codex, Cursor)
 
-19/10 · Codex · Fase 3 de Pacientes verificada en `codex/panel-nutri-fase-3`: tabla y resumen bajo la fila con datos autorizados, 3.164 pruebas y dos omitidas, tipos/build/secretos y revisiones aprobadas, 22 comprobaciones /browse. Informe: [fase 3](panel-nutri-rediseno/fase-3-verificacion.md). Inicio #151 integrado a main 4dc9a79 con web/API/worker en verde. Sigue fase 4, Ficha, en rama y PR propios; sin SQL remoto.
+19/10 · Cursor · Fase 5 (Agenda, Cobranzas y Página pública) en `cursor/panel-nutri-fase-5`, [PR #153](https://github.com/Facu42/plan-v/pull/153). Facundo autorizó juntarla. La fase 4 ya está en main por [PR #154](https://github.com/Facu42/plan-v/pull/154). Mercado Pago y Google Calendar muestran «Conectar». WhatsApp salió del panel: los avisos van por la app. Sin SQL remoto.
+
+19/10 · Codex · Fase 4 de Ficha integrada a main por [PR #154](https://github.com/Facu42/plan-v/pull/154). Revisión de código y visual cerradas, seis e2e aprobados y suite estable final verde (3.177 y dos omitidas, 494 archivos). [Informe y límites](panel-nutri-rediseno/fase-4-verificacion.md). Sin SQL remoto.
 
 
 Una sola página para que los agentes no se pisen. **Leela antes de empezar una tarea y actualizala al
@@ -28,8 +30,8 @@ visto bueno de Facundo.
 | Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Ánimo y síntomas publicado (PR #112, 14/10). Recorridos de punta a punta y monitor en main (#114, 15/10). Aviso de recurso indicado en PR propio. El resto, por empezar |
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
-| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (desarrollo) | `codex/panel-nutri-fase-3`, [plan](panel-nutri-rediseno/plan.md) | Fase 1 integrada por #150; fase 2 verificada en [PR #151](https://github.com/Facu42/plan-v/pull/151), CI en curso. Fase 3 reservada y en curso por Codex. Una rama y PR por fase; no modifica #147 de Cursor |
-| Suscripciones de pacientes (débito con Mercado Pago de la nutri) | Cursor | `cursor/suscripciones-pacientes-backend`, [spec](suscripciones-pacientes/spec.md) | Parte 1 lista: backend, migración sin aplicar, bandera apagada. Pantallas (Cobranzas y página pública) en otra rama. No toca el panel de Codex |
+| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (fases 1 a 4); Cursor (fase 5) | Fases 1 a 5 en main (`c09466b`). [Plan](panel-nutri-rediseno/plan.md) | Fase 4 integrada por #154. Fase 5 integrada por #153. Una rama y un PR por fase; no se usa el PR #147 |
+| Suscripciones de pacientes (débito con Mercado Pago de la nutri) | Cursor | `cursor/suscripciones-pacientes-backend`, [spec](suscripciones-pacientes/spec.md) | Parte 1 lista: backend, migración sin aplicar, bandera apagada. Pantallas (Cobranzas y página pública) en otra rama. No toca la ficha ni el chat |
 
 ## 2. Reglas para no pisarse
 
@@ -80,7 +82,12 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
-- **19/10 · Cursor · Backend de suscripciones** · [PR #155](https://github.com/Facu42/plan-v/pull/155), rama `cursor/suscripciones-pacientes-backend`. Migración `20261020120000_patient_subscriptions` escrita y sin aplicar. Webhook general de Mercado Pago, alta con el token de la nutri, cobro único en Cobranzas, anulación por devolución, conciliación cada 6 horas y links que vencen a los 7 días. Bandera apagada. Sin pantallas del panel. 3.185 pruebas y dos omitidas, tipos y migraciones en verde. La prueba en sandbox de Mercado Pago sigue pendiente.
+- **19/10 · Cursor · Backend de suscripciones** · [PR #155](https://github.com/Facu42/plan-v/pull/155), rama `cursor/suscripciones-pacientes-backend`. Migración `20261020120000_patient_subscriptions` escrita y sin aplicar. Webhook general de Mercado Pago, alta con el token de la nutri, cobro único en Cobranzas, anulación por devolución, conciliación cada 6 horas y links que vencen a los 7 días. Bandera apagada. Sin pantallas del panel. 3.185 pruebas y dos omitidas, tipos y migraciones en verde. La prueba en sandbox de Mercado Pago sigue pendiente. Main (fases 4 y 5) quedó unido a esta rama.
+- **19/10 · Cursor · Fase 5 con la fase 4** · Se trajo main (fase 4, #154) a `cursor/panel-nutri-fase-5`. Conviven el armazón, la ficha y Agenda, Cobranzas y Página pública. [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar hasta que los controles estén verdes.
+- **19/10 · Cursor · Fase 5 comparada y sin WhatsApp** · Capturas en `design/panel-nutri/fase-5/`. [PR #153](https://github.com/Facu42/plan-v/pull/153). WhatsApp salió de Agenda, Cobranzas, Página pública y Conexiones. Los recordatorios abren el chat de la app. El servidor no se tocó.
+- **19/10 · Cursor · Cierre fase 5** · Agenda, Cobranzas y Página pública en `cursor/panel-nutri-fase-5`, desde main `6697d28`. [PR #153](https://github.com/Facu42/plan-v/pull/153). Conectar no finge claves. Se conservan transferencias, conciliación, desconectar y el resto de la agenda vieja. Sin SQL remoto. Autorizado por Facundo 19/10 porque Codex sin crédito. La fase 6 sigue pendiente.
+- **19/10 · Cursor · Inicio fase 5** · Reserva previa al código en `cursor/panel-nutri-fase-5`, desde main `6697d28`. Agenda, Cobranzas y Página pública. Mercado Pago, Google Calendar y WhatsApp muestran «Conectar» sin fingir conexión. Autorizado por Facundo 19/10 porque Codex sin crédito. Codex sigue con la ficha en `codex/panel-nutri-fase-4`. Sin SQL remoto.
+- **19/10 · Codex · Inicio fase 4** · Reserva antes del código en `codex/panel-nutri-fase-4`, desde PR #152. Ficha según boceto: once pestañas conservando las catorce rutas actuales y la lógica de consulta. Dependencia de #152 declarada, un PR propio al cerrar.
 
 - **19/10 · Codex · Inicio fase 3** · Reserva previa al código en `codex/panel-nutri-fase-3`, desde #151 `50c5d21`. Tabla y resumen de pacientes según boceto; se conserva alta/invitación/archivo y permisos. Dependencia declarada de #151 hasta integrarlo; un PR propio al terminar.
 

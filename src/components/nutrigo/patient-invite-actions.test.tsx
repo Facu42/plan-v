@@ -38,7 +38,7 @@ describe('alta e invitación sin falso éxito', () => {
     const result = await createPatientWithInvitation({ name: 'Ana', email: invite.email, goal: 'Comidas' }, { create: vi.fn().mockResolvedValue(created), activate: vi.fn().mockResolvedValue({ invite: pending, source: 'supabase' }) });
     expect(invitationReady(result.invite)).toBe(true);
     const html = renderToStaticMarkup(<InviteShare name="Ana" invite={result.invite} onClose={() => undefined} />);
-    expect(html).toContain('Invitación lista'); expect(html).toContain('Enlace de invitación'); expect(html).toContain('WhatsApp'); expect(html).toContain('Mandar por mail'); expect(html).toContain('2099'); expect(html).not.toContain('7 días');
+    expect(html).toContain('Invitación lista'); expect(html).toContain('Enlace de invitación'); expect(html).toContain('Copiar enlace'); expect(html).toContain('Mandar por mail'); expect(html).toContain('2099'); expect(html).not.toContain('7 días'); expect(html).not.toContain('WhatsApp');
   });
   it.each([invite, { ...invite, status: 'pending' as const, expires_at: '2020-01-01T00:00:00Z' }, { ...invite, status: 'revoked' as const, expires_at: '2099-01-01T00:00:00Z' }])('no ofrece compartir un acceso no habilitado (%j)', value => {
     const html = renderToStaticMarkup(<InviteShare name="Ana" invite={value} onClose={() => undefined} />);

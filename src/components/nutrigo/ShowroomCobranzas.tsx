@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { api } from '../../api/client';
-import { chargeTitle, formatFeeDate, formatPesos, PAYMENT_METHOD_LABELS, reminderWhatsAppHref, summarizeLedger } from '../../fees';
+import { chargeTitle, formatFeeDate, formatPesos, PAYMENT_METHOD_LABELS, summarizeLedger } from '../../fees';
 import { localBillingDate } from '../../billing';
 import type { BillingBoard, BillingBoardPatient, BillingProgram, PatientLedger, PaymentDecision, PaymentInput, PaymentSettings } from '../../types/fees';
 import { Icon } from '../shared/Icon';
@@ -135,7 +135,7 @@ export function PatientPanel({ patient, settings, programs = [], onPrograms = ()
     {tool === 'cobro' && <section className="cbz-block"><h3>Nuevo cobro</h3><NewChargeForm patientId={patient.patient_id} onLedger={onLedger} onDone={() => setTool(null)} /></section>}
     {tool === 'programa' && <section className="cbz-block"><h3>Asignar programa</h3>
       <ProgramAssigner patientId={patient.patient_id} currentName={patient.fee?.program_name ?? ''} programs={programs} onPrograms={onPrograms} onLedger={onLedger} onDone={() => setTool(null)} /></section>}
-    {summary.owed > 0 && <a className="nv-button nv-soft cbz-whatsapp" href={reminderWhatsAppHref({ patientName: patient.full_name, owed: summary.owed, alias: settings.alias, paymentLink: settings.payment_link })} target="_blank" rel="noopener noreferrer">Recordar por WhatsApp</a>}
+    {summary.owed > 0 && <p className="cbz-muted">La paciente ve el aviso en la app. Para escribirle, abrí Mensajes.</p>}
 
     {reported.length > 0 && <section className="cbz-block cbz-reports" aria-label="Avisos de pago por confirmar">
       <h3>Avisó que pagó</h3>
@@ -233,5 +233,5 @@ export function ShowroomCobranzas({ initialSelectedId, initialFilter = 'todas', 
 
   if (error) return <NvState kind="error" title="No pudimos cargar las cobranzas" description={error} action={<NvButton className="nv-soft" onClick={load}>Reintentar</NvButton>} />;
   if (!board) return <NvState kind="loading" title="Cargando cobranzas…" description="Estamos buscando las cuotas de tus pacientes." />;
-  return <>{reminders && <p className="pn-reminder-help" role="status">Elegí una paciente con deuda para ver su recordatorio y compartirlo por WhatsApp.</p>}<CobranzasScreen board={board} onBoard={setBoard} initialSelectedId={initialSelectedId} initialFilter={initialFilter} /></>;
+  return <>{reminders && <p className="pn-reminder-help" role="status">Elegí una paciente con deuda. El aviso ya está en su app; para escribirle, abrí Mensajes.</p>}<CobranzasScreen board={board} onBoard={setBoard} initialSelectedId={initialSelectedId} initialFilter={initialFilter} /></>;
 }
