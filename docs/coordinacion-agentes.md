@@ -25,7 +25,7 @@ visto bueno de Facundo.
 | Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Ánimo y síntomas publicado (PR #112, 14/10). Recorridos de punta a punta y monitor en main (#114, 15/10). Aviso de recurso indicado en PR propio. El resto, por empezar |
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
-| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); desarrollo sin asignar | `claude/rediseno-panel-nutri-bocetos-iw3aor`, [plan](panel-nutri-rediseno/plan.md) | Bocetos y plan hechos el 19/10. Toca el carril de la nutri: quien tome una fase la anota acá antes de empezar |
+| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (fase 1) | `claude/rediseno-panel-nutri-bocetos-iw3aor`, [plan](panel-nutri-rediseno/plan.md) | Fase 1 reservada por Codex el 19/10 en `codex/panel-nutri-fase-1`, desde main 79056fe. Sigue el boceto de #148; no modifica #147 de Cursor |
 
 ## 2. Reglas para no pisarse
 
@@ -73,6 +73,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **19/10 · Codex · Inicio fase 1** · Rama `codex/panel-nutri-fase-1`: reserva del armazón, tema y navegación del panel según #148. Sin tocar PR #147 ni producción. Detalle en [plan y Bitácora](panel-nutri-rediseno/plan.md).
 
 - **19/10 · Claude** · Rama `claude/rediseno-panel-nutri-bocetos-iw3aor`: bocetos del panel nuevo de la nutri (`design/panel-nutri/bocetos.html`, 19 pantallas, 11 pestañas de la ficha, tema oscuro, menú plegable) y plan por fases para que cualquier agente lo desarrolle (`docs/panel-nutri-rediseno/plan.md`). Solo documentos, sin código ni base.
 

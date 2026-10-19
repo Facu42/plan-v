@@ -111,7 +111,7 @@ Los enlaces viejos con `?seccion=` tienen que seguir abriendo la sección correc
 
 Cada fase se puede hacer sola, en este orden. Marcá el estado al empezar y al terminar.
 
-### Fase 1. Base visual: colores, tema oscuro y armazón · Estado: sin empezar
+### Fase 1. Base visual: colores, tema oscuro y armazón · Estado: en curso (Codex)
 
 - Variables de color del panel en un solo archivo (los valores claros y oscuros están en el `<style>`
   del boceto, bloque `html[data-mock="dark"] .m`). Ningún color escrito a mano en los componentes.
@@ -235,7 +235,8 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | Fase | Dueño | Rama / PR | Estado |
 |---|---|---|---|
 | Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
-| 1 a 9 | Codex (elegido por Facundo el 19/10; si se queda sin crédito sigue Cursor) | — | Sin empezar. Próximo paso: Fase 1 |
+| 1 | Codex | `codex/panel-nutri-fase-1` | En curso; reservada el 19/10 |
+| 2 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Sin empezar; esperar cierre de fase 1 |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
@@ -249,6 +250,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 · Codex · Fase 1, paso 0 (reserva)
+- Hecho: fase 1 reservada antes de tocar código, desde main 79056fe (PR #148 integrado).
+- Cómo: leídos plan, Bitácora, CLAUDE.md, coordinación y Regression Guard. El PR #147 de Cursor es anterior al boceto vigente, usa Plus Jakarta Sans y otra base; no se modifica ni se toma como implementación del diseño aprobado.
+- Rama y commit: codex/panel-nutri-fase-1; PR propio al terminar las verificaciones.
+- Falta: variables claras/oscuras, tema persistente, armazón y submenús reales, menú plegable, fondos fotográficos preparados, adaptación y pruebas.
+- Próximo paso exacto: abrir design/panel-nutri/bocetos.html y localizar el armazón profesional vigente antes de escribir pruebas de tema y navegación.
 
 ### 2026-10-19 · Claude · Bocetos y plan
 - Hecho: boceto navegable (`design/panel-nutri/bocetos.html`) y este plan, aprobados por Facundo.
