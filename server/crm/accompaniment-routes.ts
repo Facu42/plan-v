@@ -6,10 +6,12 @@ import { resolveWorkScope } from './repository.js';
 import { accompanimentMealQuery, loadAccompanimentMeals, loadAccompanimentMetrics } from './accompaniment-repository.js';
 import { enqueueFollowupReminder } from './accompaniment-reminders.js';
 import type { AccompanimentDays } from '../../src/types/accompaniment.js';
+import { loadAssistantSpend } from './assistant-spend.js';
 async function scopeFor(c: Context) { const auth = c.get('auth'), persistent = 'userId' in auth && isSupabaseEnabled(); if (!persistent && c.req.query('audience') === 'patient')
     throw new CareError(403, 'Sólo profesionales del consultorio.'); return resolveWorkScope('userId' in auth ? auth.userId : null, persistent); }
 const reminders = z.object({ request_id: z.uuid(), patient_ids: z.array(z.string().trim().min(1).max(100)).min(1).max(50).refine(ids => new Set(ids).size === ids.length) }).strict();
 export function registerAccompanimentRoutes(app: Hono) {
+    app.get('/api/crm/accompaniment/spend',async c=>{const scope=await scopeFor(c);if(Object.keys(c.req.query()).length)throw new CareError(400,'La consulta de gasto no admite filtros.');return c.json(await loadAssistantSpend(scope));});
     app.get('/api/crm/accompaniment/metrics', async (c) => {
         const scope = await scopeFor(c), days = Number(c.req.query('days') ?? 30);
         if (![30, 90, 365].includes(days) || Object.keys(c.req.query()).some(k => k !== 'days'))

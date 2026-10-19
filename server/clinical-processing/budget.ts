@@ -38,6 +38,9 @@ export class MemoryClinicalBudget implements ClinicalBudget {
   async used(month: string): Promise<number> {
     return [...this.rows.values()].filter(r => r.month === month).reduce((sum, r) => sum + (r.status === 'reserved' || r.status === 'uncertain' ? r.micros : r.chargedMicros), 0);
   }
+  async usedFor(month:string,keys:ReadonlySet<string>,prefix:string):Promise<number>{
+    return [...this.rows.values()].filter(r=>r.month===month&&(keys.has(r.key)||r.key.startsWith(prefix))).reduce((sum,r)=>sum+(r.status==='released'?0:r.status==='reserved'||r.status==='uncertain'?r.micros:r.chargedMicros),0);
+  }
   async reserve(input: Reservation): Promise<void> {
     const existing = this.rows.get(input.key);
     if (existing && existing.status !== 'released') throw new Error('La operación ya tiene una reserva.');

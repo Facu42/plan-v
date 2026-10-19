@@ -107,6 +107,11 @@
       "version": "20261017030000",
       "file": "20261017030000_mfa_aal2_gate.sql",
       "sha256": "68eeac7c95f7eb48c14863c8b8cb2ead403d305312ab45852fd2a9c8fa58b0f4"
+    },
+    {
+      "version": "20261019233000",
+      "file": "20261019233000_accompaniment_message_tools.sql",
+      "sha256": "d53c238acfbc9d568433d0b5215c0405ac5844b47c65ecfc3d092dad361c76a6"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

@@ -10,9 +10,11 @@ import { loadPatientQuickPreview, loadPatientRowPreview } from './patient-previe
 import { z } from 'zod';
 import { loadPatientMealPage,patientMealQuerySchema } from './patient-meals.js';
 import { registerAccompanimentRoutes } from './accompaniment-routes.js';
+import { registerMessageSettingsRoutes } from './message-settings.js';
 
 export function registerCrmRoutes(app: Hono) {
   registerAccompanimentRoutes(app);
+  registerMessageSettingsRoutes(app);
   app.get('/api/crm/patients/:id/meals',async c=>{
     const auth=c.get('auth'),persistent='userId' in auth&&isSupabaseEnabled();
     if(!persistent&&c.req.query('audience')==='patient')throw new CareError(403,'Solo profesionales del consultorio.');

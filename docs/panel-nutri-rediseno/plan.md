@@ -245,6 +245,13 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-19 · Codex · Fase 6, paso 4 (persistencia y gasto)
+- Hecho: veinte pruebas focales aprobadas, tipos, migraciones y manifiesto verdes. Persistencia de respuestas/favoritos con revisión concurrente por consultorio; Postgres real descartable prueba dos consultorios y rol paciente. Gasto del asistente acotado a jobs propios y cartera del actor, sin consultar saldo global ni cache clínico.
+- Cómo: migración 20261019233000 preparada, con RLS, límites, motivo opcional de archivo y función que bloquea la ficha al comprobar/encolar recordatorio. Cuatro RED de SQL y dos RED de rutas pasaron a GREEN. Reversión conserva datos. No se aplicó en producción.
+- Rama: codex/panel-nutri-fase-6. El manifiesto incorpora exactamente el archivo nuevo; el resto se conserva.
+- Falta: conectar las cuatro pantallas, controles en vuelo/persistentes adicionales, comparación, suite completa, fire test y revisiones finales. Aplicación de SQL de producción sólo con la frase de Facundo, con entrega concreta verificada.
+- Próximo paso exacto: añadir cliente y herramientas de respuestas al chat profesional sin cambiar la app paciente; luego componer Asistente/Seguimiento/Progreso sobre estos contratos.
+
 ### 2026-10-19 · Codex · Fase 6, paso 3 (lecturas y avisos GREEN en memoria)
 - Hecho: doce casos focales aprobados y tipos verdes. Nuevas rutas de métricas (mes/trimestre/año), comidas transversales paginadas y recordatorios in-app. Conteos completos, hábitos/pasos/actividad, permisos y último día revisados.
 - Cómo: revisión temprana detectó cuatro P2; se corrigieron estado fresco de archivo, máscara final de fotos, pasos y revalidación de cada destinataria. Nuevos RED reprodujeron pasos y archivo/registro entre avisos del lote; GREEN confirmado. La guardia persistente usa una función SQL específica que se prepara y prueba en el siguiente paso; todavía no está habilitada.
