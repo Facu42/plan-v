@@ -392,3 +392,10 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Rama y commit: `claude/rediseno-panel-nutri-bocetos-iw3aor`, PR #148 (solo documentos).
 - Próximo paso exacto: Fase 1. Crear la rama desde `main` actualizado, leer la sección 2 y el bloque
   `html[data-mock="dark"] .m` del boceto para pasar los colores a variables del panel.
+
+### 2026-10-19 · Codex · Fase 4, paso 3 (Laboratorio y Notas)
+- Hecho: comparación de análisis por fecha y unidad, ingreso manual con informe de origen y carga existente; nueva presentación de notas conserva captura, transcripción, revisión y publicación. Evolución conserva la revisión de registros compartidos.
+- Cómo: reutilización de contratos y permisos; referencias originales sin inferencias clínicas. Enlaces privados temporales se descartan al cambiar permisos o paciente. Respaldo de avance antes de corregir el recorrido remoto de fase 3.
+- Rama: codex/panel-nutri-fase-4, dependiente de #152.
+- Falta: Plan, Archivos, composición final de Consultas/Cobros/Chat, revisión visual y funcional completa, suite final, informe y PR propio.
+- Próximo paso exacto: corregir el selector del menú ya abierto al restaurar una ficha en #152; retomar las pestañas pendientes en esta rama.

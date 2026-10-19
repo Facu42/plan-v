@@ -35,6 +35,7 @@ import { PanelPatientHeader } from './PanelPatientHeader';
 import { PanelPatientOverview } from './PanelPatientOverview';
 import { PanelPatientFoodDiary } from './PanelPatientFoodDiary';
 import { PanelPatientEvolution } from './PanelPatientEvolution';
+import { PanelPatientLaboratory } from './PanelPatientLaboratory';
 import './panel-patient-record.css';
 
 export { RECORD_TABS, recordTab } from './patient-record-sections';
@@ -104,7 +105,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
       {recordPrimaryTab(tab)==='plan'&&<nav className="pn-record-plan-tabs" aria-label="Secciones del plan">{RECORD_PLAN_TABS.map(([id,label])=><button type="button" key={id} aria-current={id===tab?'page':undefined} onClick={()=>change(id)}>{label}</button>)}</nav>}
       {tab === 'resumen' && <PanelPatientOverview patient={patient} now={now} onSection={change} onReview={onReview}/>}
       {tab === 'historia' && <div className="pn-record-history-grid"><ShowroomIntakeReview patientId={patient.id}/><div><PatientImportedHistory patientId={patient.id}/><PlanSafetySummary patientId={patient.id}/></div></div>}
-      {tab === 'notas' && <ConsultationNotes patientId={patient.id} />}
+      {tab === 'notas' && <ConsultationNotes patientId={patient.id} showCompletions={false}/>}
       {tab === 'planificacion' && <NutritionTargetPanel patientId={patient.id} patientName={patient.name} onOpenPlan={() => change('plan')} />}
       {tab === 'evolucion' && <PanelPatientEvolution patient={patient} now={now} onSection={change} onChanged={addPatient}/>}
       {tab === 'alimentario' && <PanelPatientFoodDiary patient={patient} now={now} onReview={onReview} onSelect={onSelect}/>}
@@ -112,7 +113,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
       {tab === 'semanal' && <ShowroomMealPlan patient={patient} patients={patients} query="" onSelect={onSelect} onChanged={addPatient} now={now} />}
       {tab === 'compras' && <ShowroomGrocery patient={p} readOnly />}
       {tab === 'archivos' && <><CarePanel patientId={patient.id} mode="files" /><ClinicalPatientWorkspace patientId={patient.id} mode="exportacion"/></>}
-      {tab === 'laboratorio' && <><CarePanel patientId={patient.id} mode="laboratory" /><ClinicalPatientWorkspace patientId={patient.id} mode="laboratorio"/></>}
+      {tab === 'laboratorio' && <PanelPatientLaboratory key={patient.id} patientId={patient.id} now={now}/>}
       {tab === 'consultas' && <><ShowroomConsultations patient={patient} now={now} onSelect={onSelect} onChanged={addPatient} /><ConsultationCompletionPanel patientId={patient.id}/></>}
       {tab === 'chat' && <NutrigoMessages patient={p} patients={patients.map((person) => buildShowroomPatient(person, now))} role="pro" onSelect={onSelect} onNavigate={onNavigate} />}
       {tab === 'cobros' && <ShowroomCobranzas initialSelectedId={patient.id} />}
