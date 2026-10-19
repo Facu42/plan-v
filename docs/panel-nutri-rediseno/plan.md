@@ -370,3 +370,10 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Rama y commit: `claude/rediseno-panel-nutri-bocetos-iw3aor`, PR #148 (solo documentos).
 - Próximo paso exacto: Fase 1. Crear la rama desde `main` actualizado, leer la sección 2 y el bloque
   `html[data-mock="dark"] .m` del boceto para pasar los colores a variables del panel.
+
+### 2026-10-19 · Codex · Fase 3, paso 7 (recorrido de restauración)
+- Hecho: localizado el fallo remoto al restaurar: el menú continuaba abierto después del archivo y la prueba lo cerraba. El recorrido ahora abre sólo si está cerrado; conserva todas las comprobaciones de persistencia.
+- Cómo: 30 casos Auth/PostgREST y los recorridos anteriores aprobaron; corrección limitada al script, con sintaxis validada. Nueva ejecución remota pendiente.
+- Rama: codex/panel-nutri-fase-3, PR #152. Sin cambios funcionales ni migraciones.
+- Falta: CI verde para integrar #152; fase 4 en su rama reservada.
+- Próximo paso exacto: revisar el resultado del nuevo recorrido firmado y conciliar main en fase 4 al integrar.
