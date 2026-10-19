@@ -1,7 +1,7 @@
 import type { Hono } from 'hono';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
-import { buildWorkItems, loadGlobalProgress, loadWorkSnapshot, resolveWorkScope } from './repository.js';
+import { buildHomeOverview, buildWorkItems, loadGlobalProgress, loadWorkSnapshot, resolveWorkScope } from './repository.js';
 import { paginateWorkQueue, workQueueQuerySchema } from './work-queue.js';
 import { buildFeed, feedFrom, feedQuerySchema } from './feed.js';
 import { loadFeedRows } from './feed-repository.js';
@@ -20,7 +20,10 @@ export function registerCrmRoutes(app: Hono) {
     }
     if (parsed.data.patient_id) scope.patients = scope.patients.filter(patient => patient.id === parsed.data.patient_id);
     const snapshot = await loadWorkSnapshot(scope);
-    return c.json(paginateWorkQueue(buildWorkItems(scope, snapshot), parsed.data, scope.nutritionistId, persistent ? 'supabase' : 'memory'));
+    const now = new Date();
+    const items = buildWorkItems(scope, snapshot, now);
+    const queued = parsed.data.include_home ? items.filter(item => item.kind !== 'appointment' || item.status === 'needs_change') : items;
+    return c.json({ ...paginateWorkQueue(queued, parsed.data, scope.nutritionistId, persistent ? 'supabase' : 'memory'), ...(parsed.data.include_home ? { home: buildHomeOverview(scope, snapshot, items, now) } : {}) });
   });
 
   app.get('/api/crm/progress-global', async c => {

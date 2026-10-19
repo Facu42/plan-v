@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { asAiJob } from '../ai-jobs/repository.js';
-import { buildWorkItems, lastActivity, readAllRows, type WorkScope, type WorkSnapshot } from './repository.js';
+import { buildHomeOverview, buildWorkItems, lastActivity, readAllRows, type WorkScope, type WorkSnapshot } from './repository.js';
 import { paginateWorkQueue, workQueueQuerySchema } from './work-queue.js';
 
 const at = '2026-10-05T15:00:00.000Z';
@@ -14,6 +14,15 @@ const job = (id: string, status: string, applied_at: string | null = null) => as
 });
 
 describe('Bandeja del consultorio: pendientes, privacidad y paginación', () => {
+  it('resume rachas por días únicos, desde ayer, sin fechas futuras ni fichas ajenas/archivadas', () => {
+    const snapshot = empty();
+    snapshot.meal_days = new Map([
+      ['patient-a', ['2026-10-12','2026-10-13','2026-10-14','2026-10-15','2026-10-16','2026-10-17','2026-10-18','2026-10-18','2026-10-20']],
+      ['patient-b', ['2026-10-12','2026-10-13','2026-10-14','2026-10-15','2026-10-16','2026-10-17','2026-10-18']],
+      ['patient-archived', ['2026-10-12','2026-10-13','2026-10-14','2026-10-15','2026-10-16','2026-10-17','2026-10-18']],
+    ]);
+    expect(buildHomeOverview(scope, snapshot, [], new Date('2026-10-19T13:00:00Z')).meal_streaks).toEqual([{ patient_id: 'patient-a', days: 7, at_least: false }]);
+  });
   it('aísla pacientes ajenos, archivados y datos de origen en todas las categorías', () => {
     const snapshot = empty();
     for (const id of ['patient-a', 'patient-b', 'patient-archived']) {

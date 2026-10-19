@@ -138,7 +138,7 @@ Cada fase se puede hacer sola, en este orden. Marcá el estado al empezar y al t
 - Listo cuando: las pantallas actuales se ven bien en los dos temas, el menú pliega y despliega, y no hay
   desplazamiento de página a 1440×900.
 
-### Fase 2. Inicio · Estado: sin empezar
+### Fase 2. Inicio · Estado: hecha, PR #151
 
 Bloques del boceto, todos con datos reales: resumen de la mañana (lo arma el asistente; sin IA, una frase
 con los conteos), contadores de pendientes, próxima consulta preparada (alergias, último peso, adherencia,
@@ -235,8 +235,9 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | Fase | Dueño | Rama / PR | Estado |
 |---|---|---|---|
 | Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
-| 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Hecha; lista para revisar, sin integrar |
-| 2 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Próximo paso: fase 2 (Inicio), sobre la base de #150 |
+| 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Integrada a main `1f48adf`; web, API y worker comprobados |
+| 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Hecha y verificada; CI del PR en curso |
+| 3 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
@@ -250,6 +251,41 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 · Codex · Fase 2, paso 4 (PR)
+- Hecho: abierto [PR #151](https://github.com/Facu42/plan-v/pull/151) con el informe completo del paso 10 y comparación local disponible. CI en curso.
+- Cómo: versión verificada 587db0e; cierre documental sin cambiar código. No hay migraciones.
+- Rama y commit: `codex/panel-nutri-fase-2`, PR #151.
+- Falta: controles remotos del PR; fases 3–9. Se conserva el alcance y los límites del informe de fase 2.
+- Próximo paso exacto: reservar fase 3 en `codex/panel-nutri-fase-3` sobre esta base mientras termina CI; mantener una rama y PR por fase y conciliar main al integrar #151.
+
+### 2026-10-19 · Codex · Fase 2, paso 3 (verificación final)
+- Hecho: Inicio verificado; suite completa 3.153 aprobadas y dos omitidas, 486 archivos; tipos, build y secretos aprobados. /browse: 13 comprobaciones y ocho tamaños/temas, con cuatro capturas. Revisiones finales de code-reviewer y reality-checker sin P1/P2.
+- Cómo: se cerraron los contratos reales de historial, conteos por turno, fechas completas de rachas, paginación y preparación móvil desplegable. Fire test detectado. [Informe y Regression Guard](fase-2-verificacion.md) y [comparación navegable](../../design/panel-nutri/fase-2-verificacion.html).
+- Rama y commit: `codex/panel-nutri-fase-2`; implementación f06494c, correcciones 8711df5 y este cierre. PR propio se anota al crearlo.
+- Falta: CI del PR e integración; fases 3–9. La demo no tiene secreto para habilitar reserva pública (501); copia cubierta por adaptador, sin afirmar portapapeles real. Completar consulta conserva el 403 por permiso de atención ausente en demo. Sin SQL remoto.
+- Próximo paso exacto: abrir PR de fase 2 con el informe del paso 10; reservar fase 3 en otra rama y empezar por ShowroomPatients.tsx y el resumen liviano por paciente, sin modificar esta fase.
+
+### 2026-10-19 · Codex · Fase 2, paso 2 (revisión de datos)
+- Hecho: corregidas las cinco observaciones de código: reprogramaciones visibles, atención independiente de filtros, rachas resumidas desde fechas completas autorizadas, historial de turnos de hoy y reloj vivo. Corregida paginación compartida de reservas/transferencias y destino de revisión de comidas.
+- Cómo: `include_home=1` amplía la API existente con metadata, sin campos clínicos ni permisos nuevos; pruebas RED de los fallos antes de resolverlos. 25 casos focales y prueba Postgres descartable con dos consultorios aprobados. La primera suite completa alcanzó pruebas RED incorporadas mientras corría; se repite al cerrar los cambios, no se considera evidencia verde.
+- Rama y commit: `codex/panel-nutri-fase-2`; respaldo de correcciones antes de la QA final.
+- Falta: segunda revisión independiente, capturas definitivas, recorridos, suite completa estable, fire test y PR.
+- Próximo paso exacto: cerrar QA con /browse, verificar el resumen aunque la paciente no esté seleccionada y comprobar todos los accesos rápidos.
+
+### 2026-10-19 · Codex · Fase 2, paso 1 (Inicio conectado)
+- Hecho: resumen calculado, contadores por tipo, próxima consulta con antecedentes y peso, accesos reales, bandeja paginada, reservas por confirmar, agenda del día, atención, noticias y cuatro números del mes. Pruebas iniciales RED (`6930fe2`) y 11 casos GREEN; tipos aprobados. Revisión de código solicitada.
+- Cómo: PanelHome y use-home-data reutilizan las API de bandeja, cobros, agenda, ingreso y seguimiento, sin cambiar permisos ni crear tablas. panel-home deriva fechas argentinas, rachas por días únicos y saldos de cargos del mes. El resumen declara que es calculado; no finge una respuesta de IA. Diseño del boceto en 1440/390; se corrigieron saludo móvil e importes recortados observados en /browse.
+- Rama y commit: `codex/panel-nutri-fase-2`; este paso se respalda antes de la verificación final.
+- Falta: comparación y evidencia final en ambos temas, pruebas de navegación y errores, suite completa, fire test, revisiones independientes e informe Regression Guard para el PR.
+- Próximo paso exacto: ejecutar scripts/panel-nutri-inicio-qa.mjs con la demostración local; comprobar todos los botones y capturas antes de abrir el PR de fase 2.
+
+### 2026-10-19 · Codex · Fase 2, paso 0 (reserva)
+- Hecho: fase 2 reservada antes de cambiar código. Facundo pidió «Continúa con el resto» después de integrar #150; se continúa en orden, una rama y PR por fase.
+- Cómo: base main `1f48adf` publicada y comprobada (web, API y worker); leídos plan, Bitácora, coordinación y Regression Guard. Se conserva el boceto aprobado y las funciones existentes.
+- Rama y commit: `codex/panel-nutri-fase-2`, desde origin/main. Sin cambios de base de producción.
+- Falta: Inicio completo, datos reales, pruebas, comparación 1440/390 en ambos temas e informe para el PR.
+- Próximo paso exacto: leer ProfessionalWorkQueue.tsx, InicioIndicators.tsx y server/crm/repository.ts; mapear datos disponibles contra el Inicio de bocetos.html y escribir las pruebas de los huecos funcionales.
 
 ### 2026-10-19 · Codex · Fase 1, paso 3 (cierre)
 - Hecho: fase 1 entregada en [PR #150](https://github.com/Facu42/plan-v/pull/150), con informe Regression Guard completo en el cuerpo. 3.132 pruebas aprobadas y dos omitidas (483 archivos), tipos, compilación y secretos aprobados. 22 comprobaciones y 72 medidas de navegador; revisión de código y visual independientes aprobadas para el armazón.

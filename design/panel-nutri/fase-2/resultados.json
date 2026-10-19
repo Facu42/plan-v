@@ -1,0 +1,249 @@
+{
+  "date": "2026-10-19T04:27:10.421Z",
+  "checks": [
+    "Comidas lleva al registro alimentario",
+    "Atención estable al filtrar pendientes",
+    "Reservas muestra su estado vacío real",
+    "Nueva paciente abre alta real",
+    "Armar plan abre la elección real de paciente",
+    "Registrar cobro abre cobranzas reales",
+    "Configurar reserva abre el editor de página pública",
+    "Preparar consulta abre las notas de esa paciente",
+    "Ctrl K enfoca la búsqueda",
+    "Búsqueda de Inicio conserva el texto en Pacientes",
+    "Escribir abre el chat sin enviar mensajes",
+    "Preparación completa accesible en celular",
+    "Inicio sin errores; completar consulta conserva bloqueo por permiso de atención ausente en demo"
+  ],
+  "measurements": [
+    {
+      "theme": "light",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "main": {
+        "x": 288,
+        "y": 83.984375,
+        "width": 1152,
+        "height": 816.015625,
+        "top": 83.984375,
+        "right": 1440,
+        "bottom": 900,
+        "left": 288
+      },
+      "month": {
+        "x": 1024.46875,
+        "y": 643,
+        "width": 385.53125,
+        "height": 210,
+        "top": 643,
+        "right": 1410,
+        "bottom": 853,
+        "left": 1024.46875
+      },
+      "monthClipped": false
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 1867,
+      "main": {
+        "x": 0,
+        "y": 72,
+        "width": 390,
+        "height": 1657.5625,
+        "top": 72,
+        "right": 390,
+        "bottom": 1729.5625,
+        "left": 0
+      },
+      "month": {
+        "x": 16,
+        "y": 1499.375,
+        "width": 358,
+        "height": 210.1875,
+        "top": 1499.375,
+        "right": 374,
+        "bottom": 1709.5625,
+        "left": 16
+      },
+      "monthClipped": false
+    },
+    {
+      "theme": "light",
+      "width": 1280,
+      "height": 800,
+      "pageWidth": 1280,
+      "pageHeight": 800,
+      "main": {
+        "x": 288,
+        "y": 75.984375,
+        "width": 992,
+        "height": 724.015625,
+        "top": 75.984375,
+        "right": 1280,
+        "bottom": 800,
+        "left": 288
+      },
+      "month": {
+        "x": 922.875,
+        "y": 576,
+        "width": 327.109375,
+        "height": 185,
+        "top": 576,
+        "right": 1249.984375,
+        "bottom": 761,
+        "left": 922.875
+      },
+      "monthClipped": false
+    },
+    {
+      "theme": "light",
+      "width": 1680,
+      "height": 900,
+      "pageWidth": 1680,
+      "pageHeight": 900,
+      "main": {
+        "x": 288,
+        "y": 83.984375,
+        "width": 1392,
+        "height": 816.015625,
+        "top": 83.984375,
+        "right": 1680,
+        "bottom": 900,
+        "left": 288
+      },
+      "month": {
+        "x": 1176.84375,
+        "y": 643,
+        "width": 473.140625,
+        "height": 210,
+        "top": 643,
+        "right": 1649.984375,
+        "bottom": 853,
+        "left": 1176.84375
+      },
+      "monthClipped": false
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "pageHeight": 900,
+      "main": {
+        "x": 288,
+        "y": 83.984375,
+        "width": 1152,
+        "height": 816.015625,
+        "top": 83.984375,
+        "right": 1440,
+        "bottom": 900,
+        "left": 288
+      },
+      "month": {
+        "x": 1024.46875,
+        "y": 643,
+        "width": 385.53125,
+        "height": 210,
+        "top": 643,
+        "right": 1410,
+        "bottom": 853,
+        "left": 1024.46875
+      },
+      "monthClipped": false
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "pageHeight": 1867,
+      "main": {
+        "x": 0,
+        "y": 72,
+        "width": 390,
+        "height": 1657.5625,
+        "top": 72,
+        "right": 390,
+        "bottom": 1729.5625,
+        "left": 0
+      },
+      "month": {
+        "x": 16,
+        "y": 1499.375,
+        "width": 358,
+        "height": 210.1875,
+        "top": 1499.375,
+        "right": 374,
+        "bottom": 1709.5625,
+        "left": 16
+      },
+      "monthClipped": false
+    },
+    {
+      "theme": "dark",
+      "width": 1280,
+      "height": 800,
+      "pageWidth": 1280,
+      "pageHeight": 800,
+      "main": {
+        "x": 288,
+        "y": 75.984375,
+        "width": 992,
+        "height": 724.015625,
+        "top": 75.984375,
+        "right": 1280,
+        "bottom": 800,
+        "left": 288
+      },
+      "month": {
+        "x": 922.875,
+        "y": 576,
+        "width": 327.109375,
+        "height": 185,
+        "top": 576,
+        "right": 1249.984375,
+        "bottom": 761,
+        "left": 922.875
+      },
+      "monthClipped": false
+    },
+    {
+      "theme": "dark",
+      "width": 1680,
+      "height": 900,
+      "pageWidth": 1680,
+      "pageHeight": 900,
+      "main": {
+        "x": 288,
+        "y": 83.984375,
+        "width": 1392,
+        "height": 816.015625,
+        "top": 83.984375,
+        "right": 1680,
+        "bottom": 900,
+        "left": 288
+      },
+      "month": {
+        "x": 1176.84375,
+        "y": 643,
+        "width": 473.140625,
+        "height": 210,
+        "top": 643,
+        "right": 1649.984375,
+        "bottom": 853,
+        "left": 1176.84375
+      },
+      "monthClipped": false
+    }
+  ],
+  "expectedDenials": [
+    "GET http://127.0.0.1:5173/api/patients/pat-sofia/consultations/completions?offset=0&limit=1 → 403 (6ms, 77B)",
+    "GET http://127.0.0.1:5173/api/patients/pat-sofia/consultations/completions?offset=0&limit=50 → 403 (6ms, 77B)"
+  ],
+  "publicClipboardVerified": false
+}

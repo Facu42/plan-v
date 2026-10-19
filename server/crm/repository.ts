@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { CrmWorkItem, CrmWorkKind } from '../../src/types/crm-work.js';
+import type { CrmHomeOverview, CrmWorkItem, CrmWorkKind } from '../../src/types/crm-work.js';
 import type { AiJobView } from '../../src/types/ai-jobs.js';
 import type { PatientLedger } from '../../src/types/fees.js';
 import { CARE_LABELS, type CareData } from '../../src/types/care.js';
@@ -35,6 +35,7 @@ export type WorkSnapshot = {
    * `null` si no registró nada en ese lapso. Sin el mapa no se arma el aviso de pacientes sin registros.
    */
   activity?: Map<string, string | null>;
+  meal_days?: Map<string, string[]>;
 };
 
 /** Días sin registros a partir de los que la paciente aparece en la bandeja (aviso, no juicio clínico). */
@@ -150,8 +151,9 @@ export async function loadWorkSnapshot(scope: WorkScope): Promise<WorkSnapshot> 
         starts_at: full.appointment.starts_at, patient_reply: full.appointment.patient_reply,
       });
     }
-    snapshot.activity = lastActivity(patients.map(patient => patient.id),
-      patients.flatMap(patient => memory.get(patient.id)!.meal_logs.map(log => ({ patient_id: patient.id, logged_at: log.logged_at }))),
+    const mealDates = patients.flatMap(patient => memory.get(patient.id)!.meal_logs.map(log => ({ patient_id: patient.id, logged_at: log.logged_at })));
+    snapshot.meal_days = mealDays(ids, mealDates);
+    snapshot.activity = lastActivity(patients.map(patient => patient.id), mealDates,
       patients.flatMap(patient => memory.get(patient.id)!.habit_logs.map(habit => ({ ...habit, patient_id: patient.id }))));
     snapshot.records = (await listCareRecords(null, false)).map(record => ({
       id: record.id, patient_id: record.patient_id, kind: record.data.kind,
@@ -184,6 +186,7 @@ export async function loadWorkSnapshot(scope: WorkScope): Promise<WorkSnapshot> 
     recentMeals.map(row => ({ patient_id: String(row.patient_id), logged_at: String(row.logged_at) })),
     recentHabits.map(row => ({ patient_id: String(row.patient_id), date: String(row.date), hydration: Number(row.hydration ?? 0),
       energy: row.energy as string | null, sleep_minutes: row.sleep_minutes as number | null, steps: row.steps as number | null, symptoms: row.symptoms as string[] | null })));
+  snapshot.meal_days = mealDays(ids, recentMeals.map(row => ({ patient_id: String(row.patient_id), logged_at: String(row.logged_at) })));
   snapshot.ledgers = board.patients;
   snapshot.intakes = intakes.map(row => ({ id: String(row.id), patient_id: String(row.patient_id), status: String(row.status), updated_at: String(row.updated_at) }));
   const latestConsents = new Map<string, Row>();
@@ -215,6 +218,27 @@ function localDate(iso: string) {
   return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(date);
 }
 
+function mealDays(ids: string[], rows: Array<{ patient_id: string; logged_at: string }>) {
+  const dates = new Map<string, Set<string>>(ids.map(id => [id, new Set()]));
+  for (const row of rows) { const day = localDate(row.logged_at); if (day) dates.get(row.patient_id)?.add(day); }
+  return new Map([...dates].map(([id, days]) => [id, [...days]]));
+}
+
+/** Solo fechas y metadata ya autorizadas. La ventana de actividad no se toma de las fichas truncadas del navegador. */
+export function buildHomeOverview(scope: WorkScope, snapshot: WorkSnapshot, items: CrmWorkItem[], now = new Date()): CrmHomeOverview {
+  const today = localDate(now.toISOString());
+  const todayMs = Date.parse(`${today}T12:00:00Z`);
+  const meal_streaks: CrmHomeOverview['meal_streaks'] = [];
+  for (const patient of activePatients(scope)) {
+    const dates = new Set(snapshot.meal_days?.get(patient.id) ?? []);
+    let cursor = dates.has(today) ? todayMs : todayMs - 86_400_000;
+    let days = 0;
+    while (days < QUIET_WINDOW_DAYS && dates.has(new Date(cursor).toISOString().slice(0, 10))) { days++; cursor -= 86_400_000; }
+    if (days >= 7) meal_streaks.push({ patient_id: patient.id, days, at_least: days >= QUIET_WINDOW_DAYS - 1 });
+  }
+  return { quiet: items.filter(item => item.kind === 'quiet'), reschedule_count: items.filter(item => item.kind === 'appointment' && item.status === 'needs_change').length, meal_streaks };
+}
+
 function daysBetween(from: string, to: string) {
   return Math.round((Date.parse(`${to}T12:00:00Z`) - Date.parse(`${from}T12:00:00Z`)) / 86_400_000);
 }
@@ -224,6 +248,7 @@ function destination(kind: CrmWorkKind, patientId: string, entityId: string) {
   if (kind === 'ai_menu') { params.set('propuesta', entityId); return `/crm/plan?${params}`; }
   if (kind === 'message' || kind === 'quiet') return `/crm/mensajes?${params}`;
   if (kind === 'payment' || kind === 'fee_overdue') return `/crm/cobranzas?${params}`;
+  if (kind === 'meal') { params.set('seccion', 'alimentario'); return `/crm/ficha?${params}`; }
   params.set('seccion', kind === 'intake' ? 'ingreso' : kind === 'appointment' ? 'consultas' : 'registros');
   return `/crm/ficha?${params}`;
 }

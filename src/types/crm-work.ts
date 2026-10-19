@@ -15,6 +15,8 @@ export type CrmWorkItem = {
 };
 
 export type CrmWorkQuery = {
+  /** Inicio agrega metadata completa y deja los turnos ordinarios en su agenda; conserva reprogramaciones. */
+  include_home?: '1';
   patient_id?: string;
   kind?: CrmWorkKind;
   cursor?: string;
@@ -22,6 +24,7 @@ export type CrmWorkQuery = {
 };
 
 export type CrmWorkResponse = {
+  home?: CrmHomeOverview;
   items: CrmWorkItem[];
   next_cursor: string | null;
   /** Total del filtro combinado de paciente y tipo, antes de paginar. */
@@ -29,4 +32,11 @@ export type CrmWorkResponse = {
   /** Contadores del paciente elegido o del consultorio completo, antes del filtro de tipo. */
   counts: Record<CrmWorkKind, number>;
   source: 'memory' | 'supabase';
+};
+
+export type CrmHomeOverview = {
+  /** Resumen de todas las tareas; no depende del filtro ni de la página. */
+  quiet: CrmWorkItem[];
+  reschedule_count: number;
+  meal_streaks: Array<{ patient_id: string; days: number; at_least: boolean }>;
 };

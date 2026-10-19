@@ -26,7 +26,7 @@ export function countConsultations(patients: readonly Pick<Patient, 'appointment
   let first = 0;
   let followUp = 0;
   for (const patient of patients) {
-    const dates = [...new Set((patient.appointment_history ?? []).filter((entry) => entry.action === 'elapsed' && entry.dateId).map((entry) => entry.dateId as string))].sort();
+    const dates = [...new Map((patient.appointment_history ?? []).filter((entry) => entry.action === 'elapsed' && entry.dateId).map((entry) => [entry.id || entry.dateId, entry.dateId as string])).values()].sort();
     for (const [index, dateId] of dates.entries()) {
       if (!inWindow(dateId, window)) continue;
       if (index === 0) first += 1; else followUp += 1;
