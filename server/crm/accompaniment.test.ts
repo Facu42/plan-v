@@ -39,4 +39,13 @@ describe('resúmenes autorizados de acompañamiento',()=>{
   const data=buildAccompanimentMetrics({patients:people,meals:[],habits:[],measurements:[],permissions:{}},30,new Date('2026-10-31T18:00:00Z'));
   expect(data.totals.retained).toBe(1);expect(data.quiet.map(p=>p.id)).not.toContain('new');
  });
+ it('agua declarada en cero y actividad cuentan sin inventar litros ni avisar que no hay registros',()=>{
+  const data=buildAccompanimentMetrics({patients,meals:[],habits:[{patient_id:'a',date:'2026-10-19',hydration:0,hydration_declared:true}],measurements:[],activities:[{patient_id:'b',logged_at:'2026-10-19T12:00:00Z'}],permissions:{a:['care_relationship'],b:['care_relationship']}},30,now);
+  expect(data.totals.water_glasses).toBe(0);expect(data.totals.activity_days).toBe(0.5);
+  expect(data.week.find(p=>p.id==='b')?.recorded_days).toBe(1);expect(data.quiet).toHaveLength(0);
+ });
+ it('un registro de pasos es actividad registrada aunque no tenga agua, sueño ni comidas',()=>{
+  const data=buildAccompanimentMetrics({patients,meals:[],habits:[{patient_id:'a',date:'2026-10-19',hydration:0,steps:4000}],measurements:[],permissions:{}},30,now);
+  expect(data.week.find(p=>p.id==='a')?.recorded_days).toBe(1);expect(data.quiet.map(p=>p.id)).not.toContain('a');
+ });
 });

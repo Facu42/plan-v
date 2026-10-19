@@ -245,6 +245,13 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-19 · Codex · Fase 6, paso 3 (lecturas y avisos GREEN en memoria)
+- Hecho: doce casos focales aprobados y tipos verdes. Nuevas rutas de métricas (mes/trimestre/año), comidas transversales paginadas y recordatorios in-app. Conteos completos, hábitos/pasos/actividad, permisos y último día revisados.
+- Cómo: revisión temprana detectó cuatro P2; se corrigieron estado fresco de archivo, máscara final de fotos, pasos y revalidación de cada destinataria. Nuevos RED reprodujeron pasos y archivo/registro entre avisos del lote; GREEN confirmado. La guardia persistente usa una función SQL específica que se prepara y prueba en el siguiente paso; todavía no está habilitada.
+- Rama: codex/panel-nutri-fase-6. Sin cambios de producción. Falta aún prueba persistente con dos consultorios y cambios en vuelo.
+- Falta: SQL de respuestas/favoritos/motivo de archivo y guardia de aviso, gasto propio, cuatro pantallas, QA y PR.
+- Próximo paso exacto: escribir pruebas RED de persistencia, crear migración reservada 20261019233000 y verificar RLS/CAS/guardia en Postgres descartable; no aplicarla en producción.
+
 ### 2026-10-19 · Codex · Fase 6, paso 2 (primer resumen GREEN)
 - Hecho: cinco garantías aprobadas del resumen puro: 65 comidas, días únicos/Argentina, datos propios, permiso, unidades, fechas y seis meses por calendario. Prueba adicional detectó el desborde de meses de 31 días antes de corregirlo. Tipos aprobados.
 - Cómo: contratos en types/accompaniment y derivación sin proveedores en crm/accompaniment. No se usa el score de adherencia como serie histórica: el gráfico semanal contará registros con fuente explícita. No se infiere avance clínico desde la ausencia de comidas.

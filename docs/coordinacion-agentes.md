@@ -59,6 +59,7 @@ visto bueno de Facundo.
 
 | Rango o archivo | Dueño | Estado |
 |---|---|---|
+| `20261019233000_accompaniment_message_tools` | Codex, fase 6 | Reservada: respuestas/favoritos por consultorio, motivo opcional de archivo y guardia de recordatorio. Sólo pruebas locales; sin aplicar en producción |
 | `20261011140000_clinical_ai_budget` … `20261013123000_imported_clinical_export` (17 archivos, manifiesto en `docs/deployment/nutridesk-migrations-2026-10-13.json` de la rama de Codex) | Codex | Sin aplicar |
 | `20261014180000_sara2_catalog` | Codex | Escrita el 14/10 antes de la regla de fechas nuevas; conservada como entrega 8. Sin aplicar |
 | `20261015090000_patient_views_read_only` | Claude | PR #110, en main desde el 14/10. Aplicada en la base el 14/10 con la frase de Facundo (el historial de la base la anota como `20261014215529`) |
