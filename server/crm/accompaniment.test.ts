@@ -1,0 +1,37 @@
+import {describe,expect,it} from 'vitest';
+import {buildAccompanimentMetrics} from './accompaniment';
+
+const now=new Date('2026-10-20T02:59:59Z');
+const patients=[
+ {id:'a',name:'Ana',created_at:'2026-01-01T12:00:00Z',adherence_score:0,goal_status:'completed',goal_progress:100,goal_updated_at:'2026-10-18T12:00:00Z'},
+ {id:'b',name:'Bea',created_at:'2026-10-01T12:00:00Z',adherence_score:80,goal_status:'active',goal_progress:0},
+ {id:'archived',name:'Archivada',created_at:'2026-08-01T12:00:00Z',archived_at:'2026-10-10T12:00:00Z',archive_reason:'Mudanza'},
+];
+const meal=(id:string,patient_id:string,logged_at:string)=>({id,patient_id,logged_at,status:'pending_review',slot:'Almuerzo'});
+
+describe('resúmenes autorizados de acompañamiento',()=>{
+ it('cuenta el período completo, días únicos y medianoche argentina sin incluir ajenas ni futuras',()=>{
+  const meals=Array.from({length:65},(_,i)=>meal(String(i),'a','2026-10-19T15:00:00Z'));
+  meals.push(meal('edge','b','2026-10-20T02:59:59Z'),meal('future','b','2026-10-20T03:00:00Z'),meal('foreign','other','2026-10-19T15:00:00Z'),meal('archived','archived','2026-10-19T15:00:00Z'));
+  const data=buildAccompanimentMetrics({patients,meals,habits:[],measurements:[],permissions:{a:['care_relationship'],b:['care_relationship']}},30,now);
+  expect(data.totals.meals).toBe(66);expect(data.week.find(p=>p.id==='a')?.recorded_days).toBe(1);
+  expect(data.week.find(p=>p.id==='b')?.days.at(-1)).toBe(true);
+  expect(data.totals.adherence).toBe(40);expect(data.totals.active).toBe(2);
+ });
+ it('no muestra metas ni hábitos sin Atención y no sustituye agua ausente por cero',()=>{
+  const data=buildAccompanimentMetrics({patients,meals:[],habits:[{patient_id:'a',date:'2026-10-19',hydration:8,energy:'Alta',symptoms:['hinchazon']}],measurements:[],permissions:{a:[],b:['care_relationship']}},30,now);
+  expect(data.wellbeing).toHaveLength(0);expect(data.totals.water_glasses).toBeNull();
+  expect(data.goals.map(g=>g.id)).toEqual(['b']);expect(data.goals[0].progress).toBe(0);expect(data.totals.completed_goals).toBe(0);
+ });
+ it('altas y bajas salen de fechas propias y no del listado activo solamente',()=>{
+  const data=buildAccompanimentMetrics({patients,meals:[],habits:[],measurements:[],permissions:{}},90,now);
+  expect(data.movements.find(m=>m.month==='2026-10')).toMatchObject({joined:1,left:1});
+  expect(data.totals.retained).toBe(1);expect(data.archive_reasons).toEqual([{reason:'Mudanza',count:1}]);
+ });
+ it('una medición requiere permiso y no mezcla unidades ni fechas futuras',()=>{
+  const measurements=[{id:'first',patient_id:'a',kind:'weight',value_numeric:70,unit:'kg',captured_on:'2026-10-01'}, {id:'last',patient_id:'a',kind:'weight',value_numeric:68,unit:'kg',captured_on:'2026-10-19'}, {id:'lb',patient_id:'a',kind:'weight',value_numeric:150,unit:'lb',captured_on:'2026-10-19'}, {id:'future',patient_id:'a',kind:'weight',value_numeric:60,unit:'kg',captured_on:'2026-10-20'}];
+  const input={patients,meals:[],habits:[],measurements,permissions:{a:['measurement']}};
+  expect(buildAccompanimentMetrics(input,30,now).totals.weight_decreased).toBe(1);
+  expect(buildAccompanimentMetrics({...input,permissions:{}},30,now).totals.weight_decreased).toBe(0);
+ });
+});

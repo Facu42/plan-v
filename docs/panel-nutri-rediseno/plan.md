@@ -245,6 +245,13 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-19 · Codex · Fase 6, paso 1 (contratos y RED)
+- Hecho: mapa de flujos y plan técnico en [fase-6-implementacion.md](fase-6-implementacion.md). Pruebas nuevas RED del resumen: 65 comidas, medianoche argentina, días únicos, ajenas/archivadas, ausencia frente a cero, consentimiento, unidades y altas/bajas.
+- Cómo: auditoría temprana independiente de contratos. Se reutilizan ai-jobs con contexto/revalidación y borrador, revisión existente, avisos in-app y mensajes. La IA de cartera conserva sus fuentes; sugerencias de chat locales identificadas, sin usar el copilot sin presupuesto.
+- Rama: codex/panel-nutri-fase-6. RED confirmado por módulo de resumen aún ausente; no es una suite verde.
+- Falta: implementar lecturas agregadas, gasto atribuible, avisos, persistencia de respuestas/favoritos y las cuatro pantallas. SQL nuevo sólo local, con aprobación de producción al final.
+- Próximo paso exacto: crear types/accompaniment y crm/accompaniment; pasar las cuatro garantías sin consultar producción y añadir pruebas de rutas/aislamiento.
+
 ### 2026-10-19 · Codex · Fase 6, paso 0 (reserva)
 - Hecho: reservada exclusivamente la fase 6 antes de cambiar código, por pedido «Seguí con la fase 6 exclusivamente». La fase 5 ya está integrada por #153 en main c09466b; la fase 4 por #154 en b3d6d43, controles y publicación aprobados.
 - Cómo: leídos plan, última Bitácora, coordinación, reglas y Regression Guard. Se sigue el boceto aprobado; no se reabre diseño ni se toman fases 7–9.
