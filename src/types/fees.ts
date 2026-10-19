@@ -20,6 +20,8 @@ export type PatientPayment = {
   status: PaymentStatus;
   reported_by_patient: boolean;
   created_at: string;
+  /** manual: lo cargó la nutri. checkout: seña de una consulta. subscription: débito automático. */
+  source?: 'manual' | 'checkout' | 'subscription';
 };
 
 export type PatientLedger = {

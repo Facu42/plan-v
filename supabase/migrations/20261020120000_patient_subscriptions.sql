@@ -15,6 +15,8 @@
 --     drop column if exists provider_payment_id,
 --     drop column if exists provider,
 --     drop column if exists source;
+--   Volvé public.billing_ledger_json a la versión anterior antes de sacar source:
+--   el libro deja de leer esa columna.
 
 alter table public.patient_payments
   add column if not exists source text not null default 'manual'
@@ -148,9 +150,10 @@ create table if not exists public.patient_subscription_events (
   processed_at timestamptz
 );
 
+-- Solo los avisos con firma válida ocupan la clave. Uno rechazado no tapa el reintento bueno.
 create unique index if not exists patient_subscription_events_notice_uidx
   on public.patient_subscription_events (topic, resource_id, provider_notification_id)
-  where provider_notification_id is not null;
+  where provider_notification_id is not null and signature_valid;
 create index if not exists patient_subscription_events_queue_idx
   on public.patient_subscription_events (status, next_attempt_at);
 create index if not exists patient_subscription_events_subscription_idx
@@ -185,23 +188,24 @@ grant all on public.patient_subscription_plans, public.patient_subscriptions,
   public.patient_subscription_payments, public.patient_subscription_events to service_role;
 
 -- Apaga la cuota manual cuando el débito ya está activo, para no cobrar dos veces.
+-- Usa la misma baja que Cobranzas (amount null): no toca cobros sueltos ni cuotas ya vencidas.
 create or replace function public.pause_manual_fee_for_debit(target uuid)
 returns void
 language plpgsql
 security definer
 set search_path = ''
 as $$
+declare
+  nid uuid;
 begin
   if target is null then
     return;
   end if;
-  delete from public.patient_charges as charge
-   where charge.patient_id = target
-     and charge.kind = 'fee'
-     and charge.status = 'open'
-     and charge.due_on > current_date;
-  delete from public.patient_fees as fee
-   where fee.patient_id = target;
+  select patient.nutritionist_id into nid from public.patients as patient where patient.id = target;
+  if nid is null then
+    return;
+  end if;
+  perform public.billing_apply_fee(target, nid, null, current_date, '');
 end;
 $$;
 
@@ -266,3 +270,29 @@ $$;
 
 revoke all on function public.get_my_subscriptions() from public, anon, authenticated;
 grant execute on function public.get_my_subscriptions() to authenticated, service_role;
+
+-- El libro de Cobranzas muestra de dónde salió el cobro, sin cambiar el resto de los campos.
+create or replace function public.billing_ledger_json(target uuid)
+returns jsonb language sql stable security definer set search_path = '' as $$
+  select jsonb_build_object(
+    'patient_id', target,
+    'fee', (
+      select jsonb_build_object('amount', f.amount, 'first_due_on', f.first_due_on, 'program_name', f.program_name)
+      from public.patient_fees f where f.patient_id = target
+    ),
+    'charges', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'id', c.id, 'due_on', c.due_on, 'amount', c.amount, 'status', c.status, 'kind', c.kind, 'concept', c.concept
+      ) order by c.due_on, c.created_at)
+      from public.patient_charges c where c.patient_id = target
+    ), '[]'::jsonb),
+    'payments', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'id', p.id, 'amount', p.amount, 'paid_on', p.paid_on, 'method', p.method, 'note', p.note,
+        'status', p.status, 'reported_by_patient', p.reported_by_patient, 'created_at', p.created_at,
+        'source', p.source
+      ) order by p.paid_on desc, p.created_at desc)
+      from public.patient_payments p where p.patient_id = target
+    ), '[]'::jsonb)
+  );
+$$;

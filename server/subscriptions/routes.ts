@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { CareError } from '../care/errors.js';
 import { isSupabaseEnabled, getRequestDb } from '../db/supabase-client.js';
 import { sbGetActor } from '../db/supabase-repo.js';
-import { subscriptionsEnabled } from './flag.js';
+import { subscriptionsAllowed, subscriptionsEnabled } from './flag.js';
 import * as service from './service.js';
 
 const uuid = z.uuid();
@@ -39,11 +39,13 @@ async function owner(c: Context) {
   if (!('userId' in auth)) throw new CareError(403, 'Solo la nutricionista puede hacer esto.');
   const actor = await sbGetActor(auth.userId);
   if (actor?.role !== 'nutri') throw new CareError(403, 'Solo la nutricionista puede hacer esto.');
+  if (!subscriptionsAllowed(actor.nutritionistId)) throw new CareError(404, 'No encontrado.');
   return actor.nutritionistId;
 }
 
 async function reader(c: Context, nutritionistId: string) {
   enabled();
+  if (!subscriptionsAllowed(nutritionistId)) throw new CareError(404, 'No encontrado.');
   const auth = c.get('auth');
   if (!('userId' in auth)) throw new CareError(403, 'No tenés acceso a este consultorio.');
   const allowed = await getRequestDb().rpc('scheduling_can_manage', { nid: nutritionistId });

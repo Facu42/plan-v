@@ -27,7 +27,7 @@ describe('firma del aviso de Mercado Pago', () => {
     const rows: StoredNotice[] = [];
     const save = async (row: StoredNotice) => {
       const key = `${row.topic}:${row.dataId}:${row.notificationId}`;
-      if (row.signatureValid && rows.some(item => `${item.topic}:${item.dataId}:${item.notificationId}` === key)) return 'duplicate' as const;
+      if (row.signatureValid && rows.some(item => item.signatureValid && `${item.topic}:${item.dataId}:${item.notificationId}` === key)) return 'duplicate' as const;
       rows.push(row);
       return 'saved' as const;
     };

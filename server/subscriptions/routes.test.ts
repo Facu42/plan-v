@@ -15,7 +15,7 @@ vi.mock('../db/supabase-client.js', () => ({
 vi.mock('./repository.js', () => ({
   saveNotice: async (row: Record<string, unknown>) => {
     const key = `${row.topic}:${row.resource_id}:${row.provider_notification_id}`;
-    if (row.signature_valid && notices.some(item => `${item.topic}:${item.resource_id}:${item.provider_notification_id}` === key)) return 'duplicate';
+    if (row.signature_valid && notices.some(item => item.signature_valid && `${item.topic}:${item.resource_id}:${item.provider_notification_id}` === key)) return 'duplicate';
     notices.push(row);
     return 'saved';
   },

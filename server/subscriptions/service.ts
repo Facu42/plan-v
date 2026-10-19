@@ -422,6 +422,7 @@ export async function reconcileNutritionist(nutritionistId: string, id?: string)
 }
 
 export async function reconcileOne(sub: Sub) {
+  if (!subscriptionsAllowed(sub.nutritionist_id)) return 'none';
   const account = await repo.connectionAccount(sub.nutritionist_id);
   const action = reconcileAction({
     status: sub.status,
@@ -552,7 +553,7 @@ export async function patientSubscriptions() {
 
 export async function cancelForPatient(patientId: string, id: string, expected: number) {
   const sub = asSub(await repo.getSubscription(id));
-  if (!sub || sub.patient_id !== patientId) throw new CareError(404, 'No encontramos ese débito.');
+  if (!sub || sub.patient_id !== patientId || !subscriptionsAllowed(sub.nutritionist_id)) throw new CareError(404, 'No encontramos ese débito.');
   return changeSubscription(sub.nutritionist_id, id, 'cancel', expected, 'patient');
 }
 
@@ -594,16 +595,25 @@ async function processOne(event: Record<string, unknown>) {
   }
   const candidates = await repo.integrationsByAccount(userId);
   for (const candidate of candidates) {
-    if (!subscriptionsAllowed(candidate.nutritionist_id)) continue;
-    const handled = await handleCandidate(candidate.nutritionist_id, candidate.account_id, topic, resourceId);
+    const handled = await handleCandidate(
+      candidate.nutritionist_id,
+      candidate.account_id,
+      topic,
+      resourceId,
+      subscriptionsAllowed(candidate.nutritionist_id),
+    );
     if (!handled) continue;
     await repo.finishNotice(String(event.id), { status: 'processed', processed_at: new Date().toISOString(), subscription_id: handled === true ? null : handled });
     return;
   }
-  await repo.finishNotice(String(event.id), { status: 'unroutable', processed_at: new Date().toISOString() });
+  await repo.finishNotice(String(event.id), {
+    status: candidates.length ? 'ignored' : 'unroutable',
+    processed_at: new Date().toISOString(),
+  });
 }
 
-async function handleCandidate(nutritionistId: string, accountId: string, topic: string, resourceId: string): Promise<string | true | null> {
+async function handleCandidate(nutritionistId: string, accountId: string, topic: string, resourceId: string, allowSubscriptions: boolean): Promise<string | true | null> {
+  if ((topic === 'subscription_preapproval' || topic === 'subscription_authorized_payment') && !allowSubscriptions) return null;
   const { token } = await nutriToken(nutritionistId);
   if (topic === 'subscription_preapproval') {
     const remote = await readOrNull(() => mercadoPago.getPreapproval(token, resourceId));
@@ -625,7 +635,7 @@ async function handleCandidate(nutritionistId: string, accountId: string, topic:
     const payment = await readOrNull(() => mercadoPago.getPayment(token, resourceId));
     if (!payment || (payment.collector_id != null && String(payment.collector_id) !== accountId)) return null;
     const reference = typeof payment.external_reference === 'string' ? payment.external_reference : '';
-    if (UUID.test(reference)) {
+    if (allowSubscriptions && UUID.test(reference)) {
       const sub = asSub(await repo.findSubscriptionById(reference, nutritionistId));
       if (sub) {
         await book(sub, payment);
@@ -674,7 +684,7 @@ export async function reconcileLive() {
   let after: string | null = null;
   let checked = 0;
   for (;;) {
-    const page = (await repo.livePage(after)).map(asSub);
+    const page: Sub[] = (await repo.livePage(after)).map(asSub);
     for (const sub of page) {
       try {
         await reconcileOne(sub);

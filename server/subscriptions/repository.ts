@@ -79,6 +79,7 @@ export async function insertProgram(nutritionistId: string, name: string, pesos:
   const row = await db().from('nutritionist_programs').insert({ nutritionist_id: nutritionistId, name, amount: pesos }).select('id').single();
   if (row.error?.code === '23505') throw new CareError(409, 'Ya tenés un programa con ese nombre.');
   raiseDb(row.error);
+  if (!row.data?.id) throw new CareError(503, 'No se pudo guardar. Reintentá.');
   return String(row.data.id);
 }
 
@@ -252,6 +253,7 @@ export async function insertLedger(values: Record<string, unknown>) {
     return { id: existing.id, created: false };
   }
   raiseDb(row.error);
+  if (!row.data?.id) throw new CareError(503, 'No se pudo guardar el cobro.');
   return { id: String(row.data.id), created: true };
 }
 
