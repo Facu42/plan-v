@@ -15,7 +15,7 @@ describe('resúmenes autorizados de acompañamiento',()=>{
   meals.push(meal('edge','b','2026-10-20T02:59:59Z'),meal('future','b','2026-10-20T03:00:00Z'),meal('foreign','other','2026-10-19T15:00:00Z'),meal('archived','archived','2026-10-19T15:00:00Z'));
   const data=buildAccompanimentMetrics({patients,meals,habits:[],measurements:[],permissions:{a:['care_relationship'],b:['care_relationship']}},30,now);
   expect(data.totals.meals).toBe(66);expect(data.week.find(p=>p.id==='a')?.recorded_days).toBe(1);
-  expect(data.week.find(p=>p.id==='b')?.days.at(-1)).toBe(true);
+  expect(data.week.find(p=>p.id==='b')?.days[6]).toBe(true);
   expect(data.totals.adherence).toBe(40);expect(data.totals.active).toBe(2);
  });
  it('no muestra metas ni hábitos sin Atención y no sustituye agua ausente por cero',()=>{
@@ -33,5 +33,10 @@ describe('resúmenes autorizados de acompañamiento',()=>{
   const input={patients,meals:[],habits:[],measurements,permissions:{a:['measurement']}};
   expect(buildAccompanimentMetrics(input,30,now).totals.weight_decreased).toBe(1);
   expect(buildAccompanimentMetrics({...input,permissions:{}},30,now).totals.weight_decreased).toBe(0);
+ });
+ it('seis meses se cuentan por calendario y un alta reciente no recibe aviso de siete días',()=>{
+  const people=[{id:'old',name:'Abril',created_at:'2026-04-30T12:00:00Z'},{id:'short',name:'Mayo',created_at:'2026-05-01T12:00:00Z'},{id:'new',name:'Nueva',created_at:'2026-10-30T12:00:00Z'}];
+  const data=buildAccompanimentMetrics({patients:people,meals:[],habits:[],measurements:[],permissions:{}},30,new Date('2026-10-31T18:00:00Z'));
+  expect(data.totals.retained).toBe(1);expect(data.quiet.map(p=>p.id)).not.toContain('new');
  });
 });

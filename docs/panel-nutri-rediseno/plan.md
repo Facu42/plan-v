@@ -245,6 +245,13 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-19 · Codex · Fase 6, paso 2 (primer resumen GREEN)
+- Hecho: cinco garantías aprobadas del resumen puro: 65 comidas, días únicos/Argentina, datos propios, permiso, unidades, fechas y seis meses por calendario. Prueba adicional detectó el desborde de meses de 31 días antes de corregirlo. Tipos aprobados.
+- Cómo: contratos en types/accompaniment y derivación sin proveedores en crm/accompaniment. No se usa el score de adherencia como serie histórica: el gráfico semanal contará registros con fuente explícita. No se infiere avance clínico desde la ausencia de comidas.
+- Rama: codex/panel-nutri-fase-6; código inicial, aún no conectado a pantallas.
+- Falta: repositorios/rutas, seguridad/SQL local, cuatro pantallas, verificaciones finales y PR.
+- Próximo paso exacto: añadir pruebas RED de API para página completa, pacientes archivadas/ajenas y recordatorios idempotentes; conectar las lecturas autorizadas.
+
 ### 2026-10-19 · Codex · Fase 6, paso 1 (contratos y RED)
 - Hecho: mapa de flujos y plan técnico en [fase-6-implementacion.md](fase-6-implementacion.md). Pruebas nuevas RED del resumen: 65 comidas, medianoche argentina, días únicos, ajenas/archivadas, ausencia frente a cero, consentimiento, unidades y altas/bajas.
 - Cómo: auditoría temprana independiente de contratos. Se reutilizan ai-jobs con contexto/revalidación y borrador, revisión existente, avisos in-app y mensajes. La IA de cartera conserva sus fuentes; sugerencias de chat locales identificadas, sin usar el copilot sin presupuesto.
