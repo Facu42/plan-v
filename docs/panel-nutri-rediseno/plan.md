@@ -244,6 +244,13 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-19 22:30 · Cursor · Pago único de la cuota, pedido registrado
+- Hecho: Facu pidió un pago de un solo mes, sin suscripción. Quedó escrito en la spec (sección 2.9) antes de programarlo. La nutri genera un enlace de Mercado Pago para la cuota del mes, lo copia, y la paciente puede pagarlo desde su app o desde la página pública. El cobro entra una sola vez en Movimientos y la cuota pasa a «Al día». Si ya tiene débito activo, no se ofrece.
+- Cómo: misma bandera apagada, mismos textos en español y sin WhatsApp. Se reutiliza el enlace de la seña y la conciliación. Si hace falta una tabla, la migración se escribe y no se aplica. No se toca la ficha ni el chat.
+- Rama y PR: se abre `cursor/pago-mensual-unico` desde `cursor/suscripciones-cobranzas-pagina`, borrador apilado sobre esa rama (PR #156), no sobre main.
+- Falta: programarlo, probarlo y dejar las capturas con el menú lateral del panel.
+- Próximo paso exacto: implementar 2.9 en esa rama. Al cerrar, actualizar la spec, esta bitácora y `docs/coordinacion-agentes.md`.
+
 ### 2026-10-19 21:30 · Cursor · Suscripciones, pantallas de Cobranzas y página pública
 - Hecho: en Cobranzas se crea y se edita el plan mensual, se activa el débito, se copia el enlace, se ve quién está al día y está Conciliar. En la página pública del panel se ve el plan y la consulta suelta. La paciente elige el plan en la página del consultorio. La bandera sigue apagada: si el servidor dice que no existe, no se ve nada nuevo. No se tocó la ficha ni el chat.
 - Cómo: misma pieza visual de la fase 5. El boceto no dibuja el débito; cada captura de la app quedó al lado de `#cobranzas` o `#publica` en `design/suscripciones/`. El formulario de la paciente se comparó con la vista de celular de la página pública, que es lo más parecido. 3.228 pruebas y 2 omitidas, tipos en verde. La prueba de fuego aflojó «Al día» y las pruebas lo cazaron; quedó revertido.

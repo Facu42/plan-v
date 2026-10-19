@@ -1,7 +1,7 @@
 # Spec: suscripciones de pacientes con Mercado Pago (Plan V)
 
 Versión 1 · 19/10/2026. Las preguntas P1–P10 quedaron cerradas el 19/10 (sección 7.3). La migración se escribe y **no se aplica**; no se toca Railway, Supabase de producción ni Mercado Pago.
-Base de la parte 1: `origin/main` en `c09466b` (fases 4 y 5 ya juntas). El backend vive en `cursor/suscripciones-pacientes-backend` ([PR #155](https://github.com/Facu42/plan-v/pull/155)). Las pantallas de Cobranzas y de la página pública viven en `cursor/suscripciones-cobranzas-pagina` ([PR #156](https://github.com/Facu42/plan-v/pull/156), borrador, apilado sobre el backend y no sobre main).
+Base de la parte 1: `origin/main` en `c09466b` (fases 4 y 5 ya juntas). El backend vive en `cursor/suscripciones-pacientes-backend` ([PR #155](https://github.com/Facu42/plan-v/pull/155)). Las pantallas de Cobranzas y de la página pública viven en `cursor/suscripciones-cobranzas-pagina` ([PR #156](https://github.com/Facu42/plan-v/pull/156), borrador, apilado sobre el backend y no sobre main). El pago único de la cuota (sección 2.9) se hace en `cursor/pago-mensual-unico`, apilado sobre las pantallas y no sobre main.
 
 ## Estado al cerrar la parte 2 (19/10, noche)
 
@@ -26,21 +26,22 @@ Otro agente puede seguir desde acá sin el chat.
 - El boceto (`design/panel-nutri/bocetos.html`, `#cobranzas` y `#publica`) no dibuja la tarjeta de débito ni el formulario de la paciente, y en «Recordar» todavía muestra WhatsApp. La app no. Las capturas de la app están al lado del boceto en `design/suscripciones/`.
 
 ### Qué falta
-- **Parte 3.** Ficha (4.4) y chat (4.5). Crear `cursor/suscripciones-ficha-chat` desde `cursor/suscripciones-cobranzas-pagina`. PR borrador contra esa rama, no contra main. No mergear #155 ni #156.
-- **App de la paciente (4.6).** Después, en `cursor/suscripciones-app-paciente`. Incluye la baja que Facu ya aprobó (P4).
+- **Pago único de la cuota (2.9).** Pedido por Facu el 19/10 a la noche. No es una suscripción: es un enlace de Mercado Pago de un solo mes, para una paciente que ya tiene cuota manual. Se implementa en `cursor/pago-mensual-unico`, desde `cursor/suscripciones-cobranzas-pagina`, con PR borrador contra esa rama. Misma bandera apagada. Si hace falta tabla nueva, la migración se escribe y no se aplica.
+- **Parte 3.** Ficha (4.4) y chat (4.5). Quedan para después del pago único. Crear `cursor/suscripciones-ficha-chat` desde la rama que corresponda cuando 2.9 esté cerrada. No mergear #155 ni #156.
+- **App de la paciente para el débito (4.6).** Después, en `cursor/suscripciones-app-paciente`. Incluye la baja que Facu ya aprobó (P4). El botón para pagar la cuota de un mes (2.9) sí entra en esta parte, en Pagos, y no es la ficha ni el chat.
 - **Sandbox de Mercado Pago (6.3).** Sigue pendiente. Un script aparte, sin producción. No afirmar que ya se cobró de verdad.
 - **Facu.** Aplicar la migración con su frase, prender la bandera y tildar «Planes y suscripciones» y «Vinculación de aplicaciones». Sigue anotado en el PR #155.
 - Nada de merge, Railway, Vercel, Supabase de producción ni Mercado Pago hasta esa frase.
 
 ### Próximo paso concreto
-Abrir `cursor/suscripciones-ficha-chat` desde `cursor/suscripciones-cobranzas-pagina` e implementar la ficha y el chat (4.4 y 4.5). Al cerrar, actualizar este archivo, la bitácora de `docs/panel-nutri-rediseno/plan.md` y `docs/coordinacion-agentes.md`, y dejar cada captura junto a su pantalla del boceto.
+Implementar la sección 2.9 en `cursor/pago-mensual-unico`. Al cerrar, actualizar este archivo, la bitácora de `docs/panel-nutri-rediseno/plan.md` y `docs/coordinacion-agentes.md`, y dejar las capturas de la app junto al boceto, con el menú lateral del panel real.
 
 ---
 
 ## 0. Resumen en 10 líneas
 
 1. Cada nutri cobra a sus pacientes **con su propia cuenta de Mercado Pago**. La plata entra directo a su cuenta y Plan V no toca dinero.
-2. Hay dos formas de cobrar: **(a) débito automático mensual** de un "plan de seguimiento" (lo nuevo) y **(b) consulta suelta** con seña/saldo por Checkout Pro (ya existe, no cambia).
+2. Hay tres formas de cobrar: **(a) débito automático mensual** de un "plan de seguimiento", **(b) consulta suelta** con seña/saldo por Checkout Pro (ya existe, no cambia) y **(c) pago único de la cuota del mes** (sección 2.9): un enlace de Checkout Pro, sin suscripción, para quien sigue con cuota manual.
 3. Para (a) usamos **suscripciones de Mercado Pago sin plan asociado y con pago pendiente** (`POST /preapproval` con `status: "pending"`): una por paciente, creada con el token OAuth de la nutri. Mercado Pago devuelve un link (`init_point`) y la paciente carga su medio de pago ahí. No tocamos datos de tarjeta.
 4. El "plan de seguimiento" (nombre, precio, qué incluye) se guarda **en Plan V**, no como `preapproval_plan` en Mercado Pago, porque las suscripciones con plan asociado obligan a mandar `card_token_id` (o sea, a tokenizar la tarjeta nosotros).
 5. **La app "Plan V" que ya existe sirve** (mismo Client ID, mismo OAuth, mismos tokens y la misma URL de avisos con "Planes y suscripciones" tildado). No hace falta crear otra app ni pedir a las nutris que vuelvan a conectar, salvo que la prueba en sandbox muestre lo contrario.
@@ -73,7 +74,7 @@ Que la nutri pueda cobrar su seguimiento mensual sin perseguir a nadie: arma su 
 - WhatsApp y correo. Los avisos van por la app (decisión 11/10 y 19/10).
 - Facturación electrónica (AFIP). Mercado Pago le manda el comprobante de pago a la paciente; la factura sigue siendo cosa de la nutri.
 - Tokenizar tarjetas en Plan V (Card Payment Brick / Checkout API). Queda como opción futura (ver 3.10).
-- Cambios en la consulta suelta: seña/saldo con Checkout Pro sigue igual (`scheduling_checkout_intents`, `createMpPreference`, `applyVerifiedPayment`).
+- Cambios en la consulta suelta: seña/saldo con Checkout Pro sigue igual (`scheduling_checkout_intents`, `createMpPreference`, `applyVerifiedPayment`). El pago único de la cuota reutiliza la forma de ese enlace, pero no usa la tabla de las reservas.
 
 ---
 
@@ -162,6 +163,23 @@ La paciente esporádica sigue reservando en la Página pública y paga seña o s
 | **Aviso de otra app o cuenta desconocida** | Se guarda como `unroutable`, se contesta 200 y no se procesa. |
 | **Prueba gratis** | Ver 3.10. Apagada en la v1 hasta confirmarla en sandbox. |
 | **Día fijo de cobro** | `billing_day` existe solo con plan asociado [F11]. En la v1 se cobra el mismo día del mes en que la paciente se suscribió. |
+
+### 2.9 Pago único de la cuota del mes (sin suscripción)
+
+Pedido por Facu el 19/10. No reemplaza al débito ni a la consulta suelta. Sirve cuando la paciente sigue con **cuota manual** y la nutri quiere cobrar un mes por Mercado Pago, una sola vez.
+
+1. La nutri entra a Cobranzas, o a la fila de esa paciente dentro de Cobranzas (no a la ficha ni al chat). Elige el mes en curso o otro mes que ya tenga cuota abierta.
+2. Plan V arma un enlace de **Checkout Pro** (`POST /checkout/preferences`) con el token OAuth de la nutri. No se manda `marketplace_fee` ni `application_fee`: Plan V no cobra comisión (P1). El título es la cuota de ese mes, en español. El aviso de Mercado Pago va a la URL general (`/api/public/scheduling/mp/webhook/`).
+3. La nutri copia el enlace y se lo manda. No hay WhatsApp ni mensaje por el chat en esta parte.
+4. La paciente también puede pagarlo desde **Pagos** en su app, o desde la página pública del consultorio. Es el mismo enlace: si ya hay uno vigente para ese mes, se reutiliza.
+5. Cuando el pago entra por el webhook general, se anota **una sola vez** en `patient_payments`, con `source` `checkout`, el medio Mercado Pago, y queda ligado a esa cuota y a ese mes (`covers_due_on`). La idempotencia es `provider` + `provider_payment_id` (el índice que ya trae la migración de suscripciones). No se anota en la tabla de la consulta suelta ni en la del débito.
+6. Ese cobro se aplica a la cuota de ese mes. Si no queda deuda vencida, el estado pasa a **«Al día»**. El movimiento aparece en Movimientos como «Cuota de … · Mercado Pago».
+7. El enlace sin usar vence a los 7 días, igual que el del débito. Vencido, se puede generar otro. Un segundo aviso del mismo pago, o un segundo pago del mes que ya quedó cubierto, no agrega otra fila.
+8. Si la paciente tiene débito **activo** (autorizado o en pausa), este enlace **no se ofrece** (P6). Un débito que todavía no se pagó no apaga la cuota manual, así que el enlace sigue disponible.
+9. La conciliación del botón y el worker de 6 horas también miran estos enlaces, con la misma búsqueda por referencia que ya usa la seña.
+10. Todo detrás de `PATIENT_SUBSCRIPTIONS_ENABLED`. Apagada, las rutas responden 404 y no se ve el botón.
+
+La consulta suelta no se toca. La ficha y el chat no se tocan en esta parte.
 
 ---
 
@@ -511,7 +529,8 @@ Una rama y un PR por tema. Las migraciones van con fecha ≥ 20261019000000 y **
 | 1 | Codex (o Cursor si Facu autoriza) | `codex/suscripciones-spike-sandbox` | Script de prueba con cuentas de prueba: los 5 puntos de 6.3. Sin tocar producción. | 0 |
 | 2 | Cursor | `cursor/suscripciones-pacientes-backend` | Migración (sin aplicar), endpoints, webhook general, worker, conciliación, libro, push `subscription`, pruebas. Bandera apagada. | Decisiones de 7.3 |
 | 3 | Cursor | `cursor/suscripciones-cobranzas-pagina` | Cobranzas (4.1), Página pública (4.2) y página `/consultorio` (4.3). Hecho en el [PR #156](https://github.com/Facu42/plan-v/pull/156), borrador contra la rama del backend. Bandera apagada. Capturas en `design/suscripciones/` | #153 ya está en main; contratos de 2 |
-| 4 | Cursor | `cursor/suscripciones-ficha-chat` | Ficha (4.4) y chat (4.5) | Fase 4 mergeada; 3 |
+| 3b | Cursor | `cursor/pago-mensual-unico` | Pago único de la cuota del mes (2.9). Enlace de Checkout Pro, libro con `source` `checkout`, app y página pública. Bandera apagada. Migración nueva solo si hace falta, sin aplicar | 3 |
+| 4 | Cursor | `cursor/suscripciones-ficha-chat` | Ficha (4.4) y chat (4.5). Después de 3b | Fase 4 mergeada; 3b |
 | 5 | Lane de la app de pacientes (o Cursor) | `cursor/suscripciones-app-paciente` | Pagos (4.6) y aviso en Inicio | 2 |
 | 6 | Facu | — | Aplica la migración con su frase, configura Mercado Pago (6.1), prende la bandera en Railway | 2–5 en verde |
 
@@ -592,11 +611,11 @@ Estas decisiones reemplazan P1–P10. El backend de esta rama las cumple.
 - **P3. Frecuencia.** Solo mensual. No hay trimestral en esta versión.
 - **P4. Baja desde la app.** La paciente puede darse de baja desde la app. También puede cancelar la nutri, o Mercado Pago.
 - **P5. Cambio de precio.** 10 días de aviso. El precio nuevo vale enseguida para los links nuevos. En las que ya están activas, se avisa y Mercado Pago recién lo cobra cuando pasan esos 10 días.
-- **P6. Cuota manual.** Si la paciente queda con el débito activo, se apaga su cuota manual para no cobrar dos veces. Si el link todavía no se pagó, la cuota manual sigue.
+- **P6. Cuota manual.** Si la paciente queda con el débito activo, se apaga su cuota manual para no cobrar dos veces. Si el enlace del débito todavía no se pagó, la cuota manual sigue. Con débito activo (o en pausa) no se ofrece el pago único del mes (2.9).
 - **P7. Equipo.** Solo la nutri activa, pausa, reanuda o cancela débitos. Recepción y equipo solo ven.
 - **P8. Página pública.** Se ofrece en la página pública y también por link. Cada plan tiene su interruptor para mostrarse o no.
 - **P9. Medios de pago.** Se aceptan todos los medios que ofrezca Mercado Pago. No se filtran.
-- **P10. Quién programa.** Cursor hace el backend y las pantallas. El backend está en el PR #155. Cobranzas y la página pública están en el PR #156. Faltan la ficha, el chat y la app de la paciente.
+- **P10. Quién programa.** Cursor hace el backend y las pantallas. El backend está en el PR #155. Cobranzas y la página pública están en el PR #156. El pago único del mes va en `cursor/pago-mensual-unico`. Después faltan la ficha, el chat y el débito dentro de la app de la paciente.
 
 ---
 
