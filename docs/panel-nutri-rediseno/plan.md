@@ -254,6 +254,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
 
+### 2026-10-19 · Codex · Fase 4, paso 1 (encabezado y resumen)
+- Hecho: encabezado con acciones reales, once pestañas y subpestañas de Plan manteniendo las catorce rutas. Resumen conectado a medidas, comidas por revisar, notas autorizadas, días registrados, laboratorio, antecedentes y cuotas. Historia conserva ingreso/importación y suma cuidado al preparar plan. Tipos y ocho pruebas focales aprobados; primer vistazo /browse sin desborde en 1440.
+- Cómo: pruebas RED de agrupación y datos antes de implementar. Se reutilizan API, permisos, gráficos/medidas y lógica de consulta; no se inventa meta numérica, diagnóstico, edad ni resumen de IA. Unidades distintas y comparadores de laboratorio no se mezclan. Todavía no se declara fase completa.
+- Rama y commit: codex/panel-nutri-fase-4, base #152; este paso se respalda antes de continuar.
+- Falta: evolución con composición aprobada, rediseño de notas, vista actual de Plan, laboratorio con comparación de tres fechas y gráfico, archivos/consultas/cobros/chat, revisión y QA final propias.
+- Próximo paso exacto: completar las piezas de Evolución y Laboratorio sobre ClinicalPatientWorkspace, conservar todos sus formularios en paneles desplegables y adaptar Notas sin cambiar captura/publicación.
+
 ### 2026-10-19 08:44 · Codex · Fase 4, paso 0 (reserva)
 - Hecho: fase 4 reservada antes de cambiar código. Fase 3 entregada en #152 y su CI corre.
 - Cómo: continuación del pedido de Facundo, una rama y PR por parte. Se mantiene toda la lógica y permisos de las 14 secciones, agrupadas visualmente en las once pestañas aprobadas.
