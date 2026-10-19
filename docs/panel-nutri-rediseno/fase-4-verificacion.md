@@ -1,5 +1,7 @@
 # Fase 4 · Ficha de paciente
 
+Entregada en [PR #154](https://github.com/Facu42/plan-v/pull/154), rama `codex/panel-nutri-fase-4`. Código verificado en 0987346; después sólo se registra este enlace y la Bitácora.
+
 ## Resultado
 
 Ficha con once pestañas principales según la composición aprobada: Resumen, Historia clínica, Evolución, Notas, Plan, Registro alimentario, Laboratorio, Archivos, Consultas, Cobros y Chat. Se conservan las catorce secciones anteriores: las cuatro del plan quedan agrupadas y los enlaces `ingreso`, `registros` y `mensajes` mantienen sus destinos.

@@ -2,7 +2,7 @@
 
 ## 19/10 · Ficha de la nutri, fase 4
 
-Implementación en `codex/panel-nutri-fase-4`: once pestañas, encabezado, resumen y datos iniciales; evolución, plan publicado/editor, diario completo, laboratorio, notas, archivos privados, consultas, cobros y chat. Conserva las catorce secciones y enlaces anteriores. API de lectura paginada de comidas, sin cambios de base. Revisiones independientes cerradas; seis e2e verdes, suite estable final 3.177 aprobadas y dos omitidas (494 archivos), tipos/build/secretos aprobados; 28 controles del navegador y 44 tamaños/temas, 47 capturas. PR propio en preparación. [Informe](panel-nutri-rediseno/fase-4-verificacion.md) y [comparación local](../design/panel-nutri/fase-4-verificacion.html).
+Implementación en `codex/panel-nutri-fase-4`: once pestañas, encabezado, resumen y datos iniciales; evolución, plan publicado/editor, diario completo, laboratorio, notas, archivos privados, consultas, cobros y chat. Conserva las catorce secciones y enlaces anteriores. API de lectura paginada de comidas, sin cambios de base. Revisiones independientes cerradas; seis e2e verdes, suite estable final 3.177 aprobadas y dos omitidas (494 archivos), tipos/build/secretos aprobados; 28 controles del navegador y 44 tamaños/temas, 47 capturas. Entregada en [PR #154](https://github.com/Facu42/plan-v/pull/154), con paso 10; integración sujeta a sus controles remotos. [Informe](panel-nutri-rediseno/fase-4-verificacion.md) y [comparación local](../design/panel-nutri/fase-4-verificacion.html).
 
 Fase 3 integrada por #152 en main `6697d28`, controles y web/API/worker verdes. Por indicación expresa de Facundo, **este trabajo termina en fase 4; fase 5 se está haciendo por otro lado**. No reservar fases siguientes desde este hilo.
 

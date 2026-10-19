@@ -159,7 +159,7 @@ pendientes con un botón por fila y pestañas por tipo, consultas de hoy, necesi
   «Escribir», «Armar plan» y «Abrir ficha completa». Se cierra tocando la fila otra vez o con Escape; el foco queda en la fila.
 - Necesita un pedido liviano a la API que traiga ese resumen por paciente (sin traer la ficha entera).
 
-### Fase 4. Ficha con sus 11 pestañas · Estado: reservada por Codex, codex/panel-nutri-fase-4
+### Fase 4. Ficha con sus 11 pestañas · Estado: verificada por Codex, PR #154
 
 Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» (abre Notas de consulta) e
 «Iniciar consulta». Contenido de cada pestaña según el boceto:
@@ -171,7 +171,7 @@ Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» 
 - **Plan**: plan de hoy con alternativas, pedido de cambio de la paciente (aprobar o proponer otra), planificación (calorías y macros), lista de compras.
 - **Registro alimentario**, **Laboratorio** (con tres fechas y gráfico del valor elegido), **Archivos** (con zona para arrastrar y exportar ficha en PDF), **Consultas** (con «Cerrar la consulta de hoy»), **Cobros**, **Chat**.
 
-### Fase 5. Agenda, Cobranzas y Página pública · Estado: sin empezar
+### Fase 5. Agenda, Cobranzas y Página pública · Estado: en otro carril por indicación de Facundo
 
 Agenda semanal con colores por tipo, línea de la hora, bloqueos, reservas por confirmar, tipos de consulta
 y link de reserva. Cobranzas con cobrado, por cobrar, vencido, ingresos por mes, cuotas vencidas con
@@ -238,11 +238,19 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Integrada a main `1f48adf`; web, API y worker comprobados |
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
 | 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main 6697d28; controles remotos aprobados |
-| 4 | Codex | codex/panel-nutri-fase-4 | Implementada; verificación visual, de permisos y cierre de PR en curso |
+| 4 | Codex | `codex/panel-nutri-fase-4` · [PR #154](https://github.com/Facu42/plan-v/pull/154) | Hecha y verificada; entrega exclusiva de fase 4. Integración sujeta a CI verde |
 | 5 | Otro carril indicado por Facundo | — | Fuera de este trabajo por pedido del 19/10 |
 | 6 a 9 | Por coordinar | — | Fuera del alcance actual; este trabajo termina en fase 4 |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-19 · Codex · Fase 4, paso 7 (entrega en PR #154)
+- Hecho: entregada la ficha de once pestañas en [PR #154](https://github.com/Facu42/plan-v/pull/154), con informe completo del paso 10 y comparación local disponible. Suite estable: 3.177 aprobadas y dos omitidas, 494 archivos; tipos/build/secretos verdes. 28 controles de navegador y 44 tamaños/temas, 47 capturas, seis e2e.
+- Cómo: implementación 8456ded y cierre verificado 0987346; código y visual revisados sin P1/P2. Comparadores manuales preservados, retiro de permisos verificado incluso en vuelo, fire test detectado y restaurado. Sin migraciones ni cambios de producción.
+- Rama: codex/panel-nutri-fase-4, PR #154, sobre main 6697d28. Los controles remotos del PR habilitan la integración; no se integra con un control rojo.
+- Qué falta: sólo CI remoto e integración de esta entrega; fases siguientes fuera del alcance de este hilo. Las limitaciones de hardware/IA/PDF de punta a punta quedan explícitas en el informe.
+- Próximo paso exacto: comprobar CI de #154, integrarlo con todo verde y detener este trabajo. **La fase 5 ya se realiza en otro carril por pedido de Facundo; no tomarla ni continuar con fases 6–9.**
+
 
 ### 2026-10-19 · Codex · Fase 4, paso 6 (cierre verificado)
 - Hecho: once pestañas verificadas, suite estable de 3.177 aprobadas y dos omitidas (494 archivos), tipos/build/secretos verdes. Seis e2e, 14 controles y 44 tamaños/temas, nueve acciones privadas y cinco ensayos de paginación; 47 capturas. Comparación navegable comprobada y abierta para Facundo.

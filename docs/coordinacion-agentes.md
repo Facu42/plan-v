@@ -1,6 +1,6 @@
 # Coordinación entre agentes (Claude, Codex, Cursor)
 
-19/10 · Codex · Fase 4 de Ficha implementada en `codex/panel-nutri-fase-4`; revisión de código y visual cerradas, seis e2e aprobados y suite estable final verde (3.177 y dos omitidas, 494 archivos), tipos/build/secretos aprobados. 28 comprobaciones de navegador y 44 tamaños/temas, con 47 capturas. PR propio en preparación. Fase 3 integrada por #152 en main 6697d28, web/API/worker verdes. **Facundo limitó este trabajo a terminar fase 4; fase 5 se realiza en otro carril.** [Informe y límites](panel-nutri-rediseno/fase-4-verificacion.md). Sin SQL remoto.
+19/10 · Codex · Fase 4 de Ficha implementada en `codex/panel-nutri-fase-4`; revisión de código y visual cerradas, seis e2e aprobados y suite estable final verde (3.177 y dos omitidas, 494 archivos), tipos/build/secretos aprobados. 28 comprobaciones de navegador y 44 tamaños/temas, con 47 capturas. Entregada en [PR #154](https://github.com/Facu42/plan-v/pull/154), con paso 10 completo; integración sujeta a CI verde. Fase 3 integrada por #152 en main 6697d28, web/API/worker verdes. **Facundo limitó este trabajo a terminar fase 4; fase 5 se realiza en otro carril.** [Informe y límites](panel-nutri-rediseno/fase-4-verificacion.md). Sin SQL remoto.
 
 19/10 · Codex · Fase 3 de Pacientes verificada en `codex/panel-nutri-fase-3`: tabla y resumen bajo la fila con datos autorizados, 3.164 pruebas y dos omitidas, tipos/build/secretos y revisiones aprobadas, 22 comprobaciones /browse. Informe: [fase 3](panel-nutri-rediseno/fase-3-verificacion.md). Inicio #151 integrado a main 4dc9a79 con web/API/worker en verde. Sigue fase 4, Ficha, en rama y PR propios; sin SQL remoto.
 
@@ -30,7 +30,7 @@ visto bueno de Facundo.
 | Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Ánimo y síntomas publicado (PR #112, 14/10). Recorridos de punta a punta y monitor en main (#114, 15/10). Aviso de recurso indicado en PR propio. El resto, por empezar |
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
-| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (fase 4); fase 5 en otro carril por Facundo | `codex/panel-nutri-fase-4`, [plan](panel-nutri-rediseno/plan.md) | Fases 1–3 integradas (#150–152). Fase 4 en cierre de pruebas y PR propio. Este hilo se detiene al terminarla; no toma fase 5 ni modifica #147 de Cursor |
+| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (fase 4); fase 5 en otro carril por Facundo | `codex/panel-nutri-fase-4`, [plan](panel-nutri-rediseno/plan.md) | Fases 1–3 integradas (#150–152). Fase 4 verificada y entregada en [PR #154](https://github.com/Facu42/plan-v/pull/154), CI previo a integración. Este hilo se detiene al terminarla; no toma fase 5 ni modifica #147 de Cursor |
 
 ## 2. Reglas para no pisarse
 
