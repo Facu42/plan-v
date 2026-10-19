@@ -176,7 +176,7 @@ Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» 
 Agenda semanal con colores por tipo, línea de la hora, bloqueos, reservas por confirmar, tipos de consulta
 y link de reserva. Cobranzas con cobrado, por cobrar, vencido, ingresos por mes, cuotas vencidas con
 «Recordar» y movimientos. Página pública con editor y vista previa en celular. Mercado Pago, Google
-Calendar y WhatsApp quedan armados y muestran «Conectar» hasta que haya claves (no se finge conexión).
+Calendar queda armado y muestra «Conectar» hasta que haya claves (no se finge conexión). WhatsApp no se ofrece en el panel: los mensajes y recordatorios van por el chat y los avisos de la app (decisión de Facundo, 19/10).
 
 ### Fase 6. Acompañamiento: Asistente IA, Seguimiento, Mensajes y Progreso · Estado: sin empezar
 
@@ -254,6 +254,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 16:15 · Cursor · Fase 5, paso 3 (boceto y sin WhatsApp)
+- Hecho: capturas de Agenda, Cobranzas y Página pública en 1440×900 y 390×844, claro y oscuro, al lado del boceto, en `design/panel-nutri/fase-5/`. Se sacó WhatsApp del panel de la nutri: no hay botón Conectar, ni recordatorio por WhatsApp, ni ajuste para activarlo. Recordar abre el chat de la app. El aviso de la cuota sigue en el inicio de la paciente. No se tocó el servidor ni las migraciones.
+- Cómo: mismas pantallas. Las tarjetas de cobranzas usan la foto suave del panel. Lo que el boceto muestra con datos de Verónica y la app no tiene (turnos inventados, matrícula, foto de perfil) queda vacío o con el dato real.
+- Rama y commit: `cursor/panel-nutri-fase-5`. [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar.
+- Falta: el visto de Facundo. El celular del boceto no dibuja Cobranzas ni Página pública (repite el Inicio).
+- Próximo paso exacto: fase 6 (Asistente IA, Seguimiento, Mensajes y Progreso), en otra rama.
 
 ### 2026-10-19 14:45 · Cursor · Fase 5, paso 2 (cierre)
 - Hecho: las tres pantallas quedaron en la rama y se conservaron las acciones que ya tenía la agenda: confirmar, cancelar y reprogramar, revisar transferencias, conciliar Mercado Pago, sincronizar el calendario, desconectar Google o Mercado Pago, ver más reservas y más fichas, seña por tipo, Meet, alias y agendas. Mercado Pago, Google Calendar y WhatsApp siguen en Conectar si el servidor no tiene claves. `npm run check` pasó. Las pruebas de estas pantallas: 13 en 5 archivos. La suite completa: 3171 pasaron, 2 omitidas y 5 fallaron en `server/security/mfa.test.ts` y `server/db/supabase-client.test.ts` porque esta máquina usa Node 20 y no tiene WebSocket nativo; esos archivos no están en el diff.

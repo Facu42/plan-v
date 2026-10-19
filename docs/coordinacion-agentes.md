@@ -1,6 +1,6 @@
 # Coordinación entre agentes (Claude, Codex, Cursor)
 
-19/10 · Cursor · Fase 5 (Agenda, Cobranzas y Página pública) lista para revisar en `cursor/panel-nutri-fase-5`, desde main `6697d28`. Autorizado por Facundo 19/10 porque Codex sin crédito. Codex sigue con la ficha en `codex/panel-nutri-fase-4`; esta rama no toca esos archivos. Mercado Pago, Google Calendar y WhatsApp muestran «Conectar» hasta que haya claves. Sin SQL remoto.
+19/10 · Cursor · Fase 5 (Agenda, Cobranzas y Página pública) lista para revisar en `cursor/panel-nutri-fase-5`, [PR #153](https://github.com/Facu42/plan-v/pull/153). Autorizado por Facundo 19/10 porque Codex sin crédito. Codex sigue con la ficha. Mercado Pago y Google Calendar muestran «Conectar». WhatsApp salió del panel: los avisos van por la app. Sin SQL remoto.
 
 
 Una sola página para que los agentes no se pisen. **Leela antes de empezar una tarea y actualizala al
@@ -77,6 +77,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **19/10 · Cursor · Fase 5 comparada y sin WhatsApp** · Capturas en `design/panel-nutri/fase-5/`. [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar. WhatsApp salió de Agenda, Cobranzas, Página pública y Conexiones. Los recordatorios abren el chat de la app. El servidor no se tocó.
 - **19/10 · Cursor · Cierre fase 5** · Agenda, Cobranzas y Página pública en `cursor/panel-nutri-fase-5`, desde main `6697d28`. [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar. Conectar no finge claves. Se conservan transferencias, conciliación, desconectar y el resto de la agenda vieja. Sin SQL remoto. Autorizado por Facundo 19/10 porque Codex sin crédito. La fase 6 sigue pendiente.
 - **19/10 · Cursor · Inicio fase 5** · Reserva previa al código en `cursor/panel-nutri-fase-5`, desde main `6697d28`. Agenda, Cobranzas y Página pública. Mercado Pago, Google Calendar y WhatsApp muestran «Conectar» sin fingir conexión. Autorizado por Facundo 19/10 porque Codex sin crédito. Codex sigue con la ficha en `codex/panel-nutri-fase-4`. Sin SQL remoto.
 

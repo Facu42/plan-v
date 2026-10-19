@@ -62,12 +62,14 @@ describe('Pantalla Cobranzas del nutricionista', () => {
   it('el panel del paciente lista avisos, cuotas, historial y recordatorio', () => {
     const html = renderToStaticMarkup(<CobranzasScreen board={board} onBoard={vi.fn()} today={TODAY} initialSelectedId="marina" />);
     expect(html).toContain('Cobranzas de Marina Gil');
-    for (const text of ['Confirmar', 'Rechazar', 'Registrar pago', 'Cambiar cuota', 'Quitar cuota', 'Perdonar', 'Vencida', 'Anulado', 'Recordar por WhatsApp', 'https://wa.me/', 'Transferí ayer']) expect(html).toContain(text);
+    for (const text of ['Confirmar', 'Rechazar', 'Registrar pago', 'Cambiar cuota', 'Quitar cuota', 'Perdonar', 'Vencida', 'Anulado', 'La paciente ve el aviso en la app', 'Transferí ayer']) expect(html).toContain(text);
+    expect(html).not.toContain('WhatsApp');
+    expect(html).not.toContain('wa.me');
     expect(html).toContain('value="60000"');
   });
   it('no ofrece recordatorio ni anular si no corresponde', () => {
     const html = renderToStaticMarkup(<PatientPanel patient={{ ...board.patients[1] }} settings={board.settings} onLedger={vi.fn()} onBack={vi.fn()} today={TODAY} />);
-    expect(html).not.toContain('Recordar por WhatsApp');
+    expect(html).not.toContain('aviso en la app');
     expect(html).toContain('Anular');
     expect(html).toContain('Pagada');
   });

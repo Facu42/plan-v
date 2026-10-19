@@ -60,19 +60,20 @@
 .pn-panel .p5 textarea { min-height:88px; resize:vertical; }
 .pn-panel .p5-switch { width:42px; height:26px; border:0; border-radius:999px; background:var(--pn-toggle); position:relative; cursor:pointer; flex:none; }
 .pn-panel .p5-switch::after { content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:var(--pn-white); transition:transform 220ms var(--pn-ease); }
+.pn-panel .p5-switch:disabled { opacity:.45; cursor:not-allowed; }
 .pn-panel .p5-switch.on { background:var(--pn-lime); }
 .pn-panel .p5-switch.on::after { transform:translateX(16px); }
 .pn-panel .p5-sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
 .pn-panel .p5-alert { color:var(--pn-danger); font-size:13px; }
 .pn-panel .p5-focus { box-shadow:0 0 0 2px var(--pn-lime); }
 .pn-panel .p5-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
-.pn-panel .p5-kpi { min-width:0; padding:16px; border-radius:22px; background:var(--pn-white); box-shadow:var(--pn-shadow); display:flex; flex-direction:column; gap:6px; }
+.pn-panel .p5-kpi { min-width:0; padding:16px; border-radius:22px; background:linear-gradient(var(--pn-photo-overlay),var(--pn-photo-overlay)),url('/panel-nutri/comida-suave.jpg') center/cover; box-shadow:var(--pn-shadow); display:flex; flex-direction:column; gap:6px; }
 .pn-panel .p5-kpi b { font-size:26px; letter-spacing:-.03em; overflow-wrap:anywhere; }
 .pn-panel .p5-kpi small,.pn-panel .p5-kpi span { color:var(--pn-muted); font-size:12px; overflow-wrap:anywhere; }
 .pn-panel .p5-kpi i { display:block; height:6px; border-radius:99px; background:var(--pn-lime); }
 .pn-panel .p5-kpi-dark { background:var(--pn-solid); color:var(--pn-on-solid); }
 .pn-panel .p5-kpi-dark :is(small,span) { color:color-mix(in srgb,var(--pn-on-solid) 72%,transparent); }
-.pn-panel .p5-kpi-hot { background:var(--pn-orange-light); }
+.pn-panel .p5-kpi-hot { background:linear-gradient(var(--pn-photo-saffron),var(--pn-photo-saffron)),url('/panel-nutri/comida-suave.jpg') center/cover; }
 .pn-panel .p5-pair,.pn-panel .p5-public { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; }
 .pn-panel .p5-public { grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(240px,340px); }
 .pn-panel .p5-bars { display:flex; align-items:end; gap:8px; height:160px; }

@@ -1,6 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-19)
 
-19/10 · Cursor · Fase 5 (Agenda, Cobranzas y Página pública) lista para revisar en `cursor/panel-nutri-fase-5`, [PR #153](https://github.com/Facu42/plan-v/pull/153), desde main `6697d28`. Sin SQL remoto. Codex sigue con la ficha. La fase 6 (Asistente IA, Seguimiento, Mensajes y Progreso) es la siguiente.
+19/10 · Cursor · Fase 5 comparada con el boceto en `design/panel-nutri/fase-5/`. [PR #153](https://github.com/Facu42/plan-v/pull/153). WhatsApp salió del panel de la nutri; los avisos van por la app. Sin SQL remoto. La fase 6 (Asistente IA, Seguimiento, Mensajes y Progreso) es la siguiente.
 
 19/10 · Codex · Fase 3 de Pacientes verificada en `codex/panel-nutri-fase-3`: tabla y resumen bajo la fila con datos autorizados, 3.164 pruebas y dos omitidas, tipos/build/secretos y revisiones aprobadas, 22 comprobaciones /browse. Informe: [fase 3](panel-nutri-rediseno/fase-3-verificacion.md). Inicio #151 integrado a main 4dc9a79 con web/API/worker en verde. Sigue fase 4, Ficha, en rama y PR propios; sin SQL remoto.
 

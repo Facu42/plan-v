@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { api, request } from '../../api/client';
+import { api } from '../../api/client';
 import { schedulingApi, type SchedulingWorkspaceSnapshot } from '../../api/scheduling';
 import { friendlyError } from '../../lib/error-messages';
 import { schedulingDefaultSettings, type SchedulingBooking, type SchedulingSettings } from '../../types/scheduling';
@@ -12,7 +12,6 @@ export function usePanelScheduling() {
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
-  const [whatsapp, setWhatsapp] = useState(false);
   const [patients, setPatients] = useState<Array<{ id: string; name: string }>>([]);
   const [bookingMore, setBookingMore] = useState(false);
   const [patientMore, setPatientMore] = useState(false);
@@ -21,13 +20,11 @@ export function usePanelScheduling() {
     setError('');
     return Promise.all([
       schedulingApi.workspace(0, signal),
-      request<{ enabled?: boolean }>('/api/portfolio/communications', { signal }).then(body => Boolean(body.enabled)).catch(() => false),
       api.getPatients({ limit: 100, offset: 0 }, { signal }).then(body => ({ list: body.patients.map(patient => ({ id: patient.id, name: patient.name })), more: Boolean(body.page?.has_more) })).catch(() => ({ list: [] as Array<{ id: string; name: string }>, more: false })),
-    ]).then(([next, enabled, people]) => {
+    ]).then(([next, people]) => {
       if (signal?.aborted) return;
       setSnapshot(next);
       setConfig(next.profile.config);
-      setWhatsapp(enabled);
       setPatients(people.list);
       setBookingMore(next.has_more);
       setPatientMore(people.more);
@@ -54,8 +51,7 @@ export function usePanelScheduling() {
     finally { setBusy(false); }
   }
 
-  async function connect(provider: 'google' | 'mercadopago' | 'whatsapp') {
-    if (provider === 'whatsapp') { if (!whatsapp) setStatus(CONNECTION_MISSING); return; }
+  async function connect(provider: 'google' | 'mercadopago') {
     const available = Boolean(snapshot?.available[provider]);
     const connected = Boolean(snapshot?.connections[provider]);
     if (connected) return;
@@ -142,7 +138,7 @@ export function usePanelScheduling() {
     finally { setBusy(false); }
   }
 
-  return { snapshot, config, setConfig, error, status, setStatus, busy, whatsapp, patients, bookingMore, patientMore, load, save, connect, disconnect, loadMoreBookings, loadMorePatients, syncBooking, reconcileBooking, reviewTransfer, confirm, changeBooking };
+  return { snapshot, config, setConfig, error, status, setStatus, busy, patients, bookingMore, patientMore, load, save, connect, disconnect, loadMoreBookings, loadMorePatients, syncBooking, reconcileBooking, reviewTransfer, confirm, changeBooking };
 }
 
 function mergeById<T extends { id: string }>(left: T[], right: T[]) {
