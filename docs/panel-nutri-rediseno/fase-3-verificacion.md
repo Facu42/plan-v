@@ -43,3 +43,7 @@ Demo local con datos ficticios; sin cuenta real, teléfono físico ni lector de 
 ## Continuidad
 
 Sigue fase 4: Ficha con las once pestañas del boceto, conservando los accesos operativos existentes. Empezar por `ProfessionalPatientWorkspace.tsx`, las secciones compartidas y el bloque de ficha del boceto; el resumen de Pacientes ya enlaza cada destino. Notas de consulta conserva su lógica y permisos; corresponde rediseño visual. Una rama y PR propios.
+
+## Control remoto del PR #152
+
+La primera ejecución E2E de CI falló por un selector anterior al rediseño: intentaba Abrir ficha/plan sin abrir Más opciones. Se actualiza el recorrido para pulsar primero el menú visible, conservando todas las aserciones. Integración pendiente hasta que la nueva ejecución y signed-auth estén aprobadas; no se integra con un control rojo.
