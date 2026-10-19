@@ -5,9 +5,15 @@ describe('large historical secret scanning', () => {
   it('exempts only the Facebook pattern inside the one audited binary blob', () => {
     expect(auditedBinaryAllowlist('0'.repeat(40))).toBe('');
     const rule = auditedBinaryAllowlist('664f5dde8309c599f8e1fc4575e58342a9668782');
-    expect(rule).toContain('id = "facebook-page-access-token"');
-    expect(rule).toContain("paths = ['''664f5dde8309c599f8e1fc4575e58342a9668782-[0-9]+\\.txt$''']");
-    expect(rule).not.toContain('regexes');
+    expect(rule).toBe([
+      '',
+      '[[rules]]',
+      'id = "facebook-page-access-token"',
+      '[[rules.allowlists]]',
+      'description = "Random bytes in the audited Impeccable engine binary (one immutable blob)"',
+      "paths = ['''664f5dde8309c599f8e1fc4575e58342a9668782-[0-9]+\\.txt$''']",
+      '',
+    ].join('\n'));
   });
   it('does not treat unrelated credential fields as public scene assets', () => {
     const publicId = 'a'.repeat(40);
