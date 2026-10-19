@@ -244,6 +244,13 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-19 23:50 · Cursor · Pago único, con el celular que Facu rechazó
+- Hecho: el enlace de un mes sigue en esta rama, y ahora el celular no parte los nombres. En 360, 390 y 430 el débito, las cuotas vencidas y los movimientos se leen en columna o en tarjetas. El cuadro del enlace cabe en la pantalla y sus campos miden 44 px. El menú inferior queda fijo. No se repite el título ni aparecen los accesos de paciente en la vista previa.
+- Cómo: se aplicaron break-ui, frontend-patterns, frontend-a11y y verification-loop. Las vistas siguen recibiendo los mismos datos. No hay un interruptor de peor caso. Las capturas de celular se sacaron de nuevo dentro del panel, con el menú inferior, y quedaron al lado del boceto de escritorio en `design/suscripciones/`. No hay boceto de celular. El cuadro de «Cobrar este mes» tapa el menú mientras está abierto.
+- Rama y PR: `cursor/pago-mensual-unico`, [PR #157](https://github.com/Facu42/plan-v/pull/157), borrador contra `cursor/suscripciones-cobranzas-pagina`. 3.243 pruebas y 2 omitidas, en 511 archivos. Lo de Agenda que ya está en main va en `cursor/arreglo-mobile-fase5`, [PR #158](https://github.com/Facu42/plan-v/pull/158).
+- Falta: ficha, chat, el débito en la app de la paciente y la prueba en sandbox. Facu tiene que aplicar las dos migraciones y prender la bandera.
+- Próximo paso exacto: crear `cursor/suscripciones-ficha-chat` desde esta rama y hacer la ficha (4.4) y el chat (4.5).
+
 ### 2026-10-19 23:20 · Cursor · Celular de Cobranzas y de la página pública
 - Hecho: Facu rechazó el celular. En la tarjeta de débito el nombre se lee en una línea. En el celular, Movimientos es una lista de tarjetas. Las pestañas bajan de renglón. Suscribirme queda dentro del marco de la vista previa. El menú inferior queda fijo y no tapa el final. Nada se corta en 360, 390 ni 430, y los botones miden al menos 44 px.
 - Cómo: se aplicaron break-ui, frontend-patterns, frontend-a11y y verification-loop. Las vistas siguen recibiendo los mismos datos. Las capturas de celular se sacaron de nuevo dentro del panel, con el menú inferior, y quedaron al lado del boceto de escritorio en `design/suscripciones/`. No hay boceto de celular.

@@ -1,6 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-19)
 
-19/10 · Cursor · Facu pidió el pago único de la cuota del mes, sin suscripción. Quedó en la [spec](suscripciones-pacientes/spec.md) (2.9). La rama es `cursor/pago-mensual-unico`, desde las pantallas ([PR #156](https://github.com/Facu42/plan-v/pull/156)). La función sigue apagada. No se toca la ficha ni el chat. El sandbox sigue pendiente.
+19/10 · Cursor · El pago único de la cuota del mes quedó en `cursor/pago-mensual-unico` ([PR #157](https://github.com/Facu42/plan-v/pull/157), borrador contra las pantallas), con el arreglo de celular de esas pantallas. La migración `20261020143000` está escrita y sin aplicar. La función sigue apagada. El celular de Agenda y Cobranzas que ya está en main va aparte, en `cursor/arreglo-mobile-fase5` ([PR #158](https://github.com/Facu42/plan-v/pull/158)). No se tocó la ficha ni el chat. El sandbox sigue pendiente. El siguiente paso es la ficha y el chat, desde la rama del pago único. Detalle en la [spec](suscripciones-pacientes/spec.md) (2.9).
 
 19/10 · Cursor · Backend de suscripciones de pacientes en `cursor/suscripciones-pacientes-backend`. La migración queda escrita y sin aplicar. La función está apagada. Las pantallas de Cobranzas y de la página pública van en otra rama. Detalle en [spec](suscripciones-pacientes/spec.md). Main ya tiene las fases 4 y 5 del panel (`c09466b`).
 
