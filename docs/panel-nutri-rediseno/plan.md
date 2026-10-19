@@ -138,7 +138,7 @@ Cada fase se puede hacer sola, en este orden. Marcá el estado al empezar y al t
 - Listo cuando: las pantallas actuales se ven bien en los dos temas, el menú pliega y despliega, y no hay
   desplazamiento de página a 1440×900.
 
-### Fase 2. Inicio · Estado: hecha, Codex (`codex/panel-nutri-fase-2`), PR propio en preparación
+### Fase 2. Inicio · Estado: hecha, PR #151
 
 Bloques del boceto, todos con datos reales: resumen de la mañana (lo arma el asistente; sin IA, una frase
 con los conteos), contadores de pendientes, próxima consulta preparada (alergias, último peso, adherencia,
@@ -236,7 +236,7 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 |---|---|---|---|
 | Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
 | 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Integrada a main `1f48adf`; web, API y worker comprobados |
-| 2 | Codex | `codex/panel-nutri-fase-2` | Hecha y verificada; PR propio en preparación |
+| 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Hecha y verificada; CI del PR en curso |
 | 3 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
@@ -251,6 +251,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 · Codex · Fase 2, paso 4 (PR)
+- Hecho: abierto [PR #151](https://github.com/Facu42/plan-v/pull/151) con el informe completo del paso 10 y comparación local disponible. CI en curso.
+- Cómo: versión verificada 587db0e; cierre documental sin cambiar código. No hay migraciones.
+- Rama y commit: `codex/panel-nutri-fase-2`, PR #151.
+- Falta: controles remotos del PR; fases 3–9. Se conserva el alcance y los límites del informe de fase 2.
+- Próximo paso exacto: reservar fase 3 en `codex/panel-nutri-fase-3` sobre esta base mientras termina CI; mantener una rama y PR por fase y conciliar main al integrar #151.
 
 ### 2026-10-19 · Codex · Fase 2, paso 3 (verificación final)
 - Hecho: Inicio verificado; suite completa 3.153 aprobadas y dos omitidas, 486 archivos; tipos, build y secretos aprobados. /browse: 13 comprobaciones y ocho tamaños/temas, con cuatro capturas. Revisiones finales de code-reviewer y reality-checker sin P1/P2.
