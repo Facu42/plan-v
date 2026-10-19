@@ -171,7 +171,7 @@ Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» 
 - **Plan**: plan de hoy con alternativas, pedido de cambio de la paciente (aprobar o proponer otra), planificación (calorías y macros), lista de compras.
 - **Registro alimentario**, **Laboratorio** (con tres fechas y gráfico del valor elegido), **Archivos** (con zona para arrastrar y exportar ficha en PDF), **Consultas** (con «Cerrar la consulta de hoy»), **Cobros**, **Chat**.
 
-### Fase 5. Agenda, Cobranzas y Página pública · Estado: reservada por Cursor (autorizado por Facundo 19/10 porque Codex sin crédito)
+### Fase 5. Agenda, Cobranzas y Página pública · Estado: en curso por Cursor (autorizado por Facundo 19/10 porque Codex sin crédito)
 
 Agenda semanal con colores por tipo, línea de la hora, bloqueos, reservas por confirmar, tipos de consulta
 y link de reserva. Cobranzas con cobrado, por cobrar, vencido, ingresos por mes, cuotas vencidas con
@@ -239,7 +239,7 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
 | 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main `6697d28` |
 | 4 | Codex | `codex/panel-nutri-fase-4` | En curso; no se toca desde la fase 5 |
-| 5 | Cursor | `cursor/panel-nutri-fase-5` | Reservada; autorizado por Facundo 19/10 porque Codex sin crédito |
+| 5 | Cursor | `cursor/panel-nutri-fase-5` | En curso; autorizado por Facundo 19/10 porque Codex sin crédito |
 | 6 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
@@ -254,6 +254,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 14:05 · Cursor · Fase 5, paso 1 (pantallas)
+- Hecho: Agenda semanal (día, semana y mes) con colores por tipo, línea de la hora, bloqueos, reservas por confirmar y tipos de consulta. Cobranzas con cobrado, por cobrar, vencido, ingresos por mes, cuotas vencidas con Recordar y movimientos. Página pública con editor y vista previa. Mercado Pago, Google Calendar y WhatsApp muestran Conectar y no figuran conectados si el servidor no tiene claves.
+- Cómo: pantallas nuevas sobre las rutas y los datos que ya existían (agenda, cobros y página de reservas). Sin migración. La ficha de Codex no se tocó. Pruebas de los cálculos y de lo que se ve en cada pantalla.
+- Rama y commit: `cursor/panel-nutri-fase-5`.
+- Falta: suite completa, `npm run check`, informe del paso 10 y el PR.
+- Próximo paso exacto: correr `npm test` y `npm run check`, completar la Bitácora y abrir el PR contra main.
 
 ### 2026-10-19 13:08 · Cursor · Fase 5, paso 0 (reserva)
 - Hecho: fase 5 reservada antes de cambiar código. Facundo autorizó que Cursor tome la fase 5 porque Codex se quedó sin crédito. Codex sigue con la fase 4 en `codex/panel-nutri-fase-4`; esta rama no toca esa rama ni sus archivos de ficha.
