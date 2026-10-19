@@ -77,7 +77,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
-- **19/10 · Cursor · Cierre fase 5** · Agenda, Cobranzas y Página pública en `cursor/panel-nutri-fase-5`, desde main `6697d28`. Conectar no finge claves. Se conservan transferencias, conciliación, desconectar y el resto de la agenda vieja. Sin SQL remoto. Autorizado por Facundo 19/10 porque Codex sin crédito. La fase 6 sigue pendiente.
+- **19/10 · Cursor · Cierre fase 5** · Agenda, Cobranzas y Página pública en `cursor/panel-nutri-fase-5`, desde main `6697d28`. [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar. Conectar no finge claves. Se conservan transferencias, conciliación, desconectar y el resto de la agenda vieja. Sin SQL remoto. Autorizado por Facundo 19/10 porque Codex sin crédito. La fase 6 sigue pendiente.
 - **19/10 · Cursor · Inicio fase 5** · Reserva previa al código en `cursor/panel-nutri-fase-5`, desde main `6697d28`. Agenda, Cobranzas y Página pública. Mercado Pago, Google Calendar y WhatsApp muestran «Conectar» sin fingir conexión. Autorizado por Facundo 19/10 porque Codex sin crédito. Codex sigue con la ficha en `codex/panel-nutri-fase-4`. Sin SQL remoto.
 
 - **19/10 · Codex · Inicio fase 3** · Reserva previa al código en `codex/panel-nutri-fase-3`, desde #151 `50c5d21`. Tabla y resumen de pacientes según boceto; se conserva alta/invitación/archivo y permisos. Dependencia declarada de #151 hasta integrarlo; un PR propio al terminar.
