@@ -46,6 +46,27 @@ pasa a tener la paleta de la app de la paciente. La app de la paciente sigue igu
 8. **Textos** en español con voseo, cortos, sin jerga. Sin datos inventados en producción: sin dato,
    el bloque muestra cero o un texto corto («Todavía no hay mediciones»).
 9. Al terminar, una línea en la bitácora de `docs/coordinacion-agentes.md` y el estado de la fase acá abajo.
+10. **Por partes, para que cualquier agente pueda seguir** (Codex, Claude o Cursor): un paso chico = un commit
+    empujado a GitHub. Después de cada paso, escribí en la **sección 8 (Bitácora)** qué hiciste, cómo, qué falta
+    y el próximo paso exacto. El que llega lee primero la sección 7 (Estado) y la última entrada de la sección 8.
+11. **Skills obligatorias**: las de la sección 2.1, según el tipo de trabajo.
+
+### 2.1 Skills que se usan en cada fase
+
+| Para qué | Skill | Dónde está |
+|---|---|---|
+| Antes de tocar código y en el PR | regression-guard (informe del paso 10) | `.claude/skills/` en `main` |
+| Diseño, jerarquía, color, espacios, estados vacíos | Impeccable (`craft`, `audit`, `polish`, `harden`) | rama `chore/design-skills` (`.agents/skills/impeccable`), todavía no está en `main`; Codex la tiene también en su PC |
+| Reglas de interfaz web | Vercel web-design-guidelines | rama `chore/design-skills` |
+| Detalle fino y sensación de producto premium | emil-design-eng, make-interfaces-feel-better | rama `chore/design-skills` |
+| Movimiento (200–300 ms, reducir movimiento) | review-animations, improve-animations, animation-performance; Motion para React | `.claude/skills/` en `main` |
+| Datos extremos (nombres largos, sin datos, números grandes) | break-ui | `.claude/skills/` en `main` |
+| Accesibilidad (teclado, foco, lectores de pantalla) | frontend-a11y | `.claude/skills/` en `main` |
+| Componentes React y rendimiento | react-patterns, react-performance, frontend-patterns | `.claude/skills/` en `main` |
+| Pruebas | tdd-workflow, react-testing, e2e-testing, verification-loop | `.claude/skills/` en `main` |
+| Rutas nuevas del servidor o datos de salud | security-review, postgres-patterns | `.claude/skills/` en `main` |
+
+Nada de GSAP. Si una skill no está a mano, se lee su archivo desde la rama indicada; no se reemplaza por criterio propio.
 
 ## 3. Dónde vive hoy cada cosa
 
@@ -213,5 +234,24 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 | Fase | Dueño | Rama / PR | Estado |
 |---|---|---|---|
-| Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10, espera que Facundo diga quién desarrolla |
-| 1 a 9 | — | — | Sin empezar |
+| Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
+| 1 a 9 | Codex (elegido por Facundo el 19/10; si se queda sin crédito sigue Cursor) | — | Sin empezar. Próximo paso: Fase 1 |
+
+## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+Formato de cada entrada, para que el siguiente agente siga sin preguntar:
+
+```
+### AAAA-MM-DD HH:MM · Agente · Fase N, paso M
+- Hecho: qué quedó funcionando (pantallas, rutas, pruebas).
+- Cómo: decisiones tomadas, archivos principales, skills usadas.
+- Rama y commit: nombre de la rama, commit, PR.
+- Falta: lo que queda de la fase.
+- Próximo paso exacto: qué archivo abrir y qué hacer primero.
+```
+
+### 2026-10-19 · Claude · Bocetos y plan
+- Hecho: boceto navegable (`design/panel-nutri/bocetos.html`) y este plan, aprobados por Facundo.
+- Rama y commit: `claude/rediseno-panel-nutri-bocetos-iw3aor`, PR #148 (solo documentos).
+- Próximo paso exacto: Fase 1. Crear la rama desde `main` actualizado, leer la sección 2 y el bloque
+  `html[data-mock="dark"] .m` del boceto para pasar los colores a variables del panel.
