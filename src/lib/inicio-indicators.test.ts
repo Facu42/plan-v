@@ -29,6 +29,10 @@ describe('consultas del período', () => {
   it('sin historial o con una misma fecha repetida no suma de más', () => {
     expect(countConsultations([{}, history('2026-10-05', '2026-10-05')], window).total).toBe(1);
   });
+  it('dos turnos distintos el mismo día cuentan dos consultas, sin duplicar el mismo id', () => {
+    const appointment = { dateId: '2026-10-05', action: 'elapsed' as const, when: '', duration: 30, channel: 'video', actor: 'system' as const, at: '2026-10-05T15:30:00Z' };
+    expect(countConsultations([{ appointment_history: [{ ...appointment, id: 'first' }, { ...appointment, id: 'second' }, { ...appointment, id: 'first' }] }], window).total).toBe(2);
+  });
 });
 
 describe('ingresos del período', () => {

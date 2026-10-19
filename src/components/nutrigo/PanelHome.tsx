@@ -8,7 +8,7 @@ import type { SchedulingWorkspaceSnapshot } from '../../api/scheduling';
 import { api } from '../../api/client';
 import { careApi } from '../../api/care';
 import { formatPesos } from '../../fees';
-import { HOME_ZONE, homeAppointments, homeAttention, homeDay, homeMonth, homeNews, homePendingTotal, patientHref, patientMessageHref, type HomeAppointment } from '../../lib/panel-home';
+import { HOME_ZONE, copyHomeBookingLink, homeAppointments, homeAttention, homeDay, homeMonth, homeNews, homePendingTotal, patientHref, patientMessageHref, type HomeAppointment } from '../../lib/panel-home';
 import { Icon, type IconName } from '../shared/Icon';
 import { healthFactLabel } from './intake-review';
 import { useHomeData, type HomeFilter } from './use-home-data';
@@ -40,6 +40,13 @@ function PreparedAppointment({ entry, now, onOpen }: { entry: HomeAppointment | 
   const [care, setCare] = useState<CareSnapshot | null>(null);
   const [failed, setFailed] = useState(false);
   const [revision, setRevision] = useState(0);
+  const [preparedOpen, setPreparedOpen] = useState(true);
+  useEffect(() => {
+    const media = window.matchMedia('(min-width:800px)');
+    const update = () => setPreparedOpen(media.matches);
+    update(); media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
   const id = entry?.patient.id;
   useEffect(() => {
     if (!id) return;
@@ -57,8 +64,8 @@ function PreparedAppointment({ entry, now, onOpen }: { entry: HomeAppointment | 
   const weight = weights[0];
   return <section className="ph-next" aria-label="Próxima consulta preparada"><div className="ph-chips"><span>Próxima consulta · {when}</span><span>{formatTime(at)} · {channelLabel(entry.channel)}</span></div>
     <div className="ph-person"><span className="ph-avatar">{patient.initials}</span><div><h2>{patient.name}</h2><p>{patient.goal || 'Objetivo por definir'}</p></div></div>
-    <div className="ph-health"><span><b>Alergias:</b> {intake ? healthFactLabel(intake.intake.payload.allergies, 'alergias') : failed ? 'No disponible' : 'Consultando…'}</span><span><b>Restricciones:</b> {intake ? healthFactLabel(intake.intake.payload.restrictions, 'restricciones') : failed ? 'No disponible' : 'Consultando…'}</span></div>
-    <div className="ph-facts"><div><small>Último peso</small><b>{weight ? `${weight.value_numeric.toLocaleString('es-AR')} ${weight.unit}` : care ? 'Sin dato' : failed ? 'No disponible' : 'Consultando…'}</b></div><div><small>Adherencia</small><b>{patient.adherence_score}%</b><small>registrada</small></div><div><small>Quedó pendiente</small><span>{patient.next_focus || 'Sin pendientes anotados'}</span></div></div>
+    <details className="ph-preparation" open={preparedOpen} onToggle={event => setPreparedOpen(event.currentTarget.open)}><summary>Ver preparación de la consulta</summary><div className="ph-health"><span><b>Alergias:</b> {intake ? healthFactLabel(intake.intake.payload.allergies, 'alergias') : failed ? 'No disponible' : 'Consultando…'}</span><span><b>Restricciones:</b> {intake ? healthFactLabel(intake.intake.payload.restrictions, 'restricciones') : failed ? 'No disponible' : 'Consultando…'}</span></div>
+    <div className="ph-facts"><div><small>Último peso</small><b>{weight ? `${weight.value_numeric.toLocaleString('es-AR')} ${weight.unit}` : care ? 'Sin dato' : failed ? 'No disponible' : 'Consultando…'}</b></div><div><small>Adherencia</small><b>{patient.adherence_score}%</b><small>registrada</small></div><div><small>Quedó pendiente</small><span>{patient.next_focus || 'Sin pendientes anotados'}</span></div></div></details>
     <div className="ph-next-actions"><HomeLink href={patientHref(patient, 'notas')} onOpen={onOpen} className="ph-button ph-ink">Preparar consulta</HomeLink><HomeLink href={patientHref(patient)} onOpen={onOpen} className="ph-button ph-glass">Ver ficha</HomeLink>{failed && <button type="button" className="ph-retry" onClick={() => setRevision(value => value + 1)}>Reintentar datos</button>}</div>
   </section>;
 }
@@ -113,7 +120,7 @@ export function PanelHomeView({ patients, now, data, loading, error, kind, onKin
     </div>{copyStatus && <p className="ph-feedback" role="status">{copyStatus}</p>}
     <div className="ph-grid-two ph-middle">
       <section className="ph-card ph-pending"><header><h2>Pendientes</h2><button type="button" className="ph-retry" disabled={loading} onClick={onRefresh}>Actualizar</button></header>
-        <div className="ph-tabs" role="group" aria-label="Tipo de pendiente">{filters.map(filter => <button key={filter.id} type="button" aria-pressed={kind === filter.id} onClick={() => onKind(filter.id)}>{filter.label} <b>{filter.count ?? '—'}</b></button>)}<label><span className="sr-only">Otros pendientes</span><select aria-label="Otros pendientes" value={['intake','record','payment','quiet','appointment'].includes(kind) ? kind : ''} onChange={event => onKind(event.target.value as HomeFilter)}><option value="">Otros</option>{(['intake','record','payment','quiet','appointment'] as const).map(id => <option value={id} key={id}>{TASKS[id].label} ({id === 'appointment' ? data?.home?.reschedule_count ?? '—' : data?.counts[id] ?? '—'})</option>)}</select></label></div>
+        <div className="ph-tabs" role="group" aria-label="Tipo de pendiente">{filters.map(filter => <button key={filter.id} type="button" aria-pressed={kind === filter.id} onClick={() => onKind(filter.id)}>{filter.label} <b>{filter.count ?? '—'}</b></button>)}<select aria-label="Otros pendientes" value={['intake','record','payment','quiet','appointment'].includes(kind) ? kind : ''} onChange={event => onKind(event.target.value as HomeFilter)}><option value="">Otros</option>{(['intake','record','payment','quiet','appointment'] as const).map(id => <option value={id} key={id}>{TASKS[id].label} ({id === 'appointment' ? data?.home?.reschedule_count ?? '—' : data?.counts[id] ?? '—'})</option>)}</select></div>
         <div className="ph-scroll" tabIndex={0} aria-label="Lista de pendientes">
           {kind === 'reservas' ? schedulingError ? <div className="ph-empty" role="alert">No pudimos consultar las reservas.<button type="button" className="ph-retry" onClick={onRefresh}>Reintentar reservas</button></div> : !scheduling ? <p className="ph-empty" role="status">Consultando reservas…</p> : reservations.length ? <ul>{reservations.map(booking => <li className="ph-task" key={booking.id}><span className="ph-icon ph-gold"><Icon name="calendar" size={18} /></span><div><b>{booking.contact_name}</b><p>{new Date(booking.starts_at).toLocaleString('es-AR', { timeZone: HOME_ZONE, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} · Reserva por confirmar</p></div><HomeLink href="/crm/agenda?agenda=reservas" onOpen={onOpen} className="ph-button">Revisar</HomeLink></li>)}</ul> : <p className="ph-empty">No hay reservas por confirmar.</p>
           : loading ? <p className="ph-empty" role="status">Consultando pendientes…</p> : error ? <div className="ph-empty" role="alert">{error}<button type="button" className="ph-retry" onClick={onRefresh}>Reintentar pendientes</button></div> : <>
@@ -141,7 +148,7 @@ export function PanelHome({ patients, now, onOpen }: { patients: Patient[]; now:
   const copy = async () => {
     const page = state.scheduling?.profile.config.page;
     if (!page?.enabled) return;
-    try { await navigator.clipboard.writeText(`${window.location.origin}/consultorio/${encodeURIComponent(page.slug)}`); setCopyStatus('Link de reserva copiado.'); }
+    try { await copyHomeBookingLink(page, window.location.origin, text => navigator.clipboard.writeText(text)); setCopyStatus('Link de reserva copiado.'); }
     catch { setCopyStatus('No pudimos copiar el enlace. Abrí Página pública para copiarlo.'); }
   };
   return <PanelHomeView {...state} patients={patients} now={now} onOpen={onOpen} onCopy={() => void copy()} copyStatus={copyStatus} />;

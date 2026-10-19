@@ -1,5 +1,9 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-17)
 
+## Rediseño del panel · 19/10
+
+Fase 1 integrada en #150, main `1f48adf`, con web/API/worker comprobados. Inicio se desarrolla en `codex/panel-nutri-fase-2`, siguiendo el boceto aprobado y conservando las API y permisos. [Informe, evidencia y límites de fase 2](panel-nutri-rediseno/fase-2-verificacion.md). Facundo pidió continuar las partes restantes, cada una en su rama y PR; el siguiente paso es fase 3, Pacientes con resumen desplegable. Estado vivo y reservas en la [Bitácora del plan](panel-nutri-rediseno/plan.md).
+
 ## Actualización de consultas · 17/10
 
 Facundo confirmó retención cero activada y cuenta Free en Groq. Ya se configuró el proveedor en API y worker y se probó transcripción/resumen real con audio ficticio. PR140 corrige silencios y fragmentos finales de audio, conservando main `49a6a5d`; el estado de publicación definitivo y los controles están en [PR140](https://github.com/Facu42/plan-v/pull/140). Esto sustituye las menciones históricas de Groq pendiente de confirmación para consultas. [Uso, alcance y evidencia](consultas-habilitacion-2026-10-16.md).

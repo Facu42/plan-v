@@ -1,5 +1,7 @@
 # Plan por apartados (2026-09-28)
 
+Rediseño del panel de la nutri (19/10/2026): fase 1 integrada en #150; fase 2, Inicio, en `codex/panel-nutri-fase-2`. [Plan por fases y Bitácora](panel-nutri-rediseno/plan.md), [evidencia de Inicio y Regression Guard](panel-nutri-rediseno/fase-2-verificacion.md). Continúa con Pacientes, una rama y PR por fase.
+
 Sexta entrega aislada de agenda, reservas, equipo y cobros (14/10/2026): [alcance, pruebas y Regression Guard](nutridesk-release-agenda-2026-10-14.md). Base clínica `66ed039`, suite propia de 2.816 casos aprobados y dos omitidos; proveedores, producción y publicación siguen sin activar.
 
 Entrega aislada de importación, OCR local y organización documental (13/10/2026): [alcance, verificación y Regression Guard](nutridesk-release-importacion-2026-10-13.md). Basada en el PR de consultas; sin publicación ni activación de proveedores.

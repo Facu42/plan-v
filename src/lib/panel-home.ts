@@ -10,6 +10,11 @@ const dayMs = (day: string) => Date.parse(`${day}T12:00:00Z`);
 const isActive = (p: Patient) => !p.archived_at && !p.deactivated_at && !p.anonymized_at;
 export const patientHref = (patient: Patient, section = 'resumen') => `/crm/ficha?${new URLSearchParams({ paciente: patient.id, seccion: section })}`;
 export const patientMessageHref = (patient: Patient) => `/crm/mensajes?${new URLSearchParams({ paciente: patient.id })}`;
+export async function copyHomeBookingLink(page: { enabled: boolean; slug: string } | undefined, origin: string, write: (text: string) => Promise<void>): Promise<boolean> {
+  if (!page?.enabled) return false;
+  await write(new URL(`/consultorio/${encodeURIComponent(page.slug)}`, origin).href);
+  return true;
+}
 export type HomeAppointment = { patient: Patient; at: Date; duration: number; channel: string; elapsed?: boolean };
 
 /** Los turnos actuales tienen fecha absoluta. El formato semanal antiguo solo se interpreta si no hay fecha. */
@@ -22,8 +27,10 @@ export function homeAppointments(patients: readonly Patient[], now: Date) {
   for (const patient of patients.filter(isActive)) {
     for (const history of patient.appointment_history ?? []) {
       const time = history.when.split(' · ')[1];
-      if (history.action !== 'elapsed' || history.dateId !== today || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time ?? '')) continue;
-      const at = new Date(`${history.dateId}T${time}:00-03:00`);
+      if (history.action !== 'elapsed' || history.dateId !== today) continue;
+      // El directorio persistente entrega when vacío y at=endsAt; el historial antiguo conserva la hora escrita.
+      const at = /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time ?? '') ? new Date(`${history.dateId}T${time}:00-03:00`) : new Date(Date.parse(history.at) - history.duration * 60_000);
+      if (!Number.isFinite(at.getTime())) continue;
       if (!entries.some(entry => entry.patient.id === patient.id && entry.at.getTime() === at.getTime())) entries.push({ patient, at, duration: history.duration, channel: history.channel, elapsed: true });
     }
     const appointment = patient.appointment;

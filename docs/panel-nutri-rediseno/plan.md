@@ -138,7 +138,7 @@ Cada fase se puede hacer sola, en este orden. Marcá el estado al empezar y al t
 - Listo cuando: las pantallas actuales se ven bien en los dos temas, el menú pliega y despliega, y no hay
   desplazamiento de página a 1440×900.
 
-### Fase 2. Inicio · Estado: en curso, Codex (`codex/panel-nutri-fase-2`)
+### Fase 2. Inicio · Estado: hecha, Codex (`codex/panel-nutri-fase-2`), PR propio en preparación
 
 Bloques del boceto, todos con datos reales: resumen de la mañana (lo arma el asistente; sin IA, una frase
 con los conteos), contadores de pendientes, próxima consulta preparada (alergias, último peso, adherencia,
@@ -236,7 +236,7 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 |---|---|---|---|
 | Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
 | 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Integrada a main `1f48adf`; web, API y worker comprobados |
-| 2 | Codex | `codex/panel-nutri-fase-2` | En curso: Inicio; reserva previa al código |
+| 2 | Codex | `codex/panel-nutri-fase-2` | Hecha y verificada; PR propio en preparación |
 | 3 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
@@ -251,6 +251,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 · Codex · Fase 2, paso 3 (verificación final)
+- Hecho: Inicio verificado; suite completa 3.153 aprobadas y dos omitidas, 486 archivos; tipos, build y secretos aprobados. /browse: 13 comprobaciones y ocho tamaños/temas, con cuatro capturas. Revisiones finales de code-reviewer y reality-checker sin P1/P2.
+- Cómo: se cerraron los contratos reales de historial, conteos por turno, fechas completas de rachas, paginación y preparación móvil desplegable. Fire test detectado. [Informe y Regression Guard](fase-2-verificacion.md) y [comparación navegable](../../design/panel-nutri/fase-2-verificacion.html).
+- Rama y commit: `codex/panel-nutri-fase-2`; implementación f06494c, correcciones 8711df5 y este cierre. PR propio se anota al crearlo.
+- Falta: CI del PR e integración; fases 3–9. La demo no tiene secreto para habilitar reserva pública (501); copia cubierta por adaptador, sin afirmar portapapeles real. Completar consulta conserva el 403 por permiso de atención ausente en demo. Sin SQL remoto.
+- Próximo paso exacto: abrir PR de fase 2 con el informe del paso 10; reservar fase 3 en otra rama y empezar por ShowroomPatients.tsx y el resumen liviano por paciente, sin modificar esta fase.
 
 ### 2026-10-19 · Codex · Fase 2, paso 2 (revisión de datos)
 - Hecho: corregidas las cinco observaciones de código: reprogramaciones visibles, atención independiente de filtros, rachas resumidas desde fechas completas autorizadas, historial de turnos de hoy y reloj vivo. Corregida paginación compartida de reservas/transferencias y destino de revisión de comidas.

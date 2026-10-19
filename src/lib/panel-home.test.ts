@@ -1,11 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import type { Patient } from '../types';
 import type { BillingBoard } from '../types/fees';
-import { homeAppointments, homeNews, homeMonth, homePendingTotal, homeAttention } from './panel-home';
+import { copyHomeBookingLink, homeAppointments, homeNews, homeMonth, homePendingTotal, homeAttention } from './panel-home';
+import { vi } from 'vitest';
 
 const now = new Date('2026-10-19T13:00:00Z');
 const patient = (extra: Partial<Patient> = {}): Patient => ({ id: 'a', name: 'Ana', initials: 'A', tone: 'mint', meal_logs: [], habit_logs: [], messages: [], appointment: null, adherence_score: 0, ...extra }) as Patient;
 describe('Inicio con datos registrados', () => {
+  it('copia solo páginas habilitadas con la dirección de la aplicación', async () => {
+    const write = vi.fn().mockResolvedValue(undefined);
+    expect(await copyHomeBookingLink({ enabled: false, slug: 'consultorio' }, 'https://example.test', write)).toBe(false);
+    expect(write).not.toHaveBeenCalled();
+    expect(await copyHomeBookingLink({ enabled: true, slug: 'consultorio-vero' }, 'https://example.test', write)).toBe(true);
+    expect(write).toHaveBeenCalledWith('https://example.test/consultorio/consultorio-vero');
+    await expect(copyHomeBookingLink({ enabled: true, slug: 'consultorio' }, 'https://example.test', async () => { throw new Error('Sin permiso'); })).rejects.toThrow('Sin permiso');
+  });
   it('respeta fecha real y huso argentino: no convierte un turno vencido en uno de la semana siguiente', () => {
     const patients = [patient({ appointment: { starts_at: '2026-10-19T12:00:00Z', when: 'Lunes · 09:00', duration: 30, channel: 'video' } }), patient({ id: 'b', appointment: { starts_at: '2026-10-20T01:00:00Z', when: 'Lunes · 22:00', duration: 30, channel: 'video' } }), patient({ id: 'c', appointment: { starts_at: '2026-10-20T12:00:00Z', when: 'Martes · 09:00', duration: 30, channel: 'video' } })];
     const result = homeAppointments(patients, now);
@@ -21,6 +30,10 @@ describe('Inicio con datos registrados', () => {
     const p = patient({ appointment: { starts_at: '2026-10-19T15:00:00Z', when: 'Lunes · 12:00', duration: 30, channel: 'video' }, appointment_history: [{ id: 'old', dateId: '2026-10-19', when: 'Lunes · 09:00', duration: 30, channel: 'video', action: 'elapsed', actor: 'system', at: '2026-10-19T13:00:00Z' }, { id: 'same', dateId: '2026-10-19', when: 'Lunes · 12:00', duration: 30, channel: 'video', action: 'scheduled', actor: 'pro', at: '2026-10-19T13:00:00Z' }] });
     expect(homeAppointments([p], now).today).toHaveLength(2);
     expect(homeAppointments([p], now).next?.at.toISOString()).toBe('2026-10-19T15:00:00.000Z');
+  });
+  it('respeta el contrato del directorio: elapsed sin texto de hora trae at como fin del turno', () => {
+    const p = patient({ appointment_history: [{ id: 'real', dateId: '2026-10-19', when: '', duration: 30, channel: 'video', action: 'elapsed', actor: 'system', at: '2026-10-19T12:30:00Z' }] });
+    expect(homeAppointments([p], now).today[0]?.at.toISOString()).toBe('2026-10-19T12:00:00.000Z');
   });
   it('usa rachas resumidas por el servidor, sin inferirlas de una ficha truncada', () => {
     expect(homeNews([patient()], now)).toEqual([]);
