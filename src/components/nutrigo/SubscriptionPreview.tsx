@@ -4,10 +4,13 @@ import type { PatientSubscription, SubscriptionPlan } from '../../types/subscrip
 import { PanelCobranzasView } from './PanelCobranzas';
 import { PanelDebitView } from './PanelDebit';
 import { PanelFeePayDialog } from './PanelFeePay';
+import { NvIcon } from './NvIcon';
 import { PanelNavigation } from './PanelNavigation';
 import { PanelPublicPageView } from './PanelPublicPage';
 import { PublicFollowPlansView } from './PublicFollowPlans';
 import { PublicMonthlyFeeView } from './PublicMonthlyFee';
+import { Icon, Mark } from '../shared/Icon';
+import { X } from '@phosphor-icons/react';
 import './nutrigo.css';
 import './panel-nutri-tokens.css';
 import './panel-nutri-shell.css';
@@ -59,14 +62,30 @@ export function SubscriptionPreview() {
   config.page.title = 'Lic. Verónica Trenti';
   config.page.bio = 'Acompaño a mujeres a comer mejor, con un plan que entra en la rutina.';
   config.types = [{ id: '00000000-0000-4000-a000-000000000002', name: 'Consulta suelta', calendar_id: config.calendars[0].id, duration_min: 60, channel: 'presencial', price_minor: 4_000_000, deposit_minor: 0 }];
-  const panel = screen === 'suscripcion' ? '' : '/crm/cobranzas';
-  return <div className={`nv-app nv-pro pn-panel${dark ? ' nv-dark' : ''}`} style={{ minHeight: '100vh' }}>
-    {screen !== 'suscripcion' && <aside className="nv-sidebar" aria-label="Consultorio">
-      <a className="nv-brand" href="/crm/inicio"><span>Plan V<small>Tu consultorio</small></span></a>
+  const panelShell = screen !== 'suscripcion';
+  const title = screen === 'publica' ? 'Agenda' : 'Cobranzas';
+  const panel = '/crm/cobranzas';
+  return <div className={`nv-app nv-pro pn-panel${screen.startsWith('cobranzas') ? ' nv-fees-page' : ''}${dark ? ' nv-dark' : ''}`} style={{ minHeight: '100vh' }}>
+    {panelShell && <aside className="nv-sidebar" aria-label="Consultorio">
+      <button className="pn-mobile-close" type="button" aria-label="Cerrar navegación"><X size={18} aria-hidden="true" /></button>
+      <a className="nv-brand" href="/crm/inicio"><Mark /><span>Plan V<small>Tu consultorio</small></span></a>
       <PanelNavigation patients={[]} unread={0} admin={false} current={screen === 'publica' ? '/crm/agenda?agenda=publica' : panel} collapsed={false} onCollapse={noop} onOpen={noop} />
       <div className="pn-sidebar-account"><span className="nv-user-avatar" aria-hidden="true">VT</span><span className="pn-nav-label"><strong>Verónica Trenti</strong><small>Nutricionista</small></span></div>
     </aside>}
-    <main className="nv-workspace" style={{ minWidth: 0 }}>
+    <div className="nv-workspace" style={{ minWidth: 0 }}>
+    {panelShell && <header className="nv-topbar">
+      <a className="nv-brand" href="/crm/inicio"><Mark /><span>Plan V</span></a>
+      <h1 className="nv-topbar-title" aria-label={title}><span className="nv-topbar-label-desktop">{title}</span><span className="nv-topbar-label-mobile" aria-hidden="true">{title}</span></h1>
+      <button type="button" className="nv-button nv-ghost nv-menu-toggle" aria-label="Abrir el menú" aria-expanded="true"><Icon name="list" size={20} /></button>
+    </header>}
+    <div className={panelShell ? 'nv-content-layout' : undefined}>
+    <main className={panelShell ? 'nv-main' : undefined} id="nv-main">
+      {panelShell && <nav className="nv-clinic-shortcuts" aria-label="Accesos del consultorio">
+        <button type="button"><Icon name="users" size={18} />Pacientes</button>
+        <button type="button"><Icon name="contact" size={18} />Ficha</button>
+        <button type="button"><NvIcon name="plan" size={18} />Plan</button>
+        <label><span>Paciente</span><select aria-label="Paciente del consultorio" defaultValue="marina"><option value="marina">Marina López</option><option value="camila">Camila Torres</option></select></label>
+      </nav>}
       {screen.startsWith('cobranzas') && <PanelCobranzasView
         board={board} today="2026-10-21" filter="todos" reminders={false} onFilter={noop} onExport={noop} onOpen={noop} onRemind={noop} onRetry={noop} error="" loading={false}
         plansAction={<button type="button" className="p5-btn">Planes de seguimiento</button>}
@@ -95,5 +114,7 @@ export function SubscriptionPreview() {
         <form><label>Tipo de consulta <select defaultValue="consulta"><option value="consulta">Consulta suelta · 60 min · $40.000</option></select></label><button type="button">Solicitar turno</button></form>
       </section>}
     </main>
+    </div>
+    </div>
   </div>;
 }
