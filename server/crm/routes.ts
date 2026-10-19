@@ -8,8 +8,16 @@ import { loadFeedRows } from './feed-repository.js';
 import { argentinaToday, isProgressPeriodDays } from '../progress/derive.js';
 import { loadPatientQuickPreview, loadPatientRowPreview } from './patient-preview.js';
 import { z } from 'zod';
+import { loadPatientMealPage,patientMealQuerySchema } from './patient-meals.js';
 
 export function registerCrmRoutes(app: Hono) {
+  app.get('/api/crm/patients/:id/meals',async c=>{
+    const auth=c.get('auth'),persistent='userId' in auth&&isSupabaseEnabled();
+    if(!persistent&&c.req.query('audience')==='patient')throw new CareError(403,'Solo profesionales del consultorio.');
+    const parsed=patientMealQuerySchema.safeParse(c.req.query());if(!parsed.success)throw new CareError(400,'Revisá el período, estado y página solicitados.');
+    const scope=await resolveWorkScope('userId' in auth?auth.userId:null,persistent);
+    return c.json(await loadPatientMealPage(scope,c.req.param('id'),parsed.data));
+  });
   app.post('/api/crm/patients/directory-summary', async c => {
     const auth = c.get('auth');
     const persistent = 'userId' in auth && isSupabaseEnabled();

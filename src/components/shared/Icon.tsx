@@ -5,7 +5,7 @@ export type IconName =
   | 'arrow' | 'bell' | 'calendar' | 'camera' | 'check' | 'chevron' | 'clock'
   | 'contact' | 'drop' | 'grid' | 'heart' | 'history' | 'home' | 'leaf' | 'list'
   | 'message' | 'moon' | 'pin' | 'plus' | 'sparkle' | 'sun' | 'target' | 'trend'
-  | 'users' | 'video' | 'edit' | 'loader' | 'download' | 'wallet';
+  | 'users' | 'video' | 'edit' | 'loader' | 'download' | 'wallet' | 'mic';
 
 const paths: Record<IconName, ReactNode> = {
   arrow: <><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></>,
@@ -24,6 +24,7 @@ const paths: Record<IconName, ReactNode> = {
   leaf: <><path d="M20 4C10.5 4 5 8.5 5 15c0 2.2 1.8 4 4 4C15.5 19 20 13.5 20 4Z" /><path d="M4 20c3-4.5 6.5-7 11-9" /></>,
   list: <><path d="M9 6h11M9 12h11M9 18h11" /><path d="M4 6h.01M4 12h.01M4 18h.01" /></>,
   message: <><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.4 8.4 0 0 1-3-.6L4 20l1.4-4A7.2 7.2 0 0 1 4 11.5 7.5 7.5 0 0 1 12 4a7.5 7.5 0 0 1 8 7.5Z" /><path d="M8.5 12h.01M12 12h.01M15.5 12h.01" /></>,
+  mic: <><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></>,
   moon: <path d="M20 15.4A8.3 8.3 0 0 1 8.6 4 8.3 8.3 0 1 0 20 15.4Z" />,
   plus: <path d="M12 5v14M5 12h14" />,
   pin: <><path d="m15 4 5 5-4 2-3 5-5-5 5-3Z" /><path d="m9 15-5 5" /></>,

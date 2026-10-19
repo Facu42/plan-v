@@ -228,4 +228,18 @@ describe('Bandeja: rutas con sesiones y migraciones reales en Postgres descartab
     const archived = await (await preview(nutriA,patientA)).json();
     expect(archived.can_open).toBe(false);expect(archived.latest_weight).toBeNull();
   }, 30000);
+  it('las comidas de la ficha se paginan sin cruzar rol ni consultorio',async()=>{
+    const meals=(user:string,id:string,query='')=>app.request(`/api/crm/patients/${id}/meals${query}`,{headers:{'x-test-user':user}});
+    expect((await meals(nutriA,patientB)).status).toBe(403);
+    expect((await meals(patientAUser,patientA)).status).toBe(403);
+    // La prueba anterior archivó esta ficha: restauración sólo del fixture local.
+    await db.query('update public.patients set archived_at=null where id=$1',[patientA]);
+    const page=await meals(nutriA,patientA,'?status=pending_review&offset=30&limit=3');
+    expect(page.status).toBe(200);const body=await page.json();
+    expect(body.logs).toHaveLength(3);expect(body.has_more).toBe(true);
+    expect(body.logs.every((log:{patient_id:string})=>log.patient_id===patientA)).toBe(true);
+    expect(JSON.stringify(body)).not.toContain('Paciente B');
+    const last=await (await meals(nutriA,patientA,'?status=pending_review&offset=33&limit=3')).json();
+    expect(last.logs).toHaveLength(2);expect(last.has_more).toBe(false);
+  },30000);
 });

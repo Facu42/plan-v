@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-19T16:46:36.775Z",
+  "checks": [
+    "Primera página muestra cincuenta comidas",
+    "No calcula promedio con período incompleto",
+    "Segunda página agrega quince sin truncar ni duplicar",
+    "Error de otro período elimina filas anteriores",
+    "Reintento recupera la primera página del período"
+  ],
+  "fixture": "Respuestas sintéticas en el navegador local. La API real tiene pruebas de paginación propias."
+}

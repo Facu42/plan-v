@@ -159,7 +159,7 @@ pendientes con un botón por fila y pestañas por tipo, consultas de hoy, necesi
   «Escribir», «Armar plan» y «Abrir ficha completa». Se cierra tocando la fila otra vez o con Escape; el foco queda en la fila.
 - Necesita un pedido liviano a la API que traiga ese resumen por paciente (sin traer la ficha entera).
 
-### Fase 4. Ficha con sus 11 pestañas · Estado: en curso por Codex en `codex/panel-nutri-fase-4` (no se toca desde esta rama)
+### Fase 4. Ficha con sus 11 pestañas · Estado: integrada a main por Codex, PR #154
 
 Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» (abre Notas de consulta) e
 «Iniciar consulta». Contenido de cada pestaña según el boceto:
@@ -171,12 +171,12 @@ Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» 
 - **Plan**: plan de hoy con alternativas, pedido de cambio de la paciente (aprobar o proponer otra), planificación (calorías y macros), lista de compras.
 - **Registro alimentario**, **Laboratorio** (con tres fechas y gráfico del valor elegido), **Archivos** (con zona para arrastrar y exportar ficha en PDF), **Consultas** (con «Cerrar la consulta de hoy»), **Cobros**, **Chat**.
 
-### Fase 5. Agenda, Cobranzas y Página pública · Estado: lista para revisar (Cursor, autorizado por Facundo 19/10 porque Codex sin crédito)
+### Fase 5. Agenda, Cobranzas y Página pública · Estado: lista para juntar (Cursor, PR #153; Facundo autorizó)
 
 Agenda semanal con colores por tipo, línea de la hora, bloqueos, reservas por confirmar, tipos de consulta
 y link de reserva. Cobranzas con cobrado, por cobrar, vencido, ingresos por mes, cuotas vencidas con
-«Recordar» y movimientos. Página pública con editor y vista previa en celular. Mercado Pago, Google
-Calendar queda armado y muestra «Conectar» hasta que haya claves (no se finge conexión). WhatsApp no se ofrece en el panel: los mensajes y recordatorios van por el chat y los avisos de la app (decisión de Facundo, 19/10).
+«Recordar» y movimientos. Página pública con editor y vista previa en celular. Mercado Pago y Google
+Calendar muestran «Conectar» hasta que haya claves (no se finge conexión). WhatsApp no se ofrece en el panel: los mensajes y recordatorios van por el chat y los avisos de la app (decisión de Facundo, 19/10).
 
 ### Fase 6. Acompañamiento: Asistente IA, Seguimiento, Mensajes y Progreso · Estado: sin empezar
 
@@ -238,11 +238,56 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Integrada a main `1f48adf`; web, API y worker comprobados |
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
 | 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main `6697d28` |
-| 4 | Codex | `codex/panel-nutri-fase-4` | En curso; no se toca desde la fase 5 |
-| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Lista para revisar; autorizado por Facundo 19/10 porque Codex sin crédito |
-| 6 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
+| 4 | Codex | `codex/panel-nutri-fase-4` · [PR #154](https://github.com/Facu42/plan-v/pull/154) | Integrada a main |
+| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Lista para juntar; Facundo autorizó. Convive con la ficha de la fase 4 |
+| 6 a 9 | Por coordinar | — | Pendientes, una rama y un PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-19 18:40 · Cursor · Fase 5, paso 4 (junto con la fase 4)
+- Hecho: se trajo main a esta rama. La ficha de la fase 4 y Agenda, Cobranzas y Página pública conviven. En Cobranzas, Ver vuelve a llamarse «Ver cobranzas de…» para abrir la cuota. Si todavía no hay movimientos, el recorrido abre Registrar cobro.
+- Cómo: merge de `origin/main` sin rebase. Se conservan las dos bitácoras. No se tocó el servidor.
+- Rama y commit: `cursor/panel-nutri-fase-5`. [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar hasta que los controles estén verdes.
+- Falta: el verde de los controles remotos. Facundo ya autorizó juntar.
+- Próximo paso exacto: juntar #153 a main cuando el PR esté verde.
+
+### 2026-10-19 · Codex · Fase 4, paso 9 (selector del acordeón de revisión)
+- Hecho: segunda cabeza con ambas verificaciones generales, recorridos y secretos verdes. El recorrido firmado confirmó publicación/meta, archivos privados, retiro/renovación de permisos, turnos y pagos; llegó a la revisión profesional.
+- Cómo: el selector de texto del acordeón se ejecuta ahora mediante /browse, que lo admite, en lugar de querySelectorAll nativo. Se conserva Marcar revisado y la lectura persistente. Sólo script y documentación; comprobado en demo.
+- Rama: codex/panel-nutri-fase-4, PR #154.
+- Qué falta: recorrido firmado completo y controles de la nueva cabeza en verde antes de integrar.
+- Próximo paso exacto: integrar #154 al aprobar todos los controles y detenerse; no tomar fase 5.
+
+### 2026-10-19 · Codex · Fase 4, paso 8 (recorrido firmado)
+- Hecho: las dos ejecuciones generales del PR aprobaron pruebas, tipos, compilación y controles; seis recorridos y secretos aprobados. El control firmado aprobó sus 30 pruebas de Auth/PostgREST y se detuvo en un acceso anterior de la ficha.
+- Cómo: el recorrido abre ahora Plan antes de su subpestaña Planificación, conserva Confirmar y compartir y la comprobación de publicación. Corrección limitada al script; navegación comprobada en demo y sintaxis validada.
+- Rama: codex/panel-nutri-fase-4, PR #154.
+- Qué falta: repetir los controles remotos de esta cabeza e integrar sólo con todos verdes. No cambia el producto ni hay migraciones.
+- Próximo paso exacto: comprobar el recorrido firmado completo, integrar #154 y detener este hilo; fase 5 en otro carril.
+
+### 2026-10-19 · Codex · Fase 4, paso 7 (entrega en PR #154)
+- Hecho: entregada la ficha de once pestañas en [PR #154](https://github.com/Facu42/plan-v/pull/154), con informe completo del paso 10 y comparación local disponible. Suite estable: 3.177 aprobadas y dos omitidas, 494 archivos; tipos/build/secretos verdes. 28 controles de navegador y 44 tamaños/temas, 47 capturas, seis e2e.
+- Cómo: implementación 8456ded y cierre verificado 0987346; código y visual revisados sin P1/P2. Comparadores manuales preservados, retiro de permisos verificado incluso en vuelo, fire test detectado y restaurado. Sin migraciones ni cambios de producción.
+- Rama: codex/panel-nutri-fase-4, PR #154, sobre main 6697d28. Los controles remotos del PR habilitan la integración; no se integra con un control rojo.
+- Qué falta: sólo CI remoto e integración de esta entrega; fases siguientes fuera del alcance de este hilo. Las limitaciones de hardware/IA/PDF de punta a punta quedan explícitas en el informe.
+- Próximo paso exacto: comprobar CI de #154, integrarlo con todo verde y detener este trabajo. **La fase 5 ya se realiza en otro carril por pedido de Facundo; no tomarla ni continuar con fases 6–9.**
+
+
+### 2026-10-19 · Codex · Fase 4, paso 6 (cierre verificado)
+- Hecho: once pestañas verificadas, suite estable de 3.177 aprobadas y dos omitidas (494 archivos), tipos/build/secretos verdes. Seis e2e, 14 controles y 44 tamaños/temas, nueve acciones privadas y cinco ensayos de paginación; 47 capturas. Comparación navegable comprobada y abierta para Facundo.
+- Cómo: revisiones independientes de código y visual cerradas sin P1/P2. Fire test detectado y restaurado; comparadores manuales preservados con RED/GREEN. [Informe completo y paso 10](fase-4-verificacion.md). Sin migraciones ni cambios de producción.
+- Rama: codex/panel-nutri-fase-4, base main 6697d28. Este cierre se respalda antes del PR propio.
+- Falta: crear y registrar PR, controles remotos e integración con todo verde.
+- Próximo paso exacto: abrir PR de fase 4 con el paso 10; integrar al aprobar CI y detener este hilo. La fase 5 está a cargo de otro carril por pedido de Facundo.
+
+
+### 2026-10-19 · Codex · Fase 4, paso 5 (correcciones de revisión)
+- Hecho: Historia agrupada y medidas del primer día autorizado, datos de ingreso preservados; chat con estilos propios de su contexto, visor y perfil con tema del panel, pestaña activa visible en celular. Corregido desborde del plan y retiro de Atención en documentos/evaluaciones.
+- Cómo: revisión independiente de código y visual; nueve acciones privadas reales en demo, incluida apertura pendiente y retiro, laboratorio de tres fechas y nota manual/publicación. Seis e2e aprobados con Chrome local; tipos aprobados. Fire test detectó exposición de foto sin permiso, restaurado y tres casos verdes.
+- Rama: codex/panel-nutri-fase-4; base main 6697d28 conciliada en 4520e73.
+- Falta: suite completa final (primera corrida tuvo EBUSY de Windows y un timeout; sus 25 casos focales repitieron verdes), capturas finales y cierre independiente, informe y PR.
+- Próximo paso exacto: completar suite serializada, controles del navegador y artefacto; abrir PR exclusivo de fase 4 e integrar sólo con CI verde. **Por indicación de Facundo, detenerse al terminar fase 4: fase 5 se hace en otro carril.**
+
 
 Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 
@@ -282,6 +327,27 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Rama y commit: `cursor/panel-nutri-fase-5`, desde `origin/main` `6697d28`. Sin cambios de base de producción.
 - Falta: Agenda semanal, Cobranzas, Página pública, y Mercado Pago, Google Calendar y WhatsApp mostrando «Conectar» sin fingir conexión. Pruebas, comparación en 1440 y 390, claro y oscuro, e informe para el PR.
 - Próximo paso exacto: abrir `design/panel-nutri/bocetos.html` en Agenda, Cobranzas y Página pública y mapearlas contra la agenda, las cobranzas y la página pública que ya existen.
+
+### 2026-10-19 · Codex · Fase 4, paso 2 (registros completos y evolución)
+- Hecho: lectura profesional de comidas paginada y filtrada por paciente, período/estado; pruebas de más de veinte registros, archivo, rol y dos consultorios. Resumen toma pendientes de esa ruta y días de metadata completa del feed. La ficha se hidrata al abrir y ofrece reintento; no infiere cero desde la lista vacía del directorio. Evolución compone gráfico por métrica, tabla por fechas, objetivo editable y hábitos; conserva mediciones, importación y métodos en desplegables.
+- Cómo: reutiliza normalizador y firma de fotos, con consentimiento vigente y prefijo de almacenamiento propio; permisos leídos sin ingreso completo. Resumen no presenta como pendiente una nota ya compartida. 14 pruebas API focales y tipos aprobados; falta verificación final de toda la fase.
+- Rama y commit: codex/panel-nutri-fase-4; respaldo antes de arreglar en fase3 otro selector de CI para Más opciones.
+- Falta: completar laboratorio, notas, plan y demás composición; QA/teclado/móvil, suite final, revisiones y PR propios. #152 está pendiente por un selector viejo en signed-auth; e2e/verify aprobados tras la primera corrección.
+- Próximo paso exacto: corregir scripts/product-browser.local.mjs en fase3 para abrir Más opciones antes de editar/archivar/restaurar; volver a fase4 y completar Laboratorio/Notas/Plan.
+
+### 2026-10-19 · Codex · Fase 4, paso 1 (encabezado y resumen)
+- Hecho: encabezado con acciones reales, once pestañas y subpestañas de Plan manteniendo las catorce rutas. Resumen conectado a medidas, comidas por revisar, notas autorizadas, días registrados, laboratorio, antecedentes y cuotas. Historia conserva ingreso/importación y suma cuidado al preparar plan. Tipos y ocho pruebas focales aprobados; primer vistazo /browse sin desborde en 1440.
+- Cómo: pruebas RED de agrupación y datos antes de implementar. Se reutilizan API, permisos, gráficos/medidas y lógica de consulta; no se inventa meta numérica, diagnóstico, edad ni resumen de IA. Unidades distintas y comparadores de laboratorio no se mezclan. Todavía no se declara fase completa.
+- Rama y commit: codex/panel-nutri-fase-4, base #152; este paso se respalda antes de continuar.
+- Falta: evolución con composición aprobada, rediseño de notas, vista actual de Plan, laboratorio con comparación de tres fechas y gráfico, archivos/consultas/cobros/chat, revisión y QA final propias.
+- Próximo paso exacto: completar las piezas de Evolución y Laboratorio sobre ClinicalPatientWorkspace, conservar todos sus formularios en paneles desplegables y adaptar Notas sin cambiar captura/publicación.
+
+### 2026-10-19 08:44 · Codex · Fase 4, paso 0 (reserva)
+- Hecho: fase 4 reservada antes de cambiar código. Fase 3 entregada en #152 y su CI corre.
+- Cómo: continuación del pedido de Facundo, una rama y PR por parte. Se mantiene toda la lógica y permisos de las 14 secciones, agrupadas visualmente en las once pestañas aprobadas.
+- Rama y commit: codex/panel-nutri-fase-4, desde la cabeza de fase 3; dependencia explícita de #152 hasta integrarlo y conciliar main.
+- Falta: encabezado, pestañas agrupadas, resumen, historia, evolución, notas y composición de plan/registros/laboratorio/archivos/consultas/cobros/chat; QA, suite e informe propios.
+- Próximo paso exacto: leer ProfessionalPatientWorkspace.tsx, ShowroomPatientRecord.tsx y funciones ficha/fResumen/fHistoria/fEvolucion/fNotas del boceto; mapear componentes reales y escribir las garantías de rutas antiguas antes de cambiar la UI.
 
 ### 2026-10-19 · Codex · Fase 3, paso 6 (recorrido con cuentas)
 - Hecho: e2e y verify aprobados en el control remoto de a1b61bf. signed-auth llegó hasta edición/archivo y encontró sus selectores previos al menú; se actualizan para abrir Más opciones antes de editar, archivar y restaurar.
@@ -401,9 +467,22 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Próximo paso exacto: Fase 1. Crear la rama desde `main` actualizado, leer la sección 2 y el bloque
   `html[data-mock="dark"] .m` del boceto para pasar los colores a variables del panel.
 
+### 2026-10-19 · Codex · Fase 4, paso 3 (Laboratorio y Notas)
+- Hecho: comparación de análisis por fecha y unidad, ingreso manual con informe de origen y carga existente; nueva presentación de notas conserva captura, transcripción, revisión y publicación. Evolución conserva la revisión de registros compartidos.
+- Cómo: reutilización de contratos y permisos; referencias originales sin inferencias clínicas. Enlaces privados temporales se descartan al cambiar permisos o paciente. Respaldo de avance antes de corregir el recorrido remoto de fase 3.
+- Rama: codex/panel-nutri-fase-4, dependiente de #152.
+- Falta: Plan, Archivos, composición final de Consultas/Cobros/Chat, revisión visual y funcional completa, suite final, informe y PR propio.
+- Próximo paso exacto: corregir el selector del menú ya abierto al restaurar una ficha en #152; retomar las pestañas pendientes en esta rama.
 ### 2026-10-19 · Codex · Fase 3, paso 7 (recorrido de restauración)
 - Hecho: localizado el fallo remoto al restaurar: el menú continuaba abierto después del archivo y la prueba lo cerraba. El recorrido ahora abre sólo si está cerrado; conserva todas las comprobaciones de persistencia.
 - Cómo: 30 casos Auth/PostgREST y los recorridos anteriores aprobaron; corrección limitada al script, con sintaxis validada. Nueva ejecución remota pendiente.
 - Rama: codex/panel-nutri-fase-3, PR #152. Sin cambios funcionales ni migraciones.
 - Falta: CI verde para integrar #152; fase 4 en su rama reservada.
 - Próximo paso exacto: revisar el resultado del nuevo recorrido firmado y conciliar main en fase 4 al integrar.
+
+### 2026-10-19 · Codex · Fase 4, paso 4 (pestañas conectadas)
+- Hecho: plan actual separado del editor, fuente publicada por fecha, pedidos de cambio profesionales, carga privada por arrastre y visor temporal, movimientos propios de cobro y composición de consultas/chat. Incluye corrección del retiro de Atención detectada en revisión independiente.
+- Cómo: contratos existentes, sin migraciones; API completa de comidas con pruebas de medianoche argentina y foto sin permiso. Diez focales UI/datos y siete focales adicionales aprobados; tipos aprobados. Recorrido e2e ajusta la búsqueda de alergias al cuestionario por duplicación del resumen, conserva la aserción.
+- Rama: codex/panel-nutri-fase-4. #152 completó ahora todos sus controles remotos; se integra y concilia esta rama.
+- Falta: completar QA visual/funcional, pruebas finales, fire test, segunda revisión e informe/PR propio.
+- Próximo paso exacto: conciliar main tras #152 y continuar /browse de las once pestañas en ambos temas y tamaños.

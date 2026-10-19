@@ -488,9 +488,9 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
       <div className="nv-content-layout">
         {/* Cambiar de pantalla o paciente desmonta los datos y formularios anteriores. */}
         <main key={`${contentIdentity(role,page,selected?.id)}:${workspaceRevision}`} id="nv-main" tabIndex={-1} className="nv-main" data-figma-node={role === 'patient' ? (figmaDetail?.nodes ?? PATIENT_FIGMA_NODES[page])?.[compactHeader ? 1 : 0] : undefined}>
-          {role === 'pro' && page !== 'pacientes' && page !== 'modelos' && page !== 'alimentos' && !(page === 'biblioteca' && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('biblioteca') !== 'recursos' && !hasResourceHash(window.location.hash)) && <nav className="nv-clinic-shortcuts" aria-label="Accesos del consultorio">
+          {role === 'pro' && page !== 'ficha' && page !== 'pacientes' && page !== 'modelos' && page !== 'alimentos' && !(page === 'biblioteca' && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('biblioteca') !== 'recursos' && !hasResourceHash(window.location.hash)) && <nav className="nv-clinic-shortcuts" aria-label="Accesos del consultorio">
             <button type="button" onClick={() => navigate('pacientes')}><Icon name="users" size={18} />Pacientes</button>
-            <button type="button" aria-current={page === 'ficha' ? 'page' : undefined} disabled={!selected} onClick={() => navigate('ficha')}><Icon name="contact" size={18} />Ficha</button>
+            <button type="button" disabled={!selected} onClick={() => navigate('ficha')}><Icon name="contact" size={18} />Ficha</button>
             <button type="button" aria-current={page === 'plan' ? 'page' : undefined} disabled={!selected} onClick={() => navigate('plan')}><NvIcon name="plan" size={18} />Plan</button>
             <label><span>Paciente</span><select aria-label="Paciente del consultorio" value={selected?.id ?? ''} onChange={(event) => selectPatient(event.target.value)} disabled={!activePatients.length}>{!selected && <option value="" disabled>{activePatients.length ? 'Elegí un paciente' : 'Sin pacientes activos'}</option>}{activePatients.map((person) => <option key={person.id} value={person.id}>{person.name}</option>)}</select></label>
           </nav>}
