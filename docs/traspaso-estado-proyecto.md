@@ -2,8 +2,6 @@
 
 19/10 · Cursor · Backend de suscripciones de pacientes en `cursor/suscripciones-pacientes-backend`. La migración queda escrita y sin aplicar. La función está apagada. Las pantallas de Cobranzas y de la página pública van en otra rama. Detalle en [spec](suscripciones-pacientes/spec.md).
 
-# Traspaso del proyecto (actualización vigente: 2026-10-17)
-
 19/10 · Codex · Fase 3 de Pacientes verificada en `codex/panel-nutri-fase-3`: tabla y resumen bajo la fila con datos autorizados, 3.164 pruebas y dos omitidas, tipos/build/secretos y revisiones aprobadas, 22 comprobaciones /browse. Informe: [fase 3](panel-nutri-rediseno/fase-3-verificacion.md). Inicio #151 integrado a main 4dc9a79 con web/API/worker en verde. Sigue fase 4, Ficha, en rama y PR propios; sin SQL remoto.
 
 

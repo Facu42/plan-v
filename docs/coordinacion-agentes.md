@@ -29,7 +29,7 @@ visto bueno de Facundo.
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
 | Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (desarrollo) | `codex/panel-nutri-fase-3`, [plan](panel-nutri-rediseno/plan.md) | Fase 1 integrada por #150; fase 2 verificada en [PR #151](https://github.com/Facu42/plan-v/pull/151), CI en curso. Fase 3 reservada y en curso por Codex. Una rama y PR por fase; no modifica #147 de Cursor |
-| Suscripciones de pacientes (débito con Mercado Pago de la nutri) | Cursor | `cursor/suscripciones-pacientes-backend`, [spec](suscripciones-pacientes/spec.md) | Parte 1: backend, migración sin aplicar, bandera apagada. Pantallas en otras ramas. No toca el panel de Codex |
+| Suscripciones de pacientes (débito con Mercado Pago de la nutri) | Cursor | `cursor/suscripciones-pacientes-backend`, [spec](suscripciones-pacientes/spec.md) | Parte 1 lista: backend, migración sin aplicar, bandera apagada. Pantallas (Cobranzas y página pública) en otra rama. No toca el panel de Codex |
 
 ## 2. Reglas para no pisarse
 
@@ -79,6 +79,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **19/10 · Cursor · Backend de suscripciones** · Rama `cursor/suscripciones-pacientes-backend`. Migración `20261020120000_patient_subscriptions` escrita y sin aplicar. Webhook general de Mercado Pago, alta con el token de la nutri, cobro único en Cobranzas, anulación por devolución, conciliación cada 6 horas y links que vencen a los 7 días. Bandera apagada. Sin pantallas del panel. La prueba en sandbox de Mercado Pago sigue pendiente.
 
 - **19/10 · Codex · Inicio fase 3** · Reserva previa al código en `codex/panel-nutri-fase-3`, desde #151 `50c5d21`. Tabla y resumen de pacientes según boceto; se conserva alta/invitación/archivo y permisos. Dependencia declarada de #151 hasta integrarlo; un PR propio al terminar.
 
