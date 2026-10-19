@@ -159,7 +159,7 @@ pendientes con un botón por fila y pestañas por tipo, consultas de hoy, necesi
   «Escribir», «Armar plan» y «Abrir ficha completa». Se cierra tocando la fila otra vez o con Escape; el foco queda en la fila.
 - Necesita un pedido liviano a la API que traiga ese resumen por paciente (sin traer la ficha entera).
 
-### Fase 4. Ficha con sus 11 pestañas · Estado: verificada por Codex, PR #154
+### Fase 4. Ficha con sus 11 pestañas · Estado: integrada a main por Codex, PR #154
 
 Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» (abre Notas de consulta) e
 «Iniciar consulta». Contenido de cada pestaña según el boceto:
@@ -171,12 +171,12 @@ Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» 
 - **Plan**: plan de hoy con alternativas, pedido de cambio de la paciente (aprobar o proponer otra), planificación (calorías y macros), lista de compras.
 - **Registro alimentario**, **Laboratorio** (con tres fechas y gráfico del valor elegido), **Archivos** (con zona para arrastrar y exportar ficha en PDF), **Consultas** (con «Cerrar la consulta de hoy»), **Cobros**, **Chat**.
 
-### Fase 5. Agenda, Cobranzas y Página pública · Estado: en otro carril por indicación de Facundo
+### Fase 5. Agenda, Cobranzas y Página pública · Estado: lista para juntar (Cursor, PR #153; Facundo autorizó)
 
 Agenda semanal con colores por tipo, línea de la hora, bloqueos, reservas por confirmar, tipos de consulta
 y link de reserva. Cobranzas con cobrado, por cobrar, vencido, ingresos por mes, cuotas vencidas con
-«Recordar» y movimientos. Página pública con editor y vista previa en celular. Mercado Pago, Google
-Calendar y WhatsApp quedan armados y muestran «Conectar» hasta que haya claves (no se finge conexión).
+«Recordar» y movimientos. Página pública con editor y vista previa en celular. Mercado Pago y Google
+Calendar muestran «Conectar» hasta que haya claves (no se finge conexión). WhatsApp no se ofrece en el panel: los mensajes y recordatorios van por el chat y los avisos de la app (decisión de Facundo, 19/10).
 
 ### Fase 6. Acompañamiento: Asistente IA, Seguimiento, Mensajes y Progreso · Estado: sin empezar
 
@@ -237,12 +237,19 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
 | 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Integrada a main `1f48adf`; web, API y worker comprobados |
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
-| 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main 6697d28; controles remotos aprobados |
-| 4 | Codex | `codex/panel-nutri-fase-4` · [PR #154](https://github.com/Facu42/plan-v/pull/154) | Hecha y verificada; entrega exclusiva de fase 4. Integración sujeta a CI verde |
-| 5 | Otro carril indicado por Facundo | — | Fuera de este trabajo por pedido del 19/10 |
-| 6 a 9 | Por coordinar | — | Fuera del alcance actual; este trabajo termina en fase 4 |
+| 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main `6697d28` |
+| 4 | Codex | `codex/panel-nutri-fase-4` · [PR #154](https://github.com/Facu42/plan-v/pull/154) | Integrada a main |
+| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Lista para juntar; Facundo autorizó. Convive con la ficha de la fase 4 |
+| 6 a 9 | Por coordinar | — | Pendientes, una rama y un PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-19 18:40 · Cursor · Fase 5, paso 4 (junto con la fase 4)
+- Hecho: se trajo main a esta rama. La ficha de la fase 4 y Agenda, Cobranzas y Página pública conviven. En Cobranzas, Ver vuelve a llamarse «Ver cobranzas de…» para abrir la cuota. Si todavía no hay movimientos, el recorrido abre Registrar cobro.
+- Cómo: merge de `origin/main` sin rebase. Se conservan las dos bitácoras. No se tocó el servidor.
+- Rama y commit: `cursor/panel-nutri-fase-5`. [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar hasta que los controles estén verdes.
+- Falta: el verde de los controles remotos. Facundo ya autorizó juntar.
+- Próximo paso exacto: juntar #153 a main cuando el PR esté verde.
 
 ### 2026-10-19 · Codex · Fase 4, paso 9 (selector del acordeón de revisión)
 - Hecho: segunda cabeza con ambas verificaciones generales, recorridos y secretos verdes. El recorrido firmado confirmó publicación/meta, archivos privados, retiro/renovación de permisos, turnos y pagos; llegó a la revisión profesional.
@@ -292,6 +299,34 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 16:15 · Cursor · Fase 5, paso 3 (boceto y sin WhatsApp)
+- Hecho: capturas de Agenda, Cobranzas y Página pública en 1440×900 y 390×844, claro y oscuro, al lado del boceto, en `design/panel-nutri/fase-5/`. Se sacó WhatsApp del panel de la nutri: no hay botón Conectar, ni recordatorio por WhatsApp, ni ajuste para activarlo. Recordar abre el chat de la app. El aviso de la cuota sigue en el inicio de la paciente. No se tocó el servidor ni las migraciones.
+- Cómo: mismas pantallas. Las tarjetas de cobranzas usan la foto suave del panel. Lo que el boceto muestra con datos de Verónica y la app no tiene (turnos inventados, matrícula, foto de perfil) queda vacío o con el dato real.
+- Rama y commit: `cursor/panel-nutri-fase-5`. [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar.
+- Falta: el visto de Facundo. El celular del boceto no dibuja Cobranzas ni Página pública (repite el Inicio).
+- Próximo paso exacto: fase 6 (Asistente IA, Seguimiento, Mensajes y Progreso), en otra rama.
+
+### 2026-10-19 14:45 · Cursor · Fase 5, paso 2 (cierre)
+- Hecho: las tres pantallas quedaron en la rama y se conservaron las acciones que ya tenía la agenda: confirmar, cancelar y reprogramar, revisar transferencias, conciliar Mercado Pago, sincronizar el calendario, desconectar Google o Mercado Pago, ver más reservas y más fichas, seña por tipo, Meet, alias y agendas. Mercado Pago, Google Calendar y WhatsApp siguen en Conectar si el servidor no tiene claves. `npm run check` pasó. Las pruebas de estas pantallas: 13 en 5 archivos. La suite completa: 3171 pasaron, 2 omitidas y 5 fallaron en `server/security/mfa.test.ts` y `server/db/supabase-client.test.ts` porque esta máquina usa Node 20 y no tiene WebSocket nativo; esos archivos no están en el diff.
+- Cómo: mismas rutas de agenda, cobros y página pública. Sin migración. La ficha de Codex no se tocó. No hay capturas de navegador en 1440 y 390: en esta sesión no hubo navegador.
+- Rama y commit: `cursor/panel-nutri-fase-5`, `f04bc11`. [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar.
+- Falta: que Facundo mire las pantallas y, si cierran, juntarlas. La comparación lado a lado con el boceto queda para quien tenga navegador.
+- Próximo paso exacto: fase 6 (Asistente IA, Seguimiento, Mensajes y Progreso), en otra rama, cuando se tome.
+
+### 2026-10-19 14:05 · Cursor · Fase 5, paso 1 (pantallas)
+- Hecho: Agenda semanal (día, semana y mes) con colores por tipo, línea de la hora, bloqueos, reservas por confirmar y tipos de consulta. Cobranzas con cobrado, por cobrar, vencido, ingresos por mes, cuotas vencidas con Recordar y movimientos. Página pública con editor y vista previa. Mercado Pago, Google Calendar y WhatsApp muestran Conectar y no figuran conectados si el servidor no tiene claves.
+- Cómo: pantallas nuevas sobre las rutas y los datos que ya existían (agenda, cobros y página de reservas). Sin migración. La ficha de Codex no se tocó. Pruebas de los cálculos y de lo que se ve en cada pantalla.
+- Rama y commit: `cursor/panel-nutri-fase-5`.
+- Falta: suite completa, `npm run check`, informe del paso 10 y el PR.
+- Próximo paso exacto: correr `npm test` y `npm run check`, completar la Bitácora y abrir el PR contra main.
+
+### 2026-10-19 13:08 · Cursor · Fase 5, paso 0 (reserva)
+- Hecho: fase 5 reservada antes de cambiar código. Facundo autorizó que Cursor tome la fase 5 porque Codex se quedó sin crédito. Codex sigue con la fase 4 en `codex/panel-nutri-fase-4`; esta rama no toca esa rama ni sus archivos de ficha.
+- Cómo: leídos el plan, la Bitácora de `origin/codex/panel-nutri-fase-4` (solo lectura; último paso: pestañas de la ficha conectadas), la coordinación y Regression Guard. Base `origin/main` `6697d28` (fase 3 integrada).
+- Rama y commit: `cursor/panel-nutri-fase-5`, desde `origin/main` `6697d28`. Sin cambios de base de producción.
+- Falta: Agenda semanal, Cobranzas, Página pública, y Mercado Pago, Google Calendar y WhatsApp mostrando «Conectar» sin fingir conexión. Pruebas, comparación en 1440 y 390, claro y oscuro, e informe para el PR.
+- Próximo paso exacto: abrir `design/panel-nutri/bocetos.html` en Agenda, Cobranzas y Página pública y mapearlas contra la agenda, las cobranzas y la página pública que ya existen.
 
 ### 2026-10-19 · Codex · Fase 4, paso 2 (registros completos y evolución)
 - Hecho: lectura profesional de comidas paginada y filtrada por paciente, período/estado; pruebas de más de veinte registros, archivo, rol y dos consultorios. Resumen toma pendientes de esa ruta y días de metadata completa del feed. La ficha se hidrata al abrir y ofrece reintento; no infiere cero desde la lista vacía del directorio. Evolución compone gráfico por métrica, tabla por fechas, objetivo editable y hábitos; conserva mediciones, importación y métodos en desplegables.

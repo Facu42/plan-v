@@ -4,7 +4,6 @@ import {NvButton} from './primitives';
 import './professional-modules.css';
 import { PortfolioAssistant } from './PortfolioAssistant';
 import { HelpCenter } from './HelpCenter';
-import { CommunicationPanel } from './CommunicationPanel';
 import { ConfigurationReports } from './ConfigurationReports';
 import { TeamWorkspace } from './TeamWorkspace';
 import './operational-panels.css';
@@ -30,7 +29,7 @@ export function ProfessionalModules({selectedId,onOpen}:{selectedId?:string;onOp
   if(selectedId==='equipo') return <TeamWorkspace/>;
   if(selectedId==='asistente-ia') return <PortfolioAssistant onOpen={onOpen}/>;
   if(selectedId==='ayuda') return <HelpCenter onOpen={onOpen}/>;
-  if(selectedId==='comunicaciones') return <CommunicationPanel/>;
+  if(selectedId==='comunicaciones') return <section className="pm-modules" aria-label="Mensajes y avisos"><header className="pm-page-head"><div><h2>Mensajes y avisos</h2><p>Los mensajes y los recordatorios van por el chat y los avisos de la app.</p></div><NvButton onClick={()=>onOpen('/crm/mensajes')}>Abrir mensajes</NvButton></header></section>;
   if(selectedId==='configuracion') return <ConfigurationReports onOpen={onOpen}/>;
   const selected=PROFESSIONAL_MODULES.find(m=>m.id===selectedId);
   return <section className="pm-modules" aria-label="Funciones del consultorio">

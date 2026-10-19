@@ -31,8 +31,9 @@ describe('funciones presentes y previstas del consultorio',()=>{
   });
   it('abre difusiones con revisión individual y configuración con reportes',()=>{
     const communications=renderToStaticMarkup(<ProfessionalModules selectedId="comunicaciones" onOpen={vi.fn()}/>);
-    expect(communications).toContain('Difusiones por WhatsApp');
-    expect(communications).toContain('Cargando');
+    expect(communications).toContain('Mensajes y avisos');
+    expect(communications).toContain('Abrir mensajes');
+    expect(communications).not.toContain('WhatsApp');
     const settings=renderToStaticMarkup(<ProfessionalModules selectedId="configuracion" onOpen={vi.fn()}/>);
     expect(settings).toContain('Configuración y reportes');
     expect(settings).toContain('Descargar indicadores');

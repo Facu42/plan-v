@@ -1,4 +1,6 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-17)
+# Traspaso del proyecto (actualización vigente: 2026-10-19)
+
+19/10 · Cursor · Fase 5 trae la fase 4 de main y sigue en [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar hasta que los controles estén verdes. WhatsApp salió del panel. La ficha de #154 convive con Agenda, Cobranzas y Página pública. Sin SQL remoto.
 
 ## 19/10 · Ficha de la nutri, fase 4
 

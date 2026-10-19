@@ -12,7 +12,8 @@ describe('primer uso de la nutricionista', () => {
   });
 
   it('nombra los botones que de verdad existen en la app', () => {
-    expect(html).toContain('WhatsApp');
+    expect(html).toContain('copiar el enlace');
+    expect(html).not.toContain('WhatsApp');
     expect(html).toContain('Crear mi primer paciente');
     expect(html).toContain('Explorar consultorio');
     expect(html).toContain('disabled');

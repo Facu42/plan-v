@@ -14,7 +14,7 @@ export function FirstSteps({ onStart, onExplore, onInvite, onPlan, patientName, 
 }) {
   const steps = [
     { title: 'Crear paciente', text: 'Completá su ficha para empezar el acompañamiento.', action: onStart, Icon: UserPlus },
-    { title: 'Compartir invitación', text: onInvite ? `Abrí la invitación de ${patientName}.` : patientName ? 'Este paciente ya tiene su cuenta vinculada.' : 'Disponible cuando crees tu primer paciente. Podés copiar el enlace o enviarlo por WhatsApp.', action: onInvite, Icon: LinkSimple },
+    { title: 'Compartir invitación', text: onInvite ? `Abrí la invitación de ${patientName}.` : patientName ? 'Este paciente ya tiene su cuenta vinculada.' : 'Disponible cuando crees tu primer paciente. Podés copiar el enlace.', action: onInvite, Icon: LinkSimple },
     { title: 'Armar su plan', text: onPlan ? `Abrí el plan de ${patientName}.` : 'Disponible cuando crees tu primer paciente.', action: onPlan, Icon: ListChecks },
   ];
   return <section className="nv-first-steps" aria-labelledby="nv-first-steps-title">
