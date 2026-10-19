@@ -37,18 +37,21 @@
 .pn-panel .pn-patient-row:is(:hover,:focus-within) .pn-patient-toggle b { color:var(--pn-ok); }
 .pn-panel .pn-row-arrow { flex:none; opacity:0; transform:translateX(-8px); transition:opacity 200ms ease,transform 250ms var(--pn-ease); }
 .pn-panel .pn-patient-row:is(:hover,:focus-within,.pn-selected) .pn-row-arrow { opacity:1; transform:none; }
-.pn-panel .pn-selected .pn-row-arrow { transform:rotate(90deg); }
+.pn-panel .pn-patient-row.pn-selected .pn-row-arrow { transform:rotate(90deg); }
 .pn-panel .pn-adherence { display:flex; align-items:center; gap:7px; }
 .pn-panel .pn-adherence>span { width:58px; height:5px; overflow:hidden; border-radius:3px; background:var(--pn-fill); }
 .pn-panel .pn-adherence i { display:block; height:100%; background:var(--pn-lime-dark); transform-origin:left; }
 .pn-panel .pn-patient-row:hover .pn-adherence i { animation:pn-patient-bar 300ms var(--pn-ease); }
 .pn-panel .pn-status { display:inline-block; padding:4px 8px; border-radius:7px; background:var(--pn-lime-light); color:var(--pn-ok); font-size:10px; font-weight:500; overflow-wrap:anywhere; }
 .pn-panel .pn-status-alert { background:var(--pn-orange-light); color:var(--pn-danger); }
+.pn-panel .pn-status-unknown { background:var(--pn-fill); color:var(--pn-muted); }
+.pn-panel .pn-directory-order { max-width:155px; min-height:34px; padding:6px 9px; background:var(--pn-fill); color:var(--pn-ink); border:1px solid var(--pn-line); border-radius:10px; font:inherit; font-size:11px; }
 .pn-panel .pn-row-options>summary { width:32px; height:34px; border:1px solid var(--pn-line); border-radius:10px; display:grid; place-items:center; cursor:pointer; list-style:none; }
 .pn-panel .pn-row-options>summary::-webkit-details-marker { display:none; }
 .pn-panel .pn-row-options[open]>summary { background:var(--pn-lime-light); }
 .pn-panel .pn-row-menu { position:fixed; top:var(--pn-menu-top,120px); left:var(--pn-menu-left,calc(100vw - 300px)); z-index:70; width:276px; max-width:calc(100vw - 32px); max-height:min(480px,calc(100dvh - 48px)); overflow:auto; padding:12px; border:1px solid var(--pn-line); border-radius:16px; box-shadow:var(--pn-shadow); background:var(--pn-white); color:var(--pn-ink); cursor:default; }
 .pn-panel .pn-row-menu .nv-directory-actions { display:flex; flex-direction:column; align-items:stretch; gap:4px; }
+.pn-panel .pn-row-menu { inset:auto; margin:0; }
 .pn-panel .pn-row-menu .nv-directory-actions .nv-button { justify-content:flex-start; min-height:36px; }
 .pn-panel .pn-week-summary { display:flex; flex-direction:column; gap:4px; padding:10px 0 0; font-size:11px; }
 .pn-panel .pn-week-summary small { color:var(--pn-muted); font-size:10.5px; }
@@ -92,7 +95,7 @@
   .pn-panel .nv-directory-panel .nv-card-head { flex-direction:column; align-items:stretch; gap:10px; }
   .pn-panel .nv-directory-workspace .nv-directory-filters { flex-wrap:nowrap; overflow:auto; width:100%; }
   .pn-panel .nv-directory-filters button { flex:none; white-space:nowrap; }
-  .pn-panel .nv-directory-tools { width:100%; justify-content:space-between; }
+  .pn-panel .nv-directory-tools { width:100%; justify-content:space-between; flex-wrap:wrap; gap:8px; }
   .pn-panel .pn-patients-table { min-width:0; }
   .pn-panel .pn-patient-head,.pn-panel .pn-patient-row { grid-template-columns:var(--pn-mobile-cols); gap:6px; }
   .pn-panel .pn-patient-row { min-height:76px; padding:10px 4px; }
@@ -117,7 +120,7 @@
   .pn-panel .pn-patient-row { animation:pn-patient-fade 200ms ease both; animation-delay:0ms; }
   .pn-panel .pn-patient-avatar,.pn-panel .pn-row-arrow,.pn-panel .pn-preview-links>a { transition:opacity 200ms ease,background-color 200ms ease,color 200ms ease; }
   .pn-panel .pn-patient-row:hover .pn-adherence i { animation:none; }
-  .pn-panel .pn-patient-row:is(:hover,:focus-within,.pn-selected) .pn-patient-avatar,.pn-panel .pn-row-arrow,.pn-panel .pn-selected .pn-row-arrow,.pn-panel .pn-preview-links>a:is(:hover,:active) { transform:none; }
+  .pn-panel .pn-patient-row:is(:hover,:focus-within,.pn-selected) .pn-patient-avatar,.pn-panel .pn-row-arrow,.pn-panel .pn-patient-row.pn-selected .pn-row-arrow,.pn-panel .pn-preview-links>a:is(:hover,:active) { transform:none; }
   .pn-panel .pn-quick-preview { transition:opacity 200ms ease; }
 }
 @keyframes pn-patient-fade { from { opacity:0; } to { opacity:1; } }

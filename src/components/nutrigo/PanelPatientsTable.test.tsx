@@ -25,4 +25,10 @@ describe('tabla de pacientes y resumen bajo la fila',()=>{
     expect(html).toContain('Restaurá la ficha');
     expect(html).not.toContain('href="/crm/ficha');
   });
+  it('distingue falta de registros de una adherencia registrada de cero',()=>{
+    const render=(registered:boolean)=>renderToStaticMarkup(<PatientQuickPreviewView patient={{...patient,adherence_score:0,weekly_registration:registered?{start:'2026-10-13',end:'2026-10-19',recorded_days:3,meals_logged:3,meals_pending:0,water_days:0,pending_review:0,water_average:null}:null}} preview={preview}/>);
+    expect(render(false)).toContain('Sin registros');
+    expect(render(false)).not.toContain('Adherencia registrada: 0%');
+    expect(render(true)).toContain('Adherencia registrada: 0%');
+  });
 });

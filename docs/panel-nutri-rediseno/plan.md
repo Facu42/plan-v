@@ -253,6 +253,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
 
+### 2026-10-19 · Codex · Fase 3, paso 2 (correcciones y QA)
+- Hecho: corregidos resumen/columnas al archivar y restaurar, consultas de consentimiento sin notas clínicas, menú en capa superior y giro de flecha. /browse aprueba 22 comprobaciones y seis combinaciones, ocho capturas en ambos temas/tamaños; comparación navegable comprobada.
+- Cómo: dos revisiones independientes; Postgres prueba consentimiento retirado, peso no futuro y ausencia de RPC global o ingreso completo. Fire test de permiso detectado y restaurado, 11 pruebas API verdes. Se agregó distinción entre falta de registros y adherencia registrada de cero.
+- Rama y commit: codex/panel-nutri-fase-3; respaldo final antes del PR. Base main 4dc9a79 conciliada en b4ad3f4.
+- Falta: registrar suite completa estable y tipos/build finales, abrir PR propio y sus controles remotos. Fases 4–9 siguen autorizadas por Facundo.
+- Próximo paso exacto: cerrar fase-3-verificacion.md con resultados finales y copiar el paso 10 completo al PR; luego reservar fase 4 en rama propia.
+
 ### 2026-10-19 · Codex · Fase 3, paso 1 (tabla y contrato)
 - Hecho: tabla del boceto, cinco filtros, columnas/densidad conservadas, acciones en Más opciones, resumen desplegable con 14 accesos y datos por sección. Plan y peso se cargan en lotes de metadata; sólo abrir la fila pide el resumen. Inicio #151 integrado a main 4dc9a79, controles remotos aprobados.
 - Cómo: pruebas RED antes de implementar; 28 casos focales aprobados. API autorizada por consultorio y consentimiento, archivo sin contenido clínico, resumen de consulta publicado acotado. Revisión detectó consulta de cobros global: corregida a get_patient_ledger y cubierta con aserción Postgres. Sin tablas ni SQL remoto.

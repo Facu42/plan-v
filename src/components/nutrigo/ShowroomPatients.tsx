@@ -18,6 +18,7 @@ import { formatPesos } from '../../fees';
 import type { BillingBoard } from '../../types/fees';
 import { DEFAULT_WATER_GOAL, WATER_GOAL_OPTIONS } from '../../types/water';
 import { PanelPatientsTable } from './PanelPatientsTable';
+import { sortDirectoryPatients, type DirectoryOrder } from './directory-sort';
 
 const STAGE_LABELS: Record<Stage, string> = { ingreso: 'Ingreso', plan: 'Plan', seguimiento: 'Seguimiento', alta: 'Alta' };
 
@@ -262,6 +263,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'all', initi
   const [creating, setCreating] = useState(false);
   const [importing,setImporting] = useState(false);
   const [stageFilter, setStageFilter] = useState<Stage | ''>('');
+  const [order, setOrder] = useState<DirectoryOrder>('appointment');
   const [unlinkedOnly, setUnlinkedOnly] = useState(initialUnlinked);
   const [editing, setEditing] = useState<Patient | null>(null);
   const [archiveConfirmation, setArchiveConfirmation] = useState<string | null>(null);
@@ -279,7 +281,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'all', initi
   const changeLayout = (next: DirectoryLayout) => { setLayout(next); saveDirectoryLayout(next); };
   const show = (id: (typeof DIRECTORY_COLUMNS)[number]['id']) => isColumnVisible(layout, id);
   const metrics = getPatientDirectoryMetrics(patients);
-  const visible = filterDirectoryPatients(patients, query, filter).filter((person) => (!stageFilter || person.stage === stageFilter) && (!unlinkedOnly || person.has_account === false));
+  const visible = sortDirectoryPatients(filterDirectoryPatients(patients, query, filter).filter((person) => (!stageFilter || person.stage === stageFilter) && (!unlinkedOnly || person.has_account === false)), order);
 
   const setArchived = async (patient: Patient, archived: boolean) => {
     if (archived && archiveConfirmation !== patient.id) { setArchiveConfirmation(patient.id); return; }
@@ -355,7 +357,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'all', initi
           const count = item.id === 'all' ? patients.length : item.id === 'unlinked' ? patients.filter(p=>!p.archived_at&&p.has_account===false).length : item.id === 'active' ? metrics.active : item.id === 'attention' ? metrics.attention : metrics.archived;
           return <button type="button" key={item.id} disabled={item.id === 'attention' && metrics.attention === null} aria-pressed={filter === item.id} onClick={() => { setFilter(item.id); setUnlinkedOnly(false); setArchiveConfirmation(null); }}>{item.label}<span>{count ?? "—"}</span></button>;
         })}
-      </nav><div className="nv-directory-tools"><details className="pn-directory-extra"><summary>Filtros{stageFilter || unlinkedOnly ? ' · activos' : ''}</summary><div className="pw-work-filters" aria-label="Filtros de gestión"><label>Etapa<select value={stageFilter} onChange={(event) => setStageFilter(event.target.value as Stage | '')}><option value="">Todas las etapas</option>{(Object.keys(STAGE_LABELS) as Stage[]).map((id) => <option key={id} value={id}>{STAGE_LABELS[id]}</option>)}</select></label><label><span>Invitación</span><select value={unlinkedOnly ? 'pending' : 'all'} onChange={(event) => setUnlinkedOnly(event.target.value === 'pending')}><option value="all">Todas las cuentas</option><option value="pending">Pendientes de vincular</option></select></label></div></details><details className="nv-directory-columns"><summary>Columnas y densidad</summary><div className="nv-directory-columns-panel"><fieldset><legend>Mostrar columnas</legend>{DIRECTORY_COLUMNS.map((column) => <label key={column.id}><input type="checkbox" checked={show(column.id)} onChange={() => changeLayout(toggleDirectoryColumn(layout, column.id))} />{column.label}</label>)}</fieldset><fieldset><legend>Densidad</legend><label><input type="radio" name="directory-density" checked={layout.density === 'comfortable'} onChange={() => changeLayout({ ...layout, density: 'comfortable' })} />Cómoda</label><label><input type="radio" name="directory-density" checked={layout.density === 'compact'} onChange={() => changeLayout({ ...layout, density: 'compact' })} />Compacta</label></fieldset></div></details><span className="nv-directory-results" role="status">{visible.length} {visible.length===1 ? 'paciente' : 'pacientes'}</span></div></div>
+      </nav><div className="nv-directory-tools"><details className="pn-directory-extra"><summary>Filtros{stageFilter || unlinkedOnly ? ' · activos' : ''}</summary><div className="pw-work-filters" aria-label="Filtros de gestión"><label>Etapa<select value={stageFilter} onChange={(event) => setStageFilter(event.target.value as Stage | '')}><option value="">Todas las etapas</option>{(Object.keys(STAGE_LABELS) as Stage[]).map((id) => <option key={id} value={id}>{STAGE_LABELS[id]}</option>)}</select></label><label><span>Invitación</span><select value={unlinkedOnly ? 'pending' : 'all'} onChange={(event) => setUnlinkedOnly(event.target.value === 'pending')}><option value="all">Todas las cuentas</option><option value="pending">Pendientes de vincular</option></select></label></div></details><details className="nv-directory-columns"><summary>Columnas y densidad</summary><div className="nv-directory-columns-panel"><fieldset><legend>Mostrar columnas</legend>{DIRECTORY_COLUMNS.map((column) => <label key={column.id}><input type="checkbox" checked={show(column.id)} onChange={() => changeLayout(toggleDirectoryColumn(layout, column.id))} />{column.label}</label>)}</fieldset><fieldset><legend>Densidad</legend><label><input type="radio" name="directory-density" checked={layout.density === 'comfortable'} onChange={() => changeLayout({ ...layout, density: 'comfortable' })} />Cómoda</label><label><input type="radio" name="directory-density" checked={layout.density === 'compact'} onChange={() => changeLayout({ ...layout, density: 'compact' })} />Compacta</label></fieldset></div></details><select className="pn-directory-order" aria-label="Ordenar pacientes" value={order} onChange={event=>setOrder(event.target.value as DirectoryOrder)}><option value="appointment">Próxima consulta</option><option value="name">Nombre</option><option value="adherence">Menor adherencia</option></select><span className="nv-directory-results" role="status">{visible.length} {visible.length===1 ? 'paciente' : 'pacientes'}</span></div></div>
       {metrics.attention === null && <p role="status">No pudimos cargar todos los resúmenes semanales. Recargá para consultar los pendientes.</p>}
       {share && <InviteShare name={share.name} invite={share.invite} onClose={() => setShare(null)} />}
       {error && <p className="nv-dialog-error" role="alert">{error}</p>}

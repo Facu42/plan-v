@@ -1,20 +1,35 @@
 import type { PatientQuickPreview, PatientRecordSection, PatientRowPreview } from '../../src/types/patient-preview.js';
 import { PATIENT_RECORD_SECTION_IDS } from '../../src/types/patient-preview.js';
 import { currentCareConsents } from '../care/consents.js';
+import { CONSENT_CATALOG } from '../intake/consent.js';
 import { CareError } from '../care/errors.js';
 import { listMeasurements } from '../care/repository.js';
 import { getRequestDb } from '../db/supabase-client.js';
 import { getPatientPlanPreview } from '../plans/repository.js';
 import { shared } from '../consultations/memory.js';
 import { summarizeLedger, formatPesos } from '../../src/fees.js';
-import { buildWorkItems, loadWorkSnapshot, queueDbError, type WorkScope } from './repository.js';
+import { buildWorkItems, loadWorkSnapshot, queueDbError, readAllRows, type WorkScope } from './repository.js';
+
+/** Permisos y estado del ingreso, sin respuestas del cuestionario ni notas clínicas. */
+async function previewPermissions(patientId: string, persistent: boolean) {
+  if (!persistent) return currentCareConsents(patientId, false);
+  const db = getRequestDb();
+  const [events, intake] = await Promise.all([
+    readAllRows((offset,end) => db.from('consent_events').select('id,purpose,text_version,text_hash,decision,sequence').eq('patient_id',patientId).order('sequence').order('id').range(offset,end)),
+    db.from('intake_sessions').select('status').eq('patient_id',patientId).order('updated_at',{ascending:false}).range(0,0),
+  ]);
+  queueDbError(intake.error);
+  const latest = new Map(events.map(event => [String(event.purpose),event]));
+  const consented = CONSENT_CATALOG.filter(text => { const event=latest.get(text.purpose);return event?.decision==='granted'&&event.text_version===text.text_version&&event.text_hash===text.text_hash; }).map(text=>text.purpose);
+  return { consented, intake: { status: String(intake.data?.[0]?.status ?? 'draft') } };
+}
 
 export async function loadPatientQuickPreview(scope: WorkScope, patientId: string, now = new Date()): Promise<PatientQuickPreview> {
   const patient = scope.patients.find(p => p.id === patientId);
   if (!patient || patient.deactivated_at || patient.anonymized_at) throw new CareError(403, 'Esa paciente no está disponible en tu consultorio.');
   const empty: PatientQuickPreview = { patient_id: patientId, generated_at: now.toISOString(), can_open: !patient.archived_at, source: scope.persistent ? 'supabase' : 'memory', latest_weight: null, plan: { status: 'none', period_start: null, period_end: null, has_draft: false }, last_consultation: null, sections: PATIENT_RECORD_SECTION_IDS.map(id => ({ id, summary: 'Ficha archivada · restaurala para continuar' })) };
   if (patient.archived_at) return empty;
-  const bundle = await currentCareConsents(patientId, scope.persistent);
+  const bundle = await previewPermissions(patientId, scope.persistent);
   const canMeasure = bundle.consented.includes('measurement');
   const canCare = bundle.consented.includes('care_relationship');
   const canDocuments = bundle.consented.includes('clinical_document');
@@ -74,7 +89,7 @@ export async function loadPatientRowPreview(scope: WorkScope, patientId: string)
   if (!patient || patient.deactivated_at || patient.anonymized_at) throw new CareError(403, 'Esa paciente no está disponible en tu consultorio.');
   const empty: PatientRowPreview = { patient_id: patientId, can_open: !patient.archived_at, latest_weight: null, plan: { status: 'none', period_start: null, period_end: null, has_draft: false } };
   if (patient.archived_at) return empty;
-  const bundle = await currentCareConsents(patientId, scope.persistent);
+  const bundle = await previewPermissions(patientId, scope.persistent);
   const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
   const [latest_weight, plan] = await Promise.all([loadLatestWeight(patientId, scope.persistent, bundle.consented.includes('measurement'), today), getPatientPlanPreview(scope.nutritionistId, patientId, scope.persistent)]);
   return { ...empty, latest_weight, plan };

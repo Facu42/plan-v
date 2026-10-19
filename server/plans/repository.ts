@@ -113,11 +113,15 @@ export async function getPatientPlanPreview(owner: string, patientId: string, pe
     const plan = await db.from('meal_plans').select('id').eq('patient_id', patientId).eq('nutritionist_id', owner).maybeSingle();
     mealPlanDbError(plan.error);
     if (plan.data) {
-      const result = await db.from('meal_plan_versions').select('status,period_start,period_end,version').eq('meal_plan_id', plan.data.id).in('status', ['draft','published','scheduled']).order('version', { ascending: false }).range(0, 9);
-      mealPlanDbError(result.error); rows = result.data ?? [];
+      const planId = plan.data.id;
+      const results = await Promise.all(['draft','published','scheduled'].map(status => db.from('meal_plan_versions')
+        .select('status,period_start,period_end,version').eq('meal_plan_id', planId).eq('status',status)
+        .order('version', { ascending: false }).range(0,0)));
+      for (const result of results) { mealPlanDbError(result.error); rows.push(...result.data ?? []); }
     }
   }
-  const current = rows.find(v => v.status === 'published') ?? rows.find(v => v.status === 'scheduled') ?? rows.sort((a,b) => b.version - a.version)[0];
+  rows.sort((a,b) => b.version - a.version);
+  const current = rows.find(v => v.status === 'published') ?? rows.find(v => v.status === 'scheduled') ?? rows[0];
   return { status: current?.status as PatientPlanPreview['status'] ?? 'none', period_start: current?.period_start ?? null, period_end: current?.period_end ?? null, has_draft: rows.some(v => v.status === 'draft') };
 }
 
