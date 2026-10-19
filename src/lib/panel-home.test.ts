@@ -17,11 +17,15 @@ describe('Inicio con datos registrados', () => {
     expect(homeAppointments([patient({ appointment: { starts_at: 'inválido', when: 'Lunes · 11:00', duration: 30, channel: 'video' } })], now).next).toBeNull();
     expect(homeAppointments([patient({ appointment: { when: 'Sin turno', duration: 30, channel: 'video' } })], now).today).toEqual([]);
   });
-  it('cuenta rachas por días distintos, acepta ayer y no usa registros futuros', () => {
-    const logs = ['13','14','15','16','17','18','18','20'].map((day, index) => ({ id: String(index), logged_at: `2026-10-${day}T15:00:00Z` })) as Patient['meal_logs'];
-    expect(homeNews([patient({ meal_logs: logs })], now)).toEqual([]);
-    logs.push({ id: 'last', logged_at: '2026-10-12T15:00:00Z' } as Patient['meal_logs'][0]);
-    expect(homeNews([patient({ meal_logs: logs })], now)[0].detail).toBe('7 días seguidos registrando comidas');
+  it('conserva los turnos de hoy en el historial y no los duplica con el próximo turno', () => {
+    const p = patient({ appointment: { starts_at: '2026-10-19T15:00:00Z', when: 'Lunes · 12:00', duration: 30, channel: 'video' }, appointment_history: [{ id: 'old', dateId: '2026-10-19', when: 'Lunes · 09:00', duration: 30, channel: 'video', action: 'elapsed', actor: 'system', at: '2026-10-19T13:00:00Z' }, { id: 'same', dateId: '2026-10-19', when: 'Lunes · 12:00', duration: 30, channel: 'video', action: 'scheduled', actor: 'pro', at: '2026-10-19T13:00:00Z' }] });
+    expect(homeAppointments([p], now).today).toHaveLength(2);
+    expect(homeAppointments([p], now).next?.at.toISOString()).toBe('2026-10-19T15:00:00.000Z');
+  });
+  it('usa rachas resumidas por el servidor, sin inferirlas de una ficha truncada', () => {
+    expect(homeNews([patient()], now)).toEqual([]);
+    expect(homeNews([patient()], now, [{ patient_id: 'a', days: 7, at_least: false }])[0].detail).toBe('7 días seguidos registrando comidas');
+    expect(homeNews([patient()], now, [{ patient_id: 'a', days: 30, at_least: true }])[0].detail).toContain('Al menos 30 días');
   });
   it('solo felicita metas recientes y aniversarios reales, excluye archivadas', () => {
     const news = homeNews([patient({ goal_status: 'completed', goal_updated_at: '2026-10-18T15:00:00Z' }), patient({ id: 'b', created_at: '2025-10-19T15:00:00Z' }), patient({ id: 'c', goal_status: 'completed', goal_updated_at: '2026-01-01T15:00:00Z' }), patient({ id: 'd', archived_at: '2026-10-01', created_at: '2025-10-19T15:00:00Z' })], now);
@@ -36,6 +40,8 @@ describe('Inicio con datos registrados', () => {
     expect(homeMonth([], null, now)).toMatchObject({ active: 0, collected: null, outstanding: null });
   });
   it('no suma consultas a los pendientes: ya están en su propia agenda', () => {
-    expect(homePendingTotal({ intake: 1, meal: 2, ai_menu: 1, message: 3, payment: 0, appointment: 6, record: 1, fee_overdue: 2, quiet: 1 })).toBe(11);
+    const counts = { intake: 1, meal: 2, ai_menu: 1, message: 3, payment: 0, appointment: 6, record: 1, fee_overdue: 2, quiet: 1 };
+    expect(homePendingTotal(counts)).toBe(11);
+    expect(homePendingTotal(counts, 2)).toBe(13);
   });
 });

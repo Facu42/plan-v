@@ -1,6 +1,6 @@
 import type { Patient } from '../types';
 import type { BillingBoard } from '../types/fees';
-import type { CrmWorkItem, CrmWorkKind } from '../types/crm-work';
+import type { CrmHomeOverview, CrmWorkItem, CrmWorkKind } from '../types/crm-work';
 import { countConsultations, incomeIn } from './inicio-indicators';
 import { summarizeLedger } from '../fees';
 
@@ -10,7 +10,7 @@ const dayMs = (day: string) => Date.parse(`${day}T12:00:00Z`);
 const isActive = (p: Patient) => !p.archived_at && !p.deactivated_at && !p.anonymized_at;
 export const patientHref = (patient: Patient, section = 'resumen') => `/crm/ficha?${new URLSearchParams({ paciente: patient.id, seccion: section })}`;
 export const patientMessageHref = (patient: Patient) => `/crm/mensajes?${new URLSearchParams({ paciente: patient.id })}`;
-export type HomeAppointment = { patient: Patient; at: Date; duration: number; channel: string };
+export type HomeAppointment = { patient: Patient; at: Date; duration: number; channel: string; elapsed?: boolean };
 
 /** Los turnos actuales tienen fecha absoluta. El formato semanal antiguo solo se interpreta si no hay fecha. */
 export function homeAppointments(patients: readonly Patient[], now: Date) {
@@ -20,6 +20,12 @@ export function homeAppointments(patients: readonly Patient[], now: Date) {
   const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
   const entries: HomeAppointment[] = [];
   for (const patient of patients.filter(isActive)) {
+    for (const history of patient.appointment_history ?? []) {
+      const time = history.when.split(' · ')[1];
+      if (history.action !== 'elapsed' || history.dateId !== today || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time ?? '')) continue;
+      const at = new Date(`${history.dateId}T${time}:00-03:00`);
+      if (!entries.some(entry => entry.patient.id === patient.id && entry.at.getTime() === at.getTime())) entries.push({ patient, at, duration: history.duration, channel: history.channel, elapsed: true });
+    }
     const appointment = patient.appointment;
     if (!appointment) continue;
     let at: Date;
@@ -33,14 +39,16 @@ export function homeAppointments(patients: readonly Patient[], now: Date) {
       at = new Date(`${date}T${time}:00-03:00`);
     }
     if (!Number.isFinite(at.getTime())) continue;
+    const duplicate = entries.findIndex(entry => entry.patient.id === patient.id && entry.at.getTime() === at.getTime());
+    if (duplicate >= 0) entries.splice(duplicate, 1);
     entries.push({ patient, at, duration: appointment.duration, channel: appointment.channel });
   }
   entries.sort((a, b) => a.at.getTime() - b.at.getTime() || a.patient.name.localeCompare(b.patient.name, 'es-AR'));
-  return { today: entries.filter(entry => homeDay(entry.at) === today), next: entries.find(entry => entry.at.getTime() + entry.duration * 60_000 > now.getTime()) ?? null };
+  return { today: entries.filter(entry => homeDay(entry.at) === today), next: entries.find(entry => !entry.elapsed && entry.at.getTime() + entry.duration * 60_000 > now.getTime()) ?? null };
 }
 
 export type HomePatientNotice = { id: string; patient: Patient; detail: string };
-export function homeNews(patients: readonly Patient[], now: Date): HomePatientNotice[] {
+export function homeNews(patients: readonly Patient[], now: Date, streaks: CrmHomeOverview['meal_streaks'] = []): HomePatientNotice[] {
   const today = homeDay(now), todayMs = dayMs(today);
   const result: HomePatientNotice[] = [];
   for (const patient of patients.filter(isActive)) {
@@ -50,14 +58,8 @@ export function homeNews(patients: readonly Patient[], now: Date): HomePatientNo
       result.push({ id: `${patient.id}:goal`, patient, detail: 'Alcanzó su objetivo registrado' });
       continue;
     }
-    const dates = new Set((patient.meal_logs ?? []).flatMap(log => {
-      const at = new Date(log.logged_at);
-      return Number.isFinite(at.getTime()) && homeDay(at) <= today ? [homeDay(at)] : [];
-    }));
-    let last = dates.has(today) ? todayMs : todayMs - 86_400_000;
-    let streak = 0;
-    while (dates.has(new Date(last).toISOString().slice(0, 10))) { streak++; last -= 86_400_000; }
-    if (streak >= 7) { result.push({ id: `${patient.id}:streak`, patient, detail: `${streak} días seguidos registrando comidas` }); continue; }
+    const streak = streaks.find(entry => entry.patient_id === patient.id);
+    if (streak && streak.days >= 7) { result.push({ id: `${patient.id}:streak`, patient, detail: `${streak.at_least ? 'Al menos ' : ''}${streak.days} días seguidos registrando comidas` }); continue; }
     const created = patient.created_at ? new Date(patient.created_at) : null;
     if (!created || !Number.isFinite(created.getTime())) continue;
     const createdDay = homeDay(created);
@@ -76,8 +78,8 @@ export function homeAttention(patients: readonly Patient[], items: readonly CrmW
   }).sort((a, b) => a.patient.adherence_score - b.patient.adherence_score);
 }
 
-export function homePendingTotal(counts: Record<CrmWorkKind, number>) {
-  return Object.entries(counts).reduce((total, [kind, count]) => total + (kind === 'appointment' ? 0 : count), 0);
+export function homePendingTotal(counts: Record<CrmWorkKind, number>, rescheduleCount = 0) {
+  return Object.entries(counts).reduce((total, [kind, count]) => total + (kind === 'appointment' ? 0 : count), rescheduleCount);
 }
 
 /** Cobrado = pagos confirmados este mes. Por cobrar = saldo de cargos de este mes, después de aplicar el historial de pagos. */

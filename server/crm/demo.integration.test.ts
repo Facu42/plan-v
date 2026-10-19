@@ -8,6 +8,15 @@ import type { GlobalProgressResponse } from '../../src/types/progress-global.js'
 
 describe('Bandeja profesional: API demo y persistencia de las acciones existentes', () => {
   beforeEach(() => resetStore());
+  it('Inicio pide un resumen completo independiente del filtro, sin textos clínicos ni mensajes', async () => {
+    const response = await app.request('/api/crm/work-queue?include_home=1&kind=meal&limit=1');
+    expect(response.status).toBe(200);
+    const body = await response.json() as CrmWorkResponse;
+    expect(body.home).toMatchObject({ reschedule_count: 0, quiet: expect.any(Array), meal_streaks: expect.any(Array) });
+    const other = await (await app.request('/api/crm/work-queue?include_home=1&kind=record')).json() as CrmWorkResponse;
+    expect(other.home).toEqual(body.home);
+    expect(JSON.stringify(body.home)).not.toMatch(/description|clinical_notes|payload|author_id|body_progress/);
+  });
   it('recupera pendientes reales y excluye pagos confirmados y mensajes leídos al recargar', async () => {
     const patient = 'pat-sofia';
     await reportPayment(patient, { amount: 1000, paid_on: '2026-10-05', method: 'efectivo' }, false);

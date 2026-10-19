@@ -4,6 +4,7 @@ import { CRM_WORK_KINDS, type CrmWorkItem, type CrmWorkQuery, type CrmWorkRespon
 import { CareError } from '../care/errors.js';
 
 export const workQueueQuerySchema = z.object({
+  include_home: z.literal('1').optional(),
   patient_id: z.string().trim().min(1).max(100).optional(),
   kind: z.enum(CRM_WORK_KINDS).optional(),
   cursor: z.string().min(1).max(2000).optional(),

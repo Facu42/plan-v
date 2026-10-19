@@ -69,7 +69,7 @@ const TASKS: Record<CrmWorkKind, { label: string; action: string; icon: IconName
   ai_menu: { label: 'Planes', action: 'Revisar', icon: 'list', tone: 'lime' },
   message: { label: 'Mensajes', action: 'Responder', icon: 'message', tone: 'lime' },
   payment: { label: 'Pagos', action: 'Confirmar', icon: 'wallet', tone: 'gold' },
-  appointment: { label: 'Consultas', action: 'Preparar', icon: 'calendar', tone: 'gold' },
+  appointment: { label: 'Reprogramar', action: 'Reprogramar', icon: 'calendar', tone: 'gold' },
   record: { label: 'Registros', action: 'Revisar', icon: 'edit', tone: 'gold' },
   fee_overdue: { label: 'Cobros', action: 'Recordar', icon: 'wallet', tone: 'orange' },
   quiet: { label: 'Sin registros', action: 'Escribir', icon: 'message', tone: 'orange' },
@@ -87,11 +87,11 @@ type ViewProps = {
 };
 export function PanelHomeView({ patients, now, data, loading, error, kind, onKind, onRefresh, onNext, hasPrevious, board, billingError, scheduling, schedulingError, onOpen, onCopy, copyStatus }: ViewProps) {
   const appointments = homeAppointments(patients, now);
-  const items = (data?.items ?? []).filter(item => item.kind !== 'appointment');
+  const items = (data?.items ?? []).filter(item => item.kind !== 'appointment' || item.status === 'needs_change');
   const reservations = scheduling?.bookings.filter(booking => booking.status === 'requested') ?? [];
-  const total = data ? homePendingTotal(data.counts) : null;
-  const attention = homeAttention(patients, data?.items ?? []);
-  const news = homeNews(patients, now);
+  const total = data ? homePendingTotal(data.counts, data.home?.reschedule_count) : null;
+  const attention = homeAttention(patients, data?.home?.quiet ?? []);
+  const news = homeNews(patients, now, data?.home?.meal_streaks);
   const month = homeMonth(patients, board, now);
   const publicPage = scheduling?.profile.config.page;
   const filters: Array<{ id: HomeFilter; label: string; count: number | null }> = [
@@ -113,7 +113,7 @@ export function PanelHomeView({ patients, now, data, loading, error, kind, onKin
     </div>{copyStatus && <p className="ph-feedback" role="status">{copyStatus}</p>}
     <div className="ph-grid-two ph-middle">
       <section className="ph-card ph-pending"><header><h2>Pendientes</h2><button type="button" className="ph-retry" disabled={loading} onClick={onRefresh}>Actualizar</button></header>
-        <div className="ph-tabs" role="group" aria-label="Tipo de pendiente">{filters.map(filter => <button key={filter.id} type="button" aria-pressed={kind === filter.id} onClick={() => onKind(filter.id)}>{filter.label} <b>{filter.count ?? '—'}</b></button>)}<label><span className="sr-only">Otros pendientes</span><select aria-label="Otros pendientes" value={['intake','record','payment','quiet'].includes(kind) ? kind : ''} onChange={event => onKind(event.target.value as HomeFilter)}><option value="">Otros</option>{(['intake','record','payment','quiet'] as const).map(id => <option value={id} key={id}>{TASKS[id].label} ({data?.counts[id] ?? '—'})</option>)}</select></label></div>
+        <div className="ph-tabs" role="group" aria-label="Tipo de pendiente">{filters.map(filter => <button key={filter.id} type="button" aria-pressed={kind === filter.id} onClick={() => onKind(filter.id)}>{filter.label} <b>{filter.count ?? '—'}</b></button>)}<label><span className="sr-only">Otros pendientes</span><select aria-label="Otros pendientes" value={['intake','record','payment','quiet','appointment'].includes(kind) ? kind : ''} onChange={event => onKind(event.target.value as HomeFilter)}><option value="">Otros</option>{(['intake','record','payment','quiet','appointment'] as const).map(id => <option value={id} key={id}>{TASKS[id].label} ({id === 'appointment' ? data?.home?.reschedule_count ?? '—' : data?.counts[id] ?? '—'})</option>)}</select></label></div>
         <div className="ph-scroll" tabIndex={0} aria-label="Lista de pendientes">
           {kind === 'reservas' ? schedulingError ? <div className="ph-empty" role="alert">No pudimos consultar las reservas.<button type="button" className="ph-retry" onClick={onRefresh}>Reintentar reservas</button></div> : !scheduling ? <p className="ph-empty" role="status">Consultando reservas…</p> : reservations.length ? <ul>{reservations.map(booking => <li className="ph-task" key={booking.id}><span className="ph-icon ph-gold"><Icon name="calendar" size={18} /></span><div><b>{booking.contact_name}</b><p>{new Date(booking.starts_at).toLocaleString('es-AR', { timeZone: HOME_ZONE, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} · Reserva por confirmar</p></div><HomeLink href="/crm/agenda?agenda=reservas" onOpen={onOpen} className="ph-button">Revisar</HomeLink></li>)}</ul> : <p className="ph-empty">No hay reservas por confirmar.</p>
           : loading ? <p className="ph-empty" role="status">Consultando pendientes…</p> : error ? <div className="ph-empty" role="alert">{error}<button type="button" className="ph-retry" onClick={onRefresh}>Reintentar pendientes</button></div> : <>
@@ -124,7 +124,7 @@ export function PanelHomeView({ patients, now, data, loading, error, kind, onKin
         </div>
         {schedulingError && kind !== 'reservas' && <p className="ph-source-warning">Reservas no disponibles. <button type="button" className="ph-retry" onClick={onRefresh}>Reintentar reservas</button></p>}
       </section>
-      <section className="ph-card ph-agenda"><header><h2>Consultas de hoy</h2><HomeLink href="/crm/agenda" onOpen={onOpen}>Ver agenda <Icon name="arrow" size={14} /></HomeLink></header><div className="ph-scroll" tabIndex={0} aria-label="Consultas de hoy">{appointments.today.length ? <ol className="ph-timeline">{appointments.today.map(entry => <li key={entry.patient.id} className={entry === appointments.next ? 'ph-now' : entry.at.getTime() + entry.duration * 60_000 <= now.getTime() ? 'ph-done' : ''}><time dateTime={entry.at.toISOString()}>{formatTime(entry.at)}</time><span className="ph-rail" /><HomeLink href={patientHref(entry.patient, 'consultas')} onOpen={onOpen}><b>{entry.patient.name}</b><span>{entry.duration} min · {channelLabel(entry.channel)}</span></HomeLink></li>)}</ol> : <p className="ph-empty">No tenés consultas programadas para hoy.</p>}</div></section>
+      <section className="ph-card ph-agenda"><header><h2>Consultas de hoy</h2><HomeLink href="/crm/agenda" onOpen={onOpen}>Ver agenda <Icon name="arrow" size={14} /></HomeLink></header><div className="ph-scroll" tabIndex={0} aria-label="Consultas de hoy">{appointments.today.length ? <ol className="ph-timeline">{appointments.today.map(entry => <li key={`${entry.patient.id}:${entry.at.toISOString()}`} className={entry === appointments.next ? 'ph-now' : entry.at.getTime() + entry.duration * 60_000 <= now.getTime() ? 'ph-done' : ''}><time dateTime={entry.at.toISOString()}>{formatTime(entry.at)}</time><span className="ph-rail" /><HomeLink href={patientHref(entry.patient, 'consultas')} onOpen={onOpen}><b>{entry.patient.name}</b><span>{entry.duration} min · {channelLabel(entry.channel)}</span></HomeLink></li>)}</ol> : <p className="ph-empty">No tenés consultas programadas para hoy.</p>}</div></section>
     </div>
     <div className="ph-grid-three ph-bottom">
       <section className="ph-card"><header><span className="ph-pip ph-orange" /><h2>Necesitan atención</h2><HomeLink href="/crm/seguimiento" onOpen={onOpen} aria-label="Ver todas las pacientes que necesitan atención"><Icon name="arrow" size={15} /></HomeLink></header><div className="ph-scroll" tabIndex={0} aria-label="Pacientes que necesitan atención">{attention.length ? <ul>{attention.map(notice => <li key={notice.id} className="ph-notice"><span className="ph-avatar ph-orange">{notice.patient.initials}</span><div><b>{notice.patient.name}</b><p>{notice.detail}</p></div><HomeLink href={patientMessageHref(notice.patient)} onOpen={onOpen} className="ph-button" aria-label={`Escribir a ${notice.patient.name}`}>Escribir</HomeLink></li>)}</ul> : <p className="ph-empty">Sin alertas en los datos disponibles.</p>}</div></section>
@@ -136,7 +136,7 @@ export function PanelHomeView({ patients, now, data, loading, error, kind, onKin
 }
 
 export function PanelHome({ patients, now, onOpen }: { patients: Patient[]; now: Date; onOpen: Open }) {
-  const state = useHomeData();
+  const state = useHomeData(homeDay(now));
   const [copyStatus, setCopyStatus] = useState('');
   const copy = async () => {
     const page = state.scheduling?.profile.config.page;

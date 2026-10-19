@@ -5,6 +5,7 @@ import type { CrmFeedQuery, CrmFeedResponse } from '../types/crm-feed';
 export const crmWorkApi = {
   list: (query: CrmWorkQuery = {}, signal?: AbortSignal) => {
     const params = new URLSearchParams();
+    if (query.include_home) params.set('include_home', query.include_home);
     if (query.patient_id) params.set('patient_id', query.patient_id);
     if (query.kind) params.set('kind', query.kind);
     if (query.cursor) params.set('cursor', query.cursor);

@@ -179,4 +179,21 @@ describe('Bandeja: rutas con sesiones y migraciones reales en Postgres descartab
     expect(body.total).toBe(36);
     expect(body.items.some(item => item.patient_id === last)).toBe(true);
   }, 30000);
+  it('Inicio conserva reprogramaciones y rachas completas sin cruzar dos consultorios', async () => {
+    for (const pid of [patientA, patientB]) {
+      await db.query("insert into public.meal_logs(patient_id,slot_label,status,logged_at) select $1,'Cena','confirmed',now()-n*interval '1 day' from generate_series(0,6) n", [pid]);
+    }
+    await db.query("insert into public.appointments(patient_id,nutritionist_id,starts_at,channel,patient_reply) values($1,$2,now()+interval '1 day','video','needs_change')", [patientA,nutriAId]);
+    const a = await (await request(nutriA, '?include_home=1&kind=meal&limit=1')).json() as CrmWorkResponse;
+    const b = await (await request(nutriB, '?include_home=1&kind=record&limit=1')).json() as CrmWorkResponse;
+    expect(a.home?.meal_streaks).toEqual([{ patient_id: patientA, days: 7, at_least: false }]);
+    expect(b.home?.meal_streaks).toEqual([{ patient_id: patientB, days: 7, at_least: false }]);
+    expect(a.home?.reschedule_count).toBe(1);
+    expect(b.home?.reschedule_count).toBe(0);
+    const reprogram = await (await request(nutriA, '?include_home=1&kind=appointment')).json() as CrmWorkResponse;
+    expect(reprogram.items).toHaveLength(1);
+    expect(reprogram.items[0]).toMatchObject({ patient_id: patientA, status: 'needs_change' });
+    expect(JSON.stringify(a.home)).not.toMatch(/Descripción privada|Nota privada|Texto privado|Dato privado|context_hash|nutritionist_id/);
+    expect((await request(patientAUser, '?include_home=1')).status).toBe(403);
+  }, 30000);
 });

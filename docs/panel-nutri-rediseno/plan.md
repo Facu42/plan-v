@@ -252,6 +252,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
 
+### 2026-10-19 · Codex · Fase 2, paso 2 (revisión de datos)
+- Hecho: corregidas las cinco observaciones de código: reprogramaciones visibles, atención independiente de filtros, rachas resumidas desde fechas completas autorizadas, historial de turnos de hoy y reloj vivo. Corregida paginación compartida de reservas/transferencias y destino de revisión de comidas.
+- Cómo: `include_home=1` amplía la API existente con metadata, sin campos clínicos ni permisos nuevos; pruebas RED de los fallos antes de resolverlos. 25 casos focales y prueba Postgres descartable con dos consultorios aprobados. La primera suite completa alcanzó pruebas RED incorporadas mientras corría; se repite al cerrar los cambios, no se considera evidencia verde.
+- Rama y commit: `codex/panel-nutri-fase-2`; respaldo de correcciones antes de la QA final.
+- Falta: segunda revisión independiente, capturas definitivas, recorridos, suite completa estable, fire test y PR.
+- Próximo paso exacto: cerrar QA con /browse, verificar el resumen aunque la paciente no esté seleccionada y comprobar todos los accesos rápidos.
+
 ### 2026-10-19 · Codex · Fase 2, paso 1 (Inicio conectado)
 - Hecho: resumen calculado, contadores por tipo, próxima consulta con antecedentes y peso, accesos reales, bandeja paginada, reservas por confirmar, agenda del día, atención, noticias y cuatro números del mes. Pruebas iniciales RED (`6930fe2`) y 11 casos GREEN; tipos aprobados. Revisión de código solicitada.
 - Cómo: PanelHome y use-home-data reutilizan las API de bandeja, cobros, agenda, ingreso y seguimiento, sin cambiar permisos ni crear tablas. panel-home deriva fechas argentinas, rachas por días únicos y saldos de cargos del mes. El resumen declara que es calculado; no finge una respuesta de IA. Diseño del boceto en 1440/390; se corrigieron saludo móvil e importes recortados observados en /browse.

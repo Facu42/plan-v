@@ -189,7 +189,15 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
   }, [role, onboardingOpen]);
   const [preferredName, setPreferredName] = useState('');
   const [dayIndex, setDayIndex] = useState(-1);
-  const [now] = useState(() => new Date());
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    if (role !== 'pro' || page !== 'inicio') return;
+    const update = () => setNow(new Date());
+    update();
+    const timer = window.setInterval(update, 60_000);
+    window.addEventListener('focus', update);
+    return () => { window.clearInterval(timer); window.removeEventListener('focus', update); };
+  }, [role, page]);
   const [recordEditing, setRecordEditing] = useState(false);
   const [reviewLog, setReviewLog] = useState<MealLog | null>(null);
   const [mealSlot, setMealSlot] = useState<string | null>(null);
