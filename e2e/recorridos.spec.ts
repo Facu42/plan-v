@@ -67,7 +67,7 @@ test('2 · la paciente completa su ficha de ingreso y la envía', async ({ page 
   await page.getByRole('button', { name: 'Historia clínica', exact: true }).click();
   const intake = page.getByRole('main');
   await expect(intake.getByText('Tener más energía a la tarde')).toBeVisible();
-  await expect(intake.getByText('Declaró que no tiene alergias.')).toBeVisible();
+  await expect(page.getByLabel('Ingreso autodeclarado').getByText('Declaró que no tiene alergias.')).toBeVisible();
   await expect(intake.getByText('No hay faltantes de ingreso.', { exact: false })).toBeVisible();
 });
 
@@ -75,6 +75,7 @@ test('3 · la nutricionista ajusta el plan y la paciente lo ve', async ({ page }
   await enterDemo(page, '/crm/pacientes');
   await page.locator('summary[aria-label="Más opciones de Sofía R."]').click();
   await page.getByRole('button', { name: 'Abrir plan de Sofía R.' }).click();
+  await page.getByRole('button', {name:'Abrir en el editor'}).click();
   await page.getByLabel('Hora de Desayuno').fill('08:45');
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
   await page.getByRole('button', { name: 'Publicar v2' }).click();

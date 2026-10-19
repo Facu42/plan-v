@@ -3,6 +3,7 @@ import { clinicalWorkspaceApi } from '../../api/clinical-workspace';
 import { careErrorMessage,notifyCareChanged } from '../../api/care';
 import { clinicalWorkspaceInputSchema,type ClinicalWorkspaceSnapshot } from '../../types/clinical-workspace';
 import { parseImportNumber } from '../../lib/patient-import';
+import {useRecordDocument,RecordDocumentViewer} from './RecordDocumentViewer';
 import { LaboratoryEditor } from './ClinicalPatientWorkspace';
 import { CarePanel } from './CarePanel';
 import { useCare } from './useCare';
@@ -25,35 +26,27 @@ function ManualLaboratoryValue({patientId,snapshot,today,onSaved,onUpload}:{pati
 
 export function PanelPatientLaboratory({patientId,now}:{patientId:string;now:Date}){
   const {data:care,error:careError}=useCare(patientId,true);
-  const allowed=!careError&&(care?.consented.includes('clinical_document')??false);
+  const allowed=!careError&&(care?.consented.includes('clinical_document')??false)&&(care?.consented.includes('care_relationship')??false);
   const [result,setResult]=useState<{key:string;snapshot:ClinicalWorkspaceSnapshot}|null>(null),[error,setError]=useState(''),[revision,setRevision]=useState(0),[selected,setSelected]=useState(''),[mode,setMode]=useState<'none'|'manual'|'upload'>('none'),[files,setFiles]=useState(false);
-  const [docError,setDocError]=useState(''),[docLink,setDocLink]=useState<{url:string;name:string}|null>(null);
+  const document=useRecordDocument(`${patientId}:${allowed}`);
   const key=`${patientId}:${allowed}:${revision}`;
   const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires'}).format(now);
   useEffect(()=>{const changed=()=>setRevision(n=>n+1);window.addEventListener('plan-v:care-changed',changed);return()=>window.removeEventListener('plan-v:care-changed',changed);},[]);
-  useEffect(()=>{setDocLink(null);setDocError('');setResult(null);setError('');if(!allowed)return;const controller=new AbortController();clinicalWorkspaceApi.snapshot(patientId,controller.signal).then(snapshot=>{if(!controller.signal.aborted)setResult({key,snapshot});}).catch(caught=>{if(!controller.signal.aborted)setError(careErrorMessage(caught));});return()=>controller.abort();},[key]);
-  useEffect(()=>{if(!docLink)return;const timer=window.setTimeout(()=>setDocLink(null),60000);return()=>window.clearTimeout(timer);},[docLink]);
+  useEffect(()=>{setResult(null);setError('');if(!allowed)return;const controller=new AbortController();clinicalWorkspaceApi.snapshot(patientId,controller.signal).then(snapshot=>{if(!controller.signal.aborted)setResult({key,snapshot});}).catch(caught=>{if(!controller.signal.aborted)setError(careErrorMessage(caught));});return()=>controller.abort();},[key]);
   const snapshot=result?.key===key?result.snapshot:null;
   const groups=recordLabSeries(snapshot?.records??[],patientId,today);
   const dates=[...new Set(groups.flatMap(group=>group.values.map(row=>row.date)))].sort().reverse().slice(0,3).reverse();
   const current=groups.find(group=>group.key===selected)??groups[0];
-  async function openDocument(id:string){
-    const popup=window.open('about:blank','_blank');if(popup)popup.opener=null;setDocError('');setDocLink(null);
-    try{const view=await clinicalWorkspaceApi.openDocument(patientId,id),url=new URL(view.url,location.href);
-      if(url.protocol!=='https:'&&!(url.protocol==='http:'&&['127.0.0.1','localhost'].includes(url.hostname)))throw Error('Enlace inválido');
-      if(popup&&!popup.closed)popup.location.replace(url.href);else setDocLink({url:url.href,name:view.filename});
-    }catch(caught){popup?.close();setDocError(careErrorMessage(caught));}
-  }
   const changeMode=(next:typeof mode)=>{if(canLeaveWorkspace())setMode(next===mode?'none':next);};
   const saved=()=>{setMode('none');setRevision(n=>n+1);};
   return <section className="pn-record-laboratory" aria-label="Laboratorio de la paciente"><header className="pn-record-diary-tools"><p>{dates.length?`${dates.length} fechas comparadas · última: ${formatMetricDate(dates[dates.length-1])}`:'Valores revisados del laboratorio'}</p><div className="pn-record-actions"><button type="button" disabled={!allowed||!snapshot} onClick={()=>changeMode('manual')}><Icon name="plus" size={14}/>Agregar valor a mano</button><button type="button" className="pn-record-primary" disabled={!allowed} onClick={()=>changeMode('upload')}><Icon name="download" size={14}/>Cargar análisis</button></div></header>
-    {careError&&<p role="alert">{careError}</p>}{!care?<p role="status">Consultando permisos…</p>:!allowed?<p>Permiso de estudios pendiente.</p>:error?<p role="alert">{error} <button type="button" onClick={()=>setRevision(n=>n+1)}>Reintentar laboratorio</button></p>:!snapshot?<p role="status">Consultando laboratorio…</p>:<>
+    {careError&&<p role="alert">{careError}</p>}{!care?<p role="status">Consultando permisos…</p>:!allowed?<p>Permisos de atención y estudios pendientes.</p>:error?<p role="alert">{error} <button type="button" onClick={()=>setRevision(n=>n+1)}>Reintentar laboratorio</button></p>:!snapshot?<p role="status">Consultando laboratorio…</p>:<>
       {mode==='manual'&&<ManualLaboratoryValue key={patientId} patientId={patientId} snapshot={snapshot} today={today} onSaved={saved} onUpload={()=>changeMode('upload')}/>}
       {mode==='upload'&&<section className="pn-record-card"><LaboratoryEditor patientId={patientId} onChanged={saved}/></section>}
       <div className="pn-record-diary-grid"><section className="pn-record-card"><div className="pn-record-table-scroll"><table><thead><tr><th>Valor</th><th>Referencia original</th>{dates.map(date=><th key={date}>{formatMetricDate(date)}</th>)}<th>Revisión</th></tr></thead><tbody>{groups.map(group=><tr key={group.key} className={current?.key===group.key?'pn-lab-selected':''}><td><button type="button" aria-pressed={current?.key===group.key} onClick={()=>setSelected(group.key)}>{group.name}</button><small>{group.unit||'Sin unidad informada'}</small></td><td>{group.latest.range_text||'Sin informar'}</td>{dates.map(date=><td key={date}>{group.values.find(row=>row.date===date)?.value.raw_value??'—'}</td>)}<td><span className="pn-record-chip">Revisado</span></td></tr>)}</tbody></table></div>{groups.length===0&&<p>Todavía no hay valores revisados. Cargá un informe para comparar resultados.</p>}</section>
-      <aside className="pn-record-side-column"><section className="pn-record-card pn-record-weight"><header><h3>{current?.name||'Evolución del valor'}</h3><span>{current?.unit}</span></header>{current?.points.length?<><MetricChart points={current.points} unit={current.unit} label={`Evolución de ${current.name}`}/><p>Referencia del último informe: {current.latest.range_text||'Sin informar'}</p><small>Los resultados con comparador se conservan en la tabla sin dibujarlos como un valor exacto.</small></>:<p>Elegí un valor con resultados numéricos exactos para ver su evolución.</p>}</section><section className="pn-record-card"><header><h3>Archivos del análisis</h3></header>{snapshot.documents.length?snapshot.documents.map(doc=><button type="button" className="pn-record-lab-document" key={doc.id} onClick={()=>void openDocument(doc.id)}><Icon name="list" size={16}/>{doc.filename}</button>):<p>No hay informes cargados.</p>}</section></aside></div>
+      <aside className="pn-record-side-column"><section className="pn-record-card pn-record-weight"><header><h3>{current?.name||'Evolución del valor'}</h3><span>{current?.unit}</span></header>{current?.points.length?<><MetricChart points={current.points} unit={current.unit} label={`Evolución de ${current.name}`}/><p>Referencia del último informe: {current.latest.range_text||'Sin informar'}</p><small>Los resultados con comparador se conservan en la tabla sin dibujarlos como un valor exacto.</small></>:<p>Elegí un valor con resultados numéricos exactos para ver su evolución.</p>}</section><section className="pn-record-card"><header><h3>Archivos del análisis</h3></header>{snapshot.documents.length?snapshot.documents.map(doc=><button type="button" className="pn-record-lab-document" key={doc.id} disabled={document.busy} onClick={()=>void document.open(()=>clinicalWorkspaceApi.openDocument(patientId,doc.id))}><Icon name="list" size={16}/>{doc.filename}</button>):<p>No hay informes cargados.</p>}</section></aside></div>
     </>}
-    {allowed&&docError&&<p role="alert">{docError}</p>}{allowed&&docLink&&<p><a href={docLink.url} target="_blank" rel="noopener noreferrer">Abrir {docLink.name}</a></p>}
+    {document.error&&<p role="alert">{document.error}</p>}{document.file&&<RecordDocumentViewer file={document.file} onClose={document.close}/>}
     <details className="pn-record-card" onToggle={event=>setFiles(event.currentTarget.open)}><summary>Estudios adjuntos y revisión de archivos</summary>{files&&<CarePanel patientId={patientId} mode="laboratory"/>}</details>
   </section>;
 }

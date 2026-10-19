@@ -27,7 +27,7 @@ import './messages.css';
 import './messages-fig.css';
 
 type Role = 'patient' | 'pro';
-type Props = { initialUnreadOnly?: boolean; patient: ShowroomPatient; patients: ShowroomPatient[]; role: Role; remoteUnread?: ReadonlyMap<string, number> | null; onSelect: (id: string) => void; onNavigate: (page: ShowroomPage) => void };
+type Props = { embedded?: boolean; initialUnreadOnly?: boolean; patient: ShowroomPatient; patients: ShowroomPatient[]; role: Role; remoteUnread?: ReadonlyMap<string, number> | null; onSelect: (id: string) => void; onNavigate: (page: ShowroomPage) => void };
 const ACTIVE_REFRESH_MS = 15000;
 
 const NUTRITIONIST = { name: 'Tu nutricionista', initials: 'N', role: 'Nutricionista' };
@@ -42,7 +42,7 @@ const contactOf = (patient: ShowroomPatient, role: Role) => role === 'pro'
   : NUTRITIONIST;
 const narrow = () => typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 760px)').matches;
 
-export function NutrigoMessages({ initialUnreadOnly = false, patient, patients, role, remoteUnread = null, onSelect, onNavigate }: Props) {
+export function NutrigoMessages({ embedded = false, initialUnreadOnly = false, patient, patients, role, remoteUnread = null, onSelect, onNavigate }: Props) {
   const [query, setQuery] = useState('');
   const [unreadOnly, setUnreadOnly] = useState(initialUnreadOnly);
   const [profileOpen, setProfileOpen] = useState(true);
@@ -64,8 +64,8 @@ export function NutrigoMessages({ initialUnreadOnly = false, patient, patients, 
     if (role === 'pro') { setQuery(''); setUnreadOnly(false); searchRef.current?.focus(); return; }
     composeRef.current?.focus();
   };
-  return <section className={`nm-layout nm-${role}${profileOpen ? '' : ' nmf-profile-closed'}`} aria-label="Mensajería">
-    <aside className="nm-contacts" aria-label="Conversaciones">
+  return <section className={`nm-layout nm-${role}${embedded?' pn-record-chat':''}${profileOpen ? '' : ' nmf-profile-closed'}`} aria-label="Mensajería">
+    {!embedded&&<aside className="nm-contacts" aria-label="Conversaciones">
       <div className="nmf-list-head">
         <label className="nmf-search">
           <MagnifyingGlass size={18} aria-hidden />
@@ -93,7 +93,7 @@ export function NutrigoMessages({ initialUnreadOnly = false, patient, patients, 
       })}</div>
       {!contacts.length && <p className="nmf-empty">{unreadOnly && !q ? 'No hay conversaciones sin leer.' : 'No hay coincidencias.'}</p>}
       <div className="nm-contacts-footer"><button type="button" className="nmf-new-btn" onClick={newMessage}>Nuevo mensaje</button></div>
-    </aside>
+    </aside>}
     <MessageConversation key={`${role}:${patient.id}`} patient={patient} role={role} composeRef={composeRef} profileOpen={profileOpen} onToggleProfile={() => setProfileOpen((open) => !open)} onNavigate={onNavigate} />
     {profileOpen && <ConversationProfile patient={patient} role={role} onNavigate={onNavigate} />}
   </section>;

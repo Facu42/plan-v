@@ -405,3 +405,10 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Rama: codex/panel-nutri-fase-3, PR #152. Sin cambios funcionales ni migraciones.
 - Falta: CI verde para integrar #152; fase 4 en su rama reservada.
 - Próximo paso exacto: revisar el resultado del nuevo recorrido firmado y conciliar main en fase 4 al integrar.
+
+### 2026-10-19 · Codex · Fase 4, paso 4 (pestañas conectadas)
+- Hecho: plan actual separado del editor, fuente publicada por fecha, pedidos de cambio profesionales, carga privada por arrastre y visor temporal, movimientos propios de cobro y composición de consultas/chat. Incluye corrección del retiro de Atención detectada en revisión independiente.
+- Cómo: contratos existentes, sin migraciones; API completa de comidas con pruebas de medianoche argentina y foto sin permiso. Diez focales UI/datos y siete focales adicionales aprobados; tipos aprobados. Recorrido e2e ajusta la búsqueda de alergias al cuestionario por duplicación del resumen, conserva la aserción.
+- Rama: codex/panel-nutri-fase-4. #152 completó ahora todos sus controles remotos; se integra y concilia esta rama.
+- Falta: completar QA visual/funcional, pruebas finales, fire test, segunda revisión e informe/PR propio.
+- Próximo paso exacto: conciliar main tras #152 y continuar /browse de las once pestañas en ambos temas y tamaños.
