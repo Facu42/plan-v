@@ -159,7 +159,7 @@ pendientes con un botón por fila y pestañas por tipo, consultas de hoy, necesi
   «Escribir», «Armar plan» y «Abrir ficha completa». Se cierra tocando la fila otra vez o con Escape; el foco queda en la fila.
 - Necesita un pedido liviano a la API que traiga ese resumen por paciente (sin traer la ficha entera).
 
-### Fase 4. Ficha con sus 11 pestañas · Estado: sin empezar
+### Fase 4. Ficha con sus 11 pestañas · Estado: reservada por Codex, codex/panel-nutri-fase-4
 
 Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» (abre Notas de consulta) e
 «Iniciar consulta». Contenido de cada pestaña según el boceto:
@@ -238,7 +238,8 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Integrada a main `1f48adf`; web, API y worker comprobados |
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
 | 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Hecha y verificada; controles remotos en curso |
-| 4 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
+| 4 | Codex | codex/panel-nutri-fase-4 | Reservada antes del código; depende de #152 hasta integrarlo |
+| 5 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
@@ -252,6 +253,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 08:44 · Codex · Fase 4, paso 0 (reserva)
+- Hecho: fase 4 reservada antes de cambiar código. Fase 3 entregada en #152 y su CI corre.
+- Cómo: continuación del pedido de Facundo, una rama y PR por parte. Se mantiene toda la lógica y permisos de las 14 secciones, agrupadas visualmente en las once pestañas aprobadas.
+- Rama y commit: codex/panel-nutri-fase-4, desde la cabeza de fase 3; dependencia explícita de #152 hasta integrarlo y conciliar main.
+- Falta: encabezado, pestañas agrupadas, resumen, historia, evolución, notas y composición de plan/registros/laboratorio/archivos/consultas/cobros/chat; QA, suite e informe propios.
+- Próximo paso exacto: leer ProfessionalPatientWorkspace.tsx, ShowroomPatientRecord.tsx y funciones ficha/fResumen/fHistoria/fEvolucion/fNotas del boceto; mapear componentes reales y escribir las garantías de rutas antiguas antes de cambiar la UI.
 
 ### 2026-10-19 08:43 · Codex · Fase 3, paso 4 (PR)
 - Hecho: abierto [PR #152](https://github.com/Facu42/plan-v/pull/152) con el paso 10 completo; controles remotos en curso. Código verificado dc0888a, informe 3e666c3.
