@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { panelTheme, readPanelPreference, writePanelPreference, resolvedPanelTheme, panelStorageKey } from './panel-preferences';
+import { panelTheme, readPanelPreference, writePanelPreference, resolvedPanelTheme, panelStorageKey, markPanelSyncPending, effectivePanelPreference } from './panel-preferences';
 
 describe('preferencias del panel profesional', () => {
   it('valida lo guardado en el perfil sin aceptar valores arbitrarios', () => {
@@ -28,5 +28,15 @@ describe('preferencias del panel profesional', () => {
     expect(readPanelPreference(blocked, null)).toBe('system');
     expect(() => writePanelPreference(blocked, null, 'dark')).not.toThrow();
     expect(readPanelPreference({ getItem: () => 'invalid' }, null)).toBe('system');
+  });
+  it('conserva la elección local al recargar después de una sincronización fallida', () => {
+    const data = new Map<string, string>();
+    const storage = { getItem: (key: string) => data.get(key) ?? null, setItem: (key: string, value: string) => { data.set(key, value); } };
+    writePanelPreference(storage, 'a', 'dark');
+    markPanelSyncPending(storage, 'a', true);
+    expect(effectivePanelPreference(storage, 'a', 'light')).toBe('dark');
+    expect(effectivePanelPreference(storage, 'b', 'light')).toBe('light');
+    markPanelSyncPending(storage, 'a', false);
+    expect(effectivePanelPreference(storage, 'a', 'system')).toBe('system');
   });
 });

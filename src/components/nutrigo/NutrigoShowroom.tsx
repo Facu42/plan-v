@@ -77,9 +77,8 @@ import './nutrigo-fidelity.css';
 import './shell-fig.css';
 import './figma-source.css';
 import './patient-figma-front.css';
-import './motion.css';
 import { NV_ICONS, NvIcon, type NvIconName } from './NvIcon';
-import { CaretDown, CaretUp, LockSimple } from '@phosphor-icons/react';
+import { CaretDown, CaretUp, LockSimple, X } from '@phosphor-icons/react';
 import { FigmaDetailContext, FigmaPatientFooter, FigmaPlanCard, PATIENT_FIGMA_NODES, type FigmaDetail } from './FigmaPatientFront';
 import { NutrigoPatientApp } from '../../features/nutrigo/PatientApp';
 import { ServiceNotice } from './ServiceNotice';
@@ -89,6 +88,7 @@ import { usePanelTheme } from './use-panel-theme';
 import { panelStorage } from './panel-preferences';
 import './panel-nutri-tokens.css';
 import './panel-nutri-shell.css';
+import './motion.css';
 
 
 const WORK_CENTER_PAGES: WorkCenterModule[] = ['reciente', 'guardado', 'seguimiento', 'paneles', 'videollamadas'];
@@ -165,6 +165,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
   }, []);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
+  const menuWasOpen = useRef(false);
   const [onboardingOpen, setOnboardingOpen] = useState(() => !lockedRole && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('onboarding') === '1');
   const [professionalIntro, setProfessionalIntro] = useState(false);
   const [directoryAction, setDirectoryAction] = useState<DirectoryAction | null>(null);
@@ -320,16 +321,27 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
     return () => window.removeEventListener('keydown', onKey);
   }, [moreOpen]);
   useEffect(() => {
-    if (!menuOpen) return;
+    if (!menuOpen) {
+      if (menuWasOpen.current) menuButtonRef.current?.focus();
+      menuWasOpen.current = false;
+      return;
+    }
+    menuWasOpen.current = true;
     drawerRef.current?.focus();
     const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Tab' && role === 'pro') {
+        const controls = [...(drawerRef.current?.querySelectorAll<HTMLElement>('a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),[tabindex="0"]') ?? [])].filter(element => element.getClientRects().length && !element.closest('[inert]'));
+        const first = controls[0]; const last = controls[controls.length - 1];
+        if (event.shiftKey && (document.activeElement === first || document.activeElement === drawerRef.current)) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      }
       if (event.key !== 'Escape') return;
       setMenuOpen(false);
       menuButtonRef.current?.focus();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [menuOpen]);
+  }, [menuOpen, role]);
 
   const openOperation = (target: CrmEntry) => {
     if (!canLeaveWorkspace()) return;
@@ -439,6 +451,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
   return <FigmaDetailContext.Provider value={setFigmaDetail}><div className={`nv-app${page === 'inicio' ? ' nv-home' : ''}${role === 'patient' ? ' nv-patient' : ` nv-pro pn-panel${sidebarCollapsed ? ' pn-collapsed' : ''}`}${darkMode ? ' nv-dark' : ''}${menuOpen ? ' nv-menu-open' : ''}${professionalIntro ? ' nv-professional-onboarding' : ''}${page === 'mensajes' ? ' nv-messaging' : ''}${page === 'ficha' ? ' nv-record' : ''}${page === 'diario' && role === 'pro' ? ' nv-food-diary' : ''}${page === 'plan' && role === 'pro' ? ' nv-meal-plan' : ''}${page === 'consultas' && role === 'pro' ? ' nv-consultation-page' : ''}${page === 'agenda' && role === 'pro' ? ' nv-agenda-page' : ''}${page === 'objetivos' && role === 'pro' ? ' nv-goals-page' : ''}${isWorkCenterPage(page) && role === 'pro' ? ' nv-work-center-page' : ''}${page === 'compras' ? ' nv-grocery-page' : ''}${page === 'progreso' ? ' nv-progress-page' : ''}${page === 'diario' && role === 'patient' ? ' nv-patient-diary' : ''}${page === 'plan' && role === 'patient' ? ' nv-patient-plan' : ''}${page === 'agenda' && role === 'patient' ? ' nv-patient-agenda' : ''}${page === 'recetas' ? ' nv-healthy-menu' : ''}${page === 'ejercicio' ? ' nv-exercise-page' : ''}${page === 'recursos' ? ' nv-resources-page' : ''}${(page === 'cobranzas' && role === 'pro') || (page === 'pagos' && role === 'patient') || (page === 'servicio' && role === 'pro') ? ' nv-fees-page' : ''}`}>
     <a className="nv-skip" href="#nv-main">Ir al contenido</a>
     <aside className="nv-sidebar" id="nv-drawer" ref={drawerRef} tabIndex={-1} inert={compactHeader && !menuOpen} aria-label={role === 'patient' ? 'Tu espacio' : 'Consultorio'}>
+      {role === 'pro' && <button className="pn-mobile-close" type="button" aria-label="Cerrar navegación" onClick={() => { setMenuOpen(false); menuButtonRef.current?.focus(); }}><X size={18} aria-hidden="true" /></button>}
       <a className="nv-brand" href={buildAppHref(typeof window === 'undefined' ? 'https://plan.v/app/inicio' : window.location.href, role, 'inicio')} onClick={(event) => { event.preventDefault(); navigate('inicio'); }}><Mark /><span>Plan V<small>{role === 'pro' ? 'Tu consultorio' : 'Mi espacio'}</small></span></a>
       {role === 'pro' ? <PanelNavigation patients={patients} unread={messageUnread} admin={isAdmin === true} current={typeof window === 'undefined' ? '/crm/inicio' : window.location.pathname + window.location.search} collapsed={sidebarCollapsed} onCollapse={toggleSidebar} onOpen={openWorkHref} /> : <nav data-figma-node="2:4499">{surfaces.filter((item) => !['compras', 'pagos'].includes(item.id)).map((item) => item.id === 'plan' && role === 'patient' ? <div key="plan" className={`nv-nav-sub${planGroupOpen ? ' nv-open' : ''}`}>
         <button type="button" className="nv-nav-sub-head" aria-expanded={planGroupOpen} onClick={() => setPlanOpen(!planGroupOpen)}><NvIcon name="plan" size={20} /><span>{item.label}</span>{planGroupOpen ? <CaretUp size={14} aria-hidden="true" /> : <CaretDown size={14} aria-hidden="true" />}</button>
@@ -449,7 +462,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
       {compactHeader && menuOpen && <div className="nv-mobile-account">{accountMenu()}</div>}
       {onSignOut && <button type="button" className="nv-logout" onClick={() => { if (canLeaveWorkspace()) onSignOut(); }}><NvIcon name="salir" size={20} />Cerrar sesión</button>}
     </aside>
-    <div className="nv-workspace">
+    <div className="nv-workspace" inert={role === 'pro' && compactHeader && menuOpen}>
       <header className="nv-topbar" ref={topbarRef}>
         <a className="nv-brand" href={buildAppHref(typeof window === 'undefined' ? 'https://plan.v/app/inicio' : window.location.href, role, 'inicio')} onClick={(event) => { event.preventDefault(); navigate('inicio'); }}><Mark /><span>Plan V</span></a>
         <h1 className="nv-topbar-title" aria-label={figmaDetail?.title ?? libraryRecipeTitle ?? PAGE_LABELS[page]}>
@@ -493,7 +506,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
       </div>
     </div>
     {menuOpen && <div className="nv-drawer-scrim" role="presentation" onClick={() => { setMenuOpen(false); menuButtonRef.current?.focus(); }} />}
-    <nav className="nv-tabbar" aria-label="Secciones principales">
+    <nav className="nv-tabbar" inert={role === 'pro' && compactHeader && menuOpen} aria-label="Secciones principales">
       {tabs.map((tab) => <button key={tab.id} type="button" aria-current={!pendingModule && page === tab.id ? 'page' : undefined} onClick={() => navigate(tab.id)}><span className="nv-tab-icon"><Icon name={tab.icon} size={22} />{tab.id === 'mensajes' && messageUnread > 0 && <b className="nv-tab-unread" aria-label={`${messageUnread} sin leer`}>{messageUnread > 9 ? '9+' : messageUnread}</b>}</span><span>{tab.label}</span></button>)}
       <button type="button" aria-current={moreCurrent ? 'page' : undefined} aria-expanded={moreOpen} aria-controls="nv-more-sheet" onClick={() => setMoreOpen(true)}><span className="nv-tab-icon"><Icon name="grid" size={22} />{role === 'pro' && messageUnread > 0 && <b className="nv-tab-unread" aria-label={`${messageUnread} sin leer`}>{messageUnread > 9 ? '9+' : messageUnread}</b>}</span><span>Más</span></button>
     </nav>

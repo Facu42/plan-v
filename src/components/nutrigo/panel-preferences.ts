@@ -13,6 +13,15 @@ export function readPanelPreference(storage: ReadStorage | null, userId: string 
 export function writePanelPreference(storage: WriteStorage | null, userId: string | null, theme: PanelTheme) {
   try { storage?.setItem(panelStorageKey(userId), theme); } catch { /* La elección sigue activa en esta visita. */ }
 }
+export function markPanelSyncPending(storage: WriteStorage | null, userId: string | null, pending: boolean) {
+  try { storage?.setItem(`${panelStorageKey(userId)}:pending`, String(pending)); } catch { /* Sin storage, permanece en memoria. */ }
+}
+export function effectivePanelPreference(storage: ReadStorage | null, userId: string | null, profile: unknown): PanelTheme {
+  try {
+    if (storage?.getItem(`${panelStorageKey(userId)}:pending`) === 'true') return readPanelPreference(storage, userId);
+  } catch { /* El perfil sigue disponible aunque storage esté bloqueado. */ }
+  return panelTheme(profile) ?? readPanelPreference(storage, userId);
+}
 export function resolvedPanelTheme(preference: PanelTheme, systemDark: boolean): 'light' | 'dark' {
   return preference === 'system' ? systemDark ? 'dark' : 'light' : preference;
 }

@@ -1,5 +1,5 @@
 /* Sólo armazón profesional. Las pantallas se rediseñan en sus fases propias. */
-.nv-app.nv-pro.pn-panel { flex-direction:row; min-height:100dvh; padding:0; font:13px/1.4 Poppins,system-ui,sans-serif; background:var(--pn-cream); color:var(--pn-ink); font-variant-numeric:tabular-nums; }
+.nv-app.nv-pro.pn-panel { position:relative; flex-direction:row; min-height:100dvh; padding:0; font:13px/1.4 Poppins,system-ui,sans-serif; background:var(--pn-cream); color:var(--pn-ink); font-variant-numeric:tabular-nums; }
 .pn-panel ::selection { background:var(--pn-lime); color:var(--pn-on-color); }
 .pn-panel :is(input,textarea) { caret-color:var(--pn-ok); }
 .pn-panel * { scrollbar-width:thin; scrollbar-color:var(--pn-muted2) transparent; }
@@ -47,7 +47,7 @@
 .nv-app.nv-pro.pn-panel .nv-user-menu { background:var(--pn-white); color:var(--pn-ink); border:1px solid var(--pn-line); box-shadow:var(--pn-shadow); min-width:270px; max-width:calc(100vw - 32px); z-index:60; }
 .nv-app.nv-pro.pn-panel .nv-user-menu>button { color:var(--pn-ink); }
 .nv-app.nv-pro.pn-panel .nv-content-layout { display:flex; flex-direction:column; flex:1; min-height:0; width:100%; }
-.nv-app.nv-pro.pn-panel .nv-main { display:flex; flex-direction:column; gap:16px; padding:10px 30px 18px; width:100%; min-width:0; max-width:none; }
+.nv-app.nv-pro.pn-panel .nv-main { display:flex; flex-direction:column; gap:16px; padding:10px 30px 18px; width:100%; min-width:0; max-width:none; background:transparent; }
 .nv-app.nv-pro.pn-panel .nv-main>section { min-width:0; }
 .pn-panel .nv-page-head { margin:0; min-height:0; }
 .pn-panel.nv-home .nv-page-head { display:none; }
@@ -98,7 +98,8 @@
   .pn-panel .nv-directory-workspace { display:flex; flex-direction:column; min-height:0; }
   .pn-panel .nv-directory-panel { display:flex; flex-direction:column; min-height:0; }
   .pn-panel .nv-directory-scroll { overflow:auto; min-height:180px; }
-  .pn-panel .nm-layout { flex:1; min-height:0; height:100%; }
+  .nv-app.nv-pro.pn-panel.nv-messaging .nm-layout { flex:1; min-height:0; height:100%; grid-template-columns:minmax(200px,.9fr) minmax(240px,1.3fr) minmax(190px,.8fr); }
+  .nv-app.nv-pro.pn-panel.nv-messaging .nm-layout.nmf-profile-closed { grid-template-columns:minmax(200px,.9fr) minmax(240px,2fr); }
   .nv-app.nv-pro.pn-panel.nv-messaging .nv-main { overflow:hidden; }
   .nv-app.nv-pro.pn-panel.nv-messaging .nv-content-layout { flex:1; min-height:0; }
   .pn-panel .nm-layout :is(.nm-contact-list,.nm-messages,.nm-profile) { overflow:auto; min-height:0; }
@@ -135,3 +136,41 @@
 @media (prefers-reduced-motion:reduce) {
   .nv-app.nv-pro.pn-panel *, .nv-app.nv-pro.pn-panel *::before, .nv-app.nv-pro.pn-panel *::after { animation:none !important; transition-property:opacity !important; transition-duration:200ms !important; scroll-behavior:auto !important; }
 }
+
+/* Prioridad frente a los colores literales de las pantallas anteriores. */
+.nv-app.nv-pro.pn-panel.nv-dark .nv-directory-panel .nv-card-head .nv-button { background:var(--pn-lime); color:var(--pn-on-color); }
+.nv-app.nv-pro.pn-panel.nv-dark .nv-directory-panel .nv-card-head .nv-button.nv-ghost { background:var(--pn-white); color:var(--pn-ink); }
+.nv-app.nv-pro.pn-panel.nv-dark .nv-clinic-shortcuts button:is([aria-current=page],[aria-pressed=true]) { background:var(--pn-lime); color:var(--pn-on-color); }
+
+.pn-panel :is(.pw-library,.pw-record,.pw-work)>* { min-width:0; }
+.pn-panel .nv-user-name { min-width:0; max-width:22ch; }
+.pn-panel .nv-user-name strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+@media(max-width:799px) {
+ .pn-panel .recipe-catalog-filters { grid-template-columns:minmax(0,1fr); }
+ .pn-panel .recipe-catalog>header { flex-wrap:wrap; }
+ .pn-panel .recipe-header-actions { flex-wrap:wrap; }
+ .pn-panel .recipe-catalog :is(input,select) { max-width:100%; }
+}
+
+.pn-panel :is(button,a,input,select) { touch-action:manipulation; }
+.pn-panel .pn-mobile-close { display:none; }
+@media(max-width:799px) {
+ .nv-app.nv-pro.pn-panel .nv-topbar>.nv-brand { display:flex; flex:none; }
+ .nv-app.nv-pro.pn-panel .nv-topbar>.nv-brand>span { display:none; }
+ .nv-app.nv-pro.pn-panel .pn-mobile-close { position:absolute; right:8px; top:8px; display:grid; place-items:center; width:44px; height:44px; background:var(--pn-white); color:var(--pn-ink); border:0; border-radius:12px; }
+ .nv-app.nv-pro.pn-panel .nv-tabbar { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); left:max(12px,env(safe-area-inset-left)); right:max(12px,env(safe-area-inset-right)); bottom:max(12px,env(safe-area-inset-bottom)); width:auto; min-height:64px; padding:6px 4px; border:0; border-radius:24px; gap:2px; background:var(--pn-solid); backdrop-filter:none; }
+ .nv-app.nv-pro.pn-panel .nv-tabbar button { display:flex; flex-direction:column; justify-content:center; align-items:center; min-width:0; min-height:52px; padding:6px 0; gap:3px; border:0; background:transparent; color:var(--pn-on-solid); font-size:9px; font-weight:500; }
+ .nv-app.nv-pro.pn-panel .nv-tabbar button[aria-current=page] { background:transparent; color:var(--pn-lime); }
+ .nv-app.nv-pro.pn-panel .nv-tabbar .nv-tab-icon { display:grid; place-items:center; width:22px; height:22px; padding:0; background:transparent; }
+ .nv-app.nv-pro.pn-panel .nv-tabbar button>span:last-child { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+ .nv-app.nv-pro.pn-panel :is(.nv-content-layout,.nv-workspace) { background:transparent; }
+}
+
+/* Los CTA de las filas conservan el lima sólido también en oscuro. */
+.nv-app.nv-pro.pn-panel .pw-work-head>.nv-button,
+.nv-app.nv-pro.pn-panel .pw-work-list .nv-button,
+.nv-app.nv-pro.pn-panel .nv-directory-panel .nv-card-head .nv-button:not(.nv-ghost),
+.nv-app.nv-pro.pn-panel .nv-directory-panel .nv-directory-actions .nv-button.nv-soft:first-child { background:var(--pn-lime); color:var(--pn-on-color); }
+
+.nv-app.nv-pro.pn-panel .pw-tabs button[aria-current=page] { background:var(--pn-lime); color:var(--pn-on-color); }
+.nv-app.nv-pro.pn-panel :is(.nv-badge.nv-gold,.nv-badge.nv-coral,.nv-metric .nv-icon-tile) { color:var(--pn-on-color); }

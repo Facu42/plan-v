@@ -50,7 +50,7 @@ export function panelNavGroups(patients: readonly Patient[], unread: number, adm
       { label: 'Centro de ayuda', icon: 'message', href: '/crm/desarrollo?modulo=ayuda' },
     ] },
     { title: 'Cuenta', items: [
-      { label: 'Equipo', icon: 'users', href: '/equipo' },
+      { label: 'Equipo', icon: 'users', href: '/crm/desarrollo?modulo=equipo' },
       { label: 'Configuración', icon: 'grid', href: '/crm/desarrollo?modulo=configuracion' },
       { label: 'Todas las funciones', icon: 'grid', href: '/crm/desarrollo' },
       ...(admin ? [{ label: 'Panel del servicio', icon: 'wallet' as const, href: '/crm/servicio' }] : []),

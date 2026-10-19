@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { panelStorage, panelTheme, readPanelPreference, resolvedPanelTheme, writePanelPreference, type PanelTheme } from './panel-preferences';
+import { effectivePanelPreference, markPanelSyncPending, panelStorage, panelTheme, resolvedPanelTheme, writePanelPreference, type PanelTheme } from './panel-preferences';
 
 /** Preferencia cosmética de la cuenta; nunca se usa como permiso ni se guarda contenido clínico. */
 export function usePanelTheme() {
   const { session } = useAuth();
   const userId = session?.user.id ?? null;
-  const initial = () => readPanelPreference(panelStorage(), userId);
-  const [preference, setPreference] = useState<PanelTheme>(() => panelTheme(session?.user.user_metadata.panel_theme) ?? initial());
+  const [preference, setPreference] = useState<PanelTheme>(() => effectivePanelPreference(panelStorage(), userId, session?.user.user_metadata.panel_theme));
   const [systemDark, setSystemDark] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   const [status, setStatus] = useState('');
   const saving = useRef(false);
@@ -22,16 +21,18 @@ export function usePanelTheme() {
   }, []);
   const storedProfile = panelTheme(session?.user.user_metadata.panel_theme);
   useEffect(() => {
-    const next = storedProfile ?? readPanelPreference(panelStorage(), userId);
+    const next = effectivePanelPreference(panelStorage(), userId, storedProfile);
     setPreference(next); writePanelPreference(panelStorage(), userId, next); setStatus('');
   }, [userId, storedProfile]);
   const choose = async (next: PanelTheme) => {
     if (saving.current) return;
     setPreference(next); writePanelPreference(panelStorage(), userId, next);
+    markPanelSyncPending(panelStorage(), userId, true);
     if (!session || !supabase) { setStatus('Tema guardado en este navegador.'); return; }
     saving.current = true; setBusy(true); setStatus('Guardando tema…');
     try {
       const { error } = await supabase.auth.updateUser({ data: { panel_theme: next } });
+      if (!error) markPanelSyncPending(panelStorage(), userId, false);
       if (currentUser.current === userId) setStatus(error ? 'Se guardó en este navegador. No pudimos sincronizarlo con tu cuenta; volvé a elegir el tema para reintentar.' : 'Tema guardado en tu cuenta.');
     } catch {
       if (currentUser.current === userId) setStatus('Se guardó en este navegador. No pudimos sincronizarlo con tu cuenta; volvé a elegir el tema para reintentar.');

@@ -251,6 +251,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
 
+### 2026-10-19 · Codex · Fase 1, paso 2 (verificación)
+- Hecho: base visual verificada en 18 pantallas, dos temas y dos tamaños; 22 comprobaciones y 72 medidas aprobadas. Ficha incluida; barra móvil, retorno del foco, altura de chat y contraste de selección/etiquetas corregidos. Suite completa: 3.132 aprobadas, dos omitidas; 483 archivos.
+- Cómo: /browse, pruebas nuevas de preferencias/navegación/AA, fire test y revisión independiente de code-reviewer y reality-checker. [Informe y Regression Guard](fase-1-verificacion.md); [comparación navegable](../../design/panel-nutri/fase-1-verificacion.html).
+- Rama y commit: codex/panel-nutri-fase-1; se sube este paso antes de abrir el PR propio.
+- Falta: abrir el PR y anotar su número. No se publica desde este hilo. Límite: formularios largos desplazan el área central; el contenido de las fases siguientes sigue como estaba. Sin prueba de sincronización con una cuenta real de producción.
+- Próximo paso exacto: abrir el PR de fase 1 con el informe del paso 10; después, fase 2 (Inicio), conservando esta base y leyendo ProfessionalWorkQueue.tsx e InicioIndicators.tsx.
+
 ### 2026-10-19 · Codex · Fase 1, paso 1
 - Hecho: tokens claros/oscuros del boceto, preferencia por cuenta (metadato panel_theme) y navegador, tres temas, menú de 288/84 px, grupos y submenús conectados a filtros existentes. Fondo fotográfico preparado con desenfoque previo. Tipos y 20 pruebas focales aprobados.
 - Cómo: nuevos PanelNavigation, PanelThemePicker y use-panel-theme; estilos sólo en el panel profesional. Bocetos vigentes aplicados directamente (diseño ya aprobado). Habilidades: Regression Guard, Impeccable, Emil, Vercel, accesibilidad, React, pruebas y movimiento del repo.
