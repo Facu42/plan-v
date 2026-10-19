@@ -1,10 +1,14 @@
 import type { BillingBoard } from '../../types/fees';
 import { schedulingDefaultSettings } from '../../types/scheduling';
 import type { PatientSubscription, SubscriptionPlan } from '../../types/subscriptions';
+import { Icon, Mark } from '../shared/Icon';
+import { X } from '@phosphor-icons/react';
 import { PanelCobranzasView } from './PanelCobranzas';
 import { PanelDebitView } from './PanelDebit';
+import { PanelNavigation } from './PanelNavigation';
 import { PanelPublicPageView } from './PanelPublicPage';
 import { PublicFollowPlansView } from './PublicFollowPlans';
+import { PRO_TABS } from './showroom-nav';
 import './nutrigo.css';
 import './panel-nutri-tokens.css';
 import './panel-nutri-shell.css';
@@ -52,8 +56,22 @@ export function SubscriptionPreview() {
   config.page.title = 'Lic. Verónica Trenti';
   config.page.bio = 'Acompaño a mujeres a comer mejor, con un plan que entra en la rutina.';
   config.types = [{ id: '00000000-0000-4000-a000-000000000002', name: 'Consulta suelta', calendar_id: config.calendars[0].id, duration_min: 60, channel: 'presencial', price_minor: 4_000_000, deposit_minor: 0 }];
-  return <div className={`nv-app nv-pro pn-panel${dark ? ' nv-dark' : ''}`} style={{ minHeight: '100vh' }}>
-    <main style={{ padding: 24, minWidth: 0 }}>
+  const shell = screen !== 'suscripcion';
+  const current = screen === 'publica' ? '/crm/agenda?agenda=publica' : '/crm/cobranzas';
+  return <div className={`nv-app nv-pro pn-panel${screen.startsWith('cobranzas') ? ' nv-fees-page' : ''}${screen === 'publica' ? ' nv-agenda-page' : ''}${dark ? ' nv-dark' : ''}`} style={{ minHeight: '100vh' }}>
+    {shell && <aside className="nv-sidebar" aria-label="Consultorio">
+      <button className="pn-mobile-close" type="button" aria-label="Cerrar navegación"><X size={18} aria-hidden="true" /></button>
+      <a className="nv-brand" href="/crm/inicio"><Mark /><span>Plan V<small>Tu consultorio</small></span></a>
+      <PanelNavigation patients={[]} unread={0} admin={false} current={current} collapsed={false} onCollapse={noop} onOpen={noop} />
+      <div className="pn-sidebar-account"><span className="nv-user-avatar" aria-hidden="true">VT</span><span className="pn-nav-label"><strong>Verónica Trenti</strong><small>Nutricionista</small></span></div>
+    </aside>}
+    <div className="nv-workspace">
+    {shell && <header className="nv-topbar">
+      <a className="nv-brand" href="/crm/inicio"><Mark /><span>Plan V</span></a>
+      <button type="button" className="nv-button nv-ghost nv-menu-toggle" aria-label="Abrir el menú"><Icon name="list" size={20} /></button>
+    </header>}
+    <div className={shell ? 'nv-content-layout' : undefined}>
+    <main className={shell ? 'nv-main' : undefined} id="nv-main">
       {screen.startsWith('cobranzas') && <PanelCobranzasView
         board={board} today="2026-10-21" filter="todos" reminders={false} onFilter={noop} onExport={noop} onOpen={noop} onRemind={noop} onRetry={noop} error="" loading={false}
         plansAction={<button type="button" className="p5-btn">Planes de seguimiento</button>}
@@ -78,5 +96,11 @@ export function SubscriptionPreview() {
         <form><label>Tipo de consulta <select defaultValue="consulta"><option value="consulta">Consulta suelta · 60 min · $40.000</option></select></label><button type="button">Solicitar turno</button></form>
       </section>}
     </main>
+    </div>
+    </div>
+    {shell && <nav className="nv-tabbar" aria-label="Secciones principales">
+      {PRO_TABS.map(tab => <button key={tab.id} type="button" aria-current={screen === 'publica' && tab.id === 'agenda' ? 'page' : undefined}><span className="nv-tab-icon"><Icon name={tab.icon} size={22} /></span><span>{tab.label}</span></button>)}
+      <button type="button" aria-current={screen.startsWith('cobranzas') ? 'page' : undefined}><span className="nv-tab-icon"><Icon name="grid" size={22} /></span><span>Más</span></button>
+    </nav>}
   </div>;
 }

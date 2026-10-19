@@ -119,8 +119,11 @@
   .pn-panel .p5-daylist { display:flex; flex-direction:column; gap:12px; }
   .pn-panel .p5-legend { margin-left:0; }
   .pn-panel .p5-head .p5-pri { width:100%; }
-  .pn-panel .p5-btn,.pn-panel .p5-seg button,.pn-panel .p5-menu summary,.pn-panel .p5 :is(input,select) { min-height:44px; }
-  .pn-panel .p5-seg { flex-wrap:wrap; }
+  .pn-panel .p5-card>header { flex-wrap:wrap; align-items:flex-start; }
+  .pn-panel .p5-card>header .p5-seg { flex:1 1 100%; min-width:0; }
+  .pn-panel .p5-btn,.pn-panel .p5-seg button,.pn-panel .p5-menu summary,.pn-panel .p5 :is(input,select) { min-height:44px; min-width:44px; }
+  .pn-panel .p5-seg { flex-wrap:wrap; max-width:100%; min-width:0; }
+  .pn-panel .p5-seg button { white-space:nowrap; }
   .pn-panel .p5,.pn-panel .p5-card,.pn-panel .p5-phone { max-width:100%; }
   .pn-panel .p5-table-wrap { display:none; }
   .pn-panel .p5-moves { display:flex; flex-direction:column; gap:10px; }
@@ -131,8 +134,13 @@
   .pn-panel .p5-debit .p5-tx { flex:none; width:100%; }
   .pn-panel .p5-phone { width:100%; box-sizing:border-box; }
   .pn-panel .p5-phone>div { flex-wrap:wrap; align-items:flex-start; }
-  .pn-panel .p5-phone>div :is(b,small) { min-width:0; flex:1 1 8rem; overflow-wrap:break-word; }
-  .pn-panel .p5-phone .p5-preview-cta { flex:1 0 100%; min-height:44px; }
+  .pn-panel .p5-phone>div :is(b,small) { min-width:0; flex:1 1 8rem; overflow-wrap:break-word; word-break:normal; }
+  .pn-panel .p5-phone>.p5-preview-cta { flex:none; width:100%; min-height:44px; }
+  .pn-panel .p5-phone>div .p5-preview-cta { flex:1 0 100%; width:auto; min-height:44px; }
+  .pn-panel .p5-switch,.pn-panel .p5-switch.on { width:44px; height:44px; background:transparent; }
+  .pn-panel .p5-switch::before { content:""; position:absolute; left:1px; right:1px; top:9px; height:26px; border-radius:999px; background:var(--pn-toggle); }
+  .pn-panel .p5-switch.on::before { background:var(--pn-lime); }
+  .pn-panel .p5-switch::after { top:12px; left:4px; }
 }
 @media (prefers-reduced-motion:reduce) {
   .pn-panel .p5-btn,.pn-panel .p5-switch::after { transition:none; }
