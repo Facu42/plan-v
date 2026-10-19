@@ -20,7 +20,7 @@ import { buildShowroomPatient } from './showroom-model';
 import { canLeaveWorkspace } from './unsaved-changes';
 import { healthFactLabel } from './intake-review';
 import type { ProfessionalIntakeView } from '../../types/intake';
-import { NvButton } from './primitives';
+import { NvButton,NvState } from './primitives';
 import { ClinicalPatientWorkspace } from './ClinicalPatientWorkspace';
 import type { ShowroomPage } from './ShowroomPanels';
 import './professional-workspace.css';
@@ -33,6 +33,8 @@ import { PatientImportedHistory } from './PatientImportedHistory';
 import { RECORD_PRIMARY_TABS, RECORD_PLAN_TABS, recordPrimaryTab, recordTab, appointmentRecordSummary, type RecordTab } from './patient-record-sections';
 import { PanelPatientHeader } from './PanelPatientHeader';
 import { PanelPatientOverview } from './PanelPatientOverview';
+import { PanelPatientFoodDiary } from './PanelPatientFoodDiary';
+import { PanelPatientEvolution } from './PanelPatientEvolution';
 import './panel-patient-record.css';
 
 export { RECORD_TABS, recordTab } from './patient-record-sections';
@@ -76,12 +78,15 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   const addPatient = useAppStore((store) => store.addPatient);
   const refreshPatient = useAppStore(store => store.refreshPatient);
   const [refreshError,setRefreshError] = useState('');
+  const [readyId,setReadyId]=useState<string|null>(null);
+  const [patientRevision,setPatientRevision]=useState(0);
   const [contextOpen,setContextOpen] = useState(false);
   useEffect(()=>{
-    const refresh=()=>{void refreshPatient(patient.id).then(()=>setRefreshError('')).catch(()=>setRefreshError('No pudimos actualizar el resumen semanal. Recargá para consultar los pendientes.'));};
-    window.addEventListener('plan-v:care-changed',refresh);
-    return ()=>window.removeEventListener('plan-v:care-changed',refresh);
-  },[patient.id,refreshPatient]);
+    let active=true;setReadyId(null);setRefreshError('');
+    const refresh=()=>{void refreshPatient(patient.id).then(()=>{if(active){setRefreshError('');setReadyId(patient.id);}}).catch(()=>{if(active)setRefreshError('No pudimos actualizar la ficha. Reintentá para consultar sus datos.');});};
+    refresh();window.addEventListener('plan-v:care-changed',refresh);
+    return ()=>{active=false;window.removeEventListener('plan-v:care-changed',refresh);};
+  },[patient.id,refreshPatient,patientRevision]);
   const change = (next: RecordTab) => {
     if (next === tab) return;
     const url = new URL(window.location.href); url.searchParams.set('seccion', next);
@@ -95,14 +100,14 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
     <details className="pn-record-context" onToggle={event=>setContextOpen(event.currentTarget.open)}><summary>Datos y contacto</summary><label>Paciente<select aria-label="Paciente de la ficha" value={patient.id} onChange={event=>onSelect(event.target.value)}>{patients.map(person=><option key={person.id} value={person.id}>{person.name}</option>)}</select></label><dl className="pw-record-contact"><div><dt>Teléfono</dt><dd>{phone || 'Sin teléfono registrado'}</dd></div><div><dt>Próxima consulta</dt><dd>{patient.appointment?.when || 'Sin consulta programada'}</dd></div><div><dt>Consultas realizadas</dt><dd>{contextOpen?<CompletedConsultationCount patientId={patient.id}/>: '—'}</dd></div><div><dt>Asistencias confirmadas</dt><dd>{appointments.confirmed}</dd></div></dl></details>
     <nav className="pw-tabs" aria-label="Secciones de la ficha">{RECORD_PRIMARY_TABS.map(([id, label]) => <button type="button" key={id} aria-current={id === recordPrimaryTab(tab) ? 'page' : undefined} onClick={() => change(id)}>{label}</button>)}</nav>
     {refreshError && <p role="alert">{refreshError}</p>}
-    <div key={`${patient.id}:${tab}`} className="pw-record-content">
+    {readyId!==patient.id?<NvState kind={refreshError?'error':'loading'} title={refreshError?'No pudimos cargar la ficha':'Cargando ficha…'} description={refreshError||'Consultando los datos actualizados de la paciente.'} action={refreshError&&<NvButton onClick={()=>setPatientRevision(n=>n+1)}>Reintentar ficha</NvButton>}/>:<div key={`${patient.id}:${tab}`} className="pw-record-content">
       {recordPrimaryTab(tab)==='plan'&&<nav className="pn-record-plan-tabs" aria-label="Secciones del plan">{RECORD_PLAN_TABS.map(([id,label])=><button type="button" key={id} aria-current={id===tab?'page':undefined} onClick={()=>change(id)}>{label}</button>)}</nav>}
       {tab === 'resumen' && <PanelPatientOverview patient={patient} now={now} onSection={change} onReview={onReview}/>}
       {tab === 'historia' && <div className="pn-record-history-grid"><ShowroomIntakeReview patientId={patient.id}/><div><PatientImportedHistory patientId={patient.id}/><PlanSafetySummary patientId={patient.id}/></div></div>}
       {tab === 'notas' && <ConsultationNotes patientId={patient.id} />}
       {tab === 'planificacion' && <NutritionTargetPanel patientId={patient.id} patientName={patient.name} onOpenPlan={() => change('plan')} />}
-      {tab === 'evolucion' && <><ShowroomProgress patient={p} professional /><ProfessionalMeasurements patientId={patient.id} patientName={patient.name} /><ClinicalPatientWorkspace patientId={patient.id} mode="mediciones"/><ShowroomGoals patient={patient} patients={patients} onSelect={onSelect} onChanged={addPatient} onOpenPatient={onSelect} showNutritionTarget={false} /></>}
-      {tab === 'alimentario' && <ShowroomMeals patient={patient} query="" onSelect={onSelect} onReview={onReview} now={now} />}
+      {tab === 'evolucion' && <PanelPatientEvolution patient={patient} now={now} onSection={change} onChanged={addPatient}/>}
+      {tab === 'alimentario' && <PanelPatientFoodDiary patient={patient} now={now} onReview={onReview} onSelect={onSelect}/>}
       {tab === 'plan' && <><PlanSafetySummary patientId={patient.id} /><MealPlanEditor key={patient.id} patientId={patient.id} patientName={patient.name} professionalName={professionalName} onChanged={() => void api.getPatient(patient.id).then(({ patient: updated }) => addPatient(updated)).catch(() => undefined)} /></>}
       {tab === 'semanal' && <ShowroomMealPlan patient={patient} patients={patients} query="" onSelect={onSelect} onChanged={addPatient} now={now} />}
       {tab === 'compras' && <ShowroomGrocery patient={p} readOnly />}
@@ -111,6 +116,6 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
       {tab === 'consultas' && <><ShowroomConsultations patient={patient} now={now} onSelect={onSelect} onChanged={addPatient} /><ConsultationCompletionPanel patientId={patient.id}/></>}
       {tab === 'chat' && <NutrigoMessages patient={p} patients={patients.map((person) => buildShowroomPatient(person, now))} role="pro" onSelect={onSelect} onNavigate={onNavigate} />}
       {tab === 'cobros' && <ShowroomCobranzas initialSelectedId={patient.id} />}
-    </div>
+    </div>}
   </section>;
 }

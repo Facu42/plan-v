@@ -254,6 +254,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
 
+### 2026-10-19 · Codex · Fase 4, paso 2 (registros completos y evolución)
+- Hecho: lectura profesional de comidas paginada y filtrada por paciente, período/estado; pruebas de más de veinte registros, archivo, rol y dos consultorios. Resumen toma pendientes de esa ruta y días de metadata completa del feed. La ficha se hidrata al abrir y ofrece reintento; no infiere cero desde la lista vacía del directorio. Evolución compone gráfico por métrica, tabla por fechas, objetivo editable y hábitos; conserva mediciones, importación y métodos en desplegables.
+- Cómo: reutiliza normalizador y firma de fotos, con consentimiento vigente y prefijo de almacenamiento propio; permisos leídos sin ingreso completo. Resumen no presenta como pendiente una nota ya compartida. 14 pruebas API focales y tipos aprobados; falta verificación final de toda la fase.
+- Rama y commit: codex/panel-nutri-fase-4; respaldo antes de arreglar en fase3 otro selector de CI para Más opciones.
+- Falta: completar laboratorio, notas, plan y demás composición; QA/teclado/móvil, suite final, revisiones y PR propios. #152 está pendiente por un selector viejo en signed-auth; e2e/verify aprobados tras la primera corrección.
+- Próximo paso exacto: corregir scripts/product-browser.local.mjs en fase3 para abrir Más opciones antes de editar/archivar/restaurar; volver a fase4 y completar Laboratorio/Notas/Plan.
+
 ### 2026-10-19 · Codex · Fase 4, paso 1 (encabezado y resumen)
 - Hecho: encabezado con acciones reales, once pestañas y subpestañas de Plan manteniendo las catorce rutas. Resumen conectado a medidas, comidas por revisar, notas autorizadas, días registrados, laboratorio, antecedentes y cuotas. Historia conserva ingreso/importación y suma cuidado al preparar plan. Tipos y ocho pruebas focales aprobados; primer vistazo /browse sin desborde en 1440.
 - Cómo: pruebas RED de agrupación y datos antes de implementar. Se reutilizan API, permisos, gráficos/medidas y lógica de consulta; no se inventa meta numérica, diagnóstico, edad ni resumen de IA. Unidades distintas y comparadores de laboratorio no se mezclan. Todavía no se declara fase completa.

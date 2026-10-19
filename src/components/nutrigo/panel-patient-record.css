@@ -26,9 +26,10 @@
 .pn-panel .pn-record .pw-tabs button { flex:none; padding:10px 12px; min-height:42px; border:0; border-radius:0; border-bottom:2px solid transparent; color:var(--pn-muted); background:transparent; font-size:11.5px; white-space:nowrap; transition:color 200ms ease,border-color 200ms ease; }
 .pn-panel .pn-record .pw-tabs button[aria-current=page] { color:var(--pn-ink); border-bottom-color:var(--pn-lime-dark); background:transparent; font-weight:600; }
 .pn-panel .pn-record .pw-tabs button:hover { color:var(--pn-ink); }
+.nv-app.nv-pro.pn-panel .pn-record .pw-tabs button[aria-current=page] { background:transparent; color:var(--pn-ink); border-bottom-color:var(--pn-lime-dark); }
 .pn-panel .pn-record-plan-tabs { display:flex; gap:4px; padding:4px; border-radius:14px; background:var(--pn-fill); width:max-content; max-width:100%; overflow:auto; }
 .pn-panel .pn-record-plan-tabs button { flex:none; border:0; padding:8px 12px; border-radius:10px; font:500 11.5px Poppins,sans-serif; color:var(--pn-ink2); background:transparent; cursor:pointer; }
-.pn-panel .pn-record-plan-tabs button[aria-current=page] { background:var(--pn-white); box-shadow:var(--pn-shadow); color:var(--pn-ink); }
+.pn-panel .pn-record-plan-tabs button:is([aria-current=page],[aria-pressed=true]) { background:var(--pn-white); box-shadow:var(--pn-shadow); color:var(--pn-ink); }
 .pn-panel .pn-record .pw-record-content { gap:18px; animation:pn-record-in 250ms ease; }
 .pn-panel .pn-record-overview { display:grid; grid-template-columns:minmax(0,1.62fr) minmax(0,1fr); gap:18px; align-items:start; }
 .pn-panel .pn-record-main-column,.pn-panel .pn-record-side-column { display:flex; flex-direction:column; gap:18px; min-width:0; }
@@ -89,6 +90,37 @@
 .pn-panel .pn-record-history-grid { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); gap:18px; align-items:start; }
 .pn-panel .pn-record-history-grid>div { display:flex; flex-direction:column; gap:18px; min-width:0; }
 .pn-panel .pn-record-history-grid>section { min-width:0; }
+.pn-panel .pn-record-diary { display:grid; gap:16px; min-width:0; }
+.pn-panel .pn-record-diary-tools { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+.pn-panel .pn-record-diary-tools>label { display:flex; align-items:center; gap:8px; font-size:11px; }
+.pn-panel .pn-record-diary-tools select { padding:8px 10px; min-height:36px; border:1px solid var(--pn-line); border-radius:10px; background:var(--pn-white); color:var(--pn-ink); font:inherit; }
+.pn-panel .pn-record-diary-grid { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:18px; align-items:start; }
+.pn-panel .pn-record-table-scroll { overflow:auto; max-width:100%; }
+.pn-panel .pn-record-table-scroll table { width:100%; border-collapse:collapse; font-size:11.5px; }
+.pn-panel .pn-record-table-scroll th { font-size:10.5px; font-weight:500; color:var(--pn-muted); text-align:left; padding:10px 8px; white-space:nowrap; }
+.pn-panel .pn-record-table-scroll td { padding:12px 8px; border-top:1px solid var(--pn-line); }
+.pn-panel .pn-record-table-scroll td>b { font-size:11px; font-weight:500; }
+.pn-panel .pn-record-table-scroll td>small { display:block; }
+.pn-panel .pn-record-diary-food { display:flex; align-items:center; gap:10px; min-width:160px; }
+.pn-panel .pn-record-diary-food img,.pn-panel .pn-record-diary-food>span { width:44px; height:44px; border-radius:10px; object-fit:cover; flex:none; display:grid; place-items:center; background:var(--pn-fill); }
+.pn-panel .pn-record-diary-food>b { max-width:220px; font-size:11.5px; font-weight:500; overflow-wrap:anywhere; }
+.pn-panel .pn-record-diary-list button { padding:6px 9px; border:1px solid var(--pn-line); border-radius:9px; background:var(--pn-white); color:var(--pn-ink); min-height:32px; }
+.pn-panel .pn-record-diary-list>button { margin:12px 0; }
+.pn-panel .pn-record-diary-list>small { display:block; margin-top:12px; }
+.pn-panel .pn-record-pending { background:var(--pn-saffron-light); color:var(--pn-ink); }
+.pn-panel .pn-record-evolution { display:grid; gap:18px; min-width:0; }
+.pn-panel .pn-record-goal-progress { height:6px; border-radius:6px; background:var(--pn-fill); overflow:hidden; margin:12px 0 6px; }
+.pn-panel .pn-record-goal-progress i { display:block; height:100%; background:var(--pn-lime-dark); border-radius:inherit; }
+.pn-panel .pn-record-evolution .pn-record-card h4 { font-size:13px; font-weight:500; margin:10px 0; }
+.pn-panel .pn-record-evolution details summary { font-size:12px; cursor:pointer; }
+.pn-panel .pn-record-evolution details>article { padding-top:12px; border-top:1px solid var(--pn-line); }
+.pn-panel .pn-record-evolution details b { font-size:12px; font-weight:500; }
+.pn-panel .pn-record-habit-stats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-bottom:10px; }
+.pn-panel .pn-record-habit-stats small { display:block; }
+.pn-panel .pn-record-habit-stats b { display:block; font-size:14px; font-weight:500; }
+.pn-panel .pn-record-photos { display:flex; align-items:center; gap:12px; }
+.pn-panel .pn-record-photos>div { flex:1; min-width:0; }
+.pn-panel .pn-record-photos button { border:1px solid var(--pn-line); padding:8px 10px; border-radius:10px; background:var(--pn-white); color:var(--pn-ink); }
 .pn-panel .pn-record :is(button,a,summary,input,select,textarea):focus-visible { outline:2px solid var(--pn-focus); outline-offset:3px; }
 @keyframes pn-record-in { from {opacity:0;transform:translateY(5px)} to {opacity:1;transform:none} }
 @media(max-width:1100px) { .pn-panel .pn-record-head { flex-wrap:wrap; } .pn-panel .pn-record-actions { margin-left:auto; } }
@@ -107,6 +139,7 @@
   .pn-panel .pn-record-meals { grid-template-columns:1fr; }
   .pn-panel .pn-record-meals>button { display:grid; grid-template-columns:90px 1fr; }
   .pn-panel .pn-record-meals img,.pn-panel .pn-record-meal-placeholder { height:100%; min-height:96px; }
+  .pn-panel .pn-record-diary-grid { grid-template-columns:1fr; }
 }
 @media(prefers-reduced-motion:reduce) {
   .pn-panel .pn-record .pw-record-content { animation:pn-record-fade 200ms ease; }
