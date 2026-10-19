@@ -16,4 +16,3 @@ export async function previewPermissions(patientId: string, persistent: boolean)
   const consented = CONSENT_CATALOG.filter(text => { const event=latest.get(text.purpose);return event?.decision==='granted'&&event.text_version===text.text_version&&event.text_hash===text.text_hash; }).map(text=>text.purpose);
   return { consented, intake: { status: String(intake.data?.[0]?.status ?? 'draft') } };
 }
-

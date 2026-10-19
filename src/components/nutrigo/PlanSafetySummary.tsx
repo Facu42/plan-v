@@ -27,4 +27,3 @@ export function PlanSafetySummary({ patientId }: { patientId: string }) {
       </dl>}
   </section>;
 }
-
