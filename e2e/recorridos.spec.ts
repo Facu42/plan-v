@@ -67,7 +67,7 @@ test('2 · la paciente completa su ficha de ingreso y la envía', async ({ page 
   await page.getByRole('button', { name: 'Historia clínica', exact: true }).click();
   const intake = page.getByRole('main');
   await expect(intake.getByText('Tener más energía a la tarde')).toBeVisible();
-  await expect(intake.getByText('Declaró que no tiene alergias.')).toBeVisible();
+  await expect(page.getByLabel('Ingreso autodeclarado').getByText('Declaró que no tiene alergias.')).toBeVisible();
   await expect(intake.getByText('No hay faltantes de ingreso.', { exact: false })).toBeVisible();
 });
 
@@ -100,11 +100,11 @@ test('4 · la paciente registra una comida en el diario y la nutricionista la ve
   await enterDemo(page, '/crm/pacientes');
   await page.locator('summary[aria-label="Más opciones de Sofía R."]').click();
   await page.getByRole('button', { name: 'Abrir ficha de Sofía R.' }).click();
-  await page.getByRole('button', { name: 'Revisar comidas' }).click();
+  await page.getByRole('button', { name: 'Registro alimentario', exact: true }).click();
   await waitLoaded(page);
   const row = page.getByRole('row', { name: /Yogur natural con banana y nueces/ });
   await expect(row).toBeVisible();
-  await expect(row.getByRole('cell', { name: 'Pendiente', exact: true })).toBeVisible();
+  await expect(row.getByRole('cell', { name: 'Por revisar', exact: true })).toBeVisible();
 });
 
 test('5 · la nutricionista revisa la comida y la paciente la ve confirmada', async ({ page }) => {

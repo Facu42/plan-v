@@ -32,7 +32,7 @@ function ClinicBrandForm({snapshot,onChanged}:{snapshot:ClinicalWorkspaceSnapsho
 }
 type SegmentDraft=Omit<SegmentValue,'value'>&{value:number|null};
 type LabDraft=Omit<LaboratoryValue,'reviewed'>&{reviewed:boolean};
-function LaboratoryEditor({patientId,onChanged}:{patientId:string;onChanged:()=>void}){
+export function LaboratoryEditor({patientId,onChanged}:{patientId:string;onChanged:()=>void}){
   const [file,setFile]=useState<File|null>(null);const [hash,setHash]=useState('');const [pages,setPages]=useState<{page:number;text:string}[]>([]);const [values,setValues]=useState<LabDraft[]>([]);const [date,setDate]=useState(today());const [busy,setBusy]=useState(false);const [status,setStatus]=useState('');const [error,setError]=useState('');const [docId,setDocId]=useState<string|null>(null);const [recordId,setRecordId]=useState(()=>crypto.randomUUID());const lock=useRef(false);
   useUnsavedChanges(Boolean(file)||values.length>0,busy);
   const choose=async(e:ChangeEvent<HTMLInputElement>)=>{const selected=e.target.files?.[0];if(!selected||lock.current)return;lock.current=true;setBusy(true);setError('');setValues([]);setFile(null);setDocId(null);setRecordId(crypto.randomUUID());try{if(!/\.(pdf|jpe?g|png)$/i.test(selected.name))throw new Error('Elegí un PDF o foto JPG/PNG del laboratorio.');const extracted=await extractImportFile(selected,setStatus);setFile(selected);setHash(extracted.fingerprint);setPages(extracted.pages);setValues(parseLaboratoryPages(extracted.pages).map(v=>({...v,reviewed:false})));}catch(caught){setError(caught instanceof Error?caught.message:'No pudimos leer el estudio.');}finally{lock.current=false;setBusy(false);setStatus('');}};

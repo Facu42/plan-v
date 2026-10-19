@@ -2,8 +2,10 @@ import { request } from './client';
 import type { CrmWorkQuery, CrmWorkResponse } from '../types/crm-work';
 import type { CrmFeedQuery, CrmFeedResponse } from '../types/crm-feed';
 import type { PatientQuickPreview, PatientRowPreview } from '../types/patient-preview';
+import type { PatientMealPage,PatientMealQuery } from '../types/patient-meals';
 
 export const crmWorkApi = {
+  patientMeals:(patientId:string,query:PatientMealQuery={},signal?:AbortSignal)=>{const params=new URLSearchParams(Object.entries(query).filter(([,value])=>value!=null).map(([key,value])=>[key,String(value)]));return request<PatientMealPage>(`/api/crm/patients/${encodeURIComponent(patientId)}/meals${params.size?`?${params}`:''}`,{signal});},
   patientRows: (patientIds: string[], signal?: AbortSignal) => request<{ patients: PatientRowPreview[] }>('/api/crm/patients/directory-summary', { method: 'POST', body: JSON.stringify({ patient_ids: patientIds }), signal }),
   patientPreview: (patientId: string, signal?: AbortSignal) => request<PatientQuickPreview>(`/api/crm/patients/${encodeURIComponent(patientId)}/preview`, { signal }),
   list: (query: CrmWorkQuery = {}, signal?: AbortSignal) => {

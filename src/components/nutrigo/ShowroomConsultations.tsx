@@ -74,8 +74,8 @@ export function secureMeetUrl(value?: string): string | null {
   try { const parsed = new URL(value); return parsed.protocol === 'https:' ? parsed.href : null; } catch { return null; }
 }
 
-export function ShowroomConsultations({ patient, patients = [], now, onSelect, onChanged = () => undefined }: {
-  patient: Patient; patients?: Patient[]; now: Date; onSelect: (id: string) => void; onChanged?: (patient: Patient) => void;
+export function ShowroomConsultations({ patient, patients = [], now, onSelect, onChanged = () => undefined, embedded = false }: {
+  patient: Patient; embedded?: boolean; patients?: Patient[]; now: Date; onSelect: (id: string) => void; onChanged?: (patient: Patient) => void;
 }) {
   const current = patient.appointment;
   const [editing, setEditing] = useState(() => !current);
@@ -108,10 +108,10 @@ export function ShowroomConsultations({ patient, patients = [], now, onSelect, o
     finally { setBusy(false); }
   };
 
-  return <section className="nvc-consultations" aria-label={`Consultas de ${patient.name}`}>
+  return <section className={`nvc-consultations${embedded?' pn-record-consultations':''}`} aria-label={`Consultas de ${patient.name}`}>
     <header className="nvc-context"><div><span className={`nv-avatar person-${patient.tone}`}>{patient.initials}</span><div><strong>Consultas de {patient.name}</strong><small>Próximo turno y modalidad registrados por la profesional.</small></div></div>{patients.length > 0 && <label>Paciente<select aria-label="Paciente de la consulta" value={patient.id} onChange={(event) => onSelect(event.target.value)}>{patients.map((person) => <option key={person.id} value={person.id}>{person.name}</option>)}</select></label>}</header>
     <div className="nvc-layout">
-      <div className="nvc-primary">
+      {!embedded&&<div className="nvc-primary">
         <section className="nvc-stats" aria-label="Resumen de la consulta">
           <article className="nvc-stat"><span className="nv-icon-tile"><Icon name="calendar" size={18} /></span><small>Estado</small><strong>{current ? 'Programada' : 'Sin turno'}</strong></article>
           <article className="nvc-stat"><span className="nv-icon-tile"><Icon name="video" size={18} /></span><small>Modalidad</small><strong>{channelMetric}</strong></article>
@@ -122,7 +122,7 @@ export function ShowroomConsultations({ patient, patients = [], now, onSelect, o
           <div className="nvc-weekdays" aria-hidden="true">{WEEK_DAYS.map((day) => <span key={day}>{day.slice(0, 3)}</span>)}</div>
           <div className="nvc-month-grid">{calendar.cells.map((cell) => <article key={cell.dateId} data-calendar-day={cell.dateId} className={`${cell.inMonth ? '' : 'nvc-outside'}${cell.isToday ? ' nvc-today' : ''}${cell.hasAppointment ? ' nvc-has-appointment' : ''}`}><time dateTime={cell.dateId}>{cell.day}</time>{cell.hasAppointment && current && <span><b>{current.when.split(' · ')[1]}</b><small>{channelLabel}</small></span>}</article>)}</div>
         </section>
-      </div>
+      </div>}
       <aside className="nvc-detail" aria-label="Detalle de consulta">
         <header><h2>Próxima consulta</h2><NvBadge tone={current ? 'green' : 'gold'}>{current ? 'Programada' : 'Pendiente'}</NvBadge></header>
         {current ? <article className="nvc-appointment-card"><span className="nv-icon-tile"><Icon name="calendar" size={20} /></span><p className="nvc-date-label">{calendar.dateLabel}</p><h3>{current.when}</h3><dl><div><dt>Duración</dt><dd>{current.duration} min</dd></div><div><dt>Modalidad</dt><dd>{channelLabel}</dd></div></dl>{safeUrl && <a href={safeUrl} target="_blank" rel="noopener noreferrer">Abrir videollamada <Icon name="arrow" size={14} /></a>}<div className="nvc-actions"><NvButton onClick={() => { setEditing(true); setConfirmingCancel(false); }}>Reagendar</NvButton>{confirmingCancel ? <><button type="button" className="nvc-danger" disabled={busy} onClick={cancel}>Sí, cancelar</button><button type="button" className="nvc-secondary" disabled={busy} onClick={() => setConfirmingCancel(false)}>No, volver</button></> : <button type="button" className="nvc-secondary" onClick={() => { setConfirmingCancel(true); setEditing(false); }}>Cancelar turno</button>}</div></article> : <div className="nvc-empty"><span className="nv-icon-tile"><Icon name="calendar" size={22} /></span><h3>Sin consulta programada</h3><p>Agendá el próximo encuentro para que aparezca en el calendario.</p></div>}

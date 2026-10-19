@@ -28,7 +28,7 @@ function formatGoalDate(value: string | null): string {
   return Number.isNaN(date.getTime()) ? 'Actualización registrada' : new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
 }
 
-function GoalEditor({ patient, onClose, onSaved }: { patient: Patient; onClose: () => void; onSaved: (patient: Patient) => void }) {
+export function GoalEditor({ patient, onClose, onSaved }: { patient: Patient; onClose: () => void; onSaved: (patient: Patient) => void }) {
   const snapshot = getGoalSnapshot(patient);
   const [goal, setGoal] = useState(patient.goal);
   const [status, setStatus] = useState<GoalStatus>(snapshot.status);

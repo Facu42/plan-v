@@ -11,9 +11,9 @@ import './care-panel.css';
 import { documentInSection } from './patient-record-sections';
 
 const today = () => new Intl.DateTimeFormat('en-CA', {timeZone:'America/Argentina/Buenos_Aires'}).format(new Date());
-type Mode = 'progress' | 'activity' | 'menu' | 'professional' | 'files' | 'laboratory';
+type Mode = 'progress' | 'activity' | 'menu' | 'professional' | 'files' | 'laboratory' | 'professional-menu';
 type Kind = CareData['kind'];
-const titles: Record<Mode,string> = { progress:'Tus registros personales', activity:'Tu actividad física', menu:'Alternativas para tu menú', professional:'Registros y seguimiento', files:'Archivos del paciente', laboratory:'Laboratorio' };
+const titles: Record<Mode,string> = { progress:'Tus registros personales', activity:'Tu actividad física', menu:'Alternativas para tu menú', professional:'Registros y seguimiento', files:'Archivos del paciente', laboratory:'Laboratorio', 'professional-menu':'Pedidos de cambio y alternativas' };
 const PROGRESS_KINDS = ['weight','waist','hip','body_photo','clinical_document'] as const;
 
 /** Mientras no está revisada, la paciente corrige o borra su medida. Después, sólo pide la corrección. */
@@ -49,7 +49,7 @@ export function CarePanel({ patientId, mode = 'progress' }: {patientId:string; m
 }
 function CarePanelContent({patientId,mode}:{patientId:string;mode:Mode}) {
   const documents = mode === 'files' || mode === 'laboratory';
-  const professional = mode === 'professional' || documents;
+  const professional = mode === 'professional' || mode === 'professional-menu' || documents;
   const {data,error,reload} = useCare(patientId,professional);
   const [form,setForm] = useState<Kind|null>(null);
   const [fix,setFix] = useState<{id:string;mode:'edit'|'request';value:string;note:string}|null>(null);
@@ -69,7 +69,7 @@ function CarePanelContent({patientId,mode}:{patientId:string;mode:Mode}) {
     catch(e) { setStatus(careErrorMessage(e)); }
     finally { lock.current=false; setBusy(false); }
   }
-  const visible = data?.records.filter(r => documents ? documentInSection(r.data, mode === 'laboratory' ? 'laboratory' : 'files') : professional || (mode==='progress' ? (PROGRESS_KINDS as readonly string[]).includes(r.data.kind) : mode==='activity' ? r.data.kind==='activity' : r.data.kind==='menu_request')) ?? [];
+  const visible = data?.records.filter(r => mode==='professional-menu' ? r.data.kind==='menu_request' : documents ? documentInSection(r.data, mode === 'laboratory' ? 'laboratory' : 'files') : professional || (mode==='progress' ? (PROGRESS_KINDS as readonly string[]).includes(r.data.kind) : mode==='activity' ? r.data.kind==='activity' : r.data.kind==='menu_request')) ?? [];
   const payments = data?.records.filter(r => r.data.kind==='payment') ?? [];
   const reminders = data ? dueCareReminders(data.records,data.preferences,today()) : [];
   return <section className="care-panel" aria-label={titles[mode]}>
@@ -78,13 +78,13 @@ function CarePanelContent({patientId,mode}:{patientId:string;mode:Mode}) {
     {!data && !error && <p role="status">Cargando registros…</p>}
     {data && <>
       {data.source==='memory' && <p className="care-demo">Vista demo · registros ficticios para probar el seguimiento.</p>}
-      {!documents && (mode==='progress' || professional) && <div className="care-summary">{(['weight','waist','hip'] as const).map(kind => { const latest=data.measurements.filter(m=>m.kind===kind).sort((a,b)=>b.captured_on.localeCompare(a.captured_on) || b.created_at.localeCompare(a.created_at))[0]; return <article key={kind}><small>{CARE_LABELS[kind]}</small><strong>{latest ? `${latest.value_numeric} ${latest.unit}` : 'Sin registro'}</strong><span>{latest ? `${latest.captured_on} · ${MEASUREMENT_SOURCE_LABELS[latest.source]}` : 'Opcional'}</span></article>; })}<article><small>{professional ? 'Por revisar' : 'Recordatorios'}</small><strong>{professional ? data.records.filter(r=>!r.reviewed_at).length : reminders.length}</strong><span>{professional ? 'Registros nuevos' : 'Pendientes de tu preferencia'}</span></article></div>}
+      {!documents && mode!=='professional-menu' && (mode==='progress' || professional) && <div className="care-summary">{(['weight','waist','hip'] as const).map(kind => { const latest=data.measurements.filter(m=>m.kind===kind).sort((a,b)=>b.captured_on.localeCompare(a.captured_on) || b.created_at.localeCompare(a.created_at))[0]; return <article key={kind}><small>{CARE_LABELS[kind]}</small><strong>{latest ? `${latest.value_numeric} ${latest.unit}` : 'Sin registro'}</strong><span>{latest ? `${latest.captured_on} · ${MEASUREMENT_SOURCE_LABELS[latest.source]}` : 'Opcional'}</span></article>; })}<article><small>{professional ? 'Por revisar' : 'Recordatorios'}</small><strong>{professional ? data.records.filter(r=>!r.reviewed_at).length : reminders.length}</strong><span>{professional ? 'Registros nuevos' : 'Pendientes de tu preferencia'}</span></article></div>}
       {mode==='activity' && <div className="care-summary">{(() => { const entries=data.records.filter(r=>r.data.kind==='activity' && Date.parse(today())-Date.parse(r.recorded_on)<7*86400000); const activity=entries.flatMap(r=>r.data.kind==='activity'?[r.data]:[]); const calories=activity.filter(r=>r.kcal!==null); return <><article><small>Últimos 7 días</small><strong>{entries.length}</strong><span>actividades</span></article><article><small>Tiempo registrado</small><strong>{activity.reduce((s,r)=>s+r.minutes,0)} min</strong><span>duración declarada</span></article><article><small>Gasto declarado</small><strong>{calories.length ? `${calories.reduce((s,r)=>s+(r.kcal??0),0)} kcal` : 'Sin dato'}</strong><span>{calories.length} actividades con calorías</span></article></>; })()}</div>}
       {!professional && mode==='progress' && <CareConsent patientId={patientId} snapshot={data} />}
       <div className="care-actions">
-        {(documents ? [] : mode==='progress' ? PROGRESS_KINDS : mode==='activity' ? ['activity'] as const : mode==='menu' ? ['menu_request'] as const : ['weight','waist','hip','payment'] as const).map(kind=><button className="nv-button primary" type="button" key={kind} onClick={()=>{setForm(kind);setStatus('');}} disabled={busy || consentBlocked(kind,data.consented)}><Icon name="plus" size={16}/>{careActionLabel(kind)}</button>)}
+        {(documents || mode==='professional-menu' ? [] : mode==='progress' ? PROGRESS_KINDS : mode==='activity' ? ['activity'] as const : mode==='menu' ? ['menu_request'] as const : ['weight','waist','hip','payment'] as const).map(kind=><button className="nv-button primary" type="button" key={kind} onClick={()=>{setForm(kind);setStatus('');}} disabled={busy || consentBlocked(kind,data.consented)}><Icon name="plus" size={16}/>{careActionLabel(kind)}</button>)}
       </div>
-      {!documents && professional && <div className="care-payments"><h3>Registro de pagos</h3><p>Asientos manuales; no realizan cobros ni modifican el acceso del paciente.</p>{(['ARS','USD'] as const).map(currency => <strong key={currency}>{payments.reduce((s,r)=>s+(r.data.kind==='payment' && r.data.currency===currency?r.data.amount:0),0).toLocaleString('es-AR')} {currency} <small>registrados</small> </strong>)}</div>}
+      {!documents && mode!=='professional-menu' && professional && <div className="care-payments"><h3>Registro de pagos</h3><p>Asientos manuales; no realizan cobros ni modifican el acceso del paciente.</p>{(['ARS','USD'] as const).map(currency => <strong key={currency}>{payments.reduce((s,r)=>s+(r.data.kind==='payment' && r.data.currency===currency?r.data.amount:0),0).toLocaleString('es-AR')} {currency} <small>registrados</small> </strong>)}</div>}
       <div className="care-records">{visible.length ? visible.map(record => <article key={record.id}><div><span className="care-eyebrow">{CARE_LABELS[record.data.kind]} · <time>{record.recorded_on}</time></span><h3>{describeCareRecord(record)}</h3>{'note' in record.data && record.data.note && <p>{record.data.note}</p>}{record.data.kind==='payment' && record.data.reference && <p>Referencia: {record.data.reference}</p>}<small>{record.reviewed_at ? 'Revisado' : 'Pendiente de revisión profesional'}</small></div><div className="care-actions">
         {record.data.kind==='body_photo' && <button className="nv-button" type="button" disabled={busy || !data.consented.includes('body_progress')} onClick={()=>void action(async()=>{const result=await careApi.openPhoto(patientId,record.id);setPreview({url:result.url,mime:'image/jpeg',filename:'foto',kind:'body_photo'});},'Foto abierta durante un minuto.')}>Ver foto privada</button>}
         {record.data.kind==='clinical_document' && <button className="nv-button" type="button" disabled={busy || !data.consented.includes('clinical_document')} onClick={()=>void action(async()=>{const result=await careApi.openDocument(patientId,record.id);setPreview({url:result.url,mime:result.mime,filename:result.filename,kind:'clinical_document'});},'Estudio abierto durante un minuto.')}>Ver estudio</button>}

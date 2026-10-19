@@ -324,7 +324,7 @@ function mapPatient(row: Record<string, unknown>, extras: {
   };
 }
 
-function mapMealLog(row: Record<string, unknown>): MealLog {
+export function mapMealLog(row: Record<string, unknown>): MealLog {
   return {
     id: row.id as string,
     patient_id: row.patient_id as string,
