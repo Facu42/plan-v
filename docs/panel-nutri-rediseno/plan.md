@@ -146,7 +146,7 @@ lo que quedó pendiente), accesos rápidos (nueva paciente, plan con IA, copiar 
 pendientes con un botón por fila y pestañas por tipo, consultas de hoy, necesitan atención, buenas noticias
 (meta alcanzada, rachas de registro, aniversario) y cuatro números del mes.
 
-### Fase 3. Pacientes con resumen rápido · Estado: hecha y verificada, PR propio en apertura
+### Fase 3. Pacientes con resumen rápido · Estado: hecha y verificada, PR #152
 
 - Tabla del boceto con filtros (Todas, Activas, Necesitan atención, Acceso pendiente, Archivadas).
 - **Movimiento al pasar el mouse**: la fila se tiñe, la foto crece un poco con un borde lima, el nombre
@@ -237,7 +237,7 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
 | 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Integrada a main `1f48adf`; web, API y worker comprobados |
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
-| 3 | Codex | `codex/panel-nutri-fase-3` | Hecha y verificada; PR propio en apertura |
+| 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Hecha y verificada; controles remotos en curso |
 | 4 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
@@ -252,6 +252,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 08:43 · Codex · Fase 3, paso 4 (PR)
+- Hecho: abierto [PR #152](https://github.com/Facu42/plan-v/pull/152) con el paso 10 completo; controles remotos en curso. Código verificado dc0888a, informe 3e666c3.
+- Cómo: rama propia, main conciliado, evidencia y comparación locales. Cierre sin cambiar lógica ni SQL.
+- Rama y commit: codex/panel-nutri-fase-3, PR #152.
+- Falta: integración cuando todos los controles estén aprobados, más fases 4–9.
+- Próximo paso exacto: reservar fase 4 de Ficha en rama propia desde esta base, declarar dependencia de #152 y continuar mientras termina CI.
 
 ### 2026-10-19 08:42 · Codex · Fase 3, paso 3 (cierre estable)
 - Hecho: 3.164 pruebas aprobadas y dos omitidas, 489 archivos; tipos, build y secretos aprobados. 22 comprobaciones /browse y seis combinaciones, ocho capturas; revisión de código y visual sin P1/P2. [Informe completo](fase-3-verificacion.md) y [comparación navegable](../../design/panel-nutri/fase-3-verificacion.html).
