@@ -243,10 +243,11 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
 
 export type DirectoryAction = 'create' | { share: { name: string; invite: PatientInvite } };
 
-export function ShowroomPatients({ patients, query, initialFilter = 'active', initialAction, onActionConsumed, onChanged, onFollow, onRecord, onPlan, onMessage }: {
+export function ShowroomPatients({ patients, query, initialFilter = 'active', initialUnlinked = false, initialAction, onActionConsumed, onChanged, onFollow, onRecord, onPlan, onMessage }: {
   patients: Patient[];
   query: string;
   initialFilter?: PatientDirectoryFilter;
+  initialUnlinked?: boolean;
   initialAction?: DirectoryAction | null;
   onActionConsumed?: () => void;
   onChanged: (patient: Patient) => void;
@@ -259,7 +260,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'active', in
   const [creating, setCreating] = useState(false);
   const [importing,setImporting] = useState(false);
   const [stageFilter, setStageFilter] = useState<Stage | ''>('');
-  const [unlinkedOnly, setUnlinkedOnly] = useState(false);
+  const [unlinkedOnly, setUnlinkedOnly] = useState(initialUnlinked);
   const [editing, setEditing] = useState<Patient | null>(null);
   const [archiveConfirmation, setArchiveConfirmation] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);

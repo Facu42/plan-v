@@ -251,6 +251,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
 
+### 2026-10-19 · Codex · Fase 1, paso 1
+- Hecho: tokens claros/oscuros del boceto, preferencia por cuenta (metadato panel_theme) y navegador, tres temas, menú de 288/84 px, grupos y submenús conectados a filtros existentes. Fondo fotográfico preparado con desenfoque previo. Tipos y 20 pruebas focales aprobados.
+- Cómo: nuevos PanelNavigation, PanelThemePicker y use-panel-theme; estilos sólo en el panel profesional. Bocetos vigentes aplicados directamente (diseño ya aprobado). Habilidades: Regression Guard, Impeccable, Emil, Vercel, accesibilidad, React, pruebas y movimiento del repo.
+- Rama y commit: codex/panel-nutri-fase-1; este paso se sube antes de la comprobación visual final.
+- Falta: QA en navegador de ambos tamaños/temas, teclado y datos extremos; suite completa, fire test y revisiones independientes.
+- Próximo paso exacto: comprobar el panel local con /browse y corregir los problemas observados; las pantallas mantienen su contenido hasta sus fases propias. Pedidos de cambio y respuestas guardadas no existen en main; no se simulan y se incorporan en las fases 7 y 6.
+
 ### 2026-10-19 · Codex · Fase 1, paso 0 (reserva)
 - Hecho: fase 1 reservada antes de tocar código, desde main 79056fe (PR #148 integrado).
 - Cómo: leídos plan, Bitácora, CLAUDE.md, coordinación y Regression Guard. El PR #147 de Cursor es anterior al boceto vigente, usa Plus Jakarta Sans y otra base; no se modifica ni se toma como implementación del diseño aprobado.
