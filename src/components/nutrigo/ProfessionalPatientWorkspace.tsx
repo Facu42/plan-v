@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { MealLog, Patient } from '../../types';
 import type { CrmEntry } from '../crm/crm-entry';
 import { consultationsApi } from '../../api/consultations';
 import { useAppStore } from '../../store/useAppStore';
-import { ShowroomIntakeReview } from './ShowroomIntakeReview';
 import { NutritionTargetPanel } from './ShowroomNutritionTarget';
 import { ShowroomConsultations } from './ShowroomConsultations';
 import { NutrigoMessages } from './NutrigoMessages';
@@ -15,15 +14,14 @@ import './professional-workspace.css';
 import { ShowroomGrocery } from './ShowroomGrocery';
 import { ShowroomMealPlan } from './ShowroomMealPlan';
 import { ConsultationNotes,ConsultationCompletionPanel } from './ConsultationNotes';
-import { PatientImportedHistory } from './PatientImportedHistory';
 import { RECORD_PRIMARY_TABS, RECORD_PLAN_TABS, recordPrimaryTab, recordTab, appointmentRecordSummary, type RecordTab } from './patient-record-sections';
+import {PanelPatientHistory} from './PanelPatientHistory';
 import { PanelPatientHeader } from './PanelPatientHeader';
 import { PanelPatientOverview } from './PanelPatientOverview';
 import { PanelPatientFoodDiary } from './PanelPatientFoodDiary';
 import { PanelPatientEvolution } from './PanelPatientEvolution';
 import {PanelPatientBilling} from './PanelPatientBilling';
 import { PanelPatientFiles } from './PanelPatientFiles';
-import {PlanSafetySummary} from './PlanSafetySummary';
 export {PlanSafetySummary} from './PlanSafetySummary';
 import { PanelPatientPlan } from './PanelPatientPlan';
 import { PanelPatientLaboratory } from './PanelPatientLaboratory';
@@ -48,6 +46,8 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   const [refreshError,setRefreshError] = useState('');
   const [readyId,setReadyId]=useState<string|null>(null);
   const [patientRevision,setPatientRevision]=useState(0);
+  const tabsRef=useRef<HTMLElement>(null);
+  useEffect(()=>{const nav=tabsRef.current,active=nav?.querySelector<HTMLElement>('[aria-current=page]');if(!nav||!active)return;const delta=active.getBoundingClientRect().left-nav.getBoundingClientRect().left-(nav.clientWidth-active.offsetWidth)/2;nav.scrollLeft+=delta;},[tab]);
   const [contextOpen,setContextOpen] = useState(false);
   useEffect(()=>{
     let active=true;setReadyId(null);setRefreshError('');
@@ -58,7 +58,9 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   const change = (next: RecordTab) => {
     if (next === tab) return;
     const url = new URL(window.location.href); url.searchParams.set('seccion', next);
+    const focusTab=document.activeElement instanceof Element&&Boolean(document.activeElement.closest('.pw-tabs'));
     onOpenHref(url.pathname + url.search);
+    if(focusTab)requestAnimationFrame(()=>tabsRef.current?.querySelector<HTMLElement>('[aria-current=page]')?.focus({preventScroll:true}));
   };
   const p = buildShowroomPatient(patient, now);
   const appointments = appointmentRecordSummary(patient.appointment_history);
@@ -66,12 +68,12 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   return <section className="pw-record pn-record" aria-label={`Espacio de ${patient.name}`}>
     <PanelPatientHeader patient={patient} onSection={change} onOpen={onOpenHref} onEdit={onEdit}/>
     <details className="pn-record-context" onToggle={event=>setContextOpen(event.currentTarget.open)}><summary>Datos y contacto</summary><label>Paciente<select aria-label="Paciente de la ficha" value={patient.id} onChange={event=>onSelect(event.target.value)}>{patients.map(person=><option key={person.id} value={person.id}>{person.name}</option>)}</select></label><dl className="pw-record-contact"><div><dt>Teléfono</dt><dd>{phone || 'Sin teléfono registrado'}</dd></div><div><dt>Próxima consulta</dt><dd>{patient.appointment?.when || 'Sin consulta programada'}</dd></div><div><dt>Consultas realizadas</dt><dd>{contextOpen?<CompletedConsultationCount patientId={patient.id}/>: '—'}</dd></div><div><dt>Asistencias confirmadas</dt><dd>{appointments.confirmed}</dd></div></dl></details>
-    <nav className="pw-tabs" aria-label="Secciones de la ficha">{RECORD_PRIMARY_TABS.map(([id, label]) => <button type="button" key={id} aria-current={id === recordPrimaryTab(tab) ? 'page' : undefined} onClick={() => change(id)}>{label}</button>)}</nav>
+    <nav ref={tabsRef} className="pw-tabs" aria-label="Secciones de la ficha">{RECORD_PRIMARY_TABS.map(([id, label]) => <button type="button" key={id} aria-current={id === recordPrimaryTab(tab) ? 'page' : undefined} onClick={() => change(id)}>{label}</button>)}</nav>
     {refreshError && <p role="alert">{refreshError}</p>}
     {readyId!==patient.id?<NvState kind={refreshError?'error':'loading'} title={refreshError?'No pudimos cargar la ficha':'Cargando ficha…'} description={refreshError||'Consultando los datos actualizados de la paciente.'} action={refreshError&&<NvButton onClick={()=>setPatientRevision(n=>n+1)}>Reintentar ficha</NvButton>}/>:<div key={`${patient.id}:${tab}`} className="pw-record-content">
       {recordPrimaryTab(tab)==='plan'&&<nav className="pn-record-plan-tabs" aria-label="Secciones del plan">{RECORD_PLAN_TABS.map(([id,label])=><button type="button" key={id} aria-current={id===tab?'page':undefined} onClick={()=>change(id)}>{label}</button>)}</nav>}
       {tab === 'resumen' && <PanelPatientOverview patient={patient} now={now} onSection={change} onReview={onReview}/>}
-      {tab === 'historia' && <div className="pn-record-history-grid"><ShowroomIntakeReview patientId={patient.id}/><div><PatientImportedHistory patientId={patient.id}/><PlanSafetySummary patientId={patient.id}/></div></div>}
+      {tab === 'historia' && <PanelPatientHistory patientId={patient.id} now={now}/>}
       {tab === 'notas' && <ConsultationNotes patientId={patient.id} showCompletions={false}/>}
       {tab === 'planificacion' && <NutritionTargetPanel patientId={patient.id} patientName={patient.name} onOpenPlan={() => change('plan')} />}
       {tab === 'evolucion' && <PanelPatientEvolution patient={patient} now={now} onSection={change} onChanged={addPatient}/>}
@@ -82,7 +84,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
       {tab === 'archivos' && <PanelPatientFiles key={patient.id} patientId={patient.id}/>}
       {tab === 'laboratorio' && <PanelPatientLaboratory key={patient.id} patientId={patient.id} now={now}/>}
       {tab === 'consultas' && <div className="pn-record-diary-grid"><div className="pn-record-main-column"><ShowroomConsultations embedded patient={patient} now={now} onSelect={onSelect} onChanged={addPatient}/><button type="button" onClick={()=>change('notas')}>Ver notas de consulta</button></div><aside className="pn-record-side-column"><ConsultationCompletionPanel patientId={patient.id}/></aside></div>}
-      {tab === 'chat' && <NutrigoMessages embedded patient={p} patients={patients.map((person) => buildShowroomPatient(person, now))} role="pro" onSelect={onSelect} onNavigate={onNavigate} />}
+      {tab === 'chat' && <div className="pn-record-chat-scope"><NutrigoMessages embedded patient={p} patients={patients.map((person) => buildShowroomPatient(person, now))} role="pro" onSelect={onSelect} onNavigate={onNavigate} /></div>}
       {tab === 'cobros' && <PanelPatientBilling key={patient.id} patientId={patient.id} onOpen={()=>onOpenHref('/crm/cobranzas')}/>}
     </div>}
   </section>;

@@ -59,6 +59,9 @@ export function IntakeReviewPanel({
       <div><dt>Pedido</dt><dd>{payload.patient_intent?.trim() || 'Sin texto adicional'}</dd></div>
       <div><dt>Alergias</dt><dd>{healthFactLabel(payload.allergies, 'alergias')}</dd></div>
       <div><dt>Restricciones</dt><dd>{healthFactLabel(payload.restrictions, 'restricciones')}</dd></div>
+      <div><dt>Agua declarada</dt><dd>{payload.hydration_glasses!=null?`${payload.hydration_glasses} vasos/día`:'Sin dato'}</dd></div>
+      <div><dt>Sueño declarado</dt><dd>{payload.sleep_hours!=null?`${payload.sleep_hours} horas`:'Sin dato'}</dd></div>
+      <div><dt>Energía declarada</dt><dd>{payload.energy||'Sin dato'}</dd></div>
       <div><dt>Consentimiento de atención</dt><dd>{care?.decision === 'granted' ? `Otorgado · ${care.text_version ?? ''}` : 'No vigente'}</dd></div>
       <div><dt>Enviado</dt><dd>{readableDate(view.intake.submitted_at)}</dd></div>
       {view.review.reviewed_at && <div><dt>Revisión profesional</dt><dd>{readableDate(view.review.reviewed_at)}</dd></div>}

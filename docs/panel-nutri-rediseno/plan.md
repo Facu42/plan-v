@@ -237,11 +237,20 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
 | 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Integrada a main `1f48adf`; web, API y worker comprobados |
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
-| 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Hecha y verificada; controles remotos en curso |
-| 4 | Codex | codex/panel-nutri-fase-4 | Reservada antes del código; depende de #152 hasta integrarlo |
-| 5 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
+| 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main 6697d28; controles remotos aprobados |
+| 4 | Codex | codex/panel-nutri-fase-4 | Implementada; verificación visual, de permisos y cierre de PR en curso |
+| 5 | Otro carril indicado por Facundo | — | Fuera de este trabajo por pedido del 19/10 |
+| 6 a 9 | Por coordinar | — | Fuera del alcance actual; este trabajo termina en fase 4 |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-19 · Codex · Fase 4, paso 5 (correcciones de revisión)
+- Hecho: Historia agrupada y medidas del primer día autorizado, datos de ingreso preservados; chat con estilos propios de su contexto, visor y perfil con tema del panel, pestaña activa visible en celular. Corregido desborde del plan y retiro de Atención en documentos/evaluaciones.
+- Cómo: revisión independiente de código y visual; nueve acciones privadas reales en demo, incluida apertura pendiente y retiro, laboratorio de tres fechas y nota manual/publicación. Seis e2e aprobados con Chrome local; tipos aprobados. Fire test detectó exposición de foto sin permiso, restaurado y tres casos verdes.
+- Rama: codex/panel-nutri-fase-4; base main 6697d28 conciliada en 4520e73.
+- Falta: suite completa final (primera corrida tuvo EBUSY de Windows y un timeout; sus 25 casos focales repitieron verdes), capturas finales y cierre independiente, informe y PR.
+- Próximo paso exacto: completar suite serializada, controles del navegador y artefacto; abrir PR exclusivo de fase 4 e integrar sólo con CI verde. **Por indicación de Facundo, detenerse al terminar fase 4: fase 5 se hace en otro carril.**
+
 
 Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 
