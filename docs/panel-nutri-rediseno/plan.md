@@ -268,6 +268,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: encabezado, pestañas agrupadas, resumen, historia, evolución, notas y composición de plan/registros/laboratorio/archivos/consultas/cobros/chat; QA, suite e informe propios.
 - Próximo paso exacto: leer ProfessionalPatientWorkspace.tsx, ShowroomPatientRecord.tsx y funciones ficha/fResumen/fHistoria/fEvolucion/fNotas del boceto; mapear componentes reales y escribir las garantías de rutas antiguas antes de cambiar la UI.
 
+### 2026-10-19 · Codex · Fase 3, paso 5 (control remoto)
+- Hecho: CI detectó que el recorrido de ingreso seguía pulsando Abrir ficha/plan sin desplegar Más opciones. Actualizado el recorrido para usar el menú visible, sin cambiar la app ni retirar verificaciones.
+- Cómo: tipos, suite completa y /browse del código siguen aprobados. Se ejecuta nuevamente la historia de seis flujos con el selector actual; el entorno local instala el navegador fijado por Playwright. No se integra con CI rojo.
+- Rama y commit: codex/panel-nutri-fase-3, PR #152.
+- Falta: controles remotos nuevos y cierre del recorrido; fase 4 está respaldada en su propia rama 4a6e9aa.
+- Próximo paso exacto: esperar el nuevo control e2e de #152 y signed-auth; integrar sólo con todos verdes. Retomar codex/panel-nutri-fase-4.
+
 ### 2026-10-19 08:43 · Codex · Fase 3, paso 4 (PR)
 - Hecho: abierto [PR #152](https://github.com/Facu42/plan-v/pull/152) con el paso 10 completo; controles remotos en curso. Código verificado dc0888a, informe 3e666c3.
 - Cómo: rama propia, main conciliado, evidencia y comparación locales. Cierre sin cambiar lógica ni SQL.
