@@ -26,6 +26,7 @@ import {
 } from './message-panel';
 import './messages.css';
 import './messages-fig.css';
+import {MessagePatientContext} from './MessagePatientContext';
 import {useMessageTools,type MessageToolsState} from './use-message-tools';
 import {appendSavedReply,MessageReplyTools} from './MessageReplyTools';
 import './panel-accompaniment.css';
@@ -247,7 +248,7 @@ function ShowAll({ count, limit, open, onToggle, label }: { count: number; limit
 }
 
 function ConversationProfile({ patient, role, onNavigate,tools,onUseReply }: Pick<Props, 'patient' | 'role' | 'onNavigate'>&{tools:MessageToolsState;onUseReply:(body:string)=>void}) {
-  const raw = useAppStore((s) => (role === 'pro' ? s.patients.find((p) => p.id === patient.id) : undefined));
+
   const contact = contactOf(patient, role);
   const messages = sentMessages(patient);
   const { media, documents } = sharedFiles(messages);
@@ -260,7 +261,7 @@ function ConversationProfile({ patient, role, onNavigate,tools,onUseReply }: Pic
     catch { setCopied(''); }
   };
   const appointment = patient.appointment;
-  const nextFocus = raw?.next_focus?.trim();
+
   const shownMedia = expanded.media ? media : media.slice(0, 3);
   const shownDocs = expanded.docs ? documents : documents.slice(0, 3);
   const shownLinks = expanded.links ? links : links.slice(0, 3);
@@ -274,12 +275,13 @@ function ConversationProfile({ patient, role, onNavigate,tools,onUseReply }: Pic
       <h3>{contact.name}</h3>
       <span className="nmf-role">{contact.role}</span>
     </div>
+    {role==='pro'&&<MessagePatientContext key={patient.id} patientId={patient.id} onPlan={()=>onNavigate('plan')}/>}
     <section className="nmf-feature" aria-label="Acerca de">
       <FeatureTitle icon={<Info size={14} aria-hidden />} title="Acerca de" />
       <div className="nmf-about">
         {role === 'patient' && <p>Tu nutricionista de seguimiento en Plan V.</p>}
-        <p><b>{role === 'pro' ? 'Objetivo' : 'Objetivo compartido'}:</b> {patient.goal || 'Todavía no definido'}</p>
-        {nextFocus && <p><b>Próximo foco:</b> {nextFocus}</p>}
+        {role==='patient'&&<p><b>Objetivo compartido:</b> {patient.goal || 'Todavía no definido'}</p>}
+
         <p><b>Próxima consulta:</b> {appointment ? `${appointment.when} · ${appointment.duration} min · ${appointment.channel === 'video' ? 'Videollamada' : appointment.channel === 'presencial' ? 'Presencial' : appointment.channel}` : 'Por coordinar'}</p>
       </div>
     </section>

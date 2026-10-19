@@ -267,6 +267,8 @@ export function ShowroomPatients({ patients, query, initialFilter = 'all', initi
   const [unlinkedOnly, setUnlinkedOnly] = useState(initialUnlinked);
   const [editing, setEditing] = useState<Patient | null>(null);
   const [archiveConfirmation, setArchiveConfirmation] = useState<string | null>(null);
+  const [archiveReason, setArchiveReason] = useState('');
+  useUnsavedChanges(Boolean(archiveConfirmation && archiveReason.trim()));
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [share, setShare] = useState<{ name: string; invite: PatientInvite } | null>(null);
@@ -284,13 +286,13 @@ export function ShowroomPatients({ patients, query, initialFilter = 'all', initi
   const visible = sortDirectoryPatients(filterDirectoryPatients(patients, query, filter).filter((person) => (!stageFilter || person.stage === stageFilter) && (!unlinkedOnly || person.has_account === false)), order);
 
   const setArchived = async (patient: Patient, archived: boolean) => {
-    if (archived && archiveConfirmation !== patient.id) { setArchiveConfirmation(patient.id); return; }
+    if (archived && archiveConfirmation !== patient.id) { setArchiveConfirmation(patient.id); setArchiveReason(''); return; }
     setBusyId(patient.id);
     setError('');
     try {
-      const { patient: updated } = await api.setPatientArchived(patient.id, archived);
+      const { patient: updated } = await api.setPatientArchived(patient.id, archived, archived && archiveReason.trim() ? archiveReason.trim() : undefined);
       onChanged(updated);
-      setArchiveConfirmation(null);
+      setArchiveConfirmation(null); setArchiveReason('');
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'No pudimos actualizar el archivo.');
     } finally {
@@ -336,6 +338,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'all', initi
             {!patient.archived_at && <NvButton className="nv-soft" aria-label={`Ver seguimiento de ${patient.name}`} onClick={() => onFollow(patient.id)}><Icon name="trend" size={14}/>Seguimiento</NvButton>}
             {!patient.archived_at && patient.has_account === false && <NvButton className="nv-ghost" aria-label={`Invitar a ${patient.name}`} disabled={busyId === patient.id} onClick={() => invite(patient)}><Icon name="message" size={13} />Invitar</NvButton>}
             {!patient.archived_at && <NvButton className="nv-ghost" aria-label={`Editar ficha de ${patient.name}`} onClick={() => setEditing(patient)}><Icon name="edit" size={13} />Editar</NvButton>}
+            {archiveConfirmation === patient.id && <label>Motivo de archivo (opcional)<input aria-label={`Motivo de archivo de ${patient.name}`} maxLength={240} value={archiveReason} disabled={busyId === patient.id} onChange={event=>setArchiveReason(event.target.value)}/><button type="button" disabled={busyId === patient.id} onClick={()=>{setArchiveConfirmation(null);setArchiveReason('');}}>Cancelar archivo</button></label>}
             <NvButton className={`nv-ghost${archiveConfirmation === patient.id ? ' nv-confirm' : ''}`} aria-label={patient.archived_at ? `Restaurar ${patient.name}` : archiveConfirmation === patient.id ? `Confirmar archivo de ${patient.name}` : `Archivar ${patient.name}`} disabled={busyId === patient.id} onClick={() => setArchived(patient, !patient.archived_at)}>
               {busyId === patient.id ? 'Guardando…' : patient.archived_at ? 'Restaurar' : archiveConfirmation === patient.id ? 'Confirmar archivo' : 'Archivar'}
             </NvButton>

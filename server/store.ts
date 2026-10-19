@@ -184,6 +184,7 @@ export type Patient = {
   tone: 'peach' | 'lilac' | 'mint';
   status: string;
   archived_at?: string | null;
+  archive_reason?: string | null;
   deactivated_at?: string | null;
   anonymized_at?: string | null;
   billing_status: BillingStatus;
@@ -999,7 +1000,7 @@ export function setPatientProfile(
   });
 }
 
-export function setPatientArchived(id: string, archived: boolean): Patient | undefined {
+export function setPatientArchived(id: string, archived: boolean, reason?: string): Patient | undefined {
   const patient = getPatient(id);
   if (!patient) return undefined;
 
@@ -1010,7 +1011,7 @@ export function setPatientArchived(id: string, archived: boolean): Patient | und
     title: archived ? 'Paciente · archivado' : 'Paciente · restaurado',
     body: archived ? 'Se quitó de las vistas operativas.' : 'Volvió a las vistas operativas.',
   }, ...patient.timeline];
-  return updatePatient(id, { archived_at: archived ? now() : null, timeline });
+  return updatePatient(id, { archived_at: archived ? now() : null, archive_reason: archived ? reason?.trim() || null : null, timeline });
 }
 
 export function setBillingStatus(

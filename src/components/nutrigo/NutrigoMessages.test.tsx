@@ -31,7 +31,9 @@ describe('mensajería dentro del diseño Nutrigo', () => {
     const html = renderToStaticMarkup(<NutrigoMessages patient={patient} patients={[patient]} role="pro" onSelect={() => {}} onNavigate={() => {}} />);
     expect(html).toContain('Buscar conversaciones');
     expect(html).toContain('Conversación con Ana');
-    expect(html).toContain('Organizar comidas');
+    // El objetivo cacheado no se muestra antes de comprobar permisos frescos.
+    expect(html).not.toContain('Organizar comidas');
+    expect(html).toContain('Consultando ficha y permisos');
     expect(html).toContain('Abrir ficha');
     expect(html).toContain('Ver consultas');
   });

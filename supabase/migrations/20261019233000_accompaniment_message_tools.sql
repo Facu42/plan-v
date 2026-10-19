@@ -82,3 +82,35 @@ end;
 $$;
 revoke all on function public.enqueue_followup_reminder(uuid,uuid) from public,anon;
 grant execute on function public.enqueue_followup_reminder(uuid,uuid) to authenticated;
+
+-- La API anterior sigue disponible. Esta variante agrega el motivo dentro de la misma transacción.
+create function public.set_patient_archived_with_reason(target uuid,archived boolean,reason text)
+returns jsonb language plpgsql security definer set search_path='' as $$
+declare result jsonb;
+begin
+ if not exists(select 1 from public.profiles pr join public.nutritionists n on n.user_id=pr.id
+   where pr.id=(select auth.uid()) and pr.role='nutri') then
+  raise exception using errcode='42501',message='archive_pro_only';
+ end if;
+ if archived is null or (not archived and reason is not null) or pg_catalog.length(reason)>240 then
+  raise exception using errcode='22023',message='archive_reason_invalid';
+ end if;
+ perform 1 from public.patients p join public.nutritionists n on n.id=p.nutritionist_id
+  where p.id=target and n.user_id=(select auth.uid()) for update of p;
+ if not found then raise exception using errcode='42501',message='archive_forbidden';end if;
+ result:=public.set_patient_archived(target,archived);
+ update public.patients set archive_reason=case when archived then nullif(pg_catalog.btrim(reason),'') else null end where id=target;
+ return result;
+end;$$;
+revoke all on function public.set_patient_archived_with_reason(uuid,boolean,text) from public,anon;
+grant execute on function public.set_patient_archived_with_reason(uuid,boolean,text) to authenticated;
+
+-- También limpia el motivo cuando restaura un cliente anterior que usa la función de dos argumentos.
+create function public.clear_restored_archive_reason() returns trigger language plpgsql set search_path='' as $$
+begin
+ if new.archived_at is null then new.archive_reason:=null;end if;
+ return new;
+end;$$;
+revoke all on function public.clear_restored_archive_reason() from public,anon;
+create trigger patients_clear_restored_archive_reason before update of archived_at on public.patients
+for each row execute function public.clear_restored_archive_reason();

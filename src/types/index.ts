@@ -161,6 +161,8 @@ export type Patient = {
   tone: 'peach' | 'lilac' | 'mint';
   status: string;
   archived_at?: string | null;
+  /** Motivo privado, indicado por la profesional. */
+  archive_reason?: string | null;
   deactivated_at?: string | null;
   anonymized_at?: string | null;
   billing_status: BillingStatus;

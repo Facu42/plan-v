@@ -28,6 +28,7 @@ export type AccompanimentMetrics = {
         date: string;
         energy: string | null;
         sleep_minutes: number | null;
+        steps: number | null;
         symptoms: string[];
     }>;
     goals: Array<{
@@ -53,6 +54,7 @@ export type AccompanimentMetrics = {
         reason: string;
         count: number;
     }>;
+    unchanged: Array<{id:string;name:string;kind:'weight';value:number;unit:string;from:string;to:string}>;
     quiet: Array<{
         id: string;
         name: string;

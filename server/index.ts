@@ -422,9 +422,10 @@ app.patch('/api/patients/:id/archive', async (c) => {
     if (!await authorizePatient(auth.userId, patientId, 'archive_patient')) {
       return c.json({ error: 'Prohibido' }, 403);
     }
-    const { error } = await getRequestDb().rpc('set_patient_archived', {
+    const { error } = await getRequestDb().rpc(parsedBody.data.archive_reason !== undefined ? 'set_patient_archived_with_reason' : 'set_patient_archived', {
       target: patientId,
       archived: parsedBody.data.archived,
+      ...(parsedBody.data.archive_reason !== undefined ? {reason: parsedBody.data.archive_reason || null} : {}),
     });
     if (error) {
       if (['42883', 'PGRST202'].includes(error.code ?? '')) {
@@ -439,7 +440,7 @@ app.patch('/api/patients/:id/archive', async (c) => {
     return c.json({ patient: updated ? (await withWeeklyRegistration([updated],true))[0] : null, source: 'supabase' });
   }
 
-  const patient = setPatientArchived(patientId, parsedBody.data.archived);
+  const patient = setPatientArchived(patientId, parsedBody.data.archived, parsedBody.data.archive_reason);
   if (!patient) return c.notFound();
   return c.json({ patient: (await withWeeklyRegistration([patient],false))[0], source: 'memory' });
 });

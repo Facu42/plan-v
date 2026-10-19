@@ -126,10 +126,10 @@ export const api = {
     body: JSON.stringify(data),
   }),
 
-  setPatientArchived: (patientId: string, archived: boolean) =>
+  setPatientArchived: (patientId: string, archived: boolean, archive_reason?: string) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/archive`, {
       method: 'PATCH',
-      body: JSON.stringify({ archived }),
+      body: JSON.stringify({ archived, ...(archive_reason !== undefined ? {archive_reason} : {}) }),
     }),
 
   getMyPatient: (init?: RequestInit) => request<{ patient: Patient | null; shoppingList: string[] }>('/api/me/patient', init),

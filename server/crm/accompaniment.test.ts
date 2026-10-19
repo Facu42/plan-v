@@ -20,7 +20,7 @@ describe('resúmenes autorizados de acompañamiento',()=>{
  });
  it('no muestra metas ni hábitos sin Atención y no sustituye agua ausente por cero',()=>{
   const data=buildAccompanimentMetrics({patients,meals:[],habits:[{patient_id:'a',date:'2026-10-19',hydration:8,energy:'Alta',symptoms:['hinchazon']}],measurements:[],permissions:{a:[],b:['care_relationship']}},30,now);
-  expect(data.wellbeing).toHaveLength(0);expect(data.totals.water_glasses).toBeNull();
+  expect(data.wellbeing).toHaveLength(0);expect(data.totals.water_glasses).toBeNull();expect(data.totals.adherence).toBe(80);
   expect(data.goals.map(g=>g.id)).toEqual(['b']);expect(data.goals[0].progress).toBe(0);expect(data.totals.completed_goals).toBe(0);
  });
  it('altas y bajas salen de fechas propias y no del listado activo solamente',()=>{
@@ -48,4 +48,9 @@ describe('resúmenes autorizados de acompañamiento',()=>{
   const data=buildAccompanimentMetrics({patients,meals:[],habits:[{patient_id:'a',date:'2026-10-19',hydration:0,steps:4000}],measurements:[],permissions:{}},30,now);
   expect(data.week.find(p=>p.id==='a')?.recorded_days).toBe(1);expect(data.quiet.map(p=>p.id)).not.toContain('a');
  });
+});
+it('mismo peso durante cuatro semanas requiere medidas autorizadas y no afirma un diagnóstico',()=>{
+ const input={patients,meals:[],habits:[],permissions:{a:['measurement']},measurements:[{id:'1',patient_id:'a',kind:'weight',unit:'kg',value_numeric:70,captured_on:'2026-09-20'},{id:'2',patient_id:'a',kind:'weight',unit:'kg',value_numeric:70,captured_on:'2026-10-19'}]};
+ expect(buildAccompanimentMetrics(input,90,now).unchanged).toEqual([{id:'a',name:'Ana',kind:'weight',value:70,unit:'kg',from:'2026-09-20',to:'2026-10-19'}]);
+ expect(buildAccompanimentMetrics({...input,permissions:{}},90,now).unchanged).toEqual([]);
 });

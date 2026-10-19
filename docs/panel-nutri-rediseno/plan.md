@@ -245,6 +245,13 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-19 · Codex · Fase 6, paso 6 (cuatro pantallas conectadas)
+- Hecho: Asistente por paciente con propuestas privadas reales y gasto atribuible; Seguimiento con comidas, confirmación y comentario por chat; Progreso con períodos, CSV y fuentes explícitas. Motivo opcional de archivo y limpieza al restaurar.
+- Cómo: contratos existentes de planes, permisos y mensajes. SQL local con RLS y operación atómica; RED de motivo/aislamiento, adherencia sin Atención y peso sin cambios, corregidos. Primera revisión cerró cuatro P2 sobre foco/idempotencia, actualización de permisos y textos; segunda señaló los bloques de ficha del chat, ya agregados con lecturas frescas.
+- Rama: codex/panel-nutri-fase-6. Tipos de cliente/servidor/e2e aprobados antes de los últimos ajustes de presentación; repetir al cerrar.
+- Falta: QA visual/funcional completo, controles finales, fire test, revisión de correcciones, informe y PR.
+- Próximo paso exacto: recorrer propuestas, comentarios y respuestas guardadas en la demo local; preparar capturas y comparación. No se inicia fase 7.
+
 ### 2026-10-19 · Codex · Fase 6, paso 5 (Mensajes)
 - Hecho: conversaciones destacadas persistentes y editor de respuestas guardadas, sugerencia local identificada, composición profesional en tres columnas. Insertar conserva el borrador y no envía.
 - Cómo: API con revisión concurrente y controles de rol; editor con protección de cambios, diálogo nativo y foco. RED de IDs duplicados entre diálogos corregido con useId; 10 focales UI aprobados.

@@ -1,0 +1,38 @@
+/** QA reproducible de fase 6 con /browse. Sólo fixture ficticia de loopback. */
+import {execFileSync} from 'node:child_process';
+import {mkdirSync,writeFileSync} from 'node:fs';
+import {resolve} from 'node:path';
+const binary=process.env.BROWSE_BIN;if(!binary)throw Error('Indicá BROWSE_BIN.');
+const base=process.env.PANEL_QA_URL||'http://127.0.0.1:5180';if(!['127.0.0.1','localhost'].includes(new URL(base).hostname))throw Error('Sólo demo local.');
+const out=resolve('design/panel-nutri/fase-6');mkdirSync(out,{recursive:true});
+const env={...process.env,BROWSE_PARENT_PID:'0'},checks=[],measurements=[];
+const B=(...args)=>execFileSync(binary,args,{env,encoding:'utf8',windowsHide:true,timeout:30000}).trim(),js=source=>B('js',source);
+const check=(source,label)=>{const result=js(source);if(result!=='true')throw Error(`${label}: ${result}`);checks.push(label);};
+const settle=()=>js('Promise.all(document.getAnimations().map(a=>a.finished.catch(()=>{}))).then(()=>true)');
+const open=href=>{B('goto',base+href);B('wait','.pn-panel,button:has-text("Continuar en modo demo")');if(js('Boolean(document.querySelector(".pn-panel"))')!=='true')B('click','text=Continuar en modo demo');B('wait','.pn-ac,.nm-layout');settle();};
+const theme=value=>{B('click','button[aria-label="Opciones de la cuenta"]');B('click',`.nv-user-menu input[value="${value}"]`);B('press','Escape');settle();};
+open('/crm/desarrollo?modulo=asistente-ia');B('viewport','1440x900');B('console','--clear');
+B('wait','#assistant-request');B('fill','#assistant-request','Meriendas con huevo');B('click','button[type=submit]:has(svg)');B('wait','button:has-text("Abrir en el editor")');
+check('document.querySelector(".pn-assistant-private").textContent.includes("hasta que publiques")&&Boolean(document.querySelector(".pn-assistant-preview"))','Propuesta real privada con revisión antes de publicar');
+check('document.querySelector("#assistant-request").value===""','Preferencias enviadas se vacían sólo tras crear propuesta');
+B('click','button:has-text("Abrir en el editor")');B('wait','.nv-meal-plan');check('location.search.includes("propuesta=")','El editor recibe la propuesta real');
+open('/crm/seguimiento');B('wait','.pn-ac-meal:first-child');
+const mealId=js('document.querySelector(".pn-ac-meal h3").textContent');
+B('click','.pn-ac-meal:first-child button:has-text("Comentar")');B('wait','#meal-comment');
+B('fill','#meal-comment','Comentario de prueba de fase 6.');
+js('window.__qaOriginalFetch=window.fetch;window.__qaFailed=false;window.fetch=async function(...args){if(String(args[0]).includes("/messages")&&args[1]?.method==="POST"&&!window.__qaFailed){window.__qaFailed=true;throw new TypeError("Fallo de red controlado de QA");}return window.__qaOriginalFetch.apply(this,args)};true');
+B('click','button:has-text("Enviar comentario por chat")');B('wait','dialog [role=alert]');check('document.querySelector("#meal-comment").value==="Comentario de prueba de fase 6."','Comentario conserva el borrador tras fallo de red');
+B('click','button:has-text("Enviar comentario por chat")');B('wait','.pn-ac-meal:first-child');check('!document.querySelector("#meal-comment")','Comentario confirmado cierra el diálogo');js('window.fetch=window.__qaOriginalFetch;true');
+B('click','button:has-text("Pedir registro a todas")');B('wait','dialog[open]');
+js('window.__qaOriginalFetch=window.fetch;window.__qaReminderKeys=[];window.__qaLostResponse=false;window.fetch=async function(...args){if(String(args[0]).includes("accompaniment/reminders")&&args[1]?.method==="POST"){window.__qaReminderKeys.push(JSON.parse(args[1].body).request_id);const response=await window.__qaOriginalFetch.apply(this,args);if(!window.__qaLostResponse){window.__qaLostResponse=true;await new Promise(r=>setTimeout(r,1000));throw new TypeError("Respuesta perdida tras enviar en QA");}return response;}return window.__qaOriginalFetch.apply(this,args)};true');
+B('click','button:has-text("Confirmar envío de avisos")');js('window.dispatchEvent(new Event("focus"));true');
+B('wait','dialog [role=alert]');check('document.querySelector("dialog[open]").textContent.includes("Marina")','El lote conserva su sesión al recuperar foco');
+B('click','button:has-text("Reintentar avisos pendientes")');B('wait','dialog strong:has-text("Aviso enviado")');check('window.__qaReminderKeys.length===2&&window.__qaReminderKeys[0]===window.__qaReminderKeys[1]','Respuesta perdida y foco reutilizan la misma clave, sin duplicar avisos');js('window.fetch=window.__qaOriginalFetch;true');B('click','dialog button:has-text("Cerrar")');
+open('/crm/mensajes?paciente=pat-sofia');B('wait','.pn-message-replies button:has-text("Editar respuestas")');B('click','button:has-text("Editar respuestas")');B('wait','dialog[open]');B('click','button:has-text("Nueva respuesta")');B('fill','dialog label:has-text("Título") input','Seguimiento QA');B('fill','dialog textarea','Contame cómo venís con los registros.');B('click','button:has-text("Guardar respuestas")');B('wait','button[aria-label="Usar respuesta Seguimiento QA"]');
+B('fill','#nm-message','Borrador que se conserva.');const before=js('document.querySelectorAll(".nm-bubble").length');B('click','button[aria-label="Usar respuesta Seguimiento QA"]');check('document.querySelector("#nm-message").value==="Borrador que se conserva.\\n\\nContame cómo venís con los registros."','Insertar respuesta conserva el borrador');check(`document.querySelectorAll(".nm-bubble").length===${Number(before)}`,'Insertar respuesta no envía un mensaje');
+B('fill','#nm-message','');B('click','button[aria-label="Destacar conversación"]');B('wait','button[aria-label="Quitar conversación de destacadas"]');
+open('/crm/mensajes?paciente=pat-sofia');B('wait','button[aria-label="Quitar conversación de destacadas"]');check('Boolean(document.querySelector("button[aria-label=\"Usar respuesta Seguimiento QA\"]"))','Destacada y respuesta guardada persisten al recargar');
+const screens=[['asistente','/crm/desarrollo?modulo=asistente-ia','.pn-assistant-chat'],['seguimiento','/crm/seguimiento','.pn-ac-meal:first-child'],['mensajes','/crm/mensajes?paciente=pat-sofia','.pn-message-current-plan'],['progreso','/crm/progreso-global','.pn-ac-chart']];
+for(const [name,href,ready] of screens){open(href);B('wait',ready);for(const value of ['light','dark']){B('viewport','1440x900');theme(value);for(const size of ['1440x900','390x844']){B('viewport',size);settle();js('document.getElementById("nv-main").scrollTop=0;window.scrollTo(0,0);true');const measurement=JSON.parse(js('JSON.stringify({width:innerWidth,pageWidth:document.documentElement.scrollWidth,height:innerHeight,pageHeight:document.documentElement.scrollHeight})'));if(measurement.pageWidth>measurement.width+1)throw Error(`Desborde horizontal ${name} ${value} ${size}`);measurements.push({name,theme:value,...measurement});B('screenshot','--viewport',resolve(out,`${name}-${value}-${measurement.width}.png`));}}}
+B('viewport','1440x900');open('/crm/progreso-global');B('wait','.pn-ac-chart');check('document.querySelector(".pn-ac").textContent.includes("comidas registradas por semana")','Gráfico identifica su fuente sin inventar adherencia histórica');B('click','button:has-text("Año")');B('wait','.pn-ac-chart');check('document.querySelector(".pn-ac-segments button[aria-pressed=true]").textContent==="Año"','Período anual carga cifras completas');
+writeFileSync(resolve(out,'resultados.json'),JSON.stringify({date:new Date().toISOString(),checks,measurements,fixture:'Sólo datos ficticios, API3019 y web5180',commentMeal:mealId},null,2));console.log(`${checks.length} comprobaciones funcionales y ${measurements.length} capturas aprobadas.`);

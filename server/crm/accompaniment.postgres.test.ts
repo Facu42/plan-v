@@ -55,3 +55,11 @@ it('pasos recientes y archivo impiden encolar el aviso persistente',async()=>{
  const archived=await actor<{result:{skipped:boolean}}>(userA,'select public.enqueue_followup_reminder($1,gen_random_uuid()) as result',[patientA]);expect(archived[0].result.skipped).toBe(true);
  expect((await db.query<{n:number}>('select count(*)::int as n from public.outbox_events where patient_id=$1',[patientA])).rows[0].n).toBe(1);
 });
+it('archiva con motivo en una operación autorizada; el motivo no llega a la vista paciente',async()=>{
+ await expect(actor(userB,"select public.set_patient_archived_with_reason($1,true,'Ajena')",[patientA])).rejects.toThrow();
+ await actor(userA,"select public.set_patient_archived_with_reason($1,true,'Mudanza')",[patientA]);
+ expect((await actor<{archive_reason:string}>(userA,'select archive_reason from public.patients where id=$1',[patientA]))[0].archive_reason).toBe('Mudanza');
+ expect(await actor(patientUser,'select archive_reason from public.patients where id=$1',[patientA])).toEqual([]);
+ await actor(userA,"select public.set_patient_archived_with_reason($1,false,null)",[patientA]);
+ expect((await actor<{archive_reason:string|null}>(userA,'select archive_reason from public.patients where id=$1',[patientA]))[0].archive_reason).toBeNull();
+});

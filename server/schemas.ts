@@ -201,7 +201,8 @@ export const patientProfileUpdateInputSchema = z.object({
 
 export const patientArchiveInputSchema = z.object({
   archived: z.boolean(),
-});
+  archive_reason: z.string().trim().max(240).optional(),
+}).strict().refine(value => value.archived || value.archive_reason === undefined, { message: 'El motivo sólo se indica al archivar.' });
 
 export const nutritionistSetupInputSchema = z.object({
   display_name: z.string().trim().min(2).max(120),

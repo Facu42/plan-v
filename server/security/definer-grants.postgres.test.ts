@@ -215,6 +215,8 @@ const ALLOWED = [
   'send_thread_message',
   'set_organization_subscription_status',
   'set_patient_archived',
+  // Archivo con motivo: rol nutri, titularidad y bloqueo de ficha; aislamiento probado en accompaniment.postgres.
+  'set_patient_archived_with_reason',
   'set_patient_billing',
   'set_patient_charge_waived',
   'set_patient_fee',

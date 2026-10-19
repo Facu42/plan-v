@@ -42,3 +42,11 @@ it.each(['archive','steps'] as const)('revalida %s entre destinatarias del mismo
  const response=await app.request('/api/crm/accompaniment/reminders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({request_id:randomUUID(),patient_ids:['pat-sofia','pat-marina']})});
  expect(response.status).toBe(200);expect((await response.json()).results[1].status).toBe('skipped');expect(await listOutboxSnapshot('pat-marina',false)).toHaveLength(0);
 });
+it('archiva con motivo opcional validado y lo cuenta sin exponerlo al restaurar',async()=>{
+ const send=(body:unknown)=>app.request('/api/patients/pat-sofia/archive',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+ expect((await send({archived:true,archive_reason:'Mudanza'})).status).toBe(200);
+ const metrics=await (await app.request('/api/crm/accompaniment/metrics?days=30')).json();expect(metrics.archive_reasons).toContainEqual({reason:'Mudanza',count:1});
+ expect((await send({archived:true,archive_reason:'x'.repeat(241)})).status).toBe(400);
+ expect((await send({archived:false,archive_reason:'No corresponde'})).status).toBe(400);
+ expect((await send({archived:false})).status).toBe(200);
+});

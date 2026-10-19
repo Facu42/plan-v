@@ -74,9 +74,10 @@ export function buildAccompanimentMetrics(input: AccompanimentInput, days: Accom
     for (const a of activities)
         recordDay(a.patient_id, accompanimentDay(a.logged_at));
     const week = active.map(p => { const dates = datesByPatient.get(p.id) ?? new Set<string>(); const mask = Array.from({ length: 7 }, (_, i) => dates.has(shift(week_from, i))); return { id: p.id, name: p.name, days: mask, recorded_days: mask.filter(Boolean).length }; });
-    const wellbeing = habits.filter(h => h.date >= week_from && (h.energy || h.sleep_minutes != null || h.steps != null || h.symptoms?.length)).sort((a, b) => b.date.localeCompare(a.date) || a.patient_id.localeCompare(b.patient_id)).map(h => ({ id: h.patient_id, name: own.get(h.patient_id)!.name, date: h.date, energy: h.energy ?? null, sleep_minutes: h.sleep_minutes ?? null, symptoms: h.symptoms ?? [] }));
+    const wellbeing = habits.filter(h => h.date >= week_from && (h.energy || h.sleep_minutes != null || h.steps != null || h.symptoms?.length)).sort((a, b) => b.date.localeCompare(a.date) || a.patient_id.localeCompare(b.patient_id)).map(h => ({ id: h.patient_id, name: own.get(h.patient_id)!.name, date: h.date, energy: h.energy ?? null, sleep_minutes: h.sleep_minutes ?? null, steps: h.steps ?? null, symptoms: h.symptoms ?? [] }));
     const goals = active.filter(p => can(p.id, 'care_relationship') && (p.goal?.trim() || p.goal_status || p.goal_progress != null)).map(p => ({ id: p.id, name: p.name, goal: p.goal?.trim() || 'Objetivo registrado', status: p.goal_status ?? 'active', progress: finitePercent(p.goal_progress) ? p.goal_progress : null }));
     let weight_decreased = 0, weight_comparable = 0;
+    const unchanged: AccompanimentMetrics['unchanged'] = [];
     for (const p of active) {
         if (!can(p.id, 'measurement'))
             continue;
@@ -84,11 +85,12 @@ export function buildAccompanimentMetrics(input: AccompanimentInput, days: Accom
         const first = measurements[0], last = measurements[measurements.length - 1];
         if (first && last && first.captured_on !== last.captured_on) {
             weight_comparable++;
+            if (Date.parse(last.captured_on)-Date.parse(first.captured_on)>=28*86400000 && measurements.every(m=>m.value_numeric===first.value_numeric)) unchanged.push({id:p.id,name:p.name,kind:'weight',value:first.value_numeric!,unit:'kg',from:first.captured_on,to:last.captured_on});
             if (last.value_numeric! < first.value_numeric!)
                 weight_decreased++;
         }
     }
-    const adherence = active.map(p => p.adherence_score).filter(finitePercent), water = habits.filter(h => h.date >= week_from && (h.hydration_declared || h.hydration > 0) && Number.isFinite(h.hydration) && h.hydration >= 0);
+    const adherence = active.filter(p=>can(p.id,'care_relationship')).map(p => p.adherence_score).filter(finitePercent), water = habits.filter(h => h.date >= week_from && (h.hydration_declared || h.hydration > 0) && Number.isFinite(h.hydration) && h.hydration >= 0);
     const months = new Map<string, {
         month: string;
         joined: number;
@@ -120,5 +122,5 @@ export function buildAccompanimentMetrics(input: AccompanimentInput, days: Accom
     const quiet = active.filter(p => !p.created_at || accompanimentDay(p.created_at) < week_from).map(p => { const dates = [...(datesByPatient.get(p.id) ?? [])].sort(); return { id: p.id, name: p.name, last_day: dates[dates.length - 1] ?? null }; }).filter(p => !p.last_day || p.last_day < week_from);
     const activityPatients = active.filter(p => can(p.id, 'care_relationship'));
     const activityDays = new Set(activities.filter(a => can(a.patient_id, 'care_relationship') && accompanimentDay(a.logged_at) >= week_from).map(a => a.patient_id + ':' + accompanimentDay(a.logged_at))).size;
-    return { from, to, week_from, totals: { active: active.length, meals: meals.length, pending: meals.filter(m => m.status === 'pending_review').length, adherence: adherence.length ? Math.round(adherence.reduce((a, b) => a + b, 0) / adherence.length) : null, completed_goals: active.filter(p => can(p.id, 'care_relationship') && p.goal_status === 'completed' && p.goal_updated_at && inRange(accompanimentDay(p.goal_updated_at))).length, retained: active.filter(p => p.created_at && accompanimentDay(p.created_at) <= retainedFrom).length, weight_decreased, weight_comparable, activity_days: activityPatients.length ? Math.round(activityDays / activityPatients.length * 10) / 10 : null, water_glasses: water.length ? Math.round(water.reduce((n, h) => n + h.hydration, 0) / water.length * 10) / 10 : null }, week, wellbeing, goals, trend, movements: [...months.values()], archive_reasons: [...reasons].map(([reason, count]) => ({ reason, count })).sort((a, b) => b.count - a.count || a.reason.localeCompare(b.reason)), quiet };
+    return { from, to, week_from, totals: { active: active.length, meals: meals.length, pending: meals.filter(m => m.status === 'pending_review').length, adherence: adherence.length ? Math.round(adherence.reduce((a, b) => a + b, 0) / adherence.length) : null, completed_goals: active.filter(p => can(p.id, 'care_relationship') && p.goal_status === 'completed' && p.goal_updated_at && inRange(accompanimentDay(p.goal_updated_at))).length, retained: active.filter(p => p.created_at && accompanimentDay(p.created_at) <= retainedFrom).length, weight_decreased, weight_comparable, activity_days: activityPatients.length ? Math.round(activityDays / activityPatients.length * 10) / 10 : null, water_glasses: water.length ? Math.round(water.reduce((n, h) => n + h.hydration, 0) / water.length * 10) / 10 : null }, week, wellbeing, goals, trend, unchanged, movements: [...months.values()], archive_reasons: [...reasons].map(([reason, count]) => ({ reason, count })).sort((a, b) => b.count - a.count || a.reason.localeCompare(b.reason)), quiet };
 }
