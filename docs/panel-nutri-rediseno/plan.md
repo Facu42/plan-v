@@ -1,0 +1,257 @@
+# Rediseño del panel de la nutricionista: plan para desarrollar
+
+Creado el 19/10/2026 por Claude (hilo «Rediseño del panel de la nutri») a pedido de Facundo:
+«Dejá todo un plan para desarrollar con otros agentes por si te quedás sin crédito».
+Cualquier agente (Claude, Codex, Cursor) puede tomar una fase. **Leé este archivo entero antes de empezar.**
+
+## 1. Qué hay que construir
+
+Un panel nuevo para la nutricionista con las funciones que Plan V ya tiene, en el estilo que
+Facundo aprobó. La referencia visual es el boceto:
+
+- Boceto navegable: [`design/panel-nutri/bocetos.html`](../../design/panel-nutri/bocetos.html). Abrilo en el navegador.
+  Tiene 19 pantallas, las 11 pestañas de la ficha, tema claro y oscuro, menú plegable y el resumen rápido
+  de Pacientes. Copia publicada: https://claude.ai/artifact/B2CETdKwVCUY5TEJCZRcjp (privada, de Facundo).
+- Capturas: `design/panel-nutri/*.jpg`.
+
+### Decisiones de Facundo (no se discuten)
+
+| Fecha | Decisión |
+|---|---|
+| 18/10 | Rediseñar el panel de la nutri. Que sea un producto premium, con el logo de Plan V bien visible y los colores de la app de la paciente (Nutrigo: lima `#C2E66E`, crema `#F9F4F2`, tinta `#272932`, amarillo `#FFCB65`, naranja `#FFA257`) para que las dos apps se sientan una sola. Letra Poppins. |
+| 18/10 | Usar las skills de diseño y movimiento de su lista (Impeccable, Vercel web-design-guidelines, emil-design-eng, break-ui, make-interfaces-feel-better, Motion, Magic UI, transitions.dev, review-animations, improve-animations). Nada de GSAP. Animaciones de 200 a 300 ms, como máximo 500 ms. Con «reducir movimiento», solo fundidos. Un solo botón principal por fila. |
+| 19/10 00:19 | Se deja de copiar Veda: panel propio, moderno, para Plan V. |
+| 19/10 00:30 | Aprobó el Inicio: resumen del día en dos líneas, pendientes con un botón cada uno, consultas de hoy con la próxima preparada, pacientes que necesitan atención, buenas noticias, cuatro números del consultorio y accesos rápidos. Sin gráficos que solo decoran. |
+| 19/10 01:57 | Aprobó el resto de las pantallas y pidió: **todo lo que se ve tiene que funcionar** (incluidas las piezas que sumó Claude), tema oscuro, el panel sin tener que bajar para ver la parte inferior, menú lateral plegable con una flecha dentro de un círculo y animada, movimiento al pasar el mouse por la lista de pacientes y, al tocar una, un resumen con accesos a cada sección de la ficha. |
+| 19/10 02:25 | Pidió: la paciente se **despliega hacia abajo** en la misma lista (no un panel lateral); menú más ancho y con **submenús** (línea en árbol y número en círculo, como su captura); **Planes** más completo y con la paciente elegible; **fotos de comida difuminadas** de fondo en las tarjetas, sin estética de IA; todo adaptable y **sin huecos vacíos** (por ejemplo Mensajes). |
+
+Esto **reemplaza** la regla vieja de usar el gris de Nutrigo en el panel de la nutri (14/10): el panel
+pasa a tener la paleta de la app de la paciente. La app de la paciente sigue igual a Nutrigo, sin cambios.
+
+## 2. Reglas para cualquier agente
+
+1. **Antes de tocar código**, leé `CLAUDE.md`, `AGENTS.md`, `docs/coordinacion-agentes.md` y seguí
+   `.claude/skills/regression-guard/SKILL.md`. Su informe del paso 10 va en el PR.
+2. **El lado de la nutri es carril de Codex** (ver `docs/coordinacion-agentes.md`). Antes de empezar una fase,
+   anotala en la tabla de carriles con tu nombre y la rama. No empujes a ramas `codex/*` ni `respaldo/*`.
+3. **Una fase = una rama y un PR.** Nada directo a `main`: cada merge publica para usuarias reales.
+4. **No se rompe ninguna función.** Las pantallas nuevas usan las mismas rutas de la API, los mismos
+   datos y los mismos permisos. Si algo del boceto no existe en Plan V, se construye completo (con
+   API, base, pruebas) o no se muestra. Nunca un botón que no hace nada.
+5. **Migraciones**: fecha desde `20261019000000`, anotadas en la tabla de migraciones de la coordinación.
+   Aplicarlas en producción solo con la frase escrita de Facundo.
+6. **Nada de claves** en el repo ni en el chat.
+7. **Antes del PR**: `npm test`, `npm run check` y, si hay migraciones, `npm run check:migrations`.
+   Capturas a 1440×900 y 390×844, en claro y oscuro, comparadas con el boceto.
+8. **Textos** en español con voseo, cortos, sin jerga. Sin datos inventados en producción: sin dato,
+   el bloque muestra cero o un texto corto («Todavía no hay mediciones»).
+9. Al terminar, una línea en la bitácora de `docs/coordinacion-agentes.md` y el estado de la fase acá abajo.
+10. **Por partes, para que cualquier agente pueda seguir** (Codex, Claude o Cursor): un paso chico = un commit
+    empujado a GitHub. Después de cada paso, escribí en la **sección 8 (Bitácora)** qué hiciste, cómo, qué falta
+    y el próximo paso exacto. El que llega lee primero la sección 7 (Estado) y la última entrada de la sección 8.
+11. **Skills obligatorias**: las de la sección 2.1, según el tipo de trabajo.
+
+### 2.1 Skills que se usan en cada fase
+
+| Para qué | Skill | Dónde está |
+|---|---|---|
+| Antes de tocar código y en el PR | regression-guard (informe del paso 10) | `.claude/skills/` en `main` |
+| Diseño, jerarquía, color, espacios, estados vacíos | Impeccable (`craft`, `audit`, `polish`, `harden`) | rama `chore/design-skills` (`.agents/skills/impeccable`), todavía no está en `main`; Codex la tiene también en su PC |
+| Reglas de interfaz web | Vercel web-design-guidelines | rama `chore/design-skills` |
+| Detalle fino y sensación de producto premium | emil-design-eng, make-interfaces-feel-better | rama `chore/design-skills` |
+| Movimiento (200–300 ms, reducir movimiento) | review-animations, improve-animations, animation-performance; Motion para React | `.claude/skills/` en `main` |
+| Datos extremos (nombres largos, sin datos, números grandes) | break-ui | `.claude/skills/` en `main` |
+| Accesibilidad (teclado, foco, lectores de pantalla) | frontend-a11y | `.claude/skills/` en `main` |
+| Componentes React y rendimiento | react-patterns, react-performance, frontend-patterns | `.claude/skills/` en `main` |
+| Pruebas | tdd-workflow, react-testing, e2e-testing, verification-loop | `.claude/skills/` en `main` |
+| Rutas nuevas del servidor o datos de salud | security-review, postgres-patterns | `.claude/skills/` en `main` |
+
+Nada de GSAP. Si una skill no está a mano, se lee su archivo desde la rama indicada; no se reemplaza por criterio propio.
+
+## 3. Dónde vive hoy cada cosa
+
+| Pantalla nueva | Código actual que hay que reusar (no reescribir la lógica) |
+|---|---|
+| Armazón y menú | `src/components/crm/CrmDashboard.tsx`, `src/components/crm/CrmModuleView.tsx` |
+| Inicio | `src/components/nutrigo/InicioIndicators.tsx`, `src/components/nutrigo/ShowroomWorkCenter.tsx`, bandeja «Tu consultorio, hoy» (`server/crm/repository.ts`) |
+| Pacientes | `src/components/crm/CrmPatientsView.tsx`, `CrmPatientCreateDialog.tsx` |
+| Ficha (14 secciones reales) | `src/components/nutrigo/ProfessionalPatientWorkspace.tsx`, `patient-record-sections.ts`, etiquetas en `src/features/nutrigo/secondaryTranslation.ts` |
+| Notas por voz | `src/components/nutrigo/ConsultationNotes.tsx`, `server/consultations/*` (grabación, transcripción con Groq, resumen; ver `docs/consultas-habilitacion-2026-10-16.md`) |
+| Agenda | `src/components/nutrigo/ShowroomAgenda.tsx`, `showroom-calendar.ts` |
+| Consultas de la ficha | `src/components/nutrigo/ShowroomConsultations.tsx` |
+| Mensajes | `src/components/nutrigo/NutrigoMessages.tsx` |
+| Cobranzas | `ShowroomCobranzas`, `src/components/crm/CrmBillingControl.tsx`, `docs/cobros-y-panel.md` |
+| Progreso | `/crm/progreso-global` (`src/api/crm-progress.ts`, `docs/progreso-global-2026-10-10.md`) |
+| Planes | `MealPlanEditor`, `ShowroomMealPlan`, `NutritionTargetPanel` |
+| Asistente IA | `docs/ia-asistente-planes-2026-10-17.md`, tope de US$5 en el servidor |
+| Laboratorio, archivos | `CarePanel`, `ClinicalPatientWorkspace` |
+| Centro de ayuda | `src/components/nutrigo/HelpCenter.tsx` |
+
+Si un archivo cambió de nombre, buscalo con `git grep` antes de decir que no existe.
+
+### Las 11 pestañas del boceto contra las 14 secciones reales
+
+| Pestaña del boceto | Secciones reales que junta |
+|---|---|
+| Resumen | `resumen` |
+| Historia clínica | `historia` |
+| Evolución | `evolucion` |
+| Notas de consulta | `notas` |
+| Plan (con «Plan actual», «Plan semanal», «Planificación», «Lista de compras») | `plan`, `semanal`, `planificacion`, `compras` |
+| Registro alimentario | `alimentario` |
+| Laboratorio | `laboratorio` |
+| Archivos | `archivos` |
+| Consultas | `consultas` |
+| Cobros | `cobros` |
+| Chat | `chat` |
+
+Los enlaces viejos con `?seccion=` tienen que seguir abriendo la sección correcta (`recordTab`).
+
+## 4. Fases
+
+Cada fase se puede hacer sola, en este orden. Marcá el estado al empezar y al terminar.
+
+### Fase 1. Base visual: colores, tema oscuro y armazón · Estado: sin empezar
+
+- Variables de color del panel en un solo archivo (los valores claros y oscuros están en el `<style>`
+  del boceto, bloque `html[data-mock="dark"] .m`). Ningún color escrito a mano en los componentes.
+- Tema claro, oscuro y «como el sistema». Se elige en Configuración y en el menú de la cuenta; se guarda
+  en el perfil (y en el navegador para que no parpadee al entrar). El lima y el amarillo no cambian.
+- Contraste AA en los dos temas (texto chico 4,5:1).
+- Armazón nuevo: menú lateral de 288 px con logo grande de Plan V, grupos Gestión, Acompañamiento, Plan, Recursos y Cuenta.
+- **Submenús** en Pacientes (Todas, Necesitan atención, Acceso pendiente, Archivadas), Agenda, Cobranzas,
+  Mensajes y Planes (Todos los planes, Armar o editar, Pedidos de cambio): flecha que gira, apertura de
+  260 ms, línea en árbol a la izquierda y el número en un círculo oscuro. Solo queda abierto el de la sección
+  actual; cada opción filtra o lleva a su pantalla de verdad. Si el menú no entra en la altura, se desplaza solo él.
+- **Fotos de comida difuminadas** detrás de las tarjetas destacadas (resumen del día, próxima consulta,
+  accesos rápidos, números): fotos propias de Plan V (`public/landing`, `src/assets/showroom`), achicadas y
+  difuminadas de antemano (no con filtro en vivo), con una capa del color de la tarjeta encima para que el
+  texto se lea. Nada de brillos ni degradés decorativos.
+- **Menú plegable**: botón redondo con una flecha en el borde del menú. Al tocarlo, el menú se angosta a
+  84 px y queda solo con íconos (con su nombre al pasar el mouse); la flecha gira 180°. 280 ms con
+  curva suave. Se recuerda en el navegador. Con teclado: Enter y Espacio; `aria-expanded`.
+- **Se adapta al ancho y sin huecos**: el contenido usa el ancho disponible (las grillas se estiran entre
+  1280 y 1680 px) y las tarjetas toman el alto de su contenido, sin rellenos vacíos.
+- **Sin bajar para ver la parte de abajo**: el panel ocupa el alto de la ventana (`100dvh`); la página no
+  se desplaza a 1440×900. Lo largo (tablas, chats, listas) se desplaza dentro de su tarjeta. En pantallas
+  más bajas se achican espacios antes de cortar contenido. En el celular sí se desplaza la página.
+- Listo cuando: las pantallas actuales se ven bien en los dos temas, el menú pliega y despliega, y no hay
+  desplazamiento de página a 1440×900.
+
+### Fase 2. Inicio · Estado: sin empezar
+
+Bloques del boceto, todos con datos reales: resumen de la mañana (lo arma el asistente; sin IA, una frase
+con los conteos), contadores de pendientes, próxima consulta preparada (alergias, último peso, adherencia,
+lo que quedó pendiente), accesos rápidos (nueva paciente, plan con IA, copiar link de reserva, registrar cobro),
+pendientes con un botón por fila y pestañas por tipo, consultas de hoy, necesitan atención, buenas noticias
+(meta alcanzada, rachas de registro, aniversario) y cuatro números del mes.
+
+### Fase 3. Pacientes con resumen rápido · Estado: sin empezar
+
+- Tabla del boceto con filtros (Todas, Activas, Necesitan atención, Acceso pendiente, Archivadas).
+- **Movimiento al pasar el mouse**: la fila se tiñe, la foto crece un poco con un borde lima, el nombre
+  cambia a verde, la barra de adherencia se rellena de nuevo y aparece una flecha que entra desde la
+  izquierda. Entrada escalonada de filas (28 ms entre filas, 300 ms cada una). Con «reducir movimiento», solo fundidos.
+- **Al tocar una fila** (o Enter) **se despliega debajo de esa misma fila** (300 ms, una sola abierta a la vez,
+  la flecha de la fila gira) con: foto, nombre, próxima consulta,
+  adherencia, peso, cuota, avisos (adherencia baja, cuota vencida, sin acceso a la app, sin plan), lo último
+  de la consulta, y **un acceso por cada sección de la ficha** con un dato corto de cada una. Botones
+  «Escribir», «Armar plan» y «Abrir ficha completa». Se cierra tocando la fila otra vez o con Escape; el foco queda en la fila.
+- Necesita un pedido liviano a la API que traiga ese resumen por paciente (sin traer la ficha entera).
+
+### Fase 4. Ficha con sus 11 pestañas · Estado: sin empezar
+
+Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» (abre Notas de consulta) e
+«Iniciar consulta». Contenido de cada pestaña según el boceto:
+
+- **Resumen**: peso con la meta, composición, comidas por revisar, nota de la IA para aprobar, adherencia, laboratorio, datos clave.
+- **Historia clínica**: cuestionario de ingreso, datos del primer día, historia importada, «Cuidado al armar el plan» (lo respetan el editor y la IA).
+- **Evolución**: gráfico (peso, grasa, cintura, músculo), tabla de mediciones, objetivos con avance, hábitos de la semana, fotos privadas.
+- **Notas de consulta**: grabación de la videollamada con dos indicadores (micrófono y audio de la paciente), resumen y acuerdos de la IA, transcripción, «Publicar resumen revisado», otras formas (subir audio, pegar transcripción, escribir), notas anteriores y permisos. **Todo esto ya funciona en `ConsultationNotes`; es rediseño, no lógica nueva.**
+- **Plan**: plan de hoy con alternativas, pedido de cambio de la paciente (aprobar o proponer otra), planificación (calorías y macros), lista de compras.
+- **Registro alimentario**, **Laboratorio** (con tres fechas y gráfico del valor elegido), **Archivos** (con zona para arrastrar y exportar ficha en PDF), **Consultas** (con «Cerrar la consulta de hoy»), **Cobros**, **Chat**.
+
+### Fase 5. Agenda, Cobranzas y Página pública · Estado: sin empezar
+
+Agenda semanal con colores por tipo, línea de la hora, bloqueos, reservas por confirmar, tipos de consulta
+y link de reserva. Cobranzas con cobrado, por cobrar, vencido, ingresos por mes, cuotas vencidas con
+«Recordar» y movimientos. Página pública con editor y vista previa en celular. Mercado Pago, Google
+Calendar y WhatsApp quedan armados y muestran «Conectar» hasta que haya claves (no se finge conexión).
+
+### Fase 6. Acompañamiento: Asistente IA, Seguimiento, Mensajes y Progreso · Estado: sin empezar
+
+Asistente con la ficha como contexto y el gasto del mes contra el tope; nada se envía a la paciente sin
+aprobar. Seguimiento con comidas con foto, «Confirmar» y «Comentar», cómo se sienten (hábitos y síntomas,
+PR #112) y días registrados. Mensajes en tres columnas con respuesta sugerida. Progreso de toda la cartera.
+
+### Fase 7. Plan: Planes, Alimentos, Recetas, Equivalencias y Modelos · Estado: sin empezar
+
+**Todos los planes**: estado del plan de cada paciente (publicado, borrador, por vencer, sin plan) con filtros,
+números arriba y «Para hacer esta semana». **Plan de una paciente**: selector de paciente con buscador arriba,
+franja de metas (calorías, macros, peso, adherencia, restricciones), pestañas Semana, Lista de compras,
+Indicaciones y Versiones, semanas 1 a 4, publicar como paso aparte. En la semana: tocar un día muestra sus macros;
+tocar una comida muestra sus macros y tres equivalentes para reemplazarla. Pedido de cambio de la paciente con
+Aprobar. Paciente sin plan: cuatro maneras de empezar (asistente, modelo, copiar de otra paciente, desde cero).
+Todo se guarda como borrador y conserva versiones (ya existen `MealPlanEditor` y los modelos de #73).
+Alimentos (SARA 2 y propios), Recetas con foto, Equivalencias con calculadora y opción de mostrarlas en la
+app de la paciente, Modelos (planes, menús, mensajes, formularios) con «Aplicar a paciente».
+
+### Fase 8. Recursos y Cuenta: Biblioteca, Ayuda, Equipo y Configuración · Estado: sin empezar
+
+Biblioteca para compartir material, Centro de ayuda con buscador y preguntas, Equipo con roles y permisos,
+Configuración por secciones (perfil, consultorio, seguridad, avisos, cuotas, conexiones, plan, privacidad, tema).
+
+### Fase 9. Pulido y cierre · Estado: sin empezar
+
+Pasada de break-ui (sin datos, nombres largos, una sola medición), auditoría de Impeccable, revisión de
+animaciones (review-animations) en video corto, accesibilidad con teclado y lector de pantalla, celular
+en todas las pantallas. Recorridos de punta a punta de los flujos críticos.
+
+## 5. Piezas que sumó Claude y que tienen que funcionar
+
+Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, construirlas completas.
+
+| Pieza | Dónde | Cómo hacerla funcionar |
+|---|---|---|
+| Sesiones abiertas y «Cerrar las demás» | Configuración › Seguridad | Cerrar las demás: `supabase.auth.signOut({ scope: 'others' })`. Listar: el navegador no puede leer las sesiones de Supabase; hace falta una ruta del servidor que las lea con permisos de servidor solo para la propia cuenta (dispositivo, ciudad aproximada, último uso). Revisión de seguridad obligatoria. |
+| Respuestas guardadas | Mensajes y Chat de la ficha | Reusar los modelos de tipo «Mensaje» de Modelos si existen; si no, tabla nueva por consultorio con permisos por fila. Al tocar una, se pega en el cuadro de texto (no se envía sola). |
+| Actividad del equipo | Equipo | Registro de acciones del consultorio (quién, qué, cuándo, sin contenido clínico). Ver si la pila de Codex de equipo y recepción ya guarda uno antes de crear otro. |
+| Pacientes nuevas y bajas | Progreso | Se calcula con la fecha de alta y la de archivo de cada paciente; el motivo de baja es un campo opcional al archivar. |
+| Cómo se sienten y días registrados | Seguimiento | Hábitos y síntomas (PR #112) y comidas de los últimos 7 días. |
+| «Pedir registro a todas» | Seguimiento | Aviso dentro de la app a las pacientes sin registros; push y WhatsApp cuando estén conectados. |
+| Tema oscuro y menú plegable | Todo el panel | Fase 1. |
+| Resumen rápido de la paciente | Pacientes | Fase 3. |
+
+## 6. Cómo se revisa cada fase
+
+1. Capturas en 1440×900 y 390×844, claro y oscuro, al lado del boceto.
+2. `npm test` y `npm run check` en verde; pruebas nuevas para cada función nueva.
+3. Informe del paso 10 de regression-guard en el PR.
+4. Mostrarle a Facundo la página andando como Artifact (las vistas de Vercel le piden login).
+5. Juntar a `main` cuando el PR esté terminado, en verde y sin choques (regla del 17/10). La base, solo con su frase.
+
+## 7. Estado
+
+| Fase | Dueño | Rama / PR | Estado |
+|---|---|---|---|
+| Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
+| 1 a 9 | Codex (elegido por Facundo el 19/10; si se queda sin crédito sigue Cursor) | — | Sin empezar. Próximo paso: Fase 1 |
+
+## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+Formato de cada entrada, para que el siguiente agente siga sin preguntar:
+
+```
+### AAAA-MM-DD HH:MM · Agente · Fase N, paso M
+- Hecho: qué quedó funcionando (pantallas, rutas, pruebas).
+- Cómo: decisiones tomadas, archivos principales, skills usadas.
+- Rama y commit: nombre de la rama, commit, PR.
+- Falta: lo que queda de la fase.
+- Próximo paso exacto: qué archivo abrir y qué hacer primero.
+```
+
+### 2026-10-19 · Claude · Bocetos y plan
+- Hecho: boceto navegable (`design/panel-nutri/bocetos.html`) y este plan, aprobados por Facundo.
+- Rama y commit: `claude/rediseno-panel-nutri-bocetos-iw3aor`, PR #148 (solo documentos).
+- Próximo paso exacto: Fase 1. Crear la rama desde `main` actualizado, leer la sección 2 y el bloque
+  `html[data-mock="dark"] .m` del boceto para pasar los colores a variables del panel.
