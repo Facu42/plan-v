@@ -159,7 +159,7 @@ pendientes con un botón por fila y pestañas por tipo, consultas de hoy, necesi
   «Escribir», «Armar plan» y «Abrir ficha completa». Se cierra tocando la fila otra vez o con Escape; el foco queda en la fila.
 - Necesita un pedido liviano a la API que traiga ese resumen por paciente (sin traer la ficha entera).
 
-### Fase 4. Ficha con sus 11 pestañas · Estado: sin empezar
+### Fase 4. Ficha con sus 11 pestañas · Estado: en curso por Codex en `codex/panel-nutri-fase-4` (no se toca desde esta rama)
 
 Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» (abre Notas de consulta) e
 «Iniciar consulta». Contenido de cada pestaña según el boceto:
@@ -171,7 +171,7 @@ Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» 
 - **Plan**: plan de hoy con alternativas, pedido de cambio de la paciente (aprobar o proponer otra), planificación (calorías y macros), lista de compras.
 - **Registro alimentario**, **Laboratorio** (con tres fechas y gráfico del valor elegido), **Archivos** (con zona para arrastrar y exportar ficha en PDF), **Consultas** (con «Cerrar la consulta de hoy»), **Cobros**, **Chat**.
 
-### Fase 5. Agenda, Cobranzas y Página pública · Estado: sin empezar
+### Fase 5. Agenda, Cobranzas y Página pública · Estado: reservada por Cursor (autorizado por Facundo 19/10 porque Codex sin crédito)
 
 Agenda semanal con colores por tipo, línea de la hora, bloqueos, reservas por confirmar, tipos de consulta
 y link de reserva. Cobranzas con cobrado, por cobrar, vencido, ingresos por mes, cuotas vencidas con
@@ -237,8 +237,10 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
 | 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Integrada a main `1f48adf`; web, API y worker comprobados |
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
-| 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Hecha y verificada; controles remotos en curso |
-| 4 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
+| 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main `6697d28` |
+| 4 | Codex | `codex/panel-nutri-fase-4` | En curso; no se toca desde la fase 5 |
+| 5 | Cursor | `cursor/panel-nutri-fase-5` | Reservada; autorizado por Facundo 19/10 porque Codex sin crédito |
+| 6 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
@@ -252,6 +254,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 13:08 · Cursor · Fase 5, paso 0 (reserva)
+- Hecho: fase 5 reservada antes de cambiar código. Facundo autorizó que Cursor tome la fase 5 porque Codex se quedó sin crédito. Codex sigue con la fase 4 en `codex/panel-nutri-fase-4`; esta rama no toca esa rama ni sus archivos de ficha.
+- Cómo: leídos el plan, la Bitácora de `origin/codex/panel-nutri-fase-4` (solo lectura; último paso: pestañas de la ficha conectadas), la coordinación y Regression Guard. Base `origin/main` `6697d28` (fase 3 integrada).
+- Rama y commit: `cursor/panel-nutri-fase-5`, desde `origin/main` `6697d28`. Sin cambios de base de producción.
+- Falta: Agenda semanal, Cobranzas, Página pública, y Mercado Pago, Google Calendar y WhatsApp mostrando «Conectar» sin fingir conexión. Pruebas, comparación en 1440 y 390, claro y oscuro, e informe para el PR.
+- Próximo paso exacto: abrir `design/panel-nutri/bocetos.html` en Agenda, Cobranzas y Página pública y mapearlas contra la agenda, las cobranzas y la página pública que ya existen.
 
 ### 2026-10-19 · Codex · Fase 3, paso 6 (recorrido con cuentas)
 - Hecho: e2e y verify aprobados en el control remoto de a1b61bf. signed-auth llegó hasta edición/archivo y encontró sus selectores previos al menú; se actualizan para abrir Más opciones antes de editar, archivar y restaurar.
