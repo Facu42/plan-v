@@ -138,7 +138,7 @@ Cada fase se puede hacer sola, en este orden. Marcá el estado al empezar y al t
 - Listo cuando: las pantallas actuales se ven bien en los dos temas, el menú pliega y despliega, y no hay
   desplazamiento de página a 1440×900.
 
-### Fase 2. Inicio · Estado: sin empezar
+### Fase 2. Inicio · Estado: en curso, Codex (`codex/panel-nutri-fase-2`)
 
 Bloques del boceto, todos con datos reales: resumen de la mañana (lo arma el asistente; sin IA, una frase
 con los conteos), contadores de pendientes, próxima consulta preparada (alergias, último peso, adherencia,
@@ -235,8 +235,9 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | Fase | Dueño | Rama / PR | Estado |
 |---|---|---|---|
 | Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
-| 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Hecha; lista para revisar, sin integrar |
-| 2 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Próximo paso: fase 2 (Inicio), sobre la base de #150 |
+| 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Integrada a main `1f48adf`; web, API y worker comprobados |
+| 2 | Codex | `codex/panel-nutri-fase-2` | En curso: Inicio; reserva previa al código |
+| 3 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
@@ -250,6 +251,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 · Codex · Fase 2, paso 0 (reserva)
+- Hecho: fase 2 reservada antes de cambiar código. Facundo pidió «Continúa con el resto» después de integrar #150; se continúa en orden, una rama y PR por fase.
+- Cómo: base main `1f48adf` publicada y comprobada (web, API y worker); leídos plan, Bitácora, coordinación y Regression Guard. Se conserva el boceto aprobado y las funciones existentes.
+- Rama y commit: `codex/panel-nutri-fase-2`, desde origin/main. Sin cambios de base de producción.
+- Falta: Inicio completo, datos reales, pruebas, comparación 1440/390 en ambos temas e informe para el PR.
+- Próximo paso exacto: leer ProfessionalWorkQueue.tsx, InicioIndicators.tsx y server/crm/repository.ts; mapear datos disponibles contra el Inicio de bocetos.html y escribir las pruebas de los huecos funcionales.
 
 ### 2026-10-19 · Codex · Fase 1, paso 3 (cierre)
 - Hecho: fase 1 entregada en [PR #150](https://github.com/Facu42/plan-v/pull/150), con informe Regression Guard completo en el cuerpo. 3.132 pruebas aprobadas y dos omitidas (483 archivos), tipos, compilación y secretos aprobados. 22 comprobaciones y 72 medidas de navegador; revisión de código y visual independientes aprobadas para el armazón.

@@ -25,7 +25,7 @@ visto bueno de Facundo.
 | Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Ánimo y síntomas publicado (PR #112, 14/10). Recorridos de punta a punta y monitor en main (#114, 15/10). Aviso de recurso indicado en PR propio. El resto, por empezar |
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
-| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (fase 1) | `claude/rediseno-panel-nutri-bocetos-iw3aor`, [plan](panel-nutri-rediseno/plan.md) | Fase 1 entregada por Codex en [PR #150](https://github.com/Facu42/plan-v/pull/150), rama `codex/panel-nutri-fase-1`. Sin integrar. Sigue fase 2 (Inicio); no modifica #147 de Cursor |
+| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (desarrollo) | `codex/panel-nutri-fase-2`, [plan](panel-nutri-rediseno/plan.md) | Fase 1 integrada por #150 (`1f48adf`); fase 2 (Inicio) reservada y en curso por Codex. Facundo pidió continuar el resto, una rama y PR por fase; no modifica #147 de Cursor |
 
 ## 2. Reglas para no pisarse
 
@@ -73,6 +73,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **19/10 · Codex · Inicio fase 2** · Reserva previa al código en `codex/panel-nutri-fase-2`, desde main `1f48adf`. #150 integrado con autorización de Facundo; web, API y worker aprobados. Continúa Inicio según el boceto, seguido por las fases restantes, cada una en su rama y PR. Sin cambios de base de producción.
 
 - **19/10 · Codex · Cierre fase 1** · [PR #150](https://github.com/Facu42/plan-v/pull/150), rama `codex/panel-nutri-fase-1`: tema y armazón del boceto #148, submenús reales y menú plegable. 3.132 pruebas y dos omitidas; tipos/build/secretos aprobados; 22 comprobaciones y 72 medidas. [Informe y límites](panel-nutri-rediseno/fase-1-verificacion.md). Sigue fase 2 (Inicio) sobre esta base; sin merge ni producción.
 
