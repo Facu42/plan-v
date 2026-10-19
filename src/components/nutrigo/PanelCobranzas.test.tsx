@@ -17,6 +17,7 @@ describe('Cobranzas del boceto', () => {
     expect(html).not.toContain('WhatsApp');
     expect(html).toContain('escribirle por el chat');
     expect(html).toContain('aria-label="Ver cobranzas de Camila Torres de los Remedios"');
+    expect(html).toContain('class="p5-moves"');
     expect(html).not.toContain('Sofía');
   });
 

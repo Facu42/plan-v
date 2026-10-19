@@ -1,6 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-19)
 
-19/10 · Cursor · Fase 5 trae la fase 4 de main y sigue en [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar hasta que los controles estén verdes. WhatsApp salió del panel. La ficha de #154 convive con Agenda, Cobranzas y Página pública. Sin SQL remoto.
+19/10 · Cursor · El celular de Agenda y Cobranzas que ya está en main se arregla en `cursor/arreglo-mobile-fase5`, [PR #158](https://github.com/Facu42/plan-v/pull/158), borrador contra main. Un título, sin el bloque de paciente, turnos en filas y menú inferior fijo. No se junta. La fase 5 original sigue en [PR #153](https://github.com/Facu42/plan-v/pull/153). WhatsApp salió del panel. Sin SQL remoto.
 
 ## 19/10 · Ficha de la nutri, fase 4
 

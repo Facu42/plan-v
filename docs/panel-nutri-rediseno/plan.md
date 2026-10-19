@@ -244,6 +244,13 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-19 23:30 · Cursor · Celular de Agenda y Cobranzas
+- Hecho: Facu rechazó el celular. Agenda y Cobranzas muestran el título una sola vez. El bloque Pacientes/Ficha/Plan no aparece ahí. Cada turno es una fila con la hora, el nombre y la etiqueta separada. En el celular, Movimientos es una lista de tarjetas y el nombre no se parte letra por letra. El menú inferior queda fijo y deja espacio, así no tapa el contenido.
+- Cómo: se aplicaron break-ui, frontend-patterns, frontend-a11y y verification-loop. Se midió 360, 390 y 430: sin desborde y con botones de al menos 44 px. Las capturas se sacaron del panel real, con su menú, y quedaron al lado del boceto de escritorio en `design/panel-nutri/fase-5/`. No hay boceto de celular.
+- Rama y PR: `cursor/arreglo-mobile-fase5`, [PR #158](https://github.com/Facu42/plan-v/pull/158), borrador contra main. No se junta. El arreglo de las pantallas de suscripciones va en el PR #156.
+- Falta: anotar el resultado de la suite al cerrar el control.
+- Próximo paso exacto: cerrar el control de esta rama. No juntar a main.
+
 ### 2026-10-19 18:40 · Cursor · Fase 5, paso 4 (junto con la fase 4)
 - Hecho: se trajo main a esta rama. La ficha de la fase 4 y Agenda, Cobranzas y Página pública conviven. En Cobranzas, Ver vuelve a llamarse «Ver cobranzas de…» para abrir la cuota. Si todavía no hay movimientos, el recorrido abre Registrar cobro.
 - Cómo: merge de `origin/main` sin rebase. Se conservan las dos bitácoras. No se tocó el servidor.
