@@ -47,3 +47,5 @@ Sigue fase 4: Ficha con las once pestañas del boceto, conservando los accesos o
 ## Control remoto del PR #152
 
 La primera ejecución E2E de CI falló por un selector anterior al rediseño: intentaba Abrir ficha/plan sin abrir Más opciones. Se actualiza el recorrido para pulsar primero el menú visible, conservando todas las aserciones. Integración pendiente hasta que la nueva ejecución y signed-auth estén aprobadas; no se integra con un control rojo.
+
+El nuevo e2e y verify quedaron aprobados en a1b61bf. signed-auth completó plan, cobros, mensajes, archivos, revisión y permisos, y se detuvo en edición por sus selectores anteriores al menú. Se actualiza también ese recorrido para abrir Más opciones, conservando sus comprobaciones y esperando persistencia del archivo antes de restaurar. Se requiere verde en la nueva cabeza antes de integrar.

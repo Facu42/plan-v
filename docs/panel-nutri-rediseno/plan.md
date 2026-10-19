@@ -253,6 +253,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
 
+### 2026-10-19 · Codex · Fase 3, paso 6 (recorrido con cuentas)
+- Hecho: e2e y verify aprobados en el control remoto de a1b61bf. signed-auth llegó hasta edición/archivo y encontró sus selectores previos al menú; se actualizan para abrir Más opciones antes de editar, archivar y restaurar.
+- Cómo: sólo cambia el recorrido; mantiene todas las comprobaciones y agrega esperar archivo persistido antes de restaurar. Sintaxis del script aprobada. Sin cambio de app, permisos ni migraciones.
+- Rama y commit: codex/panel-nutri-fase-3, PR #152.
+- Falta: nuevo signed-auth y controles de la cabeza actual. No integrar hasta todos verdes. Fase4 respaldada en 37c239e.
+- Próximo paso exacto: volver a fase4 y completar Laboratorio/Notas/Plan mientras termina CI; después conciliar main al integrar #152.
+
 ### 2026-10-19 · Codex · Fase 3, paso 5 (control remoto)
 - Hecho: CI detectó que el recorrido de ingreso seguía pulsando Abrir ficha/plan sin desplegar Más opciones. Actualizado el recorrido para usar el menú visible, sin cambiar la app ni retirar verificaciones.
 - Cómo: tipos, suite completa y /browse del código siguen aprobados. Se ejecuta nuevamente la historia de seis flujos con el selector actual; el entorno local instala el navegador fijado por Playwright. No se integra con CI rojo.
