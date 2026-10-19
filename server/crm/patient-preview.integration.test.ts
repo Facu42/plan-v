@@ -7,6 +7,16 @@ import { CONSENT_CATALOG } from '../intake/consent.js';
 
 describe('resumen liviano de paciente para el directorio', () => {
   beforeEach(() => resetStore());
+  it('carga las columnas sin notas ni ficha completa y valida todo el lote antes de consultar', async () => {
+    const rows = (ids: string[]) => app.request('/api/crm/patients/directory-summary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ patient_ids: ids }) });
+    const response = await rows(['pat-sofia','pat-marina']);
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.patients.map((p: {patient_id:string}) => p.patient_id)).toEqual(['pat-sofia','pat-marina']);
+    expect(Object.keys(body.patients[0]).sort()).toEqual(['can_open','latest_weight','patient_id','plan']);
+    expect((await rows(['pat-sofia','ajena'])).status).toBe(403);
+    expect((await rows(Array(51).fill('pat-sofia'))).status).toBe(400);
+  });
   it('devuelve todos los accesos de la ficha con respuesta acotada, sin transcripción ni archivos', async () => {
     const response = await app.request('/api/crm/patients/pat-sofia/preview');
     expect(response.status).toBe(200);

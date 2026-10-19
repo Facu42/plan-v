@@ -236,8 +236,8 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 |---|---|---|---|
 | Bocetos y este plan | Claude | `claude/rediseno-panel-nutri-bocetos-iw3aor` | Hecho el 19/10 |
 | 1 | Codex | `codex/panel-nutri-fase-1` · [PR #150](https://github.com/Facu42/plan-v/pull/150) | Integrada a main `1f48adf`; web, API y worker comprobados |
-| 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Hecha y verificada; CI del PR en curso |
-| 3 | Codex | `codex/panel-nutri-fase-3` | Reservada antes del código; depende de #151 hasta integrarlo |
+| 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
+| 3 | Codex | `codex/panel-nutri-fase-3` | Implementada; QA final en curso, #151 integrado |
 | 4 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
@@ -252,6 +252,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 · Codex · Fase 3, paso 1 (tabla y contrato)
+- Hecho: tabla del boceto, cinco filtros, columnas/densidad conservadas, acciones en Más opciones, resumen desplegable con 14 accesos y datos por sección. Plan y peso se cargan en lotes de metadata; sólo abrir la fila pide el resumen. Inicio #151 integrado a main 4dc9a79, controles remotos aprobados.
+- Cómo: pruebas RED antes de implementar; 28 casos focales aprobados. API autorizada por consultorio y consentimiento, archivo sin contenido clínico, resumen de consulta publicado acotado. Revisión detectó consulta de cobros global: corregida a get_patient_ledger y cubierta con aserción Postgres. Sin tablas ni SQL remoto.
+- Rama y commit: codex/panel-nutri-fase-3; respaldo de implementación y conciliación con main antes de la QA final.
+- Falta: QA visual y de teclado/móvil, fire test, revisión final de ambos agentes, suite completa, informe y PR propio.
+- Próximo paso exacto: ejecutar recorridos de Pacientes con /browse en ambos temas y tamaños; cerrar observaciones y registrar evidencia.
 
 ### 2026-10-19 · Codex · Fase 3, paso 0 (reserva)
 - Hecho: fase 3 reservada antes del código; Inicio está en #151 y sus controles remotos corren.

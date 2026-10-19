@@ -25,7 +25,7 @@ visto bueno de Facundo.
 | Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Ánimo y síntomas publicado (PR #112, 14/10). Recorridos de punta a punta y monitor en main (#114, 15/10). Aviso de recurso indicado en PR propio. El resto, por empezar |
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
-| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (desarrollo) | `codex/panel-nutri-fase-2`, [plan](panel-nutri-rediseno/plan.md) | Fase 1 integrada por #150 (`1f48adf`); fase 2 verificada en [PR #151](https://github.com/Facu42/plan-v/pull/151), CI en curso. Sigue fase 3. Facundo pidió continuar el resto, una rama y PR por fase; no modifica #147 de Cursor |
+| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (desarrollo) | `codex/panel-nutri-fase-3`, [plan](panel-nutri-rediseno/plan.md) | Fase 1 integrada por #150; fase 2 verificada en [PR #151](https://github.com/Facu42/plan-v/pull/151), CI en curso. Fase 3 reservada y en curso por Codex. Una rama y PR por fase; no modifica #147 de Cursor |
 
 ## 2. Reglas para no pisarse
 

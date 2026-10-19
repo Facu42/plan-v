@@ -1,23 +1,23 @@
 import { describe, expect, it } from 'vitest';
 import {
-  DEFAULT_DIRECTORY_LAYOUT, directoryGridTemplate, loadDirectoryLayout, parseDirectoryLayout, saveDirectoryLayout, toggleDirectoryColumn,
+  DIRECTORY_COLUMNS, DEFAULT_DIRECTORY_LAYOUT, directoryGridTemplate, loadDirectoryLayout, parseDirectoryLayout, saveDirectoryLayout, toggleDirectoryColumn,
 } from './directory-columns';
 
 describe('columnas del directorio de pacientes', () => {
-  it('por defecto muestra las cinco columnas de siempre', () => {
-    expect(directoryGridTemplate(DEFAULT_DIRECTORY_LAYOUT).split(') ')).toHaveLength(5);
+  it('por defecto muestra las ocho columnas del boceto', () => {
+    expect(directoryGridTemplate(DEFAULT_DIRECTORY_LAYOUT).split(') ')).toHaveLength(8);
   });
 
   it('ocultar una columna saca su ancho y volver a elegirla la devuelve', () => {
     const hidden = toggleDirectoryColumn(DEFAULT_DIRECTORY_LAYOUT, 'focus');
-    expect(hidden.hidden).toEqual(['lastVisit', 'connection', 'focus']);
-    expect(directoryGridTemplate(hidden)).not.toContain('140px');
+    expect(hidden.hidden).toEqual(['weekly', 'lastVisit', 'focus']);
+    expect(directoryGridTemplate(DEFAULT_DIRECTORY_LAYOUT)).toContain('125px');
+    expect(directoryGridTemplate(hidden)).not.toContain('125px');
     expect(directoryGridTemplate(toggleDirectoryColumn(hidden, 'focus'))).toBe(directoryGridTemplate(DEFAULT_DIRECTORY_LAYOUT));
   });
 
   it('Paciente y Acciones quedan aunque se oculte todo lo demás', () => {
-    const all = ['status', 'focus', 'weekly'] as const;
-    const layout = all.reduce(toggleDirectoryColumn, DEFAULT_DIRECTORY_LAYOUT);
+    const layout = {...DEFAULT_DIRECTORY_LAYOUT,hidden:DIRECTORY_COLUMNS.map(c=>c.id)};
     expect(directoryGridTemplate(layout).split(') ')).toHaveLength(2);
   });
 
@@ -40,9 +40,9 @@ describe('columnas del directorio de pacientes', () => {
 });
 
 describe('columnas opcionales del directorio', () => {
-  it('Última consulta y Conexión arrancan ocultas y al activarlas suman su ancho', () => {
-    expect(DEFAULT_DIRECTORY_LAYOUT.hidden).toEqual(['lastVisit', 'connection']);
-    const shown = toggleDirectoryColumn(toggleDirectoryColumn(DEFAULT_DIRECTORY_LAYOUT, 'lastVisit'), 'connection');
-    expect(directoryGridTemplate(shown).split(') ')).toHaveLength(7);
+  it('Registro semanal y Última consulta siguen disponibles como columnas adicionales', () => {
+    expect(DEFAULT_DIRECTORY_LAYOUT.hidden).toEqual(['weekly', 'lastVisit']);
+    const shown = toggleDirectoryColumn(toggleDirectoryColumn(DEFAULT_DIRECTORY_LAYOUT, 'lastVisit'), 'weekly');
+    expect(directoryGridTemplate(shown).split(') ')).toHaveLength(10);
   });
 });
