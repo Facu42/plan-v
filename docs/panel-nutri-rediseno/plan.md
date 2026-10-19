@@ -248,7 +248,7 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 - Hecho: Facu rechazó el celular. Agenda y Cobranzas muestran el título una sola vez. El bloque Pacientes/Ficha/Plan no aparece ahí. Cada turno es una fila con la hora, el nombre y la etiqueta separada. En el celular, Movimientos es una lista de tarjetas y el nombre no se parte letra por letra. El menú inferior queda fijo y deja espacio, así no tapa el contenido.
 - Cómo: se aplicaron break-ui, frontend-patterns, frontend-a11y y verification-loop. Se midió 360, 390 y 430: sin desborde y con botones de al menos 44 px. Las capturas se sacaron del panel real, con su menú, y quedaron al lado del boceto de escritorio en `design/panel-nutri/fase-5/`. No hay boceto de celular.
 - Rama y PR: `cursor/arreglo-mobile-fase5`, [PR #158](https://github.com/Facu42/plan-v/pull/158), borrador contra main. No se junta. El arreglo de las pantallas de suscripciones va en el PR #156.
-- Falta: anotar el resultado de la suite al cerrar el control.
+- Falta: nada de esta rama. Quedó con 3.192 pruebas y 2 omitidas, tipos en verde. No se junta a main.
 - Próximo paso exacto: cerrar el control de esta rama. No juntar a main.
 
 ### 2026-10-19 18:40 · Cursor · Fase 5, paso 4 (junto con la fase 4)
