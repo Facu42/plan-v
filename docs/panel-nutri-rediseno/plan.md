@@ -171,7 +171,7 @@ Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» 
 - **Plan**: plan de hoy con alternativas, pedido de cambio de la paciente (aprobar o proponer otra), planificación (calorías y macros), lista de compras.
 - **Registro alimentario**, **Laboratorio** (con tres fechas y gráfico del valor elegido), **Archivos** (con zona para arrastrar y exportar ficha en PDF), **Consultas** (con «Cerrar la consulta de hoy»), **Cobros**, **Chat**.
 
-### Fase 5. Agenda, Cobranzas y Página pública · Estado: en curso por Cursor (autorizado por Facundo 19/10 porque Codex sin crédito)
+### Fase 5. Agenda, Cobranzas y Página pública · Estado: lista para revisar (Cursor, autorizado por Facundo 19/10 porque Codex sin crédito)
 
 Agenda semanal con colores por tipo, línea de la hora, bloqueos, reservas por confirmar, tipos de consulta
 y link de reserva. Cobranzas con cobrado, por cobrar, vencido, ingresos por mes, cuotas vencidas con
@@ -239,7 +239,7 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
 | 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main `6697d28` |
 | 4 | Codex | `codex/panel-nutri-fase-4` | En curso; no se toca desde la fase 5 |
-| 5 | Cursor | `cursor/panel-nutri-fase-5` | En curso; autorizado por Facundo 19/10 porque Codex sin crédito |
+| 5 | Cursor | `cursor/panel-nutri-fase-5` | Lista para revisar; autorizado por Facundo 19/10 porque Codex sin crédito |
 | 6 a 9 | Codex (si se queda sin crédito sigue Cursor) | — | Pendientes, una rama y PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
@@ -254,6 +254,13 @@ Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 - Falta: lo que queda de la fase.
 - Próximo paso exacto: qué archivo abrir y qué hacer primero.
 ```
+
+### 2026-10-19 14:45 · Cursor · Fase 5, paso 2 (cierre)
+- Hecho: las tres pantallas quedaron en la rama y se conservaron las acciones que ya tenía la agenda: confirmar, cancelar y reprogramar, revisar transferencias, conciliar Mercado Pago, sincronizar el calendario, desconectar Google o Mercado Pago, ver más reservas y más fichas, seña por tipo, Meet, alias y agendas. Mercado Pago, Google Calendar y WhatsApp siguen en Conectar si el servidor no tiene claves. `npm run check` pasó. Las pruebas de estas pantallas: 13 en 5 archivos. La suite completa: 3171 pasaron, 2 omitidas y 5 fallaron en `server/security/mfa.test.ts` y `server/db/supabase-client.test.ts` porque esta máquina usa Node 20 y no tiene WebSocket nativo; esos archivos no están en el diff.
+- Cómo: mismas rutas de agenda, cobros y página pública. Sin migración. La ficha de Codex no se tocó. No hay capturas de navegador en 1440 y 390: en esta sesión no hubo navegador.
+- Rama y commit: `cursor/panel-nutri-fase-5`. PR contra main, sin juntar.
+- Falta: que Facundo mire las pantallas y, si cierran, juntarlas. La comparación lado a lado con el boceto queda para quien tenga navegador.
+- Próximo paso exacto: fase 6 (Asistente IA, Seguimiento, Mensajes y Progreso), en otra rama, cuando se tome.
 
 ### 2026-10-19 14:05 · Cursor · Fase 5, paso 1 (pantallas)
 - Hecho: Agenda semanal (día, semana y mes) con colores por tipo, línea de la hora, bloqueos, reservas por confirmar y tipos de consulta. Cobranzas con cobrado, por cobrar, vencido, ingresos por mes, cuotas vencidas con Recordar y movimientos. Página pública con editor y vista previa. Mercado Pago, Google Calendar y WhatsApp muestran Conectar y no figuran conectados si el servidor no tiene claves.

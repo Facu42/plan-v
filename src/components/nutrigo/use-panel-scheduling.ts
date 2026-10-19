@@ -14,19 +14,23 @@ export function usePanelScheduling() {
   const [busy, setBusy] = useState(false);
   const [whatsapp, setWhatsapp] = useState(false);
   const [patients, setPatients] = useState<Array<{ id: string; name: string }>>([]);
+  const [bookingMore, setBookingMore] = useState(false);
+  const [patientMore, setPatientMore] = useState(false);
 
   const load = useCallback((signal?: AbortSignal) => {
     setError('');
     return Promise.all([
       schedulingApi.workspace(0, signal),
       request<{ enabled?: boolean }>('/api/portfolio/communications', { signal }).then(body => Boolean(body.enabled)).catch(() => false),
-      api.getPatients({ limit: 100, offset: 0 }, { signal }).then(body => body.patients.map(patient => ({ id: patient.id, name: patient.name }))).catch(() => []),
-    ]).then(([next, enabled, list]) => {
+      api.getPatients({ limit: 100, offset: 0 }, { signal }).then(body => ({ list: body.patients.map(patient => ({ id: patient.id, name: patient.name })), more: Boolean(body.page?.has_more) })).catch(() => ({ list: [] as Array<{ id: string; name: string }>, more: false })),
+    ]).then(([next, enabled, people]) => {
       if (signal?.aborted) return;
       setSnapshot(next);
       setConfig(next.profile.config);
       setWhatsapp(enabled);
-      setPatients(list);
+      setPatients(people.list);
+      setBookingMore(next.has_more);
+      setPatientMore(people.more);
     }).catch(reason => {
       if (signal?.aborted) return;
       setError(friendlyError(reason));
@@ -44,7 +48,7 @@ export function usePanelScheduling() {
     try {
       await schedulingApi.save(snapshot?.profile.revision ?? 0, next);
       const fresh = await schedulingApi.workspace();
-      setSnapshot(fresh); setConfig(fresh.profile.config); setStatus(message);
+      setSnapshot(fresh); setConfig(fresh.profile.config); setBookingMore(fresh.has_more); setStatus(message);
       return true;
     } catch (reason) { setStatus(friendlyError(reason)); return false; }
     finally { setBusy(false); }
@@ -75,6 +79,60 @@ export function usePanelScheduling() {
     finally { setBusy(false); }
   }
 
+  async function disconnect(provider: 'google' | 'mercadopago') {
+    setBusy(true); setStatus('');
+    try {
+      await schedulingApi.disconnect(provider);
+      await load();
+      setStatus('Conexión eliminada del consultorio.');
+    } catch (reason) { setStatus(friendlyError(reason)); }
+    finally { setBusy(false); }
+  }
+
+  async function loadMoreBookings() {
+    setBusy(true); setStatus('');
+    try {
+      const next = await schedulingApi.workspace(snapshot?.bookings.length ?? 0);
+      setSnapshot(old => old ? { ...next, bookings: mergeById(old.bookings, next.bookings), transfers: mergeById(old.transfers, next.transfers) } : next);
+      setBookingMore(next.has_more);
+    } catch (reason) { setStatus(friendlyError(reason)); }
+    finally { setBusy(false); }
+  }
+
+  async function loadMorePatients() {
+    setBusy(true); setStatus('');
+    try {
+      const body = await api.getPatients({ limit: 100, offset: patients.length });
+      setPatients(current => mergeById(current, body.patients.map(patient => ({ id: patient.id, name: patient.name }))));
+      setPatientMore(Boolean(body.page?.has_more));
+    } catch (reason) { setStatus(friendlyError(reason)); }
+    finally { setBusy(false); }
+  }
+
+  async function syncBooking(id: string) {
+    setBusy(true); setStatus('');
+    try { await schedulingApi.sync(id); setStatus('Sincronización solicitada.'); }
+    catch (reason) { setStatus(friendlyError(reason)); }
+    finally { setBusy(false); }
+  }
+
+  async function reconcileBooking(id: string) {
+    setBusy(true); setStatus('');
+    try { await schedulingApi.reconcile(id); setStatus('Pagos de Mercado Pago revisados.'); }
+    catch (reason) { setStatus(friendlyError(reason)); }
+    finally { setBusy(false); }
+  }
+
+  async function reviewTransfer(id: string, decision: 'confirm' | 'reject') {
+    setBusy(true); setStatus('');
+    try {
+      await schedulingApi.reviewTransfer(id, decision);
+      await load();
+      setStatus(decision === 'confirm' ? 'Transferencia confirmada.' : 'Transferencia rechazada.');
+    } catch (reason) { setStatus(friendlyError(reason)); }
+    finally { setBusy(false); }
+  }
+
   async function confirm(booking: SchedulingBooking, patientId: string) {
     setBusy(true); setStatus('');
     try {
@@ -84,5 +142,10 @@ export function usePanelScheduling() {
     finally { setBusy(false); }
   }
 
-  return { snapshot, config, setConfig, error, status, setStatus, busy, whatsapp, patients, load, save, connect, confirm, changeBooking };
+  return { snapshot, config, setConfig, error, status, setStatus, busy, whatsapp, patients, bookingMore, patientMore, load, save, connect, disconnect, loadMoreBookings, loadMorePatients, syncBooking, reconcileBooking, reviewTransfer, confirm, changeBooking };
+}
+
+function mergeById<T extends { id: string }>(left: T[], right: T[]) {
+  const seen = new Set(left.map(item => item.id));
+  return [...left, ...right.filter(item => !seen.has(item.id))];
 }

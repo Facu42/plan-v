@@ -9,9 +9,9 @@ import './panel-fase5.css';
 
 const money = (minor: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(minor / 100);
 
-export function PanelPublicPageView({ config, published, pageUrl, connections, status, busy, loading, error, onChange, onPublish, onToggleEnabled, onConnect, onRetry }: {
+export function PanelPublicPageView({ config, published, pageUrl, connections, status, busy, loading, error, onChange, onPublish, onToggleEnabled, onConnect, onDisconnect, onRetry }: {
   config: SchedulingSettings; published: boolean; pageUrl: string; connections: Record<ConnectionKey, boolean>; status: string; busy: boolean; loading: boolean; error: string;
-  onChange: (next: SchedulingSettings) => void; onPublish: () => void; onToggleEnabled: (enabled: boolean) => void; onConnect: (key: ConnectionKey) => void; onRetry: () => void;
+  onChange: (next: SchedulingSettings) => void; onPublish: () => void; onToggleEnabled: (enabled: boolean) => void; onConnect: (key: ConnectionKey) => void; onDisconnect?: (key: 'google' | 'mercadopago') => void; onRetry: () => void;
 }) {
   const page = config.page;
   const mode = depositMode(config.types);
@@ -42,7 +42,10 @@ export function PanelPublicPageView({ config, published, pageUrl, connections, s
           <div className="p5-li"><div className="p5-tx"><b>Reserva desde la página</b><span>Las pacientes eligen día y hora</span></div><button type="button" className={`p5-switch${page.enabled ? ' on' : ''}`} aria-pressed={page.enabled} onClick={() => onToggleEnabled(!page.enabled)}><span className="p5-sr">Reserva desde la página</span></button></div>
           {mode === 'mixed' ? <p className="p5-note">La seña cambia según el servicio.</p> : <div className="p5-li"><div className="p5-tx"><b>Pedir seña</b><span>{connections.mercadopago ? '50% con Mercado Pago' : '50% cuando conectes Mercado Pago. No se cobra sola.'}</span></div>{mode !== 'none' && <button type="button" className={`p5-switch${mode === 'on' ? ' on' : ''}`} aria-pressed={mode === 'on'} onClick={() => onChange({ ...config, types: withHalfDeposit(config.types, mode !== 'on') })}><span className="p5-sr">Pedir seña</span></button>}</div>}
           <div className="p5-li"><div className="p5-tx"><b>Anticipación mínima</b><span>24 horas. Es la regla de la página.</span></div></div>
-          <PanelConnections connected={connections} onConnect={onConnect} />
+          <label>Comprobar Google al ofrecer horarios<input type="checkbox" checked={config.google_enabled} disabled={!connections.google} onChange={event => onChange({ ...config, google_enabled: event.target.checked })} /></label>
+          <label>Crear un enlace de Meet por consulta<input type="checkbox" checked={config.create_meet} onChange={event => onChange({ ...config, create_meet: event.target.checked })} /></label>
+          <label>Alias de transferencia<input maxLength={100} value={config.transfer_alias} onChange={event => onChange({ ...config, transfer_alias: event.target.value })} /></label>
+          <PanelConnections connected={connections} onConnect={onConnect} onDisconnect={onDisconnect} />
         </section>
       </div>
       <section className="p5-card p5-preview" aria-label="Así la ve la paciente"><span>Así la ve la paciente</span>
@@ -67,7 +70,7 @@ export function PanelPublicPage() {
   useUnsavedChanges(Boolean(draft), scheduling.busy);
   const published = Boolean(scheduling.snapshot?.profile.config.page.enabled);
   const pageUrl = published ? bookingHref(typeof window === 'undefined' ? 'https://plan.v' : window.location.origin, scheduling.snapshot?.profile.config.page.slug ?? config.page.slug) : '';
-  return <PanelPublicPageView config={config} published={published} pageUrl={pageUrl} connections={{ google: Boolean(scheduling.snapshot?.connections.google), mercadopago: Boolean(scheduling.snapshot?.connections.mercadopago), whatsapp: scheduling.whatsapp }} status={scheduling.status} busy={scheduling.busy} loading={!loaded && !scheduling.error} error={scheduling.error} onChange={setDraft} onRetry={() => void scheduling.load()} onConnect={key => void scheduling.connect(key)} onToggleEnabled={enabled => { const next = { ...config, page: { ...config.page, enabled } }; setDraft(next); void scheduling.save(next, enabled ? 'La página acepta reservas.' : 'La página dejó de aceptar reservas.').then(ok => { if (ok) setDraft(null); }); }} onPublish={() => {
+  return <PanelPublicPageView config={config} published={published} pageUrl={pageUrl} connections={{ google: Boolean(scheduling.snapshot?.connections.google), mercadopago: Boolean(scheduling.snapshot?.connections.mercadopago), whatsapp: scheduling.whatsapp }} status={scheduling.status} busy={scheduling.busy} loading={!loaded && !scheduling.error} error={scheduling.error} onChange={setDraft} onRetry={() => void scheduling.load()} onConnect={key => void scheduling.connect(key)} onDisconnect={key => void scheduling.disconnect(key)} onToggleEnabled={enabled => { const next = { ...config, page: { ...config.page, enabled } }; setDraft(next); void scheduling.save(next, enabled ? 'La página acepta reservas.' : 'La página dejó de aceptar reservas.').then(ok => { if (ok) setDraft(null); }); }} onPublish={() => {
     if (!/^[a-z0-9][a-z0-9-]{2,59}$/.test(config.page.slug)) { scheduling.setStatus('La dirección usa minúsculas, números y guiones.'); return; }
     if (config.page.logo_url && !config.page.logo_url.startsWith('https://')) { scheduling.setStatus('La imagen tiene que ser un enlace https.'); return; }
     void scheduling.save({ ...config, page: { ...config.page, enabled: true, title: config.page.title.trim() || 'Mi consultorio' } }, 'Página publicada.').then(ok => { if (ok) setDraft(null); });

@@ -11,13 +11,15 @@ import './panel-fase5.css';
 
 const TONE_LABEL: Record<PanelAgendaEvent['tone'], string> = { primera: 'Primera', seguimiento: 'Seguimiento', online: 'Online', pendiente: 'Por confirmar', bloqueo: 'Bloqueado' };
 
-export function PanelAgendaView({ title, subtitle, view, days, today, now, events, pending, types, page, connections, status, busy, loading, error, focus, onView, onShift, onToday, onManage, onCopy, onConnect, onConfirm, onCancel, onReschedule, onBlock, onRetry, patients, editor }: {
+export function PanelAgendaView({ title, subtitle, view, days, today, now, events, pending, types, page, connections, status, busy, loading, error, focus, onView, onShift, onToday, onManage, onCopy, onConnect, onConfirm, onCancel, onReschedule, onBlock, onRetry, patients, editor, transfers = [], bookings = [], moreBookings = false, morePatients = false, onReviewTransfer, onSync, onReconcile, onMoreBookings, onMorePatients, onDisconnect }: {
   title: string; subtitle: string; view: AgendaView; days: string[]; today: string; now: Date; events: PanelAgendaEvent[];
   pending: SchedulingBooking[]; types: SchedulingSettings['types']; page?: SchedulingSettings['page'];
   connections: Record<ConnectionKey, boolean>; status: string; busy: boolean; loading: boolean; error: string; focus: string | null;
   onView: (view: AgendaView) => void; onShift: (delta: number) => void; onToday: () => void; onManage: () => void; onCopy: () => void;
   onConnect: (key: ConnectionKey) => void; onConfirm: (booking: SchedulingBooking, patientId: string) => void; onCancel: (booking: SchedulingBooking) => void;
   onReschedule: (booking: SchedulingBooking, startsAt: string) => void; onBlock: () => void; onRetry: () => void; patients: Array<{ id: string; name: string }>; editor?: ReactNode;
+  transfers?: Array<{ id: string; amount_minor: number; reference: string }>; bookings?: SchedulingBooking[]; moreBookings?: boolean; morePatients?: boolean;
+  onReviewTransfer?: (id: string, decision: 'confirm' | 'reject') => void; onSync?: (id: string) => void; onReconcile?: (id: string) => void; onMoreBookings?: () => void; onMorePatients?: () => void; onDisconnect?: (key: 'google' | 'mercadopago') => void;
 }) {
   const windowHours = hourWindow(events.filter(event => days.includes(event.day)));
   const rows = windowHours.end - windowHours.start;
@@ -56,8 +58,13 @@ export function PanelAgendaView({ title, subtitle, view, days, today, now, event
       <div className="p5-side">
         <section className={`p5-card${focus === 'reservas' ? ' p5-focus' : ''}`} id="pn-reservas" tabIndex={-1}><header><h3>Por confirmar</h3><span>{pending.length}</span></header>
           {!pending.length && <p className="p5-empty">No hay reservas por confirmar.</p>}
-          {pending.map(booking => <Pending key={booking.id} booking={booking} patients={patients} busy={busy} onConfirm={onConfirm} onCancel={onCancel} onReschedule={onReschedule} />)}
+          {pending.map(booking => <Pending key={booking.id} booking={booking} patients={patients} busy={busy} morePatients={morePatients} onMorePatients={onMorePatients} onConfirm={onConfirm} onCancel={onCancel} onReschedule={onReschedule} />)}
         </section>
+        {(transfers.length > 0 || bookings.some(item => item.status !== 'cancelled') || moreBookings) && <section className="p5-card" aria-label="Pagos y calendario"><header><h3>Pagos y calendario</h3></header>
+          {transfers.map(transfer => <article className="p5-pending" key={transfer.id}><div className="p5-tx"><b>Transferencia para revisar</b><span>{money(transfer.amount_minor)} · {transfer.reference}</span></div><button type="button" className="p5-btn p5-ink" disabled={busy} onClick={() => onReviewTransfer?.(transfer.id, 'confirm')}>Confirmar transferencia recibida</button><button type="button" className="p5-btn" disabled={busy} onClick={() => onReviewTransfer?.(transfer.id, 'reject')}>Rechazar</button></article>)}
+          {bookings.filter(item => item.status !== 'cancelled').map(item => <article className="p5-pending" key={item.id}><div className="p5-tx"><b>{item.contact_name}</b><span>{item.status === 'confirmed' ? 'Confirmado' : 'Pendiente'} · pagos {money(item.paid_minor)}{item.paid_minor > item.total_minor ? ' · Hay un pago excedente para revisar.' : ''}</span></div><button type="button" className="p5-btn" disabled={busy} onClick={() => onSync?.(item.id)}>Sincronizar calendario</button><button type="button" className="p5-btn" disabled={busy} onClick={() => onReconcile?.(item.id)}>Conciliar Mercado Pago</button></article>)}
+          {moreBookings && <button type="button" className="p5-btn" disabled={busy} onClick={onMoreBookings}>Ver más reservas</button>}
+        </section>}
         {editor ?? <section className="p5-card" id="pn-horarios"><header><h3>Tipos de consulta</h3></header>
           {!types.length && <p className="p5-empty">Todavía no hay tipos de consulta.</p>}
           {types.map(type => <div className="p5-li" key={type.id}><div className="p5-tx"><b>{type.name}</b><span>{type.duration_min} min · {type.channel === 'video' ? 'Online' : 'Consultorio'}</span></div><span className="p5-num">{money(type.price_minor)}</span></div>)}
@@ -65,7 +72,7 @@ export function PanelAgendaView({ title, subtitle, view, days, today, now, event
         <section className="p5-card"><header><h3>Reservas online</h3></header>
           <p className="p5-link">{page?.enabled ? `/consultorio/${page.slug}` : 'La página todavía no está publicada.'}</p>
           <button type="button" className="p5-btn" onClick={onCopy} disabled={!page?.enabled}>Copiar link</button>
-          <PanelConnections connected={connections} onConnect={onConnect} />
+          <PanelConnections connected={connections} onConnect={onConnect} onDisconnect={onDisconnect} />
         </section>
       </div>
     </div>
@@ -93,13 +100,14 @@ function Month({ events, anchor, now }: { events: PanelAgendaEvent[]; anchor: st
   return <div className="p5-month">{['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(label => <span key={label}>{label}</span>)}{cells.map(day => <div key={day} className={day === now ? 'p5-today' : day.slice(0, 7) === anchor.slice(0, 7) ? '' : 'p5-out'}><b>{Number(day.slice(8))}</b>{events.filter(event => event.day === day).slice(0, 3).map(event => <small key={event.id} className={`p5-${event.tone}`}>{event.title}</small>)}</div>)}</div>;
 }
 
-function Pending({ booking, patients, busy, onConfirm, onCancel, onReschedule }: { booking: SchedulingBooking; patients: Array<{ id: string; name: string }>; busy: boolean; onConfirm: (booking: SchedulingBooking, patientId: string) => void; onCancel: (booking: SchedulingBooking) => void; onReschedule: (booking: SchedulingBooking, startsAt: string) => void }) {
+function Pending({ booking, patients, busy, morePatients, onMorePatients, onConfirm, onCancel, onReschedule }: { booking: SchedulingBooking; patients: Array<{ id: string; name: string }>; busy: boolean; morePatients?: boolean; onMorePatients?: () => void; onConfirm: (booking: SchedulingBooking, patientId: string) => void; onCancel: (booking: SchedulingBooking) => void; onReschedule: (booking: SchedulingBooking, startsAt: string) => void }) {
   const [patientId, setPatientId] = useState('');
   const [when, setWhen] = useState('');
   const at = new Date(booking.starts_at);
   const whenLabel = Number.isFinite(at.getTime()) ? at.toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Horario por revisar';
   return <article className="p5-pending"><div className="p5-tx"><b>{booking.contact_name}</b><span>{whenLabel} · {booking.paid_minor > 0 ? 'Pagó la seña' : 'Sin seña'}</span></div>
     <label>Vincular ficha<select value={patientId} onChange={event => setPatientId(event.target.value)} disabled={busy}><option value="">Crear ficha nueva</option>{patients.map(patient => <option key={patient.id} value={patient.id}>{patient.name}</option>)}</select></label>
+    {morePatients && <button type="button" className="p5-btn" disabled={busy} onClick={onMorePatients}>Ver más fichas</button>}
     <button type="button" className="p5-btn p5-ink" disabled={busy} onClick={() => onConfirm(booking, patientId)}>Confirmar</button>
     <details><summary>Cambiar o cancelar</summary>
       <label>Nuevo horario<input type="datetime-local" value={when} onChange={event => setWhen(event.target.value)} /></label>
@@ -108,7 +116,7 @@ function Pending({ booking, patients, busy, onConfirm, onCancel, onReschedule }:
     </details></article>;
 }
 
-function HoursEditor({ config, busy, onChange, onSave }: { config: SchedulingSettings; busy: boolean; onChange: (next: SchedulingSettings) => void; onSave: () => void }) {
+function HoursEditor({ config, busy, googleConnected, onChange, onSave }: { config: SchedulingSettings; busy: boolean; googleConnected: boolean; onChange: (next: SchedulingSettings) => void; onSave: () => void }) {
   const mode = depositMode(config.types);
   const setTypes = (types: SchedulingSettings['types']) => onChange({ ...config, types });
   return <section className="p5-card" id="pn-horarios"><header><h3>Horarios y precios</h3></header>
@@ -116,6 +124,7 @@ function HoursEditor({ config, busy, onChange, onSave }: { config: SchedulingSet
       <label>Nombre<input value={type.name} maxLength={80} onChange={event => setTypes(config.types.map(item => item.id === type.id ? { ...item, name: event.target.value } : item))} /></label>
       <label>Minutos<input type="number" min={10} max={180} value={type.duration_min} onChange={event => setTypes(config.types.map(item => item.id === type.id ? { ...item, duration_min: Number(event.target.value) } : item))} /></label>
       <label>Precio<input type="number" min={0} step="1" value={type.price_minor / 100} onChange={event => setTypes(config.types.map(item => item.id === type.id ? { ...item, price_minor: Math.round(Number(event.target.value) * 100) } : item))} /></label>
+      <label>Seña en pesos<input type="number" min={0} step="1" value={type.deposit_minor / 100} onChange={event => { const deposit = Math.round(Number(event.target.value) * 100); setTypes(config.types.map(item => item.id === type.id ? { ...item, deposit_minor: Math.min(deposit, item.price_minor) } : item)); }} /></label>
       <label>Modalidad<select value={type.channel} onChange={event => setTypes(config.types.map(item => item.id === type.id ? { ...item, channel: event.target.value as 'video' | 'presencial' } : item))}><option value="presencial">Consultorio</option><option value="video">Online</option></select></label>
       <button type="button" className="p5-btn" onClick={() => setTypes(config.types.filter(item => item.id !== type.id))}>Quitar</button>
     </fieldset>)}
@@ -125,6 +134,11 @@ function HoursEditor({ config, busy, onChange, onSave }: { config: SchedulingSet
     <button type="button" className="p5-btn" onClick={() => onChange({ ...config, weekly: [...config.weekly, { calendar_id: config.calendars[0].id, weekday: 1, start: '09:00', end: '13:00' }] })}>Agregar horario</button>
     {config.blocks.map(block => <div className="p5-li" key={block.id}><div className="p5-tx"><b>{block.label || 'Bloqueo'}</b></div><button type="button" className="p5-btn" onClick={() => onChange({ ...config, blocks: config.blocks.filter(item => item.id !== block.id) })}>Quitar bloqueo</button></div>)}
     {mode === 'mixed' ? <p>La seña cambia según el tipo de consulta.</p> : mode !== 'none' && <div className="p5-li"><div className="p5-tx"><b>Pedir seña al reservar</b><span>{mode === 'on' ? '50% del precio' : 'Sin seña'}</span></div><button type="button" className={`p5-switch${mode === 'on' ? ' on' : ''}`} aria-pressed={mode === 'on'} onClick={() => setTypes(withHalfDeposit(config.types, mode !== 'on'))}><span className="p5-sr">Pedir seña al reservar</span></button></div>}
+    <label>Comprobar Google al ofrecer horarios<input type="checkbox" checked={config.google_enabled} disabled={!googleConnected} onChange={event => onChange({ ...config, google_enabled: event.target.checked })} /></label>
+    <label>Crear un enlace de Meet por consulta<input type="checkbox" checked={config.create_meet} onChange={event => onChange({ ...config, create_meet: event.target.checked })} /></label>
+    <label>Alias de transferencia<input maxLength={100} value={config.transfer_alias} onChange={event => onChange({ ...config, transfer_alias: event.target.value })} /></label>
+    {config.calendars.map(calendar => <label key={calendar.id}>Agenda<input maxLength={80} value={calendar.name} onChange={event => onChange({ ...config, calendars: config.calendars.map(item => item.id === calendar.id ? { ...item, name: event.target.value } : item) })} /></label>)}
+    <button type="button" className="p5-btn" disabled={config.calendars.length >= 10} onClick={() => onChange({ ...config, calendars: [...config.calendars, { id: crypto.randomUUID(), name: 'Otra agenda' }] })}>Agregar agenda</button>
     <button type="button" className="p5-btn p5-ink" disabled={busy} onClick={onSave}>Guardar horarios</button>
   </section>;
 }
@@ -159,7 +173,7 @@ export function PanelAgenda({ patients, now, section, onManage }: { patients: Pa
   };
 
   return <>
-    <PanelAgendaView title="Agenda" subtitle={view === 'dia' ? `${dayHeading(anchor).name} ${dayHeading(anchor).number}` : weekLabel(weekDays(anchor))} view={view} days={days} today={agendaDay(now)} now={now} events={events} pending={pending} types={config.types} page={loaded ? config.page : undefined} connections={{ google: Boolean(scheduling.snapshot?.connections.google), mercadopago: Boolean(scheduling.snapshot?.connections.mercadopago), whatsapp: scheduling.whatsapp }} status={scheduling.status} busy={scheduling.busy} loading={!loaded && !scheduling.error} error={scheduling.error} focus={section} onView={setView} onShift={delta => setAnchor(current => shiftDay(current, view === 'mes' ? delta * 30 : view === 'dia' ? delta : delta * 7))} onToday={() => setAnchor(agendaDay(now))} onManage={() => { const id = patients.find(patient => !patient.appointment)?.id ?? patients[0]?.id; if (id) onManage(id); }} onCopy={() => { if (!config.page.enabled) return; const href = bookingHref(window.location.origin, config.page.slug); void navigator.clipboard?.writeText(href).then(() => scheduling.setStatus('Link copiado.'), () => scheduling.setStatus(href)); }} onConnect={key => void scheduling.connect(key)} onConfirm={(booking, patientId) => void scheduling.confirm(booking, patientId)} onCancel={booking => void scheduling.changeBooking(booking, 'cancel')} onReschedule={(booking, startsAt) => void scheduling.changeBooking(booking, 'reschedule', startsAt)} onBlock={() => setBlocking(true)} onRetry={() => void scheduling.load()} patients={scheduling.patients} editor={section === 'horarios' && loaded ? <HoursEditor config={config} busy={scheduling.busy} onChange={setDraft} onSave={() => void scheduling.save(config, 'Horarios guardados.').then(ok => { if (ok) setDraft(null); })} /> : undefined} />
+    <PanelAgendaView title="Agenda" subtitle={view === 'dia' ? `${dayHeading(anchor).name} ${dayHeading(anchor).number}` : weekLabel(weekDays(anchor))} view={view} days={days} today={agendaDay(now)} now={now} events={events} pending={pending} types={config.types} page={loaded ? config.page : undefined} connections={{ google: Boolean(scheduling.snapshot?.connections.google), mercadopago: Boolean(scheduling.snapshot?.connections.mercadopago), whatsapp: scheduling.whatsapp }} status={scheduling.status} busy={scheduling.busy} loading={!loaded && !scheduling.error} error={scheduling.error} focus={section} onView={setView} onShift={delta => setAnchor(current => shiftDay(current, view === 'mes' ? delta * 30 : view === 'dia' ? delta : delta * 7))} onToday={() => setAnchor(agendaDay(now))} onManage={() => { const id = patients.find(patient => !patient.appointment)?.id ?? patients[0]?.id; if (id) onManage(id); }} onCopy={() => { if (!config.page.enabled) return; const href = bookingHref(window.location.origin, config.page.slug); void navigator.clipboard?.writeText(href).then(() => scheduling.setStatus('Link copiado.'), () => scheduling.setStatus(href)); }} onConnect={key => void scheduling.connect(key)} onConfirm={(booking, patientId) => void scheduling.confirm(booking, patientId)} onCancel={booking => void scheduling.changeBooking(booking, 'cancel')} onReschedule={(booking, startsAt) => void scheduling.changeBooking(booking, 'reschedule', startsAt)} onBlock={() => setBlocking(true)} onRetry={() => void scheduling.load()} patients={scheduling.patients} editor={section === 'horarios' && loaded ? <HoursEditor config={config} busy={scheduling.busy} googleConnected={Boolean(scheduling.snapshot?.connections.google)} onChange={setDraft} onSave={() => void scheduling.save(config, 'Horarios guardados.').then(ok => { if (ok) setDraft(null); })} /> : undefined} transfers={scheduling.snapshot?.transfers ?? []} bookings={scheduling.snapshot?.bookings ?? []} moreBookings={scheduling.bookingMore} morePatients={scheduling.patientMore} onReviewTransfer={(id, decision) => void scheduling.reviewTransfer(id, decision)} onSync={id => void scheduling.syncBooking(id)} onReconcile={id => void scheduling.reconcileBooking(id)} onMoreBookings={() => void scheduling.loadMoreBookings()} onMorePatients={() => void scheduling.loadMorePatients()} onDisconnect={key => void scheduling.disconnect(key)} />
     {scheduling.snapshot?.bookings.some(booking => booking.google_sync_status === 'uncertain') && <div className="p5-card">{scheduling.snapshot.bookings.filter(booking => booking.google_sync_status === 'uncertain').map(booking => <GoogleReviewControl key={booking.id} kind="booking" targetId={booking.id} revision={booking.revision} disabled={scheduling.busy} onResolved={async () => { await scheduling.load(); }} />)}</div>}
     {blocking && <div className="p5-dialog" role="dialog" aria-modal="true" aria-labelledby="p5-block-title"><form onSubmit={saveBlock}><h3 id="p5-block-title">Bloquear horario</h3>
       <label>Día<input type="date" required value={block.day} onChange={event => setBlock(current => ({ ...current, day: event.target.value }))} /></label>

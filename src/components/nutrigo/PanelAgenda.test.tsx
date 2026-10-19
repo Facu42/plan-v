@@ -23,8 +23,18 @@ describe('Agenda del boceto', () => {
   });
 
   it('dice Conectado solo cuando el servidor ya lo confirmó', () => {
-    const html = renderToStaticMarkup(<PanelAgendaView {...base} connections={{ google: true, mercadopago: false, whatsapp: false }} />);
+    const html = renderToStaticMarkup(<PanelAgendaView {...base} connections={{ google: true, mercadopago: false, whatsapp: false }} onDisconnect={noop} />);
     expect(html).toContain('Conectado');
-    expect(html.match(/Conectar/g)?.length).toBe(2);
+    expect(html).toContain('Desconectar');
+    expect(html.match(/>Conectar</g)?.length).toBe(2);
+  });
+
+  it('deja revisar una transferencia y conciliar un turno confirmado', () => {
+    const html = renderToStaticMarkup(<PanelAgendaView {...base} pending={[]} bookings={[{ ...booking, status: 'confirmed' }]} transfers={[{ id: 't1', amount_minor: 1500000, reference: 'MP-1' }]} moreBookings />);
+    expect(html).toContain('Confirmar transferencia recibida');
+    expect(html).toContain('Rechazar');
+    expect(html).toContain('Conciliar Mercado Pago');
+    expect(html).toContain('Sincronizar calendario');
+    expect(html).toContain('Ver más reservas');
   });
 });
