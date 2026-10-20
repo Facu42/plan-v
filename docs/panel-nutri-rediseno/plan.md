@@ -250,6 +250,7 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 - Hecho: se trajo `origin/main` sin rebase. La fase 5 sigue integrada. Se conservó la revisión de Claude del 20/10 00:30. El pago único no cambia. Las seis correcciones del boceto están en el PR #158.
 - Cómo: merge, sin rebase y sin tocar `codex/panel-nutri-fase-6`.
 - Rama y PR: `cursor/pago-mensual-unico`, [PR #157](https://github.com/Facu42/plan-v/pull/157). Sin merge a main y sin aplicar migraciones.
+- Pruebas: 3.244 aprobadas y 2 omitidas, en 511 archivos. Tipos en verde.
 
 ### 2026-10-20 00:30 · Claude · Revisión de lo hecho contra el boceto (sin código)
 Facundo pidió revisar lo desarrollado y marcó que **el menú lateral no coincide con el boceto**. Quien siga lo toma como la primera tarea, antes de cualquier fase nueva. Regla de Facundo: **no se sale del boceto**; si algo no coincide, se corrige, no se reinterpreta.
