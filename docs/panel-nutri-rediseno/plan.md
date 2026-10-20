@@ -51,6 +51,8 @@ pasa a tener la paleta de la app de la paciente. La app de la paciente sigue igu
     y el próximo paso exacto. El que llega lee primero la sección 7 (Estado) y la última entrada de la sección 8.
 11. **Skills obligatorias**: las de la sección 2.1, según el tipo de trabajo.
 12. **No salirse del boceto.** El código de `bocetos.html` (colores, medidas, líneas, sombras, movimiento) se copia tal cual; no se reinterpreta ni se "mejora". Antes de dar una fase por hecha se compara lado a lado con el boceto, en claro y oscuro, a 1440 y 390; lo que no coincide se corrige y se anota. El 20/10 Facundo marcó que el menú lateral se había apartado del boceto (ver Bitácora).
+    - **Cómo se copia:** los estilos del boceto están en `design/panel-nutri/boceto.css` (copiados tal cual; las reglas viven bajo `.m`). Se copian los valores, no se rehacen.
+    - **Cómo se comprueba:** con la app en demo (`npm run local`), `npm run panel:contrato` compara los estilos resueltos de la app contra el boceto (menú, flecha, submenú, contadores, títulos) en claro y oscuro. **Una fase no se da por hecha si ese comando sale con error**; pegá su informe en el PR. Si sumás una pieza nueva, agregala a `PIEZAS` en `scripts/panel-nutri-boceto-contrato.mjs`. Informe de hoy: `design/panel-nutri/contrato-informe.md`.
 
 ### 2.1 Skills que se usan en cada fase
 
@@ -109,6 +111,11 @@ Si un archivo cambió de nombre, buscalo con `git grep` antes de decir que no ex
 Los enlaces viejos con `?seccion=` tienen que seguir abriendo la sección correcta (`recordTab`).
 
 ## 4. Fases
+
+> **Desde el 20/10 manda [`instrucciones-boceto.md`](instrucciones-boceto.md)**: el boceto se pasa a la app
+> como código (mismas etiquetas, clases y estilos), pantalla por pantalla, en las fases nuevas A a I. Las fases
+> 1 a 9 de abajo quedan como historia de lo que ya se hizo. Las desarrolla Claude, y cada una se junta a `main`
+> solo con el ok de Facundo.
 
 Cada fase se puede hacer sola, en este orden. Marcá el estado al empezar y al terminar.
 
@@ -240,6 +247,22 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
 | 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main `6697d28` |
 | 4 | Codex | `codex/panel-nutri-fase-4` · [PR #154](https://github.com/Facu42/plan-v/pull/154) | Integrada a main |
+| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Lista para juntar; Facundo autorizó. Convive con la ficha de la fase 4 |
+| Fases nuevas A a I (boceto pasado como código) | Claude | una rama por fase | Ver `instrucciones-boceto.md` §4; A en curso. Reemplazan la corrección del menú y las fases 6 a 9 |
+
+### 2026-10-20 04:30 · Claude · Instrucciones pantalla por pantalla y fases nuevas
+- Hecho: `instrucciones-boceto.md` con el método (copiar el código del boceto, no redibujarlo), lo que hoy no coincide en cada pantalla, una tabla con la función y línea del boceto, la ruta, el componente actual y los datos que se conservan, y las fases nuevas A a I.
+- Cómo: pedido de Facundo del 20/10 04:02 («revisá todas las pantallas… comenzá a desarrollar por fases con mi aprobación») y 04:06 («¿no se pueden pasar en código?»).
+- Rama: `claude/instrucciones-boceto`.
+- Falta: fases A a I.
+- Próximo paso exacto: fase A en `claude/panel-fase-a-armazon`: `scripts/panel-boceto-css.mjs` genera `src/components/nutrigo/panel-boceto.css` y se pasa `shell()` del boceto al panel.
+
+### 2026-10-20 03:10 · Claude · Prueba automática contra el boceto y estilos del boceto en un archivo
+- Hecho: `design/panel-nutri/boceto.css` (estilos del boceto copiados tal cual) y `npm run panel:contrato`, que mide la app y el boceto y dice, pieza por pieza, qué valor no coincide. Hoy marca 17 diferencias (8 en oscuro y 9 en claro), todas del menú lateral; sirve de lista exacta para la corrección de la entrada de abajo.
+- Cómo: compara estilos resueltos (tamaños, colores, sombras, codos del árbol, escala al pasar el mouse), no píxeles, porque los datos de la demo no son los del boceto. Código: `scripts/panel-nutri-boceto-contrato.mjs`.
+- Rama y commit: `claude/prueba-boceto`.
+- Falta: corregir el menú hasta que el comando salga en verde, y sumar a `PIEZAS` las demás pantallas (encabezado, tarjetas, tablas) a medida que se corrigen.
+- Próximo paso exacto: correr `npm run local`, después `npm run panel:contrato`, corregir lo que marca en `panel-nutri-shell.css` y repetir hasta que no quede ninguna fila roja.
 | 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Integrada a main `c09466b`, junto con la fase 4 |
 | Corrección del menú y de lo que no coincide | Cursor | `cursor/arreglo-mobile-fase5` · [PR #158](https://github.com/Facu42/plan-v/pull/158) | Hecha en #158, sin juntar. La fase 6 sigue en Codex (`codex/panel-nutri-fase-6`) |
 | 6 a 9 | Por coordinar | — | Pendientes, una rama y un PR por fase |
