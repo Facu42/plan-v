@@ -23,7 +23,7 @@ Otro agente puede seguir desde acá sin el chat.
 - Un cobro que viene del débito se lee «Débito automático · …» en Movimientos.
 - Cada plan tiene su interruptor para la página pública. Sin Mercado Pago el interruptor queda apagado y bloqueado.
 - La vista `/?vista=suscripciones` solo existe en el servidor de desarrollo, para las capturas. No es un modo demo de producción.
-- El boceto (`design/panel-nutri/bocetos.html`, `#cobranzas` y `#publica`) no dibuja la tarjeta de débito ni el formulario de la paciente, y en «Recordar» todavía muestra WhatsApp. La app no. Las capturas de la app están al lado del boceto en `design/suscripciones/`.
+- El boceto (`design/panel-nutri/bocetos.html`, `#cobranzas` y `#publica`) no dibuja la tarjeta de débito ni el formulario de la paciente, y en «Recordar» todavía muestra WhatsApp. La app no. Las capturas de la app están al lado del boceto de escritorio que corresponde: Cobranzas con `#cobranzas` y la Página pública con `#publica`. En el celular el título está solo en la barra de arriba y el menú inferior marca «Más» en Cobranzas y en la Página pública.
 
 ### Qué falta
 - **Pago único de la cuota (2.9).** Pedido por Facu el 19/10 a la noche. No es una suscripción: es un enlace de Mercado Pago de un solo mes, para una paciente que ya tiene cuota manual. Se implementa en `cursor/pago-mensual-unico`, desde `cursor/suscripciones-cobranzas-pagina`, con PR borrador contra esa rama. Misma bandera apagada. Si hace falta tabla nueva, la migración se escribe y no se aplica.

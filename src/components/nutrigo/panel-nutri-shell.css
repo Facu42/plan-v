@@ -43,6 +43,10 @@
 .nv-app.nv-pro.pn-panel .nv-topbar { position:relative; top:auto; bottom:auto; left:auto; width:auto; min-height:76px; padding:24px 30px 8px; gap:12px; background:transparent; border:0; }
 .nv-app.nv-pro.pn-panel .nv-topbar>.nv-brand { display:none; }
 .nv-app.nv-pro.pn-panel .nv-topbar .nv-topbar-title { display:block; font-size:28px; line-height:1.1; letter-spacing:-.02em; color:var(--pn-ink); }
+.nv-app.nv-pro.pn-panel .nv-topbar-label-mobile { display:none; }
+@media (min-width:800px) {
+  .nv-app.nv-pro.pn-panel:is(.nv-agenda-page,.nv-fees-page) .nv-topbar-title { display:none; }
+}
 .nv-app.nv-pro.pn-panel .nv-user-avatar { background:var(--pn-saffron); color:var(--pn-on-color); }
 .nv-app.nv-pro.pn-panel .nv-user-menu { background:var(--pn-white); color:var(--pn-ink); border:1px solid var(--pn-line); box-shadow:var(--pn-shadow); min-width:270px; max-width:calc(100vw - 32px); z-index:60; }
 .nv-app.nv-pro.pn-panel .nv-user-menu>button { color:var(--pn-ink); }
@@ -117,7 +121,10 @@
   .nv-app.nv-pro.pn-panel.nv-menu-open .nv-sidebar { transform:translateX(0); visibility:visible; }
   .pn-panel .pn-collapse { display:none; }
   .nv-app.nv-pro.pn-panel .nv-topbar { position:sticky; top:0; padding:14px 16px; min-height:64px; background:var(--pn-cream); z-index:30; }
-  .nv-app.nv-pro.pn-panel .nv-topbar-title { font-size:22px; }
+  .nv-app.nv-pro.pn-panel .nv-topbar-title { flex:1; min-width:0; overflow:hidden; font-size:16px; text-align:center; text-overflow:ellipsis; white-space:nowrap; color:var(--pn-ink); }
+  .nv-app.nv-pro.pn-panel .nv-topbar-label-desktop { display:none; }
+  .nv-app.nv-pro.pn-panel .nv-topbar-label-mobile { display:inline; }
+  .pn-panel:is(.nv-agenda-page,.nv-fees-page) .p5-head h2 { display:none; }
   .nv-app.nv-pro.pn-panel .nv-menu-toggle { display:flex !important; margin-left:auto; width:44px; height:44px; min-width:44px; min-height:44px; }
   .nv-app.nv-pro.pn-panel .nv-sidebar a { min-height:44px; }
   .nv-app.nv-pro.pn-panel .nv-main { padding:8px 16px calc(108px + env(safe-area-inset-bottom)); overflow:visible; gap:14px; }

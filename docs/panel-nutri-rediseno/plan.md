@@ -244,6 +244,11 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-19 23:55 · Cursor · Sección activa y título en el celular
+- Hecho: en la Página pública el menú inferior marca «Más», igual que en Cobranzas. En el celular el título de la sección está en la barra de arriba y no se repite en la página. En escritorio el título sigue en la página, como el boceto. La captura de la Página pública quedó al lado del boceto de esa pantalla.
+- Cómo: break-ui, frontend-patterns, frontend-a11y y verification-loop. Una sola vez el título para quien escucha la página. Sin datos nuevos ni librería de estado.
+- Rama y PR: `cursor/suscripciones-cobranzas-pagina`, [PR #156](https://github.com/Facu42/plan-v/pull/156). La misma corrección está en el PR #157. Las capturas nuevas de Agenda y Cobranzas van en el PR #158.
+
 ### 2026-10-19 23:20 · Cursor · Celular de Cobranzas y de la página pública
 - Hecho: Facu rechazó el celular. En la tarjeta de débito el nombre se lee en una línea. En el celular, Movimientos es una lista de tarjetas. Las pestañas bajan de renglón. Suscribirme queda dentro del marco de la vista previa. El menú inferior queda fijo y no tapa el final. Nada se corta en 360, 390 ni 430, y los botones miden al menos 44 px.
 - Cómo: se aplicaron break-ui, frontend-patterns, frontend-a11y y verification-loop. Las vistas siguen recibiendo los mismos datos. Las capturas de celular se sacaron de nuevo dentro del panel, con el menú inferior, y quedaron al lado del boceto de escritorio en `design/suscripciones/`. No hay boceto de celular.

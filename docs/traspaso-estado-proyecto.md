@@ -1,5 +1,7 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-19)
 
+19/10 · Cursor · En el celular, la Página pública marca «Más» y el título queda una sola vez en la barra de arriba. La captura usa el boceto de la Página pública. Sigue en este PR de pantallas ([PR #156](https://github.com/Facu42/plan-v/pull/156)).
+
 19/10 · Cursor · Facu pidió el pago único de la cuota del mes, sin suscripción. Quedó en la [spec](suscripciones-pacientes/spec.md) (2.9). La rama es `cursor/pago-mensual-unico`, desde las pantallas ([PR #156](https://github.com/Facu42/plan-v/pull/156)). La función sigue apagada. No se toca la ficha ni el chat. El sandbox sigue pendiente.
 
 19/10 · Cursor · Backend de suscripciones de pacientes en `cursor/suscripciones-pacientes-backend`. La migración queda escrita y sin aplicar. La función está apagada. Las pantallas de Cobranzas y de la página pública van en otra rama. Detalle en [spec](suscripciones-pacientes/spec.md). Main ya tiene las fases 4 y 5 del panel (`c09466b`).

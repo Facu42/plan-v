@@ -58,6 +58,8 @@ export function SubscriptionPreview() {
   config.types = [{ id: '00000000-0000-4000-a000-000000000002', name: 'Consulta suelta', calendar_id: config.calendars[0].id, duration_min: 60, channel: 'presencial', price_minor: 4_000_000, deposit_minor: 0 }];
   const shell = screen !== 'suscripcion';
   const current = screen === 'publica' ? '/crm/agenda?agenda=publica' : '/crm/cobranzas';
+  const title = screen === 'publica' ? 'Página pública' : 'Cobranzas';
+  const moreCurrent = screen.startsWith('cobranzas') || screen === 'publica';
   return <div className={`nv-app nv-pro pn-panel${screen.startsWith('cobranzas') ? ' nv-fees-page' : ''}${screen === 'publica' ? ' nv-agenda-page' : ''}${dark ? ' nv-dark' : ''}`} style={{ minHeight: '100vh' }}>
     {shell && <aside className="nv-sidebar" aria-label="Consultorio">
       <button className="pn-mobile-close" type="button" aria-label="Cerrar navegación"><X size={18} aria-hidden="true" /></button>
@@ -68,6 +70,7 @@ export function SubscriptionPreview() {
     <div className="nv-workspace">
     {shell && <header className="nv-topbar">
       <a className="nv-brand" href="/crm/inicio"><Mark /><span>Plan V</span></a>
+      <h1 className="nv-topbar-title" aria-label={title}><span className="nv-topbar-label-desktop">{title}</span><span className="nv-topbar-label-mobile" aria-hidden="true">{title}</span></h1>
       <button type="button" className="nv-button nv-ghost nv-menu-toggle" aria-label="Abrir el menú"><Icon name="list" size={20} /></button>
     </header>}
     <div className={shell ? 'nv-content-layout' : undefined}>
@@ -99,8 +102,8 @@ export function SubscriptionPreview() {
     </div>
     </div>
     {shell && <nav className="nv-tabbar" aria-label="Secciones principales">
-      {PRO_TABS.map(tab => <button key={tab.id} type="button" aria-current={screen === 'publica' && tab.id === 'agenda' ? 'page' : undefined}><span className="nv-tab-icon"><Icon name={tab.icon} size={22} /></span><span>{tab.label}</span></button>)}
-      <button type="button" aria-current={screen.startsWith('cobranzas') ? 'page' : undefined}><span className="nv-tab-icon"><Icon name="grid" size={22} /></span><span>Más</span></button>
+      {PRO_TABS.map(tab => <button key={tab.id} type="button"><span className="nv-tab-icon"><Icon name={tab.icon} size={22} /></span><span>{tab.label}</span></button>)}
+      <button type="button" aria-current={moreCurrent ? 'page' : undefined}><span className="nv-tab-icon"><Icon name="grid" size={22} /></span><span>Más</span></button>
     </nav>}
   </div>;
 }
