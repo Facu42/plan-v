@@ -51,6 +51,8 @@ pasa a tener la paleta de la app de la paciente. La app de la paciente sigue igu
     y el próximo paso exacto. El que llega lee primero la sección 7 (Estado) y la última entrada de la sección 8.
 11. **Skills obligatorias**: las de la sección 2.1, según el tipo de trabajo.
 12. **No salirse del boceto.** El código de `bocetos.html` (colores, medidas, líneas, sombras, movimiento) se copia tal cual; no se reinterpreta ni se "mejora". Antes de dar una fase por hecha se compara lado a lado con el boceto, en claro y oscuro, a 1440 y 390; lo que no coincide se corrige y se anota. El 20/10 Facundo marcó que el menú lateral se había apartado del boceto (ver Bitácora).
+    - **Cómo se copia:** los estilos del boceto están en `design/panel-nutri/boceto.css` (copiados tal cual; las reglas viven bajo `.m`). Se copian los valores, no se rehacen.
+    - **Cómo se comprueba:** con la app en demo (`npm run local`), `npm run panel:contrato` compara los estilos resueltos de la app contra el boceto (menú, flecha, submenú, contadores, títulos) en claro y oscuro. **Una fase no se da por hecha si ese comando sale con error**; pegá su informe en el PR. Si sumás una pieza nueva, agregala a `PIEZAS` en `scripts/panel-nutri-boceto-contrato.mjs`. Informe de hoy: `design/panel-nutri/contrato-informe.md`.
 
 ### 2.1 Skills que se usan en cada fase
 
@@ -245,6 +247,13 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 6 a 9 | Por coordinar | — | Pendientes, una rama y un PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-20 03:10 · Claude · Prueba automática contra el boceto y estilos del boceto en un archivo
+- Hecho: `design/panel-nutri/boceto.css` (estilos del boceto copiados tal cual) y `npm run panel:contrato`, que mide la app y el boceto y dice, pieza por pieza, qué valor no coincide. Hoy marca 17 diferencias (8 en oscuro y 9 en claro), todas del menú lateral; sirve de lista exacta para la corrección de la entrada de abajo.
+- Cómo: compara estilos resueltos (tamaños, colores, sombras, codos del árbol, escala al pasar el mouse), no píxeles, porque los datos de la demo no son los del boceto. Código: `scripts/panel-nutri-boceto-contrato.mjs`.
+- Rama y commit: `claude/prueba-boceto`.
+- Falta: corregir el menú hasta que el comando salga en verde, y sumar a `PIEZAS` las demás pantallas (encabezado, tarjetas, tablas) a medida que se corrigen.
+- Próximo paso exacto: correr `npm run local`, después `npm run panel:contrato`, corregir lo que marca en `panel-nutri-shell.css` y repetir hasta que no quede ninguna fila roja.
 
 ### 2026-10-20 00:30 · Claude · Revisión de lo hecho contra el boceto (sin código)
 Facundo pidió revisar lo desarrollado y marcó que **el menú lateral no coincide con el boceto**. Quien siga lo toma como la primera tarea, antes de cualquier fase nueva. Regla de Facundo: **no se sale del boceto**; si algo no coincide, se corrige, no se reinterpreta.
