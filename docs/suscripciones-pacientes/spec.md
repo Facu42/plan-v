@@ -1,7 +1,7 @@
 # Spec: suscripciones de pacientes con Mercado Pago (Plan V)
 
 Versión 1 · 19/10/2026. Las preguntas P1–P10 quedaron cerradas el 19/10 (sección 7.3). El backend de esta rama sigue esas decisiones. La migración se escribe y **no se aplica**; no se toca Railway, Supabase de producción ni Mercado Pago.
-Base leída: `plan-v` en `origin/main` 6697d28 y `plan-v-fase5` en `cursor/panel-nutri-fase-5` (PR #153, 0a485ad). También se miró `codex/panel-nutri-fase-4` (7444eae) para la ficha.
+Base leída: `plan-v` en `origin/main` 6697d28 y `plan-v-fase5` en `cursor/panel-nutri-fase-5` (PR #153, 0a485ad). También se miró `codex/panel-nutri-fase-4` (7444eae) para la ficha. El 20/10 se trajo `origin/main` `f51f413` sin rebase: la fase 5 sigue integrada y el contrato de esta spec no cambia. Las correcciones visuales del boceto están en el PR #158, no en esta rama.
 
 ---
 
