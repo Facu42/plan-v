@@ -1,4 +1,5 @@
 import { chargeTitle, formatFeeDate, formatPesos, summarizeLedger } from '../fees';
+import { subscriptionConcept } from './panel-subscriptions';
 import { incomeIn } from './inicio-indicators';
 import type { BillingBoard, BillingBoardPatient } from '../types/fees';
 
@@ -30,7 +31,7 @@ export function billingMovements(board: BillingBoard, today: string): BillingMov
       if (payment.status !== 'confirmed' && payment.status !== 'reported') continue;
       rows.push({
         id: `pay:${payment.id}`, date: payment.paid_on, patientId: patient.patient_id, patientName: patient.full_name,
-        concept: payment.note.trim() || 'Pago registrado', method: METHOD[payment.method] ?? 'Otro', amount: payment.amount,
+        concept: subscriptionConcept(payment.note, payment.source), method: METHOD[payment.method] ?? 'Otro', amount: payment.amount,
         status: payment.status === 'reported' ? 'A confirmar' : 'Cobrado', kind: payment.status === 'reported' ? 'pendiente' : 'cobrado',
       });
     }

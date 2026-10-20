@@ -1,6 +1,10 @@
+19/10 noche · Cursor · El pago único de la cuota del mes quedó en `cursor/pago-mensual-unico` ([PR #157](https://github.com/Facu42/plan-v/pull/157), borrador contra las pantallas del [PR #156](https://github.com/Facu42/plan-v/pull/156)). Bandera apagada. Migración `20261020143000` escrita y sin aplicar. No se tocó la ficha ni el chat. El débito sigue en el [PR #155](https://github.com/Facu42/plan-v/pull/155). Sin merge y sin producción. Siguiente: ficha y chat desde esta rama.
+
 # Coordinación entre agentes (Claude, Codex, Cursor)
 
 20/10 · Claude · Panel de la nutri: [instrucciones pantalla por pantalla y fases nuevas A a I](panel-nutri-rediseno/instrucciones-boceto.md). El boceto se pasa como código; Claude desarrolla por fases y cada una se junta a main solo con el ok de Facundo.
+
+20/10 · Cursor · Se trajo `origin/main` (`f51f413`) a `cursor/pago-mensual-unico` ([PR #157](https://github.com/Facu42/plan-v/pull/157)) sin rebase. La fase 5 sigue integrada a main. Las correcciones del boceto van en el [PR #158](https://github.com/Facu42/plan-v/pull/158). No se toca `codex/panel-nutri-fase-6`. Sin merge, sin migración aplicada y sin producción. Pruebas: 3.244 aprobadas y 2 omitidas, en 511 archivos. Tipos en verde.
 
 19/10 · Cursor · Fase 5 (Agenda, Cobranzas y Página pública) en `cursor/panel-nutri-fase-5`, [PR #153](https://github.com/Facu42/plan-v/pull/153). Facundo autorizó juntarla. La fase 4 ya está en main por [PR #154](https://github.com/Facu42/plan-v/pull/154). Mercado Pago y Google Calendar muestran «Conectar». WhatsApp salió del panel: los avisos van por la app. Sin SQL remoto.
 
@@ -33,6 +37,7 @@ visto bueno de Facundo.
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
 | Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude desde el 20/10 (fases nuevas A a I); antes Codex (fases 1 a 4) y Cursor (fase 5) | Fases 1 a 5 en main. [Instrucciones y fases nuevas](panel-nutri-rediseno/instrucciones-boceto.md), [plan](panel-nutri-rediseno/plan.md) | Facundo (20/10 04:02) pidió que Claude pase el boceto como código y desarrolle por fases; cada fase se junta a main solo con su ok |
+| Suscripciones de pacientes (débito con Mercado Pago de la nutri) | Cursor | Backend `cursor/suscripciones-pacientes-backend` ([PR #155](https://github.com/Facu42/plan-v/pull/155)). Pantallas `cursor/suscripciones-cobranzas-pagina` ([PR #156](https://github.com/Facu42/plan-v/pull/156)). Pago único `cursor/pago-mensual-unico` ([PR #157](https://github.com/Facu42/plan-v/pull/157), borrador contra las pantallas). [Spec](suscripciones-pacientes/spec.md) sección 2.9 | Partes 1, 2 y el pago único listos en borrador. Bandera apagada. Las dos migraciones sin aplicar. Siguiente: ficha y chat desde `cursor/pago-mensual-unico`. Después, el débito en la app y el sandbox. No mergear |
 
 ## 2. Reglas para no pisarse
 
@@ -64,6 +69,8 @@ visto bueno de Facundo.
 | `20261015100000_habit_symptoms` | Claude | PR #112, en main desde el 14/10. Aplicada en la base el 14/10 con la frase de Facundo (el historial la anota como `20261014215543`) |
 | `20261015210000_activity_kcal` | Claude | PR #122, en main `9c56854`; ya observada aplicada con alias `20261015173356`. Se conserva como base exacta, no pendiente |
 | `20261015*` en adelante | Claude | Se anotan acá al crearlas |
+| `20261020120000_patient_subscriptions` | Cursor | Escrita el 19/10. Sin aplicar. Hace falta la frase de Facundo |
+| `20261020143000_patient_fee_checkouts` | Cursor | Escrita el 19/10, en `cursor/pago-mensual-unico`. Sin aplicar. Hace falta la frase de Facundo |
 
 ## 4. Decisiones vigentes de Facundo (fechadas)
 
@@ -74,6 +81,7 @@ visto bueno de Facundo.
 | 14/10 | La app de la paciente es igual a Nutrigo, colores incluidos. Regla fija |
 | 14/10 | Claude puede seguir desarrollando por carriles, sin pisar lo de Codex |
 | 14/10 | Documentos de producto ordenados en `docs/producto/` |
+| 19/10 | Suscripciones de pacientes: sin comisión, sin prueba gratis, solo mensual, la paciente puede darse de baja en la app, cambio de precio con 10 días de aviso, si hay débito activo se apaga la cuota manual, solo la nutri activa (equipo y recepción solo ven), se ofrece en la página pública y por link, todos los medios de pago. Cursor hace backend y pantallas. Detalle en `docs/suscripciones-pacientes/spec.md` |
 
 Pendientes de decidir (con recomendación en `docs/producto/07-decisiones-recomendadas.md`): precio y
 prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se use, Android, métricas
@@ -81,6 +89,12 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **19/10 · Cursor · Celular: sección activa y título** · En el [PR #157](https://github.com/Facu42/plan-v/pull/157) la Página pública marca «Más», el título queda una sola vez en la barra del celular, y la captura usa el boceto de la Página pública. 3.244 pruebas y 2 omitidas, tipos en verde. Lo mismo está en el [PR #156](https://github.com/Facu42/plan-v/pull/156). Agenda y Cobranzas del panel real, con capturas nuevas de 390, están en el [PR #158](https://github.com/Facu42/plan-v/pull/158).
+- **19/10 · Cursor · Pago único de la cuota, cerrado** · [PR #157](https://github.com/Facu42/plan-v/pull/157), rama `cursor/pago-mensual-unico`, borrador contra `cursor/suscripciones-cobranzas-pagina`. Enlace de un mes, sin suscripción. El cobro entra una vez en Movimientos. Con débito activo no se ofrece. Migración `20261020143000` escrita y sin aplicar. Trae el arreglo de celular del [PR #156](https://github.com/Facu42/plan-v/pull/156): el débito y las cuotas vencidas se leen en columna, Movimientos es una lista en el celular, y el menú inferior queda fijo. Capturas nuevas en `design/suscripciones/`, el celular al lado del boceto de escritorio. 3.243 pruebas y 2 omitidas, tipos en verde. Sin ficha, sin chat, sin merge y sin producción. Lo de Agenda que ya está en main va en [PR #158](https://github.com/Facu42/plan-v/pull/158). Siguiente: `cursor/suscripciones-ficha-chat` desde esta rama.
+- **19/10 · Cursor · Celular de las pantallas de suscripciones** · Facu rechazó el celular de 390. En [PR #156](https://github.com/Facu42/plan-v/pull/156) el débito y los movimientos se leen en columna, las pestañas bajan de renglón, Suscribirme queda dentro del marco y el menú inferior queda fijo. Capturas nuevas en `design/suscripciones/`, el celular al lado del boceto de escritorio. 3.230 pruebas y 2 omitidas, tipos en verde. Lo de Agenda y Cobranzas que ya está en main va en otra rama, `cursor/arreglo-mobile-fase5`.
+- **19/10 · Cursor · Pago único de la cuota, registrado** · Facu pidió cobrar un mes suelto por Mercado Pago, sin suscripción. Quedó en la spec, sección 2.9, antes de programarlo.
+- **19/10 · Cursor · Pantallas de suscripciones** · [PR #156](https://github.com/Facu42/plan-v/pull/156), rama `cursor/suscripciones-cobranzas-pagina`, borrador contra `cursor/suscripciones-pacientes-backend`. Cobranzas, página pública del panel y la página donde la paciente elige el plan. Bandera apagada. 3.228 pruebas y dos omitidas, tipos en verde. Capturas de la app junto al boceto en `design/suscripciones/`. No se tocó la ficha ni el chat. Sin merge, sin migración aplicada y sin producción. La ficha y el chat quedan después del pago único. El sandbox de Mercado Pago sigue pendiente.
+- **19/10 · Cursor · Backend de suscripciones** · [PR #155](https://github.com/Facu42/plan-v/pull/155), rama `cursor/suscripciones-pacientes-backend`. Migración `20261020120000_patient_subscriptions` escrita y sin aplicar. Webhook general de Mercado Pago, alta con el token de la nutri, cobro único en Cobranzas, anulación por devolución, conciliación cada 6 horas y links que vencen a los 7 días. Bandera apagada. Sin pantallas del panel. 3.185 pruebas y dos omitidas, tipos y migraciones en verde. La prueba en sandbox de Mercado Pago sigue pendiente. Main (fases 4 y 5) quedó unido a esta rama.
 - **19/10 · Cursor · Fase 5 con la fase 4** · Se trajo main (fase 4, #154) a `cursor/panel-nutri-fase-5`. Conviven el armazón, la ficha y Agenda, Cobranzas y Página pública. [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar hasta que los controles estén verdes.
 - **19/10 · Cursor · Fase 5 comparada y sin WhatsApp** · Capturas en `design/panel-nutri/fase-5/`. [PR #153](https://github.com/Facu42/plan-v/pull/153). WhatsApp salió de Agenda, Cobranzas, Página pública y Conexiones. Los recordatorios abren el chat de la app. El servidor no se tocó.
 - **19/10 · Cursor · Cierre fase 5** · Agenda, Cobranzas y Página pública en `cursor/panel-nutri-fase-5`, desde main `6697d28`. [PR #153](https://github.com/Facu42/plan-v/pull/153). Conectar no finge claves. Se conservan transferencias, conciliación, desconectar y el resto de la agenda vieja. Sin SQL remoto. Autorizado por Facundo 19/10 porque Codex sin crédito. La fase 6 sigue pendiente.

@@ -1,4 +1,5 @@
 import {registerSchedulingRoutes} from './scheduling/routes.js';
+import {registerPatientSubscriptionRoutes} from './subscriptions/routes.js';
 import {registerSchedulingTeamRoutes} from './scheduling/team-routes.js';
 import {registerDocumentOrganizerRoutes} from './document-organizer/routes.js';
 import {registerCommunicationChannelRoutes} from './communications/channel-routes.js';
@@ -312,6 +313,7 @@ registerPatientImportRoutes(app);
 registerNutritionCapabilityRoutes(app);
 registerClinicalWorkspaceRoutes(app);
 registerPortfolioRoutes(app);
+registerPatientSubscriptionRoutes(app);
 registerSchedulingRoutes(app);
 registerSchedulingTeamRoutes(app);
 registerDocumentOrganizerRoutes(app);

@@ -179,7 +179,7 @@ Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» 
 - **Plan**: plan de hoy con alternativas, pedido de cambio de la paciente (aprobar o proponer otra), planificación (calorías y macros), lista de compras.
 - **Registro alimentario**, **Laboratorio** (con tres fechas y gráfico del valor elegido), **Archivos** (con zona para arrastrar y exportar ficha en PDF), **Consultas** (con «Cerrar la consulta de hoy»), **Cobros**, **Chat**.
 
-### Fase 5. Agenda, Cobranzas y Página pública · Estado: lista para juntar (Cursor, PR #153; Facundo autorizó)
+### Fase 5. Agenda, Cobranzas y Página pública · Estado: integrada a main (Cursor, PR #153)
 
 Agenda semanal con colores por tipo, línea de la hora, bloqueos, reservas por confirmar, tipos de consulta
 y link de reserva. Cobranzas con cobrado, por cobrar, vencido, ingresos por mes, cuotas vencidas con
@@ -250,8 +250,6 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Lista para juntar; Facundo autorizó. Convive con la ficha de la fase 4 |
 | Fases nuevas A a I (boceto pasado como código) | Claude | una rama por fase | Ver `instrucciones-boceto.md` §4; A en curso. Reemplazan la corrección del menú y las fases 6 a 9 |
 
-## 8. Bitácora (una entrada por paso, la más nueva arriba)
-
 ### 2026-10-20 04:30 · Claude · Instrucciones pantalla por pantalla y fases nuevas
 - Hecho: `instrucciones-boceto.md` con el método (copiar el código del boceto, no redibujarlo), lo que hoy no coincide en cada pantalla, una tabla con la función y línea del boceto, la ruta, el componente actual y los datos que se conservan, y las fases nuevas A a I.
 - Cómo: pedido de Facundo del 20/10 04:02 («revisá todas las pantallas… comenzá a desarrollar por fases con mi aprobación») y 04:06 («¿no se pueden pasar en código?»).
@@ -265,6 +263,27 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 - Rama y commit: `claude/prueba-boceto`.
 - Falta: corregir el menú hasta que el comando salga en verde, y sumar a `PIEZAS` las demás pantallas (encabezado, tarjetas, tablas) a medida que se corrigen.
 - Próximo paso exacto: correr `npm run local`, después `npm run panel:contrato`, corregir lo que marca en `panel-nutri-shell.css` y repetir hasta que no quede ninguna fila roja.
+| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Integrada a main `c09466b`, junto con la fase 4 |
+| Corrección del menú y de lo que no coincide | Cursor | `cursor/arreglo-mobile-fase5` · [PR #158](https://github.com/Facu42/plan-v/pull/158) | Hecha en #158, sin juntar. La fase 6 sigue en Codex (`codex/panel-nutri-fase-6`) |
+| 6 a 9 | Por coordinar | — | Pendientes, una rama y un PR por fase |
+
+## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-20 01:15 · Cursor · Main en el backend de suscripciones
+- Hecho: se trajo `origin/main` sin rebase. La fase 5 sigue integrada. Se conservó la revisión de Claude del 20/10 00:30. El contrato de cobro no cambia. Las seis correcciones del boceto están en el PR #158.
+- Cómo: merge, sin rebase y sin tocar `codex/panel-nutri-fase-6`.
+- Rama y PR: `cursor/suscripciones-pacientes-backend`, [PR #155](https://github.com/Facu42/plan-v/pull/155). Sin merge a main y sin aplicar migraciones.
+- Pruebas: 3.211 aprobadas y 2 omitidas, en 504 archivos. Tipos en verde.
+### 2026-10-20 01:15 · Cursor · Main en las pantallas de suscripciones
+- Hecho: se trajo `origin/main` sin rebase. La fase 5 sigue integrada. Se conservó la revisión de Claude del 20/10 00:30. Las seis correcciones del boceto están en el PR #158, no en esta rama.
+- Cómo: merge, sin rebase y sin tocar `codex/panel-nutri-fase-6`.
+- Rama y PR: `cursor/suscripciones-cobranzas-pagina`, [PR #156](https://github.com/Facu42/plan-v/pull/156). Sin merge a main y sin aplicar migraciones.
+- Pruebas: 3.231 aprobadas y 2 omitidas, en 508 archivos. Tipos en verde.
+### 2026-10-20 01:15 · Cursor · Main en el pago único
+- Hecho: se trajo `origin/main` sin rebase. La fase 5 sigue integrada. Se conservó la revisión de Claude del 20/10 00:30. El pago único no cambia. Las seis correcciones del boceto están en el PR #158.
+- Cómo: merge, sin rebase y sin tocar `codex/panel-nutri-fase-6`.
+- Rama y PR: `cursor/pago-mensual-unico`, [PR #157](https://github.com/Facu42/plan-v/pull/157). Sin merge a main y sin aplicar migraciones.
+- Pruebas: 3.244 aprobadas y 2 omitidas, en 511 archivos. Tipos en verde.
 
 ### 2026-10-20 00:30 · Claude · Revisión de lo hecho contra el boceto (sin código)
 Facundo pidió revisar lo desarrollado y marcó que **el menú lateral no coincide con el boceto**. Quien siga lo toma como la primera tarea, antes de cualquier fase nueva. Regla de Facundo: **no se sale del boceto**; si algo no coincide, se corrige, no se reinterpreta.
@@ -280,6 +299,40 @@ Facundo pidió revisar lo desarrollado y marcó que **el menú lateral no coinci
 - Rama y commit: solo documento, rama `claude/bitacora-menu-diferencias`.
 - Falta: todo lo de arriba. No hay más crédito en el hilo de Claude para desarrollarlo.
 - Próximo paso exacto: anotarse en esta Bitácora, abrir `src/components/nutrigo/panel-nutri-shell.css` y reemplazar las líneas 15, 16, 31 a 34 por los valores del boceto; después los puntos 3 a 6. Un PR chico por esta corrección, antes de la fase 6.
+
+### 2026-10-19 23:55 · Cursor · Sección activa y título en el celular
+- Hecho: en la Página pública el menú inferior marca «Más», igual que en Cobranzas. En el celular el título de la sección está en la barra de arriba y no se repite en la página. En escritorio el título sigue en la página, como el boceto. La captura de la Página pública quedó al lado del boceto de esa pantalla.
+- Cómo: break-ui, frontend-patterns, frontend-a11y y verification-loop. Una sola vez el título para quien escucha la página. Sin datos nuevos ni librería de estado.
+- Rama y PR: `cursor/suscripciones-cobranzas-pagina`, [PR #156](https://github.com/Facu42/plan-v/pull/156). 3.231 pruebas y 2 omitidas, en 508 archivos. Tipos en verde. La misma corrección está en el PR #157. Las capturas nuevas de Agenda y Cobranzas están en el PR #158.
+- Rama y PR: `cursor/pago-mensual-unico`, [PR #157](https://github.com/Facu42/plan-v/pull/157). 3.244 pruebas y 2 omitidas, en 511 archivos. Tipos en verde. La misma corrección está en el PR #156. Las capturas nuevas de Agenda y Cobranzas están en el PR #158.
+
+### 2026-10-19 23:50 · Cursor · Pago único, con el celular que Facu rechazó
+- Hecho: el enlace de un mes sigue en esta rama, y ahora el celular no parte los nombres. En 360, 390 y 430 el débito, las cuotas vencidas y los movimientos se leen en columna o en tarjetas. El cuadro del enlace cabe en la pantalla y sus campos miden 44 px. El menú inferior queda fijo. No se repite el título ni aparecen los accesos de paciente en la vista previa.
+- Cómo: se aplicaron break-ui, frontend-patterns, frontend-a11y y verification-loop. Las vistas siguen recibiendo los mismos datos. No hay un interruptor de peor caso. Las capturas de celular se sacaron de nuevo dentro del panel, con el menú inferior, y quedaron al lado del boceto de escritorio en `design/suscripciones/`. No hay boceto de celular. El cuadro de «Cobrar este mes» tapa el menú mientras está abierto.
+- Rama y PR: `cursor/pago-mensual-unico`, [PR #157](https://github.com/Facu42/plan-v/pull/157), borrador contra `cursor/suscripciones-cobranzas-pagina`. 3.243 pruebas y 2 omitidas, en 511 archivos. Lo de Agenda que ya está en main va en `cursor/arreglo-mobile-fase5`, [PR #158](https://github.com/Facu42/plan-v/pull/158).
+- Falta: ficha, chat, el débito en la app de la paciente y la prueba en sandbox. Facu tiene que aplicar las dos migraciones y prender la bandera.
+- Próximo paso exacto: crear `cursor/suscripciones-ficha-chat` desde esta rama y hacer la ficha (4.4) y el chat (4.5).
+
+### 2026-10-19 23:20 · Cursor · Celular de Cobranzas y de la página pública
+- Hecho: Facu rechazó el celular. En la tarjeta de débito el nombre se lee en una línea. En el celular, Movimientos es una lista de tarjetas. Las pestañas bajan de renglón. Suscribirme queda dentro del marco de la vista previa. El menú inferior queda fijo y no tapa el final. Nada se corta en 360, 390 ni 430, y los botones miden al menos 44 px.
+- Cómo: se aplicaron break-ui, frontend-patterns, frontend-a11y y verification-loop. Las vistas siguen recibiendo los mismos datos. Las capturas de celular se sacaron de nuevo dentro del panel, con el menú inferior, y quedaron al lado del boceto de escritorio en `design/suscripciones/`. No hay boceto de celular.
+- Rama y PR: `cursor/suscripciones-cobranzas-pagina`, [PR #156](https://github.com/Facu42/plan-v/pull/156). Lo que ya está en main (título repetido, accesos de paciente y turnos pegados) va en `cursor/arreglo-mobile-fase5`, no en esta rama.
+- Falta: el pago único sigue en su rama. Ficha y chat, después. Esta rama quedó con 3.230 pruebas y 2 omitidas, tipos en verde.
+- Próximo paso exacto: cerrar el control de esta rama y seguir el pago único en `cursor/pago-mensual-unico`, trayendo este arreglo.
+
+### 2026-10-19 22:30 · Cursor · Pago único de la cuota, pedido registrado
+- Hecho: Facu pidió un pago de un solo mes, sin suscripción. Quedó escrito en la spec (sección 2.9) antes de programarlo. La nutri genera un enlace de Mercado Pago para la cuota del mes, lo copia, y la paciente puede pagarlo desde su app o desde la página pública. El cobro entra una sola vez en Movimientos y la cuota pasa a «Al día». Si ya tiene débito activo, no se ofrece.
+- Cómo: misma bandera apagada, mismos textos en español y sin WhatsApp. Se reutiliza el enlace de la seña y la conciliación. Si hace falta una tabla, la migración se escribe y no se aplica. No se toca la ficha ni el chat.
+- Rama y PR: se abre `cursor/pago-mensual-unico` desde `cursor/suscripciones-cobranzas-pagina`, borrador apilado sobre esa rama (PR #156), no sobre main.
+- Falta: programarlo, probarlo y dejar las capturas con el menú lateral del panel.
+- Próximo paso exacto: implementar 2.9 en esa rama. Al cerrar, actualizar la spec, esta bitácora y `docs/coordinacion-agentes.md`.
+
+### 2026-10-19 21:30 · Cursor · Suscripciones, pantallas de Cobranzas y página pública
+- Hecho: en Cobranzas se crea y se edita el plan mensual, se activa el débito, se copia el enlace, se ve quién está al día y está Conciliar. En la página pública del panel se ve el plan y la consulta suelta. La paciente elige el plan en la página del consultorio. La bandera sigue apagada: si el servidor dice que no existe, no se ve nada nuevo. No se tocó la ficha ni el chat.
+- Cómo: misma pieza visual de la fase 5. El boceto no dibuja el débito; cada captura de la app quedó al lado de `#cobranzas` o `#publica` en `design/suscripciones/`. El formulario de la paciente se comparó con la vista de celular de la página pública, que es lo más parecido. 3.228 pruebas y 2 omitidas, tipos en verde. La prueba de fuego aflojó «Al día» y las pruebas lo cazaron; quedó revertido.
+- Rama y PR: `cursor/suscripciones-cobranzas-pagina`, [PR #156](https://github.com/Facu42/plan-v/pull/156), borrador contra `cursor/suscripciones-pacientes-backend` ([PR #155](https://github.com/Facu42/plan-v/pull/155)). Sin merge, sin migración aplicada y sin producción.
+- Falta: ficha, chat, app de la paciente y la prueba en sandbox de Mercado Pago.
+- Próximo paso exacto: crear `cursor/suscripciones-ficha-chat` desde esta rama y hacer la ficha (4.4) y el chat (4.5). Al cerrar, actualizar `docs/suscripciones-pacientes/spec.md`, esta bitácora y `docs/coordinacion-agentes.md`.
 
 ### 2026-10-19 18:40 · Cursor · Fase 5, paso 4 (junto con la fase 4)
 - Hecho: se trajo main a esta rama. La ficha de la fase 4 y Agenda, Cobranzas y Página pública conviven. En Cobranzas, Ver vuelve a llamarse «Ver cobranzas de…» para abrir la cuota. Si todavía no hay movimientos, el recorrido abre Registrar cobro.

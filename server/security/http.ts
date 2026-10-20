@@ -161,7 +161,7 @@ export function createRateLimits(options: {
       const ip = address(c);
       const generalWait = general(ip);
       if (generalWait) return reject(c, generalWait);
-      const bookingMutation = c.req.method === 'POST' && /^\/api\/public\/scheduling\/[^/]+\/bookings(?:\/|$)/.test(c.req.path);
+      const bookingMutation = c.req.method === 'POST' && /^\/api\/public\/scheduling\/[^/]+\/(?:bookings|subscriptions)(?:\/|$)/.test(c.req.path);
       if (c.req.path === '/api/auth/recover' || c.req.path === '/api/ops/nutritionists' || bookingMutation) {
         const wait = sensitive(`${c.req.path}:${ip}`);
         if (wait) return reject(c, wait);
