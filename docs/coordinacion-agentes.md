@@ -2,7 +2,7 @@
 
 # Coordinación entre agentes (Claude, Codex, Cursor)
 
-20/10 · Cursor · Se trajo `origin/main` (`f51f413`) a `cursor/suscripciones-cobranzas-pagina` ([PR #156](https://github.com/Facu42/plan-v/pull/156)) sin rebase. La fase 5 sigue integrada a main. Las correcciones del boceto van en el [PR #158](https://github.com/Facu42/plan-v/pull/158). No se toca `codex/panel-nutri-fase-6`. Sin merge, sin migración aplicada y sin producción.
+20/10 · Cursor · Se trajo `origin/main` (`f51f413`) a `cursor/suscripciones-cobranzas-pagina` ([PR #156](https://github.com/Facu42/plan-v/pull/156)) sin rebase. La fase 5 sigue integrada a main. Las correcciones del boceto van en el [PR #158](https://github.com/Facu42/plan-v/pull/158). No se toca `codex/panel-nutri-fase-6`. Sin merge, sin migración aplicada y sin producción. Pruebas: 3.231 aprobadas y 2 omitidas, en 508 archivos. Tipos en verde.
 
 19/10 · Cursor · Fase 5 (Agenda, Cobranzas y Página pública) en `cursor/panel-nutri-fase-5`, [PR #153](https://github.com/Facu42/plan-v/pull/153). Facundo autorizó juntarla. La fase 4 ya está en main por [PR #154](https://github.com/Facu42/plan-v/pull/154). Mercado Pago y Google Calendar muestran «Conectar». WhatsApp salió del panel: los avisos van por la app. Sin SQL remoto.
 
