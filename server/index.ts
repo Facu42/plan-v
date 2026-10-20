@@ -1,3 +1,4 @@
+import { integrationAvailability } from './scheduling/providers.js';
 import {registerSchedulingRoutes} from './scheduling/routes.js';
 import {registerPatientSubscriptionRoutes} from './subscriptions/routes.js';
 import {registerSchedulingTeamRoutes} from './scheduling/team-routes.js';
@@ -1235,6 +1236,18 @@ if (isMainModule) {
   }
   if (process.env.WORKER_SEPARATE !== '1') startJobWorker();
   writeOpsLog('info', 'api_listen', { mode: config.mode, data: config.dataMode, ai: config.aiMode, port: String(port) });
+  {
+    // Solo presencia y formato, nunca valores: sirve para saber por qué una conexión figura como no disponible.
+    const e = process.env, has = (k: string) => String(Boolean(e[k]?.trim()));
+    let keyOk = false; try { keyOk = Buffer.from(e.SCHEDULING_TOKEN_KEY ?? '', 'base64').length === 32; } catch { keyOk = false; }
+    writeOpsLog('info', 'integrations_config', {
+      sched_key: has('SCHEDULING_TOKEN_KEY'), sched_key_32b: String(keyOk),
+      mp_client_id: has('MP_SCHEDULING_CLIENT_ID'), mp_client_id_digits: String(/^\d+$/.test(e.MP_SCHEDULING_CLIENT_ID ?? '')),
+      mp_client_secret: has('MP_SCHEDULING_CLIENT_SECRET'), mp_webhook_secret: has('MP_SCHEDULING_WEBHOOK_SECRET'),
+      base_url: has('SCHEDULING_PUBLIC_BASE_URL'), base_url_expected: String(e.SCHEDULING_PUBLIC_BASE_URL === 'https://plan-v-eight.vercel.app'),
+      mp_available: String(integrationAvailability().mercadopago),
+    });
+  }
   serve({ fetch: app.fetch, port, hostname: demoState ? '127.0.0.1' : '0.0.0.0' });
   // Sólo la demo local en memoria: nunca con datos reales ni en producción.
   if (config.mode === 'demo' && config.dataMode === 'memory') {
