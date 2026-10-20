@@ -8,6 +8,7 @@ Base de la parte 1: `origin/main` en `c09466b` (fases 4 y 5 ya juntas). El backe
 Otro agente puede seguir desde acá sin el chat.
 
 ### Hecho
+- **20/10, main.** Se trajo `origin/main` `f51f413` sin rebase. La fase 5 sigue integrada. El contrato de cobro no cambia. Las correcciones visuales del boceto están en el PR #158.
 - **Parte 1, backend.** Rama `cursor/suscripciones-pacientes-backend`, [PR #155](https://github.com/Facu42/plan-v/pull/155) contra `main`. Trae el merge de main `c09466b` (fase 4 y fase 5). Migración `20261020120000_patient_subscriptions.sql` escrita y sin aplicar. Bandera `PATIENT_SUBSCRIPTIONS_ENABLED` apagada. Webhook general, alta con el token de la nutri, un cobro por aviso, anulación si hay devolución, conciliación y enlaces que vencen a los 7 días.
 - **Parte 2, pantallas.** Rama `cursor/suscripciones-cobranzas-pagina`, [PR #156](https://github.com/Facu42/plan-v/pull/156) contra la rama del backend. Cobranzas (4.1), página pública del panel (4.2) y la página donde la paciente elige el plan (4.3), con la vuelta `/consultorio/<slug>/suscripcion/<id>`. Si la bandera está apagada, el servidor responde 404 y no se ve nada nuevo. Pruebas de esta rama: 3.228 aprobadas y 2 omitidas, en 507 archivos. `npm run check` en verde. No se aplicó la migración.
 

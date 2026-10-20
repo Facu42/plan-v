@@ -2,6 +2,8 @@
 
 # Coordinación entre agentes (Claude, Codex, Cursor)
 
+20/10 · Cursor · Se trajo `origin/main` (`f51f413`) a `cursor/suscripciones-cobranzas-pagina` ([PR #156](https://github.com/Facu42/plan-v/pull/156)) sin rebase. La fase 5 sigue integrada a main. Las correcciones del boceto van en el [PR #158](https://github.com/Facu42/plan-v/pull/158). No se toca `codex/panel-nutri-fase-6`. Sin merge, sin migración aplicada y sin producción.
+
 19/10 · Cursor · Fase 5 (Agenda, Cobranzas y Página pública) en `cursor/panel-nutri-fase-5`, [PR #153](https://github.com/Facu42/plan-v/pull/153). Facundo autorizó juntarla. La fase 4 ya está en main por [PR #154](https://github.com/Facu42/plan-v/pull/154). Mercado Pago y Google Calendar muestran «Conectar». WhatsApp salió del panel: los avisos van por la app. Sin SQL remoto.
 
 19/10 · Codex · Fase 4 de Ficha integrada a main por [PR #154](https://github.com/Facu42/plan-v/pull/154). Revisión de código y visual cerradas, seis e2e aprobados y suite estable final verde (3.177 y dos omitidas, 494 archivos). [Informe y límites](panel-nutri-rediseno/fase-4-verificacion.md). Sin SQL remoto.
@@ -32,7 +34,7 @@ visto bueno de Facundo.
 | Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Ánimo y síntomas publicado (PR #112, 14/10). Recorridos de punta a punta y monitor en main (#114, 15/10). Aviso de recurso indicado en PR propio. El resto, por empezar |
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
-| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (fases 1 a 4); Cursor (fase 5) | Fases 1 a 5 en main (`c09466b`). [Plan](panel-nutri-rediseno/plan.md) | Fase 4 integrada por #154. Fase 5 integrada por #153. Una rama y un PR por fase; no se usa el PR #147 |
+| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (fases 1 a 4 y fase 6); Cursor (fase 5 y corrección del menú) | Fases 1 a 5 en main. Corrección del menú en [PR #158](https://github.com/Facu42/plan-v/pull/158). Fase 6 en `codex/panel-nutri-fase-6`, sin tocar. [Plan](panel-nutri-rediseno/plan.md) | Fase 5 integrada por #153. Una rama y un PR por fase; no se usa el PR #147 |
 | Suscripciones de pacientes (débito con Mercado Pago de la nutri) | Cursor | Backend `cursor/suscripciones-pacientes-backend` ([PR #155](https://github.com/Facu42/plan-v/pull/155)). Pantallas `cursor/suscripciones-cobranzas-pagina` ([PR #156](https://github.com/Facu42/plan-v/pull/156), borrador contra el backend). Pago único del mes: `cursor/pago-mensual-unico`, desde las pantallas. [Spec](suscripciones-pacientes/spec.md) sección 2.9 | Parte 1 y parte 2 listas en borrador. El pago único está registrado y en curso. Bandera apagada. Migraciones sin aplicar. Después: ficha y chat, el débito en la app de la paciente, y el sandbox. No mergear |
 
 ## 2. Reglas para no pisarse
