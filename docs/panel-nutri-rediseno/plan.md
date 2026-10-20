@@ -50,6 +50,7 @@ pasa a tener la paleta de la app de la paciente. La app de la paciente sigue igu
     empujado a GitHub. Después de cada paso, escribí en la **sección 8 (Bitácora)** qué hiciste, cómo, qué falta
     y el próximo paso exacto. El que llega lee primero la sección 7 (Estado) y la última entrada de la sección 8.
 11. **Skills obligatorias**: las de la sección 2.1, según el tipo de trabajo.
+12. **No salirse del boceto.** El código de `bocetos.html` (colores, medidas, líneas, sombras, movimiento) se copia tal cual; no se reinterpreta ni se "mejora". Antes de dar una fase por hecha se compara lado a lado con el boceto, en claro y oscuro, a 1440 y 390; lo que no coincide se corrige y se anota. El 20/10 Facundo marcó que el menú lateral se había apartado del boceto (ver Bitácora).
 
 ### 2.1 Skills que se usan en cada fase
 
@@ -171,7 +172,7 @@ Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» 
 - **Plan**: plan de hoy con alternativas, pedido de cambio de la paciente (aprobar o proponer otra), planificación (calorías y macros), lista de compras.
 - **Registro alimentario**, **Laboratorio** (con tres fechas y gráfico del valor elegido), **Archivos** (con zona para arrastrar y exportar ficha en PDF), **Consultas** (con «Cerrar la consulta de hoy»), **Cobros**, **Chat**.
 
-### Fase 5. Agenda, Cobranzas y Página pública · Estado: lista para juntar (Cursor, PR #153; Facundo autorizó)
+### Fase 5. Agenda, Cobranzas y Página pública · Estado: integrada a main (Cursor, PR #153)
 
 Agenda semanal con colores por tipo, línea de la hora, bloqueos, reservas por confirmar, tipos de consulta
 y link de reserva. Cobranzas con cobrado, por cobrar, vencido, ingresos por mes, cuotas vencidas con
@@ -239,10 +240,26 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
 | 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main `6697d28` |
 | 4 | Codex | `codex/panel-nutri-fase-4` · [PR #154](https://github.com/Facu42/plan-v/pull/154) | Integrada a main |
-| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Lista para juntar; Facundo autorizó. Convive con la ficha de la fase 4 |
+| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Integrada a main `c09466b`, junto con la fase 4 |
+| Corrección del menú y de lo que no coincide | Por coordinar | — | Primera tarea; ver la última entrada de la Bitácora (20/10) |
 | 6 a 9 | Por coordinar | — | Pendientes, una rama y un PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-20 00:30 · Claude · Revisión de lo hecho contra el boceto (sin código)
+Facundo pidió revisar lo desarrollado y marcó que **el menú lateral no coincide con el boceto**. Quien siga lo toma como la primera tarea, antes de cualquier fase nueva. Regla de Facundo: **no se sale del boceto**; si algo no coincide, se corrige, no se reinterpreta.
+- Hecho: corrí main en demo, oscuro, 1440×900 y celular, y comparé con `design/panel-nutri/bocetos.html`. Fases 1 a 5 coinciden en lo grande. Esta revisión no cambió código.
+- **A corregir 1. Submenú (líneas del árbol).** Hoy hay una sola línea recta con un solo gancho arriba (`panel-nutri-shell.css` líneas 31 y 32). El boceto dibuja, para cada opción, **su propio codo curvo** que sale de la línea: `.si::before` = 12 px de ancho, 50 % de alto, borde izquierdo e inferior de 1,5 px, `border-bottom-left-radius:8px`, a `left:-16px`; y `.si:not(:last-child)::after` = la línea que sigue hacia abajo (`left:-16px; top:50%; bottom:0; border-left:1.5px`). El color del trazo es `--mut2` (gris suave), no la línea fina del panel. La opción mide 13 px de letra (hoy 11,5), con `padding:7px 10px`, `border-radius:10px`, `margin-left:16px` dentro de un contenedor con `padding-left:21px`, y el número va a la derecha en círculo de 22 px (`b`, 10,5 px, fondo oscuro). Opción activa: fondo crema y peso 500. Cada opción aparece con `opacity` y `translateY(-4px)` a `none` en 260 ms. Código exacto: `bocetos.html` líneas 358 a 370.
+- **A corregir 2. Flecha de plegar el menú.** Hoy mide 32 px, sin sombra propia ni animación al tocar (`panel-nutri-shell.css` líneas 15 y 16, 80). El boceto: círculo de **30 px** a `right:-15px; top:36px`, sombra `0 2px 8px rgba(39,41,50,.12)`, al pasar el mouse **crece a 1,1 y se pinta lima claro**, al apretar **baja a 0,94**, transición 250 ms (`transform`) y 200 ms (color), el ícono de 16 px **gira 180°** en 280 ms al plegar, y anillo de foco de 2 px `#7FA82E`. Código exacto: `bocetos.html` líneas 234 a 240 (con reducir movimiento no se anima).
+- **A corregir 3. Barra vieja** «Pacientes / Ficha / Plan» y el selector de paciente siguen arriba de Agenda, Cobranzas y Mensajes; el boceto no los tiene, y estas pantallas repiten el título (arriba y adentro).
+- **A corregir 4. Botones apagados:** «Nueva consulta» y «Registrar cobro» en Agenda y Cobranzas se ven deshabilitados (texto sin contraste sobre el lima).
+- **A corregir 5. Tema por defecto:** hoy arranca en «como el sistema» (casi siempre claro). Facundo pidió **oscuro por defecto**, con botón a claro. `panel-preferences.ts`, `readPanelPreference` devuelve `'system'`.
+- **A corregir 6. Fecha del Inicio:** sale «Lunes, 19 De Octubre»; el boceto dice «Miércoles 21 de octubre» (con «de» en minúscula).
+- Siguen con el diseño viejo, falta hacerlas: Planes y Asistente IA (fase 7); Mensajes, Seguimiento y Progreso (fase 6, hay rama de Codex `codex/panel-nutri-fase-6` sin juntar).
+- Cómo verificar: mismo tamaño que el boceto, lado a lado, claro y oscuro, y mirar la imagen, no solo que compile.
+- Rama y commit: solo documento, rama `claude/bitacora-menu-diferencias`.
+- Falta: todo lo de arriba. No hay más crédito en el hilo de Claude para desarrollarlo.
+- Próximo paso exacto: anotarse en esta Bitácora, abrir `src/components/nutrigo/panel-nutri-shell.css` y reemplazar las líneas 15, 16, 31 a 34 por los valores del boceto; después los puntos 3 a 6. Un PR chico por esta corrección, antes de la fase 6.
 
 ### 2026-10-20 00:10 · Cursor · Título en la barra del celular
 - Hecho: en Agenda y Cobranzas el celular muestra el título en la barra de arriba y no lo repite en la página. En escritorio el título sigue en la página, como el boceto. La Página pública marca «Más». Siguen ocultos los accesos de Pacientes, Ficha y Plan. Los turnos siguen en filas con su etiqueta y el menú inferior sigue fijo.
@@ -284,7 +301,6 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 - Qué falta: sólo CI remoto e integración de esta entrega; fases siguientes fuera del alcance de este hilo. Las limitaciones de hardware/IA/PDF de punta a punta quedan explícitas en el informe.
 - Próximo paso exacto: comprobar CI de #154, integrarlo con todo verde y detener este trabajo. **La fase 5 ya se realiza en otro carril por pedido de Facundo; no tomarla ni continuar con fases 6–9.**
 
-
 ### 2026-10-19 · Codex · Fase 4, paso 6 (cierre verificado)
 - Hecho: once pestañas verificadas, suite estable de 3.177 aprobadas y dos omitidas (494 archivos), tipos/build/secretos verdes. Seis e2e, 14 controles y 44 tamaños/temas, nueve acciones privadas y cinco ensayos de paginación; 47 capturas. Comparación navegable comprobada y abierta para Facundo.
 - Cómo: revisiones independientes de código y visual cerradas sin P1/P2. Fire test detectado y restaurado; comparadores manuales preservados con RED/GREEN. [Informe completo y paso 10](fase-4-verificacion.md). Sin migraciones ni cambios de producción.
@@ -292,14 +308,12 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 - Falta: crear y registrar PR, controles remotos e integración con todo verde.
 - Próximo paso exacto: abrir PR de fase 4 con el paso 10; integrar al aprobar CI y detener este hilo. La fase 5 está a cargo de otro carril por pedido de Facundo.
 
-
 ### 2026-10-19 · Codex · Fase 4, paso 5 (correcciones de revisión)
 - Hecho: Historia agrupada y medidas del primer día autorizado, datos de ingreso preservados; chat con estilos propios de su contexto, visor y perfil con tema del panel, pestaña activa visible en celular. Corregido desborde del plan y retiro de Atención en documentos/evaluaciones.
 - Cómo: revisión independiente de código y visual; nueve acciones privadas reales en demo, incluida apertura pendiente y retiro, laboratorio de tres fechas y nota manual/publicación. Seis e2e aprobados con Chrome local; tipos aprobados. Fire test detectó exposición de foto sin permiso, restaurado y tres casos verdes.
 - Rama: codex/panel-nutri-fase-4; base main 6697d28 conciliada en 4520e73.
 - Falta: suite completa final (primera corrida tuvo EBUSY de Windows y un timeout; sus 25 casos focales repitieron verdes), capturas finales y cierre independiente, informe y PR.
 - Próximo paso exacto: completar suite serializada, controles del navegador y artefacto; abrir PR exclusivo de fase 4 e integrar sólo con CI verde. **Por indicación de Facundo, detenerse al terminar fase 4: fase 5 se hace en otro carril.**
-
 
 Formato de cada entrada, para que el siguiente agente siga sin preguntar:
 
