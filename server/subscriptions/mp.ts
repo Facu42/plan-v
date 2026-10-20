@@ -1,10 +1,52 @@
 import { CareError } from '../care/errors.js';
 import { accessToken } from '../scheduling/providers.js';
+import { redactText, safePath } from '../ops/log.js';
+
+export type MpErrorCause = { code: string | null; description: string | null };
+export type MpErrorDetails = {
+  status: number | null;
+  message: string | null;
+  error: string | null;
+  cause: MpErrorCause[];
+};
 
 export class MpCallError extends Error {
-  constructor(readonly httpStatus: number) {
+  constructor(readonly httpStatus: number, readonly details: MpErrorDetails | null = null) {
     super('Mercado Pago no confirmó la operación.');
   }
+}
+
+const str = (value: unknown, max = 300) =>
+  value == null || value === '' ? null : redactText(String(value)).slice(0, max);
+
+export function parseMpErrorBody(raw: string): MpErrorDetails {
+  let body: Record<string, unknown> | null = null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object') body = parsed as Record<string, unknown>;
+  } catch { /* not JSON */ }
+  if (!body) return { status: null, message: str(raw), error: null, cause: [] };
+  const causes = Array.isArray(body.cause) ? body.cause : body.cause && typeof body.cause === 'object' ? [body.cause] : [];
+  return {
+    status: typeof body.status === 'number' ? body.status : Number(body.status) || null,
+    message: str(body.message),
+    error: str(body.error),
+    cause: causes.slice(0, 10).map((c) => {
+      const item = (c ?? {}) as Record<string, unknown>;
+      return { code: str(item.code, 60), description: str(item.description ?? item.message) };
+    }),
+  };
+}
+
+function logMpCallError(method: string, url: string, httpStatus: number, d: MpErrorDetails) {
+  let path = url;
+  try { path = new URL(url).pathname; } catch { /* keep */ }
+  const q = (v: string | null) => JSON.stringify(v ?? '');
+  const causes = d.cause.map((c) => `${c.code ?? '?'}:${c.description ?? ''}`).join(' | ');
+  console.warn(
+    `mp_call_error method=${method} path=${safePath(path)} http_status=${httpStatus} mp_status=${d.status ?? ''} ` +
+    `message=${q(d.message)} error=${q(d.error)} cause=${q(causes)}`,
+  );
 }
 
 type MpResult = Record<string, unknown>;
@@ -20,8 +62,14 @@ async function mpFetch(url: string, token: string, init: RequestInit = {}): Prom
   } catch {
     throw new MpCallError(503);
   }
-  if (response.status === 404) throw new MpCallError(404);
-  if (!response.ok) throw new MpCallError(response.status >= 500 ? 503 : response.status);
+  if (!response.ok) {
+    let raw = '';
+    try { raw = await response.text(); } catch { /* ignore */ }
+    const details = parseMpErrorBody(raw);
+    logMpCallError((init.method ?? 'GET').toUpperCase(), url, response.status, details);
+    const status = response.status === 404 ? 404 : response.status >= 500 ? 503 : response.status;
+    throw new MpCallError(status, details);
+  }
   try {
     return await response.json() as MpResult;
   } catch {
