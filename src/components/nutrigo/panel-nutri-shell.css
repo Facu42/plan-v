@@ -12,8 +12,11 @@
 .nv-app.nv-pro.pn-panel .nv-sidebar .brand-mark { width:52px; height:52px; flex-shrink:0; }
 .nv-app.nv-pro.pn-panel .nv-sidebar .nv-brand>span { font-size:19px; font-weight:600; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; }
 .nv-app.nv-pro.pn-panel .nv-sidebar .nv-brand small { display:block; color:var(--pn-muted); font-size:11.5px; font-weight:400; letter-spacing:0; margin:2px 0 0; }
-.pn-panel .pn-collapse { position:absolute; z-index:5; top:36px; right:-16px; width:32px; height:32px; min-height:32px; border:1px solid var(--pn-line); background:var(--pn-white); color:var(--pn-ink); border-radius:50%; padding:0; display:grid; place-items:center; box-shadow:var(--pn-shadow); }
-.pn-panel .pn-collapse svg { transition:transform var(--pn-motion) var(--pn-ease); }
+.pn-panel .pn-collapse { position:absolute; z-index:3; top:36px; right:-15px; width:30px; height:30px; min-width:30px; min-height:30px; border:1px solid var(--pn-line); background:var(--pn-white); color:var(--pn-ink); border-radius:50%; padding:0; display:grid; place-items:center; cursor:pointer; box-shadow:0 2px 8px rgba(39,41,50,.12); transition:transform .25s cubic-bezier(.2,.8,.2,1),background-color .2s ease; }
+.pn-panel .pn-collapse svg { width:16px; height:16px; transition:transform .28s cubic-bezier(.2,.8,.2,1); }
+.pn-panel .pn-collapse:hover { transform:scale(1.1); background:var(--pn-lime-light); }
+.pn-panel .pn-collapse:active { transform:scale(.94); }
+.pn-panel .pn-collapse:focus-visible { outline:2px solid #7FA82E; outline-offset:2px; }
 .nv-app.nv-pro.pn-panel .pn-panel-nav { display:block; flex:1; min-height:0; overflow-x:hidden; overflow-y:auto; padding:0 8px 12px; margin:0 -8px; background:transparent; }
 .pn-panel .pn-nav-heading { font-size:10.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--pn-muted); margin:18px 12px 6px; }
 .pn-panel .pn-nav-item { margin:2px 0; }
@@ -27,11 +30,17 @@
 .pn-panel .pn-nav-expander[aria-expanded=true] svg { transform:rotate(180deg); }
 .pn-panel .pn-submenu { display:grid; grid-template-rows:0fr; visibility:hidden; opacity:0; transition:grid-template-rows var(--pn-submenu-motion) var(--pn-ease),opacity 200ms ease,visibility var(--pn-submenu-motion); }
 .pn-panel .pn-submenu[data-open=true] { grid-template-rows:1fr; visibility:visible; opacity:1; }
-.pn-panel .pn-submenu>div { min-height:0; overflow:hidden; }
-.pn-panel .pn-submenu>div>div { position:relative; margin-left:21px; padding-left:13px; border-left:1px solid var(--pn-line); }
-.pn-panel .pn-submenu>div>div::before { content:""; position:absolute; left:0; top:18px; width:8px; height:1px; background:var(--pn-line); }
-.pn-panel .pn-submenu a { display:flex; align-items:center; gap:6px; min-height:36px; padding:6px 8px; border-radius:9px; font-size:11.5px; color:var(--pn-ink2); text-decoration:none; }
-.pn-panel .pn-submenu a[aria-current=page] { color:var(--pn-ink); font-weight:600; background:var(--pn-fill); }
+.pn-panel .pn-submenu>div { min-height:0; overflow:hidden; padding-left:21px; }
+.pn-panel .pn-submenu>div>div { position:relative; }
+.pn-panel .pn-submenu a { position:relative; display:flex; align-items:center; gap:8px; margin-left:16px; padding:7px 10px; border-radius:10px; font-size:13px; color:var(--pn-ink2); text-decoration:none; opacity:0; transform:translateY(-4px); transition:background-color .2s ease,color .2s ease,opacity .2s ease,transform .26s cubic-bezier(.2,.8,.2,1); }
+.pn-panel .pn-submenu>div>div:first-child a { margin-top:2px; }
+.pn-panel .pn-submenu>div>div:last-child a { margin-bottom:4px; }
+.pn-panel .pn-submenu[data-open=true] a { opacity:1; transform:none; }
+.pn-panel .pn-submenu a::before { content:""; position:absolute; left:-16px; top:0; width:12px; height:50%; border-left:1.5px solid var(--pn-muted2); border-bottom:1.5px solid var(--pn-muted2); border-bottom-left-radius:8px; }
+.pn-panel .pn-submenu>div>div:not(:last-child) a::after { content:""; position:absolute; left:-16px; top:50%; bottom:0; border-left:1.5px solid var(--pn-muted2); }
+.pn-panel .pn-submenu a:hover { background:var(--pn-cream); color:var(--pn-ink); }
+.pn-panel .pn-submenu a[aria-current=page] { color:var(--pn-ink); font-weight:500; background:var(--pn-cream); }
+.pn-panel .pn-submenu .pn-nav-count { min-width:22px; height:22px; border-radius:11px; background:var(--pn-button); color:var(--pn-on-button); font-size:10.5px; font-weight:600; padding:0 6px; }
 .pn-panel .pn-nav-count { display:grid; place-items:center; margin-left:auto; min-width:20px; height:20px; padding:0 5px; border-radius:50%; background:var(--pn-button); color:var(--pn-on-button); font-size:10px; font-weight:600; }
 .pn-panel .pn-nav-row .pn-nav-count { background:var(--pn-orange); color:var(--pn-on-color); }
 .pn-panel .pn-sidebar-account { display:flex; flex-shrink:0; align-items:center; gap:10px; margin-top:12px; padding:10px; border-radius:14px; background:var(--pn-cream); }
@@ -80,8 +89,8 @@
 .pn-panel .nv-directory-summary>button,.pn-panel .cbz-stat { background-image:linear-gradient(var(--pn-photo-overlay),var(--pn-photo-overlay)),url('/panel-nutri/comida-suave.jpg'); background-size:cover; }
 .pn-panel .pn-reminder-help { padding:12px; border-radius:12px; background:var(--pn-saffron-light); color:var(--pn-ink); }
 @media (hover:hover) and (pointer:fine) {
-  .pn-panel .pn-nav-row:hover,.pn-panel .pn-submenu a:hover { background:var(--pn-fill); }
-  .pn-panel .pn-nav-expander:hover,.pn-panel .pn-collapse:hover { background:var(--pn-lime-light); }
+  .pn-panel .pn-nav-row:hover { background:var(--pn-fill); }
+  .pn-panel .pn-nav-expander:hover { background:var(--pn-fill); }
 }
 @media (min-width:800px) {
   .nv-app.nv-pro.pn-panel { height:100dvh; overflow:hidden; }
@@ -143,6 +152,8 @@
 }
 @media (prefers-reduced-motion:reduce) {
   .nv-app.nv-pro.pn-panel *, .nv-app.nv-pro.pn-panel *::before, .nv-app.nv-pro.pn-panel *::after { animation:none !important; transition-property:opacity !important; transition-duration:200ms !important; scroll-behavior:auto !important; }
+  .pn-panel .pn-collapse,.pn-panel .pn-collapse svg { transition:none; }
+  .pn-panel .pn-submenu a { transform:none; }
 }
 
 /* Prioridad frente a los colores literales de las pantallas anteriores. */

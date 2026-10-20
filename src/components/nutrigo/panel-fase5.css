@@ -12,7 +12,7 @@
 .pn-panel .p5-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:36px; padding:0 12px; border:1px solid var(--pn-line); border-radius:12px; background:var(--pn-white); color:var(--pn-ink); font:500 12px/1.2 Poppins,system-ui,sans-serif; text-decoration:none; cursor:pointer; transition:background-color 220ms ease, transform 220ms var(--pn-ease); }
 .pn-panel .p5-btn:hover { background:var(--pn-lime-light); }
 .pn-panel .p5-btn:disabled { opacity:.55; cursor:not-allowed; }
-.pn-panel .p5-pri { min-height:44px; border:0; border-radius:14px; background:var(--pn-lime); }
+.pn-panel .p5-pri { min-height:44px; border:0; border-radius:14px; background:var(--pn-lime); color:#272932; }
 .pn-panel .p5-ink { border:0; background:var(--pn-button); color:var(--pn-on-button); }
 .pn-panel .p5-btn:focus-visible,.pn-panel .p5-seg button:focus-visible,.pn-panel .p5-switch:focus-visible,.pn-panel .p5 input:focus-visible,.pn-panel .p5 select:focus-visible,.pn-panel .p5 textarea:focus-visible { outline:2px solid var(--pn-focus); outline-offset:2px; }
 .pn-panel .p5-seg { display:flex; gap:3px; padding:3px; border-radius:12px; background:var(--pn-fill); }

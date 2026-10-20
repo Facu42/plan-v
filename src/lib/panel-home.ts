@@ -5,6 +5,14 @@ import { countConsultations, incomeIn } from './inicio-indicators';
 import { summarizeLedger } from '../fees';
 
 export const HOME_ZONE = 'America/Argentina/Buenos_Aires';
+/** Fecha del Inicio como el boceto: «Miércoles 21 de octubre», con «de» en minúscula. */
+export function homeDateLabel(now: Date): string {
+  const parts = new Intl.DateTimeFormat('es-AR', { timeZone: HOME_ZONE, weekday: 'long', day: 'numeric', month: 'long' }).formatToParts(now);
+  const pick = (type: Intl.DateTimeFormatPartTypes) => parts.find(part => part.type === type)?.value ?? '';
+  const weekday = pick('weekday');
+  const titled = weekday ? weekday.charAt(0).toLocaleUpperCase('es-AR') + weekday.slice(1) : '';
+  return `${titled} ${pick('day')} de ${pick('month').toLocaleLowerCase('es-AR')}`;
+}
 export const homeDay = (date: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: HOME_ZONE }).format(date);
 const dayMs = (day: string) => Date.parse(`${day}T12:00:00Z`);
 const isActive = (p: Patient) => !p.archived_at && !p.deactivated_at && !p.anonymized_at;

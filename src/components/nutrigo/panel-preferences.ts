@@ -7,8 +7,8 @@ export function panelTheme(value: unknown): PanelTheme | null {
 }
 export const panelStorageKey = (userId: string | null) => `plan-v:panel-theme:${userId ?? 'demo'}`;
 export function readPanelPreference(storage: ReadStorage | null, userId: string | null): PanelTheme {
-  try { return panelTheme(storage?.getItem(panelStorageKey(userId))) ?? 'system'; }
-  catch { return 'system'; }
+  try { return panelTheme(storage?.getItem(panelStorageKey(userId))) ?? 'dark'; }
+  catch { return 'dark'; }
 }
 export function writePanelPreference(storage: WriteStorage | null, userId: string | null, theme: PanelTheme) {
   try { storage?.setItem(panelStorageKey(userId), theme); } catch { /* La elección sigue activa en esta visita. */ }

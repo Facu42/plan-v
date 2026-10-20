@@ -10,7 +10,7 @@
 .pn-panel.nv-home .nv-header-menu .nv-user-name { display:none; }
 .pn-panel.nv-home .nv-header-menu .nv-alerts { order:0; margin-left:0; }
 .pn-panel.nv-home .ph-heading { flex:1 0 220px; }
-.pn-panel .ph-heading>span { font-size:12px; color:var(--pn-muted); text-transform:capitalize; }
+.pn-panel .ph-heading>span { font-size:12px; color:var(--pn-muted); text-transform:none; }
 .pn-panel .ph-heading h1 { margin:3px 0 0; font-size:28px; line-height:1.1; font-weight:600; letter-spacing:-.02em; }
 .pn-panel .ph-search { display:flex; align-items:center; gap:8px; padding:0 10px; border:1px solid var(--pn-line); border-radius:14px; background:var(--pn-white); height:44px; width:280px; }
 .pn-panel .ph-search input { width:100%; min-width:0; outline:none; border:0; background:transparent; font-size:12px; }

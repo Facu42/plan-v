@@ -241,10 +241,17 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main `6697d28` |
 | 4 | Codex | `codex/panel-nutri-fase-4` · [PR #154](https://github.com/Facu42/plan-v/pull/154) | Integrada a main |
 | 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Integrada a main `c09466b`, junto con la fase 4 |
-| Corrección del menú y de lo que no coincide | Por coordinar | — | Primera tarea; ver la última entrada de la Bitácora (20/10) |
+| Corrección del menú y de lo que no coincide | Cursor | `cursor/arreglo-mobile-fase5` · [PR #158](https://github.com/Facu42/plan-v/pull/158) | Hecha en #158, sin juntar. La fase 6 sigue en Codex (`codex/panel-nutri-fase-6`) |
 | 6 a 9 | Por coordinar | — | Pendientes, una rama y un PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-20 01:15 · Cursor · Menú y tema como el boceto
+- Hecho: las seis correcciones de la revisión de Claude. Cada opción del submenú tiene su codo curvo. La flecha de plegar mide 30 px, tiene sombra, crece al pasar el mouse, baja al apretar y el ícono gira al plegar. Agenda, Cobranzas y Mensajes no muestran la barra «Pacientes, Ficha, Plan» ni repiten el título. «Nueva consulta» y «Registrar cobro» se leen en oscuro sobre el lima. El consultorio arranca en oscuro y desde Apariencia se puede pasar a claro. La fecha del Inicio lleva «de» en minúscula, como «Miércoles 21 de octubre».
+- Cómo: los valores salen de `design/panel-nutri/bocetos.html`, líneas 234 a 240 y 358 a 370. Se aplicaron break-ui, frontend-patterns, frontend-a11y y verification-loop. Capturas en 1440×900 y 390×844, claro y oscuro, al lado del boceto de cada pantalla, en `design/panel-nutri/fase-5/`.
+- Rama y PR: `cursor/arreglo-mobile-fase5`, [PR #158](https://github.com/Facu42/plan-v/pull/158), borrador contra main. No se tocó `codex/panel-nutri-fase-6`. No se junta.
+- Falta: los controles remotos de esta rama. La fase 6 sigue en Codex.
+- Próximo paso exacto: no juntar #158. La fase 6 no se toma desde esta rama.
 
 ### 2026-10-20 00:30 · Claude · Revisión de lo hecho contra el boceto (sin código)
 Facundo pidió revisar lo desarrollado y marcó que **el menú lateral no coincide con el boceto**. Quien siga lo toma como la primera tarea, antes de cualquier fase nueva. Regla de Facundo: **no se sale del boceto**; si algo no coincide, se corrige, no se reinterpreta.

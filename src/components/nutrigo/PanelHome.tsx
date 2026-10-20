@@ -8,7 +8,7 @@ import type { SchedulingWorkspaceSnapshot } from '../../api/scheduling';
 import { api } from '../../api/client';
 import { careApi } from '../../api/care';
 import { formatPesos } from '../../fees';
-import { HOME_ZONE, copyHomeBookingLink, homeAppointments, homeAttention, homeDay, homeMonth, homeNews, homePendingTotal, patientHref, patientMessageHref, type HomeAppointment } from '../../lib/panel-home';
+import { HOME_ZONE, copyHomeBookingLink, homeAppointments, homeAttention, homeDateLabel, homeDay, homeMonth, homeNews, homePendingTotal, patientHref, patientMessageHref, type HomeAppointment } from '../../lib/panel-home';
 import { Icon, type IconName } from '../shared/Icon';
 import { healthFactLabel } from './intake-review';
 import { useHomeData, type HomeFilter } from './use-home-data';
@@ -30,7 +30,7 @@ export function PanelHomeHeader({ name, now, onOpen }: { name: string; now: Date
   }, []);
   const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: HOME_ZONE, hour: '2-digit', hourCycle: 'h23' }).format(now));
   const greeting = hour < 12 ? 'Buen día' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
-  return <><div className="ph-heading"><span>{now.toLocaleDateString('es-AR', { timeZone: HOME_ZONE, weekday: 'long', day: 'numeric', month: 'long' })}</span><h1>{greeting}{name.trim() ? `, ${name.trim().split(/\s+/)[0]}` : ''}</h1></div>
+  return <><div className="ph-heading"><span>{homeDateLabel(now)}</span><h1>{greeting}{name.trim() ? `, ${name.trim().split(/\s+/)[0]}` : ''}</h1></div>
     <form className="ph-search" role="search" onSubmit={event => { event.preventDefault(); onOpen(`/crm/pacientes?${new URLSearchParams({ q: query.trim() })}`); }}><Icon name="users" size={17} /><input ref={input} type="search" aria-label="Buscar pacientes" placeholder="Buscar pacientes" value={query} onChange={event => setQuery(event.target.value)} /><button type="submit" aria-label="Buscar"><Icon name="arrow" size={16} /></button><kbd>Ctrl K</kbd></form>
     <HomeLink href="/crm/agenda" onOpen={onOpen} className="ph-button ph-primary"><Icon name="plus" size={17} />Nueva consulta</HomeLink></>;
 }

@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import type { Patient } from '../types';
 import type { BillingBoard } from '../types/fees';
-import { copyHomeBookingLink, homeAppointments, homeNews, homeMonth, homePendingTotal, homeAttention } from './panel-home';
+import { copyHomeBookingLink, homeAppointments, homeDateLabel, homeNews, homeMonth, homePendingTotal, homeAttention } from './panel-home';
 import { vi } from 'vitest';
 
 const now = new Date('2026-10-19T13:00:00Z');
 const patient = (extra: Partial<Patient> = {}): Patient => ({ id: 'a', name: 'Ana', initials: 'A', tone: 'mint', meal_logs: [], habit_logs: [], messages: [], appointment: null, adherence_score: 0, ...extra }) as Patient;
 describe('Inicio con datos registrados', () => {
+  it('escribe la fecha como el boceto, con «de» en minúscula', () => {
+    expect(homeDateLabel(new Date('2026-10-21T15:00:00-03:00'))).toBe('Miércoles 21 de octubre');
+    expect(homeDateLabel(new Date('2026-10-19T13:00:00Z'))).toContain(' de ');
+  });
   it('copia solo páginas habilitadas con la dirección de la aplicación', async () => {
     const write = vi.fn().mockResolvedValue(undefined);
     expect(await copyHomeBookingLink({ enabled: false, slug: 'consultorio' }, 'https://example.test', write)).toBe(false);

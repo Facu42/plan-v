@@ -13,7 +13,15 @@ describe('celular de Agenda y Cobranzas', () => {
     expect(phone).toMatch(/\.pn-panel:is\(\.nv-agenda-page,\.nv-fees-page\) \.p5-head h2 \{ display:none; \}/);
     expect(phone).toMatch(/\.nv-app\.nv-pro\.pn-panel \.nv-topbar-label-desktop \{ display:none; \}/);
     expect(phone).toMatch(/\.nv-app\.nv-pro\.pn-panel \.nv-topbar-label-mobile \{ display:inline; \}/);
-    expect(showroom).toContain("'agenda', 'cobranzas'");
+    expect(showroom).toContain("'agenda', 'cobranzas', 'mensajes'");
+    expect(shell).toMatch(/\.pn-panel \.pn-collapse \{[^}]*width:30px; height:30px;/);
+    expect(shell).toMatch(/box-shadow:0 2px 8px rgba\(39,41,50,\.12\)/);
+    expect(shell).toMatch(/\.pn-panel \.pn-collapse:hover \{ transform:scale\(1\.1\); background:var\(--pn-lime-light\); \}/);
+    expect(shell).toMatch(/\.pn-panel \.pn-collapse:active \{ transform:scale\(\.94\); \}/);
+    expect(shell).toMatch(/\.pn-panel\.pn-collapsed \.pn-collapse svg \{ transform:rotate\(180deg\); \}/);
+    expect(shell).toMatch(/border-bottom-left-radius:8px/);
+    expect(shell).toMatch(/\.pn-panel \.pn-submenu>div>div:not\(:last-child\) a::after \{ content:""; position:absolute; left:-16px; top:50%; bottom:0; border-left:1\.5px solid var\(--pn-muted2\); \}/);
+    expect(fase5).toMatch(/\.pn-panel \.p5-pri \{[^}]*color:#272932; \}/);
     expect(showroom).not.toContain("page === 'agenda' || page === 'cobranzas'");
     expect(showroom).toContain("const moreCurrent = publicPage || moreSection");
   });
