@@ -252,6 +252,13 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-20 04:45 · Claude · Fase A (armazón) pasada del boceto como código
+- Hecho: menú lateral con submenús en árbol, flecha de plegar, cuenta con su menú (tema, dos pasos, primeros pasos, ver como paciente) y cerrar sesión, encabezado común (título, buscador con Ctrl K, campana) y el de Inicio con fecha y saludo, barra de abajo y cajón en el celular, tema oscuro por defecto. Se sacaron la barra «Pacientes / Ficha / Plan», el título repetido del armazón y el pie dentro del panel.
+- Cómo: `scripts/panel-boceto-css.mjs` copia estilos, íconos e imágenes del boceto sin cambiar valores; `PanelBocetoShell` y `PanelNavigation` tienen el mismo marcado que `shell()`. `npm run panel:contrato`: 22 piezas iguales en claro y oscuro (antes 17 diferencias). 3.194 pruebas y los 6 recorridos de punta a punta pasan.
+- Rama: `claude/panel-fase-a-armazon`. Se junta a main solo con el ok de Facundo.
+- Falta: fases B a I. Submenús «Respuestas guardadas» (Mensajes) y «Pedidos de cambio» (Planes) ya están en el menú y abren Mensajes y Planes; sus pantallas llegan con las fases F y G. «Todas las funciones» salió del menú (el boceto no la tiene; la dirección sigue andando).
+- Próximo paso exacto: fase B (Inicio) en `claude/panel-fase-b-inicio`: pasar `inicio()` del boceto a `PanelHome.tsx` con los datos que ya calcula.
+
 ### 2026-10-20 04:30 · Claude · Instrucciones pantalla por pantalla y fases nuevas
 - Hecho: `instrucciones-boceto.md` con el método (copiar el código del boceto, no redibujarlo), lo que hoy no coincide en cada pantalla, una tabla con la función y línea del boceto, la ruta, el componente actual y los datos que se conservan, y las fases nuevas A a I.
 - Cómo: pedido de Facundo del 20/10 04:02 («revisá todas las pantallas… comenzá a desarrollar por fases con mi aprobación») y 04:06 («¿no se pueden pasar en código?»).

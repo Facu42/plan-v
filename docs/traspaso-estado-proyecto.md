@@ -1,4 +1,6 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-19)
+# Traspaso del proyecto (actualización vigente: 2026-10-20)
+
+20/10 · Claude · Panel de la nutri: el boceto se pasa a la app **como código**, por fases A a I ([instrucciones](panel-nutri-rediseno/instrucciones-boceto.md)). Fase A (armazón: menú, cuenta, encabezado, tema oscuro por defecto, celular) en `claude/panel-fase-a-armazon`; cada fase se junta a main solo con el ok de Facundo. `npm run panel:contrato` compara la app con el boceto.
 
 19/10 · Cursor · Fase 5 trae la fase 4 de main y sigue en [PR #153](https://github.com/Facu42/plan-v/pull/153), sin juntar hasta que los controles estén verdes. WhatsApp salió del panel. La ficha de #154 convive con Agenda, Cobranzas y Página pública. Sin SQL remoto.
 
