@@ -296,7 +296,10 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
   const tabs = role === 'patient' ? PATIENT_TABS : PRO_TABS;
   const carteraUnread = useCarteraUnread(role === 'pro');
   const moreItems = role === 'patient' ? PATIENT_MORE : proMore(isAdmin === true);
-  const { moreCurrent } = tabBarState(page, tabs, moreItems);
+  const publicPage = role === 'pro' && page === 'agenda' && panelQuery.get('agenda') === 'publica';
+  const { moreCurrent: moreSection } = tabBarState(page, tabs, moreItems);
+  const moreCurrent = publicPage || moreSection;
+  const barLabel = publicPage ? 'Página pública' : (figmaDetail?.title ?? libraryRecipeTitle ?? PAGE_LABELS[page]);
   const showHeading = page === 'inicio';
   const localProUnread = role === 'pro' ? activePatients.reduce((sum, person) => sum + unreadCount(person.messages.filter((message) => message.patient_id === person.id && Boolean(message.sent_at)), 'pro'), 0) : 0;
   const messageUnread = role === 'patient' && p
@@ -477,9 +480,9 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
     <div className="nv-workspace" inert={role === 'pro' && compactHeader && menuOpen}>
       <header className="nv-topbar" ref={topbarRef}>
         <a className="nv-brand" href={buildAppHref(typeof window === 'undefined' ? 'https://plan.v/app/inicio' : window.location.href, role, 'inicio')} onClick={(event) => { event.preventDefault(); navigate('inicio'); }}><Mark /><span>Plan V</span></a>
-        {role === 'pro' && page === 'inicio' ? <PanelHomeHeader name={userName ?? ''} now={now} onOpen={openWorkHref} /> : <h1 className="nv-topbar-title" aria-hidden={role === 'pro' && (page === 'agenda' || page === 'cobranzas') ? true : undefined} aria-label={figmaDetail?.title ?? libraryRecipeTitle ?? PAGE_LABELS[page]}>
-          <span className="nv-topbar-label-desktop">{figmaDetail?.title ?? libraryRecipeTitle ?? PAGE_LABELS[page]}</span>
-          <span className="nv-topbar-label-mobile" aria-hidden="true">{figmaDetail?.title ?? libraryRecipeTitle ?? MOBILE_PAGE_LABELS[page] ?? PAGE_LABELS[page]}</span>
+        {role === 'pro' && page === 'inicio' ? <PanelHomeHeader name={userName ?? ''} now={now} onOpen={openWorkHref} /> : <h1 className="nv-topbar-title" aria-label={barLabel}>
+          <span className="nv-topbar-label-desktop">{barLabel}</span>
+          <span className="nv-topbar-label-mobile" aria-hidden="true">{publicPage ? 'Página pública' : (figmaDetail?.title ?? libraryRecipeTitle ?? MOBILE_PAGE_LABELS[page] ?? PAGE_LABELS[page])}</span>
         </h1>}
         <div className="nv-desktop-account">{!compactHeader && accountMenu()}</div>
         <button type="button" className="nv-button nv-ghost nv-menu-toggle" ref={menuButtonRef} aria-label={menuOpen ? 'Cerrar el menú' : 'Abrir el menú'} aria-expanded={menuOpen} aria-controls="nv-drawer" onClick={() => setMenuOpen((open) => !open)}><Icon name="list" size={20} /></button>
@@ -519,7 +522,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
     </div>
     {menuOpen && <div className="nv-drawer-scrim" role="presentation" onClick={() => { setMenuOpen(false); menuButtonRef.current?.focus(); }} />}
     <nav className="nv-tabbar" inert={role === 'pro' && compactHeader && menuOpen} aria-label="Secciones principales">
-      {tabs.map((tab) => <button key={tab.id} type="button" aria-current={!pendingModule && page === tab.id ? 'page' : undefined} onClick={() => navigate(tab.id)}><span className="nv-tab-icon"><Icon name={tab.icon} size={22} />{tab.id === 'mensajes' && messageUnread > 0 && <b className="nv-tab-unread" aria-label={`${messageUnread} sin leer`}>{messageUnread > 9 ? '9+' : messageUnread}</b>}</span><span>{tab.label}</span></button>)}
+      {tabs.map((tab) => <button key={tab.id} type="button" aria-current={!pendingModule && !publicPage && page === tab.id ? 'page' : undefined} onClick={() => navigate(tab.id)}><span className="nv-tab-icon"><Icon name={tab.icon} size={22} />{tab.id === 'mensajes' && messageUnread > 0 && <b className="nv-tab-unread" aria-label={`${messageUnread} sin leer`}>{messageUnread > 9 ? '9+' : messageUnread}</b>}</span><span>{tab.label}</span></button>)}
       <button type="button" aria-current={moreCurrent ? 'page' : undefined} aria-expanded={moreOpen} aria-controls="nv-more-sheet" onClick={() => setMoreOpen(true)}><span className="nv-tab-icon"><Icon name="grid" size={22} />{role === 'pro' && messageUnread > 0 && <b className="nv-tab-unread" aria-label={`${messageUnread} sin leer`}>{messageUnread > 9 ? '9+' : messageUnread}</b>}</span><span>Más</span></button>
     </nav>
     {moreOpen && <div className="nv-more" role="presentation" onClick={() => setMoreOpen(false)}>
