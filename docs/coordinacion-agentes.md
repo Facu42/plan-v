@@ -1,5 +1,7 @@
 # Coordinación entre agentes (Claude, Codex, Cursor)
 
+20/10 · Claude · Panel de la nutri: [instrucciones pantalla por pantalla y fases nuevas A a I](panel-nutri-rediseno/instrucciones-boceto.md). El boceto se pasa como código; Claude desarrolla por fases y cada una se junta a main solo con el ok de Facundo.
+
 19/10 · Cursor · Fase 5 (Agenda, Cobranzas y Página pública) en `cursor/panel-nutri-fase-5`, [PR #153](https://github.com/Facu42/plan-v/pull/153). Facundo autorizó juntarla. La fase 4 ya está en main por [PR #154](https://github.com/Facu42/plan-v/pull/154). Mercado Pago y Google Calendar muestran «Conectar». WhatsApp salió del panel: los avisos van por la app. Sin SQL remoto.
 
 19/10 · Codex · Fase 4 de Ficha integrada a main por [PR #154](https://github.com/Facu42/plan-v/pull/154). Revisión de código y visual cerradas, seis e2e aprobados y suite estable final verde (3.177 y dos omitidas, 494 archivos). [Informe y límites](panel-nutri-rediseno/fase-4-verificacion.md). Sin SQL remoto.
@@ -30,7 +32,7 @@ visto bueno de Facundo.
 | Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Ánimo y síntomas publicado (PR #112, 14/10). Recorridos de punta a punta y monitor en main (#114, 15/10). Aviso de recurso indicado en PR propio. El resto, por empezar |
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
-| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (fases 1 a 4); Cursor (fase 5) | Fases 1 a 4 en main. Fase 5 en `cursor/panel-nutri-fase-5`, [PR #153](https://github.com/Facu42/plan-v/pull/153). [Plan](panel-nutri-rediseno/plan.md) | Fase 4 integrada por #154. Fase 5 autorizada por Facundo para juntar cuando el PR esté verde. Una rama y un PR por fase; no se usa el PR #147 |
+| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude desde el 20/10 (fases nuevas A a I); antes Codex (fases 1 a 4) y Cursor (fase 5) | Fases 1 a 5 en main. [Instrucciones y fases nuevas](panel-nutri-rediseno/instrucciones-boceto.md), [plan](panel-nutri-rediseno/plan.md) | Facundo (20/10 04:02) pidió que Claude pase el boceto como código y desarrolle por fases; cada fase se junta a main solo con su ok |
 
 ## 2. Reglas para no pisarse
 
