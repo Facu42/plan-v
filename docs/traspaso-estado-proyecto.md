@@ -1,6 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-19)
 
-19/10 · Cursor · En el celular, la Página pública marca «Más» y el título queda una sola vez en la barra de arriba. La captura usa el boceto de la Página pública. Sigue en este PR de pantallas ([PR #156](https://github.com/Facu42/plan-v/pull/156)).
+19/10 · Cursor · En el celular, la Página pública marca «Más» y el título queda una sola vez en la barra de arriba. La captura usa el boceto de la Página pública. 3.231 pruebas y 2 omitidas, tipos en verde. Sigue en este PR de pantallas ([PR #156](https://github.com/Facu42/plan-v/pull/156)).
 
 19/10 · Cursor · Facu pidió el pago único de la cuota del mes, sin suscripción. Quedó en la [spec](suscripciones-pacientes/spec.md) (2.9). La rama es `cursor/pago-mensual-unico`, desde las pantallas ([PR #156](https://github.com/Facu42/plan-v/pull/156)). La función sigue apagada. No se toca la ficha ni el chat. El sandbox sigue pendiente.
 
