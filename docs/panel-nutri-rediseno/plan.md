@@ -172,7 +172,7 @@ Ver la tabla de la sección 3. Encabezado con «Escribir», «Grabar consulta» 
 - **Plan**: plan de hoy con alternativas, pedido de cambio de la paciente (aprobar o proponer otra), planificación (calorías y macros), lista de compras.
 - **Registro alimentario**, **Laboratorio** (con tres fechas y gráfico del valor elegido), **Archivos** (con zona para arrastrar y exportar ficha en PDF), **Consultas** (con «Cerrar la consulta de hoy»), **Cobros**, **Chat**.
 
-### Fase 5. Agenda, Cobranzas y Página pública · Estado: lista para juntar (Cursor, PR #153; Facundo autorizó)
+### Fase 5. Agenda, Cobranzas y Página pública · Estado: integrada a main (Cursor, PR #153)
 
 Agenda semanal con colores por tipo, línea de la hora, bloqueos, reservas por confirmar, tipos de consulta
 y link de reserva. Cobranzas con cobrado, por cobrar, vencido, ingresos por mes, cuotas vencidas con
@@ -240,7 +240,7 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
 | 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main `6697d28` |
 | 4 | Codex | `codex/panel-nutri-fase-4` · [PR #154](https://github.com/Facu42/plan-v/pull/154) | Integrada a main |
-| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Lista para juntar; Facundo autorizó. Convive con la ficha de la fase 4 |
+| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Integrada a main `c09466b`, junto con la fase 4 |
 | Corrección del menú y de lo que no coincide | Por coordinar | — | Primera tarea; ver la última entrada de la Bitácora (20/10) |
 | 6 a 9 | Por coordinar | — | Pendientes, una rama y un PR por fase |
 
