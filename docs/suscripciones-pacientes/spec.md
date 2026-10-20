@@ -1,5 +1,7 @@
 # Spec: suscripciones de pacientes con Mercado Pago (Plan V)
 
+Versión 1 · 19/10/2026. Las preguntas P1–P10 quedaron cerradas el 19/10 (sección 7.3). El backend de esta rama sigue esas decisiones. La migración se escribe y **no se aplica**; no se toca Railway, Supabase de producción ni Mercado Pago.
+Base leída: `plan-v` en `origin/main` 6697d28 y `plan-v-fase5` en `cursor/panel-nutri-fase-5` (PR #153, 0a485ad). También se miró `codex/panel-nutri-fase-4` (7444eae) para la ficha. El 20/10 se trajo `origin/main` `f51f413` sin rebase: la fase 5 sigue integrada y el contrato de esta spec no cambia. Las correcciones visuales del boceto están en el PR #158, no en esta rama. En esta rama, 3.211 pruebas aprobadas y 2 omitidas, tipos en verde.
 Versión 1 · 19/10/2026. Las preguntas P1–P10 quedaron cerradas el 19/10 (sección 7.3). La migración se escribe y **no se aplica**; no se toca Railway, Supabase de producción ni Mercado Pago.
 Base de la parte 1: `origin/main` en `c09466b` (fases 4 y 5 ya juntas). El backend vive en `cursor/suscripciones-pacientes-backend` ([PR #155](https://github.com/Facu42/plan-v/pull/155)). Las pantallas de Cobranzas y de la página pública viven en `cursor/suscripciones-cobranzas-pagina` ([PR #156](https://github.com/Facu42/plan-v/pull/156), borrador, apilado sobre el backend y no sobre main). El pago único de la cuota (sección 2.9) se hace en `cursor/pago-mensual-unico`, apilado sobre las pantallas y no sobre main.
 
