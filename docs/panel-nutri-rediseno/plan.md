@@ -244,6 +244,11 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-19 23:55 · Cursor · Sección activa y título en el celular
+- Hecho: en la Página pública el menú inferior marca «Más», igual que en Cobranzas. En el celular el título de la sección está en la barra de arriba y no se repite en la página. En escritorio el título sigue en la página, como el boceto. La captura de la Página pública quedó al lado del boceto de esa pantalla.
+- Cómo: break-ui, frontend-patterns, frontend-a11y y verification-loop. Una sola vez el título para quien escucha la página. Sin datos nuevos ni librería de estado.
+- Rama y PR: `cursor/pago-mensual-unico`, [PR #157](https://github.com/Facu42/plan-v/pull/157). La misma corrección va en el PR #156. Las capturas nuevas de Agenda y Cobranzas van en el PR #158.
+
 ### 2026-10-19 23:50 · Cursor · Pago único, con el celular que Facu rechazó
 - Hecho: el enlace de un mes sigue en esta rama, y ahora el celular no parte los nombres. En 360, 390 y 430 el débito, las cuotas vencidas y los movimientos se leen en columna o en tarjetas. El cuadro del enlace cabe en la pantalla y sus campos miden 44 px. El menú inferior queda fijo. No se repite el título ni aparecen los accesos de paciente en la vista previa.
 - Cómo: se aplicaron break-ui, frontend-patterns, frontend-a11y y verification-loop. Las vistas siguen recibiendo los mismos datos. No hay un interruptor de peor caso. Las capturas de celular se sacaron de nuevo dentro del panel, con el menú inferior, y quedaron al lado del boceto de escritorio en `design/suscripciones/`. No hay boceto de celular. El cuadro de «Cobrar este mes» tapa el menú mientras está abierto.
