@@ -252,6 +252,11 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-20 · Claude · Arriba del Inicio: consultas del día en columnas y próxima paciente (opción K)
+- Hecho: Facundo eligió la opción K con líneas finas (20/10). Izquierda: «Consultas de hoy» en columnas de 3 por vista que se despliegan con un clic (objetivo, restricciones, peso, plan, novedad) y flechas para ver más. Derecha: la próxima paciente con pestañas Resumen, Novedades y Plan, accesos y botones. Por su pedido de las 15:06, los accesos son botones claros con ícono en círculo oscuro, los botones de abajo ocupan todo el ancho y la tarjeta tiene fondo degradado con puntos y anillos.
+- Cómo: `hoyLeft()` y `hoyNext()` en `bocetos.html` (clases con prefijo `h` para no chocar con las del boceto); la tarjeta vieja «Consultas de hoy» salió porque su información quedó arriba; «Tu consultorio» pasó al lado de Pendientes. Mide 900 a 1440 en oscuro y claro. Bloque copiado en `boceto.css`.
+- Próximo paso exacto: con su ok, juntar y pasar el Inicio a la app (fase B).
+
 ### 2026-10-20 · Claude · Inicio del boceto reacomodado a 1440 × 900
 - Hecho: el Inicio del boceto medía 1217 de alto a tamaño real y la página lo mostraba achicado al 62 %. Facundo eligió (20/10 13:34) reacomodar el boceto para que entre en 1440 × 900. Ahora mide 900, con los mismos bloques, el mismo orden y los mismos colores.
 - Cómo: reglas nuevas solo del Inicio (`ini-top`, `qa.ini`, `ini-mid`, `ini-bot`, `ini-scroll`) en `bocetos.html` y copiadas en `boceto.css`. Las listas largas se desplazan dentro de su tarjeta. Se corrigió además `.kp div`, que pintaba las cajas internas y escondía la barra de lo cobrado.

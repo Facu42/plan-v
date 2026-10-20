@@ -146,14 +146,8 @@ html[data-mock="dark"] .m .te.done b,html[data-mock="dark"] .m .te.done span{col
 .pip{width:8px;height:8px;border-radius:50%;display:inline-block}
 /* Inicio entra en 1440 × 900 a tamaño real (Facundo, 20/10): bloques más justos y las listas largas se desplazan dentro de su tarjeta */
 .main:has(>.ini-top){gap:14px;padding-top:20px;padding-bottom:20px}
-.g2.ini-top{grid-template-columns:1.45fr 1fr}
-.ini-top .hero{padding:18px 22px}
-.ini-top .hero p.big{font-size:19px;margin:8px 0 12px}
-.ini-top .next{padding:14px 18px;gap:8px}
-.ini-top .who .av{width:40px;height:40px}
-.ini-top .facts div{padding:7px 10px}
 .qa.ini div{height:46px}
-.g2.ini-mid{height:240px}
+.g2.ini-mid{height:200px}
 .ini-mid .card{display:flex;flex-direction:column;min-height:0}
 .ini-mid .ct{flex:none}
 .ini-scroll{flex:1;min-height:0;overflow-y:auto;margin-right:-10px;padding-right:10px;scrollbar-width:thin;scrollbar-color:var(--mut2) transparent}
@@ -161,15 +155,103 @@ html[data-mock="dark"] .m .te.done b,html[data-mock="dark"] .m .te.done span{col
 .ini-mid .pr .ic{width:32px;height:32px;border-radius:10px}
 .g3.ini-bot{height:220px}
 .ini-bot .card{padding:16px 18px;display:flex;flex-direction:column;min-height:0}
-.ini-bot .kp{flex:1;align-content:start}
+.ini-num .kp{flex:1;align-content:start}
 .ini-bot .ct{margin-bottom:8px}
 .ini-bot .lr{padding:6px 0}
 .ini-bot .lr .av{width:30px;height:30px}
-.ini-bot .kp{gap:6px}
-.ini-bot .kp>div{padding:8px 12px}
+.ini-num .kp{gap:6px}
+.ini-num .kp>div{padding:8px 12px}
 /* `.kp div` también pintaba las cajas internas y escondía la barra de lo cobrado */
-.ini-bot .kp>div div{padding:0;border-radius:0;background:none}
-.ini-bot .kp>div .prog{background:var(--white);border-radius:3px}
+.ini-num .kp>div div{padding:0;border-radius:0;background:none}
+.ini-num .kp>div .prog{background:var(--white);border-radius:3px}
+.g2.ini-bot2{grid-template-columns:1fr 1fr;height:190px}
+.ini-mid .ini-num{padding:16px 18px}
+.ini-num .ct{margin-bottom:8px}
+/* Consultas de hoy en columnas + próxima paciente (opción K, líneas finas) */
+.g2.hoy{grid-template-columns:1.45fr 1fr;height:318px}
+.g2.hoy>section{min-height:0;overflow:hidden}
+.hoy-l{background:var(--solid);color:#F2EFEC;border-radius:24px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.hoy-l .hh{display:flex;align-items:center;gap:10px}
+.hoy-l h2{margin:0;font-size:15px;font-weight:600}
+.hoy-l .hcnt{font-size:12px;color:#9A9CA1}
+.hoy-l .hpager{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:11.5px;color:#9A9CA1;font-variant-numeric:tabular-nums}
+.hoy-l .hpager button{width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.08);background:transparent;color:#F2EFEC;cursor:pointer;display:grid;place-items:center;padding:0;transition:background .2s,opacity .2s}
+.hoy-l .hpager button:hover:not(:disabled){background:rgba(255,255,255,.08)}
+.hoy-l .hpager button:disabled{opacity:.3;cursor:default}
+.hoy-l .hpager .fw svg{transform:rotate(180deg)}
+.hcols{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:start;flex:1;min-height:0}
+.hc{border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);overflow-y:auto;max-height:100%;min-width:0;scrollbar-width:thin;scrollbar-color:var(--mut2) transparent;transition:border-color .2s,background .2s}
+.hc.open{border-color:rgba(194,230,110,.35);background:rgba(194,230,110,.06)}
+.hc>button{all:unset;box-sizing:border-box;width:100%;padding:12px 14px;display:flex;flex-direction:column;gap:3px;cursor:pointer}
+.hc>button:focus-visible{outline:2px solid var(--lime-d);outline-offset:-2px;border-radius:18px}
+.hc .t{display:flex;align-items:center;gap:8px}
+.hc .t b{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+.hc .chev{margin-left:auto;color:#9A9CA1;display:grid;transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.hc.open .chev{transform:rotate(180deg);color:var(--lime)}
+.hc .nm{font-size:13.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hc .sub{font-size:11px;color:#9A9CA1}
+.hq{font-size:10.5px;border-radius:999px;padding:2px 8px;white-space:nowrap}
+.hq.now{background:var(--lime);color:#272932;font-weight:600}
+.hq.done{background:rgba(255,255,255,.08);color:#9A9CA1}
+.hq.first{background:rgba(143,184,232,.18);color:#AFCBEE}
+.hq.warn{background:rgba(255,162,87,.16);color:var(--or)}
+.hc .drop{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s cubic-bezier(.2,.8,.2,1)}
+.hc.open .drop{grid-template-rows:1fr}
+.hc .drop>div{min-height:0;overflow:hidden}
+.hc .in{margin:0 14px;padding:2px 0 8px;border-top:1px solid rgba(255,255,255,.08)}
+.hc .ln{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.hc .ln:last-child{border-bottom:0}
+.hc .ln span{color:#9A9CA1}
+.hc .ln b{font-weight:500;color:#E9E7E4;text-align:right}
+.hc .ln em{font-style:normal}.hc .ln em.dn{color:var(--lime)}.hc .ln em.up{color:#E8A06B}
+.hoy-n{--hl:rgba(39,41,50,.12);position:relative;isolation:isolate;overflow:hidden;color:#272932;border-radius:24px;padding:12px 20px 14px;display:flex;flex-direction:column;min-width:0;
+ background:radial-gradient(120% 85% at 100% 0%,#FFE7B0 0%,rgba(255,231,176,0) 55%),radial-gradient(90% 75% at 0% 100%,rgba(255,162,87,.55) 0%,rgba(255,162,87,0) 60%),radial-gradient(60% 50% at 85% 95%,rgba(194,230,110,.45) 0%,rgba(194,230,110,0) 70%),var(--saf)}
+.hoy-n::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:radial-gradient(rgba(39,41,50,.10) 1px,transparent 1.2px);background-size:14px 14px;-webkit-mask-image:linear-gradient(200deg,#000 0%,transparent 45%);mask-image:linear-gradient(200deg,#000 0%,transparent 45%)}
+.hoy-n::after{content:"";position:absolute;z-index:-1;width:230px;height:230px;right:-70px;top:-90px;border-radius:50%;border:1px solid rgba(39,41,50,.10);box-shadow:0 0 0 28px rgba(255,255,255,.10),0 0 0 29px rgba(39,41,50,.06);pointer-events:none}
+.hoy-n>*{padding-block:7px}
+.hoy-n>*+*{border-top:1px solid var(--hl)}
+.hoy-n>.hwho{padding-top:2px;display:flex;align-items:center;gap:12px}
+.hoy-n .hwho .av{width:44px;height:44px;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:600;flex:none}
+.hoy-n .hwho b{font-size:17px;font-weight:600;display:block;line-height:1.2}
+.hoy-n .hwho span{font-size:12px;color:#6b5a38}
+.hoy-n .hwhen{margin-left:auto;text-align:right}
+.hoy-n .hwhen b{font-size:20px;line-height:1}
+.hoy-n .hwhen small{font-size:11px;color:#6b5a38;display:flex;align-items:center;gap:5px;justify-content:flex-end}
+.hoy-n .hlive{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--or);animation:hoyPulse 1.8s ease-out infinite}
+@keyframes hoyPulse{0%{box-shadow:0 0 0 0 rgba(255,162,87,.6)}100%{box-shadow:0 0 0 8px rgba(255,162,87,0)}}
+.hoy-n>.htabs{display:flex;gap:4px;background:rgba(255,255,255,.45);border-radius:12px;padding:3px;border-top:0}
+.hoy-n .htabs button{flex:1;border:0;background:transparent;border-radius:9px;padding:6px;font:inherit;font-size:12px;cursor:pointer;color:#272932;transition:background .2s}
+.hoy-n .htabs button[aria-selected="true"]{background:#fff;font-weight:500}
+.hoy-n>.hpanes{display:grid;border-top:0;padding-top:4px}
+.hoy-n .hpane{grid-area:1/1;opacity:0;transform:translateX(8px);transition:opacity .22s ease,transform .25s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.hoy-n .hpane.on{opacity:1;transform:none;pointer-events:auto}
+.hoy-n .hchips{display:flex;gap:5px;flex-wrap:wrap;padding-bottom:8px}
+.hoy-n .hchip{font-size:11px;background:rgba(255,255,255,.62);border-radius:999px;padding:3px 9px;color:#272932}
+.hoy-n .hchip.al{background:#272932;color:var(--saf)}
+.hoy-n .hstats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--hl)}
+.hoy-n .hstats div{padding:7px 10px 0;border-left:1px solid var(--hl)}
+.hoy-n .hstats div:first-child{border-left:0;padding-left:0}
+.hoy-n .hstats small{display:block;font-size:10px;color:#6b5a38}
+.hoy-n .hstats b{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.hoy-n .hstats em{font-style:normal;font-size:10.5px;color:#4a6b12;font-weight:600;margin-left:3px}
+.hoy-n .hnews div{display:flex;gap:8px;align-items:baseline;font-size:12px;padding:7px 0;border-top:1px solid var(--hl)}
+.hoy-n .hnews div:first-child{border-top:0;padding-top:0}
+.hoy-n .hnews i{width:6px;height:6px;border-radius:50%;background:#272932;flex:none;transform:translateY(-1px)}
+.hoy-n .hnews small{margin-left:auto;font-size:10.5px;color:#6b5a38;white-space:nowrap}
+.hoy-n .hacc{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.hoy-n .hacc button{all:unset;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 2px 4px;font-size:10.5px;font-weight:500;cursor:pointer;border-radius:12px;background:rgba(255,255,255,.58);border:1px solid rgba(255,255,255,.75);box-shadow:0 1px 2px rgba(39,41,50,.08);transition:transform .2s cubic-bezier(.2,.8,.2,1),background .2s,box-shadow .2s}
+.hoy-n .hacc button .hi{width:22px;height:22px;border-radius:50%;background:#272932;color:var(--saf);display:grid;place-items:center}
+.hoy-n .hacc button .hi svg{width:12px;height:12px}
+.hoy-n .hacc button:hover{background:#fff;transform:translateY(-2px);box-shadow:0 6px 14px -6px rgba(39,41,50,.35)}
+.hoy-n .hacc button:active{transform:translateY(0) scale(.97)}
+.hoy-n .hacc button:focus-visible{outline:2px solid #272932;outline-offset:2px}
+.hoy-n>.hrow{display:grid;grid-template-columns:1.2fr 1fr;gap:8px;padding-bottom:0;margin-top:auto}
+.hoy-n .hbtn{height:32px;border-radius:11px;padding:0 12px;justify-content:center;transition:transform .2s cubic-bezier(.2,.8,.2,1),background .2s;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap}
+.hoy-n .hbtn svg{width:15px;height:15px}
+.hoy-n .hbtn.ink{background:#272932;color:#fff}
+.hoy-n .hbtn.soft{background:rgba(255,255,255,.62);color:#272932;border:1px solid rgba(255,255,255,.8)}
+.hoy-n .hbtn:hover{transform:translateY(-1px)}.hoy-n .hbtn.soft:hover{background:#fff}
+@media (prefers-reduced-motion:reduce){.hoy-n .hlive{animation:none}.hoy-n .hacc button,.hoy-n .hbtn{transition:none}.hoy-n .hacc button:hover,.hoy-n .hbtn:hover{transform:none}}
 /* celular */
 .ph{width:390px;height:844px;border-radius:44px;border:10px solid #272932;overflow:hidden;position:relative;box-sizing:content-box}
 .ph .in{padding:16px 16px 100px;display:flex;flex-direction:column;gap:14px;height:100%;overflow:hidden}
@@ -649,24 +731,44 @@ const PEND=[
  ['clip','var(--saf-l)','El plan de Florencia vence el viernes','Semana 4 de 4 · conviene renovarlo','3 días','Renovar']];
 const TL=[['09:00','Martina Ruiz','Primera consulta · Consultorio','done'],['09:30','Julieta Paz','Seguimiento · Online','done'],['10:30','Sofía Gómez','Seguimiento · Consultorio','now'],['11:15','Lucía Fernández','Seguimiento · Online',''],['15:00','Rocío Medina','Primera consulta · Consultorio',''],['17:30','Paula Herrera','Seguimiento · Online','']];
 
+/* Inicio · consultas de hoy en columnas (de a 3) y la próxima paciente (Facundo, 20/10: opción K con líneas finas) */
+const HOY=[
+ {h:'09:00',n:'Martina Ruiz',e:27,tipo:'Primera consulta',mod:'Consultorio',st:'done',obj:'Ganar masa muscular',rest:'Sin restricciones',peso:'61,0 kg',cam:'',plan:'Todavía sin plan',nov:'Cargó 2 comidas ayer'},
+ {h:'09:30',n:'Julieta Paz',e:41,tipo:'Seguimiento',mod:'Online',st:'done',obj:'Mantener',rest:'Sin restricciones',peso:'63,1 kg',cam:'−0,3',plan:'Mantenimiento · sem. 2 de 4',nov:'Preguntó por la cena del jueves'},
+ {h:'10:30',n:'Sofía Gómez',e:34,tipo:'Seguimiento',mod:'Consultorio',st:'now',obj:'Bajar grasa',rest:'Celíaca · sin lactosa',peso:'68,4 kg',cam:'−1,2',plan:'Sin gluten 1.800 · sem. 3 de 4',nov:'Análisis nuevos: ferritina baja'},
+ {h:'11:15',n:'Lucía Fernández',e:36,tipo:'Seguimiento',mod:'Online',st:'',obj:'Rendimiento deportivo',rest:'Sin restricciones',peso:'58,9 kg',cam:'−0,6',plan:'Deportista 2.400 · sem. 1 de 4',nov:'14 días seguidos cargando comidas'},
+ {h:'15:00',n:'Rocío Medina',e:31,tipo:'Primera consulta',mod:'Consultorio',st:'first',obj:'Bajar peso',rest:'Alergia al maní',peso:'—',cam:'',plan:'Todavía sin plan',nov:'Pidió turno por la página pública'},
+ {h:'17:30',n:'Paula Herrera',e:24,tipo:'Seguimiento',mod:'Online',st:'warn',obj:'Alimentación vegetariana',rest:'Vegetariana',peso:'55,2 kg',cam:'+0,2',plan:'Vegetariano 2.000 · sem. 2 de 4',nov:'No cargó comidas el fin de semana'}];
+let hoyStart=2;const hoyOpen=new Set([2]);let hoyTab=0;
+const hoyTag=s=>({done:'<span class="hq done">Hecha</span>',now:'<span class="hq now">Próxima</span>',first:'<span class="hq first">Primera vez</span>',warn:'<span class="hq warn">Cuota por vencer</span>'})[s]||'';
+function hoyCols(){return HOY.slice(hoyStart,hoyStart+3).map((p,k)=>{const i=hoyStart+k,on=hoyOpen.has(i);return `<div class="hc${on?' open':''}">
+  <button type="button" data-hoy="${i}" aria-expanded="${on}"><div class="t"><b>${p.h}</b>${hoyTag(p.st)}<span class="chev">${ic('chev',16)}</span></div><div class="nm">${p.n}</div><div class="sub">${p.e} años · ${p.tipo} · ${p.mod}</div></button>
+  <div class="drop"><div><div class="in">
+   <div class="ln"><span>Objetivo</span><b>${p.obj}</b></div><div class="ln"><span>Restricciones</span><b>${p.rest}</b></div>
+   <div class="ln"><span>Peso</span><b>${p.peso}${p.cam?` <em class="${p.cam[0]==='+'?'up':'dn'}">${p.cam}</em>`:''}</b></div><div class="ln"><span>Plan</span><b>${p.plan}</b></div>
+   <div class="ln"><span>Novedad</span><b>${p.nov}</b></div></div></div></div></div>`;}).join('');}
+function hoyPager(){return `<span>${hoyStart+1}–${Math.min(hoyStart+3,HOY.length)} de ${HOY.length}</span><button type="button" data-hoypg="-1" aria-label="Ver consultas anteriores"${hoyStart===0?' disabled':''}>${ic('back',14)}</button><button type="button" data-hoypg="1" class="fw" aria-label="Ver más consultas"${hoyStart+3>=HOY.length?' disabled':''}>${ic('back',14)}</button>`;}
+function hoyLeft(){return `<section class="hoy-l"><div class="hh"><h2>Consultas de hoy</h2><span class="hcnt">6 en total · 2 hechas</span><div class="hpager">${hoyPager()}</div></div><div class="hcols">${hoyCols()}</div></section>`;}
+function hoyNext(){const tab=(k,l)=>`<button type="button" role="tab" data-hoytab="${k}" aria-selected="${hoyTab===k}">${l}</button>`;
+ const pane=k=>`class="hpane${hoyTab===k?' on':''}"`;
+ return `<section class="hoy-n">
+  <div class="hwho"><span class="av">SG</span><div><b>Sofía Gómez</b><span>34 años · Seguimiento · Consultorio</span></div><div class="hwhen"><b>10:30</b><small><i class="hlive"></i>en 20 min</small></div></div>
+  <div class="htabs" role="tablist">${tab(0,'Resumen')}${tab(1,'Novedades <b>2</b>')}${tab(2,'Plan')}</div>
+  <div class="hpanes">
+   <div ${pane(0)}><div class="hchips"><span class="hchip al">Celíaca</span><span class="hchip al">Sin lactosa</span><span class="hchip">Bajar grasa</span></div>
+    <div class="hstats"><div><small>Peso</small><b>68,4</b><em>−1,2</em></div><div><small>Adherencia</small><b>86%</b></div><div><small>Consultas</small><b>7</b></div><div><small>Cuota</small><b>Al día</b></div></div></div>
+   <div ${pane(1)}><div class="hnews"><div><i></i>Subió análisis nuevos: ferritina baja<small>ayer</small></div><div><i></i>Cargó 18 comidas esta semana, 3 con foto<small>semana</small></div><div><i></i>Escribió: «¿Puedo cambiar la merienda?»<small>lun</small></div></div></div>
+   <div ${pane(2)}><div class="hnews"><div><i></i>Sin gluten 1.800 kcal · semana 3 de 4<small>vence 28/10</small></div><div><i></i>Quedó pendiente: meriendas con proteína<small>7/10</small></div><div><i></i>Pidió cambiar la cena del jueves<small>sin responder</small></div></div></div>
+  </div>
+  <div class="hacc">${[['file','Ficha','ficha'],['pen','Notas','ficha'],['clip','Plan','planes'],['chat','Mensaje','mensajes'],['lab','Análisis','ficha']].map(([i,l,g])=>`<button type="button" data-go="${g}"><span class="hi">${ic(i,14)}</span>${l}</button>`).join('')}</div>
+  <div class="hrow"><span class="hbtn ink">${ic('play',16)}Empezar consulta</span><span class="hbtn soft" data-go="ficha">${ic('file',16)}Ver ficha completa</span></div>
+ </section>`;}
+
 function inicio(){return `
    <div class="hdr"><div><div class="when">Miércoles 21 de octubre</div><h1>Buen día, Verónica</h1></div>
     <div class="search">${ic('search')}<span>Buscar paciente, plan o receta</span><span class="kbd">Ctrl K</span></div>
     <span class="ibtn">${ic('bell')}<i></i></span><span class="btn pri">${ic('plus')}Nueva consulta</span></div>
-   <div class="g2 ini-top">
-    <section class="hero pbg pb2">
-     <div class="eb">${ic('sun')}Resumen de la mañana · lo armó tu asistente a las 7:30</div>
-     <p class="big">Hoy tenés <em>6 consultas</em> y <em>12 pendientes</em>. Empezá por Sofía: trae análisis nuevos con la ferritina baja.</p>
-     <div class="cnts"><span class="cnt"><b>4</b>comidas</span><span class="cnt"><b>3</b>mensajes</span><span class="cnt"><b>2</b>reservas</span><span class="cnt hot"><b>2</b>cuotas vencidas</span><span class="cnt"><b>1</b>nota</span></div>
-    </section>
-    <section class="next pbg pb1">
-     <div style="display:flex;align-items:center;gap:8px"><span class="chip dot">Próxima consulta · en 20 min</span><span class="chip">10:30 · Consultorio</span></div>
-     <div class="who"><span class="av">SG</span><div><b>Sofía Gómez</b><span>Seguimiento · 34 años · paciente desde marzo</span></div></div>
-     <div style="display:flex;gap:6px"><span class="chip">Celíaca</span><span class="chip">Sin lactosa</span><span class="chip">Bajar grasa</span></div>
-     <div class="facts"><div><small>Último peso</small><b>68,4</b><span> kg</span> <span style="color:var(--ok-t);font-weight:600">−1,2</span></div><div><small>Adherencia</small><b>86%</b><small>esta semana</small></div><div><small>Quedó pendiente</small><span style="font-weight:500">Meriendas con proteína</span></div></div>
-     <div style="display:flex;gap:8px;margin-top:2px"><span class="btn ink sm">Preparar consulta</span><span class="btn sm" style="background:rgba(255,255,255,.7)" data-go="ficha">Ver ficha</span></div>
-    </section>
-   </div>
+   <div class="g2 ini-top hoy">${hoyLeft()}${hoyNext()}</div>
    <div class="qa ini">
     <div class="pbg pb4" data-go="pacientes" style="cursor:pointer"><span class="ic">${ic('uplus')}</span>Nueva paciente</div>
     <div class="pbg pb5" data-go="planes" style="cursor:pointer"><span class="ic">${ic('clip')}</span>Armar un plan</div>
@@ -677,23 +779,20 @@ function inicio(){return `
     <section class="card"><div class="ct"><h2>Pendientes</h2><div class="tabs"><span class="on">Todos<b>12</b></span><span>Comidas<b>4</b></span><span>Mensajes<b>3</b></span><span>Reservas<b>2</b></span><span>Cobros<b>2</b></span><span>Planes<b>1</b></span></div></div>
      <div class="ini-scroll">${PEND.map(([i,c,t,s,a,b])=>`<div class="pr"><span class="ic" style="background:${c}">${ic(i)}</span><div class="tx"><b>${t}</b><span>${s}</span></div><span class="age">${a}</span><span class="btn ghost sm" style="width:92px;justify-content:center">${b}</span></div>`).join('')}</div>
     </section>
-    <section class="card"><div class="ct"><h2>Consultas de hoy</h2><span class="lnk" data-go="agenda">Ver agenda ${ic('aright')}</span></div>
-     <div class="tl ini-scroll">${TL.map(([h,n,t,s],k)=>`<div class="te ${s}"><span class="h">${h}</span><span class="rail"><i></i>${k<TL.length-1?'<u></u>':''}</span><div class="box"><b>${n}${s==='now'?'<span class="tag">ahora</span>':''}</b><span>${t}</span></div></div>`).join('')}</div>
-    </section>
-   </div>
-   <div class="g3 ini-bot">
-    <section class="card"><div class="ct"><span class="pip" style="background:#FFA257"></span><h2>Necesitan atención</h2><span class="lnk">12 ${ic('aright')}</span></div>
-     <div class="ini-scroll">${[['CT','var(--or-l)','Camila Torres','Sin cargar comidas hace 9 días'],['FR','var(--saf-l)','Florencia Romero','Faltó a la consulta del lunes'],['BA','var(--or-l)','Brenda Acosta','Sin bajar de peso hace 6 semanas'],['PH','var(--saf-l)','Paula Herrera','La cuota vence el 30/10']].map(([a,c,n,s])=>`<div class="lr"><span class="av" style="background:${c}">${a}</span><div class="tx"><b>${n}</b><span>${s}</span></div><span class="btn ghost sm">Escribir</span></div>`).join('')}</div>
-    </section>
-    <section class="card"><div class="ct"><span class="pip" style="background:#7FA82E"></span><h2>Buenas noticias</h2><span class="lnk">9 ${ic('aright')}</span></div>
-     <div class="ini-scroll">${[['JP','var(--lime-l)','Julieta Paz','Llegó a su peso meta'],['LF','var(--lime-l)','Lucía Fernández','14 días seguidos cargando comidas'],['VS','var(--saf-l)','Valentina Sosa','Cumple un año con vos'],['MR','var(--lime-l)','Martina Ruiz','Completó su primera semana']].map(([a,c,n,s])=>`<div class="lr"><span class="av" style="background:${c}">${a}</span><div class="tx"><b>${n}</b><span>${s}</span></div><span class="btn ghost sm">${ic('heart',14)}Felicitar</span></div>`).join('')}</div>
-    </section>
-    <section class="card pbg pb6"><div class="ct"><h2>Tu consultorio · octubre</h2></div>
+    <section class="card pbg pb6 ini-num"><div class="ct"><h2>Tu consultorio · octubre</h2></div>
      <div class="kp">
       <div><small>Pacientes activas</small><div style="display:flex;align-items:center;justify-content:space-between;gap:6px"><span><b>38</b><em>+5</em></span>${spark([30,31,31,33,34,36,38],72,24,'#7FA82E')}</div></div>
       <div><small>Consultas del mes</small><div style="display:flex;align-items:center;justify-content:space-between;gap:6px"><span><b>24</b><em>+3</em></span>${spark([14,18,17,20,21,22,24],72,24,'#7FA82E')}</div></div>
       <div style="grid-column:span 2"><small>Cobrado en octubre</small><div style="display:flex;align-items:baseline;gap:8px"><b>$842.000</b><span style="font-size:11.5px;color:var(--mut)">de $1.130.000 · faltan $288.000</span></div><div class="prog"><i style="width:74.5%"></i></div></div>
      </div>
+    </section>
+   </div>
+   <div class="g2 ini-bot ini-bot2">
+    <section class="card"><div class="ct"><span class="pip" style="background:#FFA257"></span><h2>Necesitan atención</h2><span class="lnk">12 ${ic('aright')}</span></div>
+     <div class="ini-scroll">${[['CT','var(--or-l)','Camila Torres','Sin cargar comidas hace 9 días'],['FR','var(--saf-l)','Florencia Romero','Faltó a la consulta del lunes'],['BA','var(--or-l)','Brenda Acosta','Sin bajar de peso hace 6 semanas'],['PH','var(--saf-l)','Paula Herrera','La cuota vence el 30/10']].map(([a,c,n,s])=>`<div class="lr"><span class="av" style="background:${c}">${a}</span><div class="tx"><b>${n}</b><span>${s}</span></div><span class="btn ghost sm">Escribir</span></div>`).join('')}</div>
+    </section>
+    <section class="card"><div class="ct"><span class="pip" style="background:#7FA82E"></span><h2>Buenas noticias</h2><span class="lnk">9 ${ic('aright')}</span></div>
+     <div class="ini-scroll">${[['JP','var(--lime-l)','Julieta Paz','Llegó a su peso meta'],['LF','var(--lime-l)','Lucía Fernández','14 días seguidos cargando comidas'],['VS','var(--saf-l)','Valentina Sosa','Cumple un año con vos'],['MR','var(--lime-l)','Martina Ruiz','Completó su primera semana']].map(([a,c,n,s])=>`<div class="lr"><span class="av" style="background:${c}">${a}</span><div class="tx"><b>${n}</b><span>${s}</span></div><span class="btn ghost sm">${ic('heart',14)}Felicitar</span></div>`).join('')}</div>
     </section>
    </div>`;}
 
@@ -1583,6 +1682,9 @@ document.addEventListener('keydown',e=>{
 document.addEventListener('input',e=>{if(e.target.matches('[data-psearch]')){const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.pmenu .po').forEach(o=>o.hidden=!!q&&!o.dataset.name.includes(q));}});
 document.addEventListener('click',e=>{
  const T=s=>e.target.closest(s);let t;
+ if(t=T('[data-hoy]')){const i=+t.dataset.hoy,on=!hoyOpen.has(i);on?hoyOpen.add(i):hoyOpen.delete(i);t.parentElement.classList.toggle('open',on);t.setAttribute('aria-expanded',String(on));return;}
+ if(t=T('[data-hoypg]')){hoyStart=Math.max(0,Math.min(HOY.length-3,hoyStart+3*t.dataset.hoypg));const c=t.closest('.hoy-l');c.querySelector('.hcols').innerHTML=hoyCols();c.querySelector('.hpager').innerHTML=hoyPager();return;}
+ if(t=T('[data-hoytab]')){hoyTab=+t.dataset.hoytab;const n=t.closest('.hoy-n');n.querySelectorAll('[data-hoytab]').forEach(b=>b.setAttribute('aria-selected',String(b===t)));n.querySelectorAll('.hpane').forEach((p,k)=>p.classList.toggle('on',k===hoyTab));return;}
  if(T('[data-psearch]'))return;
  if(planMenu&&!T('.pwrap')){planMenu=false;const m=document.querySelector('.pmenu');if(m){m.classList.remove('open');document.querySelector('[data-psel]').setAttribute('aria-expanded','false');}}
  if(t=T('[data-psel]')){planMenu=!planMenu;t.setAttribute('aria-expanded',String(planMenu));const m=t.nextElementSibling;m.classList.toggle('open',planMenu);if(planMenu)setTimeout(()=>m.querySelector('input').focus(),60);return;}
