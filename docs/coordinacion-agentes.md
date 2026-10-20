@@ -1,6 +1,6 @@
 # Coordinación entre agentes (Claude, Codex, Cursor)
 
-20/10 · Cursor · Se trajo `origin/main` (`f51f413`) a `cursor/arreglo-mobile-fase5` ([PR #158](https://github.com/Facu42/plan-v/pull/158)) sin rebase. La fase 5 sigue integrada a main. Las seis correcciones del boceto quedaron en esta rama: codo del submenú, flecha de 30 px, sin la barra vieja ni título repetido, contraste de «Nueva consulta» y «Registrar cobro», oscuro por defecto y fecha con «de» en minúscula. No se toca `codex/panel-nutri-fase-6`. Sin merge y sin producción.
+20/10 · Cursor · Se trajo `origin/main` (`f51f413`) a `cursor/arreglo-mobile-fase5` ([PR #158](https://github.com/Facu42/plan-v/pull/158)) sin rebase. La fase 5 sigue integrada a main. Las seis correcciones del boceto quedaron en esta rama: codo del submenú, flecha de 30 px, sin la barra vieja ni título repetido, contraste de «Nueva consulta» y «Registrar cobro», oscuro por defecto y fecha con «de» en minúscula. No se toca `codex/panel-nutri-fase-6`. Sin merge y sin producción. Pruebas: 3.193 aprobadas y 2 omitidas, en 500 archivos. Tipos en verde. Capturas en `design/panel-nutri/fase-5/`.
 
 19/10 · Cursor · Fase 5 (Agenda, Cobranzas y Página pública) en `cursor/panel-nutri-fase-5`, [PR #153](https://github.com/Facu42/plan-v/pull/153). Facundo autorizó juntarla. La fase 4 ya está en main por [PR #154](https://github.com/Facu42/plan-v/pull/154). Mercado Pago y Google Calendar muestran «Conectar». WhatsApp salió del panel: los avisos van por la app. Sin SQL remoto.
 

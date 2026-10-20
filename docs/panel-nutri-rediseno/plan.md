@@ -248,7 +248,8 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ### 2026-10-20 01:15 · Cursor · Menú y tema como el boceto
 - Hecho: las seis correcciones de la revisión de Claude. Cada opción del submenú tiene su codo curvo. La flecha de plegar mide 30 px, tiene sombra, crece al pasar el mouse, baja al apretar y el ícono gira al plegar. Agenda, Cobranzas y Mensajes no muestran la barra «Pacientes, Ficha, Plan» ni repiten el título. «Nueva consulta» y «Registrar cobro» se leen en oscuro sobre el lima. El consultorio arranca en oscuro y desde Apariencia se puede pasar a claro. La fecha del Inicio lleva «de» en minúscula, como «Miércoles 21 de octubre».
-- Cómo: los valores salen de `design/panel-nutri/bocetos.html`, líneas 234 a 240 y 358 a 370. Se aplicaron break-ui, frontend-patterns, frontend-a11y y verification-loop. Capturas en 1440×900 y 390×844, claro y oscuro, al lado del boceto de cada pantalla, en `design/panel-nutri/fase-5/`.
+- Cómo: los valores salen de `design/panel-nutri/bocetos.html`, líneas 234 a 240 y 358 a 370. Se aplicaron break-ui, frontend-patterns, frontend-a11y y verification-loop. Capturas en 1440×900 y 390×844, claro y oscuro, al lado del boceto de cada pantalla, en `design/panel-nutri/fase-5/`. La Página pública quedó al lado del boceto de Página pública.
+- Pruebas: 3.193 aprobadas y 2 omitidas, en 500 archivos. Tipos en verde. No hay script de lint.
 - Rama y PR: `cursor/arreglo-mobile-fase5`, [PR #158](https://github.com/Facu42/plan-v/pull/158), borrador contra main. No se tocó `codex/panel-nutri-fase-6`. No se junta.
 - Falta: los controles remotos de esta rama. La fase 6 sigue en Codex.
 - Próximo paso exacto: no juntar #158. La fase 6 no se toma desde esta rama.
