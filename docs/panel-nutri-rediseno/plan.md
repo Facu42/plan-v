@@ -241,10 +241,15 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main `6697d28` |
 | 4 | Codex | `codex/panel-nutri-fase-4` · [PR #154](https://github.com/Facu42/plan-v/pull/154) | Integrada a main |
 | 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Integrada a main `c09466b`, junto con la fase 4 |
-| Corrección del menú y de lo que no coincide | Por coordinar | — | Primera tarea; ver la última entrada de la Bitácora (20/10) |
+| Corrección del menú y de lo que no coincide | Cursor | `cursor/arreglo-mobile-fase5` · [PR #158](https://github.com/Facu42/plan-v/pull/158) | Hecha en #158, sin juntar. La fase 6 sigue en Codex (`codex/panel-nutri-fase-6`) |
 | 6 a 9 | Por coordinar | — | Pendientes, una rama y un PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-20 01:15 · Cursor · Main en el pago único
+- Hecho: se trajo `origin/main` sin rebase. La fase 5 sigue integrada. Se conservó la revisión de Claude del 20/10 00:30. El pago único no cambia. Las seis correcciones del boceto están en el PR #158.
+- Cómo: merge, sin rebase y sin tocar `codex/panel-nutri-fase-6`.
+- Rama y PR: `cursor/pago-mensual-unico`, [PR #157](https://github.com/Facu42/plan-v/pull/157). Sin merge a main y sin aplicar migraciones.
 
 ### 2026-10-20 00:30 · Claude · Revisión de lo hecho contra el boceto (sin código)
 Facundo pidió revisar lo desarrollado y marcó que **el menú lateral no coincide con el boceto**. Quien siga lo toma como la primera tarea, antes de cualquier fase nueva. Regla de Facundo: **no se sale del boceto**; si algo no coincide, se corrige, no se reinterpreta.
