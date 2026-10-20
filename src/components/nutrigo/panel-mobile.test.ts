@@ -17,7 +17,10 @@ describe('celular de cobranzas', () => {
   it('apila el débito y los movimientos, y no parte los nombres por letra', () => {
     expect(fase5).toMatch(/\.pn-panel \.p5-tx b,\.pn-panel \.p5-tx span,\.pn-panel \.p5-link \{ display:block; overflow-wrap:break-word; word-break:normal; \}/);
     expect(fase5).toMatch(/\.pn-panel \.p5-who b \{ overflow-wrap:break-word; word-break:normal; \}/);
+    expect(mobile).toMatch(/\.pn-panel \.p5-li \{ flex-wrap:wrap; \}/);
+    expect(mobile).toMatch(/\.pn-panel \.p5-tx \{ flex:1 0 10rem; \}/);
     expect(mobile).toMatch(/\.pn-panel \.p5-debit \{ flex-direction:column; align-items:stretch; \}/);
+    expect(fase5).toMatch(/\.pn-panel \.p5-dialog :is\(input,select\) \{ width:100%; max-width:100%; box-sizing:border-box; min-height:44px; \}/);
     expect(mobile).toMatch(/\.pn-panel \.p5-table-wrap \{ display:none; \}/);
     expect(mobile).toMatch(/\.pn-panel \.p5-moves \{ display:flex; flex-direction:column;/);
     expect(mobile).toMatch(/\.pn-panel \.p5-seg \{ flex-wrap:wrap;/);

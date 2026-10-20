@@ -45,6 +45,14 @@ describe('cobranzas del panel', () => {
         : patient),
     };
     expect(billingMovements(withDebit, '2026-10-21').find(row => row.patientId === 'sofia')?.concept).toBe('Débito automático · Seguimiento mensual · octubre 2026');
+    const withCheckout: BillingBoard = {
+      ...board,
+      patients: board.patients.map(patient => patient.patient_id === 'camila'
+        ? { ...patient, payments: [...patient.payments, { id: 'p3', amount: 54000, paid_on: '2026-10-21', method: 'mercado_pago' as const, note: 'Cuota de octubre 2026', status: 'confirmed' as const, reported_by_patient: false, created_at: '2026-10-21T15:00:00Z', source: 'checkout' as const, covers_due_on: '2026-10-14' }] }
+        : patient),
+    };
+    const row = billingMovements(withCheckout, '2026-10-21').find(item => item.id === 'pay:p3');
+    expect(row).toMatchObject({ concept: 'Cuota de octubre 2026 · Mercado Pago', method: 'Mercado Pago', status: 'Cobrado', kind: 'cobrado' });
   });
 
   it('suma ingresos por mes y deja en cero los meses sin pagos', () => {

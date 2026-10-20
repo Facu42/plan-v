@@ -109,7 +109,8 @@
 .pn-panel .p5-phone em { margin-left:auto; font-style:normal; font-weight:600; }
 .pn-panel .p5-preview-cta { display:grid; place-items:center; min-height:40px; border-radius:14px; background:var(--pn-lime); font-weight:600; }
 .pn-panel .p5-dialog { position:fixed; inset:0; z-index:40; background:color-mix(in srgb,var(--pn-solid) 35%,transparent); display:grid; place-items:center; padding:18px; }
-.pn-panel .p5-dialog form,.pn-panel .p5-dialog .p5-card,.pn-panel .p5-dialog .cbz-panel,.pn-panel .p5-dialog-wide>.p5-card { width:min(520px,100%); max-height:min(84dvh,760px); overflow:auto; background:var(--pn-white); border-radius:22px; padding:18px; }
+.pn-panel .p5-dialog form,.pn-panel .p5-dialog .p5-card,.pn-panel .p5-dialog .cbz-panel,.pn-panel .p5-dialog-wide>.p5-card { width:min(520px,calc(100vw - 36px)); max-width:100%; box-sizing:border-box; max-height:min(84dvh,760px); overflow:auto; background:var(--pn-white); border-radius:22px; padding:18px; }
+.pn-panel .p5-dialog :is(input,select) { width:100%; max-width:100%; box-sizing:border-box; min-height:44px; }
 .pn-panel .p5-dialog-wide .cbz-panel { width:min(720px,100%); }
 .pn-panel .p5-row { display:flex; justify-content:flex-end; gap:8px; }
 @media (max-width:800px) {
@@ -130,6 +131,8 @@
   .pn-panel .p5-moves li { display:flex; flex-direction:column; align-items:stretch; gap:6px; min-width:0; padding:12px; border-radius:16px; background:var(--pn-fill); }
   .pn-panel .p5-moves p { margin:0; overflow-wrap:break-word; }
   .pn-panel .p5-move-meta { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+  .pn-panel .p5-li { flex-wrap:wrap; }
+  .pn-panel .p5-tx { flex:1 0 10rem; }
   .pn-panel .p5-debit { flex-direction:column; align-items:stretch; }
   .pn-panel .p5-debit .p5-tx { flex:none; width:100%; }
   .pn-panel .p5-phone { width:100%; box-sizing:border-box; }

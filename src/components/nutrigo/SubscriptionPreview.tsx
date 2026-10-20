@@ -1,13 +1,15 @@
 import type { BillingBoard } from '../../types/fees';
 import { schedulingDefaultSettings } from '../../types/scheduling';
 import type { PatientSubscription, SubscriptionPlan } from '../../types/subscriptions';
-import { Icon, Mark } from '../shared/Icon';
 import { X } from '@phosphor-icons/react';
+import { Icon, Mark } from '../shared/Icon';
 import { PanelCobranzasView } from './PanelCobranzas';
 import { PanelDebitView } from './PanelDebit';
+import { PanelFeePayDialog } from './PanelFeePay';
 import { PanelNavigation } from './PanelNavigation';
 import { PanelPublicPageView } from './PanelPublicPage';
 import { PublicFollowPlansView } from './PublicFollowPlans';
+import { PublicMonthlyFeeView } from './PublicMonthlyFee';
 import { PRO_TABS } from './showroom-nav';
 import './nutrigo.css';
 import './panel-nutri-tokens.css';
@@ -43,6 +45,10 @@ const board: BillingBoard = {
     patient_id: 'camila', full_name: 'Camila Torres', fee: { amount: 54000, first_due_on: '2026-10-01', program_name: 'Mensual' },
     charges: [{ id: 'c1', due_on: '2026-10-14', amount: 54000, status: 'open' }],
     payments: [{ id: 'p1', amount: 54000, paid_on: '2026-10-21', method: 'mercado_pago', note: 'Débito automático · Seguimiento mensual · octubre 2026', status: 'confirmed', reported_by_patient: false, created_at: '2026-10-21T12:00:00Z', source: 'subscription' }],
+  }, {
+    patient_id: 'marina', full_name: 'Marina López', fee: { amount: 28000, first_due_on: '2026-10-01', program_name: 'Mensual' },
+    charges: [{ id: 'c2', due_on: '2026-10-01', amount: 28000, status: 'open' }],
+    payments: [],
   }],
 };
 
@@ -85,7 +91,10 @@ export function SubscriptionPreview() {
           link="https://pago.example/camila" notice="" busy={false}
           onFilter={noop} onOpenPlans={noop} onOpenActivate={noop} onClose={noop} onCreate={noop} onSave={noop} onEdit={noop} onFormBack={noop} onActivate={noop} onCopy={noop} onReconcile={noop} onPause={noop} onResume={noop} onCancel={noop}
         />}
+        onFeePay={noop}
+        feeBlocked={['camila']}
       />}
+      {screen === 'cobranzas-cobro' && <PanelFeePayDialog name="Marina López" options={[{ due_on: '2026-10-01', amount: 28000, title: 'Cuota de octubre 2026' }]} busy={false} notice="Enlace generado." link="https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=uno" onClose={noop} onCreate={noop} onCopy={noop} />}
       {screen === 'publica' && <PanelPublicPageView
         config={config} published pageUrl="https://plan.v/consultorio/veronica-trenti" connections={{ google: false, mercadopago: true }}
         status="" busy={false} loading={false} error="" onChange={noop} onPublish={noop} onToggleEnabled={noop} onConnect={noop} onRetry={noop}
@@ -94,6 +103,7 @@ export function SubscriptionPreview() {
       {screen === 'suscripcion' && <section className="care-panel scheduling-panel" aria-label="Reservas del consultorio">
         <header><h1>Lic. Verónica Trenti</h1><p>Acompaño a mujeres a comer mejor, con un plan que entra en la rutina.</p></header>
         <PublicFollowPlansView plans={[plan]} busy={false} notice="" onSubmit={noop} />
+        <PublicMonthlyFeeView busy={false} notice="" onSubmit={noop} />
         <h2>Consulta suelta</h2>
         <p>Horarios en Argentina. El consultorio confirma las solicitudes.</p>
         <form><label>Tipo de consulta <select defaultValue="consulta"><option value="consulta">Consulta suelta · 60 min · $40.000</option></select></label><button type="button">Solicitar turno</button></form>

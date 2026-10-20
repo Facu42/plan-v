@@ -218,5 +218,6 @@ export function usePanelDebit(patients: { id: string; name: string }[]) {
     onResume={sub => void run(async () => { await subscriptionsApi.change(sub.id, 'resume', sub.revision); setNotice('Débito reanudado.'); })}
     onCancel={sub => void run(async () => { await subscriptionsApi.change(sub.id, 'cancel', sub.revision); setNotice('Débito cancelado.'); })}
   /> : (notice ? <p className="p5-status" role="status">{notice}</p> : null);
-  return { enabled, plans, button, card };
+  const livePatientIds = list.subscriptions.filter(item => (item.status === 'authorized' || item.status === 'paused') && item.patient_id).map(item => item.patient_id as string);
+  return { enabled, plans, button, card, livePatientIds };
 }

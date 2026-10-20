@@ -69,6 +69,7 @@ export function PanelPublicPageView({ config, published, pageUrl, connections, s
           <h4>Consulta suelta</h4>
           {previewTypes.map(type => <div key={type.id}><b>{type.name}</b><small>{type.duration_min} min</small><em>{money(type.price_minor)}</em></div>)}
           {!previewTypes.length && <p className="p5-empty">Sin consulta suelta para mostrar.</p>}
+          {plans && <><h4>Cuota del mes</h4><span className="p5-preview-cta">Pagar este mes</span></>}
           {plans && plans.some(plan => plan.public_visible) && <h4>Planes de seguimiento</h4>}
           {plans?.filter(plan => plan.public_visible).map(plan => <div key={plan.id}><b>{plan.name}</b><small>{plan.description || 'Seguimiento mensual'}</small><em>{monthlyLabel(plan.amount_cents)}</em><span className="p5-preview-cta">Suscribirme</span></div>)}
         </div>

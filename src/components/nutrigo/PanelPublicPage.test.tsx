@@ -15,6 +15,7 @@ describe('Página pública del boceto', () => {
     for (const label of ['Página pública', 'Presentación', 'Dirección del link', 'Así la ve la paciente', 'Reservar turno', 'Mercado Pago', 'Google Calendar', 'Conectar', '24 horas']) expect(html).toContain(label);
     expect(html).not.toContain('WhatsApp');
     expect(html).not.toContain('Planes de seguimiento');
+    expect(html).not.toContain('Cuota del mes');
     expect(html).toContain('Consulta suelta');
     expect(html).toContain('Todavía no está publicada.');
     expect(html).not.toContain('Conectado');
@@ -27,6 +28,7 @@ describe('Página pública del boceto', () => {
     expect(shown).toContain('Seguimiento mensual');
     expect(shown).toContain('Consulta suelta');
     expect(shown).toContain('Suscribirme');
+    expect(shown).toContain('Pagar este mes');
     const blocked = renderToStaticMarkup(<PanelPublicPageView config={schedulingDefaultSettings()} published={false} pageUrl="" connections={{ google: false, mercadopago: false }} status="" busy={false} loading={false} error="" onChange={vi.fn()} onPublish={vi.fn()} onToggleEnabled={vi.fn()} onConnect={vi.fn()} onRetry={vi.fn()} plans={[plan]} onTogglePlan={vi.fn()} onEditPlan={vi.fn()} />);
     expect(blocked).toContain('Conectá Mercado Pago para cobrar con débito automático');
     expect(blocked).toContain('disabled');

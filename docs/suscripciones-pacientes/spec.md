@@ -1,16 +1,18 @@
 # Spec: suscripciones de pacientes con Mercado Pago (Plan V)
 
 Versión 1 · 19/10/2026. Las preguntas P1–P10 quedaron cerradas el 19/10 (sección 7.3). La migración se escribe y **no se aplica**; no se toca Railway, Supabase de producción ni Mercado Pago.
-Base de la parte 1: `origin/main` en `c09466b` (fases 4 y 5 ya juntas). El backend vive en `cursor/suscripciones-pacientes-backend` ([PR #155](https://github.com/Facu42/plan-v/pull/155)). Las pantallas de Cobranzas y de la página pública viven en `cursor/suscripciones-cobranzas-pagina` ([PR #156](https://github.com/Facu42/plan-v/pull/156), borrador, apilado sobre el backend y no sobre main). El pago único de la cuota (sección 2.9) se hace en `cursor/pago-mensual-unico`, apilado sobre las pantallas y no sobre main.
+Base de la parte 1: `origin/main` en `c09466b` (fases 4 y 5 ya juntas). El backend vive en `cursor/suscripciones-pacientes-backend` ([PR #155](https://github.com/Facu42/plan-v/pull/155)). Las pantallas de Cobranzas y de la página pública viven en `cursor/suscripciones-cobranzas-pagina` ([PR #156](https://github.com/Facu42/plan-v/pull/156), borrador, apilado sobre el backend y no sobre main). El pago único de la cuota (sección 2.9) está en `cursor/pago-mensual-unico` ([PR #157](https://github.com/Facu42/plan-v/pull/157), borrador, apilado sobre las pantallas y no sobre main).
 
-## Estado al cerrar la parte 2 (19/10, noche)
+## Estado al cerrar el pago único (19/10, noche)
 
 Otro agente puede seguir desde acá sin el chat.
 
 ### Hecho
-- **20/10, main.** Se trajo `origin/main` `f51f413` sin rebase. La fase 5 sigue integrada. El contrato de cobro no cambia. Las correcciones visuales del boceto están en el PR #158. En esta rama, 3.231 pruebas aprobadas y 2 omitidas, tipos en verde.
+- **20/10, main.** Se trajo `origin/main` `f51f413` sin rebase. La fase 5 sigue integrada. El contrato del pago único no cambia. Las correcciones visuales del boceto están en el PR #158. En esta rama, 3.244 pruebas aprobadas y 2 omitidas, tipos en verde.
 - **Parte 1, backend.** Rama `cursor/suscripciones-pacientes-backend`, [PR #155](https://github.com/Facu42/plan-v/pull/155) contra `main`. Trae el merge de main `c09466b` (fase 4 y fase 5). Migración `20261020120000_patient_subscriptions.sql` escrita y sin aplicar. Bandera `PATIENT_SUBSCRIPTIONS_ENABLED` apagada. Webhook general, alta con el token de la nutri, un cobro por aviso, anulación si hay devolución, conciliación y enlaces que vencen a los 7 días.
-- **Parte 2, pantallas.** Rama `cursor/suscripciones-cobranzas-pagina`, [PR #156](https://github.com/Facu42/plan-v/pull/156) contra la rama del backend. Cobranzas (4.1), página pública del panel (4.2) y la página donde la paciente elige el plan (4.3), con la vuelta `/consultorio/<slug>/suscripcion/<id>`. Si la bandera está apagada, el servidor responde 404 y no se ve nada nuevo. Pruebas de esta rama: 3.228 aprobadas y 2 omitidas, en 507 archivos. `npm run check` en verde. No se aplicó la migración.
+- **Parte 2, pantallas.** Rama `cursor/suscripciones-cobranzas-pagina`, [PR #156](https://github.com/Facu42/plan-v/pull/156) contra la rama del backend. Cobranzas (4.1), página pública del panel (4.2) y la página donde la paciente elige el plan (4.3), con la vuelta `/consultorio/<slug>/suscripcion/<id>`. Si la bandera está apagada, el servidor responde 404 y no se ve nada nuevo.
+- **Pago único del mes (2.9).** Rama `cursor/pago-mensual-unico`, [PR #157](https://github.com/Facu42/plan-v/pull/157) contra las pantallas. La nutri genera el enlace desde Cobranzas o desde la fila de la paciente, lo copia, y la paciente lo paga en Pagos o en la página pública. El cobro entra una vez en Movimientos, ligado a esa cuota y a ese mes. Con débito activo no se ofrece. Migración `20261020143000_patient_fee_checkouts.sql` escrita y sin aplicar. Esta rama también trae el arreglo de celular del PR #156. Pruebas: 3.243 aprobadas y 2 omitidas, en 511 archivos. No se tocó la ficha ni el chat.
+- **Celular de lo que ya está en main.** Rama `cursor/arreglo-mobile-fase5`, [PR #158](https://github.com/Facu42/plan-v/pull/158) contra `main`. Agenda y Cobranzas dejan de repetir el título, el selector de paciente no aparece ahí, los turnos son filas con la etiqueta en una pastilla, y el menú inferior no tapa el final. No se junta a esta pila.
 
 ### Decisiones que las pantallas respetan
 - Sin comisión, sin prueba gratis y solo mensual. El formulario dice «Se cobra una vez por mes». No hay campo de prueba ni de otra frecuencia.
@@ -24,18 +26,18 @@ Otro agente puede seguir desde acá sin el chat.
 - Un cobro que viene del débito se lee «Débito automático · …» en Movimientos.
 - Cada plan tiene su interruptor para la página pública. Sin Mercado Pago el interruptor queda apagado y bloqueado.
 - La vista `/?vista=suscripciones` solo existe en el servidor de desarrollo, para las capturas. No es un modo demo de producción.
-- El boceto (`design/panel-nutri/bocetos.html`, `#cobranzas` y `#publica`) no dibuja la tarjeta de débito ni el formulario de la paciente, y en «Recordar» todavía muestra WhatsApp. La app no. Las capturas de la app están al lado del boceto de escritorio que corresponde: Cobranzas con `#cobranzas` y la Página pública con `#publica`. En el celular el título está solo en la barra de arriba y el menú inferior marca «Más» en Cobranzas y en la Página pública.
+- El boceto (`design/panel-nutri/bocetos.html`, `#cobranzas` y `#publica`) no dibuja la tarjeta de débito, el enlace de un mes ni el formulario de la paciente, y en «Recordar» todavía muestra WhatsApp. La app no. Las capturas de la app están al lado del boceto de escritorio que corresponde: Cobranzas con `#cobranzas` y la Página pública con `#publica`. No hay boceto de celular. En escritorio se ve el menú lateral y el título en la página. En el celular el título está solo en la barra de arriba, el menú inferior marca «Más» en Cobranzas y en la Página pública, y queda fijo, salvo en el cuadro de «Cobrar este mes», que lo tapa mientras está abierto. Siguen saliendo de la vista de desarrollo `/?vista=suscripciones` porque la función está apagada.
+- En Pagos, el botón «Pagar este mes» es el pago único de 2.9. La tarjeta del débito en la app de la paciente sigue para 4.6.
 
 ### Qué falta
-- **Pago único de la cuota (2.9).** Pedido por Facu el 19/10 a la noche. No es una suscripción: es un enlace de Mercado Pago de un solo mes, para una paciente que ya tiene cuota manual. Se implementa en `cursor/pago-mensual-unico`, desde `cursor/suscripciones-cobranzas-pagina`, con PR borrador contra esa rama. Misma bandera apagada. Si hace falta tabla nueva, la migración se escribe y no se aplica.
-- **Parte 3.** Ficha (4.4) y chat (4.5). Quedan para después del pago único. Crear `cursor/suscripciones-ficha-chat` desde la rama que corresponda cuando 2.9 esté cerrada. No mergear #155 ni #156.
-- **App de la paciente para el débito (4.6).** Después, en `cursor/suscripciones-app-paciente`. Incluye la baja que Facu ya aprobó (P4). El botón para pagar la cuota de un mes (2.9) sí entra en esta parte, en Pagos, y no es la ficha ni el chat.
+- **Parte 3.** Ficha (4.4) y chat (4.5). Crear `cursor/suscripciones-ficha-chat` desde `cursor/pago-mensual-unico`. No mergear #155, #156, #157 ni #158.
+- **App de la paciente para el débito (4.6).** Después, en `cursor/suscripciones-app-paciente`. Incluye la baja que Facu ya aprobó (P4). El botón para pagar la cuota de un mes ya está en Pagos.
 - **Sandbox de Mercado Pago (6.3).** Sigue pendiente. Un script aparte, sin producción. No afirmar que ya se cobró de verdad.
-- **Facu.** Aplicar la migración con su frase, prender la bandera y tildar «Planes y suscripciones» y «Vinculación de aplicaciones». Sigue anotado en el PR #155.
+- **Facu.** Aplicar las dos migraciones (`20261020120000` y `20261020143000`) con su frase, prender la bandera y tildar «Planes y suscripciones» y «Vinculación de aplicaciones».
 - Nada de merge, Railway, Vercel, Supabase de producción ni Mercado Pago hasta esa frase.
 
 ### Próximo paso concreto
-Implementar la sección 2.9 en `cursor/pago-mensual-unico`. Al cerrar, actualizar este archivo, la bitácora de `docs/panel-nutri-rediseno/plan.md` y `docs/coordinacion-agentes.md`, y dejar las capturas de la app junto al boceto, con el menú lateral del panel real.
+Crear `cursor/suscripciones-ficha-chat` desde `cursor/pago-mensual-unico` y hacer la ficha (4.4) y el chat (4.5). Al cerrar, actualizar este archivo, la bitácora de `docs/panel-nutri-rediseno/plan.md` y `docs/coordinacion-agentes.md`.
 
 ---
 
@@ -181,6 +183,8 @@ Pedido por Facu el 19/10. No reemplaza al débito ni a la consulta suelta. Sirve
 10. Todo detrás de `PATIENT_SUBSCRIPTIONS_ENABLED`. Apagada, las rutas responden 404 y no se ve el botón.
 
 La consulta suelta no se toca. La ficha y el chat no se tocan en esta parte.
+
+Hecho en `cursor/pago-mensual-unico`, [PR #157](https://github.com/Facu42/plan-v/pull/157). La tabla nueva es `patient_fee_checkouts`, en `supabase/migrations/20261020143000_patient_fee_checkouts.sql`, escrita y sin aplicar. El mes cubierto queda en `covers_due_on`. Un segundo pago del mismo mes no se anota.
 
 ---
 
@@ -530,7 +534,7 @@ Una rama y un PR por tema. Las migraciones van con fecha ≥ 20261019000000 y **
 | 1 | Codex (o Cursor si Facu autoriza) | `codex/suscripciones-spike-sandbox` | Script de prueba con cuentas de prueba: los 5 puntos de 6.3. Sin tocar producción. | 0 |
 | 2 | Cursor | `cursor/suscripciones-pacientes-backend` | Migración (sin aplicar), endpoints, webhook general, worker, conciliación, libro, push `subscription`, pruebas. Bandera apagada. | Decisiones de 7.3 |
 | 3 | Cursor | `cursor/suscripciones-cobranzas-pagina` | Cobranzas (4.1), Página pública (4.2) y página `/consultorio` (4.3). Hecho en el [PR #156](https://github.com/Facu42/plan-v/pull/156), borrador contra la rama del backend. Bandera apagada. Capturas en `design/suscripciones/` | #153 ya está en main; contratos de 2 |
-| 3b | Cursor | `cursor/pago-mensual-unico` | Pago único de la cuota del mes (2.9). Enlace de Checkout Pro, libro con `source` `checkout`, app y página pública. Bandera apagada. Migración nueva solo si hace falta, sin aplicar | 3 |
+| 3b | Cursor | `cursor/pago-mensual-unico` | Pago único de la cuota del mes (2.9). Hecho en el [PR #157](https://github.com/Facu42/plan-v/pull/157), borrador contra las pantallas. Migración `20261020143000` escrita y sin aplicar. Bandera apagada | 3 |
 | 4 | Cursor | `cursor/suscripciones-ficha-chat` | Ficha (4.4) y chat (4.5). Después de 3b | Fase 4 mergeada; 3b |
 | 5 | Lane de la app de pacientes (o Cursor) | `cursor/suscripciones-app-paciente` | Pagos (4.6) y aviso en Inicio | 2 |
 | 6 | Facu | — | Aplica la migración con su frase, configura Mercado Pago (6.1), prende la bandera en Railway | 2–5 en verde |
@@ -616,7 +620,7 @@ Estas decisiones reemplazan P1–P10. El backend de esta rama las cumple.
 - **P7. Equipo.** Solo la nutri activa, pausa, reanuda o cancela débitos. Recepción y equipo solo ven.
 - **P8. Página pública.** Se ofrece en la página pública y también por link. Cada plan tiene su interruptor para mostrarse o no.
 - **P9. Medios de pago.** Se aceptan todos los medios que ofrezca Mercado Pago. No se filtran.
-- **P10. Quién programa.** Cursor hace el backend y las pantallas. El backend está en el PR #155. Cobranzas y la página pública están en el PR #156. El pago único del mes va en `cursor/pago-mensual-unico`. Después faltan la ficha, el chat y el débito dentro de la app de la paciente.
+- **P10. Quién programa.** Cursor hace el backend y las pantallas. El backend está en el PR #155. Cobranzas y la página pública están en el PR #156. El pago único del mes está en el PR #157. Después faltan la ficha, el chat y el débito dentro de la app de la paciente.
 
 ---
 

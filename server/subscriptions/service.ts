@@ -5,6 +5,7 @@ import { notifyPatientPush } from '../push/push.js';
 import { sendThreadMessage } from '../messages/repository.js';
 import { disconnect } from '../scheduling/repository.js';
 import { applyVerifiedPayment } from '../scheduling/payments.js';
+import { bookMonthlyCheckout, reconcileMonthlyCheckouts } from '../fees/monthly-checkout.js';
 import { moneyMinor } from '../scheduling/logic.js';
 import { writeOpsLog } from '../ops/log.js';
 import { subscriptionsAllowed } from './flag.js';
@@ -418,7 +419,8 @@ export async function reconcileNutritionist(nutritionistId: string, id?: string)
   const rows = id ? [await owned(nutritionistId, id)] : (await repo.listSubscriptions(nutritionistId)).map(asSub).filter(row => !['cancelled', 'expired', 'failed'].includes(row.status));
   const actions = [];
   for (const row of rows) actions.push(await reconcileOne(row));
-  return { checked: rows.length, actions };
+  const fees = await reconcileMonthlyCheckouts(nutritionistId);
+  return { checked: rows.length + fees.checked, actions: [...actions, ...fees.actions] };
 }
 
 export async function reconcileOne(sub: Sub) {
@@ -635,6 +637,7 @@ async function handleCandidate(nutritionistId: string, accountId: string, topic:
     const payment = await readOrNull(() => mercadoPago.getPayment(token, resourceId));
     if (!payment || (payment.collector_id != null && String(payment.collector_id) !== accountId)) return null;
     const reference = typeof payment.external_reference === 'string' ? payment.external_reference : '';
+    if (UUID.test(reference) && await bookMonthlyCheckout(nutritionistId, accountId, payment)) return true;
     if (allowSubscriptions && UUID.test(reference)) {
       const sub = asSub(await repo.findSubscriptionById(reference, nutritionistId));
       if (sub) {
@@ -696,6 +699,7 @@ export async function reconcileLive() {
     if (page.length < 50) break;
     after = page[page.length - 1]?.id ?? null;
   }
+  await reconcileMonthlyCheckouts();
   return checked;
 }
 

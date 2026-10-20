@@ -20,6 +20,10 @@ vi.mock('../push/push.js', () => ({ notifyPatientPush: () => undefined }));
 vi.mock('../messages/repository.js', () => ({ sendThreadMessage: async () => ({ message: {}, duplicate: false }) }));
 vi.mock('../scheduling/repository.js', () => ({ disconnect: async () => undefined }));
 vi.mock('../scheduling/payments.js', () => ({ applyVerifiedPayment: async () => ({ applied: true }) }));
+vi.mock('../fees/monthly-checkout.js', () => ({
+  bookMonthlyCheckout: async () => false,
+  reconcileMonthlyCheckouts: async () => ({ checked: 0, actions: [] as string[] }),
+}));
 vi.mock('../ops/log.js', () => ({ writeOpsLog: () => undefined }));
 vi.mock('./mp.js', () => ({
   MpCallError: class MpCallError extends Error {

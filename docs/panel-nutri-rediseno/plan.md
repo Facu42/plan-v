@@ -279,6 +279,11 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 - Cómo: merge, sin rebase y sin tocar `codex/panel-nutri-fase-6`.
 - Rama y PR: `cursor/suscripciones-cobranzas-pagina`, [PR #156](https://github.com/Facu42/plan-v/pull/156). Sin merge a main y sin aplicar migraciones.
 - Pruebas: 3.231 aprobadas y 2 omitidas, en 508 archivos. Tipos en verde.
+### 2026-10-20 01:15 · Cursor · Main en el pago único
+- Hecho: se trajo `origin/main` sin rebase. La fase 5 sigue integrada. Se conservó la revisión de Claude del 20/10 00:30. El pago único no cambia. Las seis correcciones del boceto están en el PR #158.
+- Cómo: merge, sin rebase y sin tocar `codex/panel-nutri-fase-6`.
+- Rama y PR: `cursor/pago-mensual-unico`, [PR #157](https://github.com/Facu42/plan-v/pull/157). Sin merge a main y sin aplicar migraciones.
+- Pruebas: 3.244 aprobadas y 2 omitidas, en 511 archivos. Tipos en verde.
 
 ### 2026-10-20 00:30 · Claude · Revisión de lo hecho contra el boceto (sin código)
 Facundo pidió revisar lo desarrollado y marcó que **el menú lateral no coincide con el boceto**. Quien siga lo toma como la primera tarea, antes de cualquier fase nueva. Regla de Facundo: **no se sale del boceto**; si algo no coincide, se corrige, no se reinterpreta.
@@ -299,6 +304,14 @@ Facundo pidió revisar lo desarrollado y marcó que **el menú lateral no coinci
 - Hecho: en la Página pública el menú inferior marca «Más», igual que en Cobranzas. En el celular el título de la sección está en la barra de arriba y no se repite en la página. En escritorio el título sigue en la página, como el boceto. La captura de la Página pública quedó al lado del boceto de esa pantalla.
 - Cómo: break-ui, frontend-patterns, frontend-a11y y verification-loop. Una sola vez el título para quien escucha la página. Sin datos nuevos ni librería de estado.
 - Rama y PR: `cursor/suscripciones-cobranzas-pagina`, [PR #156](https://github.com/Facu42/plan-v/pull/156). 3.231 pruebas y 2 omitidas, en 508 archivos. Tipos en verde. La misma corrección está en el PR #157. Las capturas nuevas de Agenda y Cobranzas están en el PR #158.
+- Rama y PR: `cursor/pago-mensual-unico`, [PR #157](https://github.com/Facu42/plan-v/pull/157). 3.244 pruebas y 2 omitidas, en 511 archivos. Tipos en verde. La misma corrección está en el PR #156. Las capturas nuevas de Agenda y Cobranzas están en el PR #158.
+
+### 2026-10-19 23:50 · Cursor · Pago único, con el celular que Facu rechazó
+- Hecho: el enlace de un mes sigue en esta rama, y ahora el celular no parte los nombres. En 360, 390 y 430 el débito, las cuotas vencidas y los movimientos se leen en columna o en tarjetas. El cuadro del enlace cabe en la pantalla y sus campos miden 44 px. El menú inferior queda fijo. No se repite el título ni aparecen los accesos de paciente en la vista previa.
+- Cómo: se aplicaron break-ui, frontend-patterns, frontend-a11y y verification-loop. Las vistas siguen recibiendo los mismos datos. No hay un interruptor de peor caso. Las capturas de celular se sacaron de nuevo dentro del panel, con el menú inferior, y quedaron al lado del boceto de escritorio en `design/suscripciones/`. No hay boceto de celular. El cuadro de «Cobrar este mes» tapa el menú mientras está abierto.
+- Rama y PR: `cursor/pago-mensual-unico`, [PR #157](https://github.com/Facu42/plan-v/pull/157), borrador contra `cursor/suscripciones-cobranzas-pagina`. 3.243 pruebas y 2 omitidas, en 511 archivos. Lo de Agenda que ya está en main va en `cursor/arreglo-mobile-fase5`, [PR #158](https://github.com/Facu42/plan-v/pull/158).
+- Falta: ficha, chat, el débito en la app de la paciente y la prueba en sandbox. Facu tiene que aplicar las dos migraciones y prender la bandera.
+- Próximo paso exacto: crear `cursor/suscripciones-ficha-chat` desde esta rama y hacer la ficha (4.4) y el chat (4.5).
 
 ### 2026-10-19 23:20 · Cursor · Celular de Cobranzas y de la página pública
 - Hecho: Facu rechazó el celular. En la tarjeta de débito el nombre se lee en una línea. En el celular, Movimientos es una lista de tarjetas. Las pestañas bajan de renglón. Suscribirme queda dentro del marco de la vista previa. El menú inferior queda fijo y no tapa el final. Nada se corta en 360, 390 ni 430, y los botones miden al menos 44 px.
