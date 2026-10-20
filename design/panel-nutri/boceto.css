@@ -145,6 +145,32 @@ html[data-mock="dark"] .m .te.done b,html[data-mock="dark"] .m .te.done span{col
 .prog{height:6px;border-radius:3px;background:var(--white);margin-top:6px;overflow:hidden}
 .prog i{display:block;height:100%;background:var(--lime-d);border-radius:3px}
 .pip{width:8px;height:8px;border-radius:50%;display:inline-block}
+/* Inicio entra en 1440 × 900 a tamaño real (Facundo, 20/10): bloques más justos y las listas largas se desplazan dentro de su tarjeta */
+.main:has(>.ini-top){gap:14px;padding-top:20px;padding-bottom:20px}
+.g2.ini-top{grid-template-columns:1.45fr 1fr}
+.ini-top .hero{padding:18px 22px}
+.ini-top .hero p.big{font-size:19px;margin:8px 0 12px}
+.ini-top .next{padding:14px 18px;gap:8px}
+.ini-top .who .av{width:40px;height:40px}
+.ini-top .facts div{padding:7px 10px}
+.qa.ini div{height:46px}
+.g2.ini-mid{height:240px}
+.ini-mid .card{display:flex;flex-direction:column;min-height:0}
+.ini-mid .ct{flex:none}
+.ini-scroll{flex:1;min-height:0;overflow-y:auto;margin-right:-10px;padding-right:10px;scrollbar-width:thin;scrollbar-color:var(--mut2) transparent}
+.ini-mid .pr{padding:7px 0}
+.ini-mid .pr .ic{width:32px;height:32px;border-radius:10px}
+.g3.ini-bot{height:220px}
+.ini-bot .card{padding:16px 18px;display:flex;flex-direction:column;min-height:0}
+.ini-bot .kp{flex:1;align-content:start}
+.ini-bot .ct{margin-bottom:8px}
+.ini-bot .lr{padding:6px 0}
+.ini-bot .lr .av{width:30px;height:30px}
+.ini-bot .kp{gap:6px}
+.ini-bot .kp>div{padding:8px 12px}
+/* `.kp div` también pintaba las cajas internas y escondía la barra de lo cobrado */
+.ini-bot .kp>div div{padding:0;border-radius:0;background:none}
+.ini-bot .kp>div .prog{background:var(--white);border-radius:3px}
 /* celular */
 .ph{width:390px;height:844px;border-radius:44px;border:10px solid #272932;overflow:hidden;position:relative;box-sizing:content-box}
 .ph .in{padding:16px 16px 100px;display:flex;flex-direction:column;gap:14px;height:100%;overflow:hidden}

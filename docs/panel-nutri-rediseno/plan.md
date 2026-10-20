@@ -252,6 +252,12 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
+### 2026-10-20 · Claude · Inicio del boceto reacomodado a 1440 × 900
+- Hecho: el Inicio del boceto medía 1217 de alto a tamaño real y la página lo mostraba achicado al 62 %. Facundo eligió (20/10 13:34) reacomodar el boceto para que entre en 1440 × 900. Ahora mide 900, con los mismos bloques, el mismo orden y los mismos colores.
+- Cómo: reglas nuevas solo del Inicio (`ini-top`, `qa.ini`, `ini-mid`, `ini-bot`, `ini-scroll`) en `bocetos.html` y copiadas en `boceto.css`. Las listas largas se desplazan dentro de su tarjeta. Se corrigió además `.kp div`, que pintaba las cajas internas y escondía la barra de lo cobrado.
+- Rama: claude/panel-boceto-inicio-900. Comparación: https://claude.ai/artifact/VEeSS7VX9z39Qoh2sLGiMQ
+- Próximo paso exacto: con su ok, juntar y regenerar `panel-boceto.css` (fase A) antes de pasar el Inicio a la app (fase B).
+
 ### 2026-10-20 04:30 · Claude · Instrucciones pantalla por pantalla y fases nuevas
 - Hecho: `instrucciones-boceto.md` con el método (copiar el código del boceto, no redibujarlo), lo que hoy no coincide en cada pantalla, una tabla con la función y línea del boceto, la ruta, el componente actual y los datos que se conservan, y las fases nuevas A a I.
 - Cómo: pedido de Facundo del 20/10 04:02 («revisá todas las pantallas… comenzá a desarrollar por fases con mi aprobación») y 04:06 («¿no se pueden pasar en código?»).
