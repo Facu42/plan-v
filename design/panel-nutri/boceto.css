@@ -165,11 +165,11 @@ html[data-mock="dark"] .m .te.done b,html[data-mock="dark"] .m .te.done span{col
 /* `.kp div` también pintaba las cajas internas y escondía la barra de lo cobrado */
 .ini-num .kp>div div{padding:0;border-radius:0;background:none}
 .ini-num .kp>div .prog{background:var(--white);border-radius:3px}
-.g2.ini-bot2{grid-template-columns:1fr 1fr;height:172px}
+.g2.ini-bot2{grid-template-columns:1fr 1fr;height:190px}
 .ini-mid .ini-num{padding:16px 18px}
 .ini-num .ct{margin-bottom:8px}
 /* Consultas de hoy en columnas + próxima paciente (opción K, líneas finas) */
-.g2.hoy{grid-template-columns:1.45fr 1fr;height:336px}
+.g2.hoy{grid-template-columns:1.45fr 1fr;height:318px}
 .g2.hoy>section{min-height:0;overflow:hidden}
 .hoy-l{background:var(--solid);color:#F2EFEC;border-radius:24px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;min-width:0}
 .hoy-l .hh{display:flex;align-items:center;gap:10px}
@@ -256,6 +256,29 @@ html[data-mock="dark"] .m .te.done b,html[data-mock="dark"] .m .te.done span{col
 .hoy-n .hbtn.soft{background:rgba(255,255,255,.62);color:#272932;border:1px solid rgba(255,255,255,.8)}
 .hoy-n .hbtn:hover{transform:translateY(-1px)}.hoy-n .hbtn.soft:hover{background:#fff}
 @media (prefers-reduced-motion:reduce){.hoy-n .hlive{animation:none}.hoy-n .hacc button,.hoy-n .hbtn{transition:none}.hoy-n .hacc button:hover,.hoy-n .hbtn:hover{transform:none}}
+
+/* Letra de Apple, fina (Facundo 20/10 21:59): títulos grandes y números en peso liviano */
+.hdr h1{font-weight:300;letter-spacing:-.03em}
+.ct h2,.hoy-l h2{font-weight:500;letter-spacing:-.01em}
+.hoy-l h2{font-size:16px}
+.hc .t b{font-size:22px;font-weight:300;letter-spacing:-.02em}
+.hc .nm{font-weight:500}
+.hc.dn{opacity:.55}
+.hc .sub{font-size:11.5px}
+.hc .ln{font-size:12px;padding:8px 0}
+.hoy-n .hhead h3{font-weight:500}
+.hoy-n .hhead span{display:inline-flex;align-items:center;gap:6px}
+.hoy-n .hwho b{font-size:22px;font-weight:300;letter-spacing:-.02em}
+.hoy-n .hwhen b{font-size:30px;font-weight:200;letter-spacing:-.03em}
+.hoy-n .hstats{grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--hl)}
+.hoy-n .hstats div{padding:10px 14px 10px}
+.hoy-n .hstats b{font-size:22px;font-weight:300;letter-spacing:-.02em}
+.hoy-n .hstats b.sm{font-size:16px;font-weight:400}
+.hoy-n>.hstats{border-top:1px solid var(--hl)}
+.hoy-n .hacc{grid-template-columns:repeat(4,1fr)}
+.hoy-n>.hrow{grid-template-columns:1fr}
+.hoy-n .hbtn{height:38px;font-size:13px}
+.ini-num .kp b{font-weight:300;letter-spacing:-.02em}
 /* celular */
 .ph{width:390px;height:844px;border-radius:44px;border:10px solid #272932;overflow:hidden;position:relative;box-sizing:content-box}
 .ph .in{padding:16px 16px 100px;display:flex;flex-direction:column;gap:14px;height:100%;overflow:hidden}

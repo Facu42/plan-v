@@ -164,11 +164,11 @@ html[data-mock="dark"] .m .te.done b,html[data-mock="dark"] .m .te.done span{col
 /* `.kp div` también pintaba las cajas internas y escondía la barra de lo cobrado */
 .ini-num .kp>div div{padding:0;border-radius:0;background:none}
 .ini-num .kp>div .prog{background:var(--white);border-radius:3px}
-.g2.ini-bot2{grid-template-columns:1fr 1fr;height:172px}
+.g2.ini-bot2{grid-template-columns:1fr 1fr;height:190px}
 .ini-mid .ini-num{padding:16px 18px}
 .ini-num .ct{margin-bottom:8px}
 /* Consultas de hoy en columnas + próxima paciente (opción K, líneas finas) */
-.g2.hoy{grid-template-columns:1.45fr 1fr;height:336px}
+.g2.hoy{grid-template-columns:1.45fr 1fr;height:318px}
 .g2.hoy>section{min-height:0;overflow:hidden}
 .hoy-l{background:var(--solid);color:#F2EFEC;border-radius:24px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;min-width:0}
 .hoy-l .hh{display:flex;align-items:center;gap:10px}
@@ -255,6 +255,29 @@ html[data-mock="dark"] .m .te.done b,html[data-mock="dark"] .m .te.done span{col
 .hoy-n .hbtn.soft{background:rgba(255,255,255,.62);color:#272932;border:1px solid rgba(255,255,255,.8)}
 .hoy-n .hbtn:hover{transform:translateY(-1px)}.hoy-n .hbtn.soft:hover{background:#fff}
 @media (prefers-reduced-motion:reduce){.hoy-n .hlive{animation:none}.hoy-n .hacc button,.hoy-n .hbtn{transition:none}.hoy-n .hacc button:hover,.hoy-n .hbtn:hover{transform:none}}
+
+/* Letra de Apple, fina (Facundo 20/10 21:59): títulos grandes y números en peso liviano */
+.hdr h1{font-weight:300;letter-spacing:-.03em}
+.ct h2,.hoy-l h2{font-weight:500;letter-spacing:-.01em}
+.hoy-l h2{font-size:16px}
+.hc .t b{font-size:22px;font-weight:300;letter-spacing:-.02em}
+.hc .nm{font-weight:500}
+.hc.dn{opacity:.55}
+.hc .sub{font-size:11.5px}
+.hc .ln{font-size:12px;padding:8px 0}
+.hoy-n .hhead h3{font-weight:500}
+.hoy-n .hhead span{display:inline-flex;align-items:center;gap:6px}
+.hoy-n .hwho b{font-size:22px;font-weight:300;letter-spacing:-.02em}
+.hoy-n .hwhen b{font-size:30px;font-weight:200;letter-spacing:-.03em}
+.hoy-n .hstats{grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--hl)}
+.hoy-n .hstats div{padding:10px 14px 10px}
+.hoy-n .hstats b{font-size:22px;font-weight:300;letter-spacing:-.02em}
+.hoy-n .hstats b.sm{font-size:16px;font-weight:400}
+.hoy-n>.hstats{border-top:1px solid var(--hl)}
+.hoy-n .hacc{grid-template-columns:repeat(4,1fr)}
+.hoy-n>.hrow{grid-template-columns:1fr}
+.hoy-n .hbtn{height:38px;font-size:13px}
+.ini-num .kp b{font-weight:300;letter-spacing:-.02em}
 /* celular */
 .ph{width:390px;height:844px;border-radius:44px;border:10px solid #272932;overflow:hidden;position:relative;box-sizing:content-box}
 .ph .in{padding:16px 16px 100px;display:flex;flex-direction:column;gap:14px;height:100%;overflow:hidden}
@@ -742,30 +765,20 @@ const HOY=[
  {h:'11:15',n:'Lucía Fernández',e:36,tipo:'Seguimiento',mod:'Online',st:'',obj:'Rendimiento deportivo',rest:'Sin restricciones',peso:'58,9 kg',cam:'−0,6',plan:'Deportista 2.400 · sem. 1 de 4',nov:'14 días seguidos cargando comidas'},
  {h:'15:00',n:'Rocío Medina',e:31,tipo:'Primera consulta',mod:'Consultorio',st:'first',obj:'Bajar peso',rest:'Alergia al maní',peso:'—',cam:'',plan:'Todavía sin plan',nov:'Pidió turno por la página pública'},
  {h:'17:30',n:'Paula Herrera',e:24,tipo:'Seguimiento',mod:'Online',st:'warn',obj:'Alimentación vegetariana',rest:'Vegetariana',peso:'55,2 kg',cam:'+0,2',plan:'Vegetariano 2.000 · sem. 2 de 4',nov:'No cargó comidas el fin de semana'}];
-let hoyStart=2;const hoyOpen=new Set([2]);let hoyTab=0;
-const hoyTag=s=>({done:'<span class="hq done">Hecha</span>',now:'<span class="hq now">Próxima</span>',first:'<span class="hq first">Primera vez</span>',warn:'<span class="hq warn">Cuota por vencer</span>'})[s]||'';
-function hoyCols(){return HOY.slice(hoyStart,hoyStart+3).map((p,k)=>{const i=hoyStart+k,on=hoyOpen.has(i);return `<div class="hc${on?' open':''}">
-  <button type="button" data-hoy="${i}" aria-expanded="${on}"><div class="t"><b>${p.h}</b>${hoyTag(p.st)}<span class="chev">${ic('chev',16)}</span></div><div class="nm">${p.n}</div><div class="sub">${p.e} años · ${p.tipo} · ${p.mod}</div></button>
+let hoyStart=2;const hoyOpen=new Set([2]);
+const hoyTag=s=>({done:'<span class="hq done">Hecha</span>',now:'<span class="hq now">Próxima</span>'})[s]||'';
+function hoyCols(){return HOY.slice(hoyStart,hoyStart+3).map((p,k)=>{const i=hoyStart+k,on=hoyOpen.has(i);return `<div class="hc${on?' open':''}${p.st==='done'?' dn':''}">
+  <button type="button" data-hoy="${i}" aria-expanded="${on}"><div class="t"><b>${p.h}</b>${hoyTag(p.st)}<span class="chev">${ic('chev',16)}</span></div><div class="nm">${p.n}</div><div class="sub">${p.tipo} · ${p.mod}</div></button>
   <div class="drop"><div><div class="in">
-   <div class="ln"><span>Objetivo</span><b>${p.obj}</b></div><div class="ln"><span>Restricciones</span><b>${p.rest}</b></div>
-   <div class="ln"><span>Peso</span><b>${p.peso}${p.cam?` <em class="${p.cam[0]==='+'?'up':'dn'}">${p.cam}</em>`:''}</b></div><div class="ln"><span>Plan</span><b>${p.plan}</b></div>
-   <div class="ln"><span>Novedad</span><b>${p.nov}</b></div></div></div></div></div>`;}).join('');}
+   <div class="ln"><span>Objetivo</span><b>${p.obj}</b></div><div class="ln"><span>Cuidar</span><b>${p.rest}</b></div><div class="ln"><span>Novedad</span><b>${p.nov}</b></div></div></div></div></div>`;}).join('');}
 function hoyPager(){return `<span>${hoyStart+1}–${Math.min(hoyStart+3,HOY.length)} de ${HOY.length}</span><button type="button" data-hoypg="-1" aria-label="Ver consultas anteriores"${hoyStart===0?' disabled':''}>${ic('back',14)}</button><button type="button" data-hoypg="1" class="fw" aria-label="Ver más consultas"${hoyStart+3>=HOY.length?' disabled':''}>${ic('back',14)}</button>`;}
-function hoyLeft(){return `<section class="hoy-l"><div class="hh"><h2>Consultas de hoy</h2><span class="hcnt">6 en total · 2 hechas</span><div class="hpager">${hoyPager()}</div></div><div class="hcols">${hoyCols()}</div></section>`;}
-function hoyNext(){const tab=(k,l)=>`<button type="button" role="tab" data-hoytab="${k}" aria-selected="${hoyTab===k}">${l}</button>`;
- const pane=k=>`class="hpane${hoyTab===k?' on':''}"`;
- return `<section class="hoy-n">
-  <div class="hhead"><h3>Consultas del día</h3><span>Próxima · 3 de 6</span></div>
-  <div class="hwho"><span class="av">SG</span><div><b>Sofía Gómez</b><span>34 años · Seguimiento · Consultorio</span></div><div class="hwhen"><b>10:30</b><small><i class="hlive"></i>en 20 min</small></div></div>
-  <div class="htabs" role="tablist">${tab(0,'Resumen')}${tab(1,'Novedades <b>2</b>')}${tab(2,'Plan')}</div>
-  <div class="hpanes">
-   <div ${pane(0)}><div class="hchips"><span class="hchip al">Celíaca</span><span class="hchip al">Sin lactosa</span><span class="hchip">Bajar grasa</span></div>
-    <div class="hstats"><div><small>Peso</small><b>68,4</b><em>−1,2</em></div><div><small>Adherencia</small><b>86%</b></div><div><small>Consultas</small><b>7</b></div><div><small>Cuota</small><b>Al día</b></div></div></div>
-   <div ${pane(1)}><div class="hnews"><div><i></i>Subió análisis nuevos: ferritina baja<small>ayer</small></div><div><i></i>Cargó 18 comidas esta semana, 3 con foto<small>semana</small></div><div><i></i>Escribió: «¿Puedo cambiar la merienda?»<small>lun</small></div></div></div>
-   <div ${pane(2)}><div class="hnews"><div><i></i>Sin gluten 1.800 kcal · semana 3 de 4<small>vence 28/10</small></div><div><i></i>Quedó pendiente: meriendas con proteína<small>7/10</small></div><div><i></i>Pidió cambiar la cena del jueves<small>sin responder</small></div></div></div>
-  </div>
-  <div class="hacc">${[['file','Ficha','ficha'],['pen','Notas','ficha'],['clip','Plan','planes'],['chat','Mensaje','mensajes'],['lab','Análisis','ficha']].map(([i,l,g])=>`<button type="button" data-go="${g}"><span class="hi">${ic(i,14)}</span>${l}</button>`).join('')}</div>
-  <div class="hrow"><span class="hbtn ink">${ic('play',16)}Empezar consulta</span><span class="hbtn soft" data-go="ficha">${ic('file',16)}Ver ficha completa</span></div>
+function hoyLeft(){return `<section class="hoy-l"><div class="hh"><h2>Consultas de hoy</h2><span class="hcnt">2 de 6 hechas</span><div class="hpager">${hoyPager()}</div></div><div class="hcols">${hoyCols()}</div></section>`;}
+function hoyNext(){return `<section class="hoy-n">
+  <div class="hhead"><h3>Consultas del día</h3><span><i class="hlive"></i>Próxima en 20 min</span></div>
+  <div class="hwho"><span class="av">SG</span><div><b>Sofía Gómez</b><span>Seguimiento · Consultorio</span></div><div class="hwhen"><b>10:30</b></div></div>
+  <div class="hstats"><div><small>Peso</small><b>68,4</b><em>−1,2</em></div><div><small>Adherencia</small><b>86%</b></div><div><small>Cuidar</small><b class="sm">Celíaca</b></div></div>
+  <div class="hacc">${[['file','Ficha','ficha'],['pen','Notas','ficha'],['clip','Plan','planes'],['chat','Mensaje','mensajes']].map(([i,l,g])=>`<button type="button" data-go="${g}"><span class="hi">${ic(i,14)}</span>${l}</button>`).join('')}</div>
+  <div class="hrow"><span class="hbtn ink">${ic('play',16)}Empezar consulta</span></div>
  </section>`;}
 
 function inicio(){return `
@@ -1688,7 +1701,6 @@ document.addEventListener('click',e=>{
  const T=s=>e.target.closest(s);let t;
  if(t=T('[data-hoy]')){const i=+t.dataset.hoy,on=!hoyOpen.has(i);on?hoyOpen.add(i):hoyOpen.delete(i);t.parentElement.classList.toggle('open',on);t.setAttribute('aria-expanded',String(on));return;}
  if(t=T('[data-hoypg]')){hoyStart=Math.max(0,Math.min(HOY.length-3,hoyStart+3*t.dataset.hoypg));const c=t.closest('.hoy-l');c.querySelector('.hcols').innerHTML=hoyCols();c.querySelector('.hpager').innerHTML=hoyPager();return;}
- if(t=T('[data-hoytab]')){hoyTab=+t.dataset.hoytab;const n=t.closest('.hoy-n');n.querySelectorAll('[data-hoytab]').forEach(b=>b.setAttribute('aria-selected',String(b===t)));n.querySelectorAll('.hpane').forEach((p,k)=>p.classList.toggle('on',k===hoyTab));return;}
  if(T('[data-psearch]'))return;
  if(planMenu&&!T('.pwrap')){planMenu=false;const m=document.querySelector('.pmenu');if(m){m.classList.remove('open');document.querySelector('[data-psel]').setAttribute('aria-expanded','false');}}
  if(t=T('[data-psel]')){planMenu=!planMenu;t.setAttribute('aria-expanded',String(planMenu));const m=t.nextElementSibling;m.classList.toggle('open',planMenu);if(planMenu)setTimeout(()=>m.querySelector('input').focus(),60);return;}
