@@ -3,12 +3,14 @@ import { api } from '../../api/client';
 import { schedulingApi, type SchedulingWorkspaceSnapshot } from '../../api/scheduling';
 import { friendlyError } from '../../lib/error-messages';
 import { schedulingDefaultSettings, type SchedulingBooking, type SchedulingSettings } from '../../types/scheduling';
+import { bocetoWorkspace, panelDemoEnabled } from '../../lib/panel-boceto-demo';
 
 export const CONNECTION_MISSING = 'Faltan las claves en el servidor. No hay una conexión activa.';
 
 export function usePanelScheduling() {
-  const [snapshot, setSnapshot] = useState<SchedulingWorkspaceSnapshot | null>(null);
-  const [config, setConfig] = useState<SchedulingSettings>(schedulingDefaultSettings);
+  const demo = panelDemoEnabled();
+  const [snapshot, setSnapshot] = useState<SchedulingWorkspaceSnapshot | null>(() => demo ? bocetoWorkspace(new Date()) : null);
+  const [config, setConfig] = useState<SchedulingSettings>(() => demo ? bocetoWorkspace(new Date()).profile.config : schedulingDefaultSettings);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
@@ -17,6 +19,11 @@ export function usePanelScheduling() {
   const [patientMore, setPatientMore] = useState(false);
 
   const load = useCallback((signal?: AbortSignal) => {
+    if (panelDemoEnabled()) {
+      const sample = bocetoWorkspace(new Date());
+      setSnapshot(sample); setConfig(sample.profile.config); setError(''); setPatients([]); setBookingMore(false); setPatientMore(false);
+      return Promise.resolve();
+    }
     setError('');
     return Promise.all([
       schedulingApi.workspace(0, signal),
@@ -41,6 +48,12 @@ export function usePanelScheduling() {
   }, [load]);
 
   async function save(next: SchedulingSettings, message = 'Cambios guardados.') {
+    if (panelDemoEnabled()) {
+      setConfig(next);
+      setSnapshot(old => old ? { ...old, profile: { ...old.profile, config: next, revision: old.profile.revision } } : old);
+      setStatus(message);
+      return true;
+    }
     setBusy(true); setStatus('');
     try {
       await schedulingApi.save(snapshot?.profile.revision ?? 0, next);

@@ -4,6 +4,8 @@ import { crmWorkApi } from '../../api/crm-work';
 import { schedulingApi, type SchedulingWorkspaceSnapshot } from '../../api/scheduling';
 import type { BillingBoard } from '../../types/fees';
 import type { CrmWorkKind, CrmWorkResponse } from '../../types/crm-work';
+import { bocetoBillingBoard, bocetoHomeWork, bocetoWorkspace, panelDemoEnabled } from '../../lib/panel-boceto-demo';
+import { HOME_ZONE } from '../../lib/panel-home';
 
 export type HomeFilter = CrmWorkKind | 'reservas' | '';
 /** Agota la paginación antes de presentar un número de reservas como total. */
@@ -36,6 +38,11 @@ export function useHomeData(today?: string) {
   const [schedulingError, setSchedulingError] = useState(false);
   const refresh = () => { setCursor(undefined); setRevision(value => value + 1); };
   useEffect(() => {
+    if (panelDemoEnabled()) {
+      const day = today ?? new Intl.DateTimeFormat('en-CA', { timeZone: HOME_ZONE }).format(new Date());
+      setData(bocetoHomeWork(day)); setLoading(false); setError('');
+      return;
+    }
     const controller = new AbortController();
     setLoading(true); setError('');
     // No borrar los contadores durante un cambio de pestaña; nunca reutilizar las filas del filtro anterior.
@@ -46,6 +53,11 @@ export function useHomeData(today?: string) {
     return () => controller.abort();
   }, [kind, cursor, revision, today]);
   useEffect(() => {
+    if (panelDemoEnabled()) {
+      const day = today ?? new Intl.DateTimeFormat('en-CA', { timeZone: HOME_ZONE }).format(new Date());
+      setBoard(bocetoBillingBoard(day)); setBillingError(false); setScheduling(bocetoWorkspace(new Date())); setSchedulingError(false);
+      return;
+    }
     const controller = new AbortController();
     setBoard(null); setBillingError(false); setScheduling(null); setSchedulingError(false);
     api.getBillingBoard().then(result => { if (!controller.signal.aborted) setBoard(result.board); }).catch(() => { if (!controller.signal.aborted) setBillingError(true); });

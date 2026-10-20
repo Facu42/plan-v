@@ -29,6 +29,8 @@ describe('celular de Agenda y Cobranzas', () => {
   it('fija el menú inferior y separa cada turno con su etiqueta', () => {
     expect(shell).toMatch(/\.nv-app\.nv-pro\.pn-panel \.nv-tabbar \{ position:fixed; z-index:35;/);
     expect(shell).toMatch(/padding-bottom:calc\(108px \+ env\(safe-area-inset-bottom\)\)/);
+    expect(shell).toMatch(/padding-bottom:calc\(180px \+ env\(safe-area-inset-bottom\)\)/);
+    expect(fase5).toMatch(/repeat\(var\(--p5-rows\),64px\)/);
     expect(fase5).toMatch(/\.pn-panel \.p5-turn \{ display:flex; align-items:center; gap:10px; min-height:44px;/);
     expect(fase5).toMatch(/\.pn-panel \.p5-chip \{/);
     expect(fase5).toMatch(/min-height:44px; min-width:44px;/);

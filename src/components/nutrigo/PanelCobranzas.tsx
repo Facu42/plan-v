@@ -5,6 +5,7 @@ import { billingMovements, billingSnapshot, filterMovements, incomeMonths, movem
 import { localBillingDate } from '../../billing';
 import type { BillingBoard } from '../../types/fees';
 import { Icon } from '../shared/Icon';
+import { bocetoBillingBoard, panelDemoEnabled } from '../../lib/panel-boceto-demo';
 import { feeErrorMessage, replaceLedger } from './cobranzas-utils';
 import { PatientPanel } from './ShowroomCobranzas';
 import './panel-fase5.css';
@@ -62,13 +63,14 @@ export function PanelCobranzasView({ board, today, filter, reminders, onFilter, 
 }
 
 export function PanelCobranzas({ filter = 'todas', reminders = false, selectedId, onRemind }: { filter?: 'deben' | 'todas'; reminders?: boolean; selectedId?: string; onRemind?: (patientId: string) => void }) {
-  const [board, setBoard] = useState<BillingBoard | null>(null);
+  const [board, setBoard] = useState<BillingBoard | null>(() => panelDemoEnabled() ? bocetoBillingBoard(localBillingDate()) : null);
   const [error, setError] = useState('');
   const [movement, setMovement] = useState<Filter>(filter === 'deben' ? 'vencido' : 'todos');
   const [openId, setOpenId] = useState<string | null>(selectedId || null);
   const [picking, setPicking] = useState(false);
   const today = localBillingDate();
   const load = useCallback(() => {
+    if (panelDemoEnabled()) { setError(''); setBoard(bocetoBillingBoard(localBillingDate())); return; }
     setError(''); setBoard(null);
     api.getBillingBoard().then(result => setBoard(result.board)).catch(reason => setError(feeErrorMessage(reason, 'No pudimos cargar las cobranzas.')));
   }, []);

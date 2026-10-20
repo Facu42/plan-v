@@ -28,7 +28,7 @@ export function panelNavGroups(patients: readonly Patient[], unread: number, adm
       { label: 'Página pública', icon: 'contact', href: '/crm/agenda?agenda=publica' },
     ] },
     { title: 'Acompañamiento', items: [
-      { label: 'Asistente IA', icon: 'sparkle', href: '/crm/desarrollo?modulo=asistente-ia' },
+      { label: 'Asistente IA', icon: 'sparkle', href: '/crm/proximamente?modulo=asistente-ia' },
       { label: 'Seguimiento', icon: 'heart', href: '/crm/seguimiento' },
       { label: 'Mensajes', icon: 'message', href: '/crm/mensajes', children: [
         { label: 'Todas', href: '/crm/mensajes' }, { label: 'Sin leer', href: '/crm/mensajes?filtro=unread', count: unread },
@@ -47,12 +47,11 @@ export function panelNavGroups(patients: readonly Patient[], unread: number, adm
     ] },
     { title: 'Recursos', items: [
       { label: 'Biblioteca', icon: 'pin', href: '/crm/biblioteca?biblioteca=recursos' },
-      { label: 'Centro de ayuda', icon: 'message', href: '/crm/desarrollo?modulo=ayuda' },
+      { label: 'Centro de ayuda', icon: 'message', href: '/crm/proximamente?modulo=ayuda' },
     ] },
     { title: 'Cuenta', items: [
-      { label: 'Equipo', icon: 'users', href: '/crm/desarrollo?modulo=equipo' },
+      { label: 'Equipo', icon: 'users', href: '/crm/proximamente?modulo=equipo' },
       { label: 'Configuración', icon: 'grid', href: '/crm/desarrollo?modulo=configuracion' },
-      { label: 'Todas las funciones', icon: 'grid', href: '/crm/desarrollo' },
       ...(admin ? [{ label: 'Panel del servicio', icon: 'wallet' as const, href: '/crm/servicio' }] : []),
     ] },
   ];

@@ -8,6 +8,7 @@ import type { SchedulingWorkspaceSnapshot } from '../../api/scheduling';
 import { api } from '../../api/client';
 import { careApi } from '../../api/care';
 import { formatPesos } from '../../fees';
+import { bocetoHomePatients, panelDemoEnabled } from '../../lib/panel-boceto-demo';
 import { HOME_ZONE, copyHomeBookingLink, homeAppointments, homeAttention, homeDateLabel, homeDay, homeMonth, homeNews, homePendingTotal, patientHref, patientMessageHref, type HomeAppointment } from '../../lib/panel-home';
 import { Icon, type IconName } from '../shared/Icon';
 import { healthFactLabel } from './intake-review';
@@ -151,5 +152,6 @@ export function PanelHome({ patients, now, onOpen }: { patients: Patient[]; now:
     try { await copyHomeBookingLink(page, window.location.origin, text => navigator.clipboard.writeText(text)); setCopyStatus('Link de reserva copiado.'); }
     catch { setCopyStatus('No pudimos copiar el enlace. Abrí Página pública para copiarlo.'); }
   };
-  return <PanelHomeView {...state} patients={patients} now={now} onOpen={onOpen} onCopy={() => void copy()} copyStatus={copyStatus} />;
+  const shown = panelDemoEnabled() && state.scheduling ? bocetoHomePatients(state.scheduling) : patients;
+  return <PanelHomeView {...state} patients={shown} now={now} onOpen={onOpen} onCopy={() => void copy()} copyStatus={copyStatus} />;
 }

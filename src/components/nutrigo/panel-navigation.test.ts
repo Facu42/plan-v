@@ -15,6 +15,14 @@ describe('menú profesional', () => {
     expect(groups.map(g => g.title)).toEqual(['Gestión', 'Acompañamiento', 'Plan', 'Recursos', 'Cuenta']);
     const children = groups[0].items.find(i => i.label === 'Pacientes')!.children!;
     expect(children.map(c => c.count)).toEqual([1, undefined, 1, 1]);
+    const labels = groups.flatMap(g => g.items).map(i => i.label);
+    expect(labels).toEqual(expect.arrayContaining(['Recetas', 'Equivalencias', 'Modelos', 'Biblioteca', 'Centro de ayuda']));
+    expect(groups.flatMap(g => g.items).map(i => i.href)).toEqual(expect.arrayContaining([
+      '/crm/proximamente?modulo=asistente-ia',
+      '/crm/proximamente?modulo=ayuda',
+      '/crm/proximamente?modulo=equipo',
+    ]));
+    expect(labels).not.toContain('Todas las funciones');
     expect(groups.flatMap(g => g.items).some(i => i.href === '/crm/servicio')).toBe(false);
     expect(panelNavGroups([], 0, true).flatMap(g => g.items).some(i => i.href === '/crm/servicio')).toBe(true);
   });
