@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { billingSnapshot } from './panel-billing';
+import { buildPanelAgendaEvents, hourWindow, weekDays } from './panel-agenda';
 import { homeAppointments } from './panel-home';
 import { bocetoBillingBoard, bocetoHomePatients, bocetoHomeWork, bocetoWorkspace, panelDemoEnabled } from './panel-boceto-demo';
 
@@ -35,5 +36,13 @@ describe('datos de ejemplo del boceto', () => {
     const today = homeAppointments(bocetoHomePatients(bocetoWorkspace(now)), now);
     expect(today.today.map((item) => item.patient.name)).toEqual(['Valentina Sosa', 'Brenda Acosta', 'Paula Herrera']);
     expect(bocetoHomeWork('2026-10-19').counts.fee_overdue).toBe(2);
+  });
+
+  it('arma la grilla de 8 a 20, como el boceto', () => {
+    const now = new Date('2026-10-19T15:00:00Z');
+    const snapshot = bocetoWorkspace(now);
+    const events = buildPanelAgendaEvents([], snapshot.profile.config, snapshot.bookings, now, weekDays('2026-10-19'));
+    expect(hourWindow(events)).toEqual({ start: 8, end: 20 });
+    expect(events.some((event) => event.title === 'Bloqueado' && event.subtitle === 'Hospital')).toBe(true);
   });
 });

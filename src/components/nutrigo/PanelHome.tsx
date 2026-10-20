@@ -49,14 +49,15 @@ function PreparedAppointment({ entry, now, onOpen }: { entry: HomeAppointment | 
     return () => media.removeEventListener('change', update);
   }, []);
   const id = entry?.patient.id;
+  const demoCard = panelDemoEnabled();
   useEffect(() => {
-    if (!id) return;
+    if (!id || demoCard) return;
     const controller = new AbortController(); setIntake(null); setCare(null); setFailed(false);
     // Los endpoints existentes conservan el alcance profesional y los permisos clínicos.
     api.getProfessionalIntake(id, { signal: controller.signal }).then(view => { if (!controller.signal.aborted) setIntake(view); }).catch(() => { if (!controller.signal.aborted) setFailed(true); });
     careApi.snapshot(id, true, controller.signal).then(view => { if (!controller.signal.aborted) setCare(view); }).catch(() => { if (!controller.signal.aborted) setFailed(true); });
     return () => controller.abort();
-  }, [id, revision]);
+  }, [id, revision, demoCard]);
   if (!entry) return <section className="ph-next"><h2>Próxima consulta</h2><p>No hay una próxima consulta programada.</p><HomeLink href="/crm/agenda" onOpen={onOpen} className="ph-button ph-ink">Abrir agenda</HomeLink></section>;
   const { patient, at } = entry;
   const minutes = Math.ceil((at.getTime() - now.getTime()) / 60_000);
@@ -65,9 +66,9 @@ function PreparedAppointment({ entry, now, onOpen }: { entry: HomeAppointment | 
   const weight = weights[0];
   return <section className="ph-next" aria-label="Próxima consulta preparada"><div className="ph-chips"><span>Próxima consulta · {when}</span><span>{formatTime(at)} · {channelLabel(entry.channel)}</span></div>
     <div className="ph-person"><span className="ph-avatar">{patient.initials}</span><div><h2>{patient.name}</h2><p>{patient.goal || 'Objetivo por definir'}</p></div></div>
-    <details className="ph-preparation" open={preparedOpen} onToggle={event => setPreparedOpen(event.currentTarget.open)}><summary>Ver preparación de la consulta</summary><div className="ph-health"><span><b>Alergias:</b> {intake ? healthFactLabel(intake.intake.payload.allergies, 'alergias') : failed ? 'No disponible' : 'Consultando…'}</span><span><b>Restricciones:</b> {intake ? healthFactLabel(intake.intake.payload.restrictions, 'restricciones') : failed ? 'No disponible' : 'Consultando…'}</span></div>
-    <div className="ph-facts"><div><small>Último peso</small><b>{weight ? `${weight.value_numeric.toLocaleString('es-AR')} ${weight.unit}` : care ? 'Sin dato' : failed ? 'No disponible' : 'Consultando…'}</b></div><div><small>Adherencia</small><b>{patient.adherence_score}%</b><small>registrada</small></div><div><small>Quedó pendiente</small><span>{patient.next_focus || 'Sin pendientes anotados'}</span></div></div></details>
-    <div className="ph-next-actions"><HomeLink href={patientHref(patient, 'notas')} onOpen={onOpen} className="ph-button ph-ink">Preparar consulta</HomeLink><HomeLink href={patientHref(patient)} onOpen={onOpen} className="ph-button ph-glass">Ver ficha</HomeLink>{failed && <button type="button" className="ph-retry" onClick={() => setRevision(value => value + 1)}>Reintentar datos</button>}</div>
+    <details className="ph-preparation" open={preparedOpen} onToggle={event => setPreparedOpen(event.currentTarget.open)}><summary>Ver preparación de la consulta</summary>{demoCard ? <p>Sin ficha vinculada en la demostración.</p> : <div className="ph-health"><span><b>Alergias:</b> {intake ? healthFactLabel(intake.intake.payload.allergies, 'alergias') : failed ? 'No disponible' : 'Consultando…'}</span><span><b>Restricciones:</b> {intake ? healthFactLabel(intake.intake.payload.restrictions, 'restricciones') : failed ? 'No disponible' : 'Consultando…'}</span></div>}
+    <div className="ph-facts"><div><small>Último peso</small><b>{demoCard ? 'Sin dato' : weight ? `${weight.value_numeric.toLocaleString('es-AR')} ${weight.unit}` : care ? 'Sin dato' : failed ? 'No disponible' : 'Consultando…'}</b></div><div><small>Adherencia</small><b>{patient.adherence_score}%</b><small>registrada</small></div><div><small>Quedó pendiente</small><span>{patient.next_focus || 'Sin pendientes anotados'}</span></div></div></details>
+    <div className="ph-next-actions"><HomeLink href={patientHref(patient, 'notas')} onOpen={onOpen} className="ph-button ph-ink">Preparar consulta</HomeLink><HomeLink href={patientHref(patient)} onOpen={onOpen} className="ph-button ph-glass">Ver ficha</HomeLink>{failed && !demoCard && <button type="button" className="ph-retry" onClick={() => setRevision(value => value + 1)}>Reintentar datos</button>}</div>
   </section>;
 }
 

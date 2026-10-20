@@ -1,5 +1,7 @@
 # Coordinación entre agentes (Claude, Codex, Cursor)
 
+20/10 · Cursor · En [PR #158](https://github.com/Facu42/plan-v/pull/158) las pantallas con boceto toman sus medidas (menú 288 px, filas de agenda de 64 px, tarjetas y letras del archivo). El menú incluye Recetas, Equivalencias, Modelos y Recursos. Lo que no tiene pantalla abre «Próximamente». La demo local carga turnos, reservas, cuotas e ingresos parecidos al boceto; producción no. 3.198 pruebas y 2 omitidas, tipos en verde. No se toca `codex/panel-nutri-fase-6`. Sin merge y sin producción.
+
 20/10 · Cursor · Se trajo `origin/main` (`f51f413`) a `cursor/arreglo-mobile-fase5` ([PR #158](https://github.com/Facu42/plan-v/pull/158)) sin rebase. La fase 5 sigue integrada a main. Las seis correcciones del boceto quedaron en esta rama: codo del submenú, flecha de 30 px, sin la barra vieja ni título repetido, contraste de «Nueva consulta» y «Registrar cobro», oscuro por defecto y fecha con «de» en minúscula. No se toca `codex/panel-nutri-fase-6`. Sin merge y sin producción. Pruebas: 3.193 aprobadas y 2 omitidas, en 500 archivos. Tipos en verde. Capturas en `design/panel-nutri/fase-5/`.
 
 19/10 · Cursor · Fase 5 (Agenda, Cobranzas y Página pública) en `cursor/panel-nutri-fase-5`, [PR #153](https://github.com/Facu42/plan-v/pull/153). Facundo autorizó juntarla. La fase 4 ya está en main por [PR #154](https://github.com/Facu42/plan-v/pull/154). Mercado Pago y Google Calendar muestran «Conectar». WhatsApp salió del panel: los avisos van por la app. Sin SQL remoto.
@@ -32,7 +34,7 @@ visto bueno de Facundo.
 | Lado paciente que Codex no tocó: ánimo y síntomas, rachas, lista del súper por comercio y compartir, avisos de recurso asignado y plan nuevo, push | Claude | ramas `claude/*` | Ánimo y síntomas publicado (PR #112, 14/10). Recorridos de punta a punta y monitor en main (#114, 15/10). Aviso de recurso indicado en PR propio. El resto, por empezar |
 | Alternativas por comida (la paciente elige) | Claude | — | **Espera a que #108 esté en `main`** (usa sus intercambios) |
 | Página pública con paquetes, resumen de la mañana para la nutri, Centro de ayuda | — | — | **En espera.** Codex tiene piezas parecidas; Facundo decide cuál sigue |
-| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (fases 1 a 4 y fase 6); Cursor (fase 5 y corrección del menú) | Fases 1 a 5 en main. Corrección del menú en `cursor/arreglo-mobile-fase5`, [PR #158](https://github.com/Facu42/plan-v/pull/158). Fase 6 en `codex/panel-nutri-fase-6`, sin tocar. [Plan](panel-nutri-rediseno/plan.md) | Fase 5 integrada por #153. La corrección del boceto está en #158, sin juntar. Una rama y un PR por fase; no se usa el PR #147 |
+| Rediseño del panel de la nutri (bocetos aprobados y plan por fases) | Claude (bocetos y plan); Codex (fases 1 a 4 y fase 6); Cursor (fase 5 y corrección del menú) | Fases 1 a 5 en main. Medidas, menú y datos de ejemplo en `cursor/arreglo-mobile-fase5`, [PR #158](https://github.com/Facu42/plan-v/pull/158). Fase 6 en `codex/panel-nutri-fase-6`, sin tocar. [Plan](panel-nutri-rediseno/plan.md) | Fase 5 integrada por #153. La igualación al boceto está en #158, sin juntar. Una rama y un PR por fase; no se usa el PR #147 |
 
 ## 2. Reglas para no pisarse
 

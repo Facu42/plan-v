@@ -156,7 +156,7 @@ export function PanelAgenda({ patients, now, section, onManage }: { patients: Pa
   const loaded = Boolean(scheduling.snapshot);
   const days = view === 'dia' ? [anchor] : weekDays(anchor);
   const range = view === 'mes' ? monthGrid(anchor) : days;
-  const events = useMemo(() => loaded ? buildPanelAgendaEvents(patients, config, scheduling.snapshot?.bookings ?? [], now, range) : [], [loaded, patients, config, scheduling.snapshot, now, range]);
+  const events = useMemo(() => loaded ? buildPanelAgendaEvents(demo ? [] : patients, config, scheduling.snapshot?.bookings ?? [], now, range) : [], [loaded, demo, patients, config, scheduling.snapshot, now, range]);
   const pending = (scheduling.snapshot?.bookings ?? []).filter(booking => booking.status === 'requested');
   useUnsavedChanges(Boolean(draft), scheduling.busy);
   useEffect(() => {

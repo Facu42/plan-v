@@ -1,5 +1,7 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-20)
 
+20/10 · Cursor · Inicio, Agenda, Cobranzas y Página pública quedaron con las medidas del boceto en [PR #158](https://github.com/Facu42/plan-v/pull/158). El menú tiene Recetas, Equivalencias, Modelos y Recursos; lo que no tiene pantalla dice «Próximamente». La demo muestra turnos, reservas, cuotas e ingresos parecidos al dibujo. Capturas en `design/panel-nutri/fase-5/`. 3.198 pruebas y 2 omitidas, tipos en verde. La fase 6 no se tocó. Sin merge y sin producción.
+
 20/10 · Cursor · El menú del consultorio quedó como el boceto en [PR #158](https://github.com/Facu42/plan-v/pull/158): codo curvo por opción, flecha de 30 px, sin la barra vieja ni título repetido en Agenda, Cobranzas y Mensajes, botones legibles, oscuro por defecto y fecha con «de» en minúscula. Capturas de 1440×900 y 390×844, claro y oscuro, al lado del boceto, en `design/panel-nutri/fase-5/`. 3.193 pruebas y 2 omitidas, tipos en verde. La fase 5 sigue integrada a main. No se toca la fase 6. Sin merge y sin producción.
 
 19/10 · Cursor · En el celular de Agenda y Cobranzas el título quedó en la barra de arriba, una sola vez. Las capturas nuevas de 390, claro y oscuro, están en `design/panel-nutri/fase-5/`, dentro del panel real y al lado del boceto de escritorio. 3.192 pruebas y 2 omitidas, tipos en verde. Sigue en [PR #158](https://github.com/Facu42/plan-v/pull/158), borrador contra main. No se junta.

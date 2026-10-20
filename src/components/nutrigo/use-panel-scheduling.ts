@@ -10,7 +10,7 @@ export const CONNECTION_MISSING = 'Faltan las claves en el servidor. No hay una 
 export function usePanelScheduling() {
   const demo = panelDemoEnabled();
   const [snapshot, setSnapshot] = useState<SchedulingWorkspaceSnapshot | null>(() => demo ? bocetoWorkspace(new Date()) : null);
-  const [config, setConfig] = useState<SchedulingSettings>(() => demo ? bocetoWorkspace(new Date()).profile.config : schedulingDefaultSettings);
+  const [config, setConfig] = useState<SchedulingSettings>(() => demo ? bocetoWorkspace(new Date()).profile.config : schedulingDefaultSettings());
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);

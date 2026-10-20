@@ -138,7 +138,8 @@
   .nv-app.nv-pro.pn-panel .nv-sidebar a { min-height:44px; }
   .nv-app.nv-pro.pn-panel .nv-main { padding:16px 16px calc(120px + env(safe-area-inset-bottom)); overflow:visible; gap:14px; }
   .nv-app.nv-pro.pn-panel.nv-agenda-page .nv-main { padding-bottom:calc(180px + env(safe-area-inset-bottom)); }
-  .pn-panel.nv-agenda-page .p5-side { scroll-margin-bottom:96px; }
+  .pn-panel.nv-agenda-page .p5-side,
+  .pn-panel.nv-agenda-page #pn-reservas { scroll-margin-bottom:120px; }
   .pn-panel .nv-mobile-account { position:relative; margin-top:10px; }
   .pn-panel .nv-mobile-account .nv-header-menu { justify-content:space-between; }
   .pn-panel .nv-mobile-account .nv-user-menu { position:fixed; left:16px; right:16px; bottom:82px; top:auto; max-height:65dvh; overflow:auto; }

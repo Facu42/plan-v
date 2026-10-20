@@ -241,10 +241,29 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main `6697d28` |
 | 4 | Codex | `codex/panel-nutri-fase-4` · [PR #154](https://github.com/Facu42/plan-v/pull/154) | Integrada a main |
 | 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Integrada a main `c09466b`, junto con la fase 4 |
-| Corrección del menú y de lo que no coincide | Cursor | `cursor/arreglo-mobile-fase5` · [PR #158](https://github.com/Facu42/plan-v/pull/158) | Hecha en #158, sin juntar. La fase 6 sigue en Codex (`codex/panel-nutri-fase-6`) |
+| Corrección del menú y de lo que no coincide | Cursor | `cursor/arreglo-mobile-fase5` · [PR #158](https://github.com/Facu42/plan-v/pull/158) | Medidas, menú completo, Próximamente y datos de ejemplo en la demo. Sin juntar. La fase 6 sigue en Codex (`codex/panel-nutri-fase-6`) |
 | 6 a 9 | Por coordinar | — | Pendientes, una rama y un PR por fase |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-20 02:30 · Cursor · Medidas del boceto, menú completo y datos de ejemplo
+- Hecho: Inicio, Agenda, Cobranzas y Página pública usan las medidas del boceto en escritorio de 1440×900. El menú mide 288 px, el contenido tiene 30 px a los lados, las tarjetas tienen radio de 22 px y la grilla de la agenda tiene filas de 64 px desde las 08:00. En el celular el margen es de 16 px. En Agenda el menú inferior no tapa «Por confirmar»: al bajar, el bloque queda unos 44 px por encima.
+- Menú: están las entradas del boceto, también Recetas, Equivalencias, Modelos y Recursos. Asistente IA, Centro de ayuda y Equipo abren una página «Próximamente» con el diseño del panel. Recetas, Equivalencias, Modelos y Biblioteca siguen abriendo las pantallas que ya andan. Seguimiento, Mensajes y Progreso no se rehicieron: son de la fase 6.
+- Datos de ejemplo: solo en la demostración local. Nunca en producción. Hay turnos de la semana, dos reservas por confirmar, tipos de consulta, movimientos, las cuotas vencidas de Camila y Brenda, y los ingresos que cierran en $842.000 cobrados, $288.000 por cobrar y $108.000 vencidos.
+- Diferencias que quedan, y por qué:
+  - La fecha y el día marcado son los de hoy (lunes 19 de octubre, de noche), no el miércoles 21 congelado del boceto.
+  - En Cobranzas el porcentaje da 75 % y el boceto dice 74 %. Es el redondeo de 842.000 sobre 1.130.000.
+  - La tabla de movimientos lista todo el libro, no solo las seis filas del dibujo.
+  - Los tipos de consulta dicen los minutos y si es consultorio u online. El boceto, en algunos, dice «4 seguimientos». Florencia no dice «Reprogramada».
+  - Las reservas por confirmar tienen «Vincular ficha» y confirmar o cambiar. El boceto solo dibuja Confirmar. Se conserva la función.
+  - La página pública no tiene foto ni un campo aparte de matrícula. La matrícula está en el contacto. No hay un interruptor por servicio.
+  - En Inicio, «Por cobrar del mes» suma también lo vencido del mes ($396.000). En Cobranzas eso está partido: $288.000 por cobrar y $108.000 vencido. Las pacientes activas de la demo son 17, no 38. Las consultas ya pasadas del mes quedan en cero porque los turnos de ejemplo son de esta semana.
+  - Recetas, Equivalencias, Modelos y Biblioteca no van a «Próximamente»: esas pantallas ya existen. Asistente IA, Centro de ayuda y Equipo sí.
+- Cómo: se aplicaron break-ui, frontend-patterns, frontend-a11y y verification-loop. Capturas nuevas en `design/panel-nutri/fase-5/`: 16 comparaciones (1440 y 390, claro y oscuro) y el menú lateral con Recursos a la vista.
+- Pruebas: 3.198 aprobadas y 2 omitidas, en 501 archivos. Tipos en verde. No hay script de lint. El intento de dejar la fila de la agenda en 48 px lo atrapó la prueba y se volvió a 64 px.
+- Rama y PR: `cursor/arreglo-mobile-fase5`, [PR #158](https://github.com/Facu42/plan-v/pull/158), borrador contra main. No se tocó `codex/panel-nutri-fase-6`. No se junta. No hay migración ni despliegue.
+- Falta: los controles remotos. La fase 6 sigue en Codex.
+- Próximo paso exacto: no juntar #158.
 
 ### 2026-10-20 01:15 · Cursor · Menú y tema como el boceto
 - Hecho: las seis correcciones de la revisión de Claude. Cada opción del submenú tiene su codo curvo. La flecha de plegar mide 30 px, tiene sombra, crece al pasar el mouse, baja al apretar y el ícono gira al plegar. Agenda, Cobranzas y Mensajes no muestran la barra «Pacientes, Ficha, Plan» ni repiten el título. «Nueva consulta» y «Registrar cobro» se leen en oscuro sobre el lima. El consultorio arranca en oscuro y desde Apariencia se puede pasar a claro. La fecha del Inicio lleva «de» en minúscula, como «Miércoles 21 de octubre».

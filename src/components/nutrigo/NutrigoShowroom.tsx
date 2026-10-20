@@ -301,7 +301,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
   const { moreCurrent: moreSection } = tabBarState(page, tabs, moreItems);
   const moreCurrent = publicPage || moreSection;
   const barLabel = publicPage ? 'Página pública' : (figmaDetail?.title ?? libraryRecipeTitle ?? PAGE_LABELS[page]);
-  const showHeading = page === 'inicio';
+  const showHeading = page === 'inicio' && role !== 'pro';
   const localProUnread = role === 'pro' ? activePatients.reduce((sum, person) => sum + unreadCount(person.messages.filter((message) => message.patient_id === person.id && Boolean(message.sent_at)), 'pro'), 0) : 0;
   const messageUnread = role === 'patient' && p
     ? unreadCount(p.messages, 'patient')
