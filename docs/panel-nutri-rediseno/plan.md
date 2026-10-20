@@ -247,7 +247,7 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 ### 2026-10-20 00:10 · Cursor · Título en la barra del celular
 - Hecho: en Agenda y Cobranzas el celular muestra el título en la barra de arriba y no lo repite en la página. En escritorio el título sigue en la página, como el boceto. La Página pública marca «Más». Siguen ocultos los accesos de Pacientes, Ficha y Plan. Los turnos siguen en filas con su etiqueta y el menú inferior sigue fijo.
 - Cómo: break-ui, frontend-patterns, frontend-a11y y verification-loop. Capturas nuevas de 390, claro y oscuro, dentro del panel de demostración, al lado del boceto de escritorio en `design/panel-nutri/fase-5/`.
-- Rama y PR: `cursor/arreglo-mobile-fase5`, [PR #158](https://github.com/Facu42/plan-v/pull/158), borrador contra main. No se junta.
+- Rama y PR: `cursor/arreglo-mobile-fase5`, [PR #158](https://github.com/Facu42/plan-v/pull/158), borrador contra main. 3.192 pruebas y 2 omitidas, en 500 archivos. Tipos en verde. No se junta.
 
 ### 2026-10-19 23:30 · Cursor · Celular de Agenda y Cobranzas
 - Hecho: Facu rechazó el celular. Agenda y Cobranzas muestran el título una sola vez. El bloque Pacientes/Ficha/Plan no aparece ahí. Cada turno es una fila con la hora, el nombre y la etiqueta separada. En el celular, Movimientos es una lista de tarjetas y el nombre no se parte letra por letra. El menú inferior queda fijo y deja espacio, así no tapa el contenido.

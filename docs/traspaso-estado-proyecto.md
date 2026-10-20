@@ -1,6 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-19)
 
-19/10 · Cursor · En el celular de Agenda y Cobranzas el título quedó en la barra de arriba, una sola vez. Las capturas nuevas de 390, claro y oscuro, están en `design/panel-nutri/fase-5/`, dentro del panel real y al lado del boceto de escritorio. Sigue en [PR #158](https://github.com/Facu42/plan-v/pull/158), borrador contra main. No se junta.
+19/10 · Cursor · En el celular de Agenda y Cobranzas el título quedó en la barra de arriba, una sola vez. Las capturas nuevas de 390, claro y oscuro, están en `design/panel-nutri/fase-5/`, dentro del panel real y al lado del boceto de escritorio. 3.192 pruebas y 2 omitidas, tipos en verde. Sigue en [PR #158](https://github.com/Facu42/plan-v/pull/158), borrador contra main. No se junta.
 
 19/10 · Cursor · El celular de Agenda y Cobranzas que ya está en main se arregla en `cursor/arreglo-mobile-fase5`, [PR #158](https://github.com/Facu42/plan-v/pull/158), borrador contra main. Un título, sin el bloque de paciente, turnos en filas y menú inferior fijo. No se junta. La fase 5 original sigue en [PR #153](https://github.com/Facu42/plan-v/pull/153). WhatsApp salió del panel. Sin SQL remoto.
 
