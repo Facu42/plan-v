@@ -272,7 +272,7 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 ### 2026-10-21 · Cursor · Rescate de Próximamente y datos de ejemplo
 - Hecho: se rescatan de #158 la pantalla «Próximamente» (Asistente IA, Centro de ayuda y Equipo) y los datos de ejemplo del boceto, con su prueba. No reemplazan el asistente, la ayuda ni el equipo que ya andan en main.
 - Cómo: rama nueva desde main. Sin armazón de la fase A y sin migración.
-- Rama: `cursor/panel-proximamente`. Sin juntar hasta el ok.
+- Rama: `cursor/panel-proximamente`. [PR #168](https://github.com/Facu42/plan-v/pull/168). Sin juntar hasta el ok.
 
 ### 2026-10-20 01:15 · Cursor · Main en el backend de suscripciones
 - Hecho: se trajo `origin/main` sin rebase. La fase 5 sigue integrada. Se conservó la revisión de Claude del 20/10 00:30. El contrato de cobro no cambia. Las seis correcciones del boceto están en el PR #158.
