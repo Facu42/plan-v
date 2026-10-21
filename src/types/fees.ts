@@ -20,6 +20,10 @@ export type PatientPayment = {
   status: PaymentStatus;
   reported_by_patient: boolean;
   created_at: string;
+  /** manual: lo cargó la nutri. checkout: pago único de una cuota. subscription: débito automático. */
+  source?: 'manual' | 'checkout' | 'subscription';
+  /** Si viene del pago único, la cuota de este vencimiento. */
+  covers_due_on?: string | null;
 };
 
 export type PatientLedger = {

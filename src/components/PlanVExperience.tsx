@@ -28,10 +28,14 @@ import { isAdminPath } from './nutrigo/app-location';
 const AdminConsole = lazy(() => import('./nutrigo/AdminConsole').then(({ AdminConsole }) => ({ default: AdminConsole })));
 const NutrigoShowroom = lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })));
 const StandaloneWorkspace = lazy(() => import('./nutrigo/StandaloneWorkspace').then(({ StandaloneWorkspace }) => ({ default: StandaloneWorkspace })));
+const SubscriptionPreview = import.meta.env.DEV
+  ? lazy(() => import('./nutrigo/SubscriptionPreview').then(module => ({ default: module.SubscriptionPreview })))
+  : null;
 
 export function PlanVExperience() {
   const path=typeof window==='undefined'?'':window.location.pathname;
-  const publicSlug=/^\/consultorio\/([a-z0-9][a-z0-9-]{2,59})\/?$/.exec(path)?.[1];
+  const subscriptionReturn=/^\/consultorio\/([a-z0-9][a-z0-9-]{2,59})\/suscripcion\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\/?$/i.exec(path);
+  const publicSlug=subscriptionReturn?.[1]??/^\/consultorio\/([a-z0-9][a-z0-9-]{2,59})\/?$/.exec(path)?.[1];
   const teamPath=/^\/equipo\/?$/.test(path);
   const { session, demoMode, passwordRecovery, isNutri, isPatient, profile, signOut, loading: authLoading } = useAuth();
   const [view, setView] = useState<'patient' | 'pro'>('patient');
@@ -100,7 +104,10 @@ export function PlanVExperience() {
     }
   }, [session, isNutri, profile, legalOk]);
 
-  if(publicSlug){return <Suspense fallback={<LoadingScreen/>}><PwaChrome install={false}/><StandaloneWorkspace slug={publicSlug}/></Suspense>;}
+  if (SubscriptionPreview && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('vista') === 'suscripciones') {
+    return <Suspense fallback={<LoadingScreen/>}><SubscriptionPreview /></Suspense>;
+  }
+  if(publicSlug){return <Suspense fallback={<LoadingScreen/>}><PwaChrome install={false}/><StandaloneWorkspace slug={publicSlug} subscriptionId={subscriptionReturn?.[2]}/></Suspense>;}
 
   if (authLoading) {
     return (
