@@ -1,4 +1,6 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-19)
+# Traspaso del proyecto (actualización vigente: 2026-10-21)
+
+21/10 · Cursor · De #158 se rescatan la pantalla Próximamente y los datos de ejemplo del boceto, en una rama nueva desde main. El asistente, la ayuda y el equipo que ya andan no se reemplazan.
 
 19/10 · Cursor · En el celular, la Página pública marca «Más» y el título queda una sola vez en la barra de arriba. La captura usa el boceto de la Página pública. 3.244 pruebas y 2 omitidas, tipos en verde. Sigue en `cursor/pago-mensual-unico` ([PR #157](https://github.com/Facu42/plan-v/pull/157)) y en las pantallas ([PR #156](https://github.com/Facu42/plan-v/pull/156)). Las capturas nuevas de Agenda y Cobranzas están en el [PR #158](https://github.com/Facu42/plan-v/pull/158).
 
