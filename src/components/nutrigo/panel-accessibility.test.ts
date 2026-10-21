@@ -38,8 +38,7 @@ describe('accesibilidad del armazón', () => {
   it('conserva destinos y nombres accesibles con cero o muchas pacientes y menú plegado', () => {
     const patients = Array.from({ length: 1284 }, (_, index) => ({ id: String(index), name: index ? 'Jo' : 'Aleksandra Wiśniewska-Kowalczyk', has_account: false })) as Patient[];
     for (const data of [[], patients]) {
-      const html = renderToStaticMarkup(createElement(PanelNavigation, { patients: data, unread: 1284, admin: false, current: '/crm/pacientes', collapsed: true, onCollapse: () => {}, onOpen: () => {} }));
-      expect(html).toContain('aria-label="Desplegar el menú"');
+      const html = renderToStaticMarkup(createElement(PanelNavigation, { patients: data, unread: 1284, admin: false, current: '/crm/pacientes', collapsed: true, onOpen: () => {} }));
       expect(html).toContain('aria-label="Configuración"');
       expect(html).toContain('href="/crm/pacientes?filtro=archived"');
       expect(html).toContain('inert=""');

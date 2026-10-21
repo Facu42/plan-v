@@ -79,11 +79,25 @@ su aprobación para juntar cada una a `main`. Las fases 1 a 5 anteriores se apar
 
 ## 4. Fases nuevas
 
+**Ya está armado (fase A)** y cada fase lo reutiliza:
+- `node scripts/panel-boceto-css.mjs` genera `src/components/nutrigo/panel-boceto.css` (estilos del boceto con el
+  mismo peso extra en todas sus reglas: la raíz es `.m.desk#pv-panel`), `panel-boceto-icons.ts` (los trazos de
+  `ic()`) y `public/panel-boceto/` (logo y las 8 fotos difuminadas `pb1` a `pb8`). Si el boceto cambia, se vuelve a
+  correr; no se editan a mano.
+- `PanelBocetoIcon` es `ic()`; `PanelBocetoShell` es `shell()` + `hdr()` + `bnav()`; `PanelNavigation` es el menú.
+- Lo que la app agrega va en `panel-boceto-app.css`, con `.m#pv-panel` adelante para pesar lo mismo que el boceto.
+- Una pantalla nueva se pasa así: copiar el HTML de su función del boceto a JSX (mismas etiquetas y clases, `class`
+  → `className`, estilos en línea como objeto), cambiar textos y números de ejemplo por datos reales, y sacar el
+  título propio de la pantalla vieja (el título lo pone el encabezado del armazón). Los títulos repetidos que
+  todavía quedan dentro de Agenda, Cobranzas, Mensajes, Alimentos, Modelos y Equivalencias se van con su fase.
+- Comprobar: `npm run panel:contrato` (hoy 22 piezas del armazón, todas iguales en claro y oscuro). Cada fase suma
+  las suyas a `PIEZAS`: el selector es el mismo en el boceto y en la app.
+
 Cada fase: rama propia desde `main`, un PR, contrato en verde para sus piezas, y **ok de Facundo** para juntar.
 
 | Fase | Qué | Estado |
 |---|---|---|
-| A | Armazón: CSS del boceto en la app, menú lateral y submenús, flecha, cuenta, encabezado común, tema oscuro por defecto, sacar barra vieja, títulos repetidos y pie | En curso (Claude) |
+| A | Armazón: CSS del boceto en la app, menú lateral y submenús, flecha, cuenta, encabezado común, tema oscuro por defecto, sacar barra vieja, títulos repetidos del armazón y pie | Hecha en `claude/panel-fase-a-armazon`, espera el ok de Facundo |
 | B | Inicio | Pendiente |
 | C | Pacientes y resumen desplegado | Pendiente |
 | D | Ficha con sus once pestañas | Pendiente |

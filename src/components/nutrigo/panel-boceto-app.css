@@ -1,0 +1,67 @@
+/* Lo que la app necesita y el boceto no tiene. Los estilos del boceto están en panel-boceto.css (generado, no se
+   edita). Cada regla dice por qué existe. Usa el mismo peso (.m#pv-panel) para que no la pisen los estilos viejos. */
+
+/* La página del boceto define --font en :root; el panel lo necesita en su propia raíz. Mismo valor. */
+#pv-panel{--font:"Poppins", system-ui, -apple-system, "Segoe UI", sans-serif}
+
+/* La raíz vive dentro del contenedor de la app (flex): ocupa todo el ancho. */
+.pn-panel>#pv-panel{flex:1 1 auto;min-width:0}
+
+/* Pantalla completa: el boceto mide 900 de alto; en la app el menú queda quieto y se desplaza sólo la columna principal. */
+.m#pv-panel.desk{height:100dvh;min-height:0}
+.m#pv-panel .main{overflow-y:auto;min-height:0}
+
+/* Enlaces reales dentro de div.ni y div.si: `display:contents` no cambia el armado del boceto. Foco visible con su verde. */
+.m#pv-panel .ni>a,.m#pv-panel .si>a{display:contents;color:inherit;text-decoration:none}
+.m#pv-panel .ni:has(>a:focus-visible),.m#pv-panel .si:has(>a:focus-visible),.m#pv-panel .me:has(>.pv-me:focus-visible){outline:2px solid #7FA82E;outline-offset:-2px}
+
+/* Cuenta: el bloque `.me` abre el menú de la cuenta y su ícono cierra la sesión. */
+.m#pv-panel .me .pv-me{display:contents;font-family:inherit;color:inherit;cursor:pointer}
+.m#pv-panel .me .pv-out{border:0;background:transparent;color:inherit;padding:0;display:grid;place-items:center;cursor:pointer}
+/* El `.pmenu` del boceto (selector de paciente de Planes) abre hacia arriba de la cuenta. */
+.m#pv-panel .sbin>.pmenu{top:auto;bottom:84px;left:12px;width:264px;transform-origin:bottom left}
+
+/* Buscador: el boceto dibuja un texto; acá es un campo real. Borde de foco como el campo de `.pmenu`. */
+.m#pv-panel .search input{flex:1;min-width:0;height:100%;border:0;padding:0;background:transparent;font:inherit;color:var(--ink);outline:none}
+.m#pv-panel .search input::placeholder{color:var(--mut);opacity:1}
+.m#pv-panel .search:focus-within{border-color:var(--lime-d)}
+
+/* Campana y botones del boceto como botones y enlaces reales. */
+.m#pv-panel button.ibtn{padding:0;color:var(--ink);cursor:pointer}
+.m#pv-panel button.btn{border:0;font-family:inherit;cursor:pointer}
+.m#pv-panel a.btn{color:inherit;text-decoration:none}
+
+/* Saltar al contenido (teclado). */
+.m#pv-panel .pv-skip{position:absolute;left:12px;top:-60px;z-index:30;padding:8px 12px;border-radius:10px;background:var(--btn);color:var(--on-btn);text-decoration:none}
+.m#pv-panel .pv-skip:focus{top:12px}
+
+/* Logo del encabezado de Inicio: sólo lo dibuja el boceto del celular. */
+.m#pv-panel .pv-hdr-logo{display:none}
+
+/* Barra de abajo (`bnav()`): sólo en el celular. En el boceto vive dentro del marco del teléfono; acá queda fija. */
+.m#pv-panel .bn{display:none}
+.m#pv-panel .bn a{display:flex;color:inherit;text-decoration:none}
+
+@media (max-width:799px){
+  .m#pv-panel.desk{display:block;height:auto;min-height:100dvh}
+  /* `.ph .in` del boceto: 16px a los lados, 100px abajo para la barra y 14px entre bloques. */
+  .m#pv-panel .main{overflow:visible;gap:14px;padding:16px 16px calc(100px + env(safe-area-inset-bottom))}
+  .m#pv-panel .hdr h1{font-size:22px}
+  .m#pv-panel .hdr .search{display:none}
+  /* Inicio en el celular: medidas de `phoneInicio()` (logo 42, fecha 11,5, saludo 19, campana 40, sin botón principal). */
+  .m#pv-panel .hdr.pv-home{gap:10px}
+  .m#pv-panel .hdr.pv-home .pv-hdr-logo{display:block;width:42px;height:42px;border-radius:50%;background:var(--white)}
+  .m#pv-panel .hdr.pv-home .when{font-size:11.5px}
+  .m#pv-panel .hdr.pv-home h1{margin:0;font-size:19px;letter-spacing:-.01em}
+  .m#pv-panel .hdr.pv-home .ibtn{width:40px;height:40px}
+  /* Sin buscador, la campana va a la derecha (en el boceto la campana es hija directa de .hdr; acá la envuelve el aviso). */
+  .m#pv-panel .hdr .nv-alerts{margin-left:auto}
+  .m#pv-panel .hdr.pv-home .btn{display:none}
+  /* El menú lateral se abre desde «Más» como cajón. */
+  .m#pv-panel .sb{position:fixed;top:0;bottom:0;left:0;width:288px;z-index:20;transform:translateX(-100%);visibility:hidden;transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility 0s linear .28s}
+  .m#pv-panel.pv-menu .sb{transform:none;visibility:visible;transition-delay:0s}
+  .m#pv-panel .sbt{display:none}
+  .m#pv-panel.pv-menu .scrim{position:fixed;z-index:15;opacity:1;pointer-events:auto}
+  .m#pv-panel .bn{display:flex;position:fixed;z-index:10;bottom:calc(12px + env(safe-area-inset-bottom))}
+}
+@media (prefers-reduced-motion:reduce){.m#pv-panel .sb{transition:none}}
