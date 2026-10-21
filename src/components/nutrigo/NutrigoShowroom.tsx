@@ -298,7 +298,9 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
   const tabs = role === 'patient' ? PATIENT_TABS : PRO_TABS;
   const carteraUnread = useCarteraUnread(role === 'pro');
   const moreItems = role === 'patient' ? PATIENT_MORE : proMore(isAdmin === true);
-  const { moreCurrent } = tabBarState(page, tabs, moreItems);
+  const publicPage = role === 'pro' && page === 'agenda' && panelQuery.get('agenda') === 'publica';
+  const { moreCurrent: moreSection } = tabBarState(page, tabs, moreItems);
+  const moreCurrent = publicPage || moreSection;
   const showHeading = page === 'inicio';
   const localProUnread = role === 'pro' ? activePatients.reduce((sum, person) => sum + unreadCount(person.messages.filter((message) => message.patient_id === person.id && Boolean(message.sent_at)), 'pro'), 0) : 0;
   const messageUnread = role === 'patient' && p
@@ -548,7 +550,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
       </div>
     </div>
     {menuOpen && <div className="nv-drawer-scrim" role="presentation" onClick={() => { setMenuOpen(false); menuButtonRef.current?.focus(); }} />}
-    <nav className="nv-tabbar"  aria-label="Secciones principales">
+    <nav className="nv-tabbar" aria-label="Secciones principales">
       {tabs.map((tab) => <button key={tab.id} type="button" aria-current={!pendingModule && page === tab.id ? 'page' : undefined} onClick={() => navigate(tab.id)}><span className="nv-tab-icon"><Icon name={tab.icon} size={22} />{tab.id === 'mensajes' && messageUnread > 0 && <b className="nv-tab-unread" aria-label={`${messageUnread} sin leer`}>{messageUnread > 9 ? '9+' : messageUnread}</b>}</span><span>{tab.label}</span></button>)}
       <button type="button" aria-current={moreCurrent ? 'page' : undefined} aria-expanded={moreOpen} aria-controls="nv-more-sheet" onClick={() => setMoreOpen(true)}><span className="nv-tab-icon"><Icon name="grid" size={22} /></span><span>Más</span></button>
     </nav>

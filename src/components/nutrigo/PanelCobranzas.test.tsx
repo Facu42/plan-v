@@ -15,8 +15,10 @@ describe('Cobranzas del boceto', () => {
     for (const label of ['Cobranzas', 'Cobrado', 'Por cobrar', 'Vencido', 'Cuotas vencidas', 'Recordar', 'Movimientos', 'Camila Torres de los Remedios', '6 meses']) expect(html).toContain(label);
     expect(html).not.toContain('wa.me');
     expect(html).not.toContain('WhatsApp');
+    expect(html).not.toContain('Débito automático');
     expect(html).toContain('escribirle por el chat');
     expect(html).toContain('aria-label="Ver cobranzas de Camila Torres de los Remedios"');
+    expect(html).toContain('class="p5-moves"');
     expect(html).not.toContain('Sofía');
   });
 

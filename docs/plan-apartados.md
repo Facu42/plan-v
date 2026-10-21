@@ -1,5 +1,7 @@
 # Plan por apartados (2026-09-28)
 
+19/10 · Cursor · Backend de suscripciones de pacientes, apagado y sin aplicar la migración. [Spec y decisiones](suscripciones-pacientes/spec.md). Las pantallas quedan para otra rama.
+
 19/10 · Codex · Fase 3 de Pacientes verificada en `codex/panel-nutri-fase-3`: tabla y resumen bajo la fila con datos autorizados, 3.164 pruebas y dos omitidas, tipos/build/secretos y revisiones aprobadas, 22 comprobaciones /browse. Informe: [fase 3](panel-nutri-rediseno/fase-3-verificacion.md). Inicio #151 integrado a main 4dc9a79 con web/API/worker en verde. Sigue fase 4, Ficha, en rama y PR propios; sin SQL remoto.
 
 

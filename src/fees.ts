@@ -46,14 +46,28 @@ function addDays(date: string, days: number): string {
 /** Aplica los pagos confirmados a las cuotas, de la más vieja a la más nueva. */
 export function summarizeLedger(ledger: PatientLedger, today = localBillingDate()): FeeSummary {
   const confirmed = ledger.payments.filter((payment) => payment.status === 'confirmed');
-  let pool = confirmed.reduce((sum, payment) => sum + payment.amount, 0);
+  const targeted = new Map<string, number>();
+  let pool = 0;
+  for (const payment of confirmed) {
+    if (payment.covers_due_on) targeted.set(payment.covers_due_on, (targeted.get(payment.covers_due_on) ?? 0) + payment.amount);
+    else pool += payment.amount;
+  }
   const open = [...ledger.charges].sort((a, b) => a.due_on.localeCompare(b.due_on));
   const charges: ChargeProgress[] = open.map((charge) => {
     if (charge.status === 'waived') return { ...charge, paid: 0, due: charge.due_on <= today };
-    const paid = Math.min(pool, charge.amount);
-    pool -= paid;
+    let paid = 0;
+    const marked = targeted.get(charge.due_on) ?? 0;
+    if (marked > 0) {
+      paid += Math.min(marked, charge.amount);
+      pool += marked - Math.min(marked, charge.amount);
+      targeted.delete(charge.due_on);
+    }
+    const fromPool = Math.min(pool, charge.amount - paid);
+    paid += fromPool;
+    pool -= fromPool;
     return { ...charge, paid, due: charge.due_on <= today };
   });
+  for (const extra of targeted.values()) pool += extra;
 
   const unpaid = charges.filter((charge) => charge.status === 'open' && charge.paid < charge.amount);
   const overdue = unpaid.filter((charge) => charge.due);
