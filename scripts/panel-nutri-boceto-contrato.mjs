@@ -27,22 +27,32 @@ const TOLERANCIA_PX = 0.6;
 const CAJA = ['width', 'height', 'borderTopLeftRadius', 'paddingTop', 'paddingLeft', 'fontSize', 'fontWeight', 'color', 'backgroundColor', 'boxShadow'];
 const PSEUDO = ['width', 'height', 'left', 'borderLeftWidth', 'borderBottomWidth', 'borderBottomLeftRadius', 'borderLeftColor', 'borderBottomColor'];
 
-// [nombre, selector en el boceto, selector en la app, pseudo-elemento o '', propiedades, estado]
+// [nombre, selector (boceto y app), pseudo-elemento o '', propiedades, estado]
 // estado 'hover' o 'active' mide la pieza con el mouse encima o apretada (solo `transform`).
+// Desde la fase A la app usa las mismas clases que el boceto, así que el selector es el mismo en los dos.
 export const PIEZAS = [
-  ['Menú lateral · ancho', '.m.desk .sb', '.nv-sidebar', '', ['width']],
-  ['Título de grupo (GESTIÓN)', '.m .gl', '.pn-nav-heading', '', ['fontSize', 'fontWeight', 'letterSpacing', 'textTransform', 'color']],
-  ['Opción del menú', '.m .ni:not(.on)', '.pn-nav-item:not(.pn-current)>.pn-nav-row>a', '', ['height', 'borderTopLeftRadius', 'paddingLeft', 'fontSize', 'color']],
-  ['Opción activa', '.m .ni.on', '.pn-current>.pn-nav-row', '', ['backgroundColor', 'borderTopLeftRadius', 'height']],
-  ['Flecha de plegar', '.m .sbt', '.pn-collapse', '', ['width', 'height', 'borderTopLeftRadius', 'boxShadow', 'backgroundColor', 'borderTopColor', 'top', 'right']],
-  ['Flecha · ícono', '.m .sbt svg', '.pn-collapse svg', '', ['width', 'height']],
-  ['Flecha · al pasar el mouse', '.m .sbt', '.pn-collapse', '', ['transform', 'backgroundColor'], 'hover'],
-  ['Flecha · al apretar', '.m .sbt', '.pn-collapse', '', ['transform'], 'active'],
-  ['Opción del submenú', '.m .ng.open .si', '.pn-submenu[data-open=true] a', '', ['fontSize', 'height', 'paddingTop', 'paddingLeft', 'borderTopLeftRadius', 'color']],
-  ['Submenú · codo del árbol', '.m .ng.open .si', '.pn-submenu[data-open=true]>div>div', '::before', PSEUDO],
-  ['Submenú · línea que sigue', '.m .ng.open .si:not(:last-child)', '.pn-submenu[data-open=true]>div>div:not(:last-child)', '::after', ['left', 'borderLeftWidth', 'borderLeftColor']],
-  ['Contador del submenú', '.m .ng.open .si b', '.pn-submenu[data-open=true] .pn-nav-count', '', ['width', 'height', 'borderTopLeftRadius', 'fontSize', 'fontWeight', 'backgroundColor', 'color']],
-  ['Título de la pantalla', '.m .hdr h1', '.pn-main h1, .pn-panel header h1', '', ['fontSize', 'fontWeight', 'color']],
+  ['Menú lateral · ancho', '.m.desk .sb', '', ['width']],
+  ['Logo', '.m .brand img', '', ['width', 'height', 'borderTopLeftRadius']],
+  ['Nombre (Plan V)', '.m .brand b', '', ['fontSize', 'fontWeight', 'color']],
+  ['Título de grupo (GESTIÓN)', '.m .gl', '', ['fontSize', 'fontWeight', 'letterSpacing', 'textTransform', 'color', 'marginTop']],
+  ['Opción del menú', '.m .ni:not(.on)', '', ['height', 'borderTopLeftRadius', 'paddingLeft', 'fontSize', 'color']],
+  ['Opción activa', '.m .ni.on', '', ['backgroundColor', 'borderTopLeftRadius', 'height', 'color', 'fontWeight']],
+  ['Ícono de la opción', '.m .ni svg', '', ['width', 'height']],
+  ['Contador naranja', '.m .ni .n', '', ['height', 'fontSize', 'fontWeight', 'backgroundColor', 'color']],
+  ['Flecha del submenú', '.m .ni .nx', '', ['width', 'height', 'borderTopLeftRadius', 'color']],
+  ['Flecha de plegar', '.m .sbt', '', ['width', 'height', 'borderTopLeftRadius', 'boxShadow', 'backgroundColor', 'borderTopColor', 'top', 'right']],
+  ['Flecha · ícono', '.m .sbt svg', '', ['width', 'height']],
+  ['Flecha · al pasar el mouse', '.m .sbt', '', ['transform', 'backgroundColor'], 'hover'],
+  ['Flecha · al apretar', '.m .sbt', '', ['transform'], 'active'],
+  ['Opción del submenú', '.m .ng.open .si', '', ['fontSize', 'height', 'paddingTop', 'paddingLeft', 'borderTopLeftRadius', 'color']],
+  ['Submenú · codo del árbol', '.m .ng.open .si', '::before', PSEUDO],
+  ['Submenú · línea que sigue', '.m .ng.open .si:not(:last-child)', '::after', ['left', 'borderLeftWidth', 'borderLeftColor']],
+  ['Contador del submenú', '.m .ng.open .si b', '', ['minWidth', 'height', 'borderTopLeftRadius', 'fontSize', 'fontWeight', 'backgroundColor', 'color']],
+  ['Cuenta', '.m .me', '', ['paddingTop', 'borderTopLeftRadius', 'backgroundColor', 'paddingLeft']],
+  ['Columna principal', '.m .main', '', ['paddingTop', 'paddingLeft', 'rowGap', 'backgroundColor']],
+  ['Título de la pantalla', '.m .hdr h1', '', ['fontSize', 'fontWeight', 'color', 'letterSpacing']],
+  ['Buscador', '.m .hdr .search', '', ['height', 'borderTopLeftRadius', 'backgroundColor', 'borderTopColor', 'color']],
+  ['Campana', '.m .hdr .ibtn', '', ['width', 'height', 'borderTopLeftRadius', 'backgroundColor']],
 ];
 
 async function medir(pagina, selector, pseudo, props, estado) {
@@ -83,11 +93,11 @@ async function abrirBoceto(browser, tema) {
 async function abrirApp(browser, tema) {
   const pagina = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: tema })).newPage();
   // El modo demo vive en memoria: el tema se deja guardado antes de cargar y no se recarga después.
-  await pagina.addInitScript(t => localStorage.setItem('plan-v:panel-theme:demo', t), tema);
+  await pagina.addInitScript(t => localStorage.setItem('plan-v:panel-theme-v2:demo', t), tema);
   await pagina.goto(`${origen}/crm/pacientes`, { waitUntil: 'networkidle' });
   const demo = pagina.getByText('Continuar en modo demo');
   if (await demo.count()) await demo.first().click();
-  await pagina.waitForSelector('.pn-panel', { timeout: 60000 });
+  await pagina.waitForSelector('#pv-panel', { timeout: 60000 });
   await pagina.waitForTimeout(1500);
   return pagina;
 }
@@ -99,7 +109,8 @@ try {
   for (const tema of ['dark', 'light']) {
     const [b, a] = [await abrirBoceto(navegador, tema), await abrirApp(navegador, tema)];
     informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'}\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
-    for (const [nombre, selB, selA, pseudo, props, estado] of PIEZAS) {
+    for (const [nombre, selB, pseudo, props, estado] of PIEZAS) {
+      const selA = selB;
       const [vb, va] = [await medir(b, selB, pseudo, props, estado), await medir(a, selA, pseudo, props, estado)];
       if (!vb) { informe.push(`| ${nombre} | ⚠️ revisar | no se encontró en el boceto (\`${selB}\`) |`); continue; }
       if (!va) { fallas += 1; informe.push(`| ${nombre} | ❌ falta | la app no la tiene (\`${selA}\`) |`); continue; }
@@ -111,7 +122,7 @@ try {
     if (args.includes('--shots')) {
       const carpeta = resolve(raiz, 'design/panel-nutri/contrato'); await mkdir(carpeta, { recursive: true });
       await b.locator('.m .sb').first().screenshot({ path: `${carpeta}/menu-boceto-${tema}.png` });
-      await a.locator('.nv-sidebar').first().screenshot({ path: `${carpeta}/menu-app-${tema}.png` });
+      await a.locator('.m .sb').first().screenshot({ path: `${carpeta}/menu-app-${tema}.png` });
     }
   }
 } finally { await navegador.close(); }

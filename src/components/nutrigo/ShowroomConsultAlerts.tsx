@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useCareNotices, type CareNotice } from './useCareNotices';
 import { api } from '../../api/client';
 import type { DemoNotice } from '../../types';
@@ -44,6 +44,7 @@ export function ShowroomConsultAlerts({
   onOpenProNotice,
   defaultOpen = false,
   storage = typeof window === 'undefined' ? null : window.localStorage,
+  bell,
 }: {
   audience: ConsultAlertAudience;
   alerts: ConsultAlert[];
@@ -57,6 +58,8 @@ export function ShowroomConsultAlerts({
   onOpenProNotice?: (notice: ProNotice) => void;
   defaultOpen?: boolean;
   storage?: Pick<Storage, 'getItem' | 'setItem'> | null;
+  /** Campana propia (por ejemplo la `.ibtn` del panel de la nutri); sin ella se usa la de la app. */
+  bell?: { className: string; render: (badge: number) => ReactNode };
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const [tick, setTick] = useState(0);
@@ -164,9 +167,9 @@ export function ShowroomConsultAlerts({
   };
 
   return <div className="nv-alerts">
-    <button type="button" className="nv-alerts-bell" aria-label={badge ? `${title}, ${badge} pendientes` : title} aria-expanded={open} aria-controls="nv-alerts-panel" onClick={() => setOpen((value) => !value)}>
-      <Icon name="bell" size={19} />
-      {badge > 0 && <b className="nv-tab-unread">{badge > 9 ? '9+' : badge}</b>}
+    <button type="button" className={bell?.className ?? 'nv-alerts-bell'} aria-label={badge ? `${title}, ${badge} pendientes` : title} aria-expanded={open} aria-controls="nv-alerts-panel" onClick={() => setOpen((value) => !value)}>
+      {bell ? bell.render(badge) : <><Icon name="bell" size={19} />
+      {badge > 0 && <b className="nv-tab-unread">{badge > 9 ? '9+' : badge}</b>}</>}
     </button>
     {open && <div className="nv-alerts-pop" id="nv-alerts-panel" role="dialog" aria-label={title}>
       <header>

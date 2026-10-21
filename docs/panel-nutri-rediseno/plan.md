@@ -248,15 +248,26 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main `6697d28` |
 | 4 | Codex | `codex/panel-nutri-fase-4` · [PR #154](https://github.com/Facu42/plan-v/pull/154) | Integrada a main |
 | 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Integrada a main `c09466b`, junto con la fase 4 |
-| Fases nuevas A a I (boceto pasado como código) | Claude | una rama por fase | Ver `instrucciones-boceto.md` §4. El Inicio del boceto entra en 1440×900 en [PR #163](https://github.com/Facu42/plan-v/pull/163) |
+| Corrección del menú | Cursor | [PR #158](https://github.com/Facu42/plan-v/pull/158) | No se junta. El armazón queda en la fase A |
+| Fases nuevas A a I (boceto pasado como código) | Claude | Fase A en main por [PR #162](https://github.com/Facu42/plan-v/pull/162). El Inicio del boceto entra en 1440×900 en [PR #163](https://github.com/Facu42/plan-v/pull/163) | A integrada. B a I pendientes. Reemplazan la corrección del menú y las fases 6 a 9 |
 | 6 a 9 | Por coordinar | — | Pendientes; las cubren las fases A a I |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-21 · Cursor · El boceto del Inicio trae la fase A
+- Hecho: se trajo `origin/main` (fase A, #162) sin rebase. El Inicio del boceto sigue midiendo 900. No se tocó la app.
+- Cómo: el choque era solo de bitácora. Se conservan las entradas de este boceto y las de la fase A.
+- Rama: `claude/panel-boceto-inicio-900`. [PR #163](https://github.com/Facu42/plan-v/pull/163). Sin juntar.
 
 ### 2026-10-21 · Cursor · El boceto del Inicio trae main
 - Hecho: se trajo `origin/main` sin rebase. El Inicio del boceto sigue midiendo 900. No se tocó la app.
 - Cómo: el choque estaba en la bitácora. Se conservan las entradas de este boceto y las de main.
 - Rama: `claude/panel-boceto-inicio-900`. [PR #163](https://github.com/Facu42/plan-v/pull/163). Sin juntar.
+
+### 2026-10-21 · Cursor · Fase A trae main
+- Hecho: se trajo `origin/main` sin rebase. El armazón del boceto sigue para la nutri y la app de la paciente conserva su barra. La fase 5 ya está en main.
+- Cómo: el choque estaba en la bitácora y en la barra de la paciente. La nutri entra por `PanelBocetoShell` y no vuelve a la barra vieja.
+- Rama: `claude/panel-fase-a-armazon`. [PR #162](https://github.com/Facu42/plan-v/pull/162). Sin juntar.
 
 ### 2026-10-20 · Claude · Arriba del Inicio: consultas del día en columnas y próxima paciente (opción K)
 - Hecho: Facundo eligió la opción K con líneas finas (20/10). Izquierda: «Consultas de hoy» en columnas de 3 por vista que se despliegan con un clic (objetivo, restricciones, peso, plan, novedad) y flechas para ver más. Derecha: la próxima paciente con pestañas Resumen, Novedades y Plan, accesos y botones. Por su pedido de las 15:06, los accesos son botones claros con ícono en círculo oscuro, los botones de abajo ocupan todo el ancho y la tarjeta tiene fondo degradado con puntos y anillos.
@@ -271,6 +282,13 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 - Cómo: reglas nuevas solo del Inicio (`ini-top`, `qa.ini`, `ini-mid`, `ini-bot`, `ini-scroll`) en `bocetos.html` y copiadas en `boceto.css`. Las listas largas se desplazan dentro de su tarjeta. Se corrigió además `.kp div`, que pintaba las cajas internas y escondía la barra de lo cobrado.
 - Rama: claude/panel-boceto-inicio-900. Comparación: https://claude.ai/artifact/VEeSS7VX9z39Qoh2sLGiMQ
 - Próximo paso exacto: con su ok, juntar y regenerar `panel-boceto.css` (fase A) antes de pasar el Inicio a la app (fase B).
+
+### 2026-10-20 04:45 · Claude · Fase A (armazón) pasada del boceto como código
+- Hecho: menú lateral con submenús en árbol, flecha de plegar, cuenta con su menú (tema, dos pasos, primeros pasos, ver como paciente) y cerrar sesión, encabezado común (título, buscador con Ctrl K, campana) y el de Inicio con fecha y saludo, barra de abajo y cajón en el celular, tema oscuro por defecto. Se sacaron la barra «Pacientes / Ficha / Plan», el título repetido del armazón y el pie dentro del panel.
+- Cómo: `scripts/panel-boceto-css.mjs` copia estilos, íconos e imágenes del boceto sin cambiar valores; `PanelBocetoShell` y `PanelNavigation` tienen el mismo marcado que `shell()`. `npm run panel:contrato`: 22 piezas iguales en claro y oscuro (antes 17 diferencias). 3.194 pruebas y los 6 recorridos de punta a punta pasan.
+- Rama: `claude/panel-fase-a-armazon`. Se junta a main solo con el ok de Facundo.
+- Falta: fases B a I. Submenús «Respuestas guardadas» (Mensajes) y «Pedidos de cambio» (Planes) ya están en el menú y abren Mensajes y Planes; sus pantallas llegan con las fases F y G. «Todas las funciones» salió del menú (el boceto no la tiene; la dirección sigue andando).
+- Próximo paso exacto: fase B (Inicio) en `claude/panel-fase-b-inicio`: pasar `inicio()` del boceto a `PanelHome.tsx` con los datos que ya calcula.
 
 ### 2026-10-20 04:30 · Claude · Instrucciones pantalla por pantalla y fases nuevas
 - Hecho: `instrucciones-boceto.md` con el método (copiar el código del boceto, no redibujarlo), lo que hoy no coincide en cada pantalla, una tabla con la función y línea del boceto, la ruta, el componente actual y los datos que se conservan, y las fases nuevas A a I.
