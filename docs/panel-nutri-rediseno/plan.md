@@ -249,15 +249,39 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 4 | Codex | `codex/panel-nutri-fase-4` · [PR #154](https://github.com/Facu42/plan-v/pull/154) | Integrada a main |
 | 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Integrada a main `c09466b`, junto con la fase 4 |
 | Corrección del menú | Cursor | [PR #158](https://github.com/Facu42/plan-v/pull/158) | No se junta. El armazón queda en la fase A |
-| Fases nuevas A a I (boceto pasado como código) | Claude | `claude/panel-fase-a-armazon` · [PR #162](https://github.com/Facu42/plan-v/pull/162) | Fase A en esta rama. Reemplazan la corrección del menú y las fases 6 a 9 |
+| Fases nuevas A a I (boceto pasado como código) | Claude | Fase A en main por [PR #162](https://github.com/Facu42/plan-v/pull/162). El Inicio del boceto entra en 1440×900 en [PR #163](https://github.com/Facu42/plan-v/pull/163) | A integrada. B a I pendientes. Reemplazan la corrección del menú y las fases 6 a 9 |
 | 6 a 9 | Por coordinar | — | Pendientes; las cubren las fases A a I |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-21 · Cursor · El boceto del Inicio trae la fase A
+- Hecho: se trajo `origin/main` (fase A, #162) sin rebase. El Inicio del boceto sigue midiendo 900. No se tocó la app.
+- Cómo: el choque era solo de bitácora. Se conservan las entradas de este boceto y las de la fase A.
+- Rama: `claude/panel-boceto-inicio-900`. [PR #163](https://github.com/Facu42/plan-v/pull/163). Sin juntar.
+
+### 2026-10-21 · Cursor · El boceto del Inicio trae main
+- Hecho: se trajo `origin/main` sin rebase. El Inicio del boceto sigue midiendo 900. No se tocó la app.
+- Cómo: el choque estaba en la bitácora. Se conservan las entradas de este boceto y las de main.
+- Rama: `claude/panel-boceto-inicio-900`. [PR #163](https://github.com/Facu42/plan-v/pull/163). Sin juntar.
 
 ### 2026-10-21 · Cursor · Fase A trae main
 - Hecho: se trajo `origin/main` sin rebase. El armazón del boceto sigue para la nutri y la app de la paciente conserva su barra. La fase 5 ya está en main.
 - Cómo: el choque estaba en la bitácora y en la barra de la paciente. La nutri entra por `PanelBocetoShell` y no vuelve a la barra vieja.
 - Rama: `claude/panel-fase-a-armazon`. [PR #162](https://github.com/Facu42/plan-v/pull/162). Sin juntar.
+
+### 2026-10-20 · Claude · Arriba del Inicio: consultas del día en columnas y próxima paciente (opción K)
+- Hecho: Facundo eligió la opción K con líneas finas (20/10). Izquierda: «Consultas de hoy» en columnas de 3 por vista que se despliegan con un clic (objetivo, restricciones, peso, plan, novedad) y flechas para ver más. Derecha: la próxima paciente con pestañas Resumen, Novedades y Plan, accesos y botones. Por su pedido de las 15:06, los accesos son botones claros con ícono en círculo oscuro, los botones de abajo ocupan todo el ancho y la tarjeta tiene fondo degradado con puntos y anillos.
+- Cómo: `hoyLeft()` y `hoyNext()` en `bocetos.html` (clases con prefijo `h` para no chocar con las del boceto); la tarjeta vieja «Consultas de hoy» salió porque su información quedó arriba; «Tu consultorio» pasó al lado de Pendientes. Mide 900 a 1440 en oscuro y claro. Bloque copiado en `boceto.css`.
+- 20/10 22:06: izquierda «Consultas del día» con foto difuminada de fondo, el resumen del día y una lista simple separada por líneas; derecha «Próxima consulta» sin adornos y con mejor contraste. Letra de Apple fina en TODO el panel: negritas a 500 y números y títulos de 22 px o más en 300.
+- 20/10 21:59: «más simple, es mucha información»: columnas con hora, nombre y tipo (al abrir: objetivo, qué cuidar, novedad); tarjeta derecha sin pestañas, con peso, adherencia, qué cuidar, 4 accesos y un solo botón. Letra de Apple en peso fino para títulos y números.
+- 20/10 21:50: pidió dejarlo así, con el título «Consultas del día» separado por una línea fina arriba de la tarjeta derecha, y TODO el panel con letra de Apple (`--font`: -apple-system / SF Pro, con Inter de respaldo en lugar de Poppins).
+- Próximo paso exacto: con su ok, juntar y pasar el Inicio a la app (fase B).
+
+### 2026-10-20 · Claude · Inicio del boceto reacomodado a 1440 × 900
+- Hecho: el Inicio del boceto medía 1217 de alto a tamaño real y la página lo mostraba achicado al 62 %. Facundo eligió (20/10 13:34) reacomodar el boceto para que entre en 1440 × 900. Ahora mide 900, con los mismos bloques, el mismo orden y los mismos colores.
+- Cómo: reglas nuevas solo del Inicio (`ini-top`, `qa.ini`, `ini-mid`, `ini-bot`, `ini-scroll`) en `bocetos.html` y copiadas en `boceto.css`. Las listas largas se desplazan dentro de su tarjeta. Se corrigió además `.kp div`, que pintaba las cajas internas y escondía la barra de lo cobrado.
+- Rama: claude/panel-boceto-inicio-900. Comparación: https://claude.ai/artifact/VEeSS7VX9z39Qoh2sLGiMQ
+- Próximo paso exacto: con su ok, juntar y regenerar `panel-boceto.css` (fase A) antes de pasar el Inicio a la app (fase B).
 
 ### 2026-10-20 04:45 · Claude · Fase A (armazón) pasada del boceto como código
 - Hecho: menú lateral con submenús en árbol, flecha de plegar, cuenta con su menú (tema, dos pasos, primeros pasos, ver como paciente) y cerrar sesión, encabezado común (título, buscador con Ctrl K, campana) y el de Inicio con fecha y saludo, barra de abajo y cajón en el celular, tema oscuro por defecto. Se sacaron la barra «Pacientes / Ficha / Plan», el título repetido del armazón y el pie dentro del panel.
