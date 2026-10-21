@@ -63,9 +63,9 @@ async function login(actor,path='/') {
   await until('!document.querySelector("input[placeholder=Email]")');
 }
 async function logout() {
-  // El control de cuenta puede estar dentro de su menú original.
+  // El control de cuenta puede estar dentro de su menú original; en el panel de la nutri es un ícono con aria-label.
   lastAction='cerrar sesión';
-  await until(`(()=>{const b=Array.from(document.querySelectorAll('button')).find(e=>/^(Cerrar sesión|Salir)$/.test(e.textContent.trim())&&!e.matches(':disabled')&&e.getClientRects().length);if(b){b.click();return true;}const menu=Array.from(document.querySelectorAll('[aria-label="Abrir menú"], [aria-label="Abrir el menú"]')).find(e=>!e.matches(':disabled')&&e.getClientRects().length&&e.getAttribute('aria-expanded')!=='true');if(menu)menu.click();return false;})()`);
+  await until(`(()=>{const b=Array.from(document.querySelectorAll('button')).find(e=>/^(Cerrar sesión|Salir)$/.test(e.textContent.trim()||e.getAttribute('aria-label')||'')&&!e.matches(':disabled')&&e.getClientRects().length);if(b){b.click();return true;}const menu=Array.from(document.querySelectorAll('[aria-label="Abrir menú"], [aria-label="Abrir el menú"]')).find(e=>!e.matches(':disabled')&&e.getClientRects().length&&e.getAttribute('aria-expanded')!=='true');if(menu)menu.click();return false;})()`);
   await B('wait','input[placeholder="Email"]');
 }
 async function read(actor,path) {

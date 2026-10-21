@@ -1,4 +1,6 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-19)
+# Traspaso del proyecto (actualización vigente: 2026-10-20)
+
+20/10 · Claude · Panel de la nutri: el boceto se pasa a la app **como código**, por fases A a I ([instrucciones](panel-nutri-rediseno/instrucciones-boceto.md)). Fase A (armazón: menú, cuenta, encabezado, tema oscuro por defecto, celular) en `claude/panel-fase-a-armazon`; cada fase se junta a main solo con el ok de Facundo. `npm run panel:contrato` compara la app con el boceto.
 
 19/10 · Cursor · En el celular, la Página pública marca «Más» y el título queda una sola vez en la barra de arriba. La captura usa el boceto de la Página pública. 3.244 pruebas y 2 omitidas, tipos en verde. Sigue en `cursor/pago-mensual-unico` ([PR #157](https://github.com/Facu42/plan-v/pull/157)) y en las pantallas ([PR #156](https://github.com/Facu42/plan-v/pull/156)). Las capturas nuevas de Agenda y Cobranzas están en el [PR #158](https://github.com/Facu42/plan-v/pull/158).
 

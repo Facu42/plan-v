@@ -19,15 +19,15 @@ describe('preferencias del panel profesional', () => {
     const storage = { getItem: (key: string) => data.get(key) ?? null, setItem: (key: string, value: string) => { data.set(key, value); } };
     writePanelPreference(storage, 'profesional-a', 'light');
     expect(readPanelPreference(storage, 'profesional-a')).toBe('light');
-    expect(readPanelPreference(storage, 'profesional-b')).toBe('system');
+    expect(readPanelPreference(storage, 'profesional-b')).toBe('dark');
     expect(data.get('plan-v:theme')).toBe('dark');
     expect(panelStorageKey('profesional-a')).not.toBe(panelStorageKey(null));
   });
   it('sigue funcionando con el almacenamiento bloqueado o corrupto', () => {
     const blocked = { getItem: () => { throw Error('blocked'); }, setItem: () => { throw Error('blocked'); } };
-    expect(readPanelPreference(blocked, null)).toBe('system');
+    expect(readPanelPreference(blocked, null)).toBe('dark');
     expect(() => writePanelPreference(blocked, null, 'dark')).not.toThrow();
-    expect(readPanelPreference({ getItem: () => 'invalid' }, null)).toBe('system');
+    expect(readPanelPreference({ getItem: () => 'invalid' }, null)).toBe('dark');
   });
   it('conserva la elección local al recargar después de una sincronización fallida', () => {
     const data = new Map<string, string>();

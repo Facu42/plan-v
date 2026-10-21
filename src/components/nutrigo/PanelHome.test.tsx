@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { Patient } from '../../types';
 import { CRM_WORK_KINDS, type CrmWorkResponse } from '../../types/crm-work';
-import { PanelHomeView, PanelHomeHeader } from './PanelHome';
+import { PanelHomeView, panelHomeGreeting, panelHomeWhen } from './PanelHome';
 
 const data: CrmWorkResponse = { items: [{ id: 'meal:a', patient_id: 'a', patient_name: 'Ana', kind: 'meal', status: 'pending_review', title: 'Almuerzo para revisar', href: '/crm/ficha?paciente=a&seccion=registros', updated_at: '2026-10-19T12:00:00Z' }], counts: Object.fromEntries(CRM_WORK_KINDS.map(kind => [kind, kind === 'meal' ? 1 : kind === 'appointment' ? 3 : 0])) as CrmWorkResponse['counts'], total: 1, next_cursor: null, source: 'supabase' };
 const props = { patients: [] as Patient[], now: new Date('2026-10-19T13:00:00Z'), data, loading: false, error: '', kind: '' as const, onKind: vi.fn(), onRefresh: vi.fn(), onNext: vi.fn(), hasPrevious: false, board: null, billingError: false, scheduling: null, schedulingError: false, onOpen: vi.fn(), onCopy: vi.fn(), copyStatus: '' };
@@ -27,10 +27,10 @@ describe('Inicio del boceto aprobado', () => {
     expect(html).toContain('Configurar link de reserva');
     expect(html).not.toContain('href="/reservar/mi-consultorio"');
   });
-  it('ofrece búsqueda real, acceso a agenda y saludo sin nombres inventados', () => {
-    const html = renderToStaticMarkup(<PanelHomeHeader name="" now={props.now} onOpen={vi.fn()} />);
-    expect(html).toContain('Buscar pacientes');
-    expect(html).toContain('Nueva consulta');
-    expect(html).not.toContain('Verónica');
+  it('escribe la fecha como el boceto y saluda sin nombres inventados', () => {
+    const now = new Date('2026-10-21T12:30:00Z');
+    expect(panelHomeWhen(now)).toBe('Miércoles 21 de octubre');
+    expect(panelHomeGreeting('', now)).toBe('Buen día');
+    expect(panelHomeGreeting('Verónica Trenti', now)).toBe('Buen día, Verónica');
   });
 });

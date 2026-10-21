@@ -21,18 +21,17 @@ function HomeLink({ href, onOpen, children, className = '', ...props }: { href: 
 }
 const formatTime = (at: Date) => at.toLocaleTimeString('es-AR', { timeZone: HOME_ZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 const channelLabel = (channel: string) => channel === 'video' ? 'Online' : channel === 'presencial' ? 'Consultorio' : 'Modalidad por confirmar';
-export function PanelHomeHeader({ name, now, onOpen }: { name: string; now: Date; onOpen: Open }) {
-  const input = useRef<HTMLInputElement>(null);
-  const [query, setQuery] = useState('');
-  useEffect(() => {
-    const focus = (event: KeyboardEvent) => { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); input.current?.focus(); } };
-    window.addEventListener('keydown', focus); return () => window.removeEventListener('keydown', focus);
-  }, []);
+/** Fecha del encabezado de Inicio como en el boceto: «Miércoles 21 de octubre». */
+export function panelHomeWhen(now: Date) {
+  const text = now.toLocaleDateString('es-AR', { timeZone: HOME_ZONE, weekday: 'long', day: 'numeric', month: 'long' }).replace(',', '');
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/** Saludo de Inicio según la hora del consultorio, con el primer nombre si existe (nunca uno inventado). */
+export function panelHomeGreeting(name: string, now: Date) {
   const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: HOME_ZONE, hour: '2-digit', hourCycle: 'h23' }).format(now));
   const greeting = hour < 12 ? 'Buen día' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
-  return <><div className="ph-heading"><span>{now.toLocaleDateString('es-AR', { timeZone: HOME_ZONE, weekday: 'long', day: 'numeric', month: 'long' })}</span><h1>{greeting}{name.trim() ? `, ${name.trim().split(/\s+/)[0]}` : ''}</h1></div>
-    <form className="ph-search" role="search" onSubmit={event => { event.preventDefault(); onOpen(`/crm/pacientes?${new URLSearchParams({ q: query.trim() })}`); }}><Icon name="users" size={17} /><input ref={input} type="search" aria-label="Buscar pacientes" placeholder="Buscar pacientes" value={query} onChange={event => setQuery(event.target.value)} /><button type="submit" aria-label="Buscar"><Icon name="arrow" size={16} /></button><kbd>Ctrl K</kbd></form>
-    <HomeLink href="/crm/agenda" onOpen={onOpen} className="ph-button ph-primary"><Icon name="plus" size={17} />Nueva consulta</HomeLink></>;
+  return `${greeting}${name.trim() ? `, ${name.trim().split(/\s+/)[0]}` : ''}`;
 }
 
 function PreparedAppointment({ entry, now, onOpen }: { entry: HomeAppointment | null; now: Date; onOpen: Open }) {

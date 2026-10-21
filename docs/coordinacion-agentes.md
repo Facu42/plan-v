@@ -1,3 +1,5 @@
+21/10 · Cursor · Se trajo main a la fase A del armazón (`claude/panel-fase-a-armazon`, [PR #162](https://github.com/Facu42/plan-v/pull/162)) sin rebase y sin juntar. La nutri sigue con el armazón del boceto. La vista previa de suscripciones ya no le pasa al menú un control que ese menú no tiene.
+
 19/10 noche · Cursor · El pago único de la cuota del mes quedó en `cursor/pago-mensual-unico` ([PR #157](https://github.com/Facu42/plan-v/pull/157), borrador contra las pantallas del [PR #156](https://github.com/Facu42/plan-v/pull/156)). Bandera apagada. Migración `20261020143000` escrita y sin aplicar. No se tocó la ficha ni el chat. El débito sigue en el [PR #155](https://github.com/Facu42/plan-v/pull/155). Sin merge y sin producción. Siguiente: ficha y chat desde esta rama.
 
 # Coordinación entre agentes (Claude, Codex, Cursor)

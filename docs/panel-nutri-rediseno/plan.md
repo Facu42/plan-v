@@ -247,8 +247,24 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 2 | Codex | `codex/panel-nutri-fase-2` · [PR #151](https://github.com/Facu42/plan-v/pull/151) | Integrada a main 4dc9a79; controles del PR aprobados |
 | 3 | Codex | `codex/panel-nutri-fase-3` · [PR #152](https://github.com/Facu42/plan-v/pull/152) | Integrada a main `6697d28` |
 | 4 | Codex | `codex/panel-nutri-fase-4` · [PR #154](https://github.com/Facu42/plan-v/pull/154) | Integrada a main |
-| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Lista para juntar; Facundo autorizó. Convive con la ficha de la fase 4 |
-| Fases nuevas A a I (boceto pasado como código) | Claude | una rama por fase | Ver `instrucciones-boceto.md` §4; A en curso. Reemplazan la corrección del menú y las fases 6 a 9 |
+| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Integrada a main `c09466b`, junto con la fase 4 |
+| Corrección del menú | Cursor | [PR #158](https://github.com/Facu42/plan-v/pull/158) | No se junta. El armazón queda en la fase A |
+| Fases nuevas A a I (boceto pasado como código) | Claude | `claude/panel-fase-a-armazon` · [PR #162](https://github.com/Facu42/plan-v/pull/162) | Fase A en esta rama. Reemplazan la corrección del menú y las fases 6 a 9 |
+| 6 a 9 | Por coordinar | — | Pendientes; las cubren las fases A a I |
+
+## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-21 · Cursor · Fase A trae main
+- Hecho: se trajo `origin/main` sin rebase. El armazón del boceto sigue para la nutri y la app de la paciente conserva su barra. La fase 5 ya está en main.
+- Cómo: el choque estaba en la bitácora y en la barra de la paciente. La nutri entra por `PanelBocetoShell` y no vuelve a la barra vieja.
+- Rama: `claude/panel-fase-a-armazon`. [PR #162](https://github.com/Facu42/plan-v/pull/162). Sin juntar.
+
+### 2026-10-20 04:45 · Claude · Fase A (armazón) pasada del boceto como código
+- Hecho: menú lateral con submenús en árbol, flecha de plegar, cuenta con su menú (tema, dos pasos, primeros pasos, ver como paciente) y cerrar sesión, encabezado común (título, buscador con Ctrl K, campana) y el de Inicio con fecha y saludo, barra de abajo y cajón en el celular, tema oscuro por defecto. Se sacaron la barra «Pacientes / Ficha / Plan», el título repetido del armazón y el pie dentro del panel.
+- Cómo: `scripts/panel-boceto-css.mjs` copia estilos, íconos e imágenes del boceto sin cambiar valores; `PanelBocetoShell` y `PanelNavigation` tienen el mismo marcado que `shell()`. `npm run panel:contrato`: 22 piezas iguales en claro y oscuro (antes 17 diferencias). 3.194 pruebas y los 6 recorridos de punta a punta pasan.
+- Rama: `claude/panel-fase-a-armazon`. Se junta a main solo con el ok de Facundo.
+- Falta: fases B a I. Submenús «Respuestas guardadas» (Mensajes) y «Pedidos de cambio» (Planes) ya están en el menú y abren Mensajes y Planes; sus pantallas llegan con las fases F y G. «Todas las funciones» salió del menú (el boceto no la tiene; la dirección sigue andando).
+- Próximo paso exacto: fase B (Inicio) en `claude/panel-fase-b-inicio`: pasar `inicio()` del boceto a `PanelHome.tsx` con los datos que ya calcula.
 
 ### 2026-10-20 04:30 · Claude · Instrucciones pantalla por pantalla y fases nuevas
 - Hecho: `instrucciones-boceto.md` con el método (copiar el código del boceto, no redibujarlo), lo que hoy no coincide en cada pantalla, una tabla con la función y línea del boceto, la ruta, el componente actual y los datos que se conservan, y las fases nuevas A a I.
@@ -263,11 +279,6 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 - Rama y commit: `claude/prueba-boceto`.
 - Falta: corregir el menú hasta que el comando salga en verde, y sumar a `PIEZAS` las demás pantallas (encabezado, tarjetas, tablas) a medida que se corrigen.
 - Próximo paso exacto: correr `npm run local`, después `npm run panel:contrato`, corregir lo que marca en `panel-nutri-shell.css` y repetir hasta que no quede ninguna fila roja.
-| 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Integrada a main `c09466b`, junto con la fase 4 |
-| Corrección del menú y de lo que no coincide | Cursor | `cursor/arreglo-mobile-fase5` · [PR #158](https://github.com/Facu42/plan-v/pull/158) | Hecha en #158, sin juntar. La fase 6 sigue en Codex (`codex/panel-nutri-fase-6`) |
-| 6 a 9 | Por coordinar | — | Pendientes, una rama y un PR por fase |
-
-## 8. Bitácora (una entrada por paso, la más nueva arriba)
 
 ### 2026-10-20 01:15 · Cursor · Main en el backend de suscripciones
 - Hecho: se trajo `origin/main` sin rebase. La fase 5 sigue integrada. Se conservó la revisión de Claude del 20/10 00:30. El contrato de cobro no cambia. Las seis correcciones del boceto están en el PR #158.
