@@ -257,6 +257,15 @@ function publicAiEnabled() {
   }
 }
 
+function integrationsMissing(): string[] {
+  const e = process.env, out: string[] = [];
+  for (const k of ['SCHEDULING_TOKEN_KEY', 'MP_SCHEDULING_CLIENT_ID', 'MP_SCHEDULING_CLIENT_SECRET', 'MP_SCHEDULING_WEBHOOK_SECRET', 'SCHEDULING_PUBLIC_BASE_URL']) if (!e[k]?.trim()) out.push(k);
+  if (e.SCHEDULING_TOKEN_KEY && Buffer.from(e.SCHEDULING_TOKEN_KEY, 'base64').length !== 32) out.push('SCHEDULING_TOKEN_KEY:format');
+  if (e.SCHEDULING_PUBLIC_BASE_URL && !/^https:\/\//.test(e.SCHEDULING_PUBLIC_BASE_URL)) out.push('SCHEDULING_PUBLIC_BASE_URL:format');
+  if (!integrationAvailability().mercadopago) out.push('mercadopago:unavailable');
+  return out;
+}
+
 app.get('/api/health', async (c) => {
   const jobs = await processQueue.counts();
   return c.json({
@@ -267,6 +276,8 @@ app.get('/api/health', async (c) => {
     jobs,
     sha: releaseSha(),
     worker: evaluateReadiness(process.env, jobs).worker,
+    // Solo nombres de variables que faltan o tienen formato inválido; nunca valores.
+    integrations_missing: integrationsMissing(),
   });
 });
 
