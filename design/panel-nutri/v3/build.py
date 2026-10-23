@@ -5,7 +5,7 @@ os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src'))
 s=open('base.html').read()
 js=open('fx.js').read()+open('cob.js').read(); css=open('fx.css').read()+open('cob.css').read()+open('imp.css').read()+open('act.css').read()+open('msg.css').read()+open('pl.css').read()
 # --- nt --- (funciones de Nutreando, docs/nutreando/plan.md)
-css+=open('nt.css').read(); NT='\n'+open('nt.js').read()
+css+=open('nt.css').read()+open('pub.css').read(); NT='\n'+open('nt.js').read()+'\n'+open('pub.js').read()
 # --- fin nt ---
 s=s.replace('const FTABS2=',js+'\nconst FTABS2=',1)
 old="document.getElementById('fwrap').innerHTML=FT[ftab]();}"
