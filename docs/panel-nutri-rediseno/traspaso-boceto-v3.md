@@ -42,6 +42,7 @@ Las piezas de `src/`:
 | `imp.css` | Pasada de pulido (ver sección 5) |
 | `msg.js`, `msg.css` | Mensajes: bandeja, respuestas guardadas y avisos automáticos |
 | `pl.js`, `pl.css` | Planes: todos los planes, plan de una paciente, recetas, plantillas y equivalencias |
+| `nt.js`, `pub.js`, `eq.js`, `aj.js`, `mob.js` (y sus `.css`) | Funciones de Nutreando (hilo Nutreando): encabezado de la ficha y campana, Página pública, Equipo, Ajustes y versión celular. Se enganchan en el bloque «nt» de `build.py`. Pruebas: `tests/ntscr.mjs` y `tests/mobt.mjs` |
 | `mph.json`, `rcimg.json` | Fotos reales en texto (las del chat y las de recetas), sacadas de `src/assets/showroom/` y `public/landing/` |
 
 ## 3. Decisiones de Facundo que no se discuten
@@ -57,7 +58,7 @@ Las piezas de `src/`:
 | Siempre | **Nada de WhatsApp en el panel.** Los avisos a pacientes van por la app y por mail. |
 | Siempre | Respuestas a Facundo en español simple, con voseo, sin jerga ni nombres de archivos o variables. Él mira desde el celular: todo se le entrega como link de Artifact. |
 
-## 4. Estado de cada pantalla (versión 16, 23/10)
+## 4. Estado de cada pantalla (versión 22, 23/10)
 
 | Pantalla | Estado | Qué tiene |
 |---|---|---|
@@ -68,10 +69,10 @@ Las piezas de `src/`:
 | Cobranzas | Hecha | Mes, trimestre y año, movimientos, cuotas vencidas, exportar planilla |
 | Mensajes | Hecha | Bandeja de 3 columnas (lista, chat con fotos, audios y archivos, ficha corta), respuestas guardadas, avisos automáticos, mensaje a varias |
 | Planes | Hecha | Todos los planes; plan de una paciente con selector, semana editable, lista de compras, indicaciones, versiones y cuatro maneras de empezar; recetas con fotos; 10 plantillas; equivalencias. Nada le llega a la paciente hasta publicar |
-| Página pública | **Falta** | El botón del menú existe pero todavía no abre nada |
-| Equipo | **Falta** | Ídem |
-| Ajustes | **Falta** | Ídem. Acá tienen que vivir también los avisos automáticos (hoy se ven en Mensajes) |
-| Celular y tablet | **Falta** | El boceto nuevo está dibujado solo para escritorio. Facundo pidió «responsive sin huecos»: hay que dibujarlo antes de pasar a la app |
+| Página pública | Hecha (v20) | Mi página (perfil, dónde atiende, obras sociales, opiniones, vista de la paciente, QR, links por servicio, números del mes), Servicios (precios, obras sociales, descuentos, reglas) y Reservas en línea (reglas, horarios, confirmación y recordatorio por app y mail) |
+| Equipo | Hecha (v21) | Integrantes con roles y sesiones, Permisos por módulo que se tocan (la ficha clínica solo para nutris) y Registro de accesos con descarga |
+| Ajustes | Hecha (v21) | Mi cuenta, Plantillas (formularios y certificados), Avisos automáticos (usa los mismos datos que Mensajes), Seguridad e Integraciones. Planilla por obra social desde Exportar en Cobranzas |
+| Celular | Hecha (v22) | Todo el boceto a 390: barra arriba, cinco accesos abajo, menú completo en cajón, paneles que suben desde abajo; entra solo debajo de 760 de ancho o con el botón «Celular». Tablet no se dibujó |
 
 Descargas que funcionan de verdad: planillas de Cobranzas y listas (CSV), plan de la paciente y lista de compras
 (texto). Usan la función de descargas del Artifact, que ya está declarada en el link.
