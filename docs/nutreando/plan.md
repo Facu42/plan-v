@@ -76,10 +76,10 @@ y `nt.css`, con ganchos mínimos en `build.py`.
 
 | Paso | Qué | Funciones | Quién | Estado | Rama / commit |
 | --- | --- | --- | --- | --- | --- |
-| 0.1 | Campana en todas las pantallas, «Consulta en curso» en el menú, cumpleaños en Inicio, grupos en Pacientes y en «Mensaje a varias» | 7, 8, 9 | Claude (hilo Nutreando) | Hecho (sin publicar todavía) | `claude/project-thread-he8mny` |
-| 0.2 | Ficha: lista «Para la paciente» + cerrar y firmar + notas agregadas; historial y accesos; pedir registro; formularios; certificados; laboratorio con IA; balanza con IA; aviso de valor mal cargado | 1, 2, 3 (vista en ficha), 4, 5, 6, 10, 11, 12 | Claude (hilo Nutreando) | En curso | `claude/project-thread-he8mny` |
-| 0.3 | Planes y Ficha → Plan: tipo de alimentación y estrategia | 13 | Claude (hilo Nutreando) | Pendiente | |
-| 0.4 | Probar (acts, mact, pact y medidas 1440×900 en claro y oscuro), mirar capturas, publicar al mismo link, subir fuentes | — | Claude (hilo Nutreando) | Pendiente | |
+| 0.1 | Campana en todas las pantallas, «Consulta en curso» en el menú, cumpleaños en Inicio, grupos en Pacientes y en «Mensaje a varias» | 7, 8, 9 | Claude (hilo Nutreando) | Hecho (86262e7) | `claude/project-thread-he8mny` |
+| 0.2 | Ficha: lista «Para la paciente» + cerrar y firmar + notas agregadas; historial y accesos; pedir registro; formularios; certificados; laboratorio con IA; balanza con IA; aviso de valor mal cargado | 1, 2, 3 (vista en ficha), 4, 5, 6, 10, 11, 12 | Claude (hilo Nutreando) | Hecho (1eadcff) | `claude/project-thread-he8mny` |
+| 0.3 | Planes y Ficha → Plan: tipo de alimentación y estrategia | 13 | Claude (hilo Nutreando) | Hecho (1eadcff) | `claude/project-thread-he8mny` |
+| 0.4 | Probar (acts, mact, pact y medidas 1440×900 en claro y oscuro), mirar capturas, publicar al mismo link, subir fuentes | — | Claude (hilo Nutreando) | Hecho: versión 17 del boceto | `claude/project-thread-he8mny` |
 | 0.5 | Página pública: servicios, obras sociales en la reserva, links y QR, perfil completo, opiniones | 14, 15, 16, 17 | Hilo del panel | Pendiente | |
 | 0.6 | Equipo: permisos por módulo, registro de accesos | 3, 18 | Hilo del panel | Pendiente | |
 | 0.7 | Ajustes: plantillas de formularios y certificados, obras sociales, reglas de reserva, seguridad, avisos automáticos (con reglas de regreso); planilla por obra social en Cobranzas | 5, 6, 14, 15, 23 | Hilo del panel | Pendiente | |
@@ -158,5 +158,6 @@ El código de agenda pública, Google y Mercado Pago ya está en `main` y apagad
 
 ## Bitácora
 
+- 23/10 · Claude (hilo Nutreando) · 0.2, 0.3 y 0.4 hechos. Ficha: lista «Para Sofía al terminar», firma que bloquea la nota, acuerdos que ve la paciente, pedir registro alimentario (con modo sin números), certificados con 4 modelos, formularios, «Cambios y accesos», laboratorio con IA, importar de la balanza y aviso de valor raro en cintura. Planes: tipo de alimentación. Todas las pruebas pasan (acts errores [], medidas 900). Publicado como versión 17 en el mismo link. Sigue 0.5 a 0.8 en el hilo del panel, después el ok de Facundo (0.9).
 - 23/10 · Claude (hilo Nutreando) · 0.1 hecho: campana con filtros en todas las pantallas, «Consulta en curso» en el menú, cumpleaños en Pendientes y tarjeta, grupos en Pacientes y en «Mensaje a varias».
 - 23/10 · Claude (hilo Nutreando) · Plan aprobado. Este archivo creado. Arranca 0.1 en `claude/project-thread-he8mny`.
