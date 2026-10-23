@@ -170,12 +170,11 @@ const ntWithDiet=r=>{if(!r||!r.t)return r;r.body+=NTDIET();const a=r.after;r.aft
 const _ntGoal=pGoal;pGoal=function(){let h=_ntGoal().replace('<small>Meta diaria</small>',`<small>Meta diaria · ${ntDiet[0].toLowerCase()}</small>`);if(ntDiet[1]!=='Sin estrategia especial')h=h.replace('<small>Proteínas · carbohidratos · grasas</small>',`<small>${ntDiet[1]} · P · C · G</small>`);return h;};
 const _ntPlanF=FT.plan;FT.plan=()=>NTREP(_ntPlanF(),'Mifflin-St Jeor · actividad leve',`Mifflin-St Jeor · ${ntDiet[0].toLowerCase()}${ntDiet[1]==='Sin estrategia especial'?'':', '+ntDiet[1].toLowerCase()}`);
 if(ftab==='plan')drawFicha();
-// Ficha: encabezado con degradé y botones agrupados; pestañas con fondo y Consultas tercera (pedido de Facundo, 23/10)
+// Ficha: encabezado con degradé y botones ordenados (campana suelta como en Inicio); pestañas con fondo y Consultas tercera (pedido de Facundo, 23/10)
 (()=>{const fh=document.querySelector('#s-ficha .fh');if(!fh)return;fh.classList.add('ntfh');
  const st=fh.querySelector('.appst'),bell=fh.querySelector('[aria-label="Avisos"]'),chat=fh.querySelector('[data-chat="open"]'),ag=[...fh.querySelectorAll(':scope>.chip')].find(b=>b.textContent.trim()==='Agendar'),go=fh.querySelector(':scope>.cta');
  const r=document.createElement('div');r.className='ntfhr';const g=document.createElement('div');g.className='ntfhg';
- const ib=document.createElement('div');ib.className='ntib';ib.setAttribute('role','group');ib.setAttribute('aria-label','Avisos y chat');
- if(bell)ib.append(bell);if(chat){chat.className='ntchat';ib.append(chat);}
- g.append(ib);if(ag)g.append(ag);if(go)g.append(go);if(st)r.append(st);r.append(g);fh.append(r);
+ if(bell)bell.classList.add('ntbell');
+ if(chat)g.append(chat);if(ag)g.append(ag);if(bell)g.append(bell);if(go)g.append(go);if(st)r.append(st);r.append(g);fh.append(r);
  const i=FTABS2.findIndex(t=>t[0]==='consultas');if(i>2){const [c]=FTABS2.splice(i,1);FTABS2.splice(2,0,c);}
  drawFicha();})();

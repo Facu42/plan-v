@@ -48,13 +48,7 @@
 .ntfhr .appst b::after{content:"·";margin-left:8px;color:var(--ink3);font-weight:400}
 .ntfhg{display:flex;align-items:center;gap:8px}
 .ntfhg>.chip,.ntfhg>.cta{height:36px;padding:0 15px}
-.ntib{display:flex;align-items:center;height:36px;border:1px solid var(--line2);background:var(--card);border-radius:999px;padding:0 3px}
-.ntib .ibtn{width:30px;height:30px;border:0;background:none;flex:none}
-.ntib .ibtn:hover{background:var(--app)}
-.ntib .ibtn i{top:6px;right:6px}
-.ntchat{display:inline-flex;align-items:center;gap:6px;height:30px;border:0;background:none;border-left:1px solid var(--line);border-radius:0 999px 999px 0;padding:0 10px 0 9px;color:var(--ink2);font-size:12.5px;cursor:pointer}
-.ntchat:hover{color:var(--ink)}
-.ntchat svg{width:14px;height:14px}
+.ntfhg>.ntbell{width:36px;height:36px}
 #ftabs.ftabs{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;gap:1px;box-shadow:var(--shadow)}
 #ftabs.ftabs button{flex:1 1 auto;justify-content:center;padding:8px 7px;font-size:13.5px;border-radius:10px;transition:background .2s,color .2s}
 #ftabs.ftabs button:hover{background:var(--app)}
@@ -62,3 +56,14 @@
 #ftabs.ftabs button.on::after{display:none}
 #ftabs.ftabs .n{font-size:11px}
 @media (prefers-reduced-motion:reduce){#ftabs.ftabs button{transition:none}}
+/* Ficha: espacios parejos y sombra en los paneles (23/10) */
+:root{--ntsh:0 1px 2px rgba(20,21,25,.05),0 10px 26px rgba(20,21,25,.09)}
+:root[data-theme="dark"]{--ntsh:0 1px 2px rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.35)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ntsh:0 1px 2px rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.35)}}
+#s-ficha{gap:14px}
+#fwrap>.fx,#fwrap>.fbody{padding-top:0}
+#s-ficha .card,#s-ficha .dk,#ftabs.ftabs{box-shadow:var(--ntsh)}
+/* Flecha de plegar el menú: abajo, lejos del logo */
+.side .fold{top:auto;bottom:34px}
+.app.mcol .side .fold{left:auto;right:-12px;top:auto;bottom:34px}
+.app.mcol .side .fold{right:auto;left:calc(50% - 12px);bottom:74px}
