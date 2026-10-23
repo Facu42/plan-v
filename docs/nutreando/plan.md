@@ -76,8 +76,8 @@ y `nt.css`, con ganchos mínimos en `build.py`.
 
 | Paso | Qué | Funciones | Quién | Estado | Rama / commit |
 | --- | --- | --- | --- | --- | --- |
-| 0.1 | Campana en todas las pantallas, «Consulta en curso» en el menú, cumpleaños en Inicio, grupos en Pacientes y en «Mensaje a varias» | 7, 8, 9 | Claude (hilo Nutreando) | En curso | `claude/project-thread-he8mny` |
-| 0.2 | Ficha: lista «Para la paciente» + cerrar y firmar + notas agregadas; historial y accesos; pedir registro; formularios; certificados; laboratorio con IA; balanza con IA; aviso de valor mal cargado | 1, 2, 3 (vista en ficha), 4, 5, 6, 10, 11, 12 | Claude (hilo Nutreando) | Pendiente | |
+| 0.1 | Campana en todas las pantallas, «Consulta en curso» en el menú, cumpleaños en Inicio, grupos en Pacientes y en «Mensaje a varias» | 7, 8, 9 | Claude (hilo Nutreando) | Hecho (sin publicar todavía) | `claude/project-thread-he8mny` |
+| 0.2 | Ficha: lista «Para la paciente» + cerrar y firmar + notas agregadas; historial y accesos; pedir registro; formularios; certificados; laboratorio con IA; balanza con IA; aviso de valor mal cargado | 1, 2, 3 (vista en ficha), 4, 5, 6, 10, 11, 12 | Claude (hilo Nutreando) | En curso | `claude/project-thread-he8mny` |
 | 0.3 | Planes y Ficha → Plan: tipo de alimentación y estrategia | 13 | Claude (hilo Nutreando) | Pendiente | |
 | 0.4 | Probar (acts, mact, pact y medidas 1440×900 en claro y oscuro), mirar capturas, publicar al mismo link, subir fuentes | — | Claude (hilo Nutreando) | Pendiente | |
 | 0.5 | Página pública: servicios, obras sociales en la reserva, links y QR, perfil completo, opiniones | 14, 15, 16, 17 | Hilo del panel | Pendiente | |
@@ -85,6 +85,9 @@ y `nt.css`, con ganchos mínimos en `build.py`.
 | 0.7 | Ajustes: plantillas de formularios y certificados, obras sociales, reglas de reserva, seguridad, avisos automáticos (con reglas de regreso); planilla por obra social en Cobranzas | 5, 6, 14, 15, 23 | Hilo del panel | Pendiente | |
 | 0.8 | Celular (390) de todo el boceto | todas | Hilo del panel | Pendiente | |
 | 0.9 | Ok de Facundo al boceto completo | — | Facundo | Espera ok | |
+
+Notas de 0.1: todo vive en `src/nt.js` y `src/nt.css` (ganchos en `build.py`). Las pruebas del boceto aceptan
+`PW_CHROMIUM=/opt/pw-browsers/chromium` para usar el Chromium instalado. `acts.mjs` pasa con 209 botones y `errors []`.
 
 Ya resuelto: el recordatorio de cuota de Cobranzas decía «por WhatsApp»; `build.py` ya lo reemplaza por «a su app».
 
@@ -155,4 +158,5 @@ El código de agenda pública, Google y Mercado Pago ya está en `main` y apagad
 
 ## Bitácora
 
+- 23/10 · Claude (hilo Nutreando) · 0.1 hecho: campana con filtros en todas las pantallas, «Consulta en curso» en el menú, cumpleaños en Pendientes y tarjeta, grupos en Pacientes y en «Mensaje a varias».
 - 23/10 · Claude (hilo Nutreando) · Plan aprobado. Este archivo creado. Arranca 0.1 en `claude/project-thread-he8mny`.
