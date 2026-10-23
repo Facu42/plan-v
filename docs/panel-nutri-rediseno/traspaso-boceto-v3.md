@@ -138,7 +138,8 @@ NODE_PATH=$PWD/node_modules node design/panel-nutri/v3/tests/plt.mjs
 | `mact.mjs`, `pact.mjs` | Lo mismo para Mensajes (36 acciones) y Planes (unas 60) |
 | `msgt.mjs`, `plt.mjs`, `plt2.mjs`, `cobt.mjs`, `fxt.mjs` | Que cada vista mida 900 de alto en claro y oscuro y que nada se corte. Solo pueden desplazarse por dentro las listas largas (aparecen como `scroll:`) |
 
-Todas tienen que terminar con `errors []`. Además se sacan capturas a 1440×900 en claro y oscuro y **se miran**:
+Todas tienen que terminar con `errors []`. Las que miden dejan capturas `.png` en la carpeta desde donde se
+corren: miralas y borralas antes de guardar. Además se sacan capturas a 1440×900 en claro y oscuro y **se miran**:
 el porcentaje no alcanza.
 
 ### 6.4 Publicar
