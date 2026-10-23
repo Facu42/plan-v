@@ -12,7 +12,7 @@ await c('.preq [data-pq="1"]','aprobar Julia');
 await c('tr[data-pp="0"]','abrir Sofía');
 await c('[data-pc="2,1"]','celda almuerzo mar');await c('[data-palt="0"]','usar equivalente');await c('[data-pd="5"]','día sábado');
 await c('[data-pw="0"]','semana 1');await c('[data-pw="2"]','semana 3');
-await c('[data-pai="Bajar el sodio"]','asistente');await pg.waitForTimeout(800);await c('#act [data-ok]','aplicar asistente');
+await c('[data-pai="Bajar el sodio"]','asistente');await pg.waitForTimeout(800);await c('#iadr [data-iaok]','aplicar asistente');await c('[data-iaa="drx"]','cerrar asistente');
 await c('.preq [data-pq="0"]','aprobar pedido Sofía');
 await c('[data-pa="colacion"]','colación');await c('#act [data-ok]','agregar');
 await c('[data-pa="metas"]','metas');await c('#act [data-ok]','guardar metas');
@@ -22,7 +22,7 @@ await c('[data-pmenu]','abrir selector');await pg.fill('#ppq','luc');await c('.p
 await c('[data-pt="compras"]','compras');await c('.pshop input','tachar');await c('[data-pa="shopsend"]','enviar lista');
 await c('[data-pt="ind"]','indicaciones');await c('[data-pa="edit"]','editar ind');await c('[data-pa="edit"]','listo ind');await c('[data-pa="evitar"]','evitar');await pg.fill('#act input.ai','Embutidos');await c('#act [data-ok]','agregar evitar');
 await c('[data-pt="ver"]','versiones');await c('[data-pa="comparar"]','comparar');await c('#act [data-x]','cerrar');await c('[data-pa="restaurar"]','restaurar');await c('#act [data-ok]','ok');
-await pg.evaluate(()=>pOpen(12));await pg.waitForTimeout(300);await c('[data-pstart="0"]','armar asistente');
+await pg.evaluate(()=>pOpen(12));await pg.waitForTimeout(300);await c('[data-pstart="0"]','armar asistente');await c('[data-iaa="go"]','armar con IA');await pg.waitForTimeout(3000);await c('[data-iaa="drx"]','cerrar asistente');
 await pg.evaluate(()=>pView(0));await c('#pacts .cta','nuevo plan');await c('#act [data-ok]','crear plan');await pg.evaluate(()=>pView(0));
 await c('#pview [data-pv="2"]','recetas');await c('#prf [data-prf="Rápida"]','filtro rápida');await c('[data-pr="4"]','receta tostadas');await c('[data-pa="receta-plan"]','agregar al plan');await c('#act [data-ok]','ok');
 await c('#pacts .cta','nueva receta');await c('#act .adrop','foto');await pg.fill('#act input.ai','Wok de verduras');await c('#act [data-ok]','guardar receta');

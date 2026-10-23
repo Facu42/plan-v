@@ -42,7 +42,7 @@ Las piezas de `src/`:
 | `imp.css` | Pasada de pulido (ver sección 5) |
 | `msg.js`, `msg.css` | Mensajes: bandeja, respuestas guardadas y avisos automáticos |
 | `pl.js`, `pl.css` | Planes: todos los planes, plan de una paciente, recetas, plantillas y equivalencias |
-| `nt.js`, `pub.js`, `eq.js`, `aj.js`, `hc.js`, `mob.js` (y sus `.css`) | Funciones de Nutreando (hilo Nutreando): encabezado de la ficha y campana, Página pública, Equipo, Ajustes, Historia clínica y Laboratorio con fechas y propuestas de la consulta grabada (`hc.js`), y versión celular. Se enganchan en el bloque «nt» de `build.py`. Pruebas: `tests/ntscr.mjs` y `tests/mobt.mjs` |
+| `nt.js`, `pub.js`, `eq.js`, `aj.js`, `hc.js`, `ia.js`, `mob.js` (y sus `.css`) | Funciones de Nutreando (hilo Nutreando): encabezado de la ficha y campana, Página pública, Equipo, Ajustes, Historia clínica y Laboratorio con fechas y propuestas de la consulta grabada (`hc.js`), armado del plan con IA (`ia.js`), y versión celular. Se enganchan en el bloque «nt» de `build.py`. Pruebas: `tests/ntscr.mjs` y `tests/mobt.mjs` |
 | `mph.json`, `rcimg.json` | Fotos reales en texto (las del chat y las de recetas), sacadas de `src/assets/showroom/` y `public/landing/` |
 
 ## 3. Decisiones de Facundo que no se discuten
@@ -58,7 +58,7 @@ Las piezas de `src/`:
 | Siempre | **Nada de WhatsApp en el panel.** Los avisos a pacientes van por la app y por mail. |
 | Siempre | Respuestas a Facundo en español simple, con voseo, sin jerga ni nombres de archivos o variables. Él mira desde el celular: todo se le entrega como link de Artifact. |
 
-## 4. Estado de cada pantalla (versión 23, 23/10)
+## 4. Estado de cada pantalla (versión 24, 23/10)
 
 | Pantalla | Estado | Qué tiene |
 |---|---|---|
@@ -68,7 +68,7 @@ Las piezas de `src/`:
 | Ficha | Hecha | 10 pestañas: Resumen, Historia clínica, Mediciones, Objetivos y hábitos, Consultas y notas, Plan, Registro alimentario, Laboratorio y estudios, Archivos y Cobros. v23: Historia clínica por temas con fecha y origen de cada dato, propuestas de la consulta grabada y «cómo estaba» en una fecha; Laboratorio con columnas por fecha y marcas de la historia |
 | Cobranzas | Hecha | Mes, trimestre y año, movimientos, cuotas vencidas, exportar planilla |
 | Mensajes | Hecha | Bandeja de 3 columnas (lista, chat con fotos, audios y archivos, ficha corta), respuestas guardadas, avisos automáticos, mensaje a varias |
-| Planes | Hecha | Todos los planes; plan de una paciente con selector, semana editable, lista de compras, indicaciones, versiones y cuatro maneras de empezar; recetas con fotos; 10 plantillas; equivalencias. Nada le llega a la paciente hasta publicar |
+| Planes | Hecha | Todos los planes; plan de una paciente con selector, semana editable, lista de compras, indicaciones, versiones y cuatro maneras de empezar; recetas con fotos; 10 plantillas; equivalencias. Nada le llega a la paciente hasta publicar. v24: «Armar con IA» (pedido con palabras y opciones, lo que toma de la ficha, porqué de cada comida, asistente con cambios en una frase, control antes de publicar) |
 | Página pública | Hecha (v20) | Mi página (perfil, dónde atiende, obras sociales, opiniones, vista de la paciente, QR, links por servicio, números del mes), Servicios (precios, obras sociales, descuentos, reglas) y Reservas en línea (reglas, horarios, confirmación y recordatorio por app y mail) |
 | Equipo | Hecha (v21) | Integrantes con roles y sesiones, Permisos por módulo que se tocan (la ficha clínica solo para nutris) y Registro de accesos con descarga |
 | Ajustes | Hecha (v21) | Mi cuenta, Plantillas (formularios y certificados), Avisos automáticos (usa los mismos datos que Mensajes), Seguridad e Integraciones. Planilla por obra social desde Exportar en Cobranzas |
