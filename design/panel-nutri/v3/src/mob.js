@@ -36,7 +36,7 @@ IC.menu||='<path d="M4 7h16M4 12h16M4 17h10"/>';IC.dots||='<circle cx="6" cy="12
  /* calendarios y tablas que se desplazan de costado quedan como están */
  const SKIP='.days,.hrs,.mg,table,.pgrid,.pdays';
  window.mobFix=()=>{if(!MOB.on)return;
-  main.querySelectorAll('table:not(.mst)').forEach(t=>{if(!t.closest('#s-pacientes,.hoy')&&!t.matches('.eqm'))t.classList.add('mst');});
+  main.querySelectorAll('table:not(.mst)').forEach(t=>{if(!t.closest('#s-pacientes,.hoy,.lbt')&&!t.matches('.eqm'))t.classList.add('mst');});
   main.querySelectorAll('*').forEach(el=>{if(el.dataset.mk!==undefined||!el.offsetParent)return;if(el.closest(SKIP)){el.dataset.mk='';return}const cs=getComputedStyle(el);
    if(cs.display==='grid'||cs.display==='inline-grid'){const tw=cs.gridTemplateColumns.split(' ').filter(Boolean).map(parseFloat),n=tw.length;if(n<2){el.dataset.mk='';return}
     const even=Math.max(...tw)<=Math.min(...tw)*1.6;

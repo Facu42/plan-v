@@ -42,7 +42,7 @@ Las piezas de `src/`:
 | `imp.css` | Pasada de pulido (ver sección 5) |
 | `msg.js`, `msg.css` | Mensajes: bandeja, respuestas guardadas y avisos automáticos |
 | `pl.js`, `pl.css` | Planes: todos los planes, plan de una paciente, recetas, plantillas y equivalencias |
-| `nt.js`, `pub.js`, `eq.js`, `aj.js`, `mob.js` (y sus `.css`) | Funciones de Nutreando (hilo Nutreando): encabezado de la ficha y campana, Página pública, Equipo, Ajustes y versión celular. Se enganchan en el bloque «nt» de `build.py`. Pruebas: `tests/ntscr.mjs` y `tests/mobt.mjs` |
+| `nt.js`, `pub.js`, `eq.js`, `aj.js`, `hc.js`, `mob.js` (y sus `.css`) | Funciones de Nutreando (hilo Nutreando): encabezado de la ficha y campana, Página pública, Equipo, Ajustes, Historia clínica y Laboratorio con fechas y propuestas de la consulta grabada (`hc.js`), y versión celular. Se enganchan en el bloque «nt» de `build.py`. Pruebas: `tests/ntscr.mjs` y `tests/mobt.mjs` |
 | `mph.json`, `rcimg.json` | Fotos reales en texto (las del chat y las de recetas), sacadas de `src/assets/showroom/` y `public/landing/` |
 
 ## 3. Decisiones de Facundo que no se discuten
@@ -58,14 +58,14 @@ Las piezas de `src/`:
 | Siempre | **Nada de WhatsApp en el panel.** Los avisos a pacientes van por la app y por mail. |
 | Siempre | Respuestas a Facundo en español simple, con voseo, sin jerga ni nombres de archivos o variables. Él mira desde el celular: todo se le entrega como link de Artifact. |
 
-## 4. Estado de cada pantalla (versión 22, 23/10)
+## 4. Estado de cada pantalla (versión 23, 23/10)
 
 | Pantalla | Estado | Qué tiene |
 |---|---|---|
 | Inicio | Hecha | Pendientes con «Buenas noticias», Necesitan atención, tarjeta oscura de detalle, Consultas de hoy, cinco números |
 | Pacientes | Hecha | Tabla con filtros y el resumen que se despliega hacia abajo con accesos a la ficha |
 | Agenda | Hecha | Semana, turnos, bloqueos, recordatorios por la app |
-| Ficha | Hecha | 10 pestañas: Resumen, Historia clínica, Mediciones, Objetivos y hábitos, Consultas y notas, Plan, Registro alimentario, Laboratorio y estudios, Archivos y Cobros |
+| Ficha | Hecha | 10 pestañas: Resumen, Historia clínica, Mediciones, Objetivos y hábitos, Consultas y notas, Plan, Registro alimentario, Laboratorio y estudios, Archivos y Cobros. v23: Historia clínica por temas con fecha y origen de cada dato, propuestas de la consulta grabada y «cómo estaba» en una fecha; Laboratorio con columnas por fecha y marcas de la historia |
 | Cobranzas | Hecha | Mes, trimestre y año, movimientos, cuotas vencidas, exportar planilla |
 | Mensajes | Hecha | Bandeja de 3 columnas (lista, chat con fotos, audios y archivos, ficha corta), respuestas guardadas, avisos automáticos, mensaje a varias |
 | Planes | Hecha | Todos los planes; plan de una paciente con selector, semana editable, lista de compras, indicaciones, versiones y cuatro maneras de empezar; recetas con fotos; 10 plantillas; equivalencias. Nada le llega a la paciente hasta publicar |
