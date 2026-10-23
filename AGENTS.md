@@ -9,3 +9,5 @@ nada en la base de producción sin su frase escrita.
 Al terminar una tarea, anotala en la bitácora de `docs/coordinacion-agentes.md`.
 
 Panel de la nutri (rediseño): empezá por `docs/panel-nutri-rediseno/traspaso-boceto-v3.md` (boceto único, cómo se trabaja y qué sigue).
+
+Funciones de Nutreando (plan aprobado el 23/10, por etapas y con estado por paso): `docs/nutreando/plan.md`. Si se cortó otro agente, seguí desde el primer paso que no esté Hecho.
