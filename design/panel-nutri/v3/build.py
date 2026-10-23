@@ -3,7 +3,10 @@
 import os
 os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src'))
 s=open('base.html').read()
-js=open('fx.js').read()+open('cob.js').read(); css=open('fx.css').read()+open('cob.css').read()+open('imp.css').read()+open('act.css').read()+open('msg.css').read()+open('pl.css').read()+open('nt.css').read()
+js=open('fx.js').read()+open('cob.js').read(); css=open('fx.css').read()+open('cob.css').read()+open('imp.css').read()+open('act.css').read()+open('msg.css').read()+open('pl.css').read()
+# --- nt --- (funciones de Nutreando, docs/nutreando/plan.md)
+css+=open('nt.css').read(); NT='\n'+open('nt.js').read()
+# --- fin nt ---
 s=s.replace('const FTABS2=',js+'\nconst FTABS2=',1)
 old="document.getElementById('fwrap').innerHTML=FT[ftab]();}"
 assert s.count(old)==1
@@ -33,7 +36,7 @@ a='<button class="nv" type="button" aria-expanded="false" data-ic="coin">'; asse
 a='<button type="button" data-go="agenda" aria-pressed="false">Agenda</button>'; assert s.count(a)==1; s=s.replace(a,a+'<button type="button" data-go="cobranzas" aria-pressed="false">Cobranzas</button>')
 a="['pacientes','agenda','ficha'].includes(h0)"; assert s.count(a)==1; s=s.replace(a,"['pacientes','agenda','ficha','cobranzas'].includes(h0)")
 k=s.rfind('</script>')
-s=s[:k]+"document.getElementById('cwrap').innerHTML=COB();document.getElementById('cexp').insertAdjacentHTML('afterbegin',svg('dl'));\nconst _gc=go;go=function(id){_gc(id);if(id==='cobranzas')fxAnim(document.getElementById('cwrap'));};\n"+open('act.js').read()+'const MPH='+open('mph.json').read()+';\n'+open('msg.js').read()+'const RCI='+open('rcimg.json').read()+';\n'+open('pl.js').read()+'\n'+open('nt.js').read()+s[k:]
+s=s[:k]+"document.getElementById('cwrap').innerHTML=COB();document.getElementById('cexp').insertAdjacentHTML('afterbegin',svg('dl'));\nconst _gc=go;go=function(id){_gc(id);if(id==='cobranzas')fxAnim(document.getElementById('cwrap'));};\n"+open('act.js').read()+'const MPH='+open('mph.json').read()+';\n'+open('msg.js').read()+'const RCI='+open('rcimg.json').read()+';\n'+open('pl.js').read()+NT+s[k:]
 scr2='''<div class="scr" id="s-mensajes" hidden>
   <div class="top">
     <div><h1>Mensajes <span id="mtitle">· 4 sin leer</span></h1><div class="date">Chat en la app de cada paciente · respondés en 1 h 20 min en promedio</div></div>
