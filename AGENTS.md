@@ -7,3 +7,5 @@ carril de otro), después `docs/traspaso-estado-proyecto.md` (estado, pendientes
 `docs/producto/` (producto, diseño, plan y decisiones). Respetá `docs/agentes/reglas-plan-v.md`. Respuestas a Facundo en español simple. Nada directo a `main`;
 nada en la base de producción sin su frase escrita.
 Al terminar una tarea, anotala en la bitácora de `docs/coordinacion-agentes.md`.
+
+Panel de la nutri (rediseño): empezá por `docs/panel-nutri-rediseno/traspaso-boceto-v3.md` (boceto único, cómo se trabaja y qué sigue).

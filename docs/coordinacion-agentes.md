@@ -99,6 +99,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **23/10 · Claude · Traspaso del boceto único del panel** · Fuentes del boceto nuevo en `design/panel-nutri/v3/` y cómo seguir en [traspaso-boceto-v3.md](panel-nutri-rediseno/traspaso-boceto-v3.md). Solo docs y boceto, sin código de la app ni base.
 - **21/10 · Cursor · Main en Próximamente** · Se trajo main (fase A #162 e Inicio 900 #163) a [PR #168](https://github.com/Facu42/plan-v/pull/168). Siguen Próximamente y los datos de ejemplo. No reemplaza el asistente, la ayuda ni el equipo. Sin juntar.
 - **21/10 · Cursor · Rescate de Próximamente** · De #158 se rescatan `PanelSoon` y los datos de ejemplo del boceto en [PR #168](https://github.com/Facu42/plan-v/pull/168). No reemplaza el asistente, la ayuda ni el equipo que ya andan. El armazón sigue en [PR #162](https://github.com/Facu42/plan-v/pull/162). #158 se cierra. Sin SQL remoto.
 - **21/10 · Cursor · Main en el boceto del Inicio** · Se trajo main (fase A, #162) a `claude/panel-boceto-inicio-900` ([PR #163](https://github.com/Facu42/plan-v/pull/163)). El Inicio sigue midiendo 900. Solo docs y boceto. Sin juntar.

@@ -1,0 +1,17 @@
+/* Cobranzas */
+#cwrap .fx{padding-top:0}
+.fxtiles.cob4{grid-template-columns:repeat(3,1fr)}
+.cob4 .fxtile{gap:5px}
+.cob4 .fxtile .fxc{height:26px;margin-top:2px}
+.cob4 .fxtile .fxv span{font-size:11.5px}
+.cob4 .fxtile .fxstk{height:8px;margin-top:4px}
+.cob4 .fxtile .fxb{height:6px;margin-top:6px}
+.fxb.r i{background:var(--rojo-ink)}
+.fxleg.sm{font-size:11px;gap:4px 10px}
+.cwa .fxv b{color:var(--rojo-ink)}
+.cwa .fxv em{position:static;margin-left:6px}
+.fxdkp{height:6px;border-radius:99px;background:rgba(127,127,127,.28);margin-top:10px;overflow:hidden;position:relative;z-index:1}
+.fxdkp i{display:block;height:100%;border-radius:99px;background:var(--ch)}
+.fxr .cm{font-weight:500;font-size:13px;white-space:nowrap}
+.cob4 .fxtile .fxb.a{margin-top:auto}
+#cwrap .fxtb td{height:52px}

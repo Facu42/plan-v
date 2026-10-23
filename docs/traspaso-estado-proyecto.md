@@ -1,4 +1,6 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-21)
+# Traspaso del proyecto (actualización vigente: 2026-10-23)
+
+23/10 · Claude · Panel de la nutri, **boceto único con el estilo nuevo**: https://claude.ai/artifact/JwXZXARtS7e6scYcpx8cKV (fuentes en `design/panel-nutri/v3/`). Hechas Inicio, Pacientes, Agenda, Ficha de 10 pestañas, Cobranzas, Mensajes y Planes; faltan Página pública, Equipo, Ajustes y celular. Cómo seguir: [traspaso-boceto-v3.md](panel-nutri-rediseno/traspaso-boceto-v3.md).
 
 21/10 · Cursor · Se trajo main (fase A #162 e Inicio 900 #163) a [PR #168](https://github.com/Facu42/plan-v/pull/168). Siguen Próximamente y los datos de ejemplo. El asistente, la ayuda y el equipo que ya andan no se reemplazan.
 

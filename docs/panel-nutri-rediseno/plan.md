@@ -4,6 +4,8 @@ Creado el 19/10/2026 por Claude (hilo «Rediseño del panel de la nutri») a ped
 «Dejá todo un plan para desarrollar con otros agentes por si te quedás sin crédito».
 Cualquier agente (Claude, Codex, Cursor) puede tomar una fase. **Leé este archivo entero antes de empezar.**
 
+> **23/10: leé primero [traspaso-boceto-v3.md](traspaso-boceto-v3.md).** Desde el 20/10 el panel tiene un estilo nuevo y un boceto único (https://claude.ai/artifact/JwXZXARtS7e6scYcpx8cKV, fuentes en `design/panel-nutri/v3/`). Lo de abajo sigue valiendo para el método, pero la referencia visual nueva es esa.
+
 ## 1. Qué hay que construir
 
 Un panel nuevo para la nutricionista con las funciones que Plan V ya tiene, en el estilo que
@@ -250,9 +252,15 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 5 | Cursor | `cursor/panel-nutri-fase-5` · [PR #153](https://github.com/Facu42/plan-v/pull/153) | Integrada a main `c09466b`, junto con la fase 4 |
 | Corrección del menú | Cursor | [PR #158](https://github.com/Facu42/plan-v/pull/158) | No se junta. El armazón queda en la fase A |
 | Fases nuevas A a I (boceto pasado como código) | Claude | Fase A en main por [PR #162](https://github.com/Facu42/plan-v/pull/162). El Inicio del boceto entra en 1440×900 en [PR #163](https://github.com/Facu42/plan-v/pull/163) | A integrada. B a I pendientes. Reemplazan la corrección del menú y las fases 6 a 9 |
+| Boceto único, estilo nuevo (v3) | Claude | `design/panel-nutri/v3/` · [traspaso](traspaso-boceto-v3.md) | Hechas 7 pantallas (Inicio, Pacientes, Agenda, Ficha, Cobranzas, Mensajes, Planes). Faltan Página pública, Equipo, Ajustes y celular. Espera el ok de Facundo para reemplazar a `bocetos.html` |
 | 6 a 9 | Por coordinar | — | Pendientes; las cubren las fases A a I |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-23 · Claude · Traspaso del boceto único
+- Hecho: las fuentes del boceto nuevo pasaron al repo (`design/panel-nutri/v3/`: base, piezas, script de armado y pruebas) y se escribió [traspaso-boceto-v3.md](traspaso-boceto-v3.md) con el método, el estado de cada pantalla y el orden de lo que falta.
+- Cómo: `python3 design/panel-nutri/v3/build.py` arma un `panel.html` idéntico a la versión 16 publicada.
+- Próximo paso: Página pública en el boceto, después Equipo y Ajustes, cuando Facundo diga de seguir.
 
 ### 2026-10-21 · Cursor · Próximamente trae main
 - Hecho: se trajo `origin/main` (fase A #162 e Inicio 900 #163) sin rebase. Siguen la pantalla Próximamente y los datos de ejemplo. No se reemplazan el asistente, la ayuda ni el equipo.
