@@ -24,3 +24,17 @@
 @media (prefers-reduced-motion:reduce){.ntlive>i{animation:none}}
 .ntf .aseg{flex-wrap:wrap;height:auto;gap:4px}
 .ntf .aseg button{flex:0 0 auto;padding:6px 11px}
+/* Ficha: lista «Para Sofía al terminar» */
+.ntps{display:flex;flex-direction:column}
+.ntps>div{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.ntps>div:last-child{border-bottom:0}
+.ntps .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.ntps .t b{font-weight:500;font-size:12.5px}
+.ntps .t small{font-size:11px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ntps .sbtn,.ntps .pill{flex:none}
+.ntsig{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--lima-ink)}
+.ntsig.n{color:var(--ink3)}
+.nthint{display:block;color:var(--ink3);font-size:11.5px;line-height:1.45}
+.ntcert p{font-size:12px;line-height:1.55;margin:8px 0;color:var(--ink2)}
+.ntcert u{text-decoration:none;background:var(--lima-t);padding:0 3px;border-radius:4px;color:var(--ink)}
+.ntcert small{font-size:11px;color:var(--ink3)}
