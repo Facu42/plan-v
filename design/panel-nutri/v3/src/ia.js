@@ -73,7 +73,7 @@ const IAREV=i=>i===0?[['Cena del sábado: pizza sin TACC casera','Con acidez a l
  :[['Cena del sábado: pizza casera','Es la cena más pesada de la semana.',[4,5],'Pollo al limón con ensalada',440],['Desayunos: tostadas el lunes y el jueves','Se repite. Te propongo variar el jueves.',[0,3],'Bowl de frutos rojos y avena',360]];
 const iaRevLeft=i=>IAREV(i).filter((_,j)=>!(IA.rev[i]&(1<<j))?false:true);
 const _iaSem=pSemana;pSemana=function(){let h=_iaSem();if(!IA.made[pPi])return h;const [r,d]=pCell;
- return h.replace(/(<div class="pmeal"><b>[^<]*<\/b>)/,`$1<p class="iawhy">${svg('spark',12)}<span><b>Por qué:</b> ${iaWhy(r,d)}</span></p>`);};
+ h=h.replace(/<div><img(?:(?!<div><img)[\s\S])*?data-palt="2">Usar<\/button><\/div>/,'');return h.replace(/(<div class="pmeal"><b>[^<]*<\/b>)/,`$1<p class="iawhy">${svg('spark',12)}<span><b>Por qué:</b> ${iaWhy(r,d)}</span></p>`);};
 const _iaPlan=pPlan;pPlan=function(){let h=_iaPlan();if(pO()[5]==='Sin plan')return h;const n=IA.made[pPi]?iaRevLeft(pPi).length:0;
  return h.replace('<span class="sp"></span>',`${n?`<button type="button" class="iarev" data-iaa="rev">${n} para revisar</button>`:''}<span class="sp"></span><button type="button" class="sbtn k cbtn" data-iaa="dr">${svg('spark',13)}Asistente</button>`);};
 PVIEWS[1]=pPlan;
@@ -162,3 +162,15 @@ const iaOpen=i=>{iaReset(i);pPi=i;iaDrawer(0);pView(5);};
 })();
 const _iaGo2=go;go=function(id){_iaGo2(id);if(id!=='planes')iaDrawer(0);};
 const _iaDraw=pDraw;pDraw=function(a){_iaDraw(a);if(IA.dr&&pV===1)iaDrawer();};
+/* Plan más aireado (pedido de Facundo, 23/10 23:36): el submenú va en una barra con fondo y letra más grande,
+   las semanas pasan al encabezado de la semana y los botones quedan agrupados a la derecha con su ícono. */
+const _iaPlan2=pPlan;pPlan=function(){let h=_iaPlan2();if(pO()[5]==='Sin plan')return h;
+ const wk=(h.match(/<div class="tabs" id="pweek">[\s\S]*?<\/div>/)||[''])[0];
+ h=h.replace(wk,'').replace('<div class="tabs" id="ptabs">','<div class="ptabs2" id="ptabs" role="tablist">')
+  .replace(/<button type="button" data-pt="(\w+)" class="(on)?">/g,(m,k,on)=>`<button type="button" role="tab" aria-selected="${!!on}" data-pt="${k}" class="${on||''}">`)
+  .replace(/(<button type="button" class="sbtn") data-pa="vista">/,`$1 data-pa="vista">${svg('eye',13)}`).replace(/(<button type="button" class="sbtn") data-pa="guardar-tpl">Guardar como plantilla/,`$1 data-pa="guardar-tpl" title="Guardar como plantilla">${svg('copy',13)}Plantilla`)
+  ;
+ h=h.replace(/<span class="sp"><\/span>([\s\S]*?)<\/div>(?=<div class="c">|<div class="pspan)/,(m,mid)=>`<span class="sp"></span><div class="pacts2">${mid}</div></div>`);
+ if(wk&&(pTab==='semana'||pTab==='compras'))h=h.replace(/(<section class="fxp[^"]*"><header><h3>(?:Semana|Lista de compras)[^<]*<\/h3>(?:<span class="m">[^<]*<\/span>)?<span class="sp"><\/span>)/,`$1${wk.replace('class="tabs"','class="tabs pwk"').replace(/>Semana (\d)</g,'>$1<')}`);
+ return h;};
+PVIEWS[1]=pPlan;

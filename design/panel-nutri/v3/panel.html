@@ -2196,6 +2196,32 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
 .mob .iadr{top:0}
 .mob .iaideas{flex-wrap:wrap}
 .iadr{bottom:-22px}
+/* Plan más aireado */
+#pwrap.pv1 .fx{row-gap:16px}
+.prow2{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:5px 8px 5px 5px;box-shadow:var(--shadow);gap:14px}
+.ptabs2{display:flex;gap:2px}
+.ptabs2 button{font:inherit;font-size:13.5px;border:0;background:none;color:var(--ink2);padding:8px 16px;border-radius:11px;cursor:pointer;white-space:nowrap;transition:background .2s,color .2s}
+.ptabs2 button:hover{background:var(--app);color:var(--ink)}
+.ptabs2 button.on{background:var(--lima-t);color:var(--ink);font-weight:500}
+.prow2 .pstate{padding-left:14px;border-left:1px solid var(--line);font-size:12px}
+.pacts2{display:flex;align-items:center;gap:8px}
+.pacts2 .sbtn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;font-size:12px}
+.pacts2 .sbtn svg{width:13px;height:13px}
+.pwk{margin-left:10px}.pwk button{min-width:28px}
+.prow2 .iarev{margin-left:-4px}
+#pview{padding:3px}
+#pview button{font-size:12.5px;padding:6px 12px}
+#s-planes>.top,#s-planes .top{gap:14px}
+@media (prefers-reduced-motion:reduce){.ptabs2 button{transition:none}}
+.mob .prow2{flex-wrap:wrap}.mob .ptabs2{overflow-x:auto;max-width:100%;scrollbar-width:none}.mob .pacts2{flex-wrap:wrap}.mob .prow2 .pstate{border-left:0;padding-left:4px}
+#pwrap.pv1 .fx{row-gap:14px}
+.prow2{padding:4px 6px 4px 4px}
+.ptabs2 button{padding:7px 15px}
+.pacts2 .sbtn{display:inline-flex!important;gap:6px!important;white-space:nowrap}
+#pwrap .pmac{gap:4px}
+#pwrap .palt>div{padding:5px 0}
+#pwrap .iawhy{margin-top:3px}
+.pacts2 .sbtn{padding:7px 11px}.prow2{gap:12px}
 /* Celular (Nutreando 0.8) */
 .mhd,.mnav,.mscrim{display:none}
 .mob .stagewrap{height:auto!important;overflow:visible;display:flex;justify-content:center}
@@ -4832,7 +4858,7 @@ const IAREV=i=>i===0?[['Cena del sábado: pizza sin TACC casera','Con acidez a l
  :[['Cena del sábado: pizza casera','Es la cena más pesada de la semana.',[4,5],'Pollo al limón con ensalada',440],['Desayunos: tostadas el lunes y el jueves','Se repite. Te propongo variar el jueves.',[0,3],'Bowl de frutos rojos y avena',360]];
 const iaRevLeft=i=>IAREV(i).filter((_,j)=>!(IA.rev[i]&(1<<j))?false:true);
 const _iaSem=pSemana;pSemana=function(){let h=_iaSem();if(!IA.made[pPi])return h;const [r,d]=pCell;
- return h.replace(/(<div class="pmeal"><b>[^<]*<\/b>)/,`$1<p class="iawhy">${svg('spark',12)}<span><b>Por qué:</b> ${iaWhy(r,d)}</span></p>`);};
+ h=h.replace(/<div><img(?:(?!<div><img)[\s\S])*?data-palt="2">Usar<\/button><\/div>/,'');return h.replace(/(<div class="pmeal"><b>[^<]*<\/b>)/,`$1<p class="iawhy">${svg('spark',12)}<span><b>Por qué:</b> ${iaWhy(r,d)}</span></p>`);};
 const _iaPlan=pPlan;pPlan=function(){let h=_iaPlan();if(pO()[5]==='Sin plan')return h;const n=IA.made[pPi]?iaRevLeft(pPi).length:0;
  return h.replace('<span class="sp"></span>',`${n?`<button type="button" class="iarev" data-iaa="rev">${n} para revisar</button>`:''}<span class="sp"></span><button type="button" class="sbtn k cbtn" data-iaa="dr">${svg('spark',13)}Asistente</button>`);};
 PVIEWS[1]=pPlan;
@@ -4921,6 +4947,18 @@ const iaOpen=i=>{iaReset(i);pPi=i;iaDrawer(0);pView(5);};
 })();
 const _iaGo2=go;go=function(id){_iaGo2(id);if(id!=='planes')iaDrawer(0);};
 const _iaDraw=pDraw;pDraw=function(a){_iaDraw(a);if(IA.dr&&pV===1)iaDrawer();};
+/* Plan más aireado (pedido de Facundo, 23/10 23:36): el submenú va en una barra con fondo y letra más grande,
+   las semanas pasan al encabezado de la semana y los botones quedan agrupados a la derecha con su ícono. */
+const _iaPlan2=pPlan;pPlan=function(){let h=_iaPlan2();if(pO()[5]==='Sin plan')return h;
+ const wk=(h.match(/<div class="tabs" id="pweek">[\s\S]*?<\/div>/)||[''])[0];
+ h=h.replace(wk,'').replace('<div class="tabs" id="ptabs">','<div class="ptabs2" id="ptabs" role="tablist">')
+  .replace(/<button type="button" data-pt="(\w+)" class="(on)?">/g,(m,k,on)=>`<button type="button" role="tab" aria-selected="${!!on}" data-pt="${k}" class="${on||''}">`)
+  .replace(/(<button type="button" class="sbtn") data-pa="vista">/,`$1 data-pa="vista">${svg('eye',13)}`).replace(/(<button type="button" class="sbtn") data-pa="guardar-tpl">Guardar como plantilla/,`$1 data-pa="guardar-tpl" title="Guardar como plantilla">${svg('copy',13)}Plantilla`)
+  ;
+ h=h.replace(/<span class="sp"><\/span>([\s\S]*?)<\/div>(?=<div class="c">|<div class="pspan)/,(m,mid)=>`<span class="sp"></span><div class="pacts2">${mid}</div></div>`);
+ if(wk&&(pTab==='semana'||pTab==='compras'))h=h.replace(/(<section class="fxp[^"]*"><header><h3>(?:Semana|Lista de compras)[^<]*<\/h3>(?:<span class="m">[^<]*<\/span>)?<span class="sp"><\/span>)/,`$1${wk.replace('class="tabs"','class="tabs pwk"').replace(/>Semana (\d)</g,'>$1<')}`);
+ return h;};
+PVIEWS[1]=pPlan;
 
 /* Celular (Nutreando 0.8): el mismo panel a 390 de ancho.
    Arriba una barra con menú, logo, buscar, avisos y cuenta; abajo cinco accesos; el menú lateral entero se abre como cajón.

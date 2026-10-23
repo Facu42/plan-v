@@ -131,3 +131,29 @@
 .mob .iadr{top:0}
 .mob .iaideas{flex-wrap:wrap}
 .iadr{bottom:-22px}
+/* Plan más aireado */
+#pwrap.pv1 .fx{row-gap:16px}
+.prow2{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:5px 8px 5px 5px;box-shadow:var(--shadow);gap:14px}
+.ptabs2{display:flex;gap:2px}
+.ptabs2 button{font:inherit;font-size:13.5px;border:0;background:none;color:var(--ink2);padding:8px 16px;border-radius:11px;cursor:pointer;white-space:nowrap;transition:background .2s,color .2s}
+.ptabs2 button:hover{background:var(--app);color:var(--ink)}
+.ptabs2 button.on{background:var(--lima-t);color:var(--ink);font-weight:500}
+.prow2 .pstate{padding-left:14px;border-left:1px solid var(--line);font-size:12px}
+.pacts2{display:flex;align-items:center;gap:8px}
+.pacts2 .sbtn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;font-size:12px}
+.pacts2 .sbtn svg{width:13px;height:13px}
+.pwk{margin-left:10px}.pwk button{min-width:28px}
+.prow2 .iarev{margin-left:-4px}
+#pview{padding:3px}
+#pview button{font-size:12.5px;padding:6px 12px}
+#s-planes>.top,#s-planes .top{gap:14px}
+@media (prefers-reduced-motion:reduce){.ptabs2 button{transition:none}}
+.mob .prow2{flex-wrap:wrap}.mob .ptabs2{overflow-x:auto;max-width:100%;scrollbar-width:none}.mob .pacts2{flex-wrap:wrap}.mob .prow2 .pstate{border-left:0;padding-left:4px}
+#pwrap.pv1 .fx{row-gap:14px}
+.prow2{padding:4px 6px 4px 4px}
+.ptabs2 button{padding:7px 15px}
+.pacts2 .sbtn{display:inline-flex!important;gap:6px!important;white-space:nowrap}
+#pwrap .pmac{gap:4px}
+#pwrap .palt>div{padding:5px 0}
+#pwrap .iawhy{margin-top:3px}
+.pacts2 .sbtn{padding:7px 11px}.prow2{gap:12px}
