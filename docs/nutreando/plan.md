@@ -70,8 +70,8 @@ y paciente en varios consultorios, Open Food Facts, PayPal/Stripe. App de iPhone
 
 ### Etapa 0: dibujarlo en el boceto (sin app, sin base)
 
-Reparto acordado con el hilo «Rediseño del panel de la nutri» (23/10): **este hilo** hace 0.1 a 0.4; **el hilo del panel**
-hace 0.5 a 0.8 cuando Facundo le diga «seguí». Las piezas nuevas de este hilo van en `design/panel-nutri/v3/src/nt.js`
+Reparto acordado con el hilo «Rediseño del panel de la nutri» (23/10): **este hilo** hace 0.1 a 0.4; el hilo del panel
+iba a hacer 0.5 a 0.8, pero Facundo le pidió a este hilo «seguí con la próxima etapa» y se hicieron acá (avisado al hilo del panel). Las piezas nuevas de este hilo van en `design/panel-nutri/v3/src/nt.js`
 y `nt.css`, con ganchos mínimos en `build.py`.
 
 | Paso | Qué | Funciones | Quién | Estado | Rama / commit |
@@ -80,14 +80,20 @@ y `nt.css`, con ganchos mínimos en `build.py`.
 | 0.2 | Ficha: lista «Para la paciente» + cerrar y firmar + notas agregadas; historial y accesos; pedir registro; formularios; certificados; laboratorio con IA; balanza con IA; aviso de valor mal cargado | 1, 2, 3 (vista en ficha), 4, 5, 6, 10, 11, 12 | Claude (hilo Nutreando) | Hecho (1eadcff) | `claude/project-thread-he8mny` |
 | 0.3 | Planes y Ficha → Plan: tipo de alimentación y estrategia | 13 | Claude (hilo Nutreando) | Hecho (1eadcff) | `claude/project-thread-he8mny` |
 | 0.4 | Probar (acts, mact, pact y medidas 1440×900 en claro y oscuro), mirar capturas, publicar al mismo link, subir fuentes | — | Claude (hilo Nutreando) | Hecho: versión 17 del boceto | `claude/project-thread-he8mny` |
-| 0.5 | Página pública: servicios, obras sociales en la reserva, links y QR, perfil completo, opiniones | 14, 15, 16, 17 | Hilo del panel | Pendiente | |
-| 0.6 | Equipo: permisos por módulo, registro de accesos | 3, 18 | Hilo del panel | Pendiente | |
-| 0.7 | Ajustes: plantillas de formularios y certificados, obras sociales, reglas de reserva, seguridad, avisos automáticos (con reglas de regreso); planilla por obra social en Cobranzas | 5, 6, 14, 15, 23 | Hilo del panel | Pendiente | |
-| 0.8 | Celular (390) de todo el boceto | todas | Hilo del panel | Pendiente | |
+| 0.5 | Página pública: servicios, obras sociales en la reserva, links y QR, perfil completo, opiniones | 14, 15, 16, 17 | Claude (hilo Nutreando) | Hecho: versión 20 (f143eb4) | `claude/project-thread-he8mny` |
+| 0.6 | Equipo: permisos por módulo, registro de accesos | 3, 18 | Claude (hilo Nutreando) | Hecho: versión 21 (987a1ea) | `claude/project-thread-he8mny` |
+| 0.7 | Ajustes: plantillas de formularios y certificados, obras sociales, reglas de reserva, seguridad, avisos automáticos (con reglas de regreso); planilla por obra social en Cobranzas | 5, 6, 14, 15, 23 | Claude (hilo Nutreando) | Hecho: versión 21 (987a1ea) | `claude/project-thread-he8mny` |
+| 0.8 | Celular (390) de todo el boceto | todas | Claude (hilo Nutreando) | Hecho: versión 22 | `claude/project-thread-he8mny` |
 | 0.9 | Ok de Facundo al boceto completo | — | Facundo | Espera ok | |
 
 Notas de 0.1: todo vive en `src/nt.js` y `src/nt.css` (ganchos en `build.py`). Las pruebas del boceto aceptan
 `PW_CHROMIUM=/opt/pw-browsers/chromium` para usar el Chromium instalado. `acts.mjs` pasa con 209 botones y `errors []`.
+
+Notas de 0.5 a 0.8: Página pública en `src/pub.js`/`pub.css`, Equipo en `src/eq.js`/`eq.css`, Ajustes en `src/aj.js`/`aj.css`,
+celular en `src/mob.js`/`mob.css` (todos enganchados en el bloque «nt» de `build.py`). Pruebas nuevas: `tests/ntscr.mjs`
+(cada botón de las 11 vistas nuevas y medidas 900 en claro y oscuro) y `tests/mobt.mjs` (todo el boceto a 390 × 844: cada botón,
+nada que se salga de costado, accesos de abajo, cajón del menú y vuelta a computadora). El celular entra solo en pantallas de
+menos de 760 de ancho; en la computadora se elige «Celular» arriba y se ve dentro de un teléfono.
 
 Ya resuelto: el recordatorio de cuota de Cobranzas decía «por WhatsApp»; `build.py` ya lo reemplaza por «a su app».
 
@@ -158,6 +164,7 @@ El código de agenda pública, Google y Mercado Pago ya está en `main` y apagad
 
 ## Bitácora
 
+- 23/10 · Claude (hilo Nutreando) · 0.5 a 0.8 hechos (Facundo: «seguí con la próxima etapa»). Página pública (versión 20): perfil, dónde atiende, obras sociales, opiniones, vista de la paciente, QR, links por servicio, servicios con descuentos y reglas, reservas en línea con horarios y avisos por app y mail. Equipo y Ajustes (versión 21): integrantes, permisos que se tocan, registro de accesos; Mi cuenta, Plantillas, Avisos automáticos, Seguridad e Integraciones; planilla por obra social desde Exportar en Cobranzas. Celular (versión 22): barra arriba, cinco accesos abajo, menú entero en cajón, paneles que suben desde abajo, todo apilado a 390. Antes, en la Ficha: encabezado con degradé, botones ordenados, submenú con fondo y Consultas tercero, sombras y flecha del menú abajo. Falta el ok de Facundo (0.9).
 - 23/10 · Claude (hilo Nutreando) · 0.2, 0.3 y 0.4 hechos. Ficha: lista «Para Sofía al terminar», firma que bloquea la nota, acuerdos que ve la paciente, pedir registro alimentario (con modo sin números), certificados con 4 modelos, formularios, «Cambios y accesos», laboratorio con IA, importar de la balanza y aviso de valor raro en cintura. Planes: tipo de alimentación. Todas las pruebas pasan (acts errores [], medidas 900). Publicado como versión 17 en el mismo link. Sigue 0.5 a 0.8 en el hilo del panel, después el ok de Facundo (0.9).
 - 23/10 · Claude (hilo Nutreando) · 0.1 hecho: campana con filtros en todas las pantallas, «Consulta en curso» en el menú, cumpleaños en Pendientes y tarjeta, grupos en Pacientes y en «Mensaje a varias».
 - 23/10 · Claude (hilo Nutreando) · Plan aprobado. Este archivo creado. Arranca 0.1 en `claude/project-thread-he8mny`.
