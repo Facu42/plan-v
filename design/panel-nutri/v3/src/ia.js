@@ -170,7 +170,7 @@ const _iaPlan2=pPlan;pPlan=function(){let h=_iaPlan2();if(pO()[5]==='Sin plan')r
   .replace(/<button type="button" data-pt="(\w+)" class="(on)?">/g,(m,k,on)=>`<button type="button" role="tab" aria-selected="${!!on}" data-pt="${k}" class="${on||''}">`)
   .replace(/(<button type="button" class="sbtn") data-pa="vista">/,`$1 data-pa="vista">${svg('eye',13)}`).replace(/(<button type="button" class="sbtn") data-pa="guardar-tpl">Guardar como plantilla/,`$1 data-pa="guardar-tpl" title="Guardar como plantilla">${svg('copy',13)}Plantilla`)
   ;
- h=h.replace(/<span class="sp"><\/span>([\s\S]*?)<\/div>(?=<div class="c">|<div class="pspan)/,(m,mid)=>`<span class="sp"></span><div class="pacts2">${mid}</div></div>`);
+ h=h.replace(/<span class="sp"><\/span>([\s\S]*?)<\/div>(?=<div class="c|<div class="pspan)/,(m,mid)=>`<span class="sp"></span><div class="pacts2">${mid}</div></div>`);
  if(wk&&(pTab==='semana'||pTab==='compras'))h=h.replace(/(<section class="fxp[^"]*"><header><h3>(?:Semana|Lista de compras)[^<]*<\/h3>(?:<span class="m">[^<]*<\/span>)?<span class="sp"><\/span>)/,`$1${wk.replace('class="tabs"','class="tabs pwk"').replace(/>Semana (\d)</g,'>$1<')}`);
  return h;};
 PVIEWS[1]=pPlan;

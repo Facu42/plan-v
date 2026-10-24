@@ -42,7 +42,7 @@ Las piezas de `src/`:
 | `imp.css` | Pasada de pulido (ver sección 5) |
 | `msg.js`, `msg.css` | Mensajes: bandeja, respuestas guardadas y avisos automáticos |
 | `pl.js`, `pl.css` | Planes: todos los planes, plan de una paciente, recetas, plantillas y equivalencias |
-| `nt.js`, `pub.js`, `eq.js`, `aj.js`, `hc.js`, `ia.js`, `mob.js` (y sus `.css`) | Funciones de Nutreando (hilo Nutreando): encabezado de la ficha y campana, Página pública, Equipo, Ajustes, Historia clínica y Laboratorio con fechas y propuestas de la consulta grabada (`hc.js`), armado del plan con IA (`ia.js`), y versión celular. Se enganchan en el bloque «nt» de `build.py`. Pruebas: `tests/ntscr.mjs` y `tests/mobt.mjs` |
+| `nt.js`, `pub.js`, `eq.js`, `aj.js`, `hc.js`, `ia.js`, `pe.js`, `mob.js` (y sus `.css`) | Funciones de Nutreando (hilo Nutreando): encabezado de la ficha y campana, Página pública, Equipo, Ajustes, Historia clínica y Laboratorio con fechas y propuestas de la consulta grabada (`hc.js`), armado del plan con IA (`ia.js`), editor del plan por día como Nutreando con columna derecha de gestión (`pe.js`, prueba `tests/pet.mjs`), y versión celular. Se enganchan en el bloque «nt» de `build.py`. Pruebas: `tests/ntscr.mjs` y `tests/mobt.mjs` |
 | `mph.json`, `rcimg.json` | Fotos reales en texto (las del chat y las de recetas), sacadas de `src/assets/showroom/` y `public/landing/` |
 
 ## 3. Decisiones de Facundo que no se discuten
@@ -58,7 +58,7 @@ Las piezas de `src/`:
 | Siempre | **Nada de WhatsApp en el panel.** Los avisos a pacientes van por la app y por mail. |
 | Siempre | Respuestas a Facundo en español simple, con voseo, sin jerga ni nombres de archivos o variables. Él mira desde el celular: todo se le entrega como link de Artifact. |
 
-## 4. Estado de cada pantalla (versión 24, 23/10)
+## 4. Estado de cada pantalla (versión 26, 24/10)
 
 | Pantalla | Estado | Qué tiene |
 |---|---|---|

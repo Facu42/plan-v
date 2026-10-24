@@ -9,14 +9,14 @@ const st=()=>pg.evaluate(()=>({t:document.getElementById('ptitle').textContent,c
 const c=async(sel,label)=>{await pg.click(sel);await pg.waitForTimeout(380);console.log((label||sel).padEnd(26),JSON.stringify(await st()));};
 await c('#pfil [data-pf="2"]','filtro borradores');await c('.pl4 [data-pf="4"]','tile sin plan');await c('#pfil [data-pf="0"]','filtro todos');
 await c('.preq [data-pq="1"]','aprobar Julia');
-await c('tr[data-pp="0"]','abrir Sofía');
+await c('tr[data-pp="0"]','abrir Sofía');await c('[data-pem="semana"]','vista semana');
 await c('[data-pc="2,1"]','celda almuerzo mar');await c('[data-palt="0"]','usar equivalente');await c('[data-pd="5"]','día sábado');
 await c('[data-pw="0"]','semana 1');await c('[data-pw="2"]','semana 3');
 await c('[data-pai="Bajar el sodio"]','asistente');await pg.waitForTimeout(800);await c('#iadr [data-iaok]','aplicar asistente');await c('[data-iaa="drx"]','cerrar asistente');
 await c('.preq [data-pq="0"]','aprobar pedido Sofía');
 await c('[data-pa="colacion"]','colación');await c('#act [data-ok]','agregar');
 await c('[data-pa="metas"]','metas');await c('#act [data-ok]','guardar metas');
-await c('[data-pa="vista"]','vista');await c('#act [data-x]','cerrar');
+await c('[data-pem="dia"]','vista día');await c('[data-pg="vista"]','vista');await c('#act [data-x]','cerrar');
 await c('#pacts .cta','publicar');await c('#act [data-ok]','confirmar publicar');
 await c('[data-pmenu]','abrir selector');await pg.fill('#ppq','luc');await c('.ppl [data-ppk="10"]','elegir Lucía');
 await c('[data-pt="compras"]','compras');await c('.pshop input','tachar');await c('[data-pa="shopsend"]','enviar lista');
