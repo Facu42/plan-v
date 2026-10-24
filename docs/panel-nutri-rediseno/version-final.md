@@ -105,12 +105,21 @@ Cada fase: qué se hace, qué datos usa, qué falta de base, qué se sincroniza 
 
 ### Fase 1. Herramientas apuntando al boceto nuevo
 
-- `scripts/panel-boceto-css.mjs` y `scripts/panel-nutri-boceto-contrato.mjs` leen `design/panel-nutri/v3/panel.html`
-  en vez de `bocetos.html`. Regenerar `panel-boceto.css`, íconos y fotos. El boceto viejo queda como historia.
-- Sin cambios visibles todavía para la nutri (o los mínimos para que nada se rompa).
-- Aceptación: el contrato corre contra el boceto nuevo; `npm test` y `npm run check` en verde.
+- `scripts/panel-boceto-css.mjs` aprende a leer `design/panel-nutri/v3/panel.html` y escribe los estilos, íconos y
+  fotos del boceto nuevo en **archivos nuevos** (por ejemplo `panel-v3.css`, `panel-v3-icons.ts`). **No se pisa
+  `panel-boceto.css`**: el armazón actual (`PanelBocetoShell`) usa clases del boceto viejo (`.m.desk`, `.sb`) y se
+  quedaría sin estilos. La hoja vieja se reemplaza recién en la fase 2, en el mismo PR que cambia el marcado.
+- `scripts/panel-nutri-boceto-contrato.mjs` suma una lista de piezas del boceto nuevo (aparte de la vieja) y
+  **falla** (no solo avisa) si una pieza de la lista no existe en el boceto o en la app, para que no pueda pasar sin
+  comparar nada. La lista vieja sigue hasta la fase 2.
+- Sin cambios visibles para la nutri.
+- Aceptación: la app se ve igual que antes; el contrato nuevo corre contra el boceto nuevo y marca en rojo lo que
+  falta; `npm test` y `npm run check` en verde.
 
 ### Fase 2. Armazón nuevo (menú, encabezado, campana, tema, celular)
+
+- En este PR se cambian juntos el marcado del armazón, la hoja de estilos (se pasa de `panel-boceto.css` a la del
+  boceto nuevo) y las piezas del contrato. Las pantallas que todavía no se pasaron conservan sus estilos propios.
 
 - Fuente: `base.html` (`shell`, `hdr`), `nt.js` (campana y «Consulta en curso»), `mob.js` (cajón y barra de abajo).
 - Datos: los mismos contadores y rutas de `panelNavGroups`; plegado y tema guardados como hoy.
@@ -261,7 +270,7 @@ que llegar así:
 | Registra una cuota o cobro | Pantalla Pagos | `patient_fees`, `patient_charges`, pago único | Ya anda |
 | Recordatorio de turno | Aviso en la app y mail | outbox y avisos; mail con Brevo | App sí; mail espera la clave de Brevo |
 
-Reglas: **nunca WhatsApp**; mail solo cuando esté la clave de Brevo (antes, solo avisos en la app y push); nada
+Reglas: **nunca WhatsApp**; el mail queda **apagado** hasta que Facundo cargue la clave de Brevo y diga de prenderlo (el 11/10 había dicho «no se usan mensajes por mail por ahora»; el 23/10 aprobó avisos por app y mail en el plan de Nutreando, con el mail al final, en la etapa 3). Mientras tanto, solo avisos en la app y push; nada
 clínico en el texto del aviso (el aviso dice «Tenés novedades», el detalle se ve adentro de la app).
 Lo que la paciente necesita y la app todavía no tiene (reservar y cancelar, cargar mediciones, comida por audio,
 «Para hacer») es la etapa 2 de `docs/nutreando/plan.md` y se hace después del panel, comparando con Figma Nutrigo.
