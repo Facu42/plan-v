@@ -1,5 +1,7 @@
 # Traspaso: el boceto único del panel de la nutri
 
+> **Actualización de Facundo, 24/10/2026:** para continuar el dibujo con Cursor, la base vigente es la **v29**, conservada en `design/panel-nutri/v29/PlanV-Boceto-v29.html`. Leé [continuar-v29-cursor.md](continuar-v29-cursor.md). Las instrucciones sobre v26/v3 y su enlace quedan como historia; v30/v31 fueron descartadas. Esto no cambia la app productiva.
+
 Escrito el 23/10/2026 por Claude (hilo «Rediseño del panel de la nutri») porque Facundo pidió:
 «Necesito que dejes todo el plan de cómo venís trabajando y cómo debería seguir trabajando otro agente».
 Si vas a seguir este trabajo, leé este archivo entero antes de tocar nada. Complementa a [plan.md](plan.md)
