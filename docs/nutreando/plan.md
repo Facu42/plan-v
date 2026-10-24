@@ -12,7 +12,7 @@ otro (Codex, Cursor) leyendo solo este archivo.
 ## Cómo retomar (leé esto primero)
 
 1. Leé `AGENTS.md`, `docs/coordinacion-agentes.md` y `docs/panel-nutri-rediseno/traspaso-boceto-v3.md` (cómo se arma,
-   prueba y publica el boceto).
+   prueba y publica el boceto; secciones 6.5 y 6.6: cómo pedir un cambio y cómo usarlo desde otro agente).
 2. Buscá en la tabla de estado el primer paso que no esté **Hecho**. Si dice **En curso**, mirá la rama anotada.
 3. Al terminar un paso: cambiá su estado acá, anotá rama y commit, subí las fuentes del boceto
    (`design/panel-nutri/v3/src/`, `build.py`, `panel.html`) y sumá una línea a la bitácora de `docs/coordinacion-agentes.md`.
