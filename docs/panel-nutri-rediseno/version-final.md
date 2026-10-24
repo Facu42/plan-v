@@ -26,6 +26,23 @@ Sirve para **cualquier agente** (Claude, Codex, Cursor) que llegue sin contexto.
 > oscuro al lado del boceto; PR con el informe del paso 10 de regression-guard; actualizá la sección 7 y la bitácora.
 > **No juntes a `main`**: cada fase espera el ok de Facundo. Respondele en español simple, con voseo y sin jerga.
 
+### 1.1 Prompt para Cursor: dibujar las seis pantallas que faltan (fase 0B)
+
+> Vas a sumar seis pantallas al boceto del panel de la nutricionista de Plan V. Repo `Facu42/plan-v`, rama nueva
+> `cursor/boceto-seis-pantallas` desde `main`. Leé enteros: `AGENTS.md`, `docs/coordinacion-agentes.md`,
+> `docs/panel-nutri-rediseno/traspaso-boceto-v3.md` (cómo se arma, prueba y publica el boceto) y la fase 0B de
+> `docs/panel-nutri-rediseno/version-final.md` (qué va en cada pantalla). Las pantallas son Asistente IA, Seguimiento,
+> Progreso, Alimentos, Biblioteca y Centro de ayuda. Trabajá **solo** en `design/panel-nutri/v3/` (un `src/xx.js` y
+> `src/xx.css` por pantalla, enganchados en `build.py`) y en documentos; **no toques la app ni la base**. Copiá el estilo
+> de las pantallas que ya están (Inicio, Mensajes, Planes): mismos ayudantes, tarjetas, letra y colores, sin inventar
+> diseño. Mostrá solo funciones que la app ya tiene (mirá el componente y la ruta de la API que figuran en la tabla).
+> Cada pantalla entra en 1440×900 sin bajar la página, en claro y oscuro, y tiene versión celular. Cada botón hace algo.
+> Nada de WhatsApp. Armá con `python3 design/panel-nutri/v3/build.py`, sumá una prueba como `tests/ntscr.mjs` y corré
+> todas las de `tests/` hasta `errors []`; sacá capturas y miralas. Abrí un PR solo de boceto y documentos, anotá el
+> paso en la bitácora de `docs/nutreando/plan.md`, en la sección 4 del traspaso y en la sección 7 de `version-final.md`.
+> No publiques nada ni juntes a `main`: avisá que el PR está listo para que Claude publique el boceto en su link y
+> Facundo lo mire. Respondé en español simple, con voseo y sin jerga.
+
 Para pedir la fase siguiente alcanza con: «Seguí con la próxima fase de `docs/panel-nutri-rediseno/version-final.md`».
 
 ---
@@ -64,8 +81,9 @@ En una línea: **la app ya tiene casi todas las funciones con datos reales, pero
 ### 2.2 Pantallas que la app tiene y el boceto nuevo no dibuja
 
 Asistente IA, Seguimiento (revisar comidas), Progreso de la cartera, Alimentos, Biblioteca, Centro de ayuda.
-**Regla: no se borran.** Mientras Facundo no decida, quedan con el armazón nuevo y su contenido actual, en el menú
-donde estaban. Pregunta abierta en la sección 9.
+**Regla: no se borran.** Facundo decidió el 24/10 22:07: **«hay que dibujarlas»**. Se dibujan primero en el boceto v3
+con el estilo nuevo (fase 0B) y después se pasan a la app en la fase 13. Hasta entonces quedan como están, dentro del
+armazón nuevo.
 
 ---
 
@@ -97,6 +115,31 @@ donde estaban. Pregunta abierta en la sección 9.
 
 Cada fase: qué se hace, qué datos usa, qué falta de base, qué se sincroniza con la paciente y cómo se acepta.
 **Ninguna fase se junta a `main` sin el ok escrito de Facundo.** Ninguna migración se aplica sin su frase.
+
+### Fase 0B. Dibujar en el boceto las seis pantallas que faltan (pedido de Facundo, 24/10)
+
+Se hace en el boceto, no en la app. La toma Cursor (Facundo, 24/10 22:08); el prompt está en la sección 1.1.
+
+| Pantalla | Qué tiene que mostrar (lo que ya hace la app) | De dónde sale hoy en la app | Referencia en el boceto viejo |
+|---|---|---|---|
+| Asistente IA | Pedido con palabras sobre una paciente o la cartera, respuesta con la fuente de cada dato, nada se manda a la paciente sin aprobar, gasto del mes contra el tope de US$5 | `/crm/desarrollo?modulo=asistente-ia` (`ProfessionalModules`), `/api/portfolio/assistant`, `/api/patients/:id/copilot`, `docs/ia-asistente-planes-2026-10-17.md` | `ia()` en `bocetos.html` |
+| Seguimiento | Comidas con foto por revisar, «Confirmar» y «Comentar», cómo se sienten (hábitos y síntomas), días registrados, «Pedir registro» (por la app, nunca WhatsApp) | `/crm/seguimiento` (`ProfessionalWorkQueue`, `MealReviewPanel`), `/api/crm/work-queue` | `seguimiento()` |
+| Progreso | Números de toda la cartera: adherencia, pacientes que bajan o suben, altas y bajas del mes, quién necesita atención | `/crm/progreso-global` (`ProfessionalProgressGlobal`), `/api/crm/progress-global`, `docs/progreso-global-2026-10-10.md` | `progreso()` |
+| Alimentos | Buscar en SARA 2 y en los propios, ver nutrientes, crear un alimento propio | `/crm/alimentos` (`FoodCatalog`), `/api/foods`, `/api/foods/search` | `alimentos()` |
+| Biblioteca | Recursos para compartir (guías, videos, PDF), asignar a una o varias pacientes, ver quién lo leyó | `/crm/biblioteca` (`ProfessionalLibrary`), `/api/resources`, `/api/resources/assign` | `biblioteca()` |
+| Centro de ayuda | Buscador, temas, preguntas frecuentes, contacto con Plan V | `/crm/desarrollo?modulo=ayuda` (`HelpCenter`) | `ayuda()` |
+
+Reglas: cada pantalla en su propio `src/xx.js` y `src/xx.css` con la receta de la sección 6.2 de
+[traspaso-boceto-v3.md](traspaso-boceto-v3.md); mismo estilo que las demás (ayudantes de `fx.js`, tarjeta oscura,
+letra fina); en el menú lateral del boceto, en el grupo donde la app las tiene hoy; entra en 1440×900 sin bajar la
+página, en claro y oscuro; versión celular en `mob.js`; cada botón hace algo (panel, aviso o descarga); datos de
+ejemplo creíbles de Argentina; sin WhatsApp. **No se inventan funciones**: lo que la app no hace no se dibuja, salvo
+que se anote como propuesta para que Facundo decida.
+
+Aceptación: `python3 design/panel-nutri/v3/build.py` arma sin errores; las pruebas de `design/panel-nutri/v3/tests/`
+terminan con `errors []` (sumar una prueba para las seis pantallas, como `ntscr.mjs`); capturas a 1440×900 y 390×844
+en claro y oscuro, miradas. PR solo con el boceto y documentos. **Cursor no puede publicar el link del boceto**: al
+abrir el PR, avisa y un Claude lo publica al mismo link (sección 6.4 del traspaso) para que Facundo lo vea en el celular.
 
 ### Fase 0. Ok de Facundo al boceto v26
 
@@ -283,7 +326,8 @@ Actualizar al empezar y al terminar cada una.
 
 | Fase | Qué | Dueño | Rama / PR | Estado |
 |---|---|---|---|---|
-| 0 | Ok al boceto v26 | Facundo | — | Espera ok |
+| 0B | Dibujar las seis pantallas que faltan | Cursor | — | Pendiente |
+| 0 | Ok al boceto entero | Facundo | — | Espera la 0B |
 | 1 | Herramientas al boceto nuevo | — | — | Pendiente |
 | 2 | Armazón | — | — | Pendiente |
 | 3 | Inicio | — | — | Pendiente |
@@ -317,9 +361,7 @@ Las fases 3 y 4 pueden ir en paralelo con agentes distintos después de la 2; el
 
 ## 9. Preguntas abiertas para Facundo
 
-1. **Ok al boceto v26 entero** (fase 0).
-2. **Pantallas que el boceto nuevo no dibuja** (Asistente IA, Seguimiento, Progreso, Alimentos, Biblioteca, Ayuda):
-   ¿se dibujan en el boceto con el estilo nuevo, se juntan dentro de otras pantallas, o se quitan del menú?
-   Mientras no responda, quedan como están, dentro del armazón nuevo.
+1. **Ok al boceto entero** (fase 0), con las seis pantallas de la fase 0B ya dibujadas.
+2. ~~Pantallas que el boceto nuevo no dibuja~~: respondido el 24/10, se dibujan (fase 0B).
 3. **Quién desarrolla**: el plan sirve para Claude, Codex o Cursor. Recomendado: Claude en Opus para las fases 2, 6,
    7 y 12 (base y permisos); las demás las puede tomar cualquiera.
