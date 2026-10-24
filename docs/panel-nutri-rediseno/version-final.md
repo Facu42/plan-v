@@ -326,7 +326,7 @@ Actualizar al empezar y al terminar cada una.
 
 | Fase | Qué | Dueño | Rama / PR | Estado |
 |---|---|---|---|---|
-| 0B | Dibujar las seis pantallas que faltan | Cursor | `cursor/boceto-seis-pantallas-66c3` | Hecha en el boceto (copia de la v29, 24/10). Falta que Claude publique el link |
+| 0B | Dibujar las seis pantallas que faltan | Cursor | `cursor/boceto-seis-pantallas-66c3` ([PR #174](https://github.com/Facu42/plan-v/pull/174)) | Hecha en el boceto (copia de la v29, 24/10). Falta que Claude publique el link |
 | 0 | Ok al boceto entero | Facundo | — | Espera la 0B |
 | 1 | Herramientas al boceto nuevo | — | — | Pendiente |
 | 2 | Armazón | — | — | Pendiente |
