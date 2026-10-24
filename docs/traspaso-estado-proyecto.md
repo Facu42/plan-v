@@ -52,6 +52,17 @@ Una sola página para que cualquier agente (Claude, Codex u otro) siga sin tener
 Los detalles de cada tema están en los archivos que se nombran. Este archivo se actualiza
 cuando cambia algo de lo de abajo. Sin claves ni secretos: esos los tiene Facundo.
 
+## Estado al 2026-10-11 (manda sobre lo de abajo)
+
+Los PR #89 a #103 están en `main` (último commit `ae3dc30`). **Todas las migraciones del repositorio,
+hasta `20261011000000_plan_reads_can_promote`, están aplicadas en la base `plan-v-app`** (comprobado con
+`list_migrations`). Donde más abajo diga "sin aplicar" o "borrador" para mediciones, cuota por mes, recursos,
+horarios del plan, cobros por paciente, cuenta archivada, objetivo, plan con vigencia, corrección propia y
+diario de texto, ya no es así. Siguen abiertos #24, #25, #27 (espera su frase «aplicá índices en la base») y #64.
+Mails: no se usan por ahora (decisión del 11/10); Brevo queda apagado. Las migraciones con DROP, DELETE o
+TRUNCATE no se aplican por el conector: se le deja a Facundo el SQL para pegar en el editor de Supabase.
+Instructivo corto para otro agente: ver la entrega "instructivo Codex" del proyecto.
+
 ## Qué es y cómo se trabaja
 
 - Plan V: app para que nutricionistas acompañen a sus pacientes (plan, comidas, medidas, turnos,
