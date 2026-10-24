@@ -99,6 +99,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **24/10 · Claude · Instrucciones para la versión final del panel** · [panel-nutri-rediseno/version-final.md](panel-nutri-rediseno/version-final.md): revisión de la app contra el boceto v26, fases 0 a 13, base que falta (paquetes A, B y C), sincronización con la app de la paciente y prompt para cualquier agente. Solo documentos.
 - **23/10 · Claude · Plan de funciones de Nutreando** · Aprobado por Facundo. Plan por etapas con estado por paso en [nutreando/plan.md](nutreando/plan.md). Etapa 0 en el boceto v3, repartida con el hilo del panel. Rama `claude/project-thread-he8mny`. Sin código de la app ni base.
 - **23/10 · Claude · Traspaso del boceto único del panel** · Fuentes del boceto nuevo en `design/panel-nutri/v3/` y cómo seguir en [traspaso-boceto-v3.md](panel-nutri-rediseno/traspaso-boceto-v3.md). Solo docs y boceto, sin código de la app ni base.
 - **21/10 · Cursor · Main en Próximamente** · Se trajo main (fase A #162 e Inicio 900 #163) a [PR #168](https://github.com/Facu42/plan-v/pull/168). Siguen Próximamente y los datos de ejemplo. No reemplaza el asistente, la ayuda ni el equipo. Sin juntar.

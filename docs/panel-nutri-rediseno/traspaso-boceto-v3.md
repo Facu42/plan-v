@@ -194,7 +194,7 @@ entero, las etapas 1 a 3 de [docs/nutreando/plan.md](../nutreando/plan.md) y el 
 4. Preguntarle a Facundo si entran pantallas que el boceto viejo tenía y el nuevo no: Asistente IA, Seguimiento,
    Progreso, Alimentos, Biblioteca y Centro de ayuda.
 5. **Celular** (390) del boceto nuevo.
-6. Con el ok de Facundo al boceto completo: **pasarlo a la app** con el método de
+6. (24/10: el paso a paso está en [version-final.md](version-final.md).) Con el ok de Facundo al boceto completo: **pasarlo a la app** con el método de
    [instrucciones-boceto.md](instrucciones-boceto.md) (HTML y estilos tal cual, solo se conectan datos reales),
    cambiando la fuente: `design/panel-nutri/v3/panel.html` en vez de `bocetos.html`. Eso implica:
    - que `scripts/panel-boceto-css.mjs` y `scripts/panel-nutri-boceto-contrato.mjs` lean el boceto nuevo;
