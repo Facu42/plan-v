@@ -1,0 +1,69 @@
+/* Funciones de Nutreando (docs/nutreando/plan.md) */
+/* Avisos */
+.ntav{display:flex;flex-direction:column}
+.ntav>div{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line)}
+.ntav>div:last-child{border-bottom:0}
+.ntav .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ntav .t b{font-weight:500;font-size:12.5px}
+.ntav .t small{color:var(--ink3);font-size:11.5px}
+.ntav>div:not(.u) .t b{font-weight:400;color:var(--ink2)}
+.ntav i{width:7px;height:7px;border-radius:50%;background:var(--azaf);flex:none}
+.ntempty{color:var(--ink3);font-size:12px;margin:8px 0}
+/* Consulta en curso, en el menú */
+.ntlive{margin-top:auto;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;border:1px solid var(--line);background:var(--lima-t);color:var(--ink);text-align:left;font:inherit;cursor:pointer}
+.ntlive[hidden]{display:none}
+.ntlive:not([hidden])+.acct{margin-top:8px}
+.ntlive>i{width:8px;height:8px;border-radius:50%;background:var(--rojo-ink);flex:none;animation:ntp 1.6s ease-in-out infinite}
+.ntlive .lbl{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.ntlive .lbl b{font-weight:500;font-size:12px}
+.ntlive .lbl small{font-size:11px;color:var(--ink2)}
+.ntlive .go{flex:none;font-size:11.5px;font-weight:500;text-decoration:underline;text-underline-offset:2px}
+.app.mcol .ntlive{justify-content:center;padding:10px 6px}
+.app.mcol .ntlive .lbl{display:none}
+@keyframes ntp{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.ntlive>i{animation:none}}
+.ntf .aseg{flex-wrap:wrap;height:auto;gap:4px}
+.ntf .aseg button{flex:0 0 auto;padding:6px 11px}
+/* Ficha: lista «Para Sofía al terminar» */
+.ntps{display:flex;flex-direction:column}
+.ntps>div{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.ntps>div:last-child{border-bottom:0}
+.ntps .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.ntps .t b{font-weight:500;font-size:12.5px}
+.ntps .t small{font-size:11px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ntps .sbtn,.ntps .pill{flex:none}
+.ntsig{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--lima-ink)}
+.ntsig.n{color:var(--ink3)}
+.nthint{display:block;color:var(--ink3);font-size:11.5px;line-height:1.45}
+.ntcert p{font-size:12px;line-height:1.55;margin:8px 0;color:var(--ink2)}
+.ntcert u{text-decoration:none;background:var(--lima-t);padding:0 3px;border-radius:4px;color:var(--ink)}
+.ntcert small{font-size:11px;color:var(--ink3)}
+/* Ficha: encabezado y pestañas */
+.fh.ntfh{background:linear-gradient(112deg,var(--lima-t) 0%,var(--lima-tt) 30%,var(--card) 58%,var(--azaf-t) 130%);border-color:var(--line);position:relative;overflow:hidden}
+.fh.ntfh .av{box-shadow:0 0 0 4px var(--card)}
+.fh.ntfh .tagsr{flex-wrap:nowrap}
+.ntfhr{display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:none}
+.ntfhr .appst{flex-direction:row;align-items:center;gap:8px;padding:0;border:0;background:none;font-size:11.5px;color:var(--ink3)}
+.ntfhr .appst b{font-size:11.5px;color:var(--ink2)}
+.ntfhr .appst b::after{content:"·";margin-left:8px;color:var(--ink3);font-weight:400}
+.ntfhg{display:flex;align-items:center;gap:8px}
+.ntfhg>.chip,.ntfhg>.cta{height:36px;padding:0 15px}
+.ntfhg>.ntbell{width:36px;height:36px}
+#ftabs.ftabs{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;gap:1px;box-shadow:var(--shadow)}
+#ftabs.ftabs button{flex:1 1 auto;justify-content:center;padding:8px 7px;font-size:13.5px;border-radius:10px;transition:background .2s,color .2s}
+#ftabs.ftabs button:hover{background:var(--app)}
+#ftabs.ftabs button.on{background:var(--lima-t);color:var(--ink)}
+#ftabs.ftabs button.on::after{display:none}
+#ftabs.ftabs .n{font-size:11px}
+@media (prefers-reduced-motion:reduce){#ftabs.ftabs button{transition:none}}
+/* Ficha: espacios parejos y sombra en los paneles (23/10) */
+:root{--ntsh:0 1px 2px rgba(20,21,25,.05),0 10px 26px rgba(20,21,25,.09)}
+:root[data-theme="dark"]{--ntsh:0 1px 2px rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.35)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ntsh:0 1px 2px rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.35)}}
+#s-ficha{gap:14px}
+#fwrap>.fx,#fwrap>.fbody{padding-top:0}
+#s-ficha .card,#s-ficha .dk,#ftabs.ftabs{box-shadow:var(--ntsh)}
+/* Flecha de plegar el menú: abajo, lejos del logo */
+.side .fold{top:auto;bottom:34px}
+.app.mcol .side .fold{left:auto;right:-12px;top:auto;bottom:34px}
+.app.mcol .side .fold{right:auto;left:calc(50% - 12px);bottom:74px}

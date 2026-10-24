@@ -1,0 +1,85 @@
+/* Ajustes (Nutreando 0.7) */
+#s-ajustes{gap:14px}
+#ajwrap{flex:1;min-height:0;display:flex;flex-direction:column}
+#ajwrap>.fx{padding-top:0}
+#s-ajustes .fxp{box-shadow:var(--ntsh)}
+.ajsig{display:grid;grid-template-columns:1.4fr 1fr;gap:10px;flex:1;min-height:0}
+.ajfirma,.ajlogo{border:1px dashed var(--line2);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px;background:var(--app)}
+.ajfirma svg,.ajcf svg{width:150px;height:46px;fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round}
+.ajfirma small,.ajlogo small{font-size:11px;color:var(--ink3)}
+.ajlogo .mk,.ajch .mk{width:40px;height:40px;border-radius:12px;background:var(--lima);display:grid;place-items:center;font-weight:600;font-size:20px;color:#141519}
+.ajplan{display:flex;align-items:baseline;gap:8px;background:linear-gradient(110deg,var(--lima-t),var(--azaf-t));border-radius:12px;padding:12px 14px}
+.ajplan b{font-size:18px;font-weight:500;letter-spacing:-.02em}
+.ajplan small{font-size:11.5px;color:var(--ink2)}
+.ajtps{display:flex;flex-direction:column;gap:4px}
+.ajtps>small{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin:6px 0 2px}
+.ajtps>small:first-child{margin-top:0}
+.ajtp{display:flex;align-items:center;gap:10px;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:1px solid transparent;border-radius:10px;padding:8px 10px;cursor:pointer;transition:background .2s}
+.ajtp:hover{background:var(--app)}
+.ajtp.on{background:var(--lima-tt);border-color:var(--lima-t)}
+.ajtp .t{flex:1;min-width:0;display:flex;flex-direction:column}
+.ajtp b{font-weight:500;font-size:12.5px}
+.ajtp small{font-size:11px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ajtp em{font-style:normal;font-size:11px;color:var(--ink3)}
+.ajq{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.ajq li{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+.ajq li:first-child{border-top:0}
+.ajq li>span.num{width:26px;height:26px;border-radius:8px;background:var(--lima-t);color:var(--lima-ink);display:grid;place-items:center;font-size:12px;font-weight:500;flex:none}
+.ajq .t{display:flex;flex-direction:column}
+.ajq b{font-weight:500;font-size:13px}
+.ajq small{font-size:11px;color:var(--ink3)}
+.ajcert{flex:1;min-height:0;border:1px solid var(--line);border-radius:12px;padding:22px 26px;background:#fff;color:#141519;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.ajch{display:flex;align-items:center;gap:12px;border-bottom:2px solid #D6EBA3;padding-bottom:12px}
+.ajch b{display:block;font-weight:600;font-size:14px}
+.ajch small{font-size:11px;color:#71747C}
+.ajcert h4{margin:8px 0 0;font-size:15px;font-weight:600;text-align:center;letter-spacing:.02em}
+.ajcert p{margin:0;font-size:12.5px;line-height:1.7;color:#43464D}
+.ajcert u{text-decoration:none;background:#E6F3C6;padding:0 4px;border-radius:4px;color:#141519}
+.ajcf{margin-top:auto;align-self:flex-end;display:flex;flex-direction:column;align-items:center;gap:4px}
+.ajcf svg{stroke:#141519}
+.ajcf small{font-size:11px;color:#71747C}
+.ajvar{display:flex;flex-wrap:wrap;gap:6px}
+.ajvar span{font-size:11.5px;padding:3px 9px;border-radius:7px;background:var(--app);border:1px solid var(--line);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.ajav{display:flex;flex-direction:column}
+.ajav>div{display:flex;align-items:center;gap:12px;padding:10px 10px;border-top:1px solid var(--line);cursor:pointer;border-radius:10px;transition:background .2s}
+.ajav>div:first-child{border-top-color:transparent}
+.ajav>div:hover{background:var(--app)}
+.ajav>div.on{background:var(--lima-tt);border-top-color:transparent}
+.ajav>div.on+div{border-top-color:transparent}
+.ajav>div:focus-visible{outline:2px solid var(--lima-ink);outline-offset:-2px}
+.ajav .t{flex:1;min-width:0;display:flex;flex-direction:column}
+.ajav b{font-weight:500;font-size:12.5px}
+.ajav small{font-size:11px;color:var(--ink3)}
+.ajch2{display:inline-flex;gap:4px}
+.ajch2 i{font-style:normal;font-size:10.5px;padding:2px 7px;border-radius:999px;background:var(--app);border:1px solid var(--line);color:var(--ink2)}
+.ajmsg{display:flex;flex-direction:column;gap:6px;background:var(--app);border-radius:12px;padding:12px}
+.ajmsg small{font-size:11px;color:var(--ink3)}
+.ajbub{align-self:flex-start;max-width:90%;background:var(--card);border:1px solid var(--line);border-radius:14px;border-bottom-left-radius:5px;padding:9px 12px;font-size:12.5px;line-height:1.45}
+.ajint{display:flex;gap:12px;align-items:flex-start}
+.ajint svg{color:var(--lima-ink);flex:none;margin-top:2px}
+.app.ajbig .main{font-size:13.5px}
+@media (prefers-reduced-motion:reduce){.ajtp,.ajav>div{transition:none}}
+.ajav.sm>div{padding:8px 4px;cursor:default}
+.ajav.sm>div:hover{background:none}
+.ajq .t{flex:1;min-width:0}
+.ajfld{display:block;height:28px;border:1px solid var(--line2);border-radius:8px;margin-top:6px;background:var(--app)}
+.ajfld.lg{height:44px}
+.ajfld.ck{width:16px;height:16px;border-radius:5px}
+.ajq li{align-items:flex-start}
+.ajq li>span.num{margin-top:2px}
+#ajwrap .fx>.fxp .pubins{margin-top:auto}
+.fxp.ajwide{grid-column:1/-1}
+.ajsteps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;flex:1;min-height:0}
+.ajsteps>div{background:var(--app);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.ajsteps span.num{width:28px;height:28px;border-radius:9px;background:var(--lima-t);color:var(--lima-ink);display:grid;place-items:center;font-weight:500}
+.ajsteps b{font-weight:500;font-size:13px}
+.ajsteps p{margin:0;font-size:12px;line-height:1.5;color:var(--ink2)}
+.ajsteps .ajok{background:var(--lima-tt);border-color:var(--lima-t)}
+.ajok svg{color:var(--lima-ink)}
+.aji4>.fxp{justify-content:space-between}
+.ajint{align-items:center}
+.ajic{width:52px;height:52px;border-radius:16px;background:var(--lima-tt);border:1px solid var(--lima-t);display:grid;place-items:center;flex:none}
+.ajic svg{margin:0}
+.ajint p{margin:0;font-size:14px;line-height:1.45;color:var(--ink)}
+.aji4 .pubpide>div{font-size:13px}
+.aji4 .pubins{margin-top:0}

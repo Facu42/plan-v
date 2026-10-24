@@ -9,10 +9,11 @@ y a [instrucciones-boceto.md](instrucciones-boceto.md); donde choquen, manda est
 
 1. Desde el 20/10 el panel de la nutri tiene **un estilo nuevo** («medspa»: fondo claro, tarjetas pastel, una
    tarjeta negra que resalta, letra chica y fina, mucha información) y se diseña en **un solo boceto navegable**.
-2. El boceto está publicado en **https://claude.ai/artifact/JwXZXARtS7e6scYcpx8cKV** (versión 16) y sus fuentes
+2. El boceto está publicado en **https://claude.ai/artifact/JwXZXARtS7e6scYcpx8cKV** (versión 26, 24/10) y sus fuentes
    están en [`design/panel-nutri/v3/`](../../design/panel-nutri/v3/). Siempre se trabaja sobre ese link, nunca uno nuevo.
-3. Hechas: Inicio, Pacientes, Agenda, Ficha (10 pestañas), Cobranzas, Mensajes y Planes. Faltan
-   **Página pública, Equipo y Ajustes**, en ese orden.
+3. Hechas todas: Inicio, Pacientes, Agenda, Ficha (10 pestañas), Cobranzas, Mensajes, Planes, Página pública,
+   Equipo, Ajustes y la versión celular. Falta el ok de Facundo al boceto entero (paso 0.9 de
+   [docs/nutreando/plan.md](../nutreando/plan.md)).
 4. Todo lo que se ve funciona (cada botón abre un panel, cambia la pantalla, descarga algo o avisa), entra en
    **1440×900 sin bajar la página**, en claro y en oscuro.
 5. Recién cuando el boceto esté completo y Facundo lo apruebe, se pasa a la app **tal cual**, por fases y con
@@ -42,6 +43,7 @@ Las piezas de `src/`:
 | `imp.css` | Pasada de pulido (ver sección 5) |
 | `msg.js`, `msg.css` | Mensajes: bandeja, respuestas guardadas y avisos automáticos |
 | `pl.js`, `pl.css` | Planes: todos los planes, plan de una paciente, recetas, plantillas y equivalencias |
+| `nt.js`, `pub.js`, `eq.js`, `aj.js`, `hc.js`, `ia.js`, `pe.js`, `mob.js` (y sus `.css`) | Funciones de Nutreando (hilo Nutreando): encabezado de la ficha y campana, Página pública, Equipo, Ajustes, Historia clínica y Laboratorio con fechas y propuestas de la consulta grabada (`hc.js`), armado del plan con IA (`ia.js`), editor del plan por día como Nutreando con columna derecha de gestión (`pe.js`, prueba `tests/pet.mjs`), y versión celular. Se enganchan en el bloque «nt» de `build.py`. Pruebas: `tests/ntscr.mjs` y `tests/mobt.mjs` |
 | `mph.json`, `rcimg.json` | Fotos reales en texto (las del chat y las de recetas), sacadas de `src/assets/showroom/` y `public/landing/` |
 
 ## 3. Decisiones de Facundo que no se discuten
@@ -57,21 +59,21 @@ Las piezas de `src/`:
 | Siempre | **Nada de WhatsApp en el panel.** Los avisos a pacientes van por la app y por mail. |
 | Siempre | Respuestas a Facundo en español simple, con voseo, sin jerga ni nombres de archivos o variables. Él mira desde el celular: todo se le entrega como link de Artifact. |
 
-## 4. Estado de cada pantalla (versión 16, 23/10)
+## 4. Estado de cada pantalla (versión 26, 24/10)
 
 | Pantalla | Estado | Qué tiene |
 |---|---|---|
 | Inicio | Hecha | Pendientes con «Buenas noticias», Necesitan atención, tarjeta oscura de detalle, Consultas de hoy, cinco números |
 | Pacientes | Hecha | Tabla con filtros y el resumen que se despliega hacia abajo con accesos a la ficha |
 | Agenda | Hecha | Semana, turnos, bloqueos, recordatorios por la app |
-| Ficha | Hecha | 10 pestañas: Resumen, Historia clínica, Mediciones, Objetivos y hábitos, Consultas y notas, Plan, Registro alimentario, Laboratorio y estudios, Archivos y Cobros |
+| Ficha | Hecha | 10 pestañas: Resumen, Historia clínica, Mediciones, Objetivos y hábitos, Consultas y notas, Plan, Registro alimentario, Laboratorio y estudios, Archivos y Cobros. v23: Historia clínica por temas con fecha y origen de cada dato, propuestas de la consulta grabada y «cómo estaba» en una fecha; Laboratorio con columnas por fecha y marcas de la historia |
 | Cobranzas | Hecha | Mes, trimestre y año, movimientos, cuotas vencidas, exportar planilla |
 | Mensajes | Hecha | Bandeja de 3 columnas (lista, chat con fotos, audios y archivos, ficha corta), respuestas guardadas, avisos automáticos, mensaje a varias |
-| Planes | Hecha | Todos los planes; plan de una paciente con selector, semana editable, lista de compras, indicaciones, versiones y cuatro maneras de empezar; recetas con fotos; 10 plantillas; equivalencias. Nada le llega a la paciente hasta publicar |
-| Página pública | **Falta** | El botón del menú existe pero todavía no abre nada |
-| Equipo | **Falta** | Ídem |
-| Ajustes | **Falta** | Ídem. Acá tienen que vivir también los avisos automáticos (hoy se ven en Mensajes) |
-| Celular y tablet | **Falta** | El boceto nuevo está dibujado solo para escritorio. Facundo pidió «responsive sin huecos»: hay que dibujarlo antes de pasar a la app |
+| Planes | Hecha | Todos los planes; plan de una paciente con selector, semana editable, lista de compras, indicaciones, versiones y cuatro maneras de empezar; recetas con fotos; 10 plantillas; equivalencias. Nada le llega a la paciente hasta publicar. v24: «Armar con IA» (pedido con palabras y opciones, lo que toma de la ficha, porqué de cada comida, asistente con cambios en una frase, control antes de publicar). v26: arriba igual al resto (pestañas, «Nuevo plan», campana, botón negro); editor «Día» como Nutreando (hora editable, alimentos con cantidad, unidad, medida casera, kcal y nota, cambiar plato, agregar, duplicar día, deshacer y rehacer) y columna derecha con scroll (Análisis, App, PDF, Compartir y Gestión del plan). La grilla semanal sigue en «Semana» |
+| Página pública | Hecha (v20) | Mi página (perfil, dónde atiende, obras sociales, opiniones, vista de la paciente, QR, links por servicio, números del mes), Servicios (precios, obras sociales, descuentos, reglas) y Reservas en línea (reglas, horarios, confirmación y recordatorio por app y mail) |
+| Equipo | Hecha (v21) | Integrantes con roles y sesiones, Permisos por módulo que se tocan (la ficha clínica solo para nutris) y Registro de accesos con descarga |
+| Ajustes | Hecha (v21) | Mi cuenta, Plantillas (formularios y certificados), Avisos automáticos (usa los mismos datos que Mensajes), Seguridad e Integraciones. Planilla por obra social desde Exportar en Cobranzas |
+| Celular | Hecha (v22) | Todo el boceto a 390: barra arriba, cinco accesos abajo, menú completo en cajón, paneles que suben desde abajo; entra solo debajo de 760 de ancho o con el botón «Celular». Tablet no se dibujó |
 
 Descargas que funcionan de verdad: planillas de Cobranzas y listas (CSV), plan de la paciente y lista de compras
 (texto). Usan la función de descargas del Artifact, que ya está declarada en el link.
@@ -146,10 +148,44 @@ el porcentaje no alcanza.
 
 Se publica `panel.html` con la herramienta de Artifact **al mismo link** (`url` de la sección 1), sin pasar
 `capabilities` (así conserva la de descargas). Nunca un link nuevo. Cada publicación es una versión nueva
-(la 16 es la del 23/10). Después de publicar, se guardan las fuentes en esta carpeta del repo con un commit:
+(la 26 es la del 24/10). Antes de publicar, leé el link con la acción `read` de Artifact: si la versión
+publicada no es la última que guardaste en el repo, alguien publicó desde otro lado y hay que traer esos cambios
+primero. Después de publicar, se guardan las fuentes en esta carpeta del repo con un commit:
 la carpeta de trabajo de cada sesión se borra.
 
-## 7. Qué sigue, en orden
+## 6.5 Cómo pedir un cambio de diseño con otro agente (Facundo, 24/10)
+
+Cualquier agente nuevo puede seguir así:
+
+1. Traer `main` (o la rama del último PR del boceto si todavía no se juntó) y leer este archivo y
+   [docs/nutreando/plan.md](../nutreando/plan.md) (bitácora con cada versión, la más nueva arriba).
+2. Ubicar la pantalla en la tabla de la sección 2/4: cada función nueva vive en su propio `src/*.js` y `*.css`
+   (por ejemplo, el plan de la paciente: `pl.js`, `ia.js` y `pe.js`). Cambiar ahí, nunca `panel.html` a mano.
+3. `python3 design/panel-nutri/v3/build.py`, correr las pruebas (sección 6.3, más `tests/pet.mjs` para el
+   editor del plan), mirar capturas a 1440×900 y a 390.
+4. Leer el link, publicar `panel.html` al mismo link (sección 6.4), sumar una línea a la bitácora de
+   `docs/nutreando/plan.md`, actualizar la sección 4 de este archivo, commit y PR solo de boceto y documentos.
+5. Contestarle a Facundo con el link, en español simple y con voseo.
+
+## 6.6 Usar el boceto desde otro agente (Facundo, 24/10: «¿puedo usar el artefacto como lo uso acá en otro agente?»)
+
+- **Otro chat o hilo de Claude en su cuenta** (claude.ai o Claude Code): sí, igual que acá. El link es de su cuenta,
+  así que cualquier sesión suya con la herramienta de Artifact puede leerlo y publicar una versión nueva al mismo
+  link siguiendo 6.4 y 6.5. Conviene pegarle este archivo o decirle «leé docs/panel-nutri-rediseno/traspaso-boceto-v3.md».
+- **Codex, Cursor u otro agente que no es Claude**: no pueden publicar en el link de claude.ai. Sí pueden cambiar
+  las fuentes (`src/*.js` y `*.css`), correr `python3 design/panel-nutri/v3/build.py` y las pruebas, y abrir
+  `design/panel-nutri/v3/panel.html` con doble clic en el navegador: es un solo archivo y funciona igual sin
+  internet (salvo la letra Inter y las entradas suaves, que vienen de internet). Las descargas, sin el link de
+  claude.ai, bajan el archivo directo del navegador.
+- **Para que lo vea en el celular** después de un cambio hecho con Codex o Cursor: que suban las fuentes a una
+  rama y un PR, y después cualquier chat de Claude publica `panel.html` al mismo link (6.4). Si no hay Claude a
+  mano, Facundo puede abrir `panel.html` en la computadora o subirlo como archivo a un chat de Claude y pedir
+  «publicalo en el link del boceto».
+
+
+Los puntos 1 a 5 de abajo ya están hechos (versiones 17 a 26). Lo que sigue es el ok de Facundo al boceto
+entero, las etapas 1 a 3 de [docs/nutreando/plan.md](../nutreando/plan.md) y el punto 6.
+
 
 1. **Página pública** en el boceto: perfil de la nutri, servicios y precios que ella define, turnos para reservar,
    lo que ve una paciente nueva. Mirar lo que ya existe en la app (`PanelPublicPage.tsx`) para no inventar funciones.

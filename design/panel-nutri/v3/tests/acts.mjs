@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
 const D=fileURLToPath(new URL('..',import.meta.url)).replace(/\/$/,'');
-const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1472,height:1100}});
+const b=await chromium.launch(process.env.PW_CHROMIUM?{executablePath:process.env.PW_CHROMIUM}:{});const pg=await b.newPage({viewport:{width:1472,height:1100}});
 await pg.emulateMedia({reducedMotion:'reduce'});
 const errs=[];pg.on('pageerror',e=>errs.push(e.message));
 await pg.goto('file://'+D+'/panel.html');await pg.waitForTimeout(800);
