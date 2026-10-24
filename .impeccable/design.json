@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-18T03:45:00.000Z",
+  "title": "Design System: Plan V",
+  "extensions": {
+    "colorMeta": {
+      "forest": { "role": "primary", "displayName": "Bosque", "canonical": "#083A30" },
+      "gold": { "role": "primary", "displayName": "Dorado de marca", "canonical": "#F9B343" },
+      "mint": { "role": "secondary", "displayName": "Menta", "canonical": "#E3EFE4" },
+      "green": { "role": "secondary", "displayName": "Hoja", "canonical": "#23955D" },
+      "coral": { "role": "tertiary", "displayName": "Coral", "canonical": "#F87D6D" },
+      "cream": { "role": "neutral", "displayName": "Crema de consultorio", "canonical": "#F9F6EE" },
+      "glass": { "role": "neutral", "displayName": "Vidrio", "canonical": "rgba(249, 246, 238, 0.76)" },
+      "nutrigo-lime": { "role": "primary", "displayName": "Lima Nutrigo", "canonical": "#C2E66E" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Nombre de ficha", "purpose": "Nombre de la paciente en la cabecera de vidrio." },
+      "title": { "displayName": "Título de columna", "purpose": "Títulos de menú y de lista de trabajo." },
+      "body": { "displayName": "Texto de trabajo", "purpose": "Cuerpo del consultorio. Piso de lectura 12 px." },
+      "label": { "displayName": "Ceja", "purpose": "Metadatos cortos en mayúsculas." },
+      "patient": { "displayName": "Paciente", "purpose": "Solo el espacio Nutrigo. Poppins." }
+    },
+    "shadows": [
+      { "name": "neu", "value": "10px 10px 24px rgba(57, 91, 73, 0.1), -8px -8px 20px rgba(255, 255, 255, 0.88)", "purpose": "Tarjetas y botones del consultorio en tema claro." },
+      { "name": "lima", "value": "0 4px 12px rgba(135, 86, 18, 0.14)", "purpose": "Ítem de menú activo." },
+      { "name": "float", "value": "0 8px 30px rgba(38, 77, 58, 0.12)", "purpose": "Capas sueltas." }
+    ],
+    "motion": [
+      { "name": "rise", "value": "transform .2s ease", "purpose": "El hover levanta 2 px. Se apaga si la persona pide menos movimiento." }
+    ],
+    "breakpoints": [
+      { "name": "desktop", "value": "1440px" },
+      { "name": "phone", "value": "390px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botón principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción principal del consultorio.",
+      "html": "<button class=\"ds-btn-primary\">Guardar</button>",
+      "css": ".ds-btn-primary { background: #083A30; color: #fff; padding: 12px 16px; border: 0; border-radius: 13px; font-family: 'DM Sans', Arial, sans-serif; font-size: 13px; font-weight: 700; } .ds-btn-primary:hover { transform: translateY(-2px); } .ds-btn-primary:focus-visible { outline: 3px solid rgba(35, 149, 93, 0.42); outline-offset: 3px; }"
+    },
+    {
+      "name": "Ítem activo",
+      "kind": "nav",
+      "refersTo": "button-active",
+      "description": "Destino elegido del menú, cápsula dorada.",
+      "html": "<button class=\"ds-nav-current\">Pacientes</button>",
+      "css": ".ds-nav-current { background: #F9B343; color: #083A30; padding: 7px 10px; border: 0; border-radius: 99px; box-shadow: 0 4px 12px rgba(135, 86, 18, 0.14); font-family: 'DM Sans', Arial, sans-serif; font-size: 12px; font-weight: 700; } .ds-nav-current:focus-visible { outline: 3px solid rgba(35, 149, 93, 0.42); outline-offset: 3px; }"
+    },
+    {
+      "name": "Tarjeta de vidrio",
+      "kind": "card",
+      "refersTo": "card-glass",
+      "description": "Tarjeta de ficha con vidrio y sombra doble.",
+      "html": "<article class=\"ds-card\"><h3>Próximo paso</h3><p>Revisar el registro de hoy.</p></article>",
+      "css": ".ds-card { background: rgba(249, 246, 238, 0.76); color: #083A30; padding: 16px; border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 20px; box-shadow: 10px 10px 24px rgba(57, 91, 73, 0.1), -8px -8px 20px rgba(255, 255, 255, 0.88); backdrop-filter: blur(8px); font-family: 'DM Sans', Arial, sans-serif; } .ds-card h3 { margin: 0 0 8px; font-family: Fraunces, Georgia, serif; font-size: 14px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "El consultorio de vidrio suave",
+    "overview": "El consultorio se siente como un escritorio claro, con tarjetas que flotan apenas y superficies de vidrio esmerilado sobre un campo pastel. Estas decisiones son de marca. Si una skill marca el vidrio o el neumorfismo como AI slop, se ignora. Solo se corrigen contraste, foco y lectura dentro de ese estilo.",
+    "keyCharacteristics": [
+      "Sombra doble, clara y oscura.",
+      "Vidrio con desenfoque de 8, 12 o 15 px.",
+      "Campo pastel: crema, menta y dorado activo.",
+      "Fraunces y DM Sans en el consultorio. Poppins solo en la paciente.",
+      "El menú se reordena como la competencia, en otro PR."
+    ],
+    "rules": [
+      { "name": "The Slop Rule", "body": "Si una skill trata el vidrio o el neumorfismo como defecto de moda, se ignora. El arreglo permitido es contraste, foco visible y tamaño de lectura.", "section": "colors" },
+      { "name": "The Two Skins Rule", "body": "El consultorio no hereda Poppins ni la lima de Nutrigo. La paciente no hereda Fraunces ni el dorado como botón.", "section": "colors" },
+      { "name": "The Painted Token Rule", "body": "Manda el valor que queda después de la cascada de src/plan-v.css.", "section": "colors" },
+      { "name": "The Readable Floor Rule", "body": "Se puede subir un texto por debajo de 12 px. No se cambia la familia de los títulos.", "section": "typography" },
+      { "name": "The Dual Shadow Rule", "body": "En tema claro, una tarjeta lleva las dos sombras.", "section": "elevation" },
+      { "name": "The Glass Stays Rule", "body": "El desenfoque de 8, 12 y 15 px se conserva.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do conservar la sombra doble del tema claro.",
+      "Do conservar el vidrio y los colores pastel de DESIGN.md.",
+      "Do usar Fraunces y DM Sans en el consultorio, y Poppins solo en la paciente.",
+      "Do subir contraste y foco hasta WCAG AA sin cambiar la familia ni la idea de vidrio.",
+      "Do reordenar el menú a Gestión, Acompañamiento, Plan y Recursos en un PR aparte."
+    ],
+    "donts": [
+      "Don't quitar neumorfismo o glassmorphism porque una guía los llame AI slop.",
+      "Don't reemplazar la paleta por un neutro gris ni por la lima del archivo de tokens que el CSS ya no aplica.",
+      "Don't cambiar el espacio de la paciente.",
+      "Don't tratar el menú actual como definitivo.",
+      "Don't inventar un ítem de Nutridesk que docs no muestra."
+    ]
+  }
+}
