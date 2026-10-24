@@ -4,6 +4,8 @@ Creado el 19/10/2026 por Claude (hilo «Rediseño del panel de la nutri») a ped
 «Dejá todo un plan para desarrollar con otros agentes por si te quedás sin crédito».
 Cualquier agente (Claude, Codex, Cursor) puede tomar una fase. **Leé este archivo entero antes de empezar.**
 
+> **24/10: para pasar el boceto nuevo a la app como versión final, seguí [version-final.md](version-final.md)** (fases, base, sincronización con la paciente y prompt para el agente).
+>
 > **23/10: leé primero [traspaso-boceto-v3.md](traspaso-boceto-v3.md).** Desde el 20/10 el panel tiene un estilo nuevo y un boceto único (https://claude.ai/artifact/JwXZXARtS7e6scYcpx8cKV, fuentes en `design/panel-nutri/v3/`). Lo de abajo sigue valiendo para el método, pero la referencia visual nueva es esa.
 
 ## 1. Qué hay que construir
@@ -256,6 +258,10 @@ Facundo pidió que funcionen. Verificar primero si ya existen en `main`; si no, 
 | 6 a 9 | Por coordinar | — | Pendientes; las cubren las fases A a I |
 
 ## 8. Bitácora (una entrada por paso, la más nueva arriba)
+
+### 2026-10-24 · Claude · Instrucciones para la versión final
+- Hecho: [version-final.md](version-final.md) con la revisión de la app contra el boceto v26, 14 fases (0 a 13), qué datos ya existen, los paquetes de base que faltan, qué se sincroniza con la app de la paciente y un prompt corto para cualquier agente.
+- Próximo paso exacto: ok de Facundo al boceto v26 (fase 0) y después fase 1.
 
 ### 2026-10-23 · Claude · Traspaso del boceto único
 - Hecho: las fuentes del boceto nuevo pasaron al repo (`design/panel-nutri/v3/`: base, piezas, script de armado y pruebas) y se escribió [traspaso-boceto-v3.md](traspaso-boceto-v3.md) con el método, el estado de cada pantalla y el orden de lo que falta.
