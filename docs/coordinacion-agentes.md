@@ -34,7 +34,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
-| Continuación del boceto v29 (solo dibujo) | Cursor, por pedido de Facundo del 24/10 | `design/panel-nutri/v29/` y [traspaso](panel-nutri-rediseno/continuar-v29-cursor.md) | Base original archivada; continuar sobre copia, una pantalla por vez. No incorpora v30/v31 ni cambia la app productiva |
+| Continuación del boceto v29 (solo dibujo) | Cursor, por pedido de Facundo del 24/10 | `design/panel-nutri/v29/` y [traspaso](panel-nutri-rediseno/continuar-v29-cursor.md) | Las seis pantallas de la fase 0B están en la copia de trabajo, rama `cursor/boceto-seis-pantallas-66c3`. El original no se tocó. No incorpora v30/v31 ni cambia la app. Falta que Claude publique el link |
 | Acceso, cartera completa, teléfono de la paciente | Codex | PR #105 (`codex/nutridesk-release-base`) | Borrador. Falta comparar con Figma y la frase de Facundo |
 | Consultas grabadas, borrador privado y resumen revisado | Codex | PR #106 (`codex/nutridesk-release-consultas`) | Borrador, encima de #105. IA externa apagada |
 | Importar pacientes y documentos con OCR | Codex | PR #107 (`codex/nutridesk-release-importacion`) | Borrador, encima de #106 |
@@ -102,6 +102,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **24/10 · Cursor · Seis pantallas en el boceto v29** · Asistente IA, Seguimiento, Progreso, Alimentos, Biblioteca y Centro de ayuda, en la copia de trabajo de la v29. Rama `cursor/boceto-seis-pantallas-66c3`. Sin app, sin base, sin publicar y sin juntar a main.
 - **24/10 · Codex · Base v29 para Cursor** · Se conserva el HTML original y se documenta la continuación del dibujo en [continuar-v29-cursor.md](panel-nutri-rediseno/continuar-v29-cursor.md). Archivo original verificable; sin cambios de app, backend ni base.
 
 - **24/10 · Claude · Instrucciones para la versión final del panel** · [panel-nutri-rediseno/version-final.md](panel-nutri-rediseno/version-final.md): revisión de la app contra el boceto v26, fases 0 a 13, base que falta (paquetes A, B y C), sincronización con la app de la paciente y prompt para cualquier agente. Solo documentos.

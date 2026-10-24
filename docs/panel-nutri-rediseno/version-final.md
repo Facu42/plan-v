@@ -326,7 +326,7 @@ Actualizar al empezar y al terminar cada una.
 
 | Fase | Qué | Dueño | Rama / PR | Estado |
 |---|---|---|---|---|
-| 0B | Dibujar las seis pantallas que faltan | Cursor | — | Pendiente |
+| 0B | Dibujar las seis pantallas que faltan | Cursor | `cursor/boceto-seis-pantallas-66c3` | Hecha en el boceto (copia de la v29, 24/10). Falta que Claude publique el link |
 | 0 | Ok al boceto entero | Facundo | — | Espera la 0B |
 | 1 | Herramientas al boceto nuevo | — | — | Pendiente |
 | 2 | Armazón | — | — | Pendiente |
@@ -343,6 +343,8 @@ Actualizar al empezar y al terminar cada una.
 | 13 | Pantallas sin boceto y cierre | — | — | Pendiente (decisión de Facundo) |
 
 Las fases 3 y 4 pueden ir en paralelo con agentes distintos después de la 2; el resto, en orden.
+
+La fase 0B quedó dibujada el 24/10 en `design/panel-nutri/v29/panel-trabajo.html` (copia de la v29), con la letra y las tarjetas de esa versión. El archivo original de la v29 no se tocó y no se rearmó el boceto de `v3/`. Cursor no publicó el link.
 
 ---
 
