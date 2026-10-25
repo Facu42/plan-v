@@ -20,7 +20,9 @@ Se revisó el título y el apilado con `/browse` a 1440 y 390, con datos fictici
 
 **Paso 10 actualizado:** ✅ flujos críticos locales (3.300 pruebas y diez e2e); ✅ regresión del enlace anterior y recarga; contratos de asignación y lectura existentes conservados; área frágil: canonización de enlaces y selectores del navegador; migraciones: no corresponden; fire test: prueba de alias y e2e rojos antes del arreglo, verdes después; automatización: regresión incorporada a los comandos de CI existentes. Sin cambios de producción.
 
-**Estado de la continuación:** apta para revisión por el mismo PR; nueva comprobación firmada pendiente de subir la corrección. Docker está instalado en esta PC, pero su servicio no está iniciado: no se ejecutó aquí la pila descartable con sesiones firmadas. El resultado remoto previo no certifica el script corregido. Hasta completar el control remoto, **HOLD para merge**.
+**Cierre remoto sobre el código `408dc57`:** [CI general aprobado](https://github.com/Facu42/plan-v/actions/runs/40244448749), incluidos los diez e2e, y [sesiones firmadas aprobadas](https://github.com/Facu42/plan-v/actions/runs/40244448761). El segundo control aprobó las 30 pruebas de permisos y completó el navegador: Recetas, asignación y lectura de recursos, mensajes, archivos privados, plan y pago persistentes tras reiniciar el servidor. Terminó el 25/10 a las 23:32 UTC y eliminó los contenedores y los datos ficticios. La vista previa de Vercel también fue aprobada.
+
+**Estado de la continuación:** **SHIP para revisión por PR**, con los controles del código aprobados. Este cierre solo agrega documentación sobre `408dc57`; no modifica la implementación verificada. Docker está instalado en esta PC, pero su servicio no está iniciado: la pila descartable con sesiones firmadas se comprobó en GitHub. Sin merge ni cambios en producción; adjuntos de video/PDF siguen pendientes.
 
 ## Comprobaciones de la entrega inicial
 
