@@ -1,6 +1,6 @@
 # Biblioteca v29: verificación del 25/10/2026
 
-Rama: `codex/biblioteca-v29`, desde `193d4ed` (Alimentos #181). Implementación autorizada por Facundo: «APROBADO PARA IMPLEMENTAR YA. No pidas diseño ni esperes otra confirmación».
+Rama: `codex/biblioteca-v29`, desde `193d4ed` (Alimentos #181). Implementación `9331911`, [PR #182](https://github.com/Facu42/plan-v/pull/182). Autorizada por Facundo: «APROBADO PARA IMPLEMENTAR YA. No pidas diseño ni esperes otra confirmación».
 
 `/crm/biblioteca?biblioteca=recursos` usa las tarjetas y la columna «Quién lo abrió» de `sxBiblioteca`, en `design/panel-nutri/v29/panel-trabajo.html`. Conserva el catálogo real, borradores, nuevas versiones, publicación, despublicación, asignaciones y lectura. «Ver contenido» abre esas funciones en el panel lateral del boceto. «Ver recetas» conserva el catálogo de recetas existente.
 
