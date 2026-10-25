@@ -416,3 +416,10 @@ No debe volver a abrirse como pendiente salvo regresión:
 3. Reflejar cada entidad nueva en el CRM, conservando los once módulos y el aislamiento multipaciente.
 4. Contrato 016 ampliado, RLS, seeds y serializers; sin ejecutar SQL hasta go/no-go.
 5. Supabase, proveedores, E2E, operación, despliegue y producción.
+
+
+## Boceto → app (24 oct 2026)
+
+- Handoff para agentes: [docs/panel-nutri-rediseno/handoff-boceto-a-app.md](panel-nutri-rediseno/handoff-boceto-a-app.md)
+- Plan iterable: https://cursor.com/canvas/store-0f75b483-c592-490c-9d4f-f54cf2aee507/6a995189-0641-4c51-ba7e-6ad9946145ab
+- Boceto PR: https://github.com/Facu42/plan-v/pull/174
