@@ -78,7 +78,7 @@ export function PanelSeguimientoVista({
         </div>)
         : <p className="sxsub">No hay comidas en esta lista.</p>;
   return <div id="s-seguimiento" className="sxw">
-    <div className="fx" style={{ gridTemplateColumns: '1.22fr .9fr' }}>
+    <div className="fx" data-mk="1" style={{ gridTemplateColumns: '1.22fr .9fr' }}>
       <div className="c">
         <Tarjeta titulo={tab === 'pend' ? 'Comidas con foto' : 'Ya revisadas'} meta={`${pendientes} por revisar · la foto sale de la app`}>
           <div className="fxs"><div className="fxr">{filas}</div>{mas && tab === 'pend' ? <p className="sxsub">Hay más por revisar. Seguí en la ficha.</p> : null}</div>

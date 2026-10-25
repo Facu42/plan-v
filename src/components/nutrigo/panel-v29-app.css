@@ -62,7 +62,11 @@
   .nv-app.nv-pro.pn-panel:has(#pv-panel-v29) { padding-bottom: 0; }
 }
 
-/* Seguimiento llena la columna en escritorio. En el celular la pantalla sigue scrolleando. */
+/* Seguimiento llena la columna en escritorio. En el celular la pantalla sigue scrolleando.
+   El encabezado del boceto no se achica: las pestañas y Pedir registro quedan arriba de las tarjetas. */
 #pv-panel-v29:not(.mob) .main:has(#s-seguimiento) { height: 100%; overflow: hidden; }
 #pv-panel-v29:not(.mob) #pv-panel:has(#s-seguimiento) { flex: 1; min-height: 0; }
+#pv-panel-v29.mob .main:has(#s-seguimiento) > .top { flex: 0 0 auto; height: auto; }
 #pv-panel-v29 .sxpic img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; display: block; }
+/* La hoja vieja del panel pisa el chip del boceto (11px y fondo blanco). Adentro de Seguimiento vuelve el del archivo. */
+#pv-panel-v29 #s-seguimiento .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
