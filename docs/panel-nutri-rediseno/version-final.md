@@ -17,6 +17,8 @@ Sirve para **cualquier agente** (Claude, Codex, Cursor) que llegue sin contexto.
 
 **Orden de arranque:** por valor — tools → shell → Seguimiento → Progreso (no empezar por fases 1→13 de este doc). Detalle y bitácora: [handoff-boceto-a-app.md](handoff-boceto-a-app.md) y Page del plan.
 
+**Seguimiento (orden por valor):** `/crm/seguimiento` copia el dibujo de `panel-trabajo.html` y usa la bandeja, el feed de comidas revisadas y los mensajes de la app. No hay WhatsApp ni tablas nuevas. Si la lista de la cartera no trae sueño, ánimo, síntomas o foto, la pantalla lo dice o abre la ficha. Progreso sigue pendiente.
+
 Las menciones a `v3/panel.html` más abajo quedan como contexto histórico del plan canónico largo hasta que se reescriban fase a fase.
 
 ---
@@ -337,8 +339,8 @@ Actualizar al empezar y al terminar cada una.
 |---|---|---|---|---|
 | 0B | Dibujar las seis pantallas que faltan | Cursor | [PR #174](https://github.com/Facu42/plan-v/pull/174) | Juntada a main. Fuente: `v29/panel-trabajo.html` |
 | 0 | Ok al boceto entero | Facundo | ok-v29-valor | Ok escrito el 25/10. Fuente: `v29/panel-trabajo.html` |
-| 1 | Herramientas al boceto nuevo | Cursor | [PR #176](https://github.com/Facu42/plan-v/pull/176) | Lista, sin juntar. La app se ve igual |
-| 2 | Armazón | — | — | Pendiente |
+| 1 | Herramientas al boceto nuevo | Cursor | [PR #176](https://github.com/Facu42/plan-v/pull/176) | Juntada a main. La app se ve igual |
+| 2 | Armazón | Cursor | [PR #177](https://github.com/Facu42/plan-v/pull/177) | Juntada a main. En el orden por valor esto es la Fase 1 (shell). Seguimiento es la fase siguiente de ese orden, no esta fila |
 | 3 | Inicio | — | — | Pendiente |
 | 4 | Pacientes | — | — | Pendiente |
 | 5 | Ficha 1 (pestañas) | — | — | Pendiente |
@@ -353,7 +355,7 @@ Actualizar al empezar y al terminar cada una.
 
 Las fases 3 y 4 pueden ir en paralelo con agentes distintos después de la 2; el resto, en orden.
 
-La fase 0B quedó rearmada el 25/10 en `design/panel-nutri/v29/panel-trabajo.html` (copia de la v29) y ya está en main por el PR #174. Cada pantalla llena los 1440×900 como Cobranzas. El archivo original de la v29 no se tocó. Las tools de la Fase 0 están en el PR #176: archivos nuevos, la app se ve igual.
+La fase 0B quedó rearmada el 25/10 en `design/panel-nutri/v29/panel-trabajo.html` (copia de la v29) y ya está en main por el PR #174. Cada pantalla llena los 1440×900 como Cobranzas. El archivo original de la v29 no se tocó. Las tools (#176) y el armazón (#177) ya están en main. Seguimiento, en el orden por valor, usa ese armazón y no reabre esta tabla.
 
 ---
 
