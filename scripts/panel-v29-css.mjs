@@ -88,7 +88,7 @@ arbol.walkRules(regla => {
 arbol.walkAtRules('media', regla => { if (!regla.nodes?.length) regla.remove(); });
 
 const aviso = `/* GENERADO por scripts/panel-v29-css.mjs desde design/panel-nutri/v29/panel-trabajo.html. No editar a mano.
-   No importar en la app hasta la fase del armazón: la nutri sigue viendo panel-boceto.css.
+   La raíz del armazón de la nutri importa esta hoja. Las pantallas que todavía no se pasaron siguen con panel-boceto.css.
    La raíz es ${ID}: ocupa el lugar de :root y de <html> (tema, .mob y .mreal).
    La letra y el color de <body> quedan ahí, sin el relleno de la página del boceto. */\n`;
 const cssSalida = aviso + arbol.toString().trim() + '\n';
@@ -143,8 +143,9 @@ const bloques = extraerBloquesIC(script);
 if (!bloques.length) throw new Error('No pude leer los objetos IC del boceto v29');
 const caja = { IC: {} };
 vm.runInNewContext(bloques.join('\n'), caja);
+for (const extra of script.matchAll(/IC\.([A-Za-z0-9_]+)\s*\|\|=\s*'([^']*)'/g)) caja.IC[extra[1]] ??= extra[2];
 const iconos = Object.fromEntries(Object.entries(caja.IC).sort(([a], [b]) => a.localeCompare(b)));
-const menu = ['grid', 'users', 'cal', 'coin', 'globe', 'clip', 'chat', 'team', 'gear', 'bell', 'plus', 'spark', 'fork', 'heart', 'trend', 'search', 'chev'];
+const menu = ['grid', 'users', 'cal', 'coin', 'globe', 'clip', 'chat', 'team', 'gear', 'bell', 'plus', 'spark', 'fork', 'heart', 'trend', 'search', 'chev', 'menu', 'dots'];
 for (const nombre of menu) {
   if (!(nombre in iconos)) throw new Error(`El boceto v29 no tiene el ícono «${nombre}»`);
 }

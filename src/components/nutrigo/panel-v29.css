@@ -1,5 +1,5 @@
 /* GENERADO por scripts/panel-v29-css.mjs desde design/panel-nutri/v29/panel-trabajo.html. No editar a mano.
-   No importar en la app hasta la fase del armazón: la nutri sigue viendo panel-boceto.css.
+   La raíz del armazón de la nutri importa esta hoja. Las pantallas que todavía no se pasaron siguen con panel-boceto.css.
    La raíz es #pv-panel-v29: ocupa el lugar de :root y de <html> (tema, .mob y .mreal).
    La letra y el color de <body> quedan ahí, sin el relleno de la página del boceto. */
 /* Layout: app flotante 1440×900 sobre fondo gris; menú lateral claro, encabezado, aviso, 5 números, consultas de hoy + próxima consulta, 4 tarjetas abajo. */

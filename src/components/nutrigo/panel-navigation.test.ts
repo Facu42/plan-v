@@ -18,4 +18,16 @@ describe('menú profesional', () => {
     expect(groups.flatMap(g => g.items).some(i => i.href === '/crm/servicio')).toBe(false);
     expect(panelNavGroups([], 0, true).flatMap(g => g.items).some(i => i.href === '/crm/servicio')).toBe(true);
   });
+  it('deja el contador común de Pacientes antes que el naranja de Seguimiento', () => {
+    const items = panelNavGroups([], 0, false).flatMap(group => group.items);
+    const pacientes = items.find(item => item.label === 'Pacientes')!;
+    const seguimiento = items.find(item => item.label === 'Seguimiento')!;
+    expect(pacientes.count).toBe(0);
+    expect(pacientes.hot).toBeUndefined();
+    expect(seguimiento.count).toBe(0);
+    expect(seguimiento.hot).toBe(true);
+    expect(items.findIndex(item => item.label === 'Pacientes')).toBeLessThan(items.findIndex(item => item.label === 'Seguimiento'));
+    expect(items.find(item => item.label === 'Agenda')!.count).toBeUndefined();
+    expect(items.find(item => item.label === 'Cobranzas')!.hot).toBeUndefined();
+  });
 });

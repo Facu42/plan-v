@@ -22,19 +22,24 @@ describe('estilos del boceto en la app', () => {
 describe('armazón del panel', () => {
   const render = (collapsed: boolean) => renderToStaticMarkup(<PanelBocetoShell
     dark collapsed={collapsed} onCollapse={vi.fn()} menuOpen={false} onMenu={vi.fn()} nav={<nav className="nvs" />}
-    brand="Tu consultorio" name="Tu consultorio" initials="TC" account={[{ label: 'Tema claro', glyph: 'sun', onSelect: vi.fn() }]} onSignOut={vi.fn()}
-    header={{ title: 'Pacientes', search: 'Buscar' }} bell={<button type="button" className="ibtn" />} onSearch={vi.fn()}
-    tabs={[{ label: 'Inicio', glyph: 'grid', href: '/crm/inicio', on: true }, { label: 'Más', glyph: 'menu' }]} onOpen={vi.fn()} onMore={vi.fn()} mainKey="pacientes"
+    brand="Tu consultorio" name="Tu consultorio" initials="TC" account={[{ label: 'Tema claro', glyph: 'eye', onSelect: vi.fn() }]} onSignOut={vi.fn()}
+    header={{ title: 'Pacientes', search: 'Buscar', actions: <a className="cta" href="/crm/agenda">Nueva consulta</a> }} bell={<button type="button" className="ibtn" aria-label="Avisos" />} onSearch={vi.fn()}
+    tabs={[{ label: 'Inicio', glyph: 'grid', href: '/crm/inicio', on: true }, { label: 'Más', glyph: 'dots' }]} onOpen={vi.fn()} onMore={vi.fn()} mainKey="pacientes"
   ><p>contenido</p></PanelBocetoShell>);
-  it('usa el marcado del boceto con el menú desplegado o plegado', () => {
+  it('usa el marcado del boceto v29 con el menú desplegado o plegado', () => {
     const open = render(false);
-    expect(open).toContain('class="m desk" id="pv-panel"');
-    expect(open).toContain('aria-label="Plegar el menú"');
+    expect(open).toContain('id="pv-panel-v29"');
+    expect(open).toContain('data-theme="dark"');
+    expect(open).toContain('class="app"');
+    expect(open).toContain('aria-label="Plegar menú"');
     expect(open).toContain('<h1>Pacientes</h1>');
+    expect(open).toContain('aria-label="Avisos"');
+    expect(open).toContain('class="cta"');
     expect(open).toContain('aria-label="Cerrar sesión"');
-    expect(open).toContain('<span class="on">');
-    expect(render(true)).toContain('class="m desk col"');
-    expect(render(true)).toContain('aria-label="Desplegar el menú"');
+    expect(open).toContain('id="pv-panel" class="m"');
+    expect(open).toContain('class="on"');
+    expect(render(true)).toContain('class="app mcol"');
+    expect(render(true)).toContain('aria-label="Abrir menú"');
   });
   it('no deja textos vacíos ni valores rotos', () => {
     const html = render(false);

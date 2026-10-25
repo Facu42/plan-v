@@ -86,7 +86,7 @@ import { NutrigoPatientApp } from '../../features/nutrigo/PatientApp';
 import { ServiceNotice } from './ServiceNotice';
 import { PanelNavigation, panelNavActive, panelNavGroups } from './PanelNavigation';
 import { PanelBocetoShell, type PanelAccountOption, type PanelHeader } from './PanelBocetoShell';
-import { PanelBocetoIcon } from './PanelBocetoIcon';
+import { PanelV29Icon } from './PanelV29Icon';
 import { PanelThemePicker } from './PanelThemePicker';
 import { usePanelTheme } from './use-panel-theme';
 import { panelStorage } from './panel-preferences';
@@ -472,13 +472,13 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
     const location = typeof window === 'undefined' ? '/crm/inicio' : window.location.pathname + window.location.search;
     const navItem = panelNavGroups(patients, messageUnread, isAdmin === true).flatMap(group => group.items).find(item => panelNavActive(item, location));
     const header: PanelHeader = page === 'inicio'
-      ? { when: panelHomeWhen(now), title: panelHomeGreeting(userName ?? '', now), search: 'Buscar paciente, plan o receta', wideSearch: true, actions: <a className="btn pri" href="/crm/agenda" onClick={event => { event.preventDefault(); openWorkHref('/crm/agenda'); }}><PanelBocetoIcon name="plus" />Nueva consulta</a> }
+      ? { when: panelHomeWhen(now), title: panelHomeGreeting(userName ?? '', now), search: 'Buscar paciente, plan o receta', wideSearch: true, actions: <a className="cta" href="/crm/agenda" onClick={event => { event.preventDefault(); openWorkHref('/crm/agenda'); }}><PanelV29Icon name="plus" />Nueva consulta</a> }
       : { title: figmaDetail?.title ?? libraryRecipeTitle ?? (page === 'ficha' ? PAGE_LABELS[page] : navItem?.label ?? PAGE_LABELS[page]), search: 'Buscar' };
     const account: PanelAccountOption[] = [
-      { label: darkMode ? 'Tema claro' : 'Tema oscuro', glyph: darkMode ? 'sun' : 'moon', onSelect: () => void panelTheme.choose(darkMode ? 'light' : 'dark') },
+      { label: darkMode ? 'Tema claro' : 'Tema oscuro', glyph: darkMode ? 'eye' : 'moon', onSelect: () => void panelTheme.choose(darkMode ? 'light' : 'dark') },
       ...(supabaseConfigured && !demoSwitch ? [{ label: 'Verificación en dos pasos', glyph: 'shield' as const, onSelect: () => setSecurityOpen(true) }] : []),
       { label: 'Primeros pasos', glyph: 'spark', onSelect: () => setProfessionalIntro(true) },
-      ...(demoSwitch ? [{ label: 'Ver como paciente', detail: 'Modo demo', glyph: 'user' as const, onSelect: () => switchRole('patient') }] : []),
+      ...(demoSwitch ? [{ label: 'Ver como paciente', detail: 'Modo demo', glyph: 'users' as const, onSelect: () => switchRole('patient') }] : []),
     ];
     return <FigmaDetailContext.Provider value={setFigmaDetail}><div className={`nv-app${page === 'inicio' ? ' nv-home' : ''} nv-pro pn-panel${darkMode ? ' nv-dark' : ''}${professionalIntro ? ' nv-professional-onboarding' : ''}${page === 'mensajes' ? ' nv-messaging' : ''}${page === 'ficha' ? ' nv-record' : ''}${page === 'diario' ? ' nv-food-diary' : ''}${page === 'plan' ? ' nv-meal-plan' : ''}${page === 'consultas' ? ' nv-consultation-page' : ''}${page === 'agenda' ? ' nv-agenda-page' : ''}${page === 'objetivos' ? ' nv-goals-page' : ''}${isWorkCenterPage(page) ? ' nv-work-center-page' : ''}${page === 'compras' ? ' nv-grocery-page' : ''}${page === 'progreso' ? ' nv-progress-page' : ''}${page === 'recetas' ? ' nv-healthy-menu' : ''}${page === 'ejercicio' ? ' nv-exercise-page' : ''}${page === 'recursos' ? ' nv-resources-page' : ''}${page === 'cobranzas' || page === 'servicio' ? ' nv-fees-page' : ''}`}>
       <PanelBocetoShell
@@ -486,13 +486,13 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
         nav={<PanelNavigation patients={patients} unread={messageUnread} admin={isAdmin === true} current={location} collapsed={sidebarCollapsed && !compactHeader} onOpen={openWorkHref} />}
         brand={userName?.trim() ? `Consultorio de ${userName.trim().split(/\s+/)[0]}` : 'Tu consultorio'} name={displayName} initials={userInitials} account={account} onSignOut={onSignOut ? () => { if (canLeaveWorkspace()) onSignOut(); } : undefined}
         header={header} onSearch={search => openWorkHref(search ? `/crm/pacientes?${new URLSearchParams({ q: search })}` : '/crm/pacientes')}
-        bell={<ShowroomConsultAlerts key={alertAudience} audience={alertAudience} alerts={consultAlerts} reminders={habitReminders} patientId={selected?.id} onOpen={(alert) => { selectPatient(alert.patientId); navigate('agenda'); }} onManage={(alert) => { selectPatient(alert.patientId); navigate('consultas'); }} onOpenReminder={openReminder} onOpenCare={(notice) => { selectPatient(notice.patient_id); navigate(notice.target); }} proNotices={proNotices} onOpenProNotice={(notice) => { if (notice.kind !== 'payment' && notice.kind !== 'debt') selectPatient(notice.patientId); navigate(notice.page); }} bell={{ className: 'ibtn', render: badge => <><PanelBocetoIcon name="bell" />{badge > 0 && <i />}</> }} />}
+        bell={<ShowroomConsultAlerts key={alertAudience} audience={alertAudience} alerts={consultAlerts} reminders={habitReminders} patientId={selected?.id} onOpen={(alert) => { selectPatient(alert.patientId); navigate('agenda'); }} onManage={(alert) => { selectPatient(alert.patientId); navigate('consultas'); }} onOpenReminder={openReminder} onOpenCare={(notice) => { selectPatient(notice.patient_id); navigate(notice.target); }} proNotices={proNotices} onOpenProNotice={(notice) => { if (notice.kind !== 'payment' && notice.kind !== 'debt') selectPatient(notice.patientId); navigate(notice.page); }} bell={{ className: 'ibtn', render: badge => <><PanelV29Icon name="bell" />{badge > 0 && <i />}</> }} />}
         tabs={[
           { label: 'Inicio', glyph: 'grid', href: '/crm/inicio', on: page === 'inicio' },
           { label: 'Pacientes', glyph: 'users', href: '/crm/pacientes', on: page === 'pacientes' || page === 'ficha' },
           { label: 'Agenda', glyph: 'cal', href: '/crm/agenda', on: page === 'agenda' },
-          { label: 'Mensajes', glyph: 'chat', href: '/crm/mensajes', on: page === 'mensajes' },
-          { label: 'Más', glyph: 'menu', on: menuOpen },
+          { label: 'Mensajes', glyph: 'chat', href: '/crm/mensajes', on: page === 'mensajes', count: messageUnread > 0 ? messageUnread : undefined },
+          { label: 'Más', glyph: 'dots', on: menuOpen },
         ]}
         onOpen={openWorkHref} onMore={() => setMenuOpen(true)}
         mainKey={`${contentIdentity(role, page, selected?.id)}:${workspaceRevision}`}
