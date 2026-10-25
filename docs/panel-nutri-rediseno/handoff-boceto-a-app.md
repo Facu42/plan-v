@@ -19,15 +19,14 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 |---|---|
 | Plan iterable (Page) | https://cursor.com/canvas/store-0f75b483-c592-490c-9d4f-f54cf2aee507/6a995189-0641-4c51-ba7e-6ad9946145ab |
 | Plan canónico por fases | `docs/panel-nutri-rediseno/version-final.md` (fuente = v29/panel-trabajo.html) |
-| Boceto de trabajo | rama `cursor/boceto-seis-pantallas-66c3`, `design/panel-nutri/v29/panel-trabajo.html` |
-| PR boceto | https://github.com/Facu42/plan-v/pull/174 |
+| Boceto de trabajo | `design/panel-nutri/v29/panel-trabajo.html` (PR #174, ya en main) |
 | Fase 0 tools | https://github.com/Facu42/plan-v/pull/176 |
 | Original v29 (NO tocar) | `design/panel-nutri/v29/PlanV-Boceto-v29.html` |
-| Este handoff | PR https://github.com/Facu42/plan-v/pull/175 |
+| Este handoff | PR https://github.com/Facu42/plan-v/pull/175 (ya en main) |
 
 ## Qué ya está hecho
 
-- Boceto v29 + seis pantallas en `panel-trabajo.html` (PR #174).
+- Boceto v29 + seis pantallas en `panel-trabajo.html` (PR #174, ya en main).
 - Pantallas diferenciadas; Progreso con drill-down.
 - App real (`main`) con rutas/APIs; gap = piel UI del boceto.
 - Plan + handoff registrados; **ok Facu ok-v29-valor**.
@@ -58,9 +57,9 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 |---|---|---|
 | 25 oct | Fase 0 tools en PR #176: css e íconos nuevos desde `panel-trabajo.html`. La letra y el celular quedan en la raíz nueva. No se tocó lo que ve la nutri. | Cursor |
 | 25 oct | Facu: ok-v29-valor; arranque Fase 0 tools vía Herdr Cursor | Plan V + Facu |
-| 24–25 oct | Seis pantallas + diferenciación + evolución Progreso en PR #174 | Cursor agent `bc-cf297a92…` |
+| 24–25 oct | Seis pantallas + diferenciación + evolución Progreso en PR #174 (ya en main) | Cursor agent `bc-cf297a92…` |
 | 24 oct | Page del plan boceto→app | Plan V |
-| 24 oct | Handoff creado (PR #175) | Plan V |
+| 24 oct | Handoff creado (PR #175, ya en main) | Plan V |
 
 ## Cómo retomar (otro agente)
 

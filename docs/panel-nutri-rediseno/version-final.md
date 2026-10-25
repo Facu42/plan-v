@@ -335,9 +335,9 @@ Actualizar al empezar y al terminar cada una.
 
 | Fase | Qué | Dueño | Rama / PR | Estado |
 |---|---|---|---|---|
-| 0B | Dibujar las seis pantallas que faltan | Cursor | PR #174 | Dibujadas en el boceto, sin juntar |
+| 0B | Dibujar las seis pantallas que faltan | Cursor | [PR #174](https://github.com/Facu42/plan-v/pull/174) | Juntada a main. Fuente: `v29/panel-trabajo.html` |
 | 0 | Ok al boceto entero | Facundo | ok-v29-valor | Ok escrito el 25/10. Fuente: `v29/panel-trabajo.html` |
-| 1 | Herramientas al boceto nuevo | Cursor | PR #176 | Lista, sin juntar. La app se ve igual |
+| 1 | Herramientas al boceto nuevo | Cursor | [PR #176](https://github.com/Facu42/plan-v/pull/176) | Lista, sin juntar. La app se ve igual |
 | 2 | Armazón | — | — | Pendiente |
 | 3 | Inicio | — | — | Pendiente |
 | 4 | Pacientes | — | — | Pendiente |
@@ -352,6 +352,8 @@ Actualizar al empezar y al terminar cada una.
 | 13 | Pantallas sin boceto y cierre | — | — | Pendiente (decisión de Facundo) |
 
 Las fases 3 y 4 pueden ir en paralelo con agentes distintos después de la 2; el resto, en orden.
+
+La fase 0B quedó rearmada el 25/10 en `design/panel-nutri/v29/panel-trabajo.html` (copia de la v29) y ya está en main por el PR #174. Cada pantalla llena los 1440×900 como Cobranzas. El archivo original de la v29 no se tocó. Las tools de la Fase 0 están en el PR #176: archivos nuevos, la app se ve igual.
 
 ---
 

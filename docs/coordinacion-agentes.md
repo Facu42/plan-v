@@ -1,3 +1,5 @@
+24/10 · Codex → Cursor · Facundo eligió **v29** para seguir dibujando. Archivo original intacto en `design/panel-nutri/v29/PlanV-Boceto-v29.html`; [instrucciones para Cursor](panel-nutri-rediseno/continuar-v29-cursor.md). v30/v31 descartadas; no reaplicar automáticamente sus 13 marcas. Solo boceto y docs; la app y la base no se modifican.
+
 21/10 · Cursor · Se trajo main (fase A #162 e Inicio 900 #163) a `cursor/panel-proximamente`, [PR #168](https://github.com/Facu42/plan-v/pull/168). Siguen Próximamente y los datos de ejemplo. No reemplaza el asistente, la ayuda ni el equipo. Sin juntar.
 
 21/10 · Cursor · Rescate de #158: pantalla Próximamente y datos de ejemplo del boceto en `cursor/panel-proximamente`, [PR #168](https://github.com/Facu42/plan-v/pull/168). No reemplaza el asistente, la ayuda ni el equipo que ya están en main. El armazón del boceto sigue en [PR #162](https://github.com/Facu42/plan-v/pull/162). #158 se cierra. Sin SQL remoto.
@@ -32,6 +34,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Continuación del boceto v29 (solo dibujo) | Cursor, por pedido de Facundo del 24/10 | `design/panel-nutri/v29/` y [traspaso](panel-nutri-rediseno/continuar-v29-cursor.md) | Las seis pantallas quedaron rearmadas el 25/10 en la copia de trabajo, [PR #174](https://github.com/Facu42/plan-v/pull/174). El original no se tocó. No incorpora v30/v31 ni cambia la app. Falta que Claude las revise y publique el link |
 | Acceso, cartera completa, teléfono de la paciente | Codex | PR #105 (`codex/nutridesk-release-base`) | Borrador. Falta comparar con Figma y la frase de Facundo |
 | Consultas grabadas, borrador privado y resumen revisado | Codex | PR #106 (`codex/nutridesk-release-consultas`) | Borrador, encima de #105. IA externa apagada |
 | Importar pacientes y documentos con OCR | Codex | PR #107 (`codex/nutridesk-release-importacion`) | Borrador, encima de #106 |
@@ -100,6 +103,9 @@ del piloto, entidad legal.
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
 - **25/10 · Cursor · Fase 0 tools v29** · [PR #176](https://github.com/Facu42/plan-v/pull/176), rama `cursor/panel-boceto-tools-v29`: scripts nuevos leen `design/panel-nutri/v29/panel-trabajo.html` y escriben `panel-v29.css` / `panel-v29-icons.ts`. La letra, el color y el celular (en el boceto están en la página) quedan en la raíz nueva. No se pisa `panel-boceto.css`. La app se ve igual. El contrato nuevo mira solo la fuente; comparar React queda para el armazón.
+- **25/10 · Cursor · Seis pantallas con la densidad de Cobranzas** · [PR #174](https://github.com/Facu42/plan-v/pull/174), ya en main. Cada pantalla llena los 1440×900. El asistente tiene caja para escribir. Seguimiento muestra cómo se sienten. Progreso muestra adherencia, bajas y subas, altas y bajas, y quién necesita atención. La ayuda suma temas y preguntas frecuentes. Sin app y sin base.
+- **24/10 · Cursor · Seis pantallas en el boceto v29** · Asistente IA, Seguimiento, Progreso, Alimentos, Biblioteca y Centro de ayuda, en la copia de trabajo de la v29. Rama `cursor/boceto-seis-pantallas-66c3`, [PR #174](https://github.com/Facu42/plan-v/pull/174). Sin app y sin base.
+- **24/10 · Codex · Base v29 para Cursor** · Se conserva el HTML original y se documenta la continuación del dibujo en [continuar-v29-cursor.md](panel-nutri-rediseno/continuar-v29-cursor.md). Archivo original verificable; sin cambios de app, backend ni base.
 - **24/10 · Claude · Instrucciones para la versión final del panel** · [panel-nutri-rediseno/version-final.md](panel-nutri-rediseno/version-final.md): revisión de la app contra el boceto v26, fases 0 a 13, base que falta (paquetes A, B y C), sincronización con la app de la paciente y prompt para cualquier agente. Solo documentos.
 - **23/10 · Claude · Plan de funciones de Nutreando** · Aprobado por Facundo. Plan por etapas con estado por paso en [nutreando/plan.md](nutreando/plan.md). Etapa 0 en el boceto v3, repartida con el hilo del panel. Rama `claude/project-thread-he8mny`. Sin código de la app ni base.
 - **23/10 · Claude · Traspaso del boceto único del panel** · Fuentes del boceto nuevo en `design/panel-nutri/v3/` y cómo seguir en [traspaso-boceto-v3.md](panel-nutri-rediseno/traspaso-boceto-v3.md). Solo docs y boceto, sin código de la app ni base.
