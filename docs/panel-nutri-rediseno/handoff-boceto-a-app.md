@@ -76,5 +76,5 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 
 1. Leer esta nota + la Page del plan.
 2. Chequear bitácora: ok-v29-valor ya cerrado. Tools, armazón, Seguimiento, Progreso y Asistente IA (#176, #177, #178, #179 y #180) están en main. Alimentos está en el [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. La letra del panel ya es Inter.
-3. No redibujar el armazón. Después de Alimentos siguen Biblioteca y Centro de ayuda. No están empezadas.
+3. No redibujar el armazón. Alimentos ya está en main por #181. Biblioteca quedó implementada y verificada en `codex/biblioteca-v29`, sin juntar; [informe y capturas](biblioteca-v29-verificacion.md). Sigue Centro de ayuda, que todavía no está empezado.
 4. Actualizar esta bitácora al cerrar cada fase (1 párrafo + commit/PR). Facu mergea.

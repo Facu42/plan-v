@@ -66,6 +66,16 @@ export const PIEZAS_ALIMENTOS = [
   ['Pestaña de porción', '#s-alimentos .tabs button', '', ['fontSize', 'borderTopLeftRadius']],
 ];
 
+export const PIEZAS_BIBLIOTECA = [
+  ['Grilla de recursos', '#s-biblioteca .sxlib', '', ['display', 'gap']],
+  ['Tarjeta de recurso', '#s-biblioteca .sxcard', '', ['backgroundColor', 'borderTopLeftRadius', 'paddingTop', 'textAlign']],
+  ['Tarjeta elegida', '#s-biblioteca .sxcard.on', '', ['borderTopColor', 'backgroundColor']],
+  ['Título del recurso', '#s-biblioteca .sxcard b', '', ['fontSize', 'fontWeight', 'fontFamily', 'color']],
+  ['Tipo del recurso', '#s-biblioteca .sxk', '', ['fontSize', 'letterSpacing', 'color']],
+  ['Descripción', '#s-biblioteca .sxcard p', '', ['fontSize', 'lineHeight', 'color']],
+  ['Acción de asignar', '#s-biblioteca .fxp header .chip', '', ['fontSize', 'borderTopLeftRadius', 'backgroundColor']],
+];
+
 // Piezas de Progreso. El selector existe en el boceto y en la app.
 export const PIEZAS_PROGRESO = [
   ['Avatar de la cartera', '#s-progreso .fxr .av', '', ['width', 'height', 'borderTopLeftRadius']],
@@ -291,12 +301,18 @@ export async function correrContratoV29() {
       await abrirAlimentosApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Alimentos\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_ALIMENTOS, informe);
+      await b.locator('[data-go="biblioteca"]').first().click();
+      await b.waitForSelector('#s-biblioteca:not([hidden]) .sxcard');
+      await a.locator('#pv-panel-v29 a.nv').filter({ hasText: /^Biblioteca$/ }).click();
+      await a.waitForSelector('#s-biblioteca .sxcard');
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Biblioteca\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_BIBLIOTECA, informe);
       await b.close();
       await a.close();
     }
   } finally { await navegador.close(); }
 
-  const texto = `# Contrato del armazón contra el boceto v29\n\nFuente: \`design/panel-nutri/v29/panel-trabajo.html\`.\nApp: \`${origen}/crm/inicio\`, \`${origen}/crm/seguimiento\`, \`${origen}/crm/progreso-global\`, \`${origen}/crm/desarrollo?modulo=asistente-ia\` y \`${origen}/crm/alimentos\`.\n\n${fallas ? `**${fallas} piezas no coinciden.**` : '**El armazón, Seguimiento, Progreso, Asistente y Alimentos coinciden, en claro y en oscuro.**'}\n${informe.join('\n')}\n`;
+  const texto = `# Contrato del armazón contra el boceto v29\n\nFuente: \`design/panel-nutri/v29/panel-trabajo.html\`.\nApp: armazón, Seguimiento, Progreso, Asistente IA, Alimentos y Biblioteca (${origen}).\n\n${fallas ? `**${fallas} piezas no coinciden.**` : '**El armazón, Seguimiento, Progreso, Asistente, Alimentos y Biblioteca coinciden, en claro y en oscuro.**'}\n${informe.join('\n')}\n`;
   return { fallas, texto };
 }
 

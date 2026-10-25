@@ -26,6 +26,7 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
+    launchOptions: process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {},
     baseURL: `http://127.0.0.1:${WEB_PORT}`,
     locale: 'es-AR',
     timezoneId: 'America/Argentina/Buenos_Aires',

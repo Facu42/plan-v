@@ -30,7 +30,7 @@ const postcss = require('postcss');
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const soloChequeo = process.argv.includes('--check');
 const fuente = resolve(raiz, 'design/panel-nutri/v29/panel-trabajo.html');
-const html = await readFile(fuente, 'utf8');
+const html = (await readFile(fuente, 'utf8')).replace(/\r\n/g, '\n');
 const ID = '#pv-panel-v29';
 const PAGINA = ['.bar', '.seg', '.stagewrap', '.stage'];
 const MARCAS = ['.app', '.side', '.logo', '.fold', '.srch', '.nv', '.acct', '.main', '.top'];
@@ -155,7 +155,7 @@ const rutaIconos = resolve(raiz, 'src/components/nutrigo/panel-v29-icons.ts');
 async function dejar(ruta, texto, nombre) {
   if (!soloChequeo) { await writeFile(ruta, texto); return; }
   const actual = await readFile(ruta, 'utf8').catch(() => '');
-  if (actual !== texto) {
+  if (actual.replace(/\r\n/g, '\n') !== texto.replace(/\r\n/g, '\n')) {
     console.error(`${nombre} no coincide con panel-trabajo.html. Corré: node scripts/panel-v29-css.mjs`);
     process.exitCode = 1;
   }

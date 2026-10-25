@@ -34,6 +34,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Biblioteca v29: pasar el boceto aprobado a la app | Codex, autorización de Facundo del 25/10 | `codex/biblioteca-v29`, [verificación](panel-nutri-rediseno/biblioteca-v29-verificacion.md) | Implementada y verificada. Catálogo, publicación, asignación, lectura y mensajes existentes. 3.299 pruebas y 9 e2e aprobados. Sin migraciones ni merge |
 | Continuación del boceto v29 (solo dibujo) | Cursor, por pedido de Facundo del 24/10 | `design/panel-nutri/v29/` y [traspaso](panel-nutri-rediseno/continuar-v29-cursor.md) | Las seis pantallas quedaron rearmadas el 25/10 en la copia de trabajo, [PR #174](https://github.com/Facu42/plan-v/pull/174). El original no se tocó. No incorpora v30/v31 ni cambia la app. Falta que Claude las revise y publique el link |
 | Acceso, cartera completa, teléfono de la paciente | Codex | PR #105 (`codex/nutridesk-release-base`) | Borrador. Falta comparar con Figma y la frase de Facundo |
 | Consultas grabadas, borrador privado y resumen revisado | Codex | PR #106 (`codex/nutridesk-release-consultas`) | Borrador, encima de #105. IA externa apagada |
@@ -101,6 +102,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **25/10 · Codex · Biblioteca v29** · En `codex/biblioteca-v29`: tarjetas del boceto y «Quién lo abrió», catálogo real, creación y publicación en panel lateral, asignar y avisar por el chat de la app. La paciente abre el material y la nutri ve la lectura; un reintento avisa solo a quienes fallaron. Recetas conserva su catálogo. Video/PDF adjuntos quedan como próximos. 3.299 pruebas, 9 e2e, tipos, compilación y contrato v29 en verde; [informe del paso 10 y capturas](panel-nutri-rediseno/biblioteca-v29-verificacion.md). Sin base de producción ni merge.
 
 - **25/10 · Cursor · Alimentos v29, paridad** · [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. Facu rechazó la primera pasada. En gramos las porciones son siempre 100 g, 1 taza (30 g) y 1 cucharada (10 g), como el boceto. El origen se lee «SARA 2», no la cita larga. SARA 2 sigue sin editarse.
 - **25/10 · Cursor · Alimentos v29** · [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. `/crm/alimentos` copia el boceto: buscar, ver la porción y las proteínas, los carbohidratos y las grasas, y crear o editar un alimento propio. SARA 2 se consulta y no se edita. Suplementos y la fuente externa no entran: el boceto no los dibuja. Sin tablas nuevas.
