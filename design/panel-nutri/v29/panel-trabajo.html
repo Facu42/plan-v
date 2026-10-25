@@ -2989,6 +2989,34 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
 .mob #s-alimentos .top .sxin,.mob #s-ayuda .top .sxin{flex:1 1 100%}
 .mob #s-alimentos .top .sxin input,.mob #s-ayuda .top .sxin input{width:100%;min-width:0}
 .mob .sxask textarea{height:84px}
+#sxchat article{background:var(--app);border-radius:14px;padding:12px 14px}
+#sxchat .sxfrom{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink3)}
+.sxlib{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:10px;overflow:auto}
+.sxcard{border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-height:0;min-width:0;background:var(--card)}
+.sxcard.on{background:var(--lima-t);border-color:transparent}
+.sxcard .sxk{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink3)}
+.sxcard b{font-weight:500;font-size:14px;letter-spacing:-.02em}
+.sxcard p{margin:0;color:var(--ink2);font-size:12px;line-height:1.4}
+.sxavs{display:flex;gap:4px;margin-top:auto}
+.sxguide{display:flex;flex-direction:column;gap:10px}
+.sxguide .n{width:22px;height:22px;border-radius:50%;background:var(--lima-t);color:var(--lima-ink);display:grid;place-items:center;font-size:11px;flex:none}
+.sxguide li{display:flex;gap:8px;align-items:flex-start;list-style:none}
+.sxol.sxguide{padding-left:0}
+.sxcard{cursor:pointer;font:inherit;color:inherit;text-align:left;width:100%}
+.sxlib>.sxcard{height:100%;overflow:hidden}
+.sxcard .av{width:22px;height:22px;font-size:9px}
+.sxw .fxp>header h3{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.mob .sxlib{display:flex;flex-direction:column;flex:none;grid-template-rows:none}
+.mob .sxlib>.sxcard{height:auto;overflow:visible}
+.mob .sxw .fxp.g{flex:none;overflow:visible}
+.mob .sxw .fxs{overflow:visible;flex:none;-webkit-mask-image:none;mask-image:none}
+.mob #s-progreso .fxr>.l{flex-wrap:wrap}
+.mob .sxw .fxp>header{flex-wrap:wrap;align-items:flex-start;height:auto}
+.mob .sxw .fxp>header h3{white-space:normal;overflow:visible;text-overflow:clip;flex:1 1 100%}
+.mob .sxw .fxp>header .m{flex:1 1 100%;white-space:normal;overflow:visible;text-overflow:clip}
+.mob .sxtools{width:100%;min-width:0}
+.mob .sxtools .tabs{flex-wrap:wrap;max-width:100%;height:auto;overflow:visible}
+#s-seguimiento .sxwho small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -6041,7 +6069,7 @@ const SX={
   {n:'Julia Sosa',d:5,agua:'2,0 L',sueno:'7,1 h',animo:'Bien',sint:'Sin síntomas nuevos'},
   {n:'Laura Ruiz',d:0,agua:'Sin dato',sueno:'Sin dato',animo:'Sin registros',sint:'No es un incumplimiento'}
  ],
- prog:{per:30,fil:'todas',ord:'nombre'},
+ prog:{per:30,fil:'todas',ord:'nombre',who:'Sofía Gómez'},
  rows:[
   {n:'Sofía Gómez',peso:'68,4 kg',chg:-1.2,chgT:'−1,2 kg',com:19,rev:2,st:'con',adh:86},
   {n:'Martina Díaz',peso:'61,0 kg',chg:-0.4,chgT:'−0,4 kg',com:16,rev:1,st:'con',adh:92},
@@ -6144,22 +6172,41 @@ function sxTurn(q){
  const sources=who?[[who,rec]].concat(base.filter(s=>s[0]!==who)):base;
  return {q,a,sources,proposal};
 }
+const EVO={
+ 'Sofía Gómez':{meta:66.5,peso:[74,72.2,70.1,68.4],adh:[70,78,82,86],med:[['Inicio','74,0 kg'],['Hoy','68,4 kg'],['Cintura','78 cm'],['Grasa','27,8%']],hitos:[['Empezó','74 kg · sin gluten','12/3',''],['Primera baja','−1,8 kg en dos meses','7/5',''],['Merienda floja','le falta proteína','3/9','a'],['Hoy','68,4 kg · adherencia 86%','14/10','']],alert:'La merienda le queda corta de proteína. Conviene mirarlo en la ficha, sin marcarla en falta.'},
+ 'Martina Díaz':{meta:null,peso:[62.2,61.8,61.4,61],adh:[80,84,88,92],med:[['Inicio','62,2 kg'],['Hoy','61,0 kg'],['Cintura','Sin medir'],['Grasa','Sin medir']],hitos:[['Marzo','62,2 kg','mar',''],['Junio','bajó despacio','jun',''],['Septiembre','sigue parejo','sep',''],['Hoy','61,0 kg · adherencia 92%','oct','']],alert:'Viene parejo. No hace falta un aviso.'},
+ 'Paula Acosta':{meta:null,peso:[73,73.4,73.8,74.2],adh:[78,70,62,54],med:[['Inicio','73,0 kg'],['Hoy','74,2 kg'],['Cintura','Sin medir'],['Grasa','Sin medir']],hitos:[['Marzo','73 kg y adherencia alta','mar',''],['Junio','empezó a costarle','jun','a'],['Septiembre','adherencia 62%','sep','a'],['Hoy','74,2 kg · adherencia 54%','oct','a']],alert:'Dijo que le costó. Una semana más simple, sin marcarla en falta. No dio permiso para propuestas.'},
+ 'Julia Sosa':{meta:null,peso:null,adh:[84,86,88,90],med:[['Peso','Falta el dato'],['Adherencia','90%'],['Comidas','Sí'],['Cintura','Sin medir']],hitos:[['Entró','primera consulta','2/9',''],['Registra comidas','el peso no está','oct','n']],alert:'Falta el peso. Tiene comidas. No es un incumplimiento.'},
+ 'Laura Ruiz':{meta:null,peso:null,adh:null,med:[['Peso','Sin dato'],['Adherencia','Sin dato'],['Registros','0'],['Cintura','Sin medir']],hitos:[['Sin carga','no hay comidas ni peso','—','n']],alert:'Falta el dato. No la marques.'},
+ 'Camila Méndez':{meta:null,peso:[56.2,56.6,56.9,57.1],adh:[70,62,55,48],med:[['Inicio','56,2 kg'],['Hoy','57,1 kg'],['Cintura','Sin medir'],['Grasa','Sin medir']],hitos:[['Marzo','56,2 kg','mar',''],['Junio','adherencia en baja','jun','a'],['Hoy','57,1 kg · adherencia 48%','oct','a']],alert:'Esta semana cargó poco. Conviene escribirle antes del turno.'},
+ 'Romina Benítez':{meta:null,peso:[72.8,73.2,73.9,74.6],adh:[90,94,96,98],med:[['Inicio','72,8 kg'],['Hoy','74,6 kg'],['Corticoide','Desde el 8/10'],['Adherencia','98%']],hitos:[['Marzo','72,8 kg','mar',''],['Corticoide','empezó el 8/10','8/10','a'],['Hoy','74,6 kg · adherencia 98%','oct','a']],alert:'Empezó un corticoide el 8/10. Puede explicar la suba. No es una falta.'}
+};
+function sxSerie(v){if(!v)return null;const s=SX.prog.per===7?v.slice(-2):v.slice();return {v:s,lab:s.length===2?['Inicio','Hoy']:['Mar','Jun','Sep','Oct']};}
+function sxPesoCurve(e){if(!e||!e.peso)return '<p class="sxsub">No hay peso en este período. Falta el dato y no es un incumplimiento.</p>';const s=sxSerie(e.peso),o={w:640,h:118,last:String(s.v[s.v.length-1]).replace('.',',')};if(e.meta){o.goal=e.meta;o.gl=String(e.meta).replace('.',',');}return fxCurve(s.v,s.lab,o);}
+function sxAdhCols(e){if(!e||!e.adh)return '<p class="sxsub">Sin adherencia: no hay registros. No es un incumplimiento.</p>';const s=sxSerie(e.adh);return fxCols(s.v,s.lab,{h:72,max:100,hl:false});}
+function sxEvo(r){
+ if(!r)return fxP('Evolución','','','<p class="sxsub">Elegí una paciente de la lista.</p>','g');
+ const e=EVO[r.n];
+ const acts=`<div class="sxq" style="margin-top:10px;position:relative;z-index:1"><button type="button" class="chip" data-sx="ficha" data-who="${ESC(r.n)}">Ficha</button><button type="button" class="chip" data-sx="reg" data-who="${ESC(r.n)}">Registros</button><button type="button" class="chip" data-sx="peso" data-who="${ESC(r.n)}">El peso</button></div>`;
+ const big=r.st==='sin'?'Sin registros':r.peso.indexOf('Sin')===0?'Sin peso':r.chgT;
+ return fxDk('Evolución · '+SX.prog.per+' días',big,r.n+' · '+r.peso,acts)
+  +fxP('Peso en el tiempo',e&&e.meta?'la línea punteada es la meta':SX.prog.per===7?'inicio y hoy':'marzo a octubre','',sxPesoCurve(e))
+  +fxP('Cómo fue','adherencia, medidas, hitos y alertas','',`<p class="sxsub">${ESC(e?e.alert:'')}</p><div class="fxs"><p class="sxsub">Adherencia por período</p>${sxAdhCols(e)}<p class="sxsub">Medidas</p>${e?fxKv(e.med):''}<p class="sxsub">Hitos</p>${e?fxTl(e.hitos):''}</div>`,'g');
+}
 function sxAsistente(){
- const sp=sxSpend(), meals=sxMealsN(), pend=SX.meals.filter(m=>m.st==='pend').length;
+ const sp=sxSpend(), last=()=>SX.turns[SX.turns.length-1];
  if(!SX.turns.length)SX.turns.push(sxTurn('Resumen de la cartera'));
  top('asistente','Asistente IA','Cada dato muestra su fuente · nada se manda solo',
   tabs('per',String(SX.per),[['7','7 días'],['30','30 días'],['90','90 días']]),
   `<button class="chip" type="button" data-sx="csv">Descargar indicadores</button><button class="cta" type="button" data-sx="asktop">Consultar</button>`);
- const chat=SX.turns.map(t=>`<article><b>${ESC(t.q)}</b><p>${ESC(t.a)}</p>${t.proposal?`<p><b>Propuesta para revisar.</b> ${ESC(t.proposal)}</p><div class="sxq"><button type="button" class="chip" data-sx="ficha">Abrir ficha</button><button type="button" class="chip" data-sx="rev">Marcar revisada</button></div>`:''}<div class="fxr">${t.sources.map(s=>`<button type="button" class="l" data-sx="src" data-who="${ESC(s[0])}">${whoLine(s[0],s[1]+' registros en el período')}</button>`).join('')}</div></article>`).join('');
+ const chat=SX.turns.map(t=>`<article><span class="sxfrom">Vos</span><b>${ESC(t.q)}</b><span class="sxfrom">Asistente</span><p>${ESC(t.a)}</p>${t.proposal?`<p><b>Propuesta para revisar.</b> ${ESC(t.proposal)}</p><div class="sxq"><button type="button" class="chip" data-sx="ficha">Abrir ficha</button><button type="button" class="chip" data-sx="rev">Marcar revisada</button></div>`:''}</article>`).join('');
  const sug=['Resumen de la cartera','¿Quiénes no tienen registros?','¿Qué comidas están por revisar?'].map(q=>`<button type="button" class="chip" data-sx="sug" data-q="${ESC(q)}">${ESC(q)}</button>`).join('');
- document.getElementById('sxw-asistente').innerHTML=`<div class="fx" style="grid-template-columns:1.55fr .9fr"><div class="c">
-  <div class="fxtiles cob4">${tile('Comidas del período',String(meals),'las que ellas cargaron',fxBar(Math.round(meals/540*100)))}${tile('Por revisar',String(pend),'en la cola de hoy',fxBar(Math.min(100,pend*18),'a'))}${tile('Con datos','3 de 4','Laura queda aparte',fxBar(75))}</div>
-  ${fxP('Comidas de la cartera',SX.per+' días','',sxCurveMeals())}
-  ${fxP('Conversación','escribí con tus palabras','',`<div class="sxask"><textarea data-sxq="ask" aria-label="Pedido para el asistente" placeholder="Ej.: ¿cómo viene Sofía esta semana?">${ESC(SX.draft)}</textarea><div class="sxrow"><span class="sxsub">De una paciente o de toda la cartera.</span><button type="button" class="cta" data-sx="ask">Consultar</button></div></div><div class="sxq">${sug}</div><div class="fxs" id="sxchat">${chat}</div>`,'g')}
+ document.getElementById('sxw-asistente').innerHTML=`<div class="fx" style="grid-template-columns:1.7fr .78fr"><div class="c">
+  ${fxP('Conversación','escribí de una paciente o de toda la cartera','',`<div class="sxask"><textarea data-sxq="ask" aria-label="Pedido para el asistente" placeholder="Ej.: ¿cómo viene Sofía esta semana?">${ESC(SX.draft)}</textarea><div class="sxrow"><span class="sxsub">Nada se le manda a ella hasta que vos lo revisás.</span><button type="button" class="cta" data-sx="ask">Consultar</button></div></div><div class="sxq">${sug}</div><div class="fxs" id="sxchat">${chat}</div>`,'g')}
  </div><div class="c">
   ${fxDk('Gasto de este mes',sp[0],'de US$ 5. Si se pasa el tope, avisa y no consulta.',`<div class="fxdkp"><i style="width:${sp[1]}%"></i></div><div class="fxdk2"><span>Tope</span><b>US$ 5</b></div>`)}
-  ${fxP(SX.ai?'Propuestas con IA: sí':'Propuestas con IA: no','solo con permiso de ella',`<button type="button" class="chip" data-sx="ai">${SX.ai?'Apagar':'Prender'}</button>`,`<p class="sxsub">Paula no dio permiso y queda afuera. Una propuesta no le llega hasta que vos la revisás.</p><p class="sxsub">${SX.ai?'La idea queda en la conversación, para mirar.':'Prendé las propuestas si querés ideas. Nada se manda solo.'}</p>`)}
-  ${fxP('De dónde sale',SX.turns[SX.turns.length-1].sources.length+' fuentes','',`<div class="fxs"><div class="fxr">${SX.turns[SX.turns.length-1].sources.map(s=>`<button type="button" class="l" data-sx="src" data-who="${ESC(s[0])}">${whoLine(s[0],s[1]+' registros · ficha')}</button>`).join('')}</div></div>`,'g')}
+  ${fxP('Propuestas',SX.ai?'prendidas':'apagadas',`<button type="button" class="chip" data-sx="ai">${SX.ai?'Apagar':'Prender'}</button>`,`<p class="sxsub">Paula no dio permiso y queda afuera. Una propuesta no le llega hasta que vos la revisás.</p><p class="sxsub">${SX.ai?'La idea queda en la conversación, para mirar.':'Prendé las propuestas si querés ideas. Nada se manda solo.'}</p>`)}
+  ${fxP('De dónde sale la última',last().sources.length+' fuentes','',`<div class="fxs"><div class="fxr">${last().sources.map(s=>`<button type="button" class="l" data-sx="src" data-who="${ESC(s[0])}">${whoLine(s[0],s[1]+' registros · ficha')}</button>`).join('')}</div></div>`,'g')}
  </div></div>`;
  bindQ('#s-asistente [data-sxq="ask"]',v=>{SX.draft=v;});
 }
@@ -6168,22 +6215,18 @@ function sxSeguimiento(){
  const pend=SX.meals.filter(m=>m.st==='pend');
  const badge=document.getElementById('sxseg');if(badge){badge.textContent=String(pend.length);badge.classList.toggle('hot',pend.length>0);}
  const list=SX.meals.filter(m=>SX.seg==='pend'?m.st==='pend':m.st==='ok');
- const bien=SX.feel.filter(f=>f.animo==='Bien').length;
  const con=SX.feel.filter(f=>f.d>0).length;
  top('seguimiento','Seguimiento','La falta de registros no es un incumplimiento',
   tabs('seg',SX.seg,[['pend','Por revisar'],['ok','Revisadas']]),
   `<button class="cta" type="button" data-sx="pedir">Pedir registro</button>`);
  const rows=list.length?list.map(m=>`<div class="l"><span class="sxmeal">${av(m.who)}<span class="sxpic" title="Foto del plato">${svg('img',14)}</span><span class="sxwho"><b>${ESC(m.txt)}</b><small>${ESC(m.who)} · ${ESC(m.meal)} · ${ESC(m.when)} · ${ESC(m.kcal)}${m.note?' · '+ESC(m.note):''}</small></span></span><span class="sxacts">${SX.seg==='pend'?`<button type="button" class="chip" data-sx="ok" data-i="${m.id}">Confirmar</button><button type="button" class="chip" data-sx="com" data-i="${m.id}">Comentar</button>`:`<button type="button" class="chip" data-sx="ver" data-i="${m.id}">Ver</button>`}</span></div>`).join(''):'<p class="sxsub">No hay comidas en esta lista.</p>';
- const feel=SX.feel.map(f=>`<div class="l">${whoLine(f.n,f.sint)}${animoPill(f.animo)}<button type="button" class="chip" data-sx="sentir" data-who="${ESC(f.n)}">Ver</button></div>`).join('');
+ const feel=SX.feel.map(f=>`<div class="l">${whoLine(f.n,'Agua '+f.agua+' · sueño '+f.sueno+' · '+f.sint)}${animoPill(f.animo)}<button type="button" class="chip" data-sx="sentir" data-who="${ESC(f.n)}">Ver</button></div>`).join('');
  const days=SX.feel.map(f=>`<div class="l">${whoLine(f.n,f.d?f.d+' de 7':'0 de 7 · sin registros')}${dayBar(f.d)}</div>`).join('');
- document.getElementById('sxw-seguimiento').innerHTML=`<div class="fx" style="grid-template-columns:1.45fr 1fr"><div class="c">
-  <div class="fxtiles cob4">${tile('Por revisar',String(pend.length),'comidas con foto',fxBar(Math.min(100,pend.length*18),'a'))}${tile('Con registro',con+' de '+SX.feel.length,'esta semana',fxBar(Math.round(con/SX.feel.length*100)))}${tile('Ánimo bien',String(bien),'de '+SX.feel.length+' en el ejemplo',fxBar(Math.round(bien/SX.feel.length*100)))}</div>
-  ${fxP('Comidas por día','esta semana','',fxCols([8,7,9,6,5,4,3],['L','M','M','J','V','S','D'],{h:112,max:10,top:'9'}))}
-  ${fxP(SX.seg==='pend'?'Comidas con foto':'Ya revisadas',pend.length+' por revisar','',`<div class="fxs"><div class="fxr">${rows}</div></div>`,'g')}
+ document.getElementById('sxw-seguimiento').innerHTML=`<div class="fx" style="grid-template-columns:1.22fr .9fr"><div class="c">
+  ${fxP(SX.seg==='pend'?'Comidas con foto':'Ya revisadas',pend.length+' por revisar · la foto sale de la app','',`<div class="fxs"><div class="fxr">${rows}</div></div>`,'g')}
  </div><div class="c">
-  ${fxDk('Por revisar',String(pend.length),'de las comidas cargadas en la app',`<div class="fxdkp"><i style="width:${Math.min(100,pend.length*18)}%"></i></div><div class="fxdk2"><span>Canal</span><b>Por la app</b></div>`)}
-  ${fxP('Cómo se sienten','hábitos y síntomas de la semana','',`<div class="fxs"><div class="fxr">${feel}</div><p class="sxsub">Es el ejemplo de esta semana. Si no hay dato, no es una falta.</p></div>`,'g')}
-  ${fxP('Días registrados',con+' de '+SX.feel.length,'',`<div class="fxsplit">${fxGauge(Math.round(con/SX.feel.length*100),String(con),'de '+SX.feel.length,{w:108,sm:1})}<p class="sxsub">Quien no cargó no queda marcada en falta.</p></div><div class="fxs"><div class="fxr">${days}</div></div>`,'g')}
+  ${fxP('Cómo se sienten','agua, sueño y síntomas de la semana','',`<div class="fxs"><div class="fxr">${feel}</div><p class="sxsub">Es el ejemplo de esta semana. Si no hay dato, no es una falta.</p></div>`,'g')}
+  ${fxP('Días registrados',con+' de '+SX.feel.length+' cargaron esta semana','',`<div class="fxs"><div class="fxr">${days}</div><p class="sxsub">Quien no cargó no queda marcada en falta.</p></div>`,'g')}
  </div></div>`;
 }
 
@@ -6205,23 +6248,22 @@ function sxAdhCurve(){
  return fxCurve([70,74,76,78],['Jul','Ago','Sep','Oct'],{w:560,h:108,goal:80,gl:'80'});
 }
 function sxProgreso(){
- const rows=sxRows(), adh=sxAdh();
+ let rows=sxRows();
+ if(rows.length&&!rows.some(r=>r.n===SX.prog.who))SX.prog.who=rows[0].n;
+ const adh=sxAdh();
  const bajan=SX.rows.filter(r=>r.chg<0), suben=SX.rows.filter(r=>r.chg>0), sin=SX.rows.filter(r=>r.st==='sin').length;
+ const quien=SX.rows.find(r=>r.n===SX.prog.who)||null;
  top('progreso','Progreso','Sin registros no es un incumplimiento',
   tabs('pper',String(SX.prog.per),[['7','7 días'],['30','30 días'],['90','90 días']]),'');
  const fil=tabs('pfil',SX.prog.fil,[['todas','Todas'],['con','Con registros'],['sin','Sin registros']]);
  const ord=tabs('pord',SX.prog.ord,[['nombre','Nombre'],['com','Más comidas'],['chg','Cambio de peso'],['adh','Adherencia']]);
- const body=rows.length?`<table><thead><tr><th>Paciente</th><th>Peso</th><th>Adherencia</th><th>Comidas</th><th></th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${ESC(r.n)}</b><div class="sxsub">${r.st==='con'?'Con registros':'Sin registros en el período'}</div></td><td>${ESC(r.peso)}<div class="sxsub">${ESC(r.chgT)}</div></td><td>${r.adh==null?'<span class="sxsub">Sin dato</span>':`<span class="adh"><span class="tr"><i class="${r.adh<60?'lo':''}" style="width:${r.adh}%"></i></span>${r.adh}%</span>`}</td><td class="num">${r.com}</td><td><button type="button" class="chip" data-sx="ficha" data-who="${ESC(r.n)}">Ficha</button> <button type="button" class="chip" data-sx="reg" data-who="${ESC(r.n)}">Registros</button></td></tr>`).join('')}</tbody></table>`:'<p class="sxsub">Ninguna paciente en este filtro.</p>';
- const peso=[].concat(bajan,suben).map(r=>`<div class="l">${whoLine(r.n,r.chgT)}${pill(r.chg<0?'Baja':'Sube',r.chg<0?'p-conf':'p-wait')}<button type="button" class="chip" data-sx="peso" data-who="${ESC(r.n)}">Ver</button></div>`).join('');
- document.getElementById('sxw-progreso').innerHTML=`<div class="fx" style="grid-template-columns:1.5fr .95fr"><div class="c">
-  <div class="fxtiles cob4">${tile('Adherencia',adh+'%','de quienes tienen registros',fxBar(adh))}${tile('Bajan / suben',bajan.length+' / '+suben.length,'contra el período anterior',fxStk([['Bajan',Math.round(bajan.length/(bajan.length+suben.length)*100),''],['Suben',Math.round(suben.length/(bajan.length+suben.length)*100),'a']]).replace('<div class="fxleg">','<div class="fxleg sm">'))}${tile('Sin registros',String(sin),'falta el dato, no es una falta',fxBar(Math.round(sin/SX.rows.length*100),'a'))}</div>
-  ${fxP('Adherencia por semana','línea punteada: 80%',`<button type="button" class="chip" data-sx="adh">Ver el promedio</button>`,sxAdhCurve())}
-  ${fxP('Pacientes','peso, comidas y adherencia',``,`<div class="sxtools">${fil}${ord}</div><div class="fxs fxtb">${body}</div>`,'g')}
- </div><div class="c">
-  ${fxDk('Necesitan atención',String(ATN.length),'Laura no está: sin registros no es una falta',`<div class="fxdkp"><i style="width:43%"></i></div><div class="fxdk2"><span>De la cartera</span><b>${SX.rows.length} pacientes</b></div>`)}
-  ${fxP('A quién mirar','esta semana','',`<div class="fxsplit">${fxGauge(adh,String(adh),'%',{w:112,sm:1})}<div class="fxkv"><div><span>Bajan</span><b>${bajan.length}</b></div><div><span>Suben</span><b>${suben.length}</b></div><div><span>Sin registros</span><b>${sin}</b></div></div></div><div class="fxr">${ATN.map(a=>`<div class="l">${whoLine(a.n,a.why)}<button type="button" class="chip" data-sx="atn" data-who="${ESC(a.n)}">Ver</button></div>`).join('')}</div>`)}
-  ${fxP('Bajan, suben, altas y bajas','octubre · Julia sin peso nuevo','',`<div class="fxs"><div class="fxr">${peso}${MOV.map((m,i)=>`<div class="l">${whoLine(m.n,m.k+' · '+m.d)}${pill(m.k,m.k==='Alta'?'p-conf':'p-bad')}<button type="button" class="chip" data-sx="mov" data-i="${i}">Ver</button></div>`).join('')}</div><p class="sxsub">Laura no entra en esta lista: sin registros no es un incumplimiento.</p></div>`,'g')}
- </div></div>`;
+ const tag=r=>r.st==='sin'?pill('Sin registros','p-wait'):r.chg<0?pill('Baja','p-conf'):r.chg>0?pill('Sube','p-wait'):pill('Sin peso','p-ok');
+ const body=rows.length?rows.map(r=>`<button type="button" class="l${r.n===SX.prog.who?' on':''}" data-sx="evo" data-who="${ESC(r.n)}">${whoLine(r.n,r.peso+' · '+r.chgT)}${r.adh==null?'<span class="sxsub">Sin dato</span>':`<span class="adh"><span class="tr"><i class="${r.adh<60?'lo':''}" style="width:${r.adh}%"></i></span>${r.adh}%</span>`}${tag(r)}<span class="chip">Evolución</span></button>`).join(''):'<p class="sxsub">Ninguna paciente en este filtro.</p>';
+ const mirar=ATN.map(a=>`<button type="button" class="chip" data-sx="atn" data-who="${ESC(a.n)}">${ESC(a.n.split(' ')[0])}</button>`).join('');
+ const movs=MOV.map((m,i)=>`<button type="button" class="chip" data-sx="mov" data-i="${i}">${m.k} ${ESC(m.n.split(' ')[0])}</button>`).join('');
+ document.getElementById('sxw-progreso').innerHTML=`<div class="fx" style="grid-template-columns:.82fr 1.28fr"><div class="c">
+  ${fxP('La cartera',adh+'% · '+bajan.length+' bajan · '+suben.length+' suben · '+sin+' sin registros',`<button type="button" class="chip" data-sx="adh">Promedio</button>`,`<div class="sxtools">${fil}${ord}</div><div class="sxq"><span class="sxsub" style="align-self:center">Para mirar</span>${mirar}${movs}</div><div class="fxs"><div class="fxr">${body}</div><p class="sxsub">Laura no está en «para mirar»: sin registros no es un incumplimiento.</p></div>`,'g')}
+ </div><div class="c" id="sxevo">${sxEvo(quien)}</div></div>`;
 }
 
 function sxFoodList(){
@@ -6237,48 +6279,31 @@ function sxAlimentos(){
  if(!list.some(x=>x.i===SX.food.i))SX.food.i=list.length?list[0].i:0;
  const f=SX.foods[SX.food.i];
  const g=SX.food.por, k=g/100;
- const sara=SX.foods.filter(x=>!x.own).length, prop=SX.foods.filter(x=>x.own).length;
- const grupos={};SX.foods.forEach(x=>{grupos[x.grp]=(grupos[x.grp]||0)+1;});
- const cols=['','k','o','b','n','p'];
- const stk=fxStk(Object.keys(grupos).map((t,i)=>[t+' '+grupos[t],Math.round(grupos[t]/SX.foods.length*100),cols[i%cols.length]]));
  top('alimentos','Alimentos','SARA 2 y los que cargás vos',
   `<label class="sxin">${svg('search',14)}<input data-sxq="food" value="${ESC(SX.food.q)}" placeholder="Buscar alimento" aria-label="Buscar alimento"></label>`,
   `<button class="chip" type="button" data-sx="buscar">Buscar</button>`+tabs('scope',SX.food.scope,[['todos','Todos'],['sara','SARA 2'],['prop','Propios']])+`<button class="cta" type="button" data-sx="nuevo">Nuevo alimento</button>`);
- const show=list.slice(0,6);
- const rows=list.length?list.map(({f,i})=>`<div class="${i===SX.food.i?'l on':'l'}"><span class="sxwho"><b>${ESC(f.n)}</b><small>${ESC(f.src)} · ${f.kcal} kcal / 100 g</small></span><button type="button" class="chip" data-sx="ver" data-i="${i}">Ver</button></div>`).join(''):'<p class="sxsub">Ningún alimento con ese texto.</p>';
+ const rows=list.length?list.map(({f,i})=>`<div class="${i===SX.food.i?'l on':'l'}"><span class="sxwho"><b>${ESC(f.n)}</b><small>${ESC(f.src)} · ${ESC(f.grp)}</small></span><button type="button" class="chip" data-sx="ver" data-i="${i}">Ver</button></div>`).join(''):'<p class="sxsub">Ningún alimento con ese texto.</p>';
  const mismo=f?SX.foods.map((x,i)=>({x,i})).filter(({x})=>x.grp===f.grp):[];
  const mac=f?sxMacros(f):[0,0,0];
- document.getElementById('sxw-alimentos').innerHTML=`<div class="fx" style="grid-template-columns:1.4fr 1fr"><div class="c">
-  <div class="fxtiles cob4">${tile('En el catálogo',String(SX.foods.length),'SARA 2 y propios',fxBar(100))}${tile('SARA 2',String(sara),'no se editan',fxBar(Math.round(sara/SX.foods.length*100)))}${tile('Propios',String(prop),'los cargás vos',fxBar(Math.round(prop/SX.foods.length*100),'k'))}</div>
-  ${fxP('Energía por 100 g',show.length?show.length+' de esta lista':'Sin resultados','',show.length?fxCols(show.map(x=>x.f.kcal),show.map(x=>x.f.n.split(' ')[0].slice(0,8)),{h:112,max:400,hl:false}):'<p class="sxsub">Probá con otra palabra.</p>')}
-  ${fxP('Catálogo',list.length+' en esta lista','',`<div class="fxs"><div class="fxr">${rows}</div></div>`,'g')}
+ document.getElementById('sxw-alimentos').innerHTML=`<div class="fx" style="grid-template-columns:.78fr 1.28fr"><div class="c">
+  ${fxP('Catálogo',list.length+' en esta lista','',`<div class="fxs"><div class="fxr">${rows}</div><p class="sxsub">SARA 2 se consulta. Para otro valor, creá un alimento propio.</p></div>`,'g')}
  </div><div class="c">
-  ${f?fxDk(f.own?'Propio':'SARA 2',f.n,f.src,`<div class="fxdkp"><i style="width:${Math.min(100,Math.round(f.kcal/4))}%"></i></div><div class="fxdk2"><span>100 g</span><b>${f.kcal} kcal</b></div>`):fxDk('Catálogo','Sin elección','Elegí un alimento de la lista')}
-  ${f?fxP('Porción',g+' g',`<button type="button" class="chip" data-sx="edit">${f.own?'Editar':'No se edita'}</button>`,`<div class="tabs">${[100,30,10].map(n=>`<button type="button" data-sx="por" data-v="${n}" class="${g===n?'on':''}">${n===100?'100 g':n===30?'1 taza (30 g)':'1 cucharada (10 g)'}</button>`).join('')}</div><p class="sxsub">${num(f.kcal*k)} kcal en ${g} g. Lo que no está cargado no se inventa.</p><div class="sxmac"><div><b>Proteínas</b><small>${num(f.p*k)} g</small></div>${fxBar(mac[0],'k')}<div><b>Carbohidratos</b><small>${num(f.c*k)} g</small></div>${fxBar(mac[1])}<div><b>Grasas</b><small>${num(f.g*k)} g</small></div>${fxBar(mac[2],'o')}</div>`):''}
-  ${fxP('Grupos',Object.keys(grupos).length+' en el consultorio','',`${stk}<div class="fxs"><div class="fxr">${mismo.map(({x,i})=>`<button type="button" class="l${i===SX.food.i?' on':''}" data-sx="ver" data-i="${i}"><span class="sxwho"><b>${ESC(x.n)}</b><small>${ESC(x.grp)} · ${x.kcal} kcal</small></span></button>`).join('')}</div></div>`,'g')}
+  ${f?fxDk(f.own?'Alimento propio':'SARA 2',f.kcal+' kcal',f.n+' · por 100 g · '+f.src,`<div class="fxdkp"><i style="width:${Math.min(100,Math.round(f.kcal/4))}%"></i></div><div class="fxdk2"><span>Grupo</span><b>${ESC(f.grp)}</b></div>`):fxDk('Catálogo','Sin elección','Elegí un alimento de la lista')}
+  ${f?fxP('Esta porción',g+' g',`<button type="button" class="chip" data-sx="edit">${f.own?'Editar':'No se edita'}</button>`,`<div class="tabs">${[100,30,10].map(n=>`<button type="button" data-sx="por" data-v="${n}" class="${g===n?'on':''}">${n===100?'100 g':n===30?'1 taza (30 g)':'1 cucharada (10 g)'}</button>`).join('')}</div><p class="sxsub">${num(f.kcal*k)} kcal en ${g} g. Lo que no está cargado no se inventa.</p><div class="sxmac"><div><b>Proteínas</b><small>${num(f.p*k)} g</small></div>${fxBar(mac[0],'k')}<div><b>Carbohidratos</b><small>${num(f.c*k)} g</small></div>${fxBar(mac[1])}<div><b>Grasas</b><small>${num(f.g*k)} g</small></div>${fxBar(mac[2],'o')}</div>`):''}
+  ${fxP(f?'Mismo grupo · '+f.grp:'Grupos',mismo.length+' alimentos','',`<div class="fxs"><div class="fxr">${mismo.map(({x,i})=>`<button type="button" class="l${i===SX.food.i?' on':''}" data-sx="ver" data-i="${i}"><span class="sxwho"><b>${ESC(x.n)}</b><small>${x.kcal} kcal / 100 g · ${ESC(x.src)}</small></span></button>`).join('')}</div></div>`,'g')}
  </div></div>`;
  bindQ('#s-alimentos [data-sxq="food"]',v=>{SX.food.q=v;});
 }
 
 function sxBiblioteca(){
  const it=SX.libs[SX.lib.i];
- const asg=SX.libs.reduce((s,r)=>s+r.who.length,0);
- const rd=SX.libs.reduce((s,r)=>s+r.read.length,0);
- const pct=asg?Math.round(rd/asg*100):0;
- const tipos={};SX.libs.forEach(r=>{tipos[r.k]=(tipos[r.k]||0)+1;});
  top('biblioteca','Biblioteca','Guías, videos y PDF. Las recetas siguen en Planes.','',`<button class="cta" type="button" data-sx="nuevo">Nuevo recurso</button>`);
- const rows=SX.libs.map((r,i)=>`<div class="${i===SX.lib.i?'l on':'l'}"><span class="sxwho"><b>${ESC(r.t)}</b><small>${ESC(r.k)} · ${ESC(r.d)}</small></span>${pill(r.k,r.k==='Video'?'p-wait':'p-conf')}<button type="button" class="chip" data-sx="ver" data-i="${i}">Ver</button></div>`).join('');
+ const cards=SX.libs.map((r,i)=>`<button type="button" class="sxcard${i===SX.lib.i?' on':''}" data-sx="ver" data-i="${i}"><span class="sxk">${ESC(r.k)}</span><b>${ESC(r.t)}</b><p>${ESC(r.d)}</p><span class="sxavs">${r.who.length?r.who.map(n=>av(n)).join(''):'<span class="sxsub">Sin asignar</span>'}</span></button>`).join('');
  const who=it.who.length?it.who.map(n=>`<div class="l">${whoLine(n,it.read.includes(n)?'Lo abrió':'Todavía no lo abrió')}${pill(it.read.includes(n)?'Abierto':'Pendiente',it.read.includes(n)?'p-conf':'p-wait')}</div>`).join(''):'<p class="sxsub">Todavía no se lo diste a nadie.</p>';
- const cols=['','b','o'];
- document.getElementById('sxw-biblioteca').innerHTML=`<div class="fx" style="grid-template-columns:1.4fr 1fr"><div class="c">
-  <div class="fxtiles cob4">${tile('Recursos',String(SX.libs.length),'en el consultorio',fxBar(100))}${tile('Asignados',String(asg),'a una o varias',fxBar(Math.min(100,asg*12)))}${tile('Lo abrieron',rd+' de '+asg,'en este ejemplo',fxBar(pct))}</div>
-  ${fxP('Aperturas','cuántas pacientes lo abrieron','',fxCols(SX.libs.map(r=>r.read.length),SX.libs.map(r=>r.k),{h:112,max:2,hl:false}))}
-  ${fxP('Recursos',SX.libs.length+' para compartir','',`<div class="fxs"><div class="fxr">${rows}</div></div>`,'g')}
+ document.getElementById('sxw-biblioteca').innerHTML=`<div class="fx" style="grid-template-columns:1.25fr .85fr"><div class="c">
+  ${fxP('Para compartir',SX.libs.length+' recursos del consultorio',`<button type="button" class="chip" data-sx="planes">Ver recetas</button>`,`<div class="sxlib">${cards}</div>`,'g')}
  </div><div class="c">
-  ${fxDk(it.k,it.t,it.d,`<div class="fxdkp"><i style="width:${it.who.length?Math.round(it.read.length/it.who.length*100):0}%"></i></div><div class="fxdk2"><span>Lo abrieron</span><b>${it.read.length} de ${it.who.length}</b></div>`)}
-  ${fxP('Quién lo tiene',it.read.length+' lo abrieron',`<button type="button" class="chip" data-sx="asig">Asignar</button><button type="button" class="chip" data-sx="aviso">Avisar por la app</button>`,`<div class="fxs"><div class="fxr">${who}</div></div>`,'g')}
-  ${fxP('Por tipo','',``,fxStk(Object.keys(tipos).map((t,i)=>[t+' '+tipos[t],Math.round(tipos[t]/SX.libs.length*100),cols[i%cols.length]])))}
-  ${fxP('Llegaron a abrirlo','de lo que asignaste','',`<div class="fxsplit">${fxGauge(pct,String(pct),'%',{w:120,sm:1})}${fxKv([['Asignados',String(asg)],['Abiertos',String(rd)],['Sin abrir',String(asg-rd)]])}</div>`)}
+  ${fxP('Quién lo abrió',it.read.length+' de '+it.who.length,`<button type="button" class="chip" data-sx="asig">Asignar</button><button type="button" class="chip" data-sx="aviso">Avisar por la app</button>`,`<div class="fxs"><p style="margin:0;font-weight:500">${ESC(it.t)}</p><p class="sxsub">${ESC(it.k)} · ${ESC(it.d)}</p><div class="fxr">${who}</div><p class="sxsub">Las recetas no están acá. Siguen en Planes.</p></div>`,'g')}
  </div></div>`;
 }
 
@@ -6288,21 +6313,18 @@ function sxAyuda(){
  if(!list.some(x=>x.i===SX.help.i))SX.help.i=list.length?list[0].i:0;
  const g=GUIAS[SX.help.i];
  const show=list.some(x=>x.i===SX.help.i);
- const pct=Math.round(list.length/GUIAS.length*100);
  top('ayuda','Centro de ayuda','Guías, temas y preguntas frecuentes',
   `<label class="sxin">${svg('search',14)}<input data-sxq="help" value="${ESC(SX.help.q)}" placeholder="Invitación, consulta, importar…" aria-label="Buscar una guía"></label>`,
-  `<button class="chip" type="button" data-sx="buscar">Buscar</button>`);
+  `<button class="chip" type="button" data-sx="buscar">Buscar</button><button class="chip" type="button" data-sx="topguia">La más consultada</button>`);
  const temas=TEMAS.map(([v,l])=>`<button type="button" class="chip${SX.help.tema===v?' on':''}" data-sx="tema" data-v="${v}">${l}</button>`).join('');
  const rows=list.length?list.map(({g,i})=>`<div class="${i===SX.help.i?'l on':'l'}"><span class="sxwho"><b>${ESC(g.t)}</b><small>${VISTAS[i]} consultas este mes</small></span><button type="button" class="chip" data-sx="ver" data-i="${i}">Ver</button></div>`).join(''):'<p class="sxsub">No encontramos una guía con ese texto.</p>';
  const faqs=FAQ.map((f,i)=>`<button type="button" class="l" data-sx="faq" data-i="${i}"><span class="sxwho"><b>${ESC(f.q)}</b><small>${ESC(f.a)}</small></span></button>`).join('');
- document.getElementById('sxw-ayuda').innerHTML=`<div class="fx" style="grid-template-columns:1.35fr 1fr"><div class="c">
-  <div class="fxtiles cob4">${tile('Guías',String(GUIAS.length),'del consultorio',fxBar(100))}${tile('Temas',String(TEMAS.length-1),'para filtrar',fxBar(80))}${tile('Preguntas',String(FAQ.length),'frecuentes',fxBar(62))}</div>
-  ${fxP('Consultas del mes','veces que abrieron cada guía',`<button type="button" class="chip" data-sx="topguia">La más abierta</button>`,fxCols(VISTAS,['Msg','Pac','Plan','Notas','Datos','Perm','Agenda','IA'],{h:112,max:16,hl:false}))}
-  ${fxP('Guías',list.length+' de '+GUIAS.length,'',`<div class="sxtemas">${temas}</div><div class="fxs"><div class="fxr">${rows}</div></div>`,'g')}
+ const steps=show?g.steps.map((s,n)=>`<li><span class="n">${n+1}</span><span>${ESC(s)}</span></li>`).join(''):'';
+ document.getElementById('sxw-ayuda').innerHTML=`<div class="fx" style="grid-template-columns:1fr 1fr"><div class="c">
+  ${fxP('Temas',list.length+' de '+GUIAS.length+' guías','',`<div class="sxtemas">${temas}</div><div class="fxs"><div class="fxr">${rows}</div></div>`,'g')}
  </div><div class="c">
-  ${fxDk('Coinciden',String(list.length),'de '+GUIAS.length+' guías',`<div class="fxdkp"><i style="width:${pct}%"></i></div><button type="button" class="chip" data-sx="pedir" style="margin-top:10px;align-self:flex-start">Pedir ayuda a Plan V</button>`)}
-  ${show?fxP(g.t,'',`<button type="button" class="chip" data-sx="ir">Abrir apartado</button>`,`<ol class="sxol">${g.steps.map(s=>`<li>${ESC(s)}</li>`).join('')}</ol><p class="sxsub">${ESC(g.err)}</p>`):fxP('Guía','','','<p class="sxsub">Probá con otra palabra.</p>')}
-  ${fxP('Preguntas frecuentes',FAQ.length+' del consultorio','',`<div class="fxs"><div class="fxr">${faqs}</div></div>`,'g')}
+  ${show?fxP(g.t,VISTAS[SX.help.i]+' consultas este mes',`<button type="button" class="chip" data-sx="ir">Abrir apartado</button>`,`<ol class="sxol sxguide">${steps}</ol><p class="sxsub">${ESC(g.err)}</p>`):fxP('Guía','','','<p class="sxsub">Probá con otra palabra.</p>')}
+  ${fxP('Preguntas frecuentes',FAQ.length+' respuestas cortas',`<button type="button" class="chip" data-sx="pedir">Pedir ayuda a Plan V</button>`,`<div class="fxs"><div class="fxr">${faqs}</div></div>`,'g')}
  </div></div>`;
  bindQ('#s-ayuda [data-sxq="help"]',v=>{SX.help.q=v;});
 }
@@ -6334,6 +6356,7 @@ function onProg(b){
  if(x==='pfil'){if(b.dataset.v===SX.prog.fil)return same(b.textContent.trim());SX.prog.fil=b.dataset.v;sxProgreso();return;}
  if(x==='pord'){if(b.dataset.v===SX.prog.ord)return same(b.textContent.trim());SX.prog.ord=b.dataset.v;sxProgreso();toast('Orden: '+b.textContent.trim()+'.');return;}
  if(x==='adh'){toast('Adherencia de la cartera: '+sxAdh()+'%. Entra quien tiene registros. Sin registros no es un incumplimiento.');return;}
+ if(x==='evo'){if(b.dataset.who===SX.prog.who)return same('la evolución de '+b.dataset.who);SX.prog.who=b.dataset.who;sxProgreso();if(document.documentElement.classList.contains('mob'))document.getElementById('sxevo')?.scrollIntoView({block:'nearest'});toast('Evolución de '+SX.prog.who+'.');return;}
  if(x==='ficha'){go('ficha');toast('Ficha de '+b.dataset.who+'.');return;}
  if(x==='reg'){aOpen({t:'Registros de '+b.dataset.who,s:'Las comidas que ella cargó en el período',ok:false,body:`<p>${ESC(b.dataset.who)} tiene los registros de este ejemplo. La falta de datos no es un incumplimiento.</p><button type="button" class="chip" data-sx="irficha">Abrir ficha</button>`,click:btn=>{if(btn.dataset.sx==='irficha'){aClose();go('ficha');}}});return;}
  if(x==='peso'){const r=SX.rows.find(z=>z.n===b.dataset.who);aOpen({t:r.n,s:'Peso en el período',ok:false,body:`<p>${ESC(r.peso)} · ${ESC(r.chgT)}.</p><p>Adherencia ${r.adh==null?'sin dato':r.adh+'%'}.</p><p class="sxsub">${r.st==='sin'?'Sin registros no es un incumplimiento.':'Sale de lo que ella cargó.'}</p><button type="button" class="chip" data-sx="irficha">Abrir ficha</button>`,click:btn=>{if(btn.dataset.sx==='irficha'){aClose();go('ficha');}}});return;}
@@ -6352,6 +6375,7 @@ function onFood(b){
 function onLib(b){
  const x=b.dataset.sx, it=SX.libs[SX.lib.i];
  if(x==='ver'){if(+b.dataset.i===SX.lib.i)return same('este recurso');SX.lib.i=+b.dataset.i;sxBiblioteca();return;}
+ if(x==='planes'){go('planes');toast('Las recetas están en Planes.');return;}
  if(x==='asig'){aOpen({t:'Asignar «'+it.t+'»',s:'Se lo das a una o varias pacientes',ok:'Asignar',body:aF('Pacientes',aCh(PAC,it.who)),after:box=>{it.who=[...box.querySelectorAll('.ach button')].filter(x=>x.getAttribute('aria-pressed')==='true').map(x=>x.textContent);sxBiblioteca();},done:'Asignación guardada en este boceto.'});return;}
  if(x==='aviso'){toast(it.who.length?'Aviso anotado por la app para '+it.who[0]+(it.who.length>1?' y '+(it.who.length-1)+' más.':' .')+'No se envió de verdad.':'Primero asignalo a alguien.');return;}
  if(x==='nuevo'){aOpen({t:'Nuevo recurso',s:'Guía, video o PDF del consultorio',ok:'Guardar',body:aF('Título',aI('','Ej.: Compras del mes'))+aF('Tipo',aS(['Guía','Video','PDF']))+aF('De qué se trata',aT('','Una línea')),after:box=>{SX.libs.unshift({t:aVal(box,0).trim()||'Recurso nuevo',k:aVal(box,1),d:aVal(box,2).trim()||'Recurso del consultorio',who:[],read:[]});SX.lib.i=0;sxBiblioteca();},done:'Recurso guardado en este boceto.'});return;}
