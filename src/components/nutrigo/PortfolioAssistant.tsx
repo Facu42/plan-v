@@ -32,6 +32,20 @@ export function PortfolioAssistant({ onOpen, onHeader }: { onOpen: (href: string
     setAviso(texto);
     window.setTimeout(() => setAviso(actual => actual === texto ? '' : actual), 3600);
   }, []);
+  const avisarYAbrir = useCallback((texto: string, href: string) => {
+    const host = document.querySelector('#pv-panel-v29 .app');
+    if (host) {
+      host.querySelector('#atoast')?.remove();
+      const nodo = document.createElement('div');
+      nodo.id = 'atoast';
+      nodo.className = 'on';
+      nodo.setAttribute('role', 'status');
+      nodo.textContent = texto;
+      host.appendChild(nodo);
+      window.setTimeout(() => nodo.remove(), 3600);
+    }
+    onOpen(href);
+  }, [onOpen]);
 
   const pedir = useCallback(async (texto: string, opciones?: Pedido) => {
     const limpio = texto.trim();
@@ -168,8 +182,8 @@ export function PortfolioAssistant({ onOpen, onHeader }: { onOpen: (href: string
     onConsultar={consultarCaja}
     onSugerencia={texto => { void pedir(texto, { modo: 'agregar', avisoExito: 'Listo.' }); }}
     onToggle={alternar}
-    onFicha={(href, nombre) => { avisar(nombre ? `Ficha de ${nombre}, para revisar la propuesta.` : 'Abriste la ficha para revisar la propuesta.'); onOpen(href); }}
-    onFuente={fuente => { avisar(`Fuente: ${fuente.nombre} · su ficha.`); onOpen(fuente.ficha); }}
+    onFicha={(href, nombre) => avisarYAbrir(nombre ? `Ficha de ${nombre}, para revisar la propuesta.` : 'Abriste la ficha para revisar la propuesta.', href)}
+    onFuente={fuente => avisarYAbrir(`Fuente: ${fuente.nombre} · su ficha.`, fuente.ficha)}
     onRevisar={() => avisar('Quedó marcada para vos. No se le envió a la paciente.')}
   />;
 }

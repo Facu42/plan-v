@@ -21,7 +21,7 @@ Sirve para **cualquier agente** (Claude, Codex, Cursor) que llegue sin contexto.
 
 **Progreso (orden por valor):** `/crm/progreso-global` copia el dibujo de la cartera y la evolución. Usa `progress-global` y la serie de peso que ya existía. La adherencia al plan, la meta de peso y la grasa se muestran como sin dato. Quien no tiene dos pesos ve «Sin curva», no un incumplimiento. Ya está en main ([PR #179](https://github.com/Facu42/plan-v/pull/179)).
 
-**Asistente IA (orden por valor, después de Progreso):** `/crm/desarrollo?modulo=asistente-ia` copia la conversación del boceto. Usa `/api/portfolio/assistant` y la descarga de indicadores que ya existían. Cada respuesta muestra de dónde sale. Las propuestas solo aparecen si la IA está prendida y la respuesta es de la IA; si está apagada o sin cupo, se ven los números y no hay propuestas. El gasto del mes no llega a esta pantalla: queda «Sin dato» y el tope documentado de US$ 5. Nada se le manda a la paciente. Rama `cursor/panel-asistente-v29-e254`, sin juntar.
+**Asistente IA (orden por valor, después de Progreso):** `/crm/desarrollo?modulo=asistente-ia` copia la conversación del boceto. Usa `/api/portfolio/assistant` y la descarga de indicadores que ya existían. Cada respuesta muestra de dónde sale. Las propuestas solo aparecen si la IA está prendida y la respuesta es de la IA; si está apagada o sin cupo, se ven los números y no hay propuestas. El gasto del mes no llega a esta pantalla: queda «Sin dato» y el tope documentado de US$ 5. Nada se le manda a la paciente. [PR #180](https://github.com/Facu42/plan-v/pull/180), sin juntar.
 
 Las menciones a `v3/panel.html` más abajo quedan como contexto histórico del plan canónico largo hasta que se reescriban fase a fase.
 
@@ -359,7 +359,7 @@ Actualizar al empezar y al terminar cada una.
 
 Las fases 3 y 4 pueden ir en paralelo con agentes distintos después de la 2; el resto, en orden.
 
-La fase 0B quedó rearmada el 25/10 en `design/panel-nutri/v29/panel-trabajo.html` (copia de la v29) y ya está en main por el PR #174. Cada pantalla llena los 1440×900 como Cobranzas. El archivo original de la v29 no se tocó. Las tools (#176), el armazón (#177), Seguimiento (#178) y Progreso (#179) ya están en main. Asistente IA está en `cursor/panel-asistente-v29-e254`, sin juntar: usa ese armazón y no reabre esta tabla.
+La fase 0B quedó rearmada el 25/10 en `design/panel-nutri/v29/panel-trabajo.html` (copia de la v29) y ya está en main por el PR #174. Cada pantalla llena los 1440×900 como Cobranzas. El archivo original de la v29 no se tocó. Las tools (#176), el armazón (#177), Seguimiento (#178) y Progreso (#179) ya están en main. Asistente IA está en el [PR #180](https://github.com/Facu42/plan-v/pull/180), sin juntar: usa ese armazón y no reabre esta tabla.
 
 ---
 
