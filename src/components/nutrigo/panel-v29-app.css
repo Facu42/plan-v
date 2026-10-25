@@ -61,3 +61,8 @@
 @media (max-width: 799px) {
   .nv-app.nv-pro.pn-panel:has(#pv-panel-v29) { padding-bottom: 0; }
 }
+
+/* Seguimiento llena la columna en escritorio. En el celular la pantalla sigue scrolleando. */
+#pv-panel-v29:not(.mob) .main:has(#s-seguimiento) { height: 100%; overflow: hidden; }
+#pv-panel-v29:not(.mob) #pv-panel:has(#s-seguimiento) { flex: 1; min-height: 0; }
+#pv-panel-v29 .sxpic img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; display: block; }

@@ -2,7 +2,7 @@
 
 **Fecha:** 24–25 oct 2026 (America/Buenos_Aires)  
 **Dueño del hilo:** Plan V (asistente) + Facu  
-**Estado:** Fase 0 tools ya está en main ([PR #176](https://github.com/Facu42/plan-v/pull/176)). Fase 1 (armazón) está en [PR #177](https://github.com/Facu42/plan-v/pull/177), sin juntar. Siguiente: Seguimiento. Facu eligió **ok-v29-valor** (25 oct 2026). Orden: tools → shell → Seguimiento → Progreso.
+**Estado:** Fase 0 tools ([PR #176](https://github.com/Facu42/plan-v/pull/176)) y Fase 1 shell ([PR #177](https://github.com/Facu42/plan-v/pull/177)) ya están en main. Fase 2 Seguimiento está en la rama `cursor/panel-seguimiento-v29-619a`, sin juntar. Facu eligió **ok-v29-valor** (25 oct 2026). Orden: tools → shell → Seguimiento → Progreso.
 
 ## Decisiones cerradas (Facu, 25 oct 2026)
 
@@ -49,8 +49,8 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 
 1. ~~Actualizar una línea en `version-final.md`: fuente = `v29/panel-trabajo.html`.~~ Hecho en el PR #176.
 2. ~~**Fase 0 tools:** archivos nuevos desde la fuente v29; la app se ve igual.~~ Hecho en el PR #176, ya en main.
-3. ~~**Fase 1 shell:** `PanelBocetoShell` + nav + tema/celular; contrato del armazón contra la app. Se importa `panel-v29.css`. La raíz es `#pv-panel-v29` (tema, `.mob` y `.mreal`).~~ En el [PR #177](https://github.com/Facu42/plan-v/pull/177). Falta el ok de Facu para juntarlo.
-4. **Fase 2 Seguimiento:** UI boceto sobre `/api/crm/work-queue` + `MealReviewPanel`.
+3. ~~**Fase 1 shell:** `PanelBocetoShell` + nav + tema/celular; contrato del armazón contra la app. Se importa `panel-v29.css`. La raíz es `#pv-panel-v29` (tema, `.mob` y `.mreal`).~~ En main por el [PR #177](https://github.com/Facu42/plan-v/pull/177).
+4. **Fase 2 Seguimiento:** la pantalla de adentro de `/crm/seguimiento` copia el boceto y usa la bandeja, el feed y `MealReviewPanel`. Rama `cursor/panel-seguimiento-v29-619a`, sin juntar.
 5. **Fase 3 Progreso:** cartera + drill-down (mapear endpoints; Laura sin curva ≠ incumplimiento).
 
 ## Bitácora
@@ -58,7 +58,8 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 | Cuándo | Qué | Quién |
 |---|---|---|
 | 25 oct | El recorrido de sesiones firmadas no encontraba «Cerrar sesión»: está en el menú de la cuenta. El recorrido ahora abre ese menú. Misma rama del [PR #177](https://github.com/Facu42/plan-v/pull/177). | Cursor |
-| 25 oct | Fase 1 shell en [PR #177](https://github.com/Facu42/plan-v/pull/177): el armazón (menú, marca, buscador, cuenta, título, campana y el botón de Inicio) usa el boceto v29. Lo que el boceto dibuja y la app todavía no tiene queda vacío. Las pantallas de adentro no se redibujaron. Contrato en verde, claro y oscuro. | Cursor |
+| 25 oct | Fase 2 Seguimiento en `cursor/panel-seguimiento-v29-619a`: `/crm/seguimiento` usa el dibujo del boceto con la bandeja, las comidas revisadas y el pedido por la app. Sin WhatsApp y sin tablas nuevas. Lo que la lista no trae queda vacío o en la ficha. Sin juntar. | Cursor |
+| 25 oct | Fase 1 shell en [PR #177](https://github.com/Facu42/plan-v/pull/177), ya en main: el armazón (menú, marca, buscador, cuenta, título, campana y el botón de Inicio) usa el boceto v29. Lo que el boceto dibuja y la app todavía no tiene queda vacío. Las pantallas de adentro no se redibujaron. Contrato en verde, claro y oscuro. | Cursor |
 | 25 oct | Fase 0 tools en PR #176 (ya en main): css e íconos nuevos desde `panel-trabajo.html`. La letra y el celular quedan en la raíz nueva. | Cursor |
 | 25 oct | Facu: ok-v29-valor; arranque Fase 0 tools vía Herdr Cursor | Plan V + Facu |
 | 24–25 oct | Seis pantallas + diferenciación + evolución Progreso en PR #174 (ya en main) | Cursor agent `bc-cf297a92…` |
@@ -68,6 +69,6 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 ## Cómo retomar (otro agente)
 
 1. Leer esta nota + la Page del plan.
-2. Chequear bitácora: ok-v29-valor ya cerrado. Fase 0 está en main. Fase 1 (armazón) está en el [PR #177](https://github.com/Facu42/plan-v/pull/177).
-3. Si Facu juntó el #177: seguir con Seguimiento. Si no: no redibujar Seguimiento ni Progreso encima de un armazón que todavía no está en main.
+2. Chequear bitácora: ok-v29-valor ya cerrado. Fase 0 y el armazón (#176 y #177) están en main. Seguimiento está en `cursor/panel-seguimiento-v29-619a`, sin juntar.
+3. Siguiente del orden por valor: Progreso. No redibujar el armazón.
 4. Actualizar esta bitácora al cerrar cada fase (1 párrafo + commit/PR). Facu mergea.

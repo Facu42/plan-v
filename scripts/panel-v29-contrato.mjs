@@ -45,6 +45,15 @@ export const PIEZAS_V29 = [
   ['CTA', '.app .top .cta', '', ['backgroundColor', 'color']],
 ];
 
+// Piezas de Seguimiento. El selector existe en el boceto y en la app.
+export const PIEZAS_SEGUIMIENTO = [
+  ['Foto de la comida', '#s-seguimiento .sxpic', '', ['width', 'height', 'borderTopLeftRadius']],
+  ['Nombre de la comida', '#s-seguimiento .sxwho b', '', ['fontSize', 'fontWeight']],
+  ['Acciones de la comida', '#s-seguimiento .sxacts .chip', '', ['fontSize', 'borderTopLeftRadius']],
+  ['Día registrado', '#s-seguimiento .sxdays i', '', ['width', 'height', 'borderTopLeftRadius']],
+  ['Día con carga', '#s-seguimiento .sxdays i.on', '', ['backgroundColor']],
+];
+
 async function medir(pagina, selector, pseudo, props) {
   const cajas = pagina.locator(selector);
   const cantidad = await cajas.count();
@@ -109,6 +118,40 @@ async function abrirApp(browser, tema) {
   return pagina;
 }
 
+async function comparar(bocetoPagina, appPagina, piezas, informe) {
+  let fallas = 0;
+  for (const [nombre, sel, pseudo, props] of piezas) {
+    const [fuente, app] = [await medir(bocetoPagina, sel, pseudo, props), await medir(appPagina, sel, pseudo, props)];
+    if (!fuente) {
+      fallas += 1;
+      informe.push(`| ${nombre} | ❌ falta | no está en el boceto v29 (\`${sel}\`) |`);
+      continue;
+    }
+    if (!app) {
+      fallas += 1;
+      informe.push(`| ${nombre} | ❌ falta | la app no la tiene (\`${sel}\`) |`);
+      continue;
+    }
+    const distintas = props.filter(k => !igual(fuente[k], app[k]));
+    if (!distintas.length) { informe.push(`| ${nombre} | ✅ igual | |`); continue; }
+    fallas += 1;
+    informe.push(`| ${nombre} | ❌ distinta | ${distintas.map(k => `**${k}**: boceto \`${fuente[k]}\` · app \`${app[k]}\``).join('<br>')} |`);
+  }
+  return fallas;
+}
+
+async function abrirSeguimientoBoceto(pagina) {
+  await pagina.locator('[data-go="seguimiento"]').first().click();
+  await pagina.waitForSelector('#s-seguimiento:not([hidden]) .sxpic', { timeout: 10000 });
+  await pagina.waitForSelector('#s-seguimiento .sxdays i.on', { timeout: 10000 });
+}
+
+async function abrirSeguimientoApp(pagina) {
+  await pagina.locator('#pv-panel-v29 a.nv[href="/crm/seguimiento"]').click();
+  await pagina.waitForSelector('#s-seguimiento .sxpic', { timeout: 20000 });
+  await pagina.waitForSelector('#s-seguimiento .sxdays i.on', { timeout: 20000 });
+}
+
 export async function correrContratoV29() {
   const informe = [];
   let fallas = 0;
@@ -122,30 +165,18 @@ export async function correrContratoV29() {
     for (const tema of ['dark', 'light']) {
       const b = await abrirBoceto(navegador, tema);
       const a = await abrirApp(navegador, tema);
-      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'}\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
-      for (const [nombre, sel, pseudo, props] of PIEZAS_V29) {
-        const [fuente, app] = [await medir(b, sel, pseudo, props), await medir(a, sel, pseudo, props)];
-        if (!fuente) {
-          fallas += 1;
-          informe.push(`| ${nombre} | ❌ falta | no está en el boceto v29 (\`${sel}\`) |`);
-          continue;
-        }
-        if (!app) {
-          fallas += 1;
-          informe.push(`| ${nombre} | ❌ falta | la app no la tiene (\`${sel}\`) |`);
-          continue;
-        }
-        const distintas = props.filter(k => !igual(fuente[k], app[k]));
-        if (!distintas.length) { informe.push(`| ${nombre} | ✅ igual | |`); continue; }
-        fallas += 1;
-        informe.push(`| ${nombre} | ❌ distinta | ${distintas.map(k => `**${k}**: boceto \`${fuente[k]}\` · app \`${app[k]}\``).join('<br>')} |`);
-      }
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · armazón\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_V29, informe);
+      await abrirSeguimientoBoceto(b);
+      await abrirSeguimientoApp(a);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Seguimiento\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_SEGUIMIENTO, informe);
       await b.close();
       await a.close();
     }
   } finally { await navegador.close(); }
 
-  const texto = `# Contrato del armazón contra el boceto v29\n\nFuente: \`design/panel-nutri/v29/panel-trabajo.html\`.\nApp: \`${origen}/crm/inicio\`.\n\n${fallas ? `**${fallas} piezas del armazón no coinciden.**` : '**Todas las piezas del armazón coinciden, en claro y en oscuro.**'}\n${informe.join('\n')}\n`;
+  const texto = `# Contrato del armazón contra el boceto v29\n\nFuente: \`design/panel-nutri/v29/panel-trabajo.html\`.\nApp: \`${origen}/crm/inicio\` y \`${origen}/crm/seguimiento\`.\n\n${fallas ? `**${fallas} piezas no coinciden.**` : '**El armazón y Seguimiento coinciden, en claro y en oscuro.**'}\n${informe.join('\n')}\n`;
   return { fallas, texto };
 }
 
