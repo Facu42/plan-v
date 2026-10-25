@@ -1,0 +1,3 @@
+// El panel de la nutri guarda «Cerrar sesión» en el menú de la cuenta.
+// La app de la paciente lo muestra suelto, o detrás de «Abrir el menú» en el celular.
+export const logoutProbe = `(()=>{const b=Array.from(document.querySelectorAll('button')).find(e=>/^(Cerrar sesión|Salir)$/.test(e.textContent.trim()||e.getAttribute('aria-label')||'')&&!e.matches(':disabled')&&e.getClientRects().length);if(b){b.click();return true;}const menu=Array.from(document.querySelectorAll('[aria-label="Opciones de la cuenta"], [aria-label="Abrir menú"], [aria-label="Abrir el menú"]')).find(e=>!e.matches(':disabled')&&e.getClientRects().length&&e.getAttribute('aria-expanded')!=='true');if(menu)menu.click();return false;})()`;

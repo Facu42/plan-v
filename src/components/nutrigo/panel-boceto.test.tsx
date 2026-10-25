@@ -35,6 +35,8 @@ describe('armazón del panel', () => {
     expect(open).toContain('<h1>Pacientes</h1>');
     expect(open).toContain('aria-label="Avisos"');
     expect(open).toContain('class="cta"');
+    expect(open).toContain('aria-label="Opciones de la cuenta"');
+    expect(open).toContain('id="pv-account" hidden');
     expect(open).toContain('aria-label="Cerrar sesión"');
     expect(open).toContain('id="pv-panel" class="m"');
     expect(open).toContain('class="on"');

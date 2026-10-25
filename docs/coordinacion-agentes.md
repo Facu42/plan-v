@@ -102,6 +102,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **25/10 · Cursor · Cerrar sesión en el recorrido firmado** · [PR #177](https://github.com/Facu42/plan-v/pull/177): el control sigue en el menú de la cuenta. El recorrido de aislamiento ahora abre ese menú antes de cerrar sesión. No se inventó otro botón.
 - **25/10 · Cursor · Fase 1 shell v29** · [PR #177](https://github.com/Facu42/plan-v/pull/177), rama `cursor/panel-v29-shell-e0ca`: el armazón de la nutri (menú, marca, buscador, cuenta, título, campana, botón de Inicio y celular) pasa a las clases del boceto. La raíz es `#pv-panel-v29`. El contrato compara esa app con `panel-trabajo.html` y quedó en verde, en claro y en oscuro. Lo que el boceto dibuja y todavía no existe queda vacío. No se redibujaron Seguimiento ni Progreso.
 - **25/10 · Cursor · Fase 0 tools v29** · [PR #176](https://github.com/Facu42/plan-v/pull/176), ya en main: scripts nuevos leen `design/panel-nutri/v29/panel-trabajo.html` y escriben `panel-v29.css` / `panel-v29-icons.ts`. No se pisa `panel-boceto.css`.
 - **25/10 · Cursor · Seis pantallas con la densidad de Cobranzas** · [PR #174](https://github.com/Facu42/plan-v/pull/174), ya en main. Cada pantalla llena los 1440×900. El asistente tiene caja para escribir. Seguimiento muestra cómo se sienten. Progreso muestra adherencia, bajas y subas, altas y bajas, y quién necesita atención. La ayuda suma temas y preguntas frecuentes. Sin app y sin base.
