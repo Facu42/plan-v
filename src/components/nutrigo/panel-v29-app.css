@@ -83,3 +83,37 @@
 #pv-panel-v29.mob #s-progreso > .fx > .c { min-height: auto; height: auto; }
 #pv-panel-v29 #s-progreso .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
 #pv-panel-v29 #s-progreso a.chip { text-decoration: none; }
+
+/* Asistente llena la columna igual que Progreso. En el celular las dos columnas se apilan y scrollean. */
+#pv-panel-v29:not(.mob) .main:has(#s-asistente) { height: 100%; overflow: hidden; }
+#pv-panel-v29:not(.mob) #pv-panel:has(#s-asistente) { flex: 1; min-height: 0; }
+#pv-panel-v29.mob .main:has(#s-asistente) > .top { flex: 0 0 auto; height: auto; }
+#pv-panel-v29.mob #pv-panel:has(#s-asistente),
+#pv-panel-v29.mob #s-asistente,
+#pv-panel-v29.mob #s-asistente > .fx { flex: none; height: auto; min-height: auto; }
+#pv-panel-v29.mob #s-asistente > .fx { align-content: start; }
+#pv-panel-v29.mob #s-asistente > .fx > .c { min-height: auto; height: auto; min-width: 0; max-width: 100%; }
+#pv-panel-v29 #s-asistente,
+#pv-panel-v29 #s-asistente .fx,
+#pv-panel-v29 #s-asistente .c,
+#pv-panel-v29 #s-asistente .sxask,
+#pv-panel-v29 #s-asistente .sxq { min-width: 0; max-width: 100%; }
+#pv-panel-v29 #s-asistente .sxrow { min-width: 0; }
+#pv-panel-v29 #s-asistente .sxrow .sxsub { min-width: 0; flex: 1; }
+#pv-panel-v29.mob #s-asistente .sxrow { flex-wrap: wrap; }
+#pv-panel-v29 #s-asistente .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
+
+/* El boceto carga Inter 300, 400, 500 y 600 y pinta todo con --font.
+   La hoja vieja redefine --font como Poppins en #pv-panel, que es el cuerpo
+   (Asistente, Seguimiento, Progreso). Adentro del armazón vuelve el stack del boceto.
+   La app de la paciente sigue en Poppins: esta regla no sale de #pv-panel-v29. */
+#pv-panel-v29 #pv-panel {
+  --font: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+#pv-panel-v29,
+#pv-panel-v29 * {
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}

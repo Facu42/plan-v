@@ -29,9 +29,9 @@ const TOLERANCIA_PX = 0.6;
 export const PIEZAS_V29 = [
   ['Menú lateral · ancho', '.app .side', '', ['width']],
   ['Marca', '.app .logo .mk', '', ['width', 'height', 'borderTopLeftRadius', 'backgroundColor']],
-  ['Nombre (Plan V)', '.app .logo b', '', ['fontSize', 'fontWeight', 'color']],
+  ['Nombre (Plan V)', '.app .logo b', '', ['fontSize', 'fontWeight', 'fontFamily', 'color']],
   ['Título de grupo (Gestión)', '.app .grp h6', '', ['fontSize', 'fontWeight', 'letterSpacing', 'textTransform', 'color']],
-  ['Opción del menú', '.app .nv:not(.on)', '', ['fontSize', 'color', 'borderTopLeftRadius']],
+  ['Opción del menú', '.app .nv:not(.on)', '', ['fontSize', 'fontFamily', 'color', 'borderTopLeftRadius']],
   ['Opción activa', '.app .nv.on', '', ['backgroundColor', 'color', 'fontWeight']],
   ['Ícono de la opción', '.app .nv svg.i', '', ['width', 'height']],
   ['Contador', '.app .nv .ct', '', ['fontSize', 'backgroundColor', 'color']],
@@ -40,15 +40,24 @@ export const PIEZAS_V29 = [
   ['Buscador del menú', '.app .srch', '', ['borderTopLeftRadius', 'backgroundColor']],
   ['Cuenta', '.app .acct', '', ['borderTopLeftRadius', 'backgroundColor']],
   ['Columna principal', '.app .main', '', ['paddingTop', 'paddingLeft']],
-  ['Título de la pantalla', '.app .top h1', '', ['fontSize', 'fontWeight', 'color']],
+  ['Título de la pantalla', '.app .top h1', '', ['fontSize', 'fontWeight', 'fontFamily', 'color']],
   ['Campana', '.app .top .ibtn', '', ['width', 'height', 'borderTopLeftRadius']],
   ['CTA', '.app .top .cta', '', ['backgroundColor', 'color']],
+];
+
+// Piezas de Asistente. El encabezado vive en el armazón; acá se mide el cuerpo, que existe en los dos.
+export const PIEZAS_ASISTENTE = [
+  ['Caja del pedido', '#s-asistente .sxask textarea', '', ['fontSize', 'fontFamily', 'borderTopLeftRadius', 'height']],
+  ['Quién habla', '#sxchat .sxfrom', '', ['fontSize', 'fontFamily', 'textTransform', 'letterSpacing']],
+  ['Tarjeta de gasto', '#s-asistente .fxdk', '', ['borderTopLeftRadius', 'backgroundColor']],
+  ['Barra del tope', '#s-asistente .fxdkp', '', ['height', 'borderTopLeftRadius']],
+  ['Avatar de la fuente', '#s-asistente .fxr .av', '', ['width', 'height', 'borderTopLeftRadius']],
 ];
 
 // Piezas de Progreso. El selector existe en el boceto y en la app.
 export const PIEZAS_PROGRESO = [
   ['Avatar de la cartera', '#s-progreso .fxr .av', '', ['width', 'height', 'borderTopLeftRadius']],
-  ['Nombre en la lista', '#s-progreso .sxwho b', '', ['fontSize', 'fontWeight']],
+  ['Nombre en la lista', '#s-progreso .sxwho b', '', ['fontSize', 'fontWeight', 'fontFamily']],
   ['Etiqueta de la lista', '#s-progreso .pill', '', ['fontSize', 'fontWeight']],
   ['Chip Evolución', '#s-progreso .fxr .chip', '', ['fontSize', 'borderTopLeftRadius']],
   ['Tarjeta de evolución', '#sxevo .fxdk', '', ['borderTopLeftRadius', 'backgroundColor']],
@@ -58,7 +67,7 @@ export const PIEZAS_PROGRESO = [
 // Piezas de Seguimiento. El selector existe en el boceto y en la app.
 export const PIEZAS_SEGUIMIENTO = [
   ['Foto de la comida', '#s-seguimiento .sxpic', '', ['width', 'height', 'borderTopLeftRadius']],
-  ['Nombre de la comida', '#s-seguimiento .sxwho b', '', ['fontSize', 'fontWeight']],
+  ['Nombre de la comida', '#s-seguimiento .sxwho b', '', ['fontSize', 'fontWeight', 'fontFamily']],
   ['Acciones de la comida', '#s-seguimiento .sxacts .chip', '', ['fontSize', 'borderTopLeftRadius']],
   ['Día registrado', '#s-seguimiento .sxdays i', '', ['width', 'height', 'borderTopLeftRadius']],
   ['Día con carga', '#s-seguimiento .sxdays i.on', '', ['backgroundColor']],
@@ -174,6 +183,47 @@ async function abrirProgresoApp(pagina) {
   await pagina.waitForSelector('#sxevo .fxdk', { timeout: 20000 });
 }
 
+async function abrirAsistenteBoceto(pagina) {
+  await pagina.locator('[data-go="asistente"]').first().click();
+  await pagina.waitForSelector('#s-asistente:not([hidden]) .sxask textarea', { timeout: 10000 });
+  await pagina.waitForSelector('#s-asistente .fxdk', { timeout: 10000 });
+  await pagina.waitForSelector('#sxchat .sxfrom', { timeout: 10000 });
+  await pagina.waitForSelector('#s-asistente .fxr .av', { timeout: 10000 });
+}
+
+async function letraDisponible(pagina) {
+  return pagina.evaluate(async () => {
+    await document.fonts.ready;
+    const pesos = [300, 400, 500, 600];
+    const faltan = pesos.filter(peso => !document.fonts.check(`${peso} 16px Inter`));
+    const familia = selector => {
+      const el = document.querySelector(selector);
+      return el ? getComputedStyle(el).fontFamily : '';
+    };
+    return {
+      faltan,
+      titulo: familia('.top h1'),
+      menu: familia('.nv.on'),
+      cuerpo: familia('#s-asistente .sxask textarea'),
+    };
+  });
+}
+
+function letraCoincide(letra) {
+  const familias = [letra.titulo, letra.menu, letra.cuerpo];
+  const sinInter = familias.filter(familia => !familia.includes('Inter'));
+  const conPoppins = familias.filter(familia => /Poppins|DM Sans|Fraunces/i.test(familia));
+  return { sinInter, conPoppins, faltan: letra.faltan };
+}
+
+async function abrirAsistenteApp(pagina) {
+  await pagina.locator('#pv-panel-v29 a.nv[href="/crm/desarrollo?modulo=asistente-ia"]').click();
+  await pagina.waitForSelector('#s-asistente .sxask textarea', { timeout: 20000 });
+  await pagina.waitForSelector('#s-asistente .fxdk', { timeout: 20000 });
+  await pagina.waitForSelector('#sxchat .sxfrom', { timeout: 20000 });
+  await pagina.waitForSelector('#s-asistente .fxr .av', { timeout: 20000 });
+}
+
 export async function correrContratoV29() {
   const informe = [];
   let fallas = 0;
@@ -197,12 +247,26 @@ export async function correrContratoV29() {
       await abrirProgresoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Progreso\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_PROGRESO, informe);
+      await abrirAsistenteBoceto(b);
+      await abrirAsistenteApp(a);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Asistente\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_ASISTENTE, informe);
+      const [letraBoceto, letraApp] = await Promise.all([letraDisponible(b), letraDisponible(a)]);
+      const fallaBoceto = letraCoincide(letraBoceto);
+      const fallaApp = letraCoincide(letraApp);
+      const letraOk = !fallaBoceto.faltan.length && !fallaApp.faltan.length && !fallaBoceto.sinInter.length && !fallaApp.sinInter.length && !fallaBoceto.conPoppins.length && !fallaApp.conPoppins.length;
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · letra\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      if (letraOk) informe.push('| Inter 300–600 en título, menú y cuerpo | ✅ igual | |');
+      else {
+        fallas += 1;
+        informe.push(`| Inter 300–600 en título, menú y cuerpo | ❌ distinta | boceto faltan \`${fallaBoceto.faltan.join(',') || '—'}\` sin Inter \`${fallaBoceto.sinInter.join(' · ') || '—'}\` · app faltan \`${fallaApp.faltan.join(',') || '—'}\` sin Inter \`${fallaApp.sinInter.join(' · ') || '—'}\` Poppins \`${[...fallaBoceto.conPoppins, ...fallaApp.conPoppins].join(' · ') || '—'}\` |`);
+      }
       await b.close();
       await a.close();
     }
   } finally { await navegador.close(); }
 
-  const texto = `# Contrato del armazón contra el boceto v29\n\nFuente: \`design/panel-nutri/v29/panel-trabajo.html\`.\nApp: \`${origen}/crm/inicio\`, \`${origen}/crm/seguimiento\` y \`${origen}/crm/progreso-global\`.\n\n${fallas ? `**${fallas} piezas no coinciden.**` : '**El armazón, Seguimiento y Progreso coinciden, en claro y en oscuro.**'}\n${informe.join('\n')}\n`;
+  const texto = `# Contrato del armazón contra el boceto v29\n\nFuente: \`design/panel-nutri/v29/panel-trabajo.html\`.\nApp: \`${origen}/crm/inicio\`, \`${origen}/crm/seguimiento\`, \`${origen}/crm/progreso-global\` y \`${origen}/crm/desarrollo?modulo=asistente-ia\`.\n\n${fallas ? `**${fallas} piezas no coinciden.**` : '**El armazón, Seguimiento, Progreso y Asistente coinciden, en claro y en oscuro.**'}\n${informe.join('\n')}\n`;
   return { fallas, texto };
 }
 

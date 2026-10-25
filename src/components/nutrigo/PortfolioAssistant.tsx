@@ -1,18 +1,189 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { request } from '../../api/client';
-import type { PortfolioAnswer, PortfolioIndicators } from '../../types/portfolio';
 import { friendlyError } from '../../lib/error-messages';
-import { NvButton, NvCard } from './primitives';
 import { indicatorsCsv } from '../../lib/portfolio-csv';
+import { useAppStore } from '../../store/useAppStore';
+import type { PortfolioAnswer, PortfolioIndicators } from '../../types/portfolio';
+import {
+  esPeriodo, fuentesDe, nombresDePropuestas, propuestasDe,
+  type PeriodoAsistente,
+} from './asistente-presentacion';
+import { AccionesAsistente, PanelAsistenteVista, type TurnoAsistente } from './PanelAsistente';
 
-const suggested=['Resumen de la cartera','¿Quiénes no tienen registros?','¿Qué comidas están pendientes de revisión?'];
-export function PortfolioAssistant({onOpen}:{onOpen:(href:string)=>void}) {
-  const [question,setQuestion]=useState(''),[days,setDays]=useState<7|30|90>(30),[useAi,setUseAi]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
-  const [turns,setTurns]=useState<Array<{question:string;response:PortfolioAnswer}>>([]),[visible,setVisible]=useState(50);
-  const controller=useRef<AbortController|null>(null);
-  const operation=useRef<{payload:string;id:string}|null>(null);
-  useEffect(()=>{const settings=new AbortController();request<{settings:{default_days:7|30|90}}>('/api/portfolio/settings',{signal:settings.signal}).then(data=>setDays(data.settings.default_days)).catch(()=>{});return()=>{settings.abort();controller.current?.abort();};},[]);
-  async function ask(text=question){if(!text.trim()||busy)return;controller.current?.abort();const current=new AbortController();controller.current=current;setBusy(true);setError('');try{const payload=JSON.stringify({question:text,days,use_ai:useAi});if(operation.current?.payload!==payload)operation.current={payload,id:crypto.randomUUID()};const response=await request<PortfolioAnswer>('/api/portfolio/assistant',{method:'POST',body:JSON.stringify({question:text,days,use_ai:useAi,request_id:operation.current.id}),signal:current.signal});if(!current.signal.aborted){setTurns(old=>[...old,{question:text,response}]);if(!useAi||response.mode==='ai')operation.current=null;setQuestion('');setVisible(50);}}catch(e){if(!current.signal.aborted)setError(friendlyError(e));}finally{if(!current.signal.aborted)setBusy(false);}}
-  async function exportCsv(){setError('');try{const data=await request<PortfolioIndicators>(`/api/portfolio/indicators?days=${days}`);const csv=indicatorsCsv(data);const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='indicadores-cartera.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){setError(friendlyError(e));}}
-  return <NvCard title="Asistente de cartera" className="care-panel ops-panel"><p>Consultá registros, pendientes y cambios entre períodos. Cada respuesta muestra sus fuentes; las propuestas requieren revisión profesional.</p><div className="care-actions"><label>Período <select value={days} disabled={busy} onChange={e=>setDays(Number(e.target.value) as 7|30|90)}>{[7,30,90].map(d=><option key={d} value={d}>{d} días</option>)}</select></label><NvButton disabled={busy} onClick={()=>void exportCsv()}>Descargar indicadores</NvButton></div><label className="care-consent"><input type="checkbox" checked={useAi} disabled={busy} onChange={e=>setUseAi(e.target.checked)}/> Preparar propuestas con IA para pacientes que dieron permiso</label><p>La IA recibe únicamente totales de al menos cinco pacientes con permiso, sin nombres, registros individuales ni el texto de tu pregunta. Las preguntas clínicas requieren revisar la ficha correspondiente.</p><div className="care-actions">{suggested.map(text=><NvButton key={text} className="nv-soft" disabled={busy} onClick={()=>void ask(text)}>{text}</NvButton>)}</div><div role="log" aria-label="Conversación del asistente" aria-live="polite">{turns.map((turn,i)=><article key={i}><h3>{turn.question}</h3><p>{turn.response.answer}</p>{turn.response.ai_notice&&<p role="status">{turn.response.ai_notice}</p>}{turn.response.excluded_without_consent>0&&<p>{turn.response.excluded_without_consent} pacientes excluidas de las propuestas de IA por falta de permiso.</p>}{turn.response.general_proposals?.map((text,j)=><section key={`general-${j}`}><h4>Propuesta general para revisar</h4><p>{text}</p></section>)}{turn.response.proposals.map((p,j)=><section key={`${p.patient_id}-${j}`}><h4>Propuesta para revisar</h4><p>{p.text}</p><NvButton className="nv-ghost" onClick={()=>onOpen(`/crm/ficha?paciente=${encodeURIComponent(p.patient_id)}&seccion=resumen`)}>Abrir ficha y fuentes</NvButton></section>)}<details><summary>Fuentes ({turn.response.sources.length})</summary><ul>{turn.response.sources.slice(0,visible).map(row=><li key={row.patient_id}><button type="button" onClick={()=>onOpen(`/crm/ficha?paciente=${encodeURIComponent(row.patient_id)}&seccion=alimentario`)}>{row.name}</button>: {row.meal_count} registros, {row.previous_meal_count} en período anterior, {row.pending_review} en revisión.</li>)}</ul>{visible<turn.response.sources.length&&<NvButton onClick={()=>setVisible(n=>n+50)}>Ver más fuentes</NvButton>}</details></article>)}</div><form onSubmit={e=>{e.preventDefault();void ask();}}><label>Pregunta sobre los indicadores<textarea value={question} maxLength={1000} disabled={busy} onChange={e=>setQuestion(e.target.value)} rows={3}/></label><NvButton type="submit" disabled={busy||!question.trim()}>{busy?'Consultando…':'Consultar'}</NvButton></form>{error&&<p role="alert">{error}</p>}</NvCard>;
+type Modo = 'agregar' | 'reemplazar' | 'ultima';
+type Pedido = { days?: PeriodoAsistente; useAi?: boolean; modo?: Modo; silencio?: boolean; avisoExito?: string; limpiar?: boolean; signal?: AbortSignal };
+
+export function PortfolioAssistant({ onOpen, onHeader }: { onOpen: (href: string) => void; onHeader?: (actions: ReactNode) => void }) {
+  const pacientes = useAppStore(estado => estado.patients);
+  const [pregunta, setPregunta] = useState('');
+  const [days, setDays] = useState<PeriodoAsistente>(30);
+  const [useAi, setUseAi] = useState(false);
+  const [ocupado, setOcupado] = useState(false);
+  const [error, setError] = useState('');
+  const [aviso, setAviso] = useState('');
+  const [turnos, setTurnos] = useState<TurnoAsistente[]>([]);
+  const [estado, setEstado] = useState<'cargando' | 'lista' | 'error'>('cargando');
+  const control = useRef<AbortController | null>(null);
+  const operacion = useRef<{ payload: string; id: string } | null>(null);
+  const pacientesRef = useRef(pacientes);
+  const huboTurnos = useRef(false);
+  pacientesRef.current = pacientes;
+  const avisar = useCallback((texto: string) => {
+    setAviso(texto);
+    window.setTimeout(() => setAviso(actual => actual === texto ? '' : actual), 3600);
+  }, []);
+  const avisarYAbrir = useCallback((texto: string, href: string) => {
+    const host = document.querySelector('#pv-panel-v29 .app');
+    if (host) {
+      host.querySelector('#atoast')?.remove();
+      const nodo = document.createElement('div');
+      nodo.id = 'atoast';
+      nodo.className = 'on';
+      nodo.setAttribute('role', 'status');
+      nodo.textContent = texto;
+      host.appendChild(nodo);
+      window.setTimeout(() => nodo.remove(), 3600);
+    }
+    onOpen(href);
+  }, [onOpen]);
+
+  const pedir = useCallback(async (texto: string, opciones?: Pedido) => {
+    const limpio = texto.trim();
+    const modo = opciones?.modo ?? 'agregar';
+    if (!limpio) {
+      document.querySelector<HTMLTextAreaElement>('#s-asistente [aria-label="Pedido para el asistente"]')?.focus();
+      avisar('Escribí el pedido en la caja. Puede ser de una paciente o de toda la cartera.');
+      return;
+    }
+    const periodo = opciones?.days ?? days;
+    const ia = opciones?.useAi ?? useAi;
+    control.current?.abort();
+    const actual = new AbortController();
+    control.current = actual;
+    const senal = opciones?.signal;
+    const cortar = () => actual.abort();
+    senal?.addEventListener('abort', cortar);
+    setOcupado(true);
+    setError('');
+    setEstado('cargando');
+    try {
+      const carga = JSON.stringify({ question: limpio, days: periodo, use_ai: ia });
+      if (operacion.current?.payload !== carga) operacion.current = { payload: carga, id: crypto.randomUUID() };
+      const respuesta = await request<PortfolioAnswer>('/api/portfolio/assistant', {
+        method: 'POST',
+        body: JSON.stringify({ question: limpio, days: periodo, use_ai: ia, request_id: operacion.current.id }),
+        signal: actual.signal,
+      });
+      if (actual.signal.aborted) return;
+      if (!ia || respuesta.mode === 'ai') operacion.current = null;
+      const fuentes = fuentesDe(respuesta, pacientesRef.current);
+      const turno: TurnoAsistente = {
+        clave: crypto.randomUUID(),
+        pregunta: limpio,
+        respuesta: respuesta.answer,
+        aviso: respuesta.ai_notice ?? '',
+        excluidas: respuesta.excluded_without_consent,
+        propuestas: nombresDePropuestas(propuestasDe(respuesta, ia), fuentes),
+        fuentes,
+      };
+      const siguientes = modo === 'reemplazar' ? [turno] : modo === 'ultima' ? [turno] : null;
+      setTurnos(previos => {
+        const lista = siguientes ?? [...previos, turno];
+        if (modo === 'ultima' && previos.length) return [...previos.slice(0, -1), turno];
+        return lista;
+      });
+      huboTurnos.current = true;
+      if (opciones?.limpiar) setPregunta('');
+      setEstado('lista');
+      if (!opciones?.silencio) avisar(opciones?.avisoExito ?? 'Respuesta agregada. No se le envió a nadie.');
+    } catch (motivo) {
+      if (actual.signal.aborted) return;
+      setError(friendlyError(motivo));
+      setEstado(huboTurnos.current ? 'lista' : 'error');
+    } finally {
+      senal?.removeEventListener('abort', cortar);
+      if (!actual.signal.aborted) setOcupado(false);
+    }
+  }, [avisar, days, useAi]);
+
+  const pedirRef = useRef(pedir);
+  pedirRef.current = pedir;
+  useEffect(() => {
+    const ac = new AbortController();
+    void (async () => {
+      let periodo: PeriodoAsistente = 30;
+      try {
+        const data = await request<{ settings: { default_days: number } }>('/api/portfolio/settings', { signal: ac.signal });
+        if (esPeriodo(data.settings.default_days)) periodo = data.settings.default_days;
+      } catch {
+        if (ac.signal.aborted) return;
+      }
+      if (ac.signal.aborted) return;
+      setDays(periodo);
+      await pedirRef.current('Resumen de la cartera', { days: periodo, useAi: false, modo: 'reemplazar', silencio: true, signal: ac.signal });
+    })();
+    return () => ac.abort();
+  }, []);
+
+  const cambiarDias = useCallback((periodo: PeriodoAsistente) => {
+    if (periodo === days) {
+      avisar(`Ya estás viendo ${periodo} días.`);
+      return;
+    }
+    setDays(periodo);
+    avisar(`Período de ${periodo} días.`);
+    void pedir('Resumen de la cartera', { days: periodo, modo: 'reemplazar', silencio: true });
+  }, [avisar, days, pedir]);
+
+  const alternar = useCallback(() => {
+    const siguiente = !useAi;
+    setUseAi(siguiente);
+    avisar(siguiente ? 'Las propuestas quedan prendidas, siempre para revisar.' : 'Propuestas apagadas. Seguís viendo los números.');
+    const ultima = turnos[turnos.length - 1]?.pregunta ?? 'Resumen de la cartera';
+    void pedir(ultima, { useAi: siguiente, modo: 'ultima', silencio: true });
+  }, [avisar, pedir, turnos, useAi]);
+
+  const exportar = useCallback(async () => {
+    setError('');
+    try {
+      const data = await request<PortfolioIndicators>(`/api/portfolio/indicators?days=${days}`);
+      const csv = indicatorsCsv(data);
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      const enlace = document.createElement('a');
+      enlace.href = url;
+      enlace.download = 'indicadores-cartera.csv';
+      enlace.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      avisar('Listo: indicadores-cartera.csv se descargó en esta computadora.');
+    } catch (motivo) {
+      setError(friendlyError(motivo));
+    }
+  }, [avisar, days]);
+
+  const consultarCaja = useCallback(() => { void pedir(pregunta, { modo: 'agregar', limpiar: true }); }, [pedir, pregunta]);
+
+  useEffect(() => () => onHeader?.(null), [onHeader]);
+  useEffect(() => {
+    if (!onHeader) return undefined;
+    onHeader(<AccionesAsistente days={days} ocupado={ocupado} onDays={cambiarDias} onDescargar={() => void exportar()} onConsultar={consultarCaja} />);
+    return () => onHeader(null);
+  }, [onHeader, days, ocupado, cambiarDias, exportar, consultarCaja]);
+
+  return <PanelAsistenteVista
+    pregunta={pregunta}
+    propuestasOn={useAi}
+    turnos={turnos}
+    estado={estado}
+    ocupado={ocupado}
+    error={error}
+    aviso={aviso}
+    acciones={onHeader ? null : <AccionesAsistente days={days} ocupado={ocupado} onDays={cambiarDias} onDescargar={() => void exportar()} onConsultar={consultarCaja} />}
+    onPregunta={setPregunta}
+    onConsultar={consultarCaja}
+    onSugerencia={texto => { void pedir(texto, { modo: 'agregar', avisoExito: 'Listo.' }); }}
+    onToggle={alternar}
+    onFicha={(href, nombre) => avisarYAbrir(nombre ? `Ficha de ${nombre}, para revisar la propuesta.` : 'Abriste la ficha para revisar la propuesta.', href)}
+    onFuente={fuente => avisarYAbrir(`Fuente: ${fuente.nombre} · su ficha.`, fuente.ficha)}
+    onRevisar={() => avisar('Quedó marcada para vos. No se le envió a la paciente.')}
+  />;
 }

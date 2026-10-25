@@ -19,7 +19,7 @@ describe('funciones presentes y previstas del consultorio',()=>{
   });
   it('el asistente y ayuda abren funciones reales, con revisión y fuentes',()=>{
     const assistant=renderToStaticMarkup(<ProfessionalModules selectedId="asistente-ia" onOpen={vi.fn()} />);
-    expect(assistant).toContain('Asistente de cartera');expect(assistant).toContain('Consultar');expect(assistant).not.toContain('En preparación');
+    expect(assistant).toContain('Conversación');expect(assistant).toContain('Consultar');expect(assistant).toContain('Gasto de este mes');expect(assistant).toContain('Sin dato');expect(assistant).not.toContain('En preparación');
     const help=renderToStaticMarkup(<ProfessionalModules selectedId="ayuda" onOpen={vi.fn()} />);
     expect(help).toContain('Centro de ayuda');expect(help).toContain('Buscar una guía');expect(help).toContain('Importar una cartera');
   });
