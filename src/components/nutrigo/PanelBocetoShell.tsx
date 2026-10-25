@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { PanelV29Icon } from './PanelV29Icon';
 import type { PanelV29IconName } from './panel-v29-icons';
+import '@fontsource/inter/latin-300.css';
+import '@fontsource/inter/latin-400.css';
+import '@fontsource/inter/latin-500.css';
+import '@fontsource/inter/latin-600.css';
 import './panel-v29.css';
 import './panel-boceto.css';
 import './panel-boceto-app.css';

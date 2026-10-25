@@ -8,6 +8,7 @@ import { PANEL_V29_ICONS } from './panel-v29-icons';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const css = readFileSync(new URL('./panel-v29.css', import.meta.url), 'utf8');
+const hojaApp = readFileSync(new URL('./panel-v29-app.css', import.meta.url), 'utf8');
 const hojaVieja = readFileSync(new URL('./panel-boceto.css', import.meta.url), 'utf8');
 const shell = readFileSync(new URL('./PanelBocetoShell.tsx', import.meta.url), 'utf8');
 const fuente = readFileSync(resolve(raiz, 'design/panel-nutri/v29/panel-trabajo.html'), 'utf8');
@@ -53,6 +54,19 @@ describe('herramientas del boceto v29', () => {
 
   it('lo generado coincide con panel-trabajo.html', () => {
     execFileSync(process.execPath, ['scripts/panel-v29-css.mjs', '--check'], { cwd: raiz, stdio: 'pipe' });
+  });
+
+  it('carga Inter 300–600 y el cuerpo del panel no se queda con Poppins', () => {
+    for (const peso of [300, 400, 500, 600]) {
+      expect(shell).toContain(`import '@fontsource/inter/latin-${peso}.css'`);
+    }
+    expect(shell).not.toContain('@fontsource/poppins');
+    expect(css).toContain('--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,"Segoe UI",sans-serif;');
+    expect(hojaApp).toContain('#pv-panel-v29 #pv-panel {');
+    expect(hojaApp).toContain('--font: inherit;');
+    expect(hojaApp).toContain('font-size: inherit;');
+    expect(hojaApp).toMatch(/#pv-panel-v29,\s*\n#pv-panel-v29 \* \{\s*\n {2}font-family: var\(--font\);/);
+    expect(hojaApp).not.toMatch(/#pv-panel-v29[^{]*\{[^}]*font-family:\s*Poppins/);
   });
 
   it('el armazón importa la hoja v29 y las pantallas viejas siguen con la suya', () => {
