@@ -45,6 +45,15 @@ export const PIEZAS_V29 = [
   ['CTA', '.app .top .cta', '', ['backgroundColor', 'color']],
 ];
 
+// Piezas de Asistente. El encabezado vive en el armazón; acá se mide el cuerpo, que existe en los dos.
+export const PIEZAS_ASISTENTE = [
+  ['Caja del pedido', '#s-asistente .sxask textarea', '', ['fontSize', 'borderTopLeftRadius', 'height']],
+  ['Quién habla', '#sxchat .sxfrom', '', ['fontSize', 'textTransform', 'letterSpacing']],
+  ['Tarjeta de gasto', '#s-asistente .fxdk', '', ['borderTopLeftRadius', 'backgroundColor']],
+  ['Barra del tope', '#s-asistente .fxdkp', '', ['height', 'borderTopLeftRadius']],
+  ['Avatar de la fuente', '#s-asistente .fxr .av', '', ['width', 'height', 'borderTopLeftRadius']],
+];
+
 // Piezas de Progreso. El selector existe en el boceto y en la app.
 export const PIEZAS_PROGRESO = [
   ['Avatar de la cartera', '#s-progreso .fxr .av', '', ['width', 'height', 'borderTopLeftRadius']],
@@ -174,6 +183,22 @@ async function abrirProgresoApp(pagina) {
   await pagina.waitForSelector('#sxevo .fxdk', { timeout: 20000 });
 }
 
+async function abrirAsistenteBoceto(pagina) {
+  await pagina.locator('[data-go="asistente"]').first().click();
+  await pagina.waitForSelector('#s-asistente:not([hidden]) .sxask textarea', { timeout: 10000 });
+  await pagina.waitForSelector('#s-asistente .fxdk', { timeout: 10000 });
+  await pagina.waitForSelector('#sxchat .sxfrom', { timeout: 10000 });
+  await pagina.waitForSelector('#s-asistente .fxr .av', { timeout: 10000 });
+}
+
+async function abrirAsistenteApp(pagina) {
+  await pagina.locator('#pv-panel-v29 a.nv[href="/crm/desarrollo?modulo=asistente-ia"]').click();
+  await pagina.waitForSelector('#s-asistente .sxask textarea', { timeout: 20000 });
+  await pagina.waitForSelector('#s-asistente .fxdk', { timeout: 20000 });
+  await pagina.waitForSelector('#sxchat .sxfrom', { timeout: 20000 });
+  await pagina.waitForSelector('#s-asistente .fxr .av', { timeout: 20000 });
+}
+
 export async function correrContratoV29() {
   const informe = [];
   let fallas = 0;
@@ -197,12 +222,16 @@ export async function correrContratoV29() {
       await abrirProgresoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Progreso\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_PROGRESO, informe);
+      await abrirAsistenteBoceto(b);
+      await abrirAsistenteApp(a);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Asistente\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_ASISTENTE, informe);
       await b.close();
       await a.close();
     }
   } finally { await navegador.close(); }
 
-  const texto = `# Contrato del armazón contra el boceto v29\n\nFuente: \`design/panel-nutri/v29/panel-trabajo.html\`.\nApp: \`${origen}/crm/inicio\`, \`${origen}/crm/seguimiento\` y \`${origen}/crm/progreso-global\`.\n\n${fallas ? `**${fallas} piezas no coinciden.**` : '**El armazón, Seguimiento y Progreso coinciden, en claro y en oscuro.**'}\n${informe.join('\n')}\n`;
+  const texto = `# Contrato del armazón contra el boceto v29\n\nFuente: \`design/panel-nutri/v29/panel-trabajo.html\`.\nApp: \`${origen}/crm/inicio\`, \`${origen}/crm/seguimiento\`, \`${origen}/crm/progreso-global\` y \`${origen}/crm/desarrollo?modulo=asistente-ia\`.\n\n${fallas ? `**${fallas} piezas no coinciden.**` : '**El armazón, Seguimiento, Progreso y Asistente coinciden, en claro y en oscuro.**'}\n${informe.join('\n')}\n`;
   return { fallas, texto };
 }
 

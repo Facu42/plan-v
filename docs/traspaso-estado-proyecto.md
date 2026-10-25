@@ -1,6 +1,8 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-23)
 
-25/10 · Cursor · Progreso del panel de la nutri, en el orden por valor, copia el boceto v29 en `/crm/progreso-global` ([PR #179](https://github.com/Facu42/plan-v/pull/179), sin juntar). Usa el resumen de la cartera y la serie de peso que ya existían. La adherencia queda en «Sin dato». Sin registros no es un incumplimiento.
+25/10 · Cursor · Asistente IA del panel de la nutri, en el orden por valor después de Progreso, copia el boceto v29 en `/crm/desarrollo?modulo=asistente-ia` (rama `cursor/panel-asistente-v29-e254`, sin juntar). Usa el asistente de cartera que ya existía. El gasto del mes no llega: se muestra «Sin dato» y el tope de US$ 5. Nada se le manda a la paciente.
+
+25/10 · Cursor · Progreso del panel de la nutri, en el orden por valor, copia el boceto v29 en `/crm/progreso-global` ([PR #179](https://github.com/Facu42/plan-v/pull/179), ya en main). Usa el resumen de la cartera y la serie de peso que ya existían. La adherencia queda en «Sin dato». Sin registros no es un incumplimiento.
 
 25/10 · Cursor · Seguimiento del panel de la nutri, en el orden por valor, copia el boceto v29 en `/crm/seguimiento` ([PR #178](https://github.com/Facu42/plan-v/pull/178), ya en main). Usa la bandeja y los mensajes de la app. Sin WhatsApp y sin tablas nuevas.
 
