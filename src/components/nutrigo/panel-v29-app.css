@@ -70,3 +70,16 @@
 #pv-panel-v29 .sxpic img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; display: block; }
 /* La hoja vieja del panel pisa el chip del boceto (11px y fondo blanco). Adentro de Seguimiento vuelve el del archivo. */
 #pv-panel-v29 #s-seguimiento .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
+
+/* Progreso llena la columna igual que Seguimiento. El chip del boceto gana a la hoja vieja. */
+#pv-panel-v29:not(.mob) .main:has(#s-progreso) { height: 100%; overflow: hidden; }
+#pv-panel-v29:not(.mob) #pv-panel:has(#s-progreso) { flex: 1; min-height: 0; }
+#pv-panel-v29.mob .main:has(#s-progreso) > .top { flex: 0 0 auto; height: auto; }
+/* En el celular el boceto apila y scrollea. Sin esto la grilla parte la altura y la evolución tapa la lista. */
+#pv-panel-v29.mob #pv-panel:has(#s-progreso),
+#pv-panel-v29.mob #s-progreso,
+#pv-panel-v29.mob #s-progreso > .fx { flex: none; height: auto; min-height: auto; }
+#pv-panel-v29.mob #s-progreso > .fx { align-content: start; }
+#pv-panel-v29.mob #s-progreso > .fx > .c { min-height: auto; height: auto; }
+#pv-panel-v29 #s-progreso .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
+#pv-panel-v29 #s-progreso a.chip { text-decoration: none; }

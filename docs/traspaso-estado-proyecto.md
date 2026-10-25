@@ -1,6 +1,8 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-23)
 
-25/10 · Cursor · Seguimiento del panel de la nutri, en el orden por valor, copia el boceto v29 en `/crm/seguimiento` ([PR #178](https://github.com/Facu42/plan-v/pull/178), sin juntar). Usa la bandeja y los mensajes de la app. Sin WhatsApp y sin tablas nuevas. Siguiente: Progreso.
+25/10 · Cursor · Progreso del panel de la nutri, en el orden por valor, copia el boceto v29 en `/crm/progreso-global` ([PR #179](https://github.com/Facu42/plan-v/pull/179), sin juntar). Usa el resumen de la cartera y la serie de peso que ya existían. La adherencia queda en «Sin dato». Sin registros no es un incumplimiento.
+
+25/10 · Cursor · Seguimiento del panel de la nutri, en el orden por valor, copia el boceto v29 en `/crm/seguimiento` ([PR #178](https://github.com/Facu42/plan-v/pull/178), ya en main). Usa la bandeja y los mensajes de la app. Sin WhatsApp y sin tablas nuevas.
 
 24/10 · Claude · Panel de la nutri, **cómo dejarlo como versión final**: [version-final.md](panel-nutri-rediseno/version-final.md) (revisión de la app contra el boceto v26, fases 0 a 13, base que falta, sincronización con la app de la paciente y prompt para cualquier agente). Primero el ok de Facundo al boceto v26.
 
