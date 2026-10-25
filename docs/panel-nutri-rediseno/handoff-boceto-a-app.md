@@ -2,7 +2,7 @@
 
 **Fecha:** 24–25 oct 2026 (America/Buenos_Aires)  
 **Dueño del hilo:** Plan V (asistente) + Facu  
-**Estado:** Fase 0 tools ([PR #176](https://github.com/Facu42/plan-v/pull/176)), Fase 1 shell ([PR #177](https://github.com/Facu42/plan-v/pull/177)), Fase 2 Seguimiento ([PR #178](https://github.com/Facu42/plan-v/pull/178)) y Fase 3 Progreso ([PR #179](https://github.com/Facu42/plan-v/pull/179)) ya están en main. Asistente IA está en el [PR #180](https://github.com/Facu42/plan-v/pull/180), sin juntar. Facu eligió **ok-v29-valor** (25 oct 2026). Orden: tools → shell → Seguimiento → Progreso → Asistente IA.
+**Estado:** Fase 0 tools ([PR #176](https://github.com/Facu42/plan-v/pull/176)), Fase 1 shell ([PR #177](https://github.com/Facu42/plan-v/pull/177)), Fase 2 Seguimiento ([PR #178](https://github.com/Facu42/plan-v/pull/178)), Fase 3 Progreso ([PR #179](https://github.com/Facu42/plan-v/pull/179)) y Asistente IA ([PR #180](https://github.com/Facu42/plan-v/pull/180)) ya están en main. Alimentos está en el [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. Facu eligió **ok-v29-valor** (25 oct 2026). Orden: tools → shell → Seguimiento → Progreso → Asistente IA → Alimentos.
 
 ## Decisiones cerradas (Facu, 25 oct 2026)
 
@@ -52,13 +52,16 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 3. ~~**Fase 1 shell:** `PanelBocetoShell` + nav + tema/celular; contrato del armazón contra la app. Se importa `panel-v29.css`. La raíz es `#pv-panel-v29` (tema, `.mob` y `.mreal`).~~ En main por el [PR #177](https://github.com/Facu42/plan-v/pull/177).
 4. ~~**Fase 2 Seguimiento:** la pantalla de adentro de `/crm/seguimiento` copia el boceto y usa la bandeja, el feed y `MealReviewPanel`.~~ En main por el [PR #178](https://github.com/Facu42/plan-v/pull/178).
 5. ~~**Fase 3 Progreso:** cartera y evolución en `/crm/progreso-global`, con los datos de `progress-global`. Sin adherencia inventada. Quien no tiene curva de peso ve «Sin curva», no un incumplimiento.~~ En main por el [PR #179](https://github.com/Facu42/plan-v/pull/179).
-6. **Asistente IA:** `/crm/desarrollo?modulo=asistente-ia` copia la conversación, el período, las sugerencias y las propuestas del boceto. La letra del panel es Inter (pesos 300, 400, 500 y 600), la del boceto. Poppins de la app de la paciente no entra al panel. Usa el asistente de cartera que ya existía. El gasto del mes no llega a la pantalla: se muestra «Sin dato» y el tope de US$ 5. Nada se le manda a la paciente. [PR #180](https://github.com/Facu42/plan-v/pull/180), sin juntar: Facu bloqueó el merge hasta el ok visual.
+6. ~~**Asistente IA:** `/crm/desarrollo?modulo=asistente-ia` copia la conversación, el período, las sugerencias y las propuestas del boceto. La letra del panel es Inter (pesos 300, 400, 500 y 600), la del boceto. Poppins de la app de la paciente no entra al panel. Usa el asistente de cartera que ya existía. El gasto del mes no llega a la pantalla: se muestra «Sin dato» y el tope de US$ 5. Nada se le manda a la paciente.~~ En main por el [PR #180](https://github.com/Facu42/plan-v/pull/180).
+7. **Alimentos:** `/crm/alimentos` copia el catálogo del boceto. Se busca, se ve la porción y las proteínas, los carbohidratos y las grasas, y se crea o edita un alimento propio. En gramos las porciones son siempre 100 g, 1 taza (30 g) y 1 cucharada (10 g). El origen se lee «SARA 2». SARA 2 se consulta y no se edita. Suplementos y la fuente externa no se muestran: el boceto no los dibuja. [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar.
 
 ## Bitácora
 
 | Cuándo | Qué | Quién |
 |---|---|---|
-| 25 oct | Asistente IA en el [PR #180](https://github.com/Facu42/plan-v/pull/180), sin juntar. La pantalla copia el boceto: período, conversación, sugerencias y propuestas para revisar. Los números salen del asistente de cartera que ya existía. El gasto del mes no llega: «Sin dato» y tope US$ 5. Con la IA apagada no hay propuestas. Nada se le manda a la paciente. La letra del panel quedó en Inter, como el boceto. El merge sigue bloqueado hasta el ok visual de Facu. | Cursor |
+| 25 oct | Paridad de Alimentos en el [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. Facu rechazó la primera pasada. En gramos quedan las tres porciones del boceto y el origen se lee «SARA 2». SARA 2 no se edita. | Cursor |
+| 25 oct | Alimentos en el [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. `/crm/alimentos` usa el dibujo del boceto con el catálogo que ya existía. SARA 2 no se edita. Un alimento propio sí. Suplementos y la fuente externa quedan afuera de esta pantalla. | Cursor |
+| 25 oct | Asistente IA en el [PR #180](https://github.com/Facu42/plan-v/pull/180), ya en main. La pantalla copia el boceto: período, conversación, sugerencias y propuestas para revisar. Los números salen del asistente de cartera que ya existía. El gasto del mes no llega: «Sin dato» y tope US$ 5. Con la IA apagada no hay propuestas. Nada se le manda a la paciente. La letra del panel quedó en Inter, como el boceto. | Cursor |
 | 25 oct | Fase 3 Progreso en el [PR #179](https://github.com/Facu42/plan-v/pull/179), ya en main: `/crm/progreso-global` usa el dibujo del boceto (cartera, filtros, orden y evolución al lado). Los números salen de `progress-global` y de la serie de peso que ya existía. La adherencia, la meta de peso y la grasa quedan en «Sin dato». Sin registros no es un incumplimiento. | Cursor |
 | 25 oct | Fase 2 Seguimiento en [PR #178](https://github.com/Facu42/plan-v/pull/178), ya en main: `/crm/seguimiento` usa el dibujo del boceto con la bandeja, las comidas revisadas y el pedido por la app. Sin WhatsApp y sin tablas nuevas. | Cursor |
 | 25 oct | Fase 1 shell en [PR #177](https://github.com/Facu42/plan-v/pull/177), ya en main: el armazón (menú, marca, buscador, cuenta, título, campana y el botón de Inicio) usa el boceto v29. Lo que el boceto dibuja y la app todavía no tiene queda vacío. Las pantallas de adentro no se redibujaron. Contrato en verde, claro y oscuro. | Cursor |
@@ -72,6 +75,6 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 ## Cómo retomar (otro agente)
 
 1. Leer esta nota + la Page del plan.
-2. Chequear bitácora: ok-v29-valor ya cerrado. Tools, armazón, Seguimiento y Progreso (#176, #177, #178 y #179) están en main. Asistente IA está en el [PR #180](https://github.com/Facu42/plan-v/pull/180), sin juntar. La letra ya es la del boceto. El merge sigue bloqueado hasta el ok visual de Facu.
-3. No redibujar el armazón. Lo que sigue del orden por valor, después de Asistente IA, no está empezado.
+2. Chequear bitácora: ok-v29-valor ya cerrado. Tools, armazón, Seguimiento, Progreso y Asistente IA (#176, #177, #178, #179 y #180) están en main. Alimentos está en el [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. La letra del panel ya es Inter.
+3. No redibujar el armazón. Después de Alimentos siguen Biblioteca y Centro de ayuda. No están empezadas.
 4. Actualizar esta bitácora al cerrar cada fase (1 párrafo + commit/PR). Facu mergea.

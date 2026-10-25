@@ -54,6 +54,18 @@ export const PIEZAS_ASISTENTE = [
   ['Avatar de la fuente', '#s-asistente .fxr .av', '', ['width', 'height', 'borderTopLeftRadius']],
 ];
 
+// Piezas de Alimentos. El buscador vive en el encabezado; el detalle, en el cuerpo.
+export const PIEZAS_ALIMENTOS = [
+  ['Buscador', '.top .sxin', '', ['borderTopLeftRadius', 'backgroundColor']],
+  ['Campo de búsqueda', '.top .sxin input', '', ['fontSize', 'fontFamily', 'width']],
+  ['Nombre del alimento', '#s-alimentos .sxwho b', '', ['fontSize', 'fontWeight', 'fontFamily']],
+  ['Tarjeta de energía', '#s-alimentos .fxdk', '', ['borderTopLeftRadius', 'backgroundColor']],
+  ['Barra de energía', '#s-alimentos .fxdkp', '', ['height', 'borderTopLeftRadius']],
+  ['Macros', '#s-alimentos .sxmac > div', '', ['fontSize']],
+  ['Barra de un macro', '#s-alimentos .sxmac .fxb', '', ['height', 'borderTopLeftRadius']],
+  ['Pestaña de porción', '#s-alimentos .tabs button', '', ['fontSize', 'borderTopLeftRadius']],
+];
+
 // Piezas de Progreso. El selector existe en el boceto y en la app.
 export const PIEZAS_PROGRESO = [
   ['Avatar de la cartera', '#s-progreso .fxr .av', '', ['width', 'height', 'borderTopLeftRadius']],
@@ -216,6 +228,20 @@ function letraCoincide(letra) {
   return { sinInter, conPoppins, faltan: letra.faltan };
 }
 
+async function abrirAlimentosBoceto(pagina) {
+  await pagina.locator('[data-go="alimentos"]').first().click();
+  await pagina.waitForSelector('#s-alimentos:not([hidden]) .sxmac', { timeout: 10000 });
+  await pagina.waitForSelector('#s-alimentos .fxdk', { timeout: 10000 });
+  await pagina.waitForSelector('#s-alimentos .top .sxin', { timeout: 10000 });
+}
+
+async function abrirAlimentosApp(pagina) {
+  await pagina.locator('#pv-panel-v29 a.nv[href="/crm/alimentos"]').click();
+  await pagina.waitForSelector('#s-alimentos .sxmac', { timeout: 20000 });
+  await pagina.waitForSelector('#s-alimentos .fxdk', { timeout: 20000 });
+  await pagina.waitForSelector('.top .sxin input', { timeout: 20000 });
+}
+
 async function abrirAsistenteApp(pagina) {
   await pagina.locator('#pv-panel-v29 a.nv[href="/crm/desarrollo?modulo=asistente-ia"]').click();
   await pagina.waitForSelector('#s-asistente .sxask textarea', { timeout: 20000 });
@@ -261,12 +287,16 @@ export async function correrContratoV29() {
         fallas += 1;
         informe.push(`| Inter 300–600 en título, menú y cuerpo | ❌ distinta | boceto faltan \`${fallaBoceto.faltan.join(',') || '—'}\` sin Inter \`${fallaBoceto.sinInter.join(' · ') || '—'}\` · app faltan \`${fallaApp.faltan.join(',') || '—'}\` sin Inter \`${fallaApp.sinInter.join(' · ') || '—'}\` Poppins \`${[...fallaBoceto.conPoppins, ...fallaApp.conPoppins].join(' · ') || '—'}\` |`);
       }
+      await abrirAlimentosBoceto(b);
+      await abrirAlimentosApp(a);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Alimentos\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_ALIMENTOS, informe);
       await b.close();
       await a.close();
     }
   } finally { await navegador.close(); }
 
-  const texto = `# Contrato del armazón contra el boceto v29\n\nFuente: \`design/panel-nutri/v29/panel-trabajo.html\`.\nApp: \`${origen}/crm/inicio\`, \`${origen}/crm/seguimiento\`, \`${origen}/crm/progreso-global\` y \`${origen}/crm/desarrollo?modulo=asistente-ia\`.\n\n${fallas ? `**${fallas} piezas no coinciden.**` : '**El armazón, Seguimiento, Progreso y Asistente coinciden, en claro y en oscuro.**'}\n${informe.join('\n')}\n`;
+  const texto = `# Contrato del armazón contra el boceto v29\n\nFuente: \`design/panel-nutri/v29/panel-trabajo.html\`.\nApp: \`${origen}/crm/inicio\`, \`${origen}/crm/seguimiento\`, \`${origen}/crm/progreso-global\`, \`${origen}/crm/desarrollo?modulo=asistente-ia\` y \`${origen}/crm/alimentos\`.\n\n${fallas ? `**${fallas} piezas no coinciden.**` : '**El armazón, Seguimiento, Progreso, Asistente y Alimentos coinciden, en claro y en oscuro.**'}\n${informe.join('\n')}\n`;
   return { fallas, texto };
 }
 

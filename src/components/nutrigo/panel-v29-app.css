@@ -103,6 +103,26 @@
 #pv-panel-v29.mob #s-asistente .sxrow { flex-wrap: wrap; }
 #pv-panel-v29 #s-asistente .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
 
+/* Alimentos llena la columna igual que Seguimiento. En el celular las dos columnas se apilan. */
+#pv-panel-v29:not(.mob) .main:has(#s-alimentos) { height: 100%; overflow: hidden; }
+#pv-panel-v29:not(.mob) #pv-panel:has(#s-alimentos) { flex: 1; min-height: 0; }
+#pv-panel-v29.mob .main:has(#s-alimentos) > .top { flex: 0 0 auto; height: auto; }
+#pv-panel-v29.mob #pv-panel:has(#s-alimentos),
+#pv-panel-v29.mob #s-alimentos,
+#pv-panel-v29.mob #s-alimentos > .fx { flex: none; height: auto; min-height: auto; }
+#pv-panel-v29.mob #s-alimentos > .fx { align-content: start; }
+#pv-panel-v29.mob #s-alimentos > .fx > .c { min-height: auto; height: auto; min-width: 0; max-width: 100%; }
+#pv-panel-v29 #s-alimentos,
+#pv-panel-v29 #s-alimentos .fx,
+#pv-panel-v29 #s-alimentos .c,
+#pv-panel-v29 #s-alimentos .tabs,
+#pv-panel-v29 #s-alimentos .sxmac { min-width: 0; max-width: 100%; }
+#pv-panel-v29 #s-alimentos .tabs { margin-left: 0; gap: 2px; background: var(--app); border: 1px solid var(--line); border-radius: 9px; padding: 2px; overflow-x: auto; }
+#pv-panel-v29 #s-alimentos .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
+#pv-panel-v29.mob .main:has(#s-alimentos) > .top { flex-wrap: wrap; }
+#pv-panel-v29.mob .main:has(#s-alimentos) > .top .sxin { flex: 1 1 100%; }
+#pv-panel-v29.mob .main:has(#s-alimentos) > .top .sxin input { width: 100%; min-width: 0; }
+
 /* El boceto carga Inter 300, 400, 500 y 600 y pinta todo con --font.
    La hoja vieja redefine --font como Poppins en #pv-panel, que es el cuerpo
    (Asistente, Seguimiento, Progreso). Adentro del armazón vuelve el stack del boceto.

@@ -1,6 +1,10 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-23)
 
-25/10 · Cursor · Asistente IA del panel de la nutri, en el orden por valor después de Progreso, copia el boceto v29 en `/crm/desarrollo?modulo=asistente-ia` ([PR #180](https://github.com/Facu42/plan-v/pull/180), sin juntar). La letra del panel es Inter, la del boceto. El merge sigue bloqueado hasta el ok visual de Facu. Usa el asistente de cartera que ya existía. El gasto del mes no llega: se muestra «Sin dato» y el tope de US$ 5. Nada se le manda a la paciente.
+25/10 · Cursor · Alimentos del panel, corrección de paridad en el [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. Facu rechazó la primera pasada. En gramos las porciones son 100 g, 1 taza (30 g) y 1 cucharada (10 g). El origen se lee «SARA 2». SARA 2 sigue de solo lectura.
+
+25/10 · Cursor · Alimentos del panel de la nutri copia el boceto v29 en `/crm/alimentos` ([PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar). Se busca, se ve la porción y los macros, y se crea o edita un alimento propio. SARA 2 queda de solo lectura. Suplementos y la fuente externa no entran en esta pantalla.
+
+25/10 · Cursor · Asistente IA del panel de la nutri, en el orden por valor después de Progreso, copia el boceto v29 en `/crm/desarrollo?modulo=asistente-ia` ([PR #180](https://github.com/Facu42/plan-v/pull/180), ya en main). La letra del panel es Inter, la del boceto. Usa el asistente de cartera que ya existía. El gasto del mes no llega: se muestra «Sin dato» y el tope de US$ 5. Nada se le manda a la paciente.
 
 25/10 · Cursor · Progreso del panel de la nutri, en el orden por valor, copia el boceto v29 en `/crm/progreso-global` ([PR #179](https://github.com/Facu42/plan-v/pull/179), ya en main). Usa el resumen de la cartera y la serie de peso que ya existían. La adherencia queda en «Sin dato». Sin registros no es un incumplimiento.
 
