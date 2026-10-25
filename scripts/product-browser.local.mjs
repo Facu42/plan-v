@@ -7,6 +7,7 @@ import { createInterface } from 'node:readline';
 import { createClient } from '@supabase/supabase-js';
 import pg from 'pg';
 import { createBrowserRatePacer } from './browser-rate-window.mjs';
+import { logoutProbe } from './product-browser-logout.mjs';
 
 // Sólo la pila descartable del runner: sin URLs hospedadas, proveedores ni capturas.
 const run = promisify(execFile);
@@ -63,9 +64,8 @@ async function login(actor,path='/') {
   await until('!document.querySelector("input[placeholder=Email]")');
 }
 async function logout() {
-  // El control de cuenta puede estar dentro de su menú original; en el panel de la nutri es un ícono con aria-label.
   lastAction='cerrar sesión';
-  await until(`(()=>{const b=Array.from(document.querySelectorAll('button')).find(e=>/^(Cerrar sesión|Salir)$/.test(e.textContent.trim()||e.getAttribute('aria-label')||'')&&!e.matches(':disabled')&&e.getClientRects().length);if(b){b.click();return true;}const menu=Array.from(document.querySelectorAll('[aria-label="Abrir menú"], [aria-label="Abrir el menú"]')).find(e=>!e.matches(':disabled')&&e.getClientRects().length&&e.getAttribute('aria-expanded')!=='true');if(menu)menu.click();return false;})()`);
+  await until(logoutProbe);
   await B('wait','input[placeholder="Email"]');
 }
 async function read(actor,path) {

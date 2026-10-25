@@ -22,7 +22,7 @@ describe('herramientas del boceto v29', () => {
   });
 
   it('trae los íconos del menú del boceto v29', () => {
-    for (const name of ['grid', 'users', 'cal', 'coin', 'globe', 'clip', 'chat', 'team', 'gear', 'bell', 'plus', 'spark', 'fork', 'heart', 'trend', 'search', 'chev', 'shield', 'file']) {
+    for (const name of ['grid', 'users', 'cal', 'coin', 'globe', 'clip', 'chat', 'team', 'gear', 'bell', 'plus', 'spark', 'fork', 'heart', 'trend', 'search', 'chev', 'shield', 'file', 'menu', 'dots']) {
       expect(PANEL_V29_ICONS).toHaveProperty(name);
     }
   });
@@ -55,11 +55,14 @@ describe('herramientas del boceto v29', () => {
     execFileSync(process.execPath, ['scripts/panel-v29-css.mjs', '--check'], { cwd: raiz, stdio: 'pipe' });
   });
 
-  it('no pisa la hoja ni el armazón que ve la nutri hoy', () => {
+  it('el armazón importa la hoja v29 y las pantallas viejas siguen con la suya', () => {
     expect(hojaVieja.startsWith('/* GENERADO por scripts/panel-boceto-css.mjs desde design/panel-nutri/bocetos.html.')).toBe(true);
-    expect(shell).toContain("import './panel-boceto.css'");
-    expect(shell).not.toContain('panel-v29.css');
-    expect(css).toContain('No importar en la app hasta la fase del armazón');
+    const v29 = shell.indexOf("import './panel-v29.css'");
+    const vieja = shell.indexOf("import './panel-boceto.css'");
+    expect(v29).toBeGreaterThan(-1);
+    expect(vieja).toBeGreaterThan(v29);
+    expect(css).toContain('Las pantallas que todavía no se pasaron siguen con panel-boceto.css');
+    expect(css).not.toContain('No importar en la app hasta la fase del armazón');
   });
 
   it('falla si una pieza del armazón no está en el boceto v29', () => {

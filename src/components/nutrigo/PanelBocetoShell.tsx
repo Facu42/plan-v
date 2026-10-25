@@ -1,14 +1,16 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { PanelBocetoIcon } from './PanelBocetoIcon';
-import type { PanelBocetoIconName } from './panel-boceto-icons';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { PanelV29Icon } from './PanelV29Icon';
+import type { PanelV29IconName } from './panel-v29-icons';
+import './panel-v29.css';
 import './panel-boceto.css';
 import './panel-boceto-app.css';
+import './panel-v29-app.css';
 
-export type PanelAccountOption = { label: string; detail?: string; glyph: PanelBocetoIconName; onSelect: () => void };
-export type PanelTab = { label: string; glyph: PanelBocetoIconName; href?: string; on?: boolean };
+export type PanelAccountOption = { label: string; detail?: string; glyph: PanelV29IconName; onSelect: () => void };
+export type PanelTab = { label: string; glyph: PanelV29IconName; href?: string; on?: boolean; count?: number };
 export type PanelHeader = { when?: string; title: string; search: string; wideSearch?: boolean; actions?: ReactNode };
 
-/** Tema del boceto: `data-mock` en <html>, como hace `setTheme()` en bocetos.html. */
+/** Las pantallas que todavía no se pasaron leen `data-mock` en <html>. */
 export function usePanelMock(dark: boolean) {
   useEffect(() => {
     const root = document.documentElement;
@@ -17,23 +19,20 @@ export function usePanelMock(dark: boolean) {
   }, [dark]);
 }
 
-/** `hdr()` e `inicio()` del boceto: título, buscador con Ctrl K, campana y acciones. */
-function PanelHeaderBar({ header, bell, onSearch }: { header: PanelHeader; bell: ReactNode; onSearch: (query: string) => void }) {
-  const input = useRef<HTMLInputElement>(null);
-  const [query, setQuery] = useState('');
+/** El boceto enciende el celular real con el ancho interior menor a 760. */
+function useNarrow() {
+  const [narrow, setNarrow] = useState(false);
   useEffect(() => {
-    const focus = (event: KeyboardEvent) => { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); input.current?.focus(); } };
-    window.addEventListener('keydown', focus); return () => window.removeEventListener('keydown', focus);
+    const media = window.matchMedia('(max-width: 759px)');
+    const update = () => setNarrow(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
   }, []);
-  // Inicio en el celular (`phoneInicio()`): logo a la izquierda del saludo y sin el botón principal.
-  return <div className={`hdr${header.when ? ' pv-home' : ''}`}>{header.when && <img className="pv-hdr-logo" src="/panel-boceto/logo.png" alt="" />}<div>{header.when && <div className="when">{header.when}</div>}<h1>{header.title}</h1></div>
-    <form className="search" role="search" style={header.wideSearch ? undefined : { width: 280 }} onSubmit={event => { event.preventDefault(); onSearch(query.trim()); }}>
-      <PanelBocetoIcon name="search" /><input ref={input} type="search" aria-label={header.search} placeholder={header.search} value={query} onChange={event => setQuery(event.target.value)} /><span className="kbd">Ctrl K</span>
-    </form>
-    {bell}{header.actions}</div>;
+  return narrow;
 }
 
-/** `shell()` del boceto: barra lateral (logo, menú, cuenta) y columna principal. En el celular suma la barra de abajo (`bnav()`). */
+/** Armazón del boceto v29: menú `.side`, columna `.main` y, en el celular, barra de arriba y de abajo. */
 export function PanelBocetoShell({ dark, collapsed, onCollapse, menuOpen, onMenu, nav, brand, name, initials, account, onSignOut, header, bell, onSearch, tabs, onOpen, onMore, mainKey, notice, children }: {
   dark: boolean; collapsed: boolean; onCollapse: () => void; menuOpen: boolean; onMenu: (open: boolean) => void; nav: ReactNode;
   brand: string; name: string; initials: string; account: PanelAccountOption[]; onSignOut?: () => void;
@@ -41,33 +40,72 @@ export function PanelBocetoShell({ dark, collapsed, onCollapse, menuOpen, onMenu
   tabs: PanelTab[]; onOpen: (href: string) => void; onMore: () => void; mainKey: string; notice?: ReactNode; children: ReactNode;
 }) {
   usePanelMock(dark);
+  const narrow = useNarrow();
+  const folded = collapsed && !narrow;
   const [accountOpen, setAccountOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const input = useRef<HTMLInputElement>(null);
+  const wantSearch = useRef(false);
+  useEffect(() => {
+    const focus = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); input.current?.focus(); }
+    };
+    window.addEventListener('keydown', focus);
+    return () => window.removeEventListener('keydown', focus);
+  }, []);
   useEffect(() => {
     if (!accountOpen && !menuOpen) return;
     const close = (event: KeyboardEvent) => { if (event.key === 'Escape') { setAccountOpen(false); onMenu(false); } };
-    window.addEventListener('keydown', close); return () => window.removeEventListener('keydown', close);
+    window.addEventListener('keydown', close);
+    return () => window.removeEventListener('keydown', close);
   }, [accountOpen, menuOpen, onMenu]);
-  return <div className={`m desk${collapsed ? ' col' : ''}${menuOpen ? ' pv-menu' : ''}`} id="pv-panel">
+  useEffect(() => {
+    if (menuOpen && wantSearch.current) { wantSearch.current = false; input.current?.focus(); }
+  }, [menuOpen]);
+  const search = (event: FormEvent) => { event.preventDefault(); onSearch(query.trim()); };
+  const openSearch = () => { wantSearch.current = true; onMenu(true); input.current?.focus(); };
+  const appClass = `app${folded ? ' mcol' : ''}${narrow && menuOpen ? ' mdr' : ''}`;
+  return <div id="pv-panel-v29" data-theme={dark ? 'dark' : 'light'} className={narrow ? 'mob mreal' : undefined}>
     <a className="pv-skip" href="#nv-main">Ir al contenido</a>
-    <aside className="sb" aria-label="Consultorio">
-      <button type="button" className="sbt" aria-label={collapsed ? 'Desplegar el menú' : 'Plegar el menú'} aria-expanded={!collapsed} aria-controls="pv-panel-nav" onClick={onCollapse}><PanelBocetoIcon name="back" /></button>
-      <div className="sbin"><div className="brand"><img src="/panel-boceto/logo.png" alt="Logo de Plan V" /><div className="lbl"><b>Plan V</b><span>{brand}</span></div></div>{nav}
-        <div className="me">
-          <button type="button" className="pv-me" aria-label="Opciones de la cuenta" aria-expanded={accountOpen} aria-controls="pv-account" onClick={() => setAccountOpen(open => !open)}><span className="av">{initials}</span><div className="lbl"><b>{name}</b><span>Nutricionista</span></div></button>
-          {onSignOut && <span className="lbl" style={{ marginLeft: 'auto', color: 'var(--mut)' }}><button type="button" className="pv-out" aria-label="Cerrar sesión" title="Cerrar sesión" onClick={onSignOut}><PanelBocetoIcon name="out" size={18} /></button></span>}
+    <div className={appClass}>
+      <header className="mhd">
+        <button type="button" className="ibtn" aria-label="Abrir menú" aria-expanded={menuOpen} onClick={() => onMenu(!menuOpen)}><PanelV29Icon name="menu" /></button>
+        <span className="mk">V</span><b>Plan V</b><span className="sp" />
+        <button type="button" className="ibtn" aria-label="Buscar" onClick={openSearch}><PanelV29Icon name="search" /></button>
+        {narrow ? bell : null}
+        <button type="button" className="av" style={{ background: 'var(--azaf)' }} aria-label="Opciones de la cuenta" onClick={() => { onMenu(true); setAccountOpen(true); }}>{initials}</button>
+      </header>
+      <div className="mscrim" role="presentation" onClick={() => onMenu(false)} />
+      <aside className="side" aria-label="Consultorio">
+        <div className="logo"><span className="mk">V</span><div><b>Plan V</b><small>{brand}</small></div></div>
+        <button type="button" className="fold" aria-label={folded ? 'Abrir menú' : 'Plegar menú'} aria-expanded={!folded} aria-controls="pv-panel-nav" onClick={onCollapse}><PanelV29Icon name="left" /></button>
+        <form className="srch" role="search" onSubmit={search}>
+          <PanelV29Icon name="search" />
+          <input ref={input} type="search" aria-label={header.search} placeholder="Buscar…" value={query} onChange={event => setQuery(event.target.value)} />
+          <kbd>⌘K</kbd>
+        </form>
+        {nav}
+        <button type="button" className="acct" aria-label="Opciones de la cuenta" aria-expanded={accountOpen} aria-controls="pv-account" onClick={() => setAccountOpen(open => !open)}>
+          <span className="av" style={{ background: 'var(--azaf)' }}>{initials}</span>
+          <div><b>{name}</b><small>Nutricionista</small></div>
+        </button>
+        <div className="pv-acct" id="pv-account" hidden={!accountOpen} inert={!accountOpen}>
+          {account.map(option => <button type="button" key={option.label} onClick={() => { setAccountOpen(false); option.onSelect(); }}><PanelV29Icon name={option.glyph} /><span><b>{option.label}</b>{option.detail && <small>{option.detail}</small>}</span></button>)}
+          {onSignOut && <button type="button" aria-label="Cerrar sesión" onClick={() => { setAccountOpen(false); onSignOut(); }}><PanelV29Icon name="door" /><span><b>Cerrar sesión</b></span></button>}
         </div>
-        <div className={`pmenu${accountOpen ? ' open' : ''}`} id="pv-account" inert={!accountOpen}>{account.map(option => <button type="button" className="po" key={option.label} onClick={() => { setAccountOpen(false); option.onSelect(); }}><PanelBocetoIcon name={option.glyph} size={18} /><div><b>{option.label}</b>{option.detail && <small>{option.detail}</small>}</div></button>)}</div>
-      </div>
-    </aside>
-    <div className="scrim" role="presentation" onClick={() => onMenu(false)} />
-    <main className="main" id="nv-main" tabIndex={-1} key={mainKey}>
-      <PanelHeaderBar header={header} bell={bell} onSearch={onSearch} />
-      {notice}
-      {children}
-    </main>
-    <nav className="bn" aria-label="Secciones principales">{tabs.map(tab => <a key={tab.label} href={tab.href ?? '#pv-panel-nav'} aria-current={tab.on ? 'page' : undefined} onClick={event => {
-      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-      event.preventDefault(); if (tab.href) onOpen(tab.href); else onMore();
-    }}><span className={tab.on ? 'on' : undefined}><PanelBocetoIcon name={tab.glyph} />{tab.label}</span></a>)}</nav>
+      </aside>
+      <main className="main" id="nv-main" tabIndex={-1}>
+        <div className="top">
+          <div><h1>{header.title}</h1>{header.when && <div className="date">{header.when}</div>}</div>
+          <div className="sp" />
+          {header.actions}
+          {!narrow && bell}
+        </div>
+        <div id="pv-panel" className="m" key={mainKey}>{notice}{children}</div>
+      </main>
+      <nav className="mnav" aria-label="Accesos">{tabs.map(tab => <button type="button" key={tab.label} className={tab.on ? 'on' : undefined} onClick={() => { if (tab.href) onOpen(tab.href); else onMore(); }}>
+        <PanelV29Icon name={tab.glyph} size={19} /><span>{tab.label}</span>{tab.count ? <b className="num">{tab.count}</b> : null}
+      </button>)}</nav>
+    </div>
   </div>;
 }

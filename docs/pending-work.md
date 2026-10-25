@@ -1,6 +1,6 @@
 # Pendientes de Plan V
 
-- **Boceto→app (25 oct):** Facu ok-v29-valor. Fuente `v29/panel-trabajo.html`. Orden tools → shell → Seguimiento → Progreso. Handoff: `docs/panel-nutri-rediseno/handoff-boceto-a-app.md` (PR #175, ya en main). Fase 0 tools en [PR #176](https://github.com/Facu42/plan-v/pull/176): la app se ve igual. Siguiente: el armazón.
+- **Boceto→app (25 oct):** Facu ok-v29-valor. Fuente `v29/panel-trabajo.html`. Orden tools → shell → Seguimiento → Progreso. Handoff: `docs/panel-nutri-rediseno/handoff-boceto-a-app.md`. Fase 0 tools ya está en main ([PR #176](https://github.com/Facu42/plan-v/pull/176)). Fase 1 (armazón) en [PR #177](https://github.com/Facu42/plan-v/pull/177). Siguiente: Seguimiento.
 
 > **Plan vigente (2026-09-28):** ver [registro-producto-listo.md](registro-producto-listo.md#plan-de-acción-actualizado-2026-09-28). Este documento queda como historia.
 
