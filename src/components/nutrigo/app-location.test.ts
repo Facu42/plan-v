@@ -57,4 +57,13 @@ describe('rutas autenticadas de Nutrigo', () => {
     expect(buildAppHref('https://plan.test/app/recursos#recurso=x', 'patient', 'plan')).toBe('/app/plan');
     expect(buildAppHref('https://plan.test/app/recursos#recurso=x', 'patient', 'recursos', { keepHash: true })).toBe('/app/recursos#recurso=x');
   });
+
+  it('conserva el catálogo de recetas al canonizar su enlace anterior', () => {
+    expect(buildAppHref('https://plan.test/crm/recetas?paciente=p1', 'pro', 'biblioteca'))
+      .toBe('/crm/biblioteca?paciente=p1&biblioteca=recetas');
+    expect(buildAppHref('https://plan.test/crm/recetas?paciente=p1#recurso=guia', 'pro', 'biblioteca', { keepHash: true }))
+      .toBe('/crm/biblioteca?paciente=p1#recurso=guia');
+    expect(buildAppHref('https://plan.test/crm/biblioteca', 'pro', 'biblioteca'))
+      .toBe('/crm/biblioteca');
+  });
 });

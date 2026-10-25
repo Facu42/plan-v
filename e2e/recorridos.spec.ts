@@ -124,12 +124,22 @@ test('5 · la nutricionista revisa la comida y la paciente la ve confirmada', as
 });
 
 test('6 · la nutricionista indica un recurso y a la paciente le llega el aviso hasta que lo lee', async ({ page }) => {
+  test.setTimeout(90_000);
   await enterDemo(page, '/crm/pacientes');
   const assigned = await page.evaluate(async () => {
-    const response = await fetch('/api/resources/assign', {
+    const assign = () => fetch('/api/resources/assign', {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ resource_id: 'compras-desde-plan', patient_ids: ['pat-sofia'] }),
     });
+    let response = await assign();
+    // Los recorridos comparten la IP demo. Respetar el plazo del servidor conserva el límite real.
+    if (response.status === 429) {
+      const seconds = Number(response.headers.get('Retry-After'));
+      if (Number.isFinite(seconds) && seconds > 0 && seconds <= 60) {
+        await new Promise(resolve => setTimeout(resolve, seconds * 1000));
+        response = await assign();
+      }
+    }
     return response.status;
   });
   expect(assigned).toBe(200);

@@ -34,7 +34,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
-| Biblioteca v29: pasar el boceto aprobado a la app | Codex, autorización de Facundo del 25/10 | `codex/biblioteca-v29`, [PR #182](https://github.com/Facu42/plan-v/pull/182), [verificación](panel-nutri-rediseno/biblioteca-v29-verificacion.md) | Implementada y verificada. Catálogo, publicación, asignación, lectura y mensajes existentes. 3.299 pruebas y 9 e2e aprobados. Sin migraciones ni merge |
+| Biblioteca v29: pasar el boceto aprobado a la app | Codex, autorización de Facundo del 25/10 | `codex/biblioteca-v29`, [PR #182](https://github.com/Facu42/plan-v/pull/182), [verificación](panel-nutri-rediseno/biblioteca-v29-verificacion.md) | Implementada. Corregido enlace anterior de Recetas y recorrido firmado de asignación. 3.300 pruebas y 10 e2e locales aprobados; pendiente repetir control remoto firmado. Sin migraciones ni merge |
 | Continuación del boceto v29 (solo dibujo) | Cursor, por pedido de Facundo del 24/10 | `design/panel-nutri/v29/` y [traspaso](panel-nutri-rediseno/continuar-v29-cursor.md) | Las seis pantallas quedaron rearmadas el 25/10 en la copia de trabajo, [PR #174](https://github.com/Facu42/plan-v/pull/174). El original no se tocó. No incorpora v30/v31 ni cambia la app. Falta que Claude las revise y publique el link |
 | Acceso, cartera completa, teléfono de la paciente | Codex | PR #105 (`codex/nutridesk-release-base`) | Borrador. Falta comparar con Figma y la frase de Facundo |
 | Consultas grabadas, borrador privado y resumen revisado | Codex | PR #106 (`codex/nutridesk-release-consultas`) | Borrador, encima de #105. IA externa apagada |
@@ -102,6 +102,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **25/10 · Codex · Biblioteca v29, continuación de #182** · Revisión contra `sxBiblioteca` y `onLib`: corregido el enlace anterior de Recetas, conservando paciente y catálogo después de recargar, y el título de Biblioteca sin parámetros. Actualizados los controles de asignación del navegador firmado. 3.300 pruebas y diez e2e locales aprobados; tipos, compilación, secretos y contrato v29 en verde. Pruebas de regresión rojas antes del arreglo y verdes después; revisiones `code-reviewer` y `reality-checker` con `gpt-6.1-sol`. El control firmado previo aprobó 30 pruebas, pero falló luego en «Nueva receta»: debe repetirse sobre la corrección. [Informe actualizado](panel-nutri-rediseno/biblioteca-v29-verificacion.md). Sin migraciones, producción ni merge.
 
 - **25/10 · Codex · Biblioteca v29** · [PR #182](https://github.com/Facu42/plan-v/pull/182), implementación `9331911`: tarjetas del boceto y «Quién lo abrió», catálogo real, creación y publicación en panel lateral, asignar y avisar por el chat de la app. La paciente abre el material y la nutri ve la lectura; un reintento avisa solo a quienes fallaron. Recetas conserva su catálogo. Video/PDF adjuntos quedan como próximos. 3.299 pruebas, 9 e2e, tipos, compilación y contrato v29 en verde; [informe del paso 10 y capturas](panel-nutri-rediseno/biblioteca-v29-verificacion.md). Sin base de producción ni merge.
 

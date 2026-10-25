@@ -84,6 +84,10 @@ export function resolveAppLocation(input: LocationInput): ResolvedLocation {
 
 export function buildAppHref(originHref: string, role: AppRole, page: ShowroomPage, options?: { keepHash?: boolean }): string {
   const url = new URL(originHref);
+  // El enlace anterior de Recetas debe conservar su catálogo al pasar a Biblioteca.
+  if (role === 'pro' && page === 'biblioteca' && parseAppPath(url.pathname)?.page === 'recetas' && !hasResourceHash(url.hash)) {
+    url.searchParams.set('biblioteca', 'recetas');
+  }
   url.pathname = appPath(role, page);
   url.searchParams.delete('design');
   if (role === 'patient') url.searchParams.delete('paciente');

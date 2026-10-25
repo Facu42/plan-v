@@ -8,7 +8,21 @@ Rama: `codex/biblioteca-v29`, desde `193d4ed` (Alimentos #181). Implementación 
 
 La API de creación admite texto por secciones. Adjuntar video o PDF queda indicado como «Próximamente» dentro del editor. No se simulan archivos ni formatos que el servidor no guarda. Con más de cuatro recursos, las filas conservan una altura legible y se desplazan dentro de la columna.
 
-## Comprobaciones ejecutadas
+## Revisión de continuación del 25/10
+
+Se volvió a contrastar la entrega con `sxBiblioteca` y `onLib`, sin cambiar el diseño aprobado. El enlace anterior `/crm/recetas?paciente=...` perdía la selección de Recetas al convertirse en Biblioteca. Ahora conserva el catálogo y la paciente, también después de recargar; la navegación interna a Recetas elige esa sección explícitamente. Biblioteca sin parámetros muestra su título correcto.
+
+El [control firmado anterior](https://github.com/Facu42/plan-v/actions/runs/40242195904) aprobó sus 30 pruebas de permisos y aislamiento, pero el navegador falló después al buscar «Nueva receta» en ese enlace. Además, el mismo recorrido conservaba selectores de asignación de la pantalla anterior: ahora elige una tarjeta publicada y asigna desde el panel lateral v29, manteniendo la comprobación posterior desde la API de la paciente.
+
+La prueba unitaria nueva y el recorrido del enlace anterior fallaron antes de la corrección y pasaron después. Las 12 pruebas de rutas y del modelo de Biblioteca están aprobadas. La suite final aprobó **3.300 pruebas, con cuatro omitidas, en 523 archivos** (323,09 segundos). Los diez e2e completos pasaron en 1,2 minutos; tipos, compilación y contrato visual v29 también pasaron sobre la corrección. Una pasada e2e anterior recibió 429 al compartir la misma IP demo: el último recorrido ahora respeta un `Retry-After` válido de hasta 60 segundos y reintenta una sola vez, conservando la exigencia de respuesta 200. No se desactivaron los límites del servidor.
+
+Se revisó el título y el apilado con `/browse` a 1440 y 390, con datos ficticios. Las nuevas capturas y los logs de esta revisión quedan en `.npm-cache/verification/`; las ocho capturas enlazadas abajo corresponden a la entrega inicial. `code-reviewer` y `reality-checker`, ambos con `gpt-6.1-sol`, revisaron esta continuación sin hallar bloqueos de código.
+
+**Paso 10 actualizado:** ✅ flujos críticos locales (3.300 pruebas y diez e2e); ✅ regresión del enlace anterior y recarga; contratos de asignación y lectura existentes conservados; área frágil: canonización de enlaces y selectores del navegador; migraciones: no corresponden; fire test: prueba de alias y e2e rojos antes del arreglo, verdes después; automatización: regresión incorporada a los comandos de CI existentes. Sin cambios de producción.
+
+**Estado de la continuación:** apta para revisión por el mismo PR; nueva comprobación firmada pendiente de subir la corrección. Docker está instalado en esta PC, pero su servicio no está iniciado: no se ejecutó aquí la pila descartable con sesiones firmadas. El resultado remoto previo no certifica el script corregido. Hasta completar el control remoto, **HOLD para merge**.
+
+## Comprobaciones de la entrega inicial
 
 | Comprobación | Resultado |
 |---|---|

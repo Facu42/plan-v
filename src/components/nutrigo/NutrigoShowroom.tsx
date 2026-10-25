@@ -283,8 +283,8 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
     closeProfessionalIntro();
     if (typeof window !== 'undefined') {
       let href = buildAppHref(window.location.href, role, target);
-      if (role === 'pro' && ['recursos', 'guardado'].includes(requested)) {
-        const url = new URL(href, window.location.origin); url.searchParams.set('biblioteca', 'recursos'); href = url.pathname + url.search;
+      if (role === 'pro' && ['recetas', 'recursos', 'guardado'].includes(requested)) {
+        const url = new URL(href, window.location.origin); url.searchParams.set('biblioteca', requested === 'recetas' ? 'recetas' : 'recursos'); href = url.pathname + url.search;
       }
       window.history.pushState({ ...window.history.state, planVPage: target }, '', href);
       previousLocation.current = window.location.href;
@@ -305,7 +305,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
   const currentDay = buildCalendarWeek(now)[dayIndex];
   const meals = p ? resolveCalendarMeals(p, now, dayIndex) : [];
   const pageTitle = pendingModule || (page === 'inicio' ? role === 'patient' ? `Hola, ${preferredName || p?.name.split(' ')[0] || 'bienvenida'}` : 'Tu consultorio' : PAGE_LABELS[page]);
-  const libraryRecipeTitle = role === 'pro' && page === 'biblioteca' && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('biblioteca') !== 'recursos' && !hasResourceHash(window.location.hash) ? 'Recetas' : undefined;
+  const libraryRecipeTitle = role === 'pro' && page === 'biblioteca' && panelQuery.get('biblioteca') === 'recetas' ? 'Recetas' : undefined;
   const tabs = role === 'patient' ? PATIENT_TABS : PRO_TABS;
   const carteraUnread = useCarteraUnread(role === 'pro');
   const moreItems = role === 'patient' ? PATIENT_MORE : proMore(isAdmin === true);

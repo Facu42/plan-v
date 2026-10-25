@@ -1,6 +1,19 @@
 import { expect, test } from '@playwright/test';
 import { enterDemo } from './helpers';
 
+test('Biblioteca: el enlace anterior de Recetas conserva su catálogo y Biblioteca su título', async ({ page }) => {
+  await enterDemo(page, '/crm/recetas?paciente=pat-sofia');
+  await expect(page.getByRole('button', { name: 'Nueva receta', exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/biblioteca=recetas/);
+  await expect(page).toHaveURL(/paciente=pat-sofia/);
+  await page.reload();
+  await page.getByRole('button', { name: 'Continuar en modo demo' }).click();
+  await expect(page.getByRole('button', { name: 'Nueva receta', exact: true })).toBeVisible();
+  await enterDemo(page, '/crm/biblioteca');
+  await expect(page.getByRole('heading', { name: 'Biblioteca', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Para compartir', exact: true })).toBeVisible();
+});
+
 test('Biblioteca: crear, publicar, asignar y avisar; reintentar solo los avisos fallidos', async ({ page }) => {
   await enterDemo(page, '/crm/biblioteca?biblioteca=recursos');
   await expect(page.getByRole('heading', { name: 'Para compartir' })).toBeVisible();
