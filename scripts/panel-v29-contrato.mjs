@@ -45,6 +45,16 @@ export const PIEZAS_V29 = [
   ['CTA', '.app .top .cta', '', ['backgroundColor', 'color']],
 ];
 
+// Piezas de Progreso. El selector existe en el boceto y en la app.
+export const PIEZAS_PROGRESO = [
+  ['Avatar de la cartera', '#s-progreso .fxr .av', '', ['width', 'height', 'borderTopLeftRadius']],
+  ['Nombre en la lista', '#s-progreso .sxwho b', '', ['fontSize', 'fontWeight']],
+  ['Etiqueta de la lista', '#s-progreso .pill', '', ['fontSize', 'fontWeight']],
+  ['Chip Evolución', '#s-progreso .fxr .chip', '', ['fontSize', 'borderTopLeftRadius']],
+  ['Tarjeta de evolución', '#sxevo .fxdk', '', ['borderTopLeftRadius', 'backgroundColor']],
+  ['Pestaña de filtro', '#s-progreso .sxtools .tabs button', '', ['fontSize', 'borderTopLeftRadius']],
+];
+
 // Piezas de Seguimiento. El selector existe en el boceto y en la app.
 export const PIEZAS_SEGUIMIENTO = [
   ['Foto de la comida', '#s-seguimiento .sxpic', '', ['width', 'height', 'borderTopLeftRadius']],
@@ -152,6 +162,18 @@ async function abrirSeguimientoApp(pagina) {
   await pagina.waitForSelector('#s-seguimiento .sxdays i.on', { timeout: 20000 });
 }
 
+async function abrirProgresoBoceto(pagina) {
+  await pagina.locator('[data-go="progreso"]').first().click();
+  await pagina.waitForSelector('#s-progreso:not([hidden]) .fxr .av', { timeout: 10000 });
+  await pagina.waitForSelector('#sxevo .fxdk', { timeout: 10000 });
+}
+
+async function abrirProgresoApp(pagina) {
+  await pagina.locator('#pv-panel-v29 a.nv[href="/crm/progreso-global"]').click();
+  await pagina.waitForSelector('#s-progreso .fxr .av', { timeout: 20000 });
+  await pagina.waitForSelector('#sxevo .fxdk', { timeout: 20000 });
+}
+
 export async function correrContratoV29() {
   const informe = [];
   let fallas = 0;
@@ -171,12 +193,16 @@ export async function correrContratoV29() {
       await abrirSeguimientoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Seguimiento\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_SEGUIMIENTO, informe);
+      await abrirProgresoBoceto(b);
+      await abrirProgresoApp(a);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Progreso\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_PROGRESO, informe);
       await b.close();
       await a.close();
     }
   } finally { await navegador.close(); }
 
-  const texto = `# Contrato del armazón contra el boceto v29\n\nFuente: \`design/panel-nutri/v29/panel-trabajo.html\`.\nApp: \`${origen}/crm/inicio\` y \`${origen}/crm/seguimiento\`.\n\n${fallas ? `**${fallas} piezas no coinciden.**` : '**El armazón y Seguimiento coinciden, en claro y en oscuro.**'}\n${informe.join('\n')}\n`;
+  const texto = `# Contrato del armazón contra el boceto v29\n\nFuente: \`design/panel-nutri/v29/panel-trabajo.html\`.\nApp: \`${origen}/crm/inicio\`, \`${origen}/crm/seguimiento\` y \`${origen}/crm/progreso-global\`.\n\n${fallas ? `**${fallas} piezas no coinciden.**` : '**El armazón, Seguimiento y Progreso coinciden, en claro y en oscuro.**'}\n${informe.join('\n')}\n`;
   return { fallas, texto };
 }
 
