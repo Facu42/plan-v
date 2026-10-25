@@ -76,12 +76,12 @@ Las piezas de `src/`:
 | Equipo | Hecha (v21) | Integrantes con roles y sesiones, Permisos por módulo que se tocan (la ficha clínica solo para nutris) y Registro de accesos con descarga |
 | Ajustes | Hecha (v21) | Mi cuenta, Plantillas (formularios y certificados), Avisos automáticos (usa los mismos datos que Mensajes), Seguridad e Integraciones. Planilla por obra social desde Exportar en Cobranzas |
 | Celular | Hecha (v22) | Todo el boceto a 390: barra arriba, cinco accesos abajo, menú completo en cajón, paneles que suben desde abajo; entra solo debajo de 760 de ancho o con el botón «Celular». Tablet no se dibujó |
-| Asistente IA | Dibujada el 24/10 en la copia de la v29 | Pregunta sobre la cartera o una paciente, período de 7, 30 o 90 días, respuesta con la fuente de cada dato, propuestas solo si ella dio permiso y solo después de revisar, descarga de indicadores, gasto del mes contra el tope de US$ 5. Nada se manda solo |
-| Seguimiento | Dibujada el 24/10 en la copia de la v29 | Comidas con foto por revisar, Confirmar y Comentar, días registrados y pedir un registro por la app. Quien no cargó no queda marcada en falta |
-| Progreso | Dibujada el 24/10 en la copia de la v29 | Toda la cartera: período, con o sin registros, orden, peso y comidas, y acceso a la ficha. La falta de datos no es un incumplimiento |
-| Alimentos | Dibujada el 24/10 en la copia de la v29 | Buscar en SARA 2 y en los propios, ver nutrientes y porción, crear o editar un alimento propio. SARA 2 no se edita |
-| Biblioteca | Dibujada el 24/10 en la copia de la v29 | Guías, videos y PDF para compartir, asignar a una o varias pacientes y ver quién lo abrió. Las recetas siguen en Planes |
-| Centro de ayuda | Dibujada el 24/10 en la copia de la v29 | Buscador y las ocho guías del consultorio. Cada una abre su pantalla. Pedir ayuda a Plan V avisa que no se mandan datos de pacientes |
+| Asistente IA | Rearmada el 25/10 en la copia de la v29 | Caja para escribir un pedido sobre una paciente o la cartera, preguntas de ejemplo, período de 7, 30 o 90 días, respuesta con la fuente de cada dato, propuestas solo si ella dio permiso y solo después de revisar, descarga de indicadores, gasto del mes contra el tope de US$ 5. Nada se manda solo |
+| Seguimiento | Rearmada el 25/10 en la copia de la v29 | Comidas con foto por revisar, Confirmar y Comentar, cómo se sienten (hábitos y síntomas), días registrados y pedir un registro por la app. Quien no cargó no queda marcada en falta |
+| Progreso | Rearmada el 25/10 en la copia de la v29 | Adherencia de la cartera, quién baja y quién sube, altas y bajas del mes, quién necesita atención, y la tabla de peso y comidas. La falta de datos no es un incumplimiento |
+| Alimentos | Rearmada el 25/10 en la copia de la v29 | Buscar en SARA 2 y en los propios, ver nutrientes y porción, crear o editar un alimento propio. SARA 2 no se edita. Misma densidad que Cobranzas |
+| Biblioteca | Rearmada el 25/10 en la copia de la v29 | Guías, videos y PDF para compartir, asignar a una o varias pacientes y ver quién lo abrió. Las recetas siguen en Planes. Misma densidad que Cobranzas |
+| Centro de ayuda | Rearmada el 25/10 en la copia de la v29 | Buscador, temas, preguntas frecuentes y las ocho guías del consultorio. Cada una abre su pantalla. Pedir ayuda a Plan V avisa que no se mandan datos de pacientes |
 
 Esas seis están en `design/panel-nutri/v29/panel-trabajo.html`, que es una copia de la v29. El archivo original no se modificó. Todavía no están en el link que mira Facundo: lo publica Claude.
 

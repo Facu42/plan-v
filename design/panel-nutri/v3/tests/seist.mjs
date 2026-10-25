@@ -75,13 +75,26 @@ for(const th of ['light','dark'])for(const id of IDS){
 await pg.setViewportSize({width:390,height:844});
 await pg.goto('file://'+D+'panel-trabajo.html');
 await pg.waitForFunction(()=>typeof mobSet==='function');
-await pg.waitForTimeout(200);
+await pg.evaluate(()=>mobSet(true));
+await pg.waitForTimeout(250);
 for(const id of IDS){
  await pg.evaluate(id=>go(id),id);
- await pg.waitForTimeout(120);
- const side=await pg.evaluate(()=>{const m=document.querySelector('.main');return m.scrollWidth-m.clientWidth;});
- console.log('celular',id,'de costado',side);
- if(side>1)errs.push('se sale de costado: '+id+' '+side);
+ await pg.waitForTimeout(180);
+ const side=await pg.evaluate(()=>{
+  const html=document.documentElement;
+  const app=document.querySelector('.app');
+  const m=document.querySelector('.main');
+  return {
+   mob:html.classList.contains('mob'),
+   pressed:document.querySelector('#mvw [data-mv="1"]')?.getAttribute('aria-pressed')==='true',
+   w:Math.round(app.getBoundingClientRect().width),
+   side:m.scrollWidth-m.clientWidth
+  };
+ });
+ console.log('celular',id,JSON.stringify(side));
+ if(!side.mob||!side.pressed)errs.push('no activó celular: '+id);
+ if(side.w>420)errs.push('sigue en escritorio: '+id+' '+side.w);
+ if(side.side>1)errs.push('se sale de costado: '+id+' '+side.side);
 }
 console.log('botones',total,'errors',errs);
 await b.close();
