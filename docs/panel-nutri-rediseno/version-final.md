@@ -64,12 +64,11 @@ En una línea: **la app ya tiene casi todas las funciones con datos reales, pero
 
 - **Boceto nuevo (v26)**: https://claude.ai/artifact/JwXZXARtS7e6scYcpx8cKV, fuentes en `design/panel-nutri/v3/`.
   Diez pantallas (Inicio, Pacientes, Agenda, Ficha con 10 pestañas, Cobranzas, Mensajes, Planes, Página pública,
-  Equipo, Ajustes) y versión celular. Todo es maqueta: datos fijos en el JavaScript del boceto. **Todavía no tiene el
-  ok de Facundo** (paso 0.9 de `docs/nutreando/plan.md`).
+  Equipo, Ajustes) y versión celular. Todo es maqueta: datos fijos en el JavaScript del boceto. El ok del 25/10
+  es al boceto v29 (`panel-trabajo.html`, sección 0), no a este v26.
 - **App real** (`/crm/*`): armazón de la fase A (PR #162) copiado del **boceto viejo** (`design/panel-nutri/bocetos.html`),
   pantallas de las fases 1 a 5 (PR #150 a #154) con el estilo viejo. Todas leen datos reales de la API y la base.
-- **Herramientas**: `scripts/panel-boceto-css.mjs` (copia estilos e íconos) y `npm run panel:contrato` (compara la app
-  con el boceto) **todavía leen el boceto viejo**. Hay que apuntarlas al nuevo (fase 1).
+- **Fuente (Facu, 25/10, ok-v29-valor):** `design/panel-nutri/v29/panel-trabajo.html`. Las tools (`npm run panel:v29` y `npm run panel:contrato:v29`, PR #176) escriben archivos nuevos. No pisan `panel-boceto.css`. La app se ve igual. Lo que el boceto dibuja y la app todavía no tiene se muestra vacío o «Próximamente».
 
 ### 2.1 Pantalla por pantalla
 
@@ -336,9 +335,9 @@ Actualizar al empezar y al terminar cada una.
 
 | Fase | Qué | Dueño | Rama / PR | Estado |
 |---|---|---|---|---|
-| 0B | Dibujar las seis pantallas que faltan | Cursor | `cursor/boceto-seis-pantallas-66c3` ([PR #174](https://github.com/Facu42/plan-v/pull/174)) | Rearmadas el 25/10 con la densidad de Cobranzas y las funciones que faltaban. Falta que Claude publique el link |
-| 0 | Ok al boceto entero | Facundo | — | Espera la 0B |
-| 1 | Herramientas al boceto nuevo | — | — | Pendiente |
+| 0B | Dibujar las seis pantallas que faltan | Cursor | [PR #174](https://github.com/Facu42/plan-v/pull/174) | Juntada a main. Fuente: `v29/panel-trabajo.html` |
+| 0 | Ok al boceto entero | Facundo | ok-v29-valor | Ok escrito el 25/10. Fuente: `v29/panel-trabajo.html` |
+| 1 | Herramientas al boceto nuevo | Cursor | [PR #176](https://github.com/Facu42/plan-v/pull/176) | Lista, sin juntar. La app se ve igual |
 | 2 | Armazón | — | — | Pendiente |
 | 3 | Inicio | — | — | Pendiente |
 | 4 | Pacientes | — | — | Pendiente |
@@ -354,7 +353,7 @@ Actualizar al empezar y al terminar cada una.
 
 Las fases 3 y 4 pueden ir en paralelo con agentes distintos después de la 2; el resto, en orden.
 
-La fase 0B quedó rearmada el 25/10 en `design/panel-nutri/v29/panel-trabajo.html` (copia de la v29): cada pantalla llena los 1440×900 como Cobranzas, con la caja del asistente, cómo se sienten, la adherencia de la cartera y los temas de ayuda. El archivo original de la v29 no se tocó y no se rearmó el boceto de `v3/`. Cursor no publicó el link.
+La fase 0B quedó rearmada el 25/10 en `design/panel-nutri/v29/panel-trabajo.html` (copia de la v29) y ya está en main por el PR #174. Cada pantalla llena los 1440×900 como Cobranzas. El archivo original de la v29 no se tocó. Las tools de la Fase 0 están en el PR #176: archivos nuevos, la app se ve igual.
 
 ---
 
