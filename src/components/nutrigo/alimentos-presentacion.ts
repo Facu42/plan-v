@@ -38,6 +38,12 @@ export function grupoDe(food: Pick<Food, 'category'>) {
   return food.category.trim();
 }
 
+/** El boceto escribe «SARA 2», no la cita institucional. El dato del API no cambia. */
+export function origenCorto(food: Pick<Food, 'owner_id' | 'source' | 'composition'>) {
+  if (food.source === SARA2_SOURCE || food.composition?.dataset === 'sara2-2022-v1') return 'SARA 2';
+  return food.source.trim();
+}
+
 export function anchoEnergia(kcal: number | null) {
   if (kcal == null) return 0;
   return Math.min(100, Math.round(kcal / 4));
@@ -54,15 +60,22 @@ export function repartoMacros(food: Pick<Food, 'nutrients'>) {
   return { protein, carbs, fat, barras };
 }
 
+const PORCIONES_EN_GRAMOS: PorcionVista[] = [
+  { clave: '100', cantidad: 100, etiqueta: '100 g' },
+  { clave: '30', cantidad: 30, etiqueta: '1 taza (30 g)' },
+  { clave: '10', cantidad: 10, etiqueta: '1 cucharada (10 g)' },
+];
+
+/** En gramos el boceto siempre dibuja 100 g, la taza y la cucharada. Una medida propia se suma después. */
 export function porcionesDe(food: Food): PorcionVista[] {
-  const unidad = foodQuantityUnit(food);
-  const base: PorcionVista = { clave: 'base', cantidad: 100, etiqueta: `100 ${unidad}` };
-  if (unidad === 'ml') return [base];
-  return [base, ...food.portions.map((porcion, indice) => ({
-    clave: `${indice}:${porcion.name}`,
+  if (foodQuantityUnit(food) === 'ml') return [{ clave: '100', cantidad: 100, etiqueta: '100 ml' }];
+  const fijas = new Set(PORCIONES_EN_GRAMOS.map(porcion => porcion.cantidad));
+  const propias = food.portions.filter(porcion => !fijas.has(porcion.grams)).map((porcion, indice) => ({
+    clave: `propia:${indice}:${porcion.name}`,
     cantidad: porcion.grams,
     etiqueta: `${porcion.name} (${textoNumero(porcion.grams)} g)`,
-  }))];
+  }));
+  return [...PORCIONES_EN_GRAMOS, ...propias];
 }
 
 export function nutrientesDePorcion(food: Food, cantidad: number) {

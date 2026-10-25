@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { foodInputSchema, SARA2_SOURCE, type Food } from '../../types/foods';
 import {
-  anchoEnergia, borradorEdicion, borradorNuevo, porcionesDe, repartoMacros, seEdita, sigueEnVista,
+  anchoEnergia, borradorEdicion, borradorNuevo, nutrientesDePorcion, origenCorto, porcionesDe, repartoMacros, seEdita, sigueEnVista,
 } from './alimentos-presentacion';
 
 function alimento(nombre: string, extras: Partial<Food> = {}): Food {
@@ -26,10 +26,18 @@ describe('alimentos, los datos del boceto', () => {
     expect(seEdita(alimento('Avena', { composition: { dataset: 'sara2-2022-v1', source_sha256: 'a', record_id: '1', basis: { amount: 100, unit: 'g' }, carbohydrates: 'available', source_page: 1 } }))).toBe(false);
   });
 
-  it('no inventa una taza ni cuenta un vacío como cero', () => {
-    const propio = alimento('Tarta');
-    expect(porcionesDe(propio).map(porcion => porcion.etiqueta)).toEqual(['100 g', 'Porción (80 g)']);
-    expect(porcionesDe(propio).some(porcion => porcion.etiqueta.includes('taza'))).toBe(false);
+  it('en gramos siempre están las tres porciones del boceto y el origen de SARA 2 es corto', () => {
+    const propio = alimento('Tarta', { portions: [{ name: 'Porción', grams: 80 }, { name: 'Tacita', grams: 30 }] });
+    expect(porcionesDe(propio).map(porcion => porcion.etiqueta)).toEqual(['100 g', '1 taza (30 g)', '1 cucharada (10 g)', 'Porción (80 g)']);
+    const sara = alimento('Avena', { owner_id: null, source: SARA2_SOURCE, portions: [], nutrients: { kcal: 367, protein: 13.2, carbs: 59.4, fat: 7.1, fiber: null, sodium: null, calcium: null, iron: null, potassium: null, magnesium: null, vitamin_c: null } });
+    expect(porcionesDe(sara).map(porcion => porcion.etiqueta)).toEqual(['100 g', '1 taza (30 g)', '1 cucharada (10 g)']);
+    expect(nutrientesDePorcion(sara, 30).kcal).toBe(110.1);
+    expect(nutrientesDePorcion(sara, 10).protein).toBe(1.32);
+    const liquido = alimento('Leche', { owner_id: null, source: SARA2_SOURCE, portions: [{ name: 'Vaso', grams: 200 }], composition: { dataset: 'sara2-2022-v1', source_sha256: 'a', record_id: '1', basis: { amount: 100, unit: 'ml' }, carbohydrates: 'available', source_page: 1 } });
+    expect(porcionesDe(liquido).map(porcion => porcion.etiqueta)).toEqual(['100 ml']);
+    expect(origenCorto(sara)).toBe('SARA 2');
+    expect(origenCorto(liquido)).toBe('SARA 2');
+    expect(origenCorto(propio)).toBe('Rótulo del envase');
     const sinGrasa = alimento('Claro', { nutrients: { ...propio.nutrients, fat: null, carbs: null } });
     expect(repartoMacros(sinGrasa).barras).toEqual([100, 0, 0]);
     expect(repartoMacros(alimento('Vacío', { nutrients: { ...propio.nutrients, protein: null, carbs: null, fat: null, kcal: null } })).barras).toEqual([0, 0, 0]);

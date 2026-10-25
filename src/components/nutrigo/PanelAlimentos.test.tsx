@@ -27,7 +27,7 @@ describe('alimentos, el dibujo', () => {
   const sara = alimento('Avena arrollada', { id: 'b0000000-0000-4000-8000-000000000002', owner_id: null, source: SARA2_SOURCE, category: 'Cereales', portions: [] });
 
   const vista = (extra: Partial<Parameters<typeof PanelAlimentosVista>[0]> = {}) => renderToStaticMarkup(<PanelAlimentosVista
-    lista={[sara, propio]} total={2} estado="lista" elegido={sara} porcion="base" grupo={[sara]} grupoEstado="lista" grupoHayMas={false}
+    lista={[sara, propio]} total={2} estado="lista" elegido={sara} porcion="100" grupo={[sara]} grupoEstado="lista" grupoHayMas={false}
     dialog={null} toast="" errorForm="" guardando={false} {...acciones} {...extra}
   />);
 
@@ -39,6 +39,11 @@ describe('alimentos, el dibujo', () => {
     expect(html).toContain('SARA 2');
     expect(html).toContain('Esta porción');
     expect(html).toContain('100 g');
+    expect(html).toContain('1 taza (30 g)');
+    expect(html).toContain('1 cucharada (10 g)');
+    expect(html).toContain('SARA 2 · Cereales');
+    expect(html).toContain('Avena arrollada · por 100 g · SARA 2');
+    expect(html).not.toContain('Ministerio de Salud');
     expect(html).toContain('Proteínas');
     expect(html).toContain('Carbohidratos');
     expect(html).toContain('Sin dato');
@@ -49,13 +54,15 @@ describe('alimentos, el dibujo', () => {
     expect(html).toContain('Mismo grupo · Cereales');
     expect(html).toContain('SARA 2 se consulta. Para otro valor, creá un alimento propio.');
     expect(html).not.toContain('WhatsApp');
-    expect(html).not.toContain('1 taza');
   });
 
   it('un alimento propio se edita y el alta no pide datos que el boceto no dibuja', () => {
     const html = vista({ elegido: propio, grupo: [propio], dialog: { kind: 'nuevo' } });
     expect(html).toContain('Editar');
+    expect(html).toContain('1 taza (30 g)');
+    expect(html).toContain('1 cucharada (10 g)');
     expect(html).toContain('Porción (80 g)');
+    expect(html).toContain('Rótulo del envase · Propios');
     expect(html).toContain('Nuevo alimento');
     expect(html).toContain('Queda entre los tuyos. SARA 2 no se toca.');
     expect(html).toContain('Medida casera');

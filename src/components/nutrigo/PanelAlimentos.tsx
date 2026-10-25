@@ -5,7 +5,7 @@ import { foodQuantityUnit, type Food } from '../../types/foods';
 import { PanelV29Icon } from './PanelV29Icon';
 import {
   anchoEnergia, borradorEdicion, borradorNuevo, etiquetaTarjeta, filtrosDe, grupoDe, nutrientesDePorcion,
-  porcionesDe, repartoMacros, seEdita, sigueEnVista, textoCantidad, textoNumero,
+  origenCorto, porcionesDe, repartoMacros, seEdita, sigueEnVista, textoCantidad, textoNumero,
   type AlcanceAlimento, type AltaAlimento,
 } from './alimentos-presentacion';
 
@@ -77,7 +77,7 @@ export function PanelAlimentosVista({
       ? <p className="sxsub">No se pudo cargar el catálogo. <button type="button" className="chip" onClick={onReintentar}>Reintentar</button></p>
       : lista.length
         ? lista.map(food => <div className={elegido?.id === food.id ? 'l on' : 'l'} key={food.id}>
-          <span className="sxwho"><b>{food.name}</b><small>{food.source} · {grupoDe(food) || 'Sin grupo'}</small></span>
+          <span className="sxwho"><b>{food.name}</b><small>{origenCorto(food)} · {grupoDe(food) || 'Sin grupo'}</small></span>
           <button type="button" className="chip" onClick={() => onVer(food)}>Ver</button>
         </div>)
         : <p className="sxsub">Ningún alimento con ese texto.</p>;
@@ -108,7 +108,7 @@ export function PanelAlimentosVista({
           <div className="fxdk">
             <small>{etiquetaTarjeta(elegido)}</small>
             <b className="num">{elegido.nutrients.kcal == null ? 'Sin dato' : `${textoNumero(elegido.nutrients.kcal)} kcal`}</b>
-            <span>{elegido.name} · por 100 {unidad} · {elegido.source}</span>
+            <span>{elegido.name} · por 100 {unidad} · {origenCorto(elegido)}</span>
             <div className="fxdkp" aria-hidden="true"><i style={{ width: `${anchoEnergia(elegido.nutrients.kcal)}%` }} /></div>
             <div className="fxdk2"><span>Grupo</span><b>{grupoNombre || 'Sin grupo'}</b></div>
           </div>
@@ -142,7 +142,7 @@ export function PanelAlimentosVista({
             <div className="fxs">
               <div className="fxr">
                 {!grupoNombre ? <p className="sxsub">Este alimento no tiene grupo.</p> : grupoEstado === 'cargando' ? <p className="sxsub">Cargando el grupo…</p> : grupoEstado === 'error' ? <p className="sxsub">No se pudo cargar el grupo.</p> : grupo.length ? grupo.map(food => <button type="button" className={food.id === elegido.id ? 'l on' : 'l'} key={food.id} onClick={() => onGrupo(food)}>
-                  <span className="sxwho"><b>{food.name}</b><small>{food.nutrients.kcal == null ? 'Sin dato' : `${textoNumero(food.nutrients.kcal)} kcal`} / 100 {foodQuantityUnit(food)} · {food.source}</small></span>
+                  <span className="sxwho"><b>{food.name}</b><small>{food.nutrients.kcal == null ? 'Sin dato' : `${textoNumero(food.nutrients.kcal)} kcal`} / 100 {foodQuantityUnit(food)} · {origenCorto(food)}</small></span>
                 </button>) : <p className="sxsub">No hay alimentos en este grupo.</p>}
               </div>
               {grupoHayMas ? <p className="sxsub">Hay más en este grupo. Escribí el nombre en el buscador.</p> : null}
@@ -217,7 +217,7 @@ export function PanelAlimentos({ onHeader }: { onHeader?: (actions: ReactNode) =
   const [total, setTotal] = useState(0);
   const [estado, setEstado] = useState<'cargando' | 'lista' | 'error'>('cargando');
   const [elegido, setElegido] = useState<Food | null>(null);
-  const [porcion, setPorcion] = useState('base');
+  const [porcion, setPorcion] = useState('100');
   const [grupo, setGrupo] = useState<Food[]>([]);
   const [grupoTotal, setGrupoTotal] = useState(0);
   const [grupoEstado, setGrupoEstado] = useState<'oculto' | 'cargando' | 'lista' | 'error'>('oculto');
@@ -299,7 +299,7 @@ export function PanelAlimentos({ onHeader }: { onHeader?: (actions: ReactNode) =
   const ver = (food: Food) => {
     if (food.id === elegido?.id) { avisar('Ya estás viendo este alimento.'); return; }
     setElegido(food);
-    setPorcion('base');
+    setPorcion('100');
   };
   const editar = () => {
     if (!elegido) return;
@@ -319,7 +319,7 @@ export function PanelAlimentos({ onHeader }: { onHeader?: (actions: ReactNode) =
       setBorrador('');
       setConsulta('');
       setElegido(food);
-      setPorcion('base');
+      setPorcion('100');
       setMarca(valor => valor + 1);
       avisar('Alimento guardado. Quedó entre los tuyos.');
     } catch (error) {
@@ -346,7 +346,7 @@ export function PanelAlimentos({ onHeader }: { onHeader?: (actions: ReactNode) =
 
   const porciones = elegido ? porcionesDe(elegido) : [];
   const elegirPorcion = (clave: string) => {
-    if (clave === (porciones.some(item => item.clave === porcion) ? porcion : 'base')) {
+    if (clave === (porciones.some(item => item.clave === porcion) ? porcion : '100')) {
       avisar(`Ya estás viendo ${porciones.find(item => item.clave === clave)?.etiqueta ?? 'esta porción'}.`);
       return;
     }
@@ -355,7 +355,7 @@ export function PanelAlimentos({ onHeader }: { onHeader?: (actions: ReactNode) =
 
   return <PanelAlimentosVista
     lista={lista} total={total} estado={estado}
-    elegido={elegido} porcion={porciones.some(item => item.clave === porcion) ? porcion : 'base'}
+    elegido={elegido} porcion={porciones.some(item => item.clave === porcion) ? porcion : '100'}
     grupo={grupo} grupoEstado={grupoEstado} grupoHayMas={grupoTotal > grupo.length} dialog={dialog} toast={toast} errorForm={errorForm} guardando={guardando}
     onVer={ver} onPorcion={elegirPorcion} onGrupo={ver} onEditar={editar} onCerrar={() => { if (!guardando) setDialog(null); }}
     onGuardarNuevo={alta => void guardarNuevo(alta)} onGuardarEdicion={(nombre, kcal) => void guardarEdicion(nombre, kcal)}
