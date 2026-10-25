@@ -1,5 +1,7 @@
 # Traspaso: el boceto único del panel de la nutri
 
+> **Actualización de Facundo, 24/10/2026:** para continuar el dibujo con Cursor, la base vigente es la **v29**, conservada en `design/panel-nutri/v29/PlanV-Boceto-v29.html`. Leé [continuar-v29-cursor.md](continuar-v29-cursor.md). Las instrucciones sobre v26/v3 y su enlace quedan como historia; v30/v31 fueron descartadas. Esto no cambia la app productiva.
+
 Escrito el 23/10/2026 por Claude (hilo «Rediseño del panel de la nutri») porque Facundo pidió:
 «Necesito que dejes todo el plan de cómo venís trabajando y cómo debería seguir trabajando otro agente».
 Si vas a seguir este trabajo, leé este archivo entero antes de tocar nada. Complementa a [plan.md](plan.md)
@@ -74,6 +76,14 @@ Las piezas de `src/`:
 | Equipo | Hecha (v21) | Integrantes con roles y sesiones, Permisos por módulo que se tocan (la ficha clínica solo para nutris) y Registro de accesos con descarga |
 | Ajustes | Hecha (v21) | Mi cuenta, Plantillas (formularios y certificados), Avisos automáticos (usa los mismos datos que Mensajes), Seguridad e Integraciones. Planilla por obra social desde Exportar en Cobranzas |
 | Celular | Hecha (v22) | Todo el boceto a 390: barra arriba, cinco accesos abajo, menú completo en cajón, paneles que suben desde abajo; entra solo debajo de 760 de ancho o con el botón «Celular». Tablet no se dibujó |
+| Asistente IA | Rearmada el 25/10 en la copia de la v29 | Caja para escribir un pedido sobre una paciente o la cartera, preguntas de ejemplo, período de 7, 30 o 90 días, respuesta con la fuente de cada dato, propuestas solo si ella dio permiso y solo después de revisar, descarga de indicadores, gasto del mes contra el tope de US$ 5. Nada se manda solo |
+| Seguimiento | Rearmada el 25/10 en la copia de la v29 | Comidas con foto por revisar, Confirmar y Comentar, cómo se sienten (hábitos y síntomas), días registrados y pedir un registro por la app. Quien no cargó no queda marcada en falta |
+| Progreso | Rearmada el 25/10 en la copia de la v29 | Adherencia de la cartera, quién baja y quién sube, altas y bajas del mes, quién necesita atención, y la tabla de peso y comidas. La falta de datos no es un incumplimiento |
+| Alimentos | Rearmada el 25/10 en la copia de la v29 | Buscar en SARA 2 y en los propios, ver nutrientes y porción, crear o editar un alimento propio. SARA 2 no se edita. Misma densidad que Cobranzas |
+| Biblioteca | Rearmada el 25/10 en la copia de la v29 | Guías, videos y PDF para compartir, asignar a una o varias pacientes y ver quién lo abrió. Las recetas siguen en Planes. Misma densidad que Cobranzas |
+| Centro de ayuda | Rearmada el 25/10 en la copia de la v29 | Buscador, temas, preguntas frecuentes y las ocho guías del consultorio. Cada una abre su pantalla. Pedir ayuda a Plan V avisa que no se mandan datos de pacientes |
+
+Esas seis están en `design/panel-nutri/v29/panel-trabajo.html`, que es una copia de la v29. El archivo original no se modificó. Todavía no están en el link que mira Facundo: lo publica Claude.
 
 Descargas que funcionan de verdad: planillas de Cobranzas y listas (CSV), plan de la paciente y lista de compras
 (texto). Usan la función de descargas del Artifact, que ya está declarada en el link.
