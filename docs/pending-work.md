@@ -1,5 +1,7 @@
 # Pendientes de Plan V
 
+- **Boceto→app (25 oct):** Facu ok-v29-valor. Fuente `v29/panel-trabajo.html`. Orden shell→Seguimiento→Progreso. Handoff: `docs/panel-nutri-rediseno/handoff-boceto-a-app.md` (PR #175). Page: plan panel nutri boceto→app. En curso: Fase 0 tools vía Herdr Cursor.
+
 > **Plan vigente (2026-09-28):** ver [registro-producto-listo.md](registro-producto-listo.md#plan-de-acción-actualizado-2026-09-28). Este documento queda como historia.
 
 ## PV-42 — Dashboard nutri Nutrigo + foto de receta al aprobar (issue #8)

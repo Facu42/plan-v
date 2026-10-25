@@ -11,6 +11,16 @@ Sirve para **cualquier agente** (Claude, Codex, Cursor) que llegue sin contexto.
 
 ---
 
+## 0. Decisión Facu (25 oct 2026) — fuente y arranque
+
+**Fuente visual/contrato vigente:** `design/panel-nutri/v29/panel-trabajo.html` (rama `cursor/boceto-seis-pantallas-66c3` / PR #174). No tocar `PlanV-Boceto-v29.html`.
+
+**Orden de arranque:** por valor — tools → shell → Seguimiento → Progreso (no empezar por fases 1→13 de este doc). Detalle y bitácora: [handoff-boceto-a-app.md](handoff-boceto-a-app.md) y Page del plan.
+
+Las menciones a `v3/panel.html` más abajo quedan como contexto histórico del plan canónico largo hasta que se reescriban fase a fase.
+
+---
+
 ## 1. Prompt corto para pegarle al agente
 
 > Vas a dejar el panel de la nutricionista de Plan V como versión final. Repo `Facu42/plan-v`, rama nueva desde `main`.
