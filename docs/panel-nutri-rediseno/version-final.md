@@ -11,6 +11,16 @@ Sirve para **cualquier agente** (Claude, Codex, Cursor) que llegue sin contexto.
 
 ---
 
+## 0. Decisión Facu (25 oct 2026) — fuente y arranque
+
+**Fuente visual/contrato vigente:** `design/panel-nutri/v29/panel-trabajo.html` (rama `cursor/boceto-seis-pantallas-66c3` / PR #174). No tocar `PlanV-Boceto-v29.html`.
+
+**Orden de arranque:** por valor — tools → shell → Seguimiento → Progreso (no empezar por fases 1→13 de este doc). Detalle y bitácora: [handoff-boceto-a-app.md](handoff-boceto-a-app.md) y Page del plan.
+
+Las menciones a `v3/panel.html` más abajo quedan como contexto histórico del plan canónico largo hasta que se reescriban fase a fase.
+
+---
+
 ## 1. Prompt corto para pegarle al agente
 
 > Vas a dejar el panel de la nutricionista de Plan V como versión final. Repo `Facu42/plan-v`, rama nueva desde `main`.
@@ -54,12 +64,11 @@ En una línea: **la app ya tiene casi todas las funciones con datos reales, pero
 
 - **Boceto nuevo (v26)**: https://claude.ai/artifact/JwXZXARtS7e6scYcpx8cKV, fuentes en `design/panel-nutri/v3/`.
   Diez pantallas (Inicio, Pacientes, Agenda, Ficha con 10 pestañas, Cobranzas, Mensajes, Planes, Página pública,
-  Equipo, Ajustes) y versión celular. Todo es maqueta: datos fijos en el JavaScript del boceto. **Todavía no tiene el
-  ok de Facundo** (paso 0.9 de `docs/nutreando/plan.md`).
+  Equipo, Ajustes) y versión celular. Todo es maqueta: datos fijos en el JavaScript del boceto. El ok del 25/10
+  es al boceto v29 (`panel-trabajo.html`, sección 0), no a este v26.
 - **App real** (`/crm/*`): armazón de la fase A (PR #162) copiado del **boceto viejo** (`design/panel-nutri/bocetos.html`),
   pantallas de las fases 1 a 5 (PR #150 a #154) con el estilo viejo. Todas leen datos reales de la API y la base.
-- **Herramientas**: `scripts/panel-boceto-css.mjs` (copia estilos e íconos) y `npm run panel:contrato` (compara la app
-  con el boceto) **todavía leen el boceto viejo**. Hay que apuntarlas al nuevo (fase 1).
+- **Fuente (Facu, 25/10, ok-v29-valor):** `design/panel-nutri/v29/panel-trabajo.html`. Las tools (`npm run panel:v29` y `npm run panel:contrato:v29`, PR #176) escriben archivos nuevos. No pisan `panel-boceto.css`. La app se ve igual. Lo que el boceto dibuja y la app todavía no tiene se muestra vacío o «Próximamente».
 
 ### 2.1 Pantalla por pantalla
 
@@ -326,9 +335,9 @@ Actualizar al empezar y al terminar cada una.
 
 | Fase | Qué | Dueño | Rama / PR | Estado |
 |---|---|---|---|---|
-| 0B | Dibujar las seis pantallas que faltan | Cursor | — | Pendiente |
-| 0 | Ok al boceto entero | Facundo | — | Espera la 0B |
-| 1 | Herramientas al boceto nuevo | — | — | Pendiente |
+| 0B | Dibujar las seis pantallas que faltan | Cursor | PR #174 | Dibujadas en el boceto, sin juntar |
+| 0 | Ok al boceto entero | Facundo | ok-v29-valor | Ok escrito el 25/10. Fuente: `v29/panel-trabajo.html` |
+| 1 | Herramientas al boceto nuevo | Cursor | PR #176 | Lista, sin juntar. La app se ve igual |
 | 2 | Armazón | — | — | Pendiente |
 | 3 | Inicio | — | — | Pendiente |
 | 4 | Pacientes | — | — | Pendiente |

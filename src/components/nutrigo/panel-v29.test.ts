@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,6 +25,34 @@ describe('herramientas del boceto v29', () => {
     for (const name of ['grid', 'users', 'cal', 'coin', 'globe', 'clip', 'chat', 'team', 'gear', 'bell', 'plus', 'spark', 'fork', 'heart', 'trend', 'search', 'chev', 'shield', 'file']) {
       expect(PANEL_V29_ICONS).toHaveProperty(name);
     }
+  });
+
+  it('deja la letra en la raíz y el celular en la misma raíz, sin el marco de la página', () => {
+    const selectores: string[] = [];
+    const raiz: Record<string, string> = {};
+    postcss.parse(css).walkRules(rule => {
+      if (/keyframes$/.test((rule.parent as { name?: string })?.name ?? '')) return;
+      selectores.push(...rule.selectors);
+      if (rule.selectors.includes('#pv-panel-v29')) rule.walkDecls(decl => { raiz[decl.prop] = decl.value; });
+    });
+    expect(raiz['font-family']).toBe('var(--font)');
+    expect(raiz.color).toBe('var(--ink)');
+    expect(raiz['-webkit-font-smoothing']).toBe('antialiased');
+    expect(raiz['accent-color']).toBe('var(--ch)');
+    expect(raiz['scrollbar-color']).toBe('var(--line2) transparent');
+    expect(raiz['padding-block']).toBeUndefined();
+    expect(raiz.background).toBeUndefined();
+    expect(selectores).toContain('#pv-panel-v29.mob .app');
+    expect(selectores).toContain('#pv-panel-v29.mob.mreal');
+    expect(selectores).toContain('#pv-panel-v29>*');
+    expect(selectores).toContain('#pv-panel-v29>#r29-print');
+    const esTipo = (selector: string, tipo: string) => selector.split(/[\s>+~]+/).some(parte => parte === tipo || parte.startsWith(`${tipo}:`) || parte.startsWith(`${tipo}.`) || parte.startsWith(`${tipo}[`));
+    expect(selectores.some(selector => selector.includes('#pv-panel-v29 .mob') || selector.includes('#pv-panel-v29 .mreal') || esTipo(selector, 'body') || esTipo(selector, 'html'))).toBe(false);
+    expect(selectores.some(selector => selector.split(/[\s>+~]/).some(parte => parte.split(/[:[]/)[0].split('.').includes('bar')))).toBe(false);
+  });
+
+  it('lo generado coincide con panel-trabajo.html', () => {
+    execFileSync(process.execPath, ['scripts/panel-v29-css.mjs', '--check'], { cwd: raiz, stdio: 'pipe' });
   });
 
   it('no pisa la hoja ni el armazón que ve la nutri hoy', () => {

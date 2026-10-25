@@ -45,8 +45,16 @@ export const PIEZAS_V29 = [
 ];
 
 async function medir(pagina, selector, pseudo, props) {
-  const caja = pagina.locator(selector).first();
-  if (!(await caja.count())) return null;
+  const cajas = pagina.locator(selector);
+  const cantidad = await cajas.count();
+  if (!cantidad) return null;
+  // Hay una copia por pantalla y varias están ocultas. Se mide la que se ve.
+  let indice = 0;
+  for (let i = 0; i < cantidad; i++) {
+    const caja = await cajas.nth(i).boundingBox();
+    if (caja && (caja.width > 0 || caja.height > 0)) { indice = i; break; }
+  }
+  const caja = cajas.nth(indice);
   return caja.evaluate((el, [p, ps]) => {
     const css = getComputedStyle(el, p || undefined);
     const box = el.getBoundingClientRect();
@@ -67,7 +75,10 @@ async function abrirBoceto(browser, tema) {
     if (stage) stage.style.transform = 'none';
     if (wrap) wrap.style.height = '900px';
   });
-  await pagina.waitForSelector('.app .side', { timeout: 10000 });
+  // Al abrir, el boceto deja Planes adelante y esconde Inicio. El armazón se mide en Inicio, que es la pantalla visible del menú.
+  await pagina.locator('.bar [data-go="inicio"]').first().click();
+  await pagina.waitForTimeout(200);
+  await pagina.waitForSelector('#s-inicio:not([hidden]) .top .ibtn[aria-label="Avisos"]', { timeout: 10000 });
   return pagina;
 }
 
@@ -89,6 +100,12 @@ export async function correrContratoV29() {
         if (!valores) {
           fallas += 1;
           informe.push(`| ${nombre} | ❌ falta | no está en el boceto v29 (\`${sel}\`) |`);
+          continue;
+        }
+        const vacia = props.filter(k => (k === 'width' || k === 'height') && valores[k] === '0px');
+        if (vacia.length) {
+          fallas += 1;
+          informe.push(`| ${nombre} | ❌ no se ve | ${vacia.join(' y ')} en 0 (\`${sel}\`) |`);
           continue;
         }
         const detalle = Object.entries(valores).map(([k, v]) => `${k} \`${v}\``).join(' · ');

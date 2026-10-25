@@ -12,6 +12,7 @@
     "local": "node scripts/local.mjs",
     "panel:contrato": "node scripts/panel-nutri-boceto-contrato.mjs",
     "panel:v29": "node scripts/panel-v29-css.mjs",
+    "panel:v29:check": "node scripts/panel-v29-css.mjs --check",
     "panel:contrato:v29": "node scripts/panel-v29-contrato.mjs",
     "demo:consultorio": "node scripts/demo-consultorio.mjs",
     "dashboard": "node implementation-dashboard/server.mjs",

@@ -1,6 +1,7 @@
 /* GENERADO por scripts/panel-v29-css.mjs desde design/panel-nutri/v29/panel-trabajo.html. No editar a mano.
    No importar en la app hasta la fase del armazón: la nutri sigue viendo panel-boceto.css.
-   La raíz prevista es #pv-panel-v29. */
+   La raíz es #pv-panel-v29: ocupa el lugar de :root y de <html> (tema, .mob y .mreal).
+   La letra y el color de <body> quedan ahí, sin el relleno de la página del boceto. */
 /* Layout: app flotante 1440×900 sobre fondo gris; menú lateral claro, encabezado, aviso, 5 números, consultas de hoy + próxima consulta, 4 tarjetas abajo. */
 #pv-panel-v29{
   --page:#E1E2E4; --app:#EFF0EB; --card:#FFFFFF; --side:#F8F9F5;
@@ -27,7 +28,8 @@
   --azaf-t:#3A2F18; --azaf-ink:#FFD58A; --rojo-t:#3A1F1D; --rojo-ink:#F2978D; --azul-t:#1E2638; --azul-ink:#9DB5EE;
   --dark:#F1F2EE; --dark2:#E4E6E0; --dark-ink:#141519; --dark-ink2:#5B5E66;
   --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark}
-#pv-panel-v29, #pv-panel-v29 *{box-sizing:border-box}
+#pv-panel-v29,#pv-panel-v29 *{box-sizing:border-box}
+#pv-panel-v29{font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased}
 #pv-panel-v29 button{font-family:inherit}
 #pv-panel-v29 .app{width:1440px;height:900px;background:var(--app);border-radius:22px;display:grid;grid-template-columns:236px 1fr;overflow:hidden;box-shadow:0 30px 80px rgba(20,21,25,.12);font-size:12.5px;letter-spacing:-.005em}
 #pv-panel-v29 .num{font-variant-numeric:tabular-nums}
@@ -507,10 +509,10 @@
 #pv-panel-v29 .next .lst2 b{color:var(--dark-ink);font-weight:400}
 #pv-panel-v29 #det>*{animation:fin .22s ease}
 @media (prefers-reduced-motion:reduce){#pv-panel-v29 #det>*{animation:none}}
-#pv-panel-v29, #pv-panel-v29 *{scrollbar-width:thin;scrollbar-color:rgba(127,127,127,.32) transparent}
-#pv-panel-v29 *::-webkit-scrollbar{width:8px;height:8px}#pv-panel-v29 *::-webkit-scrollbar-track{background:transparent}
-#pv-panel-v29 *::-webkit-scrollbar-thumb{background:rgba(127,127,127,.28);border-radius:8px;border:2px solid transparent;background-clip:padding-box}
-#pv-panel-v29 *::-webkit-scrollbar-thumb:hover{background:rgba(127,127,127,.45);background-clip:padding-box}
+#pv-panel-v29,#pv-panel-v29 *{scrollbar-width:thin;scrollbar-color:rgba(127,127,127,.32) transparent}
+#pv-panel-v29::-webkit-scrollbar,#pv-panel-v29 *::-webkit-scrollbar{width:8px;height:8px}#pv-panel-v29::-webkit-scrollbar-track,#pv-panel-v29 *::-webkit-scrollbar-track{background:transparent}
+#pv-panel-v29::-webkit-scrollbar-thumb,#pv-panel-v29 *::-webkit-scrollbar-thumb{background:rgba(127,127,127,.28);border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+#pv-panel-v29::-webkit-scrollbar-thumb:hover,#pv-panel-v29 *::-webkit-scrollbar-thumb:hover{background:rgba(127,127,127,.45);background-clip:padding-box}
 /* Tarjeta de detalle: 3 diseños nuevos */
 #pv-panel-v29 .dv{border-radius:18px;padding:15px 17px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;min-height:0}
 #pv-panel-v29 .dv .hd{display:flex;align-items:center;gap:8px;font-size:11.5px}
@@ -919,7 +921,7 @@
 #pv-panel-v29 .klol i{flex:none;width:2px;background:color-mix(in srgb,var(--ch-a) 60%,var(--card));display:block;max-height:26px}
 #pv-panel-v29 .klol b{width:8px;height:8px;border-radius:50%;background:var(--ch-a);order:0;flex:none}#pv-panel-v29 .klol i{order:1}#pv-panel-v29 .klol small{order:2}
 #pv-panel-v29 .klol small{font-size:8.5px;color:var(--ink3);line-height:1;margin-top:2px}
-#pv-panel-v29 :focus-visible{outline:2px solid var(--lima-ink);outline-offset:2px}
+#pv-panel-v29:focus-visible,#pv-panel-v29 :focus-visible{outline:2px solid var(--lima-ink);outline-offset:2px}
 #pv-panel-v29 .legend{max-width:1440px;margin:14px auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;font-size:13.5px;color:var(--ink2);line-height:1.5}
 #pv-panel-v29 .legend div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 #pv-panel-v29 .legend b{color:var(--ink);font-weight:500;display:block;margin-bottom:2px}
@@ -1203,7 +1205,8 @@
 #pv-panel-v29 #cwrap .fxtb td{height:52px}
 /* Pasada de Impeccable: sin bordes de color a la izquierda, sin tarjetas dentro de tarjetas,
    sin brillos ni levantadas, estados en texto y superficies del navegador con la paleta. */
-#pv-panel-v29 ::selection{background:var(--lima-t);color:var(--ink)}
+#pv-panel-v29::selection,#pv-panel-v29 ::selection{background:var(--lima-t);color:var(--ink)}
+#pv-panel-v29{scrollbar-color:var(--line2) transparent;accent-color:var(--ch);caret-color:var(--ch)}
 #pv-panel-v29 .fx .num,#pv-panel-v29 .fx table{font-variant-numeric:tabular-nums}
 
 /* Filas: lista con divisores, no cajitas con franja */
@@ -2024,12 +2027,12 @@
 #pv-panel-v29 .lbbd time{font-size:11.5px;color:var(--ink3);width:56px;flex:none}
 @media (prefers-reduced-motion:reduce){#pv-panel-v29 .hcidx>button,#pv-panel-v29 .hce{transition:none}}
 /* celular */
-#pv-panel-v29 .mob .hcdoc{display:flex;flex-direction:column;gap:10px}
-#pv-panel-v29 .mob .hcidx{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:0 0 8px;gap:6px}
-#pv-panel-v29 .mob .hcidx>button{flex:none;width:auto;max-width:200px}
-#pv-panel-v29 .mob .hcidxf{margin:0;flex:none;display:flex;align-items:center}
-#pv-panel-v29 .mob .hcel{overflow:visible}
-#pv-panel-v29 .mob .lbchart{max-width:100%}
+#pv-panel-v29.mob .hcdoc{display:flex;flex-direction:column;gap:10px}
+#pv-panel-v29.mob .hcidx{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:0 0 8px;gap:6px}
+#pv-panel-v29.mob .hcidx>button{flex:none;width:auto;max-width:200px}
+#pv-panel-v29.mob .hcidxf{margin:0;flex:none;display:flex;align-items:center}
+#pv-panel-v29.mob .hcel{overflow:visible}
+#pv-panel-v29.mob .lbchart{max-width:100%}
 #pv-panel-v29 .hcidx>button{padding:4px 9px}
 #pv-panel-v29 .hcidxf{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
 #pv-panel-v29 .hcsg{gap:5px;padding:9px 11px}
@@ -2040,16 +2043,16 @@
 #pv-panel-v29 .lbhist{min-height:60px}
 #pv-panel-v29 .lbsg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 #pv-panel-v29 .lbt tr[data-lbr] td{height:34px}
-#pv-panel-v29 .mob .lbsg{grid-template-columns:1fr}
+#pv-panel-v29.mob .lbsg{grid-template-columns:1fr}
 #pv-panel-v29 .lbt tr[data-lbr] td{height:31px}
 #pv-panel-v29 .lbt tr.lbg td{height:23px}
 #pv-panel-v29 .lbt th{padding-top:7px;padding-bottom:7px}
-#pv-panel-v29 .mob .hcdoc .hcidx{flex-wrap:nowrap!important;scrollbar-width:none}
-#pv-panel-v29 .mob .hcidx>button{max-width:none}
-#pv-panel-v29 .mob .hcidx>button b{white-space:nowrap}
-#pv-panel-v29 .mob .lbt{overflow-x:auto}
-#pv-panel-v29 .mob .lbt table{display:table;min-width:640px}
-#pv-panel-v29 .mob .hcsgh{flex-wrap:wrap}
+#pv-panel-v29.mob .hcdoc .hcidx{flex-wrap:nowrap!important;scrollbar-width:none}
+#pv-panel-v29.mob .hcidx>button{max-width:none}
+#pv-panel-v29.mob .hcidx>button b{white-space:nowrap}
+#pv-panel-v29.mob .lbt{overflow-x:auto}
+#pv-panel-v29.mob .lbt table{display:table;min-width:640px}
+#pv-panel-v29.mob .hcsgh{flex-wrap:wrap}
 /* Planes · armado con IA */
 #pv-panel-v29 #s-planes{position:relative}
 #pv-panel-v29 #pwrap.pv5 .fx{grid-template-columns:minmax(0,1fr) 380px}
@@ -2163,13 +2166,13 @@
 #pv-panel-v29 .iahist b{font-weight:500;font-size:12.5px}#pv-panel-v29 .iahist small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .iahist .sbtn{display:inline-flex;align-items:center;gap:4px}
 @media (prefers-reduced-motion:reduce){#pv-panel-v29 .iadr{transition:none}#pv-panel-v29 .iasteps .now i,#pv-panel-v29 .iatyp i{animation:none}}
-#pv-panel-v29 .mob .iadr{position:fixed;inset:0;width:auto;z-index:28}
-#pv-panel-v29 .mob #pwrap.pv5 .fx{display:flex;flex-direction:column}
-#pv-panel-v29 .mob .iaopts{grid-template-columns:1fr}
-#pv-panel-v29 .mob .iagoal{flex-wrap:wrap}#pv-panel-v29 .mob .iagoal em{margin-left:0}
-#pv-panel-v29 .mob .iago{flex-direction:column;align-items:stretch}
-#pv-panel-v29 .mob .iabar{flex-wrap:wrap}
-#pv-panel-v29 .mob .iaask{overflow:visible}
+#pv-panel-v29.mob .iadr{position:fixed;inset:0;width:auto;z-index:28}
+#pv-panel-v29.mob #pwrap.pv5 .fx{display:flex;flex-direction:column}
+#pv-panel-v29.mob .iaopts{grid-template-columns:1fr}
+#pv-panel-v29.mob .iagoal{flex-wrap:wrap}#pv-panel-v29.mob .iagoal em{margin-left:0}
+#pv-panel-v29.mob .iago{flex-direction:column;align-items:stretch}
+#pv-panel-v29.mob .iabar{flex-wrap:wrap}
+#pv-panel-v29.mob .iaask{overflow:visible}
 #pv-panel-v29 #pwrap .iaask{flex:1 1 0;min-height:0;gap:11px}
 #pv-panel-v29 .iahero{gap:4px;padding:0}
 #pv-panel-v29 .iahero h2{font-size:21px}
@@ -2180,8 +2183,8 @@
 #pv-panel-v29 .iago{padding-top:10px}
 #pv-panel-v29 .iadr{top:58px}
 #pv-panel-v29 .prow2 .pstate small{white-space:nowrap}
-#pv-panel-v29 .mob .iadr{top:0}
-#pv-panel-v29 .mob .iaideas{flex-wrap:wrap}
+#pv-panel-v29.mob .iadr{top:0}
+#pv-panel-v29.mob .iaideas{flex-wrap:wrap}
 #pv-panel-v29 .iadr{bottom:-22px}
 /* Plan más aireado */
 #pv-panel-v29 #pwrap.pv1 .fx{row-gap:16px}
@@ -2200,7 +2203,7 @@
 #pv-panel-v29 #pview button{font-size:12.5px;padding:6px 12px}
 #pv-panel-v29 #s-planes>.top,#pv-panel-v29 #s-planes .top{gap:14px}
 @media (prefers-reduced-motion:reduce){#pv-panel-v29 .ptabs2 button{transition:none}}
-#pv-panel-v29 .mob .prow2{flex-wrap:wrap}#pv-panel-v29 .mob .ptabs2{overflow-x:auto;max-width:100%;scrollbar-width:none}#pv-panel-v29 .mob .pacts2{flex-wrap:wrap}#pv-panel-v29 .mob .prow2 .pstate{border-left:0;padding-left:4px}
+#pv-panel-v29.mob .prow2{flex-wrap:wrap}#pv-panel-v29.mob .ptabs2{overflow-x:auto;max-width:100%;scrollbar-width:none}#pv-panel-v29.mob .pacts2{flex-wrap:wrap}#pv-panel-v29.mob .prow2 .pstate{border-left:0;padding-left:4px}
 #pv-panel-v29 #pwrap.pv1 .fx{row-gap:14px}
 #pv-panel-v29 .prow2{padding:4px 6px 4px 4px}
 #pv-panel-v29 .ptabs2 button{padding:7px 15px}
@@ -2299,16 +2302,16 @@
 #pv-panel-v29 .pesaved svg{color:var(--lima-ink)}
 #pv-panel-v29 #pwrap .fxp>header .iaseg{flex:none}
 @media (prefers-reduced-motion:reduce){#pv-panel-v29 .pedays button,#pv-panel-v29 .pegest button{transition:none}}
-#pv-panel-v29 .mob #pwrap.pe-dia .fx{display:flex;flex-direction:column}
-#pv-panel-v29 .mob #pwrap.pe-dia .fx>.c.per{overflow:visible;margin:0;padding:0}
-#pv-panel-v29 .mob .pedays{overflow-x:auto;scrollbar-width:none;max-width:100%}
-#pv-panel-v29 .mob .pedit>header{flex-wrap:wrap}
-#pv-panel-v29 .mob .petool{flex-wrap:wrap;gap:10px}
-#pv-panel-v29 .mob .petot{grid-template-columns:1fr}#pv-panel-v29 .mob .pemc{justify-content:flex-start;flex-wrap:wrap}
-#pv-panel-v29 .mob .pemh{flex-wrap:wrap}#pv-panel-v29 .mob .pema{width:100%}
-#pv-panel-v29 .mob .pei{grid-template-columns:8px minmax(0,1fr) 64px 70px;grid-auto-rows:auto}
-#pv-panel-v29 .mob .pei em{grid-column:2;grid-row:2;text-align:left}#pv-panel-v29 .mob .pei .ibtn{grid-row:2;justify-self:end;grid-column:4}#pv-panel-v29 .mob .pei .ibtn[data-penote]{grid-column:3}#pv-panel-v29 .mob .pei .peg{grid-row:1}
-#pv-panel-v29 .mob .pemeals{overflow:visible}
+#pv-panel-v29.mob #pwrap.pe-dia .fx{display:flex;flex-direction:column}
+#pv-panel-v29.mob #pwrap.pe-dia .fx>.c.per{overflow:visible;margin:0;padding:0}
+#pv-panel-v29.mob .pedays{overflow-x:auto;scrollbar-width:none;max-width:100%}
+#pv-panel-v29.mob .pedit>header{flex-wrap:wrap}
+#pv-panel-v29.mob .petool{flex-wrap:wrap;gap:10px}
+#pv-panel-v29.mob .petot{grid-template-columns:1fr}#pv-panel-v29.mob .pemc{justify-content:flex-start;flex-wrap:wrap}
+#pv-panel-v29.mob .pemh{flex-wrap:wrap}#pv-panel-v29.mob .pema{width:100%}
+#pv-panel-v29.mob .pei{grid-template-columns:8px minmax(0,1fr) 64px 70px;grid-auto-rows:auto}
+#pv-panel-v29.mob .pei em{grid-column:2;grid-row:2;text-align:left}#pv-panel-v29.mob .pei .ibtn{grid-row:2;justify-self:end;grid-column:4}#pv-panel-v29.mob .pei .ibtn[data-penote]{grid-column:3}#pv-panel-v29.mob .pei .peg{grid-row:1}
+#pv-panel-v29.mob .pemeals{overflow:visible}
 #pv-panel-v29 #pacts{display:contents!important}
 #pv-panel-v29 #s-planes>.top>#pacts>*{order:1}
 #pv-panel-v29 #s-planes>.top>.ibtn[aria-label="Avisos"]{order:2}
@@ -2317,122 +2320,122 @@
 #pv-panel-v29 .pemt2>div{grid-template-columns:92px 1fr 78px}
 /* Celular (Nutreando 0.8) */
 #pv-panel-v29 .mhd,#pv-panel-v29 .mnav,#pv-panel-v29 .mscrim{display:none}
-#pv-panel-v29 .mob .stagewrap{height:auto!important;overflow:visible;display:flex;justify-content:center}
-#pv-panel-v29 .mob .stage{transform:none!important;width:390px;max-width:100%;border-radius:38px;padding:10px;background:#141519;box-shadow:0 30px 80px rgba(20,21,25,.18)}
-#pv-panel-v29 .mob.mreal .stage{width:100%;padding:0;background:none;border-radius:0;box-shadow:none}
-#pv-panel-v29 .mob.mreal body{padding:8px}
-#pv-panel-v29 .mob .app{width:100%;height:100%;display:flex;flex-direction:column;position:relative;border-radius:30px;font-size:12.5px}
-#pv-panel-v29 .mob.mreal .app{border-radius:20px}
-#pv-panel-v29 .mob .mhd{display:flex;align-items:center;gap:8px;padding:12px 14px 10px;background:var(--side);border-bottom:1px solid var(--line);flex:none;z-index:3}
-#pv-panel-v29 .mob .mhd .mk{width:28px;height:28px;border-radius:9px;background:var(--lima);display:grid;place-items:center;font-weight:600;font-size:14px;color:#141519}
-#pv-panel-v29 .mob .mhd b{font-weight:600;font-size:15px;letter-spacing:-.02em}
-#pv-panel-v29 .mob .mhd .sp{flex:1}
-#pv-panel-v29 .mob .mhd .av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:11.5px;font-weight:600;color:#141519}
-#pv-panel-v29 .mob .main{flex:1;height:auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:14px 14px 18px;gap:12px;overscroll-behavior:contain;scrollbar-width:none}
-#pv-panel-v29 .mob .main::-webkit-scrollbar{display:none}
-#pv-panel-v29 .mob .scr{height:auto;min-height:0;gap:12px}
-#pv-panel-v29 .mob .scr>*{flex:none!important}
-#pv-panel-v29 .mob .main *{max-height:none}
-#pv-panel-v29 .mob .mnav{display:flex;flex:none;justify-content:space-around;border-top:1px solid var(--line);background:var(--side);padding:6px 6px 10px;z-index:3}
-#pv-panel-v29 .mob .mnav button{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;font:inherit;font-size:10.5px;color:var(--ink3);padding:6px 0;border-radius:12px;cursor:pointer;transition:color .2s,background .2s}
-#pv-panel-v29 .mob .mnav button.on{color:var(--ink);background:var(--lima-tt)}
-#pv-panel-v29 .mob .mnav button.on svg{color:var(--lima-ink)}
-#pv-panel-v29 .mob .mnav b{position:absolute;top:2px;left:calc(50% + 6px);min-width:16px;height:16px;border-radius:8px;background:var(--lima);color:#141519;font-size:10px;font-weight:600;display:grid;place-items:center;padding:0 4px}
-#pv-panel-v29 .mob .side{position:absolute;top:0;left:0;bottom:0;width:286px;z-index:26;transform:translateX(-105%);transition:transform .26s cubic-bezier(.16,1,.3,1);box-shadow:0 20px 60px rgba(16,17,20,.25);overflow-y:auto;border-radius:0 22px 22px 0}
-#pv-panel-v29 .mob .app.mdr .side{transform:none}
-#pv-panel-v29 .mob .side .fold{display:none}
-#pv-panel-v29 .mob .mscrim{display:block;position:absolute;inset:0;z-index:25;background:rgba(16,17,20,.35);opacity:0;pointer-events:none;transition:opacity .2s}
-#pv-panel-v29 .mob .app.mdr .mscrim{opacity:1;pointer-events:auto}
+#pv-panel-v29.mob .stagewrap{height:auto!important;overflow:visible;display:flex;justify-content:center}
+#pv-panel-v29.mob .stage{transform:none!important;width:390px;max-width:100%;border-radius:38px;padding:10px;background:#141519;box-shadow:0 30px 80px rgba(20,21,25,.18)}
+#pv-panel-v29.mob.mreal .stage{width:100%;padding:0;background:none;border-radius:0;box-shadow:none}
+#pv-panel-v29.mob.mreal{padding:8px}
+#pv-panel-v29.mob .app{width:100%;height:100%;display:flex;flex-direction:column;position:relative;border-radius:30px;font-size:12.5px}
+#pv-panel-v29.mob.mreal .app{border-radius:20px}
+#pv-panel-v29.mob .mhd{display:flex;align-items:center;gap:8px;padding:12px 14px 10px;background:var(--side);border-bottom:1px solid var(--line);flex:none;z-index:3}
+#pv-panel-v29.mob .mhd .mk{width:28px;height:28px;border-radius:9px;background:var(--lima);display:grid;place-items:center;font-weight:600;font-size:14px;color:#141519}
+#pv-panel-v29.mob .mhd b{font-weight:600;font-size:15px;letter-spacing:-.02em}
+#pv-panel-v29.mob .mhd .sp{flex:1}
+#pv-panel-v29.mob .mhd .av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:11.5px;font-weight:600;color:#141519}
+#pv-panel-v29.mob .main{flex:1;height:auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:14px 14px 18px;gap:12px;overscroll-behavior:contain;scrollbar-width:none}
+#pv-panel-v29.mob .main::-webkit-scrollbar{display:none}
+#pv-panel-v29.mob .scr{height:auto;min-height:0;gap:12px}
+#pv-panel-v29.mob .scr>*{flex:none!important}
+#pv-panel-v29.mob .main *{max-height:none}
+#pv-panel-v29.mob .mnav{display:flex;flex:none;justify-content:space-around;border-top:1px solid var(--line);background:var(--side);padding:6px 6px 10px;z-index:3}
+#pv-panel-v29.mob .mnav button{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;font:inherit;font-size:10.5px;color:var(--ink3);padding:6px 0;border-radius:12px;cursor:pointer;transition:color .2s,background .2s}
+#pv-panel-v29.mob .mnav button.on{color:var(--ink);background:var(--lima-tt)}
+#pv-panel-v29.mob .mnav button.on svg{color:var(--lima-ink)}
+#pv-panel-v29.mob .mnav b{position:absolute;top:2px;left:calc(50% + 6px);min-width:16px;height:16px;border-radius:8px;background:var(--lima);color:#141519;font-size:10px;font-weight:600;display:grid;place-items:center;padding:0 4px}
+#pv-panel-v29.mob .side{position:absolute;top:0;left:0;bottom:0;width:286px;z-index:26;transform:translateX(-105%);transition:transform .26s cubic-bezier(.16,1,.3,1);box-shadow:0 20px 60px rgba(16,17,20,.25);overflow-y:auto;border-radius:0 22px 22px 0}
+#pv-panel-v29.mob .app.mdr .side{transform:none}
+#pv-panel-v29.mob .side .fold{display:none}
+#pv-panel-v29.mob .mscrim{display:block;position:absolute;inset:0;z-index:25;background:rgba(16,17,20,.35);opacity:0;pointer-events:none;transition:opacity .2s}
+#pv-panel-v29.mob .app.mdr .mscrim{opacity:1;pointer-events:auto}
 /* encabezados de cada pantalla */
-#pv-panel-v29 .mob .top{flex-wrap:wrap;gap:8px}
-#pv-panel-v29 .mob .top>div:first-child{flex:1 1 100%;min-width:0}
-#pv-panel-v29 .mob .top h1{font-size:21px}
-#pv-panel-v29 .mob .top h1 span{display:block;font-size:13px;margin-top:2px}
-#pv-panel-v29 .mob .top .sp{display:none}
-#pv-panel-v29 .mob .top>.tabs{flex:1 1 100%;order:-0;overflow-x:auto;scrollbar-width:none}
-#pv-panel-v29 .mob .top>.tabs button{flex:none}
-#pv-panel-v29 .mob .top>.cta{order:5}
-#pv-panel-v29 .mob .top [aria-label="Avisos"],#pv-panel-v29 .mob #s-ficha .fh [aria-label="Avisos"]{display:none}
+#pv-panel-v29.mob .top{flex-wrap:wrap;gap:8px}
+#pv-panel-v29.mob .top>div:first-child{flex:1 1 100%;min-width:0}
+#pv-panel-v29.mob .top h1{font-size:21px}
+#pv-panel-v29.mob .top h1 span{display:block;font-size:13px;margin-top:2px}
+#pv-panel-v29.mob .top .sp{display:none}
+#pv-panel-v29.mob .top>.tabs{flex:1 1 100%;order:-0;overflow-x:auto;scrollbar-width:none}
+#pv-panel-v29.mob .top>.tabs button{flex:none}
+#pv-panel-v29.mob .top>.cta{order:5}
+#pv-panel-v29.mob .top [aria-label="Avisos"],#pv-panel-v29.mob #s-ficha .fh [aria-label="Avisos"]{display:none}
 /* bloques que se apilan (lo decide mobFix) */
-#pv-panel-v29 .mob [data-mk="1"]{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:none!important;grid-auto-rows:auto!important;grid-template-areas:none!important;height:auto!important}
-#pv-panel-v29 .mob [data-mk="1"]>*{grid-column:auto!important;grid-row:auto!important;min-height:0}
-#pv-panel-v29 .mob [data-mk="2"]{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:none!important;grid-auto-rows:auto!important}
-#pv-panel-v29 .mob [data-mk="2"]>*{grid-column:auto!important;grid-row:auto!important}
-#pv-panel-v29 .mob [data-mk="c"]{flex-direction:column!important;align-items:stretch!important;height:auto!important}
-#pv-panel-v29 .mob [data-mk="c"]>*{width:auto!important;max-width:none!important;flex:none!important}
-#pv-panel-v29 .mob [data-mk="w"]{flex-wrap:wrap!important;height:auto}
-#pv-panel-v29 .mob [data-mk="s"]{overflow-x:auto;scrollbar-width:none}
-#pv-panel-v29 .mob [data-mk="s"]>*{flex:none}
-#pv-panel-v29 .mob .main table{display:block;overflow-x:auto;scrollbar-width:thin}
+#pv-panel-v29.mob [data-mk="1"]{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:none!important;grid-auto-rows:auto!important;grid-template-areas:none!important;height:auto!important}
+#pv-panel-v29.mob [data-mk="1"]>*{grid-column:auto!important;grid-row:auto!important;min-height:0}
+#pv-panel-v29.mob [data-mk="2"]{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:none!important;grid-auto-rows:auto!important}
+#pv-panel-v29.mob [data-mk="2"]>*{grid-column:auto!important;grid-row:auto!important}
+#pv-panel-v29.mob [data-mk="c"]{flex-direction:column!important;align-items:stretch!important;height:auto!important}
+#pv-panel-v29.mob [data-mk="c"]>*{width:auto!important;max-width:none!important;flex:none!important}
+#pv-panel-v29.mob [data-mk="w"]{flex-wrap:wrap!important;height:auto}
+#pv-panel-v29.mob [data-mk="s"]{overflow-x:auto;scrollbar-width:none}
+#pv-panel-v29.mob [data-mk="s"]>*{flex:none}
+#pv-panel-v29.mob .main table{display:block;overflow-x:auto;scrollbar-width:thin}
 /* paneles de acción: hoja desde abajo */
-#pv-panel-v29 .mob #act{left:0;right:0;top:auto;bottom:0;width:auto;max-height:86%;border-radius:22px 22px 0 0;transform:translateY(24px)}
-#pv-panel-v29 .mob #actw.on #act{transform:none}
-#pv-panel-v29 .mob #atoast{bottom:76px;max-width:calc(100% - 28px);width:max-content}
-@media (prefers-reduced-motion:reduce){#pv-panel-v29 .mob .side,#pv-panel-v29 .mob .mscrim,#pv-panel-v29 .mob .mnav button{transition:none}}
-#pv-panel-v29 .mob .top{height:auto;min-height:0}
-#pv-panel-v29 .mob .top h1 span{font-size:13px}
+#pv-panel-v29.mob #act{left:0;right:0;top:auto;bottom:0;width:auto;max-height:86%;border-radius:22px 22px 0 0;transform:translateY(24px)}
+#pv-panel-v29.mob #actw.on #act{transform:none}
+#pv-panel-v29.mob #atoast{bottom:76px;max-width:calc(100% - 28px);width:max-content}
+@media (prefers-reduced-motion:reduce){#pv-panel-v29.mob .side,#pv-panel-v29.mob .mscrim,#pv-panel-v29.mob .mnav button{transition:none}}
+#pv-panel-v29.mob .top{height:auto;min-height:0}
+#pv-panel-v29.mob .top h1 span{font-size:13px}
 /* Agenda: la semana se desliza de costado dentro de su tarjeta */
-#pv-panel-v29 .mob .ag .cal{height:620px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
-#pv-panel-v29 .mob .ag .cal>.days,#pv-panel-v29 .mob .ag .cal>.hrs{min-width:640px}
-#pv-panel-v29 .mob .ag .cal>.hrs{flex:1}
-#pv-panel-v29 .mob .agside .card{flex:none!important}
+#pv-panel-v29.mob .ag .cal{height:620px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+#pv-panel-v29.mob .ag .cal>.days,#pv-panel-v29.mob .ag .cal>.hrs{min-width:640px}
+#pv-panel-v29.mob .ag .cal>.hrs{flex:1}
+#pv-panel-v29.mob .agside .card{flex:none!important}
 /* Pacientes e Inicio: en la lista quedan las columnas que importan */
-#pv-panel-v29 .mob #s-pacientes table,#pv-panel-v29 .mob .hoy table{display:table;width:100%}
-#pv-panel-v29 .mob #s-pacientes th:nth-child(n+3):nth-child(-n+6),#pv-panel-v29 .mob #prows>tr>td:nth-child(n+3):nth-child(-n+6){display:none}
-#pv-panel-v29 .mob .hoy th:nth-child(n+4),#pv-panel-v29 .mob .hoy td:nth-child(n+4){display:none}
-#pv-panel-v29 .mob .pt .ch{flex-wrap:wrap}
-#pv-panel-v29 .mob .pt .ch .tabs{flex:1 1 100%;overflow-x:auto;scrollbar-width:none}
-#pv-panel-v29 .mob .pt .ch .tabs button{flex:none}
+#pv-panel-v29.mob #s-pacientes table,#pv-panel-v29.mob .hoy table{display:table;width:100%}
+#pv-panel-v29.mob #s-pacientes th:nth-child(n+3):nth-child(-n+6),#pv-panel-v29.mob #prows>tr>td:nth-child(n+3):nth-child(-n+6){display:none}
+#pv-panel-v29.mob .hoy th:nth-child(n+4),#pv-panel-v29.mob .hoy td:nth-child(n+4){display:none}
+#pv-panel-v29.mob .pt .ch{flex-wrap:wrap}
+#pv-panel-v29.mob .pt .ch .tabs{flex:1 1 100%;overflow-x:auto;scrollbar-width:none}
+#pv-panel-v29.mob .pt .ch .tabs button{flex:none}
 /* Ficha: encabezado en dos renglones */
-#pv-panel-v29 .mob #s-ficha .fh.ntfh{flex-wrap:wrap;gap:10px}
-#pv-panel-v29 .mob .ntfhr{flex:1 1 100%;flex-wrap:wrap;justify-content:flex-start;gap:8px}
-#pv-panel-v29 .mob .ntfhg{flex-wrap:wrap}
-#pv-panel-v29 .mob #s-ficha .tagsr{flex-wrap:wrap}
-#pv-panel-v29 .mob #ftabs.ftabs{overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}
-#pv-panel-v29 .mob #ftabs.ftabs button{flex:none}
-#pv-panel-v29 .mob .chatd{width:100%!important;max-width:none}
-#pv-panel-v29 .mob .ntfhr{align-items:stretch;min-width:0;flex:1 1 100%!important}
-#pv-panel-v29 .mob .ntfhr .appst{flex-wrap:wrap;row-gap:2px}
-#pv-panel-v29 .mob .ntfhg>.chip{flex:1 1 0;justify-content:center}
-#pv-panel-v29 .mob .ntfhg>.cta{flex:1 1 100%;justify-content:center}
-#pv-panel-v29 .mob .top>.cta{flex:1 1 auto;justify-content:center}
+#pv-panel-v29.mob #s-ficha .fh.ntfh{flex-wrap:wrap;gap:10px}
+#pv-panel-v29.mob .ntfhr{flex:1 1 100%;flex-wrap:wrap;justify-content:flex-start;gap:8px}
+#pv-panel-v29.mob .ntfhg{flex-wrap:wrap}
+#pv-panel-v29.mob #s-ficha .tagsr{flex-wrap:wrap}
+#pv-panel-v29.mob #ftabs.ftabs{overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}
+#pv-panel-v29.mob #ftabs.ftabs button{flex:none}
+#pv-panel-v29.mob .chatd{width:100%!important;max-width:none}
+#pv-panel-v29.mob .ntfhr{align-items:stretch;min-width:0;flex:1 1 100%!important}
+#pv-panel-v29.mob .ntfhr .appst{flex-wrap:wrap;row-gap:2px}
+#pv-panel-v29.mob .ntfhg>.chip{flex:1 1 0;justify-content:center}
+#pv-panel-v29.mob .ntfhg>.cta{flex:1 1 100%;justify-content:center}
+#pv-panel-v29.mob .top>.cta{flex:1 1 auto;justify-content:center}
 /* tablas: cada fila pasa a ser un renglón que se acomoda */
-#pv-panel-v29 .mob .main table.mst{display:block;overflow:visible}
-#pv-panel-v29 .mob .main table.mst thead{display:none}
-#pv-panel-v29 .mob .main table.mst tbody{display:block}
-#pv-panel-v29 .mob .main table.mst tr{display:flex;flex-wrap:wrap;align-items:center;gap:3px 10px;padding:10px 8px;border-bottom:1px solid var(--line)}
-#pv-panel-v29 .mob .main table.mst tr:last-child{border-bottom:0}
-#pv-panel-v29 .mob .main table.mst td{display:block;border:0!important;padding:0!important;height:auto!important;width:auto!important;max-width:100%;white-space:normal}
-#pv-panel-v29 .mob .main table.mst td:empty{display:none}
-#pv-panel-v29 .mob .eqm{display:block;overflow-x:auto}
+#pv-panel-v29.mob .main table.mst{display:block;overflow:visible}
+#pv-panel-v29.mob .main table.mst thead{display:none}
+#pv-panel-v29.mob .main table.mst tbody{display:block}
+#pv-panel-v29.mob .main table.mst tr{display:flex;flex-wrap:wrap;align-items:center;gap:3px 10px;padding:10px 8px;border-bottom:1px solid var(--line)}
+#pv-panel-v29.mob .main table.mst tr:last-child{border-bottom:0}
+#pv-panel-v29.mob .main table.mst td{display:block;border:0!important;padding:0!important;height:auto!important;width:auto!important;max-width:100%;white-space:normal}
+#pv-panel-v29.mob .main table.mst td:empty{display:none}
+#pv-panel-v29.mob .eqm{display:block;overflow-x:auto}
 /* Mensajes */
-#pv-panel-v29 .mob .mh{flex-wrap:wrap}
-#pv-panel-v29 .mob .mh .mt{flex:1;min-width:0}
-#pv-panel-v29 .mob .mh .sp{flex:1 1 100%;height:0}
-#pv-panel-v29 .mob .mcomp{flex-wrap:wrap}
-#pv-panel-v29 .mob .mcomp .mbox{flex:1 1 100%;order:-1}
+#pv-panel-v29.mob .mh{flex-wrap:wrap}
+#pv-panel-v29.mob .mh .mt{flex:1;min-width:0}
+#pv-panel-v29.mob .mh .sp{flex:1 1 100%;height:0}
+#pv-panel-v29.mob .mcomp{flex-wrap:wrap}
+#pv-panel-v29.mob .mcomp .mbox{flex:1 1 100%;order:-1}
 /* Planes: la semana de la paciente se desliza de costado */
-#pv-panel-v29 .mob .prow{flex-direction:column}
-#pv-panel-v29 .mob .ppick{width:auto;height:auto}
-#pv-panel-v29 .mob .ppsel{height:auto;min-height:56px}
-#pv-panel-v29 .mob .pgoal{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:12px 14px}
-#pv-panel-v29 .mob .pgoal>div{white-space:normal}
-#pv-panel-v29 .mob .pgoal>.pcare,#pv-panel-v29 .mob .pgoal>.sbtn{grid-column:1/-1}
-#pv-panel-v29 .mob .prow2{flex-wrap:wrap}
-#pv-panel-v29 .mob .prow2>.tabs{flex:1 1 100%;overflow-x:auto;scrollbar-width:none}
-#pv-panel-v29 .mob .prow2>.tabs button{flex:none}
-#pv-panel-v29 .mob .prow2 .sp{display:none}
-#pv-panel-v29 .mob .pgrid{grid-template-columns:64px repeat(7,92px)!important;grid-template-rows:auto!important;grid-auto-rows:minmax(74px,auto);overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
-#pv-panel-v29 .mob [data-mk="n"]>*{min-width:0;flex-shrink:1}
-#pv-panel-v29 .mob [data-mk="n"]>*:not(button):not(.pill):not(.sw):not(svg){white-space:normal}
-#pv-panel-v29 .mob .hoy td,#pv-panel-v29 .mob .hoy th{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+#pv-panel-v29.mob .prow{flex-direction:column}
+#pv-panel-v29.mob .ppick{width:auto;height:auto}
+#pv-panel-v29.mob .ppsel{height:auto;min-height:56px}
+#pv-panel-v29.mob .pgoal{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:12px 14px}
+#pv-panel-v29.mob .pgoal>div{white-space:normal}
+#pv-panel-v29.mob .pgoal>.pcare,#pv-panel-v29.mob .pgoal>.sbtn{grid-column:1/-1}
+#pv-panel-v29.mob .prow2{flex-wrap:wrap}
+#pv-panel-v29.mob .prow2>.tabs{flex:1 1 100%;overflow-x:auto;scrollbar-width:none}
+#pv-panel-v29.mob .prow2>.tabs button{flex:none}
+#pv-panel-v29.mob .prow2 .sp{display:none}
+#pv-panel-v29.mob .pgrid{grid-template-columns:64px repeat(7,92px)!important;grid-template-rows:auto!important;grid-auto-rows:minmax(74px,auto);overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+#pv-panel-v29.mob [data-mk="n"]>*{min-width:0;flex-shrink:1}
+#pv-panel-v29.mob [data-mk="n"]>*:not(button):not(.pill):not(.sw):not(svg){white-space:normal}
+#pv-panel-v29.mob .hoy td,#pv-panel-v29.mob .hoy th{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
 /* el chat de la ficha tapa el teléfono entero */
-#pv-panel-v29 .mob .app{transform:translateZ(0)}
-#pv-panel-v29 .mob .chatd{position:fixed;inset:0;width:auto!important;z-index:28}
-#pv-panel-v29 .mob .main .ch{flex-wrap:wrap;row-gap:8px}
-#pv-panel-v29 .mob .main .tabs{max-width:100%;overflow-x:auto;scrollbar-width:none}
-#pv-panel-v29 .mob .main .tabs>button{flex:none}
-#pv-panel-v29 .mob .main .fxp{min-width:0;max-width:100%}
+#pv-panel-v29.mob .app{transform:translateZ(0)}
+#pv-panel-v29.mob .chatd{position:fixed;inset:0;width:auto!important;z-index:28}
+#pv-panel-v29.mob .main .ch{flex-wrap:wrap;row-gap:8px}
+#pv-panel-v29.mob .main .tabs{max-width:100%;overflow-x:auto;scrollbar-width:none}
+#pv-panel-v29.mob .main .tabs>button{flex:none}
+#pv-panel-v29.mob .main .fxp{min-width:0;max-width:100%}
 
 /* v27 · Planes: los mismos materiales, escala y movimiento del dashboard. */
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create){--pux-ease:cubic-bezier(.23,1,.32,1);gap:20px}
@@ -2620,72 +2623,72 @@
 @media(hover:hover) and (pointer:fine){#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-meal-toggle:hover,#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .petool .lnk:hover{color:var(--lima-ink)}#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pemeal:hover{border-color:var(--line2)}#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-detail>summary:hover{background:var(--app)}}
 @media(prefers-reduced-motion:reduce){#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) *,#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) *::before,#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 /* El mismo orden al apilarse: edición, análisis y herramientas. */
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create){gap:16px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create)>.top{min-height:0;gap:12px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create)>.top>div:first-child{flex-basis:100%}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create)>.top #pview{order:5;flex-wrap:nowrap;overflow:auto;flex-shrink:0}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create)>.top #pview button{padding:9px 12px;min-height:40px;flex:none}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) #pwrap .fx,#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) #pwrap.pe-dia .fx,#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) #pwrap.pv5 .fx{display:flex;flex-direction:column;gap:16px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .ppick{width:100%}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pgoal{gap:12px 16px;padding:16px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .prow2{padding:8px;gap:10px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .ptabs2{width:100%;overflow:auto}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .ptabs2 button{min-height:42px;font-size:12px;padding:10px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pacts2{width:100%;gap:8px;flex-wrap:wrap;margin:0}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pacts2 .pesaved{margin-right:auto}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .prow2 .pstate{display:none}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pedit{padding:16px;overflow:visible}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pedit>header{flex-wrap:wrap}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pux-editor-title{flex:1 1 100%}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pux-calendar{gap:12px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pedays{flex-basis:100%;gap:4px;overflow:visible}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pedays button{min-width:0;padding:8px 4px;min-height:48px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pewk{align-items:center;flex-wrap:nowrap}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pewk>span{flex-basis:auto;margin-right:6px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pewk button{width:34px;height:34px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .petot{padding:14px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pemc{gap:10px 14px;font-size:11px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .petool{gap:8px 12px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .petool .sp{flex:1 1 0}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .petool .pefot{flex:1 1 100%}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .petool .lnk{min-height:36px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pemeals{overflow:visible;margin:0;padding:0;gap:12px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pemeal{padding:12px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pemh{flex-wrap:wrap;gap:10px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pemh>img{width:36px!important;height:36px!important}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pux-meal-toggle{flex:1;min-width:160px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pux-hour{width:56px;height:36px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pux-meal-kcal{min-width:48px;align-items:flex-start}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pema{margin-left:auto;width:auto}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pema .ibtn{width:36px;height:36px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pux-ingredient-head{display:none}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pei{grid-template-columns:6px minmax(0,1fr) 60px 62px;grid-template-rows:auto auto;gap:8px 10px;padding:12px 0}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pei .pen{grid-column:2/-1;grid-row:1}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pei .peg{grid-row:1}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pei input{grid-column:2;grid-row:2;max-width:88px;justify-self:start;text-align:left}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pei select{grid-column:3;grid-row:2}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pei em{grid-column:4;grid-row:2;font-size:11px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pei em::after{content:" kcal"}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pei .ibtn{grid-row:3;min-width:36px;height:32px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pei .ibtn[data-penote]{grid-column:3}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pei .ibtn[data-pedel]{grid-column:4}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pei input,#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pei select{height:36px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .iaask{padding:18px;gap:18px!important;overflow:visible}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .iahero h2{font-size:24px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pux-ai-heading{gap:10px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pux-duration .iaseg{width:100%}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pux-duration .iaseg button{padding:9px 10px;flex:1}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .iabar{gap:8px 12px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .iabar>small{display:none}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .iaideas button{min-height:36px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .iago{align-items:stretch;flex-direction:column;gap:12px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .iago small{max-width:100%}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .iago .cta{justify-content:center;min-height:44px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .iagoal{flex-wrap:wrap}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .iagoal em{margin-left:26px}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .iadr{position:fixed;inset:0!important;width:auto;border-radius:0;z-index:28}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create).pux-ai-open .per{visibility:visible}
-#pv-panel-v29 .mob #s-planes:is(.pux-plan,.pux-create) .pux-detail>summary{min-height:70px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create){gap:16px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create)>.top{min-height:0;gap:12px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create)>.top>div:first-child{flex-basis:100%}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create)>.top #pview{order:5;flex-wrap:nowrap;overflow:auto;flex-shrink:0}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create)>.top #pview button{padding:9px 12px;min-height:40px;flex:none}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) #pwrap .fx,#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) #pwrap.pe-dia .fx,#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) #pwrap.pv5 .fx{display:flex;flex-direction:column;gap:16px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .ppick{width:100%}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pgoal{gap:12px 16px;padding:16px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .prow2{padding:8px;gap:10px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .ptabs2{width:100%;overflow:auto}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .ptabs2 button{min-height:42px;font-size:12px;padding:10px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pacts2{width:100%;gap:8px;flex-wrap:wrap;margin:0}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pacts2 .pesaved{margin-right:auto}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .prow2 .pstate{display:none}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pedit{padding:16px;overflow:visible}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pedit>header{flex-wrap:wrap}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pux-editor-title{flex:1 1 100%}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pux-calendar{gap:12px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pedays{flex-basis:100%;gap:4px;overflow:visible}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pedays button{min-width:0;padding:8px 4px;min-height:48px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pewk{align-items:center;flex-wrap:nowrap}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pewk>span{flex-basis:auto;margin-right:6px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pewk button{width:34px;height:34px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .petot{padding:14px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pemc{gap:10px 14px;font-size:11px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .petool{gap:8px 12px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .petool .sp{flex:1 1 0}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .petool .pefot{flex:1 1 100%}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .petool .lnk{min-height:36px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pemeals{overflow:visible;margin:0;padding:0;gap:12px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pemeal{padding:12px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pemh{flex-wrap:wrap;gap:10px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pemh>img{width:36px!important;height:36px!important}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pux-meal-toggle{flex:1;min-width:160px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pux-hour{width:56px;height:36px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pux-meal-kcal{min-width:48px;align-items:flex-start}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pema{margin-left:auto;width:auto}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pema .ibtn{width:36px;height:36px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pux-ingredient-head{display:none}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pei{grid-template-columns:6px minmax(0,1fr) 60px 62px;grid-template-rows:auto auto;gap:8px 10px;padding:12px 0}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pei .pen{grid-column:2/-1;grid-row:1}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pei .peg{grid-row:1}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pei input{grid-column:2;grid-row:2;max-width:88px;justify-self:start;text-align:left}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pei select{grid-column:3;grid-row:2}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pei em{grid-column:4;grid-row:2;font-size:11px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pei em::after{content:" kcal"}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pei .ibtn{grid-row:3;min-width:36px;height:32px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pei .ibtn[data-penote]{grid-column:3}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pei .ibtn[data-pedel]{grid-column:4}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pei input,#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pei select{height:36px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .iaask{padding:18px;gap:18px!important;overflow:visible}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .iahero h2{font-size:24px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pux-ai-heading{gap:10px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pux-duration .iaseg{width:100%}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pux-duration .iaseg button{padding:9px 10px;flex:1}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .iabar{gap:8px 12px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .iabar>small{display:none}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .iaideas button{min-height:36px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .iago{align-items:stretch;flex-direction:column;gap:12px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .iago small{max-width:100%}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .iago .cta{justify-content:center;min-height:44px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .iagoal{flex-wrap:wrap}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .iagoal em{margin-left:26px}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .iadr{position:fixed;inset:0!important;width:auto;border-radius:0;z-index:28}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create).pux-ai-open .per{visibility:visible}
+#pv-panel-v29.mob #s-planes:is(.pux-plan,.pux-create) .pux-detail>summary{min-height:70px}
 
 
 /* v28 · Referencia: detalle desplegado de Pacientes. */
@@ -2800,19 +2803,19 @@
  #pv-panel-v29 #s-planes.pux-create .iaideas button:hover{background:var(--lima-tt);border-color:var(--line2)}
 }
 @media(prefers-reduced-motion:reduce){#pv-panel-v29 #s-planes.pux-plan *,#pv-panel-v29 #s-planes.pux-create *{animation:none!important;transition:none!important}}
-#pv-panel-v29 .mob #s-planes.pux-create .iaask.p28-ai-workspace{overflow:visible;padding:18px;gap:24px!important}
-#pv-panel-v29 .mob #s-planes.pux-create .p28-ai-top{flex-wrap:wrap;gap:16px}
-#pv-panel-v29 .mob #s-planes.pux-create .p28-ai-top h2{font-size:25px}
-#pv-panel-v29 .mob #s-planes.pux-create .p28-ai-grid{display:flex;flex-direction:column;gap:24px;overflow:visible}
-#pv-panel-v29 .mob #s-planes.pux-create .p28-compose,#pv-panel-v29 .mob #s-planes.pux-create .p28-config{overflow:visible;flex:none}
-#pv-panel-v29 .mob #s-planes.pux-create .p28-config{border-left:0;border-top:1px solid var(--line);padding:20px 0 0}
-#pv-panel-v29 .mob #s-planes.pux-create .p28-compose .iabox textarea{min-height:230px;font-size:14px;line-height:1.7}
-#pv-panel-v29 .mob #s-planes.pux-create .p28-context-link .sbtn{min-height:42px}
-#pv-panel-v29 .mob #s-planes.pux-create .iago{padding-top:18px}
-#pv-panel-v29 .mob #s-planes.pux-create .iago .cta{min-height:46px}
-#pv-panel-v29 .mob #s-planes.pux-plan .p28-energy{justify-content:space-between}
-#pv-panel-v29 .mob #s-planes.pux-plan .pux-analysis{padding:18px}
-#pv-panel-v29 .mob #s-planes.pux-plan .pedit{padding:16px}
+#pv-panel-v29.mob #s-planes.pux-create .iaask.p28-ai-workspace{overflow:visible;padding:18px;gap:24px!important}
+#pv-panel-v29.mob #s-planes.pux-create .p28-ai-top{flex-wrap:wrap;gap:16px}
+#pv-panel-v29.mob #s-planes.pux-create .p28-ai-top h2{font-size:25px}
+#pv-panel-v29.mob #s-planes.pux-create .p28-ai-grid{display:flex;flex-direction:column;gap:24px;overflow:visible}
+#pv-panel-v29.mob #s-planes.pux-create .p28-compose,#pv-panel-v29.mob #s-planes.pux-create .p28-config{overflow:visible;flex:none}
+#pv-panel-v29.mob #s-planes.pux-create .p28-config{border-left:0;border-top:1px solid var(--line);padding:20px 0 0}
+#pv-panel-v29.mob #s-planes.pux-create .p28-compose .iabox textarea{min-height:230px;font-size:14px;line-height:1.7}
+#pv-panel-v29.mob #s-planes.pux-create .p28-context-link .sbtn{min-height:42px}
+#pv-panel-v29.mob #s-planes.pux-create .iago{padding-top:18px}
+#pv-panel-v29.mob #s-planes.pux-create .iago .cta{min-height:46px}
+#pv-panel-v29.mob #s-planes.pux-plan .p28-energy{justify-content:space-between}
+#pv-panel-v29.mob #s-planes.pux-plan .pux-analysis{padding:18px}
+#pv-panel-v29.mob #s-planes.pux-plan .pedit{padding:16px}
 
 /* Tarjeta de Inicio: botones parejos y más arriba */
 #pv-panel-v29 .dvx{gap:9px;padding-bottom:24px}
@@ -2900,28 +2903,28 @@
 #pv-panel-v29 #s-planes .p28-ai-workspace .p28-compose textarea{min-height:210px!important}
 #pv-panel-v29 #s-planes .r29-proto{font-size:10.5px;color:var(--ink3);line-height:1.5}
 #pv-panel-v29 #r29-print{display:none}
-@media print{#pv-panel-v29 body>*{display:none!important}#pv-panel-v29 body>#r29-print{display:block!important;color:#111;background:#fff;font:12px/1.6 sans-serif}#pv-panel-v29 #r29-print section{break-inside:avoid;margin-bottom:18px}#pv-panel-v29 #r29-print h2{border-bottom:1px solid #ccc;padding-bottom:8px}#pv-panel-v29 #r29-print h3{margin:12px 0 4px}}
-#pv-panel-v29 .mob #s-planes>.top{height:auto!important;min-height:70px!important;flex-wrap:wrap!important;flex-basis:auto}
-#pv-panel-v29 .mob #s-planes>.top>div:first-child{flex-basis:100%!important}
-#pv-panel-v29 .mob #s-planes>.top #pacts{flex:1}
-#pv-panel-v29 .mob #s-planes>.top #pacts .cta{flex:1}
-#pv-panel-v29 .mob #s-planes #pview{flex-basis:auto!important;min-height:48px;max-width:100%}
-#pv-panel-v29 .mob #s-planes .r29-patient{align-items:stretch;flex-direction:column}
-#pv-panel-v29 .mob #s-planes .r29-patient .ppick{width:100%}
-#pv-panel-v29 .mob #s-planes .r29-context{flex-wrap:wrap;gap:14px}
-#pv-panel-v29 .mob #s-planes .r29-context .r29-care{flex-basis:100%}
-#pv-panel-v29 .mob #s-planes .prow2{flex-wrap:wrap!important}
-#pv-panel-v29 .mob #s-planes #ptabs{flex-basis:100%;min-height:40px}
-#pv-panel-v29 .mob #s-planes .r29-tools{margin-left:0;flex-wrap:wrap;width:100%}
-#pv-panel-v29 .mob #s-planes .r29-tools .pesaved{margin-right:auto}
-#pv-panel-v29 .mob #s-planes .r29-instructions,#pv-panel-v29 .mob #s-planes .r29-shopping{grid-template-columns:1fr}
-#pv-panel-v29 .mob #s-planes #pwrap .fx>.c{overflow:visible}
-#pv-panel-v29 .mob #s-planes .r29-menu{right:0}
+@media print{#pv-panel-v29>*{display:none!important}#pv-panel-v29>#r29-print{display:block!important;color:#111;background:#fff;font:12px/1.6 sans-serif}#pv-panel-v29 #r29-print section{break-inside:avoid;margin-bottom:18px}#pv-panel-v29 #r29-print h2{border-bottom:1px solid #ccc;padding-bottom:8px}#pv-panel-v29 #r29-print h3{margin:12px 0 4px}}
+#pv-panel-v29.mob #s-planes>.top{height:auto!important;min-height:70px!important;flex-wrap:wrap!important;flex-basis:auto}
+#pv-panel-v29.mob #s-planes>.top>div:first-child{flex-basis:100%!important}
+#pv-panel-v29.mob #s-planes>.top #pacts{flex:1}
+#pv-panel-v29.mob #s-planes>.top #pacts .cta{flex:1}
+#pv-panel-v29.mob #s-planes #pview{flex-basis:auto!important;min-height:48px;max-width:100%}
+#pv-panel-v29.mob #s-planes .r29-patient{align-items:stretch;flex-direction:column}
+#pv-panel-v29.mob #s-planes .r29-patient .ppick{width:100%}
+#pv-panel-v29.mob #s-planes .r29-context{flex-wrap:wrap;gap:14px}
+#pv-panel-v29.mob #s-planes .r29-context .r29-care{flex-basis:100%}
+#pv-panel-v29.mob #s-planes .prow2{flex-wrap:wrap!important}
+#pv-panel-v29.mob #s-planes #ptabs{flex-basis:100%;min-height:40px}
+#pv-panel-v29.mob #s-planes .r29-tools{margin-left:0;flex-wrap:wrap;width:100%}
+#pv-panel-v29.mob #s-planes .r29-tools .pesaved{margin-right:auto}
+#pv-panel-v29.mob #s-planes .r29-instructions,#pv-panel-v29.mob #s-planes .r29-shopping{grid-template-columns:1fr}
+#pv-panel-v29.mob #s-planes #pwrap .fx>.c{overflow:visible}
+#pv-panel-v29.mob #s-planes .r29-menu{right:0}
 
 
 #pv-panel-v29 #s-planes .r29-instruction-field{display:flex;flex-direction:column;gap:8px}#pv-panel-v29 #s-planes .r29-instruction-field textarea{width:100%;min-height:112px;resize:vertical;font:inherit;font-size:12px;line-height:1.7;padding:12px;border:1px solid var(--line2);border-radius:10px;color:var(--ink);background:var(--app)}#pv-panel-v29 #s-planes .r29-instruction-field small{color:var(--ink3);font-size:10.5px}#pv-panel-v29 #s-planes .pind3{overflow-y:auto;scrollbar-width:thin}#pv-panel-v29 #s-planes .pedit>header{justify-content:space-between}#pv-panel-v29 #s-planes .pedit>header .pux-editor-title{margin-right:auto}#pv-panel-v29 #s-planes .pedit>header>h3:empty{display:none}#pv-panel-v29 #s-planes [hidden]{display:none!important}
 
-#pv-panel-v29 #s-planes .r29-care-toggle{display:none}#pv-panel-v29 #s-planes .r29-diet{max-width:135px}#pv-panel-v29 .mob #s-planes>.top h1 span{display:inline!important;font-size:inherit}#pv-panel-v29 .mob #s-planes>.top{min-height:80px!important;gap:10px!important}#pv-panel-v29 .mob #s-planes .r29-context{padding:10px 12px;gap:10px;min-height:62px}#pv-panel-v29 .mob #s-planes .r29-context small{font-size:10px}#pv-panel-v29 .mob #s-planes .r29-context b{font-size:12px}#pv-panel-v29 .mob #s-planes .r29-context .r29-care{display:none}#pv-panel-v29 .mob #s-planes .r29-context .r29-care-toggle{display:block;font-size:10.5px;padding:5px 7px}#pv-panel-v29 .mob #s-planes .r29-context.r29-care-open .r29-care{display:flex}#pv-panel-v29 .mob #s-planes .r29-context>.sbtn:last-child{margin-left:auto;font-size:10.5px;padding:5px 7px}#pv-panel-v29 .mob #s-planes .r29-patient{gap:8px}#pv-panel-v29 .mob #s-planes .r29-patient .ppsel{min-height:56px;padding:10px 12px}#pv-panel-v29 #s-planes .r29-tools details[open]{z-index:55}#pv-panel-v29 #s-planes button:disabled{cursor:default;opacity:.42}
+#pv-panel-v29 #s-planes .r29-care-toggle{display:none}#pv-panel-v29 #s-planes .r29-diet{max-width:135px}#pv-panel-v29.mob #s-planes>.top h1 span{display:inline!important;font-size:inherit}#pv-panel-v29.mob #s-planes>.top{min-height:80px!important;gap:10px!important}#pv-panel-v29.mob #s-planes .r29-context{padding:10px 12px;gap:10px;min-height:62px}#pv-panel-v29.mob #s-planes .r29-context small{font-size:10px}#pv-panel-v29.mob #s-planes .r29-context b{font-size:12px}#pv-panel-v29.mob #s-planes .r29-context .r29-care{display:none}#pv-panel-v29.mob #s-planes .r29-context .r29-care-toggle{display:block;font-size:10.5px;padding:5px 7px}#pv-panel-v29.mob #s-planes .r29-context.r29-care-open .r29-care{display:flex}#pv-panel-v29.mob #s-planes .r29-context>.sbtn:last-child{margin-left:auto;font-size:10.5px;padding:5px 7px}#pv-panel-v29.mob #s-planes .r29-patient{gap:8px}#pv-panel-v29.mob #s-planes .r29-patient .ppsel{min-height:56px;padding:10px 12px}#pv-panel-v29 #s-planes .r29-tools details[open]{z-index:55}#pv-panel-v29 #s-planes button:disabled{cursor:default;opacity:.42}
 
 #pv-panel-v29 #s-planes .pemeal,#pv-panel-v29 #s-planes .pemeal.ch{align-items:stretch;justify-content:flex-start}#pv-panel-v29 #s-planes .pemh,#pv-panel-v29 #s-planes .peis{width:100%}#pv-panel-v29 #s-planes .pedit>header>h3+.sp{display:none}#pv-panel-v29 #s-planes #iadr[aria-hidden="true"]{display:none!important}
 
@@ -2963,14 +2966,14 @@
 #pv-panel-v29 .sxw .fxr>.l{min-width:0}
 #pv-panel-v29 .sxw .fxr .l.on{background:var(--lima-t)}
 #pv-panel-v29 .sxw .cta{align-self:flex-start}
-#pv-panel-v29 .mob #s-seguimiento .fxr>.l{flex-direction:column;align-items:stretch;gap:8px}
-#pv-panel-v29 .mob #s-seguimiento .sxmeal{width:100%}
-#pv-panel-v29 .mob #s-seguimiento .sxacts{width:100%}
-#pv-panel-v29 .mob #s-seguimiento .sxacts .chip{flex:1;justify-content:center}
-#pv-panel-v29 .mob .sxw .fxtiles{grid-template-columns:1fr}
-#pv-panel-v29 .mob #s-alimentos .top .sxin,#pv-panel-v29 .mob #s-ayuda .top .sxin{flex:1 1 100%}
-#pv-panel-v29 .mob #s-alimentos .top .sxin input,#pv-panel-v29 .mob #s-ayuda .top .sxin input{width:100%;min-width:0}
-#pv-panel-v29 .mob .sxask textarea{height:84px}
+#pv-panel-v29.mob #s-seguimiento .fxr>.l{flex-direction:column;align-items:stretch;gap:8px}
+#pv-panel-v29.mob #s-seguimiento .sxmeal{width:100%}
+#pv-panel-v29.mob #s-seguimiento .sxacts{width:100%}
+#pv-panel-v29.mob #s-seguimiento .sxacts .chip{flex:1;justify-content:center}
+#pv-panel-v29.mob .sxw .fxtiles{grid-template-columns:1fr}
+#pv-panel-v29.mob #s-alimentos .top .sxin,#pv-panel-v29.mob #s-ayuda .top .sxin{flex:1 1 100%}
+#pv-panel-v29.mob #s-alimentos .top .sxin input,#pv-panel-v29.mob #s-ayuda .top .sxin input{width:100%;min-width:0}
+#pv-panel-v29.mob .sxask textarea{height:84px}
 #pv-panel-v29 #sxchat article{background:var(--app);border-radius:14px;padding:12px 14px}
 #pv-panel-v29 #sxchat .sxfrom{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink3)}
 #pv-panel-v29 .sxlib{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:10px;overflow:auto}
@@ -2988,14 +2991,14 @@
 #pv-panel-v29 .sxlib>.sxcard{height:100%;overflow:hidden}
 #pv-panel-v29 .sxcard .av{width:22px;height:22px;font-size:9px}
 #pv-panel-v29 .sxw .fxp>header h3{min-width:0;overflow:hidden;text-overflow:ellipsis}
-#pv-panel-v29 .mob .sxlib{display:flex;flex-direction:column;flex:none;grid-template-rows:none}
-#pv-panel-v29 .mob .sxlib>.sxcard{height:auto;overflow:visible}
-#pv-panel-v29 .mob .sxw .fxp.g{flex:none;overflow:visible}
-#pv-panel-v29 .mob .sxw .fxs{overflow:visible;flex:none;-webkit-mask-image:none;mask-image:none}
-#pv-panel-v29 .mob #s-progreso .fxr>.l{flex-wrap:wrap}
-#pv-panel-v29 .mob .sxw .fxp>header{flex-wrap:wrap;align-items:flex-start;height:auto}
-#pv-panel-v29 .mob .sxw .fxp>header h3{white-space:normal;overflow:visible;text-overflow:clip;flex:1 1 100%}
-#pv-panel-v29 .mob .sxw .fxp>header .m{flex:1 1 100%;white-space:normal;overflow:visible;text-overflow:clip}
-#pv-panel-v29 .mob .sxtools{width:100%;min-width:0}
-#pv-panel-v29 .mob .sxtools .tabs{flex-wrap:wrap;max-width:100%;height:auto;overflow:visible}
+#pv-panel-v29.mob .sxlib{display:flex;flex-direction:column;flex:none;grid-template-rows:none}
+#pv-panel-v29.mob .sxlib>.sxcard{height:auto;overflow:visible}
+#pv-panel-v29.mob .sxw .fxp.g{flex:none;overflow:visible}
+#pv-panel-v29.mob .sxw .fxs{overflow:visible;flex:none;-webkit-mask-image:none;mask-image:none}
+#pv-panel-v29.mob #s-progreso .fxr>.l{flex-wrap:wrap}
+#pv-panel-v29.mob .sxw .fxp>header{flex-wrap:wrap;align-items:flex-start;height:auto}
+#pv-panel-v29.mob .sxw .fxp>header h3{white-space:normal;overflow:visible;text-overflow:clip;flex:1 1 100%}
+#pv-panel-v29.mob .sxw .fxp>header .m{flex:1 1 100%;white-space:normal;overflow:visible;text-overflow:clip}
+#pv-panel-v29.mob .sxtools{width:100%;min-width:0}
+#pv-panel-v29.mob .sxtools .tabs{flex-wrap:wrap;max-width:100%;height:auto;overflow:visible}
 #pv-panel-v29 #s-seguimiento .sxwho small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

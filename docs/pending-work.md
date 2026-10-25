@@ -1,5 +1,7 @@
 # Pendientes de Plan V
 
+- **Boceto→app (25 oct):** Facu ok-v29-valor. Fuente `v29/panel-trabajo.html`. Orden tools → shell → Seguimiento → Progreso. Handoff: `docs/panel-nutri-rediseno/handoff-boceto-a-app.md` (PR #175). Fase 0 tools en [PR #176](https://github.com/Facu42/plan-v/pull/176): la app se ve igual. Siguiente: el armazón.
+
 > **Plan vigente (2026-09-28):** ver [registro-producto-listo.md](registro-producto-listo.md#plan-de-acción-actualizado-2026-09-28). Este documento queda como historia.
 
 ## PV-42 — Dashboard nutri Nutrigo + foto de receta al aprobar (issue #8)
@@ -416,3 +418,10 @@ No debe volver a abrirse como pendiente salvo regresión:
 3. Reflejar cada entidad nueva en el CRM, conservando los once módulos y el aislamiento multipaciente.
 4. Contrato 016 ampliado, RLS, seeds y serializers; sin ejecutar SQL hasta go/no-go.
 5. Supabase, proveedores, E2E, operación, despliegue y producción.
+
+## Boceto → app (25 oct 2026)
+
+- Handoff para agentes: [docs/panel-nutri-rediseno/handoff-boceto-a-app.md](panel-nutri-rediseno/handoff-boceto-a-app.md) (PR #175)
+- Fuente: `design/panel-nutri/v29/panel-trabajo.html` (PR #174). No se toca `PlanV-Boceto-v29.html`.
+- Fase 0 tools: [PR #176](https://github.com/Facu42/plan-v/pull/176). Archivos nuevos. La app se ve igual. Siguiente: el armazón.
+- Plan iterable: https://cursor.com/canvas/store-0f75b483-c592-490c-9d4f-f54cf2aee507/6a995189-0641-4c51-ba7e-6ad9946145ab
