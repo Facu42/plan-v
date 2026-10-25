@@ -2,7 +2,7 @@
 
 **Fecha:** 24–25 oct 2026 (America/Buenos_Aires)  
 **Dueño del hilo:** Plan V (asistente) + Facu  
-**Estado:** Fase 0 tools ya está en main ([PR #176](https://github.com/Facu42/plan-v/pull/176)). Fase 1 (armazón) está en el PR de `cursor/panel-v29-shell-e0ca`, sin juntar. Siguiente: Seguimiento. Facu eligió **ok-v29-valor** (25 oct 2026). Orden: tools → shell → Seguimiento → Progreso.
+**Estado:** Fase 0 tools ya está en main ([PR #176](https://github.com/Facu42/plan-v/pull/176)). Fase 1 (armazón) está en [PR #177](https://github.com/Facu42/plan-v/pull/177), sin juntar. Siguiente: Seguimiento. Facu eligió **ok-v29-valor** (25 oct 2026). Orden: tools → shell → Seguimiento → Progreso.
 
 ## Decisiones cerradas (Facu, 25 oct 2026)
 
@@ -21,7 +21,7 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 | Plan canónico por fases | `docs/panel-nutri-rediseno/version-final.md` (fuente = v29/panel-trabajo.html) |
 | Boceto de trabajo | `design/panel-nutri/v29/panel-trabajo.html` (PR #174, ya en main) |
 | Fase 0 tools | https://github.com/Facu42/plan-v/pull/176 (ya en main) |
-| Fase 1 shell | rama `cursor/panel-v29-shell-e0ca` |
+| Fase 1 shell | https://github.com/Facu42/plan-v/pull/177 |
 | Original v29 (NO tocar) | `design/panel-nutri/v29/PlanV-Boceto-v29.html` |
 | Este handoff | PR https://github.com/Facu42/plan-v/pull/175 (ya en main) |
 
@@ -32,7 +32,7 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 - App real (`main`) con rutas/APIs; gap = piel UI del boceto.
 - Plan + handoff registrados; **ok Facu ok-v29-valor**.
 - Fase 0 tools (PR #176, ya en main): `npm run panel:v29` y `npm run panel:contrato:v29` leen `panel-trabajo.html` y escriben `panel-v29.css` / `panel-v29-icons.ts`. No pisan `panel-boceto.css`.
-- Fase 1 shell (rama `cursor/panel-v29-shell-e0ca`): el armazón de la nutri usa las clases del boceto (`.app`, `.side`, `.nv`) y la hoja `panel-v29.css`. La raíz es `#pv-panel-v29`. Las pantallas que todavía no se pasaron siguen adentro, con `panel-boceto.css`.
+- Fase 1 shell ([PR #177](https://github.com/Facu42/plan-v/pull/177)): el armazón de la nutri usa las clases del boceto (`.app`, `.side`, `.nv`) y la hoja `panel-v29.css`. La raíz es `#pv-panel-v29`. Las pantallas que todavía no se pasaron siguen adentro, con `panel-boceto.css`. El contrato del armazón quedó en verde, en claro y en oscuro.
 
 ## Qué NO hacer
 
@@ -49,7 +49,7 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 
 1. ~~Actualizar una línea en `version-final.md`: fuente = `v29/panel-trabajo.html`.~~ Hecho en el PR #176.
 2. ~~**Fase 0 tools:** archivos nuevos desde la fuente v29; la app se ve igual.~~ Hecho en el PR #176, ya en main.
-3. ~~**Fase 1 shell:** `PanelBocetoShell` + nav + tema/celular; contrato del armazón contra la app. Se importa `panel-v29.css`. La raíz es `#pv-panel-v29` (tema, `.mob` y `.mreal`).~~ En el PR de `cursor/panel-v29-shell-e0ca`. Falta el ok de Facu para juntarlo.
+3. ~~**Fase 1 shell:** `PanelBocetoShell` + nav + tema/celular; contrato del armazón contra la app. Se importa `panel-v29.css`. La raíz es `#pv-panel-v29` (tema, `.mob` y `.mreal`).~~ En el [PR #177](https://github.com/Facu42/plan-v/pull/177). Falta el ok de Facu para juntarlo.
 4. **Fase 2 Seguimiento:** UI boceto sobre `/api/crm/work-queue` + `MealReviewPanel`.
 5. **Fase 3 Progreso:** cartera + drill-down (mapear endpoints; Laura sin curva ≠ incumplimiento).
 
@@ -57,7 +57,7 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 
 | Cuándo | Qué | Quién |
 |---|---|---|
-| 25 oct | Fase 1 shell en `cursor/panel-v29-shell-e0ca`: el armazón (menú, marca, buscador, cuenta, título, campana y el botón de Inicio) usa el boceto v29. Lo que el boceto dibuja y la app todavía no tiene queda vacío. Las pantallas de adentro no se redibujaron. | Cursor |
+| 25 oct | Fase 1 shell en [PR #177](https://github.com/Facu42/plan-v/pull/177): el armazón (menú, marca, buscador, cuenta, título, campana y el botón de Inicio) usa el boceto v29. Lo que el boceto dibuja y la app todavía no tiene queda vacío. Las pantallas de adentro no se redibujaron. Contrato en verde, claro y oscuro. | Cursor |
 | 25 oct | Fase 0 tools en PR #176 (ya en main): css e íconos nuevos desde `panel-trabajo.html`. La letra y el celular quedan en la raíz nueva. | Cursor |
 | 25 oct | Facu: ok-v29-valor; arranque Fase 0 tools vía Herdr Cursor | Plan V + Facu |
 | 24–25 oct | Seis pantallas + diferenciación + evolución Progreso en PR #174 (ya en main) | Cursor agent `bc-cf297a92…` |
@@ -67,6 +67,6 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 ## Cómo retomar (otro agente)
 
 1. Leer esta nota + la Page del plan.
-2. Chequear bitácora: ok-v29-valor ya cerrado. Fase 0 está en main. Fase 1 (armazón) está en el PR de `cursor/panel-v29-shell-e0ca`.
-3. Si Facu juntó ese PR: seguir con Seguimiento. Si no: no redibujar Seguimiento ni Progreso encima de un armazón que todavía no está en main.
+2. Chequear bitácora: ok-v29-valor ya cerrado. Fase 0 está en main. Fase 1 (armazón) está en el [PR #177](https://github.com/Facu42/plan-v/pull/177).
+3. Si Facu juntó el #177: seguir con Seguimiento. Si no: no redibujar Seguimiento ni Progreso encima de un armazón que todavía no está en main.
 4. Actualizar esta bitácora al cerrar cada fase (1 párrafo + commit/PR). Facu mergea.
