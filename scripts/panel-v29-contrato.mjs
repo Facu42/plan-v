@@ -68,10 +68,15 @@ export const PIEZAS_ALIMENTOS = [
 
 export const PIEZAS_PLANES = [
   ['Secciones de Planes', '#s-planes #pview', '', ['borderTopLeftRadius', 'backgroundColor', 'minHeight']],
-  ['Sección activa', '#s-planes #pview button.on', '', ['backgroundColor', 'fontSize']],
+  ['Sección activa', '#s-planes #pview button.on', '', ['backgroundColor', 'fontSize', 'fontWeight', 'letterSpacing', 'lineHeight']],
   ['Buscador del listado', '#s-planes .r29-search', '', ['borderTopLeftRadius', 'backgroundColor']],
   ['Nombre en la tabla', '#s-planes .r29-table .who b', '', ['fontSize', 'fontWeight', 'fontFamily']],
-  ['Filtro del listado', '#s-planes .r29-list-filters .tabs button', '', ['fontSize', 'borderTopLeftRadius']],
+  ['Filtro del listado', '#s-planes .r29-list-filters .tabs button', '', ['fontSize', 'borderTopLeftRadius', 'fontWeight', 'letterSpacing', 'lineHeight']],
+  ['Filtro activo', '#s-planes .r29-list-filters .tabs button.on', '', ['fontWeight', 'fontSize', 'letterSpacing']],
+  ['CTA Nuevo plan', '.top .cta', '', ['minWidth', 'fontWeight', 'fontSize', 'letterSpacing', 'lineHeight', 'borderTopLeftRadius']],
+  ['Acción de la fila', '#s-planes .r29-table .sbtn', '', ['height', 'fontSize', 'fontWeight', 'letterSpacing', 'lineHeight', 'paddingTop', 'borderTopLeftRadius']],
+  ['Empezar con el asistente', '#s-planes .sbtn.k', '', ['height', 'fontSize', 'fontWeight', 'letterSpacing', 'lineHeight', 'paddingTop', 'borderTopLeftRadius']],
+  ['Orden del listado', '#s-planes .r29-list-filters select', '', ['height', 'fontSize', 'letterSpacing', 'lineHeight']],
 ];
 
 export const PIEZAS_BIBLIOTECA = [

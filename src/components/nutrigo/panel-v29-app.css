@@ -142,9 +142,47 @@
 #pv-panel-v29:not(.mob) .main:has(#s-planes) { height: 100%; overflow: hidden; }
 #pv-panel-v29:not(.mob) #pv-panel:has(#s-planes) { flex: 1; min-height: 0; }
 #pv-panel-v29 #s-planes { min-width: 0; }
+/* La hoja vieja redefine --ink, --ink2 y --line en #pv-panel. En Planes vuelven los del boceto,
+   así los botones, los bordes y el texto usan el mismo negro y el mismo gris. */
+#pv-panel-v29 #pv-panel:has(#s-planes) {
+  --ink: inherit; --ink2: inherit; --ink3: inherit; --line: inherit; color: var(--ink);
+}
 /* La hoja vieja agranda .who b a 17px. En el listado el boceto usa 12,5. */
 #pv-panel-v29 #s-planes .who b,
 #pv-panel-v29 #s-planes .fxwhen b { font-size: 12.5px; font-weight: 500; }
+/* Botones del listado. La app hereda interlineado, tracking y peso, y el ícono
+   (display:block) se apila y estira la acción. El boceto los deja en una línea,
+   peso 400, tracking normal, y el CTA de arriba mide 158. El aviso de
+   próximamente no cambia el botón: sigue el mismo .cta / .sbtn / pestaña. */
+#pv-panel-v29 .main:has(#s-planes) > .top .cta {
+  min-width: 158px; justify-content: center; gap: 7px; padding: 9px 15px;
+  border-radius: 999px; font-size: 12.5px; font-weight: 500; line-height: normal; letter-spacing: normal;
+}
+#pv-panel-v29 .main:has(#s-planes) > .top .cta svg { width: 13px; height: 13px; }
+#pv-panel-v29 #s-planes #pview button,
+#pv-panel-v29 #s-planes .r29-list-filters .tabs button,
+#pv-panel-v29 #s-planes .fxr > button {
+  font-weight: 400; line-height: normal; letter-spacing: normal;
+}
+#pv-panel-v29 #s-planes .sbtn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0; height: auto;
+  padding: 5px 9px; border-radius: 8px; font-size: 11.5px; font-weight: 400;
+  line-height: normal; letter-spacing: normal;
+}
+/* El ícono en línea del boceto queda 1,5 px más arriba que un flex centrado. */
+#pv-panel-v29 #s-planes .sbtn svg { display: block; position: relative; top: -1.5px; }
+/* En flex la línea queda 1 px más baja que el botón en línea del boceto. */
+#pv-panel-v29 #s-planes .sbtn.k { min-height: 28px; }
+/* La hoja vieja pinta todo span de .tabs como una solapa (relleno 5px 10px).
+   En el boceto ese span es solo el número, sin caja. */
+#pv-panel-v29 #s-planes .tabs span.num {
+  padding: 0; margin: 0; background: none; border-radius: 0; box-shadow: none;
+  font-size: 11.5px; font-weight: 400; color: inherit;
+}
+#pv-panel-v29 #s-planes .r29-list-filters select {
+  min-height: auto; height: auto; padding: 9px; font-size: 12.5px; font-weight: 400;
+  line-height: normal; letter-spacing: normal;
+}
 #pv-panel-v29.mob .main:has(#s-planes) > .top { flex: 0 0 auto; height: auto; flex-wrap: wrap; }
 #pv-panel-v29.mob #pv-panel:has(#s-planes),
 #pv-panel-v29.mob #s-planes { flex: none; height: auto; min-height: auto; }

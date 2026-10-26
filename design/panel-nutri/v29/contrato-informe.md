@@ -97,6 +97,11 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Buscador del listado | ✅ igual | |
 | Nombre en la tabla | ✅ igual | |
 | Filtro del listado | ✅ igual | |
+| Filtro activo | ✅ igual | |
+| CTA Nuevo plan | ✅ igual | |
+| Acción de la fila | ✅ igual | |
+| Empezar con el asistente | ✅ igual | |
+| Orden del listado | ✅ igual | |
 
 ## Tema claro · armazón
 
@@ -190,3 +195,8 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Buscador del listado | ✅ igual | |
 | Nombre en la tabla | ✅ igual | |
 | Filtro del listado | ✅ igual | |
+| Filtro activo | ✅ igual | |
+| CTA Nuevo plan | ✅ igual | |
+| Acción de la fila | ✅ igual | |
+| Empezar con el asistente | ✅ igual | |
+| Orden del listado | ✅ igual | |

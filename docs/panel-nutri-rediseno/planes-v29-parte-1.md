@@ -11,6 +11,8 @@ En `/crm/plan`, `/crm/plan?planes=todos` y `/crm/plan?planes=pedidos`:
 - Listado con búsqueda, orden, filtros y la tabla (paciente, plan y objetivo, estado, semana, acción).
 - A la derecha: tu próxima acción, pedidos de cambio y crear con el asistente.
 
+Los botones (Nuevo plan, las secciones, los filtros, Crear plan / Abrir plan, la próxima acción y Elegir paciente y empezar) usan el mismo alto, el mismo relleno, la misma letra y los mismos colores que el boceto. El aviso de «Próximamente» no les cambia la forma.
+
 Recetas abre `/crm/biblioteca?biblioteca=recetas`.
 
 El estado sale del plan que ya guarda el consultorio. Si todavía no se pudo leer, se usa la semana de la ficha y no se inventa un borrador. Si la lectura falla, queda el aviso y «Reintentar». No hay un listado de pedidos de cambio: se muestra «No hay pedidos pendientes.» Un plan que cierra dentro de siete días dice «Por vencer». El boceto, con datos de ejemplo, dice «Vence el viernes»; eso no se copia.
@@ -61,6 +63,6 @@ Entrá en modo demo a `/crm/plan`. Recetas tiene que abrir la Biblioteca. «Abri
 - Contratos revisados: el plan profesional (`audience=pro`) se lee y no se guarda ni se publica desde esta pantalla. No hay tabla nueva.
 - Áreas frágiles: el listado pide el plan de cada paciente. Si uno falla, ese queda con el dato de la ficha y aparece «Reintentar». El menú mira el parámetro `editor` para no marcar «Armar o editar» cuando estás en el listado.
 - Migraciones: no hay.
-- Fire test: ✅ se bajó el límite de «por vencer» de 7 a 3 días y la prueba del listado falló; se volvió a 7.
-- Automatizaciones nuevas: el contrato visual suma las piezas del listado (`npm run panel:contrato:v29`).
-- Veredicto: SHIP de esta parte. Suite de unidad: 3.318 aprobadas y 2 omitidas. Tipos en verde. Cuatro recorridos de Planes en verde. El contrato visual, en claro y en oscuro, coincide (secciones, sección activa, buscador, nombre y filtros). En el celular las dos columnas van una debajo de la otra para que la tabla no quede apretada.
+- Fire test: ✅ se bajó el límite de «por vencer» de 7 a 3 días y la prueba del listado falló; se volvió a 7. En el arreglo de botones, el peso de «Crear plan» pasó a 700 y el navegador lo midió en 700 (el boceto está en 400); se volvió a 400.
+- Automatizaciones nuevas: el contrato visual suma las piezas del listado y, desde este arreglo, el CTA, la acción de la fila, el filtro, el asistente y el orden (`npm run panel:contrato:v29`).
+- Veredicto: SHIP de esta parte, con los botones del listado alineados al boceto después del rechazo visual. En el celular las dos columnas van una debajo de la otra para que la tabla no quede apretada.

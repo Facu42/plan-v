@@ -1,6 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-23)
 
-26/10 · Cursor · Planes del panel, parte 1: en `/crm/plan` se ve el listado del boceto v29 (secciones, búsqueda, filtros y la columna de la derecha). El editor de la semana y el armado con IA quedan para después. El editor que ya existía sigue si se abre con una paciente o desde «Armar o editar». Sin juntar. Detalle en [planes-v29-parte-1.md](panel-nutri-rediseno/planes-v29-parte-1.md).
+26/10 · Cursor · Planes del panel, parte 1: en `/crm/plan` se ve el listado del boceto v29. Después del rechazo visual, los botones (Nuevo plan, secciones, filtros, acción de la fila y la columna de la derecha) quedaron como el boceto. El editor de la semana y el armado con IA siguen para después. Sin juntar. Detalle en [planes-v29-parte-1.md](panel-nutri-rediseno/planes-v29-parte-1.md).
 
 25/10 · Cursor · Alimentos del panel, corrección de paridad en el [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. Facu rechazó la primera pasada. En gramos las porciones son 100 g, 1 taza (30 g) y 1 cucharada (10 g). El origen se lee «SARA 2». SARA 2 sigue de solo lectura.
 
