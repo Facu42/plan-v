@@ -12,9 +12,25 @@ describe('descarga del plan como PDF local',()=>{
     expect(lines).toContain('BORRADOR GUARDADO');expect(lines).toContain('v3');expect(lines).toContain('Primera comida');
     expect(lines).toContain('Avena <script>literal</script> & fruta');expect(lines).not.toContain('@page');expect(lines).not.toContain('&lt;');
   });
+  it('fuerza un salto por semana en el PDF real',async()=>{
+    const fontBytes=await readFile(new URL('../../public/clinical-pdf/Inter-Regular.ttf',import.meta.url));
+    const longCopy={...copy,version:{...copy.version,period_end:'2026-10-20'}};
+    const options={logo:false,caseras:false,compras:false,recetas:false,hoja:true};
+    const on=await PDFDocument.load(await buildPlanPdf({...longCopy,options},{fontBytes}));
+    const off=await PDFDocument.load(await buildPlanPdf({...longCopy,options:{...options,hoja:false}},{fontBytes}));
+    expect(on.getPageCount()).toBeGreaterThanOrEqual(2);
+    expect(off.getPageCount()).toBeGreaterThan(0);
+    expect(planPdfLines({...longCopy,options})).toContain('__WEEK_BREAK__');
+    expect(planPdfLines({...longCopy,options:{...options,hoja:false}})).not.toContain('__WEEK_BREAK__');
+    const {getDocument}=await import('pdfjs-dist/legacy/build/pdf.mjs');
+    const parsed=await getDocument({data:await on.save(),useSystemFonts:true}).promise;
+    const text=await (await parsed.getPage(2)).getTextContent();
+    expect(text.items.map(item=>'str' in item?item.str:'').join(' ')).toContain('19/10/2026');
+    await parsed.destroy();
+  });
   it('genera bytes PDF reales sin diálogo de impresión y no modifica la copia',async()=>{
     const original=JSON.stringify(copy);
-    const fontBytes=await readFile(new URL('../../public/clinical-pdf/Poppins-Regular.ttf',import.meta.url));
+    const fontBytes=await readFile(new URL('../../public/clinical-pdf/Inter-Regular.ttf',import.meta.url));
     const bytes=await buildPlanPdf(copy,{fontBytes});
     expect(new TextDecoder().decode(bytes.slice(0,5))).toBe('%PDF-');
     const pdf=await PDFDocument.load(bytes);expect(pdf.getPageCount()).toBeGreaterThan(0);expect(pdf.getTitle()).toContain('v3');expect(JSON.stringify(copy)).toBe(original);

@@ -77,7 +77,7 @@ it('permite revisar sólo la copia publicada cuando el formulario no coincide y 
   expect(html).toContain('<option value="published" selected="">');
   expect(html).toContain('Copia publicada · v2');
   expect(html).toContain('no publica ni envía');
-  expect(html).toMatch(/<button[^>]*disabled=""[^>]*>Imprimir \/ guardar PDF/);
+  expect(html).toMatch(/<button[^>]*disabled=""[^>]*>Imprimir/);
   expect(html).not.toContain('private-patient-id');
 });
 

@@ -1,3 +1,4 @@
+import type { OpcionesPdf } from './PanelPlanAsistente';
 import { useEffect, useState } from 'react';
 import type { ProfessionalMealPlan } from '../../types/plans';
 import { FigmaRecordDialog } from './FigmaPatientFront';
@@ -7,7 +8,7 @@ import './plan-print.css';
 import { nutritionCapabilityApi } from '../../api/nutrition-capabilities';
 import type { ClinicBrand } from '../../types/nutrition-capabilities';
 
-export function PlanPrintDialog({ plan, patientName, professionalName = '', demo, currentAllowed, onClose }: { plan: ProfessionalMealPlan; patientName: string; professionalName?: string; demo: boolean; currentAllowed: boolean; onClose: () => void }) {
+export function PlanPrintDialog({ plan, patientName, professionalName = '', demo, currentAllowed, onClose, options, action }: { options?: OpcionesPdf; action?: 'download' | 'print'; plan: ProfessionalMealPlan; patientName: string; professionalName?: string; demo: boolean; currentAllowed: boolean; onClose: () => void }) {
   const [selection, setSelection] = useState<'current' | 'published'>(currentAllowed ? 'current' : 'published');
   const [name, setName] = useState(professionalName), [ready, setReady] = useState(false), [error, setError] = useState('');
   const [html, setHtml] = useState('');
@@ -19,11 +20,11 @@ export function PlanPrintDialog({ plan, patientName, professionalName = '', demo
     let active = true;
     setReady(false); setHtml(''); setError('');
     if (version&&brandReady) void import('./PlanPrintDocument').then(({ planPrintHtml }) => {
-      const document = planPrintHtml({ version, patientName, professionalName: name, demo, brand });
+      const document = planPrintHtml({ version, patientName, professionalName: name, demo, brand, options });
       if (active) setHtml(document);
     }).catch(() => { if (active) setError('No pudimos preparar la vista. Cerrala y volvé a intentar.'); });
     return () => { active = false; };
-  }, [version, patientName, name, demo,brand,brandReady]);
+  }, [version, patientName, name, demo,brand,brandReady,options]);
   function print() {
     if (!html || !ready) return;
     let target: Window | null = null;
@@ -34,7 +35,7 @@ export function PlanPrintDialog({ plan, patientName, professionalName = '', demo
       printWindow.opener = null;
       printWindow.document.open();
       printWindow.addEventListener('load', () => {
-        try { printWindow.focus(); printWindow.print(); }
+        try { void printWindow.document.fonts.ready.then(() => { printWindow.focus(); printWindow.print(); }); }
         catch { printWindow.close(); setError('No pudimos abrir la impresión. Volvé a intentar desde esta vista.'); }
       }, { once: true });
       printWindow.addEventListener('afterprint', () => printWindow.close(), { once: true });
@@ -49,7 +50,7 @@ export function PlanPrintDialog({ plan, patientName, professionalName = '', demo
     setDownloading(true);setError('');
     try {
       const [{buildPlanPdf},{downloadClinicalPdf}]=await Promise.all([import('../../lib/meal-plan-pdf'),import('../../lib/clinical-pdf')]);
-      const bytes=await buildPlanPdf({version,patientName,professionalName:name,demo,brand});
+      const bytes=await buildPlanPdf({version,patientName,professionalName:name,demo,brand,options});
       downloadClinicalPdf(bytes,`plan-v${version.version}-${version.period_start}.pdf`);
     }catch{setError('No pudimos preparar la descarga. Conservá la vista y volvé a intentar.');}
     finally{setDownloading(false);}
@@ -62,6 +63,6 @@ export function PlanPrintDialog({ plan, patientName, professionalName = '', demo
     {brandError&&<p role="status">{brandError}</p>}
     {error && <p role="alert">{error}</p>}
     {version ? html ? <PlanPrintPreview html={html} title={`Vista previa del plan ${version.published_at ? 'publicado' : 'en borrador'} versión ${version.version}`} onReady={setReady} /> : <p role="status">Preparando la vista previa…</p> : <p>No hay una copia disponible para imprimir.</p>}
-    <footer><NvButton type="button" disabled={!version || !ready||downloading} onClick={()=>void download()}>{downloading?'Preparando PDF…':'Descargar PDF'}</NvButton><NvButton type="button" className="nv-ghost" disabled={!version || !ready} onClick={print}>Imprimir / guardar PDF</NvButton><NvButton type="button" className="nv-ghost" onClick={onClose}>Cerrar</NvButton></footer>
+    <footer>{action !== 'print' && <NvButton type="button" disabled={!version || !ready||downloading} onClick={()=>void download()}>{downloading?'Preparando PDF…':'Descargar PDF'}</NvButton>}{action !== 'download' && <NvButton type="button" className="nv-ghost" disabled={!version || !ready} onClick={print}>Imprimir</NvButton>}<NvButton type="button" className="nv-ghost" onClick={onClose}>Cerrar</NvButton></footer>
   </FigmaRecordDialog>;
 }

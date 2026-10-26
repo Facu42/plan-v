@@ -46,7 +46,7 @@ describe('opciones del PDF', () => {
     expect(html).toContain('Una semana por hoja');
     expect(html).toContain('Descargar PDF');
     expect(html).toContain('Imprimir');
-    expect(html).toContain('todavía no cambian el PDF');
+    expect(html).not.toContain('todavía no cambian el PDF');
     expect(html).not.toContain('Abrir PDF / imprimir');
   });
 });
