@@ -11,6 +11,10 @@ import { PanelV29Icon } from './PanelV29Icon';
 import { PlanPrintDialog } from './PlanPrintDialog';
 import { fondoAvatar } from './planes-lista';
 import {
+  AVISO_PROGRAMAR, bloqueoAlPublicar, borradorDistinto, guardarPropuestaComoBorrador,
+  pedirPropuesta, periodoAsistente, propuestaDe, publicarPlanRevisado,
+} from './planes-parte-3';
+import {
   cambiarCantidad, cambiarNota, COMIDAS_EDITOR, comidaDelDia, comidasDelDia, controlEntrega,
   copiarPlan, DIAS_CORTOS, DIAS_LARGOS, duplicarDia, fechasDeSemana, filasDeVersiones, HORAS_EDITOR,
   finVisible, indiceLunes, listaDeCompras, lunesDeSemana, paraGuardar, pasaElTope, periodoDe, quitarLinea, semanaInicial, semanasDelPeriodo,
@@ -37,21 +41,6 @@ function descargarTexto(nombre: string, texto: string) {
   enlace.download = nombre;
   enlace.click();
   setTimeout(() => URL.revokeObjectURL(enlace.href), 0);
-}
-
-function propuestaDe(job: AiJobView | null) {
-  if (job?.status !== 'succeeded' || job.artifact?.kind !== 'menu_draft' || job.applied_at) return null;
-  const parsed = mealPlanDraftSchema.safeParse(job.artifact.payload);
-  return parsed.success ? parsed.data : null;
-}
-
-async function esperarPropuesta(inicial: AiJobView) {
-  let job = inicial;
-  for (let intento = 0; intento < 40 && (job.status === 'queued' || job.status === 'running'); intento += 1) {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    job = (await aiJobsApi.get(job.id)).job;
-  }
-  return job;
 }
 
 type Pestana = 'semana' | 'ind' | 'compras' | 'ver' | 'entrega';
@@ -133,9 +122,10 @@ export function PanelPlanEditor({
   const [propuesta, setPropuesta] = useState<AiJobView | null>(null);
   const [armando, setArmando] = useState(false);
   const [vistaPaciente, setVistaPaciente] = useState(false);
-  const [imprimiendo, setImprimiendo] = useState(false);
-  const asistenteVisto = useRef(asistentePedido);
-  const publicarVisto = useRef(publicarPedido);
+  const [copiaImpresion, setCopiaImpresion] = useState<{ plan: ProfessionalMealPlan; currentAllowed: boolean; demo: boolean } | null>(null);
+  const asistenteVisto = useRef(0);
+  const publicarVisto = useRef(0);
+  const pedidoAsistente = useRef(0);
   const itemsRef = useRef(items);
   itemsRef.current = items;
 
@@ -160,7 +150,8 @@ export function PanelPlanEditor({
     setPropuesta(null);
     setArmando(false);
     setVistaPaciente(false);
-    setImprimiendo(false);
+    setCopiaImpresion(null);
+    pedidoAsistente.current += 1;
     if (version) {
       const indice = semanaInicial(version.period_start, version.period_end, hoy);
       setSemana(indice);
@@ -216,7 +207,8 @@ export function PanelPlanEditor({
     ? `${version.nutrition_target.kcal.toLocaleString('es-AR')} kcal por día`
     : plan ? 'Plan en borrador' : 'Sin plan todavía';
   const control = controlEntrega(inicio, fin, items, metaKcal && Number.isFinite(metaKcal) ? metaKcal : null);
-  const hayBorradorNuevo = version?.status === 'draft';
+  const distinto = version ? borradorDistinto(version, items, horas, guidance) : false;
+  const hayBorradorNuevo = version?.status === 'draft' || distinto;
   const puedePublicar = Boolean(plan && hayBorradorNuevo && revisado && !control.vacias && items.length > 0);
 
   function recordar(siguiente: PlanItemView[]) {
@@ -225,15 +217,15 @@ export function PanelPlanEditor({
     setItems(siguiente);
   }
 
-  async function guardar(siguiente: PlanItemView[], extras: { guidance?: PlanGuidance; horas?: Partial<Record<PlanSlot, string>>; kcal?: number } = {}) {
+  async function guardar(siguiente: PlanItemView[], extras: { guidance?: PlanGuidance; horas?: Partial<Record<PlanSlot, string>>; kcal?: number } = {}): Promise<ProfessionalMealPlan | null> {
     if (!siguiente.length) {
       onAviso('El borrador necesita al menos una comida para guardarse.');
-      return;
+      return null;
     }
     if (siguiente.some(item => pasaElTope(inicio, item.for_date))) {
       onAviso('Esas comidas quedan después de las tres semanas que se pueden guardar. El plan publicado no cambió.');
       setGuardando('error');
-      return;
+      return null;
     }
     const periodo = periodoDe(siguiente, inicio, finPeriodo);
     const horasNuevas = extras.horas ?? horas;
@@ -254,7 +246,7 @@ export function PanelPlanEditor({
     if (!parsed.success) {
       onAviso('Revisá las cantidades antes de guardar. El plan publicado no cambió.');
       setGuardando('error');
-      return;
+      return null;
     }
     setGuardando('guardando');
     try {
@@ -262,76 +254,77 @@ export function PanelPlanEditor({
       onPlan(respuesta.plan);
       setGuardando('listo');
       onAviso('');
+      return respuesta.plan;
     } catch {
       setGuardando('error');
       onAviso('No se pudo guardar. El plan publicado no cambió.');
+      return null;
     }
   }
 
   async function publicar() {
-    if (!plan || !version) { onAviso('Primero guardá un borrador para publicar.'); return; }
-    if (!hayBorradorNuevo) { onAviso('No hay cambios nuevos para publicar. La versión publicada se conserva.'); return; }
     if (publicando === 'publicando') return;
-    if (!items.length) { onAviso('El borrador necesita al menos una comida para publicarse.'); return; }
-    if (control.vacias) { onAviso('Hay comidas sin alimentos. Completalas antes de publicar.'); return; }
-    if (!revisado) { onAviso('Marcá que revisaste el plan completo antes de publicar.'); return; }
+    if (!plan || !version) { onAviso(bloqueoAlPublicar({ hayPlan: false, esBorrador: false, cantidad: items.length, vacias: control.vacias, revisado }) ?? ''); return; }
+    const bloqueo = bloqueoAlPublicar({
+      hayPlan: true,
+      esBorrador: version.status === 'draft' || distinto,
+      cantidad: items.length,
+      vacias: control.vacias,
+      revisado,
+    });
+    if (bloqueo) { onAviso(bloqueo); return; }
     setPublicando('publicando');
-    try {
-      const respuesta = await plansApi.publish(plan.id, version.version, version);
-      onPlan(respuesta.plan);
+    let actual = plan;
+    if (distinto) {
+      const guardado = await guardar(items);
+      if (!guardado) { setPublicando('error'); return; }
+      actual = guardado;
+    }
+    const resultado = await publicarPlanRevisado({
+      plan: actual,
+      vacias: control.vacias,
+      cantidad: items.length,
+      revisado: true,
+      hoy,
+    });
+    if (resultado.ok) {
+      onPlan(resultado.plan);
       setRevisado(false);
       setPublicando('listo');
-      onAviso('Plan publicado. La paciente ya puede ver la versión revisada.');
-    } catch (razon) {
-      setPublicando('error');
-      onAviso(careErrorMessage(razon));
-    }
+    } else setPublicando('error');
+    onAviso(resultado.aviso);
   }
 
   async function armarConAsistente() {
     if (armando) return;
+    const marca = pedidoAsistente.current + 1;
+    pedidoAsistente.current = marca;
     setArmando(true);
     setPropuesta(null);
     onAviso('El asistente está armando una propuesta. Queda como borrador privado hasta que la revises.');
-    const desde = version?.period_start ?? lunes;
-    const hasta = version?.period_end ?? sumarDias(desde, 6);
-    try {
-      const respuesta = await aiJobsApi.enqueue({
-        patient_id: paciente.id,
-        job_type: 'menu_draft',
-        period_start: desde,
-        period_end: hasta,
-        slots: [...COMIDAS_EDITOR],
-      });
-      const job = await esperarPropuesta(respuesta.job);
-      if (job.status === 'succeeded' && propuestaDe(job)) {
-        setPropuesta(job);
-        onAviso('La propuesta está lista para revisar. Todavía no se publicó.');
-      } else {
-        onAviso('El asistente no pudo armar la propuesta. El plan no cambió.');
-      }
-    } catch (razon) {
-      onAviso(`El asistente no pudo armar la propuesta. ${careErrorMessage(razon)}`);
-    } finally {
-      setArmando(false);
-    }
+    const periodo = periodoAsistente(version?.period_start ?? lunes, version?.period_end ?? sumarDias(lunes, 6), semana);
+    const resultado = await pedirPropuesta({
+      patientId: paciente.id,
+      desde: periodo.desde,
+      hasta: periodo.hasta,
+      vigente: () => pedidoAsistente.current === marca,
+    });
+    if (pedidoAsistente.current !== marca) return;
+    setArmando(false);
+    if (resultado.ok) setPropuesta(resultado.job);
+    if (resultado.aviso) onAviso(resultado.aviso);
   }
 
   async function aplicarPropuesta() {
     if (!propuesta || armando) return;
     setArmando(true);
-    try {
-      await aiJobsApi.apply(propuesta.id);
-      const { plan: actualizado } = await plansApi.professional(paciente.id);
-      if (!actualizado) throw new Error('No encontramos el borrador actualizado.');
-      onPlan(actualizado);
+    const resultado = await guardarPropuestaComoBorrador({ jobId: propuesta.id, patientId: paciente.id });
+    setArmando(false);
+    if (resultado.ok) {
+      onPlan(resultado.plan);
       setPropuesta(null);
-      onAviso('La propuesta quedó como borrador privado. Revisala y publicala cuando quieras.');
-    } catch (razon) {
-      onAviso(`No se pudo usar la propuesta. ${careErrorMessage(razon)}`);
-    } finally {
-      setArmando(false);
     }
+    onAviso(resultado.aviso);
   }
 
   async function descartarPropuesta() {
@@ -348,9 +341,24 @@ export function PanelPlanEditor({
     onAviso('Lista de compras descargada.');
   }
 
-  function abrirImpresion() {
-    if (!plan) { onAviso('Primero guardá el plan para preparar el PDF.'); return; }
-    setImprimiendo(true);
+  async function abrirImpresion() {
+    if (!plan || !version) { onAviso('Primero guardá el plan para preparar el PDF.'); return; }
+    const distinto = borradorDistinto(version, items, horas, guidance);
+    try {
+      const fresco = await plansApi.professional(paciente.id);
+      if (!fresco.plan || fresco.plan.id !== plan.id) {
+        onAviso('El plan guardado cambió. Volvé a abrirlo antes de imprimir.');
+        return;
+      }
+      const coincide = !distinto && fresco.plan.current.revision === version.revision && fresco.plan.current.version === version.version;
+      if (!coincide && !fresco.plan.published) {
+        onAviso('Guardá los cambios antes de imprimir el borrador. Esta acción no publica el plan.');
+        return;
+      }
+      setCopiaImpresion({ plan: fresco.plan, currentAllowed: coincide, demo: fresco.source === 'memory' || demo });
+    } catch (razon) {
+      onAviso(careErrorMessage(razon));
+    }
   }
 
   function aplicar(siguiente: PlanItemView[] | null) {
@@ -581,6 +589,7 @@ export function PanelPlanEditor({
             </div>
           </> : resumen === 1 ? <div className="r29-patient-preview">
             <div className="r29-note"><PanelV29Icon name="eye" size={15} /><span><b>Así lo ve {primer} en la app.</b><br />Vista previa del borrador. No se envió ninguna notificación.</span></div>
+            <p className="mhelp">Así se vería en la app. Es la vista previa del borrador: no se envió ninguna notificación y no reemplaza el plan publicado.</p>
             {comidas.map(comida => <div key={comida.slot} className="fxr">
               <span className="t"><b>{comida.slot} · {comida.hora}</b><small>{comida.titulo}{comida.lineas.length ? ` · ${comida.lineas.map(linea => linea.nombre).join(', ')}` : ' · Sin alimentos cargados'}</small></span>
               <small className="num">{comida.macros.kcal == null ? 'Sin dato' : `${numero(comida.macros.kcal)} kcal`}</small>
@@ -600,13 +609,13 @@ export function PanelPlanEditor({
               {guidance.recommendations.length ? <section><b>Recomendaciones</b><p>{guidance.recommendations.join(' · ')}</p></section> : null}
               {guidance.avoid.length ? <section><b>Alimentos a evitar</b><p>{guidance.avoid.join(' · ')}</p></section> : null}
             </div>
-            <div className="macts"><button type="button" className="sbtn k" onClick={abrirImpresion}><PanelV29Icon name="dl" size={13} />Abrir PDF / imprimir</button></div>
+            <div className="macts"><button type="button" className="sbtn k" onClick={() => void abrirImpresion()}><PanelV29Icon name="dl" size={13} />Abrir PDF / imprimir</button></div>
           </div>}
         </section>
         <div className="r29-note"><PanelV29Icon name="file" size={15} /><span><b>{publicado ? 'La paciente conserva su plan publicado.' : 'Este plan todavía no se entregó.'}</b><br />Los cambios se preparan en borrador hasta que los revises y publiques.</span></div>
         </div>
       </div> : null}
-      {pestana === 'semana' && modo === 'semana' ? <Semana items={items} fechas={fechas} horas={horas} metaKcal={metaKcal} dia={dia} onDia={indice => { setDia(indice); setModo('dia'); }} onAviso={onAviso} onImprimir={abrirImpresion} /> : null}
+      {pestana === 'semana' && modo === 'semana' ? <Semana items={items} fechas={fechas} horas={horas} metaKcal={metaKcal} dia={dia} onDia={indice => { setDia(indice); setModo('dia'); }} onAviso={onAviso} onImprimir={() => void abrirImpresion()} /> : null}
       {pestana === 'ind' ? <Indicaciones guidance={guidance} onChange={siguiente => { setGuidance(siguiente); if (items.length) void guardar(items, { guidance: siguiente }); else onAviso('El borrador necesita al menos una comida para guardar las indicaciones.'); }} /> : null}
       {pestana === 'compras' ? <Compras items={items} fechas={fechasDeSemana(inicio, fin, semana)} semana={semana + 1} onEntrega={() => setPestana('entrega')} onAviso={onAviso} onDescargar={descargarCompras} /> : null}
       {pestana === 'ver' ? <Versiones nombre={primer} filas={filasDeVersiones(version, historial)} historial={historial.length ? historial : version ? [version] : []} borrador={version?.status === 'draft' ? 'Pendientes de publicar' : 'Sin cambios nuevos'} titulo={tituloPlan} onRestaurar={id => {
@@ -615,14 +624,14 @@ export function PanelPlanEditor({
         aplicar(elegida.items.map(item => ({ ...item, id: crypto.randomUUID(), components: item.components?.map(pieza => ({ ...pieza, id: crypto.randomUUID() })) })));
         onAviso('Se armó un borrador con esa versión. No se publicó.');
       }} onEntrega={() => setPestana('entrega')} /> : null}
-      {pestana === 'entrega' ? <Entrega nombre={primer} publicado={publicado} control={control} incluidas={guidance.recommendations.length + guidance.avoid.length} revisado={revisado} onRevisado={setRevisado} onComidas={() => setPestana('semana')} onIndicaciones={() => setPestana('ind')} onAviso={onAviso}
+      {pestana === 'entrega' ? <Entrega nombre={primer} publicado={publicado} control={control} incluidas={guidance.recommendations.length + guidance.avoid.length} revisado={revisado} onRevisado={setRevisado} onComidas={() => setPestana('semana')} onIndicaciones={() => setPestana('ind')}
         hayBorradorNuevo={hayBorradorNuevo} publicando={publicando} puedePublicar={puedePublicar}
-        onPublicar={() => void publicar()} onVistaPaciente={() => setVistaPaciente(true)} onImprimir={abrirImpresion} onDescargarCompras={descargarCompras}
-        onProgramar={() => onAviso('Programar una fecha y hora manual todavía no está disponible. Al publicar, la entrega se activa según el inicio del período del plan.')} /> : null}
+        onPublicar={() => void publicar()} onVistaPaciente={() => setVistaPaciente(true)} onImprimir={() => void abrirImpresion()} onDescargarCompras={descargarCompras}
+        onProgramar={() => onAviso(AVISO_PROGRAMAR)} /> : null}
     </> : null}
     {propuesta && propuestaDe(propuesta) ? <PropuestaIA job={propuesta} propuesta={propuestaDe(propuesta)!} armando={armando} onAplicar={() => void aplicarPropuesta()} onDescartar={() => void descartarPropuesta()} /> : null}
     {vistaPaciente ? <VistaPacienteDialog paciente={paciente.name} fecha={fecha} tituloDia={tituloDia} comidas={comidas} guidance={guidance} metaKcal={metaKcal} onClose={() => setVistaPaciente(false)} /> : null}
-    {imprimiendo && plan ? <PlanPrintDialog plan={plan} patientName={paciente.name} demo={demo} currentAllowed onClose={() => setImprimiendo(false)} /> : null}
+    {copiaImpresion ? <PlanPrintDialog plan={copiaImpresion.plan} patientName={paciente.name} demo={copiaImpresion.demo} currentAllowed={copiaImpresion.currentAllowed} onClose={() => setCopiaImpresion(null)} /> : null}
   </>;
 }
 
@@ -743,7 +752,6 @@ function Entrega({
   onRevisado: (valor: boolean) => void;
   onComidas: () => void;
   onIndicaciones: () => void;
-  onAviso: (texto: string) => void;
   hayBorradorNuevo: boolean;
   publicando: 'listo' | 'publicando' | 'error';
   puedePublicar: boolean;
@@ -764,13 +772,6 @@ function Entrega({
       </div>
       <p className="mhelp">Estos controles ayudan a recorrer el plan. Las alergias, la tolerancia y las metas requieren tu revisión.</p>
       <label className="r29-note"><input type="checkbox" checked={revisado} onChange={evento => onRevisado(evento.target.checked)} />Revisé el plan completo, las porciones y los cuidados de {nombre}.</label>
-    </section>
-    <section className="fxp">
-      <header><h3>Publicación</h3><span className="sp" /></header>
-      <p className="mhelp">{hayBorradorNuevo ? 'La nueva versión reemplaza a la publicada cuando confirmás. Si hay cambios de versión o alergias, el servidor lo frena y te avisa.' : 'No hay cambios nuevos para publicar. La versión publicada se conserva.'}</p>
-      <button type="button" className="sbtn k" disabled={!puedePublicar || publicando === 'publicando'} onClick={onPublicar}><PanelV29Icon name="send" size={13} />{publicando === 'publicando' ? 'Publicando…' : 'Publicar plan revisado'}</button>
-      {!revisado && hayBorradorNuevo ? <p className="mhelp">Marcá la revisión completa para habilitar la publicación.</p> : null}
-      {control.vacias ? <p className="mhelp">Completá las comidas sin alimentos antes de publicar.</p> : null}
     </section></div>
     <div className="c"><section className="fxp">
       <header><h3>Así lo recibe {nombre}</h3><span className="m">vista del borrador</span><span className="sp" /></header>
@@ -779,6 +780,13 @@ function Entrega({
         <button type="button" onClick={onImprimir}><PanelV29Icon name="file" size={15} /><span className="t"><b>Imprimir / guardar PDF</b><small>Semana seleccionada e indicaciones.</small></span><PanelV29Icon name="chev" size={13} /></button>
         <button type="button" onClick={onDescargarCompras}><PanelV29Icon name="dl" size={15} /><span className="t"><b>Lista de compras</b><small>Descargar cantidades de la semana.</small></span><PanelV29Icon name="chev" size={13} /></button>
       </div>
+    </section>
+    <section className="fxp">
+      <header><h3>Publicación</h3><span className="sp" /></header>
+      <p className="mhelp">{hayBorradorNuevo ? 'La nueva versión reemplaza a la publicada cuando confirmás. Si hay cambios de versión o alergias, el servidor lo frena y te avisa.' : 'No hay cambios nuevos para publicar. La versión publicada se conserva.'}</p>
+      <button type="button" className="cta" disabled={!puedePublicar || publicando === 'publicando'} onClick={onPublicar}><PanelV29Icon name="send" size={13} />{publicando === 'publicando' ? 'Publicando…' : 'Publicar plan revisado'}</button>
+      {!revisado && hayBorradorNuevo ? <p className="mhelp">Marcá la revisión completa para habilitar la publicación.</p> : null}
+      {control.vacias ? <p className="mhelp">Completá las comidas sin alimentos antes de publicar.</p> : null}
       <p><button type="button" className="sbtn" onClick={onProgramar}><PanelV29Icon name="cal" size={13} />Programar entrega</button></p>
     </section></div>
   </div>;

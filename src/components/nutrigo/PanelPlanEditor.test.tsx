@@ -67,6 +67,11 @@ describe('editor del plan', () => {
     expect(html).toContain('Pollo al horno');
     expect(html).toContain('1.800 kcal');
     expect(html).toContain('Asistente IA');
+    expect(html).toContain('Vista del resumen');
+    expect(html).toContain('Análisis');
+    expect(html).toContain('App');
+    expect(html).toContain('PDF');
+    expect(html).not.toContain('parte 3');
     expect(html).toContain('Guardar como plantilla');
     expect(html).toContain('Copiar a otra paciente');
     expect(html).toContain('Ajustar metas');

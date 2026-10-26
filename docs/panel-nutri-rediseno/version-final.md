@@ -262,7 +262,7 @@ abrir el PR, avisa y un Claude lo publica al mismo link (sección 6.4 del traspa
   espera la frase de Facundo para su migración).
 - Sincroniza con la paciente: **nada le llega hasta publicar**. Al publicar, la paciente ve el plan nuevo con «qué
   cambió» (`meal_plan_handovers`), aviso en la app y push; lista de compras al día; con #145, ve y elige las alternativas.
-- Aceptación: publicar en el panel cambia el plan en la app de la paciente; un borrador no se ve.
+- Aceptación: publicar en el panel cambia el plan en la app de la paciente; un borrador no se ve. En el editor v29 (parte 3) ese publicar está en Entrega; el asistente solo deja un borrador.
 
 ### Fase 11. Página pública
 
