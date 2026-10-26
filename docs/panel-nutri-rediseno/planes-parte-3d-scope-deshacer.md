@@ -1,6 +1,6 @@
 # Planes parte 3d: alcance y Deshacer del asistente
 
-26/10/2026 · Codex · Rama `work/planes-parte-3d-scope-deshacer`, base `876aa4e` (#187). Pedido autorizado: `/workspace/brief-planes-parte-3d-codex.md`. Sin producción ni merge.
+26/10/2026 · Codex (implementación) + Claude (cierre, Codex se cortó sin commit por cuota) · Rama `work/planes-parte-3d-scope-deshacer`, base `876aa4e` (#187), [PR #188](https://github.com/Facu42/plan-v/pull/188). Pedido autorizado: `/workspace/brief-planes-parte-3d-codex.md` (implementación) y `/workspace/brief-planes-parte-3d-claude.md` (cierre). Sin producción ni merge.
 
 ## Comportamiento
 
