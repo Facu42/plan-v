@@ -232,6 +232,18 @@
   color: var(--ink2);
   border: 1px solid var(--line2);
 }
+/* La fila Comidas · Indicaciones · Compras · Versiones · Entrega.
+   La hoja vieja pinta todo .tabs con fondo crema, radio 12 y relleno 3.
+   En el boceto esa tira es el gris del panel, radio 9 y relleno 2. */
+#pv-panel-v29 #s-planes.pux-plan .prow2 { line-height: normal; }
+#pv-panel-v29 #s-planes.pux-plan #ptabs {
+  margin-left: 0;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--app);
+  border: 1px solid var(--line);
+  line-height: normal;
+}
 #pv-panel-v29 #s-planes.pux-plan .pewk button { padding: 1px 6px; }
 #pv-panel-v29 #s-planes.pux-plan .pux-hour {
   padding: 1px 2px;

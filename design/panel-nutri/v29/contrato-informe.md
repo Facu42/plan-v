@@ -117,6 +117,8 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Día del editor | ✅ igual | |
 | Día activo | ✅ igual | |
 | Semana activa | ✅ igual | |
+| Fila Comidas | ✅ igual | |
+| Barra de las pestañas | ✅ igual | |
 | Pestaña del editor | ✅ igual | |
 | Pestaña Comidas | ✅ igual | |
 | Duplicar día | ✅ igual | |
@@ -242,6 +244,8 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Día del editor | ✅ igual | |
 | Día activo | ✅ igual | |
 | Semana activa | ✅ igual | |
+| Fila Comidas | ✅ igual | |
+| Barra de las pestañas | ✅ igual | |
 | Pestaña del editor | ✅ igual | |
 | Pestaña Comidas | ✅ igual | |
 | Duplicar día | ✅ igual | |

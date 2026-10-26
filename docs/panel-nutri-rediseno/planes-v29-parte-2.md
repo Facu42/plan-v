@@ -11,7 +11,7 @@ Si la paciente todavía no tiene plan, se ven las cuatro formas de empezar y lo 
 Con la semana abierta se ve:
 
 - La paciente, la meta diaria, el estado de trabajo y los cuidados.
-- Las pestañas Comidas, Indicaciones, Compras, Versiones y Entrega.
+- Las pestañas Comidas, Indicaciones, Compras, Versiones y Entrega, en ese orden. La tira es gris, con radio 9 y relleno 2. Comidas, cuando está elegida, es la pastilla blanca. La hoja vieja la había dejado crema y más redonda.
 - Los días, la semana, el total del día y el resumen de al lado (energía, macros y el equilibrio de la semana).
 - Cada comida se abre de a una. «Expandir todas» las abre juntas. La hora se ve. Cambiar o agregar un plato usa el mismo ícono del boceto.
 - Duplicar un día reemplaza el día de destino.
@@ -62,5 +62,5 @@ Entrá en modo demo a `/crm/plan`. Abrí una fila o tocá Nuevo plan. Si no hay 
 - Migraciones: no hay.
 - Fire test: ✅ se hizo que duplicar un día no copiara nada y la prueba falló (el destino siguió en «Sopa» en vez de «Pollo al horno»). Se volvió a dejar la copia real.
 - Automatizaciones nuevas: el contrato visual, en claro y en oscuro (`npm run panel:contrato:v29`), mide también cómo empezar (Armar con el asistente y Elegir plantilla) y, en la semana, la pestaña, el día, la semana activa, Día/Semana, Editar metas, el chip de cuidados, Asistente IA, deshacer, Más, la hora y el botón de sumar a la comida.
-- Fire test de los botones: ✅ se achicó a propósito el espacio del ícono de Asistente IA y el contrato lo marcó (6 px del boceto contra 4 px). Se volvió a dejar en 6 px.
+- Fire test de los botones: ✅ se achicó a propósito el espacio del ícono de Asistente IA y el contrato lo marcó (6 px del boceto contra 4 px). Se volvió a dejar en 6 px. La tira de Comidas se redondeó a 14 px y el contrato la marcó (el boceto mide 9). Se volvió a dejar en 9.
 - Veredicto: SHIP de esta parte, a la espera del ok visual de Facundo. Los botones que había rechazado quedan medidos contra el boceto. 3.328 pruebas aprobadas y 2 omitidas. Tipos en verde. Contrato visual en verde, claro y oscuro. Cuatro recorridos de Planes en verde. En el celular las cuatro formas de empezar van una debajo de la otra y las comidas no se pisan.
