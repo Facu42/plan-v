@@ -111,6 +111,9 @@ describe('PV-19 planes en PostgreSQL descartable', () => {
     expect(await asUser(patientAUser, 'select id from public.meal_plan_items')).toEqual([]);
     await expect(rpc(patientAUser, 'save_meal_plan_draft', [patientA, planDraft()])).rejects.toMatchObject({ code: '42501' });
     await expect(rpc(patientAUser, 'list_professional_meal_plan', [patientA])).rejects.toMatchObject({ code: '42501' });
+    // Parte 3c: copiar comidas nunca permite escribir en el consultorio ajeno.
+    await expect(rpc(nutriB, 'save_meal_plan_draft', [patientA, planDraft()])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(nutriA, 'save_meal_plan_draft', [patientB, planDraft({ id: crypto.randomUUID() })])).rejects.toMatchObject({ code: '42501' });
     expect(await rpc(nutriB, 'list_professional_meal_plan', [patientB])).toBeNull();
     expect(await rpc(patientAUser, 'list_published_meal_plan', [patientA])).toBeNull();
   });

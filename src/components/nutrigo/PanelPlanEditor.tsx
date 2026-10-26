@@ -1,3 +1,5 @@
+import { GuardarPlantilla, CopiarComidas, ElegirPlantilla } from './PanelPlanReutilizar';
+import { borradorReutilizable } from './planes-reutilizar';
 import { useEffect, useRef, useState } from 'react';
 import { aiJobsApi } from '../../api/ai-jobs';
 import { careErrorMessage } from '../../api/care';
@@ -10,7 +12,7 @@ import { FigmaRecordDialog } from './FigmaPatientFront';
 import { AtajoAsistente, CajonAsistente, CompartirPlan, GestionPlan, OpcionesImpresion, type EstadoTarjeta, type LineaPropuesta, type MensajeAsistente, type OpcionesPdf, type ViaCompartir } from './PanelPlanAsistente';
 import { PanelV29Icon } from './PanelV29Icon';
 import { PlanPrintDialog } from './PlanPrintDialog';
-import { AVISO_ALCANCE, AVISO_COMPARTIR_APP, AVISO_COPIAR_OTRA, AVISO_DESHACER, AVISO_IMPRESO, AVISO_MAIL, lineasDePropuesta } from './planes-asistente';
+import { AVISO_ALCANCE, AVISO_COMPARTIR_APP, AVISO_DESHACER, AVISO_IMPRESO, AVISO_MAIL, lineasDePropuesta } from './planes-asistente';
 import { fondoAvatar } from './planes-lista';
 import {
   AVISO_PROGRAMAR, bloqueoAlPublicar, borradorDistinto, guardarPropuestaComoBorrador,
@@ -23,7 +25,6 @@ import {
   sumarDias, sumarMacros, type GrupoCompra, type MacrosDia,
 } from './planes-editor';
 
-const AVISO_PLANTILLA = 'Próximamente. Las plantillas de Planes quedan para una pasada aparte.';
 const AVISO_PLATO = 'Próximamente. Sumar o cambiar un plato queda para después. Las porciones de lo que ya está en el plan se editan acá.';
 
 export function textoListaCompras(grupos: readonly GrupoCompra[], semana: number, nombre: string) {
@@ -83,7 +84,7 @@ const PDF_INICIAL: OpcionesPdf = { logo: true, caseras: true, compras: true, rec
 export function PanelPlanEditor({
   paciente, pacientes, planes, plan, cargando, hoy, onElegir, onPlan, onAviso,
   asistentePedido = 0, publicarPedido = 0, demo = false, onNuevo, onAsistenteAbierto,
-  propuestaLista = null, onPropuestaTomada,
+  propuestaLista = null, onPropuestaTomada, onPlanCopiado,
 }: {
   paciente: Pick<Patient, 'id' | 'name' | 'initials' | 'tone' | 'goal' | 'plan_b' | 'next_focus' | 'sensitive_hours'>;
   pacientes: Array<Pick<Patient, 'id' | 'name' | 'initials' | 'tone' | 'goal'>>;
@@ -101,7 +102,9 @@ export function PanelPlanEditor({
   onAsistenteAbierto?: (abierto: boolean) => void;
   propuestaLista?: AiJobView | null;
   onPropuestaTomada?: () => void;
+  onPlanCopiado?: (plan: ProfessionalMealPlan) => void;
 }) {
+  const [reutilizar, setReutilizar] = useState<'guardar' | 'copiar' | 'elegir' | null>(null);
   const version = plan?.current ?? null;
   const [pestana, setPestana] = useState<Pestana>('semana');
   const [modo, setModo] = useState<Modo>('dia');
@@ -145,6 +148,8 @@ export function PanelPlanEditor({
   const pedidoAsistente = useRef(0);
   const itemsRef = useRef(items);
   itemsRef.current = items;
+
+  useEffect(() => { setReutilizar(null); }, [paciente.id]);
 
   useEffect(() => {
     setPestana('semana');
@@ -495,6 +500,16 @@ export function PanelPlanEditor({
   const textoGuardado = guardando === 'guardando' ? 'Guardando…' : guardando === 'error' ? 'Sin guardar' : 'Guardado';
 
   return <>
+    {reutilizar === 'guardar' ? <GuardarPlantilla guardar={async () => {
+      if (!items.length) { onAviso('Cargá al menos una comida antes de guardar la plantilla.'); return null; }
+      return !plan || distinto ? guardar(items) : plan;
+    }} onCerrar={() => setReutilizar(null)} onAviso={onAviso} /> : null}
+    {reutilizar === 'copiar' ? <CopiarComidas pacientes={pacientes.filter(p => p.id !== paciente.id)} onCerrar={() => setReutilizar(null)} onAviso={onAviso} onPlan={p => onPlanCopiado?.(p)} copiar={async (id, destinoPlan) => {
+      const periodo = periodoDe(items, inicio, finPeriodo);
+      return (await plansApi.save(id, borradorReutilizable(items, periodo.inicio, periodo.fin, destinoPlan))).plan;
+    }} /> : null}
+    {reutilizar === 'elegir' ? <ElegirPlantilla pacientes={[paciente]} hoy={hoy} onCerrar={() => setReutilizar(null)} onAviso={onAviso} onPlan={onPlan} /> : null}
+
     <div className="pspan r29-patient">
       <div className="ppick">
         <button type="button" className="ppsel" aria-haspopup="listbox" aria-expanded={menu} onClick={() => setMenu(abierto => !abierto)}>
@@ -532,7 +547,7 @@ export function PanelPlanEditor({
         <header><h3>{primer} todavía no tiene plan</h3><span className="m">elegí cómo empezar; queda en borrador hasta que lo publiques</span><span className="sp" /></header>
         <div className="pstart">
           <div><PanelV29Icon name="spark" size={16} /><b>Con el asistente</b><p>Arma una primera semana con lo que cargaste en la ficha de {primer}.</p><button type="button" className="sbtn k" disabled={armando} onClick={() => void armarConAsistente()}>{armando ? 'Armando propuesta…' : 'Armar con el asistente'}</button></div>
-          <div><PanelV29Icon name="clip" size={16} /><b>Desde una plantilla</b><p>Por ejemplo «Descenso 1.600 kcal» o «Sin gluten 1.800 kcal».</p><button type="button" className="sbtn" onClick={() => onAviso(AVISO_PLANTILLA)}>Elegir plantilla</button></div>
+          <div><PanelV29Icon name="clip" size={16} /><b>Desde una plantilla</b><p>Por ejemplo «Descenso 1.600 kcal» o «Sin gluten 1.800 kcal».</p><button type="button" className="sbtn" onClick={() => setReutilizar('elegir')}>Elegir plantilla</button></div>
           <div><PanelV29Icon name="copy" size={16} /><b>Copiar de otra paciente</b><p>Partí del plan de una paciente parecida. Sus datos no se copian.</p><button type="button" className="sbtn" onClick={() => setCopiando(true)}>Elegir paciente</button></div>
           <div><PanelV29Icon name="pen" size={16} /><b>Desde cero</b><p>Semana vacía con las cinco comidas para completar.</p><button type="button" className="sbtn" onClick={empezarVacio}>Empezar vacío</button></div>
         </div>
@@ -572,8 +587,8 @@ export function PanelPlanEditor({
             void guardar(siguiente);
           }}><PanelV29Icon name="redo" size={14} /></button>
           <button type="button" className="sbtn" onClick={abrirCajon}><PanelV29Icon name="spark" size={13} />{armando ? 'Armando…' : 'Asistente IA'}</button>
-          <button type="button" className="sbtn" onClick={() => onAviso(AVISO_PLANTILLA)}><PanelV29Icon name="copy" size={13} />Guardar como plantilla</button>
-          <button type="button" className="sbtn" onClick={() => onAviso('Próximamente. Copiar este plan a otra paciente queda para después.')}><PanelV29Icon name="users" size={13} />Copiar a otra paciente</button>
+          <button type="button" className="sbtn" onClick={() => setReutilizar('guardar')}><PanelV29Icon name="copy" size={13} />Guardar como plantilla</button>
+          <button type="button" className="sbtn" onClick={() => setReutilizar('copiar')}><PanelV29Icon name="users" size={13} />Copiar a otra paciente</button>
           <button type="button" className="sbtn" onClick={() => { if (version?.nutrition_target) setMeta(true); else onAviso('La meta diaria no está cargada en este plan.'); }}><PanelV29Icon name="trend" size={13} />Ajustar metas</button>
         </div>
       </div>
@@ -701,7 +716,7 @@ export function PanelPlanEditor({
         </section>
         <AtajoAsistente onAbrir={abrirCajon} />
         <CompartirPlan nombre={primer} via={via} onVia={setVia} onCompartir={compartirAhora} />
-        <GestionPlan nombre={primer} onNuevo={() => { if (onNuevo) onNuevo(); else empezarVacio(); }} onAsistente={abrirCajon} onPlantilla={() => onAviso(AVISO_PLANTILLA)} onCopiar={() => onAviso(AVISO_COPIAR_OTRA)} onProgramar={() => onAviso(AVISO_PROGRAMAR)} onVer={() => setVistaPaciente(true)} onVersiones={() => setPestana('ver')} onAjustes={() => { if (version?.nutrition_target) setMeta(true); else onAviso('La meta diaria no está cargada en este plan.'); }} />
+        <GestionPlan nombre={primer} onNuevo={() => { if (onNuevo) onNuevo(); else empezarVacio(); }} onAsistente={abrirCajon} onPlantilla={() => setReutilizar('guardar')} onCopiar={() => setReutilizar('copiar')} onProgramar={() => onAviso(AVISO_PROGRAMAR)} onVer={() => setVistaPaciente(true)} onVersiones={() => setPestana('ver')} onAjustes={() => { if (version?.nutrition_target) setMeta(true); else onAviso('La meta diaria no está cargada en este plan.'); }} />
         <div className="r29-note"><PanelV29Icon name="file" size={15} /><span><b>{publicado ? 'La paciente conserva su plan publicado.' : 'Este plan todavía no se entregó.'}</b><br />Los cambios se preparan en borrador hasta que los revises y publiques.</span></div>
         </div>
       </div> : null}

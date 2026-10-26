@@ -34,6 +34,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Planes v29 parte 3c: plantillas y copia | Codex, autorizado por Facundo el 26/10 | `work/planes-parte-3c-plantilla-copiar`, [PR #187](https://github.com/Facu42/plan-v/pull/187), [informe](panel-nutri-rediseno/planes-parte-3c-plantilla-copiar.md) | Guardar plantilla, catálogo/selector y copiar comidas a otra paciente como borrador implementados. 3.362 pruebas y cuatro e2e finales aprobados. PR en borrador por contrato general detenido en asistente de cartera; sin migraciones, producción ni merge |
 | Biblioteca v29: pasar el boceto aprobado a la app | Codex, autorización de Facundo del 25/10 | `codex/biblioteca-v29`, [PR #182](https://github.com/Facu42/plan-v/pull/182), [verificación](panel-nutri-rediseno/biblioteca-v29-verificacion.md) | Corrección de los seis gaps: textos Recetas, tipos, alta de tres campos, asignaciones marcadas con push confirmado, retiro del editor y aviso directo. 3.306 pruebas aprobadas, cuatro omitidas y 12 e2e aprobados. Sin migraciones, producción ni merge |
 | Continuación del boceto v29 (solo dibujo) | Cursor, por pedido de Facundo del 24/10 | `design/panel-nutri/v29/` y [traspaso](panel-nutri-rediseno/continuar-v29-cursor.md) | Las seis pantallas quedaron rearmadas el 25/10 en la copia de trabajo, [PR #174](https://github.com/Facu42/plan-v/pull/174). El original no se tocó. No incorpora v30/v31 ni cambia la app. Falta que Claude las revise y publique el link |
 | Acceso, cartera completa, teléfono de la paciente | Codex | PR #105 (`codex/nutridesk-release-base`) | Borrador. Falta comparar con Figma y la frase de Facundo |
@@ -102,6 +103,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **26/10 · Codex · Planes parte 3c, plantillas y copia** · Autorizado por Facundo en `work/planes-parte-3c-plantilla-copiar`, [PR #187](https://github.com/Facu42/plan-v/pull/187). Guardar con nombre, listado/selector real y copiar las comidas actuales a una paciente propia como borrador, sin publicar ni copiar ficha/metas. Control de pertenencia en servidor y PostgreSQL con dos consultorios. 3.362 pruebas aprobadas, dos omitidas; cuatro e2e finales, tipos y compilación aprobados. [Informe y paso 10](panel-nutri-rediseno/planes-parte-3c-plantilla-copiar.md). PR en borrador por el contrato visual general detenido en el asistente de cartera. Sin migraciones, producción ni merge.
 
 - **26/10 · Cursor · Capturas del PDF real** · Mismo [PR #186](https://github.com/Facu42/plan-v/pull/186), sin juntar. El demo de Sofía quedó en `docs/screenshots/planes-p3b`: los cinco interruptores, Descargar PDF e Imprimir separados, la lista de compras prendida y apagada, y el archivo generado.
 - **26/10 · Codex · Planes parte 3b, PDF real** · Por pedido de Facundo, rama `work/planes-parte-3b-pdf-real` encima de #185. Los cinco interruptores alteran el documento; descarga como archivo e impresión separadas, Inter local y selección de copia guardada/publicada conservada. Cada semana empieza en otra hoja y puede continuar si es extensa. [Informe y paso 10](panel-nutri-rediseno/planes-parte-3b-pdf-real.md). Sin migraciones, producción ni merge.

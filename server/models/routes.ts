@@ -41,13 +41,15 @@ export function registerModelRoutes(app: Hono) {
         'Revisá paciente, fechas y copia del modelo antes de confirmar.',
       );
     const auth = c.get('auth');
-    if (a.persistent && 'userId' in auth)
-      await authorizePatientAction(
+    if (a.persistent && 'userId' in auth) {
+      const allowed = await authorizePatientAction(
         auth.userId,
         parsed.data.patient_id,
         'edit_menu',
         { getActor: sbGetActor, getPatientResource: sbGetPatientResource },
       );
+      if (!allowed) throw new CareError(403, 'No tenés permiso para esta paciente.');
+    }
     return c.json({
       plan: await applyModel(a.owner, id.data, parsed.data, a.persistent),
     });
@@ -64,6 +66,13 @@ export function registerModelRoutes(app: Hono) {
         400,
         'Revisá nombre, contenido y cantidades del modelo.',
       );
+    const auth = c.get('auth');
+    if (parsed.data.source && a.persistent && 'userId' in auth) {
+      const allowed = await authorizePatientAction(auth.userId, parsed.data.source.patient_id, 'edit_menu', {
+        getActor: sbGetActor, getPatientResource: sbGetPatientResource,
+      });
+      if (!allowed) throw new CareError(403, 'No tenés permiso para esta paciente.');
+    }
     return c.json({
       model: await saveModel(a.owner, parsed.data, a.persistent),
     });

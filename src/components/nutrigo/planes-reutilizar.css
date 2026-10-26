@@ -1,0 +1,29 @@
+/* Panel de acciones de la v29 (#act): misma posición, medidas y tokens. */
+#pv-panel-v29 .p3c-dialog {
+  position: fixed; inset: 10px 10px 10px auto; margin: 0;
+  width: min(440px, calc(100vw - 20px)); height: calc(100dvh - 20px);
+  max-height: none; padding: 0; border: 1px solid var(--line); border-radius: 18px;
+  background: var(--card); color: var(--ink); box-shadow: 0 18px 50px rgba(16,17,20,.16);
+}
+#pv-panel-v29 .p3c-dialog::backdrop { background: rgba(16,17,20,.18); }
+#pv-panel-v29 .p3c-dialog > header { padding: 20px 22px 14px; margin: 0; border-bottom: 1px solid var(--line); }
+#pv-panel-v29 .p3c-dialog > header h2 { font-size: 17px; font-weight: 500; letter-spacing: -.02em; color: var(--ink); }
+#pv-panel-v29 .p3c-dialog > header button { background: var(--app); color: var(--ink); }
+#pv-panel-v29 .p3c-dialog form { min-height: calc(100% - 78px); display: flex; flex-direction: column; gap: 14px; padding: 16px 22px; }
+#pv-panel-v29 .p3c-dialog .af { flex: none; }
+#pv-panel-v29 .p3c-dialog .mhelp { margin: 0; color: var(--ink3); }
+#pv-panel-v29 .p3c-dialog .p3c-input {
+  appearance: auto; box-sizing: border-box; margin: 0; width: 100%; min-width: 0; height: 38px;
+  padding: 0 12px; font-size: 13px; line-height: normal; color: var(--ink);
+  background: var(--card); border: 1px solid var(--line2); border-radius: 10px;
+}
+#pv-panel-v29 .p3c-dialog .p3c-input:focus-visible { outline: 2px solid var(--lima-ink); outline-offset: 2px; }
+#pv-panel-v29 .p3c-dialog footer { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); }
+#pv-panel-v29 .p3c-dialog [role="alert"] { color: var(--rojo-ink); }
+#pv-panel-v29 .p3c-catalog { width: min(900px, calc(100vw - 20px)); padding-bottom: 16px; }
+#pv-panel-v29 .p3c-catalog > .fx { padding: 16px 22px; }
+@media (max-width: 760px) {
+  #pv-panel-v29 .p3c-dialog { inset: auto 0 0; width: 100%; height: auto; max-height: 86dvh; border-radius: 22px 22px 0 0; }
+  #pv-panel-v29 .p3c-dialog form { min-height: 0; }
+  #pv-panel-v29 .p3c-catalog > .fx { display: flex; flex-direction: column; }
+}
