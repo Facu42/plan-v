@@ -50,6 +50,7 @@ describe('planes, la entrada', () => {
     expect(html).toContain('No hay pedidos pendientes.');
     expect(html).toContain('Crear con el asistente');
     expect(html).toContain('Elegir paciente y empezar');
+    expect(vista({ onArmar: vi.fn() })).toContain('Armar con IA');
     expect(html).not.toContain('siguen en Planes');
     expect(html).not.toContain('Vence el viernes');
     expect(html).not.toContain('meal-plan-form');

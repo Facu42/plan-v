@@ -136,6 +136,7 @@ describe('asistente', () => {
     const pedido = enqueue.mock.calls[0]?.[0];
     expect(pedido?.job_type).toBe('menu_draft');
     expect(pedido?.slots).toHaveLength(5);
+    expect(pedido?.dietary_preferences).toBeUndefined();
     expect(publicar).not.toHaveBeenCalled();
     expect(resultado.ok).toBe(true);
     if (resultado.ok) expect(resultado.aviso).toContain('Todavía no se publicó');
@@ -166,6 +167,23 @@ describe('asistente', () => {
       expect(resultado.aviso).toContain('Borradores de menú con IA');
       expect(resultado.aviso).not.toContain('Plan publicado');
     }
+  });
+
+  it('manda el pedido recortado y no publica', async () => {
+    const enqueue = vi.fn(async (_input: AiJobEnqueueInput) => {
+      throw new Error('corte');
+    });
+    const publicar = vi.spyOn(plansApi, 'publish');
+    const resultado = await pedirPropuesta({
+      patientId: 'pat-sofia', desde: '2026-10-26', hasta: '2026-11-01',
+      preferencias: ['Cenas livianas', ` ${'x'.repeat(100)}`],
+      enqueue,
+    });
+    const pedido = enqueue.mock.calls[0]?.[0];
+    expect(pedido?.dietary_preferences).toEqual(['Cenas livianas', 'x'.repeat(80)]);
+    expect(publicar).not.toHaveBeenCalled();
+    expect(resultado.ok).toBe(false);
+    publicar.mockRestore();
   });
 
   it('un plan de cuatro semanas se pide de a una semana, dentro del tope', () => {

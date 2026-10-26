@@ -7,12 +7,14 @@ import type { AiJobView } from '../../types/ai-jobs';
 import { mealPlanDraftSchema, type PlanItemView, type PlanSlot, type PlanVersionView, type ProfessionalMealPlan } from '../../types/plans';
 import { emptyGuidance, type PlanGuidance } from '../../types/plan-guidance';
 import { FigmaRecordDialog } from './FigmaPatientFront';
+import { AtajoAsistente, CajonAsistente, CompartirPlan, GestionPlan, OpcionesImpresion, type EstadoTarjeta, type LineaPropuesta, type MensajeAsistente, type OpcionesPdf, type ViaCompartir } from './PanelPlanAsistente';
 import { PanelV29Icon } from './PanelV29Icon';
 import { PlanPrintDialog } from './PlanPrintDialog';
+import { AVISO_ALCANCE, AVISO_COMPARTIR_APP, AVISO_COPIAR_OTRA, AVISO_DESHACER, AVISO_IMPRESO, AVISO_MAIL, lineasDePropuesta } from './planes-asistente';
 import { fondoAvatar } from './planes-lista';
 import {
   AVISO_PROGRAMAR, bloqueoAlPublicar, borradorDistinto, guardarPropuestaComoBorrador,
-  pedirPropuesta, periodoAsistente, propuestaDe, publicarPlanRevisado,
+  pedirPropuesta, periodoAsistente, propuestaDe, publicarPlanRevisado, recortarPreferencias,
 } from './planes-parte-3';
 import {
   cambiarCantidad, cambiarNota, COMIDAS_EDITOR, comidaDelDia, comidasDelDia, controlEntrega,
@@ -76,9 +78,12 @@ function Barra({ porcentaje }: { porcentaje: number | null }) {
   return <span className="fxb"><i style={{ width: `${Math.max(0, Math.min(100, porcentaje ?? 0))}%` }} /></span>;
 }
 
+const PDF_INICIAL: OpcionesPdf = { logo: true, caseras: true, compras: true, recetas: false, hoja: true };
+
 export function PanelPlanEditor({
   paciente, pacientes, planes, plan, cargando, hoy, onElegir, onPlan, onAviso,
-  asistentePedido = 0, publicarPedido = 0, demo = false,
+  asistentePedido = 0, publicarPedido = 0, demo = false, onNuevo, onAsistenteAbierto,
+  propuestaLista = null, onPropuestaTomada,
 }: {
   paciente: Pick<Patient, 'id' | 'name' | 'initials' | 'tone' | 'goal' | 'plan_b' | 'next_focus' | 'sensitive_hours'>;
   pacientes: Array<Pick<Patient, 'id' | 'name' | 'initials' | 'tone' | 'goal'>>;
@@ -92,6 +97,10 @@ export function PanelPlanEditor({
   asistentePedido?: number;
   publicarPedido?: number;
   demo?: boolean;
+  onNuevo?: () => void;
+  onAsistenteAbierto?: (abierto: boolean) => void;
+  propuestaLista?: AiJobView | null;
+  onPropuestaTomada?: () => void;
 }) {
   const version = plan?.current ?? null;
   const [pestana, setPestana] = useState<Pestana>('semana');
@@ -121,6 +130,14 @@ export function PanelPlanEditor({
   const [publicando, setPublicando] = useState<'listo' | 'publicando' | 'error'>('listo');
   const [propuesta, setPropuesta] = useState<AiJobView | null>(null);
   const [armando, setArmando] = useState(false);
+  const [asistenteAbierto, setAsistenteAbierto] = useState(false);
+  const [pestanaAsistente, setPestanaAsistente] = useState<'chat' | 'historial'>('chat');
+  const [alcance, setAlcance] = useState(0);
+  const [pedidoChat, setPedidoChat] = useState('');
+  const [mensajes, setMensajes] = useState<MensajeAsistente[]>([]);
+  const [tarjeta, setTarjeta] = useState<{ lineas: LineaPropuesta[]; estado: EstadoTarjeta } | null>(null);
+  const [via, setVia] = useState<ViaCompartir>('app');
+  const [pdfOpciones, setPdfOpciones] = useState<OpcionesPdf>(PDF_INICIAL);
   const [vistaPaciente, setVistaPaciente] = useState(false);
   const [copiaImpresion, setCopiaImpresion] = useState<{ plan: ProfessionalMealPlan; currentAllowed: boolean; demo: boolean } | null>(null);
   const asistenteVisto = useRef(0);
@@ -149,6 +166,13 @@ export function PanelPlanEditor({
     setPublicando('listo');
     setPropuesta(null);
     setArmando(false);
+    setAsistenteAbierto(false);
+    onAsistenteAbierto?.(false);
+    setPestanaAsistente('chat');
+    setAlcance(0);
+    setPedidoChat('');
+    setMensajes([]);
+    setTarjeta(null);
     setVistaPaciente(false);
     setCopiaImpresion(null);
     pedidoAsistente.current += 1;
@@ -165,7 +189,7 @@ export function PanelPlanEditor({
   }, [paciente.id, version?.id, version?.revision, hoy]);
 
   useEffect(() => {
-    if (pestana !== 'ver' || !paciente.id) return;
+    if ((pestana !== 'ver' && !(asistenteAbierto && pestanaAsistente === 'historial')) || !paciente.id) return;
     const control = new AbortController();
     plansApi.history(paciente.id, control.signal).then(respuesta => {
       if (!control.signal.aborted) setHistorial(respuesta.versions);
@@ -173,7 +197,31 @@ export function PanelPlanEditor({
       if (!control.signal.aborted) setHistorial(version ? [version] : []);
     });
     return () => control.abort();
-  }, [pestana, paciente.id, version]);
+  }, [pestana, asistenteAbierto, pestanaAsistente, paciente.id, version]);
+
+  useEffect(() => {
+    if (!propuestaLista) return;
+    const borrador = propuestaDe(propuestaLista);
+    setAsistenteAbierto(true);
+    onAsistenteAbierto?.(true);
+    setPestanaAsistente('chat');
+    setPropuesta(propuestaLista);
+    setTarjeta(borrador ? { lineas: lineasDePropuesta(borrador.items), estado: 'nueva' } : null);
+    setMensajes(previo => [...previo, { rol: 'ia', texto: 'La propuesta del pedido está lista para revisar. Todavía no se publicó.' }]);
+    onPropuestaTomada?.();
+  }, [propuestaLista, onAsistenteAbierto, onPropuestaTomada]);
+
+  useEffect(() => {
+    if (!asistenteAbierto) return undefined;
+    function cerrar(evento: KeyboardEvent) {
+      if (evento.key === 'Escape') {
+        setAsistenteAbierto(false);
+        onAsistenteAbierto?.(false);
+      }
+    }
+    document.addEventListener('keydown', cerrar);
+    return () => document.removeEventListener('keydown', cerrar);
+  }, [asistenteAbierto, onAsistenteAbierto]);
 
   useEffect(() => {
     if (asistentePedido > 0 && asistenteVisto.current !== asistentePedido && !cargando) {
@@ -295,24 +343,53 @@ export function PanelPlanEditor({
     onAviso(resultado.aviso);
   }
 
-  async function armarConAsistente() {
-    if (armando) return;
+  function abrirCajon() {
+    setAsistenteAbierto(true);
+    onAsistenteAbierto?.(true);
+  }
+
+  function cerrarCajon() {
+    setAsistenteAbierto(false);
+    onAsistenteAbierto?.(false);
+  }
+
+  async function pedirCambio(texto: string) {
+    const limpio = texto.trim();
+    if (!limpio || armando) return;
+    abrirCajon();
+    setPestanaAsistente('chat');
+    setMensajes(previo => [...previo, { rol: 'vos', texto: limpio }]);
+    setPedidoChat('');
     const marca = pedidoAsistente.current + 1;
     pedidoAsistente.current = marca;
     setArmando(true);
     setPropuesta(null);
+    setTarjeta(null);
     onAviso('El asistente está armando una propuesta. Queda como borrador privado hasta que la revises.');
     const periodo = periodoAsistente(version?.period_start ?? lunes, version?.period_end ?? sumarDias(lunes, 6), semana);
+    const etiqueta = [`El ${tituloDia}`, `${COMIDAS_EDITOR[Math.max(0, comidaAbierta)] ?? 'Almuerzo'} del ${tituloDia.slice(0, 3)}`, 'Todo el plan'][alcance] ?? 'Todo el plan';
     const resultado = await pedirPropuesta({
       patientId: paciente.id,
       desde: periodo.desde,
       hasta: periodo.hasta,
+      preferencias: recortarPreferencias([limpio, `Cambios en: ${etiqueta}`]),
       vigente: () => pedidoAsistente.current === marca,
     });
     if (pedidoAsistente.current !== marca) return;
     setArmando(false);
-    if (resultado.ok) setPropuesta(resultado.job);
+    if (resultado.ok) {
+      const borrador = propuestaDe(resultado.job);
+      setPropuesta(resultado.job);
+      setTarjeta(borrador ? { lineas: lineasDePropuesta(borrador.items), estado: 'nueva' } : null);
+      setMensajes(previo => [...previo, { rol: 'ia', texto: AVISO_ALCANCE }]);
+    } else {
+      setMensajes(previo => [...previo, { rol: 'ia', texto: resultado.aviso || 'No pude armar la propuesta. El plan no cambió.' }]);
+    }
     if (resultado.aviso) onAviso(resultado.aviso);
+  }
+
+  function armarConAsistente() {
+    return pedirCambio('Armá una semana con lo que ya está en la ficha.');
   }
 
   async function aplicarPropuesta() {
@@ -323,6 +400,7 @@ export function PanelPlanEditor({
     if (resultado.ok) {
       onPlan(resultado.plan);
       setPropuesta(null);
+      setTarjeta(previo => previo ? { ...previo, estado: 'ok' } : previo);
     }
     onAviso(resultado.aviso);
   }
@@ -331,7 +409,16 @@ export function PanelPlanEditor({
     if (!propuesta) return;
     try { await aiJobsApi.reject(propuesta.id); } catch { /* el descarte local alcanza */ }
     setPropuesta(null);
+    setTarjeta(previo => previo ? { ...previo, estado: 'no' } : previo);
     onAviso('Propuesta descartada. El plan no cambió.');
+  }
+
+  function compartirAhora() {
+    if (via === 'mail') { onAviso(AVISO_MAIL); return; }
+    if (via === 'impreso') { onAviso(AVISO_IMPRESO); return; }
+    if (via === 'pdf') { void abrirImpresion(); return; }
+    setPestana('entrega');
+    onAviso(AVISO_COMPARTIR_APP);
   }
 
   function descargarCompras() {
@@ -484,7 +571,7 @@ export function PanelPlanEditor({
             setItems(siguiente);
             void guardar(siguiente);
           }}><PanelV29Icon name="redo" size={14} /></button>
-          <button type="button" className="sbtn" disabled={armando} onClick={() => void armarConAsistente()}><PanelV29Icon name="spark" size={13} />{armando ? 'Armando…' : 'Asistente IA'}</button>
+          <button type="button" className="sbtn" onClick={abrirCajon}><PanelV29Icon name="spark" size={13} />{armando ? 'Armando…' : 'Asistente IA'}</button>
           <button type="button" className="sbtn" onClick={() => onAviso(AVISO_PLANTILLA)}><PanelV29Icon name="copy" size={13} />Guardar como plantilla</button>
           <button type="button" className="sbtn" onClick={() => onAviso('Próximamente. Copiar este plan a otra paciente queda para después.')}><PanelV29Icon name="users" size={13} />Copiar a otra paciente</button>
           <button type="button" className="sbtn" onClick={() => { if (version?.nutrition_target) setMeta(true); else onAviso('La meta diaria no está cargada en este plan.'); }}><PanelV29Icon name="trend" size={13} />Ajustar metas</button>
@@ -609,9 +696,12 @@ export function PanelPlanEditor({
               {guidance.recommendations.length ? <section><b>Recomendaciones</b><p>{guidance.recommendations.join(' · ')}</p></section> : null}
               {guidance.avoid.length ? <section><b>Alimentos a evitar</b><p>{guidance.avoid.join(' · ')}</p></section> : null}
             </div>
-            <div className="macts"><button type="button" className="sbtn k" onClick={() => void abrirImpresion()}><PanelV29Icon name="dl" size={13} />Abrir PDF / imprimir</button></div>
+            <OpcionesImpresion opciones={pdfOpciones} onCambio={clave => setPdfOpciones(previo => ({ ...previo, [clave]: !previo[clave] }))} onDescargar={() => void abrirImpresion()} onImprimir={() => void abrirImpresion()} />
           </div>}
         </section>
+        <AtajoAsistente onAbrir={abrirCajon} />
+        <CompartirPlan nombre={primer} via={via} onVia={setVia} onCompartir={compartirAhora} />
+        <GestionPlan nombre={primer} onNuevo={() => { if (onNuevo) onNuevo(); else empezarVacio(); }} onAsistente={abrirCajon} onPlantilla={() => onAviso(AVISO_PLANTILLA)} onCopiar={() => onAviso(AVISO_COPIAR_OTRA)} onProgramar={() => onAviso(AVISO_PROGRAMAR)} onVer={() => setVistaPaciente(true)} onVersiones={() => setPestana('ver')} onAjustes={() => { if (version?.nutrition_target) setMeta(true); else onAviso('La meta diaria no está cargada en este plan.'); }} />
         <div className="r29-note"><PanelV29Icon name="file" size={15} /><span><b>{publicado ? 'La paciente conserva su plan publicado.' : 'Este plan todavía no se entregó.'}</b><br />Los cambios se preparan en borrador hasta que los revises y publiques.</span></div>
         </div>
       </div> : null}
@@ -629,7 +719,27 @@ export function PanelPlanEditor({
         onPublicar={() => void publicar()} onVistaPaciente={() => setVistaPaciente(true)} onImprimir={() => void abrirImpresion()} onDescargarCompras={descargarCompras}
         onProgramar={() => onAviso(AVISO_PROGRAMAR)} /> : null}
     </> : null}
-    {propuesta && propuestaDe(propuesta) ? <PropuestaIA job={propuesta} propuesta={propuestaDe(propuesta)!} armando={armando} onAplicar={() => void aplicarPropuesta()} onDescartar={() => void descartarPropuesta()} /> : null}
+    <CajonAsistente
+      abierto={asistenteAbierto}
+      pestana={pestanaAsistente}
+      nombre={primer}
+      alcances={[`El ${tituloDia}`, `${COMIDAS_EDITOR[Math.max(0, comidaAbierta)] ?? 'Almuerzo'} del ${tituloDia.slice(0, 3)}`, 'Todo el plan']}
+      alcance={alcance}
+      mensajes={mensajes}
+      armando={armando}
+      pedido={pedidoChat}
+      tarjeta={tarjeta}
+      historial={historial.length ? historial : version ? [version] : []}
+      onCerrar={cerrarCajon}
+      onPestana={setPestanaAsistente}
+      onAlcance={setAlcance}
+      onPedido={setPedidoChat}
+      onEnviar={() => void pedirCambio(pedidoChat)}
+      onSugerencia={texto => void pedirCambio(texto)}
+      onAplicar={() => void aplicarPropuesta()}
+      onDescartar={() => void descartarPropuesta()}
+      onDeshacer={() => onAviso(AVISO_DESHACER)}
+    />
     {vistaPaciente ? <VistaPacienteDialog paciente={paciente.name} fecha={fecha} tituloDia={tituloDia} comidas={comidas} guidance={guidance} metaKcal={metaKcal} onClose={() => setVistaPaciente(false)} /> : null}
     {copiaImpresion ? <PlanPrintDialog plan={copiaImpresion.plan} patientName={paciente.name} demo={copiaImpresion.demo} currentAllowed={copiaImpresion.currentAllowed} onClose={() => setCopiaImpresion(null)} /> : null}
   </>;
@@ -790,31 +900,6 @@ function Entrega({
       <p><button type="button" className="sbtn" onClick={onProgramar}><PanelV29Icon name="cal" size={13} />Programar entrega</button></p>
     </section></div>
   </div>;
-}
-
-function PropuestaIA({ job, propuesta, armando, onAplicar, onDescartar }: {
-  job: AiJobView;
-  propuesta: NonNullable<ReturnType<typeof propuestaDe>>;
-  armando: boolean;
-  onAplicar: () => void;
-  onDescartar: () => void;
-}) {
-  return <FigmaRecordDialog title="Propuesta del asistente" onClose={onDescartar} closeLabel="Cerrar propuesta del asistente">
-    <p>Del {propuesta.period_start} al {propuesta.period_end}. La propuesta queda como borrador privado: no se publica ni se envía a la paciente.</p>
-    {job.warnings.map(warning => <p role="status" key={warning}>{warning}</p>)}
-    <div className="fxr">
-      {propuesta.items.slice(0, 12).map((item, indice) => <div key={`${item.for_date}-${item.slot}-${indice}`}>
-        <span className="t"><b>{item.for_date} · {item.slot}</b><small>{item.free_text || item.recipe_proposal?.title || 'Receta del catálogo'}</small></span>
-        {item.portions != null ? <small className="num">{item.portions} porciones</small> : null}
-      </div>)}
-    </div>
-    {propuesta.items.length > 12 ? <p className="mhelp">Y {propuesta.items.length - 12} comidas más.</p> : null}
-    <p className="mhelp">Revisá alergias, restricciones, porciones y alimentos antes de publicar.</p>
-    <footer>
-      <button type="button" className="sbtn k" disabled={armando} onClick={onAplicar}>{armando ? 'Guardando…' : 'Usar como borrador'}</button>
-      <button type="button" className="sbtn" disabled={armando} onClick={onDescartar}>Descartar</button>
-    </footer>
-  </FigmaRecordDialog>;
 }
 
 function VistaPacienteDialog({ paciente, fecha, tituloDia, comidas, guidance, metaKcal, onClose }: {

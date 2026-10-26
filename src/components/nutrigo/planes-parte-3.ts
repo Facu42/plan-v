@@ -1,7 +1,7 @@
 import { careErrorMessage } from '../../api/care';
 import { aiJobsApi } from '../../api/ai-jobs';
 import { plansApi } from '../../api/plans';
-import type { AiJobView } from '../../types/ai-jobs';
+import { MAX_DIETARY_PREFERENCE_LENGTH, MAX_DIETARY_PREFERENCES, type AiJobView } from '../../types/ai-jobs';
 import { planDateLabel, planTakesEffectNow } from '../../types/plan-handover';
 import { emptyGuidance, type PlanGuidance } from '../../types/plan-guidance';
 import { mealPlanDraftSchema, type PlanItemView, type PlanSlot, type PlanVersionView, type ProfessionalMealPlan } from '../../types/plans';
@@ -110,16 +110,33 @@ export async function esperarPropuesta(
   return job;
 }
 
+/** El pedido de la IA acepta hasta 10 preferencias de 80 caracteres. */
+export function recortarPreferencias(lineas: readonly string[]) {
+  const vistos = new Set<string>();
+  const salida: string[] = [];
+  for (const linea of lineas) {
+    const texto = linea.trim().slice(0, MAX_DIETARY_PREFERENCE_LENGTH);
+    const clave = texto.toLocaleLowerCase('es');
+    if (!texto || vistos.has(clave)) continue;
+    vistos.add(clave);
+    salida.push(texto);
+    if (salida.length >= MAX_DIETARY_PREFERENCES) break;
+  }
+  return salida;
+}
+
 export async function pedirPropuesta(input: {
   patientId: string;
   desde: string;
   hasta: string;
+  preferencias?: readonly string[];
   vigente?: () => boolean;
   enqueue?: typeof aiJobsApi.enqueue;
   leer?: (id: string) => Promise<AiJobView>;
   esperar?: (ms: number) => Promise<void>;
 }) {
   const vigente = input.vigente ?? (() => true);
+  const preferencias = recortarPreferencias(input.preferencias ?? []);
   try {
     const encolar = input.enqueue ?? aiJobsApi.enqueue;
     const respuesta = await encolar({
@@ -128,6 +145,7 @@ export async function pedirPropuesta(input: {
       period_start: input.desde,
       period_end: input.hasta,
       slots: [...COMIDAS_EDITOR],
+      ...(preferencias.length ? { dietary_preferences: preferencias } : {}),
     });
     if (!vigente()) return { ok: false as const, aviso: '' };
     const job = await esperarPropuesta(

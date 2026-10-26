@@ -9,11 +9,21 @@ test('Planes: la entrega muestra vista, PDF, lista y no publica sola', async ({ 
   await page.getByRole('button', { name: /plan (de|para) Sofía R\./ }).click();
   await expect(page.locator('#s-planes.pux-plan')).toBeVisible();
 
+  await expect(page.getByRole('heading', { name: 'Compartir con Sofía' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Gestión del plan' })).toBeVisible();
+  await page.getByRole('button', { name: 'Ajustar con IA', exact: true }).click();
+  await expect(page.getByRole('tab', { name: 'Chat', exact: true })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Historial de cambios', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Cerrar asistente', exact: true }).click();
+
   await page.getByRole('radio', { name: 'App', exact: true }).click();
   await expect(page.getByText('Así se vería en la app', { exact: false })).toBeVisible();
   await page.getByRole('radio', { name: 'PDF', exact: true }).click();
   await expect(page.getByText('no se envía a la paciente', { exact: false })).toBeVisible();
-  await page.getByRole('button', { name: 'Abrir PDF / imprimir', exact: true }).click();
+  await expect(page.getByRole('switch', { name: 'Logo y colores del consultorio' })).toBeVisible();
+  await expect(page.getByRole('switch', { name: 'Una semana por hoja' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Imprimir', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Descargar PDF', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Imprimir o guardar el plan como PDF' })).toBeVisible();
   await page.getByRole('button', { name: 'Cerrar', exact: true }).click();
 
@@ -33,6 +43,16 @@ test('Planes: la entrega muestra vista, PDF, lista y no publica sola', async ({ 
   await page.getByRole('button', { name: 'Programar entrega', exact: true }).click();
   await expect(page.locator('#s-planes p.mhelp[role="status"]')).toContainText('Próximamente');
   await expect(page.locator('#s-planes')).not.toContainText('Plan publicado');
+
+  await page.getByRole('button', { name: 'Todos los planes', exact: true }).click();
+  await page.locator('#s-planes').getByRole('button', { name: 'Armar con IA', exact: true }).click();
+  await expect(page.locator('#s-planes.pux-create')).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Un plan pensado para/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Crear propuesta del plan', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Dictar pedido', exact: true }).click();
+  await expect(page.locator('#s-planes p.mhelp[role="status"]')).toContainText('Próximamente');
+  await page.getByRole('button', { name: 'Volver al plan', exact: true }).click();
+  await expect(page.locator('#s-planes.pux-plan')).toBeVisible();
 });
 
 test('Planes: publicar con el borrador cambiado no reemplaza el plan de la paciente', async ({ page }) => {
