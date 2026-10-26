@@ -83,6 +83,12 @@ test('3f: diálogo día y hora entra en 1440 y 390, claro y oscuro, con Inter', 
     const dialog=page.getByRole('dialog');
     for(const el of [dialog,dialog.getByRole('heading'),dialog.getByLabel('Día'),dialog.getByLabel('Hora')]) expect(await el.evaluate(el=>getComputedStyle(el).fontFamily)).toContain('Inter');
     const box=await dialog.boundingBox(); expect(box!.x).toBeGreaterThanOrEqual(0); expect(box!.x+box!.width).toBeLessThanOrEqual(width); expect(box!.y+box!.height).toBeLessThanOrEqual(900);
+    expect(box!.x).toBeCloseTo(width === 390 ? 0 : width - 450, 0);
+    expect(box!.width).toBeCloseTo(width === 390 ? width : 440, 0);
+    expect(box!.y + box!.height).toBeCloseTo(width === 390 ? 900 : 890, 0);
+    const cta = await dialog.getByRole('button', { name: 'Programar', exact: true }).boundingBox();
+    const footer = await dialog.locator('footer').boundingBox();
+    expect(cta!.x + cta!.width).toBeCloseTo(footer!.x + footer!.width, 0);
     await page.screenshot({path:testInfo.outputPath(`programar-${width}-${dark?'oscuro':'claro'}.png`)});
     await page.keyboard.press('Escape'); await expect(dialog).toHaveCount(0);
   }
