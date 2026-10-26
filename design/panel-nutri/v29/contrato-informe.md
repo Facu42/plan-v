@@ -128,7 +128,6 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Cuidado | ✅ igual | |
 | Asistente IA | ✅ igual | |
 | Deshacer | ✅ igual | |
-| Más | ✅ igual | |
 | Hora de la comida | ✅ igual | |
 | Sumar a la comida | ✅ igual | |
 
@@ -255,6 +254,5 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Cuidado | ✅ igual | |
 | Asistente IA | ✅ igual | |
 | Deshacer | ✅ igual | |
-| Más | ✅ igual | |
 | Hora de la comida | ✅ igual | |
 | Sumar a la comida | ✅ igual | |

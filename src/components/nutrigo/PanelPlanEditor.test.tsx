@@ -93,7 +93,6 @@ describe('editor del plan', () => {
         period_start: '2026-10-26',
         period_end: '2026-11-22',
         published_at: null,
-        nutrition_target: null,
         items: [{
           id: 'item-1', for_date: '2026-10-26', slot: 'Almuerzo' as const, recipe_id: null, recipe_version: null,
           recipe_title: null, recipe: null, free_text: 'Ensalada', portions: null, public_note: '',
