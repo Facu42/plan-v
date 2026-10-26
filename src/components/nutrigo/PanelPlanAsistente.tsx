@@ -11,9 +11,9 @@ export type OpcionesPdf = { logo: boolean; caseras: boolean; compras: boolean; r
 
 const VIAS: Array<[ViaCompartir, 'send' | 'chat' | 'dl' | 'file', string, string]> = [
   ['app', 'send', 'En su app', 'le llega el aviso al publicar'],
-  ['mail', 'chat', 'Por mail', 'Próximamente. Todavía no se manda por correo.'],
+  ['mail', 'chat', 'Por mail', 'enlace al plan publicado, con acceso por su cuenta'],
   ['pdf', 'dl', 'PDF descargable', 'para guardar o mandar vos'],
-  ['impreso', 'file', 'Impreso', 'Próximamente. Todavía no hay una copia para papel distinta del PDF.'],
+  ['impreso', 'file', 'Impreso', 'vista para papel y opciones de impresión'],
 ];
 
 const INTERRUPTORES: Array<[keyof OpcionesPdf, string]> = [

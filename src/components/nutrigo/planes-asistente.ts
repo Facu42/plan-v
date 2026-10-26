@@ -14,8 +14,6 @@ export const IDEAS_ARMADO = ['Cenas livianas y temprano', 'Viandas para el traba
 
 export const AVISO_DICTAR = 'Próximamente. Dictar el pedido todavía no está disponible.';
 export const AVISO_ADJUNTAR = 'Próximamente. Adjuntar una referencia todavía no está disponible.';
-export const AVISO_MAIL = 'Próximamente. Enviar el plan por mail todavía no está disponible.';
-export const AVISO_IMPRESO = 'Próximamente. La copia impresa, distinta del PDF, todavía no está disponible.';
 export const AVISO_FICHA = 'La ficha guardada igual la lee el asistente. «No usar» solo saca esa línea de las preferencias de este pedido.';
 export const AVISO_FORMATO = 'Estas opciones orientan la propuesta. No cambian la vista ni el PDF. Intercambios y recetas dependen del catálogo; sin precios no se inventan costos. El pedido y la ficha se recortan al límite de la IA.';
 export const AVISO_COPIAR_OTRA = 'Próximamente. Copiar este plan a otra paciente queda para después.';

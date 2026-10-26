@@ -128,6 +128,8 @@ export const mealPlanPublishSchema = z.object({
   expected_snapshot: z.record(z.string(), z.unknown()),
 }).strict();
 
+export const mealPlanScheduleSchema = mealPlanPublishSchema.extend({ scheduled_at: z.iso.datetime({ offset: true }) });
+
 export type MealPlanDraftInput = z.infer<typeof mealPlanDraftSchema>;
 export type PlanRecipeDetail = {
   catalog_recipe?: RecipeCatalogSnapshot;
@@ -179,6 +181,7 @@ export type ProfessionalMealPlan = {
   published: PlanVersionView | null;
   /** Publicado, pero la paciente sigue con el anterior hasta period_start. */
   scheduled?: PlanVersionView | null;
+  delivery_schedule?: { version: number; scheduled_at: string } | null;
 };
 
 export function planReviewSnapshot(version: PlanVersionView) {

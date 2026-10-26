@@ -4,7 +4,7 @@ import { FramePair } from '../FramePair';
 import { nodeId, nodeName, sourceText, type SourceBinding, type SourceNode, type SourceResolver } from '../SourceView';
 import { plansApi } from '../../../api/plans';
 import { buildPublishedPlanDays, mealSlotLabel, planWeekIndex, type PlanItemView } from '../../../types/plans';
-import { planChangeLineText, planDateLabel, planHandoverBanner, type PlanHandover } from '../../../types/plan-handover';
+import { planChangeLineText, planHandoverWhen, planHandoverBanner, type PlanHandover } from '../../../types/plan-handover';
 import { planRecipe, planComponentItems } from '../plan-recipe';
 import { componentTitle, componentGrams, componentNativeQuantity } from '../../../types/plan-components';
 import { PlanGuidanceView } from '../../../components/nutrigo/PlanGuidance';
@@ -146,7 +146,7 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
     </FigmaRecordDialog>}
     {changes&&handover&&<FigmaRecordDialog title="Qué cambia en el plan" onClose={()=>setChanges(false)}>
       <div className="flex flex-col gap-[12px] text-[14px] text-[#272932]">
-        <p>{handover.waiting?`El plan nuevo empieza el ${planDateLabel(handover.starts_on)}. Hasta ese día seguís con el que estás viendo.`:'Este es el plan que estás siguiendo ahora.'}</p>
+        <p>{handover.waiting?`El plan nuevo empieza el ${planHandoverWhen(handover)}. Hasta entonces seguís con el que estás viendo.`:'Este es el plan que estás siguiendo ahora.'}</p>
         <p>{handover.changes.added===0&&handover.changes.removed===0&&handover.changes.changed===0?'No cambian las comidas indicadas.':`Se agregan ${handover.changes.added}, se sacan ${handover.changes.removed} y se modifican ${handover.changes.changed}.`}</p>
         {handover.changes.lines.length>0&&<ul>{handover.changes.lines.map(line=><li key={`${line.kind}-${line.for_date}-${line.slot}`}>{planChangeLineText(line)}</li>)}</ul>}
         {handover.changes.added+handover.changes.removed+handover.changes.changed>handover.changes.lines.length&&<p>Hay más cambios además de estos.</p>}

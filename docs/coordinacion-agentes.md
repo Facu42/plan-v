@@ -34,6 +34,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Planes v29 parte 3f: mail, programar e impreso | Codex, autorizado por Facundo el 26/10 | `work/planes-parte-3f-mail-programar-impreso` | Implementado; 3.396 pruebas aprobadas y dos omitidas. Mail con enlace autenticado e idempotencia, copia impresa y entrega horaria al consultar. [Informe y paso 10](panel-nutri-rediseno/planes-parte-3f-mail-programar-impreso.md). Migración solo en base descartable; sin producción ni merge |
 | Planes v29 parte 3d: alcance y deshacer IA | Codex autorizado por Facundo el 26/10; cerrado por Claude el 26/10 (Codex se cortó sin commit por cuota) | `work/planes-parte-3d-scope-deshacer`, [PR #188](https://github.com/Facu42/plan-v/pull/188), [informe](panel-nutri-rediseno/planes-parte-3d-scope-deshacer.md) | Scope día/comida/todo plan, Deshacer de la última aplicación IA e historial del cajón implementados. 3.369 pruebas, 3.365 aprobadas, 2 omitidas, 2 fallas ajenas al diff (Node 20 sin WebSocket nativo). e2e y PostgreSQL del slice aislados en verde. Diff visual de 1 px ajeno a 3d, documentado. Sin producción ni merge |
 | Planes v29 parte 3e: Armar con IA | Codex, autorizado por Facundo el 26/10 | `work/planes-parte-3e-armar-ia` | Implementado: opciones al prompt y bolsa mensual real con vacío explicado; 3.369 pruebas aprobadas y dos omitidas. [Informe y paso 10](panel-nutri-rediseno/planes-parte-3e-armar-ia.md). PR en borrador por dos diferencias visuales heredadas en filas del listado; rebasado sobre main ae04a35 con parte 3d; sin producción ni merge |
 | Planes v29 parte 3c: plantillas y copia | Codex, autorizado por Facundo el 26/10 | `work/planes-parte-3c-plantilla-copiar`, [PR #187](https://github.com/Facu42/plan-v/pull/187), [informe](panel-nutri-rediseno/planes-parte-3c-plantilla-copiar.md) | Guardar plantilla, catálogo/selector y copiar comidas a otra paciente como borrador implementados. 3.362 pruebas y cuatro e2e finales aprobados. PR en borrador por contrato general detenido en asistente de cartera; sin migraciones, producción ni merge |
@@ -80,6 +81,7 @@ visto bueno de Facundo.
 
 | Rango o archivo | Dueño | Estado |
 |---|---|---|
+| `20261026190000_plan_delivery` | Codex, Planes 3f | Escrita y probada solo en PostgreSQL descartable. Sin aplicar en producción |
 | `20261011140000_clinical_ai_budget` … `20261013123000_imported_clinical_export` (17 archivos, manifiesto en `docs/deployment/nutridesk-migrations-2026-10-13.json` de la rama de Codex) | Codex | Sin aplicar |
 | `20261014180000_sara2_catalog` | Codex | Escrita el 14/10 antes de la regla de fechas nuevas; conservada como entrega 8. Sin aplicar |
 | `20261015090000_patient_views_read_only` | Claude | PR #110, en main desde el 14/10. Aplicada en la base el 14/10 con la frase de Facundo (el historial de la base la anota como `20261014215529`) |
@@ -105,6 +107,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **26/10 · Codex · Planes parte 3f, mail/programar/impreso** · Rama `work/planes-parte-3f-mail-programar-impreso`, base `764a107`, autorizada por Facundo. Enlace autenticado por correo con transporte existente, reserva durable y errores claros; copia para imprimir separada de descarga; programación día/hora que se activa al consultar, con revisión y sin cron ni avisos automáticos. Suite completa 3.396 aprobadas y dos omitidas; cinco e2e aprobados, y repetición final funcional/visual documentada. Migración `20261026190000_plan_delivery` solo en PostgreSQL descartable. [Informe, límites y paso 10](panel-nutri-rediseno/planes-parte-3f-mail-programar-impreso.md). Sin producción ni merge.
 
 - **26/10 · Codex · Rebase de #189 sobre #188** · Rama `work/planes-parte-3e-armar-ia` rebasada sobre `ae04a35`. Único conflicto manual: esta tabla; conservadas las filas 3d y 3e. Los otros cuatro archivos se combinaron automáticamente. Alcance/Deshacer/historial y preferencias/bolsa mensual/Próximamente conservados. 52 pruebas focales aprobadas y fire test detectado y restaurado. Informe actualizado en [parte 3e](panel-nutri-rediseno/planes-parte-3e-armar-ia.md). Sin merge ni producción.
 

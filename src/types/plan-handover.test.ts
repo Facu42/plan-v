@@ -58,3 +58,9 @@ describe('vigencia del plan nuevo', () => {
     expect(planHandoverBanner(null)).toBeNull();
   });
 });
+
+it('la entrega con hora anuncia el momento efectivo en Argentina', () => {
+  const handover: PlanHandover = { version:2,previous_version:1,starts_on:'2026-10-27',scheduled_at:'2026-10-28T02:00:00Z',waiting:true,seen:false,changes:{added:0,removed:0,changed:0,lines:[]} };
+  expect(planHandoverNotice(handover)?.note).toContain('27 oct a las 23:00');
+  expect(planHandoverBanner(handover)).toContain('27 oct a las 23:00');
+});

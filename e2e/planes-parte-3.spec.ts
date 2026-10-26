@@ -62,7 +62,9 @@ test('Planes: la entrega muestra vista, PDF, lista y no publica sola', async ({ 
   expect((await descarga).suggestedFilename()).toMatch(/^lista-compras-/);
 
   await page.getByRole('button', { name: 'Programar entrega', exact: true }).click();
-  await expect(page.locator('#s-planes p.mhelp[role="status"]')).toContainText('Próximamente');
+  await expect(page.getByRole('dialog').getByLabel('Día')).toBeVisible();
+  await expect(page.getByRole('dialog').getByLabel('Hora')).toBeVisible();
+  await page.getByRole('dialog').getByRole('button', { name: 'Cerrar', exact: true }).click();
   await expect(page.locator('#s-planes')).not.toContainText('Plan publicado');
 
   await page.getByRole('button', { name: 'Todos los planes', exact: true }).click();
