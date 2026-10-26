@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { aiJobsApi } from '../../api/ai-jobs';
+import type { AiMonthlyUsage } from '../../types/ai-jobs';
 import type { Patient } from '../../types';
 import { PanelV29Icon } from './PanelV29Icon';
 import { fondoAvatar } from './planes-lista';
@@ -23,6 +25,16 @@ export function PanelPlanArmar({
   onCrear: (preferencias: string[], duracion: DuracionArmado) => void;
 }) {
   const paciente = pacientes.find(persona => persona.id === pacienteId) ?? pacientes[0];
+  const [uso, setUso] = useState<AiMonthlyUsage | null | undefined>(undefined);
+  useEffect(() => {
+    const controller = new AbortController();
+    setUso(undefined);
+    if (pacienteId) aiJobsApi.list(pacienteId, controller.signal)
+      .then(respuesta => { if (!controller.signal.aborted) setUso(respuesta.usage ?? null); })
+      .catch(() => { if (!controller.signal.aborted) setUso(null); });
+    else setUso(null);
+    return () => controller.abort();
+  }, [pacienteId, armando]);
   const [pedido, setPedido] = useState('');
   const [elegir, setElegir] = useState(false);
   const [dieta, setDieta] = useState(0);
@@ -53,13 +65,20 @@ export function PanelPlanArmar({
       onAviso('Contá qué plan necesitás antes de crear la propuesta.');
       return;
     }
-    onCrear(preferenciasDelArmado({
-      pedido,
-      dieta: DIETAS_PLAN[dieta] ?? 'General',
-      estrategias,
-      cuidados,
-      ficha,
-    }), duracion);
+    try {
+      onCrear(preferenciasDelArmado({
+        pedido,
+        dieta: DIETAS_PLAN[dieta] ?? 'General',
+        estrategias,
+        cuidados,
+        ficha,
+        formato: FORMATOS_PLAN[formato],
+        medidas: MEDIDAS_PLAN[medidas],
+        incluir: INCLUIR_PLAN.filter((_, indice) => incluir[indice]),
+      }), duracion);
+    } catch (error) {
+      onAviso(error instanceof Error ? error.message : 'Revisá las opciones del pedido.');
+    }
   }
 
   if (!paciente) return <p className="mhelp">Todavía no hay pacientes para armar un plan.</p>;
@@ -145,8 +164,14 @@ export function PanelPlanArmar({
       </section>
       <section className="fxp">
         <header><h3>Uso de IA este mes</h3><span className="sp" /></header>
-        <div className="iause"><b className="num">Sin dato</b><span>de US$ 5 · todavía no medimos el gasto de este mes</span></div>
+        <div className="iause" role="status"><b className="num">{uso ? dolares(uso.used_micros) : uso === undefined ? 'Cargando…' : 'Sin dato'}</b><span>{uso
+          ? `de ${dolares(uso.limit_micros)} · bolsa compartida de Plan V · ${uso.month}. Incluye reservas pendientes. ${uso.source === 'memory' ? 'Demo local; no es gasto real del proveedor.' : 'Registro del servidor; no es una factura del proveedor.'}`
+          : 'No pudimos consultar el registro mensual de IA. No se informa un gasto ni un tope sin verificar.'}</span></div>
       </section>
     </div>
   </div>;
+}
+
+function dolares(micros: number) {
+  return `US$ ${(micros / 1_000_000).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
 }

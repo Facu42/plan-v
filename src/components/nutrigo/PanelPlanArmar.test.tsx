@@ -25,8 +25,8 @@ describe('armar un plan con IA', () => {
     expect(html).toContain('Crear propuesta del plan');
     expect(html).toContain('No usar');
     expect(html).toContain('Uso de IA este mes');
-    expect(html).toContain('Sin dato');
-    expect(html).toContain('US$ 5');
+    expect(html).toContain('Cargando…');
+    expect(html).toContain('sin verificar');
     expect(html).not.toContain('US$ 1,20');
     expect(html).not.toContain('US$ 1.20');
     expect(html).toContain('no recibe nada hasta que lo publiques');

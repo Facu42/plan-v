@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { app } from '../index.js';
 import { resetStore } from '../store.js';
+import { clinicalMemoryBudget, argentinaBudgetMonth } from '../clinical-processing/budget.js';
+import { memoryJobContext } from './repository.js';
 import { CONSENT_CATALOG } from '../intake/consent.js';
 
 const patient = 'pat-sofia';
@@ -233,4 +235,28 @@ describe('PV-27 jobs de IA versionados', () => {
     await consentAi();
     expect(await runAiJob(DEMO_NUTRITIONIST_ID, queued.id, false)).toMatchObject({ status: 'stale', artifact: null });
   });
+});
+
+it('la lectura existente agrega la bolsa real y las opciones llegan al contexto privado', async () => {
+  resetStore();
+  await consentAi();
+  await declareAllergies();
+  const preferences = ['Formato: Lista por día', 'Medidas: Las dos', 'Incluir: Mi recetario; Lista de compras'];
+  const created = await post('/api/ai/jobs', { patient_id: patient, job_type: 'menu_draft',
+    period_start: '2026-10-26', period_end: '2026-10-26', slots: ['Almuerzo'], dietary_preferences: preferences });
+  expect(created.status).toBe(202);
+  const { job } = await created.json() as { job: { id: string; applied_at: string | null } };
+  expect(memoryJobContext(job.id)).toMatchObject({ preferences: { dietary: preferences } });
+  expect(job.applied_at).toBeNull();
+  const month = argentinaBudgetMonth();
+  const key = randomUUID();
+  await clinicalMemoryBudget.reserve({ key, month, micros: 123456 });
+  await clinicalMemoryBudget.settle(key, 'charged', 123456);
+  const response = await app.request(`/api/patients/${patient}/ai/jobs`);
+  expect(response.headers.get('Cache-Control')).toBe('no-store');
+  const body = await response.json() as { usage: { used_micros: number; month: string; scope: string }; jobs: unknown[] };
+  expect(body.usage).toMatchObject({ month, scope: 'global', used_micros: await clinicalMemoryBudget.used(month) });
+  expect(body.usage.used_micros).toBeGreaterThanOrEqual(123456);
+  expect(body.usage).not.toHaveProperty('operation_key');
+  expect((await app.request('/api/patients/missing/ai/jobs')).status).toBe(404);
 });
