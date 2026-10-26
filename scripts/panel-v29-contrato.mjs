@@ -79,6 +79,15 @@ export const PIEZAS_PLANES = [
   ['Orden del listado', '#s-planes .r29-list-filters select', '', ['height', 'fontSize', 'letterSpacing', 'lineHeight']],
 ];
 
+export const PIEZAS_EDITOR = [
+  ['Día del editor', '#s-planes .pedays button', '', ['fontSize', 'borderTopLeftRadius', 'fontWeight']],
+  ['Día activo', '#s-planes .pedays button.on', '', ['backgroundColor', 'borderTopLeftRadius']],
+  ['Pestaña del editor', '#s-planes #ptabs button', '', ['fontSize', 'borderTopLeftRadius']],
+  ['Pestaña Comidas', '#s-planes #ptabs button.on', '', ['backgroundColor', 'fontWeight']],
+  ['Duplicar día', '#s-planes .petool .lnk', '', ['fontSize', 'fontWeight']],
+  ['Contexto del plan', '#s-planes .r29-context', '', ['borderTopLeftRadius', 'minHeight']],
+];
+
 export const PIEZAS_BIBLIOTECA = [
   ['Grilla de recursos', '#s-biblioteca .sxlib', '', ['display', 'gap']],
   ['Tarjeta de recurso', '#s-biblioteca .sxcard', '', ['backgroundColor', 'borderTopLeftRadius', 'paddingTop', 'textAlign']],
@@ -328,6 +337,14 @@ export async function correrContratoV29() {
       await a.waitForSelector('#s-planes .r29-search');
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Planes\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_PLANES, informe);
+      await b.locator('#s-planes .r29-table .sbtn', { hasText: 'Abrir plan' }).first().click();
+      await b.waitForSelector('#s-planes.pux-plan .pedays button');
+      await a.locator('#s-planes .r29-table .sbtn').first().click();
+      const empezar = a.getByRole('button', { name: 'Empezar vacío', exact: true });
+      if (await empezar.count()) await empezar.click();
+      await a.waitForSelector('#s-planes.pux-plan .pedays button');
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Editor de Planes\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_EDITOR, informe);
       await b.close();
       await a.close();
     }

@@ -138,7 +138,7 @@
 #pv-panel-v29.mob .main:has(#s-alimentos) > .top .sxin { flex: 1 1 100%; }
 #pv-panel-v29.mob .main:has(#s-alimentos) > .top .sxin input { width: 100%; min-width: 0; }
 
-/* Planes (parte 1) llena la columna. El editor y el asistente no están en esta pantalla. */
+/* Planes llena la columna. El asistente de la parte 3 no está en esta pantalla. */
 #pv-panel-v29:not(.mob) .main:has(#s-planes) { height: 100%; overflow: hidden; }
 #pv-panel-v29:not(.mob) #pv-panel:has(#s-planes) { flex: 1; min-height: 0; }
 #pv-panel-v29 #s-planes { min-width: 0; }
@@ -173,6 +173,15 @@
 #pv-panel-v29 #s-planes .sbtn svg { display: block; position: relative; top: -1.5px; }
 /* En flex la línea queda 1 px más baja que el botón en línea del boceto. */
 #pv-panel-v29 #s-planes .sbtn.k { min-height: 28px; }
+#pv-panel-v29 #s-planes .pema .sbtn,
+#pv-panel-v29 #s-planes .pfoot .sbtn,
+#pv-panel-v29 #s-planes .r29-tools .sbtn { gap: 5px; }
+#pv-panel-v29.mob #s-planes .pstart { grid-template-columns: 1fr; }
+#pv-panel-v29.mob #s-planes .pstart > div { min-height: 0; }
+/* En el celular la comida no se pisa: el boceto pide ahora wrap y el editor lo anula. */
+#pv-panel-v29.mob #s-planes.pux-plan .pedit { overflow: visible; }
+#pv-panel-v29.mob #s-planes.pux-plan .pemh { flex-wrap: wrap; row-gap: 8px; }
+#pv-panel-v29.mob #s-planes.pux-plan .pema { margin-left: auto; }
 /* La hoja vieja pinta todo span de .tabs como una solapa (relleno 5px 10px).
    En el boceto ese span es solo el número, sin caja. */
 #pv-panel-v29 #s-planes .tabs span.num {
