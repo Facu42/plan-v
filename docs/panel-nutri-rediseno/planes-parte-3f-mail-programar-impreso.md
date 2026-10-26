@@ -1,6 +1,6 @@
 # Planes parte 3f — mail, programación e impreso
 
-Base 764a107; rama work/planes-parte-3f-mail-programar-impreso. Autorizado por Facundo el 26/10/2026. Sin producción ni merge.
+[PR #190 en borrador contra main](https://github.com/Facu42/plan-v/pull/190). Base 764a107; rama work/planes-parte-3f-mail-programar-impreso. Autorizado por Facundo el 26/10/2026. Sin producción ni merge.
 
 ## Plan y flujos críticos (Regression Guard, paso 1)
 
