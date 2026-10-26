@@ -12,7 +12,7 @@ Con la semana abierta se ve:
 
 - La paciente, la meta diaria, el estado de trabajo y los cuidados.
 - Las pestañas Comidas, Indicaciones, Compras, Versiones y Entrega, en ese orden. La tira es gris, con radio 9 y relleno 2. Comidas, cuando está elegida, es la pastilla blanca. La hoja vieja la había dejado crema y más redonda.
-- Los días y las semanas (1, 2, 3 y 4 al empezar vacío; la activa en negro), el total del día y el resumen de al lado (energía, macros y el equilibrio de la semana).
+- Los días, de lunes a domingo, quedan solos en su tira. Las semanas (1, 2, 3 y 4 al empezar vacío; la activa en negro) están a la izquierda de Día / Semana, en la misma fila del título. En el boceto esos círculos siguen al lado de los días; Facundo pidió subirlos.
 - Cada comida se abre de a una. «Expandir todas» las abre juntas. La hora se ve. Cambiar o agregar un plato usa el mismo ícono del boceto.
 - Duplicar un día reemplaza el día de destino.
 - Las porciones, la nota y quitar una comida se guardan en el borrador. Deshacer y rehacer también.
@@ -66,4 +66,5 @@ Entrá en modo demo a `/crm/plan`. Abrí una fila o tocá Nuevo plan. Si no hay 
 - Automatizaciones nuevas: el contrato visual, en claro y en oscuro (`npm run panel:contrato:v29`), mide también cómo empezar (Armar con el asistente y Elegir plantilla) y, en la semana, la pestaña, el día, la semana activa, Día/Semana, Editar metas, el chip de cuidados, Asistente IA, deshacer, la hora y el botón de sumar a la comida. El menú «Más» salió de la barra, así que el contrato ya no lo busca.
 - Fire test de los botones: ✅ se achicó a propósito el espacio del ícono de Asistente IA y el contrato lo marcó (6 px del boceto contra 4 px). Se volvió a dejar en 6 px. La tira de Comidas se redondeó a 14 px y el contrato la marcó (el boceto mide 9). Se volvió a dejar en 9.
 - Fire test de las semanas y de la barra: ✅ se dejó el arranque vacío en una sola semana y la prueba pidió el 15 de noviembre en vez del 25 de octubre. Se volvió a poner «Más ···» en la barra y la prueba del editor lo marcó. Se volvió a dejar las cuatro semanas y las tres acciones a la vista.
+- Fire test del lugar: ✅ se bajaron los círculos otra vez al lado de los días y la prueba dijo que estaban abajo. Se volvieron a subir, a la izquierda de Día / Semana.
 - Veredicto: SHIP de esta parte, a la espera del ok visual de Facundo. Al empezar vacío se ven las semanas 1 a 4, y la barra muestra guardar como plantilla, copiar a otra paciente y ajustar metas, sin el menú «Más». 3.330 pruebas aprobadas y 2 omitidas. Tipos en verde. Contrato visual en verde, claro y oscuro. Cuatro recorridos de Planes en verde. En el celular las cuatro formas de empezar van una debajo de la otra, las cuatro semanas se ven juntas y las comidas no se pisan.

@@ -103,6 +103,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **26/10 · Cursor · Planes v29, parte 2, semanas al lado de Día / Semana** · Mismo [PR #184](https://github.com/Facu42/plan-v/pull/184). Facundo pidió subir los círculos 1 a 4: quedan a la izquierda de Día / Semana, en esa misma fila. La tira de días queda sola. En el boceto siguen abajo; se priorizó el pedido. Sin juntar.
 - **26/10 · Cursor · Planes v29, parte 2, semanas y barra** · Mismo [PR #184](https://github.com/Facu42/plan-v/pull/184). Facundo dijo «Casi»: al empezar vacío se veían solo la semana 1, y las acciones seguían en «Más». Ahora se ven las semanas 1 a 4 juntas, y guardar como plantilla, copiar a otra paciente y ajustar metas quedan en la misma barra. Sin juntar.
 - **26/10 · Cursor · Planes v29, parte 2, pestañas** · Mismo [PR #184](https://github.com/Facu42/plan-v/pull/184). Facundo marcó la fila Comidas, Indicaciones, Compras, Versiones y Entrega. La tira quedó con el gris, el radio y el relleno del boceto. Sin juntar.
 - **26/10 · Cursor · Planes v29, parte 2, botones** · Misma rama y mismo [PR #184](https://github.com/Facu42/plan-v/pull/184). Facundo rechazó el ok visual: los botones, chips y llamadas del editor y de «cómo empezar» no cerraban contra el boceto. Quedaron con el mismo alto, relleno, letra y color. No se reabrió el listado ni se armó la parte 3. Sin juntar.

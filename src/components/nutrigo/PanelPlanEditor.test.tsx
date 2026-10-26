@@ -77,6 +77,7 @@ describe('editor del plan', () => {
     const semanas = botonesSemana(html);
     expect(semanas).toContain('>1<');
     expect(semanas).not.toContain('>2<');
+    expect(lugarDeLasSemanas(html)).toBe('arriba');
   });
 
   it('un plan de cuatro semanas muestra los cuatro círculos juntos', () => {
@@ -99,14 +100,23 @@ describe('editor del plan', () => {
         }],
       },
     };
-    const semanas = botonesSemana(editor(plan));
+    const html = editor(plan);
+    const semanas = botonesSemana(html);
     expect(semanas).toContain('>1<');
     expect(semanas).toContain('>2<');
     expect(semanas).toContain('>3<');
     expect(semanas).toContain('>4<');
     expect(semanas).not.toContain('>5<');
+    expect(lugarDeLasSemanas(html)).toBe('arriba');
   });
 });
+
+function lugarDeLasSemanas(html: string) {
+  const semana = html.indexOf('aria-label="Elegir semana"');
+  const vista = html.indexOf('aria-label="Vista de las comidas"');
+  const dia = html.indexOf('aria-label="Elegir día"');
+  return semana >= 0 && semana < vista && vista < dia ? 'arriba' : 'abajo';
+}
 
 function botonesSemana(html: string) {
   const inicio = html.indexOf('aria-label="Elegir semana"');

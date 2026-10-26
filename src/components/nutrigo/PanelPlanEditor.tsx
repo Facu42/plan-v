@@ -331,6 +331,7 @@ export function PanelPlanEditor({
           <header>
             <div className="pux-editor-title"><h4>Comidas del día</h4><small>Editá las porciones y revisá el total al instante.</small></div>
             <span className="sp" />
+            <div className="pewk" aria-label="Elegir semana"><span>Semana</span>{Array.from({ length: semanasDelPeriodo(inicio, fin) }, (_, indice) => <button type="button" key={indice} className={indice === semana ? 'on' : undefined} aria-pressed={indice === semana} onClick={() => { setSemana(indice); setDia(0); }}>{indice + 1}</button>)}</div>
             <div className="iaseg" role="radiogroup" aria-label="Vista de las comidas">
               <button type="button" role="radio" aria-checked="true" onClick={() => setModo('dia')}>Día</button>
               <button type="button" role="radio" aria-checked="false" onClick={() => setModo('semana')}>Semana</button>
@@ -343,7 +344,6 @@ export function PanelPlanEditor({
                 {items.some(item => item.for_date === iso) ? <i /> : null}
               </button>)}
             </div>
-            <div className="pewk" aria-label="Elegir semana"><span>Semana</span>{Array.from({ length: semanasDelPeriodo(inicio, fin) }, (_, indice) => <button type="button" key={indice} className={indice === semana ? 'on' : undefined} aria-pressed={indice === semana} onClick={() => { setSemana(indice); setDia(0); }}>{indice + 1}</button>)}</div>
           </div>
           <div className="petot">
             <div><small>{tituloDia}</small><b className="num">{delDia.kcal == null ? '—' : <>{numero(delDia.kcal)}<span> kcal</span></>}</b><span>{metaKcal ? `meta ${metaKcal.toLocaleString('es-AR')}` : 'sin meta cargada'}</span>{metaKcal && delDia.kcal != null ? <span className={`pill ${Math.abs(delDia.kcal / metaKcal - 1) > 0.04 ? 'p-wait' : 'p-conf'}`}>{Math.abs(delDia.kcal / metaKcal - 1) > 0.04 ? `${delDia.kcal > metaKcal ? '+' : ''}${Math.round(delDia.kcal / metaKcal * 100 - 100)}%` : 'En la meta'}</span> : null}</div>

@@ -184,12 +184,36 @@
   letter-spacing: normal;
   line-height: normal;
 }
-/* Las cuatro semanas quedan juntas, al lado de los días. Si el grupo se
-   achica, los círculos bajan de a uno y se ve un solo «1». */
-#pv-panel-v29 #s-planes.pux-plan .pux-calendar > .pewk {
+/* Las semanas van a la izquierda de Día / Semana, en la misma fila del título.
+   En el boceto el grupo está abajo, al lado de los días, y la palabra Semana
+   ocupa un renglón propio. Acá la palabra y los círculos quedan en línea. */
+#pv-panel-v29 #s-planes.pux-plan .pedit > header .pewk {
   flex: none;
+  flex-wrap: nowrap;
+  align-items: center;
+  align-self: center;
   width: max-content;
   max-width: 100%;
+}
+#pv-panel-v29 #s-planes.pux-plan .pedit > header .pewk > span {
+  flex-basis: auto;
+  margin-right: 6px;
+}
+#pv-panel-v29 #s-planes.pux-plan .pedit > header > .iaseg {
+  align-self: center;
+}
+/* En el celular el título ocupa todo el ancho. Los círculos de 34 px
+   no entran al lado de Día / Semana y el interruptor baja de renglón.
+   Un poco más chicos, quedan en la misma fila, a la izquierda. */
+#pv-panel-v29.mob #s-planes.pux-plan .pedit > header .sp {
+  display: none;
+}
+#pv-panel-v29.mob #s-planes.pux-plan .pedit > header .pewk {
+  margin-left: auto;
+}
+#pv-panel-v29.mob #s-planes.pux-plan .pedit > header .pewk button {
+  width: 30px;
+  height: 30px;
 }
 /* Guardar como plantilla, copiar y ajustar metas van en esta misma barra.
    La hoja generada deja la fila en una sola línea; con los tres textos
