@@ -1,0 +1,51 @@
+# Planes parte 3d: alcance y Deshacer del asistente
+
+26/10/2026 · Codex · Rama `work/planes-parte-3d-scope-deshacer`, base `876aa4e` (#187). Pedido autorizado: `/workspace/brief-planes-parte-3d-codex.md`. Sin producción ni merge.
+
+## Comportamiento
+
+- «Cambios en» manda fechas y comidas reales: el día visible, la comida abierta de ese día, o el período completo. El pedido captura el alcance; cambiar el selector después no modifica una propuesta ya lista.
+- Se piden las cinco comidas del editor; Extra se incluye solamente si ya existía en el plan. El servidor filtra cualquier resultado fuera del pedido y conserva las comidas restantes, el período, las indicaciones, los horarios, los nombres de comidas y la meta. El artefacto completo se aplica en una sola escritura con el control de revisión existente.
+- Aplicar registra un snapshot del borrador previo. Deshacer, en la barra del cajón, en la tarjeta o en la última aplicación del historial, restaura esa copia por la API existente. Genera una revisión nueva; no reutiliza la revisión vieja ni publica.
+- El snapshot debe coincidir con la revisión base del pedido. También se coteja el borrador leído después de Aplicar con el artefacto: si otra sesión lo cambió, no se habilita Deshacer sobre esa copia. La restauración manda `expected_revision`; un 409 conserva el trabajo de la otra sesión y no registra un deshacer exitoso.
+- Las aplicaciones y los deshaceres exitosos aparecen en el historial del mismo cajón, con hora y alcance. Los errores no se registran como éxitos. El editor impide cambios manuales mientras la operación IA está en curso. La pila manual de porciones sigue siendo otro flujo.
+- Se conserva Inter y el HTML/clases del boceto v29. No se agregaron pantallas ni servicios.
+
+## Límites explícitos
+
+1. Historial y snapshot viven en la sesión del editor, separados por paciente; se descartan al salir/recargar o elegir otra paciente. No son un registro de auditoría persistente. Solo se deshace la última aplicación; no hay rehacer de IA ni pila de aplicaciones anteriores.
+2. Si hubo una edición guardada posterior, una publicación o cambios sin guardar, Deshacer queda deshabilitado para no borrar ese trabajo. Si otra sesión editó sin que la pantalla se actualice, el servidor rechaza la revisión vieja.
+3. Cuando no había plan anterior, la primera aplicación queda registrada, pero no se puede volver a «sin plan»: la API existente exige al menos una comida y no ofrece eliminar ese borrador. El historial lo explica y Deshacer queda deshabilitado.
+4. El contrato actual permite hasta 42 comidas y 21 días de diferencia entre fechas. «Todo el plan» que exceda la capacidad del pedido se rechaza con un aviso; no se recorta a la semana visible. Si la unión con lo conservado excede 42 comidas, el servidor rechaza la propuesta sin escribir el borrador.
+5. No se probaron proveedores externos ni cuentas reales. Navegador con API/demo en memoria y claves de Supabase vacías; PostgreSQL descartable local para contratos y aislamiento.
+
+## APIs y base
+
+Se reutilizan `POST /api/ai/jobs` (`period_start`, `period_end`, `slots` y preferencias), lectura/polling del job y `POST /api/ai/jobs/:id/apply`. No cambia la forma de estos contratos. La integración de comidas fuera del alcance sucede al formar el artefacto, tanto en memoria como en la rama persistente del repositorio. Se conserva la aplicación con control de consentimiento, contexto y revisión.
+
+Deshacer usa `POST /api/patients/:id/plans` con `expected_revision`; la lectura profesional sigue en `GET /api/patients/:id/plans?audience=pro`. No llama a publicar, mensajes ni avisos. Se compartió el valor predeterminado de comidas entre el generador y la integración para que un cliente que omite `slots` conserve Colación y Extra.
+
+**Migraciones: ninguna. Variables nuevas: ninguna. Dependencias nuevas: ninguna.** No se ejecutó SQL ni se modificó configuración de producción.
+
+## Evidencia de verificación
+
+- Pruebas primero: el test API perdió dos comidas (esperaba tres y recibió una); unit faltaba el helper; el e2e inicial no encontraba Deshacer del cajón. Las dos carreras se reprodujeron con pruebas rojas antes de corregirlas. El borde de comidas predeterminadas también tuvo rojo (cero conservadas en vez de dos) y verde.
+- Unit/integración: `planes-scope.test.ts`, `plan-draft.test.ts`, `planes-parte-3.test.ts`, `flow.integration.test.ts`. Cubren límites, preservación, no publicación, snapshot, cambios posteriores, pacientes distintos, 409 y ambas carreras.
+- PostgreSQL descartable: `server/ai-jobs/postgres.integration.test.ts`, **4 aprobados**; aplicación atómica del artefacto, restauración por revisión, rechazo de otra profesional y de revisión ya usada.
+- E2E nuevo: `CHROMIUM_PATH=/usr/bin/google-chrome npm run test:e2e -- e2e/planes-parte-3d.spec.ts`, **2 aprobados** (36,7 s). Recorrido con los tres alcances, selector cambiado después del pedido, Aplicar/Deshacer repetidos, 409 real de otra sesión, plan publicado intacto y primera aplicación sin borrador anterior. Capturas claro/oscuro en 1440 y 390.
+- `npm run check`, `npm run build`, `check:migrations`, `check:release-manifest`, `check:views`, `check:secrets` y `panel:v29:check`: aprobados (repetidos por Claude al retomar, mismos resultados). `npm audit --audit-level=moderate`: cero vulnerabilidades. No existe script de lint en el proyecto; `git diff --check` aprobado.
+- Suite general (cerrada por Claude, 26/10): **535 archivos, 533 aprobados**; **3.369 pruebas, 3.365 aprobadas, 2 omitidas, 2 con falla**. Las 2 fallas (`server/db/supabase-client.test.ts`, `server/security/mfa.test.ts`) y el aviso de arranque de worker para ese mismo `mfa.test.ts` son **ajenas al slice**: ninguno de esos tres archivos está en este diff. Causa raíz confirmada corriéndolos aislados: `@supabase/realtime-js` requiere `WebSocket` nativo (Node ≥22) y este entorno corre Node 20.19.2 — el mismo error de `createActorClient` aparece en los dos archivos, sin relación con alcance/deshacer. El timeout de 5 s en `meal-plan-versions.test.tsx` (render síncrono, archivo ajeno al diff) no se repitió al aislarlo: fue saturación de CPU por los 534 archivos corriendo junto a los `postgres.integration.test.ts` del resto del repo (63 archivos con PGlite), igual que el timeout de preparación que había dejado Codex. `server/ai-jobs/postgres.integration.test.ts` (el único tocado por este slice con PGlite) se corrió aislado con `--no-file-parallelism`: **4/4 aprobados, 5,5 s**. El e2e `planes-parte-3d.spec.ts` se repitió aislado: **2/2 aprobados, 32,8 s**. Contrato visual: no se repitió (necesita `npm run local` + navegador contra el boceto; el hallazgo de 1 px en una acción de fila ajena a 3d queda como lo documentó Codex, sin inventar un fix de otra fase).
+- Revisión `code-reviewer`: cuatro hallazgos resueltos (dos carreras, Extra innecesaria y reinicio del historial); revisión final sin hallazgos pendientes. `reality-checker` corroboró pruebas/capturas y exigió registrar límites y controles generales pendientes. Ambos conservaron el modelo heredado.
+
+Capturas con datos ficticios: [escritorio claro](../screenshots/planes-p3d/historial-claro-1440.png), [escritorio oscuro](../screenshots/planes-p3d/historial-oscuro-1440.png), [celular claro](../screenshots/planes-p3d/historial-claro-390.png), [celular oscuro](../screenshots/planes-p3d/historial-oscuro-390.png).
+
+## Informe del paso 10 — Regression Guard
+
+- **Flujos críticos verificados:** ✅ alcance día/comida/todo y conservación de lo demás (unit/API/e2e); ✅ aplicar sin publicar, con permiso y revisión (pruebas de jobs/API/PostgreSQL); ✅ Deshacer restaura ítems y metadatos, sin avisar (unit/e2e/PostgreSQL); ✅ cambios posteriores/409/paciente distinto no se pisan; ✅ historial y primera aplicación (e2e); ✅ publicación explícita/revisión/alergias y vínculos del editor anterior conservan su cobertura existente. Resultados de los recorridos anteriores y suite completa: al pie.
+- **Regresiones cubiertas:** se revisó el historial de #185 y #187: borrar lo que queda fuera del alcance, aplicar sin publicar, mantener permisos/revisión, no perder historial por cambio de revisión, y no convertir un error concurrente en restauración exitosa. No se omiten pruebas para obtener verde.
+- **Contratos revisados:** fechas/slots del pedido, validación Zod del artefacto completo, límites de período/42 comidas, copia editable compartida entre servidor y editor, `expected_revision` actual en la restauración, consentimiento/contexto y aislamiento de consultorios existentes. La revisión anterior solo identifica el snapshot; la escritura usa la revisión posterior comprobada.
+- **Acoplamiento y áreas frágiles:** la serialización de ítems se extrajo a un módulo de tipos compartido, sin importar componentes React en el servidor. El mismo default de comidas se usa al generar e integrar. Se separó el reinicio por paciente de la sincronización por revisión. Puntos frágiles: carrera aplicar/leer y guardar por versión; comprobados con pruebas específicas y PostgreSQL. La meta clínica puede cambiar entre aplicación y restauración: el servidor puede rechazarla, nunca se fuerza.
+- **Migraciones:** N/A. Sin operaciones remotas; rollback del cambio de aplicación mediante revert del PR, sin SQL.
+- **Fire test:** ✅ se retiró temporalmente `previo.items.filter(i => !dentro(i))` de la integración en el entorno local. La prueba API falló (esperaba tres comidas, recibió una). Se restauró el código; integración normal y PostgreSQL volvieron a verde.
+- **Automatizaciones nuevas:** alcance, snapshot, revisión, bloqueo de doble operación y registro de éxitos no dependen de recordar pasos manuales. Pruebas nuevas incluidas en Vitest/Playwright ya ejecutados por CI. Sin pasos de despliegue, variables ni migraciones manuales nuevas.
+- **Veredicto:** SHIP de este slice, a la espera del ok visual de Facundo y del hallazgo de 1 px ajeno a 3d (otra fase). Las 2 fallas de la suite general son del entorno (Node 20 sin WebSocket nativo en `@supabase/realtime-js`), confirmadas ajenas al diff al aislarlas. No se autoriza merge ni producción.

@@ -150,6 +150,37 @@ describe('PV-27 jobs de IA versionados', () => {
     expect((await post(`/api/ai/jobs/${job.id}/apply`, {})).status).toBe(200);
   });
 
+  it('una comida conserva los otros días, comidas, indicaciones y horarios', async () => {
+    await consentAi(); await declareAllergies();
+    const id = randomUUID();
+    const initial = await post(`/api/patients/${patient}/plans`, {
+      id, period_start: '2026-09-21', period_end: '2026-09-23',
+      guidance: { recommendations: ['Agua'], avoid: [] }, meal_times: { Cena: '21:00' },
+      items: [
+        { for_date: '2026-09-21', slot: 'Almuerzo', free_text: 'Arroz' },
+        { for_date: '2026-09-21', slot: 'Cena', free_text: 'Sopa' },
+        { for_date: '2026-09-23', slot: 'Cena', free_text: 'Pollo' },
+      ],
+    });
+    expect(initial.status).toBe(200);
+    const created = await post('/api/ai/jobs', {
+      patient_id: patient, job_type: 'menu_draft', period_start: '2026-09-21', period_end: '2026-09-21', slots: ['Almuerzo'],
+    });
+    expect(created.status).toBe(202);
+    const { job } = await created.json() as { job: { id: string } };
+    expect((await post(`/api/ai/jobs/${job.id}/apply`, {})).status).toBe(200);
+    const { plan } = await (await app.request(`/api/patients/${patient}/plans?audience=pro`)).json();
+    expect(plan.current.items).toHaveLength(3);
+    expect(plan.current.items).toEqual(expect.arrayContaining([
+      expect.objectContaining({ for_date: '2026-09-21', slot: 'Cena', free_text: 'Sopa' }),
+      expect.objectContaining({ for_date: '2026-09-23', slot: 'Cena', free_text: 'Pollo' }),
+    ]));
+    expect(plan.current.period_end).toBe('2026-09-23');
+    expect(plan.current.guidance.recommendations).toEqual(['Agua']);
+    expect(plan.current.meal_times).toEqual({ Cena: '21:00' });
+    expect(plan.published).toBeNull();
+  });
+
   it('marca stale si cambia el ingreso, respeta la cola y no aplica el borrador', async () => {
     await consentAi();
     await declareAllergies();

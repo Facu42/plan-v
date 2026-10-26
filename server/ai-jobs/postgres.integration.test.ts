@@ -3,6 +3,8 @@ import { PGlite } from '@electric-sql/pglite';
 import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { integrarPropuesta, snapshotBorrador } from '../../src/types/plan-draft.js';
+import { asProfessional } from '../plans/repository.js';
 import { CONSENT_CATALOG } from '../intake/consent.js';
 
 let db: PGlite;
@@ -168,6 +170,36 @@ describe('PV-27 jobs de IA en PostgreSQL descartable', () => {
     }) as { status: string };
     expect(marked.status).toBe('stale');
     await expect(rpc(nutriA, 'apply_ai_job', [stale.id])).rejects.toMatchObject({ code: 'PT409' });
+  });
+
+  it('aplica scope y deshace con revisión en PostgreSQL, sin acceso cruzado ni publicar', async () => {
+    const original = asProfessional(await rpc(nutriA, 'save_meal_plan_draft', [patientA, {
+      id: '40000000-0000-4000-a000-0000000000a9', expected_revision: null,
+      period_start: '2026-10-26', period_end: '2026-10-27',
+      guidance: { recommendations: ['Agua'], avoid: [] }, meal_times: { Cena: '21:00' },
+      items: [
+        { for_date: '2026-10-26', slot: 'Almuerzo', free_text: 'Arroz', public_note: '' },
+        { for_date: '2026-10-27', slot: 'Cena', free_text: 'Sopa', public_note: 'Tibia' },
+      ],
+    }]) as Record<string, unknown>);
+    const request = { period_start: '2026-10-26', period_end: '2026-10-26', slots: ['Almuerzo'] };
+    const job = await rpc(nutriA, 'enqueue_ai_job', [enqueuePayload({ job_type: 'menu_draft', prompt_version: 'menu_draft.v2', request })]) as { id: string };
+    const payload = integrarPropuesta({ ...snapshotBorrador(original), period_end: request.period_end, items: [{ for_date: request.period_start, slot: 'Almuerzo', free_text: 'Pollo', public_note: '' }] }, original, request);
+    await finish(nutriA, { id: job.id, status: 'succeeded', current_context_hash: hash, artifact: { kind: 'menu_draft', payload } });
+    await expect(rpc(nutriB, 'apply_ai_job', [job.id])).rejects.toMatchObject({ code: '42501' });
+    await rpc(nutriA, 'apply_ai_job', [job.id]);
+    const aplicado = asProfessional(await rpc(nutriA, 'list_professional_meal_plan', [patientA]) as Record<string, unknown>);
+    expect(aplicado.current.items).toHaveLength(2);
+    expect(aplicado.current.items).toEqual(expect.arrayContaining([expect.objectContaining({ for_date: '2026-10-27', free_text: 'Sopa', public_note: 'Tibia' })]));
+    const restaurar = { ...snapshotBorrador(original), expected_revision: aplicado.current.revision };
+    await expect(rpc(nutriB, 'save_meal_plan_draft', [patientA, restaurar])).rejects.toMatchObject({ code: '42501' });
+    const restaurado = asProfessional(await rpc(nutriA, 'save_meal_plan_draft', [patientA, restaurar]) as Record<string, unknown>);
+    expect(snapshotBorrador(restaurado).items).toEqual(snapshotBorrador(original).items);
+    expect(restaurado.current.guidance).toEqual(original.current.guidance);
+    expect(restaurado.current.meal_times).toEqual(original.current.meal_times);
+    expect(restaurado.current.status).toBe('draft');
+    expect(restaurado.published).toBeNull();
+    await expect(rpc(nutriA, 'save_meal_plan_draft', [patientA, restaurar])).rejects.toMatchObject({ code: 'PT409' });
   });
 
   it('recupera la cola vencida, reserva una vez y descarta respuestas tardías', async () => {

@@ -12,11 +12,12 @@ import { FigmaRecordDialog } from './FigmaPatientFront';
 import { AtajoAsistente, CajonAsistente, CompartirPlan, GestionPlan, OpcionesImpresion, type EstadoTarjeta, type LineaPropuesta, type MensajeAsistente, type OpcionesPdf, type ViaCompartir } from './PanelPlanAsistente';
 import { PanelV29Icon } from './PanelV29Icon';
 import { PlanPrintDialog } from './PlanPrintDialog';
-import { AVISO_ALCANCE, AVISO_COMPARTIR_APP, AVISO_DESHACER, AVISO_IMPRESO, AVISO_MAIL, lineasDePropuesta } from './planes-asistente';
+import { AVISO_COMPARTIR_APP, AVISO_IMPRESO, AVISO_MAIL, lineasDePropuesta } from './planes-asistente';
+import { alcanceDelPedido, deshacerAplicacion, puedeDeshacerAplicacion, type AplicacionIA, type CambioIA } from './planes-scope';
 import { fondoAvatar } from './planes-lista';
 import {
   AVISO_PROGRAMAR, bloqueoAlPublicar, borradorDistinto, guardarPropuestaComoBorrador,
-  pedirPropuesta, periodoAsistente, propuestaDe, publicarPlanRevisado, recortarPreferencias,
+  pedirPropuesta, propuestaDe, publicarPlanRevisado, recortarPreferencias,
 } from './planes-parte-3';
 import {
   cambiarCantidad, cambiarNota, COMIDAS_EDITOR, comidaDelDia, comidasDelDia, controlEntrega,
@@ -136,6 +137,9 @@ export function PanelPlanEditor({
   const [asistenteAbierto, setAsistenteAbierto] = useState(false);
   const [pestanaAsistente, setPestanaAsistente] = useState<'chat' | 'historial'>('chat');
   const [alcance, setAlcance] = useState(0);
+  const [ultimaAplicacion, setUltimaAplicacion] = useState<AplicacionIA | null>(null);
+  const [cambiosIA, setCambiosIA] = useState<CambioIA[]>([]);
+  const operacionIA = useRef(false);
   const [pedidoChat, setPedidoChat] = useState('');
   const [mensajes, setMensajes] = useState<MensajeAsistente[]>([]);
   const [tarjeta, setTarjeta] = useState<{ lineas: LineaPropuesta[]; estado: EstadoTarjeta } | null>(null);
@@ -152,6 +156,9 @@ export function PanelPlanEditor({
   useEffect(() => { setReutilizar(null); }, [paciente.id]);
 
   useEffect(() => {
+    setUltimaAplicacion(null);
+    setCambiosIA([]);
+    operacionIA.current = false;
     setPestana('semana');
     setModo('dia');
     setItems(version?.items ?? []);
@@ -191,10 +198,20 @@ export function PanelPlanEditor({
       setSemana(0);
       setDia(indiceLunes(hoy));
     }
-  }, [paciente.id, version?.id, version?.revision, hoy]);
+  }, [paciente.id, hoy]);
 
   useEffect(() => {
-    if ((pestana !== 'ver' && !(asistenteAbierto && pestanaAsistente === 'historial')) || !paciente.id) return;
+    setItems(version?.items ?? []);
+    setHoras(version?.meal_times ?? {});
+    setGuidance(version?.guidance ?? emptyGuidance());
+    setKcal(version?.nutrition_target?.kcal?.toString() ?? '');
+    setDeshacer([]);
+    setRehacer([]);
+    setRevisado(false);
+  }, [version?.id, version?.revision]);
+
+  useEffect(() => {
+    if (pestana !== 'ver' || !paciente.id) return;
     const control = new AbortController();
     plansApi.history(paciente.id, control.signal).then(respuesta => {
       if (!control.signal.aborted) setHistorial(respuesta.versions);
@@ -202,7 +219,7 @@ export function PanelPlanEditor({
       if (!control.signal.aborted) setHistorial(version ? [version] : []);
     });
     return () => control.abort();
-  }, [pestana, asistenteAbierto, pestanaAsistente, paciente.id, version]);
+  }, [pestana, paciente.id, version]);
 
   useEffect(() => {
     if (!propuestaLista) return;
@@ -360,7 +377,10 @@ export function PanelPlanEditor({
 
   async function pedirCambio(texto: string) {
     const limpio = texto.trim();
-    if (!limpio || armando) return;
+    if (!limpio || armando || operacionIA.current) return;
+    let periodo: ReturnType<typeof alcanceDelPedido>;
+    try { periodo = alcanceDelPedido(alcance, fecha, COMIDAS_EDITOR[Math.max(0, comidaAbierta)] ?? 'Almuerzo', inicio, finPeriodo, items.some(i => i.slot === 'Extra')); }
+    catch (error) { onAviso(error instanceof Error ? error.message : 'Revisá el alcance.'); return; }
     abrirCajon();
     setPestanaAsistente('chat');
     setMensajes(previo => [...previo, { rol: 'vos', texto: limpio }]);
@@ -371,12 +391,12 @@ export function PanelPlanEditor({
     setPropuesta(null);
     setTarjeta(null);
     onAviso('El asistente está armando una propuesta. Queda como borrador privado hasta que la revises.');
-    const periodo = periodoAsistente(version?.period_start ?? lunes, version?.period_end ?? sumarDias(lunes, 6), semana);
     const etiqueta = [`El ${tituloDia}`, `${COMIDAS_EDITOR[Math.max(0, comidaAbierta)] ?? 'Almuerzo'} del ${tituloDia.slice(0, 3)}`, 'Todo el plan'][alcance] ?? 'Todo el plan';
     const resultado = await pedirPropuesta({
       patientId: paciente.id,
       desde: periodo.desde,
       hasta: periodo.hasta,
+      slots: periodo.slots,
       preferencias: recortarPreferencias([limpio, `Cambios en: ${etiqueta}`]),
       vigente: () => pedidoAsistente.current === marca,
     });
@@ -385,8 +405,8 @@ export function PanelPlanEditor({
     if (resultado.ok) {
       const borrador = propuestaDe(resultado.job);
       setPropuesta(resultado.job);
-      setTarjeta(borrador ? { lineas: lineasDePropuesta(borrador.items), estado: 'nueva' } : null);
-      setMensajes(previo => [...previo, { rol: 'ia', texto: AVISO_ALCANCE }]);
+      setTarjeta(borrador ? { lineas: lineasDePropuesta(borrador.items.filter(i => i.for_date >= periodo.desde && i.for_date <= periodo.hasta && periodo.slots.includes(i.slot as PlanSlot))), estado: 'nueva' } : null);
+      setMensajes(previo => [...previo, { rol: 'ia', texto: `La propuesta para ${etiqueta.toLocaleLowerCase('es')} está lista. Aplicar conserva las comidas fuera de ese alcance. Todavía no se publicó.` }]);
     } else {
       setMensajes(previo => [...previo, { rol: 'ia', texto: resultado.aviso || 'No pude armar la propuesta. El plan no cambió.' }]);
     }
@@ -394,18 +414,52 @@ export function PanelPlanEditor({
   }
 
   function armarConAsistente() {
-    return pedirCambio('Armá una semana con lo que ya está en la ficha.');
+    return pedirCambio('Armá comidas con lo que ya está en la ficha.');
+  }
+
+  function registrarCambio(titulo: CambioIA['titulo'], detalle: string) {
+    setCambiosIA(previo => [{ id: Date.now(), titulo, detalle, hora: new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) }, ...previo]);
   }
 
   async function aplicarPropuesta() {
-    if (!propuesta || armando) return;
+    if (!propuesta || armando || operacionIA.current || guardando === 'guardando') return;
+    if (distinto) { onAviso('Guardá los cambios del editor antes de aplicar la propuesta.'); return; }
+    const anterior = plan ? structuredClone(plan) : null;
+    const marca = pedidoAsistente.current;
+    operacionIA.current = true;
     setArmando(true);
-    const resultado = await guardarPropuestaComoBorrador({ jobId: propuesta.id, patientId: paciente.id });
+    const esperada = propuestaDe(propuesta);
+    if (!esperada) { operacionIA.current = false; setArmando(false); return; }
+    const resultado = await guardarPropuestaComoBorrador({ jobId: propuesta.id, patientId: paciente.id, anterior, esperada });
+    if (pedidoAsistente.current !== marca) return;
+    operacionIA.current = false;
     setArmando(false);
     if (resultado.ok) {
       onPlan(resultado.plan);
+      setUltimaAplicacion(anterior && resultado.revisionSegura && resultado.plan.current.revision ? { anterior, revisionAplicada: resultado.plan.current.revision } : null);
+      registrarCambio('Propuesta aplicada', `${propuesta.request.period_start} a ${propuesta.request.period_end} · ${propuesta.request.slots.join(', ')}${anterior ? '' : ' · Sin borrador anterior para deshacer.'}`);
       setPropuesta(null);
       setTarjeta(previo => previo ? { ...previo, estado: 'ok' } : previo);
+    }
+    onAviso(resultado.aviso);
+  }
+
+  async function deshacerIA() {
+    if (!plan || !ultimaAplicacion || armando || operacionIA.current || guardando === 'guardando') return;
+    if (distinto) { onAviso('Hay cambios posteriores sin guardar. No se deshizo la aplicación.'); return; }
+    const marca = pedidoAsistente.current;
+    operacionIA.current = true;
+    setArmando(true);
+    const resultado = await deshacerAplicacion(plan, ultimaAplicacion);
+    if (pedidoAsistente.current !== marca) return;
+    operacionIA.current = false;
+    setArmando(false);
+    if (resultado.ok) {
+      onPlan(resultado.plan);
+      setUltimaAplicacion(null);
+      setPropuesta(null);
+      setTarjeta(previo => previo ? { ...previo, estado: 'deshecha' } : previo);
+      registrarCambio('Aplicación deshecha', 'Se restauró el borrador anterior. Sin publicación ni aviso a la paciente.');
     }
     onAviso(resultado.aviso);
   }
@@ -500,6 +554,7 @@ export function PanelPlanEditor({
   const textoGuardado = guardando === 'guardando' ? 'Guardando…' : guardando === 'error' ? 'Sin guardar' : 'Guardado';
 
   return <>
+    <div style={{ display: 'contents' }} inert={armando}>
     {reutilizar === 'guardar' ? <GuardarPlantilla guardar={async () => {
       if (!items.length) { onAviso('Cargá al menos una comida antes de guardar la plantilla.'); return null; }
       return !plan || distinto ? guardar(items) : plan;
@@ -734,6 +789,7 @@ export function PanelPlanEditor({
         onPublicar={() => void publicar()} onVistaPaciente={() => setVistaPaciente(true)} onImprimir={() => void abrirImpresion()} onDescargarCompras={descargarCompras}
         onProgramar={() => onAviso(AVISO_PROGRAMAR)} /> : null}
     </> : null}
+    </div>
     <CajonAsistente
       abierto={asistenteAbierto}
       pestana={pestanaAsistente}
@@ -744,7 +800,8 @@ export function PanelPlanEditor({
       armando={armando}
       pedido={pedidoChat}
       tarjeta={tarjeta}
-      historial={historial.length ? historial : version ? [version] : []}
+      historial={cambiosIA}
+      puedeDeshacer={puedeDeshacerAplicacion(plan, ultimaAplicacion) && !distinto && guardando !== 'guardando'}
       onCerrar={cerrarCajon}
       onPestana={setPestanaAsistente}
       onAlcance={setAlcance}
@@ -753,7 +810,7 @@ export function PanelPlanEditor({
       onSugerencia={texto => void pedirCambio(texto)}
       onAplicar={() => void aplicarPropuesta()}
       onDescartar={() => void descartarPropuesta()}
-      onDeshacer={() => onAviso(AVISO_DESHACER)}
+      onDeshacer={() => void deshacerIA()}
     />
     {vistaPaciente ? <VistaPacienteDialog paciente={paciente.name} fecha={fecha} tituloDia={tituloDia} comidas={comidas} guidance={guidance} metaKcal={metaKcal} onClose={() => setVistaPaciente(false)} /> : null}
     {copiaImpresion ? <PlanPrintDialog options={pdfOpciones} action={copiaImpresion.action} plan={copiaImpresion.plan} patientName={paciente.name} demo={copiaImpresion.demo} currentAllowed={copiaImpresion.currentAllowed} onClose={() => setCopiaImpresion(null)} /> : null}

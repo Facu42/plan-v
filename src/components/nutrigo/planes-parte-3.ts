@@ -1,10 +1,11 @@
+import { snapshotBorrador } from '../../types/plan-draft';
 import { careErrorMessage } from '../../api/care';
 import { aiJobsApi } from '../../api/ai-jobs';
 import { plansApi } from '../../api/plans';
 import { MAX_DIETARY_PREFERENCE_LENGTH, MAX_DIETARY_PREFERENCES, type AiJobView } from '../../types/ai-jobs';
 import { planDateLabel, planTakesEffectNow } from '../../types/plan-handover';
 import { emptyGuidance, type PlanGuidance } from '../../types/plan-guidance';
-import { mealPlanDraftSchema, type PlanItemView, type PlanSlot, type PlanVersionView, type ProfessionalMealPlan } from '../../types/plans';
+import { mealPlanDraftSchema, type MealPlanDraftInput, type PlanItemView, type PlanSlot, type PlanVersionView, type ProfessionalMealPlan } from '../../types/plans';
 import { COMIDAS_EDITOR, fechasDeSemana, paraGuardar, sumarDias } from './planes-editor';
 
 export const AVISO_PROGRAMAR = 'Próximamente. Todavía no se puede elegir una fecha y una hora aparte. Al publicar, la paciente ve el plan desde el inicio del período. Si ese día es más adelante, sigue con el plan anterior hasta entonces.';
@@ -130,6 +131,7 @@ export async function pedirPropuesta(input: {
   desde: string;
   hasta: string;
   preferencias?: readonly string[];
+  slots?: readonly PlanSlot[];
   vigente?: () => boolean;
   enqueue?: typeof aiJobsApi.enqueue;
   leer?: (id: string) => Promise<AiJobView>;
@@ -144,7 +146,7 @@ export async function pedirPropuesta(input: {
       job_type: 'menu_draft',
       period_start: input.desde,
       period_end: input.hasta,
-      slots: [...COMIDAS_EDITOR],
+      slots: [...(input.slots ?? COMIDAS_EDITOR)],
       ...(preferencias.length ? { dietary_preferences: preferencias } : {}),
     });
     if (!vigente()) return { ok: false as const, aviso: '' };
@@ -168,15 +170,35 @@ export async function pedirPropuesta(input: {
 export async function guardarPropuestaComoBorrador(input: {
   jobId: string;
   patientId: string;
+  anterior?: ProfessionalMealPlan | null;
+  esperada?: MealPlanDraftInput;
   apply?: typeof aiJobsApi.apply;
   leer?: typeof plansApi.professional;
 }) {
+  if (input.esperada && ((input.anterior?.current.revision ?? null) !== input.esperada.expected_revision
+    || (input.anterior && (input.anterior.id !== input.esperada.id || input.anterior.patient_id !== input.patientId)))) {
+    return { ok: false as const, aviso: 'El plan cambió antes del pedido. Volvé a abrirlo y regenerá la propuesta; no se aplicó.' };
+  }
   try {
     await (input.apply ?? aiJobsApi.apply)(input.jobId);
     const lectura = await (input.leer ?? plansApi.professional)(input.patientId);
     if (!lectura.plan) return { ok: false as const, aviso: 'No se pudo usar la propuesta. No encontramos el borrador actualizado.' };
-    return { ok: true as const, plan: lectura.plan, aviso: AVISO_BORRADOR };
+    const revisionSegura = Boolean(input.esperada && lectura.plan.current.revision && lectura.plan.current.status === 'draft'
+      && lectura.plan.patient_id === input.patientId && copiaComparable(snapshotBorrador(lectura.plan)) === copiaComparable(input.esperada));
+    return { ok: true as const, plan: lectura.plan, revisionSegura,
+      aviso: input.esperada && !revisionSegura ? 'La propuesta se aplicó, pero el borrador guardado cambió después. Deshacer quedó deshabilitado para conservar esos cambios.' : AVISO_BORRADOR };
+
   } catch (razon) {
     return { ok: false as const, aviso: `No se pudo usar la propuesta. ${careErrorMessage(razon)}` };
   }
+}
+
+function copiaComparable(input: MealPlanDraftInput) {
+  return JSON.stringify({
+    id: input.id, inicio: input.period_start, fin: input.period_end, timezone: input.timezone,
+    guidance: input.guidance ?? emptyGuidance(), horas: input.meal_times ?? {}, labels: input.meal_labels ?? {},
+    target: input.nutrition_target ?? null,
+    items: [...input.items].sort((a, b) => `${a.for_date}|${a.slot}`.localeCompare(`${b.for_date}|${b.slot}`)),
+  }, (_clave, valor) => valor && typeof valor === 'object' && !Array.isArray(valor)
+    ? Object.fromEntries(Object.entries(valor).sort(([a], [b]) => a.localeCompare(b))) : valor);
 }

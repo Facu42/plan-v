@@ -11,7 +11,6 @@ export const INCLUIR_PLAN = ['Grupos de intercambio', 'Mi recetario', 'Alternati
 export const SUGERENCIAS_ASISTENTE = ['Cambiá la merluza por pollo', 'Más hierro en los almuerzos', 'Bajá las calorías de la cena', 'Completá el día con una colación'] as const;
 export const IDEAS_ARMADO = ['Cenas livianas y temprano', 'Viandas para el trabajo', 'Usá mis recetas y lo que ya come'] as const;
 
-export const AVISO_DESHACER = 'Próximamente. Deshacer un cambio del asistente todavía no vuelve atrás el borrador. En Versiones podés restaurar una copia anterior: queda como borrador y no se publica.';
 export const AVISO_DICTAR = 'Próximamente. Dictar el pedido todavía no está disponible.';
 export const AVISO_ADJUNTAR = 'Próximamente. Adjuntar una referencia todavía no está disponible.';
 export const AVISO_MAIL = 'Próximamente. Enviar el plan por mail todavía no está disponible.';
@@ -21,7 +20,6 @@ export const AVISO_FORMATO = 'El formato, las medidas y qué incluir todavía no
 export const AVISO_COPIAR_OTRA = 'Próximamente. Copiar este plan a otra paciente queda para después.';
 export const AVISO_COMPARTIR_APP = 'La entrega en la app se confirma en Publicar plan revisado. Desde acá no se publica sola.';
 export const AVISO_META_ARMADO = 'La meta diaria se edita en el plan, en Ajustes del plan.';
-export const AVISO_ALCANCE = 'Preparé una propuesta de la semana visible. Todavía no se publicó. Elegir un día o una comida no recorta este pedido.';
 
 export type DuracionArmado = 0 | 1 | 2 | 3;
 export type DatoFicha = { titulo: string; texto: string; usar: boolean };
