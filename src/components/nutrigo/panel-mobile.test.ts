@@ -30,7 +30,7 @@ describe('celular de cobranzas', () => {
   });
 
   it('en el celular el título queda en la barra y la sección activa es Más', () => {
-    expect(shell).toMatch(/@media \(min-width:800px\) \{\n  \.nv-app\.nv-pro\.pn-panel:is\(\.nv-agenda-page,\.nv-fees-page\) \.nv-topbar-title \{ display:none; \}/);
+    expect(shell).toMatch(/@media \(min-width:800px\) \{\r?\n  \.nv-app\.nv-pro\.pn-panel:is\(\.nv-agenda-page,\.nv-fees-page\) \.nv-topbar-title \{ display:none; \}/);
     expect(phone).toMatch(/\.pn-panel:is\(\.nv-agenda-page,\.nv-fees-page\) \.p5-head h2 \{ display:none; \}/);
     expect(phone).toMatch(/\.nv-app\.nv-pro\.pn-panel \.nv-topbar-label-desktop \{ display:none; \}/);
     expect(phone).toMatch(/\.nv-app\.nv-pro\.pn-panel \.nv-topbar-label-mobile \{ display:inline; \}/);

@@ -15,6 +15,8 @@ Sirve para **cualquier agente** (Claude, Codex, Cursor) que llegue sin contexto.
 
 **Fuente visual/contrato vigente:** `design/panel-nutri/v29/panel-trabajo.html` (rama `cursor/boceto-seis-pantallas-66c3` / PR #174). No tocar `PlanV-Boceto-v29.html`.
 
+**Biblioteca v29 (25/10):** implementada en `codex/biblioteca-v29`, con autorización escrita de Facundo. Catálogo, asignación, lectura, publicación y mensajes existentes. Recetas mantiene su ruta. Sin migraciones ni merge. [Verificación, límites y capturas](biblioteca-v29-verificacion.md). Centro de ayuda sigue pendiente.
+
 **Orden de arranque:** por valor — tools → shell → Seguimiento → Progreso → Asistente IA (no empezar por fases 1→13 de este doc). Detalle y bitácora: [handoff-boceto-a-app.md](handoff-boceto-a-app.md) y Page del plan.
 
 **Seguimiento (orden por valor):** `/crm/seguimiento` copia el dibujo de `panel-trabajo.html` y usa la bandeja, el feed de comidas revisadas y los mensajes de la app. Ya está en main ([PR #178](https://github.com/Facu42/plan-v/pull/178)). No hay WhatsApp ni tablas nuevas. Si la lista de la cartera no trae sueño, ánimo, síntomas o foto, la pantalla lo dice o abre la ficha.

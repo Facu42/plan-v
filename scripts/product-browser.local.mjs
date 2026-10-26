@@ -195,7 +195,12 @@ try {
   await readUntil(patient,`/api/patients/${pid}`,r=>r.patient.appointment?.meet_url==='https://example.test/consulta');await reloadContains('Abrir videollamada');
   await B('goto',origin+'/crm/cobranzas');await openCobranzas(pid);await B('fill','#cbz-fee-amount','1000');await B('fill','#cbz-fee-due',today);await button('Guardar cuota');
   await readUntil(patient,`/api/patients/${pid}/ledger?audience=patient`,r=>r.ledger.fee?.amount===1000);
-  await B('goto',origin+'/crm/biblioteca?biblioteca=recursos');await B('click','.nvw-resource-picker button:first-child');await B('click','[aria-label="Seleccionar Paciente ficticia"]');await button('Asignar a 1');await until("document.body.innerText.includes('1 asignación creada.')");
+  await B('goto',origin+'/crm/biblioteca?biblioteca=recursos');
+  const publishedResource=(await read(professional,'/api/resources?audience=pro')).resources.find(r=>r.published);
+  check(Boolean(publishedResource),'catálogo profesional tiene un recurso asignable');
+  // sxk muestra únicamente el tipo. La condición de asignable viene del catálogo, no del rótulo.
+  await until(`(()=>{const card=Array.from(document.querySelectorAll('#s-biblioteca .sxcard')).find(e=>e.querySelector('b')?.textContent===${JSON.stringify(publishedResource.title)});if(!card)return false;card.click();return true;})()`);
+  await button('Asignar');await B('click','[role="dialog"] .ach:has-text("Paciente ficticia") input');await control('[role="dialog"] .cta');await until('!document.querySelector(\'[role="dialog"]\')');
   const assignedLibrary=(await read(patient,`/api/patients/${pid}/library`)).library;const resourceAssignment=assignedLibrary.assignments[0];const resource=[...assignedLibrary.resources,...assignedLibrary.articles].find(r=>r.id===resourceAssignment.resource_id||r.slug===resourceAssignment.slug);
   check(Boolean(resource),'turno, cuota y recurso guardados por la profesional');
   await logout();phase='paciente y recarga';await login(patient,'/app/plan');await reloadContains('Arroz con vegetales');

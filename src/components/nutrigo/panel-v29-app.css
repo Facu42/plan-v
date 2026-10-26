@@ -119,6 +119,21 @@
 #pv-panel-v29 #s-alimentos .sxmac { min-width: 0; max-width: 100%; }
 #pv-panel-v29 #s-alimentos .tabs { margin-left: 0; gap: 2px; background: var(--app); border: 1px solid var(--line); border-radius: 9px; padding: 2px; overflow-x: auto; }
 #pv-panel-v29 #s-alimentos .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
+/* Biblioteca conserva la grilla del boceto y desplaza sus tarjetas dentro de la columna. */
+#pv-panel-v29 #pv-panel:has(#s-biblioteca) { --ink: inherit; --ink2: inherit; }
+#pv-panel-v29:not(.mob) .main:has(#s-biblioteca) { height: 100%; overflow: hidden; }
+#pv-panel-v29:not(.mob) #pv-panel:has(#s-biblioteca) { flex: 1; min-height: 0; }
+#pv-panel-v29.mob .main:has(#s-biblioteca) > .top { flex: 0 0 auto; height: auto; flex-wrap: wrap; }
+#pv-panel-v29.mob #pv-panel:has(#s-biblioteca),
+#pv-panel-v29.mob #s-biblioteca,
+#pv-panel-v29.mob #s-biblioteca > .fx { flex: none; height: auto; min-height: auto; }
+#pv-panel-v29.mob #s-biblioteca > .fx > .c { min-height: auto; height: auto; min-width: 0; }
+#pv-panel-v29 #s-biblioteca .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
+/* El catálogo real puede traer más lectores y títulos largos que los cuatro ejemplos. */
+#pv-panel-v29 #s-biblioteca .sxavs { flex-wrap: wrap; }
+#pv-panel-v29 #s-biblioteca .sxcard { overflow-wrap: anywhere; }
+/* El boceto trae cuatro tarjetas; con más recursos se agregan filas legibles y scroll. */
+#pv-panel-v29:not(.mob) #s-biblioteca .sxlib:has(> .sxcard:nth-child(5)) { grid-template-rows: none; grid-auto-rows: minmax(190px, 1fr); }
 #pv-panel-v29.mob .main:has(#s-alimentos) > .top { flex-wrap: wrap; }
 #pv-panel-v29.mob .main:has(#s-alimentos) > .top .sxin { flex: 1 1 100%; }
 #pv-panel-v29.mob .main:has(#s-alimentos) > .top .sxin input { width: 100%; min-width: 0; }
