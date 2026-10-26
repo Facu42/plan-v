@@ -3,14 +3,15 @@ import { plansApi } from '../../api/plans';
 import type { Patient } from '../../types';
 import type { ProfessionalMealPlan } from '../../types/plans';
 import { PanelV29Icon } from './PanelV29Icon';
+import { PanelPlanEditor } from './PanelPlanEditor';
 import {
   conteoFiltro, etiquetaAlta, filaDePlan, filaProvisoria, filasVisibles, fondoAvatar, hoyArgentina,
   primerNombrePlanes, proximasAcciones, textoAccion, FILTROS_PLANES,
   type FilaPlan, type FiltroPlanes, type OrdenPlanes, type VistaPlanes,
 } from './planes-lista';
 
-const AVISO_EDITOR = 'Próximamente. El editor del plan llega en la parte 2.';
 const AVISO_IA = 'Próximamente. El armado con el asistente llega en la parte 3. Nada le llega a la paciente hasta que se publique.';
+const AVISO_PUBLICAR = 'Próximamente. Publicar, el PDF y la vista de la paciente llegan en la parte 3. Nada le llega a la paciente desde acá.';
 
 function Encabezado({ titulo, meta }: { titulo: string; meta?: string }) {
   return <header><h3>{titulo}</h3>{meta ? <span className="m">{meta}</span> : null}<span className="sp" /></header>;
@@ -18,8 +19,9 @@ function Encabezado({ titulo, meta }: { titulo: string; meta?: string }) {
 
 export function PanelPlanesVista({
   vista, nombre, filas, consulta, orden, filtro, aviso, error, tareas,
-  onVista, onRecetas, onConsulta, onOrden, onFiltro, onLimpiar, onEditor, onAsistente, onReintentar,
+  onVista, onRecetas, onConsulta, onOrden, onFiltro, onLimpiar,   onEditor, onAsistente, onReintentar, editor = null,
 }: {
+  editor?: ReactNode;
   vista: VistaPlanes;
   nombre: string;
   filas: FilaPlan[];
@@ -35,13 +37,13 @@ export function PanelPlanesVista({
   onOrden: (orden: OrdenPlanes) => void;
   onFiltro: (filtro: FiltroPlanes) => void;
   onLimpiar: () => void;
-  onEditor: () => void;
+  onEditor: (id: string) => void;
   onAsistente: () => void;
   onReintentar: () => void;
 }) {
   const visibles = filasVisibles(filas, filtro, orden, consulta);
   const vacioTotal = filas.length === 0;
-  return <div id="s-planes" className="scr">
+  return <div id="s-planes" className={vista === 'plan' ? 'scr pux-plan' : 'scr'}>
     <nav id="pview" className="tabs" role="navigation" aria-label="Secciones de Planes">
       <button type="button" className={vista === 'lista' ? 'on' : undefined} aria-current={vista === 'lista' ? 'page' : 'false'} onClick={() => onVista('lista')}>Todos los planes</button>
       <button type="button" className={vista === 'plan' ? 'on' : undefined} aria-current={vista === 'plan' ? 'page' : 'false'} onClick={() => onVista('plan')}>Plan de {nombre}</button>
@@ -49,11 +51,11 @@ export function PanelPlanesVista({
       <button type="button" className={vista === 'plantillas' ? 'on' : undefined} aria-current={vista === 'plantillas' ? 'page' : 'false'} onClick={() => onVista('plantillas')}>Plantillas</button>
       <button type="button" className={vista === 'equivalencias' ? 'on' : undefined} aria-current={vista === 'equivalencias' ? 'page' : 'false'} onClick={() => onVista('equivalencias')}>Equivalencias</button>
     </nav>
-    <div id="pwrap">
+    <div id="pwrap" className={vista === 'plan' ? 'pe-dia' : undefined}>
       {aviso ? <p className="mhelp" role="status">{aviso}</p> : null}
-      {vista === 'plan' ? <section className="fxp"><Encabezado titulo={`Plan de ${nombre}`} /><p className="mhelp">Próximamente. El editor de la semana llega en la parte 2.</p></section> : null}
-      {vista === 'plantillas' ? <section className="fxp"><Encabezado titulo="Plantillas" /><p className="mhelp">Próximamente. Las plantillas llegan con el editor del plan.</p></section> : null}
-      {vista === 'equivalencias' ? <section className="fxp"><Encabezado titulo="Equivalencias" /><p className="mhelp">Próximamente. La calculadora de esta pantalla llega con el editor del plan.</p></section> : null}
+      {vista === 'plan' ? editor : null}
+      {vista === 'plantillas' ? <section className="fxp"><Encabezado titulo="Plantillas" /><p className="mhelp">Próximamente. Las plantillas de Planes quedan para una pasada aparte.</p></section> : null}
+      {vista === 'equivalencias' ? <section className="fxp"><Encabezado titulo="Equivalencias" /><p className="mhelp">Próximamente. La calculadora de equivalencias sigue en su módulo.</p></section> : null}
       {vista === 'lista' ? <div className="fx">
         <div className="c">
           <section className="fxp g">
@@ -81,7 +83,7 @@ export function PanelPlanesVista({
                     <td><div className="fxwhen"><b>{fila.titulo}</b><small>{fila.objetivo}</small></div></td>
                     <td><span className={`pill ${fila.clase}`}>{fila.estado}</span></td>
                     <td className="num">{fila.semana}</td>
-                    <td><button type="button" className="sbtn" aria-label={`${fila.accion} ${fila.estado === 'Sin plan' ? 'para' : 'de'} ${fila.nombre}`} onClick={onEditor}>{fila.accion}<PanelV29Icon name="chev" size={12} /></button></td>
+                    <td><button type="button" className="sbtn" aria-label={`${fila.accion} ${fila.estado === 'Sin plan' ? 'para' : 'de'} ${fila.nombre}`} onClick={() => onEditor(fila.id)}>{fila.accion}<PanelV29Icon name="chev" size={12} /></button></td>
                   </tr>) : <tr><td colSpan={5}><div className="r29-empty">
                     {vacioTotal ? <><b>Todavía no hay pacientes</b><span>Cuando des de alta a alguien, el plan aparece acá.</span></> : <><b>No hay planes con esta búsqueda</b><span>Probá otro nombre o quitá los filtros.</span><button type="button" className="sbtn" onClick={onLimpiar}>Limpiar búsqueda y filtros</button></>}
                   </div></td></tr>}
@@ -93,7 +95,7 @@ export function PanelPlanesVista({
         <div className="c">
           <section className="fxp">
             <Encabezado titulo="Tu próxima acción" meta={`${tareas.length} pendientes`} />
-            {tareas.length ? <div className="fxr">{tareas.map(fila => <button type="button" key={fila.id} onClick={onEditor}>
+            {tareas.length ? <div className="fxr">{tareas.map(fila => <button type="button" key={fila.id} onClick={() => onEditor(fila.id)}>
               <span className="av" style={{ background: fondoAvatar(fila.tono) }}>{fila.iniciales}</span>
               <span className="t"><b>{fila.nombre}</b><small>{textoAccion(fila)}</small></span>
               <PanelV29Icon name="chev" size={13} />
@@ -122,6 +124,7 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
   onHeader?: (actions: ReactNode) => void;
 }) {
   const [vista, setVista] = useState<VistaPlanes>('lista');
+  const [editorId, setEditorId] = useState(selectedId);
   const [consulta, setConsulta] = useState('');
   const [orden, setOrden] = useState<OrdenPlanes>('nombre');
   const [filtro, setFiltro] = useState<FiltroPlanes>('todos');
@@ -173,25 +176,76 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
     document.getElementById('planes-pedidos')?.scrollIntoView({ block: 'nearest' });
   }, [enfocarPedidos]);
 
-  const abrirEditor = useCallback(() => setAviso(AVISO_EDITOR), []);
   const abrirAsistente = useCallback(() => setAviso(AVISO_IA), []);
+  const pacienteDe = useCallback((id?: string) => {
+    if (id && patients.some(persona => persona.id === id)) return id;
+    const sinPlan = patients.find(persona => persona.id in cargados && !cargados[persona.id]);
+    return sinPlan?.id || patients.find(persona => persona.id === selectedId)?.id || [...patients].sort((a, b) => a.name.localeCompare(b.name, 'es'))[0]?.id || '';
+  }, [patients, cargados, selectedId]);
+  const abrirEditor = useCallback((id?: string) => {
+    const elegido = pacienteDe(id);
+    if (!elegido) return;
+    setEditorId(elegido);
+    setVista('plan');
+    setAviso('');
+  }, [pacienteDe]);
+  const abrirNuevo = useCallback(() => {
+    const sinPlan = patients.find(persona => persona.id in cargados && !cargados[persona.id]);
+    if (!sinPlan && patients.length && Object.keys(cargados).length >= patients.length) {
+      setAviso('Todas tus pacientes ya tienen un plan. Abrí el de cada una para seguir editándolo.');
+      setVista('lista');
+      return;
+    }
+    abrirEditor(sinPlan?.id);
+  }, [patients, cargados, abrirEditor]);
   const alta = etiquetaAlta(vista);
+  const planAbierto = editorId ? cargados[editorId] : undefined;
+  const enEditor = vista === 'plan' && Boolean(planAbierto);
   useEffect(() => {
-    onHeader?.(<button className="cta" type="button" onClick={abrirEditor}><PanelV29Icon name="plus" size={13} />{alta}</button>);
-  }, [onHeader, alta, abrirEditor]);
+    if (vista === 'plantillas') {
+      onHeader?.(<button className="cta" type="button" onClick={() => setAviso('Próximamente. Las plantillas de Planes quedan para una pasada aparte.')}><PanelV29Icon name="plus" size={13} />{alta}</button>);
+      return;
+    }
+    if (enEditor) {
+      const etiqueta = planAbierto?.current.status === 'published' ? 'Ver entrega' : 'Revisar y publicar';
+      onHeader?.(<>
+        <button className="chip" type="button" onClick={abrirNuevo}><PanelV29Icon name="plus" size={13} />Nuevo plan</button>
+        <button className="cta" type="button" onClick={() => setAviso(AVISO_PUBLICAR)}><PanelV29Icon name="check" size={13} />{etiqueta}</button>
+      </>);
+      return;
+    }
+    onHeader?.(<button className="cta" type="button" onClick={abrirNuevo}><PanelV29Icon name="plus" size={13} />{alta}</button>);
+  }, [onHeader, alta, abrirNuevo, enEditor, planAbierto, vista]);
   useEffect(() => () => onHeader?.(null), [onHeader]);
 
   const filas = patients.map(persona => (persona.id in cargados)
     ? filaDePlan(persona, cargados[persona.id] ?? null, hoy)
     : filaProvisoria(persona, hoy));
 
+  const idEditor = editorId || pacienteDe();
+  const personaEditor = patients.find(persona => persona.id === idEditor);
   return <PanelPlanesVista
-    vista={vista} nombre={primerNombrePlanes(patients, selectedId)} filas={filas} consulta={consulta} orden={orden} filtro={filtro}
+    vista={vista} nombre={primerNombrePlanes(patients, idEditor || selectedId)} filas={filas} consulta={consulta} orden={orden} filtro={filtro}
     aviso={aviso} error={error} tareas={proximasAcciones(filas)}
-    onVista={siguiente => { setVista(siguiente); setAviso(''); }}
+    onVista={siguiente => {
+      setAviso('');
+      if (siguiente === 'plan') abrirEditor(idEditor);
+      else setVista(siguiente);
+    }}
     onRecetas={() => onOpen('/crm/biblioteca?biblioteca=recetas')}
     onConsulta={setConsulta} onOrden={setOrden} onFiltro={setFiltro}
     onLimpiar={() => { setConsulta(''); setFiltro('todos'); }}
     onEditor={abrirEditor} onAsistente={abrirAsistente} onReintentar={() => setReintento(valor => valor + 1)}
+    editor={personaEditor ? <PanelPlanEditor
+      paciente={personaEditor}
+      pacientes={patients}
+      planes={cargados}
+      plan={cargados[personaEditor.id] ?? null}
+      cargando={!(personaEditor.id in cargados)}
+      hoy={hoy}
+      onElegir={abrirEditor}
+      onPlan={guardado => setCargados(previo => ({ ...previo, [personaEditor.id]: guardado }))}
+      onAviso={setAviso}
+    /> : null}
   />;
 }

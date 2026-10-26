@@ -24,21 +24,25 @@ test('Planes: buscar, volver y dejar el editor y el asistente para después', as
   await page.getByRole('button', { name: 'Limpiar búsqueda y filtros', exact: true }).click();
   await expect(page.getByText('Sofía R.', { exact: true }).first()).toBeVisible();
 
+  await page.getByRole('button', { name: 'Elegir paciente y empezar', exact: true }).click();
+  await expect(page.locator('#s-planes').getByRole('status')).toContainText('parte 3');
+
   await page.getByRole('navigation', { name: 'Secciones de Planes' }).getByRole('button', { name: /^Plan de / }).click();
-  await expect(page.getByText('Próximamente. El editor de la semana llega en la parte 2.', { exact: true })).toBeVisible();
+  await expect(page.locator('#s-planes.pux-plan')).toBeVisible();
+  await expect(page.locator('.meal-plan-form')).toHaveCount(0);
   await page.getByRole('button', { name: 'Todos los planes', exact: true }).click();
   await expect(page.locator('#s-planes th', { hasText: 'Estado' })).toBeVisible();
 
   await page.getByRole('button', { name: /plan (de|para) Sofía R\./ }).click();
-  await expect(page.locator('#s-planes').getByRole('status')).toHaveText('Próximamente. El editor del plan llega en la parte 2.');
+  await expect(page.locator('#s-planes.pux-plan')).toBeVisible();
+  await expect(page.locator('#s-planes')).toContainText(/todavía no tiene plan|Comidas/);
   await expect(page).not.toHaveURL(/editor=1/);
   await expect(page.locator('.meal-plan-form')).toHaveCount(0);
 
+  await page.getByRole('button', { name: 'Todos los planes', exact: true }).click();
   await page.getByRole('button', { name: 'Nuevo plan', exact: true }).click();
-  await expect(page.locator('#s-planes').getByRole('status')).toContainText('parte 2');
-  await page.getByRole('button', { name: 'Elegir paciente y empezar', exact: true }).click();
-  await expect(page.locator('#s-planes').getByRole('status')).toContainText('parte 3');
   await expect(page.locator('.meal-plan-form')).toHaveCount(0);
+  await expect(page.locator('#s-planes')).not.toContainText('llega en la parte 2');
 });
 
 test('Planes: pedidos queda en el listado y el editor viejo sigue en sus enlaces', async ({ page }) => {

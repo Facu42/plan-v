@@ -138,7 +138,7 @@
 #pv-panel-v29.mob .main:has(#s-alimentos) > .top .sxin { flex: 1 1 100%; }
 #pv-panel-v29.mob .main:has(#s-alimentos) > .top .sxin input { width: 100%; min-width: 0; }
 
-/* Planes (parte 1) llena la columna. El editor y el asistente no están en esta pantalla. */
+/* Planes llena la columna. El asistente de la parte 3 no está en esta pantalla. */
 #pv-panel-v29:not(.mob) .main:has(#s-planes) { height: 100%; overflow: hidden; }
 #pv-panel-v29:not(.mob) #pv-panel:has(#s-planes) { flex: 1; min-height: 0; }
 #pv-panel-v29 #s-planes { min-width: 0; }
@@ -173,6 +173,127 @@
 #pv-panel-v29 #s-planes .sbtn svg { display: block; position: relative; top: -1.5px; }
 /* En flex la línea queda 1 px más baja que el botón en línea del boceto. */
 #pv-panel-v29 #s-planes .sbtn.k { min-height: 28px; }
+#pv-panel-v29 #s-planes .pema .sbtn,
+#pv-panel-v29 #s-planes .pfoot .sbtn { gap: 5px; }
+/* Editor. El listado no entra: hace falta .pux-plan.
+   El reset de la app mete tracking, interlineado y relleno donde el boceto
+   deja el valor del navegador. Las tarjetas de cómo empezar vuelven al
+   botón en línea (alto 27); Asistente IA separa el ícono 6px; deshacer
+   recupera el gris y el borde del boceto. */
+#pv-panel-v29 #s-planes.pux-plan :where(button, input, select) {
+  letter-spacing: normal;
+  line-height: normal;
+}
+/* Las semanas van a la izquierda de Día / Semana, en la misma fila del título.
+   En el boceto el grupo está abajo, al lado de los días, y la palabra Semana
+   ocupa un renglón propio. Acá la palabra y los círculos quedan en línea. */
+#pv-panel-v29 #s-planes.pux-plan .pedit > header .pewk {
+  flex: none;
+  flex-wrap: nowrap;
+  align-items: center;
+  align-self: center;
+  width: max-content;
+  max-width: 100%;
+}
+#pv-panel-v29 #s-planes.pux-plan .pedit > header .pewk > span {
+  flex-basis: auto;
+  margin-right: 6px;
+}
+#pv-panel-v29 #s-planes.pux-plan .pedit > header > .iaseg {
+  align-self: center;
+}
+/* En el celular el título ocupa todo el ancho. Los círculos de 34 px
+   no entran al lado de Día / Semana y el interruptor baja de renglón.
+   Un poco más chicos, quedan en la misma fila, a la izquierda. */
+#pv-panel-v29.mob #s-planes.pux-plan .pedit > header .sp {
+  display: none;
+}
+#pv-panel-v29.mob #s-planes.pux-plan .pedit > header .pewk {
+  margin-left: auto;
+}
+#pv-panel-v29.mob #s-planes.pux-plan .pedit > header .pewk button {
+  width: 30px;
+  height: 30px;
+}
+/* Guardar como plantilla, copiar y ajustar metas van en esta misma barra.
+   La hoja generada deja la fila en una sola línea; con los tres textos
+   visibles, la barra baja de renglón para que no se corten. */
+#pv-panel-v29 #s-planes.pux-plan .prow2 {
+  flex-wrap: wrap !important;
+}
+#pv-panel-v29 #s-planes.pux-plan .r29-tools {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 5px;
+  max-width: 100%;
+}
+#pv-panel-v29 .main:has(#s-planes) > .top .chip {
+  letter-spacing: normal;
+  line-height: normal;
+}
+#pv-panel-v29 #s-planes.pux-plan .sbtn {
+  display: inline-block;
+  gap: normal;
+  min-height: auto;
+}
+#pv-panel-v29 #s-planes.pux-plan .sbtn svg {
+  display: inline;
+  position: static;
+  top: auto;
+}
+#pv-panel-v29 #s-planes.pux-plan .r29-tools .sbtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+}
+#pv-panel-v29 #s-planes.pux-plan .r29-tools .sbtn svg {
+  display: block;
+  position: relative;
+  top: 0;
+}
+#pv-panel-v29 #s-planes.pux-plan .pema .sbtn,
+#pv-panel-v29 #s-planes.pux-plan .pfoot .sbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+#pv-panel-v29 #s-planes.pux-plan .r29-care span {
+  line-height: normal;
+  border-color: currentColor;
+}
+#pv-panel-v29 #s-planes.pux-plan button.ibtn {
+  padding: 1px 6px;
+}
+#pv-panel-v29 #s-planes.pux-plan .r29-tools .ibtn {
+  color: var(--ink2);
+  border: 1px solid var(--line2);
+}
+/* La fila Comidas · Indicaciones · Compras · Versiones · Entrega.
+   La hoja vieja pinta todo .tabs con fondo crema, radio 12 y relleno 3.
+   En el boceto esa tira es el gris del panel, radio 9 y relleno 2. */
+#pv-panel-v29 #s-planes.pux-plan .prow2 { line-height: normal; }
+#pv-panel-v29 #s-planes.pux-plan #ptabs {
+  margin-left: 0;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--app);
+  border: 1px solid var(--line);
+  line-height: normal;
+}
+#pv-panel-v29 #s-planes.pux-plan .pewk button { padding: 1px 6px; }
+#pv-panel-v29 #s-planes.pux-plan .pux-hour {
+  padding: 1px 2px;
+  line-height: normal;
+  letter-spacing: normal;
+}
+#pv-panel-v29 #s-planes.pux-plan .pefot .sw { padding: 1px 6px; }
+#pv-panel-v29.mob #s-planes .pstart { grid-template-columns: 1fr; }
+#pv-panel-v29.mob #s-planes .pstart > div { min-height: 0; }
+/* En el celular la comida no se pisa: el boceto pide ahora wrap y el editor lo anula. */
+#pv-panel-v29.mob #s-planes.pux-plan .pedit { overflow: visible; }
+#pv-panel-v29.mob #s-planes.pux-plan .pemh { flex-wrap: wrap; row-gap: 8px; }
+#pv-panel-v29.mob #s-planes.pux-plan .pema { margin-left: auto; }
 /* La hoja vieja pinta todo span de .tabs como una solapa (relleno 5px 10px).
    En el boceto ese span es solo el número, sin caja. */
 #pv-panel-v29 #s-planes .tabs span.num {

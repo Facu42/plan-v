@@ -79,6 +79,30 @@ export const PIEZAS_PLANES = [
   ['Orden del listado', '#s-planes .r29-list-filters select', '', ['height', 'fontSize', 'letterSpacing', 'lineHeight']],
 ];
 
+export const PIEZAS_EMPEZAR = [
+  ['Armar con el asistente', '#s-planes .pstart .sbtn.k', '', ['height', 'display', 'gap', 'fontSize', 'fontWeight', 'letterSpacing', 'lineHeight', 'paddingTop', 'borderTopLeftRadius', 'backgroundColor', 'color']],
+  ['Elegir plantilla', '#s-planes .pstart .sbtn:not(.k)', '', ['height', 'display', 'gap', 'fontSize', 'fontWeight', 'letterSpacing', 'lineHeight', 'paddingTop', 'borderTopLeftRadius']],
+];
+
+export const PIEZAS_EDITOR = [
+  ['Día del editor', '#s-planes .pedays button', '', ['fontSize', 'borderTopLeftRadius', 'fontWeight', 'letterSpacing', 'lineHeight', 'paddingTop']],
+  ['Día activo', '#s-planes .pedays button.on', '', ['backgroundColor', 'borderTopLeftRadius', 'color']],
+  ['Semana activa', '#s-planes .pewk button.on', '', ['backgroundColor', 'color', 'width', 'height', 'borderTopLeftRadius', 'letterSpacing', 'lineHeight']],
+  ['Fila Comidas', '#s-planes #ptabs', '', ['paddingTop', 'paddingLeft', 'borderTopLeftRadius', 'backgroundColor', 'height', 'lineHeight', 'gap', 'marginLeft']],
+  ['Barra de las pestañas', '#s-planes.pux-plan .prow2', '', ['height', 'lineHeight', 'borderTopLeftRadius', 'gap']],
+  ['Pestaña del editor', '#s-planes #ptabs button', '', ['fontSize', 'borderTopLeftRadius', 'letterSpacing', 'lineHeight', 'paddingTop', 'paddingLeft', 'height']],
+  ['Pestaña Comidas', '#s-planes #ptabs button.on', '', ['backgroundColor', 'fontWeight', 'letterSpacing', 'lineHeight']],
+  ['Duplicar día', '#s-planes .petool .lnk', '', ['fontSize', 'fontWeight', 'letterSpacing', 'lineHeight']],
+  ['Día o semana', '#s-planes .pedit .iaseg button', '', ['fontSize', 'letterSpacing', 'lineHeight', 'paddingTop', 'borderTopLeftRadius']],
+  ['Contexto del plan', '#s-planes .r29-context', '', ['borderTopLeftRadius', 'minHeight']],
+  ['Editar metas', '#s-planes .r29-context > .sbtn:not(.r29-care-toggle)', '', ['height', 'fontSize', 'fontWeight', 'letterSpacing', 'lineHeight', 'paddingTop', 'borderTopLeftRadius']],
+  ['Cuidado', '#s-planes .r29-care span', '', ['height', 'fontSize', 'lineHeight', 'paddingTop', 'borderTopLeftRadius', 'backgroundColor', 'color']],
+  ['Asistente IA', '#s-planes .r29-tools .sbtn', '', ['gap', 'minHeight', 'height', 'fontSize', 'letterSpacing', 'lineHeight']],
+  ['Deshacer', '#s-planes .r29-tools .ibtn', '', ['width', 'height', 'color', 'borderTopColor', 'paddingTop', 'borderTopLeftRadius', 'letterSpacing', 'lineHeight']],
+  ['Hora de la comida', '#s-planes .pux-hour', '', ['width', 'height', 'fontSize', 'letterSpacing', 'lineHeight', 'paddingTop', 'borderTopLeftRadius']],
+  ['Sumar a la comida', '#s-planes .pema .ibtn', '', ['width', 'height', 'paddingTop', 'borderTopLeftRadius', 'borderTopColor', 'letterSpacing', 'lineHeight']],
+];
+
 export const PIEZAS_BIBLIOTECA = [
   ['Grilla de recursos', '#s-biblioteca .sxlib', '', ['display', 'gap']],
   ['Tarjeta de recurso', '#s-biblioteca .sxcard', '', ['backgroundColor', 'borderTopLeftRadius', 'paddingTop', 'textAlign']],
@@ -328,6 +352,19 @@ export async function correrContratoV29() {
       await a.waitForSelector('#s-planes .r29-search');
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Planes\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_PLANES, informe);
+      await b.locator('#s-planes .r29-table .sbtn', { hasText: 'Crear plan' }).first().click();
+      await b.waitForSelector('#s-planes .pstart .sbtn.k');
+      await a.locator('#s-planes .r29-table .sbtn', { hasText: 'Crear plan' }).first().click();
+      await a.waitForSelector('#s-planes .pstart .sbtn.k');
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Cómo empezar el plan\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_EMPEZAR, informe);
+      await b.locator('#s-planes #pview button', { hasText: 'Todos los planes' }).click();
+      await b.locator('#s-planes .r29-table .sbtn', { hasText: 'Abrir plan' }).first().click();
+      await b.waitForSelector('#s-planes.pux-plan .pedays button');
+      await a.getByRole('button', { name: 'Empezar vacío', exact: true }).click();
+      await a.waitForSelector('#s-planes.pux-plan .pedays button');
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Editor de Planes\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_EDITOR, informe);
       await b.close();
       await a.close();
     }

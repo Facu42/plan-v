@@ -1,6 +1,8 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-23)
 
-26/10 · Cursor · Planes del panel, parte 1: en `/crm/plan` se ve el listado del boceto v29. Después del rechazo visual, los botones (Nuevo plan, secciones, filtros, acción de la fila y la columna de la derecha) quedaron como el boceto. El editor de la semana y el armado con IA siguen para después. Sin juntar. Detalle en [planes-v29-parte-1.md](panel-nutri-rediseno/planes-v29-parte-1.md).
+26/10 · Cursor · Planes del panel, parte 2: en `/crm/plan`, Abrir plan, Crear plan y Nuevo plan abren el editor de la semana del boceto v29. Al empezar vacío se ven las semanas 1 a 4 a la izquierda de Día / Semana, en la misma fila. La tira de días queda sola. Guardar como plantilla, copiar a otra paciente y ajustar metas están en la misma barra, sin el menú «Más». La fila Comidas, Indicaciones, Compras, Versiones y Entrega sigue con la tira gris del boceto. Plantillas, equivalencias, el asistente, publicar, el PDF y programar la entrega siguen para la parte 3. La parte 1 ya está en main (#183). Esta parte está en el [PR #184](https://github.com/Facu42/plan-v/pull/184) y no se junta. Detalle en [planes-v29-parte-2.md](panel-nutri-rediseno/planes-v29-parte-2.md).
+
+26/10 · Cursor · Planes del panel, parte 1: en `/crm/plan` se ve el listado del boceto v29. Después del rechazo visual, los botones (Nuevo plan, secciones, filtros, acción de la fila y la columna de la derecha) quedaron como el boceto. Ya está en main (#183). Detalle en [planes-v29-parte-1.md](panel-nutri-rediseno/planes-v29-parte-1.md).
 
 25/10 · Cursor · Alimentos del panel, corrección de paridad en el [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. Facu rechazó la primera pasada. En gramos las porciones son 100 g, 1 taza (30 g) y 1 cucharada (10 g). El origen se lee «SARA 2». SARA 2 sigue de solo lectura.
 
