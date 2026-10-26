@@ -99,7 +99,6 @@ export const PIEZAS_EDITOR = [
   ['Cuidado', '#s-planes .r29-care span', '', ['height', 'fontSize', 'lineHeight', 'paddingTop', 'borderTopLeftRadius', 'backgroundColor', 'color']],
   ['Asistente IA', '#s-planes .r29-tools .sbtn', '', ['gap', 'minHeight', 'height', 'fontSize', 'letterSpacing', 'lineHeight']],
   ['Deshacer', '#s-planes .r29-tools .ibtn', '', ['width', 'height', 'color', 'borderTopColor', 'paddingTop', 'borderTopLeftRadius', 'letterSpacing', 'lineHeight']],
-  ['Más', '#s-planes .r29-tools summary', '', ['height', 'letterSpacing', 'lineHeight', 'paddingTop', 'borderTopLeftRadius']],
   ['Hora de la comida', '#s-planes .pux-hour', '', ['width', 'height', 'fontSize', 'letterSpacing', 'lineHeight', 'paddingTop', 'borderTopLeftRadius']],
   ['Sumar a la comida', '#s-planes .pema .ibtn', '', ['width', 'height', 'paddingTop', 'borderTopLeftRadius', 'borderTopColor', 'letterSpacing', 'lineHeight']],
 ];

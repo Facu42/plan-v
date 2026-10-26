@@ -8,7 +8,7 @@ import { fondoAvatar } from './planes-lista';
 import {
   cambiarCantidad, cambiarNota, COMIDAS_EDITOR, comidaDelDia, comidasDelDia, controlEntrega,
   copiarPlan, DIAS_CORTOS, DIAS_LARGOS, duplicarDia, fechasDeSemana, filasDeVersiones, HORAS_EDITOR,
-  indiceLunes, listaDeCompras, lunesDeSemana, paraGuardar, periodoDe, quitarLinea, semanaInicial, semanasDelPeriodo,
+  finVisible, indiceLunes, listaDeCompras, lunesDeSemana, paraGuardar, pasaElTope, periodoDe, quitarLinea, semanaInicial, semanasDelPeriodo,
   sumarDias, sumarMacros, type MacrosDia,
 } from './planes-editor';
 
@@ -133,7 +133,8 @@ export function PanelPlanEditor({
 
   const lunes = lunesDeSemana(hoy);
   const inicio = vacio ? lunes : version?.period_start ?? lunes;
-  const fin = vacio ? sumarDias(lunes, 6) : version?.period_end ?? sumarDias(lunes, 6);
+  const finPeriodo = vacio ? sumarDias(inicio, 6) : version?.period_end ?? sumarDias(inicio, 6);
+  const fin = finVisible(inicio, finPeriodo, vacio);
   const fechas = fechasDeSemana(inicio, fin, semana);
   const fecha = fechas[dia] ?? fechas[0] ?? hoy;
   const metaKcal = version?.nutrition_target?.kcal ?? (kcal.trim() ? Number(kcal) : null);
@@ -158,7 +159,12 @@ export function PanelPlanEditor({
       onAviso('El borrador necesita al menos una comida para guardarse.');
       return;
     }
-    const periodo = periodoDe(siguiente, inicio, fin);
+    if (siguiente.some(item => pasaElTope(inicio, item.for_date))) {
+      onAviso('Esas comidas quedan después de las tres semanas que se pueden guardar. El plan publicado no cambió.');
+      setGuardando('error');
+      return;
+    }
+    const periodo = periodoDe(siguiente, inicio, finPeriodo);
     const horasNuevas = extras.horas ?? horas;
     const guia = extras.guidance ?? guidance;
     const objetivo = version?.nutrition_target;
@@ -315,14 +321,9 @@ export function PanelPlanEditor({
             void guardar(siguiente);
           }}><PanelV29Icon name="redo" size={14} /></button>
           <button type="button" className="sbtn" onClick={() => onAviso(AVISO_IA)}><PanelV29Icon name="spark" size={13} />Asistente IA</button>
-          <details>
-            <summary aria-label="Más herramientas del plan">Más ···</summary>
-            <div className="r29-menu">
-              <button type="button" onClick={() => onAviso(AVISO_PLANTILLA)}><PanelV29Icon name="copy" size={14} />Guardar como plantilla</button>
-              <button type="button" onClick={() => onAviso('Próximamente. Copiar este plan a otra paciente queda para después.')}><PanelV29Icon name="users" size={14} />Copiar a otra paciente</button>
-              <button type="button" onClick={() => { if (version?.nutrition_target) setMeta(true); else onAviso('La meta diaria no está cargada en este plan.'); }}><PanelV29Icon name="trend" size={14} />Ajustar metas</button>
-            </div>
-          </details>
+          <button type="button" className="sbtn" onClick={() => onAviso(AVISO_PLANTILLA)}><PanelV29Icon name="copy" size={13} />Guardar como plantilla</button>
+          <button type="button" className="sbtn" onClick={() => onAviso('Próximamente. Copiar este plan a otra paciente queda para después.')}><PanelV29Icon name="users" size={13} />Copiar a otra paciente</button>
+          <button type="button" className="sbtn" onClick={() => { if (version?.nutrition_target) setMeta(true); else onAviso('La meta diaria no está cargada en este plan.'); }}><PanelV29Icon name="trend" size={13} />Ajustar metas</button>
         </div>
       </div>
       {pestana === 'semana' && modo === 'dia' ? <div className="fx">

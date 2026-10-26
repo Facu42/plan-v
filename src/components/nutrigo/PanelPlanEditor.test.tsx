@@ -67,7 +67,49 @@ describe('editor del plan', () => {
     expect(html).toContain('Pollo al horno');
     expect(html).toContain('1.800 kcal');
     expect(html).toContain('Asistente IA');
+    expect(html).toContain('Guardar como plantilla');
+    expect(html).toContain('Copiar a otra paciente');
+    expect(html).toContain('Ajustar metas');
+    expect(html).not.toContain('Más');
+    expect(html).not.toContain('<details');
     expect(html).toContain('Sin cuidados cargados');
     expect(html).not.toContain('meal-plan-form');
+    const semanas = botonesSemana(html);
+    expect(semanas).toContain('>1<');
+    expect(semanas).not.toContain('>2<');
+  });
+
+  it('un plan de cuatro semanas muestra los cuatro círculos juntos', () => {
+    const plan = {
+      id: '11111111-1111-4111-8111-111111111111',
+      patient_id: 'pat-sofia',
+      timezone: 'America/Argentina/Buenos_Aires',
+      created_at: '2026-10-01T12:00:00Z',
+      published: null,
+      current: {
+        id: 'ver',
+        version: 1,
+        status: 'draft' as const,
+        period_start: '2026-10-26',
+        period_end: '2026-11-22',
+        published_at: null,
+        nutrition_target: null,
+        items: [{
+          id: 'item-1', for_date: '2026-10-26', slot: 'Almuerzo' as const, recipe_id: null, recipe_version: null,
+          recipe_title: null, recipe: null, free_text: 'Ensalada', portions: null, public_note: '',
+        }],
+      },
+    };
+    const semanas = botonesSemana(editor(plan));
+    expect(semanas).toContain('>1<');
+    expect(semanas).toContain('>2<');
+    expect(semanas).toContain('>3<');
+    expect(semanas).toContain('>4<');
+    expect(semanas).not.toContain('>5<');
   });
 });
+
+function botonesSemana(html: string) {
+  const inicio = html.indexOf('aria-label="Elegir semana"');
+  return html.slice(inicio, html.indexOf('</div>', inicio));
+}

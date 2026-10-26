@@ -65,6 +65,20 @@ export function semanasDelPeriodo(inicio: string, fin: string) {
   return Math.max(1, Math.ceil(eachIsoDate(inicio, fin).length / 7));
 }
 
+/** El boceto arranca vacío con cuatro semanas. Un plan ya guardado muestra las suyas. */
+export const SEMANAS_AL_EMPEZAR = 4;
+
+export function finVisible(inicio: string, fin: string, vacio: boolean) {
+  if (!vacio) return fin;
+  const cuatro = sumarDias(inicio, SEMANAS_AL_EMPEZAR * 7 - 1);
+  return fin > cuatro ? fin : cuatro;
+}
+
+/** El borrador no acepta más de 21 días entre el inicio y el fin. */
+export function pasaElTope(inicio: string, fecha: string) {
+  return fecha > sumarDias(inicio, 21);
+}
+
 export function fechasDeSemana(inicio: string, fin: string, semana: number) {
   return eachIsoDate(inicio, fin).slice(semana * 7, semana * 7 + 7);
 }

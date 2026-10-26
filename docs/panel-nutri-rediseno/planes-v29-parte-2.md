@@ -6,16 +6,17 @@
 
 En `/crm/plan`, «Abrir plan», «Crear plan» y «Nuevo plan» abren el editor adentro de Planes. No abren el formulario viejo.
 
-Si la paciente todavía no tiene plan, se ven las cuatro formas de empezar y lo que ya está en su ficha (objetivo, plan B, foco, horario). «Empezar vacío» arma la semana de lunes a domingo, con el día de hoy marcado. «Copiar de otra paciente» copia las comidas a un borrador nuevo. No copia sus datos personales.
+Si la paciente todavía no tiene plan, se ven las cuatro formas de empezar y lo que ya está en su ficha (objetivo, plan B, foco, horario). «Empezar vacío» arma cuatro semanas, de lunes a domingo, con el día de hoy marcado. Un plan que ya está guardado muestra las semanas que tiene, juntas, al lado de los días. «Copiar de otra paciente» copia las comidas a un borrador nuevo. No copia sus datos personales.
 
 Con la semana abierta se ve:
 
 - La paciente, la meta diaria, el estado de trabajo y los cuidados.
 - Las pestañas Comidas, Indicaciones, Compras, Versiones y Entrega, en ese orden. La tira es gris, con radio 9 y relleno 2. Comidas, cuando está elegida, es la pastilla blanca. La hoja vieja la había dejado crema y más redonda.
-- Los días, la semana, el total del día y el resumen de al lado (energía, macros y el equilibrio de la semana).
+- Los días y las semanas (1, 2, 3 y 4 al empezar vacío; la activa en negro), el total del día y el resumen de al lado (energía, macros y el equilibrio de la semana).
 - Cada comida se abre de a una. «Expandir todas» las abre juntas. La hora se ve. Cambiar o agregar un plato usa el mismo ícono del boceto.
 - Duplicar un día reemplaza el día de destino.
 - Las porciones, la nota y quitar una comida se guardan en el borrador. Deshacer y rehacer también.
+- En la misma barra que Guardado y Asistente IA están «Guardar como plantilla», «Copiar a otra paciente» y «Ajustar metas». No hay un menú «Más».
 - Indicaciones (recomendaciones y lo que hay que evitar), la lista de compras de la semana y las versiones. Restaurar una versión arma un borrador. No publica.
 - Entrega muestra el control de comidas vacías y de días lejos de la meta, cuando hay calorías cargadas.
 
@@ -40,13 +41,14 @@ Estos botones se ven como en el boceto y avisan que llegan después. No publican
 - Plantillas (la sección, elegir plantilla, guardar como plantilla y Nueva plantilla).
 - Equivalencias dentro de Planes. La calculadora sigue en su módulo.
 - Sumar o cambiar un plato, agregar colación y duplicar la semana completa. Las porciones de lo que ya está sí se editan.
-- Copiar este plan a otra paciente desde el menú Más. Copiar desde otra paciente, al empezar, sí está.
+- Guardar como plantilla y copiar este plan a otra paciente avisan que llegan después. El botón queda a la vista. Copiar desde otra paciente, al empezar, sí está. Ajustar metas abre la meta cuando el plan ya la tiene; si no, avisa que no está cargada.
+- Una comida que cae después de las tres semanas que acepta el borrador no se guarda, y se avisa. El plan publicado no cambia.
 
 El editor que ya existía sigue en `/crm/plan?paciente=…` y en `/crm/plan?editor=1`.
 
 ## Cómo probarlo
 
-Entrá en modo demo a `/crm/plan`. Abrí una fila o tocá Nuevo plan. Si no hay plan, tocá Empezar vacío. Probá duplicar un día, abrir otra comida y las pestañas Indicaciones, Compras, Versiones y Entrega. Asistente IA y Revisar y publicar tienen que avisar que llegan en la parte 3. Recetas sigue abriendo la Biblioteca. `/crm/plan?paciente=pat-sofia` sigue mostrando el editor de siempre.
+Entrá en modo demo a `/crm/plan`. Abrí una fila o tocá Nuevo plan. Si no hay plan, tocá Empezar vacío: tienen que verse las semanas 1, 2, 3 y 4, y en la barra «Guardar como plantilla», «Copiar a otra paciente» y «Ajustar metas», sin un menú «Más». Probá duplicar un día, abrir otra comida y las pestañas Indicaciones, Compras, Versiones y Entrega. Asistente IA y Revisar y publicar tienen que avisar que llegan en la parte 3. Recetas sigue abriendo la Biblioteca. `/crm/plan?paciente=pat-sofia` sigue mostrando el editor de siempre.
 
 ## Informe del paso 10
 
@@ -58,9 +60,10 @@ Entrá en modo demo a `/crm/plan`. Abrí una fila o tocá Nuevo plan. Si no hay 
   - Publicar: ⚠️ no se llama. El botón avisa y no entrega el plan.
 - Regresiones cubiertas: el enlace `/crm/plan?paciente=` y `?editor=1` siguen abriendo el editor viejo. La parte 1 del listado sigue midiendo igual en el contrato visual.
 - Contratos revisados: guardar usa el mismo borrador del plan profesional (fechas, huso de Argentina, ítems y revisión). No se publica desde esta pantalla. No hay tabla nueva.
-- Áreas frágiles: el editor pide el plan de cada paciente al entrar al listado. Si la paciente no tiene meta, no se inventa. Una comida sin calorías deja ese total en «Sin dato», no en una suma a medias. La semana vacía arranca el lunes aunque hoy sea domingo.
+- Áreas frágiles: el editor pide el plan de cada paciente al entrar al listado. Si la paciente no tiene meta, no se inventa. Una comida sin calorías deja ese total en «Sin dato», no en una suma a medias. La semana vacía arranca el lunes aunque hoy sea domingo. Al empezar vacío se ven cuatro semanas; guardar sigue cortado a tres semanas, que es lo que ya aceptaba el borrador.
 - Migraciones: no hay.
 - Fire test: ✅ se hizo que duplicar un día no copiara nada y la prueba falló (el destino siguió en «Sopa» en vez de «Pollo al horno»). Se volvió a dejar la copia real.
-- Automatizaciones nuevas: el contrato visual, en claro y en oscuro (`npm run panel:contrato:v29`), mide también cómo empezar (Armar con el asistente y Elegir plantilla) y, en la semana, la pestaña, el día, la semana activa, Día/Semana, Editar metas, el chip de cuidados, Asistente IA, deshacer, Más, la hora y el botón de sumar a la comida.
+- Automatizaciones nuevas: el contrato visual, en claro y en oscuro (`npm run panel:contrato:v29`), mide también cómo empezar (Armar con el asistente y Elegir plantilla) y, en la semana, la pestaña, el día, la semana activa, Día/Semana, Editar metas, el chip de cuidados, Asistente IA, deshacer, la hora y el botón de sumar a la comida. El menú «Más» salió de la barra, así que el contrato ya no lo busca.
 - Fire test de los botones: ✅ se achicó a propósito el espacio del ícono de Asistente IA y el contrato lo marcó (6 px del boceto contra 4 px). Se volvió a dejar en 6 px. La tira de Comidas se redondeó a 14 px y el contrato la marcó (el boceto mide 9). Se volvió a dejar en 9.
+- Fire test de las semanas y de la barra: ✅ se dejó el arranque vacío en una sola semana y la prueba pidió el 15 de noviembre en vez del 25 de octubre. Se volvió a poner «Más ···» en la barra y la prueba del editor lo marcó. Se volvió a dejar las cuatro semanas y las tres acciones a la vista.
 - Veredicto: SHIP de esta parte, a la espera del ok visual de Facundo. Los botones que había rechazado quedan medidos contra el boceto. 3.328 pruebas aprobadas y 2 omitidas. Tipos en verde. Contrato visual en verde, claro y oscuro. Cuatro recorridos de Planes en verde. En el celular las cuatro formas de empezar van una debajo de la otra y las comidas no se pisan.

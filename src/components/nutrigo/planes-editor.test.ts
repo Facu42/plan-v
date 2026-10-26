@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { PlanItemView } from '../../types/plans';
 import {
   cambiarCantidad, comidaDelDia, controlEntrega, copiarPlan, duplicarDia, filasDeVersiones,
-  listaDeCompras, lunesDeSemana, quitarLinea, semanasDelPeriodo, sumarMacros,
+  finVisible, listaDeCompras, lunesDeSemana, pasaElTope, quitarLinea, semanasDelPeriodo, sumarMacros,
 } from './planes-editor';
 
 function plato(extra: Partial<PlanItemView> = {}): PlanItemView {
@@ -86,5 +86,13 @@ describe('editor de la semana', () => {
     expect(filas[1]?.restaurar).toBe(true);
     expect(filas[0]?.restaurar).toBe(false);
     expect(semanasDelPeriodo('2026-10-26', '2026-11-08')).toBe(2);
+  });
+
+  it('al empezar vacío se ven las cuatro semanas, y un plan corto muestra solo las suyas', () => {
+    expect(finVisible('2026-10-19', '2026-10-25', true)).toBe('2026-11-15');
+    expect(finVisible('2026-10-19', '2026-10-25', false)).toBe('2026-10-25');
+    expect(finVisible('2026-10-19', '2026-11-20', true)).toBe('2026-11-20');
+    expect(pasaElTope('2026-10-19', '2026-11-09')).toBe(false);
+    expect(pasaElTope('2026-10-19', '2026-11-10')).toBe(true);
   });
 });

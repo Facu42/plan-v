@@ -184,11 +184,24 @@
   letter-spacing: normal;
   line-height: normal;
 }
-/* «Más» no es un botón: en el boceto hereda el tracking del armazón
-   y el interlineado queda en normal. */
-#pv-panel-v29 #s-planes.pux-plan .r29-tools summary {
-  letter-spacing: inherit;
-  line-height: normal;
+/* Las cuatro semanas quedan juntas, al lado de los días. Si el grupo se
+   achica, los círculos bajan de a uno y se ve un solo «1». */
+#pv-panel-v29 #s-planes.pux-plan .pux-calendar > .pewk {
+  flex: none;
+  width: max-content;
+  max-width: 100%;
+}
+/* Guardar como plantilla, copiar y ajustar metas van en esta misma barra.
+   La hoja generada deja la fila en una sola línea; con los tres textos
+   visibles, la barra baja de renglón para que no se corten. */
+#pv-panel-v29 #s-planes.pux-plan .prow2 {
+  flex-wrap: wrap !important;
+}
+#pv-panel-v29 #s-planes.pux-plan .r29-tools {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 5px;
+  max-width: 100%;
 }
 #pv-panel-v29 .main:has(#s-planes) > .top .chip {
   letter-spacing: normal;
