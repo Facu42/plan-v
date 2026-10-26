@@ -1,11 +1,11 @@
 import type { FormEvent } from 'react';
-import type { PlanVersionView } from '../../types/plans';
+import type { CambioIA } from './planes-scope';
 import { PanelV29Icon } from './PanelV29Icon';
 import { SUGERENCIAS_ASISTENTE } from './planes-asistente';
 
 export type MensajeAsistente = { rol: 'vos' | 'ia'; texto: string };
 export type LineaPropuesta = { etiqueta: string; texto: string };
-export type EstadoTarjeta = 'nueva' | 'ok' | 'no';
+export type EstadoTarjeta = 'nueva' | 'ok' | 'no' | 'deshecha';
 export type ViaCompartir = 'app' | 'mail' | 'pdf' | 'impreso';
 export type OpcionesPdf = { logo: boolean; caseras: boolean; compras: boolean; recetas: boolean; hoja: boolean };
 
@@ -24,12 +24,6 @@ const INTERRUPTORES: Array<[keyof OpcionesPdf, string]> = [
   ['hoja', 'Una semana por hoja'],
 ];
 
-function estadoVersion(estado: PlanVersionView['status']) {
-  if (estado === 'published') return 'Publicada';
-  if (estado === 'scheduled') return 'Programada';
-  if (estado === 'archived') return 'Archivada';
-  return 'Borrador';
-}
 
 export function AtajoAsistente({ onAbrir }: { onAbrir: () => void }) {
   return <section className="fxp p28-ai-shortcut">
@@ -106,7 +100,7 @@ export function OpcionesImpresion({ opciones, onCambio, onDescargar, onImprimir 
 }
 
 export function CajonAsistente({
-  abierto, pestana, nombre, alcances, alcance, mensajes, armando, pedido, tarjeta, historial, onCerrar, onPestana, onAlcance, onPedido, onEnviar, onSugerencia, onAplicar, onDescartar, onDeshacer,
+  abierto, pestana, nombre, alcances, alcance, mensajes, armando, pedido, tarjeta, historial, puedeDeshacer, onCerrar, onPestana, onAlcance, onPedido, onEnviar, onSugerencia, onAplicar, onDescartar, onDeshacer,
 }: {
   abierto: boolean;
   pestana: 'chat' | 'historial';
@@ -117,7 +111,8 @@ export function CajonAsistente({
   armando: boolean;
   pedido: string;
   tarjeta: { lineas: readonly LineaPropuesta[]; estado: EstadoTarjeta } | null;
-  historial: readonly PlanVersionView[];
+  historial: readonly CambioIA[];
+  puedeDeshacer: boolean;
   onCerrar: () => void;
   onPestana: (pestana: 'chat' | 'historial') => void;
   onAlcance: (indice: number) => void;
@@ -140,17 +135,19 @@ export function CajonAsistente({
         <button type="button" role="tab" aria-selected={pestana === 'historial'} onClick={() => onPestana('historial')}>Historial de cambios</button>
       </div>
       <span className="sp" />
+      <button type="button" className="ibtn" aria-label="Deshacer última aplicación IA" disabled={!puedeDeshacer || armando} onClick={onDeshacer}><PanelV29Icon name="undo" size={13} /></button>
       <button type="button" className="ibtn" aria-label="Cerrar asistente" onClick={onCerrar}><PanelV29Icon name="x" size={13} /></button>
     </header>
     {pestana === 'historial' ? <div className="iahist">
-      {historial.length ? historial.map(version => <div key={version.id}>
-        <time>v{version.version}</time>
-        <span><b>Versión {version.version}</b><small>{estadoVersion(version.status)} · {version.period_start}</small></span>
-        <button type="button" className="sbtn" onClick={onDeshacer}><PanelV29Icon name="undo" size={12} />Deshacer</button>
-      </div>) : <p className="mhelp">Todavía no hay versiones guardadas de este plan.</p>}
+      {historial.length ? historial.map((cambio, indice) => <div key={cambio.id}>
+        <time>{cambio.hora}</time>
+        <span><b>{cambio.titulo}</b><small>{cambio.detalle}</small></span>
+        {indice === 0 && cambio.titulo === 'Propuesta aplicada' ? <button type="button" className="sbtn" disabled={!puedeDeshacer || armando} onClick={onDeshacer}><PanelV29Icon name="undo" size={12} />Deshacer</button> : null}
+      </div>) : <p className="mhelp">Todavía no hay aplicaciones del asistente en esta sesión.</p>}
+
     </div> : <>
       <div className="iascope"><span>Cambios en</span><div className="iaseg" role="radiogroup" aria-label="Cambios en">
-        {alcances.map((etiqueta, indice) => <button type="button" role="radio" key={etiqueta} aria-checked={alcance === indice} onClick={() => onAlcance(indice)}>{etiqueta}</button>)}
+        {alcances.map((etiqueta, indice) => <button type="button" role="radio" key={etiqueta} aria-checked={alcance === indice} disabled={armando} onClick={() => onAlcance(indice)}>{etiqueta}</button>)}
       </div></div>
       <div className="iachat">
         {mensajes.length ? mensajes.map((mensaje, indice) => <div className={mensaje.rol === 'ia' ? 'iam a' : 'iam u'} key={`${mensaje.rol}-${indice}`}>{mensaje.texto}</div>) : <p className="mhelp">Pedile un cambio. La propuesta queda en borrador hasta que la apliques.</p>}
@@ -158,7 +155,7 @@ export function CajonAsistente({
         {tarjeta ? <div className={`iaprop${tarjeta.estado === 'no' ? ' no' : tarjeta.estado === 'ok' ? ' ok' : ''}`}>
           {tarjeta.lineas.map(linea => <div key={linea.etiqueta}><small>{linea.etiqueta}</small><b>{linea.texto}</b></div>)}
           <div className="iapa">
-            {tarjeta.estado === 'ok' ? <><span><PanelV29Icon name="check" size={12} />Aplicado en el borrador</span><button type="button" className="lnk" onClick={onDeshacer}>Deshacer</button></> : tarjeta.estado === 'no' ? <span>Descartado</span> : <>
+            {tarjeta.estado === 'ok' ? <><span><PanelV29Icon name="check" size={12} />Aplicado en el borrador</span><button type="button" className="lnk" disabled={!puedeDeshacer || armando} onClick={onDeshacer}>Deshacer</button></> : tarjeta.estado === 'deshecha' ? <span>Aplicación deshecha</span> : tarjeta.estado === 'no' ? <span>Descartado</span> : <>
               <button type="button" className="sbtn k" disabled={armando} onClick={onAplicar}>Aplicar</button>
               <button type="button" className="sbtn" disabled={armando} onClick={onDescartar}>Descartar</button>
             </>}
@@ -168,7 +165,7 @@ export function CajonAsistente({
       <div className="iasug">{SUGERENCIAS_ASISTENTE.map(texto => <button type="button" key={texto} onClick={() => onSugerencia(texto)}>{texto}</button>)}</div>
       <form className="iain" onSubmit={enviar}>
         <input aria-label="Pedile un cambio" autoComplete="off" placeholder={`Pedile un cambio a la IA para ${nombre}…`} value={pedido} onChange={evento => onPedido(evento.target.value)} />
-        <button type="submit" className="ibtn go" aria-label="Enviar"><PanelV29Icon name="send" size={14} /></button>
+        <button type="submit" disabled={armando || !pedido.trim()} className="ibtn go" aria-label="Enviar"><PanelV29Icon name="send" size={14} /></button>
       </form>
     </>}
   </aside>;

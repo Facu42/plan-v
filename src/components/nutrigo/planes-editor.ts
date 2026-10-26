@@ -1,4 +1,4 @@
-import { componentInput, componentNutrients, componentTitle, type PlanComponentView } from '../../types/plan-components';
+import { componentNutrients, componentTitle, type PlanComponentView } from '../../types/plan-components';
 import { recipePortionNutrients } from '../../types/plan-recipe-selection';
 import {
   eachIsoDate, planWeekIndex, type PlanItemView, type PlanSlot, type PlanVersionView,
@@ -330,19 +330,7 @@ function redondear(valor: number) {
 
 export type FilaVersion = { id: string; titulo: string; detalle: string; restaurar: boolean };
 
-export function paraGuardar(item: PlanItemView) {
-  const conPartes = Boolean(item.components?.length);
-  return {
-    ...(conPartes ? { components: item.components!.map(componentInput) } : {}),
-    for_date: item.for_date,
-    slot: item.slot,
-    ...(conPartes || !item.recipe_id ? {} : { recipe_id: item.recipe_id, recipe_version: item.recipe_version ?? undefined }),
-    ...(conPartes || item.recipe_id || !item.free_text ? {} : { free_text: item.free_text }),
-    ...(conPartes || item.portions == null ? {} : { portions: item.portions }),
-    public_note: item.public_note,
-    ...(conPartes || item.recipe_id || !item.recipe_proposal ? {} : { recipe_proposal: item.recipe_proposal }),
-  };
-}
+export { paraGuardar } from '../../types/plan-draft.js';
 
 export function filasDeVersiones(actual: PlanVersionView | null, historial: readonly PlanVersionView[]) {
   const lista = historial.length ? historial : actual ? [actual] : [];

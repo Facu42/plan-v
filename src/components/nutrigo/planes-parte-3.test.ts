@@ -155,6 +155,24 @@ describe('asistente', () => {
     publicar.mockRestore();
   });
 
+  it('no aplica si el snapshot anterior no coincide con la base de la propuesta', async () => {
+    const apply = vi.fn();
+    const actual = plan('draft');
+    const propuesta = { id: actual.id, expected_revision: '33333333-3333-4333-8333-333333333333', period_start: actual.current.period_start, period_end: actual.current.period_end, timezone: actual.timezone, items: [{ for_date: '2026-10-26', slot: 'Almuerzo', free_text: 'Pollo', public_note: '' }] } as import('../../types/plans').MealPlanDraftInput;
+    const resultado = await guardarPropuestaComoBorrador({ jobId: 'job', patientId: actual.patient_id, anterior: actual, esperada: propuesta, apply });
+    expect(resultado.ok).toBe(false);
+    expect(apply).not.toHaveBeenCalled();
+  });
+
+  it('no habilita deshacer si otra sesión editó entre aplicar y releer', async () => {
+    const actual = plan('draft');
+    const propuesta = { id: actual.id, expected_revision: actual.current.revision, period_start: actual.current.period_start, period_end: actual.current.period_end, timezone: actual.timezone, items: [{ for_date: '2026-10-26', slot: 'Almuerzo', free_text: 'Pollo nuevo', public_note: '' }] } as import('../../types/plans').MealPlanDraftInput;
+    const apply = vi.fn(async () => ({ job: { id: 'job' } as AiJobView, source: 'memory' }));
+    const editado = plan('draft'); editado.current.items = [item('Edición de otra sesión')];
+    const leer = vi.fn(async () => ({ plan: editado, source: 'memory' }));
+    expect(await guardarPropuestaComoBorrador({ jobId: 'job', patientId: actual.patient_id, anterior: actual, esperada: propuesta, apply, leer })).toMatchObject({ ok: true, revisionSegura: false });
+  });
+
   it('sin permiso no cambia el plan', async () => {
     const enqueue = vi.fn(async () => {
       throw new ApiError(403, 'Activá el permiso «Borradores de menú con IA» antes de continuar.');

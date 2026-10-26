@@ -32,6 +32,7 @@ import {
   type AiJobView,
 } from '../../src/types/ai-jobs.js';
 import type { RecipeDraftInput } from '../../src/types/recipes.js';
+import { integrarPropuesta } from '../../src/types/plan-draft.js';
 import type { MealPlanDraftInput } from '../../src/types/plans.js';
 import { getTarget } from '../targets/repository.js';
 import { nutrientAmountsSchema } from '../../src/types/ai-nutrition.js';
@@ -410,7 +411,14 @@ export async function runAiJob(nutritionistId: string, jobId: string, persistent
         throw error;
       }
       await reservation?.charge(result.usage ? costMicroUsd(result.usage, price) : worstCaseMicroUsd(tokens, price));
-      artifact = { id: randomUUID(), kind: 'menu_draft', payload: { ...result.plan, id: base.plan_id!, expected_revision: base.revision } as unknown as Record<string, unknown>, created_at: new Date().toISOString() };
+      const actual = await getProfessionalMealPlan(nutritionistId, existing.patient_id, persistent);
+      let propuesta: MealPlanDraftInput;
+      try {
+        propuesta = integrarPropuesta({ ...result.plan, id: base.plan_id!, expected_revision: base.revision }, actual, existing.request);
+      } catch (error) {
+        throw new CareError(409, error instanceof Error ? error.message : 'Revisá el alcance de la propuesta.');
+      }
+      artifact = { id: randomUUID(), kind: 'menu_draft', payload: propuesta as unknown as Record<string, unknown>, created_at: new Date().toISOString() };
       warnings = result.warnings;
     }
     const latest = await currentHash({ ...existing, nutritionist_id: nutritionistId }, persistent);

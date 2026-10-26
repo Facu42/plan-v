@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { PLAN_SLOTS, mealPlanDraftSchema, eachIsoDate } from '../../src/types/plans.js';
 import { proposedRecipeSchema, type ProposedRecipe } from '../../src/types/ai-nutrition.js';
 import { replacementRecipeSchema } from '../../src/types/care.js';
-import { AI_JOB_TIMEOUT_MS } from '../../src/types/ai-jobs.js';
+import { AI_JOB_TIMEOUT_MS, DEFAULT_MENU_SLOTS } from '../../src/types/ai-jobs.js';
 import { AIUnavailableError } from './errors.js';
 import { logProviderFailure, resolveAiMode } from './mode.js';
 import { getAiModel } from './provider.js';
@@ -28,7 +28,7 @@ const livePlanSchema = z.object({
 export function demoMenuPlan(context: MenuJobContext, planId: string = randomUUID()) {
   const start = context.period_start ?? new Date().toISOString().slice(0, 10);
   const end = context.period_end ?? start;
-  const slots = [...new Set(context.slots.length ? context.slots : ['Desayuno', 'Almuerzo', 'Merienda', 'Cena'])];
+  const slots = [...new Set(context.slots.length ? context.slots : DEFAULT_MENU_SLOTS)];
   const items = eachIsoDate(start, end).flatMap((date) => slots.map((slot) => ({
     for_date: date,
     slot,
@@ -77,7 +77,7 @@ export async function generateMenuDraft(context: MenuJobContext, planId?: string
     };
   }
   try {
-    const requestedSlots = [...new Set(context.slots.length ? context.slots : ['Desayuno', 'Almuerzo', 'Merienda', 'Cena'])];
+    const requestedSlots = [...new Set(context.slots.length ? context.slots : DEFAULT_MENU_SLOTS)];
     const requestedDates = context.period_start && context.period_end ? eachIsoDate(context.period_start, context.period_end) : [];
     if (!requestedDates.length || requestedDates.length * requestedSlots.length > 42) throw new AIUnavailableError('invalid_period');
     const expectedKeys = new Set(requestedDates.flatMap((date) => requestedSlots.map((slot) => `${date}|${slot}`)));

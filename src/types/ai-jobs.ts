@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { PLAN_SLOTS } from './plans.js';
 
+export const DEFAULT_MENU_SLOTS = ['Desayuno', 'Almuerzo', 'Merienda', 'Cena'] as const;
+
 export const AI_JOB_TYPES = ['recipe_draft', 'menu_draft'] as const;
 export type AiJobType = (typeof AI_JOB_TYPES)[number];
 
