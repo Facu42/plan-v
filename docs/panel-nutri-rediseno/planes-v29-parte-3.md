@@ -1,6 +1,6 @@
 # Planes del panel, parte 3
 
-26/10/2026. Asistente y publicación del boceto v29 (`#s-planes` en `design/panel-nutri/v29/panel-trabajo.html`), sobre el editor de la parte 2. Parte desde el avance que ya había en `work/planes-parte-3-ia-publicar`. No se junta a main sola.
+26/10/2026. Asistente y publicación del boceto v29 (`#s-planes` en `design/panel-nutri/v29/panel-trabajo.html`), sobre el editor de la parte 2. Parte desde el avance que ya había en `work/planes-parte-3-ia-publicar`. [PR #185](https://github.com/Facu42/plan-v/pull/185). No se junta a main sola.
 
 ## Qué quedó cableado
 
