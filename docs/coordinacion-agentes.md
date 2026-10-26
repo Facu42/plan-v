@@ -103,6 +103,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **26/10 · Cursor · Capturas del PDF real** · Mismo [PR #186](https://github.com/Facu42/plan-v/pull/186), sin juntar. El demo de Sofía quedó en `docs/screenshots/planes-p3b`: los cinco interruptores, Descargar PDF e Imprimir separados, la lista de compras prendida y apagada, y el archivo generado.
 - **26/10 · Codex · Planes parte 3b, PDF real** · Por pedido de Facundo, rama `work/planes-parte-3b-pdf-real` encima de #185. Los cinco interruptores alteran el documento; descarga como archivo e impresión separadas, Inter local y selección de copia guardada/publicada conservada. Cada semana empieza en otra hoja y puede continuar si es extensa. [Informe y paso 10](panel-nutri-rediseno/planes-parte-3b-pdf-real.md). Sin migraciones, producción ni merge.
 
 - **26/10 · Cursor · Capturas de Planes parte 3** · Mismo [PR #185](https://github.com/Facu42/plan-v/pull/185), sin juntar. El demo local quedó en `docs/screenshots/planes-p3`: listado con «Armar con IA», la pantalla de armado, el editor de Sofía con asistente, compartir y gestión, el cajón en chat e historial, el PDF con los cinco interruptores y las pestañas.
