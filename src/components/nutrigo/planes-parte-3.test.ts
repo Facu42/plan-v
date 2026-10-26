@@ -6,7 +6,7 @@ import { emptyGuidance } from '../../types/plan-guidance';
 import type { PlanItemView, PlanVersionView, ProfessionalMealPlan } from '../../types/plans';
 import { textoListaCompras } from './PanelPlanEditor';
 import {
-  AVISO_PROGRAMAR, bloqueoAlPublicar, borradorDistinto, guardarPropuestaComoBorrador,
+  bloqueoAlPublicar, borradorDistinto, guardarPropuestaComoBorrador,
   pedirPropuesta, periodoAsistente, publicarPlanRevisado,
 } from './planes-parte-3';
 
@@ -227,12 +227,11 @@ describe('controles de la entrega', () => {
     expect(borradorDistinto(version('draft'), [item()], {}, emptyGuidance())).toBe(false);
   });
 
-  it('la lista de compras se puede bajar como texto y programar sigue en próximamente', () => {
+  it('la lista de compras se puede bajar como texto', () => {
     const texto = textoListaCompras([{ nombre: 'Verduras', items: [{ nombre: 'Zapallo', cantidad: '150 g' }] }], 2, 'Sofía R.');
     expect(texto).toContain('Lista de compras · Sofía R. · semana 2');
     expect(texto).toContain('VERDURAS');
     expect(texto).toContain('Zapallo');
     expect(texto).toContain('150 g');
-    expect(AVISO_PROGRAMAR).toContain('Próximamente');
   });
 });

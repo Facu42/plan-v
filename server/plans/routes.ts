@@ -1,10 +1,11 @@
+import { emailMealPlan } from './email.js';
 import type { Hono, Context } from 'hono';
 import { z } from 'zod';
 import { authorizePatientAction } from '../security/authorization.js';
 import * as sb from '../db/supabase-repo.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { DEMO_NUTRITIONIST_ID, getPatient } from '../store.js';
-import { mealPlanDraftSchema, mealPlanPublishSchema } from '../../src/types/plans.js';
+import { mealPlanDraftSchema, mealPlanPublishSchema, mealPlanScheduleSchema } from '../../src/types/plans.js';
 import * as repo from './repository.js';
 import { recipeCoverEnabled } from '../ai/recipe-cover.js';
 import { patientPlanWithPhotos } from '../recipes/ingredient-covers.js';
@@ -91,6 +92,23 @@ export function registerPlanRoutes(app: Hono) {
     const input = await body(c, mealPlanDraftSchema);
     const plan = await repo.saveMealPlanDraft(nutritionistId, id, input, persistent);
     return c.json({ plan, source: persistent ? 'supabase' : 'memory' });
+  });
+
+  app.post('/api/plans/:id/schedule', async c => {
+    const id = planIdParam.safeParse(c.req.param('id'));
+    if (!id.success) throw new repo.CareError(400, 'Volvé a abrir el plan.');
+    const actor = await professional(c);
+    const input = await body(c, mealPlanScheduleSchema);
+    const plan = await repo.scheduleMealPlan(actor.nutritionistId, id.data, input, actor.persistent);
+    return c.json({ plan, source: actor.persistent ? 'supabase' : 'memory' });
+  });
+  app.post('/api/plans/:id/email', async c => {
+    const id = planIdParam.safeParse(c.req.param('id'));
+    if (!id.success) throw new repo.CareError(400, 'Volvé a abrir el plan.');
+    const actor = await professional(c);
+    const input = await body(c, z.object({ patient_id: z.string().min(1).max(80), expected_version: z.number().int().positive() }).strict());
+    await professional(c, input.patient_id);
+    return c.json(await emailMealPlan(actor.nutritionistId, input.patient_id, id.data, input.expected_version, actor.persistent));
   });
 
   app.post('/api/plans/:id/publish', async (c) => {

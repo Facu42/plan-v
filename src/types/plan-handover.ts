@@ -20,6 +20,7 @@ export type PlanHandover = {
   version: number;
   previous_version: number | null;
   starts_on: string;
+  scheduled_at?: string | null;
   waiting: boolean;
   seen: boolean;
   changes: PlanChangeSummary;
@@ -102,13 +103,19 @@ export function planChangeLineText(line: PlanChangeLine): string {
   return `${when}: ${line.before ?? 'la comida'} pasa a ${line.after ?? 'otra comida'}`;
 }
 
+/** Fecha y hora efectivas de entrega; el período de comidas puede empezar antes. */
+export function planHandoverWhen(handover: PlanHandover): string {
+  const day = planDateLabel(handover.starts_on);
+  return handover.scheduled_at ? `${day} a las ${new Date(handover.scheduled_at).toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit', hour12: false })}` : day;
+}
+
 /** Aviso de la campana. Si ya lo vio, no vuelve a sonar. */
 export function planHandoverNotice(handover: PlanHandover | null): { title: string; note: string } | null {
   if (!handover || handover.seen) return null;
   if (handover.waiting) {
     return {
       title: 'Tenés un plan nuevo',
-      note: `Empieza el ${planDateLabel(handover.starts_on)}. Hasta entonces seguís con el actual.`,
+      note: `Empieza el ${planHandoverWhen(handover)}. Hasta entonces seguís con el actual.`,
     };
   }
   if (handover.previous_version == null) return { title: 'Tenés tu plan', note: 'Tu nutricionista lo publicó.' };
@@ -120,7 +127,7 @@ export function planHandoverNotice(handover: PlanHandover | null): { title: stri
 /** Texto en el plan. Mientras el nuevo no empieza, queda a la vista aunque ya haya abierto los cambios. */
 export function planHandoverBanner(handover: PlanHandover | null): string | null {
   if (!handover) return null;
-  if (handover.waiting) return `Seguís con este plan hasta el ${planDateLabel(handover.starts_on)}. Después empieza uno nuevo.`;
+  if (handover.waiting) return `Seguís con este plan hasta el ${planHandoverWhen(handover)}. Después empieza uno nuevo.`;
   if (handover.seen) return null;
   if (handover.previous_version == null) return 'Tu nutricionista publicó tu plan.';
   return 'Tu plan cambió. Mirá qué es distinto.';

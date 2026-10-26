@@ -1,3 +1,4 @@
+import { PanelPlanProgramar } from './PanelPlanProgramar';
 import { GuardarPlantilla, CopiarComidas, ElegirPlantilla } from './PanelPlanReutilizar';
 import { borradorReutilizable } from './planes-reutilizar';
 import { useEffect, useRef, useState } from 'react';
@@ -12,11 +13,11 @@ import { FigmaRecordDialog } from './FigmaPatientFront';
 import { AtajoAsistente, CajonAsistente, CompartirPlan, GestionPlan, OpcionesImpresion, type EstadoTarjeta, type LineaPropuesta, type MensajeAsistente, type OpcionesPdf, type ViaCompartir } from './PanelPlanAsistente';
 import { PanelV29Icon } from './PanelV29Icon';
 import { PlanPrintDialog } from './PlanPrintDialog';
-import { AVISO_COMPARTIR_APP, AVISO_IMPRESO, AVISO_MAIL, lineasDePropuesta } from './planes-asistente';
+import { AVISO_COMPARTIR_APP, lineasDePropuesta } from './planes-asistente';
 import { alcanceDelPedido, deshacerAplicacion, puedeDeshacerAplicacion, type AplicacionIA, type CambioIA } from './planes-scope';
 import { fondoAvatar } from './planes-lista';
 import {
-  AVISO_PROGRAMAR, bloqueoAlPublicar, borradorDistinto, guardarPropuestaComoBorrador,
+  bloqueoAlPublicar, borradorDistinto, guardarPropuestaComoBorrador,
   pedirPropuesta, propuestaDe, publicarPlanRevisado, recortarPreferencias,
 } from './planes-parte-3';
 import {
@@ -105,6 +106,8 @@ export function PanelPlanEditor({
   onPropuestaTomada?: () => void;
   onPlanCopiado?: (plan: ProfessionalMealPlan) => void;
 }) {
+  const [programar, setProgramar] = useState(false);
+  const enviandoMail = useRef(false);
   const [reutilizar, setReutilizar] = useState<'guardar' | 'copiar' | 'elegir' | null>(null);
   const version = plan?.current ?? null;
   const [pestana, setPestana] = useState<Pestana>('semana');
@@ -187,6 +190,7 @@ export function PanelPlanEditor({
     setTarjeta(null);
     setVistaPaciente(false);
     setCopiaImpresion(null);
+    setProgramar(false);
     pedidoAsistente.current += 1;
     if (version) {
       const indice = semanaInicial(version.period_start, version.period_end, hoy);
@@ -472,9 +476,27 @@ export function PanelPlanEditor({
     onAviso('Propuesta descartada. El plan no cambió.');
   }
 
+  function abrirProgramacion() {
+    if (!plan || !version) { onAviso('Primero guardá un borrador para programar la entrega.'); return; }
+    setProgramar(true);
+  }
+
+  async function enviarMail() {
+    if (enviandoMail.current) return;
+    if (!plan?.published) { onAviso('Primero publicá el plan. El mail comparte solo la versión vigente y no publica el borrador.'); return; }
+    const marca = pedidoAsistente.current;
+    enviandoMail.current = true;
+    onAviso('Preparando el mail con el enlace al plan vigente…');
+    try {
+      const result = await plansApi.email(plan.id, paciente.id, plan.published.version);
+      if (marca === pedidoAsistente.current) onAviso(result.status === 'accepted' ? 'El proveedor aceptó el mail con el enlace al plan vigente. Esto no confirma que haya llegado a la bandeja. El borrador no se publicó.' : 'El proveedor ya había aceptado este mail. No se volvió a mandar.');
+    } catch (e) { if (marca === pedidoAsistente.current) onAviso(careErrorMessage(e)); }
+    finally { enviandoMail.current = false; }
+  }
+
   function compartirAhora() {
-    if (via === 'mail') { onAviso(AVISO_MAIL); return; }
-    if (via === 'impreso') { onAviso(AVISO_IMPRESO); return; }
+    if (via === 'mail') { void enviarMail(); return; }
+    if (via === 'impreso') { void abrirImpresion('print'); return; }
     if (via === 'pdf') { void abrirImpresion(); return; }
     setPestana('entrega');
     onAviso(AVISO_COMPARTIR_APP);
@@ -555,6 +577,7 @@ export function PanelPlanEditor({
 
   return <>
     <div style={{ display: 'contents' }} inert={armando}>
+    {programar && plan ? <PanelPlanProgramar plan={plan} bloqueo={distinto || guardando === 'guardando' ? 'Guardá los cambios antes de programar.' : bloqueoAlPublicar({ hayPlan: !!plan, esBorrador: version?.status === 'draft', cantidad: items.length, vacias: control.vacias, revisado })} onPlan={onPlan} onAviso={onAviso} onCerrar={() => setProgramar(false)} /> : null}
     {reutilizar === 'guardar' ? <GuardarPlantilla guardar={async () => {
       if (!items.length) { onAviso('Cargá al menos una comida antes de guardar la plantilla.'); return null; }
       return !plan || distinto ? guardar(items) : plan;
@@ -771,7 +794,7 @@ export function PanelPlanEditor({
         </section>
         <AtajoAsistente onAbrir={abrirCajon} />
         <CompartirPlan nombre={primer} via={via} onVia={setVia} onCompartir={compartirAhora} />
-        <GestionPlan nombre={primer} onNuevo={() => { if (onNuevo) onNuevo(); else empezarVacio(); }} onAsistente={abrirCajon} onPlantilla={() => setReutilizar('guardar')} onCopiar={() => setReutilizar('copiar')} onProgramar={() => onAviso(AVISO_PROGRAMAR)} onVer={() => setVistaPaciente(true)} onVersiones={() => setPestana('ver')} onAjustes={() => { if (version?.nutrition_target) setMeta(true); else onAviso('La meta diaria no está cargada en este plan.'); }} />
+        <GestionPlan nombre={primer} onNuevo={() => { if (onNuevo) onNuevo(); else empezarVacio(); }} onAsistente={abrirCajon} onPlantilla={() => setReutilizar('guardar')} onCopiar={() => setReutilizar('copiar')} onProgramar={abrirProgramacion} onVer={() => setVistaPaciente(true)} onVersiones={() => setPestana('ver')} onAjustes={() => { if (version?.nutrition_target) setMeta(true); else onAviso('La meta diaria no está cargada en este plan.'); }} />
         <div className="r29-note"><PanelV29Icon name="file" size={15} /><span><b>{publicado ? 'La paciente conserva su plan publicado.' : 'Este plan todavía no se entregó.'}</b><br />Los cambios se preparan en borrador hasta que los revises y publiques.</span></div>
         </div>
       </div> : null}
@@ -787,7 +810,7 @@ export function PanelPlanEditor({
       {pestana === 'entrega' ? <Entrega nombre={primer} publicado={publicado} control={control} incluidas={guidance.recommendations.length + guidance.avoid.length} revisado={revisado} onRevisado={setRevisado} onComidas={() => setPestana('semana')} onIndicaciones={() => setPestana('ind')}
         hayBorradorNuevo={hayBorradorNuevo} publicando={publicando} puedePublicar={puedePublicar}
         onPublicar={() => void publicar()} onVistaPaciente={() => setVistaPaciente(true)} onImprimir={() => void abrirImpresion()} onDescargarCompras={descargarCompras}
-        onProgramar={() => onAviso(AVISO_PROGRAMAR)} /> : null}
+        onProgramar={abrirProgramacion} /> : null}
     </> : null}
     </div>
     <CajonAsistente

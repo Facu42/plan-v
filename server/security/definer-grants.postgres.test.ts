@@ -43,6 +43,8 @@ const ALLOWED = [
   'care_consent',
   'care_meal_photo_allowed',
   'claim_ai_job',
+  // Plan 3f: consultorio titular, consentimiento y copia vigente.
+  'claim_meal_plan_email',
   'claim_recipe_cover',
   'complete_privacy_delete',
   'complete_privacy_export',
@@ -185,6 +187,8 @@ const ALLOWED = [
   'save_recipe_draft',
   'save_routine_feedback',
   'schedule_appointment',
+  // Misma revisión y control clínico que publicar, fecha acotada al período.
+  'schedule_reviewed_meal_plan',
   // Agenda/equipo: cada RPC valida dueño, membresía operativa o asignación clínica explícita.
   'scheduling_accept_staff',
   'scheduling_add_existing_charge',

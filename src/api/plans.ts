@@ -3,6 +3,12 @@ import type { PlanHandover } from '../types/plan-handover';
 import { planReviewSnapshot, type MealPlanDraftInput, type PatientMealPlan, type ProfessionalMealPlan, type PlanVersionView } from '../types/plans';
 
 export const plansApi = {
+  schedule: (planId: string, reviewed: PlanVersionView, scheduled_at: string) => request<{ plan: ProfessionalMealPlan; source: string }>(
+    `/api/plans/${planId}/schedule`, { method: 'POST', body: JSON.stringify({ expected_version: reviewed.version, expected_snapshot: planReviewSnapshot(reviewed), scheduled_at }) },
+  ),
+  email: (planId: string, patientId: string, version: number) => request<{ status: 'accepted' | 'already_accepted' }>(
+    `/api/plans/${planId}/email`, { method: 'POST', body: JSON.stringify({ patient_id: patientId, expected_version: version }) },
+  ),
   history:(patientId:string,signal?:AbortSignal)=>request<{versions:PlanVersionView[]}>(`/api/patients/${encodeURIComponent(patientId)}/plans/history`,{signal}),
   professional: (patientId: string, signal?: AbortSignal) => request<{ plan: ProfessionalMealPlan | null; source: string; image_generation?: boolean }>(
     `/api/patients/${encodeURIComponent(patientId)}/plans?audience=pro`,

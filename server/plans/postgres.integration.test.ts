@@ -367,3 +367,35 @@ describe('D7 el plan nuevo espera su fecha', () => {
     expect((await db.query<{ status: string }>('select status from public.meal_plan_versions where version = $1 and meal_plan_id = $2', [before.version, planId])).rows[0].status).toBe('archived');
   });
 });
+
+it('3f: programación horaria aislada, revisión exacta y promoción al leer sin cron', async () => {
+  const before = await rpc(nutriA, 'list_professional_meal_plan', [patientA]) as ProfessionalMealPlan;
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
+  const input = planDraft({ expected_revision: before.current.revision, period_start: today, period_end: shiftIsoDate(today, 7), items: [{ for_date: today, slot: 'Almuerzo', free_text: 'Verduras 3f' }] });
+  const saved = await rpc(nutriA, 'save_meal_plan_draft', [patientA, input]) as ProfessionalMealPlan;
+  const at = new Date(Date.now() + 3600000).toISOString();
+  const args = [planId, saved.current.version, planReviewSnapshot(saved.current), at];
+  await expect(rpc(nutriB, 'schedule_reviewed_meal_plan', args)).rejects.toMatchObject({ code: '42501' });
+  await expect(rpc(nutriA, 'schedule_reviewed_meal_plan', [planId, saved.current.version, {}, at])).rejects.toMatchObject({ code: 'PT409' });
+  const scheduled = await rpc(nutriA, 'schedule_reviewed_meal_plan', args) as ProfessionalMealPlan;
+  expect(scheduled.scheduled?.version).toBe(saved.current.version);
+  expect(scheduled.delivery_schedule?.scheduled_at).toBeDefined();
+  const waiting = await rpc(patientAUser, 'list_published_meal_plan', [patientA]) as { handover: { scheduled_at: string; starts_on: string } };
+  expect(Date.parse(waiting.handover.scheduled_at)).toBe(Date.parse(at));
+  expect(waiting.handover.starts_on).toBe(new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date(at)));
+  expect(scheduled.published?.version).toBe(before.published?.version);
+  expect((await rpc(patientAUser, 'list_published_meal_plan', [patientA]) as {version:number}).version).toBe(before.published?.version);
+  expect((await rpc(nutriA, 'schedule_reviewed_meal_plan', args) as ProfessionalMealPlan).scheduled?.version).toBe(saved.current.version);
+  await expect(asUser(nutriA, 'update public.meal_plan_delivery_schedules set scheduled_at=now()')).rejects.toMatchObject({ code: '42501' });
+  // Simulates time elapsing in the disposable DB only, without changing immutable clinical copies.
+  await db.query("update public.meal_plan_delivery_schedules set scheduled_at=clock_timestamp()-interval '1 second' where version_id=$1", [saved.current.id]);
+  expect((await rpc(patientAUser, 'list_published_meal_plan', [patientA]) as {version:number}).version).toBe(saved.current.version);
+  await expect(rpc(nutriB, 'claim_meal_plan_email', [planId, saved.current.version])).rejects.toMatchObject({ code: '42501' });
+  const claims = await Promise.all([rpc(nutriA, 'claim_meal_plan_email', [planId, saved.current.version]), rpc(nutriA, 'claim_meal_plan_email', [planId, saved.current.version])]) as Array<{token:string|null;state:string}>;
+  expect(claims.filter(c => c.token)).toHaveLength(1);
+  expect(claims[1].state).toBe('pending');
+  await expect(rpc(nutriA, 'finish_meal_plan_email', [claims[0].token, 'accepted'])).rejects.toMatchObject({ code: '42501' });
+  await db.query("select public.finish_meal_plan_email($1,'accepted')", [claims.find(c => c.token)!.token]);
+  expect(await rpc(nutriA, 'claim_meal_plan_email', [planId, saved.current.version])).toMatchObject({ token: null, state: 'accepted' });
+  expect((await rpc(nutriA, 'list_professional_meal_plan', [patientA]) as ProfessionalMealPlan).published?.version).toBe(saved.current.version);
+});

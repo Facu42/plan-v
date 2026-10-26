@@ -1,5 +1,6 @@
 /* Panel de acciones de la v29 (#act): misma posición, medidas y tokens. */
 #pv-panel-v29 .p3c-dialog {
+  box-sizing: border-box; max-width: none;
   position: fixed; inset: 10px 10px 10px auto; margin: 0;
   width: min(440px, calc(100vw - 20px)); height: calc(100dvh - 20px);
   max-height: none; padding: 0; border: 1px solid var(--line); border-radius: 18px;
@@ -18,12 +19,12 @@
   background: var(--card); border: 1px solid var(--line2); border-radius: 10px;
 }
 #pv-panel-v29 .p3c-dialog .p3c-input:focus-visible { outline: 2px solid var(--lima-ink); outline-offset: 2px; }
-#pv-panel-v29 .p3c-dialog footer { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); }
+#pv-panel-v29 .p3c-dialog footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); }
 #pv-panel-v29 .p3c-dialog [role="alert"] { color: var(--rojo-ink); }
 #pv-panel-v29 .p3c-catalog { width: min(900px, calc(100vw - 20px)); padding-bottom: 16px; }
 #pv-panel-v29 .p3c-catalog > .fx { padding: 16px 22px; }
 @media (max-width: 760px) {
-  #pv-panel-v29 .p3c-dialog { inset: auto 0 0; width: 100%; height: auto; max-height: 86dvh; border-radius: 22px 22px 0 0; }
+  #pv-panel-v29 .p3c-dialog { inset: auto 0 0; width: auto; height: auto; max-height: 86dvh; border-radius: 22px 22px 0 0; }
   #pv-panel-v29 .p3c-dialog form { min-height: 0; }
   #pv-panel-v29 .p3c-catalog > .fx { display: flex; flex-direction: column; }
 }

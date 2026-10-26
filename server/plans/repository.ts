@@ -67,6 +67,7 @@ type MemItem = {
   recipe_proposal?: ProposedRecipe;
 };
 type MemVersion = {
+  scheduled_at?: string;
   guidance?: PlanGuidance;
   meal_times?: PlanMealTimes;
   meal_labels?: PlanMealLabels;
@@ -269,6 +270,7 @@ export function asProfessional(row: Record<string, unknown>): ProfessionalMealPl
     created_at: String(row.created_at),
     current: asVersion(row.current as Record<string, unknown>),
     published: row.published ? asVersion(row.published as Record<string, unknown>) : null,
+    delivery_schedule: row.delivery_schedule as ProfessionalMealPlan['delivery_schedule'],
     scheduled: row.scheduled ? asVersion(row.scheduled as Record<string, unknown>) : null,
   };
 }
@@ -355,7 +357,7 @@ function comparableItems(list: PlanItemView[]): PlanChangeItem[] {
 
 function promoteDueMemory(planId: string) {
   const today = argentinaToday();
-  const due = planVersions(planId).find(row => row.status === 'scheduled' && row.period_start <= today);
+  const due = planVersions(planId).find(row => row.status === 'scheduled' && (row.scheduled_at ? Date.parse(row.scheduled_at) <= Date.now() : row.period_start <= today));
   if (!due) return;
   for (const row of planVersions(planId)) if (row.status === 'published') row.status = 'archived';
   due.status = 'published';
@@ -372,6 +374,7 @@ function memHandoverView(planId: string): PlanHandover | null {
     version: target.version,
     previous_version: previous?.version ?? null,
     starts_on: row.starts_on,
+    ...(target.scheduled_at ? { scheduled_at: target.scheduled_at } : {}),
     waiting: target.status === 'scheduled',
     seen: row.seen_at != null,
     changes: row.changes,
@@ -393,6 +396,7 @@ function memProfessional(row: MemPlan): ProfessionalMealPlan {
     current: memVersionView(current),
     published: published ? memVersionView(published) : null,
     scheduled: scheduled ? memVersionView(scheduled) : null,
+    delivery_schedule: scheduled?.scheduled_at ? { version: scheduled.version, scheduled_at: scheduled.scheduled_at } : null,
   };
 }
 
@@ -585,6 +589,7 @@ function asHandover(value: unknown): PlanHandover | null {
     version: asNumber(row.version),
     previous_version: row.previous_version == null ? null : asNumber(row.previous_version),
     starts_on: String(row.starts_on).slice(0, 10),
+    ...(row.scheduled_at ? { scheduled_at: String(row.scheduled_at) } : {}),
     waiting: Boolean(row.waiting),
     seen: Boolean(row.seen),
     changes: {
@@ -696,7 +701,7 @@ export async function publishMealPlan(
     if (version.status !== 'draft') throw new CareError(409, 'El plan publicado no se puede sobrescribir. Publicá una versión nueva.');
     promoteDueMemory(planId);
     const live = planVersions(planId).find(row => row.status === 'published');
-    const takesNow = planTakesEffectNow(version.period_start, argentinaToday(), Boolean(live));
+    const takesNow = !version.scheduled_at && planTakesEffectNow(version.period_start, argentinaToday(), Boolean(live));
     if (!takesNow) {
       for (const row of planVersions(planId)) if (row.status === 'scheduled') row.status = 'archived';
       version.status = 'scheduled';
@@ -709,7 +714,7 @@ export async function publishMealPlan(
       version_id: version.id,
       meal_plan_id: plan.id,
       previous_version_id: live?.id ?? null,
-      starts_on: version.period_start,
+      starts_on: version.scheduled_at ? new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date(version.scheduled_at)) : version.period_start,
       changes: planChangeSummary(live ? comparableItems(versionItems(live.id)) : null, comparableItems(versionItems(version.id))),
       seen_at: null,
     });
@@ -776,3 +781,27 @@ export async function retryMealPlanCovers(nutritionistId: string, planId: string
 }
 
 registerDemoState('plans/repository', () => ({ plans, versions, items }));
+
+/** Reserve an immutable reviewed copy; promotion happens on existing plan reads, without a cron. */
+export async function scheduleMealPlan(owner: string, id: string, input: { expected_version: number; expected_snapshot: Record<string, unknown>; scheduled_at: string }, persistent: boolean) {
+  if (persistent) {
+    const { data, error } = await getRequestDb().rpc('schedule_reviewed_meal_plan', { target_plan: id, ...input });
+    mealPlanDbError(error);
+    return asProfessional(data as Record<string, unknown>);
+  }
+  const plan = plans.get(id);
+  if (!plan || plan.nutritionist_id !== owner) throw new CareError(403, 'No tenés permiso para esta acción.');
+  const version = planVersions(id).find(v => v.version === input.expected_version);
+  if (!version) throw new CareError(409, 'El borrador cambió. Volvé a abrirlo.');
+  const at = new Date(input.scheduled_at).toISOString();
+  if (version.scheduled_at && version.scheduled_at !== at) throw new CareError(409, 'Esta copia ya tiene otra programación. Creá un nuevo borrador.');
+  if (!version.scheduled_at) {
+    const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date(at));
+    if (Date.parse(at) <= Date.now() || day < version.period_start || day > version.period_end) throw new CareError(400, 'Elegí un día y una hora futuros dentro del período del plan (hora de Argentina).');
+    if (version.status !== 'draft') throw new CareError(409, 'Primero guardá un borrador nuevo para programar.');
+  }
+  const previous = version.scheduled_at;
+  version.scheduled_at = at;
+  try { return await publishMealPlan(owner, id, input.expected_version, false, input.expected_snapshot); }
+  catch (error) { version.scheduled_at = previous; throw error; }
+}

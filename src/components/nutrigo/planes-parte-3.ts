@@ -8,7 +8,6 @@ import { emptyGuidance, type PlanGuidance } from '../../types/plan-guidance';
 import { mealPlanDraftSchema, type MealPlanDraftInput, type PlanItemView, type PlanSlot, type PlanVersionView, type ProfessionalMealPlan } from '../../types/plans';
 import { COMIDAS_EDITOR, fechasDeSemana, paraGuardar, sumarDias } from './planes-editor';
 
-export const AVISO_PROGRAMAR = 'Próximamente. Todavía no se puede elegir una fecha y una hora aparte. Al publicar, la paciente ve el plan desde el inicio del período. Si ese día es más adelante, sigue con el plan anterior hasta entonces.';
 
 const AVISO_SIN_PROPUESTA = 'El asistente no pudo armar la propuesta. El plan no cambió.';
 const AVISO_LISTA = 'La propuesta está lista para revisar. Todavía no se publicó.';
