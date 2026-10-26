@@ -139,7 +139,7 @@ export function PanelPlanEditor({
   const [via, setVia] = useState<ViaCompartir>('app');
   const [pdfOpciones, setPdfOpciones] = useState<OpcionesPdf>(PDF_INICIAL);
   const [vistaPaciente, setVistaPaciente] = useState(false);
-  const [copiaImpresion, setCopiaImpresion] = useState<{ plan: ProfessionalMealPlan; currentAllowed: boolean; demo: boolean } | null>(null);
+  const [copiaImpresion, setCopiaImpresion] = useState<{ plan: ProfessionalMealPlan; currentAllowed: boolean; demo: boolean; action: 'download' | 'print' } | null>(null);
   const asistenteVisto = useRef(0);
   const publicarVisto = useRef(0);
   const pedidoAsistente = useRef(0);
@@ -428,7 +428,7 @@ export function PanelPlanEditor({
     onAviso('Lista de compras descargada.');
   }
 
-  async function abrirImpresion() {
+  async function abrirImpresion(action: 'download' | 'print' = 'download') {
     if (!plan || !version) { onAviso('Primero guardá el plan para preparar el PDF.'); return; }
     const distinto = borradorDistinto(version, items, horas, guidance);
     try {
@@ -442,7 +442,7 @@ export function PanelPlanEditor({
         onAviso('Guardá los cambios antes de imprimir el borrador. Esta acción no publica el plan.');
         return;
       }
-      setCopiaImpresion({ plan: fresco.plan, currentAllowed: coincide, demo: fresco.source === 'memory' || demo });
+      setCopiaImpresion({ plan: fresco.plan, currentAllowed: coincide, demo: fresco.source === 'memory' || demo, action });
     } catch (razon) {
       onAviso(careErrorMessage(razon));
     }
@@ -696,7 +696,7 @@ export function PanelPlanEditor({
               {guidance.recommendations.length ? <section><b>Recomendaciones</b><p>{guidance.recommendations.join(' · ')}</p></section> : null}
               {guidance.avoid.length ? <section><b>Alimentos a evitar</b><p>{guidance.avoid.join(' · ')}</p></section> : null}
             </div>
-            <OpcionesImpresion opciones={pdfOpciones} onCambio={clave => setPdfOpciones(previo => ({ ...previo, [clave]: !previo[clave] }))} onDescargar={() => void abrirImpresion()} onImprimir={() => void abrirImpresion()} />
+            <OpcionesImpresion opciones={pdfOpciones} onCambio={clave => setPdfOpciones(previo => ({ ...previo, [clave]: !previo[clave] }))} onDescargar={() => void abrirImpresion()} onImprimir={() => void abrirImpresion('print')} />
           </div>}
         </section>
         <AtajoAsistente onAbrir={abrirCajon} />
@@ -741,7 +741,7 @@ export function PanelPlanEditor({
       onDeshacer={() => onAviso(AVISO_DESHACER)}
     />
     {vistaPaciente ? <VistaPacienteDialog paciente={paciente.name} fecha={fecha} tituloDia={tituloDia} comidas={comidas} guidance={guidance} metaKcal={metaKcal} onClose={() => setVistaPaciente(false)} /> : null}
-    {copiaImpresion ? <PlanPrintDialog plan={copiaImpresion.plan} patientName={paciente.name} demo={copiaImpresion.demo} currentAllowed={copiaImpresion.currentAllowed} onClose={() => setCopiaImpresion(null)} /> : null}
+    {copiaImpresion ? <PlanPrintDialog options={pdfOpciones} action={copiaImpresion.action} plan={copiaImpresion.plan} patientName={paciente.name} demo={copiaImpresion.demo} currentAllowed={copiaImpresion.currentAllowed} onClose={() => setCopiaImpresion(null)} /> : null}
   </>;
 }
 

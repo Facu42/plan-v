@@ -1,7 +1,7 @@
 import type { FormEvent } from 'react';
 import type { PlanVersionView } from '../../types/plans';
 import { PanelV29Icon } from './PanelV29Icon';
-import { SUGERENCIAS_ASISTENTE, AVISO_PDF_TOGGLES } from './planes-asistente';
+import { SUGERENCIAS_ASISTENTE } from './planes-asistente';
 
 export type MensajeAsistente = { rol: 'vos' | 'ia'; texto: string };
 export type LineaPropuesta = { etiqueta: string; texto: string };
@@ -98,7 +98,6 @@ export function OpcionesImpresion({ opciones, onCambio, onDescargar, onImprimir 
         <button type="button" className="sw" role="switch" aria-checked={opciones[clave]} aria-label={etiqueta} onClick={() => onCambio(clave)} />
       </div>)}
     </div>
-    <p className="mhelp">{AVISO_PDF_TOGGLES}</p>
     <div className="macts">
       <button type="button" className="sbtn k" onClick={onDescargar}><PanelV29Icon name="dl" size={13} />Descargar PDF</button>
       <button type="button" className="sbtn" onClick={onImprimir}>Imprimir</button>

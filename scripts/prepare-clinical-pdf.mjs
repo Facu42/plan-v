@@ -7,3 +7,7 @@ const woff2=await readFile(resolve(root,'node_modules/@fontsource/poppins/files/
 await writeFile(resolve(output,'Poppins-Regular.ttf'),await wawoff2.decompress(woff2));
 await copyFile(resolve(root,'node_modules/@fontsource/poppins/LICENSE'),resolve(output,'LICENSE-Poppins.txt'));
 console.log('Tipografía local de documentos PDF preparada.');
+
+const inter = await readFile(resolve(root,'node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2'));
+await writeFile(resolve(output,'Inter-Regular.ttf'),await wawoff2.decompress(inter));
+await copyFile(resolve(root,'node_modules/@fontsource/inter/LICENSE'),resolve(output,'LICENSE-Inter.txt'));

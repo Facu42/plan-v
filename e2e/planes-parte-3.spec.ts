@@ -25,6 +25,27 @@ test('Planes: la entrega muestra vista, PDF, lista y no publica sola', async ({ 
   await expect(page.getByRole('button', { name: 'Imprimir', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Descargar PDF', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Imprimir o guardar el plan como PDF' })).toBeVisible();
+  const pdfDownload = page.waitForEvent('download');
+  await page.getByRole('dialog').getByRole('button', { name: 'Descargar PDF', exact: true }).click();
+  expect((await pdfDownload).suggestedFilename()).toMatch(/\.pdf$/);
+  await page.getByRole('button', { name: 'Cerrar', exact: true }).click();
+  await page.getByRole('switch', { name: 'Lista de compras' }).click();
+  await page.getByRole('button', { name: 'Imprimir', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('document')).not.toContainText('Lista de compras');
+  await page.evaluate(() => {
+    const open = window.open.bind(window);
+    window.open = (...args) => {
+      const popup = open(...args);
+      if (popup) popup.print = () => { popup.document.body.dataset.printed = 'true'; };
+      return popup;
+    };
+  });
+  const popupEvent = page.waitForEvent('popup');
+  await dialog.getByRole('button', { name: 'Imprimir', exact: true }).click();
+  const popup = await popupEvent;
+  await expect(popup.locator('body')).toHaveAttribute('data-printed', 'true');
+  await popup.close();
   await page.getByRole('button', { name: 'Cerrar', exact: true }).click();
 
   await page.getByRole('tab', { name: 'Entrega', exact: true }).click();

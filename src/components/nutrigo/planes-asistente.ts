@@ -16,7 +16,6 @@ export const AVISO_DICTAR = 'Próximamente. Dictar el pedido todavía no está d
 export const AVISO_ADJUNTAR = 'Próximamente. Adjuntar una referencia todavía no está disponible.';
 export const AVISO_MAIL = 'Próximamente. Enviar el plan por mail todavía no está disponible.';
 export const AVISO_IMPRESO = 'Próximamente. La copia impresa, distinta del PDF, todavía no está disponible.';
-export const AVISO_PDF_TOGGLES = 'Estos interruptores todavía no cambian el PDF. Descargar e imprimir usan el documento del consultorio que ya está guardado.';
 export const AVISO_FICHA = 'La ficha guardada igual la lee el asistente. «No usar» solo saca esa línea de las preferencias de este pedido.';
 export const AVISO_FORMATO = 'El formato, las medidas y qué incluir todavía no cambian el documento. El asistente arma la semana de comidas.';
 export const AVISO_COPIAR_OTRA = 'Próximamente. Copiar este plan a otra paciente queda para después.';
