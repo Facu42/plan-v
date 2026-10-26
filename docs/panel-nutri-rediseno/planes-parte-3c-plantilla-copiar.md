@@ -1,5 +1,7 @@
 # Planes v29 · Parte 3c
 
+[PR #187](https://github.com/Facu42/plan-v/pull/187), en borrador. Código: `c6ca72d`.
+
 Autorización de Facundo del 26/10/2026. Rama `work/planes-parte-3c-plantilla-copiar`, desde main con partes 1, 2, 3 y 3b integradas. Referencia: `design/panel-nutri/v29/panel-trabajo.html`, `#s-planes`, acciones `guardar-tpl`, gestión `tpl` y `copiar`, listado y selector de plantillas.
 
 ## Qué cambia
