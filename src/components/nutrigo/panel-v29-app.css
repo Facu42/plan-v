@@ -138,6 +138,15 @@
 #pv-panel-v29.mob .main:has(#s-alimentos) > .top .sxin { flex: 1 1 100%; }
 #pv-panel-v29.mob .main:has(#s-alimentos) > .top .sxin input { width: 100%; min-width: 0; }
 
+/* Planes (parte 1) llena la columna. El editor y el asistente no están en esta pantalla. */
+#pv-panel-v29:not(.mob) .main:has(#s-planes) { height: 100%; overflow: hidden; }
+#pv-panel-v29:not(.mob) #pv-panel:has(#s-planes) { flex: 1; min-height: 0; }
+#pv-panel-v29 #s-planes { min-width: 0; }
+#pv-panel-v29.mob .main:has(#s-planes) > .top { flex: 0 0 auto; height: auto; flex-wrap: wrap; }
+#pv-panel-v29.mob #pv-panel:has(#s-planes),
+#pv-panel-v29.mob #s-planes { flex: none; height: auto; min-height: auto; }
+#pv-panel-v29.mob #s-planes #pwrap .fx > .c { min-height: auto; height: auto; min-width: 0; }
+
 /* El boceto carga Inter 300, 400, 500 y 600 y pinta todo con --font.
    La hoja vieja redefine --font como Poppins en #pv-panel, que es el cuerpo
    (Asistente, Seguimiento, Progreso). Adentro del armazón vuelve el stack del boceto.

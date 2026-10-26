@@ -45,7 +45,7 @@ export function panelNavGroups(patients: readonly Patient[], unread: number, adm
     { title: 'Plan', items: [
       { label: 'Planes', glyph: 'clip', href: '/crm/plan', children: [
         { label: 'Todos los planes', href: '/crm/plan?planes=todos' },
-        { label: 'Armar o editar', href: '/crm/plan' },
+        { label: 'Armar o editar', href: '/crm/plan?editor=1' },
         // Pedidos de cambio: la pantalla llega con la fase G; mientras tanto abre el plan.
         { label: 'Pedidos de cambio', href: '/crm/plan?planes=pedidos' },
       ] },
@@ -71,7 +71,7 @@ export function panelNavCurrent(href: string, current: string) {
   const target = new URL(href, 'https://plan.v');
   const location = new URL(current, 'https://plan.v');
   if (target.pathname !== location.pathname) return false;
-  return ['filtro', 'agenda', 'biblioteca', 'modulo', 'planes', 'recordatorios', 'vista'].every(key => target.searchParams.get(key) === location.searchParams.get(key));
+  return ['filtro', 'agenda', 'biblioteca', 'modulo', 'planes', 'editor', 'recordatorios', 'vista'].every(key => target.searchParams.get(key) === location.searchParams.get(key));
 }
 
 export function panelNavActive(item: PanelNavItem, current: string) {

@@ -54,11 +54,14 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 5. ~~**Fase 3 Progreso:** cartera y evolución en `/crm/progreso-global`, con los datos de `progress-global`. Sin adherencia inventada. Quien no tiene curva de peso ve «Sin curva», no un incumplimiento.~~ En main por el [PR #179](https://github.com/Facu42/plan-v/pull/179).
 6. ~~**Asistente IA:** `/crm/desarrollo?modulo=asistente-ia` copia la conversación, el período, las sugerencias y las propuestas del boceto. La letra del panel es Inter (pesos 300, 400, 500 y 600), la del boceto. Poppins de la app de la paciente no entra al panel. Usa el asistente de cartera que ya existía. El gasto del mes no llega a la pantalla: se muestra «Sin dato» y el tope de US$ 5. Nada se le manda a la paciente.~~ En main por el [PR #180](https://github.com/Facu42/plan-v/pull/180).
 7. **Alimentos:** `/crm/alimentos` copia el catálogo del boceto. Se busca, se ve la porción y las proteínas, los carbohidratos y las grasas, y se crea o edita un alimento propio. En gramos las porciones son siempre 100 g, 1 taza (30 g) y 1 cucharada (10 g). El origen se lee «SARA 2». SARA 2 se consulta y no se edita. Suplementos y la fuente externa no se muestran: el boceto no los dibuja. [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar.
+8. **Biblioteca:** ya en main por el [PR #182](https://github.com/Facu42/plan-v/pull/182).
+9. **Planes, parte 1:** `/crm/plan` copia la entrada del boceto (secciones, listado, filtros y la columna de la derecha). Recetas abre la Biblioteca. El editor de la semana y el armado con IA quedan para las partes 2 y 3. El editor que ya existía sigue abierto con una paciente o desde «Armar o editar». [Nota](planes-v29-parte-1.md). Sin juntar.
 
 ## Bitácora
 
 | Cuándo | Qué | Quién |
 |---|---|---|
+| 26 oct | Planes, parte 1: el listado de `/crm/plan` copia la entrada del boceto. El editor de la semana y el asistente quedan para después. Sin juntar. | Cursor |
 | 25 oct | Paridad de Alimentos en el [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. Facu rechazó la primera pasada. En gramos quedan las tres porciones del boceto y el origen se lee «SARA 2». SARA 2 no se edita. | Cursor |
 | 25 oct | Alimentos en el [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. `/crm/alimentos` usa el dibujo del boceto con el catálogo que ya existía. SARA 2 no se edita. Un alimento propio sí. Suplementos y la fuente externa quedan afuera de esta pantalla. | Cursor |
 | 25 oct | Asistente IA en el [PR #180](https://github.com/Facu42/plan-v/pull/180), ya en main. La pantalla copia el boceto: período, conversación, sugerencias y propuestas para revisar. Los números salen del asistente de cartera que ya existía. El gasto del mes no llega: «Sin dato» y tope US$ 5. Con la IA apagada no hay propuestas. Nada se le manda a la paciente. La letra del panel quedó en Inter, como el boceto. | Cursor |
