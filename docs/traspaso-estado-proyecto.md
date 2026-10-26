@@ -1,6 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-23)
 
-26/10 · Cursor · Planes del panel, parte 2: en `/crm/plan`, Abrir plan, Crear plan y Nuevo plan abren el editor de la semana del boceto v29. Se editan porciones, notas, duplicar día, indicaciones y se restaura una versión en borrador. Plantillas, equivalencias, el asistente, publicar, el PDF y programar la entrega siguen para la parte 3. La parte 1 ya está en main (#183). Esta parte no se junta. Detalle en [planes-v29-parte-2.md](panel-nutri-rediseno/planes-v29-parte-2.md).
+26/10 · Cursor · Planes del panel, parte 2: en `/crm/plan`, Abrir plan, Crear plan y Nuevo plan abren el editor de la semana del boceto v29. Se editan porciones, notas, duplicar día, indicaciones y se restaura una versión en borrador. Plantillas, equivalencias, el asistente, publicar, el PDF y programar la entrega siguen para la parte 3. La parte 1 ya está en main (#183). Esta parte está en el [PR #184](https://github.com/Facu42/plan-v/pull/184) y no se junta. Detalle en [planes-v29-parte-2.md](panel-nutri-rediseno/planes-v29-parte-2.md).
 
 26/10 · Cursor · Planes del panel, parte 1: en `/crm/plan` se ve el listado del boceto v29. Después del rechazo visual, los botones (Nuevo plan, secciones, filtros, acción de la fila y la columna de la derecha) quedaron como el boceto. Ya está en main (#183). Detalle en [planes-v29-parte-1.md](panel-nutri-rediseno/planes-v29-parte-1.md).
 
