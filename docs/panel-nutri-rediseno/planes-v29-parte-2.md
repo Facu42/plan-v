@@ -19,7 +19,7 @@ Con la semana abierta se ve:
 - Indicaciones (recomendaciones y lo que hay que evitar), la lista de compras de la semana y las versiones. Restaurar una versión arma un borrador. No publica.
 - Entrega muestra el control de comidas vacías y de días lejos de la meta, cuando hay calorías cargadas.
 
-Los botones siguen el look de la parte 1. La letra del panel sigue en Inter 300–600.
+Los botones, los chips y las llamadas a la acción del editor y de «cómo empezar» miden igual que el boceto: mismo alto, mismo relleno, misma letra, mismo tracking y el mismo negro o el mismo borde. La letra del panel sigue en Inter 300–600.
 
 Si no hay meta, dice «Sin dato» o «sin meta cargada». Si no hay cuidados cargados, el chip dice «Sin cuidados cargados». No se inventan números ni «Sin gluten» como dato de la paciente.
 
@@ -61,5 +61,6 @@ Entrá en modo demo a `/crm/plan`. Abrí una fila o tocá Nuevo plan. Si no hay 
 - Áreas frágiles: el editor pide el plan de cada paciente al entrar al listado. Si la paciente no tiene meta, no se inventa. Una comida sin calorías deja ese total en «Sin dato», no en una suma a medias. La semana vacía arranca el lunes aunque hoy sea domingo.
 - Migraciones: no hay.
 - Fire test: ✅ se hizo que duplicar un día no copiara nada y la prueba falló (el destino siguió en «Sopa» en vez de «Pollo al horno»). Se volvió a dejar la copia real.
-- Automatizaciones nuevas: el contrato visual suma el día, el día activo, la pestaña, Duplicar día y la barra de contexto, en claro y en oscuro (`npm run panel:contrato:v29`). Elige «Abrir plan» en el boceto, porque la primera fila puede ser «Crear plan» y esa no tiene la semana.
-- Veredicto: SHIP de esta parte, a la espera del ok visual de Facundo. 3.328 pruebas aprobadas y 2 omitidas. Tipos en verde. Contrato visual en verde, claro y oscuro. En el celular las cuatro formas de empezar van una debajo de la otra y las comidas no se pisan.
+- Automatizaciones nuevas: el contrato visual, en claro y en oscuro (`npm run panel:contrato:v29`), mide también cómo empezar (Armar con el asistente y Elegir plantilla) y, en la semana, la pestaña, el día, la semana activa, Día/Semana, Editar metas, el chip de cuidados, Asistente IA, deshacer, Más, la hora y el botón de sumar a la comida.
+- Fire test de los botones: ✅ se achicó a propósito el espacio del ícono de Asistente IA y el contrato lo marcó (6 px del boceto contra 4 px). Se volvió a dejar en 6 px.
+- Veredicto: SHIP de esta parte, a la espera del ok visual de Facundo. Los botones que había rechazado quedan medidos contra el boceto. 3.328 pruebas aprobadas y 2 omitidas. Tipos en verde. Contrato visual en verde, claro y oscuro. Cuatro recorridos de Planes en verde. En el celular las cuatro formas de empezar van una debajo de la otra y las comidas no se pisan.

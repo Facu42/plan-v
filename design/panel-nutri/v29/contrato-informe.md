@@ -103,16 +103,32 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Empezar con el asistente | ✅ igual | |
 | Orden del listado | ✅ igual | |
 
+## Tema oscuro · Cómo empezar el plan
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Armar con el asistente | ✅ igual | |
+| Elegir plantilla | ✅ igual | |
+
 ## Tema oscuro · Editor de Planes
 
 | Pieza | Estado | Detalle |
 |---|---|---|
 | Día del editor | ✅ igual | |
 | Día activo | ✅ igual | |
+| Semana activa | ✅ igual | |
 | Pestaña del editor | ✅ igual | |
 | Pestaña Comidas | ✅ igual | |
 | Duplicar día | ✅ igual | |
+| Día o semana | ✅ igual | |
 | Contexto del plan | ✅ igual | |
+| Editar metas | ✅ igual | |
+| Cuidado | ✅ igual | |
+| Asistente IA | ✅ igual | |
+| Deshacer | ✅ igual | |
+| Más | ✅ igual | |
+| Hora de la comida | ✅ igual | |
+| Sumar a la comida | ✅ igual | |
 
 ## Tema claro · armazón
 
@@ -212,13 +228,29 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Empezar con el asistente | ✅ igual | |
 | Orden del listado | ✅ igual | |
 
+## Tema claro · Cómo empezar el plan
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Armar con el asistente | ✅ igual | |
+| Elegir plantilla | ✅ igual | |
+
 ## Tema claro · Editor de Planes
 
 | Pieza | Estado | Detalle |
 |---|---|---|
 | Día del editor | ✅ igual | |
 | Día activo | ✅ igual | |
+| Semana activa | ✅ igual | |
 | Pestaña del editor | ✅ igual | |
 | Pestaña Comidas | ✅ igual | |
 | Duplicar día | ✅ igual | |
+| Día o semana | ✅ igual | |
 | Contexto del plan | ✅ igual | |
+| Editar metas | ✅ igual | |
+| Cuidado | ✅ igual | |
+| Asistente IA | ✅ igual | |
+| Deshacer | ✅ igual | |
+| Más | ✅ igual | |
+| Hora de la comida | ✅ igual | |
+| Sumar a la comida | ✅ igual | |

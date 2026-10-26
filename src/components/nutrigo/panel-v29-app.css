@@ -174,8 +174,71 @@
 /* En flex la línea queda 1 px más baja que el botón en línea del boceto. */
 #pv-panel-v29 #s-planes .sbtn.k { min-height: 28px; }
 #pv-panel-v29 #s-planes .pema .sbtn,
-#pv-panel-v29 #s-planes .pfoot .sbtn,
-#pv-panel-v29 #s-planes .r29-tools .sbtn { gap: 5px; }
+#pv-panel-v29 #s-planes .pfoot .sbtn { gap: 5px; }
+/* Editor. El listado no entra: hace falta .pux-plan.
+   El reset de la app mete tracking, interlineado y relleno donde el boceto
+   deja el valor del navegador. Las tarjetas de cómo empezar vuelven al
+   botón en línea (alto 27); Asistente IA separa el ícono 6px; deshacer
+   recupera el gris y el borde del boceto. */
+#pv-panel-v29 #s-planes.pux-plan :where(button, input, select) {
+  letter-spacing: normal;
+  line-height: normal;
+}
+/* «Más» no es un botón: en el boceto hereda el tracking del armazón
+   y el interlineado queda en normal. */
+#pv-panel-v29 #s-planes.pux-plan .r29-tools summary {
+  letter-spacing: inherit;
+  line-height: normal;
+}
+#pv-panel-v29 .main:has(#s-planes) > .top .chip {
+  letter-spacing: normal;
+  line-height: normal;
+}
+#pv-panel-v29 #s-planes.pux-plan .sbtn {
+  display: inline-block;
+  gap: normal;
+  min-height: auto;
+}
+#pv-panel-v29 #s-planes.pux-plan .sbtn svg {
+  display: inline;
+  position: static;
+  top: auto;
+}
+#pv-panel-v29 #s-planes.pux-plan .r29-tools .sbtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+}
+#pv-panel-v29 #s-planes.pux-plan .r29-tools .sbtn svg {
+  display: block;
+  position: relative;
+  top: 0;
+}
+#pv-panel-v29 #s-planes.pux-plan .pema .sbtn,
+#pv-panel-v29 #s-planes.pux-plan .pfoot .sbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+#pv-panel-v29 #s-planes.pux-plan .r29-care span {
+  line-height: normal;
+  border-color: currentColor;
+}
+#pv-panel-v29 #s-planes.pux-plan button.ibtn {
+  padding: 1px 6px;
+}
+#pv-panel-v29 #s-planes.pux-plan .r29-tools .ibtn {
+  color: var(--ink2);
+  border: 1px solid var(--line2);
+}
+#pv-panel-v29 #s-planes.pux-plan .pewk button { padding: 1px 6px; }
+#pv-panel-v29 #s-planes.pux-plan .pux-hour {
+  padding: 1px 2px;
+  line-height: normal;
+  letter-spacing: normal;
+}
+#pv-panel-v29 #s-planes.pux-plan .pefot .sw { padding: 1px 6px; }
 #pv-panel-v29.mob #s-planes .pstart { grid-template-columns: 1fr; }
 #pv-panel-v29.mob #s-planes .pstart > div { min-height: 0; }
 /* En el celular la comida no se pisa: el boceto pide ahora wrap y el editor lo anula. */
