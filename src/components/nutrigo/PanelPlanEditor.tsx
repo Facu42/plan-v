@@ -1,21 +1,49 @@
 import { useEffect, useRef, useState } from 'react';
+import { aiJobsApi } from '../../api/ai-jobs';
+import { careErrorMessage } from '../../api/care';
 import { plansApi } from '../../api/plans';
 import type { Patient } from '../../types';
+import type { AiJobView } from '../../types/ai-jobs';
 import { mealPlanDraftSchema, type PlanItemView, type PlanSlot, type PlanVersionView, type ProfessionalMealPlan } from '../../types/plans';
 import { emptyGuidance, type PlanGuidance } from '../../types/plan-guidance';
+import { FigmaRecordDialog } from './FigmaPatientFront';
+import { AtajoAsistente, CajonAsistente, CompartirPlan, GestionPlan, OpcionesImpresion, type EstadoTarjeta, type LineaPropuesta, type MensajeAsistente, type OpcionesPdf, type ViaCompartir } from './PanelPlanAsistente';
 import { PanelV29Icon } from './PanelV29Icon';
+import { PlanPrintDialog } from './PlanPrintDialog';
+import { AVISO_ALCANCE, AVISO_COMPARTIR_APP, AVISO_COPIAR_OTRA, AVISO_DESHACER, AVISO_IMPRESO, AVISO_MAIL, lineasDePropuesta } from './planes-asistente';
 import { fondoAvatar } from './planes-lista';
+import {
+  AVISO_PROGRAMAR, bloqueoAlPublicar, borradorDistinto, guardarPropuestaComoBorrador,
+  pedirPropuesta, periodoAsistente, propuestaDe, publicarPlanRevisado, recortarPreferencias,
+} from './planes-parte-3';
 import {
   cambiarCantidad, cambiarNota, COMIDAS_EDITOR, comidaDelDia, comidasDelDia, controlEntrega,
   copiarPlan, DIAS_CORTOS, DIAS_LARGOS, duplicarDia, fechasDeSemana, filasDeVersiones, HORAS_EDITOR,
   finVisible, indiceLunes, listaDeCompras, lunesDeSemana, paraGuardar, pasaElTope, periodoDe, quitarLinea, semanaInicial, semanasDelPeriodo,
-  sumarDias, sumarMacros, type MacrosDia,
+  sumarDias, sumarMacros, type GrupoCompra, type MacrosDia,
 } from './planes-editor';
 
-const AVISO_PARTE_3 = 'Próximamente. Publicar, el PDF, la vista de la paciente y programar la entrega llegan en la parte 3. Nada le llega a la paciente desde acá.';
-const AVISO_IA = 'Próximamente. El armado con el asistente llega en la parte 3. Nada le llega a la paciente hasta que se publique.';
 const AVISO_PLANTILLA = 'Próximamente. Las plantillas de Planes quedan para una pasada aparte.';
 const AVISO_PLATO = 'Próximamente. Sumar o cambiar un plato queda para después. Las porciones de lo que ya está en el plan se editan acá.';
+
+export function textoListaCompras(grupos: readonly GrupoCompra[], semana: number, nombre: string) {
+  const lineas = [`Lista de compras · ${nombre} · semana ${semana}`, ''];
+  for (const grupo of grupos) {
+    lineas.push(grupo.nombre.toLocaleUpperCase('es-AR'));
+    for (const item of grupo.items) lineas.push(`- ${item.nombre}: ${item.cantidad}`);
+    lineas.push('');
+  }
+  return `${lineas.join('\n').trimEnd()}\n`;
+}
+
+function descargarTexto(nombre: string, texto: string) {
+  const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+  const enlace = document.createElement('a');
+  enlace.href = URL.createObjectURL(blob);
+  enlace.download = nombre;
+  enlace.click();
+  setTimeout(() => URL.revokeObjectURL(enlace.href), 0);
+}
 
 type Pestana = 'semana' | 'ind' | 'compras' | 'ver' | 'entrega';
 type Modo = 'dia' | 'semana';
@@ -50,8 +78,12 @@ function Barra({ porcentaje }: { porcentaje: number | null }) {
   return <span className="fxb"><i style={{ width: `${Math.max(0, Math.min(100, porcentaje ?? 0))}%` }} /></span>;
 }
 
+const PDF_INICIAL: OpcionesPdf = { logo: true, caseras: true, compras: true, recetas: false, hoja: true };
+
 export function PanelPlanEditor({
   paciente, pacientes, planes, plan, cargando, hoy, onElegir, onPlan, onAviso,
+  asistentePedido = 0, publicarPedido = 0, demo = false, onNuevo, onAsistenteAbierto,
+  propuestaLista = null, onPropuestaTomada,
 }: {
   paciente: Pick<Patient, 'id' | 'name' | 'initials' | 'tone' | 'goal' | 'plan_b' | 'next_focus' | 'sensitive_hours'>;
   pacientes: Array<Pick<Patient, 'id' | 'name' | 'initials' | 'tone' | 'goal'>>;
@@ -62,6 +94,13 @@ export function PanelPlanEditor({
   onElegir: (id: string) => void;
   onPlan: (plan: ProfessionalMealPlan) => void;
   onAviso: (texto: string) => void;
+  asistentePedido?: number;
+  publicarPedido?: number;
+  demo?: boolean;
+  onNuevo?: () => void;
+  onAsistenteAbierto?: (abierto: boolean) => void;
+  propuestaLista?: AiJobView | null;
+  onPropuestaTomada?: () => void;
 }) {
   const version = plan?.current ?? null;
   const [pestana, setPestana] = useState<Pestana>('semana');
@@ -88,6 +127,22 @@ export function PanelPlanEditor({
   const [rehacer, setRehacer] = useState<PlanItemView[][]>([]);
   const [guardando, setGuardando] = useState<'listo' | 'guardando' | 'error'>('listo');
   const [vacio, setVacio] = useState(false);
+  const [publicando, setPublicando] = useState<'listo' | 'publicando' | 'error'>('listo');
+  const [propuesta, setPropuesta] = useState<AiJobView | null>(null);
+  const [armando, setArmando] = useState(false);
+  const [asistenteAbierto, setAsistenteAbierto] = useState(false);
+  const [pestanaAsistente, setPestanaAsistente] = useState<'chat' | 'historial'>('chat');
+  const [alcance, setAlcance] = useState(0);
+  const [pedidoChat, setPedidoChat] = useState('');
+  const [mensajes, setMensajes] = useState<MensajeAsistente[]>([]);
+  const [tarjeta, setTarjeta] = useState<{ lineas: LineaPropuesta[]; estado: EstadoTarjeta } | null>(null);
+  const [via, setVia] = useState<ViaCompartir>('app');
+  const [pdfOpciones, setPdfOpciones] = useState<OpcionesPdf>(PDF_INICIAL);
+  const [vistaPaciente, setVistaPaciente] = useState(false);
+  const [copiaImpresion, setCopiaImpresion] = useState<{ plan: ProfessionalMealPlan; currentAllowed: boolean; demo: boolean } | null>(null);
+  const asistenteVisto = useRef(0);
+  const publicarVisto = useRef(0);
+  const pedidoAsistente = useRef(0);
   const itemsRef = useRef(items);
   itemsRef.current = items;
 
@@ -108,6 +163,19 @@ export function PanelPlanEditor({
     setVacio(false);
     setRevisado(false);
     setGuardando('listo');
+    setPublicando('listo');
+    setPropuesta(null);
+    setArmando(false);
+    setAsistenteAbierto(false);
+    onAsistenteAbierto?.(false);
+    setPestanaAsistente('chat');
+    setAlcance(0);
+    setPedidoChat('');
+    setMensajes([]);
+    setTarjeta(null);
+    setVistaPaciente(false);
+    setCopiaImpresion(null);
+    pedidoAsistente.current += 1;
     if (version) {
       const indice = semanaInicial(version.period_start, version.period_end, hoy);
       setSemana(indice);
@@ -121,7 +189,7 @@ export function PanelPlanEditor({
   }, [paciente.id, version?.id, version?.revision, hoy]);
 
   useEffect(() => {
-    if (pestana !== 'ver' || !paciente.id) return;
+    if ((pestana !== 'ver' && !(asistenteAbierto && pestanaAsistente === 'historial')) || !paciente.id) return;
     const control = new AbortController();
     plansApi.history(paciente.id, control.signal).then(respuesta => {
       if (!control.signal.aborted) setHistorial(respuesta.versions);
@@ -129,7 +197,46 @@ export function PanelPlanEditor({
       if (!control.signal.aborted) setHistorial(version ? [version] : []);
     });
     return () => control.abort();
-  }, [pestana, paciente.id, version]);
+  }, [pestana, asistenteAbierto, pestanaAsistente, paciente.id, version]);
+
+  useEffect(() => {
+    if (!propuestaLista) return;
+    const borrador = propuestaDe(propuestaLista);
+    setAsistenteAbierto(true);
+    onAsistenteAbierto?.(true);
+    setPestanaAsistente('chat');
+    setPropuesta(propuestaLista);
+    setTarjeta(borrador ? { lineas: lineasDePropuesta(borrador.items), estado: 'nueva' } : null);
+    setMensajes(previo => [...previo, { rol: 'ia', texto: 'La propuesta del pedido está lista para revisar. Todavía no se publicó.' }]);
+    onPropuestaTomada?.();
+  }, [propuestaLista, onAsistenteAbierto, onPropuestaTomada]);
+
+  useEffect(() => {
+    if (!asistenteAbierto) return undefined;
+    function cerrar(evento: KeyboardEvent) {
+      if (evento.key === 'Escape') {
+        setAsistenteAbierto(false);
+        onAsistenteAbierto?.(false);
+      }
+    }
+    document.addEventListener('keydown', cerrar);
+    return () => document.removeEventListener('keydown', cerrar);
+  }, [asistenteAbierto, onAsistenteAbierto]);
+
+  useEffect(() => {
+    if (asistentePedido > 0 && asistenteVisto.current !== asistentePedido && !cargando) {
+      asistenteVisto.current = asistentePedido;
+      void armarConAsistente();
+    }
+  }, [asistentePedido, cargando]);
+
+  useEffect(() => {
+    if (publicarPedido > 0 && publicarVisto.current !== publicarPedido) {
+      publicarVisto.current = publicarPedido;
+      setPestana('entrega');
+      onAviso('Revisá la entrega y confirmá la publicación cuando esté todo listo.');
+    }
+  }, [publicarPedido, onAviso]);
 
   const lunes = lunesDeSemana(hoy);
   const inicio = vacio ? lunes : version?.period_start ?? lunes;
@@ -147,6 +254,10 @@ export function PanelPlanEditor({
   const tituloPlan = version?.nutrition_target?.kcal
     ? `${version.nutrition_target.kcal.toLocaleString('es-AR')} kcal por día`
     : plan ? 'Plan en borrador' : 'Sin plan todavía';
+  const control = controlEntrega(inicio, fin, items, metaKcal && Number.isFinite(metaKcal) ? metaKcal : null);
+  const distinto = version ? borradorDistinto(version, items, horas, guidance) : false;
+  const hayBorradorNuevo = version?.status === 'draft' || distinto;
+  const puedePublicar = Boolean(plan && hayBorradorNuevo && revisado && !control.vacias && items.length > 0);
 
   function recordar(siguiente: PlanItemView[]) {
     setDeshacer(pila => [...pila, items].slice(-30));
@@ -154,15 +265,15 @@ export function PanelPlanEditor({
     setItems(siguiente);
   }
 
-  async function guardar(siguiente: PlanItemView[], extras: { guidance?: PlanGuidance; horas?: Partial<Record<PlanSlot, string>>; kcal?: number } = {}) {
+  async function guardar(siguiente: PlanItemView[], extras: { guidance?: PlanGuidance; horas?: Partial<Record<PlanSlot, string>>; kcal?: number } = {}): Promise<ProfessionalMealPlan | null> {
     if (!siguiente.length) {
       onAviso('El borrador necesita al menos una comida para guardarse.');
-      return;
+      return null;
     }
     if (siguiente.some(item => pasaElTope(inicio, item.for_date))) {
       onAviso('Esas comidas quedan después de las tres semanas que se pueden guardar. El plan publicado no cambió.');
       setGuardando('error');
-      return;
+      return null;
     }
     const periodo = periodoDe(siguiente, inicio, finPeriodo);
     const horasNuevas = extras.horas ?? horas;
@@ -183,7 +294,7 @@ export function PanelPlanEditor({
     if (!parsed.success) {
       onAviso('Revisá las cantidades antes de guardar. El plan publicado no cambió.');
       setGuardando('error');
-      return;
+      return null;
     }
     setGuardando('guardando');
     try {
@@ -191,9 +302,149 @@ export function PanelPlanEditor({
       onPlan(respuesta.plan);
       setGuardando('listo');
       onAviso('');
+      return respuesta.plan;
     } catch {
       setGuardando('error');
       onAviso('No se pudo guardar. El plan publicado no cambió.');
+      return null;
+    }
+  }
+
+  async function publicar() {
+    if (publicando === 'publicando') return;
+    if (!plan || !version) { onAviso(bloqueoAlPublicar({ hayPlan: false, esBorrador: false, cantidad: items.length, vacias: control.vacias, revisado }) ?? ''); return; }
+    const bloqueo = bloqueoAlPublicar({
+      hayPlan: true,
+      esBorrador: version.status === 'draft' || distinto,
+      cantidad: items.length,
+      vacias: control.vacias,
+      revisado,
+    });
+    if (bloqueo) { onAviso(bloqueo); return; }
+    setPublicando('publicando');
+    let actual = plan;
+    if (distinto) {
+      const guardado = await guardar(items);
+      if (!guardado) { setPublicando('error'); return; }
+      actual = guardado;
+    }
+    const resultado = await publicarPlanRevisado({
+      plan: actual,
+      vacias: control.vacias,
+      cantidad: items.length,
+      revisado: true,
+      hoy,
+    });
+    if (resultado.ok) {
+      onPlan(resultado.plan);
+      setRevisado(false);
+      setPublicando('listo');
+    } else setPublicando('error');
+    onAviso(resultado.aviso);
+  }
+
+  function abrirCajon() {
+    setAsistenteAbierto(true);
+    onAsistenteAbierto?.(true);
+  }
+
+  function cerrarCajon() {
+    setAsistenteAbierto(false);
+    onAsistenteAbierto?.(false);
+  }
+
+  async function pedirCambio(texto: string) {
+    const limpio = texto.trim();
+    if (!limpio || armando) return;
+    abrirCajon();
+    setPestanaAsistente('chat');
+    setMensajes(previo => [...previo, { rol: 'vos', texto: limpio }]);
+    setPedidoChat('');
+    const marca = pedidoAsistente.current + 1;
+    pedidoAsistente.current = marca;
+    setArmando(true);
+    setPropuesta(null);
+    setTarjeta(null);
+    onAviso('El asistente está armando una propuesta. Queda como borrador privado hasta que la revises.');
+    const periodo = periodoAsistente(version?.period_start ?? lunes, version?.period_end ?? sumarDias(lunes, 6), semana);
+    const etiqueta = [`El ${tituloDia}`, `${COMIDAS_EDITOR[Math.max(0, comidaAbierta)] ?? 'Almuerzo'} del ${tituloDia.slice(0, 3)}`, 'Todo el plan'][alcance] ?? 'Todo el plan';
+    const resultado = await pedirPropuesta({
+      patientId: paciente.id,
+      desde: periodo.desde,
+      hasta: periodo.hasta,
+      preferencias: recortarPreferencias([limpio, `Cambios en: ${etiqueta}`]),
+      vigente: () => pedidoAsistente.current === marca,
+    });
+    if (pedidoAsistente.current !== marca) return;
+    setArmando(false);
+    if (resultado.ok) {
+      const borrador = propuestaDe(resultado.job);
+      setPropuesta(resultado.job);
+      setTarjeta(borrador ? { lineas: lineasDePropuesta(borrador.items), estado: 'nueva' } : null);
+      setMensajes(previo => [...previo, { rol: 'ia', texto: AVISO_ALCANCE }]);
+    } else {
+      setMensajes(previo => [...previo, { rol: 'ia', texto: resultado.aviso || 'No pude armar la propuesta. El plan no cambió.' }]);
+    }
+    if (resultado.aviso) onAviso(resultado.aviso);
+  }
+
+  function armarConAsistente() {
+    return pedirCambio('Armá una semana con lo que ya está en la ficha.');
+  }
+
+  async function aplicarPropuesta() {
+    if (!propuesta || armando) return;
+    setArmando(true);
+    const resultado = await guardarPropuestaComoBorrador({ jobId: propuesta.id, patientId: paciente.id });
+    setArmando(false);
+    if (resultado.ok) {
+      onPlan(resultado.plan);
+      setPropuesta(null);
+      setTarjeta(previo => previo ? { ...previo, estado: 'ok' } : previo);
+    }
+    onAviso(resultado.aviso);
+  }
+
+  async function descartarPropuesta() {
+    if (!propuesta) return;
+    try { await aiJobsApi.reject(propuesta.id); } catch { /* el descarte local alcanza */ }
+    setPropuesta(null);
+    setTarjeta(previo => previo ? { ...previo, estado: 'no' } : previo);
+    onAviso('Propuesta descartada. El plan no cambió.');
+  }
+
+  function compartirAhora() {
+    if (via === 'mail') { onAviso(AVISO_MAIL); return; }
+    if (via === 'impreso') { onAviso(AVISO_IMPRESO); return; }
+    if (via === 'pdf') { void abrirImpresion(); return; }
+    setPestana('entrega');
+    onAviso(AVISO_COMPARTIR_APP);
+  }
+
+  function descargarCompras() {
+    const grupos = listaDeCompras(items, fechasDeSemana(inicio, fin, semana));
+    if (!grupos.length) { onAviso('Esta semana no tiene alimentos para armar la lista.'); return; }
+    descargarTexto(`lista-compras-${paciente.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-semana-${semana + 1}.txt`, textoListaCompras(grupos, semana + 1, paciente.name));
+    onAviso('Lista de compras descargada.');
+  }
+
+  async function abrirImpresion() {
+    if (!plan || !version) { onAviso('Primero guardá el plan para preparar el PDF.'); return; }
+    const distinto = borradorDistinto(version, items, horas, guidance);
+    try {
+      const fresco = await plansApi.professional(paciente.id);
+      if (!fresco.plan || fresco.plan.id !== plan.id) {
+        onAviso('El plan guardado cambió. Volvé a abrirlo antes de imprimir.');
+        return;
+      }
+      const coincide = !distinto && fresco.plan.current.revision === version.revision && fresco.plan.current.version === version.version;
+      if (!coincide && !fresco.plan.published) {
+        onAviso('Guardá los cambios antes de imprimir el borrador. Esta acción no publica el plan.');
+        return;
+      }
+      setCopiaImpresion({ plan: fresco.plan, currentAllowed: coincide, demo: fresco.source === 'memory' || demo });
+    } catch (razon) {
+      onAviso(careErrorMessage(razon));
     }
   }
 
@@ -280,7 +531,7 @@ export function PanelPlanEditor({
       <div className="c"><section className="fxp g">
         <header><h3>{primer} todavía no tiene plan</h3><span className="m">elegí cómo empezar; queda en borrador hasta que lo publiques</span><span className="sp" /></header>
         <div className="pstart">
-          <div><PanelV29Icon name="spark" size={16} /><b>Con el asistente</b><p>Arma una primera semana con lo que cargaste en la ficha de {primer}.</p><button type="button" className="sbtn k" onClick={() => onAviso(AVISO_IA)}>Armar con el asistente</button></div>
+          <div><PanelV29Icon name="spark" size={16} /><b>Con el asistente</b><p>Arma una primera semana con lo que cargaste en la ficha de {primer}.</p><button type="button" className="sbtn k" disabled={armando} onClick={() => void armarConAsistente()}>{armando ? 'Armando propuesta…' : 'Armar con el asistente'}</button></div>
           <div><PanelV29Icon name="clip" size={16} /><b>Desde una plantilla</b><p>Por ejemplo «Descenso 1.600 kcal» o «Sin gluten 1.800 kcal».</p><button type="button" className="sbtn" onClick={() => onAviso(AVISO_PLANTILLA)}>Elegir plantilla</button></div>
           <div><PanelV29Icon name="copy" size={16} /><b>Copiar de otra paciente</b><p>Partí del plan de una paciente parecida. Sus datos no se copian.</p><button type="button" className="sbtn" onClick={() => setCopiando(true)}>Elegir paciente</button></div>
           <div><PanelV29Icon name="pen" size={16} /><b>Desde cero</b><p>Semana vacía con las cinco comidas para completar.</p><button type="button" className="sbtn" onClick={empezarVacio}>Empezar vacío</button></div>
@@ -320,7 +571,7 @@ export function PanelPlanEditor({
             setItems(siguiente);
             void guardar(siguiente);
           }}><PanelV29Icon name="redo" size={14} /></button>
-          <button type="button" className="sbtn" onClick={() => onAviso(AVISO_IA)}><PanelV29Icon name="spark" size={13} />Asistente IA</button>
+          <button type="button" className="sbtn" onClick={abrirCajon}><PanelV29Icon name="spark" size={13} />{armando ? 'Armando…' : 'Asistente IA'}</button>
           <button type="button" className="sbtn" onClick={() => onAviso(AVISO_PLANTILLA)}><PanelV29Icon name="copy" size={13} />Guardar como plantilla</button>
           <button type="button" className="sbtn" onClick={() => onAviso('Próximamente. Copiar este plan a otra paciente queda para después.')}><PanelV29Icon name="users" size={13} />Copiar a otra paciente</button>
           <button type="button" className="sbtn" onClick={() => { if (version?.nutrition_target) setMeta(true); else onAviso('La meta diaria no está cargada en este plan.'); }}><PanelV29Icon name="trend" size={13} />Ajustar metas</button>
@@ -423,22 +674,74 @@ export function PanelPlanEditor({
                 return <div key={iso} className={indice === dia ? 'td' : undefined} title={`${DIAS_LARGOS[indiceLunes(iso)]}: ${kcalDia == null ? 'sin dato' : `${numero(kcalDia)} kcal`}`}><i className={porcentaje && (porcentaje < 95 || porcentaje > 105) ? 'lo' : undefined} style={{ height: `${Math.max(8, Math.min(100, porcentaje / 1.25))}%` }} /><small>{DIAS_CORTOS[indiceLunes(iso)].slice(0, 1)}</small></div>;
               })}
             </div>
-          </> : <p className="mhelp">{AVISO_PARTE_3}</p>}
+          </> : resumen === 1 ? <div className="r29-patient-preview">
+            <div className="r29-note"><PanelV29Icon name="eye" size={15} /><span><b>Así lo ve {primer} en la app.</b><br />Vista previa del borrador. No se envió ninguna notificación.</span></div>
+            <p className="mhelp">Así se vería en la app. Es la vista previa del borrador: no se envió ninguna notificación y no reemplaza el plan publicado.</p>
+            {comidas.map(comida => <div key={comida.slot} className="fxr">
+              <span className="t"><b>{comida.slot} · {comida.hora}</b><small>{comida.titulo}{comida.lineas.length ? ` · ${comida.lineas.map(linea => linea.nombre).join(', ')}` : ' · Sin alimentos cargados'}</small></span>
+              <small className="num">{comida.macros.kcal == null ? 'Sin dato' : `${numero(comida.macros.kcal)} kcal`}</small>
+            </div>)}
+            {guidance.recommendations.length ? <div><b>Recomendaciones</b><p className="mhelp">{guidance.recommendations.join(' · ')}</p></div> : null}
+            {guidance.avoid.length ? <div><b>Alimentos a evitar</b><p className="mhelp">{guidance.avoid.join(' · ')}</p></div> : null}
+          </div> : <div className="r29-print-preview">
+            <div className="r29-note"><PanelV29Icon name="file" size={15} /><span><b>Versión para imprimir.</b><br />El PDF usa el documento del consultorio y no se envía a la paciente.</span></div>
+            <div className="r29-document">
+              <h4>{primer} · {tituloDia}</h4>
+              <p className="mhelp">{metaKcal ? `Meta: ${metaKcal.toLocaleString('es-AR')} kcal por día` : 'Sin meta cargada'}</p>
+              {comidas.map(comida => <section key={comida.slot}>
+                <b>{comida.slot} · {comida.hora}</b>
+                <p>{comida.titulo}</p>
+                {comida.lineas.map(linea => <small key={linea.clave}>{linea.nombre} · {linea.cantidad ?? '—'} {linea.unidad}</small>)}
+              </section>)}
+              {guidance.recommendations.length ? <section><b>Recomendaciones</b><p>{guidance.recommendations.join(' · ')}</p></section> : null}
+              {guidance.avoid.length ? <section><b>Alimentos a evitar</b><p>{guidance.avoid.join(' · ')}</p></section> : null}
+            </div>
+            <OpcionesImpresion opciones={pdfOpciones} onCambio={clave => setPdfOpciones(previo => ({ ...previo, [clave]: !previo[clave] }))} onDescargar={() => void abrirImpresion()} onImprimir={() => void abrirImpresion()} />
+          </div>}
         </section>
+        <AtajoAsistente onAbrir={abrirCajon} />
+        <CompartirPlan nombre={primer} via={via} onVia={setVia} onCompartir={compartirAhora} />
+        <GestionPlan nombre={primer} onNuevo={() => { if (onNuevo) onNuevo(); else empezarVacio(); }} onAsistente={abrirCajon} onPlantilla={() => onAviso(AVISO_PLANTILLA)} onCopiar={() => onAviso(AVISO_COPIAR_OTRA)} onProgramar={() => onAviso(AVISO_PROGRAMAR)} onVer={() => setVistaPaciente(true)} onVersiones={() => setPestana('ver')} onAjustes={() => { if (version?.nutrition_target) setMeta(true); else onAviso('La meta diaria no está cargada en este plan.'); }} />
         <div className="r29-note"><PanelV29Icon name="file" size={15} /><span><b>{publicado ? 'La paciente conserva su plan publicado.' : 'Este plan todavía no se entregó.'}</b><br />Los cambios se preparan en borrador hasta que los revises y publiques.</span></div>
         </div>
       </div> : null}
-      {pestana === 'semana' && modo === 'semana' ? <Semana items={items} fechas={fechas} horas={horas} metaKcal={metaKcal} dia={dia} onDia={indice => { setDia(indice); setModo('dia'); }} onAviso={onAviso} /> : null}
+      {pestana === 'semana' && modo === 'semana' ? <Semana items={items} fechas={fechas} horas={horas} metaKcal={metaKcal} dia={dia} onDia={indice => { setDia(indice); setModo('dia'); }} onAviso={onAviso} onImprimir={() => void abrirImpresion()} /> : null}
       {pestana === 'ind' ? <Indicaciones guidance={guidance} onChange={siguiente => { setGuidance(siguiente); if (items.length) void guardar(items, { guidance: siguiente }); else onAviso('El borrador necesita al menos una comida para guardar las indicaciones.'); }} /> : null}
-      {pestana === 'compras' ? <Compras items={items} fechas={fechasDeSemana(inicio, fin, semana)} semana={semana + 1} onEntrega={() => setPestana('entrega')} onAviso={onAviso} /> : null}
+      {pestana === 'compras' ? <Compras items={items} fechas={fechasDeSemana(inicio, fin, semana)} semana={semana + 1} onEntrega={() => setPestana('entrega')} onAviso={onAviso} onDescargar={descargarCompras} /> : null}
       {pestana === 'ver' ? <Versiones nombre={primer} filas={filasDeVersiones(version, historial)} historial={historial.length ? historial : version ? [version] : []} borrador={version?.status === 'draft' ? 'Pendientes de publicar' : 'Sin cambios nuevos'} titulo={tituloPlan} onRestaurar={id => {
         const elegida = (historial.length ? historial : version ? [version] : []).find(item => item.id === id);
         if (!elegida?.items.length) { onAviso('Esa versión no tiene comidas para restaurar.'); return; }
         aplicar(elegida.items.map(item => ({ ...item, id: crypto.randomUUID(), components: item.components?.map(pieza => ({ ...pieza, id: crypto.randomUUID() })) })));
         onAviso('Se armó un borrador con esa versión. No se publicó.');
       }} onEntrega={() => setPestana('entrega')} /> : null}
-      {pestana === 'entrega' ? <Entrega nombre={primer} publicado={publicado} control={controlEntrega(inicio, fin, items, metaKcal && Number.isFinite(metaKcal) ? metaKcal : null)} incluidas={guidance.recommendations.length + guidance.avoid.length} revisado={revisado} onRevisado={setRevisado} onComidas={() => setPestana('semana')} onIndicaciones={() => setPestana('ind')} onAviso={onAviso} /> : null}
+      {pestana === 'entrega' ? <Entrega nombre={primer} publicado={publicado} control={control} incluidas={guidance.recommendations.length + guidance.avoid.length} revisado={revisado} onRevisado={setRevisado} onComidas={() => setPestana('semana')} onIndicaciones={() => setPestana('ind')}
+        hayBorradorNuevo={hayBorradorNuevo} publicando={publicando} puedePublicar={puedePublicar}
+        onPublicar={() => void publicar()} onVistaPaciente={() => setVistaPaciente(true)} onImprimir={() => void abrirImpresion()} onDescargarCompras={descargarCompras}
+        onProgramar={() => onAviso(AVISO_PROGRAMAR)} /> : null}
     </> : null}
+    <CajonAsistente
+      abierto={asistenteAbierto}
+      pestana={pestanaAsistente}
+      nombre={primer}
+      alcances={[`El ${tituloDia}`, `${COMIDAS_EDITOR[Math.max(0, comidaAbierta)] ?? 'Almuerzo'} del ${tituloDia.slice(0, 3)}`, 'Todo el plan']}
+      alcance={alcance}
+      mensajes={mensajes}
+      armando={armando}
+      pedido={pedidoChat}
+      tarjeta={tarjeta}
+      historial={historial.length ? historial : version ? [version] : []}
+      onCerrar={cerrarCajon}
+      onPestana={setPestanaAsistente}
+      onAlcance={setAlcance}
+      onPedido={setPedidoChat}
+      onEnviar={() => void pedirCambio(pedidoChat)}
+      onSugerencia={texto => void pedirCambio(texto)}
+      onAplicar={() => void aplicarPropuesta()}
+      onDescartar={() => void descartarPropuesta()}
+      onDeshacer={() => onAviso(AVISO_DESHACER)}
+    />
+    {vistaPaciente ? <VistaPacienteDialog paciente={paciente.name} fecha={fecha} tituloDia={tituloDia} comidas={comidas} guidance={guidance} metaKcal={metaKcal} onClose={() => setVistaPaciente(false)} /> : null}
+    {copiaImpresion ? <PlanPrintDialog plan={copiaImpresion.plan} patientName={paciente.name} demo={copiaImpresion.demo} currentAllowed={copiaImpresion.currentAllowed} onClose={() => setCopiaImpresion(null)} /> : null}
   </>;
 }
 
@@ -448,7 +751,7 @@ function parte(macros: MacrosDia, clave: 'carbs' | 'protein' | 'fat') {
   return Math.round((macros[clave] ?? 0) / total * 100);
 }
 
-function Semana({ items, fechas, horas, metaKcal, dia, onDia, onAviso }: {
+function Semana({ items, fechas, horas, metaKcal, dia, onDia, onAviso, onImprimir }: {
   items: PlanItemView[];
   fechas: string[];
   horas: Partial<Record<PlanSlot, string>>;
@@ -456,6 +759,7 @@ function Semana({ items, fechas, horas, metaKcal, dia, onDia, onAviso }: {
   dia: number;
   onDia: (indice: number) => void;
   onAviso: (texto: string) => void;
+  onImprimir: () => void;
 }) {
   return <div className="fx"><div className="c"><section className="fxp g">
     <header><h3>Semana</h3><span className="m">tocá un día o una comida</span><span className="sp" /></header>
@@ -476,7 +780,7 @@ function Semana({ items, fechas, horas, metaKcal, dia, onDia, onAviso }: {
     <div className="pfoot">
       <button type="button" className="sbtn" onClick={() => onAviso(AVISO_PLATO)}>Agregar colación</button>
       <button type="button" className="sbtn" onClick={() => onAviso('Próximamente. Duplicar la semana completa queda para después. Duplicar un día ya está en la vista Día.')}>Duplicar semana</button>
-      <button type="button" className="sbtn" onClick={() => onAviso(AVISO_PARTE_3)}>Descargar PDF</button>
+      <button type="button" className="sbtn" onClick={onImprimir}><PanelV29Icon name="dl" size={13} />Descargar PDF</button>
     </div>
   </section></div></div>;
 }
@@ -495,17 +799,18 @@ function Indicaciones({ guidance, onChange }: { guidance: PlanGuidance; onChange
   </section>)}</div>;
 }
 
-function Compras({ items, fechas, semana, onEntrega, onAviso }: {
+function Compras({ items, fechas, semana, onEntrega, onAviso, onDescargar }: {
   items: PlanItemView[];
   fechas: string[];
   semana: number;
   onEntrega: () => void;
   onAviso: (texto: string) => void;
+  onDescargar: () => void;
 }) {
   const grupos = listaDeCompras(items, fechas);
   return <div className="fx">
     <div className="c"><section className="fxp g">
-      <header><h3>Compras · semana {semana}</h3><span className="m">del borrador actual</span><span className="sp" /><button type="button" className="sbtn" onClick={() => onAviso(AVISO_PARTE_3)}><PanelV29Icon name="dl" size={13} />Descargar lista</button></header>
+      <header><h3>Compras · semana {semana}</h3><span className="m">del borrador actual</span><span className="sp" /><button type="button" className="sbtn" onClick={onDescargar}><PanelV29Icon name="dl" size={13} />Descargar lista</button></header>
       {grupos.length ? <div className="r29-shopping">{grupos.map(grupo => <section key={grupo.nombre}><h4>{grupo.nombre}</h4>{grupo.items.map(item => <p key={`${grupo.nombre}-${item.nombre}`}><span>{item.nombre}</span><span className="num">{item.cantidad}</span></p>)}</section>)}</div> : <p className="mhelp">Esta semana no tiene alimentos para armar la lista.</p>}
     </section></div>
     <div className="c"><section className="fxp">
@@ -544,7 +849,11 @@ function Versiones({ nombre, filas, historial, borrador, titulo, onRestaurar, on
   </div>;
 }
 
-function Entrega({ nombre, publicado, control, incluidas, revisado, onRevisado, onComidas, onIndicaciones, onAviso }: {
+function Entrega({
+  nombre, publicado, control, incluidas, revisado, onRevisado, onComidas, onIndicaciones,
+  hayBorradorNuevo, publicando, puedePublicar, onPublicar, onVistaPaciente, onImprimir,
+  onDescargarCompras, onProgramar,
+}: {
   nombre: string;
   publicado: boolean;
   control: ReturnType<typeof controlEntrega>;
@@ -553,7 +862,14 @@ function Entrega({ nombre, publicado, control, incluidas, revisado, onRevisado, 
   onRevisado: (valor: boolean) => void;
   onComidas: () => void;
   onIndicaciones: () => void;
-  onAviso: (texto: string) => void;
+  hayBorradorNuevo: boolean;
+  publicando: 'listo' | 'publicando' | 'error';
+  puedePublicar: boolean;
+  onPublicar: () => void;
+  onVistaPaciente: () => void;
+  onImprimir: () => void;
+  onDescargarCompras: () => void;
+  onProgramar: () => void;
 }) {
   return <div className="fx">
     <div className="c"><section className="fxp g">
@@ -570,11 +886,44 @@ function Entrega({ nombre, publicado, control, incluidas, revisado, onRevisado, 
     <div className="c"><section className="fxp">
       <header><h3>Así lo recibe {nombre}</h3><span className="m">vista del borrador</span><span className="sp" /></header>
       <div className="fxr">
-        <button type="button" onClick={() => onAviso(AVISO_PARTE_3)}><PanelV29Icon name="eye" size={15} /><span className="t"><b>Vista de la paciente</b><small>Revisá las comidas antes de publicar.</small></span><PanelV29Icon name="chev" size={13} /></button>
-        <button type="button" onClick={() => onAviso(AVISO_PARTE_3)}><PanelV29Icon name="file" size={15} /><span className="t"><b>Imprimir / guardar PDF</b><small>Semana seleccionada e indicaciones.</small></span><PanelV29Icon name="chev" size={13} /></button>
-        <button type="button" onClick={() => onAviso(AVISO_PARTE_3)}><PanelV29Icon name="dl" size={15} /><span className="t"><b>Lista de compras</b><small>La descarga llega en la parte 3.</small></span><PanelV29Icon name="chev" size={13} /></button>
+        <button type="button" onClick={onVistaPaciente}><PanelV29Icon name="eye" size={15} /><span className="t"><b>Vista de la paciente</b><small>Revisá las comidas antes de publicar.</small></span><PanelV29Icon name="chev" size={13} /></button>
+        <button type="button" onClick={onImprimir}><PanelV29Icon name="file" size={15} /><span className="t"><b>Imprimir / guardar PDF</b><small>Semana seleccionada e indicaciones.</small></span><PanelV29Icon name="chev" size={13} /></button>
+        <button type="button" onClick={onDescargarCompras}><PanelV29Icon name="dl" size={15} /><span className="t"><b>Lista de compras</b><small>Descargar cantidades de la semana.</small></span><PanelV29Icon name="chev" size={13} /></button>
       </div>
-      <p><button type="button" className="sbtn" onClick={() => onAviso(AVISO_PARTE_3)}><PanelV29Icon name="cal" size={13} />Programar entrega</button></p>
+    </section>
+    <section className="fxp">
+      <header><h3>Publicación</h3><span className="sp" /></header>
+      <p className="mhelp">{hayBorradorNuevo ? 'La nueva versión reemplaza a la publicada cuando confirmás. Si hay cambios de versión o alergias, el servidor lo frena y te avisa.' : 'No hay cambios nuevos para publicar. La versión publicada se conserva.'}</p>
+      <button type="button" className="cta" disabled={!puedePublicar || publicando === 'publicando'} onClick={onPublicar}><PanelV29Icon name="send" size={13} />{publicando === 'publicando' ? 'Publicando…' : 'Publicar plan revisado'}</button>
+      {!revisado && hayBorradorNuevo ? <p className="mhelp">Marcá la revisión completa para habilitar la publicación.</p> : null}
+      {control.vacias ? <p className="mhelp">Completá las comidas sin alimentos antes de publicar.</p> : null}
+      <p><button type="button" className="sbtn" onClick={onProgramar}><PanelV29Icon name="cal" size={13} />Programar entrega</button></p>
     </section></div>
   </div>;
+}
+
+function VistaPacienteDialog({ paciente, fecha, tituloDia, comidas, guidance, metaKcal, onClose }: {
+  paciente: string;
+  fecha: string;
+  tituloDia: string;
+  comidas: ReturnType<typeof comidasDelDia>;
+  guidance: PlanGuidance;
+  metaKcal: number | null;
+  onClose: () => void;
+}) {
+  return <FigmaRecordDialog title="Vista de la paciente" onClose={onClose} closeLabel="Cerrar vista de la paciente">
+    <p className="mhelp">Vista previa del borrador. No se notificó ni se envió nada a {paciente}.</p>
+    <div className="r29-patient-preview">
+      <header><h3>{paciente} · {tituloDia}</h3><span className="m">{fecha}</span><span className="sp" /></header>
+      <p className="mhelp">{metaKcal ? `Meta: ${metaKcal.toLocaleString('es-AR')} kcal por día` : 'Sin meta cargada'}</p>
+      {comidas.map(comida => <section key={comida.slot} className="fxp">
+        <header><h3>{comida.slot} · {comida.hora}</h3><span className="m">{comida.macros.kcal == null ? 'Sin dato' : `${numero(comida.macros.kcal)} kcal`}</span><span className="sp" /></header>
+        <p><b>{comida.titulo}</b></p>
+        {comida.lineas.length ? comida.lineas.map(linea => <p className="mhelp" key={linea.clave}>{linea.nombre} · {linea.cantidad ?? '—'} {linea.unidad}{linea.nota ? ` · ${linea.nota}` : ''}</p>) : <p className="mhelp">Sin alimentos cargados.</p>}
+      </section>)}
+      {guidance.recommendations.length ? <section className="fxp"><header><h3>Recomendaciones</h3><span className="sp" /></header><p className="mhelp">{guidance.recommendations.join(' · ')}</p></section> : null}
+      {guidance.avoid.length ? <section className="fxp"><header><h3>Alimentos a evitar</h3><span className="sp" /></header><p className="mhelp">{guidance.avoid.join(' · ')}</p></section> : null}
+    </div>
+    <footer><button type="button" className="sbtn" onClick={onClose}>Cerrar</button></footer>
+  </FigmaRecordDialog>;
 }

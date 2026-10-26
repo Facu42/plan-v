@@ -25,7 +25,9 @@ test('Planes: buscar, volver y dejar el editor y el asistente para después', as
   await expect(page.getByText('Sofía R.', { exact: true }).first()).toBeVisible();
 
   await page.getByRole('button', { name: 'Elegir paciente y empezar', exact: true }).click();
-  await expect(page.locator('#s-planes').getByRole('status')).toContainText('parte 3');
+  await expect(page.locator('#s-planes.pux-plan')).toBeVisible();
+  await expect(page.locator('#s-planes').getByRole('status').filter({ hasText: /asistente|propuesta|permiso|Borradores de menú/i })).toBeVisible();
+  await expect(page.locator('#s-planes')).not.toContainText('parte 3');
 
   await page.getByRole('navigation', { name: 'Secciones de Planes' }).getByRole('button', { name: /^Plan de / }).click();
   await expect(page.locator('#s-planes.pux-plan')).toBeVisible();
