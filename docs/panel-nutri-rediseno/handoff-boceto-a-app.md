@@ -56,13 +56,13 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 7. **Alimentos:** `/crm/alimentos` copia el catálogo del boceto. Se busca, se ve la porción y las proteínas, los carbohidratos y las grasas, y se crea o edita un alimento propio. En gramos las porciones son siempre 100 g, 1 taza (30 g) y 1 cucharada (10 g). El origen se lee «SARA 2». SARA 2 se consulta y no se edita. Suplementos y la fuente externa no se muestran: el boceto no los dibuja. [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar.
 8. **Biblioteca:** ya en main por el [PR #182](https://github.com/Facu42/plan-v/pull/182).
 9. **Planes, parte 1:** `/crm/plan` copia la entrada del boceto (secciones, listado, filtros y la columna de la derecha). Recetas abre la Biblioteca. El editor de la semana y el armado con IA quedan para las partes 2 y 3. El editor que ya existía sigue abierto con una paciente o desde «Armar o editar». [Nota](planes-v29-parte-1.md). Sin juntar.
-10. **Planes, parte 3:** en el editor de la semana, el asistente arma una propuesta y queda como borrador. Publicar es aparte, con la revisión y la API que ya existía. La vista de la paciente no avisa. El PDF y la lista de compras se bajan del borrador guardado. Programar la entrega dice «Próximamente». [Nota](planes-v29-parte-3.md). Sin juntar.
+10. **Planes, parte 3:** en el editor de la semana, el asistente arma una propuesta y queda como borrador. Publicar es aparte, con la revisión y la API que ya existía. La vista de la paciente no avisa. El PDF y la lista de compras se bajan del borrador guardado. Programar la entrega dice «Próximamente». [Nota](planes-v29-parte-3.md). [PR #185](https://github.com/Facu42/plan-v/pull/185), sin juntar.
 
 ## Bitácora
 
 | Cuándo | Qué | Quién |
 |---|---|---|
-| 26 oct | Planes, parte 3: el asistente arma un borrador y publicar usa la API real. Nada llega a la paciente hasta esa confirmación. Programar la entrega queda en «Próximamente». Sin juntar. | Cursor |
+| 26 oct | Planes, parte 3: el asistente arma un borrador y publicar usa la API real. Nada llega a la paciente hasta esa confirmación. Programar la entrega queda en «Próximamente». [PR #185](https://github.com/Facu42/plan-v/pull/185), sin juntar. | Cursor |
 | 26 oct | Planes, parte 1: el listado de `/crm/plan` copia la entrada del boceto. El editor de la semana y el asistente quedan para después. Sin juntar. | Cursor |
 | 25 oct | Paridad de Alimentos en el [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. Facu rechazó la primera pasada. En gramos quedan las tres porciones del boceto y el origen se lee «SARA 2». SARA 2 no se edita. | Cursor |
 | 25 oct | Alimentos en el [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. `/crm/alimentos` usa el dibujo del boceto con el catálogo que ya existía. SARA 2 no se edita. Un alimento propio sí. Suplementos y la fuente externa quedan afuera de esta pantalla. | Cursor |
