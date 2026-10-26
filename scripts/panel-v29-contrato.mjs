@@ -66,6 +66,19 @@ export const PIEZAS_ALIMENTOS = [
   ['Pestaña de porción', '#s-alimentos .tabs button', '', ['fontSize', 'borderTopLeftRadius']],
 ];
 
+export const PIEZAS_PLANES = [
+  ['Secciones de Planes', '#s-planes #pview', '', ['borderTopLeftRadius', 'backgroundColor', 'minHeight']],
+  ['Sección activa', '#s-planes #pview button.on', '', ['backgroundColor', 'fontSize', 'fontWeight', 'letterSpacing', 'lineHeight']],
+  ['Buscador del listado', '#s-planes .r29-search', '', ['borderTopLeftRadius', 'backgroundColor']],
+  ['Nombre en la tabla', '#s-planes .r29-table .who b', '', ['fontSize', 'fontWeight', 'fontFamily']],
+  ['Filtro del listado', '#s-planes .r29-list-filters .tabs button', '', ['fontSize', 'borderTopLeftRadius', 'fontWeight', 'letterSpacing', 'lineHeight']],
+  ['Filtro activo', '#s-planes .r29-list-filters .tabs button.on', '', ['fontWeight', 'fontSize', 'letterSpacing']],
+  ['CTA Nuevo plan', '.top .cta', '', ['minWidth', 'fontWeight', 'fontSize', 'letterSpacing', 'lineHeight', 'borderTopLeftRadius']],
+  ['Acción de la fila', '#s-planes .r29-table .sbtn', '', ['height', 'fontSize', 'fontWeight', 'letterSpacing', 'lineHeight', 'paddingTop', 'borderTopLeftRadius']],
+  ['Empezar con el asistente', '#s-planes .sbtn.k', '', ['height', 'fontSize', 'fontWeight', 'letterSpacing', 'lineHeight', 'paddingTop', 'borderTopLeftRadius']],
+  ['Orden del listado', '#s-planes .r29-list-filters select', '', ['height', 'fontSize', 'letterSpacing', 'lineHeight']],
+];
+
 export const PIEZAS_BIBLIOTECA = [
   ['Grilla de recursos', '#s-biblioteca .sxlib', '', ['display', 'gap']],
   ['Tarjeta de recurso', '#s-biblioteca .sxcard', '', ['backgroundColor', 'borderTopLeftRadius', 'paddingTop', 'textAlign']],
@@ -307,12 +320,20 @@ export async function correrContratoV29() {
       await a.waitForSelector('#s-biblioteca .sxcard');
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Biblioteca\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_BIBLIOTECA, informe);
+      await b.locator('[data-go="planes"]').first().click();
+      await b.waitForSelector('#s-planes:not([hidden])');
+      await b.locator('#s-planes #pview button').first().click();
+      await b.waitForSelector('#s-planes .r29-search');
+      await a.locator('#pv-panel-v29 a[href="/crm/plan"]').click();
+      await a.waitForSelector('#s-planes .r29-search');
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Planes\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_PLANES, informe);
       await b.close();
       await a.close();
     }
   } finally { await navegador.close(); }
 
-  const texto = `# Contrato del armazón contra el boceto v29\n\nFuente: \`design/panel-nutri/v29/panel-trabajo.html\`.\nApp: armazón, Seguimiento, Progreso, Asistente IA, Alimentos y Biblioteca (${origen}).\n\n${fallas ? `**${fallas} piezas no coinciden.**` : '**El armazón, Seguimiento, Progreso, Asistente, Alimentos y Biblioteca coinciden, en claro y en oscuro.**'}\n${informe.join('\n')}\n`;
+  const texto = `# Contrato del armazón contra el boceto v29\n\nFuente: \`design/panel-nutri/v29/panel-trabajo.html\`.\nApp: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Planes (${origen}).\n\n${fallas ? `**${fallas} piezas no coinciden.**` : '**El armazón, Seguimiento, Progreso, Asistente, Alimentos, Biblioteca y Planes coinciden, en claro y en oscuro.**'}\n${informe.join('\n')}\n`;
   return { fallas, texto };
 }
 

@@ -8,6 +8,10 @@ describe('menú profesional', () => {
     expect(panelNavCurrent('/crm/pacientes?filtro=archived', '/crm/pacientes?filtro=archived&paciente=abc')).toBe(true);
     expect(panelNavCurrent('/crm/biblioteca?biblioteca=recetas', '/crm/biblioteca?biblioteca=recursos')).toBe(false);
     expect(panelNavCurrent('/crm/desarrollo', '/crm/desarrollo?modulo=configuracion')).toBe(false);
+    expect(panelNavCurrent('/crm/plan?editor=1', '/crm/plan')).toBe(false);
+    expect(panelNavCurrent('/crm/plan?editor=1', '/crm/plan?editor=1&paciente=pat-sofia')).toBe(true);
+    const planes = panelNavGroups([], 0, false).flatMap(grupo => grupo.items).find(item => item.label === 'Planes')!;
+    expect(planes.children!.find(hijo => hijo.label === 'Armar o editar')!.href).toBe('/crm/plan?editor=1');
   });
   it('usa los conteos de la cartera y conserva la ausencia de datos', () => {
     const patients = [{ id: 'a', has_account: false }, { id: 'b', archived_at: '2026-10-01' }] as Patient[];
