@@ -1,9 +1,9 @@
 # Contrato del armazón contra el boceto v29
 
 Fuente: `design/panel-nutri/v29/panel-trabajo.html`.
-App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos y Biblioteca (http://127.0.0.1:5173).
+App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Planes (http://127.0.0.1:5173).
 
-**El armazón, Seguimiento, Progreso, Asistente, Alimentos y Biblioteca coinciden, en claro y en oscuro.**
+**El armazón, Seguimiento, Progreso, Asistente, Alimentos, Biblioteca y Planes coinciden, en claro y en oscuro.**
 
 ## Tema oscuro · armazón
 
@@ -88,6 +88,16 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos y Biblioteca (http
 | Descripción | ✅ igual | |
 | Acción de asignar | ✅ igual | |
 
+## Tema oscuro · Planes
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Secciones de Planes | ✅ igual | |
+| Sección activa | ✅ igual | |
+| Buscador del listado | ✅ igual | |
+| Nombre en la tabla | ✅ igual | |
+| Filtro del listado | ✅ igual | |
+
 ## Tema claro · armazón
 
 | Pieza | Estado | Detalle |
@@ -170,3 +180,13 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos y Biblioteca (http
 | Tipo del recurso | ✅ igual | |
 | Descripción | ✅ igual | |
 | Acción de asignar | ✅ igual | |
+
+## Tema claro · Planes
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Secciones de Planes | ✅ igual | |
+| Sección activa | ✅ igual | |
+| Buscador del listado | ✅ igual | |
+| Nombre en la tabla | ✅ igual | |
+| Filtro del listado | ✅ igual | |

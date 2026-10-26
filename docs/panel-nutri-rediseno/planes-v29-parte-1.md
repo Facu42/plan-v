@@ -63,4 +63,4 @@ Entrá en modo demo a `/crm/plan`. Recetas tiene que abrir la Biblioteca. «Abri
 - Migraciones: no hay.
 - Fire test: ✅ se bajó el límite de «por vencer» de 7 a 3 días y la prueba del listado falló; se volvió a 7.
 - Automatizaciones nuevas: el contrato visual suma las piezas del listado (`npm run panel:contrato:v29`).
-- Veredicto: la suite de unidad quedó en 3.318 aprobadas y 2 omitidas, y los tipos en verde. La prueba de punta a punta y el contrato visual se anotan al terminar esta entrega.
+- Veredicto: SHIP de esta parte. Suite de unidad: 3.318 aprobadas y 2 omitidas. Tipos en verde. Cuatro recorridos de Planes en verde. El contrato visual, en claro y en oscuro, coincide (secciones, sección activa, buscador, nombre y filtros). En el celular las dos columnas van una debajo de la otra para que la tabla no quede apretada.

@@ -74,7 +74,7 @@ export function PanelPlanesVista({
             </div>
             <div className="fxs fxtb tall r29-table">
               <table>
-                <thead><tr><th>Paciente</th><th>Plan y objetivo</th><th>Estado</th><th>Semana</th><th>Acción</th></tr></thead>
+                <thead><tr><th scope="col">Paciente</th><th scope="col">Plan y objetivo</th><th scope="col">Estado</th><th scope="col">Semana</th><th scope="col">Acción</th></tr></thead>
                 <tbody id="r29-rows">
                   {visibles.length ? visibles.map(fila => <tr key={fila.id}>
                     <td><div className="who"><span className="av" style={{ background: fondoAvatar(fila.tono) }}>{fila.iniciales}</span><b>{fila.nombre}</b></div></td>

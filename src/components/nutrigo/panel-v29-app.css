@@ -142,10 +142,16 @@
 #pv-panel-v29:not(.mob) .main:has(#s-planes) { height: 100%; overflow: hidden; }
 #pv-panel-v29:not(.mob) #pv-panel:has(#s-planes) { flex: 1; min-height: 0; }
 #pv-panel-v29 #s-planes { min-width: 0; }
+/* La hoja vieja agranda .who b a 17px. En el listado el boceto usa 12,5. */
+#pv-panel-v29 #s-planes .who b,
+#pv-panel-v29 #s-planes .fxwhen b { font-size: 12.5px; font-weight: 500; }
 #pv-panel-v29.mob .main:has(#s-planes) > .top { flex: 0 0 auto; height: auto; flex-wrap: wrap; }
 #pv-panel-v29.mob #pv-panel:has(#s-planes),
 #pv-panel-v29.mob #s-planes { flex: none; height: auto; min-height: auto; }
-#pv-panel-v29.mob #s-planes #pwrap .fx > .c { min-height: auto; height: auto; min-width: 0; }
+#pv-panel-v29.mob #s-planes #pwrap .fx { display: flex; flex-direction: column; }
+#pv-panel-v29.mob #s-planes #pwrap .fx > .c { min-height: auto; height: auto; min-width: 0; max-width: 100%; }
+#pv-panel-v29.mob #s-planes .r29-table { overflow-x: auto; }
+#pv-panel-v29.mob #s-planes .r29-table table { display: table; min-width: 640px; }
 
 /* El boceto carga Inter 300, 400, 500 y 600 y pinta todo con --font.
    La hoja vieja redefine --font como Poppins en #pv-panel, que es el cuerpo

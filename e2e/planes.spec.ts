@@ -6,7 +6,7 @@ test('Planes: el listado es la entrada y Recetas abre la Biblioteca', async ({ p
   await expect(page.getByRole('heading', { name: 'Planes', exact: true })).toBeVisible();
   await expect(page.getByText('Organizá, armá y entregá los planes de tus pacientes', { exact: true })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Secciones de Planes' })).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Paciente' })).toBeVisible();
+  await expect(page.locator('#s-planes th', { hasText: 'Paciente' })).toBeVisible();
   await expect(page.getByText('Sofía R.', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('No hay pedidos pendientes.', { exact: true })).toBeVisible();
   await expect(page.locator('#s-planes')).not.toContainText(/siguen en Planes/i);
@@ -25,9 +25,9 @@ test('Planes: buscar, volver y dejar el editor y el asistente para después', as
   await expect(page.getByText('Sofía R.', { exact: true }).first()).toBeVisible();
 
   await page.getByRole('navigation', { name: 'Secciones de Planes' }).getByRole('button', { name: /^Plan de / }).click();
-  await expect(page.getByText('El editor de la semana llega en la parte 2.', { exact: true })).toBeVisible();
+  await expect(page.getByText('Próximamente. El editor de la semana llega en la parte 2.', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Todos los planes', exact: true }).click();
-  await expect(page.getByRole('columnheader', { name: 'Estado' })).toBeVisible();
+  await expect(page.locator('#s-planes th', { hasText: 'Estado' })).toBeVisible();
 
   await page.getByRole('button', { name: /plan (de|para) Sofía R\./ }).click();
   await expect(page.locator('#s-planes').getByRole('status')).toHaveText('Próximamente. El editor del plan llega en la parte 2.');
@@ -55,6 +55,6 @@ test('Planes: en el celular se ven las secciones y la tabla', async ({ page }) =
   await page.setViewportSize({ width: 390, height: 800 });
   await enterDemo(page, '/crm/plan');
   await expect(page.locator('#s-planes #pview')).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Acción' })).toBeVisible();
+  await expect(page.locator('#s-planes th', { hasText: 'Acción' })).toBeVisible();
   await expect(page.getByText('Crear con el asistente', { exact: true })).toBeVisible();
 });
