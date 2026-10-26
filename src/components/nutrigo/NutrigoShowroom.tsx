@@ -493,7 +493,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
             : page === 'alimentos'
               ? { when: 'SARA 2 y los que cargás vos', title: 'Alimentos', search: 'Buscar', actions: alimentosActions }
               : page === 'biblioteca' && panelQuery.get('biblioteca') !== 'recetas'
-                ? { when: 'Guías, videos y PDF. Las recetas siguen en Planes.', title: 'Biblioteca', search: 'Buscar', actions: bibliotecaActions }
+                ? { when: 'Guías, videos, PDF y recetas del consultorio.', title: 'Biblioteca', search: 'Buscar', actions: bibliotecaActions }
               : { title: figmaDetail?.title ?? libraryRecipeTitle ?? (page === 'ficha' ? PAGE_LABELS[page] : navItem?.label ?? PAGE_LABELS[page]), search: 'Buscar' };
     const reviewPatient = reviewLog ? patients.find(person => person.id === reviewLog.patient_id) ?? null : null;
     const account: PanelAccountOption[] = [

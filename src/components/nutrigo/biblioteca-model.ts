@@ -1,6 +1,21 @@
 import type { Patient } from '../../types';
 import type { EditorialResource } from '../../types/resources';
 
+export const LIBRARY_RESOURCE_TYPES = ['Guía', 'Video', 'PDF'] as const;
+export type LibraryResourceType = typeof LIBRARY_RESOURCE_TYPES[number];
+const categories: Record<LibraryResourceType, string> = { 'Guía': 'guia', Video: 'video', PDF: 'pdf' };
+
+/** Las categorías temáticas anteriores son guías; el rótulo v29 siempre es un tipo. */
+export function libraryResourceType(category: string): LibraryResourceType {
+  const value = category.trim().toLowerCase();
+  return value === 'video' ? 'Video' : value === 'pdf' ? 'PDF' : 'Guía';
+}
+
+export function libraryResourceDraft(slug: string, title: string, type: LibraryResourceType, summary: string) {
+  return { slug, title: title.trim(), category: categories[type], summary: summary.trim(),
+    sections: [{ title: 'Recurso del consultorio', body: summary.trim() }] };
+}
+
 export function assignedReaders(resource: EditorialResource | null, patients: Patient[]) {
   if (!resource) return [];
   return patients.flatMap(patient => {

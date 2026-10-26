@@ -1,64 +1,63 @@
-# Biblioteca v29: verificación del 25/10/2026
+# Biblioteca v29: corrección efectiva del 25/10/2026
 
-Rama: `codex/biblioteca-v29`, desde `193d4ed` (Alimentos #181). Implementación `9331911`, [PR #182](https://github.com/Facu42/plan-v/pull/182). Autorizada por Facundo: «APROBADO PARA IMPLEMENTAR YA. No pidas diseño ni esperes otra confirmación».
+Rama `codex/biblioteca-v29`, [PR #182](https://github.com/Facu42/plan-v/pull/182). Esta revisión sustituye el cierre anterior rechazado por Facundo. La evidencia y los controles de `408dc57` corresponden a otra versión y no prueban estos cambios.
 
-`/crm/biblioteca?biblioteca=recursos` usa las tarjetas y la columna «Quién lo abrió» de `sxBiblioteca`, en `design/panel-nutri/v29/panel-trabajo.html`. Conserva el catálogo real, borradores, nuevas versiones, publicación, despublicación, asignaciones y lectura. «Ver contenido» abre esas funciones en el panel lateral del boceto. «Ver recetas» conserva el catálogo de recetas existente.
+Fuente: `design/panel-nutri/v29/panel-trabajo.html`, `sxBiblioteca` y `onLib`, con las seis correcciones explícitas aprobadas por Facundo.
 
-«Avisar por la app» permite elegir entre las pacientes asignadas y les manda un mensaje mediante el chat existente. Si falla una destinataria, conserva su identificador para reintentar y no vuelve a enviar a quienes ya recibieron el mensaje. Las tarjetas reconocen asignaciones tanto por slug como por UUID.
+## Cambios de aplicación
 
-La API de creación admite texto por secciones. Adjuntar video o PDF queda indicado como «Próximamente» dentro del editor. No se simulan archivos ni formatos que el servidor no guarda. Con más de cuatro recursos, las filas conservan una altura legible y se desplazan dentro de la columna.
+| Gap | Cambio concreto |
+|---|---|
+| Recetas en Biblioteca | `src/components/nutrigo/PanelBiblioteca.tsx` y `NutrigoShowroom.tsx`: subtítulo «Guías, videos, PDF y recetas del consultorio.» y pie «Las recetas están en esta Biblioteca.». Ver recetas conserva `/crm/biblioteca?biblioteca=recetas`. |
+| Tipo en tarjetas y detalle | `src/components/nutrigo/biblioteca-model.ts`: Guía/Video/PDF ↔ `guia`/`video`/`pdf`. Las categorías temáticas anteriores son Guía. `sxk` contiene solo el tipo; el detalle contiene tipo y descripción. |
+| Nuevo recurso | `PanelBiblioteca.tsx`: tres campos (Título, Tipo, De qué se trata), subtítulo y Guardar pedidos. No importa ni monta `ProfessionalResourceEditor`. Guarda y publica mediante las API existentes para permitir asignarlo inmediatamente; la descripción queda en resumen y sección legible. Si falla publicar, conserva el id y reintenta sin crear otra copia. |
+| Asignar | Título «Asignar «{título}»», subtítulo solicitado y ya asignadas marcadas. No se eliminan asignaciones existentes. Se llama a `api.assignResource` por cada nueva paciente; los fallos parciales conservan solo las pendientes. |
+| Retiro del flujo editorial | Biblioteca ya no presenta Ver contenido, publicar/despublicar ni versiones. El editor general usado fuera de esta pantalla permanece disponible para sus otros usos. |
+| Avisar por la app | Acción directa a todas las ya asignadas; mensaje con título y ruta al recurso. Sin asignadas: «Primero asignalo a alguien.». Si una falla, el siguiente toque reintenta solo pendientes con el mismo `client_id`. |
 
-## Revisión de continuación del 25/10
+## Cómo se dispara el aviso
 
-Se volvió a contrastar la entrega con `sxBiblioteca` y `onLib`, sin cambiar el diseño aprobado. El enlace anterior `/crm/recetas?paciente=...` perdía la selección de Recetas al convertirse en Biblioteca. Ahora conserva el catálogo y la paciente, también después de recargar; la navegación interna a Recetas elige esa sección explícitamente. Biblioteca sin parámetros muestra su título correcto.
+La nueva asignación usa `api.assignResource(slug, [patientId])` → `POST /api/resources/assign` → `server/resources/routes.ts`: tras guardar y recuperar las fichas, si es persistente, `assigned_count > 0` y `existing_count === 0`, llama a **`notifyPatientPush(id, 'resource')`**. Enviar una paciente por solicitud evita que un alta ya existente por concurrencia silencie el push de otra nueva. Una repetición sin altas nuevas no vuelve a dispararlo.
 
-El [control firmado anterior](https://github.com/Facu42/plan-v/actions/runs/40242195904) aprobó sus 30 pruebas de permisos y aislamiento, pero el navegador falló después al buscar «Nueva receta» en ese enlace. Además, el mismo recorrido conservaba selectores de asignación de la pantalla anterior: ahora elige una tarjeta publicada y asigna desde el panel lateral v29, manteniendo la comprobación posterior desde la API de la paciente.
+`server/push/push.ts` prepara el aviso de recurso que abre `/app/recursos`; el texto del teléfono es genérico para no exponer información clínica. La entrega depende de VAPID y de una suscripción activa ya configurados. La prueba nueva `server/resources/assignment-push.routes.test.ts` comprueba la llamada `resource`, la ausencia de duplicados y que no se avise si faltan permisos o falla la escritura. Usa dependencias aisladas: no envía a teléfonos reales.
 
-La prueba unitaria nueva y el recorrido del enlace anterior fallaron antes de la corrección y pasaron después. Las 12 pruebas de rutas y del modelo de Biblioteca están aprobadas. La suite final aprobó **3.300 pruebas, con cuatro omitidas, en 523 archivos** (323,09 segundos). Los diez e2e completos pasaron en 1,2 minutos; tipos, compilación y contrato visual v29 también pasaron sobre la corrección. Una pasada e2e anterior recibió 429 al compartir la misma IP demo: el último recorrido ahora respeta un `Retry-After` válido de hasta 60 segundos y reintenta una sola vez, conservando la exigencia de respuesta 200. No se desactivaron los límites del servidor.
+La acción directa Avisar por la app usa `api.sendMessage` con título y ruta del recurso. Los avisos de mensajes conservan el mecanismo de push de mensajes existente. No se introduce una selección de destinatarias adicional.
 
-Se revisó el título y el apilado con `/browse` a 1440 y 390, con datos ficticios. Las nuevas capturas y los logs de esta revisión quedan en `.npm-cache/verification/`; las ocho capturas enlazadas abajo corresponden a la entrega inicial. `code-reviewer` y `reality-checker`, ambos con `gpt-6.1-sol`, revisaron esta continuación sin hallar bloqueos de código.
-
-**Paso 10 actualizado:** ✅ flujos críticos locales (3.300 pruebas y diez e2e); ✅ regresión del enlace anterior y recarga; contratos de asignación y lectura existentes conservados; área frágil: canonización de enlaces y selectores del navegador; migraciones: no corresponden; fire test: prueba de alias y e2e rojos antes del arreglo, verdes después; automatización: regresión incorporada a los comandos de CI existentes. Sin cambios de producción.
-
-**Cierre remoto sobre el código `408dc57`:** [CI general aprobado](https://github.com/Facu42/plan-v/actions/runs/40244448749), incluidos los diez e2e, y [sesiones firmadas aprobadas](https://github.com/Facu42/plan-v/actions/runs/40244448761). El segundo control aprobó las 30 pruebas de permisos y completó el navegador: Recetas, asignación y lectura de recursos, mensajes, archivos privados, plan y pago persistentes tras reiniciar el servidor. Terminó el 25/10 a las 23:32 UTC y eliminó los contenedores y los datos ficticios. La vista previa de Vercel también fue aprobada.
-
-**Estado de la continuación:** **SHIP para revisión por PR**, con los controles del código aprobados. Este cierre solo agrega documentación sobre `408dc57`; no modifica la implementación verificada. Docker está instalado en esta PC, pero su servicio no está iniciado: la pila descartable con sesiones firmadas se comprobó en GitHub. Sin merge ni cambios en producción; adjuntos de video/PDF siguen pendientes.
-
-## Comprobaciones de la entrega inicial
+## Verificación actual
 
 | Comprobación | Resultado |
 |---|---|
-| `npm test -- --maxWorkers=2 --reporter=dot` | 3.299 aprobadas, 4 omitidas; 523 archivos aprobados |
-| `npm run check` | Tipos del frente, servidor y e2e aprobados |
-| `npm run build` | Aprobado; código de salida 0. Advertencias de tamaño de paquetes y anotación de Zod |
-| `CHROMIUM_PATH=... npx playwright test` | 9 recorridos aprobados: 3 nuevos y 6 existentes |
-| `CHROMIUM_PATH=... node scripts/panel-v29-contrato.mjs --write` | Aprobado; siete piezas de Biblioteca iguales en ambos temas, además de las pantallas anteriores |
-| `node scripts/check-secrets.mjs` | Aprobado |
-| `git diff --check` | Aprobado |
+| `npm test -- --maxWorkers=2` | **3.306 aprobadas, cuatro omitidas; 524 archivos aprobados**, 359,83 segundos. |
+| `npm run check` | Tipos de web, API y e2e aprobados. |
+| `npm run build` | Aprobada, 13,51 segundos. Conserva el aviso previo sobre paquetes grandes. |
+| `npm run check:secrets` | Aprobado. |
+| `git diff --check` | Aprobado. No existe un comando separado de lint en el proyecto. |
+| Contrato v29 | Aprobado para las piezas comparadas en claro y oscuro; incluye Biblioteca. No es una comparación de cada píxel ni del texto histórico del boceto. |
+| E2e de Biblioteca | **Seis aprobados**: Recetas y recarga; tres campos, asignadas y aviso; reintento de guardado; concurrencia y error parcial de asignación; error de catálogo; celular. |
+| `npm run test:e2e` | **Doce aprobados**, 3,4 minutos: los seis de Biblioteca y los seis generales, incluido aviso hasta lectura. Chrome instalado, API demo y variables de base remota vacías. |
+| Navegador firmado | `scripts/product-browser.local.mjs` elige un recurso publicado desde la API y busca su título. Ya no depende de un rótulo editorial en `sxk`. Sintaxis y tres pruebas existentes del recorrido aprobadas; ejecución firmada pendiente en el CI de la nueva cabeza. |
+| Pacing de e2e | `e2e/helpers.ts` cuenta respuestas de la API y reutiliza `createBrowserRatePacer` antes de entrar a la demo. Las ocho pruebas existentes del pacing, incluidas las del limitador real, pasan. Veinte pruebas focales de runner, modelo y push aprobadas. |
+| Revisiones | `code-reviewer`: corregidos estilos y riesgo de push con selección desactualizada; segunda lectura sin bloqueadores. `reality-checker`: seis gaps con código y evidencia, sin certificar producción. |
 
-No hay comando de lint en este proyecto: se ejecutaron tipos y revisión del diff. El contrato vigente es el de v29; el contrato anterior apunta a otro boceto y no representa esta fase.
+Una primera suite sin límite de workers registró un timeout de persistencia en recetas y se interrumpió. La suite completa posterior con dos workers terminó sin fallos. El primer recorrido del formulario encontró un nombre de selector ambiguo: se corrigió con `aria-labelledby` y se verificó el recorrido completo. La primera corrida de todos los e2e detectó un aviso adicional dejado por la prueba nueva de concurrencia en la paciente demo compartida: esa prueba ahora marca su recurso como leído al terminar. Otra corrida llegó al límite real de 300 solicitudes por IP/minuto al ampliar la suite; el runner ahora aplica el pacing existente sin cambiar ni desactivar las protecciones del servidor. Los avisos de color de Node no son fallos de la aplicación.
 
-En esta PC se usó Chrome instalado mediante `CHROMIUM_PATH`; Playwright mantiene su navegador habitual cuando esa variable no está definida. La primera suite mostró dos falsos fallos por CRLF de Windows: se normalizó el texto al verificar archivos generados y se hizo compatible la expresión regular de la prueba móvil. Una ejecución con mucha concurrencia cerró procesos inesperadamente; la ejecución completa con dos procesos terminó en verde. Los logs locales están en `.npm-cache/verification/`.
+Video y PDF se guardan como tipo; el diálogo de tres campos no incorpora adjuntos. No hay cambios de esquema, migraciones, configuración de producción ni pruebas con pacientes reales. El control firmado de la nueva cabeza debe evaluarse por su propio CI después del push; los resultados remotos antiguos no se reutilizan.
 
-## Informe del paso 10 de regression-guard
+## Capturas actuales
 
-- **Flujos críticos verificados:** ✅ acceso demo, alta e ingreso de paciente, publicación del plan, diario y revisión de comida, aviso de recurso hasta su lectura (seis e2e existentes); ✅ crear/publicar/asignar y leer el recurso desde la paciente, reintentar avisos fallidos sin duplicar, recuperar error del catálogo y apilar a 390 (tres e2e nuevos). Los permisos y el aislamiento usan los contratos existentes, cubiertos por la suite del servidor. No hubo prueba nueva contra cuentas reales.
-- **Regresiones cubiertas:** slug y UUID identifican el mismo recurso; borradores no asignables; lecturas de otro recurso no se mezclan. El recorrido prueba que «Lo abrió» aparece después de abrir el material en la app de la paciente. Se conservan las pruebas de asignaciones repetidas, rechazo de escritura parcial y vistas seguras del servidor. La prueba móvil detecta la falta de apilado; las pruebas de archivos aceptan CRLF sin ignorar diferencias de contenido.
-- **Contratos revisados:** catálogo y guardar/publicar/despublicar de `resourcesApi`; `api.assignResource` usa el slug y devuelve pacientes actualizadas; `read_at` sigue siendo la única señal de apertura; `api.sendMessage` conserva `client_id` en los reintentos. React muestra los textos como texto, sin HTML externo.
-- **Áreas frágiles:** recursos publicados y asignaciones (borradores bloqueados; asignaciones existentes conservadas); mensajes en lote (bloqueo de doble clic, destinatarias fallidas separadas, identificador estable); navegación con cambios pendientes (protección del editor y del selector); estilos heredados (colores de v29 y apilado comprobados). Los avisos push siguen usando el texto genérico del servidor existente.
-- **Migraciones:** no hay cambios de base, configuración de producción ni servicios externos. Todas las pruebas usaron memoria o simulaciones locales.
-- **Fire test:** ✅ se cambió temporalmente la detección de asignaciones para devolver ninguna. Fallaron dos pruebas; el archivo se restauró automáticamente y las tres pruebas del modelo volvieron a pasar. La suite final se corrió con el archivo restaurado.
-- **Automatizaciones nuevas:** e2e de creación, publicación, asignación, lectura, reintento parcial, errores y celular; siete piezas añadidas al contrato v29. Entran en los comandos y CI existentes. No hace falta recordar migraciones, variables ni activaciones para publicar este cambio.
-- **Revisión:** `code-reviewer` detectó el apilado y un acento mal escrito; ambos corregidos. Segunda revisión sin bloqueos. `reality-checker` verificó pruebas y capturas; alcance local, sin afirmar igualdad de pantalla completa píxel a píxel.
-- **Veredicto:** **SHIP para revisión por PR.** Sin merge a main ni publicación de producción desde esta entrega. Adjuntos de video/PDF siguen pendientes y se informan en pantalla.
+- [Biblioteca a 1440](biblioteca-v29-evidencia/correccion/biblioteca-1440.png).
+- [Nuevo recurso a 1440](biblioteca-v29-evidencia/correccion/nuevo-1440.png).
+- [Nuevo recurso a 390](biblioteca-v29-evidencia/correccion/nuevo-390.png).
 
-## Comparación visual
+Capturadas con `/browse`, servicios locales y datos ficticios. El selector usa las clases `af`/`ai` del boceto. En celular el diálogo aparece abajo y los tres campos más Guardar quedan visibles.
 
-Capturas con datos ficticios mediante `/browse` de gstack. La referencia móvil incluye los controles de presentación del archivo del boceto; permite comparar las piezas y el apilado. El contrato compara medidas, tipografía y colores resueltos; no demuestra igualdad de pantalla completa con cantidades distintas de recursos.
+## Regression guard — paso 10
 
-| Tamaño y tema | Boceto | App |
-|---|---|---|
-| 1440×900 oscuro | [Ver](biblioteca-v29-evidencia/boceto-dark-1440.png) | [Ver](biblioteca-v29-evidencia/app-dark-1440.png) |
-| 1440×900 claro | [Ver](biblioteca-v29-evidencia/boceto-light-1440.png) | [Ver](biblioteca-v29-evidencia/app-light-1440.png) |
-| 390×844 oscuro | [Ver](biblioteca-v29-evidencia/boceto-dark-390.png) | [Ver](biblioteca-v29-evidencia/app-dark-390.png) |
-| 390×844 claro | [Ver](biblioteca-v29-evidencia/boceto-light-390.png) | [Ver](biblioteca-v29-evidencia/app-light-390.png) |
+- **Flujos críticos verificados:** ✅ catálogo, alta, asignación, aviso y lectura del recurso; ✅ Recetas y recarga; ✅ error y reintentos, celular; ✅ permisos y aislamiento cubiertos por la suite general. La entrega push a un teléfono real no forma parte de esta evidencia.
+- **Regresiones cubiertas:** rótulos por tipo, categorías antiguas, alta sin editor, id estable ante fallo de publicación, asignaciones previas marcadas, selección desactualizada, fallos parciales, reintentos de aviso sin duplicados y conservación de Recetas/paciente.
+- **Contratos revisados:** `resourcesApi.save/publish/catalog`, restricciones de título/resumen/secciones, `api.assignResource` con slug y fichas actualizadas, llamada de servidor al push `resource`, `api.sendMessage` con `client_id`, `read_at` y rutas de Recetas.
+- **Áreas frágiles:** publicación interna y reintentos; estado desactualizado al asignar; dobles avisos. Se conserva el id guardado, se separan altas por paciente, se bloquean tarjetas durante operaciones y se conservan solo destinatarias fallidas.
+- **Migraciones:** no corresponden. Nada se aplicó a una base remota.
+- **Fire test:** ✅ se alteró temporalmente Video para devolver Guía: falló la prueba de tipos. Se restauró y las nueve pruebas de modelo y conexión push pasaron. Antes de implementar, las cuatro pruebas nuevas de mapeo también fallaron por ausencia de los helpers.
+- **Automatizaciones:** seis e2e de Biblioteca y prueba de conexión push dentro de los comandos existentes del CI. No requiere pasos manuales nuevos para publicar la app.
+- **Veredicto:** implementación comprobada localmente y presentada para revisión en el PR. El merge y producción quedan fuera de esta entrega; el CI de la nueva cabeza se informa por separado.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { assignedReaders, assignablePatients } from './biblioteca-model';
+import { assignedReaders, assignablePatients, libraryResourceType, libraryResourceDraft } from './biblioteca-model';
 import { SEEDED_RESOURCES } from '../../types/resources';
 import type { Patient } from '../../types';
 
@@ -9,6 +9,14 @@ const patient = (id: string, resourceId?: string, readAt: string | null = null) 
 }) as Patient;
 
 describe('Biblioteca: asignaciones reales', () => {
+  it('traduce tipos sin exponer categorías antiguas como rótulos', () => {
+    expect(['guia', 'Guía', 'Organización', 'video', 'Video', 'pdf', 'PDF'].map(libraryResourceType)).toEqual(['Guía', 'Guía', 'Guía', 'Video', 'Video', 'PDF', 'PDF']);
+  });
+  it.each([['Guía', 'guia'], ['Video', 'video'], ['PDF', 'pdf']] as const)('guarda %s con categoría %s y contenido legible', (type, category) => {
+    expect(libraryResourceDraft('recurso-prueba', ' Título ', type, ' Una línea ')).toEqual({
+      slug: 'recurso-prueba', title: 'Título', category, summary: 'Una línea', sections: [{ title: 'Recurso del consultorio', body: 'Una línea' }],
+    });
+  });
   it('reconoce slug e id sin mezclar otros recursos ni contar dos veces a una paciente', () => {
     const people = [patient('a', resource.slug, '2026-10-25'), patient('b', resource.id), patient('c', 'otro')];
     expect(assignedReaders(resource, people).map(r => [r.patient.id, Boolean(r.assignment.read_at)])).toEqual([['a', true], ['b', false]]);
