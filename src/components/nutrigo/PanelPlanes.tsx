@@ -10,9 +10,6 @@ import {
   type FilaPlan, type FiltroPlanes, type OrdenPlanes, type VistaPlanes,
 } from './planes-lista';
 
-const AVISO_IA = 'Próximamente. El armado con el asistente llega en la parte 3. Nada le llega a la paciente hasta que se publique.';
-const AVISO_PUBLICAR = 'Próximamente. Publicar, el PDF y la vista de la paciente llegan en la parte 3. Nada le llega a la paciente desde acá.';
-
 function Encabezado({ titulo, meta }: { titulo: string; meta?: string }) {
   return <header><h3>{titulo}</h3>{meta ? <span className="m">{meta}</span> : null}<span className="sp" /></header>;
 }
@@ -132,6 +129,9 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
   const [error, setError] = useState(false);
   const [reintento, setReintento] = useState(0);
   const [cargados, setCargados] = useState<Record<string, ProfessionalMealPlan | null>>({});
+  const [demo, setDemo] = useState(false);
+  const [asistentePedido, setAsistentePedido] = useState(0);
+  const [publicarPedido, setPublicarPedido] = useState(0);
   const pacientesRef = useRef(patients);
   pacientesRef.current = patients;
   const clave = patients.map(persona => persona.id).join('|');
@@ -148,9 +148,11 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
         if (control.signal.aborted) return;
         const grupo = lista.slice(inicio, inicio + 6);
         const siguientes: Record<string, ProfessionalMealPlan | null> = {};
+        let memoria = false;
         const resultados = await Promise.all(grupo.map(async persona => {
           try {
-            const { plan } = await plansApi.professional(persona.id, control.signal);
+            const { plan, source } = await plansApi.professional(persona.id, control.signal);
+            if (source === 'memory') memoria = true;
             return [persona.id, plan] as const;
           } catch (razon) {
             if (control.signal.aborted) throw razon;
@@ -162,6 +164,7 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
           if (plan !== undefined) siguientes[id] = plan;
         }
         if (control.signal.aborted) return;
+        if (memoria) setDemo(true);
         setCargados(previo => ({ ...previo, ...siguientes }));
       }
       if (!control.signal.aborted) setError(fallo);
@@ -176,7 +179,6 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
     document.getElementById('planes-pedidos')?.scrollIntoView({ block: 'nearest' });
   }, [enfocarPedidos]);
 
-  const abrirAsistente = useCallback(() => setAviso(AVISO_IA), []);
   const pacienteDe = useCallback((id?: string) => {
     if (id && patients.some(persona => persona.id === id)) return id;
     const sinPlan = patients.find(persona => persona.id in cargados && !cargados[persona.id]);
@@ -198,6 +200,11 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
     }
     abrirEditor(sinPlan?.id);
   }, [patients, cargados, abrirEditor]);
+  const abrirAsistente = useCallback(() => {
+    const sinPlan = patients.find(persona => persona.id in cargados && !cargados[persona.id]);
+    abrirEditor(sinPlan?.id);
+    setAsistentePedido(valor => valor + 1);
+  }, [patients, cargados, abrirEditor]);
   const alta = etiquetaAlta(vista);
   const planAbierto = editorId ? cargados[editorId] : undefined;
   const enEditor = vista === 'plan' && Boolean(planAbierto);
@@ -210,7 +217,7 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
       const etiqueta = planAbierto?.current.status === 'published' ? 'Ver entrega' : 'Revisar y publicar';
       onHeader?.(<>
         <button className="chip" type="button" onClick={abrirNuevo}><PanelV29Icon name="plus" size={13} />Nuevo plan</button>
-        <button className="cta" type="button" onClick={() => setAviso(AVISO_PUBLICAR)}><PanelV29Icon name="check" size={13} />{etiqueta}</button>
+        <button className="cta" type="button" onClick={() => setPublicarPedido(valor => valor + 1)}><PanelV29Icon name="check" size={13} />{etiqueta}</button>
       </>);
       return;
     }
@@ -246,6 +253,9 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
       onElegir={abrirEditor}
       onPlan={guardado => setCargados(previo => ({ ...previo, [personaEditor.id]: guardado }))}
       onAviso={setAviso}
+      asistentePedido={asistentePedido}
+      publicarPedido={publicarPedido}
+      demo={demo}
     /> : null}
   />;
 }

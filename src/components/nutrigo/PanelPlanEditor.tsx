@@ -1,21 +1,58 @@
 import { useEffect, useRef, useState } from 'react';
+import { aiJobsApi } from '../../api/ai-jobs';
+import { careErrorMessage } from '../../api/care';
 import { plansApi } from '../../api/plans';
 import type { Patient } from '../../types';
+import type { AiJobView } from '../../types/ai-jobs';
 import { mealPlanDraftSchema, type PlanItemView, type PlanSlot, type PlanVersionView, type ProfessionalMealPlan } from '../../types/plans';
 import { emptyGuidance, type PlanGuidance } from '../../types/plan-guidance';
+import { FigmaRecordDialog } from './FigmaPatientFront';
 import { PanelV29Icon } from './PanelV29Icon';
+import { PlanPrintDialog } from './PlanPrintDialog';
 import { fondoAvatar } from './planes-lista';
 import {
   cambiarCantidad, cambiarNota, COMIDAS_EDITOR, comidaDelDia, comidasDelDia, controlEntrega,
   copiarPlan, DIAS_CORTOS, DIAS_LARGOS, duplicarDia, fechasDeSemana, filasDeVersiones, HORAS_EDITOR,
   finVisible, indiceLunes, listaDeCompras, lunesDeSemana, paraGuardar, pasaElTope, periodoDe, quitarLinea, semanaInicial, semanasDelPeriodo,
-  sumarDias, sumarMacros, type MacrosDia,
+  sumarDias, sumarMacros, type GrupoCompra, type MacrosDia,
 } from './planes-editor';
 
-const AVISO_PARTE_3 = 'Próximamente. Publicar, el PDF, la vista de la paciente y programar la entrega llegan en la parte 3. Nada le llega a la paciente desde acá.';
-const AVISO_IA = 'Próximamente. El armado con el asistente llega en la parte 3. Nada le llega a la paciente hasta que se publique.';
 const AVISO_PLANTILLA = 'Próximamente. Las plantillas de Planes quedan para una pasada aparte.';
 const AVISO_PLATO = 'Próximamente. Sumar o cambiar un plato queda para después. Las porciones de lo que ya está en el plan se editan acá.';
+
+export function textoListaCompras(grupos: readonly GrupoCompra[], semana: number, nombre: string) {
+  const lineas = [`Lista de compras · ${nombre} · semana ${semana}`, ''];
+  for (const grupo of grupos) {
+    lineas.push(grupo.nombre.toLocaleUpperCase('es-AR'));
+    for (const item of grupo.items) lineas.push(`- ${item.nombre}: ${item.cantidad}`);
+    lineas.push('');
+  }
+  return `${lineas.join('\n').trimEnd()}\n`;
+}
+
+function descargarTexto(nombre: string, texto: string) {
+  const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+  const enlace = document.createElement('a');
+  enlace.href = URL.createObjectURL(blob);
+  enlace.download = nombre;
+  enlace.click();
+  setTimeout(() => URL.revokeObjectURL(enlace.href), 0);
+}
+
+function propuestaDe(job: AiJobView | null) {
+  if (job?.status !== 'succeeded' || job.artifact?.kind !== 'menu_draft' || job.applied_at) return null;
+  const parsed = mealPlanDraftSchema.safeParse(job.artifact.payload);
+  return parsed.success ? parsed.data : null;
+}
+
+async function esperarPropuesta(inicial: AiJobView) {
+  let job = inicial;
+  for (let intento = 0; intento < 40 && (job.status === 'queued' || job.status === 'running'); intento += 1) {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    job = (await aiJobsApi.get(job.id)).job;
+  }
+  return job;
+}
 
 type Pestana = 'semana' | 'ind' | 'compras' | 'ver' | 'entrega';
 type Modo = 'dia' | 'semana';
@@ -52,6 +89,7 @@ function Barra({ porcentaje }: { porcentaje: number | null }) {
 
 export function PanelPlanEditor({
   paciente, pacientes, planes, plan, cargando, hoy, onElegir, onPlan, onAviso,
+  asistentePedido = 0, publicarPedido = 0, demo = false,
 }: {
   paciente: Pick<Patient, 'id' | 'name' | 'initials' | 'tone' | 'goal' | 'plan_b' | 'next_focus' | 'sensitive_hours'>;
   pacientes: Array<Pick<Patient, 'id' | 'name' | 'initials' | 'tone' | 'goal'>>;
@@ -62,6 +100,9 @@ export function PanelPlanEditor({
   onElegir: (id: string) => void;
   onPlan: (plan: ProfessionalMealPlan) => void;
   onAviso: (texto: string) => void;
+  asistentePedido?: number;
+  publicarPedido?: number;
+  demo?: boolean;
 }) {
   const version = plan?.current ?? null;
   const [pestana, setPestana] = useState<Pestana>('semana');
@@ -88,6 +129,13 @@ export function PanelPlanEditor({
   const [rehacer, setRehacer] = useState<PlanItemView[][]>([]);
   const [guardando, setGuardando] = useState<'listo' | 'guardando' | 'error'>('listo');
   const [vacio, setVacio] = useState(false);
+  const [publicando, setPublicando] = useState<'listo' | 'publicando' | 'error'>('listo');
+  const [propuesta, setPropuesta] = useState<AiJobView | null>(null);
+  const [armando, setArmando] = useState(false);
+  const [vistaPaciente, setVistaPaciente] = useState(false);
+  const [imprimiendo, setImprimiendo] = useState(false);
+  const asistenteVisto = useRef(asistentePedido);
+  const publicarVisto = useRef(publicarPedido);
   const itemsRef = useRef(items);
   itemsRef.current = items;
 
@@ -108,6 +156,11 @@ export function PanelPlanEditor({
     setVacio(false);
     setRevisado(false);
     setGuardando('listo');
+    setPublicando('listo');
+    setPropuesta(null);
+    setArmando(false);
+    setVistaPaciente(false);
+    setImprimiendo(false);
     if (version) {
       const indice = semanaInicial(version.period_start, version.period_end, hoy);
       setSemana(indice);
@@ -131,6 +184,21 @@ export function PanelPlanEditor({
     return () => control.abort();
   }, [pestana, paciente.id, version]);
 
+  useEffect(() => {
+    if (asistentePedido > 0 && asistenteVisto.current !== asistentePedido && !cargando) {
+      asistenteVisto.current = asistentePedido;
+      void armarConAsistente();
+    }
+  }, [asistentePedido, cargando]);
+
+  useEffect(() => {
+    if (publicarPedido > 0 && publicarVisto.current !== publicarPedido) {
+      publicarVisto.current = publicarPedido;
+      setPestana('entrega');
+      onAviso('Revisá la entrega y confirmá la publicación cuando esté todo listo.');
+    }
+  }, [publicarPedido, onAviso]);
+
   const lunes = lunesDeSemana(hoy);
   const inicio = vacio ? lunes : version?.period_start ?? lunes;
   const finPeriodo = vacio ? sumarDias(inicio, 6) : version?.period_end ?? sumarDias(inicio, 6);
@@ -147,6 +215,9 @@ export function PanelPlanEditor({
   const tituloPlan = version?.nutrition_target?.kcal
     ? `${version.nutrition_target.kcal.toLocaleString('es-AR')} kcal por día`
     : plan ? 'Plan en borrador' : 'Sin plan todavía';
+  const control = controlEntrega(inicio, fin, items, metaKcal && Number.isFinite(metaKcal) ? metaKcal : null);
+  const hayBorradorNuevo = version?.status === 'draft';
+  const puedePublicar = Boolean(plan && hayBorradorNuevo && revisado && !control.vacias && items.length > 0);
 
   function recordar(siguiente: PlanItemView[]) {
     setDeshacer(pila => [...pila, items].slice(-30));
@@ -195,6 +266,91 @@ export function PanelPlanEditor({
       setGuardando('error');
       onAviso('No se pudo guardar. El plan publicado no cambió.');
     }
+  }
+
+  async function publicar() {
+    if (!plan || !version) { onAviso('Primero guardá un borrador para publicar.'); return; }
+    if (!hayBorradorNuevo) { onAviso('No hay cambios nuevos para publicar. La versión publicada se conserva.'); return; }
+    if (publicando === 'publicando') return;
+    if (!items.length) { onAviso('El borrador necesita al menos una comida para publicarse.'); return; }
+    if (control.vacias) { onAviso('Hay comidas sin alimentos. Completalas antes de publicar.'); return; }
+    if (!revisado) { onAviso('Marcá que revisaste el plan completo antes de publicar.'); return; }
+    setPublicando('publicando');
+    try {
+      const respuesta = await plansApi.publish(plan.id, version.version, version);
+      onPlan(respuesta.plan);
+      setRevisado(false);
+      setPublicando('listo');
+      onAviso('Plan publicado. La paciente ya puede ver la versión revisada.');
+    } catch (razon) {
+      setPublicando('error');
+      onAviso(careErrorMessage(razon));
+    }
+  }
+
+  async function armarConAsistente() {
+    if (armando) return;
+    setArmando(true);
+    setPropuesta(null);
+    onAviso('El asistente está armando una propuesta. Queda como borrador privado hasta que la revises.');
+    const desde = version?.period_start ?? lunes;
+    const hasta = version?.period_end ?? sumarDias(desde, 6);
+    try {
+      const respuesta = await aiJobsApi.enqueue({
+        patient_id: paciente.id,
+        job_type: 'menu_draft',
+        period_start: desde,
+        period_end: hasta,
+        slots: [...COMIDAS_EDITOR],
+      });
+      const job = await esperarPropuesta(respuesta.job);
+      if (job.status === 'succeeded' && propuestaDe(job)) {
+        setPropuesta(job);
+        onAviso('La propuesta está lista para revisar. Todavía no se publicó.');
+      } else {
+        onAviso('El asistente no pudo armar la propuesta. El plan no cambió.');
+      }
+    } catch (razon) {
+      onAviso(`El asistente no pudo armar la propuesta. ${careErrorMessage(razon)}`);
+    } finally {
+      setArmando(false);
+    }
+  }
+
+  async function aplicarPropuesta() {
+    if (!propuesta || armando) return;
+    setArmando(true);
+    try {
+      await aiJobsApi.apply(propuesta.id);
+      const { plan: actualizado } = await plansApi.professional(paciente.id);
+      if (!actualizado) throw new Error('No encontramos el borrador actualizado.');
+      onPlan(actualizado);
+      setPropuesta(null);
+      onAviso('La propuesta quedó como borrador privado. Revisala y publicala cuando quieras.');
+    } catch (razon) {
+      onAviso(`No se pudo usar la propuesta. ${careErrorMessage(razon)}`);
+    } finally {
+      setArmando(false);
+    }
+  }
+
+  async function descartarPropuesta() {
+    if (!propuesta) return;
+    try { await aiJobsApi.reject(propuesta.id); } catch { /* el descarte local alcanza */ }
+    setPropuesta(null);
+    onAviso('Propuesta descartada. El plan no cambió.');
+  }
+
+  function descargarCompras() {
+    const grupos = listaDeCompras(items, fechasDeSemana(inicio, fin, semana));
+    if (!grupos.length) { onAviso('Esta semana no tiene alimentos para armar la lista.'); return; }
+    descargarTexto(`lista-compras-${paciente.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-semana-${semana + 1}.txt`, textoListaCompras(grupos, semana + 1, paciente.name));
+    onAviso('Lista de compras descargada.');
+  }
+
+  function abrirImpresion() {
+    if (!plan) { onAviso('Primero guardá el plan para preparar el PDF.'); return; }
+    setImprimiendo(true);
   }
 
   function aplicar(siguiente: PlanItemView[] | null) {
@@ -280,7 +436,7 @@ export function PanelPlanEditor({
       <div className="c"><section className="fxp g">
         <header><h3>{primer} todavía no tiene plan</h3><span className="m">elegí cómo empezar; queda en borrador hasta que lo publiques</span><span className="sp" /></header>
         <div className="pstart">
-          <div><PanelV29Icon name="spark" size={16} /><b>Con el asistente</b><p>Arma una primera semana con lo que cargaste en la ficha de {primer}.</p><button type="button" className="sbtn k" onClick={() => onAviso(AVISO_IA)}>Armar con el asistente</button></div>
+          <div><PanelV29Icon name="spark" size={16} /><b>Con el asistente</b><p>Arma una primera semana con lo que cargaste en la ficha de {primer}.</p><button type="button" className="sbtn k" disabled={armando} onClick={() => void armarConAsistente()}>{armando ? 'Armando propuesta…' : 'Armar con el asistente'}</button></div>
           <div><PanelV29Icon name="clip" size={16} /><b>Desde una plantilla</b><p>Por ejemplo «Descenso 1.600 kcal» o «Sin gluten 1.800 kcal».</p><button type="button" className="sbtn" onClick={() => onAviso(AVISO_PLANTILLA)}>Elegir plantilla</button></div>
           <div><PanelV29Icon name="copy" size={16} /><b>Copiar de otra paciente</b><p>Partí del plan de una paciente parecida. Sus datos no se copian.</p><button type="button" className="sbtn" onClick={() => setCopiando(true)}>Elegir paciente</button></div>
           <div><PanelV29Icon name="pen" size={16} /><b>Desde cero</b><p>Semana vacía con las cinco comidas para completar.</p><button type="button" className="sbtn" onClick={empezarVacio}>Empezar vacío</button></div>
@@ -320,7 +476,7 @@ export function PanelPlanEditor({
             setItems(siguiente);
             void guardar(siguiente);
           }}><PanelV29Icon name="redo" size={14} /></button>
-          <button type="button" className="sbtn" onClick={() => onAviso(AVISO_IA)}><PanelV29Icon name="spark" size={13} />Asistente IA</button>
+          <button type="button" className="sbtn" disabled={armando} onClick={() => void armarConAsistente()}><PanelV29Icon name="spark" size={13} />{armando ? 'Armando…' : 'Asistente IA'}</button>
           <button type="button" className="sbtn" onClick={() => onAviso(AVISO_PLANTILLA)}><PanelV29Icon name="copy" size={13} />Guardar como plantilla</button>
           <button type="button" className="sbtn" onClick={() => onAviso('Próximamente. Copiar este plan a otra paciente queda para después.')}><PanelV29Icon name="users" size={13} />Copiar a otra paciente</button>
           <button type="button" className="sbtn" onClick={() => { if (version?.nutrition_target) setMeta(true); else onAviso('La meta diaria no está cargada en este plan.'); }}><PanelV29Icon name="trend" size={13} />Ajustar metas</button>
@@ -423,22 +579,50 @@ export function PanelPlanEditor({
                 return <div key={iso} className={indice === dia ? 'td' : undefined} title={`${DIAS_LARGOS[indiceLunes(iso)]}: ${kcalDia == null ? 'sin dato' : `${numero(kcalDia)} kcal`}`}><i className={porcentaje && (porcentaje < 95 || porcentaje > 105) ? 'lo' : undefined} style={{ height: `${Math.max(8, Math.min(100, porcentaje / 1.25))}%` }} /><small>{DIAS_CORTOS[indiceLunes(iso)].slice(0, 1)}</small></div>;
               })}
             </div>
-          </> : <p className="mhelp">{AVISO_PARTE_3}</p>}
+          </> : resumen === 1 ? <div className="r29-patient-preview">
+            <div className="r29-note"><PanelV29Icon name="eye" size={15} /><span><b>Así lo ve {primer} en la app.</b><br />Vista previa del borrador. No se envió ninguna notificación.</span></div>
+            {comidas.map(comida => <div key={comida.slot} className="fxr">
+              <span className="t"><b>{comida.slot} · {comida.hora}</b><small>{comida.titulo}{comida.lineas.length ? ` · ${comida.lineas.map(linea => linea.nombre).join(', ')}` : ' · Sin alimentos cargados'}</small></span>
+              <small className="num">{comida.macros.kcal == null ? 'Sin dato' : `${numero(comida.macros.kcal)} kcal`}</small>
+            </div>)}
+            {guidance.recommendations.length ? <div><b>Recomendaciones</b><p className="mhelp">{guidance.recommendations.join(' · ')}</p></div> : null}
+            {guidance.avoid.length ? <div><b>Alimentos a evitar</b><p className="mhelp">{guidance.avoid.join(' · ')}</p></div> : null}
+          </div> : <div className="r29-print-preview">
+            <div className="r29-note"><PanelV29Icon name="file" size={15} /><span><b>Versión para imprimir.</b><br />El PDF usa el documento del consultorio y no se envía a la paciente.</span></div>
+            <div className="r29-document">
+              <h4>{primer} · {tituloDia}</h4>
+              <p className="mhelp">{metaKcal ? `Meta: ${metaKcal.toLocaleString('es-AR')} kcal por día` : 'Sin meta cargada'}</p>
+              {comidas.map(comida => <section key={comida.slot}>
+                <b>{comida.slot} · {comida.hora}</b>
+                <p>{comida.titulo}</p>
+                {comida.lineas.map(linea => <small key={linea.clave}>{linea.nombre} · {linea.cantidad ?? '—'} {linea.unidad}</small>)}
+              </section>)}
+              {guidance.recommendations.length ? <section><b>Recomendaciones</b><p>{guidance.recommendations.join(' · ')}</p></section> : null}
+              {guidance.avoid.length ? <section><b>Alimentos a evitar</b><p>{guidance.avoid.join(' · ')}</p></section> : null}
+            </div>
+            <div className="macts"><button type="button" className="sbtn k" onClick={abrirImpresion}><PanelV29Icon name="dl" size={13} />Abrir PDF / imprimir</button></div>
+          </div>}
         </section>
         <div className="r29-note"><PanelV29Icon name="file" size={15} /><span><b>{publicado ? 'La paciente conserva su plan publicado.' : 'Este plan todavía no se entregó.'}</b><br />Los cambios se preparan en borrador hasta que los revises y publiques.</span></div>
         </div>
       </div> : null}
-      {pestana === 'semana' && modo === 'semana' ? <Semana items={items} fechas={fechas} horas={horas} metaKcal={metaKcal} dia={dia} onDia={indice => { setDia(indice); setModo('dia'); }} onAviso={onAviso} /> : null}
+      {pestana === 'semana' && modo === 'semana' ? <Semana items={items} fechas={fechas} horas={horas} metaKcal={metaKcal} dia={dia} onDia={indice => { setDia(indice); setModo('dia'); }} onAviso={onAviso} onImprimir={abrirImpresion} /> : null}
       {pestana === 'ind' ? <Indicaciones guidance={guidance} onChange={siguiente => { setGuidance(siguiente); if (items.length) void guardar(items, { guidance: siguiente }); else onAviso('El borrador necesita al menos una comida para guardar las indicaciones.'); }} /> : null}
-      {pestana === 'compras' ? <Compras items={items} fechas={fechasDeSemana(inicio, fin, semana)} semana={semana + 1} onEntrega={() => setPestana('entrega')} onAviso={onAviso} /> : null}
+      {pestana === 'compras' ? <Compras items={items} fechas={fechasDeSemana(inicio, fin, semana)} semana={semana + 1} onEntrega={() => setPestana('entrega')} onAviso={onAviso} onDescargar={descargarCompras} /> : null}
       {pestana === 'ver' ? <Versiones nombre={primer} filas={filasDeVersiones(version, historial)} historial={historial.length ? historial : version ? [version] : []} borrador={version?.status === 'draft' ? 'Pendientes de publicar' : 'Sin cambios nuevos'} titulo={tituloPlan} onRestaurar={id => {
         const elegida = (historial.length ? historial : version ? [version] : []).find(item => item.id === id);
         if (!elegida?.items.length) { onAviso('Esa versión no tiene comidas para restaurar.'); return; }
         aplicar(elegida.items.map(item => ({ ...item, id: crypto.randomUUID(), components: item.components?.map(pieza => ({ ...pieza, id: crypto.randomUUID() })) })));
         onAviso('Se armó un borrador con esa versión. No se publicó.');
       }} onEntrega={() => setPestana('entrega')} /> : null}
-      {pestana === 'entrega' ? <Entrega nombre={primer} publicado={publicado} control={controlEntrega(inicio, fin, items, metaKcal && Number.isFinite(metaKcal) ? metaKcal : null)} incluidas={guidance.recommendations.length + guidance.avoid.length} revisado={revisado} onRevisado={setRevisado} onComidas={() => setPestana('semana')} onIndicaciones={() => setPestana('ind')} onAviso={onAviso} /> : null}
+      {pestana === 'entrega' ? <Entrega nombre={primer} publicado={publicado} control={control} incluidas={guidance.recommendations.length + guidance.avoid.length} revisado={revisado} onRevisado={setRevisado} onComidas={() => setPestana('semana')} onIndicaciones={() => setPestana('ind')} onAviso={onAviso}
+        hayBorradorNuevo={hayBorradorNuevo} publicando={publicando} puedePublicar={puedePublicar}
+        onPublicar={() => void publicar()} onVistaPaciente={() => setVistaPaciente(true)} onImprimir={abrirImpresion} onDescargarCompras={descargarCompras}
+        onProgramar={() => onAviso('Programar una fecha y hora manual todavía no está disponible. Al publicar, la entrega se activa según el inicio del período del plan.')} /> : null}
     </> : null}
+    {propuesta && propuestaDe(propuesta) ? <PropuestaIA job={propuesta} propuesta={propuestaDe(propuesta)!} armando={armando} onAplicar={() => void aplicarPropuesta()} onDescartar={() => void descartarPropuesta()} /> : null}
+    {vistaPaciente ? <VistaPacienteDialog paciente={paciente.name} fecha={fecha} tituloDia={tituloDia} comidas={comidas} guidance={guidance} metaKcal={metaKcal} onClose={() => setVistaPaciente(false)} /> : null}
+    {imprimiendo && plan ? <PlanPrintDialog plan={plan} patientName={paciente.name} demo={demo} currentAllowed onClose={() => setImprimiendo(false)} /> : null}
   </>;
 }
 
@@ -448,7 +632,7 @@ function parte(macros: MacrosDia, clave: 'carbs' | 'protein' | 'fat') {
   return Math.round((macros[clave] ?? 0) / total * 100);
 }
 
-function Semana({ items, fechas, horas, metaKcal, dia, onDia, onAviso }: {
+function Semana({ items, fechas, horas, metaKcal, dia, onDia, onAviso, onImprimir }: {
   items: PlanItemView[];
   fechas: string[];
   horas: Partial<Record<PlanSlot, string>>;
@@ -456,6 +640,7 @@ function Semana({ items, fechas, horas, metaKcal, dia, onDia, onAviso }: {
   dia: number;
   onDia: (indice: number) => void;
   onAviso: (texto: string) => void;
+  onImprimir: () => void;
 }) {
   return <div className="fx"><div className="c"><section className="fxp g">
     <header><h3>Semana</h3><span className="m">tocá un día o una comida</span><span className="sp" /></header>
@@ -476,7 +661,7 @@ function Semana({ items, fechas, horas, metaKcal, dia, onDia, onAviso }: {
     <div className="pfoot">
       <button type="button" className="sbtn" onClick={() => onAviso(AVISO_PLATO)}>Agregar colación</button>
       <button type="button" className="sbtn" onClick={() => onAviso('Próximamente. Duplicar la semana completa queda para después. Duplicar un día ya está en la vista Día.')}>Duplicar semana</button>
-      <button type="button" className="sbtn" onClick={() => onAviso(AVISO_PARTE_3)}>Descargar PDF</button>
+      <button type="button" className="sbtn" onClick={onImprimir}><PanelV29Icon name="dl" size={13} />Descargar PDF</button>
     </div>
   </section></div></div>;
 }
@@ -495,17 +680,18 @@ function Indicaciones({ guidance, onChange }: { guidance: PlanGuidance; onChange
   </section>)}</div>;
 }
 
-function Compras({ items, fechas, semana, onEntrega, onAviso }: {
+function Compras({ items, fechas, semana, onEntrega, onAviso, onDescargar }: {
   items: PlanItemView[];
   fechas: string[];
   semana: number;
   onEntrega: () => void;
   onAviso: (texto: string) => void;
+  onDescargar: () => void;
 }) {
   const grupos = listaDeCompras(items, fechas);
   return <div className="fx">
     <div className="c"><section className="fxp g">
-      <header><h3>Compras · semana {semana}</h3><span className="m">del borrador actual</span><span className="sp" /><button type="button" className="sbtn" onClick={() => onAviso(AVISO_PARTE_3)}><PanelV29Icon name="dl" size={13} />Descargar lista</button></header>
+      <header><h3>Compras · semana {semana}</h3><span className="m">del borrador actual</span><span className="sp" /><button type="button" className="sbtn" onClick={onDescargar}><PanelV29Icon name="dl" size={13} />Descargar lista</button></header>
       {grupos.length ? <div className="r29-shopping">{grupos.map(grupo => <section key={grupo.nombre}><h4>{grupo.nombre}</h4>{grupo.items.map(item => <p key={`${grupo.nombre}-${item.nombre}`}><span>{item.nombre}</span><span className="num">{item.cantidad}</span></p>)}</section>)}</div> : <p className="mhelp">Esta semana no tiene alimentos para armar la lista.</p>}
     </section></div>
     <div className="c"><section className="fxp">
@@ -544,7 +730,11 @@ function Versiones({ nombre, filas, historial, borrador, titulo, onRestaurar, on
   </div>;
 }
 
-function Entrega({ nombre, publicado, control, incluidas, revisado, onRevisado, onComidas, onIndicaciones, onAviso }: {
+function Entrega({
+  nombre, publicado, control, incluidas, revisado, onRevisado, onComidas, onIndicaciones,
+  hayBorradorNuevo, publicando, puedePublicar, onPublicar, onVistaPaciente, onImprimir,
+  onDescargarCompras, onProgramar,
+}: {
   nombre: string;
   publicado: boolean;
   control: ReturnType<typeof controlEntrega>;
@@ -554,6 +744,14 @@ function Entrega({ nombre, publicado, control, incluidas, revisado, onRevisado, 
   onComidas: () => void;
   onIndicaciones: () => void;
   onAviso: (texto: string) => void;
+  hayBorradorNuevo: boolean;
+  publicando: 'listo' | 'publicando' | 'error';
+  puedePublicar: boolean;
+  onPublicar: () => void;
+  onVistaPaciente: () => void;
+  onImprimir: () => void;
+  onDescargarCompras: () => void;
+  onProgramar: () => void;
 }) {
   return <div className="fx">
     <div className="c"><section className="fxp g">
@@ -566,15 +764,73 @@ function Entrega({ nombre, publicado, control, incluidas, revisado, onRevisado, 
       </div>
       <p className="mhelp">Estos controles ayudan a recorrer el plan. Las alergias, la tolerancia y las metas requieren tu revisión.</p>
       <label className="r29-note"><input type="checkbox" checked={revisado} onChange={evento => onRevisado(evento.target.checked)} />Revisé el plan completo, las porciones y los cuidados de {nombre}.</label>
+    </section>
+    <section className="fxp">
+      <header><h3>Publicación</h3><span className="sp" /></header>
+      <p className="mhelp">{hayBorradorNuevo ? 'La nueva versión reemplaza a la publicada cuando confirmás. Si hay cambios de versión o alergias, el servidor lo frena y te avisa.' : 'No hay cambios nuevos para publicar. La versión publicada se conserva.'}</p>
+      <button type="button" className="sbtn k" disabled={!puedePublicar || publicando === 'publicando'} onClick={onPublicar}><PanelV29Icon name="send" size={13} />{publicando === 'publicando' ? 'Publicando…' : 'Publicar plan revisado'}</button>
+      {!revisado && hayBorradorNuevo ? <p className="mhelp">Marcá la revisión completa para habilitar la publicación.</p> : null}
+      {control.vacias ? <p className="mhelp">Completá las comidas sin alimentos antes de publicar.</p> : null}
     </section></div>
     <div className="c"><section className="fxp">
       <header><h3>Así lo recibe {nombre}</h3><span className="m">vista del borrador</span><span className="sp" /></header>
       <div className="fxr">
-        <button type="button" onClick={() => onAviso(AVISO_PARTE_3)}><PanelV29Icon name="eye" size={15} /><span className="t"><b>Vista de la paciente</b><small>Revisá las comidas antes de publicar.</small></span><PanelV29Icon name="chev" size={13} /></button>
-        <button type="button" onClick={() => onAviso(AVISO_PARTE_3)}><PanelV29Icon name="file" size={15} /><span className="t"><b>Imprimir / guardar PDF</b><small>Semana seleccionada e indicaciones.</small></span><PanelV29Icon name="chev" size={13} /></button>
-        <button type="button" onClick={() => onAviso(AVISO_PARTE_3)}><PanelV29Icon name="dl" size={15} /><span className="t"><b>Lista de compras</b><small>La descarga llega en la parte 3.</small></span><PanelV29Icon name="chev" size={13} /></button>
+        <button type="button" onClick={onVistaPaciente}><PanelV29Icon name="eye" size={15} /><span className="t"><b>Vista de la paciente</b><small>Revisá las comidas antes de publicar.</small></span><PanelV29Icon name="chev" size={13} /></button>
+        <button type="button" onClick={onImprimir}><PanelV29Icon name="file" size={15} /><span className="t"><b>Imprimir / guardar PDF</b><small>Semana seleccionada e indicaciones.</small></span><PanelV29Icon name="chev" size={13} /></button>
+        <button type="button" onClick={onDescargarCompras}><PanelV29Icon name="dl" size={15} /><span className="t"><b>Lista de compras</b><small>Descargar cantidades de la semana.</small></span><PanelV29Icon name="chev" size={13} /></button>
       </div>
-      <p><button type="button" className="sbtn" onClick={() => onAviso(AVISO_PARTE_3)}><PanelV29Icon name="cal" size={13} />Programar entrega</button></p>
+      <p><button type="button" className="sbtn" onClick={onProgramar}><PanelV29Icon name="cal" size={13} />Programar entrega</button></p>
     </section></div>
   </div>;
+}
+
+function PropuestaIA({ job, propuesta, armando, onAplicar, onDescartar }: {
+  job: AiJobView;
+  propuesta: NonNullable<ReturnType<typeof propuestaDe>>;
+  armando: boolean;
+  onAplicar: () => void;
+  onDescartar: () => void;
+}) {
+  return <FigmaRecordDialog title="Propuesta del asistente" onClose={onDescartar} closeLabel="Cerrar propuesta del asistente">
+    <p>Del {propuesta.period_start} al {propuesta.period_end}. La propuesta queda como borrador privado: no se publica ni se envía a la paciente.</p>
+    {job.warnings.map(warning => <p role="status" key={warning}>{warning}</p>)}
+    <div className="fxr">
+      {propuesta.items.slice(0, 12).map((item, indice) => <div key={`${item.for_date}-${item.slot}-${indice}`}>
+        <span className="t"><b>{item.for_date} · {item.slot}</b><small>{item.free_text || item.recipe_proposal?.title || 'Receta del catálogo'}</small></span>
+        {item.portions != null ? <small className="num">{item.portions} porciones</small> : null}
+      </div>)}
+    </div>
+    {propuesta.items.length > 12 ? <p className="mhelp">Y {propuesta.items.length - 12} comidas más.</p> : null}
+    <p className="mhelp">Revisá alergias, restricciones, porciones y alimentos antes de publicar.</p>
+    <footer>
+      <button type="button" className="sbtn k" disabled={armando} onClick={onAplicar}>{armando ? 'Guardando…' : 'Usar como borrador'}</button>
+      <button type="button" className="sbtn" disabled={armando} onClick={onDescartar}>Descartar</button>
+    </footer>
+  </FigmaRecordDialog>;
+}
+
+function VistaPacienteDialog({ paciente, fecha, tituloDia, comidas, guidance, metaKcal, onClose }: {
+  paciente: string;
+  fecha: string;
+  tituloDia: string;
+  comidas: ReturnType<typeof comidasDelDia>;
+  guidance: PlanGuidance;
+  metaKcal: number | null;
+  onClose: () => void;
+}) {
+  return <FigmaRecordDialog title="Vista de la paciente" onClose={onClose} closeLabel="Cerrar vista de la paciente">
+    <p className="mhelp">Vista previa del borrador. No se notificó ni se envió nada a {paciente}.</p>
+    <div className="r29-patient-preview">
+      <header><h3>{paciente} · {tituloDia}</h3><span className="m">{fecha}</span><span className="sp" /></header>
+      <p className="mhelp">{metaKcal ? `Meta: ${metaKcal.toLocaleString('es-AR')} kcal por día` : 'Sin meta cargada'}</p>
+      {comidas.map(comida => <section key={comida.slot} className="fxp">
+        <header><h3>{comida.slot} · {comida.hora}</h3><span className="m">{comida.macros.kcal == null ? 'Sin dato' : `${numero(comida.macros.kcal)} kcal`}</span><span className="sp" /></header>
+        <p><b>{comida.titulo}</b></p>
+        {comida.lineas.length ? comida.lineas.map(linea => <p className="mhelp" key={linea.clave}>{linea.nombre} · {linea.cantidad ?? '—'} {linea.unidad}{linea.nota ? ` · ${linea.nota}` : ''}</p>) : <p className="mhelp">Sin alimentos cargados.</p>}
+      </section>)}
+      {guidance.recommendations.length ? <section className="fxp"><header><h3>Recomendaciones</h3><span className="sp" /></header><p className="mhelp">{guidance.recommendations.join(' · ')}</p></section> : null}
+      {guidance.avoid.length ? <section className="fxp"><header><h3>Alimentos a evitar</h3><span className="sp" /></header><p className="mhelp">{guidance.avoid.join(' · ')}</p></section> : null}
+    </div>
+    <footer><button type="button" className="sbtn" onClick={onClose}>Cerrar</button></footer>
+  </FigmaRecordDialog>;
 }
