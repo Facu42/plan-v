@@ -79,3 +79,12 @@ export type AiJobView = {
   };
   artifact: AiJobArtifact | null;
 };
+
+/** Consumo y reservas de la bolsa global; no es facturación por consultorio. */
+export type AiMonthlyUsage = {
+  month: string;
+  used_micros: number;
+  limit_micros: number;
+  scope: 'global';
+  source: 'memory' | 'supabase';
+};

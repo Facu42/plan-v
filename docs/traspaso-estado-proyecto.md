@@ -1,5 +1,7 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-23)
 
+26/10 · Codex · Planes parte 3e: Formato/Medidas/Incluir orientan la generación y la lectura existente de trabajos trae el consumo y límite real de la bolsa compartida. Si falta registro se explica, sin gasto ni tope inventados. Dictar/Adjuntar siguen Próximamente. [Informe y paso 10](panel-nutri-rediseno/planes-parte-3e-armar-ia.md). Rama `work/planes-parte-3e-armar-ia`, sin parte 3d, producción ni merge.
+
 26/10 · Cursor · Planes del panel, parte 3, paridad con el boceto: en el mismo [PR #185](https://github.com/Facu42/plan-v/pull/185) quedaron el panel del asistente, la pantalla «Armar con IA», el atajo, compartir, la gestión y el PDF con dos botones. Aplicar deja un borrador. Deshacer de la IA, dictar, adjuntar, mail, impreso y programar dicen «Próximamente». No se junta. Detalle en [planes-v29-parte-3.md](panel-nutri-rediseno/planes-v29-parte-3.md).
 
 26/10 · Cursor · Planes del panel, parte 3: en `/crm/plan` el asistente arma una propuesta y la deja como borrador. Publicar es un paso aparte (revisión, alergias y versión). La vista de la paciente no avisa. El PDF y la lista de compras salen de lo guardado. Programar la entrega dice «Próximamente». Plantillas, equivalencias, sumar un plato y duplicar la semana completa siguen para después. Está en el [PR #185](https://github.com/Facu42/plan-v/pull/185) y no se junta. Detalle en [planes-v29-parte-3.md](panel-nutri-rediseno/planes-v29-parte-3.md).

@@ -6,6 +6,7 @@ import { authorizePatientAction } from '../security/authorization.js';
 import { DEMO_NUTRITIONIST_ID, getPatient } from '../store.js';
 import { aiJobEnqueueSchema } from '../../src/types/ai-jobs.js';
 import * as repo from './repository.js';
+import { readAiUsage } from '../ai/usage.js';
 
 async function professional(c: Context, patientId?: string) {
   const auth = c.get('auth');
@@ -77,6 +78,8 @@ export function registerAiJobRoutes(app: Hono) {
     const patientId = c.req.param('id');
     const { persistent, nutritionistId } = await professional(c, patientId);
     const jobs = await repo.listAiJobs(nutritionistId, patientId, persistent);
-    return c.json({ jobs, source: persistent ? 'supabase' : 'memory' });
+    const usage = await readAiUsage(persistent);
+    c.header('Cache-Control', 'no-store');
+    return c.json({ jobs, usage, source: persistent ? 'supabase' : 'memory' });
   });
 }

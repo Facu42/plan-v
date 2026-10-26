@@ -103,3 +103,12 @@ describe('asistente de planes: propuesta con referencias', () => {
     expect(String(vi.mocked(generateText).mock.calls[0][0].system)).not.toContain('plan semanal completo');
   });
 });
+
+it('lleva las opciones del armado al prompt del proveedor sin cambiar el contrato de salida', async () => {
+  vi.mocked(generateText).mockResolvedValueOnce({ output: output() } as never);
+  const dietary = ['Formato: Lista por día', 'Medidas: Las dos', 'Incluir: Mi recetario; Lista de compras; Costo estimado'];
+  await generateMenuDraft({ ...context(), preferences: { cooking_time_minutes: null, dietary } });
+  const call = vi.mocked(generateText).mock.calls[0][0];
+  expect(JSON.parse(String(call.prompt)).preferences.dietary).toEqual(dietary);
+  expect(String(call.system)).toContain('No inventes precios');
+});

@@ -49,3 +49,24 @@ describe('armado con el asistente', () => {
     expect(lineas[1]?.texto).toBe('Comida propuesta');
   });
 });
+
+ it('conserva formato, medidas y todos los incluidos aun con muchas preferencias', () => {
+   const preferencias = preferenciasDelArmado({ pedido: 'Viandas', dieta: 'Vegana',
+     estrategias: ['Alta en fibra', 'Alta en proteínas'], cuidados: ['Sin lactosa'], ficha: [],
+     formato: 'Lista por día', medidas: 'Las dos',
+     incluir: ['Grupos de intercambio', 'Mi recetario', 'Alternativas por alimento', 'Lista de compras', 'Costo estimado'],
+   });
+   expect(preferencias).toContain('Formato: Lista por día');
+   expect(preferencias).toContain('Medidas: Las dos');
+   for (const opcion of ['Grupos de intercambio', 'Mi recetario', 'Alternativas por alimento', 'Lista de compras', 'Costo estimado'])
+     expect(preferencias.join(' | ')).toContain(opcion);
+   expect(preferencias.length).toBeLessThanOrEqual(10);
+   expect(preferencias.every(linea => linea.length <= 80)).toBe(true);
+ });
+
+it('avisa si demasiadas opciones dejarían cuidados o contexto afuera del pedido', () => {
+  expect(() => preferenciasDelArmado({ pedido: 'Plan', dieta: 'Vegana',
+    estrategias: ['Alta en fibra', 'Alta en proteínas'], cuidados: ['Sin lactosa', 'Celiaquía'],
+    ficha: datosDeFicha({ goal: 'Regularidad', plan_b: 'Tostada', next_focus: 'Cenas', sensitive_hours: '20' }),
+  })).toThrow('demasiadas opciones');
+});

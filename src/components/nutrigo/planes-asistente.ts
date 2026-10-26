@@ -1,3 +1,4 @@
+import { MAX_DIETARY_PREFERENCES } from '../../types/ai-jobs';
 import { periodoAsistente, recortarPreferencias } from './planes-parte-3';
 import { sumarDias } from './planes-editor';
 
@@ -16,7 +17,7 @@ export const AVISO_ADJUNTAR = 'Próximamente. Adjuntar una referencia todavía n
 export const AVISO_MAIL = 'Próximamente. Enviar el plan por mail todavía no está disponible.';
 export const AVISO_IMPRESO = 'Próximamente. La copia impresa, distinta del PDF, todavía no está disponible.';
 export const AVISO_FICHA = 'La ficha guardada igual la lee el asistente. «No usar» solo saca esa línea de las preferencias de este pedido.';
-export const AVISO_FORMATO = 'El formato, las medidas y qué incluir todavía no cambian el documento. El asistente arma la semana de comidas.';
+export const AVISO_FORMATO = 'Estas opciones orientan la propuesta. No cambian la vista ni el PDF. Intercambios y recetas dependen del catálogo; sin precios no se inventan costos. El pedido y la ficha se recortan al límite de la IA.';
 export const AVISO_COPIAR_OTRA = 'Próximamente. Copiar este plan a otra paciente queda para después.';
 export const AVISO_COMPARTIR_APP = 'La entrega en la app se confirma en Publicar plan revisado. Desde acá no se publica sola.';
 export const AVISO_META_ARMADO = 'La meta diaria se edita en el plan, en Ajustes del plan.';
@@ -46,14 +47,33 @@ export function preferenciasDelArmado(input: {
   estrategias: readonly string[];
   cuidados: readonly string[];
   ficha: readonly DatoFicha[];
+  formato?: typeof FORMATOS_PLAN[number];
+  medidas?: typeof MEDIDAS_PLAN[number];
+  incluir?: readonly typeof INCLUIR_PLAN[number][];
 }) {
-  return recortarPreferencias([
+  const lineas = [
     input.pedido,
+    `Formato: ${input.formato ?? FORMATOS_PLAN[0]}`,
+    `Medidas: ${input.medidas ?? MEDIDAS_PLAN[1]}`,
+    ...preferenciasIncluir(input.incluir ?? []),
     input.dieta !== 'General' ? `Alimentación: ${input.dieta}` : '',
     ...input.estrategias.map(item => `Estrategia: ${item}`),
     ...input.cuidados.map(item => `Cuidado: ${item}`),
     ...input.ficha.filter(item => item.usar && item.texto !== 'Sin dato').map(item => `${item.titulo}: ${item.texto}`),
-  ]);
+  ].filter(linea => linea.trim());
+  if (lineas.length > MAX_DIETARY_PREFERENCES) throw new Error('Hay demasiadas opciones para un solo pedido. Quitá alguna estrategia, extra o dato de contexto y volvé a intentar. Las alergias y restricciones guardadas se siguen respetando.');
+  return recortarPreferencias(lineas);
+}
+
+// Se agrupan opciones completas; ninguna selección se corta a mitad por los 80 caracteres.
+function preferenciasIncluir(opciones: readonly typeof INCLUIR_PLAN[number][]) {
+  const lineas: string[] = [];
+  for (const opcion of opciones) {
+    const ultima = lineas.length - 1;
+    if (ultima >= 0 && `${lineas[ultima]}; ${opcion}`.length <= 80) lineas[ultima] += `; ${opcion}`;
+    else lineas.push(`Incluir: ${opcion}`);
+  }
+  return lineas.length ? lineas : ['Incluir: sin extras'];
 }
 
 export function lineasDePropuesta(items: readonly { for_date: string; slot: string; free_text?: string | null }[]) {
