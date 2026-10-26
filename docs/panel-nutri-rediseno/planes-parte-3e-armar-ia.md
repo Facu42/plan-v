@@ -38,3 +38,20 @@
 - **Fire test:** ✅ se cambió temporalmente `used_micros: used` por `used_micros: 0`; la prueba falló esperando 1.200.000 y recibiendo cero. Restaurado; 17 pruebas focales aprobadas después.
 - **Automatizaciones nuevas:** pruebas unit/integración y e2e descubiertas automáticamente por los comandos existentes del CI. No hay paso manual nuevo de despliegue, migración, clave o servicio.
 - **Veredicto:** HOLD para integración por las dos diferencias heredadas de alto en filas del listado; PR en borrador. Slice funcional comprobado localmente; sin producción ni merge.
+
+
+## Rebase de #189 sobre main post-#188 — 26/10
+
+Base actual: `ae04a35`. Único conflicto manual en `docs/coordinacion-agentes.md`, conservando ambas filas. Git combinó automáticamente `server/ai-jobs/flow.integration.test.ts`, `server/ai/menu-draft.ts`, `src/components/nutrigo/planes-asistente.ts` y `src/types/ai-jobs.ts`. Revisión code-reviewer sin problemas concretos; alcance día/comida/todo, Deshacer e historial de 3d conservados junto con 3e.
+
+### Regression Guard — paso 10 del rebase
+
+- Flujos críticos verificados: ✅ 52 pruebas aprobadas en siete archivos: alcance, Deshacer con revisión/409, preferencias y límites, prompt, bolsa mensual real/vacía y flujo de trabajos con permisos/contexto. Historial conservado por comparación del código; no se repitió navegador.
+- Regresiones cubiertas: no pisar ediciones posteriores al deshacer; no perder preferencias ni inventar consumo; no aplicar/publicar al generar.
+- Contratos revisados: preferencias → contexto → prompt; respuesta aditiva `usage`; alcance y revisión de aplicación/restauración.
+- Áreas frágiles: combinación de opciones con alcance, permisos y revisión del borrador. Diff comparado con main y revisión independiente de código sin hallazgos.
+- Migraciones: N/A; sin cambios de base ni producción.
+- Fire test: ✅ consumo persistente forzado temporalmente a cero detectado por `usage.test.ts` (esperaba 1.200.000). Restaurado; tres pruebas del módulo nuevamente aprobadas.
+- Automatizaciones nuevas: ninguna; se mantienen las pruebas existentes del CI.
+- Tipos y formato: `npm run check` aprobado (frente, servidor y e2e); `git diff --check` aprobado. No hay script de lint.
+- Veredicto: rebase funcional verificado con pruebas focales. No se ejecutó suite completa ni build en esta tarea por alcance solicitado. La decisión de merge y los controles remotos quedan al orquestador; se conserva la advertencia visual histórica documentada arriba.
