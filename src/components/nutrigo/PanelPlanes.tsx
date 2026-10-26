@@ -1,3 +1,4 @@
+import { CatalogoPlantillas } from './PanelPlanReutilizar';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { plansApi } from '../../api/plans';
 import type { Patient } from '../../types';
@@ -20,9 +21,10 @@ function Encabezado({ titulo, meta }: { titulo: string; meta?: string }) {
 
 export function PanelPlanesVista({
   vista, nombre, filas, consulta, orden, filtro, aviso, error, tareas,
-  onVista, onRecetas, onConsulta, onOrden, onFiltro, onLimpiar,   onEditor, onAsistente, onArmar, onReintentar, editor = null, armar = null, creando = false, asistenteAbierto = false,
+  onVista, onRecetas, onConsulta, onOrden, onFiltro, onLimpiar,   onEditor, onAsistente, onArmar, onReintentar, editor = null, armar = null, plantillas = null, creando = false, asistenteAbierto = false,
 }: {
   editor?: ReactNode;
+  plantillas?: ReactNode;
   vista: VistaPlanes;
   nombre: string;
   filas: FilaPlan[];
@@ -60,7 +62,7 @@ export function PanelPlanesVista({
     <div id="pwrap" className={creando ? 'pv5' : vista === 'plan' ? 'pe-dia' : undefined}>
       {aviso ? <p className="mhelp" role="status">{aviso}</p> : null}
       {creando ? armar : vista === 'plan' ? editor : null}
-      {vista === 'plantillas' ? <section className="fxp"><Encabezado titulo="Plantillas" /><p className="mhelp">Próximamente. Las plantillas de Planes quedan para una pasada aparte.</p></section> : null}
+      {vista === 'plantillas' ? plantillas : null}
       {vista === 'equivalencias' ? <section className="fxp"><Encabezado titulo="Equivalencias" /><p className="mhelp">Próximamente. La calculadora de equivalencias sigue en su módulo.</p></section> : null}
       {vista === 'lista' && !creando ? <div className="fx">
         <div className="c">
@@ -265,7 +267,7 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
       return;
     }
     if (vista === 'plantillas') {
-      onHeader?.(<button className="cta" type="button" onClick={() => setAviso('Próximamente. Las plantillas de Planes quedan para una pasada aparte.')}><PanelV29Icon name="plus" size={13} />{alta}</button>);
+      onHeader?.(<button className="cta" type="button" onClick={() => { abrirEditor(); setAviso('Abrí un plan y elegí Guardar como plantilla.'); }}><PanelV29Icon name="plus" size={13} />{alta}</button>);
       return;
     }
     if (enEditor) {
@@ -320,6 +322,10 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
       onAviso={setAviso}
       onCrear={(preferencias, duracion) => void crearPropuesta(preferencias, duracion)}
     /> : null}
+    plantillas={<CatalogoPlantillas pacientes={patients} hoy={hoy} onAviso={setAviso} onPlan={guardado => {
+      setCargados(previo => ({ ...previo, [guardado.patient_id]: guardado }));
+      abrirEditor(guardado.patient_id);
+    }} />}
     editor={personaEditor && !creando ? <PanelPlanEditor
       paciente={personaEditor}
       pacientes={patients}
@@ -330,6 +336,7 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
       onElegir={abrirEditor}
       onPlan={guardado => setCargados(previo => ({ ...previo, [personaEditor.id]: guardado }))}
       onAviso={setAviso}
+      onPlanCopiado={guardado => setCargados(previo => ({ ...previo, [guardado.patient_id]: guardado }))}
       asistentePedido={asistentePedido}
       publicarPedido={publicarPedido}
       demo={demo}

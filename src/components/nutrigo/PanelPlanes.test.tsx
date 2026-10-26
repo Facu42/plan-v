@@ -65,10 +65,10 @@ describe('planes, la entrada', () => {
     expect(html).toContain('No hay pendientes.');
   });
 
-  it('las plantillas y las equivalencias quedan para después, y el plan muestra el editor', () => {
+  it('las plantillas muestran el catálogo enlazado y el plan muestra el editor', () => {
     expect(vista({ vista: 'plan', editor: <p>Semana del plan</p> })).toContain('Semana del plan');
     expect(vista({ vista: 'plan', editor: <p>Semana del plan</p> })).toContain('pux-plan');
-    expect(vista({ vista: 'plantillas' })).toContain('Las plantillas de Planes quedan para una pasada aparte.');
+    expect(vista({ vista: 'plantillas', plantillas: <p>Catálogo de plantillas guardadas</p> })).toContain('Catálogo de plantillas guardadas');
     expect(vista({ vista: 'equivalencias' })).toContain('La calculadora de equivalencias sigue en su módulo.');
     expect(vista({ aviso: 'Próximamente. El armado con el asistente llega en la parte 3.', error: true })).toContain('No se pudo leer el estado de los planes.');
   });
