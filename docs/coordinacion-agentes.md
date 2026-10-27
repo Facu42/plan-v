@@ -34,6 +34,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Centro de ayuda v29 | Codex, autorizado por Facundo el 26/10 | `work/centro-ayuda-v29` | Implementado: UI, guías, FAQ y pedido local; 3.399 pruebas aprobadas, dos omitidas y tres e2e. [Informe y paso 10](panel-nutri-rediseno/centro-ayuda-v29.md). HOLD por ok visual y contrato general detenido en Asistente. Sin producción ni merge |
 | Planes v29 parte 3f: mail, programar e impreso | Codex, autorizado por Facundo el 26/10 | `work/planes-parte-3f-mail-programar-impreso`, [PR #190](https://github.com/Facu42/plan-v/pull/190) | Implementado; corrección visual del diálogo registrada en [informe](panel-nutri-rediseno/planes-p3f-fix-left.md); 3.396 pruebas aprobadas y dos omitidas. Mail con enlace autenticado e idempotencia, copia impresa y entrega horaria al consultar. [Informe y paso 10](panel-nutri-rediseno/planes-parte-3f-mail-programar-impreso.md). Migración solo en base descartable; sin producción ni merge |
 | Planes v29 parte 3d: alcance y deshacer IA | Codex autorizado por Facundo el 26/10; cerrado por Claude el 26/10 (Codex se cortó sin commit por cuota) | `work/planes-parte-3d-scope-deshacer`, [PR #188](https://github.com/Facu42/plan-v/pull/188), [informe](panel-nutri-rediseno/planes-parte-3d-scope-deshacer.md) | Scope día/comida/todo plan, Deshacer de la última aplicación IA e historial del cajón implementados. 3.369 pruebas, 3.365 aprobadas, 2 omitidas, 2 fallas ajenas al diff (Node 20 sin WebSocket nativo). e2e y PostgreSQL del slice aislados en verde. Diff visual de 1 px ajeno a 3d, documentado. Sin producción ni merge |
 | Planes v29 parte 3e: Armar con IA | Codex, autorizado por Facundo el 26/10 | `work/planes-parte-3e-armar-ia` | Implementado: opciones al prompt y bolsa mensual real con vacío explicado; 3.369 pruebas aprobadas y dos omitidas. [Informe y paso 10](panel-nutri-rediseno/planes-parte-3e-armar-ia.md). PR en borrador por dos diferencias visuales heredadas en filas del listado; rebasado sobre main ae04a35 con parte 3d; sin producción ni merge |
@@ -107,6 +108,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **26/10 · Codex · Centro de ayuda v29** · Rama `work/centro-ayuda-v29`, base `81315b3`. Ruta `/crm/ayuda` y enlace anterior, temas/búsqueda/guías, FAQ y pedido local explícitamente sin envío. Inter y shell existente, 1440/390 claro/oscuro. 3.399 pruebas aprobadas, dos omitidas, 12 focales y tres e2e. [Informe, capturas y paso 10](panel-nutri-rediseno/centro-ayuda-v29.md). PR draft, sin merge ni producción; HOLD hasta ok visual de Facu y revisión del contrato general detenido en Asistente.
 
 - **26/10 · Codex · Corrección visual del diálogo de Planes 3f** · Mismo [PR #190](https://github.com/Facu42/plan-v/pull/190) y rama. Mobile ocupa todo el ancho; desktop a la derecha; CTA al final. CSS y prueba geométrica 390/1440, capturas claro/oscuro renovadas. [Informe y paso 10](panel-nutri-rediseno/planes-p3f-fix-left.md). Sin cambios de lógica, producción ni merge.
 
