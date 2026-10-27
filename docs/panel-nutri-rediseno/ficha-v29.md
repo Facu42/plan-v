@@ -126,7 +126,7 @@ Solapa armada con el HTML final del boceto (`FT.historia`): índice de catorce t
 Valores por defecto elegidos:
 - **Qué guarda cada dato:** texto (hasta 600 letras), «desde cuándo» (opcional), origen, fecha de carga, fecha de edición y, si se dio de baja, hasta cuándo y por qué. Hoy todo lo que se carga desde el panel queda como «Vos»; los otros orígenes (paciente en la app, importado, consulta grabada, formulario) ya existen en la tabla para cuando se conecten.
 - **Permiso:** se lee y se escribe solo con el permiso de atención de la paciente (`care_relationship`), igual que los pedidos de estudios.
-- **Lo que ya había** (respuestas del formulario de ingreso, historia importada, datos del primer día) no se copia a la tabla nueva: queda en el desplegable «Respuestas del formulario, datos importados y primer día», debajo; «Ver respuestas» y «Formularios» lo abren.
+- **Lo que ya había** (respuestas del formulario de ingreso, historia importada, datos del primer día) no se copia a la tabla nueva: queda en el bloque «Respuestas del formulario, datos importados y primer día», debajo y abierto por defecto (así se revisa el ingreso sin buscarlo); «Ver respuestas» y «Formularios» lo abren.
 - **«De la consulta grabada» (propuestas de la IA)**: el bloque queda con un texto corto, sin botones, hasta que se conecten las consultas grabadas con la historia. Nada entra solo.
 - **«Datos que cambian el plan»**: junta lo vigente de Alergias, Diagnósticos, Medicación y Preferencias; no interpreta ni resume.
 - **«Plantilla: General + Celiaquía»** y **«Mandar formulario»**: no se dibujan; no hay función real detrás.

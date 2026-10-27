@@ -48,10 +48,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   patient: Patient; patients: Patient[]; professionalName?: string; onSelect: (id: string) => void; onEdit: () => void;
   onOpen: (entry: CrmEntry) => void; onOpenHref: (href: string) => void; onReview: (meal: MealLog) => void; onNavigate: (page: ShowroomPage) => void; now: Date;
 }) {
-  const seccionPedida = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('seccion');
-  const tab = recordTab(seccionPedida);
-  /** El enlace directo al ingreso abre las respuestas del formulario, donde se revisa. */
-  const abrirIngreso = seccionPedida === 'ingreso';
+  const tab = recordTab(typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('seccion'));
   const addPatient = useAppStore((store) => store.addPatient);
   const refreshPatient = useAppStore(store => store.refreshPatient);
   const [refreshError,setRefreshError] = useState('');
@@ -90,7 +87,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
     :tab==='evolucion'?<PanelFichaMediciones key={patient.id} patient={patient} now={now} datos={datos} ir={next=>change(seccionDe(next))}><div className="pw-record pn-record"><div className="pw-record-content"><PanelPatientMedicionesExtra patientId={patient.id} patientName={patient.name}/></div></div></PanelFichaMediciones>
     :<div className="pw-record pn-record"><div key={`${patient.id}:${tab}`} className="pw-record-content">
       {solapa==='plan'&&<nav className="pn-record-plan-tabs" aria-label="Secciones del plan">{RECORD_PLAN_TABS.filter(([id])=>id!=='planificacion').map(([id,label])=><button type="button" key={id} aria-current={id===tab?'page':undefined} onClick={()=>change(id)}>{label}</button>)}</nav>}
-      {tab === 'historia' && <PanelFichaHistoria key={patient.id} patient={patient} now={now} datos={datos}><details id="hc-respuestas" className="pn-record-card" open={abrirIngreso}><summary>Respuestas del formulario, datos importados y primer día</summary><PanelPatientHistory patientId={patient.id} now={now}/></details></PanelFichaHistoria>}
+      {tab === 'historia' && <PanelFichaHistoria key={patient.id} patient={patient} now={now} datos={datos}><details id="hc-respuestas" className="pn-record-card" open><summary>Respuestas del formulario, datos importados y primer día</summary><PanelPatientHistory patientId={patient.id} now={now}/></details></PanelFichaHistoria>}
       {tab === 'notas' && <ConsultationNotes patientId={patient.id} showCompletions={false}/>}
       {tab === 'planificacion' && <PanelFichaObjetivos key={patient.id} patient={patient} now={now} datos={datos} onChanged={addPatient}><NutritionTargetPanel patientId={patient.id} patientName={patient.name} onOpenPlan={() => change('plan')} /></PanelFichaObjetivos>}
       {tab === 'alimentario' && <PanelPatientFoodDiary patient={patient} now={now} onReview={onReview} onSelect={onSelect}/>}
