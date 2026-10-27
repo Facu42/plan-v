@@ -483,7 +483,7 @@
 #pv-panel-v29 #s-pacientes .pd-acts .go { background: var(--ink); color: var(--app); border-color: var(--ink); }
 #pv-panel-v29 #s-pacientes .pd-acts .go:hover { background: var(--ink); }
 /* Pacientes usa el negro y los grises del boceto, no los de la hoja vieja. */
-#pv-panel-v29 #pv-panel:has(#s-pacientes) { --ink: inherit; --ink2: inherit; --ink3: inherit; --line: inherit; color: var(--ink); }
+#pv-panel-v29 #pv-panel:has(#s-pacientes) { --ink: inherit; --ink2: inherit; --ink3: inherit; --line: inherit; color: var(--ink); background: transparent; }
 #pv-panel-v29 #s-pacientes .pd-acts button { line-height: normal; }
 /* La hoja vieja convierte .goal en una cápsula blanca; en Pacientes es la barra de avance del boceto. */
 #pv-panel-v29 #s-pacientes .goal { display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; padding: 0; background: none; border-radius: 0; gap: 6px; }
@@ -499,3 +499,7 @@
 #pv-panel-v29.mob #s-pacientes .who > div { min-width: 0; }
 #pv-panel-v29.mob #s-pacientes .who small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #pv-panel-v29.mob #s-pacientes td:nth-child(7) .pill { white-space: normal; text-align: left; line-height: 1.25; }
+
+/* Celular: las tres tarjetas del resumen van una debajo de otra, así que el divisor pasa de lado a arriba. */
+#pv-panel-v29.mob #s-pacientes .pd-t { border-left: 0; border-top: 1px solid var(--line); }
+#pv-panel-v29.mob #s-pacientes .pd-t:first-child { border-top: 0; }

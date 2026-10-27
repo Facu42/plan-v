@@ -89,6 +89,11 @@ function GraficoPeso({ serie, objetivo, uid }: { serie: PuntoPeso[]; objetivo: s
   </svg>;
 }
 
+/** En celular la tabla muestra tres columnas (flecha, paciente, estado): el resumen ocupa solo esas. */
+const COLUMNAS_ESCRITORIO = 7;
+const COLUMNAS_CELULAR = 3;
+const columnasVisibles = () => (typeof document !== 'undefined' && document.querySelector('#pv-panel-v29.mob') ? COLUMNAS_CELULAR : COLUMNAS_ESCRITORIO);
+
 function Detalle({ paciente, ahora, previews, acciones, onOpen, saliendo }: { paciente: Patient; ahora: Date; previews: Previews; acciones: AccionesPaciente; onOpen: (href: string) => void; saliendo: boolean }) {
   const datos = useDetalle(paciente, ahora);
   const preview = previews[paciente.id];
@@ -105,7 +110,7 @@ function Detalle({ paciente, ahora, previews, acciones, onOpen, saliendo }: { pa
   const nota = datos.vista?.last_consultation;
   const archivada = Boolean(paciente.archived_at);
   const nombre = paciente.name;
-  return <tr className="det"><td colSpan={7}><div className={`pd${saliendo ? ' out' : ''}`}><div className="pdin" data-mk="1">
+  return <tr className="det"><td colSpan={columnasVisibles()}><div className={`pd${saliendo ? ' out' : ''}`}><div className="pdin" data-mk="1">
     <section className="pd-who">
       <div className="pd-goal"><small>Objetivo</small><b>{paciente.goal || 'Por definir'}</b></div>
       <div className="pd-goal"><small>Paciente desde</small><b>{pacienteDesde(paciente.created_at, ahora)}</b></div>

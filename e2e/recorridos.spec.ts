@@ -77,7 +77,7 @@ test('3 · la nutricionista ajusta el plan y la paciente lo ve', async ({ page }
   await page.getByRole('button', { name: 'Abrir plan de Sofía R.' }).click();
   await page.getByLabel('Hora de Desayuno').fill('08:45');
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
-  await page.getByRole('button', { name: 'Publicar v2' }).click();
+  await page.getByRole('button', { name: /^Publicar v\d+$/ }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Plan publicado. La paciente ve la versión revisada.' })).toBeVisible();
   await enterDemo(page, '/app/plan');
   await expect(page.getByText('Desayuno · 08:45')).toBeVisible();

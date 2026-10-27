@@ -3,13 +3,17 @@ import { enterDemo } from './helpers';
 
 test('guarda plantilla, la encuentra al recargar y copia comidas sin publicar', async ({ page }) => {
   await enterDemo(page, '/crm/plan');
+  // El borrador de partida se arma por API: otros recorridos dejan el plan con comidas escritas a mano, sin cantidades que editar.
+  const anterior = (await (await page.request.get('/api/patients/pat-sofia/plans?audience=pro')).json()).plan;
+  const inicio = anterior.current.period_start;
+  const guardado = await page.request.post('/api/patients/pat-sofia/plans', { data: {
+    id: anterior.id, expected_revision: anterior.current.revision, period_start: inicio, period_end: anterior.current.period_end,
+    guidance: { recommendations: ['Tomá agua'], avoid: [] }, meal_times: { Cena: '21:00' },
+    items: ['Desayuno', 'Almuerzo', 'Cena'].map(slot => ({ for_date: inicio, slot, free_text: `Plantilla ${slot}`, public_note: '' })),
+  } });
+  expect(guardado.ok()).toBeTruthy();
+  await enterDemo(page, '/crm/plan');
   await page.getByRole('button', { name: /plan (de|para) Sofía R\./ }).click();
-  const cantidad = page.getByRole('spinbutton', { name: /^Cantidad de/ }).first();
-  await cantidad.fill('2');
-  await Promise.all([
-    page.waitForResponse(r => r.url().includes('/api/patients/pat-sofia/plans') && r.request().method() === 'POST'),
-    cantidad.press('Tab'),
-  ]);
   const origen = (await (await page.request.get('/api/patients/pat-sofia/plans?audience=pro')).json()).plan;
   await page.getByRole('button', { name: 'Guardar como plantilla', exact: true }).first().click();
   const dialogo = page.getByRole('dialog');

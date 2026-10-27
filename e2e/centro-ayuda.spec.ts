@@ -76,6 +76,8 @@ test('Ayuda: 1440/390, claro/oscuro, Inter y diálogos dentro de pantalla', asyn
     await page.screenshot({ path: `docs/screenshots/centro-ayuda/ayuda-${width}-${dark ? 'oscuro' : 'claro'}.png`, fullPage: true });
     await page.getByRole('button', { name: 'Pedir ayuda a Plan V' }).click();
     const dialog = page.getByRole('dialog');
+    // El diálogo entra deslizando unos píxeles: se mide cuando terminó de entrar.
+    await dialog.evaluate(el => Promise.all(el.getAnimations({ subtree: true }).map(a => a.finished.catch(() => undefined))));
     const box = (await dialog.boundingBox())!;
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(width);
