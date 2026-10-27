@@ -3,7 +3,9 @@ import type { MealLog,Patient } from '../../types';
 import type { PatientMealPage } from '../../types/patient-meals';
 import { crmWorkApi } from '../../api/crm-work';
 import { PanelV29Icon } from './PanelV29Icon';
-import { caloriasPorDia, ESTADO_DE_COMIDA, promedioDeMacros } from './ficha-alimentario';
+import { caloriasPorDia, ESTADO_DE_COMIDA, planillaDeComidas, promedioDeMacros } from './ficha-alimentario';
+import { PanelFichaPedirRegistro } from './PanelFichaPedirRegistro';
+import { AvisoBoceto } from './panel-v29-boceto';
 import { FxCols, FxKv, FxPanel, FxRing } from './ficha-fx';
 import { inicialDelDia } from './ficha-objetivos';
 import { numero } from './ficha-presentacion';
@@ -12,7 +14,7 @@ import { ShowroomMeals } from './ShowroomMeals';
 
 export function PanelPatientFoodDiary({patient,onReview,onSelect,now}:{patient:Patient;onReview:(meal:MealLog)=>void;onSelect:(id:string)=>void;now:Date}){
   const [days,setDays]=useState<7|30|undefined>(7),[status,setStatus]=useState<'all'|'pending_review'|'reviewed'>('all');
-  const [result,setResult]=useState<{key:string;page:PatientMealPage}|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(false),[revision,setRevision]=useState(0),[details,setDetails]=useState(false);
+  const [result,setResult]=useState<{key:string;page:PatientMealPage}|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(false),[revision,setRevision]=useState(0),[details,setDetails]=useState(false),[pidiendo,setPidiendo]=useState(false),[aviso,setAviso]=useState('');
   const key=`${patient.id}:${days}:${status}:${revision}`;const currentKey=useRef(key);currentKey.current=key;
   const controller=useRef<AbortController|null>(null),gate=useRef(false);
   async function load(offset=0,signal?:AbortSignal){
@@ -36,10 +38,11 @@ export function PanelPatientFoodDiary({patient,onReview,onSelect,now}:{patient:P
   const totalKcal=macros.reduce((suma,[,g,k])=>suma+g*k,0)||1;
   const semana=caloriasPorDia(logs,hoy);
   const registro=patient.weekly_registration;
+  const descargar=()=>{const url=URL.createObjectURL(new Blob([planillaDeComidas(logs)],{type:'text/csv;charset=utf-8'})),enlace=document.createElement('a');enlace.href=url;enlace.download=`registro-alimentario-${patient.name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}-${hoy}.csv`;document.body.append(enlace);enlace.click();enlace.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);setAviso(`Descargaste ${logs.length} ${logs.length===1?'comida':'comidas'}.`);};
   return <section className="pn-record-diary" aria-label="Registro alimentario de la paciente">
     {error&&<p role="alert">{error} <button type="button" onClick={()=>void load(page?.next_offset??0,controller.current?.signal)}>Reintentar registros</button></p>}
     <div className="fx" data-mk="1" style={{gridTemplateColumns:'1.6fr 1fr'}}>
-      <div className="c"><FxPanel titulo="Registro de comidas" meta={periodo} grande derecha={<><div className="tabs" aria-label="Estado de las comidas">{([['all','Todo'],['pending_review',porRevisar?`Por revisar · ${porRevisar}`:'Por revisar'],['reviewed','Revisadas']] as const).map(([value,label])=><button type="button" key={value} className={status===value?'on':undefined} aria-pressed={status===value} onClick={()=>setStatus(value)}>{label}</button>)}</div><div className="tabs" aria-label="Período de registros">{([[7,'Últimos 7 días'],[30,'Mes'],[undefined,'Todo']] as const).map(([value,label])=><button type="button" key={label} className={days===value?'on':undefined} aria-pressed={days===value} onClick={()=>setDays(value)}>{label}</button>)}</div></>}>
+      <div className="c"><FxPanel titulo="Registro de comidas" meta={periodo} grande derecha={<><div className="tabs" aria-label="Estado de las comidas">{([['all','Todo'],['pending_review',porRevisar?`Por revisar · ${porRevisar}`:'Por revisar'],['reviewed','Revisadas']] as const).map(([value,label])=><button type="button" key={value} className={status===value?'on':undefined} aria-pressed={status===value} onClick={()=>setStatus(value)}>{label}</button>)}</div><div className="tabs" aria-label="Período de registros">{([[7,'Últimos 7 días'],[30,'Mes'],[undefined,'Todo']] as const).map(([value,label])=><button type="button" key={label} className={days===value?'on':undefined} aria-pressed={days===value} onClick={()=>setDays(value)}>{label}</button>)}</div><button type="button" className="sbtn cbtn" disabled={!logs.length} onClick={descargar}><PanelV29Icon name="dl" size={13}/>Descargar</button><button type="button" className="sbtn k cbtn" onClick={()=>setPidiendo(true)}><PanelV29Icon name="plus" size={13}/>Pedir registro</button></>}>
         <div className="fxs fxtb tall"><table><thead><tr><th>Cuándo</th><th>Qué comió</th><th>Estimado</th><th>Estado</th><th></th></tr></thead><tbody>{logs.map(log=><tr key={log.id}><td><div className="fxwhen"><b>{log.slot}</b><small className="num">{hora(log.logged_at,{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</small></div></td><td><div className="who">{log.photo_url?<img className="photo" style={{width:32,height:32,objectFit:'cover'}} src={log.photo_url} alt="" loading="lazy"/>:<span className="photo" style={{width:32,height:32}}><PanelV29Icon name="fork" size={14}/></span>}<b>{log.description||log.foods.map(food=>food.name).join(', ')||'Sin descripción'}</b></div></td><td className="num" style={{color:'var(--ink2)'}}>{log.macros?`~${Math.round(log.macros.kcal)} kcal`:'Sin estimación'}{log.nutrition_origin==='ai_estimate'&&<small style={{display:'block',color:'var(--ink3)'}}>Estimado por IA</small>}</td><td><span className={`pill ${ESTADO_DE_COMIDA[log.status].clase}`}>{ESTADO_DE_COMIDA[log.status].texto}</span></td><td><button type="button" className={`sbtn${log.status==='pending_review'?' k':''} cbtn`} onClick={()=>onReview(log)}>{log.status==='pending_review'?<><PanelV29Icon name="check" size={13}/>Revisar</>:'Ver revisión'}</button></td></tr>)}</tbody></table></div>
         {!page&&loading?<p role="status" className="fxhint">Consultando registros…</p>:page?.logs.length===0?<p className="fxhint">No hay comidas en este período y estado.</p>:null}
         {page?.has_more&&<button type="button" className="sbtn cbtn" disabled={loading} onClick={()=>void load(page.next_offset!,controller.current?.signal)}>{loading?'Consultando…':'Cargar más registros'}</button>}
@@ -53,5 +56,7 @@ export function PanelPatientFoodDiary({patient,onReview,onSelect,now}:{patient:P
         <details className="pn-record-card" onToggle={event=>setDetails(event.currentTarget.open)}><summary>Hábitos, actividad y vista anterior</summary>{details&&<ShowroomMeals patient={{...patient,meal_logs:page?.logs??[]}} query="" onSelect={onSelect} onReview={onReview} now={now}/>}</details>
       </div>
     </div>
+    {pidiendo&&<PanelFichaPedirRegistro patient={patient} onClose={()=>setPidiendo(false)} onSent={texto=>{setPidiendo(false);setAviso(texto);}}/>}
+    {aviso&&<AvisoBoceto key={aviso} texto={aviso}/>}
   </section>;
 }

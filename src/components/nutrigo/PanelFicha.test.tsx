@@ -5,6 +5,7 @@ import { FichaSolapas, PanelFichaCabecera } from './PanelFichaCabecera';
 import { PanelFichaResumen } from './PanelFichaResumen';
 import { PanelFichaMediciones } from './PanelFichaMediciones';
 import { PanelFichaObjetivos } from './PanelFichaObjetivos';
+import { PanelFichaPedirRegistro } from './PanelFichaPedirRegistro';
 import type { FichaData } from './use-ficha-data';
 
 const ahora = new Date('2026-10-27T12:00:00-03:00');
@@ -86,5 +87,14 @@ describe('Ficha v29', () => {
     const html = renderToStaticMarkup(<PanelFichaObjetivos patient={{ ...paciente, goal: '' }} now={ahora} datos={datos()} onChanged={vi.fn()} />);
     expect(html).toContain('Todavía sin objetivo definido');
     expect(html).toContain('Agregar');
+  });
+
+  it('el cajón de pedir registro avisa que va por la app y deja elegir días y comidas', () => {
+    const html = renderToStaticMarkup(<PanelFichaPedirRegistro patient={paciente} onClose={vi.fn()} onSent={vi.fn()} />);
+    expect(html).toContain('Pedir registro a Sofía');
+    expect(html).toContain('Le llega por la app. No se usa otro canal.');
+    for (const texto of ['7 días', '14 días', 'Desayuno', 'Almuerzo', 'Merienda', 'Cena']) expect(html).toContain(texto);
+    expect(html).not.toContain('vincule la app');
+    expect(renderToStaticMarkup(<PanelFichaPedirRegistro patient={{ ...paciente, has_account: false }} onClose={vi.fn()} onSent={vi.fn()} />)).toContain('vincule la app');
   });
 });

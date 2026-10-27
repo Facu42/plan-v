@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { MealLog } from '../../types';
-import { caloriasPorDia, promedioDeMacros } from './ficha-alimentario';
+import { caloriasPorDia, planillaDeComidas, promedioDeMacros } from './ficha-alimentario';
 
 const comida = (id: string, slot: string, logged_at: string, kcal: number | null): MealLog => ({
   id, patient_id: 'p1', slot, photo_url: null, description: slot, foods: [], confidence: 1, note_for_nutri: '', status: 'confirmed', logged_at,
@@ -23,5 +23,12 @@ describe('Registro alimentario de la Ficha', () => {
   });
   it('promedia macros por día registrado', () => {
     expect(promedioDeMacros(logs)).toEqual({ dias: 2, kcal: 750, protein_g: 38, carbs_g: 75, fat_g: 19 });
+  });
+  it('arma la planilla con una fila por comida y sin dejar que un texto actúe como fórmula', () => {
+    const peligrosa = { ...comida('z', 'Cena', '2026-10-27T23:30:00Z', 400), description: '=HYPERLINK("http://x")' };
+    const lineas = planillaDeComidas([logs[0]!, peligrosa]).replace('\uFEFF', '').trim().split('\r\n');
+    expect(lineas[0]).toBe('"Fecha";"Hora";"Comida";"Qué comió";"Calorías";"Proteínas (g)";"Carbohidratos (g)";"Grasas (g)";"Estado"');
+    expect(lineas[1]).toBe('"27/10/2026";"08:00";"Desayuno";"Desayuno";"400";"20";"40";"10";"Revisada"');
+    expect(lineas[2]).toContain('"\'=HYPERLINK(""http://x"")"');
   });
 });

@@ -30,3 +30,22 @@ export const ESTADO_DE_COMIDA: Record<MealLog['status'], { texto: string; clase:
   confirmed: { texto: 'Revisada', clase: 'p-conf' },
   adjusted: { texto: 'Ajustada', clase: 'p-conf' },
 };
+
+const ENCABEZADO_PLANILLA = ['Fecha', 'Hora', 'Comida', 'Qué comió', 'Calorías', 'Proteínas (g)', 'Carbohidratos (g)', 'Grasas (g)', 'Estado'];
+/** Una celda de planilla: entre comillas, y sin que un texto de la paciente pueda leerse como fórmula en Excel. */
+const celda = (valor: string | number) => {
+  const texto = String(valor);
+  return `"${(/^[=+\-@\t\r]/.test(texto) ? `'${texto}` : texto).replace(/"/g, '""')}"`;
+};
+
+/** Las comidas cargadas como planilla CSV (separada por «;», con acentos para Excel): una fila por comida. */
+export function planillaDeComidas(logs: readonly MealLog[]) {
+  const fecha = (log: MealLog, opciones: Intl.DateTimeFormatOptions) => new Date(log.logged_at).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', ...opciones });
+  const filas = logs.map(log => [
+    fecha(log, { day: '2-digit', month: '2-digit', year: 'numeric' }), fecha(log, { hour: '2-digit', minute: '2-digit', hour12: false }), log.slot,
+    log.description || log.foods.map(food => food.name).join(', ') || 'Sin descripción',
+    log.macros ? Math.round(log.macros.kcal) : '', log.macros ? Math.round(log.macros.protein_g) : '', log.macros ? Math.round(log.macros.carbs_g) : '', log.macros ? Math.round(log.macros.fat_g) : '',
+    ESTADO_DE_COMIDA[log.status].texto,
+  ]);
+  return `\uFEFF${[ENCABEZADO_PLANILLA, ...filas].map(fila => fila.map(celda).join(';')).join('\r\n')}\r\n`;
+}
