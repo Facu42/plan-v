@@ -598,3 +598,7 @@
 
 /* Historia clínica: la hoja vieja (`.m#pv-panel .st::before`) le pinta un punto gris adentro al punto de estado del tema. */
 #pv-panel-v29 #s-ficha .hcidx .st::before{content:none}
+
+/* Registro alimentario: la regla vieja del boceto anterior (`#pv-panel .who b`) pisaba la letra de «Qué comió». */
+#pv-panel-v29 #s-ficha .fxtb .who b{font-size:12.5px;font-weight:500}
+#pv-panel-v29 #s-ficha .pn-record-diary .fxp>header{flex-wrap:wrap;row-gap:8px}

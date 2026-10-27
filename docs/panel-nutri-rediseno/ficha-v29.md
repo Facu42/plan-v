@@ -1,6 +1,6 @@
 # Ficha v29 · parte 1 (armazón, diez solapas y Resumen)
 
-Partes 1, 2a, 2b, 2c y 3a **juntadas a main el 27/10** (#199 y #201 a #204, un solo cambio `a7dc819`) con el ok visual de Facundo. La tabla de Historia clínica ya está en la base. Siguen Consultas y notas, Plan, Registro alimentario, Archivos, Cobros y el chat.
+Partes 1, 2a, 2b, 2c y 3a **juntadas a main el 27/10** (#199 y #201 a #204, un solo cambio `a7dc819`) con el ok visual de Facundo. La tabla de Historia clínica ya está en la base. Registro alimentario va en su propio PR. Siguen Consultas y notas, Plan, Archivos, Cobros y el chat.
 
 La Ficha va en tres PR, uno por tema. Este es el primero. Copia el `#s-ficha` de `design/panel-nutri/v29/panel-trabajo.html` con el encabezado de Nutreando que quedó en el boceto (`.fh.ntfh`).
 
@@ -160,3 +160,16 @@ Valores por defecto elegidos (lo que el boceto dibuja y Plan V no tiene):
 - **Contratos:** ninguna ruta ni tabla nueva; solo lectura de datos que ya llegan. Se quitó `PanelPatientObjetivos` (sin otros usos).
 - **Áreas frágiles:** el promedio de energía mezcla etiquetas; un valor viejo fuera de Alta/Media/Baja (por ejemplo «Buena» en la demo) se muestra como texto en el último registro pero no cuenta en la columna.
 - **Migraciones:** ninguna. **Veredicto:** HOLD hasta el ok visual de Facundo; técnicamente SHIP.
+
+## Parte 3b · Registro alimentario
+
+Rama `claude/ficha-v29-plan-registro`. Copia `alimentario:` del boceto (con el panel de Nutreando) con las comidas reales que carga la paciente. Archivos: `PanelPatientFoodDiary.tsx` (misma carga, filtros, «Cargar más» y revisión de antes), `ficha-alimentario.ts` (promedios y calorías por día).
+
+- **Tabla:** cuándo (comida y fecha), qué comió (foto o ícono y descripción), estimado (`~420 kcal`, con «Estimado por IA» si corresponde), estado y el botón «Revisar» / «Ver revisión» que abre la misma revisión de siempre. Filtros Todo, Por revisar, Revisadas y Últimos 7 días / Mes / Todo.
+- **Calorías por día:** columnas de los últimos 7 días con las estimaciones; el día sin estimaciones queda en cero y sin ninguna estimación dice «Sin estimaciones de calorías». Sin meta: Plan V no guarda una meta diaria, así que no se dibuja la línea de meta del boceto.
+- **Promedio:** calorías y reparto de proteínas, carbohidratos y grasas (barras = parte de las calorías, no «contra la meta»), solo con los registros ya cargados.
+- **Registro de la semana** en lugar de «Registro pedido» del boceto: el anillo y los datos son los reales (días con registro, comidas, por revisar).
+- **Valores por defecto elegidos:** la columna «Contra el plan» del boceto se llama «Estado», porque Plan V no compara cada comida con el plan; muestra Por revisar / Revisada / Ajustada. «Lo que ve la IA» dice «todavía no hay observaciones» hasta que exista esa lectura.
+- **No se dibujó, por no tener función:** «Descargar» y «Pedir registro» (pedirle a la paciente un registro de 7 días). Quedan como trabajo aparte.
+- **Contrato:** `PIEZAS_ALIMENTARIO` en `scripts/panel-v29-contrato.mjs`, 7 piezas iguales en claro y oscuro. Capturas: `docs/screenshots/ficha-v29/alimentario-claro.png`, `-oscuro.png`, `-celular.png`.
+- **Paso 10 · Regression Guard:** flujos tocados: ver registros, filtrar por estado y período, cargar más, reintentar, revisar una comida (mismas llamadas que antes). Pruebas nuevas: `ficha-alimentario.test.ts`. Migraciones: ninguna. Áreas frágiles: promedios con registros sin estimación (no inventan datos). Veredicto: HOLD hasta el ok visual de Facundo; técnicamente SHIP.

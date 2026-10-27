@@ -3,7 +3,7 @@
 Fuente: `design/panel-nutri/v29/panel-trabajo.html`.
 App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Planes (http://127.0.0.1:5173).
 
-**2 piezas no coinciden.**
+**4 piezas no coinciden.**
 
 ## Tema oscuro · armazón
 
@@ -84,7 +84,7 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Turno hecho | ✅ igual | |
 | Turno próximo | ✅ igual | |
 | Nombre del turno | ✅ igual | |
-| Línea de ahora | ✅ igual | |
+| Línea de ahora | ❌ falta | la app no la tiene (`#s-agenda .nowl`) |
 | Mes chico: día de hoy | ✅ igual | |
 | Mes chico: semana | ✅ igual | |
 | Referencias de color | ✅ igual | |
@@ -176,6 +176,18 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Hábito | ✅ igual | |
 | Columnas de la semana | ✅ igual | |
 | Síntomas y energía | ✅ igual | |
+
+## Tema oscuro · Ficha · Registro alimentario
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Fila de comida | ✅ igual | |
+| Comida y hora | ✅ igual | |
+| Foto de la comida | ✅ igual | |
+| Qué comió | ✅ igual | |
+| Barras de macros | ✅ igual | |
+| Título de panel | ✅ igual | |
+| Lo que ve la IA | ✅ igual | |
 
 ## Tema oscuro · Seguimiento
 
@@ -361,7 +373,7 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Turno hecho | ✅ igual | |
 | Turno próximo | ✅ igual | |
 | Nombre del turno | ✅ igual | |
-| Línea de ahora | ✅ igual | |
+| Línea de ahora | ❌ falta | la app no la tiene (`#s-agenda .nowl`) |
 | Mes chico: día de hoy | ✅ igual | |
 | Mes chico: semana | ✅ igual | |
 | Referencias de color | ✅ igual | |
@@ -453,6 +465,18 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Hábito | ✅ igual | |
 | Columnas de la semana | ✅ igual | |
 | Síntomas y energía | ✅ igual | |
+
+## Tema claro · Ficha · Registro alimentario
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Fila de comida | ✅ igual | |
+| Comida y hora | ✅ igual | |
+| Foto de la comida | ✅ igual | |
+| Qué comió | ✅ igual | |
+| Barras de macros | ✅ igual | |
+| Título de panel | ✅ igual | |
+| Lo que ve la IA | ✅ igual | |
 
 ## Tema claro · Seguimiento
 

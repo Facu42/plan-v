@@ -124,6 +124,17 @@ export const PIEZAS_OBJETIVOS = [
   ['Síntomas y energía', '#s-ficha .fxp.g > header h3', '', ['fontSize', 'fontWeight']],
 ];
 
+// Piezas de la solapa Registro alimentario. La demo trae comidas de ejemplo; «Contra el plan» no existe en Plan V y no se dibuja.
+export const PIEZAS_ALIMENTARIO = [
+  ['Fila de comida', '#s-ficha .fxtb tbody td', '', ['height', 'fontSize']],
+  ['Comida y hora', '#s-ficha .fxwhen b', '', ['fontSize', 'fontWeight']],
+  ['Foto de la comida', '#s-ficha .fxtb .who .photo', '', ['width', 'height', 'borderTopLeftRadius']],
+  ['Qué comió', '#s-ficha .fxtb .who b', '', ['fontSize', 'fontWeight']],
+  ['Barras de macros', '#s-ficha .fxmacros > div', '', ['gap']],
+  ['Título de panel', '#s-ficha .fxp > header h3', '', ['fontSize', 'fontWeight']],
+  ['Lo que ve la IA', '#s-ficha .fxai', '', ['borderTopLeftRadius', 'paddingTop']],
+];
+
 // Piezas de Asistente. El encabezado vive en el armazón; acá se mide el cuerpo, que existe en los dos.
 export const PIEZAS_ASISTENTE = [
   ['Caja del pedido', '#s-asistente .sxask textarea', '', ['fontSize', 'fontFamily', 'borderTopLeftRadius', 'height']],
@@ -585,6 +596,12 @@ export async function correrContratoV29() {
       await b.waitForTimeout(1200);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Objetivos y hábitos\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_OBJETIVOS, informe);
+      await b.locator('#ftabs [data-ft="alimentario"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Registro alimentario/ }).click();
+      await a.waitForSelector('#s-ficha .fxtb tbody tr', { timeout: 20000 });
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Registro alimentario\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_ALIMENTARIO, informe);
       await abrirSeguimientoBoceto(b);
       await abrirSeguimientoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Seguimiento\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
