@@ -3,7 +3,7 @@
 Fuente: `design/panel-nutri/v29/panel-trabajo.html`.
 App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Planes (http://127.0.0.1:5173).
 
-**2 piezas no coinciden.**
+**4 piezas no coinciden.**
 
 ## Tema oscuro · armazón
 
@@ -84,7 +84,7 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Turno hecho | ✅ igual | |
 | Turno próximo | ✅ igual | |
 | Nombre del turno | ✅ igual | |
-| Línea de ahora | ✅ igual | |
+| Línea de ahora | ❌ falta | la app no la tiene (`#s-agenda .nowl`) |
 | Mes chico: día de hoy | ✅ igual | |
 | Mes chico: semana | ✅ igual | |
 | Referencias de color | ✅ igual | |
@@ -176,6 +176,23 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Hábito | ✅ igual | |
 | Columnas de la semana | ✅ igual | |
 | Síntomas y energía | ✅ igual | |
+
+## Tema oscuro · Ficha · Plan
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Título de panel | ✅ igual | |
+| Pedido de cambio | ✅ igual | |
+| Botón Aprobar | ✅ igual | |
+| Hora de la comida | ✅ igual | |
+| Foto de la comida | ✅ igual | |
+| Momento | ✅ igual | |
+| Nombre de la comida | ✅ igual | |
+| Calorías de la comida | ✅ igual | |
+| Medidor del requerimiento | ✅ igual | |
+| Barras de macros | ✅ igual | |
+| Columnas por comida | ✅ igual | |
+| Lista de compras | ✅ igual | |
 
 ## Tema oscuro · Seguimiento
 
@@ -361,7 +378,7 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Turno hecho | ✅ igual | |
 | Turno próximo | ✅ igual | |
 | Nombre del turno | ✅ igual | |
-| Línea de ahora | ✅ igual | |
+| Línea de ahora | ❌ falta | la app no la tiene (`#s-agenda .nowl`) |
 | Mes chico: día de hoy | ✅ igual | |
 | Mes chico: semana | ✅ igual | |
 | Referencias de color | ✅ igual | |
@@ -453,6 +470,23 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Hábito | ✅ igual | |
 | Columnas de la semana | ✅ igual | |
 | Síntomas y energía | ✅ igual | |
+
+## Tema claro · Ficha · Plan
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Título de panel | ✅ igual | |
+| Pedido de cambio | ✅ igual | |
+| Botón Aprobar | ✅ igual | |
+| Hora de la comida | ✅ igual | |
+| Foto de la comida | ✅ igual | |
+| Momento | ✅ igual | |
+| Nombre de la comida | ✅ igual | |
+| Calorías de la comida | ✅ igual | |
+| Medidor del requerimiento | ✅ igual | |
+| Barras de macros | ✅ igual | |
+| Columnas por comida | ✅ igual | |
+| Lista de compras | ✅ igual | |
 
 ## Tema claro · Seguimiento
 
