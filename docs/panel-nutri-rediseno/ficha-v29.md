@@ -54,7 +54,7 @@ Solo se muestran los números que se conocen: no se inventan.
 Según la regla 12 de `CLAUDE.md`: lo que el archivo no dibuja se arma con sus piezas y se dice qué se eligió.
 
 - **Datos y contacto** (cambiar de paciente, teléfono, consultas realizadas, asistencias): el boceto no lo dibuja y es función de Plan V. Va como un panel más debajo del Resumen, con las piezas del boceto.
-- **Botón «+ etiqueta»**: no está, porque la función de etiquetas y grupos no existe (paso 5 de `pacientes-v29-siguiente.md`). No se dibuja un botón que no hace nada.
+- **Botón «+ etiqueta»**: se desarrolló en un PR aparte (ver «Etiquetas por paciente» al final). Mientras la migración no esté aplicada en la base, el botón no se dibuja (la lectura falla y la ficha sigue sin etiquetas propias).
 - **Lápiz de editar** en el encabezado: el boceto no lo dibuja; se conserva porque es la única forma de editar los datos de la paciente.
 - **Grabar consulta**: ya no tiene botón propio en el encabezado. Está en Consultas y notas, a un clic de «Iniciar consulta».
 - **Chat**: abre la conversación en el área de contenido (sin solapa marcada). El cajón lateral del boceto queda para el PR 3. El número del botón no se muestra: no hay conteo de mensajes sin leer.
@@ -161,6 +161,15 @@ Valores por defecto elegidos (lo que el boceto dibuja y Plan V no tiene):
 - **Áreas frágiles:** el promedio de energía mezcla etiquetas; un valor viejo fuera de Alta/Media/Baja (por ejemplo «Buena» en la demo) se muestra como texto en el último registro pero no cuenta en la columna.
 - **Migraciones:** ninguna. **Veredicto:** HOLD hasta el ok visual de Facundo; técnicamente SHIP.
 
+## Etiquetas por paciente (botón «+ etiqueta», PR aparte)
+
+Rama `claude/etiquetas-paciente`. Facundo pidió que los botones del boceto sin función se desarrollen; este era el único de la Ficha.
+
+- **Pantalla:** el cajón «Etiquetas de Sofía» del boceto (`#actw`, chips `.ach`, campo «Nueva etiqueta», Guardar). Las propias van primero (las dos primeras en azafrán, el resto en gris, como el boceto) y después las alergias y restricciones del ingreso. Hasta 8 por paciente, 30 letras cada una, sin repetidas (no distingue mayúsculas).
+- **Servidor:** `GET/POST /api/crm/patients/:id/tags` y `DELETE …/tags/:tagId` (`server/crm/patient-tags.ts`). Solo profesionales y solo pacientes del consultorio. En demo guarda en memoria.
+- **Base:** tabla nueva `patient_tags` (`supabase/migrations/20261027120000_patient_tags.sql`), aditiva, con RLS por consultorio. **Aplicada en la base el 27/10** (con su frase; verificada: tabla y 3 políticas). Antes esperaba la frase escrita de Facundo. Hasta entonces, en producción el botón no aparece.
+- **Pendiente ligado:** mostrar y filtrar por etiqueta en Pacientes.
+- **Paso 10:** flujos (agregar, quitar, repetida, tope, otra paciente) cubiertos por `patient-tags.integration.test.ts` y `PanelFicha.test.tsx`; migración: aditiva, sin DROP, manifiesto de release actualizado; fire test N/A (sin umbral numérico nuevo salvo el tope de 8, cubierto por prueba).
 ## Parte 3b · Registro alimentario
 
 Rama `claude/ficha-v29-plan-registro`. Copia `alimentario:` del boceto (con el panel de Nutreando) con las comidas reales que carga la paciente. Archivos: `PanelPatientFoodDiary.tsx` (misma carga, filtros, «Cargar más» y revisión de antes), `ficha-alimentario.ts` (promedios y calorías por día).

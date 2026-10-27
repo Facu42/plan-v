@@ -1,4 +1,4 @@
-import type { Hono } from 'hono';
+import type { Context, Hono } from 'hono';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
 import { buildHomeOverview, buildWorkItems, loadGlobalProgress, loadWorkSnapshot, resolveWorkScope } from './repository.js';
@@ -9,6 +9,7 @@ import { argentinaToday, isProgressPeriodDays } from '../progress/derive.js';
 import { loadPatientQuickPreview, loadPatientRowPreview } from './patient-preview.js';
 import { z } from 'zod';
 import { loadPatientMealPage,patientMealQuerySchema } from './patient-meals.js';
+import { addPatientTag, listPatientTags, patientTagBodySchema, removePatientTag } from './patient-tags.js';
 
 export function registerCrmRoutes(app: Hono) {
   app.get('/api/crm/patients/:id/meals',async c=>{
@@ -32,6 +33,27 @@ export function registerCrmRoutes(app: Hono) {
     // Hasta cinco lecturas simultáneas, sin notas, cobros ni ficha completa.
     for (let i = 0; i < ids.length; i += 5) patients.push(...await Promise.all(ids.slice(i, i + 5).map(id => loadPatientRowPreview(scope, id))));
     return c.json({ patients });
+  });
+  const tagScope = async (c: Context) => {
+    const auth = c.get('auth');
+    const persistent = 'userId' in auth && isSupabaseEnabled();
+    if (!persistent && c.req.query('audience') === 'patient') throw new CareError(403, 'Solo profesionales del consultorio.');
+    const id = c.req.param('id');
+    if (!id || id.length > 100 || Object.keys(c.req.query()).length) throw new CareError(400, 'Revisá la paciente solicitada.');
+    return { id, scope: await resolveWorkScope('userId' in auth ? auth.userId : null, persistent) };
+  };
+  app.get('/api/crm/patients/:id/tags', async c => { const { id, scope } = await tagScope(c); return c.json({ tags: await listPatientTags(scope, id) }); });
+  app.post('/api/crm/patients/:id/tags', async c => {
+    const { id, scope } = await tagScope(c);
+    const parsed = patientTagBodySchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) throw new CareError(400, 'Escribí una etiqueta de hasta 30 letras.');
+    return c.json({ tags: await addPatientTag(scope, id, parsed.data) });
+  });
+  app.delete('/api/crm/patients/:id/tags/:tagId', async c => {
+    const { id, scope } = await tagScope(c);
+    const tagId = c.req.param('tagId');
+    if (!tagId || tagId.length > 100) throw new CareError(400, 'Revisá la etiqueta solicitada.');
+    return c.json({ tags: await removePatientTag(scope, id, tagId) });
   });
   app.get('/api/crm/patients/:id/preview', async c => {
     const auth = c.get('auth');
