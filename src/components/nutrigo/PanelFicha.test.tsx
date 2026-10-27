@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { Patient } from '../../types';
 import { FichaSolapas, PanelFichaCabecera } from './PanelFichaCabecera';
+import { FichaEtiquetas } from './FichaEtiquetas';
 import { PanelFichaResumen } from './PanelFichaResumen';
 import { PanelFichaMediciones } from './PanelFichaMediciones';
 import { PanelFichaObjetivos } from './PanelFichaObjetivos';
@@ -62,6 +63,25 @@ describe('Ficha v29', () => {
     expect(html).toContain('No pudimos actualizar comidas');
     expect(html).toContain('Reintentar');
   });
+
+  it('muestra las etiquetas propias y el botón «+ etiqueta» solo cuando se pueden guardar', () => {
+    const props = { patient: paciente, now: ahora, datos: datos(), onBack: vi.fn(), onChat: vi.fn(), onAgendar: vi.fn(), onEdit: vi.fn(), onConsulta: vi.fn() };
+    const con = renderToStaticMarkup(<PanelFichaCabecera {...props} etiquetasPropias={[{ id: 't1', label: 'Deportista', tone: 'a' }, { id: 't2', label: 'Running', tone: 'n' }]} onGuardarEtiquetas={vi.fn()} />);
+    expect(con).toContain('<span class="tg2">Deportista</span>');
+    expect(con).toContain('<span class="tg2 n">Running</span>');
+    expect(con).toContain('+ etiqueta');
+    const sin = renderToStaticMarkup(<PanelFichaCabecera {...props} />);
+    expect(sin).not.toContain('+ etiqueta');
+  });
+
+  it('el cajón de etiquetas marca las actuales y ofrece las sugeridas', () => {
+    const html = renderToStaticMarkup(<FichaEtiquetas nombre="Sofía" actuales={['Running']} onGuardar={vi.fn()} onClose={vi.fn()} />);
+    expect(html).toContain('Etiquetas de Sofía');
+    expect(html).toContain('aria-pressed="true">Running');
+    expect(html).toContain('aria-pressed="false">Celíaca');
+    expect(html).toContain('Nueva etiqueta');
+  });
+
   it('Mediciones dibuja los medidores, las solapas y no inventa pliegues ni fórmula', () => {
     const html = renderToStaticMarkup(<PanelFichaMediciones patient={paciente} now={ahora} datos={datos()} ir={ir} />);
     for (const texto of ['Mediciones', 'Importar balanza', 'Nueva medición', 'IMC', 'Grasa', 'Músculo', 'Cintura', 'Evolución', 'Kerr · 5 componentes', 'Sin fórmula validada', 'Pliegues', 'Perímetros', 'Composición', 'Segmental']) expect(html).toContain(texto);
