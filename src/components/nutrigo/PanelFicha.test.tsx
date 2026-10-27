@@ -1,0 +1,63 @@
+import { renderToStaticMarkup } from 'react-dom/server';
+import { describe, expect, it, vi } from 'vitest';
+import type { Patient } from '../../types';
+import { FichaSolapas, PanelFichaCabecera } from './PanelFichaCabecera';
+import { PanelFichaResumen } from './PanelFichaResumen';
+import type { FichaData } from './use-ficha-data';
+
+const ahora = new Date('2026-10-27T12:00:00-03:00');
+const paciente = {
+  id: 'p1', name: 'Sofía Gómez', initials: 'SG', tone: 'mint', goal: 'Bajar a 66,5 kg', goal_progress: 40, adherence_score: 86, created_at: '2026-03-12T10:00:00Z', has_account: true,
+  appointment: null, appointment_history: [], meal_logs: [], habit_logs: [], todayPlan: [], timeline: [], messages: [],
+} as unknown as Patient;
+const medida = (id: string, kind: string, captured_on: string, value_numeric: number, unit: string) => ({ id, patient_id: 'p1', kind, captured_on, created_at: `${captured_on}T10:00:00Z`, value_numeric, unit, source: 'professional' });
+const datos = (extra: Partial<FichaData> = {}) => ({
+  care: { consented: ['care_relationship', 'measurement'], measurements: [medida('a', 'weight', '2026-09-01', 74, 'kg'), medida('b', 'weight', '2026-10-14', 68.4, 'kg'), medida('c', 'waist', '2026-10-14', 80, 'cm')] },
+  careError: null, reload: vi.fn(), canCare: true, canDocs: false, current: null, refetch: vi.fn(), ...extra,
+}) as unknown as FichaData;
+const ir = vi.fn();
+
+describe('Ficha v29', () => {
+  it('dibuja las diez solapas con el contador que se conoce y marca la activa', () => {
+    const html = renderToStaticMarkup(<FichaSolapas activa="mediciones" conteo={{ alimentario: { n: 3, hot: false }, laboratorio: { n: 2, hot: true } }} onChange={vi.fn()} />);
+    for (const solapa of ['Resumen', 'Historia clínica', 'Consultas y notas', 'Mediciones', 'Objetivos y hábitos', 'Plan', 'Registro alimentario', 'Laboratorio y estudios', 'Archivos', 'Cobros']) expect(html).toContain(solapa);
+    expect(html).toContain('class="on" aria-current="page">Mediciones');
+    expect(html).toContain('<span class="n hot">2</span>');
+    expect(html).toContain('<span class="n">3</span>');
+  });
+
+  it('el encabezado dice que falta saber, sin inventar etiquetas ni estado de la app', () => {
+    const html = renderToStaticMarkup(<PanelFichaCabecera patient={paciente} now={ahora} datos={datos()} onBack={vi.fn()} onChat={vi.fn()} onAgendar={vi.fn()} onEdit={vi.fn()} onConsulta={vi.fn()} />);
+    for (const texto of ['Sofía Gómez', 'Pacientes', 'Paciente desde marzo', 'Consultando antecedentes…', 'Chat', 'Agendar', 'Iniciar consulta', 'App conectada', 'atención autorizada']) expect(html).toContain(texto);
+    expect(html).not.toContain('Celíaca');
+    expect(html).not.toContain('WhatsApp');
+  });
+
+  it('sin vincular no ofrece el chat', () => {
+    const html = renderToStaticMarkup(<PanelFichaCabecera patient={{ ...paciente, has_account: false }} now={ahora} datos={datos()} onBack={vi.fn()} onChat={vi.fn()} onAgendar={vi.fn()} onEdit={vi.fn()} onConsulta={vi.fn()} />);
+    expect(html).toContain('Sin vincular');
+    expect(html).not.toContain('>Chat<');
+  });
+
+  it('el Resumen conserva todos sus bloques aunque no haya datos y muestra los números reales', () => {
+    const html = renderToStaticMarkup(<PanelFichaResumen patient={paciente} now={ahora} datos={datos()} ir={ir} />);
+    for (const bloque of ['Evolución del peso', 'Qué cambió desde la última consulta', 'Avance al objetivo', 'Alertas', 'Para hacer hoy', 'Próximo turno', 'Plan vigente', 'Anamnesis', 'Acuerdos de la última consulta']) expect(html).toContain(bloque);
+    expect(html).toContain('68,4');
+    expect(html).toContain('Grasa');
+    expect(html).toContain('Sin dato');
+    expect(html).toContain('Sin acuerdos cargados');
+    expect(html).toContain('data-mk="1"');
+  });
+
+  it('sin permiso de medidas lo dice en vez de dibujar una curva vacía', () => {
+    const html = renderToStaticMarkup(<PanelFichaResumen patient={paciente} now={ahora} datos={datos({ care: { consented: ['care_relationship'], measurements: [] } as never })} ir={ir} />);
+    expect(html).toContain('Permiso de medidas pendiente');
+  });
+
+  it('cuando no pudo consultar una fuente lo avisa con un reintento', () => {
+    const current = { key: 'k', intake: null, clinical: null, notes: null, meals: null, feed: null, vista: null, errors: ['comidas'] };
+    const html = renderToStaticMarkup(<PanelFichaResumen patient={paciente} now={ahora} datos={datos({ current } as never)} ir={ir} />);
+    expect(html).toContain('No pudimos actualizar comidas');
+    expect(html).toContain('Reintentar');
+  });
+});

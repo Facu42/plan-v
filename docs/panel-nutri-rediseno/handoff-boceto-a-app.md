@@ -76,9 +76,9 @@ Todo lo siguiente está en main, con ok visual de Facu y squash-merge:
 Secciones del boceto que en la app siguen viejas / no v29:
 
 1. **Inicio** v29.
-2. **Pacientes / ficha** v29.
+2. **Pacientes / ficha** v29: Pacientes juntado (#197); la Ficha va en tres PR, el 1 (armazón, diez solapas y Resumen) en la rama `claude/ficha-v29-armazon` (ver `ficha-v29.md`).
 3. **Dictar / Adjuntar** en Armar con IA (Planes 3g). Se saltó cuando Facu pidió Centro de ayuda.
-4. **Agenda** v29 en la rama `claude/agenda-v29` (espera el ok visual; ver `agenda-v29.md`).
+4. **Agenda** v29 juntada a main (#198, con el ok de Facundo; ver `agenda-v29.md`).
 5. **También en cola:** Mensajes, Cobranzas y Recetas/Plantillas/Equivalencias como módulos propios si el boceto los dibuja aparte.
 
 **27 oct, ~23:42 BA:** Facu mergeó #193 («si») y pidió seguir con Codex Sol 6.1. Se le ofreció widget Inicio / Pacientes-ficha / Dictar-Adjuntar. **Todavía no respondió.** Retomá preguntándole cuál sigue o con la opción que elija; ninguna quedó elegida por defecto.
@@ -89,6 +89,8 @@ Las filas anteriores se conservan como historia: «sin juntar» describe el mome
 
 | Cuándo | Qué | Quién |
 |---|---|---|
+| 27 oct | Ficha v29, parte 1 en PR (rama `claude/ficha-v29-armazon`), espera ok visual; [nota y paso 10](ficha-v29.md). | Claude |
+| 27 oct | Agenda v29 **juntada a main** (#198, con el ok de Facundo); [nota](agenda-v29.md). | Claude |
 | 27 oct | Inicio v29 **juntado a main** (#196, con el ok de Facundo); [nota y plan de lo que falta](inicio-v29.md). | Claude |
 | 27 oct | Pacientes v29 en PR (rama `claude/pacientes-v29`), espera ok visual; [nota y paso 10](pacientes-v29.md). | Claude |
 | 27 oct | Handoff actualizado para retomar desde main `c4bdf96`: entregas cerradas, decisiones vigentes y próximo módulo a elección de Facu. Solo documentación. | Codex |

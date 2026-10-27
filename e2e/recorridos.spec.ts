@@ -100,7 +100,7 @@ test('4 · la paciente registra una comida en el diario y la nutricionista la ve
   await enterDemo(page, '/crm/pacientes');
   await page.getByRole('row', { name: 'Ver resumen de Sofía R.' }).click();
   await page.getByRole('button', { name: 'Abrir ficha de Sofía R.' }).click();
-  await page.getByRole('button', { name: 'Registro alimentario', exact: true }).click();
+  await page.locator('#ftabs').getByRole('button', { name: /^Registro alimentario/ }).click();
   await waitLoaded(page);
   const row = page.getByRole('row', { name: /Yogur natural con banana y nueces/ });
   await expect(row).toBeVisible();

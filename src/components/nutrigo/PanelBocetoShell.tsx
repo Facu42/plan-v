@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { createContext, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { PanelV29Icon } from './PanelV29Icon';
 import type { PanelV29IconName } from './panel-v29-icons';
 import '@fontsource/inter/latin-300.css';
@@ -12,7 +12,10 @@ import './panel-v29-app.css';
 
 export type PanelAccountOption = { label: string; detail?: string; glyph: PanelV29IconName; onSelect: () => void };
 export type PanelTab = { label: string; glyph: PanelV29IconName; href?: string; on?: boolean; count?: number };
-export type PanelHeader = { when?: string; title: string; titleSuffix?: string; search: string; wideSearch?: boolean; actions?: ReactNode };
+export type PanelHeader = { when?: string; title: string; titleSuffix?: string; search: string; wideSearch?: boolean; actions?: ReactNode; /** La pantalla dibuja su propio encabezado (la Ficha): sin título ni buscador arriba. */ bare?: boolean };
+
+/** La campana de avisos, para las pantallas que la llevan dentro de su propio encabezado. Vacía en el celular, donde vive en la barra de arriba. */
+export const PanelBellContext = createContext<ReactNode>(null);
 
 /** Las pantallas que todavía no se pasaron leen `data-mock` en <html>. */
 export function usePanelMock(dark: boolean) {
@@ -99,13 +102,13 @@ export function PanelBocetoShell({ dark, collapsed, onCollapse, menuOpen, onMenu
         </div>
       </aside>
       <main className="main" id="nv-main" tabIndex={-1}>
-        <div className="top">
+        {header.bare ? null : <div className="top">
           <div><h1>{header.title}{header.titleSuffix ? <> <span>{header.titleSuffix}</span></> : null}</h1>{header.when && <div className="date">{header.when}</div>}</div>
           <div className="sp" />
           {header.actions}
           {!narrow && bell}
-        </div>
-        <div id="pv-panel" className="m" key={mainKey}>{notice}{children}</div>
+        </div>}
+        <PanelBellContext.Provider value={narrow ? null : bell}><div id="pv-panel" className="m" key={mainKey}>{notice}{children}</div></PanelBellContext.Provider>
       </main>
       <nav className="mnav" aria-label="Accesos">{tabs.map(tab => <button type="button" key={tab.label} className={tab.on ? 'on' : undefined} onClick={() => { if (tab.href) onOpen(tab.href); else onMore(); }}>
         <PanelV29Icon name={tab.glyph} size={19} /><span>{tab.label}</span>{tab.count ? <b className="num">{tab.count}</b> : null}

@@ -565,3 +565,22 @@
 #pv-panel-v29 #s-agenda .agm { grid-template-rows: auto; }
 #pv-panel-v29 #s-agenda .req .li { align-items: flex-start; }
 .ag-mas .p5-row { background: var(--pn-white, #fff); border-radius: 16px; padding: 10px 12px; }
+
+/* ---- Ficha: encabezado propio, solapas y Resumen del boceto; las demás solapas conservan su contenido dentro del marco nuevo ---- */
+#pv-panel-v29:not(.mob) .main:has(#s-ficha) { height: 100%; overflow: hidden; }
+#pv-panel-v29:not(.mob) #pv-panel:has(#s-ficha) { flex: 1; min-height: 0; }
+#pv-panel-v29 #s-ficha #fwrap { overflow-y: auto; scrollbar-width: thin; }
+#pv-panel-v29.mob #s-ficha #fwrap { overflow: visible; }
+/* El migaja es un botón real: sin el borde ni el fondo del navegador. */
+#pv-panel-v29 .fh button.crumb { border: 0; background: none; padding: 0; font: inherit; font-size: 11.5px; color: var(--ink3); }
+#pv-panel-v29 .ntfhg > .ibtn, #pv-panel-v29 .ntfhg > [aria-label="Avisos"] { width: 36px; height: 36px; }
+#pv-panel-v29 .fxsel { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; color: var(--ink3); }
+#pv-panel-v29 .fxsel select { height: 34px; border: 1px solid var(--line); border-radius: 10px; background: var(--app); color: var(--ink); font: inherit; font-size: 12.5px; padding: 0 10px; }
+#pv-panel-v29 #s-ficha .pw-record { padding-top: 14px; }
+/* Con datos reales las columnas pueden pedir más alto que la pantalla: la ficha se desplaza dentro de su marco en vez de aplastar las tarjetas. */
+#pv-panel-v29 #s-ficha #fwrap > .fx { flex: 1 0 auto; }
+#pv-panel-v29 #s-ficha #fwrap > .fxp { flex: none; margin-top: 14px; }
+/* La hoja vieja redefine --ink, --ink2 y --line en #pv-panel y agranda la tarjeta y los botones: en la Ficha vuelven las medidas y los grises del boceto. */
+#pv-panel-v29 #pv-panel:has(#s-ficha) { --ink: inherit; --ink2: inherit; --ink3: inherit; --line: inherit; color: var(--ink); background: transparent; }
+#pv-panel-v29 #pv-panel #s-ficha .card.fh { border-radius: 16px; padding: 16px 20px; }
+#pv-panel-v29 #pv-panel #s-ficha .chip { font-size: 12.5px; }

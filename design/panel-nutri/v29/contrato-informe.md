@@ -94,6 +94,32 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Proponer otro | ✅ igual | |
 | Lugar libre | ✅ igual | |
 
+## Tema oscuro · Ficha
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Encabezado | ✅ igual | |
+| Avatar | ✅ igual | |
+| Migaja | ✅ igual | |
+| Nombre | ✅ igual | |
+| Etiqueta | ✅ igual | |
+| Estado de la app | ✅ igual | |
+| Botón del encabezado | ✅ igual | |
+| Iniciar consulta | ✅ igual | |
+| Solapas | ✅ igual | |
+| Solapa | ✅ igual | |
+| Solapa elegida | ✅ igual | |
+| Contador de la solapa | ✅ igual | |
+| Mosaico | ✅ igual | |
+| Número del mosaico | ✅ igual | |
+| Panel | ✅ igual | |
+| Título del panel | ✅ igual | |
+| Fila | ✅ igual | |
+| Título de la fila | ✅ igual | |
+| Tarjeta oscura | ✅ igual | |
+| Medio círculo | ✅ igual | |
+| Datos en columna | ✅ igual | |
+
 ## Tema oscuro · Seguimiento
 
 | Pieza | Estado | Detalle |
@@ -287,6 +313,32 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Aceptar | ✅ igual | |
 | Proponer otro | ✅ igual | |
 | Lugar libre | ✅ igual | |
+
+## Tema claro · Ficha
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Encabezado | ✅ igual | |
+| Avatar | ✅ igual | |
+| Migaja | ✅ igual | |
+| Nombre | ✅ igual | |
+| Etiqueta | ✅ igual | |
+| Estado de la app | ✅ igual | |
+| Botón del encabezado | ✅ igual | |
+| Iniciar consulta | ✅ igual | |
+| Solapas | ✅ igual | |
+| Solapa | ✅ igual | |
+| Solapa elegida | ✅ igual | |
+| Contador de la solapa | ✅ igual | |
+| Mosaico | ✅ igual | |
+| Número del mosaico | ✅ igual | |
+| Panel | ✅ igual | |
+| Título del panel | ✅ igual | |
+| Fila | ✅ igual | |
+| Título de la fila | ✅ igual | |
+| Tarjeta oscura | ✅ igual | |
+| Medio círculo | ✅ igual | |
+| Datos en columna | ✅ igual | |
 
 ## Tema claro · Seguimiento
 
