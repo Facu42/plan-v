@@ -59,8 +59,8 @@ export function panelNavGroups(patients: readonly Patient[], unread: number, adm
       { label: 'Centro de ayuda', glyph: 'shield', href: '/crm/ayuda' },
     ] },
     { title: 'Cuenta', items: [
-      { label: 'Equipo', glyph: 'team', href: '/crm/desarrollo?modulo=equipo' },
-      { label: 'Configuración', glyph: 'gear', href: '/crm/desarrollo?modulo=configuracion' },
+      { label: 'Equipo', glyph: 'team', href: '/crm/equipo' },
+      { label: 'Ajustes', glyph: 'gear', href: '/crm/ajustes' },
       ...(admin ? [{ label: 'Panel del servicio', glyph: 'shield' as const, href: '/crm/servicio' }] : []),
     ] },
   ];
@@ -70,8 +70,10 @@ export function panelNavGroups(patients: readonly Patient[], unread: number, adm
 export function panelNavCurrent(href: string, current: string) {
   const target = new URL(href, 'https://plan.v');
   const location = new URL(current, 'https://plan.v');
-  if (location.pathname === '/crm/desarrollo' && location.searchParams.get('modulo') === 'ayuda') {
-    location.pathname = '/crm/ayuda';
+  const aliases: Record<string, string> = { ayuda: 'ayuda', equipo: 'equipo', configuracion: 'ajustes' };
+  const alias = aliases[location.searchParams.get('modulo') ?? ''];
+  if (location.pathname === '/crm/desarrollo' && alias) {
+    location.pathname = `/crm/${alias}`;
     location.searchParams.delete('modulo');
   }
   if (target.pathname !== location.pathname) return false;

@@ -1,0 +1,58 @@
+#pv-panel-v29 .ea-screen{display:flex;flex-direction:column;gap:14px;flex:1;min-height:0;font-family:Inter,sans-serif}
+#pv-panel-v29 #pv-panel:has(.ea-screen){--ink:inherit;--ink2:inherit;flex:1;min-height:0}
+#pv-panel-v29:not(.mob) .main:has(.ea-screen){height:100%;overflow:hidden}
+#pv-panel-v29 .ea-columns{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);padding-top:0;flex:1;min-height:0}
+#pv-panel-v29 .ea-permissions{grid-template-columns:minmax(0,1fr) 330px}
+#pv-panel-v29 .ea-settings{grid-template-columns:repeat(3,minmax(0,1fr));padding-top:0;flex:1;min-height:0}
+#pv-panel-v29 .ea-templates{grid-template-columns:minmax(0,330px) minmax(0,1fr) minmax(0,300px)}
+#pv-panel-v29 .ea-two{grid-template-columns:repeat(2,minmax(0,1fr))}
+#pv-panel-v29 .ea-screen .c{overflow:auto;scrollbar-width:thin}
+#pv-panel-v29 .ea-screen .fxp{flex-shrink:0;min-width:0;box-shadow:var(--ntsh)}
+#pv-panel-v29 .ea-screen .fxp>header{flex-wrap:wrap;gap:6px}
+#pv-panel-v29 .ea-table{overflow:auto;min-width:0;scrollbar-width:thin}
+#pv-panel-v29 .ea-table table{width:100%;border-collapse:collapse;font-size:12px}
+#pv-panel-v29 .ea-table th,#pv-panel-v29 .ea-table td{padding:9px 8px;text-align:left;border-bottom:1px solid var(--line)}
+#pv-panel-v29 .ea-table th{font-weight:400;color:var(--ink3);font-size:11px;white-space:nowrap}
+#pv-panel-v29 .ea-table .on{background:var(--lima-tt)}
+#pv-panel-v29 .ea-person{display:flex;align-items:center;gap:10px;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+#pv-panel-v29 .ea-person b{font-weight:500;max-width:170px;overflow-wrap:anywhere}
+#pv-panel-v29 .ea-avatar{background:var(--azaf-t);color:var(--azaf-ink);width:32px;height:32px;flex:none;display:grid;place-items:center;border-radius:50%;font-size:11px}
+#pv-panel-v29 .ea-kv{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:9px;margin:0;font-size:12px}
+#pv-panel-v29 .ea-kv dt{color:var(--ink3)}
+#pv-panel-v29 .ea-kv dd{margin:0;text-align:right;overflow-wrap:anywhere}
+#pv-panel-v29 .ea-empty{display:flex;flex-direction:column;gap:8px;color:var(--ink3);font-size:12px;line-height:1.5;margin:6px 0;padding:10px 0}
+#pv-panel-v29 .ea-empty b{font-weight:500;color:var(--ink2)}
+#pv-panel-v29 .ea-muted{color:var(--ink3);font-size:12px;line-height:1.5;margin:0}
+#pv-panel-v29 .ea-rules{margin:0;padding-left:18px;font-size:12px;line-height:1.7;color:var(--ink2)}
+#pv-panel-v29 .ea-foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:12px}
+#pv-panel-v29 .ea-screen .chip{font-size:12px;padding:6px 10px;font-weight:400}
+#pv-panel-v29 .ea-screen .eqmods span{background:var(--app);color:var(--ink3);border:1px solid var(--line)}
+#pv-panel-v29 .ea-tabs{max-width:100%;overflow-x:auto;flex-shrink:1;scrollbar-width:thin}
+#pv-panel-v29 .ea-tabs button{white-space:nowrap}
+#pv-panel-v29 .ea-advanced{font-size:12px;border-top:1px solid var(--line);padding-top:8px;flex:none}
+#pv-panel-v29 .ea-advanced[open]{max-height:65vh;overflow:auto}
+#pv-panel-v29 .ea-advanced summary{cursor:pointer;color:var(--ink3)}
+#pv-panel-v29 .ea-pref{display:flex;flex-direction:column;gap:8px}
+#pv-panel-v29 .ea-pref label{display:flex;justify-content:space-between;font-size:12px;color:var(--ink2)}
+#pv-panel-v29 .ea-pref input{accent-color:var(--ink)}
+#pv-panel-v29 .ea-context{display:flex;align-items:center;gap:8px;font-size:12px}
+#pv-panel-v29 .ea-context select{max-width:100%;font:inherit;background:var(--card);color:var(--ink);border:1px solid var(--line2);border-radius:8px;padding:5px}
+#pv-panel-v29 .ea-dialog{position:fixed;inset:10px 10px 10px auto;margin:0;width:460px;max-width:calc(100% - 20px);height:calc(100% - 20px);max-height:none;padding:0;border:1px solid var(--line2);border-radius:18px;background:var(--card);color:var(--ink);font-family:Inter,sans-serif;box-shadow:var(--sh2)}
+#pv-panel-v29 .ea-dialog::backdrop{background:rgba(0,0,0,.3)}
+#pv-panel-v29 .ea-dialog>header{display:flex;align-items:center;justify-content:space-between;padding:18px;border-bottom:1px solid var(--line)}
+#pv-panel-v29 .ea-dialog h2{font-size:18px;font-weight:500;margin:0}
+#pv-panel-v29 .ea-dialog-body{padding:18px;height:calc(100% - 70px);overflow:auto;font-size:12px;line-height:1.5}
+#pv-panel-v29 .ea-form{display:flex;flex-direction:column;gap:14px;min-height:100%}
+#pv-panel-v29 .ea-form label{display:flex;flex-direction:column;gap:6px}
+#pv-panel-v29 .ea-form input,#pv-panel-v29 .ea-form select{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px solid var(--line2);background:var(--app);color:var(--ink)}
+#pv-panel-v29 .ea-form small{color:var(--ink3)}
+#pv-panel-v29 .ea-form code{overflow-wrap:anywhere;user-select:all}
+#pv-panel-v29 .ea-screen .pn-theme-picker{display:flex;flex-wrap:wrap;gap:6px}
+#pv-panel-v29.mob .ea-columns,#pv-panel-v29.mob .ea-settings{grid-template-columns:minmax(0,1fr);flex:none;height:auto;min-height:auto}
+#pv-panel-v29.mob .ea-screen .c{height:auto;min-height:auto;overflow:visible}
+#pv-panel-v29.mob #pv-panel:has(.ea-screen),#pv-panel-v29.mob .ea-screen{height:auto;min-height:auto;flex:none}
+#pv-panel-v29.mob .main:has(.ea-screen)>.top{flex:none;height:auto;flex-wrap:wrap}
+#pv-panel-v29.mob .main:has(.ea-screen)>.top .ea-tabs{flex-basis:100%;order:4}
+#pv-panel-v29.mob .ea-screen .eqroles{grid-template-columns:repeat(2,minmax(0,1fr))}
+#pv-panel-v29.mob .ea-dialog{inset:0;width:100%;max-width:100%;height:100%;border-radius:0}
+#pv-panel-v29 .ea-screen button:focus-visible,#pv-panel-v29 .ea-dialog button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
