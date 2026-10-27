@@ -120,6 +120,63 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Medio círculo | ✅ igual | |
 | Datos en columna | ✅ igual | |
 
+## Tema oscuro · Ficha · Mediciones
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Panel de medidores | ✅ igual | |
+| Medidor chico | ✅ igual | |
+| Nombre del medidor | ✅ igual | |
+| Nota del medidor | ✅ igual | |
+| Solapas de medidas | ✅ igual | |
+| Solapa de medidas elegida | ✅ igual | |
+| Encabezado de la tabla | ✅ igual | |
+| Botón de fórmula | ✅ igual | |
+| Botón chico | ✅ igual | |
+
+## Tema oscuro · Ficha · Laboratorio
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Tabla de valores | ✅ igual | |
+| Fecha de la columna | ✅ igual | |
+| Fecha en número | ✅ igual | |
+| Nombre del valor | ✅ igual | |
+| Último valor | ✅ igual | |
+| Valor fuera de rango | ✅ igual | |
+| Referencia | ✅ igual | |
+| Solapas Valores y Por fecha | ✅ igual | |
+| Curva del valor | ✅ igual | |
+| Banda del rango | ✅ igual | |
+| Punto de la curva | ✅ igual | |
+| Historial del valor | ✅ igual | |
+
+## Tema oscuro · Ficha · Historia clínica
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Índice de temas | ✅ igual | |
+| Tema del índice | ✅ igual | |
+| Tema elegido | ✅ igual | |
+| Punto del tema | ✅ igual | |
+| Título del tema | ✅ igual | |
+| Dato | ✅ igual | |
+| Texto del dato | ✅ igual | |
+| Origen del dato | ✅ igual | |
+| Dato dado de baja | ✅ igual | |
+| Solapas Por tema y Por fecha | ✅ igual | |
+
+## Tema oscuro · Ficha · Objetivos y hábitos
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Anillo del objetivo | ✅ igual | |
+| Número del anillo | ✅ igual | |
+| Nombre del objetivo | ✅ igual | |
+| Hábito | ✅ igual | |
+| Columnas de la semana | ✅ igual | |
+| Síntomas y energía | ✅ igual | |
+
 ## Tema oscuro · Seguimiento
 
 | Pieza | Estado | Detalle |
@@ -339,6 +396,63 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Tarjeta oscura | ✅ igual | |
 | Medio círculo | ✅ igual | |
 | Datos en columna | ✅ igual | |
+
+## Tema claro · Ficha · Mediciones
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Panel de medidores | ✅ igual | |
+| Medidor chico | ✅ igual | |
+| Nombre del medidor | ✅ igual | |
+| Nota del medidor | ✅ igual | |
+| Solapas de medidas | ✅ igual | |
+| Solapa de medidas elegida | ✅ igual | |
+| Encabezado de la tabla | ✅ igual | |
+| Botón de fórmula | ✅ igual | |
+| Botón chico | ✅ igual | |
+
+## Tema claro · Ficha · Laboratorio
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Tabla de valores | ✅ igual | |
+| Fecha de la columna | ✅ igual | |
+| Fecha en número | ✅ igual | |
+| Nombre del valor | ✅ igual | |
+| Último valor | ✅ igual | |
+| Valor fuera de rango | ✅ igual | |
+| Referencia | ✅ igual | |
+| Solapas Valores y Por fecha | ✅ igual | |
+| Curva del valor | ✅ igual | |
+| Banda del rango | ✅ igual | |
+| Punto de la curva | ✅ igual | |
+| Historial del valor | ✅ igual | |
+
+## Tema claro · Ficha · Historia clínica
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Índice de temas | ✅ igual | |
+| Tema del índice | ✅ igual | |
+| Tema elegido | ✅ igual | |
+| Punto del tema | ✅ igual | |
+| Título del tema | ✅ igual | |
+| Dato | ✅ igual | |
+| Texto del dato | ✅ igual | |
+| Origen del dato | ✅ igual | |
+| Dato dado de baja | ✅ igual | |
+| Solapas Por tema y Por fecha | ✅ igual | |
+
+## Tema claro · Ficha · Objetivos y hábitos
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Anillo del objetivo | ✅ igual | |
+| Número del anillo | ✅ igual | |
+| Nombre del objetivo | ✅ igual | |
+| Hábito | ✅ igual | |
+| Columnas de la semana | ✅ igual | |
+| Síntomas y energía | ✅ igual | |
 
 ## Tema claro · Seguimiento
 

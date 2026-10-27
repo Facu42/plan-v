@@ -127,6 +127,11 @@
       "version": "20261027120000",
       "file": "20261027120000_patient_tags.sql",
       "sha256": "e0653d7b95a6bfa59f410d82071e406339a64adb4e817f8ac6f41f3c0cbe5e7a"
+    },
+    {
+      "version": "20261027130000",
+      "file": "20261027130000_patient_history_entries.sql",
+      "sha256": "282450006dda631e381398545c1ead68e78f32d790056bddda481d022c4dd44e"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",
