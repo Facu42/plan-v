@@ -354,7 +354,8 @@
 #pv-panel-v29 #pv-panel > #s-seguimiento,
 #pv-panel-v29 #pv-panel > #s-progreso,
 #pv-panel-v29 #pv-panel > #s-alimentos,
-#pv-panel-v29 #pv-panel > #s-asistente {
+#pv-panel-v29 #pv-panel > #s-asistente,
+#pv-panel-v29 #pv-panel > #s-inicio {
   animation: fin .25s ease;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -366,7 +367,71 @@
   #pv-panel-v29 #pv-panel > #s-seguimiento,
   #pv-panel-v29 #pv-panel > #s-progreso,
   #pv-panel-v29 #pv-panel > #s-alimentos,
-  #pv-panel-v29 #pv-panel > #s-asistente {
+  #pv-panel-v29 #pv-panel > #s-asistente,
+  #pv-panel-v29 #pv-panel > #s-inicio {
     animation: none;
   }
+}
+
+/* Inicio: los chips del encabezado vuelven al look del boceto (la hoja vieja los achica) y la fila de consultas abre la ficha sin cambiar de aspecto. */
+#pv-panel-v29 .top .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); text-decoration: none; }
+#pv-panel-v29 .top a.cta { text-decoration: none; }
+#pv-panel-v29 #s-inicio .rowlink { color: inherit; text-decoration: none; display: block; }
+#pv-panel-v29 #s-inicio .iup .lst .sxacts { display: flex; gap: 12px; padding: 6px 0; }
+#pv-panel-v29 #s-inicio .iup .lst .sxsub { padding: 6px 0; }
+#pv-panel-v29 #s-inicio .xobs .ob.p0 b { font-weight: 400; color: var(--fg2); }
+/* Inicio: la hoja vieja pisa tarjetas, números y avatares. Vuelven las medidas del boceto v29. */
+#pv-panel-v29 #s-inicio .card { padding: 0; }
+#pv-panel-v29 #s-inicio .kpis { grid-template-columns: repeat(5, 1fr); gap: 16px; height: auto; }
+#pv-panel-v29 #s-inicio .kpi { padding: 13px 15px 12px; height: 96px; }
+#pv-panel-v29 #s-inicio .av { color: #141519; }
+/* Inicio llena la columna como en el boceto: la tabla de consultas se estira y los números quedan abajo. */
+#pv-panel-v29:not(.mob) .main:has(#s-inicio) { height: 100%; overflow: hidden; }
+#pv-panel-v29:not(.mob) #pv-panel:has(#s-inicio) { flex: 1; min-height: 0; }
+#pv-panel-v29.mob #pv-panel:has(#s-inicio),
+#pv-panel-v29.mob #s-inicio { flex: none; height: auto; min-height: auto; }
+#pv-panel-v29 #s-inicio .kpi .v small { display: inline; white-space: nowrap; font-size: 13.5px; }
+#pv-panel-v29 #s-inicio .kcols small { font-size: 8px; }
+#pv-panel-v29 #s-inicio .kring span { font-size: 8.5px; }
+#pv-panel-v29 #s-inicio .kweek small { font-size: 9.5px; }
+#pv-panel-v29 #s-inicio .klol small { font-size: 8.5px; }
+#pv-panel-v29 #s-inicio .card { border-radius: 16px; background: var(--card); }
+#pv-panel-v29 #s-inicio .iup .li .ico { width: 28px; height: 28px; border-radius: 9px; }
+
+/* Movimiento de Inicio, con los tiempos del boceto (sin librería). Con «reducir movimiento» todo queda quieto. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes pvUp { from { opacity: 0; transform: translateY(14px); } }
+  @keyframes pvDown { from { opacity: 0; transform: translateY(-8px); } }
+  @keyframes pvLeft { from { opacity: 0; transform: translateX(-12px); } }
+  @keyframes pvPop { from { opacity: 0; transform: scale(0); } }
+  @keyframes pvDraw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  @keyframes pvSway { to { transform: rotate(4deg) translateY(-4px); } }
+  @keyframes pvDrift { to { transform: translate(var(--dx), var(--dy)) scale(var(--sc)); } }
+  @keyframes pvRing { from { stroke-dashoffset: 100; } }
+  @keyframes pvScaleY { from { transform: scaleY(0); } }
+  @keyframes pvScaleX { from { transform: scaleX(0); } }
+  #pv-panel-v29 #det.dvx .gbg { transform: translate(calc(var(--px, 0) * 18px), calc(var(--py, 0) * 14px)); transition: transform .8s cubic-bezier(.2, .8, .2, 1); }
+  #pv-panel-v29 #det.dvx .gbg i { animation: pvDrift 6s ease-in-out infinite alternate; }
+  #pv-panel-v29 #det.dvx .gbg .b1 { --dx: 48px; --dy: 30px; --sc: 1.15; animation-duration: 7s; }
+  #pv-panel-v29 #det.dvx .gbg .b2 { --dx: -52px; --dy: 40px; --sc: .88; animation-duration: 5.5s; }
+  #pv-panel-v29 #det.dvx .gbg .b3 { --dx: 40px; --dy: -34px; --sc: 1.2; animation-duration: 8s; }
+  #pv-panel-v29 #det.dvx .gbg .b4 { --dx: -44px; --dy: -28px; --sc: .9; animation-duration: 6.5s; }
+  #pv-panel-v29 #det.dvx .gbg .b5 { --dx: 36px; --dy: 38px; --sc: 1.1; animation-duration: 5s; }
+  #pv-panel-v29 #det.dvx .shape { transform: translate(calc(var(--px, 0) * -12px), calc(var(--py, 0) * -10px)); transition: transform .9s cubic-bezier(.2, .8, .2, 1); }
+  #pv-panel-v29 #det.dvx .shape .sway { transform-box: view-box; transform-origin: 30% 100%; animation: pvSway 3.4s ease-in-out infinite alternate; }
+  #pv-panel-v29 #det.dvx .shape .ln { stroke-dasharray: 1; animation: pvDraw 1.3s ease-in-out both; animation-delay: calc(.15s + var(--i, 0) * .05s); }
+  #pv-panel-v29 #det.dvx .hd { animation: pvDown .35s .1s ease-out both; }
+  #pv-panel-v29 #det.dvx .xname { animation: pvLeft .4s .22s ease-out both; }
+  #pv-panel-v29 #det.dvx .xhero b { animation: pvUp .55s .2s cubic-bezier(.2, .8, .2, 1) both; }
+  #pv-panel-v29 #det.dvx .xhero span { animation: pvLeft .4s .4s ease-out both; }
+  #pv-panel-v29 #det.dvx .xgrid > div, #pv-panel-v29 #det.dvx .xlist > div { animation: pvUp .45s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(.35s + var(--i, 0) * .06s); }
+  #pv-panel-v29 #det.dvx .xobs { animation: pvUp .4s .5s ease-out both; }
+  #pv-panel-v29 #det.dvx .xacts button { animation: pvUp .4s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(.6s + var(--i, 0) * .07s); }
+  #pv-panel-v29 #s-inicio .kpis .kpi { animation: pvUp .5s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i, 0) * .07s); }
+  #pv-panel-v29 #s-inicio .kslots i { animation: pvPop .35s cubic-bezier(.2, 1.6, .4, 1) both; animation-delay: calc(.25s + var(--i, 0) * .05s); }
+  #pv-panel-v29 #s-inicio .kcols i { transform-origin: 50% 100%; animation: pvScaleY .55s cubic-bezier(.2, 1.3, .4, 1) both; animation-delay: .3s; }
+  #pv-panel-v29 #s-inicio .kring .fg { animation: pvRing 1.1s .35s cubic-bezier(.2, .8, .2, 1) both; }
+  #pv-panel-v29 #s-inicio .kweek i { transform-origin: 0 50%; animation: pvScaleX .4s ease-out both; animation-delay: .4s; }
+  #pv-panel-v29 #s-inicio .klol i { transform-origin: 50% 100%; animation: pvScaleY .5s ease-out both; animation-delay: .45s; }
+  #pv-panel-v29 #s-inicio .klol b { animation: pvPop .4s .7s cubic-bezier(.2, 1.6, .4, 1) both; }
 }

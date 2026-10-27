@@ -111,6 +111,8 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **27/10 · Claude · Inicio v29** · Rama `claude/project-thread-4ic2wy`, desde main `39eeaa8`. Inicio copia el boceto: pendientes, atención, tarjeta oscura, consultas de hoy/mañana/semana y cinco números, con datos reales y movimiento sin librería (se apaga con reducir movimiento). 3.418 pruebas, tipos, build y contrato de Inicio en verde. [Nota, paso 10 y plan de lo que falta](panel-nutri-rediseno/inicio-v29.md). Sin merge ni producción; HOLD hasta el ok visual de Facundo.
+
 - **27/10 · Codex · Handoff boceto → app** · [Handoff actualizado](panel-nutri-rediseno/handoff-boceto-a-app.md) desde main `c4bdf96`, con #176–#193 cerrados y siguiente módulo a elección de Facu. Solo documentación; PR en borrador, sin merge ni producción.
 
 - **27/10 · Cursor · Motion del panel v29** · Rama `cursor/motion-panel-v29-e2b6`, código `a986e2f`, base `11645a6`. Se portaron la pastilla del menú, la entrada `fin` de los módulos ya montados, el panel lateral `#act` y el aviso `#atoast`, con los mismos tiempos del boceto y con reducir movimiento. 3.409 pruebas aprobadas, dos omitidas, tipos en verde y el CSS generado igual al boceto. [Nota y paso 10](panel-nutri-rediseno/motion-v29.md). [PR #193 en borrador](https://github.com/Facu42/plan-v/pull/193). Sin merge, sin publicación y sin migración.
