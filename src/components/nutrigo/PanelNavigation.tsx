@@ -56,7 +56,7 @@ export function panelNavGroups(patients: readonly Patient[], unread: number, adm
     ] },
     { title: 'Recursos', items: [
       { label: 'Biblioteca', glyph: 'file', href: '/crm/biblioteca?biblioteca=recursos' },
-      { label: 'Centro de ayuda', glyph: 'shield', href: '/crm/desarrollo?modulo=ayuda' },
+      { label: 'Centro de ayuda', glyph: 'shield', href: '/crm/ayuda' },
     ] },
     { title: 'Cuenta', items: [
       { label: 'Equipo', glyph: 'team', href: '/crm/desarrollo?modulo=equipo' },
@@ -70,6 +70,10 @@ export function panelNavGroups(patients: readonly Patient[], unread: number, adm
 export function panelNavCurrent(href: string, current: string) {
   const target = new URL(href, 'https://plan.v');
   const location = new URL(current, 'https://plan.v');
+  if (location.pathname === '/crm/desarrollo' && location.searchParams.get('modulo') === 'ayuda') {
+    location.pathname = '/crm/ayuda';
+    location.searchParams.delete('modulo');
+  }
   if (target.pathname !== location.pathname) return false;
   return ['filtro', 'agenda', 'biblioteca', 'modulo', 'planes', 'editor', 'recordatorios', 'vista'].every(key => target.searchParams.get(key) === location.searchParams.get(key));
 }

@@ -1,0 +1,30 @@
+#pv-panel-v29 .help-columns{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#pv-panel-v29 .help-search{display:flex;align-items:center;gap:6px;min-width:0}
+#pv-panel-v29 .help-local-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#pv-panel-v29 .help-request{display:flex;flex-direction:column;gap:16px;margin-top:18px}
+#pv-panel-v29 .help-request label{display:flex;flex-direction:column;gap:8px;font-size:12px}
+#pv-panel-v29 .help-request select,#pv-panel-v29 .help-request textarea{font:inherit;color:var(--ink);background:var(--app);border:1px solid var(--line2);border-radius:10px;padding:10px;width:100%}
+#pv-panel-v29 .help-request textarea{min-height:120px;resize:vertical}
+#pv-panel-v29 .help-request .help-check{flex-direction:row;align-items:center}
+#pv-panel-v29 .help-check input{accent-color:var(--ink);flex:none}
+#pv-panel-v29 .help-dialog #act{left:auto;right:10px}
+#pv-panel-v29 #s-ayuda button.l{width:100%;text-align:left;font:inherit;color:inherit}
+#pv-panel-v29 #s-ayuda .fxp>header{flex-wrap:wrap}
+#pv-panel-v29 .help-search:focus-within{outline:2px solid var(--ink3);outline-offset:2px;border-radius:20px}
+#pv-panel-v29.mob .help-columns{grid-template-columns:minmax(0,1fr)}
+#pv-panel-v29.mob .help-search{flex:1 1 100%}
+#pv-panel-v29.mob .help-search .sxin{flex:1;min-width:0}
+#pv-panel-v29.mob .help-search input{width:100%;min-width:0}
+#pv-panel-v29.mob .help-dialog #act{left:0;right:0;width:100%;max-width:100%}
+/* Como Biblioteca: el móvil deja crecer el contenido en lugar de dividir una altura fija. */
+#pv-panel-v29:not(.mob) .main:has(#s-ayuda){height:100%;overflow:hidden}
+#pv-panel-v29:not(.mob) #pv-panel:has(#s-ayuda){flex:1;min-height:0}
+#pv-panel-v29.mob .main:has(#s-ayuda)>.top{flex:0 0 auto;height:auto;flex-wrap:wrap}
+#pv-panel-v29.mob #pv-panel:has(#s-ayuda),#pv-panel-v29.mob #s-ayuda,#pv-panel-v29.mob #s-ayuda>.fx{flex:none;height:auto;min-height:auto}
+#pv-panel-v29.mob #s-ayuda>.fx>.c{min-height:auto;height:auto;min-width:0}
+#pv-panel-v29 #s-ayuda .chip{font-size:12.5px;font-weight:400;padding:7px 11px;background:var(--card);color:var(--ink2);border:1px solid var(--line2)}
+#pv-panel-v29 #s-ayuda .sxtemas .chip.on{background:var(--lima-t);color:var(--ink);border-color:transparent}
+
+#pv-panel-v29 .help-dialog footer .sp{flex:1}
+/* El contenedor anterior de CRM redefine estas tintas; Ayuda hereda las del shell v29. */
+#pv-panel-v29 #pv-panel:has(#s-ayuda){--ink:inherit;--ink2:inherit}
