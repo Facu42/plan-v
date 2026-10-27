@@ -3,7 +3,6 @@ import './panel-fase5.css';
 const TITLES: Record<string, string> = {
   'asistente-ia': 'Asistente IA',
   ayuda: 'Centro de ayuda',
-  equipo: 'Equipo',
   recetas: 'Recetas',
   equivalencias: 'Equivalencias',
   modelos: 'Modelos',

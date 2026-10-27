@@ -1,4 +1,6 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-23)
+# Traspaso del proyecto (actualización vigente: 2026-10-27)
+
+27/10 · Cursor · Equipo y Ajustes del panel copian el boceto v29. El menú dice Ajustes. Lo que no tiene backend queda en «Próximamente», sin cifras inventadas. [Informe y paso 10](panel-nutri-rediseno/equipo-ajustes-v29.md). [PR #192](https://github.com/Facu42/plan-v/pull/192) en borrador, sin juntar.
 
 26/10 · Codex · Planes parte 3e: Formato/Medidas/Incluir orientan la generación y la lectura existente de trabajos trae el consumo y límite real de la bolsa compartida. Si falta registro se explica, sin gasto ni tope inventados. Dictar/Adjuntar siguen Próximamente. [Informe y paso 10](panel-nutri-rediseno/planes-parte-3e-armar-ia.md). Rama `work/planes-parte-3e-armar-ia`, sin parte 3d, producción ni merge.
 
