@@ -43,7 +43,7 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
-      command: `npx vite --host 127.0.0.1 --port ${WEB_PORT} --strictPort`,
+      command: `node scripts/prepare-clinical-pdf.mjs && npx vite --host 127.0.0.1 --port ${WEB_PORT} --strictPort`,
       url: `http://127.0.0.1:${WEB_PORT}/`,
       env: { ...demoEnv, VITE_API_PROXY: `http://127.0.0.1:${API_PORT}` },
       reuseExistingServer: false,

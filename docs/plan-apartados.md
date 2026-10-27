@@ -411,3 +411,8 @@ Quinta entrega apilada: [ficha clínica y exportación histórica, evidencia y l
 930 registros de la tabla exacta del Ministerio de Salud/CONICET, con 39 componentes y procedencia por celda, catálogo y selectores iniciales, unidades de 100 g/100 ml, copias históricas y control de definiciones de carbohidratos. Entrega 8 integrada sobre #127 `5c8ea54`, con main `9c56854` conservado. Suite propia final 2.999 aprobadas, cero fallos, dos omitidas y 458 archivos; tipos, build, migraciones, manifiesto 18 + tres bases exactas y secretos aprobados. Revisión de código y [QA 1440/390](sara2-qa-2026-10-16.md) aprobados, con editor/catálogo móvil y etiquetas de volumen corregidos; 1.787 huellas finales intactas. [Plan, contratos](sara2-implementacion-2026-10-14.md), [instructivo vigente](instructivo-plan-v-actualizado-2026-10-15.md) y [verificación propia y Regression Guard](sara2-verificacion-2026-10-15.md). Borrador propio pendiente de subir y comprobar CI. No se aplicó la migración ni se habilitaron proveedores.
 
 Planes parte 3b · 26/10/2026 · Codex: opciones reales del documento, descarga PDF e impresión separadas sobre #185. [Informe y Regression Guard](panel-nutri-rediseno/planes-parte-3b-pdf-real.md). Sin merge ni producción.
+
+
+## CI e2e regression repair · 2026-10-27
+
+Codex, authorized by Facundo: isolated branch `codex/fix-ci-e2e` from main #193. Root-cause diagnosis and repairs for help dialog geometry, PDF font preparation, template quantity setup, and exact-version publication. [Verification and Regression Guard](verification/ci-e2e-2026-10-27.md). No merge, deployment, or production database changes.

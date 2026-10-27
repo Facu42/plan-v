@@ -1,15 +1,39 @@
 import { expect, test } from '@playwright/test';
 import { enterDemo } from './helpers';
+import type { ProfessionalMealPlan } from '../src/types/plans';
+import type { ProfessionalRecipe } from '../src/types/recipes';
 
 test('guarda plantilla, la encuentra al recargar y copia comidas sin publicar', async ({ page }) => {
   await enterDemo(page, '/crm/plan');
+  // Other specs deliberately leave text-only drafts. Own the editable quantity fixture.
+  const plans = await page.request.get('/api/patients/pat-sofia/plans?audience=pro');
+  expect(plans.ok()).toBeTruthy();
+  const { plan } = await plans.json() as { plan: ProfessionalMealPlan };
+  const catalog = await page.request.get('/api/recipes');
+  expect(catalog.ok()).toBeTruthy();
+  const { recipes } = await catalog.json() as { recipes: ProfessionalRecipe[] };
+  const recipe = recipes.find(item => item.published)!;
+  expect(recipe).toBeDefined();
+  const seeded = await page.request.post('/api/patients/pat-sofia/plans', { data: {
+    id: plan.id, expected_revision: plan.current.revision,
+    period_start: plan.current.period_start, period_end: plan.current.period_end,
+    timezone: plan.timezone,
+    items: [{ for_date: plan.current.period_start, slot: 'Desayuno', recipe_id: recipe.id,
+      recipe_version: recipe.published!.version, portions: 1, public_note: '' }],
+  } });
+  expect(seeded.ok()).toBeTruthy();
+  await enterDemo(page, '/crm/plan');
   await page.getByRole('button', { name: /plan (de|para) Sofía R\./ }).click();
+  await page.getByLabel('Elegir día', { exact: true }).getByRole('button').first().click();
   const cantidad = page.getByRole('spinbutton', { name: /^Cantidad de/ }).first();
+  await expect(cantidad).toHaveValue('1');
   await cantidad.fill('2');
-  await Promise.all([
+  const [saved] = await Promise.all([
     page.waitForResponse(r => r.url().includes('/api/patients/pat-sofia/plans') && r.request().method() === 'POST'),
     cantidad.press('Tab'),
   ]);
+  expect(saved.ok()).toBeTruthy();
+  expect(((await saved.json()) as { plan: ProfessionalMealPlan }).plan.current.items[0].portions).toBe(2);
   const origen = (await (await page.request.get('/api/patients/pat-sofia/plans?audience=pro')).json()).plan;
   await page.getByRole('button', { name: 'Guardar como plantilla', exact: true }).first().click();
   const dialogo = page.getByRole('dialog');
@@ -24,6 +48,8 @@ test('guarda plantilla, la encuentra al recargar y copia comidas sin publicar', 
   const despues = (await (await page.request.get(`/api/patients/${destinoId}/plans?audience=pro`)).json()).plan;
   expect(await page.locator('#s-planes').evaluate(el => getComputedStyle(el).fontFamily)).toContain('Inter');
   expect(despues.current.status).toBe('draft');
+  expect(despues.current.items[0].recipe_id).toBe(recipe.id);
+  expect(despues.current.items[0].recipe_version).toBe(recipe.published!.version);
   expect(despues.current.items.map((i: { free_text: string }) => i.free_text)).toEqual(origen.current.items.map((i: { free_text: string }) => i.free_text));
   expect(despues.current.items.map((i: { portions: number }) => i.portions)).toEqual(origen.current.items.map((i: { portions: number }) => i.portions));
   expect(despues.published).toEqual(antes?.published ?? null);
