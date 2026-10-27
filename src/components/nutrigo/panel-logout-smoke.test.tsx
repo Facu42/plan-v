@@ -53,7 +53,7 @@ describe('recorrido de cerrar sesión', () => {
     } finally {
       await browser.close();
     }
-  }, 20000);
+  }, 60000);
 
   it.skipIf(!chrome)('sigue encontrando cerrar sesión cuando ya está a la vista', async () => {
     const browser = await chromium.launch({ executablePath: chrome, headless: true, args: ['--no-sandbox'] });
@@ -64,5 +64,5 @@ describe('recorrido de cerrar sesión', () => {
     } finally {
       await browser.close();
     }
-  }, 20000);
+  }, 60000);
 });

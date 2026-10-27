@@ -577,6 +577,8 @@
 #pv-panel-v29 .fxsel { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; color: var(--ink3); }
 #pv-panel-v29 .fxsel select { height: 34px; border: 1px solid var(--line); border-radius: 10px; background: var(--app); color: var(--ink); font: inherit; font-size: 12.5px; padding: 0 10px; }
 #pv-panel-v29 #s-ficha .pw-record { padding-top: 14px; }
+/* Lo que la Ficha todavía muestra con piezas anteriores usa la letra del resto del panel, no la de Nutrigo. */
+#pv-panel-v29 #s-ficha .pw-record, #pv-panel-v29 #s-ficha .pw-record * { font-family: var(--font); }
 /* Con datos reales las columnas pueden pedir más alto que la pantalla: la ficha se desplaza dentro de su marco en vez de aplastar las tarjetas. */
 #pv-panel-v29 #s-ficha #fwrap > .fx { flex: 1 0 auto; }
 #pv-panel-v29 #s-ficha #fwrap > .fxp { flex: none; margin-top: 14px; }
@@ -584,3 +586,15 @@
 #pv-panel-v29 #pv-panel:has(#s-ficha) { --ink: inherit; --ink2: inherit; --ink3: inherit; --line: inherit; color: var(--ink); background: transparent; }
 #pv-panel-v29 #pv-panel #s-ficha .card.fh { border-radius: 16px; padding: 16px 20px; }
 #pv-panel-v29 #pv-panel #s-ficha .chip { font-size: 12.5px; }
+
+/* Ficha · solapas chicas, botón chico y chip de los paneles: la hoja vieja agranda el cuerpo y la línea. */
+#pv-panel-v29 #s-ficha .fxp .tabs { gap: 2px; background: var(--app); border: 1px solid var(--line); border-radius: 9px; padding: 2px; margin-left: -2px; }
+#pv-panel-v29 #s-ficha .fxp .tabs button { font-size: 11.5px; padding: 4px 9px; border-radius: 7px; font-weight: 400; line-height: normal; letter-spacing: normal; color: var(--ink2); }
+#pv-panel-v29 #s-ficha .fxp .tabs button.on { background: var(--card); color: var(--ink); box-shadow: var(--shadow); font-weight: 400; }
+#pv-panel-v29 #s-ficha .fxp > header .chip { line-height: normal; letter-spacing: normal; }
+#pv-panel-v29 #s-ficha .fxp .sbtn { display: inline-flex; align-items: center; justify-content: center; gap: 0; height: auto; padding: 5px 9px; border-radius: 8px; font-size: 11.5px; font-weight: 400; line-height: normal; letter-spacing: normal; }
+#pv-panel-v29 #s-ficha .fxp .sbtn svg { display: block; position: relative; top: -1.5px; }
+#pv-panel-v29 #s-ficha .fxp .sbtn.k { min-height: 28px; }
+
+/* Historia clínica: la hoja vieja (`.m#pv-panel .st::before`) le pinta un punto gris adentro al punto de estado del tema. */
+#pv-panel-v29 #s-ficha .hcidx .st::before{content:none}

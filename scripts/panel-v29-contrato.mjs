@@ -71,6 +71,59 @@ export const PIEZAS_FICHA = [
   ['Datos en columna', '#s-ficha .fxkv > div', '', ['paddingTop', 'fontSize']],
 ];
 
+// Piezas de la solapa Mediciones de la Ficha. Kerr y las filas de la tabla dependen de datos que la demo no trae: se miran en las capturas.
+export const PIEZAS_MEDICIONES = [
+  ['Panel de medidores', '#s-ficha .fxgauges', '', ['gap', 'gridTemplateColumns']],
+  ['Medidor chico', '#s-ficha .fxgauges .pg', '', ['width']],
+  ['Nombre del medidor', '#s-ficha .fxgauges small', '', ['fontSize', 'color']],
+  ['Nota del medidor', '#s-ficha .fxgauges em', '', ['fontSize', 'color']],
+  ['Solapas de medidas', '#s-ficha .fxp .tabs', '', ['borderTopLeftRadius', 'paddingTop', 'backgroundColor']],
+  ['Solapa de medidas elegida', '#s-ficha .fxp .tabs button.on', '', ['fontSize', 'fontWeight', 'backgroundColor']],
+  ['Encabezado de la tabla', '#s-ficha .fxtb th', '', ['fontSize', 'color', 'paddingTop']],
+  ['Botón de fórmula', '#s-ficha .fxp > header .chip', '', ['height', 'fontSize', 'borderTopLeftRadius']],
+  ['Botón chico', '#s-ficha .fxp > header .sbtn', '', ['height', 'fontSize', 'borderTopLeftRadius']],
+];
+
+// Piezas de la solapa Laboratorio y estudios. La demo no trae informes ni permiso: la app se mira con valores de ejemplo simulados (`simularLaboratorio`).
+export const PIEZAS_LABORATORIO = [
+  ['Tabla de valores', '#s-ficha .lbt table th', '', ['fontSize', 'color', 'paddingTop', 'textTransform']],
+  ['Fecha de la columna', '#s-ficha .lbch', '', ['gap', 'fontSize', 'borderTopLeftRadius']],
+  ['Fecha en número', '#s-ficha .lbch b', '', ['fontSize', 'fontWeight']],
+  ['Nombre del valor', '#s-ficha .lbt tr[data-lbr] td b, #s-ficha .lbt tbody tr:not(.lbg) td b', '', ['fontSize', 'fontWeight']],
+  ['Último valor', '#s-ficha .lbt td.last', '', ['fontSize', 'fontWeight', 'color']],
+  ['Valor fuera de rango', '#s-ficha .lbt td.out', '', ['color']],
+  ['Referencia', '#s-ficha .lbt td.u', '', ['fontSize', 'color']],
+  ['Solapas Valores y Por fecha', '#s-ficha .tabs.lbv', '', ['borderTopLeftRadius', 'paddingTop', 'backgroundColor']],
+  ['Curva del valor', '#s-ficha .lbchart', '', ['width']],
+  ['Banda del rango', '#s-ficha .lbband', '', ['fill']],
+  ['Punto de la curva', '#s-ficha .lbpt', '', ['stroke', 'strokeWidth']],
+  ['Historial del valor', '#s-ficha .lbhist > div', '', ['paddingTop', 'fontSize']],
+];
+
+// Piezas de la solapa Historia clínica. La demo no trae datos ni permiso de atención: la app se mira con una historia de ejemplo simulada (`simularHistoria`).
+export const PIEZAS_HISTORIA = [
+  ['Índice de temas', '#s-ficha .hcidx', '', ['borderRightWidth', 'paddingRight', 'gap']],
+  ['Tema del índice', '#s-ficha .hcidx > button', '', ['fontSize', 'borderTopLeftRadius', 'paddingTop']],
+  ['Tema elegido', '#s-ficha .hcidx > button.on', '', ['backgroundColor', 'borderTopLeftRadius']],
+  ['Punto del tema', '#s-ficha .hcidx .st', '', ['width', 'height', 'backgroundColor']],
+  ['Título del tema', '#s-ficha .hced h4', '', ['fontSize', 'fontWeight']],
+  ['Dato', '#s-ficha .hce', '', ['borderTopLeftRadius', 'paddingTop', 'paddingLeft']],
+  ['Texto del dato', '#s-ficha .hcin', '', ['fontSize', 'lineHeight']],
+  ['Origen del dato', '#s-ficha .hcsrc', '', ['fontSize', 'borderTopLeftRadius', 'paddingLeft']],
+  ['Dato dado de baja', '#s-ficha .hcpast s', '', ['fontSize', 'color']],
+  ['Solapas Por tema y Por fecha', '#s-ficha .tabs.hcv', '', ['borderTopLeftRadius', 'paddingTop', 'backgroundColor']],
+];
+
+// Piezas de la solapa Objetivos y hábitos. El objetivo viene de la paciente de la demo; los hábitos sin registro muestran «—».
+export const PIEZAS_OBJETIVOS = [
+  ['Anillo del objetivo', '#s-ficha .fxgoals .fxring', '', ['width', 'height']],
+  ['Número del anillo', '#s-ficha .fxgoals .fxring b', '', ['fontSize', 'fontWeight']],
+  ['Nombre del objetivo', '#s-ficha .fxgoals b', '', ['fontSize', 'fontWeight']],
+  ['Hábito', '#s-ficha .fxhab > div', '', ['borderTopLeftRadius', 'paddingTop', 'paddingLeft']],
+  ['Columnas de la semana', '#s-ficha .fxwk', '', ['height', 'gap']],
+  ['Síntomas y energía', '#s-ficha .fxp.g > header h3', '', ['fontSize', 'fontWeight']],
+];
+
 // Piezas de Asistente. El encabezado vive en el armazón; acá se mide el cuerpo, que existe en los dos.
 export const PIEZAS_ASISTENTE = [
   ['Caja del pedido', '#s-asistente .sxask textarea', '', ['fontSize', 'fontFamily', 'borderTopLeftRadius', 'height']],
@@ -424,6 +477,48 @@ async function abrirAlimentosApp(pagina) {
   await pagina.waitForSelector('.top .sxin input', { timeout: 20000 });
 }
 
+/** Responde con un laboratorio de ejemplo y el permiso de estudios, porque la demo no trae ninguno. */
+async function simularLaboratorio(pagina) {
+  const uid = n => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+  const valores = [['Ferritina', 'ng/ml', '30 - 200', [9, 11, 14]], ['Hemoglobina', 'g/dl', '12 - 16', [11.4, 11.9, 12.3]], ['Glucemia', 'mg/dl', '70 - 100', [90, 88, 86]], ['Colesterol total', 'mg/dl', '< 200', [195, 188, 182]]];
+  const fechas = ['2024-07-15', '2026-03-20', '2026-10-12'];
+  const documentos = fechas.map((f, k) => ({ id: uid(100 + k), patient_id: 'x', filename: `Laboratorio ${k + 1}.pdf`, mime: 'application/pdf', source_sha256: 'a'.repeat(64), asset_id: 'z', created_at: `${f}T10:00:00Z` }));
+  await pagina.route(/\/api\/patients\/[^/]+\/care\?audience=pro/, async ruta => {
+    const respuesta = await ruta.fetch();
+    const cuerpo = await respuesta.json();
+    cuerpo.consented = [...new Set([...(cuerpo.consented ?? []), 'clinical_document', 'care_relationship', 'measurement'])];
+    await ruta.fulfill({ response: respuesta, json: cuerpo });
+  });
+  await pagina.route(/\/api\/patients\/([^/]+)\/clinical-workspace$/, async ruta => {
+    const id = ruta.request().url().match(/patients\/([^/]+)\//)[1];
+    const records = fechas.map((f, k) => ({ id: uid(200 + k), patient_id: id, recorded_on: f, created_at: `${f}T10:00:00Z`, note: '', reviewed: true, data: { kind: 'laboratory', document_id: documentos[k].id, values: valores.map(([n, u, ref, v], i) => ({ id: uid(300 + k * 20 + i), name: n, value: v[k], operator: '', unit: u, range_text: ref, raw_value: String(v[k]).replace('.', ','), source_line: n, page: 1, reviewed: true })) } }));
+    await ruta.fulfill({ json: { records, documents: documentos.map(d => ({ ...d, patient_id: id })), references: [], brand: null } });
+  });
+}
+
+/** Responde con una historia de ejemplo (el permiso de atención lo pone `simularLaboratorio`) (con altas, ediciones y bajas), porque la demo no trae ninguna. */
+export async function simularHistoria(pagina) {
+  const dato = (n, topic, text, recorded_on, extra = {}) => ({ id: `00000000-0000-4000-8000-${String(900 + n).padStart(12, '0')}`, topic, text, since: '', source: 'professional', recorded_on, edited_on: null, ended_on: null, ended_reason: '', ...extra });
+  let entries = [
+    dato(1, 'motivo', 'Bajar grasa y tener más energía. Probó dietas estrictas y las dejó al mes.', '2026-03-12'),
+    dato(2, 'diag', 'Celiaquía, con biopsia', '2026-03-12', { since: 'desde 2019' }), dato(3, 'diag', 'Hipotiroidismo compensado', '2026-03-12', { since: 'desde 2021' }),
+    dato(4, 'med', 'Levotiroxina 25 µg en ayunas', '2025-06-10', { source: 'import', ended_on: '2026-03-12', ended_reason: 'la endocrinóloga subió la dosis' }),
+    dato(5, 'med', 'Levotiroxina 50 µg en ayunas', '2026-03-12', { since: 'desde marzo 2026' }), dato(6, 'med', 'Hierro, 1 por día', '2026-10-14', { since: 'desde el 20/08/26', source: 'recording' }),
+    dato(7, 'alerg', 'Gluten (celiaquía)', '2026-03-12', { since: 'desde 2019' }), dato(8, 'r24', 'Mate solo · tostadas sin TACC con queso · ensalada con pollo', '2026-10-12', { source: 'patient' }),
+  ];
+  const hoy = new Date().toISOString().slice(0, 10);
+  await pagina.route(/\/api\/crm\/patients\/[^/]+\/history(\/.*)?$/, async ruta => {
+    const pedido = ruta.request();
+    const partes = new URL(pedido.url()).pathname.split('/');
+    const alta = partes[partes.length - 1] === 'end' ? partes[partes.length - 2] : partes[partes.length - 1] !== 'history' ? partes[partes.length - 1] : null;
+    const cuerpo = pedido.postData() ? JSON.parse(pedido.postData()) : {};
+    if (pedido.method() === 'POST' && !alta) entries = [...entries, dato(entries.length + 1, cuerpo.topic, cuerpo.text, hoy, { since: cuerpo.since ?? '' })];
+    else if (pedido.method() === 'PATCH') entries = entries.map(e => e.id === alta ? { ...e, text: cuerpo.text, edited_on: hoy } : e);
+    else if (pedido.method() === 'POST') entries = entries.map(e => e.id === alta ? { ...e, ended_on: hoy, ended_reason: cuerpo.reason ?? '' } : e);
+    await ruta.fulfill({ json: { entries } });
+  });
+}
+
 async function abrirAsistenteApp(pagina) {
   await pagina.locator('#pv-panel-v29 a.nv[href="/crm/desarrollo?modulo=asistente-ia"]').click();
   await pagina.waitForSelector('#s-asistente .sxask textarea', { timeout: 20000 });
@@ -445,6 +540,8 @@ export async function correrContratoV29() {
     for (const tema of ['dark', 'light']) {
       const b = await abrirBoceto(navegador, tema);
       const a = await abrirApp(navegador, tema);
+      await simularLaboratorio(a);
+      await simularHistoria(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · armazón\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_V29, informe);
       await a.waitForSelector('#s-inicio .kpis', { timeout: 20000 });
@@ -463,6 +560,31 @@ export async function correrContratoV29() {
       await abrirFichaApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_FICHA, informe);
+      await b.locator('#ftabs [data-ft="mediciones"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Mediciones$/ }).click();
+      await a.waitForSelector('#s-ficha .fxgauges', { timeout: 20000 });
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Mediciones\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_MEDICIONES, informe);
+      await b.locator('#ftabs [data-ft="laboratorio"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Laboratorio y estudios/ }).click();
+      await a.waitForSelector('#s-ficha .lbt tbody td.out', { timeout: 20000 });
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Laboratorio\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_LABORATORIO, informe);
+      await b.locator('#ftabs [data-ft="historia"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Historia clínica/ }).click();
+      await a.waitForSelector('#s-ficha .hcidx', { timeout: 20000 });
+      await a.waitForSelector('#s-ficha .hcpast', { timeout: 20000 }).catch(() => undefined);
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Historia clínica\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_HISTORIA, informe);
+      await b.locator('#ftabs [data-ft="objetivos"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Objetivos y hábitos/ }).click();
+      await a.waitForSelector('#s-ficha .fxhab', { timeout: 20000 });
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Objetivos y hábitos\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_OBJETIVOS, informe);
       await abrirSeguimientoBoceto(b);
       await abrirSeguimientoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Seguimiento\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');

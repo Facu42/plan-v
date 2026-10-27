@@ -77,3 +77,86 @@ Según la regla 12 de `CLAUDE.md`: lo que el archivo no dibuja se arma con sus p
 - **Fire test:** se bajó el tope del avance de 100 a 99 en `avanceEnKilos`; la prueba «el avance nunca pasa de 0 a 100» se puso roja; se revirtió ✅.
 - **Automatizaciones nuevas:** `PIEZAS_FICHA` en `scripts/panel-v29-contrato.mjs` compara 21 piezas con el boceto en cada corrida.
 - **Veredicto:** HOLD hasta el ok visual de Facundo. Técnicamente SHIP (pruebas, tipos y contrato en verde).
+
+## Parte 2a · Mediciones
+
+Solapa armada con el HTML del boceto (el de piezas `fx`): cuatro a cinco medidores, tabla con solapas, Evolución, Kerr y «Para {nombre}». Captura: `docs/screenshots/ficha-v29/mediciones-claro-app.png` (al lado, la del boceto). El contrato compara las piezas de Mediciones en claro y oscuro: todas iguales.
+
+Valores por defecto elegidos:
+- **Pliegues y fórmula**: Plan V todavía no carga pliegues; la tabla lo dice y el botón «Sin fórmula validada» queda apagado hasta que Verónica valide una fórmula.
+- **Medidores**: IMC (peso y altura, categorías de la OMS), Grasa, Músculo, Cintura y Cintura/cadera. Sin dato muestran «—» y «Sin dato» o «Falta la altura»; las escalas son fijas.
+- **Evolución**: pestañas Peso, Grasa y Cintura (el boceto trae Pliegues, que no existe); la línea de meta solo aparece si el objetivo trae kilos.
+- **Kerr**: solo resultados cargados por la profesional, con la etiqueta «Resultados de la profesional». No se calcula nada automático.
+- **Informe de mediciones y Fotos de progreso**: los botones llevan a Archivos.
+- **Objetivos y hábitos** (meta y hábitos de la semana) pasan a la solapa Objetivos y hábitos; las medidas completas, evaluaciones clínicas y registros compartidos quedan debajo, plegados.
+
+### Paso 10 · Mediciones
+- **Flujos:** cargar medición, importar balanza (diálogos de siempre, sin cambios), cambiar solapas y gráfico (✅ prueba de render + contrato).
+- **Regresiones cubiertas:** sin permiso de medidas lo dice y apaga los botones (✅); sin datos no inventa valores (✅); IMC solo con peso y altura (✅, 13 pruebas de cálculo).
+- **Contratos:** sin cambios de servidor ni de API; mismos `careApi` y diálogos.
+- **Migraciones:** N/A. **Veredicto:** HOLD hasta el ok visual de Facundo; técnicamente SHIP.
+
+## Parte 2b · Laboratorio y estudios
+
+Solapa armada con el HTML final del boceto (`FT.laboratorio`, el de las vistas «Valores» y «Por fecha»), con los valores revisados reales del laboratorio. Capturas: `docs/screenshots/ficha-v29/laboratorio-claro.png`, `laboratorio-oscuro.png` (con una fecha abierta) y `laboratorio-por-fecha.png`. El contrato compara 12 piezas en claro y oscuro (con un laboratorio de ejemplo simulado, porque la demo no trae informes): todas iguales.
+
+Valores por defecto elegidos:
+- **Estado (Bajo, Alto, Límite, Normal)**: solo con valor exacto y un rango del informe que se entienda («30 - 200», «< 5», «mín. 30»…). Con comparador o rango ambiguo se muestra «Sin rango»; nunca se interpreta de más. «Límite» = dentro del primer 10 % del rango, como el boceto.
+- **Columnas**: las últimas tres fechas con análisis; tocar una fecha abre «Análisis del …» con cada valor y cómo cambió contra el anterior; «Por fecha» lista cada informe con sus valores, cuántos salen del rango y el botón Ver (el PDF de siempre).
+- **Curva**: línea de tiempo real con la banda del rango del informe; sin eventos (medicación, dieta) hasta que exista la Historia clínica con fechas (parte 2c).
+- **Agrupación por categoría** (Hierro, Vitaminas, Tiroides…): no se hace; Plan V no guarda la categoría de cada valor y no se inventa. Todos los valores van en una lista.
+- **«Sugerencia de la IA» y «Aplicar al plan»**: no hay una función real detrás. En su lugar, cuando el valor elegido sale del rango, una nota «Para revisar» con el rango del informe, sin recomendar alimentos.
+- **«Analizar con IA»**: no se dibuja, no tiene función real; la lectura por IA del PDF sigue en «Cargar análisis».
+- **«De la consulta grabada»**: el bloque queda con un texto corto («Sin propuestas por ahora») hasta que se conecten las consultas grabadas con el laboratorio.
+- **Pedidos de estudios**: lista los pedidos guardados (estudios, fecha y motivo). «Nuevo pedido» lleva a Archivos, donde ya se arma el pedido y su PDF. No hay estado «Por enviar / Recibido»: no se guarda.
+- **Agregar valor a mano**, **Cargar análisis** y **Estudios adjuntos y revisión** conservan sus formularios; se abren arriba de la solapa.
+
+### Paso 10 · Laboratorio
+- **Flujos:** cargar análisis (lector de PDF), agregar valor a mano con informe de origen y confirmación profesional, ver el PDF, cambiar entre valores y fechas (✅ cálculo con 11 pruebas; los formularios y el visor no se tocaron).
+- **Regresiones cubiertas:** sin permiso lo dice y apaga los botones (⚠️ cubierto por render en demo); resultados con comparador no se dibujan como exactos (✅); rango ambiguo → «Sin rango» (✅); otra paciente nunca aparece en la lista (✅).
+- **Contratos:** sin cambios de servidor ni de API; mismo `clinicalWorkspaceApi.snapshot`.
+- **Migraciones:** N/A. **Veredicto:** HOLD hasta el ok visual de Facundo; técnicamente SHIP.
+
+## Parte 2c · Historia clínica
+
+Solapa armada con el HTML final del boceto (`FT.historia`): índice de catorce temas, datos con fecha y origen que se editan en el lugar, «Dar de baja» (pasa a «Antes»), vista «Por fecha», «Ver cómo estaba» (la historia a una fecha) y los datos que cambian el plan. Capturas: `docs/screenshots/ficha-v29/historia-claro.png` y `historia-por-fecha-oscuro.png`. El contrato compara 10 piezas en claro y oscuro (con una historia de ejemplo simulada): todas iguales.
+
+**Base de datos:** tabla nueva `patient_history_entries` (migración `20261027130000_patient_history_entries.sql`, solo agrega; no se borra nunca un dato, «dar de baja» completa la fecha). **No se aplicó nada en la base**: espera la frase de Facundo. Mientras tanto la API existe pero la tabla no, así que en producción la solapa mostraría el aviso de error con «Reintentar». Se junta después de aplicar la migración.
+
+Valores por defecto elegidos:
+- **Qué guarda cada dato:** texto (hasta 600 letras), «desde cuándo» (opcional), origen, fecha de carga, fecha de edición y, si se dio de baja, hasta cuándo y por qué. Hoy todo lo que se carga desde el panel queda como «Vos»; los otros orígenes (paciente en la app, importado, consulta grabada, formulario) ya existen en la tabla para cuando se conecten.
+- **Permiso:** se lee y se escribe solo con el permiso de atención de la paciente (`care_relationship`), igual que los pedidos de estudios.
+- **Lo que ya había** (respuestas del formulario de ingreso, historia importada, datos del primer día) no se copia a la tabla nueva: queda en el bloque «Respuestas del formulario, datos importados y primer día», debajo y abierto por defecto (así se revisa el ingreso sin buscarlo); «Ver respuestas» y «Formularios» lo abren.
+- **«De la consulta grabada» (propuestas de la IA)**: el bloque queda con un texto corto, sin botones, hasta que se conecten las consultas grabadas con la historia. Nada entra solo.
+- **«Datos que cambian el plan»**: junta lo vigente de Alergias, Diagnósticos, Medicación y Preferencias; no interpreta ni resume.
+- **«Plantilla: General + Celiaquía»** y **«Mandar formulario»**: no se dibujan; no hay función real detrás.
+- **«No aplica»** (Embarazo, etc.): no hay forma de marcarlo todavía; un tema sin datos dice «Falta completar».
+- **Tema inicial:** Medicación y suplementos, como el boceto.
+- **Dar de baja** no pide motivo (el boceto tampoco); queda con la fecha de hoy.
+
+### Paso 10 · Historia clínica
+- **Flujos:** agregar, editar y dar de baja un dato, ver por fecha y cómo estaba a una fecha (✅ 6 pruebas de la API en memoria, 8 de cálculo y 4 de pantalla; recorrido a mano con capturas).
+- **Regresiones cubiertas:** sin permiso de atención no lee ni escribe (✅); otra paciente → 403 (✅); campos de más o temas inventados → 400 (✅); un dato dado de baja ya no se puede cambiar (✅); lo dado de baja nunca desaparece (✅).
+- **Contratos:** rutas nuevas `/api/crm/patients/:id/history` (GET, POST, PATCH `/:entryId`, POST `/:entryId/end`); no se tocó ninguna existente. Falta una prueba de la política de filas contra Postgres: se corre al aplicar la migración.
+- **Áreas frágiles:** (1) permisos por paciente y por consultorio (`scheduling_can_manage`); (2) contenteditable: se guarda al salir del campo o con Enter; si el servidor falla, el aviso queda a la vista y el texto escrito no se pierde de pantalla.
+- **Migraciones:** una, aditiva, sin `DROP`. **Veredicto:** HOLD: espera la frase de la base y el ok visual de Facundo. Técnicamente SHIP una vez aplicada.
+
+## Parte 3a · Objetivos y hábitos
+
+Solapa armada con el HTML de `objetivos:` del boceto (dos columnas: Objetivos y Hábitos de la semana a la izquierda; Energía y Síntomas a la derecha), con lo que la paciente carga en su app. Capturas: `docs/screenshots/ficha-v29/objetivos-claro.png` y `objetivos-oscuro.png` (paciente de la demo con registros de ejemplo de hábitos, energía y síntomas). El contrato compara 6 piezas en claro y oscuro; todas iguales.
+
+Valores por defecto elegidos (lo que el boceto dibuja y Plan V no tiene):
+- **Objetivos:** Plan V guarda **un solo objetivo** por paciente, con avance declarado por la profesional (no se calcula del peso). Se dibuja ese objetivo con su anillo; «Actualizar» (o «Agregar» si no hay) abre el editor de siempre y el historial queda en un desplegable. Los otros cuatro objetivos del boceto («se actualizan solos») no existen todavía y **no se inventan**.
+- **Hábitos de la semana:** Agua (promedio de vasos de los días con registro; meta de la paciente), Sueño (promedio de horas; referencia fija de 7 h, porque no hay meta de sueño por paciente), Actividad (días con actividad cargada en los últimos 7; pide el permiso de atención) y Energía (último registro). Sin registro dicen «—», nunca un cero inventado. Pasos y litros no se dibujan: no hay dato.
+- **Energía en vez de Ánimo:** el boceto muestra el ánimo de 1 a 5; la app solo guarda energía Alta, Media o Baja. Se dibujan los 14 días en tres niveles y el promedio de 1 a 3. El bloque queda aunque no haya datos.
+- **Síntomas:** los que la paciente marcó en 14 días, del más repetido al menos; sin ninguno, un texto corto. No se dibuja el «cuándo» del síntoma («después del almuerzo»): no se guarda.
+- **«Relación que ve la IA»:** no se dibuja; no hay función real detrás.
+- Debajo sigue la «Planificación nutricional» de siempre (metabolismo, gasto, meta), con la letra del resto del panel (SF Pro); la solapa se arma sin el margen extra de las pantallas anteriores, igual que Mediciones.
+- **Energía del último registro:** se muestra como Alta, Normal o Baja.
+
+### Paso 10 · Objetivos y hábitos
+- **Flujos:** actualizar/agregar el objetivo (editor existente, sin cambios); lectura de hábitos, energía y síntomas (✅ 7 pruebas de cálculo y 2 de pantalla).
+- **Regresiones cubiertas:** sin permiso de atención la actividad dice «—»; sin registros no hay ceros inventados; objetivo vacío ofrece «Agregar».
+- **Contratos:** ninguna ruta ni tabla nueva; solo lectura de datos que ya llegan. Se quitó `PanelPatientObjetivos` (sin otros usos).
+- **Áreas frágiles:** el promedio de energía mezcla etiquetas; un valor viejo fuera de Alta/Media/Baja (por ejemplo «Buena» en la demo) se muestra como texto en el último registro pero no cuenta en la columna.
+- **Migraciones:** ninguna. **Veredicto:** HOLD hasta el ok visual de Facundo; técnicamente SHIP.
