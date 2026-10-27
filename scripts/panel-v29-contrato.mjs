@@ -46,6 +46,31 @@ export const PIEZAS_V29 = [
   ['CTA', '.app .top .cta', '', ['backgroundColor', 'color']],
 ];
 
+// Piezas de la Ficha: encabezado, solapas y Resumen. El encabezado es el de Nutreando (`.fh.ntfh`), que es el que quedó en el boceto.
+export const PIEZAS_FICHA = [
+  ['Encabezado', '#s-ficha .card.fh', '', ['borderTopLeftRadius', 'paddingTop', 'paddingLeft']],
+  ['Avatar', '#s-ficha .fh .av', '', ['width', 'height', 'fontSize', 'backgroundColor']],
+  ['Migaja', '#s-ficha .fh .crumb', '', ['fontSize', 'color']],
+  ['Nombre', '#s-ficha .fh h1', '', ['fontSize', 'fontWeight', 'letterSpacing']],
+  ['Etiqueta', '#s-ficha .fh .tg2', '', ['fontSize', 'borderTopLeftRadius', 'paddingLeft']],
+  ['Estado de la app', '#s-ficha .fh .appst b', '', ['fontSize', 'color']],
+  ['Botón del encabezado', '#s-ficha .ntfhg > .chip', '', ['height', 'fontSize', 'borderTopLeftRadius', 'paddingLeft']],
+  ['Iniciar consulta', '#s-ficha .ntfhg > .cta', '', ['height', 'backgroundColor', 'color', 'borderTopLeftRadius']],
+  ['Solapas', '#ftabs', '', ['paddingLeft', 'borderBottomWidth', 'borderBottomColor']],
+  ['Solapa', '#ftabs button:not(.on)', '', ['fontSize', 'paddingTop', 'paddingLeft', 'color']],
+  ['Solapa elegida', '#ftabs button.on', '', ['fontWeight', 'color', 'backgroundColor']],
+  ['Contador de la solapa', '#ftabs .n', '', ['fontSize', 'borderTopLeftRadius', 'paddingLeft']],
+  ['Mosaico', '#s-ficha .fxtile', '', ['borderTopLeftRadius', 'paddingTop', 'paddingLeft', 'backgroundColor']],
+  ['Número del mosaico', '#s-ficha .fxtile .fxv b', '', ['fontSize', 'fontWeight']],
+  ['Panel', '#s-ficha .fxp:not(.fxtile)', '', ['borderTopLeftRadius', 'paddingTop', 'paddingLeft', 'backgroundColor']],
+  ['Título del panel', '#s-ficha .fxp > header h3', '', ['fontSize', 'fontWeight']],
+  ['Fila', '#s-ficha .fxr > *', '', ['paddingTop', 'paddingLeft']],
+  ['Título de la fila', '#s-ficha .fxr .t b', '', ['fontSize', 'fontWeight']],
+  ['Tarjeta oscura', '#s-ficha .fxdk', '', ['borderTopLeftRadius', 'backgroundColor', 'paddingTop', 'paddingLeft']],
+  ['Medio círculo', '#s-ficha .pg', '', ['width']],
+  ['Datos en columna', '#s-ficha .fxkv > div', '', ['paddingTop', 'fontSize']],
+];
+
 // Piezas de Asistente. El encabezado vive en el armazón; acá se mide el cuerpo, que existe en los dos.
 export const PIEZAS_ASISTENTE = [
   ['Caja del pedido', '#s-asistente .sxask textarea', '', ['fontSize', 'fontFamily', 'borderTopLeftRadius', 'height']],
@@ -312,6 +337,22 @@ async function abrirAgendaApp(pagina) {
   await pagina.waitForTimeout(800);
 }
 
+async function abrirFichaBoceto(pagina) {
+  await pagina.evaluate(() => globalThis.go('ficha'));
+  await pagina.waitForSelector('#s-ficha:not([hidden]) .fx .fxtile', { timeout: 10000 });
+  await pagina.waitForTimeout(1500);
+}
+
+async function abrirFichaApp(pagina) {
+  await pagina.locator('#pv-panel-v29 a[href="/crm/pacientes"]').first().click();
+  await pagina.waitForSelector('#s-pacientes #prows tr[data-i]', { timeout: 20000 });
+  await pagina.locator('#prows tr[data-i]').first().click();
+  await pagina.waitForSelector('#prows .pdin', { timeout: 10000 });
+  await pagina.locator('#prows .pd-acts .go').first().click();
+  await pagina.waitForSelector('#s-ficha .fx .fxtile', { timeout: 20000 });
+  await pagina.waitForTimeout(1500);
+}
+
 async function abrirSeguimientoBoceto(pagina) {
   await pagina.locator('[data-go="seguimiento"]').first().click();
   await pagina.waitForSelector('#s-seguimiento:not([hidden]) .sxpic', { timeout: 10000 });
@@ -418,6 +459,10 @@ export async function correrContratoV29() {
       await abrirAgendaApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Agenda\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_AGENDA, informe);
+      await abrirFichaBoceto(b);
+      await abrirFichaApp(a);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_FICHA, informe);
       await abrirSeguimientoBoceto(b);
       await abrirSeguimientoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Seguimiento\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');

@@ -523,6 +523,8 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
                 ? { when: 'Organizá, armá y entregá los planes de tus pacientes', title: 'Planes', search: 'Buscar', actions: planesActions }
               : page === 'biblioteca' && panelQuery.get('biblioteca') !== 'recetas'
                 ? { when: 'Guías, videos, PDF y recetas del consultorio.', title: 'Biblioteca', search: 'Buscar', actions: bibliotecaActions }
+              : page === 'ficha' && selected
+                ? { title: PAGE_LABELS[page], search: 'Buscar', bare: true }
               : { title: figmaDetail?.title ?? libraryRecipeTitle ?? (page === 'ficha' ? PAGE_LABELS[page] : navItem?.label ?? PAGE_LABELS[page]), search: 'Buscar' };
     const reviewPatient = reviewLog ? patients.find(person => person.id === reviewLog.patient_id) ?? null : null;
     const account: PanelAccountOption[] = [
