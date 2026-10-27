@@ -24,7 +24,8 @@ import { pendientesDeFicha } from './ficha-pendientes';
 import { useFichaData } from './use-ficha-data';
 import { homeDay } from '../../lib/panel-home';
 import { PanelPatientFoodDiary } from './PanelPatientFoodDiary';
-import { PanelPatientEvolution } from './PanelPatientEvolution';
+import { PanelPatientMedicionesExtra, PanelPatientObjetivos } from './PanelPatientEvolution';
+import { PanelFichaMediciones } from './PanelFichaMediciones';
 import {PanelPatientBilling} from './PanelPatientBilling';
 import { PanelPatientFiles } from './PanelPatientFiles';
 export {PlanSafetySummary} from './PlanSafetySummary';
@@ -81,12 +82,12 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
     <div id="fwrap" style={{flex:1,minHeight:0,display:'flex',flexDirection:'column'}}>
     {readyId!==patient.id?<NvState kind={refreshError?'error':'loading'} title={refreshError?'No pudimos cargar la ficha':'Cargando ficha…'} description={refreshError||'Consultando los datos actualizados de la paciente.'} action={refreshError&&<NvButton onClick={()=>setPatientRevision(n=>n+1)}>Reintentar ficha</NvButton>}/>
     :tab==='resumen'?<PanelFichaResumen key={patient.id} patient={patient} now={now} datos={datos} ir={next=>change(seccionDe(next))}>{contacto}</PanelFichaResumen>
+    :tab==='evolucion'?<PanelFichaMediciones key={patient.id} patient={patient} now={now} datos={datos} ir={next=>change(seccionDe(next))}><div className="pw-record pn-record"><div className="pw-record-content"><PanelPatientMedicionesExtra patientId={patient.id} patientName={patient.name}/></div></div></PanelFichaMediciones>
     :<div className="pw-record pn-record"><div key={`${patient.id}:${tab}`} className="pw-record-content">
       {solapa==='plan'&&<nav className="pn-record-plan-tabs" aria-label="Secciones del plan">{RECORD_PLAN_TABS.filter(([id])=>id!=='planificacion').map(([id,label])=><button type="button" key={id} aria-current={id===tab?'page':undefined} onClick={()=>change(id)}>{label}</button>)}</nav>}
       {tab === 'historia' && <PanelPatientHistory patientId={patient.id} now={now}/>}
       {tab === 'notas' && <ConsultationNotes patientId={patient.id} showCompletions={false}/>}
-      {tab === 'planificacion' && <NutritionTargetPanel patientId={patient.id} patientName={patient.name} onOpenPlan={() => change('plan')} />}
-      {tab === 'evolucion' && <PanelPatientEvolution patient={patient} now={now} onSection={change} onChanged={addPatient}/>}
+      {tab === 'planificacion' && <><PanelPatientObjetivos patient={patient} now={now} onChanged={addPatient}/><NutritionTargetPanel patientId={patient.id} patientName={patient.name} onOpenPlan={() => change('plan')} /></>}
       {tab === 'alimentario' && <PanelPatientFoodDiary patient={patient} now={now} onReview={onReview} onSelect={onSelect}/>}
       {tab === 'plan' && <PanelPatientPlan patientId={patient.id} patientName={patient.name} professionalName={professionalName} now={now} onSection={change} onChanged={()=>void refreshPatient(patient.id)}/>}
       {tab === 'semanal' && <ShowroomMealPlan patient={patient} patients={patients} query="" onSelect={onSelect} onChanged={addPatient} now={now} />}

@@ -120,6 +120,20 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Medio círculo | ✅ igual | |
 | Datos en columna | ✅ igual | |
 
+## Tema oscuro · Ficha · Mediciones
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Panel de medidores | ✅ igual | |
+| Medidor chico | ✅ igual | |
+| Nombre del medidor | ✅ igual | |
+| Nota del medidor | ✅ igual | |
+| Solapas de medidas | ✅ igual | |
+| Solapa de medidas elegida | ✅ igual | |
+| Encabezado de la tabla | ✅ igual | |
+| Botón de fórmula | ✅ igual | |
+| Botón chico | ✅ igual | |
+
 ## Tema oscuro · Seguimiento
 
 | Pieza | Estado | Detalle |
@@ -339,6 +353,20 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Tarjeta oscura | ✅ igual | |
 | Medio círculo | ✅ igual | |
 | Datos en columna | ✅ igual | |
+
+## Tema claro · Ficha · Mediciones
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Panel de medidores | ✅ igual | |
+| Medidor chico | ✅ igual | |
+| Nombre del medidor | ✅ igual | |
+| Nota del medidor | ✅ igual | |
+| Solapas de medidas | ✅ igual | |
+| Solapa de medidas elegida | ✅ igual | |
+| Encabezado de la tabla | ✅ igual | |
+| Botón de fórmula | ✅ igual | |
+| Botón chico | ✅ igual | |
 
 ## Tema claro · Seguimiento
 

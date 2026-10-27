@@ -82,7 +82,7 @@ export type CurvaFicha = {
   meta: { y: number; etiqueta: string; xTexto: number } | null; etiquetas: Array<{ x: number; texto: string }>; texto: string;
 };
 
-export function curvaFicha(valores: readonly number[], rotulos: readonly string[] | null, opciones: { ancho?: number; alto?: number; mini?: boolean; meta?: number | null } = {}): CurvaFicha {
+export function curvaFicha(valores: readonly number[], rotulos: readonly string[] | null, opciones: { ancho?: number; alto?: number; mini?: boolean; meta?: number | null; rotuloMeta?: string } = {}): CurvaFicha {
   const W = opciones.ancho ?? 300, H = opciones.alto ?? 110, mini = Boolean(opciones.mini);
   const pl = 6, pr = mini ? 4 : 30, pt = mini ? 4 : 18, pb = rotulos ? 20 : mini ? 3 : 8;
   const meta = opciones.meta ?? null;
@@ -101,7 +101,7 @@ export function curvaFicha(valores: readonly number[], rotulos: readonly string[
   return {
     ancho: W, alto: H, curva, ultimo, puntos: P.slice(0, -1),
     area: ultimo ? `${curva} L${ultimo[0].toFixed(1)} ${H - pb} L${P[0]![0].toFixed(1)} ${H - pb}Z` : '',
-    meta: meta === null ? null : { y: Y(meta), etiqueta: fmt(meta), xTexto: W - pr + 7 },
+    meta: meta === null ? null : { y: Y(meta), etiqueta: opciones.rotuloMeta ?? fmt(meta), xTexto: W - pr + 7 },
     etiquetas: rotulos ? rotulos.map((texto, k) => ({ x: X(k), texto })) : [],
     texto: valores.length ? fmt(valores[valores.length - 1]!) : '',
   };

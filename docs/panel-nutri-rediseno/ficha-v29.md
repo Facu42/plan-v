@@ -77,3 +77,21 @@ Según la regla 12 de `CLAUDE.md`: lo que el archivo no dibuja se arma con sus p
 - **Fire test:** se bajó el tope del avance de 100 a 99 en `avanceEnKilos`; la prueba «el avance nunca pasa de 0 a 100» se puso roja; se revirtió ✅.
 - **Automatizaciones nuevas:** `PIEZAS_FICHA` en `scripts/panel-v29-contrato.mjs` compara 21 piezas con el boceto en cada corrida.
 - **Veredicto:** HOLD hasta el ok visual de Facundo. Técnicamente SHIP (pruebas, tipos y contrato en verde).
+
+## Parte 2a · Mediciones
+
+Solapa armada con el HTML del boceto (el de piezas `fx`): cuatro a cinco medidores, tabla con solapas, Evolución, Kerr y «Para {nombre}». Captura: `docs/screenshots/ficha-v29/mediciones-claro-app.png` (al lado, la del boceto). El contrato compara las piezas de Mediciones en claro y oscuro: todas iguales.
+
+Valores por defecto elegidos:
+- **Pliegues y fórmula**: Plan V todavía no carga pliegues; la tabla lo dice y el botón «Sin fórmula validada» queda apagado hasta que Verónica valide una fórmula.
+- **Medidores**: IMC (peso y altura, categorías de la OMS), Grasa, Músculo, Cintura y Cintura/cadera. Sin dato muestran «—» y «Sin dato» o «Falta la altura»; las escalas son fijas.
+- **Evolución**: pestañas Peso, Grasa y Cintura (el boceto trae Pliegues, que no existe); la línea de meta solo aparece si el objetivo trae kilos.
+- **Kerr**: solo resultados cargados por la profesional, con la etiqueta «Resultados de la profesional». No se calcula nada automático.
+- **Informe de mediciones y Fotos de progreso**: los botones llevan a Archivos.
+- **Objetivos y hábitos** (meta y hábitos de la semana) pasan a la solapa Objetivos y hábitos; las medidas completas, evaluaciones clínicas y registros compartidos quedan debajo, plegados.
+
+### Paso 10 · Mediciones
+- **Flujos:** cargar medición, importar balanza (diálogos de siempre, sin cambios), cambiar solapas y gráfico (✅ prueba de render + contrato).
+- **Regresiones cubiertas:** sin permiso de medidas lo dice y apaga los botones (✅); sin datos no inventa valores (✅); IMC solo con peso y altura (✅, 13 pruebas de cálculo).
+- **Contratos:** sin cambios de servidor ni de API; mismos `careApi` y diálogos.
+- **Migraciones:** N/A. **Veredicto:** HOLD hasta el ok visual de Facundo; técnicamente SHIP.

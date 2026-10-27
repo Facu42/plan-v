@@ -584,3 +584,12 @@
 #pv-panel-v29 #pv-panel:has(#s-ficha) { --ink: inherit; --ink2: inherit; --ink3: inherit; --line: inherit; color: var(--ink); background: transparent; }
 #pv-panel-v29 #pv-panel #s-ficha .card.fh { border-radius: 16px; padding: 16px 20px; }
 #pv-panel-v29 #pv-panel #s-ficha .chip { font-size: 12.5px; }
+
+/* Ficha · solapas chicas, botón chico y chip de los paneles: la hoja vieja agranda el cuerpo y la línea. */
+#pv-panel-v29 #s-ficha .fxp .tabs { gap: 2px; background: var(--app); border: 1px solid var(--line); border-radius: 9px; padding: 2px; margin-left: -2px; }
+#pv-panel-v29 #s-ficha .fxp .tabs button { font-size: 11.5px; padding: 4px 9px; border-radius: 7px; font-weight: 400; line-height: normal; letter-spacing: normal; color: var(--ink2); }
+#pv-panel-v29 #s-ficha .fxp .tabs button.on { background: var(--card); color: var(--ink); box-shadow: var(--shadow); font-weight: 400; }
+#pv-panel-v29 #s-ficha .fxp > header .chip { line-height: normal; letter-spacing: normal; }
+#pv-panel-v29 #s-ficha .fxp .sbtn { display: inline-flex; align-items: center; justify-content: center; gap: 0; height: auto; padding: 5px 9px; border-radius: 8px; font-size: 11.5px; font-weight: 400; line-height: normal; letter-spacing: normal; }
+#pv-panel-v29 #s-ficha .fxp .sbtn svg { display: block; position: relative; top: -1.5px; }
+#pv-panel-v29 #s-ficha .fxp .sbtn.k { min-height: 28px; }

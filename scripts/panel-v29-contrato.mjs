@@ -71,6 +71,19 @@ export const PIEZAS_FICHA = [
   ['Datos en columna', '#s-ficha .fxkv > div', '', ['paddingTop', 'fontSize']],
 ];
 
+// Piezas de la solapa Mediciones de la Ficha. Kerr y las filas de la tabla dependen de datos que la demo no trae: se miran en las capturas.
+export const PIEZAS_MEDICIONES = [
+  ['Panel de medidores', '#s-ficha .fxgauges', '', ['gap', 'gridTemplateColumns']],
+  ['Medidor chico', '#s-ficha .fxgauges .pg', '', ['width']],
+  ['Nombre del medidor', '#s-ficha .fxgauges small', '', ['fontSize', 'color']],
+  ['Nota del medidor', '#s-ficha .fxgauges em', '', ['fontSize', 'color']],
+  ['Solapas de medidas', '#s-ficha .fxp .tabs', '', ['borderTopLeftRadius', 'paddingTop', 'backgroundColor']],
+  ['Solapa de medidas elegida', '#s-ficha .fxp .tabs button.on', '', ['fontSize', 'fontWeight', 'backgroundColor']],
+  ['Encabezado de la tabla', '#s-ficha .fxtb th', '', ['fontSize', 'color', 'paddingTop']],
+  ['Botón de fórmula', '#s-ficha .fxp > header .chip', '', ['height', 'fontSize', 'borderTopLeftRadius']],
+  ['Botón chico', '#s-ficha .fxp > header .sbtn', '', ['height', 'fontSize', 'borderTopLeftRadius']],
+];
+
 // Piezas de Asistente. El encabezado vive en el armazón; acá se mide el cuerpo, que existe en los dos.
 export const PIEZAS_ASISTENTE = [
   ['Caja del pedido', '#s-asistente .sxask textarea', '', ['fontSize', 'fontFamily', 'borderTopLeftRadius', 'height']],
@@ -463,6 +476,12 @@ export async function correrContratoV29() {
       await abrirFichaApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_FICHA, informe);
+      await b.locator('#ftabs [data-ft="mediciones"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Mediciones$/ }).click();
+      await a.waitForSelector('#s-ficha .fxgauges', { timeout: 20000 });
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Mediciones\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_MEDICIONES, informe);
       await abrirSeguimientoBoceto(b);
       await abrirSeguimientoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Seguimiento\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');

@@ -30,9 +30,9 @@ export function FxDk({ clave, titulo, sub, extra }: { clave: string; titulo: str
   return <div className="fxdk"><small>{clave}</small><b className="num">{titulo}</b><span>{sub}</span>{extra}</div>;
 }
 
-export function FxCurva({ valores, rotulos, ancho, alto, meta, mini }: { valores: readonly number[]; rotulos?: readonly string[]; ancho?: number; alto?: number; meta?: number | null; mini?: boolean }) {
+export function FxCurva({ valores, rotulos, ancho, alto, meta, rotuloMeta, mini }: { valores: readonly number[]; rotulos?: readonly string[]; ancho?: number; alto?: number; meta?: number | null; rotuloMeta?: string; mini?: boolean }) {
   const id = `fxg${useId().replace(/:/g, '')}`;
-  const c = curvaFicha(valores, rotulos ?? null, { ancho, alto, meta, mini });
+  const c = curvaFicha(valores, rotulos ?? null, { ancho, alto, meta, rotuloMeta, mini });
   if (!valores.length) return <svg className={`pw-g fxc${mini ? ' mini' : ''}`} viewBox={`0 0 ${c.ancho} ${c.alto}`} aria-hidden="true" />;
   return <svg className={`pw-g fxc${mini ? ' mini' : ''}`} viewBox={`0 0 ${c.ancho} ${c.alto}`} preserveAspectRatio={mini ? 'none' : undefined} aria-hidden="true">
     <defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0" className="s1" /><stop offset="1" className="s2" /></linearGradient></defs>
@@ -43,10 +43,10 @@ export function FxCurva({ valores, rotulos, ancho, alto, meta, mini }: { valores
   </svg>;
 }
 
-export function FxMedidor({ pct, texto, sub, ancho = 150 }: { pct: number; texto: string; sub?: string; ancho?: number }) {
+export function FxMedidor({ pct, texto, sub, ancho = 150, chico }: { pct: number; texto: string; sub?: string; ancho?: number; chico?: boolean }) {
   const m = medioCirculo(pct);
-  return <div className="pg fxg" style={{ width: ancho }}><svg className="pg-g" viewBox="0 0 160 88" aria-hidden="true"><path className="tr" pathLength={100} d={m.arco} />
-    {m.marcas.map(([x1, y1, x2, y2]) => <line key={x1} className="tk" x1={x1.toFixed(1)} y1={y1.toFixed(1)} x2={x2.toFixed(1)} y2={y2.toFixed(1)} />)}
+  return <div className={`pg fxg${chico ? ' sm' : ''}`} style={{ width: ancho }}><svg className="pg-g" viewBox="0 0 160 88" aria-hidden="true"><path className="tr" pathLength={100} d={m.arco} />
+    {chico ? null : m.marcas.map(([x1, y1, x2, y2]) => <line key={x1} className="tk" x1={x1.toFixed(1)} y1={y1.toFixed(1)} x2={x2.toFixed(1)} y2={y2.toFixed(1)} />)}
     <path className="pv" pathLength={100} strokeDasharray={100} strokeDashoffset={100 - pct} d={m.arco} />{m.fin ? <circle className="end" cx={m.fin[0].toFixed(1)} cy={m.fin[1].toFixed(1)} r={5} /> : null}</svg>
     <div className="pg-v"><b className="num">{texto}</b>{sub ? <span>{sub}</span> : null}</div></div>;
 }

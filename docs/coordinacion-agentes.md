@@ -254,3 +254,4 @@ del piloto, entidad legal.
 - Recorridos de punta a punta que fallaban en main: Ayuda medía el diálogo mientras se deslizaba; Planes 3c y 3d suponían que hoy era lunes; 3c y el recorrido 3 dependían del plan que dejaban otras pruebas. Ahora siembran su estado o esperan lo que miden. Corrida completa local: 36 pruebas.
 - Plan de lo que sigue: `docs/panel-nutri-rediseno/pacientes-v29-siguiente.md`.
 
+- **27/10 · Claude · Ficha v29, parte 2a (Mediciones)** · Rama `claude/ficha-v29-historia-lab-mediciones`, encima de #199. Solapa Mediciones del boceto con medidas reales; contrato en verde. Sin SQL. Nota en [ficha-v29.md](panel-nutri-rediseno/ficha-v29.md). HOLD hasta el ok visual de Facundo.

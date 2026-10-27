@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Patient } from '../../types';
 import { FichaSolapas, PanelFichaCabecera } from './PanelFichaCabecera';
 import { PanelFichaResumen } from './PanelFichaResumen';
+import { PanelFichaMediciones } from './PanelFichaMediciones';
 import type { FichaData } from './use-ficha-data';
 
 const ahora = new Date('2026-10-27T12:00:00-03:00');
@@ -59,5 +60,17 @@ describe('Ficha v29', () => {
     const html = renderToStaticMarkup(<PanelFichaResumen patient={paciente} now={ahora} datos={datos({ current } as never)} ir={ir} />);
     expect(html).toContain('No pudimos actualizar comidas');
     expect(html).toContain('Reintentar');
+  });
+  it('Mediciones dibuja los medidores, las solapas y no inventa pliegues ni fórmula', () => {
+    const html = renderToStaticMarkup(<PanelFichaMediciones patient={paciente} now={ahora} datos={datos()} ir={ir} />);
+    for (const texto of ['Mediciones', 'Importar balanza', 'Nueva medición', 'IMC', 'Grasa', 'Músculo', 'Cintura', 'Evolución', 'Kerr · 5 componentes', 'Sin fórmula validada', 'Pliegues', 'Perímetros', 'Composición', 'Segmental']) expect(html).toContain(texto);
+    expect(html).toContain('Los pliegues todavía no se cargan en Plan V');
+    expect(html).toContain('data-mk="1"');
+  });
+
+  it('Mediciones sin permiso de medidas lo dice y apaga los botones de carga', () => {
+    const html = renderToStaticMarkup(<PanelFichaMediciones patient={paciente} now={ahora} datos={datos({ care: { consented: ['care_relationship'], measurements: [] } as never })} ir={ir} />);
+    expect(html).toContain('Permiso de medidas pendiente');
+    expect(html).toContain('disabled');
   });
 });
