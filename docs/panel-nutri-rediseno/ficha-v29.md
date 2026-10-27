@@ -1,6 +1,6 @@
 # Ficha v29 · parte 1 (armazón, diez solapas y Resumen)
 
-Rama `claude/ficha-v29-armazon`, desde main `12ef4df` (Agenda ya juntada, #198). **Sin merge, sin producción y sin migraciones.** Espera el ok visual de Facundo.
+Partes 1, 2a, 2b, 2c y 3a **juntadas a main el 27/10** (#199 y #201 a #204, un solo cambio `a7dc819`) con el ok visual de Facundo. La tabla de Historia clínica ya está en la base. Siguen Consultas y notas, Plan, Registro alimentario, Archivos, Cobros y el chat.
 
 La Ficha va en tres PR, uno por tema. Este es el primero. Copia el `#s-ficha` de `design/panel-nutri/v29/panel-trabajo.html` con el encabezado de Nutreando que quedó en el boceto (`.fh.ntfh`).
 
