@@ -151,6 +151,21 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Punto de la curva | ✅ igual | |
 | Historial del valor | ✅ igual | |
 
+## Tema oscuro · Ficha · Historia clínica
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Índice de temas | ✅ igual | |
+| Tema del índice | ✅ igual | |
+| Tema elegido | ✅ igual | |
+| Punto del tema | ✅ igual | |
+| Título del tema | ✅ igual | |
+| Dato | ✅ igual | |
+| Texto del dato | ✅ igual | |
+| Origen del dato | ✅ igual | |
+| Dato dado de baja | ✅ igual | |
+| Solapas Por tema y Por fecha | ✅ igual | |
+
 ## Tema oscuro · Seguimiento
 
 | Pieza | Estado | Detalle |
@@ -401,6 +416,21 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Banda del rango | ✅ igual | |
 | Punto de la curva | ✅ igual | |
 | Historial del valor | ✅ igual | |
+
+## Tema claro · Ficha · Historia clínica
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Índice de temas | ✅ igual | |
+| Tema del índice | ✅ igual | |
+| Tema elegido | ✅ igual | |
+| Punto del tema | ✅ igual | |
+| Título del tema | ✅ igual | |
+| Dato | ✅ igual | |
+| Texto del dato | ✅ igual | |
+| Origen del dato | ✅ igual | |
+| Dato dado de baja | ✅ igual | |
+| Solapas Por tema y Por fecha | ✅ igual | |
 
 ## Tema claro · Seguimiento
 

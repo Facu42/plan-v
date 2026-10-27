@@ -122,6 +122,11 @@
       "version": "20261026190000",
       "file": "20261026190000_plan_delivery.sql",
       "sha256": "65a8bf9dcdbe6760656dad368e12a2b29756cfd8252a4e21359d3889ed560821"
+    },
+    {
+      "version": "20261027130000",
+      "file": "20261027130000_patient_history_entries.sql",
+      "sha256": "d02f0b374578f64178391559bf7eb00de761bf9c927bc8c3eb735d1f2b7a35c4"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

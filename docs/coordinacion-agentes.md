@@ -256,3 +256,4 @@ del piloto, entidad legal.
 
 - **27/10 · Claude · Ficha v29, parte 2a (Mediciones)** · Rama `claude/ficha-v29-historia-lab-mediciones`, encima de #199. Solapa Mediciones del boceto con medidas reales; contrato en verde. Sin SQL. Nota en [ficha-v29.md](panel-nutri-rediseno/ficha-v29.md). HOLD hasta el ok visual de Facundo.
 - **27/10 · Claude · Ficha v29, parte 2b (Laboratorio y estudios)** · Rama `claude/ficha-v29-laboratorio`, encima de #201. Valores por fecha, análisis por fecha, curva con banda del rango y pedidos de estudios, con datos reales; contrato en verde (12 piezas). Sin SQL. HOLD hasta el ok visual de Facundo.
+- **27/10 · Claude · Ficha v29, parte 2c (Historia clínica)** · Rama `claude/ficha-v29-historia`, encima de #202. Historia por temas con datos fechados; tabla nueva `patient_history_entries` (migración `20261027130000`, **sin aplicar**, espera la frase de Facundo). Contrato en verde (10 piezas). HOLD.

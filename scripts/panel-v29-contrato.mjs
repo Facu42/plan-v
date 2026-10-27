@@ -100,6 +100,20 @@ export const PIEZAS_LABORATORIO = [
   ['Historial del valor', '#s-ficha .lbhist > div', '', ['paddingTop', 'fontSize']],
 ];
 
+// Piezas de la solapa Historia clínica. La demo no trae datos ni permiso de atención: la app se mira con una historia de ejemplo simulada (`simularHistoria`).
+export const PIEZAS_HISTORIA = [
+  ['Índice de temas', '#s-ficha .hcidx', '', ['borderRightWidth', 'paddingRight', 'gap']],
+  ['Tema del índice', '#s-ficha .hcidx > button', '', ['fontSize', 'borderTopLeftRadius', 'paddingTop']],
+  ['Tema elegido', '#s-ficha .hcidx > button.on', '', ['backgroundColor', 'borderTopLeftRadius']],
+  ['Punto del tema', '#s-ficha .hcidx .st', '', ['width', 'height', 'backgroundColor']],
+  ['Título del tema', '#s-ficha .hced h4', '', ['fontSize', 'fontWeight']],
+  ['Dato', '#s-ficha .hce', '', ['borderTopLeftRadius', 'paddingTop', 'paddingLeft']],
+  ['Texto del dato', '#s-ficha .hcin', '', ['fontSize', 'lineHeight']],
+  ['Origen del dato', '#s-ficha .hcsrc', '', ['fontSize', 'borderTopLeftRadius', 'paddingLeft']],
+  ['Dato dado de baja', '#s-ficha .hcpast s', '', ['fontSize', 'color']],
+  ['Solapas Por tema y Por fecha', '#s-ficha .tabs.hcv', '', ['borderTopLeftRadius', 'paddingTop', 'backgroundColor']],
+];
+
 // Piezas de Asistente. El encabezado vive en el armazón; acá se mide el cuerpo, que existe en los dos.
 export const PIEZAS_ASISTENTE = [
   ['Caja del pedido', '#s-asistente .sxask textarea', '', ['fontSize', 'fontFamily', 'borderTopLeftRadius', 'height']],
@@ -472,6 +486,29 @@ async function simularLaboratorio(pagina) {
   });
 }
 
+/** Responde con una historia de ejemplo (el permiso de atención lo pone `simularLaboratorio`) (con altas, ediciones y bajas), porque la demo no trae ninguna. */
+export async function simularHistoria(pagina) {
+  const dato = (n, topic, text, recorded_on, extra = {}) => ({ id: `00000000-0000-4000-8000-${String(900 + n).padStart(12, '0')}`, topic, text, since: '', source: 'professional', recorded_on, edited_on: null, ended_on: null, ended_reason: '', ...extra });
+  let entries = [
+    dato(1, 'motivo', 'Bajar grasa y tener más energía. Probó dietas estrictas y las dejó al mes.', '2026-03-12'),
+    dato(2, 'diag', 'Celiaquía, con biopsia', '2026-03-12', { since: 'desde 2019' }), dato(3, 'diag', 'Hipotiroidismo compensado', '2026-03-12', { since: 'desde 2021' }),
+    dato(4, 'med', 'Levotiroxina 25 µg en ayunas', '2025-06-10', { source: 'import', ended_on: '2026-03-12', ended_reason: 'la endocrinóloga subió la dosis' }),
+    dato(5, 'med', 'Levotiroxina 50 µg en ayunas', '2026-03-12', { since: 'desde marzo 2026' }), dato(6, 'med', 'Hierro, 1 por día', '2026-10-14', { since: 'desde el 20/08/26', source: 'recording' }),
+    dato(7, 'alerg', 'Gluten (celiaquía)', '2026-03-12', { since: 'desde 2019' }), dato(8, 'r24', 'Mate solo · tostadas sin TACC con queso · ensalada con pollo', '2026-10-12', { source: 'patient' }),
+  ];
+  const hoy = new Date().toISOString().slice(0, 10);
+  await pagina.route(/\/api\/crm\/patients\/[^/]+\/history(\/.*)?$/, async ruta => {
+    const pedido = ruta.request();
+    const partes = new URL(pedido.url()).pathname.split('/');
+    const alta = partes[partes.length - 1] === 'end' ? partes[partes.length - 2] : partes[partes.length - 1] !== 'history' ? partes[partes.length - 1] : null;
+    const cuerpo = pedido.postData() ? JSON.parse(pedido.postData()) : {};
+    if (pedido.method() === 'POST' && !alta) entries = [...entries, dato(entries.length + 1, cuerpo.topic, cuerpo.text, hoy, { since: cuerpo.since ?? '' })];
+    else if (pedido.method() === 'PATCH') entries = entries.map(e => e.id === alta ? { ...e, text: cuerpo.text, edited_on: hoy } : e);
+    else if (pedido.method() === 'POST') entries = entries.map(e => e.id === alta ? { ...e, ended_on: hoy, ended_reason: cuerpo.reason ?? '' } : e);
+    await ruta.fulfill({ json: { entries } });
+  });
+}
+
 async function abrirAsistenteApp(pagina) {
   await pagina.locator('#pv-panel-v29 a.nv[href="/crm/desarrollo?modulo=asistente-ia"]').click();
   await pagina.waitForSelector('#s-asistente .sxask textarea', { timeout: 20000 });
@@ -494,6 +531,7 @@ export async function correrContratoV29() {
       const b = await abrirBoceto(navegador, tema);
       const a = await abrirApp(navegador, tema);
       await simularLaboratorio(a);
+      await simularHistoria(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · armazón\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_V29, informe);
       await a.waitForSelector('#s-inicio .kpis', { timeout: 20000 });
@@ -524,6 +562,13 @@ export async function correrContratoV29() {
       await b.waitForTimeout(1200);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Laboratorio\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_LABORATORIO, informe);
+      await b.locator('#ftabs [data-ft="historia"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Historia clínica/ }).click();
+      await a.waitForSelector('#s-ficha .hcidx', { timeout: 20000 });
+      await a.waitForSelector('#s-ficha .hcpast', { timeout: 20000 }).catch(() => undefined);
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Historia clínica\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_HISTORIA, informe);
       await abrirSeguimientoBoceto(b);
       await abrirSeguimientoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Seguimiento\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');

@@ -116,3 +116,27 @@ Valores por defecto elegidos:
 - **Regresiones cubiertas:** sin permiso lo dice y apaga los botones (⚠️ cubierto por render en demo); resultados con comparador no se dibujan como exactos (✅); rango ambiguo → «Sin rango» (✅); otra paciente nunca aparece en la lista (✅).
 - **Contratos:** sin cambios de servidor ni de API; mismo `clinicalWorkspaceApi.snapshot`.
 - **Migraciones:** N/A. **Veredicto:** HOLD hasta el ok visual de Facundo; técnicamente SHIP.
+
+## Parte 2c · Historia clínica
+
+Solapa armada con el HTML final del boceto (`FT.historia`): índice de catorce temas, datos con fecha y origen que se editan en el lugar, «Dar de baja» (pasa a «Antes»), vista «Por fecha», «Ver cómo estaba» (la historia a una fecha) y los datos que cambian el plan. Capturas: `docs/screenshots/ficha-v29/historia-claro.png` y `historia-por-fecha-oscuro.png`. El contrato compara 10 piezas en claro y oscuro (con una historia de ejemplo simulada): todas iguales.
+
+**Base de datos:** tabla nueva `patient_history_entries` (migración `20261027130000_patient_history_entries.sql`, solo agrega; no se borra nunca un dato, «dar de baja» completa la fecha). **No se aplicó nada en la base**: espera la frase de Facundo. Mientras tanto la API existe pero la tabla no, así que en producción la solapa mostraría el aviso de error con «Reintentar». Se junta después de aplicar la migración.
+
+Valores por defecto elegidos:
+- **Qué guarda cada dato:** texto (hasta 600 letras), «desde cuándo» (opcional), origen, fecha de carga, fecha de edición y, si se dio de baja, hasta cuándo y por qué. Hoy todo lo que se carga desde el panel queda como «Vos»; los otros orígenes (paciente en la app, importado, consulta grabada, formulario) ya existen en la tabla para cuando se conecten.
+- **Permiso:** se lee y se escribe solo con el permiso de atención de la paciente (`care_relationship`), igual que los pedidos de estudios.
+- **Lo que ya había** (respuestas del formulario de ingreso, historia importada, datos del primer día) no se copia a la tabla nueva: queda en el desplegable «Respuestas del formulario, datos importados y primer día», debajo; «Ver respuestas» y «Formularios» lo abren.
+- **«De la consulta grabada» (propuestas de la IA)**: el bloque queda con un texto corto, sin botones, hasta que se conecten las consultas grabadas con la historia. Nada entra solo.
+- **«Datos que cambian el plan»**: junta lo vigente de Alergias, Diagnósticos, Medicación y Preferencias; no interpreta ni resume.
+- **«Plantilla: General + Celiaquía»** y **«Mandar formulario»**: no se dibujan; no hay función real detrás.
+- **«No aplica»** (Embarazo, etc.): no hay forma de marcarlo todavía; un tema sin datos dice «Falta completar».
+- **Tema inicial:** Medicación y suplementos, como el boceto.
+- **Dar de baja** no pide motivo (el boceto tampoco); queda con la fecha de hoy.
+
+### Paso 10 · Historia clínica
+- **Flujos:** agregar, editar y dar de baja un dato, ver por fecha y cómo estaba a una fecha (✅ 6 pruebas de la API en memoria, 8 de cálculo y 4 de pantalla; recorrido a mano con capturas).
+- **Regresiones cubiertas:** sin permiso de atención no lee ni escribe (✅); otra paciente → 403 (✅); campos de más o temas inventados → 400 (✅); un dato dado de baja ya no se puede cambiar (✅); lo dado de baja nunca desaparece (✅).
+- **Contratos:** rutas nuevas `/api/crm/patients/:id/history` (GET, POST, PATCH `/:entryId`, POST `/:entryId/end`); no se tocó ninguna existente. Falta una prueba de la política de filas contra Postgres: se corre al aplicar la migración.
+- **Áreas frágiles:** (1) permisos por paciente y por consultorio (`scheduling_can_manage`); (2) contenteditable: se guarda al salir del campo o con Enter; si el servidor falla, el aviso queda a la vista y el texto escrito no se pierde de pantalla.
+- **Migraciones:** una, aditiva, sin `DROP`. **Veredicto:** HOLD: espera la frase de la base y el ok visual de Facundo. Técnicamente SHIP una vez aplicada.

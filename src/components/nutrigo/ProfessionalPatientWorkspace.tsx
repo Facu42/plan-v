@@ -26,6 +26,7 @@ import { homeDay } from '../../lib/panel-home';
 import { PanelPatientFoodDiary } from './PanelPatientFoodDiary';
 import { PanelPatientMedicionesExtra, PanelPatientObjetivos } from './PanelPatientEvolution';
 import { PanelFichaMediciones } from './PanelFichaMediciones';
+import { PanelFichaHistoria } from './PanelFichaHistoria';
 import {PanelPatientBilling} from './PanelPatientBilling';
 import { PanelPatientFiles } from './PanelPatientFiles';
 export {PlanSafetySummary} from './PlanSafetySummary';
@@ -85,7 +86,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
     :tab==='evolucion'?<PanelFichaMediciones key={patient.id} patient={patient} now={now} datos={datos} ir={next=>change(seccionDe(next))}><div className="pw-record pn-record"><div className="pw-record-content"><PanelPatientMedicionesExtra patientId={patient.id} patientName={patient.name}/></div></div></PanelFichaMediciones>
     :<div className="pw-record pn-record"><div key={`${patient.id}:${tab}`} className="pw-record-content">
       {solapa==='plan'&&<nav className="pn-record-plan-tabs" aria-label="Secciones del plan">{RECORD_PLAN_TABS.filter(([id])=>id!=='planificacion').map(([id,label])=><button type="button" key={id} aria-current={id===tab?'page':undefined} onClick={()=>change(id)}>{label}</button>)}</nav>}
-      {tab === 'historia' && <PanelPatientHistory patientId={patient.id} now={now}/>}
+      {tab === 'historia' && <PanelFichaHistoria key={patient.id} patient={patient} now={now} datos={datos}><details id="hc-respuestas" className="pn-record-card"><summary>Respuestas del formulario, datos importados y primer día</summary><PanelPatientHistory patientId={patient.id} now={now}/></details></PanelFichaHistoria>}
       {tab === 'notas' && <ConsultationNotes patientId={patient.id} showCompletions={false}/>}
       {tab === 'planificacion' && <><PanelPatientObjetivos patient={patient} now={now} onChanged={addPatient}/><NutritionTargetPanel patientId={patient.id} patientName={patient.name} onOpenPlan={() => change('plan')} /></>}
       {tab === 'alimentario' && <PanelPatientFoodDiary patient={patient} now={now} onReview={onReview} onSelect={onSelect}/>}
