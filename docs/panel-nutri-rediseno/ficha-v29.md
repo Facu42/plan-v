@@ -143,7 +143,7 @@ Valores por defecto elegidos:
 
 ## Parte 3a · Objetivos y hábitos
 
-Solapa armada con el HTML de `objetivos:` del boceto (dos columnas: Objetivos y Hábitos de la semana a la izquierda; Energía y Síntomas a la derecha), con lo que la paciente carga en su app. Capturas: `docs/screenshots/ficha-v29/objetivos-claro.png` y `objetivos-oscuro.png` (paciente de la demo). El contrato compara 6 piezas en claro y oscuro; todas iguales.
+Solapa armada con el HTML de `objetivos:` del boceto (dos columnas: Objetivos y Hábitos de la semana a la izquierda; Energía y Síntomas a la derecha), con lo que la paciente carga en su app. Capturas: `docs/screenshots/ficha-v29/objetivos-claro.png` y `objetivos-oscuro.png` (paciente de la demo con registros de ejemplo de hábitos, energía y síntomas). El contrato compara 6 piezas en claro y oscuro; todas iguales.
 
 Valores por defecto elegidos (lo que el boceto dibuja y Plan V no tiene):
 - **Objetivos:** Plan V guarda **un solo objetivo** por paciente, con avance declarado por la profesional (no se calcula del peso). Se dibuja ese objetivo con su anillo; «Actualizar» (o «Agregar» si no hay) abre el editor de siempre y el historial queda en un desplegable. Los otros cuatro objetivos del boceto («se actualizan solos») no existen todavía y **no se inventan**.
@@ -151,7 +151,8 @@ Valores por defecto elegidos (lo que el boceto dibuja y Plan V no tiene):
 - **Energía en vez de Ánimo:** el boceto muestra el ánimo de 1 a 5; la app solo guarda energía Alta, Media o Baja. Se dibujan los 14 días en tres niveles y el promedio de 1 a 3. El bloque queda aunque no haya datos.
 - **Síntomas:** los que la paciente marcó en 14 días, del más repetido al menos; sin ninguno, un texto corto. No se dibuja el «cuándo» del síntoma («después del almuerzo»): no se guarda.
 - **«Relación que ve la IA»:** no se dibuja; no hay función real detrás.
-- Debajo sigue la «Planificación nutricional» de siempre (metabolismo, gasto, meta).
+- Debajo sigue la «Planificación nutricional» de siempre (metabolismo, gasto, meta), con la letra del resto del panel (SF Pro); la solapa se arma sin el margen extra de las pantallas anteriores, igual que Mediciones.
+- **Energía del último registro:** se muestra como Alta, Normal o Baja.
 
 ### Paso 10 · Objetivos y hábitos
 - **Flujos:** actualizar/agregar el objetivo (editor existente, sin cambios); lectura de hábitos, energía y síntomas (✅ 7 pruebas de cálculo y 2 de pantalla).

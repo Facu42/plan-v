@@ -32,7 +32,7 @@ describe('ficha-objetivos', () => {
     expect(h[0]!.valor).toBe('7');
     expect(h[1]!.valor).toBe('6,5');
     expect(h[2]!.valor).toBe('2');
-    expect(h[3]!.valor).toBe('sin energía');
+    expect(h[3]!.valor).toBe('Baja');
   });
 
   it('sin permiso de atención la actividad no se muestra', () => {

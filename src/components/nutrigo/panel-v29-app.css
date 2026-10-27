@@ -577,6 +577,8 @@
 #pv-panel-v29 .fxsel { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; color: var(--ink3); }
 #pv-panel-v29 .fxsel select { height: 34px; border: 1px solid var(--line); border-radius: 10px; background: var(--app); color: var(--ink); font: inherit; font-size: 12.5px; padding: 0 10px; }
 #pv-panel-v29 #s-ficha .pw-record { padding-top: 14px; }
+/* Lo que la Ficha todavía muestra con piezas anteriores usa la letra del resto del panel, no la de Nutrigo. */
+#pv-panel-v29 #s-ficha .pw-record, #pv-panel-v29 #s-ficha .pw-record * { font-family: var(--font); }
 /* Con datos reales las columnas pueden pedir más alto que la pantalla: la ficha se desplaza dentro de su marco en vez de aplastar las tarjetas. */
 #pv-panel-v29 #s-ficha #fwrap > .fx { flex: 1 0 auto; }
 #pv-panel-v29 #s-ficha #fwrap > .fxp { flex: none; margin-top: 14px; }
