@@ -95,3 +95,24 @@ Valores por defecto elegidos:
 - **Regresiones cubiertas:** sin permiso de medidas lo dice y apaga los botones (✅); sin datos no inventa valores (✅); IMC solo con peso y altura (✅, 13 pruebas de cálculo).
 - **Contratos:** sin cambios de servidor ni de API; mismos `careApi` y diálogos.
 - **Migraciones:** N/A. **Veredicto:** HOLD hasta el ok visual de Facundo; técnicamente SHIP.
+
+## Parte 2b · Laboratorio y estudios
+
+Solapa armada con el HTML final del boceto (`FT.laboratorio`, el de las vistas «Valores» y «Por fecha»), con los valores revisados reales del laboratorio. Capturas: `docs/screenshots/ficha-v29/laboratorio-claro.png`, `laboratorio-oscuro.png` (con una fecha abierta) y `laboratorio-por-fecha.png`. El contrato compara 12 piezas en claro y oscuro (con un laboratorio de ejemplo simulado, porque la demo no trae informes): todas iguales.
+
+Valores por defecto elegidos:
+- **Estado (Bajo, Alto, Límite, Normal)**: solo con valor exacto y un rango del informe que se entienda («30 - 200», «< 5», «mín. 30»…). Con comparador o rango ambiguo se muestra «Sin rango»; nunca se interpreta de más. «Límite» = dentro del primer 10 % del rango, como el boceto.
+- **Columnas**: las últimas tres fechas con análisis; tocar una fecha abre «Análisis del …» con cada valor y cómo cambió contra el anterior; «Por fecha» lista cada informe con sus valores, cuántos salen del rango y el botón Ver (el PDF de siempre).
+- **Curva**: línea de tiempo real con la banda del rango del informe; sin eventos (medicación, dieta) hasta que exista la Historia clínica con fechas (parte 2c).
+- **Agrupación por categoría** (Hierro, Vitaminas, Tiroides…): no se hace; Plan V no guarda la categoría de cada valor y no se inventa. Todos los valores van en una lista.
+- **«Sugerencia de la IA» y «Aplicar al plan»**: no hay una función real detrás. En su lugar, cuando el valor elegido sale del rango, una nota «Para revisar» con el rango del informe, sin recomendar alimentos.
+- **«Analizar con IA»**: no se dibuja, no tiene función real; la lectura por IA del PDF sigue en «Cargar análisis».
+- **«De la consulta grabada»**: el bloque queda con un texto corto («Sin propuestas por ahora») hasta que se conecten las consultas grabadas con el laboratorio.
+- **Pedidos de estudios**: lista los pedidos guardados (estudios, fecha y motivo). «Nuevo pedido» lleva a Archivos, donde ya se arma el pedido y su PDF. No hay estado «Por enviar / Recibido»: no se guarda.
+- **Agregar valor a mano**, **Cargar análisis** y **Estudios adjuntos y revisión** conservan sus formularios; se abren arriba de la solapa.
+
+### Paso 10 · Laboratorio
+- **Flujos:** cargar análisis (lector de PDF), agregar valor a mano con informe de origen y confirmación profesional, ver el PDF, cambiar entre valores y fechas (✅ cálculo con 11 pruebas; los formularios y el visor no se tocaron).
+- **Regresiones cubiertas:** sin permiso lo dice y apaga los botones (⚠️ cubierto por render en demo); resultados con comparador no se dibujan como exactos (✅); rango ambiguo → «Sin rango» (✅); otra paciente nunca aparece en la lista (✅).
+- **Contratos:** sin cambios de servidor ni de API; mismo `clinicalWorkspaceApi.snapshot`.
+- **Migraciones:** N/A. **Veredicto:** HOLD hasta el ok visual de Facundo; técnicamente SHIP.

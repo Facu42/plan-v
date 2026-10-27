@@ -93,7 +93,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
       {tab === 'semanal' && <ShowroomMealPlan patient={patient} patients={patients} query="" onSelect={onSelect} onChanged={addPatient} now={now} />}
       {tab === 'compras' && <ShowroomGrocery patient={p} readOnly />}
       {tab === 'archivos' && <PanelPatientFiles key={patient.id} patientId={patient.id}/>}
-      {tab === 'laboratorio' && <PanelPatientLaboratory key={patient.id} patientId={patient.id} now={now}/>}
+      {tab === 'laboratorio' && <PanelPatientLaboratory key={patient.id} patientId={patient.id} now={now} ir={next=>change(seccionDe(next))}/>}
       {tab === 'consultas' && <div className="pn-record-diary-grid"><div className="pn-record-main-column"><ShowroomConsultations embedded patient={patient} now={now} onSelect={onSelect} onChanged={addPatient}/><button type="button" onClick={()=>change('notas')}>Ver notas de consulta</button></div><aside className="pn-record-side-column"><ConsultationCompletionPanel patientId={patient.id}/></aside></div>}
       {tab === 'chat' && <div className="pn-record-chat-scope"><NutrigoMessages embedded patient={p} patients={patients.map((person) => buildShowroomPatient(person, now))} role="pro" onSelect={onSelect} onNavigate={onNavigate} /></div>}
       {tab === 'cobros' && <PanelPatientBilling key={patient.id} patientId={patient.id} onOpen={()=>onOpenHref('/crm/cobranzas')}/>}

@@ -134,6 +134,23 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Botón de fórmula | ✅ igual | |
 | Botón chico | ✅ igual | |
 
+## Tema oscuro · Ficha · Laboratorio
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Tabla de valores | ✅ igual | |
+| Fecha de la columna | ✅ igual | |
+| Fecha en número | ✅ igual | |
+| Nombre del valor | ✅ igual | |
+| Último valor | ✅ igual | |
+| Valor fuera de rango | ✅ igual | |
+| Referencia | ✅ igual | |
+| Solapas Valores y Por fecha | ✅ igual | |
+| Curva del valor | ✅ igual | |
+| Banda del rango | ✅ igual | |
+| Punto de la curva | ✅ igual | |
+| Historial del valor | ✅ igual | |
+
 ## Tema oscuro · Seguimiento
 
 | Pieza | Estado | Detalle |
@@ -367,6 +384,23 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Encabezado de la tabla | ✅ igual | |
 | Botón de fórmula | ✅ igual | |
 | Botón chico | ✅ igual | |
+
+## Tema claro · Ficha · Laboratorio
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Tabla de valores | ✅ igual | |
+| Fecha de la columna | ✅ igual | |
+| Fecha en número | ✅ igual | |
+| Nombre del valor | ✅ igual | |
+| Último valor | ✅ igual | |
+| Valor fuera de rango | ✅ igual | |
+| Referencia | ✅ igual | |
+| Solapas Valores y Por fecha | ✅ igual | |
+| Curva del valor | ✅ igual | |
+| Banda del rango | ✅ igual | |
+| Punto de la curva | ✅ igual | |
+| Historial del valor | ✅ igual | |
 
 ## Tema claro · Seguimiento
 

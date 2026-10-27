@@ -84,6 +84,22 @@ export const PIEZAS_MEDICIONES = [
   ['Botón chico', '#s-ficha .fxp > header .sbtn', '', ['height', 'fontSize', 'borderTopLeftRadius']],
 ];
 
+// Piezas de la solapa Laboratorio y estudios. La demo no trae informes ni permiso: la app se mira con valores de ejemplo simulados (`simularLaboratorio`).
+export const PIEZAS_LABORATORIO = [
+  ['Tabla de valores', '#s-ficha .lbt table th', '', ['fontSize', 'color', 'paddingTop', 'textTransform']],
+  ['Fecha de la columna', '#s-ficha .lbch', '', ['gap', 'fontSize', 'borderTopLeftRadius']],
+  ['Fecha en número', '#s-ficha .lbch b', '', ['fontSize', 'fontWeight']],
+  ['Nombre del valor', '#s-ficha .lbt tr[data-lbr] td b, #s-ficha .lbt tbody tr:not(.lbg) td b', '', ['fontSize', 'fontWeight']],
+  ['Último valor', '#s-ficha .lbt td.last', '', ['fontSize', 'fontWeight', 'color']],
+  ['Valor fuera de rango', '#s-ficha .lbt td.out', '', ['color']],
+  ['Referencia', '#s-ficha .lbt td.u', '', ['fontSize', 'color']],
+  ['Solapas Valores y Por fecha', '#s-ficha .tabs.lbv', '', ['borderTopLeftRadius', 'paddingTop', 'backgroundColor']],
+  ['Curva del valor', '#s-ficha .lbchart', '', ['width']],
+  ['Banda del rango', '#s-ficha .lbband', '', ['fill']],
+  ['Punto de la curva', '#s-ficha .lbpt', '', ['stroke', 'strokeWidth']],
+  ['Historial del valor', '#s-ficha .lbhist > div', '', ['paddingTop', 'fontSize']],
+];
+
 // Piezas de Asistente. El encabezado vive en el armazón; acá se mide el cuerpo, que existe en los dos.
 export const PIEZAS_ASISTENTE = [
   ['Caja del pedido', '#s-asistente .sxask textarea', '', ['fontSize', 'fontFamily', 'borderTopLeftRadius', 'height']],
@@ -437,6 +453,25 @@ async function abrirAlimentosApp(pagina) {
   await pagina.waitForSelector('.top .sxin input', { timeout: 20000 });
 }
 
+/** Responde con un laboratorio de ejemplo y el permiso de estudios, porque la demo no trae ninguno. */
+async function simularLaboratorio(pagina) {
+  const uid = n => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+  const valores = [['Ferritina', 'ng/ml', '30 - 200', [9, 11, 14]], ['Hemoglobina', 'g/dl', '12 - 16', [11.4, 11.9, 12.3]], ['Glucemia', 'mg/dl', '70 - 100', [90, 88, 86]], ['Colesterol total', 'mg/dl', '< 200', [195, 188, 182]]];
+  const fechas = ['2024-07-15', '2026-03-20', '2026-10-12'];
+  const documentos = fechas.map((f, k) => ({ id: uid(100 + k), patient_id: 'x', filename: `Laboratorio ${k + 1}.pdf`, mime: 'application/pdf', source_sha256: 'a'.repeat(64), asset_id: 'z', created_at: `${f}T10:00:00Z` }));
+  await pagina.route(/\/api\/patients\/[^/]+\/care\?audience=pro/, async ruta => {
+    const respuesta = await ruta.fetch();
+    const cuerpo = await respuesta.json();
+    cuerpo.consented = [...new Set([...(cuerpo.consented ?? []), 'clinical_document', 'care_relationship', 'measurement'])];
+    await ruta.fulfill({ response: respuesta, json: cuerpo });
+  });
+  await pagina.route(/\/api\/patients\/([^/]+)\/clinical-workspace$/, async ruta => {
+    const id = ruta.request().url().match(/patients\/([^/]+)\//)[1];
+    const records = fechas.map((f, k) => ({ id: uid(200 + k), patient_id: id, recorded_on: f, created_at: `${f}T10:00:00Z`, note: '', reviewed: true, data: { kind: 'laboratory', document_id: documentos[k].id, values: valores.map(([n, u, ref, v], i) => ({ id: uid(300 + k * 20 + i), name: n, value: v[k], operator: '', unit: u, range_text: ref, raw_value: String(v[k]).replace('.', ','), source_line: n, page: 1, reviewed: true })) } }));
+    await ruta.fulfill({ json: { records, documents: documentos.map(d => ({ ...d, patient_id: id })), references: [], brand: null } });
+  });
+}
+
 async function abrirAsistenteApp(pagina) {
   await pagina.locator('#pv-panel-v29 a.nv[href="/crm/desarrollo?modulo=asistente-ia"]').click();
   await pagina.waitForSelector('#s-asistente .sxask textarea', { timeout: 20000 });
@@ -458,6 +493,7 @@ export async function correrContratoV29() {
     for (const tema of ['dark', 'light']) {
       const b = await abrirBoceto(navegador, tema);
       const a = await abrirApp(navegador, tema);
+      await simularLaboratorio(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · armazón\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_V29, informe);
       await a.waitForSelector('#s-inicio .kpis', { timeout: 20000 });
@@ -482,6 +518,12 @@ export async function correrContratoV29() {
       await b.waitForTimeout(1200);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Mediciones\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_MEDICIONES, informe);
+      await b.locator('#ftabs [data-ft="laboratorio"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Laboratorio y estudios/ }).click();
+      await a.waitForSelector('#s-ficha .lbt tbody td.out', { timeout: 20000 });
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Laboratorio\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_LABORATORIO, informe);
       await abrirSeguimientoBoceto(b);
       await abrirSeguimientoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Seguimiento\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
