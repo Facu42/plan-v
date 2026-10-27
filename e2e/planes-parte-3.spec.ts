@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { enterDemo } from './helpers';
 
@@ -27,7 +28,11 @@ test('Planes: la entrega muestra vista, PDF, lista y no publica sola', async ({ 
   await expect(page.getByRole('heading', { name: 'Imprimir o guardar el plan como PDF' })).toBeVisible();
   const pdfDownload = page.waitForEvent('download');
   await page.getByRole('dialog').getByRole('button', { name: 'Descargar PDF', exact: true }).click();
-  expect((await pdfDownload).suggestedFilename()).toMatch(/\.pdf$/);
+  const pdf = await pdfDownload;
+  expect(pdf.suggestedFilename()).toMatch(/\.pdf$/);
+  expect(await pdf.failure()).toBeNull();
+  const pdfBytes = await readFile((await pdf.path())!);
+  expect(pdfBytes.subarray(0, 5).toString()).toBe('%PDF-');
   await page.getByRole('button', { name: 'Cerrar', exact: true }).click();
   await page.getByRole('switch', { name: 'Lista de compras' }).click();
   await page.getByRole('button', { name: 'Imprimir', exact: true }).click();

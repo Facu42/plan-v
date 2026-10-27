@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { enterDemo, waitLoaded } from './helpers';
+import type { ProfessionalMealPlan, PatientMealPlan } from '../src/types/plans';
 
 // Los recorridos comparten el servidor de prueba y siguen una historia: van en orden.
 test.describe.configure({ mode: 'serial' });
@@ -75,11 +76,27 @@ test('3 · la nutricionista ajusta el plan y la paciente lo ve', async ({ page }
   await enterDemo(page, '/crm/pacientes');
   await page.locator('summary[aria-label="Más opciones de Sofía R."]').click();
   await page.getByRole('button', { name: 'Abrir plan de Sofía R.' }).click();
+  const before = await page.request.get('/api/patients/pat-sofia/plans');
+  expect(before.ok()).toBeTruthy();
+  const publishedBefore = ((await before.json()) as { plan: PatientMealPlan }).plan;
   await page.getByLabel('Hora de Desayuno').fill('08:45');
-  await page.getByRole('button', { name: 'Guardar borrador' }).click();
-  await page.getByRole('button', { name: 'Publicar v2' }).click();
+  const [saved] = await Promise.all([
+    page.waitForResponse(response => new URL(response.url()).pathname === '/api/patients/pat-sofia/plans' && response.request().method() === 'POST'),
+    page.getByRole('button', { name: 'Guardar borrador' }).click(),
+  ]);
+  expect(saved.ok()).toBeTruthy();
+  const { plan } = await saved.json() as { plan: ProfessionalMealPlan };
+  expect(plan.current.meal_times?.Desayuno).toBe('08:45');
+  // All specs share the demo API; a saved draft need not be version 2.
+  const afterSave = await page.request.get('/api/patients/pat-sofia/plans');
+  expect(afterSave.ok()).toBeTruthy();
+  expect(((await afterSave.json()) as { plan: PatientMealPlan }).plan).toEqual(publishedBefore);
+  await page.getByRole('button', { name: `Publicar v${plan.current.version}`, exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Plan publicado. La paciente ve la versión revisada.' })).toBeVisible();
   await enterDemo(page, '/app/plan');
+  const patient = await page.request.get('/api/patients/pat-sofia/plans');
+  expect(patient.ok()).toBeTruthy();
+  expect(((await patient.json()) as { plan: PatientMealPlan }).plan.version).toBe(plan.current.version);
   await expect(page.getByText('Desayuno · 08:45')).toBeVisible();
   await expect(page.getByText('Tu plan cambió. Mirá qué es distinto.')).toBeVisible();
 });

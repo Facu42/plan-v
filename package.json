@@ -19,7 +19,7 @@
     "dashboard:test": "node --test implementation-dashboard/verification.mjs",
     "dev": "concurrently -n api,vite -c blue,green \"npm run dev:api\" \"npm run dev:vite\"",
     "dev:api": "node scripts/with-env.mjs tsx watch server/index.ts",
-    "dev:vite": "node scripts/with-env.mjs vite --host",
+    "dev:vite": "node scripts/prepare-clinical-pdf.mjs && node scripts/with-env.mjs vite --host",
     "build": "node scripts/prepare-patient-import-ocr.mjs && node scripts/prepare-clinical-pdf.mjs && npm run nutrigo:styles && vite build",
     "nutrigo:styles": "node scripts/build-nutrigo-styles.mjs",
     "nutrigo:source": "node scripts/build-nutrigo-source.mjs",

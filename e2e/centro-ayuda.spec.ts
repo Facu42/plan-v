@@ -56,7 +56,7 @@ test('Ayuda: FAQ abre destinos reales y pedido local no genera solicitudes', asy
   expect(writes).toEqual([]);
 });
 
-test('Ayuda: 1440/390, claro/oscuro, Inter y diálogos dentro de pantalla', async ({ page }) => {
+test('Ayuda: 1440/390, claro/oscuro, Inter y diálogos dentro de pantalla', async ({ page }, testInfo) => {
   await enterDemo(page, '/crm/ayuda');
   await expect(page.locator('#s-ayuda')).toBeVisible();
   for (const width of [1440, 390]) for (const dark of [false, true]) {
@@ -73,14 +73,18 @@ test('Ayuda: 1440/390, claro/oscuro, Inter y diálogos dentro de pantalla', asyn
     else expect(right.x).toBeGreaterThan(left.x);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     expect(await page.locator('#s-ayuda').evaluate(el => getComputedStyle(el).fontFamily)).toContain('Inter');
-    await page.screenshot({ path: `docs/screenshots/centro-ayuda/ayuda-${width}-${dark ? 'oscuro' : 'claro'}.png`, fullPage: true });
+    await page.screenshot({ path: testInfo.outputPath(`ayuda-${width}-${dark ? 'oscuro' : 'claro'}.png`), fullPage: true });
     await page.getByRole('button', { name: 'Pedir ayuda a Plan V' }).click();
     const dialog = page.getByRole('dialog');
+    // Visibility includes the entrance frame translated 24px beyond the settled position.
+    await expect(dialog).toBeVisible();
+    await expect.poll(() => dialog.evaluate(el => getComputedStyle(el).transform)).toBe('none');
     const box = (await dialog.boundingBox())!;
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(width);
     expect(box.y + box.height).toBeLessThanOrEqual(900);
-    await page.screenshot({ path: `docs/screenshots/centro-ayuda/pedido-${width}-${dark ? 'oscuro' : 'claro'}.png` });
+    await page.screenshot({ path: testInfo.outputPath(`pedido-${width}-${dark ? 'oscuro' : 'claro'}.png`) });
     await page.keyboard.press('Escape');
+    await expect(dialog).toHaveCount(0);
   }
 });
