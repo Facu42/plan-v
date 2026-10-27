@@ -1,67 +1,97 @@
 # Handoff: boceto panel nutri → app funcional
 
-**Fecha:** 24–25 oct 2026 (America/Buenos_Aires)  
-**Dueño del hilo:** Plan V (asistente) + Facu  
-**Estado:** Fase 0 tools ([PR #176](https://github.com/Facu42/plan-v/pull/176)), Fase 1 shell ([PR #177](https://github.com/Facu42/plan-v/pull/177)), Fase 2 Seguimiento ([PR #178](https://github.com/Facu42/plan-v/pull/178)), Fase 3 Progreso ([PR #179](https://github.com/Facu42/plan-v/pull/179)) y Asistente IA ([PR #180](https://github.com/Facu42/plan-v/pull/180)) ya están en main. Alimentos está en el [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. Facu eligió **ok-v29-valor** (25 oct 2026). Orden: tools → shell → Seguimiento → Progreso → Asistente IA → Alimentos.
+**Fecha:** 27 oct 2026 (America/Buenos_Aires)
 
-## Decisiones cerradas (Facu, 25 oct 2026)
+**Dueño del hilo:** Plan V + Facu
 
-1. **Ok escrito** al boceto (v29 + PR #174 / `panel-trabajo.html`).
+**Main tip:** `c4bdf96` (`c4bdf96831c215ddad65c4f4528bda9701da3f6e`, post #193).
+
+**Estado:** en main, con ok visual de Facu y squash-merge: #176–#182, #183–#190 (Planes 1–3f), #191 Centro de ayuda, #192 Equipo/Ajustes y #193 Motion panel v29. La migración `plan_delivery` se aplicó en producción `plan-v-app` el 26 oct, con aval escrito de Facu. El próximo módulo espera su elección.
+
+## Decisiones cerradas (Facu, 25–27 oct 2026)
+
+1. **Ok escrito** al boceto (v29 + PR #174 / `panel-trabajo.html`): **ok-v29-valor**.
 2. **Fuente de estilos/contrato:** `design/panel-nutri/v29/panel-trabajo.html` (no el build `v3/` hasta nuevo aviso).
-3. **Orden:** por valor — shell → Seguimiento → Progreso → Asistente IA (no fases 1→13 de `version-final.md` como arranque).
-4. **La interfaz no sale del boceto.** Si un botón o una sección todavía no está hecha, se muestra vacío o «Próximamente». No se inventa otra pantalla.
-
-Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal Centro de ayuda; paquetes A/B/C + PR #145 (frase migraciones).
+3. **Orden por valor:** tools → shell → Seguimiento → Progreso → Asistente IA fue el arranque aprobado, no las fases 1→13 de `version-final.md`. Ese recorrido ya está en main; ahora Facu elige qué sigue.
+4. **La interfaz sale del boceto v29.** Si algo no está disponible, se muestra vacío o «Próximamente». No se inventa UI.
+5. **Merge de UI solo tras ok visual de Facu:** «Bien», «si» o «mergeá». Adjuntá las capturas/imágenes del PR al pedirle ese ok. Facu mergea.
+6. **Paridad del editor Planes:** chequeá las cinco pestañas `ptabs2`: Comidas, Indicaciones, Compras, Versiones y Entrega.
+7. **Implementación preferida:** Codex Sol `gpt-6.1-sol` vía Herdr / `codex exec -m gpt-6.1-sol`. Si Codex se queda sin cuota, fallback a Cloud Agent Grok 4.7: Facu lo pidió explícitamente cuando Sol se quedó sin uso.
+8. **Cloud Agent no es el default:** se usa cuando Facu lo pide o Codex no puede. Evitá gastar créditos de Cursor Agent en código de Plan V si se puede.
 
 ## Fuentes canónicas
 
 | Qué | Dónde |
 |---|---|
 | Plan iterable (Page) | https://cursor.com/canvas/store-0f75b483-c592-490c-9d4f-f54cf2aee507/6a995189-0641-4c51-ba7e-6ad9946145ab |
-| Plan canónico por fases | `docs/panel-nutri-rediseno/version-final.md` (fuente = v29/panel-trabajo.html) |
-| Boceto de trabajo | `design/panel-nutri/v29/panel-trabajo.html` (PR #174, ya en main) |
-| Fase 0 tools | https://github.com/Facu42/plan-v/pull/176 (ya en main) |
-| Fase 1 shell | https://github.com/Facu42/plan-v/pull/177 |
+| Plan canónico por fases | [version-final.md](version-final.md) (fuente = v29/panel-trabajo.html) |
+| Boceto de trabajo aprobado | [panel-trabajo.html](../../design/panel-nutri/v29/panel-trabajo.html) (PR #174, en main) |
 | Original v29 (NO tocar) | `design/panel-nutri/v29/PlanV-Boceto-v29.html` |
-| Este handoff | PR https://github.com/Facu42/plan-v/pull/175 (ya en main) |
+| Planes | [Parte 1](planes-v29-parte-1.md), [parte 2](planes-v29-parte-2.md), [parte 3](planes-v29-parte-3.md) y notas `planes-parte-3*.md` enlazadas abajo |
+| Centro de ayuda | [centro-ayuda-v29.md](centro-ayuda-v29.md) |
+| Equipo y Ajustes | [equipo-ajustes-v29.md](equipo-ajustes-v29.md) |
+| Motion | [motion-v29.md](motion-v29.md) |
+| Origen de este handoff | [PR #175](https://github.com/Facu42/plan-v/pull/175), en main |
 
 ## Qué ya está hecho
 
-- Boceto v29 + seis pantallas en `panel-trabajo.html` (PR #174, ya en main).
-- Pantallas diferenciadas; Progreso con drill-down.
-- App real (`main`) con rutas/APIs; gap = piel UI del boceto.
-- Plan + handoff registrados; **ok Facu ok-v29-valor**.
-- Fase 0 tools (PR #176, ya en main): `npm run panel:v29` y `npm run panel:contrato:v29` leen `panel-trabajo.html` y escriben `panel-v29.css` / `panel-v29-icons.ts`. No pisan `panel-boceto.css`.
-- Fase 1 shell ([PR #177](https://github.com/Facu42/plan-v/pull/177)): el armazón de la nutri usa las clases del boceto (`.app`, `.side`, `.nv`) y la hoja `panel-v29.css`. La raíz es `#pv-panel-v29`. Las pantallas que todavía no se pasaron siguen adentro, con `panel-boceto.css`. El contrato del armazón quedó en verde, en claro y en oscuro.
+Todo lo siguiente está en main, con ok visual de Facu y squash-merge:
+
+| Entrega | PR | Qué quedó |
+|---|---|---|
+| Tools v29 | [#176](https://github.com/Facu42/plan-v/pull/176) | `panel:v29` y `panel:contrato:v29` leen el boceto de trabajo; CSS e íconos nuevos sin pisar `panel-boceto.css` |
+| Shell | [#177](https://github.com/Facu42/plan-v/pull/177) | Armazón, menú, tema y celular; raíz `#pv-panel-v29`, letra Inter |
+| Seguimiento | [#178](https://github.com/Facu42/plan-v/pull/178) | Bandeja, comidas revisadas y pedido de registro por la app |
+| Progreso | [#179](https://github.com/Facu42/plan-v/pull/179) | Cartera y evolución; sin datos inventados ni falta de registros marcada como incumplimiento |
+| Asistente IA | [#180](https://github.com/Facu42/plan-v/pull/180) | Conversación, período, sugerencias y propuestas para revisar; nada se manda solo |
+| Alimentos | [#181](https://github.com/Facu42/plan-v/pull/181) | Catálogo y alimentos propios; SARA 2 solo lectura |
+| Biblioteca | [#182](https://github.com/Facu42/plan-v/pull/182) | Recursos y asignaciones; [verificación](biblioteca-v29-verificacion.md) |
+| Planes 1 | [#183](https://github.com/Facu42/plan-v/pull/183) | Listado, filtros y botones |
+| Planes 2 | [#184](https://github.com/Facu42/plan-v/pull/184) | Editor Día/Semana y pestañas del plan |
+| Planes 3 | [#185](https://github.com/Facu42/plan-v/pull/185) | Asistente y publicación separada del borrador |
+| Planes 3b | [#186](https://github.com/Facu42/plan-v/pull/186) | PDF real; [nota](planes-parte-3b-pdf-real.md) |
+| Planes 3c | [#187](https://github.com/Facu42/plan-v/pull/187) | Guardar plantilla y copiar; [nota](planes-parte-3c-plantilla-copiar.md) |
+| Planes 3d | [#188](https://github.com/Facu42/plan-v/pull/188) | Alcance (scope) y deshacer IA; [nota](planes-parte-3d-scope-deshacer.md) |
+| Planes 3e | [#189](https://github.com/Facu42/plan-v/pull/189) | Armar con IA: Formato, Medidas e Incluir; [nota](planes-parte-3e-armar-ia.md) |
+| Planes 3f | [#190](https://github.com/Facu42/plan-v/pull/190) | Mail, programar e impreso; [nota](planes-parte-3f-mail-programar-impreso.md). `plan_delivery` aplicada en prod con aval de Facu |
+| Centro de ayuda | [#191](https://github.com/Facu42/plan-v/pull/191) | Buscador, guías, FAQ y pedido local; [nota](centro-ayuda-v29.md) |
+| Equipo y Ajustes | [#192](https://github.com/Facu42/plan-v/pull/192) | Pantallas v29 y «Próximamente» donde falta soporte; [nota](equipo-ajustes-v29.md) |
+| Motion panel v29 | [#193](https://github.com/Facu42/plan-v/pull/193) | Pastilla del menú, entradas, panel lateral y avisos; [nota](motion-v29.md). Squash `c4bdf96` |
 
 ## Qué NO hacer
 
 - No mergear el HTML del boceto a `main` como frontend.
 - No tocar `PlanV-Boceto-v29.html`.
 - No WhatsApp.
-- No Cloud Agent salvo pedido explícito; código por Cursor/Codex vía Herdr.
-- No migraciones a prod sin frase escrita de Facu.
+- No usar Cloud Agent como default: solo con pedido de Facu o fallback cuando Codex no puede, incluida falta de cuota.
+- No gastar créditos de Cursor Agent en código Plan V si se puede evitar; preferí Codex Sol 6.1.
+- No migraciones a prod sin frase escrita de Facu. El aval de `plan_delivery` no autoriza otras migraciones.
 - No inventar APIs/tablas.
 - No pisar `panel-boceto.css` antes del marcado nuevo (archivos nuevos para tools).
 - No inventar una interfaz que el boceto no dibuja.
+- No mergear UI sin ok visual de Facu y capturas adjuntas al pedirlo.
 
-## Próximo paso (en curso)
+## Próximo paso (pendiente — Facu eligiendo)
 
-1. ~~Actualizar una línea en `version-final.md`: fuente = `v29/panel-trabajo.html`.~~ Hecho en el PR #176.
-2. ~~**Fase 0 tools:** archivos nuevos desde la fuente v29; la app se ve igual.~~ Hecho en el PR #176, ya en main.
-3. ~~**Fase 1 shell:** `PanelBocetoShell` + nav + tema/celular; contrato del armazón contra la app. Se importa `panel-v29.css`. La raíz es `#pv-panel-v29` (tema, `.mob` y `.mreal`).~~ En main por el [PR #177](https://github.com/Facu42/plan-v/pull/177).
-4. ~~**Fase 2 Seguimiento:** la pantalla de adentro de `/crm/seguimiento` copia el boceto y usa la bandeja, el feed y `MealReviewPanel`.~~ En main por el [PR #178](https://github.com/Facu42/plan-v/pull/178).
-5. ~~**Fase 3 Progreso:** cartera y evolución en `/crm/progreso-global`, con los datos de `progress-global`. Sin adherencia inventada. Quien no tiene curva de peso ve «Sin curva», no un incumplimiento.~~ En main por el [PR #179](https://github.com/Facu42/plan-v/pull/179).
-6. ~~**Asistente IA:** `/crm/desarrollo?modulo=asistente-ia` copia la conversación, el período, las sugerencias y las propuestas del boceto. La letra del panel es Inter (pesos 300, 400, 500 y 600), la del boceto. Poppins de la app de la paciente no entra al panel. Usa el asistente de cartera que ya existía. El gasto del mes no llega a la pantalla: se muestra «Sin dato» y el tope de US$ 5. Nada se le manda a la paciente.~~ En main por el [PR #180](https://github.com/Facu42/plan-v/pull/180).
-7. **Alimentos:** `/crm/alimentos` copia el catálogo del boceto. Se busca, se ve la porción y las proteínas, los carbohidratos y las grasas, y se crea o edita un alimento propio. En gramos las porciones son siempre 100 g, 1 taza (30 g) y 1 cucharada (10 g). El origen se lee «SARA 2». SARA 2 se consulta y no se edita. Suplementos y la fuente externa no se muestran: el boceto no los dibuja. [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar.
-8. **Biblioteca:** ya en main por el [PR #182](https://github.com/Facu42/plan-v/pull/182).
-9. **Planes, parte 1:** `/crm/plan` copia la entrada del boceto (secciones, listado, filtros y la columna de la derecha). Recetas abre la Biblioteca. El editor de la semana y el armado con IA quedan para las partes 2 y 3. El editor que ya existía sigue abierto con una paciente o desde «Armar o editar». [Nota](planes-v29-parte-1.md). Sin juntar.
-10. **Planes, parte 3:** en el editor de la semana, el asistente arma una propuesta y queda como borrador. Publicar es aparte, con la revisión y la API que ya existía. La vista de la paciente no avisa. El PDF y la lista de compras se bajan del borrador guardado. El panel del asistente, la pantalla «Armar con IA», compartir, la gestión y los dos botones del PDF siguen el boceto. Lo que no tiene atrás (deshacer de la IA, dictar, adjuntar, mail, impreso, interruptores del PDF y programar) se ve y dice «Próximamente». [Nota](planes-v29-parte-3.md). [PR #185](https://github.com/Facu42/plan-v/pull/185), sin juntar.
+Secciones del boceto que en la app siguen viejas / no v29:
+
+1. **Inicio** v29.
+2. **Pacientes / ficha** v29.
+3. **Dictar / Adjuntar** en Armar con IA (Planes 3g). Se saltó cuando Facu pidió Centro de ayuda.
+4. **También en cola:** Mensajes, Agenda, Cobranzas y Recetas/Plantillas/Equivalencias como módulos propios si el boceto los dibuja aparte.
+
+**27 oct, ~23:42 BA:** Facu mergeó #193 («si») y pidió seguir con Codex Sol 6.1. Se le ofreció widget Inicio / Pacientes-ficha / Dictar-Adjuntar. **Todavía no respondió.** Retomá preguntándole cuál sigue o con la opción que elija; ninguna quedó elegida por defecto.
 
 ## Bitácora
 
+Las filas anteriores se conservan como historia: «sin juntar» describe el momento de cada entrada, no el estado actual de arriba.
+
 | Cuándo | Qué | Quién |
 |---|---|---|
+| 27 oct | Handoff actualizado para retomar desde main `c4bdf96`: entregas cerradas, decisiones vigentes y próximo módulo a elección de Facu. Solo documentación. | Codex |
+| 26–27 oct | Motion panel v29 en main por [#193](https://github.com/Facu42/plan-v/pull/193), Cloud Agent Grok 4.7 `bc-f265be57`; squash `c4bdf96`, con ok visual de Facu. | Plan V + Facu |
+| 26 oct | Centro de ayuda [#191](https://github.com/Facu42/plan-v/pull/191) y Equipo/Ajustes [#192](https://github.com/Facu42/plan-v/pull/192) en main. Codex Sol se quedó sin cuota a mitad de Equipo/Ajustes; Cloud Agent Grok 4.7 `bc-36494eb5` lo cerró. | Codex + Cloud Agent + Facu |
+| 26 oct | Planes 3b–3f [#186](https://github.com/Facu42/plan-v/pull/186)–[#190](https://github.com/Facu42/plan-v/pull/190) en main. Migración `plan_delivery` aplicada en prod `plan-v-app` con aval escrito de Facu. | Plan V + Facu |
 | 26 oct | Planes, parte 3: se cerraron los seis huecos del boceto en el mismo [PR #185](https://github.com/Facu42/plan-v/pull/185). Panel del asistente, pantalla «Armar con IA», atajo, compartir, gestión y PDF con dos botones. Lo que no tiene atrás queda en «Próximamente». Sin juntar. | Cursor |
 | 26 oct | Planes, parte 3: el asistente arma un borrador y publicar usa la API real. Nada llega a la paciente hasta esa confirmación. Programar la entrega queda en «Próximamente». [PR #185](https://github.com/Facu42/plan-v/pull/185), sin juntar. | Cursor |
 | 26 oct | Planes, parte 1: el listado de `/crm/plan` copia la entrada del boceto. El editor de la semana y el asistente quedan para después. Sin juntar. | Cursor |
@@ -80,7 +110,8 @@ Pendientes (no bloquean Fase 0–1): Progreso drill-down inline vs ficha; canal 
 
 ## Cómo retomar (otro agente)
 
-1. Leer esta nota + la Page del plan.
-2. Chequear bitácora: ok-v29-valor ya cerrado. Tools, armazón, Seguimiento, Progreso y Asistente IA (#176, #177, #178, #179 y #180) están en main. Alimentos está en el [PR #181](https://github.com/Facu42/plan-v/pull/181), sin juntar. La letra del panel ya es Inter.
-3. No redibujar el armazón. Alimentos ya está en main por #181. Biblioteca quedó implementada y verificada en [PR #182](https://github.com/Facu42/plan-v/pull/182) (`codex/biblioteca-v29`), sin juntar; [informe y capturas](biblioteca-v29-verificacion.md). Sigue Centro de ayuda, que todavía no está empezado.
-4. Actualizar esta bitácora al cerrar cada fase (1 párrafo + commit/PR). Facu mergea.
+1. Leé este handoff, `design/panel-nutri/v29/panel-trabajo.html` y las notas del módulo que siga.
+2. Partí de main `c4bdf96` o más nuevo. Las entregas #176–#193 ya están en main; no tomes los estados históricos de otras notas como pendientes actuales.
+3. No redibujes el shell ni el motion que ya están en main.
+4. Arrancá el módulo que Facu elija con Codex Sol 6.1. Si todavía no eligió, preguntale. Un PR por módulo, merge en espera y capturas adjuntas para su ok visual. Si tocás Planes, chequeá Comidas/Indicaciones/Compras/Versiones/Entrega (`ptabs2`). Facu mergea.
+5. Actualizá esta bitácora al cerrar, con lo hecho y el commit/PR.

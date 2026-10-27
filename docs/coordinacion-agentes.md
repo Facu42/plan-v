@@ -111,6 +111,8 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **27/10 · Codex · Handoff boceto → app** · [Handoff actualizado](panel-nutri-rediseno/handoff-boceto-a-app.md) desde main `c4bdf96`, con #176–#193 cerrados y siguiente módulo a elección de Facu. Solo documentación; PR en borrador, sin merge ni producción.
+
 - **27/10 · Cursor · Motion del panel v29** · Rama `cursor/motion-panel-v29-e2b6`, código `a986e2f`, base `11645a6`. Se portaron la pastilla del menú, la entrada `fin` de los módulos ya montados, el panel lateral `#act` y el aviso `#atoast`, con los mismos tiempos del boceto y con reducir movimiento. 3.409 pruebas aprobadas, dos omitidas, tipos en verde y el CSS generado igual al boceto. [Nota y paso 10](panel-nutri-rediseno/motion-v29.md). [PR #193 en borrador](https://github.com/Facu42/plan-v/pull/193). Sin merge, sin publicación y sin migración.
 
 - **27/10 · Cursor · Equipo y Ajustes v29** · Continuación del avance de Codex en `4e52a34`. Rama `cursor/equipo-ajustes-v29-70bc`, código `0649e18`, base `62a8e48`. Equipo (Integrantes, Permisos, Registro) y Ajustes (cinco pestañas, menú «Ajustes»). Invitaciones, marca, tema, avisos de la profesional y conexiones usan lo que ya existía. Permisos, registro de accesos, plantillas, Brevo y respaldos quedan en «Próximamente», sin números del boceto. 3.403 pruebas aprobadas, dos omitidas, cuatro e2e y contrato v29 del armazón en verde. [Informe y paso 10](panel-nutri-rediseno/equipo-ajustes-v29.md). [PR #192 en borrador](https://github.com/Facu42/plan-v/pull/192). Sin merge, sin publicación y sin migración.
