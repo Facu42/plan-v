@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { usePanelBoceto } from './panel-v29-boceto';
 import { PanelV29Icon } from './PanelV29Icon';
 import { filterGuides, HELP_GUIDES, HELP_TOPICS, HELP_FAQ } from './help-center-model';
 import './help-center.css';
@@ -51,19 +52,20 @@ export function HelpCenter({ onOpen, onHeader }: { onOpen: (href: string) => voi
 
 function HelpDialog({ title, children, onClose, footer }: { title: string; children: ReactNode; onClose: () => void; footer?: ReactNode }) {
   const ref = useRef<HTMLElement>(null);
+  const { clase, cerrar } = usePanelBoceto(onClose);
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     ref.current?.focus();
     return () => previous?.focus();
   }, []);
-  const node = <div id="actw" className="on help-dialog"><div className="ascrim" onClick={onClose}/><aside id="act" ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="help-dialog-title" onKeyDown={event => {
-    if (event.key === 'Escape') { event.stopPropagation(); onClose(); }
+  const node = <div id="actw" className={clase ? `on help-dialog` : 'help-dialog'}><div className="ascrim" onClick={cerrar}/><aside id="act" ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="help-dialog-title" onKeyDown={event => {
+    if (event.key === 'Escape') { event.stopPropagation(); cerrar(); }
     if (event.key !== 'Tab') return;
     const targets = Array.from(ref.current?.querySelectorAll<HTMLElement>('button, input, textarea, select') ?? []);
     const first = targets[0], last = targets[targets.length - 1];
     if (event.shiftKey && (document.activeElement === first || document.activeElement === ref.current)) { event.preventDefault(); last?.focus(); }
     else if (!event.shiftKey && (document.activeElement === last || document.activeElement === ref.current)) { event.preventDefault(); first?.focus(); }
-  }}><header><div><h2 id="help-dialog-title">{title}</h2></div><button type="button" className="ibtn" aria-label="Cerrar" onClick={onClose}><PanelV29Icon name="x" size={13}/></button></header><div className="abody">{children}</div><footer>{footer ?? <button type="button" className="chip" onClick={onClose}>Cerrar panel</button>}</footer></aside></div>;
+  }}><header><div><h2 id="help-dialog-title">{title}</h2></div><button type="button" className="ibtn" aria-label="Cerrar" onClick={cerrar}><PanelV29Icon name="x" size={13}/></button></header><div className="abody">{children}</div><footer>{footer ?? <button type="button" className="chip" onClick={cerrar}>Cerrar panel</button>}</footer></aside></div>;
   const host = typeof document === 'undefined' ? null : document.querySelector('#pv-panel-v29 .app');
   return host ? createPortal(node, host) : node;
 }

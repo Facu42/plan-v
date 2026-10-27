@@ -6,6 +6,7 @@ import type { Patient } from '../../types';
 import type { ProgressPeriodDays, ProgressSeries } from '../../types/progress';
 import type { GlobalProgressResponse } from '../../types/progress-global';
 import { PanelProgresoVista, PeriodoProgreso } from './PanelProgreso';
+import { TOAST_DESMONTE_MS } from './panel-v29-motion';
 import { filasDe, puntosDeSerie, type FiltroCartera, type OrdenCartera, type PuntoPeso } from './progreso-presentacion';
 import { NvButton, NvState } from './primitives';
 
@@ -30,7 +31,7 @@ export function ProfessionalProgressGlobal({ onOpen, onHeader, patients = [] }: 
   const [curva, setCurva] = useState<Curva>(vacia);
   const avisar = useCallback((texto: string) => {
     setAviso(texto);
-    window.setTimeout(() => setAviso(actual => actual === texto ? '' : actual), 3600);
+    window.setTimeout(() => setAviso(actual => actual === texto ? '' : actual), TOAST_DESMONTE_MS);
   }, []);
   const cambiarDias = useCallback((periodo: ProgressPeriodDays) => {
     setDays(periodo);

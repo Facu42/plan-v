@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { foodApi } from '../../api/foods';
 import { foodQuantityUnit, type Food } from '../../types/foods';
+import { AvisoBoceto, usePanelBoceto } from './panel-v29-boceto';
+import { TOAST_DESMONTE_MS } from './panel-v29-motion';
 import { PanelV29Icon } from './PanelV29Icon';
 import {
   anchoEnergia, borradorEdicion, borradorNuevo, etiquetaTarjeta, filtrosDe, grupoDe, nutrientesDePorcion,
@@ -35,9 +37,7 @@ export function AccionesAlimentos({
 }
 
 function Aviso({ texto }: { texto: string }) {
-  const nodo = <div id="atoast" className="on" role="status">{texto}</div>;
-  const host = typeof document === 'undefined' ? null : document.querySelector('#pv-panel-v29 .app');
-  return host ? createPortal(nodo, host) : nodo;
+  return <AvisoBoceto texto={texto} />;
 }
 
 function Barra({ porcentaje, clase }: { porcentaje: number; clase?: string }) {
@@ -167,15 +167,16 @@ function PanelAlimento({ dialog, error, guardando, onCerrar, onGuardarNuevo, onG
   const [alta, setAlta] = useState<AltaAlimento>({ nombre: '', fuente: '', kcal: '', proteina: '', medida: '', gramos: '' });
   const [nombre, setNombre] = useState(dialog.kind === 'editar' ? dialog.food.name : '');
   const [kcal, setKcal] = useState(dialog.kind === 'editar' && dialog.food.nutrients.kcal != null ? String(dialog.food.nutrients.kcal) : '');
-  const nodo = <div id="actw" className="on">
-    <div className="ascrim" onClick={onCerrar} />
+  const { clase, cerrar } = usePanelBoceto(onCerrar);
+  const nodo = <div id="actw" className={clase || undefined}>
+    <div className="ascrim" onClick={cerrar} />
     <aside id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
       <header>
         <div>
           <h2 id="actt">{dialog.kind === 'nuevo' ? 'Nuevo alimento' : 'Editar alimento'}</h2>
           <p id="acts">{dialog.kind === 'nuevo' ? 'Queda entre los tuyos. SARA 2 no se toca.' : dialog.food.name}</p>
         </div>
-        <button type="button" className="ibtn" aria-label="Cerrar" onClick={onCerrar}><PanelV29Icon name="x" size={13} /></button>
+        <button type="button" className="ibtn" aria-label="Cerrar" onClick={cerrar}><PanelV29Icon name="x" size={13} /></button>
       </header>
       <div className="abody" id="actb">
         {dialog.kind === 'nuevo' ? <>
@@ -198,7 +199,7 @@ function PanelAlimento({ dialog, error, guardando, onCerrar, onGuardarNuevo, onG
         {error ? <p className="sxsub" role="alert">{error}</p> : null}
       </div>
       <footer id="actf">
-        <button type="button" className="chip" onClick={onCerrar}>Cancelar</button>
+        <button type="button" className="chip" onClick={cerrar}>Cancelar</button>
         <span style={{ flex: 1 }} />
         <button type="button" className="cta" disabled={guardando} onClick={() => dialog.kind === 'nuevo' ? onGuardarNuevo(alta) : onGuardarEdicion(nombre, kcal)}>{guardando ? 'Guardando…' : dialog.kind === 'nuevo' ? 'Guardar alimento' : 'Guardar'}</button>
       </footer>
@@ -227,7 +228,7 @@ export function PanelAlimentos({ onHeader }: { onHeader?: (actions: ReactNode) =
   const [guardando, setGuardando] = useState(false);
   const avisar = useCallback((texto: string) => {
     setToast(texto);
-    window.setTimeout(() => setToast(actual => actual === texto ? '' : actual), 3600);
+    window.setTimeout(() => setToast(actual => actual === texto ? '' : actual), TOAST_DESMONTE_MS);
   }, []);
   const buscar = useCallback(() => {
     setConsulta(borrador.trim());

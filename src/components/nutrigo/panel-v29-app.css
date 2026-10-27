@@ -344,3 +344,29 @@
 #pv-panel-v29 #s-planes .p28-ai-shortcut,
 #pv-panel-v29 #s-planes .peshare,
 #pv-panel-v29 #s-planes .pegest { margin-top: 0; }
+
+/* Entrada de módulo: la misma `fin` de `.fbody` (opacidad y 4 px). No se usa la clase `.fbody` porque arma una grilla. */
+#pv-panel-v29 #pv-panel > #s-ayuda,
+#pv-panel-v29 #pv-panel > #s-equipo,
+#pv-panel-v29 #pv-panel > #s-ajustes,
+#pv-panel-v29 #pv-panel > #s-planes,
+#pv-panel-v29 #pv-panel > #s-biblioteca,
+#pv-panel-v29 #pv-panel > #s-seguimiento,
+#pv-panel-v29 #pv-panel > #s-progreso,
+#pv-panel-v29 #pv-panel > #s-alimentos,
+#pv-panel-v29 #pv-panel > #s-asistente {
+  animation: fin .25s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  #pv-panel-v29 #pv-panel > #s-ayuda,
+  #pv-panel-v29 #pv-panel > #s-equipo,
+  #pv-panel-v29 #pv-panel > #s-ajustes,
+  #pv-panel-v29 #pv-panel > #s-planes,
+  #pv-panel-v29 #pv-panel > #s-biblioteca,
+  #pv-panel-v29 #pv-panel > #s-seguimiento,
+  #pv-panel-v29 #pv-panel > #s-progreso,
+  #pv-panel-v29 #pv-panel > #s-alimentos,
+  #pv-panel-v29 #pv-panel > #s-asistente {
+    animation: none;
+  }
+}
