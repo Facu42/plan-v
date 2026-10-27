@@ -7,6 +7,7 @@
 // Uso (app en demo: `npm run local`):
 //   node scripts/panel-v29-contrato.mjs          → imprime el informe y sale con 1 si algo no coincide
 //   node scripts/panel-v29-contrato.mjs --write  → además lo guarda en design/panel-nutri/v29/contrato-informe.md
+import { usarAgendaDeEjemplo } from './panel-v29-agenda-ejemplo.mjs';
 import { createRequire } from 'node:module';
 import { existsSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
@@ -163,6 +164,31 @@ export const PIEZAS_PACIENTES = [
   ['Detalle: nota', '#prows .pd-note', '', ['fontSize', 'borderLeftWidth', 'paddingLeft']],
 ];
 
+// Piezas de Agenda. Los selectores existen en el boceto y en la app; el turno «próximo» y el «hecho» salen de la hora real.
+export const PIEZAS_AGENDA = [
+  ['Tarjeta del calendario', '#s-agenda .card.cal', '', ['borderTopLeftRadius', 'backgroundColor']],
+  ['Encabezado de días', '#s-agenda .days', '', ['gridTemplateColumns', 'borderBottomWidth']],
+  ['Día de hoy', '#s-agenda .days .today b', '', ['fontSize', 'backgroundColor', 'borderTopLeftRadius', 'paddingLeft']],
+  ['Cantidad de consultas', '#s-agenda .days small', '', ['fontSize', 'color']],
+  ['Columna de hoy', '#s-agenda .hcol.today', '', ['backgroundColor', 'borderLeftWidth']],
+  ['Hora', '#s-agenda .hlab span', '', ['fontSize', 'color']],
+  ['Turno de consultorio', '#s-agenda .ev.c', '', ['backgroundColor', 'borderTopLeftRadius', 'paddingTop', 'paddingLeft', 'fontSize']],
+  ['Turno de videollamada', '#s-agenda .ev.v', '', ['backgroundColor', 'borderTopLeftRadius']],
+  ['Turno sin confirmar', '#s-agenda .ev.w', '', ['backgroundColor', 'borderTopLeftRadius']],
+  ['Turno hecho', '#s-agenda .ev.d', '', ['backgroundColor', 'color']],
+  ['Turno próximo', '#s-agenda .ev.n', '', ['backgroundColor', 'color']],
+  ['Nombre del turno', '#s-agenda .ev b', '', ['fontSize', 'fontWeight']],
+  ['Línea de ahora', '#s-agenda .nowl', '', ['borderTopWidth', 'borderTopColor']],
+  ['Mes chico: día de hoy', '#s-agenda #mg .td', '', ['backgroundColor', 'fontWeight', 'borderTopLeftRadius']],
+  ['Mes chico: semana', '#s-agenda #mg .wk', '', ['backgroundColor']],
+  ['Referencias de color', '#s-agenda .lgd span', '', ['fontSize', 'color']],
+  ['Tarjeta de pedidos', '#s-agenda .card.req', '', ['borderTopLeftRadius', 'backgroundColor']],
+  ['Avatar del pedido', '#s-agenda .req .av', '', ['width', 'height', 'fontSize', 'borderTopLeftRadius']],
+  ['Aceptar', '#s-agenda .req .sbtn.k', '', ['backgroundColor', 'color', 'fontSize', 'borderTopLeftRadius', 'paddingLeft']],
+  ['Proponer otro', '#s-agenda .req .sbtn:not(.k)', '', ['backgroundColor', 'fontSize', 'borderTopLeftRadius']],
+  ['Lugar libre', '#s-agenda .slot button', '', ['fontSize', 'borderTopLeftRadius', 'paddingTop', 'paddingLeft', 'backgroundColor']],
+];
+
 // Piezas de Seguimiento. El selector existe en el boceto y en la app.
 export const PIEZAS_SEGUIMIENTO = [
   ['Foto de la comida', '#s-seguimiento .sxpic', '', ['width', 'height', 'borderTopLeftRadius']],
@@ -272,6 +298,20 @@ async function abrirPacientesApp(pagina) {
   await pagina.waitForTimeout(1800);
 }
 
+async function abrirAgendaBoceto(pagina) {
+  await pagina.locator('[data-go="agenda"]').first().click();
+  await pagina.waitForSelector('#s-agenda:not([hidden]) .ev', { timeout: 10000 });
+  await pagina.waitForTimeout(800);
+}
+
+async function abrirAgendaApp(pagina) {
+  await usarAgendaDeEjemplo(pagina);
+  await pagina.locator('#pv-panel-v29 a[href="/crm/agenda"]').first().click();
+  await pagina.waitForSelector('#s-agenda .card.cal .days', { timeout: 20000 });
+  await pagina.waitForSelector('#s-agenda .ev', { timeout: 20000 });
+  await pagina.waitForTimeout(800);
+}
+
 async function abrirSeguimientoBoceto(pagina) {
   await pagina.locator('[data-go="seguimiento"]').first().click();
   await pagina.waitForSelector('#s-seguimiento:not([hidden]) .sxpic', { timeout: 10000 });
@@ -374,6 +414,10 @@ export async function correrContratoV29() {
       await abrirPacientesApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Pacientes\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_PACIENTES, informe);
+      await abrirAgendaBoceto(b);
+      await abrirAgendaApp(a);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Agenda\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_AGENDA, informe);
       await abrirSeguimientoBoceto(b);
       await abrirSeguimientoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Seguimiento\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');

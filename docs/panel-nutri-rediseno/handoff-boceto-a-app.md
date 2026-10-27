@@ -78,7 +78,8 @@ Secciones del boceto que en la app siguen viejas / no v29:
 1. **Inicio** v29.
 2. **Pacientes / ficha** v29.
 3. **Dictar / Adjuntar** en Armar con IA (Planes 3g). Se saltó cuando Facu pidió Centro de ayuda.
-4. **También en cola:** Mensajes, Agenda, Cobranzas y Recetas/Plantillas/Equivalencias como módulos propios si el boceto los dibuja aparte.
+4. **Agenda** v29 en la rama `claude/agenda-v29` (espera el ok visual; ver `agenda-v29.md`).
+5. **También en cola:** Mensajes, Cobranzas y Recetas/Plantillas/Equivalencias como módulos propios si el boceto los dibuja aparte.
 
 **27 oct, ~23:42 BA:** Facu mergeó #193 («si») y pidió seguir con Codex Sol 6.1. Se le ofreció widget Inicio / Pacientes-ficha / Dictar-Adjuntar. **Todavía no respondió.** Retomá preguntándole cuál sigue o con la opción que elija; ninguna quedó elegida por defecto.
 
