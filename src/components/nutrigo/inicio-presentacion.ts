@@ -308,6 +308,16 @@ export function encabezadoInicio(pacientes: readonly Patient[], ahora: Date) {
   const { today, next } = homeAppointments(pacientes, ahora);
   return {
     sufijo: `· ${today.length === 0 ? 'sin consultas' : today.length === 1 ? '1 consulta' : `${today.length} consultas`} hoy`,
-    proxima: next ? `la próxima es a las ${hora(next.at)}` : 'no queda otra consulta hoy',
+    proxima: next ? `la próxima es ${cuandoEsLaProxima(next.at, ahora)}a las ${hora(next.at)}` : 'no queda otra consulta hoy',
   };
+}
+
+/** Hoy no lleva día; si la próxima es otro día se dice cuál («mañana», «el vie 30»). */
+function cuandoEsLaProxima(cuando: Date, ahora: Date) {
+  const dia = homeDay(cuando);
+  if (dia === homeDay(ahora)) return '';
+  const manana = homeDay(new Date(ahora.getTime() + 86_400_000));
+  if (dia === manana) return 'mañana ';
+  const corto = new Intl.DateTimeFormat('es-AR', { timeZone: HOME_ZONE, weekday: 'short', day: 'numeric' }).format(cuando).replace('.', '');
+  return `el ${corto} `;
 }

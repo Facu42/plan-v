@@ -6,7 +6,7 @@ test.describe.configure({ mode: 'serial' });
 
 test('1 · la nutricionista da de alta a una paciente nueva con invitación', async ({ page }) => {
   await enterDemo(page, '/crm/pacientes');
-  await page.getByRole('button', { name: 'Nuevo paciente' }).click();
+  await page.getByRole('button', { name: 'Nueva paciente' }).click();
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Nombre completo').fill('Ana Prueba');
   await dialog.getByLabel('Email para la invitación').fill('ana.prueba@example.com');
@@ -62,7 +62,7 @@ test('2 · la paciente completa su ficha de ingreso y la envía', async ({ page 
   await expect(page.getByText('Ya estás en tu espacio')).toBeVisible();
 
   await enterDemo(page, '/crm/pacientes');
-  await page.locator('summary[aria-label="Más opciones de Sofía R."]').click();
+  await page.getByRole('row', { name: 'Ver resumen de Sofía R.' }).click();
   await page.getByRole('button', { name: 'Abrir ficha de Sofía R.' }).click();
   await page.getByRole('button', { name: 'Historia clínica', exact: true }).click();
   const intake = page.getByRole('main');
@@ -73,11 +73,11 @@ test('2 · la paciente completa su ficha de ingreso y la envía', async ({ page 
 
 test('3 · la nutricionista ajusta el plan y la paciente lo ve', async ({ page }) => {
   await enterDemo(page, '/crm/pacientes');
-  await page.locator('summary[aria-label="Más opciones de Sofía R."]').click();
+  await page.getByRole('row', { name: 'Ver resumen de Sofía R.' }).click();
   await page.getByRole('button', { name: 'Abrir plan de Sofía R.' }).click();
   await page.getByLabel('Hora de Desayuno').fill('08:45');
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
-  await page.getByRole('button', { name: 'Publicar v2' }).click();
+  await page.getByRole('button', { name: /^Publicar v\d+$/ }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Plan publicado. La paciente ve la versión revisada.' })).toBeVisible();
   await enterDemo(page, '/app/plan');
   await expect(page.getByText('Desayuno · 08:45')).toBeVisible();
@@ -98,7 +98,7 @@ test('4 · la paciente registra una comida en el diario y la nutricionista la ve
   await expect(meal.getByRole('heading', { name: '¡Listo, Sofía!' })).toBeVisible();
 
   await enterDemo(page, '/crm/pacientes');
-  await page.locator('summary[aria-label="Más opciones de Sofía R."]').click();
+  await page.getByRole('row', { name: 'Ver resumen de Sofía R.' }).click();
   await page.getByRole('button', { name: 'Abrir ficha de Sofía R.' }).click();
   await page.getByRole('button', { name: 'Registro alimentario', exact: true }).click();
   await waitLoaded(page);

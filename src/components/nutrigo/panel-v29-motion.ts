@@ -5,6 +5,8 @@ export const ESTIRAR_MS = 180;
 export const LIMPIAR_MS = 320;
 export const SEGUIR_PLEGADO_MS = 450;
 export const CERRAR_PANEL_MS = 220;
+/** Cierre del detalle de Pacientes: `closeAnim` del boceto (.3 s). */
+export const SALIDA_DETALLE_MS = 300;
 export const TOAST_MS = 3600;
 export const TOAST_SALIDA_MS = 260;
 export const TOAST_DESMONTE_MS = TOAST_MS + TOAST_SALIDA_MS;

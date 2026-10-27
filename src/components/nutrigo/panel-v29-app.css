@@ -435,3 +435,71 @@
   #pv-panel-v29 #s-inicio .klol i { transform-origin: 50% 100%; animation: pvScaleY .5s ease-out both; animation-delay: .45s; }
   #pv-panel-v29 #s-inicio .klol b { animation: pvPop .4s .7s cubic-bezier(.2, 1.6, .4, 1) both; }
 }
+
+/* Pacientes: acciones secundarias del detalle (editar, archivar…). El boceto no las dibuja; viven como enlaces chicos bajo los botones. */
+#pv-panel-v29 #s-pacientes .pd-more { display: flex; flex-wrap: wrap; gap: 4px 14px; padding-top: 2px; }
+#pv-panel-v29 #s-pacientes .pd-more .lnk { font-size: 11.5px; padding: 0; background: none; border: 0; color: var(--ink2); cursor: pointer; }
+#pv-panel-v29 #s-pacientes .pd-more .lnk:hover { color: var(--ink); text-decoration: underline; }
+#pv-panel-v29 #s-pacientes .pd-more .lnk.warn { color: var(--rojo-ink); font-weight: 500; }
+#pv-panel-v29 #s-pacientes tr[data-i] { cursor: pointer; }
+#pv-panel-v29 #s-pacientes tr[data-i]:focus-visible { outline: 2px solid var(--ch); outline-offset: -2px; }
+#pv-panel-v29 #s-pacientes .av { color: #141519; }
+
+/* Detalle de Pacientes: se despliega hacia abajo y sus piezas entran con los tiempos del boceto (openAnim). */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes pvOpen { from { grid-template-rows: 0fr; } to { grid-template-rows: 1fr; } }
+  @keyframes pvClose { to { grid-template-rows: 0fr; opacity: 0; } }
+  @keyframes pvFade { from { opacity: 0; } }
+  #pv-panel-v29 #s-pacientes .pd { display: grid; grid-template-rows: 1fr; animation: pvOpen .45s cubic-bezier(.65, 0, .35, 1); }
+  #pv-panel-v29 #s-pacientes .pd.out { animation: pvClose .3s ease-in forwards; }
+  #pv-panel-v29 #s-pacientes .pd > .pdin { min-height: 0; }
+  #pv-panel-v29 #s-pacientes .pdin > section { animation: pvUp .4s .3s both cubic-bezier(.2, .8, .2, 1); }
+  #pv-panel-v29 #s-pacientes .pdin > section:nth-child(2) { animation-delay: .38s; }
+  #pv-panel-v29 #s-pacientes .pdin > section:nth-child(3) { animation-delay: .46s; }
+  #pv-panel-v29 #s-pacientes .pd-pl > div { animation: pvLeft .35s .45s both ease-out; }
+  #pv-panel-v29 #s-pacientes .pw-g .ln { stroke-dasharray: 1; animation: pvDraw 1s .75s both ease-in-out; }
+  #pv-panel-v29 #s-pacientes .pw-g .ar { animation: pvUp .6s .95s both ease-out; }
+  #pv-panel-v29 #s-pacientes .pw-g .dt { transform-box: fill-box; transform-origin: 50% 50%; animation: pvPop .3s both cubic-bezier(.34, 1.56, .64, 1); animation-delay: calc(.95s + var(--i, 0) * .04s); }
+  #pv-panel-v29 #s-pacientes .pw-g .now, #pv-panel-v29 #s-pacientes .pw-g .nt { transform-box: fill-box; transform-origin: 50% 50%; animation: pvPop .45s 1.75s both cubic-bezier(.34, 1.56, .64, 1); }
+  #pv-panel-v29 #s-pacientes .pw-g .goal, #pv-panel-v29 #s-pacientes .pw-g .gt { animation: pvFade .4s .95s both; }
+  #pv-panel-v29 #s-pacientes .pg-g .pv { animation: pvRing 1.1s .6s both cubic-bezier(.22, 1, .36, 1); }
+  #pv-panel-v29 #s-pacientes .pg-g .end { transform-box: fill-box; transform-origin: 50% 50%; animation: pvPop .4s 1.5s both cubic-bezier(.34, 1.56, .64, 1); }
+  #pv-panel-v29 #s-pacientes .pg-g .tk { animation: pvFade .3s both; animation-delay: calc(.3s + var(--i, 0) * .05s); }
+  #pv-panel-v29 #s-pacientes .pa7 i { transform-origin: 50% 100%; animation: pvScaleY .6s both cubic-bezier(.34, 1.4, .64, 1); animation-delay: calc(.65s + var(--i, 0) * .05s); }
+  #pv-panel-v29 #s-pacientes .pa7 .avg { transform-origin: 0 50%; animation: pvScaleX .6s 1.3s both ease-out; }
+  #pv-panel-v29 #s-pacientes .pa7 u { animation: pvUp .3s 1.4s both; }
+  #pv-panel-v29 #s-pacientes .pd-tl li { animation: pvLeft .3s both; animation-delay: calc(.9s + var(--i, 0) * .07s); }
+}
+
+/* Pacientes: la hoja vieja pisa tarjeta, solapas, chip y botones del detalle. Vuelven las medidas del boceto v29. */
+#pv-panel-v29 #s-pacientes .card.pt { padding: 0; border-radius: 16px; background: var(--card); }
+#pv-panel-v29 #s-pacientes #pfil { border-radius: 9px; padding: 2px; background: var(--app); gap: 2px; }
+#pv-panel-v29 #s-pacientes #pfil button { font-size: 11.5px; padding: 4px 9px; border-radius: 7px; background: none; color: var(--ink2); font-weight: 400; box-shadow: none; }
+#pv-panel-v29 #s-pacientes #pfil button.on { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
+#pv-panel-v29 #s-pacientes .ch .chip { border-radius: 999px; font-size: 12px; }
+#pv-panel-v29 #s-pacientes .who b { font-weight: 500; }
+#pv-panel-v29 #s-pacientes .pd-acts button { font-size: 12px; border-radius: 10px; padding: 8px 0; background: var(--card); color: var(--ink); border: 1px solid var(--line2); }
+#pv-panel-v29 #s-pacientes .pd-acts button:hover { background: var(--app); }
+#pv-panel-v29 #s-pacientes .pd-acts .go { background: var(--ink); color: var(--app); border-color: var(--ink); }
+#pv-panel-v29 #s-pacientes .pd-acts .go:hover { background: var(--ink); }
+/* Pacientes usa el negro y los grises del boceto, no los de la hoja vieja. */
+#pv-panel-v29 #pv-panel:has(#s-pacientes) { --ink: inherit; --ink2: inherit; --ink3: inherit; --line: inherit; color: var(--ink); background: transparent; }
+#pv-panel-v29 #s-pacientes .pd-acts button { line-height: normal; }
+/* La hoja vieja convierte .goal en una cápsula blanca; en Pacientes es la barra de avance del boceto. */
+#pv-panel-v29 #s-pacientes .goal { display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; padding: 0; background: none; border-radius: 0; gap: 6px; }
+#pv-panel-v29 #s-pacientes .goal .tr { display: block; height: 5px; border-radius: 9px; background: var(--line); }
+#pv-panel-v29 #s-pacientes .goal .tr i { display: block; height: 100%; border-radius: 9px; background: var(--ink); }
+/* Celular: el detalle ocupa el ancho de la tarjeta (las columnas del medio se esconden, como en el boceto). */
+#pv-panel-v29.mob #s-pacientes table { table-layout: fixed; }
+#pv-panel-v29.mob #s-pacientes .pd, #pv-panel-v29.mob #s-pacientes .pdin, #pv-panel-v29.mob #s-pacientes .pdin > section { min-width: 0; max-width: 100%; }
+#pv-panel-v29.mob #s-pacientes tr.det td { white-space: normal; }
+#pv-panel-v29.mob #s-pacientes th:nth-child(7) { width: 112px; }
+#pv-panel-v29.mob #s-pacientes td:nth-child(7) { padding-left: 4px; padding-right: 10px; }
+#pv-panel-v29.mob #s-pacientes td:nth-child(2) { overflow: hidden; }
+#pv-panel-v29.mob #s-pacientes .who > div { min-width: 0; }
+#pv-panel-v29.mob #s-pacientes .who small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#pv-panel-v29.mob #s-pacientes td:nth-child(7) .pill { white-space: normal; text-align: left; line-height: 1.25; }
+
+/* Celular: las tres tarjetas del resumen van una debajo de otra, así que el divisor pasa de lado a arriba. */
+#pv-panel-v29.mob #s-pacientes .pd-t { border-left: 0; border-top: 1px solid var(--line); }
+#pv-panel-v29.mob #s-pacientes .pd-t:first-child { border-top: 0; }

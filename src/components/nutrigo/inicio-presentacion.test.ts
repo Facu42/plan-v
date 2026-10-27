@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Patient } from '../../types';
 import type { BillingBoard } from '../../types/fees';
-import { armarAtencion, armarConsultas, armarKpis, armarPendientes, compacto, cuotaDe } from './inicio-presentacion';
+import { armarAtencion, armarConsultas, armarKpis, armarPendientes, compacto, cuotaDe, encabezadoInicio } from './inicio-presentacion';
 
 const ahora = new Date('2026-10-19T13:00:00Z'); // 10:00 en Buenos Aires
 const paciente = (extra: Partial<Patient> = {}): Patient => ({ id: 'a', name: 'Ana López', initials: 'AL', tone: 'mint', goal: '', adherence_score: 0, meal_logs: [], habit_logs: [], messages: [], appointment: null, ...extra }) as Patient;
@@ -76,5 +76,14 @@ describe('Inicio: lo que se dibuja sale de datos reales', () => {
     expect(compacto(1_280_000)).toEqual({ valor: '$1,28', unidad: 'M' });
     expect(compacto(162_000)).toEqual({ valor: '$162', unidad: 'mil' });
     expect(compacto(0)).toEqual({ valor: '$0' });
+  });
+});
+
+describe('Inicio: encabezado con la próxima consulta', () => {
+  it('dice el día cuando la próxima no es hoy', () => {
+    const proxima = (starts_at: string) => encabezadoInicio([paciente({ appointment: turno(starts_at) })], ahora).proxima;
+    expect(proxima('2026-10-19T14:30:00Z')).toBe('la próxima es a las 11:30');
+    expect(proxima('2026-10-20T13:00:00Z')).toBe('la próxima es mañana a las 10:00');
+    expect(proxima('2026-10-23T13:00:00Z')).toBe('la próxima es el vie 23 a las 10:00');
   });
 });

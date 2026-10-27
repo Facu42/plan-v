@@ -111,7 +111,9 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
-- **27/10 · Claude · Inicio v29** · Rama `claude/project-thread-4ic2wy`, desde main `39eeaa8`. Inicio copia el boceto: pendientes, atención, tarjeta oscura, consultas de hoy/mañana/semana y cinco números, con datos reales y movimiento sin librería (se apaga con reducir movimiento). 3.418 pruebas, tipos, build y contrato de Inicio en verde. [Nota, paso 10 y plan de lo que falta](panel-nutri-rediseno/inicio-v29.md). Sin merge ni producción; HOLD hasta el ok visual de Facundo.
+- **27/10 · Claude · Pacientes v29** · Rama `claude/pacientes-v29`, desde main `9f11908` (Inicio ya juntado con el ok de Facundo, #196). Pacientes copia el boceto: solapas, orden, tabla y resumen que se despliega hacia abajo con peso, avance, adherencia, turno y últimos hechos, con datos reales y movimiento sin librería. Patologías dice «Sin declarar» (no hay dato). Contrato de Pacientes en verde. [Nota, paso 10 y qué no se copió](panel-nutri-rediseno/pacientes-v29.md). Sin merge ni producción; HOLD hasta el ok visual de Facundo.
+
+- **27/10 · Claude · Inicio v29** · Rama `claude/project-thread-4ic2wy`, desde main `39eeaa8`. Inicio copia el boceto: pendientes, atención, tarjeta oscura, consultas de hoy/mañana/semana y cinco números, con datos reales y movimiento sin librería (se apaga con reducir movimiento). 3.418 pruebas, tipos, build y contrato de Inicio en verde. [Nota, paso 10 y plan de lo que falta](panel-nutri-rediseno/inicio-v29.md). **Juntado a main el 27/10 (#196) con el ok de Facundo.**
 
 - **27/10 · Codex · Handoff boceto → app** · [Handoff actualizado](panel-nutri-rediseno/handoff-boceto-a-app.md) desde main `c4bdf96`, con #176–#193 cerrados y siguiente módulo a elección de Facu. Solo documentación; PR en borrador, sin merge ni producción.
 
@@ -242,3 +244,11 @@ del piloto, entidad legal.
 - **16/10 · Claude** · Rama `claude/meta-de-agua`: meta de agua por paciente (4 a 16 vasos) que elige la nutri. Toca con cambios chicos `ShowroomPatients.tsx`, `PatientOverview.tsx`, `screens/Home.tsx`, `Diary.tsx`, `Progress.tsx`, `showroom-model.ts`, `supabase-repo.ts` y `contracts.ts`. Migración `20261016090000_water_goal`, aplicada el 16/10.
 - **15/10 · Claude** · Rama `claude/super-unidades-locales`: la lista del súper muestra cantidades como se piden en el comercio (1/2 kg, 1,5 l, 1 docena). Cambia `screens/shopping-format.ts` y una celda de `screens/Shopping.tsx`. Sin base.
 - **17/10 · Claude** · Rama `claude/indices-base` (reemplaza al PR #27): migración `20261017010000_performance_indexes`, índices para toda clave foránea de `public` y `private` y 7 reglas con `(select auth.uid())`. Una migración nueva de Codex con claves foráneas tiene que traer su índice (lo exige `server/db-performance.postgres.test.ts`).
+
+### 2026-10-27 · Claude · CI y celular de Pacientes v29 (PR #197)
+
+- Resumen abierto en celular claro: la fila ocupaba 7 columnas en una tabla de 3 (tabla angosta y cortada); fondo viejo rosado en las esquinas. Corregido en `PanelPacientes.tsx` y `panel-v29-app.css`.
+- Encabezado de Inicio dice «mañana» o «el vie 30» si la próxima consulta no es hoy.
+- Recorridos de punta a punta que fallaban en main: Ayuda medía el diálogo mientras se deslizaba; Planes 3c y 3d suponían que hoy era lunes; 3c y el recorrido 3 dependían del plan que dejaban otras pruebas. Ahora siembran su estado o esperan lo que miden. Corrida completa local: 36 pruebas.
+- Plan de lo que sigue: `docs/panel-nutri-rediseno/pacientes-v29-siguiente.md`.
+

@@ -24,6 +24,8 @@ test('Planes: alcance día/comida/todo, aplicar, deshacer e historial sin public
   expect((await page.request.post('/api/patients/pat-sofia/consents', { data: { purpose: permiso.purpose, text_version: permiso.text_version, text_hash: permiso.text_hash, decision: 'granted' } })).ok()).toBeTruthy();
   await enterDemo(page, '/crm/plan');
   await page.getByRole('button', { name: /plan (de|para) Sofía R\./ }).click();
+  // El editor abre en el día de hoy; el recorrido pide el primer día del plan, que es el que se compara.
+  await page.locator('.pedays button').first().click();
   await page.getByRole('button', { name: 'Ajustar con IA', exact: true }).click();
   const cajon = page.locator('#iadr');
   await expect(cajon.getByRole('button', { name: 'Deshacer última aplicación IA' })).toBeDisabled();
