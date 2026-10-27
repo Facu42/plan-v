@@ -140,6 +140,29 @@ export const PIEZAS_INICIO = [
   ['Pie de la tarjeta', '#s-inicio .kpi .ft', '', ['fontSize', 'color']],
 ];
 
+// Piezas de Pacientes, con la primera fila desplegada (el boceto la trae abierta).
+export const PIEZAS_PACIENTES = [
+  ['Tarjeta de la lista', '#s-pacientes .card.pt', '', ['borderTopLeftRadius', 'backgroundColor', 'paddingTop', 'paddingLeft']],
+  ['Solapas', '#pfil', '', ['borderTopLeftRadius', 'paddingTop', 'backgroundColor']],
+  ['Solapa elegida', '#pfil button.on', '', ['fontSize', 'backgroundColor', 'color', 'paddingTop', 'paddingLeft']],
+  ['Chip de orden', '#s-pacientes .ch .chip', '', ['fontSize', 'borderTopLeftRadius', 'paddingTop', 'height']],
+  ['Encabezado de la tabla', '#s-pacientes th', '', ['fontSize', 'letterSpacing', 'textTransform', 'color', 'paddingTop']],
+  ['Celda de la fila', '#prows tr[data-i] td:nth-child(2)', '', ['height', 'paddingLeft', 'fontSize']],
+  ['Avatar', '#prows .who .av', '', ['width', 'height', 'fontSize', 'borderTopLeftRadius']],
+  ['Nombre', '#prows .who b', '', ['fontSize', 'fontWeight']],
+  ['Estado', '#prows .pill', '', ['fontSize', 'borderTopLeftRadius', 'paddingLeft']],
+  ['Patología', '#prows .pat', '', ['fontSize', 'borderTopLeftRadius', 'paddingLeft']],
+  ['Barra de adherencia', '#prows .adh .tr', '', ['width', 'height', 'borderTopLeftRadius']],
+  ['Fila abierta', '#prows tr.open td', '', ['backgroundColor']],
+  ['Detalle: panel', '#prows .pdin > section', '', ['borderTopLeftRadius', 'paddingTop', 'paddingLeft', 'backgroundColor']],
+  ['Detalle: botón principal', '#prows .pd-acts .go', '', ['height', 'backgroundColor', 'color', 'borderTopLeftRadius']],
+  ['Detalle: botón', '#prows .pd-acts button:not(.go)', '', ['height', 'fontSize', 'borderTopLeftRadius', 'backgroundColor']],
+  ['Detalle: número', '#prows .pd-v b', '', ['fontSize', 'fontWeight', 'letterSpacing']],
+  ['Detalle: columna de números', '#prows .pd-t', '', ['paddingTop', 'paddingLeft', 'borderLeftWidth']],
+  ['Detalle: próximo turno', '#prows .pd-next', '', ['backgroundColor', 'borderTopLeftRadius', 'paddingTop']],
+  ['Detalle: nota', '#prows .pd-note', '', ['fontSize', 'borderLeftWidth', 'paddingLeft']],
+];
+
 // Piezas de Seguimiento. El selector existe en el boceto y en la app.
 export const PIEZAS_SEGUIMIENTO = [
   ['Foto de la comida', '#s-seguimiento .sxpic', '', ['width', 'height', 'borderTopLeftRadius']],
@@ -233,6 +256,20 @@ async function comparar(bocetoPagina, appPagina, piezas, informe) {
     informe.push(`| ${nombre} | ❌ distinta | ${distintas.map(k => `**${k}**: boceto \`${fuente[k]}\` · app \`${app[k]}\``).join('<br>')} |`);
   }
   return fallas;
+}
+
+async function abrirPacientesBoceto(pagina) {
+  await pagina.locator('[data-go="pacientes"]').first().click();
+  await pagina.waitForSelector('#s-pacientes:not([hidden]) #prows tr.open', { timeout: 10000 });
+  await pagina.waitForTimeout(1800);
+}
+
+async function abrirPacientesApp(pagina) {
+  await pagina.locator('#pv-panel-v29 a[href="/crm/pacientes"]').first().click();
+  await pagina.waitForSelector('#s-pacientes #prows tr[data-i]', { timeout: 20000 });
+  await pagina.locator('#prows tr[data-i]').first().click();
+  await pagina.waitForSelector('#prows .pdin', { timeout: 10000 });
+  await pagina.waitForTimeout(1800);
 }
 
 async function abrirSeguimientoBoceto(pagina) {
@@ -333,6 +370,10 @@ export async function correrContratoV29() {
       await a.waitForSelector('#det .xhero', { timeout: 20000 });
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Inicio\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_INICIO, informe);
+      await abrirPacientesBoceto(b);
+      await abrirPacientesApp(a);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Pacientes\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_PACIENTES, informe);
       await abrirSeguimientoBoceto(b);
       await abrirSeguimientoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Seguimiento\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');

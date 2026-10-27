@@ -111,7 +111,9 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
-- **27/10 · Claude · Inicio v29** · Rama `claude/project-thread-4ic2wy`, desde main `39eeaa8`. Inicio copia el boceto: pendientes, atención, tarjeta oscura, consultas de hoy/mañana/semana y cinco números, con datos reales y movimiento sin librería (se apaga con reducir movimiento). 3.418 pruebas, tipos, build y contrato de Inicio en verde. [Nota, paso 10 y plan de lo que falta](panel-nutri-rediseno/inicio-v29.md). Sin merge ni producción; HOLD hasta el ok visual de Facundo.
+- **27/10 · Claude · Pacientes v29** · Rama `claude/pacientes-v29`, desde main `9f11908` (Inicio ya juntado con el ok de Facundo, #196). Pacientes copia el boceto: solapas, orden, tabla y resumen que se despliega hacia abajo con peso, avance, adherencia, turno y últimos hechos, con datos reales y movimiento sin librería. Patologías dice «Sin declarar» (no hay dato). Contrato de Pacientes en verde. [Nota, paso 10 y qué no se copió](panel-nutri-rediseno/pacientes-v29.md). Sin merge ni producción; HOLD hasta el ok visual de Facundo.
+
+- **27/10 · Claude · Inicio v29** · Rama `claude/project-thread-4ic2wy`, desde main `39eeaa8`. Inicio copia el boceto: pendientes, atención, tarjeta oscura, consultas de hoy/mañana/semana y cinco números, con datos reales y movimiento sin librería (se apaga con reducir movimiento). 3.418 pruebas, tipos, build y contrato de Inicio en verde. [Nota, paso 10 y plan de lo que falta](panel-nutri-rediseno/inicio-v29.md). **Juntado a main el 27/10 (#196) con el ok de Facundo.**
 
 - **27/10 · Codex · Handoff boceto → app** · [Handoff actualizado](panel-nutri-rediseno/handoff-boceto-a-app.md) desde main `c4bdf96`, con #176–#193 cerrados y siguiente módulo a elección de Facu. Solo documentación; PR en borrador, sin merge ni producción.
 

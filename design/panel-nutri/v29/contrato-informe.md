@@ -3,7 +3,7 @@
 Fuente: `design/panel-nutri/v29/panel-trabajo.html`.
 App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Planes (http://127.0.0.1:5173).
 
-**El armazón, Seguimiento, Progreso, Asistente, Alimentos, Biblioteca y Planes coinciden, en claro y en oscuro.**
+**2 piezas no coinciden.**
 
 ## Tema oscuro · armazón
 
@@ -25,6 +25,48 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Título de la pantalla | ✅ igual | |
 | Campana | ✅ igual | |
 | CTA | ✅ igual | |
+
+## Tema oscuro · Inicio
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Tarjeta de Pendientes | ✅ igual | |
+| Título de la tarjeta | ✅ igual | |
+| Fila de la lista | ✅ igual | |
+| Ícono de la fila | ✅ igual | |
+| Tipo de la fila | ✅ igual | |
+| Motivo de atención | ✅ igual | |
+| Tarjeta oscura | ✅ igual | |
+| Número grande | ✅ igual | |
+| Botón principal | ✅ igual | |
+| Encabezado de la tabla | ✅ igual | |
+| Tarjeta de número | ✅ igual | |
+| Número de la tarjeta | ✅ igual | |
+| Pie de la tarjeta | ✅ igual | |
+
+## Tema oscuro · Pacientes
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Tarjeta de la lista | ✅ igual | |
+| Solapas | ✅ igual | |
+| Solapa elegida | ✅ igual | |
+| Chip de orden | ✅ igual | |
+| Encabezado de la tabla | ✅ igual | |
+| Celda de la fila | ✅ igual | |
+| Avatar | ✅ igual | |
+| Nombre | ✅ igual | |
+| Estado | ✅ igual | |
+| Patología | ✅ igual | |
+| Barra de adherencia | ✅ igual | |
+| Fila abierta | ✅ igual | |
+| Detalle: panel | ✅ igual | |
+| Detalle: botón principal | ✅ igual | |
+| Detalle: botón | ✅ igual | |
+| Detalle: número | ✅ igual | |
+| Detalle: columna de números | ✅ igual | |
+| Detalle: próximo turno | ✅ igual | |
+| Detalle: nota | ✅ igual | |
 
 ## Tema oscuro · Seguimiento
 
@@ -99,7 +141,7 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Filtro del listado | ✅ igual | |
 | Filtro activo | ✅ igual | |
 | CTA Nuevo plan | ✅ igual | |
-| Acción de la fila | ✅ igual | |
+| Acción de la fila | ❌ distinta | **height**: boceto `27px` · app `26px` |
 | Empezar con el asistente | ✅ igual | |
 | Orden del listado | ✅ igual | |
 
@@ -151,6 +193,48 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Título de la pantalla | ✅ igual | |
 | Campana | ✅ igual | |
 | CTA | ✅ igual | |
+
+## Tema claro · Inicio
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Tarjeta de Pendientes | ✅ igual | |
+| Título de la tarjeta | ✅ igual | |
+| Fila de la lista | ✅ igual | |
+| Ícono de la fila | ✅ igual | |
+| Tipo de la fila | ✅ igual | |
+| Motivo de atención | ✅ igual | |
+| Tarjeta oscura | ✅ igual | |
+| Número grande | ✅ igual | |
+| Botón principal | ✅ igual | |
+| Encabezado de la tabla | ✅ igual | |
+| Tarjeta de número | ✅ igual | |
+| Número de la tarjeta | ✅ igual | |
+| Pie de la tarjeta | ✅ igual | |
+
+## Tema claro · Pacientes
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Tarjeta de la lista | ✅ igual | |
+| Solapas | ✅ igual | |
+| Solapa elegida | ✅ igual | |
+| Chip de orden | ✅ igual | |
+| Encabezado de la tabla | ✅ igual | |
+| Celda de la fila | ✅ igual | |
+| Avatar | ✅ igual | |
+| Nombre | ✅ igual | |
+| Estado | ✅ igual | |
+| Patología | ✅ igual | |
+| Barra de adherencia | ✅ igual | |
+| Fila abierta | ✅ igual | |
+| Detalle: panel | ✅ igual | |
+| Detalle: botón principal | ✅ igual | |
+| Detalle: botón | ✅ igual | |
+| Detalle: número | ✅ igual | |
+| Detalle: columna de números | ✅ igual | |
+| Detalle: próximo turno | ✅ igual | |
+| Detalle: nota | ✅ igual | |
 
 ## Tema claro · Seguimiento
 
@@ -225,7 +309,7 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Filtro del listado | ✅ igual | |
 | Filtro activo | ✅ igual | |
 | CTA Nuevo plan | ✅ igual | |
-| Acción de la fila | ✅ igual | |
+| Acción de la fila | ❌ distinta | **height**: boceto `27px` · app `26px` |
 | Empezar con el asistente | ✅ igual | |
 | Orden del listado | ✅ igual | |
 

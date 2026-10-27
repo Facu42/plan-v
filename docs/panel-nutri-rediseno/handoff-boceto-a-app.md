@@ -88,7 +88,8 @@ Las filas anteriores se conservan como historia: «sin juntar» describe el mome
 
 | Cuándo | Qué | Quién |
 |---|---|---|
-| 27 oct | Inicio v29 en PR (rama `claude/project-thread-4ic2wy`), espera ok visual; [nota y plan de lo que falta](inicio-v29.md). | Claude |
+| 27 oct | Inicio v29 **juntado a main** (#196, con el ok de Facundo); [nota y plan de lo que falta](inicio-v29.md). | Claude |
+| 27 oct | Pacientes v29 en PR (rama `claude/pacientes-v29`), espera ok visual; [nota y paso 10](pacientes-v29.md). | Claude |
 | 27 oct | Handoff actualizado para retomar desde main `c4bdf96`: entregas cerradas, decisiones vigentes y próximo módulo a elección de Facu. Solo documentación. | Codex |
 | 26–27 oct | Motion panel v29 en main por [#193](https://github.com/Facu42/plan-v/pull/193), Cloud Agent Grok 4.7 `bc-f265be57`; squash `c4bdf96`, con ok visual de Facu. | Plan V + Facu |
 | 26 oct | Centro de ayuda [#191](https://github.com/Facu42/plan-v/pull/191) y Equipo/Ajustes [#192](https://github.com/Facu42/plan-v/pull/192) en main. Codex Sol se quedó sin cuota a mitad de Equipo/Ajustes; Cloud Agent Grok 4.7 `bc-36494eb5` lo cerró. | Codex + Cloud Agent + Facu |

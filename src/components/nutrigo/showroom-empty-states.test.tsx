@@ -48,7 +48,7 @@ describe('matriz de estados vacíos de las superficies del consultorio', () => {
   it('el directorio de pacientes muestra métricas en cero y estado vacío accionable', () => {
     const html = renderToStaticMarkup(<ShowroomPatients patients={[]} query="" onChanged={vi.fn()} onFollow={vi.fn()} />);
     expect(html).toContain('Sin coincidencias');
-    expect(html).toContain('Nuevo paciente');
+    expect(html).toContain('Nueva paciente');
     expect(html).not.toMatch(/NaN|undefined/);
   });
 });

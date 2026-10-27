@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { api, isAbortError, type InviteEmailDelivery, type PatientInvite } from '../../api/client';
 import { useAppStore } from '../../store/useAppStore';
 import { PatientImportDialog } from './PatientImportDialog';
@@ -6,18 +6,19 @@ import { patientImportApi } from '../../api/patient-import';
 import { ApiError } from '../../api/error';
 import { careErrorMessage } from '../../api/care';
 import type { Patient, Stage } from '../../types';
-import { filterDirectoryPatients, getPatientDirectoryMetrics, type PatientDirectoryFilter } from '../crm/crm-patients';
+import type { PatientDirectoryFilter } from '../crm/crm-patients';
 import { Icon } from '../shared/Icon';
-import { NvBadge, NvButton, NvCard, NvState } from './primitives';
+import { NvButton } from './primitives';
 import { hasFullPatientAccess } from '../../billing';
 import { createPatientWithInvitation, invitationReady } from './patient-invite-actions';
 import './showroom-patients.css';
-import { DIRECTORY_COLUMNS, isColumnVisible, loadDirectoryLayout, saveDirectoryLayout, toggleDirectoryColumn, type DirectoryLayout } from './directory-columns';
 import { useUnsavedChanges, canLeaveWorkspace } from './unsaved-changes';
-import { formatPesos } from '../../fees';
 import type { BillingBoard } from '../../types/fees';
 import { DEFAULT_WATER_GOAL, WATER_GOAL_OPTIONS } from '../../types/water';
-import { PanelPatientsTable } from './PanelPatientsTable';
+import { PanelPacientes, usePreviews } from './PanelPacientes';
+import { PanelV29Icon } from './PanelV29Icon';
+import { FILTROS, ETIQUETA_SIN_VINCULAR, ORDENES, SIGUIENTE_ORDEN, contarFiltros, encabezadoPacientes, filtrarPacientes, type FiltroPacientes } from './pacientes-presentacion';
+import { homeDay } from '../../lib/panel-home';
 import { sortDirectoryPatients, type DirectoryOrder } from './directory-sort';
 
 const STAGE_LABELS: Record<Stage, string> = { ingreso: 'Ingreso', plan: 'Plan', seguimiento: 'Seguimiento', alta: 'Alta' };
@@ -25,14 +26,6 @@ const STAGE_LABELS: Record<Stage, string> = { ingreso: 'Ingreso', plan: 'Plan', 
 export function followFromDirectory(patientId: string) {
   return { patientId, module: 'seguimiento' as const };
 }
-const FILTERS: Array<{ id: PatientDirectoryFilter; label: string }> = [
-  { id: 'all', label: 'Todas' },
-  { id: 'active', label: 'Activas' },
-  { id: 'attention', label: 'Necesitan atención' },
-  { id: 'unlinked', label: 'Acceso pendiente' },
-  { id: 'archived', label: 'Archivadas' },
-];
-
 function useDialogKeys(onClose: () => void, busy: boolean) {
   const latest = useRef({ onClose, busy }); latest.current = { onClose, busy };
   useEffect(() => {
@@ -244,8 +237,12 @@ export function ShowroomPatientEdit({ patient, onClose, onSaved }: { patient: Pa
 }
 
 export type DirectoryAction = 'create' | { share: { name: string; invite: PatientInvite } };
+/** Lo que Pacientes le pasa al encabezado del panel: el sufijo del título, la línea de abajo y los botones. */
+export type PacientesHeader = { sufijo: string; cuando: string; actions: ReactNode };
 
-export function ShowroomPatients({ patients, query, initialFilter = 'all', initialUnlinked = false, initialAction, onActionConsumed, onChanged, onFollow, onRecord, onPlan, onMessage, onOpenHref }: {
+const FILTRO_INICIAL: Record<PatientDirectoryFilter, FiltroPacientes> = { all: 'todas', active: 'todas', attention: 'atencion', unlinked: 'sinvincular', archived: 'inactivas' };
+
+export function ShowroomPatients({ patients, query, initialFilter = 'all', initialUnlinked = false, initialAction, onActionConsumed, onChanged, onFollow, onRecord, onPlan, onMessage, onOpenHref, onHeader }: {
   patients: Patient[];
   query: string;
   initialFilter?: PatientDirectoryFilter;
@@ -258,13 +255,12 @@ export function ShowroomPatients({ patients, query, initialFilter = 'all', initi
   onPlan?: (id: string) => void;
   onMessage?: (id: string) => void;
   onOpenHref?: (href: string) => void;
+  onHeader?: (header: PacientesHeader | null) => void;
 }) {
-  const [filter, setFilter] = useState<PatientDirectoryFilter>(initialFilter);
+  const [filter, setFilter] = useState<FiltroPacientes>(initialUnlinked ? 'sinvincular' : FILTRO_INICIAL[initialFilter]);
   const [creating, setCreating] = useState(false);
-  const [importing,setImporting] = useState(false);
-  const [stageFilter, setStageFilter] = useState<Stage | ''>('');
+  const [importing, setImporting] = useState(false);
   const [order, setOrder] = useState<DirectoryOrder>('appointment');
-  const [unlinkedOnly, setUnlinkedOnly] = useState(initialUnlinked);
   const [editing, setEditing] = useState<Patient | null>(null);
   const [archiveConfirmation, setArchiveConfirmation] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -272,16 +268,16 @@ export function ShowroomPatients({ patients, query, initialFilter = 'all', initi
   const [share, setShare] = useState<{ name: string; invite: PatientInvite } | null>(null);
   const [billing, setBilling] = useState<BillingBoard | null>(null);
   const [billingError, setBillingError] = useState('');
+  const now = new Date();
+  const today = homeDay(now);
+  const { previews, error: previewError, reintentar } = usePreviews(patients);
   useEffect(() => {
     let active = true;
     api.getBillingBoard().then(({ board }) => { if (active) setBilling(board); }).catch(() => { if (active) setBillingError('No pudimos consultar las deudas. Abrí Cobranzas para reintentar.'); });
     return () => { active = false; };
   }, []);
-  const [layout, setLayout] = useState<DirectoryLayout>(() => loadDirectoryLayout());
-  const changeLayout = (next: DirectoryLayout) => { setLayout(next); saveDirectoryLayout(next); };
-  const show = (id: (typeof DIRECTORY_COLUMNS)[number]['id']) => isColumnVisible(layout, id);
-  const metrics = getPatientDirectoryMetrics(patients);
-  const visible = sortDirectoryPatients(filterDirectoryPatients(patients, query, filter).filter((person) => (!stageFilter || person.stage === stageFilter) && (!unlinkedOnly || person.has_account === false)), order);
+  const counts = contarFiltros(patients, previews, today);
+  const visible = filtrarPacientes(patients, query, filter, previews, today, order, now);
 
   const setArchived = async (patient: Patient, archived: boolean) => {
     if (archived && archiveConfirmation !== patient.id) { setArchiveConfirmation(patient.id); return; }
@@ -328,44 +324,37 @@ export function ShowroomPatients({ patients, query, initialFilter = 'all', initi
     onActionConsumed?.();
   }, [initialAction]);
 
-  const rowActions = (patient: Patient) => (
-          <span className="nv-directory-actions">
-            {!patient.archived_at && onRecord && <NvButton className="nv-soft" aria-label={`Abrir ficha de ${patient.name}`} onClick={() => onRecord(patient.id)}><Icon name="contact" size={14} />Ficha</NvButton>}
-            {!patient.archived_at && onMessage && patient.has_account !== false && <NvButton className="nv-soft" aria-label={`Escribirle a ${patient.name}`} onClick={() => onMessage(patient.id)}><Icon name="message" size={14} />Mensaje</NvButton>}
-            {!patient.archived_at && onPlan && <NvButton className="nv-soft" aria-label={`Abrir plan de ${patient.name}`} onClick={() => onPlan(patient.id)}><Icon name="list" size={14} />Plan</NvButton>}
-            {!patient.archived_at && <NvButton className="nv-soft" aria-label={`Ver seguimiento de ${patient.name}`} onClick={() => onFollow(patient.id)}><Icon name="trend" size={14}/>Seguimiento</NvButton>}
-            {!patient.archived_at && patient.has_account === false && <NvButton className="nv-ghost" aria-label={`Invitar a ${patient.name}`} disabled={busyId === patient.id} onClick={() => invite(patient)}><Icon name="message" size={13} />Invitar</NvButton>}
-            {!patient.archived_at && <NvButton className="nv-ghost" aria-label={`Editar ficha de ${patient.name}`} onClick={() => setEditing(patient)}><Icon name="edit" size={13} />Editar</NvButton>}
-            <NvButton className={`nv-ghost${archiveConfirmation === patient.id ? ' nv-confirm' : ''}`} aria-label={patient.archived_at ? `Restaurar ${patient.name}` : archiveConfirmation === patient.id ? `Confirmar archivo de ${patient.name}` : `Archivar ${patient.name}`} disabled={busyId === patient.id} onClick={() => setArchived(patient, !patient.archived_at)}>
-              {busyId === patient.id ? 'Guardando…' : patient.archived_at ? 'Restaurar' : archiveConfirmation === patient.id ? 'Confirmar archivo' : 'Archivar'}
-            </NvButton>
-          </span>
-  );
+  const heading = encabezadoPacientes(patients, now);
+  const headingKey = `${heading.sufijo}|${heading.cuando}`;
+  useEffect(() => {
+    onHeader?.({ sufijo: heading.sufijo, cuando: heading.cuando, actions: <>
+      <button className="chip" type="button" onClick={() => setImporting(true)}><PanelV29Icon name="up" />Importar</button>
+      <button className="cta" type="button" onClick={() => setCreating(true)}><PanelV29Icon name="plus" />Nueva paciente</button></> });
+  }, [headingKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => onHeader?.(null), []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return <section className="nv-directory-workspace" aria-label="Gestión de pacientes">
+  const open = (href: string) => (onOpenHref ?? ((to: string) => window.location.assign(to)))(href);
+  const tabs = [...FILTROS, ...(counts.sinvincular || filter === 'sinvincular' ? [{ id: 'sinvincular' as const, label: ETIQUETA_SIN_VINCULAR }] : [])];
 
+  return <div className="scr" id="s-pacientes" aria-label="Gestión de pacientes">
     {billingError && <p role="alert">{billingError}</p>}
-    <div className="nv-directory-summary" aria-label="Resumen del directorio">
-      <button type="button" className="nv-summary-active" aria-label="Filtrar pacientes activos" aria-pressed={filter==='active'} onClick={()=>setFilter('active')}><span><Icon name="users" size={18}/>Pacientes activos</span><strong>{metrics.active}</strong><small>En tu consultorio</small></button>
-      <button type="button" className="nv-summary-pending" disabled={metrics.attention===null} aria-label="Filtrar pacientes pendientes de revisión" aria-pressed={filter==='attention'} onClick={()=>setFilter('attention')}><span><Icon name="camera" size={18}/>Pendientes de revisión</span><strong>{metrics.attention ?? '—'}</strong><small>Pacientes con registros por revisar</small></button>
-      <div><span><Icon name="calendar" size={18}/>Con próxima consulta</span><strong>{metrics.appointments}</strong><small>Pacientes con turno vigente</small></div>
-      <button type="button" className="nv-summary-archived" aria-label="Filtrar pacientes archivados" aria-pressed={filter==='archived'} onClick={()=>setFilter('archived')}><span><Icon name="history" size={18}/>Archivados</span><strong>{metrics.archived}</strong><small>Consultar o restaurar</small></button>
+    {previewError && <p role="alert">No pudimos cargar plan y peso. <button type="button" className="lnk" onClick={reintentar}>Reintentar</button></p>}
+    {share && <InviteShare name={share.name} invite={share.invite} onClose={() => setShare(null)} />}
+    {error && <p className="nv-dialog-error" role="alert">{error}</p>}
+    {!onHeader && <div className="top"><div className="sp" /><button className="chip" type="button" onClick={() => setImporting(true)}>Importar</button><button className="cta" type="button" onClick={() => setCreating(true)}>Nueva paciente</button></div>}
+    <div className="card pt">
+      <div className="ch"><div className="tabs" id="pfil" role="group" aria-label="Filtrar pacientes">
+        {tabs.map(tab => <button key={tab.id} type="button" className={filter === tab.id ? 'on' : undefined} aria-pressed={filter === tab.id} onClick={() => { setFilter(tab.id); setArchiveConfirmation(null); }}>{tab.label} · {counts[tab.id] ?? '—'}</button>)}</div>
+        <span className="sp" /><span className="meta">Ordenar por</span>
+        <button className="chip" type="button" style={{ padding: '5px 10px' }} aria-label={`Ordenar pacientes por ${ORDENES[order].toLowerCase()}`} onClick={() => setOrder(SIGUIENTE_ORDEN[order])}>{ORDENES[order]}</button></div>
+      <div className="scroll">
+        <PanelPacientes pacientes={visible} ahora={now} board={billing} billingError={Boolean(billingError)} previews={previews} onOpen={open}
+          acciones={{ onFollow, onRecord, onPlan, onMessage, onAgenda: () => open('/crm/agenda'), onEdit: setEditing, onInvite: invite, onArchive: setArchived, archiveConfirmation, busyId }} />
+        {!visible.length && <p className="meta" role="status" style={{ padding: '24px 18px' }}>{patients.length ? 'Sin coincidencias. Probá otra búsqueda o solapa.' : 'Sin coincidencias. Todavía no hay pacientes: creá la primera con «Nueva paciente».'}</p>}
+      </div>
     </div>
-    <NvCard className="nv-directory-panel" title="Directorio de pacientes" action={<><NvButton className="nv-ghost" onClick={()=>setImporting(true)}>Importar pacientes</NvButton><NvButton className="nv-soft" onClick={() => setCreating(true)}><Icon name="plus" size={14} />Nuevo paciente</NvButton></>}>
-      <div className="nv-directory-toolbar"><nav className="nv-directory-filters" aria-label="Filtrar pacientes">
-        {FILTERS.map((item) => {
-          const count = item.id === 'all' ? patients.length : item.id === 'unlinked' ? patients.filter(p=>!p.archived_at&&p.has_account===false).length : item.id === 'active' ? metrics.active : item.id === 'attention' ? metrics.attention : metrics.archived;
-          return <button type="button" key={item.id} disabled={item.id === 'attention' && metrics.attention === null} aria-pressed={filter === item.id} onClick={() => { setFilter(item.id); setUnlinkedOnly(false); setArchiveConfirmation(null); }}>{item.label}<span>{count ?? "—"}</span></button>;
-        })}
-      </nav><div className="nv-directory-tools"><details className="pn-directory-extra"><summary>Filtros{stageFilter || unlinkedOnly ? ' · activos' : ''}</summary><div className="pw-work-filters" aria-label="Filtros de gestión"><label>Etapa<select value={stageFilter} onChange={(event) => setStageFilter(event.target.value as Stage | '')}><option value="">Todas las etapas</option>{(Object.keys(STAGE_LABELS) as Stage[]).map((id) => <option key={id} value={id}>{STAGE_LABELS[id]}</option>)}</select></label><label><span>Invitación</span><select value={unlinkedOnly ? 'pending' : 'all'} onChange={(event) => setUnlinkedOnly(event.target.value === 'pending')}><option value="all">Todas las cuentas</option><option value="pending">Pendientes de vincular</option></select></label></div></details><details className="nv-directory-columns"><summary>Columnas y densidad</summary><div className="nv-directory-columns-panel"><fieldset><legend>Mostrar columnas</legend>{DIRECTORY_COLUMNS.map((column) => <label key={column.id}><input type="checkbox" checked={show(column.id)} onChange={() => changeLayout(toggleDirectoryColumn(layout, column.id))} />{column.label}</label>)}</fieldset><fieldset><legend>Densidad</legend><label><input type="radio" name="directory-density" checked={layout.density === 'comfortable'} onChange={() => changeLayout({ ...layout, density: 'comfortable' })} />Cómoda</label><label><input type="radio" name="directory-density" checked={layout.density === 'compact'} onChange={() => changeLayout({ ...layout, density: 'compact' })} />Compacta</label></fieldset></div></details><select className="pn-directory-order" aria-label="Ordenar pacientes" value={order} onChange={event=>setOrder(event.target.value as DirectoryOrder)}><option value="appointment">Próxima consulta</option><option value="name">Nombre</option><option value="adherence">Menor adherencia</option></select><span className="nv-directory-results" role="status">{visible.length} {visible.length===1 ? 'paciente' : 'pacientes'}</span></div></div>
-      {metrics.attention === null && <p role="status">No pudimos cargar todos los resúmenes semanales. Recargá para consultar los pendientes.</p>}
-      {share && <InviteShare name={share.name} invite={share.invite} onClose={() => setShare(null)} />}
-      {error && <p className="nv-dialog-error" role="alert">{error}</p>}
-      <PanelPatientsTable patients={visible} layout={layout} billing={billing} billingError={Boolean(billingError)} renderActions={rowActions} onOpen={onOpenHref} />
-      {!visible.length && <NvState title="Sin coincidencias" description="Probá otra búsqueda o filtro." />}
-    </NvCard>
     {creating && <ShowroomPatientCreate onClose={() => setCreating(false)} onCreated={created} />}
     {importing && <PatientImportDialog onClose={()=>setImporting(false)} onImported={()=>{void useAppStore.getState().refreshDirectory().catch(error=>{if(!isAbortError(error))setError('La importación se guardó, pero no pudimos actualizar el directorio. Recargá para verlo.');});}}/>}
     {editing && <ShowroomPatientEdit patient={editing} onClose={() => setEditing(null)} onSaved={(updated) => { onChanged(updated); setEditing(null); }} />}
-  </section>;
+  </div>;
 }

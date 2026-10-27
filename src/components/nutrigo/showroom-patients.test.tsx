@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { Patient } from '../../types';
 import { ShowroomPatientCreate, ShowroomPatientEdit, ShowroomPatients, followFromDirectory } from './ShowroomPatients';
+import { PanelPacientes, type AccionesPaciente } from './PanelPacientes';
 
 const emptyWeek = {start:'2026-10-03',end:'2026-10-09',recorded_days:0,meals_logged:0,meals_pending:0,water_days:0,water_average:null,pending_review:0};
 const base: Patient = {
@@ -22,6 +23,10 @@ const patients: Patient[] = [
 const render = (props?: Partial<Parameters<typeof ShowroomPatients>[0]>) =>
   renderToStaticMarkup(<ShowroomPatients patients={patients} query="" onChanged={vi.fn()} onFollow={vi.fn()} {...props} />);
 
+const acciones: AccionesPaciente = { onFollow: vi.fn(), onAgenda: vi.fn(), onEdit: vi.fn(), onInvite: vi.fn(), onArchive: vi.fn(), archiveConfirmation: null, busyId: null };
+const renderPanel = (abierta: string, lista: Patient[] = patients, extra: Partial<AccionesPaciente> = {}) =>
+  renderToStaticMarkup(<PanelPacientes pacientes={lista} ahora={new Date('2026-10-27T15:00:00Z')} board={null} billingError={false} previews={{}} acciones={{ ...acciones, ...extra }} onOpen={vi.fn()} abierta={abierta} onAbrir={vi.fn()} />);
+
 describe('directorio de pacientes del showroom', () => {
   it('el editor permite conservar o corregir teléfono opcional sin inventarlo', () => {
     const patient = { ...base, phone: '+54 11 1234 5678' };
@@ -29,61 +34,44 @@ describe('directorio de pacientes del showroom', () => {
     expect(html).toContain('Teléfono'); expect(html).toContain('type="tel"'); expect(html).toContain('+54 11 1234 5678');
     expect(renderToStaticMarkup(<ShowroomPatientEdit patient={base} onClose={vi.fn()} onSaved={vi.fn()} />)).toContain('type="tel"');
   });
-  it('mantiene acciones e identifica días, comidas, agua y pendientes por separado',()=>{
-    const html=render({onRecord:vi.fn(),onPlan:vi.fn()});
-    for(const label of ['Abrir ficha de Sofía','Abrir plan de Sofía','Ver seguimiento de Sofía','Editar ficha de Sofía','Archivar Sofía'])expect(html).toContain(label);
-    expect(html).toContain('nv-directory-weekly');expect(html).toContain('Agua sin registrar');expect(html).toContain('0 de 7 días');
-    expect(html).toContain('Filtrar pacientes activos');
-    const missing=render({patients:[{...base,has_account:false,weekly_registration:null}]});
-    expect(missing).toContain('Invitar a Sofía');expect(missing).toContain('Resumen no disponible');expect(missing).not.toContain('0 de 7 días');
-  });
-  it('ofrece elegir columnas y densidad, con las ocho columnas del boceto por defecto', () => {
+  it('muestra las solapas del boceto con su cantidad y los botones de arriba', () => {
     const html = render();
-    expect(html).toContain('Columnas y densidad');
-    for (const label of ['Próxima consulta', 'Plan', 'Adherencia', 'Peso', 'Cuota', 'App']) expect(html).toContain(`<input type="checkbox" checked=""/>${label}`);
-    expect(html.match(/role="columnheader"/g)).toHaveLength(8);
-    expect(html).toContain('Cómoda');
-    expect(html).toContain('Compacta');
+    for (const label of ['Todas · 2', 'Necesitan atención · 1', 'Primera vez · 0', 'Inactivas · 1']) expect(html).toContain(label);
+    expect(html).toContain('Plan por vencer · —');
+    expect(html).toContain('Importar'); expect(html).toContain('Nueva paciente');
+    expect(html).toContain('Ordenar por'); expect(html).toContain('Próxima consulta');
+    for (const label of ['Paciente', 'Patologías', 'Avance', 'Adherencia', 'Estado']) expect(html).toContain(`<th>${label}</th>`);
   });
-  it('suma la acción de mensaje sólo para quien ya tiene cuenta y conserva columnas adicionales', () => {
-    const html = render({ onMessage: vi.fn() });
-    expect(html).toContain('Escribirle a Sofía');
-    expect(render({ onMessage: vi.fn(), patients: [{ ...base, has_account: false }] })).not.toContain('Escribirle a Sofía');
-    expect(html).toContain('<input type="checkbox"/>Última consulta');
-    expect(html).toContain('<input type="checkbox"/>Registro semanal');
-  });
-  it('resume el directorio completo y permite seguir mostrando solo activas', () => {
-    const html = render({initialFilter:'active'});
-    expect(html).toContain('Pacientes activos');
-    expect(html).toContain('Pendientes de revisión');
-    expect(html).toContain('Archivados');
-    expect(html).toContain('Sofía');
-    expect(html).toContain('Marina');
-    expect(html).not.toContain('Laura');
-    expect(html).toContain('aria-pressed="true"');
-    expect(html).toContain('Nuevo paciente');
-  });
-
-  it('ofrece acciones accesibles por paciente activo', () => {
+  it('cada fila trae objetivo, adherencia, próxima consulta y estado reales', () => {
     const html = render();
-    expect(html).toContain('aria-label="Ver seguimiento de Sofía"');
-    expect(html).toContain('aria-label="Editar ficha de Sofía"');
-    expect(html).toContain('aria-label="Archivar Sofía"');
-    expect(html).toContain('Jueves · 14:30');
-    expect(html).toContain('Sumar proteína');
+    expect(html).toContain('Organizar comidas'); expect(html).toContain('85 %'); expect(html).toContain('Sin declarar');
+    expect(html).toContain('aria-label="Ver resumen de Sofía"'); expect(html).toContain('aria-expanded="false"');
+    expect(html).toContain('Sin turno'); expect(html).toContain('último registro: sin registros');
+    expect(html).not.toMatch(/NaN|undefined/);
+  });
+  it('el detalle desplegado ofrece ficha, plan, mensaje, agendar y las acciones de gestión', () => {
+    const html = renderPanel('sofia');
+    for (const label of ['Abrir ficha de Sofía', 'Abrir plan de Sofía', 'Escribirle a Sofía', 'Agendar a Sofía', 'Ver seguimiento de Sofía', 'Editar ficha de Sofía', 'Archivar Sofía']) expect(html).toContain(`aria-label="${label}"`);
+    expect(html).toContain('Sin patologías declaradas'); expect(html).toContain('Peso actual'); expect(html).toContain('Avance al objetivo'); expect(html).toContain('Adherencia, 7 días');
+    expect(html).toContain('aria-expanded="true"');
+    const sinCuenta = renderPanel('sofia', [{ ...base, has_account: false }]);
+    expect(sinCuenta).toContain('aria-label="Invitar a Sofía"'); expect(sinCuenta).not.toContain('Escribirle a Sofía');
+  });
+  it('pide confirmar antes de archivar', () => {
+    expect(renderPanel('sofia', undefined, { archiveConfirmation: 'sofia' })).toContain('aria-label="Confirmar archivo de Sofía"');
   });
 
   it('abre el centro de seguimiento del paciente, no el inicio del CRM', () => {
     expect(followFromDirectory('sofia')).toEqual({ patientId: 'sofia', module: 'seguimiento' });
   });
 
-  it('lista archivados con restaurar y sin acciones operativas', () => {
+  it('lista las inactivas con restaurar y sin acciones operativas', () => {
     const html = render({ initialFilter: 'archived' });
     expect(html).toContain('Laura');
-    expect(html).toContain('aria-label="Restaurar Laura"');
-    expect(html).not.toContain('Ver seguimiento');
-    expect(html).not.toContain('Archivar Laura');
     expect(html).not.toContain('Sofía');
+    const detalle = renderPanel('laura');
+    expect(detalle).toContain('aria-label="Restaurar Laura"');
+    expect(detalle).not.toContain('Ver seguimiento'); expect(detalle).not.toContain('Archivar Laura'); expect(detalle).not.toContain('Abrir ficha de Laura');
   });
 
   it('pendientes lista registros sin revisar y excluye archivados', () => {
@@ -137,5 +125,16 @@ describe('PV-47 enlace de invitación', () => {
     expect(inviteMessage('Lía Pérez', link)).toBe(`Hola Lía, te invito a Plan V para seguir tu plan conmigo. Creá tu cuenta con este enlace: ${link}`);
     expect(accessLabel({ billing_status: 'active', billing_until: '2026-10-31' })).toBe('Acceso hasta 31/10/2026');
     expect(accessLabel({ billing_status: 'pending', billing_until: null })).toBe('Acceso pendiente');
+  });
+});
+
+describe('movimiento de Pacientes', () => {
+  it('el detalle se despliega y entra con keyframes, solo si la persona no pidió reducir movimiento', async () => {
+    const { readFileSync } = await import('node:fs');
+    const css = readFileSync(new URL('./panel-v29-app.css', import.meta.url), 'utf8');
+    const bloque = css.slice(css.indexOf('Detalle de Pacientes: se despliega'));
+    expect(bloque).toContain('@media (prefers-reduced-motion: no-preference)');
+    for (const pieza of ['pvOpen', 'pvClose', '#s-pacientes .pw-g .ln', '#s-pacientes .pg-g .pv', '#s-pacientes .pa7 i', '#s-pacientes .pd-tl li']) expect(bloque).toContain(pieza);
+    expect(bloque.slice(0, bloque.indexOf('@media'))).not.toMatch(/animation/);
   });
 });

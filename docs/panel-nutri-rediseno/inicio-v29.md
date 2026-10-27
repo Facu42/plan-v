@@ -1,6 +1,6 @@
 # Inicio v29
 
-Rama `claude/project-thread-4ic2wy`, desde main `39eeaa8`. **Sin merge, sin producción y sin migraciones.** Espera el ok visual de Facundo.
+Rama `claude/project-thread-4ic2wy`, desde main `39eeaa8`. **Juntado a main el 27/10 (#196) con el ok de Facundo** («mergeá Inicio también»). Sin producción y sin migraciones. Los recorridos de punta a punta ya estaban rojos en main (5 pruebas: Ayuda, Planes y el recorrido 3); verify, signed-auth y secrets dieron verde.
 
 Inicio copia el `#s-inicio` de `design/panel-nutri/v29/panel-trabajo.html`: encabezado con «· N consultas hoy» y la fecha, tres atajos (Nuevo plan, Cargar pago, Mensaje) y Nueva consulta; Pendientes (Todos, Para hacer, Felicitar); Necesitan atención; la tarjeta oscura «J · Noche»; Consultas de hoy (Hoy, Mañana, Semana) y los cinco números de abajo. Los estilos salen del CSS ya generado; solo se sumaron en `panel-v29-app.css` los pisos de la hoja vieja (tarjetas, números, avatares, chips).
 
@@ -51,7 +51,7 @@ Comprobado en el navegador: con movimiento las manchas, la forma y las tarjetas 
 - **Migraciones:** no hay.
 - **Fire test:** la prueba de la cuota que vence hoy falló al cambiar la regla y volvió a verde al restaurarla ✅.
 - **Automatizaciones:** el contrato mide Inicio en cada corrida.
-- **Veredicto: HOLD** hasta el ok visual de Facundo. No se junta a main.
+- **Veredicto: GO**, juntado con el ok escrito de Facundo.
 
 ## Qué falta frente al boceto v29 y plan
 
