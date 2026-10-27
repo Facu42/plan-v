@@ -5,6 +5,8 @@ import { crmWorkApi } from '../../api/crm-work';
 import type { MealLog, Patient } from '../../types';
 import type { CrmFeedItem } from '../../types/crm-feed';
 import type { CrmWorkItem } from '../../types/crm-work';
+import { AvisoBoceto, usePanelBoceto } from './panel-v29-boceto';
+import { TOAST_DESMONTE_MS } from './panel-v29-motion';
 import { PanelV29Icon } from './PanelV29Icon';
 import {
   armarComida, COMIDAS_PEDIDO, comidaId, diasDe, fondoAvatar, sentimientoDe, textoPedido,
@@ -114,9 +116,7 @@ export function PanelSeguimientoVista({
 }
 
 function Aviso({ texto }: { texto: string }) {
-  const nodo = <div id="atoast" className="on" role="status">{texto}</div>;
-  const host = typeof document === 'undefined' ? null : document.querySelector('#pv-panel-v29 .app');
-  return host ? createPortal(nodo, host) : nodo;
+  return <AvisoBoceto texto={texto} />;
 }
 
 function PanelLateral({ dialog, pedir, onClose, onGuardarComentario, onPedir, onAbrir }: {
@@ -133,6 +133,7 @@ function PanelLateral({ dialog, pedir, onClose, onGuardarComentario, onPedir, on
   const [comidas, setComidas] = useState<string[]>(pedir.comidas);
   const [aviso, setAviso] = useState(pedir.aviso);
   const [falta, setFalta] = useState('');
+  const { clase, cerrar } = usePanelBoceto(onClose);
   const paciente = pedir.pacientes.find(persona => persona.id === pacienteId);
   const titulo = dialog.kind === 'comentar' ? 'Comentar la comida'
     : dialog.kind === 'ver' ? `${dialog.meal.name} · ${dialog.meal.slot}`
@@ -147,10 +148,10 @@ function PanelLateral({ dialog, pedir, onClose, onGuardarComentario, onPedir, on
     : dialog.kind === 'pedir'
       ? () => { if (!aviso) { setFalta('El aviso va solo por la app.'); return; } if (!pacienteId) { setFalta('Elegí una paciente.'); return; } onPedir(pacienteId, dias, comidas, aviso); }
       : null;
-  const nodo = <div id="actw" className="on">
-    <div className="ascrim" onClick={onClose} />
+  const nodo = <div id="actw" className={clase || undefined}>
+    <div className="ascrim" onClick={cerrar} />
     <aside id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
-      <header><div><h2 id="actt">{titulo}</h2><p id="acts">{subtitulo}</p></div><button type="button" className="ibtn" aria-label="Cerrar" onClick={onClose}><PanelV29Icon name="x" size={13} /></button></header>
+      <header><div><h2 id="actt">{titulo}</h2><p id="acts">{subtitulo}</p></div><button type="button" className="ibtn" aria-label="Cerrar" onClick={cerrar}><PanelV29Icon name="x" size={13} /></button></header>
       <div className="abody" id="actb">
         {dialog.kind === 'comentar' && <label className="af"><span>Comentario</span><textarea className="ai" rows={4} placeholder="Ej.: la porción de pizza fue el doble" value={comentario} onChange={event => { setComentario(event.target.value); setFalta(''); }} /></label>}
         {dialog.kind === 'ver' && <><p>{dialog.meal.title}</p><p>{dialog.meal.meta}</p><button type="button" className="chip" onClick={() => onAbrir(dialog.meal.href)}>Abrir ficha</button></>}
@@ -165,8 +166,8 @@ function PanelLateral({ dialog, pedir, onClose, onGuardarComentario, onPedir, on
         {falta ? <p className="sxsub">{falta}</p> : null}
       </div>
       <footer id="actf">{guardar
-        ? <><button type="button" className="chip" onClick={onClose}>Cancelar</button><span style={{ flex: 1 }} /><button type="button" className="cta" onClick={guardar}>{dialog.kind === 'comentar' ? 'Guardar comentario' : 'Pedir registro'}</button></>
-        : <button type="button" className="chip" onClick={onClose}>Cerrar</button>}</footer>
+        ? <><button type="button" className="chip" onClick={cerrar}>Cancelar</button><span style={{ flex: 1 }} /><button type="button" className="cta" onClick={guardar}>{dialog.kind === 'comentar' ? 'Guardar comentario' : 'Pedir registro'}</button></>
+        : <button type="button" className="chip" onClick={cerrar}>Cerrar</button>}</footer>
     </aside>
   </div>;
   const host = typeof document === 'undefined' ? null : document.querySelector('#pv-panel-v29 .app');
@@ -212,7 +213,7 @@ export function PanelSeguimiento({ patients, onOpen, onReview, onHeader }: {
   const dias = ordenadas.map(diasDe);
   const avisar = useCallback((texto: string) => {
     setToast(texto);
-    window.setTimeout(() => setToast(actual => actual === texto ? '' : actual), 3600);
+    window.setTimeout(() => setToast(actual => actual === texto ? '' : actual), TOAST_DESMONTE_MS);
   }, []);
 
   useEffect(() => () => onHeader(null), [onHeader]);

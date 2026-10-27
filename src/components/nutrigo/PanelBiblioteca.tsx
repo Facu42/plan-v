@@ -7,6 +7,7 @@ import { useAppStore } from '../../store/useAppStore';
 import type { Patient } from '../../types';
 import type { EditorialResource } from '../../types/resources';
 import { assignedReaders, assignablePatients, LIBRARY_RESOURCE_TYPES, libraryResourceDraft, libraryResourceType, type LibraryResourceType } from './biblioteca-model';
+import { usePanelBoceto } from './panel-v29-boceto';
 import { PanelV29Icon } from './PanelV29Icon';
 import { canLeaveWorkspace, useUnsavedChanges } from './unsaved-changes';
 
@@ -176,18 +177,19 @@ export function PanelBiblioteca({ patients, onOpen, onHeader }: {
 
 function LibraryDrawer({ title, onClose, busy, children }: { title: string; onClose: () => void; busy: boolean; children: ReactNode }) {
   const ref = useRef<HTMLElement>(null);
+  const { clase, cerrar } = usePanelBoceto(onClose);
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     ref.current?.focus();
     return () => previous?.focus();
   }, []);
-  const node = <div id="actw" className="on"><div className="ascrim" onClick={onClose} /><aside ref={ref} tabIndex={-1} id="act" role="dialog" aria-modal="true" aria-labelledby="actt" onKeyDown={event => {
+  const node = <div id="actw" className={clase || undefined}><div className="ascrim" onClick={cerrar} /><aside ref={ref} tabIndex={-1} id="act" role="dialog" aria-modal="true" aria-labelledby="actt" onKeyDown={event => {
     if (event.key !== 'Tab') return;
     const targets = Array.from(ref.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), summary, [tabindex="0"]') ?? []).filter(el => el.getClientRects().length);
     const first = targets[0], last = targets[targets.length - 1];
     if (event.shiftKey && (document.activeElement === first || document.activeElement === ref.current)) { event.preventDefault(); last?.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
-  }}><header><div><h2 id="actt">{title}</h2></div><button type="button" className="ibtn" aria-label="Cerrar" disabled={busy} onClick={onClose}><PanelV29Icon name="x" size={13} /></button></header><div className="abody" id="actb">{children}</div></aside></div>;
+  }}><header><div><h2 id="actt">{title}</h2></div><button type="button" className="ibtn" aria-label="Cerrar" disabled={busy} onClick={cerrar}><PanelV29Icon name="x" size={13} /></button></header><div className="abody" id="actb">{children}</div></aside></div>;
   const host = typeof document === 'undefined' ? null : document.querySelector('#pv-panel-v29 .app');
   return host ? createPortal(node, host) : node;
 }

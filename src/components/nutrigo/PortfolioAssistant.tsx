@@ -9,6 +9,8 @@ import {
   type PeriodoAsistente,
 } from './asistente-presentacion';
 import { AccionesAsistente, PanelAsistenteVista, type TurnoAsistente } from './PanelAsistente';
+import { avisoEnElPanel } from './panel-v29-boceto';
+import { TOAST_DESMONTE_MS } from './panel-v29-motion';
 
 type Modo = 'agregar' | 'reemplazar' | 'ultima';
 type Pedido = { days?: PeriodoAsistente; useAi?: boolean; modo?: Modo; silencio?: boolean; avisoExito?: string; limpiar?: boolean; signal?: AbortSignal };
@@ -30,20 +32,10 @@ export function PortfolioAssistant({ onOpen, onHeader }: { onOpen: (href: string
   pacientesRef.current = pacientes;
   const avisar = useCallback((texto: string) => {
     setAviso(texto);
-    window.setTimeout(() => setAviso(actual => actual === texto ? '' : actual), 3600);
+    window.setTimeout(() => setAviso(actual => actual === texto ? '' : actual), TOAST_DESMONTE_MS);
   }, []);
   const avisarYAbrir = useCallback((texto: string, href: string) => {
-    const host = document.querySelector('#pv-panel-v29 .app');
-    if (host) {
-      host.querySelector('#atoast')?.remove();
-      const nodo = document.createElement('div');
-      nodo.id = 'atoast';
-      nodo.className = 'on';
-      nodo.setAttribute('role', 'status');
-      nodo.textContent = texto;
-      host.appendChild(nodo);
-      window.setTimeout(() => nodo.remove(), 3600);
-    }
+    avisoEnElPanel(texto);
     onOpen(href);
   }, [onOpen]);
 

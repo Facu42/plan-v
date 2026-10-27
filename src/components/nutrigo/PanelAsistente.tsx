@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { createPortal } from 'react-dom';
+import { AvisoBoceto } from './panel-v29-boceto';
 import {
   PERIODOS, SUGERENCIAS, textoIdeas, textoPermiso,
   type FuenteVista, type PeriodoAsistente, type PropuestaVista,
@@ -34,9 +34,7 @@ export function AccionesAsistente({
 }
 
 function Aviso({ texto }: { texto: string }) {
-  const nodo = <div id="atoast" className="on" role="status">{texto}</div>;
-  const host = typeof document === 'undefined' ? null : document.querySelector('#pv-panel-v29 .app');
-  return host ? createPortal(nodo, host) : nodo;
+  return <AvisoBoceto texto={texto} />;
 }
 
 export function PanelAsistenteVista({

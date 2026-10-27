@@ -34,6 +34,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Motion del panel v29 | Cursor | `cursor/motion-panel-v29-e2b6` | Pastilla, entrada `fin`, panel `#act` y aviso `#atoast` con los tiempos del boceto. Sin pantallas nuevas. [Nota y paso 10](panel-nutri-rediseno/motion-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
 | Equipo y Ajustes v29 | Cursor, sobre el avance de Codex (se cortó sin cuota) | `cursor/equipo-ajustes-v29-70bc`, [PR #192](https://github.com/Facu42/plan-v/pull/192) | Pantallas del boceto con datos reales donde hay API y «Próximamente» en permisos, registro, plantillas y Brevo. 3.403 pruebas aprobadas, dos omitidas y cuatro e2e. [Informe y paso 10](panel-nutri-rediseno/equipo-ajustes-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
 | Centro de ayuda v29 | Codex, autorizado por Facundo el 26/10 | `work/centro-ayuda-v29`, [PR #191](https://github.com/Facu42/plan-v/pull/191) | Implementado: UI, guías, FAQ y pedido local; 3.399 pruebas aprobadas, dos omitidas y tres e2e. [Informe y paso 10](panel-nutri-rediseno/centro-ayuda-v29.md). HOLD por ok visual y contrato general detenido en Asistente. Sin producción ni merge |
 | Planes v29 parte 3f: mail, programar e impreso | Codex, autorizado por Facundo el 26/10 | `work/planes-parte-3f-mail-programar-impreso`, [PR #190](https://github.com/Facu42/plan-v/pull/190) | Implementado; corrección visual del diálogo registrada en [informe](panel-nutri-rediseno/planes-p3f-fix-left.md); 3.396 pruebas aprobadas y dos omitidas. Mail con enlace autenticado e idempotencia, copia impresa y entrega horaria al consultar. [Informe y paso 10](panel-nutri-rediseno/planes-parte-3f-mail-programar-impreso.md). Migración solo en base descartable; sin producción ni merge |
@@ -109,6 +110,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **27/10 · Cursor · Motion del panel v29** · Rama `cursor/motion-panel-v29-e2b6`, base `11645a6`. Se portaron la pastilla del menú, la entrada `fin` de los módulos ya montados, el panel lateral `#act` y el aviso `#atoast`, con los mismos tiempos del boceto y con reducir movimiento. No se tocó el CSS generado ni se inventaron pantallas. [Nota y paso 10](panel-nutri-rediseno/motion-v29.md). Borrador, sin merge, sin publicación y sin migración.
 
 - **27/10 · Cursor · Equipo y Ajustes v29** · Continuación del avance de Codex en `4e52a34`. Rama `cursor/equipo-ajustes-v29-70bc`, código `0649e18`, base `62a8e48`. Equipo (Integrantes, Permisos, Registro) y Ajustes (cinco pestañas, menú «Ajustes»). Invitaciones, marca, tema, avisos de la profesional y conexiones usan lo que ya existía. Permisos, registro de accesos, plantillas, Brevo y respaldos quedan en «Próximamente», sin números del boceto. 3.403 pruebas aprobadas, dos omitidas, cuatro e2e y contrato v29 del armazón en verde. [Informe y paso 10](panel-nutri-rediseno/equipo-ajustes-v29.md). [PR #192 en borrador](https://github.com/Facu42/plan-v/pull/192). Sin merge, sin publicación y sin migración.
 

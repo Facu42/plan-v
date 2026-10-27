@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { createPortal } from 'react-dom';
 import type { Patient } from '../../types';
+import { AvisoBoceto } from './panel-v29-boceto';
 import { PROGRESS_PERIODS, type ProgressPeriodDays } from '../../types/progress';
 import type { ProgressSeries } from '../../types/progress';
 import type { GlobalPatientProgress, GlobalProgressResponse } from '../../types/progress-global';
@@ -17,9 +17,7 @@ export function PeriodoProgreso({ days, onDays }: { days: ProgressPeriodDays; on
 }
 
 function Aviso({ texto }: { texto: string }) {
-  const nodo = <div id="atoast" className="on" role="status">{texto}</div>;
-  const host = typeof document === 'undefined' ? null : document.querySelector('#pv-panel-v29 .app');
-  return host ? createPortal(nodo, host) : nodo;
+  return <AvisoBoceto texto={texto} />;
 }
 
 function Curva({ puntos }: { puntos: PuntoPeso[] }) {

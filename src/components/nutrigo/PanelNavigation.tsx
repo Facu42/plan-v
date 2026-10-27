@@ -2,6 +2,7 @@ import { Fragment, useLayoutEffect, useRef, useState, type MouseEvent } from 're
 import type { Patient } from '../../types';
 import { PanelV29Icon } from './PanelV29Icon';
 import type { PanelV29IconName } from './panel-v29-icons';
+import { SEGUIR_PLEGADO_MS, aplicarPastilla, movimientoReducido, type PendientePastilla, type PosicionPastilla } from './panel-v29-motion';
 
 // Menú del boceto v29 con las rutas y los números que la app ya tiene.
 // Los grupos quedan en el orden de la app: el boceto dibuja otros nombres y otro orden, y eso no se inventa acá.
@@ -84,11 +85,9 @@ export function panelNavActive(item: PanelNavItem, current: string) {
   return panelNavCurrent(item.href, current) || Boolean(item.children?.some(child => panelNavCurrent(child.href, current))) || (item.label === 'Pacientes' && current.split('?')[0] === '/crm/ficha');
 }
 
-function placePill(nav: HTMLElement) {
-  const pill = nav.querySelector<HTMLElement>('.nvpill');
+function medirPastilla(nav: HTMLElement, pill: HTMLElement, cur: PosicionPastilla | null, pendiente: PendientePastilla, instantaneo: boolean) {
   const on = nav.querySelector<HTMLElement>('.nv.on');
-  if (!pill) return;
-  if (!on) { pill.style.opacity = '0'; return; }
+  if (!on) { pill.style.opacity = '0'; return cur; }
   pill.style.opacity = '1';
   const navBox = nav.getBoundingClientRect();
   const onBox = on.getBoundingClientRect();
@@ -101,8 +100,8 @@ function placePill(nav: HTMLElement) {
       y += end - wrap.getBoundingClientRect().height / scale;
     }
   });
-  pill.style.transform = `translateY(${y + nav.scrollTop}px)`;
-  pill.style.height = `${on.offsetHeight}px`;
+  const instant = instantaneo || movimientoReducido() || pill.dataset.inst === '1';
+  return aplicarPastilla(pill, cur, y + nav.scrollTop, on.offsetHeight, instant, pendiente, (fn, ms) => window.setTimeout(fn, ms), id => window.clearTimeout(id));
 }
 
 /** Menú (`.navs` / `.nv`) del boceto v29. */
@@ -115,15 +114,43 @@ export function PanelNavigation({ patients, unread, admin, current, collapsed, o
   const [open, setOpen] = useState(() => ({ at: current, labels: new Set([activeParent]) }));
   const labels = open.at === current ? open.labels : new Set([activeParent]);
   const navRef = useRef<HTMLDivElement>(null);
+  const curRef = useRef<PosicionPastilla | null>(null);
+  const pendiente = useRef<PendientePastilla>({ id: null });
+  const colapsadoPrevio = useRef(collapsed);
+  const primera = useRef(true);
   const openKey = [...labels].sort().join('|');
   useLayoutEffect(() => {
     const nav = navRef.current;
     if (!nav) return;
-    const place = () => placePill(nav);
-    place();
-    nav.addEventListener('scroll', place, { passive: true });
-    window.addEventListener('resize', place);
-    return () => { nav.removeEventListener('scroll', place); window.removeEventListener('resize', place); };
+    const pill = nav.querySelector<HTMLElement>('.nvpill');
+    if (!pill) return;
+    let cuadro = 0;
+    let instTimer = 0;
+    const place = (instantaneo: boolean) => { curRef.current = medirPastilla(nav, pill, curRef.current, pendiente.current, instantaneo); };
+    const onScroll = () => { pill.dataset.inst = '1'; place(true); delete pill.dataset.inst; };
+    const onResize = () => place(false);
+    const plegando = colapsadoPrevio.current !== collapsed;
+    colapsadoPrevio.current = collapsed;
+    if (primera.current || plegando) {
+      if (plegando) pill.dataset.inst = '1';
+      const t0 = performance.now();
+      const ms = plegando ? SEGUIR_PLEGADO_MS : 0;
+      const seguir = () => {
+        place(true);
+        if (performance.now() - t0 < ms) cuadro = requestAnimationFrame(seguir);
+      };
+      seguir();
+      if (plegando) instTimer = window.setTimeout(() => { delete pill.dataset.inst; }, 470);
+      primera.current = false;
+    } else place(false);
+    nav.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onResize);
+    return () => {
+      if (cuadro) cancelAnimationFrame(cuadro);
+      if (instTimer) window.clearTimeout(instTimer);
+      nav.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onResize);
+    };
   }, [current, collapsed, openKey, patients, unread, admin]);
   const go = (href: string) => (event: MouseEvent) => {
     if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
