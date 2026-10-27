@@ -16,7 +16,7 @@ describe('Equipo y Ajustes v29', () => {
   });
   it('muestra las pestañas de Equipo sin afirmar personas ni accesos antes de cargar', () => {
     const html = renderToStaticMarkup(<PanelEquipo/>);
-    for (const label of ['Integrantes', 'Permisos', 'Registro de accesos', 'Invitar a alguien', 'Cargando equipo']) expect(html).toContain(label);
+    for (const label of ['Integrantes', 'Permisos', 'Registro de accesos', 'Invitar a alguien', 'Cargando equipo', 'Último ingreso', 'Dos pasos', 'Estado']) expect(html).toContain(label);
     expect(html).not.toContain('Verónica Trenti');
     expect(html).not.toContain('4 personas');
   });

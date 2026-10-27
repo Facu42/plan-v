@@ -13,6 +13,12 @@
 #pv-panel-v29 .ea-table table{width:100%;border-collapse:collapse;font-size:12px}
 #pv-panel-v29 .ea-table th,#pv-panel-v29 .ea-table td{padding:9px 8px;text-align:left;border-bottom:1px solid var(--line)}
 #pv-panel-v29 .ea-table th{font-weight:400;color:var(--ink3);font-size:11px;white-space:nowrap}
+#pv-panel-v29:not(.mob) .ea-screen table.eqt{table-layout:fixed}
+#pv-panel-v29:not(.mob) .ea-screen table.eqt th,#pv-panel-v29:not(.mob) .ea-screen table.eqt td{white-space:normal;height:auto;overflow-wrap:anywhere}
+#pv-panel-v29:not(.mob) .ea-screen table.eqt th:nth-child(1){width:22%}
+#pv-panel-v29:not(.mob) .ea-screen table.eqt th:nth-child(2){width:14%}
+#pv-panel-v29:not(.mob) .ea-screen table.eqt th:nth-child(4),#pv-panel-v29:not(.mob) .ea-screen table.eqt th:nth-child(5){width:14%}
+#pv-panel-v29:not(.mob) .ea-screen table.eqt th:nth-child(6){width:12%}
 #pv-panel-v29 .ea-table .on{background:var(--lima-tt)}
 #pv-panel-v29 .ea-person{display:flex;align-items:center;gap:10px;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
 #pv-panel-v29 .ea-person b{font-weight:500;max-width:170px;overflow-wrap:anywhere}
