@@ -1,6 +1,6 @@
 # Motion del panel, paridad con el boceto v29
 
-Rama `cursor/motion-panel-v29-e2b6`, desde main `11645a6` (Equipo y Ajustes, #192). Código `a986e2f`. **Borrador. Sin merge, sin publicación y sin migraciones.**
+Rama `cursor/motion-panel-v29-e2b6`, desde main `11645a6` (Equipo y Ajustes, #192). Código del movimiento `a986e2f`. [PR #193](https://github.com/Facu42/plan-v/pull/193) en borrador. **Sin merge, sin publicación y sin migraciones.**
 
 No se redibujó ninguna pantalla. No se agregó una librería de animación. El CSS generado `panel-v29.css` no se editó a mano: ya traía las transiciones del boceto `design/panel-nutri/v29/panel-trabajo.html`. Lo que faltaba era dispararlas.
 
@@ -38,6 +38,12 @@ No está la pieza en la app, o el propio boceto la apagó. No se inventó la pan
 - Flechas `.ar` de las tarjetas de vidrio (`.dv-g` / `.dvx`): no están montadas.
 - El menú de cuenta `.pv-acct` es de la app. El boceto no le pone movimiento.
 - Los botones del pie de «Pedir ayuda» (Ayuda) y Guardar, que cierra el padre al terminar, salen de una: el cierre de 220 ms corre cuando el panel mismo pide cerrar.
+
+## Evidencia
+
+En el demo local, a 1440, claro y oscuro: el menú se pliega a íconos, el submenú de Pacientes se abre, el panel de una pregunta de Ayuda entra desde la derecha, y en el plan de Sofía el interruptor Fotos prende y el chevron de Desayuno gira. Al prender Fotos aparece el aviso «Estas comidas no tienen foto.».
+
+Suite: **3.409 aprobadas y dos omitidas, 542 archivos**. `npm run check` en verde. `panel:v29:check`: el CSS generado sigue igual al boceto.
 
 ## Regression Guard · paso 10
 
