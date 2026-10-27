@@ -36,7 +36,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
-| CI e2e regression repair (help, PDF, templates, patient journey) | Codex | `codex/fix-ci-e2e` | Authorized by Facundo on 27/10. [Verification](verification/ci-e2e-2026-10-27.md). 36 local e2e passed; 3,409 unit/integration tests passed (2 existing skips). Fix PR to main; CI status in PR. No merge or deployment. |
+| CI e2e regression repair (help, PDF, templates, patient journey) | Codex | `codex/fix-ci-e2e` | Authorized by Facundo on 27/10. [Verification](verification/ci-e2e-2026-10-27.md). 36 local e2e passed; 3,409 unit/integration tests passed (2 existing skips). [PR #195](https://github.com/Facu42/plan-v/pull/195) to main; CI status in PR. No merge or deployment. |
 | Motion del panel v29 | Cursor | `cursor/motion-panel-v29-e2b6`, [PR #193](https://github.com/Facu42/plan-v/pull/193) | Pastilla, entrada `fin`, panel `#act` y aviso `#atoast` con los tiempos del boceto. 3.409 pruebas aprobadas y dos omitidas. [Nota y paso 10](panel-nutri-rediseno/motion-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
 | Equipo y Ajustes v29 | Cursor, sobre el avance de Codex (se cortó sin cuota) | `cursor/equipo-ajustes-v29-70bc`, [PR #192](https://github.com/Facu42/plan-v/pull/192) | Pantallas del boceto con datos reales donde hay API y «Próximamente» en permisos, registro, plantillas y Brevo. 3.403 pruebas aprobadas, dos omitidas y cuatro e2e. [Informe y paso 10](panel-nutri-rediseno/equipo-ajustes-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
 | Centro de ayuda v29 | Codex, autorizado por Facundo el 26/10 | `work/centro-ayuda-v29`, [PR #191](https://github.com/Facu42/plan-v/pull/191) | Implementado: UI, guías, FAQ y pedido local; 3.399 pruebas aprobadas, dos omitidas y tres e2e. [Informe y paso 10](panel-nutri-rediseno/centro-ayuda-v29.md). HOLD por ok visual y contrato general detenido en Asistente. Sin producción ni merge |
@@ -114,7 +114,9 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
-- **27/10 · Codex · CI e2e regression repair** · `codex/fix-ci-e2e` from main #193: PDF font setup, settled help-dialog measurements, independent recipe quantity fixture/day, and exact saved-version publication. Full local e2e 36/36, unit/integration 3,409 passed (2 existing skips), build/types/static gates passed; controlled quantity fire test caught and restored. [Report](verification/ci-e2e-2026-10-27.md). PR to main only; no merge, deployment, or production database changes.
+- **27/10 · Codex · CI e2e regression repair** · `codex/fix-ci-e2e` from main #193: PDF font setup, settled help-dialog measurements, independent recipe quantity fixture/day, and exact saved-version publication. Full local e2e 36/36, unit/integration 3,409 passed (2 existing skips), build/types/static gates passed; controlled quantity fire test caught and restored. [Report](verification/ci-e2e-2026-10-27.md). [PR #195](https://github.com/Facu42/plan-v/pull/195) to main only; no merge to main, deployment, or production database changes.
+
+- **27/10 · Codex · Handoff boceto → app** · [Handoff actualizado](panel-nutri-rediseno/handoff-boceto-a-app.md) desde main `c4bdf96`, con #176–#193 cerrados y siguiente módulo a elección de Facu. Solo documentación; PR en borrador, sin merge ni producción.
 
 - **27/10 · Cursor · Motion del panel v29** · Rama `cursor/motion-panel-v29-e2b6`, código `a986e2f`, base `11645a6`. Se portaron la pastilla del menú, la entrada `fin` de los módulos ya montados, el panel lateral `#act` y el aviso `#atoast`, con los mismos tiempos del boceto y con reducir movimiento. 3.409 pruebas aprobadas, dos omitidas, tipos en verde y el CSS generado igual al boceto. [Nota y paso 10](panel-nutri-rediseno/motion-v29.md). [PR #193 en borrador](https://github.com/Facu42/plan-v/pull/193). Sin merge, sin publicación y sin migración.
 
