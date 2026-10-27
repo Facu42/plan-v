@@ -20,6 +20,8 @@ create table if not exists public.patient_history_entries (
 );
 create index if not exists patient_history_entries_patient_idx
  on public.patient_history_entries (nutritionist_id, patient_id, topic, recorded_on);
+create index if not exists patient_history_entries_by_patient_idx
+ on public.patient_history_entries (patient_id, topic, recorded_on);
 alter table public.patient_history_entries enable row level security;
 drop policy if exists patient_history_entries_select on public.patient_history_entries;
 create policy patient_history_entries_select on public.patient_history_entries
