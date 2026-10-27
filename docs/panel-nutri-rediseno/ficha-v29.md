@@ -140,3 +140,22 @@ Valores por defecto elegidos:
 - **Contratos:** rutas nuevas `/api/crm/patients/:id/history` (GET, POST, PATCH `/:entryId`, POST `/:entryId/end`); no se tocó ninguna existente. Falta una prueba de la política de filas contra Postgres: se corre al aplicar la migración.
 - **Áreas frágiles:** (1) permisos por paciente y por consultorio (`scheduling_can_manage`); (2) contenteditable: se guarda al salir del campo o con Enter; si el servidor falla, el aviso queda a la vista y el texto escrito no se pierde de pantalla.
 - **Migraciones:** una, aditiva, sin `DROP`. **Veredicto:** HOLD: espera la frase de la base y el ok visual de Facundo. Técnicamente SHIP una vez aplicada.
+
+## Parte 3a · Objetivos y hábitos
+
+Solapa armada con el HTML de `objetivos:` del boceto (dos columnas: Objetivos y Hábitos de la semana a la izquierda; Energía y Síntomas a la derecha), con lo que la paciente carga en su app. Capturas: `docs/screenshots/ficha-v29/objetivos-claro.png` y `objetivos-oscuro.png` (paciente de la demo). El contrato compara 6 piezas en claro y oscuro; todas iguales.
+
+Valores por defecto elegidos (lo que el boceto dibuja y Plan V no tiene):
+- **Objetivos:** Plan V guarda **un solo objetivo** por paciente, con avance declarado por la profesional (no se calcula del peso). Se dibuja ese objetivo con su anillo; «Actualizar» (o «Agregar» si no hay) abre el editor de siempre y el historial queda en un desplegable. Los otros cuatro objetivos del boceto («se actualizan solos») no existen todavía y **no se inventan**.
+- **Hábitos de la semana:** Agua (promedio de vasos de los días con registro; meta de la paciente), Sueño (promedio de horas; referencia fija de 7 h, porque no hay meta de sueño por paciente), Actividad (días con actividad cargada en los últimos 7; pide el permiso de atención) y Energía (último registro). Sin registro dicen «—», nunca un cero inventado. Pasos y litros no se dibujan: no hay dato.
+- **Energía en vez de Ánimo:** el boceto muestra el ánimo de 1 a 5; la app solo guarda energía Alta, Media o Baja. Se dibujan los 14 días en tres niveles y el promedio de 1 a 3. El bloque queda aunque no haya datos.
+- **Síntomas:** los que la paciente marcó en 14 días, del más repetido al menos; sin ninguno, un texto corto. No se dibuja el «cuándo» del síntoma («después del almuerzo»): no se guarda.
+- **«Relación que ve la IA»:** no se dibuja; no hay función real detrás.
+- Debajo sigue la «Planificación nutricional» de siempre (metabolismo, gasto, meta).
+
+### Paso 10 · Objetivos y hábitos
+- **Flujos:** actualizar/agregar el objetivo (editor existente, sin cambios); lectura de hábitos, energía y síntomas (✅ 7 pruebas de cálculo y 2 de pantalla).
+- **Regresiones cubiertas:** sin permiso de atención la actividad dice «—»; sin registros no hay ceros inventados; objetivo vacío ofrece «Agregar».
+- **Contratos:** ninguna ruta ni tabla nueva; solo lectura de datos que ya llegan. Se quitó `PanelPatientObjetivos` (sin otros usos).
+- **Áreas frágiles:** el promedio de energía mezcla etiquetas; un valor viejo fuera de Alta/Media/Baja (por ejemplo «Buena» en la demo) se muestra como texto en el último registro pero no cuenta en la columna.
+- **Migraciones:** ninguna. **Veredicto:** HOLD hasta el ok visual de Facundo; técnicamente SHIP.

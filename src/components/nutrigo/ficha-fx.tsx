@@ -1,5 +1,5 @@
 // Piezas del Resumen de la Ficha v29: el mismo HTML y las mismas clases del boceto (`fxP`, `fxRows`, `fxKv`…), con datos reales.
-import { useId, type ReactNode } from 'react';
+import { useId, type CSSProperties, type ReactNode } from 'react';
 import { PanelV29Icon } from './PanelV29Icon';
 import { curvaFicha, medioCirculo, type SolapaFicha } from './ficha-presentacion';
 
@@ -54,4 +54,17 @@ export function FxMedidor({ pct, texto, sub, ancho = 150, chico }: { pct: number
 export function FxMosaico({ etiqueta, valor, unidad, cambio, bueno, serie, ir }: { etiqueta: string; valor: string; unidad: string; cambio: string; bueno: boolean; serie: readonly number[]; ir: () => void }) {
   return <button type="button" className="fxp fxtile" onClick={ir}><small>{etiqueta}</small><div className="fxv"><b className="num">{valor}</b><span>{unidad}</span><em className={bueno ? '' : 'bad'}>{cambio}</em></div>
     <FxCurva valores={serie} ancho={120} alto={30} mini /></button>;
+}
+
+/** Anillo de avance de la lista de objetivos (`fxRing` del boceto). */
+export function FxRing({ pct, texto, tamano = 46 }: { pct: number; texto?: string; tamano?: number }) {
+  return <span className="fxring" style={{ '--s': `${tamano}px` } as CSSProperties}><svg viewBox="0 0 40 40" aria-hidden="true"><circle className="bg" cx={20} cy={20} r={16} /><circle className="fg" cx={20} cy={20} r={16} pathLength={100} strokeDasharray={100} strokeDashoffset={100 - pct} /></svg><b className="num">{texto ?? `${pct}%`}</b></span>;
+}
+
+/** Columnas de los últimos días (`fxCols` del boceto): la última resaltada, el promedio como línea. */
+export function FxCols({ valores, rotulos, max, alto = 110, promedio, bajo, medio, tope }: { valores: readonly number[]; rotulos: readonly string[]; max: number; alto?: number; promedio?: number | null; bajo?: number; medio?: number; tope?: string }) {
+  return <div className="pa7 fxcols" style={{ height: alto }}>{promedio != null ? <span className="avg" style={{ bottom: `calc(${(promedio / max * 100).toFixed(1)}% * .78 + 18px)` }} /> : null}
+    {valores.map((x, k) => { const ultimo = k === valores.length - 1; const clase = bajo != null && x < bajo ? 'lo' : medio != null && x < medio ? 'md' : '';
+      return <div key={k} className={ultimo ? 'td' : ''}>{ultimo && tope ? <u className="num">{tope}</u> : null}<i style={{ height: `${(x / max * 78).toFixed(1)}%` }} className={clase} /><small>{rotulos[k]}</small></div>; })}
+  </div>;
 }

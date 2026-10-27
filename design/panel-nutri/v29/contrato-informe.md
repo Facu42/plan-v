@@ -166,6 +166,17 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Dato dado de baja | ✅ igual | |
 | Solapas Por tema y Por fecha | ✅ igual | |
 
+## Tema oscuro · Ficha · Objetivos y hábitos
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Anillo del objetivo | ✅ igual | |
+| Número del anillo | ✅ igual | |
+| Nombre del objetivo | ✅ igual | |
+| Hábito | ✅ igual | |
+| Columnas de la semana | ✅ igual | |
+| Síntomas y energía | ✅ igual | |
+
 ## Tema oscuro · Seguimiento
 
 | Pieza | Estado | Detalle |
@@ -431,6 +442,17 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Origen del dato | ✅ igual | |
 | Dato dado de baja | ✅ igual | |
 | Solapas Por tema y Por fecha | ✅ igual | |
+
+## Tema claro · Ficha · Objetivos y hábitos
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Anillo del objetivo | ✅ igual | |
+| Número del anillo | ✅ igual | |
+| Nombre del objetivo | ✅ igual | |
+| Hábito | ✅ igual | |
+| Columnas de la semana | ✅ igual | |
+| Síntomas y energía | ✅ igual | |
 
 ## Tema claro · Seguimiento
 

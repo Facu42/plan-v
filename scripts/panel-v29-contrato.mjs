@@ -114,6 +114,16 @@ export const PIEZAS_HISTORIA = [
   ['Solapas Por tema y Por fecha', '#s-ficha .tabs.hcv', '', ['borderTopLeftRadius', 'paddingTop', 'backgroundColor']],
 ];
 
+// Piezas de la solapa Objetivos y hábitos. El objetivo viene de la paciente de la demo; los hábitos sin registro muestran «—».
+export const PIEZAS_OBJETIVOS = [
+  ['Anillo del objetivo', '#s-ficha .fxgoals .fxring', '', ['width', 'height']],
+  ['Número del anillo', '#s-ficha .fxgoals .fxring b', '', ['fontSize', 'fontWeight']],
+  ['Nombre del objetivo', '#s-ficha .fxgoals b', '', ['fontSize', 'fontWeight']],
+  ['Hábito', '#s-ficha .fxhab > div', '', ['borderTopLeftRadius', 'paddingTop', 'paddingLeft']],
+  ['Columnas de la semana', '#s-ficha .fxwk', '', ['height', 'gap']],
+  ['Síntomas y energía', '#s-ficha .fxp.g > header h3', '', ['fontSize', 'fontWeight']],
+];
+
 // Piezas de Asistente. El encabezado vive en el armazón; acá se mide el cuerpo, que existe en los dos.
 export const PIEZAS_ASISTENTE = [
   ['Caja del pedido', '#s-asistente .sxask textarea', '', ['fontSize', 'fontFamily', 'borderTopLeftRadius', 'height']],
@@ -569,6 +579,12 @@ export async function correrContratoV29() {
       await b.waitForTimeout(1200);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Historia clínica\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_HISTORIA, informe);
+      await b.locator('#ftabs [data-ft="objetivos"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Objetivos y hábitos/ }).click();
+      await a.waitForSelector('#s-ficha .fxhab', { timeout: 20000 });
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Objetivos y hábitos\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_OBJETIVOS, informe);
       await abrirSeguimientoBoceto(b);
       await abrirSeguimientoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Seguimiento\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
