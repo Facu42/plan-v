@@ -123,6 +123,23 @@ export const PIEZAS_PROGRESO = [
   ['Pestaña de filtro', '#s-progreso .sxtools .tabs button', '', ['fontSize', 'borderTopLeftRadius']],
 ];
 
+// Piezas de Inicio. Se miden con la pantalla abierta, antes de ir a otra.
+export const PIEZAS_INICIO = [
+  ['Tarjeta de Pendientes', '#s-inicio .iup .card', '', ['borderTopLeftRadius', 'backgroundColor', 'height', 'paddingTop']],
+  ['Título de la tarjeta', '#s-inicio .iup .ch h2', '', ['fontSize', 'fontWeight', 'fontFamily']],
+  ['Fila de la lista', '#s-inicio .iup .li.pick', '', ['paddingTop', 'paddingLeft', 'borderTopLeftRadius', 'fontSize']],
+  ['Ícono de la fila', '#s-inicio .iup .li .ico', '', ['width', 'height', 'borderTopLeftRadius']],
+  ['Tipo de la fila', '#s-inicio .iup .li .kind', '', ['fontSize', 'color']],
+  ['Motivo de atención', '#s-inicio .iup .li .why', '', ['fontSize', 'borderTopLeftRadius']],
+  ['Tarjeta oscura', '#det', '', ['borderTopLeftRadius', 'backgroundColor', 'height', 'paddingTop']],
+  ['Número grande', '#det .xhero b', '', ['fontSize', 'fontWeight', 'letterSpacing']],
+  ['Botón principal', '#det .xacts button.go', '', ['height', 'backgroundColor', 'color', 'borderTopLeftRadius']],
+  ['Encabezado de la tabla', '#s-inicio .hoy th', '', ['fontSize', 'letterSpacing', 'textTransform', 'color']],
+  ['Tarjeta de número', '#s-inicio .kpi', '', ['height', 'paddingTop', 'paddingLeft', 'borderTopLeftRadius']],
+  ['Número de la tarjeta', '#s-inicio .kpi .v', '', ['fontSize', 'fontWeight']],
+  ['Pie de la tarjeta', '#s-inicio .kpi .ft', '', ['fontSize', 'color']],
+];
+
 // Piezas de Seguimiento. El selector existe en el boceto y en la app.
 export const PIEZAS_SEGUIMIENTO = [
   ['Foto de la comida', '#s-seguimiento .sxpic', '', ['width', 'height', 'borderTopLeftRadius']],
@@ -312,6 +329,10 @@ export async function correrContratoV29() {
       const a = await abrirApp(navegador, tema);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · armazón\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_V29, informe);
+      await a.waitForSelector('#s-inicio .kpis', { timeout: 20000 });
+      await a.waitForSelector('#det .xhero', { timeout: 20000 });
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Inicio\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_INICIO, informe);
       await abrirSeguimientoBoceto(b);
       await abrirSeguimientoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Seguimiento\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');

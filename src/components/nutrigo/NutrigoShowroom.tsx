@@ -30,7 +30,7 @@ import { ShowroomPatientEdit, ShowroomPatients, followFromDirectory, type Direct
 import { ProfessionalPatientWorkspace } from './ProfessionalPatientWorkspace';
 import { ProfessionalProgressGlobal } from './ProfessionalProgressGlobal';
 import { PanelSeguimiento } from './PanelSeguimiento';
-import { PanelHome, panelHomeGreeting, panelHomeWhen } from './PanelHome';
+import { PanelHome, panelHomeHeading } from './PanelHome';
 import { ProfessionalPlans } from './ProfessionalPlans';
 import { PanelPlanes } from './PanelPlanes';
 import { planesMuestraEditor } from './planes-lista';
@@ -500,7 +500,9 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
       : (page === 'ajustes' || (page === 'desarrollo' && panelQuery.get('modulo') === 'configuracion'))
       ? { when: 'Tu cuenta, plantillas, avisos y seguridad del consultorio', title: 'Ajustes', search: 'Buscar', actions: ajustesActions }
       : page === 'inicio'
-      ? { when: panelHomeWhen(now), title: panelHomeGreeting(userName ?? '', now), search: 'Buscar paciente, plan o receta', wideSearch: true, actions: <a className="cta" href="/crm/agenda" onClick={event => { event.preventDefault(); openWorkHref('/crm/agenda'); }}><PanelV29Icon name="plus" />Nueva consulta</a> }
+      ? { ...panelHomeHeading(userName ?? '', activePatients, now), search: 'Buscar paciente, plan o receta', wideSearch: true, actions: <>
+          {([['/crm/plan', 'clip', 'Nuevo plan'], ['/crm/cobranzas', 'coin', 'Cargar pago'], ['/crm/mensajes', 'chat', 'Mensaje']] as const).map(([href, glyph, label]) => <a key={href} className="chip" href={href} onClick={event => { event.preventDefault(); openWorkHref(href); }}><PanelV29Icon name={glyph} />{label}</a>)}
+          <a className="cta" href="/crm/agenda" onClick={event => { event.preventDefault(); openWorkHref('/crm/agenda'); }}><PanelV29Icon name="plus" />Nueva consulta</a></> }
       : page === 'seguimiento'
         ? { when: 'La falta de registros no es un incumplimiento', title: 'Seguimiento', search: 'Buscar', actions: seguimientoActions }
         : page === 'progreso-global'

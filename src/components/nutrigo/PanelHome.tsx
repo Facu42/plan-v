@@ -1,26 +1,21 @@
-import { useEffect, useRef, useState, type ReactNode, type MouseEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import type { Patient } from '../../types';
-import type { CrmWorkItem, CrmWorkKind, CrmWorkResponse } from '../../types/crm-work';
+import type { IntakeHealthFact } from '../../types/intake';
+import type { CrmWorkResponse } from '../../types/crm-work';
 import type { BillingBoard } from '../../types/fees';
-import type { ProfessionalIntakeView } from '../../types/intake';
-import type { CareSnapshot } from '../../types/care';
 import type { SchedulingWorkspaceSnapshot } from '../../api/scheduling';
 import { api } from '../../api/client';
 import { careApi } from '../../api/care';
-import { formatPesos } from '../../fees';
-import { HOME_ZONE, copyHomeBookingLink, homeAppointments, homeAttention, homeDay, homeMonth, homeNews, homePendingTotal, patientHref, patientMessageHref, type HomeAppointment } from '../../lib/panel-home';
-import { Icon, type IconName } from '../shared/Icon';
-import { healthFactLabel } from './intake-review';
+import { HOME_ZONE, homeAttention, homeDay, homeNews } from '../../lib/panel-home';
+import { PanelV29Icon } from './PanelV29Icon';
+import { movimientoReducido } from './panel-v29-motion';
 import { useHomeData, type HomeFilter } from './use-home-data';
-import './panel-home.css';
+import {
+  armarAtencion, armarConsultas, armarKpis, armarPendientes, encabezadoInicio, type Detalle, type DetalleExtra, type RangoConsultas,
+} from './inicio-presentacion';
 
 type Open = (href: string) => void;
-function HomeLink({ href, onOpen, children, className = '', ...props }: { href: string; onOpen: Open; children: ReactNode; className?: string; 'aria-label'?: string }) {
-  const click = (event: MouseEvent<HTMLAnchorElement>) => { if (event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); onOpen(href); };
-  return <a href={href} className={className} onClick={click} {...props}>{children}</a>;
-}
-const formatTime = (at: Date) => at.toLocaleTimeString('es-AR', { timeZone: HOME_ZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-const channelLabel = (channel: string) => channel === 'video' ? 'Online' : channel === 'presencial' ? 'Consultorio' : 'Modalidad por confirmar';
+
 /** Fecha del encabezado de Inicio como en el boceto: «Miércoles 21 de octubre». */
 export function panelHomeWhen(now: Date) {
   const text = now.toLocaleDateString('es-AR', { timeZone: HOME_ZONE, weekday: 'long', day: 'numeric', month: 'long' }).replace(',', '');
@@ -34,121 +29,239 @@ export function panelHomeGreeting(name: string, now: Date) {
   return `${greeting}${name.trim() ? `, ${name.trim().split(/\s+/)[0]}` : ''}`;
 }
 
-function PreparedAppointment({ entry, now, onOpen }: { entry: HomeAppointment | null; now: Date; onOpen: Open }) {
-  const [intake, setIntake] = useState<ProfessionalIntakeView | null>(null);
-  const [care, setCare] = useState<CareSnapshot | null>(null);
-  const [failed, setFailed] = useState(false);
-  const [revision, setRevision] = useState(0);
-  const [preparedOpen, setPreparedOpen] = useState(true);
-  useEffect(() => {
-    const media = window.matchMedia('(min-width:800px)');
-    const update = () => setPreparedOpen(media.matches);
-    update(); media.addEventListener('change', update);
-    return () => media.removeEventListener('change', update);
-  }, []);
-  const id = entry?.patient.id;
-  useEffect(() => {
-    if (!id) return;
-    const controller = new AbortController(); setIntake(null); setCare(null); setFailed(false);
-    // Los endpoints existentes conservan el alcance profesional y los permisos clínicos.
-    api.getProfessionalIntake(id, { signal: controller.signal }).then(view => { if (!controller.signal.aborted) setIntake(view); }).catch(() => { if (!controller.signal.aborted) setFailed(true); });
-    careApi.snapshot(id, true, controller.signal).then(view => { if (!controller.signal.aborted) setCare(view); }).catch(() => { if (!controller.signal.aborted) setFailed(true); });
-    return () => controller.abort();
-  }, [id, revision]);
-  if (!entry) return <section className="ph-next"><h2>Próxima consulta</h2><p>No hay una próxima consulta programada.</p><HomeLink href="/crm/agenda" onOpen={onOpen} className="ph-button ph-ink">Abrir agenda</HomeLink></section>;
-  const { patient, at } = entry;
-  const minutes = Math.ceil((at.getTime() - now.getTime()) / 60_000);
-  const when = minutes <= 0 ? 'En curso' : minutes < 60 ? `En ${minutes} min` : homeDay(at) === homeDay(now) ? 'Hoy' : at.toLocaleDateString('es-AR', { timeZone: HOME_ZONE, day: 'numeric', month: 'short' });
-  const weights = (care?.measurements ?? []).filter(m => m.kind === 'weight' && m.captured_on <= homeDay(now)).sort((a,b) => b.captured_on.localeCompare(a.captured_on) || b.created_at.localeCompare(a.created_at));
-  const weight = weights[0];
-  return <section className="ph-next" aria-label="Próxima consulta preparada"><div className="ph-chips"><span>Próxima consulta · {when}</span><span>{formatTime(at)} · {channelLabel(entry.channel)}</span></div>
-    <div className="ph-person"><span className="ph-avatar">{patient.initials}</span><div><h2>{patient.name}</h2><p>{patient.goal || 'Objetivo por definir'}</p></div></div>
-    <details className="ph-preparation" open={preparedOpen} onToggle={event => setPreparedOpen(event.currentTarget.open)}><summary>Ver preparación de la consulta</summary><div className="ph-health"><span><b>Alergias:</b> {intake ? healthFactLabel(intake.intake.payload.allergies, 'alergias') : failed ? 'No disponible' : 'Consultando…'}</span><span><b>Restricciones:</b> {intake ? healthFactLabel(intake.intake.payload.restrictions, 'restricciones') : failed ? 'No disponible' : 'Consultando…'}</span></div>
-    <div className="ph-facts"><div><small>Último peso</small><b>{weight ? `${weight.value_numeric.toLocaleString('es-AR')} ${weight.unit}` : care ? 'Sin dato' : failed ? 'No disponible' : 'Consultando…'}</b></div><div><small>Adherencia</small><b>{patient.adherence_score}%</b><small>registrada</small></div><div><small>Quedó pendiente</small><span>{patient.next_focus || 'Sin pendientes anotados'}</span></div></div></details>
-    <div className="ph-next-actions"><HomeLink href={patientHref(patient, 'notas')} onOpen={onOpen} className="ph-button ph-ink">Preparar consulta</HomeLink><HomeLink href={patientHref(patient)} onOpen={onOpen} className="ph-button ph-glass">Ver ficha</HomeLink>{failed && <button type="button" className="ph-retry" onClick={() => setRevision(value => value + 1)}>Reintentar datos</button>}</div>
-  </section>;
+/** Título y fecha del encabezado de Inicio: «Buen día, Verónica · 6 consultas hoy» y «Martes 21 de octubre · la próxima es a las 10:30». */
+export function panelHomeHeading(name: string, patients: readonly Patient[], now: Date) {
+  const { sufijo, proxima } = encabezadoInicio(patients, now);
+  return { title: panelHomeGreeting(name, now), titleSuffix: sufijo, when: `${panelHomeWhen(now)} · ${proxima}` };
 }
 
-const TASKS: Record<CrmWorkKind, { label: string; action: string; icon: IconName; tone: string }> = {
-  intake: { label: 'Ingresos', action: 'Revisar', icon: 'contact', tone: 'gold' },
-  meal: { label: 'Comidas', action: 'Revisar', icon: 'camera', tone: 'orange' },
-  ai_menu: { label: 'Planes', action: 'Revisar', icon: 'list', tone: 'lime' },
-  message: { label: 'Mensajes', action: 'Responder', icon: 'message', tone: 'lime' },
-  payment: { label: 'Pagos', action: 'Confirmar', icon: 'wallet', tone: 'gold' },
-  appointment: { label: 'Reprogramar', action: 'Reprogramar', icon: 'calendar', tone: 'gold' },
-  record: { label: 'Registros', action: 'Revisar', icon: 'edit', tone: 'gold' },
-  fee_overdue: { label: 'Cobros', action: 'Recordar', icon: 'wallet', tone: 'orange' },
-  quiet: { label: 'Sin registros', action: 'Escribir', icon: 'message', tone: 'orange' },
-};
-function TaskRow({ item, onOpen }: { item: CrmWorkItem; onOpen: Open }) {
-  const config = TASKS[item.kind];
-  return <li className="ph-task"><span className={`ph-icon ph-${config.tone}`}><Icon name={config.icon} size={18} /></span><div><b>{item.patient_name}</b><p>{item.title}</p></div><HomeLink href={item.href} onOpen={onOpen} className="ph-button" aria-label={`${config.action}: ${item.patient_name}`}>{config.action}</HomeLink></li>;
+const TABS_PENDIENTES: Array<{ id: 'all' | 'hacer' | 'fel'; label: string }> = [{ id: 'all', label: 'Todos' }, { id: 'hacer', label: 'Para hacer' }, { id: 'fel', label: 'Felicitar' }];
+const TABS_CONSULTAS: Array<{ id: RangoConsultas; label: string }> = [{ id: 'hoy', label: 'Hoy' }, { id: 'manana', label: 'Mañana' }, { id: 'semana', label: 'Semana' }];
+
+const hechoCorto = (hecho: IntakeHealthFact | undefined) => !hecho || hecho.state === 'unknown' ? 'sin dato' : hecho.state === 'none' ? 'ninguna' : hecho.items.join(', ') || 'sin detalle';
+
+/** Último peso y alergias o restricciones de la paciente elegida, con los mismos endpoints que ya usaba Inicio. */
+function useExtraDe(pacienteId: string | undefined, hoy: string) {
+  const [extras, setExtras] = useState<Record<string, DetalleExtra>>({});
+  useEffect(() => {
+    if (!pacienteId) return undefined;
+    const controller = new AbortController();
+    setExtras(previos => (previos[pacienteId] ? previos : { ...previos, [pacienteId]: { peso: 'Consultando…', alergias: '', restricciones: '', estado: 'cargando' } }));
+    Promise.all([api.getProfessionalIntake(pacienteId, { signal: controller.signal }), careApi.snapshot(pacienteId, true, controller.signal)]).then(([intake, care]) => {
+      if (controller.signal.aborted) return;
+      const pesos = care.measurements.filter(m => m.kind === 'weight' && m.captured_on <= hoy).sort((a, b) => b.captured_on.localeCompare(a.captured_on) || b.created_at.localeCompare(a.created_at));
+      const peso = pesos[0];
+      setExtras(previos => ({ ...previos, [pacienteId]: {
+        peso: peso ? `${peso.value_numeric.toLocaleString('es-AR')} ${peso.unit}` : 'Sin dato',
+        alergias: hechoCorto(intake.intake.payload.allergies), restricciones: hechoCorto(intake.intake.payload.restrictions), estado: 'listo',
+      } }));
+    }).catch(() => {
+      if (!controller.signal.aborted) setExtras(previos => ({ ...previos, [pacienteId]: { peso: 'No disponible', alergias: '', restricciones: '', estado: 'error' } }));
+    });
+    return () => controller.abort();
+  }, [pacienteId, hoy]);
+  return extras;
 }
+
+/** Las seis formas de línea del boceto («J · Noche»): cada 4,5 s se dibuja la siguiente. */
+const RAYOS = (cx: number, cy: number, r: number) => Array.from({ length: 8 }, (_, k) => { const a = (k * Math.PI) / 4; return `M${cx} ${cy}L${(cx + r * Math.cos(a)).toFixed(1)} ${(cy + r * Math.sin(a)).toFixed(1)}`; });
+const FORMAS: Array<{ paths: string[]; circles?: Array<[number, number, number]> }> = [
+  { paths: ['M70 200C90 150 112 100 150 40', ...[[96, 150], [106, 128], [116, 106], [127, 85], [139, 64]].map(([x, y]) => `M${x} ${y}c-16-4-24-16-22-30 14 4 22 16 22 30zM${x} ${y}c6-14 18-20 32-16-6 14-18 20-32 16z`)] },
+  { paths: ['M112 70c-10-12-34-16-50-2-22 20-14 66 8 88 12 12 28 14 42 4 14 10 30 8 42-4 22-22 30-68 8-88-16-14-40-10-50 2z', 'M112 70c0-14 4-24 12-32', 'M120 50c8-16 28-20 40-12-8 16-26 20-40 12z'] },
+  { paths: RAYOS(112, 116, 60), circles: [[112, 116, 70], [112, 116, 60]] },
+  { paths: ['M112 44c-26 0-38 30-44 60-8 40 10 82 44 82s52-42 44-82c-6-30-18-60-44-60z'], circles: [[112, 134, 22]] },
+  { paths: ['M66 186L136 72c10-8 22 2 16 14L82 196c-6 6-20 0-16-10z', 'M96 150l12 6M112 124l12 6M124 102l10 6', 'M146 70c4-16 14-26 28-28M142 66c-4-16 2-30 12-38M152 76c14-6 28-2 34 8'] },
+  { paths: ['M60 196C80 150 110 110 160 70', 'M88 150c-24-2-36-16-36-34 22 0 36 14 36 34zM104 124c4-22 20-34 38-32-2 22-18 32-38 32zM120 106c-22-6-30-22-26-40 20 6 30 22 26 40zM140 84c6-20 24-28 40-22-6 20-24 28-40 22z'] },
+];
+const CAMBIO_FORMA_MS = 4500;
+
+function Fondo({ forma }: { forma: number }) {
+  const actual = FORMAS[forma % FORMAS.length]!;
+  return <>
+    <div className="gbg" aria-hidden="true"><i className="b1" /><i className="b2" /><i className="b3" /><i className="b4" /><i className="b5" />
+      <svg className="grain"><filter id="gn"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch" /></filter><rect width="100%" height="100%" filter="url(#gn)" /></svg></div>
+    <svg className="shape" viewBox="0 0 200 200" aria-hidden="true"><g className="sway" key={forma}>
+      {actual.circles?.map(([cx, cy, r], i) => <circle key={`c${i}`} className="ln" pathLength={1} cx={cx} cy={cy} r={r} style={{ '--i': i } as CSSProperties} />)}
+      {actual.paths.map((d, i) => <path key={d} className="ln" pathLength={1} d={d} style={{ '--i': i } as CSSProperties} />)}</g></svg>
+  </>;
+}
+
+/** Cuenta hasta el número como el boceto (1,1 s, frena al final). Sin movimiento o sin cifra, deja el texto. Solo la primera vez que aparece. */
+export function Cuenta({ valor }: { valor: string }) {
+  const [texto, setTexto] = useState(valor);
+  const hecho = useRef(false);
+  useEffect(() => {
+    setTexto(valor);
+    if (hecho.current || movimientoReducido() || valor.includes(':')) return undefined;
+    const m = valor.match(/^([^\d]*)([\d.]*\d(?:,\d+)?)(.*)$/);
+    if (!m) return undefined;
+    const decimales = (m[2]!.split(',')[1] ?? '').length;
+    const meta = parseFloat(m[2]!.replace(/\./g, '').replace(',', '.'));
+    if (!Number.isFinite(meta)) return undefined;
+    hecho.current = true;
+    const inicio = performance.now();
+    let cuadro = 0;
+    const paso = (ahora: number) => {
+      const k = Math.min(1, (ahora - inicio) / 1100);
+      const avance = 1 - (1 - k) ** 3;
+      setTexto(`${m[1]}${(meta * avance).toLocaleString('es-AR', { minimumFractionDigits: decimales, maximumFractionDigits: decimales })}${m[3]}`);
+      if (k < 1) cuadro = requestAnimationFrame(paso);
+    };
+    cuadro = requestAnimationFrame(paso);
+    return () => cancelAnimationFrame(cuadro);
+  }, [valor]);
+  return <>{texto}</>;
+}
+
+/** Tarjeta oscura «J · Noche» del boceto: lo que se toca en las listas se muestra acá. */
+function TarjetaDetalle({ detalle, posicion, total, onOpen }: { detalle: Detalle; posicion: number; total: number; onOpen: Open }) {
+  const [forma, setForma] = useState(0);
+  useEffect(() => {
+    if (movimientoReducido()) return undefined;
+    const reloj = window.setInterval(() => setForma(actual => (actual + 1) % FORMAS.length), CAMBIO_FORMA_MS);
+    return () => window.clearInterval(reloj);
+  }, []);
+  // El fondo y la forma siguen al puntero, cada uno para su lado (18/14 px y −12/−10 px del boceto).
+  const mover = (evento: PointerEvent<HTMLDivElement>) => {
+    if (movimientoReducido()) return;
+    const caja = evento.currentTarget.getBoundingClientRect();
+    evento.currentTarget.style.setProperty('--px', String((evento.clientX - caja.left) / caja.width - 0.5));
+    evento.currentTarget.style.setProperty('--py', String((evento.clientY - caja.top) / caja.height - 0.5));
+  };
+  const soltar = (evento: PointerEvent<HTMLDivElement>) => { evento.currentTarget.style.setProperty('--px', '0'); evento.currentTarget.style.setProperty('--py', '0'); };
+  return <div className="dv dvx dv-j" id="det" aria-live="polite" data-detalle={detalle.hd} onPointerMove={mover} onPointerLeave={soltar}>
+    <Fondo forma={forma} />
+    <div className="hd"><span className="xchip"><PanelV29Icon name="spark" size={13} />{detalle.hd}</span><span className="sp" />
+      {detalle.live ? <span className="xlive"><i />{detalle.live}</span> : null}{total ? <span className="num">{posicion} de {total}</span> : null}</div>
+    <div className="xhero"><b className="num gnum"><Cuenta valor={detalle.hero} /></b><span>{detalle.unidad}{detalle.unidad && detalle.leyenda ? <br /> : null}{detalle.leyenda}</span></div>
+    <div className="xname"><b>{detalle.nombre}</b> · {detalle.sub}</div>
+    {detalle.grid ? <div className="xgrid">{detalle.grid.map(([a, b, c], i) => <div key={a} style={{ '--i': i } as CSSProperties}><small className="l">{a}</small><span className="v num">{b}{c ? <> <em className="e" style={{ display: 'inline' }}>{c}</em></> : null}</span></div>)}</div> : null}
+    {detalle.lista ? <div className="xlist">{detalle.lista.map(([a, b]) => <div key={`${a}:${b}`}><span>{a}</span><b>{b}</b></div>)}</div> : null}
+    {detalle.observaciones || detalle.sinObservaciones ? <div className="xobs"><small className="l">Observaciones</small><div>
+      {detalle.observaciones ? detalle.observaciones.map(obs => <span key={obs.titulo} className={`ob ${obs.clase}`} title={`${obs.titulo}: ${obs.texto}`}><PanelV29Icon name={obs.icono} size={12} /><b>{obs.titulo}</b> <em>{obs.texto}</em></span>)
+        : <span className="ob p0"><b>{detalle.sinObservaciones}</b></span>}</div></div> : null}
+    <div className="xacts">{detalle.acciones.map((accion, i) => <button type="button" key={accion.texto} style={{ '--i': i } as CSSProperties} className={accion.principal ? 'go' : undefined} onClick={() => onOpen(accion.href)}>
+      {accion.principal ? null : <PanelV29Icon name={accion.icono} size={13} />}{accion.texto}{accion.principal ? <span className="ar"><PanelV29Icon name="chev" size={13} /></span> : null}</button>)}</div>
+  </div>;
+}
+
+const VACIO: Detalle = {
+  hd: 'Todo al día', iniciales: '·', fondo: 'transparent', nombre: 'Tu bandeja está al día', sub: 'Cuando haya algo para hacer, lo ves acá', hero: '0', unidad: 'pendientes',
+  acciones: [{ icono: 'cal', texto: 'Abrir agenda', href: '/crm/agenda' }, { icono: 'users', texto: 'Ver pacientes', href: '/crm/pacientes', principal: true }],
+};
 
 type ViewProps = {
-  patients: Patient[]; now: Date; data: CrmWorkResponse | null; loading: boolean; error: string; kind: HomeFilter;
-  onKind: (kind: HomeFilter) => void; onRefresh: () => void; onNext: () => void; hasPrevious: boolean;
+  patients: Patient[]; now: Date; data: CrmWorkResponse | null; loading: boolean; error: string; kind?: HomeFilter;
+  onKind?: (kind: HomeFilter) => void; onRefresh: () => void; onNext: () => void; hasPrevious: boolean;
   board: BillingBoard | null; billingError: boolean; scheduling: SchedulingWorkspaceSnapshot | null; schedulingError: boolean;
-  onOpen: Open; onCopy: () => void; copyStatus: string;
+  onOpen: Open;
 };
-export function PanelHomeView({ patients, now, data, loading, error, kind, onKind, onRefresh, onNext, hasPrevious, board, billingError, scheduling, schedulingError, onOpen, onCopy, copyStatus }: ViewProps) {
-  const appointments = homeAppointments(patients, now);
-  const items = (data?.items ?? []).filter(item => item.kind !== 'appointment' || item.status === 'needs_change');
-  const reservations = scheduling?.bookings.filter(booking => booking.status === 'requested') ?? [];
-  const total = data ? homePendingTotal(data.counts, data.home?.reschedule_count) : null;
-  const attention = homeAttention(patients, data?.home?.quiet ?? []);
-  const news = homeNews(patients, now, data?.home?.meal_streaks);
-  const month = homeMonth(patients, board, now);
-  const publicPage = scheduling?.profile.config.page;
-  const filters: Array<{ id: HomeFilter; label: string; count: number | null }> = [
-    { id: '', label: 'Todos', count: total === null || !scheduling ? null : total + reservations.length },
-    ...(['meal', 'message'] as const).map(id => ({ id, label: TASKS[id].label, count: data?.counts[id] ?? null })),
-    { id: 'reservas', label: 'Reservas', count: scheduling ? reservations.length : null },
-    ...(['fee_overdue', 'ai_menu'] as const).map(id => ({ id, label: TASKS[id].label, count: data?.counts[id] ?? null })),
-  ];
-  return <section className="ph-home" aria-label="Inicio del consultorio">
-    <div className="ph-grid-two ph-top">
-      <section className="ph-summary"><div className="ph-eyebrow"><Icon name="sun" size={16} />Resumen del día · calculado con tus datos</div><p className="ph-summary-text">Hoy tenés <em>{appointments.today.length} consultas</em> y <em>{total === null ? 'pendientes por consultar' : scheduling ? `${total + reservations.length} pendientes` : `${total} pendientes registrados`}</em>. {appointments.next ? `Prepará la consulta de ${appointments.next.patient.name}.` : 'Revisá tu bandeja para organizar el día.'}</p><div className="ph-counts">{(['meal', 'message', 'fee_overdue', 'record'] as const).map(id => <button type="button" key={id} onClick={() => onKind(id)} className={id === 'fee_overdue' && data?.counts[id] ? 'ph-hot' : ''}><b>{data?.counts[id] ?? '—'}</b>{TASKS[id].label.toLocaleLowerCase('es-AR')}</button>)}<button type="button" onClick={() => onKind('reservas')}><b>{scheduling ? reservations.length : '—'}</b>reservas</button></div></section>
-      <PreparedAppointment key={appointments.next?.patient.id ?? 'none'} entry={appointments.next} now={now} onOpen={onOpen} />
-    </div>
-    <div className="ph-quick" aria-label="Accesos rápidos">
-      <HomeLink href="/crm/pacientes?accion=crear" onOpen={onOpen}><Icon name="users" size={19} />Nueva paciente</HomeLink>
-      <HomeLink href="/crm/plan?planes=todos" onOpen={onOpen}><Icon name="list" size={19} />Armar un plan</HomeLink>
-      {publicPage?.enabled ? <button type="button" onClick={onCopy}><Icon name="arrow" size={19} />Copiar link de reserva</button> : <HomeLink href="/crm/agenda?agenda=publica" onOpen={onOpen}><Icon name="arrow" size={19} />Configurar link de reserva</HomeLink>}
-      <HomeLink href="/crm/cobranzas" onOpen={onOpen}><Icon name="wallet" size={19} />Registrar cobro</HomeLink>
-    </div>{copyStatus && <p className="ph-feedback" role="status">{copyStatus}</p>}
-    <div className="ph-grid-two ph-middle">
-      <section className="ph-card ph-pending"><header><h2>Pendientes</h2><button type="button" className="ph-retry" disabled={loading} onClick={onRefresh}>Actualizar</button></header>
-        <div className="ph-tabs" role="group" aria-label="Tipo de pendiente">{filters.map(filter => <button key={filter.id} type="button" aria-pressed={kind === filter.id} onClick={() => onKind(filter.id)}>{filter.label} <b>{filter.count ?? '—'}</b></button>)}<select aria-label="Otros pendientes" value={['intake','record','payment','quiet','appointment'].includes(kind) ? kind : ''} onChange={event => onKind(event.target.value as HomeFilter)}><option value="">Otros</option>{(['intake','record','payment','quiet','appointment'] as const).map(id => <option value={id} key={id}>{TASKS[id].label} ({id === 'appointment' ? data?.home?.reschedule_count ?? '—' : data?.counts[id] ?? '—'})</option>)}</select></div>
-        <div className="ph-scroll" tabIndex={0} aria-label="Lista de pendientes">
-          {kind === 'reservas' ? schedulingError ? <div className="ph-empty" role="alert">No pudimos consultar las reservas.<button type="button" className="ph-retry" onClick={onRefresh}>Reintentar reservas</button></div> : !scheduling ? <p className="ph-empty" role="status">Consultando reservas…</p> : reservations.length ? <ul>{reservations.map(booking => <li className="ph-task" key={booking.id}><span className="ph-icon ph-gold"><Icon name="calendar" size={18} /></span><div><b>{booking.contact_name}</b><p>{new Date(booking.starts_at).toLocaleString('es-AR', { timeZone: HOME_ZONE, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} · Reserva por confirmar</p></div><HomeLink href="/crm/agenda?agenda=reservas" onOpen={onOpen} className="ph-button">Revisar</HomeLink></li>)}</ul> : <p className="ph-empty">No hay reservas por confirmar.</p>
-          : loading ? <p className="ph-empty" role="status">Consultando pendientes…</p> : error ? <div className="ph-empty" role="alert">{error}<button type="button" className="ph-retry" onClick={onRefresh}>Reintentar pendientes</button></div> : <>
-            {!kind && reservations.length > 0 && <div className="ph-task"><span className="ph-icon ph-gold"><Icon name="calendar" size={18} /></span><div><b>{reservations.length} reservas por confirmar</b><p>Revisá los horarios y vinculá cada paciente.</p></div><button type="button" className="ph-button" onClick={() => onKind('reservas')}>Revisar</button></div>}
-            {items.length ? <ul>{items.map(item => <TaskRow key={item.id} item={item} onOpen={onOpen} />)}</ul> : <p className="ph-empty">No hay pendientes en este filtro.</p>}
-            {(hasPrevious || data?.next_cursor) && <div className="ph-pagination">{hasPrevious && <button type="button" className="ph-retry" onClick={onRefresh}>Volver al principio</button>}{data?.next_cursor && <button type="button" className="ph-retry" onClick={onNext}>Siguientes pendientes</button>}</div>}
-          </>}
+
+function Mensaje({ children }: { children: ReactNode }) {
+  return <p className="sxsub">{children}</p>;
+}
+
+export function PanelHomeView({ patients, now, data, loading, error, onRefresh, onNext, hasPrevious, board, billingError, scheduling, schedulingError, onOpen }: ViewProps) {
+  const [filtro, setFiltro] = useState<'all' | 'hacer' | 'fel'>('all');
+  const [rango, setRango] = useState<RangoConsultas>('hoy');
+  const [elegida, setElegida] = useState<string | null>(null);
+  const hoy = homeDay(now);
+  const reservas = useMemo(() => (scheduling?.bookings ?? []).filter(reserva => reserva.status === 'requested').map(reserva => ({
+    id: reserva.id, nombre: reserva.contact_name,
+    cuando: new Date(reserva.starts_at).toLocaleString('es-AR', { timeZone: HOME_ZONE, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+  })), [scheduling]);
+  const [pidiendo, setPidiendo] = useState<string | undefined>(undefined);
+  const extras = useExtraDe(pidiendo, hoy);
+  const entrada = useMemo(() => ({
+    pacientes: patients, ahora: now, data, reservas, rachas: data?.home?.meal_streaks ?? [],
+    novedades: homeNews(patients, now, data?.home?.meal_streaks), atencion: homeAttention(patients, data?.home?.quiet ?? []),
+  }), [patients, now, data, reservas]);
+  const pendientes = useMemo(() => armarPendientes(entrada, extras), [entrada, extras]);
+  const atencion = useMemo(() => armarAtencion(entrada, extras), [entrada, extras]);
+  const visibles = pendientes.filter(fila => filtro === 'all' || fila.filtro === filtro);
+  const activa = visibles.find(fila => fila.key === elegida) ?? atencion.find(fila => fila.key === elegida) ?? visibles[0] ?? atencion[0];
+  const detalle = activa?.detalle ?? VACIO;
+  useEffect(() => { setPidiendo(detalle.pacienteId); }, [detalle.pacienteId]);
+  const enAtencion = atencion.some(fila => fila.key === activa?.key);
+  const lista = enAtencion ? atencion : visibles;
+  const posicion = Math.max(0, lista.findIndex(fila => fila.key === activa?.key)) + 1;
+  const consultas = useMemo(() => armarConsultas(patients, now, rango, board), [patients, now, rango, board]);
+  const porVideo = consultas.filter(fila => fila.video).length;
+  const kpis = useMemo(() => armarKpis(patients, now, board, billingError), [patients, now, board, billingError]);
+  const abrir = (href: string) => (evento: MouseEvent<HTMLAnchorElement>) => {
+    if (evento.button || evento.ctrlKey || evento.metaKey || evento.shiftKey || evento.altKey) return;
+    evento.preventDefault(); onOpen(href);
+  };
+  const cargandoLista = loading && !data;
+  return <div className="scr" id="s-inicio">
+    <section className="iup" data-mk="1">
+      <div className="card">
+        <div className="ch"><h2>Pendientes</h2><span className="meta num" id="pcount">{cargandoLista || error ? '—' : visibles.length}</span><span className="sp" />
+          <div className="tabs" id="pfil2">{TABS_PENDIENTES.map(tab => <button key={tab.id} type="button" className={filtro === tab.id ? 'on' : undefined} aria-pressed={filtro === tab.id} onClick={() => setFiltro(tab.id)}>{tab.label}</button>)}</div></div>
+        <div className="lst" id="plist" tabIndex={0} aria-label="Lista de pendientes">
+          {cargandoLista ? <Mensaje>Consultando pendientes…</Mensaje> : error ? <Mensaje>{error} <button type="button" className="lnk" onClick={onRefresh}>Reintentar pendientes</button></Mensaje> : visibles.length
+            ? visibles.map(fila => <button type="button" key={fila.key} className={`li pick${fila.key === activa?.key ? ' sel' : ''}`} onClick={() => setElegida(fila.key)}>
+              <span className={`ico ${fila.tono}`}><PanelV29Icon name={fila.icono} /></span><span className="tx"><b>{fila.titulo}</b><small>{fila.sub}</small></span><span className="kind">{fila.tipo}</span></button>)
+            : <Mensaje>No hay pendientes en esta lista.</Mensaje>}
+          {!error && (hasPrevious || data?.next_cursor) ? <div className="sxacts">{hasPrevious ? <button type="button" className="lnk" onClick={onRefresh}>Volver al principio</button> : null}{data?.next_cursor ? <button type="button" className="lnk" onClick={onNext}>Siguientes pendientes</button> : null}</div> : null}
+          {schedulingError ? <Mensaje>Reservas no disponibles. <button type="button" className="lnk" onClick={onRefresh}>Reintentar reservas</button></Mensaje> : null}
+          {data?.source === 'memory' ? <Mensaje>Modo demo · datos ficticios.</Mensaje> : null}
         </div>
-        {schedulingError && kind !== 'reservas' && <p className="ph-source-warning">Reservas no disponibles. <button type="button" className="ph-retry" onClick={onRefresh}>Reintentar reservas</button></p>}
-      </section>
-      <section className="ph-card ph-agenda"><header><h2>Consultas de hoy</h2><HomeLink href="/crm/agenda" onOpen={onOpen}>Ver agenda <Icon name="arrow" size={14} /></HomeLink></header><div className="ph-scroll" tabIndex={0} aria-label="Consultas de hoy">{appointments.today.length ? <ol className="ph-timeline">{appointments.today.map(entry => <li key={`${entry.patient.id}:${entry.at.toISOString()}`} className={entry === appointments.next ? 'ph-now' : entry.at.getTime() + entry.duration * 60_000 <= now.getTime() ? 'ph-done' : ''}><time dateTime={entry.at.toISOString()}>{formatTime(entry.at)}</time><span className="ph-rail" /><HomeLink href={patientHref(entry.patient, 'consultas')} onOpen={onOpen}><b>{entry.patient.name}</b><span>{entry.duration} min · {channelLabel(entry.channel)}</span></HomeLink></li>)}</ol> : <p className="ph-empty">No tenés consultas programadas para hoy.</p>}</div></section>
-    </div>
-    <div className="ph-grid-three ph-bottom">
-      <section className="ph-card"><header><span className="ph-pip ph-orange" /><h2>Necesitan atención</h2><HomeLink href="/crm/seguimiento" onOpen={onOpen} aria-label="Ver todas las pacientes que necesitan atención"><Icon name="arrow" size={15} /></HomeLink></header><div className="ph-scroll" tabIndex={0} aria-label="Pacientes que necesitan atención">{attention.length ? <ul>{attention.map(notice => <li key={notice.id} className="ph-notice"><span className="ph-avatar ph-orange">{notice.patient.initials}</span><div><b>{notice.patient.name}</b><p>{notice.detail}</p></div><HomeLink href={patientMessageHref(notice.patient)} onOpen={onOpen} className="ph-button" aria-label={`Escribir a ${notice.patient.name}`}>Escribir</HomeLink></li>)}</ul> : <p className="ph-empty">Sin alertas en los datos disponibles.</p>}</div></section>
-      <section className="ph-card"><header><span className="ph-pip ph-lime" /><h2>Buenas noticias</h2></header><div className="ph-scroll" tabIndex={0} aria-label="Buenas noticias">{news.length ? <ul>{news.map(notice => <li key={notice.id} className="ph-notice"><span className="ph-avatar ph-lime">{notice.patient.initials}</span><div><b>{notice.patient.name}</b><p>{notice.detail}</p></div><HomeLink href={patientMessageHref(notice.patient)} onOpen={onOpen} className="ph-button" aria-label={`Felicitar a ${notice.patient.name}`}><Icon name="heart" size={14} /><span className="ph-congratulate">Felicitar</span></HomeLink></li>)}</ul> : <p className="ph-empty">Las metas alcanzadas, rachas de comidas y aniversarios van a aparecer acá.</p>}</div></section>
-      <section className="ph-card ph-month"><header><h2>Tu consultorio · {now.toLocaleDateString('es-AR', { timeZone: HOME_ZONE, month: 'long' })}</h2></header><dl><div><dt>Pacientes activas</dt><dd>{month.active}</dd></div><div><dt>Consultas del mes</dt><dd>{month.consultations}</dd><small>Horarios transcurridos</small></div><div><dt>Cobrado este mes</dt><dd>{month.collected === null ? billingError ? 'No disponible' : 'Consultando…' : formatPesos(month.collected)}</dd></div><div><dt>Por cobrar del mes</dt><dd>{month.outstanding === null ? billingError ? 'No disponible' : 'Consultando…' : formatPesos(month.outstanding)}</dd></div></dl>{billingError && <button type="button" className="ph-retry" onClick={onRefresh}>Reintentar cobros</button>}</section>
-    </div>
-    {data?.source === 'memory' && <p className="ph-demo">Modo demo · datos ficticios.</p>}
-  </section>;
+      </div>
+      <div className="card">
+        <div className="ch"><h2>Necesitan atención</h2><span className="meta num">{atencion.length}</span><span className="sp" /><a className="lnk" href="/crm/seguimiento" onClick={abrir('/crm/seguimiento')}>Seguimiento</a></div>
+        <div className="lst" id="alist" tabIndex={0} aria-label="Pacientes que necesitan atención">
+          {atencion.length ? atencion.map(fila => <button type="button" key={fila.key} className={`li pick${fila.key === activa?.key ? ' sel' : ''}`} onClick={() => setElegida(fila.key)}>
+            <span className="av" style={{ background: fila.fondo }}>{fila.iniciales}</span><span className="tx"><b>{fila.nombre}</b><small>{fila.sub}</small></span>
+            <span className="why" style={{ background: `var(--${fila.tono === 'r' ? 'rojo' : 'azaf'}-t)`, color: `var(--${fila.tono === 'r' ? 'rojo' : 'azaf'}-ink)` }}>{fila.motivo}</span></button>)
+            : <Mensaje>Sin alertas en los datos disponibles.</Mensaje>}
+        </div>
+      </div>
+      <TarjetaDetalle key={activa?.key ?? 'vacio'} detalle={detalle} posicion={posicion} total={lista.length} onOpen={onOpen} />
+    </section>
+    <section className="hoy">
+      <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="ch"><h2>{rango === 'hoy' ? 'Consultas de hoy' : rango === 'manana' ? 'Consultas de mañana' : 'Consultas de la semana'}</h2>
+          <span className="meta num">{consultas.length} {consultas.length === 1 ? 'consulta' : 'consultas'} · {porVideo} por videollamada</span><span className="sp" />
+          <div className="tabs">{TABS_CONSULTAS.map(tab => <button key={tab.id} type="button" className={rango === tab.id ? 'on' : undefined} aria-pressed={rango === tab.id} onClick={() => setRango(tab.id)}>{tab.label}</button>)}</div>
+          <a className="lnk" href="/crm/agenda" onClick={abrir('/crm/agenda')}>Agenda <PanelV29Icon name="chev" size={12} /></a></div>
+        <table>
+          <thead><tr><th>Hora</th><th>Paciente</th><th>Consulta</th><th>Modalidad</th><th>Adherencia</th><th>Cuota</th><th>Estado</th></tr></thead>
+          <tbody id="rows">{consultas.length ? consultas.map(fila => <tr key={fila.key} className={fila.clase}>
+            <td className="num">{fila.dia ? `${fila.dia} · ` : ''}{fila.hora}</td>
+            <td><a className="rowlink" href={fila.href} onClick={abrir(fila.href)}><div className="who"><span className="av" style={{ background: fila.fondo }}>{fila.iniciales}</span><div><b>{fila.nombre}</b></div></div></a></td>
+            <td>{fila.consulta}</td><td><span className="mod"><PanelV29Icon name={fila.video ? 'video' : 'door'} size={13} />{fila.modalidad}</span></td>
+            <td>{fila.adherencia == null ? <span style={{ color: 'var(--ink3)' }}>Sin dato</span> : <div className="adh"><span className="tr"><i className={fila.adherencia < 70 ? 'lo' : undefined} style={{ width: `${fila.adherencia}%` }} /></span><span className="num">{fila.adherencia}%</span></div>}</td>
+            <td style={{ color: fila.cuotaHoy ? 'var(--azaf-ink)' : 'var(--ink2)' }}>{fila.cuota}</td>
+            <td><span className={`pill ${fila.pill}`}>{fila.estado}</span></td></tr>)
+            : <tr><td colSpan={7} style={{ color: 'var(--ink3)' }}>{rango === 'hoy' ? 'No tenés consultas programadas para hoy.' : rango === 'manana' ? 'No tenés consultas programadas para mañana.' : 'No tenés consultas programadas esta semana.'}</td></tr>}</tbody>
+        </table>
+      </div>
+    </section>
+    <section className="kpis" data-mk="2">
+      <div className="card kpi" style={{ '--i': 0 } as CSSProperties}><div className="lb"><PanelV29Icon name={kpis.consultas.icono} />{kpis.consultas.etiqueta}</div>
+        <div className="row"><div className="v num"><Cuenta valor={kpis.consultas.valor} /><small>{kpis.consultas.unidad}</small></div><div className="kv kslots" aria-hidden="true">{kpis.consultas.puntos.map((clase, i) => <i key={i} className={clase} style={{ '--i': i } as CSSProperties} />)}</div></div>
+        <div className="ft"><span className={`dl ${kpis.consultas.pie.clase}`}>{kpis.consultas.pie.destacado}</span>{kpis.consultas.pie.resto}</div></div>
+      <div className="card kpi" style={{ '--i': 1 } as CSSProperties}><div className="lb"><PanelV29Icon name={kpis.pacientes.icono} />{kpis.pacientes.etiqueta}</div>
+        <div className="row"><div className="v num"><Cuenta valor={kpis.pacientes.valor} /></div><div className="kv kcols" aria-hidden="true">{kpis.pacientes.columnas.map(col => <span key={col.mes}><i style={{ height: col.alto }} /><small>{col.mes}</small></span>)}</div></div>
+        <div className="ft"><span className={`dl ${kpis.pacientes.pie.clase}`}>{kpis.pacientes.pie.destacado}</span>{kpis.pacientes.pie.resto}</div></div>
+      <div className="card kpi" style={{ '--i': 2 } as CSSProperties}><div className="lb"><PanelV29Icon name={kpis.adherencia.icono} />{kpis.adherencia.etiqueta}</div>
+        <div className="row"><div className="v num"><Cuenta valor={kpis.adherencia.valor} />{kpis.adherencia.unidad ? <small>{kpis.adherencia.unidad}</small> : null}</div>
+          <div className="kv kring" aria-hidden="true"><svg viewBox="0 0 40 40"><circle className="bg" cx="20" cy="20" r="15" /><circle className="fg" cx="20" cy="20" r="15" pathLength={100} strokeDasharray={100} strokeDashoffset={100 - kpis.adherencia.anillo} /></svg><span>{kpis.adherencia.leyenda}</span></div></div>
+        <div className="ft"><span className="dl">{kpis.adherencia.pie.destacado}</span>{kpis.adherencia.pie.resto}</div></div>
+      <div className="card kpi" style={{ '--i': 3 } as CSSProperties}><div className="lb"><PanelV29Icon name={kpis.cobrado.icono} />{kpis.cobrado.etiqueta}</div>
+        <div className="row"><div className="v num"><Cuenta valor={kpis.cobrado.valor} />{kpis.cobrado.unidad ? <small>{kpis.cobrado.unidad}</small> : null}</div>
+          <div className="kv kweek" aria-hidden="true"><small>{kpis.cobrado.leyenda}</small><div>{kpis.cobrado.semanas.map((ancho, i) => <i key={i} style={{ width: `${ancho}%` }} />)}</div></div></div>
+        <div className="ft"><span className={`dl ${kpis.cobrado.pie.clase}`}>{kpis.cobrado.pie.destacado}</span>{kpis.cobrado.pie.resto}</div></div>
+      <div className="card kpi" style={{ '--i': 4 } as CSSProperties}><div className="lb"><PanelV29Icon name={kpis.porCobrar.icono} />{kpis.porCobrar.etiqueta}</div>
+        <div className="row"><div className="v num"><Cuenta valor={kpis.porCobrar.valor} />{kpis.porCobrar.unidad ? <small>{kpis.porCobrar.unidad}</small> : null}</div>
+          <div className="kv klol" aria-hidden="true">{kpis.porCobrar.barras.map((barra, i) => <span key={i}><i style={{ height: barra.alto }} /><b /><small>{barra.dias}d</small></span>)}</div></div>
+        <div className="ft"><span className={`dl ${kpis.porCobrar.pie.clase}`}>{kpis.porCobrar.pie.destacado}</span>{kpis.porCobrar.pie.resto}{kpis.porCobrar.reintentar ? <button type="button" className="lnk" onClick={onRefresh}>Reintentar cobros</button> : null}</div></div>
+    </section>
+  </div>;
 }
 
 export function PanelHome({ patients, now, onOpen }: { patients: Patient[]; now: Date; onOpen: Open }) {
   const state = useHomeData(homeDay(now));
-  const [copyStatus, setCopyStatus] = useState('');
-  const copy = async () => {
-    const page = state.scheduling?.profile.config.page;
-    if (!page?.enabled) return;
-    try { await copyHomeBookingLink(page, window.location.origin, text => navigator.clipboard.writeText(text)); setCopyStatus('Link de reserva copiado.'); }
-    catch { setCopyStatus('No pudimos copiar el enlace. Abrí Página pública para copiarlo.'); }
-  };
-  return <PanelHomeView {...state} patients={patients} now={now} onOpen={onOpen} onCopy={() => void copy()} copyStatus={copyStatus} />;
+  return <PanelHomeView {...state} patients={patients} now={now} onOpen={onOpen} />;
 }

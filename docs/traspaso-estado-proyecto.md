@@ -26,6 +26,8 @@
 
 24/10 · Claude · Panel de la nutri, **cómo dejarlo como versión final**: [version-final.md](panel-nutri-rediseno/version-final.md) (revisión de la app contra el boceto v26, fases 0 a 13, base que falta, sincronización con la app de la paciente y prompt para cualquier agente). Primero el ok de Facundo al boceto v26.
 
+27/10 · Claude · Panel de la nutri: Inicio v29 pasado a la app con datos reales y movimiento (rama `claude/project-thread-4ic2wy`, espera ok visual). Detalle y plan de lo que falta (Pacientes, Agenda, Cobranzas, Mensajes, Ficha, Página pública, Planes 3g): [inicio-v29.md](panel-nutri-rediseno/inicio-v29.md).
+
 23/10 · Claude · Panel de la nutri, **boceto único con el estilo nuevo**: https://claude.ai/artifact/JwXZXARtS7e6scYcpx8cKV (fuentes en `design/panel-nutri/v3/`). Hechas Inicio, Pacientes, Agenda, Ficha de 10 pestañas, Cobranzas, Mensajes y Planes; faltan Página pública, Equipo, Ajustes y celular. Cómo seguir: [traspaso-boceto-v3.md](panel-nutri-rediseno/traspaso-boceto-v3.md).
 
 21/10 · Cursor · Se trajo main (fase A #162 e Inicio 900 #163) a [PR #168](https://github.com/Facu42/plan-v/pull/168). Siguen Próximamente y los datos de ejemplo. El asistente, la ayuda y el equipo que ya andan no se reemplazan.
