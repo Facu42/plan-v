@@ -1,6 +1,6 @@
 # Motion del panel, paridad con el boceto v29
 
-Rama `cursor/motion-panel-v29-e2b6`, desde main `11645a6` (Equipo y Ajustes, #192). **Borrador. Sin merge, sin publicación y sin migraciones.** El identificador del commit queda en el PR.
+Rama `cursor/motion-panel-v29-e2b6`, desde main `11645a6` (Equipo y Ajustes, #192). Código `a986e2f`. **Borrador. Sin merge, sin publicación y sin migraciones.**
 
 No se redibujó ninguna pantalla. No se agregó una librería de animación. El CSS generado `panel-v29.css` no se editó a mano: ya traía las transiciones del boceto `design/panel-nutri/v29/panel-trabajo.html`. Lo que faltaba era dispararlas.
 
