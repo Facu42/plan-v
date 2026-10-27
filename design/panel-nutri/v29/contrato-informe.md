@@ -68,6 +68,32 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Detalle: próximo turno | ✅ igual | |
 | Detalle: nota | ✅ igual | |
 
+## Tema oscuro · Agenda
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Tarjeta del calendario | ✅ igual | |
+| Encabezado de días | ✅ igual | |
+| Día de hoy | ✅ igual | |
+| Cantidad de consultas | ✅ igual | |
+| Columna de hoy | ✅ igual | |
+| Hora | ✅ igual | |
+| Turno de consultorio | ✅ igual | |
+| Turno de videollamada | ✅ igual | |
+| Turno sin confirmar | ✅ igual | |
+| Turno hecho | ✅ igual | |
+| Turno próximo | ✅ igual | |
+| Nombre del turno | ✅ igual | |
+| Línea de ahora | ✅ igual | |
+| Mes chico: día de hoy | ✅ igual | |
+| Mes chico: semana | ✅ igual | |
+| Referencias de color | ✅ igual | |
+| Tarjeta de pedidos | ✅ igual | |
+| Avatar del pedido | ✅ igual | |
+| Aceptar | ✅ igual | |
+| Proponer otro | ✅ igual | |
+| Lugar libre | ✅ igual | |
+
 ## Tema oscuro · Seguimiento
 
 | Pieza | Estado | Detalle |
@@ -235,6 +261,32 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Detalle: columna de números | ✅ igual | |
 | Detalle: próximo turno | ✅ igual | |
 | Detalle: nota | ✅ igual | |
+
+## Tema claro · Agenda
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Tarjeta del calendario | ✅ igual | |
+| Encabezado de días | ✅ igual | |
+| Día de hoy | ✅ igual | |
+| Cantidad de consultas | ✅ igual | |
+| Columna de hoy | ✅ igual | |
+| Hora | ✅ igual | |
+| Turno de consultorio | ✅ igual | |
+| Turno de videollamada | ✅ igual | |
+| Turno sin confirmar | ✅ igual | |
+| Turno hecho | ✅ igual | |
+| Turno próximo | ✅ igual | |
+| Nombre del turno | ✅ igual | |
+| Línea de ahora | ✅ igual | |
+| Mes chico: día de hoy | ✅ igual | |
+| Mes chico: semana | ✅ igual | |
+| Referencias de color | ✅ igual | |
+| Tarjeta de pedidos | ✅ igual | |
+| Avatar del pedido | ✅ igual | |
+| Aceptar | ✅ igual | |
+| Proponer otro | ✅ igual | |
+| Lugar libre | ✅ igual | |
 
 ## Tema claro · Seguimiento
 

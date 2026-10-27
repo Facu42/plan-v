@@ -503,3 +503,65 @@
 /* Celular: las tres tarjetas del resumen van una debajo de otra, así que el divisor pasa de lado a arriba. */
 #pv-panel-v29.mob #s-pacientes .pd-t { border-left: 0; border-top: 1px solid var(--line); }
 #pv-panel-v29.mob #s-pacientes .pd-t:first-child { border-top: 0; }
+
+/* ---- Agenda ---- */
+/* La hoja vieja pinta el fondo y redefine el negro y los grises; en Agenda valen los del boceto. */
+#pv-panel-v29 #pv-panel:has(#s-agenda) { --ink: inherit; --ink2: inherit; --ink3: inherit; --line: inherit; color: var(--ink); background: transparent; }
+#pv-panel-v29 #s-agenda { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 16px; }
+#pv-panel-v29 #s-agenda .ibtn { width: 34px; height: 34px; }
+#pv-panel-v29 .ag-vacio { color: var(--ink3); font-size: 12px; padding: 10px 15px; margin: 0; }
+#pv-panel-v29 .hrs .ag-vacio-sobre { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; padding: 0; }
+#pv-panel-v29 .ag-aviso { margin: 0; font-size: 12px; color: var(--azaf-ink); background: var(--azaf-t); border-radius: 10px; padding: 8px 12px; }
+#pv-panel-v29 .ag-foco { outline: 2px solid var(--lima-ink); outline-offset: 2px; }
+#pv-panel-v29 .ag-foot { flex-wrap: wrap; gap: 4px 14px; }
+#pv-panel-v29 .ag-foot .lnk:disabled { opacity: .55; cursor: default; }
+#pv-panel-v29 .ag-mas-lugares { align-self: center; }
+#pv-panel-v29 .mh .lnk { width: 22px; height: 22px; justify-content: center; border-radius: 7px; }
+#pv-panel-v29 .mh .lnk:hover { background: var(--app); }
+#pv-panel-v29 .mg span[role="button"] { cursor: pointer; }
+#pv-panel-v29 .mg span[role="button"]:hover:not(.td) { background: var(--lima-tt); }
+#pv-panel-v29 .mg span[role="button"]:focus-visible, #pv-panel-v29 .req .sbtn:focus-visible { outline: 2px solid var(--lima-ink); outline-offset: 1px; }
+#pv-panel-v29 .req .lst { overflow: auto; }
+#pv-panel-v29 .req .li .tx { min-width: 0; flex: 1; }
+#pv-panel-v29 .req .li .tx b { overflow-wrap: anywhere; }
+#pv-panel-v29 .ag-otro { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; font-size: 11.5px; color: var(--ink2); }
+#pv-panel-v29 .ag-otro label { display: flex; flex-direction: column; gap: 3px; }
+#pv-panel-v29 .ag-otro :is(select, input) { font: inherit; font-size: 12px; color: var(--ink); background: var(--card); border: 1px solid var(--line2); border-radius: 8px; padding: 6px 8px; min-width: 0; }
+.ag-mas { display: flex; flex-direction: column; gap: 12px; align-items: stretch; max-height: 92dvh; overflow: auto; width: min(560px, calc(100vw - 36px)); }
+/* Mes: no está dibujado en el boceto; se arma con sus colores de turno. */
+#pv-panel-v29 .agm { display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: minmax(84px, 1fr); flex: 1; min-height: 0; overflow: auto; }
+#pv-panel-v29 .agm > span { padding: 8px 10px; font-size: 10.5px; color: var(--ink3); text-transform: uppercase; border-bottom: 1px solid var(--line); }
+#pv-panel-v29 .agm > div { padding: 6px 8px; border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 3px; font-size: 11px; min-width: 0; }
+#pv-panel-v29 .agm > div:nth-child(7n+8) { border-left: 0; }
+#pv-panel-v29 .agm > div.o { opacity: .5; }
+#pv-panel-v29 .agm b { font-size: 15px; font-weight: 300; letter-spacing: -.02em; align-self: flex-start; }
+#pv-panel-v29 .agm .td b { background: var(--lima); color: #141519; border-radius: 8px; padding: 0 6px; font-weight: 400; }
+#pv-panel-v29 .agm small { border-radius: 6px; padding: 1px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+#pv-panel-v29 .agm small.c { background: var(--lima-t); }
+#pv-panel-v29 .agm small.v { background: var(--azul-t); }
+#pv-panel-v29 .agm small.w { background: var(--azaf-t); }
+#pv-panel-v29 .agm small.blk { background: var(--line); color: var(--ink3); }
+@media (prefers-reduced-motion: no-preference) {
+  #pv-panel-v29 .ev { animation: ag-ev .28s ease-out both; }
+  #pv-panel-v29 .req .li, #pv-panel-v29 .slot button { animation: ag-ev .24s ease-out both; }
+  #pv-panel-v29 .ag-otro { animation: ag-ev .2s ease-out both; }
+  @keyframes ag-ev { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+}
+#pv-panel-v29.mob #s-agenda .agm { min-width: 560px; }
+#pv-panel-v29 #s-agenda .card { padding: 0; border-radius: 16px; background: var(--card); }
+#pv-panel-v29 #s-agenda .ev { left: 4px; right: 4px; border-radius: 9px; padding: 5px 8px; font-size: 11px; display: flex; flex-direction: column; gap: 1px; line-height: normal; }
+#pv-panel-v29 #s-agenda .ev b { font-weight: 500; font-size: 11.5px; }
+#pv-panel-v29 #s-agenda .ev small { opacity: .75; }
+/* La hoja vieja deja la tarjeta del calendario con ancho propio: los días y las horas ocupan toda la tarjeta, como en el boceto. */
+#pv-panel-v29 #s-agenda .cal { display: flex; flex-direction: column; align-items: stretch; overflow: hidden; }
+#pv-panel-v29 #s-agenda .cal > .days, #pv-panel-v29 #s-agenda .cal > .hrs { width: 100%; box-sizing: border-box; }
+/* Celular: el calendario y las tarjetas de al lado van una debajo de otra (el boceto lo hace con una marca en el HTML). */
+#pv-panel-v29.mob #s-agenda .ag { grid-template-columns: minmax(0, 1fr); flex: none; }
+#pv-panel-v29.mob #s-agenda .agside { min-height: 0; }
+/* Lugares libres: la lista se desplaza dentro de su tarjeta y los accesos de abajo quedan siempre a la vista. */
+#pv-panel-v29 #s-agenda .agside > .card { display: flex; flex-direction: column; }
+#pv-panel-v29 #s-agenda .slot { overflow: auto; flex: 0 1 auto; min-height: 0; }
+#pv-panel-v29 #s-agenda .req .av { color: #141519; }
+#pv-panel-v29 #s-agenda .agm { grid-template-rows: auto; }
+#pv-panel-v29 #s-agenda .req .li { align-items: flex-start; }
+.ag-mas .p5-row { background: var(--pn-white, #fff); border-radius: 16px; padding: 10px 12px; }

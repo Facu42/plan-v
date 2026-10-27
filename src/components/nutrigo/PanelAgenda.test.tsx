@@ -14,28 +14,48 @@ const base = {
 };
 
 describe('Agenda del boceto', () => {
-  it('muestra la semana, las reservas y Conectar sin fingir que hay claves', () => {
+  it('muestra los pedidos de turno, los lugares libres y el aviso de semana vacía', () => {
     const html = renderToStaticMarkup(<PanelAgendaView {...base} />);
-    for (const label of ['Agenda', 'Por confirmar', 'Agustina Díaz con un nombre largo de verdad', 'Mercado Pago', 'Google Calendar', 'Conectar', 'Bloquear horario', 'Nueva consulta']) expect(html).toContain(label);
+    for (const label of ['Agenda', 'Pedidos de turno', 'Agustina Díaz con un nombre largo de verdad · primera vez', 'Pide viernes 23, 14:30', 'Aceptar', 'Proponer otro', 'Lugares libres', 'Bloquear horario', 'Nuevo turno', 'Octubre 2026']) expect(html).toContain(label);
     expect(html).not.toContain('WhatsApp');
-    expect(html).not.toContain('Conectado');
     expect(html).toContain('Todavía no hay turnos esta semana.');
-    expect(CONNECTION_MISSING).toMatch(/No hay una conexión activa/);
+    expect(html).toContain('Cargá tus horarios y tipos de consulta');
+  });
+
+  it('dibuja los turnos con los colores del boceto y deja en negro solo el próximo', () => {
+    const events = [
+      { id: 'a', tone: 'seguimiento' as const, title: 'Ana López', subtitle: 'Seguimiento', day: '2026-10-21', startMin: 8 * 60 + 30, endMin: 9 * 60 + 15 },
+      { id: 'b', tone: 'online' as const, title: 'Julia Sosa', subtitle: 'Videollamada', day: '2026-10-21', startMin: 14 * 60 + 30, endMin: 15 * 60 + 15 },
+      { id: 'c', tone: 'primera' as const, title: 'Valeria Núñez', subtitle: 'Primera', day: '2026-10-21', startMin: 16 * 60, endMin: 17 * 60 },
+    ];
+    const html = renderToStaticMarkup(<PanelAgendaView {...base} events={events} />);
+    expect(html).toContain('ev d');
+    expect(html).toContain('ev n');
+    expect(html).toContain('Próxima · videollamada');
+    expect(html).toContain('ev f');
+    expect(html).not.toContain('Todavía no hay turnos');
   });
 
   it('dice Conectado solo cuando el servidor ya lo confirmó', () => {
-    const html = renderToStaticMarkup(<PanelAgendaView {...base} connections={{ google: true, mercadopago: false }} onDisconnect={noop} />);
-    expect(html).toContain('Conectado');
-    expect(html).toContain('Desconectar');
-    expect(html.match(/>Conectar</g)?.length).toBe(1);
+    const sin = renderToStaticMarkup(<PanelAgendaView {...base} focus="conexiones" />);
+    expect(sin).not.toContain('Conectado');
+    expect(sin).toContain('Conectar');
+    const con = renderToStaticMarkup(<PanelAgendaView {...base} focus="conexiones" connections={{ google: true, mercadopago: false }} onDisconnect={noop} />);
+    expect(con).toContain('Conectado');
+    expect(con).toContain('Desconectar');
+    expect(con.match(/>Conectar</g)?.length).toBe(1);
+    expect(CONNECTION_MISSING).toMatch(/No hay una conexión activa/);
   });
 
   it('deja revisar una transferencia y conciliar un turno confirmado', () => {
-    const html = renderToStaticMarkup(<PanelAgendaView {...base} pending={[]} bookings={[{ ...booking, status: 'confirmed' }]} transfers={[{ id: 't1', amount_minor: 1500000, reference: 'MP-1' }]} moreBookings />);
-    expect(html).toContain('Confirmar transferencia recibida');
-    expect(html).toContain('Rechazar');
-    expect(html).toContain('Conciliar Mercado Pago');
-    expect(html).toContain('Sincronizar calendario');
-    expect(html).toContain('Ver más reservas');
+    const html = renderToStaticMarkup(<PanelAgendaView {...base} focus="pagos" pending={[]} bookings={[{ ...booking, status: 'confirmed' }]} transfers={[{ id: 't1', amount_minor: 1500000, reference: 'MP-1' }]} moreBookings />);
+    for (const label of ['Confirmar transferencia recibida', 'Rechazar', 'Conciliar Mercado Pago', 'Sincronizar calendario', 'Ver más reservas', 'No hay pedidos de turno.']) expect(html).toContain(label);
+  });
+
+  it('muestra los lugares libres sin pasarse del tope', () => {
+    const libres = Array.from({ length: 15 }, (_, index) => ({ day: '2026-10-22', startMin: 600 + index * 30, dia: 'Jue 22', hora: `${10 + Math.floor(index / 2)}:${index % 2 ? '30' : '00'}` }));
+    const html = renderToStaticMarkup(<PanelAgendaView {...base} libres={libres} />);
+    expect(html.match(/<small>Jue 22<\/small>/g)?.length).toBe(8);
+    expect(html).toContain('+7 más');
   });
 });
