@@ -22,6 +22,7 @@ import { PanelFichaResumen } from './PanelFichaResumen';
 import { conteoDeSolapas, seccionDe, solapaDe } from './ficha-presentacion';
 import { pendientesDeFicha } from './ficha-pendientes';
 import { useFichaData } from './use-ficha-data';
+import { usePatientTags } from './use-patient-tags';
 import { homeDay } from '../../lib/panel-home';
 import { PanelPatientFoodDiary } from './PanelPatientFoodDiary';
 import { PanelPatientEvolution } from './PanelPatientEvolution';
@@ -53,6 +54,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   const [patientRevision,setPatientRevision]=useState(0);
   const tabsRef=useRef<HTMLElement>(null);
   const datos=useFichaData(patient);
+  const etiquetas=usePatientTags(patient.id);
   const solapa=solapaDe(tab);
   useEffect(()=>{const nav=tabsRef.current,active=nav?.querySelector<HTMLElement>('[aria-current=page]');if(!nav||!active)return;const delta=active.getBoundingClientRect().left-nav.getBoundingClientRect().left-(nav.clientWidth-active.offsetWidth)/2;nav.scrollLeft+=delta;},[tab]);
   useEffect(()=>{
@@ -75,7 +77,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   const conteo = conteoDeSolapas({ comidas: pendientes.comidas, notaPorAprobar: pendientes.notaPorAprobar, alterados: pendientes.alterados.length });
   const contacto = <FxPanel titulo="Datos y contacto"><label className="fxsel">Paciente<select aria-label="Paciente de la ficha" value={patient.id} onChange={event=>onSelect(event.target.value)}>{patients.map(person=><option key={person.id} value={person.id}>{person.name}</option>)}</select></label><FxKv filas={[['Teléfono',phone||'Sin teléfono registrado'],['Próxima consulta',patient.appointment?.when||'Sin consulta programada'],['Consultas realizadas',<CompletedConsultationCount key="hechas" patientId={patient.id}/>],['Asistencias confirmadas',String(appointments.confirmed)]]}/></FxPanel>;
   return <div className="scr" id="s-ficha" aria-label={`Espacio de ${patient.name}`}>
-    <PanelFichaCabecera patient={patient} now={now} datos={datos} onBack={()=>onOpenHref('/crm/pacientes')} onChat={()=>change('chat')} onAgendar={()=>onOpenHref('/crm/agenda')} onEdit={onEdit} onConsulta={()=>change('consultas')}/>
+    <PanelFichaCabecera patient={patient} now={now} datos={datos} etiquetasPropias={etiquetas.tags} onGuardarEtiquetas={etiquetas.guardar} onBack={()=>onOpenHref('/crm/pacientes')} onChat={()=>change('chat')} onAgendar={()=>onOpenHref('/crm/agenda')} onEdit={onEdit} onConsulta={()=>change('consultas')}/>
     <FichaSolapas ref={tabsRef} activa={solapa} conteo={conteo} onChange={next=>change(seccionDe(next))}/>
     {refreshError && <p role="alert">{refreshError}</p>}
     <div id="fwrap" style={{flex:1,minHeight:0,display:'flex',flexDirection:'column'}}>
