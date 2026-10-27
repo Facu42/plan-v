@@ -1,6 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-27)
 
-27/10 · Cursor · El panel copia el movimiento del boceto v29 (pastilla del menú, entrada de cada módulo, panel lateral y avisos). No se redibujó nada y no se publicó. [Nota](panel-nutri-rediseno/motion-v29.md). Borrador, sin juntar.
+27/10 · Cursor · El panel copia el movimiento del boceto v29 (pastilla del menú, entrada de cada módulo, panel lateral y avisos). No se redibujó nada y no se publicó. [Nota](panel-nutri-rediseno/motion-v29.md). [PR #193](https://github.com/Facu42/plan-v/pull/193) en borrador, sin juntar.
 
 27/10 · Cursor · Equipo y Ajustes del panel copian el boceto v29. El menú dice Ajustes. Lo que no tiene backend queda en «Próximamente», sin cifras inventadas. [Informe y paso 10](panel-nutri-rediseno/equipo-ajustes-v29.md). [PR #192](https://github.com/Facu42/plan-v/pull/192) en borrador, sin juntar.
 
