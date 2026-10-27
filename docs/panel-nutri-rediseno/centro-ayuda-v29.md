@@ -1,6 +1,6 @@
 # Centro de ayuda v29
 
-Rama `work/centro-ayuda-v29`, base `81315b3` (#190). Entrega preparada para revisión visual de Facu; **sin merge ni producción**.
+[PR #191 en borrador](https://github.com/Facu42/plan-v/pull/191). Código `73cd947dc35d010de10f42b65eef0c58846d171a`. Rama `work/centro-ayuda-v29`, base `81315b3` (#190). Entrega preparada para revisión visual de Facu; **sin merge ni producción**.
 
 La ruta `/crm/ayuda` usa el shell v29 existente, Inter y los temas claro/oscuro. `/crm/desarrollo?modulo=ayuda` sigue funcionando y marca Ayuda en el menú. Se reutilizan las ocho guías reales de `HelpCenter` y las cinco FAQ del boceto. Temas, búsqueda por título/pasos/error, selección y enlaces usan rutas reales; para consultas y privacidad se abre el directorio para elegir paciente.
 
