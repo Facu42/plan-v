@@ -132,6 +132,11 @@
       "version": "20261027130000",
       "file": "20261027130000_patient_history_entries.sql",
       "sha256": "282450006dda631e381398545c1ead68e78f32d790056bddda481d022c4dd44e"
+    },
+    {
+      "version": "20261028140000",
+      "file": "20261028140000_scheduling_reminders_flag.sql",
+      "sha256": "c59b85da4705defb5e1742948e4aa7d7723418b0d9fb482effb56f82ddf8673a"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

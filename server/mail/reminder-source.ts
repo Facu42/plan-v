@@ -7,23 +7,26 @@ async function all(query:(from:number,to:number)=>PromiseLike<{data:unknown;erro
  const rows:Row[]=[];
  for(let from=0;;from+=250){const result=await query(from,from+249);if(result.error||!Array.isArray(result.data))throw new Error('Reminder source unavailable');rows.push(...result.data);if(result.data.length<250)return rows;}
 }
+/** Nutris que apagaron el recordatorio de turno en su agenda (`reminders_enabled: false`). Sin la clave, está activo. */
+export function remindersOff(profiles:Row[]):Set<string>{return new Set(profiles.filter(x=>(x.config as {reminders_enabled?:unknown}|null)?.reminders_enabled===false).map(x=>String(x.nutritionist_id)));}
 /** Metadata and current consent only. No clinical fields, no truncation, no implicit email opt-in. */
 export async function listDueAppointments(from:string,to:string,db:SupabaseClient=privilegedDb(),onlyId?:string):Promise<DueAppointment[]> {
  const appointments=await all((start,end)=>{let q=db.from('appointments').select('id,starts_at,channel,meet_url,patient_id,nutritionist_id').eq('status','scheduled').gte('starts_at',from).lt('starts_at',to);if(onlyId)q=q.eq('id',onlyId);return q.order('starts_at').order('id').range(start,end);});
  const due:DueAppointment[]=[],care=consentTextByPurpose('care_relationship');
  for(let start=0;start<appointments.length;start+=100){
   const rows=appointments.slice(start,start+100),ids=[...new Set(rows.map(r=>r.patient_id))],clinics=[...new Set(rows.map(r=>r.nutritionist_id))];
-  const [patients,professionals,consents]=await Promise.all([
+  const [patients,professionals,consents,profiles]=await Promise.all([
    all((offset,end)=>db.from('patients').select('id,full_name,user_id,nutritionist_id,archived_at,deactivated_at,anonymized_at').in('id',ids).order('id').range(offset,end)),
    all((offset,end)=>db.from('nutritionists').select('id,display_name').in('id',clinics).order('id').range(offset,end)),
    all((offset,end)=>db.from('consent_events').select('patient_id,purpose,decision,text_version,text_hash,sequence').in('patient_id',ids).eq('purpose','care_relationship').order('sequence').order('id').range(offset,end)),
+   all((offset,end)=>db.from('scheduling_profiles').select('nutritionist_id,config').in('nutritionist_id',clinics).order('nutritionist_id').range(offset,end)),
   ]);
   const userIds=patients.map(p=>p.user_id).filter(Boolean);
   const preferences=userIds.length?await all((offset,end)=>db.from('notification_preferences').select('user_id,email').in('user_id',userIds).eq('email',true).order('user_id').range(offset,end)):[];
-  const opted=new Set(preferences.map(p=>p.user_id)),latest=new Map(consents.map(c=>[c.patient_id,c]));
+  const opted=new Set(preferences.map(p=>p.user_id)),off=remindersOff(profiles),latest=new Map(consents.map(c=>[c.patient_id,c]));
   for(const row of rows){
    const p=patients.find(p=>p.id===row.patient_id),n=professionals.find(n=>n.id===row.nutritionist_id),consent=latest.get(row.patient_id);
-   if(!p?.user_id||!n||p.nutritionist_id!==row.nutritionist_id||p.archived_at||p.deactivated_at||p.anonymized_at||!opted.has(p.user_id)
+   if(!p?.user_id||!n||p.nutritionist_id!==row.nutritionist_id||p.archived_at||p.deactivated_at||p.anonymized_at||!opted.has(p.user_id)||off.has(String(row.nutritionist_id))
      ||consent?.decision!=='granted'||consent.text_version!==care.text_version||consent.text_hash!==care.text_hash)continue;
    const account=await db.auth.admin.getUserById(String(p.user_id));if(account.error)throw new Error('Reminder account unavailable');
    const email=account.data.user?.email_confirmed_at?account.data.user.email??null:null;if(!email)continue;
