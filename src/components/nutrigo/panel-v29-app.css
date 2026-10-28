@@ -606,3 +606,6 @@
 /* Plan: el boceto no fija interlineado (queda «normal»); la hoja vieja del panel lo hereda en 1,4 y agranda cada fila. */
 #pv-panel-v29 #s-ficha .pn-record-plan .fx, #pv-panel-v29 #s-ficha .pn-record-plan .fx * { line-height: normal; }
 #pv-panel-v29 #s-ficha .pn-record-plan .fxp .sbtn.k { min-height: 0; }
+/* Botones del encabezado del Plan: el boceto los separa del ícono con 6 px y no los sube. */
+#pv-panel-v29 #s-ficha .pn-record-plan .fxp .sbtn { gap: 6px; }
+#pv-panel-v29 #s-ficha .pn-record-plan .fxp .sbtn svg { position: static; top: auto; }

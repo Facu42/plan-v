@@ -128,7 +128,7 @@ export const PIEZAS_OBJETIVOS = [
 export const PIEZAS_PLAN = [
   ['Título de panel', '#s-ficha .fxp.g > header h3', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
   ['Fila de comida', '#s-ficha .fxmeals li', '', ['height', 'display']],
-  ['Botón del encabezado', '#s-ficha .fxp > header .sbtn.k', '', ['height', 'fontSize']],
+  ['Botón del encabezado', '#s-ficha .fxp > header .sbtn.k', '', ['height', 'width', 'fontSize']],
   ['Pedido de cambio', '#s-ficha .fxask', '', ['paddingTop', 'paddingLeft', 'borderTopLeftRadius', 'fontSize']],
   ['Botón Aprobar', '#s-ficha .fxask .sbtn.k', '', ['fontSize', 'paddingLeft', 'borderTopLeftRadius']],
   ['Hora de la comida', '#s-ficha .fxmeals time', '', ['fontSize', 'color']],
