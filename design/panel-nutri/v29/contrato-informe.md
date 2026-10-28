@@ -3,7 +3,7 @@
 Fuente: `design/panel-nutri/v29/panel-trabajo.html`.
 App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Planes (http://127.0.0.1:5173).
 
-**4 piezas no coinciden.**
+**8 piezas no coinciden.**
 
 ## Tema oscuro · armazón
 
@@ -177,6 +177,24 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Columnas de la semana | ✅ igual | |
 | Síntomas y energía | ✅ igual | |
 
+## Tema oscuro · Ficha · Registro alimentario
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Contra el plan | ✅ igual | |
+| Botón Confirmar | ✅ igual | |
+| Barra de proteínas | ✅ igual | |
+| Título del panel | ✅ igual | |
+| Botón del encabezado | ✅ igual | |
+| Botón Descargar | ✅ igual | |
+| Fila de comida | ✅ igual | |
+| Comida y hora | ✅ igual | |
+| Foto de la comida | ✅ igual | |
+| Qué comió | ✅ igual | |
+| Barras de macros | ✅ igual | |
+| Título de panel | ✅ igual | |
+| Lo que ve la IA | ✅ igual | |
+
 ## Tema oscuro · Ficha · Plan
 
 | Pieza | Estado | Detalle |
@@ -196,6 +214,27 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Barra de proteínas | ✅ igual | |
 | Columnas por comida | ✅ igual | |
 | Lista de compras | ✅ igual | |
+
+## Tema oscuro · Ficha · Archivos
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Título de panel | ✅ igual | |
+| Solapas de tipo | ✅ igual | |
+| Botón Exportar PDF | ✅ igual | |
+| Fila de archivo | ❌ distinta | **height**: boceto `55px` · app `57px` |
+| Ícono del archivo | ❌ distinta | **width**: boceto `34px` · app `36px`<br>**height**: boceto `34px` · app `36px`<br>**borderTopLeftRadius**: boceto `10px` · app `12px` |
+| Nombre del archivo | ✅ igual | |
+| Detalle del archivo | ✅ igual | |
+| Fecha del archivo | ✅ igual | |
+| Tamaño o tipo | ✅ igual | |
+| Botón Ver | ✅ igual | |
+| Barra por tipo | ✅ igual | |
+| Leyenda | ✅ igual | |
+| Zona de subida | ✅ igual | |
+| Título de la zona | ✅ igual | |
+| Botón Elegir archivos | ✅ igual | |
+| Aviso | ✅ igual | |
 
 ## Tema oscuro · Seguimiento
 
@@ -474,6 +513,24 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Columnas de la semana | ✅ igual | |
 | Síntomas y energía | ✅ igual | |
 
+## Tema claro · Ficha · Registro alimentario
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Contra el plan | ✅ igual | |
+| Botón Confirmar | ✅ igual | |
+| Barra de proteínas | ✅ igual | |
+| Título del panel | ✅ igual | |
+| Botón del encabezado | ✅ igual | |
+| Botón Descargar | ✅ igual | |
+| Fila de comida | ✅ igual | |
+| Comida y hora | ✅ igual | |
+| Foto de la comida | ✅ igual | |
+| Qué comió | ✅ igual | |
+| Barras de macros | ✅ igual | |
+| Título de panel | ✅ igual | |
+| Lo que ve la IA | ✅ igual | |
+
 ## Tema claro · Ficha · Plan
 
 | Pieza | Estado | Detalle |
@@ -493,6 +550,27 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Barra de proteínas | ✅ igual | |
 | Columnas por comida | ✅ igual | |
 | Lista de compras | ✅ igual | |
+
+## Tema claro · Ficha · Archivos
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Título de panel | ✅ igual | |
+| Solapas de tipo | ✅ igual | |
+| Botón Exportar PDF | ✅ igual | |
+| Fila de archivo | ❌ distinta | **height**: boceto `55px` · app `57px` |
+| Ícono del archivo | ❌ distinta | **width**: boceto `34px` · app `36px`<br>**height**: boceto `34px` · app `36px`<br>**borderTopLeftRadius**: boceto `10px` · app `12px` |
+| Nombre del archivo | ✅ igual | |
+| Detalle del archivo | ✅ igual | |
+| Fecha del archivo | ✅ igual | |
+| Tamaño o tipo | ✅ igual | |
+| Botón Ver | ✅ igual | |
+| Barra por tipo | ✅ igual | |
+| Leyenda | ✅ igual | |
+| Zona de subida | ✅ igual | |
+| Título de la zona | ✅ igual | |
+| Botón Elegir archivos | ✅ igual | |
+| Aviso | ✅ igual | |
 
 ## Tema claro · Seguimiento
 

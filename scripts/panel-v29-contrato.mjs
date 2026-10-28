@@ -141,6 +141,26 @@ export const PIEZAS_ALIMENTARIO = [
   ['Lo que ve la IA', '#s-ficha .fxai', '', ['borderTopLeftRadius', 'paddingTop']],
 ];
 
+// Piezas de la solapa Archivos. La demo trae los informes simulados por `simularLaboratorio`; el resto de los tipos no existe en la demo.
+export const PIEZAS_ARCHIVOS = [
+  ['Título de panel', '#s-ficha .fxp > header h3', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
+  ['Solapas de tipo', '#s-ficha .fxp > header .tabs button', '', ['height', 'fontSize']],
+  ['Botón Exportar PDF', '#s-ficha .fxp > header .sbtn', '', ['height', 'width', 'fontSize']],
+  ['Fila de archivo', '#s-ficha .fxfiles > div', '', ['height', 'paddingTop']],
+  ['Ícono del archivo', '#s-ficha .fxfiles .ico', '', ['width', 'height', 'borderTopLeftRadius']],
+  ['Nombre del archivo', '#s-ficha .fxfiles .t b', '', ['fontSize', 'fontWeight']],
+  ['Detalle del archivo', '#s-ficha .fxfiles .t small', '', ['fontSize', 'color']],
+  ['Fecha del archivo', '#s-ficha .fxfiles time', '', ['fontSize', 'color']],
+  ['Tamaño o tipo', '#s-ficha .fxfiles .sz', '', ['fontSize', 'color']],
+  ['Botón Ver', '#s-ficha .fxfiles .sbtn', '', ['height', 'width', 'fontSize']],
+  ['Barra por tipo', '#s-ficha .fxstk', '', ['height', 'borderTopLeftRadius']],
+  ['Leyenda', '#s-ficha .fxleg span', '', ['fontSize']],
+  ['Zona de subida', '#s-ficha .fxdrop', '', ['paddingTop', 'borderTopLeftRadius']],
+  ['Título de la zona', '#s-ficha .fxdrop > b', '', ['fontSize', 'fontWeight']],
+  ['Botón Elegir archivos', '#s-ficha .fxdrop .sbtn.k', '', ['height', 'width', 'fontSize']],
+  ['Aviso', '#s-ficha .fxai', '', ['paddingTop', 'borderTopLeftRadius', 'fontSize']],
+];
+
 // Piezas de la solapa Plan. El plan sale del plan publicado de la demo; las calorías que el plan no trae quedan en blanco.
 export const PIEZAS_PLAN = [
   ['Título de panel', '#s-ficha .fxp.g > header h3', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
@@ -636,6 +656,12 @@ export async function correrContratoV29() {
       await b.waitForTimeout(1200);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Plan\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_PLAN, informe);
+      await b.locator('#ftabs [data-ft="archivos"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Archivos/ }).click();
+      await a.waitForSelector('#s-ficha .fxfiles .t', { timeout: 20000 });
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Archivos\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_ARCHIVOS, informe);
       await abrirSeguimientoBoceto(b);
       await abrirSeguimientoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Seguimiento\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');

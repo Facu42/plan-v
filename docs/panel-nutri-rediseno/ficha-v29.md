@@ -219,3 +219,25 @@ Se comparó el árbol del boceto contra el de la app elemento por elemento (regl
 - «Contra el plan» ya no es un valor por defecto: compara lo que la paciente comió con lo que el plan publicado indica para esa comida y ese día (`nutrientesDelPlan`). Más de 20 % arriba en calorías: «Se pasó»; proteína menos del 80 % de la indicada: «Faltó proteína»; más de 20 % abajo: «Quedó corto»; si no, «Coincide». Sin plan para ese día o sin estimación de la comida, dice «—». «Con lactosa» del boceto no se dibuja: la comida no guarda alérgenos.
 - Acción de la fila: «Confirmar» (abre la revisión) si está por revisar; si no, el estado en texto gris, tocable para ver la revisión. El horario se dice «Hoy 8:10», «Ayer 21:10», «Dom 13:00».
 - Sigue siendo un valor por defecto «Registro de la semana» en lugar de «Registro pedido», y «Lo que ve la IA» sin observaciones: no hay dónde guardar el pedido ni quien las genere.
+
+## Parte 3e · Archivos
+
+Se armó con el código del boceto (`#ftabs [data-ft="archivos"]`, mismas clases y orden): `FxPanel`, zona de carga, filtros `FxStk` y lista `.fxfiles`. Se conservó toda la lógica real de subir, revisar, abrir y exportar.
+
+Defaults elegidos (el boceto dibuja algo que la app no tiene):
+- No hay pestaña ni tipo «Planes».
+- La columna de tamaño muestra el tipo de archivo.
+- Botón «Revisado» para archivos pendientes de la paciente.
+- El texto de orden por IA se reemplaza por «Origen: …».
+- «Hacer certificado» copia el texto al portapapeles (el texto está repetido en línea hasta que se junte #208).
+
+Contrato: `PIEZAS_ARCHIVOS` (16 piezas). Ícono del archivo ajustado a 34 px / radio 10.
+
+### Informe Regression Guard (paso 10)
+- Flujos: subir, revisar, abrir y exportar archivos conservados.
+- Regresiones: ninguna esperada; solo cambia la presentación de la pestaña.
+- Contratos: sin cambios de API.
+- Áreas frágiles: ninguna tocada (sin base, sin auth).
+- Migraciones: no hay.
+- Fire test / automatizaciones: sin cambios.
+- Veredicto: listo para revisión visual.
