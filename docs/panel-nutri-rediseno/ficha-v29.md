@@ -219,3 +219,42 @@ Se comparó el árbol del boceto contra el de la app elemento por elemento (regl
 - «Contra el plan» ya no es un valor por defecto: compara lo que la paciente comió con lo que el plan publicado indica para esa comida y ese día (`nutrientesDelPlan`). Más de 20 % arriba en calorías: «Se pasó»; proteína menos del 80 % de la indicada: «Faltó proteína»; más de 20 % abajo: «Quedó corto»; si no, «Coincide». Sin plan para ese día o sin estimación de la comida, dice «—». «Con lactosa» del boceto no se dibuja: la comida no guarda alérgenos.
 - Acción de la fila: «Confirmar» (abre la revisión) si está por revisar; si no, el estado en texto gris, tocable para ver la revisión. El horario se dice «Hoy 8:10», «Ayer 21:10», «Dom 13:00».
 - Sigue siendo un valor por defecto «Registro de la semana» en lugar de «Registro pedido», y «Lo que ve la IA» sin observaciones: no hay dónde guardar el pedido ni quien las genere.
+
+## Parte 3d · Consultas y notas
+
+Rama `claude/ficha-v29-consultas`. Solapa armada con el HTML de `consultas:` del boceto (el efectivo, con la capa «Para Sofía al terminar»): tres columnas de 290 px, el resto y 300 px. El HTML se sacó del boceto ya dibujado (`#fwrap .fx`) y se enchufaron datos reales; no se miró ninguna captura.
+
+Datos reales:
+- **Turnos:** `consultationsApi.completions` (turnos con su estado de confirmación) y el turno agendado de la paciente si todavía no figura.
+- **Notas y versiones publicadas:** `consultationsApi.list` (sesiones y resúmenes compartidos).
+- **Plan vigente:** `plansApi.published`, solo para decir cuándo vence.
+
+Cada botón tiene una función real:
+- **Iniciar consulta:** crea la nota de la consulta (manual, asociada al turno) o abre la que ya existe.
+- **Grabar:** abre la sección de abajo, donde está «Grabar videollamada» de siempre.
+- **SOAP (plantilla):** si la nota está vacía, la llena con S, O, A y P; si ya tiene texto, no la toca.
+- **Nota / Transcripción / Para la paciente:** cambian lo que se ve; «Para…» muestra la versión publicada o cómo la va a ver.
+- **Acuerdos de hoy:** salen del apartado «P» de la nota; los que se tildan se suman a lo que se publica.
+- **Editar:** abre la edición completa (la de siempre) debajo.
+- **Copiar versión para la paciente:** copia el texto que ve la paciente.
+- **Aprobar y publicar:** publica la nota (`publish`); la paciente la ve en su app. Nunca por WhatsApp.
+- **Para la paciente al terminar:** Devolución → «Para…»; Plan → solapa Plan; Material → Biblioteca; Registro alimentario → el pedido de registro por la app; Formulario → dice si respondió; Certificado → copia un texto de asistencia; Cobro → solapa Cobros; Próximo turno → Agenda.
+- **Terminar y firmar:** confirma la consulta como realizada (`completeAppointment`).
+
+Valores por defecto elegidos (lo que el boceto dibuja y Plan V no tiene):
+- **«Faltas»:** Plan V no guarda inasistencias; el cuadro dice «Canceladas» y cuenta los turnos cancelados.
+- **Tipo de consulta:** la primera es «Primera consulta»; el resto, «Seguimiento».
+- **Estados:** «Publicada» (hay versión compartida), «Nota por aprobar» (hay nota sin publicar), «Realizada», «Sin confirmar», «Cancelada» y «Próxima».
+- **Plantilla:** el boceto muestra «Plantilla: Seguimiento SOAP» y, en su capa final, solo «SOAP»; Plan V no tiene plantillas, así que el botón pone el esquema SOAP.
+- **Firma:** el boceto muestra matrícula; Plan V no la guarda, así que muestra el nombre del profesional.
+- **Aviso único al firmar:** el boceto promete un solo aviso; Plan V avisa cada publicación por separado, así que el texto dice solo que la paciente ve todo en su app.
+- **Cobro:** el boceto muestra el monto de la consulta; no hay arancel guardado por consulta, así que lleva a Cobros.
+- **Sin turnos ni notas:** los bloques se dibujan igual y dicen «Sin nota», 0 % o «—».
+- **Edición completa:** debajo quedan las herramientas de siempre (grabación, transcripción, versiones compartidas, programar turno y confirmar consultas) para no perder ninguna función.
+
+### Paso 10 · Consultas y notas
+- **Flujos:** iniciar consulta, plantilla SOAP, publicar, copiar versión, firmar y los accesos a Plan, Cobros, Agenda y pedido de registro.
+- **Regresiones cubiertas:** sin turnos ni notas no se rompe; la nota sin encabezados S/O/A/P se muestra entera; nada se publica con la nota vacía; el pedido de registro y la edición completa siguen siendo los de siempre.
+- **Contratos:** ninguna ruta ni tabla nueva; se usan `list`, `completions`, `command` (start, draft, publish) y `completeAppointment` como ya lo hace el resto del panel. El código de Codex (grabación y resumen con IA, #131) no se tocó: solo se lee lo que guarda.
+- **Áreas frágiles:** «Terminar y firmar» solo anda si el turno ya empezó (regla del servidor); el aviso lo dice si no. Publicar usa la revisión vigente de la nota: si cambió desde otra pestaña, pide actualizar.
+- **Migraciones:** ninguna. **Veredicto:** HOLD hasta el ok visual de Facundo; técnicamente SHIP.

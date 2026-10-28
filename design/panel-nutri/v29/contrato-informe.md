@@ -177,6 +177,24 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Columnas de la semana | ✅ igual | |
 | Síntomas y energía | ✅ igual | |
 
+## Tema oscuro · Ficha · Registro alimentario
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Contra el plan | ✅ igual | |
+| Botón Confirmar | ✅ igual | |
+| Barra de proteínas | ✅ igual | |
+| Título del panel | ✅ igual | |
+| Botón del encabezado | ✅ igual | |
+| Botón Descargar | ✅ igual | |
+| Fila de comida | ✅ igual | |
+| Comida y hora | ✅ igual | |
+| Foto de la comida | ✅ igual | |
+| Qué comió | ✅ igual | |
+| Barras de macros | ✅ igual | |
+| Título de panel | ✅ igual | |
+| Lo que ve la IA | ✅ igual | |
+
 ## Tema oscuro · Ficha · Plan
 
 | Pieza | Estado | Detalle |
@@ -196,6 +214,37 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Barra de proteínas | ✅ igual | |
 | Columnas por comida | ✅ igual | |
 | Lista de compras | ✅ igual | |
+
+## Tema oscuro · Ficha · Consultas y notas
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Tarjeta de consulta | ✅ igual | |
+| Título de la tarjeta | ✅ igual | |
+| Botones de la tarjeta | ✅ igual | |
+| Título de panel | ✅ igual | |
+| Medidor de asistencia | ✅ igual | |
+| Número del medidor | ✅ igual | |
+| Fila de consulta | ✅ igual | |
+| Punto de la línea | ✅ igual | |
+| Fecha de la consulta | ✅ igual | |
+| Estado de la consulta | ✅ igual | |
+| Solapas de la nota | ✅ igual | |
+| Botón SOAP | ✅ igual | |
+| Letra del bloque | ✅ igual | |
+| Título del bloque | ✅ igual | |
+| Texto del bloque | ✅ igual | |
+| Acuerdos | ✅ igual | |
+| Acuerdo | ✅ igual | |
+| Pie de la nota | ✅ igual | |
+| Botón del pie | ✅ igual | |
+| Paso al terminar | ✅ igual | |
+| Ícono del paso | ✅ igual | |
+| Título del paso | ✅ igual | |
+| Texto del paso | ✅ igual | |
+| Botón del paso | ✅ igual | |
+| Aviso de la IA | ✅ igual | |
+| Firma | ✅ igual | |
 
 ## Tema oscuro · Seguimiento
 
@@ -474,6 +523,24 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Columnas de la semana | ✅ igual | |
 | Síntomas y energía | ✅ igual | |
 
+## Tema claro · Ficha · Registro alimentario
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Contra el plan | ✅ igual | |
+| Botón Confirmar | ✅ igual | |
+| Barra de proteínas | ✅ igual | |
+| Título del panel | ✅ igual | |
+| Botón del encabezado | ✅ igual | |
+| Botón Descargar | ✅ igual | |
+| Fila de comida | ✅ igual | |
+| Comida y hora | ✅ igual | |
+| Foto de la comida | ✅ igual | |
+| Qué comió | ✅ igual | |
+| Barras de macros | ✅ igual | |
+| Título de panel | ✅ igual | |
+| Lo que ve la IA | ✅ igual | |
+
 ## Tema claro · Ficha · Plan
 
 | Pieza | Estado | Detalle |
@@ -493,6 +560,37 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Barra de proteínas | ✅ igual | |
 | Columnas por comida | ✅ igual | |
 | Lista de compras | ✅ igual | |
+
+## Tema claro · Ficha · Consultas y notas
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Tarjeta de consulta | ✅ igual | |
+| Título de la tarjeta | ✅ igual | |
+| Botones de la tarjeta | ✅ igual | |
+| Título de panel | ✅ igual | |
+| Medidor de asistencia | ✅ igual | |
+| Número del medidor | ✅ igual | |
+| Fila de consulta | ✅ igual | |
+| Punto de la línea | ✅ igual | |
+| Fecha de la consulta | ✅ igual | |
+| Estado de la consulta | ✅ igual | |
+| Solapas de la nota | ✅ igual | |
+| Botón SOAP | ✅ igual | |
+| Letra del bloque | ✅ igual | |
+| Título del bloque | ✅ igual | |
+| Texto del bloque | ✅ igual | |
+| Acuerdos | ✅ igual | |
+| Acuerdo | ✅ igual | |
+| Pie de la nota | ✅ igual | |
+| Botón del pie | ✅ igual | |
+| Paso al terminar | ✅ igual | |
+| Ícono del paso | ✅ igual | |
+| Título del paso | ✅ igual | |
+| Texto del paso | ✅ igual | |
+| Botón del paso | ✅ igual | |
+| Aviso de la IA | ✅ igual | |
+| Firma | ✅ igual | |
 
 ## Tema claro · Seguimiento
 

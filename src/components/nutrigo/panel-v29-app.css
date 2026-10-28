@@ -631,3 +631,15 @@
 /* Botones del encabezado del Plan: el boceto los separa del ícono con 6 px y no los sube. */
 #pv-panel-v29 #s-ficha .pn-record-plan .fxp .sbtn { gap: 6px; }
 #pv-panel-v29 #s-ficha .pn-record-plan .fxp .sbtn svg { position: static; top: auto; }
+
+/* Consultas y notas: el boceto no fija interlineado (queda «normal»); la hoja vieja del panel lo hereda en 1,4 y agranda cada fila. */
+#pv-panel-v29 #s-ficha .pn-record-consultas .fx, #pv-panel-v29 #s-ficha .pn-record-consultas .fx * { line-height: normal; }
+#pv-panel-v29 #s-ficha .pw-record:has(.pn-record-consultas > .fx) { padding-top: 0; }
+/* Botones de las tarjetas: el boceto los separa del ícono con 6 px y no los sube ni les fija alto mínimo. */
+#pv-panel-v29 #s-ficha .pn-record-consultas .fxp .sbtn { gap: 6px; }
+#pv-panel-v29 #s-ficha .pn-record-consultas .fxp .sbtn svg { position: static; top: auto; }
+#pv-panel-v29 #s-ficha .pn-record-consultas .fxp .sbtn.k { min-height: 0; }
+#pv-panel-v29 #s-ficha .pn-record-consultas .pg-v b { line-height: 1; }
+/* La hoja vieja del panel agranda `.ico` a 36 px; en «Para la paciente al terminar» el boceto lo deja en 28. */
+#pv-panel-v29 #s-ficha .pn-record-consultas .ntps .ico { width: 28px; height: 28px; border-radius: 9px; }
+#pv-panel-v29 #s-ficha .pn-record-consultas .fxsoap p { line-height: 1.55; }

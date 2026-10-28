@@ -141,6 +141,36 @@ export const PIEZAS_ALIMENTARIO = [
   ['Lo que ve la IA', '#s-ficha .fxai', '', ['borderTopLeftRadius', 'paddingTop']],
 ];
 
+// Piezas de la solapa Consultas y notas. La demo no trae turnos registrados ni notas: la app se mira con ejemplos simulados (`simularConsultas`).
+export const PIEZAS_CONSULTAS = [
+  ['Tarjeta de consulta', '#s-ficha .fxdk', '', ['height', 'paddingTop', 'borderTopLeftRadius']],
+  ['Título de la tarjeta', '#s-ficha .fxdk b', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
+  ['Botones de la tarjeta', '#s-ficha .fxdkb button', '', ['height', 'width', 'fontSize']],
+  ['Título de panel', '#s-ficha .fxp > header h3', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
+  ['Medidor de asistencia', '#s-ficha .fxsplit .pg', '', ['width', 'height']],
+  ['Número del medidor', '#s-ficha .pg-v b', '', ['fontSize', 'lineHeight', 'height']],
+  ['Fila de consulta', '#s-ficha .fxtl li', '', ['height', 'fontSize']],
+  ['Punto de la línea', '#s-ficha .fxtl li > i', '', ['width', 'height']],
+  ['Fecha de la consulta', '#s-ficha .fxtl li b', '', ['fontSize', 'fontWeight']],
+  ['Estado de la consulta', '#s-ficha .fxtl .pill', '', ['fontSize', 'height']],
+  ['Solapas de la nota', '#s-ficha .fxp > header .tabs button', '', ['height', 'fontSize']],
+  ['Botón SOAP', '#s-ficha .fxp > header .chip', '', ['height', 'fontSize', 'paddingLeft']],
+  ['Letra del bloque', '#s-ficha .fxsoap .sl', '', ['width', 'height', 'fontSize']],
+  ['Título del bloque', '#s-ficha .fxsoap b', '', ['fontSize', 'fontWeight']],
+  ['Texto del bloque', '#s-ficha .fxsoap p', '', ['fontSize', 'lineHeight', 'color']],
+  ['Acuerdos', '#s-ficha .fxclose', '', ['paddingTop', 'borderTopLeftRadius']],
+  ['Acuerdo', '#s-ficha .fxck > div', '', ['height', 'fontSize']],
+  ['Pie de la nota', '#s-ficha .fxfoot', '', ['paddingTop', 'height']],
+  ['Botón del pie', '#s-ficha .fxfoot .sbtn', '', ['height', 'fontSize']],
+  ['Paso al terminar', '#s-ficha .ntps > div', '', ['height', 'paddingTop']],
+  ['Ícono del paso', '#s-ficha .ntps .ico', '', ['width', 'height', 'borderTopLeftRadius']],
+  ['Título del paso', '#s-ficha .ntps .t b', '', ['fontSize', 'fontWeight']],
+  ['Texto del paso', '#s-ficha .ntps .t small', '', ['fontSize', 'color']],
+  ['Botón del paso', '#s-ficha .ntps .sbtn', '', ['height', 'width', 'fontSize']],
+  ['Aviso de la IA', '#s-ficha .fxai', '', ['paddingTop', 'borderTopLeftRadius', 'fontSize']],
+  ['Firma', '#s-ficha .ntsig', '', ['fontSize', 'color']],
+];
+
 // Piezas de la solapa Plan. El plan sale del plan publicado de la demo; las calorías que el plan no trae quedan en blanco.
 export const PIEZAS_PLAN = [
   ['Título de panel', '#s-ficha .fxp.g > header h3', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
@@ -515,6 +545,17 @@ async function abrirAlimentosApp(pagina) {
   await pagina.waitForSelector('.top .sxin input', { timeout: 20000 });
 }
 
+/** Responde con turnos registrados y notas de ejemplo, porque la demo no trae ninguno. */
+async function simularConsultas(pagina) {
+  const turno = (id, starts_at, channel, extra = {}) => ({ appointment_id: id, starts_at, duration_min: 30, channel, status: 'scheduled', completed: true, revision: 1, marked_at: null, marked_by: null, appointment_starts_at: null, ...extra });
+  const futuro = new Date(Date.now() + 21 * 86400000).toISOString();
+  const cierres = { appointments: [turno('a6', futuro, 'presencial', { completed: false }), turno('a5', '2026-10-14T13:00:00Z', 'video'), turno('a4', '2026-09-16T13:00:00Z', 'presencial'), turno('a3', '2026-08-19T13:00:00Z', 'presencial', { status: 'cancelled', completed: false }), turno('a2', '2026-08-18T20:00:00Z', 'video'), turno('a1', '2026-03-12T12:00:00Z', 'presencial')], total_completed: 5, has_more: false };
+  const sesion = (id, cita, inicio, draft) => ({ id, patient_id: 'pat-sofia', appointment_id: cita, nutritionist_id: 'n', source: 'capture', status: 'finished', revision: 2, started_at: inicio, finished_at: inicio, duration_seconds: 1500, microphone: true, remote_audio: true, incomplete: false, transcript: 'Hola Sofía, ¿cómo estuviste?', draft, manual_transcript: false });
+  const lista = { sessions: [sesion('s5', 'a5', '2026-10-14T13:00:00Z', 'S: Le cuesta sostener la merienda los días de oficina. Duerme mejor desde que cena más temprano.\nO: Peso 68,4 kg (−1,2). Grasa 27,8%. Cintura 78 cm.\nA: Buena evolución. Proteína baja en la merienda.\nP: Sumar yogur sin lactosa o huevo en la merienda. Repetir hierro en 60 días. Legumbres solo a la noche. Próxima consulta en 4 semanas.'), sesion('s4', 'a4', '2026-09-16T13:00:00Z', 'S: Sin cambios.')], shared: [{ id: 'h4', session_id: 's4', patient_id: 'pat-sofia', version: 1, summary: 'Resumen publicado', published_at: '2026-09-16T15:00:00Z', consultation_date: '2026-09-16T13:00:00Z' }], tasks: [], has_more: false };
+  await pagina.route(/\/consultations\/completions\?/, ruta => ruta.fulfill({ json: cierres }));
+  await pagina.route(/\/consultations\?audience=pro/, ruta => ruta.fulfill({ json: lista }));
+}
+
 /** Responde con un laboratorio de ejemplo y el permiso de estudios, porque la demo no trae ninguno. */
 async function simularLaboratorio(pagina) {
   const uid = n => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
@@ -638,6 +679,13 @@ export async function correrContratoV29() {
       await b.waitForTimeout(1200);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Plan\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_PLAN, informe);
+      await simularConsultas(a);
+      await b.locator('#ftabs [data-ft="consultas"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Consultas y notas/ }).click();
+      await a.waitForSelector('#s-ficha .fxtl li', { timeout: 20000 });
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Consultas y notas\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_CONSULTAS, informe);
       await abrirSeguimientoBoceto(b);
       await abrirSeguimientoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Seguimiento\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
