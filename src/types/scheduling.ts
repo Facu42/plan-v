@@ -1,6 +1,19 @@
 import {z} from 'zod';
 const time=z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/);
 const timestamp=z.iso.datetime({offset:true});
+const pct=z.number().int().min(0).max(100);
+/** Contenido extra de la página pública (perfil, obras sociales, descuentos, indicaciones por servicio, qué se pide al reservar y avisos). Todo opcional: sin la clave, la página queda como antes. */
+export const pageExtrasSchema=z.object({
+ license:z.string().trim().max(60).optional(),
+ area:z.string().trim().max(80).optional(),
+ specialties:z.array(z.string().trim().min(1).max(40)).max(12).optional(),
+ insurers:z.array(z.object({name:z.string().trim().min(1).max(60),mode:z.enum(['copago','reintegro','completo','no']),note:z.string().trim().max(60)}).strict()).max(20).optional(),
+ discounts:z.object({transfer:pct,cash:pct,card:pct}).strict().optional(),
+ service_notes:z.record(z.uuid(),z.object({instructions:z.string().trim().max(400),who:z.enum(['any','patients']),insurer:z.boolean()}).strict()).optional(),
+ intake:z.array(z.object({text:z.string().trim().min(1).max(100),on:z.boolean()}).strict()).max(12).optional(),
+ notices:z.object({confirm:z.boolean(),unconfirmed:z.boolean(),reopen:z.boolean(),review:z.boolean()}).partial().strict().optional(),
+}).strict();
+export type PageExtras=z.infer<typeof pageExtrasSchema>;
 export const schedulingSettingsSchema=z.object({
  timezone:z.literal('America/Argentina/Buenos_Aires'),
  calendars:z.array(z.object({id:z.uuid(),name:z.string().trim().min(1).max(80)}).strict()).min(1).max(10),
@@ -11,6 +24,7 @@ export const schedulingSettingsSchema=z.object({
  google_calendar_id:z.string().trim().max(200),google_enabled:z.boolean(),create_meet:z.boolean(),transfer_alias:z.string().trim().max(100),
  // Recordatorio de turno 24 h antes (app y mail). Sin la clave está activo.
  reminders_enabled:z.boolean().optional(),
+ page_extras:pageExtrasSchema.optional(),
 }).strict().superRefine((s,ctx)=>{const ids=new Set(s.calendars.map(c=>c.id));if(ids.size!==s.calendars.length||new Set(s.types.map(t=>t.id)).size!==s.types.length)ctx.addIssue({code:'custom',message:'Identificadores repetidos.'});if(s.types.some(t=>!ids.has(t.calendar_id)||t.deposit_minor>t.price_minor)||s.weekly.some(w=>!ids.has(w.calendar_id)||w.start>=w.end)||s.blocks.some(b=>!ids.has(b.calendar_id)||Date.parse(b.start)>=Date.parse(b.end)))ctx.addIssue({code:'custom',message:'Revisá la agenda, las horas y los importes.'});});
 export type SchedulingSettings=z.infer<typeof schedulingSettingsSchema>;
 export type SchedulingInterval={start:string;end:string};
