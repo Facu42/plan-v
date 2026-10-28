@@ -176,6 +176,8 @@ export const PIEZAS_ARCHIVOS = [
   ['Título de la zona', '#s-ficha .fxdrop > b', '', ['fontSize', 'fontWeight']],
   ['Botón Elegir archivos', '#s-ficha .fxdrop .sbtn.k', '', ['height', 'width', 'fontSize']],
   ['Aviso', '#s-ficha .fxai', '', ['paddingTop', 'borderTopLeftRadius', 'fontSize']],
+];
+
 // Piezas de la solapa Consultas y notas. La demo no trae turnos registrados ni notas: la app se mira con ejemplos simulados (`simularConsultas`).
 export const PIEZAS_CONSULTAS = [
   ['Tarjeta de consulta', '#s-ficha .fxdk', '', ['height', 'paddingTop', 'borderTopLeftRadius']],
