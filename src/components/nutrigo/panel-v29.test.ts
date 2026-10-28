@@ -15,6 +15,14 @@ const fuente = readFileSync(resolve(raiz, 'design/panel-nutri/v29/panel-trabajo.
 const piezas = ['.app', '.side', '.logo', '.mk', '.fold', '.srch', '.grp', '.nv', '.ct', '.acct', '.main', '.top', '.ibtn', '.cta'];
 
 describe('herramientas del boceto v29', () => {
+  it('el CSS del boceto viejo no se aplica a las pantallas ya pasadas a v29', () => {
+    const selectors: string[] = [];
+    postcss.parse(hojaVieja).walkRules(rule => { if (!/keyframes$/.test((rule.parent as { name?: string })?.name ?? '')) selectors.push(...rule.selectors); });
+    expect(selectors.length).toBeGreaterThan(300);
+    expect(selectors.filter(s => !s.includes(':where(:not(:has(#s-inicio,#s-pacientes,#s-agenda,#s-ficha,'))).toEqual([]);
+    expect(hojaApp).toMatch(/#pv-panel-v29 \{[^}]*line-height: normal/);
+  });
+
   it('limita cada regla a #pv-panel-v29 para no tocar la app de la paciente', () => {
     const selectors: string[] = [];
     postcss.parse(css).walkRules(rule => { if (!/keyframes$/.test((rule.parent as { name?: string })?.name ?? '')) selectors.push(...rule.selectors); });

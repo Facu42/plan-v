@@ -26,6 +26,7 @@ import { PAGE_LABELS, ShowroomDetail, type ShowroomPage } from './ShowroomPanels
 import type { CrmEntry } from '../crm/crm-entry';
 import { MealThumbnail, PatientOverview } from './PatientOverview';
 import { NutrigoMessages } from './NutrigoMessages';
+import { PanelMensajeVarias } from './PanelMensajeVarias';
 import { ShowroomPatientEdit, ShowroomPatients, followFromDirectory, type DirectoryAction, type PacientesHeader } from './ShowroomPatients';
 import { ProfessionalPatientWorkspace } from './ProfessionalPatientWorkspace';
 import { ProfessionalProgressGlobal } from './ProfessionalProgressGlobal';
@@ -210,6 +211,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
   const [reviewLog, setReviewLog] = useState<MealLog | null>(null);
   const [seguimientoActions, setSeguimientoActions] = useState<ReactNode>(null);
   const [pacientesHeader, setPacientesHeader] = useState<PacientesHeader | null>(null);
+  const [variasAbierto, setVariasAbierto] = useState(false);
   const [agendaHeader, setAgendaHeader] = useState<AgendaHeader | null>(null);
   const setSeguimientoHeader = useCallback((actions: ReactNode) => setSeguimientoActions(actions), []);
   const [progresoActions, setProgresoActions] = useState<ReactNode>(null);
@@ -509,6 +511,8 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
       ? { title: 'Agenda', titleSuffix: agendaHeader?.sufijo, when: agendaHeader?.cuando, search: 'Buscar paciente', actions: agendaHeader?.actions }
       : page === 'pacientes'
       ? { title: 'Pacientes', titleSuffix: pacientesHeader?.sufijo, when: pacientesHeader?.cuando, search: 'Buscar paciente', actions: pacientesHeader?.actions }
+      : page === 'mensajes'
+      ? { title: 'Mensajes', titleSuffix: messageUnread > 0 ? `· ${messageUnread} sin leer` : undefined, when: 'Chat en la app de cada paciente', search: 'Buscar', actions: <button className="chip" type="button" onClick={() => setVariasAbierto(true)}><PanelV29Icon name="users" />Mensaje a varias</button> }
       : page === 'seguimiento'
         ? { when: 'La falta de registros no es un incumplimiento', title: 'Seguimiento', search: 'Buscar', actions: seguimientoActions }
         : page === 'progreso-global'
@@ -553,6 +557,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
       >{pageContent}</PanelBocetoShell>
       {securityOpen && <ShowroomSecurity canDisable={!mfaEnforcedInApp()} onClose={() => setSecurityOpen(false)} />}
       {recordEditing && selected && <ShowroomPatientEdit patient={selected} onClose={() => setRecordEditing(false)} onSaved={(updated) => { addPatient(updated); setRecordEditing(false); }} />}
+      {variasAbierto && page === 'mensajes' && <PanelMensajeVarias pacientes={activePatients} ahora={now} onClose={() => setVariasAbierto(false)} />}
       {reviewLog && reviewPatient && <div className="modal-backdrop review-backdrop"><MealReviewPanel patient={reviewPatient} log={reviewLog} onClose={() => { setReviewLog(null); window.dispatchEvent(new CustomEvent('plan-v:seguimiento-refresh')); }} /></div>}
     </div></FigmaDetailContext.Provider>;
   }

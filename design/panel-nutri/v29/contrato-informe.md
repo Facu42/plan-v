@@ -3,7 +3,7 @@
 Fuente: `design/panel-nutri/v29/panel-trabajo.html`.
 App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Planes (http://127.0.0.1:5173).
 
-**8 piezas no coinciden.**
+**4 piezas no coinciden.**
 
 ## Tema oscuro · armazón
 
@@ -215,26 +215,36 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Columnas por comida | ✅ igual | |
 | Lista de compras | ✅ igual | |
 
-## Tema oscuro · Ficha · Archivos
+## Tema oscuro · Ficha · Consultas y notas
 
 | Pieza | Estado | Detalle |
 |---|---|---|
+| Tarjeta de consulta | ✅ igual | |
+| Título de la tarjeta | ✅ igual | |
+| Botones de la tarjeta | ✅ igual | |
 | Título de panel | ✅ igual | |
-| Solapas de tipo | ✅ igual | |
-| Botón Exportar PDF | ✅ igual | |
-| Fila de archivo | ❌ distinta | **height**: boceto `55px` · app `57px` |
-| Ícono del archivo | ❌ distinta | **width**: boceto `34px` · app `36px`<br>**height**: boceto `34px` · app `36px`<br>**borderTopLeftRadius**: boceto `10px` · app `12px` |
-| Nombre del archivo | ✅ igual | |
-| Detalle del archivo | ✅ igual | |
-| Fecha del archivo | ✅ igual | |
-| Tamaño o tipo | ✅ igual | |
-| Botón Ver | ✅ igual | |
-| Barra por tipo | ✅ igual | |
-| Leyenda | ✅ igual | |
-| Zona de subida | ✅ igual | |
-| Título de la zona | ✅ igual | |
-| Botón Elegir archivos | ✅ igual | |
-| Aviso | ✅ igual | |
+| Medidor de asistencia | ✅ igual | |
+| Número del medidor | ✅ igual | |
+| Fila de consulta | ✅ igual | |
+| Punto de la línea | ✅ igual | |
+| Fecha de la consulta | ✅ igual | |
+| Estado de la consulta | ✅ igual | |
+| Solapas de la nota | ✅ igual | |
+| Botón SOAP | ✅ igual | |
+| Letra del bloque | ✅ igual | |
+| Título del bloque | ✅ igual | |
+| Texto del bloque | ✅ igual | |
+| Acuerdos | ✅ igual | |
+| Acuerdo | ✅ igual | |
+| Pie de la nota | ✅ igual | |
+| Botón del pie | ✅ igual | |
+| Paso al terminar | ✅ igual | |
+| Ícono del paso | ✅ igual | |
+| Título del paso | ✅ igual | |
+| Texto del paso | ✅ igual | |
+| Botón del paso | ✅ igual | |
+| Aviso de la IA | ✅ igual | |
+| Firma | ✅ igual | |
 
 ## Tema oscuro · Seguimiento
 
@@ -551,26 +561,36 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Columnas por comida | ✅ igual | |
 | Lista de compras | ✅ igual | |
 
-## Tema claro · Ficha · Archivos
+## Tema claro · Ficha · Consultas y notas
 
 | Pieza | Estado | Detalle |
 |---|---|---|
+| Tarjeta de consulta | ✅ igual | |
+| Título de la tarjeta | ✅ igual | |
+| Botones de la tarjeta | ✅ igual | |
 | Título de panel | ✅ igual | |
-| Solapas de tipo | ✅ igual | |
-| Botón Exportar PDF | ✅ igual | |
-| Fila de archivo | ❌ distinta | **height**: boceto `55px` · app `57px` |
-| Ícono del archivo | ❌ distinta | **width**: boceto `34px` · app `36px`<br>**height**: boceto `34px` · app `36px`<br>**borderTopLeftRadius**: boceto `10px` · app `12px` |
-| Nombre del archivo | ✅ igual | |
-| Detalle del archivo | ✅ igual | |
-| Fecha del archivo | ✅ igual | |
-| Tamaño o tipo | ✅ igual | |
-| Botón Ver | ✅ igual | |
-| Barra por tipo | ✅ igual | |
-| Leyenda | ✅ igual | |
-| Zona de subida | ✅ igual | |
-| Título de la zona | ✅ igual | |
-| Botón Elegir archivos | ✅ igual | |
-| Aviso | ✅ igual | |
+| Medidor de asistencia | ✅ igual | |
+| Número del medidor | ✅ igual | |
+| Fila de consulta | ✅ igual | |
+| Punto de la línea | ✅ igual | |
+| Fecha de la consulta | ✅ igual | |
+| Estado de la consulta | ✅ igual | |
+| Solapas de la nota | ✅ igual | |
+| Botón SOAP | ✅ igual | |
+| Letra del bloque | ✅ igual | |
+| Título del bloque | ✅ igual | |
+| Texto del bloque | ✅ igual | |
+| Acuerdos | ✅ igual | |
+| Acuerdo | ✅ igual | |
+| Pie de la nota | ✅ igual | |
+| Botón del pie | ✅ igual | |
+| Paso al terminar | ✅ igual | |
+| Ícono del paso | ✅ igual | |
+| Título del paso | ✅ igual | |
+| Texto del paso | ✅ igual | |
+| Botón del paso | ✅ igual | |
+| Aviso de la IA | ✅ igual | |
+| Firma | ✅ igual | |
 
 ## Tema claro · Seguimiento
 
