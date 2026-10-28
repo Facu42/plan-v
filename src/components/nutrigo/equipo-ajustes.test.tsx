@@ -21,8 +21,13 @@ describe('Equipo y Ajustes v29', () => {
     expect(html).not.toContain('4 personas');
   });
   it('muestra Mi cuenta y cinco pestañas sin métricas del boceto', () => {
-    const html = renderToStaticMarkup(<PanelAjustes onOpen={vi.fn()} appearance={<button>Tema oscuro</button>}/>);
+    const html = renderToStaticMarkup(<PanelAjustes onOpen={vi.fn()}/>);
     for (const label of ['Mi cuenta', 'Plantillas', 'Avisos automáticos', 'Seguridad', 'Integraciones', 'Datos del consultorio', 'Firma y marca', 'Título y matrícula', 'Tema oscuro']) expect(html).toContain(label);
     expect(html).not.toContain('Fundadora'); expect(html).not.toContain('48 pacientes');
+  });
+  it('arma Mi cuenta con los bloques del boceto y sin datos inventados', () => {
+    const html = renderToStaticMarkup(<PanelAjustes onOpen={vi.fn()}/>);
+    for (const label of ['Obras sociales y reservas', 'Tu servicio de Plan V', 'Apariencia', 'Idioma y horario', 'Avisos para vos', 'Tus datos', 'Sin completar', 'role="switch"', 'class="fx"']) expect(html).toContain(label);
+    for (const falso of ['MN 4521', '27-28.456.912-4', 'Av. Cabildo', 'OSDE']) expect(html).not.toContain(falso);
   });
 });

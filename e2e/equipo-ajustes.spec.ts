@@ -48,14 +48,14 @@ test('Ajustes: alias, preferencias reales, cinco pestañas y enlaces', async ({ 
   await label.click(); expect((await response).ok()).toBe(true);
   await expect(page.getByRole('status').filter({ hasText: 'Preferencias guardadas' })).toBeVisible();
   await page.getByRole('tab', { name: 'Plantillas', exact: true }).click();
-  await expect(page.getByText('No hay plantillas guardadas', { exact: false })).toBeVisible();
+  await expect(page.getByText('Todavía no hay plantillas.', { exact: true }).first()).toBeVisible();
   await page.getByRole('tab', { name: 'Avisos automáticos', exact: true }).click();
-  await expect(page.getByText('La conexión con Brevo todavía no está disponible.', { exact: false })).toBeVisible();
+  await expect(page.getByText('se activa cuando conectes Brevo', { exact: false })).toBeVisible();
   await page.getByRole('tab', { name: 'Integraciones', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Brevo', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Mail (Brevo)', exact: true })).toBeVisible();
   await page.getByRole('tab', { name: 'Seguridad', exact: true }).click();
-  await expect(page.getByText('No disponible en modo demo', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Ver registro de accesos' }).click();
+  await expect(page.getByText('Sin información', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Ver', exact: true }).click();
   await expect(page).toHaveURL(/\/crm\/equipo\?vista=registro/);
   await expect(page.getByRole('tab', { name: 'Registro de accesos' })).toHaveAttribute('aria-selected', 'true');
   await page.locator('.side').getByRole('link', { name: 'Ajustes', exact: true }).click();
@@ -85,7 +85,7 @@ test('1440/390 claro/oscuro: Equipo y Ajustes sin desborde, capturas y medidas',
       if (screen === 'ajustes') await expect(root.getByLabel('Por mail', { exact: true })).toBeEnabled();
       expect(await root.evaluate(el => getComputedStyle(el).fontFamily)).toContain('Inter');
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-      measurements.push({ width, dark, screen, boxes: await root.locator(':scope > .fx > .c').evaluateAll(els => els.map(el => { const b = el.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; })) });
+      measurements.push({ width, dark, screen, boxes: await root.locator('.fx > .c').evaluateAll(els => els.map(el => { const b = el.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; })) });
       await page.waitForTimeout(350);
       await page.screenshot({ path: `docs/screenshots/equipo-ajustes/${screen}-${width}-${dark ? 'oscuro' : 'claro'}.png`, fullPage: true });
       await page.getByRole('tab', { name: screen === 'equipo' ? 'Permisos' : 'Seguridad', exact: true }).click();

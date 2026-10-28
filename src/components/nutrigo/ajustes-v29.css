@@ -1,0 +1,6 @@
+/* Ajustes v29: el contenedor de cada vista es el `.fx` del boceto; aquí solo se acomoda dentro de la pantalla. */
+#pv-panel-v29 .ea-screen>.ea-settings-v29{display:contents}
+#pv-panel-v29 .ea-settings-v29>.fx{padding-top:0;flex:1;min-height:0}
+#pv-panel-v29.mob .ea-settings-v29>.fx{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:none!important;flex:none;height:auto;min-height:auto}
+#pv-panel-v29 .ea-settings-v29 .ajav>div:focus-visible{outline:2px solid var(--lima-ink);outline-offset:-2px}
+#pv-panel-v29 .ea-settings-v29 .fxp>header{flex-wrap:nowrap}
