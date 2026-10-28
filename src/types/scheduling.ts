@@ -9,6 +9,8 @@ export const schedulingSettingsSchema=z.object({
  blocks:z.array(z.object({id:z.uuid(),calendar_id:z.uuid(),start:timestamp,end:timestamp,label:z.string().trim().max(80)}).strict()).max(300),
  page:z.object({slug:z.string().regex(/^[a-z0-9][a-z0-9-]{2,59}$/),enabled:z.boolean(),title:z.string().trim().min(1).max(100),bio:z.string().trim().max(1200),location:z.string().trim().max(200),contact:z.string().trim().max(150),logo_url:z.union([z.literal(''),z.url().startsWith('https://')])}).strict(),
  google_calendar_id:z.string().trim().max(200),google_enabled:z.boolean(),create_meet:z.boolean(),transfer_alias:z.string().trim().max(100),
+ // Recordatorio de turno 24 h antes (app y mail). Sin la clave está activo.
+ reminders_enabled:z.boolean().optional(),
 }).strict().superRefine((s,ctx)=>{const ids=new Set(s.calendars.map(c=>c.id));if(ids.size!==s.calendars.length||new Set(s.types.map(t=>t.id)).size!==s.types.length)ctx.addIssue({code:'custom',message:'Identificadores repetidos.'});if(s.types.some(t=>!ids.has(t.calendar_id)||t.deposit_minor>t.price_minor)||s.weekly.some(w=>!ids.has(w.calendar_id)||w.start>=w.end)||s.blocks.some(b=>!ids.has(b.calendar_id)||Date.parse(b.start)>=Date.parse(b.end)))ctx.addIssue({code:'custom',message:'Revisá la agenda, las horas y los importes.'});});
 export type SchedulingSettings=z.infer<typeof schedulingSettingsSchema>;
 export type SchedulingInterval={start:string;end:string};

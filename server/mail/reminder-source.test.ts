@@ -30,4 +30,13 @@ describe('recordatorios completos con opt-in y vínculo vigente',()=>{
   const fake=database(tables);
   expect(await listDueAppointments('2026-10-13T00:00:00Z','2026-10-14T00:00:00Z',fake.db)).toEqual([]);expect(fake.getUserById).not.toHaveBeenCalled();
  });
+ it('no avisa a las pacientes de una nutri que apagó el recordatorio y sí a las de quien no lo tocó',async()=>{
+  const care=consentTextByPurpose('care_relationship');
+  const tables={appointments:[1,2].map(i=>({id:`a${i}`,status:'scheduled',starts_at:'2026-10-13T15:00:00Z',patient_id:`p${i}`,nutritionist_id:`n${i}`})),
+   patients:[1,2].map(i=>({id:`p${i}`,user_id:`u${i}`,nutritionist_id:`n${i}`,full_name:'Paciente'})),nutritionists:[1,2].map(i=>({id:`n${i}`,display_name:'Consultorio'})),
+   notification_preferences:[1,2].map(i=>({user_id:`u${i}`,email:true})),consent_events:[1,2].map(i=>({patient_id:`p${i}`,purpose:care.purpose,text_version:care.text_version,text_hash:care.text_hash,decision:'granted',sequence:1})),
+   scheduling_profiles:[{nutritionist_id:'n1',config:{reminders_enabled:false}},{nutritionist_id:'n2',config:{}}]} as Record<string,Row[]>;
+  const rows=await listDueAppointments('2026-10-13T00:00:00Z','2026-10-14T00:00:00Z',database(tables).db);
+  expect(rows.map(r=>r.id)).toEqual(['a2']);
+ });
 });

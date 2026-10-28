@@ -1,6 +1,7 @@
 import { isSupabaseEnabled, privilegedDb } from '../db/supabase-client.js';
 import { writeOpsLog } from '../ops/log.js';
 import { REMINDER_SLOT_MS, reminderWindow } from '../mail/reminders.js';
+import { remindersOff } from '../mail/reminder-source.js';
 import { pushConfig, pushNotifier } from './push.js';
 
 type PushReminderDeps = {
@@ -14,10 +15,14 @@ let running = false;
 
 async function listDuePatients(from: string, to: string): Promise<string[]> {
   const db = privilegedDb();
-  const { data: rows, error } = await db.from('appointments').select('patient_id')
+  const { data: rows, error } = await db.from('appointments').select('patient_id,nutritionist_id')
     .eq('status', 'scheduled').gte('starts_at', from).lt('starts_at', to).limit(500);
   if (error) throw error;
-  const ids = [...new Set((rows ?? []).map((row) => String(row.patient_id)))];
+  const clinics = [...new Set((rows ?? []).map((row) => String(row.nutritionist_id)))];
+  const { data: profiles, error: profileError } = clinics.length ? await db.from('scheduling_profiles').select('nutritionist_id,config').in('nutritionist_id', clinics) : { data: [], error: null };
+  if (profileError) throw profileError;
+  const off = remindersOff(profiles ?? []);
+  const ids = [...new Set((rows ?? []).filter((row) => !off.has(String(row.nutritionist_id))).map((row) => String(row.patient_id)))];
   if (!ids.length) return [];
   const { data: patients, error: patientError } = await db.from('patients').select('id,user_id,deactivated_at,anonymized_at').in('id', ids);
   if (patientError) throw patientError;
