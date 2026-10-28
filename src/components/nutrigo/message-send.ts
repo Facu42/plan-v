@@ -3,6 +3,8 @@ type MessageInput = {
   text: string;
   role: 'patient' | 'pro';
   client_id?: string;
+  /** El texto salió tal cual de la sugerencia de la IA (copiloto). */
+  suggestedByAi?: boolean;
   asset_id?: string;
   filename?: string;
 };
@@ -31,7 +33,7 @@ export async function sendShowroomMessage(input: MessageInput, services: Message
     input.patientId,
     text,
     input.role === 'pro' ? 'vero' : 'patient',
-    false,
+    input.role === 'pro' && input.suggestedByAi === true,
     input.client_id,
     ...(attachment ? [attachment] : []),
   );

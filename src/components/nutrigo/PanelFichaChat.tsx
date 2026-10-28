@@ -14,6 +14,10 @@ import { sendShowroomMessage } from './message-send';
 const ACTIVE_REFRESH_MS = 15000;
 
 /** Solo los mensajes que se enviaron, del más viejo al más nuevo. */
+/** Respuesta que el copiloto ya dejó preparada para esta paciente (la misma del Inicio), si hay una vigente. */
+export const sugerenciaDe = (patient: Pick<Patient, 'brief' | 'briefDismissed'>) =>
+  !patient.briefDismissed && patient.brief?.suggested_action === 'mensaje' ? patient.brief.draft_message?.trim() || null : null;
+
 export const enviadosDe = (patient: Pick<Patient, 'messages'>) =>
   (patient.messages ?? []).filter(m => Boolean(m.sent_at)).slice().sort((a, b) => Date.parse(a.sent_at) - Date.parse(b.sent_at));
 
@@ -22,11 +26,13 @@ export function PanelFichaChat({ patient, open, onClose }: { patient: Patient; o
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [pidiendo, setPidiendo] = useState(false);
   const inFlight = useRef(false);
   const clientId = useRef(crypto.randomUUID());
   const lista = useRef<HTMLDivElement>(null);
   const archivo = useRef<HTMLInputElement>(null);
   const mensajes = enviadosDe(patient);
+  const sugerida = sugerenciaDe(patient);
   const sinLeer = unreadCount(mensajes, 'pro');
 
   useEffect(() => { if (lista.current) lista.current.scrollTop = lista.current.scrollHeight; }, [mensajes.length, open]);
@@ -55,13 +61,20 @@ export function PanelFichaChat({ patient, open, onClose }: { patient: Patient; o
     try {
       const subido = adjunto ? await uploadChatAttachment(patient.id, adjunto, true) : null;
       await sendShowroomMessage({
-        patientId: patient.id, text, role: 'pro', client_id: clientId.current,
+        patientId: patient.id, text, role: 'pro', client_id: clientId.current, suggestedByAi: Boolean(sugerida) && text.trim() === sugerida,
         asset_id: subido?.asset_id, filename: subido?.filename,
       }, { send: api.sendMessage, refresh });
       clientId.current = crypto.randomUUID();
       setText('');
     } catch { setError('No pudimos enviar el mensaje. Se conserva lo que escribiste para reintentar.'); }
     finally { inFlight.current = false; setBusy(false); if (archivo.current) archivo.current.value = ''; }
+  };
+  const pedirSugerencia = async () => {
+    if (pidiendo) return;
+    setPidiendo(true); setError('');
+    try { await api.generateBrief(patient.id); await refresh(patient.id); }
+    catch { setError('No pudimos preparar una respuesta sugerida. Puede faltar el permiso de la paciente para el seguimiento con IA.'); }
+    finally { setPidiendo(false); }
   };
   const elegirArchivo = (siguiente: File | null) => {
     if (!siguiente) return;
@@ -91,6 +104,12 @@ export function PanelFichaChat({ patient, open, onClose }: { patient: Patient; o
           </div>
         </div>;
       })}
+    </div>
+    <div className="sug">
+      <span>{sugerida ? <>Respuesta sugerida: «{sugerida}»</> : 'Sin respuesta sugerida por ahora.'}</span><span className="sp" />
+      {sugerida
+        ? <button type="button" className="sbtn k" disabled={busy} onClick={() => setText(sugerida)}>Usar</button>
+        : <button type="button" className="sbtn k" disabled={pidiendo} onClick={() => void pedirSugerencia()}>{pidiendo ? 'Preparando…' : 'Pedir una'}</button>}
     </div>
     {error ? <p role="alert" className="sug" style={{ borderStyle: 'solid' }}>{error}</p> : null}
     <form className="compose" onSubmit={enviar}>

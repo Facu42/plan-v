@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { Patient } from '../../types';
-import { PanelFichaChat, enviadosDe } from './PanelFichaChat';
+import { PanelFichaChat, enviadosDe, sugerenciaDe } from './PanelFichaChat';
 
 const mensaje = (id: string, from: 'vero' | 'patient', sent_at: string, text: string) => ({ id, from, sent_at, text });
 const paciente = {
@@ -28,5 +28,25 @@ describe('PanelFichaChat', () => {
     expect(abierto).toContain('bub in');
     expect(abierto).toContain('bub out');
     expect(abierto.indexOf('Mañana te llevo')).toBeLessThan(abierto.indexOf('Perfecto, Sofía.'));
+  });
+
+  it('ofrece la respuesta que dejó el copiloto solo si es un mensaje y no se descartó', () => {
+    const brief = { suggested_action: 'mensaje', up_next_title: null, up_next_body: null, draft_message: ' Hola, ¿cómo vas? ', source_ids: [], adherence_why: '' };
+
+    expect(sugerenciaDe({ brief, briefDismissed: false } as unknown as Patient)).toBe('Hola, ¿cómo vas?');
+    expect(sugerenciaDe({ brief, briefDismissed: true } as unknown as Patient)).toBeNull();
+    expect(sugerenciaDe({ brief: { ...brief, suggested_action: 'turno' } } as unknown as Patient)).toBeNull();
+    expect(sugerenciaDe({ brief: null } as unknown as Patient)).toBeNull();
+  });
+
+  it('muestra Usar con la sugerencia y Pedir una cuando no hay', () => {
+    const brief = { suggested_action: 'mensaje', up_next_title: null, up_next_body: null, draft_message: 'Hola', source_ids: [], adherence_why: '' };
+    const con = renderToStaticMarkup(<PanelFichaChat patient={{ ...paciente, brief } as unknown as Patient} open onClose={() => undefined} />);
+    const sin = renderToStaticMarkup(<PanelFichaChat patient={paciente} open onClose={() => undefined} />);
+
+    expect(con).toContain('Respuesta sugerida');
+    expect(con).toContain('>Usar<');
+    expect(sin).toContain('Sin respuesta sugerida por ahora.');
+    expect(sin).toContain('>Pedir una<');
   });
 });
