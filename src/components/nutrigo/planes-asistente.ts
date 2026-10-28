@@ -1,6 +1,7 @@
 import { MAX_DIETARY_PREFERENCES } from '../../types/ai-jobs';
 import { periodoAsistente, recortarPreferencias } from './planes-parte-3';
 import { sumarDias } from './planes-editor';
+import { lineasDeReferencia, type Referencia } from './planes-referencia';
 
 export const DURACIONES_PLAN = ['1 día', '7 días', '14 días', '4 semanas'] as const;
 export const DIETAS_PLAN = ['General', 'Mediterránea', 'Vegetariana', 'Vegana', 'Pescetariana', 'Flexitariana', 'DASH'] as const;
@@ -12,8 +13,6 @@ export const INCLUIR_PLAN = ['Grupos de intercambio', 'Mi recetario', 'Alternati
 export const SUGERENCIAS_ASISTENTE = ['Cambiá la merluza por pollo', 'Más hierro en los almuerzos', 'Bajá las calorías de la cena', 'Completá el día con una colación'] as const;
 export const IDEAS_ARMADO = ['Cenas livianas y temprano', 'Viandas para el trabajo', 'Usá mis recetas y lo que ya come'] as const;
 
-export const AVISO_DICTAR = 'Próximamente. Dictar el pedido todavía no está disponible.';
-export const AVISO_ADJUNTAR = 'Próximamente. Adjuntar una referencia todavía no está disponible.';
 export const AVISO_FICHA = 'La ficha guardada igual la lee el asistente. «No usar» solo saca esa línea de las preferencias de este pedido.';
 export const AVISO_FORMATO = 'Estas opciones orientan la propuesta. No cambian la vista ni el PDF. Intercambios y recetas dependen del catálogo; sin precios no se inventan costos. El pedido y la ficha se recortan al límite de la IA.';
 export const AVISO_COPIAR_OTRA = 'Próximamente. Copiar este plan a otra paciente queda para después.';
@@ -48,9 +47,11 @@ export function preferenciasDelArmado(input: {
   formato?: typeof FORMATOS_PLAN[number];
   medidas?: typeof MEDIDAS_PLAN[number];
   incluir?: readonly typeof INCLUIR_PLAN[number][];
+  referencias?: readonly Referencia[];
 }) {
   const lineas = [
     input.pedido,
+    ...(input.referencias ?? []).flatMap(lineasDeReferencia),
     `Formato: ${input.formato ?? FORMATOS_PLAN[0]}`,
     `Medidas: ${input.medidas ?? MEDIDAS_PLAN[1]}`,
     ...preferenciasIncluir(input.incluir ?? []),

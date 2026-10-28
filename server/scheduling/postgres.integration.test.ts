@@ -143,4 +143,12 @@ describe('el token público no crea una segunda vía para miembros revocados',()
   await expect(actor(b,'select public.scheduling_save_config($1,$2,$3)',[nutriB,await revision(),{...base,otra_clave:true}])).rejects.toThrow();
   await actor(b,'select public.scheduling_save_config($1,$2,$3)',[nutriB,await revision(),base]);
  });
+ it('acepta page_extras como objeto y rechaza otro tipo',async()=>{
+  const revision=async()=>(await actor<{revision:number}>(b,'select revision from public.scheduling_profiles where nutritionist_id=$1',[nutriB]))[0].revision;
+  const base={...settings,page:{...settings.page,slug:'consultorio-b'}};
+  await actor(b,'select public.scheduling_save_config($1,$2,$3)',[nutriB,await revision(),{...base,page_extras:{specialties:['Celiaquía']}}]);
+  expect((await actor<{config:{page_extras?:{specialties?:string[]}}}>(b,'select config from public.scheduling_profiles where nutritionist_id=$1',[nutriB]))[0].config.page_extras?.specialties).toEqual(['Celiaquía']);
+  await expect(actor(b,'select public.scheduling_save_config($1,$2,$3)',[nutriB,await revision(),{...base,page_extras:'texto'}])).rejects.toThrow();
+  await actor(b,'select public.scheduling_save_config($1,$2,$3)',[nutriB,await revision(),base]);
+ });
 });

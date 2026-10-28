@@ -28,10 +28,10 @@ test('Armar con IA envía opciones y muestra el uso mensual de la API', async ({
   await expect(uso).toContainText('US$ 1,20');
   await expect(uso).toContainText('US$ 3,00');
   await expect(uso).toContainText('compartida');
-  for (const name of ['Dictar pedido', 'Adjuntar referencia']) {
-    await page.getByRole('button', { name, exact: true }).click();
-    await expect(page.locator('#s-planes p.mhelp[role="status"]')).toContainText('Próximamente');
-  }
+  await page.getByRole('button', { name: /Dictar pedido|Escuchando/ }).click();
+  await expect(page.locator('#s-planes').getByText(/no permite dictar|Escuchando/).first()).toBeVisible();
+  await page.getByLabel('Elegir archivo de referencia').setInputFiles({ name: 'menu-actual.csv', mimeType: 'text/csv', buffer: Buffer.from('desayuno;avena con leche\nalmuerzo;pollo con arroz') });
+  await expect(page.locator('#s-planes')).toContainText('menu-actual');
   const solicitud = page.waitForRequest(req => req.url().endsWith('/api/ai/jobs') && req.method() === 'POST');
   await page.getByRole('button', { name: 'Crear propuesta del plan', exact: true }).click();
   const req = await solicitud;
@@ -41,6 +41,7 @@ test('Armar con IA envía opciones y muestra el uso mensual de la API', async ({
   expect(body.dietary_preferences).toContain('Medidas: Las dos');
   for (const opcion of ['Grupos de intercambio', 'Mi recetario', 'Alternativas por alimento', 'Lista de compras', 'Costo estimado'])
     expect(body.dietary_preferences.join(' | ')).toContain(opcion);
+  expect(body.dietary_preferences.join(' | ')).toContain('Ref. menu-actual');
   expect(body.job_type).toBe('menu_draft');
   await expect(page.getByRole('tab', { name: 'Chat', exact: true })).toBeVisible();
   await expect(page.locator('#s-planes')).not.toContainText('Plan publicado');

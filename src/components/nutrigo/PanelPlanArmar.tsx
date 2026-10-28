@@ -1,14 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { aiJobsApi } from '../../api/ai-jobs';
 import type { AiMonthlyUsage } from '../../types/ai-jobs';
 import type { Patient } from '../../types';
 import { PanelV29Icon } from './PanelV29Icon';
 import { fondoAvatar } from './planes-lista';
 import {
-  AVISO_ADJUNTAR, AVISO_DICTAR, AVISO_FICHA, AVISO_FORMATO, AVISO_META_ARMADO,
+  AVISO_FICHA, AVISO_FORMATO, AVISO_META_ARMADO,
   CUIDADOS_PLAN, DIETAS_PLAN, DURACIONES_PLAN, ESTRATEGIAS_PLAN, FORMATOS_PLAN, IDEAS_ARMADO, INCLUIR_PLAN, MEDIDAS_PLAN,
   datosDeFicha, notaDuracion, periodoDesdeDuracion, preferenciasDelArmado, type DuracionArmado,
 } from './planes-asistente';
+import {
+  AVISO_DEMASIADAS, AVISO_ERROR_DICTADO, AVISO_LIMITE_REFERENCIA, AVISO_SIN_DICTADO, MAX_REFERENCIAS,
+  agregarTexto, leerReferencia, reconocimientoDelNavegador, textoDictado, type Reconocimiento, type Referencia,
+} from './planes-referencia';
 
 type Persona = Pick<Patient, 'id' | 'name' | 'initials' | 'tone' | 'goal' | 'plan_b' | 'next_focus' | 'sensitive_hours'>;
 
@@ -36,6 +40,11 @@ export function PanelPlanArmar({
     return () => controller.abort();
   }, [pacienteId, armando]);
   const [pedido, setPedido] = useState('');
+  const [referencias, setReferencias] = useState<Referencia[]>([]);
+  const [escuchando, setEscuchando] = useState(false);
+  const selector = useRef<HTMLInputElement>(null);
+  const dictado = useRef<Reconocimiento | null>(null);
+  useEffect(() => () => dictado.current?.stop(), []);
   const [elegir, setElegir] = useState(false);
   const [dieta, setDieta] = useState(0);
   const [estrategias, setEstrategias] = useState<string[]>([]);
@@ -60,6 +69,33 @@ export function PanelPlanArmar({
     setElegir(false);
   }
 
+  function dictar() {
+    if (dictado.current) { dictado.current.stop(); return; }
+    const crearReconocimiento = reconocimientoDelNavegador();
+    if (!crearReconocimiento) { onAviso(AVISO_SIN_DICTADO); return; }
+    const reconocimiento = crearReconocimiento();
+    reconocimiento.lang = 'es-AR'; reconocimiento.continuous = false; reconocimiento.interimResults = false;
+    reconocimiento.onresult = evento => setPedido(actual => agregarTexto(actual, textoDictado(evento)));
+    reconocimiento.onerror = evento => onAviso(AVISO_ERROR_DICTADO[evento.error ?? ''] ?? 'No se pudo dictar. Escribí el pedido.');
+    reconocimiento.onend = () => { dictado.current = null; setEscuchando(false); };
+    dictado.current = reconocimiento; setEscuchando(true);
+    try { reconocimiento.start(); } catch { dictado.current = null; setEscuchando(false); onAviso(AVISO_SIN_DICTADO); }
+  }
+
+  async function adjuntar(evento: ChangeEvent<HTMLInputElement>) {
+    const archivo = evento.target.files?.[0];
+    evento.target.value = '';
+    if (!archivo) return;
+    if (referencias.length >= MAX_REFERENCIAS) { onAviso(AVISO_DEMASIADAS); return; }
+    try {
+      const referencia = await leerReferencia(archivo);
+      setReferencias(actuales => [...actuales, referencia]);
+      onAviso(AVISO_LIMITE_REFERENCIA);
+    } catch (error) {
+      onAviso(error instanceof Error ? error.message : 'No se pudo leer el archivo.');
+    }
+  }
+
   function crear() {
     if (!pedido.trim()) {
       onAviso('Contá qué plan necesitás antes de crear la propuesta.');
@@ -75,6 +111,7 @@ export function PanelPlanArmar({
         formato: FORMATOS_PLAN[formato],
         medidas: MEDIDAS_PLAN[medidas],
         incluir: INCLUIR_PLAN.filter((_, indice) => incluir[indice]),
+        referencias,
       }), duracion);
     } catch (error) {
       onAviso(error instanceof Error ? error.message : 'Revisá las opciones del pedido.');
@@ -107,9 +144,11 @@ export function PanelPlanArmar({
             <div className="iabox">
               <label className="pux-prompt-label" htmlFor="iatxt">¿Qué plan querés crear?</label>
               <textarea id="iatxt" rows={8} aria-label="Qué plan querés" placeholder={`Por ejemplo: una semana de comidas fáciles para ${nombre}. Desayunos rápidos, viandas para llevar al trabajo y cenas livianas.`} value={pedido} onChange={evento => setPedido(evento.target.value)} />
+              {referencias.length ? <div className="iafiles">{referencias.map((referencia, indice) => <span key={`${referencia.nombre}${indice}`}><PanelV29Icon name="file" size={12} />{referencia.nombre}<button type="button" aria-label={`Quitar ${referencia.nombre}`} onClick={() => setReferencias(actuales => actuales.filter((_, i) => i !== indice))}><PanelV29Icon name="x" size={10} /></button></span>)}</div> : null}
               <div className="iabar">
-                <button type="button" className="lnk" onClick={() => onAviso(AVISO_ADJUNTAR)}><PanelV29Icon name="clip" size={13} />Adjuntar referencia</button>
-                <button type="button" className="lnk" onClick={() => onAviso(AVISO_DICTAR)}><PanelV29Icon name="mic" size={13} />Dictar pedido</button>
+                <button type="button" className="lnk" onClick={() => selector.current?.click()}><PanelV29Icon name="clip" size={13} />Adjuntar referencia</button>
+                <button type="button" className={`lnk${escuchando ? ' on' : ''}`} aria-pressed={escuchando} onClick={dictar}><PanelV29Icon name="mic" size={13} />{escuchando ? 'Escuchando…' : 'Dictar pedido'}</button>
+                <input ref={selector} type="file" hidden accept=".pdf,.txt,.csv,.md,application/pdf,text/*" aria-label="Elegir archivo de referencia" onChange={event => void adjuntar(event)} />
               </div>
             </div>
             <div className="iaideas"><span>Para empezar</span>{IDEAS_ARMADO.map(idea => <button type="button" key={idea} onClick={() => setPedido(idea)}>{idea}</button>)}</div>

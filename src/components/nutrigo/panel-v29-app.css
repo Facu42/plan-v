@@ -73,6 +73,11 @@
 /* La hoja vieja del panel pisa el chip del boceto (11px y fondo blanco). Adentro de Seguimiento vuelve el del archivo. */
 #pv-panel-v29 #s-seguimiento .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
 
+/* Mensajes llena la columna igual que Seguimiento: la lista y el chat se desplazan adentro de su tarjeta. */
+#pv-panel-v29:not(.mob) .main:has(#s-mensajes) { height: 100%; overflow: hidden; }
+#pv-panel-v29:not(.mob) #pv-panel:has(#s-mensajes) { flex: 1; min-height: 0; }
+#pv-panel-v29.mob .main:has(#s-mensajes) > .top { flex: 0 0 auto; height: auto; }
+
 /* Progreso llena la columna igual que Seguimiento. El chip del boceto gana a la hoja vieja. */
 #pv-panel-v29:not(.mob) .main:has(#s-progreso) { height: 100%; overflow: hidden; }
 #pv-panel-v29:not(.mob) #pv-panel:has(#s-progreso) { flex: 1; min-height: 0; }
@@ -355,6 +360,9 @@
 #pv-panel-v29 #pv-panel > #s-biblioteca,
 #pv-panel-v29 #pv-panel > #s-seguimiento,
 #pv-panel-v29 #pv-panel > #s-progreso,
+#pv-panel-v29 #pv-panel > #s-mensajes,
+#pv-panel-v29 #pv-panel > #s-cobranzas,
+#pv-panel-v29 #pv-panel > #s-publica,
 #pv-panel-v29 #pv-panel > #s-alimentos,
 #pv-panel-v29 #pv-panel > #s-asistente,
 #pv-panel-v29 #pv-panel > #s-inicio {
@@ -632,6 +640,44 @@
 #pv-panel-v29 #s-ficha .pn-record-plan .fxp .sbtn { gap: 6px; }
 #pv-panel-v29 #s-ficha .pn-record-plan .fxp .sbtn svg { position: static; top: auto; }
 
+/* Cobranzas llena la columna igual que Seguimiento: las dos columnas del boceto se desplazan adentro. En el celular se apilan. */
+#pv-panel-v29:not(.mob) .main:has(#s-cobranzas) { height: 100%; overflow: hidden; }
+#pv-panel-v29:not(.mob) #pv-panel:has(#s-cobranzas) { flex: 1; min-height: 0; }
+#pv-panel-v29.mob .main:has(#s-cobranzas) > .top { flex: 0 0 auto; height: auto; flex-wrap: wrap; }
+#pv-panel-v29.mob #pv-panel:has(#s-cobranzas),
+#pv-panel-v29.mob #s-cobranzas,
+#pv-panel-v29.mob #s-cobranzas > #cwrap,
+#pv-panel-v29.mob #s-cobranzas .fx { flex: none; height: auto; min-height: auto; }
+#pv-panel-v29.mob #s-cobranzas .fx { grid-template-columns: 1fr !important; align-content: start; }
+#pv-panel-v29 #s-cobranzas,
+#pv-panel-v29 #s-cobranzas .fx,
+#pv-panel-v29 #s-cobranzas .c,
+#pv-panel-v29 #s-cobranzas .tabs { min-width: 0; max-width: 100%; }
+#pv-panel-v29 #s-cobranzas .sbtn[aria-label] { white-space: nowrap; }
+#pv-panel-v29 #s-cobranzas .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+#pv-panel-v29 #s-cobranzas .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
+
+/* Página pública llena la columna: las tres columnas del boceto se desplazan adentro. En el celular se apilan. */
+#pv-panel-v29:not(.mob) .main:has(#s-publica) { height: 100%; overflow: hidden; }
+#pv-panel-v29:not(.mob) #pv-panel:has(#s-publica) { flex: 1; min-height: 0; }
+#pv-panel-v29.mob .main:has(#s-publica) > .top { flex: 0 0 auto; height: auto; flex-wrap: wrap; }
+#pv-panel-v29.mob #pv-panel:has(#s-publica),
+#pv-panel-v29.mob #s-publica,
+#pv-panel-v29.mob #s-publica > #pubwrap,
+#pv-panel-v29.mob #s-publica .fx { flex: none; height: auto; min-height: auto; }
+#pv-panel-v29.mob #s-publica .fx { grid-template-columns: 1fr !important; align-content: start; }
+#pv-panel-v29 #s-publica,
+#pv-panel-v29 #s-publica .fx,
+#pv-panel-v29 #s-publica .c,
+#pv-panel-v29 #s-publica .tabs { min-width: 0; max-width: 100%; }
+#pv-panel-v29 #s-publica .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
+#pv-panel-v29 #s-publica .sw:disabled { cursor: default; }
+
+/* Con pocos servicios la tabla no se estira hasta el pie de la tarjeta. */
+#pv-panel-v29 #s-publica .pubts .pubt:has(tbody tr:last-child:nth-child(-n+3)) { flex: 0 0 auto; }
+/* Con una o dos obras sociales las filas no se reparten por toda la tarjeta. */
+#pv-panel-v29 #s-publica .pubhr.pubev:has(> div:last-child:nth-child(-n+3)) { justify-content: flex-start; }
+
 /* Archivos: el boceto no fija interlineado (queda «normal») y no deja aire arriba de la grilla. */
 #pv-panel-v29 #s-ficha .pn-record-files .fx, #pv-panel-v29 #s-ficha .pn-record-files .fx * { line-height: normal; }
 #pv-panel-v29 #s-ficha .pw-record:has(.pn-record-files > .fx) { padding-top: 0; }
@@ -650,3 +696,10 @@
 /* La hoja vieja del panel agranda `.ico` a 36 px; en «Para la paciente al terminar» el boceto lo deja en 28. */
 #pv-panel-v29 #s-ficha .pn-record-consultas .ntps .ico { width: 28px; height: 28px; border-radius: 9px; }
 #pv-panel-v29 #s-ficha .pn-record-consultas .fxsoap p { line-height: 1.55; }
+#pv-panel-v29 #s-ficha .pn-record-billing > .fx, #pv-panel-v29 #s-ficha .pn-record-billing > .fx * { line-height: normal; }
+#pv-panel-v29 #s-ficha .pw-record:has(.pn-record-billing > .fx) { padding-top: 0; }
+#pv-panel-v29 #s-ficha .pn-record-billing .fxp .sbtn { gap: 6px; }
+#pv-panel-v29 #s-ficha .pn-record-billing .fxp .sbtn svg { position: static; top: auto; }
+#pv-panel-v29 #s-ficha .pn-record-billing .fxp .sbtn.k { min-height: 0; }
+#pv-panel-v29 #s-ficha .pn-record-billing .fxtile .fxv b { line-height: 24px; }
+#pv-panel-v29 #s-ficha .pn-record-billing .pg-v b { line-height: 1; }
