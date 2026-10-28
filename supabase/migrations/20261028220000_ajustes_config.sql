@@ -1,13 +1,13 @@
 -- Ajustes completo: datos del consultorio, plantillas de formularios y certificados, avisos automáticos.
 -- Aditiva: tablas nuevas y una función reemplazada (sin DROP) para que la marca acepte los campos nuevos.
--- No se aplica sin la frase de Facundo.
+-- Aplicada en la base el 28/10/2026 con la frase de Facundo (función por SQL y tablas por migración).
 begin;
 set local lock_timeout='2s';
 set local statement_timeout='30s';
 
 -- La marca del consultorio suma matrícula, CUIT, dirección, teléfono, mail, título, matrícula provincial, especialidad y firma.
 create or replace function private.valid_nutrition_settings(value jsonb) returns boolean language plpgsql immutable set search_path='' as $$
-declare row jsonb; seen text[]:='{}'; label text;
+declare row jsonb; seen text[]:='{}'; label text; lim int;
 begin
  if jsonb_typeof(value) is distinct from 'object' or not(value ?& array['approvals','micronutrients','brand']) or (select count(*) from jsonb_object_keys(value))<>3 then return false;end if;
  if jsonb_typeof(value->'approvals') is distinct from 'array' or jsonb_array_length(value->'approvals')>5 or jsonb_typeof(value->'micronutrients') is distinct from 'array' or jsonb_array_length(value->'micronutrients')>6 then return false;end if;
@@ -22,7 +22,8 @@ begin
  end loop;
  row:=value->'brand';if jsonb_typeof(row) is distinct from 'object' or not(row ?& array['name','contact','logo']) or exists(select 1 from jsonb_object_keys(row) k where k<>all(array['name','contact','logo','cuit','address','phone','email','degree','license','province_license','specialty','signature'])) then return false;end if;
  for label in select k from jsonb_object_keys(row) k where k not in ('name','contact','logo','signature') loop
-  if jsonb_typeof(row->label)<>'string' or length(row->>label)>case label when 'address' then 160 when 'cuit' then 20 when 'phone' then 40 when 'license' then 40 when 'province_license' then 60 else 120 end then return false;end if;
+  lim:=case label when 'address' then 160 when 'cuit' then 20 when 'phone' then 40 when 'license' then 40 when 'province_license' then 60 else 120 end;
+  if jsonb_typeof(row->label)<>'string' or length(row->>label)>lim then return false;end if;
  end loop;
  if row ? 'signature' and (jsonb_typeof(row->'signature')<>'string' or length(row->>'signature')>700000 or (row->>'signature'<>'' and row->>'signature' !~ '^data:image/(png|jpeg);base64,[A-Za-z0-9+/]+={0,2}$')) then return false;end if;
  if jsonb_typeof(row->'name')<>'string' or length(row->>'name')>120 or jsonb_typeof(row->'contact')<>'string' or length(row->>'contact')>240 or jsonb_typeof(row->'logo')<>'string' or length(row->>'logo')>700000 or (row->>'logo'<>'' and row->>'logo' !~ '^data:image/(png|jpeg);base64,[A-Za-z0-9+/]+={0,2}$') then return false;end if;
