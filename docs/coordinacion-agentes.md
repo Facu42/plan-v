@@ -96,6 +96,7 @@ visto bueno de Facundo.
 
 ## 4. Decisiones vigentes de Facundo (fechadas)
 
+- **Panel de la nutri · REGLA FIJA (28/10/2026, Facundo):** cada pantalla se arma copiando el HTML y los estilos del boceto v29 (`design/panel-nutri/v29/panel-trabajo.html`, el DOM que dibuja tras `go()` y el clic en la solapa), con las mismas clases, estilos y orden, y solo se enchufan datos reales. Nunca se rehace mirando capturas. Se comprueba comparando el árbol del boceto contra el de la app (medidas, interlineado y estilos calculados de cada elemento) y con `node scripts/panel-v29-contrato.mjs`. Las capturas son solo evidencia para él.
 | Fecha | Decisión |
 |---|---|
 | 22/9 | "Exacto a Nutrigo": si Plan V se aparta del archivo, gana el archivo |

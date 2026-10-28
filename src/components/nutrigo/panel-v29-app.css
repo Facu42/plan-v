@@ -602,3 +602,7 @@
 /* Plan: si la columna no se estira (la lista de comidas manda el alto), las columnas de calorías conservan su alto del boceto. */
 #pv-panel-v29 #s-ficha .pn-record-plan .fxp.g > .fxcols { min-height: 120px; }
 #pv-panel-v29 #s-ficha .pw-record:has(.pn-record-plan > .fx) { padding-top: 0; }
+
+/* Plan: el boceto no fija interlineado (queda «normal»); la hoja vieja del panel lo hereda en 1,4 y agranda cada fila. */
+#pv-panel-v29 #s-ficha .pn-record-plan .fx, #pv-panel-v29 #s-ficha .pn-record-plan .fx * { line-height: normal; }
+#pv-panel-v29 #s-ficha .pn-record-plan .fxp .sbtn.k { min-height: 0; }

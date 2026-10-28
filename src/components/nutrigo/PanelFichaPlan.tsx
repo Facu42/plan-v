@@ -121,7 +121,6 @@ export function PanelFichaPlan({ patient, professionalName, now, onChanged, onSe
                   : <div className="fxs">{fecha !== hoy && <p className="fxhint">Mostrando el {formatMetricDate(fecha)}.{dias.some(dia => dia.isoDate === hoy) && <> <button type="button" className="lnk" onClick={() => setElegido(hoy)}>Volver a hoy</button></>}</p>}
                     {comidas.length ? <ol className="fxmeals">{comidas.map(comida => <li key={comida.id}><time className="num">{comida.hora ?? '—'}</time><i /><span className="photo" style={{ '--g': FONDOS[comida.slot] ?? FONDOS.Extra } as CSSProperties}><PanelV29Icon name="fork" size={14} /></span><div className="tx"><small>{comida.etiqueta}</small><b>{comida.titulo}</b>{comida.nota && <span>{comida.nota}</span>}</div><div className="kc">{comida.kcal === null ? <small>Sin calorías</small> : <><b className="num">{numero(comida.kcal)}</b><small>kcal</small><span className="fxb"><i style={{ width: `${Math.min(100, comida.kcal / Math.max(...comidas.map(otra => otra.kcal ?? 0), 1) * 100)}%` }} /></span></>}</div></li>)}</ol> : <p className="fxhint">Sin comidas indicadas para esta fecha.</p>}</div>}
         </FxPanel>
-        <details className="pn-record-card" onToggle={event => setPedidosAbiertos(event.currentTarget.open)} open={pedidosAbiertos}><summary>Pedidos de cambio y alternativas de la paciente</summary>{pedidosAbiertos && <CarePanel patientId={patient.id} mode="professional-menu" />}</details>
       </div>
       <div className="c">
         <FxPanel titulo="Requerimiento" meta={meta?.inputs.formula ? FORMULA_LABELS[meta.inputs.formula] : meta ? FORMULA_LABELS.mifflin : undefined} derecha={<button type="button" className="sbtn cbtn" onClick={() => onSection('planificacion')}><PanelV29Icon name="pen" size={13} />Editar</button>}>
@@ -133,11 +132,13 @@ export function PanelFichaPlan({ patient, professionalName, now, onChanged, onSe
         <FxPanel titulo="Calorías por comida" meta={totalDia === null ? undefined : `${numero(totalDia)} en el día`} grande>
           {porMomento.length ? <FxCols valores={porMomento.map(m => m.kcal)} rotulos={porMomento.map(m => m.etiqueta)} max={Math.max(...porMomento.map(m => m.kcal)) * 1.15} alto={120} /> : <div className="fxhint">{publicado ? 'Las comidas de este día no traen calorías.' : 'Sin plan publicado.'}</div>}
         </FxPanel>
-        <FxPanel titulo="Lista de compras" meta={publicado ? `semana ${semanaActual}` : undefined} derecha={<button className="lnk" type="button" disabled={ocupado} onClick={() => void enviarCompras()}>Enviar a {primerNombre}</button>}>
-          {!compras ? <div className="fxhint">Consultando la lista…</div> : compras.items.length ? <><FxKv filas={compras.items.slice(0, 6).map(linea => [linea.name, linea.quantity !== null ? `${String(linea.quantity).replace('.', ',')}${linea.unit ? ` ${linea.unit}` : ''}` : 'Sin cantidad'] as const)} />{compras.items.length > 6 && <button type="button" className="lnk" onClick={() => onSection('compras')}>Ver las {compras.items.length} líneas</button>}</> : <div className="fxhint">La lista está vacía: se arma con las recetas del plan publicado.</div>}
+        <FxPanel titulo="Lista de compras" meta={publicado ? `semana ${semanaActual}${compras?.items.length ? ` · ${compras.items.length} líneas` : ''}` : undefined} derecha={<><button className="lnk" type="button" onClick={() => onSection('compras')}>Ver todas</button><button className="lnk" type="button" disabled={ocupado} onClick={() => void enviarCompras()}>Enviar a {primerNombre}</button></>}>
+          {!compras ? <div className="fxhint">Consultando la lista…</div> : compras.items.length ? <><FxKv filas={compras.items.slice(0, 3).map(linea => [linea.name, linea.quantity !== null ? `${String(linea.quantity).replace('.', ',')}${linea.unit ? ` ${linea.unit}` : ''}` : 'Sin cantidad'] as const)} /></> : <div className="fxhint">La lista está vacía: se arma con las recetas del plan publicado.</div>}
         </FxPanel>
       </div>
     </div>
+
+    <details className="pn-record-card" onToggle={event => setPedidosAbiertos(event.currentTarget.open)} open={pedidosAbiertos}><summary>Pedidos de cambio y alternativas de la paciente</summary>{pedidosAbiertos && <CarePanel patientId={patient.id} mode="professional-menu" />}</details>
     {aviso && <AvisoBoceto key={aviso} texto={aviso} />}
   </section>;
 }

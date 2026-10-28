@@ -126,18 +126,20 @@ export const PIEZAS_OBJETIVOS = [
 
 // Piezas de la solapa Plan. El plan sale del plan publicado de la demo; las calorías que el plan no trae quedan en blanco.
 export const PIEZAS_PLAN = [
-  ['Título de panel', '#s-ficha .fxp.g > header h3', '', ['fontSize', 'fontWeight']],
+  ['Título de panel', '#s-ficha .fxp.g > header h3', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
+  ['Fila de comida', '#s-ficha .fxmeals li', '', ['height', 'display']],
+  ['Botón del encabezado', '#s-ficha .fxp > header .sbtn.k', '', ['height', 'fontSize']],
   ['Pedido de cambio', '#s-ficha .fxask', '', ['paddingTop', 'paddingLeft', 'borderTopLeftRadius', 'fontSize']],
   ['Botón Aprobar', '#s-ficha .fxask .sbtn.k', '', ['fontSize', 'paddingLeft', 'borderTopLeftRadius']],
   ['Hora de la comida', '#s-ficha .fxmeals time', '', ['fontSize', 'color']],
   ['Foto de la comida', '#s-ficha .fxmeals .photo', '', ['width', 'height', 'borderTopLeftRadius']],
   ['Momento', '#s-ficha .fxmeals .tx small', '', ['fontSize', 'color']],
-  ['Nombre de la comida', '#s-ficha .fxmeals .tx b', '', ['fontSize', 'fontWeight']],
+  ['Nombre de la comida', '#s-ficha .fxmeals .tx b', '', ['fontSize', 'fontWeight', 'lineHeight']],
   ['Calorías de la comida', '#s-ficha .fxmeals .kc b', '', ['fontSize', 'fontWeight']],
   ['Medidor del requerimiento', '#s-ficha .fxsplit .pg', '', ['width']],
   ['Barras de macros', '#s-ficha .fxmacros .fxb', '', ['height', 'borderTopLeftRadius']],
   ['Columnas por comida', '#s-ficha .fxcols i', '', ['width', 'borderTopLeftRadius']],
-  ['Lista de compras', '#s-ficha .fxkv > div', '', ['paddingTop', 'fontSize']],
+  ['Lista de compras', '#s-ficha .fxkv > div', '', ['paddingTop', 'fontSize', 'height']],
 ];
 
 // Piezas de Asistente. El encabezado vive en el armazón; acá se mide el cuerpo, que existe en los dos.

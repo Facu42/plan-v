@@ -182,6 +182,8 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Pieza | Estado | Detalle |
 |---|---|---|
 | Título de panel | ✅ igual | |
+| Fila de comida | ✅ igual | |
+| Botón del encabezado | ✅ igual | |
 | Pedido de cambio | ✅ igual | |
 | Botón Aprobar | ✅ igual | |
 | Hora de la comida | ✅ igual | |
@@ -476,6 +478,8 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Pieza | Estado | Detalle |
 |---|---|---|
 | Título de panel | ✅ igual | |
+| Fila de comida | ✅ igual | |
+| Botón del encabezado | ✅ igual | |
 | Pedido de cambio | ✅ igual | |
 | Botón Aprobar | ✅ igual | |
 | Hora de la comida | ✅ igual | |
