@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { Patient } from '../../types';
 import { FichaSolapas, PanelFichaCabecera } from './PanelFichaCabecera';
+import { PanelFichaPlan } from './PanelFichaPlan';
 import { FichaEtiquetas } from './FichaEtiquetas';
 import { PanelFichaResumen } from './PanelFichaResumen';
 import { PanelFichaMediciones } from './PanelFichaMediciones';
@@ -106,5 +107,11 @@ describe('Ficha v29', () => {
     const html = renderToStaticMarkup(<PanelFichaObjetivos patient={{ ...paciente, goal: '' }} now={ahora} datos={datos()} onChanged={vi.fn()} />);
     expect(html).toContain('Todavía sin objetivo definido');
     expect(html).toContain('Agregar');
+  });
+  it('el Plan dibuja los bloques del boceto con sus botones y avisa mientras consulta', () => {
+    const html = renderToStaticMarkup(<PanelFichaPlan patient={paciente} now={ahora} onChanged={vi.fn()} onSection={vi.fn()} />);
+    for (const texto of ['Plan vigente', 'Requerimiento', 'Calorías por comida', 'Lista de compras', 'Hoy', 'Semana', 'Vista de Sofía', 'Abrir en el editor', 'Editar', 'Enviar a Sofía', 'Consultando el plan vigente…']) expect(html).toContain(texto);
+    expect(html).not.toContain('WhatsApp');
+    expect(html).toContain('data-mk="1"');
   });
 });
