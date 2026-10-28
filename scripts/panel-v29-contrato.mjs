@@ -126,6 +126,9 @@ export const PIEZAS_OBJETIVOS = [
 
 // Piezas de la solapa Registro alimentario. La demo trae comidas de ejemplo; «Contra el plan» no existe en Plan V y no se dibuja.
 export const PIEZAS_ALIMENTARIO = [
+  ['Título del panel', '#s-ficha .fxp.g > header h3', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
+  ['Botón del encabezado', '#s-ficha .fxp > header .sbtn.k', '', ['height', 'width', 'fontSize']],
+  ['Botón Descargar', '#s-ficha .fxp > header .sbtn:not(.k)', '', ['height', 'width']],
   ['Fila de comida', '#s-ficha .fxtb tbody td', '', ['height', 'fontSize']],
   ['Comida y hora', '#s-ficha .fxwhen b', '', ['fontSize', 'fontWeight']],
   ['Foto de la comida', '#s-ficha .fxtb .who .photo', '', ['width', 'height', 'borderTopLeftRadius']],
