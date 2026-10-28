@@ -9,7 +9,7 @@ import { argentinaToday, isProgressPeriodDays } from '../progress/derive.js';
 import { loadPatientQuickPreview, loadPatientRowPreview } from './patient-preview.js';
 import { z } from 'zod';
 import { loadPatientMealPage,patientMealQuerySchema } from './patient-meals.js';
-import { addPatientTag, listPatientTags, patientTagBodySchema, removePatientTag } from './patient-tags.js';
+import { addPatientTag, listPatientTags, listTagGroups, patientTagBodySchema, removePatientTag } from './patient-tags.js';
 
 export function registerCrmRoutes(app: Hono) {
   app.get('/api/crm/patients/:id/meals',async c=>{
@@ -42,6 +42,13 @@ export function registerCrmRoutes(app: Hono) {
     if (!id || id.length > 100 || Object.keys(c.req.query()).length) throw new CareError(400, 'Revisá la paciente solicitada.');
     return { id, scope: await resolveWorkScope('userId' in auth ? auth.userId : null, persistent) };
   };
+  app.get('/api/crm/tag-groups', async c => {
+    const auth = c.get('auth');
+    const persistent = 'userId' in auth && isSupabaseEnabled();
+    if (!persistent && c.req.query('audience') === 'patient') throw new CareError(403, 'Solo profesionales del consultorio.');
+    if (Object.keys(c.req.query()).length) throw new CareError(400, 'Revisá lo solicitado.');
+    return c.json({ groups: await listTagGroups(await resolveWorkScope('userId' in auth ? auth.userId : null, persistent)) });
+  });
   app.get('/api/crm/patients/:id/tags', async c => { const { id, scope } = await tagScope(c); return c.json({ tags: await listPatientTags(scope, id) }); });
   app.post('/api/crm/patients/:id/tags', async c => {
     const { id, scope } = await tagScope(c);

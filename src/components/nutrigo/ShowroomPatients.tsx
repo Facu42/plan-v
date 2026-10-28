@@ -17,7 +17,10 @@ import type { BillingBoard } from '../../types/fees';
 import { DEFAULT_WATER_GOAL, WATER_GOAL_OPTIONS } from '../../types/water';
 import { PanelPacientes, usePreviews } from './PanelPacientes';
 import { PanelV29Icon } from './PanelV29Icon';
-import { FILTROS, ETIQUETA_SIN_VINCULAR, ORDENES, SIGUIENTE_ORDEN, contarFiltros, encabezadoPacientes, filtrarPacientes, type FiltroPacientes } from './pacientes-presentacion';
+import { PanelGrupos, gruposConCantidad, pacientesDelGrupo } from './PanelGrupos';
+import { avisoEnElPanel } from './panel-v29-boceto';
+import { crmWorkApi, type TagGroup } from '../../api/crm-work';
+import { FILTROS, ETIQUETA_SIN_VINCULAR, esActiva, ORDENES, SIGUIENTE_ORDEN, contarFiltros, encabezadoPacientes, filtrarPacientes, type FiltroPacientes } from './pacientes-presentacion';
 import { homeDay } from '../../lib/panel-home';
 import { sortDirectoryPatients, type DirectoryOrder } from './directory-sort';
 
@@ -268,6 +271,9 @@ export function ShowroomPatients({ patients, query, initialFilter = 'all', initi
   const [share, setShare] = useState<{ name: string; invite: PatientInvite } | null>(null);
   const [billing, setBilling] = useState<BillingBoard | null>(null);
   const [billingError, setBillingError] = useState('');
+  const [grupos, setGrupos] = useState<TagGroup[]>([]);
+  const [grupo, setGrupo] = useState<string | null>(null);
+  const [gruposAbierto, setGruposAbierto] = useState(false);
   const now = new Date();
   const today = homeDay(now);
   const { previews, error: previewError, reintentar } = usePreviews(patients);
@@ -276,8 +282,22 @@ export function ShowroomPatients({ patients, query, initialFilter = 'all', initi
     api.getBillingBoard().then(({ board }) => { if (active) setBilling(board); }).catch(() => { if (active) setBillingError('No pudimos consultar las deudas. Abrí Cobranzas para reintentar.'); });
     return () => { active = false; };
   }, []);
+  const cargarGrupos = () => crmWorkApi.tagGroups().then(r => setGrupos(r.groups)).catch(() => undefined);
+  useEffect(() => { void cargarGrupos(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const activas = patients.filter(esActiva);
+  const gruposVisibles = gruposConCantidad(grupos, new Set(activas.map(p => p.id)));
+  const crearGrupo = async (etiqueta: string, ids: readonly string[]) => {
+    try {
+      for (const id of ids) await crmWorkApi.addPatientTag(id, etiqueta);
+      await cargarGrupos();
+      setGrupo(etiqueta);
+      avisoEnElPanel(`Grupo «${etiqueta}» creado.`);
+      return true;
+    } catch { void cargarGrupos(); return false; }
+  };
+  const verGrupo = (nombre: string | null) => { setGrupo(nombre); avisoEnElPanel(nombre ? 'Lista filtrada por grupo.' : 'Mostrando a todas.'); };
   const counts = contarFiltros(patients, previews, today);
-  const visible = filtrarPacientes(patients, query, filter, previews, today, order, now);
+  const visible = pacientesDelGrupo(filtrarPacientes(patients, query, filter, previews, today, order, now), grupos, grupo);
 
   const setArchived = async (patient: Patient, archived: boolean) => {
     if (archived && archiveConfirmation !== patient.id) { setArchiveConfirmation(patient.id); return; }
@@ -327,10 +347,11 @@ export function ShowroomPatients({ patients, query, initialFilter = 'all', initi
   const heading = encabezadoPacientes(patients, now);
   const headingKey = `${heading.sufijo}|${heading.cuando}`;
   useEffect(() => {
-    onHeader?.({ sufijo: heading.sufijo, cuando: heading.cuando, actions: <>
+    onHeader?.({ sufijo: grupo ? `· grupo ${grupo}` : heading.sufijo, cuando: heading.cuando, actions: <>
+      <button className="chip" type="button" onClick={() => setGruposAbierto(true)}><PanelV29Icon name="users" />Grupos</button>
       <button className="chip" type="button" onClick={() => setImporting(true)}><PanelV29Icon name="up" />Importar</button>
       <button className="cta" type="button" onClick={() => setCreating(true)}><PanelV29Icon name="plus" />Nueva paciente</button></> });
-  }, [headingKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [headingKey, grupo]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => onHeader?.(null), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const open = (href: string) => (onOpenHref ?? ((to: string) => window.location.assign(to)))(href);
@@ -353,6 +374,7 @@ export function ShowroomPatients({ patients, query, initialFilter = 'all', initi
         {!visible.length && <p className="meta" role="status" style={{ padding: '24px 18px' }}>{patients.length ? 'Sin coincidencias. Probá otra búsqueda o solapa.' : 'Sin coincidencias. Todavía no hay pacientes: creá la primera con «Nueva paciente».'}</p>}
       </div>
     </div>
+    {gruposAbierto && <PanelGrupos pacientes={activas} grupos={gruposVisibles} actual={grupo} total={activas.length} onVer={verGrupo} onCrear={crearGrupo} onClose={() => setGruposAbierto(false)} />}
     {creating && <ShowroomPatientCreate onClose={() => setCreating(false)} onCreated={created} />}
     {importing && <PatientImportDialog onClose={()=>setImporting(false)} onImported={()=>{void useAppStore.getState().refreshDirectory().catch(error=>{if(!isAbortError(error))setError('La importación se guardó, pero no pudimos actualizar el directorio. Recargá para verlo.');});}}/>}
     {editing && <ShowroomPatientEdit patient={editing} onClose={() => setEditing(null)} onSaved={(updated) => { onChanged(updated); setEditing(null); }} />}
