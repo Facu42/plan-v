@@ -677,3 +677,29 @@
 #pv-panel-v29 #s-publica .pubts .pubt:has(tbody tr:last-child:nth-child(-n+3)) { flex: 0 0 auto; }
 /* Con una o dos obras sociales las filas no se reparten por toda la tarjeta. */
 #pv-panel-v29 #s-publica .pubhr.pubev:has(> div:last-child:nth-child(-n+3)) { justify-content: flex-start; }
+
+/* Archivos: el boceto no fija interlineado (queda «normal») y no deja aire arriba de la grilla. */
+#pv-panel-v29 #s-ficha .pn-record-files .fx, #pv-panel-v29 #s-ficha .pn-record-files .fx * { line-height: normal; }
+#pv-panel-v29 #s-ficha .pw-record:has(.pn-record-files > .fx) { padding-top: 0; }
+#pv-panel-v29 #s-ficha .pn-record-files .fxp .sbtn { gap: 6px; }
+#pv-panel-v29 #s-ficha .pn-record-files .fxp .sbtn svg { position: static; top: auto; }
+#pv-panel-v29 #s-ficha .pn-record-files .fxp .sbtn.k { min-height: 0; }
+#pv-panel-v29 #s-ficha .pn-record-files .fxfiles .ico { width: 34px; height: 34px; border-radius: 10px; flex: none; }
+/* Consultas y notas: el boceto no fija interlineado (queda «normal»); la hoja vieja del panel lo hereda en 1,4 y agranda cada fila. */
+#pv-panel-v29 #s-ficha .pn-record-consultas .fx, #pv-panel-v29 #s-ficha .pn-record-consultas .fx * { line-height: normal; }
+#pv-panel-v29 #s-ficha .pw-record:has(.pn-record-consultas > .fx) { padding-top: 0; }
+/* Botones de las tarjetas: el boceto los separa del ícono con 6 px y no los sube ni les fija alto mínimo. */
+#pv-panel-v29 #s-ficha .pn-record-consultas .fxp .sbtn { gap: 6px; }
+#pv-panel-v29 #s-ficha .pn-record-consultas .fxp .sbtn svg { position: static; top: auto; }
+#pv-panel-v29 #s-ficha .pn-record-consultas .fxp .sbtn.k { min-height: 0; }
+#pv-panel-v29 #s-ficha .pn-record-consultas .pg-v b { line-height: 1; }
+/* La hoja vieja del panel agranda `.ico` a 36 px; en «Para la paciente al terminar» el boceto lo deja en 28. */
+#pv-panel-v29 #s-ficha .pn-record-consultas .ntps .ico { width: 28px; height: 28px; border-radius: 9px; }
+#pv-panel-v29 #s-ficha .pn-record-consultas .fxsoap p { line-height: 1.55; }
+#pv-panel-v29 #s-ficha .pn-record-billing > .fx, #pv-panel-v29 #s-ficha .pn-record-billing > .fx * { line-height: normal; }
+#pv-panel-v29 #s-ficha .pw-record:has(.pn-record-billing > .fx) { padding-top: 0; }
+#pv-panel-v29 #s-ficha .pn-record-billing .fxp .sbtn { gap: 6px; }
+#pv-panel-v29 #s-ficha .pn-record-billing .fxp .sbtn svg { position: static; top: auto; }
+#pv-panel-v29 #s-ficha .pn-record-billing .fxp .sbtn.k { min-height: 0; }
+#pv-panel-v29 #s-ficha .pn-record-billing .fxtile .fxv b { line-height: 24px; }
+#pv-panel-v29 #s-ficha .pn-record-billing .pg-v b { line-height: 1; }
