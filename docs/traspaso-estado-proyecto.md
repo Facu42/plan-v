@@ -2,6 +2,7 @@
 
 28/10 · Claude · Auditoría del panel contra el boceto v29 (código contra código): el CSS viejo del boceto pisaba a las pantallas ya pasadas (colores, sombras, botones, gráficos de peso) y faltaba el interlineado «normal». Arreglado con un PR solo de CSS: `scripts/panel-boceto-css.mjs` ahora deja el CSS viejo solo para las pantallas que no están en la lista `PASADAS_A_V29`. **Cada pantalla nueva que se pase a v29 (Equipo, Ajustes, Ayuda…) se suma a esa lista** y se regenera con `node scripts/panel-boceto-css.mjs`. Informe: https://claude.ai/artifact/LLkGNjAbAExkLRV6F4QrVN
 28/10 · Claude · REGLA FIJA de Facundo para el panel de la nutri: cada pantalla se arma copiando el HTML y los estilos del boceto v29, nunca mirando capturas; si una función no existe, se desarrolla con el mismo diseño, estructura y estilos. Plan de la Ficha en el [PR #207](https://github.com/Facu42/plan-v/pull/207) (comparado contra el boceto elemento por elemento) y Registro alimentario en el #206; ambos esperan su ok visual.
+28/10 · Claude · Panel de la nutri, Ficha: Registro alimentario (#206) y Plan (#207) ya están en main con el ok visual de Facundo. Consultas y notas (rama `claude/ficha-v29-consultas`) está armada con el HTML del boceto y conectada a turnos y notas reales; espera su ok visual. Detalle y valores por defecto en `docs/panel-nutri-rediseno/ficha-v29.md` (Parte 3d). Sigue Archivos, Cobros y el cajón del chat.
 
 27/10 · Cursor · El panel copia el movimiento del boceto v29 (pastilla del menú, entrada de cada módulo, panel lateral y avisos). No se redibujó nada y no se publicó. [Nota](panel-nutri-rediseno/motion-v29.md). [PR #193](https://github.com/Facu42/plan-v/pull/193) en borrador, sin juntar.
 
@@ -417,3 +418,5 @@ Facundo aprobó los bocetos del panel nuevo (paleta de la app de la paciente, te
 ## Rediseño del panel de la nutri · 19/10/2026
 
 Fase 1 del [plan aprobado](panel-nutri-rediseno/plan.md) entregada por Codex en [PR #150](https://github.com/Facu42/plan-v/pull/150), rama `codex/panel-nutri-fase-1`: paleta/tema, menú y armazón. [Verificación y límites](panel-nutri-rediseno/fase-1-verificacion.md). Sigue fase 2 (Inicio); los cuerpos de pantallas se desarrollan por sus fases. Sin integración a main ni cambios de producción.
+- Ficha Archivos (v29): armada con el código del boceto, PR en borrador (ver ficha-v29.md parte 3e).
+- Ficha Cobros (v29): armada con el código del boceto, PR en borrador (ver ficha-v29.md parte 3f).
