@@ -15,7 +15,6 @@ import { alternar, conversacionesDe, enviadosDe, guardarMarcas, horaDeLista, lee
 import { sugerenciaDe } from './PanelFichaChat';
 import { PanelV29Icon } from './PanelV29Icon';
 import { avisoEnElPanel } from './panel-v29-boceto';
-import { fondoAvatar } from './seguimiento-presentacion';
 import type { ShowroomPatient } from './showroom-model';
 
 const ACTIVE_REFRESH_MS = 15000;
@@ -35,9 +34,15 @@ type Props = {
   onPlan: () => void;
 };
 
-const Avatar = ({ paciente, tamano }: { paciente: ShowroomPatient; tamano: number }) => (
-  <span className="av" style={{ background: fondoAvatar(undefined), width: tamano, height: tamano, fontSize: tamano > 40 ? 14 : tamano > 30 ? 11.5 : 10.5 }}>{paciente.initials}</span>
-);
+/** `mAv` del boceto: cada persona tiene su color (`var(--c-t)` y `var(--c-ink)`); acá sale del id para que no cambie entre pantallas. */
+const TONOS_BOCETO = ['azul', 'lima', 'azaf'] as const;
+const tonoDe = (id: string) => TONOS_BOCETO[[...id].reduce((suma, letra) => suma + letra.charCodeAt(0), 0) % TONOS_BOCETO.length];
+const Avatar = ({ paciente, tamano }: { paciente: ShowroomPatient; tamano: number }) => {
+  const c = tonoDe(paciente.id);
+  return (
+  <span className="av" style={{ background: `var(--${c}-t)`, color: `var(--${c}-ink)`, width: tamano, height: tamano, fontSize: tamano > 40 ? 14 : tamano > 30 ? 11.5 : 10.5 }}>{paciente.initials}</span>
+  );
+};
 
 export function PanelMensajes({ vista, pacientes, seleccionada, sinLeerRemoto, sinLeerInicial = false, pedidoNuevo, onSelect, onFicha, onAgenda, onPlan }: Props) {
   const [filtro, setFiltro] = useState<FiltroBandeja>(sinLeerInicial ? 'un' : 'all');
@@ -185,7 +190,7 @@ function Conversacion({ paciente, destacada, onDestacar, onArchivar, onFicha }: 
     <div className="msug" id="msug">
       <span>{sugerida ? <><b>Respuesta sugerida</b> «{sugerida}»</> : 'Sin respuesta sugerida por ahora.'}</span>
       {sugerida
-        ? <button type="button" className="sbtn k" disabled={ocupada} onClick={() => setTexto(sugerida)}>Usar</button>
+        ? <><button type="button" className="sbtn" disabled={ocupada || pidiendo} onClick={() => void pedirSugerencia()}>{pidiendo ? 'Preparando…' : 'Otra'}</button><button type="button" className="sbtn k" disabled={ocupada} onClick={() => setTexto(sugerida)}>Usar</button></>
         : <button type="button" className="sbtn k" disabled={pidiendo} onClick={() => void pedirSugerencia()}>{pidiendo ? 'Preparando…' : 'Pedir una'}</button>}
     </div>
     {error ? <p role="alert" className="mnote">{error}</p> : null}
