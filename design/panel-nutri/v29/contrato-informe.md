@@ -3,7 +3,7 @@
 Fuente: `design/panel-nutri/v29/panel-trabajo.html`.
 App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Planes (http://127.0.0.1:5173).
 
-**4 piezas no coinciden.**
+**2 piezas no coinciden.**
 
 ## Tema oscuro · armazón
 
@@ -84,7 +84,7 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Turno hecho | ✅ igual | |
 | Turno próximo | ✅ igual | |
 | Nombre del turno | ✅ igual | |
-| Línea de ahora | ❌ falta | la app no la tiene (`#s-agenda .nowl`) |
+| Línea de ahora | ✅ igual | |
 | Mes chico: día de hoy | ✅ igual | |
 | Mes chico: semana | ✅ igual | |
 | Referencias de color | ✅ igual | |
@@ -214,6 +214,45 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Barra de proteínas | ✅ igual | |
 | Columnas por comida | ✅ igual | |
 | Lista de compras | ✅ igual | |
+
+## Tema oscuro · Ficha · Archivos
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Título de panel | ✅ igual | |
+| Solapas de tipo | ✅ igual | |
+| Botón Exportar PDF | ✅ igual | |
+| Fila de archivo | ✅ igual | |
+| Ícono del archivo | ✅ igual | |
+| Nombre del archivo | ✅ igual | |
+| Detalle del archivo | ✅ igual | |
+| Fecha del archivo | ✅ igual | |
+| Tamaño o tipo | ✅ igual | |
+| Botón Ver | ✅ igual | |
+| Barra por tipo | ✅ igual | |
+| Leyenda | ✅ igual | |
+| Zona de subida | ✅ igual | |
+| Título de la zona | ✅ igual | |
+| Botón Elegir archivos | ✅ igual | |
+| Aviso | ✅ igual | |
+
+## Tema oscuro · Ficha · Cobros
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Mosaico de cobros | ✅ igual | |
+| Cifra del mosaico | ✅ igual | |
+| Título de panel | ✅ igual | |
+| Columnas de pagos | ✅ igual | |
+| Botón Registrar cobro | ✅ igual | |
+| Fila de movimiento | ✅ igual | |
+| Monto del movimiento | ✅ igual | |
+| Tarjeta oscura | ✅ igual | |
+| Medidor de cuotas | ✅ igual | |
+| Cifra del medidor | ✅ igual | |
+| Datos de cuotas | ✅ igual | |
+| Barra de medios | ✅ igual | |
+| Aviso de acceso | ✅ igual | |
 
 ## Tema oscuro · Ficha · Consultas y notas
 
@@ -430,7 +469,7 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Turno hecho | ✅ igual | |
 | Turno próximo | ✅ igual | |
 | Nombre del turno | ✅ igual | |
-| Línea de ahora | ❌ falta | la app no la tiene (`#s-agenda .nowl`) |
+| Línea de ahora | ✅ igual | |
 | Mes chico: día de hoy | ✅ igual | |
 | Mes chico: semana | ✅ igual | |
 | Referencias de color | ✅ igual | |
@@ -560,6 +599,45 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Barra de proteínas | ✅ igual | |
 | Columnas por comida | ✅ igual | |
 | Lista de compras | ✅ igual | |
+
+## Tema claro · Ficha · Archivos
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Título de panel | ✅ igual | |
+| Solapas de tipo | ✅ igual | |
+| Botón Exportar PDF | ✅ igual | |
+| Fila de archivo | ✅ igual | |
+| Ícono del archivo | ✅ igual | |
+| Nombre del archivo | ✅ igual | |
+| Detalle del archivo | ✅ igual | |
+| Fecha del archivo | ✅ igual | |
+| Tamaño o tipo | ✅ igual | |
+| Botón Ver | ✅ igual | |
+| Barra por tipo | ✅ igual | |
+| Leyenda | ✅ igual | |
+| Zona de subida | ✅ igual | |
+| Título de la zona | ✅ igual | |
+| Botón Elegir archivos | ✅ igual | |
+| Aviso | ✅ igual | |
+
+## Tema claro · Ficha · Cobros
+
+| Pieza | Estado | Detalle |
+|---|---|---|
+| Mosaico de cobros | ✅ igual | |
+| Cifra del mosaico | ✅ igual | |
+| Título de panel | ✅ igual | |
+| Columnas de pagos | ✅ igual | |
+| Botón Registrar cobro | ✅ igual | |
+| Fila de movimiento | ✅ igual | |
+| Monto del movimiento | ✅ igual | |
+| Tarjeta oscura | ✅ igual | |
+| Medidor de cuotas | ✅ igual | |
+| Cifra del medidor | ✅ igual | |
+| Datos de cuotas | ✅ igual | |
+| Barra de medios | ✅ igual | |
+| Aviso de acceso | ✅ igual | |
 
 ## Tema claro · Ficha · Consultas y notas
 

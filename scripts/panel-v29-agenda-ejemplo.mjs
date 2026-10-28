@@ -30,7 +30,13 @@ export function snapshotAgendaEjemplo() {
       timezone: ZONA, calendars: [{ id: CALENDARIO, name: 'Consultorio' }], types: tipos,
       weekly: [1, 2, 3, 4, 5, 6].map(weekday => ({ calendar_id: CALENDARIO, weekday, start: '08:00', end: '19:00' })),
       blocks: [], page: { slug: 'demo-consultorio', enabled: true, title: 'Consultorio', bio: '', location: '', contact: '', logo_url: '' },
-      google_calendar_id: 'primary', google_enabled: false, create_meet: false, transfer_alias: '' } },
+      google_calendar_id: 'primary', google_enabled: false, create_meet: false, transfer_alias: '',
+      page_extras: {
+        license: 'MN 4521', area: 'Belgrano, CABA', specialties: ['Celiaquía', 'Descenso de peso'],
+        insurers: [{ name: 'OSDE', mode: 'reintegro', note: '' }, { name: 'Swiss Medical', mode: 'copago', note: '$8.000' }, { name: 'Particular', mode: 'completo', note: '' }],
+        discounts: { transfer: 10, cash: 10, card: 0 },
+        service_notes: { [tipos[0].id]: { instructions: 'Cargá en la app lo que comiste esta semana.', who: 'patients', insurer: true } },
+      } } },
     connections: { google: false, mercadopago: false }, available: { google: false, mercadopago: false },
     bookings: [
       reserva(1, 0, '08:30', seguimiento, 'confirmed', 'Ana López'),
