@@ -141,6 +141,23 @@ export const PIEZAS_ALIMENTARIO = [
   ['Lo que ve la IA', '#s-ficha .fxai', '', ['borderTopLeftRadius', 'paddingTop']],
 ];
 
+// Piezas de la solapa Cobros (la demo trae el tablero de cobros).
+export const PIEZAS_COBROS = [
+  ['Mosaico de cobros', '#s-ficha .fxtiles .fxtile', '', ['height', 'paddingTop']],
+  ['Cifra del mosaico', '#s-ficha .fxtile .fxv b', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
+  ['Título de panel', '#s-ficha .fxp > header h3', '', ['fontSize', 'fontWeight', 'height']],
+  ['Columnas de pagos', '#s-ficha .fxcols', '', ['height']],
+  ['Botón Registrar cobro', '#s-ficha .fxp > header .sbtn', '', ['height', 'fontSize']],
+  ['Fila de movimiento', '#s-ficha .fxtl li', '', ['height', 'paddingTop']],
+  ['Monto del movimiento', '#s-ficha .fxtl time b', '', ['fontSize', 'fontWeight']],
+  ['Tarjeta oscura', '#s-ficha .fxdk', '', ['height', 'borderTopLeftRadius']],
+  ['Medidor de cuotas', '#s-ficha .fxsplit .pg', '', ['width', 'height']],
+  ['Cifra del medidor', '#s-ficha .fxsplit .pg-v b', '', ['fontSize', 'lineHeight', 'height']],
+  ['Datos de cuotas', '#s-ficha .fxsplit .fxkv > div', '', ['height']],
+  ['Barra de medios', '#s-ficha .fxstk', '', ['height']],
+  ['Aviso de acceso', '#s-ficha .fxp.g .pill', '', ['height', 'fontSize']],
+];
+
 // Piezas de la solapa Archivos. La demo trae los informes simulados por `simularLaboratorio`; el resto de los tipos no existe en la demo.
 export const PIEZAS_ARCHIVOS = [
   ['Título de panel', '#s-ficha .fxp > header h3', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
@@ -703,6 +720,12 @@ export async function correrContratoV29() {
       await b.waitForTimeout(1200);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Archivos\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_ARCHIVOS, informe);
+      await b.locator('#ftabs [data-ft="cobros"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Cobros/ }).click();
+      await a.waitForSelector('#s-ficha .fxtile', { timeout: 20000 });
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Cobros\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_COBROS, informe);
       await simularConsultas(a);
       await b.locator('#ftabs [data-ft="consultas"]').click();
       await a.locator('#ftabs button').filter({ hasText: /^Consultas y notas/ }).click();

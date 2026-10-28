@@ -416,3 +416,4 @@ Facundo aprobó los bocetos del panel nuevo (paleta de la app de la paciente, te
 
 Fase 1 del [plan aprobado](panel-nutri-rediseno/plan.md) entregada por Codex en [PR #150](https://github.com/Facu42/plan-v/pull/150), rama `codex/panel-nutri-fase-1`: paleta/tema, menú y armazón. [Verificación y límites](panel-nutri-rediseno/fase-1-verificacion.md). Sigue fase 2 (Inicio); los cuerpos de pantallas se desarrollan por sus fases. Sin integración a main ni cambios de producción.
 - Ficha Archivos (v29): armada con el código del boceto, PR en borrador (ver ficha-v29.md parte 3e).
+- Ficha Cobros (v29): armada con el código del boceto, PR en borrador (ver ficha-v29.md parte 3f).
