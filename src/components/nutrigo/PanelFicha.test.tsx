@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { Patient } from '../../types';
 import { FichaSolapas, PanelFichaCabecera } from './PanelFichaCabecera';
+import { PanelFichaPlan } from './PanelFichaPlan';
 import { FichaEtiquetas } from './FichaEtiquetas';
 import { PanelFichaResumen } from './PanelFichaResumen';
 import { PanelFichaMediciones } from './PanelFichaMediciones';
@@ -116,5 +117,12 @@ describe('Ficha v29', () => {
     for (const texto of ['7 días', '14 días', 'Desayuno', 'Almuerzo', 'Merienda', 'Cena']) expect(html).toContain(texto);
     expect(html).not.toContain('vincule la app');
     expect(renderToStaticMarkup(<PanelFichaPedirRegistro patient={{ ...paciente, has_account: false }} onClose={vi.fn()} onSent={vi.fn()} />)).toContain('vincule la app');
+  });
+
+  it('el Plan dibuja los bloques del boceto con sus botones y avisa mientras consulta', () => {
+    const html = renderToStaticMarkup(<PanelFichaPlan patient={paciente} now={ahora} onChanged={vi.fn()} onSection={vi.fn()} />);
+    for (const texto of ['Plan vigente', 'Requerimiento', 'Calorías por comida', 'Lista de compras', 'Hoy', 'Semana', 'Vista de Sofía', 'Abrir en el editor', 'Editar', 'Enviar a Sofía', 'Consultando el plan vigente…']) expect(html).toContain(texto);
+    expect(html).not.toContain('WhatsApp');
+    expect(html).toContain('data-mk="1"');
   });
 });

@@ -1,4 +1,6 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-27)
+# Traspaso del proyecto (actualización vigente: 2026-10-28)
+
+28/10 · Claude · REGLA FIJA de Facundo para el panel de la nutri: cada pantalla se arma copiando el HTML y los estilos del boceto v29, nunca mirando capturas; si una función no existe, se desarrolla con el mismo diseño, estructura y estilos. Plan de la Ficha en el [PR #207](https://github.com/Facu42/plan-v/pull/207) (comparado contra el boceto elemento por elemento) y Registro alimentario en el #206; ambos esperan su ok visual.
 
 27/10 · Cursor · El panel copia el movimiento del boceto v29 (pastilla del menú, entrada de cada módulo, panel lateral y avisos). No se redibujó nada y no se publicó. [Nota](panel-nutri-rediseno/motion-v29.md). [PR #193](https://github.com/Facu42/plan-v/pull/193) en borrador, sin juntar.
 

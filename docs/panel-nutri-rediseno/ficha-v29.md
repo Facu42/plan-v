@@ -170,6 +170,34 @@ Rama `claude/etiquetas-paciente`. Facundo pidió que los botones del boceto sin 
 - **Base:** tabla nueva `patient_tags` (`supabase/migrations/20261027120000_patient_tags.sql`), aditiva, con RLS por consultorio. **Aplicada en la base el 27/10** (con su frase; verificada: tabla y 3 políticas). Antes esperaba la frase escrita de Facundo. Hasta entonces, en producción el botón no aparece.
 - **Pendiente ligado:** mostrar y filtrar por etiqueta en Pacientes.
 - **Paso 10:** flujos (agregar, quitar, repetida, tope, otra paciente) cubiertos por `patient-tags.integration.test.ts` y `PanelFicha.test.tsx`; migración: aditiva, sin DROP, manifiesto de release actualizado; fire test N/A (sin umbral numérico nuevo salvo el tope de 8, cubierto por prueba).
+
+## Parte 3c · Plan
+
+Rama `claude/ficha-v29-plan`. Solapa armada con el HTML de `plan:` del boceto (el efectivo, con la capa de Nutreando): a la izquierda «Plan vigente» con Hoy / Semana / Vista de la paciente, el pedido de cambio y las comidas; a la derecha Requerimiento, Calorías por comida y Lista de compras. Los datos son los del plan publicado (`plansApi.published`), la meta calculada (`nutritionTargetApi`), los pedidos de la paciente (`careApi.snapshot`) y la lista (`shoppingApi`). Capturas y medidas: `design/panel-nutri/v29/contrato-informe.md` (sección «Ficha · Plan», 12 piezas iguales en claro y oscuro).
+
+Cada botón tiene una función real:
+- **Abrir en el editor:** abre el editor del plan de siempre (`MealPlanEditor`), con «Volver al plan actual».
+- **Hoy / Semana / Vista de la paciente:** Hoy muestra las comidas de la fecha (hoy si el plan la cubre); Semana lista los días con sus calorías y «Ver el día» salta a Hoy en esa fecha; Vista de la paciente muestra el plan tal como lo ve ella (con selector de fecha).
+- **Aprobar:** marca revisado el pedido de cambio más viejo (`careApi.review`) y abre el editor para aplicarlo.
+- **Proponer otra:** arma una alternativa con IA (`careApi.generate`) solo si la paciente dio el permiso `ai_menu_draft`; si no, lo dice y abre «Pedidos de cambio y alternativas» para resolverlo a mano.
+- **Editar (Requerimiento):** va a Objetivos y hábitos, donde se calcula la meta.
+- **Enviar a la paciente (lista de compras):** manda por el chat de la app (nunca WhatsApp) las líneas sin tildar; si la paciente no vinculó la app, queda en el chat y el aviso lo dice.
+- **Ver las N líneas:** abre la lista de compras completa.
+
+Valores por defecto elegidos (lo que el boceto dibuja y Plan V no tiene):
+- **«Puede cambiar por…»:** el plan no guarda alternativas por comida (las alternativas están en el PR #145, que espera la base). Se muestra en su lugar la indicación pública de cada comida, si la tiene.
+- **Calorías de cada comida:** se suman de los alimentos o recetas del ítem; si el ítem no trae nutrientes dice «Sin calorías» (no se inventa). El total del día suma solo lo conocido.
+- **Gasto y diferencia:** salen de la meta calculada; sin meta calculada dicen «Sin dato». Sin ningún requerimiento publicado, el bloque dice dónde se calcula.
+- **Lista de compras por tienda:** el boceto la agrupa por verdulería, carnicería y almacén; la lista real no guarda el rubro, así que se dibujan las primeras seis líneas con su cantidad.
+- **Sub-solapas viejas (Plan actual / Plan semanal / Lista de compras):** no se dibujan sobre la solapa Plan (el boceto no las tiene); Semana y Lista de compras quedan dentro de la pantalla.
+
+### Paso 10 · Plan
+- **Flujos:** ver el plan del día y de la semana, cambiar de fecha, vista de la paciente, aprobar un pedido, proponer alternativa, abrir el editor, enviar la lista por el chat (✅ probados a mano en la demo con Playwright: 7 días en Semana, mensaje de la lista y PATCH de revisión; ✅ 4 pruebas de cálculo y 1 de pantalla).
+- **Regresiones cubiertas:** sin plan publicado dice qué hay (borrador, programado o nada) y ofrece el editor; sin calorías no hay totales inventados; lista vacía no envía nada; el editor y los pedidos de cambio de antes siguen accesibles.
+- **Contratos:** ninguna ruta ni tabla nueva; solo se leen APIs existentes y se usan `review`, `generate` y `sendMessage` como ya las usa el resto del panel (con `crypto.randomUUID()` como identificador del mensaje).
+- **Áreas frágiles:** el pedido de cambio mostrado es el más viejo sin revisar; con varios, se resuelven de a uno. `Proponer otra` depende del permiso de IA de la paciente.
+- **Migraciones:** ninguna. **Veredicto:** HOLD hasta el ok visual de Facundo; técnicamente SHIP.
+
 ## Parte 3b · Registro alimentario
 
 Rama `claude/ficha-v29-plan-registro`. Copia `alimentario:` del boceto (con el panel de Nutreando) con las comidas reales que carga la paciente. Archivos: `PanelPatientFoodDiary.tsx` (misma carga, filtros, «Cargar más» y revisión de antes), `ficha-alimentario.ts` (promedios y calorías por día).

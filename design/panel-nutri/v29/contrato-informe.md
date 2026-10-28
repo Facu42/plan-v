@@ -177,23 +177,25 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Columnas de la semana | ✅ igual | |
 | Síntomas y energía | ✅ igual | |
 
-## Tema oscuro · Ficha · Registro alimentario
+## Tema oscuro · Ficha · Plan
 
 | Pieza | Estado | Detalle |
 |---|---|---|
-| Contra el plan | ✅ igual | |
-| Botón Confirmar | ✅ igual | |
-| Barra de proteínas | ✅ igual | |
-| Título del panel | ✅ igual | |
-| Botón del encabezado | ✅ igual | |
-| Botón Descargar | ✅ igual | |
-| Fila de comida | ✅ igual | |
-| Comida y hora | ✅ igual | |
-| Foto de la comida | ✅ igual | |
-| Qué comió | ✅ igual | |
-| Barras de macros | ✅ igual | |
 | Título de panel | ✅ igual | |
-| Lo que ve la IA | ✅ igual | |
+| Fila de comida | ✅ igual | |
+| Botón del encabezado | ✅ igual | |
+| Pedido de cambio | ✅ igual | |
+| Botón Aprobar | ✅ igual | |
+| Hora de la comida | ✅ igual | |
+| Foto de la comida | ✅ igual | |
+| Momento | ✅ igual | |
+| Nombre de la comida | ✅ igual | |
+| Calorías de la comida | ✅ igual | |
+| Medidor del requerimiento | ✅ igual | |
+| Barras de macros | ✅ igual | |
+| Barra de proteínas | ✅ igual | |
+| Columnas por comida | ✅ igual | |
+| Lista de compras | ✅ igual | |
 
 ## Tema oscuro · Seguimiento
 
@@ -472,23 +474,25 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Columnas de la semana | ✅ igual | |
 | Síntomas y energía | ✅ igual | |
 
-## Tema claro · Ficha · Registro alimentario
+## Tema claro · Ficha · Plan
 
 | Pieza | Estado | Detalle |
 |---|---|---|
-| Contra el plan | ✅ igual | |
-| Botón Confirmar | ✅ igual | |
-| Barra de proteínas | ✅ igual | |
-| Título del panel | ✅ igual | |
-| Botón del encabezado | ✅ igual | |
-| Botón Descargar | ✅ igual | |
-| Fila de comida | ✅ igual | |
-| Comida y hora | ✅ igual | |
-| Foto de la comida | ✅ igual | |
-| Qué comió | ✅ igual | |
-| Barras de macros | ✅ igual | |
 | Título de panel | ✅ igual | |
-| Lo que ve la IA | ✅ igual | |
+| Fila de comida | ✅ igual | |
+| Botón del encabezado | ✅ igual | |
+| Pedido de cambio | ✅ igual | |
+| Botón Aprobar | ✅ igual | |
+| Hora de la comida | ✅ igual | |
+| Foto de la comida | ✅ igual | |
+| Momento | ✅ igual | |
+| Nombre de la comida | ✅ igual | |
+| Calorías de la comida | ✅ igual | |
+| Medidor del requerimiento | ✅ igual | |
+| Barras de macros | ✅ igual | |
+| Barra de proteínas | ✅ igual | |
+| Columnas por comida | ✅ igual | |
+| Lista de compras | ✅ igual | |
 
 ## Tema claro · Seguimiento
 
