@@ -137,6 +137,11 @@
       "version": "20261028140000",
       "file": "20261028140000_scheduling_reminders_flag.sql",
       "sha256": "c59b85da4705defb5e1742948e4aa7d7723418b0d9fb482effb56f82ddf8673a"
+    },
+    {
+      "version": "20261028150000",
+      "file": "20261028150000_ai_lab_reading_consent.sql",
+      "sha256": "56b7bb1bc744b2e6c4b7436c8f5d7b43fbc962f0f0e190d9fb3905534a103c1c"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

@@ -1,6 +1,7 @@
 // «Analizar» del Laboratorio (v29): lectura calculada con los valores ya revisados. No usa IA ni manda nada afuera:
 // compara con el análisis anterior y nombra lo que sale del rango del informe, sin interpretar causas ni indicar tratamientos.
 import { estadoDe, fechaCorta, fechasDeLaboratorio, type EstadoLab } from './ficha-laboratorio';
+import type { LabReadingRequest } from '../../api/clinical-workspace';
 import { recordLaboratoryText, type RecordLabSeries } from './panel-record-data';
 
 export type FilaLectura = { nombre: string; unidad: string; valor: string; cambio: string; estado: EstadoLab | null };
@@ -37,4 +38,18 @@ export function armarLectura(series: readonly RecordLabSeries[]): Lectura {
   if (previa && cambios.length) partes.push(`Desde el ${fechaCorta(previa)}: ${lista(cambios.map(f => `${f.nombre} ${f.cambio}`))}.`);
   partes.push('Es una lectura automática de los valores del informe: no interpreta causas ni indica tratamientos. El criterio clínico es tuyo.');
   return { ultima, previa, filas, texto: partes.join(' ') };
+}
+
+/** Lo único que sale hacia la IA: estudio, valor, unidad, rango del informe y fecha. Sin nombre ni contacto. */
+export function pedidoParaIA(series: readonly RecordLabSeries[]): LabReadingRequest | null {
+  const fechas = fechasDeLaboratorio(series, 2);
+  const ultima = fechas[fechas.length - 1], previa = fechas.length > 1 ? fechas[0]! : null;
+  if (!ultima) return null;
+  const rows = series.flatMap(serie => {
+    const actual = serie.values.find(v => v.date === ultima)?.value;
+    if (!actual) return [];
+    const antes = previa ? serie.values.find(v => v.date === previa)?.value : undefined;
+    return [{ name: serie.name, value: recordLaboratoryText(actual), unit: serie.unit, ...(actual.range_text ? { range: actual.range_text } : {}), ...(antes ? { previous: recordLaboratoryText(antes) } : {}) }];
+  });
+  return rows.length ? { date: ultima, previous_date: previa, rows: rows.slice(0, 60) } : null;
 }
