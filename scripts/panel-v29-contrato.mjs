@@ -15,7 +15,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
-function playwright() {
+export function playwright() {
   try { return require('playwright'); } catch { try { return require('playwright-core'); } catch { return require(`${process.env.PLAYWRIGHT_GLOBAL ?? '/opt/node22/lib/node_modules'}/playwright`); } }
 }
 
@@ -141,6 +141,23 @@ export const PIEZAS_ALIMENTARIO = [
   ['Lo que ve la IA', '#s-ficha .fxai', '', ['borderTopLeftRadius', 'paddingTop']],
 ];
 
+// Piezas de la solapa Cobros (la demo trae el tablero de cobros).
+export const PIEZAS_COBROS = [
+  ['Mosaico de cobros', '#s-ficha .fxtiles .fxtile', '', ['height', 'paddingTop']],
+  ['Cifra del mosaico', '#s-ficha .fxtile .fxv b', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
+  ['Título de panel', '#s-ficha .fxp > header h3', '', ['fontSize', 'fontWeight', 'height']],
+  ['Columnas de pagos', '#s-ficha .fxcols', '', ['height']],
+  ['Botón Registrar cobro', '#s-ficha .fxp > header .sbtn', '', ['height', 'fontSize']],
+  ['Fila de movimiento', '#s-ficha .fxtl li', '', ['height', 'paddingTop']],
+  ['Monto del movimiento', '#s-ficha .fxtl time b', '', ['fontSize', 'fontWeight']],
+  ['Tarjeta oscura', '#s-ficha .fxdk', '', ['height', 'borderTopLeftRadius']],
+  ['Medidor de cuotas', '#s-ficha .fxsplit .pg', '', ['width', 'height']],
+  ['Cifra del medidor', '#s-ficha .fxsplit .pg-v b', '', ['fontSize', 'lineHeight', 'height']],
+  ['Datos de cuotas', '#s-ficha .fxsplit .fxkv > div', '', ['height']],
+  ['Barra de medios', '#s-ficha .fxstk', '', ['height']],
+  ['Aviso de acceso', '#s-ficha .fxp.g .pill', '', ['height', 'fontSize']],
+];
+
 // Piezas de la solapa Archivos. La demo trae los informes simulados por `simularLaboratorio`; el resto de los tipos no existe en la demo.
 export const PIEZAS_ARCHIVOS = [
   ['Título de panel', '#s-ficha .fxp > header h3', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
@@ -159,6 +176,8 @@ export const PIEZAS_ARCHIVOS = [
   ['Título de la zona', '#s-ficha .fxdrop > b', '', ['fontSize', 'fontWeight']],
   ['Botón Elegir archivos', '#s-ficha .fxdrop .sbtn.k', '', ['height', 'width', 'fontSize']],
   ['Aviso', '#s-ficha .fxai', '', ['paddingTop', 'borderTopLeftRadius', 'fontSize']],
+];
+
 // Piezas de la solapa Consultas y notas. La demo no trae turnos registrados ni notas: la app se mira con ejemplos simulados (`simularConsultas`).
 export const PIEZAS_CONSULTAS = [
   ['Tarjeta de consulta', '#s-ficha .fxdk', '', ['height', 'paddingTop', 'borderTopLeftRadius']],
@@ -379,7 +398,7 @@ async function medir(pagina, selector, pseudo, props) {
   }, [pseudo, props]);
 }
 
-async function abrirBoceto(browser, tema) {
+export async function abrirBoceto(browser, tema) {
   const pagina = await (await browser.newContext({ viewport: { width: 1500, height: 1000 }, colorScheme: tema })).newPage();
   await pagina.goto(boceto); await pagina.waitForTimeout(800);
   await pagina.locator(tema === 'dark' ? '#t-dark' : '#t-light').first().click().catch(() => {});
@@ -399,13 +418,13 @@ async function abrirBoceto(browser, tema) {
 }
 
 const numero = valor => (/^-?[\d.]+px$/.test(valor) ? parseFloat(valor) : null);
-function igual(a, b) {
+export function igual(a, b) {
   if (a === b) return true;
   const x = numero(a); const y = numero(b);
   return x !== null && y !== null && Math.abs(x - y) <= TOLERANCIA_PX;
 }
 
-async function abrirApp(browser, tema) {
+export async function abrirApp(browser, tema) {
   const pagina = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: tema })).newPage();
   await pagina.addInitScript(guardado => localStorage.setItem('plan-v:panel-theme-v2:demo', guardado), tema);
   // La línea de ahora de la Agenda solo se dibuja en horario de atención; el boceto la tiene siempre (10:10). Se fija la hora para que el contrato no dependa del reloj.
@@ -703,6 +722,12 @@ export async function correrContratoV29() {
       await b.waitForTimeout(1200);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Archivos\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_ARCHIVOS, informe);
+      await b.locator('#ftabs [data-ft="cobros"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Cobros/ }).click();
+      await a.waitForSelector('#s-ficha .fxtile', { timeout: 20000 });
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Cobros\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_COBROS, informe);
       await simularConsultas(a);
       await b.locator('#ftabs [data-ft="consultas"]').click();
       await a.locator('#ftabs button').filter({ hasText: /^Consultas y notas/ }).click();

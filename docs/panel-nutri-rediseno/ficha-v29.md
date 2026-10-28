@@ -279,3 +279,24 @@ Valores por defecto elegidos (lo que el boceto dibuja y Plan V no tiene):
 - **Contratos:** ninguna ruta ni tabla nueva; se usan `list`, `completions`, `command` (start, draft, publish) y `completeAppointment` como ya lo hace el resto del panel. El código de Codex (grabación y resumen con IA, #131) no se tocó: solo se lee lo que guarda.
 - **Áreas frágiles:** «Terminar y firmar» solo anda si el turno ya empezó (regla del servidor); el aviso lo dice si no. Publicar usa la revisión vigente de la nota: si cambió desde otra pestaña, pide actualizar.
 - **Migraciones:** ninguna. **Veredicto:** HOLD hasta el ok visual de Facundo; técnicamente SHIP.
+
+## Parte 3f · Cobros
+
+Armado con el código del boceto (`#ftabs [data-ft="cobros"]`, mismas clases y orden): tres mosaicos, «Pagos por mes», «Movimientos», tarjeta oscura de próximo vencimiento, «Cuotas al día», «Medios de pago» y «Acceso a la app». Todo sale del tablero de cobros real; la gestión completa (programa, cuotas, pagos, confirmar avisos) sigue debajo, en «Gestionar programa, cuotas y pagos».
+
+Defaults elegidos:
+- «Si se vence» muestra «Los cobros no bloquean el acceso» (es lo que hace la app) en lugar del texto de recordatorio del boceto.
+- No se promete un recordatorio automático 3 días antes: la tarjeta oscura dice que los cobros no bloquean el acceso.
+- La etiqueta del acceso dice «Sin bloqueo» (la app no bloquea por cobros).
+- Un aviso de pago de la paciente aparece en «Movimientos» con «Revisar aviso».
+- Sin pagos: el mismo bloque muestra cero o «Sin pagos confirmados todavía».
+
+Revisión contra el código del boceto (regla del 28/10): árbol del boceto vs. app comparado elemento por elemento; solo difieren anchos de texto y cantidad de filas, que dependen de los datos. Se corrigió el interlineado de las cifras (24 px) y del medidor (1).
+
+### Informe Regression Guard (paso 10)
+- Flujos: registrar cobro, revisar aviso, cambiar programa y gestionar cuotas (siguen en el panel de abajo).
+- Regresiones: ninguna esperada; no cambia API ni cálculo de deuda (`summarizeLedger`).
+- Contratos: sin rutas ni tablas nuevas.
+- Áreas frágiles: plata; los totales salen de los mismos pagos confirmados que antes.
+- Migraciones: ninguna. Automatizaciones: ninguna. Fire test: no aplica.
+- Tests: 816 pasan (incluye `ficha-cobros.test.ts`).
