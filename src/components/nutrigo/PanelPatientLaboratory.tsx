@@ -13,7 +13,7 @@ import { PanelV29Icon } from './PanelV29Icon';
 import { FxCurva, FxFilas, FxPanel } from './ficha-fx';
 import { COLUMNAS_LAB, analisisDeFecha, analisisPorFecha, estadoDe, fechaCorta, fechasDeLaboratorio, graficoDeValor, historialDeValor, metaDeAnalisis, pedidosDeEstudios, valoresPorFecha, type GraficoLab } from './ficha-laboratorio';
 import { LabLectura } from './LabLectura';
-import { armarLectura } from './lab-lectura';
+import { armarLectura, pedidoParaIA } from './lab-lectura';
 import { valoresAlterados, type SolapaFicha } from './ficha-presentacion';
 
 function ManualLaboratoryValue({patientId,snapshot,today,onSaved,onUpload}:{patientId:string;snapshot:ClinicalWorkspaceSnapshot;today:string;onSaved:()=>void;onUpload:()=>void}){
@@ -37,6 +37,12 @@ function GraficoValor({grafico}:{grafico:GraficoLab}){
     {grafico.puntos.map(punto=><g key={punto.x}><circle className={`lbpt${punto.fuera?' out':''}`} cx={punto.x.toFixed(1)} cy={punto.y.toFixed(1)} r={4}/><text className="lbpv" x={punto.x.toFixed(1)} y={(punto.y-9).toFixed(1)} textAnchor="middle">{punto.texto}</text></g>)}
     {grafico.anios.map(anio=><text key={anio.texto} className="lbx" x={anio.x.toFixed(1)} y={alto-6} textAnchor="middle">{anio.texto}</text>)}
   </svg>;
+}
+
+async function pedirLecturaIA(patientId:string,series:Parameters<typeof pedidoParaIA>[0]):Promise<string>{
+  const pedido=pedidoParaIA(series);if(!pedido)throw new Error('No hay valores para leer.');
+  try{return (await clinicalWorkspaceApi.labReading(patientId,pedido,crypto.randomUUID())).text;}
+  catch(caught){throw new Error(careErrorMessage(caught));}
 }
 
 export function PanelPatientLaboratory({patientId,now,ir}:{patientId:string;now:Date;ir:(solapa:SolapaFicha)=>void}){
@@ -101,7 +107,7 @@ export function PanelPatientLaboratory({patientId,now,ir}:{patientId:string;now:
         </FxPanel>
       </div>
     </div>
-    {lecturaAbierta&&<LabLectura lectura={armarLectura(groups)} onClose={()=>setLecturaAbierta(false)}/>}
+    {lecturaAbierta&&<LabLectura lectura={armarLectura(groups)} onClose={()=>setLecturaAbierta(false)} pedirIA={care?.consented.includes('ai_lab_reading')&&pedidoParaIA(groups)?()=>pedirLecturaIA(patientId,groups):undefined}/>}
     {document.error&&<p role="alert">{document.error}</p>}{document.file&&<RecordDocumentViewer file={document.file} onClose={document.close}/>}
     <details className="pn-record-card" onToggle={event=>setFiles(event.currentTarget.open)}><summary>Estudios adjuntos y revisión de archivos</summary>{files&&<CarePanel patientId={patientId} mode="laboratory"/>}</details>
   </section>;

@@ -1,0 +1,4 @@
+-- Aditiva. Permiso opcional para que la IA lea los valores de laboratorio: sólo agrega una fila al catálogo.
+-- Rollback operativo: apagar Groq (GROQ_API_KEY); la fila puede quedar, no cambia nada sin consentimientos.
+insert into public.consent_catalog(purpose,text_version,text_hash,body,required) values
+('ai_lab_reading','ai_lab_reading.v1','e85c417666783c8f41e0a83f26a4f1d309cb71f9a1c75bb8807c320f86e0a65a','Autorizo a Plan V a enviar a Groq los valores de mis análisis de laboratorio (estudio, valor, unidad, rango del informe y fecha) para preparar un borrador de lectura para mi nutricionista. No se envían mi nombre ni mis datos de contacto. Puede contener datos de salud. El proveedor se configura sin retención de datos. La IA no diagnostica ni indica tratamientos y mi nutricionista revisa el borrador antes de usarlo. Este permiso es opcional y puedo retirarlo; la lectura automática sin IA sigue disponible.',false);
