@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { MealLog } from '../../types';
-import { caloriasPorDia, planillaDeComidas, promedioDeMacros } from './ficha-alimentario';
+import { caloriasPorDia, contraElPlan, cuandoComio, planillaDeComidas, promedioDeMacros } from './ficha-alimentario';
 
 const comida = (id: string, slot: string, logged_at: string, kcal: number | null): MealLog => ({
   id, patient_id: 'p1', slot, photo_url: null, description: slot, foods: [], confidence: 1, note_for_nutri: '', status: 'confirmed', logged_at,
@@ -30,5 +30,23 @@ describe('Registro alimentario de la Ficha', () => {
     expect(lineas[0]).toBe('"Fecha";"Hora";"Comida";"Qué comió";"Calorías";"Proteínas (g)";"Carbohidratos (g)";"Grasas (g)";"Estado"');
     expect(lineas[1]).toBe('"27/10/2026";"08:00";"Desayuno";"Desayuno";"400";"20";"40";"10";"Revisada"');
     expect(lineas[2]).toContain('"\'=HYPERLINK(""http://x"")"');
+  });
+
+  it('dice cuándo se comió como el boceto: Hoy, Ayer o el día corto, en hora de Argentina', () => {
+    const ahora = new Date('2026-10-27T15:00:00Z');
+    expect(cuandoComio('2026-10-27T11:10:00Z', ahora)).toBe('Hoy 8:10');
+    expect(cuandoComio('2026-10-27T00:10:00Z', ahora)).toBe('Ayer 21:10');
+    expect(cuandoComio('2026-10-25T16:00:00Z', ahora)).toBe('Dom 13:00');
+  });
+
+  it('compara con el plan sin inventar: sin plan o sin estimación no hay veredicto', () => {
+    const comida = (kcal: number, protein_g: number) => ({ macros: { kcal, protein_g, carbs_g: 0, fat_g: 0 } });
+    const plan = { kcal: 500, protein: 30 };
+    expect(contraElPlan(comida(520, 28), plan)?.texto).toBe('Coincide');
+    expect(contraElPlan(comida(700, 40), plan)?.texto).toBe('Se pasó');
+    expect(contraElPlan(comida(480, 10), plan)?.texto).toBe('Faltó proteína');
+    expect(contraElPlan(comida(300, 40), plan)?.texto).toBe('Quedó corto');
+    expect(contraElPlan(comida(500, 30), null)).toBeNull();
+    expect(contraElPlan({ macros: null }, plan)).toBeNull();
   });
 });

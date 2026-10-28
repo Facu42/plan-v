@@ -185,3 +185,9 @@ Rama `claude/ficha-v29-plan-registro`. Copia `alimentario:` del boceto (con el p
 
 ### Ajuste del 28/10 · Registro alimentario igual al código del boceto
 Se comparó el árbol del boceto contra el de la app elemento por elemento (regla fija del código). Cambios: el interlineado queda «normal» como en el boceto; el encabezado tiene un solo grupo de solapas (Todo / Por revisar) más Descargar y Pedir registro, con la separación de 6 px entre ícono y texto; el período (últimos 7 días, último mes, todo) se cambia tocando la leyenda; «Calorías por día» muestra la meta y «Promedio de la semana» compara con la meta calculada cuando existe; el bloque «Hábitos, actividad y vista anterior» pasó debajo de las columnas; la tabla se desplaza dentro de su tarjeta. Queda como valor por defecto «Registro de la semana» en lugar de «Registro pedido» (no se guarda el pedido) y la columna Estado en lugar de «Contra el plan».
+
+### Segundo ajuste del 28/10 · Registro alimentario
+- La barra de proteínas es negra y la de grasas azafrán, como en el boceto (la clase va en la barra, no en el relleno).
+- «Contra el plan» ya no es un valor por defecto: compara lo que la paciente comió con lo que el plan publicado indica para esa comida y ese día (`nutrientesDelPlan`). Más de 20 % arriba en calorías: «Se pasó»; proteína menos del 80 % de la indicada: «Faltó proteína»; más de 20 % abajo: «Quedó corto»; si no, «Coincide». Sin plan para ese día o sin estimación de la comida, dice «—». «Con lactosa» del boceto no se dibuja: la comida no guarda alérgenos.
+- Acción de la fila: «Confirmar» (abre la revisión) si está por revisar; si no, el estado en texto gris, tocable para ver la revisión. El horario se dice «Hoy 8:10», «Ayer 21:10», «Dom 13:00».
+- Sigue siendo un valor por defecto «Registro de la semana» en lugar de «Registro pedido», y «Lo que ve la IA» sin observaciones: no hay dónde guardar el pedido ni quien las genere.

@@ -49,3 +49,27 @@ export function planillaDeComidas(logs: readonly MealLog[]) {
   ]);
   return `\uFEFF${[ENCABEZADO_PLANILLA, ...filas].map(fila => fila.map(celda).join(';')).join('\r\n')}\r\n`;
 }
+
+const FECHA_AR = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+const DIA_CORTO = new Intl.DateTimeFormat('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short' });
+const HORA_24 = new Intl.DateTimeFormat('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour: 'numeric', minute: '2-digit', hour12: false });
+
+export function fechaArgentina(iso: string): string { return FECHA_AR.format(new Date(iso)); }
+
+/** «Hoy 8:10», «Ayer 21:10» o «Dom 13:00», como lo dibuja el boceto. */
+export function cuandoComio(iso: string, ahora: Date): string {
+  const fecha = fechaArgentina(iso), hoy = fechaArgentina(ahora.toISOString()), ayer = fechaArgentina(new Date(ahora.getTime() - 86400000).toISOString());
+  const dia = fecha === hoy ? 'Hoy' : fecha === ayer ? 'Ayer' : DIA_CORTO.format(new Date(iso)).replace('.', '').replace(/^./, letra => letra.toUpperCase());
+  return `${dia} ${HORA_24.format(new Date(iso)).replace(/^0/, '')}`;
+}
+
+export type ContraElPlan = { texto: 'Coincide' | 'Se pasó' | 'Faltó proteína' | 'Quedó corto'; clase: 'p-conf' | 'p-wait' };
+
+/** Compara lo que la paciente comió con lo que el plan indica para esa comida. Sin plan para ese día o sin estimación, no hay veredicto. */
+export function contraElPlan(comida: Pick<MealLog, 'macros'>, plan: { kcal: number; protein: number | null } | null): ContraElPlan | null {
+  if (!comida.macros || !plan || !(plan.kcal > 0)) return null;
+  if (comida.macros.kcal > plan.kcal * 1.2) return { texto: 'Se pasó', clase: 'p-wait' };
+  if (plan.protein && comida.macros.protein_g < plan.protein * 0.8) return { texto: 'Faltó proteína', clase: 'p-wait' };
+  if (comida.macros.kcal < plan.kcal * 0.8) return { texto: 'Quedó corto', clase: 'p-wait' };
+  return { texto: 'Coincide', clase: 'p-conf' };
+}

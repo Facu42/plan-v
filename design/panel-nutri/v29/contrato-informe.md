@@ -181,6 +181,9 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 
 | Pieza | Estado | Detalle |
 |---|---|---|
+| Contra el plan | ✅ igual | |
+| Botón Confirmar | ✅ igual | |
+| Barra de proteínas | ✅ igual | |
 | Título del panel | ✅ igual | |
 | Botón del encabezado | ✅ igual | |
 | Botón Descargar | ✅ igual | |
@@ -473,6 +476,9 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 
 | Pieza | Estado | Detalle |
 |---|---|---|
+| Contra el plan | ✅ igual | |
+| Botón Confirmar | ✅ igual | |
+| Barra de proteínas | ✅ igual | |
 | Título del panel | ✅ igual | |
 | Botón del encabezado | ✅ igual | |
 | Botón Descargar | ✅ igual | |

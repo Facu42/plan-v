@@ -617,3 +617,4 @@
 #pv-panel-v29:not(.mob) #s-ficha .pn-record-diary .c > .fxp, #pv-panel-v29:not(.mob) #s-ficha .pn-record-diary .c > .fxai { flex-shrink: 0; }
 #pv-panel-v29:not(.mob) #s-ficha .pn-record-diary { display: flex; flex-direction: column; }
 #pv-panel-v29:not(.mob) #s-ficha .pn-record-diary > .fx { flex: 1 0 auto; min-height: 0; }
+#pv-panel-v29 #s-ficha .pw-record:has(.pn-record-diary > .fx) { padding-top: 0; }
