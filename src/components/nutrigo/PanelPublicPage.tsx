@@ -11,7 +11,10 @@ import { PlanForm } from './PanelDebit';
 import { PanelConnections, type ConnectionKey } from './PanelConnections';
 import { useUnsavedChanges } from './unsaved-changes';
 import { usePanelScheduling } from './use-panel-scheduling';
-import { PanelPublicaV29, PESTANAS_PUBLICA, type VistaPublica } from './PanelPublicaV29';
+import { PanelPublicaV29, Celular, PESTANAS_PUBLICA, type CajonPublica, type VistaPublica } from './PanelPublicaV29';
+import { CajonV29 } from './CajonV29';
+import { CajonDescuentos, CajonHorarios, CajonLugar, CajonObras, CajonPerfil, CajonPide, CajonReglas, CajonServicio, conExtras } from './PanelPublicaCajones';
+import { conHorarioDelDia, qrComoSvg, type AvisoReserva } from './publica-extras';
 import { PanelV29Icon } from './PanelV29Icon';
 import './panel-fase5.css';
 
@@ -81,8 +84,9 @@ export function PanelPublicPageView({ config, published, pageUrl, connections, s
 }
 
 const PERFIL_VACIO = 'Mi consultorio';
+const HORARIO_NUEVO = { start: '09:00', end: '13:00' };
 
-export function PanelPublicPage({ onHeader }: { onHeader?: (actions: ReactNode) => void }) {
+export function PanelPublicPage({ onHeader, onAgenda }: { onHeader?: (actions: ReactNode) => void; onAgenda?: () => void }) {
   const scheduling = usePanelScheduling();
   const [draft, setDraft] = useState<SchedulingSettings | null>(null);
   const [plans, setPlans] = useState<SubscriptionPlan[] | null>(null);
@@ -90,7 +94,7 @@ export function PanelPublicPage({ onHeader }: { onHeader?: (actions: ReactNode) 
   const [planNotice, setPlanNotice] = useState('');
   const [vista, setVista] = useState<VistaPublica>(0);
   const [servicio, setServicio] = useState(0);
-  const [dialogo, setDialogo] = useState<'perfil' | string | null>(null);
+  const [cajon, setCajon] = useState<{ cual: CajonPublica; id: string | null } | null>(null);
   const loadPlans = () => {
     subscriptionsApi.plans().then(result => setPlans(result.plans.filter(plan => plan.status === 'active'))).catch(error => {
       if (error instanceof ApiError && error.status === 404) setPlans(null);
@@ -110,11 +114,15 @@ export function PanelPublicPage({ onHeader }: { onHeader?: (actions: ReactNode) 
     void scheduling.save({ ...config, page: { ...config.page, enabled: true, title: config.page.title.trim() || PERFIL_VACIO } }, 'Página publicada.').then(ok => { if (ok) setDraft(null); });
   };
   const copy = () => { if (pageUrl) void navigator.clipboard.writeText(pageUrl).then(() => scheduling.setStatus('Link copiado.')).catch(() => scheduling.setStatus('No se pudo copiar. Seleccioná el link y copialo a mano.')); };
-  const addService = () => {
-    const id = crypto.randomUUID();
-    setDraft({ ...config, types: [...config.types, { id, name: 'Consulta', calendar_id: config.calendars[0].id, duration_min: 60, channel: 'presencial', price_minor: 0, deposit_minor: 0 }] });
-    setVista(1); setServicio(config.types.length); setDialogo(id);
+  const downloadQr = () => {
+    if (!pageUrl) return;
+    const url = URL.createObjectURL(new Blob([qrComoSvg(pageUrl)], { type: 'image/svg+xml' }));
+    const enlace = document.createElement('a');
+    enlace.href = url; enlace.download = `qr-${config.page.slug}.svg`; enlace.click();
+    URL.revokeObjectURL(url);
+    scheduling.setStatus('QR descargado.');
   };
+  const addService = () => { setVista(1); setCajon({ cual: 'servicio', id: null }); };
   const acciones = useRef({ copy, publish, addService });
   acciones.current = { copy, publish, addService }; // los botones del encabezado usan siempre lo último que hay en pantalla
   const sinServicios = config.types.length >= 30;
@@ -127,37 +135,44 @@ export function PanelPublicPage({ onHeader }: { onHeader?: (actions: ReactNode) 
     </>);
   }, [onHeader, vista, pageUrl, sinServicios, scheduling.busy, loaded]);
   const current = editor && editor !== 'nuevo' ? editor : null;
-  const tipoEditado = dialogo && dialogo !== 'perfil' ? config.types.find(tipo => tipo.id === dialogo) : undefined;
-  const cambiarTipo = (patch: Partial<SchedulingSettings['types'][number]>) => setDraft({ ...config, types: config.types.map(tipo => tipo.id === dialogo ? { ...tipo, ...patch } : tipo) });
+  const cerrar = () => setCajon(null);
+  const comun = { config, onAplicar: setDraft, onClose: cerrar };
+  const quitarServicio = (id: string) => {
+    const { [id]: _quitada, ...notas } = config.page_extras?.service_notes ?? {};
+    setDraft(config.page_extras?.service_notes ? conExtras({ ...config, types: config.types.filter(tipo => tipo.id !== id) }, { service_notes: notas }) : { ...config, types: config.types.filter(tipo => tipo.id !== id) });
+    setServicio(0);
+  };
+  const duplicarServicio = (id: string) => {
+    const tipo = config.types.find(item => item.id === id);
+    if (!tipo || config.types.length >= 30) return;
+    const copia = { ...tipo, id: crypto.randomUUID(), name: `${tipo.name} (copia)`.slice(0, 80) };
+    const nota = config.page_extras?.service_notes?.[id];
+    const base = { ...config, types: [...config.types, copia] };
+    setDraft(nota ? conExtras(base, { service_notes: { ...config.page_extras?.service_notes, [copia.id]: nota } }) : base);
+    setServicio(config.types.length);
+  };
+  const setAviso = (clave: AvisoReserva, activo: boolean) => setDraft(conExtras(config, { notices: { ...config.page_extras?.notices, [clave]: activo } }));
+  const setDia = (dia: number, activo: boolean) => setDraft({ ...config, weekly: conHorarioDelDia(config.weekly, dia, activo ? [HORARIO_NUEVO] : [], config.calendars[0].id) });
   return <>
     <PanelPublicaV29 config={config} reservas={scheduling.snapshot?.bookings ?? []} publicada={published} sinPublicar={Boolean(draft)} link={pageUrl} planes={plans} mercadoPago={mercadoPago}
       vista={vista} servicio={servicio} cargando={!loaded && !scheduling.error} error={scheduling.error} estado={planNotice || scheduling.status}
-      onServicio={setServicio} onEditarPerfil={() => setDialogo('perfil')} onEditarServicio={setDialogo}
-      onQuitarServicio={id => { setDraft({ ...config, types: config.types.filter(tipo => tipo.id !== id) }); setServicio(0); }}
-      onCopiar={copy} onRecordatorios={() => { const next = { ...config, reminders_enabled: config.reminders_enabled === false }; setDraft(next); void scheduling.save(next, next.reminders_enabled ? 'Recordatorio de 24 h prendido.' : 'Recordatorio de 24 h apagado.').then(ok => { if (ok) setDraft(null); }); }}
-      onReservar={() => setVista(2)} onReintentar={() => void scheduling.load()}
+      onServicio={setServicio} onCajon={(cual, id) => setCajon({ cual, id: id ?? null })} onQuitarServicio={quitarServicio} onDuplicarServicio={duplicarServicio}
+      onCopiar={copy} onDescargarQr={downloadQr} onAviso={setAviso} onDia={setDia}
+      onRecordatorios={() => { const next = { ...config, reminders_enabled: config.reminders_enabled === false }; setDraft(next); void scheduling.save(next, next.reminders_enabled ? 'Recordatorio de 24 h prendido.' : 'Recordatorio de 24 h apagado.').then(ok => { if (ok) setDraft(null); }); }}
+      onReservar={onAgenda ?? (() => setVista(2))} onReintentar={() => void scheduling.load()}
       onConfirmar={id => { const reserva = scheduling.snapshot?.bookings.find(item => item.id === id); if (reserva) void scheduling.confirm(reserva, reserva.patient_id ?? ''); }}
       onNuevoPlan={plans ? () => { setPlanNotice(''); setEditor('nuevo'); } : undefined}
       onPlan={plans ? (plan, visible) => { subscriptionsApi.updatePlan(plan.id, { expected_revision: plan.revision, public_visible: visible }).then(loadPlans).catch(error => setPlanNotice(friendlyError(error))); } : undefined}
       conexiones={<PanelConnections connected={{ google: Boolean(scheduling.snapshot?.connections.google), mercadopago: mercadoPago }} onConnect={key => void scheduling.connect(key)} onDisconnect={key => void scheduling.disconnect(key)} />} />
-    {dialogo === 'perfil' && <div className="p5-dialog" role="dialog" aria-modal="true" aria-label="Editar perfil"><form className="p5-card" onSubmit={event => { event.preventDefault(); setDialogo(null); }}>
-      <h3>Perfil</h3>
-      <label>Nombre<input value={config.page.title} maxLength={100} required onChange={event => setDraft({ ...config, page: { ...config.page, title: event.target.value } })} /></label>
-      <label>Presentación<textarea maxLength={1200} value={config.page.bio} onChange={event => setDraft({ ...config, page: { ...config.page, bio: event.target.value } })} /></label>
-      <label>Dirección del link<span className="p5-slug">planv.app/<input aria-label="Dirección del link" value={config.page.slug} pattern="[a-z0-9][a-z0-9-]{2,59}" onChange={event => setDraft({ ...config, page: { ...config.page, slug: event.target.value } })} /></span></label>
-      <label>Dónde atendés<input value={config.page.location} maxLength={200} onChange={event => setDraft({ ...config, page: { ...config.page, location: event.target.value } })} /></label>
-      <label>Contacto público<input value={config.page.contact} maxLength={150} onChange={event => setDraft({ ...config, page: { ...config.page, contact: event.target.value } })} /></label>
-      <label>Imagen pública<input type="url" placeholder="https://" value={config.page.logo_url} onChange={event => setDraft({ ...config, page: { ...config.page, logo_url: event.target.value } })} /></label>
-      <div className="p5-row"><button className="p5-btn p5-pri">Listo</button></div>
-    </form></div>}
-    {tipoEditado && <div className="p5-dialog" role="dialog" aria-modal="true" aria-label="Editar servicio"><form className="p5-card" onSubmit={event => { event.preventDefault(); setDialogo(null); }}>
-      <h3>Servicio</h3>
-      <label>Nombre<input value={tipoEditado.name} maxLength={80} required onChange={event => cambiarTipo({ name: event.target.value })} /></label>
-      <label>Duración (minutos)<input type="number" min={10} max={180} value={tipoEditado.duration_min} onChange={event => cambiarTipo({ duration_min: Math.min(180, Math.max(10, Number(event.target.value) || 10)) })} /></label>
-      <label>Dónde<select value={tipoEditado.channel} onChange={event => cambiarTipo({ channel: event.target.value === 'video' ? 'video' : 'presencial' })}><option value="presencial">Consultorio</option><option value="video">Videollamada</option></select></label>
-      <label>Precio en pesos<input type="number" min={0} value={Math.round(tipoEditado.price_minor / 100)} onChange={event => cambiarTipo({ price_minor: Math.max(0, Number(event.target.value) || 0) * 100 })} /></label>
-      <div className="p5-row"><button className="p5-btn p5-pri">Listo</button></div>
-    </form></div>}
+    {cajon?.cual === 'perfil' && <CajonPerfil {...comun} />}
+    {cajon?.cual === 'lugar' && <CajonLugar {...comun} />}
+    {cajon?.cual === 'obras' && <CajonObras {...comun} />}
+    {cajon?.cual === 'desc' && <CajonDescuentos {...comun} />}
+    {cajon?.cual === 'servicio' && <CajonServicio {...comun} tipoId={cajon.id} onAplicar={next => { setDraft(next); if (!cajon.id) setServicio(next.types.length - 1); }} />}
+    {cajon?.cual === 'pide' && <CajonPide {...comun} />}
+    {cajon?.cual === 'horarios' && <CajonHorarios {...comun} />}
+    {cajon?.cual === 'reglas' && <CajonReglas onClose={cerrar} />}
+    {cajon?.cual === 'abrir' && <CajonV29 titulo="Tu página pública" sub={pageUrl.replace(/^https?:\/\//, '') || 'Sin publicar'} ok={false} onClose={cerrar}><div className="pubbig"><Celular config={config} publicados={config.types} /></div></CajonV29>}
     {editor && <div className="p5-dialog" role="dialog" aria-modal="true" aria-label={current ? 'Editar plan' : 'Nuevo plan'}>
       <PlanForm plan={current} canPublish={mercadoPago} onCancel={() => setEditor(null)} onSubmit={draft => {
         const problem = planDraftError(draft);

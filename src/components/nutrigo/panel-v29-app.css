@@ -672,3 +672,8 @@
 #pv-panel-v29 #s-publica .tabs { min-width: 0; max-width: 100%; }
 #pv-panel-v29 #s-publica .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
 #pv-panel-v29 #s-publica .sw:disabled { cursor: default; }
+
+/* Con pocos servicios la tabla no se estira hasta el pie de la tarjeta. */
+#pv-panel-v29 #s-publica .pubts .pubt:has(tbody tr:last-child:nth-child(-n+3)) { flex: 0 0 auto; }
+/* Con una o dos obras sociales las filas no se reparten por toda la tarjeta. */
+#pv-panel-v29 #s-publica .pubhr.pubev:has(> div:last-child:nth-child(-n+3)) { justify-content: flex-start; }
