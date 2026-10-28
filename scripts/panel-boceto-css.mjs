@@ -27,7 +27,7 @@ const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const html = await readFile(resolve(raiz, 'design/panel-nutri/bocetos.html'), 'utf8');
 // Las pantallas ya pasadas a v29 se estilan solo con panel-v29.css: sin esto, las variables y reglas de este archivo
 // (el boceto viejo) les ganan y cambian colores, sombras, botones y gráficos. Equipo, Ajustes, Ayuda y las demás siguen con este.
-const PASADAS_A_V29 = ['inicio', 'pacientes', 'agenda', 'ficha', 'seguimiento', 'progreso', 'asistente', 'alimentos', 'biblioteca', 'planes'];
+const PASADAS_A_V29 = ['inicio', 'pacientes', 'agenda', 'ficha', 'seguimiento', 'progreso', 'asistente', 'alimentos', 'biblioteca', 'planes', 'mensajes'];
 const SOLO_VIEJAS = `:where(:not(:has(${PASADAS_A_V29.map(p => `#s-${p}`).join(",")})))`; // :where no suma peso: las reglas viejas siguen ganando igual que antes en sus pantallas
 const ID = `#pv-panel${SOLO_VIEJAS}`;
 const INICIO_PANEL = '/* ============ Boceto';
