@@ -6,6 +6,7 @@ import { careApi } from '../../api/care';
 import { crmWorkApi } from '../../api/crm-work';
 import { homeDay, patientHref, patientMessageHref } from '../../lib/panel-home';
 import { PanelV29Icon } from './PanelV29Icon';
+import { clasePatologia, usePatologias, type Patologia } from './patologias';
 import { Cuenta } from './PanelHome';
 import { fondoAvatar, inicialesDe } from './seguimiento-presentacion';
 import { SALIDA_DETALLE_MS, movimientoReducido } from './panel-v29-motion';
@@ -94,7 +95,7 @@ const COLUMNAS_ESCRITORIO = 7;
 const COLUMNAS_CELULAR = 3;
 const columnasVisibles = () => (typeof document !== 'undefined' && document.querySelector('#pv-panel-v29.mob') ? COLUMNAS_CELULAR : COLUMNAS_ESCRITORIO);
 
-function Detalle({ paciente, ahora, previews, acciones, onOpen, saliendo }: { paciente: Patient; ahora: Date; previews: Previews; acciones: AccionesPaciente; onOpen: (href: string) => void; saliendo: boolean }) {
+function Detalle({ paciente, patologias, ahora, previews, acciones, onOpen, saliendo }: { paciente: Patient; patologias: readonly Patologia[]; ahora: Date; previews: Previews; acciones: AccionesPaciente; onOpen: (href: string) => void; saliendo: boolean }) {
   const datos = useDetalle(paciente, ahora);
   const preview = previews[paciente.id];
   const abrir = (href: string) => (evento: MouseEvent) => { evento.stopPropagation(); onOpen(href); };
@@ -114,7 +115,9 @@ function Detalle({ paciente, ahora, previews, acciones, onOpen, saliendo }: { pa
     <section className="pd-who">
       <div className="pd-goal"><small>Objetivo</small><b>{paciente.goal || 'Por definir'}</b></div>
       <div className="pd-goal"><small>Paciente desde</small><b>{pacienteDesde(paciente.created_at, ahora)}</b></div>
-      <div className="pd-pl"><div className="p0"><b>{TEXTO_SIN_PATOLOGIAS[0]}</b><small>{TEXTO_SIN_PATOLOGIAS[1]}</small></div></div>
+      <div className="pd-pl">{patologias.length
+        ? patologias.map(t => <div key={t.texto} className={clasePatologia(t.texto)}><b>{t.texto}</b><small>{t.desde ? `desde ${t.desde}` : 'en seguimiento'}</small></div>)
+        : <div className="p0"><b>{TEXTO_SIN_PATOLOGIAS[0]}</b><small>{TEXTO_SIN_PATOLOGIAS[1]}</small></div>}</div>
       {!archivada ? <div className="pd-acts">
         <button type="button" className="go" data-go="ficha" aria-label={`Abrir ficha de ${nombre}`} onClick={() => acciones.onRecord ? acciones.onRecord(paciente.id) : onOpen(patientHref(paciente))}><PanelV29Icon name="file" size={14} />Abrir ficha</button>
         <button type="button" aria-label={`Abrir plan de ${nombre}`} onClick={() => acciones.onPlan ? acciones.onPlan(paciente.id) : onOpen(patientHref(paciente, 'plan'))}><PanelV29Icon name="clip" size={14} />Plan</button>
@@ -165,6 +168,7 @@ export function PanelPacientes({ pacientes, ahora, board, billingError, previews
   const reloj = useRef<number | undefined>(undefined);
   const elegida = abierta === undefined ? propia : abierta;
   const hoy = homeDay(ahora);
+  const patologias = usePatologias(pacientes, hoy);
   useEffect(() => () => window.clearTimeout(reloj.current), []);
   useEffect(() => { if (elegida && !pacientes.some(p => p.id === elegida)) (onAbrir ?? setPropia)(null); }, [pacientes, elegida, onAbrir]);
   const alternar = (id: string) => {
@@ -180,13 +184,15 @@ export function PanelPacientes({ pacientes, ahora, board, billingError, previews
       onClick={() => alternar(p.id)} onKeyDown={evento => { if (evento.key === 'Enter' || evento.key === ' ') { evento.preventDefault(); alternar(p.id); } }}>
       <td><PanelV29Icon name="chev" className="i chev" size={14} /></td>
       <td><div className="who"><span className="av" style={{ background: fondoAvatar(p.tone) }}>{inicialesDe(p.name, p.initials)}</span><div><b>{p.name}</b><small>{p.goal || 'Objetivo por definir'}</small></div></div></td>
-      <td><div className="pats"><span className="pat p0">Sin declarar</span></div></td>
+      <td><div className="pats">{(patologias.get(p.id) ?? []).length
+        ? (patologias.get(p.id) ?? []).map(t => <span key={t.texto} className={`pat ${clasePatologia(t.texto)}`}>{t.texto}</span>)
+        : <span className="pat p0">Sin declarar</span>}</div></td>
       <td>{avance ? <div className="goal"><span className="tr"><i style={{ width: `${avance.pct}%` }} /></span><small className="num">{avance.texto}</small></div> : <span style={{ color: 'var(--ink3)' }}>Sin medir</span>}</td>
       <td>{conAdherencia ? <div className="adh"><span className="tr"><i className={p.adherence_score < 70 ? 'lo' : undefined} style={{ width: `${Math.max(0, Math.min(100, p.adherence_score))}%` }} /></span><span className="num">{Math.round(p.adherence_score)} %</span></div> : <span style={{ color: 'var(--ink3)' }}>—</span>}</td>
       <td><div className="nx"><b className="num">{proximaConsulta(p, ahora)}</b><small style={{ color: registro.viejo ? 'var(--azaf-ink)' : 'var(--ink3)' }}>último registro: {registro.texto}</small></div></td>
       <td><span className={`pill ${estado.pill}`}>{estado.texto}</span>{estado.cuota ? <small className="cuo">{estado.cuota}</small> : billingError ? <small className="cuo">Cuota sin consultar</small> : null}</td>
     </tr>;
-    return abierto || saliendo === p.id ? [fila, <Detalle key={`${p.id}-det`} paciente={p} ahora={ahora} previews={previews} acciones={acciones} onOpen={onOpen} saliendo={saliendo === p.id && !abierto} />] : [fila];
+    return abierto || saliendo === p.id ? [fila, <Detalle key={`${p.id}-det`} paciente={p} patologias={patologias.get(p.id) ?? []} ahora={ahora} previews={previews} acciones={acciones} onOpen={onOpen} saliendo={saliendo === p.id && !abierto} />] : [fila];
   });
   return <table>
     <thead><tr><th style={{ width: 44 }} /><th>Paciente</th><th>Patologías</th><th>Avance</th><th>Adherencia</th><th>Próxima consulta</th><th>Estado</th></tr></thead>
