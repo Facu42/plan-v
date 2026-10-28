@@ -99,7 +99,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
       {tab === 'plan' && <PanelFichaPlan key={patient.id} patient={patient} professionalName={professionalName} now={now} onSection={change} onChanged={()=>void refreshPatient(patient.id)}/>}
       {tab === 'semanal' && <ShowroomMealPlan patient={patient} patients={patients} query="" onSelect={onSelect} onChanged={addPatient} now={now} />}
       {tab === 'compras' && <ShowroomGrocery patient={p} readOnly />}
-      {tab === 'archivos' && <PanelPatientFiles key={patient.id} patientId={patient.id}/>}
+      {tab === 'archivos' && <PanelPatientFiles key={patient.id} patientId={patient.id} patientName={patient.name}/>}
       {tab === 'laboratorio' && <PanelPatientLaboratory key={patient.id} patientId={patient.id} now={now} ir={next=>change(seccionDe(next))}/>}
       {(tab === 'consultas' || tab === 'notas') && <PanelFichaConsultas key={patient.id} patient={patient} now={now} professionalName={professionalName} datos={datos} onSection={change} onOpenHref={onOpenHref} onChanged={()=>void refreshPatient(patient.id)}/>}
       {tab === 'chat' && <div className="pn-record-chat-scope"><NutrigoMessages embedded patient={p} patients={patients.map((person) => buildShowroomPatient(person, now))} role="pro" onSelect={onSelect} onNavigate={onNavigate} /></div>}

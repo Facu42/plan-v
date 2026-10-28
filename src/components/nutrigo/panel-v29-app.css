@@ -632,6 +632,13 @@
 #pv-panel-v29 #s-ficha .pn-record-plan .fxp .sbtn { gap: 6px; }
 #pv-panel-v29 #s-ficha .pn-record-plan .fxp .sbtn svg { position: static; top: auto; }
 
+/* Archivos: el boceto no fija interlineado (queda «normal») y no deja aire arriba de la grilla. */
+#pv-panel-v29 #s-ficha .pn-record-files .fx, #pv-panel-v29 #s-ficha .pn-record-files .fx * { line-height: normal; }
+#pv-panel-v29 #s-ficha .pw-record:has(.pn-record-files > .fx) { padding-top: 0; }
+#pv-panel-v29 #s-ficha .pn-record-files .fxp .sbtn { gap: 6px; }
+#pv-panel-v29 #s-ficha .pn-record-files .fxp .sbtn svg { position: static; top: auto; }
+#pv-panel-v29 #s-ficha .pn-record-files .fxp .sbtn.k { min-height: 0; }
+#pv-panel-v29 #s-ficha .pn-record-files .fxfiles .ico { width: 34px; height: 34px; border-radius: 10px; flex: none; }
 /* Consultas y notas: el boceto no fija interlineado (queda «normal»); la hoja vieja del panel lo hereda en 1,4 y agranda cada fila. */
 #pv-panel-v29 #s-ficha .pn-record-consultas .fx, #pv-panel-v29 #s-ficha .pn-record-consultas .fx * { line-height: normal; }
 #pv-panel-v29 #s-ficha .pw-record:has(.pn-record-consultas > .fx) { padding-top: 0; }
