@@ -1,7 +1,47 @@
 // Contenido fijo de las cinco vistas de Ajustes (`ajV0` a `ajV4` de design/panel-nutri/v29/panel-trabajo.html)
 // y los pequeños cálculos para enchufarles datos reales. Lo que la app todavía no guarda se muestra con cero o un texto corto.
 
+import type { ClinicBrand } from '../../types/nutrition-capabilities';
+import type { NoticeKey, NoticeView } from '../../types/ajustes';
+
 export const SIN_COMPLETAR = 'Sin completar';
+
+const o = (texto: string | null | undefined) => (texto ?? '').trim() || SIN_COMPLETAR;
+
+/** Lo que muestran «Datos del consultorio» y «Título y matrícula»: los campos propios y, si faltan, el contacto de siempre. */
+export function datosDeMarca(marca: Partial<ClinicBrand> | null | undefined) {
+  const contacto = separarContacto(marca?.contact);
+  return {
+    nombre: o(marca?.name), matricula: o(marca?.license), cuit: o(marca?.cuit), direccion: o(marca?.address),
+    telefono: marca?.phone?.trim() || contacto.telefono, mail: marca?.email?.trim() || contacto.mail,
+    titulo: o(marca?.degree), provincial: o(marca?.province_license), especialidad: o(marca?.specialty),
+    firma: marca?.signature || '', logo: marca?.logo || '',
+  };
+}
+
+export type CambiosMarca = Partial<Pick<ClinicBrand, 'name' | 'license' | 'cuit' | 'address' | 'phone' | 'email' | 'degree' | 'province_license' | 'specialty' | 'signature' | 'logo'>>;
+
+/** Marca nueva con los cambios aplicados; «contacto» (el texto único que usan los PDF) se mantiene al día con teléfono y mail. */
+export function fusionarMarca(actual: ClinicBrand | null | undefined, cambios: CambiosMarca): ClinicBrand {
+  const base: ClinicBrand = { name: '', contact: '', logo: '', ...(actual ?? {}) };
+  const marca: ClinicBrand = { ...base, ...cambios };
+  const limpia = Object.fromEntries(Object.entries(marca).map(([k, v]) => [k, typeof v === 'string' && k !== 'logo' && k !== 'signature' ? v.trim() : v])) as ClinicBrand;
+  if ('phone' in cambios || 'email' in cambios) limpia.contact = [limpia.phone, limpia.email].filter(Boolean).join(' · ').slice(0, 240);
+  return limpia;
+}
+
+/** Imagen de firma o logo elegida por la profesional: sólo PNG o JPG de hasta 500 KB. */
+export function validarImagen(archivo: { type: string; size: number }): string | null {
+  if (!/^image\/(png|jpeg)$/.test(archivo.type)) return 'Usá una imagen PNG o JPG.';
+  if (archivo.size > 500 * 1024) return 'La imagen pesa más de 500 KB. Probá con una más liviana.';
+  return null;
+}
+
+/** Aviso con su configuración guardada o, si nunca se tocó, apagado y con el texto sugerido. */
+export function avisoConfigurado(clave: NoticeKey, guardados: readonly NoticeView[], sugerido: { cuando: string; texto: string }) {
+  const guardado = guardados.find(a => a.key === clave);
+  return { enabled: guardado?.enabled ?? false, cuando: guardado?.when_text || sugerido.cuando, texto: guardado?.message || sugerido.texto, personalizado: Boolean(guardado) };
+}
 
 /** El campo «contacto» de la marca es un solo texto: si trae una arroba va a Mail, si no a Teléfono. */
 export function separarContacto(contacto: string | null | undefined): { mail: string; telefono: string } {

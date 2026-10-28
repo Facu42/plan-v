@@ -10,13 +10,19 @@ import { PanelV29Icon } from './PanelV29Icon';
 import { SettingsDialog } from './EquipoAjustesShared';
 import { usePanelScheduling } from './use-panel-scheduling';
 import { useAvisosProfesional, useDosPasos } from './AjustesAccount';
-import { AVISOS_AUTOMATICOS, CANALES_AVISO, GRUPOS_PLANTILLAS, INTEGRACIONES, REGLAS_DE_REGRESO, SIN_COMPLETAR, estadoDosPasos, separarContacto, textoDeEjemplo, type ClaveIntegracion } from './ficha-ajustes';
+import { AVISOS_AUTOMATICOS, CANALES_AVISO, GRUPOS_PLANTILLAS, INTEGRACIONES, REGLAS_DE_REGRESO, avisoConfigurado, datosDeMarca, estadoDosPasos, textoDeEjemplo, type ClaveIntegracion } from './ficha-ajustes';
+import { usePrefsPanel } from './ajustes-prefs';
+import { CajonAjustes } from './AjustesCajon';
+import type { ModoMarca } from './AjustesEditores';
+import { CERTIFICATE_VARIABLES, NOTICE_KEYS, certificateVariables, type NoticeKey, type NoticeView, type TemplateView } from '../../types/ajustes';
+import type { ClinicBrand } from '../../types/nutrition-capabilities';
 
 type Icono = Parameters<typeof PanelV29Icon>[0]['name'];
-export type Marca = { name: string; contact: string; logo?: string | null } | null;
+export type Marca = ClinicBrand | null;
 export type TemaAjustes = { dark: boolean; busy: boolean; status: string; choose: (next: 'light' | 'dark') => void };
 
 const SIN_DATO = 'Sin dato';
+const CLAVES_AVISOS = NOTICE_KEYS.slice(0, AVISOS_AUTOMATICOS.length), CLAVES_REGLAS = NOTICE_KEYS.slice(AVISOS_AUTOMATICOS.length);
 const PRONTO = 'Todavía no está disponible.';
 const Boton = ({ texto, icono, clase = '', onClick, disabled, titulo }: { texto: string; icono?: Icono; clase?: string; onClick?: () => void; disabled?: boolean; titulo?: string }) =>
   <button type="button" className={`sbtn${clase ? ` ${clase}` : ''} cbtn`} onClick={onClick} disabled={disabled} title={disabled && !titulo ? PRONTO : titulo}>{icono ? <PanelV29Icon name={icono} size={13} /> : null}{texto}</button>;
@@ -25,25 +31,25 @@ const Interruptor = ({ etiqueta, activo, alCambiar, disabled, titulo }: { etique
 const Vacio = ({ texto }: { texto: string }) => <span className="ntempty">{texto}</span>;
 const Pastilla = ({ texto, clase }: { texto: string; clase: string }) => <span className={`pill ${clase}`}>{texto}</span>;
 
-type CuentaProps = { marca: Marca; cargando: boolean; tema?: TemaAjustes; onEditar: () => void; onExportar: () => void; onOpen: (href: string) => void };
+type CuentaProps = { marca: Marca; cargando: boolean; tema?: TemaAjustes; onEditar: (modo: ModoMarca) => void; onExportar: () => void; onOpen: (href: string) => void };
 
 export function AjustesCuenta({ marca, cargando, tema, onEditar, onExportar, onOpen }: CuentaProps) {
   const avisos = useAvisosProfesional();
-  const contacto = separarContacto(marca?.contact);
-  const nombre = cargando ? 'Cargando…' : marca?.name || SIN_COMPLETAR;
+  const datos = datosDeMarca(marca), { prefs, alternar } = usePrefsPanel();
+  const nombre = cargando ? 'Cargando…' : datos.nombre;
   return <div className="fx" style={{ gridTemplateColumns: '1.2fr 1fr 1fr' }}>
     <div className="c">
-      <FxPanel titulo="Datos del consultorio" meta="salen en certificados y en tu página" derecha={<Boton texto="Editar" icono="pen" onClick={onEditar} />}>
-        <FxKv filas={[['Nombre', nombre], ['Matrícula', SIN_COMPLETAR], ['CUIT', SIN_COMPLETAR], ['Dirección', SIN_COMPLETAR], ['Teléfono', contacto.telefono], ['Mail', contacto.mail]]} />
+      <FxPanel titulo="Datos del consultorio" meta="salen en certificados y en tu página" derecha={<Boton texto="Editar" icono="pen" onClick={() => onEditar('datos')} disabled={cargando || !marca} />}>
+        <FxKv filas={[['Nombre', nombre], ['Matrícula', datos.matricula], ['CUIT', datos.cuit], ['Dirección', datos.direccion], ['Teléfono', datos.telefono], ['Mail', datos.mail]]} />
       </FxPanel>
-      <FxPanel titulo="Firma y marca" meta="para certificados e informes" derecha={<Boton texto="Cambiar" onClick={onEditar} />}>
+      <FxPanel titulo="Firma y marca" meta="para certificados e informes" derecha={<Boton texto="Cambiar" onClick={() => onEditar('firma')} disabled={cargando || !marca} />}>
         <div className="ajsig">
-          <div className="ajfirma"><small>Sin firma cargada</small></div>
+          <div className="ajfirma">{datos.firma ? <img src={datos.firma} alt="Tu firma" style={{ maxHeight: 46, maxWidth: 150 }} /> : <small>Sin firma cargada</small>}</div>
           <div className="ajlogo">{marca?.logo ? <img src={marca.logo} width={40} height={40} alt="Logo del consultorio" /> : <span className="mk">V</span>}<small>{marca?.logo ? 'Tu logo' : 'Logo de Plan V'}</small></div>
         </div>
       </FxPanel>
-      <FxPanel titulo="Título y matrícula" meta="se imprimen en certificados" derecha={<Boton texto="Editar" disabled />} grande>
-        <FxKv filas={[['Título', SIN_COMPLETAR], ['Matrícula nacional', SIN_COMPLETAR], ['Matrícula provincial', SIN_COMPLETAR], ['Especialidad', SIN_COMPLETAR]]} />
+      <FxPanel titulo="Título y matrícula" meta="se imprimen en certificados" derecha={<Boton texto="Editar" onClick={() => onEditar('titulo')} disabled={cargando || !marca} />} grande>
+        <FxKv filas={[['Título', datos.titulo], ['Matrícula nacional', datos.matricula], ['Matrícula provincial', datos.provincial], ['Especialidad', datos.especialidad]]} />
       </FxPanel>
     </div>
     <div className="c">
@@ -61,8 +67,8 @@ export function AjustesCuenta({ marca, cargando, tema, onEditar, onExportar, onO
       <FxPanel titulo="Apariencia">
         <div className="pubhr">
           <div><b>Tema oscuro</b><span>Para trabajar de noche</span><Interruptor etiqueta="Tema oscuro" activo={Boolean(tema?.dark)} disabled={!tema || tema.busy} titulo={tema ? undefined : PRONTO} alCambiar={() => tema?.choose(tema.dark ? 'light' : 'dark')} /></div>
-          <div><b>Letra más grande</b><span>En todo el panel</span><Interruptor etiqueta="Letra más grande" activo={false} disabled /></div>
-          <div><b>Menos movimiento</b><span>Sin animaciones</span><Interruptor etiqueta="Menos movimiento" activo={false} disabled titulo="El panel ya respeta la preferencia de reducir movimiento de tu dispositivo." /></div>
+          <div><b>Letra más grande</b><span>En todo el panel</span><Interruptor etiqueta="Letra más grande" activo={prefs.letra} alCambiar={() => alternar('letra')} titulo="Se guarda en este dispositivo." /></div>
+          <div><b>Menos movimiento</b><span>Sin animaciones</span><Interruptor etiqueta="Menos movimiento" activo={prefs.movimiento} alCambiar={() => alternar('movimiento')} titulo="Se guarda en este dispositivo." /></div>
         </div>
         {tema?.status ? <small className="nthint" role="status">{tema.status}</small> : null}
       </FxPanel>
@@ -81,41 +87,85 @@ export function AjustesCuenta({ marca, cargando, tema, onEditar, onExportar, onO
   </div>;
 }
 
-export function AjustesPlantillas() {
+type PlantillasProps = { marca: Marca; plantillas: TemplateView[] | null; error: string; onNueva: () => void; onEditar: (t: TemplateView) => void; onCuando: (t: TemplateView) => void; onReintentar: () => void };
+
+export function AjustesPlantillas({ marca, plantillas, error, onNueva, onEditar, onCuando, onReintentar }: PlantillasProps) {
+  const [elegida, setElegida] = useState<string | null>(null), [vista, setVista] = useState(false);
+  const lista = plantillas ?? [];
+  const t = lista.find(x => x.id === elegida) ?? lista[0] ?? null;
+  const cert = t?.kind === 'Certificado', datos = datosDeMarca(marca);
+  const grupo = (tipo: (typeof GRUPOS_PLANTILLAS)[number]) => {
+    const filas = lista.filter(x => x.kind === tipo);
+    if (!filas.length) return <Vacio texto={plantillas ? 'Todavía no hay plantillas.' : error ? 'No se pudieron cargar.' : 'Cargando…'} />;
+    return filas.map(x => <button key={x.id} type="button" className={`ajtp${x.id === t?.id ? ' on' : ''}`} onClick={() => setElegida(x.id)}><span className="t"><b>{x.name}</b><small>{x.when_text}</small></span><em className="num">—</em></button>);
+  };
+  const datosFirma = [datos.titulo !== 'Sin completar' ? datos.titulo : 'Nutricionista', datos.matricula !== 'Sin completar' ? `MN ${datos.matricula.replace(/^MN\s*/i, '')}` : '', datos.direccion !== 'Sin completar' ? datos.direccion : ''].filter(Boolean).join(' · ');
   return <div className="fx" style={{ gridTemplateColumns: '330px 1fr 300px' }}>
-    <div className="c"><FxPanel titulo="Plantillas" meta="formularios y certificados" derecha={<Boton texto="Nueva" icono="plus" disabled />} grande>
-      <div className="fxs"><div className="ajtps">{GRUPOS_PLANTILLAS.map(grupo => <Fragment key={grupo}><small>{grupo === 'Formulario' ? 'Formularios' : 'Certificados'}</small><Vacio texto="Todavía no hay plantillas." /></Fragment>)}</div></div>
+    <div className="c"><FxPanel titulo="Plantillas" meta="formularios y certificados" derecha={<Boton texto="Nueva" icono="plus" onClick={onNueva} />} grande>
+      <div className="fxs"><div className="ajtps">{GRUPOS_PLANTILLAS.map(g => <Fragment key={g}><small>{g === 'Formulario' ? 'Formularios' : 'Certificados'}</small>{grupo(g)}</Fragment>)}</div>
+        {error ? <small className="nthint" role="alert">{error} <button type="button" className="lnk" onClick={onReintentar}>Reintentar</button></small> : null}</div>
     </FxPanel></div>
-    <div className="c"><FxPanel titulo="Plantilla" meta="elegí una para verla" derecha={<><Boton texto="Vista de la paciente" icono="eye" disabled /><Boton texto="Editar" clase="k" icono="pen" disabled /></>} grande>
-      <div className="fxs"><Vacio texto="Cuando haya una plantilla, la ves acá tal como la recibe la paciente." /></div>
+    <div className="c"><FxPanel titulo={t?.name ?? 'Plantilla'} meta={t ? <Pastilla texto={t.kind} clase={cert ? 'p-vid' : 'p-conf'} /> : 'elegí una para verla'}
+      derecha={<><Boton texto="Vista de la paciente" icono="eye" disabled={!t} onClick={() => setVista(true)} /><Boton texto="Editar" clase="k" icono="pen" disabled={!t} onClick={() => t && onEditar(t)} /></>} grande>
+      {!t ? <div className="fxs"><Vacio texto="Cuando haya una plantilla, la ves acá tal como la recibe la paciente." /></div>
+        : t.kind === 'Certificado' ? <div className="ajcert"><div className="ajch">{datos.logo ? <img src={datos.logo} width={32} height={32} alt="" /> : <span className="mk">V</span>}<span><b>{datos.nombre}</b><small>{datosFirma}</small></span></div>
+          <h4>{t.name}</h4><p>{partirVariables(t.text)}</p><p>Se extiende a pedido de la interesada para ser presentado ante quien corresponda.</p>
+          <div className="ajcf">{datos.firma ? <img src={datos.firma} alt="Tu firma" style={{ maxHeight: 46, maxWidth: 150 }} /> : <svg viewBox="0 0 160 50" aria-hidden="true"><path d="M8 34c14-22 22-24 24-12s-6 18 2 8 14-24 18-14-8 22 4 14 16-20 22-10 4 12 14 4 18-10 28-6 12 4 26-2" /></svg>}<small>Firma y sello · <u>fecha</u></small></div></div>
+          : <div className="fxs"><ol className="ajq">{t.questions.map((q, i) => <li key={i}><span className="num">{i + 1}</span><span className="t"><b>{q}</b><small>Respuesta libre</small><i className="ajfld lg" /></span></li>)}</ol></div>}
     </FxPanel></div>
     <div className="c">
-      <FxPanel titulo="Uso"><div className="pubkp"><div><small>Enviados</small><b className="num">0</b><em>este año</em></div><div><small>Respondieron</small><b className="num">—</b><em>a tiempo</em></div></div></FxPanel>
-      <FxPanel titulo="Cuándo se usa" derecha={<Boton texto="Cambiar" disabled />}><p className="pubbio">Sin plantilla elegida.</p></FxPanel>
-      <FxPanel titulo="Variables" meta="se completan solas"><Vacio texto="Aparecen cuando hay una plantilla." /></FxPanel>
-      <FxPanel titulo="Últimas respuestas" grande><div className="fxs"><Vacio texto="Todavía no hay respuestas." /></div></FxPanel>
+      <FxPanel titulo="Uso"><div className="pubkp"><div><small>{cert ? 'Generados' : 'Enviados'}</small><b className="num">—</b><em>todavía no se cuenta</em></div><div><small>{cert ? 'Firmados' : 'Respondieron'}</small><b className="num">—</b><em>{cert ? 'con matrícula' : 'a tiempo'}</em></div></div></FxPanel>
+      <FxPanel titulo="Cuándo se usa" derecha={<Boton texto="Cambiar" disabled={!t} onClick={() => t && onCuando(t)} />}>
+        <p className="pubbio">{t ? `${t.when_text}.` : 'Sin plantilla elegida.'}</p>
+        {t ? <small className="nthint">{cert ? 'Lleva tu firma, matrícula y logo.' : 'Las respuestas quedan en la historia clínica de cada paciente.'}</small> : null}
+      </FxPanel>
+      <FxPanel titulo="Variables" meta="se completan solas">
+        {t ? <div className="ajvar">{(t.kind === 'Certificado' ? [...new Set([...certificateVariables(t.text), ...CERTIFICATE_VARIABLES.slice(0, 3)])] : ['nombre', 'fecha del turno', 'nutricionista']).map(v => <span key={v}>{v}</span>)}</div> : <Vacio texto="Aparecen cuando hay una plantilla." />}
+      </FxPanel>
+      <FxPanel titulo={cert ? 'Últimos generados' : 'Últimas respuestas'} grande><div className="fxs"><Vacio texto="Todavía no hay respuestas." /></div></FxPanel>
     </div>
+    {vista && t ? <CajonAjustes titulo={t.name} sub="Así lo ve la paciente en su app" sinGuardar onGuardar={async () => undefined} onClose={() => setVista(false)}>
+      {t.kind === 'Certificado' ? <p className="pubbio">{ejemploCertificado(t.text)}</p> : t.questions.map((q, i) => <label key={i} className="af"><span>{q}</span><input className="ai" type="text" placeholder="Tu respuesta" disabled /></label>)}
+    </CajonAjustes> : null}
   </div>;
 }
 
-export function AjustesAvisos({ irAIntegraciones }: { irAIntegraciones: () => void }) {
+/** Texto del certificado con cada {variable} resaltada, como en el boceto. */
+function partirVariables(texto: string) {
+  return texto.split(/(\{\w+\})/g).map((parte, i) => /^\{\w+\}$/.test(parte) ? <u key={i}>{parte.slice(1, -1)}</u> : parte);
+}
+function ejemploCertificado(texto: string) {
+  const ejemplo: Record<string, string> = { nombre: 'Sofía Gómez', dni: '38.412.556', fecha: '23/10/2026' };
+  return texto.replace(/\{(\w+)\}/g, (_, k: string) => ejemplo[k] ?? '…');
+}
+
+type AvisosProps = { avisos: NoticeView[] | null; error: string; irAIntegraciones: () => void; onGuardar: (aviso: { key: NoticeKey; enabled: boolean; when_text: string | null; message: string | null }) => void; onEditar: (aviso: { key: NoticeKey; titulo: string; cuando: string; texto: string; activo: boolean }) => void; onReintentar: () => void };
+
+export function AjustesAvisos({ avisos, error, irAIntegraciones, onGuardar, onEditar, onReintentar }: AvisosProps) {
   const [elegido, setElegido] = useState(0);
-  const [titulo, cuando, texto] = AVISOS_AUTOMATICOS[elegido];
+  const guardados = avisos ?? [];
+  const config = (i: number) => { const [, cuando, texto] = AVISOS_AUTOMATICOS[i]; return avisoConfigurado(CLAVES_AVISOS[i], guardados, { cuando, texto }); };
+  const [titulo] = AVISOS_AUTOMATICOS[elegido], actual = config(elegido), prendidos = AVISOS_AUTOMATICOS.filter((_, i) => config(i).enabled).length;
+  const cambiar = (clave: NoticeKey, enabled: boolean, cuando: string | null, mensaje: string | null) => onGuardar({ key: clave, enabled, when_text: cuando, message: mensaje });
   return <div className="fx" style={{ gridTemplateColumns: '1.35fr 1fr' }}>
     <div className="c">
-      <FxPanel titulo="Avisos a tus pacientes" meta={`${AVISOS_AUTOMATICOS.length} para configurar · por la app y por mail`} grande>
-        <div className="fxs"><div className="ajav">{AVISOS_AUTOMATICOS.map(([nombre, detalle], i) => <div key={nombre} className={i === elegido ? 'on' : ''} tabIndex={0} aria-current={i === elegido}
+      <FxPanel titulo="Avisos a tus pacientes" meta={`${prendidos} de ${AVISOS_AUTOMATICOS.length} prendidos · por la app y por mail`} grande>
+        <div className="fxs"><div className="ajav">{AVISOS_AUTOMATICOS.map(([nombre], i) => { const c = config(i); return <div key={nombre} className={i === elegido ? 'on' : ''} tabIndex={0} aria-current={i === elegido}
           onClick={() => setElegido(i)} onKeyDown={e => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setElegido(i); } }}>
-          <span className="t"><b>{nombre}</b><small>{detalle}</small></span><span className="ajch2"><i>App</i><i>Mail</i></span><Interruptor etiqueta={nombre} activo={false} disabled titulo="Todavía no se prenden ni se apagan desde acá." /></div>)}</div></div>
+          <span className="t"><b>{nombre}</b><small>{c.cuando}</small></span><span className="ajch2"><i>App</i><i>Mail</i></span>
+          <Interruptor etiqueta={nombre} activo={c.enabled} disabled={!avisos} alCambiar={() => cambiar(CLAVES_AVISOS[i], !c.enabled, c.personalizado ? c.cuando : null, c.personalizado ? c.texto : null)} /></div>; })}</div>
+          {error ? <small className="nthint" role="alert">{error} <button type="button" className="lnk" onClick={onReintentar}>Reintentar</button></small> : null}</div>
       </FxPanel>
       <FxPanel titulo="Reglas de regreso" meta="para que nadie se pierda">
-        <div className="pubhr">{REGLAS_DE_REGRESO.map(([nombre, detalle]) => <div key={nombre}><b>{nombre}</b><span>{detalle}</span><Interruptor etiqueta={nombre} activo={false} disabled /></div>)}</div>
+        <div className="pubhr">{REGLAS_DE_REGRESO.map(([nombre, detalle], i) => { const c = avisoConfigurado(CLAVES_REGLAS[i], guardados, { cuando: detalle, texto: '' });
+          return <div key={nombre}><b>{nombre}</b><span>{detalle}</span><Interruptor etiqueta={nombre} activo={c.enabled} disabled={!avisos} alCambiar={() => cambiar(CLAVES_REGLAS[i], !c.enabled, null, null)} /></div>; })}</div>
       </FxPanel>
     </div>
     <div className="c">
-      <FxPanel titulo={titulo} meta={<Pastilla texto="Sin configurar" clase="p-ok" />} derecha={<Boton texto="Editar" icono="pen" disabled />}>
-        <FxKv filas={[['Cuándo', cuando], ['Por dónde', 'App y mail'], ['Enviados', SIN_DATO]]} />
-        <div className="ajmsg"><small>Mensaje sugerido</small><div className="ajbub">{textoDeEjemplo(texto)}</div></div>
+      <FxPanel titulo={titulo} meta={<Pastilla texto={actual.enabled ? 'Prendido' : 'Apagado'} clase={actual.enabled ? 'p-conf' : 'p-ok'} />} derecha={<Boton texto="Editar" icono="pen" disabled={!avisos} onClick={() => onEditar({ key: CLAVES_AVISOS[elegido], titulo, cuando: actual.cuando, texto: actual.texto, activo: actual.enabled })} />}>
+        <FxKv filas={[['Cuándo', actual.cuando], ['Por dónde', 'App y mail'], ['Enviados', SIN_DATO]]} />
+        <div className="ajmsg"><small>Así le llega</small><div className="ajbub">{textoDeEjemplo(actual.texto)}</div></div>
+        <small className="nthint">Guardamos tu elección. Cada aviso empieza a salir cuando se conecta su envío.</small>
       </FxPanel>
       <FxPanel titulo="Últimos enviados" grande><div className="fxs"><Vacio texto="Todavía no hay envíos registrados." /></div></FxPanel>
       <div className="fxai"><PanelV29Icon name="spark" size={14} /><span><b>El mail</b> se activa cuando conectes Brevo en <button type="button" className="lnk" onClick={irAIntegraciones}>Integraciones</button>. Mientras tanto, todos los avisos llegan a la app.</span></div>
@@ -163,7 +213,7 @@ export function AjustesSeguridad({ onOpen, onSecurity }: { onOpen: (href: string
       </FxPanel>
     </div>
     <div className="c">
-      <FxPanel titulo="Copias de seguridad"><FxKv filas={[['Frecuencia', SIN_DATO], ['Se guardan', SIN_DATO], ['Última', SIN_DATO]]} /></FxPanel>
+      <FxPanel titulo="Copias de seguridad" meta="automáticas"><FxKv filas={[['Frecuencia', 'Todos los días'], ['Se guardan', '7 días'], ['Última', SIN_DATO]]} /></FxPanel>
       <FxPanel titulo="Datos de salud"><div className="pubpide">{['Las fichas se comparten por asignación explícita', 'Recepción no accede a las notas clínicas', 'No compartas claves ni datos de pacientes por canales públicos'].map(t => <div key={t}><PanelV29Icon name="shield" size={13} /><span>{t}</span></div>)}</div></FxPanel>
       <FxPanel titulo="Consentimientos" derecha={<Boton texto="Pedir firma" clase="k" disabled />} grande>
         <div className="publk"><Vacio texto="Todavía no hay un resumen de firmas." /></div>

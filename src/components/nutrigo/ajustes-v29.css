@@ -4,3 +4,7 @@
 #pv-panel-v29.mob .ea-settings-v29>.fx{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:none!important;flex:none;height:auto;min-height:auto}
 #pv-panel-v29 .ea-settings-v29 .ajav>div:focus-visible{outline:2px solid var(--lima-ink);outline-offset:-2px}
 #pv-panel-v29 .ea-settings-v29 .fxp>header{flex-wrap:nowrap}
+/* Cajones de Ajustes: dos campos en la misma fila (`aRow` del boceto) sin salirse del cajón. */
+#pv-panel-v29 .arow>.af{flex:1;min-width:0}
+/* Las reglas viejas del panel pesan más que `.pubkp b` del boceto (letra fina de los números) en esta pantalla. */
+#pv-panel-v29 .ea-settings-v29 .pubkp b{font-weight:300}
