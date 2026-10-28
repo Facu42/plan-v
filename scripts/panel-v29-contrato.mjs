@@ -138,6 +138,7 @@ export const PIEZAS_PLAN = [
   ['Calorías de la comida', '#s-ficha .fxmeals .kc b', '', ['fontSize', 'fontWeight']],
   ['Medidor del requerimiento', '#s-ficha .fxsplit .pg', '', ['width']],
   ['Barras de macros', '#s-ficha .fxmacros .fxb', '', ['height', 'borderTopLeftRadius']],
+  ['Barra de proteínas', '#s-ficha .fxmacros .fxb.k i', '', ['height', 'backgroundColor']],
   ['Columnas por comida', '#s-ficha .fxcols i', '', ['width', 'borderTopLeftRadius']],
   ['Lista de compras', '#s-ficha .fxkv > div', '', ['paddingTop', 'fontSize', 'height']],
 ];

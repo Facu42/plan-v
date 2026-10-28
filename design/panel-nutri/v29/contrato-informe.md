@@ -193,6 +193,7 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Calorías de la comida | ✅ igual | |
 | Medidor del requerimiento | ✅ igual | |
 | Barras de macros | ✅ igual | |
+| Barra de proteínas | ✅ igual | |
 | Columnas por comida | ✅ igual | |
 | Lista de compras | ✅ igual | |
 
@@ -489,6 +490,7 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Calorías de la comida | ✅ igual | |
 | Medidor del requerimiento | ✅ igual | |
 | Barras de macros | ✅ igual | |
+| Barra de proteínas | ✅ igual | |
 | Columnas por comida | ✅ igual | |
 | Lista de compras | ✅ igual | |
 

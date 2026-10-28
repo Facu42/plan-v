@@ -9,6 +9,7 @@ import type { Patient } from '../../types';
 import type { CareRecord } from '../../types/care';
 import { buildPublishedPlanDays, planWeekIndex, eachIsoDate, type PatientMealPlan, type ProfessionalMealPlan } from '../../types/plans';
 import { FORMULA_LABELS } from '../../types/nutrition-capabilities';
+import { GOAL_LABELS } from '../../lib/nutrition-target';
 import type { ShoppingListView } from '../../types/shopping';
 import { CarePanel } from './CarePanel';
 import { FxCols, FxKv, FxMedidor, FxPanel } from './ficha-fx';
@@ -106,7 +107,7 @@ export function PanelFichaPlan({ patient, professionalName, now, onChanged, onSe
   const solapas = <div className="tabs" aria-label="Vista del plan">{([['hoy', 'Hoy'], ['semana', 'Semana'], ['paciente', `Vista de ${primerNombre}`]] as const).map(([valor, texto]) => <button type="button" key={valor} className={vista === valor ? 'on' : undefined} aria-pressed={vista === valor} onClick={() => setVista(valor)}>{texto}</button>)}</div>;
   const metaPlan = publicado ? `${kcalMeta !== null ? `${numero(kcalMeta)} kcal · ` : ''}semana ${semanaActual} de ${semanas} · vence ${corto(publicado.period_end)}` : undefined;
   const macros = (calculo ? [['Proteínas', calculo.protein_g, calculo.protein_pct, 'k', `${String(meta!.inputs.protein_g_per_kg).replace('.', ',')} g/kg`], ['Carbohidratos', calculo.carbs_g, calculo.carbs_pct, '', ''], ['Grasas', calculo.fat_g, calculo.fat_pct, 'o', '']] : objetivo ? [['Proteínas', objetivo.protein_g, null, 'k', ''], ['Carbohidratos', objetivo.carbs_g, null, '', ''], ['Grasas', objetivo.fat_g, null, 'o', '']] : []) as Array<[string, number, number | null, string, string]>;
-  const gramosTotales = macros.reduce((suma, [, g]) => suma + g, 0) || 1;
+  const mayor = Math.max(...macros.map(([, g]) => g), 1);
 
   return <section className="pn-record-plan" aria-label="Plan de la paciente">
     {error && <p role="alert">{error} <button type="button" onClick={() => setRevision(n => n + 1)}>Reintentar plan</button></p>}
@@ -123,11 +124,11 @@ export function PanelFichaPlan({ patient, professionalName, now, onChanged, onSe
         </FxPanel>
       </div>
       <div className="c">
-        <FxPanel titulo="Requerimiento" meta={meta?.inputs.formula ? FORMULA_LABELS[meta.inputs.formula] : meta ? FORMULA_LABELS.mifflin : undefined} derecha={<button type="button" className="sbtn cbtn" onClick={() => onSection('planificacion')}><PanelV29Icon name="pen" size={13} />Editar</button>}>
+        <FxPanel titulo="Requerimiento" meta={meta ? `${FORMULA_LABELS[meta.inputs.formula ?? 'mifflin']} · ${GOAL_LABELS[meta.inputs.goal].toLowerCase()}` : undefined} derecha={<button type="button" className="sbtn cbtn" onClick={() => onSection('planificacion')}><PanelV29Icon name="pen" size={13} />Editar</button>}>
           {kcalMeta === null ? <div className="fxhint">Todavía no hay requerimiento publicado. Se calcula en Objetivos y hábitos.</div> : <>
             <div className="fxsplit"><FxMedidor pct={calculo ? Math.min(100, Math.round(kcalMeta / Math.max(calculo.tdee, kcalMeta) * 100)) : 100} texto={numero(kcalMeta)} sub="kcal" ancho={164} />
-              <FxKv filas={[['Gasto', calculo ? `${numero(calculo.tdee)} kcal` : 'Sin dato'], ['Plan', `${numero(kcalMeta)} kcal`], ['Diferencia', calculo && calculo.tdee ? `${Math.round((kcalMeta / calculo.tdee - 1) * 100)}%`.replace('-', '−') : 'Sin dato']]} /></div>
-            <div className="fxmacros">{macros.map(([nombre, g, pct, clase, extra]) => <div key={nombre}><span><b>{nombre}</b><small className="num">{pct !== null ? `${Math.round(pct)}% · ` : ''}{numero(g)} g{extra ? ` · ${extra}` : ''}</small></span><span className="fxb"><i className={clase || undefined} style={{ width: `${Math.round(g / gramosTotales * 100)}%` }} /></span></div>)}</div></>}
+              <FxKv filas={[['Gasto', calculo ? `${numero(calculo.tdee)} kcal` : 'Sin dato'], ['Plan', `${numero(kcalMeta)} kcal`], [calculo && kcalMeta > calculo.tdee ? 'Superávit' : calculo && kcalMeta < calculo.tdee ? 'Déficit' : 'Diferencia', calculo && calculo.tdee ? `${Math.round((kcalMeta / calculo.tdee - 1) * 100)}%`.replace('-', '−') : 'Sin dato']]} /></div>
+            <div className="fxmacros">{macros.map(([nombre, g, pct, clase, extra]) => <div key={nombre}><span><b>{nombre}</b><small className="num">{pct !== null ? `${Math.round(pct)}% · ` : ''}{numero(g)} g{extra ? ` · ${extra}` : ''}</small></span><span className={`fxb${clase ? ` ${clase}` : ''}`}><i style={{ width: `${Math.round(g / mayor * 100)}%` }} /></span></div>)}</div></>}
         </FxPanel>
         <FxPanel titulo="Calorías por comida" meta={totalDia === null ? undefined : `${numero(totalDia)} en el día`} grande>
           {porMomento.length ? <FxCols valores={porMomento.map(m => m.kcal)} rotulos={porMomento.map(m => m.etiqueta)} max={Math.max(...porMomento.map(m => m.kcal)) * 1.15} alto={120} /> : <div className="fxhint">{publicado ? 'Las comidas de este día no traen calorías.' : 'Sin plan publicado.'}</div>}
