@@ -43,7 +43,7 @@ en español (`docs/nutrigo-igual-al-archivo-2026-10-07.md`).
 
 ## Cómo trabajar
 
-- **Panel de la nutri: el código del boceto manda.** Cada pantalla se arma copiando el HTML y los estilos de `design/panel-nutri/v29/panel-trabajo.html` (mismas clases y orden) y solo se enchufan datos reales; nunca mirando capturas (regla fija de Facundo, 28/10/2026).
+- **Panel de la nutri: el código del boceto manda.** Cada pantalla se arma copiando el HTML y los estilos de `design/panel-nutri/v29/panel-trabajo.html` (mismas clases y orden) y solo se enchufan datos reales; nunca mirando capturas (regla fija de Facundo, 28/10/2026). Si una función no existe, se desarrolla con el mismo diseño, estructura y estilos del boceto. Aplica a cualquier agente que tome y continúe el trabajo.
 - Una rama y un PR por tema. Nada directo a `main`: cada merge publica la web y la API para usuarios reales.
   Se junta solo con el "publicalo" o "juntalo al main" de Facundo.
 - Nada en la base de producción ni en servicios pagos sin su frase escrita.
