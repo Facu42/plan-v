@@ -6,8 +6,8 @@ import { curvaFicha, medioCirculo, type SolapaFicha } from './ficha-presentacion
 export type Ir = (solapa: SolapaFicha) => void;
 
 /** `alCambiarMeta` vuelve la leyenda del boceto (por ejemplo «últimos 7 días») un selector sin cambiar cómo se ve. */
-export function FxPanel({ titulo, meta, derecha, grande, alCambiarMeta, children }: { titulo: string; meta?: string; derecha?: ReactNode; grande?: boolean; alCambiarMeta?: () => void; children: ReactNode }) {
-  return <section className={`fxp${grande ? ' g' : ''}`}><header><h3>{titulo}</h3>{meta ? alCambiarMeta ? <span className="m" role="button" tabIndex={0} style={{ cursor: 'pointer' }} title="Cambiar el período" onClick={alCambiarMeta} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); alCambiarMeta(); } }}>{meta}</span> : <span className="m">{meta}</span> : null}<span className="sp" />{derecha}</header>{children}</section>;
+export function FxPanel({ titulo, meta, derecha, grande, clase, alCambiarMeta, children }: { titulo: string; meta?: ReactNode; derecha?: ReactNode; grande?: boolean; clase?: string; alCambiarMeta?: () => void; children: ReactNode }) {
+  return <section className={`fxp${grande ? ' g' : ''}${clase ? ` ${clase}` : ''}`}><header><h3>{titulo}</h3>{meta ? alCambiarMeta ? <span className="m" role="button" tabIndex={0} style={{ cursor: 'pointer' }} title="Cambiar el período" onClick={alCambiarMeta} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); alCambiarMeta(); } }}>{meta}</span> : <span className="m">{meta}</span> : null}<span className="sp" />{derecha}</header>{children}</section>;
 }
 
 export function FxIr({ a, ir, texto = 'Ver' }: { a: SolapaFicha; ir: Ir; texto?: string }) {

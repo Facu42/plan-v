@@ -107,7 +107,7 @@ export function PanelPublicaV29(p: Props) {
         </FxPanel>
       </div>
       <div className="c">
-        {actual ? <FxPanel titulo={actual.name} meta={estado[0]} derecha={<Boton texto="Editar" icono="pen" onClick={() => p.onCajon('servicio', actual.id)} />} grande>
+        {actual ? <FxPanel titulo={actual.name} meta={<span className={`pill ${estado[1]}`}>{estado[0]}</span>} derecha={<Boton texto="Editar" icono="pen" onClick={() => p.onCajon('servicio', actual.id)} />} grande>
           <FxKv filas={[['Tipo', 'Consulta'], ['Duración', `${actual.duration_min} min`], ['Dónde', canal(actual.channel)], ['Precio', plata(actual.price_minor)], ['Seña', actual.deposit_minor ? plata(actual.deposit_minor) : 'Sin seña'], ['Quién reserva', nota?.who === 'patients' ? 'Solo pacientes' : 'Cualquier persona'], ['Obra social', nota && !nota.insurer ? 'Solo particular' : 'Acepta (copago o reintegro)'], ['Link', linkCorto || 'Publicá la página para tener link']]} />
           <div className="pubins"><small>Obras sociales</small>{nota && !nota.insurer ? <p>Solo particular. Se puede pedir reintegro con la factura.</p> : obras.length ? <ListaObras obras={obras} chico /> : <p>Todavía no cargaste obras sociales.</p>}</div>
           <div className="pubins"><small>Le llega a la paciente al reservar</small><p>{nota?.instructions || 'Sin indicaciones.'}</p></div>
@@ -158,7 +158,7 @@ export function PanelPublicaV29(p: Props) {
   const reservasDelMes = reservas.filter(reserva => reserva.status !== 'cancelled' && mismoMes(reserva.created_at)).length;
   return marco(<div className="fx" style={{ gridTemplateColumns: '1.12fr 312px 1fr' }}>
     <div className="c">
-      <FxPanel titulo="Perfil" meta={p.publicada ? (p.sinPublicar ? 'Cambios sin publicar' : 'Publicada') : 'Sin publicar'} derecha={<Boton texto="Editar" icono="pen" onClick={() => p.onCajon('perfil')} />}>
+      <FxPanel titulo="Perfil" meta={<span className={`pill ${p.publicada && !p.sinPublicar ? 'p-conf' : 'p-wait'}`}>{p.publicada ? (p.sinPublicar ? 'Cambios sin publicar' : 'Publicada') : 'Sin publicar'}</span>} derecha={<Boton texto="Editar" icono="pen" onClick={() => p.onCajon('perfil')} />}>
         <div className="pubpf"><span className="av">{iniciales(config.page.title)}</span><span><b>{config.page.title}</b><small>{[config.page.contact || 'Nutricionista', extras?.license, extras?.area].filter(Boolean).join(' · ')}</small></span></div>
         <p className="pubbio">{config.page.bio || 'Todavía no escribiste una presentación.'}</p>
         {extras?.specialties?.length ? <div className="pubchips">{extras.specialties.map(e => <span key={e}>{e}</span>)}</div> : null}
@@ -173,7 +173,7 @@ export function PanelPublicaV29(p: Props) {
         <p className="sxsub">Todavía no hay opiniones de pacientes. Cuando el pedido esté activo, las verificadas van a aparecer acá.</p>
       </FxPanel>
     </div>
-    <div className="c"><FxPanel titulo="Así la ve una paciente nueva" meta="" derecha={<button className="lnk" type="button" onClick={() => p.onCajon('abrir')}>Abrir <PanelV29Icon name="chev" size={11} /></button>} grande><Celular config={config} publicados={config.types} /></FxPanel></div>
+    <div className="c"><FxPanel titulo="Así la ve una paciente nueva" meta="" derecha={<button className="lnk" type="button" onClick={() => p.onCajon('abrir')}>Abrir <PanelV29Icon name="chev" size={11} /></button>} grande clase="pubprev"><Celular config={config} publicados={config.types} /></FxPanel></div>
     <div className="c">
       <FxPanel titulo="Compartir" meta="">
         <div className="pubsh">{p.link ? <Qr link={p.link} /> : null}<div><small>Tu link</small><b>{linkCorto || 'Publicá la página para tener link'}</b><div className="pubshb"><Boton texto="Copiar link" icono="copy" clave onClick={p.onCopiar} deshabilitado={!p.link} /><Boton texto="Descargar QR" icono="dl" onClick={p.onDescargarQr} deshabilitado={!p.link} /></div><small className="nthint">El QR sirve para la puerta del consultorio o una tarjeta.</small></div></div>
