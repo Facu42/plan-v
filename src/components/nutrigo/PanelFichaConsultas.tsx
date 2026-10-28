@@ -73,7 +73,10 @@ export function PanelFichaConsultas({ patient, now, professionalName, datos, onS
   const sesion = sesiones.find(s => s.id === elegida) ?? porAprobar ?? sesiones[0] ?? null;
   const publicada = sesion ? vista.shared.filter(p => p.session_id === sesion.id).sort((a, b) => b.version - a.version)[0] ?? null : null;
   const turnoDeHoy = proximo && fechaCorta(proximo.starts_at) === fechaCorta(now.toISOString()) ? proximo : null;
-  const turnoFirma = turnoDeHoy ?? turnos.filter(t => t.status !== 'cancelled' && Date.parse(t.starts_at) <= now.getTime()).sort((a, b) => b.starts_at.localeCompare(a.starts_at))[0] ?? null;
+  const hoy = fechaCorta(now.toISOString());
+  const deHoy = turnos.find(t => t.status !== 'cancelled' && fechaCorta(t.starts_at) === hoy);
+  const sinConfirmar = [...turnos].filter(t => t.status !== 'cancelled' && !t.completed && Date.parse(t.starts_at) <= now.getTime()).sort((x, y) => y.starts_at.localeCompare(x.starts_at))[0];
+  const turnoFirma = deHoy ?? sinConfirmar ?? null;
   const firmada = Boolean(turnoFirma?.completed);
   const realizadas = asistencia.realizadas;
   const bloques = partirNota(sesion?.draft ?? '');

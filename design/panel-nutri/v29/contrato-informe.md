@@ -3,7 +3,7 @@
 Fuente: `design/panel-nutri/v29/panel-trabajo.html`.
 App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Planes (http://127.0.0.1:5173).
 
-**12 piezas no coinciden.**
+**4 piezas no coinciden.**
 
 ## Tema oscuro · armazón
 
@@ -233,18 +233,18 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Botón SOAP | ✅ igual | |
 | Letra del bloque | ✅ igual | |
 | Título del bloque | ✅ igual | |
-| Texto del bloque | ❌ distinta | **lineHeight**: boceto `19.375px` · app `normal` |
+| Texto del bloque | ✅ igual | |
 | Acuerdos | ✅ igual | |
 | Acuerdo | ✅ igual | |
 | Pie de la nota | ✅ igual | |
 | Botón del pie | ✅ igual | |
-| Paso al terminar | ❌ distinta | **height**: boceto `49px` · app `55px` |
-| Ícono del paso | ❌ distinta | **width**: boceto `28px` · app `36px`<br>**height**: boceto `28px` · app `36px`<br>**borderTopLeftRadius**: boceto `9px` · app `12px` |
+| Paso al terminar | ✅ igual | |
+| Ícono del paso | ✅ igual | |
 | Título del paso | ✅ igual | |
 | Texto del paso | ✅ igual | |
 | Botón del paso | ✅ igual | |
 | Aviso de la IA | ✅ igual | |
-| Firma | ❌ distinta | **color**: boceto `rgb(110, 113, 122)` · app `rgb(207, 226, 166)` |
+| Firma | ✅ igual | |
 
 ## Tema oscuro · Seguimiento
 
@@ -579,18 +579,18 @@ App: armazón, Seguimiento, Progreso, Asistente IA, Alimentos, Biblioteca y Plan
 | Botón SOAP | ✅ igual | |
 | Letra del bloque | ✅ igual | |
 | Título del bloque | ✅ igual | |
-| Texto del bloque | ❌ distinta | **lineHeight**: boceto `19.375px` · app `normal` |
+| Texto del bloque | ✅ igual | |
 | Acuerdos | ✅ igual | |
 | Acuerdo | ✅ igual | |
 | Pie de la nota | ✅ igual | |
 | Botón del pie | ✅ igual | |
-| Paso al terminar | ❌ distinta | **height**: boceto `49px` · app `55px` |
-| Ícono del paso | ❌ distinta | **width**: boceto `28px` · app `36px`<br>**height**: boceto `28px` · app `36px`<br>**borderTopLeftRadius**: boceto `9px` · app `12px` |
+| Paso al terminar | ✅ igual | |
+| Ícono del paso | ✅ igual | |
 | Título del paso | ✅ igual | |
 | Texto del paso | ✅ igual | |
 | Botón del paso | ✅ igual | |
 | Aviso de la IA | ✅ igual | |
-| Firma | ❌ distinta | **color**: boceto `rgb(113, 116, 124)` · app `rgb(63, 90, 10)` |
+| Firma | ✅ igual | |
 
 ## Tema claro · Seguimiento
 
