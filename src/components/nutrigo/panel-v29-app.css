@@ -362,6 +362,7 @@
 #pv-panel-v29 #pv-panel > #s-progreso,
 #pv-panel-v29 #pv-panel > #s-mensajes,
 #pv-panel-v29 #pv-panel > #s-cobranzas,
+#pv-panel-v29 #pv-panel > #s-publica,
 #pv-panel-v29 #pv-panel > #s-alimentos,
 #pv-panel-v29 #pv-panel > #s-asistente,
 #pv-panel-v29 #pv-panel > #s-inicio {
@@ -655,6 +656,27 @@
 #pv-panel-v29 #s-cobranzas .sbtn[aria-label] { white-space: nowrap; }
 #pv-panel-v29 #s-cobranzas .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 #pv-panel-v29 #s-cobranzas .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
+
+/* Página pública llena la columna: las tres columnas del boceto se desplazan adentro. En el celular se apilan. */
+#pv-panel-v29:not(.mob) .main:has(#s-publica) { height: 100%; overflow: hidden; }
+#pv-panel-v29:not(.mob) #pv-panel:has(#s-publica) { flex: 1; min-height: 0; }
+#pv-panel-v29.mob .main:has(#s-publica) > .top { flex: 0 0 auto; height: auto; flex-wrap: wrap; }
+#pv-panel-v29.mob #pv-panel:has(#s-publica),
+#pv-panel-v29.mob #s-publica,
+#pv-panel-v29.mob #s-publica > #pubwrap,
+#pv-panel-v29.mob #s-publica .fx { flex: none; height: auto; min-height: auto; }
+#pv-panel-v29.mob #s-publica .fx { grid-template-columns: 1fr !important; align-content: start; }
+#pv-panel-v29 #s-publica,
+#pv-panel-v29 #s-publica .fx,
+#pv-panel-v29 #s-publica .c,
+#pv-panel-v29 #s-publica .tabs { min-width: 0; max-width: 100%; }
+#pv-panel-v29 #s-publica .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
+#pv-panel-v29 #s-publica .sw:disabled { cursor: default; }
+
+/* Con pocos servicios la tabla no se estira hasta el pie de la tarjeta. */
+#pv-panel-v29 #s-publica .pubts .pubt:has(tbody tr:last-child:nth-child(-n+3)) { flex: 0 0 auto; }
+/* Con una o dos obras sociales las filas no se reparten por toda la tarjeta. */
+#pv-panel-v29 #s-publica .pubhr.pubev:has(> div:last-child:nth-child(-n+3)) { justify-content: flex-start; }
 
 /* Archivos: el boceto no fija interlineado (queda «normal») y no deja aire arriba de la grilla. */
 #pv-panel-v29 #s-ficha .pn-record-files .fx, #pv-panel-v29 #s-ficha .pn-record-files .fx * { line-height: normal; }

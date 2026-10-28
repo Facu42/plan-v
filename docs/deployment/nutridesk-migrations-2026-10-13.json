@@ -144,6 +144,11 @@
       "sha256": "56b7bb1bc744b2e6c4b7436c8f5d7b43fbc962f0f0e190d9fb3905534a103c1c"
     },
     {
+      "version": "20261028170000",
+      "file": "20261028170000_scheduling_page_extras.sql",
+      "sha256": "d55865db7e32586bbc7ce3671216626c2fc59f5649ed957653b041bbc1937ff8"
+    },
+    {
       "version": "20261028220000",
       "file": "20261028220000_ajustes_config.sql",
       "sha256": "4c21ab6e990c470e44a9995801aeb1f3663e25b84728cca5542bd9aadcff20a8"
