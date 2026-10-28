@@ -3,7 +3,9 @@
    opción, contadores, flecha, buscador, cuenta, columna, título, campana, CTA). */
 
 .pn-panel > #pv-panel-v29 { flex: 1 1 auto; min-width: 0; min-height: 0; height: 100dvh; }
-#pv-panel-v29 { padding: 0; }
+#pv-panel-v29 :is(button, input, select, textarea) { letter-spacing: normal; } /* el boceto no usa el espaciado de letras de los botones de la app */
+#pv-panel-v29 :is(button, a)[aria-pressed="true"] { font-weight: inherit; } /* la regla global de .nv-app los pone en negrita; el boceto no */
+#pv-panel-v29 { padding: 0; line-height: normal; } /* el boceto no define interlineado: «normal», no el 1,5 del cuerpo de la app */
 #pv-panel-v29 .app { width: 100%; height: 100dvh; border-radius: 0; box-shadow: none; }
 #pv-panel-v29 .main { height: auto; overflow: auto; min-height: 0; }
 #pv-panel-v29 #pv-panel { display: flex; flex-direction: column; gap: 16px; min-width: 0; min-height: 0; }
@@ -514,6 +516,7 @@
 #pv-panel-v29 .ag-aviso { margin: 0; font-size: 12px; color: var(--azaf-ink); background: var(--azaf-t); border-radius: 10px; padding: 8px 12px; }
 #pv-panel-v29 .ag-foco { outline: 2px solid var(--lima-ink); outline-offset: 2px; }
 #pv-panel-v29 .ag-foot { flex-wrap: wrap; gap: 4px 14px; }
+#pv-panel-v29 #ag-recordatorio { margin-top: 0; } /* la línea del boceto va debajo de los accesos, pegada al borde de la tarjeta */
 #pv-panel-v29 .ag-foot .lnk:disabled { opacity: .55; cursor: default; }
 #pv-panel-v29 .ag-mas-lugares { align-self: center; }
 #pv-panel-v29 .mh .lnk { width: 22px; height: 22px; justify-content: center; border-radius: 7px; }

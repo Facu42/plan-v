@@ -360,6 +360,8 @@ function igual(a, b) {
 async function abrirApp(browser, tema) {
   const pagina = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: tema })).newPage();
   await pagina.addInitScript(guardado => localStorage.setItem('plan-v:panel-theme-v2:demo', guardado), tema);
+  // La línea de ahora de la Agenda solo se dibuja en horario de atención; el boceto la tiene siempre (10:10). Se fija la hora para que el contrato no dependa del reloj.
+  await pagina.clock.install({ time: new Date(`${new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())}T13:10:00Z`) });
   await pagina.goto(`${origen}/crm/inicio`, { waitUntil: 'domcontentloaded' });
   const demo = pagina.getByText('Continuar en modo demo');
   if (await demo.count()) await demo.first().click();
