@@ -17,6 +17,7 @@ import { ConsultationNotes,ConsultationCompletionPanel } from './ConsultationNot
 import { RECORD_PLAN_TABS, recordTab, appointmentRecordSummary, type RecordTab } from './patient-record-sections';
 import {PanelPatientHistory} from './PanelPatientHistory';
 import { FichaSolapas, PanelFichaCabecera } from './PanelFichaCabecera';
+import { PanelFichaChat } from './PanelFichaChat';
 import { FxKv, FxPanel } from './ficha-fx';
 import { PanelFichaResumen } from './PanelFichaResumen';
 import { conteoDeSolapas, seccionDe, solapaDe } from './ficha-presentacion';
@@ -54,6 +55,8 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   const refreshPatient = useAppStore(store => store.refreshPatient);
   const [refreshError,setRefreshError] = useState('');
   const [readyId,setReadyId]=useState<string|null>(null);
+  const [chatOpen,setChatOpen]=useState(false);
+  useEffect(()=>setChatOpen(false),[patient.id]);
   const [patientRevision,setPatientRevision]=useState(0);
   const tabsRef=useRef<HTMLElement>(null);
   const datos=useFichaData(patient);
@@ -80,7 +83,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   const conteo = conteoDeSolapas({ comidas: pendientes.comidas, notaPorAprobar: pendientes.notaPorAprobar, alterados: pendientes.alterados.length });
   const contacto = <FxPanel titulo="Datos y contacto"><label className="fxsel">Paciente<select aria-label="Paciente de la ficha" value={patient.id} onChange={event=>onSelect(event.target.value)}>{patients.map(person=><option key={person.id} value={person.id}>{person.name}</option>)}</select></label><FxKv filas={[['Teléfono',phone||'Sin teléfono registrado'],['Próxima consulta',patient.appointment?.when||'Sin consulta programada'],['Consultas realizadas',<CompletedConsultationCount key="hechas" patientId={patient.id}/>],['Asistencias confirmadas',String(appointments.confirmed)]]}/></FxPanel>;
   return <div className="scr" id="s-ficha" aria-label={`Espacio de ${patient.name}`}>
-    <PanelFichaCabecera patient={patient} now={now} datos={datos} etiquetasPropias={etiquetas.tags} onGuardarEtiquetas={etiquetas.guardar} onBack={()=>onOpenHref('/crm/pacientes')} onChat={()=>change('chat')} onAgendar={()=>onOpenHref('/crm/agenda')} onEdit={onEdit} onConsulta={()=>change('consultas')}/>
+    <PanelFichaCabecera patient={patient} now={now} datos={datos} etiquetasPropias={etiquetas.tags} onGuardarEtiquetas={etiquetas.guardar} onBack={()=>onOpenHref('/crm/pacientes')} onChat={()=>setChatOpen(true)} onAgendar={()=>onOpenHref('/crm/agenda')} onEdit={onEdit} onConsulta={()=>change('consultas')}/>
     <FichaSolapas ref={tabsRef} activa={solapa} conteo={conteo} onChange={next=>change(seccionDe(next))}/>
     {refreshError && <p role="alert">{refreshError}</p>}
     <div id="fwrap" style={{flex:1,minHeight:0,display:'flex',flexDirection:'column'}}>
@@ -103,5 +106,6 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
       {tab === 'cobros' && <PanelPatientBilling key={patient.id} patientId={patient.id} onOpen={()=>onOpenHref('/crm/cobranzas')}/>}
     </div></div>}
     </div>
+    <PanelFichaChat patient={patient} open={chatOpen} onClose={()=>setChatOpen(false)}/>
   </div>;
 }

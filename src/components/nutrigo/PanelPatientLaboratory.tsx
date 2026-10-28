@@ -61,11 +61,11 @@ export function PanelPatientLaboratory({patientId,now,ir}:{patientId:string;now:
   const verFecha=(date:string)=>{setColumn(date);setView('valores');};
   const verValor=(clave:string)=>{setSelected(clave);setColumn(null);};
   const tabla=<div className="fxs fxtb tall lbt"><table><thead><tr><th>Valor</th><th>Referencia</th>{dates.map(date=><th key={date} className={column===date?'colsel':''}><button type="button" className="lbch" onClick={()=>verFecha(date)}><b className="num">{fechaCorta(date)}</b><small>{groups.filter(g=>g.values.some(v=>v.date===date)).length} valores</small></button></th>)}<th>Tendencia</th><th>Estado</th></tr></thead><tbody>
-    {groups.length?groups.map(group=>{const st=estadoDe(group.latest);const celdas=valoresPorFecha(group,dates);return <tr key={group.key} className={!column&&current?.key===group.key?'sel':undefined} onClick={()=>verValor(group.key)}>
+    {groups.length?groups.map(group=>{const st=estadoDe(group.latest);const celdas=valoresPorFecha(group,dates);return <tr key={group.key} data-lbr={group.key} className={!column&&current?.key===group.key?'sel':undefined} onClick={()=>verValor(group.key)}>
       <td><b>{group.name}</b> <span className="u">{group.unit}</span></td>
       <td className="num u">{group.latest.range_text||'Sin informar'}</td>
       {celdas.map((celda,k)=><td key={dates[k]} className={`num${k===celdas.length-1?' last':''}${celda.fuera?' out':''}${column===dates[k]?' colsel':''}`}>{celda.texto}</td>)}
-      <td style={{width:78}}>{group.points.length>1?<FxCurva valores={group.points.map(p=>p.value)} ancho={70} alto={22} mini/>:null}</td>
+      <td style={{width:78}}>{group.points.length>1?<FxCurva valores={group.points.map(p=>p.value)} ancho={70} alto={22} mini alerta={st?.fuera}/>:null}</td>
       <td>{st?<span className={`pill ${st.clase}`}>{st.texto}</span>:<span className="pill p-wait">Sin rango</span>}</td></tr>;})
       :<tr><td colSpan={dates.length+4} style={{color:'var(--ink3)'}}>{aviso||'Todavía no hay valores revisados. Cargá un informe para comparar resultados.'}{error&&allowed?<> <button type="button" className="lnk" onClick={()=>setRevision(n=>n+1)}>Reintentar laboratorio</button></>:null}</td></tr>}
   </tbody></table></div>;
