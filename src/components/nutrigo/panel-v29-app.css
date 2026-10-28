@@ -3,7 +3,9 @@
    opción, contadores, flecha, buscador, cuenta, columna, título, campana, CTA). */
 
 .pn-panel > #pv-panel-v29 { flex: 1 1 auto; min-width: 0; min-height: 0; height: 100dvh; }
-#pv-panel-v29 { padding: 0; }
+#pv-panel-v29 :is(button, input, select, textarea) { letter-spacing: normal; } /* el boceto no usa el espaciado de letras de los botones de la app */
+#pv-panel-v29 :is(button, a)[aria-pressed="true"] { font-weight: inherit; } /* la regla global de .nv-app los pone en negrita; el boceto no */
+#pv-panel-v29 { padding: 0; line-height: normal; } /* el boceto no define interlineado: «normal», no el 1,5 del cuerpo de la app */
 #pv-panel-v29 .app { width: 100%; height: 100dvh; border-radius: 0; box-shadow: none; }
 #pv-panel-v29 .main { height: auto; overflow: auto; min-height: 0; }
 #pv-panel-v29 #pv-panel { display: flex; flex-direction: column; gap: 16px; min-width: 0; min-height: 0; }
