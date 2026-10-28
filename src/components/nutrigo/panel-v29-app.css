@@ -361,6 +361,7 @@
 #pv-panel-v29 #pv-panel > #s-seguimiento,
 #pv-panel-v29 #pv-panel > #s-progreso,
 #pv-panel-v29 #pv-panel > #s-mensajes,
+#pv-panel-v29 #pv-panel > #s-cobranzas,
 #pv-panel-v29 #pv-panel > #s-alimentos,
 #pv-panel-v29 #pv-panel > #s-asistente,
 #pv-panel-v29 #pv-panel > #s-inicio {
@@ -637,6 +638,23 @@
 /* Botones del encabezado del Plan: el boceto los separa del ícono con 6 px y no los sube. */
 #pv-panel-v29 #s-ficha .pn-record-plan .fxp .sbtn { gap: 6px; }
 #pv-panel-v29 #s-ficha .pn-record-plan .fxp .sbtn svg { position: static; top: auto; }
+
+/* Cobranzas llena la columna igual que Seguimiento: las dos columnas del boceto se desplazan adentro. En el celular se apilan. */
+#pv-panel-v29:not(.mob) .main:has(#s-cobranzas) { height: 100%; overflow: hidden; }
+#pv-panel-v29:not(.mob) #pv-panel:has(#s-cobranzas) { flex: 1; min-height: 0; }
+#pv-panel-v29.mob .main:has(#s-cobranzas) > .top { flex: 0 0 auto; height: auto; flex-wrap: wrap; }
+#pv-panel-v29.mob #pv-panel:has(#s-cobranzas),
+#pv-panel-v29.mob #s-cobranzas,
+#pv-panel-v29.mob #s-cobranzas > #cwrap,
+#pv-panel-v29.mob #s-cobranzas .fx { flex: none; height: auto; min-height: auto; }
+#pv-panel-v29.mob #s-cobranzas .fx { grid-template-columns: 1fr !important; align-content: start; }
+#pv-panel-v29 #s-cobranzas,
+#pv-panel-v29 #s-cobranzas .fx,
+#pv-panel-v29 #s-cobranzas .c,
+#pv-panel-v29 #s-cobranzas .tabs { min-width: 0; max-width: 100%; }
+#pv-panel-v29 #s-cobranzas .sbtn[aria-label] { white-space: nowrap; }
+#pv-panel-v29 #s-cobranzas .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+#pv-panel-v29 #s-cobranzas .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
 
 /* Archivos: el boceto no fija interlineado (queda «normal») y no deja aire arriba de la grilla. */
 #pv-panel-v29 #s-ficha .pn-record-files .fx, #pv-panel-v29 #s-ficha .pn-record-files .fx * { line-height: normal; }
