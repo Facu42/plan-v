@@ -15,7 +15,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
-function playwright() {
+export function playwright() {
   try { return require('playwright'); } catch { try { return require('playwright-core'); } catch { return require(`${process.env.PLAYWRIGHT_GLOBAL ?? '/opt/node22/lib/node_modules'}/playwright`); } }
 }
 
@@ -398,7 +398,7 @@ async function medir(pagina, selector, pseudo, props) {
   }, [pseudo, props]);
 }
 
-async function abrirBoceto(browser, tema) {
+export async function abrirBoceto(browser, tema) {
   const pagina = await (await browser.newContext({ viewport: { width: 1500, height: 1000 }, colorScheme: tema })).newPage();
   await pagina.goto(boceto); await pagina.waitForTimeout(800);
   await pagina.locator(tema === 'dark' ? '#t-dark' : '#t-light').first().click().catch(() => {});
@@ -418,13 +418,13 @@ async function abrirBoceto(browser, tema) {
 }
 
 const numero = valor => (/^-?[\d.]+px$/.test(valor) ? parseFloat(valor) : null);
-function igual(a, b) {
+export function igual(a, b) {
   if (a === b) return true;
   const x = numero(a); const y = numero(b);
   return x !== null && y !== null && Math.abs(x - y) <= TOLERANCIA_PX;
 }
 
-async function abrirApp(browser, tema) {
+export async function abrirApp(browser, tema) {
   const pagina = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: tema })).newPage();
   await pagina.addInitScript(guardado => localStorage.setItem('plan-v:panel-theme-v2:demo', guardado), tema);
   // La línea de ahora de la Agenda solo se dibuja en horario de atención; el boceto la tiene siempre (10:10). Se fija la hora para que el contrato no dependa del reloj.
