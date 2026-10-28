@@ -287,7 +287,7 @@ export function PanelSeguimiento({ patients, onOpen, onReview, onHeader }: {
     if (dialog?.kind !== 'comentar') return;
     const meal = dialog.meal;
     try {
-      await api.sendMessage(meal.patientId, texto, 'vero', false, `seg-${crypto.randomUUID()}`);
+      await api.sendMessage(meal.patientId, texto, 'vero', false, crypto.randomUUID());
       await api.updateMeal(meal.patientId, meal.id, { status: 'confirmed' });
       setDialog(null);
       setTab('ok');
@@ -302,7 +302,7 @@ export function PanelSeguimiento({ patients, onOpen, onReview, onHeader }: {
     const persona = patients.find(patient => patient.id === pacienteId);
     if (!persona) { avisar('Elegí una paciente.'); return; }
     try {
-      await api.sendMessage(persona.id, textoPedido(persona.name, diasPedido, comidas), 'vero', false, `seg-${crypto.randomUUID()}`);
+      await api.sendMessage(persona.id, textoPedido(persona.name, diasPedido, comidas), 'vero', false, crypto.randomUUID());
       setDialog(null);
       avisar(`Pedido anotado para ${persona.name}. Le llega por la app.`);
     } catch (error) {

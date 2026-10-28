@@ -599,6 +599,25 @@
 /* Historia clínica: la hoja vieja (`.m#pv-panel .st::before`) le pinta un punto gris adentro al punto de estado del tema. */
 #pv-panel-v29 #s-ficha .hcidx .st::before{content:none}
 
+/* Registro alimentario: la regla vieja del boceto anterior (`#pv-panel .who b`) pisaba la letra de «Qué comió». */
+#pv-panel-v29 #s-ficha .fxtb .who b{font-size:12.5px;font-weight:500}
+#pv-panel-v29 #s-ficha .pn-record-diary .fxp>header{flex-wrap:wrap;row-gap:8px}
+
+/* Registro alimentario: igual que el boceto, el interlineado queda «normal» y la tabla se desplaza dentro de su tarjeta en vez de estirar la pantalla. */
+#pv-panel-v29 #s-ficha .pn-record-diary .fx, #pv-panel-v29 #s-ficha .pn-record-diary .fx * { line-height: normal; }
+#pv-panel-v29:not(.mob) #s-ficha .pw-record:has(.pn-record-diary > .fx) { flex: 1; min-height: 0; }
+#pv-panel-v29:not(.mob) #s-ficha .pw-record:has(.pn-record-diary > .fx) .pw-record-content, #pv-panel-v29:not(.mob) #s-ficha .pn-record-diary { min-height: 100%; }
+#pv-panel-v29:not(.mob) #s-ficha .pn-record-diary > .fx { min-height: 100%; }
+#pv-panel-v29:not(.mob) #s-ficha .pn-record-diary .fxp.g > .fxs.tall { min-height: 0; flex: 1; max-height: calc(100vh - 330px); }
+/* Botones del encabezado de estas solapas: el boceto los separa del ícono con 6 px y no los sube ni les fija alto mínimo. */
+#pv-panel-v29 #s-ficha .pn-record-diary .fxp .sbtn { gap: 6px; }
+#pv-panel-v29 #s-ficha .pn-record-diary .fxp .sbtn svg { position: static; top: auto; }
+#pv-panel-v29 #s-ficha .pn-record-diary .fxp .sbtn.k { min-height: 0; }
+#pv-panel-v29:not(.mob) #s-ficha .pn-record-diary > .fx { height: auto; }
+#pv-panel-v29:not(.mob) #s-ficha .pn-record-diary .c > .fxp, #pv-panel-v29:not(.mob) #s-ficha .pn-record-diary .c > .fxai { flex-shrink: 0; }
+#pv-panel-v29:not(.mob) #s-ficha .pn-record-diary { display: flex; flex-direction: column; }
+#pv-panel-v29:not(.mob) #s-ficha .pn-record-diary > .fx { flex: 1 0 auto; min-height: 0; }
+#pv-panel-v29 #s-ficha .pw-record:has(.pn-record-diary > .fx) { padding-top: 0; }
 /* Plan: si la columna no se estira (la lista de comidas manda el alto), las columnas de calorías conservan su alto del boceto. */
 #pv-panel-v29 #s-ficha .pn-record-plan .fxp.g > .fxcols { min-height: 120px; }
 #pv-panel-v29 #s-ficha .pw-record:has(.pn-record-plan > .fx) { padding-top: 0; }

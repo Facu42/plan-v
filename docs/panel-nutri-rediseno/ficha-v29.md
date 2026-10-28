@@ -1,6 +1,6 @@
 # Ficha v29 · parte 1 (armazón, diez solapas y Resumen)
 
-Partes 1, 2a, 2b, 2c y 3a **juntadas a main el 27/10** (#199 y #201 a #204, un solo cambio `a7dc819`) con el ok visual de Facundo. La tabla de Historia clínica ya está en la base. Siguen Consultas y notas, Plan, Registro alimentario, Archivos, Cobros y el chat.
+Partes 1, 2a, 2b, 2c y 3a **juntadas a main el 27/10** (#199 y #201 a #204, un solo cambio `a7dc819`) con el ok visual de Facundo. La tabla de Historia clínica ya está en la base. Registro alimentario va en su propio PR. Siguen Consultas y notas, Plan, Archivos, Cobros y el chat.
 
 La Ficha va en tres PR, uno por tema. Este es el primero. Copia el `#s-ficha` de `design/panel-nutri/v29/panel-trabajo.html` con el encabezado de Nutreando que quedó en el boceto (`.fh.ntfh`).
 
@@ -197,3 +197,25 @@ Valores por defecto elegidos (lo que el boceto dibuja y Plan V no tiene):
 - **Contratos:** ninguna ruta ni tabla nueva; solo se leen APIs existentes y se usan `review`, `generate` y `sendMessage` como ya las usa el resto del panel (con `crypto.randomUUID()` como identificador del mensaje).
 - **Áreas frágiles:** el pedido de cambio mostrado es el más viejo sin revisar; con varios, se resuelven de a uno. `Proponer otra` depende del permiso de IA de la paciente.
 - **Migraciones:** ninguna. **Veredicto:** HOLD hasta el ok visual de Facundo; técnicamente SHIP.
+
+## Parte 3b · Registro alimentario
+
+Rama `claude/ficha-v29-plan-registro`. Copia `alimentario:` del boceto (con el panel de Nutreando) con las comidas reales que carga la paciente. Archivos: `PanelPatientFoodDiary.tsx` (misma carga, filtros, «Cargar más» y revisión de antes), `ficha-alimentario.ts` (promedios y calorías por día).
+
+- **Tabla:** cuándo (comida y fecha), qué comió (foto o ícono y descripción), estimado (`~420 kcal`, con «Estimado por IA» si corresponde), estado y el botón «Revisar» / «Ver revisión» que abre la misma revisión de siempre. Filtros Todo, Por revisar, Revisadas y Últimos 7 días / Mes / Todo.
+- **Calorías por día:** columnas de los últimos 7 días con las estimaciones; el día sin estimaciones queda en cero y sin ninguna estimación dice «Sin estimaciones de calorías». Sin meta: Plan V no guarda una meta diaria, así que no se dibuja la línea de meta del boceto.
+- **Promedio:** calorías y reparto de proteínas, carbohidratos y grasas (barras = parte de las calorías, no «contra la meta»), solo con los registros ya cargados.
+- **Registro de la semana** en lugar de «Registro pedido» del boceto: el anillo y los datos son los reales (días con registro, comidas, por revisar).
+- **Valores por defecto elegidos:** la columna «Contra el plan» del boceto se llama «Estado», porque Plan V no compara cada comida con el plan; muestra Por revisar / Revisada / Ajustada. «Lo que ve la IA» dice «todavía no hay observaciones» hasta que exista esa lectura.
+- **Botones con función (pedido de Facundo del 27/10):** «Descargar» baja las comidas cargadas como planilla CSV (separada por «;», con acentos para Excel, sin que un texto pueda leerse como fórmula). «Pedir registro» abre el cajón del boceto (días 7 o 14 y qué comidas cargar) y manda el pedido por el chat de la app, igual que en Seguimiento (nunca WhatsApp). De paso se corrigió Seguimiento: su «Pedir registro» mandaba un identificador que el servidor rechazaba.
+- **Contrato:** `PIEZAS_ALIMENTARIO` en `scripts/panel-v29-contrato.mjs`, 7 piezas iguales en claro y oscuro. Capturas: `docs/screenshots/ficha-v29/alimentario-claro.png`, `-oscuro.png`, `-celular.png`.
+- **Paso 10 · Regression Guard:** flujos tocados: ver registros, filtrar por estado y período, cargar más, reintentar, revisar una comida (mismas llamadas que antes). Pruebas nuevas: `ficha-alimentario.test.ts` y el cajón en `PanelFicha.test.tsx`; en el navegador de demo se bajó la planilla y se mandó el pedido. Migraciones: ninguna. Áreas frágiles: promedios con registros sin estimación (no inventan datos). Veredicto: HOLD hasta el ok visual de Facundo; técnicamente SHIP.
+
+### Ajuste del 28/10 · Registro alimentario igual al código del boceto
+Se comparó el árbol del boceto contra el de la app elemento por elemento (regla fija del código). Cambios: el interlineado queda «normal» como en el boceto; el encabezado tiene un solo grupo de solapas (Todo / Por revisar) más Descargar y Pedir registro, con la separación de 6 px entre ícono y texto; el período (últimos 7 días, último mes, todo) se cambia tocando la leyenda; «Calorías por día» muestra la meta y «Promedio de la semana» compara con la meta calculada cuando existe; el bloque «Hábitos, actividad y vista anterior» pasó debajo de las columnas; la tabla se desplaza dentro de su tarjeta. Queda como valor por defecto «Registro de la semana» en lugar de «Registro pedido» (no se guarda el pedido) y la columna Estado en lugar de «Contra el plan».
+
+### Segundo ajuste del 28/10 · Registro alimentario
+- La barra de proteínas es negra y la de grasas azafrán, como en el boceto (la clase va en la barra, no en el relleno).
+- «Contra el plan» ya no es un valor por defecto: compara lo que la paciente comió con lo que el plan publicado indica para esa comida y ese día (`nutrientesDelPlan`). Más de 20 % arriba en calorías: «Se pasó»; proteína menos del 80 % de la indicada: «Faltó proteína»; más de 20 % abajo: «Quedó corto»; si no, «Coincide». Sin plan para ese día o sin estimación de la comida, dice «—». «Con lactosa» del boceto no se dibuja: la comida no guarda alérgenos.
+- Acción de la fila: «Confirmar» (abre la revisión) si está por revisar; si no, el estado en texto gris, tocable para ver la revisión. El horario se dice «Hoy 8:10», «Ayer 21:10», «Dom 13:00».
+- Sigue siendo un valor por defecto «Registro de la semana» en lugar de «Registro pedido», y «Lo que ve la IA» sin observaciones: no hay dónde guardar el pedido ni quien las genere.

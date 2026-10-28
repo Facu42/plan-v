@@ -124,6 +124,23 @@ export const PIEZAS_OBJETIVOS = [
   ['Síntomas y energía', '#s-ficha .fxp.g > header h3', '', ['fontSize', 'fontWeight']],
 ];
 
+// Piezas de la solapa Registro alimentario. La demo trae comidas de ejemplo; «Contra el plan» no existe en Plan V y no se dibuja.
+export const PIEZAS_ALIMENTARIO = [
+  ['Contra el plan', '#s-ficha .fxtb tbody .pill', '', ['fontSize', 'height', 'borderTopLeftRadius']],
+  ['Botón Confirmar', '#s-ficha .fxtb tbody .sbtn.k', '', ['height', 'width', 'fontSize']],
+  ['Barra de proteínas', '#s-ficha .fxmacros .fxb.k i', '', ['height', 'backgroundColor']],
+  ['Título del panel', '#s-ficha .fxp.g > header h3', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
+  ['Botón del encabezado', '#s-ficha .fxp > header .sbtn.k', '', ['height', 'width', 'fontSize']],
+  ['Botón Descargar', '#s-ficha .fxp > header .sbtn:not(.k)', '', ['height', 'width']],
+  ['Fila de comida', '#s-ficha .fxtb tbody td', '', ['height', 'fontSize']],
+  ['Comida y hora', '#s-ficha .fxwhen b', '', ['fontSize', 'fontWeight']],
+  ['Foto de la comida', '#s-ficha .fxtb .who .photo', '', ['width', 'height', 'borderTopLeftRadius']],
+  ['Qué comió', '#s-ficha .fxtb .who b', '', ['fontSize', 'fontWeight']],
+  ['Barras de macros', '#s-ficha .fxmacros > div', '', ['gap']],
+  ['Título de panel', '#s-ficha .fxp > header h3', '', ['fontSize', 'fontWeight']],
+  ['Lo que ve la IA', '#s-ficha .fxai', '', ['borderTopLeftRadius', 'paddingTop']],
+];
+
 // Piezas de la solapa Plan. El plan sale del plan publicado de la demo; las calorías que el plan no trae quedan en blanco.
 export const PIEZAS_PLAN = [
   ['Título de panel', '#s-ficha .fxp.g > header h3', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
@@ -606,6 +623,12 @@ export async function correrContratoV29() {
       await b.waitForTimeout(1200);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Objetivos y hábitos\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_OBJETIVOS, informe);
+      await b.locator('#ftabs [data-ft="alimentario"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Registro alimentario/ }).click();
+      await a.waitForSelector('#s-ficha .fxtb tbody tr', { timeout: 20000 });
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Registro alimentario\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_ALIMENTARIO, informe);
       await b.locator('#ftabs [data-ft="plan"]').click();
       await a.locator('#ftabs button').filter({ hasText: /^Plan$/ }).click();
       await a.waitForSelector('#s-ficha .fxmeals li', { timeout: 20000 });

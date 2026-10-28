@@ -104,7 +104,7 @@ test('4 · la paciente registra una comida en el diario y la nutricionista la ve
   await waitLoaded(page);
   const row = page.getByRole('row', { name: /Yogur natural con banana y nueces/ });
   await expect(row).toBeVisible();
-  await expect(row.getByRole('cell', { name: 'Por revisar', exact: true })).toBeVisible();
+  await expect(row.getByRole('button', { name: 'Confirmar' })).toBeVisible();
 });
 
 test('5 · la nutricionista revisa la comida y la paciente la ve confirmada', async ({ page }) => {

@@ -7,6 +7,7 @@ import { FichaEtiquetas } from './FichaEtiquetas';
 import { PanelFichaResumen } from './PanelFichaResumen';
 import { PanelFichaMediciones } from './PanelFichaMediciones';
 import { PanelFichaObjetivos } from './PanelFichaObjetivos';
+import { PanelFichaPedirRegistro } from './PanelFichaPedirRegistro';
 import type { FichaData } from './use-ficha-data';
 
 const ahora = new Date('2026-10-27T12:00:00-03:00');
@@ -108,6 +109,16 @@ describe('Ficha v29', () => {
     expect(html).toContain('Todavía sin objetivo definido');
     expect(html).toContain('Agregar');
   });
+
+  it('el cajón de pedir registro avisa que va por la app y deja elegir días y comidas', () => {
+    const html = renderToStaticMarkup(<PanelFichaPedirRegistro patient={paciente} onClose={vi.fn()} onSent={vi.fn()} />);
+    expect(html).toContain('Pedir registro a Sofía');
+    expect(html).toContain('Le llega por la app. No se usa otro canal.');
+    for (const texto of ['7 días', '14 días', 'Desayuno', 'Almuerzo', 'Merienda', 'Cena']) expect(html).toContain(texto);
+    expect(html).not.toContain('vincule la app');
+    expect(renderToStaticMarkup(<PanelFichaPedirRegistro patient={{ ...paciente, has_account: false }} onClose={vi.fn()} onSent={vi.fn()} />)).toContain('vincule la app');
+  });
+
   it('el Plan dibuja los bloques del boceto con sus botones y avisa mientras consulta', () => {
     const html = renderToStaticMarkup(<PanelFichaPlan patient={paciente} now={ahora} onChanged={vi.fn()} onSection={vi.fn()} />);
     for (const texto of ['Plan vigente', 'Requerimiento', 'Calorías por comida', 'Lista de compras', 'Hoy', 'Semana', 'Vista de Sofía', 'Abrir en el editor', 'Editar', 'Enviar a Sofía', 'Consultando el plan vigente…']) expect(html).toContain(texto);
