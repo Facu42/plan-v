@@ -34,4 +34,13 @@ describe('Etiquetas de la paciente (demo en memoria)', () => {
     expect((await app.request('/api/crm/patients/no-existe/tags')).status).toBe(403);
     expect((await app.request('/api/crm/patients/no-existe/tags', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ label: 'X' }) })).status).toBe(403);
   });
+
+  it('arma los grupos con las pacientes de cada etiqueta', async () => {
+    expect(await (await app.request('/api/crm/tag-groups')).json()).toEqual({ groups: [] });
+    await post('Running'); await post('celíacas');
+    expect((await app.request('/api/crm/patients/pat-marina/tags', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ label: ' running' }) })).status).toBe(200);
+    const { groups } = await (await app.request('/api/crm/tag-groups')).json() as { groups: { label: string; patient_ids: string[] }[] };
+    expect(groups.map(g => g.label)).toEqual(['celíacas', 'Running']);
+    expect(groups.find(g => g.label === 'Running')!.patient_ids).toEqual(['pat-sofia', 'pat-marina']);
+  });
 });
