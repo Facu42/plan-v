@@ -96,7 +96,7 @@ export function SubscriptionPreview() {
       />}
       {screen === 'cobranzas-cobro' && <PanelFeePayDialog name="Marina López" options={[{ due_on: '2026-10-01', amount: 28000, title: 'Cuota de octubre 2026' }]} busy={false} notice="Enlace generado." link="https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=uno" onClose={noop} onCreate={noop} onCopy={noop} />}
       {screen === 'publica' && <PanelPublicPageView
-        config={config} published pageUrl="https://plan.v/veronica-trenti" connections={{ google: false, mercadopago: true }}
+        config={config} published pageUrl="https://plan.v/consultorio/veronica-trenti" connections={{ google: false, mercadopago: true }}
         status="" busy={false} loading={false} error="" onChange={noop} onPublish={noop} onToggleEnabled={noop} onConnect={noop} onRetry={noop}
         plans={[plan]} onTogglePlan={noop} onEditPlan={noop}
       />}

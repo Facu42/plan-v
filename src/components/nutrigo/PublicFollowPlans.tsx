@@ -99,7 +99,7 @@ export function PublicSubscriptionReturn({ slug, id }: { slug: string; id: strin
   return <section aria-label="Estado del débito">
     <h1>{message.startsWith('Tu débito') ? '¡Listo!' : 'Débito automático'}</h1>
     <p role="status">{message}</p>
-    {again && <a href={`/${slug}`}>Podés intentar de nuevo</a>}
-    {!again && <a href={`/${slug}`}>Volver al consultorio</a>}
+    {again && <a href={`/consultorio/${slug}`}>Podés intentar de nuevo</a>}
+    {!again && <a href={`/consultorio/${slug}`}>Volver al consultorio</a>}
   </section>;
 }

@@ -12,7 +12,7 @@ describe('Inicio con datos registrados', () => {
     expect(await copyHomeBookingLink({ enabled: false, slug: 'consultorio' }, 'https://example.test', write)).toBe(false);
     expect(write).not.toHaveBeenCalled();
     expect(await copyHomeBookingLink({ enabled: true, slug: 'consultorio-vero' }, 'https://example.test', write)).toBe(true);
-    expect(write).toHaveBeenCalledWith('https://example.test/consultorio-vero');
+    expect(write).toHaveBeenCalledWith('https://example.test/consultorio/consultorio-vero');
     await expect(copyHomeBookingLink({ enabled: true, slug: 'consultorio' }, 'https://example.test', async () => { throw new Error('Sin permiso'); })).rejects.toThrow('Sin permiso');
   });
   it('respeta fecha real y huso argentino: no convierte un turno vencido en uno de la semana siguiente', () => {

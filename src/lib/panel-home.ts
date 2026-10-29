@@ -12,7 +12,7 @@ export const patientHref = (patient: Patient, section = 'resumen') => `/crm/fich
 export const patientMessageHref = (patient: Patient) => `/crm/mensajes?${new URLSearchParams({ paciente: patient.id })}`;
 export async function copyHomeBookingLink(page: { enabled: boolean; slug: string } | undefined, origin: string, write: (text: string) => Promise<void>): Promise<boolean> {
   if (!page?.enabled) return false;
-  await write(new URL(`/${encodeURIComponent(page.slug)}`, origin).href);
+  await write(new URL(`/consultorio/${encodeURIComponent(page.slug)}`, origin).href);
   return true;
 }
 export type HomeAppointment = { patient: Patient; at: Date; duration: number; channel: string; elapsed?: boolean };
