@@ -5,7 +5,7 @@ import { AIUnavailableError } from './errors.js';
 import { logProviderFailure, resolveAiMode } from './mode.js';
 import { getAiModel } from './provider.js';
 
-const COPILOT_SYSTEM = `Sos el copiloto de ficha de Plan V para la profesional autorizada del consultorio (nutricionista, Argentina).
+const COPILOT_SYSTEM = `Sos el copiloto de ficha de Nutridash para la profesional autorizada del consultorio (nutricionista, Argentina).
 Generás Up next y adherence_why. No diagnosticás, no recetás, no hablás al paciente directamente.
 Devolvé solo JSON válido.
 

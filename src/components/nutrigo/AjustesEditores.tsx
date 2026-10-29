@@ -43,11 +43,11 @@ export function EditarMarca({ modo, data, onSaved, onClose }: { modo: ModoMarca;
       </Campo>
       {c.signature ? <div className="ajfirma"><img src={c.signature} alt="Tu firma" style={{ maxHeight: 46, maxWidth: 150 }} /></div> : null}
       {c.signature ? <button type="button" className="chip" onClick={() => poner('signature')('')}>Quitar firma</button> : null}
-      <Campo etiqueta="Logo" ayuda="Si no subís uno, se usa la V de Plan V">
+      <Campo etiqueta="Logo" ayuda="Si no subís uno, se usa la V de Nutridash">
         <input className="ai" type="file" accept="image/png,image/jpeg" onChange={e => void elegir('logo', e.target.files?.[0])} />
       </Campo>
       {c.logo ? <img src={c.logo} width={40} height={40} alt="Tu logo" /> : null}
-      {c.logo ? <button type="button" className="chip" onClick={() => poner('logo')('')}>Usar la V de Plan V</button> : null}
+      {c.logo ? <button type="button" className="chip" onClick={() => poner('logo')('')}>Usar la V de Nutridash</button> : null}
     </>}
     {aviso ? <p className="sxsub" role="alert">{aviso}</p> : null}
   </CajonAjustes>;

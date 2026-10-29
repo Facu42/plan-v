@@ -49,7 +49,7 @@ describe('NV-FIDELITY shell vs inventario', () => {
     expect(css).toMatch(/--nv-bg:\s*#F9F4F2/);
     expect(css).toMatch(/--nv-shadow:\s*0 4px 12px rgba\(176, 176, 176, 0\.14\)/);
     expect(css).toMatch(/--nv-fs-h3:\s*26px/);
-    // La lima Plan V y el dorado del isotipo no pintan esta superficie
+    // La lima Nutridash y el dorado del isotipo no pintan esta superficie
     // (los comentarios sí pueden nombrarlos para dejar asentada la desviación retirada).
     const rules = css.replace(/\/\*[\s\S]*?\*\//g, '');
     expect(rules).not.toMatch(/#EAFF78/i);

@@ -105,7 +105,7 @@ if (isMainModule) {
   const manifest = await writeBackupPair(target, {
     appMode: process.env.APP_MODE || 'demo',
     engine: 'memory',
-    dbContents: '-- Plan V demo snapshot. No Postgres dump. Do not apply this file to a project with patients.\n',
+    dbContents: '-- Nutridash demo snapshot. No Postgres dump. Do not apply this file to a project with patients.\n',
     storageObjects: [],
   });
   console.log(`Backup pair written: ${target} (${manifest.id})`);

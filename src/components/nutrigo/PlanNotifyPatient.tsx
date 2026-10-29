@@ -4,7 +4,7 @@ import { NvButton } from './primitives';
 export function planPublishedNoticeText(patientName: string, version: number): string {
   const firstName = patientName.trim().split(/\s+/)[0] ?? '';
   const greeting = firstName ? `Hola ${firstName},` : 'Hola,';
-  return `${greeting} ya publiqué tu plan alimentario (versión ${version}). Lo ves en la sección Plan de Plan V. Cualquier duda, escribime por acá.`;
+  return `${greeting} ya publiqué tu plan alimentario (versión ${version}). Lo ves en la sección Plan de Nutridash. Cualquier duda, escribime por acá.`;
 }
 
 export function PlanNotifyPatient({ patientName, publishedVersion, busy, sentVersion, onNotify }: {

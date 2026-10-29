@@ -30,7 +30,7 @@ function addDays(iso: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** Lunes de la semana de `iso` (la semana de Plan V empieza el lunes). */
+/** Lunes de la semana de `iso` (la semana de Nutridash empieza el lunes). */
 function mondayOf(iso: string): string {
   const weekday = new Date(`${iso}T12:00:00Z`).getUTCDay();
   return addDays(iso, -((weekday + 6) % 7));

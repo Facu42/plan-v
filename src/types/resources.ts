@@ -74,7 +74,7 @@ export type PatientLibraryView = {
 
 const LICENSE_OPERATIONAL = {
   license_kind: 'internal_operational' as const,
-  license_note: 'Texto original de Plan V. Sin imagen de terceros ni URL remota.',
+  license_note: 'Texto original de Nutridash. Sin imagen de terceros ni URL remota.',
   cover_url: null,
   author_name: 'Plan V',
   reviewed_at: '2026-09-16T12:00:00.000Z',
@@ -98,7 +98,7 @@ export const SEEDED_OPERATIONAL_RESOURCES: EditorialResource[] = [
     action_page: 'plan',
     sections: [
       { title: 'Una semana, siete días', body: 'En Mi plan podés recorrer los siete días publicados por tu nutricionista. Cada tarjeta conserva el título y el momento de comida que forman parte del plan vigente.' },
-      { title: 'Sólo mostramos lo que fue indicado', body: 'Plan V no completa por su cuenta porciones, cantidades ni información nutricional. Si una indicación necesita más detalle, usá Mensajes para consultarlo.' },
+      { title: 'Sólo mostramos lo que fue indicado', body: 'Nutridash no completa por su cuenta porciones, cantidades ni información nutricional. Si una indicación necesita más detalle, usá Mensajes para consultarlo.' },
       { title: 'Encontrá una preparación', body: 'El buscador recorre títulos, días y momentos. Menú saludable reúne los mismos títulos para ver rápidamente dónde aparecen durante la semana.' },
     ],
     ...LICENSE_OPERATIONAL,
@@ -120,7 +120,7 @@ export const SEEDED_OPERATIONAL_RESOURCES: EditorialResource[] = [
     sections: [
       { title: 'Foto o descripción', body: 'Elegí el momento de comida y registrá una foto o un texto. La entrada queda asociada a tu ficha y visible para la profesional que te acompaña.' },
       { title: 'Revisión profesional', body: 'Cuando exista una revisión, el Diario muestra únicamente la devolución habilitada para vos. Las notas privadas de trabajo profesional permanecen fuera de tu vista.' },
-      { title: 'Análisis disponible', body: 'Si el análisis asistido está habilitado, Plan V lo procesa dentro del circuito existente. Si no está disponible, tu registro igualmente conserva el contenido que enviaste.' },
+      { title: 'Análisis disponible', body: 'Si el análisis asistido está habilitado, Nutridash lo procesa dentro del circuito existente. Si no está disponible, tu registro igualmente conserva el contenido que enviaste.' },
     ],
     ...LICENSE_OPERATIONAL,
   },
@@ -154,7 +154,7 @@ export const SEEDED_OPERATIONAL_RESOURCES: EditorialResource[] = [
     eyebrow: 'SEGUÍ EN CONTACTO',
     minutes: 2,
     icon: 'message',
-    summary: 'Encontrá tu próxima consulta y mantené la conversación en el mismo hilo privado de Plan V.',
+    summary: 'Encontrá tu próxima consulta y mantené la conversación en el mismo hilo privado de Nutridash.',
     tags: ['mensajes', 'agenda', 'consulta'],
     related: ['leer-plan-semanal', 'registrar-comida'],
     action_label: 'Abrir mensajes',
@@ -162,7 +162,7 @@ export const SEEDED_OPERATIONAL_RESOURCES: EditorialResource[] = [
     sections: [
       { title: 'Una conversación continua', body: 'Mensajes conserva el intercambio con tu nutricionista dentro de tu ficha. Es el lugar indicado para consultar una indicación o compartir contexto.' },
       { title: 'Tu próxima consulta', body: 'Agenda muestra la próxima ocurrencia disponible, junto con modalidad y duración cuando esos datos fueron definidos por la profesional.' },
-      { title: 'Sin estados supuestos', body: 'Plan V no muestra confirmaciones de lectura o entrega que todavía no estén persistidas. El hilo presenta únicamente los mensajes disponibles.' },
+      { title: 'Sin estados supuestos', body: 'Nutridash no muestra confirmaciones de lectura o entrega que todavía no estén persistidas. El hilo presenta únicamente los mensajes disponibles.' },
     ],
     ...LICENSE_OPERATIONAL,
   },
@@ -182,7 +182,7 @@ export const SEEDED_OPERATIONAL_RESOURCES: EditorialResource[] = [
     action_page: 'progreso',
     sections: [
       { title: 'Una ventana de siete días', body: 'Progreso organiza los datos que ya existen en tu ficha para mostrar una vista breve de comidas revisadas y hábitos registrados.' },
-      { title: 'Datos disponibles, no estimaciones', body: 'Cuando falta un registro, Plan V no lo completa ni lo reemplaza con valores aproximados. La vista se limita a la información disponible.' },
+      { title: 'Datos disponibles, no estimaciones', body: 'Cuando falta un registro, Nutridash no lo completa ni lo reemplaza con valores aproximados. La vista se limita a la información disponible.' },
       { title: 'Contexto para conversar', body: 'Usá esta pantalla como apoyo para reconocer patrones y preparar preguntas. La interpretación profesional corresponde a tu nutricionista.' },
     ],
     ...LICENSE_OPERATIONAL,
@@ -212,7 +212,7 @@ export const SEEDED_OPERATIONAL_RESOURCES: EditorialResource[] = [
 
 const LICENSE_CLINICAL = {
   license_kind: 'placeholder' as const,
-  license_note: 'Artículo revisado de Plan V. Portada ilustrativa local; no hay imagen licenciada remota.',
+  license_note: 'Artículo revisado de Nutridash. Portada ilustrativa local; no hay imagen licenciada remota.',
   cover_url: null,
   author_name: 'Equipo editorial Plan V',
   reviewed_at: '2026-09-16T15:00:00.000Z',
@@ -229,14 +229,14 @@ export const SEEDED_CLINICAL_ARTICLES: EditorialResource[] = [
     eyebrow: 'ARTÍCULO REVISADO',
     minutes: 4,
     icon: 'sparkle',
-    summary: 'Cómo usar el registro de hidratación de Plan V para conversar con tu nutricionista, sin cantidades prescritas por la app.',
+    summary: 'Cómo usar el registro de hidratación de Nutridash para conversar con tu nutricionista, sin cantidades prescritas por la app.',
     tags: ['agua', 'hábitos', 'registro'],
     related: ['progreso-semanal'],
     action_label: 'Ver mi progreso',
     action_page: 'progreso',
     sections: [
-      { title: 'Lo que sí registra Plan V', body: 'El vaso de hidratación cuenta lo que vos marcás. No estima sed, no completa vasos faltantes y no convierte el recuento en una indicación clínica.' },
-      { title: 'Autoría y revisión', body: 'Este artículo fue escrito por el equipo editorial de Plan V y marcado como revisado antes de publicarse. No se publica solo desde un borrador de IA.' },
+      { title: 'Lo que sí registra Nutridash', body: 'El vaso de hidratación cuenta lo que vos marcás. No estima sed, no completa vasos faltantes y no convierte el recuento en una indicación clínica.' },
+      { title: 'Autoría y revisión', body: 'Este artículo fue escrito por el equipo editorial de Nutridash y marcado como revisado antes de publicarse. No se publica solo desde un borrador de IA.' },
       { title: 'Qué consultar', body: 'Si tu profesional indicó una cantidad o un horario, esa indicación vive en el plan o en Mensajes. Este texto no la reemplaza ni la infiere.' },
     ],
     ...LICENSE_CLINICAL,
@@ -250,13 +250,13 @@ export const SEEDED_CLINICAL_ARTICLES: EditorialResource[] = [
     eyebrow: 'ARTÍCULO REVISADO',
     minutes: 4,
     icon: 'leaf',
-    summary: 'Cómo apoyarte en el plan vigente cuando comés fuera, sin que Plan V arme un menú alternativo por su cuenta.',
+    summary: 'Cómo apoyarte en el plan vigente cuando comés fuera, sin que Nutridash arme un menú alternativo por su cuenta.',
     tags: ['plan', 'fuera de casa', 'organización'],
     related: ['leer-plan-semanal', 'compras-desde-plan'],
     action_label: 'Abrir mi plan',
     action_page: 'plan',
     sections: [
-      { title: 'Partí del plan publicado', body: 'Si hay un título o un momento publicado para ese día, usalo como referencia. Plan V no inventa un plato equivalente ni calcula porciones de un restaurante.' },
+      { title: 'Partí del plan publicado', body: 'Si hay un título o un momento publicado para ese día, usalo como referencia. Nutridash no inventa un plato equivalente ni calcula porciones de un restaurante.' },
       { title: 'Registro honesto', body: 'Si comiste algo distinto, el Diario admite foto o texto. Eso no cambia el plan vigente ni genera una receta nueva.' },
       { title: 'Límite editorial', body: 'Este artículo no diagnostica intolerancias ni prescribe un reemplazo. La decisión clínica queda en tu nutricionista.' },
     ],

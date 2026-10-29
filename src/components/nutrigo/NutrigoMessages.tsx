@@ -260,7 +260,7 @@ function ConversationProfile({ patient, role, onNavigate }: Pick<Props, 'patient
     <section className="nmf-feature" aria-label="Acerca de">
       <FeatureTitle icon={<Info size={14} aria-hidden />} title="Acerca de" />
       <div className="nmf-about">
-        {role === 'patient' && <p>Tu nutricionista de seguimiento en Plan V.</p>}
+        {role === 'patient' && <p>Tu nutricionista de seguimiento en Nutridash.</p>}
         <p><b>{role === 'pro' ? 'Objetivo' : 'Objetivo compartido'}:</b> {patient.goal || 'Todavía no definido'}</p>
         {nextFocus && <p><b>Próximo foco:</b> {nextFocus}</p>}
         <p><b>Próxima consulta:</b> {appointment ? `${appointment.when} · ${appointment.duration} min · ${appointment.channel === 'video' ? 'Videollamada' : appointment.channel === 'presencial' ? 'Presencial' : appointment.channel}` : 'Por coordinar'}</p>

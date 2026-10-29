@@ -46,7 +46,7 @@ export async function syncGoogleBooking(booking:Pick<SchedulingBooking,'id'|'nut
  const existing=await fetch(eventUrl,{headers,signal:AbortSignal.timeout(20000)});
  if(!existing.ok&&existing.status!==404&&existing.status!==410)throw new CareError(503,'No se pudo comprobar la cita en Google.');
  const old=existing.ok?await existing.json() as {etag?:string;extendedProperties?:{private?:Record<string,string>};conferenceData?:unknown}:null;
- if(old?.extendedProperties?.private?.planv_booking!==booking.id&&old)throw new CareError(403,'Ese evento no fue creado por Plan V. No se modifica.');
+ if(old?.extendedProperties?.private?.planv_booking!==booking.id&&old)throw new CareError(403,'Ese evento no fue creado por Nutridash. No se modifica.');
  if(old?.extendedProperties?.private?.planv_revision&&(!/^\d+$/.test(old.extendedProperties.private.planv_revision)||Number(old.extendedProperties.private.planv_revision)>booking.revision))throw new CareError(409,'Google ya contiene una revisión más reciente.');
  if(old&&typeof old.etag!=='string')throw new CareError(503,'No se pudo verificar la revisión del calendario.');
  const eventHeaders:Record<string,string>={...headers};if(old?.etag)eventHeaders['If-Match']=old.etag;
@@ -56,7 +56,7 @@ export async function syncGoogleBooking(booking:Pick<SchedulingBooking,'id'|'nut
   const r=await fetch(`${eventUrl}?sendUpdates=none`,{method:'DELETE',headers:eventHeaders,signal:AbortSignal.timeout(20000)});
   if(!r.ok&&r.status!==404&&r.status!==410)throw new SchedulingUncertainError();await authorize();return null;
  }
- const body:Record<string,unknown>={id:eventId,summary:'Consulta Plan V',start:{dateTime:booking.starts_at,timeZone:settings.timezone},end:{dateTime:new Date(Date.parse(booking.starts_at)+booking.duration_min*60000).toISOString(),timeZone:settings.timezone},extendedProperties:{private:{planv_booking:booking.id,planv_revision:String(booking.revision)}}};
+ const body:Record<string,unknown>={id:eventId,summary:'Consulta Nutridash',start:{dateTime:booking.starts_at,timeZone:settings.timezone},end:{dateTime:new Date(Date.parse(booking.starts_at)+booking.duration_min*60000).toISOString(),timeZone:settings.timezone},extendedProperties:{private:{planv_booking:booking.id,planv_revision:String(booking.revision)}}};
  if(old?.conferenceData)body.conferenceData=old.conferenceData;
  const wantMeet=settings.create_meet&&settings.types.find(t=>t.id===booking.type_id)?.channel==='video';
  if(wantMeet&&!body.conferenceData)body.conferenceData={createRequest:{requestId:`${eventId}-${booking.revision}`,conferenceSolutionKey:{type:'hangoutsMeet'}}};

@@ -17,7 +17,7 @@ export function PatientPaywall({
   return (
     <main className="patient-shell billing-shell">
       <header className="patient-topbar">
-        <div className="brand-lockup"><Mark /><span>Plan V</span></div>
+        <div className="brand-lockup"><Mark /><span>Nutridash</span></div>
         <button className="round-button theme-toggle" type="button" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} aria-pressed={darkMode} onClick={onToggleTheme}>
           <Icon name={darkMode ? 'sun' : 'moon'} size={18} />
         </button>

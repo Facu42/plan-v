@@ -11,7 +11,7 @@ export function feeMonthTitle(dueOn: string): string {
   return `Cuota de ${label} ${year ?? ''}`.trim();
 }
 
-/** Cuerpo de la preferencia de Checkout Pro. Sin comisión para Plan V. */
+/** Cuerpo de la preferencia de Checkout Pro. Sin comisión para Nutridash. */
 export function feePreferenceBody(input: { id: string; title: string; amountPesos: number; notificationUrl: string; patientId: string }) {
   return {
     items: [{ id: input.id, title: input.title.slice(0, 120), quantity: 1, currency_id: 'ARS', unit_price: input.amountPesos }],

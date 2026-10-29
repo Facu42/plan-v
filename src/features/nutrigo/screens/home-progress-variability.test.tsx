@@ -132,7 +132,7 @@ const progressData = (patch: Record<string, unknown> = {}) => ({ progress: { ser
 
 describe.each([false, true])('Progreso: variabilidad de datos (celular %s)', mobile => {
   beforeEach(() => { context.mobile = mobile; });
-  it('las medidas que Plan V no registra se ven como raya, no como casilla en blanco', () => {
+  it('las medidas que Nutridash no registra se ven como raya, no como casilla en blanco', () => {
     context.data = progressData({ progress: { series: [series('waist', 'cm', [['2026-10-01', 88]]), series('hip', 'cm', [['2026-10-01', 100]])], meals: {} } });
     const out = text(progress());
     if (mobile) expect(out).toMatch(/Cintura 88 cm/);

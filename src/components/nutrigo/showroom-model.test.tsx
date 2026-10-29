@@ -89,7 +89,7 @@ describe('modelo seguro del showroom', () => {
   });
 });
 
-describe('componentes visuales Nutrigo / Plan V', () => {
+describe('componentes visuales Nutrigo / Nutridash', () => {
   it('mantiene contraste AA del texto secundario en todas las superficies claras', () => {
     const css = readFileSync(new URL('./nutrigo.css', import.meta.url), 'utf8').split('.nv-app.nv-dark')[0];
     const token = (name: string) => css.match(new RegExp(`--nv-${name}:(#[a-f0-9]{6})`))![1];

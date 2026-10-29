@@ -19,7 +19,7 @@ export type DisplayRecipe = Pick<PatientRecipe,'id'|'title'|'version'|'yield_por
 type MacroKey = 'kcal'|'carbs_g'|'protein_g'|'fat_g';
 function nutrients(recipe:DisplayRecipe) {return recipe.nutrition?.per_portion??recipe.card?.macros??null;}
 const macroValue=(recipe:DisplayRecipe|null|undefined,key:MacroKey,portions=1)=>{const value=recipe?nutrients(recipe)?.[key]:null;return isAmount(value)?value*portions:null;};
-/** Dato que Plan V no tiene (o no es un número válido): «—» dentro del bloque, nunca un número inventado. */
+/** Dato que Nutridash no tiene (o no es un número válido): «—» dentro del bloque, nunca un número inventado. */
 const NO_DATA=NO_VALUE;
 const amount=formatAmount;
 
@@ -29,7 +29,7 @@ const TONE_CLASSES=Object.values(TONES).flatMap(tone=>[tone.strong,tone.soft]);
 const toneOf=(category:string|undefined)=>['Desayuno','Colación'].includes(category??'')?TONES.green:['Cena','Extra'].includes(category??'')?TONES.orange:TONES.saffron;
 const categoryOf=(recipe:DisplayRecipe)=>recipe.card?.category??'Receta';
 const SAMPLE_CATEGORIES=['Breakfast','Lunch','Snack','Dinner'];
-/** Filtros del archivo (All, Breakfast, Lunch, Snack, Dinner) con los momentos de Plan V. */
+/** Filtros del archivo (All, Breakfast, Lunch, Snack, Dinner) con los momentos de Nutridash. */
 const CATEGORY_FILTERS:Record<string,string|null>={All:null,Breakfast:'Desayuno',Lunch:'Almuerzo',Snack:'Merienda',Dinner:'Cena'};
 const SORTS=[{id:'original',label:'Original'},{id:'kcal',label:'Calorías'},{id:'name',label:'Nombre'}] as const;
 type SortId=(typeof SORTS)[number]['id'];
@@ -63,7 +63,7 @@ function categoryBinding(node:SourceNode,category:string|undefined):SourceBindin
   if(leaf(node)&&SAMPLE_CATEGORIES.includes(sourceText(node)))return {text:category??'Receta'};
   return undefined;
 }
-/** Calificaciones y reseñas: Plan V no las guarda, así que el bloque queda sin reseñas. */
+/** Calificaciones y reseñas: Nutridash no las guarda, así que el bloque queda sin reseñas. */
 function ratingText(sample:string) {
   if(/^\d\.\d\/5/.test(sample)||/^\d\.\d$/.test(sample))return 'Sin reseñas';
   if(sample==='/5')return '';
@@ -103,7 +103,7 @@ function recipeCardBinding(node:SourceNode,recipe:DisplayRecipe,open:()=>void,ti
 }
 
 // Filas de información del archivo: sólo se completa lo que declara la receta publicada.
-// Dificultad, puntaje y tiempo de cocción no existen en Plan V y quedan "Sin indicar".
+// Dificultad, puntaje y tiempo de cocción no existen en Nutridash y quedan "Sin indicar".
 const INFO_LABELS:Record<string,string>={'Eat Time':'Momento','Prep Time':'Preparación','Cook Time':'Cocción','Cook Duration':'Preparación','Difficulty':'Dificultad','Total Steps':'Pasos','Health Score':'Procedencia'};
 function recipeInfoBinding(node:SourceNode,recipe:DisplayRecipe):SourceBinding|undefined {
   if(nodeName(node)!=='Item Detail Info')return undefined;

@@ -737,7 +737,7 @@ export function sendPatientInvite(inviteId: string): PatientInvite | null {
     eventType: 'invite_sent',
     kind: 'reminder',
     subject: `Invitación enviada · ${current.email}`,
-    body: 'La invitación quedó en el buzón in-app de Plan V; no se envió un mail real.',
+    body: 'La invitación quedó en el buzón in-app de Nutridash; no se envió un mail real.',
     clientId: inviteId,
   });
   return publicInviteView(activated.invite);
@@ -1190,8 +1190,8 @@ export function setAppointment(
       kind: 'appointment',
       subject: `${title} · ${patient.name}`,
       body: scheduled
-        ? `Turno publicado: ${when} · ${scheduled.duration} min · ${scheduled.channel}. Este aviso quedó en el buzón demo de Plan V; no se envió a internet.`
-        : `Turno cancelado${previous ? ` (era ${previous.when})` : ''}. Este aviso quedó en el buzón demo de Plan V; no se envió a internet.`,
+        ? `Turno publicado: ${when} · ${scheduled.duration} min · ${scheduled.channel}. Este aviso quedó en el buzón demo de Nutridash; no se envió a internet.`
+        : `Turno cancelado${previous ? ` (era ${previous.when})` : ''}. Este aviso quedó en el buzón demo de Nutridash; no se envió a internet.`,
     });
   }
 
@@ -1225,7 +1225,7 @@ export function confirmAppointment(id: string, reply: 'attending' | 'needs_chang
     eventType: 'appointment_confirmed',
     kind: 'appointment',
     subject: `Consulta · ${reply === 'attending' ? 'confirmada' : 'pide cambio'} · ${patient.name}`,
-    body: `La paciente respondió ${reply === 'attending' ? 'asiste' : 'pide cambio'} al turno ${appointment.when}. Este aviso quedó en el buzón in-app de Plan V; no se envió a internet.`,
+    body: `La paciente respondió ${reply === 'attending' ? 'asiste' : 'pide cambio'} al turno ${appointment.when}. Este aviso quedó en el buzón in-app de Nutridash; no se envió a internet.`,
   });
   return updatePatient(id, { appointment, appointment_history: history });
 }

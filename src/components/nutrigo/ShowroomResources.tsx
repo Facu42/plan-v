@@ -315,7 +315,7 @@ export function ShowroomResources({ patientId, query, assignments = [], onNaviga
           <header>
             <p className="nvrf-meta"><span>{selected.category}</span><i aria-hidden="true" /><small>{selected.minutes} min de lectura</small></p>
             <h2>{selected.title}</h2>
-            <p className="nvrf-byline"><i aria-hidden="true" />{selected.kind === 'clinical' ? selected.author_name : 'Guía de uso de Plan V'}{date && <><b aria-hidden="true" /><small>Revisado {date}</small></>}</p>
+            <p className="nvrf-byline"><i aria-hidden="true" />{selected.kind === 'clinical' ? selected.author_name : 'Guía de uso de Nutridash'}{date && <><b aria-hidden="true" /><small>Revisado {date}</small></>}</p>
           </header>
           <Cover guide={selected} size={48} />
           <p className="nvrf-intro">{selected.summary}</p>
