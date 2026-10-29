@@ -93,3 +93,8 @@ La revisión automática rechazó publicar el nuevo árbol en el repositorio pú
 ### Autorización recibida
 
 Facundo respondió «sí» a la solicitud explícita de publicar esta ampliación —código, migración e informes— en el repositorio público Facu42/plan-v y aplicar después la migración en producción plan-v-app cuando los controles estén en verde. La autorización de publicación y base queda recibida; sigue la publicación, la CI remota de la cabeza exacta, la aplicación y verificación de esa única migración, y la integración del PR.
+
+
+### Parche de la auditoría de dependencias
+
+La CI de `1e369d57` se detuvo antes de los tests por GHSA-8g5g-mxqh-grgj, aviso actualizado el 29/10 que afecta Vite 6.4.4. Se instaló el parche oficial 6.4.5 fijado exactamente: solo cambia el paquete Vite y sus datos de integridad en el lock; no hay otros cambios transitivos. Auditoría local posterior: cero vulnerabilidades. Build aprobado (13,47 s), tipos aprobados y revisión independiente sin P1/P2. Se conserva el control de auditoría sin exclusiones. Referencia: https://github.com/advisories/GHSA-8g5g-mxqh-grgj. La CI se repite en la cabeza con el parche; no se aplicó aún la migración de producción.
