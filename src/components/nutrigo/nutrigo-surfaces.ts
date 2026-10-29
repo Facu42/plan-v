@@ -1,6 +1,6 @@
 import type { ShowroomPage } from './ShowroomPanels';
 
-/** Canonical Nutrigo frame widths. 320 is Plan V extra. Not Facu visual approval. */
+/** Canonical Nutrigo frame widths. 320 is Nutridash extra. Not Facu visual approval. */
 export const NUTRIGO_VIEWPORTS = {
   desktop: 1440,
   tablet: 800,

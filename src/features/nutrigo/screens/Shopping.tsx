@@ -12,7 +12,7 @@ import { boughtLabel, localAmount, monthName, productCount, recentMonths, SHOPPI
 import { leftAlignedSearch } from './search-align';
 import { GREEN_BG, swapBackground } from '../source-tone';
 
-/** Solapas del archivo (All Categories, Grains…) con los filtros reales de la lista de Plan V. */
+/** Solapas del archivo (All Categories, Grains…) con los filtros reales de la lista de Nutridash. */
 const TABS=[{id:'all',label:'Todos'},{id:'pending',label:'Pendientes'},{id:'checked',label:'Comprados'},{id:'plan',label:'Del plan'},{id:'manual',label:'Agregados'}] as const;
 type TabId=(typeof TABS)[number]['id'];
 const SORTS=[{id:'original',label:'Original'},{id:'name',label:'Nombre'}] as const;
@@ -79,7 +79,7 @@ export function NutrigoShopping({ patient, query = '', onNavigate, onSignOut, no
       : undefined) };
     if (cell === 'Cell-Category') return { children: relabel(child, () => storeBadge(storeOf(item.name)), n => nodeName(n) === 'Badge Category - Grocery List' ? { props: { title: storeOf(item.name), style: { background: storeColor(item.name), maxWidth: '100%' } } } : leaf(n) ? { text: storeBadge(storeOf(item.name)), props: { style: oneLine } } : undefined) };
     if (cell === 'Cell-Qty') { const local = localAmount(item.quantity, item.unit, item.name); const hint = local.exact && local.exact !== `${local.amount} ${local.unit}`.trim() ? `${local.amount} ${local.unit} · en el plan suma ${local.exact}` : local.amount; return { children: relabel(child, sample => /^\d/.test(sample) ? local.amount : local.unit, n => nodeName(n) === 'Button Group' ? dim : leaf(n) && /^\d/.test(sourceText(n)) ? { text: local.amount, props: { title: hint, style: oneLine } } : undefined) }; }
-    // Plan V no tiene calorías ni precios por producto: las columnas quedan sin dato, como «Actual» en el archivo.
+    // Nutridash no tiene calorías ni precios por producto: las columnas quedan sin dato, como «Actual» en el archivo.
     if (['Cell-Calories', 'Cell-Cost', 'Cell-Actual'].includes(cell)) return { children: relabel(child, sample => /^\d/.test(sample) ? '-' : '') };
     if (cell === 'Cell-Status') return { children: relabel(child, () => item.checked ? 'Comprado' : 'Pendiente', n => leaf(n) ? { text: item.checked ? 'Comprado' : 'Pendiente', props: { style: { width: 'auto', whiteSpace: 'nowrap' } } } : n !== child && objects(child).includes(n) ? { onClick: () => void mutate(() => shoppingApi.check(patient.id, { source_key: item.source_key, checked: !item.checked })), label: `${item.checked ? 'Desmarcar' : 'Marcar como comprado'}: ${item.name}`, props: { disabled: busy, 'aria-pressed': item.checked } } : undefined) };
     return undefined;

@@ -109,7 +109,7 @@ export function PatientImportDialog({onClose,onImported}:{onClose:()=>void;onImp
   return <FigmaRecordDialog title="Importar pacientes" closeLabel="Cerrar importación" onClose={()=>{if(!busy&&canLeaveWorkspace())onClose();}} className="pi-dialog">
     <p className="pi-hint">Los archivos se leen en tu computadora. Sólo se guardan los datos que revisás. No se crean cuentas, se mandan invitaciones ni se publican planes.</p>
     <label className="pi-file">Archivos (hasta 20, de 20 MB cada uno; PDF hasta 40 páginas)<input type="file" multiple accept=".xlsx,.csv,.docx,.pdf,.jpg,.jpeg,.png" disabled={busy||loading} onChange={event=>void choose(event)}/></label>
-    <p className="pi-hint">El reconocimiento de fotos y escaneos corre localmente. La primera lectura descarga el motor y el idioma desde Plan V; el contenido del archivo permanece en tu computadora hasta que confirmes los datos revisados.</p>
+    <p className="pi-hint">El reconocimiento de fotos y escaneos corre localmente. La primera lectura descarga el motor y el idioma desde Nutridash; el contenido del archivo permanece en tu computadora hasta que confirmes los datos revisados.</p>
     {loading&&<p role="status">Cargando fichas e importaciones anteriores…</p>}
     {busy&&<p role="status" aria-live="polite">{progress}</p>}
     {error&&<p className="pi-error" role="alert">{error}</p>}

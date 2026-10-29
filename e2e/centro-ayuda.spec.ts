@@ -44,7 +44,7 @@ test('Ayuda: FAQ abre destinos reales y pedido local no genera solicitudes', asy
   await enterDemo(page, '/crm/ayuda');
   const writes: string[] = [];
   page.on('request', request => { if (request.url().includes('/api/') && request.method() !== 'GET') writes.push(request.url()); });
-  await help.getByRole('button', { name: 'Pedir ayuda a Plan V' }).click();
+  await help.getByRole('button', { name: 'Pedir ayuda a Nutridash' }).click();
   await dialog.getByLabel('Apartado', { exact: true }).selectOption('Pacientes e invitaciones');
   await dialog.getByLabel('Qué pasó', { exact: true }).fill('No veo una opción. Ejemplo ficticio.');
   await dialog.getByRole('button', { name: 'Anotar pedido' }).click();
@@ -52,7 +52,7 @@ test('Ayuda: FAQ abre destinos reales y pedido local no genera solicitudes', asy
   await dialog.getByRole('checkbox').check();
   await dialog.getByRole('button', { name: 'Anotar pedido' }).click();
   await expect(dialog).toHaveCount(0);
-  await expect(help.getByRole('status')).toContainText('No se envió a Plan V');
+  await expect(help.getByRole('status')).toContainText('No se envió a Nutridash');
   expect(writes).toEqual([]);
 });
 
@@ -74,7 +74,7 @@ test('Ayuda: 1440/390, claro/oscuro, Inter y diálogos dentro de pantalla', asyn
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     expect(await page.locator('#s-ayuda').evaluate(el => getComputedStyle(el).fontFamily)).toContain('Inter');
     await page.screenshot({ path: `docs/screenshots/centro-ayuda/ayuda-${width}-${dark ? 'oscuro' : 'claro'}.png`, fullPage: true });
-    await page.getByRole('button', { name: 'Pedir ayuda a Plan V' }).click();
+    await page.getByRole('button', { name: 'Pedir ayuda a Nutridash' }).click();
     const dialog = page.getByRole('dialog');
     // El diálogo entra deslizando unos píxeles: se mide cuando terminó de entrar.
     await dialog.evaluate(el => Promise.all(el.getAnimations({ subtree: true }).map(a => a.finished.catch(() => undefined))));

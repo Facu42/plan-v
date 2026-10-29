@@ -8,9 +8,11 @@ import type { BillingBoard } from '../../types/fees';
 import { useAppStore } from '../../store/useAppStore';
 import { PanelV29Icon } from './PanelV29Icon';
 import { avisoEnElPanel, usePanelBoceto } from './panel-v29-boceto';
-import { MAX_MENSAJE, armarAudiencias, destinatarias, enviarAVarias } from './mensaje-varias';
+import { MAX_MENSAJE, armarAudiencias, destinatarias, enviarAVarias, manianaALas9, programarAVarias } from './mensaje-varias';
 
 const TEXTO_INICIAL = '¡Hola {nombre}! ';
+const CUANDO = [['ahora', 'Ahora'], ['maniana', 'Mañana a las 9']] as const;
+type Cuando = typeof CUANDO[number][0];
 
 export function PanelMensajeVarias({ pacientes, ahora, onClose }: { pacientes: readonly Patient[]; ahora: Date; onClose: () => void }) {
   const [grupos, setGrupos] = useState<TagGroup[]>([]);
@@ -19,6 +21,7 @@ export function PanelMensajeVarias({ pacientes, ahora, onClose }: { pacientes: r
   const [texto, setTexto] = useState(TEXTO_INICIAL);
   const [aviso, setAviso] = useState('');
   const [enviando, setEnviando] = useState(false);
+  const [cuando, setCuando] = useState<Cuando>('ahora');
   const { clase, cerrar } = usePanelBoceto(onClose);
   useEffect(() => {
     const controller = new AbortController();
@@ -36,6 +39,15 @@ export function PanelMensajeVarias({ pacientes, ahora, onClose }: { pacientes: r
     if (cuerpo.length > MAX_MENSAJE) { setAviso(`El mensaje puede tener hasta ${MAX_MENSAJE} letras.`); return; }
     setEnviando(true); setAviso('');
     const quienes = pacientes.filter(p => ids.includes(p.id));
+    if (cuando === 'maniana') {
+      try {
+        await programarAVarias(quienes, cuerpo, manianaALas9(new Date()), api.scheduleMessages);
+        avisoEnElPanel(`Mensaje programado a ${quienes.length} ${quienes.length === 1 ? 'paciente' : 'pacientes'}.`); cerrar();
+      } catch (error) {
+        setAviso(error instanceof Error && error.message ? error.message : 'No pudimos programar el mensaje. Probá de nuevo.');
+      } finally { setEnviando(false); }
+      return;
+    }
     const r = await enviarAVarias(quienes, cuerpo, api.sendMessage);
     setEnviando(false);
     if (r.enviados) void useAppStore.getState().refreshDirectory().catch(() => undefined);
@@ -50,6 +62,7 @@ export function PanelMensajeVarias({ pacientes, ahora, onClose }: { pacientes: r
       <div className="abody" id="actb">
         <div className="af"><span>Para</span><div className="ach">{opciones.map(o => <button type="button" key={o.id} aria-pressed={elegidas.includes(o.id)} onClick={() => alternar(o.id)}>{o.texto} · {o.ids.length}</button>)}</div></div>
         <label className="af"><span>Mensaje</span><textarea className="ai" rows={4} maxLength={MAX_MENSAJE} value={texto} onChange={e => { setTexto(e.target.value); setAviso(''); }} /><small>Escribí {'{nombre}'} y se completa con el nombre de cada paciente.</small></label>
+        <label className="af"><span>Cuándo</span><div className="aseg" role="radiogroup">{CUANDO.map(([v, t]) => <button type="button" key={v} role="radio" aria-label={t} aria-checked={cuando === v} onClick={() => { setCuando(v); setAviso(''); }}>{t}</button>)}</div></label>
         {ids.length ? <p className="sxsub">Le llega a {ids.length} {ids.length === 1 ? 'paciente' : 'pacientes'}.</p> : null}
         {aviso ? <p className="sxsub" role="alert">{aviso}</p> : null}
       </div>

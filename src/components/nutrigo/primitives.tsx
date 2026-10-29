@@ -22,7 +22,7 @@ export function NvProgress({ value, label }: { value: number; label: string }) {
   const safeValue = Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 0;
   return <div className="nv-progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={safeValue}><span style={{ width: `${safeValue}%` }} /></div>;
 }
-/** `nvIcon` usa el glifo Phosphor del .fig; `icon` es el juego propio de Plan V. */
+/** `nvIcon` usa el glifo Phosphor del .fig; `icon` es el juego propio de Nutridash. */
 export function NvMetric({ label, value, note, icon, nvIcon, tone = 'green', children, onOpen }: { label: string; value: ReactNode; note: string; icon: IconName; nvIcon?: NvIconName; tone?: 'green' | 'gold' | 'coral'; children?: ReactNode; onOpen?: () => void }) {
   const glyph = nvIcon ? <NvIcon name={nvIcon} size={14} /> : <Icon name={icon} size={14} />;
   const content = <><div className="nv-metric-label"><h2>{label}</h2><span className="nv-icon-tile">{glyph}</span></div><strong>{value}</strong>{children}<small>{note}</small></>;

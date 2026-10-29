@@ -12,13 +12,13 @@ describe('aviso del servicio para la nutricionista', () => {
     expect(serviceNoticeText(null)).toBeNull();
   });
   it('avisa la prueba por terminar con fecha, días y precio', () => {
-    expect(serviceNoticeText(base)).toEqual({ tone: 'info', title: 'Tu prueba termina pronto', body: expect.stringMatching(/termina el 30\/10\/2026 \(faltan 5 días\)\. Coordiná el pago con Plan V\. El servicio cuesta \$\s?20\.000 por mes\./) });
+    expect(serviceNoticeText(base)).toEqual({ tone: 'info', title: 'Tu prueba termina pronto', body: expect.stringMatching(/termina el 30\/10\/2026 \(faltan 5 días\)\. Coordiná el pago con Nutridash\. El servicio cuesta \$\s?20\.000 por mes\./) });
   });
   it('vencida, aunque pasen días, solo avisa: no habla de solo lectura', () => {
     for (const [state, days_left] of [['vencida', -2], ['cortada', -30]] as const) {
       const notice = serviceNoticeText({ ...base, state, days_left });
       expect(notice).toMatchObject({ tone: 'warning', title: 'Servicio vencido' });
-      expect(notice?.body).toContain('venció el 30/10/2026. Coordiná el pago con Plan V.');
+      expect(notice?.body).toContain('venció el 30/10/2026. Coordiná el pago con Nutridash.');
       expect(notice?.body).not.toContain('solo lectura');
     }
   });

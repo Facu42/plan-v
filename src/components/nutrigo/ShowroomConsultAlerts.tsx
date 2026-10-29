@@ -97,7 +97,7 @@ export function ShowroomConsultAlerts({
     if (!prefs.browser) return;
     care.notices.forEach(notice => {
       if (wasNoticeFired(storage, notice.id)) return;
-      if (fireBrowserNotice(audience === 'pro' ? 'Plan V · nuevo registro' : notice.title, audience === 'pro' ? 'Tenés registros pendientes en el consultorio.' : notice.detail)) markNoticeFired(storage, notice.id);
+      if (fireBrowserNotice(audience === 'pro' ? 'Nutridash · nuevo registro' : notice.title, audience === 'pro' ? 'Tenés registros pendientes en el consultorio.' : notice.detail)) markNoticeFired(storage, notice.id);
     });
     visible.filter((alert) => alert.urgency === 'soon').forEach((alert) => {
       if (wasNoticeFired(storage, alert.id)) return;

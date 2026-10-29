@@ -27,7 +27,7 @@ export const INGREDIENT_NOUNS: Readonly<Record<string, string>> = {
   pollo: 'chicken', 'pechuga de pollo': 'chicken breast', 'muslo de pollo': 'chicken thighs', carne: 'raw beef', bife: 'raw beef steak',
   lomo: 'raw beef tenderloin', nalga: 'raw beef', peceto: 'raw beef', cuadril: 'raw beef', vacio: 'raw beef flank', asado: 'raw beef short ribs', cerdo: 'raw pork',
   bondiola: 'raw pork shoulder', jamon: 'ham', panceta: 'bacon', chorizo: 'raw sausage', salchicha: 'sausages', pavo: 'turkey', cordero: 'raw lamb', higado: 'raw liver',
-  huevo: 'eggs', 'clara de huevo': 'egg whites', 'yema de huevo': 'egg yolks', merluza: 'raw white fish fillet', pescado: 'raw fish fillet', salmon: 'raw salmon fillet',
+  huevo: 'eggs', 'clara de huevo': 'egg whites', 'yema de huevo': 'egg yolks', merluza: 'raw white fish fillet lying directly on a plain cream surface', pescado: 'raw fish fillet', salmon: 'raw salmon fillet',
   atun: 'tuna', sardina: 'sardines', trucha: 'raw trout', camaron: 'shrimp', langostino: 'prawns', calamar: 'squid', mejillon: 'mussels', surimi: 'surimi sticks',
   tofu: 'tofu', seitan: 'seitan',
   // Lácteos

@@ -69,13 +69,13 @@ export function SubscriptionPreview() {
   return <div className={`nv-app nv-pro pn-panel${screen.startsWith('cobranzas') ? ' nv-fees-page' : ''}${screen === 'publica' ? ' nv-agenda-page' : ''}${dark ? ' nv-dark' : ''}`} style={{ minHeight: '100vh' }}>
     {shell && <aside className="nv-sidebar" aria-label="Consultorio">
       <button className="pn-mobile-close" type="button" aria-label="Cerrar navegación"><X size={18} aria-hidden="true" /></button>
-      <a className="nv-brand" href="/crm/inicio"><Mark /><span>Plan V<small>Tu consultorio</small></span></a>
+      <a className="nv-brand" href="/crm/inicio"><Mark /><span>Nutridash<small>Tu consultorio</small></span></a>
       <PanelNavigation patients={[]} unread={0} admin={false} current={current} collapsed={false} onOpen={noop} />
       <div className="pn-sidebar-account"><span className="nv-user-avatar" aria-hidden="true">VT</span><span className="pn-nav-label"><strong>Verónica Trenti</strong><small>Nutricionista</small></span></div>
     </aside>}
     <div className="nv-workspace">
     {shell && <header className="nv-topbar">
-      <a className="nv-brand" href="/crm/inicio"><Mark /><span>Plan V</span></a>
+      <a className="nv-brand" href="/crm/inicio"><Mark /><span>Nutridash</span></a>
       <h1 className="nv-topbar-title" aria-label={title}><span className="nv-topbar-label-desktop">{title}</span><span className="nv-topbar-label-mobile" aria-hidden="true">{title}</span></h1>
       <button type="button" className="nv-button nv-ghost nv-menu-toggle" aria-label="Abrir el menú"><Icon name="list" size={20} /></button>
     </header>}

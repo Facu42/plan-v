@@ -120,7 +120,7 @@ function PatientHome({ openPhoto, onShowPlan, onShowMessages, darkMode, onToggle
   return (
     <main className="patient-shell">
       <header className="patient-topbar">
-        <div className="brand-lockup"><Mark /><span>Plan V</span></div>
+        <div className="brand-lockup"><Mark /><span>Nutridash</span></div>
         <div className="topbar-actions">
           <button className="round-button theme-toggle" type="button" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} aria-pressed={darkMode} onClick={onToggleTheme}><Icon name={darkMode ? 'sun' : 'moon'} size={18} /></button>
           <button className="round-button" type="button" aria-label="Ver recordatorios" aria-expanded={remindersOpen} aria-controls="daily-reminders-panel" onClick={() => setRemindersOpen(true)}>

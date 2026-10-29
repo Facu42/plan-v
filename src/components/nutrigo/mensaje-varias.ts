@@ -57,3 +57,18 @@ export async function enviarAVarias(pacientes: readonly Pick<Patient, 'id' | 'na
   return resultado;
 }
 
+
+/** «Mañana a las 9»: las 9:00 del día siguiente en la Argentina, sea la hora que sea en la compu de la nutri. */
+export function manianaALas9(ahora: Date) {
+  const hoy = new Date(`${homeDay(ahora)}T12:00:00-03:00`);
+  const maniana = new Date(hoy.getTime() + 86_400_000).toISOString().slice(0, 10);
+  return new Date(`${maniana}T09:00:00-03:00`).toISOString();
+}
+
+type Programar = (sendAt: string, items: Array<{ patient_id: string; client_id: string; text: string }>) => Promise<{ scheduled: number }>;
+
+/** Deja el mensaje programado para todas de una vez, ya con el nombre de cada una. */
+export async function programarAVarias(pacientes: readonly Pick<Patient, 'id' | 'name'>[], texto: string, sendAt: string, programar: Programar, nuevoId: () => string = () => crypto.randomUUID()) {
+  const items = pacientes.map(p => ({ patient_id: p.id, client_id: nuevoId(), text: personalizar(texto, p.name) }));
+  return programar(sendAt, items);
+}

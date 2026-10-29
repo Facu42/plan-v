@@ -15,7 +15,7 @@ const services = [
   ['plan', ['run', 'dashboard']],
 ];
 
-console.log('Plan V local');
+console.log('Nutridash local');
 console.log('Paciente:      http://127.0.0.1:5173/app/inicio');
 console.log('Nutricionista: http://127.0.0.1:5173/crm/inicio');
 console.log('Implementación: http://127.0.0.1:4317/#overview');

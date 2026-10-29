@@ -2,21 +2,26 @@ import { useEffect, useRef, useState } from 'react';
 import { api } from '../../api/client';
 import { supabase } from '../../lib/supabase';
 import { friendlyError } from '../../lib/error-messages';
-import { SettingsCard as Card, Soon } from './EquipoAjustesShared';
+import type { CanalAviso } from './ficha-ajustes';
+
+type PreferenciasAviso = Record<CanalAviso, boolean>;
 
 /** Preferencias de la profesional, nunca de la paciente seleccionada. */
-export function ProfessionalNoticePreferences() {
-  const [prefs, setPrefs] = useState<{ in_app: boolean; email: boolean; push: boolean } | null>(null), [error, setError] = useState(''), [status, setStatus] = useState(''), [busy, setBusy] = useState(false), [revision, setRevision] = useState(0);
+export function useAvisosProfesional() {
+  const [prefs, setPrefs] = useState<PreferenciasAviso | null>(null), [error, setError] = useState(''), [status, setStatus] = useState(''), [busy, setBusy] = useState(false), [revision, setRevision] = useState(0);
   const lock = useRef(false);
   useEffect(() => { let alive = true; api.getNotificationPrefs(undefined, 'pro').then(r => { if (alive) setPrefs(r.prefs); }).catch(e => { if (alive) setError(friendlyError(e)); }); return () => { alive = false; }; }, [revision]);
-  async function toggle(key: 'in_app'|'email'|'push') {
+  async function toggle(key: CanalAviso) {
     if (!prefs || lock.current) return; lock.current = true; setBusy(true); setError(''); setStatus('');
     try { const current = await api.getNotificationPrefs(undefined, 'pro'); const saved = await api.saveNotificationPrefs({ ...current.prefs, [key]: !prefs[key] }, undefined, 'pro'); setPrefs(saved.prefs); setStatus('Preferencias guardadas. El envío depende de los canales habilitados.'); } catch (e) { setError(friendlyError(e)); } finally { setBusy(false); lock.current = false; }
   }
-  return <>{prefs ? <div className="ea-pref">{([['in_app', 'En la app'], ['email', 'Por mail'], ['push', 'Notificaciones push']] as const).map(([key, text]) => <label key={key}>{text}<input type="checkbox" checked={prefs[key]} disabled={busy} onChange={() => void toggle(key)}/></label>)}</div> : !error && <p role="status">Cargando preferencias…</p>}{error && <p role="alert">{error} <button className="chip" onClick={() => { setError(''); setRevision(r => r + 1); }}>Reintentar</button></p>}{status && <p role="status">{status}</p>}</>;
+  const retry = () => { setError(''); setRevision(r => r + 1); };
+  return { prefs, error, status, busy, toggle, retry };
 }
-export function AjustesSecurity({ onOpen, onSecurity }: { onOpen: (href: string) => void; onSecurity?: () => void }) {
+
+/** Estado de la verificación en dos pasos de la profesional; solo consulta. */
+export function useDosPasos() {
   const [mfa, setMfa] = useState('Consultando…'), [error, setError] = useState('');
   useEffect(() => { let alive = true; if (!supabase) { setMfa('No disponible en modo demo'); return; } supabase.auth.mfa.listFactors().then(({ data, error }) => { if (!alive) return; if (error) { setMfa('Sin información'); setError(friendlyError(error)); } else setMfa(data.totp.some(f => f.status === 'verified') ? 'Activa' : 'Apagada'); }).catch(e => { if (alive) { setMfa('Sin información'); setError(friendlyError(e)); } }); return () => { alive = false; }; }, []);
-  return <><div className="c"><Card title="Verificación en dos pasos"><dl className="ea-kv"><dt>Para vos</dt><dd>{mfa}</dd><dt>Para el equipo</dt><dd>Exigencia pendiente de habilitación</dd></dl><p className="ea-muted">Además de la clave, una app de códigos protege el ingreso. Esta pantalla consulta el estado; no activa ni desactiva la protección.</p>{onSecurity && <button className="chip" onClick={onSecurity}>Configurar dos pasos</button>}{error && <p role="alert">{error}</p>}</Card><Card title="Clave"><p className="ea-muted">Podés pedir un enlace para recuperar tu clave desde la pantalla de ingreso, en «Olvidé mi contraseña». No mostramos una fecha de cambio sin información.</p></Card><Card title="Ingresos a tu cuenta" grow><Soon>El historial de ingresos todavía no está disponible.</Soon></Card></div><div className="c"><Card title="Sesiones abiertas"><Soon>No hay una lista de dispositivos consultable. No podemos cerrar sesiones individuales desde acá.</Soon></Card><Card title="Registro de accesos" grow><p className="ea-muted">Quién abrió cada ficha y qué cambió. El registro del equipo está pendiente de habilitación.</p><button className="chip" onClick={() => onOpen('/crm/equipo?vista=registro')}>Ver registro de accesos</button></Card></div><div className="c"><Card title="Copias de seguridad"><p className="ea-muted">Esta pantalla no consulta el estado de los respaldos. No podemos informar una última copia ni garantizar su frecuencia desde acá.</p></Card><Card title="Datos de salud"><ul className="ea-rules"><li>Las fichas se comparten por asignación explícita.</li><li>Recepción no accede a las notas clínicas.</li><li>No compartas claves ni información de pacientes por canales públicos.</li></ul></Card><Card title="Consentimientos" grow><p className="ea-muted">Revisá los consentimientos en la ficha de cada paciente. No hay un resumen disponible en Ajustes.</p><button className="chip" onClick={() => onOpen('/crm/pacientes')}>Ir a Pacientes</button></Card></div></>;
+  return { mfa, error };
 }

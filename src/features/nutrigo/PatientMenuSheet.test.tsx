@@ -24,9 +24,9 @@ describe('menú de la paciente', () => {
   });
 
   it('en el celular ofrece instalar dentro de «Mi cuenta» solo si hay oferta', () => {
-    expect(render()).not.toContain('Instalar Plan V');
-    const html = render({ installOffer: { title: 'Instalar Plan V', card: 'Instalá Plan V en este teléfono y abrila como una app.' }, onInstall: vi.fn() });
-    expect(html).toContain('Instalar Plan V');
+    expect(render()).not.toContain('Instalar Nutridash');
+    const html = render({ installOffer: { title: 'Instalar Nutridash', card: 'Instalá Nutridash en este teléfono y abrila como una app.' }, onInstall: vi.fn() });
+    expect(html).toContain('Instalar Nutridash');
     expect(html).toContain('abrila como una app');
   });
 

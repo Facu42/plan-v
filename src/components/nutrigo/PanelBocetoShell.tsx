@@ -1,5 +1,6 @@
 import { createContext, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { PanelV29Icon } from './PanelV29Icon';
+import { aplicarPrefsGuardadas } from './ajustes-prefs';
 import type { PanelV29IconName } from './panel-v29-icons';
 import '@fontsource/inter/latin-300.css';
 import '@fontsource/inter/latin-400.css';
@@ -53,6 +54,7 @@ export function PanelBocetoShell({ dark, collapsed, onCollapse, menuOpen, onMenu
   const [query, setQuery] = useState('');
   const input = useRef<HTMLInputElement>(null);
   const wantSearch = useRef(false);
+  useEffect(() => { aplicarPrefsGuardadas(); }, []);
   useEffect(() => {
     const focus = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); input.current?.focus(); }
@@ -77,14 +79,14 @@ export function PanelBocetoShell({ dark, collapsed, onCollapse, menuOpen, onMenu
     <div className={appClass}>
       <header className="mhd">
         <button type="button" className="ibtn" aria-label="Abrir menú" aria-expanded={menuOpen} onClick={() => onMenu(!menuOpen)}><PanelV29Icon name="menu" /></button>
-        <span className="mk">V</span><b>Plan V</b><span className="sp" />
+        <span className="mk">nd</span><b>Nutridash</b><span className="sp" />
         <button type="button" className="ibtn" aria-label="Buscar" onClick={openSearch}><PanelV29Icon name="search" /></button>
         {narrow ? bell : null}
         <button type="button" className="av" style={{ background: 'var(--azaf)' }} aria-label="Opciones de la cuenta" onClick={() => { onMenu(true); setAccountOpen(true); }}>{initials}</button>
       </header>
       <div className="mscrim" role="presentation" onClick={() => onMenu(false)} />
       <aside className="side" aria-label="Consultorio">
-        <div className="logo"><span className="mk">V</span><div><b>Plan V</b><small>{brand}</small></div></div>
+        <div className="logo"><span className="mk">nd</span><div><b>Nutridash</b><small>{brand}</small></div></div>
         <button type="button" className="fold" aria-label={folded ? 'Abrir menú' : 'Plegar menú'} aria-expanded={!folded} aria-controls="pv-panel-nav" onClick={onCollapse}><PanelV29Icon name="left" /></button>
         <form className="srch" role="search" onSubmit={search}>
           <PanelV29Icon name="search" />

@@ -19,15 +19,15 @@ export const INSTALL_COPY: Record<Exclude<InstallPlatform, 'standalone'>, { titl
     action: 'Entendido',
   },
   android: {
-    title: 'Instalar Plan V',
+    title: 'Instalar Nutridash',
     body: 'Podés instalar la app en este teléfono. Los datos clínicos no se guardan sin conexión.',
-    card: 'Instalá Plan V en este teléfono y abrila como una app.',
+    card: 'Instalá Nutridash en este teléfono y abrila como una app.',
     action: 'Instalar',
   },
   desktop: {
-    title: 'Instalar Plan V',
+    title: 'Instalar Nutridash',
     body: 'En Chrome o Edge podés instalar el consultorio o la app como una ventana propia.',
-    card: 'Instalá Plan V en esta computadora y abrila como una app.',
+    card: 'Instalá Nutridash en esta computadora y abrila como una app.',
     action: 'Instalar',
   },
 };

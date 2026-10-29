@@ -12,6 +12,13 @@ import { writeOpsLog } from '../ops/log.js';
 import { enqueueOutboxBestEffort } from '../outbox/repository.js';
 import { notifyPatientPush } from '../push/push.js';
 import { ARCHIVED_ACCOUNT_NOTICE } from '../../src/lib/account-archive.js';
+import { CareError } from '../care/errors.js';
+import { MAX_PROGRAMADAS, scheduleThreadMessages } from './scheduled.js';
+
+const scheduleSchema = z.object({
+  send_at: z.iso.datetime({ offset: true }),
+  items: z.array(z.object({ patient_id: z.string().min(1).max(64), client_id: z.uuid(), text: z.string().trim().min(1).max(2000) }).strict()).min(1).max(MAX_PROGRAMADAS),
+}).strict();
 
 const access = {
   getActor: sb.sbGetActor,
@@ -39,6 +46,18 @@ async function jsonBody<T>(c: Context, schema: z.ZodType<T>) {
 }
 
 export function registerMessageRoutes(app: Hono) {
+  // «Mensaje a varias» con «Mañana a las 9»: solo la nutricionista, a sus pacientes.
+  app.post('/api/messages/scheduled', async (c) => {
+    const auth = c.get('auth');
+    const parsed = await jsonBody(c, scheduleSchema);
+    if (!parsed.success) return c.json({ error: 'Revisá el mensaje y a quién se lo mandás.' }, 400);
+    if ('demo' in auth) return c.json(await scheduleThreadMessages(parsed.data, false));
+    if (!isSupabaseEnabled()) throw new CareError(503, 'El servicio no está disponible.');
+    const actor = await sb.sbGetActor(auth.userId);
+    if (actor?.role !== 'nutri') return c.json({ error: 'Prohibido' }, 403);
+    return c.json(await scheduleThreadMessages(parsed.data, true));
+  });
+
   app.post('/api/patients/:id/messages', async (c) => {
     const auth = c.get('auth');
     const patientId = c.req.param('id');
@@ -71,7 +90,7 @@ export function registerMessageRoutes(app: Hono) {
         event_type: 'thread_message',
         client_id: clientId,
         subject: 'Mensaje nuevo en el hilo',
-        body: 'Hay un mensaje nuevo. Este aviso quedó en el buzón in-app de Plan V; no se envió a internet.',
+        body: 'Hay un mensaje nuevo. Este aviso quedó en el buzón in-app de Nutridash; no se envió a internet.',
         kind: 'message',
       }, true);
       const updated = await sb.sbGetPatientById(patientId, audience(actor.role));
@@ -99,7 +118,7 @@ export function registerMessageRoutes(app: Hono) {
       event_type: 'thread_message',
       client_id: clientId,
       subject: 'Mensaje nuevo en el hilo',
-      body: 'Hay un mensaje nuevo. Este aviso quedó en el buzón in-app de Plan V; no se envió a internet.',
+      body: 'Hay un mensaje nuevo. Este aviso quedó en el buzón in-app de Nutridash; no se envió a internet.',
       kind: 'message',
     }, false);
     const updated = getPatient(patientId)!;

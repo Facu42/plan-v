@@ -1,5 +1,7 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-28)
+# Traspaso del proyecto (actualización vigente: 2026-10-29)
 
+29/10 · Claude · «Mañana a las 9» de Mensaje a varias: el cajón suma «Cuándo» (Ahora / Mañana a las 9) como en el boceto v29. Programado guarda cada mensaje ya con el nombre de la paciente en la tabla nueva `scheduled_messages` (migración `20261029120000_scheduled_messages.sql`, aditiva) y el worker lo manda a las 9:00 de Argentina del día siguiente, entra al hilo como un mensaje normal y avisa al teléfono. Sin la tabla, el panel dice que falta instalarla y «Ahora» sigue igual. **Base primero (con su frase), main después.**
+28/10 · Claude · Ajustes del panel armado con el código del boceto v29 (cinco vistas, datos reales donde la app los tiene, el resto en el mismo bloque con texto corto). [Detalle y revisión contra el boceto](panel-nutri-rediseno/ajustes-v29.md). PR en borrador, espera el ok visual de Facundo.
 28/10 · Claude · Planes 3g: «Dictar pedido» y «Adjuntar referencia» de Armar con IA ya funcionan (dictado del navegador; lectura de PDF con texto y texto/CSV en el navegador, hasta 2 líneas de 80 caracteres por archivo por el límite de la IA). [Nota](panel-nutri-rediseno/planes-3g-dictar-adjuntar.md). PR en borrador.
 28/10 · Claude · Auditoría del panel contra el boceto v29 (código contra código): el CSS viejo del boceto pisaba a las pantallas ya pasadas (colores, sombras, botones, gráficos de peso) y faltaba el interlineado «normal». Arreglado con un PR solo de CSS: `scripts/panel-boceto-css.mjs` ahora deja el CSS viejo solo para las pantallas que no están en la lista `PASADAS_A_V29`. **Cada pantalla nueva que se pase a v29 (Equipo, Ajustes, Ayuda…) se suma a esa lista** y se regenera con `node scripts/panel-boceto-css.mjs`. Informe: https://claude.ai/artifact/LLkGNjAbAExkLRV6F4QrVN
 28/10 · Claude · REGLA FIJA de Facundo para el panel de la nutri: cada pantalla se arma copiando el HTML y los estilos del boceto v29, nunca mirando capturas; si una función no existe, se desarrolla con el mismo diseño, estructura y estilos. Plan de la Ficha en el [PR #207](https://github.com/Facu42/plan-v/pull/207) (comparado contra el boceto elemento por elemento) y Registro alimentario en el #206; ambos esperan su ok visual.
@@ -55,6 +57,13 @@
 19/10 · Cursor · Backend de suscripciones de pacientes en `cursor/suscripciones-pacientes-backend`. La migración queda escrita y sin aplicar. La función está apagada. Las pantallas de Cobranzas y de la página pública van en otra rama. Detalle en [spec](suscripciones-pacientes/spec.md). Main ya tiene las fases 4 y 5 del panel (`c09466b`).
 
 19/10 · Cursor · Fase 5 y fase 4 quedaron en main. WhatsApp salió del panel. La ficha de #154 convive con Agenda, Cobranzas y Página pública. Sin SQL remoto.
+
+## 29/10 · Verificar la IA desde el panel de administrador
+Nueva pestaña «Verificar IA» en /admin (`POST /api/admin/ai-check`, solo administrador). Hace una consulta corta al modelo gratis de
+OpenRouter y genera una foto de ejemplo con Cloudflare, sin usar cuentas ni datos de pacientes y sin guardar nada. Dice «Anda / No anda /
+Apagada» con el motivo (por ejemplo, faltan las cuatro variables de Cloudflare en Railway, o se agotó la cuota diaria). Una verificación
+cada 30 segundos para no gastar la cuota gratuita. Sin migraciones ni variables nuevas. Además, «Probar receta y fotos» (`POST /api/admin/ai-check/full`, una por minuto) arma una receta de ejemplo con la IA y genera cuatro fotos (dos platos, dos ingredientes) con los mismos textos que usa la app, para comprobar a ojo que las fotos coinciden con el nombre. Ya hay dos nutris de prueba en la base
+(`[Prueba] Nutricionista`, creadas por «Cuentas de prueba»). Pendiente: dejar a la IA del administrador (resumen del servicio) para otra rama.
 
 ## 19/10 · Ficha de la nutri, fase 4
 

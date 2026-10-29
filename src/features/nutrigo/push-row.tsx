@@ -8,7 +8,7 @@ export function pushRowText(state: PushState, failed: boolean): RowText | null {
   if (state === 'unsupported') return null;
   if (failed) return { title: 'No pudimos activar los avisos', note: 'Tocá para probar de nuevo.' };
   if (state === 'on') return { title: 'Avisos activados en este teléfono', note: 'Tocá para desactivarlos.' };
-  if (state === 'blocked') return { title: 'Los avisos están bloqueados', note: 'Permitilos para Plan V en los ajustes del teléfono.' };
+  if (state === 'blocked') return { title: 'Los avisos están bloqueados', note: 'Permitilos para Nutridash en los ajustes del teléfono.' };
   return { title: 'Recibir avisos en este teléfono', note: 'Te avisamos cuando tu nutricionista te escriba, publique tu plan o cambie tu consulta.' };
 }
 

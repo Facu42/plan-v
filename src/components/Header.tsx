@@ -14,7 +14,7 @@ export function Header() {
           <div className="w-10 h-10 rounded-full overflow-hidden">
             <ImageWithFallback
               src={logoImage}
-              alt="Plan V Nutrición"
+              alt="Nutridash"
               className="w-full h-full object-cover"
             />
           </div>

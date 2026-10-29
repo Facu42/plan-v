@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "Plan V",
-  "short_name": "Plan V",
+  "name": "Nutridash",
+  "short_name": "Nutridash",
   "description": "Acompañamiento nutricional. Paciente y consultorio.",
   "start_url": "/app/inicio",
   "scope": "/",
