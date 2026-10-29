@@ -11,6 +11,7 @@ import {runSchedulingSyncJobs} from '../scheduling/worker.js';
 import {runPendingDocumentOrganizer} from '../document-organizer/worker.js';
 import { tickPushReminders } from '../push/reminders.js';
 import { tickPatientSubscriptions } from '../subscriptions/worker.js';
+import { tickScheduledMessages } from '../messages/scheduled.js';
 
 let timer: ReturnType<typeof setInterval> | null = null;
 let draining = false;
@@ -44,6 +45,7 @@ export function startJobWorker(owner = 'plan-v-worker', keepAlive = false) {
       void cleanupExpiredConsultationAudio().catch(() => writeOpsLog('warn', 'consultation_cleanup_failed', { status: 'retry_pending' })).finally(() => { cleanupRunning = false; });
     }
     void tickPushReminders().catch(() => undefined);
+    void tickScheduledMessages();
     if (!subscriptionDraining) {
       subscriptionDraining = true;
       void tickPatientSubscriptions().catch(() => writeOpsLog('warn', 'subscription_worker_failed', { status: 'review_pending' })).finally(() => { subscriptionDraining = false; });

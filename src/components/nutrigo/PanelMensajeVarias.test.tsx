@@ -12,5 +12,8 @@ describe('PanelMensajeVarias', () => {
     expect(html).toContain('¡Hola {nombre}! ');
     expect(html).toContain('se completa con el nombre de cada paciente');
     expect(html).toContain('>Enviar<');
+    expect(html).toContain('<span>Cuándo</span><div class="aseg" role="radiogroup">');
+    expect(html).toContain('aria-checked="true">Ahora<');
+    expect(html).toContain('aria-checked="false">Mañana a las 9<');
   });
 });

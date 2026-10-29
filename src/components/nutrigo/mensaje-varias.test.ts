@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Patient } from '../../types';
-import { armarAudiencias, destinatarias, enviarAVarias, personalizar } from './mensaje-varias';
+import { armarAudiencias, destinatarias, enviarAVarias, manianaALas9, personalizar, programarAVarias } from './mensaje-varias';
 
 const ahora = new Date('2026-10-28T15:00:00Z');
 const paciente = (id: string, name: string, extra: Partial<Patient> = {}) => ({ id, name, has_account: true, ...extra }) as unknown as Patient;
@@ -40,5 +40,21 @@ describe('mensaje a varias', () => {
     expect(send).toHaveBeenCalledTimes(3);
     expect(send).toHaveBeenNthCalledWith(1, 'a', 'Hola Ana', 'vero', false, 'id-1');
     expect(send).toHaveBeenNthCalledWith(3, 'c', 'Hola Cora', 'vero', false, 'id-3');
+  });
+});
+
+describe('mensaje a varias programado', () => {
+  it('«Mañana a las 9» es a las 9 de la Argentina del día siguiente, también de noche', () => {
+    expect(manianaALas9(new Date('2026-10-28T15:00:00Z'))).toBe('2026-10-29T12:00:00.000Z');
+    expect(manianaALas9(new Date('2026-10-29T02:30:00Z'))).toBe('2026-10-29T12:00:00.000Z');
+    expect(manianaALas9(new Date('2026-10-31T23:00:00-03:00'))).toBe('2026-11-01T12:00:00.000Z');
+  });
+
+  it('manda un solo pedido con el nombre de cada una', async () => {
+    const programar = vi.fn().mockResolvedValue({ scheduled: 2 });
+    let n = 0;
+    await programarAVarias([{ id: 'a', name: 'Ana Gómez' }, { id: 'b', name: 'Bea Ruiz' }], 'Hola {nombre}', '2026-10-29T12:00:00.000Z', programar, () => `id-${++n}`);
+    expect(programar).toHaveBeenCalledTimes(1);
+    expect(programar).toHaveBeenCalledWith('2026-10-29T12:00:00.000Z', [{ patient_id: 'a', client_id: 'id-1', text: 'Hola Ana' }, { patient_id: 'b', client_id: 'id-2', text: 'Hola Bea' }]);
   });
 });
