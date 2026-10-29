@@ -34,6 +34,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Revisión de main contra v29 · 29/10 | Codex, por pedido de Facundo | `work/revision-main-v29` | Revisión de código y muestreo en claro/oscuro; no certifica fidelidad completa. [Informe](panel-nutri-rediseno/revision-main-v29-2026-10-29.md). Sin cambios de app ni base |
 | Motion del panel v29 | Cursor | `cursor/motion-panel-v29-e2b6`, [PR #193](https://github.com/Facu42/plan-v/pull/193) | Pastilla, entrada `fin`, panel `#act` y aviso `#atoast` con los tiempos del boceto. 3.409 pruebas aprobadas y dos omitidas. [Nota y paso 10](panel-nutri-rediseno/motion-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
 | Equipo y Ajustes v29 | Cursor, sobre el avance de Codex (se cortó sin cuota) | `cursor/equipo-ajustes-v29-70bc`, [PR #192](https://github.com/Facu42/plan-v/pull/192) | Pantallas del boceto con datos reales donde hay API y «Próximamente» en permisos, registro, plantillas y Brevo. 3.403 pruebas aprobadas, dos omitidas y cuatro e2e. [Informe y paso 10](panel-nutri-rediseno/equipo-ajustes-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
 | Centro de ayuda v29 | Codex, autorizado por Facundo el 26/10 | `work/centro-ayuda-v29`, [PR #191](https://github.com/Facu42/plan-v/pull/191) | Implementado: UI, guías, FAQ y pedido local; 3.399 pruebas aprobadas, dos omitidas y tres e2e. [Informe y paso 10](panel-nutri-rediseno/centro-ayuda-v29.md). HOLD por ok visual y contrato general detenido en Asistente. Sin producción ni merge |
@@ -111,6 +112,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **29/10 · Codex · Revisión de main contra v29** · Base `ebf7ac84`. Se amplía la comparación a las pantallas y pestañas; se corrige la validación falsa de Inter y las piezas ausentes dejan de aprobarse. [Informe, límites y paso 10](panel-nutri-rediseno/revision-main-v29-2026-10-29.md). No se modifica la app; no se certifica paridad ni se integra a main.
 
 - **27/10 · Claude · Pacientes v29** · Rama `claude/pacientes-v29`, desde main `9f11908` (Inicio ya juntado con el ok de Facundo, #196). Pacientes copia el boceto: solapas, orden, tabla y resumen que se despliega hacia abajo con peso, avance, adherencia, turno y últimos hechos, con datos reales y movimiento sin librería. Patologías dice «Sin declarar» (no hay dato). Contrato de Pacientes en verde. [Nota, paso 10 y qué no se copió](panel-nutri-rediseno/pacientes-v29.md). Sin merge ni producción; HOLD hasta el ok visual de Facundo.
 - **27/10 · Claude · Agenda v29** · Rama `claude/agenda-v29`, desde main `3ced7f6` (Pacientes ya juntado, #197). La Agenda copia el boceto: calendario hora por hora con turnos de colores y línea de ahora, mes chico, Pedidos de turno y Lugares libres, con datos reales; Mes y Día armados con los colores del boceto. Las funciones que el boceto no dibuja (horarios y precios, pagos y calendario, conexiones, bloquear, reprogramar) se conservan en el pie y en un diálogo. Contrato de Agenda en verde. [Nota, paso 10 y qué no se copió](panel-nutri-rediseno/agenda-v29.md). Sin merge ni producción; HOLD hasta el ok visual de Facundo.

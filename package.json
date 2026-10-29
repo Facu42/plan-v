@@ -41,7 +41,9 @@
     "worker": "node scripts/with-env.mjs tsx server/jobs/worker-main.ts",
     "start:api": "node scripts/with-env.mjs tsx server/index.ts",
     "start:worker": "node scripts/with-env.mjs tsx server/jobs/worker-main.ts",
-    "check:secrets": "node scripts/check-secrets.mjs"
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "panel:revision:v29": "node scripts/panel-v29-clases.mjs --todas --ambos --write",
+    "panel:fuentes:v29": "node scripts/panel-v29-contrato.mjs --verificar-fuentes"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.53",

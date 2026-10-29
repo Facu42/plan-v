@@ -1,0 +1,404 @@
+[
+  {
+    "nombre": "ficha",
+    "tema": "dark",
+    "iguales": 566,
+    "distintas": 90,
+    "noEncontradas": 239,
+    "vistas": [
+      "resumen",
+      "historia",
+      "mediciones",
+      "objetivos",
+      "consultas",
+      "plan",
+      "alimentario",
+      "laboratorio",
+      "archivos",
+      "cobros"
+    ]
+  },
+  {
+    "nombre": "ficha",
+    "tema": "light",
+    "iguales": 568,
+    "distintas": 90,
+    "noEncontradas": 237,
+    "vistas": [
+      "resumen",
+      "historia",
+      "mediciones",
+      "objetivos",
+      "consultas",
+      "plan",
+      "alimentario",
+      "laboratorio",
+      "archivos",
+      "cobros"
+    ]
+  },
+  {
+    "nombre": "inicio",
+    "tema": "dark",
+    "iguales": 82,
+    "distintas": 10,
+    "noEncontradas": 17,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "inicio",
+    "tema": "light",
+    "iguales": 82,
+    "distintas": 10,
+    "noEncontradas": 17,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "pacientes",
+    "tema": "dark",
+    "iguales": 60,
+    "distintas": 9,
+    "noEncontradas": 19,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "pacientes",
+    "tema": "light",
+    "iguales": 60,
+    "distintas": 9,
+    "noEncontradas": 19,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "planes-editor",
+    "tema": "dark",
+    "iguales": 61,
+    "distintas": 17,
+    "noEncontradas": 33,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "planes-editor",
+    "tema": "light",
+    "iguales": 61,
+    "distintas": 17,
+    "noEncontradas": 33,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "recetas",
+    "tema": "dark",
+    "iguales": 0,
+    "distintas": 2,
+    "noEncontradas": 30,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "recetas",
+    "tema": "light",
+    "iguales": 0,
+    "distintas": 2,
+    "noEncontradas": 30,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "agenda",
+    "tema": "dark",
+    "iguales": 53,
+    "distintas": 12,
+    "noEncontradas": 5,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "agenda",
+    "tema": "light",
+    "iguales": 53,
+    "distintas": 12,
+    "noEncontradas": 5,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "equipo",
+    "tema": "dark",
+    "iguales": 53,
+    "distintas": 14,
+    "noEncontradas": 47,
+    "vistas": [
+      "Integrantes",
+      "Permisos",
+      "Registro de accesos"
+    ]
+  },
+  {
+    "nombre": "equipo",
+    "tema": "light",
+    "iguales": 53,
+    "distintas": 14,
+    "noEncontradas": 47,
+    "vistas": [
+      "Integrantes",
+      "Permisos",
+      "Registro de accesos"
+    ]
+  },
+  {
+    "nombre": "ajustes",
+    "tema": "dark",
+    "iguales": 108,
+    "distintas": 21,
+    "noEncontradas": 29,
+    "vistas": [
+      "Mi cuenta",
+      "Plantillas",
+      "Avisos automáticos",
+      "Seguridad",
+      "Integraciones"
+    ]
+  },
+  {
+    "nombre": "ajustes",
+    "tema": "light",
+    "iguales": 108,
+    "distintas": 21,
+    "noEncontradas": 29,
+    "vistas": [
+      "Mi cuenta",
+      "Plantillas",
+      "Avisos automáticos",
+      "Seguridad",
+      "Integraciones"
+    ]
+  },
+  {
+    "nombre": "planes",
+    "tema": "dark",
+    "iguales": 35,
+    "distintas": 15,
+    "noEncontradas": 52,
+    "vistas": [
+      "Todos los planes",
+      "Plantillas",
+      "Equivalencias"
+    ]
+  },
+  {
+    "nombre": "planes",
+    "tema": "light",
+    "iguales": 35,
+    "distintas": 15,
+    "noEncontradas": 52,
+    "vistas": [
+      "Todos los planes",
+      "Plantillas",
+      "Equivalencias"
+    ]
+  },
+  {
+    "nombre": "publica",
+    "tema": "dark",
+    "iguales": 115,
+    "distintas": 18,
+    "noEncontradas": 25,
+    "vistas": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "nombre": "publica",
+    "tema": "light",
+    "iguales": 115,
+    "distintas": 18,
+    "noEncontradas": 25,
+    "vistas": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "nombre": "cobranzas",
+    "tema": "dark",
+    "iguales": 52,
+    "distintas": 5,
+    "noEncontradas": 15,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "cobranzas",
+    "tema": "light",
+    "iguales": 52,
+    "distintas": 5,
+    "noEncontradas": 15,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "mensajes",
+    "tema": "dark",
+    "iguales": 70,
+    "distintas": 7,
+    "noEncontradas": 73,
+    "vistas": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "nombre": "mensajes",
+    "tema": "light",
+    "iguales": 70,
+    "distintas": 7,
+    "noEncontradas": 73,
+    "vistas": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "nombre": "seguimiento",
+    "tema": "dark",
+    "iguales": 27,
+    "distintas": 2,
+    "noEncontradas": 4,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "seguimiento",
+    "tema": "light",
+    "iguales": 27,
+    "distintas": 2,
+    "noEncontradas": 4,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "progreso",
+    "tema": "dark",
+    "iguales": 34,
+    "distintas": 3,
+    "noEncontradas": 21,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "progreso",
+    "tema": "light",
+    "iguales": 34,
+    "distintas": 3,
+    "noEncontradas": 21,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "asistente",
+    "tema": "dark",
+    "iguales": 29,
+    "distintas": 2,
+    "noEncontradas": 3,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "asistente",
+    "tema": "light",
+    "iguales": 29,
+    "distintas": 2,
+    "noEncontradas": 3,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "alimentos",
+    "tema": "dark",
+    "iguales": 36,
+    "distintas": 2,
+    "noEncontradas": 3,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "alimentos",
+    "tema": "light",
+    "iguales": 36,
+    "distintas": 2,
+    "noEncontradas": 3,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "biblioteca",
+    "tema": "dark",
+    "iguales": 17,
+    "distintas": 3,
+    "noEncontradas": 9,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "biblioteca",
+    "tema": "light",
+    "iguales": 17,
+    "distintas": 3,
+    "noEncontradas": 9,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "ayuda",
+    "tema": "dark",
+    "iguales": 24,
+    "distintas": 4,
+    "noEncontradas": 4,
+    "vistas": [
+      0
+    ]
+  },
+  {
+    "nombre": "ayuda",
+    "tema": "light",
+    "iguales": 24,
+    "distintas": 4,
+    "noEncontradas": 4,
+    "vistas": [
+      0
+    ]
+  }
+]
