@@ -4,6 +4,8 @@ import { careApi, careErrorMessage } from '../../api/care';
 import type { CareReplacement } from '../../types/care';
 import { foodQuantityUnit, type Food } from '../../types/foods';
 import { type ExchangeGroup } from '../../types/nutrition-capabilities';
+import { useExchangeVisibility } from './use-exchange-visibility';
+import type { ExchangeVisibility } from '../../types/exchange-visibility';
 import { ExchangeEditor } from './NutritionExchanges';
 
 const numero = (n: number) => n.toLocaleString('es-AR', { maximumFractionDigits: 2 });
@@ -30,7 +32,8 @@ function Panel({ titulo, meta, derecha, grande = false, children }: { titulo: st
   return <section className={`fxp${grande ? ' g' : ''}`}><header><h3>{titulo}</h3>{meta && <span className="m">{meta}</span>}<span className="sp" />{derecha}</header>{children}</section>;
 }
 
-export function PanelPlanEquivalenciasVista({ grupos, grupoId, alimentoId, cantidad, estado, error = '', cambios = [], historialEstado = 'sin-paciente', onGrupo, onAlimento, onCantidad, onEditar, onReintentar, onPlan }: {
+export function PanelPlanEquivalenciasVista({ grupos, grupoId, alimentoId, cantidad, estado, error = '', cambios = [], historialEstado = 'sin-paciente', onGrupo, onAlimento, onCantidad, onEditar, onReintentar, onPlan, visibilidad, guardandoVisibilidad = false, cargandoVisibilidad = true, errorVisibilidad = '', avisoVisibilidad = '', onVisibilidad, onReintentarVisibilidad }: {
+  visibilidad?: ExchangeVisibility | null; guardandoVisibilidad?: boolean; cargandoVisibilidad?: boolean; errorVisibilidad?: string; avisoVisibilidad?: string; onVisibilidad?: () => void; onReintentarVisibilidad?: () => void;
   grupos: ExchangeGroup[]; grupoId: string; alimentoId: string; cantidad: string; estado: 'cargando' | 'lista' | 'error'; error?: string;
   cambios?: CareReplacement[]; historialEstado?: 'cargando' | 'lista' | 'error' | 'sin-paciente';
   onGrupo: (id: string) => void; onAlimento: (id: string) => void; onCantidad: (v: string) => void; onEditar: (g?: ExchangeGroup) => void; onReintentar: () => void; onPlan?: () => void;
@@ -53,14 +56,15 @@ export function PanelPlanEquivalenciasVista({ grupos, grupoId, alimentoId, canti
     </Panel>
     <Panel titulo="Últimos cambios en los planes" meta="propuestas publicadas para la paciente elegida" grande><div className="fxs fxr">{historialEstado === 'sin-paciente' ? <p className="mhelp">Elegí una paciente para ver sus propuestas de cambio.</p> : historialEstado === 'cargando' ? <p className="mhelp" role="status">Cargando cambios…</p> : historialEstado === 'error' ? <p className="mhelp" role="alert">No se pudieron leer los cambios. <button className="sbtn" type="button" onClick={onReintentar}>Reintentar</button></p> : cambios.length ? cambios.map(c => <div key={c.id}><span className="t"><b>{c.recipe.title}</b><small>{c.recipe.explanation}</small></span><span style={{ fontSize: '11.5px', color: 'var(--ink3)' }}>{new Date(c.published_at!).toLocaleDateString('es-AR')}</span></div>) : <p className="mhelp">No hay propuestas de cambio publicadas para esta paciente.</p>}</div></Panel>
   </div><div className="c">
-    <Panel titulo="En la app de la paciente" derecha={<button type="button" className="sw" role="switch" disabled aria-checked={false} aria-label="Mostrar equivalencias en la app" title="No hay un interruptor global: las alternativas se revisan y publican por paciente." />}>
-      <p className="mhelp">Las equivalencias de esta calculadora quedan solo para vos. Las propuestas de cambio se revisan y publican por paciente; no existe un interruptor global.</p><div className="mnot"><i className="mnl">V</i><span><b>Tu plan</b><small>Esta comparación no modifica ni publica el plan de la paciente.</small></span></div>{onPlan && <button type="button" className="sbtn" onClick={onPlan}>Revisar el plan</button>}
+    <Panel titulo="En la app de la paciente" derecha={<button type="button" className={`sw${visibilidad?.enabled ? ' on' : ''}`} role="switch" disabled={!visibilidad || cargandoVisibilidad || guardandoVisibilidad || Boolean(errorVisibilidad) || !onVisibilidad} aria-checked={visibilidad?.enabled ?? false} aria-label="Mostrar equivalencias en la app" onClick={onVisibilidad} />}>
+      <p className="mhelp">Al activar, todas tus pacientes pueden consultar todos los grupos revisados y sus próximas actualizaciones en las opciones de su plan. Esto no cambia sus comidas ni publica un plan.</p>{cargandoVisibilidad && <p className="mhelp" role="status">Cargando configuración…</p>}{guardandoVisibilidad && <p className="mhelp" role="status">Guardando configuración…</p>}{errorVisibilidad && <p className="mhelp" role="alert">{errorVisibilidad} <button type="button" className="sbtn" disabled={guardandoVisibilidad || cargandoVisibilidad} onClick={onReintentarVisibilidad}>Recargar configuración</button></p>}{avisoVisibilidad && <p className="mhelp" role="status">{avisoVisibilidad}</p>}<div className="mnot"><i className="mnl">V</i><span><b>Tu plan</b><small>Esta comparación no modifica ni publica el plan de la paciente.</small></span></div>{onPlan && <button type="button" className="sbtn" onClick={onPlan}>Revisar el plan</button>}
     </Panel>
     <Panel titulo="Grupos" meta="cómo se arman" grande><div className="fxkv">{grupos.map(g => <div key={g.id}><span>{g.name}</span><b>{g.items.map(i => i.food.name).join(', ')}</b></div>)}</div><div className="macts pbot"><button type="button" className="sbtn" onClick={() => onEditar()}>Nuevo grupo</button>{grupo && <button type="button" className="sbtn" onClick={() => onEditar(grupo)}>Revisar grupo</button>}</div></Panel>
   </div></div>;
 }
 
 export function PanelPlanEquivalencias({ pacienteId, onOpenPlan }: { pacienteId?: string; onOpenPlan?: () => void }) {
+  const visibilidad = useExchangeVisibility();
   const [grupos, setGrupos] = useState<ExchangeGroup[]>([]), [grupoId, setGrupo] = useState(''), [alimentoId, setAlimento] = useState(''), [cantidad, setCantidad] = useState('150');
   const [estado, setEstado] = useState<'cargando' | 'lista' | 'error'>('cargando'), [error, setError] = useState(''), [intento, setIntento] = useState(0), [editar, setEditar] = useState<ExchangeGroup | null | undefined>();
   const [historial, setHistorial] = useState<{ paciente: string; estado: 'cargando' | 'lista' | 'error'; cambios: CareReplacement[] }>({ paciente: '', estado: 'cargando', cambios: [] });
@@ -68,6 +72,7 @@ export function PanelPlanEquivalencias({ pacienteId, onOpenPlan }: { pacienteId?
   useEffect(() => { if (!pacienteId) return; const c = new AbortController(); setHistorial({ paciente: pacienteId, estado: 'cargando', cambios: [] }); careApi.snapshot(pacienteId, true, c.signal).then(r => { if (!c.signal.aborted) setHistorial({ paciente: pacienteId, estado: 'lista', cambios: r.replacements.filter(r => r.published_at !== null).sort((a,b) => b.published_at!.localeCompare(a.published_at!)) }); }).catch(() => { if (!c.signal.aborted) setHistorial({ paciente: pacienteId, estado: 'error', cambios: [] }); }); return () => c.abort(); }, [pacienteId, intento]);
   return <><PanelPlanEquivalenciasVista grupos={grupos} grupoId={grupoId} alimentoId={alimentoId} cantidad={cantidad} estado={estado} error={error}
     cambios={pacienteId === historial.paciente ? historial.cambios : []} historialEstado={!pacienteId ? 'sin-paciente' : pacienteId === historial.paciente ? historial.estado : 'cargando'}
+    visibilidad={visibilidad.value} cargandoVisibilidad={visibilidad.loading} guardandoVisibilidad={visibilidad.busy} errorVisibilidad={visibilidad.error} avisoVisibilidad={visibilidad.notice} onVisibilidad={() => void visibilidad.toggle()} onReintentarVisibilidad={visibilidad.reload}
     onGrupo={id => { setGrupo(id); setAlimento(''); }} onAlimento={setAlimento} onCantidad={setCantidad} onEditar={setEditar} onReintentar={() => setIntento(n => n + 1)} onPlan={onOpenPlan} />
     {editar !== undefined && <ExchangeEditor group={editar ?? undefined} panel onClose={() => setEditar(undefined)} onSaved={g => { setGrupos(v => [...v.filter(x => x.id !== g.id), g]); setGrupo(g.id); setAlimento(''); setEditar(undefined); }} />}
   </>;

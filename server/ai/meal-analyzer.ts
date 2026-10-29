@@ -4,7 +4,7 @@ import { AIUnavailableError } from './errors.js';
 import { logProviderFailure, resolveAiMode } from './mode.js';
 import { getAiModel } from './provider.js';
 
-const MEAL_SYSTEM = `Sos el analizador de comidas de Plan V (Argentina, español rioplatense).
+const MEAL_SYSTEM = `Sos el analizador de comidas de Nutridash (Argentina, español rioplatense).
 Estimás alimentos y macros de una comida. No diagnosticás, no juzgás, no recetás.
 Devolvé JSON válido según el schema.
 

@@ -3,8 +3,8 @@
 const ZONA = 'America/Argentina/Buenos_Aires';
 const CALENDARIO = '00000000-0000-4000-a000-000000000001';
 
-function lunesDeEstaSemana() {
-  const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: ZONA }).format(new Date());
+function lunesDeEstaSemana(ahora = new Date()) {
+  const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: ZONA }).format(ahora);
   const fecha = new Date(`${hoy}T15:00:00Z`);
   fecha.setUTCDate(fecha.getUTCDate() - ((fecha.getUTCDay() + 6) % 7));
   return fecha;
@@ -12,8 +12,16 @@ function lunesDeEstaSemana() {
 
 const dia = (lunes, desplazo) => { const f = new Date(lunes); f.setUTCDate(f.getUTCDate() + desplazo); return f.toISOString().slice(0, 10); };
 
-export function snapshotAgendaEjemplo() {
-  const lunes = lunesDeEstaSemana();
+/** Martes a las 10:10 de la semana actual: conserva hechos, próxima, consultorio y video. */
+export function fechaAgendaContrato(ahora = new Date()) {
+  const martes = lunesDeEstaSemana(ahora);
+  martes.setUTCDate(martes.getUTCDate() + 1);
+  martes.setUTCHours(13, 10, 0, 0);
+  return martes;
+}
+
+export function snapshotAgendaEjemplo(ahora = new Date()) {
+  const lunes = lunesDeEstaSemana(ahora);
   const tipos = [
     { id: '00000000-0000-4000-a000-0000000000a1', name: 'Seguimiento', calendar_id: CALENDARIO, duration_min: 45, channel: 'presencial', price_minor: 3000000, deposit_minor: 0 },
     { id: '00000000-0000-4000-a000-0000000000a2', name: 'Primera consulta', calendar_id: CALENDARIO, duration_min: 60, channel: 'presencial', price_minor: 4000000, deposit_minor: 0 },

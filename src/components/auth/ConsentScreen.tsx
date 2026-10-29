@@ -20,7 +20,7 @@ export function ConsentScreen() {
   };
 
   return (
-    <EntryChrome title="Antes de seguir" subtitle="Para usar Plan V necesitamos que aceptes cómo cuidamos tus datos.">
+    <EntryChrome title="Antes de seguir" subtitle="Para usar Nutridash necesitamos que aceptes cómo cuidamos tus datos.">
       <label className="entry-check">
         <input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} />
         <span>Leí y acepto los <a href={TERMS_URL} target="_blank" rel="noreferrer">términos y condiciones</a> y la <a href={PRIVACY_URL} target="_blank" rel="noreferrer">política de privacidad</a>, y doy mi consentimiento expreso para que se traten mis datos de salud, incluso en servidores fuera de Argentina, para los fines que ahí se explican.</span>

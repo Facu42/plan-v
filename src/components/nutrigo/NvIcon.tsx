@@ -8,7 +8,7 @@
  * Phosphor se conserva para pesos alternativos y secciones propias del CRM.
  *
  * El mapa de abajo respeta la elección del archivo pantalla por pantalla. Donde
- * Plan V tiene una sección que Nutrigo no tiene, se elige de la misma familia.
+ * Nutridash tiene una sección que Nutrigo no tiene, se elige de la misma familia.
  */
 import {
   BowlFood, CalendarDots, CaretDown, ChartLineUp, ChatTeardropDots, Fire, Footprints,
@@ -55,7 +55,7 @@ const SOURCE_ICONS: Partial<Record<NvIconName, string>> = {
   desplegar: sourcedesplegar,
 };
 
-/** Izquierda: sección de Plan V. Derecha: el icono que usa el .fig para esa sección. */
+/** Izquierda: sección de Nutridash. Derecha: el icono que usa el .fig para esa sección. */
 export const NV_ICONS = {
   inicio: SquaresFour,            // Dashboard
   agenda: CalendarDots,           // Calendar

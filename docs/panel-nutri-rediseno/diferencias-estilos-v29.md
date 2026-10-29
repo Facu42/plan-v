@@ -41,3 +41,7 @@ No se cuentan como defectos el color de un avatar de otra paciente, textos/canti
 `e2e/estilos-punto4-v29.spec.ts` compara la app real con el HTML ejecutado del boceto, en claro y oscuro: controles, Historia, Equipo, Ayuda, Mensajes, distribución pública y fila de Planes. Para el caso de pocas filas se reducen ambas listas a dos entradas de prueba. No usa imágenes como fuente de valores ni escribe en producción.
 
 El resultado final y el informe de Regression Guard están en [Recetas y Equivalencias](recetas-equivalencias-v29.md).
+
+## Cierre de la muestra de Agenda
+
+La continuación de PR #233 completa la preparación del contrato: fecha de Agenda aislada en martes 10:10 de la semana, con consulta presencial, video, próxima, realizada y pendiente. Ficha conserva la fecha real y elige Sofía explícitamente. El contrato general terminó sin diferencias en claro y oscuro; no se eliminó ninguna comprobación ni se alteraron colores para hacerlo pasar.

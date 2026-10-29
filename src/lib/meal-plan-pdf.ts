@@ -27,5 +27,5 @@ export async function buildPlanPdf(copy:PlanPrintCopy,options:{fontBytes?:Uint8A
   }
   const fontBytes=options.fontBytes??new Uint8Array(await(await fetch('/clinical-pdf/Inter-Regular.ttf')).arrayBuffer());
   const brand=copy.options?.logo === false ? undefined : copy.brand;
-  return buildClinicalPdf({title:`Plan de alimentación · v${copy.version.version}`,patientName:copy.patientName,brand:{name:brand?.name||'Plan V',contact:brand?.contact||'',logo:brand?.logo||null,license:''},sections,charts:points.length?[{title:'Energía de los días con composición completa (incluye estimaciones declaradas)',unit:'kcal',points}]:[],fontBytes,monochrome:copy.options?.logo === false});
+  return buildClinicalPdf({title:`Plan de alimentación · v${copy.version.version}`,patientName:copy.patientName,brand:{name:brand?.name||'Nutridash',contact:brand?.contact||'',logo:brand?.logo||null,license:''},sections,charts:points.length?[{title:'Energía de los días con composición completa (incluye estimaciones declaradas)',unit:'kcal',points}]:[],fontBytes,monochrome:copy.options?.logo === false});
 }

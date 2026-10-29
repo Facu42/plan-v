@@ -1,4 +1,4 @@
-/* Páginas públicas de Plan V (nutricionistas y pacientes). Usa tokens.css; no comparte estilos con la app. */
+/* Páginas públicas de Nutridash (nutricionistas y pacientes). Usa tokens.css; no comparte estilos con la app. */
 :root {
   --lima: var(--pv-gold);
   --lima-dark: var(--pv-green);

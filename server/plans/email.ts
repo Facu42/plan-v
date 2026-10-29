@@ -60,7 +60,7 @@ export async function emailMealPlan(owner: string, patientId: string, id: string
   const link = `${site}/app/plan`;
   try {
     await deps.send(config, {
-      to: { email: to.email }, subject: 'Tu plan en Plan V',
+      to: { email: to.email }, subject: 'Tu plan en Nutridash',
       text: `Tu nutricionista compartió el acceso a tu plan publicado. Entrá con tu cuenta para verlo. Este enlace muestra la versión vigente; no incluye un PDF adjunto.\n\n${link}\n`,
       html: `<div style="font-family:Inter,Arial,sans-serif"><p>Tu nutricionista compartió el acceso a tu plan publicado.</p><p>Entrá con tu cuenta para verlo. El enlace muestra la versión vigente; no incluye un PDF adjunto.</p><p><a href="${link}">Ver mi plan</a></p></div>`,
       idempotencyKey: stableUuid(`plan-email:${id}:${version}`),

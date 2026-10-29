@@ -1,3 +1,11 @@
+29/10 · Codex · Gate local final de la continuación #233: 3.683 pruebas aprobadas y cuatro omitidas (588 archivos), contrato general v29 completo verde en ambos temas, recorrido real de visibilidad aprobado, tipos/build/migraciones/manifiesto/secretos aprobados. Migración de visibilidad preparada y requisitos existentes de producción confirmados solo en lectura. No se aplicó SQL remoto.
+
+29/10 · Codex · Continuación de PR #233 implementada: contrato general v29 completamente verde; interruptor de Equivalencias con CAS/SQL local y consulta en Opciones del plan paciente, sin cambios de comidas. 35 focales y recorrido completo de visibilidad aprobados; revisión independiente sin P1/P2. La migración nueva sigue sin aplicar: requiere autorización concreta para producción y gate final. [Informe vigente](panel-nutri-rediseno/recetas-equivalencias-v29.md).
+
+29/10 · Codex · Reservada `20261029195500_nutrition_exchange_visibility.sql`: visibilidad de grupos revisados por consultorio y lectura propia paciente. Solo ensayo local, sin producción.
+
+29/10 · Codex · Continuación autorizada de PR #233: cerrar muestra Agenda/recorrido antiguo de Recetas e implementar interruptor persistente de Equivalencias con lectura real en app paciente. Main f5ecdde incorporado; backend reservado al agente equivalencias_v29, frontend y contrato al hilo principal. Sin base de producción.
+
 29/10 · Codex · Correcciones del punto 4 terminadas en PR #233: Historia, Equipo, iconos/switches, bordes de Ayuda, botón de Planes de 27 px, distribución pública y recorte heredado. Informe de muestras rectificado por identidad/estado. 3.646 pruebas y cuatro omitidas; 9 e2e y 2 repeticiones de estilos a escala real; tipos/build aprobados. Comparador carga Inter local. Contrato general solo pendiente del turno .ev.c ausente en fixture, ambos temas; HOLD para merge. Sin producción. [Informe](panel-nutri-rediseno/recetas-equivalencias-v29.md).
 
 29/10 · Codex · Reserva autorizada por Facundo: corregir diferencias confirmadas del punto 4 contra el código v29 en `work/recetas-equivalencias-v29`, PR #233. Recetas y Equivalencias publicadas en la rama; main 247a00d incorporado sin conflictos. Sin merge ni producción.

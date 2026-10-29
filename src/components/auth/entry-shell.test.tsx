@@ -44,7 +44,7 @@ describe('pantalla de ingreso', () => {
     const html = renderToStaticMarkup(<LoginScreen darkMode={false} onToggleTheme={vi.fn()} />);
     expect(html).toContain('mcp-nutrigo');
     expect(html).toContain('data-name="Logo"');
-    expect(html).toContain('>Plan V<');
+    expect(html).toContain('>Nutridash<');
     expect(html).toContain('Iniciar sesión');
     expect(html).toContain('data-name="Segmented Button"');
     expect(html).toContain('data-node-id="217:6464"');
@@ -54,7 +54,7 @@ describe('pantalla de ingreso', () => {
     expect(html).toContain('data-node-id="207:7100"');
     expect(html).toContain('bg-[#c2e66e]');
     expect(html).not.toContain('Continuar en modo demo');
-    expect(html).not.toContain('Instalar Plan V');
+    expect(html).not.toContain('Instalar Nutridash');
     expect(html).not.toContain('auth-card');
     expect(html).not.toContain('loading-card');
     expect(html).not.toContain('Fraunces');

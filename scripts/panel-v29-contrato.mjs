@@ -7,7 +7,7 @@
 // Uso (app en demo: `npm run local`):
 //   node scripts/panel-v29-contrato.mjs          → imprime el informe y sale con 1 si algo no coincide
 //   node scripts/panel-v29-contrato.mjs --write  → además lo guarda en design/panel-nutri/v29/contrato-informe.md
-import { usarAgendaDeEjemplo } from './panel-v29-agenda-ejemplo.mjs';
+import { fechaAgendaContrato, usarAgendaDeEjemplo } from './panel-v29-agenda-ejemplo.mjs';
 import { createRequire } from 'node:module';
 import { existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
@@ -438,11 +438,11 @@ export function igual(a, b) {
   return x !== null && y !== null && Math.abs(x - y) <= TOLERANCIA_PX;
 }
 
-export async function abrirApp(browser, tema) {
+export async function abrirApp(browser, tema, fecha) {
   const pagina = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: tema })).newPage();
   await pagina.addInitScript(guardado => localStorage.setItem('plan-v:panel-theme-v2:demo', guardado), tema);
-  // La línea de ahora de la Agenda solo se dibuja en horario de atención; el boceto la tiene siempre (10:10). Se fija la hora para que el contrato no dependa del reloj.
-  await pagina.clock.install({ time: new Date(`${new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())}T13:10:00Z`) });
+  // El resto de las pantallas conserva la fecha real de sus datos demo. Agenda usa su contexto aislado.
+  await pagina.clock.install({ time: fecha ?? new Date(`${new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())}T13:10:00Z`) });
   await pagina.goto(`${origen}/crm/inicio`, { waitUntil: 'domcontentloaded' });
   const demo = pagina.getByText('Continuar en modo demo');
   if (await demo.count()) await demo.first().click();
@@ -490,7 +490,8 @@ async function abrirPacientesBoceto(pagina) {
 async function abrirPacientesApp(pagina) {
   await pagina.locator('#pv-panel-v29 a[href="/crm/pacientes"]').first().click();
   await pagina.waitForSelector('#s-pacientes #prows tr[data-i]', { timeout: 20000 });
-  await pagina.locator('#prows tr[data-i]').first().click();
+  const fila = pagina.getByRole('row', { name: 'Ver resumen de Sofía R.', exact: true });
+  if (await fila.getAttribute('aria-expanded') !== 'true') await fila.click();
   await pagina.waitForSelector('#prows .pdin', { timeout: 10000 });
   await pagina.waitForTimeout(1800);
 }
@@ -518,9 +519,10 @@ async function abrirFichaBoceto(pagina) {
 async function abrirFichaApp(pagina) {
   await pagina.locator('#pv-panel-v29 a[href="/crm/pacientes"]').first().click();
   await pagina.waitForSelector('#s-pacientes #prows tr[data-i]', { timeout: 20000 });
-  await pagina.locator('#prows tr[data-i]').first().click();
+  const fila = pagina.getByRole('row', { name: 'Ver resumen de Sofía R.', exact: true });
+  if (await fila.getAttribute('aria-expanded') !== 'true') await fila.click();
   await pagina.waitForSelector('#prows .pdin', { timeout: 10000 });
-  await pagina.locator('#prows .pd-acts .go').first().click();
+  await pagina.getByRole('button', { name: 'Abrir ficha de Sofía R.', exact: true }).click();
   await pagina.waitForSelector('#s-ficha .fx .fxtile', { timeout: 20000 });
   await pagina.waitForTimeout(1500);
 }
@@ -685,9 +687,12 @@ export async function correrContratoV29() {
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Pacientes\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_PACIENTES, informe);
       await abrirAgendaBoceto(b);
-      await abrirAgendaApp(a);
+      // Aislar la fecha de Agenda: cambiarla en la página de Ficha dejaría su plan demo fuera de período.
+      const agenda = await abrirApp(navegador, tema, fechaAgendaContrato());
+      await abrirAgendaApp(agenda);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Agenda\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
-      fallas += await comparar(b, a, PIEZAS_AGENDA, informe);
+      fallas += await comparar(b, agenda, PIEZAS_AGENDA, informe);
+      await agenda.close();
       await abrirFichaBoceto(b);
       await abrirFichaApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');

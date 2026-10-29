@@ -7,13 +7,13 @@ import { installCardBinding } from './install-card';
 const source = inicio as SourceNode;
 const card = findSource(source, node => node.tag === 'p' && /^Start your health journey/.test(sourceText(node)))!;
 const button = findSource(source, node => nodeName(node) === 'Button' && sourceText(node) === 'Claim Now!')!;
-const offer = { title: 'Instalar Plan V', body: 'b', card: 'Instalá Plan V en esta computadora y abrila como una app.', action: 'Instalar' };
+const offer = { title: 'Instalar Nutridash', body: 'b', card: 'Instalá Nutridash en esta computadora y abrila como una app.', action: 'Instalar' };
 
 describe('instalar desde la tarjeta amarilla del menú (lugar del «Claim Now!» del archivo)', () => {
   it('con oferta, la tarjeta invita a instalar y su botón instala', () => {
     const install = vi.fn();
     const html = renderToStaticMarkup(<>{installCardBinding(card, offer, install)?.children}</>);
-    expect(html).toBe('<span class="leading-[1.5] text-[12px]">Instalá Plan V en esta computadora y abrila como una app.</span>');
+    expect(html).toBe('<span class="leading-[1.5] text-[12px]">Instalá Nutridash en esta computadora y abrila como una app.</span>');
     const action = installCardBinding(button, offer, install)!;
     expect(action.label).toBe('Instalar');
     expect(action.text).toBeUndefined();

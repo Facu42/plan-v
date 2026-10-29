@@ -1,4 +1,4 @@
-// Panel del servicio: suscripción de cada nutricionista a Plan V. Sin datos de salud.
+// Panel del servicio: suscripción de cada nutricionista a Nutridash. Sin datos de salud.
 export type ServiceOverride = 'none' | 'waived' | 'suspended';
 export type ServicePaymentMethod = 'transferencia' | 'mercado_pago' | 'efectivo' | 'otro';
 export type ServicePaymentStatus = 'confirmed' | 'voided';
@@ -127,4 +127,17 @@ export interface OwnService {
   monthly_price: number | null;
   /** Vencido hace más de la gracia o suspendido: ve todo pero no puede cargar ni cambiar nada. */
   read_only: boolean;
+}
+
+export type AiCheckStatus = 'ok' | 'failed' | 'off' | 'demo';
+export interface AiCheckPart { status: AiCheckStatus; detail: string; ms: number }
+export interface AiCheck {
+  text: AiCheckPart & { model: string | null };
+  image: AiCheckPart & { preview: string | null };
+}
+
+export interface AiCheckPhoto { label: string; kind: 'plato' | 'ingrediente'; prompt: string; status: AiCheckStatus; detail: string; preview: string | null }
+export interface AiFullCheck {
+  recipe: AiCheckPart & { title: string | null; items: number; steps: number };
+  photos: AiCheckPhoto[];
 }

@@ -27,12 +27,19 @@ describe('equivalencias v29 con referencias reales', () => {
   it('una porción pequeña no se convierte en cero por el redondeo del boceto', () => {
     expect(calcularEquivalencias(origen, 1, [destino])?.alternativas[0].quantity).toBe(2);
   });
-  it('copia las columnas, clases y advertencia del boceto, con grupos propios y sin switch ficticio', () => {
+  it('copia las columnas, clases y advertencia del boceto, con grupos propios y switch deshabilitado hasta leer configuración', () => {
     const html = renderToStaticMarkup(<PanelPlanEquivalenciasVista grupos={[grupo]} grupoId="g" alimentoId={origen.id} cantidad="150" estado="lista" onGrupo={vi.fn()} onAlimento={vi.fn()} onCantidad={vi.fn()} onEditar={vi.fn()} onReintentar={vi.fn()} />);
     for (const s of ['class="fx pfx"', 'class="peqin"', 'class="peqk"', 'id="peg"', 'id="peqf"', 'id="peqg"', 'class="fxs fxtb tall"', 'La equivalencia compara energía dentro de un grupo.', '300 ml', 'Últimos cambios en los planes', 'En la app de la paciente', 'Grupos']) expect(html).toContain(s);
     expect(html).toMatch(/role="switch" disabled="" aria-checked="false"/);
     expect(html).not.toContain('Arroz por quinoa');
     expect(html).not.toContain('Tu plan · almuerzo');
+  });
+  it('muestra la configuración confirmada sin habilitar cambios mientras guarda o hay error', () => {
+    const render = (props: object) => renderToStaticMarkup(<PanelPlanEquivalenciasVista grupos={[]} grupoId="" alimentoId="" cantidad="150" estado="lista" onGrupo={vi.fn()} onAlimento={vi.fn()} onCantidad={vi.fn()} onEditar={vi.fn()} onReintentar={vi.fn()} visibilidad={{ enabled: true, revision: 3 }} cargandoVisibilidad={false} onVisibilidad={vi.fn()} {...props}/>);
+    expect(render({})).toMatch(/role="switch" aria-checked="true"/);
+    expect(render({guardandoVisibilidad:true})).toMatch(/role="switch" disabled="" aria-checked="true"/);
+    expect(render({errorVisibilidad:'No pudimos guardar.'})).toContain('Recargar configuración');
+    expect(render({errorVisibilidad:'No pudimos guardar.'})).toMatch(/role="switch" disabled="" aria-checked="true"/);
   });
   it('sin grupos explica el vacío y permite crear uno sin mostrar resultados inventados', () => {
     const html = renderToStaticMarkup(<PanelPlanEquivalenciasVista grupos={[]} grupoId="" alimentoId="" cantidad="150" estado="lista" onGrupo={vi.fn()} onAlimento={vi.fn()} onCantidad={vi.fn()} onEditar={vi.fn()} onReintentar={vi.fn()} />);

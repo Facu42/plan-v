@@ -45,7 +45,7 @@ export function AjustesCuenta({ marca, cargando, tema, onEditar, onExportar, onO
       <FxPanel titulo="Firma y marca" meta="para certificados e informes" derecha={<Boton texto="Cambiar" onClick={() => onEditar('firma')} disabled={cargando || !marca} />}>
         <div className="ajsig">
           <div className="ajfirma">{datos.firma ? <img src={datos.firma} alt="Tu firma" style={{ maxHeight: 46, maxWidth: 150 }} /> : <small>Sin firma cargada</small>}</div>
-          <div className="ajlogo">{marca?.logo ? <img src={marca.logo} width={40} height={40} alt="Logo del consultorio" /> : <span className="mk">V</span>}<small>{marca?.logo ? 'Tu logo' : 'Logo de Plan V'}</small></div>
+          <div className="ajlogo">{marca?.logo ? <img src={marca.logo} width={40} height={40} alt="Logo del consultorio" /> : <span className="mk">nd</span>}<small>{marca?.logo ? 'Tu logo' : 'Logo de Nutridash'}</small></div>
         </div>
       </FxPanel>
       <FxPanel titulo="Título y matrícula" meta="se imprimen en certificados" derecha={<Boton texto="Editar" onClick={() => onEditar('titulo')} disabled={cargando || !marca} />} grande>
@@ -53,7 +53,7 @@ export function AjustesCuenta({ marca, cargando, tema, onEditar, onExportar, onO
       </FxPanel>
     </div>
     <div className="c">
-      <FxPanel titulo="Tu servicio de Plan V">
+      <FxPanel titulo="Tu servicio de Nutridash">
         <div className="ajplan"><b>—</b><small>Todavía no hay datos de tu servicio</small></div>
         <FxKv filas={[['Pacientes activas', '—'], ['Equipo', '—'], ['Próximo pago', '—'], ['Medio', '—']]} />
         <div className="fxfoot"><Boton texto="Ver pagos" disabled /><Boton texto="Descargar factura" icono="dl" disabled /></div>
@@ -108,7 +108,7 @@ export function AjustesPlantillas({ marca, plantillas, error, onNueva, onEditar,
     <div className="c"><FxPanel titulo={t?.name ?? 'Plantilla'} meta={t ? <Pastilla texto={t.kind} clase={cert ? 'p-vid' : 'p-conf'} /> : 'elegí una para verla'}
       derecha={<><Boton texto="Vista de la paciente" icono="eye" disabled={!t} onClick={() => setVista(true)} /><Boton texto="Editar" clase="k" icono="pen" disabled={!t} onClick={() => t && onEditar(t)} /></>} grande>
       {!t ? <div className="fxs"><Vacio texto="Cuando haya una plantilla, la ves acá tal como la recibe la paciente." /></div>
-        : t.kind === 'Certificado' ? <div className="ajcert"><div className="ajch">{datos.logo ? <img src={datos.logo} width={32} height={32} alt="" /> : <span className="mk">V</span>}<span><b>{datos.nombre}</b><small>{datosFirma}</small></span></div>
+        : t.kind === 'Certificado' ? <div className="ajcert"><div className="ajch">{datos.logo ? <img src={datos.logo} width={32} height={32} alt="" /> : <span className="mk">nd</span>}<span><b>{datos.nombre}</b><small>{datosFirma}</small></span></div>
           <h4>{t.name}</h4><p>{partirVariables(t.text)}</p><p>Se extiende a pedido de la interesada para ser presentado ante quien corresponda.</p>
           <div className="ajcf">{datos.firma ? <img src={datos.firma} alt="Tu firma" style={{ maxHeight: 46, maxWidth: 150 }} /> : <svg viewBox="0 0 160 50" aria-hidden="true"><path d="M8 34c14-22 22-24 24-12s-6 18 2 8 14-24 18-14-8 22 4 14 16-20 22-10 4 12 14 4 18-10 28-6 12 4 26-2" /></svg>}<small>Firma y sello · <u>fecha</u></small></div></div>
           : <div className="fxs"><ol className="ajq">{t.questions.map((q, i) => <li key={i}><span className="num">{i + 1}</span><span className="t"><b>{q}</b><small>Respuesta libre</small><i className="ajfld lg" /></span></li>)}</ol></div>}

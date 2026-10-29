@@ -139,7 +139,7 @@ export function CrmModuleView({ module, patients, onOpenPatient, onOpenAppointme
     <div className="crm-module-view">
       <header className="module-view-header">
         <span><Icon name={copy.icon} size={20} /></span>
-        <div><p className="eyebrow">Plan V</p><h1>{copy.title}</h1><p>{copy.subtitle}</p></div>
+        <div><p className="eyebrow">Nutridash</p><h1>{copy.title}</h1><p>{copy.subtitle}</p></div>
       </header>
       {content}
     </div>

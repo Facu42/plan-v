@@ -13,7 +13,7 @@ export function discoverPlanVSupabase(): PlanVSupabasePublic {
   const projectId = info.match(/projectId = "([^"]+)"/)?.[1];
   const anonKey = info.match(/publicAnonKey = "([^"]+)"/)?.[1];
   if (!projectId || !anonKey) {
-    throw new Error('Plan V public Supabase project id/anon key are missing from src/utils/supabase/info.tsx');
+    throw new Error('Nutridash public Supabase project id/anon key are missing from src/utils/supabase/info.tsx');
   }
   return { projectId, url: `https://${projectId}.supabase.co`, anonKey };
 }

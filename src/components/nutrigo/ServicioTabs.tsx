@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { api } from '../../api/client';
-import type { NutritionistCreateMode, ServiceEvent, ServiceNutritionist, TestAccount, TestAccountsResult } from '../../types/service';
+import type { AiCheck, AiCheckPart, AiFullCheck, AiCheckStatus, NutritionistCreateMode, ServiceEvent, ServiceNutritionist, TestAccount, TestAccountsResult } from '../../types/service';
 import { NvBadge, NvButton, NvCard } from './primitives';
 import { FeeError } from './cobranzas-shared';
 import { adminErrorMessage, filterServiceEvents, isValidEmail, MIN_PASSWORD, SERVICE_EVENT_LABELS, serviceEventLabel, shortDateTime, testAliasEmails } from './servicio-utils';
@@ -117,6 +117,71 @@ export function PruebasTab({ initialAccounts = null }: { initialAccounts?: TestA
           <NvBadge tone={account.role === 'nutricionista' ? 'green' : 'gold'}>{account.role === 'nutricionista' ? 'Nutricionista' : 'Paciente'}</NvBadge>
         </li>)}</ul> : <p className="cbz-muted">{listError || 'Todavía no hay cuentas de prueba.'}</p>}
       {accounts !== null && accounts.length === 0 && listError ? <NvButton className="nv-ghost" onClick={load}>Reintentar</NvButton> : null}
+    </NvCard>
+  </div>;
+}
+
+const CHECK_TONE: Record<AiCheckStatus, 'green' | 'gold'> = { ok: 'green', failed: 'gold', off: 'gold', demo: 'gold' };
+const CHECK_LABEL: Record<AiCheckStatus, string> = { ok: 'Anda', failed: 'No anda', off: 'Apagada', demo: 'Demo' };
+
+function CheckLine({ title, part, extra }: { title: string; part: AiCheckPart; extra?: string }) {
+  return <li className="cbz-row">
+    <div><strong>{title}</strong><small>{part.detail}{extra ? ` ${extra}` : ''}{part.ms ? ` · ${(part.ms / 1000).toFixed(1)} s` : ''}</small></div>
+    <NvBadge tone={CHECK_TONE[part.status]}>{CHECK_LABEL[part.status]}</NvBadge>
+  </li>;
+}
+
+/** Prueba la IA de texto y las fotos sin entrar a ninguna cuenta: una consulta corta y una foto de ejemplo. */
+export function VerificarTab() {
+  const [check, setCheck] = useState<AiCheck | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [full, setFull] = useState<AiFullCheck | null>(null);
+  const [fullBusy, setFullBusy] = useState(false);
+  const [fullError, setFullError] = useState('');
+
+  const runFull = async () => {
+    setFullBusy(true); setFullError('');
+    try { setFull((await api.checkAiFull()).check); } catch (reason) { setFullError(adminErrorMessage(reason, 'No pudimos hacer la prueba completa.')); } finally { setFullBusy(false); }
+  };
+
+  const run = async () => {
+    setBusy(true); setError('');
+    try { setCheck((await api.checkAi()).check); } catch (reason) { setError(adminErrorMessage(reason, 'No pudimos verificar la IA.')); } finally { setBusy(false); }
+  };
+
+  return <div className="svc-two">
+    <NvCard title="Verificar la IA del servicio" className="cbz-settings">
+      <p className="cbz-hint">Hace una consulta corta de texto y genera una foto de ejemplo (lentejas). No usa cuentas ni datos de pacientes, y no guarda nada. Cada foto gasta cuota gratuita de Cloudflare.</p>
+      <FeeError message={error} />
+      <NvButton onClick={() => void run()} disabled={busy}>{busy ? 'Verificando…' : 'Verificar ahora'}</NvButton>
+      {check && <ul className="cbz-list" aria-live="polite">
+        <CheckLine title="IA de texto (planes y recetas)" part={check.text} extra={check.text.model ? `Modelo: ${check.text.model}.` : undefined} />
+        <CheckLine title="Fotos de recetas e ingredientes" part={check.image} />
+      </ul>}
+    </NvCard>
+    <NvCard title="Prueba completa: receta y fotos" className="svc-full">
+      <p className="cbz-hint">Arma una receta de ejemplo con la IA y genera cuatro fotos (dos platos y dos ingredientes) con los mismos textos que usa la app. Sirve para ver si las fotos se parecen a lo que dice el nombre. No guarda nada.</p>
+      <FeeError message={fullError} />
+      <NvButton onClick={() => void runFull()} disabled={fullBusy}>{fullBusy ? 'Probando… puede tardar un minuto' : 'Probar receta y fotos'}</NvButton>
+      {full && <>
+        <ul className="cbz-list" aria-live="polite">
+          <CheckLine title="Receta de ejemplo" part={full.recipe} extra={full.recipe.title ? `«${full.recipe.title}»: ${full.recipe.items} ingredientes, ${full.recipe.steps} pasos.` : undefined} />
+        </ul>
+        <div className="svc-photo-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12, marginTop: 12 }}>
+          {full.photos.map((photo) => <figure key={`${photo.kind}-${photo.label}`} style={{ margin: 0 }}>
+            {photo.preview
+              ? <img src={photo.preview} alt={`${photo.label}: foto de ejemplo generada con IA`} width={256} height={256} style={{ width: '100%', height: 'auto', borderRadius: 12 }} />
+              : <p className="cbz-muted">{photo.detail}</p>}
+            <figcaption><strong>{photo.label}</strong> <NvBadge tone={CHECK_TONE[photo.status]}>{photo.kind === 'plato' ? 'Plato' : 'Ingrediente'}</NvBadge></figcaption>
+          </figure>)}
+        </div>
+      </>}
+    </NvCard>
+    <NvCard title="Foto de ejemplo">
+      {check?.image.preview
+        ? <img src={check.image.preview} alt="Foto de ejemplo de lentejas generada con IA" width={256} height={256} style={{ maxWidth: '100%', height: 'auto', borderRadius: 12 }} />
+        : <p className="cbz-muted">{check ? 'No se generó la foto.' : 'Tocá «Verificar ahora» para ver la foto.'}</p>}
     </NvCard>
   </div>;
 }
