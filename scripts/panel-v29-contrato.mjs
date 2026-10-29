@@ -9,7 +9,7 @@
 //   node scripts/panel-v29-contrato.mjs --write  → además lo guarda en design/panel-nutri/v29/contrato-informe.md
 import { usarAgendaDeEjemplo } from './panel-v29-agenda-ejemplo.mjs';
 import { createRequire } from 'node:module';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -399,8 +399,21 @@ async function medir(pagina, selector, pseudo, props) {
 }
 
 export async function abrirBoceto(browser, tema) {
-  const pagina = await (await browser.newContext({ viewport: { width: 1500, height: 1000 }, colorScheme: tema })).newPage();
-  await pagina.goto(boceto); await pagina.waitForTimeout(800);
+  const pagina = await (await browser.newContext({ viewport: { width: 1500, height: 1000 }, colorScheme: tema, reducedMotion: 'reduce' })).newPage();
+  // La fuente remota puede fallar en CI; check() devuelve true incluso sin una sola FontFace.
+  // Servir los mismos bytes locales de Inter que importa la app permite medir sin depender de Google.
+  const fuentes = [300, 400, 500, 600].map(peso => {
+    const bytes = readFileSync(resolve(raiz, `node_modules/@fontsource/inter/files/inter-latin-${peso}-normal.woff2`));
+    return `@font-face{font-family:Inter;font-style:normal;font-weight:${peso};src:url(data:font/woff2;base64,${bytes.toString('base64')}) format('woff2');}`;
+  }).join('\n');
+  await pagina.route('https://fonts.googleapis.com/**', route => route.fulfill({ contentType: 'text/css', body: fuentes }));
+  await pagina.route('https://fonts.gstatic.com/**', route => route.abort());
+  // Este contrato mide el estado final; las animaciones tienen su prueba aparte.
+  await pagina.route('https://cdnjs.cloudflare.com/**', route => route.abort());
+  await pagina.goto(boceto);
+  await pagina.evaluate(() => Promise.all([300,400,500,600].map(p => document.fonts.load(`${p} 16px Inter`))));
+  const fuente = await letraDisponible(pagina);
+  if (fuente.faltan.length) throw new Error(`No se pudo cargar Inter en el boceto: ${fuente.faltan.join(', ')}`); await pagina.waitForTimeout(800);
   await pagina.locator(tema === 'dark' ? '#t-dark' : '#t-light').first().click().catch(() => {});
   await pagina.waitForTimeout(200);
   // El boceto se muestra a escala: se lleva a 1:1 para medir tamaños reales.
@@ -425,7 +438,7 @@ export function igual(a, b) {
 }
 
 export async function abrirApp(browser, tema) {
-  const pagina = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: tema })).newPage();
+  const pagina = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: tema, reducedMotion: 'reduce' })).newPage();
   await pagina.addInitScript(guardado => localStorage.setItem('plan-v:panel-theme-v2:demo', guardado), tema);
   // La línea de ahora de la Agenda solo se dibuja en horario de atención; el boceto la tiene siempre (10:10). Se fija la hora para que el contrato no dependa del reloj.
   await pagina.clock.install({ time: new Date(`${new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())}T13:10:00Z`) });
@@ -441,6 +454,9 @@ export async function abrirApp(browser, tema) {
   }
   await pagina.waitForSelector('#pv-panel-v29 .top .cta', { timeout: 15000 });
   await pagina.waitForSelector('#pv-panel-v29 .top .ibtn', { timeout: 15000 });
+  await pagina.evaluate(() => Promise.all([300,400,500,600].map(p => document.fonts.load(`${p} 16px Inter`))));
+  const fuente = await letraDisponible(pagina);
+  if (fuente.faltan.length) throw new Error(`No se pudo cargar Inter en la app: ${fuente.faltan.join(', ')}`);
   await pagina.waitForTimeout(400);
   return pagina;
 }
@@ -501,7 +517,7 @@ async function abrirFichaBoceto(pagina) {
   await pagina.waitForTimeout(1500);
 }
 
-async function abrirFichaApp(pagina) {
+export async function abrirFichaApp(pagina) {
   await pagina.locator('#pv-panel-v29 a[href="/crm/pacientes"]').first().click();
   await pagina.waitForSelector('#s-pacientes #prows tr[data-i]', { timeout: 20000 });
   await pagina.locator('#prows tr[data-i]').first().click();
@@ -543,11 +559,12 @@ async function abrirAsistenteBoceto(pagina) {
   await pagina.waitForSelector('#s-asistente .fxr .av', { timeout: 10000 });
 }
 
-async function letraDisponible(pagina) {
+export async function letraDisponible(pagina) {
   return pagina.evaluate(async () => {
     await document.fonts.ready;
     const pesos = [300, 400, 500, 600];
-    const faltan = pesos.filter(peso => !document.fonts.check(`${peso} 16px Inter`));
+    const registradas = [...document.fonts].filter(f => f.family.replace(/["']/g, '') === 'Inter' && f.status === 'loaded');
+    const faltan = pesos.filter(peso => !registradas.some(f => f.weight === String(peso)) || !document.fonts.check(`${peso} 16px Inter`));
     const familia = selector => {
       const el = document.querySelector(selector);
       return el ? getComputedStyle(el).fontFamily : '';
@@ -583,7 +600,7 @@ async function abrirAlimentosApp(pagina) {
 }
 
 /** Responde con turnos registrados y notas de ejemplo, porque la demo no trae ninguno. */
-async function simularConsultas(pagina) {
+export async function simularConsultas(pagina) {
   const turno = (id, starts_at, channel, extra = {}) => ({ appointment_id: id, starts_at, duration_min: 30, channel, status: 'scheduled', completed: true, revision: 1, marked_at: null, marked_by: null, appointment_starts_at: null, ...extra });
   const futuro = new Date(Date.now() + 21 * 86400000).toISOString();
   const cierres = { appointments: [turno('a6', futuro, 'presencial', { completed: false }), turno('a5', '2026-10-14T13:00:00Z', 'video'), turno('a4', '2026-09-16T13:00:00Z', 'presencial'), turno('a3', '2026-08-19T13:00:00Z', 'presencial', { status: 'cancelled', completed: false }), turno('a2', '2026-08-18T20:00:00Z', 'video'), turno('a1', '2026-03-12T12:00:00Z', 'presencial')], total_completed: 5, has_more: false };
@@ -594,7 +611,7 @@ async function simularConsultas(pagina) {
 }
 
 /** Responde con un laboratorio de ejemplo y el permiso de estudios, porque la demo no trae ninguno. */
-async function simularLaboratorio(pagina) {
+export async function simularLaboratorio(pagina) {
   const uid = n => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
   const valores = [['Ferritina', 'ng/ml', '30 - 200', [9, 11, 14]], ['Hemoglobina', 'g/dl', '12 - 16', [11.4, 11.9, 12.3]], ['Glucemia', 'mg/dl', '70 - 100', [90, 88, 86]], ['Colesterol total', 'mg/dl', '< 200', [195, 188, 182]]];
   const fechas = ['2024-07-15', '2026-03-20', '2026-10-12'];
@@ -798,7 +815,17 @@ export async function correrContratoV29() {
 }
 
 const esPrincipal = process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]);
-if (esPrincipal) {
+if (esPrincipal && args.includes('--verificar-fuentes')) {
+  const navegador = await playwright().chromium.launch();
+  try {
+    const pagina = await abrirBoceto(navegador, 'dark');
+    if ((await letraDisponible(pagina)).faltan.length) throw new Error('Inter no está completa.');
+    // Mutación controlada: quitar la página que declara la fuente debe poner el control en rojo.
+    await pagina.goto('about:blank');
+    if ((await letraDisponible(pagina)).faltan.length !== 4) throw new Error('El control no detectó Inter ausente.');
+    console.log('Inter 300–600 cargada y prueba de fuente ausente detectada.');
+  } finally { await navegador.close(); }
+} else if (esPrincipal) {
   const { fallas, texto } = await correrContratoV29();
   console.log(texto);
   if (args.includes('--write')) await writeFile(resolve(raiz, 'design/panel-nutri/v29/contrato-informe.md'), texto);
