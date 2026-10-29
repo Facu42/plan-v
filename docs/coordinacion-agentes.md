@@ -1,3 +1,17 @@
+29/10 · Codex · Cierre autorizado de #233: main 4b29bce incorporado; subida de ampliación completada. Auditoría de CI detectó aviso nuevo en Vite6.4.4; parche oficial6.4.5 exacto, sin cambios transitivos. Auditoría0/build/tipos y revisión independientes aprobados; sigue CI nueva antes de la migración de visibilidad autorizada y merge.
+
+29/10 · Codex · Gate local final de la continuación #233: 3.683 pruebas aprobadas y cuatro omitidas (588 archivos), contrato general v29 completo verde en ambos temas, recorrido real de visibilidad aprobado, tipos/build/migraciones/manifiesto/secretos aprobados. Migración de visibilidad preparada y requisitos existentes de producción confirmados solo en lectura. No se aplicó SQL remoto.
+
+29/10 · Codex · Continuación de PR #233 implementada: contrato general v29 completamente verde; interruptor de Equivalencias con CAS/SQL local y consulta en Opciones del plan paciente, sin cambios de comidas. 35 focales y recorrido completo de visibilidad aprobados; revisión independiente sin P1/P2. La migración nueva sigue sin aplicar: requiere autorización concreta para producción y gate final. [Informe vigente](panel-nutri-rediseno/recetas-equivalencias-v29.md).
+
+29/10 · Codex · Reservada `20261029195500_nutrition_exchange_visibility.sql`: visibilidad de grupos revisados por consultorio y lectura propia paciente. Solo ensayo local, sin producción.
+
+29/10 · Codex · Continuación autorizada de PR #233: cerrar muestra Agenda/recorrido antiguo de Recetas e implementar interruptor persistente de Equivalencias con lectura real en app paciente. Main f5ecdde incorporado; backend reservado al agente equivalencias_v29, frontend y contrato al hilo principal. Sin base de producción.
+
+29/10 · Codex · Correcciones del punto 4 terminadas en PR #233: Historia, Equipo, iconos/switches, bordes de Ayuda, botón de Planes de 27 px, distribución pública y recorte heredado. Informe de muestras rectificado por identidad/estado. 3.646 pruebas y cuatro omitidas; 9 e2e y 2 repeticiones de estilos a escala real; tipos/build aprobados. Comparador carga Inter local. Contrato general solo pendiente del turno .ev.c ausente en fixture, ambos temas; HOLD para merge. Sin producción. [Informe](panel-nutri-rediseno/recetas-equivalencias-v29.md).
+
+29/10 · Codex · Reserva autorizada por Facundo: corregir diferencias confirmadas del punto 4 contra el código v29 en `work/recetas-equivalencias-v29`, PR #233. Recetas y Equivalencias publicadas en la rama; main 247a00d incorporado sin conflictos. Sin merge ni producción.
+
 24/10 · Codex → Cursor · Facundo eligió **v29** para seguir dibujando. Archivo original intacto en `design/panel-nutri/v29/PlanV-Boceto-v29.html`; [instrucciones para Cursor](panel-nutri-rediseno/continuar-v29-cursor.md). v30/v31 descartadas; no reaplicar automáticamente sus 13 marcas. Solo boceto y docs; la app y la base no se modifican.
 
 21/10 · Cursor · Se trajo main (fase A #162 e Inicio 900 #163) a `cursor/panel-proximamente`, [PR #168](https://github.com/Facu42/plan-v/pull/168). Siguen Próximamente y los datos de ejemplo. No reemplaza el asistente, la ayuda ni el equipo. Sin juntar.
@@ -111,6 +125,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **29/10 · Codex · Recetas y Equivalencias dentro de Planes** · Pedido de Facundo para corregir los puntos 1 y 2 de la revisión de main. Rama `work/recetas-equivalencias-v29`; copia de HTML/CSS v29 y APIs existentes. Detalle del punto 4 en `docs/panel-nutri-rediseno/diferencias-estilos-v29.md`. Sin cambios de base. Implementación y cuatro e2e locales aprobados; 25 tests específicos, tipos y compilación aprobados. Suite general sin completar en 180 s: HOLD para merge. [Informe](panel-nutri-rediseno/recetas-equivalencias-v29.md).
 
 - **27/10 · Claude · Pacientes v29** · Rama `claude/pacientes-v29`, desde main `9f11908` (Inicio ya juntado con el ok de Facundo, #196). Pacientes copia el boceto: solapas, orden, tabla y resumen que se despliega hacia abajo con peso, avance, adherencia, turno y últimos hechos, con datos reales y movimiento sin librería. Patologías dice «Sin declarar» (no hay dato). Contrato de Pacientes en verde. [Nota, paso 10 y qué no se copió](panel-nutri-rediseno/pacientes-v29.md). Sin merge ni producción; HOLD hasta el ok visual de Facundo.
 - **27/10 · Claude · Agenda v29** · Rama `claude/agenda-v29`, desde main `3ced7f6` (Pacientes ya juntado, #197). La Agenda copia el boceto: calendario hora por hora con turnos de colores y línea de ahora, mes chico, Pedidos de turno y Lugares libres, con datos reales; Mes y Día armados con los colores del boceto. Las funciones que el boceto no dibuja (horarios y precios, pagos y calendario, conexiones, bloquear, reprogramar) se conservan en el pie y en un diálogo. Contrato de Agenda en verde. [Nota, paso 10 y qué no se copió](panel-nutri-rediseno/agenda-v29.md). Sin merge ni producción; HOLD hasta el ok visual de Facundo.

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { enterDemo } from './helpers';
 
-test('Planes: el listado es la entrada y Recetas abre la Biblioteca', async ({ page }) => {
+test('Planes: el listado es la entrada y Recetas permanece en Planes', async ({ page }) => {
   await enterDemo(page, '/crm/plan');
   await expect(page.getByRole('heading', { name: 'Planes', exact: true })).toBeVisible();
   await expect(page.getByText('Organizá, armá y entregá los planes de tus pacientes', { exact: true })).toBeVisible();
@@ -13,7 +13,10 @@ test('Planes: el listado es la entrada y Recetas abre la Biblioteca', async ({ p
   await expect(page.locator('.meal-plan-form')).toHaveCount(0);
 
   await page.getByRole('navigation', { name: 'Secciones de Planes' }).getByRole('button', { name: 'Recetas', exact: true }).click();
-  await expect(page).toHaveURL(/biblioteca=recetas/);
+  await expect(page).toHaveURL(/\/crm\/plan/);
+  await expect(page.locator('#s-planes #pwrap.pv2 .prgrid')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Recetas', exact: true })).toBeVisible();
+  await expect(page.locator('#s-biblioteca')).toHaveCount(0);
   await expect(page.locator('body')).not.toContainText(/siguen en Planes/i);
 });
 

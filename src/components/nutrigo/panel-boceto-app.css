@@ -27,7 +27,7 @@
 .m#pv-panel .search:focus-within{border-color:var(--lime-d)}
 
 /* Campana y botones del boceto como botones y enlaces reales. */
-.m#pv-panel button.ibtn{padding:0;color:var(--ink);cursor:pointer}
+.pn-panel:not(:has(#pv-panel-v29)) .m#pv-panel button.ibtn{padding:0;color:var(--ink);cursor:pointer}
 .m#pv-panel button.btn{border:0;font-family:inherit;cursor:pointer}
 .m#pv-panel a.btn{color:inherit;text-decoration:none}
 
