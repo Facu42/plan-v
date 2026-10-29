@@ -4,7 +4,7 @@ import { getSessionToken } from '../lib/supabase';
 import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } from '../types/intake';
 import type { PrivacyRequestKind, PrivacyRequestView } from '../types/privacy';
 import { resolveApiUrl } from './origin';
-import type { AiCheck, NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
+import type { AiCheck, AiFullCheck, NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
 import type { BillingBoard, BillingProgram, ChargeInput, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
 
 export { ApiError } from './error';
@@ -268,6 +268,7 @@ export const api = {
     request<TestAccountsResult>('/api/admin/test-accounts', { method: 'POST', body: JSON.stringify(input) }),
   listTestAccounts: () => request<{ accounts: TestAccount[] }>('/api/admin/test-accounts'),
   checkAi: () => request<{ check: AiCheck }>('/api/admin/ai-check', { method: 'POST' }),
+  checkAiFull: () => request<{ check: AiFullCheck }>('/api/admin/ai-check/full', { method: 'POST' }),
 
   // Cobranzas. En modo demo la vista de paciente manda ?audience=patient.
   getBillingBoard: () => request<{ board: BillingBoard }>('/api/billing'),
