@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import * as repo from './repository.js';
 import * as accounts from './accounts.js';
+import { demoAiCheck, runAiCheck } from './ai-check.js';
 import { MFA_REQUIRED_MESSAGE, mfaEnforced, tokenAal } from '../security/mfa.js';
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => !Number.isNaN(Date.parse(`${value}T12:00:00Z`)));
@@ -139,5 +140,10 @@ export function registerAdminRoutes(app: Hono) {
     const input = await strictBody(c, testAccountsSchema);
     const result = await accounts.createTestAccounts(input, persistent, (path, init) => app.request(path, init));
     return c.json({ ...result, source: source(persistent) }, result.created ? 201 : 200);
+  });
+  // Prueba texto y una foto de ejemplo sin entrar a ninguna cuenta. No guarda nada.
+  app.post('/api/admin/ai-check', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ check: persistent ? await runAiCheck() : demoAiCheck(), source: source(persistent) });
   });
 }

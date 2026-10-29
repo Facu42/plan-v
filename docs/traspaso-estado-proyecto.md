@@ -46,6 +46,13 @@
 
 19/10 · Cursor · Fase 5 y fase 4 quedaron en main. WhatsApp salió del panel. La ficha de #154 convive con Agenda, Cobranzas y Página pública. Sin SQL remoto.
 
+## 29/10 · Verificar la IA desde el panel de administrador
+Nueva pestaña «Verificar IA» en /admin (`POST /api/admin/ai-check`, solo administrador). Hace una consulta corta al modelo gratis de
+OpenRouter y genera una foto de ejemplo con Cloudflare, sin usar cuentas ni datos de pacientes y sin guardar nada. Dice «Anda / No anda /
+Apagada» con el motivo (por ejemplo, faltan las cuatro variables de Cloudflare en Railway, o se agotó la cuota diaria). Una verificación
+cada 30 segundos para no gastar la cuota gratuita. Sin migraciones ni variables nuevas. Ya hay dos nutris de prueba en la base
+(`[Prueba] Nutricionista`, creadas por «Cuentas de prueba»). Pendiente: dejar a la IA del administrador (resumen del servicio) para otra rama.
+
 ## 19/10 · Ficha de la nutri, fase 4
 
 Implementación en `codex/panel-nutri-fase-4`: once pestañas, encabezado, resumen y datos iniciales; evolución, plan publicado/editor, diario completo, laboratorio, notas, archivos privados, consultas, cobros y chat. Conserva las catorce secciones y enlaces anteriores. API de lectura paginada de comidas, sin cambios de base. Revisiones independientes cerradas; seis e2e verdes, suite estable final 3.177 aprobadas y dos omitidas (494 archivos), tipos/build/secretos aprobados; 28 controles del navegador y 44 tamaños/temas, 47 capturas. Entregada en [PR #154](https://github.com/Facu42/plan-v/pull/154), con paso 10; integración sujeta a sus controles remotos. [Informe](panel-nutri-rediseno/fase-4-verificacion.md) y [comparación local](../design/panel-nutri/fase-4-verificacion.html).
