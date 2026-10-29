@@ -61,7 +61,7 @@ describe('contrato del proveedor para propuestas estimadas', () => {
     expect(generateText).toHaveBeenCalledTimes(1);
   });
   it('la receta individual también marca nutrientes por porción como estimación', async () => {
-    vi.mocked(generateText).mockResolvedValueOnce({ output: { title: proposal.title, yield_portions: 2, steps: proposal.steps, items: [{name:'Apio, hervido',quantity:100,unit:'g'}], nutrition } } as never);
+    vi.mocked(generateText).mockResolvedValue({ output: { title: proposal.title, yield_portions: 2, steps: proposal.steps, items: [{name:'Apio, hervido',quantity:100,unit:'g'}], nutrition } } as never);
     const result = await generateRecipeDraft(buildRecipeJobContext({ intake }));
     expect(result.recipe.nutrition?.origin).toBe('ai_estimate');
     expect(result.recipe.nutrient_source).toBe('estimacion_ia.v2');
