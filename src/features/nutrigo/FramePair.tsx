@@ -13,10 +13,12 @@ import { iconButtonAction, iconButtonLabel, mapIconButtons } from './icon-button
 import './nutrigo.generated.css';
 
 const frames = import.meta.glob<{default:SourceNode}>('./source/*.json');
-export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, children, onSearch, query = '', unread = 0, banner = false }: {
+export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, children, beforeFooter, onSearch, query = '', unread = 0, banner = false }: {
   nodes: [string,string]; resolve:SourceResolver; patientName:string; onNavigate:(page:ShowroomPage)=>void; onSignOut?:()=>void; children?:ReactNode; onSearch?:(query:string)=>void; query?:string; unread?:number;
   /** La pantalla usa la tarjeta amarilla para un aviso propio: en el celular también se copia arriba del contenido. */
   banner?: boolean;
+  /** Bloque propio de Plan V que va dentro de la columna del archivo, justo antes de su pie (no debajo de toda la pantalla). */
+  beforeFooter?: ReactNode;
 }) {
   const [mobile,setMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 799px)').matches);
   const [source,setSource] = useState<SourceNode|null>(null);
@@ -51,6 +53,7 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
     const specific=resolve(node);if(specific)return specific;
     const navigation=patientNavBinding(node,onNavigate,unreadMessages);if(navigation)return navigation;
     const name=nodeName(node), text=sourceText(node);
+    if(beforeFooter&&name==='Section Footer')return {tag:'div',props:{className:undefined,style:{display:'contents'},'data-name':'Section Footer slot'},children:<>{beforeFooter}{renderSource(node,n=>n===node?undefined:common(n),translateSource)}</>};
     if(name==='Button Nav') {
       if(!text)return {onClick:()=>setMenu(true),label:'Abrir menú'};
       if(text==='Logout')return onSignOut ? {onClick:onSignOut,label:'Salir'} : {hidden:true};
