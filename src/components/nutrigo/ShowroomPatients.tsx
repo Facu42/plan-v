@@ -53,12 +53,12 @@ export function inviteLink(inviteId: string, origin = typeof window === 'undefin
 
 export function inviteMessage(patientName: string, link: string) {
   const first = patientName.trim().split(/\s+/)[0] || '';
-  return `Hola ${first}, te invito a Plan V para seguir tu plan conmigo. Creá tu cuenta con este enlace: ${link}`;
+  return `Hola ${first}, te invito a Nutridash para seguir tu plan conmigo. Creá tu cuenta con este enlace: ${link}`;
 }
 
 /** La invitación sale del mail de la nutricionista: se abre su programa de correo con el texto listo. */
 export function inviteMailto(email: string, patientName: string, link: string) {
-  const subject = 'Tu espacio en Plan V';
+  const subject = 'Tu espacio en Nutridash';
   return `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(inviteMessage(patientName, link))}`;
 }
 

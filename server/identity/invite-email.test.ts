@@ -37,7 +37,7 @@ describe('invitación por mail con Supabase', () => {
     expect(result).toEqual({ delivery: 'magic_link' });
     expect(generate).toHaveBeenNthCalledWith(1, 'invite', 'ana@example.com', link);
     expect(generate).toHaveBeenNthCalledWith(2, 'magiclink', 'ana@example.com', link);
-    expect(send).toHaveBeenCalledWith(expect.objectContaining({ to: { email: 'ana@example.com', name: 'Ana Pérez' }, subject: 'Verónica te invita a Plan V', text: expect.stringContaining('https://supabase.test/verify?token=x') }));
+    expect(send).toHaveBeenCalledWith(expect.objectContaining({ to: { email: 'ana@example.com', name: 'Ana Pérez' }, subject: 'Verónica te invita a Nutridash', text: expect.stringContaining('https://supabase.test/verify?token=x') }));
   });
 
   it('sale con el nombre de la nutricionista y las respuestas van a su mail', async () => {

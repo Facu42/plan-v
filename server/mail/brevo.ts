@@ -21,7 +21,7 @@ export function brevoConfig(env: Record<string, string | undefined> = process.en
   const apiKey = env.BREVO_API_KEY?.trim();
   const senderEmail = env.BREVO_SENDER_EMAIL?.trim();
   if (!apiKey || !senderEmail) return null;
-  return { apiKey, senderEmail, senderName: env.BREVO_SENDER_NAME?.trim() || 'Plan V' };
+  return { apiKey, senderEmail, senderName: env.BREVO_SENDER_NAME?.trim() || 'Nutridash' };
 }
 
 /** UUID estable a partir de un texto: la misma llave para el mismo aviso. */

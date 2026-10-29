@@ -7,7 +7,7 @@ type TransportModule={createTransport(options:Record<string,unknown>):Mailer};
 export function mailTransportConfig(env:Record<string,string|undefined>=process.env):MailTransportConfig|null{
  if(env.MAIL_ENABLED!=='true')return null;
  const provider=env.MAIL_PROVIDER??env.SMTP_PROVIDER;
- if(provider==='gmail'){const user=env.SMTP_USER?.trim(),password=env.SMTP_PASSWORD?.replace(/\s/g,'');if(!user||!/^[^\s@]+@(?:gmail\.com|googlemail\.com)$/i.test(user)||!password||!/^[a-z]{16}$/i.test(password))return null;return {provider:'gmail',user,password,senderName:env.SMTP_SENDER_NAME?.trim()||'Plan V',host:'smtp.gmail.com',port:465,secure:true};}
+ if(provider==='gmail'){const user=env.SMTP_USER?.trim(),password=env.SMTP_PASSWORD?.replace(/\s/g,'');if(!user||!/^[^\s@]+@(?:gmail\.com|googlemail\.com)$/i.test(user)||!password||!/^[a-z]{16}$/i.test(password))return null;return {provider:'gmail',user,password,senderName:env.SMTP_SENDER_NAME?.trim()||'Nutridash',host:'smtp.gmail.com',port:465,secure:true};}
  if(provider==='brevo'){const config=brevoConfig(env);if(config)return {provider:'brevo',config};}return null;
 }
 async function mailerModule():Promise<TransportModule>{const name='nodemailer';const mod=await import(name) as TransportModule&{default?:TransportModule};const value=typeof mod.createTransport==='function'?mod:mod.default;if(!value||typeof value.createTransport!=='function')throw new MailDeliveryError(false);return value;}
