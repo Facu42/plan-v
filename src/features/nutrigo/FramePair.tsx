@@ -13,8 +13,10 @@ import { iconButtonAction, iconButtonLabel, mapIconButtons } from './icon-button
 import './nutrigo.generated.css';
 
 const frames = import.meta.glob<{default:SourceNode}>('./source/*.json');
-export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, children, onSearch, query = '', unread = 0 }: {
+export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, children, onSearch, query = '', unread = 0, banner = false }: {
   nodes: [string,string]; resolve:SourceResolver; patientName:string; onNavigate:(page:ShowroomPage)=>void; onSignOut?:()=>void; children?:ReactNode; onSearch?:(query:string)=>void; query?:string; unread?:number;
+  /** La pantalla usa la tarjeta amarilla para un aviso propio: en el celular también se copia arriba del contenido. */
+  banner?: boolean;
 }) {
   const [mobile,setMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 799px)').matches);
   const [source,setSource] = useState<SourceNode|null>(null);
@@ -25,7 +27,7 @@ export function FramePair({ nodes, resolve, patientName, onNavigate, onSignOut, 
   const feeNotice = useFeeNotice();
   const accountArchived = useAccountArchived();
   const [promo, setPromo] = useState<SourceNode | null>(null);
-  const bannerActive = accountArchived || Boolean(feeNotice);
+  const bannerActive = accountArchived || Boolean(feeNotice) || banner;
   const notices = usePatientNotices();
   const [noticesOpen,setNoticesOpen] = useState(false);
   const unreadMessages = unread || notices.unreadMessages;

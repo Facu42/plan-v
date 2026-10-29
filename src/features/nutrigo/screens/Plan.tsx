@@ -14,6 +14,9 @@ import { NutrigoRecipeDetail } from './Menu';
 import { AiPlanNutritionSummary } from '../../../components/nutrigo/AiPlanNutritionSummary';
 import { FigmaRecordDialog } from '../../../components/nutrigo/FigmaPatientFront';
 import { leftAlignedSearch } from './search-align';
+import { useFeeNotice } from '../fee-notice';
+import { useAccountArchived } from '../patient-notices';
+import { planBannerBinding } from '../plan-banner';
 import { EmptyState, dateId, fields, leaf, objects, searchBinding, source, Stateful, useRemote, type ScreenProps } from './shared';
 
 const MAIN_SLOTS=['Desayuno','Almuerzo','Merienda','Cena'] as const;
@@ -56,7 +59,9 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
   const [changes,setChanges]=useState(false);
   const plan=remote.data?.plan;
   const handover: PlanHandover | null = remote.data?.handover ?? null;
-  const banner=planHandoverBanner(handover);
+  const feeNotice=useFeeNotice(),archived=useAccountArchived();
+  // La cuota y la cuenta archivada ya usan la tarjeta amarilla: el aviso del plan sigue en la campana.
+  const banner=archived||feeNotice?null:planHandoverBanner(handover);
   const openChanges=async()=>{
     setChanges(true);
     if(!handover||handover.seen)return;
@@ -96,6 +101,7 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
   };
 
   const resolve:SourceResolver=node=>{
+    const notice=planBannerBinding(node,banner,()=>void openChanges());if(notice)return notice;
     const name=nodeName(node),text=sourceText(node),id=nodeId(node);
     if(id==='89:3846')return {onClick:()=>setPage(v=>Math.max(0,v-1)),label:'Semana anterior',props:{disabled:page===0}};
     if(id==='89:3878')return {onClick:()=>setPage(v=>v+1),label:'Semana siguiente',props:{disabled:(page+1)*7>=days.length}};
@@ -128,7 +134,7 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
           return {children:objects(child).map((inner,i)=>source(inner,n=>n===inner?mealCell(inner,MAIN_SLOTS[index],day.items):undefined,i))};
         },day.isoDate);
       });
-      return {...tableProps,children:<>{banner&&<section className="p-[16px] text-[14px] text-[#272932]" aria-label="Cambio de plan"><p>{banner}</p><button type="button" className="underline" onClick={()=>void openChanges()}>Ver qué cambia</button></section>}{plan.guidance&&(plan.guidance.recommendations.length>0||plan.guidance.avoid.length>0)&&<details className="p-[16px] text-[14px] text-[#272932]"><summary className="cursor-pointer">Recomendaciones y alimentos a evitar</summary><PlanGuidanceView guidance={plan.guidance}/></details>}{header}{rows.length?rows:<EmptyState text={term?'No hay comidas que coincidan con la búsqueda.':'No hay comidas indicadas esta semana.'}/>}{bar}</>};
+      return {...tableProps,children:<>{plan.guidance&&(plan.guidance.recommendations.length>0||plan.guidance.avoid.length>0)&&<details className="p-[16px] text-[14px] text-[#272932]"><summary className="cursor-pointer">Recomendaciones y alimentos a evitar</summary><PlanGuidanceView guidance={plan.guidance}/></details>}{header}{rows.length?rows:<EmptyState text={term?'No hay comidas que coincidan con la búsqueda.':'No hay comidas indicadas esta semana.'}/>}{bar}</>};
     }
     if(leaf(node)&&text==='September')return {text:plan?periodLabel(plan.period_start,plan.period_end):'Sin plan publicado'};
     if(leaf(node)&&text==='2028')return {text:plan?periodYear(plan.period_start,plan.period_end):''};
@@ -137,7 +143,7 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
     return undefined;
   };
   const extras=shown.flatMap(day=>day.items.filter(item=>EXTRA_SLOT[item.slot]&&matchesItem(item)));
-  return <FramePair nodes={['84:2994','470:15300']} resolve={resolve} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut} query={search} onSearch={setSearch}>
+  return <FramePair nodes={['84:2994','470:15300']} banner={Boolean(banner)} resolve={resolve} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut} query={search} onSearch={setSearch}>
     {meal&&<FigmaRecordDialog title={`${meal.slot} · ${shortDate(meal.for_date)}`} onClose={()=>setMeal(null)}>
       <div className="flex flex-col gap-[16px] text-[14px] text-[#272932]">
         {meal.components?.map((component,index)=>{const entry=planComponentItems(meal)[index];const recipe=planRecipe(entry);return <section key={component.id}><h3>{componentTitle(component)}</h3><p>{component.kind==='food'?`${component.quantity.toLocaleString('es-AR')} ${component.measure??(component.food_snapshot?foodQuantityUnit(component.food_snapshot):'g')}${component.measure?` · ${componentNativeQuantity(component)?.toLocaleString('es-AR')??'Sin cantidad'} ${component.food_snapshot?foodQuantityUnit(component.food_snapshot):'g'}`:''}`:component.kind==='recipe'?`${component.portions.toLocaleString('es-AR')} porciones`:component.recipe_proposal?`${component.portions??''} porciones`:''}</p>{component.public_note&&<p>{component.public_note}</p>}{recipe&&<button type="button" className="underline" onClick={()=>{setMeal(null);setChosen(entry);}}>Ver ingredientes y preparación</button>}</section>;})}
