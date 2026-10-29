@@ -1,13 +1,16 @@
 import { spawn, execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { randomUUID, randomBytes } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { createInterface } from 'node:readline';
 import { createClient } from '@supabase/supabase-js';
 import pg from 'pg';
 import { createBrowserRatePacer } from './browser-rate-window.mjs';
 import { logoutProbe } from './product-browser-logout.mjs';
+
+// La misma versión que pide la app (src/legal.ts): si no coincide, la cuenta queda en la pantalla de aceptar los términos.
+const LEGAL_VERSION = (await readFile(new URL('../src/legal.ts', import.meta.url), 'utf8')).match(/LEGAL_VERSION = '([^']+)'/)[1];
 
 // Sólo la pila descartable del runner: sin URLs hospedadas, proveedores ni capturas.
 const run = promisify(execFile);
@@ -35,7 +38,7 @@ function startLocalApi() {
 }
 async function identity(label) {
   const email=label.toLowerCase().replaceAll(' ','-')+'-'+randomUUID()+'@example.test';
-  const created=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:label,legal_version:'2026-09-29',legal_accepted_at:new Date().toISOString()}});
+  const created=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:label,legal_version:LEGAL_VERSION,legal_accepted_at:new Date().toISOString()}});
   if(created.error) throw Error('Identidad ficticia no creada');
   const client=createClient(env.SUPABASE_URL,env.SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
   const signed=await client.auth.signInWithPassword({email,password});
