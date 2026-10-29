@@ -15,13 +15,13 @@ test('Equipo: pestañas, invitación real, error y registro pendiente', async ({
   await fixtureTeam(page);
   await enterDemo(page, '/crm/equipo');
   await expect(page.getByRole('heading', { name: /^Equipo/ }).first()).toBeVisible();
-  await expect(page.locator('#s-equipo .ea-person')).toHaveCount(2);
+  await expect(page.locator('#s-equipo table.eqt tbody tr')).toHaveCount(2);
   await page.getByRole('tab', { name: 'Permisos', exact: true }).click();
-  await expect(page.getByText('La matriz todavía no se puede consultar ni editar.', { exact: false })).toBeVisible();
+  await expect(page.getByText('los permisos por módulo todavía no se guardan uno por uno', { exact: false })).toBeVisible();
   await expect(page.locator('.eqc').first()).toBeDisabled();
   await page.getByRole('tab', { name: 'Registro de accesos', exact: true }).click();
   await page.getByRole('tab', { name: 'Fichas', exact: true }).click();
-  await expect(page.getByText('El registro de fichas todavía no está disponible.', { exact: false })).toBeVisible();
+  await expect(page.getByText('Todavía no hay registro de fichas.', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: 'Invitar a alguien' }).click();
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Mail', { exact: true }).fill('recepcion.ficticia@example.test');
