@@ -7,7 +7,7 @@ import type { ProgressPeriodDays, ProgressSeries } from '../../types/progress';
 import type { GlobalProgressResponse } from '../../types/progress-global';
 import { PanelProgresoVista, PeriodoProgreso } from './PanelProgreso';
 import { TOAST_DESMONTE_MS } from './panel-v29-motion';
-import { filasDe, puntosDeSerie, type FiltroCartera, type OrdenCartera, type PuntoPeso } from './progreso-presentacion';
+import { adherenciaDe, filasDe, promedioAdherencia, puntosDeSerie, type FiltroCartera, type OrdenCartera, type PersonaProgreso, type PuntoPeso } from './progreso-presentacion';
 import { NvButton, NvState } from './primitives';
 
 type Curva = { estado: 'lista' | 'vacia' | 'cargando' | 'error'; puntos: PuntoPeso[]; series: ProgressSeries[] | null };
@@ -17,7 +17,7 @@ const vacia: Curva = { estado: 'vacia', puntos: [], series: null };
 export function ProfessionalProgressGlobal({ onOpen, onHeader, patients = [] }: {
   onOpen: (href: string) => void;
   onHeader?: (actions: ReactNode) => void;
-  patients?: readonly Pick<Patient, 'id' | 'name' | 'initials' | 'tone' | 'created_at' | 'archived_at'>[];
+  patients?: readonly (PersonaProgreso & Pick<Patient, 'name'>)[];
 }) {
   const [days, setDays] = useState<ProgressPeriodDays>(30);
   const [data, setData] = useState<GlobalProgressResponse | null>(null);
@@ -40,7 +40,7 @@ export function ProfessionalProgressGlobal({ onOpen, onHeader, patients = [] }: 
   const cambiarOrden = (siguiente: OrdenCartera) => {
     setOrden(siguiente);
     const etiqueta = siguiente === 'name' ? 'Nombre' : siguiente === 'meals' ? 'Más comidas' : siguiente === 'weight-change' ? 'Cambio de peso' : 'Adherencia';
-    avisar(siguiente === 'adherence' ? 'Orden: Adherencia. Sin dato: la app no registra la adherencia al plan.' : `Orden: ${etiqueta}.`);
+    avisar(`Orden: ${etiqueta}.`);
   };
 
   useEffect(() => {
@@ -59,7 +59,8 @@ export function ProfessionalProgressGlobal({ onOpen, onHeader, patients = [] }: 
     return () => controller.abort();
   }, [days, refresh]);
 
-  const filas = data ? filasDe(data.patients, filtro, orden) : [];
+  const adherencias = new Map((data?.patients ?? []).map(item => [item.patient_id, adherenciaDe(item, patients.find(persona => persona.id === item.patient_id))]));
+  const filas = data ? filasDe(data.patients, filtro, orden, adherencias) : [];
   const quien = filas.some(fila => fila.patient_id === elegida) ? elegida : (filas[0]?.patient_id ?? '');
   const fila = data?.patients.find(item => item.patient_id === quien) ?? null;
   const puntosContados = fila?.weight.state === 'ok' ? fila.weight.points : 0;
@@ -89,7 +90,7 @@ export function ProfessionalProgressGlobal({ onOpen, onHeader, patients = [] }: 
   return <PanelProgresoVista
     data={data} days={days} filtro={filtro} orden={orden} quien={quien} puntos={curva.puntos} series={curva.series} curvaEstado={curva.estado}
     pacientes={patients} aviso={aviso} onFiltro={setFiltro} onOrden={cambiarOrden} onQuien={setElegida} onOpen={onOpen}
-    onPromedio={() => avisar('Sin dato. La adherencia al plan no está en la app. Sin registros no es un incumplimiento.')}
+    onPromedio={() => { const promedio = promedioAdherencia(adherencias); avisar(promedio === null ? 'Sin dato: ninguna paciente tiene indicador de adherencia. Sin registros no es un incumplimiento.' : `Adherencia promedio de la cartera: ${promedio}%. Es el indicador de cada ficha, sin recalcular.`); }}
     onAviso={avisar}
   />;
 }

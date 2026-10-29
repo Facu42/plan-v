@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { GlobalPatientProgress, GlobalProgressResponse } from '../../types/progress-global';
 import { PeriodoProgreso, PanelProgresoVista } from './PanelProgreso';
-import { filasDe, movimientosDelMes, paraMirar, puntosDeSerie, textoCurva } from './progreso-presentacion';
+import { adherenciaDe, columnasAdherencia, filasDe, movimientosDelMes, paraMirar, puntosDeSerie, textoCurva } from './progreso-presentacion';
 
 const peso = (delta: number | null, points = 2): GlobalPatientProgress['weight'] => ({
   state: 'ok', unit: 'kg', last: 68.4, last_on: '2026-10-20', from: delta === null ? null : 70, from_on: delta === null ? null : '2026-10-01', delta, points,
@@ -95,9 +95,28 @@ describe('progreso, el dibujo', () => {
     expect(html).toContain('href="/crm/ficha?paciente=sofia"'.replace('href="', ''));
     expect(html).toContain('/crm/ficha?paciente=sofia');
     expect(html).toContain('/crm/ficha?paciente=sofia&amp;seccion=registros');
-    expect(html).toContain('Sin dato. No es un incumplimiento.');
+    expect(html).toContain('Sin adherencia: no hay registros. No es un incumplimiento.');
     expect(html).toContain('Grasa');
     expect(html).toContain('Sin dato');
+  });
+
+  it('muestra el indicador de adherencia de la ficha, ordena por él y arma las columnas con las comidas cargadas', () => {
+    const ahora = new Date('2026-10-20T15:00:00.000Z');
+    const logs = [{ logged_at: '2026-10-20T14:00:00.000Z' }, { logged_at: '2026-10-18T14:00:00.000Z' }, { logged_at: '2026-10-12T14:00:00.000Z' }];
+    expect(adherenciaDe(sofia, { adherence_score: 86.4 })).toBe(86);
+    expect(adherenciaDe(laura, { adherence_score: 80 })).toBeNull();
+    expect(adherenciaDe(romina, { adherence_score: 0 })).toBeNull();
+    const mapa = new Map([['laura', null], ['sofia', 86], ['romina', 54]]);
+    expect(filasDe([laura, romina, sofia], 'all', 'adherence', mapa).map(item => item.patient_id)).toEqual(['sofia', 'romina', 'laura']);
+    expect(columnasAdherencia(undefined, 7, ahora)).toBeNull();
+    expect(columnasAdherencia(logs, 7, ahora)?.valores.filter(valor => valor === 100)).toHaveLength(2);
+    expect(columnasAdherencia(logs, 30, ahora)?.valores).toHaveLength(4);
+    const html = vista({
+      data: datos([laura, sofia]), quien: 'sofia',
+      pacientes: [{ id: 'sofia', name: 'Sofía Gómez', initials: 'SG', tone: 'mint', created_at: '2026-08-01T15:00:00.000Z', adherence_score: 86, meal_logs: [] }],
+    });
+    expect(html).toContain('<span class="adh"><span class="tr"><i style="width:86%"></i></span>86%</span>');
+    expect(html).toContain('86% · 1 bajan');
   });
 
   it('el período se marca en las pestañas de 7, 30 y 90', () => {
