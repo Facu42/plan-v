@@ -62,7 +62,7 @@
 Nueva pestaña «Verificar IA» en /admin (`POST /api/admin/ai-check`, solo administrador). Hace una consulta corta al modelo gratis de
 OpenRouter y genera una foto de ejemplo con Cloudflare, sin usar cuentas ni datos de pacientes y sin guardar nada. Dice «Anda / No anda /
 Apagada» con el motivo (por ejemplo, faltan las cuatro variables de Cloudflare en Railway, o se agotó la cuota diaria). Una verificación
-cada 30 segundos para no gastar la cuota gratuita. Sin migraciones ni variables nuevas. Ya hay dos nutris de prueba en la base
+cada 30 segundos para no gastar la cuota gratuita. Sin migraciones ni variables nuevas. Además, «Probar receta y fotos» (`POST /api/admin/ai-check/full`, una por minuto) arma una receta de ejemplo con la IA y genera cuatro fotos (dos platos, dos ingredientes) con los mismos textos que usa la app, para comprobar a ojo que las fotos coinciden con el nombre. Ya hay dos nutris de prueba en la base
 (`[Prueba] Nutricionista`, creadas por «Cuentas de prueba»). Pendiente: dejar a la IA del administrador (resumen del servicio) para otra rama.
 
 ## 19/10 · Ficha de la nutri, fase 4

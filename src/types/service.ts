@@ -135,3 +135,9 @@ export interface AiCheck {
   text: AiCheckPart & { model: string | null };
   image: AiCheckPart & { preview: string | null };
 }
+
+export interface AiCheckPhoto { label: string; kind: 'plato' | 'ingrediente'; prompt: string; status: AiCheckStatus; detail: string; preview: string | null }
+export interface AiFullCheck {
+  recipe: AiCheckPart & { title: string | null; items: number; steps: number };
+  photos: AiCheckPhoto[];
+}
