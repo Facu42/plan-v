@@ -19,10 +19,20 @@ export type HealthSlice = {
   items: string[];
 };
 
+/** Ficha de la paciente para el asistente. Nunca incluye nombre ni teléfono. */
+export type PatientProfileSlice = {
+  goal: string;
+  conditions_note: string;
+  hydration_glasses: number | null;
+  sleep_hours: number | null;
+  energy: IntakePayload['energy'] | null;
+};
+
 export type RecipeJobContext = {
   schema: typeof RECIPE_PROMPT_VERSION;
   allergies: HealthSlice;
   restrictions: HealthSlice;
+  patient_profile: PatientProfileSlice;
   cooking_time_minutes: number | null;
   title_hint: string | null;
   validity?: { intake_revision: number; consent_event_id: string | null };
@@ -35,6 +45,7 @@ export type MenuJobContext = {
   schema: typeof MENU_PROMPT_VERSION;
   allergies: HealthSlice;
   restrictions: HealthSlice;
+  patient_profile: PatientProfileSlice;
   cooking_time_minutes: number | null;
   period_start: string | null;
   period_end: string | null;
@@ -60,8 +71,20 @@ function sliceFact(fact: IntakePayload['allergies']): HealthSlice {
   return { state: fact.state, items: [...fact.items] };
 }
 
+type ProfileSource = Pick<IntakePayload, 'allergies' | 'restrictions' | 'cooking_time_minutes'> & Partial<Pick<IntakePayload, 'patient_intent' | 'conditions_note' | 'hydration_glasses' | 'sleep_hours' | 'energy'>>;
+
+function profileSlice(intake: ProfileSource): PatientProfileSlice {
+  return {
+    goal: intake.patient_intent?.trim() ?? '',
+    conditions_note: intake.conditions_note?.trim() ?? '',
+    hydration_glasses: intake.hydration_glasses ?? null,
+    sleep_hours: intake.sleep_hours ?? null,
+    energy: intake.energy ?? null,
+  };
+}
+
 export function buildRecipeJobContext(input: {
-  intake: Pick<IntakePayload, 'allergies' | 'restrictions' | 'cooking_time_minutes'>;
+  intake: ProfileSource;
   titleHint?: string | null;
 }): RecipeJobContext {
   assertKnownAllergies(input.intake);
@@ -69,13 +92,14 @@ export function buildRecipeJobContext(input: {
     schema: RECIPE_PROMPT_VERSION,
     allergies: sliceFact(input.intake.allergies),
     restrictions: sliceFact(input.intake.restrictions),
+    patient_profile: profileSlice(input.intake),
     cooking_time_minutes: input.intake.cooking_time_minutes ?? null,
     title_hint: input.titleHint?.trim() ? input.titleHint.trim() : null,
   };
 }
 
 export function buildMenuJobContext(input: {
-  intake: Pick<IntakePayload, 'allergies' | 'restrictions' | 'cooking_time_minutes'>;
+  intake: ProfileSource;
   periodStart?: string | null;
   periodEnd?: string | null;
   slots?: string[];
@@ -92,6 +116,7 @@ export function buildMenuJobContext(input: {
     schema: MENU_PROMPT_VERSION,
     allergies: sliceFact(input.intake.allergies),
     restrictions: sliceFact(input.intake.restrictions),
+    patient_profile: profileSlice(input.intake),
     cooking_time_minutes: input.intake.cooking_time_minutes ?? null,
     period_start: input.periodStart ?? null,
     period_end: input.periodEnd ?? null,

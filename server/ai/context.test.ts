@@ -11,11 +11,12 @@ import {
 import { emptyIntakePayload } from '../intake/payload.js';
 
 describe('contexto mínimo de jobs de IA', () => {
-  it('exige alergias y restricciones declaradas y no manda nombre ni notas', () => {
+  it('exige alergias y restricciones declaradas y manda la ficha pero nunca nombre ni teléfono', () => {
     expect(() => assertKnownAllergies(emptyIntakePayload())).toThrow(CareError);
     const intake = {
       ...emptyIntakePayload(),
       preferred_name: 'Sofía Privada',
+      phone: '1155550000',
       conditions_note: 'Nota clínica',
       allergies: { state: 'reported' as const, items: ['Maní'] },
       restrictions: { state: 'none' as const, items: [] },
@@ -26,7 +27,8 @@ describe('contexto mínimo de jobs de IA', () => {
     expect(encoded).toContain('Maní');
     expect(encoded).toContain('recipe_draft.v2');
     expect(encoded).not.toContain('Sofía');
-    expect(encoded).not.toContain('Nota clínica');
+    expect(encoded).not.toContain('1155550000');
+    expect(encoded).toContain('Nota clínica');
     const menu = buildMenuJobContext({
       intake,
       periodStart: '2026-09-21',
@@ -39,6 +41,8 @@ describe('contexto mínimo de jobs de IA', () => {
     expect(menuJson).toContain('Pollo');
     expect(menuJson).toContain('menu_draft.v2');
     expect(menuJson).not.toContain('Sofía Privada');
+    expect(menuJson).not.toContain('1155550000');
+    expect(menuJson).toContain('Nota clínica');
     expect(hashAiContext(recipe)).toHaveLength(64);
     expect(estimateTokens(recipe)).toBeGreaterThan(0);
     expect(hashAiContext(recipe)).toBe(hashAiContext({ ...recipe }));

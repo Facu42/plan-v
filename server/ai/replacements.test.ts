@@ -11,10 +11,10 @@ describe('alternativas con IA',()=>{
  it('bloquea alergias/restricciones sin completar antes de llamar al proveedor',async()=>{
    await expect(generateReplacement(request,emptyIntakePayload(),[])).rejects.toMatchObject({status:409});expect(mocks.generateText).not.toHaveBeenCalled();
  });
- it('no cambia a demo cuando el proveedor falla y envía sólo datos necesarios',async()=>{
+ it('no cambia a demo cuando el proveedor falla y envía la ficha sin nombre',async()=>{
    mocks.generateText.mockRejectedValue(new Error('provider failed'));
    const intake={...emptyIntakePayload(),preferred_name:'Privado',conditions_note:'Nota privada',allergies:{state:'reported' as const,items:['Maní']},restrictions:{state:'none' as const,items:[]}};
    await expect(generateReplacement(request,intake,[])).rejects.toMatchObject({code:'AI_UNAVAILABLE'});
-   const prompt=mocks.generateText.mock.calls[0][0].prompt;expect(prompt).toContain('Maní');expect(prompt).not.toContain('Privado');expect(prompt).not.toContain('Nota privada');
+   const prompt=mocks.generateText.mock.calls[0][0].prompt;expect(prompt).toContain('Maní');expect(prompt).not.toContain('Privado');expect(prompt).toContain('Nota privada');
  });
 });
