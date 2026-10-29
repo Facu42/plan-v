@@ -28,7 +28,7 @@ describe('Equipo y Ajustes v29', () => {
   });
   it('arma Mi cuenta con los bloques del boceto y sin datos inventados', () => {
     const html = renderToStaticMarkup(<PanelAjustes onOpen={vi.fn()}/>);
-    for (const label of ['Obras sociales y reservas', 'Tu servicio de Plan V', 'Apariencia', 'Idioma y horario', 'Avisos para vos', 'Tus datos', 'Sin completar', 'role="switch"', 'class="fx"']) expect(html).toContain(label);
+    for (const label of ['Obras sociales y reservas', 'Tu servicio de Nutridash', 'Apariencia', 'Idioma y horario', 'Avisos para vos', 'Tus datos', 'Sin completar', 'role="switch"', 'class="fx"']) expect(html).toContain(label);
     for (const falso of ['MN 4521', '27-28.456.912-4', 'Av. Cabildo', 'OSDE']) expect(html).not.toContain(falso);
   });
   const plantillas = [
