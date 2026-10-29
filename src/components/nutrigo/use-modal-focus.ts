@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 
 /** Mantiene el teclado en el diálogo activo y devuelve el foco al control que lo abrió. */
-export function useModalFocus(active: boolean, onClose: () => void) {
-  const root = useRef<HTMLDivElement>(null);
+export function useModalFocus<T extends HTMLElement = HTMLDivElement>(active: boolean, onClose: () => void) {
+  const root = useRef<T>(null);
   const close = useRef(onClose); close.current = onClose;
   useEffect(() => {
     if (!active || !root.current) return;

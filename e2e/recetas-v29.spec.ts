@@ -1,0 +1,51 @@
+import { expect, test } from '@playwright/test';
+import { enterDemo } from './helpers';
+
+test('Recetas permanece en Planes, guarda borrador y comparte solo una versión publicada', async ({ page }) => {
+  const titulo = `Receta v29 desde Planes ${Date.now()}`;
+  await enterDemo(page, '/crm/plan');
+  await page.locator('#pview').getByRole('button', { name: 'Recetas', exact: true }).click();
+  await expect(page).toHaveURL(/\/crm\/plan/);
+  await expect(page.locator('#pwrap.pv2 .fx.pfx')).toBeVisible();
+  await page.getByRole('button', { name: 'Nueva receta', exact: true }).click();
+  const dialogo = page.getByRole('dialog');
+  await dialogo.getByLabel('Título', { exact: true }).fill(titulo);
+  let preguntas = 0;
+  page.once('dialog', async aviso => { preguntas++; await aviso.dismiss(); });
+  await dialogo.locator('header').first().getByRole('button', { name: 'Cerrar', exact: true }).click();
+  expect(preguntas).toBe(1);
+  await expect(dialogo).toBeVisible();
+  await expect(dialogo.getByLabel('Título', { exact: true })).toHaveValue(titulo);
+  await dialogo.getByLabel('Ingrediente 1', { exact: true }).fill('Arroz integral');
+  await dialogo.getByLabel('Cantidad 1', { exact: true }).fill('150');
+  await dialogo.getByLabel('Pasos de la receta', { exact: true }).fill('Hervir el arroz y servir.');
+  await dialogo.getByRole('button', { name: 'Guardar borrador', exact: true }).click();
+  await expect(dialogo.getByRole('status').filter({ hasText: 'Borrador guardado' })).toBeVisible();
+  await dialogo.locator('header').first().getByRole('button', { name: 'Cerrar', exact: true }).click();
+  await expect(dialogo).not.toBeVisible();
+  await page.getByRole('searchbox', { name: 'Buscar recetas', exact: true }).fill(titulo);
+  await page.locator('.prc').filter({ hasText: titulo }).click();
+  await expect(page.locator('.pfs h3')).toHaveText(titulo);
+  await expect(page.getByRole('button', { name: 'Compartir en su app', exact: true })).toBeDisabled();
+  await page.getByRole('button', { name: 'Publicar borrador', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Compartir en su app', exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: 'Compartir en su app', exact: true }).click();
+  await dialogo.getByLabel('Paciente para compartir la receta').selectOption('pat-sofia');
+  await dialogo.getByRole('button', { name: 'Compartir', exact: true }).click();
+  await expect(dialogo).not.toBeVisible();
+  await expect(page.locator('#s-planes').getByRole('status').filter({ hasText: 'Receta compartida en su app' })).toBeVisible();
+  const respuesta = await page.request.get('/api/patients/pat-sofia/recipes');
+  expect(respuesta.ok()).toBeTruthy();
+  const asignadas = (await respuesta.json()).recipes as { title: string }[];
+  expect(asignadas.some(r => r.title === titulo)).toBeTruthy();
+  await page.screenshot({ path: '/tmp/planv-recetas-v29-desktop.png', fullPage: true });
+
+  // Un error real de escritura no cierra el cajón ni muestra un éxito ficticio.
+  await page.getByRole('button', { name: 'Compartir en su app', exact: true }).click();
+  await page.route('**/api/recipes/*/assign', route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'No disponible' }) }));
+  await dialogo.getByRole('button', { name: 'Compartir', exact: true }).click();
+  await expect(dialogo.getByRole('alert')).toBeVisible();
+  await expect(dialogo).toBeVisible();
+  await expect(dialogo.getByRole('button', { name: 'Compartir', exact: true })).toBeEnabled();
+  await expect(page).toHaveURL(/\/crm\/plan/);
+});
