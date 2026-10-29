@@ -73,7 +73,7 @@ test('Planes: la entrega muestra vista, PDF, lista y no publica sola', async ({ 
   await expect(page.getByRole('heading', { name: /Un plan pensado para/ })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Crear propuesta del plan', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Dictar pedido', exact: true }).click();
-  await expect(page.locator('#s-planes p.mhelp[role="status"]')).toContainText('Próximamente');
+  await expect(page.locator('#s-planes').getByText(/no permite dictar|Escuchando/).first()).toBeVisible();
   await page.getByRole('button', { name: 'Volver al plan', exact: true }).click();
   await expect(page.locator('#s-planes.pux-plan')).toBeVisible();
 });
