@@ -4,7 +4,6 @@ import { useAppStore } from '../../store/useAppStore';
 import { PatientImportDialog } from './PatientImportDialog';
 import { patientImportApi } from '../../api/patient-import';
 import { ApiError } from '../../api/error';
-import { careErrorMessage } from '../../api/care';
 import type { Patient, Stage } from '../../types';
 import type { PatientDirectoryFilter } from '../crm/crm-patients';
 import { Icon } from '../shared/Icon';
@@ -56,6 +55,12 @@ export function inviteMessage(patientName: string, link: string) {
   return `Hola ${first}, te invito a Plan V para seguir tu plan conmigo. Creá tu cuenta con este enlace: ${link}`;
 }
 
+/** La invitación sale del mail de la nutricionista: se abre su programa de correo con el texto listo. */
+export function inviteMailto(email: string, patientName: string, link: string) {
+  const subject = 'Tu espacio en Plan V';
+  return `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(inviteMessage(patientName, link))}`;
+}
+
 export function inviteEmailNotice(delivery: InviteEmailDelivery, email: string) {
   if (delivery === 'demo') return 'En la demostración no se mandan mails reales.';
   if (delivery === 'magic_link') return `Ya tenía cuenta: le mandamos a ${email} un enlace para entrar y vincularse.`;
@@ -78,14 +83,7 @@ export function InviteShare({ name, invite, onClose }: { name: string; invite: P
   const linked = current.status === 'accepted';
   const link = inviteLink(current.id);
   const [copied, setCopied] = useState(false);
-  const [mailed, setMailed] = useState('');
-  useEffect(() => { setCurrent(invite); setError(''); setCopied(false); setMailed(''); }, [invite.id, invite.updated_at]);
-  const email = async () => {
-    if (lock.current) return; lock.current = true; setBusy(true); setError(''); setMailed('');
-    try { setMailed(inviteEmailNotice((await api.emailInvite(current.id)).delivery, current.email)); }
-    catch (caught) { setError(careErrorMessage(caught)); }
-    finally { lock.current = false; setBusy(false); }
-  };
+  useEffect(() => { setCurrent(invite); setError(''); setCopied(false); }, [invite.id, invite.updated_at]);
   const prepare = async () => {
     if (lock.current) return; lock.current = true; setBusy(true); setError('');
     try { const saved = (await api.patientInvite(current.patient_id)).invite; setCurrent(saved); if (saved.status !== 'accepted' && !invitationReady(saved)) setError('El enlace todavía no está habilitado. Reintentá preparar la invitación.'); }
@@ -101,11 +99,10 @@ export function InviteShare({ name, invite, onClose }: { name: string; invite: P
     <span>
       <strong>{linked ? `Cuenta vinculada de ${name}` : ready ? `Invitación lista para ${name}` : `Ficha creada para ${name}; falta preparar su acceso`}</strong>
       {linked ? <small>Esta paciente ya aceptó la invitación. Se recuperó su ficha existente.</small> : ready ? <><small>Mandale este enlace: crea su cuenta con {current.email} y queda vinculada a tu consultorio. Vence el {new Date(current.expires_at!).toLocaleString('es-AR')}.</small><input readOnly value={link} aria-label="Enlace de invitación" onFocus={(event) => event.currentTarget.select()} /></> : <small>El enlace todavía no está habilitado. Podés reintentar sin repetir el alta.</small>}
-      {mailed && <small>{mailed}</small>}
       {error && <small role="alert">{error}</small>}
     </span>
     {!linked && <span className="nv-invite-actions">
-      {ready ? <><NvButton className="nv-soft" onClick={copy}>{copied ? 'Copiado' : 'Copiar enlace'}</NvButton><NvButton className="nv-ghost" disabled={busy} onClick={() => void email()}>{busy ? 'Mandando…' : 'Mandar por mail'}</NvButton></> : <NvButton className="nv-soft" disabled={busy} onClick={() => void prepare()}>{busy ? 'Preparando…' : 'Reintentar preparar invitación'}</NvButton>}
+      {ready ? <><NvButton className="nv-soft" onClick={copy}>{copied ? 'Copiado' : 'Copiar enlace'}</NvButton><a className="nv-button nv-ghost" href={inviteMailto(current.email, name, link)}>Mandar desde mi mail</a></> : <NvButton className="nv-soft" disabled={busy} onClick={() => void prepare()}>{busy ? 'Preparando…' : 'Reintentar preparar invitación'}</NvButton>}
     </span>}
     <button type="button" disabled={busy} onClick={() => { if (canLeaveWorkspace()) onClose(); }} aria-label="Cerrar aviso">×</button>
   </div>;
