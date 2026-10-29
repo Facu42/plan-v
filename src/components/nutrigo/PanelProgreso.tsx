@@ -1,13 +1,14 @@
 import type { ReactNode } from 'react';
 import type { Patient } from '../../types';
 import { AvisoBoceto } from './panel-v29-boceto';
+import { FxCols } from './ficha-fx';
 import { PROGRESS_PERIODS, type ProgressPeriodDays } from '../../types/progress';
 import type { ProgressSeries } from '../../types/progress';
 import type { GlobalPatientProgress, GlobalProgressResponse } from '../../types/progress-global';
 import {
-  alertaDe, cambioTexto, etiquetaCurva, etiquetaDe, fichaHref, filasDe, fondoAvatar, hitosDe, inicialesDe, lineaLista,
+  adherenciaDe, alertaDe, cambioTexto, columnasAdherencia, promedioAdherencia, etiquetaCurva, etiquetaDe, fichaHref, filasDe, fondoAvatar, hitosDe, inicialesDe, lineaLista,
   medidasDe, movimientosDelMes, paraMirar, pesoTexto, primerNombre, registrosHref, resumenCartera, textoCurva, tituloEvolucion,
-  type FiltroCartera, type OrdenCartera, type PuntoPeso,
+  type FiltroCartera, type OrdenCartera, type PersonaProgreso, type PuntoPeso,
 } from './progreso-presentacion';
 
 export function PeriodoProgreso({ days, onDays }: { days: ProgressPeriodDays; onDays: (days: ProgressPeriodDays) => void }) {
@@ -73,7 +74,7 @@ export function PanelProgresoVista({
   puntos: PuntoPeso[];
   series: ProgressSeries[] | null;
   curvaEstado: 'lista' | 'vacia' | 'cargando' | 'error';
-  pacientes: readonly Pick<Patient, 'id' | 'name' | 'initials' | 'tone' | 'created_at' | 'archived_at'>[];
+  pacientes: readonly (PersonaProgreso & Pick<Patient, 'name'>)[];
   aviso: string;
   onFiltro: (filtro: FiltroCartera) => void;
   onOrden: (orden: OrdenCartera) => void;
@@ -82,11 +83,12 @@ export function PanelProgresoVista({
   onPromedio: () => void;
   onAviso: (texto: string) => void;
 }) {
-  const filas = filasDe(data.patients, filtro, orden);
+  const ficha = new Map(pacientes.map(persona => [persona.id, persona]));
+  const adherencias = new Map(data.patients.map(fila => [fila.patient_id, adherenciaDe(fila, ficha.get(fila.patient_id))]));
+  const filas = filasDe(data.patients, filtro, orden, adherencias);
   const elegida = filas.find(fila => fila.patient_id === quien) ?? null;
   const mirar = paraMirar(data.patients);
   const movimientos = movimientosDelMes(pacientes);
-  const ficha = new Map(pacientes.map(persona => [persona.id, persona]));
   const elegir = (id: string) => {
     onQuien(id);
     if (typeof document !== 'undefined' && document.querySelector('#pv-panel-v29.mob')) {
@@ -100,7 +102,7 @@ export function PanelProgresoVista({
         <section className="fxp g">
           <header>
             <h3>La cartera</h3>
-            <span className="m">{resumenCartera(data.patients)}</span>
+            <span className="m">{resumenCartera(data.patients, promedioAdherencia(adherencias))}</span>
             <span className="sp" />
             <button type="button" className="chip" onClick={onPromedio}>Promedio</button>
           </header>
@@ -114,31 +116,32 @@ export function PanelProgresoVista({
             {movimientos.length ? movimientos.map(item => <button type="button" key={`${item.tipo}:${item.id}`} className="chip" onClick={() => { if (filas.some(fila => fila.patient_id === item.id)) elegir(item.id); onAviso(item.detalle); }}>{item.tipo} {primerNombre(item.nombre)}</button>) : <span className="sxsub">Sin altas ni bajas con fecha este mes.</span>}
           </div>
           <div className="fxs">
-            <div className="fxr">{filas.length ? filas.map(fila => <Fila key={fila.patient_id} fila={fila} activa={fila.patient_id === elegida?.patient_id} persona={ficha.get(fila.patient_id)} onElegir={() => elegir(fila.patient_id)} />) : <p className="sxsub">Ninguna paciente en este filtro.</p>}</div>
+            <div className="fxr">{filas.length ? filas.map(fila => <Fila key={fila.patient_id} fila={fila} activa={fila.patient_id === elegida?.patient_id} persona={ficha.get(fila.patient_id)} adherencia={adherencias.get(fila.patient_id) ?? null} onElegir={() => elegir(fila.patient_id)} />) : <p className="sxsub">Ninguna paciente en este filtro.</p>}</div>
             <p className="sxsub">Laura no está en «para mirar»: sin registros no es un incumplimiento.</p>
           </div>
         </section>
       </div>
-      <div className="c" id="sxevo">{elegida ? <Evolucion fila={elegida} days={days} puntos={puntos} series={series} curvaEstado={curvaEstado} onOpen={onOpen} /> : <section className="fxp g"><header><h3>Evolución</h3><span className="sp" /></header><p className="sxsub">Elegí una paciente de la lista.</p></section>}</div>
+      <div className="c" id="sxevo">{elegida ? <Evolucion fila={elegida} persona={ficha.get(elegida.patient_id)} days={days} puntos={puntos} series={series} curvaEstado={curvaEstado} onOpen={onOpen} /> : <section className="fxp g"><header><h3>Evolución</h3><span className="sp" /></header><p className="sxsub">Elegí una paciente de la lista.</p></section>}</div>
     </div>
     {data.source === 'memory' && <p className="sxsub">Modo demo · datos ficticios para recorrer el consultorio.</p>}
     {aviso ? <Aviso texto={aviso} /> : null}
   </div>;
 }
 
-function Fila({ fila, activa, persona, onElegir }: { fila: GlobalPatientProgress; activa: boolean; persona: Pick<Patient, 'initials' | 'tone'> | undefined; onElegir: () => void }) {
+function Fila({ fila, activa, persona, adherencia, onElegir }: { fila: GlobalPatientProgress; activa: boolean; persona: Pick<Patient, 'initials' | 'tone'> | undefined; adherencia: number | null; onElegir: () => void }) {
   const etiqueta = etiquetaDe(fila);
   return <button type="button" className={activa ? 'l on' : 'l'} aria-pressed={activa} onClick={onElegir}>
     <span className="av" style={{ background: fondoAvatar(persona?.tone) }}>{inicialesDe(fila.patient_name, persona?.initials)}</span>
     <span className="sxwho"><b>{fila.patient_name}</b><small>{lineaLista(fila)}</small></span>
-    <span className="sxsub">Sin dato</span>
+    {adherencia === null ? <span className="sxsub">Sin dato</span> : <span className="adh"><span className="tr"><i className={adherencia < 60 ? 'lo' : undefined} style={{ width: `${adherencia}%` }} /></span>{adherencia}%</span>}
     <span className={`pill ${etiqueta.clase}`}>{etiqueta.texto}</span>
     <span className="chip">Evolución</span>
   </button>;
 }
 
-function Evolucion({ fila, days, puntos, series, curvaEstado, onOpen }: {
+function Evolucion({ fila, persona, days, puntos, series, curvaEstado, onOpen }: {
   fila: GlobalPatientProgress;
+  persona: PersonaProgreso | undefined;
   days: ProgressPeriodDays;
   puntos: PuntoPeso[];
   series: ProgressSeries[] | null;
@@ -154,6 +157,7 @@ function Evolucion({ fila, days, puntos, series, curvaEstado, onOpen }: {
       : vacio
         ? <p className="sxsub">{vacio}</p>
         : <Curva puntos={puntos} />;
+  const columnas = columnasAdherencia(persona?.meal_logs, days);
   const peso = () => document.getElementById('sxpeso')?.scrollIntoView({ block: 'nearest' });
   return <>
     <div className="fxdk">
@@ -175,7 +179,7 @@ function Evolucion({ fila, days, puntos, series, curvaEstado, onOpen }: {
       <div className="fxs">
         <p className="sxsub">{alertaDe(fila)}</p>
         <p className="sxsub">Adherencia por período</p>
-        <p className="sxsub">Sin dato. No es un incumplimiento.</p>
+        {columnas ? <FxCols valores={columnas.valores} rotulos={columnas.rotulos} max={100} alto={72} /> : <p className="sxsub">Sin adherencia: no hay registros. No es un incumplimiento.</p>}
         <p className="sxsub">Medidas</p>
         <div className="fxkv">{medidasDe(series, fila).map(([nombre, valor]) => <div key={nombre}><span>{nombre}</span><b>{valor}</b></div>)}</div>
         <p className="sxsub">Hitos</p>
