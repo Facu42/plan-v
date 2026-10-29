@@ -128,3 +128,10 @@ export interface OwnService {
   /** Vencido hace más de la gracia o suspendido: ve todo pero no puede cargar ni cambiar nada. */
   read_only: boolean;
 }
+
+export type AiCheckStatus = 'ok' | 'failed' | 'off' | 'demo';
+export interface AiCheckPart { status: AiCheckStatus; detail: string; ms: number }
+export interface AiCheck {
+  text: AiCheckPart & { model: string | null };
+  image: AiCheckPart & { preview: string | null };
+}

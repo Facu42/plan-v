@@ -9,7 +9,7 @@ import { NvBadge, NvButton, NvCard, NvState } from './primitives';
 import { ConfirmDialog, FeeError } from './cobranzas-shared';
 import { feeErrorMessage, parsePesos } from './cobranzas-utils';
 import { adminErrorMessage, buildMailto, buildServiceRows, daysLeftText, emailsOf, filterServiceRows, mailKindFor, mailTemplate, replaceNutritionist, SERVICE_ORDERS, SERVICE_STATE_FILTERS, SERVICE_STATE_TONE, serviceEventLabel, shortDateTime, focusCounts, matchesFocus, monthlyCollections, serviceRowsCsv, SERVICE_FOCUS, type ServiceFocus, type ServiceOrder, type ServiceRow } from './servicio-utils';
-import { ActividadTab, AltasTab, PruebasTab } from './ServicioTabs';
+import { ActividadTab, AltasTab, PruebasTab, VerificarTab } from './ServicioTabs';
 import { CollectionsChart, CountUp, StateDonut, type DonutSlice } from './AdminViz';
 import './cobranzas-fig.css';
 import './servicio-fig.css';
@@ -189,11 +189,11 @@ export function NutritionistPanel({ nutritionist, monthlyPrice, onChange, onBack
   </aside>;
 }
 
-export type ServicioTab = 'resumen' | 'altas' | 'pruebas' | 'actividad' | 'precio';
+export type ServicioTab = 'resumen' | 'altas' | 'pruebas' | 'verificar' | 'actividad' | 'precio';
 export const SERVICIO_TABS: Array<{ id: ServicioTab; label: string }> = [
-  { id: 'resumen', label: 'Resumen' }, { id: 'altas', label: 'Altas' }, { id: 'pruebas', label: 'Cuentas de prueba' }, { id: 'actividad', label: 'Actividad' }, { id: 'precio', label: 'Precio y prueba' },
+  { id: 'resumen', label: 'Resumen' }, { id: 'altas', label: 'Altas' }, { id: 'pruebas', label: 'Cuentas de prueba' }, { id: 'verificar', label: 'Verificar IA' }, { id: 'actividad', label: 'Actividad' }, { id: 'precio', label: 'Precio y prueba' },
 ];
-export const SERVICIO_TAB_ICONS: Record<ServicioTab, IconName> = { resumen: 'grid', altas: 'plus', pruebas: 'sparkle', actividad: 'history', precio: 'wallet' };
+export const SERVICIO_TAB_ICONS: Record<ServicioTab, IconName> = { resumen: 'grid', altas: 'plus', pruebas: 'sparkle', verificar: 'check', actividad: 'history', precio: 'wallet' };
 
 const SORTABLE: Array<{ label: string; order?: ServiceOrder }> = [
   { label: '#' }, { label: 'Nutricionista', order: 'nombre' }, { label: 'Estado' }, { label: 'Pacientes', order: 'pacientes' }, { label: 'Vigencia', order: 'vencimiento' }, { label: 'Último ingreso', order: 'ingreso' },
@@ -331,6 +331,7 @@ export function ServicioScreen({ board, onBoard, today = localBillingDate(), ini
       </>}
       {tab === 'altas' && <AltasTab nutritionists={board.nutritionists} onCreated={(nutritionist) => onBoard({ ...board, nutritionists: [...board.nutritionists.filter((item) => item.id !== nutritionist.id), nutritionist] })} onOpen={(id) => { setSelectedId(id); setTab('resumen'); }} />}
       {tab === 'pruebas' && <PruebasTab />}
+      {tab === 'verificar' && <VerificarTab />}
       {tab === 'actividad' && <ActividadTab events={board.events} names={names} />}
       {tab === 'precio' && <SettingsCard settings={board.settings} onSaved={(settings) => onBoard({ ...board, settings })} />}
     </div>

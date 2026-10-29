@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ServiceBoard, ServiceNutritionist } from '../../types/service';
 import { api, ApiError } from '../../api/client';
 import { adminErrorMessage, buildMailto, buildServiceRows, emailsOf, filterServiceEvents, filterServiceRows, mailKindFor, mailTemplate, testAliasEmails } from './servicio-utils';
-import { ActividadTab, AltasTab, PruebasTab } from './ServicioTabs';
+import { ActividadTab, AltasTab, PruebasTab, VerificarTab } from './ServicioTabs';
 import { ServicioScreen } from './ShowroomServicio';
 
 const TODAY = '2026-09-30';
@@ -72,6 +72,10 @@ describe('Pestañas del panel', () => {
     const html = renderToStaticMarkup(<PruebasTab initialAccounts={[{ email: 'f+plan-v-nutri@gmail.com', name: 'Nutri de prueba', role: 'nutricionista' }, { email: 'f+plan-v-paciente@gmail.com', name: 'Paciente de prueba', role: 'paciente' }]} />);
     for (const text of ['Tu mail', 'Clave', 'Crear nutricionista y paciente de prueba', 'facundorodriguez42@gmail.com', 'f+plan-v-nutri@gmail.com', 'Paciente de prueba', 'Cuentas de prueba existentes']) expect(html).toContain(text);
     expect(renderToStaticMarkup(<PruebasTab initialAccounts={[]} />)).toContain('Todavía no hay cuentas de prueba');
+  });
+  it('Verificar IA: botón y foto de ejemplo vacía antes de probar', () => {
+    const html = renderToStaticMarkup(<VerificarTab />);
+    for (const text of ['Verificar la IA del servicio', 'Verificar ahora', 'Foto de ejemplo', 'No usa cuentas ni datos de pacientes']) expect(html).toContain(text);
   });
   it('Actividad: historial completo con filtro por tipo y buscador', () => {
     const events = [...board.events, { id: 'e2', occurred_at: '2026-09-20T10:00:00Z', action: 'service.trial_extended', nutritionist_id: 'bea', metadata: {} }, { id: 'e3', occurred_at: '2026-09-25T10:00:00Z', action: 'service.settings', nutritionist_id: null, metadata: {} }];
