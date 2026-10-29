@@ -1,4 +1,4 @@
-import { generateText } from 'ai';
+import { APICallError, generateText } from 'ai';
 import { resolveAiMode } from '../ai/mode.js';
 import { getAiModel, resolveAiProvider } from '../ai/provider.js';
 import { generateCoverFromPrompt, recipeCoverEnabled, type RecipeCoverResult } from '../ai/recipe-cover.js';
@@ -33,7 +33,6 @@ const realDeps: AiCheckDeps = {
   runText: async () => (await generateText({
     model: getAiModel(),
     prompt: 'Respondé solo con la palabra OK.',
-    maxOutputTokens: 16,
     abortSignal: AbortSignal.timeout(TEXT_TIMEOUT_MS),
   })).text,
   imageEnabled: recipeCoverEnabled,
@@ -42,12 +41,21 @@ const realDeps: AiCheckDeps = {
 
 let lastRunAt = 0;
 
+/** Motivo para el administrador: solo el código HTTP y el aviso corto del proveedor, nunca claves ni el pedido. */
+function failureDetail(error: unknown): string {
+  if (APICallError.isInstance(error) && error.statusCode) {
+    const message = (error.message ?? '').replace(/\s+/g, ' ').slice(0, 140);
+    return `El proveedor respondió ${error.statusCode}${message ? `: ${message}` : ''}.`;
+  }
+  return 'El proveedor no respondió a tiempo o el pedido no salió.';
+}
+
 async function timed(run: () => Promise<Omit<AiCheckPart, 'ms'>>, now: () => number): Promise<AiCheckPart> {
   const start = now();
   try {
     return { ...await run(), ms: now() - start };
-  } catch {
-    return { status: 'failed', detail: 'El proveedor no respondió a tiempo o rechazó el pedido.', ms: now() - start };
+  } catch (error) {
+    return { status: 'failed', detail: failureDetail(error), ms: now() - start };
   }
 }
 

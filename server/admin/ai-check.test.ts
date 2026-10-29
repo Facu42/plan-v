@@ -66,6 +66,16 @@ describe('runAiCheck', () => {
   });
 });
 
+describe('failure detail', () => {
+  it('shows the HTTP status and the provider notice, but never the request', async () => {
+    const { APICallError } = await import('ai');
+    const error = new APICallError({ message: 'No endpoints found for this request', url: 'https://openrouter.ai/api/v1/chat/completions', requestBodyValues: { key: 'sk-secret' }, statusCode: 404 });
+    const result = await runAiCheck(deps({ runText: async () => { throw error; } }));
+    expect(result.text.detail).toBe('El proveedor respondió 404: No endpoints found for this request.');
+    expect(JSON.stringify(result)).not.toContain('sk-secret');
+  });
+});
+
 describe('demoAiCheck', () => {
   it('has no real provider data', () => {
     expect(demoAiCheck().text.status).toBe('demo');
