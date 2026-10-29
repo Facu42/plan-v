@@ -132,7 +132,7 @@ export function PanelAgendaView({ view, anchor = '', days, today, now, events, p
           {moreBookings && <button type="button" className="p5-btn" disabled={busy} onClick={onMoreBookings}>Ver más reservas</button>}
         </section>}
         {seccion === 'conexiones' && <section className="p5-card"><header><h3>Reservas online</h3></header>
-          <p className="p5-link">{page?.enabled ? `/consultorio/${page.slug}` : 'La página todavía no está publicada.'}</p>
+          <p className="p5-link">{page?.enabled ? `/${page.slug}` : 'La página todavía no está publicada.'}</p>
           <button type="button" className="p5-btn" onClick={onCopy} disabled={!page?.enabled}>Copiar link</button>
           <PanelConnections connected={connections} onConnect={onConnect} onDisconnect={onDisconnect} />
         </section>}

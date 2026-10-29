@@ -6,6 +6,7 @@ import { subscriptionsApi } from '../../api/subscriptions';
 import { ApiError } from '../../api/error';
 import { friendlyError } from '../../lib/error-messages';
 import type { SubscriptionPlan } from '../../types/subscriptions';
+import { isPublicSlug } from '../../types/public-slug';
 import { Icon } from '../shared/Icon';
 import { PlanForm } from './PanelDebit';
 import { PanelConnections, type ConnectionKey } from './PanelConnections';
@@ -109,7 +110,7 @@ export function PanelPublicPage({ onHeader, onAgenda }: { onHeader?: (actions: R
   const pageUrl = published ? bookingHref(typeof window === 'undefined' ? 'https://plan.v' : window.location.origin, scheduling.snapshot?.profile.config.page.slug ?? config.page.slug) : '';
   const mercadoPago = Boolean(scheduling.snapshot?.connections.mercadopago);
   const publish = () => {
-    if (!/^[a-z0-9][a-z0-9-]{2,59}$/.test(config.page.slug)) { scheduling.setStatus('La dirección usa minúsculas, números y guiones.'); return; }
+    if (!isPublicSlug(config.page.slug)) { scheduling.setStatus('La dirección usa minúsculas, números y guiones, y no puede ser una palabra reservada.'); return; }
     if (config.page.logo_url && !config.page.logo_url.startsWith('https://')) { scheduling.setStatus('La imagen tiene que ser un enlace https.'); return; }
     void scheduling.save({ ...config, page: { ...config.page, enabled: true, title: config.page.title.trim() || PERFIL_VACIO } }, 'Página publicada.').then(ok => { if (ok) setDraft(null); });
   };

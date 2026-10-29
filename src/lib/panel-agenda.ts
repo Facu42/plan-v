@@ -209,7 +209,7 @@ export function withHalfDeposit<T extends { price_minor: number; deposit_minor: 
 }
 
 export function bookingHref(origin: string, slug: string): string {
-  return new URL(`/consultorio/${encodeURIComponent(slug)}`, origin).href;
+  return new URL(`/${encodeURIComponent(slug)}`, origin).href;
 }
 
 export function argentinaStamp(day: string, time: string): string {
