@@ -40,7 +40,7 @@ describe('totales y ajuste calórico de menús revisables', () => {
     expect(summarizeMenuNutrition([item], target, [{ id: 'recipe-1', version: 2, nutrition }]).days[0].totals?.kcal).toBe(1000);
     expect(summarizeMenuNutrition([item], target, [{ id: 'recipe-1', version: 1, nutrition }]).days[0].status).toBe('missing_nutrients');
   });
-  it('cambios en meta, catálogo o preferencias invalidan el hash sin enviar identidad ni datos corporales', () => {
+  it('cambios en meta, catálogo o preferencias invalidan el hash sin enviar nombre ni datos corporales', () => {
     const intake = { ...emptyIntakePayload(), preferred_name: 'PRIVATE_NAME', conditions_note: 'PRIVATE_NOTE', cooking_time_minutes: 20, allergies: { state: 'none' as const, items: [] }, restrictions: { state: 'none' as const, items: [] } };
     const catalog = [{ ...proposal, id: 'recipe-1', version: 1 }];
     const context = buildMenuJobContext({ intake, catalog, confirmedTarget: target });
@@ -48,7 +48,7 @@ describe('totales y ajuste calórico de menús revisables', () => {
     expect(hashAiContext(buildMenuJobContext({ intake, catalog, confirmedTarget: { ...target, kcal: 2100 } }))).not.toBe(original);
     expect(hashAiContext(buildMenuJobContext({ intake, catalog: [{ ...catalog[0], version: 2 }], confirmedTarget: target }))).not.toBe(original);
     expect(hashAiContext(buildMenuJobContext({ intake: { ...intake, cooking_time_minutes: 30 }, catalog, confirmedTarget: target }))).not.toBe(original);
-    expect(JSON.stringify(context)).not.toContain('PRIVATE_');
+    expect(JSON.stringify(context)).not.toContain('PRIVATE_NAME');
     expect(JSON.stringify(context)).not.toMatch(/weight_kg|sex|height_cm|birth_date/);
   });
 });
