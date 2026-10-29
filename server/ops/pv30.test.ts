@@ -150,25 +150,35 @@ describe('deploy contract', () => {
   it('keeps the Vercel artifact as the Vite frontend, not the Node API', () => {
     const vercel = JSON.parse(readFileSync(new URL('../../vercel.json', import.meta.url), 'utf8')) as {
       outputDirectory: string;
-      rewrites?: { source: string; destination: string }[];
+      rewrites?: { source: string; destination: string; has?: { type: string; value: string }[] }[];
     };
     expect(vercel.outputDirectory).toBe('dist');
     expect(JSON.stringify(vercel)).not.toMatch(/server\/index/);
     // The Node API stays on Railway. Only OAuth/booking and unsubscribe need a narrow same-origin proxy.
     // Existing authenticated clinical endpoints never acquire a wildcard web proxy.
-    expect(vercel.rewrites).toEqual([
+    const rewrites = vercel.rewrites ?? [];
+    expect(rewrites.slice(0, 3)).toEqual([
       { source: '/api/public/communications/email-unsubscribe', destination: 'https://api-production-aad6.up.railway.app/api/public/communications/email-unsubscribe' },
       { source: '/api/scheduling/:path*', destination: 'https://api-production-aad6.up.railway.app/api/scheduling/:path*' },
       { source: '/api/public/scheduling/:path*', destination: 'https://api-production-aad6.up.railway.app/api/public/scheduling/:path*' },
-      { source: '/consultorio/:path*', destination: '/index.html' },
-      { source: '/equipo', destination: '/index.html' },
-      { source: '/pacientes', destination: '/pacientes/index.html' },
-      { source: '/admin', destination: '/index.html' },
-      { source: '/app', destination: '/index.html' },
-      { source: '/app/:path*', destination: '/index.html' },
-      { source: '/crm', destination: '/index.html' },
-      { source: '/crm/:path*', destination: '/index.html' },
     ]);
+    const host = (value: string, destination: string) => ({ source: '/', has: [{ type: 'host', value }], destination });
+    expect(rewrites).toContainEqual(host('nutridash-ar.vercel.app', '/nutris/index.html'));
+    expect(rewrites).toContainEqual(host('nutridash.com.ar', '/nutris/index.html'));
+    expect(rewrites).toContainEqual(host('www.nutridash.com.ar', '/nutris/index.html'));
+    expect(rewrites).toContainEqual(host('nutridash-app.vercel.app', '/index.html'));
+    expect(rewrites).toContainEqual(host('app.nutridash.com.ar', '/index.html'));
+    expect(rewrites).toContainEqual(host('plan-v-eight.vercel.app', '/index.html'));
+    for (const route of ['/pacientes', '/app', '/crm', '/consultorio']) {
+      expect(rewrites).toContainEqual({ source: route, destination: route === '/pacientes' ? '/pacientes/index.html' : '/index.html' });
+    }
+    const slugIndex = rewrites.findIndex(route => route.source === '/:slug([a-z0-9][a-z0-9-]{2,59})');
+    expect(slugIndex).toBe(rewrites.length - 1);
+    for (const reserved of ['app', 'crm', 'pacientes', 'consultorio', 'equipo', 'admin', 'api', 'legal', 'nutris', 'assets', 'static']) {
+      const index = rewrites.findIndex(route => route.source === `/${reserved}`);
+      expect(index).toBeGreaterThanOrEqual(0);
+      expect(index).toBeLessThan(slugIndex);
+    }
   });
 
   it('check:secrets refuses a leaked VITE_ service role and passes in test mode', () => {
