@@ -134,4 +134,21 @@ describe('el token público no crea una segunda vía para miembros revocados',()
   await expect(actor(patientUser,'select public.scheduling_change_booking($1,$2,$3,$4)',[nutriA,booking.id,{action:'cancel',expected_revision:1},hash])).rejects.toThrow();
   await expect(actor(admin,'select token_hash from public.scheduling_bookings')).rejects.toThrow();
  });
+ it('acepta reminders_enabled booleano en la configuración y rechaza otro tipo o una clave desconocida',async()=>{
+  const revision=async()=>(await actor<{revision:number}>(b,'select revision from public.scheduling_profiles where nutritionist_id=$1',[nutriB]))[0].revision;
+  const base={...settings,page:{...settings.page,slug:'consultorio-b'}};
+  await actor(b,'select public.scheduling_save_config($1,$2,$3)',[nutriB,await revision(),{...base,reminders_enabled:false}]);
+  expect((await actor<{config:{reminders_enabled?:boolean}}>(b,'select config from public.scheduling_profiles where nutritionist_id=$1',[nutriB]))[0].config.reminders_enabled).toBe(false);
+  await expect(actor(b,'select public.scheduling_save_config($1,$2,$3)',[nutriB,await revision(),{...base,reminders_enabled:'no'}])).rejects.toThrow();
+  await expect(actor(b,'select public.scheduling_save_config($1,$2,$3)',[nutriB,await revision(),{...base,otra_clave:true}])).rejects.toThrow();
+  await actor(b,'select public.scheduling_save_config($1,$2,$3)',[nutriB,await revision(),base]);
+ });
+ it('acepta page_extras como objeto y rechaza otro tipo',async()=>{
+  const revision=async()=>(await actor<{revision:number}>(b,'select revision from public.scheduling_profiles where nutritionist_id=$1',[nutriB]))[0].revision;
+  const base={...settings,page:{...settings.page,slug:'consultorio-b'}};
+  await actor(b,'select public.scheduling_save_config($1,$2,$3)',[nutriB,await revision(),{...base,page_extras:{specialties:['Celiaquía']}}]);
+  expect((await actor<{config:{page_extras?:{specialties?:string[]}}}>(b,'select config from public.scheduling_profiles where nutritionist_id=$1',[nutriB]))[0].config.page_extras?.specialties).toEqual(['Celiaquía']);
+  await expect(actor(b,'select public.scheduling_save_config($1,$2,$3)',[nutriB,await revision(),{...base,page_extras:'texto'}])).rejects.toThrow();
+  await actor(b,'select public.scheduling_save_config($1,$2,$3)',[nutriB,await revision(),base]);
+ });
 });

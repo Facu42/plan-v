@@ -1,5 +1,6 @@
 import { createContext, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { PanelV29Icon } from './PanelV29Icon';
+import { aplicarPrefsGuardadas } from './ajustes-prefs';
 import type { PanelV29IconName } from './panel-v29-icons';
 import '@fontsource/inter/latin-300.css';
 import '@fontsource/inter/latin-400.css';
@@ -53,6 +54,7 @@ export function PanelBocetoShell({ dark, collapsed, onCollapse, menuOpen, onMenu
   const [query, setQuery] = useState('');
   const input = useRef<HTMLInputElement>(null);
   const wantSearch = useRef(false);
+  useEffect(() => { aplicarPrefsGuardadas(); }, []);
   useEffect(() => {
     const focus = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); input.current?.focus(); }

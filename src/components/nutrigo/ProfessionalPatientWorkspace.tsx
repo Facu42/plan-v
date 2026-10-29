@@ -17,6 +17,7 @@ import { ConsultationNotes,ConsultationCompletionPanel } from './ConsultationNot
 import { RECORD_PLAN_TABS, recordTab, appointmentRecordSummary, type RecordTab } from './patient-record-sections';
 import {PanelPatientHistory} from './PanelPatientHistory';
 import { FichaSolapas, PanelFichaCabecera } from './PanelFichaCabecera';
+import { PanelFichaChat } from './PanelFichaChat';
 import { FxKv, FxPanel } from './ficha-fx';
 import { PanelFichaResumen } from './PanelFichaResumen';
 import { conteoDeSolapas, seccionDe, solapaDe } from './ficha-presentacion';
@@ -33,6 +34,7 @@ import {PanelPatientBilling} from './PanelPatientBilling';
 import { PanelPatientFiles } from './PanelPatientFiles';
 export {PlanSafetySummary} from './PlanSafetySummary';
 import { PanelFichaPlan } from './PanelFichaPlan';
+import { PanelFichaConsultas } from './PanelFichaConsultas';
 import { PanelPatientLaboratory } from './PanelPatientLaboratory';
 import './panel-patient-record.css';
 
@@ -54,6 +56,8 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   const refreshPatient = useAppStore(store => store.refreshPatient);
   const [refreshError,setRefreshError] = useState('');
   const [readyId,setReadyId]=useState<string|null>(null);
+  const [chatOpen,setChatOpen]=useState(false);
+  useEffect(()=>setChatOpen(false),[patient.id]);
   const [patientRevision,setPatientRevision]=useState(0);
   const tabsRef=useRef<HTMLElement>(null);
   const datos=useFichaData(patient);
@@ -80,7 +84,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   const conteo = conteoDeSolapas({ comidas: pendientes.comidas, notaPorAprobar: pendientes.notaPorAprobar, alterados: pendientes.alterados.length });
   const contacto = <FxPanel titulo="Datos y contacto"><label className="fxsel">Paciente<select aria-label="Paciente de la ficha" value={patient.id} onChange={event=>onSelect(event.target.value)}>{patients.map(person=><option key={person.id} value={person.id}>{person.name}</option>)}</select></label><FxKv filas={[['Teléfono',phone||'Sin teléfono registrado'],['Próxima consulta',patient.appointment?.when||'Sin consulta programada'],['Consultas realizadas',<CompletedConsultationCount key="hechas" patientId={patient.id}/>],['Asistencias confirmadas',String(appointments.confirmed)]]}/></FxPanel>;
   return <div className="scr" id="s-ficha" aria-label={`Espacio de ${patient.name}`}>
-    <PanelFichaCabecera patient={patient} now={now} datos={datos} etiquetasPropias={etiquetas.tags} onGuardarEtiquetas={etiquetas.guardar} onBack={()=>onOpenHref('/crm/pacientes')} onChat={()=>change('chat')} onAgendar={()=>onOpenHref('/crm/agenda')} onEdit={onEdit} onConsulta={()=>change('consultas')}/>
+    <PanelFichaCabecera patient={patient} now={now} datos={datos} etiquetasPropias={etiquetas.tags} onGuardarEtiquetas={etiquetas.guardar} onBack={()=>onOpenHref('/crm/pacientes')} onChat={()=>setChatOpen(true)} onAgendar={()=>onOpenHref('/crm/agenda')} onEdit={onEdit} onConsulta={()=>change('consultas')}/>
     <FichaSolapas ref={tabsRef} activa={solapa} conteo={conteo} onChange={next=>change(seccionDe(next))}/>
     {refreshError && <p role="alert">{refreshError}</p>}
     <div id="fwrap" style={{flex:1,minHeight:0,display:'flex',flexDirection:'column'}}>
@@ -91,17 +95,17 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
     :<div className="pw-record pn-record"><div key={`${patient.id}:${tab}`} className="pw-record-content">
       {solapa==='plan'&&tab!=='plan'&&<nav className="pn-record-plan-tabs" aria-label="Secciones del plan">{RECORD_PLAN_TABS.filter(([id])=>id!=='planificacion').map(([id,label])=><button type="button" key={id} aria-current={id===tab?'page':undefined} onClick={()=>change(id)}>{label}</button>)}</nav>}
       {tab === 'historia' && <PanelFichaHistoria key={patient.id} patient={patient} now={now} datos={datos}><details id="hc-respuestas" className="pn-record-card" open><summary>Respuestas del formulario, datos importados y primer día</summary><PanelPatientHistory patientId={patient.id} now={now}/></details></PanelFichaHistoria>}
-      {tab === 'notas' && <ConsultationNotes patientId={patient.id} showCompletions={false}/>}
       {tab === 'alimentario' && <PanelPatientFoodDiary patient={patient} now={now} onReview={onReview} onSelect={onSelect}/>}
       {tab === 'plan' && <PanelFichaPlan key={patient.id} patient={patient} professionalName={professionalName} now={now} onSection={change} onChanged={()=>void refreshPatient(patient.id)}/>}
       {tab === 'semanal' && <ShowroomMealPlan patient={patient} patients={patients} query="" onSelect={onSelect} onChanged={addPatient} now={now} />}
       {tab === 'compras' && <ShowroomGrocery patient={p} readOnly />}
-      {tab === 'archivos' && <PanelPatientFiles key={patient.id} patientId={patient.id}/>}
+      {tab === 'archivos' && <PanelPatientFiles key={patient.id} patientId={patient.id} patientName={patient.name}/>}
       {tab === 'laboratorio' && <PanelPatientLaboratory key={patient.id} patientId={patient.id} now={now} ir={next=>change(seccionDe(next))}/>}
-      {tab === 'consultas' && <div className="pn-record-diary-grid"><div className="pn-record-main-column"><ShowroomConsultations embedded patient={patient} now={now} onSelect={onSelect} onChanged={addPatient}/><button type="button" onClick={()=>change('notas')}>Ver notas de consulta</button></div><aside className="pn-record-side-column"><ConsultationCompletionPanel patientId={patient.id}/></aside></div>}
+      {(tab === 'consultas' || tab === 'notas') && <PanelFichaConsultas key={patient.id} patient={patient} now={now} professionalName={professionalName} datos={datos} onSection={change} onOpenHref={onOpenHref} onChanged={()=>void refreshPatient(patient.id)}/>}
       {tab === 'chat' && <div className="pn-record-chat-scope"><NutrigoMessages embedded patient={p} patients={patients.map((person) => buildShowroomPatient(person, now))} role="pro" onSelect={onSelect} onNavigate={onNavigate} /></div>}
       {tab === 'cobros' && <PanelPatientBilling key={patient.id} patientId={patient.id} onOpen={()=>onOpenHref('/crm/cobranzas')}/>}
     </div></div>}
     </div>
+    <PanelFichaChat patient={patient} open={chatOpen} onClose={()=>setChatOpen(false)}/>
   </div>;
 }

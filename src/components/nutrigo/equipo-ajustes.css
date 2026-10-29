@@ -13,12 +13,12 @@
 #pv-panel-v29 .ea-table table{width:100%;border-collapse:collapse;font-size:12px}
 #pv-panel-v29 .ea-table th,#pv-panel-v29 .ea-table td{padding:9px 8px;text-align:left;border-bottom:1px solid var(--line)}
 #pv-panel-v29 .ea-table th{font-weight:400;color:var(--ink3);font-size:11px;white-space:nowrap}
-#pv-panel-v29:not(.mob) .ea-screen table.eqt{table-layout:fixed}
-#pv-panel-v29:not(.mob) .ea-screen table.eqt th,#pv-panel-v29:not(.mob) .ea-screen table.eqt td{white-space:normal;height:auto;overflow-wrap:anywhere}
-#pv-panel-v29:not(.mob) .ea-screen table.eqt th:nth-child(1){width:22%}
-#pv-panel-v29:not(.mob) .ea-screen table.eqt th:nth-child(2){width:14%}
-#pv-panel-v29:not(.mob) .ea-screen table.eqt th:nth-child(4),#pv-panel-v29:not(.mob) .ea-screen table.eqt th:nth-child(5){width:14%}
-#pv-panel-v29:not(.mob) .ea-screen table.eqt th:nth-child(6){width:12%}
+#pv-panel-v29:not(.mob) .ea-screen table.eqt td{white-space:normal}
+#pv-panel-v29:not(.mob) .ea-screen table.eqt td:first-child{overflow-wrap:anywhere}
+/* La hoja vieja (panel-boceto.css) pone 500 a toda <b> fuera de las pantallas de su lista: se devuelve el peso del boceto. */
+#pv-panel-v29 #s-equipo .av{font-weight:600}
+#pv-panel-v29 #s-equipo .pubkp b{font-weight:300}
+#pv-panel-v29 .ea-registro{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
 #pv-panel-v29 .ea-table .on{background:var(--lima-tt)}
 #pv-panel-v29 .ea-person{display:flex;align-items:center;gap:10px;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
 #pv-panel-v29 .ea-person b{font-weight:500;max-width:170px;overflow-wrap:anywhere}
@@ -32,7 +32,6 @@
 #pv-panel-v29 .ea-rules{margin:0;padding-left:18px;font-size:12px;line-height:1.7;color:var(--ink2)}
 #pv-panel-v29 .ea-foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:12px}
 #pv-panel-v29 .ea-screen .chip{font-size:12px;padding:6px 10px;font-weight:400}
-#pv-panel-v29 .ea-screen .eqmods span{background:var(--app);color:var(--ink3);border:1px solid var(--line)}
 #pv-panel-v29 .ea-tabs{max-width:100%;overflow-x:auto;flex-shrink:1;scrollbar-width:thin}
 #pv-panel-v29 .ea-tabs button{white-space:nowrap}
 #pv-panel-v29 .ea-advanced{font-size:12px;border-top:1px solid var(--line);padding-top:8px;flex:none}
@@ -62,3 +61,4 @@
 #pv-panel-v29.mob .ea-screen .eqroles{grid-template-columns:repeat(2,minmax(0,1fr))}
 #pv-panel-v29.mob .ea-dialog{inset:0;width:100%;max-width:100%;height:100%;border-radius:0}
 #pv-panel-v29 .ea-screen button:focus-visible,#pv-panel-v29 .ea-dialog button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+#pv-panel-v29:not(.mob) .ea-registro .fxp>header{flex-wrap:nowrap}

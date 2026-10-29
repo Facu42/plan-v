@@ -36,6 +36,12 @@ describe('Agenda del boceto', () => {
     expect(html).not.toContain('Todavía no hay turnos');
   });
 
+  it('muestra el recordatorio de turno como el boceto, activo o apagado, y no lo inventa mientras carga', () => {
+    expect(renderToStaticMarkup(<PanelAgendaView {...base} recordatorio />)).toContain('activo · en la app y por mail 24 h antes');
+    expect(renderToStaticMarkup(<PanelAgendaView {...base} recordatorio={false} />)).toContain('apagado · no se avisa antes del turno');
+    expect(renderToStaticMarkup(<PanelAgendaView {...base} />)).not.toContain('Recordatorio de turno');
+  });
+
   it('dice Conectado solo cuando el servidor ya lo confirmó', () => {
     const sin = renderToStaticMarkup(<PanelAgendaView {...base} focus="conexiones" />);
     expect(sin).not.toContain('Conectado');

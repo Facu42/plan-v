@@ -53,5 +53,31 @@ export async function removePatientTag(scope: WorkScope, patientId: string, tagI
   return listPatientTags(scope, patientId);
 }
 
+export type TagGroup = { label: string; patient_ids: string[] };
+const MAX_TAG_ROWS = 5000;
+
+/** Cada etiqueta de la nutri con las pacientes que la tienen: son los «grupos» de Pacientes. */
+export async function listTagGroups(scope: WorkScope): Promise<TagGroup[]> {
+  const available = new Set(scope.patients.filter(p => !p.deactivated_at && !p.anonymized_at).map(p => p.id));
+  let rows: Array<{ label: string; patient_id: string }>;
+  if (!scope.persistent) {
+    const prefix = `${scope.nutritionistId}:`;
+    rows = [...memory.entries()].filter(([k]) => k.startsWith(prefix)).flatMap(([k, tags]) => tags.map(tag => ({ label: tag.label, patient_id: k.slice(prefix.length) })));
+  } else {
+    const { data, error } = await getRequestDb().from('patient_tags').select('label,patient_id').eq('nutritionist_id', scope.nutritionistId).order('created_at').limit(MAX_TAG_ROWS);
+    if (error) throw new CareError(503, 'No pudimos leer los grupos. Probá de nuevo.');
+    rows = (data ?? []).map(row => ({ label: String(row.label), patient_id: String(row.patient_id) }));
+  }
+  const groups = new Map<string, TagGroup>();
+  for (const row of rows) {
+    if (!available.has(row.patient_id)) continue;
+    const key = row.label.trim().toLowerCase();
+    const group = groups.get(key) ?? { label: row.label, patient_ids: [] };
+    if (!group.patient_ids.includes(row.patient_id)) group.patient_ids.push(row.patient_id);
+    groups.set(key, group);
+  }
+  return [...groups.values()].sort((a, b) => a.label.localeCompare(b.label, 'es'));
+}
+
 /** Solo para pruebas: vacía las etiquetas en memoria. */
 export const resetPatientTagsMemory = () => memory.clear();

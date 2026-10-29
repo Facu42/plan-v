@@ -189,6 +189,8 @@ const ALLOWED = [
   'schedule_appointment',
   // Misma revisión y control clínico que publicar, fecha acotada al período.
   'schedule_reviewed_meal_plan',
+  // Mensaje a varias programado: solo la nutri, a pacientes asignadas (is_assigned_patient por cada una).
+  'schedule_thread_messages',
   // Agenda/equipo: cada RPC valida dueño, membresía operativa o asignación clínica explícita.
   'scheduling_accept_staff',
   'scheduling_add_existing_charge',

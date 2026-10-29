@@ -12,6 +12,8 @@ import { recordLabSeries,recordLaboratoryText } from './panel-record-data';
 import { PanelV29Icon } from './PanelV29Icon';
 import { FxCurva, FxFilas, FxPanel } from './ficha-fx';
 import { COLUMNAS_LAB, analisisDeFecha, analisisPorFecha, estadoDe, fechaCorta, fechasDeLaboratorio, graficoDeValor, historialDeValor, metaDeAnalisis, pedidosDeEstudios, valoresPorFecha, type GraficoLab } from './ficha-laboratorio';
+import { LabLectura } from './LabLectura';
+import { armarLectura, pedidoParaIA } from './lab-lectura';
 import { valoresAlterados, type SolapaFicha } from './ficha-presentacion';
 
 function ManualLaboratoryValue({patientId,snapshot,today,onSaved,onUpload}:{patientId:string;snapshot:ClinicalWorkspaceSnapshot;today:string;onSaved:()=>void;onUpload:()=>void}){
@@ -37,10 +39,16 @@ function GraficoValor({grafico}:{grafico:GraficoLab}){
   </svg>;
 }
 
+async function pedirLecturaIA(patientId:string,series:Parameters<typeof pedidoParaIA>[0]):Promise<string>{
+  const pedido=pedidoParaIA(series);if(!pedido)throw new Error('No hay valores para leer.');
+  try{return (await clinicalWorkspaceApi.labReading(patientId,pedido,crypto.randomUUID())).text;}
+  catch(caught){throw new Error(careErrorMessage(caught));}
+}
+
 export function PanelPatientLaboratory({patientId,now,ir}:{patientId:string;now:Date;ir:(solapa:SolapaFicha)=>void}){
   const {data:care,error:careError}=useCare(patientId,true);
   const allowed=!careError&&(care?.consented.includes('clinical_document')??false)&&(care?.consented.includes('care_relationship')??false);
-  const [result,setResult]=useState<{key:string;snapshot:ClinicalWorkspaceSnapshot}|null>(null),[error,setError]=useState(''),[revision,setRevision]=useState(0),[selected,setSelected]=useState(''),[column,setColumn]=useState<string|null>(null),[view,setView]=useState<'valores'|'fecha'>('valores'),[mode,setMode]=useState<'none'|'manual'|'upload'>('none'),[files,setFiles]=useState(false);
+  const [lecturaAbierta,setLecturaAbierta]=useState(false),[result,setResult]=useState<{key:string;snapshot:ClinicalWorkspaceSnapshot}|null>(null),[error,setError]=useState(''),[revision,setRevision]=useState(0),[selected,setSelected]=useState(''),[column,setColumn]=useState<string|null>(null),[view,setView]=useState<'valores'|'fecha'>('valores'),[mode,setMode]=useState<'none'|'manual'|'upload'>('none'),[files,setFiles]=useState(false);
   const document=useRecordDocument(`${patientId}:${allowed}`);
   const key=`${patientId}:${allowed}:${revision}`;
   const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires'}).format(now);
@@ -61,11 +69,11 @@ export function PanelPatientLaboratory({patientId,now,ir}:{patientId:string;now:
   const verFecha=(date:string)=>{setColumn(date);setView('valores');};
   const verValor=(clave:string)=>{setSelected(clave);setColumn(null);};
   const tabla=<div className="fxs fxtb tall lbt"><table><thead><tr><th>Valor</th><th>Referencia</th>{dates.map(date=><th key={date} className={column===date?'colsel':''}><button type="button" className="lbch" onClick={()=>verFecha(date)}><b className="num">{fechaCorta(date)}</b><small>{groups.filter(g=>g.values.some(v=>v.date===date)).length} valores</small></button></th>)}<th>Tendencia</th><th>Estado</th></tr></thead><tbody>
-    {groups.length?groups.map(group=>{const st=estadoDe(group.latest);const celdas=valoresPorFecha(group,dates);return <tr key={group.key} className={!column&&current?.key===group.key?'sel':undefined} onClick={()=>verValor(group.key)}>
+    {groups.length?groups.map(group=>{const st=estadoDe(group.latest);const celdas=valoresPorFecha(group,dates);return <tr key={group.key} data-lbr={group.key} className={!column&&current?.key===group.key?'sel':undefined} onClick={()=>verValor(group.key)}>
       <td><b>{group.name}</b> <span className="u">{group.unit}</span></td>
       <td className="num u">{group.latest.range_text||'Sin informar'}</td>
       {celdas.map((celda,k)=><td key={dates[k]} className={`num${k===celdas.length-1?' last':''}${celda.fuera?' out':''}${column===dates[k]?' colsel':''}`}>{celda.texto}</td>)}
-      <td style={{width:78}}>{group.points.length>1?<FxCurva valores={group.points.map(p=>p.value)} ancho={70} alto={22} mini/>:null}</td>
+      <td style={{width:78}}>{group.points.length>1?<FxCurva valores={group.points.map(p=>p.value)} ancho={70} alto={22} mini alerta={st?.fuera}/>:null}</td>
       <td>{st?<span className={`pill ${st.clase}`}>{st.texto}</span>:<span className="pill p-wait">Sin rango</span>}</td></tr>;})
       :<tr><td colSpan={dates.length+4} style={{color:'var(--ink3)'}}>{aviso||'Todavía no hay valores revisados. Cargá un informe para comparar resultados.'}{error&&allowed?<> <button type="button" className="lnk" onClick={()=>setRevision(n=>n+1)}>Reintentar laboratorio</button></>:null}</td></tr>}
   </tbody></table></div>;
@@ -85,7 +93,7 @@ export function PanelPatientLaboratory({patientId,now,ir}:{patientId:string;now:
     {mode==='upload'&&<section className="pn-record-card"><LaboratoryEditor patientId={patientId} onChanged={saved}/></section>}
     <div className="fx hcx" data-mk="1" style={{gridTemplateColumns:'1.62fr 1fr'}}>
       <div className="c">
-        <FxPanel titulo="Laboratorio y estudios" grande derecha={<><div className="tabs lbv"><button type="button" className={view==='valores'?'on':''} aria-pressed={view==='valores'} onClick={()=>setView('valores')}>Valores</button><button type="button" className={view==='fecha'?'on':''} aria-pressed={view==='fecha'} onClick={()=>setView('fecha')}>Por fecha</button></div><button type="button" className="sbtn cbtn" disabled={!allowed||!snapshot} onClick={()=>changeMode('manual')}><PanelV29Icon name="plus" size={13}/>Agregar valor</button><button type="button" className="sbtn k cbtn" disabled={!allowed} onClick={()=>changeMode('upload')}><PanelV29Icon name="up" size={13}/>Cargar análisis</button></>}>
+        <FxPanel titulo="Laboratorio y estudios" grande derecha={<><div className="tabs lbv"><button type="button" className={view==='valores'?'on':''} aria-pressed={view==='valores'} onClick={()=>setView('valores')}>Valores</button><button type="button" className={view==='fecha'?'on':''} aria-pressed={view==='fecha'} onClick={()=>setView('fecha')}>Por fecha</button></div><button type="button" className="sbtn cbtn" disabled={!allowed||!snapshot} onClick={()=>changeMode('manual')}><PanelV29Icon name="plus" size={13}/>Agregar valor</button><button type="button" className="sbtn cbtn" disabled={!allowed||!snapshot||!groups.length} onClick={()=>setLecturaAbierta(true)}><PanelV29Icon name="spark" size={13}/>Analizar valores</button><button type="button" className="sbtn k cbtn" disabled={!allowed} onClick={()=>changeMode('upload')}><PanelV29Icon name="up" size={13}/>Cargar análisis</button></>}>
           {view==='fecha'?lista:<>{tabla}<small className="fxhint">{snapshot&&groups.length?`${metaDeAnalisis(groups)}. `:''}Tocá una fecha para ver ese análisis entero, o un valor para ver cómo cambió.</small></>}
         </FxPanel>
         <FxPanel titulo="De la consulta grabada" meta="lo que la paciente cuenta de sus análisis">
@@ -99,6 +107,7 @@ export function PanelPatientLaboratory({patientId,now,ir}:{patientId:string;now:
         </FxPanel>
       </div>
     </div>
+    {lecturaAbierta&&<LabLectura lectura={armarLectura(groups)} onClose={()=>setLecturaAbierta(false)} pedirIA={care?.consented.includes('ai_lab_reading')&&pedidoParaIA(groups)?()=>pedirLecturaIA(patientId,groups):undefined}/>}
     {document.error&&<p role="alert">{document.error}</p>}{document.file&&<RecordDocumentViewer file={document.file} onClose={document.close}/>}
     <details className="pn-record-card" onToggle={event=>setFiles(event.currentTarget.open)}><summary>Estudios adjuntos y revisión de archivos</summary>{files&&<CarePanel patientId={patientId} mode="laboratory"/>}</details>
   </section>;
