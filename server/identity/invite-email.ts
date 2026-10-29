@@ -49,14 +49,17 @@ export async function emailPatientInvite(invite: { id: string; email: string }, 
   return { delivery: 'magic_link' };
 }
 
-/** Con Brevo: Supabase sólo arma el enlace (sin mandar nada) y el mail sale en castellano por Brevo. */
+/**
+ * Con un mail de envío propio (Gmail o Brevo): Supabase sólo arma el enlace, sin mandar nada, y el mail sale
+ * en castellano con el nombre de la nutricionista como remitente. Si la paciente contesta, le llega a ella.
+ */
 export type BrevoInviteMailer = {
   generate(type: 'invite' | 'magiclink', email: string, redirectTo: string): Promise<{ link: string | null; error: MailError }>;
   send(message: BrevoMessage): Promise<unknown>;
 };
 
 export async function emailPatientInviteWithBrevo(
-  invite: { id: string; email: string; patientName: string; nutritionistName: string },
+  invite: { id: string; email: string; patientName: string; nutritionistName: string; nutritionistEmail?: string | null },
   site: string | undefined,
   mailer: BrevoInviteMailer,
 ): Promise<{ delivery: InviteEmailDelivery }> {
@@ -71,9 +74,15 @@ export async function emailPatientInviteWithBrevo(
   if (generated.error || !generated.link) mailFailure(generated.error ?? { code: 'no_link' }, delivery);
   const content = inviteEmail({ patientName: invite.patientName, nutritionistName: invite.nutritionistName, link: generated.link, existing: delivery === 'magic_link' });
   try {
-    await mailer.send({ to: { email: invite.email, name: invite.patientName }, ...content });
+    const pro = invite.nutritionistName.replace(/[\r\n]/g, ' ').trim();
+    await mailer.send({
+      to: { email: invite.email, name: invite.patientName },
+      ...content,
+      ...(pro ? { senderName: `${pro} vía Nutridash` } : {}),
+      ...(invite.nutritionistEmail ? { replyTo: { email: invite.nutritionistEmail, ...(pro ? { name: pro } : {}) } } : {}),
+    });
   } catch (error) {
-    writeOpsLog('warn', 'invite_email_failed', { step: 'brevo', code: error instanceof Error ? error.message.slice(0, 40) : 'unknown' });
+    writeOpsLog('warn', 'invite_email_failed', { step: 'mail', code: error instanceof Error ? error.message.slice(0, 40) : 'unknown' });
     throw new CareError(503, 'No se pudo mandar el mail. Copiá el enlace o reintentá en un momento.');
   }
   return { delivery };

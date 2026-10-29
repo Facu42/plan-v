@@ -1,3 +1,4 @@
+import { careErrorMessage } from '../../api/care';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { api, isAbortError, type InviteEmailDelivery, type PatientInvite } from '../../api/client';
 import { useAppStore } from '../../store/useAppStore';
@@ -83,7 +84,14 @@ export function InviteShare({ name, invite, onClose }: { name: string; invite: P
   const linked = current.status === 'accepted';
   const link = inviteLink(current.id);
   const [copied, setCopied] = useState(false);
-  useEffect(() => { setCurrent(invite); setError(''); setCopied(false); }, [invite.id, invite.updated_at]);
+  const [mailed, setMailed] = useState('');
+  useEffect(() => { setCurrent(invite); setError(''); setCopied(false); setMailed(''); }, [invite.id, invite.updated_at]);
+  const email = async () => {
+    if (lock.current) return; lock.current = true; setBusy(true); setError(''); setMailed('');
+    try { setMailed(inviteEmailNotice((await api.emailInvite(current.id)).delivery, current.email)); }
+    catch (caught) { setError(`${careErrorMessage(caught)} También podés mandarla desde tu mail.`); }
+    finally { lock.current = false; setBusy(false); }
+  };
   const prepare = async () => {
     if (lock.current) return; lock.current = true; setBusy(true); setError('');
     try { const saved = (await api.patientInvite(current.patient_id)).invite; setCurrent(saved); if (saved.status !== 'accepted' && !invitationReady(saved)) setError('El enlace todavía no está habilitado. Reintentá preparar la invitación.'); }
@@ -99,10 +107,11 @@ export function InviteShare({ name, invite, onClose }: { name: string; invite: P
     <span>
       <strong>{linked ? `Cuenta vinculada de ${name}` : ready ? `Invitación lista para ${name}` : `Ficha creada para ${name}; falta preparar su acceso`}</strong>
       {linked ? <small>Esta paciente ya aceptó la invitación. Se recuperó su ficha existente.</small> : ready ? <><small>Mandale este enlace: crea su cuenta con {current.email} y queda vinculada a tu consultorio. Vence el {new Date(current.expires_at!).toLocaleString('es-AR')}.</small><input readOnly value={link} aria-label="Enlace de invitación" onFocus={(event) => event.currentTarget.select()} /></> : <small>El enlace todavía no está habilitado. Podés reintentar sin repetir el alta.</small>}
+      {mailed && <small>{mailed}</small>}
       {error && <small role="alert">{error}</small>}
     </span>
     {!linked && <span className="nv-invite-actions">
-      {ready ? <><NvButton className="nv-soft" onClick={copy}>{copied ? 'Copiado' : 'Copiar enlace'}</NvButton><a className="nv-button nv-ghost" href={inviteMailto(current.email, name, link)}>Mandar desde mi mail</a></> : <NvButton className="nv-soft" disabled={busy} onClick={() => void prepare()}>{busy ? 'Preparando…' : 'Reintentar preparar invitación'}</NvButton>}
+      {ready ? <><NvButton className="nv-ghost" onClick={copy}>{copied ? 'Copiado' : 'Copiar enlace'}</NvButton><NvButton className="nv-soft" disabled={busy} onClick={() => void email()}>{busy ? 'Mandando…' : 'Mandar invitación'}</NvButton><a className="nv-button nv-ghost" href={inviteMailto(current.email, name, link)}>Desde mi mail</a></> : <NvButton className="nv-soft" disabled={busy} onClick={() => void prepare()}>{busy ? 'Preparando…' : 'Reintentar preparar invitación'}</NvButton>}
     </span>}
     <button type="button" disabled={busy} onClick={() => { if (canLeaveWorkspace()) onClose(); }} aria-label="Cerrar aviso">×</button>
   </div>;
