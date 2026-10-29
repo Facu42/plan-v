@@ -6,7 +6,10 @@ import type { PatientMealPage,PatientMealQuery } from '../types/patient-meals';
 
 export type PatientTag = { id: string; label: string; tone: 'a' | 'n' };
 
+export type TagGroup = { label: string; patient_ids: string[] };
+
 export const crmWorkApi = {
+  tagGroups: (signal?: AbortSignal) => request<{ groups: TagGroup[] }>('/api/crm/tag-groups', { signal }),
   patientTags: (patientId: string, signal?: AbortSignal) => request<{ tags: PatientTag[] }>(`/api/crm/patients/${encodeURIComponent(patientId)}/tags`, { signal }),
   addPatientTag: (patientId: string, label: string, tone: 'a' | 'n' = 'n') => request<{ tags: PatientTag[] }>(`/api/crm/patients/${encodeURIComponent(patientId)}/tags`, { method: 'POST', body: JSON.stringify({ label, tone }) }),
   removePatientTag: (patientId: string, tagId: string) => request<{ tags: PatientTag[] }>(`/api/crm/patients/${encodeURIComponent(patientId)}/tags/${encodeURIComponent(tagId)}`, { method: 'DELETE' }),

@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Patient } from '../../types';
 import { FichaSolapas, PanelFichaCabecera } from './PanelFichaCabecera';
 import { PanelFichaPlan } from './PanelFichaPlan';
+import { PanelFichaConsultas } from './PanelFichaConsultas';
 import { FichaEtiquetas } from './FichaEtiquetas';
 import { PanelFichaResumen } from './PanelFichaResumen';
 import { PanelFichaMediciones } from './PanelFichaMediciones';
@@ -124,5 +125,11 @@ describe('Ficha v29', () => {
     for (const texto of ['Plan vigente', 'Requerimiento', 'Calorías por comida', 'Lista de compras', 'Hoy', 'Semana', 'Vista de Sofía', 'Abrir en el editor', 'Editar', 'Enviar a Sofía', 'Consultando el plan vigente…']) expect(html).toContain(texto);
     expect(html).not.toContain('WhatsApp');
     expect(html).toContain('data-mk="1"');
+  });
+
+  it('Consultas y notas muestra que consulta turnos y notas mientras carga y no usa otro canal que la app', () => {
+    const html = renderToStaticMarkup(<PanelFichaConsultas patient={paciente} now={ahora} datos={datos()} onSection={vi.fn()} onOpenHref={vi.fn()} onChanged={vi.fn()} />);
+    expect(html).toContain('Consultando turnos y notas…');
+    expect(html).not.toContain('WhatsApp');
   });
 });

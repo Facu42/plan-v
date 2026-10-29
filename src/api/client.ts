@@ -4,7 +4,7 @@ import { getSessionToken } from '../lib/supabase';
 import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } from '../types/intake';
 import type { PrivacyRequestKind, PrivacyRequestView } from '../types/privacy';
 import { resolveApiUrl } from './origin';
-import type { NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
+import type { AiCheck, NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
 import type { BillingBoard, BillingProgram, ChargeInput, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
 
 export { ApiError } from './error';
@@ -267,6 +267,7 @@ export const api = {
   createTestAccounts: (input: TestAccountsInput) =>
     request<TestAccountsResult>('/api/admin/test-accounts', { method: 'POST', body: JSON.stringify(input) }),
   listTestAccounts: () => request<{ accounts: TestAccount[] }>('/api/admin/test-accounts'),
+  checkAi: () => request<{ check: AiCheck }>('/api/admin/ai-check', { method: 'POST' }),
 
   // Cobranzas. En modo demo la vista de paciente manda ?audience=patient.
   getBillingBoard: () => request<{ board: BillingBoard }>('/api/billing'),
@@ -333,6 +334,12 @@ export const api = {
         ...(clientId ? { client_id: clientId } : {}),
         ...(attachment ? { asset_id: attachment.asset_id, filename: attachment.filename } : {}),
       }),
+    }),
+
+  scheduleMessages: (sendAt: string, items: Array<{ patient_id: string; client_id: string; text: string }>) =>
+    request<{ scheduled: number; send_at: string }>('/api/messages/scheduled', {
+      method: 'POST',
+      body: JSON.stringify({ send_at: sendAt, items }),
     }),
 
   markMessagesRead: (patientId: string, reader: 'vero' | 'patient') =>

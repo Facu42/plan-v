@@ -9,6 +9,7 @@ import { feeErrorMessage, replaceLedger } from './cobranzas-utils';
 import { PatientPanel } from './ShowroomCobranzas';
 import { usePanelDebit } from './PanelDebit';
 import { PanelFeePayDialog } from './PanelFeePay';
+import { CobranzasEncabezado, PanelCobranzasV29, type PeriodoCobranzas } from './PanelCobranzasV29';
 import { feeCheckoutApi } from '../../api/fee-checkout';
 import { payableFeeCharges } from '../../lib/fee-checkout';
 import { friendlyError } from '../../lib/error-messages';
@@ -70,7 +71,8 @@ export function PanelCobranzasView({ board, today, filter, reminders, onFilter, 
   </section>;
 }
 
-export function PanelCobranzas({ filter = 'todas', reminders = false, selectedId, onRemind }: { filter?: 'deben' | 'todas'; reminders?: boolean; selectedId?: string; onRemind?: (patientId: string) => void }) {
+export function PanelCobranzas({ filter = 'todas', selectedId, onRemind, onHeader }: { filter?: 'deben' | 'todas'; reminders?: boolean; selectedId?: string; onRemind?: (patientId: string) => void; onHeader?: (actions: ReactNode) => void }) {
+  const [periodo, setPeriodo] = useState<PeriodoCobranzas>('mes');
   const [board, setBoard] = useState<BillingBoard | null>(null);
   const [error, setError] = useState('');
   const [movement, setMovement] = useState<Filter>(filter === 'deben' ? 'vencido' : 'todos');
@@ -105,8 +107,11 @@ export function PanelCobranzas({ filter = 'todas', reminders = false, selectedId
     link.href = url; link.download = `cobranzas-${today}.csv`; link.click();
     URL.revokeObjectURL(url);
   };
+  useEffect(() => {
+    onHeader?.(<CobranzasEncabezado periodo={periodo} onPeriodo={setPeriodo} onExport={download} onRegistrar={() => setPicking(true)} deshabilitado={!board} extra={debitPanel.button} />);
+  }, [onHeader, periodo, board, debitPanel.button]); // eslint-disable-line react-hooks/exhaustive-deps -- download se rehace con board
   return <>
-    <PanelCobranzasView board={board} today={today} filter={movement} reminders={reminders} onFilter={setMovement} onExport={download} onOpen={id => { if (!id) { setPicking(true); return; } setOpenId(id); }} onRemind={id => { setOpenId(null); onRemind?.(id); }} onRetry={load} error={error} loading={!board && !error} plansAction={debitPanel.button} debit={debitPanel.card} followNames={followNames} onFeePay={debitPanel.enabled ? (patientId, dueOn) => { setFeePatientId(patientId); setFeeDue(dueOn); setFeeLink(''); setFeeNotice(''); } : undefined} feeBlocked={debitPanel.livePatientIds} />
+    <PanelCobranzasV29 board={board} today={today} periodo={periodo} filtro={movement} error={error} cargando={!board && !error} debito={debitPanel.card} programasExtra={followNames} onFiltro={setMovement} onAbrir={setOpenId} onRecordar={id => { setOpenId(null); onRemind?.(id); }} onReintentar={load} onCobrar={debitPanel.enabled ? (patientId, dueOn) => { setFeePatientId(patientId); setFeeDue(dueOn); setFeeLink(''); setFeeNotice(''); } : undefined} cobroBloqueado={debitPanel.livePatientIds} />
     {(selected || picking) && board && <div className="p5-dialog p5-dialog-wide" role="dialog" aria-modal="true" aria-label={selected ? `Cobranzas de ${selected.full_name}` : 'Registrar cobro'}>
       {selected ? <PatientPanel patient={selected} settings={board.settings} programs={board.programs ?? []} onPrograms={programs => setBoard({ ...board, programs })} today={today} onBack={() => setOpenId(null)} onLedger={ledger => setBoard(replaceLedger(board, ledger))} />
         : <form className="p5-card" onSubmit={event => { event.preventDefault(); const data = new FormData(event.currentTarget); const id = String(data.get('paciente') ?? ''); if (id) { setOpenId(id); setPicking(false); } }}><h3>Registrar cobro</h3><label>Paciente<select name="paciente" required defaultValue="">{board.patients.map(patient => <option key={patient.patient_id} value={patient.patient_id}>{patient.full_name}</option>)}{!board.patients.length && <option value="">Todavía no hay pacientes</option>}</select></label><div className="p5-row"><button type="button" className="p5-btn" onClick={() => setPicking(false)}>Volver</button><button className="p5-btn p5-pri" disabled={!board.patients.length}>Continuar</button></div></form>}

@@ -16,6 +16,13 @@ describe('mensajes operativos del diseño Nutrigo', () => {
     await sendShowroomMessage({ ...input, role: 'pro', patientId: 'p2' }, deps);
     expect(deps.send).toHaveBeenCalledWith('p2', 'Hola', 'vero', false, undefined);
   });
+  it('marca el mensaje como sugerido por la IA solo si lo pide la profesional', async () => {
+    const deps = dependencies();
+    await sendShowroomMessage({ ...input, role: 'pro', suggestedByAi: true }, deps);
+    await sendShowroomMessage({ ...input, role: 'patient', suggestedByAi: true }, deps);
+    expect(deps.send).toHaveBeenNthCalledWith(1, 'p1', 'Hola', 'vero', true, undefined);
+    expect(deps.send).toHaveBeenNthCalledWith(2, 'p1', 'Hola', 'patient', false, undefined);
+  });
   it.each([' ', 'a'.repeat(2001)])('rechaza textos vacíos o demasiado largos', async (text) => {
     const deps = dependencies();
     await expect(sendShowroomMessage({ ...input, text }, deps)).rejects.toThrow();

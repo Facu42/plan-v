@@ -15,7 +15,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
-function playwright() {
+export function playwright() {
   try { return require('playwright'); } catch { try { return require('playwright-core'); } catch { return require(`${process.env.PLAYWRIGHT_GLOBAL ?? '/opt/node22/lib/node_modules'}/playwright`); } }
 }
 
@@ -139,6 +139,73 @@ export const PIEZAS_ALIMENTARIO = [
   ['Barras de macros', '#s-ficha .fxmacros > div', '', ['gap']],
   ['Título de panel', '#s-ficha .fxp > header h3', '', ['fontSize', 'fontWeight']],
   ['Lo que ve la IA', '#s-ficha .fxai', '', ['borderTopLeftRadius', 'paddingTop']],
+];
+
+// Piezas de la solapa Cobros (la demo trae el tablero de cobros).
+export const PIEZAS_COBROS = [
+  ['Mosaico de cobros', '#s-ficha .fxtiles .fxtile', '', ['height', 'paddingTop']],
+  ['Cifra del mosaico', '#s-ficha .fxtile .fxv b', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
+  ['Título de panel', '#s-ficha .fxp > header h3', '', ['fontSize', 'fontWeight', 'height']],
+  ['Columnas de pagos', '#s-ficha .fxcols', '', ['height']],
+  ['Botón Registrar cobro', '#s-ficha .fxp > header .sbtn', '', ['height', 'fontSize']],
+  ['Fila de movimiento', '#s-ficha .fxtl li', '', ['height', 'paddingTop']],
+  ['Monto del movimiento', '#s-ficha .fxtl time b', '', ['fontSize', 'fontWeight']],
+  ['Tarjeta oscura', '#s-ficha .fxdk', '', ['height', 'borderTopLeftRadius']],
+  ['Medidor de cuotas', '#s-ficha .fxsplit .pg', '', ['width', 'height']],
+  ['Cifra del medidor', '#s-ficha .fxsplit .pg-v b', '', ['fontSize', 'lineHeight', 'height']],
+  ['Datos de cuotas', '#s-ficha .fxsplit .fxkv > div', '', ['height']],
+  ['Barra de medios', '#s-ficha .fxstk', '', ['height']],
+  ['Aviso de acceso', '#s-ficha .fxp.g .pill', '', ['height', 'fontSize']],
+];
+
+// Piezas de la solapa Archivos. La demo trae los informes simulados por `simularLaboratorio`; el resto de los tipos no existe en la demo.
+export const PIEZAS_ARCHIVOS = [
+  ['Título de panel', '#s-ficha .fxp > header h3', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
+  ['Solapas de tipo', '#s-ficha .fxp > header .tabs button', '', ['height', 'fontSize']],
+  ['Botón Exportar PDF', '#s-ficha .fxp > header .sbtn', '', ['height', 'width', 'fontSize']],
+  ['Fila de archivo', '#s-ficha .fxfiles > div', '', ['height', 'paddingTop']],
+  ['Ícono del archivo', '#s-ficha .fxfiles .ico', '', ['width', 'height', 'borderTopLeftRadius']],
+  ['Nombre del archivo', '#s-ficha .fxfiles .t b', '', ['fontSize', 'fontWeight']],
+  ['Detalle del archivo', '#s-ficha .fxfiles .t small', '', ['fontSize', 'color']],
+  ['Fecha del archivo', '#s-ficha .fxfiles time', '', ['fontSize', 'color']],
+  ['Tamaño o tipo', '#s-ficha .fxfiles .sz', '', ['fontSize', 'color']],
+  ['Botón Ver', '#s-ficha .fxfiles .sbtn', '', ['height', 'width', 'fontSize']],
+  ['Barra por tipo', '#s-ficha .fxstk', '', ['height', 'borderTopLeftRadius']],
+  ['Leyenda', '#s-ficha .fxleg span', '', ['fontSize']],
+  ['Zona de subida', '#s-ficha .fxdrop', '', ['paddingTop', 'borderTopLeftRadius']],
+  ['Título de la zona', '#s-ficha .fxdrop > b', '', ['fontSize', 'fontWeight']],
+  ['Botón Elegir archivos', '#s-ficha .fxdrop .sbtn.k', '', ['height', 'width', 'fontSize']],
+  ['Aviso', '#s-ficha .fxai', '', ['paddingTop', 'borderTopLeftRadius', 'fontSize']],
+];
+
+// Piezas de la solapa Consultas y notas. La demo no trae turnos registrados ni notas: la app se mira con ejemplos simulados (`simularConsultas`).
+export const PIEZAS_CONSULTAS = [
+  ['Tarjeta de consulta', '#s-ficha .fxdk', '', ['height', 'paddingTop', 'borderTopLeftRadius']],
+  ['Título de la tarjeta', '#s-ficha .fxdk b', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
+  ['Botones de la tarjeta', '#s-ficha .fxdkb button', '', ['height', 'width', 'fontSize']],
+  ['Título de panel', '#s-ficha .fxp > header h3', '', ['fontSize', 'fontWeight', 'lineHeight', 'height']],
+  ['Medidor de asistencia', '#s-ficha .fxsplit .pg', '', ['width', 'height']],
+  ['Número del medidor', '#s-ficha .pg-v b', '', ['fontSize', 'lineHeight', 'height']],
+  ['Fila de consulta', '#s-ficha .fxtl li', '', ['height', 'fontSize']],
+  ['Punto de la línea', '#s-ficha .fxtl li > i', '', ['width', 'height']],
+  ['Fecha de la consulta', '#s-ficha .fxtl li b', '', ['fontSize', 'fontWeight']],
+  ['Estado de la consulta', '#s-ficha .fxtl .pill', '', ['fontSize', 'height']],
+  ['Solapas de la nota', '#s-ficha .fxp > header .tabs button', '', ['height', 'fontSize']],
+  ['Botón SOAP', '#s-ficha .fxp > header .chip', '', ['height', 'fontSize', 'paddingLeft']],
+  ['Letra del bloque', '#s-ficha .fxsoap .sl', '', ['width', 'height', 'fontSize']],
+  ['Título del bloque', '#s-ficha .fxsoap b', '', ['fontSize', 'fontWeight']],
+  ['Texto del bloque', '#s-ficha .fxsoap p', '', ['fontSize', 'lineHeight', 'color']],
+  ['Acuerdos', '#s-ficha .fxclose', '', ['paddingTop', 'borderTopLeftRadius']],
+  ['Acuerdo', '#s-ficha .fxck > div', '', ['height', 'fontSize']],
+  ['Pie de la nota', '#s-ficha .fxfoot', '', ['paddingTop', 'height']],
+  ['Botón del pie', '#s-ficha .fxfoot .sbtn', '', ['height', 'fontSize']],
+  ['Paso al terminar', '#s-ficha .ntps > div', '', ['height', 'paddingTop']],
+  ['Ícono del paso', '#s-ficha .ntps .ico', '', ['width', 'height', 'borderTopLeftRadius']],
+  ['Título del paso', '#s-ficha .ntps .t b', '', ['fontSize', 'fontWeight']],
+  ['Texto del paso', '#s-ficha .ntps .t small', '', ['fontSize', 'color']],
+  ['Botón del paso', '#s-ficha .ntps .sbtn', '', ['height', 'width', 'fontSize']],
+  ['Aviso de la IA', '#s-ficha .fxai', '', ['paddingTop', 'borderTopLeftRadius', 'fontSize']],
+  ['Firma', '#s-ficha .ntsig', '', ['fontSize', 'color']],
 ];
 
 // Piezas de la solapa Plan. El plan sale del plan publicado de la demo; las calorías que el plan no trae quedan en blanco.
@@ -331,7 +398,7 @@ async function medir(pagina, selector, pseudo, props) {
   }, [pseudo, props]);
 }
 
-async function abrirBoceto(browser, tema) {
+export async function abrirBoceto(browser, tema) {
   const pagina = await (await browser.newContext({ viewport: { width: 1500, height: 1000 }, colorScheme: tema })).newPage();
   await pagina.goto(boceto); await pagina.waitForTimeout(800);
   await pagina.locator(tema === 'dark' ? '#t-dark' : '#t-light').first().click().catch(() => {});
@@ -351,15 +418,17 @@ async function abrirBoceto(browser, tema) {
 }
 
 const numero = valor => (/^-?[\d.]+px$/.test(valor) ? parseFloat(valor) : null);
-function igual(a, b) {
+export function igual(a, b) {
   if (a === b) return true;
   const x = numero(a); const y = numero(b);
   return x !== null && y !== null && Math.abs(x - y) <= TOLERANCIA_PX;
 }
 
-async function abrirApp(browser, tema) {
+export async function abrirApp(browser, tema) {
   const pagina = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: tema })).newPage();
   await pagina.addInitScript(guardado => localStorage.setItem('plan-v:panel-theme-v2:demo', guardado), tema);
+  // La línea de ahora de la Agenda solo se dibuja en horario de atención; el boceto la tiene siempre (10:10). Se fija la hora para que el contrato no dependa del reloj.
+  await pagina.clock.install({ time: new Date(`${new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())}T13:10:00Z`) });
   await pagina.goto(`${origen}/crm/inicio`, { waitUntil: 'domcontentloaded' });
   const demo = pagina.getByText('Continuar en modo demo');
   if (await demo.count()) await demo.first().click();
@@ -513,6 +582,17 @@ async function abrirAlimentosApp(pagina) {
   await pagina.waitForSelector('.top .sxin input', { timeout: 20000 });
 }
 
+/** Responde con turnos registrados y notas de ejemplo, porque la demo no trae ninguno. */
+async function simularConsultas(pagina) {
+  const turno = (id, starts_at, channel, extra = {}) => ({ appointment_id: id, starts_at, duration_min: 30, channel, status: 'scheduled', completed: true, revision: 1, marked_at: null, marked_by: null, appointment_starts_at: null, ...extra });
+  const futuro = new Date(Date.now() + 21 * 86400000).toISOString();
+  const cierres = { appointments: [turno('a6', futuro, 'presencial', { completed: false }), turno('a5', '2026-10-14T13:00:00Z', 'video'), turno('a4', '2026-09-16T13:00:00Z', 'presencial'), turno('a3', '2026-08-19T13:00:00Z', 'presencial', { status: 'cancelled', completed: false }), turno('a2', '2026-08-18T20:00:00Z', 'video'), turno('a1', '2026-03-12T12:00:00Z', 'presencial')], total_completed: 5, has_more: false };
+  const sesion = (id, cita, inicio, draft) => ({ id, patient_id: 'pat-sofia', appointment_id: cita, nutritionist_id: 'n', source: 'capture', status: 'finished', revision: 2, started_at: inicio, finished_at: inicio, duration_seconds: 1500, microphone: true, remote_audio: true, incomplete: false, transcript: 'Hola Sofía, ¿cómo estuviste?', draft, manual_transcript: false });
+  const lista = { sessions: [sesion('s5', 'a5', '2026-10-14T13:00:00Z', 'S: Le cuesta sostener la merienda los días de oficina. Duerme mejor desde que cena más temprano.\nO: Peso 68,4 kg (−1,2). Grasa 27,8%. Cintura 78 cm.\nA: Buena evolución. Proteína baja en la merienda.\nP: Sumar yogur sin lactosa o huevo en la merienda. Repetir hierro en 60 días. Legumbres solo a la noche. Próxima consulta en 4 semanas.'), sesion('s4', 'a4', '2026-09-16T13:00:00Z', 'S: Sin cambios.')], shared: [{ id: 'h4', session_id: 's4', patient_id: 'pat-sofia', version: 1, summary: 'Resumen publicado', published_at: '2026-09-16T15:00:00Z', consultation_date: '2026-09-16T13:00:00Z' }], tasks: [], has_more: false };
+  await pagina.route(/\/consultations\/completions\?/, ruta => ruta.fulfill({ json: cierres }));
+  await pagina.route(/\/consultations\?audience=pro/, ruta => ruta.fulfill({ json: lista }));
+}
+
 /** Responde con un laboratorio de ejemplo y el permiso de estudios, porque la demo no trae ninguno. */
 async function simularLaboratorio(pagina) {
   const uid = n => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
@@ -636,6 +716,25 @@ export async function correrContratoV29() {
       await b.waitForTimeout(1200);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Plan\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
       fallas += await comparar(b, a, PIEZAS_PLAN, informe);
+      await b.locator('#ftabs [data-ft="archivos"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Archivos/ }).click();
+      await a.waitForSelector('#s-ficha .fxfiles .t', { timeout: 20000 });
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Archivos\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_ARCHIVOS, informe);
+      await b.locator('#ftabs [data-ft="cobros"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Cobros/ }).click();
+      await a.waitForSelector('#s-ficha .fxtile', { timeout: 20000 });
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Cobros\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_COBROS, informe);
+      await simularConsultas(a);
+      await b.locator('#ftabs [data-ft="consultas"]').click();
+      await a.locator('#ftabs button').filter({ hasText: /^Consultas y notas/ }).click();
+      await a.waitForSelector('#s-ficha .fxtl li', { timeout: 20000 });
+      await b.waitForTimeout(1200);
+      informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Ficha · Consultas y notas\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');
+      fallas += await comparar(b, a, PIEZAS_CONSULTAS, informe);
       await abrirSeguimientoBoceto(b);
       await abrirSeguimientoApp(a);
       informe.push(`\n## Tema ${tema === 'dark' ? 'oscuro' : 'claro'} · Seguimiento\n`, '| Pieza | Estado | Detalle |', '|---|---|---|');

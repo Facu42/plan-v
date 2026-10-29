@@ -6,8 +6,8 @@ import { curvaFicha, medioCirculo, type SolapaFicha } from './ficha-presentacion
 export type Ir = (solapa: SolapaFicha) => void;
 
 /** `alCambiarMeta` vuelve la leyenda del boceto (por ejemplo «últimos 7 días») un selector sin cambiar cómo se ve. */
-export function FxPanel({ titulo, meta, derecha, grande, alCambiarMeta, children }: { titulo: string; meta?: string; derecha?: ReactNode; grande?: boolean; alCambiarMeta?: () => void; children: ReactNode }) {
-  return <section className={`fxp${grande ? ' g' : ''}`}><header><h3>{titulo}</h3>{meta ? alCambiarMeta ? <span className="m" role="button" tabIndex={0} style={{ cursor: 'pointer' }} title="Cambiar el período" onClick={alCambiarMeta} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); alCambiarMeta(); } }}>{meta}</span> : <span className="m">{meta}</span> : null}<span className="sp" />{derecha}</header>{children}</section>;
+export function FxPanel({ titulo, meta, derecha, grande, clase, alCambiarMeta, children }: { titulo: string; meta?: ReactNode; derecha?: ReactNode; grande?: boolean; clase?: string; alCambiarMeta?: () => void; children: ReactNode }) {
+  return <section className={`fxp${grande ? ' g' : ''}${clase ? ` ${clase}` : ''}`}><header><h3>{titulo}</h3>{meta ? alCambiarMeta ? <span className="m" role="button" tabIndex={0} style={{ cursor: 'pointer' }} title="Cambiar el período" onClick={alCambiarMeta} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); alCambiarMeta(); } }}>{meta}</span> : <span className="m">{meta}</span> : null}<span className="sp" />{derecha}</header>{children}</section>;
 }
 
 export function FxIr({ a, ir, texto = 'Ver' }: { a: SolapaFicha; ir: Ir; texto?: string }) {
@@ -31,11 +31,11 @@ export function FxDk({ clave, titulo, sub, extra }: { clave: string; titulo: str
   return <div className="fxdk"><small>{clave}</small><b className="num">{titulo}</b><span>{sub}</span>{extra}</div>;
 }
 
-export function FxCurva({ valores, rotulos, ancho, alto, meta, rotuloMeta, mini }: { valores: readonly number[]; rotulos?: readonly string[]; ancho?: number; alto?: number; meta?: number | null; rotuloMeta?: string; mini?: boolean }) {
+export function FxCurva({ valores, rotulos, ancho, alto, meta, rotuloMeta, mini, alerta }: { valores: readonly number[]; rotulos?: readonly string[]; ancho?: number; alto?: number; meta?: number | null; rotuloMeta?: string; mini?: boolean; alerta?: boolean }) {
   const id = `fxg${useId().replace(/:/g, '')}`;
   const c = curvaFicha(valores, rotulos ?? null, { ancho, alto, meta, rotuloMeta, mini });
-  if (!valores.length) return <svg className={`pw-g fxc${mini ? ' mini' : ''}`} viewBox={`0 0 ${c.ancho} ${c.alto}`} aria-hidden="true" />;
-  return <svg className={`pw-g fxc${mini ? ' mini' : ''}`} viewBox={`0 0 ${c.ancho} ${c.alto}`} preserveAspectRatio={mini ? 'none' : undefined} aria-hidden="true">
+  if (!valores.length) return <svg className={`pw-g fxc${mini ? ' mini' : ''}${alerta ? ' wa' : ''}`} viewBox={`0 0 ${c.ancho} ${c.alto}`} aria-hidden="true" />;
+  return <svg className={`pw-g fxc${mini ? ' mini' : ''}${alerta ? ' wa' : ''}`} viewBox={`0 0 ${c.ancho} ${c.alto}`} preserveAspectRatio={mini ? 'none' : undefined} aria-hidden="true">
     <defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0" className="s1" /><stop offset="1" className="s2" /></linearGradient></defs>
     {c.meta ? <><line className="goal" x1={6} x2={c.ancho - (mini ? 4 : 30) + 4} y1={c.meta.y.toFixed(1)} y2={c.meta.y.toFixed(1)} />{mini ? null : <text className="gt" x={c.meta.xTexto} y={(c.meta.y + 3).toFixed(1)}>{c.meta.etiqueta}</text>}</> : null}
     <path className="ar" d={c.area} style={{ fill: `url(#${id})` }} /><path className="ln" pathLength={1} d={c.curva} />
