@@ -14,7 +14,7 @@ export function PlanPrintDialog({ plan, patientName, professionalName = '', demo
   const [html, setHtml] = useState('');
   const [downloading,setDownloading]=useState(false);
   const[brand,setBrand]=useState<ClinicBrand|undefined>(),[brandReady,setBrandReady]=useState(false),[brandError,setBrandError]=useState('');
-  useEffect(()=>{const controller=new AbortController();nutritionCapabilityApi.settings(controller.signal).then(view=>{if(!controller.signal.aborted)setBrand(view.settings.brand);}).catch(()=>{if(!controller.signal.aborted)setBrandError('No pudimos consultar la marca del consultorio. Esta copia conserva la identidad de Plan V.');}).finally(()=>{if(!controller.signal.aborted)setBrandReady(true);});return()=>controller.abort();},[]);
+  useEffect(()=>{const controller=new AbortController();nutritionCapabilityApi.settings(controller.signal).then(view=>{if(!controller.signal.aborted)setBrand(view.settings.brand);}).catch(()=>{if(!controller.signal.aborted)setBrandError('No pudimos consultar la marca del consultorio. Esta copia conserva la identidad de Nutridash.');}).finally(()=>{if(!controller.signal.aborted)setBrandReady(true);});return()=>controller.abort();},[]);
   const version = selection === 'published' ? plan.published : currentAllowed ? plan.current : null;
   useEffect(() => {
     let active = true;
@@ -30,7 +30,7 @@ export function PlanPrintDialog({ plan, patientName, professionalName = '', demo
     let target: Window | null = null;
     try {
       target = window.open('', '_blank');
-      if (!target) { setError('El navegador bloqueó la impresión. Permití ventanas emergentes para Plan V y volvé a intentar.'); return; }
+      if (!target) { setError('El navegador bloqueó la impresión. Permití ventanas emergentes para Nutridash y volvé a intentar.'); return; }
       const printWindow = target;
       printWindow.opener = null;
       printWindow.document.open();

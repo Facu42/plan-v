@@ -46,15 +46,15 @@ export function AdminConsole({ darkMode, onToggleTheme, onSignOut, userName }: {
   }, [darkMode]);
 
   return <div className={`nv-app nv-pro nv-fees-page nv-admin${darkMode ? ' nv-dark' : ''}`}>
-    <nav className="nv-admin-rail" aria-label="Plan V">
-      <a className="nv-admin-brand" href="/admin" aria-label="Plan V, panel del servicio"><Mark /></a>
+    <nav className="nv-admin-rail" aria-label="Nutridash">
+      <a className="nv-admin-brand" href="/admin" aria-label="Nutridash, panel del servicio"><Mark /></a>
       {admin ? <div className="nv-admin-rail-links">{SERVICIO_TABS.map((item) => <button key={item.id} type="button" className="nv-admin-rail-link" aria-current={tab === item.id ? 'page' : undefined} aria-label={item.label} title={item.label} onClick={() => setTab(item.id)}><Icon name={SERVICIO_TAB_ICONS[item.id]} size={17} /></button>)}</div> : null}
       <span className="nv-admin-rail-gap" />
       {onToggleTheme ? <button type="button" className="nv-admin-theme" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} aria-pressed={darkMode} title={darkMode ? 'Tema claro' : 'Tema oscuro'} onClick={onToggleTheme}><Icon name={darkMode ? 'sun' : 'moon'} size={18} /></button> : null}
     </nav>
     <div className="nv-admin-body">
       <header className="nv-admin-bar">
-        <div className="nv-admin-title"><h1>Panel del servicio</h1><p>Las nutricionistas de Plan V, <em>de un vistazo.</em></p></div>
+        <div className="nv-admin-title"><h1>Panel del servicio</h1><p>Las nutricionistas de Nutridash, <em>de un vistazo.</em></p></div>
         <div className="nv-admin-user">
           {userName ? <span>{userName}</span> : null}
           {onSignOut ? <NvButton className="nv-soft" onClick={onSignOut}>Cerrar sesión</NvButton> : null}
@@ -63,7 +63,7 @@ export function AdminConsole({ darkMode, onToggleTheme, onSignOut, userName }: {
     <main id="nv-main" tabIndex={-1} className="nv-main nv-admin-main">
       {admin === null ? <NvState kind="loading" title="Cargando…" description="Estamos verificando tu acceso." />
         : admin ? <ShowroomServicio tab={tab} onTab={setTab} />
-          : <NvState title="No tenés permiso para ver esta pantalla" description="El Panel del servicio es sólo para quien administra Plan V." action={<NvButton className="nv-soft" onClick={() => { window.location.assign('/'); }}>Ir al inicio</NvButton>} />}
+          : <NvState title="No tenés permiso para ver esta pantalla" description="El Panel del servicio es sólo para quien administra Nutridash." action={<NvButton className="nv-soft" onClick={() => { window.location.assign('/'); }}>Ir al inicio</NvButton>} />}
     </main>
     </div>
   </div>;

@@ -23,7 +23,7 @@ describe('Solo lectura cuando el administrador suspende a la nutricionista', () 
     const { app } = appFor(async () => service('suspendida', true, null));
     const response = await post(app, '/api/patients/p1/plan');
     expect(response.status).toBe(403);
-    expect(await response.json()).toEqual({ code: 'service_read_only', error: 'Tu cuenta de Plan V está suspendida: podés ver todo, pero no cargar ni cambiar nada. Escribile a Plan V para reactivarla.' });
+    expect(await response.json()).toEqual({ code: 'service_read_only', error: 'Tu cuenta de Nutridash está suspendida: podés ver todo, pero no cargar ni cambiar nada. Escribile a Nutridash para reactivarla.' });
   });
 
   it('deja leer todo aunque esté suspendida', async () => {
@@ -80,7 +80,7 @@ describe('memoria del estado', () => {
 });
 
 describe('mensaje', () => {
-  it('suspendida pide escribir a Plan V', () => {
-    expect(READ_ONLY_MESSAGE).toContain('Escribile a Plan V');
+  it('suspendida pide escribir a Nutridash', () => {
+    expect(READ_ONLY_MESSAGE).toContain('Escribile a Nutridash');
   });
 });

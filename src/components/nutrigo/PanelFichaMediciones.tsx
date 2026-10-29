@@ -31,7 +31,7 @@ export function PanelFichaMediciones({ patient, now, datos, ir, children }: { pa
   const fotos = care?.consented.includes('body_progress') ? care.records.filter(r => r.patient_id === patient.id && r.data.kind === 'body_photo').length : null;
   const filas = solapa === 'perimetros' || solapa === 'composicion' ? filasDeMedidas(medidas, solapa, hoy) : solapa === 'segmental' ? filasSegmentales(registros, hoy) : [];
   const vacio = !care ? (careError ? 'No pudimos cargar las medidas.' : 'Consultando medidas…') : !permitido ? SIN_PERMISO
-    : solapa === 'pliegues' ? 'Los pliegues todavía no se cargan en Plan V. Se suman con la fórmula que valide Verónica.'
+    : solapa === 'pliegues' ? 'Los pliegues todavía no se cargan en Nutridash. Se suman con la fórmula que valide Verónica.'
       : solapa === 'segmental' ? (canDocs ? 'Sin evaluación segmental cargada.' : 'Permiso de estudios pendiente.') : 'Sin mediciones cargadas.';
   const primerNombre = patient.name.split(' ')[0] ?? patient.name;
   return <>

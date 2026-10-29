@@ -204,7 +204,7 @@ export function PanelPlanArmar({
       <section className="fxp">
         <header><h3>Uso de IA este mes</h3><span className="sp" /></header>
         <div className="iause" role="status"><b className="num">{uso ? dolares(uso.used_micros) : uso === undefined ? 'Cargando…' : 'Sin dato'}</b><span>{uso
-          ? `de ${dolares(uso.limit_micros)} · bolsa compartida de Plan V · ${uso.month}. Incluye reservas pendientes. ${uso.source === 'memory' ? 'Demo local; no es gasto real del proveedor.' : 'Registro del servidor; no es una factura del proveedor.'}`
+          ? `de ${dolares(uso.limit_micros)} · bolsa compartida de Nutridash · ${uso.month}. Incluye reservas pendientes. ${uso.source === 'memory' ? 'Demo local; no es gasto real del proveedor.' : 'Registro del servidor; no es una factura del proveedor.'}`
           : 'No pudimos consultar el registro mensual de IA. No se informa un gasto ni un tope sin verificar.'}</span></div>
       </section>
     </div>

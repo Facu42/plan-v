@@ -20,7 +20,7 @@ export const WEEK_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 
 export type PlanTone = 'breakfast' | 'lunch' | 'snack' | 'dinner';
 export type PlanColumn = { slot: string; tone: PlanTone; optional?: boolean };
 
-// Breakfast/Lunch/Snack/Dinner del archivo → momentos de Plan V. Colación y Extra sólo aparecen si se usan.
+// Breakfast/Lunch/Snack/Dinner del archivo → momentos de Nutridash. Colación y Extra sólo aparecen si se usan.
 export const PLAN_COLUMNS: readonly PlanColumn[] = [
   { slot: 'Desayuno', tone: 'breakfast' },
   { slot: 'Colación', tone: 'snack', optional: true },

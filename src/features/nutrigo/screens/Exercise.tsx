@@ -62,7 +62,7 @@ export function NutrigoExercise({ patient, query = '', onNavigate, onSignOut }: 
       if (name === 'Cell-Sets') return { children: inner(child, part => leaf(part) ? { text: item.sets == null ? NONE : String(item.sets) } : undefined) };
       if (name === 'Cell-Reps') return pair(child, item.duration ? String(item.duration) : item.reps == null ? NONE : String(item.reps), item.duration ? 'min' : item.reps == null ? '' : compact ? 'rep.' : item.reps === 1 ? 'repetición' : 'repeticiones');
       if (name === 'Cell-Rest') return pair(child, item.rest == null ? NONE : String(item.rest), item.rest == null ? '' : 'seg');
-      // Las calorías aparecen si la paciente las cargó; Plan V no registra peso levantado: esas celdas quedan en «—», como el archivo cuando no aplica.
+      // Las calorías aparecen si la paciente las cargó; Nutridash no registra peso levantado: esas celdas quedan en «—», como el archivo cuando no aplica.
       if (name === 'Cell-Calories' && item.kcal != null) return pair(child, String(item.kcal), 'kcal');
       if (name === 'Cell-Weight' || name === 'Cell-Calories') return pair(child, NONE, '');
       if (name === 'Cell-Status') {

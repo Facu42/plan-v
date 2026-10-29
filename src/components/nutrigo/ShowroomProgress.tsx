@@ -24,7 +24,7 @@ import { FigmaBodyMap, FigmaRecordDialog } from './FigmaPatientFront';
 /* Progreso = frame 25 "Progress" (105:2790; móvil 498:18237).
    Cuerpo 767 + 20 + 374. Izquierda: Main Info (440 + 20 + 275) y la tabla de medidas;
    derecha: tres widgets (Calories Activities, Sleep Statistics, Hydration) mapeados a
-   comidas, descanso/energía e hidratación, que es lo que Plan V registra de verdad. */
+   comidas, descanso/energía e hidratación, que es lo que Nutridash registra de verdad. */
 
 function formatSleep(minutes: number | null): string {
   if (minutes === null) return 'Sin registro';

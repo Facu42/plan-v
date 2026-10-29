@@ -11,7 +11,7 @@ const labels: Record<string,string> = {
   'Expense Overview':'Resumen de costos','Expense Breakdown':'Detalle de costos','Total Expense':'Costo total','Items':'Productos',
   'Search name, chat, etc':'Buscar mensajes','Type a message..':'Escribí un mensaje…','Send':'Enviar',
   'Apr':'Abr','May':'May','Jun':'Jun','Jul':'Jul','Aug':'Ago','September':'Septiembre',
-  'Nutrigo':'Plan V','Dashboard':'Inicio','Calendar':'Agenda','Messages':'Mensajes','Healthy Menu':'Menú','Meal Plan':'Plan','Food Diary':'Diario','Progress':'Progreso','Exercises':'Ejercicio','Exercise':'Ejercicio','Health Insights':'Recursos','Healthy Insights':'Recursos','Logout':'Salir',
+  'Nutrigo':'Nutridash','Dashboard':'Inicio','Calendar':'Agenda','Messages':'Mensajes','Healthy Menu':'Menú','Meal Plan':'Plan','Food Diary':'Diario','Progress':'Progreso','Exercises':'Ejercicio','Exercise':'Ejercicio','Health Insights':'Recursos','Healthy Insights':'Recursos','Logout':'Salir',
   'Member':'Paciente','Search anything':'Buscar','Search placeholder':'Buscar','Search food':'Buscar comida','Search articles':'Buscar recursos','Search recipes':'Buscar recetas',
   "Let's begin our journey to better health today":'Tu acompañamiento, día a día',"Welcome and Let’s do some workout today!":'Tu acompañamiento, día a día',
   'Weight':'Peso','Steps':'Pasos','Sleep':'Descanso','Water Intake':'Hidratación','Weight Data':'Datos de peso','Current Weight':'Peso actual','Start Weight':'Peso inicial','Weight Goal':'Meta de peso','Weight Tracking':'Seguimiento de peso',
@@ -36,7 +36,7 @@ export function translateSource(text: string): string {
   const value = text.trim();
   if (!value) return text;
   if (value in labels) return labels[value];
-  if (/Copyright/.test(value)) return `© ${new Date().getFullYear()} Plan V`;
+  if (/Copyright/.test(value)) return `© ${new Date().getFullYear()} Nutridash`;
   if (/^Hello,/.test(value)) return 'Hola';
   if (/^Start your health journey/.test(value)) return 'Tu plan y tus registros, siempre a mano.';
   if (/Progress is progress/.test(value)) return 'Cada registro te ayuda a seguir tu progreso.';

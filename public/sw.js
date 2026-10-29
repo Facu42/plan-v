@@ -1,4 +1,4 @@
-/* Plan V shell worker. Never cache /api, Supabase, signed URLs or clinical payloads. */
+/* Nutridash shell worker. Never cache /api, Supabase, signed URLs or clinical payloads. */
 const SHELL = 'plan-v-shell-v2';
 const SHELL_URLS = ['/offline.html', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png'];
 
@@ -86,7 +86,7 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch { data = {}; }
-  const title = typeof data.title === 'string' ? data.title : 'Plan V';
+  const title = typeof data.title === 'string' ? data.title : 'Nutridash';
   const url = typeof data.url === 'string' && data.url.startsWith('/app/') ? data.url : '/app';
   event.waitUntil(self.registration.showNotification(title, {
     body: typeof data.body === 'string' ? data.body : 'Tenés un aviso nuevo.',

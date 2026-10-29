@@ -11,6 +11,6 @@ describe('Documento con marca del consultorio',()=>{
   it('escapa los textos de la marca y mantiene la identidad original si no se configura',()=>{
     const html=renderToStaticMarkup(<PlanPrintDocument version={version} patientName="Paciente ficticia" professionalName="" demo={false} brand={{name:'<script>bad()</script>',contact:'<img onerror=bad()>',logo:''}}/>);
     expect(html).not.toContain('<script>');expect(html).toContain('&lt;script&gt;');
-    expect(renderToStaticMarkup(<PlanPrintDocument version={version} patientName="" professionalName="" demo={false}/>)).toContain('Plan V · Nutrición');
+    expect(renderToStaticMarkup(<PlanPrintDocument version={version} patientName="" professionalName="" demo={false}/>)).toContain('Nutridash · Nutrición');
   });
 });

@@ -12,12 +12,12 @@ export type PushKind = 'message' | 'plan' | 'resource' | 'appointment' | 'remind
 export type PushPayload = { title: string; body: string; url: string; tag: string };
 
 export const PUSH_TEXTS: Record<PushKind, PushPayload> = {
-  message: { title: 'Tu nutricionista te escribió', body: 'Abrí Plan V para leer el mensaje.', url: '/app/mensajes', tag: 'plan-v-message' },
-  plan: { title: 'Tenés un plan nuevo', body: 'Tu nutricionista publicó tu plan en Plan V.', url: '/app/plan', tag: 'plan-v-plan' },
+  message: { title: 'Tu nutricionista te escribió', body: 'Abrí Nutridash para leer el mensaje.', url: '/app/mensajes', tag: 'plan-v-message' },
+  plan: { title: 'Tenés un plan nuevo', body: 'Tu nutricionista publicó tu plan en Nutridash.', url: '/app/plan', tag: 'plan-v-plan' },
   resource: { title: 'Tu nutricionista te indicó un recurso', body: 'Está en Recursos, en «Indicados».', url: '/app/recursos', tag: 'plan-v-resource' },
-  appointment: { title: 'Tu consulta cambió', body: 'Mirá el día y la hora en Plan V.', url: '/app/agenda', tag: 'plan-v-appointment' },
-  reminder: { title: 'Mañana tenés consulta', body: 'Mirá el horario en Plan V.', url: '/app/agenda', tag: 'plan-v-reminder' },
-  subscription: { title: 'Novedades de tu plan', body: 'Abrí Plan V para ver el estado de tu pago.', url: '/app/pagos', tag: 'plan-v-subscription' },
+  appointment: { title: 'Tu consulta cambió', body: 'Mirá el día y la hora en Nutridash.', url: '/app/agenda', tag: 'plan-v-appointment' },
+  reminder: { title: 'Mañana tenés consulta', body: 'Mirá el horario en Nutridash.', url: '/app/agenda', tag: 'plan-v-reminder' },
+  subscription: { title: 'Novedades de tu plan', body: 'Abrí Nutridash para ver el estado de tu pago.', url: '/app/pagos', tag: 'plan-v-subscription' },
 };
 
 export type PushConfig = { publicKey: string; privateKey: string; subject: string };

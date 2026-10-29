@@ -39,7 +39,7 @@ const HEALTH: Array<{ id: HealthChoice; label: string }> = [
   { id: 'reported', label: 'Sí' },
 ];
 const STEP_COPY: Record<OnboardingStep, { eyebrow: string; title: string; lead: string }> = {
-  invite: { eyebrow: 'Tu espacio en Plan V', title: 'Bienvenida a tu espacio', lead: 'Tu plan, tus registros y tu nutricionista en un solo lugar.' },
+  invite: { eyebrow: 'Tu espacio en Nutridash', title: 'Bienvenida a tu espacio', lead: 'Tu plan, tus registros y tu nutricionista en un solo lugar.' },
   privacy: { eyebrow: 'Privacidad', title: 'Vos elegís qué compartir', lead: 'Tu nutricionista ve lo que registrás para acompañarte. Las fotos corporales y los estudios son opcionales.' },
   profile: { eyebrow: 'Sobre vos', title: 'Contanos sobre vos', lead: 'Empecemos por cómo preferís que te llamemos y qué te gustaría trabajar.' },
   allergies: { eyebrow: 'Alimentos y hábitos', title: 'Tu día a día también cuenta', lead: 'Contanos si hay alimentos que evitás. Los hábitos son opcionales: podés completarlos después.' },
@@ -299,7 +299,7 @@ export function ShowroomPatientOnboarding({
   return <section className={`nvon${step === 'invite' ? ' nvon-welcome' : ''}`} aria-label="Ingreso del paciente">
     <header className="nvon-top">
       <Mark />
-      <span>Plan V</span>
+      <span>Nutridash</span>
       <p className="nvon-progress" aria-live="polite">{step === 'ready' ? 'Ingreso completo' : `${stepNumber} de ${ONBOARDING_STEPS.length}`}</p>
       <ol aria-label="Pasos del ingreso">{ONBOARDING_STEPS.map((id, index) => <li key={id} aria-current={id === step ? 'step' : undefined}><span className="nvon-sr">{index + 1}. {STEP_COPY[id].eyebrow}</span></li>)}</ol>
       <NvButton className="nv-ghost nv-theme" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} onClick={onToggleTheme}><Icon name={darkMode ? 'sun' : 'moon'} size={18} /></NvButton>

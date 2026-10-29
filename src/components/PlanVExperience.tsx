@@ -256,7 +256,7 @@ export function PlanVExperience() {
       </div>
       <Suspense fallback={(
         <div className="loading-screen" role="status" aria-live="polite">
-          <div className="loading-card"><Mark /><p className="eyebrow">Plan V</p><h2>Cargando módulo…</h2></div>
+          <div className="loading-card"><Mark /><p className="eyebrow">Nutridash</p><h2>Cargando módulo…</h2></div>
         </div>
       )}>
         {view === 'patient'

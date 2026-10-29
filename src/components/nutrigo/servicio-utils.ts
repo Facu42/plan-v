@@ -112,16 +112,16 @@ export function mailTemplate(kind: MailKind, name = ''): { subject: string; body
   const first = name.trim().split(/\s+/)[0];
   const hello = first ? `Hola ${first},` : 'Hola,';
   if (kind === 'por_vencer') return {
-    subject: 'Tu servicio de Plan V está por vencer',
-    body: `${hello}\n\nTe escribo para avisarte que tu servicio de Plan V está por vencer. Si querés seguir usándolo sin cortes, contame y te paso los datos para renovarlo.\n\nCualquier duda, escribime por acá.\n\nUn abrazo,\nFacundo`,
+    subject: 'Tu servicio de Nutridash está por vencer',
+    body: `${hello}\n\nTe escribo para avisarte que tu servicio de Nutridash está por vencer. Si querés seguir usándolo sin cortes, contame y te paso los datos para renovarlo.\n\nCualquier duda, escribime por acá.\n\nUn abrazo,\nFacundo`,
   };
   if (kind === 'vencida') return {
-    subject: 'Tu servicio de Plan V está vencido',
-    body: `${hello}\n\nTe escribo porque tu servicio de Plan V figura vencido. Tus pacientes y tu información siguen guardados. Cuando regularices el pago vas a recuperar el acceso completo.\n\nSi ya pagaste o necesitás más tiempo, avisame y lo vemos.\n\nUn abrazo,\nFacundo`,
+    subject: 'Tu servicio de Nutridash está vencido',
+    body: `${hello}\n\nTe escribo porque tu servicio de Nutridash figura vencido. Tus pacientes y tu información siguen guardados. Cuando regularices el pago vas a recuperar el acceso completo.\n\nSi ya pagaste o necesitás más tiempo, avisame y lo vemos.\n\nUn abrazo,\nFacundo`,
   };
   return {
-    subject: 'Bienvenida a Plan V',
-    body: `${hello}\n\n¡Bienvenida a Plan V! Ya podés entrar a https://plan-v-eight.vercel.app con tu mail para armar tu consultorio y sumar a tus pacientes.\n\nSi necesitás ayuda con algo, escribime por acá.\n\nUn abrazo,\nFacundo`,
+    subject: 'Bienvenida a Nutridash',
+    body: `${hello}\n\n¡Bienvenida a Nutridash! Ya podés entrar a https://plan-v-eight.vercel.app con tu mail para armar tu consultorio y sumar a tus pacientes.\n\nSi necesitás ayuda con algo, escribime por acá.\n\nUn abrazo,\nFacundo`,
   };
 }
 

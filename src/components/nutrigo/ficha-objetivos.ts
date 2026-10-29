@@ -7,7 +7,7 @@ import { numero } from './ficha-presentacion';
 
 const DIA = 86_400_000;
 const INICIALES = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
-/** Referencia general de sueño para un adulto; Plan V no guarda una meta de sueño por paciente. */
+/** Referencia general de sueño para un adulto; Nutridash no guarda una meta de sueño por paciente. */
 export const HORAS_DE_SUENO_DE_REFERENCIA = 7;
 const NIVEL_DE_ENERGIA: Record<string, number> = { Alta: 3, Media: 2, Baja: 1 };
 const ETIQUETA_DE_ENERGIA: Record<string, string> = { Alta: 'Alta', Media: 'Normal', Baja: 'Baja' };

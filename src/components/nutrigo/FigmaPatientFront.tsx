@@ -1,5 +1,5 @@
 /** Front Nutrigo obtenido por get_design_context (24 nodos en design/figma-reference).
- * Traducción de sus piezas a React/CSS nativo. Los slots reciben datos de Plan V;
+ * Traducción de sus piezas a React/CSS nativo. Los slots reciben datos de Nutridash;
  * su ausencia no elimina ni reemplaza la estructura dibujada en Figma. */
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { ShowroomPage } from './ShowroomPanels';
@@ -36,7 +36,7 @@ export function FigmaPlanCard({ onOpen }: { onOpen: () => void }) {
 /** Section Footer: fila 20 px, copyright, enlaces y cinco assets originales. */
 export function FigmaPatientFooter({ year, onContact }: { year: number; onContact: () => void }) {
   return <footer className="nv-footer fp-footer">
-    <p>© {year} Plan V</p>
+    <p>© {year} Nutridash</p>
     <nav className="fp-footer-links" aria-label="Información y contacto"><a href="/legal/privacidad.html" target="_blank" rel="noreferrer">Privacidad</a>
     <a href="/legal/terminos.html" target="_blank" rel="noreferrer">Términos y condiciones</a>
     <button type="button" onClick={onContact}>Contacto</button></nav>

@@ -25,7 +25,7 @@ describe('Centro de ayuda v29', () => {
   });
   it('renderiza las dos columnas del boceto sin cifras de consultas inventadas', () => {
     const html = renderToStaticMarkup(<HelpCenter onOpen={vi.fn()} />);
-    for (const text of ['Temas', 'Preguntas frecuentes', 'Pedir ayuda a Plan V', 'Abrir apartado', 'sxguide']) expect(html).toContain(text);
+    for (const text of ['Temas', 'Preguntas frecuentes', 'Pedir ayuda a Nutridash', 'Abrir apartado', 'sxguide']) expect(html).toContain(text);
     expect(html).not.toMatch(/\d+ consultas este mes/);
     expect(html).toContain('Sin medición de consultas');
   });
