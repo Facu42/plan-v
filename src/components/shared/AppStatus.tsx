@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { reportClientError } from '../../lib/client-errors';
 import './app-status.css';
 
 /** Pantalla de carga de la app: el primer cuadro que ve quien entra mientras baja el consultorio. */
@@ -33,6 +34,7 @@ export class AppErrorBoundary extends Component<{ children: ReactNode }, Boundar
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('Falla al dibujar la app', error, info.componentStack);
+    reportClientError('render', error);
   }
 
   render() {

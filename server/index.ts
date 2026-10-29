@@ -55,6 +55,7 @@ import { emitOpsAlert } from './ops/alerts.js';
 import { resolveCorsOrigin } from './ops/cors.js';
 import { safePath, writeOpsLog } from './ops/log.js';
 import { createRateLimitMiddleware } from './ops/rate-limit.js';
+import { registerClientErrorRoutes } from './ops/client-errors.js';
 import { maxBodyBytes, evaluateReadiness, releaseSha } from './ops/readiness.js';
 import { assertSecretBoundary, inspectSecrets } from './ops/secrets.js';
 import {
@@ -297,6 +298,7 @@ app.get('/api/ready', async (c) => {
   });
 });
 
+registerClientErrorRoutes(app);
 registerCareRoutes(app);
 registerAssetRoutes(app);
 registerRecipeRoutes(app);
