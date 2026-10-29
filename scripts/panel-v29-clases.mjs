@@ -5,7 +5,7 @@
 // y la app todavía no tiene dato queda como «sin dato», no como falla.
 //
 // Uso (app en demo: `npm run local`):
-//   node scripts/panel-v29-clases.mjs publica|cobranzas|mensajes [--tema=dark|light] [--write]
+//   node scripts/panel-v29-clases.mjs publica|cobranzas|mensajes|seguimiento|progreso|asistente|alimentos|biblioteca|ayuda [--tema=dark|light] [--write]
 import { writeFile } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -40,6 +40,42 @@ const PANTALLAS = {
     raiz: '#s-mensajes', vistas: [0],
     abrirBoceto: async b => { await b.locator('[data-go="mensajes"]').first().click(); await b.waitForSelector('#s-mensajes:not([hidden])', { timeout: 10000 }); await b.waitForTimeout(600); },
     abrirApp: async a => { await irA(a, '/crm/mensajes'); await a.waitForSelector('#s-mensajes', { timeout: 20000 }); await a.waitForTimeout(800); },
+    preparar: async () => {},
+  },
+  seguimiento: {
+    raiz: '#s-seguimiento', vistas: [0],
+    abrirBoceto: async b => { await b.locator('[data-go="seguimiento"]').first().click(); await b.waitForSelector('#s-seguimiento:not([hidden]) #sxw-seguimiento *', { timeout: 10000 }); await b.waitForTimeout(600); },
+    abrirApp: async a => { await irA(a, '/crm/seguimiento'); await a.waitForSelector('#s-seguimiento', { timeout: 20000 }); await a.waitForTimeout(800); },
+    preparar: async () => {},
+  },
+  progreso: {
+    raiz: '#s-progreso', vistas: [0],
+    abrirBoceto: async b => { await b.locator('[data-go="progreso"]').first().click(); await b.waitForSelector('#s-progreso:not([hidden]) #sxw-progreso *', { timeout: 10000 }); await b.waitForTimeout(600); },
+    abrirApp: async a => { await irA(a, '/crm/progreso-global'); await a.waitForSelector('#s-progreso', { timeout: 20000 }); await a.waitForTimeout(800); },
+    preparar: async () => {},
+  },
+  asistente: {
+    raiz: '#s-asistente', vistas: [0],
+    abrirBoceto: async b => { await b.locator('[data-go="asistente"]').first().click(); await b.waitForSelector('#s-asistente:not([hidden]) #sxw-asistente *', { timeout: 10000 }); await b.waitForTimeout(600); },
+    abrirApp: async a => { await irA(a, '/crm/desarrollo?modulo=asistente-ia'); await a.waitForSelector('#s-asistente', { timeout: 20000 }); await a.waitForTimeout(800); },
+    preparar: async () => {},
+  },
+  alimentos: {
+    raiz: '#s-alimentos', vistas: [0],
+    abrirBoceto: async b => { await b.locator('[data-go="alimentos"]').first().click(); await b.waitForSelector('#s-alimentos:not([hidden]) #sxw-alimentos *', { timeout: 10000 }); await b.waitForTimeout(600); },
+    abrirApp: async a => { await irA(a, '/crm/alimentos'); await a.waitForSelector('#s-alimentos', { timeout: 20000 }); await a.waitForTimeout(800); },
+    preparar: async () => {},
+  },
+  biblioteca: {
+    raiz: '#s-biblioteca', vistas: [0],
+    abrirBoceto: async b => { await b.locator('[data-go="biblioteca"]').first().click(); await b.waitForSelector('#s-biblioteca:not([hidden]) #sxw-biblioteca *', { timeout: 10000 }); await b.waitForTimeout(600); },
+    abrirApp: async a => { await irA(a, '/crm/biblioteca'); await a.waitForSelector('#s-biblioteca', { timeout: 20000 }); await a.waitForTimeout(800); },
+    preparar: async () => {},
+  },
+  ayuda: {
+    raiz: '#s-ayuda', vistas: [0],
+    abrirBoceto: async b => { await b.locator('[data-go="ayuda"]').first().click(); await b.waitForSelector('#s-ayuda:not([hidden]) #sxw-ayuda *', { timeout: 10000 }); await b.waitForTimeout(600); },
+    abrirApp: async a => { await irA(a, '/crm/ayuda'); await a.waitForSelector('#s-ayuda', { timeout: 20000 }); await a.waitForTimeout(800); },
     preparar: async () => {},
   },
 };
@@ -107,7 +143,7 @@ async function correr(nombre, tema) {
 
 const args = process.argv.slice(2);
 const nombre = args.find(x => PANTALLAS[x]);
-if (!nombre) { console.error('Uso: node scripts/panel-v29-clases.mjs publica|cobranzas|mensajes [--tema=dark|light] [--write]'); process.exit(2); }
+if (!nombre) { console.error('Uso: node scripts/panel-v29-clases.mjs publica|cobranzas|mensajes|seguimiento|progreso|asistente|alimentos|biblioteca|ayuda [--tema=dark|light] [--write]'); process.exit(2); }
 const tema = (args.find(x => x.startsWith('--tema=')) ?? '--tema=dark').split('=')[1];
 const { texto, distintas } = await correr(nombre, tema);
 console.log(texto);
