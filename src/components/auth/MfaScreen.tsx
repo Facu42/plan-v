@@ -25,7 +25,7 @@ export function MfaScreen({ mode, onDone }: { mode: 'verify' | 'enroll'; onDone:
       for (const factor of data?.all ?? []) {
         if (factor.factor_type === 'totp' && factor.status === 'unverified') await supabase.auth.mfa.unenroll({ factorId: factor.id });
       }
-      const created = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Plan V' });
+      const created = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Nutridash' });
       if (created.error || !created.data) { setError('No pudimos preparar el código. Probá de nuevo.'); return; }
       setEnrollment({ factorId: created.data.id, qr: created.data.totp.qr_code, secret: created.data.totp.secret });
     })();
@@ -55,7 +55,7 @@ export function MfaScreen({ mode, onDone }: { mode: 'verify' | 'enroll'; onDone:
       title={enrolling ? 'Activá la verificación en dos pasos' : 'Ingresá tu código'}
       subtitle={enrolling
         ? 'Escaneá el código con Google Authenticator (o una app parecida) y escribí el número de 6 cifras que te muestra.'
-        : 'Abrí tu aplicación de códigos y escribí el número de 6 cifras de Plan V.'}
+        : 'Abrí tu aplicación de códigos y escribí el número de 6 cifras de Nutridash.'}
     >
       <form onSubmit={(event) => { void submit(event); }} aria-busy={busy}>
         <fieldset disabled={busy} style={{ border: 0, padding: 0, display: 'grid', gap: 16 }}>

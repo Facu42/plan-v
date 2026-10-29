@@ -76,7 +76,7 @@ export function createServiceReadOnlyGuard(get: (userId: string) => Promise<OwnS
   };
 }
 
-export const READ_ONLY_MESSAGE = 'Tu cuenta de Plan V está suspendida: podés ver todo, pero no cargar ni cambiar nada. Escribile a Plan V para reactivarla.';
+export const READ_ONLY_MESSAGE = 'Tu cuenta de Nutridash está suspendida: podés ver todo, pero no cargar ni cambiar nada. Escribile a Nutridash para reactivarla.';
 
 export function registerOwnServiceRoutes(app: Hono, get: (userId: string) => Promise<OwnService | null>) {
   app.get('/api/me/service', async (c) => {

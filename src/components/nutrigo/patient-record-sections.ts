@@ -2,7 +2,7 @@ import type { AppointmentHistoryEntry } from '../../types';
 import { patientRecordLabels } from '../../features/nutrigo/secondaryTranslation';
 import { PATIENT_RECORD_SECTION_IDS } from '../../types/patient-preview';
 
-/** Las diez secciones clínicas conviven con los accesos operativos de Plan V. */
+/** Las diez secciones clínicas conviven con los accesos operativos de Nutridash. */
 const SECTION_IDS = PATIENT_RECORD_SECTION_IDS;
 export const RECORD_TABS = SECTION_IDS.map(id => [id, patientRecordLabels[id]] as const);
 export type RecordTab = typeof RECORD_TABS[number][0];

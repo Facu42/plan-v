@@ -107,7 +107,7 @@ export function reminderWhatsAppHref(input: { patientName: string; owed: number;
   const parts = [`Hola ${firstName}, te recuerdo que tenés pendiente la cuota de ${formatPesos(input.owed)}.`];
   if (input.alias) parts.push(`Podés transferir al alias ${input.alias}.`);
   if (input.paymentLink) parts.push(`O pagar desde este link: ${input.paymentLink}`);
-  parts.push('Cuando pagues, avisame desde Plan V con "Ya pagué". ¡Gracias!');
+  parts.push('Cuando pagues, avisame desde Nutridash con "Ya pagué". ¡Gracias!');
   return `https://wa.me/?text=${encodeURIComponent(parts.join(' '))}`;
 }
 
@@ -118,7 +118,7 @@ export function chargeTitle(charge: { kind?: string; concept?: string }): string
 
 /**
  * Mensaje con el link de pago de un cobro, listo para pegar en WhatsApp o mail. Usa el link y el alias
- * que la nutricionista ya cargó (Plan V no genera links de cobro). Sin ninguno, no hay nada que copiar.
+ * que la nutricionista ya cargó (Nutridash no genera links de cobro). Sin ninguno, no hay nada que copiar.
  */
 export function chargeLinkText(input: { patientName: string; title: string; amount: number; dueOn: string; alias?: string; paymentLink?: string }): string | null {
   const link = input.paymentLink?.trim() ?? '';
@@ -129,6 +129,6 @@ export function chargeLinkText(input: { patientName: string; title: string; amou
   const parts = [`Hola ${firstName}, te paso lo de «${input.title}»: ${formatPesos(input.amount)}, vence el ${formatFeeDate(input.dueOn)}.`];
   if (safeLink) parts.push(`Podés pagar desde este link: ${safeLink}`);
   if (alias) parts.push(safeLink ? `O transferir al alias ${alias}.` : `Podés transferir al alias ${alias}.`);
-  parts.push('Cuando pagues, avisame desde Plan V con "Ya pagué". ¡Gracias!');
+  parts.push('Cuando pagues, avisame desde Nutridash con "Ya pagué". ¡Gracias!');
   return parts.join(' ');
 }

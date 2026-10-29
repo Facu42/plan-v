@@ -8,7 +8,7 @@ import { recipeNutritionLabel, type ProposedRecipe } from '../../types/ai-nutrit
 import interUrl from '@fontsource/inter/files/inter-latin-400-normal.woff2?url';
 import { listaDeCompras } from './planes-editor';
 import type { OpcionesPdf } from './PanelPlanAsistente';
-import logo from '../../assets/plan-v-logo-256.png';
+import logo from '../../assets/nutridash-logo-256.png';
 import { PlanGuidanceView } from './PlanGuidance';
 import { clinicBrandSchema, type ClinicBrand } from '../../types/nutrition-capabilities';
 import { analyzePlanWeek, macroEnergyShare, type DayAnalysisLine } from '../../types/plan-day-analysis';
@@ -56,7 +56,7 @@ export function PlanPrintDocument({ version, patientName, professionalName, demo
   const published = Boolean(version.published_at);
   const verifiedBrand=options?.logo !== false && brand ? clinicBrandSchema.safeParse(brand) : undefined;
   const identity=verifiedBrand?.success?verifiedBrand.data:undefined;
-  return <main className={options?.logo === false ? "pv-paper pv-monochrome" : "pv-paper"}><header className="pv-head"><div>{options?.logo !== false && <img src={identity?.logo||logo} alt={identity?.name||"Plan V"} />}<span>{identity?.name||"Plan V · Nutrición"}</span></div><p className={published ? 'pv-state' : 'pv-state pv-draft'}>{published ? 'PLAN PUBLICADO' : 'BORRADOR GUARDADO · NO PUBLICADO'} · v{version.version}</p></header>
+  return <main className={options?.logo === false ? "pv-paper pv-monochrome" : "pv-paper"}><header className="pv-head"><div>{options?.logo !== false && <img src={identity?.logo||logo} alt={identity?.name||"Nutridash"} />}<span>{identity?.name||"Nutridash · Nutrición"}</span></div><p className={published ? 'pv-state' : 'pv-state pv-draft'}>{published ? 'PLAN PUBLICADO' : 'BORRADOR GUARDADO · NO PUBLICADO'} · v{version.version}</p></header>
     {identity?.contact&&<p>{identity.contact}</p>}
     <h1>Plan de alimentación</h1><p className="pv-patient">{patientName || 'Paciente seleccionado'}</p>{professionalName.trim() && <p>Profesional: {professionalName.trim()}</p>}
     <p>Del {dateLabel(version.period_start)} al {dateLabel(version.period_end)} · Argentina</p>

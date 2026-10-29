@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import planVLogo from '../../assets/plan-v-logo-256.png';
+import nutridashLogo from '../../assets/nutridash-logo-256.png';
 
 export type IconName =
   | 'arrow' | 'bell' | 'calendar' | 'camera' | 'check' | 'chevron' | 'clock'
@@ -62,7 +62,7 @@ export function Icon({ name, size = 20, className }: { name: IconName; size?: nu
 export function Mark() {
   return (
     <div className="brand-mark">
-      <img src={planVLogo} alt="Logo Plan V Nutrición" />
+      <img src={nutridashLogo} alt="Logo Nutridash" />
     </div>
   );
 }

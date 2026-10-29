@@ -87,7 +87,7 @@ describe('Ficha v29', () => {
   it('Mediciones dibuja los medidores, las solapas y no inventa pliegues ni fórmula', () => {
     const html = renderToStaticMarkup(<PanelFichaMediciones patient={paciente} now={ahora} datos={datos()} ir={ir} />);
     for (const texto of ['Mediciones', 'Importar balanza', 'Nueva medición', 'IMC', 'Grasa', 'Músculo', 'Cintura', 'Evolución', 'Kerr · 5 componentes', 'Sin fórmula validada', 'Pliegues', 'Perímetros', 'Composición', 'Segmental']) expect(html).toContain(texto);
-    expect(html).toContain('Los pliegues todavía no se cargan en Plan V');
+    expect(html).toContain('Los pliegues todavía no se cargan en Nutridash');
     expect(html).toContain('data-mk="1"');
   });
 

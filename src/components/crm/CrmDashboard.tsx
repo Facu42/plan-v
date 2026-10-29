@@ -143,7 +143,7 @@ export function CrmDashboard({ darkMode, onToggleTheme, initialEntry }: { darkMo
       <section className="reference-frame">
         <header className="crm-appbar">
           <div className="crm-product">
-            <span className="grid-dot">⠿</span><Mark /><b>Plan V</b><i /><span>Centro profesional</span>
+            <span className="grid-dot">⠿</span><Mark /><b>Nutridash</b><i /><span>Centro profesional</span>
           </div>
           <div className="crm-tools">
             <button type="button" className="crm-theme-toggle" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} aria-pressed={darkMode} onClick={onToggleTheme}>

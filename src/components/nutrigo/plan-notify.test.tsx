@@ -4,7 +4,7 @@ import { PlanNotifyPatient, planPublishedNoticeText } from './PlanNotifyPatient'
 
 describe('avisarle a la paciente que su plan está publicado', () => {
   it('el mensaje nombra a la paciente, la versión y dónde verlo', () => {
-    expect(planPublishedNoticeText('Sofía Rodríguez', 3)).toBe('Hola Sofía, ya publiqué tu plan alimentario (versión 3). Lo ves en la sección Plan de Plan V. Cualquier duda, escribime por acá.');
+    expect(planPublishedNoticeText('Sofía Rodríguez', 3)).toBe('Hola Sofía, ya publiqué tu plan alimentario (versión 3). Lo ves en la sección Plan de Nutridash. Cualquier duda, escribime por acá.');
     expect(planPublishedNoticeText('', 1)).toMatch(/^Hola, ya publiqué/);
   });
 

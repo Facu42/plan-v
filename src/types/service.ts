@@ -1,4 +1,4 @@
-// Panel del servicio: suscripción de cada nutricionista a Plan V. Sin datos de salud.
+// Panel del servicio: suscripción de cada nutricionista a Nutridash. Sin datos de salud.
 export type ServiceOverride = 'none' | 'waived' | 'suspended';
 export type ServicePaymentMethod = 'transferencia' | 'mercado_pago' | 'efectivo' | 'otro';
 export type ServicePaymentStatus = 'confirmed' | 'voided';

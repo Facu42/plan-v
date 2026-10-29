@@ -11,7 +11,7 @@ const discovered = applyDiscoveredLiveAuthEnv();
 const live = process.env.PLANV_LIVE_AUTH === '1';
 const actorJwt = liveActorJwtConfigured();
 
-describe.skipIf(!live)('Plan V hosted Auth / Storage (sin migrar SQL)', () => {
+describe.skipIf(!live)('Nutridash hosted Auth / Storage (sin migrar SQL)', () => {
   afterAll(() => {
     expect(process.env.DISPOSABLE_DATABASE_URL ?? '').not.toMatch(/supabase\.co/);
   });

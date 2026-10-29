@@ -102,7 +102,7 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
       'Cell-Amount': amount(log),
       'Cell-Calories': [value('kcal'), unit('kcal')],
       'Data-Carbs': [value('carbs_g'), unit('g')], 'Data-Protein': [value('protein_g'), unit('g')], 'Data-Fats': [value('fat_g'), unit('g')],
-      // Plan V no registra azúcar: la celda muestra «—» en lugar de inventar un cero.
+      // Nutridash no registra azúcar: la celda muestra «—» en lugar de inventar un cero.
       'Cell-Sugar': ['—', ''],
       'Cell-Thoughts': [reviewLabel(log)],
     };
@@ -114,7 +114,7 @@ export function NutrigoDiary({ patient, onNavigate, onSignOut, query = '', now =
     const fill = (cell: SourceNode, values: ReactNode[]): SourceBinding => {
       const leaves = descendants(cell).filter(child => leaf(child) && child.tag === 'p');
       const kind = nodeName(cell);
-      return { props: { title: kind === 'Cell-Thoughts' ? reviewDetail(log) : kind === 'Cell-Sugar' ? 'Plan V no registra azúcar' : undefined }, children: objects(cell).map((child, index) => source(child, part => {
+      return { props: { title: kind === 'Cell-Thoughts' ? reviewDetail(log) : kind === 'Cell-Sugar' ? 'Nutridash no registra azúcar' : undefined }, children: objects(cell).map((child, index) => source(child, part => {
         if (kind === 'Cell-Category' && nodeName(part) === 'Badge Category - Meal Time') return { props: { style: { maxWidth: '100%', overflow: 'hidden' } } };
         const position = leaves.indexOf(part);
         return position >= 0 ? { text: values[position] ?? '', props: position === 0 ? clip[kind] : undefined } : undefined;

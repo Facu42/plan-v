@@ -14,7 +14,7 @@ import { dateLabel, descendants, EmptyState, errorText, leaf, listChildren, obje
 
 type Props = ScreenProps & { resourceId?: string | null; onOpenResource?: (slug: string | null) => void };
 type View = 'all' | 'recent' | 'saved' | 'assigned' | 'short';
-/** Las cinco pastillas del buscador del archivo pasan a ser los filtros de Plan V. */
+/** Las cinco pastillas del buscador del archivo pasan a ser los filtros de Nutridash. */
 const VIEWS: { id: View; label: string; hint: string }[] = [
   { id: 'all', label: 'Todos', hint: 'Ver todos los recursos' }, { id: 'recent', label: 'Recientes', hint: 'Ordenar por fecha de revisión' },
   { id: 'saved', label: 'Guardados', hint: 'Ver mis recursos guardados' }, { id: 'assigned', label: 'Indicados', hint: 'Ver los recursos que te indicó tu nutricionista' },
@@ -35,7 +35,7 @@ export function NutrigoResources({ patient, query = '', onNavigate, onSignOut, r
   const matches = (item: EditorialResource) => (!category || item.category === category) && (view !== 'saved' || favorites.has(item.id)) && (view !== 'assigned' || assignedIds.has(item.slug) || assignedIds.has(item.id)) && (view !== 'short' || item.minutes <= 3) && `${item.title} ${item.summary} ${item.author_name} ${item.tags.join(' ')}`.toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'));
   const filtered = catalog.filter(matches);
   const visible = view === 'recent' ? filtered.slice().sort((a, b) => (b.reviewed_at ?? '').localeCompare(a.reviewed_at ?? '')) : filtered;
-  // Lugares del archivo: destacado (1), lista (2), recomendados (2) y «Más recursos» (2, el bloque de videos: Plan V no tiene videos).
+  // Lugares del archivo: destacado (1), lista (2), recomendados (2) y «Más recursos» (2, el bloque de videos: Nutridash no tiene videos).
   // Lo que sobra se suma a la lista para no perder nada.
   const popular = [...visible.slice(1, 3), ...visible.slice(7)];
   const recommended = visible.slice(3, 5);
@@ -61,7 +61,7 @@ export function NutrigoResources({ patient, query = '', onNavigate, onSignOut, r
     const categories = inside('Info Category'); const authors = new Set([...inside('Info Author'), ...descendants(prototype).filter(node => nodeName(node) === 'Info Date' && descendants(node).some(child => nodeName(child) === 'Avatar')).flatMap(descendants)]); const dates = inside('Info Date');
     return source(prototype, node => {
       const name = nodeName(node);
-      // Plan V no publica videos: el botón de reproducir del archivo solo corresponde a un recurso en video.
+      // Nutridash no publica videos: el botón de reproducir del archivo solo corresponde a un recurso en video.
       if (name === 'Play') return { hidden: true };
       if (name === 'Image') return plateImage({ cover_status: 'ready', cover_url: item.cover_url }, '');
       if (['Left Info', 'Info Author', 'Info Category', 'Info Date'].includes(name)) return { props: { style: shrinkable } };
@@ -168,7 +168,7 @@ export function NutrigoResources({ patient, query = '', onNavigate, onSignOut, r
         if (child === plain && !current.sections.length) return <EmptyState key="no-sections" text="Este recurso todavía no tiene secciones." />;
         if (child === plain) return section ? current.sections.map((item, position) => source(section, part => nodeName(part) === 'Div Title' ? { children: inner(part, title => leaf(title) ? { text: item.title } : undefined) } : leaf(part) ? { text: item.body } : undefined, `section-${position}`)) : null;
         if (child === section && plain && license) return source(plain, part => leaf(part) ? { text: license, props: { style: { fontSize: '12px', color: '#8a8c90' } } } : undefined, index);
-        // Citas y listas del artículo de ejemplo: Plan V publica el recurso por secciones.
+        // Citas y listas del artículo de ejemplo: Nutridash publica el recurso por secciones.
         return null;
       })}</> };
     }
@@ -190,7 +190,7 @@ export function NutrigoResources({ patient, query = '', onNavigate, onSignOut, r
       return leaf(part) ? { text: sourceText(part) === '#' ? '#' : tag } : undefined;
     }, 'Sin temas.', { key: tag => tag });
     if (name === 'Section Related Articles' || name === 'Section Related VIdeo') {
-      // El bloque de videos del archivo muestra otros recursos: Plan V no publica videos.
+      // El bloque de videos del archivo muestra otros recursos: Nutridash no publica videos.
       const video = name === 'Section Related VIdeo';
       const related = catalog.filter(item => item.id !== current?.id && (video ? !current?.related.includes(item.slug) : current?.related.includes(item.slug))).slice(0, video ? 2 : undefined);
       return { children: inner(node, child => {

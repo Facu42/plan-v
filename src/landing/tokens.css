@@ -1,4 +1,4 @@
-/* Sistema de diseño de Plan V para páginas públicas. Los colores salen del logo (marca/brand_kit.json).
+/* Sistema de diseño de Nutridash para páginas públicas. Los colores salen del logo (marca/brand_kit.json).
    Este archivo es la fuente: las páginas usan estas variables y no valores sueltos.
    La app (pantallas de nutricionista y paciente) sigue el modelo de Nutrigo y no usa este archivo. */
 :root {

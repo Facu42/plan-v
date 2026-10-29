@@ -1,7 +1,7 @@
 import { NUTRIGO_SURFACES, type NutrigoSurfaceId } from './nutrigo-surfaces';
 
 /** Facu, 2026-09-22: "exacto al .fig, copy en espanol".
- *  Layout AND skin come from the pack. The earlier Plan V pastel deviation is withdrawn.
+ *  Layout AND skin come from the pack. The earlier Nutridash pastel deviation is withdrawn.
  *  These values are READ FROM THE FILE over the Figma MCP (node 12:792), not sampled
  *  from a screenshot. The keys are the .fig's own variable names.
  *  Canonical note: design/nutrigo-fidelity.md. */

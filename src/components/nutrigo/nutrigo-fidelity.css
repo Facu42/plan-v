@@ -1,6 +1,6 @@
 /* NV-FIDELITY: layout AND skin from the Nutrigo pack (Facu, 2026-09-22).
    Law: design/nutrigo-fidelity.md — "exacto al .fig, copy en espanol".
-   This supersedes the earlier pass that pushed the skin to Plan V pastels,
+   This supersedes the earlier pass that pushed the skin to Nutridash pastels,
    lima #EAFF78 and Inter. That deviation is withdrawn.
    Figma file key OTolnKfsxUFjaZOhhdb04i (composition only; Figma MCP unused, OAuth 403).
    Desktop frame 1440 = sidebar 223 + content + rail.
@@ -125,7 +125,7 @@
   .nv-app.nv-pro .nv-topbar .nv-brand { display: none; }
 
   /* Topbar: the .fig has none on desktop (the Navbar carries everything),
-     so this strip is Plan V's own — the role switch to flip between the
+     so this strip is Nutridash's own — the role switch to flip between the
      patient and nutritionist dashboards, plus avisos and tema. It used to
      be squeezed to the sidebar's 223 and its controls spilled past the
      edge; now it runs the content's own width and reads as a quiet utility
@@ -525,7 +525,7 @@
   line-height: var(--nv-lh-t14);
   font-weight: 600;
 }
-/* El archivo fija 306; acá es un piso porque la nota de datos de Plan V no
+/* El archivo fija 306; acá es un piso porque la nota de datos de Nutridash no
    existe en el pack y la fila crece con ella. */
 .nv-app .np-chart-grid > .nv-card { height: auto; min-height: 306px; }
 .nv-app .np-data-note { margin-top: auto!important; padding-top: 8px; font-size: var(--nv-fs-p11)!important; line-height: var(--nv-lh-p11); }
@@ -1010,7 +1010,7 @@
    El archivo arma el plan como tabla de 1161: una celda de día de 120 en
    Cream-BG y una celda por comida, con imagen de 88 y radio 14. Cada momento
    tiene su tinte: desayuno Green-Subtle, almuerzo Saffron-Subtle, merienda
-   Orange-Subtle y cena Gray-BG-Subtle. Plan V muestra un día por vez, así que
+   Orange-Subtle y cena Gray-BG-Subtle. Nutridash muestra un día por vez, así que
    la fila se aplica a las comidas de ese día. */
 .nv-app .nvpp-plan { gap: var(--nv-section-gap); }
 .nv-app .nvpp-hero {
@@ -1576,7 +1576,7 @@
   font-weight: 400;
 }
 /* Card Related Article: título 14/600, fondo de la card, sin relleno gris.
-   El archivo la arma con una foto de 253 × 160 que Plan V no tiene: acá
+   El archivo la arma con una foto de 253 × 160 que Nutridash no tiene: acá
    la fila queda con el icono de la guía en su lugar. */
 .nv-app .nvr-detail-layout > .nvr-related > section > div > button {
   padding: 0;
@@ -1597,7 +1597,7 @@
 
 /* ─── Detalle de receta, nodo 84:3145 "13. Recipe Details (Desktop)" ───
    El cuerpo 1161 es izquierda 275 + contenido 591 + derecha 295, sin huecos:
-   la separación la hace el padding de cada columna. Plan V no tiene pantalla
+   la separación la hace el padding de cada columna. Nutridash no tiene pantalla
    de receta: la ficha vive como card (RecipePlateCard) dentro del diario y
    del plan, así que acá se aplican las piezas que sí existen. */
 .nv-app .recipe-plate {
@@ -1648,7 +1648,7 @@
   line-height: var(--nv-lh-p14);
 }
 /* Details: cuatro fichas de 118 de alto, radio 16, Green, padding 12.
-   La del archivo apila icono y valor; el dt/dd de Plan V ocupa ese lugar. */
+   La del archivo apila icono y valor; el dt/dd de Nutridash ocupa ese lugar. */
 .nv-app .recipe-macros { gap: 12px; margin: 0; }
 .nv-app .recipe-macros div {
   gap: 2px;
@@ -1734,7 +1734,7 @@
     background: var(--nv-card);
   }
   /* El archivo muestra el nombre de la pantalla en la barra; el móvil de
-     Plan V lo escondía. Vuelve, en 16 semibold. */
+     Nutridash lo escondía. Vuelve, en 16 semibold. */
   .nv-app .nv-topbar .nv-topbar-title,
   .nv-app.nv-patient .nv-topbar-title,
   .nv-app.nv-pro .nv-topbar-title {
@@ -1808,7 +1808,7 @@
     background: rgba(39, 41, 50, 0.45);
   }
 
-  /* La barra del archivo es logo 32 + título + un botón de 32. Plan V suma
+  /* La barra del archivo es logo 32 + título + un botón de 32. Nutridash suma
      el selector de rol y las alertas, que no están en el archivo: se
      compactan a 32 para que la barra caiga en los 64 y el título respire. */
   .nv-app .nv-topbar .nv-brand { height: 32px; flex: none; gap: 8px; }
@@ -1841,7 +1841,7 @@
   .nv-app .nv-main { padding: 24px var(--nv-card-pad); }
   /* Header del contenido: 46 de alto, título 20 semibold y bajada 11 Gray-20. */
   .nv-app .nv-page-head { margin-bottom: 24px; }
-  /* Los 46 son del bloque de título; el buscador de Plan V baja debajo. */
+  /* Los 46 son del bloque de título; el buscador de Nutridash baja debajo. */
   .nv-app .nv-page-head > div { min-height: 46px; max-width: none; }
   .nv-app .nv-page-head h1 {
     font-size: 20px;
@@ -1893,9 +1893,9 @@
   /* Calendario (433:17250): tres cards de resumen de 178 en una fila, y el
      calendario a sangre con celdas de 55,71 × 120 y cabecera de 36. */
   .nv-app .nvpa-layout { grid-template-columns: minmax(0, 1fr); }
-  /* El archivo pone tres cards de resumen en una fila; Plan V tiene cuatro,
+  /* El archivo pone tres cards de resumen en una fila; Nutridash tiene cuatro,
      así que van dos por fila para que ninguna quede huérfana. El alto de 178
-     del archivo es para una card con gráfico: la de Plan V lleva rótulo y
+     del archivo es para una card con gráfico: la de Nutridash lleva rótulo y
      cifra, y se queda en los 108 que ya usa en escritorio. */
   .nv-app .nvpa-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));

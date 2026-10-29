@@ -27,6 +27,6 @@ describe('aviso al teléfono el día antes de la consulta', () => {
   });
 
   it('el texto no dice la hora, el lugar ni el nombre de la nutri', () => {
-    expect(PUSH_TEXTS.reminder).toEqual({ title: 'Mañana tenés consulta', body: 'Mirá el horario en Plan V.', url: '/app/agenda', tag: 'plan-v-reminder' });
+    expect(PUSH_TEXTS.reminder).toEqual({ title: 'Mañana tenés consulta', body: 'Mirá el horario en Nutridash.', url: '/app/agenda', tag: 'plan-v-reminder' });
   });
 });

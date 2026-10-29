@@ -71,7 +71,7 @@ export function registerMessageRoutes(app: Hono) {
         event_type: 'thread_message',
         client_id: clientId,
         subject: 'Mensaje nuevo en el hilo',
-        body: 'Hay un mensaje nuevo. Este aviso quedó en el buzón in-app de Plan V; no se envió a internet.',
+        body: 'Hay un mensaje nuevo. Este aviso quedó en el buzón in-app de Nutridash; no se envió a internet.',
         kind: 'message',
       }, true);
       const updated = await sb.sbGetPatientById(patientId, audience(actor.role));
@@ -99,7 +99,7 @@ export function registerMessageRoutes(app: Hono) {
       event_type: 'thread_message',
       client_id: clientId,
       subject: 'Mensaje nuevo en el hilo',
-      body: 'Hay un mensaje nuevo. Este aviso quedó en el buzón in-app de Plan V; no se envió a internet.',
+      body: 'Hay un mensaje nuevo. Este aviso quedó en el buzón in-app de Nutridash; no se envió a internet.',
       kind: 'message',
     }, false);
     const updated = getPatient(patientId)!;

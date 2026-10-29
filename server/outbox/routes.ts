@@ -59,7 +59,7 @@ export function registerOutboxRoutes(app: Hono) {
       event_type: 'reminder',
       client_id: body.client_id ?? randomUUID(),
       subject: `Recordatorio · ${body.title}`,
-      body: `${body.detail} Este aviso quedó en el buzón in-app de Plan V; no se envió a internet.`,
+      body: `${body.detail} Este aviso quedó en el buzón in-app de Nutridash; no se envió a internet.`,
       kind: 'reminder',
       pref_user: prefUser,
     }, persistent);

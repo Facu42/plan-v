@@ -14,7 +14,7 @@ const patient = { id: 'p1', name: 'Ana Real' } as unknown as ShowroomPatient;
 const navigate = () => undefined;
 const text = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
 const LONG = 'Ensalada templada de lentejas, vegetales asados de estación, queso fresco y aderezo cítrico de la casa';
-const resource = (index: number, extra: Record<string, unknown> = {}) => ({ id: `r${index}`, slug: `r-${index}`, kind: 'operational', title: `Recurso ${index}`, summary: `Resumen ${index}`, category: `Categoría ${index % 3}`, author_name: 'Equipo Plan V', minutes: 2, reviewed_at: '2026-09-16T12:00:00.000Z', cover_url: null, tags: ['diario'], sections: [], related: [], action_label: 'Abrir', action_page: 'diario', license_note: '', published: true, ...extra });
+const resource = (index: number, extra: Record<string, unknown> = {}) => ({ id: `r${index}`, slug: `r-${index}`, kind: 'operational', title: `Recurso ${index}`, summary: `Resumen ${index}`, category: `Categoría ${index % 3}`, author_name: 'Equipo Nutridash', minutes: 2, reviewed_at: '2026-09-16T12:00:00.000Z', cover_url: null, tags: ['diario'], sections: [], related: [], action_label: 'Abrir', action_page: 'diario', license_note: '', published: true, ...extra });
 const library = (resources: unknown[]) => ({ resources, articles: [], favorites: [], assignments: [] });
 const render = (resources: unknown[], props: { resourceId?: string; query?: string } = {}) => { context.data = library(resources); return renderToStaticMarkup(<NutrigoResources patient={patient} onNavigate={navigate} {...props} />); };
 beforeEach(() => { context.mobile = false; context.data = null; });

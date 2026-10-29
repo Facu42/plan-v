@@ -4,7 +4,7 @@ import type { OwnService } from '../../types/service';
 import { serviceNoticeText } from './service-notice';
 import './service-notice.css';
 
-/** Aviso del servicio de Plan V para la nutricionista (prueba por terminar, vencido o solo lectura). */
+/** Aviso del servicio de Nutridash para la nutricionista (prueba por terminar, vencido o solo lectura). */
 export function ServiceNotice() {
   const [service, setService] = useState<OwnService | null>(null);
   useEffect(() => {
@@ -16,7 +16,7 @@ export function ServiceNotice() {
   }, []);
   const text = serviceNoticeText(service);
   if (!text) return null;
-  return <section className={`nv-service-notice nv-service-${text.tone}`} role={text.tone === 'blocked' ? 'alert' : 'status'} aria-label="Tu servicio de Plan V">
+  return <section className={`nv-service-notice nv-service-${text.tone}`} role={text.tone === 'blocked' ? 'alert' : 'status'} aria-label="Tu servicio de Nutridash">
     <strong>{text.title}</strong><p>{text.body}</p>
   </section>;
 }

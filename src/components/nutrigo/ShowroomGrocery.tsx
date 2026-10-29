@@ -16,7 +16,7 @@ import { parseAppPath } from './app-location';
 import './plan-fig.css';
 
 /* Grocery List del .fig (105:2472 escritorio, 492:11324 móvil). Sin precios, calorías ni gasto:
- * Plan V no los tiene. Las tarjetas y gráficos cuentan elementos reales de la lista. */
+ * Nutridash no los tiene. Las tarjetas y gráficos cuentan elementos reales de la lista. */
 
 type GroceryFilter = 'all' | 'pending' | 'checked';
 type GrocerySort = 'category' | 'name' | 'pending' | 'meals';
