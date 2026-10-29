@@ -39,4 +39,21 @@ El punto 4 se detalla por pantalla y selector en [diferencias-estilos-v29.md](di
 
 ## Estado de entrega
 
-La subida a GitHub fue rechazada por revisión automática por requerir autorización explícita del usuario para publicar código e informes en el repositorio público. Se verificó mediante el conector que el propietario y la cuenta autenticada son Facu42, con permisos admin/push; el segundo intento reducido también fue rechazado. No se intentará otro método de subida. Los cambios están en el commit local y requieren esa autorización para subirlos. La rama remota creada sigue en el commit base; no se abrió PR ni se integró a main.
+Facundo autorizó expresamente el 29/10 publicar código e informes en su repositorio público y después corregir el punto 4. La subida se completó y se abrió el [PR #233](https://github.com/Facu42/plan-v/pull/233) en borrador. El bloqueo automático anterior quedó resuelto con esa autorización. Main `247a00d` se incorporó sin conflictos a la rama local antes de corregir los estilos. No se integró a main ni se tocó producción.
+
+## Ampliación: punto 4 de estilos
+
+Diferencias confirmadas corregidas y muestras que comparaban distintos elementos rectificadas en [el informe por pantalla](diferencias-estilos-v29.md). La revisión independiente de código no encontró P1/P2 en el diff CSS. La revisión de evidencia detectó la escala del boceto en la medición de altura; el nuevo recorrido la normaliza antes de medir.
+
+Regression Guard adicional: navegación, lectura y formularios mantienen sus contratos; sin endpoints ni migraciones nuevos. Áreas frágiles: cascada compartida, colores de enviar/grabar y desplazamiento de listas. Las reglas se limitan al panel profesional; se conservan variantes y el scroll de Agenda. La comparación de estilos por identidad del elemento queda automatizada para ambos temas. Validación de la ampliación:
+
+- 25 pruebas específicas aprobadas nuevamente, en siete archivos.
+- Nueve recorridos de uso aprobados: los cuatro de Recetas/Equivalencias, los tres de Ayuda y dos comparaciones de estilos. Después de normalizar la escala y corregir `vertical-align:baseline`, los dos recorridos de estilos se repitieron: **27,00 px en ambos botones**, fuente y app, en claro y oscuro. Cada recorrido mide 14 elementos/estados.
+- Fire test CSS: se inyectaron 2 px de relleno en Historia únicamente en la página de prueba. El recorrido falló exactamente por `padding-top:2px` contra `0px`; la prueba temporal fue retirada. No cambió archivos de la app ni otras páginas.
+- Se corrigió el cargador del contrato general para registrar Inter local 300–600: `document.fonts.check()` podía aprobar sin ninguna cara registrada y producir mediciones con otra fuente. La comprobación específica también carga esas fuentes y quita la escala antes de medir.
+- Suite general: con el proceso en UTC hubo tres fallos en pruebas de horario de archivos intactos contra main. Se repite con `TZ=America/Argentina/Buenos_Aires` antes de iniciar Vitest. No se modifican lógica ni pruebas para ocultar esos fallos.
+- Suite general con `forks`: **3.646 aprobadas y cuatro omitidas, 582 archivos**, salida 0, 612,74 s. Es la corrida iniciada en esta sesión con `npm test -- --pool=forks --maxWorkers=2 --no-file-parallelism`; sustituye el límite anterior de 180 s. Los fallos de horario descritos corresponden al experimento separado con threads/UTC.
+- Tipos y compilación finales aprobados (build 15,96 s); sintaxis del comparador, frontera de secretos y `git diff --check` aprobados. No hay script de lint independiente en el proyecto.
+- Contrato general corregido: **solo dos comprobaciones sin muestra**, el mismo turno `.ev.c` de Agenda en claro y oscuro. Los turnos confirmados de la fixture ya pasaron y se dibujan como hechos; la fixture carece de otro turno de consultorio futuro que no sea el próximo. Todas las medidas y colores muestreados restantes coinciden. No se declara el contrato completo en verde mientras falte esa muestra.
+- Capturas de Recetas y Equivalencias generadas con demo, sin datos de producción. La evidencia es auxiliar; el código y los estilos calculados son la referencia.
+- Veredicto: alcance implementado y pruebas de uso aprobadas; **HOLD para merge** por contrato general sin muestra completa de Agenda y revisión final. PR en borrador. No se publicó a main ni se aplicaron cambios de producción.

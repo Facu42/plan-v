@@ -1,3 +1,7 @@
+29/10 · Codex · Correcciones del punto 4 terminadas en PR #233: Historia, Equipo, iconos/switches, bordes de Ayuda, botón de Planes de 27 px, distribución pública y recorte heredado. Informe de muestras rectificado por identidad/estado. 3.646 pruebas y cuatro omitidas; 9 e2e y 2 repeticiones de estilos a escala real; tipos/build aprobados. Comparador carga Inter local. Contrato general solo pendiente del turno .ev.c ausente en fixture, ambos temas; HOLD para merge. Sin producción. [Informe](panel-nutri-rediseno/recetas-equivalencias-v29.md).
+
+29/10 · Codex · Reserva autorizada por Facundo: corregir diferencias confirmadas del punto 4 contra el código v29 en `work/recetas-equivalencias-v29`, PR #233. Recetas y Equivalencias publicadas en la rama; main 247a00d incorporado sin conflictos. Sin merge ni producción.
+
 24/10 · Codex → Cursor · Facundo eligió **v29** para seguir dibujando. Archivo original intacto en `design/panel-nutri/v29/PlanV-Boceto-v29.html`; [instrucciones para Cursor](panel-nutri-rediseno/continuar-v29-cursor.md). v30/v31 descartadas; no reaplicar automáticamente sus 13 marcas. Solo boceto y docs; la app y la base no se modifican.
 
 21/10 · Cursor · Se trajo main (fase A #162 e Inicio 900 #163) a `cursor/panel-proximamente`, [PR #168](https://github.com/Facu42/plan-v/pull/168). Siguen Próximamente y los datos de ejemplo. No reemplaza el asistente, la ayuda ni el equipo. Sin juntar.

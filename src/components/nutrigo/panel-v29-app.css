@@ -675,8 +675,7 @@
 
 /* Con pocos servicios la tabla no se estira hasta el pie de la tarjeta. */
 #pv-panel-v29 #s-publica .pubts .pubt:has(tbody tr:last-child:nth-child(-n+3)) { flex: 0 0 auto; }
-/* Con una o dos obras sociales las filas no se reparten por toda la tarjeta. */
-#pv-panel-v29 #s-publica .pubhr.pubev:has(> div:last-child:nth-child(-n+3)) { justify-content: flex-start; }
+/* La distribución de las obras sociales sigue .pubhr.pubev del boceto, incluso con pocas filas. */
 
 /* Archivos: el boceto no fija interlineado (queda «normal») y no deja aire arriba de la grilla. */
 #pv-panel-v29 #s-ficha .pn-record-files .fx, #pv-panel-v29 #s-ficha .pn-record-files .fx * { line-height: normal; }
@@ -703,3 +702,28 @@
 #pv-panel-v29 #s-ficha .pn-record-billing .fxp .sbtn.k { min-height: 0; }
 #pv-panel-v29 #s-ficha .pn-record-billing .fxtile .fxv b { line-height: 24px; }
 #pv-panel-v29 #s-ficha .pn-record-billing .pg-v b { line-height: 1; }
+
+/* Correcciones medidas contra el código v29 (punto 4, PR #233).
+   Los controles sin tipografía/relleno explícitos en la fuente conservan los valores
+   nativos del botón; la hoja general de la app los estaba reemplazando. */
+#pv-panel-v29 button.ibtn,
+#pv-panel-v29 button.sw { font-size: 13.333333px; padding: 1px 6px; }
+#pv-panel-v29 button.sw { color: ButtonText; }
+/* #fwrap > .fx en el boceto no tiene relleno superior. En React hay un
+   contenedor intermedio para los datos y permisos de la historia. */
+#pv-panel-v29 #s-ficha .pw-record:has(.hcx),
+#pv-panel-v29 #s-ficha .hcx { padding-top: 0; }
+#pv-panel-v29 #s-ficha .fxp .cbtn.sbtn { gap: 6px; }
+#pv-panel-v29 #s-ficha .fxp .cbtn.sbtn svg { position: static; top: auto; }
+/* El botón del listado es inline-block en la fuente; flex le quita 1 px
+   a la línea del ícono. No afecta los botones del editor ni los cajones. */
+#pv-panel-v29 #s-planes .r29-table .sbtn { display: inline-block; }
+#pv-panel-v29 #s-planes .r29-table .sbtn svg { display: inline; position: static; top: auto; vertical-align: baseline; }
+
+/* Estas tres pantallas conservan .sxw como host de React, pero no son las seis
+   pantallas nuevas del boceto. Su .fxp.g no lleva el recorte de .sxw .fxp.g.
+   Las listas .fxs siguen desplazándose dentro de cada tarjeta. */
+#pv-panel-v29 :is(#s-cobranzas, #s-mensajes, #s-publica) .fxp.g { overflow: visible; }
+
+/* Equivalente del #eqwrap > .fx de la fuente. */
+#pv-panel-v29 #s-equipo > .fx { padding-top: 0; }

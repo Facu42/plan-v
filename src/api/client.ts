@@ -335,6 +335,12 @@ export const api = {
       }),
     }),
 
+  scheduleMessages: (sendAt: string, items: Array<{ patient_id: string; client_id: string; text: string }>) =>
+    request<{ scheduled: number; send_at: string }>('/api/messages/scheduled', {
+      method: 'POST',
+      body: JSON.stringify({ send_at: sendAt, items }),
+    }),
+
   markMessagesRead: (patientId: string, reader: 'vero' | 'patient') =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/messages/read`, {
       method: 'POST',

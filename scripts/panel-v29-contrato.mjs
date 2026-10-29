@@ -10,7 +10,7 @@
 import { usarAgendaDeEjemplo } from './panel-v29-agenda-ejemplo.mjs';
 import { createRequire } from 'node:module';
 import { existsSync } from 'node:fs';
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -400,7 +400,21 @@ async function medir(pagina, selector, pseudo, props) {
 
 export async function abrirBoceto(browser, tema) {
   const pagina = await (await browser.newContext({ viewport: { width: 1500, height: 1000 }, colorScheme: tema })).newPage();
-  await pagina.goto(boceto); await pagina.waitForTimeout(800);
+  await pagina.goto(boceto);
+  // fonts.check() da true cuando no hay ninguna FontFace registrada: no prueba
+  // que Google Fonts haya cargado. Usamos los mismos archivos locales de la app.
+  const inter = await Promise.all([300, 400, 500, 600].map(async peso => ({
+    peso, datos: (await readFile(resolve(raiz, `node_modules/@fontsource/inter/files/inter-latin-${peso}-normal.woff2`))).toString('base64'),
+  })));
+  await pagina.evaluate(async fuentes => {
+    await Promise.all(fuentes.map(async ({ peso, datos }) => {
+      const cara = new FontFace('Inter', `url(data:font/woff2;base64,${datos})`, { weight: String(peso) });
+      document.fonts.add(cara);
+      await cara.load();
+    }));
+    await document.fonts.ready;
+  }, inter);
+  await pagina.waitForTimeout(800);
   await pagina.locator(tema === 'dark' ? '#t-dark' : '#t-light').first().click().catch(() => {});
   await pagina.waitForTimeout(200);
   // El boceto se muestra a escala: se lleva a 1:1 para medir tamaños reales.
