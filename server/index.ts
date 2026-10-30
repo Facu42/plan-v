@@ -722,6 +722,14 @@ app.post('/api/nutritionist/setup', async (c) => {
   }
 });
 
+app.get('/api/nutritionist/setup', async (c) => {
+  const auth = c.get('auth');
+  if (!('userId' in auth) || !isSupabaseEnabled()) return c.json({ error: 'Requires Supabase auth' }, 400);
+  if (await sb.sbGetProfileRole(auth.userId) !== 'nutri') return c.json({ error: 'Prohibido' }, 403);
+  const nutritionistId = await sb.sbGetNutritionistId(auth.userId);
+  return c.json({ nutritionist_id: nutritionistId, setup_complete: Boolean(nutritionistId) });
+});
+
 // PV-47: alta propia de nutricionistas. El registro público sigue naciendo como
 // paciente (el rol nunca viene del cliente); con la cuenta ya verificada, quien
 // eligió "Soy nutricionista" abre su consultorio vacío. RLS la aísla: sólo ve
