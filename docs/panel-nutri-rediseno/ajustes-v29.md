@@ -18,7 +18,8 @@ Amplía `private.valid_nutrition_settings` (cuit, address, phone, email, degree,
 
 ## Defaults elegidos (el archivo dibuja algo que la app no tiene)
 - Bloques sin dato muestran «Sin completar», «—», «Sin dato» o un texto corto; no hay datos de ejemplo (ni MN 4521, ni «Fundadora», ni 48 pacientes, ni «88 % a tiempo»).
-- Siguen sin función, con su razón o un texto corto: plan de Plan V, pagos y factura, obras sociales y planilla (dependen de Página pública, otro hilo), «Dos pasos obligatoria para el equipo», uso y últimas respuestas de cada plantilla, «Últimos enviados», historial de ingresos, registro de accesos y consentimientos (no hay dónde se registren para sumarlos) y la lista de sesiones.
+- **Tu servicio de Nutridash:** el bloque del boceto (`ajplan`, `fxkv`, `fxfoot`) muestra el plan real cuando el cobro está prendido. Si está apagado, el mismo bloque dice que todavía no está activado. La factura sigue sin función (no hay ARCA).
+- Siguen sin función, con su razón o un texto corto: obras sociales y planilla (dependen de Página pública, otro hilo), «Dos pasos obligatoria para el equipo», uso y últimas respuestas de cada plantilla, «Últimos enviados», historial de ingresos, registro de accesos y consentimientos (no hay dónde se registren para sumarlos) y la lista de sesiones.
 - Prender un aviso guarda la elección; el envío automático de cada uno se conecta aparte (el mail espera la clave de Brevo). La pantalla lo dice en una nota corta que el boceto no trae.
 - «Firma»: el boceto ofrece «Dibujarla» o «Subir una foto»; sólo está la foto. «Color de los informes» del boceto no se desarrolló.
 - «Brevo / Conectar» abre un cartel que explica que se conecta al final, con la clave cargada por nosotros.

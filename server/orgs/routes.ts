@@ -7,6 +7,7 @@ import { getPatient } from '../store.js';
 import { orgNameSchema, orgSlugSchema } from '../../src/types/orgs.js';
 import { DEMO_OWNER_NUTRITIONIST_ID } from './memory.js';
 import * as repo from './repository.js';
+import { assertCanAdd } from '../billing-platform/limits.js';
 
 async function body<T>(c: Context, schema: z.ZodType<T>, fallback: string): Promise<T> {
   const raw = await c.req.text();
@@ -93,6 +94,7 @@ export function registerOrgRoutes(app: Hono) {
   app.post('/api/orgs/:id/members', async (c) => {
     const input = await body(c, inviteSchema, 'Revisá la organización, el equipo y las reglas de delegación.');
     const { persistent, actorId } = await nutriAccess(c);
+    if (persistent) await assertCanAdd(actorId, 'nutritionist', 1);
     const organization = await repo.inviteOrgMember(c.req.param('id'), input.nutritionist_id, input.role, persistent, actorId);
     return c.json({ organization, source: persistent ? 'supabase' : 'memory' });
   });

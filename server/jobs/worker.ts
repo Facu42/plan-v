@@ -11,6 +11,7 @@ import {runSchedulingSyncJobs} from '../scheduling/worker.js';
 import {runPendingDocumentOrganizer} from '../document-organizer/worker.js';
 import { tickPushReminders } from '../push/reminders.js';
 import { tickPatientSubscriptions } from '../subscriptions/worker.js';
+import { tickPlatformBilling } from '../billing-platform/worker.js';
 import { tickScheduledMessages } from '../messages/scheduled.js';
 
 let timer: ReturnType<typeof setInterval> | null = null;
@@ -46,6 +47,7 @@ export function startJobWorker(owner = 'plan-v-worker', keepAlive = false) {
     }
     void tickPushReminders().catch(() => undefined);
     void tickScheduledMessages();
+    void tickPlatformBilling().catch(() => writeOpsLog('warn', 'platform_billing_worker_failed', { status: 'retry_pending' }));
     if (!subscriptionDraining) {
       subscriptionDraining = true;
       void tickPatientSubscriptions().catch(() => writeOpsLog('warn', 'subscription_worker_failed', { status: 'review_pending' })).finally(() => { subscriptionDraining = false; });

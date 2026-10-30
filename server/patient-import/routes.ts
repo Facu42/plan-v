@@ -7,6 +7,7 @@ import { CareError } from '../care/errors.js';
 import { commitImportBatch,listImportBatches,listImportContacts,listImportedHistory,readImportBatch,saveImportBatch,prepareImportedInvite } from './repository.js';
 import {importAuthorizationInputSchema,importAuthorizationRevokeSchema} from '../../src/types/import-authorization.js';
 import {importAuthorizationState,recordImportAuthorization,revokeImportAuthorization,listImportedMeasurements} from './external-authorization.js';
+import { assertCanAdd } from '../billing-platform/limits.js';
 
 async function scope(c:Context){
   const auth=c.get('auth');const persistent='userId' in auth&&isSupabaseEnabled();
@@ -32,5 +33,5 @@ export function registerPatientImportRoutes(app:Hono){
   app.get('/api/patient-imports/contacts',async c=>{const s=await scope(c);return c.json({contacts:await listImportContacts(s.persistent,s.nutritionistId)});});
   app.post('/api/patient-imports',async c=>{const s=await scope(c);return c.json({batch:await saveImportBatch(await input(c),s.persistent)},201);});
   app.get('/api/patient-imports/:id',async c=>{const s=await scope(c);return c.json({batch:await readImportBatch(c.req.param('id'),s.persistent)});});
-  app.post('/api/patient-imports/:id/commit',async c=>{const s=await scope(c);const parsed=await input(c);if(parsed.id!==c.req.param('id'))throw new CareError(400,'El identificador del lote cambió.');return c.json({batch:await commitImportBatch(parsed,s.persistent)});});
+  app.post('/api/patient-imports/:id/commit',async c=>{const s=await scope(c);const parsed=await input(c);if(parsed.id!==c.req.param('id'))throw new CareError(400,'El identificador del lote cambió.');if(s.persistent)await assertCanAdd(s.nutritionistId,'patient',parsed.candidates.length);return c.json({batch:await commitImportBatch(parsed,s.persistent)});});
 }

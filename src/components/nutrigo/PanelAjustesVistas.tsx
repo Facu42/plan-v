@@ -16,6 +16,7 @@ import { CajonAjustes } from './AjustesCajon';
 import type { ModoMarca } from './AjustesEditores';
 import { CERTIFICATE_VARIABLES, NOTICE_KEYS, certificateVariables, type NoticeKey, type NoticeView, type TemplateView } from '../../types/ajustes';
 import type { ClinicBrand } from '../../types/nutrition-capabilities';
+import { PlanNutridash } from './PlanNutridash';
 
 type Icono = Parameters<typeof PanelV29Icon>[0]['name'];
 export type Marca = ClinicBrand | null;
@@ -54,9 +55,7 @@ export function AjustesCuenta({ marca, cargando, tema, onEditar, onExportar, onO
     </div>
     <div className="c">
       <FxPanel titulo="Tu servicio de Nutridash">
-        <div className="ajplan"><b>—</b><small>Todavía no hay datos de tu servicio</small></div>
-        <FxKv filas={[['Pacientes activas', '—'], ['Equipo', '—'], ['Próximo pago', '—'], ['Medio', '—']]} />
-        <div className="fxfoot"><Boton texto="Ver pagos" disabled /><Boton texto="Descargar factura" icono="dl" disabled /></div>
+        <PlanNutridash />
       </FxPanel>
       <FxPanel titulo="Obras sociales y reservas" meta="se configuran en tu página pública" grande>
         <FxKv filas={[['Obras sociales', '—'], ['Reservas', '—'], ['Cancelar', '—']]} />
