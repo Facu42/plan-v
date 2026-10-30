@@ -42,6 +42,7 @@ import { enqueueMemoryOutbox, listMemoryMailbox, processMemoryDeliveries, resetO
 import { resetExerciseMemory } from './exercise/memory.js';
 import { resetResourceMemory } from './resources/memory.js';
 import { resetOrgMemory } from './orgs/memory.js';
+import { resetTeamMemory } from './scheduling/team-routes.js';
 import type { OutboxEventType } from '../src/types/outbox.js';
 
 export type { PatientInvite, InviteEvent } from './identity/invites.js';
@@ -824,6 +825,7 @@ export function resetStore(): void {
   resetExerciseMemory();
   resetResourceMemory();
   resetOrgMemory();
+  resetTeamMemory();
   store = {
     patients: seedPatients(),
     patientInvites: [],
