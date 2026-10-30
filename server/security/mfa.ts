@@ -23,3 +23,12 @@ export function tokenAal(authorization: string | undefined): 'aal1' | 'aal2' {
 export function isMfaExemptPath(path: string): boolean {
   return path.startsWith('/api/auth/') || path === '/api/admin/me';
 }
+
+/**
+ * Rutas mínimas que una profesional puede necesitar antes de completar MFA.
+ * El middleware confirma además el rol y, para la bandeja, que el consultorio
+ * siga vacío; esta lista por sí sola nunca concede acceso.
+ */
+export function isPreMfaProfessionalPath(path: string): boolean {
+  return path === '/api/nutritionist/setup' || path === '/api/crm/work-queue';
+}

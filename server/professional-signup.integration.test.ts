@@ -5,6 +5,7 @@ const sbMocks = vi.hoisted(() => ({
   sbUserHasPatientLink: vi.fn(),
   sbProvisionNutritionist: vi.fn(),
   sbEnsureNutritionist: vi.fn(),
+  sbGetNutritionistId: vi.fn(),
 }));
 
 vi.mock('./db/supabase-repo.js', async (importOriginal) => {
@@ -37,6 +38,7 @@ describe('PV-47 alta propia de nutricionistas', () => {
     sbMocks.sbUserHasPatientLink.mockResolvedValue(false);
     sbMocks.sbProvisionNutritionist.mockResolvedValue('nutri-9');
     sbMocks.sbEnsureNutritionist.mockResolvedValue('nutri-9');
+    sbMocks.sbGetNutritionistId.mockResolvedValue('nutri-9');
   });
 
   it('una cuenta nueva sin paciente vinculada abre su consultorio', async () => {
@@ -65,5 +67,23 @@ describe('PV-47 alta propia de nutricionistas', () => {
     expect((await claim({ display_name: 'Ana' }, '')).status).toBe(401);
     expect((await claim({ display_name: ' ' })).status).toBe(400);
     expect(sbMocks.sbProvisionNutritionist).not.toHaveBeenCalled();
+  });
+
+  it('consulta y reintenta el setup propio sin abrirlo a pacientes', async () => {
+    sbMocks.sbGetProfileRole.mockResolvedValue('nutri');
+    const read = await app.request('/api/nutritionist/setup', { headers: { Authorization: 'Bearer test-token' } });
+    expect(read.status).toBe(200);
+    expect(await read.json()).toEqual({ nutritionist_id: 'nutri-9', setup_complete: true });
+
+    const retry = await app.request('/api/nutritionist/setup', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer test-token', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ display_name: 'Ana' }),
+    });
+    expect(retry.status).toBe(200);
+    expect(sbMocks.sbEnsureNutritionist).toHaveBeenCalledWith('user-9', 'Ana');
+
+    sbMocks.sbGetProfileRole.mockResolvedValue('paciente');
+    expect((await app.request('/api/nutritionist/setup', { headers: { Authorization: 'Bearer test-token' } })).status).toBe(403);
   });
 });
