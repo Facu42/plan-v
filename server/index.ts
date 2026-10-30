@@ -56,6 +56,7 @@ import { emitOpsAlert } from './ops/alerts.js';
 import { resolveCorsOrigin } from './ops/cors.js';
 import { safePath, writeOpsLog } from './ops/log.js';
 import { createRateLimitMiddleware } from './ops/rate-limit.js';
+import { registerClientErrorRoutes } from './ops/client-errors.js';
 import { maxBodyBytes, evaluateReadiness, releaseSha } from './ops/readiness.js';
 import { assertSecretBoundary, inspectSecrets } from './ops/secrets.js';
 import {
@@ -98,7 +99,8 @@ import { toPatientIntakeView, toProfessionalIntakeView } from './intake/views.js
 import * as intakeDb from './intake/repository.js';
 import { IntakeRepositoryError } from './intake/repository.js';
 import { getAuthAccount, getRequestDb, isSupabaseEnabled, privilegedDb } from './db/supabase-client.js';
-import { emailPatientInvite } from './identity/invite-email.js';
+import { emailPatientInvite, emailPatientInviteWithBrevo } from './identity/invite-email.js';
+import { mailTransportConfig, sendOperationalMail } from './mail/transport.js';
 import { PUBLIC_SIGNUP_ROLE } from '../src/context/auth-policy.js';
 import { siteUrl } from './admin/accounts.js';
 import * as sb from './db/supabase-repo.js';
@@ -298,6 +300,7 @@ app.get('/api/ready', async (c) => {
   });
 });
 
+registerClientErrorRoutes(app);
 registerCareRoutes(app);
 registerAssetRoutes(app);
 registerRecipeRoutes(app);
@@ -793,6 +796,29 @@ app.post('/api/invites/:id/email', async (c) => {
     if (!invite || invite.nutritionist_id !== actor.nutritionistId) return c.json({ error: 'Prohibido' }, 403);
     if (!usable(invite)) return c.json(unavailable, 409);
     const admin = privilegedDb();
+    const mail = mailTransportConfig();
+    if (mail) {
+      // Con mail de envío propio sale con el nombre de la nutricionista y las respuestas le llegan a ella.
+      const [patient, pro, account] = await Promise.all([
+        admin.from('patients').select('full_name').eq('id', invite.patient_id).maybeSingle(),
+        admin.from('nutritionists').select('display_name').eq('id', actor.nutritionistId).maybeSingle(),
+        admin.auth.admin.getUserById(auth.userId),
+      ]);
+      return c.json(await emailPatientInviteWithBrevo({
+        id: invite.id, email: invite.email,
+        patientName: String(patient.data?.full_name ?? ''),
+        nutritionistName: String(pro.data?.display_name ?? ''),
+        nutritionistEmail: account.data.user?.email ?? null,
+      }, siteUrl(), {
+        generate: async (type, email, redirectTo) => {
+          const { data, error } = type === 'invite'
+            ? await admin.auth.admin.generateLink({ type: 'invite', email, options: { redirectTo, data: { role: PUBLIC_SIGNUP_ROLE } } })
+            : await admin.auth.admin.generateLink({ type: 'magiclink', email, options: { redirectTo } });
+          return { link: data?.properties?.action_link ?? null, error };
+        },
+        send: message => sendOperationalMail(mail, message, async () => true),
+      }));
+    }
     return c.json(await emailPatientInvite(invite, siteUrl(), {
       invite: (email, options) => admin.auth.admin.inviteUserByEmail(email, options),
       magicLink: (email, redirectTo) => admin.auth.signInWithOtp({ email, options: { shouldCreateUser: false, emailRedirectTo: redirectTo } }),

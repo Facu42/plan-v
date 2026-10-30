@@ -1,10 +1,10 @@
+import { careErrorMessage } from '../../api/care';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { api, isAbortError, type InviteEmailDelivery, type PatientInvite } from '../../api/client';
 import { useAppStore } from '../../store/useAppStore';
 import { PatientImportDialog } from './PatientImportDialog';
 import { patientImportApi } from '../../api/patient-import';
 import { ApiError } from '../../api/error';
-import { careErrorMessage } from '../../api/care';
 import type { Patient, Stage } from '../../types';
 import type { PatientDirectoryFilter } from '../crm/crm-patients';
 import { Icon } from '../shared/Icon';
@@ -53,7 +53,13 @@ export function inviteLink(inviteId: string, origin = typeof window === 'undefin
 
 export function inviteMessage(patientName: string, link: string) {
   const first = patientName.trim().split(/\s+/)[0] || '';
-  return `Hola ${first}, te invito a Plan V para seguir tu plan conmigo. Creá tu cuenta con este enlace: ${link}`;
+  return `Hola ${first}, te invito a Nutridash para seguir tu plan conmigo. Creá tu cuenta con este enlace: ${link}`;
+}
+
+/** La invitación sale del mail de la nutricionista: se abre su programa de correo con el texto listo. */
+export function inviteMailto(email: string, patientName: string, link: string) {
+  const subject = 'Tu espacio en Nutridash';
+  return `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(inviteMessage(patientName, link))}`;
 }
 
 export function inviteEmailNotice(delivery: InviteEmailDelivery, email: string) {
@@ -83,7 +89,7 @@ export function InviteShare({ name, invite, onClose }: { name: string; invite: P
   const email = async () => {
     if (lock.current) return; lock.current = true; setBusy(true); setError(''); setMailed('');
     try { setMailed(inviteEmailNotice((await api.emailInvite(current.id)).delivery, current.email)); }
-    catch (caught) { setError(careErrorMessage(caught)); }
+    catch (caught) { setError(`${careErrorMessage(caught)} También podés mandarla desde tu mail.`); }
     finally { lock.current = false; setBusy(false); }
   };
   const prepare = async () => {
@@ -105,7 +111,7 @@ export function InviteShare({ name, invite, onClose }: { name: string; invite: P
       {error && <small role="alert">{error}</small>}
     </span>
     {!linked && <span className="nv-invite-actions">
-      {ready ? <><NvButton className="nv-soft" onClick={copy}>{copied ? 'Copiado' : 'Copiar enlace'}</NvButton><NvButton className="nv-ghost" disabled={busy} onClick={() => void email()}>{busy ? 'Mandando…' : 'Mandar por mail'}</NvButton></> : <NvButton className="nv-soft" disabled={busy} onClick={() => void prepare()}>{busy ? 'Preparando…' : 'Reintentar preparar invitación'}</NvButton>}
+      {ready ? <><NvButton className="nv-ghost" onClick={copy}>{copied ? 'Copiado' : 'Copiar enlace'}</NvButton><NvButton className="nv-soft" disabled={busy} onClick={() => void email()}>{busy ? 'Mandando…' : 'Mandar invitación'}</NvButton><a className="nv-button nv-ghost" href={inviteMailto(current.email, name, link)}>Desde mi mail</a></> : <NvButton className="nv-soft" disabled={busy} onClick={() => void prepare()}>{busy ? 'Preparando…' : 'Reintentar preparar invitación'}</NvButton>}
     </span>}
     <button type="button" disabled={busy} onClick={() => { if (canLeaveWorkspace()) onClose(); }} aria-label="Cerrar aviso">×</button>
   </div>;

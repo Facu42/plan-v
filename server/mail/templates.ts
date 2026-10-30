@@ -6,17 +6,17 @@ const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? '';
 
 function layout(paragraphs: string[], action?: { label: string; href: string }) {
   const button = action ? `<p style="margin:24px 0"><a href="${escape(action.href)}" style="background:#c5e46d;color:#272932;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:600">${escape(action.label)}</a></p>` : '';
-  return `<div style="font-family:Poppins,Arial,sans-serif;color:#272932;font-size:15px;line-height:1.5;max-width:520px">${paragraphs.map((p) => `<p>${p}</p>`).join('')}${button}<p style="color:#6b6d75;font-size:12px">Plan V · Este mail se mandó automáticamente; si no esperabas recibirlo, podés ignorarlo.</p></div>`;
+  return `<div style="font-family:Poppins,Arial,sans-serif;color:#272932;font-size:15px;line-height:1.5;max-width:520px">${paragraphs.map((p) => `<p>${p}</p>`).join('')}${button}<p style="color:#6b6d75;font-size:12px">Nutridash · Este mail se mandó automáticamente; si no esperabas recibirlo, podés ignorarlo.</p></div>`;
 }
 
 export function inviteEmail(input: { patientName: string; nutritionistName: string; link: string; existing: boolean }): MailContent {
   const name = firstName(input.patientName);
   const pro = input.nutritionistName.trim() || 'Tu nutricionista';
-  const lead = `${pro} te invita a Plan V para seguir tu plan de alimentación.`;
+  const lead = `${pro} te invita a Nutridash para seguir tu plan de alimentación.`;
   const how = input.existing ? 'Ya tenés una cuenta: entrá con este enlace y tu cuenta queda vinculada a su consultorio.' : 'Creá tu cuenta con este enlace y queda vinculada a su consultorio.';
-  const label = input.existing ? 'Entrar a Plan V' : 'Aceptar la invitación';
+  const label = input.existing ? 'Entrar a Nutridash' : 'Aceptar la invitación';
   return {
-    subject: `${pro} te invita a Plan V`,
+    subject: `${pro} te invita a Nutridash`,
     html: layout([`Hola ${escape(name)},`, escape(lead), escape(how)], { label, href: input.link }),
     text: `Hola ${name},\n\n${lead}\n${how}\n\n${input.link}\n`,
   };
@@ -33,8 +33,8 @@ export function appointmentReminderEmail(input: { patientName: string; nutrition
   const name = firstName(input.patientName);
   const pro = input.nutritionistName.trim() || 'tu nutricionista';
   const when = `Tu consulta con ${pro} es el ${argentinaDate(input.startsAt)} (hora de Argentina).`;
-  const where = input.channel === 'video' && input.meetUrl ? `Videollamada: ${input.meetUrl}` : input.channel === 'video' ? 'Videollamada: el enlace aparece en tu Agenda de Plan V.' : 'Consulta presencial.';
-  const change = 'Si necesitás cambiarla, avisale desde tu Agenda en Plan V.';
+  const where = input.channel === 'video' && input.meetUrl ? `Videollamada: ${input.meetUrl}` : input.channel === 'video' ? 'Videollamada: el enlace aparece en tu Agenda de Nutridash.' : 'Consulta presencial.';
+  const change = 'Si necesitás cambiarla, avisale desde tu Agenda en Nutridash.';
   const agenda = `${input.site}/app/agenda`;
   return {
     subject: `Recordatorio: tu consulta con ${pro}`,

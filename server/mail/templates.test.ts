@@ -4,12 +4,12 @@ import { appointmentReminderEmail, inviteEmail } from './templates.js';
 describe('textos de los mails', () => {
   it('la invitación nombra a la nutricionista, lleva el enlace y escapa los nombres', () => {
     const mail = inviteEmail({ patientName: 'Ana <b>Pérez</b>', nutritionistName: 'Verónica', link: 'https://plan-v.test/app/inicio?invite=1&x=2', existing: false });
-    expect(mail.subject).toBe('Verónica te invita a Plan V');
+    expect(mail.subject).toBe('Verónica te invita a Nutridash');
     expect(mail.html).toContain('Hola Ana');
     expect(mail.html).not.toContain('<b>Pérez</b>');
     expect(mail.html).toContain('href="https://plan-v.test/app/inicio?invite=1&amp;x=2"');
     expect(mail.text).toContain('https://plan-v.test/app/inicio?invite=1&x=2');
-    expect(inviteEmail({ patientName: 'Ana', nutritionistName: 'Verónica', link: 'https://x.test', existing: true }).html).toContain('Entrar a Plan V');
+    expect(inviteEmail({ patientName: 'Ana', nutritionistName: 'Verónica', link: 'https://x.test', existing: true }).html).toContain('Entrar a Nutridash');
   });
 
   it('el recordatorio dice día y hora de Argentina, la modalidad y el enlace de la videollamada', () => {

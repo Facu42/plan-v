@@ -1,6 +1,6 @@
 import { safePath, writeOpsLog } from './log.js';
 
-export type OpsAlertKind = 'http_5xx' | 'rate_limit' | 'ready_fail' | 'dead_letter';
+export type OpsAlertKind = 'http_5xx' | 'rate_limit' | 'ready_fail' | 'dead_letter' | 'client_error';
 
 export type OpsAlert = {
   kind: OpsAlertKind;

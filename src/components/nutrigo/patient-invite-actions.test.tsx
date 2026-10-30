@@ -38,12 +38,12 @@ describe('alta e invitación sin falso éxito', () => {
     const result = await createPatientWithInvitation({ name: 'Ana', email: invite.email, goal: 'Comidas' }, { create: vi.fn().mockResolvedValue(created), activate: vi.fn().mockResolvedValue({ invite: pending, source: 'supabase' }) });
     expect(invitationReady(result.invite)).toBe(true);
     const html = renderToStaticMarkup(<InviteShare name="Ana" invite={result.invite} onClose={() => undefined} />);
-    expect(html).toContain('Invitación lista'); expect(html).toContain('Enlace de invitación'); expect(html).toContain('Copiar enlace'); expect(html).toContain('Mandar por mail'); expect(html).toContain('2099'); expect(html).not.toContain('7 días'); expect(html).not.toContain('WhatsApp');
+    expect(html).toContain('Invitación lista'); expect(html).toContain('Enlace de invitación'); expect(html).toContain('Copiar enlace'); expect(html).toContain('Mandar invitación'); expect(html).toContain('Desde mi mail'); expect(html).toContain('href="mailto:patient%40example.test?subject=Tu%20espacio%20en%20Nutridash&amp;body=Hola%20Ana%2C'); expect(html).toContain('2099'); expect(html).not.toContain('7 días'); expect(html).not.toContain('WhatsApp');
   });
   it.each([invite, { ...invite, status: 'pending' as const, expires_at: '2020-01-01T00:00:00Z' }, { ...invite, status: 'revoked' as const, expires_at: '2099-01-01T00:00:00Z' }])('no ofrece compartir un acceso no habilitado (%j)', value => {
     const html = renderToStaticMarkup(<InviteShare name="Ana" invite={value} onClose={() => undefined} />);
     expect(html).toContain('Ficha creada'); expect(html).toContain('Reintentar preparar invitación');
-    expect(html).not.toContain('Invitación lista'); expect(html).not.toContain('Enlace de invitación'); expect(html).not.toContain('WhatsApp'); expect(html).not.toContain('Mandar por mail');
+    expect(html).not.toContain('Invitación lista'); expect(html).not.toContain('Enlace de invitación'); expect(html).not.toContain('WhatsApp'); expect(html).not.toContain('Mandar invitación'); expect(html).not.toContain('Desde mi mail');
   });
   it('cuenta en castellano qué mail salió, sin prometer uno real en la demo', () => {
     expect(inviteEmailNotice('invite', 'ana@example.test')).toBe('Le mandamos la invitación a ana@example.test.');

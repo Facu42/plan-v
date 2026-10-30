@@ -9,6 +9,10 @@ export type BrevoMessage = {
   text: string;
   /** Mismo valor = Brevo no repite el envío (por un rato), aunque el pedido llegue dos veces. */
   idempotencyKey?: string;
+  /** Nombre visible del remitente para este mail (la dirección sigue siendo la de Plan V). */
+  senderName?: string;
+  /** A quién le llegan las respuestas, por ejemplo la nutricionista que invita. */
+  replyTo?: { email: string; name?: string };
 };
 
 const BREVO_URL = 'https://api.brevo.com/v3/smtp/email';
@@ -17,7 +21,7 @@ export function brevoConfig(env: Record<string, string | undefined> = process.en
   const apiKey = env.BREVO_API_KEY?.trim();
   const senderEmail = env.BREVO_SENDER_EMAIL?.trim();
   if (!apiKey || !senderEmail) return null;
-  return { apiKey, senderEmail, senderName: env.BREVO_SENDER_NAME?.trim() || 'Plan V' };
+  return { apiKey, senderEmail, senderName: env.BREVO_SENDER_NAME?.trim() || 'Nutridash' };
 }
 
 /** UUID estable a partir de un texto: la misma llave para el mismo aviso. */
@@ -34,8 +38,9 @@ export async function sendBrevoEmail(config: BrevoConfig, message: BrevoMessage,
     method: 'POST',
     headers: { 'api-key': config.apiKey, 'content-type': 'application/json', accept: 'application/json' },
     body: JSON.stringify({
-      sender: { email: config.senderEmail, name: config.senderName },
+      sender: { email: config.senderEmail, name: message.senderName ?? config.senderName },
       to: [message.to],
+      ...(message.replyTo ? { replyTo: message.replyTo } : {}),
       subject: message.subject,
       htmlContent: message.html,
       textContent: message.text,

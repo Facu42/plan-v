@@ -8,7 +8,7 @@ describe('Brevo', () => {
   it('sólo se usa con clave y remitente cargados', () => {
     expect(brevoConfig({})).toBeNull();
     expect(brevoConfig({ BREVO_API_KEY: 'x' })).toBeNull();
-    expect(brevoConfig({ BREVO_API_KEY: ' x ', BREVO_SENDER_EMAIL: 'hola@planv.test' })).toEqual({ apiKey: 'x', senderEmail: 'hola@planv.test', senderName: 'Plan V' });
+    expect(brevoConfig({ BREVO_API_KEY: ' x ', BREVO_SENDER_EMAIL: 'hola@planv.test' })).toEqual({ apiKey: 'x', senderEmail: 'hola@planv.test', senderName: 'Nutridash' });
   });
 
   it('manda el mail con la clave en el encabezado y una llave para no repetirlo', async () => {

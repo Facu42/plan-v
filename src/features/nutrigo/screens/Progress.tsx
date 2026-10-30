@@ -325,8 +325,7 @@ export function NutrigoProgress({ patient, onNavigate, onSignOut, onRecord, onHy
     if (name === 'Widget Hydration') return hydrationWidget(node);
     return undefined;
   };
-  return <FramePair nodes={['105:2790', '498:18237']} resolve={resolver} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut}>
-    <PatientGoalCard patient={patient} history />
+  return <FramePair nodes={['105:2790', '498:18237']} resolve={resolver} patientName={patient.name} onNavigate={onNavigate} onSignOut={onSignOut} beforeFooter={<PatientGoalCard patient={patient} history />}>
     {remote.error && <Stateful error={remote.error} onRetry={remote.reload} />}{error && <Stateful error={error} />}
   </FramePair>;
 }

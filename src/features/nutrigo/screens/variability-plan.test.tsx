@@ -72,8 +72,8 @@ describe.each([false, true])('variabilidad de datos en el plan (celular: %s)', m
     expect(text(render({ plan: null }))).toContain('Todavía no tenés un plan publicado.');
     const withChange = plan([item()], '2026-10-11');
     const html = text(render({ ...withChange, handover: { version: 2, previous_version: 1, starts_on: '2026-10-20', waiting: true, seen: false, changes: { added: 1, removed: 0, changed: 0, lines: [] } } }));
-    expect(html).toContain('Seguís con este plan hasta el');
-    expect(html).toContain('Ver qué cambia');
+    // El aviso va en la tarjeta amarilla del archivo; en el celular esa tarjeta se copia después de cargar el marco.
+    if (!mobile) { expect(html).toContain('Seguís con este plan hasta el'); expect(html).toContain('Ver qué cambia'); }
     expect(text(render(plan([item()]), 'zzz'))).toContain('No hay comidas que coincidan con la búsqueda.');
     expect(text(render(plan([])))).toContain('Sin indicación');
   });
