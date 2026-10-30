@@ -154,12 +154,14 @@ describe('deploy contract', () => {
     };
     expect(vercel.outputDirectory).toBe('dist');
     expect(JSON.stringify(vercel)).not.toMatch(/server\/index/);
-    // The Node API stays on Railway. Only OAuth/booking and unsubscribe need a narrow same-origin proxy.
+    // The Node API stays on Railway. Only OAuth/booking, the platform plan charge and unsubscribe need a narrow same-origin proxy.
     // Existing authenticated clinical endpoints never acquire a wildcard web proxy.
     expect(vercel.rewrites).toEqual([
       { source: '/api/public/communications/email-unsubscribe', destination: 'https://api-production-aad6.up.railway.app/api/public/communications/email-unsubscribe' },
       { source: '/api/scheduling/:path*', destination: 'https://api-production-aad6.up.railway.app/api/scheduling/:path*' },
       { source: '/api/public/scheduling/:path*', destination: 'https://api-production-aad6.up.railway.app/api/public/scheduling/:path*' },
+      { source: '/api/billing/:path*', destination: 'https://api-production-aad6.up.railway.app/api/billing/:path*' },
+      { source: '/api/public/billing/:path*', destination: 'https://api-production-aad6.up.railway.app/api/public/billing/:path*' },
       { source: '/consultorio/:path*', destination: '/index.html' },
       { source: '/equipo', destination: '/index.html' },
       { source: '/pacientes', destination: '/pacientes/index.html' },

@@ -1,4 +1,7 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-29)
+# Traspaso del proyecto (actualización vigente: 2026-10-30)
+
+30/10 · Cursor · Cobro de Nutridash a la nutricionista con Mercado Pago de la plataforma, en `work/cobro-suscripciones-mp`. No es el débito de la paciente. Bandera apagada y migración sin aplicar en producción. El detalle y los pasos de Facundo están en [cobro-plataforma.md](cobro-plataforma.md).
+
 
 29/10 · Claude · «Mañana a las 9» de Mensaje a varias: el cajón suma «Cuándo» (Ahora / Mañana a las 9) como en el boceto v29. Programado guarda cada mensaje ya con el nombre de la paciente en la tabla nueva `scheduled_messages` (migración `20261029120000_scheduled_messages.sql`, aditiva) y el worker lo manda a las 9:00 de Argentina del día siguiente, entra al hilo como un mensaje normal y avisa al teléfono. Sin la tabla, el panel dice que falta instalarla y «Ahora» sigue igual. **Base primero (con su frase), main después.**
 28/10 · Claude · Ajustes del panel armado con el código del boceto v29 (cinco vistas, datos reales donde la app los tiene, el resto en el mismo bloque con texto corto). [Detalle y revisión contra el boceto](panel-nutri-rediseno/ajustes-v29.md). PR en borrador, espera el ok visual de Facundo.

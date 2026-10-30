@@ -6,3 +6,9 @@
 #pv-panel-v29 .ea-settings-v29 .fxp>header{flex-wrap:nowrap}
 /* Cajones de Ajustes: dos campos en la misma fila (`aRow` del boceto) sin salirse del cajón. */
 #pv-panel-v29 .arow>.af{flex:1;min-width:0}
+#pv-panel-v29 .ea-settings-v29 .ajuso{display:flex;flex-direction:column;gap:8px;margin:8px 0;min-width:0}
+#pv-panel-v29 .ea-settings-v29 .ajuso>div{display:grid;gap:4px;min-width:0}
+#pv-panel-v29 .ea-settings-v29 .ajuso .bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+#pv-panel-v29 .ea-settings-v29 .ajuso .bar>i{display:block;height:100%;background:var(--lima)}
+#pv-panel-v29 .ea-settings-v29 .fxfoot{flex-wrap:wrap}
+@media (max-width: 900px){#pv-panel-v29 .ea-settings-v29>.fx{grid-template-columns:minmax(0,1fr)!important}}

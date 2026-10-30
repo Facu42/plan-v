@@ -30,6 +30,14 @@ describe('RLS A/B matrix (JWT, never service_role)', () => {
     expect(data ?? []).toEqual([]);
   });
 
+  it.skipIf(!live)('RLS plataforma: la nutri A no lee suscripciones de otra nutri', async () => {
+    process.env.SUPABASE_URL = process.env.DISPOSABLE_SUPABASE_URL;
+    const nutriA = createActorClient(process.env.RLS_JWT_NUTRI_A);
+    const { data, error } = await nutriA!.from('platform_subscriptions').select('id').eq('nutritionist_id', '00000000-0000-4000-8000-000000000099');
+    expect(error).toBeNull();
+    expect(data ?? []).toEqual([]);
+  });
+
   it.skipIf(!live)('RLS-02 write: Nutri A cannot update Paciente B', async () => {
     process.env.SUPABASE_URL = process.env.DISPOSABLE_SUPABASE_URL;
     const nutriA = createActorClient(process.env.RLS_JWT_NUTRI_A);

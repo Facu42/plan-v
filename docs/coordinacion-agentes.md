@@ -1,3 +1,5 @@
+30/10 · Cursor · Cobro de Nutridash a la nutricionista con Mercado Pago de la plataforma, rama `work/cobro-suscripciones-mp`. No es el cobro a la paciente. Bandera apagada. Migración `20261030120000_platform_billing.sql` escrita y sin aplicar en producción. [Nota](cobro-plataforma.md).
+
 29/10 · Codex · Cierre autorizado de #233: main 4b29bce incorporado; subida de ampliación completada. Auditoría de CI detectó aviso nuevo en Vite6.4.4; parche oficial6.4.5 exacto, sin cambios transitivos. Auditoría0/build/tipos y revisión independientes aprobados; sigue CI nueva antes de la migración de visibilidad autorizada y merge.
 
 29/10 · Codex · Gate local final de la continuación #233: 3.683 pruebas aprobadas y cuatro omitidas (588 archivos), contrato general v29 completo verde en ambos temas, recorrido real de visibilidad aprobado, tipos/build/migraciones/manifiesto/secretos aprobados. Migración de visibilidad preparada y requisitos existentes de producción confirmados solo en lectura. No se aplicó SQL remoto.
@@ -48,6 +50,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Cobro de suscripciones Nutridash con MP | Cursor, brief de Codex, decisiones de Facundo del 30/10 | `work/cobro-suscripciones-mp` | Backend, webhook, límites y bloque de plan en Ajustes. Bandera apagada. Migración sin aplicar en producción. [Nota](cobro-plataforma.md) |
 | Motion del panel v29 | Cursor | `cursor/motion-panel-v29-e2b6`, [PR #193](https://github.com/Facu42/plan-v/pull/193) | Pastilla, entrada `fin`, panel `#act` y aviso `#atoast` con los tiempos del boceto. 3.409 pruebas aprobadas y dos omitidas. [Nota y paso 10](panel-nutri-rediseno/motion-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
 | Equipo y Ajustes v29 | Cursor, sobre el avance de Codex (se cortó sin cuota) | `cursor/equipo-ajustes-v29-70bc`, [PR #192](https://github.com/Facu42/plan-v/pull/192) | Pantallas del boceto con datos reales donde hay API y «Próximamente» en permisos, registro, plantillas y Brevo. 3.403 pruebas aprobadas, dos omitidas y cuatro e2e. [Informe y paso 10](panel-nutri-rediseno/equipo-ajustes-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
 | Centro de ayuda v29 | Codex, autorizado por Facundo el 26/10 | `work/centro-ayuda-v29`, [PR #191](https://github.com/Facu42/plan-v/pull/191) | Implementado: UI, guías, FAQ y pedido local; 3.399 pruebas aprobadas, dos omitidas y tres e2e. [Informe y paso 10](panel-nutri-rediseno/centro-ayuda-v29.md). HOLD por ok visual y contrato general detenido en Asistente. Sin producción ni merge |
@@ -106,6 +109,7 @@ visto bueno de Facundo.
 | `20261015210000_activity_kcal` | Claude | PR #122, en main `9c56854`; ya observada aplicada con alias `20261015173356`. Se conserva como base exacta, no pendiente |
 | `20261015*` en adelante | Claude | Se anotan acá al crearlas |
 | `20261020120000_patient_subscriptions` | Cursor | Escrita el 19/10. Sin aplicar. Hace falta la frase de Facundo |
+| `20261030120000_platform_billing` | Cursor | Cobro de Nutridash a la nutri. Escrita el 30/10. Sin aplicar. Hace falta la frase de Facundo |
 | `20261020143000_patient_fee_checkouts` | Cursor | Escrita el 19/10, en `cursor/pago-mensual-unico`. Sin aplicar. Hace falta la frase de Facundo |
 
 ## 4. Decisiones vigentes de Facundo (fechadas)
@@ -125,6 +129,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **30/10 · Cursor · Cobro de Nutridash con Mercado Pago** · Rama `work/cobro-suscripciones-mp`. Le cobra a la nutricionista con el token de la plataforma. No toca el cobro a la paciente. Arranque 24.900 / Pro 49.900 / Consultorio 89.900. Fotos de IA: 150, 600 y sin tope. Sin prueba. 7 días de gracia y después solo lectura para la nutri; la paciente no pierde el acceso. Paciente activa: movimiento en 30 días. El 40% de fundadora no se suma al 20% anual. Variables en Railway, sin valores en el repo. Migración sin aplicar en producción. [Nota](cobro-plataforma.md).
 
 - **29/10 · Codex · Recetas y Equivalencias dentro de Planes** · Pedido de Facundo para corregir los puntos 1 y 2 de la revisión de main. Rama `work/recetas-equivalencias-v29`; copia de HTML/CSS v29 y APIs existentes. Detalle del punto 4 en `docs/panel-nutri-rediseno/diferencias-estilos-v29.md`. Sin cambios de base. Implementación y cuatro e2e locales aprobados; 25 tests específicos, tipos y compilación aprobados. Suite general sin completar en 180 s: HOLD para merge. [Informe](panel-nutri-rediseno/recetas-equivalencias-v29.md).
 

@@ -162,6 +162,11 @@
       "version": "20261029195500",
       "file": "20261029195500_nutrition_exchange_visibility.sql",
       "sha256": "b7cc4f98ca5fffcb7fcc3664b655059a4b04a6856f34ee2c3920cb6305dfccc8"
+    },
+    {
+      "version": "20261030120000",
+      "file": "20261030120000_platform_billing.sql",
+      "sha256": "61f4a6da44bb4f969747df163eccf1b2923fd85b8fd4d837b80c65831eaf63cd"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

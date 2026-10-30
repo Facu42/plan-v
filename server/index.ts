@@ -1,6 +1,9 @@
 import { integrationAvailability } from './scheduling/providers.js';
 import {registerSchedulingRoutes} from './scheduling/routes.js';
 import {registerPatientSubscriptionRoutes} from './subscriptions/routes.js';
+import { registerPlatformBillingRoutes } from './billing-platform/routes.js';
+import { createPlatformReadOnlyGuard } from './billing-platform/guard.js';
+import { assertCanAdd } from './billing-platform/limits.js';
 import {registerSchedulingTeamRoutes} from './scheduling/team-routes.js';
 import {registerDocumentOrganizerRoutes} from './document-organizer/routes.js';
 import {registerCommunicationChannelRoutes} from './communications/channel-routes.js';
@@ -229,6 +232,7 @@ app.use('/api/*', authMiddleware);
 app.use('/api/*', securityLimits.protected);
 const ownService = createOwnServiceCache((userId) => loadOwnService(userId));
 app.use('/api/*', createServiceReadOnlyGuard(ownService.get, ownService.clear));
+app.use('/api/*', createPlatformReadOnlyGuard());
 app.use('/api/*', async (c, next) => {
   await next();
   if (!['/api/health','/api/ready'].includes(c.req.path)) persistDemoState();
@@ -333,6 +337,7 @@ registerAjustesRoutes(app);
 registerClinicalWorkspaceRoutes(app);
 registerPortfolioRoutes(app);
 registerPatientSubscriptionRoutes(app);
+registerPlatformBillingRoutes(app);
 registerSchedulingRoutes(app);
 registerSchedulingTeamRoutes(app);
 registerDocumentOrganizerRoutes(app);
@@ -373,6 +378,7 @@ app.post('/api/patients', async (c) => {
       return c.json({ error: 'Prohibido' }, 403);
     }
     try {
+      await assertCanAdd(actor.nutritionistId, 'patient', 1);
       const created = await sb.sbCreatePatient({
         nutritionistId: actor.nutritionistId,
         name: parsedBody.data.name,
@@ -442,6 +448,10 @@ app.patch('/api/patients/:id/archive', async (c) => {
   if ('userId' in auth && isSupabaseEnabled()) {
     if (!await authorizePatient(auth.userId, patientId, 'archive_patient')) {
       return c.json({ error: 'Prohibido' }, 403);
+    }
+    if (!parsedBody.data.archived) {
+      const actor = await sb.sbGetActor(auth.userId);
+      if (actor?.role === 'nutri') await assertCanAdd(actor.nutritionistId, 'patient', 1);
     }
     const { error } = await getRequestDb().rpc('set_patient_archived', {
       target: patientId,
