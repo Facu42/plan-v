@@ -34,7 +34,11 @@
     },
     {
       "source": "/pacientes",
-      "destination": "/pacientes/index.html"
+      "destination": "/pacientes.html"
+    },
+    {
+      "source": "/nutricionistas",
+      "destination": "/nutricionistas/index.html"
     },
     {
       "source": "/admin",
