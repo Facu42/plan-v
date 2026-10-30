@@ -1,4 +1,4 @@
-30/10 · Cursor · Landing pública de Nutridash para nutricionistas en `work/landing-nutridash`, dirección `/nutricionistas`. Usa el mismo diseño que `/pacientes` y el texto apunta al consultorio. Sin producción ni merge.
+30/10 · Cursor · `/nutricionistas` copia las secciones de la landing de pacientes, en el mismo orden y con las mismas fotos. Solo cambian los textos y los botones, que hablan al consultorio. Sin producción ni merge.
 
 30/10 · Cursor · Cobro de Nutridash a la nutricionista con Mercado Pago de la plataforma, rama `work/cobro-suscripciones-mp`. No es el cobro a la paciente. Bandera apagada. Migración `20261030120000_platform_billing.sql` escrita y sin aplicar en producción. [Nota](cobro-plataforma.md).
 

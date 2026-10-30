@@ -1,6 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-30)
 
-30/10 · Cursor · Landing de Nutridash para nutricionistas en `/nutricionistas`, con el mismo diseño que la página de pacientes. Cambian el texto y los botones: hablan al consultorio. `/pacientes` sigue igual. No se tocó producción.
+30/10 · Cursor · `/nutricionistas` es la landing de pacientes con el mismo orden de secciones y las mismas fotos. El texto le habla a la nutricionista. `/pacientes` sigue igual. No se tocó producción.
 
 30/10 · Cursor · Cobro de Nutridash a la nutricionista con Mercado Pago de la plataforma, en `work/cobro-suscripciones-mp`. No es el débito de la paciente. Bandera apagada y migración sin aplicar en producción. El detalle y los pasos de Facundo están en [cobro-plataforma.md](cobro-plataforma.md).
 
