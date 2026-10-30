@@ -36,4 +36,24 @@ describe('RLS A/B matrix (JWT, never service_role)', () => {
     const { data } = await nutriA!.from('patients').update({ goal: 'cross-tenant' }).eq('id', process.env.RLS_PATIENT_B_ID).select('id');
     expect(data ?? []).toEqual([]);
   });
+
+  it.skipIf(!live)('RLS-02 history: Nutri A cannot read patient_history_entries of Paciente B', async () => {
+    process.env.SUPABASE_URL = process.env.DISPOSABLE_SUPABASE_URL;
+    process.env.VITE_SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
+    const nutriA = createActorClient(process.env.RLS_JWT_NUTRI_A);
+    expect(nutriA).not.toBeNull();
+    const { data, error } = await nutriA!.from('patient_history_entries').select('id').eq('patient_id', process.env.RLS_PATIENT_B_ID);
+    expect(error).toBeNull();
+    expect(data ?? []).toEqual([]);
+  });
+
+  it.skipIf(!live)('RLS-02 consultations: Nutri A cannot read consultation_completions of Paciente B', async () => {
+    process.env.SUPABASE_URL = process.env.DISPOSABLE_SUPABASE_URL;
+    process.env.VITE_SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
+    const nutriA = createActorClient(process.env.RLS_JWT_NUTRI_A);
+    expect(nutriA).not.toBeNull();
+    const { data, error } = await nutriA!.from('consultation_completions').select('appointment_id').eq('patient_id', process.env.RLS_PATIENT_B_ID);
+    expect(error).toBeNull();
+    expect(data ?? []).toEqual([]);
+  });
 });

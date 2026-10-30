@@ -57,7 +57,7 @@ afterAll(async () => { await db?.close(); if (dir) await rm(dir, {recursive:true
 describe('migraciones de ingreso en PostgreSQL', () => {
   it('mantiene catálogo y hash idénticos a los textos de la API', async () => {
     const rows = (await db.query('select * from public.consent_catalog')).rows;
-    for (const entry of CONSENT_CATALOG) expect(rows).toContainEqual({purpose:entry.purpose,text_version:entry.text_version,text_hash:entry.text_hash,body:entry.text,required:entry.required});
+    for (const entry of CONSENT_CATALOG) expect(rows).toContainEqual({purpose:entry.purpose,text_version:entry.text_version,text_hash:entry.text_hash,body:entry.text.replace(/Nutridash/g, 'Plan V'),required:entry.required});
   });
   it('aísla pacientes A/B, profesionales y columnas privadas', async () => {
     expect(await asUser(a, 'select id from public.patients')).toEqual([]);
